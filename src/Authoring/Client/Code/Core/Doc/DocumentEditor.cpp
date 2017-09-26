@@ -1196,10 +1196,16 @@ public:
                 QT3DS_ASSERT(false);
                 return;
             }
-            if (m_AssetGraph.IsExist(theInstance))
+            if (m_AssetGraph.IsExist(theInstance)) {
                 RecursiveDeleteInstanceInSceneGraph(theInstance);
-            else
+            } else if (IsInstance(theInstance)) {
+                // When deleting multiple instances that have a parent-descendant
+                // relationship, it is possible that an instance not in asset graph
+                // has already been recursively deleted in this loop.
+                // We cannot do blind delete for out-of-graph items without checking
+                // if they exist.
                 DoDeleteInstance(theInstance);
+            }
         }
     }
 
