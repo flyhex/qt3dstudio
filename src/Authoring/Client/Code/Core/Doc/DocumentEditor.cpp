@@ -506,7 +506,8 @@ public:
 
     bool CanPropertyBeLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
     {
-        if (inProperty == m_Bridge.GetAlias().m_ReferencedNode.m_Property)
+        if (inProperty == m_Bridge.GetAlias().m_ReferencedNode.m_Property ||
+            inProperty == m_Bridge.GetDataInput().m_ControlledElemProp.m_Property)
             return false;
         return m_SlideSystem.CanPropertyBeLinked(inInstance, inProperty);
     }
@@ -1512,12 +1513,13 @@ public:
             // Now set the property for reals
             thePropertySystem.SetInstancePropertyValue(instance, propName, value);
         } else {
-            if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property)
+            if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property &&
+                propName != m_Bridge.GetDataInput().m_ControlledElemProp.m_Property)
                 thePropertySystem.SetInstancePropertyValue(instance, propName, value);
             else {
-                // Alias properties are set in the scene graph, not in the slides.  This
-                // makes the runtime expansion easier and stops problems such as someone unlinking
-                // the alias
+                // Alias and datainput properties are set in the scene graph, not in the slides.
+                // This makes the runtime expansion easier and stops problems such as
+                // someone unlinking the alias
                 // node reference and setting it to different values on different slides.
                 m_DataCore.SetInstancePropertyValue(instance, propName, value);
             }

@@ -1198,6 +1198,13 @@ struct SDataInputTranslator : public Qt3DSTranslator
                         Element().GetBelongedPresentation()->GetApplication(),
                         Element().GetBelongedPresentation(), elemAndProperty.first,
                         Element().GetParent());
+
+            if (!controlledElem) {
+                qCWarning(qt3ds::WARNING()) << "DataInput controlled element not found!";
+                QT3DS_ASSERT(false);
+                return;
+            }
+
             SPresentation presentation = inParser.m_Presentation;
             Qt3DSTranslator *controlledTranslator =
                     reinterpret_cast<Qt3DSTranslator *>(controlledElem->GetAssociation());

@@ -446,8 +446,8 @@
         </Text>
         <DataInput>
           <Property name="name" formalName="Name" type="String" default="DataInput" hidden="True" />
-          <Property name="timefrom" formalName="Time from" type="Long" description="Datainput incoming value corresponding to playhead time zero" animatable="False" />
-          <Property name="timeto" formalName="Time to" type="Long" description="Datainput incoming value corresponding to playhead end" animatable="False" />
-          <Property name="controlledelemprop" formalName="Controlled Element-Properties" type="String" description ="Element/properties connected to this data input" animatable="False" default="" />
+          <Property name="timefrom" formalName="Time from" description="Datainput incoming value corresponding to playhead time zero" animatable="False" min="0" default="0"/>
+          <Property name="timeto" formalName="Time to" description="Datainput incoming value corresponding to playhead end" animatable="False" min="0" default="0" />
+          <Property name="controlledelemprop" formalName="Controlled Element-Properties" type="MultiLineString" description ="Element/properties connected to this data input" animatable="False" />
         </DataInput>
 </MetaData>

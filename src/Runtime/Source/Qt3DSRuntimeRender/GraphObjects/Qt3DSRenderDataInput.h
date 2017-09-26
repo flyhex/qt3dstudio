@@ -50,8 +50,8 @@ namespace render {
         CRegisteredString m_ValueStr;
         CRegisteredString m_ControlledElemProp;
 
-        QT3DSI32 m_TimeFrom;
-        QT3DSI32 m_TimeTo;
+        QT3DSF32 m_TimeFrom;
+        QT3DSF32 m_TimeTo;
 
         SDataInput *m_NextSibling;
 

@@ -511,6 +511,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     auto studioSystem = doc->GetStudioSystem();
     const auto propertySystem = studioSystem->GetPropertySystem();
+    auto bridge = studioSystem->GetClientDataModelBridge();
     qt3dsdm::SValue value;
     const auto instance = element->m_instance;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
@@ -561,7 +562,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
 
                 selectedIndex = stringlist.indexOf(listOpt);
                 // Add the slide names (exclude the master slide)
-                auto bridge = studioSystem->GetClientDataModelBridge();
                 auto slideHandle = slideSystem->GetSlideByInstance(instance);
                 auto masterSlide = slideSystem->GetMasterSlide(slideHandle);
                 long slideCount = (long)slideSystem->GetSlideCount(masterSlide);
@@ -613,6 +613,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             QFileInfo fileInfo(qt3dsdm::get<QString>(value));
             element->m_value = fileInfo.fileName();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::PathBuffer) {
+            element->m_value = qt3dsdm::get<QString>(value);
+        } else if (bridge->GetObjectType(element->m_instance) ==  OBJTYPE_DATAINPUT) {
             element->m_value = qt3dsdm::get<QString>(value);
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
