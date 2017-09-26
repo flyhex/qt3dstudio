@@ -188,7 +188,9 @@ public:
                                          CompleteMetaDataType::Enum inDataType,
                                          const SValue &inDefaultValue,
                                          const TMetaDataData &inMetaData, TStrType inGroupName,
-                                         bool inIsHidden = false, bool inIsAnimatable = false) = 0;
+                                         Qt3DSDMInstanceHandle inDataInputSource = 0,
+                                         bool inIsHidden = false, bool inIsAnimatable = false,
+                                         bool inisControlled = false ) = 0;
 
     // Destroy just this meta data property
     // Does not destroy the underlying data core property, so this function isn't a perfect

@@ -35,6 +35,7 @@
 #include "Qt3DSRenderDefaultMaterial.h"
 #include "Qt3DSRenderImage.h"
 #include "Qt3DSRenderText.h"
+#include "Qt3DSRenderDataInput.h"
 #include "Qt3DSDMWindowsCompatibility.h"
 #include "Qt3DSRenderLayer.h"
 #include "Qt3DSRenderModel.h"
@@ -458,6 +459,12 @@ namespace render {
 #define ITERATE_QT3DS_RENDER_PATH_SUBPATH_PROPERTIES                                                 \
     HANDLE_QT3DS_RENDER_PROPERTY(SubPath, Closed, Dirty)
 
+#define ITERATE_QT3DS_RENDER_DATAINPUT_PROPERTIES                                                 \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, Value, Dirty)                                        \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ValueStr, Dirty)                                        \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeFrom, Dirty)                                     \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ControlledElemProp, Dirty)                              \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeTo, Dirty)
 }
 }
 #endif

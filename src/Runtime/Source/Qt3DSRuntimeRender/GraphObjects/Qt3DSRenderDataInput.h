@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2012 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -27,41 +26,46 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#pragma once
-#ifndef QT3DS_RENDER_SCENE_H
-#define QT3DS_RENDER_SCENE_H
-#include "Qt3DSRender.h"
-#include "foundation/Qt3DSVec3.h"
+
+#ifndef QT3DSRENDERDATAINPUT_H
+#define QT3DSRENDERDATAINPUT_H
+
 #include "Qt3DSRenderGraphObject.h"
+#include "foundation/Qt3DSFoundation.h"
+#include "foundation/StringTable.h"
+#include "foundation/Qt3DSLogging.h"
 
 namespace qt3ds {
 namespace render {
-    struct SLayer;
-    struct SPresentation;
-    struct SDataInput;
 
-    struct SScene : public SGraphObject
+    struct SScene;
+    struct SDataInput : public SGraphObject
     {
-        SPresentation *m_Presentation;
-        SLayer *m_FirstChild;
-        SDataInput *m_FirstDataInput;
-        QT3DSVec3 m_ClearColor;
-        bool m_UseClearColor;
-        bool m_Dirty;
+        SDataInput();
 
-        enum RenderClearCommand {
-            ClearIsOptional = 0,
-            DoNotClear = 1,
-            AlwaysClear = 2,
-        };
+        // DataInput should always be at the root of the scene
+        SScene *m_Scene;
 
-        SScene();
+        QT3DSF32 m_Value;
+        CRegisteredString m_ValueStr;
+        CRegisteredString m_ControlledElemProp;
 
-        void AddChild(SLayer &inLayer);
-        void AddDataInput(SDataInput &inDataInput);
+        QT3DSI32 m_TimeFrom;
+        QT3DSI32 m_TimeTo;
 
-        SLayer *GetLastChild();
-        SDataInput *GetLastDataInput();
+        SDataInput *m_NextSibling;
+
+        // List of "target element" - "property"
+        // - pairs that this DataInput controls
+        QVector<QPair<CRegisteredString, CRegisteredString>> m_ControlledElementsProperties;
+
+        void AddControlledElementProperty(QPair<CRegisteredString, CRegisteredString> pair);
+        void SetControlledElementProperties(
+            QVector<QPair<CRegisteredString, CRegisteredString>> vec)
+        {
+            m_ControlledElementsProperties = vec;
+        }
+        QVector<QPair<CRegisteredString, CRegisteredString>> GetControlledElementsProperties();
 
         // Generic method used during serialization
         // to remap string and object pointers
@@ -69,16 +73,12 @@ namespace render {
         void Remap(TRemapperType &inRemapper)
         {
             SGraphObject::Remap(inRemapper);
-            inRemapper.Remap(m_Presentation);
-            inRemapper.Remap(m_FirstChild);
-            inRemapper.Remap(m_FirstDataInput);
+            inRemapper.Remap(m_Scene);
+            inRemapper.Remap(m_ValueStr);
+            inRemapper.Remap(m_NextSibling);
+            inRemapper.Remap(m_ControlledElemProp);
         }
-        // returns true if any of the layers were dirty or if this object was dirty
-        bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext);
-        void Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
-                    RenderClearCommand command = ClearIsOptional);
     };
 }
 }
-
-#endif
+#endif // QT3DSRENDERDATAINPUT_H

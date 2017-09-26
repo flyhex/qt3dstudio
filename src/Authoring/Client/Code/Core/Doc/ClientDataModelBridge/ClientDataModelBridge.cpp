@@ -94,6 +94,7 @@ CClientDataModelBridge::CClientDataModelBridge(
     , m_Alias(inDefinitions->m_Alias)
     , m_Path(inDefinitions->m_Path)
     , m_Lightmaps(inDefinitions->m_Lightmaps)
+    , m_DataInput(inDefinitions->m_DataInput)
     , m_CacheEnabled(false)
 {
 }
@@ -244,6 +245,9 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId
         break;
     case OBJTYPE_LIGHTMAPS:
         m_DataCore->DeriveInstance(theNewInstance, m_Lightmaps.m_Instance);
+        break;
+    case OBJTYPE_DATAINPUT:
+        m_DataCore->DeriveInstance(theNewInstance, m_DataInput.m_Instance);
         break;
     }
 
@@ -1388,6 +1392,7 @@ bool CClientDataModelBridge::CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance
     case OBJTYPE_PATHANCHORPOINT:
     case OBJTYPE_SUBPATH:
     case OBJTYPE_EFFECT:
+    case OBJTYPE_DATAINPUT:
         return !IsLockedAtAll(inInstance);
         break;
     case OBJTYPE_COMPONENT:
@@ -1555,6 +1560,8 @@ EStudioObjectType CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstance
         return OBJTYPE_PATHANCHORPOINT;
     else if (theType == L"SubPath")
         return OBJTYPE_SUBPATH;
+    else if (theType == L"DataInput")
+        return OBJTYPE_DATAINPUT;
     else if (theType == L"Lightmaps")
         return OBJTYPE_LIGHTMAPS;
     else {
@@ -1642,6 +1649,11 @@ bool CClientDataModelBridge::IsCustomMaterialInstance(qt3dsdm::Qt3DSDMInstanceHa
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_CustomMaterial.m_Instance);
 }
 
+bool CClientDataModelBridge::IsDataInputInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
+{
+    return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_DataInput.m_Instance);
+}
+
 bool CClientDataModelBridge::IsReferencedMaterialInstance(
     qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
@@ -1665,7 +1677,8 @@ bool CClientDataModelBridge::IsSceneGraphInstance(qt3dsdm::Qt3DSDMInstanceHandle
     return IsNodeType(inInstance) || IsSceneInstance(inInstance) || IsImageInstance(inInstance)
         || IsMaterialInstance(inInstance) || IsCustomMaterialInstance(inInstance)
         || IsReferencedMaterialInstance(inInstance) || IsRenderPluginInstance(inInstance)
-        || IsEffectInstance(inInstance) || IsBehaviorInstance(inInstance);
+        || IsEffectInstance(inInstance) || IsBehaviorInstance(inInstance)
+        || IsDataInputInstance(inInstance);
 }
 
 bool SActionInvalidProperty::operator()(qt3dsdm::Qt3DSDMPropertyHandle inProperty)

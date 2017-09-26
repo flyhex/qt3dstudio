@@ -319,6 +319,7 @@ SOURCES += \
     Palettes/Timeline/ToggleToolbar.cpp \
     Palettes/Timeline/TreeBlankControl.cpp \
     Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/DataInputTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
     Palettes/Timeline/Bindings/GroupTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/ImageTimelineItemBinding.cpp \

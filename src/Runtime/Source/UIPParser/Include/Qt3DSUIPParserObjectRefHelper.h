@@ -92,6 +92,7 @@ private:
     TImageNamePropertyList m_ImageNamePropertyList;
     TStrType m_MaterialStr;
     eastl::vector<void *> m_SceneGraphAliasList;
+    eastl::vector<void *> m_SceneGraphDataInputList;
 
     typedef eastl::pair<eastl::string, eastl::string> TLightProbeAndNamePair;
     typedef eastl::map<eastl::string, eastl::string> TLightProbeIdToNameMap;

@@ -249,6 +249,10 @@
         <file>images/Objects-edit-disabled@2x.png</file>
         <file>images/Objects-edit-normal.png</file>
         <file>images/Objects-edit-normal@2x.png</file>
+        <file>images/Objects-DataInput-Normal.png</file>
+        <file>images/Objects-DataInput-Normal@2x.png</file>
+        <file>images/Objects-DataInput-Disabled.png</file>
+        <file>images/Objects-DataInput-Disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

@@ -1366,7 +1366,9 @@ public:
                                  CompleteMetaDataType::Enum inDataType,
                                  const SValue &inDefaultValue,
                                  const TMetaDataData &inMetaData, TStrType inGroupName,
-                                 bool inIsHidden, bool inIsAnimatable) override
+                                         Qt3DSDMInstanceHandle inDataInputSource,
+                                         bool inIsHidden, bool inIsAnimatable,
+                                         bool inIsControlled) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inPropertyHandle);
         if (infoPtr == NULL) {
@@ -1380,7 +1382,9 @@ public:
                             inDefaultValue, inMetaData);
         newInfo.m_IsHidden = inIsHidden;
         newInfo.m_Animatable = inIsAnimatable;
+        newInfo.m_IsControlledByDataInput = inIsControlled;
         newInfo.m_GroupName = inGroupName;
+        newInfo.m_DataInputSource = inDataInputSource;
         EnsureDataCoreProperty(newInfo);
 
         SetItemInfo(__FILE__, __LINE__, inPropertyHandle, oldInfo, newInfo, m_Properties,
@@ -2721,7 +2725,9 @@ public:
                                             theInfo.m_Description, theInfo.m_Usage,
                                             theInfo.m_CompleteType, theInfo.m_DefaultValue,
                                             theInfo.m_MetaDataData, theInfo.m_GroupName,
-                                            theInfo.m_IsHidden, theInfo.m_Animatable);
+                                            theInfo.m_DataInputSource,
+                                            theInfo.m_IsHidden, theInfo.m_Animatable,
+                                            theInfo.m_IsControlledByDataInput);
                     CreateInstanceGroupInfo(theInfo);
                     theProperties.push_back(theProperty);
                     ReadChildren(inReader, theInfo, theProperty);
@@ -3066,7 +3072,9 @@ public:
             SetMetaDataPropertyInfo(theProp, theInfo.m_Name, theInfo.m_FormalName,
                                     theInfo.m_Description, theInfo.m_Usage, theInfo.m_CompleteType,
                                     theInfo.m_DefaultValue, theInfo.m_MetaDataData,
-                                    theInfo.m_GroupName, true, theInfo.m_Animatable);
+                                    theInfo.m_GroupName, theInfo.m_DataInputSource,
+                                    true, theInfo.m_Animatable,
+                                    theInfo.m_IsControlledByDataInput);
         }
     }
     static inline void GetShaderName(const TCharStr &inObjectName,

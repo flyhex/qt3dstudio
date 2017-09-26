@@ -985,6 +985,9 @@ EElementType GetElementType(const char *inType)
     else if (AreEqual(inType, "SubPath"))
         return ELEMENTTYPE_SUBPATH;
 
+    else if (AreEqual(inType, "DataInput"))
+        return ELEMENTTYPE_DATAINPUT;
+
     else
         return ELEMENTTYPE_UNKNOWN;
 }
@@ -2539,6 +2542,9 @@ SElementAndType CUIPParserImpl::GetElementForID(const char *inElementName)
         break;
     case qt3dsdm::ComposerObjectTypes::SubPath:
         theUIPType = UIPElementTypes::PathSubPath;
+        break;
+    case qt3dsdm::ComposerObjectTypes::DataInput:
+        theUIPType = UIPElementTypes::DataInput;
         break;
     default:
         QT3DS_ASSERT(false);

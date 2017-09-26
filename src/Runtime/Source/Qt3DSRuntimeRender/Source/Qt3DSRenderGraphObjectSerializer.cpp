@@ -53,6 +53,7 @@
 #include "Qt3DSRenderPath.h"
 #include "Qt3DSRenderPathSubPath.h"
 #include "Qt3DSRenderPathManager.h"
+#include "Qt3DSRenderDataInput.h"
 
 using namespace qt3ds::render;
 using namespace qt3ds::render::dynamic;

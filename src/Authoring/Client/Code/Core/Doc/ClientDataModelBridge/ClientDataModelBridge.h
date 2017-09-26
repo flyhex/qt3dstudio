@@ -91,6 +91,8 @@ typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::CustomM
 typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Lightmaps> SDataModelLightmaps;
 typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Alias> SDataModelAlias;
 typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Path> SDataModelPath;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::DataInput>
+    SDataModelDataInput;
 
 struct IValueFilter
 {
@@ -146,6 +148,7 @@ class CClientDataModelBridge
     SDataModelAlias &m_Alias;
     SDataModelPath &m_Path;
     SDataModelLightmaps &m_Lightmaps;
+    SDataModelDataInput &m_DataInput;
 
     // cache to increase performance
     bool m_CacheEnabled;
@@ -233,6 +236,7 @@ public:
     const SDataModelAlias &GetAlias() const { return m_Alias; }
     const SDataModelPath &GetPath() const { return m_Path; }
     const SDataModelLightmaps &GetLightmaps() const { return m_Lightmaps; }
+    const SDataModelDataInput &GetDataInput() const { return m_DataInput; }
 
     // Is this the instance that owns the document's currently active slide?
     bool IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
@@ -412,6 +416,7 @@ public:
     bool IsCustomMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     bool IsLightmapsInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     bool IsNodeType(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
+    bool IsDataInputInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     // Returns true if this instance would be in the scene graph
     bool IsSceneGraphInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
 };

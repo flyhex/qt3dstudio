@@ -53,7 +53,13 @@ void BasicObjectsModel::initialize()
         {tr("Text"), "Asset-Text-Normal.png"_L1, OBJTYPE_TEXT, PRIMITIVETYPE_UNKNOWN},
         {tr("Camera"), "Asset-Camera-Normal.png"_L1, OBJTYPE_CAMERA, PRIMITIVETYPE_UNKNOWN},
         {tr("Light"), "Asset-Light-Normal.png"_L1, OBJTYPE_LIGHT, PRIMITIVETYPE_UNKNOWN},
-        {tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN}
+        {tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN},
+        // For now, adding Datainput (and Layer) is done by drag-drop. TODO: remove after a separate
+        // panel for adding these metaobjects exists
+
+        // Master control for adding datainput functionality to studio, uncomment to enable adding
+        // datainput
+        // {tr("Datainput"), "Objects-DataInput-Normal.png"_L1, OBJTYPE_DATAINPUT, PRIMITIVETYPE_UNKNOWN}
     };
 }
 
