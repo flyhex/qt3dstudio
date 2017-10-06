@@ -1,0 +1,302 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Getting Started
+\page getting-started.html
+\ingroup qt3dstudio-quick-start-guides
+
+\section1 Introduction
+This guide will teach you how to create your first Qt 3D Studio project. Additionally it will
+explain the basics of assets, slides, layers, the timeline, and components.
+
+When you run Qt 3D Studio for the first time you will be greeted by the welcome screen.
+Read through the slides.
+
+\image welcomeScreen.png "Qt 3D Studio Welcome screen"
+
+\section1 Creating a New Project
+
+When you have read through the welcome screen slides, select \e{Create New} on the last slide to
+create a new project.
+
+\image createNewProject.png "Create new project"
+
+You can also create a new project after closing the welcome screen by selecting
+\e{Create New Project}.
+
+\image createNewProject2.png "Create new project"
+
+Then browse to the location in your file system where you want to create your project and
+give your project a name. Your project file (\c{.uip}) and project folder will be
+named accordingly.
+
+It is recommended to check the \e{Create directory for project} check box. This will create a new
+folder with the project name. Inside the folder a pre-defined project folder structure is created.
+
+\image newProjectDialog.png "Create new project dialog window"
+
+\section1 Adding Assets
+Create your 2D, 3D, and other assets in your favorite software and then use Qt 3D Studio
+to add them to your presentation.
+
+You can add new assets to your project by dragging the files from the file system to the
+\e{project  palette}. This will create a copy of the file in the project folder structure.
+The original file will \b always remain untouched.
+
+Once added to the project you can start using the assets by dragging them to either a layer in the
+\e{timeline palette} or to the \e{scene view}.
+
+\raw HTML
+<a href="images/addAssets.png">
+\endraw
+\image addAssets.png "Add assets to a project"
+\raw HTML
+</a>
+\endraw
+
+\section2 Sample Assets
+
+You can access sample assets from the bottom of the \e{project palette}.
+
+\image sampleAssets.png "Sample assets"
+
+Clicking any of the icons will open corresponding sample asset library in the file system.
+Add sample assets by dragging them to the \e{project palette}. This will create a copy of
+the file in the project folder structure. The original file will \b always remain untouched.
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{studio-project-palette.html} {Studio: Project Palette}
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{best-practices-importing-3d-content.html} {Best Practices: Working with 3D Content}
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{best-practices-optimizingimages.html} {Best Practices: Optimizing images}
+\endtable
+
+\section1 Working with Objects
+
+Once added to the layer you can start working with your object.
+
+\section2 Basic Properties
+Clicking the object in the \e{timeline palette} will bring up the object basic properties in
+the \e{inspector palette}. The basic properties includes scaling, rotating and positioning
+of the object.
+
+\section2 Material
+By clicking the black arrow on the left side of the object name in the
+\e{timeline palette} you will toggle the visibility of the \e{Material} tab.
+Once visible you can click \e{Material} to show lighting and material properties for
+the object in the \e{inspector palette}. These properties includes object colors,
+textures and maps.
+
+\image objectTimeline.png "Object in timeline"
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{studio-inspector-palette.html#material} {Studie: Inspector Palette: Material}
+\endtable
+
+\section1 Slides
+
+\section2 Master Slide
+Each scene and component has one \e{master slide}. Elements located on the \e{master slide}
+have their name displayed in green both in the \e{timeline palette} and the \e{inspector palette}.
+Elements placed on the \e{master slide} exist on all slides of that scene or component.
+
+\section2 Slides
+In addition to the \e{master slide} each scene and component in a project have one or more
+\e{slide}.
+
+These slides can be thought of as states or transitions between states that show small changes or
+completely different views when moving between them.
+\section2 Editing Slides
+
+The active slide is displayed in a light grey color while inactive slides are displayed in a dark
+grey color. You can make a slide active by clicking on it.
+
+\image slidePalette.png "Slide palette"
+
+You can right-click on a slide to perform the following commands:
+\list
+  \li
+  \c{New slide}
+  \li
+  \c{Duplicate slide}
+  \li
+  \c{Delete slide}
+\endlist
+
+To edit the \e{master slide} click the \e{Edit Master} button.
+
+You can change the \c{play mode} and \c{initial play state} properties for the active slide from
+the \e{inspector palette}.
+
+\section2 Play Modes for Slide Transition
+
+\c{Play mode} controls what happens when the playhead reaches the end time for the slide.
+The following options are available:
+
+\list
+  \li
+  \c{Stop at end} - The playhead will stop at the end time. This is the default value.
+  \li
+  \c{Looping} - When reaching the end time the playhead will jump to start time and start
+  playing again.
+  \li
+  \c{PingPong} - When reaching the end time the playhead will start playing backwards until
+  reaching the start time again where it will start playing forward again.
+  \li
+  \c{Ping} - Similar to \c{PingPong} but when the playhead returns to the start time it will
+  stop.
+  \li
+  \c{Play Through To} - When reaching the end time the scene or component will jump to
+  another slide.
+\endlist
+
+\image slidePlayMode.png "Slide play mode and initial play state"
+
+\section2 Initial Play State
+
+This controls if the playhead should start playing immediately when entering the active slide.
+
+\section2 Related Content
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{studio-slide-palette.html} {Studio: Slide Palette}
+\endtable
+
+\section1 Layers and the Timeline Palette
+
+The \e{timeline palette} provides direct access to all elements in your
+scene, including those not producing a visible result, and also gives you control over the
+animation and timing within a slide.
+
+The \e{timeline palette} is comprised of two connected sections:
+the \e{scene graph} on the left side and the \e{animation portion} on the right side.
+
+Elements and animated properties that are present on the \e{master slide} have their name
+displayed in green while elements that are only present on the current slide have their
+name displayed in light grey color.
+
+The basic elements of the \e{timeline palette} are:
+\list
+  \li
+  \c{Time bars} - Controls the life span of each element.
+  \li
+  \c{Keyframe markers} - Controls the timing of the animation.
+  \li
+  \c{Eyeball icon} - Controls visibility of elements in both the working area and in runtime.
+  \li
+  \c{Shy icon} - Controls visibility of elements in the \e{timeline palette}. Clicking the button
+at the top of this column will toggle the visibility of element rows marked as \e{Shy}.
+\endlist
+
+\image timeline.png "Timeline palette"
+
+\section2 Add a Layer
+
+You can add a layer to your presentation by dragging it from the \e{basic objects palette} to
+either the \e{timeline palette} or the \e{scene view} as described in the
+\l{adding-assets} {adding assets} section. Dragging the layer object to the \e{scene view} will
+always put the layer behind all current layers.
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{studio-timeline-palette.html} {Studio: Timeline Palette}
+\endtable
+
+\section1 Inspector Palette
+
+The \e{inspector palette} is used to control the
+properties of slides, layers and other elements. You can control which properties should be
+animated or changed.
+
+Properties that can be animated have a small stopwatch icon next to them in the
+\e{inspector palette}. Click on the icon to enable/disable animation for the specific property.
+The icon is yellow \inlineimage{animationIconActive.png}
+when animation is enabled and grey \inlineimage{animationIconInactive.png}
+when disabled.
+
+If you want to animate or change the animation of an element that exists on the \e{master slide},
+right-click the \e{stopwatch icon} and select \e{Unlink Property from Master Slide}. The name of
+the property will change from green to light grey and the change/animation will now only affect
+the active slide.
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l{studio-inspector-palette.html} {Studio: Inspector Palette}
+\endtable
+
+\section1 Components
+
+Components are like small scenes. A component has its own set of slides (including a master slide),
+assets on layers, and an independent timeline.
+
+You can control transitions of components with the \c{play mode} and \c{initial play state}
+properties in the \e{inspector palette}.
+
+\image component_timeline.png "Component timeline"
+
+\section2 Create a Component
+Right-click on an element or a group on the \e{layer palette} and choose \e{Make Component}
+from the \e{context menu}.
+
+\section2 Edit a Component
+
+To display and edit the content of a component, double-click the
+\e{component icon} \inlineimage{component_icon.png}
+in the \e{timeline palette}. The \e{timeline} and \e{slide palette} will switch to show the
+content of the component. To leave the component and return to the scene, click on the
+\e{scene} in the top bar of the \e{layers palette}.
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l {studio-timeline-palette.html#editing-components}
+    {Studio: Timeline Palette: Editing Components}
+\endtable
+
+*/

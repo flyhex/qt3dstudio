@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="main.qml">qml/qmldynamickeyframes/main.qml</file>
+        <file>presentation/dyn_key.uip</file>
+    </qresource>
+</RCC>

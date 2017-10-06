@@ -1,0 +1,131 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+\keyword Qt 3D Studio
+\title Qt 3D Studio Index
+\page index.html
+
+\section1 Table of Contents
+
+\list
+    \li \l {Getting started}
+    \li \l {Studio Index}{Studio}
+    \li \l {Viewer Index}{Viewer}
+    \li \l {QML API}{QML API Reference}
+    \li \l {C++ API}{C++ API Reference}
+    \li \l {Runtime}
+    \li \l {File Formats}
+    \omit
+    TODO: Needs to be checked. Maybe a rewrite, or just remove it all.
+    \li \l {Integrating with Qt 3D Studio}
+    \endomit
+    \li \l {Best Practices}
+    \omit
+    \li \l {Copyright Notices}
+    \endomit
+\endlist
+
+\section1 Applications
+
+The Qt 3D Studio suite includes:
+
+\section2 Studio
+
+\image studio_128.png
+
+An authoring tool for creating interactive 3D presentations and applications. Studio is exclusively
+available for Windows PCs.
+
+\section2 Viewer
+
+\image viewer_128.png
+
+A runtime player to test and deploy interfaces created in Studio. The Viewer is currently available
+for PC, with more devices planned.
+
+\section1 Concepts
+
+\section2 Project
+
+A \e{\"project\"} is simply a folder on your computer holding all the art and other assets needed
+for your application. You can create a \e project by creating folders on your favorite OS, or you
+can also have a template project created for you (with suggested folders for organization) from
+\l Studio application.
+
+\section2 Application
+
+Your \e{\"application\"} is the entry point of your project. It is represented by a single \c{.uia}
+file at the root of your project folder. This file references the presentation and
+sub-presentations in your project. The \e application is what is displayed by the \l Viewer.
+
+\omit
+TODO: To be updated for the open source release. Not really needed or even usable now.
+\e{Learn more about the file format for an application in}
+\l{file-formats-uia.html}{The .uia File Format}.
+\endomit
+
+\section2 Presentation
+
+Artists use \l Studio to create \e{presentation} files, represented by \c{.uip} files in your
+project. A presentation has one or more \e{layers} composited to the screen, comprised of 2D and
+3D assets created in other applications.
+
+Each application can only have one main presentation shown on screen (specified by the \c{.uia})
+but this presentation may reference other \e{sub-presentations}, either on flat layers or as images
+and textures drawn in a scene.
+
+\e{Learn more about creating presentations in the reference for}
+\l{Studio Index}{Studio application}.
+
+\section2 QML
+
+Additional functionality can be built on top of the Qt 3D Studio presentations with QML by
+incorporating applications or presentations into QML with the \l Studio3D element.
+
+\e{Learn more in}
+\l{QML API}{QML API Reference}.
+
+\section2 Layer
+
+A single \l Studio presentation combines one or more \e{layers}. The visual result of each \e layer
+comes from rendering a 3D scene, 2D scene (via an orthographic camera), or sub-presentation. Layers
+are then composited with items on upper layers drawing on top of the content on lower layers.
+
+\e{Learn more about the properties of layers in}
+\l{studio-inspector-palette.html#layer-properties}{Layer Properties}.
+
+\section2 Slide
+
+A \l Studio presentation combines 3D assets with animations and \e{slides}. Slides provide visual
+variations within the presentation.
+
+\e{Learn more about slides in}
+\l{studio-slide-palette.html}{Slide Palette}.
+
+*/

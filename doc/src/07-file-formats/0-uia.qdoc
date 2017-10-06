@@ -1,0 +1,368 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+TODO: Rewrite is needed.
+
+\title The .uia File Format
+\page file-formats-uia.html
+\ingroup qt3dstudio-file-formats
+
+Every project has one \c{.uia}
+file (which we like to pronounce as \e{\"OO-yah!\"})
+representing the application. This XML file is created automatically
+when you create a new project with Qt 3D Studio. The file contains an \c{<assets>}
+section followed by zero or more
+\c{<statemachine>} sections:
+
+\badcode
+<?xml version="1.0" encoding="UTF-8"?>
+<application scalemode="center" watermark-location="1.0 1.0" xmlns="http://nvidia.com/uicomposer">
+  <assets initial="#IVI">
+    <behavior     id="MainApp" src="scripts/App.lua"                        />
+    <presentation id="IVI"     src="IVI.uip"                                />
+    <presentation id="music"   src="sub_music.uip"                          />
+    <presentation id="radio"   src="sub_radio.uip"   active="false"         />
+    <statemachine id="logic"   src="./charts/app.scxml" datamodel="getIt()" />
+    <renderplugin id="plugin:mapviewer" src="scripts/mylib.so" args="whee"  />
+  </assets>
+
+  <statemachine ref="#logic">
+    <visual-states>
+      <state ref="Menu">
+        <enter>
+          <goto-slide element="IVI:Scene.Layer3D.Camera" slide="Animated"/>
+        </enter>
+        <exit>
+          <goto-slide element="IVI:Scene" rel="next" wrap="true"/>
+        </exit>
+      </state>
+      <state ref="Climate"><enter>
+        <call element="IVI:Scene.Menu" handler="focusItem" arguments="'Climate'"/>
+        <set-attribute element="IVI:Scene.Subs" attribute="sourcepath" value="'phone'"/>
+      </enter></state>
+      <transition ref="transition_93">
+        <fire-event element="IVI:Scene" event="onSomethingHappened" />
+      </transition>
+    </visual-states>
+  </statemachine>
+</application>
+\endcode
+
+\section1 Application
+
+The \c{<application>} element encompasses
+the contents of the file and also specifies simple attributes for the
+application's display.
+
+The \c{scalemode="..."} attribute specifies how large the
+\"initial presentation\" \e{(see below)} is rendered when the
+dimensions of the supplied viewport are different than the size entered
+for that presentation. There are three legal values for this attribute:
+
+\list
+\li
+  \c{scalemode="center"} - the presentation is rendered at the size
+  specified in Studio. Additional content is cropped, additional space
+  is letterboxed. This setting is the default behavior if not specified.
+\li
+  \c{scalemode="fit"} - the aspect ratio of the initial
+  presentation is preserved, letterboxing as needed.
+\li
+  \c{scalemode="fill"} - the presentation is always rendered to
+  fill the viewport.
+\endlist
+\e{For more information on the behavior of the \c{scalemode}
+settin - nd its interaction with layer sizing and camera scalin - ee
+\l{best-practices-scalemodes.html}{Using Scale Modes}.}
+
+\section1 Assets
+
+The \c{<assets>} section may contain one or
+more \c{<behavior/>},
+\c{<presentation/>},
+\c{<statemachine/>}, and
+\c{<renderplugin/>} elements, in any order.
+
+Each asset must have a unique \c{id="..."} attribute and a
+\c{src="..."} attribute referencing the location of the file
+(relative to the project folder).
+
+A \c{<statemachine/>} asset may optionally
+have a \c{datamodel="..."} attribute. If present, this attribute
+must provide valid Lua code to run that returns a Lua table. The
+contents of this table will be used for the initial values in the data
+model of the state chart.
+
+A \c{<renderplugin/>} asset may optionally
+have a \c{args="..."} attribute. This provides arguments needed to
+initialize the shared library for the plugin.
+
+An application does not need any
+\c{<presentation/>} elements to run. This
+allows you to create state charts and test them before any visuals have
+been created. Such an application will not display anything on screen,
+however.
+
+If more than one \c{<presentation/>} asset
+is supplied then the first one listed is chosen as the `initial'
+(outermost) presentation that renders for the application; all others
+are treated as `sub-presentations' which may be referenced by the main
+presentation. To select a different presentation as the initial the
+\c{<assets>} element may have an
+\c{initial="\#presentation-id"} attribute referencing the
+presentation to use as the main presentation.
+
+A \c{<presentation/>} element may
+\e{optionally} have an \c{active="..."} attribute with either
+the value \c{true} (the default) or \c{false}. \e{See the
+\l{set-presentation}{\c{<set-presentation> action}}
+below for more information on the effects of making a presentation
+inactive.}
+
+All \c{<behavior/>} assets are initialized
+before any \c{<statemachine/>} assets,
+regardless of element ordering. This allows you to create a global
+function in your application behaviors and use that function to
+initialize the data model for a state chart.
+
+\section1 Visual States
+
+Each \c{<statemachine/>} in the
+\c{<assets>} section (above) may have a
+paired \c{<statemachine>} element following
+the \c{<assets>} section. These provide the
+glue between the logical states of the state chart and the visual impact
+displayed by the presentation(s).
+
+A \c{<statemachine>} section must have a
+\c{ref="\#statemachine-asset-id"} attribute referencing the state
+chart to listen to.
+
+The only allowed child element of a
+\c{<statemachine>} section is
+\c{<visual-states>}. The
+\c{<visual-states>} element may have zero or
+more \c{<state>} and
+\c{<transition>} elements, in any order.
+
+\list
+\li
+  Each \c{<state>} element must have a
+  \c{ref="StateId"} attribute describing a valid state id in the
+  associated state chart. It may have either or both of
+  \c{<enter>} and
+  \c{<exit>} elements, describing what
+  occurs when the state is entered or exited. Each of these elements may
+  have zero or more visual action elements (see below).
+\li
+  Each \c{<transition>} element must have a
+  \c{ref="TransitionId"} attribute describing a valid transition id
+  in the associated state chart. It may have zero or more visual action
+  elements that describe what occurs when the transition is taken.
+\endlist
+
+\target visual-actions
+\section1 Visual Actions
+
+The content elements in each \c{<enter>},
+\c{<exit>}, and
+\c{<transition>} element may be any of the
+following (as many as you like, in any order):
+
+\target goto-slide
+\section2 \c{<goto-slide element="..."/>}
+
+\e{Change scene or component slide, possibly changing how it plays}.
+
+\list
+\li
+  The \b{\c{element}} attribute must reference a full path to
+  a Scene or component element in a presentation, prefixed with that
+  presentation's id and a colon. \e{For example,
+  \c{element="IVI:Scene.Background.Theme"}.}
+\li
+  The action must have \e{either} a \c{slide="..."}** or
+  \c{rel="..."} attribute (but not both):
+\li
+  The \b{\c{slide}} attribute must reference the name of a
+  slide to go to.
+\li
+  The \b{\c{rel}} attribute must be either \c{rel="next"}
+  or \c{rel="prev"}, describing a direction to change slides.
+  \list
+  \li
+    (optional) With \c{rel} you may also supply
+    \c{wrap="true"} to indicate that slide changes past the end of
+    the slide list should wrap to the slide on the other end.
+  \endlist
+\li
+  (optional) Specifying \b{\c{direction="..."}} will
+  force playback on the new slide to go either \c{forward} or
+  \c{reverse}.
+\li
+  If the direction is \c{reverse} and no \c{time="..."}
+  attribute is specified \e{(see below)} then playback will start at
+  the end time of the slide.
+\li
+  (optional) Specifying \b{\c{mode="..."}} will override
+  the play mode for the slide to be one of: \c{stopatend},
+  \c{looping}, \c{ping}, \c{pingpong}, or
+  \c{playthrough}.
+\li
+  If \c{playthrough} is specified you must also add
+  \c{playthroughto="..."} with either the name of a slide to
+  play through to, or the values \c{next} or \c{previous}.
+\li
+  (optional) Specifying \b{\c{state="..."}} with either
+  \c{play} or \c{pause} will override the play state set for
+  the slide.
+\li
+  (optional) Specifying \b{\c{rate="..."}} with a
+  floating point value will cause the playback speed to be multiplied by
+  this value.
+\li
+  \e{For example, a value of \c{2} will cause animations on the
+  slide to play back twice as fast as normal, while a value of
+  \c{0.5} will cause animations to play at half speed.}
+\li
+  \e{The behavior of the runtime for negative rate values is not
+  guaranteed; use \c{direction="reverse"} to play backwards.}
+\li
+  (optional) Specifying \b{\c{time="..."}} with a
+  floating point value will cause playback to start at the specified
+  time.
+\endlist
+
+\section2 \c{<call element="..." handler="..."/>}
+
+\e{Invoke a function on a presentation behavior}.
+
+\list
+\li
+  The \b{\c{element}} attribute must reference a full
+  id-prefixed path to a behavior element in a presentation.
+\li
+  The \b{\c{handler}} attribute must match the name of a
+  function value on the table for the referenced behavior.
+\li
+  (optional) Specifying an \c{arguments="..."} attribute allows you
+  to pass arguments to the function. The contents of this attribute are
+  evaluated in the global Lua context. If the resulting value is a Lua
+  table, it is treated as a list and each integer-keyed value passed to
+  the function through \c{unpack()}. If the result is any other
+  type of value it is passed as a single first parameter to the
+  function.
+\li
+  \e{To pass just one argument, use \c{arguments="42"}}
+\li
+  \e{To pass multiple arguments, use \c{arguments="\{1,2,3\}"}}
+\li
+  \e{To pass a single Lua table to the function wrap it in a list
+  table, e.g. \c{arguments="\{\{hello='World',valid=true\}\}"}}
+\endlist
+
+\section2 \c{<set-attribute element="..." attribute="..." value="..."/>}
+
+\e{Set a value on a presentation element}.
+
+\list
+\li
+  The \b{\c{element}} attribute must reference a full
+  id-prefixed path to any element in a presentation.
+\li
+  The \b{\c{attribute}} attribute must match the
+  \l{QML Reference: Attribute Names}{scripting name} of an attribute on that element.
+\li
+  The \b{\c{value}} attribute must provide a Lua expression to
+  evaluate, the result of which will be set as the value on the element.
+\endlist
+
+\e{For example,
+\c{<set-attribute element="IVI:Scene.Background" attribute="name" value="'new name'"/>};
+note the extra quotes needed in the \c{value} attribute to set a
+string value.}
+
+\target set-presentation
+\section2 \c{<set-presentation ref="..." attribute="active" value="..."/>}
+
+\e{make a presentation active/inactive}.
+
+\list
+\li
+  The \b{\c{ref}} must be the id of a
+  \c{<presentation/>} in the
+  \c{<assets>} section.
+\li
+  The \b{\c{attribute}} attribute must be equal to
+  \c{active}. \e{(Future releases may allow the control of more
+  presentation attributes.)}
+\li
+  The \b{\c{value}} attribute must be either \c{true} or
+  \c{false}. \e{(Arbitrary Lua expressions are not supported at
+  this time.)}
+\endlist
+
+\e{For example,
+\c{<set-presentation ref="music" attribute="active" value="true"/>}.}
+
+\b{Notes}
+
+\list
+\li
+  Making a presentation inactive prevents any elements, behaviors, and
+  animations within it from updating. It also prevents any events within
+  that presentation from being processed. It does not, however, prevent
+  the presentation from rendering. An inactive presentation will
+  continue to render using its last-updated information.
+\li
+  Explicitly inactivating presentations can provide a significant
+  performance increase, depending on the number and size of the
+  presentations that are inactive.
+\li
+  Inactive presentations are not `paused'. When the presentation is
+  re-activated, animations will resume at the time they should be had
+  they been running, not where they were when the presentation was made
+  inactive.
+\endlist
+
+\section2 \c{<fire-event element="..." event="..."/>}
+
+\e{Fire a presentation event on an element in the presentation}.
+
+\list
+\li
+  The \b{\c{element}} attribute must reference a full
+  id-prefixed path to any element in a presentation.
+\li
+  The \b{\c{event}} attribute must be the name of the event to
+  fire.
+\endlist
+
+*/

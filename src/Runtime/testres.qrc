@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="aluminium.material">../../Studio/Content/Material Library/aluminum.material</file>
+        <file alias="asphalt.material">../../Studio/Content/Material Library/asphalt.material</file>
+        <file alias="concrete.material">../../Studio/Content/Material Library/concrete.material</file>
+        <file alias="copper.material">../../Studio/Content/Material Library/copper.material</file>
+        <file alias="porcelain.material">../../Studio/Content/Material Library/porcelain.material</file>
+        <file alias="simple_glass.material">../../Studio/Content/Material Library/simple_glass.material</file>
+        <file alias="Desaturate.effect">../../Studio/Content/Effect Library/Desaturate.effect</file>
+        <file alias="Gaussian Blur.effect">../../Studio/Content/Effect Library/Gaussian Blur.effect</file>
+        <file alias="Sepia.effect">../../Studio/Content/Effect Library/Sepia.effect</file>
+        <file alias="Bloom.effect">../../Studio/Content/Effect Library/Bloom.effect</file>
+    </qresource>
+</RCC>

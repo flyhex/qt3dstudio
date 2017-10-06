@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<project name="Viewer">
+	<target name="setup">
+		<echo>Setting up directory structure...</echo>
+
+		<property name="UsingFlow" value="${ flowfile != '' }"/>
+		
+		<property name="BaseFilePath" value="${ directory::get-current-directory( ) }"  unless="${UsingFlow}"/>
+		<property name="BaseFilePath" value="${ path::get-directory-name( flowfile ) }" if=    "${UsingFlow}"/>
+		<property name="AbsoluteOutputPath" value="${BaseFilePath}" />
+		<property name="OutputFileName" value="${ path::get-file-name( uipfile ) }" />
+   
+		<if test="${ not UsingFlow}">
+			<echo message="No Flow"/>
+		</if>
+
+		<if test="${UsingFlow}">
+			<property name="OutputFileName" value="${ path::get-file-name( flowfile ) }" />
+		</if>
+	</target>
+</project>

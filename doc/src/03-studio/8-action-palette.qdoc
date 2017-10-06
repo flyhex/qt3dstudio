@@ -1,0 +1,150 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Studio: Action Palette
+\page studio-action-palette.html
+\ingroup qt3dstudio-studio
+
+\image Studio-Action.png
+
+\e Actions provide a way for an artist to create interactivity in a
+presentation without scripting. Actions listen for an event to occur on
+an element (or, due to event bubbling, on any descendant of the
+element), and when it occurs they cause an effect in the presentation.
+This effect may be a direct modification of the presentation (tell a
+component to switch slides, change the color of an element).
+
+\section1 Creating Actions
+
+An action is defined by five attributes:
+
+\list
+\li
+  The element that the action is attached to (the \"home element\").
+\li
+  The element that the action is listening to (the \"Trigger Object\").
+\li
+  The event that the action is listening for (the \"Trigger Event\").
+\li
+  The element that the action will control (the \"Target Object\").
+\li
+  The handler to invoke on the target element (with possible additional
+  parameters).
+\endlist
+
+To create an action, first choose the slide and home element that the
+action is attached to. Actions may be non-master, taking effect only on
+a particular slide. For your sanity, we recommend attaching the action
+to either the Trigger or Target object.
+
+Second, click the \b {New Action} button in the Action palette. An action
+will be created and selected, with its properties set to default values.
+Modify these properties in the bottom half of the Action palette as
+appropriate.
+
+\section1 Managing Actions
+
+Actions may be deleted by clicking on the action summary at the top of
+the Actions palette and pressing the \c{Delete} key, by choosing
+\c{Delete Action} after right-clicking on an action sumary, or by
+selecting the action summary and clicking the trash can icon at the
+bottom of the Actions palette.
+
+Tip: it is possible to have an action visually selected at the same time
+as Studio thinks that a different palette (for example, the Timeline palette) is
+actually accepting keyboard input. If you press the \c{Delete} key,
+you might want to double-check and ensure that only the action was
+deleted, and not the element that was selected in the Timeline palette.
+
+\section2 Copying Actions
+
+To save time, you may copy and paste an action to a different element
+instead of creating a new action on that element. You must do this using
+the \c{Copy Action} and \c{Paste Action} context menu entries
+for the action summary. (If you use \c{ctrl-c} and \c{ctrl-v}
+you will end up copying and pasting the entire element that the action
+is on.)
+
+The values of the Trigger Object and Target Object properties for the
+pasted action depends on the \b{Type} chosen when picking the
+objects:
+
+\list
+\li
+  If the type is \c{Absolute Reference} then the same element will
+  be used in the pasted action.
+\li
+  If the type is \c{Path Reference} then the element will be
+  resolved relative to the home element for the new action.
+\endlist
+
+For example, consider an action on element \c{A} that has
+\c{A} as the Trigger Object. You then copy and paste the action to
+element \c{B}. If the Trigger Object was specified with an Absolute
+Reference, the new action on element \c{B} will still be using
+element \c{A} as the Trigger Object. However, if the Trigger Object
+was specified with a Path Reference then the new action will use element
+\c{B} as the Trigger Object.
+
+This seemingly-complex system allows the sophisticated artist to quickly
+copy and paste actions to multiple elements with a minimum of editing on
+each new action.
+
+\omit
+TODO: Not appropriate until we have state machine or somesuch back.
+\section1 When to Use Actions
+
+Generally, actions are appropriate for:
+
+\list
+\li
+  Reporting the intention of touch interactions to the state machine
+  - \e{"when the user taps on this component, it means that you should
+  mute the volume"}.
+\li
+  Communicating events raised by presentation behaviors - \e {"you told
+  the the list manager to show the next item, but it says that there are
+  no more to show"}.
+\li
+  Performing trivial view changes that do not affect the state machine
+  - \e{"when the user presses down on this button, make it glow a
+  little"}
+\endlist
+
+Using actions beyond the above is fine for rough prototyping
+(\e{"when the user taps the `music' button tell the scene to switch
+to to the Music slide"}), but should be evaluated for implementation at
+the application level (\e{"when the user taps the `music' button,
+tell the state machine that they want to see music; separately,
+\b{only if} the state machine tells me that we should be seeing
+music then a visual action will make the scene to go to the Music
+slide"}).
+\endomit
+*/

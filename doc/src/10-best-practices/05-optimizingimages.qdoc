@@ -1,0 +1,281 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Optimizing Images
+\page best-practices-optimizingimages.html
+\ingroup qt3dstudio-best-practices
+
+ Optimizing the images in your presentation
+can substantially improve both the startup and runtime performance of
+your application, as well as the visual quality in certain situations.
+
+\section1 Motivation
+
+Unoptimized images can hurt the performance of your application in
+several ways:
+
+\list
+\li
+  A large image takes more memory bandwidth when being traversed as a
+  texture.
+\li
+  PNG and JPG compressed images must be decompressed before they can be
+  sent to the graphics system.
+\li
+  Poorly-sized images cause a performance hit and quality degradation on
+  startup.
+\li
+  Uncompressed images take longer to send to the graphics system, and
+  take up more graphics memory when there.
+\endlist
+Additionally, choosing an appropriate size for your images and using MIP
+maps \e{(see below)} can prevent aliasing issues if your image is
+going to be shown substantially smaller at some points.
+
+\section1 Reduce Image Dimensions
+
+\e{\b{Make your image small, but with dimensions that are
+multiple of 4.}}
+
+The first thing you need to do is resize your image to be \e{almost}
+as small as possible. The smaller your image, the faster it will upload
+to the graphics system, and less graphics bandwidth and memory it will
+use. Think about the largest size your image will ever be seen, and
+resize your image down to that size. If your carbon fiber will be tiling
+at about 32 pixels per repetition, don't save it at 1024×1024.
+
+However, note that both the horizontal and vertical dimensions of your
+image \b{must be a multiple of 4} to be stored on the graphics
+card. If you save an image at 107×29, the Qt 3D Studio Runtime
+will asymmetrically scale it up to 108×32 before sending it to the
+graphics card. This smears your image slightly, and also wastes
+performance while the image is resized.
+
+\e{If you are using MIP maps, there are further constraints on image
+dimensions; see below.}
+
+\section1 Choose a File Format
+
+\e{\b{Prefer DDS - with the appropriate encoding - in almost all
+cases.}}
+
+Qt 3D Studio supports three main image file formats: JPG, PNG,
+and DDS. You can search the Internet for the pros and cons of JPG versus
+PNG, when to choose which. However, the only advantages that they have
+over DDS is:
+
+\list 1
+\li
+  JPG and PNG are well-supported in most image applications and external
+  systems; DDS is not.
+\li
+  JPG and PNG will usually result in smaller image file sizes \b{on
+  disk} compared with DDS.
+\endlist
+In comparison, DDS offers these benefits:
+
+\list 1
+\li
+  \b{DDS files load faster.} DDS files can be loaded directly into
+  the graphics system without decompressing them first.
+\li
+  \b{Most DDS files render faster.} Almost all DDS encoding schemes
+  use less memory \b{on the graphics card}, making them faster to
+  sample as textures.
+\li
+  \b{DDS files can render even faster, with better visual quality,
+  at small sizes.} DDS files can encode MIP maps (pre-calculated
+  lower-resolution images to use at reduced sizes). These smoothly
+  cross-fade based on image size using trilinear interpolation.
+\endlist
+\section1 Saving as DDS
+
+The easiest way to create a DDS image (for most artists) is to use
+\l{https://developer.nvidia.com/nvidia-texture-tools-adobe-photoshop}{NVIDIA's
+Texture Tools for Photoshop}. Once installed, the standard
+\c{Save As...} dialog has an option to save an image as a
+\c{.dds} file format. You will need to ensure that the dimensions
+of your image are multiples of 4 for the dialog to be used.
+
+After you specify the file name you are presented with a
+somewhat-daunting dialog that provides a large number of options for
+saving the image:
+
+\image DDS-Dialog.png
+
+ The Save As... DDS
+dialog
+
+The most important settings are the drop-down list at the top used to
+select the DDS encoding, and the MIP map section.
+
+\section2 Selecting a DDS Encoding
+
+The encoding drop-down list has 30 entries filled with what looks at
+first like gibberish. Only eight of the encodings are relevant to Qt 3D Studio;
+the irrelevant ones have been grayed out in this picture:
+
+\image DDS-Formats.png
+
+ DDS Encodings Relevant to
+Qt 3D Studio
+
+You should pick the encoding with the least number of bits per pixel
+(bpp) that meets your visual needs:
+
+\list
+\li
+  \b{DXT1} - Applies a lossy compression algorithm, and does not
+  preserve any alpha.
+\li
+  \b{DXT1a} - Similar to DXT1, but also preserves 2 shades of
+  alpha (fully transparent or fully opaque).
+\li
+  \b{DXT3} - Similar to DXT1, but also preserves 16 explicit
+  shades of alpha.
+\li
+  \b{DXT5} - Similar to DXT3, but smoothly transitions the alpha.
+\li
+  \b{alpha} - Lossless 256 shades of alpha with no RGB. Useful
+  for an opacity map.
+\list
+\li
+  \e{If used as a diffuse map, the color channels are all implicitly
+  black.}
+\endlist
+\li
+  \b{luminance} - Lossless 256 shades of grey with no alpha. You
+  may use the Diffuse Color of a Standard Material to tint the result.
+\li
+  \b{alpha/luminance} - Combining the two previous results
+  encodings (at twice the storage space).
+\li
+  \b{8.8.8.8 ARGB} - Lossless RGB and alpha. Try to use DXT5
+  before you resort to this 4-times-larger encoding.
+\list
+\li
+  \e{Though the largest of all DDS encodings, this uses the same
+  amount of graphics memory and bandwidth as a PNG, yet it is still
+  faster to upload to the graphics system because it does not need to be
+  decompressed before uploading.}
+\endlist
+\endlist
+\section2 Using MIP Maps
+
+\e{\b{Use MIP maps when your image may be seen smaller than the
+original size, including portions in perspective.}}
+
+Enabling MIP maps creates many smaller copies of the image at an
+additional 1/3 memory usage. Each mipmap is half the dimensions of the
+one preceding it, downsized in Photoshop with good image resampling. The
+result speeds up renderin - t the appropriate times the graphics card
+will use the smaller image for texture lookup - nd also reduces
+aliasing artifacts such as moiré effects or
+\l{best-practices-antialiasing.html#texture-aliasing}{texture subsampling}.
+
+Select the \"Generate MIP maps\" radio button to cause your DDS to be
+saved with them. Use the \"2D Preview\" button to see them. Use the
+\"Sharpening...\" button to apply simple effects (including
+sharpening or blurring) to separate mipmap levels.
+
+On the other hand, if you do not need MIP maps for your image, select
+the \"No MIP maps\" radio button to save an extra 1/3 memory for your
+image.
+
+Note that MIP maps require specific image dimensions to work correctly
+at all levels, depending on which encoding is used:
+
+\list
+\li
+  \b{DXT*} - all DXT encodings require that the width and height of
+  your image are both some power of 2, e.g. 32, 64, 128, 256, etc. if
+  you wish to use MIP maps.
+\li
+  \b{alpha/luminance} - The alpha, luminance, and alpha/luminance
+  encodings require that the width be a power of 2 for MIP maps to work,
+  but the height may be a multiple of 4.
+\li
+  \b{8.8.8.8 ARGB} - This encoding requires only that your image
+  dimensions be multiples of 4 to work with MIP maps.
+\endlist
+\section3 MIP Maps and Image Dimensions
+
+Just as the original image needs to have dimensions that are
+independently some multiple of 4, so each mipmap level that you want to
+display must also be a multiple of 4. If it is not, you will see
+rendering artifacts as the mipmap level is displayed.
+
+For example, if you save an image that is 132×44, the image will render
+just fine at its normal size. The first mipmap, however, will be created
+at 66×22; as these values are not integer multiples of 4, the image will
+look incorrect at smaller sizes.
+
+So, if you're going to use MIP maps for your image, your image
+dimensions must be a multiple of 4×(2×\c{number\_of\_mip\_levels}).
+If you ensure that your MIP-mapped image dimensions are multiples of 32
+then the first 3 mipmaps will work correctly, allowing your image to
+shrink to 1/8 of its original size efficiently and attractively.
+
+\section2 Saving Alpha Channels
+
+Most of the time when dealing with images with semi-transparent regions
+it is easier to use Photoshop's transparent layers when editing an
+image. If you choose a DDS encoding that supports alpha, the transparent
+regions of your layers will be properly used for the alpha information.
+
+However, in certain cases you need to control the RGB values of fully
+transparent pixels. Specifically, you can see visual artifacts if:
+
+\list
+\li
+  any portion of your image will ever be seen at a size larger than
+  saved, and
+\li
+  you have fully transparent pixels in your image next to rather opaque
+  pixels
+\endlist
+In this case the texture interpolation between a fully-transparent pixel
+and its neighboring somewhat-opaque pixel will blend the RGB values
+between the two. If you use Photoshop's transparent layers, the RGB
+values for certain transparent pixels will be saved as white, and you
+will thus see white fringing at the edges of your transparent regions.
+
+For such cases, instead of creating a semi-transparent layer in
+Photoshop, create a layer will no transparency at all, setting the RGB
+value for every pixel you care about. Then, save the alpha information
+in a fourth Channel (in the Channels palette). When you choose \"Save
+As...\" from Photoshop, check the \"Alpha Channels\" checkbox. The
+information from your fourth channel will be used for the DDS alpha.
+
+\e{Regardless of how you save the alpha information, if you re-open
+an DDS with alpha in Photoshop the alpha information will always be
+displayed in a fourth channel.}
+
+*/

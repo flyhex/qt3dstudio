@@ -1,0 +1,93 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 or (at your option) any later version
+** approved by the KDE Free Qt Foundation. The licenses are as published by
+** the Free Software Foundation and appearing in the file LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \class Q3DSElement
+    \inheaderfile q3dselement.h
+    \inmodule QtStudio3D
+    \brief Control class for elements in a Qt 3D Studio presentation.
+
+    This class is a convenience class for managing a presentation element.
+
+    \sa Q3DSPresentation, Q3DSWidget, Q3DSSurfaceViewer, Q3DSSceneElement
+*/
+
+/*!
+    \fn Q3DSElement::Q3DSElement(const QString &elementPath, QObject *parent = nullptr)
+
+    Constructs a Q3DSElement instance and initializes the \a elementPath.
+    An optional \a parent object can be specified.
+*/
+
+/*!
+    \fn Q3DSElement::Q3DSElement(Q3DSPresentation *presentation, const QString &elementPath,
+                                 QObject *parent = nullptr)
+
+    Constructs a Q3DSElement instance and initializes the \a elementPath.
+    The constructed instance is automatically \l{Q3DSPresentation::registerElement}{registered}
+    for the \a presentation.
+    An optional \a parent object can be specified.
+*/
+
+/*!
+    \fn Q3DSElement::Q3DSElement(Q3DSElementPrivate *d, Q3DSPresentation *presentation,
+                                 const QString &elementPath, QObject *parent = nullptr)
+    \internal
+*/
+
+/*!
+    \property Q3DSElement::elementPath
+
+    Holds the element path of the presentation element.
+    This property must be set before the element is registered to a presentation.
+    You can specify an element of a sub-presentation by adding "SubPresentationId:"
+    in front of the element path, for example \c{"SubPresentationOne:Scene"}.
+
+    \sa Q3DSPresentation::registerElement()
+*/
+
+/*!
+    \fn void Q3DSElement::setAttribute(const QString &attributeName, const QVariant &value)
+
+    Sets the \a value of an attribute on the element specified by this instance.
+    The \a attributeName is the \l{QML Reference: Attribute Names}{scripting name} of the attribute.
+
+    The attribute must be preserved for scripting to be set by this function, or else it will fail.
+    An attribute is preserved if it is either \e{animated}, or
+    \e{an attribute on a master element that is unlinked and changed per-slide}.
+*/
+
+/*!
+    \fn void Q3DSElement::fireEvent(const QString &eventName)
+
+    Dispatches an event with \a eventName on the element specified by this instance.
+    Appropriate actions created in Qt 3D Studio or callbacks registered using the registerForEvent()
+    method in attached scripts will be executed in response to the event.
+*/
+

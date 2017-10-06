@@ -1,0 +1,65 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+\title Studio Index
+\group qt3dstudio-studio
+
+Qt 3D Studio is an artist-centric tool
+designed for designing and building rich interactive interfaces. Though
+there is a strong emphasis on 3D content - all objects are placed in
+three dimensional space - it is not a 3D content creation tool. It is
+also not a drawing program, though it uses 2D images and vectors
+heavily. Studio is a compositing tool.
+
+Create your 2D, 3D, and script assets in other programs and then use
+Studio to place them in your presentation.
+
+\e{For more on importing models into your project see the section}
+\l{best-practices-importing-3d-content.html}{Working with 3D Content}.
+
+\noautolist
+
+\section1 Contents
+
+//! [toc]
+\list
+    \li \l {Studio: Menu}
+    \li \l {Studio: Toolbar}
+    \li \l {Studio: Scene View and Matte}
+    \li \l {Studio: Project Palette}
+    \li \l {Studio: Basic Objects Palette}
+    \li \l {Studio: Timeline Palette}
+    \li \l {Studio: Slide Palette}
+    \li \l {Studio: Inspector Palette}
+    \li \l {Studio: Action Palette}
+    \li \l {Studio: Keyboard Shortcuts}
+\endlist
+//! [toc]
+
+*/

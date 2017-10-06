@@ -1,0 +1,315 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Studio: Keyboard Shortcuts
+\page studio-keyboard-shortcuts.html
+\ingroup qt3dstudio-studio
+
+\section1 File Management
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Preview
+    \li \c{F12}
+  \row
+    \li New
+    \li \c{Ctrl + N}
+  \row
+    \li Open
+    \li \c{Ctrl + O}
+  \row
+    \li Save
+    \li \c{Ctrl + S}
+  \row
+    \li Save As...
+    \li \c{Ctrl + Shift + S}
+  \row
+    \li Save a Copy
+    \li \c{Ctrl + Alt + S}
+\endtable
+
+\section1 Edit Menu
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Undo
+    \li \c{Ctrl + Z}
+  \row
+    \li Redo
+    \li \c{Ctrl + Y} or \c{Ctrl + Shift + Z}
+  \row
+    \li Cut
+    \li \c{Ctrl + X}
+  \row
+    \li Copy
+    \li \c{Ctrl + C}
+  \row
+    \li Paste
+    \li \c{Ctrl + V}
+  \row
+    \li Duplicate Object
+    \li \c{Ctrl + D}
+  \row
+    \li Presentation Settings
+    \li \c{Ctrl + P}
+\endtable
+
+\section1 View Menu
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Show Action Palette
+    \li \c{Ctrl + Shift + A}
+  \row
+    \li Show Basic Objects Palette
+    \li \c{Ctrl + Shift + B}
+  \row
+    \li Show Inspector Palette
+    \li \c{Ctrl + Shift + I}
+  \row
+    \li Show Project Palette
+    \li \c{Ctrl + Shift + P}
+  \row
+    \li Show Slide Palette
+    \li \c{Ctrl + Shift + D}
+  \row
+    \li Show Timeline Palette
+    \li \c{Ctrl + Shift + T}
+  \row
+    \li Show/Hide Bounding Boxes
+    \li \c{Ctrl + B}
+  \row
+    \li Show/Hide Pivot Point
+    \li \c{Ctrl + Alt + P}
+\endtable
+
+\section1 Animation Control
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Set Changed Keyframes
+    \li \c{F6}
+  \row
+    \li Toggle Autoset Keyframes
+    \li \c{K}
+\endtable
+
+\section1 Scene View
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Group Select Mode
+    \li \c{A}
+  \row
+    \li Item Select Mode
+    \li \c{V}
+  \row
+    \li Position Mode
+    \li \c{W}
+  \row
+    \li Scale Mode
+    \li \c{E}
+  \row
+    \li Rotate Mode
+    \li \c{R}
+  \row
+    \li Constrain drag to axis
+    \li \c{Shift} + Mouse Drag
+\endtable
+
+\section2 Nudge Position
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li X+ (Left)
+    \li \c{Left Arrow}
+  \row
+    \li X- (Right)
+    \li \c{Right Arrow}
+  \row
+    \li Y+ (Up)
+    \li \c{Up Arrow}
+  \row
+    \li Y- (Down)
+    \li \c{Down Arrow}
+  \row
+    \li Z- (Forward)
+    \li \c{Shift + Down Arrow}
+  \row
+    \li Z+ (Backward)
+    \li \c{Shift + Up Arrow}
+\endtable
+
+\section2 Nudge Rotation
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li X+
+    \li \c{Ctrl + Up Arrow}
+  \row
+    \li X-
+    \li \c{Ctrl + Down Arrow}
+  \row
+    \li Y+
+    \li \c{Ctrl + Left Arrow}
+  \row
+    \li Y-
+    \li \c{Ctrl + Right Arrow}
+  \row
+    \li Z-
+    \li \c{Ctrl + Shift + Down Arrow}
+  \row
+    \li Z+
+    \li \c{Ctrl + Shift + Up Arrow}
+\endtable
+
+\section2 Nudge Scale
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li X+
+    \li \c{Alt + Right Arrow}
+  \row
+    \li X-
+    \li \c{Alt + Left Arrow}
+  \row
+    \li Y+
+    \li \c{Alt + Up Arrow}
+  \row
+    \li Y-
+    \li \c{Alt + Down Arrow}
+  \row
+    \li Z-
+    \li \c{Alt + Shift + Down Arrow}
+  \row
+    \li Z+
+    \li \c{Alt + Shift + Up Arrow}
+\endtable
+
+\section2 Edit Cameras
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Fit Selected
+    \li \c{F}
+  \row
+    \li Pan
+    \li Middle Mouse Drag
+  \row
+    \li Zoom
+    \li Mouse Wheel
+  \row
+    \li Orbit
+    \li \c{Alt} + Middle Mouse Drag
+  \row
+    \li Toggle Headlight
+    \li \c{F3}
+\endtable
+
+\section1 Timeline
+
+\table
+  \header
+    \li Function
+    \li Shortcut
+  \row
+    \li Quick Play
+    \li Hold down \c{spacebar}
+  \row
+    \li Toggle Play/Pause
+    \li \c{Enter}
+  \row
+    \li Set Time Bar Start Time
+    \li \c{[}
+  \row
+    \li Set Time Bar End Time
+    \li \c{]}
+  \row
+    \li Snap while Dragging
+    \li \c{Shift} + Mouse Drag
+  \row
+    \li Move Playhead to next minor tick mark
+     \li \c{.}
+  \row
+    \li Move Playhead to previous minor tick mark
+    \li \c{,}
+  \row
+    \li Move Playhead to next medium tick mark
+    \li \c{Shift + >}
+  \row
+    \li Move Playhead to previous medium tick mark
+    \li \c{Shift + <}
+\endtable
+
+\section1 Inspector Palette
+
+\table
+  \header
+    \li Function
+     \li Shortcut
+  \row
+    \li Increment value by .1
+    \li \c{Ctrl + Up/Down Arrow}
+  \row
+    \li Increment value by 1
+    \li \c{Up/Down Arrow}
+  \row
+    \li Increment value by 10
+    \li \c{Shift + Up/Down Arrow}
+\endtable
+
+*/

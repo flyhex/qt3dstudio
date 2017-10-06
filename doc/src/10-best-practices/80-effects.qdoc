@@ -1,0 +1,257 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Applying Layer Effects
+\page best-practices-effects.html
+\ingroup qt3dstudio-best-practices
+
+\section1 Using Effects
+
+Each layer in a Studio presentation may have one or more post-processing
+effects applied to the visual result. A small library of predefined
+effects is included with the Windows installer. To use one of these
+effects:
+
+\list 1
+\li
+  Click on the
+  \inlineimage{Studio-fx.png}
+  icon at the bottom of the Project palette of Studio.
+\endlist
+\list
+\li
+  \e{This will open the folder for the library in Windows, showing
+  you the available effects.}
+\endlist
+\list 1
+\li
+  Drag one of the \c{.effect} files from the Windows folder into
+  your Project palette.
+\endlist
+\list
+\li
+  \e{This makes a copy of the effect in your project folder.}
+\endlist
+\list 2
+\li
+  Drag the effect from the Project palette onto a Layer in the Timeline
+  palette.
+\endlist
+\list
+\li
+  \e{This applies an instance of the effect to the Layer.}
+\endlist
+\list 3
+\li
+  With the effect selected in the Timeline, use the Inspector palette to
+  adjust or animated the parameters of the effect.
+\endlist
+\list
+\li
+  \e{You will see the effect applied and update immediately within
+  the Studio viewport.}
+\endlist
+You cannot cause an effect to apply to only certain models of a Layer.
+The entire Layer is rendered via its camera, and \e{then} the effect
+is applied. The placement of effects with respect to other (non-effect)
+children of the Layer makes no difference.
+
+You may, however, apply more than one effect to the same Layer. Just as
+layers placed lower in the Timeline render before layers that are on top
+of them, so effects that are lower in the Timeline will be applied
+before the effects that are above them.
+
+\target hdrbloomtonemap
+\section1 Using HDRBloomTonemap
+
+\image Effects-HDRBloomTonemap.png
+
+The \"HDRBloomTonemap\" effect provides two features:
+
+\list 1
+\li
+  Adjust the gamma and exposure of the high-dynamic range rendered
+  content to achieve the image quality you want, and
+\li
+  Apply an adjustable 'bloom' effect to very bright areas (like the sun
+  glinting off a car).
+\endlist
+When you add an HDRBloomTonemap effect to a layer, the following
+properties are available in the Inspector palette:
+
+\list
+\li
+  \b{Gamma} - this affects the non-linear curve of the lighting.
+  Higher values will increase the exposure of mid tones, lightening the
+  image (and decreasing the contrast). A value of \c{1.0} causes no
+  adjustment to the image.
+\li
+  \b{Exposure} - this is a linear multiplier on the lighting,
+  brightening or darkening the image overall. A value of \c{0.0}
+  causes no adjustment to the image.
+\li
+  \b{Bloom Threshold} - lighting greater than this value will
+  bloom. A value of \c{1.0} corresponds to white in the original
+  render result. Lowering this value will cause more areas of the
+  rendered scene to bloom; at a value of \c{0.0} everything in the
+  scene will bloom.
+\list
+\li
+  \e{Tip: to disable bloom and use only the tone mapping, set this to
+  a sufficiently high value, like \c{999}.}
+\endlist
+\li
+  \b{Bloom Falloff} - adjusts the amount of bloom. Lower values
+  result in stronger bloom effect; higher values make the effect more
+  subtle.
+\endlist
+\section1 Using FXAA
+
+\image Effects-FXAA.png
+
+The \"FXAA\" effect applies Fast approXimate Anti-Aliasing to the layer.
+This is a high-speed anti-aliasing technique that removes some of the
+\"jaggies\" from the image without impacting performance as heavily as
+super-sampling would.
+
+\list
+\li
+  Pros: easy fix for many aliasing problems; works with moving images
+  (unlike \l{best-practices-antialiasing.html#progressive-aa}{Progressive Anti-Aliasing}).
+\li
+  Cons: can blur and otherwise 'munge' fine text details present in the
+  layer; as a screen-space heuristic technique it can sometimes leave
+  sharp edges that ideally would be anti-aliased.
+\endlist
+\section1 Using Depth of Field
+
+\image Effects-DOF.png
+
+The \"Depth Of Field HQ Blur\" effect increasingly blurs regions of the
+image based on their deviation from a specified distance from the
+camera. (Notice that the cube and same-distance floor are in focus while
+the closer cone and farther sphere are blurred.)
+
+For this effect to work well, you need to adjust the
+\c{Clipping Start} and \c{Clipping End} properties of the
+camera for the Layer to 'frame' the content. (You ideally want the
+largest possible value for \c{Start} and the smallest possible
+value for \c{End}.) After you do this you can use the properties of
+the effect in the Inspector palette to adjust the effect.
+
+\list
+\li
+  The \c{Focus Distance} property specifies the distance from the
+  camera where the content is in perfect focus.
+\li
+  The \c{Depth of Field} property specifies a the distance around
+  the \c{Focus Distance} where items are fully in focus. The focus
+  then fades away to fully blurred by the same distance on both the near
+  and far sides.
+\endlist
+For example, a \c{Focus Distance} of 100 and a
+\c{Depth of Field} of 20 means that everything that is between 90
+and 110 units away from the camera will be fully in focus, items at a
+distance of 70-90 and 110-130 units will experiencing variable blurring,
+and everything closer than 70 or farther than 130 will be fully blurred.
+
+To make it easier to set up this effect, turn on the
+\c{Debug Focus Rendering} checkbox for the effect:
+\image Effects-DOF-Debug.png
+
+When enabled the scene will switch to a mode showing the amount of blur
+to be applied. Anything completely fogged in white will be fully
+blurred, anything that is fully black will be fully in focus, and shades
+of grey represent varying amounts of blur in between. You will find it
+far easier to turn on this mode and just scrub the values in the
+Inspector palette until the content you want is bracketed, compared to
+performing distance calculations and entering numbers.
+
+\section1 Using Tilt Shift
+
+\image Effects-TiltShift.png
+
+The \"Tilt Shift\" effect simulates depth of field in a much simpler
+(and more performant) manner. Instead of blurring based on the depth
+buffer, it simply blurs everything except for horizontal stripe on the
+layer. The effect is controlled by the properties:
+
+\list
+\li
+  \c{Focus Position} - the vertical placement of the center of
+  effect (the 'focused region') on the screen, from top to bottom.
+\li
+  \c{Focus Width} - the vertical size of the in-focus region.
+\li
+  \c{Blur Amount} - how much the not-in-focus regions are blurred.
+\endlist
+As with the Depth of Field effect, this effect has a
+\c{Debug Rendering} option that you can enable to see where the
+blur will be applied to the Layer. (See above for further description.)
+\image Effects-TiltShift-Debug.png
+
+\section1 Using Gaussian Blur
+
+\image Effects-GaussianBlur.png
+
+The \"Gaussian Blur\" effect is one of the simplest to use and
+understand. Drop it on a Layer and adjust the \c{Blurriness}
+property in the Inspector palette. In order to keep the effect
+performant large blur values will produce a mosaic result instead of
+smooth blurriness. Play with the slider for the value to find the best
+visual result for your needs.
+
+\section1 Using Motion Blur
+
+\image Effects-MotionBlur.png
+
+The \"Motion Blur\" effect takes the image from the previous frame,
+blurs it, fades it by a specified amount, and draws this \e{in the
+transparent areas of the layer}. The end result is that items moving
+over a transparent background will leave a ghost behind them.
+
+The caveats for this effect are implicit in the above description:
+
+\list
+\li
+  The contents are slightly blurred, which (as shown in the image above)
+  can cause static (and even slowly-moving) items to have a halo around
+  them.
+\li
+  Only the transparent regions are drawn to. If a moving object passes
+  in front of another object on the same layer, there will be no motion
+  trail passing over the object.
+\endlist
+In the simple image shown above the blue ring is placed on a second
+Layer underneath the Layer with the motion blur effect applied. This
+both allows the 'needle' to leave a blur trail over top of the ring, and
+also prevents the ring from having a blurry blue halo around it.
+
+*/

@@ -1,0 +1,174 @@
+/****************************************************************************
+**
+** Copyright (C) 2006 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 as published by the Free Software
+** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+//==============================================================================
+// Prefix
+//==============================================================================
+#include "stdafx.h"
+#include "StudioDefs.h"
+#include "Strings.h"
+#include "StringLoader.h"
+
+//==============================================================================
+// Includes
+//==============================================================================
+
+#include "StartupDlg.h"
+
+#include "StudioPreferences.h"
+#include "ui_StartupDlg.h"
+
+#include <QtCore/qfileinfo.h>
+#include <QtGui/qpalette.h>
+#include <QtCore/qdatetime.h>
+#include <QtCore/qdir.h>
+
+// CStartupDlg dialog
+
+CStartupDlg::CStartupDlg(QWidget *pParent)
+    : QDialog(pParent, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint)
+    , m_Choice(EStartupChoice_Invalid)
+    , m_RecentDocSelected("")
+    , m_ui(new Ui::StartupDlg)
+    , m_palette(nullptr)
+{
+    m_ui->setupUi(this);
+}
+
+CStartupDlg::~CStartupDlg()
+{
+    delete m_palette;
+}
+
+static QString GetFileTimeReadable(const CUICFile &inFile)
+{
+    QFileInfo finfo(inFile.GetAbsolutePath().toQString());
+    if (!finfo.exists())
+        return {};
+
+    return finfo.lastModified().toString("MM/dd/yyyy");
+}
+
+void CStartupDlg::showEvent(QShowEvent *ev)
+{
+    OnInitDialog();
+    QDialog::showEvent(ev);
+}
+
+void CStartupDlg::OnInitDialog()
+{
+    connect(m_ui->newDocument, &QPushButton::clicked, this, &CStartupDlg::OnNewDocClicked);
+    connect(m_ui->openDocument, &QPushButton::clicked, this, &CStartupDlg::OnOpenDocClicked);
+
+    // Load the product version
+    m_ProductVersionStr.Format(
+        ::LoadResourceString(IDS_UIC_STUDIO_VERSION),
+        static_cast<const wchar_t *>(CStudioPreferences::GetVersionString()));
+    m_ui->versionStr->setText(m_ProductVersionStr.toQString());
+
+    // Populate the recent document list
+    for (uint theIndex = 0; theIndex < RECENT_COUNT; ++theIndex) {
+        ClickableLabel *recent
+                = findChild<ClickableLabel *>(QStringLiteral("recent%1").arg(theIndex));
+        connect(recent, &ClickableLabel::clicked, this, &CStartupDlg::OnStnClickedStartupRecent);
+
+        recent->setProperty("recentIndex", theIndex);
+
+        if (m_RecentDocs.size() > theIndex) {
+            // Set the name
+            recent->setText(m_RecentDocs[theIndex].GetName().toQString());
+            // Set path and date to tooltip
+            QFileInfo thePath(m_RecentDocs[theIndex].GetAbsolutePath().toQString());
+            QString toolTip = thePath.absoluteDir().path();
+            toolTip.append(QStringLiteral("\n"));
+            toolTip.append(GetFileTimeReadable(m_RecentDocs[theIndex]));
+            recent->setToolTip(toolTip);
+        } else {
+            recent->hide();
+        }
+    }
+}
+
+void CStartupDlg::AddRecentItem(const CUICFile &inRecentItem)
+{
+    m_RecentDocs.push_back(inRecentItem);
+}
+
+CStartupDlg::EStartupChoice CStartupDlg::GetChoice()
+{
+    return m_Choice;
+}
+
+CUICFile CStartupDlg::GetRecentDoc() const
+{
+    return m_RecentDocSelected;
+}
+
+void CStartupDlg::OnNewDocClicked()
+{
+    m_Choice = EStartupChoice_NewDoc;
+    QDialog::accept();
+}
+
+void CStartupDlg::OnOpenDocClicked()
+{
+    m_Choice = EStartupChoice_OpenDoc;
+    QDialog::accept();
+}
+
+void CStartupDlg::OnStnClickedStartupRecent()
+{
+    const int index = sender()->property("recentIndex").toInt();
+    OpenRecent(index);
+}
+
+void CStartupDlg::OpenRecent(size_t inIndex)
+{
+    if (inIndex < m_RecentDocs.size()) {
+        m_RecentDocSelected = m_RecentDocs[inIndex];
+        m_Choice = EStartupChoice_OpenRecent;
+        QDialog::accept();
+    }
+}
+
+void CStartupDlg::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event)
+    if (m_palette)
+        return;
+
+    delete m_palette;
+    m_palette = new QPalette;
+    QPixmap pic = QPixmap(":/startup/open_dialog.png");
+    pic.setDevicePixelRatio(devicePixelRatio());
+    m_palette->setBrush(QPalette::Window, pic);
+    setPalette(*m_palette);
+    resize(pic.size());
+    setFixedSize(size());
+}

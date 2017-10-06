@@ -1,0 +1,178 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+TODO: Needs to be rewritten or removed.
+
+\title QML: Preserving Attributes
+\page qml-reference-preserving-attributes.html
+\ingroup qt3dstudio-qml-api
+
+Everyone wants presentations to take
+up as little memory at runtime as possible. The benefits of memory
+efficiency are numerous, especially on embedded hardware where cache
+coherency is king. In order to minimize the amount of memory used by a
+given presentation the Qt 3D Studio Runtime employs several
+sophisticated and aggressive optimizations.
+
+One such optimization is the static analysis of a presentation performed
+by the runtime at startup. The runtime looks at each attribute on each
+element in the presentation and uses a simple heuristic to decide if a
+given attribute is `going to change at runtime'. The idea is that if an
+attribute is not going to change at runtime there is no point in storing
+it at all, anywhere. It will be set in the static scene and never need
+to be updated.
+
+The heuristic that is used to make this determination is twofold. An
+attribute will be preserved (not optimized away) if it is either (1)
+animated, or (2) an attribute on a master element that is unlinked and
+changed per-slide.
+
+A problem occurs when an attribute is optimized away and later a script
+tries to access or modify that attribute at runtime. When this happens
+this error message will be logged:
+\c{setAttribute: Attribute "someAttribute" not found.} The solution
+to this problem is to \"reference\" these attributes with the behavior
+that needs to change them to ensure they are not optimized away.
+
+Note that not every attribute needs to be referenced for scripting.
+Custom attributes on behaviors are never optimized away (otherwise, why
+did you add them?) and some other attributes are also never optimized
+away, such as \c{name} for all elements, or attributes specified to
+Text objects (because the runtime bitmap font engine needs access to the
+values to accurately render the text).
+
+\section1 References
+
+To make the references modular, and to ensure they require no knowledge
+or intervention from an artist wanting to use a behavior, the references
+are stored as part of the behavior. These are placed inside a
+\c{<Reference>} element in the \e{Artist Interface}
+preamble at the top of a behavior. For example:
+
+\badcode
+--[[
+  <Property ... />
+  <Property ... />
+  <Handler  ... />
+  <Event    ... />
+  <Event    ... />
+  <Event    ... />
+
+  <Reference>
+    parent.opacity
+    parent.children.position
+  </Reference>
+--]]
+
+-- The rest of the behavior code
+function self:onInitialize()
+  ...
+end
+\endcode
+
+Add reference strings to indicate which attributes this behavior needs
+at runtime to guarantee its proper execution. Each attribute reference
+string is made up of two parts:
+
+\list
+\li
+  the element or elements to preserve the attributes on,
+\li
+  followed by the attribute(s) to preserve.
+\endlist
+The first part can start with a path, either relative or absolute.
+\c{Scene.Layer.Cube} specifies a path to a certain cube absolutely,
+while \c{parent.Cube} specifies a path to a sibling Cube (relative
+to the behavior). Alternatively, the first part can start with a square
+bracketed name, like \c{{[}targetObject{]}} where the name in
+square brackets is the name of a Object Reference type custom property
+on this behavior. Using the square bracket syntax is equivalent to
+typing an absolute path to an object, except the object can be chosen by
+the artist in the inspector palette.
+
+The first part can optionally end with one of the two keywords,
+\c{.children} or \c{.descendants}. Specifying these will cause
+the specified attribute(s) to be preserved on either all of the children
+of the element pointed to by the specified path, or recursively preserve
+that attribute on all descendants. See the examples below for more
+details.
+
+The second part of the attribute reference string is the name of a
+attribute. The \e{\l{QML Reference: Attribute Names}{Attribute Names}}
+page of this manual outlines the names of the different
+attributes. You can also use the suffixe \c{.all} to preserve all
+attributes on a certain object, though this is typically not recommended
+as it undermines the operation of the optimizer.
+
+The second part of the attribute reference string can also use a square
+bracket syntax to reference a String type custom property on this
+behavior to specify (by name, as a string) which attribute to preserve.
+For example, if you had a String type custom property called
+\c{targetProp}, you could have an attribute reference string like
+\c{Scene.Layer.Cube.{[}targetProp{]}} which would preserve whatever
+property that was specified (by name) as the value of targetProp set in
+the inspector palette.
+
+Explaining that all in words is a bit cumbersome, the following examples
+show many different attribute reference strings.
+
+\section2 Reference Examples
+
+\badcode
+# Preserve opacity on a certain cube
+
+Scene.Layer.Cube.opacity
+
+# Preserve opacity on the element the behavior is attached to
+
+parent.opacity
+
+# Preserve position on all the children of a certain group
+
+Scene.Layer.Group.children.position
+
+# Same as above, but specify the group with an object reference custom property
+
+[targetGroup].children.position
+
+# Keep opacity on siblings and their descendants
+
+parent.descendants.opacity
+
+# Preserves the property typed in by the artist in the Inspector palette
+
+parent.[targetProp]
+
+# Circumvent the optimizer (don't do this :)
+
+Scene.descendants.all
+\endcode
+
+*/

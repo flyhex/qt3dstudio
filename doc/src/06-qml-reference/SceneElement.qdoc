@@ -1,0 +1,151 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 or (at your option) any later version
+** approved by the KDE Free Qt Foundation. The licenses are as published by
+** the Free Software Foundation and appearing in the file LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \qmltype SceneElement
+    \inqmlmodule QtStudio3D
+    \inherits Element
+    \brief Control type for scene and component elements in a Qt 3D Studio presentation.
+
+    This type is a convenience type for managing the slides of a single
+    time context (a Scene or a Component element) of a presentation.
+
+    All methods provided by this type are queued and handled asynchronously before the next
+    frame is displayed.
+
+    \sa Studio3D, Presentation
+*/
+
+/*!
+    \qmlproperty int SceneElement::currentSlideIndex
+
+    Holds the index of the currently active slide of the tracked time context.
+
+    Changing the current slide via this property is asynchronous. The property
+    value will not actually change until the next frame has been processed, and
+    even then only if the new slide was valid.
+
+    \note If this property is set to something else than the default slide for the scene at the
+    initial declaration of SceneElement, you will still get an extra changed signal for the
+    default slide before the slide changes to the desired one. This happens in order to ensure
+    we end up with the index of the slide that is actually shown even if the slide specified in the
+    initial declaration is invalid.
+*/
+
+/*!
+    \qmlproperty int SceneElement::previousSlideIndex
+
+    Holds the index of the previously active slide of the tracked time context.
+
+    This property is read-only.
+*/
+
+/*!
+    \qmlproperty string SceneElement::currentSlideName
+
+    Holds the name of the currently active slide of the tracked time context.
+
+    Changing the current slide via this property is asynchronous. The property
+    value will not actually change until the next frame has been processed, and
+    even then only if the new slide was valid.
+
+    \note If this property is set to something else than the default slide for the scene at the
+    initial declaration of SceneElement, you will still get an extra changed signal for the
+    default slide before the slide changes to the desired one. This happens in order to ensure
+    we end up with the name of the slide that is actually shown even if the slide specified in the
+    initial declaration is invalid.
+*/
+
+/*!
+    \qmlproperty string SceneElement::previousSlideName
+
+    Holds the name of the previously active slide of the tracked time context.
+
+    This property is read-only.
+*/
+
+/*!
+    \qmlsignal SceneElement::currentSlideIndexChanged(int currentSlideIndex)
+
+    This signal is emitted when the current slide changes.
+    The new value is provided in the \a currentSlideIndex parameter.
+
+    This signal is always emitted with currentSlideNameChanged.
+
+    The corresponding handler is \c onCurrentSlideIndexChanged.
+*/
+
+/*!
+    \qmlsignal SceneElement::previousSlideIndexChanged(int previousSlideIndex)
+
+    This signal is emitted when the previous slide changes.
+    The new value is provided in the \a previousSlideIndex parameter.
+
+    This signal is always emitted with previousSlideNameChanged.
+
+    The corresponding handler is \c onPreviousSlideIndexChanged.
+*/
+
+/*!
+    \qmlsignal SceneElement::currentSlideNameChanged(string currentSlideName)
+
+    This signal is emitted when the current slide changes.
+    The new value is provided in the \a currentSlideName parameter.
+
+    This signal is always emitted with currentSlideIndexChanged.
+
+    The corresponding handler is \c onCurrentSlideNameChanged.
+*/
+
+/*!
+    \qmlsignal SceneElement::previousSlideNameChanged(string previousSlideName)
+
+    This signal is emitted when the previous slide changes.
+    The new value is provided in the \a previousSlideName parameter.
+
+    This signal is always emitted with previousSlideIndexChanged.
+
+    The corresponding handler is \c onPreviousSlideNameChanged.
+*/
+
+/*!
+    \qmlmethod void SceneElement::goToSlide(bool next, bool wrap)
+
+    Requests a time context (a Scene or a Component element) to change to the next or the
+    previous slide, depending on the value of \a next. If the context is already at the
+    last or first slide, \a wrap defines if change occurs to the opposite end.
+*/
+
+/*!
+    \qmlmethod void SceneElement::goToTime(string elementPath, real time)
+
+    Sets a time context (a Scene or a Component element) to a specific playback \a time in seconds.
+
+    For behavior details, see Presentation::goToTime() documentation.
+*/

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<project name="Viewer">
+	<target name="preview">
+		<if test="${preview_app=='_NULL_'}">
+			<echo message="Previewing ${ OutputFileName }" />
+			<if test="${ not property::exists('AbsoluteOutputPath')}">
+				<fail message="This script relies on setup.include to set up deploy parameters correctly." />
+			</if>
+      
+			<property name="ViewerPath" value="${ path::combine( uicomposerpath, 'Runtime\Build\Bin\Win32\' ) }" />
+			<!-- preview app defaults to the one on the Deploy folder -->
+			<property name="ViewerArg" value="${ '&quot;' + path::combine( AbsoluteOutputPath, OutputFileName ) + '&quot;' }"/>
+			<echo message="ViewerPath = ${ ViewerPath }" />
+			<echo message="ViewerArg = ${ ViewerArg }" />
+			<exec program="${ path::combine( ViewerPath, Win32ViewerApp ) }" failonerror="false" commandline="${ ViewerArg }" resultproperty='status' />
+			<fail message="Unable to execute ${ Win32ViewerApp }" unless="${ status == '0' }" />
+		</if>
+		
+		<if test="${preview_app != '_NULL_'}">
+			<exec program="${ preview_app }" failonerror="false" resultproperty='status' />
+			<fail message="Unable to execute ${ preview_app }" unless="${ status == '0' }" />
+		</if>
+	</target>
+</project>

@@ -1,0 +1,90 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Viewer: Menu
+\page viewer-menu.html
+\ingroup qt3dstudio-viewer
+
+\section1 File
+
+\list
+\li
+  \b{Open...} - Open a \c{.uip} presentation or
+  \c{.uia} application file to view.
+\li
+  \b{Reload} - Restart the presentation/application from the
+  beginning.
+\li
+  \b{Quit} - Quit the Viewer.
+\endlist
+
+\section1 View
+
+\list
+\li
+  \b{Full Screen} - Remove the window for the viewer and use the
+  full screen for the application. (Whether or not the initial
+  presentation fills the screen or not depends on the
+  \l{studio-menu.html#project-settings}{presentation size}
+  and the scale mode, which is set via the application
+  \l{file-formats-uia.html#application}{scale mode setting}, or
+  Viewer override command (see \e{Scale Mode} below).
+\li
+  \b{Show Matte} - Toggle the display of any letterboxed regions
+  (areas outside the initial presentation) as a darker matte. When
+  disabled, the clear color for the initial presentation is displayed
+  instead.
+\li
+  \b{Scale Mode} - Override the scale mode set by the
+  \l{file-formats-uia.html#application}{application}:
+
+  \image Runtime-ApplicationScaleMode.png
+
+\li
+  \b{VSync Interval} - Clamp render refresh rate to monitor refresh
+  rate to avoid tearing.
+  \list
+  \li
+    \e {Adaptive VSync} - At high frame rates avoid tearing. At low frame
+    rates avoid stuttering.
+  \li
+    \e {VSync Off} - Disable VSync.
+  \li
+    \e {VSync On} - Enable VSync.
+  \endlist
+\li
+  \b{Shade Mode} - Enable overlayed wireframe rendering for
+  tesselated geometry.
+\li
+  \b{Show Render Statistics} - Display debug information on top of
+  the viewer with information for recent average frame rate/frame time.
+\endlist
+
+*/

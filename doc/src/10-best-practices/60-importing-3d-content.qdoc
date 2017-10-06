@@ -1,0 +1,779 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Working with 3D Content
+\page best-practices-importing-3d-content.html
+\ingroup qt3dstudio-best-practices
+
+\chapter 3D Content Overview
+
+\list
+\li
+  \b{Use Triangles} - Qt 3D Studio only supports geometry
+  exported as triangles. When exporting you must ensure that this option
+  is selected. Many of the exporters provide an option for this at
+  export time, and Studio will tell you what went wrong if you forget to
+  export with this option.
+\li
+  \b{Time-based Animations} - By default in Max or Maya, when you
+  are creating keyframes you are associating them with certain frame
+  numbers. This is great in the film industry where frame rates are
+  constant, but this technique necessarily has problems in applications
+  where the frame rate may or may not be rock solid. Our solution to
+  this problem is to express the locations of keyframes in time values
+  instead of frame numbers. That way, if you say \"this logo animation
+  will play for 3 seconds\" we can guarantee that it will play for 3
+  seconds. If you express it in frames, \"this logo animation will play
+  for 180 frames\" it may play for 3 seconds if you're getting 60 fps,
+  but if you drop to 30 fps the animation is going to go much slower.
+
+  Luckily, accounting for this is relatively simple. Max and Maya both
+  default to a setting of 24 frames per second, so your keyframes will
+  be translated at that ratio. If you want a keyframe at one second, put
+  it on frame 24. Two seconds? Frame 48, etc. Both Max and Maya offer
+  configurable frame rates, and the frame rate setting should be
+  respected upon import, if changed. It's also worthwhile to note that
+  Maya, by default, starts at frame 1. If you have a keyframe at frame
+  one, the time for that keyframe will be 1/24 or 0.041 seconds. It may
+  be a good idea to go into your Maya animation settings and start your
+  animations at frame 0, or 0/24 = 0 seconds.
+\li
+  \b{Different Animation Systems} - DCC packages offer highly
+  complex and specialized animation systems. We recommend using Studio's
+  animation capabilities whenever practical. This helps keep mesh
+  information on import clean and reduces conflicts between imported
+  mesh animation and Studio's animation upon refreshing.
+
+  The animation system in Studio is a full implementation of bezier
+  keys, and the full complement of bezier animation that you can create
+  with Max or Maya and export with COLLADA will be represented in
+  Studio. The more extreme differences between the various animation
+  systems are mitigated by the limitations imposed by the COLLADA and
+  FBX formats, but there could be some animations that you would be able
+  to create in Max or Maya that would not be represented correctly in
+  Studio. If you believe you've found such an animation, and you'd like
+  to use it in your UI, please bring it up with us. We love finding edge
+  cases we haven't covered yet, and look forward to improving our
+  animation support to meet your needs.
+\li
+  \b{Handling Pivot Points} - DCC packages all handle pivot points
+  differently. In Qt 3D Studio there is only one pivot per object
+  and it is used as the origin for position, scale, and rotation
+  operations. In your DCC package, feel free to adjust the position of a
+  3D model's pivot as needed. However, extreme edits to pivots in Modo,
+  Max, or Maya can cause problems upon import into Studio, especially if
+  animated. This difference is often manifested as a difference in the
+  position or orientation of an object. As an artist you can prevent
+  these kinds of problems by only making simple edits to your pivot
+  points. Keep your pivot points to the default (world) alignment, don't
+  scale them, and make sure that if you have multiple pivots (Maya) that
+  they are all at the same location in space.
+\endlist
+
+\chapter 3D Content via FBX
+
+\image 3D_Content/FBX-Maya.png
+
+Studio can import 3D geometry and animations exported using FBX. Please
+use the following settings when exporting:
+
+\list
+\li
+  \b{Geometry}
+\li
+  Uncheck all options, except \b{check the following}:
+  \list
+  \li
+    Split per-vertex Normals
+  \li
+    Tangents and Binormals
+  \li
+    Referenced Assets Content
+  \li
+    Triangulate
+  \endlist
+\li
+  \b{Animation} - enable or disable as desired; bake or unbake
+  animations as desired
+\li
+  \b{Cameras} and \b{Lights} - these objects will only come
+  into Studio as empty nodes (groups). This can be useful if you need to
+  animate these objects and use those animations in Studio (by attaching
+  Studio cameras and lights to the animated groups).
+\li
+  \b{Axis Conversion} - Qt 3D Studio uses a Y-up coordinate
+  system, so ensure that \c{Up Axis} is set to \c{Y}.
+\li
+  \b{FBX File Format}
+\li
+  \b{Type} - Studio supports either ASCII or Binary FBX files.
+  ASCII files are preferred for any bug reports.
+\li
+  \b{Version} - Studio supports FBX versions 2013 and 2014 (up to
+  2014.2). We recommend 2014.
+\endlist
+\chapter 3D Content via COLLADA
+
+\section1 Exporting COLLADA from Various 3D Modeling Applications
+
+Each 3D modeling application uses a specific COLLADA exporter that
+produces a format recognized by Studio. Autodesk's 3D Studio Max 2011
+and Maya 2011 use OpenCOLLADA which can be found by visiting
+www.opencollada.org/download.html
+
+Download the correct version of OpenCOLLADA for 3D Studio Max and Maya.
+Maya and 3D Studio Max need to be installed prior to installing the
+correct OpenCOLLADA version. In addition, be sure that no 3D programs
+are open during the installation of OpenCOLLADA.
+
+\section1 Exporting OpenCOLLADA from Maya
+
+In order for the OpenCOLLADA exporter to become active, some options
+need to be checked and unchecked in the Plug-in Manager. To find the
+Plug-in Manager, go to Window > Settings/Preferences
+> Plug-in Manager.
+
+The \"fbxmaya.mll\" plug-in has to be unchecked. The COLLADAMaya.mll
+needs to be checked as both Loaded and Auto Load.
+
+\image 3D_Content/colladaMaya01.png
+
+Next, go to File > Export Selection and open the dialog
+box.
+
+\image 3D_Content/colladaMaya02.png
+
+Under General Options, be sure that OpenCOLLADA exporter is selected and
+set as the default file extension. Under general export options, check
+that the following options are active.
+
+\image 3D_Content/colladaMaya03.png
+
+The triangulate option must be checked on prior to export.
+
+Finally, choose the location for the COLLADA file to be saved. It is a
+good practice to keep all source art, including COLLADA files, in a
+folder outside of your Studio project folder.
+
+\image 3D_Content/colladaMaya04.png
+
+\section1 Exporting OpenCollada from 3D Studio Max
+
+Select the object to be exported. Next, open the Export dialog box.
+
+\image 3D_Content/colladaMax01.png
+
+Be sure to select OpenCOLLADA and not Autodesk Collada.
+
+Next, you will be prompted with another set of options for the
+OpenCOLLADA exporter.
+
+\image 3D_Content/colladaMax02.png
+
+Again, be sure that triangulate is checked on.
+
+\section1 Exporting COLLADA from Luxology's Modo 601
+
+Modo comes installed with a COLLADA exporter that works with Studio as
+of versions 501 and 601.
+
+With the mesh object selected, triangulate the mesh by pressing Shift+T.
+
+\image 3D_Content/colladaModo01.png
+
+\image 3D_Content/colladaModo02.png
+
+Next, go to System > Preferences to configure the COLLADA
+exporter.
+
+\image 3D_Content/colladaModo03.png
+
+In the Preferences dialog box, locate the Collada I/O section under File
+I/O. Be sure that Save Triangles as Triangles is checked on.
+
+\image 3D_Content/colladaModo04.png
+
+\section1 Description of supported features
+
+The following section describes the features supported by COLLADA import
+into Studio. Where appropriate, caveats, limitations, and differences
+between different DCC applications are discussed.
+
+\section2 Geometry
+
+Generally speaking, the geometry import capabilities are very solid.
+We've stress tested different high poly count scenarios. The one caveat
+here is mentioned above, Studio only supports triangulated geometry, so
+be sure to check that option when exporting COLLADA data for use in
+Studio.
+
+\section2 Transformation
+
+As you would expect with COLLADA you can import full 3D transform
+information including position, rotation, scale, and pivot. Studio can
+import left and right handed coordinate systems, Y-up or Z-up and
+rotations applied in any order. The principal limitation in this area is
+pivot points. As discussed above, only simple edits to pivot points are
+supported.
+
+Most DCC tools allow artists to freeze transformations and we highly
+recommend performing this operation before importing mesh data into
+Studio. This operation ensures that the mesh coming into Studio has
+clean transformation data and no arbitrary transformation values which
+can be confusing or an impediment to your work.
+
+Please note: After freezing transforms, you may have to reposition the
+pivot point in some DCC tools.
+
+\section2 Hierarchy
+
+The plug-in supports translating hierarchical information from COLLADA
+into Scene Graph information inside of Studio. Hierarchies of arbitrary
+depth are supported, including grouped nodes. Hierarchical transforms
+are applied as expected.
+
+\section2 Materials
+
+The plug-in supports translating material settings from the DCC
+application into material settings inside of Studio. Specific mappings
+have been made to ensure consistent control of the look inside of NVIDIA
+from within the DCC application. Material settings for diffuse,
+specular, ambient, and opacity are all imported correctly.
+
+\section2 Textures
+
+Images applied to different material IDs will be imported with the
+COLLADA file and applied inside of Studio. Note that the COLLADA files
+reference the images on disk. (Rather than include them in the COLLADA
+file.) This means that a path to the image is stored in the COLLADA
+file, Studio uses this path to import the image. Studio can import
+transformed UV sets (e.g.~Tiling, Rotation) as well as multi-textured
+setups.
+
+We recommend using .png and .dds image formats. These formats support
+alpha channels and allow for lossless editing. With .dds, you can set
+the compression to DXT5 with alpha blending if your image has
+transparency.
+
+\section2 Using Powers of Two Texture Map Pixel Dimensions
+
+As is the case with most real-time graphics, texture maps run optimally
+when their pixel dimensions are set to powers of two. An example of
+powers of two texture maps include 32X32, 64X64, 128X128, 512X512,
+1024X1024, 2048X2048 and tall or wide images that could be 512X64 or
+128X1024. Dimensions do not have to be square but they should be powers
+of two.
+
+\section2 Materials Inspector palette properties
+
+Materials are found parented to a mesh object in the timeline. The image
+below describes the hierarchy of meshes, materials and texture maps:
+
+\image 3D_Content/timeline_material.png
+
+\list
+\li
+  \b{A}: Mesh object
+\li
+  \b{B}: Material
+\li
+  \b{C}: Texture map
+\endlist
+
+When a material is selected, the Inspector palette lists properties
+relevant to editing the material.
+
+The animation toggle is associated with animatable properties.
+
+\image 3D_Content/Materials_InspectorPalette.png
+
+\list
+\li
+  \b{Lighting}: Vertex, Pixel. Per pixel lighting mode is used
+  primarily for materials that utilize Specular Amount and Specular
+  Roughness. Vertex lighting is the default.
+\li
+  \b{Blending Mode}: Normal, Screen, Multiply, Overlay. Setting the
+  Blend Mode to Screen will result in an additive type effect. Multiply
+  and Overlay are similar to what is found in most photo editing
+  programs. The default is Normal blending which yields no special
+  effect.
+\li
+  \b{Diffuse Color}: Change the diffuse color of your material.
+  There are predefined swatches and a custom color palette where
+  specific RGB values can be input.
+\li
+  \b{Diffuse Map}: This channel UV maps a bitmap image onto a
+  material's surface.
+\endlist
+\section3 Add texture maps to any channel by clicking on the channel
+slot and choosing an image from the pop-up menu. This menu displays all
+supported images in your project directory.
+
+\image 3D_Content/texture_selection.png
+
+\list
+\li
+  \b{Emissive Power}: The default value is zero. Increasing
+  the emissive power causes the material to become luminous. At 100\%
+  emissive, lights will not have an effect on your material.
+\li
+  \b{Emissive Map}: Control the amount and location of the emissive
+  value with a texture map.
+\li
+  \b{Specular Reflection}: When a map is assigned to this channel,
+  it is environmentally mapped to the surface and treated as a
+  reflection.
+\li
+  \b{Specular Amount}: With per pixel lighting turned on, this
+  setting adjusts the specular amount of a material surface.
+\li
+  \b{Specular Roughness}: Controls the spread and falloff of the
+  specular appearance.
+\li
+  \b{Opacity}: Controls the general opacity of the material.
+\li
+  \b{Opacity Map}: Adding a texture map to this channel controls
+  the amount and location of opacity on a material.
+\endlist
+
+\section2 Texture map Inspector palette properties
+
+With a texture map selected in the timeline, the inspector palette will
+display the following properties:
+
+\image 3D_Content/texture_inspectorPalette.png
+
+The animation toggle is associated with animatable properties.
+
+\list
+\li
+  \b{A}: U and V repeat. These properties adjust the texture map's
+  repeat values in U and V space. Default is set to 1.
+\li
+  \b{B}: Sets the texture mapping mode to either UV Mapping or
+  Environmental Mapping.
+\li
+  \b{C}: U and V tiling. Sets the texture map to either tile or not
+  tile (repeat) in either U or V direction. Default is set to No Tiling.
+\li
+  \b{D}: UV Rotation, U and V position, U and V pivot. These
+  properties allow for transforming a texture map in U and V space. To
+  rotate a texture map about its center, set the U and V positions to
+  -.500 and the U and V pivot to .500.
+\endlist
+
+\section2 Adding Fonts and Using Text in Studio
+
+In order to use text in Studio, fonts need to be added to the fonts
+folder within the user's project directory. Before adding fonts to your
+project, be sure that you have the rights to distribute the fonts or use
+open source fonts from www.google.com/webfonts
+
+Studio comes packaged with a default library of open source webfonts.
+These fonts can be found in the project palette font library directory.
+
+\image 3D_Content/text01.png
+
+Drag a font from Windows Explorer to the fonts folder in the project
+directory. A copy of the font will be generated and added to the
+project.
+
+\image 3D_Content/text02.png
+
+Next, drag the font from the fonts folder in the project palette to the
+scene.
+
+\image 3D_Content/text03.png
+
+If there are multiple fonts in the font folder, the user can change the
+font in the scene by first selecting the text, then choosing a different
+font in the font property found in the inspector palette.
+
+Replacing missing fonts is as easy as locating the missing font and
+adding it to the fonts folder.
+
+\note To replace a specific font in your presentation without having
+to tediously locate each font in the presentation, open your
+\c{.uip} file in a text editor and perform a find/replace
+operation. For example, if you wish to replace all 100 instances of
+\"TitilliumWeb\" with \"Michroma\", you simply need to find all
+instances of \"TitilliumWeb\" in a text editor and replace with
+\"Michroma\". Be sure to correctly identify the font names or this
+operation will not work. Save the \c{.uip} file after find/replace
+is complete and reopen the .uip in Studio. Voila! All specified fonts
+will be replaced with the desired font.
+
+\section2 Animation
+
+Animations can be brought into Studio using COLLADA. Animation is
+supported on any imported attribute. Position, rotation, scale, pivot,
+and material attributes can all be animated. An example of our advanced
+support for animations would be a hierarchy of items, rotated
+simultaneously on arbitrary axes in arbitrary axis order. Studio also
+supports importing bezier tangent value tweaked into animations.
+
+\chapter 3D Workflow Case Study
+
+The examples presented below use Luxology's Modo 601 for digital content
+creation, however, these concepts also apply to other DCC tools such as
+Autodesk's 3D Studio Max and Maya.
+
+\section1 Building a simple gauge and importing to Studio.
+
+The following section describes the process of building a simple gauge
+in Modo, Luxology's 3D modeling and animation program. The concepts of
+this example can also be applied to other DCC tools.
+
+Traditionally, artists build their 3D models first and then build
+texture maps based on the mesh's UV coordinate layout. This is
+especially true with complex 3D models such as cars.
+
+Another technique bases the 3D geometry on existing artwork. In many
+cases, source imagery and artwork can be used to build texture maps.
+These resulting texture maps can then be used as a guide to build
+geometry. In the example below, we are going to use a texture map as a
+basis for constructing the 3D gauge model. This technique ensures that
+proper scale and proportions of the 3D models match the original concept
+artwork.
+
+\section1 Elements of a texture map
+
+The texture map shown on the left features alpha transparency and will
+be the final map used in Studio on our mesh material. An alternate copy,
+shown here on the right, replaces the transparent background with black
+for easy reference modeling.
+
+\image 3D_Content/00_transparentmap.png
+
+This texture map has a height and width of 512px and features a circular
+meter, needle, and needle glow graphics. The needle graphic displays all
+four sides of the needle. Remember that once the modeling is finished,
+the UV layout process will assign the appropriate geometry face to the
+correct area of the texture map. Also included on this map is a center
+registration point that makes it easy for alignment.
+
+\image 3D_Content/02_texture_elements.png
+
+\section1 Modeling geometry based on backdrop image
+
+With Modo open, click on the Images tab on the upper right panel and
+choose Add Clip. Then locate and load the reference map or texture map.
+
+With the texture map loaded in Modo, we can now use it as a reference
+image to begin the modeling process. Now click on the Items tab on the
+upper right panel and choose Add Item > Backdrop Item to
+create a new Backdrop Item object in the scene.
+
+With the Backdrop Item selected, now choose the Properties tab and
+assign the texture map to the Image channel.
+
+\image 3D_Content/03_backdropItem.png
+
+Now we can begin modeling the gauge geometry. With the Mesh object
+selected in the Items panel, let's build the circular meter component.
+To do this, choose the front view then under the Basic objects tab
+(upper left panel) click on the cylinder button. Now, while holding the
+Ctrl key, line up the cursor over the center registration mark on the
+Backdrop Item and Cntrl click and drag out to just beyond the circular
+meter graphic. In the cylinder creation parameters on the left, choose
+22 segments. Now press the spacebar to drop the tool and complete the
+modeling operation. Next let's remove excess geometry. Go to the
+perspective view so you can view the 3D cylinder mesh. Press \"3\" on
+the keyboard (not the numeric keypad) and now we are in polygon mode.
+Choose the front-facing polygon and next press the left bracket key to
+inverse select the cylinder's other faces. Now press delete. You will be
+left with a single circular face with 22 sides.
+
+Tip: Use the numerical keypad's numbers to change views or shading
+modes. Pressing \"7\" will switch to wireframe mode while \"4\" switches
+to shaded view mode. Pressing \"2\" and \"3\" will send you into front
+and side views respectively while pressing the . key will bring you back
+to perspective view. Using the numbers along the top of the main
+keyboard will also make you an efficient modeler. Numbers 1,2,3 and 4
+will activate different sub object modes such as vertex, edges, polygon
+and item modes.
+
+For accuracy, we can center the selected circular face to the world's
+origin. To do this, click on the Basic tab on the upper left and with
+the circular polygon still selected choose Center Selected
+> All. This will place the selected poly exactly in the
+middle of your scene.
+
+Currently, your geometry should cover the entire circular meter graphic
+as seen here:
+
+\image 3D_Content/01b_modelingStart.png
+
+It is important to optimize your geometry and only place geometry over
+places on the texture map where a graphical element is present. As an
+example, if we were to leave this polygon as-is and import it into
+Studio with the chosen texture map, there will be an entire region of
+the geometry that will have to be needlessly drawn at runtime. Even
+though this area of the map is transparent, it is still calculated by
+the hardware and as one would imagine could cause performance issues. So
+we need to punch a hole in the geometry so that the mesh is only
+covering the circular meter graphic and nothing else.
+
+In the front view, select the polygon and press the \"b\" key to
+activate the beveling tool. Now bevel the polygon so that the orange
+selected portion of the bevel resides just inside the circular meter
+graphic. Press the spacebar and complete the operation. Now delete the
+center polygon. Next, delete the lower right faces of the circular
+geometry that do not make up the meter. Rename the Mesh item to
+\"indication.\"
+
+The resulting mesh should look similar to this:
+
+\image 3D_Content/01_texture_map.png
+
+\section1 Modeling the needle and needle glow
+
+Create a new Mesh item in the Items tab and draw a cube over top of the
+Backdrop Item, matching the overall dimensions of the needle graphic.
+Remember, the texture is displaying all four sides of the needle so in
+this case we are modeling the center portion of the needle only.
+
+Adjust the cube's shape to taper off at the top and side views. Delete
+the backfacing and bottom polygons of the needle, since we will not see
+them in the final product. Subdivide the geometry across the middle by
+selecting the ring of edges and connecting them (Alt+C).
+
+\image 3D_Content/modeling_needle.png
+
+Model the glow geometry using the same techniques as described earlier.
+Start out with a new Mesh item and draw a cube directly overtop of the
+left side glow gradient. Remove excess polygon faces. With one remaining
+polygon face, taper the points to closely surround the gradient but
+leaving a slight gap between the gradient edges and the geometry.
+
+Now mirror the geometry (select the polygons and select Duplicate
+> Mirror) to the right side to cover the right gradient.
+The mirroring command can be found in the Duplicate tab on the left
+panel.
+
+Now select the four vertical edges of the glow geometry and bisect them
+(Alt+C). Now rename this Mesh item to \"glow.\"
+
+We bisect long strips of polygons to avoid visual artifacts later on.
+
+\image 3D_Content/modeling_glow.png
+
+\section1 Adjusting needle location and pivot
+
+Next, we need to position the needle in such a way that will allow it to
+rotate about its Z axis at the base of the needle. Select all of the
+polygons that make up the needle item and choose Center Selected under
+the Basic tab. Do the same for the glow item. Make sure that both left
+and right glow polygons reside to the left and right of the needle
+respectively. Now select both the needle and glow items and move them up
+in the Y axis so that the bottom of the needle and glow line up just
+around the world origin.
+
+Next, we need to parent the glow item to the needle by selecting the
+glow item in the Items panel and dragging it onto the needle item. It
+will now appear as a child object of the parent needle. This will ensure
+that the glow object travels with the rotation of the needle.
+
+\image 3D_Content/Item_panel_parenting.png
+
+Select the needle item and click and hold on the Items button at the top
+menu. Choose Center. The Center pivot will appear in the modeling space.
+
+\image 3D_Content/center.png
+
+Now position the pivot to the world origin using the move tool.
+
+\image 3D_Content/08_adjustPivots.png
+
+\section1 Creating a material and adding a texture map
+
+The following steps are a simple way to add a material to your polygon
+selections and adding texture maps to them easily.
+
+Continuing with our case study, select all three Items and turn on the
+polygon selection mode. Next, press the \"m\" key to open the material
+assignment pop-up window and type in \"gauge\" for the description. Be
+sure the Diffuse amount is set to 100\%. Press Enter. A new material
+called \"gauge\" has now been created.
+
+\image 3D_Content/selectPolys_MakeMaterial.png
+
+You can view this material by clicking on Texture at the top menu and
+choosing Open Material Editor.
+
+Now with the material editor open, we can drag our image to the gauge
+material to assign a texture map to it.
+
+\image 3D_Content/image_toMaterial.png
+
+\section1 UV layout
+
+This section assumes prior knowledge of UV coordinates and layout. For
+further explanation on advanced techniques, please visit
+www.luxology.com.
+
+With the three items selected (indication, needle, and glow) choose the
+Lists tab. Now expand UV Maps and click on (new map). If there is an
+existing UV map such as Texture or other preexisting UV map, just delete
+it. You should now only have one UV map listed under the UV Maps
+rollout. Rename this map channel to \"gauge.\"
+
+\image 3D_Content/Lists.png
+
+Now click on the UV tab at the top menu.
+
+\image 3D_Content/UVTab.png
+
+Begin unwrapping the UV coordinates by planar mapping the indication
+geometry and glow geometry. Unwrap the needle using the Atlas method so
+that all sides of the needle are broken up into four pieces, one for
+each side.
+
+Position the UVs over the texture map so that it resembles the image
+below.
+
+\image 3D_Content/04_UVSpace.png
+
+The result should look something like this:
+
+\image 3D_Content/05_TexturedModel.png
+
+\section1 Exporting 3D models to Studio via COLLADA.
+
+This section describes the process of preparing a model for export to
+Studio.
+
+As mentioned earlier, it is important to freeze transforms on your mesh
+objects to ensure a clean import to Studio.
+
+Select all three mesh items (indication, needle, glow) and then choose
+Item > Transforms > Freeze All in the top
+menu.
+
+\image 3D_Content/07_freezeTransforms.png
+
+Next, we need to be sure the correct texture map is applied to our
+material prior to export. If you recall, there is a version of the
+texture map that has transparency information. This is the map we will
+use for our exported geometry. Go to the Images tab in the upper right
+panel. Right-click on the image and choose \"Replace as Still\" then
+choose the \"gauge\_elements.png\" map. You will notice the texture map
+updating in the viewport.
+
+Next, with all three models still selected press Shift+T which is the
+shortcut command to triple the polygons. This is a quick method to
+convert quads to triangulated mesh.
+
+\section3 Pro Tips: Save a copy of your project prior to preparing it
+for export. This way, you have non-triangulated version of your project
+for future editing.
+
+\image 3D_Content/export_triangulateMesh.png
+
+Before we export our 3D models, we must first check our export
+preferences. In Modo, this is located under System >
+Preferences.
+
+Next, click on Scene I/O under the File I/O rollout list. Now, be sure
+that \"Save Triangles as Triangles\" is checked on. Here is a common
+configuration for successful export from Modo via COLLADA.
+
+\image 3D_Content/export_exportSettings.png
+
+Export the 3D models by choosing File > Export As.
+
+Choose COLLADA as the Save as type. Save the COLLADA file as
+\"Gauge.dae\"
+
+\section1 Import 3D gauge into Studio
+
+The following steps will guide you through the process of importing a
+COLLADA 3D model into Studio.
+
+Launch Studio 5.0.
+
+Create a new project and with \"Create directory for project\" checked
+on, save the project as Gauge.uip.
+
+You now have created a new UIP project called Gauge. Now, locate your
+exported Gauge.dae file in Windows Explorer.
+
+Drag and drop the Gauge.dae file onto the models folder in Studio's
+Project palette. A series of mesh files are created in addition to a
+.import file.
+
+\image 3D_Content/export_DragDAE.png
+
+\section3 Converted DAE to .mesh objects:
+
+\image 3D_Content/export_project.png
+
+If you want this gauge to appear in additional slides, turn on the Edit
+Master slide view button at the upper left of Studio's user interface.
+
+Now drag the Gauge.import to either the timeline or the scene project
+window.
+
+\image 3D_Content/export_dragToScene.png
+
+The gauge will appear very small in the project window. Select the
+camera under the Layer and adjust its Z position under the Inspector
+palette.
+
+Expand the Gauge, needle, and glow mesh objects in the timeline. Notice
+the gauge materials under each mesh object. These are the materials we
+assigned in Modo.
+
+Select the gauge material for the needle and change its color to red
+using the Diffuse color property under the Inspector palette.
+
+Repeat the previous steps to change the glow's material to red as well.
+With the glow material still selected, increase its emmisive value to
+100\%.
+
+\image 3D_Content/export_diffuseColor.png
+
+You may notice that the indication texture is visible in front of the
+needle. If this is the case, try moving the indication mesh object back
+and away from the needle and also scale it up until it looks correct.
+Some values to consider:
+
+\list
+\li
+  Position Z = 2.4
+\li
+  Scale XYZ = 1.120
+\endlist
+
+Now with the needle selected in the timeline, rotate it about its Z axis
+and notice how it rotates correctly.
+
+*/

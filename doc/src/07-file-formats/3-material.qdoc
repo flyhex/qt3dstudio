@@ -1,0 +1,265 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title The .material Format
+\page file-formats-material.html
+\ingroup qt3dstudio-file-formats
+
+Qt 3D Studio supports custom
+materials used to render elements. Materials are arbitrary single-pass
+GLSL shaders, wrapped in a file format providing an artist-friendly
+interface for tweaking material parameters in Studio.
+
+\section1 Overview
+
+The general structure of a \c{.material} file is shown below. Note
+that some of the attributes and elements shown here are optional (and
+this example does not include all possible attributes):
+
+\badcode
+<Material formalName="..." version="1.0">
+  <MetaData author="...">
+    <Property name="..." />
+    <Property name="..." />
+  </MetaData>
+  <Shaders type="GLSL">
+    <Shader>
+      <VertexShader>
+        <Source>...</Source>
+      </VertexShader>
+      <FragmentShader>
+        <Source>...</Source>
+      </FragmentShader>
+    </Shader>
+  </Shaders>
+</Material>
+\endcode
+
+The actual code for the shader is placed within the
+\c{<Source>} elements.
+
+\section1 Schemata
+
+Legal \c{.material} files are described by the following formal
+schemata. The RelaxNG Compact schema is the reference from which the XML
+Schema Definition schema was derived.
+
+\section2 RelaxNG Compact (\c{.rnc)}
+
+\badcode
+grammar \{
+  start = MaterialElement                       # Everything is wrapped in a <Material> element
+
+  MaterialElement = element Material \{
+    attribute version     \{"1.0"\,              }# This file describes version 1.0 only
+    attribute formalName  \{text\?,              }# The formalName attribute is optional;      default: filename (minus extension)
+    attribute description \{text\?,              }# Optional long description of the material
+    MetaDataElement?,                           # <MetaData> is optional,
+    ShadersElement                              # but <Shaders> is required
+  \}
+
+  MetaDataElement = element MetaData\{
+    attribute author      \{text\?,              }# Various descriptive attributes (optional)
+    attribute created     \{text\?,}
+    attribute modified    \{text\?,}
+    PropertyElement*                            # Zero or more <Property> elements
+  \}
+
+  PropertyElement = element Property \{          # All <Property> attributes are optional except for name
+    attribute name        \{xsd:ID\,             }# The internal, script name of the property (must be a unique identifier)
+    attribute description \{text\?,              }# Tooltip to display in Inspector palette
+    attribute formalName  \{text\?,              }# The name to display in Inspector palette;  default: the property `name`
+    attribute type        \{PropertyType\?,      }# The type of the property (defined below);  default: Float
+    attribute min         \{xsd:float\?,         }# UI min value for numeric types;            default: none
+    attribute max         \{xsd:float\?,         }# UI max value for numeric types;            default: none
+    attribute default     \{text\?,              }# Default value for the property;            default: 0/""
+    attribute usage       \{UsageType\?,         }# Only for textures;                         default: diffuse
+    attribute filter      \{FilterType\?,        }# Only for textures;                         default: linear
+    attribute clamp       \{ClampType\?          }# Only for textures;                         default: wrap
+  \}
+
+  ShadersElement = element Shaders \{
+    attribute type        \{"GLSL" | "HLSL"\?,   }# Optional shader type; only GLSL supported. default: GLSL
+    attribute version     \{text\?,              }# Code version
+    element Shared        \{text\?,              }# Arbitrary definition code to run for all shaders (optional)
+    ShaderElement+                              # There must be at least one <Shader> in the .material file
+  \}
+
+  ShaderElement = element Shader \{
+    attribute name        \{xsd:NCName\?,        }# An identifier-like name
+    ((VSEl | FSEl) | (VSEl & FSEl))             # Either or both of <VertexShader> and <FragmentShader>, in either order
+  \}
+  VSEl = element VertexShader   \{ShaderContent\}
+  FSEl = element FragmentShader \{ShaderContent\}
+
+  ShaderContent = element Source  \{ text \      }# Shaders currently require a single <Source> element
+
+  UsageType     = "diffuse" | "specular" | "bump" | "environment"
+  FilterType    = "nearest" | "linear"
+  ClampType     = "clamp" | "wrap"
+  PropertyType  = "Boolean" | "Color" | "Float" | "Float2" | "Font"
+                  | "FontSize" | "Image" | "Import" | "Long" | "Mesh"
+                  | "MultiLineString" | "Rotation" | "String" | "Vector"
+                  | "Texture" | "Texture3D" | "TextureCube"
+\}
+\endcode
+
+\section2 XML Schema Definition (\c{.xsd)}
+
+\badcode
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="Material">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="MetaData"/>
+        <xs:element ref="Shaders"/>
+      </xs:sequence>
+      <xs:attribute name="version" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="1.0"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="formalName"/>
+      <xs:attribute name="description"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MetaData">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="Property"/>
+      </xs:sequence>
+      <xs:attribute name="author"/>
+      <xs:attribute name="created"/>
+      <xs:attribute name="modified"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Property">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:ID"/>
+      <xs:attribute name="description"/>
+      <xs:attribute name="formalName"/>
+      <xs:attribute name="type" type="PropertyType"/>
+      <xs:attribute name="min" type="xs:float"/>
+      <xs:attribute name="max" type="xs:float"/>
+      <xs:attribute name="default"/>
+      <xs:attribute name="usage" type="UsageType"/>
+      <xs:attribute name="filter" type="FilterType"/>
+      <xs:attribute name="clamp" type="ClampType"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Shaders">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="Shared"/>
+        <xs:element maxOccurs="unbounded" ref="Shader"/>
+      </xs:sequence>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="GLSL"/>
+            <xs:enumeration value="HLSL"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Shared" type="xs:string"/>
+  <xs:element name="Shader">
+    <xs:complexType>
+      <xs:choice>
+        <xs:choice>
+          <xs:element ref="VertexShader"/>
+          <xs:element ref="FragmentShader"/>
+        </xs:choice>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="VertexShader"/>
+          <xs:element ref="FragmentShader"/>
+        </xs:choice>
+      </xs:choice>
+      <xs:attribute name="name" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="VertexShader" type="ShaderContent"/>
+  <xs:element name="FragmentShader" type="ShaderContent"/>
+  <xs:complexType name="ShaderContent">
+    <xs:sequence>
+      <xs:element ref="Source"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Source" type="xs:string"/>
+  <xs:simpleType name="UsageType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="diffuse"/>
+      <xs:enumeration value="specular"/>
+      <xs:enumeration value="bump"/>
+      <xs:enumeration value="environment"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="FilterType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="nearest"/>
+      <xs:enumeration value="linear"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ClampType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="clamp"/>
+      <xs:enumeration value="wrap"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="PropertyType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Boolean"/>
+      <xs:enumeration value="Color"/>
+      <xs:enumeration value="Float"/>
+      <xs:enumeration value="Float2"/>
+      <xs:enumeration value="Font"/>
+      <xs:enumeration value="FontSize"/>
+      <xs:enumeration value="Image"/>
+      <xs:enumeration value="Import"/>
+      <xs:enumeration value="Long"/>
+      <xs:enumeration value="Mesh"/>
+      <xs:enumeration value="MultiLineString"/>
+      <xs:enumeration value="Rotation"/>
+      <xs:enumeration value="String"/>
+      <xs:enumeration value="Vector"/>
+      <xs:enumeration value="Texture"/>
+      <xs:enumeration value="Texture3D"/>
+      <xs:enumeration value="TextureCube"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+\endcode
+
+*/

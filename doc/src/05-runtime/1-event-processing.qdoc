@@ -1,0 +1,227 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Runtime: Event Processing
+\page runtime-event-processing.html
+\ingroup qt3dstudio-runtime
+
+\omit
+There are three different event systems in
+the Qt 3D Studio Runtime:
+
+\list
+\li
+  \e{External Events} arrive from outside the
+  system (e.g. from the CAN bus, a keyboard, a game controller) via
+  plugins that expose a queue of events each frame to your application.
+  These events must be explicitly received and handled by your
+  application.
+\li
+  \e{State Machine Events} occur within each
+  state machine running in your application, possibly causing the state
+  machine to possibly change states.
+\li
+  \l{presentation-events}{Presentation Events} occur within each
+  presentation (e.g. touch events, slide changes, Lua script), bubbling
+  up the scene graph of elements within the presentation.
+\endlist
+
+\target external-events
+\section1 External Events
+
+\list
+\li
+  \e{TODO: document the handling of events, with an example App.lua
+  with links to the Lua functions and also to the reference for writing
+  plugins.}
+\endlist
+
+\target state-machine-events
+\section1 State Machine Events
+
+\list
+\li
+  \e{TODO: document the firing of events on state machines, with
+  links to the Lua functions.}
+\endlist
+\endomit
+
+\target presentation-events
+\section1 Presentation Events
+
+In the Runtime, processing presentation events is a single stage of the
+overall \l{runtime-frame-update-cycle.html}{Frame Update} cycle
+governing the operation of the runtime. Processing events is a
+sophisticated process with many associated activities and contracts.
+This page describes how event processing works, what sorts of things can
+happen as a result of events being processed, and how your application
+(C++) can interact with the runtime in terms of events.
+
+\section2 How Stuff Works
+
+The stages of the update cycle are clearly defined entities, with nice
+start and end conditions, that occur one right after another and in a
+well-specified order to accomplish the calculations and activities
+required for a given frame. The event processing stage is arguably the
+most important stage, so we'll explore some of the details of its
+operation here.
+
+There exists a list of events that is treated as a first-in/first-out
+queue. The act of 'firing an event' is literally adding the event being
+ 'fired' to the end of this queue. This operation is the same regardless
+of when the event is fired.
+
+On each frame the processing of events is started implicitly by the call
+to \c{CRuntime::UpdatePresentations}. On most frames, when event
+processing begins, the event list (queue) is empty. There are two cases
+in which there will be events in the queue.
+
+\list 1
+\li
+  An input event was fired by the Input Engine in response to user
+  action (e.g. Pressing buttons on the controller)
+\li
+  An event was fired after event processing was complete for last frame
+  (e.g. An event was fired from QML)
+\endlist
+
+Event processing happens in the same way regardless of how the events
+got on the list; Each event in the list is looked at in turn and anyone
+interested in that event is notified. It's important to note that all of
+the events in the queue are processed in turn (including events fired as
+a result of other events being processed) on and on until there are no
+events left to process. Only when the event list is completely empty
+does the event processing stage end for this frame.
+
+There are several possible outcomes of processing an event, we'll
+explore them next.
+
+\section2 Event Processing Results
+
+\section3 Changing Slides
+
+All slide changes are effected as the result of processing events. This
+can be a critical point to understand when trying to deduce the effects
+of complex interactions between actions, slides and script. For example,
+you set up a visual state saying that when the state machine enters a
+particular state tell a component to go to the next slide. For the
+runtime, a piece of logic gets created representing this action. When
+the onSelect event is fired and later processed, the interested logic
+will be notified and the slide change will occur.
+
+\omit
+TODO: Needs to be rewritten?
+Note that behavior event registrations (created with Lua's
+registerForEvent) work similarly to the logic described above. If a
+script registers explicitly for a certain event and in the handler calls
+goToSlide, essentially the same things happen.
+\endomit
+
+\section3 Changing Properties
+
+Attributes can have their values changed in response to events,
+affecting the visual appearance of the presentation. Set Property
+actions created in Studio will be executed when their specified event is
+processed, resulting in properties being changed. Also, changing slides
+will result in changed properties if a master object inside of Studio
+has one or more of its properties unlinked from the master slide and
+that property is changed per-slide.
+
+\omit
+\section3 Executing Script
+
+Processing an event can result in arbitrary script code being executed.
+An event registration can be created by using the registerForEvent
+function to listen for a specific event on a specific element. The
+registration also has a callback function associated with it and when
+that specific event targeting that element is processed, the script
+callback function will be executed.
+
+Of course, script can inspect and change properties on various elements,
+affect slide changes, fire more events, etc. Being able to respond to
+events being processed really empowers scripting.
+\endomit
+
+\omit
+TODO: Needs to be rewritten.
+\section3 Firing More Events (Cascading)
+
+There are two ways a presentation may fire an event in response to
+another event. The first way is through script as described above, and
+the second way is through the action palette.
+
+Behaviors in Studio can have arbitrary Custom Events associated with
+them by adding these custom events in the header section of the
+behavior's .lua file. When a behavior with one or more Custom Events is
+the target of an action in the action palette Studio will offer the Fire
+Event action. By using this action, arbitrary cascading events can be
+set up to fire by pointing and clicking. (as opposed to scripting).
+
+It's worth repeating that these cascading events will all be processed
+in the same frame. The event processor doesn't stop processing events
+until there are none left to process.
+\endomit
+
+\section2 How Your Application (C++) Interacts with Event Processing
+
+There are two basic use cases for your application interacting with
+event processing:
+
+\list 1
+\li
+  Firing arbitrary events into the Runtime system.
+\li
+  Responding (with C++ callbacks) to events being processed.
+\endlist
+
+\section3 Firing Your Own Arbitrary Events into a Presentation
+
+You can fire arbitrary events into a presentation using
+\c{CPresentation::FireEvent}. If some part of your application
+needs to notify a running presentation of something in an event driven
+manner, this is the way to go. This is useful in a lot of circumstances
+such as \e {"A cut-scene video is done playing"} and \e {"Someone from the
+user's online friend list has logged on!"}.
+
+The arguments to \c{CPresentation::FireEvent} allow you to
+parameterize the events you fire into the system. The lifespan of the
+memory associated with these parameters is completely managed by the
+Runtime itself allowing you to 'fire and forget'.
+
+\section3 Responding to Events Being Processed
+
+The method \c{CPresentation::RegisterEventCallback} allows you to
+register a C++ callback for when a specific event is processed on a
+certain element. The TEventCallback typedef is the signature your
+callback function should implement. Also note the last parameter to
+\c{CPresentation::RegisterEventCallback} which allows you to store
+a \c{void*} context data for use in your callback.
+
+*/

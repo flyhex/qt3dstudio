@@ -1,0 +1,126 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Blend Mode
+\page best-practices-blend-mode.html
+\ingroup qt3dstudio-best-practices
+
+This page describes the
+\c{Blend Mode} property edited in Qt 3D Studio.
+
+\image LayerBlendModes.png "Blend Mode"
+
+The Blend Mode property controls how the colors of the active layer or object are blended with
+the colors of the background layer or object.
+
+In Qt 3D Studio both layers and object materials have the Blend Mode property. Changing Blend
+Mode in a layer will effect all objects in that layer while changing Blend Mode for a single
+object will only effect that object and it will only blend with background objects in the same
+layer, not with objects in other layers.
+
+Different blend modes are using different formulas to calculate the result as described below.
+It is important to know that every color channel of a pixel has a value ranging from 0.0 (black)
+to 1.0 (white). In formulas below \e A is the pixel color value of the active layer or object
+while \e B is the pixel color value of the background layer or object.
+
+\e{Note that modes marked with * are available only with hardware supporting KHR and NV
+extensions.}
+
+\section1 Blend Modes
+
+\section2 Normal
+For both layers and objects the default blend mode is \e Normal. Opaque objects will
+occlude objects in the background.
+
+\image LayerBlendModeNormal.png "Normal"
+
+\section2 Screen
+\e Screen inverts the pixel color values of both active and background layers or objects,
+then multiplies them and finally inverts the product. This will produce a lighter result.
+Black pixels in the active layer will be rendered as 100% transparent.
+
+\b Formula: \c{1-(1-A)*(1-B)}
+
+\image LayerBlendModeScreen.png "Screen"
+
+\section2 Multiply
+\e Multiply multiplies the pixel color values of both active and background layers or objects.
+This will produce a darker result. White pixels in the active layer will be rendered as 100%
+transparent.
+
+\b Formula: \c{A*B}
+
+\image LayerBlendModeMultiply.png "Multiply"
+
+\section2 Add
+\e Add simply adds the pixel color values of both layers. This will produce a lighter result.
+Black pixels in the active layer will be rendered as 100% transparent.
+
+\b Formula: \c{A+B}
+
+\e{Note: Available only in Layers}
+
+\image LayerBlendModeAdd.png "Add"
+
+\section2 Subtract
+\e Subtract simply subtracts the pixel color value of the active layer or object from the pixel
+color value of the background layer or object. This will produce a darker result.
+
+\b Formula: \c{B-A}
+
+\e{Note: Available only in Layers}
+
+\image LayerBlendModeSubtract.png "Subtract"
+
+\section2 Overlay
+\e Overlay uses a combination of \e Multiply and \e Screen modes. Basically it uses \e Screen
+mode on lighter pixels and \e Multiply mode on darker pixels. This will produce a result with
+increased contrast.
+
+\image LayerBlendModeOverlay.png "Overlay"
+
+\section2 ColorBurn
+\e ColorBurn inverts the pixel color value of the background layer or object and then divides it
+with the pixel color value of the active layer or object. Finally the result is inverted. This
+will produce a result darker than with \e Multiply.
+
+\b Formula: \c{1-(1-B)/A}
+
+\image LayerBlendModeColorburn.png "Colorburn"
+
+\section2 ColorDodge
+\e ColorDodge divides the pixel color value of the background layer or object with the inverted
+pixel color value of the active layer or object. This will produce a result lighter than with
+\e Screen.
+
+\b Formula: \c{B/(1-A)}
+
+\image LayerBlendModeColordodge.png "Colordodge"
+
+*/

@@ -1,0 +1,127 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Studio: Scene View and Matte
+\page studio-scene-view-and-matte.html
+\ingroup qt3dstudio-studio
+
+\image Studio-SceneView.png
+
+The \e {scene view} is the center region of Studio, showing you the
+visual result of rendering and compositing the layers of your
+presentation, and also allowing you to select and transform elements
+graphically.
+
+Surrounding the scene view is the \e matte. The matte may not be
+visible if your presentation is larger than the available space. (This
+would be a shame, since it is rather useful; see below.)
+
+\section1 Scene View
+
+The content of the scene view depends on whether or not you are using an
+\l{studio-toolbar.html#edit-cameras}{edit camera}. Normally (without an
+edit camera) the contents of all layer - s seen through the camera for
+each laye - re composited in the scene view. When an edit camera is
+used, the contents of a single layer are seen as viewed through the edit
+camera.
+
+\section2 Selecting Elements
+
+In addition to displaying content, the scene view allows you to select
+and transform visible elements. Click on an element in the scene to
+select it in the \l{studio-timeline-palette.html}{Timeline palette}
+and show its properties in the
+\l{studio-inspector-palette.html}{Inspector palette}.
+
+Clicking in empty space will drop the current selection. If you don't
+have any empty space to click on, you can alternatively click on empty
+space in the \l{studio-slide-palette.html}{Slide palette} to drop the
+current selection.
+
+\section2 Showing and Hiding Bounding Boxes
+
+When an element is selected its bounding box is drawn in the scene view,
+along with the bounding boxes of immediate children. If this is getting
+in your way, you can turn off bounding boxes in the bottom half of the
+View menu (keyboard shortcut: \c{Ctrl-B}).
+
+\section2 Transforming Elements
+
+When an element is selected, an interactive transform manipulator will
+be displayed in the scene view. Click and drag on portions of the
+manipulator to move/rotate/scale the element. (The manipulator displayed
+is controlled by the current
+\l{studio-toolbar.html#manipulator-modes}{manipulator mode}).
+
+Alternatively, you can click and drag on the element itself to affect
+the transform:
+
+\list
+\li
+  In \b{Position} mode...
+\li
+  left-mouse dragging on the element will adjust the position
+  perpendicular to the camera's view axis. (That's a complicated way of
+  saying that if you drag an item to the left, it will move to the
+  left.)
+\li
+  right-mouse dragging up/down on the element will move it farther
+  from/closer to the camera.
+\li
+  In \b{Rotation} mode...
+\li
+  left-mouse dragging on the element will tumble it.
+\li
+  right-mouse dragging up/down on the element will rotate it counter
+  clockwise/clockwise within the view.
+\li
+  In \b{Scale} mode...
+\li
+  left-mouse dragging up/down on the element will proportionately scale
+  it smaller/larger.
+\li
+  right-mouse dragging up/down on the element will affect the local Z
+  scale.
+\endlist
+
+\section1 Matte
+
+Sometimes you need to select an item via the
+\l{studio-timeline-palette.html}{Timeline palette} because other items
+are in front of it. However, when you attempt to transform it by
+dragging on it (instead of using the manipulators), you end up selecting
+a different item.
+
+Clicking and dragging in the matte area when an element is selected is
+the same as clicking and dragging on the element itself. Using the matte
+for your dragging ensures that you will not accidentally transform the
+wrong element.
+
+*/

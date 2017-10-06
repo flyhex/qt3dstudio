@@ -1,0 +1,84 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Lua Modules
+\page integrating-lua-modules.html
+\ingroup qt3dstudio-integrating
+
+\section1 Extending Qt 3D Studio
+
+The Qt 3D Studio Runtime can easily be integrated with existing
+hardware and software by means of modules. Modules are a standard
+feature of the Lua language that allow new C bindings to be added with a
+DLL or shared library.
+
+\image Workflow-Solid.png
+
+The diagram above shows multiple Lua Modules extending the capabilities
+of the Runtime scripting to allow access to low level calls controlling
+hardware such as music, navigation, and general CAN Bus communication.
+
+\section1 Binding Code to Lua
+
+Lua Bindings are a well-documented topic online. A nice reference for
+implementation can be found
+\l{http://lua-users.org/wiki/BindingCodeToLua}{on the Lua wiki}.
+Additionally, a simple sample of a CAN module that works with
+CarConnection behavior is provided with your installation of Qt 3D Studio
+at \c{INSTALL_DIRECTORY/Runtime/Plugins/Bindings/CAN/...}.
+
+To call functions in your module, place the \c{.dll} (Windows) or
+\c{.so} (Linux/Android) directly next to the Qt 3D Studio
+Viewer executable. At the top of a script where you would like to call
+your custom bindings, use the Lua \c{require} function.
+
+\badcode
+-- Load the CAN module and output any errors in the process
+require("CAN")
+\endcode
+
+The use of \c{require()} will produce helpful error strings if the
+module cannot be found. Once the system is in place, however it is often
+preferable to control the resulting errors. For this, you can use the
+built-in Lua function \c{pcall()}:
+
+\badcode
+-- Instead, one can use pcall to hide errors and control the program flow
+if not pcall( require, "CAN" ) then
+   output( "Could not locate CAN module." )
+end
+
+-- Call a function in our Lua binding
+if CAN then
+   self.catalog = CAN.getCatalog()
+end
+\endcode
+
+*/

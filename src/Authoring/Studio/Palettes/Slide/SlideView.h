@@ -1,0 +1,113 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 as published by the Free Software
+** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+#ifndef SLIDEVIEW_H
+#define SLIDEVIEW_H
+
+#include <QQuickWidget>
+
+#include "DispatchListeners.h"
+#include "SlideModel.h"
+
+#include "UICDMHandles.h"
+#include "UICDMSignals.h"
+#include <unordered_map>
+class CClientDataModelBridge;
+class CDoc;
+
+namespace UICDM {
+class ISlideSystem;
+}
+
+class SlideView : public QQuickWidget, public CPresentationChangeListener
+{
+    Q_OBJECT
+    Q_PROPERTY(QAbstractItemModel *currentModel READ currentModel NOTIFY currentModelChanged FINAL)
+    Q_PROPERTY(bool showMasterSlide READ showMasterSlide WRITE setShowMasterSlide NOTIFY showMasterSlideChanged FINAL)
+public:
+    SlideView(QWidget *parent = nullptr);
+    ~SlideView();
+
+    bool showMasterSlide() const;
+    void setShowMasterSlide(bool show);
+    QAbstractItemModel *currentModel() { return m_CurrentModel; }
+    QSize sizeHint() const override;
+
+    Q_INVOKABLE void deselectAll();
+    Q_INVOKABLE void addNewSlide(int row);
+    Q_INVOKABLE void removeSlide(int row);
+    Q_INVOKABLE void duplicateSlide(int row);
+    Q_INVOKABLE void moveSlide(int from, int to);
+    Q_INVOKABLE void showContextMenu(int x, int y, int row);
+
+    // Presentation Change Listener
+    void OnNewPresentation() override;
+    void OnClosingPresentation() override;
+
+Q_SIGNALS:
+    void currentModelChanged();
+    void showMasterSlideChanged();
+
+
+protected:
+    // UICDM callbacks
+    virtual void OnActiveSlide(const UICDM::CUICDMSlideHandle &inMaster, int inIndex,
+                               const UICDM::CUICDMSlideHandle &inSlide);
+    virtual void OnNewSlide(const UICDM::CUICDMSlideHandle &inSlide);
+    virtual void OnDeleteSlide(const UICDM::CUICDMSlideHandle &inSlide);
+    virtual void OnSlideRearranged(const UICDM::CUICDMSlideHandle &inMaster, int inOldIndex,
+                                   int inNewIndex);
+
+private:
+    void initialize();
+    void clearSlideList();
+    void setActiveSlide(const UICDM::CUICDMSlideHandle &inActiveSlideHandle);
+    inline CDoc *GetDoc();
+    inline CClientDataModelBridge *GetBridge();
+    inline UICDM::ISlideSystem *GetSlideSystem();
+    long GetSlideIndex(const UICDM::CUICDMSlideHandle &inSlideHandle);
+    bool isMaster(const UICDM::CUICDMSlideHandle &inSlideHandle);
+    void rebuildSlideList(const UICDM::CUICDMSlideHandle &inActiveSlideHandle);
+
+    SlideModel *m_CurrentModel = nullptr;
+    SlideModel *m_MasterSlideModel = nullptr;
+    SlideModel *m_SlidesModel = nullptr;
+    QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
+    std::vector<std::shared_ptr<UICDM::ISignalConnection>>
+        m_Connections; /// connections to the UICDM
+    typedef std::unordered_map<int, int> TIntIntMap;
+    // We need to remember which slide we were on when we entered the master slide.
+    // Then, when the users leave the master slide we can go back to roughly the same
+    // state.
+    TIntIntMap m_MasterSlideReturnPointers;
+
+    UICDM::CUICDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
+    UICDM::CUICDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
+};
+
+#endif // SLIDEVIEW_H

@@ -1,0 +1,122 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Studio: Project Palette
+\page studio-project-palette.html
+\ingroup qt3dstudio-studio
+
+The Project palette displays the files and folders on disk for your project.
+However, only files usable by Studio are displayed in the palette.
+
+\section1 Adding Assets
+
+You can add new assets to your project by dragging the files from the file system to the
+\e{project palette}. This will create a copy of the file in the project folder structure.
+The original file will always remain untouched.
+
+\section2 Adding Assets from a Library
+
+\image Studio-Project-Libraries.png
+
+Qt 3D Studio ships with a variety of sample assets to help you
+experiment and to speed common development needs. These files are hidden
+by the installer deep in the bowels of your computer. To make them easier
+to access, the bottom of the Project palette has five icons that provide
+direct access to a specific library.
+
+Clicking on one of these icons will open the corresponding folder in
+your file system. Once you have found the asset that you want, drag the
+asset from the file system onto the appropriate folder in the Project
+palette. As described above, this will \e{copy} the sample asset into
+your project. Once you have a copy you are free to edit it without fear
+of damaging the pristine original.
+
+\section1 Managing Assets
+
+If you wish to rename or delete items from your project, simply do so
+via the file system. Double-clicking on the folder in the Project
+palette will open the folder in the file system.
+
+Alternatively, you may right-click on a project asset and choose
+\c{Show in Explorer}. This will open the folder containing the item
+and also select it in the file system.
+
+\section1 Using Assets
+
+To use an item from the Project palette in your presentation, drag the
+item into the \l{studio-scene-view-and-matte.html}{scene view}
+or \l{studio-timeline-palette.html}{Timeline palette}. A new element
+will be created in your scene tied to that asset.
+
+For convenience, dragging an image from the Project palette into your
+scene will automatically create a rectangular model scaled to the aspect
+ratio of your image, with the image used as the diffuse map on the
+material. Dragging out a font file will create a text element with the
+font set correctly.
+
+Changes to the asset on disk (for example, editing an image in Photoshop,
+changing a script in Architect) will automatically update inside Studio.
+
+The one caveat to the above are 3D model assets. When you import a 3D
+model (in Collada or FBX format) into your project, it is converted into
+a \c{.import} file that references one or more \c{.mesh}
+assets. Changes to the original 3D model file will \b{not}
+automatically update inside of Studio. To update a changed model,
+right-click on the \c{.import} file in the Project palette and
+choose \c{Refresh Import...}. In the subsequent file dialog,
+select the model file on disk that you wish to re-import. Studio will do
+its best to understand the differences between your original file and
+the new version, and apply them to your presentation. For more details,
+read the section
+\l{best-practices-importing-3d-content.html}{Working with 3D Content}.
+
+\section1 Locating Missing Assets
+
+\image Studio-Project-MissingAsset.png
+
+If you open a presentation that references other files, and one or more
+those files cannot be found, Studio will present you with a dialog
+listing all assets that could not be found. Additionally, each missing
+asset will be shown in the Project palette with a caution icon next to
+the file.
+
+If you click on this icon, a context menu with the option \b {Locate
+File} will be shown. Choosing this option will show a standard file
+open dialog, allowing you to supply a new location for a moved asset.
+\omit
+\b {Warning}: If the missing assets expose custom properties to the
+artist - such as a presentation behavior, layer effect, or custom
+material - any custom values or animations you have specified for these
+assets will be lost if you relocate the file. Until
+\l{known-limitations.html#i9208}{this issue} is resolved,
+the only safe way to move or rename such referenced assets is by
+hand-editing the \c{.uip} presentation file.
+\endomit
+*/

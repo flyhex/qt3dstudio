@@ -1,0 +1,97 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Using Sub-Presentations
+\page best-practices-using-sub-presentations.html
+\ingroup qt3dstudio-best-practices
+
+\section1 Introduction
+
+Sub-Presentations is a feature which allows one presentation to be
+embedded in another.
+
+The main benefit of doing this is that you can author different parts of
+a large presentation as separate smaller presentations. This can help
+control complexity in single \c{.uip} files, as well as allow
+different parts of a presentation to be authored separately and
+simultaneously.
+
+Sub-presentations execute independently, albeit inside the same Runtime
+process as the initial presentation. The rendered frame from each
+sub-presentation is essentially used as a texture on a rectangle in the
+main presentation. This allows control over where and how each
+sub-presentation is composited into the final frame.
+
+\section1 Using Sub-Presentations
+
+There are two different ways to display a sub-presentation; on a separate layer
+or on an image element on an existing layer.
+
+\target sub-presentation layer
+\section2 Sub-presentation on a Layer
+
+\list 1
+\li
+  From the file menu, select \uicontrol{Edit} > \uicontrol{Sub-presentations}.
+\li
+  Click \uicontrol{Browse}, browse to the project folder of your desired project and select the
+  \c{.uia} file.
+  \image subpresentation-dialog.png
+\li
+  Enter desired name for the sub-presentation in the \uicontrol{Name} field. In case you have
+  several sub-presentations in your project the names need to be unique.
+\li
+  Select the layer you want to use for the sub-presentation in the \e{timeline palette}.
+  Then, in the inspector palette, select the desired sub-presentation in the
+  \uicontrol{Sub-Presentation} field. All sub-presentations added to the project will be listed
+  here.
+  \image layer-sub-presentation.png
+\endlist
+
+\section2 Sub-presentation on an Image Element
+\list 1
+\li
+  Follow step 1 to 3 in the \l {sub-presentation layer}{Sub-presentation on a layer}
+  section above.
+\li
+  Add a basic object to your layer, preferably a rectangle.
+\li
+  Add any image as a diffuse map for the material of the object by first selecting the material
+  of the object in the \e{timeline palette} and then selecting \uicontrol{Diffuse Map} in the
+  \e{inspector palette}.
+  \image add-diffuse-map.png
+\li
+  Select the \e{diffuse map} in the \e{timeline palette} and then select the desired
+  sub-presentation in the \uicontrol{Sub-Presentation} field. All sub-presentations added in
+  the \c{.uia} will be listed here.
+  \image add-diffuse-map-subpresentation.png
+\endlist
+
+*/

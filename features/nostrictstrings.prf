@@ -1,0 +1,2 @@
+QMAKE_CFLAGS ~= s/-Zc:strictStrings//
+QMAKE_CXXFLAGS ~= s/-Zc:strictStrings//

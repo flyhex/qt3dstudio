@@ -1,0 +1,280 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Studio: Toolbar
+\page studio-toolbar.html
+\ingroup qt3dstudio-studio
+
+\section1 Selection Modes
+
+\image Studio-Toolbar-Selection.png
+
+The Selection Mode buttons control what item is selected in the Timeline
+palette when you click on items within the rendered scene.
+
+\list
+\li
+  Clicking on an item using \b{Group Select} mode (dark arrow;
+  keyboard shortcut: \c{A}) will select the highest group or
+  component owning the item you clicked on. This mode is useful when you
+  want to move a group of items at once.
+\li
+  Clicking on an item using \b{Item Select} mode (white arrow;
+  keyboard shortcut: \c{V}) will select the item you clicked on. If
+  the item is not present in the Timeline palette (if it is inside a
+  component) then the component is selected instead.
+\endlist
+
+With either tool, if you \b{double-click} on an item in the
+rendered scene then the item itself will be selected (changing which
+component is displayed in the Timeline palette as necessary).
+
+\section1 Manipulator Modes
+
+\image Studio-Toolbar-Transform.png
+
+The Manipulator Mode buttons control what manipulator is shown in the
+rendered scene when an item is selected, and what happens when you drag
+on the selected item (or on the matte area surrounding the rendered
+scene).
+
+\list
+\li
+  The \b{Position} mode (keyboard shortcut: \c{W}) adjusts the
+  Position of the selected item. Left-dragging on the item/matte will
+  adjust the selected item's position in the plane of the render camera;
+  right-dragging will adjust the selected item's position along the view
+  axis of the camera.
+\li
+  The \b{Scale} mode (keyboard shortcut: \c{E}) adjusts the
+  Scale of the selected item. Left-dragging on the item/matte will
+  uniformly scale the selected item; right-dragging will adjust only the
+  local Z scale of the item.
+\li
+  The \b{Rotation} mode (keyboard shortcut: \c{R}) adjusts the
+  Rotation of the selected item. Left-dragging on the item/matte will
+  tumble the selected item; right-dragging rotate the item around the
+  view axis of the camera.
+\endlist
+By default the manipulators affect the local transformation of the item.
+For example, selecting an unrotated cube inside a rotated group with the
+Position manipulator mode active will show rotated axes. Dragging on the
+red arrow of the manipulator will affect only the X position of the
+item.
+
+The \b{Local/Global Manipulators} mode (last icon above) changes
+this behavior to affect the global transform of the selected item
+instead. In Global mode, the manipulators always transform with respect
+to the global space. In the example above, turning on Global mode will
+show the red arrow for the position manipulator aligned with the screen
+(assuming an unrotated camera). Dragging on the red arrow may affect two
+or three of the position values for the selected item in order to move
+it in global space.
+
+\section1 Keyframing
+
+\image Studio-Toolbar-Animation.png
+
+The \b{Autoset Keyframes} toggle (keyboard shortcut: \c{K})
+controls whether keyframes are automatically created at the current
+playhead time in the timeline whenever a value with animation enabled
+has its value changed.
+
+The following example illustrates the use of this toggle:
+
+\list
+\li
+  Create an object positioned at 0,0,0
+\li
+  Move the playhead to time 0.
+\li
+  Turn on the animation toggle for the Position property in the
+  Inspector palette.
+\endlist
+
+\list
+\li
+  \e{A keyframe is created at time 0 by default.}
+\endlist
+
+\list
+\li
+  Move the playhead to a new time (e.g.~1 second).
+\li
+  Turn off the \c{Autoset Keyframes} toggle.
+\li
+  Adjust the position to 100,200,0.
+\endlist
+
+\list
+\li
+  \e{The object moves in the rendered scene, but no keyframe is
+  created.}
+\endlist
+
+\list
+\li
+  Drag the playhead to a new time (e.g.~2 seconds).
+\endlist
+\list
+\li
+  \e{The object snaps back to position 0,0,0, since no new keyframe
+  was created for the new position.}
+\endlist
+
+\list
+\li
+  Turn on the \c{Autoset Keyframes} toggle.
+\li
+  Adjust the position to 100,200,0.
+\endlist
+
+\list
+\li
+  \e{As soon as you stop editing one of the position values a new
+  keyframe is created. Each time you change a value at this time the
+  keyframe is updated.}
+\endlist
+Without the \c{Autoset Keyframes} mode you must use the Set Changed
+Keyframes command from the Timeline menu to create a new keyframe, such
+as after the second-last example above.
+
+\section1 Edit Cameras
+
+\image Studio-Toolbar-EditCameras.png
+
+By default the rendered scene looks through the camera in each layer and
+shows the composited result. Sometimes you want to instead move around
+the 3D space of your scene without adjusting the final rendered view.
+Studio calls this concept \e {Edit Cameras}, and it is controlled by the
+section of the toolbar displayed above.
+
+Note that when Edit Camera is in use it only makes sense to show the
+contents of one layer at a time. To control which layer's items you are
+viewing, select any item inside the desired layer in the Timeline
+palette.
+
+\list
+\li
+  The \b{Edit Camera Mode} drop-down menu controls the view.
+\li
+  The \b{Perspective View} and \b{Orthographic} view are
+  free-form cameras that you can use to rotate around the scene.
+\li
+  The
+  \b{Top}/\b{Bottom}/\b{Left}/\b{Right}/\b{Front}/\b{Back}
+  axis-aligned presets are orthographic cameras that may be panned and
+  zoomed, but not orbited.
+\li
+  The \b{Scene Camera View} entry at the bottom of the menu
+  switches out of edit camera mode and returns to displaying the final
+  composited result from the cameras in each layer of the presentation.
+\li
+  \target fit-selected
+  The \b{Fit Selected} command (keyboard
+  shortcut: \c{F}) will ensure that whatever is selected fills the
+  view of the active edit camera. If no item is selected, this command
+  ensures that the contents of the active layer are all visible in the
+  edit camera.
+
+  \list
+  \li
+  \b Tip: if you want to drop your selection, but cannot find
+     any empty space in the view to click on, you can click on empty
+     space in the Slides palette to cause no items to be selected.
+     This may seem a little weird, but it is effective.)
+  \li
+    When not using an Edit Camera - when using the default
+    \c{Scene Camera View} mode- this command will instead
+    downscale the appearance of the presentation to fit within the
+    available space in Studio.
+  \endlist
+\li
+  With the \b{Pan} mode active (shortcut: middle-button mouse drag)
+  clicking and dragging anywhere in the rendered view for the edit
+  camera will slide the view around.
+\li
+  With the \b{Zoom} mode active (shortcut: roll the mouse wheel)
+  clicking and dragging anywhere in the rendered view for the edit
+  camera will zoom the view in/out as you drag up/down.
+\li
+  With the \b{Orbit} mode active (shortcut: alt+middle-button mouse
+  drag) clicking and dragging anywhere in the rendered view for the edit
+  camera will rotate the view. (This is not available for the
+  predefined, axis-aligned orthographic views.)
+\li
+  The \b{Shading Mode} toggle (shortcut: \c{F3}) toggles a
+  `headlamp' attached to your edit camera. When enabled (the default)
+  items are lit by the edit camera such that they are always easy to
+  see. When disabled, the lighting from the final rendering is used. If
+  you have a black ambient lighting in your scene (the default) then
+  objects viewed from behind may not be visible without turning on your
+  headlamp.
+\endlist
+
+\section1 Playback Control
+
+\image Studio-Toolbar-Playback.png
+
+These commands control the playhead, making it easier to preview
+animations and slide transitions without leaving Studio.
+
+\list
+\li
+  The \b{Rewind} command sets the playhead to time 0.
+\li
+  The \b{Stop} command stops any playback.
+\li
+  The \b{Play} command starts advancing the playhead in realtime,
+  previewing animations on elements. The \b{Play Mode} for the
+  current slide is honored, possibly looping or ping-ponging playback,
+  or causing Studio to switch to an new slide when the end time for the
+  current slide is reached.
+\li
+  Holding down the space bar temporarily enables playback while held
+  down. Releasing the spacebar returns the playhead to its previous
+  time, allowing you to repeatedly hold down space to preview an
+  animation.
+\li
+  Pressing the Enter key will start playback. Press Enter again to stop
+  playback.
+\endlist
+
+\section1 Preview
+
+\image Studio-Toolbar-Preview.png
+
+Invoking the \b{Preview} command (keyboard shortcut: \c{F12})
+will launch the Qt 3D Studio Viewer application and preview the
+application for the presentation. If there is no \c{.uia} file in
+the folder for this presentation, then the presentation will be
+previewed by itself (no sub-presentations).
+
+*/

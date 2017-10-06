@@ -1,0 +1,54 @@
+project                 = Qt3DStudio
+description             = Qt 3D Studio Reference Manual
+version                 = $QT_VERSION
+
+sources.fileextensions  = "*.qdoc *.html"
+sourcedirs              = ./src \
+                          ../src/Viewer
+
+headerdirs              = ../src/Viewer
+
+# TODO: Move images to doc/images
+imagedirs               = ./src/images
+
+depends = qtcore qtgui qtwidgets qtqml qtquick qtmultimedia qtdoc
+
+qhp.projects            = Qt3DStudio
+
+qhp.Qt3DStudio.file                = qt3dstudio.qhp
+qhp.Qt3DStudio.namespace           = io.qt.qt3dstudio.$QT_VERSION_TAG
+qhp.Qt3DStudio.virtualFolder       = qt3dstudio
+qhp.Qt3DStudio.indexTitle          = Qt 3D Studio
+qhp.Qt3DStudio.indexRoot           =
+
+qhp.Qt3DStudio.filterAttributes    = qt3dstudio $QT_VERSION
+qhp.Qt3DStudio.customFilters.Qt.name = Qt3DStudio $QT_VERSION
+qhp.Qt3DStudio.customFilters.Qt.filterAttributes = qt3dstudio $QT_VERSION
+
+qhp.Qt3DStudio.subprojects         = manual qmltypes classes
+qhp.Qt3DStudio.subprojects.manual.title = Qt 3D Studio
+qhp.Qt3DStudio.subprojects.manual.indexTitle = Qt 3D Studio TOC
+qhp.Qt3DStudio.subprojects.manual.type = manual
+
+qhp.Qt3DStudio.subprojects.qmltypes.title = QML Types
+qhp.Qt3DStudio.subprojects.qmltypes.indexTitle = Qt 3D Studio QML Types
+qhp.Qt3DStudio.subprojects.qmltypes.selectors = qmltype
+qhp.Qt3DStudio.subprojects.qmltypes.sortPages = true
+
+qhp.Qt3DStudio.subprojects.classes.title      = C++ Classes
+qhp.Qt3DStudio.subprojects.classes.indexTitle = Qt 3D Studio C++ Classes
+qhp.Qt3DStudio.subprojects.classes.selectors  = class fake:headerfile
+qhp.Qt3DStudio.subprojects.classes.sortPages  = true
+
+
+# Add an .html file with sidebar content, used in the online style
+#HTML.stylesheets             += style/qt5-sidebar.html
+
+# ensure all images are included
+#HTML.extraimages             += ./src/static/Runtime-AODistances.jpg
+#qhp.Qt3DStudio.extraimages          += ./src/static/Runtime-AODistances.jpg
+
+navigation.homepage            = Qt 3D Studio
+navigation.cppclassespage      = Qt 3D Studio C++ Classes
+navigation.qmltypespage        = Qt 3D Studio QML Types
+buildversion                   = "Qt 3D Studio $QT_VER Manual"

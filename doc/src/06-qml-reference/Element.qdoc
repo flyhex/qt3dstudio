@@ -1,0 +1,78 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 or (at your option) any later version
+** approved by the KDE Free Qt Foundation. The licenses are as published by
+** the Free Software Foundation and appearing in the file LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \qmltype Element
+    \inqmlmodule QtStudio3D
+    \brief Control type for elements in a Qt 3D Studio presentation.
+
+    This type is a convenience type for managing a presentation element.
+
+    All methods provided by this type are queued and handled asynchronously before the next
+    frame is displayed.
+
+    \sa Studio3D, Presentation, SceneElement
+*/
+
+/*!
+    \qmlproperty string Element::elementPath
+
+    Holds the element path of the presentation element.
+    This property must be set as part of Element declaration.
+    You can specify an element of a sub-presentation by adding "SubPresentationId:"
+    in front of the element path, for example \c{"SubPresentationOne:Scene"}.
+*/
+
+/*!
+    \qmlmethod void Element::setAttribute(string attributeName, variant value)
+
+    Sets the \a value of an attribute on an element specified by this instance.
+    The \a attributeName is the \l{QML Reference: Attribute Names}{scripting name} of the attribute.
+
+    The attribute must be preserved for scripting to be set by this function, or else it will fail.
+    An attribute is preserved if it is either \e{animated}, or
+    \e{an attribute on a master element that is unlinked and changed per-slide}.
+*/
+
+/*!
+    \qmlmethod void Element::fireEvent(string eventName)
+
+    Dispatches an event with \a eventName on the element specified by this instance.
+    Appropriate actions created in Qt 3D Studio or callbacks registered using the registerForEvent()
+    method in attached scripts will be executed in response to the event.
+*/
+
+/*!
+    \qmlsignal Element::elementPathChanged(string elementPath)
+
+    This signal is emitted when the element path property changes.
+    The new value is provided in the \a elementPath parameter.
+
+    The corresponding handler is \c onElementPathChanged.
+*/

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>simple_cube_animation/simple_cube_animation.uia</file>
+        <file>simple_cube_animation/simple_cube_animation.uip</file>
+        <file>tst_qt3dsviewer.qml</file>
+    </qresource>
+</RCC>

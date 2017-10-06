@@ -1,0 +1,10 @@
+{
+    "Id": "convertutf",
+    "Name": "ConvertUTF",
+    "QDocModule": "qt3dstudio",
+    "QtUsage": "Used by Qt3DStudio, Studio and Runtime components.",
+
+    "License": "Other",
+    "LicenseFile": "LICENSE_CONVERTUTF.TXT",
+    "Copyright": "Copyright 2001-2004 Unicode, Inc."
+}

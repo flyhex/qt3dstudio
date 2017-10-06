@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP version="3" >
+	<Project >
+		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False" />
+		<Classes >
+			<Behavior id="Billboard" name="Billboard" sourcepath="scripts\Billboard.qml" />
+			<Behavior id="CatchEvents" name="CatchEvents" sourcepath="scripts\CatchEvents.qml" />
+			<Behavior id="Keyboard" name="Keyboard" sourcepath="scripts\Keyboard.qml" />
+			<Behavior id="SineWave" name="SineWave" sourcepath="scripts\SineWave.qml" />
+			<Behavior id="Toggle" name="Toggle" sourcepath="scripts\Toggle.qml" />
+		</Classes>
+		<Graph >
+			<Scene id="Scene" >
+				<Layer id="Layer" >
+					<Camera id="Camera" >
+						<Behavior id="Billboard_002" class="#Billboard" />
+					</Camera>
+					<Light id="Light" />
+					<Model id="Cube2" >
+						<Material id="Material_001" />
+						<Behavior id="SineWave_001" class="#SineWave" />
+						<Model id="Cube" >
+							<Material id="Material" />
+							<Behavior id="Billboard_001" class="#Billboard" />
+						</Model>
+					</Model>
+					<Model id="Sphere" >
+						<Material id="Material_002" />
+					</Model>
+					<Model id="Rectangle" >
+						<Material id="Material_003" />
+						<Behavior id="Toggle_001" class="#Toggle" />
+					</Model>
+				</Layer>
+				<Behavior id="CatchEvents_001" class="#CatchEvents" />
+				<Behavior id="Keyboard_001" class="#Keyboard" />
+			</Scene>
+		</Graph>
+		<Logic >
+			<State name="Master Slide" component="#Scene" >
+				<Add ref="#Layer" />
+				<Add ref="#Camera" />
+				<Add ref="#Light" lightambient="0.333333 0 0" lighttype="Directional" rotation="29 36 0" />
+				<State id="Scene-Slide1" name="Slide1" playmode="PingPong" >
+					<Add ref="#Billboard_002" name="Billboard" renderCamera="#Cube2" />
+					<Add ref="#Cube2" name="Cube2" position="-410.66 -269.615 131.722" sourcepath="#Cube" >
+						<AnimationTrack property="position.x" type="EaseInOut" >0 -410.66 100 100 3.706 514.024 100 100 6.958 -17.5718 100 100 10 -531.565 100 100</AnimationTrack>
+						<AnimationTrack property="position.y" type="EaseInOut" >0 -246.021 100 100 3.706 -141.615 100 100 6.958 394.782 100 100 10 -154.656 100 100</AnimationTrack>
+						<AnimationTrack property="position.z" type="EaseInOut" >0 131.722 100 100 3.706 131.722 100 100 6.958 131.722 100 100 10 131.722 100 100</AnimationTrack>
+						<AnimationTrack property="rotation.x" type="EaseInOut" />
+						<AnimationTrack property="rotation.y" type="EaseInOut" />
+						<AnimationTrack property="rotation.z" type="EaseInOut" />
+						<Action id="Cube2-Action" eyeball="True" triggerObject="#Cube2" event="onPressureDown" targetObject="#SineWave_001" handler="toggle" />
+					</Add>
+					<Add ref="#Material_001" />
+					<Add ref="#SineWave_001" name="SineWave" ampOffset="0" amplitude="45" />
+					<Add ref="#Cube" name="Cube" position="-531.565 -276.656 131.722" scale="1 1 1" sourcepath="#Cube" >
+						<AnimationTrack property="position.x" type="EaseInOut" >0 0 100 100</AnimationTrack>
+						<AnimationTrack property="position.y" type="EaseInOut" >0 113.361 100 100</AnimationTrack>
+						<AnimationTrack property="position.z" type="EaseInOut" >0 0 100 100</AnimationTrack>
+					</Add>
+					<Add ref="#Material" name="Material" />
+					<Add ref="#Billboard_001" name="Billboard" billboardType="Face Camera" renderCamera="#Camera" startImmediately="True" yOnly="False" />
+					<Add ref="#Sphere" name="Sphere" position="191.969 4.33009 0" sourcepath="#Sphere" />
+					<Add ref="#Material_002" />
+					<Add ref="#Rectangle" name="Rectangle" position="56.2916 1.44336 0" sourcepath="#Rectangle" />
+					<Add ref="#Material_003" />
+					<Add ref="#Toggle_001" name="Toggle" >
+						<Action id="Toggle-Action" eyeball="True" triggerObject="#Toggle_001" event="onToggle" targetObject="#Material_002" handler="Set Property" >
+							<HandlerArgument name="Property Name" type="String" argtype="Property" value="diffuse" />
+							<HandlerArgument name="Property Value" type="Float3" argtype="Dependent" value="0 0 1" />
+						</Action>
+						<Action id="Toggle-Action_001" eyeball="True" triggerObject="#Toggle_001" event="onUntoggle" targetObject="#Material_002" handler="Set Property" >
+							<HandlerArgument name="Property Name" type="String" argtype="Property" value="diffuse" />
+							<HandlerArgument name="Property Value" type="Float3" argtype="Dependent" value="1 1 1" />
+						</Action>
+					</Add>
+					<Add ref="#CatchEvents_001" name="CatchEvents" />
+					<Add ref="#Keyboard_001" name="Keyboard" >
+						<Action id="Keyboard-Action" eyeball="True" triggerObject="#Keyboard_001" event="onLEFTDown" targetObject="#Sphere" handler="Set Property" >
+							<HandlerArgument name="Property Name" type="String" argtype="Property" value="scale" />
+							<HandlerArgument name="Property Value" type="Float3" argtype="Dependent" value="2 2 2" />
+						</Action>
+						<Action id="Keyboard-Action_001" eyeball="True" triggerObject="#Keyboard_001" event="onLEFTUp" targetObject="#Sphere" handler="Set Property" >
+							<HandlerArgument name="Property Name" type="String" argtype="Property" value="scale" />
+							<HandlerArgument name="Property Value" type="Float3" argtype="Dependent" value="1 1 1" />
+						</Action>
+					</Add>
+				</State>
+			</State>
+		</Logic>
+	</Project>
+</UIP>

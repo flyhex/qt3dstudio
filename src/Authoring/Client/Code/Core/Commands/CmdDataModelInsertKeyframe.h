@@ -1,0 +1,139 @@
+/****************************************************************************
+**
+** Copyright (C) 2016 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 as published by the Free Software
+** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+#ifndef INCLUDED_CMD_DATAMODEL_INSERTKEYFRAME_H
+#define INCLUDED_CMD_DATAMODEL_INSERTKEYFRAME_H 1
+
+#pragma once
+
+//==============================================================================
+//	Include
+//==============================================================================
+#include "Cmd.h"
+#include "CmdDataModel.h"
+#include "Doc.h"
+#include "UICDMHandles.h"
+#include "UICDMAnimation.h"
+#include "CmdDataModelBase.h"
+#include "UICDMStudioSystem.h"
+#include "UICDMAnimation.h"
+
+// This will animate the property if it is not already animated
+class CCmdDataModelInsertKeyframe : public CCmd, public UICDM::CmdDataModel
+{
+public:
+    struct STimeKeyframeData
+    {
+        UICDM::CUICDMPropertyHandle m_Property;
+        float m_KeyframeTime;
+        UICDM::SGetOrSetKeyframeInfo m_Infos[3];
+        size_t m_ValidInfoCount;
+
+        STimeKeyframeData(UICDM::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+                          UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+            : m_Property(inProperty)
+            , m_KeyframeTime(inKeyframeTime)
+        {
+            m_ValidInfoCount = inInfoCount <= 3 ? inInfoCount : 3;
+            for (size_t idx = 0, end = m_ValidInfoCount; idx < end; ++idx) {
+                m_Infos[idx] = inInfos[idx];
+            }
+        }
+    };
+
+protected:
+    typedef std::vector<STimeKeyframeData> TKeyframeDataList;
+
+protected: // Members
+    CDoc *m_Doc;
+    UICDM::CUICDMInstanceHandle m_Instance;
+    TKeyframeDataList m_KeyframeDataList;
+
+public: // Construction
+    //@param inTime is in secs
+    CCmdDataModelInsertKeyframe(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
+                                UICDM::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+                                UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+        : UICDM::CmdDataModel(*inDoc)
+        , m_Doc(inDoc)
+        , m_Instance(inInstance)
+    {
+        AddKeyframeData(inProperty, inKeyframeTime, inInfos, inInfoCount);
+    }
+    ~CCmdDataModelInsertKeyframe() {}
+
+    void AddKeyframeData(UICDM::CUICDMPropertyHandle inProperty, float inTime,
+                         UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+    {
+        m_KeyframeDataList.push_back(STimeKeyframeData(inProperty, inTime, inInfos, inInfoCount));
+    }
+
+    //======================================================================
+    //	Do/Redo
+    //======================================================================
+    unsigned long Do() override
+    {
+        if (!ConsumerExists()) {
+            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
+            UICDM::IStudioAnimationSystem *theAnimationSystem =
+                m_Doc->GetStudioSystem()->GetAnimationSystem();
+            // if there are existing keyframes exist at the same times, the values are overridden. (
+            // That's how it always work in studio anyways )
+            for (size_t i = 0; i < m_KeyframeDataList.size(); ++i)
+                theAnimationSystem->SetOrCreateKeyframe(
+                    m_Instance, m_KeyframeDataList[i].m_Property,
+                    m_KeyframeDataList[i].m_KeyframeTime, m_KeyframeDataList[i].m_Infos,
+                    m_KeyframeDataList[i].m_ValidInfoCount);
+        } else {
+            DataModelRedo();
+        }
+        return 0;
+    }
+
+    //======================================================================
+    //	Undo
+    //======================================================================
+    unsigned long Undo() override
+    {
+        if (ConsumerExists()) {
+            DataModelUndo();
+        }
+        return 0;
+    }
+
+    //======================================================================
+    //	ToString
+    //======================================================================
+    QString ToString() override
+    {
+        return QObject::tr("Insert Keyframe");
+    }
+};
+
+#endif

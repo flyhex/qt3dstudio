@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainFrame</class>
+ <widget class="QMainWindow" name="MainFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>973</width>
+    <height>617</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Qt 3D Studio</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="MainFrm.qrc">
+    <normaloff>:/res/Studio.png</normaloff>:/res/Studio.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>973</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <widget class="QMenu" name="menuRecent_Projects">
+     <property name="title">
+      <string>Recent Projects</string>
+     </property>
+     <addaction name="actionSomething"/>
+    </widget>
+    <addaction name="action_New"/>
+    <addaction name="action_Open"/>
+    <addaction name="action_Save"/>
+    <addaction name="actionSave_As"/>
+    <addaction name="actionSave_a_Copy"/>
+    <addaction name="action_Revert"/>
+    <addaction name="action_Connect_to_Device"/>
+    <addaction name="separator"/>
+    <addaction name="menuRecent_Projects"/>
+    <addaction name="separator"/>
+    <addaction name="action_Exit"/>
+   </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="action_Undo"/>
+    <addaction name="action_Redo"/>
+    <addaction name="separator"/>
+    <addaction name="action_Cut"/>
+    <addaction name="action_Copy"/>
+    <addaction name="action_Paste"/>
+    <addaction name="action_Duplicate_Object"/>
+    <addaction name="separator"/>
+    <addaction name="actionStudio_Preferences"/>
+    <addaction name="actionPresentation_Settings"/>
+    <addaction name="actionSubpresentations"/>
+   </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="actionAction"/>
+    <addaction name="actionBasic_Objects"/>
+    <addaction name="actionInspector"/>
+    <addaction name="actionProject"/>
+    <addaction name="actionSlide"/>
+    <addaction name="actionTimeline"/>
+    <addaction name="separator"/>
+    <addaction name="actionBounding_Boxes"/>
+    <addaction name="actionPivot_Point"/>
+    <addaction name="actionWireframe"/>
+    <addaction name="actionTooltips"/>
+    <addaction name="actionRulers_Guides"/>
+    <addaction name="actionLock_Guides"/>
+    <addaction name="actionClear_Guides"/>
+   </widget>
+   <widget class="QMenu" name="menu_Timeline">
+    <property name="title">
+     <string>&amp;Timeline</string>
+    </property>
+    <addaction name="actionSet_Changed_Keyframes"/>
+    <addaction name="actionDelete_Selected_Keyframe_s"/>
+    <addaction name="actionSet_Interpolation"/>
+    <addaction name="actionChange_Time_Bar_Color"/>
+    <addaction name="separator"/>
+    <addaction name="actionAutoset_Keyframes"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_Reference_Manual"/>
+    <addaction name="action_Visit_Qt_Web_Site"/>
+    <addaction name="action_About_Qt_3D_Studio"/>
+    <addaction name="action_Open_Tutorial"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_Edit"/>
+   <addaction name="menu_View"/>
+   <addaction name="menu_Timeline"/>
+   <addaction name="menu_Help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>Tool Bar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>15</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_New"/>
+   <addaction name="action_Open"/>
+   <addaction name="action_Save"/>
+   <addaction name="separator"/>
+   <addaction name="action_Cut"/>
+   <addaction name="action_Copy"/>
+   <addaction name="action_Paste"/>
+   <addaction name="separator"/>
+   <addaction name="action_Undo"/>
+   <addaction name="action_Redo"/>
+  </widget>
+  <widget class="QToolBar" name="m_ClientToolsBar">
+   <property name="windowTitle">
+    <string>Client Tools</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionGroup_Select_Tool"/>
+   <addaction name="actionItem_Select_Tool"/>
+   <addaction name="separator"/>
+   <addaction name="actionPosition_Tool"/>
+   <addaction name="actionScale_Tool"/>
+   <addaction name="actionRotation_Tool"/>
+   <addaction name="actionLocal_Global_Manipulators"/>
+   <addaction name="separator"/>
+   <addaction name="actionAutoset_Keyframes"/>
+  </widget>
+  <widget class="CEditCameraBar" name="m_EditCamerasBar">
+   <property name="windowTitle">
+    <string>Edit Cameras</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionFit_Selected"/>
+   <addaction name="actionPan_Tool"/>
+   <addaction name="actionZoom_Tool"/>
+   <addaction name="actionOrbit_Tool"/>
+   <addaction name="separator"/>
+   <addaction name="actionShading_Mode"/>
+   <addaction name="actionWireframe"/>
+  </widget>
+  <widget class="QToolBar" name="m_PlaybackToolbar">
+   <property name="windowTitle">
+    <string>Playback</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionRewind"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionPlay"/>
+   <addaction name="separator"/>
+   <addaction name="actionPreview"/>
+  </widget>
+  <action name="action_Reference_Manual">
+   <property name="text">
+    <string>&amp;Reference Manual...</string>
+   </property>
+  </action>
+  <action name="action_Visit_Qt_Web_Site">
+   <property name="text">
+    <string>&amp;Visit Qt Web site...</string>
+   </property>
+  </action>
+  <action name="action_About_Qt_3D_Studio">
+   <property name="text">
+    <string>&amp;About Qt 3D Studio...</string>
+   </property>
+  </action>
+  <action name="action_Open_Tutorial">
+   <property name="text">
+    <string>&amp;Open Tutorial...</string>
+   </property>
+  </action>
+  <action name="actionSet_Changed_Keyframes">
+   <property name="text">
+    <string>Set Changed Keyframes</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionDelete_Selected_Keyframe_s">
+   <property name="text">
+    <string>Delete Selected Keyframe(s)</string>
+   </property>
+  </action>
+  <action name="actionSet_Interpolation">
+   <property name="text">
+    <string>Set Interpolation...</string>
+   </property>
+  </action>
+  <action name="actionChange_Time_Bar_Color">
+   <property name="text">
+    <string>Change Time Bar Color...</string>
+   </property>
+  </action>
+  <action name="actionAutoset_Keyframes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-06.png</normaloff>:/res/client_tools_hi_color-06.png</iconset>
+   </property>
+   <property name="text">
+    <string>Autoset Keyframes</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle autoset keyframes</string>
+   </property>
+  </action>
+  <action name="actionAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Action</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
+   </property>
+  </action>
+  <action name="actionBasic_Objects">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Basic Objects</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+B</string>
+   </property>
+  </action>
+  <action name="actionInspector">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Inspector</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+I</string>
+   </property>
+  </action>
+  <action name="actionProject">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionSlide">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Slide</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
+   </property>
+  </action>
+  <action name="actionTimeline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Timeline</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+T</string>
+   </property>
+  </action>
+  <action name="actionBounding_Boxes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bounding Boxes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionPivot_Point">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Pivot Point</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+P</string>
+   </property>
+  </action>
+  <action name="actionWireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/editcamera_tools_hi-05.png</normaloff>
+     <disabledoff>:/res/editcamera_tools_hi-05_disabled.png</disabledoff>:/res/editcamera_tools_hi-05.png</iconset>
+   </property>
+   <property name="text">
+    <string>Wireframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Show or Hide Wireframe</string>
+   </property>
+  </action>
+  <action name="actionTooltips">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tooltips</string>
+   </property>
+  </action>
+  <action name="actionRulers_Guides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Rulers &amp;&amp; Guides</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+;</string>
+   </property>
+  </action>
+  <action name="actionLock_Guides">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Lock Guides</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+;</string>
+   </property>
+  </action>
+  <action name="actionClear_Guides">
+   <property name="text">
+    <string>Clear Guides</string>
+   </property>
+  </action>
+  <action name="action_Undo">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-06.png</normaloff>:/res/Toolbar-06.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="action_Redo">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-07.png</normaloff>:/res/Toolbar-07.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="action_Cut">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-03.png</normaloff>:/res/Toolbar-03.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cu&amp;t</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_Copy">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-04.png</normaloff>:/res/Toolbar-04.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="action_Paste">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-05.png</normaloff>:/res/Toolbar-05.png</iconset>
+   </property>
+   <property name="text">
+    <string>P&amp;aste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="action_Duplicate_Object">
+   <property name="text">
+    <string>&amp;Duplicate Object</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionStudio_Preferences">
+   <property name="text">
+    <string>Studio &amp;Preferences...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
+   </property>
+  </action>
+  <action name="actionPresentation_Settings">
+   <property name="text">
+    <string>Presentation &amp;Settings...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="action_New">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-00.png</normaloff>:/res/Toolbar-00.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="action_Open">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-01.png</normaloff>:/res/Toolbar-01.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_Save">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/Toolbar-02.png</normaloff>:/res/Toolbar-02.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="text">
+    <string>Save &amp;As...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionSave_a_Copy">
+   <property name="text">
+    <string>Save a Copy...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+S</string>
+   </property>
+  </action>
+  <action name="action_Revert">
+   <property name="text">
+    <string>&amp;Revert...</string>
+   </property>
+  </action>
+  <action name="action_Connect_to_Device">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Connect to Device</string>
+   </property>
+  </action>
+  <action name="action_Exit">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionSomething">
+   <property name="text">
+    <string>Something</string>
+   </property>
+  </action>
+  <action name="actionGroup_Select_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-00.png</normaloff>:/res/client_tools_hi_color-00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Group Select Tool</string>
+   </property>
+   <property name="toolTip">
+    <string>Group Select</string>
+   </property>
+  </action>
+  <action name="actionItem_Select_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-01.png</normaloff>:/res/client_tools_hi_color-01.png</iconset>
+   </property>
+   <property name="text">
+    <string>Item Select Tool</string>
+   </property>
+   <property name="toolTip">
+    <string>Select Item</string>
+   </property>
+  </action>
+  <action name="actionRotation_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-04.png</normaloff>:/res/client_tools_hi_color-04.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotation Tool</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate current selection</string>
+   </property>
+  </action>
+  <action name="actionPosition_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-02.png</normaloff>:/res/client_tools_hi_color-02.png</iconset>
+   </property>
+   <property name="text">
+    <string>Position Tool</string>
+   </property>
+   <property name="toolTip">
+    <string>Move current selection</string>
+   </property>
+  </action>
+  <action name="actionScale_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-03.png</normaloff>:/res/client_tools_hi_color-03.png</iconset>
+   </property>
+   <property name="text">
+    <string>Scale Tool</string>
+   </property>
+   <property name="toolTip">
+    <string>Scale current selection</string>
+   </property>
+  </action>
+  <action name="actionLocal_Global_Manipulators">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/client_tools_hi_color-05.png</normaloff>:/res/client_tools_hi_color-05.png</iconset>
+   </property>
+   <property name="text">
+    <string>Local/Global Manipulators</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Manipulators to work in global/local space</string>
+   </property>
+  </action>
+  <action name="actionFit_Selected">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/editcamera_tools_hi-00.png</normaloff>
+     <disabledoff>:/res/editcamera_tools_hi-00_disabled.png</disabledoff>:/res/editcamera_tools_hi-00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fit Selected (F)</string>
+   </property>
+   <property name="toolTip">
+    <string>Fit Selected</string>
+   </property>
+  </action>
+  <action name="actionPan_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/editcamera_tools_hi-01.png</normaloff>
+     <disabledoff>:/res/editcamera_tools_hi-01_disabled.png</disabledoff>:/res/editcamera_tools_hi-01.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pan Tool (Middle Mouse Drag)</string>
+   </property>
+   <property name="toolTip">
+    <string>Pan current edit camera</string>
+   </property>
+  </action>
+  <action name="actionZoom_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/editcamera_tools_hi-02.png</normaloff>
+     <disabledoff>:/res/editcamera_tools_hi-02_disabled.png</disabledoff>:/res/editcamera_tools_hi-02.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Tool (Mouse Wheel)</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom current edit camera</string>
+   </property>
+  </action>
+  <action name="actionOrbit_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/editcamera_tools_hi-03.png</normaloff>
+     <disabledoff>:/res/editcamera_tools_hi-03_disabled.png</disabledoff>:/res/editcamera_tools_hi-03.png</iconset>
+   </property>
+   <property name="text">
+    <string>Orbit Tool (Alt+Middle Mouse Drag)</string>
+   </property>
+   <property name="toolTip">
+    <string>Orbit current edit camera</string>
+   </property>
+  </action>
+  <action name="actionShading_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/editcamera_tools_hi-04.png</normaloff>
+     <disabledoff>:/res/editcamera_tools_hi-04_disabled.png</disabledoff>:/res/editcamera_tools_hi-04.png</iconset>
+   </property>
+   <property name="text">
+    <string>Shading Mode (F3)</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Shading Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionRewind">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/playback_tools_low-00.png</normaloff>:/res/playback_tools_low-00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rewind</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/playback_tools_low-01.png</normaloff>:/res/playback_tools_low-01.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/playback_tools_low-02.png</normaloff>:/res/playback_tools_low-02.png</iconset>
+   </property>
+   <property name="text">
+    <string>Play</string>
+   </property>
+  </action>
+  <action name="actionPreview">
+   <property name="icon">
+    <iconset resource="MainFrm.qrc">
+     <normaloff>:/res/playback_tools_low-03.png</normaloff>:/res/playback_tools_low-03.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preview</string>
+   </property>
+  </action>
+  <action name="actionSubpresentations">
+   <property name="text">
+    <string>Sub-presentations...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CEditCameraBar</class>
+   <extends>QToolBar</extends>
+   <header>Studio/_Win/UI/EditCameraBar.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="MainFrm.qrc"/>
+ </resources>
+ <connections/>
+</ui>

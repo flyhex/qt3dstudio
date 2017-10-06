@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StudioPreferencesPropSheet</class>
+ <widget class="QDialog" name="StudioPreferencesPropSheet">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>484</width>
+    <height>466</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Studio Preferences</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="m_TabCtrl">
+     <widget class="CStudioAppPrefsPage" name="m_AppPrefsPage">
+      <attribute name="icon">
+       <iconset resource="../../MainFrm.qrc">
+        <normaloff>:/res/prefstab-00.png</normaloff>:/res/prefstab-00.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Studio</string>
+      </attribute>
+     </widget>
+     <widget class="CStudioProjectSettingsPage" name="m_ProjectSettingsPage">
+      <attribute name="icon">
+       <iconset resource="../../MainFrm.qrc">
+        <normaloff>:/res/prefstab-01.png</normaloff>:/res/prefstab-01.png</iconset>
+      </attribute>
+      <attribute name="title">
+       <string>Presentation Settings</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CStudioProjectSettingsPage</class>
+   <extends>QWidget</extends>
+   <header>StudioProjectSettingsPage.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CStudioAppPrefsPage</class>
+   <extends>QWidget</extends>
+   <header>StudioAppPrefsPage.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../MainFrm.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>StudioPreferencesPropSheet</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>StudioPreferencesPropSheet</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

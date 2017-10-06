@@ -1,0 +1,60 @@
+{
+    "module": "Authoring",
+    "testDir": "../../config.tests",
+
+    "libraries": {
+        "fbx": {
+            "label": "Autodesk FBX",
+            "test": "fbx",
+            "comment": "Specify FBX SDK location with FBXSDK env variable, if not in 3rdparty folder",
+            "sources": [
+                {
+                    "type": "fbx",
+                    "libs": "-lfbxsdk",
+                    "compiler": "clang",
+                    "condition": "config.osx"
+                },
+                {
+                    "type": "fbx",
+                    "libs": "-lfbxsdk",
+                    "compiler": "gcc4",
+                    "condition": "config.linux"
+                },
+                {
+                    "comment": "This is custom library path/naming for old provisioning",
+                    "type": "fbx",
+                    "debuglibs": "-llibfbxsdk-mdd",
+                    "releaselibs": "-llibfbxsdk-md",
+                    "compiler": "vs2015",
+                    "condition": "config.win32"
+                },
+                {
+                    "type": "fbx",
+                    "libs": "-llibfbxsdk-md",
+                    "compiler": "vs2015",
+                    "condition": "config.win32"
+                }
+            ]
+        }
+    },
+
+    "features": {
+        "qt3dstudio-fbx": {
+            "label": "Autodesk FBX",
+            "condition": "libs.fbx",
+            "output": [
+                "privateFeature",
+                { "type": "define", "name": "QT_3DSTUDIO_FBX" }
+            ]
+        }
+    },
+
+    "summary": [
+        {
+            "section": "Qt 3D Studio dependencies",
+            "entries": [
+                "qt3dstudio-fbx"
+            ]
+        }
+    ]
+}

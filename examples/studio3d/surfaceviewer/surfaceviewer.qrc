@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>presentation/circling_cube.uip</file>
+    </qresource>
+</RCC>

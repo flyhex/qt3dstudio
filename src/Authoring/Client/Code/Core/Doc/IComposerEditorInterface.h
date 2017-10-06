@@ -1,0 +1,90 @@
+/****************************************************************************
+**
+** Copyright (C) 1999-2002 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 as published by the Free Software
+** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+#pragma once
+#ifndef ICOMPOSERIMPORTINTERFACEH
+#define ICOMPOSERIMPORTINTERFACEH
+#include "IDocumentEditor.h"
+#include "UICImportPerformImport.h"
+
+namespace UICDM {
+class IStringTable;
+};
+
+namespace Q3DStudio {
+class CGraph;
+
+namespace ComposerImport {
+
+    using namespace Q3DStudio;
+    using namespace UICDM;
+    using namespace UICIMP;
+    using std::unordered_map;
+    using std::vector;
+    using std::pair;
+
+    // For the children of this instance that are associated with this slide,
+    // update their information.
+    typedef unordered_map<const wchar_t *, vector<pair<CUICDMSlideHandle, CUICDMInstanceHandle>>>
+        TIdMultiMap;
+
+    // Interface between the import library (which defines IComposerEditor)
+    // and the document (which provides IDocumentEditor)
+    class IComposerEditorInterface : public IComposerEditor
+    {
+    protected:
+        ~IComposerEditorInterface(){}
+
+    public:
+        friend class std::shared_ptr<IComposerEditorInterface>;
+
+        virtual bool HasError() = 0;
+        // This file path contains the import document id.
+        virtual void Finalize(const Q3DStudio::CFilePath &inDestFilePath) = 0;
+        virtual CUICDMInstanceHandle FindInstance(TImportId inImportHdl) = 0;
+        virtual CUICDMInstanceHandle GetRoot() = 0;
+        virtual const Q3DStudio::CFilePath &GetDestImportFile() = 0;
+        virtual void AddInstanceMap(CUICDMInstanceHandle instanceHandle, TImportId inImportId) = 0;
+
+        static std::shared_ptr<IComposerEditorInterface> CreateEditorInterface(
+            Q3DStudio::IDocumentEditor &editor, UICDM::CDataModelHandle parent // Parent object
+            ,
+            UICDM::CDataModelHandle root, UICDM::CUICDMSlideHandle slide,
+            const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &fullPathToImportFile,
+            long inStartTime, UICDM::IStringTable &inStringTable);
+
+        // The refresh interface is setup to refresh multiple trees automatically
+        static std::shared_ptr<IComposerEditor>
+        CreateEditorInterface(Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inRoots,
+                              const Q3DStudio::CFilePath &docPath,
+                              const Q3DStudio::CFilePath &fullPathToImportFile, long inStartTime,
+                              UICDM::IStringTable &inStringTable, CGraph &inAssetGraph);
+    };
+}
+}
+#endif

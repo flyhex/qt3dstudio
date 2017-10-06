@@ -1,0 +1,219 @@
+/* General coloring and font size */
+QWidget {
+    color: #ffffff;
+    background: #2e2f30;
+    font-size: 12px;
+    border: 0px;
+}
+
+/* DockWidget separators */
+QMainWindow::separator {
+    background: #000000;
+    width: 1px;  /* when vertical */
+    height: 1px; /* when horizontal */
+}
+
+/* Tabs */
+QTabBar::tab:selected {
+    background: #2e2f30;
+    padding: 5px;
+}
+
+QTabBar::tab:!selected {
+    background: #262829;
+    color: #727476;
+    padding: 5px;
+}
+
+QTabWidget::pane {
+    border: 1px solid #404244;
+}
+
+/* Scrollbar */
+QScrollBar:horizontal {
+    border: 1px solid #262829;
+    background: #404244;
+}
+
+QScrollBar::handle:horizontal {
+    background: #727476;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar:vertical {
+    border: 1px solid #262829;
+    background: #404244;
+}
+
+QScrollBar::handle:vertical {
+    background: #727476;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* Menubar */
+QMenuBar {
+    background: #404244;
+    border-top: 1px solid #262829;
+}
+
+QMenuBar::item {
+    background: transparent;
+}
+
+QMenuBar::item:selected {
+    background: #46a2da;
+    border: 1px solid #262829;
+}
+
+/* Menu */
+QMenu {
+    background: #262829;
+    border: 1px solid #727476;
+}
+
+QMenu::item {
+    padding: 4px 20px 4px 20px;
+}
+
+QMenu::item:selected:enabled {
+    background: #46a2da;
+}
+
+QMenu::item:disabled {
+    padding: 4px 20px 4px 20px;
+    color: #727476;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #727476;
+}
+
+/* Toolbar */
+QToolBar {
+    background: #404244;
+    border-top: 1px solid #262829;
+    min-height: 24px;
+    max-height: 24px;
+}
+
+QToolBar::handle {
+    image: url(:/res/separator.png);
+}
+
+QToolBar::separator {
+    background: #727476;
+    width: 1px;
+    margin: 3px;
+}
+
+QToolButton:!checked {
+    min-width: 22px;
+    min-height: 22px;
+    background-color: #404244;
+}
+
+QToolButton:checked, QToolButton:hover {
+    min-width: 22px;
+    min-height: 22px;
+    background-color: #262829;
+}
+
+QToolButton:pressed {
+    min-width: 22px;
+    min-height: 22px;
+    background-color: #46a2da;
+}
+
+QComboBox#cameraSelector {
+    /* We have a specific style for camera selector combobox, as it's in the toolbar and needs to
+       blend in */
+    background: #404244;
+    border: 0px;
+    border-radius: 0;
+    padding: 3px;
+}
+
+/* ToolTip */
+QToolTip {
+    background: #404244;
+    color: #ffffff;
+    font-size: 12px;
+    border: 1px solid #727476;
+    border-radius: 2;
+}
+
+/* Dialog widgets */
+QComboBox,
+QLineEdit,
+QSpinBox,
+QTimeEdit {
+    background: #404244;
+    border: 1px solid #262829;
+    border-radius: 2;
+    padding: 3px;
+}
+
+QComboBox::drop-down {
+    background: #404244;
+}
+
+QComboBox::down-arrow {
+    image: url(:/res/arrow_down.png);
+}
+
+QGroupBox {
+    padding: 14px 0px 0px 0px;
+    border: 1px solid #262829;
+}
+
+QGroupBox::title {
+    subcontrol-origin: padding;
+    margin-top: 2px;
+    margin-left: 10px;
+}
+
+QPushButton {
+    background: #404244;
+    border: 1px solid #262829;
+    border-radius: 2;
+    padding: 3px 10px 3px 10px;
+    min-width: 75;
+}
+
+/* Tutorial Dialog */
+QDialog#StudioTutorialWidget,
+QDialog#StudioTutorialWidget QWidget {
+    color: #ffffff;
+    background-color: transparent;
+    border: 0px;
+}
+
+QPushButton:!pressed#studioTutorialOpen,
+QPushButton:!pressed#studioTutorialNew {
+    background: transparent;
+    border: 1px solid #41cd52;
+}
+
+QPushButton:pressed#studioTutorialOpen,
+QPushButton:pressed#studioTutorialNew {
+    background: #41cd52;
+    border: 1px solid #41cd52;
+}
+
+/* Startup Dialog */
+QDialog#StartupDlg,
+QDialog#StartupDlg QWidget {
+    color: #ffffff;
+    background-color: transparent;
+    border: 0px;
+    font-size: 16px;
+}

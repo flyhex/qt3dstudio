@@ -1,0 +1,60 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+\contentspage {Qt 3D Studio}
+\page qt3dstudio-toc.html
+\title Qt 3D Studio TOC
+
+\omit
+This file is used for generating a TOC in a .qch file.
+\endomit
+
+\list
+    \li \l {index.html}{Concepts}
+    \li \l {Studio Index}{Studio}
+    \include studio-index.qdoc toc
+    \li \l {Viewer Index}{Viewer}
+    \include viewer-index.qdoc toc
+    \li \l {QML API}{QML API Reference}
+    \include qml-index.qdoc toc
+    \li \l {C++ API}{C++ API Reference}
+    \include cpp-index.qdoc toc
+    \li \l {Runtime}
+    \include runtime-index.qdoc toc
+    \li \l {File Formats}
+    \include formats-index.qdoc toc
+    \omit
+    TODO: Needs to be checked. Maybe a rewrite, or just remove it all.
+    \li \l {Integrating with Qt 3D Studio}
+    \include integrating-index.qdoc toc
+    \endomit
+    \li \l {Best Practices}
+    \include practices-index.qdoc toc
+    \li \l {Copyright Notices}
+\endlist
+*/

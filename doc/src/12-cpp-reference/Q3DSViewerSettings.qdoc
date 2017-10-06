@@ -1,0 +1,117 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:GPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 or (at your option) any later version
+** approved by the KDE Free Qt Foundation. The licenses are as published by
+** the Free Software Foundation and appearing in the file LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \class Q3DSViewerSettings
+    \inheaderfile q3dsviewersettings.h
+    \inmodule QtStudio3D
+    \brief Qt 3D Studio presentation viewer settings.
+
+    Q3DSViewerSettings provides properties to define presentation independent viewer settings.
+
+    You should never construct this class yourself. You can ask for an instance
+    from \l{Q3DSSurfaceViewer::settings}{Q3DSSurfaceViewer}
+    or \l{Q3DSWidget::settings}{Q3DSWidget}.
+*/
+
+/*!
+    \fn Q3DSViewerSettings::Q3DSViewerSettings(QObject *parent = nullptr)
+    \internal
+*/
+
+/*!
+    \fn Q3DSViewerSettings::~Q3DSViewerSettings()
+    \internal
+*/
+
+/*!
+    \property Q3DSViewerSettings::matteColor
+
+    Specifies the color of the viewer area not occupied by the presentation.
+    Default value is black.
+*/
+
+/*!
+    \property Q3DSViewerSettings::showRenderStats
+
+    If this property is set to \c{true}, render statistics are displayed on the upper part
+    of the viewer.
+    Default value is \c{false}.
+*/
+
+/*!
+    \property Q3DSViewerSettings::shadeMode
+
+    The shading mode used for the viewed presentation.
+    The default value is \c{ShadeModeShaded}.
+*/
+
+/*!
+    \property Q3DSViewerSettings::scaleMode
+
+    The scaling mode used for the viewer presentation.
+    The default value is \c{ScaleModeCenter}.
+*/
+
+/*!
+    \enum Q3DSViewerSettings::ShadeMode
+
+    This enumeration specifies the possible shading modes.
+
+    \value ShadeModeShaded The objects in the presentation are shaded normally.
+    \value ShadeModeShadedWireframe The objects in the presentation are shaded
+    with a super-imposed wireframe on top of the normal shading. Only objects that specify
+    a tesselation mode will display this wireframe.
+*/
+
+/*!
+    \enum Q3DSViewerSettings::ScaleMode
+
+    This enumeration specifies the possible scaling modes.
+
+    \value ScaleModeFit Scales the presentation to fit the viewer.
+    \value ScaleModeFill Scales the presentation to fill the viewer.
+    \value ScaleModeCenter Centers the presentation into the viewer without scaling it.
+*/
+
+/*!
+    \fn void Q3DSViewerSettings::save(const QString &group, const QString &organization = QString(),
+                                      const QString &application = QString())
+
+    Persistently saves the viewer \l{QSettings}{settings} using \a group, \a organization and
+    \a application.
+*/
+
+/*!
+    \fn void Q3DSViewerSettings::load(const QString &group, const QString &organization = QString(),
+                                      const QString &application = QString())
+
+     Loads previously saved viewer \l{QSettings}{settings} using \a group, \a organization and
+     \a application.
+*/

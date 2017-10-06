@@ -1,0 +1,234 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Using Scale Modes
+\page best-practices-scalemodes.html
+\ingroup qt3dstudio-best-practices
+
+Qt 3D Studio allows you to use the same application on different
+resolutions and aspect ratios and control how portions of the content
+adjust to the new sizing. There are four related settings that control
+this:
+
+\list
+\li
+  The \e{size set for the presentation} controls how large the application renders.
+  Note that the render size might also be effected by the \e{Application Scale Mode} setting.
+\li
+  The \e{Application Scale Mode} controls how much of your viewport is
+  covered by the application.
+\li
+  \e{Layer positioning and sizing} controls how layers align and the size of them.
+\li
+  \e{Camera scaling and anchoring} controls how the content adjusts
+  (panning and scaling) as the layer size changes.
+\endlist
+
+\target presentation-size
+\section1 Presentation Size
+
+You can set the presentation size by following the steps below:
+
+\list 1
+  \li From the file menu select \uicontrol{Edit} >
+  \uicontrol{Presentation Settings}
+  \li Enter the desired width and height for the presentation. When editing
+  presentation size you can retain proportions by checking the
+  \uicontrol{Constrain Proportions} check box.
+  \image presentation-size.png
+\endlist
+
+The effect of setting the size of a presentation in Studio
+depends on how the presentation is used within the application:
+
+\list
+\li
+  If the presentation is the \e{main presentation} and the
+  \e{\l{Application Scale Mode}} is set to
+  \c{center} (the default value), then the size
+  of the presentation is the size of the application. No matter how big
+  your viewport or the resolution of your screen are, the presentation size
+  you specify will be the final size.
+\li
+  If the presentation is used as a
+  \l{best-practices-using-sub-presentations.html}{sub-presentation}
+  via an image element, the size you specify is the
+  render size for the presentation. The presentation is rendered at this
+  size and then displayed as an image on the material.
+\list
+\li
+  \note If your presentation size is larger than the final display size
+  of your image, you will spend performance rendering results that only
+  lightly affect the end result. You will get a form of AA on the
+  sub-presentation via the linear interpolation of the final image, but
+  at a non-trivial cost to the graphics performance.
+\endlist
+\li
+  If the presentation is used as a
+  \l{best-practices-using-sub-presentations.html}{sub-presentation}
+  via a layer, the presentation is always
+  rendered at the size of the layer. If the layer size differs from the
+  presentation size, the \l{camera-scaling-and-anchoring}{camera scaling and anchoring properties}
+  for the layers within the presentation control how
+  the content for those layers reacts to the size changes.
+\endlist
+
+\target application-scale-mode
+\section1 Application Scale Mode
+
+The \e{Scale Mode} attribute specifies how large the initial presentation is rendered.
+
+\list
+\li
+  \c{Center} - the presentation is rendered at the size
+  specified in Studio. Additional content is cropped, additional space
+  is letterboxed. This setting is the default setting.
+\li
+  \c{Fit} - the aspect ratio of the presentation is
+  preserved, the presentation will scale to fit the viewport, letterboxing as needed.
+\li
+  \c{Fill} - the presentation is always rendered to
+  fill the viewport both horizontally and vertically, adjusting
+  ascpect ratio if needed.
+\endlist
+
+\image Runtime-ApplicationScaleMode.png
+
+\note This setting only describes how much space to fill, but not
+how the content adjusts to fill these dimensions. The results
+depend on how the layers of the presentation adjust with changing
+presentation render size, and how cameras within those layers choose
+which content to display. Read on for these details.
+
+When you view your presentation in the Viewer you
+can change the \e{Scale Mode} either by using shortcut \c{Ctrl + Shift + S} to toggle
+\e{Scale Mode} or by selecting \uicontrol{View} > \uicontrol{Scale Mode} from
+the file menu.
+\image view-scale-mode.png
+
+\target layer-position-and-size
+\section1 Layer Position and Size
+
+A \e{layer} on a presentation is a screen-aligned rectangle into which
+to draw content. By default each layer is set to fill the entire
+presentation. However, you can set layers to fill only a particular
+portion of the presentation. You may wish to do this for the visual
+result (for example if you want a navigation bar that is always 100 pixels high
+regardless of the presentation size, anchored at the bottom of the
+screen.). However, even if you don't need the visual effect of
+cropping, it's a good idea to crop your layers to only minimal content
+needing to be shown, so that no graphics processing power is wasted
+rendering empty space.
+
+Sizing and positioning of layers is done by adjusting the \uicontrol{Horizontal Fields}
+and \uicontrol{Vertical Fields} properties of the layers. You adjust these
+properties in the \e{inspector palette} once you have selected the desired layer in the
+\e{timeline palette}.
+
+\image layer-position-properties.png
+
+\list
+  \li \uicontrol{Horizontal Fields} - Choose which two fields of \uicontrol{Left},
+  \uicontrol{Width}, and \uicontrol{Right} are used to control the horizontal placement
+  and sizing of the layer within the presentation. Each of these values can be set either
+  in pixels or as a percentage of the presentation width.
+  \li \uicontrol{Left} - The distance between the left edge of the presentation
+  and the left edge of the layer.
+  \li \uicontrol{Width} - The width of the layer, either in pixels or as a percentage
+  of the presentation width.
+  \li \uicontrol{Right} - The distance between the right edge of the presentation and
+  the right edge of the layer.
+  \li \uicontrol{Vertical Fields} - Choose which two fields of \uicontrol{Top},
+  \uicontrol{Height}, and \uicontrol{Bottom}
+  are used to control the vertical placement and sizing of the layer within the presentation.
+  Each of these values can be set either in pixels or as a
+  percentage of the presentation width.
+  \li \uicontrol{Top} - The distance between the top edge of the presentation and the top edge
+  of the layer.
+  \li \uicontrol{Height} - The height of the layer, either in pixels or as a percentage
+  of the presentation height.
+  \li \uicontrol{Bottom} - The distance between the bottom edge of the presentation
+  and the bottom edge of the layer.
+\endlist
+
+\image Runtime-LayerSizing.png
+
+\target camera-scaling-and-anchoring
+\section1 Camera Scaling and Anchoring
+
+Whenever a layer is not the same size as the \l{presentation-size} {presentation size},
+and the layer is displaying its own content (rendered from a camera in the layer instead
+of showing a \l{best-practices-using-sub-presentations.html}{sub-presentation}), two
+properties of its camera control how the content adjusts to fill the new size:
+
+\list
+\li
+  \uicontrol{Scale Mode}
+    \list
+    \li \uicontrol{Same Size} - render the content seen by the camera at the same
+    size (same number of pixels) as seen when the layer size is the same
+    as the presentation sized authored in Studio. Layers smaller than the
+    original presentation size will cause content to be cropped, while
+    larger layers will cause additional content (beyond the original
+    bounds of the camera) to be shown.
+    \li \uicontrol{Fit} - render the content seen by the camera (based on the
+    aspect ratio of the presentation) larger or smaller to fit within the
+    layer. When the aspect ratio of the layer is different than the
+    presentation, additional content will be shown either
+    above/below or left/right; the content seen by the camera will never
+    be cropped.
+    \li \uicontrol{Fit Horizontal} - Same as \uicontrol{Fit} but will render the
+    content seen by the camera larger or smaller to fit within the layer horizontally.
+    \li \uicontrol{Fit Vertical} - Same as \uicontrol{Fit} but will render the
+    content seen by the camera larger or smaller to fit within the layer vertically.
+  \endlist
+\li
+  \b{Scale Anchor} - When changes to the layer size cause
+  the camera to render more or less content this property controls which
+  part of the content stays in the same spot relative to the layer. A
+  value of \e{Center} causes the center of the camera to always
+  remain in the center of the layer, a value of \e{NW} causes the
+  upper left corner of the content seen in Studio to always be at the
+  upper left corner of the layer, a value of \e{N} causes the top
+  middle of the content seen in Studio to always be at the top middle
+  edge of the layer, and so forth.
+\endlist
+\raw HTML
+<a href="images/Runtime-CameraModes.png">
+\endraw
+\image Runtime-CameraModes.png
+\raw HTML
+</a>
+\endraw
+You can adjust these properties in the \e{inspector palette} once you have selected the
+desired camera in the \e{timeline palette}.
+
+\image camera-scale-mode.png
+*/

@@ -1,0 +1,131 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Disable Depth Test
+\page best-practices-disable-depth-test.html
+\ingroup qt3dstudio-best-practices
+
+ This page describes the
+\c{Disable Depth Test} property of Layers edited in Qt 3D Studio.
+
+\image DisableDepthTest.png
+
+The Disable Depth Test property can be used to simultaneously override
+depth testing and the order objects are rendered. The operation of this
+property is not as obvious as many of the other properties in the system
+so this page offers some insight into when, where, and why this property
+might be used.
+
+\section1 What Does It Do?
+
+By default, the Disable Depth Test property is unchecked
+(\c{false}). This is the normal mode of operation. In this mode
+rendering is done in two passes. First, reading and writing from the
+depth buffer is enabled and all opaque objects are rendered from front
+to back (objects closer to camera are rendered first). In the second
+pass, writing to the depth buffer is disabled and all transparent
+(non-opaque) objects are rendered from back to front.
+
+The first pass allows for optimal z-culling for normal opaque 3D objects
+and the second pass allows for correct blending of transparent objects.
+
+By checking the Disable Depth Test property - setting it to
+\c{true} - a different single pass rendering mode is enabled for
+the Layer. In this mode the depth buffer is not used at all, and all
+objects are rendered in a single back to front pass.
+
+\section1 Why?
+
+Each setting for this property has pros and cons.
+
+\section2 Disable Depth Test: \c{false}
+
+\b{Pros:}
+
+\list
+\li
+  This mode ensures the best visual quality because the two pass
+  rendering technique enables the correct rendering of overlapping and
+  intersecting 3D objects as well as correct blending of transparent
+  objects.
+\li
+  Performance can be higher in this mode if there are opaque objects
+  which occlude other objects. Skipping the rendering of pixels which
+  are hidden behind fully opaque objects is a common and powerful 3D
+  rendering optimization known as z-culling.
+\endlist
+
+\b{Cons:}
+
+\list
+\li
+  The two pass rendering technique can be more expensive in some
+  scenarios.
+\endlist
+
+\section2 Disable Depth Test: \c{true}
+
+\b{Pros:}
+
+\list
+\li
+  This mode can increase performance if there are very few (or no)
+  objects benefiting from z culling. In cases with little overlap it can
+  be faster to render with the one pass technique.
+\endlist
+
+\b{Cons:}
+
+\list
+\li
+  In some scenarios, rendering errors may be introduced and/or
+  performance can suffer in this mode. When objects intersect or overlap
+  each other depth testing and the two pass rendering technique are
+  necessary to achieve the correct results. (For more details, see
+  \l{http://en.wikipedia.org/wiki/Painter\%27s\_algorithm}{\"Painters
+  Algorithm\" on Wikipedia}.
+\endlist
+
+\section1 Conclusion
+
+The Disable Depth Test property on Layers is an advanced property that
+can be used to increase performance under certain specific scenarios. It
+can be activated per-Layer to enable a separate one pass rendering
+technique that can achieve higher performance than the default rendering
+technique by eliminating the overhead of doing expensive depth testing
+in cases where 3D objects do not overlap or intersect.
+
+This property should be enabled with some care. Though it is possible to
+increase performance by enabling this property on some Layers it is also
+possible to introduce undesirable rendering errors and even in some
+cases adversely affect performance. Remember to measure thoroughly when
+optimizing.
+
+*/

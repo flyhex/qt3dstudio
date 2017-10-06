@@ -1,0 +1,24 @@
+[
+    {
+        "Id": "foreach",
+        "Name": "Foreach",
+        "QDocModule": "qt3dstudio",
+        "QtUsage": "Used by Qt3DStudio, Studio component.",
+
+        "Description": "Foreach loop used by UICMacros.",
+        "License": "MIT Old style",
+        "LicenseFile": "LICENSE_FOREACH.TXT",
+        "Copyright": "Copyright (c) 2003 Eric Niebler"
+    },
+    {
+        "Id": "ptypes",
+        "Name": "PTypes",
+        "QDocModule": "qt3dstudio",
+        "QtUsage": "Used by Qt3DStudio, Studio component.",
+
+        "Description": "C++ Portable Types Library (PTypes).",
+        "License": "Zlib license",
+        "LicenseId": "Zlib",
+        "Copyright": "Copyright (C) 2001-2007 Hovik Melikyan"
+    }
+]

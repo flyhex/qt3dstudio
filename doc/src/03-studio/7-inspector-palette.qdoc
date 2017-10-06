@@ -1,0 +1,1092 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Studio: Inspector Palette
+\page studio-inspector-palette.html
+\ingroup qt3dstudio-studio
+
+ The Inspector palette is the most-used
+palette in Studio. It is used to control which properties are animated
+or change on a per-slide basis and the values for each of those
+properties.
+
+\section1 Animating Properties
+
+Almost every property of every element may be animated at runtime.
+Non-animatable exceptions are properties with discrete values (booleans,
+text strings, or drop-down lists).
+
+Properties that \e{can} be animated have a small stopwatch icon next
+to them in the Inspector palette. Click on this icon to enable animation
+for an property.
+
+Turning off the toggle for an property with complex animation saves the
+keyframes during the same session; if you accidentally turn off
+animation you can turn it back on and all your keyframes will come back.
+However, if you save your presentation with the animation turned off,
+those keyframes are discarded. Re-enabling animation after re-opening
+the presentation will start with a blank slate.
+
+\section1 Unlinking from the Master Slide
+
+ By default, elements on the
+\l{studio-slide-palette.html#the-master-slide}{master slide} of their
+owning time context have the same property values on all slides. If you
+change the Scale of an that change is applied on all slides. However, it
+is also possible to \"unlink\" any property of a master element. An
+unlinked attriute can have custom values and animations for each slide.
+
+To unlink an property, right-click on the property name in the Inspector
+palette and choose \"Unlink Property from Master Slide\". The name of
+the property will change from green to light grey. This is the same
+color used for the name of elements that are present only on a single
+slide, and the properties of such elements.
+
+Tip: when you first unlink a property the current value for that
+property, including any animation keyframes, is used as the value for
+every slide. If you want a similar-but-slightly-different animation on
+all or most slides, first create the animation on the master slide and
+\b{then} unlink the property and tweak the animation on other
+slides. A little thinking ahead can save you from needing to perform
+redudant work.
+
+\section1 Editing Numeric Values
+
+Studio provides two mechanisms for experimentally changing numeric
+values in the Inspector palette when you are not sure of the exact value
+you want.
+
+\list 1
+\li
+  When a numeric input is \b{not} already focused (ready to be
+  typed into), click and drag the mouse up and down on the number you
+  want to change. The value will increase or decrease as you drag the
+  mouse, and the scene view will update to show the effect of the
+  change.
+\li
+  With a numeric input focused, press the up/down arrow keys to
+  increment/decrement the value by 1 for each key press.
+\endlist
+With both of these techniques, you can hold down the \b{shift} key
+to make the values adjust by 10 instead of 1, or hold down the
+\b{control} key to make the values adjust by 0.1 instead.
+
+\target scenecomponent-properties
+\section1 Scene/Component Properties
+
+Scenes and components are both \"time contexts\". When their contents
+are displayed in the Timeline palette (when you are \"inside\" the scene
+or component) and the element is selected, the following properties are
+shown in the Inspector palette \e{specific to the active slide}:
+
+\list
+\li
+  \b{Play Mode}: Controls what happens when the playhead reaches
+  the end time for the slide:
+\list
+\li
+  \c{Stop at end} - This default value simply holds the playhead at
+  the end time, with any animated properties holding their final value.
+\li
+  \c{Looping} - Upon reaching the final time the playhead starts
+  over at time 0.
+\li
+  \c{PingPong} - Upon reaching the final time the playhead starts
+  playing backwards; upon reaching time 0 the playeah starts playing
+  forwards again.
+\li
+  \c{Ping} - Similar to \e{PingPong}, but when the playhead
+  reaches time 0 it stops playback and holds that time.
+\li
+  \c{Play Through To...} - Upon reaching the final time the
+  scene or component will switch to a new slide. This is useful to have
+  an intro animation that then leads into a looping animation (on a
+  separate slide). You may specify a specific slide to play through to,
+  or simply the next/previous slide in the Slide palette. \^{}
+\endlist
+\li
+  \b{Initial Play State} - When entering this slide, should the
+  playhead immediately start playing, or wait to be started? Using the
+  \b{Pause} setting is particularly useful when QML application is going
+  to control the time for the context and you don't
+  need or want the runtime attempting to do its own work.
+\endlist
+
+\target layer-properties
+\section1 Layer
+Properties
+
+Selecting a layer in the Timeline palette shows the following properties
+in the Inspector palette:
+
+\list
+\li
+  \b{Disable Depth Test} - Controls whether depth-testing is used
+  when rendering objects in the layer. For details see the discussion on
+  the
+  \e{\l{best-practices-disable-depth-test.html}{Disable Depth Test}} page.
+\li
+  \b{Progressive AA} - Controls whether progressive anti-aliasing
+  is used when rendering the layer. For details see the discussion on
+  \e{\l{best-practices-antialiasing.html#progressive-aa}{Progressive Anti-Aliasing}}.
+\li
+  \b{Multisample AA} - Controls whether multisample anti-aliasing
+  is used when rendering the layer. For details see the discussion on
+  \e{\l{best-practices-antialiasing.html#multisample-aa}{Multisample Anti-Aliasing}}.
+\li
+  \b{Temporal AA} - Controls whether temporal anti-aliasing is used
+  when rendering the layer. For details see the discussion on
+  \e{\l{best-practices-antialiasing.html#temporal-aa}{Temporal Anti-Aliasing}}.
+\li
+  \b{Layer Background} - Controls how the layer clears when it
+  starts to render each frame:
+\list
+\li
+  \c{Transparent} - Clear the layer to transparent each frame so
+  that content behind it can be seen.
+\li
+  \c{Unspecified} - Do not clear layer each frame. This provides a
+  slight performance boost if the layer is filled with content, and
+  hence will fully overwrite the previous result.
+\li
+  \c{Solid Color} - Clear this layer to a non-transparent color.
+  This provides a slight performance boost if the layer fills the
+  viewport \b{and} if you turn off \"Enable Background Color\" for
+  the Scene.
+\endlist
+\li
+  \b{Blend Mode} - Controls how colors in the active layer blends with colors in the background
+  layer. For details see the discussion on the
+  \e{\l{best-practices-blend-mode.html}{Blend Mode}} page.
+\list
+\li
+  \c{Normal} - Default blend mode. Opaque objects will occlude objects in layers behind.
+\li
+  \c{Screen} - Colors are blended using an inverted multiply, producing a lighter result.
+\li
+  \c{Multiply} - Colors are blended using a multiply, producing a darker result.
+\li
+  \c{Add} - Colors are blended by addition, producing a lighter result.
+\li
+  \c{Subtract} - Colors are blended by subtraction, producing a darker result.
+\li
+  \c{Overlay} - A mix of \c Multiply and \c Screen modes, producing a result with higher contrast.
+\li
+  \c{Colorburn} - Colors are blended by inverted division where the result also is inverted,
+  producing a darker result. Darker than \c Multiply.
+\li
+  \c{Colordodge} - Colors are blended by inverted division, producing a lighter result. Lighter
+  than \c Screen.
+\endlist
+\li
+  \b{Horizontal Fields} - Choose which two fields of \c{Left},
+  \c{Width}, and \c{Right} are used to control the horizontal
+  placement and sizing of the layer within the presentation.
+\li
+  \b{Left} - The distance between the left edges of the
+  presentation and the layer, either in pixels or as a percentage of the
+  presentation's width.
+\li
+  \b{Width} - The width of the layer, either in pixels or as a
+  percentage of the presentation's width.
+\li
+  \b{Right} - The distance between the right edges of the
+  presentation and the layer, either in pixels or as a percentage of the
+  presentation's width.
+\li
+  \b{Vertical Fields} - Choose which two fields of \c{Top},
+  \c{Height}, and \c{Bottom} are used to control the vertical
+  placement and sizing of the layer within the presentation.
+\li
+  \b{Top} - The distance between the top edges of the presentation
+  and the layer, either in pixels or as a percentage of the
+  presentation's height.
+\li
+  \b{Height} - The height of the layer, either in pixels or as a
+  percentage of the presentation's height.
+\li
+  \b{Bottom} - The distance between the bottom edges of the
+  presentation and the layer, either in pixels or as a percentage of the
+  presentation's height.
+\li
+  \b{Sub-Presentation} - If you specify a value here, it is
+  intepreted to be the \c{id} attribute of another presentation in
+  \omit
+  TODO: Not really usable right now.
+  \l{file-formats-uia.html}{the \c{.uia} application file}.
+  \endomit
+  the \c{.uia} application file.
+   Instead of rendering the contents of this layer,
+  the specified presentation will be rendered and composited in place of
+  this layer. For more information, see the discussion on the
+  \e{\l{best-practices-using-sub-presentations.html}{Using Sub-Presentations}} page.
+\li
+  \b{Ambient Occlusion} - Controls the strength of ambient
+  occlusion (AO). AO is a form of approximated global illumination which
+  causes non-directional self-shadowing where objects are close
+  together. A value of \c{100} causes full darkness shadows; lower
+  values cause the shadowing to appear lighter. A value of \c{0}
+  disables ambient occlusion entirely, improving performance at a cost
+  to the visual realism of 3D objects rendered in the layer. All values
+  other than \c{0} have the same impact to the performance.
+\li
+  \b{AO Distance} - Roughly how far (in world units) ambient
+  occlusion shadows spread away from objects. The following graphic
+  illustrates a variety of distances, starting with 0 (no AO) at left.
+  Greater distances cause increasing impact to performance.
+\raw HTML
+<a href=images/Runtime-AODistances.jpg>
+\endraw
+\image Runtime-AODistances.jpg
+\raw HTML
+</a>
+\endraw
+\li
+  \b{AO Softness} - How smooth the edges of the AO shading are. The
+  following graphic illustrates a variety of softness values, going from
+  \c{0} at left to \c{100} at right.
+  \raw HTML
+<a href=images/Runtime-AOSoftnesses.jpg>
+\endraw
+\image Runtime-AOSoftnesses.jpg
+\raw HTML
+</a>
+\endraw
+\li
+  \b{AO Threshold} - A cutoff distance preventing objects from
+  exhibiting AO at close distances. Higher values increase the distance
+  required between objects before AO is seen.
+  \list
+  \li
+    \note If you see AO shadowing on objects where there should be
+    no shadowing, increase the AO Threshold value slightly to clip away
+    close results.
+  \endlist
+\li
+  \b{AO Sampling Rate} - Larger values result in better AO quality
+  (more shades of gray) at the expense of performance.
+\li
+  \b{AO Detail} - Scatters the edges of the AO shadow bands to
+  improve smoothness (at the risk of sometimes producing obvious
+  patterned artifacts).
+  \list
+  \li
+    \note Very large distances between the clipping planes of your
+    camera may cause problems with AO. If you are seeing odd banding in
+    your AO, try adjusting the Far Clip Plane of your camera to be closer
+    to your content.
+  \endlist
+\li
+  \b{Shadow Strength} - Controls the strength of directional
+  occlusion (DO). DO is a form of approximated directional shadowing. A
+  value of \c{100} causes full darkness shadows; lower values cause
+  the shadowing to appear lighter. A value of \c{0} disables DO
+  entirely, improving performance at a cost to the visual realism of 3D
+  objects rendered in the layer. All values other than \c{0} have
+  the same impact to the performance.
+  \list
+  \li
+    \note Directional occlusion will only render on \e{Standard Materials}
+    that have the \l{standard-materials}{Lighting property} set to \c{Pixel}.
+  \endlist
+\li
+  \b{Shadow Distance} - Roughly how far (in world units) the faked
+  shadows spread away from objects.
+\li
+  \b{Shadow Softness} - Crossfade amount between sharp shadows and
+  smooth gradations.
+\li
+  \b{Shadow Threshold} - A cutoff distance preventing objects from
+  self-shadowing. Higher values increase the distance required between
+  objects before DO is seen.
+  \list
+  \li
+    \note If you see DO shadowing in regions where there should be
+    no shadowing, increase the Shadow Threshold value slightly to clip
+    away close results.
+  \endlist
+\li
+  \b{Light Probe} - Select an image (preferably a high dynamic
+  range image (\c{.hdr})) to use to light the scene, either instead of or
+  in addition to standard lights. If selected, note that this image will
+  be used as the environment for any custom \c{.material}, instead
+  of the environment often associated with them.
+\li
+  \b{IBL Brightness} - The amount of light emitted by the light probe.
+\li
+  \b{IBL Horizon Cutoff} - Increasing the value will add darkness (black)
+  to the bottom half of the environment, forcing the lighting to come
+  predominantly from the top of the image (and removing specific
+  reflections from the lower half).
+\li
+  \b{IBL FOV Angle} - The image source field of view.
+\li
+  \b{Secondary Light Probe} - Select an image to use as secondary IBL light source.
+\li
+  \b{Probe Crossfade} - The blend amount between the primary and secondary light probes.
+\endlist
+
+\target transform-properties
+\section1 Transform
+Properties
+
+Selecting an element in the Timeline palette that has a 3D presence
+shows the following properties in the Inspector palette:
+
+\list
+\li
+  \b{Position} - The local position of the element in the space
+  established by the parent element. Note that Qt 3D Studio uses
+  a Y-up \"left-handed\" coordinate system. Increasing values of X go to
+  the right (as seen from the default camera location), increasing
+  values of Y go up, and increasing values of Z go away from the camera.
+\li
+  \b{Rotation} - The local rotation of the element in the space
+  established by the parent element. Each value is the left-handed
+  rotation about the axis in question, with the direction of the axes as
+  described above. Rotations are applied in the order ZXY.
+\li
+  \b{Scale} - The local scale of the element in the space
+  established by the parent element. Note that an odd-number of negative
+  scale values will cause your element to render 'inside-out', which
+  cannot be seen due to backface-culling.
+\li
+  \b{Pivot} - The local pivot offset for the object. You can think
+  of the pivot as offsetting the geometry for the element away from the
+  origin, allowing an object to rotate and scale around a point other
+  than its local origin. Pivots are applied before scaling and rotation.
+\li
+  \b{Opacity} - Although not technically a transformation, every
+  transformable element has an opacity applied to it. An opacity of 100
+  causes the object to be fully opaque, while an opacity of 0 prevents
+  an object from rendering at all.
+\endlist
+
+Just as modifying the position or rotation of a parent element affects
+all descendant elements, opacity is multiplicatively cumulative through
+the transform hierarchy. A cube that is 50\% opaque inside a group that
+is 80\% opaque will render with an equivalent apperance of 40\% opacity
+(\c{0.8 * 0.5 = 0.4}). Setting the opacity of a group to 0 will
+prevent any descendants within the group from rendering.
+
+For models, having an equivalent opacity of 0 also prevents any touch
+events from being processed for the element. If you can't see the cube,
+you can't click on it. Note, however, that you may alternatively adjust
+the \l{material-properties}{opacity of a material} to 0. In this
+case you cannot see the model but you \b{can} click on it.
+
+\section1 Camera Properties
+
+A camera selected in the Timeline palette shows the following properties
+in the Inspector palette (in addition to the
+\l{transform-properties}{transform properties} described above):
+
+\list
+\li
+  \b{Orthographic} - When enabled, the layer for this camera
+  renders all contents with no perspective. Additionally the default
+  scale of the camera ensures that each world unit renders at exactly
+  one pixel in the final presentation.
+\endlist
+
+Orthographic layers (layers with a camera set to be orthographic) are
+ideal for layering 2D UI elements. Not only are your images guaranteed
+to be the right size on the screen, you can use the Z position of
+objects to bring them closer to/farther from the camera (z-sorting) with
+no foreshortening artifacts.
+
+\list
+\li
+  \b{Field of View} - For perspective cameras (ones without the
+  Orthographic box checked), this is the number of degrees between the
+  top and bottom edges of the camera frustum. The larger the value, the
+  stronger the sense of 3D in your scene. The horizontal field of view
+  is automatically calculated based on the aspect ratio of the
+  presentation as authored in Studio.
+\li
+  \b{Clipping Start/End} - Content closer to the camera than the
+  clipping start or farther than the clipping end will not be rendered.
+  This occurs at the pixel level, not the element level: a model that
+  crosses the clipping plane may be only partially rendered.
+\endlist
+\omit
+TODO: Replace the following paragraph with this once AO is back.
+\e{The default values are intended to cause anything within the view
+of the camera to be rendered. Aside from special clipping effects, you
+may need to adjust these values to more closely contain your content for
+better results with Ambient Occlusion, or with a layer effect that uses
+the depth buffer of the camera, such as the
+\endomit
+\e{The default values are intended to cause anything within the view
+of the camera to be rendered. Aside from special clipping effects, you
+may need to adjust these values to more closely contain your content for
+better results with a layer effect that uses the depth buffer of the camera, such as the
+\l{best-practices-effects.html#using-depth-of-field}{Depth of Field effect}.}
+
+\list
+\li
+  \b{Scale Mode} - When the final size of the layer is different
+  than the presentation size (due to the
+  \l{file-formats-uia.html#application}{application scale mode} and/or
+  the \l{layer-properties}{layer size}), this
+  setting controls how the camera adjusts to fill the space:
+\list
+\li
+  \c{Fit} - render the content seen by the camera (based on the
+  aspect ratio of the presentation) larger or smaller to fit within the
+  layer. When the aspect ratio of the layer is different than the
+  presentation additional content will be shown \e{either}
+  above/below or left/right; the content seen by the camera will never
+  be cropped.
+\li
+  \c{Same Size} - render the content seen by the camera at the same
+  size (same number of pixels) as seen when the layer size is the same
+  as the presentation sized authored in Studio. Layers smaller than the
+  original presentation size will cause content to be cropped, while
+  larger layers will cause additional content (beyond the original
+  bounds of the camera) to be shown.
+\endlist
+\li
+  \b{Scale Anchor} - When changes to the layer size cause the
+  camera to render more or less content this property controls which
+  part of the content stays in the same spot relative to the layer. A
+  value of \c{Center} causes the center of the camera to always
+  remain in the center of the layer, a value of \c{NW} causes the
+  upper left corner of the content seen in Studio to always be at the
+  upper left corner of the layer, a value of \c{N} causes the top
+  middle of the content seen in Studio to always be at the top middle
+  edge of the layer, and so forth.
+\endlist
+
+\section1 Light Properties
+
+A light selected in the Timeline palette shows the following properties
+in the Inspector palette (in addition to the
+\l{transform-properties}{transform properties} described above):
+
+\list
+\li
+  \b{Scope} - Select an element to have this light affect only that
+  element and its descendants.
+\li
+  \b{Light Type}\target light-properties\_light-type
+ - Choose
+  whether the light is a directional or point light:
+\list
+\li
+  \c{Directional} - Lighting is applied uniformly in the direction
+  of the Z axis for this light. The rotation of directional lights
+  affects the result, but not the position or scale.
+\li
+  \c{Point} - Lighting is applied outwards from the center of the
+  light, becoming increasingly dim away from the center. (See the
+  \e{Brightness} and \e{Linear}/\e{Exponential Fade} properties
+  below.) The position of point lights affects the result, but not the
+  rotation or scale.
+\li
+  \c{Area} - Lighting emits from the +Z face of a rectangular
+  light. Use the X/Y scale transforms to control the size of the area
+  light.
+  \list
+  \li
+    \e{Tip: turn on Bounding Boxes (Ctrl-B) to see the size of the
+    area light when selected.}
+  \endlist
+\endlist
+\li
+  \b{Light Color} - The diffuse color (and intensity) applied to
+  models illuminated by this light.
+\li
+  \b{Specular Color} - The specular color (and intensity) applied
+  to models illuminated by this light. Note that a model's material must
+  have a non-zero \e{Specular Amount} for any specular lighting to
+  take effect.
+\li
+  \b{Ambient Color} - The diffuse color (and intensity) applied to
+  materials before being lit by this light.
+\li
+  \b{Brightness} (point light only) - An overall multiplier for the
+  light's effects.
+\li
+  \b{Linear Fade} (point light only) - Turn up this value to
+  increase the rate at which the lighting effect dims the farther
+  surfaces are from the light.
+\li
+  \b{Exponential Fade} (point light only) - Turn up this value to
+  increase the rate at which the lighting effect dims on surfaces that
+  are extra far away from the light.
+\li
+  \b{Cast Shadows?}\target light-properties\_cast-shadows
+ - Simulate
+  shadows using this light?
+\li
+  \b{Shadow Darkness} - How dark should the cast shadows be?
+\li
+  \b{Shadow Softness} - Amount of blur applied to the shadows.
+\li
+  \b{Shadow Resolution} - Size of the shadow map created for the
+  shadows (affects performance and memory usage).
+\li
+  \b{Shadow Depth Bias} - Tweak this value by small amounts if you
+  see objects casting shadows on themselves.
+\li
+  \b{Shadow Far Clip} - Maximum distance for the shadow map;
+  smaller values may improve the precision and effects of the map.
+\endlist
+
+\b Notes:
+
+\list
+\li
+  Each additional light will reduce rendering performance of your
+  presentation. Use them sparingly. Employ a
+  \l{layer-properties}{light probe} on the layer for image-based
+  lighting that can produce soft and subtle lighting.
+\li
+  The \e{Lighting} property for materials (see below) affects the
+  quality/performance of lighting on a per-material basis.
+\li
+  When using only a light probe, or when using an interface layer where
+  the materials are all set to use \c{None} for the lighting, it is
+  valid and beneficial to delete all lights from a layer.
+\li
+  Cast shadows work best with area or point lights.
+\endlist
+
+\target model-properties
+\section1 Model
+Properties
+
+A model selected in the Timeline palette shows the following properties
+in the Inspector palette (in addition to the
+\l{transform-properties}{transform properties} described above):
+
+\list
+\li
+  \b{Mesh} - A \"model\" is just a notional placeholder for
+  displaying geometry, and you may change which geometry is displayed
+  (when authoring in Studio, or during Runtime) by picking a new mesh
+  for the geometry. Clicking the drop-down for this property will open a
+  floating mesh picker. Hover a mesh to see how it appears in the scene
+  for this model, and click on a mesh to pick it as the new mesh.
+\li
+  \b{Tesselation Mode} - Dynamically generate additional geometry
+  for the model. Tessellation is useful if you are using a
+  \l{material-properties_displacement-map}{displacement map} with
+  your geometry, or if you wish to generate a smoother silhouette (Phong
+  and NPatch tessellation modes only) when zooming in.
+\li
+  \e{Tip: turn on tessellation wireframe mode (View menu or toolbar)
+  to display the tessellation result.}
+\endlist
+
+\target material-properties
+\section1 Material
+Properties
+
+A material selected in the Timeline palette shows the different
+properties in the Inspector palette depending on the type of the
+material, chosen in the top-most property:
+
+\list
+\li
+  \b{Material Type} - Controls the type of material to be used. The
+  values are \"Standard Material\" and \"Referenced Material\", followed
+  by a list of any custom \c{.material} files present your
+  application folder.
+\li
+  \e{Tip: Material Type is a special type of property that cannot be
+  unlinked or changed at runtime. If you want to change the type of
+  material used for a model, set the material type to \"Referenced
+  Material\" and then unlink the
+  \l{referenced-materials}{Referenced Material property} to
+  reference different materials during runtime.}
+\endlist
+
+\target standard-materials
+\section2 Standard
+Materials
+
+\list
+\li
+  \b{Lighting} - Choose the type of lighting calculations used for
+  this material:
+\list
+\li
+  \c{Pixel} - Diffuse and specular lighting is calculated for each
+  rendered pixel. This produces better results than Vertex lighting, but
+  is slightly more expensive to compute. Certain effects (such as a
+  Fresnel or bump map) require Pixel lighting to work.
+\li
+  \c{None} - No lighting is calculated. This mode is (predictably)
+  very fast, and is quite effective when image maps are used that you do
+  not need to be shaded by lighting.
+\endlist
+\li
+  \b{Blending Mode} - Choose how the colors of this object blend
+  with those behind it. For details see the discussion on the
+  \e{\l{best-practices-blend-mode.html}{Blend Mode}} page.
+\list
+\li
+  \c{Normal} - Default blend mode. Opaque objects occlude objects behind them.
+\li
+  \c{Screen} - Colors are blended using an
+  inverted multiply, producing a lighter result. This blend mode is
+  order-independent; if you are using semi-opaque objects and
+  experiencing 'popping' as faces or models sort differently, using
+  Screen blending is one way to produce results without popping.
+\li
+  \c{Multiply} - Colors are blended using a multiply, producing a darker result.
+  This blend mode is also order-independent.
+\li
+  \c{Overlay} - A mix of \c Multiply and \c Screen modes, producing a result with higher contrast.
+\li
+  \c{Colorburn} - Colors are blended by inverted division where the result also is inverted,
+  producing a darker result. Darker than \c Multiply.
+\li
+  \c{Colordodge} - Colors are blended by inverted division, producing a lighter result.
+  Lighter than \c Screen.
+\endlist
+\li
+  \b{Diffuse Color} - The base color for the material. Set to black
+  to create a purely-specular material (e.g. metals or mirrors).
+\li
+  \b{Diffuse Map/2/3} - Image maps to apply to the material as a
+  texture. Click to pick an image from the project directory. Using an
+  image format with transparency (e.g. PNG or DDS with DXT5) will also
+  apply the alpha channel as an opacity map.
+\li
+  \b{Specular Reflection} - An image map used for specular
+  highlights on the material. By default the map is applied using
+  environmental mapping (not UV mapping): as you rotate the model the
+  map will appear as though it is reflecting from the environment.
+  Specular Reflection maps are an easy way to add a high-quality look
+  with relatively low cost.
+\list
+\li
+  \e{Tip: Using a Light Probe on your Layer for image-based lighting
+  will automatically use that image as the specular reflection.}
+\li
+  \e{Tip: Studio comes installed with a variety of helpful specular
+  maps for your use. Click the maps button at the bottom of the Project
+  palette to open the library, open the Specular Reflection folder, and
+  drag maps into the Project palette to copy them to your project.}
+\li
+  \e{Tip: Crisp images cause your material to look very glossy; the
+  more you blur your image the softer your material will appear.}
+\endlist
+\li
+  \b{Specular Tint} - A color used to adjust the specular
+  reflections. Use white for no effect
+\li
+  \b{Specular Amount} - Controls the strength of specularity
+  (highlights and reflections). Note that this property does not affect
+  the Specular Reflection map, but does affect the amount of reflections
+  from a layer's \l{layer-properties}{Light Probe}.
+\list
+\li
+  \e{Tip: Unless your mesh is high resolution, you may need to use
+  Pixel lighting (see above) to get good specular highlights from scene
+  lights.}
+\endlist
+\li
+  \b{Specular Map} - A grayscale image map to modulate the amount
+  of specularity across the surface of the material. These values are
+  multiplied by the Specular Amount.
+\li
+  \b{Specular Roughness} - Controls the size of the specular
+  highlight generated from lights, and the clarity of reflections in
+  general. Larger values increase the roughness, softening specular
+  highlights and blurring reflections.
+\li
+  \b{Fresnel Power} - Decreases head-on reflections (looking
+  directly at the surface) while maintaining reflections seen at grazing
+  angles.
+\li
+  \b{Index of Refraction} - Controls what angles of reflections are
+  affected by the Fresnel Power.
+\li
+  \b{Bump Map} - A grayscale image map to \e{simulate} fine
+  geometry displacement across the surface of the material. Brighter
+  pixels indicate raised regions. The amount of the effect is controlled
+  by the Bump Amount property.
+\list
+\li
+  \e{Tip: Bump maps will not affect the silhouette of a model. Use a
+  displacement map if this is required.}
+\endlist
+\li
+  \b{Normal Map} - An RGB image used to \e{simulate} fine
+  geometry displacement across the surface of the material. The RGB
+  channels indicate XYZ normal deviations. The amount of the effect is
+  controlled by the Bump Amount property.
+\list
+\li
+  \e{Tip: Normal maps will not affect the silhouette of a model. Use
+  a displacement map if this is required.}
+\endlist
+\li
+  \b{Bump Amount} - Controls the amount of simulated displacement
+  for a Bump Map or a Normal Map.
+\li
+  \b{Displacement Map}\target material-properties\_displacement-map
+
+  - A grayscale image used to offset the vertices of geometry across the
+  surface of the material. Brighter pixels indicate raised regions. The
+  amount of the effect is controlled by the Displacement Amount
+  property.
+\list
+\li
+  \e{Tip: Displacement maps require vertices to offset. If your model
+  is not high-enough resolution you may need to dynamically generate
+  additional vertices by using the
+  \l{model-properties}{Tessellation properties} on the model.}
+\li
+  \e{Tip: Displacement maps do not affect the normals of your
+  geometry. To look correct with lighting or reflections you will likely
+  want to also add a matching bump map or normal map to your material.}
+\endlist
+\li
+  \b{Emissive Power} - The amount of self-illumination from the
+  material. In a scene with black ambient lighting a material with 0
+  emissive power will appear black wherever the light does not shine on
+  it; turning the emissive power to 100 will cause the material to
+  appear as its diffuse color instead.
+\list
+\li
+  \e{Tip: When you want a material to not be affected by lighting,
+  instead of using 100\% emissive power consider setting the lighting
+  mode to} \c{None} \e{for a performance benefit.}
+\endlist
+\li
+  \b{Emissive Map} - An image map used to set the emissive power
+  for different parts of the material. Using a grayscale image will not
+  affect the color of the result, while using a color image will produce
+  glowing regions with the color affected by the emissive map.
+\li
+  \b{Opacity} - Drop the opacity of just this material, separate
+  from the model.
+\list
+\li
+  Note: Setting the opacity of a \e{model} very low (below 1\% or
+  less) will prevent it from receiving touch events, but setting the
+  opacity of its \e{material} very low still allows touch events to
+  occur.
+\endlist
+\li
+  \b{Opacity Map} - An image map used to control the opacity
+  differently for different parts of the material. Note that you must
+  use an image format with transparency (e.g. a 32-bit PNG, or a DDS
+  with an alpha portion) for the opacity to be applied. You cannot use a
+  grayscale PNG file, for example, to control the opacity.
+\endlist
+Note that the Runtime custom-compiles shaders for each unique
+combination of material properties used. Each additional material
+feature that you use results in a (slight) additional performance hit.
+
+\target referenced-materials
+\section2 Referenced Materials
+
+A \"referenced material\" uses whatever settings are present on another
+material element. This both allows you to have 'master'
+materials - changing the settings on one material affects all the
+others - and also provides a mechanism for quickly switching between
+different material types (in either Studio or at runtime). When you
+select this type of material, the Inspector palette shows only a single
+property:
+
+\list
+\li
+  \b{Referenced Material} - a picker for selecting another material
+  within the presentation.
+\li
+  \e{Tip: the material you reference does \b{not} have to be
+  visible or even active for this to work. It is valid to have a small
+  pile of models with custom materials on them all eyeballed off, and
+  then reference those materials for rendering on other objects.}
+\endlist
+\section1 Image Properties
+
+When image maps are applied to a material (e.g. Diffuse, Specular,
+Opacity, etc.) a new element appears in the Timeline palette as a child
+of the material. This element represents the properties that control
+that image, allowing them to be animated over time. Selecting one of
+these images shows the following properties in the Inspector palette:
+
+\list
+\li
+  \b{U/V Repeat} - Controls how many copies of the image are
+  displayed across the UV coordinates of the material. With UV Tiling
+  set to \"No Repeat\" this will cause the image to only show once on a
+  smaller portion of the material.
+\li
+  \b{Texture Mapping} - Choose how the image is applied to the
+  material:
+\list
+\li
+  \c{UV Mapping} - The default for diffuse and opacity maps, this
+  causes the image to be stuck to the mesh. The same portion of the
+  image will always appear on the same vertex (unless the UV properties
+  are animated).
+\li
+  \c{Environmental Mapping} - The default for specular reflection,
+  this causes the image to be 'projected' onto the material as though it
+  is being reflected. Using Environmental Mapping for diffuse maps
+  provides a mirror effect.
+\endlist
+\li
+  \b{U/V Tiling} - Controls how the image map is applied across the
+  material when the U/V repeat values are greater than 1.
+\li
+  \b{UV Rotation} - Rotates the image map around the pivot point.
+\li
+  \b{U/V Position} - Slides the image map across the UV
+  coordinates.
+\li
+  \b{U/V Pivot} - Sets the pivot location in UV space.
+\li
+  \b{Sub-Presentation} - If you specify a value here, it is
+  intepreted to be the \c{id} attribute of another presentation in
+\omit
+  TODO: Not really usable yet.
+  \l{file-formats-uia.html}{the \c{.uia} application file}.
+\endomit
+  the \c{.uia} application file.
+  Instead of displaying the contents of this image on
+  the material, the specified presentation will be rendered and the
+  resulting image will be used instead. For more information, see the
+  discussion on the
+  \e{\l{best-practices-using-sub-presentations.html}{Using Sub-Presentations}} page.
+\endlist
+
+\section1 Text Properties
+
+A text element selected in the Timeline palette shows the following
+properties in the Inspector palette (in addition to the
+\l{transform-properties}{transform properties} described above):
+
+\list
+\li
+  \b{Text String} - The text to display for the text element.
+\list
+\li
+  \e{Note: Qt 3D Studio does not (currently) support styled
+  text. There is no way to make one word in a paragraph bold, larger, or
+  a different color.}
+\li
+  \e{Note: Qt 3D Studio also does not (currently) support automatically
+  wrapping text; you must manually inject line breaks to wrap your text.}
+\endlist
+\li
+  \b{Text Color} - The color for the text.
+\li
+  \b{Font} - Click to open a font browser. This will only look for
+  font files \e{inside the \c{fonts} directory} for your
+  project.
+\omit
+TODO: Only one font for now. More to be added?
+\list
+\li
+  \e{Tip: Studio comes with a small library of fonts licensed under
+  the Open Font License. Click the second button at the bottom of the
+  Project palette to open the Font Library, find one or more font files
+  that you like and drag them into the \c{fonts} folder of your
+  Project palette to copy the font(s) to your project.}
+\endlist
+\endomit
+\li
+  \b{Font Size} - Changes the size of the font. In addition to
+  clicking the drop-down to pick from predefined font sizes, you can
+  also type a new value for the font.
+\list
+\li
+  \e{Tip: Although the font size is just a number, it is
+  intentionally not animatable. Each time the font size changes a rather
+  expensive rasterization of the text string occurs. You should animate
+  the scale of the text element instead.}
+\endlist
+\li
+  \b{Horizontal/Vertical Alignment} - Controls the placement of the
+  text with respect to the text element's origin. Note that this is for
+  the entire text box, and as such may include padding reserved for
+  characters not present in your text string. \e{(For example, using
+  the Text String \"Text\" with Vertical Alignment of \b{Bottom}
+  will cause the baseline of the letters to appear above the origin for
+  the element. Adding characters with descenders, such as \"y\",
+  illustrates why this occurs.)}
+\li
+  \b{Leading} - Controls the amount of extra (or negative) vertical
+  spacing between lines of text.
+\li
+  \b{Tracking} - Controls the amount of extra (or negative)
+  horizontal spacing between every character pair.
+\endlist
+
+\section1 Alias Properties
+
+An \l{studio-basic-objects-palette.html#alias}{alias} selected in
+the Timeline palette shows the following properties in the Inspector
+palette (in addition to the \l{transform-properties}{transform properties} described above):
+
+\list
+\li
+  \b{Reference} - the node to create an alias of.
+\li
+  \e{Note that you cannot create an alias of a Scene, Layer,
+  Behavior, Material, Effect, or Image element. You can only alias items
+  that have a transform, i.e. groups, components, cameras, lights,
+  models, and text.}
+\endlist
+\section1 Path Properties
+
+A \l{best-practices-paths.html}{path} selected in the
+Timeline palette shows the following properties in the Inspector palette
+(in addition to the \l{transform-properties}{transform properties}
+described above):
+
+\list
+\li
+  \b{Path} - the \c{.path} file on disk to reference for this
+  path, or \c{[None]} if this path has been
+  \l{best-practices-paths.html#internalized-paths}{internalized}.
+\li
+  \b{Stroke Width} - the size of the stroke in local units.
+\li
+  \b{Path Type}
+\list
+\li
+  \c{Painted} - the path is filled and/or stroked with perfect
+  precision and UV coordinates relative to the bounding box.
+\li
+  \c{Geometry} the path is stroked with geometry with customizable
+  tessellation. UV coordinates are relative to the path, i.e. along and
+  across the length.
+\endlist
+\endlist
+
+\section2 For Painted Paths
+
+\list
+\li
+  \b{Paint Style}
+\list
+\li
+  \c{Filled and Stroked} - the path has independent materials for
+  the fill and stroke.
+\li
+  \c{Filled} - the path has only one material, for the fill.
+\li
+  \c{Stroked} - the path has only one material, for the stroke.
+\endlist
+\endlist
+
+\section2 For Geometry Paths
+
+\list
+\li
+  \b{CPU Limit} - amount of tessellation work done on the CPU
+  before GPU tessellation is involved; lower numbers use more CPU
+  values. Edge and Width Detail are applied after the CPU is done.
+\list
+\li
+  \e{Tip: for best performance you usually want to leave this at a
+  high value, leaning mostly on the GPU for tessellation.}
+\endlist
+\li
+  \b{Edge Detail} - amount of GPU tessellation detail used to
+  improve the appearance of the stroke.
+\list
+\li
+  \e{Tip: Turn on Wireframe
+  view (from the View menu or the toolbar) to see the underlying
+  geometry being created for the stroke.}
+\endlist
+\li
+  \b{Width Detail} - amount of GPU tessellation detail used to
+  create geometry across the width of the stroke. Unless you are using a
+  material with a displacement map for the stroke, you likely should
+  leave this set at the lowest setting to improve performance.
+\list
+\li
+  \e{Tip: Turn on Wireframe view (from the View menu or the toolbar)
+  to see the underlying geometry being created for the stroke.}
+\endlist
+\li
+  \b{Begin/End Cap Style} - set this to \"Taper\" to finely taper
+  the end of your stroke over a specified distance. Additional
+  properties will appear allowing you to control the length of the
+  taper, and the size and opacity at the end of the taper.
+\endlist
+
+\section1 SubPath Properties
+
+When you have
+\l{best-practices-paths.html#internalized-paths}{internalized}
+a path you will see a SubPath child element in the Timeline for each set
+of path commands in the path. Selecting this element shows a single
+property allowing you to modify whether the SubPath is \"closed\" or
+not:
+
+\list
+\li
+  \b{Closed Path?} - should the stroke for the path be 'closed',
+  drawing a straight line from the last anchor point to the first?
+\li
+  \e{SubPaths in SVG are always 'closed' with respect to the fill.
+  This property only affects the stroke.}
+\endlist
+
+\section1 Anchor Point Properties
+
+When you have
+\l{best-practices-paths.html#internalized-paths}{internalized}
+a path each SubPath element in the Timeline will have child Anchor Point
+elements for each point along the path. Selecting these elements shows
+the following properties in the Inspector palette:
+
+\list
+\li
+  \b{Position} - the 2D location of the point with respect to the
+  origin of the path. \e{(Though the entire path lives in 3D space
+  within the presentation, the points are all constrained to the same 2D
+  plane, which you may choose to position or rotate in 3D space.)}
+\li
+  \b{Handle Angle} - every anchor is treated as a cubic Bézier with
+  a locked (smooth) tangent. This property controls the angle of that
+  tangent measured counter-clockwise from horizontal going right to
+  left.
+\li
+  \b{Incoming/Outgoing Distance} - the distance of the control
+  point from the anchor. The \"Incoming\" value is meaningless for the
+  first anchor point, as is the \"Outgoing\" value for the last anchor
+  point.
+\endlist
+
+*/
