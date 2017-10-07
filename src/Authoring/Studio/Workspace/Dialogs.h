@@ -55,7 +55,7 @@ class CControl;
 class CDialogControl;
 class IProgressCallback;
 
-class CProgressPalette;
+class CProgressView;
 
 class CDialogs
 {
@@ -178,9 +178,7 @@ protected:
                                        const Q3DStudio::CString &inRecommendedVersion,
                                        bool inError);
 
-#ifdef WIN32
-    CProgressPalette *m_ProgressPalette;
-#endif
+    CProgressView *m_ProgressPalette;
     bool m_ShowGUI;
 
     Q3DStudio::CString m_LastSaveFile; ///< Path to the file was previously saved

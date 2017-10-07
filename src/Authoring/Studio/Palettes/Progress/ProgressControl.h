@@ -38,6 +38,9 @@
 // Includes
 //==============================================================================
 #include "Control.h"
+#include "ProgressCallback.h"
+
+#include <QPixmap>
 
 //==============================================================================
 // Forwards
@@ -49,13 +52,13 @@ class CResImage;
 /**
  * Top-level control of a loading progress window.
  */
-class CProgressControl : public CControl
+class CProgressControl : public CControl, public IProgressCallback
 {
 public:
     CProgressControl();
     virtual ~CProgressControl();
 
-    virtual CPt GetSize() const;
+    virtual CPt GetPreferredSize() override;
     virtual void Draw(CRenderer *inRenderer);
     virtual void SetActionText(const Q3DStudio::CString &inText);
     virtual void SetProgress(long inPercent);
@@ -63,10 +66,10 @@ public:
 
 protected:
     long m_Percent;
-    Q3DStudio::CString m_ActionText;
-    Q3DStudio::CString m_PercentString;
-    Q3DStudio::CString m_FileName;
-    CResImage *m_Image;
+    QString m_ActionText;
+    QString m_PercentString;
+    QString m_FileName;
+    QPixmap m_Image;
 };
 
 #endif // INCLUDED_PROGRESS_CONTROL_H

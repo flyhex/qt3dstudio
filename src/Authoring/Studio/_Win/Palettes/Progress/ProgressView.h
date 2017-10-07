@@ -39,10 +39,14 @@
 // Includes
 //==============================================================================
 
+#include <QWidget>
+
+#include "ProgressCallback.h"
+
 //==============================================================================
 // Forwards
 //==============================================================================
-class CWndControl;
+class WidgetControl;
 class CProgressControl;
 class CStudioApp;
 
@@ -50,31 +54,23 @@ class CStudioApp;
 /**
  * Windows view encapsulating the splash screen.
  */
-class CProgressView : public CView
+class CProgressView : public QWidget, public IProgressCallback
 {
 public:
-    /// Used to pass messages from the palette, down to this view
-    enum EProgressMessage {
-        PROGRESSUPDATE_PERCENT = 0, ///< Inidicates that the percentage displayed should be updated
-        PROGRESSUPDATE_FILENAME, ///< Indicates that the file name displayed should be updated
-        PROGRESSUPDATE_ACTIONTEXT, ///< Indicates that the text above the file name needs to be
-                                   ///updated
-    };
+    CProgressView(QWidget *parent = nullptr);
 
-    virtual void OnDraw(CDC *inDC);
-    virtual LRESULT OnInitializePalettes(WPARAM inwParam, LPARAM inlParam);
-    virtual LRESULT OnUpdateProgress(WPARAM inwParam, LPARAM inlParam);
+    void OnInitializePalettes();
+
+    void SetActionText(const Q3DStudio::CString &inText) override;
+    void SetProgress(long inPercent) override;
+    void SetFileName(const Q3DStudio::CString &inFileName);
 
 protected:
-    CWndControl *m_WndControl;
+    WidgetControl *m_WndControl;
     CProgressControl *m_ProgressControl;
 
-    CProgressView(); ///< Constructor is protected because you can only create this view dynamically
-    DECLARE_DYNCREATE(CProgressView)
     virtual ~CProgressView();
-    afx_msg void OnSize(UINT inType, int inX, int inY);
-    afx_msg BOOL OnEraseBkgnd(CDC *inDC);
-    DECLARE_MESSAGE_MAP()
+    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // INCLUDED_PROGRESS_VIEW_H

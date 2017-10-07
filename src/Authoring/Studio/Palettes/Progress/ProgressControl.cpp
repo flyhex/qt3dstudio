@@ -39,7 +39,7 @@
 #include "ProgressControl.h"
 #include "Renderer.h"
 #include "ResourceCache.h"
-#include "ResImage.h"
+#include "StringLoader.h"
 
 //==============================================================================
 /**
@@ -52,7 +52,7 @@ CProgressControl::CProgressControl()
     m_Image = CResourceCache::GetInstance()->GetBitmap("progress-screen.png");
 
     // Load the default string for the window for now
-    m_ActionText = ::LoadResourceString(IDS_WAIT_LOADING);
+    m_ActionText = LoadResourceString(IDS_WAIT_LOADING).toQString();
 }
 
 //==============================================================================
@@ -68,9 +68,9 @@ CProgressControl::~CProgressControl()
  * The size of this control is equal to the size of the image that we display.
  * @return the size (in pixels) of this control.
  */
-CPt CProgressControl::GetSize() const
+CPt CProgressControl::GetPreferredSize()
 {
-    return m_Image->GetSize();
+    return CPt(m_Image.width(), m_Image.height());
 }
 
 //==============================================================================
@@ -80,18 +80,24 @@ CPt CProgressControl::GetSize() const
  */
 void CProgressControl::Draw(CRenderer *inRenderer)
 {
+    QRect r(QPoint(), GetSize());
+
     // Draw the image over the whole window
     inRenderer->DrawBitmap(CPt(0, 0), m_Image);
 
+    inRenderer->PushPen(QColor(255, 255, 255));
+
     // Show "Loading..."
-    inRenderer->DrawText(105, 20, m_ActionText, GetSize(), CColor(255, 255, 255));
+    inRenderer->DrawText(105, 20, m_ActionText);
 
     // Show the file name
-    if (!m_FileName.IsEmpty())
-        inRenderer->DrawText(105, 35, m_FileName, GetSize(), CColor(255, 255, 255));
+    if (!m_FileName.isEmpty())
+        inRenderer->DrawText(105, 35, m_FileName);
 
     // Show the percentage
-    inRenderer->DrawText(105, 50, m_PercentString, GetSize(), CColor(255, 255, 255));
+    inRenderer->DrawText(105, 50, m_PercentString);
+
+    inRenderer->PopPen();
 }
 
 //==============================================================================
@@ -101,7 +107,7 @@ void CProgressControl::Draw(CRenderer *inRenderer)
  */
 void CProgressControl::SetActionText(const Q3DStudio::CString &inText)
 {
-    m_ActionText = inText;
+    m_ActionText = inText.toQString();
     Invalidate();
 }
 
@@ -113,10 +119,7 @@ void CProgressControl::SetActionText(const Q3DStudio::CString &inText)
 void CProgressControl::SetProgress(long inPercent)
 {
     m_Percent = inPercent;
-    char theBuffer[256] = { 0 };
-    _ltoa(m_Percent, theBuffer, 10);
-    m_PercentString = theBuffer;
-    m_PercentString += " %";
+    m_PercentString = QStringLiteral("%1 %").arg(inPercent);
     Invalidate();
 }
 
@@ -128,6 +131,6 @@ void CProgressControl::SetProgress(long inPercent)
  */
 void CProgressControl::SetFileName(const Q3DStudio::CString &inFileName)
 {
-    m_FileName = inFileName;
+    m_FileName = inFileName.toQString();
     Invalidate();
 }

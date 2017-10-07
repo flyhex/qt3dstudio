@@ -39,13 +39,12 @@
 // Includes
 //==============================================================================
 #include "StudioPaletteBar.h"
-#include "ProgressCallback.h"
 
 //=============================================================================
 /**
  * Palette for the loading screen
  */
-class CProgressPalette : public CStudioDialog, public IProgressCallback
+class CProgressPalette : public CStudioDialog
 {
 public:
     CProgressPalette();

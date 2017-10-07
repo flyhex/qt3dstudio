@@ -42,8 +42,9 @@
 #include "StringTokenizer.h"
 #include "Resource.h"
 #include "Preferences.h"
-#include "ProgressPalette.h"
+#endif
 #include "ProgressView.h"
+#ifdef KDAB_TEMPORARILY_REMOVED
 #include "Views.h"
 #include "WinUtils.h"
 #include "MasterP.h"
@@ -77,11 +78,9 @@
  *	@param	inShowGUI	true if dialogs should be displayed or piped to std:cout instead
  */
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
-#ifdef KDAB_TEMPORARILY_REMOVED
     : m_ProgressPalette(nullptr)
     , m_ShowGUI(inShowGUI)
     , m_LastSaveFile(CUICFile::GetApplicationDirectory().GetAbsolutePath())
-#endif
 {
 }
 
@@ -1118,18 +1117,13 @@ void CDialogs::DisplayProgressScreen(const Q3DStudio::CString &inActionText,
                                      const Q3DStudio::CString &inFileName,
                                      const Q3DStudio::CString &inWindowTitle)
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    if (m_ShowGUI && (!m_ProgressPalette || !m_ProgressPalette->GetSafeHwnd())) {
-        m_ProgressPalette = new CProgressPalette();
-        CViews::CreateDialogAndView(RUNTIME_CLASS(CProgressView), m_ProgressPalette,
-                                    (CFrameWnd *)AfxGetMainWnd(), inWindowTitle);
-        m_ProgressPalette->ShowDialog();
-        m_ProgressPalette->InitialUpdate();
+    if (m_ShowGUI && !m_ProgressPalette) {
+        m_ProgressPalette = new CProgressView(qApp->activeWindow());
+        m_ProgressPalette->setWindowTitle(inWindowTitle.toQString());
         m_ProgressPalette->SetActionText(inActionText);
         m_ProgressPalette->SetFileName(inFileName);
-        m_ProgressPalette->RedrawWindow(nullptr, nullptr, RDW_UPDATENOW);
+        m_ProgressPalette->show();
     }
-#endif
 }
 
 //==============================================================================
@@ -1139,10 +1133,7 @@ void CDialogs::DisplayProgressScreen(const Q3DStudio::CString &inActionText,
  */
 IProgressCallback *CDialogs::GetProgressScreen() const
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
     return m_ProgressPalette;
-#endif
-    return nullptr;
 }
 
 //==============================================================================
@@ -1153,14 +1144,10 @@ IProgressCallback *CDialogs::GetProgressScreen() const
  */
 void CDialogs::DestroyProgressScreen()
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    if (m_ShowGUI && (m_ProgressPalette && m_ProgressPalette->GetSafeHwnd())) {
-        // Don't call delete on m_ProgressPalette.  You should only call DestroyWindow on
-        // CFrameWnds.  See the MSDN.
-        m_ProgressPalette->DestroyWindow();
+    if (m_ShowGUI && m_ProgressPalette) {
+        m_ProgressPalette->deleteLater();
         m_ProgressPalette = nullptr;
     }
-#endif
 }
 
 //==============================================================================

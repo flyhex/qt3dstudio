@@ -49,7 +49,7 @@ SOURCES += \
     #Studio/_Win/DragNDrop/WinDnd.cpp \
     Studio/_Win/Palettes/PaletteManager.cpp \
     #Studio/_Win/Palettes/Progress/ProgressPalette.cpp \
-    #Studio/_Win/Palettes/Progress/ProgressView.cpp \
+    Studio/_Win/Palettes/Progress/ProgressView.cpp \
     #Studio/_Win/Palettes/Splash/SplashPalette.cpp \
     Studio/_Win/Palettes/Splash/SplashView.cpp \
     #Studio/_Win/Studio/stdafx.cpp \
@@ -168,7 +168,7 @@ SOURCES += \
     Studio/Palettes/Inspector/TabOrderHandler.cpp \
     #Studio/Palettes/Master/MasterControl.cpp \
     #Studio/Palettes/Master/MasterView.cpp \
-    #Studio/Palettes/Progress/ProgressControl.cpp \
+    Studio/Palettes/Progress/ProgressControl.cpp \
     Studio/Palettes/Project/ProjectView.cpp \
     Studio/Palettes/Project/ProjectFileSystemModel.cpp \
     Studio/Palettes/Project/ProjectContextMenu.cpp \
