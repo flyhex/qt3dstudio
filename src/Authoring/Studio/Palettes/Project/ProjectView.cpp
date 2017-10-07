@@ -177,7 +177,11 @@ void ProjectView::showInExplorer(int row) const
         return;
     const auto path = m_ProjectModel->filePath(row);
 #if defined(Q_OS_WIN)
-    QProcess::startDetached("explorer", {"/select", path});
+    QString param;
+    if (!QFileInfo(path).isDir())
+        param += QLatin1String("/select,");
+    param += QStringLiteral("\"%1\"").arg(QDir::toNativeSeparators(path));
+    QProcess::startDetached(QStringLiteral("explorer"), {param});
 #elif defined(Q_OS_MACOS)
     QProcess::startDetached("/usr/bin/osascript", {"-e",
         QStringLiteral("tell application \"Finder\" to reveal POSIX file \"%1\"").arg(path)});
