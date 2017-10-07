@@ -136,11 +136,6 @@ public:
                          int inIcon);
     void DisplayKnownErrorDialog(const Q3DStudio::CString &inErrorText);
 
-    bool LocateFileReference(CUICFile &outFile, long inFileType);
-    bool LocateFolderReference(CUICFile &outFile);
-    bool BrowseForFolderDialog(CUICFile &outFile, Q3DStudio::CString inDefaultDir,
-                               Q3DStudio::CString inDialogTitle);
-
     ESavePromptResult PromptForSave();
     bool PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut);
 
@@ -159,9 +154,6 @@ public:
 
     void DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErrorMessage);
 
-    Q3DStudio::CString GetFilePathChoice(const Q3DStudio::CString &inFileExtensionFilter,
-                                         const Q3DStudio::CString &inDefault,
-                                         const Q3DStudio::CString *inDialogTitle = NULL);
     void ResetSettings(const Q3DStudio::CString &inCurrentDocPath = "");
 
     bool DisplayResetKeyframeValuesDlg();

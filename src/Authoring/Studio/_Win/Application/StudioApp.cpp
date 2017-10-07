@@ -82,10 +82,8 @@ int main(int argc, char *argv[])
 #include "Strings.h"
 #include "MainFrm.h"
 #include "AboutDlg.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "StackOps.h"
 #include "Views.h"
-#endif
 #include "StringLoader.h"
 #include "Doc.h"
 #include "Dialogs.h"
@@ -98,7 +96,6 @@ int main(int argc, char *argv[])
 #include "Views.h"
 #include "UICLog.h"
 #ifdef KDAB_TEMPORARILY_REMOVED
-#include "WinUtils.h"
 #include "CrashDlg.h"
 #endif
 #include "UICFile.h"
@@ -108,11 +105,8 @@ int main(int argc, char *argv[])
 #include "IDocumentEditor.h"
 #include "StudioUtils.h"
 
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "IObjectReferenceHelper.h"
-#endif
 #include "ClientDataModelBridge.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "CommonConstants.h"
 #include "IOLibraryException.h"
 
@@ -124,9 +118,7 @@ int main(int argc, char *argv[])
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include <io.h>
 #include <fcntl.h>
-#endif
 #include <string.h>
 
 #include <QApplication>
@@ -134,9 +126,9 @@ int main(int argc, char *argv[])
 
 #ifdef KDAB_TEMPORARILY_REMOVED
 #include "..\Build\versionnumber.h"
+#endif
 
 #include "UICDESKey.h" // g_DESKey
-#endif
 
 #include "Core.h"
 #include "HotKeys.h"
@@ -147,18 +139,13 @@ int main(int argc, char *argv[])
 #include "UICDMSlides.h"
 #include "UICDMMaterialInspectable.h"
 #include "UICDMSceneInspectable.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "UICDMAnimation.h"
 #include "UICDMDataCore.h"
-#include "SlideControl.h"
-#endif
 #include "IDirectoryWatchingSystem.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "ITickTock.h"
 #include "UICFileTools.h"
 #include "foundation/Qt3DSLogging.h"
 
-#endif
 #ifdef USE_LICENSE_HANDLER
 #include "licensehandler.h"
 #endif
@@ -189,26 +176,22 @@ void NVAssert(const char *exp, const char *file, int line, bool *igonore)
  * Constructor
  */
 CStudioApp::CStudioApp()
-#ifdef KDAB_TEMPORARILY_REMOVED
+    : m_Core(NULL)
     , m_SplashPalette(nullptr)
-    , m_OldHelpFilePath(nullptr)
     , m_UnitTestResults(0)
     , m_IsSilent(false)
-    , m_Core(NULL)
     , m_Views(NULL)
-    , m_Dialogs(NULL)
+    , m_ToolMode(STUDIO_TOOLMODE_MOVE)
     , m_ManipulationMode(StudioManipulationModes::Local)
-    , m_PlaybackTime(0)
-    , m_pGdiToken(0)
-    , m_AuthorZoom(false)
-#endif
-    : m_ToolMode(STUDIO_TOOLMODE_MOVE)
     , m_SelectMode(STUDIO_SELECTMODE_GROUP)
+    , m_Dialogs(NULL)
+    , m_PlaybackTime(0)
+    , m_AuthorZoom(false)
     , m_welcomeShownThisSession(false)
     , m_goStraightToWelcomeFileDialog(false)
     , m_tutorialPage(0)
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
+#ifdef WIN32
 #ifdef _DEBUG
     AfxEnableMemoryTracking(TRUE);
     CMemoryLeak::SetXMLFileName("StudioMemoryLeaks.xml");
@@ -344,14 +327,6 @@ BOOL CStudioApp::InitInstance(int argc, char* argv[])
         m_Views = new CViews(this);
     }
 
-    // All custom icons (PNGs) are drawn using Gdiplus so that transparency are handled.
-    // note that gdiplus.dll are included with WinXP ( previous OS versions require the gdi
-    // redistributables to be installed and unless
-    // support for those OS becomes a priority, we assume Studio is run minimally on a XP machine )
-#ifdef KDAB_TEMPORARILY_REMOVED
-    Gdiplus::GdiplusStartup(&m_pGdiToken, &m_gdiplusStartupInput, nullptr); // gdi+ init
-#endif
-
     m_Core = new CCore();
     GetRenderer();
     m_Core->GetDoc()->SetSceneGraph(m_Renderer);
@@ -408,58 +383,6 @@ void CStudioApp::OnAppAbout()
     CAboutDlg aboutDlg;
     aboutDlg.exec();
 }
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-//=============================================================================
-/**
- *	Overrides registry access member functions, direct settings to a XML file
- */
-UINT CStudioApp::GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault)
-{
-    QT3DS_ASSERT(lpszSection != nullptr);
-    QT3DS_ASSERT(lpszEntry != nullptr);
-
-    Q3DStudio::CString theSubKeyName;
-    theSubKeyName.Format(L"%s\\%s\\%s", PALETTE_KEY, PALETTE_SUBKEY, lpszSection);
-    return CPreferences::GetUserPreferences(theSubKeyName).GetLongValue(lpszEntry, nDefault);
-}
-BOOL CStudioApp::WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue)
-{
-    QT3DS_ASSERT(lpszSection != nullptr);
-    QT3DS_ASSERT(lpszEntry != nullptr);
-
-    Q3DStudio::CString theSubKeyName;
-    theSubKeyName.Format(L"%s\\%s\\%s", PALETTE_KEY, PALETTE_SUBKEY, lpszSection);
-    CPreferences::GetUserPreferences(theSubKeyName).SetLongValue(lpszEntry, nValue);
-    return TRUE;
-}
-::CString CStudioApp::GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry,
-                                       LPCTSTR lpszDefault /* = nullptr */)
-{
-    QT3DS_ASSERT(lpszSection != nullptr);
-    QT3DS_ASSERT(lpszEntry != nullptr);
-
-    Q3DStudio::CString theSubKeyName;
-    theSubKeyName.Format(L"%s\\%s\\%s", PALETTE_KEY, PALETTE_SUBKEY, lpszSection);
-    return CPreferences::GetUserPreferences(theSubKeyName).GetStringValue(lpszEntry, lpszDefault);
-}
-BOOL CStudioApp::WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue)
-{
-    QT3DS_ASSERT(lpszSection != nullptr);
-    Q3DStudio::CString theSubKeyName;
-    theSubKeyName.Format(L"%s\\%s\\%s", PALETTE_KEY, PALETTE_SUBKEY, lpszSection);
-
-    if (lpszEntry == nullptr) // delete whole section
-    {
-        CPreferences::GetUserPreferences(theSubKeyName).Clear();
-    } else if (lpszValue == nullptr) {
-        CPreferences::GetUserPreferences(theSubKeyName).RemoveKey(lpszEntry);
-    } else {
-        CPreferences::GetUserPreferences(theSubKeyName).SetStringValue(lpszEntry, lpszValue);
-    }
-    return TRUE;
-}
-#endif
 
 //=============================================================================
 /**
@@ -776,41 +699,6 @@ int CStudioApp::OpenAndRunApplication(const Q3DStudio::CString &inFilename)
  */
 int CStudioApp::RunApplication()
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    BOOL bIdle = TRUE;
-    LONG lIdleCount = 0;
-    MSG theMessage;
-
-    // CStackOps::RegisterCrashHandler( );
-
-    // acquire and dispatch messages until a WM_QUIT message is received.
-    for (;;) {
-        // phase1: check to see if we can do idle work
-        while (bIdle && !::PeekMessage(&theMessage, nullptr, nullptr, nullptr, PM_NOREMOVE)) {
-            // call OnIdle while in bIdle state
-            if (!OnIdle(lIdleCount++))
-                bIdle = FALSE; // assume "no idle" state
-        }
-
-        // phase2: pump messages while available
-        do {
-            try {
-                // Pump message, but quit on WM_QUIT
-                if (!PumpMessage())
-                    return ExitInstance();
-            } catch (...) {
-                // Throw here so that any crash goes through the crash reporter
-                throw;
-            }
-
-            // Reset "no idle" state after pumping "normal" message
-            if (IsIdleMessage(&theMessage)) {
-                bIdle = TRUE;
-                lIdleCount = 0;
-            }
-        } while (::PeekMessage(&theMessage, nullptr, nullptr, nullptr, PM_NOREMOVE));
-    }
-#endif
     return qApp->exec();
 }
 
@@ -833,10 +721,6 @@ void CStudioApp::InitCore()
     } else {
         ASSERT(0); // No views? wha?
     }
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-    CMsgRouter::GetInstance()->SetMainframe(m_pMainWnd);
-#endif
 
     // At this point, get rid of the splash screen, otherwise any errors dialog would be hidden
     // behind.
@@ -1217,13 +1101,12 @@ bool CStudioApp::CanDuplicateObject()
 {
     // Get the currently selected object
     UICDM::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
+    if (!theSelectedInstance.Valid())
+        return false;
 
-#ifdef KDAB_TEMPORARILY_REMOVED
     // Check if the object can be duplicated
     return m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsDuplicateable(
         theSelectedInstance);
-#endif
-    return false;
 }
 
 //==============================================================================
@@ -1654,11 +1537,9 @@ bool CStudioApp::OnLoadDocument(const CUICFile &inDocument, bool inShowStartupDi
         m_Core->GetDispatch()->FireOnOpenDocument(inDocument, false);
 
         // Show startup dialog
-#ifdef KDAB_TEMPORARILY_REMOVED
         if (inShowStartupDialogOnError)
             if (!ShowStartupDialog())
-                PostQuitMessage(WM_QUIT);
-#endif
+                qApp->quit();
     } else {
         m_Dialogs->ResetSettings(inDocument.GetPath());
 

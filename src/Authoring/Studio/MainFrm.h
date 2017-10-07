@@ -127,9 +127,6 @@ public:
     void OnEditDuplicate();
     void OnUpdateEditDuplicate();
 
-#ifdef KDAB_TEMPORARILY_REMOVED
-    afx_msg LRESULT OnMsgRouterMsg(WPARAM inWParam, LPARAM inLParam);
-#endif
     void timerEvent(QTimerEvent *event) override;
     void showEvent(QShowEvent *event) override;
 

@@ -31,46 +31,24 @@ SOURCES += \
     Studio/PreviewHelper.cpp \
     Studio/remotedeploymentsender.cpp \
     Studio/_Win/Application/AboutDlg.cpp \
-    #Studio/_Win/Application/BaseLink.cpp \
     Studio/_Win/Application/MsgRouter.cpp \
     Studio/_Win/Application/StudioApp.cpp \
-    #Studio/_Win/Application/TextLink.cpp \
-    #Studio/_Win/Application/WebLink.cpp \
     Studio/_Win/Controls/AppFonts.cpp \
     Studio/_Win/Controls/BufferedRenderer.cpp \
-    #Studio/_Win/Controls/MFCEditControl.cpp \
     Studio/_Win/Controls/OffscreenRenderer.cpp \
-    #Studio/_Win/Controls/PlatformEditControl.cpp \
-    #Studio/_Win/Controls/PlatformStaticControl.cpp \
-    #Studio/_Win/Controls/PlatformWindowControl.cpp \
     Studio/_Win/Controls/WinRenderer.cpp \
-    #Studio/_Win/Controls/WndControl.cpp \
     Studio/_Win/DragNDrop/DropProxy.cpp \
-    #Studio/_Win/DragNDrop/WinDnd.cpp \
     Studio/_Win/Palettes/PaletteManager.cpp \
-    #Studio/_Win/Palettes/Progress/ProgressPalette.cpp \
     Studio/_Win/Palettes/Progress/ProgressView.cpp \
-    #Studio/_Win/Palettes/Splash/SplashPalette.cpp \
     Studio/_Win/Palettes/Splash/SplashView.cpp \
-    #Studio/_Win/Studio/stdafx.cpp \
-    #Studio/_Win/UI/ContextMenu.cpp \
-    #Studio/_Win/UI/ControlButton.cpp \
     #Studio/_Win/UI/CrashDlg.cpp \
     Studio/_Win/UI/EditCameraBar.cpp \
     Studio/_Win/UI/EditorPane.cpp \
-    #Studio/_Win/UI/FileDialogEX.cpp \
     #Studio/_Win/UI/GLVersionDlg.cpp \
     Studio/_Win/UI/InterpolationDlg.cpp \
-    #Studio/_Win/UI/MemoryDC.cpp \
-    #Studio/_Win/UI/MenuEdit.cpp \
-    #Studio/_Win/UI/MenuItem.cpp \
-    #Studio/_Win/UI/NumericEdit.cpp \
     Studio/_Win/UI/PlayerContainerWnd.cpp \
     Studio/_Win/UI/PlayerWnd.cpp \
-    #Studio/_Win/UI/PopupWnd.cpp \
-    #Studio/_Win/UI/PreviewOutputDlg.cpp \
     Studio/_Win/UI/RecentItems.cpp \
-    #Studio/_Win/UI/ReportDlg.cpp \
     #Studio/_Win/UI/ResetKeyframeValuesDlg.cpp \
     Studio/_Win/UI/SceneView.cpp \
     Studio/_Win/UI/StartupDlg.cpp \
@@ -80,8 +58,6 @@ SOURCES += \
     Studio/_Win/UI/StudioProjectSettingsPage.cpp \
     Studio/_Win/UI/TimeEditDlg.cpp \
     Studio/_Win/Utils/MouseCursor.cpp \
-    #Studio/_Win/Utils/ResImage.cpp \
-    #Studio/_Win/Utils/WinUtils.cpp \
     Studio/_Win/Workspace/Dialogs.cpp \
     Studio/_Win/Workspace/Views.cpp \
     Studio/Application/StudioInstance.cpp \
@@ -187,7 +163,6 @@ SOURCES += \
     Studio/Palettes/Timeline/ComponentContextMenu.cpp \
     Studio/Palettes/Timeline/FilterToolbar.cpp \
     Studio/Palettes/Timeline/KeyframeContextMenu.cpp \
-    #Studio/Palettes/Timeline/MultiSelectAspect.cpp \
     Studio/Palettes/Timeline/Playhead.cpp \
     Studio/Palettes/Timeline/PropertyColorControl.cpp \
     Studio/Palettes/Timeline/PropertyGraphKeyframe.cpp \
@@ -208,7 +183,6 @@ SOURCES += \
     Studio/Palettes/Timeline/StateTimebarRow.cpp \
     Studio/Palettes/Timeline/TimebarControl.cpp \
     Studio/Palettes/Timeline/TimebarTip.cpp \
-    #Studio/Palettes/Timeline/TimeEditAspect.cpp \
     Studio/Palettes/Timeline/TimelineControl.cpp \
     Studio/Palettes/Timeline/TimelineFilter.cpp \
     Studio/Palettes/Timeline/TimelineKeyframe.cpp \
@@ -248,7 +222,6 @@ SOURCES += \
     Studio/Render/StudioTranslationWidget.cpp \
     Studio/Render/StudioWidget.cpp \
     Studio/Render/WGLRenderContext.cpp \
-    #Studio/UI/CustomReBar.cpp \
     #Studio/UI/PaletteState.cpp \
     Studio/Utils/CmdLineParser.cpp \
     Studio/Utils/ImportUtils.cpp \
@@ -274,8 +247,6 @@ HEADERS += \
     Studio/Palettes/BasicObjects/BasicObjectsView.h \
     Studio/Palettes/Inspector/InspectorControlView.h \
     Studio/Palettes/Inspector/InspectorControlModel.h \
-#    Studio/Palettes/Project/ProjectBrokenLinkMenu.h \
-#    Studio/Palettes/Project/ProjectContextMenu.h \
     Studio/Palettes/Slide/SlideModel.h \
     Studio/Palettes/Slide/SlideView.h \
     Studio/Palettes/Timeline/ComponentContextMenu.h \

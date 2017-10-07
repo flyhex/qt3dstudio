@@ -81,10 +81,6 @@
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
 
-#ifdef KDAB_TEMPORARILY_REMOVED
-ON_MESSAGE(WM_STUDIO_MESSAGE_ROUTER, OnMsgRouterMsg)
-#endif
-
 //==============================================================================
 /**
  * Constructor
@@ -296,23 +292,6 @@ int CMainFrame::OnCreate()
 
         theDialogs->ResetSettings(theMostRecentOpen);
     }
-#ifdef KDAB_TEMPORARILY_REMOVED
-
-    // Change the background color for the menu bar
-    if (IsMenu(theMenu)) {
-        MENUINFO theMenuInfo = { 0 };
-        theMenuInfo.cbSize = sizeof(MENUINFO);
-        theMenuInfo.fMask = MIM_BACKGROUND;
-
-        CBrush *theNewBrush = new CBrush();
-        CColor theBaseColor(CStudioPreferences::GetMenuBarBaseColor());
-        theNewBrush->CreateSolidBrush(
-                    RGB(theBaseColor.GetRed(), theBaseColor.GetGreen(), theBaseColor.GetBlue()));
-        theMenuInfo.hbrBack = *theNewBrush; // Brush you want to draw
-
-        SetMenuInfo(theMenu, &theMenuInfo);
-    }
-#endif
 
     // Create the view manager
     m_PaletteManager = new CPaletteManager(this);
@@ -324,88 +303,6 @@ int CMainFrame::OnCreate()
     setCentralWidget(m_SceneView);
     return 0;
 }
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-
-// If we want things to look good then on the *first* paint we want to actually
-// paint over the background.  I don't know why, but if you were to paint
-// the entire background on every message you would get some flashing.
-void CMainFrame::OnPaint()
-{
-    static bool needsPaint = true;
-    if (needsPaint) {
-        needsPaint = false;
-        RECT theRect;
-        ::GetClientRect(GetSafeHwnd(), &theRect);
-        CBrush theBrush;
-        ::CColor theColor = CStudioPreferences::GetBaseColor();
-        DWORD theColorRef = RGB(theColor.GetRed(), theColor.GetGreen(), theColor.GetBlue());
-        theBrush.CreateSolidBrush(theColor);
-        CPaintDC dc(this);
-        dc.FillRect(&theRect, &theBrush);
-    }
-    CFrameWnd::OnPaint();
-}
-//==============================================================================
-void CMainFrame::OnInitMenu(CMenu *inMenu)
-{
-    ReleaseFocus();
-    // Emulate a Control ModifierUp on the Sceneview to "unstick" the Alt-Key/Scale Tool
-    m_SceneView->HandleModifierUp(CHotKeys::KEY_MENU, 0, 0);
-    CFrameWnd::OnInitMenu(inMenu);
-}
-
-::CString CMainFrame::m_WindowClass;
-
-::CString CMainFrame::GetWindowClass()
-{
-    if (m_WindowClass.GetLength() == 0) {
-        ::CColor theColor = CStudioPreferences::GetBaseColor();
-        DWORD theRefColor = RGB(theColor.GetRed(), theColor.GetGreen(), theColor.GetBlue());
-        HBRUSH theBrush = ::CreateSolidBrush(theRefColor);
-        m_WindowClass = AfxRegisterWndClass(0, 0, theBrush, 0);
-    }
-    return m_WindowClass;
-}
-
-BOOL CMainFrame::PreCreateWindow(CREATESTRUCT &cs)
-{
-    if (!CFrameWnd::PreCreateWindow(cs))
-        return FALSE;
-
-    // TODO: Modify the Window class or styles here by modifying
-    cs.lpszClass = GetWindowClass();
-    return TRUE;
-}
-
-BOOL CMainFrame::DestroyWindow()
-{
-    // Save before we destroy anything
-    SaveLayout();
-
-    SAFE_DELETE(m_PaletteManager);
-
-    g_StudioApp.GetCore()->GetDispatch()->RemovePresentationChangeListener(this);
-    g_StudioApp.GetCore()->GetDispatch()->RemoveFileOpenListener(this);
-    g_StudioApp.GetCore()->GetDispatch()->RemoveClientPlayChangeListener(this);
-
-    SAFE_DELETE(m_RecentItems);
-
-    // In order to help debug why image lists sometimes crash on shutdown
-    // This will help identify whcih cone is causing the problem
-    m_ClientToolsImageList.DeleteImageList();
-    m_ClientToolsImageListHot.DeleteImageList();
-    m_ClientToolsImageListDisabled.DeleteImageList();
-    m_PlaybackImageList.DeleteImageList();
-    m_PlaybackImageListHot.DeleteImageList();
-    m_PlaybackImageListDisabled.DeleteImageList();
-    m_EditCameraToolsImageList.DeleteImageList();
-    m_EditCameraToolsImageListHot.DeleteImageList();
-    m_EditCameraToolsImageListDisabled.DeleteImageList();
-
-    return CFrameWnd::DestroyWindow();
-}
-#endif
 
 //==============================================================================
 /**
@@ -691,20 +588,6 @@ void CMainFrame::OnUpdateEditPaste()
         m_ui->action_Paste->setEnabled(false);
     }
 }
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-//=============================================================================
-/**
- * Router for forwarding messages onto the MsgRouter.
- * This is used for posting messages between threads.
- */
-LRESULT CMainFrame::OnMsgRouterMsg(WPARAM inWParam, LPARAM inLParam)
-{
-    CMsgRouter::GetInstance()->HandleMessage(inWParam, inLParam);
-
-    return TRUE;
-}
-#endif
 
 //=============================================================================
 /**

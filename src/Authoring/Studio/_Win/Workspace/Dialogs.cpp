@@ -37,35 +37,27 @@
 
 #include "InterpolationDlg.h"
 
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "UICMessageBox.h"
 #include "StringTokenizer.h"
-#include "Resource.h"
 #include "Preferences.h"
-#endif
 #include "ProgressView.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "Views.h"
-#include "WinUtils.h"
 #include "MasterP.h"
 #include "TimeEditDlg.h"
 #include "StudioPreferences.h"
+#ifdef KDAB_TEMPORARILY_REMOVED
 #include "ResetKeyframeValuesDlg.h"
 #include "GLVersionDlg.h"
 #endif
 #include "Core.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "UICMacros.h"
 #include "IDocumentEditor.h"
 #include "UICFileTools.h"
-#endif
 #include "ImportUtils.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "FileDialogEx.h"
-#endif
 
 #include "StringLoader.h"
 
+#include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
@@ -392,154 +384,6 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 
 //==============================================================================
 /**
- * Allows the user to select/confirm the file to fix broken file reference.
- * This method opens a file dialog to the specified location, and allows the user to
- * accept, or select a different file.
- * @param	outFile		The output path
- * @param	inFileType	The file type filter for the dialog.
- * @return	true		If the user accepted the file, false if the user canceled.
- */
-bool CDialogs::LocateFileReference(CUICFile &outFile, long inFileType)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    Q3DStudio::CString theFileFilter = CreateAllowedTypesString(inFileType, false);
-
-    bool theResult = false;
-
-    // Open the dialog.
-    CFileDialogEx theFileDialog(TRUE, nullptr, nullptr, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-                                theFileFilter, nullptr);
-
-    // Set the initial directory to document path's directory (it should exist).
-    CUICFile theDocumentFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath());
-    Q3DStudio::CFilePath theInitDir =
-        Q3DStudio::CFilePath(theDocumentFile.GetAbsolutePath()).GetDirectory();
-    theFileDialog.SetInitialDirectory(theInitDir);
-
-    // Set the title of the dialog
-    theFileDialog.SetWindowTitle(::LoadResourceString(IDS_PROJECT_CM_LOCATE_FILE));
-
-    INT_PTR refreshResult = theFileDialog.DoModal();
-
-    if (refreshResult == IDOK) {
-        Q3DStudio::CString thePath = theFileDialog.GetPathName();
-        Q3DStudio::CString theName = theFileDialog.GetFileName();
-        outFile = CUICFile(thePath, theName);
-
-        // The user has accepted this file.
-        theResult = true;
-    }
-
-    return theResult;
-#endif
-    return false;
-}
-
-//==============================================================================
-/**
- * Allows the user to select/confirm the folder to fix broken folder reference.
- * This method opens a folder dialog to the specified location, and allows the user to
- * accept, or select a different folder.
- * @param	outFile		The output path
- * @return	true		If the user accepted the file, false if the user canceled.
- */
-bool CDialogs::LocateFolderReference(CUICFile &outFile)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    // Set the initial directory to document path's directory (it should exist).
-    CUICFile theDocumentFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath());
-    Q3DStudio::CFilePath theInitDir =
-        Q3DStudio::CFilePath(theDocumentFile.GetAbsolutePath()).GetDirectory();
-
-    // Set the title of the dialog
-    Q3DStudio::CString theDialogTitle(::LoadResourceString(IDS_PROJECT_CM_LOCATE_FOLDER));
-
-    return BrowseForFolderDialog(outFile, theInitDir, theDialogTitle);
-#endif
-    return false;
-}
-
-//==============================================================================
-/**
- *	BrowseCallbackProc:		Handles the callback proc for SHBrowseForFolder()
- *
- *	Handles selecting the correct path when the SHBrowseForFolder dialog is
- *	initially displayed.
- */
-#ifdef KDAB_TEMPORARILY_REMOVED
-static int CALLBACK BrowseCallbackProc(HWND inHwnd, UINT inMsg, LPARAM /*inlParam*/,
-                                       LPARAM inlpData)
-{
-    switch (inMsg) {
-    case BFFM_INITIALIZED:
-        // Indicates the browse dialog box has finished initializing. The lParam value is zero.
-        if (inlpData != nullptr) {
-            // Do so by sendint the BFFM_SETSELECTION message to the inHwnd:
-            // Selects the specified folder. To use a PIDL to specify the folder, set the
-            // message's lParam to the PIDL, and set wParam to FALSE. To specify the folder's
-            // path, set the message's lParam value to point to a nullptr-terminated string with
-            // the path, and set wParam to TRUE.
-
-            SendMessage(inHwnd, BFFM_SETSELECTION, (WPARAM)TRUE, (LPARAM)inlpData);
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    return 0;
-}
-#endif
-
-//==============================================================================
-/**
- * Show browse for folder dialog
- * @param	outFile			The output path
- * @param	inDefaultDir	The default directory
- * @param	inDialogTitle	The title of the dialog
- * @return	true			If the user accepted the file, false if the user canceled.
- */
-bool CDialogs::BrowseForFolderDialog(CUICFile &outFile, Q3DStudio::CString inDefaultDir,
-                                     Q3DStudio::CString inDialogTitle)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    bool theResult = false;
-    BROWSEINFO theInfo = { 0 };
-    TCHAR theDispName[MAX_PATH] = { '\0' };
-
-    theInfo.pszDisplayName = theDispName;
-    theInfo.lpszTitle = inDialogTitle;
-    theInfo.ulFlags = BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_NONEWFOLDERBUTTON;
-    theInfo.lpfn = BrowseCallbackProc;
-    theInfo.lParam = (LPARAM)inDefaultDir.c_str();
-
-    // Ask the user to choose a directory
-    LPITEMIDLIST theItem = SHBrowseForFolder(&theInfo);
-
-    if (theItem != nullptr) {
-        TCHAR thePath[MAX_PATH] = { '\0' };
-        // If a path was chosen
-        if (::SHGetPathFromIDList(theItem, thePath)) {
-            theResult = true;
-            outFile = CUICFile(Q3DStudio::CString(thePath));
-        }
-
-        // Free Memory used
-        LPMALLOC thePMalloc = 0;
-        if (SUCCEEDED(SHGetMalloc(&thePMalloc))) {
-            thePMalloc->Free(theItem);
-            thePMalloc->Release();
-        }
-    }
-
-    return theResult;
-#endif
-    return false;
-}
-
-//==============================================================================
-/**
  *	Notify the user that the presentation we tried to load has failed.
  *	@param	inPresentation	The AKFile that we failed to load.
  */
@@ -831,51 +675,6 @@ bool CDialogs::IsSoundFileExtension(const wchar_t *inExt)
 
 //==============================================================================
 /**
- *	File picker.
- *	Format for filter is as follows:
- *	Each entry in the filter list is '<description>|*.ext'
- *	String must end with '|'
- *	Example, XML Exporter (*.xml)|*.xml|All files (*.*)|*.*|
- *
- *	@param	inFileExtensionFilter	Well-formed extension filter string. See comments
- *above for the format.
- *	@param	inDefault				Default string in case of abortion or
- *failure
- *	@return	chosen file path if successful, inDefault otherwise.
- */
-Q3DStudio::CString CDialogs::GetFilePathChoice(const Q3DStudio::CString &inFileExtensionFilter,
-                                               const Q3DStudio::CString &inDefault,
-                                               const Q3DStudio::CString *inDialogTitle /*= nullptr */)
-{
-    Q3DStudio::CString theResult(inDefault);
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-    CFileDialogEx theFileDlg(true, nullptr, nullptr, 0, inFileExtensionFilter, AfxGetMainWnd());
-
-    Q3DStudio::CString theInitDir =
-        CPreferences::GetUserPreferences().GetStringValue("LastChosenFile", "");
-    theFileDlg.SetInitialDirectory(theInitDir);
-
-    // Remember the filter setting between invokations
-    static long s_LastFilterIndex = -1;
-    if (s_LastFilterIndex > 0)
-        theFileDlg.SetFilterIndex(s_LastFilterIndex);
-
-    if (inDialogTitle) // Set the title of the dialog if specied
-        theFileDlg.SetWindowTitle(*inDialogTitle);
-
-    if (theFileDlg.DoModal() == IDOK) {
-        theResult = theFileDlg.GetPathName();
-        CPreferences::GetUserPreferences().SetStringValue("LastChosenFile", theResult);
-        s_LastFilterIndex = theFileDlg.GetLastFilterIndex();
-    }
-#endif
-
-    return theResult;
-}
-
-//==============================================================================
-/**
  *	CreateAllowedTypesString: Creates the string used to determine allowable types for import or
  *for filereferences
  *	@return the string that dynamicly created with the extensions supported.
@@ -1158,15 +957,11 @@ void CDialogs::DestroyProgressScreen()
  */
 bool CDialogs::PromptObjectTimebarColor(CColor &ioColor)
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    std::auto_ptr<CColorDialog> theColorDlg(new CColorDialog(ioColor, CC_SOLIDCOLOR | CC_FULLOPEN));
-    ::CColor theSelectedColor;
-    if (theColorDlg->DoModal() == IDOK) {
-        ioColor = theColorDlg->GetColor();
+    std::auto_ptr<QColorDialog> theColorDlg(new QColorDialog(ioColor));
+    if (theColorDlg->exec() == QDialog::Accepted) {
+        ioColor = theColorDlg->selectedColor();
         return true;
     }
-    return false;
-#endif
     return false;
 }
 
@@ -1177,7 +972,6 @@ bool CDialogs::PromptObjectTimebarColor(CColor &ioColor)
 void CDialogs::DisplayProfilingStatistics()
 {
     Q3DStudio::CString theStatistics = "<Not Enabled>";
-#ifdef KDAB_TEMPORARILY_REMOVED
 #ifdef PERFORM_PROFILE
     CMasterProf *theMasterP = CMasterProf::GetInstance();
 
@@ -1193,9 +987,8 @@ void CDialogs::DisplayProfilingStatistics()
         CUICMessageBox::Show("Profiling Statistics", theStatistics, CUICMessageBox::ICON_INFO);
     else {
         std::cout << "Profiling Statistics"
-                  << ": " << theStatistics.GetMulti() << std::endl;
+                  << ": " << theStatistics.GetCharStar() << std::endl;
     }
-#endif
 }
 
 //==============================================================================

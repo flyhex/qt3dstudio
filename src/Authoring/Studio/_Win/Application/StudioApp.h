@@ -40,10 +40,6 @@
 //==============================================================================
 #include "CmdLineParser.h"
 #include "StudioObjectTypes.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include <minmax.h>
-#include <gdiplus.h>
-#endif
 #include "DispatchListeners.h"
 #include "UICDMHandles.h"
 
@@ -97,13 +93,6 @@ public:
     virtual BOOL InitInstance(int argc, char *argv[]);
     virtual int ExitInstance();
     virtual int Run();
-#ifdef KDAB_TEMPORARILY_REMOVED
-    virtual UINT GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault);
-    virtual BOOL WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue);
-    virtual ::CString GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry,
-                                       LPCTSTR lpszDefault = nullptr);
-    virtual BOOL WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue);
-#endif
 
     void OnAppAbout();
 
@@ -153,11 +142,6 @@ protected:
     bool m_AuthorZoom;
 
 private:
-#ifdef KDAB_TEMPORARILY_REMOVED
-    Gdiplus::GdiplusStartupInput m_gdiplusStartupInput;
-    ULONG_PTR m_pGdiToken;
-#endif
-
     bool m_welcomeShownThisSession;
     // are we are launching welcome screen again due to
     // user canceling file dialog?

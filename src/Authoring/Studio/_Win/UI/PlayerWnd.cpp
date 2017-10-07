@@ -55,6 +55,7 @@
 #include "WGLRenderContext.h"
 #include "IStudioRenderer.h"
 
+#include <QMessageBox>
 #include <QMouseEvent>
 
 //==============================================================================
@@ -133,19 +134,7 @@ void CPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 void CPlayerWnd::resizeEvent(QResizeEvent *event)
 {
     QOpenGLWidget::resizeEvent(event);
-#ifdef KDAB_TEMPORARILY_REMOVED
-    CWnd *theChildWnd = this->GetWindow(GW_CHILD);
 
-    if (theChildWnd != nullptr) {
-        CRect theWndRect;
-
-        // Set the child window at the same position as the parent
-        this->GetWindowRect(&theWndRect);
-
-        theChildWnd->ScreenToClient(&theWndRect);
-        theChildWnd->MoveWindow(&theWndRect, FALSE);
-    }
-#endif
     update();
 }
 
@@ -243,19 +232,11 @@ void CPlayerWnd::initializeGL()
         try {
             theRenderer.Initialize(this);
         } catch (...) {
-#ifdef KDAB_TEMPORARILY_REMOVED
 
-            wchar_t theBufferString[MAX_ENTRY_LENGTH];
-
-            _aswprintf(theBufferString, MAX_ENTRY_LENGTH - 1,
-                       L"Unable to initialize OpenGL.\nThis may be because your graphic device is "
-                       L"not sufficient, or simply because your driver is too old.\n\nPlease try "
-                       L"upgrading your graphics driver and try again.");
-            ::wcsncat(theBufferString, L"\r\n\r\n", MAX_ENTRY_LENGTH - 1);
-
-            ::MessageBoxW(nullptr, theBufferString, L"Fatal Error",
-                          MB_OK | MB_ICONSTOP | MB_DEFBUTTON1);
-#endif
+            QMessageBox::critical(this, tr("Fatal Error"),
+                tr("Unable to initialize OpenGL.\nThis may be because your graphic device is "
+                   "not sufficient, or simply because your driver is too old.\n\nPlease try "
+                   "upgrading your graphics driver and try again."));
             exit(1);
         }
     }
