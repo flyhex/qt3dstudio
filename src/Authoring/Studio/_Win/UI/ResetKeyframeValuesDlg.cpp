@@ -32,35 +32,23 @@
 //==============================================================================
 #include "stdafx.h"
 #include "ResetKeyframeValuesDlg.h"
-#include ".\resetkeyframevaluesdlg.h"
+#include "ui_ResetKeyframeValuesDlg.h"
 
-IMPLEMENT_DYNAMIC(CResetKeyframeValuesDlg, CDialog)
-CResetKeyframeValuesDlg::CResetKeyframeValuesDlg(CWnd *pParent /*=nullptr*/)
-    : CDialog(CResetKeyframeValuesDlg::IDD, pParent)
+#include <QPushButton>
+#include <QStyle>
+
+CResetKeyframeValuesDlg::CResetKeyframeValuesDlg(QWidget *pParent)
+    : QDialog(pParent)
+    , m_ui(new Ui::ResetKeyframeValuesDlg)
 {
+    m_ui->setupUi(this);
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Reset Key"));
+    const int i = style()->pixelMetric(QStyle::PM_LargeIconSize);
+    const QIcon icon = style()->standardIcon(QStyle::SP_MessageBoxWarning);
+    m_ui->m_WarningIcon->setPixmap(icon.pixmap(i, i));
+    setFixedSize(size());
 }
 
 CResetKeyframeValuesDlg::~CResetKeyframeValuesDlg()
 {
-}
-
-void CResetKeyframeValuesDlg::DoDataExchange(CDataExchange *pDX)
-{
-    CDialog::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_RESETKEYFRAMEVALUES_DLG_ICON, m_WarningIcon);
-    DDX_Control(pDX, IDCANCEL, m_CancelButton);
-}
-
-BEGIN_MESSAGE_MAP(CResetKeyframeValuesDlg, CDialog)
-END_MESSAGE_MAP()
-
-BOOL CResetKeyframeValuesDlg::OnInitDialog()
-{
-    CDialog::OnInitDialog();
-
-    m_WarningIcon.SetIcon(::AfxGetApp()->LoadStandardIcon(IDI_WARNING));
-    m_CancelButton.SetButtonStyle(BS_DEFPUSHBUTTON);
-
-    return TRUE; // return TRUE unless you set the focus to a control
-    // EXCEPTION: OCX Property Pages should return FALSE
 }

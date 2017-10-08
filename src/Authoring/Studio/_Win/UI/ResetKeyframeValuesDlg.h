@@ -31,27 +31,21 @@
 //	Includes
 //==============================================================================
 #pragma once
-#include "Resource.h"
-#include "afxwin.h"
 
-class CResetKeyframeValuesDlg : public CDialog
+#include <QDialog>
+
+namespace Ui
 {
-    DECLARE_DYNAMIC(CResetKeyframeValuesDlg)
+    class ResetKeyframeValuesDlg;
+}
 
+class CResetKeyframeValuesDlg : public QDialog
+{
+    Q_OBJECT
 public:
-    CResetKeyframeValuesDlg(CWnd *pParent = nullptr); // standard constructor
-    virtual ~CResetKeyframeValuesDlg();
+    CResetKeyframeValuesDlg(QWidget *pParent = nullptr); // standard constructor
+    ~CResetKeyframeValuesDlg();
 
-    // Dialog Data
-    enum { IDD = IDD_RESETKEYFRAMEVALUES_DLG };
-
-protected:
-    virtual void DoDataExchange(CDataExchange *pDX); // DDX/DDV support
-
-    DECLARE_MESSAGE_MAP()
-    CStatic m_WarningIcon;
-
-public:
-    virtual BOOL OnInitDialog();
-    CButton m_CancelButton;
+private:
+    QScopedPointer<Ui::ResetKeyframeValuesDlg> m_ui;
 };

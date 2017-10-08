@@ -45,8 +45,8 @@
 #include "MasterP.h"
 #include "TimeEditDlg.h"
 #include "StudioPreferences.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "ResetKeyframeValuesDlg.h"
+#ifdef KDAB_TEMPORARILY_REMOVED
 #include "GLVersionDlg.h"
 #endif
 #include "Core.h"
@@ -1029,11 +1029,8 @@ void CDialogs::ResetSettings(const Q3DStudio::CString &inCurrentDocPath)
 
 bool CDialogs::DisplayResetKeyframeValuesDlg()
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
     CResetKeyframeValuesDlg theDialog;
-    return theDialog.DoModal() == IDOK;
-#endif
-    return false;
+    return theDialog.exec() == QDialog::Accepted;
 }
 
 //==============================================================================
