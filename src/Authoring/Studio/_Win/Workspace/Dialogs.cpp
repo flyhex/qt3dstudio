@@ -46,9 +46,7 @@
 #include "TimeEditDlg.h"
 #include "StudioPreferences.h"
 #include "ResetKeyframeValuesDlg.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
 #include "GLVersionDlg.h"
-#endif
 #include "Core.h"
 #include "UICMacros.h"
 #include "IDocumentEditor.h"
@@ -1092,18 +1090,16 @@ void CDialogs::DisplayGLVersionDialog(const Q3DStudio::CString &inGLVersion,
         theMessageResourceID = IDS_GL_VERSION_WARNING;
     }
 
-#ifdef KDAB_TEMPORARILY_REMOVED
-    Q3DStudio::CString theTitle(::LoadResourceString(theTitleResourceID));
-    Q3DStudio::CString theMessage(::LoadResourceString(theMessageResourceID));
+    Q3DStudio::CString theTitle(LoadResourceString(theTitleResourceID));
+    Q3DStudio::CString theMessage(LoadResourceString(theMessageResourceID));
     Q3DStudio::CString theFormattedMessage;
     theFormattedMessage.Format(theMessage, static_cast<const wchar_t *>(inGLVersion),
                                static_cast<const wchar_t *>(inRecommendedVersion));
 
     CGLVersionDlg theGLVersionDlg;
     theGLVersionDlg.Initialize(theTitle, theFormattedMessage, inError);
-    theGLVersionDlg.DoModal();
+    theGLVersionDlg.exec();
 
     if (theGLVersionDlg.GetDontShowAgain())
         CStudioPreferences::SetDontShowGLVersionDialog(true);
-#endif
 }

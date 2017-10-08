@@ -39,37 +39,33 @@
 //==============================================================================
 //	 Includes
 //==============================================================================
-#include "resource.h"
+#include <QDialog>
+
+#include "UICString.h"
+
+namespace Ui
+{
+    class GLVersionDlg;
+}
 
 //==============================================================================
 /**
  *	CGLVersionDlg: Dialog class for showing Open GL Version Warning
  */
 //==============================================================================
-class CGLVersionDlg : public CDialog
+class CGLVersionDlg : public QDialog
 {
+    Q_OBJECT
 public:
-    CGLVersionDlg(CWnd *pParent = nullptr); // standard constructor
-    virtual ~CGLVersionDlg();
+    CGLVersionDlg(QWidget *pParent = nullptr); // standard constructor
+    ~CGLVersionDlg();
 
-    // Dialog Data
-    enum { IDD = IDD_GL_VERSION_DLG };
-
-protected:
-    virtual void DoDataExchange(CDataExchange *pDX); // DDX/DDV support
-
-    DECLARE_MESSAGE_MAP()
-    CStatic m_WarningIcon; // Warning icon
-    CString m_Title; // Title for the dialog
-    CString m_Message; // Warning message
-    BOOL m_DontShowAgain; // Set to true to "Don't show this dialog again"
-    LPCTSTR m_Icon; // Which icon to load
-
-public:
-    virtual BOOL OnInitDialog();
     void Initialize(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inMessage,
                     bool inErrorIcon);
-    BOOL GetDontShowAgain();
+    bool GetDontShowAgain();
+
+private:
+    QScopedPointer<Ui::GLVersionDlg> m_ui;
 };
 
 #endif // INCLUDED_GL_VERSION_DLG

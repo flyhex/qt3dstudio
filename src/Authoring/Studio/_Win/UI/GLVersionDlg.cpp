@@ -32,60 +32,37 @@
 //==============================================================================
 #include "stdafx.h"
 #include "GLVersionDlg.h"
+#include "ui_GLVersionDlg.h"
 
-CGLVersionDlg::CGLVersionDlg(CWnd *pParent /*=nullptr*/)
-    : CDialog(CGLVersionDlg::IDD, pParent)
+#include <QStyle>
+
+CGLVersionDlg::CGLVersionDlg(QWidget *pParent)
+    : QDialog(pParent)
+    , m_ui(new Ui::GLVersionDlg)
 {
-    m_Title = _T("");
-    m_Message = _T("");
-    m_Icon = nullptr;
-    m_DontShowAgain = FALSE;
+    m_ui->setupUi(this);
+    setFixedSize(size());
 }
 
 CGLVersionDlg::~CGLVersionDlg()
 {
 }
 
-void CGLVersionDlg::DoDataExchange(CDataExchange *pDX)
-{
-    CDialog::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_GL_VERSION_ICON, m_WarningIcon);
-    DDX_Text(pDX, IDC_GL_VERSION_MESSAGE, m_Message);
-    DDX_Check(pDX, IDC_CHECK1, m_DontShowAgain);
-}
-
-BEGIN_MESSAGE_MAP(CGLVersionDlg, CDialog)
-END_MESSAGE_MAP()
-
-BOOL CGLVersionDlg::OnInitDialog()
-{
-    CDialog::OnInitDialog();
-
-    // Set the title
-    this->SetWindowText(m_Title);
-
-    // Set icon
-    m_WarningIcon.SetIcon(::AfxGetApp()->LoadStandardIcon(m_Icon));
-
-    return TRUE; // return TRUE unless you set the focus to a control
-    // EXCEPTION: OCX Property Pages should return FALSE
-}
-
 void CGLVersionDlg::Initialize(const Q3DStudio::CString &inTitle,
                                const Q3DStudio::CString &inMessage, bool inErrorIcon)
 {
     // Set title and message
-    m_Title = CString(inTitle);
-    m_Message = CString(inMessage);
+    setWindowTitle(inTitle.toQString());
+    m_ui->m_Message->setText(inMessage.toQString());
 
     // Set which icon to load
-    if (inErrorIcon)
-        m_Icon = IDI_ERROR;
-    else
-        m_Icon = IDI_WARNING;
+    const int size = style()->pixelMetric(QStyle::PM_LargeIconSize);
+    m_ui->m_WarningIcon->setPixmap(style()->standardIcon(inErrorIcon ?
+        QStyle::SP_MessageBoxCritical :
+        QStyle::SP_MessageBoxWarning).pixmap(size, size));
 }
 
-BOOL CGLVersionDlg::GetDontShowAgain()
+bool CGLVersionDlg::GetDontShowAgain()
 {
-    return m_DontShowAgain;
+    return m_ui->m_DontShowAgain->isChecked();
 }

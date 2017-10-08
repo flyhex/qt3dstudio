@@ -14,6 +14,7 @@ HEADERS += \
     Studio/_Win/UI/StudioPreferencesPropSheet.h \
     Studio/_Win/UI/StudioProjectSettingsPage.h \
     Studio/_Win/UI/ResetKeyframeValuesDlg.h \
+    Studio/_Win/UI/GLVersionDlg.h \
     Studio/_Win/DragNDrop/DropProxy.h \
     Studio/Palettes/Inspector/ObjectListModel.h \
     Studio/Palettes/Inspector/ObjectBrowserView.h \
@@ -26,6 +27,7 @@ FORMS += \
     Studio/_Win/UI/StudioProjectSettingsPage.ui \
     Studio/_Win/UI/InterpolationDlg.ui \
     Studio/_Win/UI/ResetKeyframeValuesDlg.ui \
+    Studio/_Win/UI/GLVersionDlg.ui \
     Studio/Application/StudioTutorialWidget.ui
 
 SOURCES += \
@@ -46,7 +48,7 @@ SOURCES += \
     #Studio/_Win/UI/CrashDlg.cpp \
     Studio/_Win/UI/EditCameraBar.cpp \
     Studio/_Win/UI/EditorPane.cpp \
-    #Studio/_Win/UI/GLVersionDlg.cpp \
+    Studio/_Win/UI/GLVersionDlg.cpp \
     Studio/_Win/UI/InterpolationDlg.cpp \
     Studio/_Win/UI/PlayerContainerWnd.cpp \
     Studio/_Win/UI/PlayerWnd.cpp \
