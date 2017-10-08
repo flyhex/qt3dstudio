@@ -36,6 +36,22 @@
 
 int main(int argc, char *argv[])
 {
+    // to enable QOpenGLWidget to work on macOS, we must set the default
+    // QSurfaceFormat before QApplication is created. Otherwise context-sharing
+    // fails and QOpenGLWidget breaks.
+
+    // fortunately, we know which OpenGL version we can use on macOS, so we
+    // can simply hard-code it here.
+#if defined(Q_OS_MACOS)
+    QSurfaceFormat openGL33Format;
+    openGL33Format.setRenderableType(QSurfaceFormat::OpenGL);
+    openGL33Format.setProfile(QSurfaceFormat::CoreProfile);
+    openGL33Format.setMajorVersion(3);
+    openGL33Format.setMinorVersion(3);
+    openGL33Format.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(openGL33Format);
+#endif
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setOrganizationName("The Qt Company");
     QCoreApplication::setOrganizationDomain("qt.io");

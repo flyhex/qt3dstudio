@@ -45,3 +45,5 @@ INCLUDEPATH += \
     $$PWD/../Runtime/Source/Engine/Include \
     $$PWD/../Runtime/Source/System/Include \
     $$PWD/../QtExtras/qmlstreamer
+
+macos:QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/

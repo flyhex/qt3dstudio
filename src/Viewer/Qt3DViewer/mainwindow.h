@@ -92,7 +92,7 @@ private Q_SLOTS:
 
 private:
     Ui::MainWindow *ui;
-    QQuickItem *m_studio3D = nullptr;
+    Q3DSView *m_studio3D = nullptr;
     QQuickItem *m_connectionInfo = nullptr;
     QString m_openFileDir;
     bool m_embeddedMode;

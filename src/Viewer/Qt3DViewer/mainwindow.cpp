@@ -90,7 +90,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Set import paths so that standalone installation works
     QString extraImportPath1(QStringLiteral("%1/qml"));
+#ifdef Q_OS_MACOS
+    QString extraImportPath2(QStringLiteral("%1/../../../../qml"));
+#else
     QString extraImportPath2(QStringLiteral("%1/../qml"));
+#endif
     ui->quickWidget->engine()->addImportPath(
                 extraImportPath1.arg(QGuiApplication::applicationDirPath()));
     ui->quickWidget->engine()->addImportPath(
@@ -284,7 +288,7 @@ void MainWindow::on_actionReload_triggered()
 
 Q3DSView *MainWindow::viewer() const
 {
-    return dynamic_cast<Q3DSView *>(m_studio3D);
+    return m_studio3D;
 }
 
 void MainWindow::loadFile(const QString &filename)
@@ -318,7 +322,7 @@ void MainWindow::loadFile(const QString &filename)
         return;
     }
 
-    m_studio3D = qobject_cast<QQuickItem *>(component.create());
+    m_studio3D = static_cast<Q3DSView *>(component.create());
     viewer()->presentation()->setSource(sourceUrl);
 
     QQmlEngine::setObjectOwnership(m_studio3D, QQmlEngine::CppOwnership);
