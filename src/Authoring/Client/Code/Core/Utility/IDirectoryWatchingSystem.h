@@ -33,6 +33,7 @@
 #include <memory>
 #include <vector>
 #include <QtCore/qstring.h>
+#include <functional>
 
 namespace UICDM {
 class ISignalConnection;

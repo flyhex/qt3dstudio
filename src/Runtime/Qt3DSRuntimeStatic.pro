@@ -7,6 +7,10 @@ include(commoninclude.pri)
     RESOURCES += res.qrc
 }
 
+linux {
+    DEFINES += _POSIX_C_SOURCE=199309L
+}
+
 QT += qml
 
 # Foundation

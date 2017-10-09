@@ -61,6 +61,10 @@ linux {
     QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-local-typedefs
 }
 
+linux-clang {
+    DEFINES += __STRICT_ANSI__
+}
+
 integrity {
     exists($$THIRDPARTY_DIR/boost/1.65.0) {
         INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.65.0

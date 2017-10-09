@@ -1,3 +1,5 @@
+include(../examples.pri)
+
 TEMPLATE = app
 QT += widgets studio3d
 

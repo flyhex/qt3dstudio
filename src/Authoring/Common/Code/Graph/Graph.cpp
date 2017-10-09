@@ -748,13 +748,7 @@ void CGraphIterator::ApplyCriterias()
         const SGraphableCriteria &theCriteria = *theIter;
         switch (theCriteria.m_Type) {
         case ECriteriaType_Sorter:
-            // use a lamda to workaround a clang + libstdc++ (from g++) bug
-            // https://bugs.llvm.org/show_bug.cgi?id=24115
-            // https://bugs.llvm.org/show_bug.cgi?id=31535
-            std::stable_sort(m_Results.begin(), m_Results.end(),
-                             [&theCriteria](const auto &lhs, const auto &rhs) -> bool {
-                                    return theCriteria.m_SortFunc(lhs, rhs);
-                             });
+            std::stable_sort(m_Results.begin(), m_Results.end(), theCriteria.m_SortFunc);
             break;
 
         case ECriteriaType_Filter:
