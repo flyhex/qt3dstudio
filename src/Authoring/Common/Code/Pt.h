@@ -215,7 +215,7 @@ inline bool CPt::operator>(const CPt &inPt) const
  */
 inline bool CPt::operator<=(const CPt &inPt) const
 {
-    return (*this < inPt || (inPt.x == x && inPt.y == y));
+    return (x <= inPt.x && y <= inPt.y);
 }
 
 //=============================================================================
@@ -225,7 +225,7 @@ inline bool CPt::operator<=(const CPt &inPt) const
  */
 inline bool CPt::operator>=(const CPt &inPt) const
 {
-    return (*this > inPt || (inPt.x == x && inPt.y == y));
+    return (x >= inPt.x && y >= inPt.y);
 }
 
 //=============================================================================
