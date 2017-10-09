@@ -71,6 +71,8 @@ private:
     QString convertMimeDataToFilename(const QMimeData *mimeData);
 
 private Q_SLOTS:
+    void on_actionToggle_Scale_Mode_triggered();
+    void on_actionToggle_Shade_Mode_triggered();
     void on_actionBorder_triggered();
     void on_actionFull_Screen_triggered();
     void on_actionShowOnScreenStats_triggered();

@@ -197,6 +197,14 @@
     <string>Ctrl+Shift+S</string>
    </property>
   </action>
+  <action name="actionToggle_Shade_Mode">
+   <property name="text">
+    <string>Toggle Shade Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+W</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

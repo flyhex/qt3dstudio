@@ -85,6 +85,8 @@ MainWindow::MainWindow(QWidget *parent)
     addAction(ui->actionFull_Screen);
     addAction(ui->actionShowOnScreenStats);
     addAction(ui->actionBorder);
+    addAction(ui->actionToggle_Scale_Mode);
+    addAction(ui->actionToggle_Shade_Mode);
 
     // Set import paths so that standalone installation works
     QString extraImportPath1(QStringLiteral("%1/qml"));
@@ -101,6 +103,37 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::on_actionToggle_Scale_Mode_triggered()
+{
+    switch (viewer()->viewerSettings()->scaleMode())
+    {
+    case Q3DSViewerSettings::ScaleModeCenter:
+        viewer()->viewerSettings()->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
+        break;
+    case Q3DSViewerSettings::ScaleModeFill:
+        viewer()->viewerSettings()->setScaleMode(Q3DSViewerSettings::ScaleModeFit);
+        break;
+    case Q3DSViewerSettings::ScaleModeFit:
+        viewer()->viewerSettings()->setScaleMode(Q3DSViewerSettings::ScaleModeCenter);
+        break;
+    }
+    updateUI();
+}
+
+void MainWindow::on_actionToggle_Shade_Mode_triggered()
+{
+    switch (viewer()->viewerSettings()->shadeMode())
+    {
+    case Q3DSViewerSettings::ShadeModeShaded:
+        viewer()->viewerSettings()->setShadeMode(Q3DSViewerSettings::ShadeModeShadedWireframe);
+        break;
+    case Q3DSViewerSettings::ShadeModeShadedWireframe:
+        viewer()->viewerSettings()->setShadeMode(Q3DSViewerSettings::ShadeModeShaded);
+        break;
+    }
+    updateUI();
 }
 
 void MainWindow::on_actionBorder_triggered()
