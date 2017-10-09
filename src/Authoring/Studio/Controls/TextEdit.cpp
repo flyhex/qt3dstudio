@@ -85,7 +85,7 @@ CTextEdit::CTextEdit()
     , m_BackgroundColorFocus(CStudioPreferences::GetTextBoxBGColorWithFocus())
     , m_BoldText(false)
     , m_ScrollAmount(0, 0)
-    , m_CommandHandler(g_StudioApp.GetCore()->GetHotKeys())
+    , m_CommandHandler(new CHotKeys())
 {
     ADDTO_OBJECT_COUNTER(CTextEdit)
 
@@ -114,6 +114,7 @@ CTextEdit::~CTextEdit()
 
     // Added to help debug freeing memory allocated from inside a DLL
     m_DisplayString.Clear();
+    delete m_CommandHandler;
 }
 
 //==============================================================================
@@ -371,19 +372,16 @@ bool CTextEdit::OnChar(const QString &inChar, Qt::KeyboardModifiers inFlags)
 
     bool theReturnValue = false;
 
-    if (!m_CommandHandler->OnChar(QKeySequence::fromString(inChar)[0], 1, inFlags)) {
-        // Do not process the character if control is down, this will allow
-        // app's hotkey to process application hotkeys.
-        if (!(inFlags &  Qt::ControlModifier)) {
-            // Always return true whenever it captures focus and tries insert character.
-            // Though InsertChar fails, this is still getting the focus and have processed the
-            // event, return true so that no other controls will handle it
-            // Refer to Bug 897
-            InsertChar(inChar[0].unicode());
-            theReturnValue = true;
-        }
-    } else
+    // Do not process the character if control is down, this will allow
+    // app's hotkey to process application hotkeys.
+    if (!(inFlags &  Qt::ControlModifier)) {
+        // Always return true whenever it captures focus and tries insert character.
+        // Though InsertChar fails, this is still getting the focus and have processed the
+        // event, return true so that no other controls will handle it
+        // Refer to Bug 897
+        InsertChar(inChar[0].unicode());
         theReturnValue = true;
+    }
 
     return theReturnValue;
 }

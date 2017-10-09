@@ -564,8 +564,11 @@ bool CHotKeys::isFocusOnTextEditControl()
     auto widgetControl = dynamic_cast<WidgetControl *>(qApp->focusObject());
     if (widgetControl) {
         auto control = widgetControl->getControl();
-        if (control && dynamic_cast<CTextEdit *>(control->FocusedChild()))
-            return true;
+        if (control) {
+            auto te = dynamic_cast<CTextEdit *>(control->FocusedChild());
+            if (te && !te->IsReadOnly())
+                return true;
+        }
     }
     return false;
 }

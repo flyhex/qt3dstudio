@@ -41,6 +41,8 @@
 #include "TextEditInPlace.h"
 #include "Renderer.h"
 
+#include <QTimer>
+
 //==============================================================================
 //	Static class constants
 //==============================================================================
@@ -177,7 +179,7 @@ void CTextEditInPlace::SetEditMode(bool inEditMode)
 void CTextEditInPlace::EnterText(bool inHighlight)
 {
     CStringEdit::EnterText(inHighlight);
-    OnLoseFocus();
+    QTimer::singleShot(0, [this] { OnLoseFocus(); });
 }
 
 //==============================================================================

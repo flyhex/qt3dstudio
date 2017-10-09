@@ -60,7 +60,8 @@ bool WidgetControl::event(QEvent *event)
 {
     if (event->type() == QEvent::ShortcutOverride) {
         QKeyEvent *ke = static_cast<QKeyEvent *>(event);
-        m_control->OnKeyDown(ke->key(), ke->modifiers());
+        if (ke->key() == Qt::Key_C && ke->modifiers() == Qt::ControlModifier)
+            m_control->OnKeyDown(ke->key(), ke->modifiers());
     }
     return QWidget::event(event);
 }
@@ -89,9 +90,9 @@ void WidgetControl::resizeEvent(QResizeEvent *event)
 
 void WidgetControl::keyPressEvent(QKeyEvent *event)
 {
+    QWidget::keyPressEvent(event);
     m_control->OnKeyDown(event->key(), event->modifiers());
     m_control->OnChar(event->text(), event->modifiers());
-    QWidget::keyPressEvent(event);
 }
 
 void WidgetControl::keyReleaseEvent(QKeyEvent *event)
