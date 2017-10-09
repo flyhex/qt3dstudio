@@ -30,6 +30,7 @@
 #pragma once
 #ifndef IDIRECTORYWATCHINGSYSTEMH
 #define IDIRECTORYWATCHINGSYSTEMH
+#include <memory>
 #include <vector>
 #include <QtCore/qstring.h>
 
