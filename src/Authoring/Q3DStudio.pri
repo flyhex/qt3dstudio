@@ -29,7 +29,7 @@ FORMS += \
 SOURCES += \
     Studio/MainFrm.cpp \
     Studio/PreviewHelper.cpp \
-    Studio/remoteproject.cpp \
+    Studio/remotedeploymentsender.cpp \
     Studio/_Win/Application/AboutDlg.cpp \
     #Studio/_Win/Application/BaseLink.cpp \
     Studio/_Win/Application/MsgRouter.cpp \
@@ -291,7 +291,7 @@ HEADERS += \
     Studio/Controls/ClickableLabel.h \
     Studio/_Win/UI/SceneView.h \
     Studio/PreviewHelper.h \
-    Studio/remoteproject.h \
+    Studio/remotedeploymentsender.h \
     Studio/Application/StudioTutorialWidget.h \
     Studio/Palettes/Inspector/ChooserModelBase.h \
     Studio/Palettes/Inspector/ImageChooserView.h \

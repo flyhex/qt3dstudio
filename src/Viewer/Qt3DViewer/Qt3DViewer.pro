@@ -17,7 +17,7 @@ SOURCES += \
     $$PWD/../qmlviewer/q3dspresentationitem.cpp \
     main.cpp \
     mainwindow.cpp \
-    remoteproject.cpp
+    remotedeploymentreceiver.cpp
 
 HEADERS += \
     $$PWD/../qmlviewer/Qt3DSViewPlugin.h \
@@ -25,7 +25,7 @@ HEADERS += \
     $$PWD/../qmlviewer/Qt3DSRenderer.h \
     $$PWD/../qmlviewer/q3dspresentationitem.h \
     mainwindow.h \
-    remoteproject.h
+    remotedeploymentreceiver.h
 
 LIBS += \
     -lqt3dsruntime$$qtPlatformTargetSuffix() \

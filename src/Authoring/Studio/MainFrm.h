@@ -55,7 +55,7 @@ class CSceneView;
 class CStudioApp;
 class CTimelineControl;
 class ITimelineTimebar;
-class RemoteProject;
+class RemoteDeploymentSender;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -236,7 +236,7 @@ public:
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
-    RemoteProject *m_remoteProject = nullptr;
+    RemoteDeploymentSender *m_remoteDeploymentSender = nullptr;
     CSceneView *m_SceneView = nullptr;
     CRecentItems *m_RecentItems = nullptr;
     CPaletteManager *m_PaletteManager = nullptr;

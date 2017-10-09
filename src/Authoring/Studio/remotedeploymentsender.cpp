@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "remoteproject.h"
+#include "remotedeploymentsender.h"
 
 #include <QtCore/qpair.h>
 #include <QtCore/qfile.h>
@@ -65,7 +65,7 @@ ConnectionDialog::ConnectionDialog(QWidget *parent)
     portLabel->setBuddy(m_portLineEdit);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(
-        QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
+                QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
     connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -88,17 +88,17 @@ QPair<QString, int> ConnectionDialog::getInfo(QWidget *parent)
         return QPair<QString, int>();
 
     return qMakePair(dialog.m_hostLineEdit->text(),
-        dialog.m_portLineEdit->text().toInt());
+                     dialog.m_portLineEdit->text().toInt());
 }
 
-RemoteProject::RemoteProject(QWidget *parent)
+RemoteDeploymentSender::RemoteDeploymentSender(QWidget *parent)
     : QObject(parent)
     , m_tcpSocket(0)
     , m_mainWindow(parent)
 {
 }
 
-void RemoteProject::connect()
+void RemoteDeploymentSender::connect()
 {
     if (isConnected())
         return;
@@ -107,13 +107,13 @@ void RemoteProject::connect()
     m_tcpSocket = new QTcpSocket(this);
 
     QObject::connect(m_tcpSocket, &QTcpSocket::connected, this,
-        &RemoteProject::checkConnection);
+                     &RemoteDeploymentSender::checkConnection);
     QObject::connect(m_tcpSocket, &QTcpSocket::disconnected, this,
-        &RemoteProject::checkConnection);
+                     &RemoteDeploymentSender::checkConnection);
     QObject::connect(m_tcpSocket,
-        static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>
-            (&QAbstractSocket::error),
-        this, &RemoteProject::connectionError);
+                     static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>
+                     (&QAbstractSocket::error),
+                     this, &RemoteDeploymentSender::connectionError);
 
     QPair<QString, int> info = ConnectionDialog::getInfo(m_mainWindow);
 
@@ -124,33 +124,33 @@ void RemoteProject::connect()
     }
 }
 
-void RemoteProject::disconnect()
+void RemoteDeploymentSender::disconnect()
 {
     Q_ASSERT(m_tcpSocket);
     m_tcpSocket->disconnectFromHost();
 }
 
-bool RemoteProject::isConnected() const
+bool RemoteDeploymentSender::isConnected() const
 {
     return m_tcpSocket && m_tcpSocket->state()
-        == QAbstractSocket::ConnectedState;
+            == QAbstractSocket::ConnectedState;
 }
 
-void RemoteProject::checkConnection()
+void RemoteDeploymentSender::checkConnection()
 {
     Q_EMIT connectionChanged(isConnected());
 }
 
-void RemoteProject::connectionError()
+void RemoteDeploymentSender::connectionError()
 {
     if (m_tcpSocket) {
         QMessageBox::warning(m_mainWindow, tr("Connect to Device"),
-            tr("Device connection error: ") + m_tcpSocket->errorString());
+                             tr("Device connection error: ") + m_tcpSocket->errorString());
     }
     Q_EMIT connectionChanged(isConnected());
 }
 
-void RemoteProject::streamProject(const QString &projectFile)
+void RemoteDeploymentSender::streamProject(const QString &projectFile)
 {
     Q_ASSERT(isConnected());
     if (!isConnected())
@@ -170,11 +170,11 @@ void RemoteProject::streamProject(const QString &projectFile)
 
     // The file to be loaded
     const QString relativePath
-        = projectDirectory.relativeFilePath(fileInfo.filePath());
+            = projectDirectory.relativeFilePath(fileInfo.filePath());
 
     int fileCount = 0;
     QDirIterator it(fileInfo.absolutePath(), QDir::Files,
-        QDirIterator::Subdirectories);
+                    QDirIterator::Subdirectories);
     while (it.hasNext()) {
         const QString filePath = it.next();
         QFile file(filePath);

@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , m_studio3D(0)
     , m_connectionInfo(0)
-    , m_remoteProject(0)
+    , m_remoteDeploymentReceiver(0)
 {
     ui->setupUi(this);
 
@@ -172,9 +172,9 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionConnect_triggered()
 {
-    if (m_remoteProject) {
-        delete m_remoteProject;
-        m_remoteProject = 0;
+    if (m_remoteDeploymentReceiver) {
+        delete m_remoteDeploymentReceiver;
+        m_remoteDeploymentReceiver = 0;
         delete m_connectionInfo;
         m_connectionInfo = 0;
         if (m_studio3D)
@@ -184,21 +184,21 @@ void MainWindow::on_actionConnect_triggered()
         return;
     }
 
-    m_remoteProject = new RemoteProject(this);
-    if (!m_remoteProject->startServer()) {
+    m_remoteDeploymentReceiver = new RemoteDeploymentReceiver(this);
+    if (!m_remoteDeploymentReceiver->startServer()) {
         QString msg = "Unable to connect to remote project.\n";
         QMessageBox::warning(this, "Connection Error", msg, QMessageBox::Close);
-        delete m_remoteProject;
-        m_remoteProject = 0;
+        delete m_remoteDeploymentReceiver;
+        m_remoteDeploymentReceiver = 0;
         updateUI();
         return;
     }
 
-    int port = m_remoteProject->serverPort();
+    int port = m_remoteDeploymentReceiver->serverPort();
     QString message;
     QTextStream stream(&message);
     stream << "Connection Info\n"
-           << "Address: " << m_remoteProject->hostAddress().toString() << "\n"
+           << "Address: " << m_remoteDeploymentReceiver->hostAddress().toString() << "\n"
            << "Port: " + QString::number(port);
 
     QQmlEngine *engine = ui->quickWidget->engine();
@@ -229,14 +229,14 @@ void MainWindow::on_actionConnect_triggered()
     m_connectionInfo->setParentItem(root);
     m_connectionInfo->setParent(engine);
 
-    connect(m_remoteProject, &RemoteProject::remoteConnected,
-        this, &MainWindow::remoteConnected);
+    connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::remoteConnected,
+            this, &MainWindow::remoteConnected);
 
-    connect(m_remoteProject, &RemoteProject::remoteDisconnected,
-        this, &MainWindow::remoteDisconnected);
+    connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::remoteDisconnected,
+            this, &MainWindow::remoteDisconnected);
 
-    connect(m_remoteProject, &RemoteProject::projectChanged,
-        this, &MainWindow::loadRemoteProject);
+    connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::projectChanged,
+            this, &MainWindow::loadRemoteDeploymentReceiver);
 
     updateUI();
 }
@@ -414,13 +414,13 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::updateUI()
 {
-    ui->actionConnect->setChecked(m_remoteProject);
+    ui->actionConnect->setChecked(m_remoteDeploymentReceiver);
 
-    if (m_remoteProject) {
+    if (m_remoteDeploymentReceiver) {
         if (m_connectionInfo)
-            m_connectionInfo->setVisible(!m_remoteProject->isConnected());
+            m_connectionInfo->setVisible(!m_remoteDeploymentReceiver->isConnected());
         if (m_studio3D)
-            m_studio3D->setVisible(m_remoteProject->isConnected());
+            m_studio3D->setVisible(m_remoteDeploymentReceiver->isConnected());
     }
 
     Q3DSView *view = viewer();
@@ -437,10 +437,10 @@ void MainWindow::updateUI()
     ui->actionShowOnScreenStats->setChecked(view->viewerSettings()->isShowRenderStats());
 }
 
-void MainWindow::loadRemoteProject()
+void MainWindow::loadRemoteDeploymentReceiver()
 {
-    Q_ASSERT(m_remoteProject);
-    const QString remote = m_remoteProject->fileName();
+    Q_ASSERT(m_remoteDeploymentReceiver);
+    const QString remote = m_remoteDeploymentReceiver->fileName();
     loadFile(remote);
     updateUI();
 }

@@ -66,7 +66,7 @@
 #include "IStudioRenderer.h"
 #include "SubPresentationsDlg.h"
 #include "StudioTutorialWidget.h"
-#include "remoteproject.h"
+#include "remotedeploymentsender.h"
 
 #include "InspectorControlView.h"
 
@@ -101,7 +101,7 @@ CMainFrame::CMainFrame()
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
     g_StudioApp.SetupTimer(WM_STUDIO_TIMER, this);
 
-    m_remoteProject = new RemoteProject(this);
+    m_remoteDeploymentSender = new RemoteDeploymentSender(this);
 
     // File Menu
     connect(m_ui->action_Open, &QAction::triggered, this, &CMainFrame::OnFileOpen);
@@ -111,9 +111,9 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
-        &CMainFrame::OnFileConnectToDevice);
-    connect(m_remoteProject, &RemoteProject::connectionChanged,
-        m_ui->action_Connect_to_Device, &QAction::setChecked);
+            &CMainFrame::OnFileConnectToDevice);
+    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
+            m_ui->action_Connect_to_Device, &QAction::setChecked);
     connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
     m_RecentItems = new CRecentItems(m_ui->menuRecent_Projects, 0);
@@ -298,21 +298,21 @@ int CMainFrame::OnCreate()
     }
 #ifdef KDAB_TEMPORARILY_REMOVED
 
-        // Change the background color for the menu bar
-        if (IsMenu(theMenu)) {
-            MENUINFO theMenuInfo = { 0 };
-            theMenuInfo.cbSize = sizeof(MENUINFO);
-            theMenuInfo.fMask = MIM_BACKGROUND;
+    // Change the background color for the menu bar
+    if (IsMenu(theMenu)) {
+        MENUINFO theMenuInfo = { 0 };
+        theMenuInfo.cbSize = sizeof(MENUINFO);
+        theMenuInfo.fMask = MIM_BACKGROUND;
 
-            CBrush *theNewBrush = new CBrush();
-            CColor theBaseColor(CStudioPreferences::GetMenuBarBaseColor());
-            theNewBrush->CreateSolidBrush(
-                RGB(theBaseColor.GetRed(), theBaseColor.GetGreen(), theBaseColor.GetBlue()));
-            theMenuInfo.hbrBack = *theNewBrush; // Brush you want to draw
+        CBrush *theNewBrush = new CBrush();
+        CColor theBaseColor(CStudioPreferences::GetMenuBarBaseColor());
+        theNewBrush->CreateSolidBrush(
+                    RGB(theBaseColor.GetRed(), theBaseColor.GetGreen(), theBaseColor.GetBlue()));
+        theMenuInfo.hbrBack = *theNewBrush; // Brush you want to draw
 
-            SetMenuInfo(theMenu, &theMenuInfo);
-        }
-   #endif
+        SetMenuInfo(theMenu, &theMenuInfo);
+    }
+#endif
 
     // Create the view manager
     m_PaletteManager = new CPaletteManager(this);
@@ -729,7 +729,7 @@ void CMainFrame::OnUpdateToolChange()
     m_ui->actionOrbit_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE);
     m_ui->actionZoom_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM);
 
-/*CEditCameraContainer* theEditCameras = g_StudioApp.GetCore()->GetDoc()->GetEditCameraContainer( );
+    /*CEditCameraContainer* theEditCameras = g_StudioApp.GetCore()->GetDoc()->GetEditCameraContainer( );
 CSEditCamera* theActiveEditCamera = theEditCameras->GetActiveEditCamera( );
 bool theIsEditView = !m_SceneView->IsDeploymentView( );
 m_EditCamerasBar.GetToolBarCtrl( ).EnableButton( ID_TOOL_EDITCAMERA_ROTATE, ( theActiveEditCamera &&
@@ -1015,13 +1015,13 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetSnapRange(10);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
-// Edit Cameras
+        // Edit Cameras
 #ifdef INCLUDE_EDIT_CAMERA
         CColor theDefaultBgColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetEditViewBackgroundColor(theDefaultBgColor);
         // g_StudioApp.GetCore()->GetDoc()->SetEditViewBackgroundColor( theDefaultBgColor );
         CStudioPreferences::SetPreferredStartupView(
-            CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
+                    CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
 #endif
 
         if (m_PaletteManager)
@@ -1031,26 +1031,26 @@ void CMainFrame::EditPreferences(short inPageIndex)
 
         // Remove keys related to the ObjRef and PropRef Pickers
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("ObjectReferenceWidth");
+                .RemoveKey("ObjectReferenceWidth");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("ObjectReferenceHeight");
+                .RemoveKey("ObjectReferenceHeight");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("ObjectReferenceXPos");
+                .RemoveKey("ObjectReferenceXPos");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("ObjectReferenceYPos");
+                .RemoveKey("ObjectReferenceYPos");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("PropertyReferenceWidth");
+                .RemoveKey("PropertyReferenceWidth");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("PropertyReferenceHeight");
+                .RemoveKey("PropertyReferenceHeight");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("PropertyReferenceXPos");
+                .RemoveKey("PropertyReferenceXPos");
         CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-            .RemoveKey("PropertyReferenceYPos");
+                .RemoveKey("PropertyReferenceYPos");
 
         // Also clear out the viewer's settings file
         Q3DStudio::CFilePath theFilePath(Q3DStudio::CFilePath::CombineBaseAndRelative(
-            Q3DStudio::CFilePath::GetUserApplicationDirectory(),
-            "UIComposer\\UICViewerSettings.txt"));
+                                             Q3DStudio::CFilePath::GetUserApplicationDirectory(),
+                                             "UIComposer\\UICViewerSettings.txt"));
         theFilePath.DeleteThisFile();
     }
 }
@@ -1150,8 +1150,8 @@ void CMainFrame::OnPlaybackStop()
  */
 void CMainFrame::OnPlaybackPreview()
 {
-    if (m_remoteProject->isConnected())
-        CPreviewHelper::OnDeploy(*m_remoteProject);
+    if (m_remoteDeploymentSender->isConnected())
+        CPreviewHelper::OnDeploy(*m_remoteDeploymentSender);
     else
         CPreviewHelper::OnPreview();
 }
@@ -1220,50 +1220,50 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys)
     inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnToolScale),
                                 0, Qt::Key_E);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewBoundingBoxes),
-        Qt::ControlModifier, Qt::Key_B);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewBoundingBoxes),
+                Qt::ControlModifier, Qt::Key_B);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewPivotPoint),
-        Qt::ControlModifier | Qt::AltModifier, Qt::Key_P);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewPivotPoint),
+                Qt::ControlModifier | Qt::AltModifier, Qt::Key_P);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnEditPresentationPreferences),
-        Qt::ControlModifier, Qt::Key_P);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnEditPresentationPreferences),
+                Qt::ControlModifier, Qt::Key_P);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnOpenMostRecentlyUsedDocument),
-        Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier, Qt::Key_P);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnOpenMostRecentlyUsedDocument),
+                Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier, Qt::Key_P);
 
     inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowAction),
                                 Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_A);
     inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowBasic),
                                 Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_B);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowInspector),
-        Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_I);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowInspector),
+                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_I);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowProject),
-        Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_P);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowProject),
+                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_P);
     inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowSlide),
                                 Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_D);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowTimeline),
-        Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_T);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowTimeline),
+                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_T);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewGuidesRulers),
-        Qt::ControlModifier, Qt::Key_Semicolon);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewGuidesRulers),
+                Qt::ControlModifier, Qt::Key_Semicolon);
     inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnLockGuides),
                                 Qt::ControlModifier | Qt::AltModifier, Qt::Key_Semicolon);
 
 #ifdef INCLUDE_EDIT_CAMERA
     inHotKeys->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::HandleEditViewFillModeKey), 0,
-        Qt::Key_F3);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::HandleEditViewFillModeKey), 0,
+                Qt::Key_F3);
     inHotKeys->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::HandleEditCameraZoomExtent), 0, Qt::Key_F);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::HandleEditCameraZoomExtent), 0, Qt::Key_F);
 #endif
 
     inHotKeys->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnPlaybackPreview), 0,
-        Qt::Key_F5);
+                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnPlaybackPreview), 0,
+                Qt::Key_F5);
 
     m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);
 
@@ -1536,8 +1536,8 @@ void CMainFrame::OnUpdateEditCameraPan()
 void CMainFrame::OnUpdateEditCameraRotate()
 {
     if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()
-        && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-               g_StudioApp.GetRenderer().GetEditCamera())) {
+            && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
+                g_StudioApp.GetRenderer().GetEditCamera())) {
         m_ui->actionOrbit_Tool->setEnabled(true);
 
         long theCurrentToolSettings = g_StudioApp.GetToolMode();
@@ -1640,7 +1640,7 @@ void CMainFrame::OnClearGuides()
 void CMainFrame::OnUpdateClearGuides()
 {
     bool enable = g_StudioApp.GetRenderer().AreGuidesEnabled()
-        && g_StudioApp.GetRenderer().AreGuidesEditable() && m_SceneView->IsDeploymentView();
+            && g_StudioApp.GetRenderer().AreGuidesEditable() && m_SceneView->IsDeploymentView();
 
     m_ui->actionClear_Guides->setEnabled(enable);
 }
@@ -1674,7 +1674,7 @@ void CMainFrame::OnViewAction()
 void CMainFrame::OnUpdateViewAction()
 {
     m_ui->actionAction->setChecked(
-        m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_ACTION));
+                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_ACTION));
 }
 
 void CMainFrame::OnViewBasicObjects()
@@ -1697,7 +1697,7 @@ void CMainFrame::OnViewInspector()
 void CMainFrame::OnUpdateViewInspector()
 {
     m_ui->actionInspector->setChecked(
-        m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_INSPECTOR));
+                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_INSPECTOR));
 }
 
 void CMainFrame::OnViewProject()
@@ -1709,7 +1709,7 @@ void CMainFrame::OnViewProject()
 void CMainFrame::OnUpdateViewProject()
 {
     m_ui->actionProject->setChecked(
-        m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_PROJECT));
+                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_PROJECT));
 }
 
 void CMainFrame::OnViewSlide()
@@ -1721,7 +1721,7 @@ void CMainFrame::OnViewSlide()
 void CMainFrame::OnUpdateViewSlide()
 {
     m_ui->actionSlide->setChecked(
-        m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_SLIDE) ? TRUE : FALSE);
+                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_SLIDE) ? TRUE : FALSE);
 }
 
 //==============================================================================
@@ -1742,7 +1742,7 @@ void CMainFrame::OnViewTimeline()
 void CMainFrame::OnUpdateViewTimeline()
 {
     m_ui->actionTimeline->setChecked(
-        m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_TIMELINE));
+                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_TIMELINE));
 }
 
 //==============================================================================
@@ -1897,10 +1897,10 @@ void CMainFrame::OnFileRevert()
 
 void CMainFrame::OnFileConnectToDevice()
 {
-    if (m_remoteProject->isConnected())
-        m_remoteProject->disconnect();
+    if (m_remoteDeploymentSender->isConnected())
+        m_remoteDeploymentSender->disconnect();
     else
-        m_remoteProject->connect();
+        m_remoteDeploymentSender->connect();
 }
 
 //==============================================================================
@@ -2011,7 +2011,7 @@ CTimelineControl *CMainFrame::GetTimelineControl()
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
 {
     CUICDMTimelineItemBinding *theTimelineItemBinding =
-        GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
+            GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
     if (theTimelineItemBinding == NULL)
         return NULL;
 

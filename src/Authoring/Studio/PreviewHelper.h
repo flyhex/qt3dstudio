@@ -38,7 +38,7 @@
 //==============================================================================
 #include "UICFile.h"
 #include "UICString.h"
-#include "remoteproject.h"
+#include "remotedeploymentsender.h"
 
 //==============================================================================
 //	Forwards
@@ -63,13 +63,13 @@ public:
 
 public:
     static void OnPreview();
-    static void OnDeploy(RemoteProject &project);
+    static void OnDeploy(RemoteDeploymentSender &project);
     static void PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                 EExecMode inMode, RemoteProject *project = 0);
+                                 EExecMode inMode, RemoteDeploymentSender *project = 0);
     static void DoPreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
                                    const Q3DStudio::CString &inDocumentFile,
                                    EExecMode inMode,
-                                   RemoteProject *project = 0);
+                                   RemoteDeploymentSender *project = 0);
 
 protected:
     static Q3DStudio::CString InterpretString(Q3DStudio::CBuildConfiguration *inSelectedConfig,

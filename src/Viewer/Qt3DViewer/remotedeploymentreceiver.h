@@ -27,35 +27,50 @@
 **
 ****************************************************************************/
 
-#ifndef REMOTEPROJECT_H
-#define REMOTEPROJECT_H
+
+#ifndef REMOTEDEPLOYMENTRECEIVER_H
+#define REMOTEDEPLOYMENTRECEIVER_H
 
 #include <QtCore/qobject.h>
+#include <QtCore/qdatastream.h>
+#include <QtCore/qtemporarydir.h>
+#include <QtNetwork/qtcpserver.h>
 #include <QtWidgets/qwidget.h>
-#include <QtNetwork/qtcpsocket.h>
 
-class RemoteProject : public QObject
+class RemoteDeploymentReceiver : public QObject
 {
     Q_OBJECT
 public:
-    explicit RemoteProject(QWidget *parent);
+    explicit RemoteDeploymentReceiver(QWidget *parent);
+    ~RemoteDeploymentReceiver();
 
-    void connect();
-    void disconnect();
-    bool isConnected() const;
+    bool startServer();
 
-    void streamProject(const QString &);
-
-public Q_SLOTS:
-    void checkConnection();
-    void connectionError();
+    QHostAddress hostAddress() const { return m_hostAddress; }
+    int serverPort() const { return m_serverPort; }
+    void setServerPort(int port) { m_serverPort = port; }
+    bool isConnected() const { return m_connection; }
+    QString fileName() const { return m_projectFile; }
 
 Q_SIGNALS:
-    void connectionChanged(bool) const;
+    void projectChanged();
+    void remoteConnected();
+    void remoteDisconnected();
+
+private Q_SLOTS:
+    void acceptRemoteConnection();
+    void acceptRemoteDisconnection();
+    void readProject();
 
 private:
-    QTcpSocket *m_tcpSocket;
-    QWidget *m_mainWindow;
+    QWidget *m_mainWindow = nullptr;
+    QTcpServer *m_tcpServer = nullptr;
+    QTcpSocket *m_connection = nullptr;
+    QHostAddress m_hostAddress;
+    QDataStream m_incoming;
+    QTemporaryDir *m_temporaryDir = nullptr;
+    QString m_projectFile;
+    int m_serverPort;
 };
 
-#endif // REMOTEPROJECT_H
+#endif // REMOTEDEPLOYMENTRECEIVER_H

@@ -27,12 +27,12 @@
 **
 ****************************************************************************/
 
-#include "remoteproject.h"
+#include "remotedeploymentreceiver.h"
 
 #include <QtNetwork>
 #include <QtWidgets/qinputdialog.h>
 
-RemoteProject::RemoteProject(QWidget *parent)
+RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
     : QObject(parent)
     , m_mainWindow(parent)
     , m_tcpServer(0)
@@ -42,16 +42,16 @@ RemoteProject::RemoteProject(QWidget *parent)
 {
     m_incoming.setVersion(QDataStream::Qt_5_8);
     m_serverPort = QInputDialog::getInt(m_mainWindow, tr("Connection Info"),
-        tr("Enter IP Port:"), m_serverPort);
+                                        tr("Enter IP Port:"), m_serverPort);
 }
 
-RemoteProject::~RemoteProject()
+RemoteDeploymentReceiver::~RemoteDeploymentReceiver()
 {
     delete m_temporaryDir;
     m_temporaryDir = 0;
 }
 
-bool RemoteProject::startServer()
+bool RemoteDeploymentReceiver::startServer()
 {
     if (m_tcpServer)
         return true;
@@ -59,7 +59,7 @@ bool RemoteProject::startServer()
     m_tcpServer = new QTcpServer(this);
     if (!m_tcpServer->listen(QHostAddress::Any, m_serverPort)) {
         qWarning() << "Can't start the remote connection: "
-            << m_tcpServer->errorString();
+                   << m_tcpServer->errorString();
         delete m_tcpServer;
         m_tcpServer = 0;
         return false;
@@ -69,7 +69,7 @@ bool RemoteProject::startServer()
     // use the first non-localhost IPv4 address
     for (int i = 0; i < ipAddressesList.size(); ++i) {
         if (ipAddressesList.at(i) != QHostAddress::LocalHost
-            && ipAddressesList.at(i).toIPv4Address()) {
+                && ipAddressesList.at(i).toIPv4Address()) {
             m_hostAddress = ipAddressesList.at(i);
             break;
         }
@@ -81,11 +81,11 @@ bool RemoteProject::startServer()
 
     m_serverPort = m_tcpServer->serverPort();
     connect(m_tcpServer, SIGNAL(newConnection()),
-        this, SLOT(acceptRemoteConnection()));
+            this, SLOT(acceptRemoteConnection()));
     return true;
 }
 
-void RemoteProject::acceptRemoteConnection()
+void RemoteDeploymentReceiver::acceptRemoteConnection()
 {
     Q_ASSERT(m_tcpServer);
     Q_ASSERT(!m_connection);
@@ -95,15 +95,15 @@ void RemoteProject::acceptRemoteConnection()
     m_incoming.setDevice(m_connection);
 
     connect(m_connection, SIGNAL(disconnected()),
-        this, SLOT(acceptRemoteDisconnection()));
+            this, SLOT(acceptRemoteDisconnection()));
 
     connect(m_connection, SIGNAL(readyRead()),
-        this, SLOT(readProject()));
+            this, SLOT(readProject()));
 
     Q_EMIT(remoteConnected());
 }
 
-void RemoteProject::acceptRemoteDisconnection()
+void RemoteDeploymentReceiver::acceptRemoteDisconnection()
 {
     Q_ASSERT(m_tcpServer);
     Q_ASSERT(m_connection);
@@ -115,7 +115,7 @@ void RemoteProject::acceptRemoteDisconnection()
     Q_EMIT(remoteDisconnected());
 }
 
-void RemoteProject::readProject()
+void RemoteDeploymentReceiver::readProject()
 {
     m_incoming.startTransaction();
 
@@ -161,7 +161,7 @@ void RemoteProject::readProject()
             delete m_temporaryDir;
             m_temporaryDir = 0;
             qWarning() << "Error opening temporary file for remote project:"
-                << filePath;
+                       << filePath;
             return;
         }
 

@@ -34,7 +34,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtQuickWidgets/QQuickWidget>
 
-#include "remoteproject.h"
+#include "remotedeploymentreceiver.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -84,7 +84,7 @@ private Q_SLOTS:
 
     void updateUI();
 
-    void loadRemoteProject();
+    void loadRemoteDeploymentReceiver();
     void remoteConnected();
     void remoteDisconnected();
 
@@ -95,7 +95,7 @@ private:
     QString m_openFileDir;
     bool m_embeddedMode;
     QPoint m_swipeStart;
-    RemoteProject *m_remoteProject = nullptr;
+    RemoteDeploymentReceiver *m_remoteDeploymentReceiver = nullptr;
 };
 
 #endif // MAINWINDOW_H

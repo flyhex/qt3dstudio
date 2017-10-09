@@ -51,7 +51,7 @@
 #include <QMessageBox>
 #include <QProcess>
 
-#include "remoteproject.h"
+#include "remotedeploymentsender.h"
 
 //=============================================================================
 /**
@@ -82,9 +82,9 @@ Q3DStudio::CString CPreviewHelper::GetLaunchFile(const Q3DStudio::CString &inUip
 void CPreviewHelper::OnPreview()
 {
     Q3DStudio::CBuildConfigurations &theConfigurations =
-        g_StudioApp.GetCore()->GetBuildConfigurations();
+            g_StudioApp.GetCore()->GetBuildConfigurations();
     Q3DStudio::CBuildConfiguration *theBuildConfiguration =
-        theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
+            theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
     if (theBuildConfiguration)
         PreviewViaConfig(theBuildConfiguration, EXECMODE_PREVIEW);
 }
@@ -93,12 +93,12 @@ void CPreviewHelper::OnPreview()
 /**
  *	Callback for deploying a presentation.
  */
-void CPreviewHelper::OnDeploy(RemoteProject &project)
+void CPreviewHelper::OnDeploy(RemoteDeploymentSender &project)
 {
     Q3DStudio::CBuildConfigurations &theConfigurations =
-        g_StudioApp.GetCore()->GetBuildConfigurations();
+            g_StudioApp.GetCore()->GetBuildConfigurations();
     Q3DStudio::CBuildConfiguration *theBuildConfiguration =
-        theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
+            theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
     if (theBuildConfiguration) {
         // ItemDataPtr != nullptr ==> Build configurations specified NANT pipeline exporter
         PreviewViaConfig(theBuildConfiguration, EXECMODE_DEPLOY, &project);
@@ -113,7 +113,7 @@ void CPreviewHelper::OnDeploy(RemoteProject &project)
  *	2	Viewing the exported content following the command specified in the configuration.
  */
 void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                      EExecMode inMode, RemoteProject *project)
+                                      EExecMode inMode, RemoteDeploymentSender *project)
 {
     bool theUsingTempFile;
     CUICFile theDocument = GetDocumentFile(theUsingTempFile);
@@ -124,7 +124,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
         }
 
         DoPreviewViaConfig(inSelectedConfig, theDocument.GetAbsolutePath(),
-            inMode, project);
+                           inMode, project);
     } catch (...) {
         theCore->GetDispatch()->FireOnProgressEnd();
         g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(theDocument);
@@ -139,7 +139,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
 void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSelectedConfig*/,
                                         const Q3DStudio::CString &inDocumentFile,
                                         EExecMode inMode,
-                                        RemoteProject *project)
+                                        RemoteDeploymentSender *project)
 {
     using namespace Q3DStudio;
     Q3DStudio::CString theCommandStr;
@@ -148,7 +148,7 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
         Q_ASSERT(project);
         project->streamProject(inDocumentFile.GetCharStar());
     } else if (inMode == EXECMODE_PREVIEW
-        && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
+               && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
         // Quick Preview on PC without going via NANT
         CFilePath theCurrentPath(CUICFile::GetApplicationDirectory().GetAbsolutePath());
         CFilePath theViewerDir = CFilePath::fromQString(QApplication::applicationDirPath());
@@ -208,7 +208,7 @@ Q3DStudio::CString CPreviewHelper::InterpretString(Q3DStudio::CBuildConfiguratio
             if (Q3DStudio::CString::ENDOFSTRING != theEndIndex) {
                 // first, resolve the variable by the toolbar selection
                 Q3DStudio::CString theVariable =
-                    inSourceString.Extract(theBeginIndex + 1, theEndIndex - theBeginIndex - 1);
+                        inSourceString.Extract(theBeginIndex + 1, theEndIndex - theBeginIndex - 1);
                 Q3DStudio::CString theResolvedVariable;
                 bool theHasResolved = ResolveVariable(inSelectedConfig, inDocumentFile, theVariable,
                                                       theResolvedVariable);
