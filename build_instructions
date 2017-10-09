@@ -9,6 +9,11 @@ Clone the 3D Studio repository from
 
 https://codereview.qt-project.org/#/admin/projects/qt3dstudio/qt3dstudio
 
+Remember to add --recursive flag to the clone command, as the repository contains submodules
+for 3rd party components. For example:
+
+git clone --recursive https://codereview.qt-project.org/qt3dstudio/qt3dstudio
+
 Additionally Qt 3D Studio Editor requires Boost library and optionally, if FBX assets
 are used, also the FBX SDK.
 
