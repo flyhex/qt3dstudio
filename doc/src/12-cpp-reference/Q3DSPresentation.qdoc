@@ -239,9 +239,6 @@
     Passes a wheel event \a e to the presentation.
     An attached script can register callbacks for \c onHorizontalScrollWheel and
     \c onVerticalScrollWheel events to handle wheel events.
-
-    \note registerForEvent() method has not been implemented yet in Qt 3D Studio early access
-    release.
 */
 
 /*!
@@ -249,9 +246,6 @@
 
     Passes a key press event \a e to the presentation.
     An attached script can register callback for \c onKeyDown event to handle key presses.
-
-    \note registerForEvent() method has not been implemented yet in Qt 3D Studio early access
-    release.
 */
 
 /*!
@@ -259,7 +253,4 @@
 
     Passes a key release event \a e to the presentation.
     An attached script can register callback for \c onKeyUp event to handle key releases.
-
-    \note registerForEvent() method has not been implemented yet in Qt 3D Studio early access
-    release.
 */
