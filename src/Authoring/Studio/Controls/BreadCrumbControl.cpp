@@ -96,9 +96,10 @@ static inline CBreadCrumbControl::TSeparatorButtonType *CreateSeparatorButton(co
         new CBreadCrumbControl::TSeparatorButtonType;
     theButton->SetAutoSize(true);
     theButton->SetUpImage(inImage);
-    theButton->SetSize(CPt(12, 21));
-    theButton->SetMinimumSize(CPt(12, 21));
-    theButton->SetMaximumSize(CPt(12, 21));
+    theButton->SetSize(CPt(12, 24));
+    theButton->SetMinimumSize(CPt(12, 24));
+    theButton->SetMaximumSize(CPt(12, 24));
+    theButton->SetCenterImage(true, false);
     return theButton;
 }
 
@@ -121,8 +122,9 @@ static inline CBreadCrumbControl::TButtonType *CreateButton(const QPixmap &inIma
     theButton->SetFillColorUp(CStudioPreferences::GetBaseColor());
     theButton->SetFillColorDown(CStudioPreferences::GetBaseColor());
     theButton->SetFillColorOver(CStudioPreferences::GetMouseOverHighlightColor());
-    theButton->SetMinimumSize(CPt(16, 21));
-    theButton->SetMaximumSize(CPt(125, 21));
+    theButton->SetMinimumSize(CPt(16, 24));
+    theButton->SetMaximumSize(CPt(125, 24));
+    theButton->SetCenterImage(true, false);
     return theButton;
 }
 

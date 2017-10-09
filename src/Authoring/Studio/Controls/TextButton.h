@@ -46,8 +46,8 @@
 
 #include <QSize>
 
-const long MARGIN_X = 12;
-const long MARGIN_Y = 6;
+const long MARGIN_X = 2;
+const long MARGIN_Y = 0;
 
 //=============================================================================
 /**
