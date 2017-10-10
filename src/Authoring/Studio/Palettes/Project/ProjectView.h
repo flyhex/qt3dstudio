@@ -35,6 +35,7 @@
 #include <QModelIndex>
 
 class ProjectFileSystemModel;
+QT_FORWARD_DECLARE_CLASS(QQuickItem)
 
 class ProjectView : public QQuickWidget,
                     public CPresentationChangeListener,
@@ -60,7 +61,7 @@ public:
     Q_INVOKABLE void modelAction();
     Q_INVOKABLE void behaviorAction();
 
-    Q_INVOKABLE void startDrag(int row);
+    Q_INVOKABLE void startDrag(QQuickItem *item, int row);
 
     Q_INVOKABLE void showInExplorer(int row) const;
     Q_INVOKABLE void copyPath(int row) const;

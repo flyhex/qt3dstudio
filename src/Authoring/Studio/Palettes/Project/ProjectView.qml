@@ -116,7 +116,7 @@ Rectangle {
                                     drag.target: dragItem
                                 }
 
-                                Drag.onDragStarted: _projectView.startDrag(index)
+                                Drag.onDragStarted: _projectView.startDrag(dragArea, index)
                             }
                         }
                     }

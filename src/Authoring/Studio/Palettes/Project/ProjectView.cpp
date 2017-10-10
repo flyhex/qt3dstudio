@@ -47,6 +47,7 @@
 #include <QtGui/qdesktopservices.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
+#include <QtQuick/qquickitem.h>
 
 ProjectView::ProjectView(QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
@@ -160,13 +161,14 @@ void ProjectView::OnImmediateRefreshInstanceMultiple(UICDM::CUICDMInstanceHandle
     Q_UNUSED(inInstanceCount);
 }
 
-void ProjectView::startDrag(int row)
+void ProjectView::startDrag(QQuickItem *item, int row)
 {
     const auto index = m_ProjectModel->index(row);
 
     QDrag drag(this);
     drag.setMimeData(m_ProjectModel->mimeData({index}));
     drag.exec(Qt::CopyAction);
+    QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
 void ProjectView::showInExplorer(int row) const

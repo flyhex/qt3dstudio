@@ -61,12 +61,11 @@ Rectangle {
 
                 MouseArea {
                     id: dragArea
-                    property bool dragging: false
                     anchors.fill: parent
                     drag.target: dragItem
                 }
 
-                Drag.onDragStarted: _basicObjectsView.startDrag(model.index)
+                Drag.onDragStarted: _basicObjectsView.startDrag(dragArea, model.index)
             }
             Row {
                 id: contentRow

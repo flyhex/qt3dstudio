@@ -32,6 +32,7 @@
 #include <QQuickWidget>
 
 class BasicObjectsModel;
+QT_FORWARD_DECLARE_CLASS(QQuickItem)
 
 class BasicObjectsView : public QQuickWidget
 {
@@ -41,7 +42,7 @@ public:
 
     QSize sizeHint() const override;
 
-    Q_INVOKABLE void startDrag(int row);
+    Q_INVOKABLE void startDrag(QQuickItem *item, int row);
 private:
     void initialize();
 
