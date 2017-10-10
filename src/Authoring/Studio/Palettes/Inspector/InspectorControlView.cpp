@@ -123,6 +123,11 @@ void InspectorControlView::OnLoadedSubPresentation()
                 std::bind(&InspectorControlView::onFilesChanged, this, std::placeholders::_1));
 }
 
+void InspectorControlView::OnTimeChanged()
+{
+    m_inspectorControlModel->refresh();
+}
+
 void InspectorControlView::onFilesChanged(
         const Q3DStudio::TFileModificationList &inFileModificationList)
 {
@@ -239,6 +244,8 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
         auto sp = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
         m_PropertyChangeConnection = sp->ConnectInstancePropertyValue(
                     std::bind(&InspectorControlView::titleChanged, this));
+        m_timeChanged = sp->ConnectComponentSeconds(
+                    std::bind(&InspectorControlView::OnTimeChanged, this));
     }
 }
 

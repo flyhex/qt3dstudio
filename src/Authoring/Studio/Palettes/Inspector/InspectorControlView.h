@@ -100,11 +100,13 @@ private:
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
     void OnLoadedSubPresentation() override;
+    void OnTimeChanged();
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     void showBrowser(QQuickWidget *browser, const QPoint &point);
 
     std::shared_ptr<UICDM::ISignalConnection> m_selectionChangedConnection;
+    std::shared_ptr<UICDM::ISignalConnection> m_timeChanged;
     std::shared_ptr<UICDM::ISignalConnection> m_DirectoryConnection;
     std::shared_ptr<UICDM::ISignalConnection> m_PropertyChangeConnection;
     QColor m_backgroundColor;
