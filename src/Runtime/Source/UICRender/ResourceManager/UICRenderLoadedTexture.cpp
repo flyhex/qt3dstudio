@@ -659,17 +659,18 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
     QString fileName;
     inFactory.GetPathForFile(inPath, fileName);
     if (theStream.mPtr && inPath.size() > 3) {
-        if (inPath.endsWith("png"))
+        if (inPath.endsWith("png", Qt::CaseInsensitive))
             theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation);
-        else if (inPath.endsWith("jpg") || inPath.endsWith("peg"))
+        else if (inPath.endsWith("jpg", Qt::CaseInsensitive)
+                 || inPath.endsWith("peg", Qt::CaseInsensitive))
             theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation);
-        else if (inPath.endsWith("dds"))
+        else if (inPath.endsWith("dds", Qt::CaseInsensitive))
             theLoadedImage = LoadDDS(*theStream, inFlipY, inFoundation);
-        else if (inPath.endsWith("gif"))
+        else if (inPath.endsWith("gif", Qt::CaseInsensitive))
             theLoadedImage = LoadGIF(*theStream, !inFlipY, inFoundation);
-        else if (inPath.endsWith("bmp"))
+        else if (inPath.endsWith("bmp", Qt::CaseInsensitive))
             theLoadedImage = LoadBMP(*theStream, !inFlipY, inFoundation);
-        else if (inPath.endsWith("hdr"))
+        else if (inPath.endsWith("hdr", Qt::CaseInsensitive))
             theLoadedImage = LoadHDR(*theStream, inFoundation);
         else {
             qCCritical(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
