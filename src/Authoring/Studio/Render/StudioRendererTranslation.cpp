@@ -2752,7 +2752,12 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         }
     }
     // Pick against the widget first if possible.
-    if (m_LastRenderedWidget) {
+    // If we are in Edit camera mode, m_LastRenderedWidget might be outdated
+    // (and invisible = non-pickable) if the scene was not re-rendered when
+    // switching to edit camera. In this case do not pick against it, nor
+    // when it is inactive.
+    if (m_LastRenderedWidget && !m_EditCameraEnabled
+        && m_LastRenderedWidget->GetNode().m_Flags.IsActive()) {
         Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
         if (picked.hasValue()) {
             RequestRender();
