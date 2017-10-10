@@ -85,12 +85,25 @@ public:
         case QEvent::ShortcutOverride:
         case QEvent::KeyPress: {
             QKeyEvent *ke = static_cast<QKeyEvent *>(event);
-            return m_hotkeys->OnKeyDown(ke->key(), ke->count(), ke->modifiers()) ||
-                   m_hotkeys->OnChar(ke->key(), ke->count(), ke->modifiers());
+            // We are not in a text field, so we can
+            // ignore auto-repeated key presses as it breaks
+            // timeline animation on/off switching by hotkey
+            if (!ke->isAutoRepeat()) {
+                return m_hotkeys->OnKeyDown(ke->key(), ke->count(), ke->modifiers())
+                        || m_hotkeys->OnChar(ke->key(), ke->count(), ke->modifiers());
+            } else {
+                return true;
+            }
         }
         case QEvent::KeyRelease: {
             QKeyEvent *ke = static_cast<QKeyEvent *>(event);
-            return m_hotkeys->OnKeyUp(ke->key(), ke->count(), ke->modifiers());
+            // We are not in a text field, so we can
+            // ignore auto-repeated key releases as it breaks
+            // timeline animation on/off switching by hotkey
+            if (!ke->isAutoRepeat())
+                return m_hotkeys->OnKeyUp(ke->key(), ke->count(), ke->modifiers());
+            else
+                return true;
         }
         default:
             break;
