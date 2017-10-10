@@ -36,26 +36,20 @@ Rectangle {
 
     readonly property bool masterSlide: _slideView.showMasterSlide
 
-    color: _backgroundColor
-
-    MouseArea {
-        id: mainMouseArea
-
-        propagateComposedEvents: true
-        anchors.fill: parent
-        acceptedButtons: Qt.AllButtons
-        onClicked: {
-            if (mouse.button === Qt.RightButton) {
-                _slideView.showContextMenu(mouse.x, mouse.y, -1);
-            } else {
-                root.focus = true;
-                //Unselect All element when we click outside slider item in listView.
-                //It worked as it in old version.
-                _slideView.deselectAll();
-                mouse.accepted = false
-            }
+    function handleMouseClicks(mouse) {
+        if (mouse.button === Qt.RightButton) {
+            const coords = mapToItem(root, mouse.x, mouse.y);
+            _slideView.showContextMenu(coords.x, coords.y, -1);
+        } else {
+            root.focus = true;
+            //Unselect All element when we click outside slider item in listView.
+            //It worked as it in old version.
+            _slideView.deselectAll();
+            mouse.accepted = false
         }
     }
+
+    color: _backgroundColor
 
     Column {
         anchors {
@@ -66,33 +60,44 @@ Rectangle {
 
         spacing: 5
 
-        Column {
-            id: masterButtonColumn
-            spacing: -4
-            anchors.horizontalCenter: parent.horizontalCenter
-            Button {
-                id: masterEditButton
-                anchors.horizontalCenter: parent.horizontalCenter
+        MouseArea {
+            id: masterMouseArea
 
-                onClicked: _slideView.showMasterSlide = !_slideView.showMasterSlide
+            width: parent.width
+            height: childrenRect.height
 
-                background: Rectangle {
-                    color: "transparent"
-                }
-                contentItem: Image {
-                    source: _resDir + "Slide-Master-Active.png"
-                }
-            }
-            StyledLabel {
-                id: masterEditLabel
-                text: _slideView.showMasterSlide ? qsTr("Leave Master") : qsTr("Edit Master")
-                font.pixelSize: _fontSize
-                color: _masterColor
-                verticalAlignment: Text.AlignVCenter
+            propagateComposedEvents: true
+            acceptedButtons: Qt.AllButtons
+            onClicked: root.handleMouseClicks(mouse)
+
+            Column {
+                id: masterButtonColumn
+                spacing: -4
                 anchors.horizontalCenter: parent.horizontalCenter
+                Button {
+                    id: masterEditButton
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    onClicked: _slideView.showMasterSlide = !_slideView.showMasterSlide
+
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+                    contentItem: Image {
+                        source: _resDir + "Slide-Master-Active.png"
+                    }
+                }
+
+                StyledLabel {
+                    id: masterEditLabel
+                    text: _slideView.showMasterSlide ? qsTr("Leave Master") : qsTr("Edit Master")
+                    font.pixelSize: _fontSize
+                    color: _masterColor
+                    verticalAlignment: Text.AlignVCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
         }
-
         StyledMenuSeparator {
             id: separator
             leftPadding: 12
@@ -114,6 +119,18 @@ Rectangle {
             model: _slideView.currentModel
             spacing: 10
 
+            MouseArea {
+                // mouse handling for the area not covered by the delegates
+                propagateComposedEvents: true
+                anchors.fill: parent
+                acceptedButtons: Qt.AllButtons
+                onClicked: {
+                    if (slideList.indexAt(mouse.x, mouse.y) === -1)
+                        root.handleMouseClicks(mouse);
+                    else
+                        mouse.accepted = false;
+                }
+            }
 
             delegate: MouseArea {
                 id: delegateArea
