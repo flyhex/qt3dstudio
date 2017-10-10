@@ -32,3 +32,6 @@ LIBS += \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 macos:QMAKE_RPATHDIR += $$PWD/../../../lib
+
+target.path = $$[QT_INSTALL_BINS]
+INSTALLS += target
