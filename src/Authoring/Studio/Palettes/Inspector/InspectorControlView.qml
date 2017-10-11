@@ -221,9 +221,6 @@ Rectangle {
                                     readonly property var modelData: propertyRow.modelData
                                     sourceComponent: {
                                         const dataType = modelData.dataType;
-                                        console.warn("KDAB_TODO: DEBUG for type", dataType,
-                                                     "property", modelData.propertyType,
-                                                     "text ", model.modelData.title);
                                         switch (dataType) {
                                         case DataModelDataType.Long:
                                             if (modelData.propertyType ===
