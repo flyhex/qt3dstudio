@@ -40,7 +40,6 @@ Row {
     id: root
 
     property alias value: slider.value
-    property int intValue: slider.value
     property alias sliderMin: slider.from
     property alias sliderMax: slider.to
     property bool intSlider: false
@@ -79,7 +78,8 @@ Row {
 
         from: 0
         to: 100
-        stepSize: 2
+        stepSize: root.intSlider ? 1 : 2
+        snapMode: root.intSlider ? Slider.SnapAlways : Slider.NoSnap
 
         onMoved: {
             if (!rateLimiter.running) {

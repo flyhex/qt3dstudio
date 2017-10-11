@@ -696,10 +696,11 @@ Rectangle {
 
         HandlerPropertyBaseSlider {
             intSlider: true;
+            property int intValue: Math.round(value)
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
-            intValue: parent.modelData.value
+            value: parent.modelData.value
             sliderMin: values[0]
             sliderMax: values[1]
 
