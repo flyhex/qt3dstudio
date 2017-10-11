@@ -85,6 +85,17 @@ void CWGLRenderContext::Open(UICWindow inRenderWindow)
     OpenNormalContext(qRenderWidget);
 }
 
+static bool compareContextVersion(QSurfaceFormat a, QSurfaceFormat b)
+{
+    if (a.renderableType() != b.renderableType())
+        return false;
+    if (a.majorVersion() != b.majorVersion())
+        return false;
+    if (a.minorVersion() != b.minorVersion())
+        return false;
+    return true;
+}
+
 QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
 {
     struct ContextVersion {
@@ -97,6 +108,7 @@ QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
         {4, 1, qt3ds::render::NVRenderContextValues::GL4},
         {3, 3, qt3ds::render::NVRenderContextValues::GL3},
         {2, 1, qt3ds::render::NVRenderContextValues::GL2},
+        {2, 0, qt3ds::render::NVRenderContextValues::GLES2},
         {0, 0, qt3ds::render::NVRenderContextValues::NullContext}
     };
 
@@ -111,9 +123,13 @@ QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
         QScopedPointer<QOffscreenSurface> offscreenSurface(new QOffscreenSurface);
 
         QSurfaceFormat format = window->format();
-        format.setRenderableType(QSurfaceFormat::OpenGL);
-        if (ver.major >= 2)
-            format.setProfile(QSurfaceFormat::CoreProfile);
+        if (ver.contextType == qt3ds::render::NVRenderContextValues::GLES2) {
+            format.setRenderableType(QSurfaceFormat::OpenGLES);
+        } else {
+            format.setRenderableType(QSurfaceFormat::OpenGL);
+            if (ver.major >= 2)
+                format.setProfile(QSurfaceFormat::CoreProfile);
+        }
         format.setMajorVersion(ver.major);
         format.setMinorVersion(ver.minor);
         format.setDepthBufferSize(24);
@@ -125,7 +141,7 @@ QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
 
         QScopedPointer<QOpenGLContext> queryContext(new QOpenGLContext);
         queryContext->setFormat(format);
-        if (queryContext->create()) {
+        if (queryContext->create() && compareContextVersion(format, queryContext->format())) {
             valid = true;
             result = format;
             break;

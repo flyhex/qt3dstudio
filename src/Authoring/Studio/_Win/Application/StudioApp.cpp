@@ -42,6 +42,7 @@
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qurl.h>
+#include <QtGui/qopenglcontext.h>
 
 int main(int argc, char *argv[])
 {
@@ -59,6 +60,27 @@ int main(int argc, char *argv[])
     openGL33Format.setMinorVersion(3);
     openGL33Format.setStencilBufferSize(8);
     QSurfaceFormat::setDefaultFormat(openGL33Format);
+#elif defined(QT_OPENGL_ES_2)
+    QSurfaceFormat format;
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setMajorVersion(2);
+    format.setMinorVersion(0);
+    format.setDepthBufferSize(24);
+    format.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
+#else
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setStencilBufferSize(8);
+    QScopedPointer<QOpenGLContext> context(new QOpenGLContext());
+    context->setFormat(format);
+    context->create();
+    if (context->isOpenGLES()) {
+        format.setRenderableType(QSurfaceFormat::OpenGLES);
+        format.setMajorVersion(2);
+        format.setMinorVersion(0);
+        QSurfaceFormat::setDefaultFormat(format);
+    }
 #endif
 
     // init runtime static resources

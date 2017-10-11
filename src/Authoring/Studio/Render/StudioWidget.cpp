@@ -291,9 +291,15 @@ NVRenderShaderProgram *IStudioWidget::CreateWidgetPickShader(IRenderWidgetContex
     theVertexGenerator.Append("}");
     theFragmentGenerator.AddUniform("object_id", "int");
     theFragmentGenerator.Append("void main() {");
-    theFragmentGenerator.Append("\tgl_FragColor.r = float(object_id % 256)/255.0;");
+    if (inRenderContext.GetRenderContextType() == NVRenderContextValues::GLES2) {
+        theFragmentGenerator.Append("int moddiv = object_id / 256;");
+        theFragmentGenerator.Append(
+                    "\tgl_FragColor.r = float(object_id - moddiv * 256)/255.0;");
+    } else {
+        theFragmentGenerator.Append("\tgl_FragColor.r = float(object_id % 256)/255.0;");
+    }
     theFragmentGenerator.Append("\tgl_FragColor.g = float(object_id / 256)/255.0;");
-    theFragmentGenerator.Append("\tgl_FragColor.b = 0;");
+    theFragmentGenerator.Append("\tgl_FragColor.b = 0.0;");
     theFragmentGenerator.Append("\tgl_FragColor.a = 1.0;");
     theFragmentGenerator.Append("}");
     return inWidgetContext.CompileAndStoreShader(theSharedName);
