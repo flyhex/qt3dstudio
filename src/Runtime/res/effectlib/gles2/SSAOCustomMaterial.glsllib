@@ -1,5 +1,6 @@
 /****************************************************************************
 **
+** Copyright (C) 2014 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -27,22 +28,73 @@
 **
 ****************************************************************************/
 
-#ifndef QT3DSOPENGLPREFIX_H
-#define QT3DSOPENGLPREFIX_H
+#ifndef SSAO_CUSTOM_MATERIAL_GLSLLIB
+#define SSAO_CUSTOM_MATERIAL_GLSLLIB
 
-#include <QtGui/qtguiglobal.h>
-#if defined(QT_OPENGL_ES)
-#define GL_GLEXT_PROTOTYPES
-#if defined(QT_OPENGL_ES_3_2)
-#include <GLES3/gl32.h>
+#ifndef UIC_ENABLE_SSAO
+#define UIC_ENABLE_SSAO 0
+#endif
+
+#ifndef UIC_ENABLE_SSDO
+#define UIC_ENABLE_SSDO 0
+#endif
+
+#if UIC_ENABLE_SSAO || UIC_ENABLE_SSDO
+
+#include "viewProperties.glsllib"
+#if UIC_ENABLE_SSDO
+#include "screenSpaceDO.glsllib"
+
+
+uniform vec4 ao_properties;
+uniform vec4 ao_properties2;
+uniform vec4 shadow_properties;
+uniform vec4 aoScreenConst;
+uniform vec4 UvToEyeConst;
+
+
+uniform sampler2D depth_sampler;
+#endif
+uniform sampler2D ao_sampler;
+uniform vec2 ao_sampler_size;
+
+#endif  // UIC_ENABLE_SSAO || UIC_ENABLE_SSDO
+
+#if UIC_ENABLE_SSAO
+
+float customMaterialAO()
+{
+#if UIC_ENABLE_SSDO
+    vec2 smpUV = (gl_FragCoord.xy) * aoScreenConst.zw;
 #else
-#include <GLES2/gl2.h>
-#include <GLES3/gl3.h>
+    vec2 smpUV = gl_FragCoord.xy / ao_sampler_size;
+#endif
+    return texture(ao_sampler, smpUV).x;
+}
+
+#else
+
+float customMaterialAO()
+{
+    return 1.0;
+}
+
 #endif
 
-// Adding this to ensure that platform version of gl2ext.h is included
-// before Qt's qopengles2ext.h which is missing symbols we need
-#include <GLES2/gl2ext.h>
+#if UIC_ENABLE_SSDO
+
+float customMaterialShadow( vec3 lightDir, vec3 varWorldPos )
+{
+    return shadowOcclusion( depth_sampler, lightDir, varWorldPos, view_matrix, view_projection_matrix, shadow_properties, camera_properties, aoScreenConst, UvToEyeConst );
+}
+
+#else
+
+float customMaterialShadow( vec3 lightDir, vec3 varWorldPos )
+{
+    return 1.0;
+}
+
 #endif
 
-#endif // QT3DSOPENGLPREFIX_H
+#endif  // #ifndef SSAO_CUSTOM_MATERIAL_GLSLLIB

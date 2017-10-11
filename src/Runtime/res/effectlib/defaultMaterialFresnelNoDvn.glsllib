@@ -1,5 +1,6 @@
 /****************************************************************************
 **
+** Copyright (C) 2014 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -27,22 +28,16 @@
 **
 ****************************************************************************/
 
-#ifndef QT3DSOPENGLPREFIX_H
-#define QT3DSOPENGLPREFIX_H
+#ifndef DEFAULT_MATERIAL_FRESNEL_NO_DVN_GLSLLIB
+#define DEFAULT_MATERIAL_FRESNEL_NO_DVN_GLSLLIB
 
-#include <QtGui/qtguiglobal.h>
-#if defined(QT_OPENGL_ES)
-#define GL_GLEXT_PROTOTYPES
-#if defined(QT_OPENGL_ES_3_2)
-#include <GLES3/gl32.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES3/gl3.h>
+float defaultMaterialSimpleFresnel( in vec3 N, in vec3 viewDir, in float ior, float fresnelPower )
+{
+    float F = ((1.0-ior) * (1.0-ior)) / ((1.0+ior) * (1.0+ior));
+    float VdotN = dot(viewDir, N);
+    VdotN = clamp( VdotN, 0.0, 1.0 );
+    float ratio = F + (1.0 - F) * pow(1.0 - VdotN, fresnelPower);
+    return clamp( ratio * pow( VdotN, fresnelPower ), 0.0, 1.0 );
+}
+
 #endif
-
-// Adding this to ensure that platform version of gl2ext.h is included
-// before Qt's qopengles2ext.h which is missing symbols we need
-#include <GLES2/gl2ext.h>
-#endif
-
-#endif // QT3DSOPENGLPREFIX_H

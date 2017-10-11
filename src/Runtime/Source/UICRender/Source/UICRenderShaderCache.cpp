@@ -287,8 +287,12 @@ struct ShaderCache : public IShaderCache
 
     void AddShaderExtensionStrings(ShaderType::Enum shaderType, bool isGLES)
     {
-        if (isGLES)
-            m_InsertStr += "#extension GL_OES_standard_derivatives : enable\n";
+        if (isGLES) {
+            if (m_RenderContext.IsStandardDerivativesSupported())
+                m_InsertStr += "#extension GL_OES_standard_derivatives : enable\n";
+            else
+                m_InsertStr += "#extension GL_OES_standard_derivatives : disable\n";
+        }
 
         if (IUICRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
             if (shaderType == ShaderType::TessControl || shaderType == ShaderType::TessEval) {
@@ -304,20 +308,20 @@ struct ShaderCache : public IShaderCache
         } else {
             if (shaderType == ShaderType::Vertex || shaderType == ShaderType::Fragment
                 || shaderType == ShaderType::Geometry) {
-                m_InsertStr += "#extension GL_ARB_gpu_shader5 : enable\n";
-                m_InsertStr += "#extension GL_ARB_shading_language_420pack : enable\n";
-                if (m_RenderContext.IsShaderImageLoadStoreSupported()) {
+                if (m_RenderContext.GetRenderContextType() != NVRenderContextValues::GLES2) {
+                    m_InsertStr += "#extension GL_ARB_gpu_shader5 : enable\n";
+                    m_InsertStr += "#extension GL_ARB_shading_language_420pack : enable\n";
+                }
+                if (isGLES && m_RenderContext.IsTextureLodSupported())
+                    m_InsertStr += "#extension GL_EXT_shader_texture_lod : enable\n";
+                if (m_RenderContext.IsShaderImageLoadStoreSupported())
                     m_InsertStr += "#extension GL_ARB_shader_image_load_store : enable\n";
-                }
-                if (m_RenderContext.IsAtomicCounterBufferSupported()) {
+                if (m_RenderContext.IsAtomicCounterBufferSupported())
                     m_InsertStr += "#extension GL_ARB_shader_atomic_counters : enable\n";
-                }
-                if (m_RenderContext.IsStorageBufferSupported()) {
+                if (m_RenderContext.IsStorageBufferSupported())
                     m_InsertStr += "#extension GL_ARB_shader_storage_buffer_object : enable\n";
-                }
-                if (m_RenderContext.IsAdvancedBlendHwSupportedKHR()) {
+                if (m_RenderContext.IsAdvancedBlendHwSupportedKHR())
                     m_InsertStr += "#extension GL_KHR_blend_equation_advanced : enable\n";
-                }
             }
         }
     }
@@ -338,7 +342,7 @@ struct ShaderCache : public IShaderCache
         const QT3DSU32 type = (QT3DSU32)m_RenderContext.GetRenderContextType();
         switch (type) {
         case NVRenderContextValues::GLES2:
-            stream << "1" << minor << "0 es\n";
+            stream << "1" << minor << "0\n";
             break;
         case NVRenderContextValues::GL2:
             stream << "1" << minor << "0\n";
@@ -390,11 +394,14 @@ struct ShaderCache : public IShaderCache
 
                 AddBackwardCompatibilityDefines(shaderType);
             } else {
+                // GLES2
                 m_InsertStr.append("precision mediump float;\n"
                                    "precision mediump int;\n"
-                                   "precision mediump sampler2D;\n"
-                                   "precision mediump sampler2DArray;\n"
-                                   "precision mediump sampler2DShadow;\n");
+                                   "#define texture texture2D\n");
+                if (m_RenderContext.IsTextureLodSupported())
+                    m_InsertStr.append("#define textureLod texture2DLodEXT\n");
+                else
+                    m_InsertStr.append("#define textureLod(s, co, lod) texture2D(s, co)\n");
             }
         } else {
             if (!IUICRenderer::IsGl2Context(m_RenderContext.GetRenderContextType())) {

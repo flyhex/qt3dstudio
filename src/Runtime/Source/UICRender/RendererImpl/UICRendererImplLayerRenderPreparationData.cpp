@@ -1169,7 +1169,8 @@ namespace render {
             thePrepResult.m_Flags.SetRequiresDepthTexture(requiresDepthPrepass
                                                           || NeedsWidgetTexture());
             thePrepResult.m_Flags.SetShouldRenderToTexture(shouldRenderToTexture);
-            thePrepResult.m_Flags.SetRequiresSsaoPass(SSAOEnabled);
+            if (m_Renderer.GetContext().GetRenderContextType() != NVRenderContextValues::GLES2)
+                thePrepResult.m_Flags.SetRequiresSsaoPass(SSAOEnabled);
 
             if (thePrepResult.IsLayerVisible()) {
                 if (shouldRenderToTexture) {
@@ -1248,8 +1249,9 @@ namespace render {
                         if (theLight->m_Flags.IsGloballyActive()) {
                             if (theLight->m_Scope == NULL) {
                                 m_Lights.push_back(theLight);
-
-                                if (theLight->m_CastShadow && GetShadowMapManager()) {
+                                if (m_Renderer.GetContext().GetRenderContextType()
+                                        != NVRenderContextValues::GLES2
+                                        && theLight->m_CastShadow && GetShadowMapManager()) {
                                     // PKC -- use of "res" as an exponent of two is an annoying
                                     // artifact of the XML interface
                                     // I'll change this with an enum interface later on, but that's
@@ -1263,7 +1265,6 @@ namespace render {
                                         m_Lights.size() - 1, mapSize, mapSize,
                                         NVRenderTextureFormats::R16, 1, mapMode,
                                         ShadowFilterValues::NONE);
-
                                     thePrepResult.m_Flags.SetRequiresShadowMapPass(true);
                                     SetShaderFeature("UIC_ENABLE_SSM", true);
                                 }

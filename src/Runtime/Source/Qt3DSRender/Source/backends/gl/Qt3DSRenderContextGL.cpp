@@ -54,7 +54,12 @@ namespace render {
         NVScopedRefCounted<IStringTable> theStringTable(inStringTable);
         NVScopedRefCounted<NVRenderBackend> theBackend;
         bool isES = format.renderableType() == QSurfaceFormat::OpenGLES;
-        if (format.majorVersion() == 3 && format.minorVersion() >= 1 && !isES) {
+        if (isES && (format.majorVersion() == 2
+                     || (format.majorVersion() == 3 && format.minorVersion() == 0))) {
+            theBackend = QT3DS_NEW(foundation.getAllocator(), NVRenderBackendGLES2Impl)(foundation,
+                                                                                   *theStringTable,
+                                                                                   format);
+        } else if (format.majorVersion() == 3 && format.minorVersion() >= 1 && !isES) {
             theBackend = QT3DS_NEW(foundation.getAllocator(), NVRenderBackendGL3Impl)(foundation,
                                                                                    *theStringTable,
                                                                                    format);

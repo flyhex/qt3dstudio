@@ -36,6 +36,8 @@ namespace uic {
 namespace render {
 
     class UICShadowMap;
+    struct SShaderGeneratorGeneratedShader;
+    struct SLightConstantProperties;
 
     class IDefaultMaterialVertexPipeline : public IShaderStageGenerator
     {
@@ -110,6 +112,8 @@ namespace render {
 
         static IDefaultMaterialShaderGenerator &
         CreateDefaultMaterialShaderGenerator(IUICRenderContext &inRenderContext);
+
+        SLightConstantProperties *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader);
     };
 }
 }

@@ -33,15 +33,21 @@
 #include "render/backends/gl/Qt3DSRenderBackendRenderStatesGL.h"
 #include "render/backends/gl/Qt3DSRenderBackendShaderProgramGL.h"
 
-#define GL_CALL_EXTRA_FUNCTION(x) m_glExtraFunctions->x; checkGLError();
+#ifdef RENDER_BACKEND_LOG_GL_ERRORS
+#define RENDER_LOG_ERROR_PARAMS(x) checkGLError(#x, __FILE__, __LINE__)
+#else
+#define RENDER_LOG_ERROR_PARAMS(x) checkGLError()
+#endif
+
+#define GL_CALL_EXTRA_FUNCTION(x) m_glExtraFunctions->x; RENDER_LOG_ERROR_PARAMS(x);
 
 #if defined(QT_OPENGL_ES)
-#define GL_CALL_TIMER_EXT(x) m_qt3dsExtensions->x; checkGLError();
-#define GL_CALL_TESSELATION_EXT(x) m_qt3dsExtensions->x; checkGLError();
+#define GL_CALL_TIMER_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_TESSELATION_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
 #else
-#define GL_CALL_TIMER_EXT(x) m_timerExtension->x; checkGLError();
-#define GL_CALL_TESSELATION_EXT(x) m_tessellationShader->x; checkGLError();
-#define GL_CALL_MULTISAMPLE_EXT(x) m_multiSample->x; checkGLError();
+#define GL_CALL_TIMER_EXT(x) m_timerExtension->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_TESSELATION_EXT(x) m_tessellationShader->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_MULTISAMPLE_EXT(x) m_multiSample->x; RENDER_LOG_ERROR_PARAMS(x);
 #endif
 
 namespace qt3ds {
@@ -71,7 +77,7 @@ namespace render {
         eastl::string apiVendor(getVendorString());
         qCInfo(TRACE_INFO, "HW vendor: %s", apiVendor.c_str());
 
-        eastl::string apiRenderer(geRendererString());
+        eastl::string apiRenderer(getRendererString());
         qCInfo(TRACE_INFO, "Vendor renderer: %s", apiRenderer.c_str());
 
         // clear support bits
@@ -85,11 +91,8 @@ namespace render {
 
         for (QT3DSI32 i = 0; i < numExtensions; i++) {
             char *extensionString = (char *)GL_CALL_EXTRA_FUNCTION(glGetStringi(GL_EXTENSIONS, i));
-            const TContextStr::value_type *thePtr =
-                reinterpret_cast<TContextStr::value_type *>(extensionString);
-            m_Extensions.push_back(
-                TContextStr(ForwardingAllocator(m_Foundation.getAllocator(), "ExtensionStr")));
-            m_Extensions.back().assign(thePtr);
+
+            m_extensions.push_back(QString::fromLocal8Bit(extensionString));
 
             if (extensionBuffer.size())
                 extensionBuffer.append(" ");
@@ -123,6 +126,9 @@ namespace render {
         m_backendSupport.caps.bits.bDepthStencilSupported = true;
         // constant buffers support is always true
         m_backendSupport.caps.bits.bConstantBufferSupported = true;
+        m_backendSupport.caps.bits.bStandardDerivativesSupported = true;
+        m_backendSupport.caps.bits.bVertexArrayObjectSupported = true;
+        m_backendSupport.caps.bits.bTextureLodSupported = true;
 
         if (!isESCompatible()) {
             // render to float textures is always supported on none ES systems which support >=GL3
@@ -143,7 +149,7 @@ namespace render {
         setAndInspectHardwareCaps();
 
         // Initialize extensions
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES_2)
         m_qt3dsExtensions = new Qt3DSOpenGLES2Extensions;
         m_qt3dsExtensions->initializeOpenGLFunctions();
 #else
@@ -162,7 +168,7 @@ namespace render {
     {
         if (m_pCurrentMiscState)
             NVDelete(m_Foundation.getAllocator(), m_pCurrentMiscState);
-#if !defined(QT_OPENGL_ES)
+#if !defined(QT_OPENGL_ES_2)
         if (m_timerExtension)
             delete m_timerExtension;
         if (m_tessellationShader)
@@ -393,7 +399,9 @@ namespace render {
             && m_pCurrentMiscState->m_PatchVertexCount != inputAssembler->m_PatchVertexCount) {
             m_pCurrentMiscState->m_PatchVertexCount = inputAssembler->m_PatchVertexCount;
 #if defined(QT_OPENGL_ES)
+#if !defined (QT_OPENGL_ES_2)
             GL_CALL_TESSELATION_EXT(glPatchParameteriEXT(GL_PATCH_VERTICES, inputAssembler->m_PatchVertexCount));
+#endif
 #else
             GL_CALL_TESSELATION_EXT(glPatchParameteri(GL_PATCH_VERTICES, inputAssembler->m_PatchVertexCount));
 #endif
@@ -736,7 +744,7 @@ namespace render {
         if (m_backendSupport.caps.bits.bTimerQuerySupported) {
             GLuint queryID = HandleToID_cast(GLuint, size_t, qo);
 #if defined(QT_OPENGL_ES)
-            GL_CALL_TIMER_EXT(glQueryCounterEXT(queryID, GL_TIMESTAMP));
+            GL_CALL_TIMER_EXT(glQueryCounterEXT(queryID, GL_TIMESTAMP_EXT));
 #else
             GL_CALL_TIMER_EXT(glQueryCounter(queryID, GL_TIMESTAMP));
 #endif

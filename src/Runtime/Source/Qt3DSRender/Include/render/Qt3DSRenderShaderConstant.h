@@ -215,7 +215,7 @@ namespace render {
         virtual void Release() = 0;
 
         virtual void Validate(NVRenderShaderProgram *inShader) = 0;
-        virtual void BindToPorgram(NVRenderShaderProgram *inShader) = 0;
+        virtual void BindToProgram(NVRenderShaderProgram *inShader) = 0;
         virtual void Update() = 0;
     };
 
@@ -271,7 +271,7 @@ namespace render {
                 m_pCB->Update();
         }
 
-        void BindToPorgram(NVRenderShaderProgram *inShader) override
+        void BindToProgram(NVRenderShaderProgram *inShader) override
         {
             if (m_pCB)
                 m_pCB->BindToShaderProgram(inShader, m_Location, m_Binding);
@@ -329,7 +329,7 @@ namespace render {
                 m_pSB->Update();
         }
 
-        void BindToPorgram(NVRenderShaderProgram * /*inShader*/) override
+        void BindToProgram(NVRenderShaderProgram * /*inShader*/) override
         {
             if (m_pSB)
                 m_pSB->BindToShaderProgram(m_Location);
@@ -388,7 +388,7 @@ namespace render {
                 m_pAcB->Update();
         }
 
-        void BindToPorgram(NVRenderShaderProgram * /*inShader*/) override
+        void BindToProgram(NVRenderShaderProgram * /*inShader*/) override
         {
             if (m_pAcB)
                 m_pAcB->BindToShaderProgram(m_Location);

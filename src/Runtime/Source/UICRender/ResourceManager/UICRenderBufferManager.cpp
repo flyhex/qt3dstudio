@@ -249,12 +249,17 @@ struct SBufferManager : public IBufferManager
         NVRenderTexture2D *theTexture = m_Context->CreateTexture2D();
         if (inLoadedImage.data) {
             qt3ds::render::NVRenderTextureFormats::Enum destFormat = inLoadedImage.format;
-            if (inBsdfMipmaps)
-                destFormat = qt3ds::render::NVRenderTextureFormats::RGBA16F;
-            else
+            if (inBsdfMipmaps) {
+                if (m_Context->GetRenderContextType() == render::NVRenderContextValues::GLES2)
+                    destFormat = qt3ds::render::NVRenderTextureFormats::RGBA8;
+                else
+                    destFormat = qt3ds::render::NVRenderTextureFormats::RGBA16F;
+            }
+            else {
                 theTexture->SetTextureData(
                     NVDataRef<QT3DSU8>((QT3DSU8 *)inLoadedImage.data, inLoadedImage.dataSizeInBytes), 0,
                     inLoadedImage.width, inLoadedImage.height, inLoadedImage.format, destFormat);
+            }
 
             if (inBsdfMipmaps
                 && NVRenderTextureFormats::isUncompressedTextureFormat(inLoadedImage.format)) {

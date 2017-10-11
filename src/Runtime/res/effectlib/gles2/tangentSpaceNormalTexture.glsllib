@@ -44,6 +44,12 @@
 
 #endif
 
+int modulo(int a, int b)
+{
+    int k = (a / b);
+    return a - k*b;
+}
+
 //interpreting the color values of a bitmap as a vector in tangent space
 vec3 tangentSpaceNormalTexture( in sampler2D tex, in float factor, in bool flipTangentU, in bool flipTangentV
                               , in texture_coordinate_info uvw, in vec2 cropU, in vec2 cropV, in int wrapU, in int wrapV )
@@ -53,13 +59,13 @@ vec3 tangentSpaceNormalTexture( in sampler2D tex, in float factor, in bool flipT
   bool flipV = flipTangentV;
   if ( wrapU == wrap_mirrored_repeat )
   {
-    if (    ( ( 0.0 < uvw.position.x ) && ( int( uvw.position.x ) % 2 == 1 ) )
-        ||  ( ( uvw.position.x < 0.0 ) && ( int( uvw.position.x ) % 2 == 0 ) ) )
+    if (    ( ( 0.0 < uvw.position.x ) && ( modulo(int( uvw.position.x ), 2) == 1 ) )
+        ||  ( ( uvw.position.x < 0.0 ) && ( modulo(int( uvw.position.x ), 2) == 0 ) ) )
     {
       flipU = !flipU;
     }
-    if (    ( ( 0.0 < uvw.position.y ) && ( int( uvw.position.y ) % 2 == 1 ) )
-        ||  ( ( uvw.position.y < 0.0 ) && ( int( uvw.position.y ) % 2 == 0 ) ) )
+    if (    ( ( 0.0 < uvw.position.y ) && ( modulo(int( uvw.position.y ), 2) == 1 ) )
+        ||  ( ( uvw.position.y < 0.0 ) && ( modulo(int( uvw.position.y ), 2) == 0 ) ) )
     {
       flipV = !flipV;
     }

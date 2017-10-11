@@ -119,8 +119,8 @@ struct SPGRenderer : public IPixelGraphicsRenderer
             m_FragmentGenerator.Begin();
             m_VertexGenerator.AddAttribute("attr_pos", "vec2");
             m_VertexGenerator.AddUniform("model_view_projection", "mat4");
-            m_VertexGenerator.AddUniform("leftright", "float[2]");
-            m_VertexGenerator.AddUniform("bottomtop", "float[2]");
+            m_VertexGenerator.AddUniform("leftright[2]", "float");
+            m_VertexGenerator.AddUniform("bottomtop[2]", "float");
             m_FragmentGenerator.AddVarying("rect_uvs", "vec2");
             m_FragmentGenerator.AddUniform("rect_color", "vec4");
             m_VertexGenerator << "void main() {" << Endl

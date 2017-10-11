@@ -34,11 +34,29 @@
 #include "render/backends/gl/Qt3DSRenderBackendRenderStatesGL.h"
 #include "foundation/StringTable.h"
 
-#define GL_CALL_FUNCTION(x) m_glFunctions->x; checkGLError();
-#define GL_CALL_EXTRA_FUNCTION(x) m_glExtraFunctions->x; checkGLError();
+#ifdef RENDER_BACKEND_LOG_GL_ERRORS
+#define RENDER_LOG_ERROR_PARAMS(x) checkGLError(#x, __FILE__, __LINE__)
+#else
+#define RENDER_LOG_ERROR_PARAMS(x) checkGLError()
+#endif
+
+#define GL_CALL_FUNCTION(x) m_glFunctions->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_EXTRA_FUNCTION(x) m_glExtraFunctions->x; RENDER_LOG_ERROR_PARAMS(x);
 
 namespace qt3ds {
 namespace render {
+
+#ifndef GL_PROGRAM_SEPARABLE
+#define GL_PROGRAM_SEPARABLE 0x8258
+#endif
+
+#ifndef GL_UNSIGNED_INT_IMAGE_2D
+#define GL_UNSIGNED_INT_IMAGE_2D 0x9063
+#endif
+
+#ifndef GL_UNSIGNED_INT_ATOMIC_COUNTER
+#define GL_UNSIGNED_INT_ATOMIC_COUNTER 0x92DB
+#endif
 
     /// constructor
     NVRenderBackendGLBase::NVRenderBackendGLBase(NVFoundationBase &fnd,
@@ -48,7 +66,6 @@ namespace render {
         , m_Foundation(fnd)
         , m_StringTable(stringTable)
         , m_Conversion()
-        , m_Extensions(m_Foundation.getAllocator(), "NVRenderBackendGLBase::m_Extensions")
         , m_MaxAttribCount(0)
         , m_DrawBuffersArray(m_Foundation.getAllocator(),
                              "NVRenderBackendGLBase::m_DrawBuffersArray")
@@ -212,6 +229,15 @@ namespace render {
             break;
         case NVRenderBackendCaps::gpuShader5:
             bSupported = m_backendSupport.caps.bits.bGPUShader5ExtensionSupported;
+            break;
+        case NVRenderBackendCaps::VertexArrayObject:
+            bSupported = m_backendSupport.caps.bits.bVertexArrayObjectSupported;
+            break;
+        case NVRenderBackendCaps::StandardDerivatives:
+            bSupported = m_backendSupport.caps.bits.bStandardDerivativesSupported;
+            break;
+        case NVRenderBackendCaps::TextureLod:
+            bSupported = m_backendSupport.caps.bits.bTextureLodSupported;
             break;
         default:
             QT3DS_ASSERT(false);
@@ -849,7 +875,6 @@ namespace render {
         GLuint texID = 0;
 
         GL_CALL_FUNCTION(glGenTextures(1, &texID));
-
         return (NVRenderBackend::NVRenderBackendTextureObject)texID;
     }
 
@@ -940,6 +965,7 @@ namespace render {
             m_Conversion.fromUncompressedTextureFormatToGL(GetRenderContextType(), internalFormat,
                                                            glformat, gltype, glInternalFormat);
 
+
         if (conversionRequired) {
             GLenum dummy;
             m_Conversion.fromUncompressedTextureFormatToGL(GetRenderContextType(), format, glformat,
@@ -951,7 +977,9 @@ namespace render {
         } else if (NVRenderTextureFormats::isDepthTextureFormat(format))
             m_Conversion.fromDepthTextureFormatToGL(GetRenderContextType(), format, glformat,
                                                     gltype, glInternalFormat);
-
+#ifdef QT_OPENGL_ES_2
+        glInternalFormat = glformat;
+#endif
         GL_CALL_FUNCTION(glTexImage2D(glTarget, level, glInternalFormat, (GLsizei)width, (GLsizei)height,
                                 border, glformat, gltype, hostPtr));
 
@@ -2115,9 +2143,18 @@ namespace render {
         return retval;
     }
 
-    const char *NVRenderBackendGLBase::geRendererString()
+    const char *NVRenderBackendGLBase::getRendererString()
     {
         const char *retval = (const char *)GL_CALL_FUNCTION(glGetString(GL_RENDERER));
+        if (retval == NULL)
+            return "";
+
+        return retval;
+    }
+
+    const char *NVRenderBackendGLBase::getExtensionString()
+    {
+        const char *retval = (const char *)GL_CALL_FUNCTION(glGetString(GL_EXTENSIONS));
         if (retval == NULL)
             return "";
 
@@ -2145,6 +2182,17 @@ namespace render {
         }
     }
 
+#ifdef RENDER_BACKEND_LOG_GL_ERRORS
+    void NVRenderBackendGLBase::checkGLError(const char *function, const char *file,
+                                             const unsigned int line) const
+    {
+        GLenum error = m_glFunctions->glGetError();
+        if (error != GL_NO_ERROR) {
+            qCCritical(GL_ERROR) << GLConversion::processGLError(error) << " "
+                                 << function << " " << file << " " << line;
+        }
+    }
+#else
     void NVRenderBackendGLBase::checkGLError() const
     {
 #if !defined(NDEBUG) || defined(_DEBUG)
@@ -2155,6 +2203,7 @@ namespace render {
         }
 #endif
     }
+#endif
 
 }
 }

@@ -1,5 +1,6 @@
 /****************************************************************************
 **
+** Copyright (C) 2014 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -27,22 +28,31 @@
 **
 ****************************************************************************/
 
-#ifndef QT3DSOPENGLPREFIX_H
-#define QT3DSOPENGLPREFIX_H
+#ifndef MONO_CHANNEL_GLSLLIB
+#define MONO_CHANNEL_GLSLLIB
 
-#include <QtGui/qtguiglobal.h>
-#if defined(QT_OPENGL_ES)
-#define GL_GLEXT_PROTOTYPES
-#if defined(QT_OPENGL_ES_3_2)
-#include <GLES3/gl32.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES3/gl3.h>
+#ifdef UIC_DEFINE_API
+#define mono_alpha 0
+#define mono_average 1
+#define mono_luminance 2
+#define mono_maximum 3
 #endif
 
-// Adding this to ensure that platform version of gl2ext.h is included
-// before Qt's qopengles2ext.h which is missing symbols we need
-#include <GLES2/gl2ext.h>
-#endif
+float monoChannel( in vec4 t, const in int monoSource )
+{
+    if ( monoSource == mono_alpha )
+        return( t.w );
 
-#endif // QT3DSOPENGLPREFIX_H
+    if ( monoSource == mono_average )
+        return( ( t.x + t.y + t.z ) / 3.0 );
+
+    if ( monoSource == mono_luminance )
+        return( luminance( t.xyz ) );
+
+    if ( monoSource == mono_maximum )
+        return( max( t.x, max( t.y, t.z ) ) );
+
+    return( 1.0 );
+}
+
+#endif

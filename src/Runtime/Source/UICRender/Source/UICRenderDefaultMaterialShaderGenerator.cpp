@@ -40,6 +40,7 @@
 #include "UICRenderShadowMap.h"
 #include "UICRenderCustomMaterial.h"
 #include "UICRenderDynamicObjectSystem.h"
+#include "render/Qt3DSRenderShaderProgram.h"
 
 using namespace uic::render;
 using qt3ds::render::NVRenderCachedShaderProperty;
@@ -81,11 +82,14 @@ struct SShaderTextureProperties
     NVRenderCachedShaderProperty<NVRenderTexture2D *> m_Sampler;
     NVRenderCachedShaderProperty<QT3DSVec3> m_Offsets;
     NVRenderCachedShaderProperty<QT3DSVec4> m_Rotations;
+    NVRenderCachedShaderProperty<QT3DSVec2> m_Size;
     SShaderTextureProperties(const char *sampName, const char *offName, const char *rotName,
+                             const char *sizeName,
                              NVRenderShaderProgram &inShader)
         : m_Sampler(sampName, inShader)
         , m_Offsets(offName, inShader)
         , m_Rotations(rotName, inShader)
+        , m_Size(sizeName, inShader)
     {
     }
     SShaderTextureProperties() {}
@@ -122,6 +126,45 @@ struct SShadowMapProperties
         , m_ShadowmapSettings(shadowmapSettingsName, inShader)
     {
     }
+};
+
+struct SShaderGeneratorGeneratedShader;
+
+struct SLightConstantProperties
+{
+    struct LightConstants
+    {
+        NVRenderCachedShaderProperty<QT3DSVec4> m_position;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_direction;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_up;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_right;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_diffuse;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_ambient;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_specular;
+        NVRenderCachedShaderProperty<QT3DSF32> m_spotExponent;
+        NVRenderCachedShaderProperty<QT3DSF32> m_spotCutoff;
+        NVRenderCachedShaderProperty<QT3DSF32> m_constantAttenuation;
+        NVRenderCachedShaderProperty<QT3DSF32> m_linearAttenuation;
+        NVRenderCachedShaderProperty<QT3DSF32> m_quadraticAttenuation;
+        NVRenderCachedShaderProperty<QT3DSF32> m_range;
+        NVRenderCachedShaderProperty<QT3DSF32> m_width;
+        NVRenderCachedShaderProperty<QT3DSF32> m_height;
+        NVRenderCachedShaderProperty<QT3DSVec4> m_shadowControls;
+        NVRenderCachedShaderProperty<QT3DSMat44> m_shadowView;
+        NVRenderCachedShaderProperty<QT3DSI32> m_shadowIdx;
+        NVRenderCachedShaderProperty<QT3DSVec3> m_attenuation;
+
+        LightConstants(const QString &lightRef, NVRenderShaderProgram &shader);
+
+        void updateLights(int lIdx, SShaderGeneratorGeneratedShader &shader);
+    };
+
+    SLightConstantProperties(SShaderGeneratorGeneratedShader &shader, bool packed);
+    ~SLightConstantProperties();
+    void updateLights(SShaderGeneratorGeneratedShader &shader);
+
+    QVector<LightConstants *> m_constants;
+    NVRenderCachedShaderProperty<QT3DSI32> m_lightCount;
 };
 
 /**
@@ -161,11 +204,15 @@ struct SShaderGeneratorGeneratedShader
     NVRenderCachedShaderProperty<QT3DSVec4> m_LightProbeOpts;
     NVRenderCachedShaderProperty<QT3DSVec4> m_LightProbeRot;
     NVRenderCachedShaderProperty<QT3DSVec4> m_LightProbeOfs;
+    NVRenderCachedShaderProperty<QT3DSVec2> m_LightProbeSize;
     NVRenderCachedShaderProperty<NVRenderTexture2D *> m_LightProbe2;
     NVRenderCachedShaderProperty<QT3DSVec4> m_LightProbe2Props;
+    NVRenderCachedShaderProperty<QT3DSVec2> m_LightProbe2Size;
 
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AoShadowParams;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_LightsBuffer;
+
+    SLightConstantProperties *m_lightConstantProperties;
 
     // Cache the image property name lookups
     nvvector<SShaderTextureProperties> m_Images;
@@ -203,10 +250,13 @@ struct SShaderGeneratorGeneratedShader
         , m_LightProbeOpts("light_probe_opts", inShader)
         , m_LightProbeRot("light_probe_rotation", inShader)
         , m_LightProbeOfs("light_probe_offset", inShader)
+        , m_LightProbeSize("light_probe_size", inShader)
         , m_LightProbe2("light_probe2", inShader)
         , m_LightProbe2Props("light_probe2_props", inShader)
+        , m_LightProbe2Size("light_probe2_size", inShader)
         , m_AoShadowParams("cbAoShadow", inShader)
         , m_LightsBuffer("cbBufferLights", inShader)
+        , m_lightConstantProperties(NULL)
         , m_Images(inContext.GetAllocator(), "SShaderGeneratorGeneratedShader::m_Images")
         , m_Lights(inContext.GetAllocator(), "SShaderGeneratorGeneratedShader::m_Lights")
         , m_ShadowMaps(inContext.GetAllocator(), "SShaderGeneratorGeneratedShader::m_ShadowMaps")
@@ -214,7 +264,12 @@ struct SShaderGeneratorGeneratedShader
     {
         m_Shader.addRef();
     }
-    ~SShaderGeneratorGeneratedShader() { m_Shader.release(); }
+    ~SShaderGeneratorGeneratedShader()
+    {
+        if (m_lightConstantProperties)
+            delete m_lightConstantProperties;
+        m_Shader.release();
+    }
 
     void addRef() { ++m_RefCount; }
     void release()
@@ -226,6 +281,109 @@ struct SShaderGeneratorGeneratedShader
         }
     }
 };
+
+static const QStringList lconstantnames = {
+    QStringLiteral("position"),
+    QStringLiteral("direction"),
+    QStringLiteral("up"),
+    QStringLiteral("right"),
+    QStringLiteral("diffuse"),
+    QStringLiteral("ambient"),
+    QStringLiteral("specular"),
+    QStringLiteral("spotExponent"),
+    QStringLiteral("spotCutoff"),
+    QStringLiteral("constantAttenuation"),
+    QStringLiteral("linearAttenuation"),
+    QStringLiteral("quadraticAttenuation"),
+    QStringLiteral("range"),
+    QStringLiteral("width"),
+    QStringLiteral("height"),
+    QStringLiteral("shadowControls"),
+    QStringLiteral("shadowView"),
+    QStringLiteral("shadowIdx"),
+    QStringLiteral("attenuation")
+};
+
+SLightConstantProperties::LightConstants::LightConstants(const QString &lightRef,
+                                                         NVRenderShaderProgram &shader)
+    : m_position(QString("%1%2").arg(lightRef, lconstantnames[0]), shader)
+    , m_direction(QString("%1%2").arg(lightRef).arg(lconstantnames[1]), shader)
+    , m_up(QString("%1%2").arg(lightRef, lconstantnames[2]), shader)
+    , m_right(QString("%1%2").arg(lightRef, lconstantnames[3]), shader)
+    , m_diffuse(QString("%1%2").arg(lightRef, lconstantnames[4]), shader)
+    , m_ambient(QString("%1%2").arg(lightRef, lconstantnames[5]), shader)
+    , m_specular(QString("%1%2").arg(lightRef, lconstantnames[6]), shader)
+    , m_spotExponent(QString("%1%2").arg(lightRef, lconstantnames[7]), shader)
+    , m_spotCutoff(QString("%1%2").arg(lightRef, lconstantnames[8]), shader)
+    , m_constantAttenuation(QString("%1%2").arg(lightRef, lconstantnames[9]), shader)
+    , m_linearAttenuation(QString("%1%2").arg(lightRef, lconstantnames[10]), shader)
+    , m_quadraticAttenuation(QString("%1%2").arg(lightRef, lconstantnames[11]), shader)
+    , m_range(QString("%1%2").arg(lightRef, lconstantnames[12]), shader)
+    , m_width(QString("%1%2").arg(lightRef, lconstantnames[13]), shader)
+    , m_height(QString("%1%2").arg(lightRef, lconstantnames[14]), shader)
+    , m_shadowControls(QString("%1%2").arg(lightRef, lconstantnames[15]), shader)
+    , m_shadowView(QString("%1%2").arg(lightRef, lconstantnames[16]), shader)
+    , m_shadowIdx(QString("%1%2").arg(lightRef, lconstantnames[17]), shader)
+    , m_attenuation(QString("%1%2").arg(lightRef, lconstantnames[18]), shader)
+{
+
+}
+
+void SLightConstantProperties::LightConstants::updateLights(int lIdx,
+                                                            SShaderGeneratorGeneratedShader &shader)
+{
+    m_position.Set(shader.m_Lights[lIdx].m_LightData.m_position);
+    m_direction.Set(shader.m_Lights[lIdx].m_LightData.m_direction);
+    m_up.Set(shader.m_Lights[lIdx].m_LightData.m_up);
+    m_right.Set(shader.m_Lights[lIdx].m_LightData.m_right);
+    m_diffuse.Set(shader.m_Lights[lIdx].m_LightData.m_diffuse);
+    m_ambient.Set(shader.m_Lights[lIdx].m_LightData.m_ambient);
+    m_specular.Set(shader.m_Lights[lIdx].m_LightData.m_specular);
+    m_spotExponent.Set(shader.m_Lights[lIdx].m_LightData.m_spotExponent);
+    m_spotCutoff.Set(shader.m_Lights[lIdx].m_LightData.m_spotCutoff);
+    m_constantAttenuation.Set(shader.m_Lights[lIdx].m_LightData.m_constantAttenuation);
+    m_linearAttenuation.Set(shader.m_Lights[lIdx].m_LightData.m_linearAttenuation);
+    m_quadraticAttenuation.Set(shader.m_Lights[lIdx].m_LightData.m_quadraticAttenuation);
+    m_range.Set(shader.m_Lights[lIdx].m_LightData.m_range);
+    m_width.Set(shader.m_Lights[lIdx].m_LightData.m_width);
+    m_height.Set(shader.m_Lights[lIdx].m_LightData.m_height);
+    m_shadowControls.Set(shader.m_Lights[lIdx].m_LightData.m_shadowControls);
+    m_shadowView.Set(shader.m_Lights[lIdx].m_LightData.m_shadowView);
+    m_shadowIdx.Set(shader.m_Lights[lIdx].m_LightData.m_shadowIdx);
+    m_attenuation.Set(QT3DSVec3(shader.m_Lights[lIdx].m_LightData.m_constantAttenuation,
+                                shader.m_Lights[lIdx].m_LightData.m_linearAttenuation,
+                                shader.m_Lights[lIdx].m_LightData.m_quadraticAttenuation));
+}
+
+
+SLightConstantProperties::SLightConstantProperties(SShaderGeneratorGeneratedShader &shader,
+                                                   bool packed)
+    : m_lightCount("uNumLights", shader.m_Shader)
+{
+    m_constants.resize(shader.m_Lights.size());
+    for (unsigned int i = 0; i < shader.m_Lights.size(); ++i) {
+        QString lref;
+        if (packed)
+            lref = QStringLiteral("light_%1_");
+        else
+            lref = QStringLiteral("lights[%1].");
+        lref = lref.arg(i);
+        m_constants[i] = new LightConstants(lref, shader.m_Shader);
+    }
+    m_lightCount.Set(shader.m_Lights.size());
+}
+
+SLightConstantProperties::~SLightConstantProperties()
+{
+    qDeleteAll(m_constants);
+}
+
+void SLightConstantProperties::updateLights(SShaderGeneratorGeneratedShader &shader)
+{
+    for (int i = 0; i < m_constants.size(); ++i)
+        m_constants[i]->updateLights(i, shader);
+}
+
 
 #ifndef EA_PLATFORM_WINDOWS
 #define _snprintf snprintf
@@ -251,6 +409,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     NVDataRef<SLight *> m_Lights;
     SRenderableImage *m_FirstImage;
     bool m_HasTransparency;
+    bool m_LightsAsSeparateUniforms;
 
     TStrType m_ImageStem;
     TStrType m_ImageSampler;
@@ -258,13 +417,14 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     TStrType m_ImageRotations;
     TStrType m_ImageFragCoords;
     TStrType m_ImageTemp;
+    TStrType m_ImageSamplerSize;
 
     TStrType m_TexCoordTemp;
 
     TStrType m_LightStem;
     TStrType m_LightColor;
     TStrType m_LightSpecularColor;
-    TStrType m_LightAttenutation;
+    TStrType m_LightAttenuation;
     TStrType m_LightConstantAttenuation;
     TStrType m_LightLinearAttenuation;
     TStrType m_LightQuadraticAttenuation;
@@ -301,6 +461,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         , m_ShadowMapManager(NULL)
         , m_CurrentPipeline(NULL)
         , m_FirstImage(NULL)
+        , m_LightsAsSeparateUniforms(false)
         , m_ProgramToShaderMap(inRc.GetAllocator(), "m_ProgramToShaderMap")
         , m_ConstantBuffers(inRc.GetAllocator(), "m_ConstantBuffers")
         , m_RefCount(0)
@@ -348,6 +509,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         m_ImageRotations.append("rotations");
         m_ImageFragCoords = m_ImageStem;
         m_ImageFragCoords.append("uv_coords");
+        m_ImageSamplerSize = m_ImageStem;
+        m_ImageSamplerSize.append("size");
     }
 
     void SetupTexCoordVariableName(size_t uvSet)
@@ -500,7 +663,6 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     void OutputDiffuseAreaLighting(IShaderStageGenerator &infragmentShader, const char *inPos,
                                    TStrType inLightPrefix)
     {
-        m_LightAttenutation = inLightPrefix + "_attenuation";
         m_NormalizedDirection = inLightPrefix + "_areaDir";
         AddLocalVariable(infragmentShader, m_NormalizedDirection, "vec3");
         infragmentShader << "\tlightAttenuation = calculateDiffuseAreaOld( " << m_LightDirection
@@ -635,13 +797,16 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     }
 
     bool MaybeAddMaterialFresnel(IShaderStageGenerator &fragmentShader, NVConstDataRef<QT3DSU32> inKey,
-                                 bool inFragmentHasSpecularAmount)
+                                 bool inFragmentHasSpecularAmount, bool supportStandardDerivates)
     {
         if (m_DefaultMaterialShaderKeyProperties.m_FresnelEnabled.GetValue(inKey)) {
             if (inFragmentHasSpecularAmount == false)
                 fragmentShader << "\tfloat specularAmount = 1.0;" << Endl;
             inFragmentHasSpecularAmount = true;
-            fragmentShader.AddInclude("defaultMaterialFresnel.glsllib");
+            if (supportStandardDerivates)
+                fragmentShader.AddInclude("defaultMaterialFresnel.glsllib");
+            else
+                fragmentShader.AddInclude("defaultMaterialFresnelNoDvn.glsllib");
             fragmentShader.AddUniform("fresnelPower", "float");
             fragmentShader.AddUniform("material_specular", "vec4");
             fragmentShader << "\tfloat fresnelRatio = defaultMaterialSimpleFresnel( world_normal, "
@@ -653,33 +818,58 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     }
     void SetupLightVariableNames(size_t lightIdx, SLight &inLight)
     {
-        m_LightStem = "lights";
-        char buf[16];
-        _snprintf(buf, 16, "[%lu].", lightIdx);
-        m_LightStem.append(buf);
+        if (m_LightsAsSeparateUniforms) {
+            char buf[16];
+            _snprintf(buf, 16, "light_%u", lightIdx);
+            m_LightStem = buf;
+            m_LightColor = m_LightStem;
+            m_LightColor.append("_diffuse");
+            m_LightDirection = m_LightStem;
+            m_LightDirection.append("_direction");
+            m_LightSpecularColor = m_LightStem;
+            m_LightSpecularColor.append("_specular");
+            if (inLight.m_LightType == RenderLightTypes::Point) {
+                m_LightPos = m_LightStem;
+                m_LightPos.append("_position");
+                m_LightAttenuation = m_LightStem;
+                m_LightAttenuation.append("_attenuation");
+            } else if (inLight.m_LightType == RenderLightTypes::Area) {
+                m_LightPos = m_LightStem;
+                m_LightPos.append("_position");
+                m_LightUp = m_LightStem;
+                m_LightUp.append("_up");
+                m_LightRt = m_LightStem;
+                m_LightRt.append("_right");
+            }
+        } else {
+            m_LightStem = "lights";
+            char buf[16];
+            _snprintf(buf, 16, "[%u].", lightIdx);
+            m_LightStem.append(buf);
 
-        m_LightColor = m_LightStem;
-        m_LightColor.append("diffuse");
-        m_LightDirection = m_LightStem;
-        m_LightDirection.append("direction");
-        m_LightSpecularColor = m_LightStem;
-        m_LightSpecularColor.append("specular");
-        if (inLight.m_LightType == RenderLightTypes::Point) {
-            m_LightPos = m_LightStem;
-            m_LightPos.append("position");
-            m_LightConstantAttenuation = m_LightStem;
-            m_LightConstantAttenuation.append("constantAttenuation");
-            m_LightLinearAttenuation = m_LightStem;
-            m_LightLinearAttenuation.append("linearAttenuation");
-            m_LightQuadraticAttenuation = m_LightStem;
-            m_LightQuadraticAttenuation.append("quadraticAttenuation");
-        } else if (inLight.m_LightType == RenderLightTypes::Area) {
-            m_LightPos = m_LightStem;
-            m_LightPos.append("position");
-            m_LightUp = m_LightStem;
-            m_LightUp.append("up");
-            m_LightRt = m_LightStem;
-            m_LightRt.append("right");
+            m_LightColor = m_LightStem;
+            m_LightColor.append("diffuse");
+            m_LightDirection = m_LightStem;
+            m_LightDirection.append("direction");
+            m_LightSpecularColor = m_LightStem;
+            m_LightSpecularColor.append("specular");
+            if (inLight.m_LightType == RenderLightTypes::Point) {
+                m_LightPos = m_LightStem;
+                m_LightPos.append("position");
+                m_LightConstantAttenuation = m_LightStem;
+                m_LightConstantAttenuation.append("constantAttenuation");
+                m_LightLinearAttenuation = m_LightStem;
+                m_LightLinearAttenuation.append("linearAttenuation");
+                m_LightQuadraticAttenuation = m_LightStem;
+                m_LightQuadraticAttenuation.append("quadraticAttenuation");
+            } else if (inLight.m_LightType == RenderLightTypes::Area) {
+                m_LightPos = m_LightStem;
+                m_LightPos.append("position");
+                m_LightUp = m_LightStem;
+                m_LightUp.append("up");
+                m_LightRt = m_LightStem;
+                m_LightRt.append("right");
+            }
         }
     }
 
@@ -784,7 +974,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             SetupImageVariableNames(idx);
             inShader.m_Images.push_back(
                 SShaderTextureProperties(m_ImageSampler.c_str(), m_ImageOffsets.c_str(),
-                                         m_ImageRotations.c_str(), inShader.m_Shader));
+                                         m_ImageRotations.c_str(), m_ImageSamplerSize.c_str(),
+                                         inShader.m_Shader));
         }
         SShaderTextureProperties &theShaderProps = inShader.m_Images[idx];
         const QT3DSMat44 &textureTransform = inImage.m_Image.m_TextureTransform;
@@ -804,13 +995,16 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         // on the shader.
         // because setting the image on the texture forces the textue to bind and immediately apply
         // any tex params.
+        NVRenderTexture2D *imageTexture = inImage.m_Image.m_TextureData.m_Texture;
         inImage.m_Image.m_TextureData.m_Texture->SetTextureWrapS(
             inImage.m_Image.m_HorizontalTilingMode);
         inImage.m_Image.m_TextureData.m_Texture->SetTextureWrapT(
             inImage.m_Image.m_VerticalTilingMode);
-        theShaderProps.m_Sampler.Set(inImage.m_Image.m_TextureData.m_Texture);
+        theShaderProps.m_Sampler.Set(imageTexture);
         theShaderProps.m_Offsets.Set(offsets);
         theShaderProps.m_Rotations.Set(rotations);
+        theShaderProps.m_Size.Set(QT3DSVec2(imageTexture->GetTextureDetails().m_Width,
+                                            imageTexture->GetTextureDetails().m_Height));
     }
 
     void GenerateShadowMapOcclusion(QT3DSU32 lightIdx, bool inShadowEnabled,
@@ -884,6 +1078,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         QT3DSU32 lightmapRadiosityImageIdx = 0;
         SRenderableImage *lightmapShadowImage = NULL;
         QT3DSU32 lightmapShadowImageIdx = 0;
+        const bool supportStandardDerivatives
+                = m_RenderContext.GetRenderContext().IsStandardDerivativesSupported();
 
         for (SRenderableImage *img = m_FirstImage; img != NULL;
              img = img->m_NextImage, ++imageIdx) {
@@ -923,6 +1119,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         bool enableSSAO = false;
         bool enableSSDO = false;
         bool enableShadowMaps = false;
+        bool enableBumpNormal = normalImage || bumpImage;
 
         for (QT3DSU32 idx = 0; idx < FeatureSet().size(); ++idx) {
             eastl::string name(FeatureSet()[idx].m_Name.c_str());
@@ -957,7 +1154,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         }
 
         if (hasLighting) {
-            addFunction(fragmentShader, "sampleLightVars");
+            if (!m_LightsAsSeparateUniforms)
+                addFunction(fragmentShader, "sampleLightVars");
             addFunction(fragmentShader, "diffuseReflectionBSDF");
         }
 
@@ -975,12 +1173,13 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             fragmentShader.Append("\tvec3 vTransform;");
         }
 
-        if (includeSSAOSSDOVars || hasSpecMap || hasLighting || hasEnvMap || enableFresnel || hasIblProbe) {
+        if (includeSSAOSSDOVars || hasSpecMap || hasLighting || hasEnvMap || enableFresnel
+                || hasIblProbe || enableBumpNormal) {
             vertexShader.GenerateViewVector();
             vertexShader.GenerateWorldNormal();
             vertexShader.GenerateWorldPosition();
         }
-        if (includeSSAOSSDOVars || bumpImage || normalImage || specularEnabled || hasIblProbe)
+        if (includeSSAOSSDOVars || specularEnabled || hasIblProbe || enableBumpNormal)
             vertexShader.GenerateVarTangentAndBinormal();
 
         // You do bump or normal mapping but not both
@@ -988,13 +1187,23 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             GenerateImageUVCoordinates(bumpImageIdx, *bumpImage);
             fragmentShader.AddUniform("bumpAmount", "float");
 
-            fragmentShader.AddInclude("uicDefaultMaterialFileBumpTexture.glsllib");
-            // vec3 simplerFileBumpTexture( in sampler2D sampler, in float factor, vec2
-            // texCoord, vec3 tangent, vec3 binormal, vec3 normal )
+            if (m_RenderContext.GetRenderContext().GetRenderContextType()
+                    == NVRenderContextValues::GLES2) {
+                fragmentShader.AddUniform(m_ImageSamplerSize, "vec2");
+                fragmentShader.AddInclude("defaultMaterialBumpNoLod.glsllib");
+                fragmentShader << "\tworld_normal = defaultMaterialBumpNoLod( " << m_ImageSampler
+                               << ", bumpAmount, " << m_ImageFragCoords
+                               << ", tangent, binormal, world_normal, "
+                               << m_ImageSamplerSize << ");" << Endl;
+            } else {
+                fragmentShader.AddInclude("uicDefaultMaterialFileBumpTexture.glsllib");
+                // vec3 simplerFileBumpTexture( in sampler2D sampler, in float factor, vec2
+                // texCoord, vec3 tangent, vec3 binormal, vec3 normal )
 
-            fragmentShader << "\tworld_normal = simplerFileBumpTexture( " << m_ImageSampler
-                           << ", bumpAmount, " << m_ImageFragCoords
-                           << ", tangent, binormal, world_normal );" << Endl;
+                fragmentShader << "\tworld_normal = simplerFileBumpTexture( " << m_ImageSampler
+                               << ", bumpAmount, " << m_ImageFragCoords
+                               << ", tangent, binormal, world_normal );" << Endl;
+            }
             // Do gram schmidt
             fragmentShader << "\tbinormal = normalize(cross(world_normal, tangent) );\n";
             fragmentShader << "\ttangent = normalize(cross(binormal, world_normal) );\n";
@@ -1010,7 +1219,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                            << ", tangent, binormal );" << Endl;
         }
 
-        if (includeSSAOSSDOVars || specularEnabled || hasIblProbe)
+        if (includeSSAOSSDOVars || specularEnabled || hasIblProbe || enableBumpNormal)
             fragmentShader << "\tmat3 tanFrame = mat3(tangent, binormal, world_normal);" << Endl;
 
         bool fragmentHasSpecularAmount = false;
@@ -1099,7 +1308,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             }
 
             fragmentHasSpecularAmount =
-                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount);
+                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount,
+                                        supportStandardDerivatives);
 
             // Iterate through all lights
             for (QT3DSU32 lightIdx = 0; lightIdx < m_Lights.size(); ++lightIdx) {
@@ -1120,6 +1330,11 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                 fragmentShader << "\tlightAttenuation = 1.0;" << Endl;
                 if (isDirectional) {
 
+                    if (m_LightsAsSeparateUniforms) {
+                        fragmentShader.AddUniform(m_LightDirection, "vec4");
+                        fragmentShader.AddUniform(m_LightColor, "vec4");
+                    }
+
                     if (enableSSDO) {
                         fragmentShader << "\tshadowFac = customMaterialShadow( " << m_LightDirection
                                        << ".xyz, varWorldPos );" << Endl;
@@ -1139,12 +1354,22 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                                    << m_LightColor << ".rgb, 0.0 ).rgb;" << Endl;
 
                     if (specularEnabled) {
+                        if (m_LightsAsSeparateUniforms)
+                            fragmentShader.AddUniform(m_LightSpecularColor, "vec4");
                         OutputSpecularEquation(Material().m_SpecularModel, fragmentShader,
                                                m_LightDirection.c_str(),
                                                m_LightSpecularColor.c_str());
                     }
                 } else if (isArea) {
-                    addFunction(fragmentShader, "areaLightVars");
+                    if (m_LightsAsSeparateUniforms) {
+                        fragmentShader.AddUniform(m_LightColor, "vec4");
+                        fragmentShader.AddUniform(m_LightPos, "vec4");
+                        fragmentShader.AddUniform(m_LightDirection, "vec4");
+                        fragmentShader.AddUniform(m_LightUp, "vec4");
+                        fragmentShader.AddUniform(m_LightRt, "vec4");
+                    } else {
+                        addFunction(fragmentShader, "areaLightVars");
+                    }
                     addFunction(fragmentShader, "calculateDiffuseAreaOld");
                     vertexShader.GenerateWorldPosition();
                     GenerateShadowMapOcclusion(lightIdx, enableShadowMaps && isShadow,
@@ -1171,6 +1396,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
                     if (specularEnabled) {
                         vertexShader.GenerateViewVector();
+                        if (m_LightsAsSeparateUniforms)
+                            fragmentShader.AddUniform(m_LightSpecularColor, "vec4");
                         OutputSpecularAreaLighting(fragmentShader, "varWorldPos", "view_vector",
                                                    m_LightSpecularColor.c_str());
                     }
@@ -1189,6 +1416,11 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                     vertexShader.GenerateWorldPosition();
                     GenerateShadowMapOcclusion(lightIdx, enableShadowMaps && isShadow,
                                                lightNode->m_LightType);
+
+                    if (m_LightsAsSeparateUniforms) {
+                        fragmentShader.AddUniform(m_LightColor, "vec4");
+                        fragmentShader.AddUniform(m_LightPos, "vec4");
+                    }
 
                     m_RelativeDirection = m_TempStr;
                     m_RelativeDirection.append("_relativeDirection");
@@ -1216,11 +1448,23 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
                     addFunction(fragmentShader, "calculatePointLightAttenuation");
 
-                    fragmentShader
-                        << "\tlightAttenuation = shadowFac * calculatePointLightAttenuation( vec3( "
-                        << m_LightConstantAttenuation << ", " << m_LightLinearAttenuation << ", "
-                        << m_LightQuadraticAttenuation << "), " << m_RelativeDistance << ");"
-                        << Endl;
+                    if (m_LightsAsSeparateUniforms) {
+                        fragmentShader.AddUniform(m_LightAttenuation, "vec3");
+                        fragmentShader
+                            << "\tlightAttenuation = shadowFac * calculatePointLightAttenuation("
+                            << "vec3( " << m_LightAttenuation << ".x, " << m_LightAttenuation
+                            << ".y, " << m_LightAttenuation << ".z), " << m_RelativeDistance
+                            << ");" << Endl;
+                    } else {
+                        fragmentShader
+                            << "\tlightAttenuation = shadowFac * calculatePointLightAttenuation("
+                            << "vec3( " << m_LightConstantAttenuation << ", "
+                            << m_LightLinearAttenuation << ", " << m_LightQuadraticAttenuation
+                            << "), " << m_RelativeDistance << ");"
+                            << Endl;
+                    }
+
+
 
                     AddTranslucencyIrradiance(fragmentShader, translucencyImage, m_TempStr, false);
 
@@ -1230,6 +1474,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                                    << m_LightColor << ".rgb, 0.0 ).rgb;" << Endl;
 
                     if (specularEnabled) {
+                        if (m_LightsAsSeparateUniforms)
+                            fragmentShader.AddUniform(m_LightSpecularColor, "vec4");
                         OutputSpecularEquation(Material().m_SpecularModel, fragmentShader,
                                                m_NormalizedDirection.c_str(),
                                                m_LightSpecularColor.c_str());
@@ -1255,7 +1501,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
             // We still have specular maps and such that could potentially use the fresnel variable.
             fragmentHasSpecularAmount =
-                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount);
+                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount,
+                                        supportStandardDerivatives);
         }
 
         // Fresnel also modulates alpha.
@@ -1399,6 +1646,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         m_GeneratedShaderString.assign(nonNull(inShaderPrefix));
         SShaderDefaultMaterialKey theKey(Key());
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
+
+        m_LightsAsSeparateUniforms = !m_RenderContext.GetRenderContext().GetConstantBufferSupport();
 
         GenerateVertexShader();
         GenerateFragmentShader(theKey);
@@ -1636,15 +1885,14 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                 shader.m_LightProbeProps.Set(QT3DSVec4(0.0f, 0.0f, -1.0f, 0.0f));
                 shader.m_LightProbe2Props.Set(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
             }
-            shader.m_LightProbe.Set(theLightProbe->m_TextureData.m_Texture);
+            NVRenderTexture2D *textureImage = theLightProbe->m_TextureData.m_Texture;
+            shader.m_LightProbe.Set(textureImage);
+            shader.m_LightProbeSize.Set(QT3DSVec2(textureImage->GetTextureDetails().m_Width,
+                                                  textureImage->GetTextureDetails().m_Height));
         } else {
             shader.m_LightProbeProps.Set(QT3DSVec4(0.0f, 0.0f, -1.0f, 0.0f));
             shader.m_LightProbe2Props.Set(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
         }
-
-        NVRenderConstantBuffer *pLightCb = GetLightConstantBuffer(shader.m_Lights.size());
-        // if we have lights we need a light buffer
-        QT3DS_ASSERT(shader.m_Lights.size() == 0 || pLightCb);
 
         QT3DSF32 emissivePower = 1.0;
 
@@ -1663,22 +1911,45 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         shader.m_MaterialSpecular.Set(material_specular);
         shader.m_CameraProperties.Set(inCameraVec);
         shader.m_FresnelPower.Set(inMaterial.m_FresnelPower);
-        for (QT3DSU32 idx = 0, end = shader.m_Lights.size(); idx < end && pLightCb; ++idx) {
-            shader.m_Lights[idx].m_LightData.m_diffuse =
-                QT3DSVec4(shader.m_Lights[idx].m_LightColor.x * inMaterial.m_DiffuseColor.x,
-                       shader.m_Lights[idx].m_LightColor.y * inMaterial.m_DiffuseColor.y,
-                       shader.m_Lights[idx].m_LightColor.z * inMaterial.m_DiffuseColor.z, 1.0);
 
-            // this is our final change update memory
-            pLightCb->UpdateRaw(idx * sizeof(SLightSourceShader) + (4 * sizeof(QT3DSI32)),
-                                NVDataRef<QT3DSU8>((QT3DSU8 *)&shader.m_Lights[idx].m_LightData,
-                                                sizeof(SLightSourceShader)));
-        }
-        // update light buffer to hardware
-        if (pLightCb) {
-            QT3DSI32 cgLights = shader.m_Lights.size();
-            pLightCb->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&cgLights, sizeof(QT3DSI32)));
-            shader.m_LightsBuffer.Set();
+        if (context.GetConstantBufferSupport()) {
+            NVRenderConstantBuffer *pLightCb = GetLightConstantBuffer(shader.m_Lights.size());
+            // if we have lights we need a light buffer
+            QT3DS_ASSERT(shader.m_Lights.size() == 0 || pLightCb);
+
+            for (QT3DSU32 idx = 0, end = shader.m_Lights.size(); idx < end && pLightCb; ++idx) {
+                shader.m_Lights[idx].m_LightData.m_diffuse =
+                    QT3DSVec4(shader.m_Lights[idx].m_LightColor.x * inMaterial.m_DiffuseColor.x,
+                           shader.m_Lights[idx].m_LightColor.y * inMaterial.m_DiffuseColor.y,
+                           shader.m_Lights[idx].m_LightColor.z * inMaterial.m_DiffuseColor.z, 1.0);
+
+                // this is our final change update memory
+                pLightCb->UpdateRaw(idx * sizeof(SLightSourceShader) + (4 * sizeof(QT3DSI32)),
+                                    NVDataRef<QT3DSU8>((QT3DSU8 *)&shader.m_Lights[idx].m_LightData,
+                                                    sizeof(SLightSourceShader)));
+            }
+            // update light buffer to hardware
+            if (pLightCb) {
+                QT3DSI32 cgLights = shader.m_Lights.size();
+                pLightCb->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&cgLights, sizeof(QT3DSI32)));
+                shader.m_LightsBuffer.Set();
+            }
+        } else {
+            SLightConstantProperties *pLightConstants = GetLightConstantProperties(shader);
+
+            // if we have lights we need a light buffer
+            QT3DS_ASSERT(shader.m_Lights.size() == 0 || pLightConstants);
+
+            for (QT3DSU32 idx = 0, end = shader.m_Lights.size();
+                    idx < end && pLightConstants; ++idx) {
+                shader.m_Lights[idx].m_LightData.m_diffuse =
+                    QT3DSVec4(shader.m_Lights[idx].m_LightColor.x * inMaterial.m_DiffuseColor.x,
+                           shader.m_Lights[idx].m_LightColor.y * inMaterial.m_DiffuseColor.y,
+                           shader.m_Lights[idx].m_LightColor.z * inMaterial.m_DiffuseColor.z, 1.0);
+            }
+            // update light buffer to hardware
+            if (pLightConstants)
+                pLightConstants->updateLights(shader);
         }
 
         shader.m_MaterialDiffuseLightAmbientTotal.Set(
@@ -1772,6 +2043,18 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                               inRenderProperties.m_ProbeHorizon, inRenderProperties.m_ProbeBright,
                               inRenderProperties.m_Probe2Window, inRenderProperties.m_Probe2Pos,
                               inRenderProperties.m_Probe2Fade, inRenderProperties.m_ProbeFOV);
+    }
+
+    SLightConstantProperties *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader)
+    {
+        if (!shader.m_lightConstantProperties
+                || shader.m_Lights.size() > !shader.m_lightConstantProperties->m_constants.size()) {
+            if (shader.m_lightConstantProperties)
+                delete shader.m_lightConstantProperties;
+            shader.m_lightConstantProperties
+                    = new SLightConstantProperties(shader, m_LightsAsSeparateUniforms);
+        }
+        return shader.m_lightConstantProperties;
     }
 };
 }

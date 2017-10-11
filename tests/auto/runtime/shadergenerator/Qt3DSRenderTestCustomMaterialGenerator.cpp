@@ -224,7 +224,7 @@ struct CustomTestKey
 
 #define MAX_TEST_KEY ((1llu<<20)-1)
 
-CustomTestKey randomizeTestKey()
+static CustomTestKey randomizeTestKey()
 {
     uint64_t v = (uint64_t(qrand()))%MAX_TEST_KEY;
     return *reinterpret_cast<CustomTestKey*>(&v);

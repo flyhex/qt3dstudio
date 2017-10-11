@@ -77,6 +77,10 @@ public:
         GLsizei, GLfloat *);
     void (QOPENGLF_APIENTRYP GetPathSpacingNV)(GLenum, GLsizei, GLenum,
         const void *, GLuint, GLfloat, GLfloat, GLenum, GLfloat *);
+    void (QOPENGLF_APIENTRYP BindVertexArrayOES) (GLuint array);
+    void (QOPENGLF_APIENTRYP DeleteVertexArraysOES) (GLsizei n, const GLuint *arrays);
+    void (QOPENGLF_APIENTRYP GenVertexArraysOES) (GLsizei n, GLuint *arrays);
+    GLboolean (QOPENGLF_APIENTRYP IsVertexArrayOES) (GLuint array);
 #endif
 };
 
@@ -180,6 +184,10 @@ public:
         GLenum pathNameType, const void *paths, GLuint pathBase,
         GLfloat advanceScale, GLfloat kerningScale, GLenum transformType,
         GLfloat *returnedSpacing);
+    void glBindVertexArrayOES(GLuint array);
+    void glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays);
+    void glGenVertexArraysOES(GLsizei n, GLuint *arrays);
+    GLboolean glIsVertexArrayOES(GLuint array);
 
     bool initializeOpenGLFunctions() Q_DECL_FINAL;
 };
@@ -353,6 +361,30 @@ inline void Qt3DSOpenGLES2Extensions::glGetPathSpacingNV(GLenum pathListMode,
     Q_D(Qt3DSOpenGLExtensions);
     d->GetPathSpacingNV(pathListMode, numPaths, pathNameType, paths, pathBase,
         advanceScale, kerningScale, transformType, returnedSpacing);
+}
+
+inline void Qt3DSOpenGLES2Extensions::glBindVertexArrayOES(GLuint array)
+{
+    Q_D(Qt3DSOpenGLExtensions);
+    d->BindVertexArrayOES(array);
+}
+
+inline void Qt3DSOpenGLES2Extensions::glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays)
+{
+    Q_D(Qt3DSOpenGLExtensions);
+    d->DeleteVertexArraysOES(n, arrays);
+}
+
+inline void Qt3DSOpenGLES2Extensions::glGenVertexArraysOES(GLsizei n, GLuint *arrays)
+{
+    Q_D(Qt3DSOpenGLExtensions);
+    d->GenVertexArraysOES(n, arrays);
+}
+
+inline GLboolean Qt3DSOpenGLES2Extensions::glIsVertexArrayOES(GLuint array)
+{
+    Q_D(Qt3DSOpenGLExtensions);
+    return d->IsVertexArrayOES(array);
 }
 
 #endif // QT_OPENGL_ES

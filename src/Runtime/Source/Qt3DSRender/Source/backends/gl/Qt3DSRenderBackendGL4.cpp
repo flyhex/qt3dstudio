@@ -34,15 +34,25 @@
 
 #define NVRENDER_BACKEND_UNUSED(arg) (void)arg;
 
-#define GL_CALL_EXTRA_FUNCTION(x) m_glExtraFunctions->x; checkGLError();
+#ifdef RENDER_BACKEND_LOG_GL_ERRORS
+#define RENDER_LOG_ERROR_PARAMS(x) checkGLError(#x, __FILE__, __LINE__)
+#else
+#define RENDER_LOG_ERROR_PARAMS(x) checkGLError()
+#endif
+
+#define GL_CALL_EXTRA_FUNCTION(x) m_glExtraFunctions->x; RENDER_LOG_ERROR_PARAMS(x);
 
 #if defined(QT_OPENGL_ES)
-#define GL_CALL_NVPATH_EXT(x) m_qt3dsExtensions->x; checkGLError();
-#define GL_CALL_QT3DS_EXT(x) m_qt3dsExtensions->x; checkGLError();
+#define GL_CALL_NVPATH_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_QT3DS_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
 #else
-#define GL_CALL_NVPATH_EXT(x) m_nvPathRendering->x; checkGLError();
-#define GL_CALL_DIRECTSTATE_EXT(x) m_directStateAccess->x; checkGLError();
-#define GL_CALL_QT3DS_EXT(x) m_qt3dsExtensions->x; checkGLError();
+#define GL_CALL_NVPATH_EXT(x) m_nvPathRendering->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_DIRECTSTATE_EXT(x) m_directStateAccess->x; RENDER_LOG_ERROR_PARAMS(x);
+#define GL_CALL_QT3DS_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
+#endif
+
+#ifndef GL_GEOMETRY_SHADER_EXT
+#define GL_GEOMETRY_SHADER_EXT 0x8DD9
 #endif
 
 namespace qt3ds {
@@ -233,8 +243,11 @@ namespace render {
     NVRenderBackendGL4Impl::CreateTessControlShader(NVConstDataRef<QT3DSI8> source,
                                                     eastl::string &errorMessage, bool binary)
     {
+#if !defined(QT_OPENGL_ES)
         GLuint shaderID = GL_CALL_EXTRA_FUNCTION(glCreateShader(GL_TESS_CONTROL_SHADER));
-
+#else
+        GLuint shaderID = 0;
+#endif
         if (shaderID && !compileSource(shaderID, source, errorMessage, binary)) {
             GL_CALL_EXTRA_FUNCTION(glDeleteShader(shaderID));
             shaderID = 0;
@@ -247,7 +260,11 @@ namespace render {
     NVRenderBackendGL4Impl::CreateTessEvaluationShader(NVConstDataRef<QT3DSI8> source,
                                                        eastl::string &errorMessage, bool binary)
     {
+#if !defined(QT_OPENGL_ES)
         GLuint shaderID = GL_CALL_EXTRA_FUNCTION(glCreateShader(GL_TESS_EVALUATION_SHADER));
+#else
+        GLuint shaderID = 0;
+#endif
 
         if (shaderID && !compileSource(shaderID, source, errorMessage, binary)) {
             GL_CALL_EXTRA_FUNCTION(glDeleteShader(shaderID));
@@ -307,9 +324,11 @@ namespace render {
         NVRenderBackendShaderProgramGL *pProgram = (NVRenderBackendShaderProgramGL *)po;
         GLuint programID = static_cast<GLuint>(pProgram->m_ProgramID);
 
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
         if (m_backendSupport.caps.bits.bProgramInterfaceSupported)
             GL_CALL_EXTRA_FUNCTION(glGetProgramInterfaceiv(programID, GL_SHADER_STORAGE_BLOCK,
                                                GL_ACTIVE_RESOURCES, &numStorageBuffers));
+#endif
         return numStorageBuffers;
     }
 
@@ -329,7 +348,7 @@ namespace render {
 
         NVRenderBackendShaderProgramGL *pProgram = (NVRenderBackendShaderProgramGL *)po;
         GLuint programID = static_cast<GLuint>(pProgram->m_ProgramID);
-
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
         if (m_backendSupport.caps.bits.bProgramInterfaceSupported) {
             GL_CALL_EXTRA_FUNCTION(glGetProgramResourceName(programID, GL_SHADER_STORAGE_BLOCK, id, nameBufSize,
                                                 length, nameBuf));
@@ -351,14 +370,17 @@ namespace render {
                 *paramCount = params[2];
             }
         }
+#endif
         return bufferIndex;
     }
 
     void NVRenderBackendGL4Impl::ProgramSetStorageBuffer(QT3DSU32 index,
                                                          NVRenderBackendBufferObject bo)
     {
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
         GL_CALL_EXTRA_FUNCTION(
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, HandleToID_cast(GLuint, size_t, bo)));
+#endif
     }
 
     QT3DSI32 NVRenderBackendGL4Impl::GetAtomicCounterBufferCount(NVRenderBackendShaderProgramObject po)
@@ -367,10 +389,11 @@ namespace render {
         QT3DS_ASSERT(po);
         NVRenderBackendShaderProgramGL *pProgram = (NVRenderBackendShaderProgramGL *)po;
         GLuint programID = static_cast<GLuint>(pProgram->m_ProgramID);
-
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
         if (m_backendSupport.caps.bits.bProgramInterfaceSupported)
             GL_CALL_EXTRA_FUNCTION(glGetProgramInterfaceiv(programID, GL_ATOMIC_COUNTER_BUFFER,
                                                GL_ACTIVE_RESOURCES, &numAtomicCounterBuffers));
+#endif
         return numAtomicCounterBuffers;
     }
 
@@ -390,7 +413,7 @@ namespace render {
 
         NVRenderBackendShaderProgramGL *pProgram = (NVRenderBackendShaderProgramGL *)po;
         GLuint programID = static_cast<GLuint>(pProgram->m_ProgramID);
-
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
         if (m_backendSupport.caps.bits.bProgramInterfaceSupported) {
             {
 #define QUERY_COUNT 3
@@ -419,14 +442,17 @@ namespace render {
                                                     length, nameBuf));
             }
         }
+#endif
         return bufferIndex;
     }
 
     void NVRenderBackendGL4Impl::ProgramSetAtomicCounterBuffer(QT3DSU32 index,
                                                                NVRenderBackendBufferObject bo)
     {
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
         GL_CALL_EXTRA_FUNCTION(
             glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, index, HandleToID_cast(GLuint, size_t, bo)));
+#endif
     }
 
     void NVRenderBackendGL4Impl::SetConstantValue(NVRenderBackendShaderProgramObject po, QT3DSU32 id,
@@ -494,13 +520,15 @@ namespace render {
     NVRenderBackendGL4Impl::CreateComputeShader(NVConstDataRef<QT3DSI8> source,
                                                 eastl::string &errorMessage, bool binary)
     {
-        GLuint shaderID = m_glExtraFunctions->glCreateShader(GL_COMPUTE_SHADER);
+        GLuint shaderID = 0;
+#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
+        shaderID = m_glExtraFunctions->glCreateShader(GL_COMPUTE_SHADER);
 
         if (shaderID && !compileSource(shaderID, source, errorMessage, binary)) {
             GL_CALL_EXTRA_FUNCTION(glDeleteShader(shaderID));
             shaderID = 0;
         }
-
+#endif
         return (NVRenderBackend::NVRenderBackendComputeShaderObject)shaderID;
     }
 
@@ -583,35 +611,43 @@ namespace render {
     NVRenderBackendGL4Impl::GetPathObjectBoundingBox(NVRenderBackendPathObject inPathObject)
     {
         float data[4];
+#if defined(GL_NV_path_rendering)
         GL_CALL_NVPATH_EXT(glGetPathParameterfvNV(
             HandleToID_cast(GLuint, size_t, inPathObject),
             GL_PATH_OBJECT_BOUNDING_BOX_NV, data));
+#endif
         return NVBounds3(QT3DSVec3(data[0], data[1], 0.0f), QT3DSVec3(data[2], data[3], 0.0f));
     }
 
     NVBounds3 NVRenderBackendGL4Impl::GetPathObjectFillBox(NVRenderBackendPathObject inPathObject)
     {
         float data[4];
+#if defined(GL_NV_path_rendering)
         GL_CALL_NVPATH_EXT(glGetPathParameterfvNV(
             HandleToID_cast(GLuint, size_t, inPathObject),
             GL_PATH_FILL_BOUNDING_BOX_NV, data));
+#endif
         return NVBounds3(QT3DSVec3(data[0], data[1], 0.0f), QT3DSVec3(data[2], data[3], 0.0f));
     }
 
     NVBounds3 NVRenderBackendGL4Impl::GetPathObjectStrokeBox(NVRenderBackendPathObject inPathObject)
     {
         float data[4];
+#if defined(GL_NV_path_rendering)
         GL_CALL_NVPATH_EXT(glGetPathParameterfvNV(
             HandleToID_cast(GLuint, size_t, inPathObject),
             GL_PATH_STROKE_BOUNDING_BOX_NV, data));
+#endif
         return NVBounds3(QT3DSVec3(data[0], data[1], 0.0f), QT3DSVec3(data[2], data[3], 0.0f));
     }
 
     void NVRenderBackendGL4Impl::SetStrokeWidth(NVRenderBackendPathObject inPathObject,
                                                 QT3DSF32 inStrokeWidth)
     {
+#if defined(GL_NV_path_rendering)
         GL_CALL_NVPATH_EXT(glPathParameterfNV(HandleToID_cast(GLuint, size_t, inPathObject),
                                       GL_PATH_STROKE_WIDTH_NV, inStrokeWidth));
+#endif
     }
 
     void NVRenderBackendGL4Impl::SetPathProjectionMatrix(const QT3DSMat44 inPathProjection)
@@ -649,8 +685,10 @@ namespace render {
 
     void NVRenderBackendGL4Impl::StencilFillPath(NVRenderBackendPathObject inPathObject)
     {
+#if defined(GL_NV_path_rendering)
         GL_CALL_NVPATH_EXT(glStencilFillPathNV(HandleToID_cast(GLuint, size_t, inPathObject),
                                        GL_COUNT_UP_NV, (GLuint)~0));
+#endif
     }
 
     void NVRenderBackendGL4Impl::ReleasePathNVObject(NVRenderBackendPathObject po, size_t range)

@@ -27,22 +27,26 @@
 **
 ****************************************************************************/
 
-#ifndef QT3DSOPENGLPREFIX_H
-#define QT3DSOPENGLPREFIX_H
+float calcRGBAvg(in vec4 rgba)
+{
+    return (rgba.r + rgba.g + rgba.b) / 3.0;
+}
 
-#include <QtGui/qtguiglobal.h>
-#if defined(QT_OPENGL_ES)
-#define GL_GLEXT_PROTOTYPES
-#if defined(QT_OPENGL_ES_3_2)
-#include <GLES3/gl32.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES3/gl3.h>
-#endif
+vec3 defaultMaterialBumpNoLod(in sampler2D sampler, in float factor,
+                              in vec2 texCoord, in vec3 tangent, in vec3 binormal,
+                              in vec3 normal, in vec2 bumpSize )
+{
+    // invert factor
+    float invFactor = -factor;
 
-// Adding this to ensure that platform version of gl2ext.h is included
-// before Qt's qopengles2ext.h which is missing symbols we need
-#include <GLES2/gl2ext.h>
-#endif
+    vec2 unitStep = 1.0 / bumpSize;
 
-#endif // QT3DSOPENGLPREFIX_H
+    float du = calcRGBAvg(texture2D( sampler, vec2( texCoord.x + unitStep.x, texCoord.y )))
+             - calcRGBAvg(texture2D( sampler, vec2( texCoord.x, texCoord.y )));
+    float dv = calcRGBAvg(texture2D( sampler, vec2( texCoord.x, texCoord.y + unitStep.y )))
+             - calcRGBAvg(texture2D( sampler, vec2( texCoord.x, texCoord.y )));
+
+    vec3 n = normalize(vec3(invFactor * du, invFactor * dv, 1.0));
+    n = n.x * normalize(tangent) + n.y * normalize(binormal) + n.z * normal;
+    return normalize(normal + n);
+}

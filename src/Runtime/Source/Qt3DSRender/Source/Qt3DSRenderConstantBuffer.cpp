@@ -86,7 +86,7 @@ namespace render {
 
     NVRenderConstantBuffer::~NVRenderConstantBuffer()
     {
-        // chekc if we should release memory
+        // check if we should release memory
         if (m_ShadowCopy.size()) {
             m_Foundation.getAllocator().deallocate(m_ShadowCopy.begin());
         }

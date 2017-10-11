@@ -126,6 +126,9 @@ namespace render {
                 BlendCoherency, ///< Hardware supports blend coherency
                 gpuShader5, // for high precision sampling
                 AdvancedBlendKHR, ///< Driver supports advanced blend modes
+                VertexArrayObject,
+                StandardDerivatives,
+                TextureLod
             };
         } NVRenderBackendCaps;
 
@@ -2213,8 +2216,8 @@ namespace render {
                     bool bTimerQuerySupported : 1; ///< Hardware supports timer queries
                     bool bProgramInterfaceSupported : 1; ///< API supports program interface queries
                     bool bStorageBufferSupported : 1; ///< Shader storage buffers are supported
-                    bool
-                        bAtomicCounterBufferSupported : 1; ///< Atomic counter buffers are supported
+                    bool bAtomicCounterBufferSupported : 1; ///< Atomic counter buffers are
+                                                            /// supported
                     bool bShaderImageLoadStoreSupported : 1; ///< Shader image load / store
                                                              ///operations are supported
                     bool bProgramPipelineSupported : 1; ///< Driver supports separate programs
@@ -2225,6 +2228,9 @@ namespace render {
                     bool bGPUShader5ExtensionSupported : 1;
                     bool bKHRAdvancedBlendSupported : 1; ///< Advanced blend modes supported
                     bool bKHRBlendCoherenceSupported : 1; ///< Advanced blend done coherently
+                    bool bVertexArrayObjectSupported : 1;
+                    bool bStandardDerivativesSupported : 1;
+                    bool bTextureLodSupported : 1;
                 } bits;
 
                 QT3DSU32 u32Values;

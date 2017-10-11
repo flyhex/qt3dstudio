@@ -46,6 +46,38 @@
 namespace qt3ds {
 namespace render {
 
+#ifndef GL_TEXTURE_2D_MULTISAMPLE
+#define GL_TEXTURE_2D_MULTISAMPLE 0x9100
+#endif
+
+#ifndef GL_IMAGE_2D
+#define GL_IMAGE_2D 0x904D
+#endif
+
+#ifndef GL_MULTISAMPLE_EXT
+#define GL_MULTISAMPLE_EXT 0x809D
+#endif
+
+#ifndef GL_COLOR_ATTACHMENT1
+#define GL_COLOR_ATTACHMENT1 0x8CE1
+#define GL_COLOR_ATTACHMENT2 0x8CE2
+#define GL_COLOR_ATTACHMENT3 0x8CE3
+#define GL_COLOR_ATTACHMENT4 0x8CE4
+#define GL_COLOR_ATTACHMENT5 0x8CE5
+#define GL_COLOR_ATTACHMENT6 0x8CE6
+#define GL_COLOR_ATTACHMENT7 0x8CE7
+#endif
+
+#ifndef GL_RED
+#define GL_RED 0x1903
+#define GL_GREEN 0x1904
+#define GL_BLUE 0x1905
+#endif
+
+#ifndef GL_PATCHES
+#define GL_PATCHES 0x000E
+#endif
+
 #define QT3DS_RENDER_ITERATE_QT3DS_GL_COLOR_FUNC                                                         \
     QT3DS_RENDER_HANDLE_GL_COLOR_FUNC(GL_ZERO, Zero)                                                  \
     QT3DS_RENDER_HANDLE_GL_COLOR_FUNC(GL_ONE, One)                                                    \
@@ -156,7 +188,7 @@ namespace render {
     QT3DS_RENDER_HANDLE_GL_QT3DS_SHADER_ATTRIB_TYPES(GL_FLOAT_MAT2, QT3DSF32, 4)                            \
     QT3DS_RENDER_HANDLE_GL_QT3DS_SHADER_ATTRIB_TYPES(GL_FLOAT_MAT3, QT3DSF32, 9)                            \
     QT3DS_RENDER_HANDLE_GL_QT3DS_SHADER_ATTRIB_TYPES(GL_FLOAT_MAT4, QT3DSF32, 16)
-
+#if defined(GL_DEPTH_COMPONENT32)
 #define QT3DS_RENDER_ITERATE_GL_QT3DS_RENDERBUFFER_FORMATS                                               \
     QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_RGBA4, RGBA4)                                    \
     QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_RGB565, RGB565)                                  \
@@ -165,6 +197,15 @@ namespace render {
     QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_DEPTH_COMPONENT24, Depth24)                      \
     QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_DEPTH_COMPONENT32, Depth32)                      \
     QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_STENCIL_INDEX8, StencilIndex8)
+#else
+#define QT3DS_RENDER_ITERATE_GL_QT3DS_RENDERBUFFER_FORMATS                                               \
+    QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_RGBA4, RGBA4)                                    \
+    QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_RGB565, RGB565)                                  \
+    QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_RGB5_A1, RGBA5551)                               \
+    QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_DEPTH_COMPONENT16, Depth16)                      \
+    QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_DEPTH_COMPONENT24, Depth24)                      \
+    QT3DS_RENDER_HANDLE_GL_QT3DS_RENDERBUFFER_FORMAT(GL_STENCIL_INDEX8, StencilIndex8)
+#endif
 
 #define QT3DS_RENDER_ITERATE_GL_QT3DS_FRAMEBUFFER_ATTACHMENTS                                            \
     QT3DS_RENDER_HANDLE_GL_QT3DS_FRAMEBUFFER_COLOR_ATTACHMENT(Color0, 0)                                 \
@@ -324,8 +365,7 @@ namespace render {
                 }
             }
 
-            // TODO: Why aren't these defined?
-#ifndef __APPLE__
+#if defined(GL_KHR_blend_equation_advanced)
             if (khrAdvancedBlendSupported) {
                 switch (value) {
                 case NVRenderBlendEquation::Overlay:
@@ -619,12 +659,14 @@ namespace render {
                 retval = GL_ELEMENT_ARRAY_BUFFER;
             else if (value & NVRenderBufferBindValues::Constant)
                 retval = GL_UNIFORM_BUFFER;
+#if defined(GL_ARB_shader_storage_buffer_object)
             else if (value & NVRenderBufferBindValues::Storage)
                 retval = GL_SHADER_STORAGE_BUFFER;
             else if (value & NVRenderBufferBindValues::Atomic_Counter)
                 retval = GL_ATOMIC_COUNTER_BUFFER;
             else if (value & NVRenderBufferBindValues::Draw_Indirect)
                 retval = GL_DRAW_INDIRECT_BUFFER;
+#endif
             else
                 QT3DS_ASSERT(false);
 
@@ -641,12 +683,14 @@ namespace render {
                 retval |= NVRenderBufferBindValues::Index;
             else if (value == GL_UNIFORM_BUFFER)
                 retval |= NVRenderBufferBindValues::Constant;
+#if defined(GL_ARB_shader_storage_buffer_object)
             else if (value == GL_SHADER_STORAGE_BUFFER)
                 retval |= NVRenderBufferBindValues::Storage;
             else if (value == GL_ATOMIC_COUNTER_BUFFER)
                 retval |= NVRenderBufferBindValues::Atomic_Counter;
             else if (value == GL_DRAW_INDIRECT_BUFFER)
                 retval |= NVRenderBufferBindValues::Draw_Indirect;
+#endif
             else
                 QT3DS_ASSERT(false);
 
@@ -688,8 +732,13 @@ namespace render {
             GLenum retval = GL_INVALID_ENUM;
             if (type == NVRenderQueryType::Samples)
                 retval = GL_ANY_SAMPLES_PASSED;
+#if defined(GL_TIME_ELAPSED)
             else if (type == NVRenderQueryType::Timer)
                 retval = GL_TIME_ELAPSED;
+#elif defined(GL_TIME_ELAPSED_EXT)
+            else if (type == NVRenderQueryType::Timer)
+                retval = GL_TIME_ELAPSED_EXT;
+#endif
             else
                 QT3DS_ASSERT(false);
 
@@ -796,8 +845,13 @@ namespace render {
         {
             switch (value) {
             case NVRenderTextureFormats::R8:
-                outFormat = GL_RED;
-                outInternalFormat = GL_R8;
+                if (type == NVRenderContextValues::GLES2) {
+                    outFormat = GL_ALPHA;
+                    outInternalFormat = GL_ALPHA;
+                } else {
+                    outFormat = GL_RED;
+                    outInternalFormat = GL_R8;
+                }
                 outDataType = GL_UNSIGNED_BYTE;
                 return true;
             case NVRenderTextureFormats::RG8:
@@ -859,6 +913,7 @@ namespace render {
             // check extented texture formats
             if (!(type & contextFlags)) {
                 switch (value) {
+#if !defined(QT_OPENGL_ES)
                 case NVRenderTextureFormats::R16: {
                     if (IsGlEsContext(type)) {
                         outFormat = GL_RED_INTEGER;
@@ -870,6 +925,7 @@ namespace render {
                     outDataType = GL_UNSIGNED_SHORT;
                     return true;
                 }
+#endif
                 case NVRenderTextureFormats::R16F:
                     outFormat = GL_RED;
                     outInternalFormat = GL_R16F;
@@ -1240,8 +1296,10 @@ namespace render {
             return GL_INVALID_ENUM;
         }
 
+
         static GLenum fromImageAccessToGL(NVRenderImageAccessType::Enum value)
         {
+#if defined(GL_READ_ONLY)
             switch (value) {
             case NVRenderImageAccessType::Read:
                 return GL_READ_ONLY;
@@ -1252,7 +1310,7 @@ namespace render {
             default:
                 break;
             }
-
+#endif
             QT3DS_ASSERT(false);
             return GL_INVALID_ENUM;
         }
@@ -1279,7 +1337,7 @@ namespace render {
         {
             QT3DSU32 value = flags;
             GLbitfield retval = 0;
-
+#if !defined(QT_OPENGL_ES)
             if (value & NVRenderBufferBarrierValues::AtomicCounter)
                 retval |= GL_ATOMIC_COUNTER_BARRIER_BIT;
             if (value & NVRenderBufferBarrierValues::BufferUpdate)
@@ -1306,7 +1364,7 @@ namespace render {
                 retval |= GL_UNIFORM_BARRIER_BIT;
             if (value & NVRenderBufferBarrierValues::VertexAttribArray)
                 retval |= GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT;
-
+#endif
             QT3DS_ASSERT(retval);
             return retval;
         }
@@ -1315,7 +1373,7 @@ namespace render {
         {
             QT3DSU32 value = flags;
             GLbitfield retval = 0;
-
+#if !defined(QT_OPENGL_ES)
             if (value & NVRenderShaderTypeValue::Vertex)
                 retval |= GL_VERTEX_SHADER_BIT;
             if (value & NVRenderShaderTypeValue::Fragment)
@@ -1325,12 +1383,12 @@ namespace render {
             if (value & NVRenderShaderTypeValue::TessEvaluation)
                 retval |= GL_TESS_EVALUATION_SHADER_BIT;
             if (value & NVRenderShaderTypeValue::Geometry)
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES_3_1)
                 retval |= GL_GEOMETRY_SHADER_BIT_EXT;
 #else
                 retval |= GL_GEOMETRY_SHADER_BIT;
 #endif
-
+#endif
             QT3DS_ASSERT(retval || !value);
             return retval;
         }
@@ -1360,10 +1418,12 @@ namespace render {
 #undef QT3DS_RENDER_HANDLE_GL_QT3DS_SHADER_UNIFORM_TYPES
             case GL_SAMPLER_2D_SHADOW:
                 return NVRenderShaderDataTypes::NVRenderTexture2DPtr;
+#if !defined(QT_OPENGL_ES)
             case GL_UNSIGNED_INT_ATOMIC_COUNTER:
                 return NVRenderShaderDataTypes::QT3DSU32;
             case GL_UNSIGNED_INT_IMAGE_2D:
                 return NVRenderShaderDataTypes::NVRenderImage2DPtr;
+#endif
             default:
                 break;
             }
@@ -1644,6 +1704,7 @@ namespace render {
             GLenum glFillMode;
 
             switch (inMode) {
+#if !defined(QT_OPENGL_ES)
             case NVRenderPathFillMode::Fill:
                 glFillMode = GL_PATH_FILL_MODE_NV;
                 break;
@@ -1656,9 +1717,9 @@ namespace render {
             case NVRenderPathFillMode::Invert:
                 glFillMode = GL_INVERT;
                 break;
+#endif
             default:
                 QT3DS_ASSERT(false);
-                glFillMode = GL_PATH_FILL_MODE_NV;
                 break;
             }
 
@@ -1670,6 +1731,7 @@ namespace render {
             GLenum glFontTarget;
 
             switch (inFontTarget) {
+#if !defined(QT_OPENGL_ES)
             case NVRenderPathFontTarget::StandardFont:
                 glFontTarget = GL_STANDARD_FONT_NAME_NV;
                 break;
@@ -1679,9 +1741,9 @@ namespace render {
             case NVRenderPathFontTarget::FileFont:
                 glFontTarget = GL_FILE_NAME_NV;
                 break;
+#endif
             default:
                 QT3DS_ASSERT(false);
-                glFontTarget = GL_STANDARD_FONT_NAME_NV;
                 break;
             }
 
@@ -1693,6 +1755,7 @@ namespace render {
             NVRenderPathReturnValues::Enum returnValue;
 
             switch (inReturnValue) {
+#if !defined(QT_OPENGL_ES)
             case GL_FONT_GLYPHS_AVAILABLE_NV:
                 returnValue = NVRenderPathReturnValues::FontGlypsAvailable;
                 break;
@@ -1705,6 +1768,7 @@ namespace render {
             case GL_FONT_UNINTELLIGIBLE_NV:
                 returnValue = NVRenderPathReturnValues::FontUnintelligible;
                 break;
+#endif
             case GL_INVALID_ENUM:
             case GL_INVALID_VALUE:
                 returnValue = NVRenderPathReturnValues::InvalidEnum;
@@ -1726,15 +1790,16 @@ namespace render {
             GLenum glMissingGlyphs;
 
             switch (inHandleGlyphs) {
+#if !defined(QT_OPENGL_ES)
             case NVRenderPathMissingGlyphs::SkipMissing:
                 glMissingGlyphs = GL_SKIP_MISSING_GLYPH_NV;
                 break;
             case NVRenderPathMissingGlyphs::UseMissing:
                 glMissingGlyphs = GL_USE_MISSING_GLYPH_NV;
                 break;
+#endif
             default:
                 QT3DS_ASSERT(false);
-                glMissingGlyphs = GL_SKIP_MISSING_GLYPH_NV;
                 break;
             }
 
@@ -1746,6 +1811,7 @@ namespace render {
             GLenum glListMode;
 
             switch (inListMode) {
+#if !defined(QT_OPENGL_ES)
             case NVRenderPathListMode::AccumAdjacentPairs:
                 glListMode = GL_ACCUM_ADJACENT_PAIRS_NV;
                 break;
@@ -1755,9 +1821,9 @@ namespace render {
             case NVRenderPathListMode::FirstToRest:
                 glListMode = GL_FIRST_TO_REST_NV;
                 break;
+#endif
             default:
                 QT3DS_ASSERT(false);
-                glListMode = GL_ACCUM_ADJACENT_PAIRS_NV;
                 break;
             }
 
@@ -1769,6 +1835,7 @@ namespace render {
             GLenum glCoverMode;
 
             switch (inMode) {
+#if !defined(QT_OPENGL_ES)
             case NVRenderPathCoverMode::ConvexHull:
                 glCoverMode = GL_CONVEX_HULL_NV;
                 break;
@@ -1784,9 +1851,9 @@ namespace render {
             case NVRenderPathCoverMode::PathStrokeCover:
                 glCoverMode = GL_PATH_STROKE_COVER_MODE_NV;
                 break;
+#endif
             default:
                 QT3DS_ASSERT(false);
-                glCoverMode = GL_BOUNDING_BOX_NV;
                 break;
             }
 
@@ -1815,11 +1882,11 @@ namespace render {
                 return GL_3_BYTES_NV;
             case NVRenderPathFormatType::Bytes4:
                 return GL_4_BYTES_NV;
-#endif
             case NVRenderPathFormatType::Utf8:
                 return GL_UTF8_NV;
             case NVRenderPathFormatType::Utf16:
                 return GL_UTF16_NV;
+#endif
             default:
                 break;
             }
@@ -1831,12 +1898,12 @@ namespace render {
         {
             QT3DSU32 value = flags;
             GLbitfield retval = 0;
-
+#if !defined(QT_OPENGL_ES)
             if (value & NVRenderPathFontStyleValues::Bold)
                 retval |= GL_BOLD_BIT_NV;
             if (value & NVRenderPathFontStyleValues::Italic)
                 retval |= GL_ITALIC_BIT_NV;
-
+#endif
             QT3DS_ASSERT(retval || !value);
             return retval;
         }
@@ -1846,6 +1913,7 @@ namespace render {
             switch (value) {
             case NVRenderPathTransformType::NoTransform:
                 return GL_NONE;
+#if !defined(QT_OPENGL_ES)
             case NVRenderPathTransformType::TranslateX:
                 return GL_TRANSLATE_X_NV;
             case NVRenderPathTransformType::TranslateY:
@@ -1862,6 +1930,7 @@ namespace render {
                 return GL_TRANSPOSE_AFFINE_2D_NV;
             case NVRenderPathTransformType::TransposeAffine3D:
                 return GL_TRANSPOSE_AFFINE_3D_NV;
+#endif
             default:
                 break;
             }
@@ -1873,7 +1942,7 @@ namespace render {
         {
             QT3DSU32 value = flags;
             GLbitfield retval = 0;
-
+#if !defined(QT_OPENGL_ES)
             if (value & NVRenderPathGlyphFontMetricValues::GlyphWidth)
                 retval |= GL_GLYPH_WIDTH_BIT_NV;
             if (value & NVRenderPathGlyphFontMetricValues::GlyphHeight)
@@ -1921,7 +1990,7 @@ namespace render {
                 retval |= GL_FONT_HAS_KERNING_BIT_NV;
             if (value & NVRenderPathGlyphFontMetricValues::FontNumGlyphIndices)
                 retval |= GL_FONT_NUM_GLYPH_INDICES_BIT_NV;
-
+#endif
             QT3DS_ASSERT(retval || !value);
             return retval;
         }

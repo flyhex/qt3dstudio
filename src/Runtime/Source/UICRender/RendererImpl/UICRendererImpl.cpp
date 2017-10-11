@@ -1172,9 +1172,14 @@ namespace render {
             m_UICContext.GetRenderContext().SetRenderTarget(theAtlasFB);
 
             // this texture contains our single entries
-            NVRenderTexture2D *theTexture = m_UICContext.GetResourceManager().AllocateTexture2D(
-                32, 32, NVRenderTextureFormats::Alpha8);
-
+            NVRenderTexture2D *theTexture = nullptr;
+            if (m_Context->GetRenderContextType() == NVRenderContextValues::GLES2) {
+                theTexture = m_UICContext.GetResourceManager()
+                        .AllocateTexture2D(32, 32, NVRenderTextureFormats::RGBA8);
+            } else {
+                theTexture = m_UICContext.GetResourceManager()
+                        .AllocateTexture2D(32, 32, NVRenderTextureFormats::Alpha8);
+            }
             m_Context->SetClearColor(QT3DSVec4(0, 0, 0, 0));
             m_Context->Clear(NVRenderClearValues::Color);
             m_Context->SetDepthTestEnabled(false);

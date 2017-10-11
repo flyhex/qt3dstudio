@@ -151,6 +151,18 @@ bool Qt3DSOpenGLES2Extensions::initializeOpenGLFunctions()
         GLenum, GLsizei, GLenum, const void *, GLuint, GLfloat, GLfloat, GLenum,
         GLfloat *)>(
             context->getProcAddress("glGetPathSpacingNV"));
+    d->BindVertexArrayOES = reinterpret_cast<void (QOPENGLF_APIENTRYP)
+        (GLuint)>(
+            context->getProcAddress("glBindVertexArrayOES"));
+    d->DeleteVertexArraysOES = reinterpret_cast<void (QOPENGLF_APIENTRYP)
+        (GLsizei, const GLuint *)>(
+            context->getProcAddress("glDeleteVertexArraysOES"));
+    d->GenVertexArraysOES = reinterpret_cast<void (QOPENGLF_APIENTRYP)
+        (GLsizei, GLuint *)>(
+            context->getProcAddress("glGenVertexArraysOES"));
+    d->IsVertexArrayOES = reinterpret_cast<GLboolean (QOPENGLF_APIENTRYP)
+        (GLuint)>(
+            context->getProcAddress("glIsVertexArrayOES"));
 #endif
     Qt3DSOpenGLExtensions::initializeOpenGLFunctions();
     return true;

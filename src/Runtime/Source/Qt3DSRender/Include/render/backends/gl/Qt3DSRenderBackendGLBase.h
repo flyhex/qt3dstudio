@@ -46,6 +46,9 @@
 
 #define NVRENDER_BACKEND_UNUSED(arg) (void)arg;
 
+// Enable this to log opengl errors instead of an assert
+//#define RENDER_BACKEND_LOG_GL_ERRORS
+
 namespace qt3ds {
 namespace render {
 
@@ -492,7 +495,8 @@ namespace render {
                                    eastl::string &errorMessage, bool binary);
         virtual const char *getVersionString();
         virtual const char *getVendorString();
-        virtual const char *geRendererString();
+        virtual const char *getRendererString();
+        virtual const char *getExtensionString();
 
         virtual void setAndInspectHardwareCaps();
 
@@ -502,7 +506,7 @@ namespace render {
         NVScopedRefCounted<qt3ds::foundation::IStringTable>
             m_StringTable; ///< pointer to a string table
         GLConversion m_Conversion; ///< Class for conversion from base type to GL types
-        nvvector<TContextStr> m_Extensions; ///< contains the OpenGL extension string
+        QStringList m_extensions; ///< contains the OpenGL extension string
         QT3DSI32 m_MaxAttribCount; ///< Maximum attributes which can be used
         nvvector<GLenum> m_DrawBuffersArray; ///< Contains the drawbuffer enums
         QSurfaceFormat m_format;
@@ -512,7 +516,11 @@ namespace render {
         NVRenderBackendDepthStencilStateGL
             *m_pCurrentDepthStencilState; ///< this holds the current depth stencil state
 
+#ifdef RENDER_BACKEND_LOG_GL_ERRORS
+        void checkGLError(const char *function, const char *file, const unsigned int line) const;
+#else
         void checkGLError() const;
+#endif
         QOpenGLFunctions *m_glFunctions;
         QOpenGLExtraFunctions *m_glExtraFunctions;
     };

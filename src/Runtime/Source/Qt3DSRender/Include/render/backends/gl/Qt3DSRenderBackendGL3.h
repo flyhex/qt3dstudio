@@ -156,7 +156,7 @@ namespace render {
 
     protected:
         NVRenderBackendMiscStateGL *m_pCurrentMiscState; ///< this holds the current misc state
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES_2)
         Qt3DSOpenGLES2Extensions *m_qt3dsExtensions;
 #else
         QOpenGLExtension_ARB_timer_query *m_timerExtension;

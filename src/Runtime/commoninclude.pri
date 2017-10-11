@@ -37,7 +37,7 @@ INCLUDEPATH += \
     $$PWD/../Authoring/UICDM \
     $$PWD/../Authoring/UICDM/Systems \
     $$PWD/../Authoring/UICDM/Systems/Cores \
-    ../3rdparty/EASTL/UnknownVersion/include \
+    $$PWD/../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/Lua/UnknownVersion/src \
     ../3rdparty/utf8cpp/2.3.2/source \
     ../3rdparty/color \

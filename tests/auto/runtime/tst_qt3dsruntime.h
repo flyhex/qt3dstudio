@@ -85,7 +85,24 @@ private Q_SLOTS:
 
     void testRenderEffectGenerator();
 
-#if !defined(Q_OS_ANDROID)
+#if defined(QT_OPENGL_ES_2)
+    void testRenderDefaultShaderGenerator_200es();
+    void testRenderCustomShaderGenerator_200es();
+#endif
+#if defined(QT_OPENGL_ES_3)
+    void testRenderDefaultShaderGenerator_300es();
+    void testRenderCustomShaderGenerator_300es();
+#if defined(QT_FEATURE_opengles31)
+    void testRenderDefaultShaderGenerator_310es();
+    void testRenderCustomShaderGenerator_310es();
+#endif
+#if defined(QT_FEATURE_opengles32)
+    void testRenderDefaultShaderGenerator_320es();
+    void testRenderCustomShaderGenerator_320es();
+#endif
+#endif
+
+#if defined(QT_OPENGL_DYNAMIC)
     void testRenderDefaultShaderGenerator_300();
     void testRenderDefaultShaderGenerator_310();
     void testRenderDefaultShaderGenerator_320();
@@ -103,9 +120,6 @@ private Q_SLOTS:
     void testRenderCustomShaderGenerator_410();
     void testRenderCustomShaderGenerator_420();
     void testRenderCustomShaderGenerator_430();
-#else
-    void testRenderDefaultShaderGenerator_320es();
-    void testRenderCustomShaderGenerator_320es();
 #endif
 
 

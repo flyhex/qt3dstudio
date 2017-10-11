@@ -215,6 +215,7 @@ namespace render {
         NVRenderCachedShaderProperty<QT3DSVec3> m_CameraDirection;
         NVRenderCachedShaderProperty<NVRenderTexture2D *> m_DepthTexture;
         NVRenderCachedShaderProperty<NVRenderTextureCube *> m_CubeTexture;
+        NVRenderCachedShaderProperty<QT3DSVec2> m_DepthSamplerSize;
 
         NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AoShadowParams;
         QT3DSI32 m_RefCount;
@@ -227,6 +228,7 @@ namespace render {
             , m_CameraDirection("camera_direction", inShader)
             , m_DepthTexture("depth_sampler", inShader)
             , m_CubeTexture("depth_cube", inShader)
+            , m_DepthSamplerSize("depth_sampler_size", inShader)
             , m_AoShadowParams("cbAoShadow", inShader)
             , m_RefCount(0)
         {

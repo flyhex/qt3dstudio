@@ -241,7 +241,8 @@ SOURCES += \
     Source/Qt3DSRender/Source/backends/gl/Qt3DSRenderBackendGL4.cpp \
     Source/Qt3DSRender/Source/backends/gl/Qt3DSRenderBackendGLBase.cpp \
     Source/Qt3DSRender/Source/backends/gl/Qt3DSRenderContextGL.cpp \
-    Source/Qt3DSRender/Source/backends/software/Qt3DSRenderBackendNULL.cpp
+    Source/Qt3DSRender/Source/backends/software/Qt3DSRenderBackendNULL.cpp \
+    Source/Qt3DSRender/Source/backends/gl/Q3DSRenderBackendGLES2.cpp
 
 HEADERS += \
     Source/Qt3DSRender/Include/render/backends/Qt3DSRenderBackend.h \
@@ -254,7 +255,8 @@ HEADERS += \
     Source/Qt3DSRender/Include/render/backends/gl/Qt3DSRenderBackendInputAssemblerGL.h \
     Source/Qt3DSRender/Include/render/backends/gl/Qt3DSRenderBackendRenderStatesGL.h \
     Source/Qt3DSRender/Include/render/backends/gl/Qt3DSRenderBackendShaderProgramGL.h \
-    Source/Qt3DSRender/Include/render/backends/software/Qt3DSRenderBackendNULL.h
+    Source/Qt3DSRender/Include/render/backends/software/Qt3DSRenderBackendNULL.h \
+    Source/Qt3DSRender/Include/render/backends/gl/Q3DSRenderBackendGLES2.h
 
 # UICDM
 SOURCES += \

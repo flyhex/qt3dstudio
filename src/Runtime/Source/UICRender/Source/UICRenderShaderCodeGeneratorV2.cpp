@@ -37,6 +37,8 @@
 #include "UICRenderContext.h"
 #include "UICRenderDynamicObjectSystem.h"
 
+#include <QtGui/qopengl.h>
+
 using namespace uic::render;
 
 namespace {
@@ -92,8 +94,10 @@ struct SStageGeneratorBase : public IShaderStageGenerator
     {
         m_Incoming.insert(eastl::make_pair(Str(name), Str(type)));
     }
-
-    virtual const char8_t *GetIncomingVariableName() { return "in"; }
+    virtual const char8_t *GetIncomingVariableName()
+    {
+        return "in";
+    }
 
     void AddIncoming(const TStrType &name, const char8_t *type) override
     {
@@ -334,6 +338,7 @@ struct SFragmentShaderGenerator : public SStageGeneratorBase
         : SStageGeneratorBase(inFnd, strTable, ShaderGeneratorStages::Fragment)
     {
     }
+    void AddShaderIncomingMap() override { AddShaderItemMap("varying", m_Incoming); }
     void AddShaderOutgoingMap() override {}
 };
 

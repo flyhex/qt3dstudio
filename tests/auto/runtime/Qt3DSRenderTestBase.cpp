@@ -46,6 +46,32 @@ bool NVRenderTestBase::initializeUICRenderer(QSurfaceFormat format)
     m_rc = m_factory->GetUICRenderContext();
     m_renderImpl = new uic::render::CUICRendererImpl(*m_rc);
 
+    QString versionString;
+    switch ((QT3DSU32)m_rc->GetRenderContext().GetRenderContextType()) {
+    case NVRenderContextValues::GLES2:
+        versionString = QLatin1Literal("gles2");
+        break;
+    case NVRenderContextValues::GL2:
+        versionString = QLatin1Literal("gl2");
+        break;
+    case NVRenderContextValues::GLES3:
+        versionString = QLatin1Literal("gles3");
+        break;
+    case NVRenderContextValues::GL3:
+        versionString = QLatin1Literal("gl3");
+        break;
+    case NVRenderContextValues::GLES3PLUS:
+        versionString = QLatin1Literal("gles3x");
+        break;
+    case NVRenderContextValues::GL4:
+        versionString = QLatin1Literal("gl4");
+        break;
+    default:
+        break;
+    }
+
+    m_rc->GetDynamicObjectSystem().setShaderCodeLibraryVersion(versionString);
+
     return true;
 }
 

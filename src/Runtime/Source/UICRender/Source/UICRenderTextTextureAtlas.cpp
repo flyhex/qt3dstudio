@@ -89,8 +89,13 @@ struct STextTextureAtlas : public ITextTextureAtlas
                 m_TextureAtlasInitialized = true;
                 m_textureAtlas->addRef();
                 // if you change the size you need to adjust UICOnscreenTextRenderer too
-                m_textureAtlas->SetTextureData(NVDataRef<QT3DSU8>(), 0, TEXTURE_ATLAS_DIM,
+                if (m_RenderContext->GetRenderContextType() == NVRenderContextValues::GLES2) {
+                    m_textureAtlas->SetTextureData(NVDataRef<QT3DSU8>(), 0, TEXTURE_ATLAS_DIM,
+                                               TEXTURE_ATLAS_DIM, NVRenderTextureFormats::RGBA8);
+                } else {
+                    m_textureAtlas->SetTextureData(NVDataRef<QT3DSU8>(), 0, TEXTURE_ATLAS_DIM,
                                                TEXTURE_ATLAS_DIM, NVRenderTextureFormats::Alpha8);
+                }
                 m_textureAtlas->SetMagFilter(qt3ds::render::NVRenderTextureMagnifyingOp::Linear);
                 m_textureAtlas->SetMinFilter(qt3ds::render::NVRenderTextureMinifyingOp::Linear);
                 m_textureAtlas->SetTextureWrapS(NVRenderTextureCoordOp::ClampToEdge);

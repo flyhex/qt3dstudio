@@ -1880,13 +1880,20 @@ namespace render {
                 // fragmentGenerator.AddInclude( "SSAOCustomMaterial.glsllib" );
                 theFragmentGenerator.AddInclude("viewProperties.glsllib");
                 theFragmentGenerator.AddInclude("screenSpaceAO.glsllib");
-
-                theFragmentGenerator
-                    << "layout (std140) uniform cbAoShadow { " << Endl << "    vec4 ao_properties;"
-                    << Endl << "    vec4 ao_properties2;" << Endl << "    vec4 shadow_properties;"
-                    << Endl << "    vec4 aoScreenConst;" << Endl << "    vec4 UvToEyeConst;" << Endl
-                    << "};" << Endl;
-
+                if (m_Context->GetRenderContextType() == NVRenderContextValues::GLES2) {
+                    theFragmentGenerator
+                        << "\tuniform vec4 ao_properties;" << Endl
+                        << "\tuniform vec4 ao_properties2;" << Endl
+                        << "\tuniform vec4 shadow_properties;" << Endl
+                        << "\tuniform vec4 aoScreenConst;" << Endl
+                        << "\tuniform vec4 UvToEyeConst;" << Endl;
+                } else {
+                    theFragmentGenerator
+                        << "layout (std140) uniform cbAoShadow { " << Endl << "\tvec4 ao_properties;"
+                        << Endl << "\tvec4 ao_properties2;" << Endl << "\tvec4 shadow_properties;"
+                        << Endl << "\tvec4 aoScreenConst;" << Endl << "\tvec4 UvToEyeConst;" << Endl
+                        << "};" << Endl;
+                }
                 theFragmentGenerator.AddUniform("camera_direction", "vec3");
                 theFragmentGenerator.AddUniform("depth_sampler", "sampler2D");
                 theFragmentGenerator.Append("void main() {");
@@ -1899,22 +1906,42 @@ namespace render {
                 // values at the edges
                 // surrounding objects, and this also ends up giving us weird AO values.
                 // If we had a proper screen-space normal map, that would also do the trick.
-                theFragmentGenerator.Append("\tivec2 iCoords = ivec2( gl_FragCoord.xy );");
-                theFragmentGenerator.Append("\tfloat depth = getDepthValue( "
-                                            "texelFetch(depth_sampler, iCoords, 0), "
-                                            "camera_properties );");
-                theFragmentGenerator.Append(
-                    "\tdepth = depthValueToLinearDistance( depth, camera_properties );");
-                theFragmentGenerator.Append("\tdepth = (depth - camera_properties.x) / "
-                                            "(camera_properties.y - camera_properties.x);");
-                theFragmentGenerator.Append("\tfloat depth2 = getDepthValue( "
-                                            "texelFetch(depth_sampler, iCoords+ivec2(1), 0), "
-                                            "camera_properties );");
-                theFragmentGenerator.Append(
-                    "\tdepth2 = depthValueToLinearDistance( depth, camera_properties );");
-                theFragmentGenerator.Append("\tfloat depth3 = getDepthValue( "
-                                            "texelFetch(depth_sampler, iCoords-ivec2(1), 0), "
-                                            "camera_properties );");
+                if (m_Context->GetRenderContextType() == NVRenderContextValues::GLES2) {
+                    theFragmentGenerator.AddUniform("depth_sampler_size", "vec2");
+                    theFragmentGenerator.Append("\tivec2 iCoords = ivec2( gl_FragCoord.xy );");
+                    theFragmentGenerator.Append("\tfloat depth = getDepthValue( "
+                                                "texture2D(depth_sampler, vec2(iCoords)"
+                                                " / depth_sampler_size), camera_properties );");
+                    theFragmentGenerator.Append(
+                        "\tdepth = depthValueToLinearDistance( depth, camera_properties );");
+                    theFragmentGenerator.Append("\tdepth = (depth - camera_properties.x) / "
+                                                "(camera_properties.y - camera_properties.x);");
+                    theFragmentGenerator.Append("\tfloat depth2 = getDepthValue( "
+                                                "texture2D(depth_sampler, vec2(iCoords+ivec2(1))"
+                                                " / depth_sampler_size), camera_properties );");
+                    theFragmentGenerator.Append(
+                        "\tdepth2 = depthValueToLinearDistance( depth, camera_properties );");
+                    theFragmentGenerator.Append("\tfloat depth3 = getDepthValue( "
+                                                "texture2D(depth_sampler, vec2(iCoords-ivec2(1))"
+                                                " / depth_sampler_size), camera_properties );");
+                } else {
+                    theFragmentGenerator.Append("\tivec2 iCoords = ivec2( gl_FragCoord.xy );");
+                    theFragmentGenerator.Append("\tfloat depth = getDepthValue( "
+                                                "texelFetch(depth_sampler, iCoords, 0), "
+                                                "camera_properties );");
+                    theFragmentGenerator.Append(
+                        "\tdepth = depthValueToLinearDistance( depth, camera_properties );");
+                    theFragmentGenerator.Append("\tdepth = (depth - camera_properties.x) / "
+                                                "(camera_properties.y - camera_properties.x);");
+                    theFragmentGenerator.Append("\tfloat depth2 = getDepthValue( "
+                                                "texelFetch(depth_sampler, iCoords+ivec2(1), 0), "
+                                                "camera_properties );");
+                    theFragmentGenerator.Append(
+                        "\tdepth2 = depthValueToLinearDistance( depth, camera_properties );");
+                    theFragmentGenerator.Append("\tfloat depth3 = getDepthValue( "
+                                                "texelFetch(depth_sampler, iCoords-ivec2(1), 0), "
+                                                "camera_properties );");
+                }
                 theFragmentGenerator.Append(
                     "\tdepth3 = depthValueToLinearDistance( depth, camera_properties );");
                 theFragmentGenerator.Append("\tvec3 tanU = vec3(10, 0, dFdx(depth));");

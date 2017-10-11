@@ -254,6 +254,8 @@ namespace render {
         shader->m_ViewMatrix.Set(m_Camera->m_GlobalTransform);
 
         shader->m_DepthTexture.Set(m_LayerDepthTexture);
+        shader->m_DepthSamplerSize.Set(QT3DSVec2(m_LayerDepthTexture->GetTextureDetails().m_Width,
+                                                 m_LayerDepthTexture->GetTextureDetails().m_Height));
 
         // Important uniforms for AO calculations
         QT3DSVec2 theCameraProps = QT3DSVec2(m_Camera->m_ClipNear, m_Camera->m_ClipFar);
@@ -290,6 +292,8 @@ namespace render {
 
         shader->m_DepthTexture.Set(theDepthTex);
         shader->m_CubeTexture.Set(theDepthCube);
+        shader->m_DepthSamplerSize.Set(QT3DSVec2(theDepthTex->GetTextureDetails().m_Width,
+                                                 theDepthTex->GetTextureDetails().m_Height));
 
         // Important uniforms for AO calculations
         QT3DSVec2 theCameraProps = QT3DSVec2(m_Camera->m_ClipNear, m_Camera->m_ClipFar);
@@ -721,7 +725,9 @@ namespace render {
                                      *pEntry->m_DepthRender);
                     (*theFB)->AttachFace(NVRenderFrameBufferAttachments::Color0,
                                          *pEntry->m_DepthCube, curFace);
+                    (*theFB)->IsComplete();
                     theRenderContext.Clear(clearFlags);
+
                     RunRenderPass(RenderRenderableShadowMapPass, false, true, true, i,
                                   theCameras[k]);
                 }
@@ -787,7 +793,6 @@ namespace render {
 
         qt3ds::render::NVRenderClearFlags clearFlags(qt3ds::render::NVRenderClearValues::Stencil
                                                   | qt3ds::render::NVRenderClearValues::Depth);
-
         theRenderContext.Clear(clearFlags);
 
         RunRenderPass(RenderRenderableDepthPass, false, true, inEnableTransparentDepthWrite, 0,
@@ -1201,7 +1206,8 @@ namespace render {
         SWindowDimensions theLayerOriginalTextureDimensions = theLayerTextureDimensions;
         NVRenderTextureFormats::Enum DepthTextureFormat = NVRenderTextureFormats::Depth24Stencil8;
         NVRenderTextureFormats::Enum ColorTextureFormat = NVRenderTextureFormats::RGBA8;
-        if (thePrepResult.m_LastEffect) {
+        if (thePrepResult.m_LastEffect
+                && theRenderContext.GetRenderContextType() != NVRenderContextValues::GLES2) {
             if (m_Layer.m_Background != LayerBackground::Transparent)
                 ColorTextureFormat = NVRenderTextureFormats::R11G11B10;
             else
@@ -1216,8 +1222,10 @@ namespace render {
             && theRenderContext.AreMultisampleTexturesSupported())
             sampleCount = (QT3DSU32)m_Layer.m_MultisampleAAMode;
 
-        bool isMultisamplePass =
-            (sampleCount > 1) || (m_Layer.m_MultisampleAAMode == AAModeValues::SSAA);
+        bool isMultisamplePass = false;
+        if (theRenderContext.GetRenderContextType() != NVRenderContextValues::GLES2)
+            isMultisamplePass =
+                    (sampleCount > 1) || (m_Layer.m_MultisampleAAMode == AAModeValues::SSAA);
 
         qt3ds::render::NVRenderTextureTargetType::Enum thFboAttachTarget =
             qt3ds::render::NVRenderTextureTargetType::Texture2D;

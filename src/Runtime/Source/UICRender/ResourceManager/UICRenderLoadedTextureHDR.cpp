@@ -240,7 +240,11 @@ static FIBITMAP *DoLoadHDR(FreeImageIO *io, fi_handle handle,
 SLoadedTexture *SLoadedTexture::LoadHDR(ISeekableIOStream &inStream, NVFoundationBase &inFnd)
 {
     FreeImageIO theIO(inFnd.getAllocator(), inFnd);
+#ifdef QT_OPENGL_ES_2
+    SLoadedTexture *retval = DoLoadHDR(&theIO, &inStream, NVRenderTextureFormats::RGBA8);
+#else
     SLoadedTexture *retval = DoLoadHDR(&theIO, &inStream, NVRenderTextureFormats::RGBA16F);
+#endif
 
     // Let's just assume we don't support this just yet.
     //	if ( retval )

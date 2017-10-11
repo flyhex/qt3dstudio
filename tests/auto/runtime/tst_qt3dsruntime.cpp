@@ -168,7 +168,9 @@ bool tst_qt3dsruntime::init(QSurfaceFormat format)
 
 bool tst_qt3dsruntime::init()
 {
-#if defined(Q_OS_ANDROID)
+#if defined(QT_OPENGL_ES_2)
+    return init(makeFormat(2, 0, true, false));
+#elif defined(Q_OS_ANDROID) || defined(QT_OPENGL_ES_3)
     return init(makeFormat(3, 2, true, false));
 #else
     return init(makeFormat(4, 3));
@@ -459,7 +461,67 @@ void tst_qt3dsruntime::testNVRenderTestProgramPipeline()
     cleanup();
 }
 
-#if !defined(Q_OS_ANDROID)
+#if defined(QT_OPENGL_ES_2)
+void tst_qt3dsruntime::testRenderDefaultShaderGenerator_200es()
+{
+    if (init(makeFormat(2, 0, true, false))) {
+        runDefaultShaderGeneratorTest();
+        cleanup();
+    }
+}
+void tst_qt3dsruntime::testRenderCustomShaderGenerator_200es()
+{
+    runCustomShaderGeneratorTest(makeFormat(2, 0, true, false));
+    cleanup();
+}
+#endif
+
+#if defined(QT_OPENGL_ES_3)
+void tst_qt3dsruntime::testRenderDefaultShaderGenerator_300es()
+{
+    if (init(makeFormat(3, 0, true, false))) {
+        runDefaultShaderGeneratorTest();
+        cleanup();
+    }
+}
+void tst_qt3dsruntime::testRenderCustomShaderGenerator_300es()
+{
+    runCustomShaderGeneratorTest(makeFormat(3, 0, true, false));
+    cleanup();
+}
+
+#if defined(QT_FEATURE_opengles31)
+void tst_qt3dsruntime::testRenderDefaultShaderGenerator_310es()
+{
+    if (init(makeFormat(3, 1, true, false))) {
+        runDefaultShaderGeneratorTest();
+        cleanup();
+    }
+}
+void tst_qt3dsruntime::testRenderCustomShaderGenerator_310es()
+{
+    runCustomShaderGeneratorTest(makeFormat(3, 1, true, false));
+    cleanup();
+}
+#endif
+#if defined(QT_FEATURE_opengles32)
+void tst_qt3dsruntime::testRenderDefaultShaderGenerator_320es()
+{
+    if (init(makeFormat(3, 1, true, false))) {
+        runDefaultShaderGeneratorTest();
+        cleanup();
+    }
+}
+void tst_qt3dsruntime::testRenderCustomShaderGenerator_320es()
+{
+    runCustomShaderGeneratorTest(makeFormat(3, 1, true, false));
+    cleanup();
+}
+
+#endif
+#endif
+
+#if defined(QT_OPENGL_DYNAMIC)
 void tst_qt3dsruntime::testRenderDefaultShaderGenerator_300()
 {
     QSKIP("OpenGL 3.0 is not supported");
@@ -564,21 +626,6 @@ void tst_qt3dsruntime::testRenderCustomShaderGenerator_420()
 void tst_qt3dsruntime::testRenderCustomShaderGenerator_430()
 {
     runCustomShaderGeneratorTest(makeFormat(4, 3));
-}
-
-#else
-
-void tst_qt3dsruntime::testRenderDefaultShaderGenerator_320es()
-{
-    if (init(makeFormat(3, 2, true, false))) {
-        runDefaultShaderGeneratorTest();
-        cleanup();
-    }
-}
-
-void tst_qt3dsruntime::testRenderCustomShaderGenerator_320es()
-{
-    runCustomShaderGeneratorTest(makeFormat(3, 2, true, false));
 }
 
 #endif

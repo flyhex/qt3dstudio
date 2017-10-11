@@ -37,6 +37,7 @@
 #include "foundation/Qt3DSDataRef.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "render/glg/Qt3DSGLImplObjects.h"
+#include "render/backends/gl/Q3DSRenderBackendGLES2.h"
 #include "render/backends/gl/Qt3DSRenderBackendGL3.h"
 #include "render/backends/gl/Qt3DSRenderBackendGL4.h"
 #include "render/backends/software/Qt3DSRenderBackendNULL.h"
@@ -149,6 +150,8 @@ namespace render {
         virtual bool IsBlendCoherencySupported() const = 0;
         virtual bool IsAdvancedBlendHwSupported() const = 0;
         virtual bool IsAdvancedBlendHwSupportedKHR() const = 0;
+        virtual bool IsStandardDerivativesSupported() const = 0;
+        virtual bool IsTextureLodSupported() const = 0;
 
         virtual void SetDefaultRenderTarget(QT3DSU64 targetID) = 0;
         virtual void SetDefaultDepthBufferBitCount(QT3DSI32 depthBits) = 0;
@@ -762,6 +765,14 @@ namespace render {
         bool IsBlendCoherencySupported() const override
         {
             return GetRenderBackendCap(NVRenderBackend::NVRenderBackendCaps::BlendCoherency);
+        }
+        bool IsStandardDerivativesSupported() const override
+        {
+            return GetRenderBackendCap(NVRenderBackend::NVRenderBackendCaps::StandardDerivatives);
+        }
+        bool IsTextureLodSupported() const override
+        {
+            return GetRenderBackendCap(NVRenderBackend::NVRenderBackendCaps::TextureLod);
         }
 
         void SetDefaultRenderTarget(QT3DSU64 targetID) override

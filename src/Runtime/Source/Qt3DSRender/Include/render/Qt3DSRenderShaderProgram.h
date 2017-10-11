@@ -407,6 +407,11 @@ namespace render {
         NVRenderShaderProgram *m_Shader; ///< pointer to shader program
         NVRenderShaderConstantBase *m_Constant; ///< poiner to shader constant object
 
+        NVRenderCachedShaderProperty(const QString &inConstantName, NVRenderShaderProgram &inShader)
+            : NVRenderCachedShaderProperty(qPrintable(inConstantName), inShader)
+        {
+        }
+
         NVRenderCachedShaderProperty(const char *inConstantName, NVRenderShaderProgram &inShader)
             : m_Shader(&inShader)
             , m_Constant(NULL)
@@ -424,6 +429,7 @@ namespace render {
                 }
             }
         }
+
         NVRenderCachedShaderProperty()
             : m_Shader(NULL)
             , m_Constant(NULL)
@@ -468,7 +474,7 @@ namespace render {
             if (m_ShaderBuffer) {
                 m_ShaderBuffer->Validate(m_Shader);
                 m_ShaderBuffer->Update();
-                m_ShaderBuffer->BindToPorgram(m_Shader);
+                m_ShaderBuffer->BindToProgram(m_Shader);
             }
         }
 
