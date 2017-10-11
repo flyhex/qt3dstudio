@@ -51,7 +51,6 @@ SOURCES += \
     Common/Code/Report/StackOps.cpp \
     Common/Code/EulerAngles/EulerAngles.cpp \
     Common/Code/Memory/MemoryObject.cpp \
-    Common/Code/Memory/UICMemoryLeak.cpp \
     Common/Code/Serialize/FormattedInputStream.cpp \
     Common/Code/Serialize/FormattedOutputStream.cpp \
     Common/Code/Serialize/PreferencesSerializer.cpp \

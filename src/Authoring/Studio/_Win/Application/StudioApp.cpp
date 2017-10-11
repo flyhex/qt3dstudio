@@ -110,9 +110,6 @@ int main(int argc, char *argv[])
 #include "CommonConstants.h"
 #include "IOLibraryException.h"
 
-#ifdef _DEBUG
-#include "UICMemoryLeak.h"
-#endif
 #include "UICDMErrors.h"
 
 #include <iostream>
@@ -155,12 +152,6 @@ long g_UICErrorCode = 0;
 
 using namespace Q3DStudio;
 
-#ifndef MAX_PATH
-#define MAX_PATH 260
-#endif
-
-char g_DumpPath[MAX_PATH] = { 0 };
-
 #ifndef WIN32
 namespace qt3ds
 {
@@ -191,14 +182,6 @@ CStudioApp::CStudioApp()
     , m_goStraightToWelcomeFileDialog(false)
     , m_tutorialPage(0)
 {
-#ifdef WIN32
-#ifdef _DEBUG
-    AfxEnableMemoryTracking(TRUE);
-    CMemoryLeak::SetXMLFileName("StudioMemoryLeaks.xml");
-    CMemoryLeak::SetShowDialogOnExit(false);
-#endif // _DEBUG
-    g_DumpPath[0] = 0;
-#endif
 }
 
 //=============================================================================
