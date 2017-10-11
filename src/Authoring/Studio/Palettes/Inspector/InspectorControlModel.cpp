@@ -684,16 +684,18 @@ void InspectorControlModel::refreshRenderables()
 
 void InspectorControlModel::refresh()
 {
-    for (int row = 0; row < m_groupElements.count(); ++row) {
-        auto group = m_groupElements[row];
-        for (int p = 0; p < group.controlElements.count(); ++p) {
-            QVariant& element = group.controlElements[p];
-            InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property.Valid())
-                updatePropertyValue(property);
+    if (isTreeRebuildRequired(m_inspectableBase)) {
+        rebuildTree();
+    } else {
+        // group structure is intact, let's walk to see which rows changed
+        long theCount = m_inspectableBase->GetGroupCount();
+        for (long theIndex = 0; theIndex < theCount; ++theIndex) {
+            if (isGroupRebuildRequired(m_inspectableBase, theIndex)) {
+                m_groupElements[theIndex] = computeGroup(m_inspectableBase, theIndex);
+                Q_EMIT dataChanged(index(theIndex), index(theIndex));
+            }
         }
     }
-    Q_EMIT dataChanged(index(0), index(rowCount() - 1));
 }
 
 void InspectorControlModel::setMaterialTypeValue(long instance, int handle, const QVariant &value)
@@ -757,21 +759,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
 
     if (commit) {
         m_UpdatableEditor.CommitEditor();
-
-        if (isTreeRebuildRequired(m_inspectableBase)) {
-            rebuildTree();
-        } else {
-            // group strucutre is intact, let's walk to see which rows changed
-            long theCount = m_inspectableBase->GetGroupCount();
-            for (long theIndex = 0; theIndex < theCount; ++theIndex) {
-                if (isGroupRebuildRequired(m_inspectableBase, theIndex)) {
-                    m_groupElements[theIndex] = computeGroup(m_inspectableBase, theIndex);
-                    Q_EMIT dataChanged(index(theIndex), index(theIndex));
-                }
-            }
-        }
-
-    } // of commit
+        refresh();
+    }
 }
 
 void InspectorControlModel::setSlideSelection(long instance, int handle, int index,
