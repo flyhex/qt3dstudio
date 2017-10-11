@@ -1,10 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/style/dark.qss</file>
         <file>resources/images/viewer_icon.png</file>
-        <file>resources/style/checkbox.png</file>
-        <file>resources/style/down_arrow.png</file>
-        <file>resources/style/handle.png</file>
         <file>viewer.qml</file>
+        <file alias="style.qss">../../Authoring/Studio/style.qss</file>
+        <file alias="res/arrow_down.png">../../Authoring/Studio/res/arrow_down.png</file>
+        <file alias="res/separator.png">../../Authoring/Studio/res/separator.png</file>
     </qresource>
 </RCC>

@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     if (!files.isEmpty())
         w.loadFile(files.first());
 
-    QFile styleFile(":/resources/style/dark.qss");
+    QFile styleFile(":/style.qss");
     styleFile.open(QFile::ReadOnly);
 
     QString style(styleFile.readAll());
