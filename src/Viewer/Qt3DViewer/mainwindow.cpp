@@ -449,15 +449,15 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 }
 #endif
 
-void MainWindow::updateUI()
+void MainWindow::updateUI(bool statusVisible)
 {
     ui->actionConnect->setChecked(m_remoteDeploymentReceiver);
 
     if (m_remoteDeploymentReceiver) {
         if (m_connectionInfo)
-            m_connectionInfo->setVisible(!m_remoteDeploymentReceiver->isConnected());
+            m_connectionInfo->setVisible(statusVisible);
         if (m_studio3D)
-            m_studio3D->setVisible(m_remoteDeploymentReceiver->isConnected());
+            m_studio3D->setVisible(!statusVisible && m_remoteDeploymentReceiver->isConnected());
     }
 
     Q3DSView *view = viewer();
@@ -479,15 +479,29 @@ void MainWindow::loadRemoteDeploymentReceiver()
     Q_ASSERT(m_remoteDeploymentReceiver);
     const QString remote = m_remoteDeploymentReceiver->fileName();
     loadFile(remote);
-    updateUI();
+    updateUI(false);
 }
 
 void MainWindow::remoteConnected()
 {
+    m_connectionInfo->setProperty("text", "Remote Connected");
     updateUI();
 }
 
 void MainWindow::remoteDisconnected()
 {
+    m_connectionInfo->setProperty("text", "Remote Disconnected");
     updateUI();
+}
+
+void MainWindow::updateProgress(int percent)
+{
+    QString progress = QStringLiteral("Receiving (");
+    progress.append(QString::number(percent));
+    progress.append("%)");
+    // Don't wait for 100%, as it'll already start loading and text isn't updated anymore
+    if (percent >= 99)
+        m_connectionInfo->setProperty("text", QStringLiteral("Loading"));
+    else
+        m_connectionInfo->setProperty("text", progress);
 }

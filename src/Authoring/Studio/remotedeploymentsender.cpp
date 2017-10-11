@@ -120,7 +120,7 @@ void RemoteDeploymentSender::connect()
     m_tcpSocket->connectToHost(info.first, info.second);
     if (!m_tcpSocket->waitForConnected(2000)) {
         m_tcpSocket->abort();
-        checkConnection();
+        connectionError();
     }
 }
 

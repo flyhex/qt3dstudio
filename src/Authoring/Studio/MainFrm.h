@@ -220,6 +220,8 @@ public:
     void OnShowAction();
     void OnShowInspector();
 
+    void OnConnectionChanged(bool);
+
     CTimelineControl *GetTimelineControl();
     ITimelineTimebar *GetSelectedTimelineTimebar();
 

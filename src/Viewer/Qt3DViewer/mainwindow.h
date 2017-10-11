@@ -54,6 +54,7 @@ public:
 
     void loadFile(const QString &filename);
     void loadProject(const QByteArray &data);
+    void updateProgress(int percent);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -84,7 +85,7 @@ private Q_SLOTS:
     void on_actionScale_To_Fit_triggered();
     void on_actionScale_To_Fill_triggered();
 
-    void updateUI();
+    void updateUI(bool statusVisible = true);
 
     void loadRemoteDeploymentReceiver();
     void remoteConnected();

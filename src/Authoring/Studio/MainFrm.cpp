@@ -110,6 +110,8 @@ CMainFrame::CMainFrame()
             &CMainFrame::OnFileConnectToDevice);
     connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
             m_ui->action_Connect_to_Device, &QAction::setChecked);
+    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
+            this, &CMainFrame::OnConnectionChanged);
     connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
     m_RecentItems = new CRecentItems(m_ui->menuRecent_Projects, 0);
@@ -1033,10 +1035,16 @@ void CMainFrame::OnPlaybackStop()
  */
 void CMainFrame::OnPlaybackPreview()
 {
-    if (m_remoteDeploymentSender->isConnected())
+    if (m_remoteDeploymentSender->isConnected()) {
+        g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
+                    "Deploying to",
+                    "remote device",
+                    "Deploying...");
         CPreviewHelper::OnDeploy(*m_remoteDeploymentSender);
-    else
+        g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
+    } else {
         CPreviewHelper::OnPreview();
+    }
 }
 
 //==============================================================================
@@ -1780,10 +1788,19 @@ void CMainFrame::OnFileRevert()
 
 void CMainFrame::OnFileConnectToDevice()
 {
-    if (m_remoteDeploymentSender->isConnected())
+    if (m_remoteDeploymentSender->isConnected()) {
+        g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
+                    "Disconnecting from",
+                    "remote device",
+                    "Disconnecting...");
         m_remoteDeploymentSender->disconnect();
-    else
+    } else {
+        g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
+                    "Connecting to",
+                    "remote device",
+                    "Connecting...");
         m_remoteDeploymentSender->connect();
+    }
 }
 
 //==============================================================================
@@ -1884,6 +1901,12 @@ void CMainFrame::OnShowAction()
 void CMainFrame::OnShowInspector()
 {
     m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
+}
+
+void CMainFrame::OnConnectionChanged(bool connected)
+{
+    Q_UNUSED(connected)
+    g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
 }
 
 CTimelineControl *CMainFrame::GetTimelineControl()

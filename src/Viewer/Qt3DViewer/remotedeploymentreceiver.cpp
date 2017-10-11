@@ -28,6 +28,7 @@
 ****************************************************************************/
 
 #include "remotedeploymentreceiver.h"
+#include "mainwindow.h"
 
 #include <QtNetwork>
 #include <QtWidgets/qinputdialog.h>
@@ -94,11 +95,11 @@ void RemoteDeploymentReceiver::acceptRemoteConnection()
 
     m_incoming.setDevice(m_connection);
 
-    connect(m_connection, SIGNAL(disconnected()),
-            this, SLOT(acceptRemoteDisconnection()));
+    connect(m_connection, &QTcpSocket::disconnected,
+        this, &RemoteDeploymentReceiver::acceptRemoteDisconnection);
 
-    connect(m_connection, SIGNAL(readyRead()),
-            this, SLOT(readProject()));
+    connect(m_connection, &QTcpSocket::readyRead,
+        this, &RemoteDeploymentReceiver::readProject);
 
     Q_EMIT(remoteConnected());
 }
@@ -121,6 +122,9 @@ void RemoteDeploymentReceiver::readProject()
 
     int totalBytes = 0;
     m_incoming >> totalBytes;
+
+    qobject_cast<MainWindow *>(m_mainWindow)->updateProgress(
+                100 * ((double)m_connection->bytesAvailable() / (double)totalBytes));
 
     if (m_connection->bytesAvailable() < totalBytes) {
         m_incoming.rollbackTransaction();
