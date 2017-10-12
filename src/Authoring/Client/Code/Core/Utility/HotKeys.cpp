@@ -620,14 +620,6 @@ Qt::KeyboardModifier CHotKeys::GetModifierFromString(const Q3DStudio::CString &i
 {
     Qt::KeyboardModifier theRetVal = Qt::NoModifier;
 
-#ifndef WIN32
-#ifdef KDAB_TEMPORARILY_REMOVED
-    if (inString == ::LoadResourceString(IDS_HK_CMD))
-        theRetVal = MODIFIER_COMMAND;
-    else if (inString == ::LoadResourceString(IDS_HK_ALPHALOCK))
-        theRetVal = MODIFIER_CAPS;
-#endif
-#endif
     if (inString == L"ctrl") // TODO: Localize
         theRetVal = Qt::ControlModifier;
     else if (inString == L"shift") // TODO: Localize
