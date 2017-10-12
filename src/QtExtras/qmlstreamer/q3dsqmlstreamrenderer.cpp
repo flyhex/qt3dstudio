@@ -414,6 +414,7 @@ void Q3DSQmlStreamRenderer::render()
         QOpenGLContext *context = QOpenGLContext::currentContext();
         QOpenGLFunctions *func = context->functions();
         GLuint texture = m_frameBuffer->texture();
+        func->glDisable(GL_DEPTH_TEST);
 
         if (!m_program)
             initializeFboCopy();
@@ -439,6 +440,7 @@ void Q3DSQmlStreamRenderer::render()
         func->glActiveTexture(GL_TEXTURE0);
         func->glBindTexture(GL_TEXTURE_2D, texture);
         func->glDrawArrays(GL_TRIANGLES, 0, 6);
+        func->glEnable(GL_DEPTH_TEST);
 
         m_update = false;
         m_program->release();
