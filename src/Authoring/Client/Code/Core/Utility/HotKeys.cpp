@@ -143,7 +143,8 @@ CHotKeys::CHotKeys()
 //=============================================================================
 CHotKeys::~CHotKeys()
 {
-    qApp->removeEventFilter(m_EventFilter);
+    if (qApp)
+        qApp->removeEventFilter(m_EventFilter);
     this->ClearAllEvents();
     REMOVEFROM_OBJECT_COUNTER(CHotKeys)
 }

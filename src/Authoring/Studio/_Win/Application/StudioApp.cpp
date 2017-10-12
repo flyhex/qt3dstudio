@@ -190,6 +190,15 @@ CStudioApp::CStudioApp()
  */
 CStudioApp::~CStudioApp()
 {
+
+    delete m_SplashPalette;
+    m_SplashPalette = nullptr;
+    delete m_Views;
+    m_Views = nullptr;
+    delete m_Dialogs;
+    m_Dialogs = nullptr;
+    delete m_Core;
+    m_Core = nullptr;
     // Do not call PerformShutdown from here as the C has already been shutdown (!!)
 }
 
@@ -208,18 +217,6 @@ void CStudioApp::PerformShutdown()
         m_Renderer->Close();
         m_Renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
     }
-
-    // No need to delete m_SplashPalette.  You should not call delete on CFrameWnds,
-    // you should call DestroyWindow( ) instead.  See the MSDN.
-    // delete m_SplashPalette;
-#ifdef KDAB_TEMPORARILY_REMOVED
-    delete m_Views;
-    m_Views = nullptr;
-    delete m_Dialogs;
-    m_Dialogs = nullptr;
-    delete m_Core;
-    m_Core = nullptr;
-#endif
 
     CStringLoader::UnloadStrings();
 
