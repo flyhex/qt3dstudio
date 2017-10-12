@@ -154,6 +154,7 @@ private:
 
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
+    void refreshTree();
     void notifyInstancePropertyValue(UICDM::CUICDMInstanceHandle, UICDM::CUICDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase* inItem);
 

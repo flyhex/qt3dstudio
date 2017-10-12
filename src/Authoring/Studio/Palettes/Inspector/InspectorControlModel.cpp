@@ -682,8 +682,9 @@ void InspectorControlModel::refreshRenderables()
     }
 }
 
-void InspectorControlModel::refresh()
+void InspectorControlModel::refreshTree()
 {
+    //check if the structure has changed
     if (isTreeRebuildRequired(m_inspectableBase)) {
         rebuildTree();
     } else {
@@ -696,6 +697,22 @@ void InspectorControlModel::refresh()
             }
         }
     }
+}
+
+void InspectorControlModel::refresh()
+{
+    refreshTree();
+    // update values
+    for (int row = 0; row < m_groupElements.count(); ++row) {
+        auto group = m_groupElements[row];
+        for (int p = 0; p < group.controlElements.count(); ++p) {
+            QVariant& element = group.controlElements[p];
+            InspectorControlBase *property = element.value<InspectorControlBase *>();
+            if (property->m_property.Valid())
+                updatePropertyValue(property);
+        }
+    }
+    Q_EMIT dataChanged(index(0), index(rowCount() - 1));
 }
 
 void InspectorControlModel::setMaterialTypeValue(long instance, int handle, const QVariant &value)
@@ -759,7 +776,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
 
     if (commit) {
         m_UpdatableEditor.CommitEditor();
-        refresh();
+        refreshTree();
     }
 }
 
