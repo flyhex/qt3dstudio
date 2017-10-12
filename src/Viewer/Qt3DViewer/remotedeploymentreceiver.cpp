@@ -42,14 +42,32 @@ RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
     , m_serverPort(36000)
 {
     m_incoming.setVersion(QDataStream::Qt_5_8);
-    m_serverPort = QInputDialog::getInt(m_mainWindow, tr("Connection Info"),
-                                        tr("Enter IP Port:"), m_serverPort);
+
+    QInputDialog inputPort;
+    inputPort.setLabelText(tr("Enter IP Port:"));
+    inputPort.setInputMode(QInputDialog::IntInput);
+    inputPort.setIntMinimum(0);
+    inputPort.setIntMaximum(65536);
+    inputPort.setIntValue(m_serverPort);
+    inputPort.setWindowFlags(Qt::Popup);
+    connect(&inputPort, &QInputDialog::intValueSelected, this, &RemoteDeploymentReceiver::setPort);
+#ifdef Q_OS_ANDROID
+    // Android requires this weird stylesheet modification, or the contents of the spinbox are cut.
+    // Seems to be caused by QTBUG-41773
+    inputPort.setStyleSheet("QSpinBox { height: 40px; padding: -10px; }");
+#endif
+    inputPort.exec();
 }
 
 RemoteDeploymentReceiver::~RemoteDeploymentReceiver()
 {
     delete m_temporaryDir;
     m_temporaryDir = 0;
+}
+
+void RemoteDeploymentReceiver::setPort(int value)
+{
+    m_serverPort = value;
 }
 
 bool RemoteDeploymentReceiver::startServer()

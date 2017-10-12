@@ -61,6 +61,7 @@ private Q_SLOTS:
     void acceptRemoteConnection();
     void acceptRemoteDisconnection();
     void readProject();
+    void setPort(int value);
 
 private:
     QWidget *m_mainWindow = nullptr;
