@@ -93,6 +93,7 @@ void CSubPresentationsDlg::OnInitDialog()
         m_ui->lineEditId->setText(m_records[0].m_id);
         m_ui->lineEditPreview->setText(m_records[0].m_argsOrSrc);
     }
+    m_ui->lineEditId->setEnabled(current != -1);
     m_ui->lineEditPreview->setReadOnly(true);
     m_ui->buttonBox->setFocusPolicy(Qt::NoFocus);
 }
@@ -101,9 +102,11 @@ void CSubPresentationsDlg::OnSelectPresentation(int selectionIndex)
 {
     if (selectionIndex >= 0 && selectionIndex < m_records.size()) {
         current = selectionIndex;
+        m_ui->lineEditId->setEnabled(true);
         m_ui->lineEditId->setText(m_records[current].m_id);
         m_ui->lineEditPreview->setText(m_records[current].m_argsOrSrc);
     } else {
+        m_ui->lineEditId->setEnabled(false);
         m_ui->lineEditId->setText(QString());
         m_ui->lineEditPreview->setText(QString());
     }
@@ -157,8 +160,10 @@ void CSubPresentationsDlg::OnBrowsePresentation()
 
 void CSubPresentationsDlg::OnIdChanged(const QString &text)
 {
-    m_records[current].m_id = text;
-    m_ui->comboBox->setItemText(current, text);
+    if (current != -1) {
+        m_records[current].m_id = text;
+        m_ui->comboBox->setItemText(current, text);
+    }
 }
 
 void CSubPresentationsDlg::on_buttonBox_accepted()
