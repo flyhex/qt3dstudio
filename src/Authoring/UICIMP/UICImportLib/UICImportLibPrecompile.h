@@ -63,7 +63,7 @@ namespace UICIMP {
 using namespace qt3ds;
 using namespace qt3ds::foundation;
 using namespace qt3ds::render;
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace std;
 }
 

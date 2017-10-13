@@ -35,7 +35,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 SSlideSystem::SSlideSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
                            TSlideGraphCorePtr inSlideGraphCore, TAnimationCorePtr inAnimationCore,
@@ -264,7 +264,7 @@ void SSlideSystem::InsertEntryAndPropertyInstance(const TSlideEntry &inEntry,
         {
             // get all references belong to this instance (ex: image instances that belong to this
             // material instance)
-            UICDM::SValue theValue;
+            qt3dsdm::SValue theValue;
             for (TPropertyHandlePropertyInfoPairList::iterator theIter =
                      m_PropertyInfoPairList.begin();
                  theIter != m_PropertyInfoPairList.end(); ++theIter) {
@@ -795,7 +795,7 @@ ISlideSystemSignalSender *SSlideSystem::GetSignalSender()
     return dynamic_cast<ISlideSystemSignalSender *>(m_Signaller.get());
 }
 
-UICDM::CUICDMSlideHandle SSlideSystem::GetApplicableSlide(CUICDMInstanceHandle inHandle,
+qt3dsdm::CUICDMSlideHandle SSlideSystem::GetApplicableSlide(CUICDMInstanceHandle inHandle,
                                                           CUICDMPropertyHandle inProperty)
 {
     TGraphSlidePair theGraphSlidePair = m_SlideGraphCore->GetAssociatedGraph(inHandle);

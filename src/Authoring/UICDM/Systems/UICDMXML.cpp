@@ -47,7 +47,7 @@
 typedef char XML_Char;
 typedef char XML_LChar;
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using std::shared_ptr;
 using namespace qt3ds::foundation;
 using qt3ds::foundation::Pool;
@@ -55,7 +55,7 @@ using qt3ds::foundation::Pool;
 #define QT3DSXML_FOREACH(idxnm, val)                                                                  \
     for (QT3DSU32 idxnm = 0, __numItems = (QT3DSU32)val; idxnm < __numItems; ++idxnm)
 
-namespace UICDM {
+namespace qt3dsdm {
 
 // All names are string table values so we can do straight
 // pointer comparisons on them, we don't have the compare their
@@ -334,7 +334,7 @@ struct SDOMReader : public IDOMReader
     SDOMFlags m_Flags;
     eastl::basic_string<TWCharEASTLConverter::TCharType> m_TempBuffer;
 
-    SDOMReader(SDOMElement &te, std::shared_ptr<UICDM::IStringTable> s,
+    SDOMReader(SDOMElement &te, std::shared_ptr<qt3dsdm::IStringTable> s,
                std::shared_ptr<IDOMFactory> inFactory = std::shared_ptr<IDOMFactory>())
         : IDOMReader(s)
         , m_TopElement(&te)
@@ -608,7 +608,7 @@ struct SDOMWriter : public IDOMWriter, public SDOMReader
     IDOMFactory &m_Factory;
 
     SDOMWriter(std::shared_ptr<IDOMFactory> inDOMFactory,
-               std::shared_ptr<UICDM::IStringTable> inStringTable, SDOMElement &inTopElem)
+               std::shared_ptr<qt3dsdm::IStringTable> inStringTable, SDOMElement &inTopElem)
         : m_FactoryPtr(inDOMFactory)
         , m_Factory(*inDOMFactory)
         , SDOMReader(inTopElem, inStringTable)
@@ -1097,10 +1097,10 @@ class SimpleDomFactory : public IDOMFactory
     eastl::vector<char8_t *> m_BigStrings;
     eastl::vector<char8_t> m_StringBuilder;
     TNarrowStr m_ConvertBuffer;
-    std::shared_ptr<UICDM::IStringTable> m_StringTable;
+    std::shared_ptr<qt3dsdm::IStringTable> m_StringTable;
 
 public:
-    SimpleDomFactory(std::shared_ptr<UICDM::IStringTable> strt)
+    SimpleDomFactory(std::shared_ptr<qt3dsdm::IStringTable> strt)
         : m_StringTable(strt)
     {
     }
@@ -1188,7 +1188,7 @@ public:
         return m_ElementPool.construct(n, __FILE__, __LINE__);
     }
 
-    std::shared_ptr<UICDM::IStringTable> GetStringTable() override { return m_StringTable; }
+    std::shared_ptr<qt3dsdm::IStringTable> GetStringTable() override { return m_StringTable; }
 };
 }
 
@@ -1205,7 +1205,7 @@ bool IDOMReader::Value(DataModelDataType::Value type, SValue &outValue)
 
 std::shared_ptr<IDOMReader>
 IDOMReader::CreateDOMReader(SDOMElement &inRootElement,
-                            std::shared_ptr<UICDM::IStringTable> inStringTable,
+                            std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                             std::shared_ptr<IDOMFactory> inFactory)
 {
     return std::make_shared<SDOMReader>(std::ref(inRootElement), std::ref(inStringTable),
@@ -1214,7 +1214,7 @@ IDOMReader::CreateDOMReader(SDOMElement &inRootElement,
 
 eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
 IDOMWriter::CreateDOMWriter(std::shared_ptr<IDOMFactory> inFactory, SDOMElement &inRootElement,
-                            std::shared_ptr<UICDM::IStringTable> inStringTable)
+                            std::shared_ptr<qt3dsdm::IStringTable> inStringTable)
 {
     std::shared_ptr<SDOMWriter> writer(std::make_shared<SDOMWriter>(
         inFactory, std::ref(inStringTable), std::ref(inRootElement)));
@@ -1240,7 +1240,7 @@ TXMLCharPtr IDOMFactory::RegisterValue(TXMLCharPtr inValue)
 }
 
 std::shared_ptr<IDOMFactory>
-IDOMFactory::CreateDOMFactory(std::shared_ptr<UICDM::IStringTable> inStrTable)
+IDOMFactory::CreateDOMFactory(std::shared_ptr<qt3dsdm::IStringTable> inStrTable)
 {
     return std::make_shared<SimpleDomFactory>(std::ref(inStrTable));
 }

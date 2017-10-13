@@ -104,7 +104,7 @@ namespace render {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDOMReader;
 class IDOMWriter;
 }
@@ -403,8 +403,8 @@ class CUIPParserImpl : public IUIPParser
     //	Fields
     //==============================================================================
 protected:
-    std::shared_ptr<UICDM::IDOMReader> m_DOMReader;
-    std::shared_ptr<UICDM::IDOMWriter> m_DOMWriter;
+    std::shared_ptr<qt3dsdm::IDOMReader> m_DOMReader;
+    std::shared_ptr<qt3dsdm::IDOMWriter> m_DOMWriter;
     IRuntimeMetaData &m_MetaData; ///< Reference to Metadata
     IInputStreamFactory &m_InputStreamFactory;
     SParseElementManager m_ParseElementManager; ///< Map of id, SElement*
@@ -527,7 +527,7 @@ public: // Parse UIP file
     BOOL Load(IPresentation &inPresentation,
                       NVConstDataRef<SElementAttributeReference> inStateReferences,
                       qt3ds::state::debugger::ISceneGraphRuntimeDebugger &debugger) override;
-    UICDM::IDOMReader &GetDOMReader() override;
+    qt3dsdm::IDOMReader &GetDOMReader() override;
     IRuntimeMetaData &GetMetaData() override;
     SElementAndType GetElementForID(const char *inStringId) override;
     eastl::string ResolveReference(const char *inStringId, const char *inReferance) override;
@@ -537,50 +537,50 @@ public: // Parse UIP file
     }
 
 protected: // Operation
-    BOOL LoadProjectSettings(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
-    BOOL LoadClasses(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
-    BOOL LoadGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
-    BOOL LoadSceneGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader,
+    BOOL LoadProjectSettings(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader);
+    BOOL LoadClasses(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader);
+    BOOL LoadGraph(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader);
+    BOOL LoadSceneGraph(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader,
                         qt3ds::runtime::element::SElement *inNewStyleParent = NULL);
-    BOOL LoadLogic(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
-    BOOL LoadStateGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
+    BOOL LoadLogic(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader);
+    BOOL LoadStateGraph(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader);
 
 protected: // Memory Counter
-    void ComputeAndReserveMemory(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
-    void DoGraphSectionCount(UICDM::IDOMReader &inReader, SGraphSectionCount &outGraphCounter);
-    void DoLogicSectionCount(UICDM::IDOMReader &inReader, SLogicSectionCount &outLogicCounter);
-    void DoStateSectionCount(UICDM::IDOMReader &inReader, INT32 inSlideIndex,
+    void ComputeAndReserveMemory(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader);
+    void DoGraphSectionCount(qt3dsdm::IDOMReader &inReader, SGraphSectionCount &outGraphCounter);
+    void DoLogicSectionCount(qt3dsdm::IDOMReader &inReader, SLogicSectionCount &outLogicCounter);
+    void DoStateSectionCount(qt3dsdm::IDOMReader &inReader, INT32 inSlideIndex,
                              SLogicSectionCount &outLogicCounter);
-    void DoRefSectionCount(UICDM::IDOMReader &inReader, INT32 inNumSlideMultiplier,
+    void DoRefSectionCount(qt3dsdm::IDOMReader &inReader, INT32 inNumSlideMultiplier,
                            INT32 inSlideIndex, SLogicSectionCount &outLogicCounter);
 
 protected: // Scene graph heler
-    void CacheGraphRequiredAttributes(UICDM::IDOMReader &inReader);
-    BOOL CacheLogicRequiredAttributes(UICDM::IDOMReader &inReader, qt3ds::QT3DSI32 inSlideIndex = 0,
+    void CacheGraphRequiredAttributes(qt3dsdm::IDOMReader &inReader);
+    BOOL CacheLogicRequiredAttributes(qt3dsdm::IDOMReader &inReader, qt3ds::QT3DSI32 inSlideIndex = 0,
                                       SParseSlide *inParentSlide = NULL);
-    void CacheClassRequiredAttributes(UICDM::IDOMReader &inReader);
-    void CacheClassSceneAttributes(UICDM::IDOMReader &inReader);
-    void CacheClassStateAttributes(UICDM::IDOMReader &inReader);
+    void CacheClassRequiredAttributes(qt3dsdm::IDOMReader &inReader);
+    void CacheClassSceneAttributes(qt3dsdm::IDOMReader &inReader);
+    void CacheClassStateAttributes(qt3dsdm::IDOMReader &inReader);
     void AddElementRefToPatch(TPropertyDescAndValueList &outDescList, SElementData &inElement,
                               const char *inName, const char *inValue);
     void PatchSceneElementRef();
 
 protected: // Slide helper
     BOOL LoadState(IPresentation &inPresentation, SElement *inComponent, INT32 inSlideIndex,
-                   UICDM::IDOMReader &inReader);
-    qt3ds::runtime::SSlidePlayInformation GetPlayMode(UICDM::IDOMReader &inReader);
-    INT32 GetPlayThroughTo(INT32 inCurrentSlideIndex, UICDM::IDOMReader &inReader);
-    eastl::string GetSlideName(UICDM::IDOMReader &inReader);
-    eastl::string GetSlideId(UICDM::IDOMReader &inReader);
-    BOOL LoadSlideElements(IPresentation &inPresentation, UICDM::IDOMReader &inReader,
+                   qt3dsdm::IDOMReader &inReader);
+    qt3ds::runtime::SSlidePlayInformation GetPlayMode(qt3dsdm::IDOMReader &inReader);
+    INT32 GetPlayThroughTo(INT32 inCurrentSlideIndex, qt3dsdm::IDOMReader &inReader);
+    eastl::string GetSlideName(qt3dsdm::IDOMReader &inReader);
+    eastl::string GetSlideId(qt3dsdm::IDOMReader &inReader);
+    BOOL LoadSlideElements(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader,
                            bool inMaster, SElement *inComponent, INT32 *outMaxTime = NULL);
     SElementData *AddSlideElement(IPresentation &inPresentation, bool inMaster,
-                                  UICDM::IDOMReader &inReader, INT32 *outMaxTime = NULL);
+                                  qt3dsdm::IDOMReader &inReader, INT32 *outMaxTime = NULL);
     BOOL LoadSlideElementAttrs(IPresentation &inPresentation, bool inMaster,
-                               SElementData &inElementData, UICDM::IDOMReader &inReader,
+                               SElementData &inElementData, qt3dsdm::IDOMReader &inReader,
                                SElement *inComponent);
     BOOL ProcessStateRef(IPresentation &inPresentation, SElement *inComponent, bool inMaster,
-                         UICDM::IDOMReader &inReader);
+                         qt3dsdm::IDOMReader &inReader);
 
 protected: // Animation helper
     void LoadAnimationTrack(IPresentation &inPresentation, SElementData &inElementData,
@@ -595,9 +595,9 @@ protected: // Animation helper
                            bool inIsRotation);
     SEaseInEaseOutKeyframe ParseEaseInOutKey(const float *&inFloatIter);
     BOOL ProcessSlideAnimAction(IPresentation &inPresentation, eastl::string &inSlideId,
-                                bool inMaster, UICDM::IDOMReader &inReader);
+                                bool inMaster, qt3dsdm::IDOMReader &inReader);
     BOOL AddSlideAction(IPresentation &inPresentation, eastl::string &inSlideId, bool inActive,
-                        UICDM::IDOMReader &inReader);
+                        qt3dsdm::IDOMReader &inReader);
     void CreateBezierKeyframeFromEaseInEaseOutKeyframe(float *inPreviousValue,
                                                        SEaseInEaseOutKeyframe &inCurrent,
                                                        float *inNextValue, float *&outBezierValues);
@@ -635,10 +635,10 @@ protected:
     void AddBoolAttribute(TPropertyDescAndValueList &outDescList, CRegisteredString inAttStrName,
                           bool &inValue);
     void AddFloat2Attribute(TPropertyDescAndValueList &outDescList,
-                            CRegisteredString *inAttStrNames, UICDM::SFloat2 &inValue);
+                            CRegisteredString *inAttStrNames, qt3dsdm::SFloat2 &inValue);
     void AddFloat3Attribute(TPropertyDescAndValueList &outDescList,
                             ERuntimeAdditionalMetaDataType inAdditionalType,
-                            CRegisteredString *inAttStrNames, UICDM::SFloat3 &inValue);
+                            CRegisteredString *inAttStrNames, qt3dsdm::SFloat3 &inValue);
     void AddStringAttribute(IPresentation &inPresentation, TPropertyDescAndValueList &outDescList,
                             CRegisteredString inAttStrName, const char *inValue);
     void AddElementRefAttribute(TPropertyDescAndValueList &outDescList,

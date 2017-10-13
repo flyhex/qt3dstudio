@@ -100,7 +100,7 @@ QSize ActionView::sizeHint() const
     return {500, 500};
 }
 
-void ActionView::setItem(const UICDM::CUICDMInstanceHandle &handle)
+void ActionView::setItem(const qt3dsdm::CUICDMInstanceHandle &handle)
 {
     m_objRefHelper = GetDoc()->GetDataModelObjectReferenceHelper();
     m_itemHandle = handle;
@@ -257,8 +257,8 @@ void ActionView::setCurrentPropertyIndex(int handle, int index)
 
     // set the property for the handler
     if (m_propertyModel && handle != 0) {
-        UICDM::SValue sValue(QVariant(m_propertyModel->property(index).m_nameId));
-        UICDM::SValue oldValue;
+        qt3dsdm::SValue sValue(QVariant(m_propertyModel->property(index).m_nameId));
+        qt3dsdm::SValue oldValue;
         GetDoc()->GetStudioSystem()->GetActionCore()->GetHandlerArgumentValue(handle, oldValue);
 
         if (!Equals(oldValue, sValue)) {
@@ -372,7 +372,7 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
         m_eventsModel = new EventsModel(this);
     }
 
-    UICDM::TEventHandleList eventList;
+    qt3dsdm::TEventHandleList eventList;
     bridge->GetEvents(instanceHandle, eventList);
     m_eventsModel->setEventList(eventList);
 
@@ -385,7 +385,7 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
-        setEvent(UICDM::CUICDMEventHandle(m_eventsBrowser->selectedHandle()));
+        setEvent(qt3dsdm::CUICDMEventHandle(m_eventsBrowser->selectedHandle()));
     });
 
     return m_eventsBrowser;
@@ -404,7 +404,7 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
         m_handlersModel = new EventsModel(this);
     }
 
-    UICDM::THandlerHandleList handlerList;
+    qt3dsdm::THandlerHandleList handlerList;
     bridge->GetHandlers(instanceHandle, handlerList);
     m_handlersModel->setHandlerList(handlerList);
 
@@ -417,7 +417,7 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
-        setHandler(UICDM::CUICDMHandlerHandle(m_handlerBrowser->selectedHandle()));
+        setHandler(qt3dsdm::CUICDMHandlerHandle(m_handlerBrowser->selectedHandle()));
     });
 
     return m_handlerBrowser;
@@ -436,7 +436,7 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
         m_fireEventsModel = new EventsModel(this);
     }
 
-    UICDM::TEventHandleList eventList;
+    qt3dsdm::TEventHandleList eventList;
     bridge->GetEvents(instanceHandle, eventList);
     m_fireEventsModel->setEventList(eventList);
 
@@ -449,7 +449,7 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this, handle] {
-          setArgumentValue(handle, UICDM::CUICDMEventHandle(m_fireEventsBrowser->selectedHandle()).GetHandleValue());
+          setArgumentValue(handle, qt3dsdm::CUICDMEventHandle(m_fireEventsBrowser->selectedHandle()).GetHandleValue());
     });
 
     return m_fireEventsBrowser;
@@ -518,7 +518,7 @@ void ActionView::resetFiredEvent()
 void ActionView::OnNewPresentation()
 {
     // Register callback
-    UICDM::IStudioFullSystemSignalProvider *theSignalProvider =
+    qt3dsdm::IStudioFullSystemSignalProvider *theSignalProvider =
         g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
     m_connections.push_back(theSignalProvider->ConnectActionCreated(
         std::bind(&ActionView::OnActionAdded, this, std::placeholders::_1,
@@ -547,25 +547,25 @@ void ActionView::OnNewPresentation()
 
 void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
 {
-    UICDM::CUICDMInstanceHandle theInstance;
-    std::vector<UICDM::CUICDMInstanceHandle> instances;
+    qt3dsdm::CUICDMInstanceHandle theInstance;
+    std::vector<qt3dsdm::CUICDMInstanceHandle> instances;
 
     switch (inSelectable.getType()) {
     case Q3DStudio::SelectedValueTypes::Instance:
-        theInstance = inSelectable.getData<UICDM::CUICDMInstanceHandle>();
+        theInstance = inSelectable.getData<qt3dsdm::CUICDMInstanceHandle>();
         break;
     case Q3DStudio::SelectedValueTypes::MultipleInstances:
-        instances = inSelectable.getData<std::vector<UICDM::CUICDMInstanceHandle>>();
+        instances = inSelectable.getData<std::vector<qt3dsdm::CUICDMInstanceHandle>>();
         // handling only if we have one selected element.
         if (instances.size() == 1)
             theInstance = instances[0];
         break;
     case Q3DStudio::SelectedValueTypes::Slide: {
-        UICDM::CUICDMSlideHandle theSlideHandle =
+        qt3dsdm::CUICDMSlideHandle theSlideHandle =
             inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Slide;
         // Get the owning component instance
         CClientDataModelBridge *theBridge = GetBridge();
-        UICDM::SLong4 theComponentGuid = theBridge->GetComponentGuid(theSlideHandle);
+        qt3dsdm::SLong4 theComponentGuid = theBridge->GetComponentGuid(theSlideHandle);
         Q_ASSERT(GuidValid(theComponentGuid));
         theInstance = theBridge->GetInstanceByGUID(theComponentGuid);
         Q_ASSERT(theInstance.Valid());
@@ -575,15 +575,15 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
     setItem(theInstance);
 }
 
-void ActionView::OnActionAdded(UICDM::CUICDMActionHandle inAction, UICDM::CUICDMSlideHandle inSlide, UICDM::CUICDMInstanceHandle inOwner)
+void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::CUICDMInstanceHandle inOwner)
 {
     CDoc *theDoc = GetDoc();
-    UICDM::CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
+    qt3dsdm::CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
 
-    UICDM::CUICDMSlideHandle theCurrentSlide = theDoc->GetActiveSlide();
-    UICDM::CUICDMSlideHandle theMasterSlideOfAction =
+    qt3dsdm::CUICDMSlideHandle theCurrentSlide = theDoc->GetActiveSlide();
+    qt3dsdm::CUICDMSlideHandle theMasterSlideOfAction =
         theStudioSystem->GetSlideSystem()->GetMasterSlide(inSlide);
-    UICDM::CUICDMSlideHandle theMasterOfCurrentSlide =
+    qt3dsdm::CUICDMSlideHandle theMasterOfCurrentSlide =
         theStudioSystem->GetSlideSystem()->GetMasterSlide(theCurrentSlide);
 
     if (inOwner == m_itemHandle && // the action is added to current viewed instance
@@ -597,14 +597,14 @@ void ActionView::OnActionAdded(UICDM::CUICDMActionHandle inAction, UICDM::CUICDM
     }
 }
 
-void ActionView::OnActionDeleted(UICDM::CUICDMActionHandle inAction, UICDM::CUICDMSlideHandle inSlide, UICDM::CUICDMInstanceHandle inOwner)
+void ActionView::OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::CUICDMInstanceHandle inOwner)
 {
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
     m_actionsModel->removeAction(inAction);
 }
 
-void ActionView::OnActionModified(UICDM::CUICDMActionHandle inAction)
+void ActionView::OnActionModified(qt3dsdm::CUICDMActionHandle inAction)
 {
     if (GetDoc()->GetStudioSystem()->GetActionCore()->HandleValid(inAction)) {
            m_actionsModel->updateAction(inAction);
@@ -612,12 +612,12 @@ void ActionView::OnActionModified(UICDM::CUICDMActionHandle inAction)
     }
 }
 
-void ActionView::OnHandlerArgumentModified(UICDM::CUICDMHandlerArgHandle inHandlerArgument)
+void ActionView::OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument)
 {
     emitActionChanged();
 }
 
-void ActionView::OnInstancePropertyValueChanged(UICDM::CUICDMInstanceHandle inInstance, UICDM::CUICDMPropertyHandle inProperty)
+void ActionView::OnInstancePropertyValueChanged(qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::CUICDMPropertyHandle inProperty)
 {
     emitActionChanged();
 }
@@ -645,7 +645,7 @@ void ActionView::pasteAction()
         ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
 }
 
-void ActionView::setTriggerObject(const UICDM::SObjectRefType &object)
+void ActionView::setTriggerObject(const qt3dsdm::SObjectRefType &object)
 {
     auto action = m_actionsModel->actionAt(m_currentActionIndex);
     if (!action.Valid())
@@ -670,7 +670,7 @@ void ActionView::setTriggerObject(const UICDM::SObjectRefType &object)
     emitActionChanged();
 }
 
-void ActionView::setTargetObject(const UICDM::SObjectRefType &object)
+void ActionView::setTargetObject(const qt3dsdm::SObjectRefType &object)
 {
     auto action = m_actionsModel->actionAt(m_currentActionIndex);
     if (!action.Valid())
@@ -729,7 +729,7 @@ void ActionView::setHandler(const CUICDMHandlerHandle &handler)
 
 QVariant ActionView::handlerArgumentValue(int handle) const
 {
-    UICDM::SValue value;
+    qt3dsdm::SValue value;
     GetDoc()->GetStudioSystem()->GetActionCore()->GetHandlerArgumentValue(handle, value);
     return value.toQVariant();
 }
@@ -778,8 +778,8 @@ void ActionView::setArgumentValue(int handle, const QVariant &value)
     if (handle == 0)
         return;
 
-    UICDM::SValue sValue(value);
-    UICDM::SValue oldValue;
+    qt3dsdm::SValue sValue(value);
+    qt3dsdm::SValue oldValue;
     GetDoc()->GetStudioSystem()->GetActionCore()->GetHandlerArgumentValue(handle, oldValue);
 
     if (!Equals(oldValue, sValue)) {
@@ -812,15 +812,16 @@ void ActionView::initialize()
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
     rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
-    qmlRegisterUncreatableType<UICDM::HandlerArgumentType>("Qt3DStudio", 1, 0, "HandlerArgumentType",
+
+    qmlRegisterUncreatableType<qt3dsdm::HandlerArgumentType>("Qt3DStudio", 1, 0, "HandlerArgumentType",
                                                           "HandlerArgumentType is an enum container"_L1);
-    qmlRegisterUncreatableType<UICDM::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
+    qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
                                                           "DataModelDataType is an enum container"_L1);
-    qmlRegisterUncreatableType<UICDM::AdditionalMetaDataType>("Qt3DStudio", 1, 0, "AdditionalMetaDataType",
+    qmlRegisterUncreatableType<qt3dsdm::AdditionalMetaDataType>("Qt3DStudio", 1, 0, "AdditionalMetaDataType",
                                                           "AdditionalMetaDataType is an enum container"_L1);
     qmlRegisterUncreatableType<PropertyInfo>("Qt3DStudio", 1, 0, "PropertyInfo",
                                              "PropertyInfo is anot creatable in QML"_L1);
-    qmlRegisterUncreatableType<UICDM::CompleteMetaDataType>("Qt3DStudio", 1, 0, "CompleteMetaDataType",
+    qmlRegisterUncreatableType<qt3dsdm::CompleteMetaDataType>("Qt3DStudio", 1, 0, "CompleteMetaDataType",
                                                           "CompleteMetaDataType is an enum container"_L1);
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Studio/Palettes/Action/ActionView.qml"_L1));

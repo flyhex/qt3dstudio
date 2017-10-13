@@ -45,9 +45,9 @@
 #include "UICDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
-class CCmdDataModelActionSetValue : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelActionSetValue : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
@@ -57,7 +57,7 @@ protected: // Members
 public: // Construction
     CCmdDataModelActionSetValue(CDoc *inDoc, CUICDMActionHandle inAction,
                                 const QString &inNiceText)
-        : UICDM::CmdDataModel(*inDoc)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Action(inAction)
         , m_NiceText(inNiceText)
@@ -72,7 +72,7 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
             DoOperation();
         } else {
             DataModelRedo();
@@ -210,11 +210,11 @@ public: // Construction
 class CCmdDataModelActionSetHandler : public CCmdDataModelActionResetHandler
 {
 protected: // Members
-    UICDM::wstring m_Handler;
+    qt3dsdm::wstring m_Handler;
 
 public: // Construction
     CCmdDataModelActionSetHandler(CDoc *inDoc, CUICDMActionHandle inAction,
-                                  UICDM::wstring inHandler)
+                                  qt3dsdm::wstring inHandler)
         : CCmdDataModelActionResetHandler(inDoc, inAction, "Set Handler")
         , m_Handler(inHandler)
     {
@@ -228,7 +228,7 @@ public: // Construction
     }
 };
 
-class CCmdDataModelActionSetArgumentValue : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelActionSetArgumentValue : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
@@ -238,7 +238,7 @@ protected: // Members
 public: // Construction
     CCmdDataModelActionSetArgumentValue(CDoc *inDoc, CUICDMHandlerArgHandle inHandlerArgument,
                                         SValue inValue)
-        : UICDM::CmdDataModel(*inDoc)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_HandlerArgument(inHandlerArgument)
         , m_Value(inValue)
@@ -251,7 +251,7 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
             m_Doc->GetStudioSystem()->GetClientDataModelBridge()->SetHandlerArgumentValue(
                 m_HandlerArgument, m_Value);
         } else {

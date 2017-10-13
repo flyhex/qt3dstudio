@@ -29,7 +29,7 @@
 #include "UICDMPrefix.h"
 #include "SimpleDataCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 TUICDMDebugLogFunction g_UICDMDebugLogger = NULL;
 // Instances
 CUICDMInstanceHandle CSimpleDataCore::CreateInstance(CUICDMInstanceHandle hdl)

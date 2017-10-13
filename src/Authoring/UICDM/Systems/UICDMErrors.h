@@ -31,7 +31,7 @@
 #define UICDMERRORSH
 #include "UICDMWindowsCompatibility.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class UICDMError : public std::exception
 {
 public:

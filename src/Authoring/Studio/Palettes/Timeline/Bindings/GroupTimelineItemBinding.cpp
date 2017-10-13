@@ -52,7 +52,7 @@
 #include "UICDMDataCore.h"
 #include "UICFileTools.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CGroupTimelineItemBinding::CGroupTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      CUICDMInstanceHandle inDataHandle)
@@ -71,9 +71,9 @@ bool CGroupTimelineItemBinding::OpenAssociatedEditor()
     if (GetObjectType() == OBJTYPE_COMPONENT) {
         ISlideSystem *theSlideSystem = m_StudioSystem->GetSlideSystem();
 
-        UICDM::CUICDMInstanceHandle theInstance = GetInstance();
+        qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
         Q3DStudio::CId theId = m_StudioSystem->GetClientDataModelBridge()->GetGUID(theInstance);
-        UICDM::CUICDMSlideHandle theMasterSlide =
+        qt3dsdm::CUICDMSlideHandle theMasterSlide =
             theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
 
         if (theMasterSlide.Valid()) {
@@ -94,16 +94,16 @@ bool CGroupTimelineItemBinding::OpenAssociatedEditor()
 bool CGroupTimelineItemBinding::IsImported() const
 {
 
-    UICDM::CUICDMInstanceHandle theInstance = GetInstance();
-    UICDM::IPropertySystem *thePropertySystem =
+    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::IPropertySystem *thePropertySystem =
         m_TransMgr->GetDoc()->GetStudioSystem()->GetPropertySystem();
-    UICDM::SValue theValue;
+    qt3dsdm::SValue theValue;
     if (thePropertySystem->GetInstancePropertyValue(theInstance, m_TransMgr->GetDoc()
                                                                      ->GetStudioSystem()
                                                                      ->GetClientDataModelBridge()
                                                                      ->GetSourcePathProperty(),
                                                     theValue)) {
-        UICDM::TDataStrPtr theSrcPath(UICDM::get<UICDM::TDataStrPtr>(theValue));
+        qt3dsdm::TDataStrPtr theSrcPath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue));
         Q3DStudio::CFilePath theFilePath(theSrcPath->GetData());
         if (theFilePath.GetExtension() == CDialogs::GetWideImportFileExtension())
             return true;

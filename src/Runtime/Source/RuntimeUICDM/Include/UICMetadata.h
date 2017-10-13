@@ -43,7 +43,7 @@ namespace foundation {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class IStringTable;
 struct SMetaDataEffect;
 struct SMetaDataCustomMaterial;
@@ -365,12 +365,12 @@ public:
     virtual bool LoadPluginXMLFile(const char *inType, const char *inId, const char *inName,
                                    const char *inSourcePath) = 0;
 
-    virtual Option<UICDM::SMetaDataEffect> GetEffectMetaDataBySourcePath(const char *inName) = 0;
+    virtual Option<qt3dsdm::SMetaDataEffect> GetEffectMetaDataBySourcePath(const char *inName) = 0;
 
-    virtual Option<UICDM::SMetaDataCustomMaterial>
+    virtual Option<qt3dsdm::SMetaDataCustomMaterial>
     GetMaterialMetaDataBySourcePath(const char *inSourcePath) = 0;
 
-    virtual std::shared_ptr<UICDM::IStringTable> GetStringTable() = 0;
+    virtual std::shared_ptr<qt3dsdm::IStringTable> GetStringTable() = 0;
 
     virtual TStrTableStr Register(const char *inStr) = 0;
 

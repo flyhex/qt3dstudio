@@ -32,7 +32,7 @@
 
 #include "UICDMDataTypes.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct SUICDMPropertyDefinition
 {

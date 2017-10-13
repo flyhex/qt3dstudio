@@ -32,7 +32,7 @@
 #include <functional>
 #include "UICDMSignals.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 typedef std::function<void(void *, const char *, const char *, size_t)> TGenericSignalHandlerFunc;
 
 class ISignalSystem

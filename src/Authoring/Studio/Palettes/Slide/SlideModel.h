@@ -68,12 +68,12 @@ public:
 
 private:
     bool hasSlideWithName(const QString &name) const;
-    QString slideName(const UICDM::CUICDMSlideHandle &handle) const;
-    void setSlideName(const UICDM::CUICDMSlideHandle &handle, const QString &name);
+    QString slideName(const qt3dsdm::CUICDMSlideHandle &handle) const;
+    void setSlideName(const qt3dsdm::CUICDMSlideHandle &handle, const QString &name);
     inline CDoc *GetDoc() const;
     inline CClientDataModelBridge *GetBridge() const;
 
-    QVector<UICDM::CUICDMSlideHandle> m_slides;
+    QVector<qt3dsdm::CUICDMSlideHandle> m_slides;
     int m_selectedRow = -1;
 };
 

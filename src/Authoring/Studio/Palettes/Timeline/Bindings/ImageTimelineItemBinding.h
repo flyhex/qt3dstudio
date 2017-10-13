@@ -52,7 +52,7 @@ class CImageTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public:
     CImageTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              UICDM::CUICDMInstanceHandle inDataHandle);
+                              qt3dsdm::CUICDMInstanceHandle inDataHandle);
     virtual ~CImageTimelineItemBinding();
 
     // CUICDMTimelineItemBinding
@@ -64,15 +64,15 @@ public:
     void Bind(CBaseStateRow *inRow) override;
     bool OpenAssociatedEditor() override;
 
-    void SetPropertyHandle(UICDM::CUICDMPropertyHandle inProperty)
+    void SetPropertyHandle(qt3dsdm::CUICDMPropertyHandle inProperty)
     {
         m_PropertyHandle = inProperty;
     }
-    UICDM::CUICDMPropertyHandle GetPropertyHandle() const { return m_PropertyHandle; }
+    qt3dsdm::CUICDMPropertyHandle GetPropertyHandle() const { return m_PropertyHandle; }
 
 protected:
     Q3DStudio::CString m_Name;
-    UICDM::CUICDMPropertyHandle m_PropertyHandle;
+    qt3dsdm::CUICDMPropertyHandle m_PropertyHandle;
 };
 
 #endif // INCLUDED_IMAGE_TIMELINEITEM_BINDING_H

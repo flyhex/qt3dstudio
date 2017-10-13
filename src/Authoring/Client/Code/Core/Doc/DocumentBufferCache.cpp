@@ -93,13 +93,13 @@ struct SDocBufferCache : public IDocumentBufferCache
 
     typedef unordered_map<const wchar_t *, SModelBufferOrImage> TBufferHashMap;
 
-    UICDM::TStringTablePtr m_StringTablePtr;
+    qt3dsdm::TStringTablePtr m_StringTablePtr;
     TBufferHashMap m_Buffers;
     bool m_HasPrimitiveBuffers;
 
     SDocBufferCache(CDoc &inDoc)
         : m_Doc(inDoc)
-        , m_StringTablePtr(UICDM::IStringTable::CreateStringTable())
+        , m_StringTablePtr(qt3dsdm::IStringTable::CreateStringTable())
         , m_HasPrimitiveBuffers(false)
     {
     }

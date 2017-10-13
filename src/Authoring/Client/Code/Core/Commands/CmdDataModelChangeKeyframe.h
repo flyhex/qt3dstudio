@@ -46,11 +46,11 @@
 class CCmdDataModelSetKeyframeTime : public CCmdDataModelBase<float>
 {
 protected: // Members
-    UICDM::CUICDMKeyframeHandle m_Keyframe;
+    qt3dsdm::CUICDMKeyframeHandle m_Keyframe;
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelSetKeyframeTime(CDoc *inDoc, UICDM::CUICDMKeyframeHandle inKeyframe, float inTime)
+    CCmdDataModelSetKeyframeTime(CDoc *inDoc, qt3dsdm::CUICDMKeyframeHandle inKeyframe, float inTime)
         : CCmdDataModelBase(inDoc, inTime)
         , m_Keyframe(inKeyframe)
     {
@@ -59,8 +59,8 @@ public: // Construction
 
     void DoOperation() override
     {
-        UICDM::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
-        UICDM::TKeyframe theKeyframe = theAnimationCore->GetKeyframeData(m_Keyframe);
+        qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+        qt3dsdm::TKeyframe theKeyframe = theAnimationCore->GetKeyframeData(m_Keyframe);
         theKeyframe = SetKeyframeSeconds(theKeyframe, m_Value);
         theAnimationCore->SetKeyframeData(m_Keyframe, theKeyframe);
     }
@@ -77,11 +77,11 @@ public: // Construction
 class CCmdDataModelSetKeyframeValue : public CCmdDataModelBase<float>
 {
 protected: // Members
-    UICDM::CUICDMKeyframeHandle m_Keyframe;
+    qt3dsdm::CUICDMKeyframeHandle m_Keyframe;
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelSetKeyframeValue(CDoc *inDoc, UICDM::CUICDMKeyframeHandle inKeyframe,
+    CCmdDataModelSetKeyframeValue(CDoc *inDoc, qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                                   float inValue)
         : CCmdDataModelBase(inDoc, inValue)
         , m_Keyframe(inKeyframe)
@@ -91,8 +91,8 @@ public: // Construction
 
     void DoOperation() override
     {
-        UICDM::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
-        UICDM::TKeyframe theKeyframe = theAnimationCore->GetKeyframeData(m_Keyframe);
+        qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+        qt3dsdm::TKeyframe theKeyframe = theAnimationCore->GetKeyframeData(m_Keyframe);
         theKeyframe = SetKeyframeValue(theKeyframe, m_Value);
         theAnimationCore->SetKeyframeData(m_Keyframe, theKeyframe);
     }
@@ -106,18 +106,18 @@ public: // Construction
     }
 };
 
-class CCmdDataModelChangeDynamicKeyframe : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelChangeDynamicKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
-    typedef std::set<UICDM::CUICDMAnimationHandle> TTrackList;
+    typedef std::set<qt3dsdm::CUICDMAnimationHandle> TTrackList;
     CDoc *m_Doc;
     TTrackList m_Tracks; // 1..n tracks affected, unique list
     bool m_Dynamic;
 
 public: // Construction
-    CCmdDataModelChangeDynamicKeyframe(CDoc *inDoc, UICDM::CUICDMAnimationHandle inHandle,
+    CCmdDataModelChangeDynamicKeyframe(CDoc *inDoc, qt3dsdm::CUICDMAnimationHandle inHandle,
                                        bool inDynamic)
-        : UICDM::CmdDataModel(*inDoc)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Dynamic(inDynamic)
     {
@@ -125,7 +125,7 @@ public: // Construction
     }
     ~CCmdDataModelChangeDynamicKeyframe() {}
 
-    void AddHandle(UICDM::CUICDMAnimationHandle inHandle) { m_Tracks.insert(inHandle); }
+    void AddHandle(qt3dsdm::CUICDMAnimationHandle inHandle) { m_Tracks.insert(inHandle); }
 
     //======================================================================
     //	Do/Redo
@@ -133,8 +133,8 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
-            UICDM::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
             TTrackList::iterator theIter = m_Tracks.begin();
             for (; theIter != m_Tracks.end(); ++theIter)
                 theAnimationCore->SetFirstKeyframeDynamic(*theIter, m_Dynamic);

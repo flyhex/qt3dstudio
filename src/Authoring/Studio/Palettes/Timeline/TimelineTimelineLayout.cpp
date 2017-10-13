@@ -312,7 +312,7 @@ void CTimelineTimelineLayout::OnTimelineLayoutChanged()
  *	Deletes the time zoom ratio for a particular slide.
  *	@param inContext the time context of that slide to delete
  */
-void CTimelineTimelineLayout::DeleteTimelineRatio(UICDM::CUICDMSlideHandle inSlide)
+void CTimelineTimelineLayout::DeleteTimelineRatio(qt3dsdm::CUICDMSlideHandle inSlide)
 {
     m_TimelineRatio.erase(inSlide);
 }
@@ -330,7 +330,7 @@ void CTimelineTimelineLayout::ClearAllTimeRatios()
  *	@param inContext the time context of that slide to retrieve zoom ratio
  *  @return the zoom ratio, or -1 if it's not found
  */
-double CTimelineTimelineLayout::GetTimelineRatio(UICDM::CUICDMSlideHandle inSlide)
+double CTimelineTimelineLayout::GetTimelineRatio(qt3dsdm::CUICDMSlideHandle inSlide)
 {
     TSlideRatioMap::iterator theResult = m_TimelineRatio.find(inSlide);
     if (theResult != m_TimelineRatio.end())
@@ -344,7 +344,7 @@ double CTimelineTimelineLayout::GetTimelineRatio(UICDM::CUICDMSlideHandle inSlid
  *	@param inContext the time context of that slide
  *  @param inRatio the zoom factor
  */
-void CTimelineTimelineLayout::SetTimelineRatio(UICDM::CUICDMSlideHandle inSlide, double inRatio)
+void CTimelineTimelineLayout::SetTimelineRatio(qt3dsdm::CUICDMSlideHandle inSlide, double inRatio)
 {
     m_TimelineRatio[inSlide] = inRatio;
 }

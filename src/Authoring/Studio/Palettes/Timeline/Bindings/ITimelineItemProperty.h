@@ -52,7 +52,7 @@ public:
 
     virtual Q3DStudio::CString GetName() const = 0;
     virtual bool IsMaster() const = 0;
-    virtual UICDM::TDataTypePair GetType() const = 0;
+    virtual qt3dsdm::TDataTypePair GetType() const = 0;
     virtual float GetMaximumValue() const = 0;
     virtual float GetMinimumValue() const = 0;
 

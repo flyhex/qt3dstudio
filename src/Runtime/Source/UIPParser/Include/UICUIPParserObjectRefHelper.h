@@ -103,7 +103,7 @@ public: // Construction
     CUIPParserObjectRefHelper(IRuntimeMetaData &inMetaData);
     virtual ~CUIPParserObjectRefHelper();
 
-    void CacheGraph(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inWriter);
+    void CacheGraph(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inWriter);
     SGraphNode *GetNode(const char *inId);
     SGraphNode *GetNode(eastl::string inId);
     TStrType GetName(const eastl::string &inId); // return the node name given the node id
@@ -114,33 +114,33 @@ public: // Construction
     eastl::string BuildReferenceString(eastl::string inObjectPath);
     void MarkAllReferencedAttributes(eastl::string inId,
                                      const eastl::vector<eastl::string> &inReferences,
-                                     UICDM::IDOMReader &inReader,
+                                     qt3dsdm::IDOMReader &inReader,
                                      SParseElementManager &outIdAttributesMap);
 
 private:
-    void CacheSceneGraph(UICDM::IDOMReader &inReader, SGraphNode *inParent = NULL);
-    SGraphNode &CacheSceneGraphNode(UICDM::IDOMReader &inReader, SGraphNode *inParent = NULL);
-    void CacheStateGraph(UICDM::IDOMReader &inReader);
+    void CacheSceneGraph(qt3dsdm::IDOMReader &inReader, SGraphNode *inParent = NULL);
+    SGraphNode &CacheSceneGraphNode(qt3dsdm::IDOMReader &inReader, SGraphNode *inParent = NULL);
+    void CacheStateGraph(qt3dsdm::IDOMReader &inReader);
 
-    void CopySceneGraph(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inWriter,
-                        UICDM::IDOMWriter &inSlideWriter, TStrToStrMap &inMap,
+    void CopySceneGraph(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inWriter,
+                        qt3dsdm::IDOMWriter &inSlideWriter, TStrToStrMap &inMap,
                         const char *inAliasName, const char *inAliasId, SGraphNode &inParent);
-    void CopyStates(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inSlideWriter,
+    void CopyStates(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inSlideWriter,
                     TStrToStrMap &inMap, const char *inAliasName, const char *inAliasId);
-    void CopyAttributes(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inSlideWriter,
+    void CopyAttributes(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inSlideWriter,
                         TStrToStrMap &inMap, const char *inAliasName, const char *inAliasId);
-    void CopyHierarchy(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inSlideWriter,
+    void CopyHierarchy(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inSlideWriter,
                        TStrToStrMap &inMap, const char *inAliasName, const char *inAliasId);
-    void CopyStateCommands(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inWriter,
+    void CopyStateCommands(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inWriter,
                            TStrToStrMap &oldToNewIdMap, const char *inAliasName,
                            const char *inOldId, const char *inNewId);
     // Helper method for Preseve Attributes
     SGraphNode *GetReferenceNode(SGraphNode *inInstance, eastl::string &inAssetName,
                                  eastl::vector<SGraphNode *> &outInstanceList,
-                                 UICDM::IDOMReader &inReader);
+                                 qt3dsdm::IDOMReader &inReader);
     bool MarkAttributeAsReferenced(SGraphNode *inBaseInstance,
                                    eastl::vector<SGraphNode *> &inInstanceList,
-                                   eastl::string &inAttributeName, UICDM::IDOMReader &inReader,
+                                   eastl::string &inAttributeName, qt3dsdm::IDOMReader &inReader,
                                    SParseElementManager &outIdAttributesMap);
     void MarkPreserveFlag(SGraphNode *inInstance, eastl::string inProperty,
                           SParseElementManager &outIdAttributesMap);

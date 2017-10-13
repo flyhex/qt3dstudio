@@ -45,7 +45,7 @@
 
 #include "UICDMTimelineKeyframe.h" //TODO: remove once we resolve the precision issue
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 COffsetKeyframesCommandHelper::COffsetKeyframesCommandHelper(CDoc &inDoc)
     : Q3DStudio::CUpdateableDocumentEditor(inDoc)
@@ -59,7 +59,7 @@ COffsetKeyframesCommandHelper::~COffsetKeyframesCommandHelper()
 }
 
 //@param inTime time in millisecs
-void COffsetKeyframesCommandHelper::SetCommandTime(UICDM::CUICDMKeyframeHandle inKeyframe,
+void COffsetKeyframesCommandHelper::SetCommandTime(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                                                    long inTime)
 {
     // The UICDM system will take care of merging these under the hood.

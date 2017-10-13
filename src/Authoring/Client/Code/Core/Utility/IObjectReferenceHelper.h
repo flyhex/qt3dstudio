@@ -70,31 +70,31 @@ public:
     virtual ~IObjectReferenceHelper() {}
 
 public:
-    virtual SObjectRefInfo GetInfo(const UICDM::CUICDMInstanceHandle &inInstance) const = 0;
+    virtual SObjectRefInfo GetInfo(const qt3dsdm::CUICDMInstanceHandle &inInstance) const = 0;
 
-    virtual UICDM::TSlideHandleList
-    GetSlideList(const UICDM::CUICDMInstanceHandle inInstance) const = 0;
+    virtual qt3dsdm::TSlideHandleList
+    GetSlideList(const qt3dsdm::CUICDMInstanceHandle inInstance) const = 0;
     virtual bool
-    GetChildInstanceList(const UICDM::CUICDMInstanceHandle &inInstance,
-                         UICDM::TInstanceHandleList &outlist, UICDM::CUICDMSlideHandle inSlide,
-                         const UICDM::CUICDMInstanceHandle &inOwningInstance) const = 0;
+    GetChildInstanceList(const qt3dsdm::CUICDMInstanceHandle &inInstance,
+                         qt3dsdm::TInstanceHandleList &outlist, qt3dsdm::CUICDMSlideHandle inSlide,
+                         const qt3dsdm::CUICDMInstanceHandle &inOwningInstance) const = 0;
     virtual Q3DStudio::CString
-    LookupObjectFormalName(const UICDM::CUICDMInstanceHandle inInstance) const = 0;
+    LookupObjectFormalName(const qt3dsdm::CUICDMInstanceHandle inInstance) const = 0;
 
     virtual Q3DStudio::CString
-    GetObjectReferenceString(const UICDM::CUICDMInstanceHandle &inBaseInstance,
+    GetObjectReferenceString(const qt3dsdm::CUICDMInstanceHandle &inBaseInstance,
                              CRelativePathTools::EPathType inPathType,
-                             const UICDM::CUICDMInstanceHandle &inInstance) const = 0;
-    virtual bool ResolvePath(const UICDM::CUICDMInstanceHandle &inInstance,
+                             const qt3dsdm::CUICDMInstanceHandle &inInstance) const = 0;
+    virtual bool ResolvePath(const qt3dsdm::CUICDMInstanceHandle &inInstance,
                              const Q3DStudio::CString &inPathValue,
                              CRelativePathTools::EPathType &outType,
-                             UICDM::CUICDMInstanceHandle &outResolvedInstance) = 0;
-    virtual UICDM::CUICDMInstanceHandle
-    Resolve(const UICDM::SValue &inObjectRefValue,
-            const UICDM::CUICDMInstanceHandle &inBaseInstance) const = 0;
-    virtual UICDM::SObjectRefType
-    GetAssetRefValue(const UICDM::CUICDMInstanceHandle &inInstance,
-                     const UICDM::CUICDMInstanceHandle &inBaseInstance,
+                             qt3dsdm::CUICDMInstanceHandle &outResolvedInstance) = 0;
+    virtual qt3dsdm::CUICDMInstanceHandle
+    Resolve(const qt3dsdm::SValue &inObjectRefValue,
+            const qt3dsdm::CUICDMInstanceHandle &inBaseInstance) const = 0;
+    virtual qt3dsdm::SObjectRefType
+    GetAssetRefValue(const qt3dsdm::CUICDMInstanceHandle &inInstance,
+                     const qt3dsdm::CUICDMInstanceHandle &inBaseInstance,
                      CRelativePathTools::EPathType inPathType) const = 0;
 };
 

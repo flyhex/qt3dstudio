@@ -34,7 +34,7 @@
 #include "HandleSystemBase.h"
 #include "UICDMActionInfo.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 const long REFERENCED_AS_OWNER = 0x01;
 const long REFERENCED_AS_TRIGGER = 0x02;
 const long REFERENCED_AS_TARGET = 0x04;

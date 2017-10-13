@@ -53,8 +53,8 @@ public: // Construction
     ~CPasteKeyframeCommandHelper() {}
 
     // inTime should be relative to the earliest keyframe time in this list
-    void AddKeyframeData(UICDM::CUICDMPropertyHandle inProperty, float inKeyframeTime,
-                         UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+    void AddKeyframeData(qt3dsdm::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+                         qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
     {
         m_CopiedKeyframeList.push_back(CCmdDataModelInsertKeyframe::STimeKeyframeData(
             inProperty, inKeyframeTime, inInfos, inInfoCount));
@@ -72,13 +72,13 @@ public: // Construction
     //
     // 2. The first pasted keyframe is at current view time and the rest are offset accordingly.
     CCmdDataModelInsertKeyframe *GetCommand(CDoc *inDoc, long inTimeOffsetInMilliseconds,
-                                            UICDM::CUICDMInstanceHandle inTargetInstance)
+                                            qt3dsdm::CUICDMInstanceHandle inTargetInstance)
     {
-        using namespace UICDM;
+        using namespace qt3dsdm;
 
         CCmdDataModelInsertKeyframe *theInsertKeyframesCommand = nullptr;
         TCopiedKeyframeList::iterator theIter = m_CopiedKeyframeList.begin();
-        UICDM::IPropertySystem *thePropertySystem = inDoc->GetStudioSystem()->GetPropertySystem();
+        qt3dsdm::IPropertySystem *thePropertySystem = inDoc->GetStudioSystem()->GetPropertySystem();
         CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
         for (; theIter != m_CopiedKeyframeList.end(); ++theIter) {

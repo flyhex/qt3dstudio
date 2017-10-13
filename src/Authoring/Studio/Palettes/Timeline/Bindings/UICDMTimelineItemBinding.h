@@ -55,7 +55,7 @@ class CBaseStateRow;
 class CUICDMTimelineItemProperty;
 class CCmdDataModelSetKeyframeTime;
 
-namespace UICDM {
+namespace qt3dsdm {
 class CStudioSystem;
 }
 
@@ -70,33 +70,33 @@ class CUICDMTimelineItemBinding : public ITimelineItemBinding,
 
 {
 protected: // Typedef
-    typedef std::map<UICDM::CUICDMPropertyHandle, CUICDMTimelineItemProperty *> TPropertyBindingMap;
+    typedef std::map<qt3dsdm::CUICDMPropertyHandle, CUICDMTimelineItemProperty *> TPropertyBindingMap;
     typedef std::vector<CUICDMAssetTimelineKeyframe> TAssetKeyframeList;
 
 protected:
     CBaseStateRow *m_Row;
     CTimelineTranslationManager *m_TransMgr;
-    UICDM::CUICDMInstanceHandle m_DataHandle;
+    qt3dsdm::CUICDMInstanceHandle m_DataHandle;
     ITimelineItemBinding *m_Parent;
     ITimelineTimebar *m_TimelineTimebar;
     TPropertyBindingMap m_PropertyBindingMap;
     TAssetKeyframeList m_Keyframes; /// Sorted (by time) list of keyframes
-    UICDM::CStudioSystem *m_StudioSystem;
+    qt3dsdm::CStudioSystem *m_StudioSystem;
 
-    UICDM::TSignalConnectionPtr m_StartTimeConnection;
-    UICDM::TSignalConnectionPtr m_EndTimeConnection;
+    qt3dsdm::TSignalConnectionPtr m_StartTimeConnection;
+    qt3dsdm::TSignalConnectionPtr m_EndTimeConnection;
 
 public:
     CUICDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              UICDM::CUICDMInstanceHandle inDataHandle);
+                              qt3dsdm::CUICDMInstanceHandle inDataHandle);
     CUICDMTimelineItemBinding(CTimelineTranslationManager *inMgr);
     virtual ~CUICDMTimelineItemBinding();
 
 protected:
-    bool UICDMGetBoolean(UICDM::CUICDMPropertyHandle inProperty) const;
-    void UICDMSetBoolean(UICDM::CUICDMPropertyHandle inProperty, bool inValue,
+    bool UICDMGetBoolean(qt3dsdm::CUICDMPropertyHandle inProperty) const;
+    void UICDMSetBoolean(qt3dsdm::CUICDMPropertyHandle inProperty, bool inValue,
                          const QString &inNiceText) const;
-    void SetInstanceHandle(UICDM::CUICDMInstanceHandle inDataHandle);
+    void SetInstanceHandle(qt3dsdm::CUICDMInstanceHandle inDataHandle);
 
 public:
     // ITimelineItem
@@ -167,26 +167,26 @@ public:
     void SelectKeyframes(bool inSelected, long inTime = -1) override;
 
     // IUICDMSelectable
-    virtual UICDM::CUICDMInstanceHandle GetInstanceHandle() const;
+    virtual qt3dsdm::CUICDMInstanceHandle GetInstanceHandle() const;
 
     // IDragable
     long GetFlavor() const override;
 
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
-    void OnImmediateRefreshInstanceSingle(UICDM::CUICDMInstanceHandle inInstance) override;
-    void OnImmediateRefreshInstanceMultiple(UICDM::CUICDMInstanceHandle *inInstance,
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance,
                                                     long inInstanceCount) override;
     void RefreshStateRow(bool inRefreshChildren = false);
 
-    virtual void AddPropertyRow(UICDM::CUICDMPropertyHandle inPropertyHandle,
+    virtual void AddPropertyRow(qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
                                 bool inAppend = false);
-    virtual void RemovePropertyRow(UICDM::CUICDMPropertyHandle inPropertyHandle);
-    virtual void RefreshPropertyKeyframe(UICDM::CUICDMPropertyHandle inPropertyHandle,
-                                         UICDM::CUICDMKeyframeHandle,
+    virtual void RemovePropertyRow(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
+    virtual void RefreshPropertyKeyframe(qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
+                                         qt3dsdm::CUICDMKeyframeHandle,
                                          ETimelineKeyframeTransaction inTransaction);
-    virtual void OnPropertyChanged(UICDM::CUICDMPropertyHandle inPropertyHandle);
-    virtual void OnPropertyLinked(UICDM::CUICDMPropertyHandle inPropertyHandle);
+    virtual void OnPropertyChanged(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
+    virtual void OnPropertyLinked(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
 
     virtual void UIRefreshPropertyKeyframe(long inOffset);
     // Keyframe manipulation
@@ -195,20 +195,20 @@ public:
     virtual void DoSelectKeyframes(bool inSelected, long inTime, bool inUpdateUI);
     virtual void OnPropertySelection(long inTime);
 
-    virtual void OnAddChild(UICDM::CUICDMInstanceHandle inInstance);
-    virtual void OnDeleteChild(UICDM::CUICDMInstanceHandle inInstance);
+    virtual void OnAddChild(qt3dsdm::CUICDMInstanceHandle inInstance);
+    virtual void OnDeleteChild(qt3dsdm::CUICDMInstanceHandle inInstance);
 
     void UpdateActionStatus();
 
     Q3DStudio::CId GetGuid() const;
 
     // Bridge between asset & UICDM. Ideally we should be fully UICDM
-    virtual UICDM::CUICDMInstanceHandle GetInstance() const;
+    virtual qt3dsdm::CUICDMInstanceHandle GetInstance() const;
 
 protected:
     virtual ITimelineTimebar *CreateTimelineTimebar();
-    ITimelineItemProperty *GetPropertyBinding(UICDM::CUICDMPropertyHandle inPropertyHandle);
-    ITimelineItemProperty *GetOrCreatePropertyBinding(UICDM::CUICDMPropertyHandle inPropertyHandle);
+    ITimelineItemProperty *GetPropertyBinding(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
+    ITimelineItemProperty *GetOrCreatePropertyBinding(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
     void RemoveAllPropertyBindings();
     void AddKeyframes(ITimelineItemProperty *inPropertyBinding);
     bool

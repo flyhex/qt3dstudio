@@ -45,7 +45,7 @@
  * Base class that provide basic Update/Finalize functionality, when changing UICDM data.
  */
 template <class TDataType>
-class CCmdDataModelBase : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelBase : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;

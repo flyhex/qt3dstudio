@@ -80,32 +80,32 @@ static QStringList renderableItems()
         if (!ext.CompareNoCase("uia"))
             continue;
 
-        UICDM::TStringTablePtr theStringTable
-                = UICDM::IStringTable::CreateStringTable();
-        std::shared_ptr<UICDM::IDOMFactory> theDomFact =
-            UICDM::IDOMFactory::CreateDOMFactory(theStringTable);
+        qt3dsdm::TStringTablePtr theStringTable
+                = qt3dsdm::IStringTable::CreateStringTable();
+        std::shared_ptr<qt3dsdm::IDOMFactory> theDomFact =
+            qt3dsdm::IDOMFactory::CreateDOMFactory(theStringTable);
         Q3DStudio::CString fullFile = dirFiles[idx];
         qt3ds::foundation::CFileSeekableIOStream theStream(
             fullFile, qt3ds::foundation::FileReadFlags());
 
-        UICDM::SDOMElement *theElem
-                = UICDM::CDOMSerializer::Read(*theDomFact, theStream);
+        qt3dsdm::SDOMElement *theElem
+                = qt3dsdm::CDOMSerializer::Read(*theDomFact, theStream);
         if (theElem) {
-            std::shared_ptr<UICDM::IDOMReader> theReader =
-                UICDM::IDOMReader::CreateDOMReader(*theElem, theStringTable,
+            std::shared_ptr<qt3dsdm::IDOMReader> theReader =
+                qt3dsdm::IDOMReader::CreateDOMReader(*theElem, theStringTable,
                                                    theDomFact);
             if (theReader->MoveToFirstChild("assets")) {
                 for (bool success = theReader->MoveToFirstChild(); success;
                      success = theReader->MoveToNextSibling()) {
-                    if (UICDM::AreEqual(theReader->GetElementName(), L"presentation") ||
-                        UICDM::AreEqual(theReader->GetElementName(), L"presentation-qml")) {
-                        UICDM::TXMLStr src = nullptr;
-                        UICDM::TXMLStr id = nullptr;
+                    if (qt3dsdm::AreEqual(theReader->GetElementName(), L"presentation") ||
+                        qt3dsdm::AreEqual(theReader->GetElementName(), L"presentation-qml")) {
+                        qt3dsdm::TXMLStr src = nullptr;
+                        qt3dsdm::TXMLStr id = nullptr;
                         theReader->Att("src", src);
                         theReader->Att("id", id);
                         if (docFilename != src.c_str())
                             renderables.push_back(QString::fromLatin1(id.c_str()));
-                    } else if (UICDM::AreEqual(theReader->GetElementName(),
+                    } else if (qt3dsdm::AreEqual(theReader->GetElementName(),
                                         L"renderplugin")) {
                         const wchar_t *id = nullptr;
                         theReader->UnregisteredAtt(L"id", id);
@@ -135,13 +135,13 @@ static QStringList renderableItems()
     return renderables;
 }
 
-static std::pair<bool, bool> getSlideCharacteristics(UICDM::CUICDMInstanceHandle instance,
-                                                     const UICDM::ISlideCore &slideCore,
-                                                     const UICDM::ISlideSystem &slideSystem)
+static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::CUICDMInstanceHandle instance,
+                                                     const qt3dsdm::ISlideCore &slideCore,
+                                                     const qt3dsdm::ISlideSystem &slideSystem)
 {
     // Get the slide from the instance.
-    UICDM::CUICDMSlideHandle slide = slideCore.GetSlideByInstance(instance);
-    UICDM::CUICDMSlideHandle master = slideSystem.GetMasterSlide(slide);
+    qt3dsdm::CUICDMSlideHandle slide = slideCore.GetSlideByInstance(instance);
+    qt3dsdm::CUICDMSlideHandle master = slideSystem.GetMasterSlide(slide);
     int index = (int)slideSystem.GetSlideIndex(slide);
     int count = (int)slideSystem.GetSlideCount(master);
     bool hasNextSlide = index > 0 && index < count - 1;
@@ -180,8 +180,8 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
     }
 }
 
-void InspectorControlModel::notifyInstancePropertyValue(UICDM::CUICDMInstanceHandle inHandle,
-                                                        UICDM::CUICDMPropertyHandle inProperty)
+void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle inHandle,
+                                                        qt3dsdm::CUICDMPropertyHandle inProperty)
 {
     auto doc = g_StudioApp.GetCore()->GetDoc();
     bool changed = false;
@@ -190,8 +190,8 @@ void InspectorControlModel::notifyInstancePropertyValue(UICDM::CUICDMInstanceHan
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            UICDM::CUICDMInstanceHandle imageInstance;
-            if (property->m_dataType == UICDM::DataModelDataType::Long4
+            qt3dsdm::CUICDMInstanceHandle imageInstance;
+            if (property->m_dataType == qt3dsdm::DataModelDataType::Long4
                 && property->m_property.Valid()) {
                 imageInstance = doc->GetDocumentReader().GetImageInstanceForProperty(
                                                 property->m_instance, property->m_property);
@@ -213,7 +213,7 @@ QVariant InspectorControlModel::getPropertyValue(long instance, int handle)
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property == UICDM::CDataModelHandle(handle))
+            if (property->m_property == qt3dsdm::CDataModelHandle(handle))
                 return property->m_value;
         }
     }
@@ -249,8 +249,8 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(CUICDMInspectabl
 
     CClientDataModelBridge *theBridge = studio->GetClientDataModelBridge();
     EStudioObjectType theType = theBridge->GetObjectType(item->m_instance);
-    item->m_dataType = UICDM::DataModelDataType::StringRef;
-    item->m_propertyType = UICDM::AdditionalMetaDataType::None;
+    item->m_dataType = qt3dsdm::DataModelDataType::StringRef;
+    item->m_propertyType = qt3dsdm::AdditionalMetaDataType::None;
     item->m_tooltip = tr("Type of material being used or custom material");
 
     item->m_animatable = false;
@@ -291,7 +291,7 @@ InspectorControlBase* InspectorControlModel::createItem(CUICDMInspectable *inspe
 }
 
 InspectorControlBase* InspectorControlModel::createItem(CUICDMInspectable *inspectable,
-                                                        const UICDM::SMetaDataPropertyInfo &metaProperty,
+                                                        const qt3dsdm::SMetaDataPropertyInfo &metaProperty,
                                                         int groupIndex)
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
@@ -310,7 +310,7 @@ InspectorControlBase* InspectorControlModel::createItem(CUICDMInspectable *inspe
 
     const auto propertySystem = studio->GetPropertySystem();
     item->m_dataType = propertySystem->GetDataType(metaProperty.m_Property);
-    item->m_propertyType = static_cast<UICDM::AdditionalMetaDataType::Value>
+    item->m_propertyType = static_cast<qt3dsdm::AdditionalMetaDataType::Value>
             (propertySystem->GetAdditionalMetaDataType(item->m_instance, metaProperty.m_Property));
     item->m_tooltip = Q3DStudio::CString(metaProperty.m_Description.c_str()).toQString();
 
@@ -337,9 +337,9 @@ InspectorControlBase* InspectorControlModel::createItem(CUICDMInspectable *inspe
     return item;
 }
 
-UICDM::SValue InspectorControlModel::currentPropertyValue(long instance, int handle)
+qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int handle)
 {
-    UICDM::SValue value;
+    qt3dsdm::SValue value;
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     auto studioSystem = doc->GetStudioSystem();
     const auto propertySystem = studioSystem->GetPropertySystem();
@@ -481,7 +481,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     auto studioSystem = doc->GetStudioSystem();
     const auto propertySystem = studioSystem->GetPropertySystem();
-    UICDM::SValue value;
+    qt3dsdm::SValue value;
     const auto instance = element->m_instance;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
 
@@ -489,12 +489,12 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     const auto info = metaDataProvider->GetMetaDataPropertyInfo(
                 metaDataProvider->GetMetaDataProperty(instance, element->m_property));
     switch (element->m_dataType) {
-    case UICDM::DataModelDataType::String:
-        element->m_value = UICDM::get<QString>(value);
+    case qt3dsdm::DataModelDataType::String:
+        element->m_value = qt3dsdm::get<QString>(value);
         //intentional fall-through
-    case UICDM::DataModelDataType::StringOrInt:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::StringList) {
-            QStringList stringlist = UICDM::get<QStringList>(info->m_MetaDataData);
+    case qt3dsdm::DataModelDataType::StringOrInt:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::StringList) {
+            QStringList stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);
             auto slideSystem = studioSystem->GetSlideSystem();
 
             if (element->m_title == QStringLiteral("Play Mode")) {
@@ -522,12 +522,12 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 QString listOpt;
                 int selectedSlideHandle = 0;
                 int selectedIndex = -1;
-                UICDM::SStringOrInt stringOrInt = UICDM::get<UICDM::SStringOrInt>(value);
-                if (stringOrInt.GetType() == UICDM::SStringOrIntTypes::String)
-                    listOpt = QString::fromWCharArray(UICDM::get<UICDM::TDataStrPtr>
+                qt3dsdm::SStringOrInt stringOrInt = qt3dsdm::get<qt3dsdm::SStringOrInt>(value);
+                if (stringOrInt.GetType() == qt3dsdm::SStringOrIntTypes::String)
+                    listOpt = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>
                                                       (stringOrInt.m_Value)->GetData());
                 else
-                    selectedSlideHandle = UICDM::get<long>(stringOrInt.m_Value);
+                    selectedSlideHandle = qt3dsdm::get<long>(stringOrInt.m_Value);
 
                 selectedIndex = stringlist.indexOf(listOpt);
                 // Add the slide names (exclude the master slide)
@@ -553,54 +553,54 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                                    : stringlist.first()).replace("|separator", "");
             }
             element->m_values = stringlist;
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Import) {
-            QStringList stringlist = UICDM::get<QStringList>(info->m_MetaDataData);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Import) {
+            QStringList stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);
             element->m_values = stringlist;
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Renderable) {
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Renderable) {
             element->m_values = renderableItems();
             if (element->m_value.toString().isEmpty())
                 element->m_value = element->m_values.toStringList().at(0);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::MultiLine) {
-            element->m_value = UICDM::get<QString>(value);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Font) {
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::MultiLine) {
+            element->m_value = qt3dsdm::get<QString>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Font) {
             std::vector<Q3DStudio::CString> fontNames;
             g_StudioApp.GetCore()->GetDoc()->GetProjectFonts(fontNames);
             QStringList possibleValues;
             for (const auto &fontName: fontNames)
                 possibleValues.append(fontName.toQString());
             element->m_values = possibleValues;
-            element->m_value = UICDM::get<QString>(value);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Mesh) {
-            QString meshValue = UICDM::get<QString>(value);
+            element->m_value = qt3dsdm::get<QString>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Mesh) {
+            QString meshValue = qt3dsdm::get<QString>(value);
             Q3DStudio::CFilePath theSelectionItem(Q3DStudio::CString::fromQString(meshValue));
             Q3DStudio::CFilePath theSelectionWithoutId(theSelectionItem.GetPathWithoutIdentifier());
             if (theSelectionWithoutId.size())
                 element->m_value = theSelectionWithoutId.GetFileName().toQString();
             else
                 element->m_value = theSelectionItem.GetIdentifier().toQString();
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Texture) {
-            QFileInfo fileInfo(UICDM::get<QString>(value));
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Texture) {
+            QFileInfo fileInfo(qt3dsdm::get<QString>(value));
             element->m_value = fileInfo.fileName();
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::PathBuffer) {
-            element->m_value = UICDM::get<QString>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::PathBuffer) {
+            element->m_value = qt3dsdm::get<QString>(value);
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
                        << element->m_dataType << " element->m_propertyType : "
                        << element->m_propertyType;
         }
         break;
-    case UICDM::DataModelDataType::StringRef:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::None) {
-            element->m_value = UICDM::get<QString>(value);
+    case qt3dsdm::DataModelDataType::StringRef:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
+            element->m_value = qt3dsdm::get<QString>(value);
         }
         break;
-    case UICDM::DataModelDataType::Bool:
-        element->m_value = UICDM::get<bool>(value);
+    case qt3dsdm::DataModelDataType::Bool:
+        element->m_value = qt3dsdm::get<bool>(value);
         break;
-    case UICDM::DataModelDataType::Long4:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::Image) {
-            UICDM::Option<UICDM::SLong4> guid = UICDM::get<UICDM::SLong4>(value);
-            UICDM::CUICDMInstanceHandle imageInstance = doc->GetDocumentReader()
+    case qt3dsdm::DataModelDataType::Long4:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Image) {
+            qt3dsdm::Option<qt3dsdm::SLong4> guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
+            qt3dsdm::CUICDMInstanceHandle imageInstance = doc->GetDocumentReader()
                     .GetInstanceForGuid(guid);
             if (imageInstance.Valid()) {
                 Q3DStudio::CString path = doc->GetDocumentReader().GetSourcePath(imageInstance);
@@ -614,50 +614,50 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                        << element->m_dataType << " " << element->m_title;
         }
         break;
-    case UICDM::DataModelDataType::Long:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::Range) {
-            element->m_value = UICDM::get<int>(value);
-            const UICDM::SMetaDataRange ranges = UICDM::get<UICDM::SMetaDataRange>(info->m_MetaDataData);
+    case qt3dsdm::DataModelDataType::Long:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Range) {
+            element->m_value = qt3dsdm::get<int>(value);
+            const qt3dsdm::SMetaDataRange ranges = qt3dsdm::get<qt3dsdm::SMetaDataRange>(info->m_MetaDataData);
             const QList<double> rangesValues{ranges.m_Min, ranges.m_Max};
             element->m_values = QVariant::fromValue<QList<double> >(rangesValues);
         }
-        else if (element->m_propertyType == UICDM::AdditionalMetaDataType::ShadowMapResolution) {
-            element->m_value = UICDM::get<int>(value);
+        else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::ShadowMapResolution) {
+            element->m_value = qt3dsdm::get<int>(value);
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
                        << element->m_dataType;
         }
         break;
-    case UICDM::DataModelDataType::Float3:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::Color) {
-            element->m_value = UICDM::get<QColor>(value);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Rotation) {
-            const QVector3D theFloat3 = UICDM::get<QVector3D>(value);
+    case qt3dsdm::DataModelDataType::Float3:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Color) {
+            element->m_value = qt3dsdm::get<QColor>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Rotation) {
+            const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(value);
             const QList<double> float3Values{theFloat3.x(), theFloat3.y(), theFloat3.z()};
             element->m_values = QVariant::fromValue<QList<double> >(float3Values);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::None) {
-            const QVector3D theFloat3 = UICDM::get<QVector3D>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
+            const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(value);
             const QList<double> float3Values{theFloat3.x(), theFloat3.y(), theFloat3.z()};
             element->m_values = QVariant::fromValue<QList<double> >(float3Values);
         }
         break;
-    case UICDM::DataModelDataType::Float:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::None) {
-            element->m_value = UICDM::get<float>(value);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::Range) {
-            element->m_value = UICDM::get<float>(value);
-            const UICDM::SMetaDataRange ranges = UICDM::get<UICDM::SMetaDataRange>(info->m_MetaDataData);
+    case qt3dsdm::DataModelDataType::Float:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
+            element->m_value = qt3dsdm::get<float>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Range) {
+            element->m_value = qt3dsdm::get<float>(value);
+            const qt3dsdm::SMetaDataRange ranges = qt3dsdm::get<qt3dsdm::SMetaDataRange>(info->m_MetaDataData);
             const QList<double> rangesValues{ranges.m_Min, ranges.m_Max};
             element->m_values = QVariant::fromValue<QList<double> >(rangesValues);
-        } else if (element->m_propertyType == UICDM::AdditionalMetaDataType::FontSize) {
-            element->m_value = UICDM::get<float>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::FontSize) {
+            element->m_value = qt3dsdm::get<float>(value);
         }
         break;
-    case UICDM::DataModelDataType::ObjectRef:
-        if (element->m_propertyType == UICDM::AdditionalMetaDataType::ObjectRef) {
+    case qt3dsdm::DataModelDataType::ObjectRef:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::ObjectRef) {
             IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
             if (objRefHelper) {
-                UICDM::CUICDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
+                qt3dsdm::CUICDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
                 element->m_value = objRefHelper->LookupObjectFormalName(refInstance).toQString();
             }
         }
@@ -678,7 +678,7 @@ void InspectorControlModel::refreshRenderables()
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_propertyType == UICDM::AdditionalMetaDataType::Renderable)
+            if (property->m_propertyType == qt3dsdm::AdditionalMetaDataType::Renderable)
                 updatePropertyValue(property);
         }
     }
@@ -742,13 +742,13 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
 
 void InspectorControlModel::setRenderableValue(long instance, int handle, const QVariant &value)
 {
-    UICDM::SValue oldValue = currentPropertyValue(instance, handle);
+    qt3dsdm::SValue oldValue = currentPropertyValue(instance, handle);
 
     QString v = value.toString();
     if (v == QObject::tr("No renderable item"))
         v = QString();
 
-    if (v == UICDM::get<QString>(oldValue))
+    if (v == qt3dsdm::get<QString>(oldValue))
         return;
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
@@ -758,8 +758,8 @@ void InspectorControlModel::setRenderableValue(long instance, int handle, const 
 
 void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value, bool commit)
 {
-    UICDM::SValue oldValue = currentPropertyValue(instance, handle);
-    UICDM::SValue v = value;
+    qt3dsdm::SValue oldValue = currentPropertyValue(instance, handle);
+    qt3dsdm::SValue v = value;
 
     // If this set is a commit for property that was previously changed without
     // committing, we must let the set go through even if the value hasn't changed
@@ -802,7 +802,7 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
     const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
     const auto info = metaDataProvider->GetMetaDataPropertyInfo(
                 metaDataProvider->GetMetaDataProperty(instance, handle));
-    QStringList stringlist = UICDM::get<QStringList>(info->m_MetaDataData);
+    QStringList stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);
 
     auto slideSystem = studioSystem->GetSlideSystem();
     std::pair<bool, bool> slideData(
@@ -810,7 +810,7 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
                                 *slideSystem));
     bool hasNextSlide(slideData.first);
     bool hasPreviousSlide(slideData.second);
-    UICDM::SStringOrInt newSelectedData;
+    qt3dsdm::SStringOrInt newSelectedData;
     if (!hasNextSlide)
         stringlist.removeAll("Next");
     if (!hasPreviousSlide)
@@ -818,14 +818,14 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
 
     auto itemCount = stringlist.count();
     if (index < itemCount) {
-        newSelectedData = UICDM::SStringOrInt(std::make_shared<UICDM::CDataStr>
+        newSelectedData = qt3dsdm::SStringOrInt(std::make_shared<qt3dsdm::CDataStr>
                                               (Q3DStudio::CString::fromQString(list[index]).c_str()));
     } else {
         auto slideHandle = slideSystem->GetSlideByInstance(instance);
         auto masterSlide = slideSystem->GetMasterSlide(slideHandle);
         long slideIndex = index - itemCount + 1;
         auto newSelectedSlide = slideSystem->GetSlideByIndex(masterSlide, slideIndex);
-        newSelectedData = UICDM::SStringOrInt((long)newSelectedSlide);
+        newSelectedData = qt3dsdm::SStringOrInt((long)newSelectedSlide);
     }
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
@@ -844,7 +844,7 @@ void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool 
     g_StudioApp.GetCore()->ExecuteCommand(cmd);
 }
 
-void InspectorControlModel::onSlideRearranged(const UICDM::CUICDMSlideHandle &inMaster,
+void InspectorControlModel::onSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster,
                                               int inOldIndex, int inNewIndex)
 {
     Q_UNUSED(inMaster);

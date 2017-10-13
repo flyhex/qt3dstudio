@@ -38,7 +38,7 @@
 #include "UICDMTransactions.h"
 #include "SignalsImpl.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 class CActionSystem : public IActionSystem
 {

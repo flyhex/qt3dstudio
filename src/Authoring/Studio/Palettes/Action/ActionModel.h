@@ -34,7 +34,7 @@
 #include "UICDMActionInfo.h"
 #include "UICDMHandles.h"
 
-namespace UICDM {
+namespace qt3dsdm {
     class IActionSystem;
 }
 
@@ -45,7 +45,7 @@ class ActionModel : public QAbstractListModel
 public:
     explicit ActionModel(QObject *parent = nullptr);
 
-    void setInstanceHandle(const UICDM::CUICDMInstanceHandle &handle);
+    void setInstanceHandle(const qt3dsdm::CUICDMInstanceHandle &handle);
 
     enum Roles {
         DescriptionRole = Qt::DisplayRole,
@@ -59,19 +59,19 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &data, int role = Qt::EditRole) override;
 
-    void addAction(const UICDM::CUICDMActionHandle &action);
-    void removeAction(const UICDM::CUICDMActionHandle &action);
-    void updateAction(const UICDM::CUICDMActionHandle &action);
-    const UICDM::CUICDMActionHandle actionAt(int row);
-    const UICDM::SActionInfo actionInfoAt(int row);
+    void addAction(const qt3dsdm::CUICDMActionHandle &action);
+    void removeAction(const qt3dsdm::CUICDMActionHandle &action);
+    void updateAction(const qt3dsdm::CUICDMActionHandle &action);
+    const qt3dsdm::CUICDMActionHandle actionAt(int row);
+    const qt3dsdm::SActionInfo actionInfoAt(int row);
 
 private:
-    UICDM::IActionSystem *actionSystem() const;
-    UICDM::CUICDMSlideHandle activeSlide() const;
-    QString actionString(const UICDM::CUICDMActionHandle &action) const;
+    qt3dsdm::IActionSystem *actionSystem() const;
+    qt3dsdm::CUICDMSlideHandle activeSlide() const;
+    QString actionString(const qt3dsdm::CUICDMActionHandle &action) const;
 
-    UICDM::CUICDMInstanceHandle m_handle;
-    UICDM::TActionHandleList m_actions;
+    qt3dsdm::CUICDMInstanceHandle m_handle;
+    qt3dsdm::TActionHandleList m_actions;
 };
 
 #endif // ACTIONMODEL_H

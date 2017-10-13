@@ -134,13 +134,13 @@ struct SGAnimation
     }
 };
 
-static inline UICDM::SValue ToColor(const float p[])
+static inline qt3dsdm::SValue ToColor(const float p[])
 {
-    return UICDM::SFloat3(p[0], p[1], p[2]);
+    return qt3dsdm::SFloat3(p[0], p[1], p[2]);
 }
-static inline UICDM::SValue ToColor(const float p[], float inMult)
+static inline qt3dsdm::SValue ToColor(const float p[], float inMult)
 {
-    return UICDM::SFloat3(p[0] * inMult, p[1] * inMult, p[2] * inMult);
+    return qt3dsdm::SFloat3(p[0] * inMult, p[1] * inMult, p[2] * inMult);
 }
 template <typename TDataType>
 static inline TDataType GetMin(TDataType a, TDataType b)
@@ -570,7 +570,7 @@ public:
             Option<SValue> theName(
                 m_Import.GetInstancePropertyValue(material, m_Asset.m_NameProp.GetName()));
             if (theName.hasValue()) {
-                theNameBuf = UICDM::get<TDataStrPtr>(*theName)->GetData();
+                theNameBuf = qt3dsdm::get<TDataStrPtr>(*theName)->GetData();
 
                 GetOrCreateMeshBuilder()->AddMeshSubset(
                     theNameBuf, inNumberOfFaces * 3,
@@ -657,10 +657,10 @@ public:
             // Set diffuse color to 1.0 if there is diffuse texture because I think diffuse color is
             // multiplied with diffuse texture to get the final color
             SetInstancePropertyValue(theMaterial, m_Material.m_DiffuseColor,
-                                     UICDM::SFloat3(1.0f, 1.0f, 1.0f));
+                                     qt3dsdm::SFloat3(1.0f, 1.0f, 1.0f));
         else
             SetInstancePropertyValue(theMaterial, m_Material.m_DiffuseColor,
-                                     UICDM::SFloat3(inMaterialParameters.m_Diffuse.m_Color[0],
+                                     qt3dsdm::SFloat3(inMaterialParameters.m_Diffuse.m_Color[0],
                                                     inMaterialParameters.m_Diffuse.m_Color[1],
                                                     inMaterialParameters.m_Diffuse.m_Color[2]));
 

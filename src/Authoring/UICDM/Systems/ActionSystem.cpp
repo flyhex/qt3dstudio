@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CActionSystem::CActionSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
                              TSlideGraphCorePtr inSlideGraphCore, TActionCorePtr inActionCore,
@@ -106,7 +106,7 @@ bool CActionSystem::GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
     // query SlideCore directly.
     m_SlideCore->GetInstancePropertyValue(inActiveSlide, theInstance, m_ActionEyeball, theValue);
     if (m_SlideCore->IsSlide(inActiveSlide))
-        return UICDM::get<bool>(theValue);
+        return qt3dsdm::get<bool>(theValue);
     return false;
 }
 

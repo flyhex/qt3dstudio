@@ -47,18 +47,18 @@
 #include "UICDMSlides.h"
 #include "ClientDataModelBridge.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CSlideTimelineItemBinding::CSlideTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      CUICDMInstanceHandle inDataHandle)
     : CUICDMTimelineItemBinding(inMgr)
 {
-    UICDM::CUICDMSlideHandle theSlideHandle =
+    qt3dsdm::CUICDMSlideHandle theSlideHandle =
         m_StudioSystem->GetSlideSystem()->GetSlideByInstance(inDataHandle);
 
     // Get the owning component of m_SlideHandle.
     // This should return CAsset OBJTYPE_SCENE or OBJTYPE_COMPONENT.
-    UICDM::CUICDMInstanceHandle theInstance =
+    qt3dsdm::CUICDMInstanceHandle theInstance =
         m_StudioSystem->GetClientDataModelBridge()->GetOwningComponentInstance(theSlideHandle);
     SetInstanceHandle(theInstance);
 
@@ -67,7 +67,7 @@ CSlideTimelineItemBinding::CSlideTimelineItemBinding(CTimelineTranslationManager
     std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle)> theSetter(
         std::bind(&CSlideTimelineItemBinding::OnPropertyChanged, this, std::placeholders::_2));
     m_Connection = theEngine->ConnectInstancePropertyValue(
-        std::bind(UICDM::MaybackCallbackInstancePropertyValue<std::function<void(
+        std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
                         CUICDMInstanceHandle, CUICDMPropertyHandle)>>,
                     std::placeholders::_1, std::placeholders::_2, theInstance,
                     m_StudioSystem->GetClientDataModelBridge()->GetNameProperty(), theSetter));
@@ -91,7 +91,7 @@ void CSlideTimelineItemBinding::Bind(CBaseStateRow *inRow)
 
 bool CSlideTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)
 {
-    UICDM::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
     switch (inTransaction) {
     // Disable the following context menus
     case EUserTransaction_Rename:

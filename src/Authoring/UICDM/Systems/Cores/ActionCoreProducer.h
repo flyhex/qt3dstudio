@@ -35,7 +35,7 @@
 #include "UICDMSignals.h"
 #include "UICDMStringTable.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class CActionCoreProducer : public IActionCore,
                             public ITransactionProducer,
                             public IActionCoreSignalProvider

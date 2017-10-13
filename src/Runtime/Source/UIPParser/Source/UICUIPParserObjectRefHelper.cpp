@@ -43,7 +43,7 @@
 #include "UICDMXML.h"
 #include "UICMetadata.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 //==============================================================================
 //	Namespace
@@ -114,7 +114,7 @@ namespace {
     }
 }
 
-void CUIPParserObjectRefHelper::CacheGraph(UICDM::IDOMReader &inReader, UICDM::IDOMWriter &inWriter)
+void CUIPParserObjectRefHelper::CacheGraph(qt3dsdm::IDOMReader &inReader, qt3dsdm::IDOMWriter &inWriter)
 {
     {
         // First, we parse Graph section to build the scene graph
@@ -134,13 +134,13 @@ void CUIPParserObjectRefHelper::CacheGraph(UICDM::IDOMReader &inReader, UICDM::I
         IDOMReader::Scope __aliasScope(inReader);
         // Now we expand aliases
         eastl::hash_map<TStrType, TStrType> oldToNewIdMap;
-        std::shared_ptr<UICDM::IDOMFactory> theFactory = inWriter.GetFactory();
-        std::shared_ptr<UICDM::IStringTable> theStrTable = inReader.GetStringTable();
-        UICDM::SDOMElement *theSlidesRoot = theFactory->NextElement("AliasSlides");
-        eastl::pair<std::shared_ptr<UICDM::IDOMWriter>, std::shared_ptr<UICDM::IDOMReader>>
+        std::shared_ptr<qt3dsdm::IDOMFactory> theFactory = inWriter.GetFactory();
+        std::shared_ptr<qt3dsdm::IStringTable> theStrTable = inReader.GetStringTable();
+        qt3dsdm::SDOMElement *theSlidesRoot = theFactory->NextElement("AliasSlides");
+        eastl::pair<std::shared_ptr<qt3dsdm::IDOMWriter>, std::shared_ptr<qt3dsdm::IDOMReader>>
             slideWriterReaderPair =
-                UICDM::IDOMWriter::CreateDOMWriter(theFactory, *theSlidesRoot, theStrTable);
-        std::shared_ptr<UICDM::IDOMWriter> slideWriter = slideWriterReaderPair.first;
+                qt3dsdm::IDOMWriter::CreateDOMWriter(theFactory, *theSlidesRoot, theStrTable);
+        std::shared_ptr<qt3dsdm::IDOMWriter> slideWriter = slideWriterReaderPair.first;
 
         {
             IDOMReader::Scope __loopScope(inReader);
@@ -167,11 +167,11 @@ void CUIPParserObjectRefHelper::CacheGraph(UICDM::IDOMReader &inReader, UICDM::I
                 }
                 inReader.SetScope(referencedNode->m_ReaderContext);
                 oldToNewIdMap.clear();
-                std::shared_ptr<UICDM::IDOMFactory> theFactory = inWriter.GetFactory();
-                std::shared_ptr<UICDM::IStringTable> theStrTable = inReader.GetStringTable();
-                UICDM::SDOMElement *theRoot = theFactory->NextElement(inReader.GetElementName());
-                std::shared_ptr<UICDM::IDOMWriter> copyWriter =
-                    UICDM::IDOMWriter::CreateDOMWriter(theFactory, *theRoot, theStrTable).first;
+                std::shared_ptr<qt3dsdm::IDOMFactory> theFactory = inWriter.GetFactory();
+                std::shared_ptr<qt3dsdm::IStringTable> theStrTable = inReader.GetStringTable();
+                qt3dsdm::SDOMElement *theRoot = theFactory->NextElement(inReader.GetElementName());
+                std::shared_ptr<qt3dsdm::IDOMWriter> copyWriter =
+                    qt3dsdm::IDOMWriter::CreateDOMWriter(theFactory, *theRoot, theStrTable).first;
 
                 // Step one is just to copy the scene graph generating ids.
                 SGraphNode *theParent = aliasNode->m_Parent;
@@ -189,8 +189,8 @@ void CUIPParserObjectRefHelper::CacheGraph(UICDM::IDOMReader &inReader, UICDM::I
                      success = inReader.MoveToNextSibling()) {
                     if (AreEqual(inReader.GetNarrowElementName(), "Alias"))
                         continue;
-                    UICDM::IDOMReader::Scope __loopScoper(inReader);
-                    UICDM::IDOMWriter::Scope writerScope(*copyWriter,
+                    qt3dsdm::IDOMReader::Scope __loopScoper(inReader);
+                    qt3dsdm::IDOMWriter::Scope writerScope(*copyWriter,
                                                          inReader.GetNarrowElementName());
                     CopySceneGraph(inReader, *copyWriter, *slideWriter, oldToNewIdMap,
                                    aliasNode->m_Name.c_str(), theIdStr, *aliasNode);
@@ -265,7 +265,7 @@ void CUIPParserObjectRefHelper::CacheSceneGraph(IDOMReader &inReader, SGraphNode
 }
 
 CUIPParserObjectRefHelper::SGraphNode &
-CUIPParserObjectRefHelper::CacheSceneGraphNode(UICDM::IDOMReader &inReader, SGraphNode *inParent)
+CUIPParserObjectRefHelper::CacheSceneGraphNode(qt3dsdm::IDOMReader &inReader, SGraphNode *inParent)
 {
     SGraphNode *theNode = new SGraphNode();
     const char8_t *theIdStr;
@@ -356,13 +356,13 @@ void CUIPParserObjectRefHelper::CacheStateGraph(IDOMReader &inReader)
     }
 }
 
-void CUIPParserObjectRefHelper::CopySceneGraph(UICDM::IDOMReader &inReader,
-                                               UICDM::IDOMWriter &inWriter,
-                                               UICDM::IDOMWriter &inSlideWriter,
+void CUIPParserObjectRefHelper::CopySceneGraph(qt3dsdm::IDOMReader &inReader,
+                                               qt3dsdm::IDOMWriter &inWriter,
+                                               qt3dsdm::IDOMWriter &inSlideWriter,
                                                TStrToStrMap &inMap, const char *inAliasName,
                                                const char *inAliasId, SGraphNode &inParent)
 {
-    UICDM::IDOMReader::Scope __graphScope(inReader);
+    qt3dsdm::IDOMReader::Scope __graphScope(inReader);
     // Assume the element itself is already copied.
     // Run through attributes and duplicate them, but for any id attributes generate a new id.
     const char8_t *tempItem;
@@ -392,13 +392,13 @@ void CUIPParserObjectRefHelper::CopySceneGraph(UICDM::IDOMReader &inReader,
     inParent.m_Children.push_back(newNode);
 
     {
-        UICDM::IDOMReader::Scope __childrenScope(inReader);
+        qt3dsdm::IDOMReader::Scope __childrenScope(inReader);
 
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
             if (AreEqual(inReader.GetNarrowElementName(), "Alias"))
                 continue;
-            UICDM::IDOMWriter::Scope __newNode(inWriter, inReader.GetNarrowElementName());
+            qt3dsdm::IDOMWriter::Scope __newNode(inWriter, inReader.GetNarrowElementName());
             CopySceneGraph(inReader, inWriter, inSlideWriter, inMap, inAliasName, inAliasId,
                            *theParent);
         }
@@ -433,12 +433,12 @@ void CUIPParserObjectRefHelper::CopySceneGraph(UICDM::IDOMReader &inReader,
     }
 }
 
-void CUIPParserObjectRefHelper::CopyStates(UICDM::IDOMReader &inReader,
-                                           UICDM::IDOMWriter &inSlideWriter, TStrToStrMap &inMap,
+void CUIPParserObjectRefHelper::CopyStates(qt3dsdm::IDOMReader &inReader,
+                                           qt3dsdm::IDOMWriter &inSlideWriter, TStrToStrMap &inMap,
                                            const char *inAliasName, const char *inAliasId)
 {
-    UICDM::IDOMReader::Scope __stateScope(inReader);
-    UICDM::IDOMWriter::Scope stateScope(inSlideWriter, "State");
+    qt3dsdm::IDOMReader::Scope __stateScope(inReader);
+    qt3dsdm::IDOMWriter::Scope stateScope(inSlideWriter, "State");
     CopyAttributes(inReader, inSlideWriter, inMap, inAliasName, inAliasId);
     for (bool success = inReader.MoveToFirstChild(); success;
          success = inReader.MoveToNextSibling()) {
@@ -480,8 +480,8 @@ eastl::pair<const char8_t *, const char8_t *> CUIPParserObjectRefHelper::Process
     return eastl::make_pair(propName, propValue);
 }
 
-void CUIPParserObjectRefHelper::CopyAttributes(UICDM::IDOMReader &inReader,
-                                               UICDM::IDOMWriter &inSlideWriter,
+void CUIPParserObjectRefHelper::CopyAttributes(qt3dsdm::IDOMReader &inReader,
+                                               qt3dsdm::IDOMWriter &inSlideWriter,
                                                TStrToStrMap &inMap, const char *inAliasName,
                                                const char *inAliasId)
 {
@@ -529,12 +529,12 @@ void CUIPParserObjectRefHelper::CopyAttributes(UICDM::IDOMReader &inReader,
     }
 }
 
-void CUIPParserObjectRefHelper::CopyHierarchy(UICDM::IDOMReader &inReader,
-                                              UICDM::IDOMWriter &inSlideWriter, TStrToStrMap &inMap,
+void CUIPParserObjectRefHelper::CopyHierarchy(qt3dsdm::IDOMReader &inReader,
+                                              qt3dsdm::IDOMWriter &inSlideWriter, TStrToStrMap &inMap,
                                               const char *inAliasName, const char *inAliasId)
 {
-    UICDM::IDOMReader::Scope __commandScope(inReader);
-    UICDM::IDOMWriter::Scope __writerScope(inSlideWriter, inReader.GetNarrowElementName());
+    qt3dsdm::IDOMReader::Scope __commandScope(inReader);
+    qt3dsdm::IDOMWriter::Scope __writerScope(inSlideWriter, inReader.GetNarrowElementName());
     CopyAttributes(inReader, inSlideWriter, inMap, inAliasName, inAliasId);
     const char8_t *childData;
     if (inReader.Value(childData)) {
@@ -545,25 +545,25 @@ void CUIPParserObjectRefHelper::CopyHierarchy(UICDM::IDOMReader &inReader,
         CopyHierarchy(inReader, inSlideWriter, inMap, inAliasName, inAliasId);
 }
 
-void CUIPParserObjectRefHelper::CopyStateCommands(UICDM::IDOMReader &inReader,
-                                                  UICDM::IDOMWriter &inWriter,
+void CUIPParserObjectRefHelper::CopyStateCommands(qt3dsdm::IDOMReader &inReader,
+                                                  qt3dsdm::IDOMWriter &inWriter,
                                                   TStrToStrMap &oldToNewIdMap,
                                                   const char *inAliasName, const char *inOldId,
                                                   const char *inNewId)
 {
-    UICDM::IDOMReader::Scope __commandScope(inReader);
-    UICDM::SDOMElement *theSlidesRoot = NULL;
-    eastl::pair<std::shared_ptr<UICDM::IDOMWriter>, std::shared_ptr<UICDM::IDOMReader>>
+    qt3dsdm::IDOMReader::Scope __commandScope(inReader);
+    qt3dsdm::SDOMElement *theSlidesRoot = NULL;
+    eastl::pair<std::shared_ptr<qt3dsdm::IDOMWriter>, std::shared_ptr<qt3dsdm::IDOMReader>>
         slideWriterReaderPair;
-    std::shared_ptr<UICDM::IDOMWriter> commandWriter;
+    std::shared_ptr<qt3dsdm::IDOMWriter> commandWriter;
     {
-        UICDM::IDOMReader::Scope __loopScope(inReader);
+        qt3dsdm::IDOMReader::Scope __loopScope(inReader);
         eastl::vector<eastl::pair<eastl::string, eastl::string>> copiedAttributes;
         void *destCommand = NULL;
         eastl::string strBuilder;
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
-            UICDM::IDOMReader::Scope childScope(inReader);
+            qt3dsdm::IDOMReader::Scope childScope(inReader);
             if (AreEqual(inReader.GetNarrowElementName(), "State"))
                 CopyStateCommands(inReader, inWriter, oldToNewIdMap, inAliasName, inOldId, inNewId);
             else {
@@ -573,16 +573,16 @@ void CUIPParserObjectRefHelper::CopyStateCommands(UICDM::IDOMReader &inReader,
                     TStrToStrMap::iterator iter = oldToNewIdMap.find(m_MetaData.Register(refItem));
                     if (iter != oldToNewIdMap.end()) {
                         if (theSlidesRoot == NULL) {
-                            std::shared_ptr<UICDM::IDOMFactory> theFactory =
+                            std::shared_ptr<qt3dsdm::IDOMFactory> theFactory =
                                 inWriter.GetFactory();
-                            std::shared_ptr<UICDM::IStringTable> theStrTable =
+                            std::shared_ptr<qt3dsdm::IStringTable> theStrTable =
                                 inReader.GetStringTable();
                             theSlidesRoot = theFactory->NextElement("AliasSlides");
-                            slideWriterReaderPair = UICDM::IDOMWriter::CreateDOMWriter(
+                            slideWriterReaderPair = qt3dsdm::IDOMWriter::CreateDOMWriter(
                                 theFactory, *theSlidesRoot, theStrTable);
                             commandWriter = slideWriterReaderPair.first;
                         }
-                        UICDM::IDOMWriter::Scope elemScope(*commandWriter,
+                        qt3dsdm::IDOMWriter::Scope elemScope(*commandWriter,
                                                            inReader.GetNarrowElementName());
                         for (eastl::pair<const char8_t *, const char8_t *> att =
                                  inReader.GetNarrowFirstAttribute();
@@ -600,7 +600,7 @@ void CUIPParserObjectRefHelper::CopyStateCommands(UICDM::IDOMReader &inReader,
                         }
                         for (bool commandChild = inReader.MoveToFirstChild(); commandChild;
                              commandChild = inReader.MoveToNextSibling()) {
-                            UICDM::IDOMReader::Scope commandChildScope(inReader);
+                            qt3dsdm::IDOMReader::Scope commandChildScope(inReader);
                             CopyHierarchy(inReader, *commandWriter, oldToNewIdMap, inAliasName, "");
                         }
                     } else if (AreEqual(refItem, inOldId)) {
@@ -756,7 +756,7 @@ eastl::string CUIPParserObjectRefHelper::BuildAbsoluteReferenceString(SGraphNode
 
 void CUIPParserObjectRefHelper::MarkAllReferencedAttributes(
     eastl::string inId, const eastl::vector<eastl::string> &inReferences,
-    UICDM::IDOMReader &inReader, SParseElementManager &outIdAttributesMap)
+    qt3dsdm::IDOMReader &inReader, SParseElementManager &outIdAttributesMap)
 {
     IDOMReader::Scope __scope(inReader);
     eastl::string theReferencesTokenizer;
@@ -829,7 +829,7 @@ void CUIPParserObjectRefHelper::MarkAllReferencedAttributes(
 CUIPParserObjectRefHelper::SGraphNode *
 CUIPParserObjectRefHelper::GetReferenceNode(SGraphNode *inInstance, eastl::string &inAssetName,
                                             eastl::vector<SGraphNode *> &outInstanceList,
-                                            UICDM::IDOMReader &inReader)
+                                            qt3dsdm::IDOMReader &inReader)
 {
     if (!inInstance)
         return NULL;
@@ -908,7 +908,7 @@ CUIPParserObjectRefHelper::GetReferenceNode(SGraphNode *inInstance, eastl::strin
 
 bool CUIPParserObjectRefHelper::MarkAttributeAsReferenced(
     SGraphNode *inBaseInstance, eastl::vector<SGraphNode *> &inInstanceList,
-    eastl::string &inAttributeName, UICDM::IDOMReader &inReader,
+    eastl::string &inAttributeName, qt3dsdm::IDOMReader &inReader,
     SParseElementManager &outIdAttributesMap)
 {
     bool theRet(false);

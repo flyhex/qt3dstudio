@@ -39,7 +39,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 // TODO: figure out if we can just use IDoc instead of CDoc
 CUICDMTimelineKeyframe::CUICDMTimelineKeyframe(IDoc *inDoc)
@@ -112,7 +112,7 @@ void CUICDMTimelineKeyframe::SetTime(const long inNewTime)
 #endif
 }
 
-inline CUICDMAnimationHandle GetAnimationHandle(UICDM::IAnimationCore *inAnimationCore,
+inline CUICDMAnimationHandle GetAnimationHandle(qt3dsdm::IAnimationCore *inAnimationCore,
                                                 const TKeyframeHandleList &inKeyframes)
 {
     if (!inKeyframes.empty())
@@ -134,7 +134,7 @@ void CUICDMTimelineKeyframe::SetDynamic(bool inIsDynamic)
 // Only the first key of a track can be dynamic.
 bool CUICDMTimelineKeyframe::IsDynamic() const
 {
-    UICDM::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+    qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     CUICDMAnimationHandle theAnimation = GetAnimationHandle(theAnimationCore, m_KeyframeHandles);
     if (theAnimation.Valid()) {
         SAnimationInfo theInfo = theAnimationCore->GetAnimationInfo(theAnimation);
@@ -150,12 +150,12 @@ bool CUICDMTimelineKeyframe::IsDynamic() const
     return false;
 }
 
-void CUICDMTimelineKeyframe::AddKeyframeHandle(UICDM::CUICDMKeyframeHandle inHandle)
+void CUICDMTimelineKeyframe::AddKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle)
 {
     m_KeyframeHandles.push_back(inHandle);
 }
 
-bool CUICDMTimelineKeyframe::HasKeyframeHandle(UICDM::CUICDMKeyframeHandle inHandle) const
+bool CUICDMTimelineKeyframe::HasKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle) const
 {
     TKeyframeHandleList::const_iterator theIter = m_KeyframeHandles.begin();
     for (; theIter != m_KeyframeHandles.end(); ++theIter) {

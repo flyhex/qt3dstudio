@@ -66,9 +66,9 @@ public:
     bool GetHasValidTarget();
     void SetHasValidTarget(bool inValid) override;
 
-    CCmd *GenerateAssetCommand(UICDM::CUICDMInstanceHandle inTarget,
+    CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
                                        EDROPDESTINATION inDestType,
-                                       UICDM::CUICDMSlideHandle inSlide) override;
+                                       qt3dsdm::CUICDMSlideHandle inSlide) override;
 };
 
 #endif // #ifndef __FILEDROPSOURCE_H__

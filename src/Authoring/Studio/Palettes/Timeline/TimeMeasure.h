@@ -69,6 +69,6 @@ protected:
     double m_TimePerPixel;
     bool m_IsMouseDown;
     CTimelineTimelineLayout *m_TimelineLayout;
-    std::shared_ptr<UICDM::ISignalConnection> m_TimerConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_TimerConnection;
 };
 #endif // INCLUDED_TIME_MEASURE_H

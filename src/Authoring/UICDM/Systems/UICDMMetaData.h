@@ -43,7 +43,7 @@ namespace foundation {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 using qt3ds::foundation::Option;
 using qt3ds::QT3DSU32;

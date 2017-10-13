@@ -31,7 +31,7 @@
 #define STANDARDEXTENSIONSH
 #include <algorithm>
 
-namespace UICDM {
+namespace qt3dsdm {
 template <typename TContainer, typename TPred>
 inline void erase_if(TContainer &inContainer, TPred inPred)
 {

@@ -58,9 +58,9 @@ public:
     bool ValidateTarget(CDropTarget *inTarget) override;
     void InterpretKeyFlags(long inModifyerKeys) override;
 
-    CCmd *GenerateAssetCommand(UICDM::CUICDMInstanceHandle inTarget,
+    CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
                                        EDROPDESTINATION inDestType,
-                                       UICDM::CUICDMSlideHandle inSlide) override;
+                                       qt3dsdm::CUICDMSlideHandle inSlide) override;
 };
 
 #endif // #ifndef __TIMELINEDROPSOURCE_H__

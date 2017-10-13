@@ -117,7 +117,7 @@ protected:
     bool m_MouseDown;
     bool m_DrawAcceptBefore;
     bool m_DrawAcceptAfter;
-    std::shared_ptr<UICDM::ISignalConnection> m_TimerHandler;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_TimerHandler;
     ::CColor m_NormalTextColor;
     ::CColor m_SelectedTextColor;
     ::CColor m_LockedTextColor;

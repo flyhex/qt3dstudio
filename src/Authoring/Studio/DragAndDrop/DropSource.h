@@ -55,7 +55,7 @@ protected:
     long m_Flavor;
     unsigned long m_Size;
 
-    UICDM::TInstanceHandleList m_Instances;
+    qt3dsdm::TInstanceHandleList m_Instances;
     long m_ObjectType;
     bool m_HasValidTarget;
     CPt m_CurrentPoint;
@@ -81,8 +81,8 @@ public:
     virtual void SetCurrentFlags(Qt::KeyboardModifiers inFlags) { m_CurrentFlags = inFlags; }
     virtual Qt::KeyboardModifiers GetCurrentFlags() const { return m_CurrentFlags; }
 
-    virtual CCmd *GenerateAssetCommand(UICDM::CUICDMInstanceHandle, EDROPDESTINATION,
-                                       UICDM::CUICDMSlideHandle)
+    virtual CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle, EDROPDESTINATION,
+                                       qt3dsdm::CUICDMSlideHandle)
     {
         return nullptr;
     }

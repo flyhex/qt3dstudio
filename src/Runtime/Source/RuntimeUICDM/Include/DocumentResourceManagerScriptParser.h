@@ -40,7 +40,7 @@
 namespace Q3DStudio {
 namespace ScriptParser {
 
-    using namespace UICDM;
+    using namespace qt3dsdm;
     using namespace Q3DStudio;
 
     struct StringInStream : qt3ds::foundation::IInStream
@@ -72,7 +72,7 @@ namespace ScriptParser {
     {
         static std::shared_ptr<IDOMReader>
         ParseScriptFile(std::shared_ptr<IDOMFactory> factory,
-                        std::shared_ptr<UICDM::IStringTable> stringTable,
+                        std::shared_ptr<qt3dsdm::IStringTable> stringTable,
                         const QString &fullPath, CXmlErrorHandler &errorHandler,
                         qt3ds::render::IInputStreamFactory &streamFactory)
         {

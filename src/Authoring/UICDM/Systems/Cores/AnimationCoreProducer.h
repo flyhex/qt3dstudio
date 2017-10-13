@@ -33,7 +33,7 @@
 #include "UICDMTransactions.h"
 #include "UICDMSignals.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class CAnimationCoreProducer : public IAnimationCore,
                                public ITransactionProducer,
                                public IAnimationCoreSignalProvider

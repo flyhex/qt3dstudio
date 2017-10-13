@@ -52,9 +52,9 @@ public:
     bool CanCopy() override;
     bool ValidateTarget(CDropTarget *inTarget) override;
 
-    CCmd *GenerateAssetCommand(UICDM::CUICDMInstanceHandle inTarget,
+    CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
                                        EDROPDESTINATION inDestType,
-                                       UICDM::CUICDMSlideHandle inSlide) override;
+                                       qt3dsdm::CUICDMSlideHandle inSlide) override;
 
 protected:
     EPrimitiveType m_PrimitiveType;

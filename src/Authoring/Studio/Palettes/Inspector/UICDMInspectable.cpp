@@ -53,15 +53,15 @@
 #include "Strings.h"
 #include "StringLoader.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 //==============================================================================
 /**
  *	Constructor
  */
 CUICDMInspectable::CUICDMInspectable(CStudioApp &inApp, CCore *inCore,
-                                     UICDM::CUICDMInstanceHandle inInstance,
-                                     UICDM::CUICDMInstanceHandle inDualPersonalityInstance /*= 0*/)
+                                     qt3dsdm::CUICDMInstanceHandle inInstance,
+                                     qt3dsdm::CUICDMInstanceHandle inDualPersonalityInstance /*= 0*/)
     : CInspectableBase(inCore)
     , m_Instance(inInstance)
     , m_DualPersonalityInstance((inDualPersonalityInstance != 0) ? inDualPersonalityInstance
@@ -134,10 +134,10 @@ TMetaDataPropertyHandleList CUICDMInspectable::GetGroupProperties(long inIndex)
     TMetaDataPropertyHandleList retval;
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
     theMetaData.GetMetaDataProperties(GetGroupInstance(inIndex), retval);
-    UICDM::IPropertySystem &thePropertySystem(
+    qt3dsdm::IPropertySystem &thePropertySystem(
         *m_Core->GetDoc()->GetStudioSystem()->GetPropertySystem());
     // get name of the current group fofr filtering
-    Option<UICDM::TCharStr> theGroupFilterName =
+    Option<qt3dsdm::TCharStr> theGroupFilterName =
         theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(inIndex), inIndex);
     long theGroupCount = GetGroupCount();
 
@@ -220,7 +220,7 @@ CUICDMInstanceHandle CUICDMInspectable::GetGroupInstance(long inGroupIndex)
 EStudioObjectType CUICDMInspectable::GetObjectType()
 {
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
-    Option<UICDM::TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(m_Instance);
+    Option<qt3dsdm::TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(m_Instance);
     if (theObjTypeName.hasValue()) {
         ComposerObjectTypes::Enum theType =
             ComposerObjectTypes::Convert(theObjTypeName->wide_str());
@@ -229,7 +229,7 @@ EStudioObjectType CUICDMInspectable::GetObjectType()
             CDoc *theDoc = m_Core->GetDoc();
             CClientDataModelBridge *theBridge =
                 theDoc->GetStudioSystem()->GetClientDataModelBridge();
-            UICDM::CUICDMInstanceHandle theInstance =
+            qt3dsdm::CUICDMInstanceHandle theInstance =
                 theBridge->GetOwningComponentInstance(theDoc->GetActiveSlide());
             Option<TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(theInstance);
             if (theObjTypeName.hasValue()) {
@@ -292,7 +292,7 @@ bool CUICDMInspectable::IsValid() const
 bool CUICDMInspectable::IsMaster()
 {
     ISlideSystem *theSlideSystem = m_Core->GetDoc()->GetStudioSystem()->GetSlideSystem();
-    UICDM::CUICDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(m_Instance);
+    qt3dsdm::CUICDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(m_Instance);
     if (theSlideHandle.Valid())
         return theSlideSystem->IsMasterSlide(theSlideHandle);
     // Slide handle may not be valid if we are selecting the Scene or if we are inside Component and

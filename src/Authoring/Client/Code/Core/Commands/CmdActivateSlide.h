@@ -37,7 +37,7 @@
 
 class CDoc;
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISlideSystem;
 class CUICDMSlideHandle;
 };
@@ -45,8 +45,8 @@ class CUICDMSlideHandle;
 class CCmdActivateSlide : public CNonModifyingCmd
 {
 public:
-    CCmdActivateSlide(CDoc *inDoc, UICDM::CUICDMSlideHandle inSlideHandle);
-    CCmdActivateSlide(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance);
+    CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlideHandle);
+    CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance);
     virtual ~CCmdActivateSlide();
 
     unsigned long Do() override;
@@ -58,7 +58,7 @@ public:
 
 protected:
     CDoc *m_Doc;
-    UICDM::CUICDMSlideHandle m_SlideHandle;
+    qt3dsdm::CUICDMSlideHandle m_SlideHandle;
     bool m_ForceRefresh;
 };
 #endif // INCLUDED_CMD_ACTIVATE_SLIDE_H

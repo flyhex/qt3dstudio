@@ -92,7 +92,7 @@ void Qt3DSRenderTestEffectGenerator::cleanup(NVRenderContext *context,
     Q_UNUSED(pUserData);
 }
 
-bool GenShader(IUICRenderContext &UICContext, SEffect &effect, UICDM::SMetaDataEffect *metaEffect)
+bool GenShader(IUICRenderContext &UICContext, SEffect &effect, qt3dsdm::SMetaDataEffect *metaEffect)
 {
     bool success = true;
     for (int i = 0; i < metaEffect->m_EffectCommands.size(); i++) {
@@ -130,7 +130,7 @@ bool Qt3DSRenderTestEffectGenerator::run(NVRenderContext *context, userContextDa
         CRegisteredString name = context->GetStringTable().RegisterStr(cname);
 
         metadata()->LoadEffectXMLFile("Effect", "", effectName.toLatin1().data(), cname);
-        Option<UICDM::SMetaDataEffect> metaEffect =
+        Option<qt3dsdm::SMetaDataEffect> metaEffect =
                             metadata()->GetEffectMetaDataBySourcePath(cname);
 
         if (metaEffect.hasValue()) {

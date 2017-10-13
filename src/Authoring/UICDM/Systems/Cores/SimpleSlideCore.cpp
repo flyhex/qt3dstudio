@@ -34,7 +34,7 @@ using namespace std;
 #pragma warning(disable : 4503)
 #endif
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMSlideHandle CSimpleSlideCore::CreateSlide(CUICDMInstanceHandle inInstance)
 {

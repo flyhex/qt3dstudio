@@ -185,7 +185,7 @@ void CScrollController::OnCancelScrolling(CControl *inButton)
     m_ScrollingForward = false;
     m_ScrollingBackward = false;
 
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
 }
 
 //=============================================================================

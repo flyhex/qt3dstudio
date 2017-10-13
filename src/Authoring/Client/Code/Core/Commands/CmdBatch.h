@@ -42,7 +42,7 @@
 class CDoc;
 class CDispatch;
 class CCore;
-namespace UICDM {
+namespace qt3dsdm {
 class IStudioFullSystemSignalSender;
 }
 

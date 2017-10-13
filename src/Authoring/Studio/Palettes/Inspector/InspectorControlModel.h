@@ -43,7 +43,7 @@ class CInspectableBase;
 class CUICDMInspectable;
 class SGuideInspectableImpl;
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISignalConnection;
 typedef std::shared_ptr<ISignalConnection> TSignalConnectionPtr;
 }
@@ -56,8 +56,8 @@ class CUICDMInspectorRow;
 class InspectorControlBase : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(UICDM::DataModelDataType::Value dataType MEMBER m_dataType CONSTANT)
-    Q_PROPERTY(UICDM::AdditionalMetaDataType::Value propertyType MEMBER m_propertyType CONSTANT)
+    Q_PROPERTY(qt3dsdm::DataModelDataType::Value dataType MEMBER m_dataType CONSTANT)
+    Q_PROPERTY(qt3dsdm::AdditionalMetaDataType::Value propertyType MEMBER m_propertyType CONSTANT)
     Q_PROPERTY(QVariant value MEMBER m_value NOTIFY valueChanged)
     Q_PROPERTY(QVariant values MEMBER m_values NOTIFY valuesChanged)
     Q_PROPERTY(QString title MEMBER m_title CONSTANT)
@@ -77,20 +77,20 @@ Q_SIGNALS:
     void animatedChanged();
 
 public:
-    UICDM::DataModelDataType::Value m_dataType;
-    UICDM::AdditionalMetaDataType::Value m_propertyType;
+    qt3dsdm::DataModelDataType::Value m_dataType;
+    qt3dsdm::AdditionalMetaDataType::Value m_propertyType;
     QVariant m_value;
     QVariant m_values;
     QString m_title;
     QString m_tooltip;
 
-    UICDM::CUICDMInstanceHandle m_instance;
-    UICDM::CUICDMPropertyHandle m_property;
+    qt3dsdm::CUICDMInstanceHandle m_instance;
+    qt3dsdm::CUICDMPropertyHandle m_property;
 
     bool m_animatable  = false;
     bool m_animated = false;
 
-    std::vector<UICDM::TSignalConnectionPtr> m_connections;
+    std::vector<qt3dsdm::TSignalConnectionPtr> m_connections;
 };
 
 class InspectorControlModel : public QAbstractListModel
@@ -125,7 +125,7 @@ public:
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
 
 private:
-    void onSlideRearranged(const UICDM::CUICDMSlideHandle &inMaster, int inOldIndex,
+    void onSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster, int inOldIndex,
                            int inNewIndex);
 
 
@@ -157,20 +157,20 @@ private:
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();
-    void notifyInstancePropertyValue(UICDM::CUICDMInstanceHandle, UICDM::CUICDMPropertyHandle inProperty);
+    void notifyInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle, qt3dsdm::CUICDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase* inItem);
 
-    std::shared_ptr<UICDM::ISignalConnection> m_notifier;
-    std::shared_ptr<UICDM::ISignalConnection> m_slideNotifier;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
 
     InspectorControlBase *createMaterialItem(CUICDMInspectable *inspectable, int groupIndex);
     InspectorControlBase *createItem(CUICDMInspectable *inspectable,
                                      Q3DStudio::CUICDMInspectorRow *row, int groupIndex);
     InspectorControlBase *createItem(CUICDMInspectable *inspectable,
-                                     const UICDM::SMetaDataPropertyInfo &metaProperty,
+                                     const qt3dsdm::SMetaDataPropertyInfo &metaProperty,
                                      int groupIndex);
 
-    UICDM::SValue currentPropertyValue(long instance, int handle);
+    qt3dsdm::SValue currentPropertyValue(long instance, int handle);
 
     QVector<GroupInspectorControl> computeTree(CInspectableBase *inspectBase);
     bool isTreeRebuildRequired(CInspectableBase *inspectBase) const;

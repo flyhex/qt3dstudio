@@ -30,7 +30,7 @@
 #ifndef VECTORTRANSACTIONSH
 #define VECTORTRANSACTIONSH
 
-namespace UICDM {
+namespace qt3dsdm {
 template <typename TItemType>
 inline void VecInsert(std::vector<TItemType> &inItems, const TItemType &inItem, size_t inIndex)
 {

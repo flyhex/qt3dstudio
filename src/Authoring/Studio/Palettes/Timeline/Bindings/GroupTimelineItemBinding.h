@@ -52,7 +52,7 @@ class CGroupTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public:
     CGroupTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              UICDM::CUICDMInstanceHandle inDataHandle);
+                              qt3dsdm::CUICDMInstanceHandle inDataHandle);
     ~CGroupTimelineItemBinding() {}
 
     // CUICDMTimelineItemBinding

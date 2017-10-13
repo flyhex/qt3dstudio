@@ -32,7 +32,7 @@
 #include "UICDMHandles.h"
 #include "UICDMActionCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 /**
  *	ActionSystem acts as a wrapper or helper around ActionCore. ActionSystem will call
  *	ActionCore and perform other necessary setups. It also has the knowledge of other

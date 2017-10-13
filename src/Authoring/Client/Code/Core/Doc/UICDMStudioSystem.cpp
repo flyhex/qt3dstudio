@@ -47,7 +47,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 inline std::wstring GetFullPath(Q3DStudio::CString inSource)
 {
 #ifdef Q_OS_MACOS
@@ -124,7 +124,7 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
                                              CUICDMSlideHandle inDestSlide,
                                              CUICDMInstanceHandle inInstance) override
     {
-        std::pair<UICDM::CUICDMInstanceHandle, UICDM::SLong4> theInstanceGuidPair(
+        std::pair<qt3dsdm::CUICDMInstanceHandle, qt3dsdm::SLong4> theInstanceGuidPair(
             m_Bridge->CreateImageInstance(inInstance, m_Slot, inDestSlide));
         CUICDMInstanceHandle theNewInstance(theInstanceGuidPair.first);
         TSlideEntryList theEntries;

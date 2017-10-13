@@ -43,7 +43,7 @@
  *	integrity checking taking the various cores into account.
  */
 
-namespace UICDM {
+namespace qt3dsdm {
 
 typedef std::pair<CUICDMPropertyHandle, TPropertyInstanceInfoPtr> TPropertyHandlePropertyInfoPair;
 typedef std::vector<TPropertyHandlePropertyInfoPair> TPropertyHandlePropertyInfoPairList;

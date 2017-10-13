@@ -76,7 +76,7 @@ bool SlideModel::setData(const QModelIndex &index, const QVariant &value, int ro
         break;
     }
     case HandleRole: {
-        slideHandle = value.value<UICDM::CUICDMSlideHandle>();
+        slideHandle = value.value<qt3dsdm::CUICDMSlideHandle>();
         Q_EMIT dataChanged(index, index, {HandleRole, NameRole});
         break;
     }
@@ -202,7 +202,7 @@ void SlideModel::addNewSlide(int row)
     const auto handle = (row < m_slides.size()) ? m_slides[row] : m_slides.last();
 
     const auto instanceHandle = GetBridge()->GetOwningComponentInstance(handle);
-    UICDM::CUICDMSlideHandle theMasterSlide = GetBridge()->GetComponentSlide(instanceHandle, 0);
+    qt3dsdm::CUICDMSlideHandle theMasterSlide = GetBridge()->GetComponentSlide(instanceHandle, 0);
 
     beginInsertRows({}, row, row);
     m_slides.insert(row, Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(),
@@ -230,7 +230,7 @@ bool SlideModel::hasSlideWithName(const QString &name) const
     return false;
 }
 
-QString SlideModel::slideName(const UICDM::CUICDMSlideHandle &handle) const
+QString SlideModel::slideName(const qt3dsdm::CUICDMSlideHandle &handle) const
 {
     auto doc = GetDoc();
     if (!doc->IsValid())
@@ -239,11 +239,11 @@ QString SlideModel::slideName(const UICDM::CUICDMSlideHandle &handle) const
     return GetBridge()->GetName(instanceHandle).toQString();
 }
 
-void SlideModel::setSlideName(const UICDM::CUICDMSlideHandle &handle, const QString &name)
+void SlideModel::setSlideName(const qt3dsdm::CUICDMSlideHandle &handle, const QString &name)
 {
     const auto oldName = slideName(handle);
     if (oldName != name && !name.trimmed().isEmpty()) {
-        using namespace UICDM;
+        using namespace qt3dsdm;
         CDoc *theDoc = GetDoc();
         CClientDataModelBridge *theBridge = GetBridge();
         if (!theBridge)

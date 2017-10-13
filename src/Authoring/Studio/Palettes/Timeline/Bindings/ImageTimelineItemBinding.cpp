@@ -43,7 +43,7 @@
 #include "IObjectReferenceHelper.h"
 #include "EmptyTimelineTimebar.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CImageTimelineItemBinding::CImageTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      CUICDMInstanceHandle inDataHandle)

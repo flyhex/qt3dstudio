@@ -32,7 +32,7 @@
 #include "IDocumentEditor.h"
 #include "UICImportPerformImport.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class IStringTable;
 };
 
@@ -42,7 +42,7 @@ class CGraph;
 namespace ComposerImport {
 
     using namespace Q3DStudio;
-    using namespace UICDM;
+    using namespace qt3dsdm;
     using namespace UICIMP;
     using std::unordered_map;
     using std::vector;
@@ -72,18 +72,18 @@ namespace ComposerImport {
         virtual void AddInstanceMap(CUICDMInstanceHandle instanceHandle, TImportId inImportId) = 0;
 
         static std::shared_ptr<IComposerEditorInterface> CreateEditorInterface(
-            Q3DStudio::IDocumentEditor &editor, UICDM::CDataModelHandle parent // Parent object
+            Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
             ,
-            UICDM::CDataModelHandle root, UICDM::CUICDMSlideHandle slide,
+            qt3dsdm::CDataModelHandle root, qt3dsdm::CUICDMSlideHandle slide,
             const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &fullPathToImportFile,
-            long inStartTime, UICDM::IStringTable &inStringTable);
+            long inStartTime, qt3dsdm::IStringTable &inStringTable);
 
         // The refresh interface is setup to refresh multiple trees automatically
         static std::shared_ptr<IComposerEditor>
         CreateEditorInterface(Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inRoots,
                               const Q3DStudio::CFilePath &docPath,
                               const Q3DStudio::CFilePath &fullPathToImportFile, long inStartTime,
-                              UICDM::IStringTable &inStringTable, CGraph &inAssetGraph);
+                              qt3dsdm::IStringTable &inStringTable, CGraph &inAssetGraph);
     };
 }
 }

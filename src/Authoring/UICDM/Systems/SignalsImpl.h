@@ -31,7 +31,7 @@
 #define SIGNALSIMPLH
 #include "UICDMSignals.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISlideSystemSignalProvider;
 
 TSignalItemPtr CreatePropertyCoreSignaller();

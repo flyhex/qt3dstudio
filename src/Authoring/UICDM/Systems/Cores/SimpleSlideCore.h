@@ -51,7 +51,7 @@ template<> struct hash<std::pair<int,int> >
 
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 // The first revision of this
 typedef std::pair<int, int> TSlideInstancePropertyPair;

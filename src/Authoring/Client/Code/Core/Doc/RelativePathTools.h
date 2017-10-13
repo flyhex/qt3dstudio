@@ -56,35 +56,35 @@ public:
     //	 Static Methods
     //==============================================================================
 public:
-    static bool IsGUID(const UICDM::SObjectRefType &inObjectRefValue);
-    static bool IsRelativePath(const UICDM::SObjectRefType &inObjectRefValue);
-    static EPathType GetPathType(const UICDM::SObjectRefType &inObjectRefValue);
+    static bool IsGUID(const qt3dsdm::SObjectRefType &inObjectRefValue);
+    static bool IsRelativePath(const qt3dsdm::SObjectRefType &inObjectRefValue);
+    static EPathType GetPathType(const qt3dsdm::SObjectRefType &inObjectRefValue);
 
-    static Q3DStudio::CString BuildReferenceString(const UICDM::CUICDMInstanceHandle inInstance,
-                                                   const UICDM::CUICDMInstanceHandle inRootInstance,
+    static Q3DStudio::CString BuildReferenceString(const qt3dsdm::CUICDMInstanceHandle inInstance,
+                                                   const qt3dsdm::CUICDMInstanceHandle inRootInstance,
                                                    EPathType inPathType, CDoc *inDoc);
     static Q3DStudio::CString
-    BuildAbsoluteReferenceString(const UICDM::CUICDMInstanceHandle inInstance, CDoc *inDoc);
+    BuildAbsoluteReferenceString(const qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc);
     static Q3DStudio::CString
-    BuildRelativeReferenceString(const UICDM::CUICDMInstanceHandle inInstance,
-                                 const UICDM::CUICDMInstanceHandle inRootInstance, CDoc *inDoc);
-    static UICDM::CUICDMInstanceHandle
-    FindAssetInstanceByObjectPath(CDoc *inDoc, const UICDM::CUICDMInstanceHandle &inRootInstance,
+    BuildRelativeReferenceString(const qt3dsdm::CUICDMInstanceHandle inInstance,
+                                 const qt3dsdm::CUICDMInstanceHandle inRootInstance, CDoc *inDoc);
+    static qt3dsdm::CUICDMInstanceHandle
+    FindAssetInstanceByObjectPath(CDoc *inDoc, const qt3dsdm::CUICDMInstanceHandle &inRootInstance,
                                   const Q3DStudio::CString &inString, EPathType &outPathType,
                                   bool &outIsResolved,
                                   const IObjectReferenceHelper *inHelper = NULL);
-    static UICDM::SObjectRefType
-    CreateAssetRefValue(const UICDM::CUICDMInstanceHandle inInstance,
-                        const UICDM::CUICDMInstanceHandle inRootInstance, EPathType inPathType,
+    static qt3dsdm::SObjectRefType
+    CreateAssetRefValue(const qt3dsdm::CUICDMInstanceHandle inInstance,
+                        const qt3dsdm::CUICDMInstanceHandle inRootInstance, EPathType inPathType,
                         CDoc *inDoc);
 
 protected:
-    static UICDM::CUICDMInstanceHandle
-    DoFindAssetInstanceByObjectPath(CDoc *inDoc, const UICDM::CUICDMInstanceHandle &inRootInstance,
-                                    const UICDM::CUICDMInstanceHandle inTimeParentInstance,
-                                    UICDM::CUICDMSlideHandle inSlide, CStackTokenizer &ioTokenizer,
+    static qt3dsdm::CUICDMInstanceHandle
+    DoFindAssetInstanceByObjectPath(CDoc *inDoc, const qt3dsdm::CUICDMInstanceHandle &inRootInstance,
+                                    const qt3dsdm::CUICDMInstanceHandle inTimeParentInstance,
+                                    qt3dsdm::CUICDMSlideHandle inSlide, CStackTokenizer &ioTokenizer,
                                     bool &outIsResolved, const IObjectReferenceHelper *inHelper);
-    static Q3DStudio::CString LookupObjectName(const UICDM::CUICDMInstanceHandle inInstance,
+    static Q3DStudio::CString LookupObjectName(const qt3dsdm::CUICDMInstanceHandle inInstance,
                                                CDoc *inDoc);
 };
 

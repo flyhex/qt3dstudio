@@ -38,8 +38,8 @@
 #include "IInspectableItem.h"
 #include "UICDMValue.h"
 
-typedef std::function<UICDM::SValue()> TGetterFunc;
-typedef std::function<void(UICDM::SValue)> TSetterFunc;
+typedef std::function<qt3dsdm::SValue()> TGetterFunc;
+typedef std::function<void(qt3dsdm::SValue)> TSetterFunc;
 typedef std::function<void()> TCommitFunc;
 typedef std::function<void()> TCancelFunc;
 
@@ -70,15 +70,15 @@ struct SInspectableDataInfo
 struct SComboAttItem : public IInspectableAttributeItem
 {
     SInspectableDataInfo m_BaseInspectableInfo;
-    UICDM::TMetaDataStringList m_MetaDataTypes;
-    SComboAttItem(const SInspectableDataInfo &inInfo, const UICDM::TMetaDataStringList &inTypes)
+    qt3dsdm::TMetaDataStringList m_MetaDataTypes;
+    SComboAttItem(const SInspectableDataInfo &inInfo, const qt3dsdm::TMetaDataStringList &inTypes)
         : m_BaseInspectableInfo(inInfo)
         , m_MetaDataTypes(inTypes)
     {
     }
-    UICDM::HandlerArgumentType::Value GetInspectableSubType() const override
+    qt3dsdm::HandlerArgumentType::Value GetInspectableSubType() const override
     {
-        return UICDM::HandlerArgumentType::Property;
+        return qt3dsdm::HandlerArgumentType::Property;
     }
     Q3DStudio::CString GetInspectableName() const override { return m_BaseInspectableInfo.m_Name; }
     Q3DStudio::CString GetInspectableFormalName() const override
@@ -90,8 +90,8 @@ struct SComboAttItem : public IInspectableAttributeItem
         return m_BaseInspectableInfo.m_Description;
     }
 
-    UICDM::SValue GetInspectableData() const override { return m_BaseInspectableInfo.m_Getter(); }
-    void SetInspectableData(const UICDM::SValue &inValue) override
+    qt3dsdm::SValue GetInspectableData() const override { return m_BaseInspectableInfo.m_Getter(); }
+    void SetInspectableData(const qt3dsdm::SValue &inValue) override
     {
         m_BaseInspectableInfo.m_Setter(inValue);
         m_BaseInspectableInfo.m_Commit();
@@ -99,24 +99,24 @@ struct SComboAttItem : public IInspectableAttributeItem
 
     float GetInspectableMin() const override { return 0; }
     float GetInspectableMax() const override { return 0; }
-    UICDM::TMetaDataStringList GetInspectableList() const override { return m_MetaDataTypes; }
-    UICDM::DataModelDataType::Value GetInspectableType() const override
+    qt3dsdm::TMetaDataStringList GetInspectableList() const override { return m_MetaDataTypes; }
+    qt3dsdm::DataModelDataType::Value GetInspectableType() const override
     {
-        return UICDM::DataModelDataType::String;
+        return qt3dsdm::DataModelDataType::String;
     }
-    UICDM::AdditionalMetaDataType::Value GetInspectableAdditionalType() const override
+    qt3dsdm::AdditionalMetaDataType::Value GetInspectableAdditionalType() const override
     {
-        return UICDM::AdditionalMetaDataType::StringList;
+        return qt3dsdm::AdditionalMetaDataType::StringList;
     }
 };
 
 struct SFloatIntItem : public IInspectableAttributeItem
 {
     SInspectableDataInfo m_BaseInspectableInfo;
-    UICDM::DataModelDataType::Value m_DataType;
+    qt3dsdm::DataModelDataType::Value m_DataType;
     float m_Min;
     float m_Max;
-    SFloatIntItem(const SInspectableDataInfo &inInfo, UICDM::DataModelDataType::Value inType,
+    SFloatIntItem(const SInspectableDataInfo &inInfo, qt3dsdm::DataModelDataType::Value inType,
                   float inMin = 0, float inMax = 0)
         : m_BaseInspectableInfo(inInfo)
         , m_DataType(inType)
@@ -124,9 +124,9 @@ struct SFloatIntItem : public IInspectableAttributeItem
         , m_Max(inMax)
     {
     }
-    UICDM::HandlerArgumentType::Value GetInspectableSubType() const override
+    qt3dsdm::HandlerArgumentType::Value GetInspectableSubType() const override
     {
-        return UICDM::HandlerArgumentType::Property;
+        return qt3dsdm::HandlerArgumentType::Property;
     }
     Q3DStudio::CString GetInspectableName() const override { return m_BaseInspectableInfo.m_Name; }
     Q3DStudio::CString GetInspectableFormalName() const override
@@ -138,14 +138,14 @@ struct SFloatIntItem : public IInspectableAttributeItem
         return m_BaseInspectableInfo.m_Description;
     }
 
-    UICDM::SValue GetInspectableData() const override { return m_BaseInspectableInfo.m_Getter(); }
-    void SetInspectableData(const UICDM::SValue &inValue) override
+    qt3dsdm::SValue GetInspectableData() const override { return m_BaseInspectableInfo.m_Getter(); }
+    void SetInspectableData(const qt3dsdm::SValue &inValue) override
     {
         m_BaseInspectableInfo.m_Setter(inValue);
         m_BaseInspectableInfo.m_Commit();
     }
 
-    void ChangeInspectableData(const UICDM::SValue &inValue) override
+    void ChangeInspectableData(const qt3dsdm::SValue &inValue) override
     {
         m_BaseInspectableInfo.m_Setter(inValue);
     }
@@ -153,25 +153,25 @@ struct SFloatIntItem : public IInspectableAttributeItem
 
     float GetInspectableMin() const override { return m_Min; }
     float GetInspectableMax() const override { return m_Max; }
-    UICDM::TMetaDataStringList GetInspectableList() const override
+    qt3dsdm::TMetaDataStringList GetInspectableList() const override
     {
-        return UICDM::TMetaDataStringList();
+        return qt3dsdm::TMetaDataStringList();
     }
-    UICDM::DataModelDataType::Value GetInspectableType() const override { return m_DataType; }
-    UICDM::AdditionalMetaDataType::Value GetInspectableAdditionalType() const override
+    qt3dsdm::DataModelDataType::Value GetInspectableType() const override { return m_DataType; }
+    qt3dsdm::AdditionalMetaDataType::Value GetInspectableAdditionalType() const override
     {
-        return UICDM::AdditionalMetaDataType::None;
+        return qt3dsdm::AdditionalMetaDataType::None;
     }
 };
 
 
 CInspectableBase *CGuideInspectable::CreateInspectable(CCore &inCore,
-                                                       UICDM::CUICDMGuideHandle inGuide)
+                                                       qt3dsdm::CUICDMGuideHandle inGuide)
 {
     return new SGuideInspectableImpl(inCore, inGuide);
 }
 
-SGuideInspectableImpl::SGuideInspectableImpl(CCore &inCore, UICDM::CUICDMGuideHandle inGuide)
+SGuideInspectableImpl::SGuideInspectableImpl(CCore &inCore, qt3dsdm::CUICDMGuideHandle inGuide)
     : CInspectableBase(&inCore)
     , m_Guide(inGuide)
     , m_Editor(*inCore.GetDoc())
@@ -209,8 +209,8 @@ CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
                                                     std::bind(&SGuideInspectableImpl::SetPosition, this,
                                                               std::placeholders::_1),
                                                     theCommiter, theCanceler),
-                               UICDM::DataModelDataType::Float));
-    UICDM::TMetaDataStringList theComboItems;
+                               qt3dsdm::DataModelDataType::Float));
+    qt3dsdm::TMetaDataStringList theComboItems;
     theComboItems.push_back(L"Horizontal");
     theComboItems.push_back(L"Vertical");
 
@@ -227,7 +227,7 @@ CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
                                                     std::bind(&SGuideInspectableImpl::GetWidth, this),
                                                     std::bind(&SGuideInspectableImpl::SetWidth, this, std::placeholders::_1),
                                                     theCommiter, theCanceler),
-                               UICDM::DataModelDataType::Long, 1.0f, 50.0f));
+                               qt3dsdm::DataModelDataType::Long, 1.0f, 50.0f));
 
     CEasyInspectorGroup *theNewGroup = new CEasyInspectorGroup(QObject::tr("Basic"));
     return theNewGroup;
@@ -243,61 +243,61 @@ bool SGuideInspectableImpl::IsMaster()
     return true;
 }
 
-void SGuideInspectableImpl::SetDirection(const UICDM::SValue &inValue)
+void SGuideInspectableImpl::SetDirection(const qt3dsdm::SValue &inValue)
 {
-    UICDM::TDataStrPtr theData = inValue.getData<UICDM::TDataStrPtr>();
-    UICDM::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
+    qt3dsdm::TDataStrPtr theData = inValue.getData<qt3dsdm::TDataStrPtr>();
+    qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     if (theData) {
-        if (UICDM::AreEqual(theData->GetData(), L"Horizontal"))
-            theSetter.m_Direction = UICDM::GuideDirections::Horizontal;
-        else if (UICDM::AreEqual(theData->GetData(), L"Vertical"))
-            theSetter.m_Direction = UICDM::GuideDirections::Vertical;
+        if (qt3dsdm::AreEqual(theData->GetData(), L"Horizontal"))
+            theSetter.m_Direction = qt3dsdm::GuideDirections::Horizontal;
+        else if (qt3dsdm::AreEqual(theData->GetData(), L"Vertical"))
+            theSetter.m_Direction = qt3dsdm::GuideDirections::Vertical;
     }
     Editor().UpdateGuide(m_Guide, theSetter);
     FireRefresh();
 }
 
-UICDM::SValue SGuideInspectableImpl::GetDirection()
+qt3dsdm::SValue SGuideInspectableImpl::GetDirection()
 {
     switch (Reader().GetGuideInfo(m_Guide).m_Direction) {
-    case UICDM::GuideDirections::Horizontal:
-        return std::make_shared<UICDM::CDataStr>(L"Horizontal");
-    case UICDM::GuideDirections::Vertical:
-        return std::make_shared<UICDM::CDataStr>(L"Vertical");
+    case qt3dsdm::GuideDirections::Horizontal:
+        return std::make_shared<qt3dsdm::CDataStr>(L"Horizontal");
+    case qt3dsdm::GuideDirections::Vertical:
+        return std::make_shared<qt3dsdm::CDataStr>(L"Vertical");
     default:
-        return std::make_shared<UICDM::CDataStr>(L"");
+        return std::make_shared<qt3dsdm::CDataStr>(L"");
     }
 }
 
-void SGuideInspectableImpl::SetPosition(const UICDM::SValue &inValue)
+void SGuideInspectableImpl::SetPosition(const qt3dsdm::SValue &inValue)
 {
     float thePos = inValue.getData<float>();
-    UICDM::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
+    qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     theSetter.m_Position = thePos;
     Editor().UpdateGuide(m_Guide, theSetter);
     FireRefresh();
 }
 
-UICDM::SValue SGuideInspectableImpl::GetPosition()
+qt3dsdm::SValue SGuideInspectableImpl::GetPosition()
 {
-    UICDM::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
+    qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     return theSetter.m_Position;
 }
 
-void SGuideInspectableImpl::SetWidth(const UICDM::SValue &inValue)
+void SGuideInspectableImpl::SetWidth(const qt3dsdm::SValue &inValue)
 {
     auto theData = inValue.getData<qt3ds::QT3DSI32>();
 
-    UICDM::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
+    qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     theSetter.m_Width = theData;
     Editor().UpdateGuide(m_Guide, theSetter);
     FireRefresh();
 
 }
 
-UICDM::SValue SGuideInspectableImpl::GetWidth()
+qt3dsdm::SValue SGuideInspectableImpl::GetWidth()
 {
-    UICDM::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
+    qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     return theSetter.m_Width;
 }
 
@@ -318,5 +318,5 @@ void SGuideInspectableImpl::Rollback()
 
 void SGuideInspectableImpl::FireRefresh()
 {
-    m_Editor.FireImmediateRefresh(UICDM::CUICDMInstanceHandle());
+    m_Editor.FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle());
 }

@@ -55,7 +55,7 @@ namespace foundation {
     class IInStream;
 }
 }
-namespace UICDM {
+namespace qt3dsdm {
 class CUICDMInstanceHandle;
 class CUICDMSlideHandle;
 class CStudioSystem;
@@ -83,14 +83,14 @@ class IDoc
 public:
     virtual long GetCurrentViewTime() const = 0;
     virtual void NotifyTimeChanged(long inNewTime) = 0;
-    virtual void NotifyActiveSlideChanged(UICDM::CUICDMSlideHandle inNewActiveSlide) = 0;
-    virtual void NotifyActiveSlideChanged(UICDM::CUICDMSlideHandle inNewActiveSlide,
+    virtual void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide) = 0;
+    virtual void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
                                           bool inForceRefresh,
                                           bool inIgnoreLastDisplayTime = false) = 0;
     virtual void NotifySelectionChanged(
         Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue()) = 0;
 
-    virtual UICDM::CStudioSystem *GetStudioSystem() = 0;
+    virtual qt3dsdm::CStudioSystem *GetStudioSystem() = 0;
 
     virtual void SetKeyframeInterpolation() = 0;
     virtual void DeselectAllKeyframes() = 0;
@@ -100,11 +100,11 @@ public:
     virtual void SetKeyframesManager(IKeyframesManager *inManager) = 0;
     virtual IKeyframesManager *GetKeyframesManager() = 0;
 
-    virtual UICDM::IPropertySystem *GetPropertySystem() = 0;
-    virtual UICDM::IAnimationCore *GetAnimationCore() = 0;
-    virtual void SetInstancePropertyValue(UICDM::CUICDMInstanceHandle inInstance,
+    virtual qt3dsdm::IPropertySystem *GetPropertySystem() = 0;
+    virtual qt3dsdm::IAnimationCore *GetAnimationCore() = 0;
+    virtual void SetInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle inInstance,
                                           const std::wstring &inPropertyName,
-                                          const UICDM::SValue &inValue) = 0;
+                                          const qt3dsdm::SValue &inValue) = 0;
     // Return an editor to editing the scene graph of the document.
     // This editor takes care of putting objects into the property slide
     // as well as updating the world
@@ -141,10 +141,10 @@ public:
     virtual std::shared_ptr<Q3DStudio::IComposerSerializer> CreateSerializer() = 0;
     // Create a DOM writer that is opened to the project element.  This is where the serializer
     // should write to.
-    virtual std::shared_ptr<UICDM::IDOMWriter> CreateDOMWriter() = 0;
+    virtual std::shared_ptr<qt3dsdm::IDOMWriter> CreateDOMWriter() = 0;
     // Create a DOM reader and check that the top element's version is correct.  Opens the reader
     // to the project element.
-    virtual std::shared_ptr<UICDM::IDOMReader>
+    virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CreateDOMReader(const Q3DStudio::CString &inFilePath, qt3ds::QT3DSI32 &outVersion) = 0;
 
     virtual CCore *GetCore() = 0;

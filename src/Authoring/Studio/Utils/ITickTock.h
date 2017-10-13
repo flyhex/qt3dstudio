@@ -34,7 +34,7 @@ namespace Q3DStudio {
 class CString;
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISignalConnection;
 }
 
@@ -62,7 +62,7 @@ public:
     // The timer is canceled if the shared ptr deletes the signal connection.  Save to call from any
     // thread.
     // The callback, however, (inTickTockProc) will be activated solely from the UI thread.
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     AddTimer(unsigned long inTime, bool inIsPeriodic, TTickTockProc inTickTockProc,
              const Q3DStudio::CString &inName) = 0;
 

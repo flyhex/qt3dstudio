@@ -223,7 +223,7 @@ CStudioApp::~CStudioApp()
 
 void CStudioApp::PerformShutdown()
 {
-    m_DirectoryWatcherTicker = std::shared_ptr<UICDM::ISignalConnection>();
+    m_DirectoryWatcherTicker = std::shared_ptr<qt3dsdm::ISignalConnection>();
 
     // Dispatch un-registration
     if (m_Core) {
@@ -447,7 +447,7 @@ int CStudioApp::Run()
     } catch (CUICExceptionClass &inException) {
         g_UICErrorCode = inException.GetErrorCode();
         throw;
-    } catch (UICDM::UICDMError &uicdmError) {
+    } catch (qt3dsdm::UICDMError &uicdmError) {
         Q_UNUSED(uicdmError);
 
 #ifdef KDAB_TEMPORARILY_REMOVED
@@ -1065,7 +1065,7 @@ Q3DStudio::CString CStudioApp::GetPasteType()
 bool CStudioApp::CanChangeTimebarColor()
 {
     bool theRetVal = true;
-    UICDM::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
+    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
     if (!theSelectedInstance.Valid()
         || m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsSceneInstance(
                theSelectedInstance))
@@ -1108,7 +1108,7 @@ void CStudioApp::HandleDuplicateCommand()
 bool CStudioApp::CanDuplicateObject()
 {
     // Get the currently selected object
-    UICDM::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
+    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
     if (!theSelectedInstance.Valid())
         return false;
 
@@ -1332,16 +1332,16 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
             // active slide belongs,
             // for example when user selects the Root in Timeline Palette
             CDoc *theDoc = m_Core->GetDoc();
-            UICDM::TInstanceHandleList theSelectedInstances =
+            qt3dsdm::TInstanceHandleList theSelectedInstances =
                 theDoc->GetSelectedValue().GetSelectedInstances();
-            UICDM::CUICDMInstanceHandle theSelectedInstance;
+            qt3dsdm::CUICDMInstanceHandle theSelectedInstance;
             if (theSelectedInstances.size() == 1)
                 theSelectedInstance = theSelectedInstances[0];
 
             if (m_Core->GetDoc()->GetDocumentReader().IsInstance(theSelectedInstance)) {
                 CClientDataModelBridge *theBridge =
                     theDoc->GetStudioSystem()->GetClientDataModelBridge();
-                UICDM::CUICDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
+                qt3dsdm::CUICDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
 
                 // Slide, scene or component
                 if (theSelectedInstance
@@ -1368,7 +1368,7 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
             }
         } break;
         case Q3DStudio::SelectedValueTypes::Guide: {
-            UICDM::CUICDMGuideHandle theGuide = inSelectable.getData<UICDM::CUICDMGuideHandle>();
+            qt3dsdm::CUICDMGuideHandle theGuide = inSelectable.getData<qt3dsdm::CUICDMGuideHandle>();
             theInspectableBase = CGuideInspectable::CreateInspectable(*m_Core, theGuide);
         } break;
         };

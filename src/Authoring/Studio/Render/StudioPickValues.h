@@ -36,8 +36,8 @@
 
 namespace qt3ds {
 namespace studio {
-    using UICDM::CUICDMInstanceHandle;
-    using UICDM::CUICDMGuideHandle;
+    using qt3dsdm::CUICDMInstanceHandle;
+    using qt3dsdm::CUICDMGuideHandle;
 
     struct StudioPickValueTypes
     {
@@ -116,9 +116,9 @@ namespace studio {
     {
         typedef StudioPickValueTypes::Enum TIdType;
         enum {
-            TBufferSize = Q3DStudio::StaticMaxSize<UICDM::CUICDMInstanceHandle,
+            TBufferSize = Q3DStudio::StaticMaxSize<qt3dsdm::CUICDMInstanceHandle,
                                                    SWidgetPick,
-                                                   UICDM::CUICDMGuideHandle,
+                                                   qt3dsdm::CUICDMGuideHandle,
                                                    SPathPick>::value
         };
 
@@ -135,11 +135,11 @@ namespace studio {
         {
             switch (inType) {
             case StudioPickValueTypes::Instance:
-                return inVisitor(*qt3ds::NVUnionCast<UICDM::CUICDMInstanceHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMInstanceHandle *>(inData));
             case StudioPickValueTypes::Widget:
                 return inVisitor(*qt3ds::NVUnionCast<SWidgetPick *>(inData));
             case StudioPickValueTypes::Guide:
-                return inVisitor(*qt3ds::NVUnionCast<UICDM::CUICDMGuideHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMGuideHandle *>(inData));
             case StudioPickValueTypes::Path:
                 return inVisitor(*qt3ds::NVUnionCast<SPathPick *>(inData));
             default:
@@ -154,11 +154,11 @@ namespace studio {
         {
             switch (inType) {
             case StudioPickValueTypes::Instance:
-                return inVisitor(*qt3ds::NVUnionCast<const UICDM::CUICDMInstanceHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMInstanceHandle *>(inData));
             case StudioPickValueTypes::Widget:
                 return inVisitor(*qt3ds::NVUnionCast<const SWidgetPick *>(inData));
             case StudioPickValueTypes::Guide:
-                return inVisitor(*qt3ds::NVUnionCast<const UICDM::CUICDMGuideHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMGuideHandle *>(inData));
             case StudioPickValueTypes::Path:
                 return inVisitor(*qt3ds::NVUnionCast<const SPathPick *>(inData));
             default:

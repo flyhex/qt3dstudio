@@ -57,7 +57,7 @@ public:
     COffsetKeyframesCommandHelper(CDoc &inDoc);
     ~COffsetKeyframesCommandHelper();
 
-    void SetCommandTime(UICDM::CUICDMKeyframeHandle inKeyframe, long inTime);
+    void SetCommandTime(qt3dsdm::CUICDMKeyframeHandle inKeyframe, long inTime);
     void Finalize();
     void Rollback() { RollbackEditor(); }
 };

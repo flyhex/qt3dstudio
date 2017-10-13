@@ -56,13 +56,13 @@ static const Q3DStudio::CString SOURCEPATHTHIS(L"this");
  */
 Q3DStudio::CString
 CPathConstructionHelper::BuildAbsoluteReferenceString(CDoc *inDoc,
-                                                      UICDM::CUICDMInstanceHandle inInstance)
+                                                      qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
     Q3DStudio::CString theNameStart;
     Q3DStudio::CString theNameEnd = EscapeAssetName(theBridge->GetName(inInstance));
 
-    UICDM::CUICDMInstanceHandle theParentInstance = theBridge->GetParentInstance(inInstance);
+    qt3dsdm::CUICDMInstanceHandle theParentInstance = theBridge->GetParentInstance(inInstance);
     if (theParentInstance.Valid()) {
         theNameStart = BuildAbsoluteReferenceString(inDoc, theParentInstance);
         theNameStart += ".";
@@ -77,7 +77,7 @@ CPathConstructionHelper::BuildAbsoluteReferenceString(CDoc *inDoc,
  *	Create a relative path reference string
  */
 Q3DStudio::CString CPathConstructionHelper::BuildRelativeReferenceString(
-    CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance, UICDM::CUICDMInstanceHandle inRootInstance)
+    CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::CUICDMInstanceHandle inRootInstance)
 {
     Q3DStudio::CString theAbsRelPath = BuildAbsoluteReferenceString(inDoc, inInstance);
     Q3DStudio::CString theAbsRootPath = BuildAbsoluteReferenceString(inDoc, inRootInstance);

@@ -11,15 +11,15 @@ struct PropertyInfo {
     Q_PROPERTY(QString name MEMBER m_name CONSTANT FINAL)
     Q_PROPERTY(float min MEMBER m_min CONSTANT FINAL)
     Q_PROPERTY(float max MEMBER m_max CONSTANT FINAL)
-    Q_PROPERTY(UICDM::DataModelDataType::Value type MEMBER m_type CONSTANT FINAL)
-    Q_PROPERTY(UICDM::AdditionalMetaDataType::Value additionalType MEMBER m_additionalType CONSTANT FINAL)
+    Q_PROPERTY(qt3dsdm::DataModelDataType::Value type MEMBER m_type CONSTANT FINAL)
+    Q_PROPERTY(qt3dsdm::AdditionalMetaDataType::Value additionalType MEMBER m_additionalType CONSTANT FINAL)
     Q_PROPERTY(QStringList possibleValues MEMBER m_possibleValues CONSTANT FINAL)
 
-    UICDM::CUICDMPropertyHandle m_handle;
+    qt3dsdm::CUICDMPropertyHandle m_handle;
     QString m_name;
     QString m_nameId;
-    UICDM::DataModelDataType::Value m_type;
-    UICDM::AdditionalMetaDataType::Value m_additionalType;
+    qt3dsdm::DataModelDataType::Value m_type;
+    qt3dsdm::AdditionalMetaDataType::Value m_additionalType;
     QStringList m_possibleValues;
     float m_min = 0.0f;
     float m_max = 0.0f;
@@ -42,9 +42,9 @@ public:
         HandleRole = Qt::UserRole + 1
     };
 
-    void setAction(const UICDM::CUICDMActionHandle &action);
-    void setNameHandle(const UICDM::CUICDMHandlerArgHandle &valueHandle);
-    void setValueHandle(const UICDM::CUICDMHandlerArgHandle &valueHandle);
+    void setAction(const qt3dsdm::CUICDMActionHandle &action);
+    void setNameHandle(const qt3dsdm::CUICDMHandlerArgHandle &valueHandle);
+    void setValueHandle(const qt3dsdm::CUICDMHandlerArgHandle &valueHandle);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -52,7 +52,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     PropertyInfo property(int index) const;
-    UICDM::CUICDMActionHandle action() const { return m_action; }
+    qt3dsdm::CUICDMActionHandle action() const { return m_action; }
     int valueHandle() const;
 
     QVariant value() const;
@@ -68,9 +68,9 @@ private:
     void updateDefaultPropertyIndex();
 
     QVector<PropertyInfo> m_properties;
-    UICDM::CUICDMActionHandle m_action;
-    UICDM::CUICDMHandlerArgHandle m_nameHandle;
-    UICDM::CUICDMHandlerArgHandle m_valueHandle;
+    qt3dsdm::CUICDMActionHandle m_action;
+    qt3dsdm::CUICDMHandlerArgHandle m_nameHandle;
+    qt3dsdm::CUICDMHandlerArgHandle m_valueHandle;
     int m_defaultPropertyIndex = -1;
     QVariant m_value;
 };

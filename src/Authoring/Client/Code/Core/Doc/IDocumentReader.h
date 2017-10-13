@@ -37,7 +37,7 @@
 #include "UICDMComposerTypeDefinitions.h"
 #include "UICFileTools.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDOMWriter;
 class IDOMReader;
 struct SGuideInfo;
@@ -56,20 +56,20 @@ namespace Q3DStudio {
 using std::shared_ptr;
 class IDynamicLua;
 
-typedef std::vector<std::pair<UICDM::CUICDMSlideHandle, UICDM::CUICDMInstanceHandle>>
+typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, qt3dsdm::CUICDMInstanceHandle>>
     TSlideInstanceList;
-typedef std::vector<std::pair<UICDM::CUICDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
+typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
 typedef std::unordered_map<const wchar_t *, TSlideInstanceList> TCharPtrToSlideInstanceMap;
 using qt3ds::foundation::Option;
-using UICDM::CUICDMInstanceHandle;
-using UICDM::CUICDMPropertyHandle;
-using UICDM::CUICDMSlideHandle;
-using UICDM::CUICDMKeyframeHandle;
-using UICDM::CUICDMActionHandle;
-using UICDM::CUICDMAnimationHandle;
-using UICDM::SValue;
-using UICDM::IDOMReader;
-using UICDM::IDOMWriter;
+using qt3dsdm::CUICDMInstanceHandle;
+using qt3dsdm::CUICDMPropertyHandle;
+using qt3dsdm::CUICDMSlideHandle;
+using qt3dsdm::CUICDMKeyframeHandle;
+using qt3dsdm::CUICDMActionHandle;
+using qt3dsdm::CUICDMAnimationHandle;
+using qt3dsdm::SValue;
+using qt3dsdm::IDOMReader;
+using qt3dsdm::IDOMWriter;
 
 // Reader class to read complex information from the document.  Encapsulates the various UICDM
 // subsystems
@@ -83,7 +83,7 @@ public:
     typedef CUICDMPropertyHandle TPropertyHandle;
     typedef CUICDMSlideHandle TSlideHandle;
     typedef CUICDMKeyframeHandle TKeyframeHandle;
-    typedef UICDM::SValue SValue;
+    typedef qt3dsdm::SValue SValue;
     typedef std::pair<TSlideHandle, SValue> TSlideValuePair;
     typedef std::vector<TSlideValuePair> TSlideValuePairList;
     typedef std::vector<TSlideHandle> TSlideList;
@@ -183,11 +183,11 @@ public:
     virtual std::pair<long, long> GetTimeRangeInSlide(CUICDMSlideHandle inSlide,
                                                       TInstanceHandle instance) const = 0;
     // Get the GUID for a given instance.
-    virtual UICDM::SLong4 GetGuidForInstance(TInstanceHandle instance) const = 0;
-    virtual TInstanceHandle GetInstanceForGuid(const UICDM::SLong4 &inGuid) const = 0;
+    virtual qt3dsdm::SLong4 GetGuidForInstance(TInstanceHandle instance) const = 0;
+    virtual TInstanceHandle GetInstanceForGuid(const qt3dsdm::SLong4 &inGuid) const = 0;
     virtual TInstanceHandle
     GetInstanceForObjectRef(TInstanceHandle inRootInstance,
-                            const UICDM::SObjectRefType &inReference) const = 0;
+                            const qt3dsdm::SObjectRefType &inReference) const = 0;
     // Get the scene graph parent of this instance
     virtual TInstanceHandle GetParent(TInstanceHandle child) const = 0;
     // Get all the children if this instance in this slide.  If the slide is invalid,
@@ -205,9 +205,9 @@ public:
     virtual bool IsAnimationArtistEdited(TSlideHandle inSlide, TInstanceHandle instance,
                                          const wchar_t *propName, long subIndex) = 0;
 
-    virtual UICDM::TGuideHandleList GetGuides() const = 0;
-    virtual UICDM::SGuideInfo GetGuideInfo(UICDM::CUICDMGuideHandle inGuide) const = 0;
-    virtual bool IsGuideValid(UICDM::CUICDMGuideHandle inGuide) const = 0;
+    virtual qt3dsdm::TGuideHandleList GetGuides() const = 0;
+    virtual qt3dsdm::SGuideInfo GetGuideInfo(qt3dsdm::CUICDMGuideHandle inGuide) const = 0;
+    virtual bool IsGuideValid(qt3dsdm::CUICDMGuideHandle inGuide) const = 0;
     virtual bool AreGuidesEditable() const = 0;
     // This can be done outside a transaction, hence it is an operation on the reader
     // not on the editor.
@@ -216,17 +216,17 @@ public:
     // Given the active slide on the document (which we query) and an instance,
     // produce a temporary file (CUICFile::GetTemporaryFile) and serialize this object
     // to that temporary file.
-    virtual CFilePath CopySceneGraphObjects(UICDM::TInstanceHandleList inInstances) = 0;
+    virtual CFilePath CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances) = 0;
 
     CFilePath CopySceneGraphObject(CUICDMInstanceHandle inInstance)
     {
-        UICDM::TInstanceHandleList theInstances;
+        qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
         return CopySceneGraphObjects(theInstances);
     }
 
     // Copy the object just to a DOM representation, don't serialize to file.
-    virtual std::shared_ptr<UICDM::IDOMReader>
+    virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CopySceneGraphObjectToMemory(CUICDMInstanceHandle inInstance) = 0;
 
     virtual CFilePath CopyAction(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide) = 0;
@@ -237,7 +237,7 @@ public:
     virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
 
     // Must not be a master slide.  Used during duplicate slide.
-    virtual std::shared_ptr<UICDM::IDOMReader> CopySlide(CUICDMSlideHandle inSlide) = 0;
+    virtual std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(CUICDMSlideHandle inSlide) = 0;
 
     // Don't release this, it is owned and cached by the document.  Also, reset top to 0 with a
     // scope, please.
@@ -252,13 +252,13 @@ inline Option<TDataType> IDocumentReader::GetTypedInstancePropertyValue(TInstanc
     Option<SValue> theValue = GetInstancePropertyValue(instance, inProperty);
     if (theValue.isEmpty())
         return qt3ds::foundation::Empty();
-    return UICDM::get<TDataType>(*theValue);
+    return qt3dsdm::get<TDataType>(*theValue);
 }
 
 // Helper function needed by a few objects
-inline EStudioObjectType GetStudioObjectType(UICDM::ComposerObjectTypes::Enum inType)
+inline EStudioObjectType GetStudioObjectType(qt3dsdm::ComposerObjectTypes::Enum inType)
 {
-    using namespace UICDM;
+    using namespace qt3dsdm;
     switch (inType) {
     case ComposerObjectTypes::Scene:
         return OBJTYPE_SCENE;

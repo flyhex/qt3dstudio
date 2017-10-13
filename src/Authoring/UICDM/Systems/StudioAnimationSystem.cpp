@@ -35,7 +35,7 @@
 using namespace std;
 using namespace boost;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 bool AnimationFloatPairContainsAnimation(CUICDMAnimationHandle inAnimation,
                                          const TAnimationFloatPair &inPair)
@@ -518,7 +518,7 @@ void CStudioAnimationSystem::SetOrCreateKeyframe(CUICDMInstanceHandle inInstance
                                                  SGetOrSetKeyframeInfo *inKeyframeInfo,
                                                  size_t inNumInfos)
 {
-    UICDM::DataModelDataType::Value thePropertyType = m_PropertySystem->GetDataType(inProperty);
+    qt3dsdm::DataModelDataType::Value thePropertyType = m_PropertySystem->GetDataType(inProperty);
     CUICDMSlideHandle theApplicableSlide;
     std::tuple<bool, size_t> arity = GetDatatypeAnimatableAndArity(thePropertyType);
     if (std::get<0>(arity)) {

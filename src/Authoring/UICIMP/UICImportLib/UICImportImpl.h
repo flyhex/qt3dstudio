@@ -35,9 +35,9 @@
 
 namespace eastl {
 template <>
-struct hash<UICDM::ComposerPropertyNames::Enum>
+struct hash<qt3dsdm::ComposerPropertyNames::Enum>
 {
-    size_t operator()(UICDM::ComposerPropertyNames::Enum val) const
+    size_t operator()(qt3dsdm::ComposerPropertyNames::Enum val) const
     {
         return hash<qt3ds::QT3DSU32>()((qt3ds::QT3DSU32)val);
     }
@@ -79,7 +79,7 @@ public:
     {
         m_PropertyValues[name] = val;
     }
-    void SetPropertyValues(NVConstDataRef<PropertyValue> values, UICDM::IStringTable &inStringTable)
+    void SetPropertyValues(NVConstDataRef<PropertyValue> values, qt3dsdm::IStringTable &inStringTable)
     {
         m_PropertyValues.clear();
         QT3DSIMP_FOREACH(idx, values.size())

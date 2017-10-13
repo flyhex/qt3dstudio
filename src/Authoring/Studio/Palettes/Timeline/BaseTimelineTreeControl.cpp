@@ -308,7 +308,7 @@ void CBaseTimelineTreeControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inF
     if (m_TimerHandler) {
 
         // nullptr out our handle so we can create a new one.
-        m_TimerHandler = std::shared_ptr<UICDM::ISignalConnection>();
+        m_TimerHandler = std::shared_ptr<qt3dsdm::ISignalConnection>();
     }
 
     AcceptDropAfter(false);

@@ -40,9 +40,9 @@
 #include "UICFileToolsSeekableMeshBufIOStream.h"
 #include "foundation/StrConvertUTF.h"
 
-using UICDM::IStringTable;
+using qt3dsdm::IStringTable;
 
-namespace UICDM {
+namespace qt3dsdm {
 }
 
 using namespace UICIMP;
@@ -221,7 +221,7 @@ struct MeshEntry
     TCharPtr m_FilePath;
     TCharPtr m_ReferencePath; // file path plus revision
     MeshEntry(TCharPtr inSourceId, CFilePath inPath, QT3DSU32 inRevision,
-              UICDM::IStringTable &inStringTable)
+              qt3dsdm::IStringTable &inStringTable)
         : m_SourceId(inSourceId)
         , m_FilePath(L"")
         , m_ReferencePath(L"")
@@ -231,7 +231,7 @@ struct MeshEntry
         m_ReferencePath = inStringTable.RegisterStr(inPath);
     }
 
-    MeshEntry(TCharPtr inSourceId, TCharPtr inPath, UICDM::IStringTable &inStringTable)
+    MeshEntry(TCharPtr inSourceId, TCharPtr inPath, qt3dsdm::IStringTable &inStringTable)
         : m_SourceId(inStringTable.RegisterStr(inSourceId))
         , m_FilePath(inStringTable.RegisterStr(inPath))
         , m_ReferencePath(L"")
@@ -270,7 +270,7 @@ public:
     typedef ImportHashMap<TCharPtr, MeshEntry, STCharPtrHash, STCharPtrEqualTo> TPathToMeshMap;
 
     TStringTablePtr m_StringTablePtr;
-    UICDM::IStringTable &m_StringTable;
+    qt3dsdm::IStringTable &m_StringTable;
     ImportHashSet<TIMPHandle> m_ValidInstances;
     ImportHashSet<TIMPHandle> m_InValidInstances;
     TIdToInstanceMap m_IdToInstMap;
@@ -1880,7 +1880,7 @@ ImportPtrOrError Import::Create(TCharPtr _srcPath, TCharPtr _destDir)
     if (!destDir.CreateDir(true))
         return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, destDir);
 
-    TStringTablePtr strTable = UICDM::IStringTable::CreateStringTable();
+    TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
     return new ImportImpl(strTable, srcPath, destDir, L"maps", L"meshes");
 }
 
@@ -1892,7 +1892,7 @@ ImportPtrOrError Import::Load(TCharPtr pathToFile, QT3DSU32 inImportVersion)
     if (fullFilePath.IsFile() == false)
         return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath);
 
-    TStringTablePtr strTable = UICDM::IStringTable::CreateStringTable();
+    TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
     ImportImpl *impl = new ImportImpl(strTable, Q3DStudio::CString(), destDir);
     bool success = impl->Load(fullFilePath, inImportVersion);
     QT3DS_ASSERT(success);
@@ -1926,8 +1926,8 @@ QT3DSU32 Import::GetHighestImportRevision(TCharPtr pathToFile)
         return 0;
     }
 
-    std::shared_ptr<UICDM::IStringTable> theStringTable =
-        UICDM::IStringTable::CreateStringTable();
+    std::shared_ptr<qt3dsdm::IStringTable> theStringTable =
+        qt3dsdm::IStringTable::CreateStringTable();
     std::shared_ptr<IDOMFactory> theFactory = IDOMFactory::CreateDOMFactory(theStringTable);
     SDOMElement *theTopElement = CDOMSerializer::Read(*theFactory, stream);
 

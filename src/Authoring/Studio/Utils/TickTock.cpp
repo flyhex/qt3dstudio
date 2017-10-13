@@ -41,7 +41,7 @@
 
 using namespace Q3DStudio;
 using Q3DStudio::CString;
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace std;
 
 namespace {

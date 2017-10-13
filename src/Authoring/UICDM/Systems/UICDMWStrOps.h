@@ -29,7 +29,7 @@
 #pragma once
 #ifndef UICDMWSTROPSH
 #define UICDMWSTROPSH
-namespace UICDM {
+namespace qt3dsdm {
 // Template base class so that we can convert items to and from wide string
 template <typename TDataType>
 struct WStrOps

@@ -42,7 +42,7 @@
 #include "StringTokenizer.h"
 #include "UICFileTools.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 class CPreferencesSerializer
 {

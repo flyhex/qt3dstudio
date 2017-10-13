@@ -41,8 +41,8 @@ class EventsModel : public QAbstractListModel
 public:
     explicit EventsModel(QObject *parent = nullptr);
 
-    void setEventList(const UICDM::TEventHandleList &eventList);
-    void setHandlerList(const UICDM::THandlerHandleList &handlerList);
+    void setEventList(const qt3dsdm::TEventHandleList &eventList);
+    void setHandlerList(const qt3dsdm::THandlerHandleList &handlerList);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -63,11 +63,11 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    UICDM::CDataModelHandle handleForRow(int row) const;
+    qt3dsdm::CDataModelHandle handleForRow(int row) const;
 
 private:
     struct EventInfo {
-        UICDM::CDataModelHandle handle;
+        qt3dsdm::CDataModelHandle handle;
         QString name;
         QString description;
 

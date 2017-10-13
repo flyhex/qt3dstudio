@@ -49,7 +49,7 @@
 #include "UICLogicSystem.h"
 #include "UICParametersSystem.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 //==============================================================================
 //	Namespace
@@ -77,7 +77,7 @@ CUIPParserActionHelper::~CUIPParserActionHelper()
 {
 }
 
-void CUIPParserActionHelper::CacheAction(UICDM::IDOMReader &inReader,
+void CUIPParserActionHelper::CacheAction(qt3dsdm::IDOMReader &inReader,
                                          const char8_t *inActionOwnerId)
 {
     if (IsTrivial(inActionOwnerId))
@@ -143,7 +143,7 @@ void CUIPParserActionHelper::AddListenerEventPair(eastl::string inListener,
     m_ListenerEventsNameMap.insert(eastl::make_pair(inListener, inEventName));
 }
 
-void CUIPParserActionHelper::CacheHandlerArguments(UICDM::IDOMReader &inReader,
+void CUIPParserActionHelper::CacheHandlerArguments(qt3dsdm::IDOMReader &inReader,
                                                    SActionInfo &inAction)
 {
     IDOMReader::Scope __handlerArgScope(inReader);

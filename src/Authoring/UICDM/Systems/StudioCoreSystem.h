@@ -32,7 +32,7 @@
 #include "UICDMTransactions.h"
 #include "UICDMHandles.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDataCore;
 class ISlideCore;
 class ISlideGraphCore;

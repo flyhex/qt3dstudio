@@ -36,7 +36,7 @@
 #include "UICDMTransactions.h"
 #include <functional>
 
-namespace UICDM {
+namespace qt3dsdm {
 struct GuideDirections
 {
     enum Enum {

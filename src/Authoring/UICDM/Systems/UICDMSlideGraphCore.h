@@ -33,7 +33,7 @@
 #include "UICDMHandles.h"
 #include "HandleSystemBase.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 typedef std::pair<CUICDMSlideHandle, CUICDMInstanceHandle> TSlideInstancePair;
 typedef std::vector<TSlideInstancePair> TSlideInstancePairList;

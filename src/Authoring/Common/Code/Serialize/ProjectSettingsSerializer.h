@@ -45,7 +45,7 @@
 
 #include <QtWidgets/qcolordialog.h>
 
-namespace UICDM {
+namespace qt3dsdm {
 }
 
 class CProjectSettingsSerializer
@@ -53,9 +53,9 @@ class CProjectSettingsSerializer
     class CustomColorSerializer
     {
     public:
-        void Serialize(UICDM::IDOMWriter &ar)
+        void Serialize(qt3dsdm::IDOMWriter &ar)
         {
-            using namespace UICDM;
+            using namespace qt3dsdm;
             ar.Att(L"count", static_cast<qt3ds::QT3DSI32>(QColorDialog::customCount()));
             QString strColor;
             for (int i = 0; i < QColorDialog::customCount(); ++i) {
@@ -67,9 +67,9 @@ class CProjectSettingsSerializer
             QByteArray data = strColor.toLatin1();
             ar.Value(data.data());
         }
-        void Serialize(UICDM::IDOMReader &ar)
+        void Serialize(qt3dsdm::IDOMReader &ar)
         {
-            using namespace UICDM;
+            using namespace qt3dsdm;
             TCharStr countStr;
             ar.Att(L"count", countStr);
             int count = QString::fromWCharArray(countStr.wide_str()).toInt();
@@ -94,9 +94,9 @@ public:
     }
     virtual ~CProjectSettingsSerializer() {}
 
-    void Serialize(UICDM::IDOMWriter &ar)
+    void Serialize(qt3dsdm::IDOMWriter &ar)
     {
-        using namespace UICDM;
+        using namespace qt3dsdm;
         using namespace std;
         CStudioProjectSettings *theProjectSettings = GetProjectSettings();
         Q3DStudio::CString author =
@@ -124,9 +124,9 @@ public:
             ar.Serialize(L"CustomColors", ccs);
         }
     }
-    void Serialize(UICDM::IDOMReader &ar)
+    void Serialize(qt3dsdm::IDOMReader &ar)
     {
-        using namespace UICDM;
+        using namespace qt3dsdm;
         using namespace std;
         CStudioProjectSettings *theProjectSettings = GetProjectSettings();
         theProjectSettings->Reset();

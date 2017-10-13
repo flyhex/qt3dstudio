@@ -52,7 +52,7 @@ using qt3ds::QT3DSI64;
 using qt3ds::foundation::SeekPosition;
 using qt3ds::foundation::FileOpenFlags;
 using qt3ds::foundation::FileOpenFlagValues;
-using UICDM::WStrOps;
+using qt3dsdm::WStrOps;
 
 class CFilePathTokenizer
 {

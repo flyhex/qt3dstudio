@@ -32,7 +32,7 @@
 #include "HandleSystemBase.h"
 #include "UICDMTransactions.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 inline void InsertItemInMap(THandleObjectMap &inObjects,
                             const std::pair<int, THandleObjectPtr> &inItem)
 {

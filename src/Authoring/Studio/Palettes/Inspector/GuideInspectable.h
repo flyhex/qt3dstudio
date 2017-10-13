@@ -41,13 +41,13 @@ class CInspectableBase;
 class CGuideInspectable
 {
 public:
-    static CInspectableBase *CreateInspectable(CCore &inCore, UICDM::CUICDMGuideHandle inGuide);
+    static CInspectableBase *CreateInspectable(CCore &inCore, qt3dsdm::CUICDMGuideHandle inGuide);
 };
 
 class SGuideInspectableImpl : public CInspectableBase
 {
 public:
-    SGuideInspectableImpl(CCore &inCore, UICDM::CUICDMGuideHandle inGuide);
+    SGuideInspectableImpl(CCore &inCore, qt3dsdm::CUICDMGuideHandle inGuide);
 
     Q3DStudio::IDocumentReader &Reader() const;
     // Interface
@@ -60,24 +60,24 @@ public:
 
     // Implementation to get/set properties
 
-    void SetDirection(const UICDM::SValue &inValue);
+    void SetDirection(const qt3dsdm::SValue &inValue);
 
-    UICDM::SValue GetDirection();
+    qt3dsdm::SValue GetDirection();
 
-    void SetPosition(const UICDM::SValue &inValue);
+    void SetPosition(const qt3dsdm::SValue &inValue);
 
-    UICDM::SValue GetPosition();
+    qt3dsdm::SValue GetPosition();
 
-    void SetWidth(const UICDM::SValue &inValue);
+    void SetWidth(const qt3dsdm::SValue &inValue);
 
-    UICDM::SValue GetWidth();
+    qt3dsdm::SValue GetWidth();
 
     Q3DStudio::IDocumentEditor &Editor();
     void Commit();
     void Rollback();
     void FireRefresh();
 private:
-    UICDM::CUICDMGuideHandle m_Guide;
+    qt3dsdm::CUICDMGuideHandle m_Guide;
     Q3DStudio::CUpdateableDocumentEditor m_Editor;
     std::vector<std::shared_ptr<IInspectableAttributeItem>> m_Properties;
 };

@@ -56,7 +56,7 @@ class IUICDMSelectable;
 class CClientDataModelBridge;
 
 // UICDM
-namespace UICDM {
+namespace qt3dsdm {
 class CStudioSystem;
 class ISignalConnection;
 }
@@ -71,11 +71,11 @@ class CTimelineTranslationManager
 {
 protected: // Typedefs
     // UICDM support
-    typedef std::map<UICDM::CUICDMInstanceHandle, CUICDMTimelineItemBinding *>
+    typedef std::map<qt3dsdm::CUICDMInstanceHandle, CUICDMTimelineItemBinding *>
         TInstanceHandleBindingMap;
 
     // Store expanded state
-    typedef std::map<UICDM::CUICDMInstanceHandle, bool> TInstanceHandleExpandedMap; // UICDM support
+    typedef std::map<qt3dsdm::CUICDMInstanceHandle, bool> TInstanceHandleExpandedMap; // UICDM support
 
 protected: // Properties
     // UICDM support
@@ -83,7 +83,7 @@ protected: // Properties
 
     CKeyframesManager *m_KeyframesManager;
     IBreadCrumbProvider *m_BreadCrumbProvider;
-    std::vector<std::shared_ptr<UICDM::ISignalConnection>>
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the UICDM
 
     TInstanceHandleExpandedMap m_InstanceHandleExpandedMap;
@@ -93,7 +93,7 @@ public:
     ~CTimelineTranslationManager();
 
 public:
-    ITimelineItemBinding *GetOrCreate(UICDM::CUICDMInstanceHandle inInstance);
+    ITimelineItemBinding *GetOrCreate(qt3dsdm::CUICDMInstanceHandle inInstance);
     void CreateNewPropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding,
                               CBaseStateRow *inParentRow, CPropertyRow *inNextRow);
     void RemovePropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding);
@@ -105,56 +105,56 @@ public:
     IBreadCrumbProvider *GetBreadCrumbProvider() const;
     CBaseStateRow *GetSelectedRow() const;
     long GetCurrentViewTime() const;
-    CUICDMTimelineItemBinding *GetBinding(UICDM::CUICDMInstanceHandle inHandle) const;
+    CUICDMTimelineItemBinding *GetBinding(qt3dsdm::CUICDMInstanceHandle inHandle) const;
     CUICDMTimelineItemBinding *GetSelectedBinding() const;
 
     void ClearKeyframeSelection();
     void OnNewPresentation();
     void OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
 
-    UICDM::CStudioSystem *GetStudioSystem() const;
+    qt3dsdm::CStudioSystem *GetStudioSystem() const;
 
     // UICDM callback
-    void OnAnimationCreated(UICDM::CUICDMInstanceHandle inInstance,
-                            UICDM::CUICDMPropertyHandle inProperty);
-    void OnAnimationDeleted(UICDM::CUICDMInstanceHandle inInstance,
-                            UICDM::CUICDMPropertyHandle inProperty);
-    void OnPropertyLinked(UICDM::CUICDMInstanceHandle inInstance,
-                          UICDM::CUICDMPropertyHandle inProperty);
-    void OnPropertyUnlinked(UICDM::CUICDMInstanceHandle inInstance,
-                            UICDM::CUICDMPropertyHandle inProperty);
-    void RefreshKeyframe(UICDM::CUICDMAnimationHandle inAnimation,
-                         UICDM::CUICDMKeyframeHandle inKeyframe,
+    void OnAnimationCreated(qt3dsdm::CUICDMInstanceHandle inInstance,
+                            qt3dsdm::CUICDMPropertyHandle inProperty);
+    void OnAnimationDeleted(qt3dsdm::CUICDMInstanceHandle inInstance,
+                            qt3dsdm::CUICDMPropertyHandle inProperty);
+    void OnPropertyLinked(qt3dsdm::CUICDMInstanceHandle inInstance,
+                          qt3dsdm::CUICDMPropertyHandle inProperty);
+    void OnPropertyUnlinked(qt3dsdm::CUICDMInstanceHandle inInstance,
+                            qt3dsdm::CUICDMPropertyHandle inProperty);
+    void RefreshKeyframe(qt3dsdm::CUICDMAnimationHandle inAnimation,
+                         qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
-    void OnKeyframeInserted(UICDM::CUICDMAnimationHandle inAnimation,
-                            UICDM::CUICDMKeyframeHandle inKeyframe);
-    void OnKeyframeDeleted(UICDM::CUICDMAnimationHandle inAnimation,
-                           UICDM::CUICDMKeyframeHandle inKeyframe);
-    void OnKeyframeUpdated(UICDM::CUICDMKeyframeHandle inKeyframe);
-    void OnPropertyChanged(UICDM::CUICDMInstanceHandle inInstance,
-                           UICDM::CUICDMPropertyHandle inProperty);
-    void OnDynamicKeyframeChanged(UICDM::CUICDMAnimationHandle inAnimation, bool inDynamic);
+    void OnKeyframeInserted(qt3dsdm::CUICDMAnimationHandle inAnimation,
+                            qt3dsdm::CUICDMKeyframeHandle inKeyframe);
+    void OnKeyframeDeleted(qt3dsdm::CUICDMAnimationHandle inAnimation,
+                           qt3dsdm::CUICDMKeyframeHandle inKeyframe);
+    void OnKeyframeUpdated(qt3dsdm::CUICDMKeyframeHandle inKeyframe);
+    void OnPropertyChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
+                           qt3dsdm::CUICDMPropertyHandle inProperty);
+    void OnDynamicKeyframeChanged(qt3dsdm::CUICDMAnimationHandle inAnimation, bool inDynamic);
 
-    void OnAssetCreated(UICDM::CUICDMInstanceHandle inInstance);
-    void OnAssetDeleted(UICDM::CUICDMInstanceHandle inInstance);
+    void OnAssetCreated(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void OnAssetDeleted(qt3dsdm::CUICDMInstanceHandle inInstance);
     void OnChildAdded(int inParent, int inChild, long inIndex);
     void OnChildRemoved(int inParent, int inChild, long inIndex);
     void OnChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);
 
-    void OnActionEvent(UICDM::CUICDMActionHandle inAction, UICDM::CUICDMSlideHandle inSlide,
-                       UICDM::CUICDMInstanceHandle inOwner);
+    void OnActionEvent(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
+                       qt3dsdm::CUICDMInstanceHandle inOwner);
 
     // Helper function to iterate over all bindings
     void ClearBindingsKeyframeSelection();
     CDoc *GetDoc() const;
 
     // Store expanded state
-    bool IsExpanded(UICDM::CUICDMInstanceHandle inInstance) const;
-    void SetExpanded(UICDM::CUICDMInstanceHandle inInstance, bool inExpanded);
+    bool IsExpanded(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    void SetExpanded(qt3dsdm::CUICDMInstanceHandle inInstance, bool inExpanded);
 
 protected:
     void SetSelected(Q3DStudio::SSelectedValue inSelectable, bool inSelected);
-    ITimelineItemBinding *EnsureLoaded(UICDM::CUICDMInstanceHandle inHandle);
+    ITimelineItemBinding *EnsureLoaded(qt3dsdm::CUICDMInstanceHandle inHandle);
 };
 
 #endif // INCLUDED_TIMELINE_TRANSLATIONMANAGER_H

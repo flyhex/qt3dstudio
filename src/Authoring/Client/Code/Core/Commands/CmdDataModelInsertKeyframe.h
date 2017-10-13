@@ -45,18 +45,18 @@
 #include "UICDMAnimation.h"
 
 // This will animate the property if it is not already animated
-class CCmdDataModelInsertKeyframe : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelInsertKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {
 public:
     struct STimeKeyframeData
     {
-        UICDM::CUICDMPropertyHandle m_Property;
+        qt3dsdm::CUICDMPropertyHandle m_Property;
         float m_KeyframeTime;
-        UICDM::SGetOrSetKeyframeInfo m_Infos[3];
+        qt3dsdm::SGetOrSetKeyframeInfo m_Infos[3];
         size_t m_ValidInfoCount;
 
-        STimeKeyframeData(UICDM::CUICDMPropertyHandle inProperty, float inKeyframeTime,
-                          UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+        STimeKeyframeData(qt3dsdm::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+                          qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
             : m_Property(inProperty)
             , m_KeyframeTime(inKeyframeTime)
         {
@@ -72,15 +72,15 @@ protected:
 
 protected: // Members
     CDoc *m_Doc;
-    UICDM::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
     TKeyframeDataList m_KeyframeDataList;
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelInsertKeyframe(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
-                                UICDM::CUICDMPropertyHandle inProperty, float inKeyframeTime,
-                                UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
-        : UICDM::CmdDataModel(*inDoc)
+    CCmdDataModelInsertKeyframe(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+                                qt3dsdm::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+                                qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
     {
@@ -88,8 +88,8 @@ public: // Construction
     }
     ~CCmdDataModelInsertKeyframe() {}
 
-    void AddKeyframeData(UICDM::CUICDMPropertyHandle inProperty, float inTime,
-                         UICDM::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+    void AddKeyframeData(qt3dsdm::CUICDMPropertyHandle inProperty, float inTime,
+                         qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
     {
         m_KeyframeDataList.push_back(STimeKeyframeData(inProperty, inTime, inInfos, inInfoCount));
     }
@@ -100,8 +100,8 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
-            UICDM::IStudioAnimationSystem *theAnimationSystem =
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::IStudioAnimationSystem *theAnimationSystem =
                 m_Doc->GetStudioSystem()->GetAnimationSystem();
             // if there are existing keyframes exist at the same times, the values are overridden. (
             // That's how it always work in studio anyways )

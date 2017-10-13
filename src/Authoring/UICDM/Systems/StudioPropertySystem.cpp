@@ -34,7 +34,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CStudioPropertySystem::CStudioPropertySystem(std::shared_ptr<IMetaData> inMetaData,
                                              TDataCorePtr inDataCore, TSlideSystemPtr inSlideSystem,
@@ -87,7 +87,7 @@ CStudioPropertySystem::GetAdditionalMetaDataData(CUICDMInstanceHandle inInstance
 CUICDMInstanceHandle CStudioPropertySystem::GetPropertyOwner(CUICDMPropertyHandle inProperty) const
 {
 
-    UICDM::SUICDMPropertyDefinition thePropDef = m_DataCore->GetProperty(inProperty);
+    qt3dsdm::SUICDMPropertyDefinition thePropDef = m_DataCore->GetProperty(inProperty);
     return thePropDef.m_Instance;
 }
 

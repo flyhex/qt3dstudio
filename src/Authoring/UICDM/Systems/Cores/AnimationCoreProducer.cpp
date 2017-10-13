@@ -37,7 +37,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct SArtistEditedUndoRedoScope
 {
@@ -353,10 +353,10 @@ void CAnimationCoreProducer::OffsetAnimations(CUICDMSlideHandle inSlide,
                 CUICDMKeyframeHandle theKeyframeHandle(theTrack->m_Keyframes[keyframeIdx]);
                 TKeyframe theCurrentKeyframe = m_Data->GetKeyframeData(theKeyframeHandle);
 
-                float seconds = UICDM::GetKeyframeSeconds(theCurrentKeyframe);
+                float seconds = qt3dsdm::GetKeyframeSeconds(theCurrentKeyframe);
 
                 theCurrentKeyframe =
-                    UICDM::SetKeyframeSeconds(theCurrentKeyframe, seconds + theOffsetSeconds);
+                    qt3dsdm::SetKeyframeSeconds(theCurrentKeyframe, seconds + theOffsetSeconds);
 
                 SetKeyframeData(theKeyframeHandle, theCurrentKeyframe);
             }

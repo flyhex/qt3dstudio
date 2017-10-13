@@ -42,7 +42,7 @@
 
 class CDoc;
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDataCore;
 class ISlideGraphCore;
 class ISlideCore;
@@ -56,7 +56,7 @@ class IMetaData;
 
 struct SLong4Hasher
 {
-    std::size_t operator()(const UICDM::SLong4 &inObject) const
+    std::size_t operator()(const qt3dsdm::SLong4 &inObject) const
     {
         return std::hash<unsigned long>()(inObject.m_Longs[0])
             ^ std::hash<unsigned long>()(inObject.m_Longs[1])
@@ -65,63 +65,63 @@ struct SLong4Hasher
     }
 };
 
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Material>
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Material>
     SDataModelDefaultMaterial;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Image> SDataModelSceneImage;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Node> SDataModelNode;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Layer> SDataModelLayer;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Model> SDataModelModel;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Light> SDataModelLight;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Camera> SDataModelCamera;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Text> SDataModelText;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Group> SDataModelGroup;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Component> SDataModelComponent;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Behavior> SDataModelBehavior;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Scene> SDataModelScene;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Slide> SDataModelSlide;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Action> SDataModelAction;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Asset> SDataModelSceneAsset;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Effect> SDataModelEffect;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::RenderPlugin>
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Image> SDataModelSceneImage;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Node> SDataModelNode;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Layer> SDataModelLayer;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Model> SDataModelModel;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Light> SDataModelLight;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Camera> SDataModelCamera;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Text> SDataModelText;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Group> SDataModelGroup;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Component> SDataModelComponent;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Behavior> SDataModelBehavior;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Scene> SDataModelScene;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Slide> SDataModelSlide;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Action> SDataModelAction;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Asset> SDataModelSceneAsset;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Effect> SDataModelEffect;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::RenderPlugin>
     SDataModelRenderPlugin;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::MaterialBase>
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::MaterialBase>
     SDataModelMaterialBase;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::CustomMaterial>
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::CustomMaterial>
     SDataModelCustomMaterial;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Lightmaps> SDataModelLightmaps;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Alias> SDataModelAlias;
-typedef UICDM::SComposerObjectDefinition<UICDM::ComposerObjectTypes::Path> SDataModelPath;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Lightmaps> SDataModelLightmaps;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Alias> SDataModelAlias;
+typedef qt3dsdm::SComposerObjectDefinition<qt3dsdm::ComposerObjectTypes::Path> SDataModelPath;
 
 struct IValueFilter
 {
     virtual ~IValueFilter() {}
-    virtual bool KeepValue(UICDM::CUICDMInstanceHandle inInstance,
-                           UICDM::CUICDMPropertyHandle inProperty,
-                           const UICDM::SValue &inValue) = 0;
+    virtual bool KeepValue(qt3dsdm::CUICDMInstanceHandle inInstance,
+                           qt3dsdm::CUICDMPropertyHandle inProperty,
+                           const qt3dsdm::SValue &inValue) = 0;
 };
 
 struct SActionInvalidProperty
 {
-    UICDM::CUICDMInstanceHandle m_Instance;
-    UICDM::IPropertySystem &m_PropertySystem;
-    SActionInvalidProperty(UICDM::IPropertySystem &ps, UICDM::CUICDMInstanceHandle inInstance)
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::IPropertySystem &m_PropertySystem;
+    SActionInvalidProperty(qt3dsdm::IPropertySystem &ps, qt3dsdm::CUICDMInstanceHandle inInstance)
         : m_Instance(inInstance)
         , m_PropertySystem(ps)
     {
     }
-    bool operator()(UICDM::CUICDMPropertyHandle inProperty);
+    bool operator()(qt3dsdm::CUICDMPropertyHandle inProperty);
 };
 
 class CClientDataModelBridge
 {
     Q_DISABLE_COPY(CClientDataModelBridge)
 
-    UICDM::IDataCore *m_DataCore;
-    UICDM::ISlideCore *m_SlideCore;
-    UICDM::ISlideGraphCore *m_SlideGraphCore;
-    UICDM::IAnimationCore *m_AnimationCore;
-    std::shared_ptr<UICDM::IMetaData> m_NewMetaData;
-    std::shared_ptr<UICDM::SComposerObjectDefinitions> m_ObjectDefinitions;
+    qt3dsdm::IDataCore *m_DataCore;
+    qt3dsdm::ISlideCore *m_SlideCore;
+    qt3dsdm::ISlideGraphCore *m_SlideGraphCore;
+    qt3dsdm::IAnimationCore *m_AnimationCore;
+    std::shared_ptr<qt3dsdm::IMetaData> m_NewMetaData;
+    std::shared_ptr<qt3dsdm::SComposerObjectDefinitions> m_ObjectDefinitions;
     CDoc *m_Doc;
 
     SDataModelDefaultMaterial &m_DefaultMaterial;
@@ -150,69 +150,69 @@ class CClientDataModelBridge
     // cache to increase performance
     bool m_CacheEnabled;
 
-    typedef std::unordered_map<UICDM::SLong4, UICDM::CUICDMInstanceHandle, SLong4Hasher>
+    typedef std::unordered_map<qt3dsdm::SLong4, qt3dsdm::CUICDMInstanceHandle, SLong4Hasher>
         TGUIDInstanceHash;
-    typedef std::unordered_map<int, UICDM::SLong4> TInstanceToGUIDHash;
+    typedef std::unordered_map<int, qt3dsdm::SLong4> TInstanceToGUIDHash;
 
     TGUIDInstanceHash m_CachedGUIDToInstancesHash;
-    std::shared_ptr<UICDM::ISignalConnection> m_InstanceCachePropertyChangedConnection;
-    std::shared_ptr<UICDM::ISignalConnection> m_InstanceCacheInstanceDeletedConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_InstanceCachePropertyChangedConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_InstanceCacheInstanceDeletedConnection;
     TInstanceToGUIDHash m_CachedInstanceToGUIDHash;
 
-    UICDM::TInstanceHandleList m_CachedGuidInstances;
-    UICDM::TInstanceHandleList m_CacheImageInstances;
-    UICDM::TInstanceHandleList m_CacheMaterialInstances;
-    UICDM::TInstanceHandleList m_CacheModelInstances;
+    qt3dsdm::TInstanceHandleList m_CachedGuidInstances;
+    qt3dsdm::TInstanceHandleList m_CacheImageInstances;
+    qt3dsdm::TInstanceHandleList m_CacheMaterialInstances;
+    qt3dsdm::TInstanceHandleList m_CacheModelInstances;
 
 public:
-    CClientDataModelBridge(UICDM::IDataCore *inDataCore, UICDM::ISlideCore *inSlideCore,
-                           UICDM::ISlideGraphCore *inSlideGraphCore,
-                           UICDM::IAnimationCore *inAnimationCore,
-                           std::shared_ptr<UICDM::IMetaData> inNewMetaData,
-                           std::shared_ptr<UICDM::SComposerObjectDefinitions> inDefinitions,
+    CClientDataModelBridge(qt3dsdm::IDataCore *inDataCore, qt3dsdm::ISlideCore *inSlideCore,
+                           qt3dsdm::ISlideGraphCore *inSlideGraphCore,
+                           qt3dsdm::IAnimationCore *inAnimationCore,
+                           std::shared_ptr<qt3dsdm::IMetaData> inNewMetaData,
+                           std::shared_ptr<qt3dsdm::SComposerObjectDefinitions> inDefinitions,
                            CDoc *inDoc);
     virtual ~CClientDataModelBridge();
 
-    virtual UICDM::CUICDMInstanceHandle CreateAssetInstance(Q3DStudio::CId &inId,
+    virtual qt3dsdm::CUICDMInstanceHandle CreateAssetInstance(Q3DStudio::CId &inId,
                                                             EStudioObjectType inObjectType);
-    virtual UICDM::CUICDMSlideGraphHandle GetOrCreateGraph(UICDM::CUICDMInstanceHandle inInstance);
-    virtual UICDM::CUICDMSlideHandle GetOrCreateGraphRoot(UICDM::CUICDMInstanceHandle inInstance);
-    virtual UICDM::CUICDMInstanceHandle GetSlideInstance();
-    virtual UICDM::CUICDMPropertyHandle GetSlideComponentIdProperty();
-    virtual UICDM::CUICDMPropertyHandle GetNameProperty();
-    virtual UICDM::CUICDMPropertyHandle GetIdProperty();
-    virtual UICDM::CUICDMPropertyHandle GetTypeProperty();
-    virtual UICDM::CUICDMPropertyHandle GetSourcePathProperty();
-    virtual UICDM::CUICDMInstanceHandle GetActionInstance();
-    virtual UICDM::CUICDMPropertyHandle GetActionEyeball();
-    virtual UICDM::CUICDMPropertyHandle GetImportId();
+    virtual qt3dsdm::CUICDMSlideGraphHandle GetOrCreateGraph(qt3dsdm::CUICDMInstanceHandle inInstance);
+    virtual qt3dsdm::CUICDMSlideHandle GetOrCreateGraphRoot(qt3dsdm::CUICDMInstanceHandle inInstance);
+    virtual qt3dsdm::CUICDMInstanceHandle GetSlideInstance();
+    virtual qt3dsdm::CUICDMPropertyHandle GetSlideComponentIdProperty();
+    virtual qt3dsdm::CUICDMPropertyHandle GetNameProperty();
+    virtual qt3dsdm::CUICDMPropertyHandle GetIdProperty();
+    virtual qt3dsdm::CUICDMPropertyHandle GetTypeProperty();
+    virtual qt3dsdm::CUICDMPropertyHandle GetSourcePathProperty();
+    virtual qt3dsdm::CUICDMInstanceHandle GetActionInstance();
+    virtual qt3dsdm::CUICDMPropertyHandle GetActionEyeball();
+    virtual qt3dsdm::CUICDMPropertyHandle GetImportId();
 
-    virtual UICDM::SComposerObjectDefinitions &GetObjectDefinitions()
+    virtual qt3dsdm::SComposerObjectDefinitions &GetObjectDefinitions()
     {
         return *m_ObjectDefinitions;
     }
-    virtual const UICDM::SComposerObjectDefinitions &GetObjectDefinitions() const
+    virtual const qt3dsdm::SComposerObjectDefinitions &GetObjectDefinitions() const
     {
         return *m_ObjectDefinitions;
     }
 
-    virtual bool IsInternalProperty(const UICDM::TCharStr &inPropertyName) const;
+    virtual bool IsInternalProperty(const qt3dsdm::TCharStr &inPropertyName) const;
 
-    virtual UICDM::CUICDMInstanceHandle
-    GetOwningComponentInstance(UICDM::CUICDMInstanceHandle inInstanceHandle);
-    virtual UICDM::CUICDMInstanceHandle
-    GetOwningComponentInstance(UICDM::CUICDMInstanceHandle inInstanceHandle, int &outSlideIndex);
-    virtual UICDM::CUICDMInstanceHandle
-    GetOwningComponentInstance(UICDM::CUICDMSlideHandle inSlideHandle, int &outSlideIndex);
-    virtual UICDM::CUICDMInstanceHandle
-    GetOwningComponentInstance(UICDM::CUICDMSlideHandle inSlideHandle);
-    virtual UICDM::SLong4 GetComponentGuid(UICDM::CUICDMSlideHandle inSlideHandle);
+    virtual qt3dsdm::CUICDMInstanceHandle
+    GetOwningComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstanceHandle);
+    virtual qt3dsdm::CUICDMInstanceHandle
+    GetOwningComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstanceHandle, int &outSlideIndex);
+    virtual qt3dsdm::CUICDMInstanceHandle
+    GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle, int &outSlideIndex);
+    virtual qt3dsdm::CUICDMInstanceHandle
+    GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle);
+    virtual qt3dsdm::SLong4 GetComponentGuid(qt3dsdm::CUICDMSlideHandle inSlideHandle);
 
-    virtual bool IsActive(UICDM::CUICDMInstanceHandle inInstanceHandle, long inCurrentTime);
+    virtual bool IsActive(qt3dsdm::CUICDMInstanceHandle inInstanceHandle, long inCurrentTime);
 
-    virtual UICDM::CUICDMSlideHandle
-    GetComponentActiveSlide(UICDM::CUICDMInstanceHandle inComponent);
-    virtual UICDM::CUICDMSlideHandle GetComponentSlide(UICDM::CUICDMInstanceHandle inComponent,
+    virtual qt3dsdm::CUICDMSlideHandle
+    GetComponentActiveSlide(qt3dsdm::CUICDMInstanceHandle inComponent);
+    virtual qt3dsdm::CUICDMSlideHandle GetComponentSlide(qt3dsdm::CUICDMInstanceHandle inComponent,
                                                        long inIndex);
 
     const SDataModelDefaultMaterial &GetDefaultMaterial() const { return m_DefaultMaterial; }
@@ -235,199 +235,199 @@ public:
     const SDataModelLightmaps &GetLightmaps() const { return m_Lightmaps; }
 
     // Is this the instance that owns the document's currently active slide?
-    bool IsActiveComponent(UICDM::CUICDMInstanceHandle inInstance);
+    bool IsActiveComponent(qt3dsdm::CUICDMInstanceHandle inInstance);
 
 public: // Operations which likely don't belong on this class
-    virtual bool GetMaterialFromImageInstance(UICDM::CUICDMInstanceHandle inInstance,
-                                              UICDM::CUICDMInstanceHandle &outMaterialInstance,
-                                              UICDM::CUICDMPropertyHandle &outProperty);
-    virtual bool GetLayerFromImageProbeInstance(UICDM::CUICDMInstanceHandle inInstance,
-                                                UICDM::CUICDMInstanceHandle &outLayerInstance,
-                                                UICDM::CUICDMPropertyHandle &outProperty);
+    virtual bool GetMaterialFromImageInstance(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                              qt3dsdm::CUICDMInstanceHandle &outMaterialInstance,
+                                              qt3dsdm::CUICDMPropertyHandle &outProperty);
+    virtual bool GetLayerFromImageProbeInstance(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                                qt3dsdm::CUICDMInstanceHandle &outLayerInstance,
+                                                qt3dsdm::CUICDMPropertyHandle &outProperty);
 
 public: // Bridging to Actions. These needs to be here as UICDM has no hierarchy info and we need to
         // resolve the path to idenitfy the object referenced
     // We should really reconsider to have the hierachcy store outside of UICDM.
-    void GetReferencedActions(UICDM::CUICDMInstanceHandle inReferencedInstance,
-                              long inReferencedMode, UICDM::TActionHandleList &outActions);
-    void UpdateHandlerArgumentValue(UICDM::HandlerArgumentType::Value inArgType,
-                                    UICDM::CUICDMInstanceHandle inTargetObject,
-                                    UICDM::SValue inOrigValue, UICDM::SValue inNewValue);
-    std::wstring GetDefaultHandler(UICDM::CUICDMInstanceHandle inInstance,
+    void GetReferencedActions(qt3dsdm::CUICDMInstanceHandle inReferencedInstance,
+                              long inReferencedMode, qt3dsdm::TActionHandleList &outActions);
+    void UpdateHandlerArgumentValue(qt3dsdm::HandlerArgumentType::Value inArgType,
+                                    qt3dsdm::CUICDMInstanceHandle inTargetObject,
+                                    qt3dsdm::SValue inOrigValue, qt3dsdm::SValue inNewValue);
+    std::wstring GetDefaultHandler(qt3dsdm::CUICDMInstanceHandle inInstance,
                                    std::wstring inOldHandler = L"");
-    std::wstring GetDefaultEvent(UICDM::CUICDMInstanceHandle inInstance,
+    std::wstring GetDefaultEvent(qt3dsdm::CUICDMInstanceHandle inInstance,
                                  std::wstring inOldEvent = L"");
-    void ResetHandlerArguments(UICDM::CUICDMActionHandle inAction,
-                               UICDM::CUICDMHandlerHandle inHandler);
+    void ResetHandlerArguments(qt3dsdm::CUICDMActionHandle inAction,
+                               qt3dsdm::CUICDMHandlerHandle inHandler);
     // Resolve the path
-    void ResetHandlerArguments(UICDM::CUICDMActionHandle inAction, const std::wstring &inHandler);
-    UICDM::CUICDMEventHandle ResolveEvent(UICDM::CUICDMInstanceHandle inResolveRoot,
-                                          const UICDM::SObjectRefType &inResolution,
+    void ResetHandlerArguments(qt3dsdm::CUICDMActionHandle inAction, const std::wstring &inHandler);
+    qt3dsdm::CUICDMEventHandle ResolveEvent(qt3dsdm::CUICDMInstanceHandle inResolveRoot,
+                                          const qt3dsdm::SObjectRefType &inResolution,
                                           const std::wstring &inEventName);
-    UICDM::CUICDMHandlerHandle ResolveHandler(UICDM::CUICDMInstanceHandle inResolveRoot,
-                                              const UICDM::SObjectRefType &inResolution,
+    qt3dsdm::CUICDMHandlerHandle ResolveHandler(qt3dsdm::CUICDMInstanceHandle inResolveRoot,
+                                              const qt3dsdm::SObjectRefType &inResolution,
                                               const std::wstring &inHandlerName);
-    UICDM::CUICDMEventHandle ResolveEvent(const UICDM::SActionInfo &inInfo);
-    UICDM::CUICDMHandlerHandle ResolveHandler(const UICDM::SActionInfo &inInfo);
-    void SetHandlerArgumentValue(UICDM::CUICDMHandlerArgHandle inHandlerArgument,
-                                 const UICDM::SValue &inValue);
-    void GetActionDependentProperty(UICDM::CUICDMActionHandle inAction,
-                                    UICDM::CUICDMInstanceHandle &outInstance,
-                                    UICDM::CUICDMPropertyHandle &outProperty);
-    void GetSlideNamesOfAction(UICDM::CUICDMActionHandle inAction,
+    qt3dsdm::CUICDMEventHandle ResolveEvent(const qt3dsdm::SActionInfo &inInfo);
+    qt3dsdm::CUICDMHandlerHandle ResolveHandler(const qt3dsdm::SActionInfo &inInfo);
+    void SetHandlerArgumentValue(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument,
+                                 const qt3dsdm::SValue &inValue);
+    void GetActionDependentProperty(qt3dsdm::CUICDMActionHandle inAction,
+                                    qt3dsdm::CUICDMInstanceHandle &outInstance,
+                                    qt3dsdm::CUICDMPropertyHandle &outProperty);
+    void GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle inAction,
                                std::list<Q3DStudio::CString> &outSlideNames);
 
 protected:
-    void SetArgTypeDependentDefaultValue(UICDM::CUICDMHandlerArgHandle inHandlerArgument,
-                                         UICDM::DataModelDataType::Value inDataType,
-                                         UICDM::CUICDMInstanceHandle inInstance,
-                                         UICDM::CUICDMPropertyHandle inProperty);
+    void SetArgTypeDependentDefaultValue(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument,
+                                         qt3dsdm::DataModelDataType::Value inDataType,
+                                         qt3dsdm::CUICDMInstanceHandle inInstance,
+                                         qt3dsdm::CUICDMPropertyHandle inProperty);
 
 public: // TODO: We should really consider having CStudioCoreSystem or CStudioFullSystem manages the
         // MetaData, so that we can query directly from within
-    void GetEvents(UICDM::CUICDMInstanceHandle inInstance, UICDM::TEventHandleList &outEvents);
-    UICDM::SEventInfo GetEventInfo(UICDM::CUICDMEventHandle inEvent);
+    void GetEvents(qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::TEventHandleList &outEvents);
+    qt3dsdm::SEventInfo GetEventInfo(qt3dsdm::CUICDMEventHandle inEvent);
 
-    void GetHandlers(UICDM::CUICDMInstanceHandle inInstance, UICDM::THandlerHandleList &outHandles);
-    UICDM::SHandlerInfo GetHandlerInfo(UICDM::CUICDMHandlerHandle inHandler);
+    void GetHandlers(qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::THandlerHandleList &outHandles);
+    qt3dsdm::SHandlerInfo GetHandlerInfo(qt3dsdm::CUICDMHandlerHandle inHandler);
 
-    UICDM::CUICDMPropertyHandle
-    GetAggregateInstancePropertyByName(UICDM::CUICDMInstanceHandle inInstance,
-                                       const UICDM::TCharStr &inStr);
+    qt3dsdm::CUICDMPropertyHandle
+    GetAggregateInstancePropertyByName(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                       const qt3dsdm::TCharStr &inStr);
 
 private:
-    UICDM::CUICDMInstanceHandle
-    GetInstanceByGUIDDerivedFrom(UICDM::SLong4 inLong4, UICDM::CUICDMInstanceHandle inParentHandle,
-                                 UICDM::CUICDMPropertyHandle inProperty);
-    UICDM::CUICDMInstanceHandle
-    GetInstanceByGUIDDerivedFrom(UICDM::SLong4 inLong4, const UICDM::TInstanceHandleList &instances,
-                                 UICDM::CUICDMPropertyHandle inProperty);
-    UICDM::CUICDMInstanceHandle MaybeCacheGetInstanceByGUIDDerivedFrom(
-        UICDM::SLong4 inLong4, UICDM::TInstanceHandleList &ioCacheInstances,
-        UICDM::CUICDMInstanceHandle inParentHandle, UICDM::CUICDMPropertyHandle inProperty);
-    static bool DerivedGuidMatches(UICDM::IDataCore &inDataCore,
-                                   UICDM::CUICDMInstanceHandle inInstance,
-                                   UICDM::CUICDMPropertyHandle inProperty, UICDM::SLong4 inGuid);
+    qt3dsdm::CUICDMInstanceHandle
+    GetInstanceByGUIDDerivedFrom(qt3dsdm::SLong4 inLong4, qt3dsdm::CUICDMInstanceHandle inParentHandle,
+                                 qt3dsdm::CUICDMPropertyHandle inProperty);
+    qt3dsdm::CUICDMInstanceHandle
+    GetInstanceByGUIDDerivedFrom(qt3dsdm::SLong4 inLong4, const qt3dsdm::TInstanceHandleList &instances,
+                                 qt3dsdm::CUICDMPropertyHandle inProperty);
+    qt3dsdm::CUICDMInstanceHandle MaybeCacheGetInstanceByGUIDDerivedFrom(
+        qt3dsdm::SLong4 inLong4, qt3dsdm::TInstanceHandleList &ioCacheInstances,
+        qt3dsdm::CUICDMInstanceHandle inParentHandle, qt3dsdm::CUICDMPropertyHandle inProperty);
+    static bool DerivedGuidMatches(qt3dsdm::IDataCore &inDataCore,
+                                   qt3dsdm::CUICDMInstanceHandle inInstance,
+                                   qt3dsdm::CUICDMPropertyHandle inProperty, qt3dsdm::SLong4 inGuid);
     void ClearCache();
-    UICDM::CUICDMInstanceHandle GetSceneOrComponentInstance(UICDM::CUICDMInstanceHandle inInstance);
-    UICDM::CUICDMSlideHandle CreateNonMasterSlide(UICDM::CUICDMSlideHandle inMasterSlide,
+    qt3dsdm::CUICDMInstanceHandle GetSceneOrComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
+    qt3dsdm::CUICDMSlideHandle CreateNonMasterSlide(qt3dsdm::CUICDMSlideHandle inMasterSlide,
                                                   Q3DStudio::CId inGuid,
                                                   const Q3DStudio::CString &inName);
 
 public: // helpers
     void BeginRender(); // enable cache to increase performance
     void EndRender(); // disable cache
-    UICDM::CUICDMInstanceHandle GetInstanceByGUID(const Q3DStudio::CId &inId);
-    UICDM::CUICDMInstanceHandle GetInstanceByGUID(UICDM::SLong4 inLong4);
+    qt3dsdm::CUICDMInstanceHandle GetInstanceByGUID(const Q3DStudio::CId &inId);
+    qt3dsdm::CUICDMInstanceHandle GetInstanceByGUID(qt3dsdm::SLong4 inLong4);
     // GUIDS are auto-generated, but is sometimes necessary to hard-set a specific guid
-    UICDM::SLong4 GetInstanceGUID(UICDM::CUICDMInstanceHandle);
-    void SetInstanceGUID(UICDM::CUICDMInstanceHandle, UICDM::SLong4 inGuid);
-    void ClearInstanceGUIDCache(UICDM::CUICDMInstanceHandle inInstance,
-                                UICDM::CUICDMPropertyHandle inProperty);
-    UICDM::CUICDMInstanceHandle GetImageInstanceByGUID(const Q3DStudio::CId &inId);
-    UICDM::CUICDMInstanceHandle GetImageInstanceByGUID(UICDM::SLong4 inLong4);
-    UICDM::CUICDMInstanceHandle GetMaterialInstanceByGUID(const Q3DStudio::CId &inId);
-    UICDM::CUICDMInstanceHandle GetMaterialInstanceByGUID(UICDM::SLong4 inLong4);
-    UICDM::CUICDMInstanceHandle GetModelInstanceByGUID(const Q3DStudio::CId &inId);
-    UICDM::CUICDMInstanceHandle GetModelInstanceByGUID(UICDM::SLong4 inLong4);
-    UICDM::CUICDMInstanceHandle GetComponentInstanceByGUID(const Q3DStudio::CId &inId);
-    UICDM::CUICDMInstanceHandle GetComponentInstanceByGUID(UICDM::SLong4 inLong4);
-    UICDM::CUICDMInstanceHandle GetInstance(UICDM::CUICDMInstanceHandle inRoot,
-                                            const UICDM::SValue &inValue);
-    UICDM::CUICDMInstanceHandle GetInstance(UICDM::CUICDMInstanceHandle inRoot,
-                                            const UICDM::SObjectRefType &inValue);
-    UICDM::TInstanceHandleList GetItemBaseInstances() const;
+    qt3dsdm::SLong4 GetInstanceGUID(qt3dsdm::CUICDMInstanceHandle);
+    void SetInstanceGUID(qt3dsdm::CUICDMInstanceHandle, qt3dsdm::SLong4 inGuid);
+    void ClearInstanceGUIDCache(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                qt3dsdm::CUICDMPropertyHandle inProperty);
+    qt3dsdm::CUICDMInstanceHandle GetImageInstanceByGUID(const Q3DStudio::CId &inId);
+    qt3dsdm::CUICDMInstanceHandle GetImageInstanceByGUID(qt3dsdm::SLong4 inLong4);
+    qt3dsdm::CUICDMInstanceHandle GetMaterialInstanceByGUID(const Q3DStudio::CId &inId);
+    qt3dsdm::CUICDMInstanceHandle GetMaterialInstanceByGUID(qt3dsdm::SLong4 inLong4);
+    qt3dsdm::CUICDMInstanceHandle GetModelInstanceByGUID(const Q3DStudio::CId &inId);
+    qt3dsdm::CUICDMInstanceHandle GetModelInstanceByGUID(qt3dsdm::SLong4 inLong4);
+    qt3dsdm::CUICDMInstanceHandle GetComponentInstanceByGUID(const Q3DStudio::CId &inId);
+    qt3dsdm::CUICDMInstanceHandle GetComponentInstanceByGUID(qt3dsdm::SLong4 inLong4);
+    qt3dsdm::CUICDMInstanceHandle GetInstance(qt3dsdm::CUICDMInstanceHandle inRoot,
+                                            const qt3dsdm::SValue &inValue);
+    qt3dsdm::CUICDMInstanceHandle GetInstance(qt3dsdm::CUICDMInstanceHandle inRoot,
+                                            const qt3dsdm::SObjectRefType &inValue);
+    qt3dsdm::TInstanceHandleList GetItemBaseInstances() const;
 
-    std::pair<UICDM::CUICDMInstanceHandle, UICDM::SLong4>
-    CreateImageInstance(UICDM::CUICDMInstanceHandle inSourceInstance,
-                        UICDM::CUICDMPropertyHandle inSlot, UICDM::CUICDMSlideHandle inUICDMSlide);
+    std::pair<qt3dsdm::CUICDMInstanceHandle, qt3dsdm::SLong4>
+    CreateImageInstance(qt3dsdm::CUICDMInstanceHandle inSourceInstance,
+                        qt3dsdm::CUICDMPropertyHandle inSlot, qt3dsdm::CUICDMSlideHandle inUICDMSlide);
 
-    void SetName(UICDM::CUICDMInstanceHandle inInstanceHandle, const Q3DStudio::CString &inName);
-    Q3DStudio::CString GetName(UICDM::CUICDMInstanceHandle inInstanceHandle);
+    void SetName(qt3dsdm::CUICDMInstanceHandle inInstanceHandle, const Q3DStudio::CString &inName);
+    Q3DStudio::CString GetName(qt3dsdm::CUICDMInstanceHandle inInstanceHandle);
 
     // Convenience functions to get GUID property value from instance handle
 private:
-    Q3DStudio::CId GetId(UICDM::CUICDMInstanceHandle inInstance,
-                         UICDM::CUICDMPropertyHandle inProperty) const;
+    Q3DStudio::CId GetId(qt3dsdm::CUICDMInstanceHandle inInstance,
+                         qt3dsdm::CUICDMPropertyHandle inProperty) const;
 
     // Helper for old methods in CAsset
 public:
-    bool IsInActiveComponent(UICDM::CUICDMInstanceHandle inInstance);
-    bool IsInComponent(UICDM::CUICDMInstanceHandle inInstance,
-                       UICDM::CUICDMInstanceHandle inComponentInstance);
-    UICDM::CUICDMInstanceHandle GetParentComponent(UICDM::CUICDMInstanceHandle inInstance,
+    bool IsInActiveComponent(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool IsInComponent(qt3dsdm::CUICDMInstanceHandle inInstance,
+                       qt3dsdm::CUICDMInstanceHandle inComponentInstance);
+    qt3dsdm::CUICDMInstanceHandle GetParentComponent(qt3dsdm::CUICDMInstanceHandle inInstance,
                                                    bool inIsFirstCall = true);
-    Q3DStudio::CString GetUniqueChildName(UICDM::CUICDMInstanceHandle inParent,
-                                          UICDM::CUICDMInstanceHandle inInstance,
+    Q3DStudio::CString GetUniqueChildName(qt3dsdm::CUICDMInstanceHandle inParent,
+                                          qt3dsdm::CUICDMInstanceHandle inInstance,
                                           Q3DStudio::CString inDesiredName);
-    bool CheckNameUnique(UICDM::CUICDMInstanceHandle inInstance, Q3DStudio::CString inDesiredName);
-    Q3DStudio::CString GetSourcePath(UICDM::CUICDMInstanceHandle inInstance) const;
+    bool CheckNameUnique(qt3dsdm::CUICDMInstanceHandle inInstance, Q3DStudio::CString inDesiredName);
+    Q3DStudio::CString GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance) const;
     std::set<Q3DStudio::CString> GetSourcePathList() const;
     std::set<Q3DStudio::CString> GetFontFileList() const;
     std::set<Q3DStudio::CString> GetDynamicObjectTextureList() const;
-    bool IsLockedAtAll(UICDM::CUICDMInstanceHandle inInstance);
-    bool IsDuplicateable(UICDM::CUICDMInstanceHandle inInstance);
-    bool IsMultiSelectable(UICDM::CUICDMInstanceHandle inInstance);
-    bool CanDelete(UICDM::CUICDMInstanceHandle inInstance);
-    bool IsMaster(UICDM::CUICDMInstanceHandle inInstance);
-    UICDM::CUICDMInstanceHandle GetResidingLayer(UICDM::CUICDMInstanceHandle inInstance);
-    void GetValueListFromAllSlides(UICDM::CUICDMInstanceHandle inInstance,
-                                   UICDM::CUICDMPropertyHandle inProperty,
-                                   std::vector<UICDM::SValue> &outValueList,
+    bool IsLockedAtAll(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool IsDuplicateable(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool IsMultiSelectable(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool CanDelete(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool IsMaster(qt3dsdm::CUICDMInstanceHandle inInstance);
+    qt3dsdm::CUICDMInstanceHandle GetResidingLayer(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void GetValueListFromAllSlides(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                   qt3dsdm::CUICDMPropertyHandle inProperty,
+                                   std::vector<qt3dsdm::SValue> &outValueList,
                                    IValueFilter *inFilter = NULL) const;
 
 protected:
-    UICDM::CUICDMInstanceHandle GetChildByName(UICDM::CUICDMInstanceHandle inParent,
+    qt3dsdm::CUICDMInstanceHandle GetChildByName(qt3dsdm::CUICDMInstanceHandle inParent,
                                                Q3DStudio::CString inChildName);
-    std::vector<UICDM::SValue>
-    GetValueList(UICDM::CUICDMInstanceHandle inParentInstance,
-                                         UICDM::CUICDMPropertyHandle inProperty,
+    std::vector<qt3dsdm::SValue>
+    GetValueList(qt3dsdm::CUICDMInstanceHandle inParentInstance,
+                                         qt3dsdm::CUICDMPropertyHandle inProperty,
                                          IValueFilter *inFilter = NULL) const;
 
 public:
-    Q3DStudio::CId GetGUID(UICDM::CUICDMInstanceHandle inInstance) const;
+    Q3DStudio::CId GetGUID(qt3dsdm::CUICDMInstanceHandle inInstance) const;
 
-    UICDM::CUICDMInstanceHandle GetParentInstance(UICDM::CUICDMInstanceHandle inInstance);
+    qt3dsdm::CUICDMInstanceHandle GetParentInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
 
     // TODO: EStudioObjectType and EASSETTYPE can't co-exist, one must go. Think EStudioObjectType
     // should win since things are better classified
-    EStudioObjectType GetObjectType(UICDM::CUICDMInstanceHandle inInstance);
-    bool IsBehaviorInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsCameraInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsGroupInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsActionInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsComponentInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsLayerInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsLightInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsModelInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsMaterialBaseInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsMaterialInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsReferencedMaterialInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsImageInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsSceneInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsTextInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsEffectInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsRenderPluginInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsCustomMaterialInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsLightmapsInstance(UICDM::CUICDMInstanceHandle inInstance) const;
-    bool IsNodeType(UICDM::CUICDMInstanceHandle inInstance) const;
+    EStudioObjectType GetObjectType(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool IsBehaviorInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsCameraInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsGroupInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsActionInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsLayerInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsLightInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsModelInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsMaterialBaseInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsMaterialInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsReferencedMaterialInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsImageInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsSceneInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsTextInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsRenderPluginInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsCustomMaterialInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsLightmapsInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
+    bool IsNodeType(qt3dsdm::CUICDMInstanceHandle inInstance) const;
     // Returns true if this instance would be in the scene graph
-    bool IsSceneGraphInstance(UICDM::CUICDMInstanceHandle inInstance) const;
+    bool IsSceneGraphInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const;
 };
 
-inline UICDM::SLong4 GuidtoSLong4(const Q3DStudio::CId &inId)
+inline qt3dsdm::SLong4 GuidtoSLong4(const Q3DStudio::CId &inId)
 {
     Q3DStudio::TGUIDPacked thePacked(inId);
-    return UICDM::SLong4(thePacked.Data1, thePacked.Data2, thePacked.Data3, thePacked.Data4);
+    return qt3dsdm::SLong4(thePacked.Data1, thePacked.Data2, thePacked.Data3, thePacked.Data4);
 }
 
-inline Q3DStudio::CId Long4ToGuid(const UICDM::SLong4 &inLong4)
+inline Q3DStudio::CId Long4ToGuid(const qt3dsdm::SLong4 &inLong4)
 {
     return Q3DStudio::CId(inLong4.m_Longs[0], inLong4.m_Longs[1], inLong4.m_Longs[2],
                           inLong4.m_Longs[3]);
 }
 
-inline bool GuidValid(const UICDM::SLong4 &inLong4)
+inline bool GuidValid(const qt3dsdm::SLong4 &inLong4)
 {
     return (inLong4.m_Longs[0] && inLong4.m_Longs[1] && inLong4.m_Longs[2] && inLong4.m_Longs[3]);
 }

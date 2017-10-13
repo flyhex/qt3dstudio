@@ -58,15 +58,15 @@ class IObjectReferenceHelper;
 class QAbstractItemModel;
 
 struct HandlerArgument {
-    Q_PROPERTY(UICDM::HandlerArgumentType::Value type MEMBER m_type FINAL)
+    Q_PROPERTY(qt3dsdm::HandlerArgumentType::Value type MEMBER m_type FINAL)
     Q_PROPERTY(QString name MEMBER m_name FINAL)
     Q_PROPERTY(int handle MEMBER m_handle FINAL)
     Q_PROPERTY(QVariant value MEMBER m_value FINAL)
-    Q_PROPERTY(UICDM::CompleteMetaDataType::Enum completeType MEMBER m_completeType FINAL)
+    Q_PROPERTY(qt3dsdm::CompleteMetaDataType::Enum completeType MEMBER m_completeType FINAL)
 
-    UICDM::CUICDMHandlerArgHandle m_handle;
-    UICDM::HandlerArgumentType::Value m_type;
-    UICDM::CompleteMetaDataType::Enum m_completeType;
+    qt3dsdm::CUICDMHandlerArgHandle m_handle;
+    qt3dsdm::HandlerArgumentType::Value m_type;
+    qt3dsdm::CompleteMetaDataType::Enum m_completeType;
     QString m_name;
     QVariant m_value;
 
@@ -100,7 +100,7 @@ public:
 
     QSize sizeHint() const override;
 
-    void setItem(const UICDM::CUICDMInstanceHandle &handle);
+    void setItem(const qt3dsdm::CUICDMInstanceHandle &handle);
     QString itemIcon() const;
     QString itemText() const;
     QColor itemColor() const;
@@ -135,14 +135,14 @@ public:
     void OnSelectionSet(Q3DStudio::SSelectedValue inSelectable);
 
     // Action callback
-    void OnActionAdded(UICDM::CUICDMActionHandle inAction, UICDM::CUICDMSlideHandle inSlide,
-                       UICDM::CUICDMInstanceHandle inOwner);
-    void OnActionDeleted(UICDM::CUICDMActionHandle inAction, UICDM::CUICDMSlideHandle inSlide,
-                         UICDM::CUICDMInstanceHandle inOwner);
-    void OnActionModified(UICDM::CUICDMActionHandle inAction);
-    void OnHandlerArgumentModified(UICDM::CUICDMHandlerArgHandle inHandlerArgument);
-    void OnInstancePropertyValueChanged(UICDM::CUICDMInstanceHandle inInstance,
-                                        UICDM::CUICDMPropertyHandle inProperty);
+    void OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
+                       qt3dsdm::CUICDMInstanceHandle inOwner);
+    void OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
+                         qt3dsdm::CUICDMInstanceHandle inOwner);
+    void OnActionModified(qt3dsdm::CUICDMActionHandle inAction);
+    void OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument);
+    void OnInstancePropertyValueChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                        qt3dsdm::CUICDMPropertyHandle inProperty);
 
 Q_SIGNALS:
     void itemChanged();
@@ -157,10 +157,10 @@ private Q_SLOTS:
     void pasteAction();
 
 private:
-    void setTriggerObject(const UICDM::SObjectRefType &object);
-    void setTargetObject(const UICDM::SObjectRefType &object);
-    void setEvent(const UICDM::CUICDMEventHandle &event);
-    void setHandler(const UICDM::CUICDMHandlerHandle &handler);
+    void setTriggerObject(const qt3dsdm::SObjectRefType &object);
+    void setTargetObject(const qt3dsdm::SObjectRefType &object);
+    void setEvent(const qt3dsdm::CUICDMEventHandle &event);
+    void setHandler(const qt3dsdm::CUICDMHandlerHandle &handler);
     QVariant handlerArgumentValue(int handle) const;
     void updateHandlerArguments();
     void emitActionChanged();
@@ -175,11 +175,11 @@ private:
     void initialize();
     QColor m_baseColor = QColor::fromRgb(75, 75, 75);
     QColor m_selectColor = Qt::transparent;
-    UICDM::CUICDMInstanceHandle m_itemHandle;
+    qt3dsdm::CUICDMInstanceHandle m_itemHandle;
     IObjectReferenceHelper *m_objRefHelper = nullptr;
     ActionModel *m_actionsModel = nullptr;
     PropertyModel *m_propertyModel = nullptr;
-    std::vector<std::shared_ptr<UICDM::ISignalConnection>>
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_connections; /// connections to the UICDM
     QPointer<ObjectListModel> m_objectsModel;
     QPointer<ObjectBrowserView> m_triggerObjectBrowser;
@@ -192,8 +192,8 @@ private:
     QPointer<EventsBrowserView> m_fireEventsBrowser;
     int m_currentActionIndex = -1;
     int m_currentPropertyIndex = -1;
-    UICDM::CUICDMHandlerArgHandle m_currentPropertyNameHandle;
-    UICDM::CUICDMHandlerArgHandle m_currentPropertyValueHandle;
+    qt3dsdm::CUICDMHandlerArgHandle m_currentPropertyNameHandle;
+    qt3dsdm::CUICDMHandlerArgHandle m_currentPropertyValueHandle;
     QVariantList m_handlerArguments;
     QTimer m_actionChangedCompressionTimer;
     QString m_firedEvent;

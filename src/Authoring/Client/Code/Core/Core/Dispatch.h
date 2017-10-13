@@ -100,13 +100,13 @@ public:
     // is dragged (or when multiple keyframes are dragged.
     // Most views should ignore this or ensure they filter the message by at least their instance.
     // Inproperty may be 0 in which case it should be assumed all properties may have changed
-    void FireImmediateRefreshInstance(UICDM::CUICDMInstanceHandle inInstance);
-    void FireImmediateRefreshInstance(UICDM::CUICDMInstanceHandle *inInstance,
+    void FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle *inInstance,
                                       long inInstanceCount);
 
     void AddReloadListener(IReloadListener *inListener);
     void RemoveReloadListener(IReloadListener *inListener);
-    void FireReloadEffectInstance(UICDM::CUICDMInstanceHandle inInstance);
+    void FireReloadEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
 
     void AddDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
     void RemoveDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
@@ -127,7 +127,7 @@ public:
 
     // Selection Change new skool.
 
-    UICDM::TSignalConnectionPtr
+    qt3dsdm::TSignalConnectionPtr
     ConnectSelectionChange(std::function<void(Q3DStudio::SSelectedValue)> inListener);
     void FireSelectionChange(Q3DStudio::SSelectedValue inValue);
 
@@ -138,7 +138,7 @@ public:
     void FireOnNewPresentation();
     void FireOnClosingPresentation();
     void FireOnSavingPresentation(const CUICFile *inNewPresentationFile = NULL);
-    void FireOnExportingAsset(UICDM::CUICDMInstanceHandle inInstance);
+    void FireOnExportingAsset(qt3dsdm::CUICDMInstanceHandle inInstance);
     void FireOnPresentationModifiedExternally();
 
     void AddClientPlayChangeListener(CClientPlayChangeListener *inListener);
@@ -250,9 +250,9 @@ struct CDispatchDataModelNotificationScope
 struct CDispatchDataModelImmediateScope
 {
     CDispatch &m_Dispatch;
-    UICDM::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
 
-    CDispatchDataModelImmediateScope(CDispatch &dispatch, UICDM::CUICDMInstanceHandle instance)
+    CDispatchDataModelImmediateScope(CDispatch &dispatch, qt3dsdm::CUICDMInstanceHandle instance)
         : m_Dispatch(dispatch)
         , m_Instance(instance)
     {

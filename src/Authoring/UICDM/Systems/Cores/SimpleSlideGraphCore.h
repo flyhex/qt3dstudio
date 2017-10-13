@@ -34,7 +34,7 @@
 #include "HandleSystemBase.h"
 #include "UICDMErrors.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 using namespace std;
 struct SSlideGraph : public CHandleObject
 {

@@ -33,7 +33,7 @@
 
 // Define the subset of types that the import library supports.
 namespace UICIMP {
-using namespace UICDM;
+using namespace qt3dsdm;
 
 template <typename TDataType>
 struct SImportPropertyDefinition

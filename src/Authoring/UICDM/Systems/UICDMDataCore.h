@@ -35,7 +35,7 @@
 #include "UICDMMetaData.h"
 #include "UICDMValue.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 typedef std::pair<CUICDMPropertyHandle, SValue> TPropertyHandleValuePair;
 typedef std::vector<TPropertyHandleValuePair> TPropertyHandleValuePairList;
@@ -288,7 +288,7 @@ inline TDataType GetSpecificInstancePropertyValue(TCoreType inDataCore,
                                                   CUICDMInstanceHandle inInstance,
                                                   CUICDMPropertyHandle inProperty)
 {
-    return UICDM::get<TDataType>(GetInstancePropertyValue(inDataCore, inInstance, inProperty));
+    return qt3dsdm::get<TDataType>(GetInstancePropertyValue(inDataCore, inInstance, inProperty));
 }
 
 template <typename TDataType, typename TCoreType>

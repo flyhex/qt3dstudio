@@ -32,7 +32,7 @@
 
 #include <QMetaType>
 
-namespace UICDM {
+namespace qt3dsdm {
 
 class IDataCore;
 
@@ -454,6 +454,6 @@ public:
 typedef std::vector<CUICDMGuideHandle> TGuideHandleList;
 }
 
-Q_DECLARE_METATYPE(UICDM::CUICDMSlideHandle);
+Q_DECLARE_METATYPE(qt3dsdm::CUICDMSlideHandle);
 
 #endif

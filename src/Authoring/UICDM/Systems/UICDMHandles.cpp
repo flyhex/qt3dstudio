@@ -29,5 +29,5 @@
 #include "UICDMPrefix.h"
 #include "UICDMHandles.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 }

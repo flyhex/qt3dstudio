@@ -60,7 +60,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CTimelineTranslationManager::CTimelineTranslationManager()
 {
@@ -82,14 +82,14 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(CUICDMInstanceHan
     ITimelineItemBinding *theBinding = GetBinding(inInstance);
     if (!theBinding) {
         CUICDMTimelineItemBinding *theReturn = nullptr;
-        UICDM::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
+        qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
         CUICDMPropertyHandle theTypeProperty =
             thePropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
 
         SValue theTypeValue;
         thePropertySystem->GetInstancePropertyValue(inInstance, theTypeProperty, theTypeValue);
 
-        std::wstring theWideTypeString(UICDM::get<TDataStrPtr>(theTypeValue)->GetData());
+        std::wstring theWideTypeString(qt3dsdm::get<TDataStrPtr>(theTypeValue)->GetData());
 
         if (theWideTypeString == L"Material" || theWideTypeString == L"CustomMaterial"
             || theWideTypeString == L"ReferencedMaterial")
@@ -185,7 +185,7 @@ void CTimelineTranslationManager::Unregister(ITimelineItemBinding *inTimelineIte
     for (; theInstanceIter != m_InstanceHandleBindingMap.end(); ++theInstanceIter) {
         if (theInstanceIter->second == inTimelineItem) {
             // If this is the currently selected object and make sure that is cleared.
-            UICDM::CUICDMInstanceHandle theSelectedInstance =
+            qt3dsdm::CUICDMInstanceHandle theSelectedInstance =
                 g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
             if (theSelectedInstance.Valid() && theSelectedInstance == theInstanceIter->first)
                 theDeselectItem = true;
@@ -236,7 +236,7 @@ CTimelineTranslationManager::GetBinding(CUICDMInstanceHandle inHandle) const
 
 CUICDMTimelineItemBinding *CTimelineTranslationManager::GetSelectedBinding() const
 {
-    UICDM::CUICDMInstanceHandle theSelectedInstance =
+    qt3dsdm::CUICDMInstanceHandle theSelectedInstance =
         g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
     if (theSelectedInstance.Valid()) {
         CUICDMTimelineItemBinding *theBinding = GetBinding(theSelectedInstance);
@@ -422,8 +422,8 @@ void CTimelineTranslationManager::OnKeyframeUpdated(CUICDMKeyframeHandle inKeyfr
     // else, keyframe has been nuked, ignore this event, we'll get a KeyframeDeleted
 }
 
-void CTimelineTranslationManager::OnPropertyChanged(UICDM::CUICDMInstanceHandle inInstance,
-                                                    UICDM::CUICDMPropertyHandle inProperty)
+void CTimelineTranslationManager::OnPropertyChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                                    qt3dsdm::CUICDMPropertyHandle inProperty)
 {
     CUICDMTimelineItemBinding *theTimelineBinding =
         dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
@@ -431,7 +431,7 @@ void CTimelineTranslationManager::OnPropertyChanged(UICDM::CUICDMInstanceHandle 
         theTimelineBinding->OnPropertyChanged(inProperty);
 }
 
-void CTimelineTranslationManager::OnDynamicKeyframeChanged(UICDM::CUICDMAnimationHandle inAnimation,
+void CTimelineTranslationManager::OnDynamicKeyframeChanged(qt3dsdm::CUICDMAnimationHandle inAnimation,
                                                            bool inDynamic)
 {
     Q_UNUSED(inDynamic);
@@ -448,7 +448,7 @@ void CTimelineTranslationManager::OnDynamicKeyframeChanged(UICDM::CUICDMAnimatio
     }
 }
 
-void CTimelineTranslationManager::OnAssetCreated(UICDM::CUICDMInstanceHandle inInstance)
+void CTimelineTranslationManager::OnAssetCreated(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     CClientDataModelBridge *theDataModelBridge = GetStudioSystem()->GetClientDataModelBridge();
 
@@ -456,7 +456,7 @@ void CTimelineTranslationManager::OnAssetCreated(UICDM::CUICDMInstanceHandle inI
         EnsureLoaded(inInstance);
 }
 
-void CTimelineTranslationManager::OnAssetDeleted(UICDM::CUICDMInstanceHandle inInstance)
+void CTimelineTranslationManager::OnAssetDeleted(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     // You can't assume the instance is valid.  Someone may have deleted a large number of items
     // from the model and then decided to send notifications after the fact.
@@ -493,9 +493,9 @@ void CTimelineTranslationManager::OnChildMoved(int /*inParent*/, int inChild, lo
  * Basically, it tells the owner of the action to update its timeline control to
  * update the icon that shows action association status
  */
-void CTimelineTranslationManager::OnActionEvent(UICDM::CUICDMActionHandle inAction,
-                                                UICDM::CUICDMSlideHandle inSlide,
-                                                UICDM::CUICDMInstanceHandle inOwner)
+void CTimelineTranslationManager::OnActionEvent(qt3dsdm::CUICDMActionHandle inAction,
+                                                qt3dsdm::CUICDMSlideHandle inSlide,
+                                                qt3dsdm::CUICDMInstanceHandle inOwner)
 {
     Q_UNUSED(inAction);
 
@@ -526,7 +526,7 @@ void CTimelineTranslationManager::ClearBindingsKeyframeSelection()
 void CTimelineTranslationManager::SetSelected(Q3DStudio::SSelectedValue inSelectable,
                                               bool inSelected)
 {
-    UICDM::TInstanceHandleList theInstances = inSelectable.GetSelectedInstances();
+    qt3dsdm::TInstanceHandleList theInstances = inSelectable.GetSelectedInstances();
     for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
         CUICDMInstanceHandle theInstance(theInstances[idx]);
         if (GetStudioSystem()->IsInstance(theInstance)) {

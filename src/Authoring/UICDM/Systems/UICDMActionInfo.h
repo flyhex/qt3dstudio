@@ -33,7 +33,7 @@
 #include "UICDMDataTypes.h"
 #include "UICDMMetaDataTypes.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 using std::wstring;
 struct SActionInfo
 {

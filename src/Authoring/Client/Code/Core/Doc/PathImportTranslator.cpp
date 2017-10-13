@@ -88,7 +88,7 @@ QT3DSU64 SPathImportTranslator::GetChild(TInstanceHandle inItem, QT3DSI32 inInde
 }
 
 QT3DSU64 SPathImportTranslator::CreateSceneGraphInstance(
-    UICDM::ComposerObjectTypes::Enum inObjectType, SPathImportTranslator::TInstanceHandle inParent,
+    qt3dsdm::ComposerObjectTypes::Enum inObjectType, SPathImportTranslator::TInstanceHandle inParent,
     const Q3DStudio::CString &inId)
 {
     Q3DStudio::CString theIdStr(inId);
@@ -134,7 +134,7 @@ QT3DSU64 SPathImportTranslator::ParseSVGGroup(TInstanceHandle inParent,
     if (inRoot)
         idItem = "__import__root__";
     TInstanceHandle retval =
-        CreateSceneGraphInstance(UICDM::ComposerObjectTypes::Group, inParent, idItem.c_str());
+        CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Group, inParent, idItem.c_str());
     SetUniqueName(retval, itemName.c_str(), inExistingNames);
     ParseSVGGroupChildren(retval);
     return retval;
@@ -238,7 +238,7 @@ QT3DSU64 SPathImportTranslator::ParseSVGPath(TInstanceHandle inParent,
         } else {
             m_Import->SetInstancePropertyValue(retval, m_ObjectTypes.m_Path.m_PaintStyle,
                                                L"Filled and Stroked");
-            CreateSceneGraphInstance(UICDM::ComposerObjectTypes::Material, retval, "Fill");
+            CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Material, retval, "Fill");
         }
 
         TInstanceHandle theFillMaterial = GetChild(retval, fillMaterialIndex);

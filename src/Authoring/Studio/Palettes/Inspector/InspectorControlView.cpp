@@ -142,9 +142,9 @@ void InspectorControlView::onFilesChanged(
                             record.m_File));
 
             if (record.m_ModificationType == Q3DStudio::FileModificationType::Created)
-                UICDM::binary_sort_insert_unique(m_fileList, relativePath);
+                qt3dsdm::binary_sort_insert_unique(m_fileList, relativePath);
             else if (record.m_ModificationType == Q3DStudio::FileModificationType::Destroyed)
-                UICDM::binary_sort_erase(m_fileList, relativePath);
+                qt3dsdm::binary_sort_erase(m_fileList, relativePath);
         }
         if (record.m_FileInfo.IsFile()
                 && record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {
@@ -177,9 +177,10 @@ void InspectorControlView::initialize()
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
     rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
-    qmlRegisterUncreatableType<UICDM::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
+
+    qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
                                                          "DataModelDataType is an enum container");
-    qmlRegisterUncreatableType<UICDM::AdditionalMetaDataType>(
+    qmlRegisterUncreatableType<qt3dsdm::AdditionalMetaDataType>(
                 "Qt3DStudio", 1, 0, "AdditionalMetaDataType",
                 "AdditionalMetaDataType is an enum container");
     engine()->addImportPath(qmlImportPath());
@@ -392,7 +393,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     connect(m_objectReferenceView, &ObjectBrowserView::selectionChanged,
             this, [this, doc, handle, instance] {
         auto selectedItem = m_objectReferenceView->selectedHandle();
-        UICDM::SObjectRefType objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
+        qt3dsdm::SObjectRefType objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
                     selectedItem, handle,
                     (CRelativePathTools::EPathType)(m_objectReferenceView->pathType()));
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
@@ -426,12 +427,12 @@ void InspectorControlView::OnEndDataModelNotifications()
     m_inspectorControlModel->refresh();
 }
 
-void InspectorControlView::OnImmediateRefreshInstanceSingle(UICDM::CUICDMInstanceHandle inInstance)
+void InspectorControlView::OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     m_inspectorControlModel->refresh();
 }
 
-void InspectorControlView::OnImmediateRefreshInstanceMultiple(UICDM::CUICDMInstanceHandle *inInstance, long inInstanceCount)
+void InspectorControlView::OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance, long inInstanceCount)
 {
     m_inspectorControlModel->refresh();
 }

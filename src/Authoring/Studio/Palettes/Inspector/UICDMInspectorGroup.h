@@ -72,7 +72,7 @@ public: // Construction
     }
 
 public: // Use
-    void CreateRow(CDoc *inDoc, UICDM::CUICDMMetaDataPropertyHandle inProperty);
+    void CreateRow(CDoc *inDoc, qt3dsdm::CUICDMMetaDataPropertyHandle inProperty);
 };
 
 #endif

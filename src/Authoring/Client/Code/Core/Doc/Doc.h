@@ -85,7 +85,7 @@ class IDocSceneGraph;
 struct SSelectedValue;
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class CStudioSystem;
 class ISignalConnection;
 class CmdDataModel;
@@ -183,8 +183,8 @@ public:
     bool IsModified();
     bool IsValid() const;
 
-    UICDM::CUICDMInstanceHandle GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem);
-    UICDM::CUICDMInstanceHandle GetSelectedInstance();
+    qt3dsdm::CUICDMInstanceHandle GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem);
+    qt3dsdm::CUICDMInstanceHandle GetSelectedInstance();
 
     void CutSelectedObject();
     void DeleteSelectedObject();
@@ -192,29 +192,29 @@ public:
     void SetChangedKeyframes();
 
     // Cut object to clipboard
-    void CutObject(UICDM::TInstanceHandleList inInstance);
-    void CutObject(UICDM::CUICDMInstanceHandle inInstance)
+    void CutObject(qt3dsdm::TInstanceHandleList inInstance);
+    void CutObject(qt3dsdm::CUICDMInstanceHandle inInstance)
     {
-        UICDM::TInstanceHandleList objects;
+        qt3dsdm::TInstanceHandleList objects;
         objects.push_back(inInstance);
         CutObject(objects);
     }
     // copy object to clipboard
-    void CopyObject(UICDM::TInstanceHandleList inInstance);
-    void CopyObject(UICDM::CUICDMInstanceHandle inInstance)
+    void CopyObject(qt3dsdm::TInstanceHandleList inInstance);
+    void CopyObject(qt3dsdm::CUICDMInstanceHandle inInstance)
     {
-        UICDM::TInstanceHandleList objects;
+        qt3dsdm::TInstanceHandleList objects;
         objects.push_back(inInstance);
         CopyObject(objects);
     }
     // paste object to clipboard
-    void PasteObject(UICDM::CUICDMInstanceHandle inInstance);
-    void PasteObjectMaster(UICDM::CUICDMInstanceHandle inInstance);
-    void DeleteObject(const UICDM::TInstanceHandleList &inInstances);
+    void PasteObject(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void PasteObjectMaster(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances);
 
-    void DeleteObject(UICDM::CUICDMInstanceHandle inInstance)
+    void DeleteObject(qt3dsdm::CUICDMInstanceHandle inInstance)
     {
-        UICDM::TInstanceHandleList theInstances;
+        qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
         DeleteObject(theInstances);
     }
@@ -227,7 +227,7 @@ public:
     void HandleCut();
 
     bool CanCopyObject(); // specifically for objects
-    bool CanCopyObject(const UICDM::TInstanceHandleList &inInstances); // specifically for objects
+    bool CanCopyObject(const qt3dsdm::TInstanceHandleList &inInstances); // specifically for objects
     bool CanCopyKeyframe(); // specifically for keyframes
     bool CanCopyAction(); // specifically for actions
     bool CanPasteObject(); // specifically for objects
@@ -239,15 +239,15 @@ public:
     bool CanCut(); // for objects or keyframes or actions
     void HandleDuplicateCommand();
 
-    bool VerifyCanRename(UICDM::CUICDMInstanceHandle inAsset);
+    bool VerifyCanRename(qt3dsdm::CUICDMInstanceHandle inAsset);
 
     void DeselectAllItems(bool inSendEvent);
     void DeselectAllItems() { DeselectAllItems(true); }
 
-    UICDM::CUICDMInstanceHandle GetActiveLayer();
-    void SetActiveLayer(UICDM::CUICDMInstanceHandle inLayerInstance);
-    UICDM::CUICDMSlideHandle GetActiveSlide();
-    void OnLayerDeleted(UICDM::CUICDMInstanceHandle inLayerInstance);
+    qt3dsdm::CUICDMInstanceHandle GetActiveLayer();
+    void SetActiveLayer(qt3dsdm::CUICDMInstanceHandle inLayerInstance);
+    qt3dsdm::CUICDMSlideHandle GetActiveSlide();
+    void OnLayerDeleted(qt3dsdm::CUICDMInstanceHandle inLayerInstance);
 
     void SetPlayMode(EPlayMode inPlayMode, long inRestoreTime = -1);
     bool IsPlaying();
@@ -255,18 +255,18 @@ public:
 
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
 
-    UICDM::CUICDMInstanceHandle GetSceneInstance() { return m_SceneInstance; }
+    qt3dsdm::CUICDMInstanceHandle GetSceneInstance() { return m_SceneInstance; }
 
     // IDoc
-    virtual UICDM::CUICDMInstanceHandle GetActiveRootInstance();
+    virtual qt3dsdm::CUICDMInstanceHandle GetActiveRootInstance();
     long GetCurrentViewTime() const override;
     virtual void OnComponentSeconds();
     // Notify time changed and set the playback clock to this time.
     void NotifyTimeChanged(long inNewTime) override;
     // Notify time changed.
     virtual void DoNotifyTimeChanged(long inNewTime);
-    void NotifyActiveSlideChanged(UICDM::CUICDMSlideHandle inNewActiveSlide) override;
-    void NotifyActiveSlideChanged(UICDM::CUICDMSlideHandle inNewActiveSlide,
+    void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide) override;
+    void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
                                           bool inForceRefresh,
                                           bool inIgnoreLastDisplayTime = false) override;
     virtual void
@@ -277,11 +277,11 @@ public:
     void SetModifiedFlag(bool inIsModified = true) override;
     void SetKeyframesManager(IKeyframesManager *inManager) override;
     IKeyframesManager *GetKeyframesManager() override;
-    UICDM::IPropertySystem *GetPropertySystem() override;
-    UICDM::IAnimationCore *GetAnimationCore() override;
-    void SetInstancePropertyValue(UICDM::CUICDMInstanceHandle inInstance,
+    qt3dsdm::IPropertySystem *GetPropertySystem() override;
+    qt3dsdm::IAnimationCore *GetAnimationCore() override;
+    void SetInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle inInstance,
                                           const std::wstring &inPropertyName,
-                                          const UICDM::SValue &inValue) override;
+                                          const qt3dsdm::SValue &inValue) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
@@ -297,18 +297,18 @@ public:
     virtual std::shared_ptr<Q3DStudio::IComposerSerializer> CreateTransactionlessSerializer();
     // Create a DOM writer that is opened to the project element.  This is where the serializer
     // should write to.
-    std::shared_ptr<UICDM::IDOMWriter> CreateDOMWriter() override;
+    std::shared_ptr<qt3dsdm::IDOMWriter> CreateDOMWriter() override;
     // Create a DOM reader and check that the top element's version is correct.  Opens the reader
     // to the project element.
-    virtual std::shared_ptr<UICDM::IDOMReader>
+    virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CreateDOMReader(const Q3DStudio::CString &inFilePath, qt3ds::QT3DSI32 &outVersion) override;
-    virtual std::shared_ptr<UICDM::IDOMReader> CreateDOMReader(CBufferedInputStream &inStream,
+    virtual std::shared_ptr<qt3dsdm::IDOMReader> CreateDOMReader(CBufferedInputStream &inStream,
                                                                  qt3ds::QT3DSI32 &outVersion);
 
-    void SelectUICDMObject(UICDM::CUICDMInstanceHandle inInstanceHandle);
+    void SelectUICDMObject(qt3dsdm::CUICDMInstanceHandle inInstanceHandle);
     // multiselect support
-    void ToggleUICDMObjectToSelection(UICDM::CUICDMInstanceHandle inInstanceHandle);
-    void SelectAndNavigateToUICDMObject(UICDM::CUICDMInstanceHandle inInstanceHandle);
+    void ToggleUICDMObjectToSelection(qt3dsdm::CUICDMInstanceHandle inInstanceHandle);
+    void SelectAndNavigateToUICDMObject(qt3dsdm::CUICDMInstanceHandle inInstanceHandle);
     long GetLatestEndTime();
 
     CCore *GetCore() override;
@@ -330,7 +330,7 @@ public:
     Q3DStudio::CColor           GetEditViewBackgroundColor( );
     */
 
-    UICDM::CStudioSystem *GetStudioSystem() override { return m_StudioSystem.get(); }
+    qt3dsdm::CStudioSystem *GetStudioSystem() override { return m_StudioSystem.get(); }
 
     IObjectReferenceHelper *GetDataModelObjectReferenceHelper() const
     {
@@ -338,28 +338,28 @@ public:
     }
 
     void SetDefaultKeyframeInterpolation(bool inSmooth);
-    void ScheduleRemoveImageInstances(UICDM::CUICDMInstanceHandle inInstance, CCmdBatch *outBatch);
-    void ScheduleRemoveDataModelInstances(UICDM::CUICDMInstanceHandle inInstance,
+    void ScheduleRemoveImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance, CCmdBatch *outBatch);
+    void ScheduleRemoveDataModelInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
                                           CCmdBatch *outBatch);
-    void ScheduleRemoveComponentInstances(UICDM::CUICDMInstanceHandle inInstance,
+    void ScheduleRemoveComponentInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
                                           CCmdBatch *outBatch);
 
     TAssetGraphPtr GetAssetGraph() { return m_AssetGraph; }
-    virtual void AddToGraph(UICDM::CUICDMInstanceHandle inParentInstance,
-                            UICDM::CUICDMInstanceHandle inInstance);
+    virtual void AddToGraph(qt3dsdm::CUICDMInstanceHandle inParentInstance,
+                            qt3dsdm::CUICDMInstanceHandle inInstance);
 
     // helper
-    void IterateImageInstances(UICDM::CUICDMInstanceHandle inInstance,
+    void IterateImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
                                std::vector<Q3DStudio::CId> *outImageIdList);
-    UICDM::CUICDMInstanceHandle GetObjectbySelectMode(UICDM::CUICDMInstanceHandle inInstance,
+    qt3dsdm::CUICDMInstanceHandle GetObjectbySelectMode(qt3dsdm::CUICDMInstanceHandle inInstance,
                                                       bool inGroupMode);
 
     // ICmdStackModifier
     bool CanUndo() override;
     bool PreUndo() override;
 
-    void CheckActionDependencies(UICDM::CUICDMInstanceHandle inInstance);
-    void SetActiveSlideWithTransaction(UICDM::CUICDMSlideHandle inNewActiveSlide);
+    void CheckActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void SetActiveSlideWithTransaction(qt3dsdm::CUICDMSlideHandle inNewActiveSlide);
 
     void SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph);
     Q3DStudio::IDocSceneGraph *GetSceneGraph() { return m_SceneGraph.get(); }
@@ -373,10 +373,10 @@ public:
 
 protected:
     // Set the active slide, return true if delving
-    void SetActiveSlideChange(UICDM::CUICDMSlideHandle inNewActiveSlide);
-    void OnSlideDeleted(UICDM::CUICDMSlideHandle inSlide);
-    void OnInstanceDeleted(UICDM::CUICDMInstanceHandle inInstance);
-    Q3DStudio::SSelectedValue SetupInstanceSelection(UICDM::CUICDMInstanceHandle inInstance);
+    void SetActiveSlideChange(qt3dsdm::CUICDMSlideHandle inNewActiveSlide);
+    void OnSlideDeleted(qt3dsdm::CUICDMSlideHandle inSlide);
+    void OnInstanceDeleted(qt3dsdm::CUICDMInstanceHandle inInstance);
+    Q3DStudio::SSelectedValue SetupInstanceSelection(qt3dsdm::CUICDMInstanceHandle inInstance);
     // Set the selection, but don't send an event.
     bool SetSelection(Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue());
     void LoadPresentationFile(CBufferedInputStream *inInputStream);
@@ -392,18 +392,18 @@ protected:
     void ClosePresentation();
 
     void DeleteSelectedItems();
-    void GetActionDependencies(UICDM::CUICDMInstanceHandle inInstance,
+    void GetActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance,
                                Q3DStudio::CString &ioActionDependencies);
-    void GetActionDependencies(UICDM::CUICDMInstanceHandle inInstance,
-                               UICDM::TActionHandleList &ioActionList);
+    void GetActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance,
+                               qt3dsdm::TActionHandleList &ioActionList);
 
     bool OnNudgeKey(int inChar, int inRepeatCount, Qt::KeyboardModifiers modifiers);
     void OnNudgeDone();
 
-    UICDM::CUICDMInstanceHandle GetFirstSelectableLayer();
-    UICDM::CUICDMInstanceHandle GetTopmostGroup(UICDM::CUICDMInstanceHandle inInstance);
+    qt3dsdm::CUICDMInstanceHandle GetFirstSelectableLayer();
+    qt3dsdm::CUICDMInstanceHandle GetTopmostGroup(qt3dsdm::CUICDMInstanceHandle inInstance);
 
-    void GetActionsAffectedByRename(UICDM::CUICDMInstanceHandle inAsset,
+    void GetActionsAffectedByRename(qt3dsdm::CUICDMInstanceHandle inAsset,
                                     std::set<Q3DStudio::CString> &ioActionsAffected);
 
     bool isFocusOnTextEditControl();
@@ -416,9 +416,9 @@ protected:
     Q3DStudio::SSelectedValue m_SelectedObject; ///< DIE USELESS COMMENTS DIE.
     long m_CurrentViewTime; ///< The current time that is displayed by the playhead, not necessarily
                             ///the client time.
-    UICDM::CUICDMInstanceHandle m_SceneInstance; ///< Pointer to the root level Scene object.
-    UICDM::CUICDMSlideHandle m_ActiveSlide; ///< The currently active Slide Handle.
-    UICDM::CUICDMInstanceHandle m_ActiveLayer; ///< The currently active layer.
+    qt3dsdm::CUICDMInstanceHandle m_SceneInstance; ///< Pointer to the root level Scene object.
+    qt3dsdm::CUICDMSlideHandle m_ActiveSlide; ///< The currently active Slide Handle.
+    qt3dsdm::CUICDMInstanceHandle m_ActiveLayer; ///< The currently active layer.
     CPlaybackClock *m_PlaybackClock; ///< Playback clock. This is used when user clicks "Play"
     CCore *m_Core;
     bool m_IsModified;
@@ -427,7 +427,7 @@ protected:
 
     CDataManager *m_DataManager; ///< Manager for handling data properties.
 
-    std::shared_ptr<UICDM::CStudioSystem> m_StudioSystem;
+    std::shared_ptr<qt3dsdm::CStudioSystem> m_StudioSystem;
 
     IKeyframesManager *m_KeyframesManager; ///< To support menu actions for selected keys
 
@@ -438,13 +438,13 @@ protected:
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> m_SceneEditor;
     std::shared_ptr<SDocumentDataModelListener> m_DataModelListener;
     std::shared_ptr<Q3DStudio::IDocumentBufferCache> m_DocumentBufferCache;
-    std::vector<std::shared_ptr<UICDM::ISignalConnection>> m_Connections;
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
     std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler>
         m_DeletingReferencedObjectHandler;
     long m_TransactionDepth;
-    std::shared_ptr<UICDM::CmdDataModel> m_OpenTransaction;
+    std::shared_ptr<qt3dsdm::CmdDataModel> m_OpenTransaction;
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;
     Q3DStudio::SSelectedValue m_SelectedValue;
 

@@ -112,7 +112,7 @@ struct CustomTestParams
     SShaderDefaultMaterialKey shaderkey;
     SCustomMaterial *material;
     eastl::vector<SShaderPreprocessorFeature> features;
-    Option<UICDM::SMetaDataCustomMaterial> metaMaterial;
+    Option<qt3dsdm::SMetaDataCustomMaterial> metaMaterial;
     SImage dummyImages[SShaderDefaultMaterialKeyProperties::ImageMapCount];
     eastl::vector<SRenderableImage*> renderableImages;
     qt3ds::render::CUICRendererImpl *render;
@@ -438,7 +438,7 @@ bool Qt3DSRenderTestCustomMaterialGenerator::run(NVRenderContext *context,
         CRegisteredString name = context->GetStringTable().RegisterStr("qrc:/copper.material");
 
         metadata()->LoadMaterialXMLFile("CustomMaterial", "", "copper", "qrc:/copper.material");
-        Option<UICDM::SMetaDataCustomMaterial> metaMaterial =
+        Option<qt3dsdm::SMetaDataCustomMaterial> metaMaterial =
                             metadata()->GetMaterialMetaDataBySourcePath("qrc:/copper.material");
 
         if (metaMaterial.hasValue()) {

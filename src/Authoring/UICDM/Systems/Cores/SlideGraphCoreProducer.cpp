@@ -33,7 +33,7 @@
 #include "SignalsImpl.h"
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMSlideGraphHandle CSlideGraphCoreProducer::CreateSlideGraph(CUICDMSlideHandle inRoot)
 {

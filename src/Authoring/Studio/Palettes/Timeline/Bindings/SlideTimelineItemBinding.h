@@ -52,7 +52,7 @@ class CSlideTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public:
     CSlideTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              UICDM::CUICDMInstanceHandle inDataHandle);
+                              qt3dsdm::CUICDMInstanceHandle inDataHandle);
     ~CSlideTimelineItemBinding() {}
 
     // CUICDMTimelineItemBinding
@@ -112,7 +112,7 @@ public:
     void OnPropertySelection(long inTime) override { Q_UNUSED(inTime); }
 
 protected:
-    std::shared_ptr<UICDM::ISignalConnection>
+    std::shared_ptr<qt3dsdm::ISignalConnection>
         m_Connection; // Callback when the Asset name changes
 
     bool AmITimeParent() const override { return true; }

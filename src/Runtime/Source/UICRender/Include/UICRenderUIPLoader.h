@@ -43,7 +43,7 @@ namespace Q3DStudio {
 class IRuntimeMetaData;
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDOMReader;
 struct SMetaDataEffect;
 struct SMetaDataCustomMaterial;
@@ -74,7 +74,7 @@ namespace render {
         // several objects that exist at the top level of the uip file.
         // Returns NULL if we were incapable of loading the presentation.
         static SPresentation *
-        LoadUIPFile(UICDM::IDOMReader &inReader
+        LoadUIPFile(qt3dsdm::IDOMReader &inReader
                     // the full path, including the filename
                     // to the presentation file
                     ,
@@ -111,13 +111,13 @@ namespace render {
         static void CreateEffectClassFromMetaEffect(CRegisteredString inEffectName,
                                                     NVFoundationBase &inFoundation,
                                                     IEffectSystem &inEffectSystem,
-                                                    const UICDM::SMetaDataEffect &inMetaDataEffect,
+                                                    const qt3dsdm::SMetaDataEffect &inMetaDataEffect,
                                                     IStringTable &inStrTable);
 
         static void CreateMaterialClassFromMetaMaterial(
             CRegisteredString inEffectName, NVFoundationBase &inFoundation,
             ICustomMaterialSystem &inEffectSystem,
-            const UICDM::SMetaDataCustomMaterial &inMetaDataMaterial, IStringTable &inStrTable);
+            const qt3dsdm::SMetaDataCustomMaterial &inMetaDataMaterial, IStringTable &inStrTable);
     };
 }
 }

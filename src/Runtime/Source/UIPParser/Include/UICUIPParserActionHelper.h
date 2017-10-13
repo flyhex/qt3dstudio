@@ -141,7 +141,7 @@ public: // Construction
     virtual ~CUIPParserActionHelper();
 
 public:
-    void CacheAction(UICDM::IDOMReader &inReader, const char8_t *inOwnerId);
+    void CacheAction(qt3dsdm::IDOMReader &inReader, const char8_t *inOwnerId);
     void BuildActions(IPresentation &inPresentation);
     void GetActionSectionCount(CUIPParserImpl::SActionSectionCount &outActionCount);
     INT32 GetActionCount(const eastl::string &inActionId);
@@ -149,7 +149,7 @@ public:
 
 protected: // Action helper
     void AddListenerEventPair(eastl::string inListener, const eastl::string &inEventName);
-    void CacheHandlerArguments(UICDM::IDOMReader &inReader, SActionInfo &inAction);
+    void CacheHandlerArguments(qt3dsdm::IDOMReader &inReader, SActionInfo &inAction);
     void BuildAction(TElement &inElement, UINT32 inEventName, IPresentation &inPresentation,
                      const eastl::string &inActionId);
     INT32 GetActionCount(const eastl::string &inActionId, INT32 &outStringAttrCount,

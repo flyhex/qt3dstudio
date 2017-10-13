@@ -38,7 +38,7 @@
 #include <QVector2D>
 #include <QVector3D>
 
-namespace UICDM {
+namespace qt3dsdm {
 
 template <typename TDataType>
 struct SDataTypeToEnumMap
@@ -289,38 +289,38 @@ inline SObjectRefType ConvertToObjectRef(const SValue &inValue)
 template <>
 inline QColor get<QColor>(const SValue &inType)
 {
-    auto f = get<UICDM::SFloat3>(inType);
+    auto f = get<qt3dsdm::SFloat3>(inType);
     return QColor::fromRgbF(f.m_Floats[0], f.m_Floats[1], f.m_Floats[2]);
 }
 
 template <>
-inline QString get<QString>(const UICDM::SValue &inType)
+inline QString get<QString>(const qt3dsdm::SValue &inType)
 {
-    return QString::fromWCharArray(UICDM::get<UICDM::TDataStrPtr>(inType)->GetData());
+    return QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(inType)->GetData());
 }
 
 template <>
-inline QVector2D get<QVector2D>(const UICDM::SValue &inType)
+inline QVector2D get<QVector2D>(const qt3dsdm::SValue &inType)
 {
-    auto f = get<UICDM::SFloat2>(inType);
+    auto f = get<qt3dsdm::SFloat2>(inType);
     return QVector2D(f.m_Floats[0], f.m_Floats[1]);
 }
 
 template <>
-inline QVector3D get<QVector3D>(const UICDM::SValue &inType)
+inline QVector3D get<QVector3D>(const qt3dsdm::SValue &inType)
 {
-    auto f = get<UICDM::SFloat3>(inType);
+    auto f = get<qt3dsdm::SFloat3>(inType);
     return QVector3D(f.m_Floats[0], f.m_Floats[1], f.m_Floats[2]);
 }
 
 // KDAB_TODO Shortcut to not define our own 4 member long structure
 template <>
-inline QVector<qt3ds::QT3DSU32> get<QVector<qt3ds::QT3DSU32> >(const UICDM::SValue &inType)
+inline QVector<qt3ds::QT3DSU32> get<QVector<qt3ds::QT3DSU32> >(const qt3dsdm::SValue &inType)
 {
-    auto f = get<UICDM::SLong4>(inType);
+    auto f = get<qt3dsdm::SLong4>(inType);
     return {f.m_Longs[0], f.m_Longs[1], f.m_Longs[2], f.m_Longs[3]};
 }
 
 }
-Q_DECLARE_METATYPE(UICDM::DataModelDataType)
+Q_DECLARE_METATYPE(qt3dsdm::DataModelDataType)
 #endif

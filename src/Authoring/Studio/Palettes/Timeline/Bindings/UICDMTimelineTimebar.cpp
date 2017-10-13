@@ -54,7 +54,7 @@
 
 CUICDMTimelineTimebar::CUICDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,
-    UICDM::CUICDMInstanceHandle inDataHandle)
+    qt3dsdm::CUICDMInstanceHandle inDataHandle)
     : Q3DStudio::CUpdateableDocumentEditor(*inTimelineTranslationManager->GetDoc())
     , m_TimelineTranslationManager(inTimelineTranslationManager)
     , m_PropertySystem(inTimelineTranslationManager->GetStudioSystem()->GetPropertySystem())
@@ -64,16 +64,16 @@ CUICDMTimelineTimebar::CUICDMTimelineTimebar(
         inTimelineTranslationManager->GetStudioSystem()->GetClientDataModelBridge();
     m_StartTime = theClientDataModelBridge->GetSceneAsset().m_StartTime;
     m_EndTime = theClientDataModelBridge->GetSceneAsset().m_EndTime;
-    UICDM::SValue theValue;
+    qt3dsdm::SValue theValue;
     if (m_PropertySystem->GetInstancePropertyValue(
             m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarColor, theValue)) {
-        UICDM::SFloat3 theTimebarColor = UICDM::get<UICDM::SFloat3>(theValue);
+        qt3dsdm::SFloat3 theTimebarColor = qt3dsdm::get<qt3dsdm::SFloat3>(theValue);
 
         m_Color.SetRGB(static_cast<int>(theTimebarColor.m_Floats[0] * 255.0f),
                        static_cast<int>(theTimebarColor.m_Floats[1] * 255.0f),
                        static_cast<int>(theTimebarColor.m_Floats[2] * 255.0f));
     }
-    UICDM::IStudioFullSystemSignalProvider *theProvider =
+    qt3dsdm::IStudioFullSystemSignalProvider *theProvider =
         inTimelineTranslationManager->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
     m_PropertyChangedSignal = theProvider->ConnectInstancePropertyValue(
         std::bind(&CUICDMTimelineTimebar::OnPropertyChanged, this,
@@ -83,12 +83,12 @@ CUICDMTimelineTimebar::CUICDMTimelineTimebar(
     OnPropertyChanged(m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarText);
 }
 
-void CUICDMTimelineTimebar::OnPropertyChanged(UICDM::CUICDMInstanceHandle inInstance,
-                                              UICDM::CUICDMPropertyHandle inProperty)
+void CUICDMTimelineTimebar::OnPropertyChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                              qt3dsdm::CUICDMPropertyHandle inProperty)
 {
     if (m_DataHandle == inInstance) {
         bool needsInvalidate = false;
-        UICDM::SValue theValue;
+        qt3dsdm::SValue theValue;
         CClientDataModelBridge *theClientDataModelBridge =
             m_TimelineTranslationManager->GetStudioSystem()->GetClientDataModelBridge();
         if (inProperty == theClientDataModelBridge->GetSceneAsset().m_TimebarColor) {
@@ -96,7 +96,7 @@ void CUICDMTimelineTimebar::OnPropertyChanged(UICDM::CUICDMInstanceHandle inInst
             if (m_PropertySystem->GetInstancePropertyValue(
                     m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarColor,
                     theValue)) {
-                UICDM::SFloat3 theTimebarColor = UICDM::get<UICDM::SFloat3>(theValue);
+                qt3dsdm::SFloat3 theTimebarColor = qt3dsdm::get<qt3dsdm::SFloat3>(theValue);
 
                 m_Color.SetRGB(static_cast<int>(theTimebarColor.m_Floats[0] * 255.0f),
                                static_cast<int>(theTimebarColor.m_Floats[1] * 255.0f),
@@ -137,7 +137,7 @@ void CUICDMTimelineTimebar::OnPropertyChanged(UICDM::CUICDMInstanceHandle inInst
             if (m_PropertySystem->GetInstancePropertyValue(
                     m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarText,
                     theValue)) {
-                UICDM::SStringRef theTimebarComment = UICDM::get<UICDM::SStringRef>(theValue);
+                qt3dsdm::SStringRef theTimebarComment = qt3dsdm::get<qt3dsdm::SStringRef>(theValue);
                 m_Comment.Assign(static_cast<const wchar_t *>(theTimebarComment));
             } else {
                 m_Comment.Assign(L"");
@@ -164,13 +164,13 @@ CUICDMTimelineTimebar::~CUICDMTimelineTimebar()
 
 // TODO: Can we put this on IInstancePropertyCore?
 template <typename T>
-T GetInstancePropertyValue(UICDM::IPropertySystem *inPropertySystem,
-                           UICDM::CUICDMInstanceHandle inInstanceHandle,
-                           UICDM::CUICDMPropertyHandle inProperty)
+T GetInstancePropertyValue(qt3dsdm::IPropertySystem *inPropertySystem,
+                           qt3dsdm::CUICDMInstanceHandle inInstanceHandle,
+                           qt3dsdm::CUICDMPropertyHandle inProperty)
 {
-    UICDM::SValue theValue;
+    qt3dsdm::SValue theValue;
     inPropertySystem->GetInstancePropertyValue(inInstanceHandle, inProperty, theValue);
-    return UICDM::get<T>(theValue);
+    return qt3dsdm::get<T>(theValue);
 }
 
 long CUICDMTimelineTimebar::GetStartTime() const
@@ -237,7 +237,7 @@ void CUICDMTimelineTimebar::SetTimebarColor(const ::CColor &inColor)
 {
     using namespace Q3DStudio;
     if (inColor != m_Color) {
-        UICDM::CUICDMInstanceHandle theHandle = m_DataHandle;
+        qt3dsdm::CUICDMInstanceHandle theHandle = m_DataHandle;
         SCOPED_DOCUMENT_EDITOR(*m_TimelineTranslationManager->GetDoc(), QObject::tr("Set Timebar Color"))
             ->SetTimebarColor(theHandle, inColor);
     }
@@ -247,7 +247,7 @@ void CUICDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inCommen
 {
     using namespace Q3DStudio;
     if (inComment != m_Comment) {
-        UICDM::CUICDMInstanceHandle theHandle = m_DataHandle;
+        qt3dsdm::CUICDMInstanceHandle theHandle = m_DataHandle;
         SCOPED_DOCUMENT_EDITOR(*m_TimelineTranslationManager->GetDoc(), QObject::tr("Set Timebar Text"))
             ->SetTimebarText(theHandle, inComment);
     }

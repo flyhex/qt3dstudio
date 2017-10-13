@@ -42,7 +42,7 @@ ActionModel::ActionModel(QObject *parent)
 {
 }
 
-void ActionModel::setInstanceHandle(const UICDM::CUICDMInstanceHandle &handle)
+void ActionModel::setInstanceHandle(const qt3dsdm::CUICDMInstanceHandle &handle)
 {
     beginResetModel();
     m_handle = handle;
@@ -154,12 +154,12 @@ const SActionInfo ActionModel::actionInfoAt(int row)
     return actionCore->GetActionInfo(action);
 }
 
-UICDM::IActionSystem *ActionModel::actionSystem() const
+qt3dsdm::IActionSystem *ActionModel::actionSystem() const
 {
     return g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetActionSystem();
 }
 
-UICDM::CUICDMSlideHandle ActionModel::activeSlide() const
+qt3dsdm::CUICDMSlideHandle ActionModel::activeSlide() const
 {
     return g_StudioApp.GetCore()->GetDoc()->GetActiveSlide();
 }

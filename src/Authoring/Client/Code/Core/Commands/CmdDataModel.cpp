@@ -42,7 +42,7 @@
 
 using namespace boost;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 void SApplicationState::Store(CDoc &inDoc)
 {

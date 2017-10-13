@@ -108,7 +108,7 @@ CTextEdit::CTextEdit()
  */
 CTextEdit::~CTextEdit()
 {
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
 
     REMOVEFROM_OBJECT_COUNTER(CTextEdit)
 
@@ -805,7 +805,7 @@ void CTextEdit::SetFillBackground(bool inFillBackground)
  */
 void CTextEdit::OnLoseFocus()
 {
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
     m_Caret.show = false;
     m_ScrollAmount.x = 0;
     ClearSelection();
@@ -1451,7 +1451,7 @@ void CTextEdit::OnTimer()
 void CTextEdit::ResetBlinkingCursor()
 {
     // Cancel the current timer
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
 
     // If the cursor is not visible, make it visible
     if (!m_Caret.visible) {

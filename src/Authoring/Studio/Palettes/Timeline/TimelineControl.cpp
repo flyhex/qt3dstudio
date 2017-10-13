@@ -156,12 +156,12 @@ void CTimelineControl::ClearView()
  * root of the doc.
  * @param inState the state to be viewed as the root asset.
  */
-void CTimelineControl::ViewSlide(UICDM::CUICDMSlideHandle inSlide)
+void CTimelineControl::ViewSlide(qt3dsdm::CUICDMSlideHandle inSlide)
 {
     m_ActiveSlide = inSlide;
 
-    UICDM::ISlideSystem *theSlideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
-    UICDM::CUICDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
+    qt3dsdm::ISlideSystem *theSlideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
+    qt3dsdm::CUICDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
     CSlideRow *theSlideRow = new CSlideRow(m_TranslationManager->GetOrCreate(theSlideInstance));
     theSlideRow->SetTimelineControl(this);
 
@@ -190,7 +190,7 @@ void CTimelineControl::ViewSlide(UICDM::CUICDMSlideHandle inSlide)
  * Notification from the StudioFullSystem signal provider that a we have a new active slide.
  * This will populate this view with the new context.
  */
-void CTimelineControl::OnActiveSlide(UICDM::CUICDMSlideHandle inSlide)
+void CTimelineControl::OnActiveSlide(qt3dsdm::CUICDMSlideHandle inSlide)
 {
     ClearView();
     ViewSlide(inSlide);
@@ -209,7 +209,7 @@ void CTimelineControl::OnNewPresentation()
     m_TranslationManager->OnNewPresentation();
 
     // Register callback
-    UICDM::IStudioFullSystemSignalProvider *theSignalProvider =
+    qt3dsdm::IStudioFullSystemSignalProvider *theSignalProvider =
         GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
     m_Connections.push_back(theSignalProvider->ConnectActiveSlide(
         std::bind(&CTimelineControl::OnActiveSlide, this, std::placeholders::_3)));
@@ -238,7 +238,7 @@ void CTimelineControl::OnClosingPresentation()
 /**
  * Accessor for the root object being displayed in this view.
  */
-UICDM::CUICDMSlideHandle CTimelineControl::GetActiveSlide()
+qt3dsdm::CUICDMSlideHandle CTimelineControl::GetActiveSlide()
 {
     return m_ActiveSlide;
 }
@@ -561,7 +561,7 @@ void CTimelineControl::OnSavingPresentation(const CUICFile *inNewPresentationFil
 /**
  * Notification from the StudioFullSystem signal provider that a slide has been deleted.
  */
-void CTimelineControl::OnDeleteSlide(UICDM::CUICDMSlideHandle inSlide)
+void CTimelineControl::OnDeleteSlide(qt3dsdm::CUICDMSlideHandle inSlide)
 {
     m_TimelineLayout->DeleteTimelineRatio(inSlide);
 }

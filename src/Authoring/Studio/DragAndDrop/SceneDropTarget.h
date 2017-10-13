@@ -55,10 +55,10 @@ public:
     CSceneViewDropTarget();
     bool Accept(CDropSource &inSource) override;
     bool Drop(CDropSource &inSource) override;
-    UICDM::CUICDMInstanceHandle GetInstance() override;
+    qt3dsdm::CUICDMInstanceHandle GetInstance() override;
 
-    bool IsRelative(UICDM::CUICDMInstanceHandle inInstance) override;
-    bool IsSelf(UICDM::CUICDMInstanceHandle inInstance) override;
+    bool IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance) override;
+    bool IsSelf(qt3dsdm::CUICDMInstanceHandle inInstance) override;
     long GetObjectType() override;
     void SetDropSourceObjectType(long inObjType);
     void SetDropTime(long inDropTime);

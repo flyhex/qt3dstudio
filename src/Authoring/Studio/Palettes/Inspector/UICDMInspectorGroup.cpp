@@ -73,7 +73,7 @@ CUICDMInspectorGroup::~CUICDMInspectorGroup()
 /**
  * Method to create a new InspectorRowBase.
  */
-void CUICDMInspectorGroup::CreateRow(CDoc *inDoc, UICDM::CUICDMMetaDataPropertyHandle inProperty)
+void CUICDMInspectorGroup::CreateRow(CDoc *inDoc, qt3dsdm::CUICDMMetaDataPropertyHandle inProperty)
 {
     Q3DStudio::CUICDMInspectorRow *theUICDMRow =
         new Q3DStudio::CUICDMInspectorRow(inDoc, inProperty);

@@ -88,7 +88,7 @@ void ObjectReferenceView::setInstance(int instance)
 
 void ObjectReferenceView::setSelectedReference(const QString &name)
 {
-    UICDM::SValue v = QVariant(name);
+    qt3dsdm::SValue v = QVariant(name);
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
             ->SetInstancePropertyValue(m_instance, m_handle, v);
 }

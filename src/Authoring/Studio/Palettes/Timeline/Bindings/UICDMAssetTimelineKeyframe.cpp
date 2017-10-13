@@ -31,7 +31,7 @@
 #include "UICDMAssetTimelineKeyframe.h"
 #include "UICDMTimelineItemBinding.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CUICDMAssetTimelineKeyframe::CUICDMAssetTimelineKeyframe(CUICDMTimelineItemBinding *inOwningBinding,
                                                          long inTime)

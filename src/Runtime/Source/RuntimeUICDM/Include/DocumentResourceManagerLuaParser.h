@@ -44,7 +44,7 @@
 namespace Q3DStudio {
 namespace LuaParser {
 
-    using namespace UICDM;
+    using namespace qt3dsdm;
     using namespace std;
     using namespace Q3DStudio;
 
@@ -157,7 +157,7 @@ namespace LuaParser {
     {
         static std::shared_ptr<IDOMReader>
         ParseLuaData(std::shared_ptr<IDOMFactory> inFactory,
-                     std::shared_ptr<UICDM::IStringTable> inStringTable,
+                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                      eastl::string &inFileData, CXmlErrorHandler &inErrorHandler)
         {
             eastl::string theOpenTag("<Behavior>\n");
@@ -188,7 +188,7 @@ namespace LuaParser {
 
         static std::shared_ptr<IDOMReader>
         ParseLuaFile(std::shared_ptr<IDOMFactory> inFactory,
-                     std::shared_ptr<UICDM::IStringTable> inStringTable,
+                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                      const char8_t *inFileData, CXmlErrorHandler &inErrorHandler,
                      qt3ds::render::IInputStreamFactory &inStreamFactory)
         {

@@ -40,15 +40,15 @@
 #include "Doc.h"
 #include "UICDMHandles.h"
 
-class CCmdDataModelDeleteInstance : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelDeleteInstance : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    UICDM::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
 
 public: // Construction
-    CCmdDataModelDeleteInstance(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance)
-        : UICDM::CmdDataModel(*inDoc)
+    CCmdDataModelDeleteInstance(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
     {
@@ -89,14 +89,14 @@ public: // Construction
     }
 };
 
-class CCmdDataModelDeleteComponentInstance : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelDeleteComponentInstance : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    UICDM::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
 
 public: // Construction
-    CCmdDataModelDeleteComponentInstance(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance)
+    CCmdDataModelDeleteComponentInstance(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance)
         : CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
@@ -110,8 +110,8 @@ public: // Construction
     {
         if (!ConsumerExists()) {
             SetConsumer();
-            UICDM::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
-            UICDM::CUICDMSlideHandle theSlide = theSlideSystem->GetSlideByInstance(m_Instance);
+            qt3dsdm::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
+            qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetSlideByInstance(m_Instance);
             theSlideSystem->DeleteSlideByIndex(theSlide, 0);
 
             ReleaseConsumer();

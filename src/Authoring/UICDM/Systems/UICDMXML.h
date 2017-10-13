@@ -41,7 +41,7 @@
 #include "UICDMValue.h"
 #include <memory>
 
-namespace UICDM {
+namespace qt3dsdm {
 using qt3ds::foundation::MemoryBuffer;
 using qt3ds::foundation::RawAllocator;
 class IStringTable;

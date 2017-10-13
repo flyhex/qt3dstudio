@@ -48,7 +48,7 @@
 
 #include <QObject>
 
-namespace UICDM {
+namespace qt3dsdm {
 
 typedef const wchar_t *TCharPtr;
 struct SUICDMStr : public eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType>
@@ -460,30 +460,30 @@ namespace qt3ds {
 namespace foundation {
 
     template <>
-    struct DestructTraits<UICDM::SFloat2>
+    struct DestructTraits<qt3dsdm::SFloat2>
     {
-        void destruct(UICDM::SFloat2 &) {}
+        void destruct(qt3dsdm::SFloat2 &) {}
     };
     template <>
-    struct DestructTraits<UICDM::SFloat3>
+    struct DestructTraits<qt3dsdm::SFloat3>
     {
-        void destruct(UICDM::SFloat3 &) {}
+        void destruct(qt3dsdm::SFloat3 &) {}
     };
     template <>
-    struct DestructTraits<UICDM::SLong4>
+    struct DestructTraits<qt3dsdm::SLong4>
     {
-        void destruct(UICDM::SLong4 &) {}
+        void destruct(qt3dsdm::SLong4 &) {}
     };
     template <>
-    struct DestructTraits<UICDM::SStringRef>
+    struct DestructTraits<qt3dsdm::SStringRef>
     {
-        void destruct(UICDM::SStringRef &) {}
+        void destruct(qt3dsdm::SStringRef &) {}
     };
 
     template <>
-    struct EqualVisitorTraits<UICDM::TDataStrPtr>
+    struct EqualVisitorTraits<qt3dsdm::TDataStrPtr>
     {
-        bool operator()(const UICDM::TDataStrPtr &lhs, const UICDM::TDataStrPtr &rhs)
+        bool operator()(const qt3dsdm::TDataStrPtr &lhs, const qt3dsdm::TDataStrPtr &rhs)
         {
             if (lhs && rhs)
                 return *lhs == *rhs;
@@ -495,7 +495,7 @@ namespace foundation {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 using qt3ds::NVUnionCast;
 

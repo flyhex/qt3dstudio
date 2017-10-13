@@ -39,7 +39,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 inline bool AnimationInstanceMatches(CUICDMAnimationHandle inAnimation,
                                      TAnimationCorePtr inAnimationCore,

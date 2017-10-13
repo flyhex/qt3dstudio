@@ -38,7 +38,7 @@ class Q3DSDirSystem : public Q3DStudio::IDirectoryWatchingSystem
 {
 public:
     Q3DSDirSystem(Q3DStudio::TCallbackCaller caller);
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     AddDirectory(const QString &directory, Q3DStudio::TFileModCallbackType callback);
 
 private:

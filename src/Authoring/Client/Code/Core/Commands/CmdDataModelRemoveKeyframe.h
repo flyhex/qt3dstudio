@@ -43,23 +43,23 @@
 #include "CmdDataModelBase.h"
 #include "UICDMStudioSystem.h"
 
-class CCmdDataModelRemoveKeyframe : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelRemoveKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    std::vector<UICDM::CUICDMKeyframeHandle> m_Keyframes; // 1..n keyframes to be deleted
+    std::vector<qt3dsdm::CUICDMKeyframeHandle> m_Keyframes; // 1..n keyframes to be deleted
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelRemoveKeyframe(CDoc *inDoc, UICDM::CUICDMKeyframeHandle inKeyframe)
-        : UICDM::CmdDataModel(*inDoc)
+    CCmdDataModelRemoveKeyframe(CDoc *inDoc, qt3dsdm::CUICDMKeyframeHandle inKeyframe)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
     {
         AddKeyframeHandle(inKeyframe);
     }
     ~CCmdDataModelRemoveKeyframe() {}
 
-    void AddKeyframeHandle(UICDM::CUICDMKeyframeHandle inKeyframe)
+    void AddKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inKeyframe)
     {
         m_Keyframes.push_back(inKeyframe);
     }
@@ -70,8 +70,8 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
-            UICDM::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
             for (size_t i = 0; i < m_Keyframes.size(); ++i)
                 theAnimationCore->EraseKeyframe(m_Keyframes[i]);
         } else {

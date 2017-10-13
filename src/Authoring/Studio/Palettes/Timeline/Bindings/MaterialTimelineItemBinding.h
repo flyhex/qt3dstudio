@@ -51,7 +51,7 @@ class CBaseStateRow;
 class CMaterialTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public: // Types
-    typedef std::tuple<UICDM::TCharStr, UICDM::TCharStr> TNameFormalNamePair;
+    typedef std::tuple<qt3dsdm::TCharStr, qt3dsdm::TCharStr> TNameFormalNamePair;
     typedef std::vector<TNameFormalNamePair> TNameFormalNamePairList;
 
 protected: // Members
@@ -59,7 +59,7 @@ protected: // Members
 
 public: // Construction
     CMaterialTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                 UICDM::CUICDMInstanceHandle inDataHandle);
+                                 qt3dsdm::CUICDMInstanceHandle inDataHandle);
     virtual ~CMaterialTimelineItemBinding();
 
 public: // CUICDMTimelineItemBinding
@@ -69,14 +69,14 @@ public: // CUICDMTimelineItemBinding
     // Hierarchy
     long GetChildrenCount() override;
     ITimelineItemBinding *GetChild(long inIndex) override;
-    void OnAddChild(UICDM::CUICDMInstanceHandle inInstance) override;
+    void OnAddChild(qt3dsdm::CUICDMInstanceHandle inInstance) override;
     // Event callback
-    void OnPropertyChanged(UICDM::CUICDMPropertyHandle inPropertyHandle) override;
-    void OnPropertyLinked(UICDM::CUICDMPropertyHandle inPropertyHandle) override;
+    void OnPropertyChanged(qt3dsdm::CUICDMPropertyHandle inPropertyHandle) override;
+    void OnPropertyLinked(qt3dsdm::CUICDMPropertyHandle inPropertyHandle) override;
 
 protected:
-    UICDM::CUICDMInstanceHandle GetImage(UICDM::CUICDMPropertyHandle inPropertyHandle);
-    ITimelineItemBinding *GetOrCreateImageBinding(UICDM::CUICDMPropertyHandle inPropertyHandle,
+    qt3dsdm::CUICDMInstanceHandle GetImage(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
+    ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
                                                   const wchar_t *inName);
 };
 

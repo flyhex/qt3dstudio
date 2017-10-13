@@ -711,7 +711,7 @@ bool CScroller::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 void CScroller::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     if (m_IsMouseDown) {
-        m_CurrentTickTock = std::shared_ptr<UICDM::ISignalConnection>();
+        m_CurrentTickTock = std::shared_ptr<qt3dsdm::ISignalConnection>();
 
         CPt theOffset;
         if ((inPoint.x < 0))
@@ -781,13 +781,13 @@ void CScroller::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
     CControl::OnMouseUp(inPoint, inFlags);
 
-    m_CurrentTickTock = std::shared_ptr<UICDM::ISignalConnection>();
+    m_CurrentTickTock = std::shared_ptr<qt3dsdm::ISignalConnection>();
 }
 
 void CScroller::OnLoseFocus()
 {
     m_IsMouseDown = false;
-    m_CurrentTickTock = std::shared_ptr<UICDM::ISignalConnection>();
+    m_CurrentTickTock = std::shared_ptr<qt3dsdm::ISignalConnection>();
     CControl::OnLoseFocus();
 }
 

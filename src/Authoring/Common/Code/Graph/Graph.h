@@ -35,7 +35,7 @@
 #include <map>
 #include "SIterator.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class ITransactionConsumer;
 class ISignalConnection;
 }
@@ -185,7 +185,7 @@ class CGraph
 {
 public:
     virtual ~CGraph(){}
-    virtual void SetConsumer(std::shared_ptr<UICDM::ITransactionConsumer> inConsumer) = 0;
+    virtual void SetConsumer(std::shared_ptr<qt3dsdm::ITransactionConsumer> inConsumer) = 0;
 
     /**
      *	Add a new child to the graph.  If inParent == NULL then it is added to the list of roots.
@@ -270,12 +270,12 @@ public:
 
     // Signals
     // Always in the form of parent,child,childIdx
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildAdded(std::function<void(TIdentifier, TIdentifier, long)> inCallback) = 0;
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildRemoved(std::function<void(TIdentifier, TIdentifier, long)> inCallback) = 0;
     // parent,child,oldpos,newpos
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildMoved(std::function<void(TIdentifier, TIdentifier, long, long)> inCallback) = 0;
 
     static std::shared_ptr<CGraph> CreateGraph(TIdentifier inRoot = 0);

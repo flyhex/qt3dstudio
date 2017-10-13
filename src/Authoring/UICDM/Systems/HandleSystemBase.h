@@ -32,7 +32,7 @@
 
 #include <unordered_map>
 
-namespace UICDM {
+namespace qt3dsdm {
 
 class CHandleObject
 {

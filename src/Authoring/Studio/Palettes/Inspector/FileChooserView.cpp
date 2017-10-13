@@ -99,10 +99,10 @@ void FileChooserView::showEvent(QShowEvent *event)
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
 
-    UICDM::SValue value;
+    qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
-    m_model->setCurrentFile(UICDM::get<QString>(value));
+    m_model->setCurrentFile(qt3dsdm::get<QString>(value));
 
     QQuickWidget::showEvent(event);
 }

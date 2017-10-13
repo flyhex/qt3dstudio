@@ -77,8 +77,8 @@ public:
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
-    void OnImmediateRefreshInstanceSingle(UICDM::CUICDMInstanceHandle inInstance) override;
-    void OnImmediateRefreshInstanceMultiple(UICDM::CUICDMInstanceHandle *inInstance,
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance,
                                                     long inInstanceCount) override;
 
 
@@ -106,10 +106,10 @@ private:
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     void showBrowser(QQuickWidget *browser, const QPoint &point);
 
-    std::shared_ptr<UICDM::ISignalConnection> m_selectionChangedConnection;
-    std::shared_ptr<UICDM::ISignalConnection> m_timeChanged;
-    std::shared_ptr<UICDM::ISignalConnection> m_DirectoryConnection;
-    std::shared_ptr<UICDM::ISignalConnection> m_PropertyChangeConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_timeChanged;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_DirectoryConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_PropertyChangeConnection;
     QColor m_backgroundColor;
     InspectorControlModel *m_inspectorControlModel = nullptr;
     CInspectableBase *m_inspectableBase = nullptr;

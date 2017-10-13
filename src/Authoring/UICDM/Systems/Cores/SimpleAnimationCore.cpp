@@ -48,7 +48,7 @@ typedef SPerfLogEvent TPerfLogMathEvent1;
 using namespace std;
 using namespace boost;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMAnimationHandle
 CSimpleAnimationCore::CreateAnimation(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,

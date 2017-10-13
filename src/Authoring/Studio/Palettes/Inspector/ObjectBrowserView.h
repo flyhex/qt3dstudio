@@ -70,7 +70,7 @@ public:
     PathType pathType() const {return m_pathType;}
     void setPathType(PathType type);
 
-    UICDM::CUICDMInstanceHandle selectedHandle() const;
+    qt3dsdm::CUICDMInstanceHandle selectedHandle() const;
 
 Q_SIGNALS:
     void modelChanged();

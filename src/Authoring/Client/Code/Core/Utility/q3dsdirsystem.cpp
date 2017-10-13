@@ -30,7 +30,7 @@
 #include "q3dsdirwatcher.h"
 #include "UICDMSignals.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace Q3DStudio;
 
 class Q3DSDirCallback : public ISignalConnection

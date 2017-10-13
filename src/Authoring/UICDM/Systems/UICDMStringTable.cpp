@@ -31,7 +31,7 @@
 #include "foundation/StringTable.h"
 #include "foundation/TrackingAllocator.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace eastl;
 using namespace qt3ds;
 

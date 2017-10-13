@@ -107,8 +107,8 @@ public:
     ISnappingListProvider *GetSnappingListProvider() const override;
 
     void ClearView();
-    void ViewSlide(UICDM::CUICDMSlideHandle inSlide);
-    UICDM::CUICDMSlideHandle GetActiveSlide();
+    void ViewSlide(qt3dsdm::CUICDMSlideHandle inSlide);
+    qt3dsdm::CUICDMSlideHandle GetActiveSlide();
 
     CTimelineTimelineLayout *GetTimelineLayout();
     CTimelineTreeLayout *GetTreeLayout();
@@ -132,8 +132,8 @@ protected:
     void HideInsertionMarkers();
 
     // UICDM callbacks
-    void OnActiveSlide(UICDM::CUICDMSlideHandle inSlide);
-    void OnDeleteSlide(UICDM::CUICDMSlideHandle inSlide);
+    void OnActiveSlide(qt3dsdm::CUICDMSlideHandle inSlide);
+    void OnDeleteSlide(qt3dsdm::CUICDMSlideHandle inSlide);
 
     // Helper functions
     inline CDoc *GetDoc();
@@ -142,7 +142,7 @@ protected:
     CTimelineSplitter *m_Splitter;
     CTimelineTreeLayout *m_TreeLayout;
     CTimelineTimelineLayout *m_TimelineLayout;
-    UICDM::CUICDMSlideHandle m_ActiveSlide;
+    qt3dsdm::CUICDMSlideHandle m_ActiveSlide;
     CInsertionLine
         *m_InsertionLine; ///< Drag-and-drop insertion line for dropping between timeline items
     CInsertionOverlay
@@ -152,7 +152,7 @@ protected:
 
     CTimelineTranslationManager *m_TranslationManager;
 
-    std::vector<std::shared_ptr<UICDM::ISignalConnection>>
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the UICDM
 };
 #endif // INCLUDED_TIMELINE_CONTROL_H

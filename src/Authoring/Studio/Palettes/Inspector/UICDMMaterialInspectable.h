@@ -49,7 +49,7 @@ class CUICDMMaterialInspectable : public CUICDMInspectable
 {
 public:
     CUICDMMaterialInspectable(CStudioApp &inApp, CCore *inCore,
-                              UICDM::CUICDMInstanceHandle inInstance)
+                              qt3dsdm::CUICDMInstanceHandle inInstance)
         : CUICDMInspectable(inApp, inCore, inInstance)
     {
     }

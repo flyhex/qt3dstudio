@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraph(CUICDMSlideHandle inRoot)
 {

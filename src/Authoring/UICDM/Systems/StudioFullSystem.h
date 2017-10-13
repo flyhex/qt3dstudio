@@ -34,7 +34,7 @@
 #include "UICDMSignals.h"
 #include "UICDMDataTypes.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 class IPropertySystem;
 class ISlideSystem;
 class IStudioAnimationSystem;

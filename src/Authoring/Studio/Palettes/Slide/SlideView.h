@@ -40,7 +40,7 @@
 class CClientDataModelBridge;
 class CDoc;
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISlideSystem;
 }
 
@@ -76,29 +76,29 @@ Q_SIGNALS:
 
 protected:
     // UICDM callbacks
-    virtual void OnActiveSlide(const UICDM::CUICDMSlideHandle &inMaster, int inIndex,
-                               const UICDM::CUICDMSlideHandle &inSlide);
-    virtual void OnNewSlide(const UICDM::CUICDMSlideHandle &inSlide);
-    virtual void OnDeleteSlide(const UICDM::CUICDMSlideHandle &inSlide);
-    virtual void OnSlideRearranged(const UICDM::CUICDMSlideHandle &inMaster, int inOldIndex,
+    virtual void OnActiveSlide(const qt3dsdm::CUICDMSlideHandle &inMaster, int inIndex,
+                               const qt3dsdm::CUICDMSlideHandle &inSlide);
+    virtual void OnNewSlide(const qt3dsdm::CUICDMSlideHandle &inSlide);
+    virtual void OnDeleteSlide(const qt3dsdm::CUICDMSlideHandle &inSlide);
+    virtual void OnSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster, int inOldIndex,
                                    int inNewIndex);
 
 private:
     void initialize();
     void clearSlideList();
-    void setActiveSlide(const UICDM::CUICDMSlideHandle &inActiveSlideHandle);
+    void setActiveSlide(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHandle);
     inline CDoc *GetDoc();
     inline CClientDataModelBridge *GetBridge();
-    inline UICDM::ISlideSystem *GetSlideSystem();
-    long GetSlideIndex(const UICDM::CUICDMSlideHandle &inSlideHandle);
-    bool isMaster(const UICDM::CUICDMSlideHandle &inSlideHandle);
-    void rebuildSlideList(const UICDM::CUICDMSlideHandle &inActiveSlideHandle);
+    inline qt3dsdm::ISlideSystem *GetSlideSystem();
+    long GetSlideIndex(const qt3dsdm::CUICDMSlideHandle &inSlideHandle);
+    bool isMaster(const qt3dsdm::CUICDMSlideHandle &inSlideHandle);
+    void rebuildSlideList(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHandle);
 
     SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
     SlideModel *m_SlidesModel = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
-    std::vector<std::shared_ptr<UICDM::ISignalConnection>>
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the UICDM
     typedef std::unordered_map<int, int> TIntIntMap;
     // We need to remember which slide we were on when we entered the master slide.
@@ -106,8 +106,8 @@ private:
     // state.
     TIntIntMap m_MasterSlideReturnPointers;
 
-    UICDM::CUICDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
-    UICDM::CUICDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
+    qt3dsdm::CUICDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
+    qt3dsdm::CUICDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
 };
 
 #endif // SLIDEVIEW_H

@@ -47,7 +47,7 @@ namespace UICIMP {
 using namespace qt3ds;
 using namespace qt3ds::foundation;
 using namespace std;
-using namespace UICDM;
+using namespace qt3dsdm;
 
 struct ParentChildLink;
 struct PropertyValue;

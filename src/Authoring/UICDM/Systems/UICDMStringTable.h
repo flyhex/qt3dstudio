@@ -39,7 +39,7 @@ namespace foundation {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 class IStringTable
 {

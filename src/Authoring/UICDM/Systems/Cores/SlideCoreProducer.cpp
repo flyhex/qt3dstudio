@@ -37,7 +37,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMSlideHandle CSlideCoreProducer::CreateSlide(CUICDMInstanceHandle inInstance)
 {
@@ -207,7 +207,7 @@ struct HashMapDataValueInsertTransaction
         SValue theTempValue = m_Value.second.GetValue();
         TDataStrPtr theStrPtr;
         if (GetValueType(theTempValue) == DataModelDataType::String) {
-            theStrPtr = UICDM::get<TDataStrPtr>(theTempValue);
+            theStrPtr = qt3dsdm::get<TDataStrPtr>(theTempValue);
         }
         (void)theStrPtr;
         TBase::Add();
@@ -232,7 +232,7 @@ inline void CSlideCoreProducer::DoForceSetInstancePropertyValue(CUICDMSlideHandl
                                                 inSlide, inHandle, inProperty, theTempValue);
         iter->second->Update(theNewValue);
         if (GetValueType(theTempValue) == DataModelDataType::String) {
-            TDataStrPtr theStrPtr = UICDM::get<TDataStrPtr>(theTempValue);
+            TDataStrPtr theStrPtr = qt3dsdm::get<TDataStrPtr>(theTempValue);
             UICDM_DEBUG_LOG(m_Data->GetStringTable().GetNarrowStr(theStrPtr->GetData()));
         }
         return; // don't signal

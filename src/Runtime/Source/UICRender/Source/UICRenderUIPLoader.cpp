@@ -120,7 +120,7 @@ using qt3ds::render::SPath;
 using qt3ds::render::SPathSubPath;
 using qt3ds::render::SLightmaps;
 
-namespace UICDM {
+namespace qt3dsdm {
 template <>
 struct WStrOps<SFloat2>
 {
@@ -130,7 +130,7 @@ struct WStrOps<SFloat2>
         ioTempBuf.resize(len + 1);
         memCopy(ioTempBuf.data(), buffer, (len + 1) * sizeof(char8_t));
         MemoryBuffer<RawAllocator> unused;
-        UICDM::IStringTable *theTable(NULL);
+        qt3dsdm::IStringTable *theTable(NULL);
         WCharTReader reader(ioTempBuf.begin(), unused, *theTable);
         reader.ReadRef(NVDataRef<QT3DSF32>(item.m_Floats, 2));
     }
@@ -145,7 +145,7 @@ struct WStrOps<SFloat3>
         ioTempBuf.resize(len + 1);
         memCopy(ioTempBuf.data(), buffer, (len + 1) * sizeof(char8_t));
         MemoryBuffer<RawAllocator> unused;
-        UICDM::IStringTable *theTable(NULL);
+        qt3dsdm::IStringTable *theTable(NULL);
         WCharTReader reader(ioTempBuf.begin(), unused, *theTable);
         reader.ReadRef(NVDataRef<QT3DSF32>(item.m_Floats, 3));
     }
@@ -256,12 +256,12 @@ public:
 
 struct SDomReaderPropertyParser : public IPropertyParser
 {
-    UICDM::IDOMReader &m_Reader;
+    qt3dsdm::IDOMReader &m_Reader;
     nvvector<char8_t> &m_TempBuf;
     IDOMReferenceResolver &m_Resolver;
     SGraphObject &m_Object;
 
-    SDomReaderPropertyParser(UICDM::IDOMReader &reader, nvvector<char8_t> &inTempBuf,
+    SDomReaderPropertyParser(qt3dsdm::IDOMReader &reader, nvvector<char8_t> &inTempBuf,
                              IDOMReferenceResolver &inResolver, SGraphObject &inObject)
         : m_Reader(reader)
         , m_TempBuf(inTempBuf)
@@ -285,20 +285,20 @@ struct SDomReaderPropertyParser : public IPropertyParser
     }
     Option<QT3DSVec2> ParseVec2(const char8_t *inName) override
     {
-        UICDM::SFloat2 retval;
+        qt3dsdm::SFloat2 retval;
         const char8_t *tempData;
         if (m_Reader.UnregisteredAtt(inName, tempData)) {
-            UICDM::WStrOps<UICDM::SFloat2>().StrTo(tempData, retval, m_TempBuf);
+            qt3dsdm::WStrOps<qt3dsdm::SFloat2>().StrTo(tempData, retval, m_TempBuf);
             return QT3DSVec2(retval.m_Floats[0], retval.m_Floats[1]);
         }
         return Empty();
     }
     Option<QT3DSVec3> ParseVec3(const char8_t *inName) override
     {
-        UICDM::SFloat3 retval;
+        qt3dsdm::SFloat3 retval;
         const char8_t *tempData;
         if (m_Reader.UnregisteredAtt(inName, tempData)) {
-            UICDM::WStrOps<UICDM::SFloat3>().StrTo(tempData, retval, m_TempBuf);
+            qt3dsdm::WStrOps<qt3dsdm::SFloat3>().StrTo(tempData, retval, m_TempBuf);
             return QT3DSVec3(retval.m_Floats[0], retval.m_Floats[1], retval.m_Floats[2]);
         }
         return Empty();
@@ -446,10 +446,10 @@ struct SPathAndAnchorIndex
 
 struct SRenderUIPLoader : public IDOMReferenceResolver
 {
-    typedef UICDM::IDOMReader::Scope TScope;
+    typedef qt3dsdm::IDOMReader::Scope TScope;
     typedef eastl::map<CRegisteredString, eastl::string> TIdStringMap;
     typedef eastl::hash_map<CRegisteredString, SPathAndAnchorIndex> TIdPathAnchorIndexMap;
-    UICDM::IDOMReader &m_Reader;
+    qt3dsdm::IDOMReader &m_Reader;
     Q3DStudio::IRuntimeMetaData &m_MetaData;
     IStringTable &m_StrTable;
     NVFoundationBase &m_Foundation;
@@ -472,7 +472,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     MemoryBuffer<RawAllocator> m_ValueBuffer;
     TIdPathAnchorIndexMap m_AnchorIdToPathAndAnchorIndexMap;
 
-    SRenderUIPLoader(UICDM::IDOMReader &inReader, const char8_t *inFullPathToPresentationFile,
+    SRenderUIPLoader(qt3dsdm::IDOMReader &inReader, const char8_t *inFullPathToPresentationFile,
                      Q3DStudio::IRuntimeMetaData &inMetaData, IStringTable &inStrTable
                      // Allocator for datastructures we need to parse the file.
                      ,
@@ -596,7 +596,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     {
         qt3ds::render::SEnumNameMap *theMap = qt3ds::render::SEnumParseMap<TEnumType>::GetMap();
         for (qt3ds::render::SEnumNameMap *item = theMap; item->m_Name; ++item) {
-            if (UICDM::AreEqual(inStr, item->m_Name)) {
+            if (qt3dsdm::AreEqual(inStr, item->m_Name)) {
                 ioEnum = static_cast<TEnumType>(item->m_Enum);
                 return true;
             }
@@ -1153,53 +1153,53 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     void ParseGraphPass1(SGraphObject *inParent)
     {
         TScope __elemScope(m_Reader);
-        UICDM::ComposerObjectTypes::Enum theObjType =
-            UICDM::ComposerObjectTypes::Convert(m_Reader.GetElementName());
+        qt3dsdm::ComposerObjectTypes::Enum theObjType =
+            qt3dsdm::ComposerObjectTypes::Convert(m_Reader.GetElementName());
         SGraphObject *theNewObject(NULL);
         const char8_t *theId;
         m_Reader.Att("id", theId);
 
         switch (theObjType) {
-        case UICDM::ComposerObjectTypes::Scene: {
+        case qt3dsdm::ComposerObjectTypes::Scene: {
             SScene *theScene = QT3DS_NEW(m_PresentationAllocator, SScene)();
             theNewObject = theScene;
             m_Presentation->m_Scene = theScene;
             theScene->m_Presentation = m_Presentation;
         } break;
-        case UICDM::ComposerObjectTypes::Layer:
+        case qt3dsdm::ComposerObjectTypes::Layer:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SLayer)();
             break;
-        case UICDM::ComposerObjectTypes::Group:
+        case qt3dsdm::ComposerObjectTypes::Group:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SNode)();
             break;
-        case UICDM::ComposerObjectTypes::Component:
+        case qt3dsdm::ComposerObjectTypes::Component:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SNode)();
             break;
-        case UICDM::ComposerObjectTypes::Camera:
+        case qt3dsdm::ComposerObjectTypes::Camera:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SCamera)();
             break;
-        case UICDM::ComposerObjectTypes::Light:
+        case qt3dsdm::ComposerObjectTypes::Light:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SLight)();
             break;
-        case UICDM::ComposerObjectTypes::Model:
+        case qt3dsdm::ComposerObjectTypes::Model:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SModel)();
             break;
-        case UICDM::ComposerObjectTypes::Material:
+        case qt3dsdm::ComposerObjectTypes::Material:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SDefaultMaterial)();
             break;
-        case UICDM::ComposerObjectTypes::ReferencedMaterial:
+        case qt3dsdm::ComposerObjectTypes::ReferencedMaterial:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SReferencedMaterial)();
             break;
-        case UICDM::ComposerObjectTypes::Image:
+        case qt3dsdm::ComposerObjectTypes::Image:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SImage)();
             break;
-        case UICDM::ComposerObjectTypes::Text:
+        case qt3dsdm::ComposerObjectTypes::Text:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SText)();
             break;
-        case UICDM::ComposerObjectTypes::Path:
+        case qt3dsdm::ComposerObjectTypes::Path:
             theNewObject = QT3DS_NEW(m_PresentationAllocator, SPath)();
             break;
-        case UICDM::ComposerObjectTypes::SubPath: {
+        case qt3dsdm::ComposerObjectTypes::SubPath: {
             SPathSubPath *thePath = QT3DS_NEW(m_PresentationAllocator, SPathSubPath)();
             theNewObject = thePath;
             QT3DSU32 anchorCount = 0;
@@ -1215,14 +1215,14 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
             }
             m_PathManager.ResizePathSubPathBuffer(*thePath, anchorCount);
         } break;
-        case UICDM::ComposerObjectTypes::Effect: {
+        case qt3dsdm::ComposerObjectTypes::Effect: {
             const char8_t *effectClassId;
             m_Reader.Att("class", effectClassId);
             CRegisteredString theStr = m_StrTable.RegisterStr(effectClassId + 1);
             if (m_EffectSystem.IsEffectRegistered(theStr))
                 theNewObject = m_EffectSystem.CreateEffectInstance(theStr, m_PresentationAllocator);
         } break;
-        case UICDM::ComposerObjectTypes::RenderPlugin: {
+        case qt3dsdm::ComposerObjectTypes::RenderPlugin: {
             const char8_t *classId;
             m_Reader.Att("class", classId);
             if (!qt3ds::foundation::isTrivial(classId)) {
@@ -1243,7 +1243,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                 }
             }
         } break;
-        case UICDM::ComposerObjectTypes::CustomMaterial: {
+        case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
             const char8_t *materialClassId;
             m_Reader.Att("class", materialClassId);
             CRegisteredString theStr = m_StrTable.RegisterStr(materialClassId + 1);
@@ -1618,7 +1618,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         CRegisteredString theId(m_StrTable.RegisterStr(idStr));
                         if (m_EffectSystem.IsEffectRegistered(theId) == false) {
                             // File should already be loaded.
-                            Option<UICDM::SMetaDataEffect> theEffectMetaData =
+                            Option<qt3dsdm::SMetaDataEffect> theEffectMetaData =
                                 m_MetaData.GetEffectMetaDataBySourcePath(sourcepath);
                             if (theEffectMetaData.hasValue()) {
                                 qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
@@ -1632,7 +1632,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         CRegisteredString theId(m_StrTable.RegisterStr(idStr));
                         if (m_CustomMaterialSystem.IsMaterialRegistered(theId) == false) {
                             // File should already be loaded.
-                            Option<UICDM::SMetaDataCustomMaterial> theMetaData =
+                            Option<qt3dsdm::SMetaDataCustomMaterial> theMetaData =
                                 m_MetaData.GetMaterialMetaDataBySourcePath(sourcepath);
                             if (theMetaData.hasValue()) {
                                 qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
@@ -1785,7 +1785,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 }
 
 SPresentation *qt3ds::render::IUIPLoader::LoadUIPFile(
-    UICDM::IDOMReader &inReader, const char8_t *inFullPathToPresentationFile,
+    qt3dsdm::IDOMReader &inReader, const char8_t *inFullPathToPresentationFile,
     Q3DStudio::IRuntimeMetaData &inMetaData, IStringTable &inStrTable,
     NVFoundationBase &inFoundation
     // Allocator used for the presentation objects themselves
@@ -1807,7 +1807,7 @@ SPresentation *qt3ds::render::IUIPLoader::LoadUIPFile(
                                inDynamicSystem, inPathManager, inResolver);
     return theLoader.Load(inSetValuesFromSlides);
 }
-using namespace UICDM;
+using namespace qt3dsdm;
 
 inline qt3ds::render::NVRenderTextureFormats::Enum
 ConvertTypeAndFormatToTextureFormat(const char8_t *inType, const char8_t *inFormat,
@@ -1890,7 +1890,7 @@ QString ConvertUTFtoQString(const wchar_t *string)
 // system are sharing the same string table.
 void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
     CRegisteredString inEffectName, NVFoundationBase &inFoundation, IEffectSystem &inEffectSystem,
-    const UICDM::SMetaDataEffect &inMetaDataEffect, IStringTable &inStrTable)
+    const qt3dsdm::SMetaDataEffect &inMetaDataEffect, IStringTable &inStrTable)
 {
     using namespace qt3ds::render::dynamic;
     if (inEffectSystem.IsEffectRegistered(inEffectName)) {
@@ -1930,7 +1930,7 @@ void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
                 theDefinition.m_CoordOp, theDefinition.m_MagFilterOp, theDefinition.m_MinFilterOp);
     }
     for (QT3DSU32 idx = 0, end = inMetaDataEffect.m_Shaders.size(); idx < end; ++idx) {
-        const UICDM::SMetaDataShader &theShader = inMetaDataEffect.m_Shaders[idx];
+        const qt3dsdm::SMetaDataShader &theShader = inMetaDataEffect.m_Shaders[idx];
         theConvertStr.clear();
         theConvertStr = ConvertUTFtoQString(
             theShader.m_Code.c_str()).toStdString();
@@ -1951,7 +1951,7 @@ void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
 void qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
     CRegisteredString inClassName, NVFoundationBase &inFoundation,
     ICustomMaterialSystem &inMaterialSystem,
-    const UICDM::SMetaDataCustomMaterial &inMetaDataMaterial, IStringTable &inStrTable)
+    const qt3dsdm::SMetaDataCustomMaterial &inMetaDataMaterial, IStringTable &inStrTable)
 {
     using namespace qt3ds::render::dynamic;
     if (inMaterialSystem.IsMaterialRegistered(inClassName)) {
@@ -1993,7 +1993,7 @@ void qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
     }
     if (inMetaDataMaterial.m_Shaders.size()) {
         for (QT3DSU32 idx = 0, end = (QT3DSU32)inMetaDataMaterial.m_Shaders.size(); idx < end; ++idx) {
-            const UICDM::SMetaDataShader &theShader = inMetaDataMaterial.m_Shaders[idx];
+            const qt3dsdm::SMetaDataShader &theShader = inMetaDataMaterial.m_Shaders[idx];
             theConvertStr = ConvertUTFtoQString(
                 theShader.m_Code.c_str()).toStdString();
             theConvertShaderTypeStr = ConvertUTFtoQString(

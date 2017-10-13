@@ -150,12 +150,12 @@ void ProjectView::OnEndDataModelNotifications()
     m_ProjectModel->updateReferences(true);
 }
 
-void ProjectView::OnImmediateRefreshInstanceSingle(UICDM::CUICDMInstanceHandle inInstance)
+void ProjectView::OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     Q_UNUSED(inInstance);
 }
 
-void ProjectView::OnImmediateRefreshInstanceMultiple(UICDM::CUICDMInstanceHandle *inInstance, long inInstanceCount)
+void ProjectView::OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance, long inInstanceCount)
 {
     Q_UNUSED(inInstance);
     Q_UNUSED(inInstanceCount);

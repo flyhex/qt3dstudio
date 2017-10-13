@@ -47,7 +47,7 @@
 //==============================================================================
 class CDoc;
 class CClientDataModelBridge;
-namespace UICDM {
+namespace qt3dsdm {
 class IPropertySystem;
 class ISlideSystem;
 class ISlideCore;
@@ -67,16 +67,16 @@ class ISlideCore;
 //            For broken files this will only fix the specific file that was located
 //            The project palette will update to reflect the changes
 
-class CCmdLocateReference : public CCmd, public UICDM::CmdDataModel
+class CCmdLocateReference : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
     Q3DStudio::CFilePath m_OldPath;
     Q3DStudio::CFilePath m_NewPath;
     CClientDataModelBridge *m_Bridge;
-    UICDM::IPropertySystem *m_PropertySystem;
-    UICDM::ISlideSystem *m_SlideSystem;
-    UICDM::ISlideCore *m_SlideCore;
+    qt3dsdm::IPropertySystem *m_PropertySystem;
+    qt3dsdm::ISlideSystem *m_SlideSystem;
+    qt3dsdm::ISlideCore *m_SlideCore;
 
 public:
     CCmdLocateReference(CDoc *inDoc, const Q3DStudio::CFilePath &inOldPath,
@@ -89,13 +89,13 @@ public:
 
 protected:
     void LocateReference();
-    void UpdateSourcePath(UICDM::CUICDMInstanceHandle inInstance,
-                          UICDM::CUICDMSlideHandle inSpecificSlide = 0);
-    void GetSourcePath(UICDM::CUICDMInstanceHandle inInstance,
-                       UICDM::CUICDMSlideHandle inSpecificSlide, Q3DStudio::CFilePath &outPath,
+    void UpdateSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+                          qt3dsdm::CUICDMSlideHandle inSpecificSlide = 0);
+    void GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+                       qt3dsdm::CUICDMSlideHandle inSpecificSlide, Q3DStudio::CFilePath &outPath,
                        Q3DStudio::CString &outIdentifier);
-    void SetSourcePath(UICDM::CUICDMInstanceHandle inInstance,
-                       UICDM::CUICDMSlideHandle inSpecificSlide, const Q3DStudio::CFilePath &inPath,
+    void SetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+                       qt3dsdm::CUICDMSlideHandle inSpecificSlide, const Q3DStudio::CFilePath &inPath,
                        const Q3DStudio::CString &inIdentifier);
 
     // subclasses should implement the following methods

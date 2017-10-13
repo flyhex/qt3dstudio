@@ -57,7 +57,7 @@ using boost::BOOST_SIGNALS_NAMESPACE::scoped_connection;
 using boost::BOOST_SIGNALS_NAMESPACE::connection;
 #endif
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using std::shared_ptr;
 using std::make_shared;
 using std::static_pointer_cast;
@@ -77,7 +77,7 @@ typedef CUICDMHandlerArgHandle THandlerArgHandle;
 typedef CUICDMMetaDataPropertyHandle TMetaDataPropertyHandle;
 typedef CUICDMCategoryHandle TCategoryHandle;
 
-namespace UICDM {
+namespace qt3dsdm {
 #define UIC_WCHAR_T_None L"None"
 #define UIC_WCHAR_T_StringList L"StringList"
 #define UIC_WCHAR_T_Range L"Range"
@@ -338,7 +338,7 @@ struct SBoostSignalConnection : public ISignalConnection
 #define CONNECT(x) std::make_shared<SBoostSignalConnection>(x.connect(inCallback))
 #else
 
-#define CONNECT(x) std::shared_ptr<UICDM::ISignalConnection>()
+#define CONNECT(x) std::shared_ptr<qt3dsdm::ISignalConnection>()
 
 struct SNullFunc
 {
@@ -3152,7 +3152,7 @@ struct SNewMetaDataImpl : public IMetaData
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::QT3DSI32;
                             const TMetaDataStringList &theList =
-                                    UICDM::get<TMetaDataStringList>(theInfo.m_MetaDataData);
+                                    qt3dsdm::get<TMetaDataStringList>(theInfo.m_MetaDataData);
                             ioObject.m_EnumValueNames.push_back(
                                         new eastl::vector<qt3ds::foundation::CRegisteredString>());
                             eastl::vector<qt3ds::foundation::CRegisteredString> &theBack =
@@ -3748,7 +3748,7 @@ struct SNewMetaDataImpl : public IMetaData
     {
         std::shared_ptr<IDOMFactory> theFactory(
                     IDOMFactory::CreateDOMFactory(m_DataCore->GetStringTablePtr()));
-        UICDM::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, NULL);
+        qt3dsdm::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, NULL);
         if (theElem != NULL) {
             std::shared_ptr<IDOMReader> theReader(
                         IDOMReader::CreateDOMReader(*theElem, m_DataCore->GetStringTablePtr(), theFactory));
@@ -4031,7 +4031,7 @@ struct SNewMetaDataImpl : public IMetaData
     {
         std::shared_ptr<IDOMFactory> theFactory(
                     IDOMFactory::CreateDOMFactory(m_DataCore->GetStringTablePtr()));
-        UICDM::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, NULL);
+        qt3dsdm::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, NULL);
         if (theElem != NULL) {
             std::shared_ptr<IDOMReader> theReader(
                         IDOMReader::CreateDOMReader(*theElem, m_DataCore->GetStringTablePtr(), theFactory));

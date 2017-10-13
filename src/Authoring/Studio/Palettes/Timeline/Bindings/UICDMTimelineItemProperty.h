@@ -51,14 +51,14 @@ class CUICDMTimelineItemProperty : public ITimelineItemProperty
 {
 public:
     CUICDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
-                               UICDM::CUICDMPropertyHandle inPropertyHandle,
-                               UICDM::CUICDMInstanceHandle inInstance);
+                               qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
+                               qt3dsdm::CUICDMInstanceHandle inInstance);
     virtual ~CUICDMTimelineItemProperty();
 
     // ITimelineProperty
     Q3DStudio::CString GetName() const override;
     bool IsMaster() const override;
-    UICDM::TDataTypePair GetType() const override;
+    qt3dsdm::TDataTypePair GetType() const override;
     float GetMaximumValue() const override;
     float GetMinimumValue() const override;
     void SetSelected() override;
@@ -82,21 +82,21 @@ public:
     void Release() override;
     CPropertyRow *GetRow() override;
 
-    bool RefreshKeyframe(UICDM::CUICDMKeyframeHandle inKeyframe,
+    bool RefreshKeyframe(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
-    IKeyframe *GetKeyframeByHandle(UICDM::CUICDMKeyframeHandle inKeyframe);
+    IKeyframe *GetKeyframeByHandle(qt3dsdm::CUICDMKeyframeHandle inKeyframe);
     void DoSelectKeyframes(bool inSelected, long inTime, bool inParentTriggered,
                            CUICDMTimelineItemBinding *inParent);
 
     void RefreshKeyFrames(void);
 
 protected:
-    void InitializeCachedVariables(UICDM::CUICDMInstanceHandle inInstance);
-    bool CreateKeyframeIfNonExistent(UICDM::CUICDMKeyframeHandle inKeyframe,
-                                     UICDM::CUICDMAnimationHandle inOwningAnimation);
-    void OnPropertyLinkStatusChanged(UICDM::CUICDMSlideHandle inSlide,
-                                     UICDM::CUICDMInstanceHandle inInstance,
-                                     UICDM::CUICDMPropertyHandle inProperty);
+    void InitializeCachedVariables(qt3dsdm::CUICDMInstanceHandle inInstance);
+    bool CreateKeyframeIfNonExistent(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+                                     qt3dsdm::CUICDMAnimationHandle inOwningAnimation);
+    void OnPropertyLinkStatusChanged(qt3dsdm::CUICDMSlideHandle inSlide,
+                                     qt3dsdm::CUICDMInstanceHandle inInstance,
+                                     qt3dsdm::CUICDMPropertyHandle inProperty);
     void CreateKeyframes();
     void ReleaseKeyframes();
 
@@ -104,16 +104,16 @@ protected:
     typedef std::vector<CUICDMTimelineKeyframe *> TKeyframeList;
 
     CPropertyRow *m_Row;
-    UICDM::CUICDMInstanceHandle m_InstanceHandle;
-    UICDM::CUICDMPropertyHandle m_PropertyHandle;
+    qt3dsdm::CUICDMInstanceHandle m_InstanceHandle;
+    qt3dsdm::CUICDMPropertyHandle m_PropertyHandle;
     CTimelineTranslationManager *m_TransMgr;
-    std::vector<UICDM::CUICDMAnimationHandle> m_AnimationHandles;
+    std::vector<qt3dsdm::CUICDMAnimationHandle> m_AnimationHandles;
     TKeyframeList m_Keyframes;
     CCmdDataModelSetKeyframeValue
         *m_SetKeyframeValueCommand; // for merging modifying keyframe values via graph
-    UICDM::TDataTypePair m_Type;
+    qt3dsdm::TDataTypePair m_Type;
     Q3DStudio::CString m_Name;
-    std::vector<std::shared_ptr<UICDM::ISignalConnection>> m_Signals;
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Signals;
 };
 
 #endif // INCLUDED_UICDMTIMELINE_ITEM_PROPERTY_H

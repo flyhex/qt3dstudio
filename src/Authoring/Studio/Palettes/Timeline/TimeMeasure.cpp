@@ -215,7 +215,7 @@ bool CTimeMeasure::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
  */
 void CTimeMeasure::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
 
     // subtract out the button width since the playhead is never allowed into that area on the right
     // side
@@ -262,7 +262,7 @@ void CTimeMeasure::OnTimer()
 void CTimeMeasure::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseUp(inPoint, inFlags);
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
     m_IsMouseDown = false;
 }
 
@@ -276,7 +276,7 @@ void CTimeMeasure::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
 void CTimeMeasure::OnMouseRUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseUp(inPoint, inFlags);
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
     m_IsMouseDown = false;
 }
 
@@ -307,7 +307,7 @@ void CTimeMeasure::PopulateSnappingList(CSnapper *inSnapper)
 
 void CTimeMeasure::OnLoseFocus()
 {
-    m_TimerConnection = std::shared_ptr<UICDM::ISignalConnection>();
+    m_TimerConnection = std::shared_ptr<qt3dsdm::ISignalConnection>();
     m_IsMouseDown = false;
 }
 

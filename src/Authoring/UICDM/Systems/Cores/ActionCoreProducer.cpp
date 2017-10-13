@@ -34,7 +34,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMActionHandle CActionCoreProducer::CreateAction(CUICDMInstanceHandle inInstance,
                                                      CUICDMSlideHandle inSlide,

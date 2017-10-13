@@ -39,7 +39,7 @@ namespace render {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct HandlerArgumentType {
 
@@ -347,5 +347,5 @@ struct SMetaDataCustomMaterial : public SMetaDataDynamicObject
 };
 }
 
-Q_DECLARE_METATYPE(UICDM::HandlerArgumentType::Value)
+Q_DECLARE_METATYPE(qt3dsdm::HandlerArgumentType::Value)
 

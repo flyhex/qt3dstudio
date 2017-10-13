@@ -39,7 +39,7 @@
 class CDoc;
 class CClientDataModelBridge;
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISlideSystem;
 class IPropertySystem;
 }
@@ -90,8 +90,8 @@ protected:
     void OnReachedUpperBound();
 
     // UICDM Helper functions.
-    inline UICDM::IPropertySystem *GetPropertySystem() const;
-    inline UICDM::ISlideSystem *GetSlideSystem() const;
+    inline qt3dsdm::IPropertySystem *GetPropertySystem() const;
+    inline qt3dsdm::ISlideSystem *GetSlideSystem() const;
     inline CClientDataModelBridge *GetClientDataModelBridge() const;
 };
 

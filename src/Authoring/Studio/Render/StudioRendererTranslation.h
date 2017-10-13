@@ -61,22 +61,22 @@ namespace render {
 namespace qt3ds {
 namespace studio {
 
-    typedef std::shared_ptr<UICDM::ISignalConnection> TSignalConnection;
+    typedef std::shared_ptr<qt3dsdm::ISignalConnection> TSignalConnection;
 
     struct STranslation;
 
     struct SGraphObjectTranslator
     {
     protected:
-        UICDM::CUICDMInstanceHandle m_InstanceHandle;
+        qt3dsdm::CUICDMInstanceHandle m_InstanceHandle;
 
     public:
         // This will never be null.  The reason it is a pointer is because
         // alias translators need to switch which graph object they point to
-        UICDM::CUICDMInstanceHandle m_AliasInstanceHandle;
+        qt3dsdm::CUICDMInstanceHandle m_AliasInstanceHandle;
         SGraphObject *m_GraphObject;
         QT3DSU32 m_DirtyIndex;
-        SGraphObjectTranslator(UICDM::CUICDMInstanceHandle inInstance, SGraphObject &inObj)
+        SGraphObjectTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, SGraphObject &inObj)
             : m_InstanceHandle(inInstance)
             , m_GraphObject(&inObj)
             , m_DirtyIndex(QT3DS_MAX_U32)
@@ -94,12 +94,12 @@ namespace studio {
         virtual void AppendChild(SGraphObject &inChild) = 0;
         virtual SGraphObject &GetGraphObject() { return *m_GraphObject; }
         virtual SGraphObject &GetNonAliasedGraphObject() { return *m_GraphObject; }
-        virtual UICDM::CUICDMInstanceHandle GetInstanceHandle() { return m_InstanceHandle; }
-        virtual UICDM::CUICDMInstanceHandle GetSceneGraphInstanceHandle()
+        virtual qt3dsdm::CUICDMInstanceHandle GetInstanceHandle() { return m_InstanceHandle; }
+        virtual qt3dsdm::CUICDMInstanceHandle GetSceneGraphInstanceHandle()
         {
             return m_InstanceHandle;
         }
-        virtual UICDM::CUICDMInstanceHandle GetPossiblyAliasedInstanceHandle()
+        virtual qt3dsdm::CUICDMInstanceHandle GetPossiblyAliasedInstanceHandle()
         {
             if (m_AliasInstanceHandle.Valid())
                 return m_AliasInstanceHandle;
@@ -325,21 +325,21 @@ namespace studio {
 
     struct STranslation : public qt3ds::render::IUICRenderNodeFilter
     {
-        typedef eastl::pair<UICDM::CUICDMInstanceHandle, SGraphObjectTranslator *>
+        typedef eastl::pair<qt3dsdm::CUICDMInstanceHandle, SGraphObjectTranslator *>
             THandleTranslatorPair;
         typedef eastl::vector<THandleTranslatorPair> THandleTranslatorPairList;
         // Now that we have aliases, one instance handle can map to several translators.  One
         // translator, however, only
         // maps to one instance handle.
-        typedef nvhash_map<UICDM::CUICDMInstanceHandle, THandleTranslatorPairList, eastl::hash<int>>
+        typedef nvhash_map<qt3dsdm::CUICDMInstanceHandle, THandleTranslatorPairList, eastl::hash<int>>
             TInstanceToTranslatorMap;
         IStudioRenderer &m_Renderer;
         IUICRenderContext &m_UICContext;
         CDoc &m_Doc;
         IDocumentReader &m_Reader;
         SComposerObjectDefinitions &m_ObjectDefinitions;
-        UICDM::CStudioSystem &m_StudioSystem;
-        UICDM::CStudioFullSystem &m_FullSystem;
+        qt3dsdm::CStudioSystem &m_StudioSystem;
+        qt3dsdm::CStudioFullSystem &m_FullSystem;
         Q3DStudio::CGraph &m_AssetGraph;
 
         // allocator for scene graph and translators
@@ -390,9 +390,9 @@ namespace studio {
         QT3DSVec4 m_selectedGuideFillColor;
 
         STranslation(IStudioRenderer &inRenderer, IUICRenderContext &inContext);
-        void MarkBeginComponentSeconds(UICDM::CUICDMSlideHandle) { ++m_ComponentSecondsDepth; }
+        void MarkBeginComponentSeconds(qt3dsdm::CUICDMSlideHandle) { ++m_ComponentSecondsDepth; }
 
-        void MarkComponentSeconds(UICDM::CUICDMSlideHandle)
+        void MarkComponentSeconds(qt3dsdm::CUICDMSlideHandle)
         {
             m_ComponentSecondsDepth = NVMax(0, m_ComponentSecondsDepth - 1);
             if (m_ComponentSecondsDepth == 0)
@@ -407,9 +407,9 @@ namespace studio {
             MarkDirty(inInstance);
         }
 
-        void MarkDirty(UICDM::CUICDMInstanceHandle inInstance);
+        void MarkDirty(qt3dsdm::CUICDMInstanceHandle inInstance);
 
-        void MarkDirty(UICDM::CUICDMInstanceHandle *inInstance, long inInstanceCount)
+        void MarkDirty(qt3dsdm::CUICDMInstanceHandle *inInstance, long inInstanceCount)
         {
             for (long idx = 0; idx < inInstanceCount; ++idx)
                 MarkDirty(inInstance[idx]);
@@ -488,14 +488,14 @@ namespace studio {
             m_DirtySet.clear();
         }
         // We build the render graph every time we render.  This may seem wasteful
-        void BuildRenderGraph(UICDM::CUICDMInstanceHandle inParent,
-                              CUICDMInstanceHandle inAliasHandle = UICDM::CUICDMInstanceHandle());
+        void BuildRenderGraph(qt3dsdm::CUICDMInstanceHandle inParent,
+                              CUICDMInstanceHandle inAliasHandle = qt3dsdm::CUICDMInstanceHandle());
         void
         BuildRenderGraph(SGraphObjectTranslator &inParent,
-                         UICDM::CUICDMInstanceHandle inAliasHandle = UICDM::CUICDMInstanceHandle());
+                         qt3dsdm::CUICDMInstanceHandle inAliasHandle = qt3dsdm::CUICDMInstanceHandle());
         void
         DeactivateScan(SGraphObjectTranslator &inParent,
-                       UICDM::CUICDMInstanceHandle inAliasHandle = UICDM::CUICDMInstanceHandle());
+                       qt3dsdm::CUICDMInstanceHandle inAliasHandle = qt3dsdm::CUICDMInstanceHandle());
         void PreRender();
         void Render(int inWidgetId, bool inDrawGuides);
         void EndRender();
@@ -510,11 +510,11 @@ namespace studio {
         Option<QT3DSU32> PickWidget(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
                                  qt3ds::widgets::IStudioWidgetBase &inWidget);
 
-        qt3ds::foundation::Option<UICDM::SGuideInfo> PickRulers(CPt inMouseCoords);
+        qt3ds::foundation::Option<qt3dsdm::SGuideInfo> PickRulers(CPt inMouseCoords);
 
         SNode *GetSelectedNode()
         {
-            UICDM::CUICDMInstanceHandle theHandle = m_Doc.GetSelectedInstance();
+            qt3dsdm::CUICDMInstanceHandle theHandle = m_Doc.GetSelectedInstance();
             SGraphObjectTranslator *theTranslator = GetOrCreateTranslator(theHandle);
             if (theTranslator
                 && GraphObjectTypes::IsNodeType(theTranslator->GetGraphObject().m_Type))
@@ -559,7 +559,7 @@ namespace studio {
             inEditor.FireImmediateRefresh(m_Doc.GetSelectedInstance());
         }
 
-        QT3DSVec3 GetIntendedPosition(UICDM::CUICDMInstanceHandle inInstance, CPt inPos);
+        QT3DSVec3 GetIntendedPosition(qt3dsdm::CUICDMInstanceHandle inInstance, CPt inPos);
 
         void ApplyPositionalChange(QT3DSVec3 inDiff, SNode &inNode,
                                    CUpdateableDocumentEditor &inEditor);
@@ -633,19 +633,19 @@ namespace studio {
 
         SNode *GetEditCameraLayer();
 
-        void ReleaseEffect(UICDM::CUICDMInstanceHandle inInstance);
+        void ReleaseEffect(qt3dsdm::CUICDMInstanceHandle inInstance);
         // Create a new translator for this type.  Do not add to any maps or anything else.
-        SGraphObjectTranslator *CreateTranslator(UICDM::CUICDMInstanceHandle inInstance);
+        SGraphObjectTranslator *CreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance);
         // Returns the canonical translator for a given instance or creates a new translator if none
         // exist.
-        SGraphObjectTranslator *GetOrCreateTranslator(UICDM::CUICDMInstanceHandle inInstance);
+        SGraphObjectTranslator *GetOrCreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance);
         // Create a new aliased translator for this type.
-        SGraphObjectTranslator *GetOrCreateTranslator(UICDM::CUICDMInstanceHandle inInstance,
-                                                      UICDM::CUICDMInstanceHandle inAliasInstance);
+        SGraphObjectTranslator *GetOrCreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                                      qt3dsdm::CUICDMInstanceHandle inAliasInstance);
         THandleTranslatorPairList &
-        GetTranslatorsForInstance(UICDM::CUICDMInstanceHandle inInstance);
-        UICDM::CUICDMInstanceHandle GetAnchorPoint(SPathPick &inPick);
-        UICDM::CUICDMInstanceHandle GetAnchorPoint(QT3DSU32 inAnchorIndex);
+        GetTranslatorsForInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
+        qt3dsdm::CUICDMInstanceHandle GetAnchorPoint(SPathPick &inPick);
+        qt3dsdm::CUICDMInstanceHandle GetAnchorPoint(QT3DSU32 inAnchorIndex);
     };
 
     struct SDisableUseClearColor

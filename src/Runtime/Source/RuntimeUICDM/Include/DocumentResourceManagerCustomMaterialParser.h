@@ -45,15 +45,15 @@ namespace Q3DStudio {
 struct CCustomMaterialParser
 {
 
-    static bool NavigateToMetadata(std::shared_ptr<UICDM::IDOMReader> inReader)
+    static bool NavigateToMetadata(std::shared_ptr<qt3dsdm::IDOMReader> inReader)
     {
         return inReader->MoveToFirstChild("MetaData");
     }
 
-    static std::shared_ptr<UICDM::IDOMReader>
-    ParseFile(std::shared_ptr<UICDM::IDOMFactory> inFactory,
-              std::shared_ptr<UICDM::IStringTable> inStringTable, const char8_t *inFileData,
-              UICDM::CXmlErrorHandler &inErrorHandler,
+    static std::shared_ptr<qt3dsdm::IDOMReader>
+    ParseFile(std::shared_ptr<qt3dsdm::IDOMFactory> inFactory,
+              std::shared_ptr<qt3dsdm::IStringTable> inStringTable, const char8_t *inFileData,
+              qt3dsdm::CXmlErrorHandler &inErrorHandler,
               qt3ds::render::IInputStreamFactory &inStreamFactory)
     {
         using namespace qt3ds;
@@ -63,16 +63,16 @@ struct CCustomMaterialParser
             inStreamFactory.GetStreamForFile(inFileData));
         if (!theStream) {
             QT3DS_ASSERT(0);
-            return std::shared_ptr<UICDM::IDOMReader>();
+            return std::shared_ptr<qt3dsdm::IDOMReader>();
         }
 
-        UICDM::SDOMElement *theElem(
-            UICDM::CDOMSerializer::Read(*inFactory, *theStream, &inErrorHandler));
+        qt3dsdm::SDOMElement *theElem(
+            qt3dsdm::CDOMSerializer::Read(*inFactory, *theStream, &inErrorHandler));
 
         if (theElem == NULL) {
-            return std::shared_ptr<UICDM::IDOMReader>();
+            return std::shared_ptr<qt3dsdm::IDOMReader>();
         } else
-            return UICDM::IDOMReader::CreateDOMReader(*theElem, inStringTable, inFactory);
+            return qt3dsdm::IDOMReader::CreateDOMReader(*theElem, inStringTable, inFactory);
     }
 };
 }

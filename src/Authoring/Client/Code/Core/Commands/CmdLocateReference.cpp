@@ -49,7 +49,7 @@
  */
 CCmdLocateReference::CCmdLocateReference(CDoc *inDoc, const Q3DStudio::CFilePath &inOldPath,
                                          const Q3DStudio::CFilePath &inNewPath)
-    : UICDM::CmdDataModel(*inDoc)
+    : qt3dsdm::CmdDataModel(*inDoc)
     , m_Doc(inDoc)
     , m_OldPath(inOldPath)
     , m_NewPath(inNewPath)
@@ -85,7 +85,7 @@ CCmdLocateReference::~CCmdLocateReference()
 unsigned long CCmdLocateReference::Do()
 {
     if (!ConsumerExists()) {
-        UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
+        qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
         LocateReference();
     } else {
         DataModelRedo();
@@ -111,7 +111,7 @@ unsigned long CCmdLocateReference::Undo()
  */
 void CCmdLocateReference::LocateReference()
 {
-    using namespace UICDM;
+    using namespace qt3dsdm;
     // Get all instances that are derived from ItemBase instance (they should have sourcepath
     // property)
     // Iterate through each instance derived from ItemBase and get the sourcepath property value.
@@ -145,8 +145,8 @@ void CCmdLocateReference::LocateReference()
  * @param inInstance		the instance to update
  * @param inSpecificSlide	the slide to update, if valid
  */
-void CCmdLocateReference::UpdateSourcePath(UICDM::CUICDMInstanceHandle inInstance,
-                                           UICDM::CUICDMSlideHandle inSpecificSlide)
+void CCmdLocateReference::UpdateSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                           qt3dsdm::CUICDMSlideHandle inSpecificSlide)
 {
     // Get the sourcepath value
     Q3DStudio::CFilePath thePath;
@@ -168,20 +168,20 @@ void CCmdLocateReference::UpdateSourcePath(UICDM::CUICDMInstanceHandle inInstanc
  * @param outPath			the sourcepath without the identifier
  * @param outIdentifier		the identifier
  */
-void CCmdLocateReference::GetSourcePath(UICDM::CUICDMInstanceHandle inInstance,
-                                        UICDM::CUICDMSlideHandle inSpecificSlide,
+void CCmdLocateReference::GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                        qt3dsdm::CUICDMSlideHandle inSpecificSlide,
                                         Q3DStudio::CFilePath &outPath,
                                         Q3DStudio::CString &outIdentifier)
 {
     // Get the sourcepath property value
-    UICDM::SValue theValue;
+    qt3dsdm::SValue theValue;
     bool theGetValue = false;
 
     if (inSpecificSlide.Valid())
         theGetValue = m_SlideCore->GetSpecificInstancePropertyValue(
             inSpecificSlide, inInstance, m_Bridge->GetSourcePathProperty(), theValue);
     else {
-        UICDM::SValue temp;
+        qt3dsdm::SValue temp;
         theGetValue = m_PropertySystem->GetInstancePropertyValue(
             inInstance, m_Bridge->GetSourcePathProperty(), temp);
         if (theGetValue)
@@ -189,7 +189,7 @@ void CCmdLocateReference::GetSourcePath(UICDM::CUICDMInstanceHandle inInstance,
     }
 
     if (theGetValue) {
-        Q3DStudio::CFilePath theSourcePath(UICDM::get<UICDM::TDataStrPtr>(theValue)->GetData());
+        Q3DStudio::CFilePath theSourcePath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData());
 
         // Split the source path and the identifier
         outIdentifier = theSourcePath.GetIdentifier();
@@ -208,14 +208,14 @@ void CCmdLocateReference::GetSourcePath(UICDM::CUICDMInstanceHandle inInstance,
  * @param inPath			the sourcepath without the identifier
  * @param inIdentifier		the identifier
  */
-void CCmdLocateReference::SetSourcePath(UICDM::CUICDMInstanceHandle inInstance,
-                                        UICDM::CUICDMSlideHandle inSpecificSlide,
+void CCmdLocateReference::SetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                        qt3dsdm::CUICDMSlideHandle inSpecificSlide,
                                         const Q3DStudio::CFilePath &inPath,
                                         const Q3DStudio::CString &inIdentifier)
 {
     Q3DStudio::CFilePath theSourcePath(inPath);
     theSourcePath.SetIdentifier(inIdentifier);
-    UICDM::SValue theValue(UICDM::TDataStrPtr(new UICDM::CDataStr(theSourcePath)));
+    qt3dsdm::SValue theValue(qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(theSourcePath)));
 
     if (inSpecificSlide.Valid())
         m_SlideCore->ForceSetInstancePropertyValue(inSpecificSlide, inInstance,

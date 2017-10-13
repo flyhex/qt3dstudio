@@ -209,7 +209,7 @@ private:
     long m_SelectionStart;
     long m_SelectionEnd;
     CPt m_ScrollAmount; ///< Pixel offset to scroll the text and caret by
-    std::shared_ptr<UICDM::ISignalConnection> m_TimerConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_TimerConnection;
 };
 
 #endif // INCLUDED_TEXT_EDIT_H

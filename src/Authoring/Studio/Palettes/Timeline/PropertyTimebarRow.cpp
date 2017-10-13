@@ -88,9 +88,9 @@ void CPropertyTimebarRow::Draw(CRenderer *inRenderer)
     }
 
     CRct theRect(GetSize());
-    UICDM::TDataTypePair theType = m_PropertyRow->GetProperty()->GetType();
-    if (theType.first == UICDM::DataModelDataType::Float3
-        && theType.second == UICDM::AdditionalMetaDataType::Color) {
+    qt3dsdm::TDataTypePair theType = m_PropertyRow->GetProperty()->GetType();
+    if (theType.first == qt3dsdm::DataModelDataType::Float3
+        && theType.second == qt3dsdm::AdditionalMetaDataType::Color) {
         inRenderer->FillSolidRect(CRct(0, 0, theRect.size.x, theRect.size.y - 1),
                                   m_BackgroundColor);
         DrawColor(inRenderer);

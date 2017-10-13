@@ -77,39 +77,39 @@ public:
 class IInspectableObject
 {
 public:
-    virtual UICDM::CUICDMInstanceHandle GetInspectableBaseInstance() = 0;
-    virtual void SetInspectableObject(const UICDM::SObjectRefType &) = 0;
-    virtual UICDM::SObjectRefType GetInspectableObject() = 0;
+    virtual qt3dsdm::CUICDMInstanceHandle GetInspectableBaseInstance() = 0;
+    virtual void SetInspectableObject(const qt3dsdm::SObjectRefType &) = 0;
+    virtual qt3dsdm::SObjectRefType GetInspectableObject() = 0;
 };
 
 class IInspectableEvent
 {
 public:
-    virtual UICDM::CUICDMInstanceHandle GetInspectableInstance() = 0;
-    virtual UICDM::CUICDMEventHandle GetInspectableEvent() = 0;
-    virtual void SetInspectableEvent(const UICDM::CUICDMEventHandle &inEventHandle) = 0;
+    virtual qt3dsdm::CUICDMInstanceHandle GetInspectableInstance() = 0;
+    virtual qt3dsdm::CUICDMEventHandle GetInspectableEvent() = 0;
+    virtual void SetInspectableEvent(const qt3dsdm::CUICDMEventHandle &inEventHandle) = 0;
 };
 
 class IInspectableTargetSection : public IInspectableObject
 {
 public:
-    virtual UICDM::CUICDMActionHandle GetInspectableAction() const = 0;
+    virtual qt3dsdm::CUICDMActionHandle GetInspectableAction() const = 0;
 };
 
 class IInspectableEventSection : public IInspectableObject, public IInspectableEvent
 {
 public:
-    virtual UICDM::CUICDMActionHandle GetInspectableAction() const = 0;
+    virtual qt3dsdm::CUICDMActionHandle GetInspectableAction() const = 0;
 };
 
 class IInspectableHandlerSection
 {
 public:
-    virtual UICDM::CUICDMActionHandle GetInspectableAction() const = 0;
-    virtual UICDM::CUICDMHandlerHandle GetInspectableHandler() = 0;
-    virtual void SetInspectableHandler(const UICDM::CUICDMHandlerHandle &inHandlerHandle) = 0;
+    virtual qt3dsdm::CUICDMActionHandle GetInspectableAction() const = 0;
+    virtual qt3dsdm::CUICDMHandlerHandle GetInspectableHandler() = 0;
+    virtual void SetInspectableHandler(const qt3dsdm::CUICDMHandlerHandle &inHandlerHandle) = 0;
 
-    virtual UICDM::THandlerHandleList GetInspectableHandlerList() = 0;
+    virtual qt3dsdm::THandlerHandleList GetInspectableHandlerList() = 0;
     virtual long GetArgumentCount() = 0;
     virtual IInspectableItem *GetArgument(long inIndex) = 0;
     virtual Q3DStudio::CString GetInspectableDescription() = 0;
@@ -126,21 +126,21 @@ public:
     virtual ~IInspectableItem() {}
     virtual EInspectableItemTypes GetInspectableKind() { return INSPECTABLEITEMTYPE_VANILLA; }
 
-    virtual UICDM::HandlerArgumentType::Value
+    virtual qt3dsdm::HandlerArgumentType::Value
     GetInspectableSubType() const = 0; // TODO : Make this method name correct
     virtual Q3DStudio::CString GetInspectableName() const = 0;
     virtual Q3DStudio::CString GetInspectableFormalName() const = 0;
     virtual Q3DStudio::CString GetInspectableDescription() const = 0;
 
-    virtual UICDM::SValue GetInspectableData() const = 0;
-    virtual void SetInspectableData(const UICDM::SValue &) = 0;
+    virtual qt3dsdm::SValue GetInspectableData() const = 0;
+    virtual void SetInspectableData(const qt3dsdm::SValue &) = 0;
 
     // TODO: Remove from here onwards after cleaning up the rest of the UI classes
     // This is the non-commital version of SetInspectableData, which must be called
     // after ChangeInspectableData to commit the action.
     virtual bool GetInspectableReadOnly() const { return false; }
 
-    virtual void ChangeInspectableData(const UICDM::SValue & /*inAttr*/){};
+    virtual void ChangeInspectableData(const qt3dsdm::SValue & /*inAttr*/){};
     virtual void CancelInspectableData(){}
 
     virtual void AddInspectableChangeListener(IInspectableItemChangeListener * /*inListener*/){};
@@ -155,8 +155,8 @@ class IInspectablePropertyItem : public IInspectableItem
 {
 public:
     EInspectableItemTypes GetInspectableKind() override { return INSPECTABLEITEMTYPE_PROPERTY; }
-    virtual void GetInspectablePropertyList(UICDM::TPropertyHandleList &outList) = 0;
-    virtual UICDM::CUICDMInstanceHandle GetInspectableInstance() = 0;
+    virtual void GetInspectablePropertyList(qt3dsdm::TPropertyHandleList &outList) = 0;
+    virtual qt3dsdm::CUICDMInstanceHandle GetInspectableInstance() = 0;
 };
 
 //==============================================================================
@@ -169,9 +169,9 @@ public:
     EInspectableItemTypes GetInspectableKind() override { return INSPECTABLEITEMTYPE_DEPENDENT; }
     virtual float GetInspectableMin() const = 0;
     virtual float GetInspectableMax() const = 0;
-    virtual UICDM::TMetaDataStringList GetInspectableList() const = 0;
-    virtual UICDM::DataModelDataType::Value GetInspectableType() const = 0;
-    virtual UICDM::AdditionalMetaDataType::Value GetInspectableAdditionalType() const = 0;
+    virtual qt3dsdm::TMetaDataStringList GetInspectableList() const = 0;
+    virtual qt3dsdm::DataModelDataType::Value GetInspectableType() const = 0;
+    virtual qt3dsdm::AdditionalMetaDataType::Value GetInspectableAdditionalType() const = 0;
 };
 
 //==============================================================================

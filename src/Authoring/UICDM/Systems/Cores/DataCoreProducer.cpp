@@ -34,7 +34,7 @@
 #ifdef _WIN32
 #pragma warning(disable : 4503) // decorated name length exceeded
 #endif
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMInstanceHandle CDataCoreProducer::CreateInstance(CUICDMInstanceHandle inTargetId)
 {

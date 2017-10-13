@@ -41,7 +41,7 @@
 using namespace boost;
 using namespace boost::BOOST_SIGNALS_NAMESPACE;
 using namespace Q3DStudio;
-using namespace UICDM;
+using namespace qt3dsdm;
 
 //==============================================================================
 //	Statics
@@ -95,10 +95,10 @@ struct SAddRemoveChildAction
     void RemoveChild();
 };
 
-struct SInsertChildTransaction : public UICDM::ITransaction, public SAddRemoveChildAction
+struct SInsertChildTransaction : public qt3dsdm::ITransaction, public SAddRemoveChildAction
 {
     SInsertChildTransaction(const char *inFile, int inLine, const SAddRemoveChildAction &action)
-        : UICDM::ITransaction(inFile, inLine)
+        : qt3dsdm::ITransaction(inFile, inLine)
         , SAddRemoveChildAction(action)
     {
     }
@@ -106,10 +106,10 @@ struct SInsertChildTransaction : public UICDM::ITransaction, public SAddRemoveCh
     void Undo() override { RemoveChild(); }
 };
 
-struct SRemoveChildTransaction : public UICDM::ITransaction, public SAddRemoveChildAction
+struct SRemoveChildTransaction : public qt3dsdm::ITransaction, public SAddRemoveChildAction
 {
     SRemoveChildTransaction(const char *inFile, int inLine, const SAddRemoveChildAction &action)
-        : UICDM::ITransaction(inFile, inLine)
+        : qt3dsdm::ITransaction(inFile, inLine)
         , SAddRemoveChildAction(action)
     {
     }
@@ -117,7 +117,7 @@ struct SRemoveChildTransaction : public UICDM::ITransaction, public SAddRemoveCh
     void Undo() override { AddChild(); }
 };
 
-struct SReorderChildTransaction : public UICDM::ITransaction
+struct SReorderChildTransaction : public qt3dsdm::ITransaction
 {
     TGraphImplPtr m_Graph;
     TIdentifier m_Parent;
@@ -127,7 +127,7 @@ struct SReorderChildTransaction : public UICDM::ITransaction
 
     SReorderChildTransaction(const char *inFile, int inLine, TGraphImplPtr graph,
                              TIdentifier parent, TIdentifier child, long oldIdx, long newIdx)
-        : UICDM::ITransaction(inFile, inLine)
+        : qt3dsdm::ITransaction(inFile, inLine)
         , m_Graph(graph)
         , m_Parent(parent)
         , m_Child(child)
@@ -184,7 +184,7 @@ public:
         if (inRoot != 0)
             CreateImpl(inRoot);
     }
-    void SetConsumer(std::shared_ptr<UICDM::ITransactionConsumer> inConsumer) override
+    void SetConsumer(std::shared_ptr<qt3dsdm::ITransactionConsumer> inConsumer) override
     {
         m_Consumer = inConsumer;
     }
@@ -557,24 +557,24 @@ public:
     }
     // Signals
     // Always in the form of parent,child.
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildAdded(std::function<void(TIdentifier, TIdentifier, long)> inCallback) override
     {
         return CONNECT(m_ChildAddedSignal.connect(inCallback));
     }
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildRemoved(std::function<void(TIdentifier, TIdentifier, long)> inCallback) override
     {
         return CONNECT(m_ChildRemoveSignal.connect(inCallback));
     }
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildMoved(std::function<void(TIdentifier, TIdentifier, long, long)> inCallback) override
     {
         return CONNECT(m_ChildMoved.connect(inCallback));
     }
 
     Graph::SGraphImpl<int, int> m_Graph;
-    std::shared_ptr<UICDM::ITransactionConsumer> m_Consumer;
+    std::shared_ptr<qt3dsdm::ITransactionConsumer> m_Consumer;
 
     signal<void(TIdentifier, TIdentifier, long)> m_ChildAddedSignal;
     signal<void(TIdentifier, TIdentifier, long)> m_ChildRemoveSignal;

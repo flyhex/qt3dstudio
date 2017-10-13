@@ -40,7 +40,7 @@
 #include "EABase/eabase.h"
 #include "UICDMStringTable.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 using qt3ds::QT3DSI8;
 using qt3ds::QT3DSU8;
 using qt3ds::QT3DSI16;

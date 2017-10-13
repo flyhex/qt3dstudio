@@ -43,7 +43,7 @@ namespace Q3DStudio {
 class IDocumentEditor;
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class IPropertySystem;
 class ISignalConnection;
 }
@@ -56,20 +56,20 @@ class CUICDMTimelineTimebar : public ITimelineTimebar, public Q3DStudio::CUpdate
 {
 public:
     CUICDMTimelineTimebar(CTimelineTranslationManager *inTimelineTranslationManager,
-                          UICDM::CUICDMInstanceHandle inDataHandle);
+                          qt3dsdm::CUICDMInstanceHandle inDataHandle);
     virtual ~CUICDMTimelineTimebar();
 
 protected:
     CTimelineTranslationManager *m_TimelineTranslationManager;
-    UICDM::IPropertySystem *m_PropertySystem;
-    UICDM::CUICDMInstanceHandle m_DataHandle; // The Instance Handle for this Timeline Timeber.
-    UICDM::CUICDMPropertyHandle m_StartTime;
-    UICDM::CUICDMPropertyHandle m_EndTime;
+    qt3dsdm::IPropertySystem *m_PropertySystem;
+    qt3dsdm::CUICDMInstanceHandle m_DataHandle; // The Instance Handle for this Timeline Timeber.
+    qt3dsdm::CUICDMPropertyHandle m_StartTime;
+    qt3dsdm::CUICDMPropertyHandle m_EndTime;
     ::CColor m_Color; // Timebar color
     Q3DStudio::CString m_Comment; // Timebar comment text
-    std::shared_ptr<UICDM::ISignalConnection> m_PropertyChangedSignal;
-    void OnPropertyChanged(UICDM::CUICDMInstanceHandle inInstance,
-                           UICDM::CUICDMPropertyHandle inProperty);
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_PropertyChangedSignal;
+    void OnPropertyChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
+                           qt3dsdm::CUICDMPropertyHandle inProperty);
 
 public:
     // ITimelineTimebar

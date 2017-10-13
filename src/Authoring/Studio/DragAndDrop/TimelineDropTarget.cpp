@@ -79,16 +79,16 @@ bool CTimeLineDropTarget::Accept(CDropSource &inSource)
  */
 bool CTimeLineDropTarget::Drop(CDropSource &inSource)
 {
-    UICDM::CUICDMInstanceHandle theTargetInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theTargetInstance = GetInstance();
 
     if (theTargetInstance.Valid()) {
         CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-        UICDM::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
-        UICDM::CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
+        qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
+        qt3dsdm::CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
         if (!theSlideSystem->IsMasterSlide(theSlide)
             && (inSource.GetCurrentFlags() & CHotKeys::MODIFIER_ALT)) {
             if (CanAddToMaster()) {
-                UICDM::CUICDMSlideHandle theMasterSlideHandle =
+                qt3dsdm::CUICDMSlideHandle theMasterSlideHandle =
                     theSlideSystem->GetMasterSlide(theSlide);
                 if (theMasterSlideHandle.Valid())
                     theSlide = theMasterSlideHandle;
@@ -110,7 +110,7 @@ bool CTimeLineDropTarget::Drop(CDropSource &inSource)
  */
 long CTimeLineDropTarget::GetObjectType()
 {
-    UICDM::CUICDMInstanceHandle theTargetInstance = GetTargetInstance();
+    qt3dsdm::CUICDMInstanceHandle theTargetInstance = GetTargetInstance();
     if (theTargetInstance.Valid()) {
         CClientDataModelBridge *theBridge =
             g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
@@ -125,10 +125,10 @@ long CTimeLineDropTarget::GetObjectType()
  *		Check to see if the Asset is a relative of our asset.
  * 		@return true if the inAsset is a parent grandparent...etc. of this asset.
  */
-bool CTimeLineDropTarget::IsRelative(UICDM::CUICDMInstanceHandle inInstance)
+bool CTimeLineDropTarget::IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     bool theReturn = false; ///< Default return value.
-    UICDM::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
 
     // This will check to see if the inAsset is already some sort of parent grandparent....etc.
     if (theThisInstance.Valid())
@@ -144,9 +144,9 @@ bool CTimeLineDropTarget::IsRelative(UICDM::CUICDMInstanceHandle inInstance)
  *	 @param inAsset The Asset to check.
  *	 @return true if we are the same.
  */
-bool CTimeLineDropTarget::IsSelf(UICDM::CUICDMInstanceHandle inInstance)
+bool CTimeLineDropTarget::IsSelf(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
-    UICDM::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
     // true if self.....
     return (theThisInstance == inInstance);
 }
@@ -172,9 +172,9 @@ bool CTimeLineDropTarget::IsMaster()
     else if (m_Instance == g_StudioApp.GetCore()->GetDoc()->GetActiveRootInstance())
         return true;
     else {
-        UICDM::ISlideSystem *theSlideSystem =
+        qt3dsdm::ISlideSystem *theSlideSystem =
             g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetSlideSystem();
-        UICDM::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(m_Instance);
+        qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(m_Instance);
         return theSlideSystem->IsMasterSlide(theSlide);
     }
 }
@@ -196,9 +196,9 @@ EDROPDESTINATION CTimeLineDropTarget::GetDestination() const
  *of m_Asset
  *	Otherwise, this m_Asset ends up being a sibling
  */
-UICDM::CUICDMInstanceHandle CTimeLineDropTarget::GetTargetInstance()
+qt3dsdm::CUICDMInstanceHandle CTimeLineDropTarget::GetTargetInstance()
 {
-    UICDM::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
     if (!theInstance.Valid())
         return 0;
 

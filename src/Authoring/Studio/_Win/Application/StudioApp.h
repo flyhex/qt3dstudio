@@ -53,7 +53,7 @@ class IStudioRenderer;
 struct SSelectedValue;
 };
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISignalConnection;
 };
 
@@ -132,12 +132,12 @@ protected:
     CDialogs *m_Dialogs;
     long m_PlaybackTime; ///< Stores the playhead's starting position so that it can be restored
     ///after playing the presentation for a little while
-    UICDM::CUICDMSlideHandle
-    m_PlaybackOriginalSlide; ///< Stores the current slide handle before playback started.
+    qt3dsdm::CUICDMSlideHandle
+        m_PlaybackOriginalSlide; ///< Stores the current slide handle before playback started.
 
     std::shared_ptr<Q3DStudio::ITickTock> m_TickTock;
     std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
-    std::shared_ptr<UICDM::ISignalConnection> m_DirectoryWatcherTicker;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_DirectoryWatcherTicker;
     std::shared_ptr<Q3DStudio::IStudioRenderer> m_Renderer;
     bool m_AuthorZoom;
 

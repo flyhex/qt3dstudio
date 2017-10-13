@@ -44,17 +44,17 @@
 #include "UICDMDataCore.h"
 
 // Keyframes are always set at the property level, never for individual animation handle.
-class CCmdDataModelAnimate : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelAnimate : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    UICDM::CUICDMInstanceHandle m_Instance;
-    UICDM::CUICDMPropertyHandle m_Property;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMPropertyHandle m_Property;
 
 public: // Construction
-    CCmdDataModelAnimate(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
-                         UICDM::CUICDMPropertyHandle inProperty)
-        : UICDM::CmdDataModel(*inDoc)
+    CCmdDataModelAnimate(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+                         qt3dsdm::CUICDMPropertyHandle inProperty)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
         , m_Property(inProperty)
@@ -67,9 +67,9 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            using namespace UICDM;
+            using namespace qt3dsdm;
 
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
             IStudioAnimationSystem *theAnimationSystem =
                 m_Doc->GetStudioSystem()->GetAnimationSystem();
             theAnimationSystem->Animate(m_Instance, m_Property);
@@ -100,17 +100,17 @@ public: // Construction
 };
 
 // Keyframes are always set at the property level, never for individual animation handle.
-class CCmdDataModelDeanimate : public CCmd, public UICDM::CmdDataModel
+class CCmdDataModelDeanimate : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    UICDM::CUICDMInstanceHandle m_Instance;
-    UICDM::CUICDMPropertyHandle m_Property;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMPropertyHandle m_Property;
 
 public: // Construction
-    CCmdDataModelDeanimate(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
-                           UICDM::CUICDMPropertyHandle inProperty)
-        : UICDM::CmdDataModel(*inDoc)
+    CCmdDataModelDeanimate(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+                           qt3dsdm::CUICDMPropertyHandle inProperty)
+        : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
         , m_Property(inProperty)
@@ -123,9 +123,9 @@ public: // Construction
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
-            using namespace UICDM;
+            using namespace qt3dsdm;
 
-            UICDM::SScopedDataModelConsumer __scopedConsumer(*this);
+            qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
 
             IStudioAnimationSystem *theAnimationSystem =
                 m_Doc->GetStudioSystem()->GetAnimationSystem();

@@ -45,7 +45,7 @@ class CDoc;
 class CEasyInspectorRow;
 
 // UICDM
-namespace UICDM {
+namespace qt3dsdm {
 class ISignalConnection;
 }
 
@@ -65,25 +65,25 @@ class CUICDMInspectorRow
     //	Members
     //==============================================================================
 protected:
-    UICDM::CUICDMMetaDataPropertyHandle m_MetaProperty;
-    UICDM::SMetaDataPropertyInfo m_MetaDataPropertyInfo;
+    qt3dsdm::CUICDMMetaDataPropertyHandle m_MetaProperty;
+    qt3dsdm::SMetaDataPropertyInfo m_MetaDataPropertyInfo;
 
     //==============================================================================
     //	Methods
     //==============================================================================
 public: // Construction
-    CUICDMInspectorRow(CDoc *inDoc, UICDM::CUICDMMetaDataPropertyHandle inProperty);
+    CUICDMInspectorRow(CDoc *inDoc, qt3dsdm::CUICDMMetaDataPropertyHandle inProperty);
     virtual ~CUICDMInspectorRow();
 
 private: // Disabled parameterless construction
     CUICDMInspectorRow();
 
 public: // Use
-    UICDM::CUICDMMetaDataPropertyHandle GetMetaDataProperty() const
+    qt3dsdm::CUICDMMetaDataPropertyHandle GetMetaDataProperty() const
     {
       return m_MetaProperty;
     }
-    const UICDM::SMetaDataPropertyInfo &GetMetaDataPropertyInfo() const
+    const qt3dsdm::SMetaDataPropertyInfo &GetMetaDataPropertyInfo() const
     {
       return m_MetaDataPropertyInfo;
     }

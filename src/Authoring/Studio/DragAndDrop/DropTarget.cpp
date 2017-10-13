@@ -51,7 +51,7 @@ bool CDropTarget::CanAddToMaster()
     if (theTargetObjectType == OBJTYPE_SCENE || theTargetObjectType == OBJTYPE_COMPONENT)
         return true;
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    UICDM::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
-    UICDM::CUICDMSlideHandle theTargetSlide = theSlideSystem->GetAssociatedSlide(GetInstance());
+    qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
+    qt3dsdm::CUICDMSlideHandle theTargetSlide = theSlideSystem->GetAssociatedSlide(GetInstance());
     return theTargetSlide && theSlideSystem->IsMasterSlide(theTargetSlide);
 }

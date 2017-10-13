@@ -45,7 +45,7 @@
 
 using namespace std;
 
-namespace UICDM {
+namespace qt3dsdm {
 
 template <typename TDoTransaction, typename TUndoTransaction>
 inline void NotifyConsumer(TTransactionConsumerPtr inConsumer, TDoTransaction inDoNotification,
@@ -410,9 +410,9 @@ CStudioFullSystem::CStudioFullSystem(std::shared_ptr<CStudioCoreSystem> inCoreSy
     CStudioAnimationSystem *theAnimationSystem = new CStudioAnimationSystem(
         m_PropertySystem, m_SlideSystem, m_CoreSystem->GetSlideCore(),
         m_CoreSystem->GetSlideGraphCore(), m_CoreSystem->GetAnimationCore());
-    m_AnimationSystem = std::shared_ptr<UICDM::IStudioAnimationSystem>(theAnimationSystem);
+    m_AnimationSystem = std::shared_ptr<qt3dsdm::IStudioAnimationSystem>(theAnimationSystem);
 
-    m_PropertySystem = std::shared_ptr<UICDM::IPropertySystem>(
+    m_PropertySystem = std::shared_ptr<qt3dsdm::IPropertySystem>(
         new CStudioPropertySystem(m_CoreSystem->GetNewMetaData(), m_CoreSystem->GetDataCore(),
                                   m_SlideSystem, m_AnimationSystem));
     theAnimationSystem->SetPropertySystem(m_PropertySystem);

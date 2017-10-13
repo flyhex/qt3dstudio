@@ -53,7 +53,7 @@
 #include "UICAnimationSystem.h"
 #include "UICSlideSystem.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 #ifndef M_PI
 #define M_PI 3.1415926535898
@@ -341,9 +341,9 @@ void SParseSlideManager::SetAnimationData(SParseSlide &inSlide, const char8_t *i
     m_KeyframeParseFloatBuffer.clear();
     char8_t *theBufData = const_cast<char8_t *>(m_KeyframeParseBuffer.c_str());
 
-    char8_t *theStartPtr = UICDM::FindNextNonWhitespace(theBufData);
+    char8_t *theStartPtr = qt3dsdm::FindNextNonWhitespace(theBufData);
     while (theStartPtr && *theStartPtr) {
-        char8_t *nextPtr = UICDM::FindNextWhitespace(theStartPtr);
+        char8_t *nextPtr = qt3dsdm::FindNextWhitespace(theStartPtr);
         if (nextPtr && *nextPtr)
             *nextPtr = 0;
         else
@@ -451,10 +451,10 @@ CUIPParserImpl::CUIPParserImpl(const QString &inFileName, IRuntimeMetaData &inMe
     , m_ParseSlideManager(inMetaData, m_ParseElementManager)
 {
     // Setup DOMSerializer and DOMReader to read the file
-    std::shared_ptr<UICDM::IStringTable> theStrTable(inMetaData.GetStringTable());
-    shared_ptr<UICDM::IDOMFactory> theFactory(UICDM::IDOMFactory::CreateDOMFactory(theStrTable));
+    std::shared_ptr<qt3dsdm::IStringTable> theStrTable(inMetaData.GetStringTable());
+    shared_ptr<qt3dsdm::IDOMFactory> theFactory(qt3dsdm::IDOMFactory::CreateDOMFactory(theStrTable));
     TInputStreamPtr theInStream(inFactory.GetStreamForFile(inFileName));
-    UICDM::SDOMElement *topElement = NULL;
+    qt3dsdm::SDOMElement *topElement = NULL;
     if (theInStream)
         topElement = CDOMSerializer::Read(*theFactory, *theInStream);
     if (!topElement) {
@@ -683,7 +683,7 @@ BOOL CUIPParserImpl::LoadClasses(IPresentation & /*inPresentation*/, IDOMReader 
     return true;
 }
 
-BOOL CUIPParserImpl::LoadGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader)
+BOOL CUIPParserImpl::LoadGraph(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __childScope(inReader);
 
@@ -1139,7 +1139,7 @@ BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &i
  *	This method will parse through the graph sections to cache those attributes that
  *	should never be optimized
  */
-void CUIPParserImpl::CacheGraphRequiredAttributes(UICDM::IDOMReader &inReader)
+void CUIPParserImpl::CacheGraphRequiredAttributes(qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __childScope(inReader);
 
@@ -1188,7 +1188,7 @@ void CUIPParserImpl::CacheGraphRequiredAttributes(UICDM::IDOMReader &inReader)
  *	This method will parse through the logic sections to cache those attributes that
  *	will be changed and thus needs to be at the SElement
  */
-BOOL CUIPParserImpl::CacheLogicRequiredAttributes(UICDM::IDOMReader &inReader,
+BOOL CUIPParserImpl::CacheLogicRequiredAttributes(qt3dsdm::IDOMReader &inReader,
                                                   qt3ds::QT3DSI32 inSlideIndex,
                                                   SParseSlide *inParentSlide)
 {
@@ -1400,7 +1400,7 @@ BOOL CUIPParserImpl::CacheLogicRequiredAttributes(UICDM::IDOMReader &inReader,
     return TRUE;
 }
 
-void CUIPParserImpl::CacheClassRequiredAttributes(UICDM::IDOMReader &inReader)
+void CUIPParserImpl::CacheClassRequiredAttributes(qt3dsdm::IDOMReader &inReader)
 {
     {
         // First, we parse Graph section to cache custom attributes specified by the class
@@ -1512,7 +1512,7 @@ void CUIPParserImpl::PatchSceneElementRef()
     }
 }
 
-BOOL CUIPParserImpl::LoadLogic(IPresentation &inPresentation, UICDM::IDOMReader &inReader)
+BOOL CUIPParserImpl::LoadLogic(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __logicScope(inReader);
 
@@ -1555,7 +1555,7 @@ BOOL CUIPParserImpl::LoadLogic(IPresentation &inPresentation, UICDM::IDOMReader 
  *	@param	inPresentation		presentation written to
  *	@return a flag indicating whether or not we successfully loaded the file
  */
-BOOL CUIPParserImpl::LoadStateGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader)
+BOOL CUIPParserImpl::LoadStateGraph(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __slideScope(inReader);
 
@@ -1594,7 +1594,7 @@ BOOL CUIPParserImpl::LoadStateGraph(IPresentation &inPresentation, UICDM::IDOMRe
  *	@return a flag indicating whether or not we successfully loaded the file
  */
 BOOL CUIPParserImpl::LoadState(IPresentation &inPresentation, SElement *inComponent,
-                               INT32 inSlideIndex, UICDM::IDOMReader &inReader)
+                               INT32 inSlideIndex, qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __stateScope(inReader);
 
@@ -1638,7 +1638,7 @@ BOOL CUIPParserImpl::LoadState(IPresentation &inPresentation, SElement *inCompon
  *	Process the state information to add all the animations and actions that might be setup
  */
 BOOL CUIPParserImpl::ProcessStateRef(IPresentation &inPresentation, SElement *inComponent,
-                                     bool inMaster, UICDM::IDOMReader &inReader)
+                                     bool inMaster, qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __stateScope(inReader);
     eastl::string theSlideId = GetSlideId(inReader);
@@ -1653,7 +1653,7 @@ BOOL CUIPParserImpl::ProcessStateRef(IPresentation &inPresentation, SElement *in
 }
 
 void CUIPParserImpl::ComputeAndReserveMemory(IPresentation & /*inPresentation*/,
-                                             UICDM::IDOMReader &inReader)
+                                             qt3dsdm::IDOMReader &inReader)
 {
     SGraphSectionCount theGraphSectionCount;
     SLogicSectionCount theLogicSectionCount;
@@ -1668,7 +1668,7 @@ void CUIPParserImpl::ComputeAndReserveMemory(IPresentation & /*inPresentation*/,
     m_ActionHelper->GetActionSectionCount(theActionSectionCount);
 }
 
-void CUIPParserImpl::DoGraphSectionCount(UICDM::IDOMReader &inReader,
+void CUIPParserImpl::DoGraphSectionCount(qt3dsdm::IDOMReader &inReader,
                                          SGraphSectionCount &outGraphCounter)
 {
     IDOMReader::Scope __graphScope(inReader);
@@ -1720,7 +1720,7 @@ void CUIPParserImpl::DoGraphSectionCount(UICDM::IDOMReader &inReader,
     }
 }
 
-void CUIPParserImpl::DoLogicSectionCount(UICDM::IDOMReader &inReader,
+void CUIPParserImpl::DoLogicSectionCount(qt3dsdm::IDOMReader &inReader,
                                          SLogicSectionCount &outLogicCounter)
 {
     IDOMReader::Scope __logicCountScope(inReader);
@@ -1733,7 +1733,7 @@ void CUIPParserImpl::DoLogicSectionCount(UICDM::IDOMReader &inReader,
     }
 }
 
-void CUIPParserImpl::DoStateSectionCount(UICDM::IDOMReader &inReader, Q3DStudio::INT32 inStateIndex,
+void CUIPParserImpl::DoStateSectionCount(qt3dsdm::IDOMReader &inReader, Q3DStudio::INT32 inStateIndex,
                                          SLogicSectionCount &outLogicCounter)
 {
     IDOMReader::Scope __slideCountScope(inReader);
@@ -1773,7 +1773,7 @@ void CUIPParserImpl::DoStateSectionCount(UICDM::IDOMReader &inReader, Q3DStudio:
  *	@ param inNumSlideMultiplier		To know how this is used, see comments on the place
  *where SlideMultipler is calculated
  */
-void CUIPParserImpl::DoRefSectionCount(UICDM::IDOMReader &inReader, INT32 inNumSlideMultiplier,
+void CUIPParserImpl::DoRefSectionCount(qt3dsdm::IDOMReader &inReader, INT32 inNumSlideMultiplier,
                                        INT32, SLogicSectionCount &outLogicCounter)
 {
     IDOMReader::Scope __refCountScope(inReader);
@@ -1811,7 +1811,7 @@ void CUIPParserImpl::DoRefSectionCount(UICDM::IDOMReader &inReader, INT32 inNumS
     outLogicCounter.m_PaddingCount += inNumSlideMultiplier;
 }
 
-qt3ds::runtime::SSlidePlayInformation CUIPParserImpl::GetPlayMode(UICDM::IDOMReader &inReader)
+qt3ds::runtime::SSlidePlayInformation CUIPParserImpl::GetPlayMode(qt3dsdm::IDOMReader &inReader)
 {
     using qt3ds::runtime::PlayMode;
 
@@ -1862,7 +1862,7 @@ qt3ds::runtime::SSlidePlayInformation CUIPParserImpl::GetPlayMode(UICDM::IDOMRea
     return thePlayInformation;
 }
 
-INT32 CUIPParserImpl::GetPlayThroughTo(INT32 inCurrentSlideIndex, UICDM::IDOMReader &inReader)
+INT32 CUIPParserImpl::GetPlayThroughTo(INT32 inCurrentSlideIndex, qt3dsdm::IDOMReader &inReader)
 {
     // Just hardcode it to Next since we know from the metadata the default is Next.
     // If we want to query from MetaData, need to write accessor to get back SStringOrInt
@@ -1887,7 +1887,7 @@ INT32 CUIPParserImpl::GetPlayThroughTo(INT32 inCurrentSlideIndex, UICDM::IDOMRea
     return thePlayThroughTo;
 }
 
-eastl::string CUIPParserImpl::GetSlideName(UICDM::IDOMReader &inReader)
+eastl::string CUIPParserImpl::GetSlideName(qt3dsdm::IDOMReader &inReader)
 {
     eastl::string theSlideName;
     if (!inReader.Att("name", theSlideName))
@@ -1895,7 +1895,7 @@ eastl::string CUIPParserImpl::GetSlideName(UICDM::IDOMReader &inReader)
     return theSlideName;
 }
 
-eastl::string CUIPParserImpl::GetSlideId(UICDM::IDOMReader &inReader)
+eastl::string CUIPParserImpl::GetSlideId(qt3dsdm::IDOMReader &inReader)
 {
     eastl::string theSlideId;
     if (!inReader.Att("id", theSlideId))
@@ -1905,7 +1905,7 @@ eastl::string CUIPParserImpl::GetSlideId(UICDM::IDOMReader &inReader)
 
 // In the event we added something to the slide, we return the element data.
 SElementData *CUIPParserImpl::AddSlideElement(IPresentation &inPresentation, bool inMaster,
-                                              UICDM::IDOMReader &inReader, INT32 *outMaxTime)
+                                              qt3dsdm::IDOMReader &inReader, INT32 *outMaxTime)
 {
     ISlideSystem &theBuilder = inPresentation.GetSlideSystem();
 
@@ -1943,7 +1943,7 @@ SElementData *CUIPParserImpl::AddSlideElement(IPresentation &inPresentation, boo
     return theElementData;
 }
 
-BOOL CUIPParserImpl::LoadSlideElements(IPresentation &inPresentation, UICDM::IDOMReader &inReader,
+BOOL CUIPParserImpl::LoadSlideElements(IPresentation &inPresentation, qt3dsdm::IDOMReader &inReader,
                                        bool inMaster, SElement *inComponent, INT32 *outMaxTime)
 {
     BOOL theSuccess = true;
@@ -2083,7 +2083,7 @@ BOOL CUIPParserImpl::LoadSlideElements(IPresentation &inPresentation, UICDM::IDO
 }
 
 BOOL CUIPParserImpl::LoadSlideElementAttrs(IPresentation &inPresentation, bool,
-                                           SElementData &inElementData, UICDM::IDOMReader &inReader,
+                                           SElementData &inElementData, qt3dsdm::IDOMReader &inReader,
                                            SElement *inComponent)
 {
     ISlideSystem &theBuilder = inPresentation.GetSlideSystem();
@@ -2380,7 +2380,7 @@ void CUIPParserImpl::CreateBezierKeyframeFromEaseInEaseOutKeyframe(
 }
 
 BOOL CUIPParserImpl::ProcessSlideAnimAction(IPresentation &inPresentation, eastl::string &inSlideId,
-                                            bool inMaster, UICDM::IDOMReader &inReader)
+                                            bool inMaster, qt3dsdm::IDOMReader &inReader)
 {
     IDOMReader::Scope __animationScope(inReader);
 
@@ -2399,7 +2399,7 @@ BOOL CUIPParserImpl::ProcessSlideAnimAction(IPresentation &inPresentation, eastl
 }
 
 BOOL CUIPParserImpl::AddSlideAction(IPresentation &, eastl::string &inSlideId, bool inActive,
-                                    UICDM::IDOMReader &inReader)
+                                    qt3dsdm::IDOMReader &inReader)
 {
     SParseSlide *theSlide = m_ParseSlideManager.FindSlide(inSlideId.c_str());
     if (theSlide == NULL) {
@@ -2485,62 +2485,62 @@ SElementAndType CUIPParserImpl::GetElementForID(const char *inElementName)
     if (theData == NULL)
         return SElementAndType(UIPElementTypes::Unknown, NULL);
 
-    UICDM::ComposerObjectTypes::Enum theComposerType(
-        UICDM::ComposerObjectTypes::Convert(theData->m_Type.c_str()));
+    qt3dsdm::ComposerObjectTypes::Enum theComposerType(
+        qt3dsdm::ComposerObjectTypes::Convert(theData->m_Type.c_str()));
     UIPElementTypes::Enum theUIPType(UIPElementTypes::Unknown);
     switch (theComposerType) {
-    case UICDM::ComposerObjectTypes::Scene:
+    case qt3dsdm::ComposerObjectTypes::Scene:
         theUIPType = UIPElementTypes::Scene;
         break;
-    case UICDM::ComposerObjectTypes::Layer:
+    case qt3dsdm::ComposerObjectTypes::Layer:
         theUIPType = UIPElementTypes::Layer;
         break;
-    case UICDM::ComposerObjectTypes::Group:
+    case qt3dsdm::ComposerObjectTypes::Group:
         theUIPType = UIPElementTypes::Group;
         break;
-    case UICDM::ComposerObjectTypes::Component:
+    case qt3dsdm::ComposerObjectTypes::Component:
         theUIPType = UIPElementTypes::Component;
         break;
-    case UICDM::ComposerObjectTypes::Camera:
+    case qt3dsdm::ComposerObjectTypes::Camera:
         theUIPType = UIPElementTypes::Camera;
         break;
-    case UICDM::ComposerObjectTypes::Light:
+    case qt3dsdm::ComposerObjectTypes::Light:
         theUIPType = UIPElementTypes::Light;
         break;
-    case UICDM::ComposerObjectTypes::Model:
+    case qt3dsdm::ComposerObjectTypes::Model:
         theUIPType = UIPElementTypes::Model;
         break;
-    case UICDM::ComposerObjectTypes::Material:
+    case qt3dsdm::ComposerObjectTypes::Material:
         theUIPType = UIPElementTypes::Material;
         break;
-    case UICDM::ComposerObjectTypes::Image:
+    case qt3dsdm::ComposerObjectTypes::Image:
         theUIPType = UIPElementTypes::Image;
         break;
-    case UICDM::ComposerObjectTypes::Behavior:
+    case qt3dsdm::ComposerObjectTypes::Behavior:
         theUIPType = UIPElementTypes::Behavior;
         break;
-    case UICDM::ComposerObjectTypes::Text:
+    case qt3dsdm::ComposerObjectTypes::Text:
         theUIPType = UIPElementTypes::Text;
         break;
-    case UICDM::ComposerObjectTypes::Effect:
+    case qt3dsdm::ComposerObjectTypes::Effect:
         theUIPType = UIPElementTypes::Effect;
         break;
-    case UICDM::ComposerObjectTypes::CustomMaterial:
+    case qt3dsdm::ComposerObjectTypes::CustomMaterial:
         theUIPType = UIPElementTypes::CustomMaterial;
         break;
-    case UICDM::ComposerObjectTypes::ReferencedMaterial:
+    case qt3dsdm::ComposerObjectTypes::ReferencedMaterial:
         theUIPType = UIPElementTypes::ReferencedMaterial;
         break;
-    case UICDM::ComposerObjectTypes::RenderPlugin:
+    case qt3dsdm::ComposerObjectTypes::RenderPlugin:
         theUIPType = UIPElementTypes::RenderPlugin;
         break;
-    case UICDM::ComposerObjectTypes::Path:
+    case qt3dsdm::ComposerObjectTypes::Path:
         theUIPType = UIPElementTypes::Path;
         break;
-    case UICDM::ComposerObjectTypes::PathAnchorPoint:
+    case qt3dsdm::ComposerObjectTypes::PathAnchorPoint:
         theUIPType = UIPElementTypes::PathAnchorPoint;
         break;
-    case UICDM::ComposerObjectTypes::SubPath:
+    case qt3dsdm::ComposerObjectTypes::SubPath:
         theUIPType = UIPElementTypes::PathSubPath;
         break;
     default:

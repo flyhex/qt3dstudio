@@ -48,7 +48,7 @@
 #include "SelectedValueImpl.h"
 
 namespace {
-struct SSignalConnection : public UICDM::ISignalConnection, boost::noncopyable
+struct SSignalConnection : public qt3dsdm::ISignalConnection, boost::noncopyable
 {
     boost::BOOST_SIGNALS_NAMESPACE::scoped_connection m_connection;
     SSignalConnection(const boost::BOOST_SIGNALS_NAMESPACE::connection &inConnection)
@@ -120,13 +120,13 @@ void CDispatch::FireEndDataModelNotifications()
     }
 }
 
-void CDispatch::FireImmediateRefreshInstance(UICDM::CUICDMInstanceHandle inInstance)
+void CDispatch::FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     m_DataModelListeners.FireEvent(&IDataModelListener::OnImmediateRefreshInstanceSingle,
                                    inInstance);
 }
 
-void CDispatch::FireImmediateRefreshInstance(UICDM::CUICDMInstanceHandle *inInstances,
+void CDispatch::FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle *inInstances,
                                              long inInstanceCount)
 {
     m_DataModelListeners.FireEvent(&IDataModelListener::OnImmediateRefreshInstanceMultiple,
@@ -143,7 +143,7 @@ void CDispatch::RemoveReloadListener(IReloadListener *inListener)
     m_ReloadListeners.RemoveListener(inListener);
 }
 
-void CDispatch::FireReloadEffectInstance(UICDM::CUICDMInstanceHandle inInstance)
+void CDispatch::FireReloadEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     m_ReloadListeners.FireEvent(&IReloadListener::OnReloadEffectInstance, inInstance);
 }
@@ -257,7 +257,7 @@ void CDispatch::FireOnNudgeDone()
     m_SceneDragListeners.FireEvent(&CSceneDragListener::OnNudgeDone);
 }
 
-UICDM::TSignalConnectionPtr
+qt3dsdm::TSignalConnectionPtr
 CDispatch::ConnectSelectionChange(std::function<void(Q3DStudio::SSelectedValue)> inCallback)
 {
     return CONNECT(m_SignalSystem->m_SelectionChanged);
@@ -335,7 +335,7 @@ void CDispatch::FireOnSavingPresentation(const CUICFile *inNewPresentationFile)
                                             inNewPresentationFile);
 }
 
-void CDispatch::FireOnExportingAsset(UICDM::CUICDMInstanceHandle inInstance)
+void CDispatch::FireOnExportingAsset(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnExportingAsset,
                                             inInstance);

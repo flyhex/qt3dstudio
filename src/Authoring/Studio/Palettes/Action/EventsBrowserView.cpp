@@ -63,7 +63,7 @@ QSize EventsBrowserView::sizeHint() const
     return {500, 500};
 }
 
-UICDM::CDataModelHandle EventsBrowserView::selectedHandle() const
+qt3dsdm::CDataModelHandle EventsBrowserView::selectedHandle() const
 {
     const auto handleId = m_model->handleForRow(m_selection);
     return handleId;

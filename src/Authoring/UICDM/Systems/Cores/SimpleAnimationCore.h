@@ -33,7 +33,7 @@
 #include "HandleSystemBase.h"
 #include <boost/unordered_map.hpp>
 
-namespace UICDM {
+namespace qt3dsdm {
 struct SAnimationTrack : public CHandleObject
 {
     int m_Slide;

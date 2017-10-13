@@ -52,7 +52,7 @@ class CPathAnchorPointTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public: // Construction
     CPathAnchorPointTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                        UICDM::CUICDMInstanceHandle inDataHandle);
+                                        qt3dsdm::CUICDMInstanceHandle inDataHandle);
 
     bool ShowToggleControls() const override { return false; }
     bool IsVisible() const override { return true; }

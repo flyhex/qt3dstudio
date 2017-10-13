@@ -35,7 +35,7 @@
 class CDoc;
 class CDispatch;
 
-namespace UICDM {
+namespace qt3dsdm {
 class ITransactionConsumer;
 class ITransactionProducer;
 struct CTransactionConsumer;
@@ -43,9 +43,9 @@ struct CTransactionConsumer;
 struct SApplicationState
 {
     bool m_Dirty;
-    UICDM::CUICDMInstanceHandle m_SelectedInstance;
-    UICDM::CUICDMSlideHandle m_ActiveSlide;
-    UICDM::CUICDMInstanceHandle m_ActiveLayer;
+    qt3dsdm::CUICDMInstanceHandle m_SelectedInstance;
+    qt3dsdm::CUICDMSlideHandle m_ActiveSlide;
+    qt3dsdm::CUICDMInstanceHandle m_ActiveLayer;
 
     SApplicationState()
         : m_Dirty(false)

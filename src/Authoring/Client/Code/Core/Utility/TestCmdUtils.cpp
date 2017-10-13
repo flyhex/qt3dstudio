@@ -58,7 +58,7 @@
  * @param inSlideIndex a slide index where zero is the master slide
  * @return a pointer to the new child object or NULL if not added
  */
-UICDM::CUICDMInstanceHandle TestCmdUtilsAddObject(CAsset *inParent, CAsset *inChild,
+qt3dsdm::CUICDMInstanceHandle TestCmdUtilsAddObject(CAsset *inParent, CAsset *inChild,
                                                   long inSlideIndex)
 {
     Q_UNUSED(inParent);

@@ -50,7 +50,7 @@ class CBehaviorTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public:
     CBehaviorTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                 UICDM::CUICDMInstanceHandle inDataHandle);
+                                 qt3dsdm::CUICDMInstanceHandle inDataHandle);
     ~CBehaviorTimelineItemBinding() {}
 
     // CUICDMTimelineItemBinding

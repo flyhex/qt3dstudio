@@ -49,7 +49,7 @@
 
 UIC_DEFINE_THISFILE;
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace std;
 
 //====================================================================
@@ -117,31 +117,31 @@ void CPlaybackClock::UpdateTime()
 
 void CPlaybackClock::OnReachedUpperBound()
 {
-    UICDM::CUICDMSlideHandle theActiveSlide(m_Doc->GetActiveSlide());
+    qt3dsdm::CUICDMSlideHandle theActiveSlide(m_Doc->GetActiveSlide());
     // clock has passed the end, check whether needs to switch slide
-    UICDM::CUICDMInstanceHandle theInstanceHandle =
+    qt3dsdm::CUICDMInstanceHandle theInstanceHandle =
         GetSlideSystem()->GetSlideInstance(theActiveSlide);
 
     // Get the play through state
-    UICDM::SValue theValue;
+    qt3dsdm::SValue theValue;
     GetPropertySystem()->GetInstancePropertyValue(
         theInstanceHandle, GetClientDataModelBridge()->GetSlide().m_PlayMode, theValue);
-    Q3DStudio::CString thePlayMode = UICDM::get<UICDM::TDataStrPtr>(theValue)->GetData();
+    Q3DStudio::CString thePlayMode = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData();
 
     if (thePlayMode == L"Play Through To...") {
         // figure out which slide to activate
         GetPropertySystem()->GetInstancePropertyValue(
             theInstanceHandle, GetClientDataModelBridge()->GetSlide().m_PlaythroughTo, theValue);
-        SStringOrInt thePlaythroughTo = UICDM::get<SStringOrInt>(theValue);
+        SStringOrInt thePlaythroughTo = qt3dsdm::get<SStringOrInt>(theValue);
 
-        UICDM::ISlideSystem *theSlideSystem = GetSlideSystem();
-        UICDM::CUICDMSlideHandle thePlaythroughToSlide;
+        qt3dsdm::ISlideSystem *theSlideSystem = GetSlideSystem();
+        qt3dsdm::CUICDMSlideHandle thePlaythroughToSlide;
 
         if (thePlaythroughTo.GetType() == SStringOrIntTypes::String) {
             Q3DStudio::CString theValue(get<TDataStrPtr>(thePlaythroughTo.m_Value)->GetData());
             if (theValue == L"Next") {
                 size_t theNextSlideIndex = theSlideSystem->GetSlideIndex(theActiveSlide) + 1;
-                UICDM::CUICDMSlideHandle theMasterSlide =
+                qt3dsdm::CUICDMSlideHandle theMasterSlide =
                     theSlideSystem->GetMasterSlide(theActiveSlide);
                 size_t theSlideCount = theSlideSystem->GetSlideCount(theMasterSlide);
                 if (theNextSlideIndex < theSlideCount) {
@@ -151,7 +151,7 @@ void CPlaybackClock::OnReachedUpperBound()
                 }
             } else if (theValue == L"Previous") {
                 int thePrevSlideIndex = theSlideSystem->GetSlideIndex(theActiveSlide) - 1;
-                UICDM::CUICDMSlideHandle theMasterSlide =
+                qt3dsdm::CUICDMSlideHandle theMasterSlide =
                     theSlideSystem->GetMasterSlide(theActiveSlide);
                 if (thePrevSlideIndex > 0) // Index 0 refers to MasterSlide, so we check > 0
                 {
@@ -214,18 +214,18 @@ void CPlaybackClock::Reset()
  */
 void CPlaybackClock::UpdateClockProperties()
 {
-    UICDM::CUICDMInstanceHandle theInstanceHandle =
+    qt3dsdm::CUICDMInstanceHandle theInstanceHandle =
         GetSlideSystem()->GetSlideInstance(m_Doc->GetActiveSlide());
     ASSERT(theInstanceHandle.Valid());
 
-    UICDM::SValue theValue;
+    qt3dsdm::SValue theValue;
     GetPropertySystem()->GetInstancePropertyValue(
         theInstanceHandle, GetClientDataModelBridge()->GetSlide().m_InitialPlayState, theValue);
-    Q3DStudio::CString theInitialPlayState = UICDM::get<UICDM::TDataStrPtr>(theValue)->GetData();
+    Q3DStudio::CString theInitialPlayState = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData();
 
     GetPropertySystem()->GetInstancePropertyValue(
         theInstanceHandle, GetClientDataModelBridge()->GetSlide().m_PlayMode, theValue);
-    Q3DStudio::CString thePlayMode = UICDM::get<UICDM::TDataStrPtr>(theValue)->GetData();
+    Q3DStudio::CString thePlayMode = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData();
 
     m_Policy = PlaybackClockPolicy::Normal;
     m_Looping = false;
@@ -247,11 +247,11 @@ void CPlaybackClock::UpdateClockProperties()
     m_VirtualTime = m_Doc->GetCurrentClientTime();
 }
 
-UICDM::IPropertySystem *CPlaybackClock::GetPropertySystem() const
+qt3dsdm::IPropertySystem *CPlaybackClock::GetPropertySystem() const
 {
     return m_Doc->GetStudioSystem()->GetPropertySystem();
 }
-UICDM::ISlideSystem *CPlaybackClock::GetSlideSystem() const
+qt3dsdm::ISlideSystem *CPlaybackClock::GetSlideSystem() const
 {
     return m_Doc->GetStudioSystem()->GetSlideSystem();
 }

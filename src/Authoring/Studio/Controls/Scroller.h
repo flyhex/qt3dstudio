@@ -166,6 +166,6 @@ protected:
 
     long m_OffsetAmmount;
     unsigned long m_DelayTime;
-    std::shared_ptr<UICDM::ISignalConnection> m_CurrentTickTock;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_CurrentTickTock;
 };
 #endif // INCLUDED_SCROLLER_H

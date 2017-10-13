@@ -40,7 +40,7 @@ EventsModel::EventsModel(QObject *parent)
 {
 }
 
-void EventsModel::setEventList(const UICDM::TEventHandleList &eventList)
+void EventsModel::setEventList(const qt3dsdm::TEventHandleList &eventList)
 {
     beginResetModel();
 
@@ -52,12 +52,12 @@ void EventsModel::setEventList(const UICDM::TEventHandleList &eventList)
     auto theBridge = studioSystem->GetClientDataModelBridge();
     auto thePos = eventList.begin();
     for (; thePos != eventList.end(); ++thePos) {
-        UICDM::SEventInfo theEvent = theBridge->GetEventInfo(*thePos);
+        qt3dsdm::SEventInfo theEvent = theBridge->GetEventInfo(*thePos);
 
         CategoryInfo category;
         category.name = QString::fromWCharArray(theEvent.m_Category.wide_str());
         if (!m_events.contains(category.name)) {
-          UICDM::SCategoryInfo theCategoryMetaData = studioSystem->GetActionMetaData()
+          qt3dsdm::SCategoryInfo theCategoryMetaData = studioSystem->GetActionMetaData()
                   ->GetEventCategory(theEvent.m_Category);
           category.icon = QString::fromWCharArray(theCategoryMetaData.m_Icon.wide_str());
           category.highlightIcon = QString::fromWCharArray(theCategoryMetaData.m_HighlightIcon.wide_str());
@@ -83,7 +83,7 @@ void EventsModel::setEventList(const UICDM::TEventHandleList &eventList)
     endResetModel();
 }
 
-void EventsModel::setHandlerList(const UICDM::THandlerHandleList &handlerList)
+void EventsModel::setHandlerList(const qt3dsdm::THandlerHandleList &handlerList)
 {
     beginResetModel();
     m_rowCount = 0;
@@ -94,12 +94,12 @@ void EventsModel::setHandlerList(const UICDM::THandlerHandleList &handlerList)
     auto theBridge = studioSystem->GetClientDataModelBridge();
     auto thePos = handlerList.begin();
     for (; thePos != handlerList.end(); ++thePos) {
-        UICDM::SHandlerInfo handlerInfo = theBridge->GetHandlerInfo(*thePos);
+        qt3dsdm::SHandlerInfo handlerInfo = theBridge->GetHandlerInfo(*thePos);
 
         CategoryInfo category;
         category.name = QString::fromWCharArray(handlerInfo.m_Category.wide_str());
         if (!m_events.contains(category.name)) {
-          UICDM::SCategoryInfo theCategoryMetaData = studioSystem->GetActionMetaData()
+          qt3dsdm::SCategoryInfo theCategoryMetaData = studioSystem->GetActionMetaData()
                   ->GetHandlerCategory(handlerInfo.m_Category);
           category.icon = QString::fromWCharArray(theCategoryMetaData.m_Icon.wide_str());
           category.highlightIcon = QString::fromWCharArray(theCategoryMetaData.m_HighlightIcon.wide_str());
@@ -202,7 +202,7 @@ QHash<int, QByteArray> EventsModel::roleNames() const
     return names;
 }
 
-UICDM::CDataModelHandle EventsModel::handleForRow(int row) const
+qt3dsdm::CDataModelHandle EventsModel::handleForRow(int row) const
 {
     if (row < 0 || row >= m_rowCount)
         return {};

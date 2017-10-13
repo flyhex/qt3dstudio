@@ -36,7 +36,7 @@ namespace render {
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDataCore;
 class IMetaData;
 class ISlideCore;
@@ -64,51 +64,51 @@ protected:
     virtual ~IComposerSerializer() {}
 public:
     // Empty graph roots means use the actual graph roots in the asset graph
-    virtual void SerializeScene(UICDM::IDOMWriter &inWriter) = 0;
+    virtual void SerializeScene(qt3dsdm::IDOMWriter &inWriter) = 0;
     // Write properties into the active slide until we get to a slide owner, then create new slides.
     // inActiveSlide may be zero if the top item we find happens to be a scene or a component.
     // The graph roots hold the top items
-    virtual void SerializeScene(UICDM::IDOMReader &inReader,
+    virtual void SerializeScene(qt3dsdm::IDOMReader &inReader,
                                 const Q3DStudio::CFilePath &inDocumentDirectory,
                                 int inUIPVersion) = 0;
 
     // Write this instance and its children (and possibly its slides) to a writer.
     // Equivalent to the older partial serialization system
-    virtual void SerializeSceneGraphObjects(UICDM::IDOMWriter &inWriter,
-                                            const UICDM::TInstanceHandleList &inInstances,
-                                            UICDM::CUICDMSlideHandle inActiveSlide) = 0;
+    virtual void SerializeSceneGraphObjects(qt3dsdm::IDOMWriter &inWriter,
+                                            const qt3dsdm::TInstanceHandleList &inInstances,
+                                            qt3dsdm::CUICDMSlideHandle inActiveSlide) = 0;
 
     // Read a partial serialization into this slide, attaching the instance as the last child of the
     // new root.
-    virtual UICDM::TInstanceHandleList SerializeSceneGraphObject(
-        UICDM::IDOMReader &inReader, const Q3DStudio::CFilePath &inDocumentDirectory,
-        UICDM::CUICDMInstanceHandle inNewRoot, UICDM::CUICDMSlideHandle inActiveSlide) = 0;
+    virtual qt3dsdm::TInstanceHandleList SerializeSceneGraphObject(
+        qt3dsdm::IDOMReader &inReader, const Q3DStudio::CFilePath &inDocumentDirectory,
+        qt3dsdm::CUICDMInstanceHandle inNewRoot, qt3dsdm::CUICDMSlideHandle inActiveSlide) = 0;
 
     // Save and load just a single action
-    virtual void SerializeAction(UICDM::IDOMWriter &inWriter, UICDM::CUICDMSlideHandle inSlide,
-                                 UICDM::CUICDMActionHandle inAction) = 0;
+    virtual void SerializeAction(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide,
+                                 qt3dsdm::CUICDMActionHandle inAction) = 0;
     // Load a new action onto this root object
-    virtual UICDM::CUICDMActionHandle SerializeAction(UICDM::IDOMReader &inReader,
-                                                      UICDM::CUICDMInstanceHandle inNewRoot,
-                                                      UICDM::CUICDMSlideHandle inSlide) = 0;
+    virtual qt3dsdm::CUICDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
+                                                      qt3dsdm::CUICDMInstanceHandle inNewRoot,
+                                                      qt3dsdm::CUICDMSlideHandle inSlide) = 0;
 
-    virtual void SerializeSlide(UICDM::IDOMWriter &inWriter, UICDM::CUICDMSlideHandle inSlide) = 0;
+    virtual void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide) = 0;
 
-    virtual UICDM::CUICDMSlideHandle SerializeSlide(UICDM::IDOMReader &inReader,
+    virtual qt3dsdm::CUICDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
                                                     const CFilePath &inDocumentDirectory,
-                                                    UICDM::CUICDMSlideHandle inMaster,
+                                                    qt3dsdm::CUICDMSlideHandle inMaster,
                                                     int inNewIndex = -1) = 0;
 
     friend class std::shared_ptr<IComposerSerializer>;
 
     static std::shared_ptr<IComposerSerializer> CreateGraphSlideSerializer(
-        UICDM::IDataCore &inDataCore, UICDM::IMetaData &inMetaData, UICDM::ISlideCore &inSlideCore,
-        UICDM::IAnimationCore &inAnimationCore, UICDM::IActionCore &inActionCore,
-        CGraph &inAssetGraph, UICDM::ISlideSystem &inSlideSystem,
-        UICDM::IActionSystem &inActionSystem, UICDM::ISlideGraphCore &inSlideGraphCore,
-        UICDM::SComposerObjectDefinitions &inObjectDefinitions,
+        qt3dsdm::IDataCore &inDataCore, qt3dsdm::IMetaData &inMetaData, qt3dsdm::ISlideCore &inSlideCore,
+        qt3dsdm::IAnimationCore &inAnimationCore, qt3dsdm::IActionCore &inActionCore,
+        CGraph &inAssetGraph, qt3dsdm::ISlideSystem &inSlideSystem,
+        qt3dsdm::IActionSystem &inActionSystem, qt3dsdm::ISlideGraphCore &inSlideGraphCore,
+        qt3dsdm::SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-        UICDM::IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager);
+        qt3dsdm::IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager);
 };
 }
 

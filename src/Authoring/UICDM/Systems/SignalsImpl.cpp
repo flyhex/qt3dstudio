@@ -49,7 +49,7 @@ bool g_UICDMSignalsEnabled = true;
     }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 void SetUICDMSignalsEnabled(bool inEnabled)
 {
     g_UICDMSignalsEnabled = inEnabled;

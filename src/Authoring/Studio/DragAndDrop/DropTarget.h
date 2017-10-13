@@ -44,7 +44,7 @@ class CStudioApp;
 class CDropTarget
 {
 protected:
-    UICDM::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
     long m_ObjectType;
 
 public:
@@ -55,11 +55,11 @@ public:
     virtual bool Drop(CDropSource &inSource) = 0;
     virtual long GetObjectType() = 0;
 
-    virtual void SetInstance(UICDM::CUICDMInstanceHandle inInstance) { m_Instance = inInstance; }
-    virtual UICDM::CUICDMInstanceHandle GetInstance() { return m_Instance; }
+    virtual void SetInstance(qt3dsdm::CUICDMInstanceHandle inInstance) { m_Instance = inInstance; }
+    virtual qt3dsdm::CUICDMInstanceHandle GetInstance() { return m_Instance; }
 
-    virtual bool IsRelative(UICDM::CUICDMInstanceHandle) { return false; }
-    virtual bool IsSelf(UICDM::CUICDMInstanceHandle) { return false; }
+    virtual bool IsRelative(qt3dsdm::CUICDMInstanceHandle) { return false; }
+    virtual bool IsSelf(qt3dsdm::CUICDMInstanceHandle) { return false; }
     virtual bool IsMaster() { return false; }
     virtual bool CanAddToMaster();
 };

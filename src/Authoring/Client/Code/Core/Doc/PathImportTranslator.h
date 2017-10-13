@@ -73,7 +73,7 @@ protected:
     void SetUniqueName(TInstanceHandle inItem, const char8_t *inNameBase,
                        eastl::vector<Q3DStudio::CString> &inExistingNames);
     TInstanceHandle GetChild(TInstanceHandle inItem, qt3ds::QT3DSI32 inIndex);
-    TInstanceHandle CreateSceneGraphInstance(UICDM::ComposerObjectTypes::Enum inObjectTypes,
+    TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inObjectTypes,
                                              TInstanceHandle inParent,
                                              const Q3DStudio::CString &inId);
     TInstanceHandle ParseSVGItem(TInstanceHandle parentHandle, TNameList &existingChildNames,

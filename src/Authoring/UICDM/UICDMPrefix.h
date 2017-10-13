@@ -66,7 +66,7 @@
 // Project includes
 #include "StandardExtensions.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 using std::ref;
 using std::get;
 using std::bind;

@@ -30,7 +30,7 @@
 #include "PathAnchorPointTimelineItemBinding.h"
 #include "EmptyTimelineTimebar.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CPathAnchorPointTimelineItemBinding::CPathAnchorPointTimelineItemBinding(
     CTimelineTranslationManager *inMgr, CUICDMInstanceHandle inDataHandle)

@@ -33,7 +33,7 @@
 #include "UICDMDataTypes.h"
 #include "UICDMValue.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct SLinearKeyframe
 {
@@ -69,24 +69,24 @@ namespace qt3ds {
 namespace foundation {
     // Disable calling destructor of these pod types
     template <>
-    struct DestructTraits<UICDM::SEaseInEaseOutKeyframe>
+    struct DestructTraits<qt3dsdm::SEaseInEaseOutKeyframe>
     {
-        void destruct(UICDM::SEaseInEaseOutKeyframe &) {}
+        void destruct(qt3dsdm::SEaseInEaseOutKeyframe &) {}
     };
     template <>
-    struct DestructTraits<UICDM::SBezierKeyframe>
+    struct DestructTraits<qt3dsdm::SBezierKeyframe>
     {
-        void destruct(UICDM::SBezierKeyframe &) {}
+        void destruct(qt3dsdm::SBezierKeyframe &) {}
     };
     template <>
-    struct DestructTraits<UICDM::SLinearKeyframe>
+    struct DestructTraits<qt3dsdm::SLinearKeyframe>
     {
-        void destruct(UICDM::SLinearKeyframe &) {}
+        void destruct(qt3dsdm::SLinearKeyframe &) {}
     };
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 enum EAnimationType {
     EAnimationTypeNone = 0,

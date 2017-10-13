@@ -100,10 +100,10 @@ void ImageChooserView::showEvent(QShowEvent *event)
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
 
-    UICDM::SValue value;
+    qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
-    const auto guid = UICDM::get<UICDM::SLong4>(value);
+    const auto guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
 
     const auto imageInstance = doc->GetDocumentReader().GetInstanceForGuid(guid);
     if (imageInstance.Valid()) {

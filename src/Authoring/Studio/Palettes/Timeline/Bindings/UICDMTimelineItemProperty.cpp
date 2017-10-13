@@ -59,7 +59,7 @@
 #include "UICDMDataCore.h"
 #include "StudioFullSystem.h"
 #include <boost/bind.hpp>
-using namespace UICDM;
+using namespace qt3dsdm;
 
 bool SortKeyframeByTime(const CUICDMTimelineKeyframe *inLHS, const CUICDMTimelineKeyframe *inRHS)
 {
@@ -110,7 +110,7 @@ void CUICDMTimelineItemProperty::CreateKeyframes()
     // Cache all the animation handles because we need them for any keyframes manipulation.
     // the assumption is that all associated handles are created all at once (i.e. we do not need to
     // add or delete from this list )
-    UICDM::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
+    qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
     DataModelDataType::Value theDataType = thePropertySystem->GetDataType(m_PropertyHandle);
     IStudioAnimationSystem *theAnimationSystem =
         m_TransMgr->GetStudioSystem()->GetAnimationSystem();
@@ -145,10 +145,10 @@ void CUICDMTimelineItemProperty::ReleaseKeyframes()
 }
 
 // Type doesn't change and due to the logic required to figure this out, cache it.
-void CUICDMTimelineItemProperty::InitializeCachedVariables(UICDM::CUICDMInstanceHandle inInstance)
+void CUICDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    UICDM::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
+    qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
 
     m_Type.first = thePropertySystem->GetDataType(m_PropertyHandle);
     m_Type.second = thePropertySystem->GetAdditionalMetaDataType(inInstance, m_PropertyHandle);
@@ -192,7 +192,7 @@ bool CUICDMTimelineItemProperty::IsMaster() const
     return false;
 }
 
-UICDM::TDataTypePair CUICDMTimelineItemProperty::GetType() const
+qt3dsdm::TDataTypePair CUICDMTimelineItemProperty::GetType() const
 {
     return m_Type;
 }
@@ -311,31 +311,31 @@ float CUICDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lon
         if (theParentBinding) {
 
             SValue theValue;
-            UICDM::IPropertySystem *thePropertySystem =
+            qt3dsdm::IPropertySystem *thePropertySystem =
                 m_TransMgr->GetStudioSystem()->GetPropertySystem();
             thePropertySystem->GetInstancePropertyValue(theParentBinding->GetInstanceHandle(),
                                                         m_PropertyHandle, theValue);
             switch (m_Type.first) {
             case DataModelDataType::Float3: {
                 if (m_Type.second == AdditionalMetaDataType::Color) {
-                    SFloat3 theFloat3 = UICDM::get<SFloat3>(theValue);
+                    SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
                     if (inChannelIndex >= 0 && inChannelIndex < 3)
                         return UICDMToColor(theFloat3[inChannelIndex]);
                 } else {
-                    SFloat3 theFloat3 = UICDM::get<SFloat3>(theValue);
+                    SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
                     if (inChannelIndex >= 0 && inChannelIndex < 3)
                         return theFloat3[inChannelIndex];
                 }
                 break;
             }
             case DataModelDataType::Float2: {
-                SFloat2 theFloat2 = UICDM::get<SFloat2>(theValue);
+                SFloat2 theFloat2 = qt3dsdm::get<SFloat2>(theValue);
                 if (inChannelIndex >= 0 && inChannelIndex < 2)
                     return theFloat2[inChannelIndex];
                 break;
             }
             case DataModelDataType::Float:
-                return UICDM::get<float>(theValue);
+                return qt3dsdm::get<float>(theValue);
                 break;
             default: // TODO: handle other types
                 break;
@@ -423,7 +423,7 @@ bool CUICDMTimelineItemProperty::IsDynamicAnimation()
 /**
  * For updating the UI when keyframes are added/updated/deleted.
  */
-bool CUICDMTimelineItemProperty::RefreshKeyframe(UICDM::CUICDMKeyframeHandle inKeyframe,
+bool CUICDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                                                  ETimelineKeyframeTransaction inTransaction)
 {
     bool theHandled = false;
@@ -468,7 +468,7 @@ bool CUICDMTimelineItemProperty::RefreshKeyframe(UICDM::CUICDMKeyframeHandle inK
     return theHandled;
 }
 
-IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByHandle(UICDM::CUICDMKeyframeHandle inKeyframe)
+IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByHandle(qt3dsdm::CUICDMKeyframeHandle inKeyframe)
 {
     TKeyframeList::iterator theIter = m_Keyframes.begin();
     for (; theIter != m_Keyframes.end(); ++theIter) {
@@ -527,7 +527,7 @@ void CUICDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime,
  * @return true if created, false if already exists.
  */
 bool CUICDMTimelineItemProperty::CreateKeyframeIfNonExistent(
-    UICDM::CUICDMKeyframeHandle inKeyframeHandle, CUICDMAnimationHandle inOwningAnimation)
+    qt3dsdm::CUICDMKeyframeHandle inKeyframeHandle, CUICDMAnimationHandle inOwningAnimation)
 {
     TKeyframeList::iterator theIter = m_Keyframes.begin();
     for (; theIter != m_Keyframes.end(); ++theIter) {
@@ -562,9 +562,9 @@ bool CUICDMTimelineItemProperty::CreateKeyframeIfNonExistent(
     return true;
 }
 
-void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(UICDM::CUICDMSlideHandle inSlide,
-                                                             UICDM::CUICDMInstanceHandle inInstance,
-                                                             UICDM::CUICDMPropertyHandle inProperty)
+void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::CUICDMSlideHandle inSlide,
+                                                             qt3dsdm::CUICDMInstanceHandle inInstance,
+                                                             qt3dsdm::CUICDMPropertyHandle inProperty)
 {
     if (inInstance == m_InstanceHandle && inProperty == m_PropertyHandle) {
         // Re-bind to keyframes because the ones we should be pointing to will have changed.

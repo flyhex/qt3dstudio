@@ -33,7 +33,7 @@
 #include "SimpleSlideCore.h"
 #include "UICDMSignals.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 struct SlideInstancePropertyKey
 {
     int m_Slide;

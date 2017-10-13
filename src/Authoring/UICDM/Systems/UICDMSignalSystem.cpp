@@ -30,7 +30,7 @@
 #include "UICDMSignalSystem.h"
 #include "EASTL/hash_map.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 namespace {
 

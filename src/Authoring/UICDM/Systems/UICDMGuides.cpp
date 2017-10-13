@@ -33,7 +33,7 @@
 #include <boost/signals/connection.hpp>
 #include "VectorTransactions.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 namespace {
 

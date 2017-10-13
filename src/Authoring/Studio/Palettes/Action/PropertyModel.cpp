@@ -17,7 +17,7 @@ PropertyModel::PropertyModel(QObject *parent)
 {
 }
 
-void PropertyModel::setAction(const UICDM::CUICDMActionHandle &action)
+void PropertyModel::setAction(const qt3dsdm::CUICDMActionHandle &action)
 {
     beginResetModel();
     m_action = action;
@@ -33,8 +33,8 @@ void PropertyModel::setAction(const UICDM::CUICDMActionHandle &action)
 
         auto actionInfo = studioSystem->GetActionCore()->GetActionInfo(action);
 
-        UICDM::IMetaData &metaData(*studioSystem->GetActionMetaData());
-        UICDM::TMetaDataPropertyHandleList metaProperties;
+        qt3dsdm::IMetaData &metaData(*studioSystem->GetActionMetaData());
+        qt3dsdm::TMetaDataPropertyHandleList metaProperties;
         const auto instance = bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
         metaData.GetMetaDataProperties(instance, metaProperties);
 
@@ -50,18 +50,18 @@ void PropertyModel::setAction(const UICDM::CUICDMActionHandle &action)
 
                 const auto additionalMetaDataType = propertySystem->GetAdditionalMetaDataType(instance, property.m_handle);
                 switch (additionalMetaDataType) {
-                case UICDM::AdditionalMetaDataType::Range: {
-                    const UICDM::TMetaDataData &metaDataData =
+                case qt3dsdm::AdditionalMetaDataType::Range: {
+                    const qt3dsdm::TMetaDataData &metaDataData =
                             propertySystem->GetAdditionalMetaDataData(instance, property.m_handle);
-                    UICDM::SMetaDataRange minMax = UICDM::get<UICDM::SMetaDataRange>(metaDataData);
+                    qt3dsdm::SMetaDataRange minMax = qt3dsdm::get<qt3dsdm::SMetaDataRange>(metaDataData);
                     property.m_min = minMax.m_Min;
                     property.m_max = minMax.m_Max;
                     break;
                 }
-                case UICDM::AdditionalMetaDataType::StringList: {
-                    const UICDM::TMetaDataData &metaDataData =
+                case qt3dsdm::AdditionalMetaDataType::StringList: {
+                    const qt3dsdm::TMetaDataData &metaDataData =
                             propertySystem->GetAdditionalMetaDataData(instance, property.m_handle);
-                    auto values = UICDM::get<UICDM::TMetaDataStringList>(metaDataData);
+                    auto values = qt3dsdm::get<qt3dsdm::TMetaDataStringList>(metaDataData);
                     QStringList possibleValues;
                     for (const auto &value: values) {
                         possibleValues.append(QString::fromWCharArray(value.wide_str()));
@@ -69,7 +69,7 @@ void PropertyModel::setAction(const UICDM::CUICDMActionHandle &action)
                     property.m_possibleValues = possibleValues;
                     break;
                 }
-                case UICDM::AdditionalMetaDataType::Font: {
+                case qt3dsdm::AdditionalMetaDataType::Font: {
                     std::vector<Q3DStudio::CString> fontNames;
                     doc->GetProjectFonts(fontNames);
                     QStringList possibleValues;
@@ -90,12 +90,12 @@ void PropertyModel::setAction(const UICDM::CUICDMActionHandle &action)
     Q_EMIT valueHandleChanged();
 }
 
-void PropertyModel::setNameHandle(const UICDM::CUICDMHandlerArgHandle &handle)
+void PropertyModel::setNameHandle(const qt3dsdm::CUICDMHandlerArgHandle &handle)
 {
     m_nameHandle = handle;
 }
 
-void PropertyModel::setValueHandle(const UICDM::CUICDMHandlerArgHandle &handle)
+void PropertyModel::setValueHandle(const qt3dsdm::CUICDMHandlerArgHandle &handle)
 {
     m_valueHandle = handle;
 
@@ -169,18 +169,18 @@ void PropertyModel::updateDefaultPropertyIndex()
         return;
     }
 
-    UICDM::SValue sValue;
+    qt3dsdm::SValue sValue;
     auto doc = g_StudioApp.GetCore()->GetDoc();
     auto studioSystem = doc->GetStudioSystem();
     studioSystem->GetActionCore()->GetHandlerArgumentValue(m_nameHandle, sValue);
 
-    if (sValue.getType() != UICDM::DataModelDataType::String) {
+    if (sValue.getType() != qt3dsdm::DataModelDataType::String) {
         m_defaultPropertyIndex = -1;
         Q_EMIT defaultPropertyIndexChanged();
         return;
     }
 
-    auto propertyName = UICDM::get<QString>(sValue);
+    auto propertyName = qt3dsdm::get<QString>(sValue);
     auto iter = std::find_if(m_properties.constBegin(), m_properties.constEnd(),
                              [&propertyName](const PropertyInfo &info)
     {
@@ -206,7 +206,7 @@ void PropertyModel::updateValue()
     if (!m_valueHandle.Valid()) {
         m_value.clear();
     } else {
-        UICDM::SValue sValue;
+        qt3dsdm::SValue sValue;
         auto doc = g_StudioApp.GetCore()->GetDoc();
         auto studioSystem = doc->GetStudioSystem();
         studioSystem->GetActionCore()->GetHandlerArgumentValue(m_valueHandle, sValue);

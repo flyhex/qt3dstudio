@@ -35,7 +35,7 @@
 #include "UICDMSignals.h"
 #include "SimpleSlideCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 class CDataCoreProducer : public IDataCore,
                           public ITransactionProducer,
@@ -161,7 +161,7 @@ private:
     template <typename TTransactionType>
     inline void RunWithConsumer(TTransactionType inTransaction)
     {
-        UICDM::RunWithConsumer(m_Consumer, inTransaction);
+        qt3dsdm::RunWithConsumer(m_Consumer, inTransaction);
     }
 
     void InitSignallers();

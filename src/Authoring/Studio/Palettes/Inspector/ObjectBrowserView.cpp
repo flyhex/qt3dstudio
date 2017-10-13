@@ -93,10 +93,10 @@ void ObjectBrowserView::setPathType(ObjectBrowserView::PathType type)
     }
 }
 
-UICDM::CUICDMInstanceHandle ObjectBrowserView::selectedHandle() const
+qt3dsdm::CUICDMInstanceHandle ObjectBrowserView::selectedHandle() const
 {
     auto handleId = m_model->index(m_selection, 0).data(ObjectListModel::HandleRole).toInt();
-    return UICDM::CUICDMInstanceHandle(handleId);
+    return qt3dsdm::CUICDMInstanceHandle(handleId);
 }
 
 void ObjectBrowserView::focusOutEvent(QFocusEvent *event)

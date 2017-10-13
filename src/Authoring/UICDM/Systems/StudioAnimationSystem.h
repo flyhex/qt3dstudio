@@ -38,7 +38,7 @@
 #include "UICDMDataCore.h"
 #include "UICDMSignals.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 typedef std::pair<CUICDMAnimationHandle, float> TAnimationFloatPair;
 typedef std::vector<TAnimationFloatPair> TAnimationFloatPairList;

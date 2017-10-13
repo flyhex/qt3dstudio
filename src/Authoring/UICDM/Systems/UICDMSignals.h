@@ -37,7 +37,7 @@
 #include <functional>
 #include <string>
 
-namespace UICDM {
+namespace qt3dsdm {
 // One may notice this looks a lot like std::signals.
 // One may also notice that I chose to hide the implementation completely instead
 // taking the route of boost/function.hpp instead.

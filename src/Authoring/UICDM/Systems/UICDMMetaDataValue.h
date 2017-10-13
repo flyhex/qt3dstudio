@@ -36,7 +36,7 @@
 
 #include <QStringList>
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct AdditionalMetaDataType {
 
@@ -96,14 +96,14 @@ namespace qt3ds {
 namespace foundation {
 
     template <>
-    struct DestructTraits<UICDM::SMetaDataRange>
+    struct DestructTraits<qt3dsdm::SMetaDataRange>
     {
-        void destruct(UICDM::SMetaDataRange &) {}
+        void destruct(qt3dsdm::SMetaDataRange &) {}
     };
 }
 }
 
-namespace UICDM {
+namespace qt3dsdm {
 
 template <typename TDataType>
 struct SMetaDataTypeToEnumMap
@@ -233,13 +233,13 @@ typedef SMetaDataData TMetaDataData;
 
 
 template <>
-inline QStringList get<QStringList>(const UICDM::SMetaDataData &inType)
+inline QStringList get<QStringList>(const qt3dsdm::SMetaDataData &inType)
 {
     QStringList result;
-    if (inType.getType() == UICDM::AdditionalMetaDataType::None)
+    if (inType.getType() == qt3dsdm::AdditionalMetaDataType::None)
         return result;
 
-    auto list = UICDM::get<UICDM::TMetaDataStringList>(inType);
+    auto list = qt3dsdm::get<qt3dsdm::TMetaDataStringList>(inType);
     std::transform(list.begin(), list.end(), std::back_inserter(result), [](const SUICDMStr &s) {
         return QString::fromWCharArray(s.wide_str());
     });
@@ -247,5 +247,5 @@ inline QStringList get<QStringList>(const UICDM::SMetaDataData &inType)
 }
 }
 
-Q_DECLARE_METATYPE(UICDM::AdditionalMetaDataType)
+Q_DECLARE_METATYPE(qt3dsdm::AdditionalMetaDataType)
 

@@ -29,7 +29,7 @@
 #include "UICDMPrefix.h"
 #include "SimpleActionCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 CUICDMActionHandle CSimpleActionCore::CreateAction(CUICDMInstanceHandle inInstance,
                                                    CUICDMSlideHandle inSlide,

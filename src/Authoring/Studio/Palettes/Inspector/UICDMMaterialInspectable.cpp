@@ -45,7 +45,7 @@
 #include "UICDMSignals.h"
 #include "UICString.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 struct SMaterialTypeDropDown : public CGenericComboDropDown
 {

@@ -47,7 +47,7 @@ public:
     QAbstractItemModel *model() const;
     void setModel(EventsModel *model);
     QSize sizeHint() const override;
-    UICDM::CDataModelHandle selectedHandle() const;
+    qt3dsdm::CDataModelHandle selectedHandle() const;
 
     int selection() const { return m_selection; }
     void setSelection(int index);

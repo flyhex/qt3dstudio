@@ -66,40 +66,40 @@ const Q3DStudio::TFilter FilterAwayAssetType(CDoc *inDoc, EStudioObjectType inOb
 bool FilterForNodeType(CDoc *inDoc, Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter FilterForNodeType(CDoc *inDoc);
 
-bool FilterForSlide(CDoc *inDoc, UICDM::CUICDMSlideHandle inSlide,
+bool FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide,
                     Q3DStudio::TIdentifier inGraphable);
-const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, UICDM::CUICDMSlideHandle inSlide);
+const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide);
 
 bool FilterForControllingTimeParent(CDoc *inDoc,
-                                    UICDM::CUICDMInstanceHandle inControllingTimeParent,
+                                    qt3dsdm::CUICDMInstanceHandle inControllingTimeParent,
                                     Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter
-FilterForControllingTimeParent(CDoc *inDoc, UICDM::CUICDMInstanceHandle inControllingTimeParent);
+FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inControllingTimeParent);
 
-bool FilterForActiveComponent(CDoc *inDoc, UICDM::CUICDMSlideHandle inActiveComponentSlide,
+bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inActiveComponentSlide,
                               Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter FilterForActiveComponent(CDoc *inDoc,
-                                                  UICDM::CUICDMSlideHandle inActiveComponentSlide);
+                                                  qt3dsdm::CUICDMSlideHandle inActiveComponentSlide);
 
-bool FilterForCurrentSlide(CDoc *inDoc, UICDM::CUICDMInstanceHandle inTimeParent,
+bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inTimeParent,
                            Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter FilterForCurrentSlide(CDoc *inDoc,
-                                               UICDM::CUICDMInstanceHandle inTimeParent);
+                                               qt3dsdm::CUICDMInstanceHandle inTimeParent);
 
 //==============================================================================
 //	Helper functions to get children from the graph
 //==============================================================================
-void GetAssetChildren(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
+void GetAssetChildren(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
                       Q3DStudio::CGraphIterator &outIterator,
                       EStudioObjectType inObjectType = OBJTYPE_UNKNOWN);
-void GetAssetChildrenInSlide(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
-                             UICDM::CUICDMSlideHandle inSlide,
+void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+                             qt3dsdm::CUICDMSlideHandle inSlide,
                              Q3DStudio::CGraphIterator &outIterator,
                              EStudioObjectType inObjectType = OBJTYPE_UNKNOWN);
-void GetAssetChildrenInTimeParent(UICDM::CUICDMInstanceHandle inInstance, CDoc *inDoc,
+void GetAssetChildrenInTimeParent(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc,
                                   bool inIsAssetTimeParent, Q3DStudio::CGraphIterator &outIterator,
-                                  UICDM::CUICDMSlideHandle inActiveComponentSlide = 0);
-void GetAssetChildrenInCurrentSlide(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance,
+                                  qt3dsdm::CUICDMSlideHandle inActiveComponentSlide = 0);
+void GetAssetChildrenInCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
                                     Q3DStudio::CGraphIterator &outIterator,
                                     EStudioObjectType inObjectType = OBJTYPE_UNKNOWN);
 
@@ -112,7 +112,7 @@ bool IsAscendant(Q3DStudio::TIdentifier inDescendant, Q3DStudio::TIdentifier inA
 Q3DStudio::TIdentifier GetSibling(const Q3DStudio::TIdentifier inNode, bool inAfter,
                                   const Q3DStudio::CGraphIterator &inIterator);
 
-void PrintAssetSubTree(UICDM::CUICDMInstanceHandle inInstance, CDoc *m_Doc, char *prefix);
-void PrintSlideInfo(CDoc *m_Doc, char *prefix, UICDM::CUICDMSlideHandle theMasterSlide);
+void PrintAssetSubTree(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *m_Doc, char *prefix);
+void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::CUICDMSlideHandle theMasterSlide);
 
 #endif // INCLUDED_GRAPH_UTILS_H

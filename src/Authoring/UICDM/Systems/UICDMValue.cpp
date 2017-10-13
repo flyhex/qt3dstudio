@@ -33,7 +33,7 @@
 #include <QDebug>
 #include <QVariant>
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 SValue::SValue(const QVariant &inData)
 {
@@ -46,7 +46,7 @@ SValue::SValue(const QVariant &inData)
     case QVariant::Color:
     {
         const QColor c = inData.value<QColor>();
-        *this = UICDM::SFloat3(c.redF(), c.greenF(), c.blueF());
+        *this = qt3dsdm::SFloat3(c.redF(), c.greenF(), c.blueF());
         break;
     }
     case QVariant::String:
@@ -60,7 +60,7 @@ SValue::SValue(const QVariant &inData)
 #endif
         tempBuf[count - 1] = 0;
         q.toWCharArray(tempBuf);
-        *this = std::make_shared<UICDM::CDataStr>(tempBuf);
+        *this = std::make_shared<qt3dsdm::CDataStr>(tempBuf);
 #ifdef __INTEGRITY
         free(tempBuf);
 #endif
@@ -77,7 +77,7 @@ SValue::SValue(const QVariant &inData)
 
     case QVariant::Vector3D: {
         const auto v = inData.value<QVector3D>();
-        *this = UICDM::SFloat3(v.x(), v.y(), v.z());
+        *this = qt3dsdm::SFloat3(v.x(), v.y(), v.z());
         break;
     }
 

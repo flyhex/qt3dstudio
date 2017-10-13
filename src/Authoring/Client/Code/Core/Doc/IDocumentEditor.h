@@ -48,7 +48,7 @@
 class IDoc;
 class CDoc;
 
-namespace UICDM {
+namespace qt3dsdm {
 class IDataCore;
 class ISlideCore;
 class ISlideSystem;
@@ -113,47 +113,47 @@ public:
     // Function callable without a document editor instance, used when loading document
     static TInstanceHandle
     CreateSceneGraphInstance(const wchar_t *inType, TInstanceHandle parent, TSlideHandle inSlide,
-                             UICDM::IDataCore &inDataCore, UICDM::ISlideSystem &inSlideSystem,
-                             UICDM::SComposerObjectDefinitions &inObjectDefs,
-                             Q3DStudio::CGraph &inAssetGraph, UICDM::IMetaData &inMetaData,
+                             qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
+                             qt3dsdm::SComposerObjectDefinitions &inObjectDefs,
+                             Q3DStudio::CGraph &inAssetGraph, qt3dsdm::IMetaData &inMetaData,
                              TInstanceHandle inTargetId = TInstanceHandle());
 
     static TInstanceHandle CreateSceneGraphInstance(
         CUICDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
-        UICDM::IDataCore &inDataCore, UICDM::ISlideSystem &inSlideSystem,
-        UICDM::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-        UICDM::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle());
+        qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
+        qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
+        qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle());
 
-    static void UnlinkAlwaysUnlinkedProperties(UICDM::CUICDMInstanceHandle inInstance,
-                                               UICDM::SComposerObjectDefinitions &inDefs,
-                                               UICDM::ISlideSystem &inSlideSystem);
+    static void UnlinkAlwaysUnlinkedProperties(qt3dsdm::CUICDMInstanceHandle inInstance,
+                                               qt3dsdm::SComposerObjectDefinitions &inDefs,
+                                               qt3dsdm::ISlideSystem &inSlideSystem);
 
     // Returns valid properties followed by exactly one invalid property.
     static CUICDMPropertyHandle *
-    GetAlwaysUnlinkedProperties(UICDM::SComposerObjectDefinitions &inDefs);
+    GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions &inDefs);
 
     // Create a new instance in the scene under this slide and such
     // Target id must be an id of an invalid instance so that we can potentially change an object
     // type while still maintaining references to that logical object.
     virtual TInstanceHandle
-    CreateSceneGraphInstance(UICDM::ComposerObjectTypes::Enum type, TInstanceHandle parent,
+    CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type, TInstanceHandle parent,
                              TSlideHandle inSlide,
                              TInstanceHandle inTargetId = TInstanceHandle()) = 0;
 
-    virtual TInstanceHandle CreateSceneGraphInstance(UICDM::ComposerObjectTypes::Enum type,
+    virtual TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type,
                                                      TInstanceHandle parent, TSlideHandle inSlide,
                                                      DocumentEditorInsertType::Enum inInsertType,
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
                                                      long inStartTime) = 0;
 
-    virtual void DeleteInstances(UICDM::TInstanceHandleList inInstances) = 0;
+    virtual void DeleteInstances(qt3dsdm::TInstanceHandleList inInstances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene
     // graph
     // if this instance is represented in the scene graph.
     void DeleteInstance(TInstanceHandle instance)
     {
-        UICDM::TInstanceHandleList theInstances;
+        qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(instance);
         DeleteInstances(theInstances);
     }
@@ -238,7 +238,7 @@ public:
     // function.
     virtual CUICDMAnimationHandle
     CreateOrSetAnimation(TSlideHandle inSlide, TInstanceHandle instance, const wchar_t *propName,
-                         long subIndex, UICDM::EAnimationType animType, const float *keyframeValues,
+                         long subIndex, qt3dsdm::EAnimationType animType, const float *keyframeValues,
                          long numValues, bool inUserEdited = true) = 0;
     virtual bool RemoveAnimation(TSlideHandle inSlide, TInstanceHandle instance,
                                  const wchar_t *propName, long subIndex) = 0;
@@ -253,38 +253,38 @@ public:
 
     // Paste a scene graph object into this system at this location.  Returns the new object
     //(but it sets the new object as the selected object so clients probably don't need this)
-    virtual UICDM::TInstanceHandleList
+    virtual qt3dsdm::TInstanceHandleList
     PasteSceneGraphObject(const CFilePath &inFilePath, CUICDMInstanceHandle inNewRoot,
                           bool inGenerateUniqueName, DocumentEditorInsertType::Enum inInsertType,
                           const CPt &inPosition) = 0;
 
-    virtual UICDM::TInstanceHandleList PasteSceneGraphObjectMaster(
+    virtual qt3dsdm::TInstanceHandleList PasteSceneGraphObjectMaster(
         const CFilePath &inFilePath, CUICDMInstanceHandle inNewRoot, bool inGenerateUniqueName,
         DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition) = 0;
 
-    virtual void RearrangeObjects(const UICDM::TInstanceHandleList &inInstances,
+    virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType) = 0;
 
     void RearrangeObject(TInstanceHandle inInstance, TInstanceHandle inDest,
                          DocumentEditorInsertType::Enum inInsertType)
     {
-        UICDM::TInstanceHandleList theInstances;
+        qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
         RearrangeObjects(theInstances, inDest, inInsertType);
     }
 
     // Returns the new component.
-    virtual TInstanceHandle MakeComponent(const UICDM::TInstanceHandleList &inInstances) = 0;
+    virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
 
-    virtual UICDM::TInstanceHandleList
-    DuplicateInstances(const UICDM::TInstanceHandleList &inInstances, TInstanceHandle inDest,
+    virtual qt3dsdm::TInstanceHandleList
+    DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances, TInstanceHandle inDest,
                        DocumentEditorInsertType::Enum inInsertType) = 0;
 
     TInstanceHandle DuplicateInstance(TInstanceHandle inInstance, TInstanceHandle inDest,
                                       DocumentEditorInsertType::Enum inInsertType)
     {
-        UICDM::TInstanceHandleList theInstances;
+        qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
         theInstances = DuplicateInstances(theInstances, inDest, inInsertType);
         if (theInstances.empty() == false)
@@ -292,10 +292,10 @@ public:
         return TInstanceHandle();
     }
 
-    virtual void DuplicateInstances(const UICDM::TInstanceHandleList &inInstances) = 0;
+    virtual void DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
     void DuplicateInstance(TInstanceHandle inInstance)
     {
-        UICDM::TInstanceHandleList theInstances;
+        qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
         return DuplicateInstances(theInstances);
     }
@@ -318,9 +318,9 @@ public:
 
     virtual CUICDMSlideHandle DuplicateSlide(CUICDMSlideHandle inSlide) = 0;
 
-    virtual UICDM::CUICDMGuideHandle CreateGuide(const UICDM::SGuideInfo &inInfo) = 0;
-    virtual void UpdateGuide(UICDM::CUICDMGuideHandle hdl, const UICDM::SGuideInfo &inInfo) = 0;
-    virtual void DeleteGuide(UICDM::CUICDMGuideHandle hdl) = 0;
+    virtual qt3dsdm::CUICDMGuideHandle CreateGuide(const qt3dsdm::SGuideInfo &inInfo) = 0;
+    virtual void UpdateGuide(qt3dsdm::CUICDMGuideHandle hdl, const qt3dsdm::SGuideInfo &inInfo) = 0;
+    virtual void DeleteGuide(qt3dsdm::CUICDMGuideHandle hdl) = 0;
     virtual void ClearGuides() = 0;
 
     // Imports a colladafile and, if successful, returns the instance handle from the imported
@@ -396,25 +396,25 @@ public:
 
     static std::shared_ptr<IDOMReader>
     ParseLuaFile(const Q3DStudio::CFilePath &inFullPathToDocument,
-                 std::shared_ptr<UICDM::IStringTable> inStringTable,
+                 std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                  std::shared_ptr<IImportFailedHandler> inHandler,
                  qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,
-                    std::shared_ptr<UICDM::IStringTable> inStringTable,
+                    std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
                     qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocument,
-                    std::shared_ptr<UICDM::IStringTable> inStringTable,
+                    std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
                     qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathToDocument,
-                            std::shared_ptr<UICDM::IStringTable> inStringTable,
+                            std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                             std::shared_ptr<IImportFailedHandler> inHandler,
                             qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
@@ -454,8 +454,8 @@ public:
     IDoc &GetEditorDoc() { return m_EditorIDocDoc; }
     bool HasEditor() const;
     IDocumentEditor &EnsureEditor(const wchar_t *inCommandName, const char *inFile, int inLine);
-    void FireImmediateRefresh(UICDM::CUICDMInstanceHandle *inInstances, long inInstanceCount);
-    void FireImmediateRefresh(UICDM::CUICDMInstanceHandle inInstance)
+    void FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle *inInstances, long inInstanceCount);
+    void FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle inInstance)
     {
         FireImmediateRefresh(&inInstance, 1);
     }

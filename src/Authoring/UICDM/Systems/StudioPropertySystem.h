@@ -35,7 +35,7 @@
 #include "UICDMSignals.h"
 #include "UICDMDataCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 typedef std::tuple<CUICDMInstanceHandle, CUICDMPropertyHandle, SValue> TTemporaryPropertyValue;
 typedef std::vector<TTemporaryPropertyValue> TTemporaryPropertyValueList;
@@ -118,9 +118,9 @@ public:
                                            CUICDMPropertyHandle inProperty, SValue &outValue) const;
 
 private:
-    static bool DerivedGuidMatches(UICDM::IDataCore &inDataCore,
-                                   UICDM::CUICDMInstanceHandle inInstance,
-                                   UICDM::CUICDMPropertyHandle inProperty, UICDM::SLong4 inGuid);
+    static bool DerivedGuidMatches(qt3dsdm::IDataCore &inDataCore,
+                                   qt3dsdm::CUICDMInstanceHandle inInstance,
+                                   qt3dsdm::CUICDMPropertyHandle inProperty, qt3dsdm::SLong4 inGuid);
     CStudioPropertySystem(const CStudioPropertySystem&) = delete;
     CStudioPropertySystem& operator=(const CStudioPropertySystem&) = delete;
 };

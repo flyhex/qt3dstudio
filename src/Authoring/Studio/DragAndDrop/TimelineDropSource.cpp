@@ -116,13 +116,13 @@ bool CTimeLineDropSource::ValidateTarget(CDropTarget *inTarget)
         (EStudioObjectType)GetObjectType(), (EStudioObjectType)inTarget->GetObjectType());
 
     for (size_t idx = 0, end = m_Instances.size(); idx < end && theValidTarget; ++idx) {
-        UICDM::CUICDMInstanceHandle theHandle(m_Instances[idx]);
+        qt3dsdm::CUICDMInstanceHandle theHandle(m_Instances[idx]);
 
         if (theValidTarget && theHandle.Valid()) {
             theValidTarget &= (!inTarget->IsSelf(theHandle) && !inTarget->IsRelative(theHandle));
-            UICDM::ISlideSystem *theSlideSystem =
+            qt3dsdm::ISlideSystem *theSlideSystem =
                 g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetSlideSystem();
-            UICDM::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(theHandle);
+            qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(theHandle);
             bool theIsMaster = theSlideSystem->IsMasterSlide(theSlide);
 
             theValidTarget &= !(theIsMaster && !inTarget->IsMaster());
@@ -134,19 +134,19 @@ bool CTimeLineDropSource::ValidateTarget(CDropTarget *inTarget)
     return theValidTarget;
 }
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace Q3DStudio;
 
-inline void Rearrange(CDoc &inDoc, const UICDM::TInstanceHandleList &inInstances,
+inline void Rearrange(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances,
                       CUICDMInstanceHandle inTarget, DocumentEditorInsertType::Enum inInsertType)
 {
     SCOPED_DOCUMENT_EDITOR(inDoc, QObject::tr("Rearrange Object"))
         ->RearrangeObjects(inInstances, inTarget, inInsertType);
 }
 
-CCmd *CTimeLineDropSource::GenerateAssetCommand(UICDM::CUICDMInstanceHandle inTarget,
+CCmd *CTimeLineDropSource::GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
                                                 EDROPDESTINATION inDestType,
-                                                UICDM::CUICDMSlideHandle inSlide)
+                                                qt3dsdm::CUICDMSlideHandle inSlide)
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *theBridge = theDoc->GetStudioSystem()->GetClientDataModelBridge();

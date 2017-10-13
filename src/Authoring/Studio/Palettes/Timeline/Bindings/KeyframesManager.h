@@ -102,7 +102,7 @@ protected:
     COffsetKeyframesCommandHelper m_OffsetKeyframeCommandHelper; // so that we can commit on mouseup
     CPasteKeyframeCommandHelper *m_PasteKeyframeCommandHelper;
     std::set<CUICDMTimelineItemBinding *> m_InstanceSet;
-    std::vector<UICDM::CUICDMInstanceHandle> m_InstanceList;
+    std::vector<qt3dsdm::CUICDMInstanceHandle> m_InstanceList;
 };
 
 #endif // INCLUDED_IKEYFRAMES_MANAGER_H

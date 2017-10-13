@@ -39,7 +39,7 @@
 #include <unordered_set>
 #include "UICDMValue.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct PropertyValueFlags
 {

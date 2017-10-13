@@ -35,7 +35,7 @@
 #include "UICDMStringTable.h"
 #include "UICDMDataCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 typedef std::pair<CUICDMInstanceHandle, CUICDMPropertyHandle> TInstancePropertyPair;
 typedef std::vector<TInstancePropertyPair> TInstancePropertyPairList;
 

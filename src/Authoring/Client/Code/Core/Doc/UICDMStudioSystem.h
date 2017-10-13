@@ -35,7 +35,7 @@
 class CDoc;
 class CClientDataModelBridge;
 
-namespace UICDM {
+namespace qt3dsdm {
 class IPropertySystem;
 class ISlideCore;
 class ISlideGraphCore;

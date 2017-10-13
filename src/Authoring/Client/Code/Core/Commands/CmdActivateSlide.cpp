@@ -38,21 +38,21 @@
 
 #include <QObject>
 
-CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, UICDM::CUICDMSlideHandle inSlideHandle)
+CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlideHandle)
     : m_Doc(inDoc)
     , m_SlideHandle(inSlideHandle)
     , m_ForceRefresh(true)
 {
 }
 
-CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, UICDM::CUICDMInstanceHandle inInstance)
+CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance)
     : m_Doc(inDoc)
     , m_ForceRefresh(true)
 {
     CClientDataModelBridge *theBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();
-    UICDM::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
+    qt3dsdm::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = theBridge->GetGUID(inInstance);
-    UICDM::CUICDMSlideHandle theMasterSlide =
+    qt3dsdm::CUICDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     m_SlideHandle = theSlideSystem->GetActiveSlide(theMasterSlide);
 }

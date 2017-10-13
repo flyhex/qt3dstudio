@@ -35,7 +35,7 @@
 #include <QtCore/qstring.h>
 #include <functional>
 
-namespace UICDM {
+namespace qt3dsdm {
 class ISignalConnection;
 }
 
@@ -62,7 +62,7 @@ public:
     // message router.
     // This will remain constant even if we move the query into another thread (which really isn't
     // likely).
-    virtual std::shared_ptr<UICDM::ISignalConnection>
+    virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     AddDirectory(const QString &inDirectory, TFileModCallbackType inCallback) = 0;
 
     friend class std::shared_ptr<IDirectoryWatchingSystem>;

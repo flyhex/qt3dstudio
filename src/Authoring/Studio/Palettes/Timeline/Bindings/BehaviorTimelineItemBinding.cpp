@@ -42,7 +42,7 @@
 #include "ClientDataModelBridge.h"
 #include "Doc.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 CBehaviorTimelineItemBinding::CBehaviorTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                            CUICDMInstanceHandle inDataHandle)

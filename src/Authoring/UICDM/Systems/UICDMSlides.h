@@ -32,7 +32,7 @@
 #include "UICDMHandles.h"
 #include "UICDMSlideCore.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 /**
  *	Some properties point to instances which act like extended properties.
  *	An example of this would be the images on materials.  If a material has an

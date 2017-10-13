@@ -53,7 +53,7 @@
 using qt3ds::render::IInputStreamFactory;
 using qt3ds::render::IRefCountedInputStream;
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using namespace Q3DStudio;
 
 namespace {
@@ -140,7 +140,7 @@ private:
     //==============================================================================
     //	Fields
     //==============================================================================
-    std::shared_ptr<UICDM::IStringTable> m_StrTable;
+    std::shared_ptr<qt3dsdm::IStringTable> m_StrTable;
     std::shared_ptr<IDataCore> m_DataCore;
     std::shared_ptr<IMetaData> m_NewMetaData;
     std::shared_ptr<SComposerObjectDefinitions> m_Objects;
@@ -174,13 +174,13 @@ public:
         // g_UICDMDebugLogger = SimpleUICDMLogger;
         try {
             // need to pause here to hook up the debugger
-            m_StrTable = UICDM::IStringTable::CreateStringTable();
+            m_StrTable = qt3dsdm::IStringTable::CreateStringTable();
             m_DataCore = std::make_shared<CSimpleDataCore>(m_StrTable);
             m_NewMetaData = IMetaData::CreateNewMetaData(m_DataCore);
 
             m_Objects = std::make_shared<SComposerObjectDefinitions>(std::ref(*m_DataCore),
                                                                        std::ref(*m_NewMetaData));
-        } catch (UICDM::UICDMError &error) {
+        } catch (qt3dsdm::UICDMError &error) {
             qCCritical(INTERNAL_ERROR) << "SRuntimeMetaDataImpl UICDMError: "
                                        << m_StrTable->GetNarrowStr(error.m_Message);
         } catch (std::runtime_error &exc) {
@@ -447,7 +447,7 @@ public:
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue())
-            return UICDM::get<float>(*theInfo.m_Value);
+            return qt3dsdm::get<float>(*theInfo.m_Value);
         return Empty();
     }
 
@@ -456,7 +456,7 @@ public:
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue()) {
-            SFloat2 theFloat2 = UICDM::get<SFloat2>(*theInfo.m_Value);
+            SFloat2 theFloat2 = qt3dsdm::get<SFloat2>(*theInfo.m_Value);
             return qt3ds::QT3DSVec3(theFloat2[0], theFloat2[1], 0);
         }
         return Empty();
@@ -467,7 +467,7 @@ public:
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue()) {
-            SFloat3 theFloat3 = UICDM::get<SFloat3>(*theInfo.m_Value);
+            SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(*theInfo.m_Value);
             return qt3ds::QT3DSVec3(theFloat3[0], theFloat3[1], theFloat3[2]);
         }
         return Empty();
@@ -478,7 +478,7 @@ public:
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue())
-            return UICDM::get<qt3ds::QT3DSI32>(*theInfo.m_Value);
+            return qt3dsdm::get<qt3ds::QT3DSI32>(*theInfo.m_Value);
         return Empty();
     }
 
@@ -487,7 +487,7 @@ public:
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue()) {
-            TDataStrPtr theStr = UICDM::get<TDataStrPtr>(*theInfo.m_Value);
+            TDataStrPtr theStr = qt3dsdm::get<TDataStrPtr>(*theInfo.m_Value);
             TRuntimeMetaDataStrType retval;
             qt3ds::foundation::ConvertUTF(
                 reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(
@@ -505,7 +505,7 @@ public:
         if (theInfo.m_Value.hasValue()) {
             SObjectRefType theObjectRef = ConvertToObjectRef(*theInfo.m_Value);
             if (theObjectRef.GetReferenceType() == ObjectReferenceType::Relative) {
-                TDataStrPtr theStr = UICDM::get<TDataStrPtr>(theObjectRef.m_Value);
+                TDataStrPtr theStr = qt3dsdm::get<TDataStrPtr>(theObjectRef.m_Value);
                 TRuntimeMetaDataStrType retval;
                 qt3ds::foundation::ConvertUTF(
                     reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(
@@ -526,7 +526,7 @@ public:
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue())
-            return UICDM::get<bool>(*theInfo.m_Value);
+            return qt3dsdm::get<bool>(*theInfo.m_Value);
         return Empty();
     }
 
@@ -584,7 +584,7 @@ public:
         qt3ds::foundation::ConvertUTF(argInfo.m_FormalName.c_str(), argInfo.m_FormalName.size(),
                                    arg.m_FormalName);
         switch (argInfo.GetAdditionalType()) {
-        case UICDM::AdditionalMetaDataType::StringList: {
+        case qt3dsdm::AdditionalMetaDataType::StringList: {
             const eastl::vector<TCharStr> &theData =
                 argInfo.m_MetaDataData.getData<eastl::vector<TCharStr>>();
             arg.m_MetaDataList.resize(theData.size());
@@ -592,7 +592,7 @@ public:
                 qt3ds::foundation::ConvertUTF(theData[metaIdx].c_str(), theData[metaIdx].size(),
                                            arg.m_MetaDataList[metaIdx]);
         } break;
-        case UICDM::AdditionalMetaDataType::Range: {
+        case qt3dsdm::AdditionalMetaDataType::Range: {
             const SMetaDataRange &range = argInfo.m_MetaDataData.getData<SMetaDataRange>();
             arg.m_MetaDataRange = eastl::make_pair(range.m_Min, range.m_Max);
         } break;
@@ -746,10 +746,10 @@ public:
     }
 
     std::shared_ptr<IDOMReader> ParseLuaFile(const wchar_t *inFullPathToDocument,
-                                               std::shared_ptr<UICDM::IStringTable> inStringTable)
+                                               std::shared_ptr<qt3dsdm::IStringTable> inStringTable)
     {
         using namespace LuaParser;
-        std::shared_ptr<UICDM::IStringTable> theStringTable(inStringTable);
+        std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
         std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
         SImportXmlErrorHandler theXmlErrorHandler;
         qt3ds::foundation::MallocAllocator allocator;
@@ -771,10 +771,10 @@ public:
     }
 
     std::shared_ptr<IDOMReader> ParseScriptFile(const wchar_t *inFullPathToDocument,
-                                                  std::shared_ptr<UICDM::IStringTable> inStringTable)
+                                                  std::shared_ptr<qt3dsdm::IStringTable> inStringTable)
     {
         using namespace ScriptParser;
-        std::shared_ptr<UICDM::IStringTable> theStringTable(inStringTable);
+        std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
         std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
         SImportXmlErrorHandler theXmlErrorHandler;
         const QString path = QString::fromWCharArray(inFullPathToDocument);
@@ -931,7 +931,7 @@ public:
         return false;
     }
 
-    struct PluginErrorHandler : public UICDM::CXmlErrorHandler
+    struct PluginErrorHandler : public qt3dsdm::CXmlErrorHandler
     {
         void OnXmlError(TWideXMLCharPtr, int, int) override {}
     };
@@ -949,11 +949,11 @@ public:
         if (!theMaster.Valid())
             return false;
 
-        std::shared_ptr<UICDM::IDOMFactory> theFactory =
-            UICDM::IDOMFactory::CreateDOMFactory(m_StrTable);
+        std::shared_ptr<qt3dsdm::IDOMFactory> theFactory =
+            qt3dsdm::IDOMFactory::CreateDOMFactory(m_StrTable);
 
         PluginErrorHandler dummyHandler;
-        std::shared_ptr<UICDM::IDOMReader> theReader = Q3DStudio::CRenderPluginParser::ParseFile(
+        std::shared_ptr<qt3dsdm::IDOMReader> theReader = Q3DStudio::CRenderPluginParser::ParseFile(
             theFactory, m_StrTable, inSourcePath, dummyHandler, m_InputStreamFactory);
         if (theReader) {
             Q3DStudio::CRenderPluginParser::NavigateToMetadata(theReader);
@@ -968,12 +968,12 @@ public:
         return false;
     }
 
-    Option<UICDM::SMetaDataEffect> GetEffectMetaDataBySourcePath(const char *inName) override
+    Option<qt3dsdm::SMetaDataEffect> GetEffectMetaDataBySourcePath(const char *inName) override
     {
         return m_NewMetaData->GetEffectBySourcePath(inName);
     }
 
-    virtual Option<UICDM::SMetaDataCustomMaterial>
+    virtual Option<qt3dsdm::SMetaDataCustomMaterial>
     GetMaterialMetaDataBySourcePath(const char *inName) override
     {
         return m_NewMetaData->GetMaterialBySourcePath(inName);
@@ -1016,7 +1016,7 @@ public:
         GetInstanceProperties(Convert0(inType), Convert2(inId), outProperties, inSearchParent);
     }
 
-    std::shared_ptr<UICDM::IStringTable> GetStringTable() override { return m_StrTable; }
+    std::shared_ptr<qt3dsdm::IStringTable> GetStringTable() override { return m_StrTable; }
 
     TStrTableStr Register(const char *inStr) override
     {

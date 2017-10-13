@@ -64,13 +64,13 @@ struct SComposerImportBase
     CFilePath m_DestImportFile;
     Q3DStudio::CFilePath m_Relativeimportfile;
     qt3ds::QT3DSI32 m_StartTime;
-    UICDM::IStringTable &m_StringTable;
+    qt3dsdm::IStringTable &m_StringTable;
     SComposerImportBase(
         IDocumentEditor &inEditor,
         const Q3DStudio::CFilePath &docPath /// Root directory where the studio file sits.
         ,
         const Q3DStudio::CFilePath &inFullPathToImportFile, long inStartTime,
-        UICDM::IStringTable &inStringTable)
+        qt3dsdm::IStringTable &inStringTable)
         : m_Editor(inEditor)
         , m_DocumentPath(docPath)
         , m_DestImportDir(inFullPathToImportFile
@@ -98,13 +98,13 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     // When we are refreshing, the root assets is the group we are refreshing.
     SComposerImportInterface(
-        Q3DStudio::IDocumentEditor &editor, UICDM::CDataModelHandle parent // Parent object
+        Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
         ,
-        UICDM::CDataModelHandle root, UICDM::CUICDMSlideHandle slide,
+        qt3dsdm::CDataModelHandle root, qt3dsdm::CUICDMSlideHandle slide,
         const Q3DStudio::CFilePath &docPath /// Root directory where the studio file sits.
         ,
         const Q3DStudio::CFilePath &inFullPathToImportFile, long inStartTime,
-        UICDM::IStringTable &inStringTable)
+        qt3dsdm::IStringTable &inStringTable)
         : SComposerImportBase(editor, docPath, inFullPathToImportFile, inStartTime, inStringTable)
         , m_Parent(parent)
         , m_Root(root)
@@ -250,7 +250,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             if (value.m_Name == ComposerPropertyNames::sourcepath) {
                 // re-work the path to be relative to where the main document
                 // is saved instead of where the import result is saved
-                TDataStrPtr value = UICDM::get<TDataStrPtr>(theValue);
+                TDataStrPtr value = qt3dsdm::get<TDataStrPtr>(theValue);
                 if (value->GetLength()) {
                     Q3DStudio::CString valueStr(value->GetData());
                     Q3DStudio::CFilePath fullPath =
@@ -325,7 +325,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         TCharPtr m_Id;
 
         SSlideInstanceIdMapIterator(TImportId inImportId, TIdMultiMap &inItems,
-                                    UICDM::IStringTable &inStringTable)
+                                    qt3dsdm::IStringTable &inStringTable)
             : m_CurrentItems(NULL)
             , m_CurrentTreeIdx(0)
             , m_CurrentTreeEnd(0)
@@ -368,7 +368,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     SComposerRefreshInterface(Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inIdToInstanceMap,
                               const Q3DStudio::CFilePath &docPath,
                               const Q3DStudio::CFilePath &inDestimportfile, long inStartTime,
-                              UICDM::IStringTable &inStringTable, CGraph &inAssetGraph)
+                              qt3dsdm::IStringTable &inStringTable, CGraph &inAssetGraph)
         : SComposerImportBase(editor, docPath, inDestimportfile, inStartTime, inStringTable)
         , m_IdToSlideInstances(inIdToInstanceMap)
         , m_HasError(false)
@@ -458,7 +458,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                 if (value.m_Name == ComposerPropertyNames::sourcepath) {
                     // re-work the path to be relative to where the main document
                     // is saved instead of where the import result is saved
-                    TDataStrPtr value = UICDM::get<TDataStrPtr>(theValue);
+                    TDataStrPtr value = qt3dsdm::get<TDataStrPtr>(theValue);
                     if (value->GetLength()) {
                         Q3DStudio::CString valueStr(value->GetData());
                         Q3DStudio::CFilePath fullPath =
@@ -575,11 +575,11 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 }
 
 std::shared_ptr<IComposerEditorInterface> IComposerEditorInterface::CreateEditorInterface(
-    Q3DStudio::IDocumentEditor &editor, UICDM::CDataModelHandle parent // Parent object
+    Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
     ,
-    UICDM::CDataModelHandle root, UICDM::CUICDMSlideHandle slide,
+    qt3dsdm::CDataModelHandle root, qt3dsdm::CUICDMSlideHandle slide,
     const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &destimportfile,
-    long inStartTime, UICDM::IStringTable &inStringTable)
+    long inStartTime, qt3dsdm::IStringTable &inStringTable)
 {
     return std::make_shared<SComposerImportInterface>(std::ref(editor), parent, root, slide,
                                                         docPath, destimportfile, inStartTime,
@@ -590,7 +590,7 @@ std::shared_ptr<IComposerEditorInterface> IComposerEditorInterface::CreateEditor
 std::shared_ptr<IComposerEditor> IComposerEditorInterface::CreateEditorInterface(
     Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inRoots, const Q3DStudio::CFilePath &docPath,
     const Q3DStudio::CFilePath &destimportfile, long inStartTime,
-    UICDM::IStringTable &inStringTable, CGraph &inAssetGraph)
+    qt3dsdm::IStringTable &inStringTable, CGraph &inAssetGraph)
 {
     return std::make_shared<SComposerRefreshInterface>(
         std::ref(editor), std::ref(inRoots), docPath, destimportfile, inStartTime,

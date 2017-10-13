@@ -36,7 +36,7 @@
 
 #include <QtGlobal>
 
-using namespace UICDM;
+using namespace qt3dsdm;
 using std::make_shared;
 using std::shared_ptr;
 

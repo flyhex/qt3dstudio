@@ -35,7 +35,7 @@
 
 // Defines the minimal property model that UIComposer needs to
 // run off of.
-namespace UICDM {
+namespace qt3dsdm {
 class IDataCore;
 class IMetaData;
 class ISlideCore;

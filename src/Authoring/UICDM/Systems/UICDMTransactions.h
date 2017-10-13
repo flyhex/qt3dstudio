@@ -33,7 +33,7 @@
 #include "StandardExtensions.h"
 #include <functional>
 
-namespace UICDM {
+namespace qt3dsdm {
 
 /**
  *	Transaction is some small entity that changes data.  A transaction consumer is expected to
@@ -189,7 +189,7 @@ struct CTransactionConsumer : public ITransactionConsumer
 
 struct SIgnorantTransactionConsumer : public ITransactionConsumer
 {
-    void OnTransaction(UICDM::TTransactionPtr) override {}
+    void OnTransaction(qt3dsdm::TTransactionPtr) override {}
     // Notifications to be sent for undo/redo  These are used to
     // notify clients that something is different.
     void OnDoNotification(std::function<void()>) override {}

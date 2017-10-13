@@ -68,7 +68,7 @@ public:
 protected:
     void OnTimer();
 
-    std::shared_ptr<UICDM::ISignalConnection> m_TimerConnection;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_TimerConnection;
     IScrollerBar::EOrientation m_Orientation;
     IScrollerBar *m_ScrollerBar;
     CControl *m_Control;

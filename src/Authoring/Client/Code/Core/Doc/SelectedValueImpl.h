@@ -37,8 +37,8 @@ namespace Q3DStudio {
 
 struct SSlideInstanceWrapper
 {
-    UICDM::CUICDMInstanceHandle m_Instance;
-    UICDM::CUICDMSlideHandle m_Slide;
+    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::CUICDMSlideHandle m_Slide;
 #ifdef _WIN32
     // We have a multiple unions which needs to be big enough
     // This is strange on 32 bit systems but wrong on 64 bit.
@@ -46,7 +46,7 @@ struct SSlideInstanceWrapper
     size_t m_Padding;
 #endif
     SSlideInstanceWrapper() {}
-    SSlideInstanceWrapper(UICDM::CUICDMInstanceHandle inst, UICDM::CUICDMSlideHandle slide)
+    SSlideInstanceWrapper(qt3dsdm::CUICDMInstanceHandle inst, qt3dsdm::CUICDMSlideHandle slide)
         : m_Instance(inst)
         , m_Slide(slide)
     {
@@ -78,7 +78,7 @@ struct SSelectedValueTypeMap
 };
 
 template <>
-struct SSelectedValueTypeMap<UICDM::CUICDMInstanceHandle>
+struct SSelectedValueTypeMap<qt3dsdm::CUICDMInstanceHandle>
 {
     static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::Instance; }
 };
@@ -90,7 +90,7 @@ struct SSelectedValueTypeMap<SSlideInstanceWrapper>
 };
 
 template <>
-struct SSelectedValueTypeMap<UICDM::CUICDMGuideHandle>
+struct SSelectedValueTypeMap<qt3dsdm::CUICDMGuideHandle>
 {
     static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::Guide; }
 };
@@ -102,7 +102,7 @@ struct SSelectedValueTypeMap<SSlideInsertionWrapper>
 };
 
 template <>
-struct SSelectedValueTypeMap<UICDM::TInstanceHandleList>
+struct SSelectedValueTypeMap<qt3dsdm::TInstanceHandleList>
 {
     static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::MultipleInstances; }
 };
@@ -127,15 +127,15 @@ struct SSelectedValueTraits
     {
         switch (inType) {
         case SelectedValueTypes::Instance:
-            return inVisitor(*qt3ds::NVUnionCast<UICDM::CUICDMInstanceHandle *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMInstanceHandle *>(inData));
         case SelectedValueTypes::Slide:
             return inVisitor(*qt3ds::NVUnionCast<SSlideInstanceWrapper *>(inData));
         case SelectedValueTypes::Guide:
-            return inVisitor(*qt3ds::NVUnionCast<UICDM::CUICDMGuideHandle *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMGuideHandle *>(inData));
         case SelectedValueTypes::SlideInsertion:
             return inVisitor(*qt3ds::NVUnionCast<void **>(inData));
         case SelectedValueTypes::MultipleInstances:
-            return inVisitor(*qt3ds::NVUnionCast<UICDM::TInstanceHandleList *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::TInstanceHandleList *>(inData));
         default:
             QT3DS_ASSERT(false);
         case SelectedValueTypes::UnknownSelectedValueType:
@@ -148,15 +148,15 @@ struct SSelectedValueTraits
     {
         switch (inType) {
         case SelectedValueTypes::Instance:
-            return inVisitor(*qt3ds::NVUnionCast<const UICDM::CUICDMInstanceHandle *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMInstanceHandle *>(inData));
         case SelectedValueTypes::Slide:
             return inVisitor(*qt3ds::NVUnionCast<const SSlideInstanceWrapper *>(inData));
         case SelectedValueTypes::Guide:
-            return inVisitor(*qt3ds::NVUnionCast<const UICDM::CUICDMGuideHandle *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMGuideHandle *>(inData));
         case SelectedValueTypes::SlideInsertion:
             return inVisitor(*qt3ds::NVUnionCast<const void **>(inData));
         case SelectedValueTypes::MultipleInstances:
-            return inVisitor(*qt3ds::NVUnionCast<const UICDM::TInstanceHandleList *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::TInstanceHandleList *>(inData));
         default:
             QT3DS_ASSERT(false);
         case SelectedValueTypes::UnknownSelectedValueType:
@@ -180,7 +180,7 @@ struct SSelectedValue : public TSelectedValueUnionType
         : TSelectedValueUnionType(static_cast<const TSelectedValueUnionType &>(other))
     {
     }
-    SSelectedValue(UICDM::CUICDMInstanceHandle val)
+    SSelectedValue(qt3dsdm::CUICDMInstanceHandle val)
         : TSelectedValueUnionType(val)
     {
     }
@@ -188,7 +188,7 @@ struct SSelectedValue : public TSelectedValueUnionType
         : TSelectedValueUnionType(val)
     {
     }
-    SSelectedValue(UICDM::CUICDMGuideHandle val)
+    SSelectedValue(qt3dsdm::CUICDMGuideHandle val)
         : TSelectedValueUnionType(val)
     {
     }
@@ -196,7 +196,7 @@ struct SSelectedValue : public TSelectedValueUnionType
         : TSelectedValueUnionType(val)
     {
     }
-    SSelectedValue(const UICDM::TInstanceHandleList &val)
+    SSelectedValue(const qt3dsdm::TInstanceHandleList &val)
         : TSelectedValueUnionType(val)
     {
     }
@@ -211,15 +211,15 @@ struct SSelectedValue : public TSelectedValueUnionType
 
     operator bool() const { return !empty(); }
 
-    UICDM::TInstanceHandleList GetSelectedInstances() const
+    qt3dsdm::TInstanceHandleList GetSelectedInstances() const
     {
         if (getType() == SelectedValueTypes::Instance) {
-            UICDM::TInstanceHandleList retval;
-            retval.push_back(getData<UICDM::CUICDMInstanceHandle>());
+            qt3dsdm::TInstanceHandleList retval;
+            retval.push_back(getData<qt3dsdm::CUICDMInstanceHandle>());
             return retval;
         } else if (getType() == SelectedValueTypes::MultipleInstances)
-            return getData<UICDM::TInstanceHandleList>();
-        return UICDM::TInstanceHandleList();
+            return getData<qt3dsdm::TInstanceHandleList>();
+        return qt3dsdm::TInstanceHandleList();
     }
 };
 }

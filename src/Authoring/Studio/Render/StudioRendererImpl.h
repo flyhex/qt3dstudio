@@ -124,11 +124,11 @@ namespace studio {
     using qt3ds::render::SReferencedMaterial;
     using qt3ds::render::CRegisteredString;
     using qt3ds::render::IStringTable;
-    using UICDM::SFloat3;
-    using UICDM::SLong4;
-    using UICDM::SComposerObjectDefinitions;
-    using UICDM::CUICDMInstanceHandle;
-    using UICDM::CUICDMPropertyHandle;
+    using qt3dsdm::SFloat3;
+    using qt3dsdm::SLong4;
+    using qt3dsdm::SComposerObjectDefinitions;
+    using qt3dsdm::CUICDMInstanceHandle;
+    using qt3dsdm::CUICDMPropertyHandle;
 }
 }
 #endif

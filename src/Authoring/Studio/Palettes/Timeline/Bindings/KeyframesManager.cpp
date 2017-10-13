@@ -53,7 +53,7 @@
 #include "Core.h"
 #include "Dialogs.h"
 
-using namespace UICDM;
+using namespace qt3dsdm;
 
 bool SortKeyframeInstancePairByTime(const CKeyframesManager::SKeyframeInstancePair &inLHS,
                                     const CKeyframesManager::SKeyframeInstancePair &inRHS)
@@ -117,7 +117,7 @@ bool CKeyframesManager::CanPerformKeyframeCopy()
 bool CKeyframesManager::CanPerformKeyframePaste()
 {
     if (m_PasteKeyframeCommandHelper && m_PasteKeyframeCommandHelper->HasCopiedKeyframes()) {
-        UICDM::CUICDMInstanceHandle theSelectedInstance =
+        qt3dsdm::CUICDMInstanceHandle theSelectedInstance =
             g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
         if (theSelectedInstance.Valid()) {
             return true;
@@ -184,7 +184,7 @@ void CKeyframesManager::PasteKeyframes()
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
 
     if (m_PasteKeyframeCommandHelper && m_PasteKeyframeCommandHelper->HasCopiedKeyframes()) {
-        UICDM::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
+        qt3dsdm::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
         if (theSelectedInstance.Valid()) {
             long theCurrentViewTimeInMilliseconds = theDoc->GetCurrentViewTime();
             CCmdDataModelInsertKeyframe *theInsertKeyframesCommand =
@@ -276,7 +276,7 @@ void CKeyframesManager::SetChangedKeyframes()
 {
 
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    UICDM::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
+    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
     if (theSelectedInstance.Valid()) {
         using namespace Q3DStudio;
         Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Set Changed Keyframes", __FILE__,
@@ -306,15 +306,15 @@ void CKeyframesManager::SetKeyframeTime(long inTime)
 void CKeyframesManager::SetKeyframeDynamic(CUICDMTimelineKeyframe *inKeyframe, bool inDynamic)
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    UICDM::TKeyframeHandleList theKeyframeHandle;
+    qt3dsdm::TKeyframeHandleList theKeyframeHandle;
     CCmdDataModelChangeDynamicKeyframe *theCmd = nullptr;
 
     if (inKeyframe != nullptr)
         inKeyframe->GetKeyframeHandles(theKeyframeHandle);
 
-    UICDM::IAnimationCore *theAnimationCore = theDoc->GetStudioSystem()->GetAnimationCore();
+    qt3dsdm::IAnimationCore *theAnimationCore = theDoc->GetStudioSystem()->GetAnimationCore();
     for (size_t theKeyframe = 0; theKeyframe < theKeyframeHandle.size(); ++theKeyframe) {
-        UICDM::CUICDMAnimationHandle theAnimation(
+        qt3dsdm::CUICDMAnimationHandle theAnimation(
             theAnimationCore->GetAnimationForKeyframe(theKeyframeHandle.at(theKeyframe)));
         if (!theCmd)
             theCmd = new CCmdDataModelChangeDynamicKeyframe(theDoc, theAnimation, inDynamic);
@@ -390,7 +390,7 @@ void CKeyframesManager::RollbackChangedKeyframes()
 
 bool CKeyframesManager::CanMakeSelectedKeyframesDynamic()
 {
-    using namespace UICDM;
+    using namespace qt3dsdm;
     TKeyframeHandleList theKeyframes;
     TKeyframeHandleList allTheKeyframes;
     IAnimationCore &theAnimationCore(
@@ -435,11 +435,11 @@ void CKeyframesManager::SetKeyframeSelected(CUICDMTimelineKeyframe *inKeyframe, 
     }
 }
 
-UICDM::SGetOrSetKeyframeInfo SetupKeyframeInfo(UICDM::CUICDMKeyframeHandle inKeyframe,
-                                               UICDM::IAnimationCore &inCore)
+qt3dsdm::SGetOrSetKeyframeInfo SetupKeyframeInfo(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+                                               qt3dsdm::IAnimationCore &inCore)
 {
     TKeyframe theKeyframeData = inCore.GetKeyframeData(inKeyframe);
-    SEaseInEaseOutKeyframe theKeyframe = UICDM::get<SEaseInEaseOutKeyframe>(theKeyframeData);
+    SEaseInEaseOutKeyframe theKeyframe = qt3dsdm::get<SEaseInEaseOutKeyframe>(theKeyframeData);
     // Is this the first keyframe?
     bool isDynamic = false;
     if (inCore.IsFirstKeyframe(inKeyframe))
@@ -469,7 +469,7 @@ void CKeyframesManager::CopySelectedKeyframes()
             CUICDMTimelineKeyframe *theKeyframe = (*theIter).m_Keyframe;
             CUICDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
             theKeyframe->GetKeyframeHandles(theKeyframeHandles);
-            UICDM::SGetOrSetKeyframeInfo theInfos[3];
+            qt3dsdm::SGetOrSetKeyframeInfo theInfos[3];
             size_t theValidInfos = 0;
             if (!theKeyframeHandles.empty()) {
                 // TODO: need to figure out a good way to convert from individual keyframes back to

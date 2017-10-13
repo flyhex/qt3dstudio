@@ -71,7 +71,7 @@ CSceneViewDropTarget::CSceneViewDropTarget()
  */
 long CSceneViewDropTarget::GetObjectType()
 {
-    UICDM::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
 
     if (theInstance.Valid()) {
         CClientDataModelBridge *theBridge =
@@ -144,15 +144,15 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
     // We have to set this so we can adjust the Target to accept this source.
     SetDropSourceObjectType(inSource.GetObjectType());
 
-    UICDM::CUICDMInstanceHandle theTargetInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theTargetInstance = GetInstance();
     if (theTargetInstance.Valid()) {
         CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-        UICDM::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
-        UICDM::CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
+        qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
+        qt3dsdm::CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
         if (!theSlideSystem->IsMasterSlide(theSlide)
             && (inSource.GetCurrentFlags() & CHotKeys::MODIFIER_ALT)) {
             if (CanAddToMaster()) {
-                UICDM::CUICDMSlideHandle theMasterSlideHandle =
+                qt3dsdm::CUICDMSlideHandle theMasterSlideHandle =
                     theSlideSystem->GetMasterSlide(theSlide);
                 if (theMasterSlideHandle.Valid())
                     theSlide = theMasterSlideHandle;
@@ -171,10 +171,10 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
 /**
  * 	 @return the Asset that we would like the DropSource to drop on to.
  */
-UICDM::CUICDMInstanceHandle CSceneViewDropTarget::GetInstance()
+qt3dsdm::CUICDMInstanceHandle CSceneViewDropTarget::GetInstance()
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    UICDM::CUICDMInstanceHandle theRootObject = theDoc->GetActiveRootInstance();
+    qt3dsdm::CUICDMInstanceHandle theRootObject = theDoc->GetActiveRootInstance();
     EStudioObjectType theRootObjType =
         theDoc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theRootObject);
 
@@ -196,11 +196,11 @@ UICDM::CUICDMInstanceHandle CSceneViewDropTarget::GetInstance()
  *		Check to see if the Asset is a relative of our asset.
  * 		@return true if the inAsset is a parent grandparent...etc. of this asset.
  */
-bool CSceneViewDropTarget::IsRelative(UICDM::CUICDMInstanceHandle inInstance)
+bool CSceneViewDropTarget::IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
     bool theReturn = false;
 
-    UICDM::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
     // This will check to see if the inAsset is already a parent, grandparent....etc.
     if (theThisInstance.Valid())
         theReturn = IsAscendant(theThisInstance, inInstance,
@@ -214,9 +214,9 @@ bool CSceneViewDropTarget::IsRelative(UICDM::CUICDMInstanceHandle inInstance)
  *	 @param inAsset The Asset to check.
  *	 @return true if we are the same.
  */
-bool CSceneViewDropTarget::IsSelf(UICDM::CUICDMInstanceHandle inInstance)
+bool CSceneViewDropTarget::IsSelf(qt3dsdm::CUICDMInstanceHandle inInstance)
 {
-    UICDM::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
     return (theThisInstance == inInstance);
 }
 

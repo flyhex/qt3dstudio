@@ -49,7 +49,7 @@ class COffsetKeyframesCommandHelper;
 class CUICDMTimelineKeyframe : public IKeyframe
 {
 public:
-    typedef std::vector<UICDM::CUICDMKeyframeHandle> TKeyframeHandleList;
+    typedef std::vector<qt3dsdm::CUICDMKeyframeHandle> TKeyframeHandleList;
 
 protected:
     TKeyframeHandleList
@@ -68,8 +68,8 @@ public:
     void SetDynamic(bool inIsDynamic) override;
     bool IsDynamic() const override;
 
-    void AddKeyframeHandle(UICDM::CUICDMKeyframeHandle inHandle);
-    bool HasKeyframeHandle(UICDM::CUICDMKeyframeHandle inHandle) const;
+    void AddKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle);
+    bool HasKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle) const;
     void SetSelected(bool inSelected);
     void UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper, long inTime);
     void GetKeyframeHandles(TKeyframeHandleList &outList) const;
