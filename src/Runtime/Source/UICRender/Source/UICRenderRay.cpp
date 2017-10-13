@@ -30,7 +30,7 @@
 #include "UICRenderRay.h"
 #include "foundation/Qt3DSPlane.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rayplane_intersection.htm
 

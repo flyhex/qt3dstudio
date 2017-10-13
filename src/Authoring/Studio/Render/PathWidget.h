@@ -33,13 +33,13 @@
 #include "UICDMHandles.h"
 #include "StudioPickValues.h"
 
-namespace uic {
+namespace qt3ds {
 namespace widgets {
 
     class IPathWidget : public IStudioWidgetBase
     {
     public:
-        uic::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override = 0;
+        qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override = 0;
         static IPathWidget &CreatePathWidget(NVAllocatorCallback &inAlloc,
                                              IUICRenderContext &inRenderContext);
     };

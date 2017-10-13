@@ -32,7 +32,7 @@
 #define UIC_RENDER_LIGHT_H
 #include "UICRenderNode.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct RenderLightTypes

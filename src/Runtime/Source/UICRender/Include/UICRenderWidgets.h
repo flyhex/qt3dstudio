@@ -42,7 +42,7 @@
 #include "render/Qt3DSRenderIndexBuffer.h"
 #include "UICRenderText.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SWidgetRenderInformation

@@ -74,14 +74,14 @@ namespace ScriptParser {
         ParseScriptFile(std::shared_ptr<IDOMFactory> factory,
                         std::shared_ptr<UICDM::IStringTable> stringTable,
                         const QString &fullPath, CXmlErrorHandler &errorHandler,
-                        uic::render::IInputStreamFactory &streamFactory)
+                        qt3ds::render::IInputStreamFactory &streamFactory)
         {
             QVector<QT3DSU8> readBuf;
             {
                 using namespace qt3ds;
                 using namespace qt3ds::foundation;
                 eastl::string strConvert;
-                NVScopedRefCounted<uic::render::IRefCountedInputStream> stream(
+                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> stream(
                     streamFactory.GetStreamForFile(fullPath));
                 if (!stream) {
                     QT3DS_ASSERT(0);

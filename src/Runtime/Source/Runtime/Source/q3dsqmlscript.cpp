@@ -129,7 +129,7 @@ void Q3DSQmlScript::call(const QString &function)
 void Q3DSQmlScript::updateProperties()
 {
     using namespace qt3ds::foundation;
-    using namespace uic::runtime::element;
+    using namespace qt3ds::runtime::element;
 
     if (!m_behavior.GetActive())
         return;
@@ -314,7 +314,7 @@ QVector2D Q3DSQmlScript::getMousePosition()
 {
     CPresentation *presentation
             = static_cast<CPresentation *>(m_behavior.GetBelongedPresentation());
-    uic::runtime::IApplication &app = presentation->GetApplication();
+    qt3ds::runtime::IApplication &app = presentation->GetApplication();
 
     SInputFrame input = app.GetInputEngine().GetInputFrame();
     if (app.GetPrimaryPresentation()) {

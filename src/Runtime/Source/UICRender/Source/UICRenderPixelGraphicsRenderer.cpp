@@ -37,8 +37,8 @@
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "UICRenderShaderCache.h"
 
-using namespace uic;
-using namespace uic::render;
+using namespace qt3ds;
+using namespace qt3ds::render;
 
 namespace {
 

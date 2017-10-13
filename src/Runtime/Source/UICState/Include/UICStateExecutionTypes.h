@@ -32,7 +32,7 @@
 #pragma once
 #include "UICStateTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     struct ExecutableContentTypes

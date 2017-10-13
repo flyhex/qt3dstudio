@@ -86,8 +86,8 @@ namespace Q3DStudio {
 #define Q3DStudio_LOG_EVENT(S)
 #endif
 
-using uic::runtime::IApplicationCore;
-using uic::runtime::IApplication;
+using qt3ds::runtime::IApplicationCore;
+using qt3ds::runtime::IApplication;
 using namespace qt3ds;
 
 namespace __SQmlEngineImpl_Basic_Structs__ {
@@ -386,12 +386,12 @@ public:
     void EnableMultithreadedAccess() override;
     void DisableMultithreadedAccess() override;
 
-    void SetApplicationCore(uic::runtime::IApplicationCore &inApplication) override;
-    void SetApplication(uic::runtime::IApplication &inApplication) override;
-    uic::runtime::IApplication *GetApplication() override;
+    void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) override;
+    void SetApplication(qt3ds::runtime::IApplication &inApplication) override;
+    qt3ds::runtime::IApplication *GetApplication() override;
 
     void BeginPreloadScripts(const eastl::vector<const char *> &,
-                                     uic::render::IThreadPool &, const char *) override {}
+                                     qt3ds::render::IThreadPool &, const char *) override {}
     void EndPreloadScripts() override {}
     eastl::vector<eastl::string> GetLoadedScripts() override
     {
@@ -430,7 +430,7 @@ public:
     // No need to implement here, as sound playing is done in UICViewerApp
     bool PlaySoundFile(const char *) override { return false; }
 
-    void EnableDebugging(uic::state::debugger::IMultiProtocolSocket &) override {}
+    void EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket &) override {}
     void EnableProfiling() override {}
     void StepGC() override {}
 
@@ -476,19 +476,19 @@ void CQmlEngineImpl::DisableMultithreadedAccess()
     m_MultithreadedMutex = NULL;
 }
 
-void CQmlEngineImpl::SetApplicationCore(uic::runtime::IApplicationCore &inApplication)
+void CQmlEngineImpl::SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication)
 {
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_ApplicationCore = &inApplication;
 }
 
-void CQmlEngineImpl::SetApplication(uic::runtime::IApplication &inApplication)
+void CQmlEngineImpl::SetApplication(qt3ds::runtime::IApplication &inApplication)
 {
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_Application = &inApplication;
 }
 
-uic::runtime::IApplication *CQmlEngineImpl::GetApplication()
+qt3ds::runtime::IApplication *CQmlEngineImpl::GetApplication()
 {
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
     return m_Application;
@@ -666,14 +666,14 @@ bool CQmlEngineImpl::GetSlideInfo(const char *element, int &currentIndex, int &p
         if (currentIndex > 0) {
             currentName = QString::fromLocal8Bit(
                         thePresentation->GetSlideSystem().GetSlideName(
-                            uic::runtime::SSlideKey(*theComponent, QT3DSU32(currentIndex))));
+                            qt3ds::runtime::SSlideKey(*theComponent, QT3DSU32(currentIndex))));
         } else {
             currentName.clear();
         }
         if (previousIndex > 0) {
             previousName = QString::fromLocal8Bit(
                         thePresentation->GetSlideSystem().GetSlideName(
-                            uic::runtime::SSlideKey(*theComponent, QT3DSU32(previousIndex))));
+                            qt3ds::runtime::SSlideKey(*theComponent, QT3DSU32(previousIndex))));
         } else {
             previousName.clear();
         }
@@ -721,7 +721,7 @@ void CQmlEngineImpl::ProcessFrameCallbacks(IPresentation *)
 void CQmlEngineImpl::ProcessSignal(IPresentation *inPresentation,
                                    const SEventCommand &inCommand)
 {
-    using uic::runtime::TIdValuePair;
+    using qt3ds::runtime::TIdValuePair;
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
     TElement *theElement = inCommand.m_Target; // the element that is a behavior
 
@@ -760,7 +760,7 @@ void CQmlEngineImpl::ProcessCustomActions(IPresentation *presentation,
                 return;
             }
 
-            uic::runtime::TIdValuePair tempData = parametersManager.GetParameter(groupId, 0);
+            qt3ds::runtime::TIdValuePair tempData = parametersManager.GetParameter(groupId, 0);
             if (tempData.first != CHash::HashString("string")) {
                 QT3DS_ASSERT(false);
                 return;

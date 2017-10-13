@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderResourceBufferObjects.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 /*
         IResourceManager&		m_ResourceManager;

@@ -39,7 +39,7 @@
 #include "UICRenderContext.h"
 #include "UICRenderShaderCodeGeneratorV2.h"
 
-using namespace uic::widgets;
+using namespace qt3ds::widgets;
 
 namespace {
 
@@ -68,7 +68,7 @@ struct SPointEntry
 
 struct SPathWidget : public IPathWidget
 {
-    typedef nvvector<eastl::pair<QT3DSU32, uic::studio::SPathPick::EAnchorProperty>>
+    typedef nvvector<eastl::pair<QT3DSU32, qt3ds::studio::SPathPick::EAnchorProperty>>
         TReverseAnchorBuffer;
 
     NVAllocatorCallback &m_Allocator;
@@ -326,7 +326,7 @@ struct SPathWidget : public IPathWidget
     }
 
     void PushPoint(const SPointEntry &inEntry, QT3DSU32 inAnchorIndex,
-                   uic::studio::SPathPick::EAnchorProperty inProperty)
+                   qt3ds::studio::SPathPick::EAnchorProperty inProperty)
     {
         QT3DSU32 anchorIndex = (QT3DSU32)m_PointBuffer.size();
         m_PointBuffer.push_back(inEntry);
@@ -350,30 +350,30 @@ struct SPathWidget : public IPathWidget
 
         for (SPathSubPath *theSubPath = thePath.m_FirstSubPath; theSubPath;
              theSubPath = theSubPath->m_NextSubPath) {
-            NVDataRef<uic::render::SPathAnchorPoint> thePathBuffer(
+            NVDataRef<qt3ds::render::SPathAnchorPoint> thePathBuffer(
                 theManager.GetPathSubPathBuffer(*theSubPath));
             if (thePathBuffer.size() == 0)
                 return;
 
             QT3DSU32 numAnchors = thePathBuffer.size();
             for (QT3DSU32 idx = 0, end = numAnchors; idx < end; ++idx) {
-                const uic::render::SPathAnchorPoint &theAnchorPoint(thePathBuffer[idx]);
+                const qt3ds::render::SPathAnchorPoint &theAnchorPoint(thePathBuffer[idx]);
                 if (idx > 0) {
-                    QT3DSVec2 incoming(uic::render::IPathManagerCore::GetControlPointFromAngleDistance(
+                    QT3DSVec2 incoming(qt3ds::render::IPathManagerCore::GetControlPointFromAngleDistance(
                         theAnchorPoint.m_Position, theAnchorPoint.m_IncomingAngle,
                         theAnchorPoint.m_IncomingDistance));
                     PushPoint(SPointEntry(incoming, controlColor, m_PointBuffer.size()),
-                              anchorIndex, uic::studio::SPathPick::IncomingControl);
+                              anchorIndex, qt3ds::studio::SPathPick::IncomingControl);
                     m_LineBuffer.push_back(eastl::make_pair(theAnchorPoint.m_Position, incoming));
                 }
                 PushPoint(SPointEntry(theAnchorPoint.m_Position, anchorColor, m_PointBuffer.size()),
-                          anchorIndex, uic::studio::SPathPick::Anchor);
+                          anchorIndex, qt3ds::studio::SPathPick::Anchor);
                 if (idx < (numAnchors - 1)) {
-                    QT3DSVec2 outgoing(uic::render::IPathManagerCore::GetControlPointFromAngleDistance(
+                    QT3DSVec2 outgoing(qt3ds::render::IPathManagerCore::GetControlPointFromAngleDistance(
                         theAnchorPoint.m_Position, theAnchorPoint.m_OutgoingAngle,
                         theAnchorPoint.m_OutgoingDistance));
                     PushPoint(SPointEntry(outgoing, controlColor, m_PointBuffer.size()),
-                              anchorIndex, uic::studio::SPathPick::OutgoingControl);
+                              anchorIndex, qt3ds::studio::SPathPick::OutgoingControl);
                     m_LineBuffer.push_back(eastl::make_pair(theAnchorPoint.m_Position, outgoing));
                 }
                 ++anchorIndex;
@@ -381,7 +381,7 @@ struct SPathWidget : public IPathWidget
         }
 
         m_RenderSetup = SWidgetRenderSetupResult(inWidgetContext, *m_Node,
-                                                 uic::render::RenderWidgetModes::Local);
+                                                 qt3ds::render::RenderWidgetModes::Local);
 
         m_PointMVP = m_RenderSetup.m_WidgetInfo.m_LayerProjection
             * m_RenderSetup.m_WidgetInfo.m_CameraGlobalInverse * m_Node->m_GlobalTransform;
@@ -477,7 +477,7 @@ struct SPathWidget : public IPathWidget
     }
 
     void RenderPick(const QT3DSMat44 &inProjPreMult, NVRenderContext &inRenderContext,
-                            uic::render::SWindowDimensions inWinDimensions) override
+                            qt3ds::render::SWindowDimensions inWinDimensions) override
     {
         if (m_PointAssembler == nullptr || m_PointPickShader == nullptr)
             return;
@@ -491,16 +491,16 @@ struct SPathWidget : public IPathWidget
         RenderPointBuffer(*m_PointPickShader, theMVP, inRenderContext);
     }
 
-    uic::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override
+    qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override
     {
         inPickIndex -= 1;
 
         if (inPickIndex < m_AnchorIndexBuffer.size())
-            return uic::studio::SPathPick(m_AnchorIndexBuffer[inPickIndex].first,
+            return qt3ds::studio::SPathPick(m_AnchorIndexBuffer[inPickIndex].first,
                                           m_AnchorIndexBuffer[inPickIndex].second);
         else {
             QT3DS_ASSERT(false);
-            return uic::studio::SPathPick();
+            return qt3ds::studio::SPathPick();
         }
     }
 };

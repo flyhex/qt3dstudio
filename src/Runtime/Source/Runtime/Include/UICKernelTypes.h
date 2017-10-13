@@ -35,7 +35,7 @@
 //==============================================================================
 #include "UICArray.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     namespace element {
         struct SElement;
@@ -45,8 +45,8 @@ namespace runtime {
 }
 
 namespace Q3DStudio {
-typedef uic::runtime::element::SElement TElement;
-typedef uic::runtime::element::SComponent TComponent;
+typedef qt3ds::runtime::element::SElement TElement;
+typedef qt3ds::runtime::element::SComponent TComponent;
 }
 //==============================================================================
 //	Namespace

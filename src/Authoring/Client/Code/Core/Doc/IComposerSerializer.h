@@ -30,7 +30,7 @@
 #ifndef COMPOSERSERIALIZERH
 #define COMPOSERSERIALIZERH
 #include "UICDMHandles.h"
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IPathManager;
 }
@@ -108,7 +108,7 @@ public:
         UICDM::IActionSystem &inActionSystem, UICDM::ISlideGraphCore &inSlideGraphCore,
         UICDM::SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-        UICDM::IGuideSystem &inGuideSystem, uic::render::IPathManager &inPathManager);
+        UICDM::IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager);
 };
 }
 

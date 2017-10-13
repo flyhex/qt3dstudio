@@ -35,7 +35,7 @@
 #include "UICRenderDynamicObjectSystem.h"
 #include "../RendererImpl/UICVertexPipelineImpl.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     namespace dynamic {

@@ -33,8 +33,8 @@
 #include "EASTL/set.h"
 #include "foundation/Qt3DSAtomic.h"
 
-using namespace uic::state;
-using namespace uic::state::debugger;
+using namespace qt3ds::state;
+using namespace qt3ds::state::debugger;
 
 namespace {
 

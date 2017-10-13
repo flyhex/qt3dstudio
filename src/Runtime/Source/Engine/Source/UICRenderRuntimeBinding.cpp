@@ -83,15 +83,15 @@
 #pragma warning(disable : 4355)
 #endif
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using eastl::make_pair;
 using eastl::pair;
-using uic::runtime::IApplication;
+using qt3ds::runtime::IApplication;
 
 #ifndef _WIN32
 #define stricmp strcasecmp
 #endif
-namespace uic {
+namespace qt3ds {
 namespace render {
     qt3ds::foundation::MallocAllocator g_BaseAllocator;
 }
@@ -322,16 +322,16 @@ struct SUICRenderScene : public Q3DStudio::IScene
                 theMapperObjects[idx] = theMapperObject;
             }
         }
-        uic::render::SBasisPlanes::Enum thePlane(uic::render::SBasisPlanes::XY);
+        qt3ds::render::SBasisPlanes::Enum thePlane(qt3ds::render::SBasisPlanes::XY);
         switch (inPlane) {
         case Q3DStudio::FacePositionPlanes::XY:
-            thePlane = uic::render::SBasisPlanes::XY;
+            thePlane = qt3ds::render::SBasisPlanes::XY;
             break;
         case Q3DStudio::FacePositionPlanes::YZ:
-            thePlane = uic::render::SBasisPlanes::YZ;
+            thePlane = qt3ds::render::SBasisPlanes::YZ;
             break;
         case Q3DStudio::FacePositionPlanes::XZ:
-            thePlane = uic::render::SBasisPlanes::XZ;
+            thePlane = qt3ds::render::SBasisPlanes::XZ;
             break;
         }
         if (theBounds.isEmpty() == false)
@@ -547,10 +547,10 @@ struct SUICRenderScene : public Q3DStudio::IScene
     {
         CUICTranslator *theTranslator = reinterpret_cast<CUICTranslator *>(inElem.GetAssociation());
         if (theTranslator && theTranslator->m_RenderObject) {
-            Option<uic::render::SCuboidRect> theRectOpt =
+            Option<qt3ds::render::SCuboidRect> theRectOpt =
                 m_Context->GetRenderer().GetCameraBounds(*theTranslator->m_RenderObject);
             if (theRectOpt.hasValue()) {
-                uic::render::SCuboidRect theRect(*theRectOpt);
+                qt3ds::render::SCuboidRect theRect(*theRectOpt);
                 return Q3DStudio::SCameraRect(theRect.m_Left, theRect.m_Top, theRect.m_Right,
                                               theRect.m_Bottom);
             }
@@ -762,7 +762,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
     Q3DStudio::INT32 LoadImageBatch(qt3ds::foundation::CRegisteredString *inFullPaths,
                                             Q3DStudio::INT32 inNumPaths,
                                             qt3ds::foundation::CRegisteredString inDefaultImage,
-                                            uic::render::IImageLoadListener *inLoadCallback) override
+                                            qt3ds::render::IImageLoadListener *inLoadCallback) override
     {
         return static_cast<Q3DStudio::INT32>(m_Context->GetImageBatchLoader().LoadImageBatch(
             toConstDataRef(inFullPaths, (QT3DSU32)inNumPaths), inDefaultImage, inLoadCallback));
@@ -917,7 +917,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         }
     }
 
-    struct SResolver : public uic::render::IUIPReferenceResolver
+    struct SResolver : public qt3ds::render::IUIPReferenceResolver
     {
         IStringTable &m_StringTable;
         Q3DStudio::IUIPParser &m_Parser;
@@ -1048,7 +1048,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
     // threadsafe
     // returns a handle to the loaded object. Return value of zero means error.
     qt3ds::QT3DSU32 LoadSceneStage1(CRegisteredString inPresentationDirectory,
-                                      uic::render::ILoadedBuffer &inData) override
+                                      qt3ds::render::ILoadedBuffer &inData) override
     {
         SStackPerfTimer __perfTimer(m_Context->m_CoreContext->GetPerfTimer(),
                                     "Load Scene Graph Stage 1");
@@ -1195,9 +1195,9 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         Q3DStudio::CDLLManager &theDLLManager = Q3DStudio::CDLLManager::GetDLLManager();
         long theHandle = theDLLManager.LoadLibrary(inPath, EDLLTYPE_RENDERABLE_PLUGIN);
         if (theHandle >= 0) {
-            uic::render::IOffscreenRenderer *theOffscreenRenderer =
+            qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
                 QT3DS_NEW(m_Context->GetAllocator(),
-                       uic::render::COldNBustedPluginRenderer)(*m_Context->m_UICContext, theHandle);
+                       qt3ds::render::COldNBustedPluginRenderer)(*m_Context->m_UICContext, theHandle);
             qt3ds::foundation::CRegisteredString theAssetString =
                 m_Context->m_CoreContext->GetStringTable().RegisterStr(inAssetIDString);
 
@@ -1230,7 +1230,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
     void LoadQmlStreamerPlugin(const char *inAssetIDString) override
     {
-        uic::render::IOffscreenRenderer *theOffscreenRenderer =
+        qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
             QT3DS_NEW(m_Context->GetAllocator(),
                    Q3DSQmlRender)(*m_Context->m_UICContext, inAssetIDString);
         if (theOffscreenRenderer) {
@@ -1644,8 +1644,8 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
 struct SRenderFactory;
 
-struct SVisualStateHandler : public uic::state::IVisualStateInterpreterFactory,
-                             public uic::state::IVisualStateCommandHandler
+struct SVisualStateHandler : public qt3ds::state::IVisualStateInterpreterFactory,
+                             public qt3ds::state::IVisualStateCommandHandler
 {
     NVAllocatorCallback &m_Allocator;
     QT3DSI32 mRefCount;
@@ -1660,12 +1660,12 @@ public:
     }
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_Allocator)
 
-    uic::state::IStateInterpreter *OnNewStateMachine(const char8_t *inPath,
+    qt3ds::state::IStateInterpreter *OnNewStateMachine(const char8_t *inPath,
                                                              const char8_t *inId,
                                                              const char8_t *inDatamodelFunction) override;
 
-    void Handle(const uic::state::SVisualStateCommand &inCommand,
-                        uic::state::IScriptContext &inScriptContext) override;
+    void Handle(const qt3ds::state::SVisualStateCommand &inCommand,
+                        qt3ds::state::IScriptContext &inScriptContext) override;
 };
 
 struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
@@ -1675,10 +1675,10 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
     NVScopedRefCounted<Q3DStudio::CLuaEngine> m_ScriptBridge;
     NVScopedRefCounted<Q3DStudio::CQmlEngine> m_ScriptBridgeQml;
     NVScopedRefCounted<SUICRenderSceneManager> m_SceneManager;
-    NVScopedRefCounted<uic::state::IVisualStateContext> m_VisualStateContext;
-    NVScopedRefCounted<uic::evt::IEventSystem> m_EventSystem;
-    uic::runtime::IApplicationCore *m_ApplicationCore;
-    uic::runtime::IApplication *m_Application;
+    NVScopedRefCounted<qt3ds::state::IVisualStateContext> m_VisualStateContext;
+    NVScopedRefCounted<qt3ds::evt::IEventSystem> m_EventSystem;
+    qt3ds::runtime::IApplicationCore *m_ApplicationCore;
+    qt3ds::runtime::IApplication *m_Application;
     QT3DSI32 m_RefCount;
 
     SRenderFactory(SBindingCore &inCore)
@@ -1714,13 +1714,13 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
         }
     }
 
-    uic::render::IUICRenderContextCore &GetUICRenderContextCore() override
+    qt3ds::render::IUICRenderContextCore &GetUICRenderContextCore() override
     {
         return *m_Context->m_CoreContext;
     }
 
-    uic::runtime::IApplicationCore *GetApplicationCore() override { return m_ApplicationCore; }
-    void SetApplicationCore(uic::runtime::IApplicationCore *app) override
+    qt3ds::runtime::IApplicationCore *GetApplicationCore() override { return m_ApplicationCore; }
+    void SetApplicationCore(qt3ds::runtime::IApplicationCore *app) override
     {
         m_ApplicationCore = app;
     }
@@ -1763,19 +1763,19 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
 
         return *m_ScriptBridgeQml;
     }
-    uic::render::IInputStreamFactory &GetInputStreamFactory() override
+    qt3ds::render::IInputStreamFactory &GetInputStreamFactory() override
     {
         return m_Context->m_CoreContext->GetInputStreamFactory();
     }
 
-    uic::render::IUICRenderContext &GetUICRenderContext() override
+    qt3ds::render::IUICRenderContext &GetUICRenderContext() override
     {
         return *m_Context->m_UICContext;
     }
-    uic::state::IVisualStateContext &GetVisualStateContext() override
+    qt3ds::state::IVisualStateContext &GetVisualStateContext() override
     {
         if (!m_VisualStateContext) {
-            m_VisualStateContext = uic::state::IVisualStateContext::Create(
+            m_VisualStateContext = qt3ds::state::IVisualStateContext::Create(
                 *m_Context->m_Foundation, m_Context->m_CoreContext->GetStringTable());
             SVisualStateHandler *newHandle =
                 QT3DS_NEW(m_Context->m_Foundation->getAllocator(),
@@ -1785,10 +1785,10 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
         }
         return *m_VisualStateContext;
     }
-    uic::evt::IEventSystem &GetEventSystem() override
+    qt3ds::evt::IEventSystem &GetEventSystem() override
     {
         if (!m_EventSystem) {
-            m_EventSystem = uic::evt::IEventSystem::Create(*m_Context->m_Foundation);
+            m_EventSystem = qt3ds::evt::IEventSystem::Create(*m_Context->m_Foundation);
         }
         return *m_EventSystem;
     }
@@ -1802,8 +1802,8 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
     {
         return m_Context->m_CoreContext->GetPerfTimer();
     }
-    uic::runtime::IApplication *GetApplication() override { return m_Application; }
-    void SetApplication(uic::runtime::IApplication *app) override
+    qt3ds::runtime::IApplication *GetApplication() override { return m_Application; }
+    void SetApplication(qt3ds::runtime::IApplication *app) override
     {
         m_Application = app;
         if (app) {
@@ -1866,7 +1866,7 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
     }
 };
 
-uic::state::IStateInterpreter *
+qt3ds::state::IStateInterpreter *
 SVisualStateHandler::OnNewStateMachine(const char8_t *inPath, const char8_t *inId,
                                        const char8_t *inDatamodelFunction)
 {
@@ -1876,9 +1876,9 @@ SVisualStateHandler::OnNewStateMachine(const char8_t *inPath, const char8_t *inI
     return m_Factory.m_ScriptBridge->CreateStateMachine(inPath, inId, inDatamodelFunction);
 }
 
-Q3DStudio::SScriptEngineGotoSlideArgs ToEngine(const uic::state::SGotoSlideData &inData)
+Q3DStudio::SScriptEngineGotoSlideArgs ToEngine(const qt3ds::state::SGotoSlideData &inData)
 {
-    using namespace uic::state;
+    using namespace qt3ds::state;
     Q3DStudio::SScriptEngineGotoSlideArgs retval;
     if (inData.m_Mode.hasValue()) {
         switch (*inData.m_Mode) {
@@ -1915,7 +1915,7 @@ class CStateScriptEngineCallFunctionArgRetriever
 {
 public:
     CStateScriptEngineCallFunctionArgRetriever(const char *inArguments,
-                                               uic::state::IScriptContext &inScriptContext)
+                                               qt3ds::state::IScriptContext &inScriptContext)
         : CScriptEngineCallFunctionArgRetriever(inArguments)
         , m_ScriptContext(inScriptContext)
     {
@@ -1927,13 +1927,13 @@ public:
     }
 
 private:
-    uic::state::IScriptContext &m_ScriptContext;
+    qt3ds::state::IScriptContext &m_ScriptContext;
 };
 
-void SVisualStateHandler::Handle(const uic::state::SVisualStateCommand &inCommand,
-                                 uic::state::IScriptContext &inScriptContext)
+void SVisualStateHandler::Handle(const qt3ds::state::SVisualStateCommand &inCommand,
+                                 qt3ds::state::IScriptContext &inScriptContext)
 {
-    using namespace uic::state;
+    using namespace qt3ds::state;
     switch (inCommand.getType()) {
     case VisualStateCommandTypes::GotoSlide: {
         const SGotoSlide &theInfo(inCommand.getData<SGotoSlide>());

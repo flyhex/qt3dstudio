@@ -47,7 +47,7 @@
 #include <QFileInfo>
 #include <QUrl>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 struct SInputStream : public IRefCountedInputStream

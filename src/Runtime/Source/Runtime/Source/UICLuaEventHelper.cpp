@@ -122,7 +122,7 @@ int CLuaEventHelper::FireEvent(lua_State *inLuaState)
     UVariant theArg2;
     qt3ds::foundation::IStringTable &theStrTable(
         theElement->GetBelongedPresentation()->GetStringTable());
-    uic::runtime::IApplication &theApplication(
+    qt3ds::runtime::IApplication &theApplication(
         theElement->GetBelongedPresentation()->GetApplication());
 
     if (theTop == 3)
@@ -241,7 +241,7 @@ void CLuaEventHelper::EventCallback(void *inContextData, SEventCommand &ioEvent)
 
     qt3ds::foundation::IStringTable &theStrTable(
         ioEvent.m_Target->GetBelongedPresentation()->GetStringTable());
-    uic::runtime::IApplication &theApplication(
+    qt3ds::runtime::IApplication &theApplication(
         ioEvent.m_Target->GetBelongedPresentation()->GetApplication());
 
     theArgumentCount += CLuaHelper::PushArgument(theLuaState, ioEvent.m_Arg1Type, ioEvent.m_Arg1,

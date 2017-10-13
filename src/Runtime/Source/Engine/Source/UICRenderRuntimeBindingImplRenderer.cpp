@@ -33,7 +33,7 @@
 #include "UICWindowSystem.h"
 #include "UICRenderLoadedTexture.h"
 
-using uic::render::SWindowDimensions;
+using qt3ds::render::SWindowDimensions;
 
 struct SRenderer;
 struct SRendererRSM : public Q3DStudio::ITegraRenderStateManager
@@ -196,8 +196,8 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
         if (inTextureData && inDataSize) {
             SMemoryInStream theInStream(inTextureData, inTextureData + inDataSize);
             NVFoundationBase &theFoundation(*m_BindingCore->m_Foundation);
-            uic::render::SLoadedTexture *theLoadedTexture =
-                uic::render::SLoadedTexture::LoadDDS(theInStream, true, theFoundation);
+            qt3ds::render::SLoadedTexture *theLoadedTexture =
+                qt3ds::render::SLoadedTexture::LoadDDS(theInStream, true, theFoundation);
             if (theLoadedTexture && theLoadedTexture->dds) {
                 theLoadedTexture->EnsureMultiplerOfFour(theFoundation, "AutoworksWatermark.png");
                 qt3ds::render::NVRenderContext &theContext = *m_BindingCore->m_RenderContext;

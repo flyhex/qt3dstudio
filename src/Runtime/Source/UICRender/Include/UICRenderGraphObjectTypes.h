@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include "foundation/Qt3DSAssert.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
 // If you need a generic switch statement, then these macros will ensure

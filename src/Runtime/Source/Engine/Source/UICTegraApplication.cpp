@@ -75,7 +75,7 @@
 //==============================================================================
 //	Namespace
 //==============================================================================
-namespace uic {
+namespace qt3ds {
 namespace render {
 extern qt3ds::foundation::MallocAllocator g_BaseAllocator;
 }
@@ -146,13 +146,13 @@ private:
     ITegraApplicationRenderEngine *m_RenderEngine; ///< Handles all rendering functions
     CTegraInputEngine *m_InputEngine; ///< Handles all user input events
     // Pre graphics init objects
-    NVScopedRefCounted<uic::render::IUICRenderFactoryCore> m_RuntimeFactoryCore;
-    NVScopedRefCounted<uic::runtime::IApplicationCore>
+    NVScopedRefCounted<qt3ds::render::IUICRenderFactoryCore> m_RuntimeFactoryCore;
+    NVScopedRefCounted<qt3ds::runtime::IApplicationCore>
     m_ApplicationCore; ///< Base application before graphis
 
     // Post graphics init objects
-    NVScopedRefCounted<uic::render::IUICRenderFactory> m_RuntimeFactory;
-    NVScopedRefCounted<uic::runtime::IApplication> m_Application; ///< Application after graphics
+    NVScopedRefCounted<qt3ds::render::IUICRenderFactory> m_RuntimeFactory;
+    NVScopedRefCounted<qt3ds::runtime::IApplication> m_Application; ///< Application after graphics
     CPresentation *m_Presentation; ///< Currently loaded presentation, this should be removed in the future
 
     CPausingTimeProvider m_TimeProvider;
@@ -161,7 +161,7 @@ private:
 
     volatile QT3DSI32 mRefCount;
 
-    uic::UICAssetVisitor *m_visitor;
+    qt3ds::UICAssetVisitor *m_visitor;
     bool m_showOnScreenStats;
 
 public:
@@ -169,7 +169,7 @@ public:
              IAudioPlayer *inAudioPlayer);
     ~CNDDView();
 
-    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(uic::render::g_BaseAllocator);
+    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(qt3ds::render::g_BaseAllocator);
 
     bool BeginLoad(const QString &sourcePath) override;
     bool HasOfflineLoadingCompleted() override;
@@ -186,7 +186,7 @@ public:
     void Pause() override;
     void UnPause() override;
     bool IsPaused() override;
-    void setAssetVisitor(uic::UICAssetVisitor *) override;
+    void setAssetVisitor(qt3ds::UICAssetVisitor *) override;
 
     INT32 GetFrameCount() override;
     void showOnScreenStats(bool) override;
@@ -654,9 +654,9 @@ void CNDDView::BootupPreGraphicsInitObjects()
     // Create engines and runtime
     const eastl::string &theAppDir = QCoreApplication::applicationDirPath().toLatin1().constData();
 
-    m_RuntimeFactoryCore = uic::render::IUICRenderFactoryCore::CreateRenderFactoryCore(
+    m_RuntimeFactoryCore = qt3ds::render::IUICRenderFactoryCore::CreateRenderFactoryCore(
                 theAppDir.c_str(), m_WindowSystem, m_TimeProvider);
-    m_ApplicationCore = uic::runtime::IApplicationCore::CreateApplicationCore(*m_RuntimeFactoryCore,
+    m_ApplicationCore = qt3ds::runtime::IApplicationCore::CreateApplicationCore(*m_RuntimeFactoryCore,
                                                                               theAppDir.c_str());
 
     if (m_ApplicationCore && m_visitor)
@@ -668,7 +668,7 @@ void CNDDView::BootupPreGraphicsInitObjects()
     qCInfo(TRACE_INFO) << "CNDDView::DoInitialize: Successfully initialized!";
 }
 
-void CNDDView::setAssetVisitor(uic::UICAssetVisitor *v)
+void CNDDView::setAssetVisitor(qt3ds::UICAssetVisitor *v)
 {
     m_visitor = v;
     if (m_ApplicationCore)
@@ -678,7 +678,7 @@ void CNDDView::setAssetVisitor(uic::UICAssetVisitor *v)
 INDDView &INDDView::Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
                            IAudioPlayer *inAudioPlayer)
 {
-    return *QT3DS_NEW(uic::render::g_BaseAllocator, CNDDView)(inProvider, inWindowSystem,
+    return *QT3DS_NEW(qt3ds::render::g_BaseAllocator, CNDDView)(inProvider, inWindowSystem,
                                                               inAudioPlayer);
 }
 

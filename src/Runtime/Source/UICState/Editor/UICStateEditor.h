@@ -40,7 +40,7 @@
 #include "foundation/Qt3DSVec3.h"
 #include "UICStateInterpreter.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

@@ -33,7 +33,7 @@
 #include "UICStateDebugger.h"
 #include "UICUIADatamodel.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
 
@@ -102,7 +102,7 @@ namespace state {
 
             virtual void RefreshData(bool inNeedReloadData) = 0;
 
-            static ISceneGraphArchitectDebugger &Create(uic::app::IDatamodel &inDatamodel);
+            static ISceneGraphArchitectDebugger &Create(qt3ds::app::IDatamodel &inDatamodel);
         };
     }
 }

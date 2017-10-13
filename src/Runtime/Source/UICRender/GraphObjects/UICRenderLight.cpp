@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderLight.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SLight::SLight()
     : SNode(GraphObjectTypes::Light)

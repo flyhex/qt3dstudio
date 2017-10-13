@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "render/Qt3DSRenderBaseTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class IRenderTask

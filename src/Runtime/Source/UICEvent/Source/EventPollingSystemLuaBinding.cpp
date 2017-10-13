@@ -38,7 +38,7 @@
 #include "EventPollingSystem.h"
 #include "EventPollingSystemLuaBinding.h"
 
-using namespace uic::evt;
+using namespace qt3ds::evt;
 
 namespace {
 // No need to use static in an anonymous namespace
@@ -176,7 +176,7 @@ int GetNextEvents(lua_State *inState)
 //}
 }
 
-void uic::evt::SLuaEventPollerBinding::WrapEventPoller(lua_State *inState, IEventSystem &inPoller)
+void qt3ds::evt::SLuaEventPollerBinding::WrapEventPoller(lua_State *inState, IEventSystem &inPoller)
 {
     lua_newtable(inState);
     lua_pushlightuserdata(inState, inPoller.GetCInterface()); // Store the C poller, for Lua will

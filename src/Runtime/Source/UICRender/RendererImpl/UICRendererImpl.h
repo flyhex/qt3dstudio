@@ -67,7 +67,7 @@
 #include "UICRenderProfiler.h"
 #include "UICRenderDefaultMaterialShaderGenerator.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     inline bool FloatLessThan(QT3DSF32 lhs, QT3DSF32 rhs)

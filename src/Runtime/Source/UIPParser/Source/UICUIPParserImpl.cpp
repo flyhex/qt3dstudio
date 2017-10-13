@@ -498,7 +498,7 @@ CUIPParserImpl::~CUIPParserImpl()
  */
 BOOL CUIPParserImpl::Load(IPresentation &inPresentation,
                           NVConstDataRef<SElementAttributeReference> inStateReferences,
-                          uic::state::debugger::ISceneGraphRuntimeDebugger &debugger)
+                          qt3ds::state::debugger::ISceneGraphRuntimeDebugger &debugger)
 {
     m_CurrentPresentation = &inPresentation;
     if (!m_DOMReader) {
@@ -573,13 +573,13 @@ BOOL CUIPParserImpl::Load(IPresentation &inPresentation,
 
     if (theLoadResult) {
         // Register all element ids with the debugger
-        eastl::vector<uic::state::debugger::SGElemIdMap> elemMapBuffer;
+        eastl::vector<qt3ds::state::debugger::SGElemIdMap> elemMapBuffer;
         for (TIdElementMap::iterator iter = m_ParseElementManager.m_ElementMap.begin(),
                                      end = m_ParseElementManager.m_ElementMap.end();
              iter != end; ++iter) {
             const SElementData &theData = iter->second;
             if (theData.m_Element) {
-                uic::state::debugger::SGElemIdMap mapEntry;
+                qt3ds::state::debugger::SGElemIdMap mapEntry;
                 mapEntry.m_Elem = theData.m_Element;
                 mapEntry.m_Id = iter->first.c_str();
                 elemMapBuffer.push_back(mapEntry);
@@ -705,8 +705,8 @@ inline RuntimeVector3 Convert(const QT3DSVec3 &input)
 {
     return RuntimeVector3(input.x, input.y, input.z);
 }
-using uic::runtime::element::SPropertyDesc;
-using uic::runtime::element::TPropertyDescAndValue;
+using qt3ds::runtime::element::SPropertyDesc;
+using qt3ds::runtime::element::TPropertyDescAndValue;
 
 void CUIPParserImpl::GetMetaAttribute(IPresentation &inPresentation,
                                       TPropertyDescAndValueList &outDescList, TStrType inType,
@@ -997,17 +997,17 @@ EElementType GetElementType(const char *inType)
  *	@return a flag indicating whether or not we successfully loaded the file
  */
 BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &inReader,
-                                    uic::runtime::element::SElement *inNewStyleParent)
+                                    qt3ds::runtime::element::SElement *inNewStyleParent)
 {
     IDOMReader::Scope __childScope(inReader);
     IScriptBridge *theScriptBridge = inPresentation.GetScriptBridge();
     IScriptBridge *theScriptBridgeQml = inPresentation.GetScriptBridgeQml();
 
     eastl::string theFileString;
-    uic::runtime::IApplication &theApp(inPresentation.GetApplication());
-    uic::runtime::IElementAllocator &theElemAllocator(theApp.GetElementAllocator());
+    qt3ds::runtime::IApplication &theApp(inPresentation.GetApplication());
+    qt3ds::runtime::IElementAllocator &theElemAllocator(theApp.GetElementAllocator());
     TPropertyDescAndValueList theProperties;
-    using uic::runtime::element::SPropertyDesc;
+    using qt3ds::runtime::element::SPropertyDesc;
     qt3ds::foundation::IStringTable &theStringTable(inPresentation.GetStringTable());
     // build out the graph.
     for (bool success = inReader.MoveToFirstChild(); success;
@@ -1098,7 +1098,7 @@ BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &i
                 (void)theNumAtts;
             }
         }
-        uic::runtime::element::SElement &theNewElem = theElemAllocator.CreateElement(
+        qt3ds::runtime::element::SElement &theNewElem = theElemAllocator.CreateElement(
             theStringTable.RegisterStr(theName.c_str()), theStringTable.RegisterStr(theType),
             theStringTable.RegisterStr(theElementData.m_Class.c_str()),
             toConstDataRef(theProperties.data(), (QT3DSU32)theProperties.size()), &inPresentation,
@@ -1603,7 +1603,7 @@ BOOL CUIPParserImpl::LoadState(IPresentation &inPresentation, SElement *inCompon
 
     eastl::string theSlideName = GetSlideName(inReader);
 
-    uic::runtime::SSlidePlayInformation thePlayMode = GetPlayMode(inReader);
+    qt3ds::runtime::SSlidePlayInformation thePlayMode = GetPlayMode(inReader);
     thePlayMode.m_PlayThroughTo = (QT3DSU8)GetPlayThroughTo(inSlideIndex, inReader);
     // Setup with the default value from the metadata
     INT32 theMinTime = m_MetaData.GetPropertyValueLong(m_MetaData.Register("Asset"),
@@ -1811,11 +1811,11 @@ void CUIPParserImpl::DoRefSectionCount(UICDM::IDOMReader &inReader, INT32 inNumS
     outLogicCounter.m_PaddingCount += inNumSlideMultiplier;
 }
 
-uic::runtime::SSlidePlayInformation CUIPParserImpl::GetPlayMode(UICDM::IDOMReader &inReader)
+qt3ds::runtime::SSlidePlayInformation CUIPParserImpl::GetPlayMode(UICDM::IDOMReader &inReader)
 {
-    using uic::runtime::PlayMode;
+    using qt3ds::runtime::PlayMode;
 
-    uic::runtime::SSlidePlayInformation thePlayInformation;
+    qt3ds::runtime::SSlidePlayInformation thePlayInformation;
     // Setup with the default value from the metadata
     eastl::string thePlayMode = m_MetaData.GetPropertyValueString(m_MetaData.Register("Slide"),
                                                                   m_MetaData.Register("playmode"));
@@ -1984,7 +1984,7 @@ BOOL CUIPParserImpl::LoadSlideElements(IPresentation &inPresentation, UICDM::IDO
                     theActionIdStr.assign(theActionEntry.m_ActionId.c_str());
                     qt3ds::QT3DSI32 theActionIndex = m_ActionHelper->GetActionIndex(theActionIdStr);
                     for (qt3ds::QT3DSI32 idx = 0; idx < theActionEntry.m_ActionCount; ++idx) {
-                        uic::runtime::SSlideAnimAction *theSlideData =
+                        qt3ds::runtime::SSlideAnimAction *theSlideData =
                             theBuilder.AddSlideAnimAction(false, theActionIndex + idx,
                                                           theActionEntry.m_Active
                                                               && canActivateFlag);

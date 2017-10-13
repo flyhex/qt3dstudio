@@ -149,7 +149,7 @@ struct ScopedBoolean
     ~ScopedBoolean() { m_Value = !m_Value; }
 };
 
-typedef qt3ds::foundation::NVScopedRefCounted<uic::render::IInputStreamFactory> TStreamFactoryPtr;
+typedef qt3ds::foundation::NVScopedRefCounted<qt3ds::render::IInputStreamFactory> TStreamFactoryPtr;
 
 struct SImportXmlErrorHandler : public CXmlErrorHandler
 {
@@ -220,7 +220,7 @@ public:
         , m_IgnoreDirChange(false)
         , m_StringTable(m_DataCore.GetStringTable())
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
-        , m_InputStreamFactory(uic::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
+        , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
         , m_LuaState(NULL)
 
     {
@@ -3094,7 +3094,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<UICDM::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                uic::render::IInputStreamFactory &inInputStreamFactory) = 0;
+                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) = 0;
     };
 
     virtual TInstanceHandle LoadDynamicInstance(const Q3DStudio::CString &inFullPathToDocument,
@@ -3184,7 +3184,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<UICDM::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                uic::render::IInputStreamFactory &inInputStreamFactory) override
+                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) override
         {
             return IDocumentEditor::ParseLuaFile(inFullPathToDocument, inStringTable, inHandler,
                                                  inInputStreamFactory);
@@ -3213,7 +3213,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<UICDM::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                uic::render::IInputStreamFactory &inInputStreamFactory) override
+                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) override
         {
             return IDocumentEditor::ParseScriptFile(inFullPathToDocument, inStringTable, inHandler,
                                                     inInputStreamFactory);
@@ -3259,7 +3259,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<UICDM::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                uic::render::IInputStreamFactory &inInputStreamFactory) override
+                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) override
         {
             return IDocumentEditor::ParsePluginFile(inFullPathToDocument, inStringTable, inHandler,
                                                     inInputStreamFactory);
@@ -3380,7 +3380,7 @@ public:
 
                 std::vector<SMetaDataLoadWarning> theWarnings;
                 QString shaderFile = QString::fromWCharArray(theShaderFile);
-                NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream(
+                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(shaderFile));
                 (m_MetaData.*inLoader)(m_StringTable.GetNarrowStr(theRelativePath),
                                        theParentInstance,
@@ -4231,7 +4231,7 @@ public:
         theLoadedBuffer->Free(m_Foundation.m_Foundation->getAllocator());
     }
 
-    void ReplaceTextFontNameWithTextFileStem(uic::render::ITextRenderer &inRenderer) override
+    void ReplaceTextFontNameWithTextFileStem(qt3ds::render::ITextRenderer &inRenderer) override
     {
         TInstanceHandleList theTextInstances;
         m_DataCore.GetInstancesDerivedFrom(theTextInstances, m_Bridge.GetText().m_Instance);
@@ -4567,7 +4567,7 @@ public:
                        && theInstances.empty() == false) {
                 CString theNameStr = GetName(theInstances[0].second);
                 std::vector<SMetaDataLoadWarning> theWarnings;
-                NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream(
+                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(
                         QString::fromWCharArray(theRecord.m_File)));
                 if (theStream) {
@@ -4720,7 +4720,7 @@ std::shared_ptr<IDOMReader>
 IDocumentEditor::ParseLuaFile(const CFilePath &inFullPathToDocument,
                               std::shared_ptr<UICDM::IStringTable> inStringTable,
                               std::shared_ptr<IImportFailedHandler> inHandler,
-                              uic::render::IInputStreamFactory &inInputStreamFactory)
+                              qt3ds::render::IInputStreamFactory &inInputStreamFactory)
 {
     using namespace LuaParser;
     std::shared_ptr<UICDM::IStringTable> theStringTable(inStringTable);
@@ -4744,7 +4744,7 @@ std::shared_ptr<IDOMReader>
 IDocumentEditor::ParseScriptFile(const CFilePath &inFullPathToDocument,
                                  std::shared_ptr<UICDM::IStringTable> inStringTable,
                                  std::shared_ptr<IImportFailedHandler> inHandler,
-                                 uic::render::IInputStreamFactory &inInputStreamFactory)
+                                 qt3ds::render::IInputStreamFactory &inInputStreamFactory)
 {
     using namespace ScriptParser;
     std::shared_ptr<UICDM::IStringTable> theStringTable(inStringTable);
@@ -4770,7 +4770,7 @@ std::shared_ptr<IDOMReader>
 IDocumentEditor::ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                                  std::shared_ptr<UICDM::IStringTable> inStringTable,
                                  std::shared_ptr<IImportFailedHandler> inHandler,
-                                 uic::render::IInputStreamFactory &inInputStreamFactory)
+                                 qt3ds::render::IInputStreamFactory &inInputStreamFactory)
 {
     std::shared_ptr<UICDM::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
@@ -4794,7 +4794,7 @@ std::shared_ptr<IDOMReader>
 IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                                          std::shared_ptr<UICDM::IStringTable> inStringTable,
                                          std::shared_ptr<IImportFailedHandler> inHandler,
-                                         uic::render::IInputStreamFactory &inInputStreamFactory)
+                                         qt3ds::render::IInputStreamFactory &inInputStreamFactory)
 {
     std::shared_ptr<UICDM::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));

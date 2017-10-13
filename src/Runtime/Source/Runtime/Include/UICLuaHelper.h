@@ -41,7 +41,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
 }
@@ -68,11 +68,11 @@ private: // Constructors
 public: // Lua Global Functions
     static UINT8 GetArgument(lua_State *inLuaState, INT32 inIndex, UVariant &outValue,
                              qt3ds::foundation::IStringTable &strTable,
-                             uic::runtime::IApplication &application);
+                             qt3ds::runtime::IApplication &application);
 
     static INT32 PushArgument(lua_State *inLuaState, const UINT8 inType, UVariant &inValue,
                               qt3ds::foundation::IStringTable &strTable,
-                              uic::runtime::IApplication &application);
+                              qt3ds::runtime::IApplication &application);
 };
 
 } // namespace Q3DStudio

@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSIndexableLinkedList.h"
 #include "foundation/SerializationTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
 
     template <typename TListType, typename TNodeType>

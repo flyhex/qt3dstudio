@@ -46,7 +46,7 @@ class CInputEngine;
 class IAudioPlayer;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 namespace debugger {
 class IDebugger;
@@ -55,7 +55,7 @@ class ISceneGraphRuntimeDebugger;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 class UICAssetVisitor;
 namespace runtime {
 using namespace qt3ds::foundation;
@@ -110,8 +110,8 @@ public:
     virtual Q3DStudio::IRuntimeFactoryCore &GetRuntimeFactoryCore() = 0;
     virtual void HideFPS(bool flag) = 0;
 
-    virtual uic::state::debugger::ISceneGraphRuntimeDebugger &GetSceneGraphDebugger() = 0;
-    virtual uic::state::debugger::IDebugger &GetStateDebugger() = 0;
+    virtual qt3ds::state::debugger::ISceneGraphRuntimeDebugger &GetSceneGraphDebugger() = 0;
+    virtual qt3ds::state::debugger::IDebugger &GetStateDebugger() = 0;
     virtual IActivityZoneManager &GetActivityZoneManager() = 0;
     virtual IElementAllocator &GetElementAllocator() = 0;
 
@@ -140,7 +140,7 @@ public:
     // Runs any queued runnables.
     virtual bool HasCompletedLoading() = 0;
 
-    virtual void setAssetVisitor(uic::UICAssetVisitor *) = 0;
+    virtual void setAssetVisitor(qt3ds::UICAssetVisitor *) = 0;
 
     // will force loading to end if endLoad hasn't been called yet.  Will fire off loading
     // of resources that need to be uploaded to opengl.  Maintains reference to runtime factory

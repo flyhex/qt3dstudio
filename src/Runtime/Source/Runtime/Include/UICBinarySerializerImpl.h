@@ -36,7 +36,7 @@
 #include "UICBinarySerializer.h"
 #include "foundation/Qt3DSFoundation.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IAnimationSystem;
     class ISlideSystem;

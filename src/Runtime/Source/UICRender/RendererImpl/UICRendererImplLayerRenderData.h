@@ -34,7 +34,7 @@
 #include "UICRendererImplLayerRenderPreparationData.h"
 #include "UICRenderResourceBufferObjects.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
 struct AdvancedBlendModes

@@ -36,7 +36,7 @@
 
 #include <QtCore/qstring.h>
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     // So far the generator is only useful for graphics stages,
     // it doesn't seem useful for compute stages.

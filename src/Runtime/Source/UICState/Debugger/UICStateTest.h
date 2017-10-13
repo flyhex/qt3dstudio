@@ -33,7 +33,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSOption.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace test {
 

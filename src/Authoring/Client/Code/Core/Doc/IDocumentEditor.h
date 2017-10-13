@@ -61,7 +61,7 @@ namespace UICIMP {
 struct STranslationLog;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IInputStreamFactory;
     class ITextRenderer;
@@ -389,7 +389,7 @@ public:
     // Absolute path to the file.
     virtual void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) = 0;
 
-    virtual void ReplaceTextFontNameWithTextFileStem(uic::render::ITextRenderer &inRenderer) = 0;
+    virtual void ReplaceTextFontNameWithTextFileStem(qt3ds::render::ITextRenderer &inRenderer) = 0;
 
     virtual void ExternalizePath(TInstanceHandle path) = 0;
     virtual void InternalizePath(TInstanceHandle path) = 0;
@@ -398,25 +398,25 @@ public:
     ParseLuaFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                  std::shared_ptr<UICDM::IStringTable> inStringTable,
                  std::shared_ptr<IImportFailedHandler> inHandler,
-                 uic::render::IInputStreamFactory &inInputStreamFactory);
+                 qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                     std::shared_ptr<UICDM::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
-                    uic::render::IInputStreamFactory &inInputStreamFactory);
+                    qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                     std::shared_ptr<UICDM::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
-                    uic::render::IInputStreamFactory &inInputStreamFactory);
+                    qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                             std::shared_ptr<UICDM::IStringTable> inStringTable,
                             std::shared_ptr<IImportFailedHandler> inHandler,
-                            uic::render::IInputStreamFactory &inInputStreamFactory);
+                            qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static void DisplayImportErrors(const QString &inImportSource,
                                     UICIMP::ImportErrorCodes::Enum inImportError,

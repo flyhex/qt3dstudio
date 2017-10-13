@@ -36,7 +36,7 @@
 #include "foundation/Qt3DSMat33.h"
 #include "foundation/Qt3DSOption.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // Vector graphics with no scaling are pixel aligned with 0,0 being the bottom,left of the

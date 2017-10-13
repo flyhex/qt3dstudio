@@ -37,7 +37,7 @@
 #include "UICRenderImageTextureData.h"
 #include "foundation/Qt3DSBounds3.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class IBufferManager : public NVRefCounted

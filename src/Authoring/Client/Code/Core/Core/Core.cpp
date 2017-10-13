@@ -253,7 +253,7 @@ void CCore::OnNewDocument(const CUICFile &inDocument, bool inCreateDirectory)
 
 #ifdef DRIVE_DESIGN_STUDIO
     // Update the uia file if possible.
-    uic::state::IApplication::EnsureApplicationFile(theDocument.GetCharStar(), QStringList());
+    qt3ds::state::IApplication::EnsureApplicationFile(theDocument.GetCharStar(), QStringList());
 #endif
 }
 

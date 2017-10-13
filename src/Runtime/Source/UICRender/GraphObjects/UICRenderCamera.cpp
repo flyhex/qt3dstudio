@@ -37,7 +37,7 @@
 #include <Windows.h>
 */
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 
@@ -325,7 +325,7 @@ void SCamera::LookAt(const QT3DSVec3 &inCameraPos, const QT3DSVec3 &inUpDir, con
         theDirection.z *= -1.0f;
     m_Rotation = GetRotationVectorFromRotationMatrix(GetLookAtMatrix(inUpDir, theDirection));
     m_Position = inCameraPos;
-    MarkDirty(uic::render::NodeTransformDirtyFlag::TransformIsDirty);
+    MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
 }
 
 void SCamera::CalculateViewProjectionMatrix(QT3DSMat44 &outMatrix) const

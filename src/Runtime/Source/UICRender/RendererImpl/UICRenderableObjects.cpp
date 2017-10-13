@@ -38,7 +38,7 @@
 
 using qt3ds::foundation::CRegisteredString;
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SRenderableImage;
     struct SShaderGeneratorGeneratedShader;

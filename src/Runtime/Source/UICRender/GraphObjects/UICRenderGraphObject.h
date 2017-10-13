@@ -34,7 +34,7 @@
 #include "UICRenderTaggedPointer.h"
 #include "UICRenderGraphObjectTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // Types should be setup on construction.  Change the type

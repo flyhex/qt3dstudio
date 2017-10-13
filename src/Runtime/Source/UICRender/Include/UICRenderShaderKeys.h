@@ -39,7 +39,7 @@
 #include "UICRenderTessModeValues.h"
 #include "render/Qt3DSRenderBaseTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     // We have an ever expanding set of properties we like to hash into one or more 32 bit
     // quantities.
@@ -503,15 +503,15 @@ namespace render {
         }
 
         void SetSpecularModel(NVDataRef<QT3DSU32> inKeySet,
-                              uic::render::DefaultMaterialSpecularModel::Enum inModel)
+                              qt3ds::render::DefaultMaterialSpecularModel::Enum inModel)
         {
             SetValue(inKeySet, (QT3DSU32)inModel);
         }
 
-        uic::render::DefaultMaterialSpecularModel::Enum
+        qt3ds::render::DefaultMaterialSpecularModel::Enum
         GetSpecularModel(NVConstDataRef<QT3DSU32> inKeySet) const
         {
-            return static_cast<uic::render::DefaultMaterialSpecularModel::Enum>(GetValue(inKeySet));
+            return static_cast<qt3ds::render::DefaultMaterialSpecularModel::Enum>(GetValue(inKeySet));
         }
 
         void ToString(eastl::string &ioStr, NVConstDataRef<QT3DSU32> inKeySet) const
@@ -784,9 +784,9 @@ namespace render {
 
 namespace eastl {
 template <>
-struct hash<uic::render::SShaderDefaultMaterialKey>
+struct hash<qt3ds::render::SShaderDefaultMaterialKey>
 {
-    size_t operator()(const uic::render::SShaderDefaultMaterialKey &key) const
+    size_t operator()(const qt3ds::render::SShaderDefaultMaterialKey &key) const
     {
         return key.hash();
     }

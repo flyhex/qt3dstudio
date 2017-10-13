@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include "foundation/Qt3DSFlags.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // forward declararion

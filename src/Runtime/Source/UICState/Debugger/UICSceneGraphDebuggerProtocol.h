@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "foundation/SerializationTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
 

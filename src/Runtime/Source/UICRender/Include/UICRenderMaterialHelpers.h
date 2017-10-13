@@ -34,7 +34,7 @@
 #include "UICRenderDefaultMaterial.h"
 #include "UICRenderReferencedMaterial.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     inline bool IsMaterial(SGraphObject &obj)

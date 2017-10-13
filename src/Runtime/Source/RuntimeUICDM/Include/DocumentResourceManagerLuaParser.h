@@ -190,14 +190,14 @@ namespace LuaParser {
         ParseLuaFile(std::shared_ptr<IDOMFactory> inFactory,
                      std::shared_ptr<UICDM::IStringTable> inStringTable,
                      const char8_t *inFileData, CXmlErrorHandler &inErrorHandler,
-                     uic::render::IInputStreamFactory &inStreamFactory)
+                     qt3ds::render::IInputStreamFactory &inStreamFactory)
         {
             eastl::vector<QT3DSU8> readBuf;
             {
                 using namespace qt3ds;
                 using namespace qt3ds::foundation;
                 eastl::string strConvert;
-                NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream(
+                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
                     inStreamFactory.GetStreamForFile(inFileData));
                 if (!theStream) {
                     QT3DS_ASSERT(0);

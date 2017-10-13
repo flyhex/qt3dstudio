@@ -83,11 +83,11 @@
 #include <QtCore/qlibraryinfo.h>
 #include <QtCore/qpair.h>
 
-using namespace uic;
-using namespace uic::runtime;
+using namespace qt3ds;
+using namespace qt3ds::runtime;
 using namespace Q3DStudio;
-using uic::state::debugger::ISceneGraphRuntimeDebugger;
-using uic::state::debugger::SSGPropertyChange;
+using qt3ds::state::debugger::ISceneGraphRuntimeDebugger;
+using qt3ds::state::debugger::SSGPropertyChange;
 
 namespace qt3ds {
 namespace foundation {
@@ -228,10 +228,10 @@ public:
     virtual void OnGraphicsInitialized(IRuntimeFactory &inFactory) = 0;
     virtual bool HasCompletedLoading() = 0;
     static IAppLoadContext &CreateXMLLoadContext(
-            SApp &inApp, NVConstDataRef<uic::state::SElementReference> inStateReferences,
+            SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
             const char8_t *inScaleMode);
     static IAppLoadContext &CreateBinaryLoadContext(SApp &inApp,
-                                                    uic::render::ScaleModes::Enum inScaleMode,
+                                                    qt3ds::render::ScaleModes::Enum inScaleMode,
                                                     NVDataRef<QT3DSU8> inStrTableData);
 };
 
@@ -452,8 +452,8 @@ struct SApp : public IApplication
     nvvector<eastl::pair<SBehaviorAsset, bool>> m_Behaviors;
     NVScopedRefCounted<SocketSystem> m_SocketSystem;
     NVScopedRefCounted<SocketStream> m_ServerStream;
-    NVScopedRefCounted<uic::state::debugger::IMultiProtocolSocket> m_ProtocolSocket;
-    NVScopedRefCounted<uic::state::debugger::IDebugger> m_StateDebugger;
+    NVScopedRefCounted<qt3ds::state::debugger::IMultiProtocolSocket> m_ProtocolSocket;
+    NVScopedRefCounted<qt3ds::state::debugger::IDebugger> m_StateDebugger;
     NVScopedRefCounted<ISceneGraphRuntimeDebugger> m_SceneGraphDebugger;
     NVScopedRefCounted<IActivityZoneManager> m_ActivityZoneManager;
     NVScopedRefCounted<IElementAllocator> m_ElementAllocator;
@@ -570,7 +570,7 @@ struct SApp : public IApplication
         }
     }
 
-    void setAssetVisitor(uic::UICAssetVisitor *v) override
+    void setAssetVisitor(qt3ds::UICAssetVisitor *v) override
     {
         m_visitor = v;
     }
@@ -911,10 +911,10 @@ struct SApp : public IApplication
                     m_ChangeBuffer.push_back(SSGPropertyChange());
                     QT3DSI32 active = theElement.GetActive() ? 1 : 0;
                     m_ChangeBuffer.back().m_Hash = CHash::HashAttribute("active");
-                    m_ChangeBuffer.back().m_Value = uic::state::debugger::SSGValue(active);
+                    m_ChangeBuffer.back().m_Value = qt3ds::state::debugger::SSGValue(active);
                     for (long attIdx = 0, attEnd = theElement.GetAttributeCount(); attIdx < attEnd;
                          ++attIdx) {
-                        Option<uic::runtime::element::TPropertyDescAndValuePtr> theValue =
+                        Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> theValue =
                                 theElement.GetPropertyByIndex(attIdx);
                         m_ChangeBuffer.push_back(SSGPropertyChange());
                         SSGPropertyChange &theChange(m_ChangeBuffer.back());
@@ -925,27 +925,27 @@ struct SApp : public IApplication
                         case ATTRIBUTETYPE_BOOL:
                         case ATTRIBUTETYPE_INT32:
                             theChange.m_Value =
-                                    uic::state::debugger::SSGValue(
+                                    qt3ds::state::debugger::SSGValue(
                                         (QT3DSI32)theValue->second->m_INT32);
                             break;
                         case ATTRIBUTETYPE_FLOAT:
                             theChange.m_Value =
-                                    uic::state::debugger::SSGValue(theValue->second->m_FLOAT);
+                                    qt3ds::state::debugger::SSGValue(theValue->second->m_FLOAT);
                             break;
                         case ATTRIBUTETYPE_STRING: {
                             CRegisteredString data = m_CoreFactory->GetStringTable().HandleToStr(
                                         theValue->second->m_StringHandle);
-                            theChange.m_Value = uic::state::debugger::SSGValue(data);
+                            theChange.m_Value = qt3ds::state::debugger::SSGValue(data);
                         } break;
                         case ATTRIBUTETYPE_POINTER: {
                             void *ptrVal = theValue->second->m_VoidPointer;
                             QT3DSU64 coercedVal = (QT3DSU64)ptrVal;
-                            theChange.m_Value = uic::state::debugger::SSGValue(coercedVal);
+                            theChange.m_Value = qt3ds::state::debugger::SSGValue(coercedVal);
                         } break;
                         case ATTRIBUTETYPE_ELEMENTREF: {
                             void *ptrVal = GetElementByHandle(theValue->second->m_ElementHandle);
                             QT3DSU64 coercedVal = (QT3DSU64)ptrVal;
-                            theChange.m_Value = uic::state::debugger::SSGValue(coercedVal);
+                            theChange.m_Value = qt3ds::state::debugger::SSGValue(coercedVal);
                         } break;
                         default:
                             QT3DS_ASSERT(false);
@@ -1048,7 +1048,7 @@ struct SApp : public IApplication
                                            theFile);
         // Check if the file event exists
         eastl::string fullPath;
-        NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream
+        NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream
                 = m_CoreFactory->GetUICRenderContextCore().GetInputStreamFactory().GetStreamForFile(
                     theFile.c_str());
         if (theStream) {
@@ -1096,7 +1096,7 @@ struct SApp : public IApplication
 
     bool LoadUIA(IDOMReader &inReader, NVFoundationBase &fnd)
     {
-        NVConstDataRef<uic::state::SElementReference> theStateReferences;
+        NVConstDataRef<qt3ds::state::SElementReference> theStateReferences;
         {
             IDOMReader::Scope __preparseScope(inReader);
             theStateReferences = m_CoreFactory->GetVisualStateContext().PreParseDocument(inReader);
@@ -1228,7 +1228,7 @@ struct SApp : public IApplication
             if (m_ServerStream) {
                 m_ServerStream->setTimeout(QT3DS_MAX_U32);
                 // This system declares protocols, we don't listen for new ones.
-                m_ProtocolSocket = uic::state::debugger::IMultiProtocolSocket::CreateProtocolSocket(
+                m_ProtocolSocket = qt3ds::state::debugger::IMultiProtocolSocket::CreateProtocolSocket(
                             fnd, *m_ServerStream, m_CoreFactory->GetStringTable(), NULL);
                 if (!m_ProtocolSocket->Initialize()) {
                     m_ProtocolSocket = NULL;
@@ -1239,7 +1239,7 @@ struct SApp : public IApplication
                               m_DebugSettings->m_Server.c_str(), m_DebugSettings->m_Port);
 
                 } else {
-                    using namespace uic::state::debugger;
+                    using namespace qt3ds::state::debugger;
                     theBridge.EnableDebugging(*m_ProtocolSocket);
                     NVScopedRefCounted<IMultiProtocolSocketStream> socketStream
                             = m_ProtocolSocket->CreateProtocol(
@@ -1306,7 +1306,7 @@ struct SApp : public IApplication
             RegisterAsset(SPresentationAsset(RegisterStr(filename.c_str()),
                                              RegisterStr(relativePath.c_str())));
             m_AppLoadContext = IAppLoadContext::CreateXMLLoadContext(
-                        *this, NVDataRef<uic::state::SElementReference>(), "");
+                        *this, NVDataRef<qt3ds::state::SElementReference>(), "");
 
             retval = true;
         } else if (extension.comparei("uia") == 0) {
@@ -1687,8 +1687,8 @@ struct SApp : public IApplication
             }
             QT3DSU32 theScaleMode = 0;
             theInStream.Read(&theScaleMode, 1);
-            uic::render::ScaleModes::Enum theProperScaleMode
-                    = static_cast<uic::render::ScaleModes::Enum>(theScaleMode);
+            qt3ds::render::ScaleModes::Enum theProperScaleMode
+                    = static_cast<qt3ds::render::ScaleModes::Enum>(theScaleMode);
             theInStream.Read(m_WatermarkCoordinates);
             m_UIAFileSettings.Load(theInStream);
 
@@ -1878,17 +1878,17 @@ struct SApp : public IApplication
         return *m_MetaData;
     }
 
-    uic::state::debugger::IDebugger &GetStateDebugger() override
+    qt3ds::state::debugger::IDebugger &GetStateDebugger() override
     {
         if (!m_StateDebugger)
-            m_StateDebugger = uic::state::debugger::IDebugger::CreateDebugger();
+            m_StateDebugger = qt3ds::state::debugger::IDebugger::CreateDebugger();
         return *m_StateDebugger;
     }
 
-    uic::state::debugger::ISceneGraphRuntimeDebugger &GetSceneGraphDebugger() override
+    qt3ds::state::debugger::ISceneGraphRuntimeDebugger &GetSceneGraphDebugger() override
     {
         if (!m_SceneGraphDebugger)
-            m_SceneGraphDebugger = uic::state::debugger::ISceneGraphRuntimeDebugger::Create(
+            m_SceneGraphDebugger = qt3ds::state::debugger::ISceneGraphRuntimeDebugger::Create(
                         m_CoreFactory->GetFoundation(), m_CoreFactory->GetStringTable());
         return *m_SceneGraphDebugger;
     }
@@ -1912,10 +1912,10 @@ struct SXMLLoader : public IAppLoadContext
 {
     SApp &m_App;
     eastl::string m_ScaleMode;
-    eastl::vector<uic::state::SElementReference> m_References;
+    eastl::vector<qt3ds::state::SElementReference> m_References;
     QT3DSI32 mRefCount;
 
-    SXMLLoader(SApp &inApp, const char8_t *sc, NVConstDataRef<uic::state::SElementReference> refs)
+    SXMLLoader(SApp &inApp, const char8_t *sc, NVConstDataRef<qt3ds::state::SElementReference> refs)
         : m_App(inApp)
         , m_ScaleMode(nonNull(sc))
         , mRefCount(0)
@@ -1999,11 +1999,11 @@ struct SXMLLoader : public IAppLoadContext
             const char8_t *initialScaleMode(m_ScaleMode.c_str());
             // Force loading to finish here, just like used to happen.
             if (AreEqual(initialScaleMode, "center")) {
-                inFactory.GetUICRenderContext().SetScaleMode(uic::render::ScaleModes::ExactSize);
+                inFactory.GetUICRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
             } else if (AreEqual(initialScaleMode, "fit")) {
-                inFactory.GetUICRenderContext().SetScaleMode(uic::render::ScaleModes::ScaleToFit);
+                inFactory.GetUICRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ScaleToFit);
             } else if (AreEqual(initialScaleMode, "fill")) {
-                inFactory.GetUICRenderContext().SetScaleMode(uic::render::ScaleModes::ScaleToFill);
+                inFactory.GetUICRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ScaleToFill);
             } else {
                 qCCritical(INVALID_PARAMETER, "Unrecognized scale mode attribute value: ",
                            initialScaleMode);
@@ -2063,7 +2063,7 @@ struct SLoadingPresentation
 
 typedef NVDataRef<SLoadingPresentation> TLoadingPresentationBuffer;
 
-struct SUIBLoadedCallback : public uic::render::IBufferLoaderCallback
+struct SUIBLoadedCallback : public qt3ds::render::IBufferLoaderCallback
 {
     SApp &m_App;
     TLoadingPresentationBuffer m_LoadingPresentations;
@@ -2103,7 +2103,7 @@ struct SUIBLoadedCallback : public uic::render::IBufferLoaderCallback
             SetPresentation(*theChild, inPresentation);
     }
 
-    void OnBufferLoaded(uic::render::ILoadedBuffer &inBuffer) override
+    void OnBufferLoaded(qt3ds::render::ILoadedBuffer &inBuffer) override
     {
         eastl::pair<SLoadingPresentation *, QT3DSU32> theBufferData = FindBuffer(inBuffer.Path());
         SLoadingPresentation *theLoadingPresentation = theBufferData.first;
@@ -2163,7 +2163,7 @@ struct SUIBLoadedCallback : public uic::render::IBufferLoaderCallback
     void OnBufferLoadCancelled(CRegisteredString inPath) override { SetFailCondition(inPath); }
 };
 
-struct SUIBSGLoadedCallback : public uic::render::IBufferLoaderCallback
+struct SUIBSGLoadedCallback : public qt3ds::render::IBufferLoaderCallback
 {
     SApp &m_App;
     TLoadingPresentationBuffer m_LoadingPresentations;
@@ -2194,7 +2194,7 @@ struct SUIBSGLoadedCallback : public uic::render::IBufferLoaderCallback
         return eastl::make_pair(theLoadingPresentation, theLoadBufferIdx - 1);
     }
 
-    void OnBufferLoaded(uic::render::ILoadedBuffer &inBuffer) override
+    void OnBufferLoaded(qt3ds::render::ILoadedBuffer &inBuffer) override
     {
         SLoadingPresentation *theLoadingPresentation = FindBuffer(inBuffer.Path()).first;
 
@@ -2223,7 +2223,7 @@ struct SUIBSGLoadedCallback : public uic::render::IBufferLoaderCallback
 struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
 {
     SApp &m_App;
-    uic::render::ScaleModes::Enum m_ScaleMode;
+    qt3ds::render::ScaleModes::Enum m_ScaleMode;
     Mutex m_PresentationInitMutex;
     NVScopedRefCounted<SUIBLoadedCallback> m_UIBCallback;
     NVScopedRefCounted<SUIBSGLoadedCallback> m_UIBSGCallback;
@@ -2232,7 +2232,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
     SStackPerfTimer *m_OfflineLoadTimer;
     QT3DSI32 mRefCount;
 
-    SBinaryLoader(SApp &app, uic::render::ScaleModes::Enum sc, NVDataRef<QT3DSU8> inStringTableData)
+    SBinaryLoader(SApp &app, qt3ds::render::ScaleModes::Enum sc, NVDataRef<QT3DSU8> inStringTableData)
         : m_App(app)
         , m_ScaleMode(sc)
         , m_PresentationInitMutex(app.m_CoreFactory->GetFoundation().getAllocator())
@@ -2241,7 +2241,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
               new SStackPerfTimer(app.m_CoreFactory->GetPerfTimer(), "Binary Offline Load"))
         , mRefCount(0)
     {
-        using uic::render::IBufferLoader;
+        using qt3ds::render::IBufferLoader;
         IBufferLoader &theLoader(m_App.m_CoreFactory->GetUICRenderContextCore().GetBufferLoader());
         eastl::string fullpath, directory, filename, extension, sceneGraphPath, presentationPath;
         IStringTable &theStringTable(m_App.m_CoreFactory->GetStringTable());
@@ -2297,7 +2297,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
 
     ~SBinaryLoader()
     {
-        using uic::render::IBufferLoader;
+        using qt3ds::render::IBufferLoader;
         NVFoundationBase &theBase = m_App.m_CoreFactory->GetUICRenderContextCore().GetFoundation();
         IBufferLoader &theLoader(m_App.m_CoreFactory->GetUICRenderContextCore().GetBufferLoader());
         (void)theBase;
@@ -2341,7 +2341,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
 
     void EndLoad() override
     {
-        using uic::render::IBufferLoader;
+        using qt3ds::render::IBufferLoader;
         IBufferLoader &theLoader(m_App.m_CoreFactory->GetUICRenderContextCore().GetBufferLoader());
         while (theLoader.WillLoadedBuffersBeAvailable())
             theLoader.NextLoadedBuffer();
@@ -2436,7 +2436,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
 };
 
 IAppLoadContext &IAppLoadContext::CreateXMLLoadContext(
-        SApp &inApp, NVConstDataRef<uic::state::SElementReference> inStateReferences,
+        SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
         const char8_t *inScaleMode)
 {
     return *QT3DS_NEW(inApp.m_CoreFactory->GetFoundation().getAllocator(),
@@ -2444,7 +2444,7 @@ IAppLoadContext &IAppLoadContext::CreateXMLLoadContext(
 }
 
 IAppLoadContext &IAppLoadContext::CreateBinaryLoadContext(SApp &inApp,
-                                                          uic::render::ScaleModes::Enum inScaleMode,
+                                                          qt3ds::render::ScaleModes::Enum inScaleMode,
                                                           NVDataRef<QT3DSU8> inStrTableData)
 {
     return *QT3DS_NEW(inApp.m_CoreFactory->GetFoundation().getAllocator(),

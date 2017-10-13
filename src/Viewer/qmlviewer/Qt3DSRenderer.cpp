@@ -46,7 +46,7 @@ using namespace UICViewer;
 
 QT_BEGIN_NAMESPACE
 
-Q3DSRenderer::Q3DSRenderer(bool visibleFlag, uic::UICAssetVisitor *assetVisitor)
+Q3DSRenderer::Q3DSRenderer(bool visibleFlag, qt3ds::UICAssetVisitor *assetVisitor)
     : m_visibleFlag(visibleFlag)
     , m_initElements(false)
     , m_runtime(0)

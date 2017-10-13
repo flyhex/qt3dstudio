@@ -56,7 +56,7 @@
 
 #include <string>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace qt3ds {
 namespace render {
@@ -134,7 +134,7 @@ bool Qt3DSRenderTestEffectGenerator::run(NVRenderContext *context, userContextDa
                             metadata()->GetEffectMetaDataBySourcePath(cname);
 
         if (metaEffect.hasValue()) {
-            uic::render::IUIPLoader::CreateEffectClassFromMetaEffect(
+            qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
                 name, context->GetFoundation(),
                 uicRenderer()->GetUICContext().GetEffectSystem(), *metaEffect,
                 context->GetStringTable());

@@ -33,10 +33,10 @@
 #include "UICStateDebugger.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
-        using namespace uic::state::editor;
+        using namespace qt3ds::state::editor;
 
         // Force compile error if unsupported datatype requested
         template <typename TDataType>
@@ -504,34 +504,34 @@ namespace state {
 namespace qt3ds {
 namespace foundation {
     template <>
-    struct DestructTraits<uic::state::debugger::SNil>
+    struct DestructTraits<qt3ds::state::debugger::SNil>
     {
-        void destruct(uic::state::debugger::SNil &) {}
+        void destruct(qt3ds::state::debugger::SNil &) {}
     };
     template <>
-    struct DestructTraits<uic::state::debugger::SDatamodelTable *>
+    struct DestructTraits<qt3ds::state::debugger::SDatamodelTable *>
     {
-        void destruct(uic::state::debugger::SDatamodelTable *) {}
+        void destruct(qt3ds::state::debugger::SDatamodelTable *) {}
     };
     template <>
-    struct DestructTraits<uic::state::debugger::SDatamodelUserData *>
+    struct DestructTraits<qt3ds::state::debugger::SDatamodelUserData *>
     {
-        void destruct(uic::state::debugger::SDatamodelUserData *) {}
+        void destruct(qt3ds::state::debugger::SDatamodelUserData *) {}
     };
     template <>
-    struct DestructTraits<uic::state::debugger::SDatamodelFunction *>
+    struct DestructTraits<qt3ds::state::debugger::SDatamodelFunction *>
     {
-        void destruct(uic::state::debugger::SDatamodelFunction *) {}
+        void destruct(qt3ds::state::debugger::SDatamodelFunction *) {}
     };
     template <>
-    struct DestructTraits<uic::state::debugger::SDatamodelCFunction *>
+    struct DestructTraits<qt3ds::state::debugger::SDatamodelCFunction *>
     {
-        void destruct(uic::state::debugger::SDatamodelCFunction *) {}
+        void destruct(qt3ds::state::debugger::SDatamodelCFunction *) {}
     };
     template <>
-    struct DestructTraits<uic::state::debugger::SDatamodelThread *>
+    struct DestructTraits<qt3ds::state::debugger::SDatamodelThread *>
     {
-        void destruct(uic::state::debugger::SDatamodelThread *) {}
+        void destruct(qt3ds::state::debugger::SDatamodelThread *) {}
     };
 }
 }

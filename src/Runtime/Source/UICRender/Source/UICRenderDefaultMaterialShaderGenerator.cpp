@@ -42,7 +42,7 @@
 #include "UICRenderDynamicObjectSystem.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using qt3ds::render::NVRenderCachedShaderProperty;
 using qt3ds::render::NVRenderCachedShaderBuffer;
 
@@ -1818,8 +1818,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
         shader.m_AOTexture.Set(inSSaoTexture);
 
-        uic::render::SImage *theLightProbe = inLightProbe;
-        uic::render::SImage *theLightProbe2 = inLightProbe2;
+        qt3ds::render::SImage *theLightProbe = inLightProbe;
+        qt3ds::render::SImage *theLightProbe2 = inLightProbe2;
 
         // If the material has its own IBL Override, we should use that image instead.
         if ((inMaterial.m_IblProbe) && (inMaterial.m_IblProbe->m_TextureData.m_Texture)) {

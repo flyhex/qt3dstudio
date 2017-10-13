@@ -32,7 +32,7 @@
 #define EVENT_POLLING_SYSTEM_LUA_BINDING_H
 struct lua_State;
 
-namespace uic {
+namespace qt3ds {
 namespace evt {
 
     class IEventSystem;

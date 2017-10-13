@@ -42,7 +42,7 @@
 #include "UICRenderCustomMaterial.h"
 #include "UICRenderCustomMaterialSystem.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using qt3ds::render::NVRenderCachedShaderProperty;
 using qt3ds::render::NVRenderCachedShaderBuffer;
 
@@ -659,8 +659,8 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         theShader.m_DepthTexture.Set(inDepthTexture);
         theShader.m_AOTexture.Set(inSSaoTexture);
 
-        uic::render::SImage *theLightProbe = inLightProbe;
-        uic::render::SImage *theLightProbe2 = inLightProbe2;
+        qt3ds::render::SImage *theLightProbe = inLightProbe;
+        qt3ds::render::SImage *theLightProbe2 = inLightProbe2;
 
         if (inMaterial.m_IblProbe && inMaterial.m_IblProbe->m_TextureData.m_Texture) {
             theLightProbe = inMaterial.m_IblProbe;
@@ -914,7 +914,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
     void GenerateFragmentShader(SShaderDefaultMaterialKey &, const char8_t *inShaderPathName)
     {
-        uic::render::IDynamicObjectSystem &theDynamicSystem(
+        qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
             m_RenderContext.GetDynamicObjectSystem());
         CRenderString theShaderBuffer;
         const char8_t *fragSource = theDynamicSystem.GetShaderSource(

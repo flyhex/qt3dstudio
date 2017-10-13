@@ -36,7 +36,7 @@
 #include "foundation/Qt3DSTime.h"
 
 // Stream protocol, regardless of binary vs. text.
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
 

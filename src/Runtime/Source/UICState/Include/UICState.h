@@ -50,7 +50,7 @@ namespace intrinsics {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     using namespace qt3ds;

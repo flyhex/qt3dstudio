@@ -33,7 +33,7 @@
 #include "UICState.h"
 #include "foundation/StringTable.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     struct VisualStateCommandTypes

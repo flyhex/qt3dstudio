@@ -39,7 +39,7 @@
 #include "UICTextRenderer.h"
 #include <QImage>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SLoadedTexture *SLoadedTexture::LoadQImage(const QString &inPath, QT3DSI32 flipVertical,
                                            NVFoundationBase &fnd)

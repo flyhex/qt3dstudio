@@ -68,7 +68,7 @@ CLuaHelper::~CLuaHelper()
  */
 INT32 CLuaHelper::PushArgument(lua_State *inLuaState, const UINT8 inType, UVariant &inValue,
                                qt3ds::foundation::IStringTable &strTable,
-                               uic::runtime::IApplication &application)
+                               qt3ds::runtime::IApplication &application)
 {
     INT32 theResult = 1;
 
@@ -121,7 +121,7 @@ INT32 CLuaHelper::PushArgument(lua_State *inLuaState, const UINT8 inType, UVaria
  *	@return the type of the argument that is retrieved
  */
 UINT8 CLuaHelper::GetArgument(lua_State *inLuaState, INT32 inIndex, UVariant &outValue,
-                              qt3ds::foundation::IStringTable &strTable, uic::runtime::IApplication &)
+                              qt3ds::foundation::IStringTable &strTable, qt3ds::runtime::IApplication &)
 {
     UINT8 theType = ATTRIBUTETYPE_NONE;
     switch (lua_type(inLuaState, inIndex)) {

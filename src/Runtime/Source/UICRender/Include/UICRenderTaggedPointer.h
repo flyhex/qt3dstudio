@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include "foundation/StringTable.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // User's will need to define specialize this struct in order

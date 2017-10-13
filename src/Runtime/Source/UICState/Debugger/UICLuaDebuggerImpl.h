@@ -34,9 +34,9 @@
 
 namespace eastl {
 template <>
-struct hash<uic::state::debugger::SFileAndLine>
+struct hash<qt3ds::state::debugger::SFileAndLine>
 {
-    size_t operator()(const uic::state::debugger::SFileAndLine &data) const
+    size_t operator()(const qt3ds::state::debugger::SFileAndLine &data) const
     {
         return hash<qt3ds::foundation::CRegisteredString>()(data.m_File)
             ^ hash<qt3ds::QT3DSU32>()(data.m_Line);

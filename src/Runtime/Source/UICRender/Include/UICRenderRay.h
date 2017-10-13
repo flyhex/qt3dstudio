@@ -38,7 +38,7 @@
 #include "foundation/Qt3DSMat44.h"
 #include "foundation/Qt3DSBounds3.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SBasisPlanes

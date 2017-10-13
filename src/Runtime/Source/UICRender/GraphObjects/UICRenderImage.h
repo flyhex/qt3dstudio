@@ -39,7 +39,7 @@
 #include "UICRenderImageTextureData.h"
 #include "EASTL/utility.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IUICRenderContext;
     class IOffscreenRenderManager;

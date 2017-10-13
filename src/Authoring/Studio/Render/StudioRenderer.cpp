@@ -38,7 +38,7 @@
 #ifdef _WIN32
 #pragma warning(disable : 4201) // nonstandard extension used : nameless struct/union
 #endif
-using namespace uic::studio;
+using namespace qt3ds::studio;
 
 namespace {
 
@@ -173,14 +173,14 @@ struct SRendererImpl : public IStudioRenderer,
             m_RenderContext = std::make_shared<CWGLRenderContext>(inWindow);
 
             Q3DStudio::CString theResourcePath = Q3DStudio::CString::fromQString(resourcePath());
-            NVScopedRefCounted<uic::render::IUICRenderContextCore> theCore =
-                uic::render::IUICRenderContextCore::Create(
+            NVScopedRefCounted<qt3ds::render::IUICRenderContextCore> theCore =
+                qt3ds::render::IUICRenderContextCore::Create(
                     m_RenderContext->GetRenderContext().GetFoundation(),
                     m_RenderContext->GetRenderContext().GetStringTable());
 
             // Create text renderer
-            uic::render::ITextRendererCore &theTextRenderer(
-                        uic::render::ITextRendererCore::CreateQtTextRenderer(
+            qt3ds::render::ITextRendererCore &theTextRenderer(
+                        qt3ds::render::ITextRendererCore::CreateQtTextRenderer(
                             m_RenderContext->GetRenderContext().GetFoundation(),
                             m_RenderContext->GetRenderContext().GetStringTable()));
             theCore->SetTextRendererCore(theTextRenderer);

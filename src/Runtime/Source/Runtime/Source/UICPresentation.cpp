@@ -69,7 +69,7 @@ const INT32 Q3DStudio_MAXEVENTCOMMANDLOOPCOUNT = Q3DStudio_EVENTCOMMANDQUEUECAPA
 /**
  *	Constructor
  */
-CPresentation::CPresentation(const CHAR *inName, uic::runtime::IApplication *inApplication)
+CPresentation::CPresentation(const CHAR *inName, qt3ds::runtime::IApplication *inApplication)
     : m_Name(inName)
     , m_Application(inApplication)
     , m_Scene(NULL)
@@ -125,7 +125,7 @@ void CPresentation::RegisterEventCallback(TElement *inElement, const TEventComma
     m_EventCallbacks.RegisterCallback(inElement, inEventHash, inCallback, inContextData);
     inElement->SetFlag(ELEMENTFLAG_REGISTEREDFOREVENTCALLBACK, true);
 
-    if (uic::runtime::IApplicationCore::isPickingEvent(inEventHash))
+    if (qt3ds::runtime::IApplicationCore::isPickingEvent(inEventHash))
         inElement->SetFlag(ELEMENTFLAG_PICKENABLED, true);
 }
 
@@ -149,7 +149,7 @@ BOOL CPresentation::UnregisterEventCallback(TElement *inElement,
     if (theLast)
         inElement->SetFlag(ELEMENTFLAG_REGISTEREDFOREVENTCALLBACK, false);
 
-    if (uic::runtime::IApplicationCore::isPickingEvent(inEventHash))
+    if (qt3ds::runtime::IApplicationCore::isPickingEvent(inEventHash))
         inElement->SetFlag(ELEMENTFLAG_PICKENABLED, false);
 
     return theResult;
@@ -164,7 +164,7 @@ void CPresentation::ClearDirtyList()
     GetFrameData().Reset();
 }
 
-inline void ConvertActivityZoneBufferToElementList(uic::runtime::TActivityItemBuffer inSource,
+inline void ConvertActivityZoneBufferToElementList(qt3ds::runtime::TActivityItemBuffer inSource,
                                                    TElementList &outResult)
 {
     for (qt3ds::QT3DSU32 idx = 0, end = inSource.size(); idx < end; ++idx)
@@ -620,12 +620,12 @@ void CPresentation::SetScene(IScene *inScene)
     m_Scene = inScene;
 }
 
-void CPresentation::SetActivityZone(uic::runtime::IActivityZone *inZone)
+void CPresentation::SetActivityZone(qt3ds::runtime::IActivityZone *inZone)
 {
     m_ActivityZone = inZone;
     m_ActivityZone->SetZoneActive(m_Active);
     TElement *theSceneElement = m_RootElement;
-    uic::runtime::IActivityZone &theZone(*GetActivityZone());
+    qt3ds::runtime::IActivityZone &theZone(*GetActivityZone());
     // The activity zone requires elements described to it in breadth first search order.
     theZone.AddActivityItems(*theSceneElement);
 }
@@ -696,7 +696,7 @@ ISlideSystem &CPresentation::GetSlideSystem()
 /**
  *	Simple manager access: Animation Manager
  */
-uic::runtime::IAnimationSystem &CPresentation::GetAnimationSystem()
+qt3ds::runtime::IAnimationSystem &CPresentation::GetAnimationSystem()
 {
     return *m_AnimationSystem;
 }
@@ -753,7 +753,7 @@ CPresentationFrameData &CPresentation::GetFrameData()
     return m_FrameData;
 }
 
-void CPresentation::SetLoadedBuffer(uic::render::ILoadedBuffer &inBuffer)
+void CPresentation::SetLoadedBuffer(qt3ds::render::ILoadedBuffer &inBuffer)
 {
     m_LoadedBuffer = inBuffer;
 }

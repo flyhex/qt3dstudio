@@ -42,7 +42,7 @@
 #include "UICRenderPresentation.h"
 
 // map from UICDM to UIC::RENDER
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     template <typename TEnumType>

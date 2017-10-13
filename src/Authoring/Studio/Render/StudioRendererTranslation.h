@@ -41,24 +41,24 @@
 #include "PathWidget.h"
 #include "StudioPreferences.h"
 
-namespace uic {
+namespace qt3ds {
 namespace studio {
     struct SGraphObjectTranslator;
     extern QT3DSU32 g_GraphObjectTranslatorTag;
     inline void InitializePointerTags(IStringTable &) { g_GraphObjectTranslatorTag = 0x0088BEEF; }
 }
 }
-namespace uic {
+namespace qt3ds {
 namespace render {
     template <>
-    struct SPointerTag<uic::studio::SGraphObjectTranslator>
+    struct SPointerTag<qt3ds::studio::SGraphObjectTranslator>
     {
-        static QT3DSU32 GetTag() { return uic::studio::g_GraphObjectTranslatorTag; }
+        static QT3DSU32 GetTag() { return qt3ds::studio::g_GraphObjectTranslatorTag; }
     };
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace studio {
 
     typedef std::shared_ptr<UICDM::ISignalConnection> TSignalConnection;
@@ -81,7 +81,7 @@ namespace studio {
             , m_GraphObject(&inObj)
             , m_DirtyIndex(QT3DS_MAX_U32)
         {
-            m_GraphObject->m_UserData = uic::render::STaggedPointer(this);
+            m_GraphObject->m_UserData = qt3ds::render::STaggedPointer(this);
         }
         // The destructors will not be called at this time for most of the objects
         // but they will be released.
@@ -217,7 +217,7 @@ namespace studio {
             // This works because the camera has no hierarchy.
             inCamera.m_LocalTransform = theGlobalTransform;
             inCamera.m_Flags.SetTransformDirty(false);
-            inCamera.MarkDirty(uic::render::NodeTransformDirtyFlag::TransformNotDirty);
+            inCamera.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformNotDirty);
         }
 
         bool IsOrthographic() const { return m_CameraType != EditCameraTypes::Perspective; }
@@ -241,8 +241,8 @@ namespace studio {
     struct SZoomRender
     {
         CPt m_Point;
-        uic::render::SLayer *m_Layer;
-        SZoomRender(CPt inPoint, uic::render::SLayer *inLayer)
+        qt3ds::render::SLayer *m_Layer;
+        SZoomRender(CPt inPoint, qt3ds::render::SLayer *inLayer)
             : m_Point(inPoint)
             , m_Layer(inLayer)
         {
@@ -289,7 +289,7 @@ namespace studio {
 
     struct SDragPreparationResult
     {
-        uic::render::IUICRenderer *m_Renderer;
+        qt3ds::render::IUICRenderer *m_Renderer;
         SNode *m_Node;
         SLayer *m_Layer;
         SCamera *m_Camera;
@@ -301,9 +301,9 @@ namespace studio {
         QT3DSMat44 m_GlobalTransform;
         QT3DSMat33 m_NormalMatrix;
         QT3DSU32 m_AxisIndex;
-        uic::widgets::StudioWidgetComponentIds::Enum m_ComponentId;
-        uic::widgets::StudioWidgetTypes::Enum m_WidgetType;
-        uic::render::RenderWidgetModes::Enum m_WidgetMode;
+        qt3ds::widgets::StudioWidgetComponentIds::Enum m_ComponentId;
+        qt3ds::widgets::StudioWidgetTypes::Enum m_WidgetType;
+        qt3ds::render::RenderWidgetModes::Enum m_WidgetMode;
         SRay m_OriginalRay;
         SRay m_CurrentRay;
         SRay m_PreviousRay;
@@ -323,7 +323,7 @@ namespace studio {
         SPathAnchorDragInitialValue() {}
     };
 
-    struct STranslation : public uic::render::IUICRenderNodeFilter
+    struct STranslation : public qt3ds::render::IUICRenderNodeFilter
     {
         typedef eastl::pair<UICDM::CUICDMInstanceHandle, SGraphObjectTranslator *>
             THandleTranslatorPair;
@@ -347,8 +347,8 @@ namespace studio {
         // All translator related containers must come after the allocator
         TInstanceToTranslatorMap m_TranslatorMap;
         TTranslatorDirtySet m_DirtySet;
-        uic::render::SPresentation m_Presentation;
-        uic::render::SScene *m_Scene;
+        qt3ds::render::SPresentation m_Presentation;
+        qt3ds::render::SScene *m_Scene;
         Q3DStudio::CGraphIterator m_GraphIterator;
         nvvector<TSignalConnection> m_SignalConnections;
         QT3DSI32 m_ComponentSecondsDepth;
@@ -366,16 +366,16 @@ namespace studio {
         QT3DSVec2 m_Viewport;
         SEditCameraLayerTranslator *m_EditCameraLayerTranslator;
         Option<SZoomRender> m_ZoomRender;
-        NVScopedRefCounted<uic::widgets::IStudioWidget> m_TranslationWidget;
-        NVScopedRefCounted<uic::widgets::IStudioWidget> m_RotationWidget;
-        NVScopedRefCounted<uic::widgets::IStudioWidget> m_ScaleWidget;
-        NVScopedRefCounted<uic::widgets::IStudioWidget> m_LastRenderedWidget;
-        NVScopedRefCounted<uic::widgets::IPathWidget> m_PathWidget;
+        NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_TranslationWidget;
+        NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_RotationWidget;
+        NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_ScaleWidget;
+        NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_LastRenderedWidget;
+        NVScopedRefCounted<qt3ds::widgets::IPathWidget> m_PathWidget;
         NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_PickBuffer;
         Option<SPathAnchorDragInitialValue> m_LastPathDragValue;
         nvvector<qt3ds::QT3DSU8> m_PixelBuffer;
         QT3DSF32 m_CumulativeRotation;
-        eastl::vector<uic::render::SPGGraphObject *> m_GuideContainer;
+        eastl::vector<qt3ds::render::SPGGraphObject *> m_GuideContainer;
         qt3ds::foundation::SFastAllocator<> m_GuideAllocator;
         // The rects are maintained from last render because the render context
         // doesn't guarantee the rects it returns are valid outside of begin/end render calls.
@@ -508,7 +508,7 @@ namespace studio {
 
         SStudioPickValue Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode);
         Option<QT3DSU32> PickWidget(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
-                                 uic::widgets::IStudioWidgetBase &inWidget);
+                                 qt3ds::widgets::IStudioWidgetBase &inWidget);
 
         qt3ds::foundation::Option<UICDM::SGuideInfo> PickRulers(CPt inMouseCoords);
 
@@ -594,9 +594,9 @@ namespace studio {
                                     bool inLockToAxis);
 
         Option<SDragPreparationResult>
-        PrepareWidgetDrag(uic::widgets::StudioWidgetComponentIds::Enum inComponentId,
-                          uic::widgets::StudioWidgetTypes::Enum inWidgetId,
-                          uic::render::RenderWidgetModes::Enum inWidgetMode, SNode &inNode,
+        PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum inComponentId,
+                          qt3ds::widgets::StudioWidgetTypes::Enum inWidgetId,
+                          qt3ds::render::RenderWidgetModes::Enum inWidgetMode, SNode &inNode,
                           CPt inOriginalCoords, CPt inPreviousMouseCoords, CPt inMouseCoords);
 
         void PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoords,
@@ -608,7 +608,7 @@ namespace studio {
         void CheckGuideInPresentationRect(CUICDMGuideHandle inGuide,
                                           CUpdateableDocumentEditor &inEditor);
 
-        void PerformPathDrag(uic::studio::SPathPick &inPathPick, CPt inOriginalCoords,
+        void PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,
                              CPt inPreviousMouseCoords, CPt inMouseCoords,
                              CUpdateableDocumentEditor &inEditor);
 

@@ -32,7 +32,7 @@
 #include "UICRender.h"
 #include "foundation/Qt3DSVec2.h"
 #include "foundation/Qt3DSVec3.h"
-namespace uic {
+namespace qt3ds {
 namespace render {
 namespace path {
 // Solve quadratic equation in with a templated real number system.

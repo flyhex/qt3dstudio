@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSAllocatorCallback.h"
 #include "UICRenderString.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     namespace dynamic {
 

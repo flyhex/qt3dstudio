@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include <string>
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     // can't name this CString else we will conflict a
     class CRenderString : public std::basic_string<char8_t>

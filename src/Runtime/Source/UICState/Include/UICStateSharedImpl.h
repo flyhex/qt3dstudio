@@ -32,7 +32,7 @@
 #include "UICState.h"
 #include "foundation/Utils.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace impl {
 

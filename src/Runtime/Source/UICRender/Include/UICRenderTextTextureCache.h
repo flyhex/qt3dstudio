@@ -35,7 +35,7 @@
 #include "UICRenderText.h"
 #include "EASTL/algorithm.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class ITextRenderer;

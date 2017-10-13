@@ -54,8 +54,8 @@
 #include "UICRenderPathSubPath.h"
 #include "UICRenderPathManager.h"
 
-using namespace uic::render;
-using namespace uic::render::dynamic;
+using namespace qt3ds::render;
+using namespace qt3ds::render::dynamic;
 
 namespace {
 typedef nvhash_set<void *> TPtrSet;
@@ -486,7 +486,7 @@ struct SGraphObjectSerializerImpl<SPathSubPath>
         if (theSubPath) {
             QT3DSU32 numPoints = *inReadContext.Load<QT3DSU32>();
             SPathAnchorPoint *theAnchorPointBuffer =
-                reinterpret_cast<uic::render::SPathAnchorPoint *>(inReadContext.m_CurrentPtr);
+                reinterpret_cast<qt3ds::render::SPathAnchorPoint *>(inReadContext.m_CurrentPtr);
             inReadContext.m_CurrentPtr += sizeof(SPathAnchorPoint) * numPoints;
 
             // CN - !!Note this call is done on multiple threads simultaneously.  I added a mutex to

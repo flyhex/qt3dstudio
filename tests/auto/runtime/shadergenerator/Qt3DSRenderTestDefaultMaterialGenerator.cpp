@@ -44,7 +44,7 @@
 
 #include <QTime>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 #include <string>
 
@@ -210,9 +210,9 @@ struct TestParams
     SImage dummyImages[SShaderDefaultMaterialKeyProperties::ImageMapCount];
     NVRenderTexture2D *textures[4];
     eastl::vector<SRenderableImage*> renderableImages;
-    uic::render::CUICRendererImpl *render;
+    qt3ds::render::CUICRendererImpl *render;
 
-    TestParams(NVRenderContext *context, uic::render::CUICRendererImpl *renderImpl)
+    TestParams(NVRenderContext *context, qt3ds::render::CUICRendererImpl *renderImpl)
         : subset(context->GetAllocator())
         , modelContext(model, viewProjection)
         , images(NULL)
@@ -272,7 +272,7 @@ TestKey randomizeTestKey()
 }
 
 
-TestParams *generateTest(uic::render::CUICRendererImpl *renderImpl,
+TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
                          NVRenderContext *context, TestKey key)
 {
     // TODO: light probes

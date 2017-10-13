@@ -42,7 +42,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     struct SVisualStateCommand;

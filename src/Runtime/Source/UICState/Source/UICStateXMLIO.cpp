@@ -40,8 +40,8 @@
 #include "UICStateEditor.h"
 #include "UICStateEditorValue.h"
 
-using namespace uic::state;
-using namespace uic::state::editor;
+using namespace qt3ds::state;
+using namespace qt3ds::state::editor;
 
 namespace {
 #define ITERATE_XML_ELEMENT_NAMES                                                                  \
@@ -1778,7 +1778,7 @@ void GenerateUniqueIdT(TDataType &inNode, const char8_t *inStem, IStateContext &
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     void CXMLIO::GenerateUniqueId(SStateNode &inNode, const char8_t *inStem,

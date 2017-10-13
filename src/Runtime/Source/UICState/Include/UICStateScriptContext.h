@@ -36,7 +36,7 @@
 #include "foundation/Qt3DSOption.h"
 #include "foundation/StringTable.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class IScriptEvent : public IEvent

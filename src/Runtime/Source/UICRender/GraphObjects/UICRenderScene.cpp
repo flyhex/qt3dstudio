@@ -33,7 +33,7 @@
 #include "UICRenderContext.h"
 #include "render/Qt3DSRenderContext.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SScene::SScene()
     : SGraphObject(GraphObjectTypes::Scene)

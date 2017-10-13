@@ -34,7 +34,7 @@
 #include "UICRenderNode.h"
 #include "EASTL/utility.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     /**
      *	Unfortunately we still use an XYZ-Euler rotation system.  This means that identical

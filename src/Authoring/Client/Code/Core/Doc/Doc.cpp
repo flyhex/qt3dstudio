@@ -965,9 +965,9 @@ void CDoc::GetProjectFonts(
     std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList)
 {
     outFontNameFileList.clear();
-    uic::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<uic::render::SRendererFontEntry> theProjectFonts =
+        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
             theRenderer->GetProjectFontList();
         for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
             outFontNameFileList.push_back(
@@ -979,9 +979,9 @@ void CDoc::GetProjectFonts(
 void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
 {
     outFonts.clear();
-    uic::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<uic::render::SRendererFontEntry> theProjectFonts =
+        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
             theRenderer->GetProjectFontList();
         for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
             outFonts.push_back(ConvertToWide(theProjectFonts[idx].m_FontName));
@@ -990,10 +990,10 @@ void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
 
 Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPathToFontFile)
 {
-    uic::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     Q3DStudio::CString theFont;
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<uic::render::SRendererFontEntry> theProjectFonts =
+        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
             theRenderer->GetProjectFontList();
         qCInfo(qt3ds::TRACE_INFO) << "Attempting to find font: "
                                   << inFullPathToFontFile.GetCharStar();
@@ -2317,7 +2317,7 @@ std::shared_ptr<UICDM::IDOMReader> CDoc::CreateDOMReader(CBufferedInputStream &i
 }
 using std::pair;
 using std::make_pair;
-using uic::render::SImageTextureData;
+using qt3ds::render::SImageTextureData;
 
 static bool SourcePathImageBufferLessThan(const pair<Q3DStudio::CString, SImageTextureData> &lhs,
                                           const pair<Q3DStudio::CString, SImageTextureData> &rhs)

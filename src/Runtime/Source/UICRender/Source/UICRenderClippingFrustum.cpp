@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderClippingFrustum.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SClippingFrustum::SClippingFrustum(const QT3DSMat44 &modelviewprojection, SClipPlane nearPlane)
 {

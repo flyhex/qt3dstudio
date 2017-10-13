@@ -35,7 +35,7 @@
 #include "UICRenderPathManager.h"
 #include "UICRenderPath.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SNode::SNode(GraphObjectTypes::Enum inGraphObjectType)
     : SGraphObject(inGraphObjectType)
@@ -203,10 +203,10 @@ QT3DSVec3 SNode::GetRotationVectorFromRotationMatrix(const QT3DSMat33 &inMatrix)
     QT3DSMat44 theConvertMatrix(inMatrix, QT3DSVec3(0, 0, 0));
     if (m_Flags.IsLeftHanded())
         SNode::FlipCoordinateSystem(theConvertMatrix);
-    uic::render::CEulerAngleConverter theConverter;
-    uic::render::HMatrix *theHMatrix =
-        reinterpret_cast<uic::render::HMatrix *>(theConvertMatrix.front());
-    uic::render::EulerAngles theAngles = theConverter.Eul_FromHMatrix(*theHMatrix, m_RotationOrder);
+    qt3ds::render::CEulerAngleConverter theConverter;
+    qt3ds::render::HMatrix *theHMatrix =
+        reinterpret_cast<qt3ds::render::HMatrix *>(theConvertMatrix.front());
+    qt3ds::render::EulerAngles theAngles = theConverter.Eul_FromHMatrix(*theHMatrix, m_RotationOrder);
     return GetRotationVectorFromEulerAngles(theAngles);
 }
 

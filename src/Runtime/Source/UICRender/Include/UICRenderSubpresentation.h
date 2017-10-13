@@ -40,7 +40,7 @@
 #include "foundation/StringTable.h"
 #include "render/Qt3DSRenderBaseTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class CSubPresentationRenderer;

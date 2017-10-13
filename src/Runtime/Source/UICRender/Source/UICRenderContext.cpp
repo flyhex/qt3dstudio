@@ -66,7 +66,7 @@
 #include "UICRenderDefaultMaterialShaderGenerator.h"
 #include "UICRenderCustomMaterialShaderGenerator.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

@@ -32,7 +32,7 @@
 #ifndef UIC_RENDER_LOAD_DDS_H
 #define UIC_RENDER_LOAD_DDS_H
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
 /** The maximum number of mipmap levels (per texture or per cubemap face) */

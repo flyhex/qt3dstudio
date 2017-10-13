@@ -35,7 +35,7 @@
 //==============================================================================
 #include "UICUIPParserImpl.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IParametersSystem;
 }
@@ -44,7 +44,7 @@ namespace runtime {
 //	Namespace
 //==============================================================================
 namespace Q3DStudio {
-using uic::runtime::IParametersSystem;
+using qt3ds::runtime::IParametersSystem;
 //==============================================================================
 //	Forwards
 //==============================================================================

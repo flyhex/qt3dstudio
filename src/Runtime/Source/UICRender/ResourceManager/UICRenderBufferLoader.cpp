@@ -37,7 +37,7 @@
 #include "UICRenderInputStreamFactory.h"
 #include "UICRenderThreadPool.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 struct SBufferLoader;

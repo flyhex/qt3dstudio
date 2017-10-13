@@ -58,7 +58,7 @@
 
 namespace {
 
-using namespace uic::state;
+using namespace qt3ds::state;
 using qt3ds::NVFoundationBase;
 using qt3ds::foundation::NVConstDataRef;
 using qt3ds::foundation::IDOMReader;
@@ -358,7 +358,7 @@ struct SStateCallbackConnection : public INDDStateEngine::IStateEventHandlerConn
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Alloc)
 };
 
-struct SStateInterpreterEventHandler : public uic::state::IStateInterpreterEventHandler
+struct SStateInterpreterEventHandler : public qt3ds::state::IStateInterpreterEventHandler
 {
 public:
     SStateInterpreterResource &m_StateInterpreterResource;
@@ -370,7 +370,7 @@ public:
 
     virtual ~SStateInterpreterEventHandler() {}
 
-    void OnInterpreterEvent(uic::state::InterpreterEventTypes::Enum inEvent,
+    void OnInterpreterEvent(qt3ds::state::InterpreterEventTypes::Enum inEvent,
                                     qt3ds::foundation::CRegisteredString inEventId) override;
 };
 
@@ -388,14 +388,14 @@ struct SStateInterpreterResource : public qt3ds::foundation::NVRefCounted
 {
 public:
     qt3ds::NVAllocatorCallback &m_Allocator;
-    uic::state::IStateInterpreter *m_StateInterpreter;
+    qt3ds::state::IStateInterpreter *m_StateInterpreter;
 
 private:
     SStateEventHandlersWithLock m_StateEventHandlersWithLock;
 
 public:
     SStateInterpreterEventHandler *m_StateInterpreterEventHandler;
-    uic::state::TSignalConnectionPtr m_SignalConnection;
+    qt3ds::state::TSignalConnectionPtr m_SignalConnection;
 
     volatile QT3DSI32 mRefCount;
 
@@ -453,7 +453,7 @@ public:
         return theResult.second;
     }
 
-    void TriggerCallbackOnEvent(uic::state::InterpreterEventTypes::Enum inEvent,
+    void TriggerCallbackOnEvent(qt3ds::state::InterpreterEventTypes::Enum inEvent,
                                 const qt3ds::foundation::CRegisteredString &inEventId)
     {
         qt3ds::foundation::Mutex::ScopedLock theLock(m_StateEventHandlersWithLock.m_HandlersLock);
@@ -476,7 +476,7 @@ SStateCallbackConnection::~SStateCallbackConnection()
 }
 
 void SStateInterpreterEventHandler::OnInterpreterEvent(
-    uic::state::InterpreterEventTypes::Enum inEvent, qt3ds::foundation::CRegisteredString inEventId)
+    qt3ds::state::InterpreterEventTypes::Enum inEvent, qt3ds::foundation::CRegisteredString inEventId)
 {
     qCDebug (qt3ds::TRACE_INFO) << "SStateInterpreterEventHandler: OnInterpreterEvent: event type: "
                                 << inEvent <<  " event ID: " << inEventId.c_str();
@@ -488,7 +488,7 @@ typedef eastl::map<qt3ds::foundation::CRegisteredString,
     TStateInterpreterResourceMap;
 
 struct SStateInterpreterCreateCallback
-    : public uic::state::INDDStateFactory::IStateInterpreterCreateCallback
+    : public qt3ds::state::INDDStateFactory::IStateInterpreterCreateCallback
 {
 public:
     TStateInterpreterResourceMap &m_StateInterpreterResourceMap;
@@ -498,7 +498,7 @@ public:
     }
     virtual ~SStateInterpreterCreateCallback() {}
     void OnCreate(const qt3ds::foundation::CRegisteredString &inId,
-                          uic::state::IStateInterpreter &inStateInterpreter) override
+                          qt3ds::state::IStateInterpreter &inStateInterpreter) override
     {
         TStateInterpreterResourceMap::iterator thePos = m_StateInterpreterResourceMap.find(inId);
         if (thePos == m_StateInterpreterResourceMap.end()) {
@@ -512,7 +512,7 @@ public:
     }
 };
 
-struct SApp : public uic::state::INDDStateApplication
+struct SApp : public qt3ds::state::INDDStateApplication
 {
 public:
     typedef nvvector<eastl::pair<CRegisteredString, NVScopedRefCounted<SRefCountedAssetValue>>>
@@ -563,7 +563,7 @@ public:
     bool LoadUIA(IDOMReader &inReader, NVFoundationBase &fnd)
     {
         m_IsLoaded = false;
-        NVConstDataRef<uic::state::SElementReference> theStateReferences;
+        NVConstDataRef<qt3ds::state::SElementReference> theStateReferences;
         {
             IDOMReader::Scope __preparseScope(inReader);
             theStateReferences =
@@ -764,12 +764,12 @@ public:
     }
 };
 
-class CNDDStateEngine : public uic::state::INDDStateEngine
+class CNDDStateEngine : public qt3ds::state::INDDStateEngine
 {
 public:
     qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> m_Foundation;
     qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> m_StringTable;
-    qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory> m_InputStreamFactory;
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory> m_InputStreamFactory;
     Q3DStudio::ITimeProvider &m_TimeProvider;
 
     qt3ds::foundation::NVScopedRefCounted<SNDDStateContext> m_Context;
@@ -784,7 +784,7 @@ public:
     CNDDStateEngine(
         qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> inFoundation,
         qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> inStringTable,
-        qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory> inInputStreamFactory,
+        qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory> inInputStreamFactory,
         Q3DStudio::ITimeProvider &inTimeProvider);
     virtual ~CNDDStateEngine();
 
@@ -812,7 +812,7 @@ public:
 CNDDStateEngine::CNDDStateEngine(
     qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> inFoundation,
     qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> inStringTable,
-    qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory> inInputStreamFactory,
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory> inInputStreamFactory,
     Q3DStudio::ITimeProvider &inTimeProvider)
     : m_Foundation(inFoundation)
     , m_StringTable(inStringTable)
@@ -984,7 +984,7 @@ void CNDDStateEngine::FireEvent(const char *inEventName, unsigned long long inDe
                 << "CNDDStateEngine::FireEvent: Find null state machine " << inMachineId;
         return;
     }
-    uic::state::IStateInterpreter *theStateInterpreter =
+    qt3ds::state::IStateInterpreter *theStateInterpreter =
         theStateInterpreterResource->m_StateInterpreter;
     if (!theStateInterpreter) {
         qCCritical (qt3ds::INVALID_OPERATION)
@@ -1019,7 +1019,7 @@ void CNDDStateEngine::FireEvent(const char *inEventName, bool inIsExternal, cons
                 << "CNDDStateEngine::FireEvent: Find null state machine " << inMachineId;
         return;
     }
-    uic::state::IStateInterpreter *theStateInterpreter =
+    qt3ds::state::IStateInterpreter *theStateInterpreter =
         theStateInterpreterResource->m_StateInterpreter;
     if (!theStateInterpreter) {
         qCCritical (qt3ds::INVALID_OPERATION)
@@ -1053,7 +1053,7 @@ void CNDDStateEngine::CancelEvent(const char *inCancelId, const char *inMachineI
                 << "CNDDStateEngine::FireEvent: Find null state machine " << inMachineId;
         return;
     }
-    uic::state::IStateInterpreter *theStateInterpreter =
+    qt3ds::state::IStateInterpreter *theStateInterpreter =
         theStateInterpreterResource->m_StateInterpreter;
     if (!theStateInterpreter) {
         qCCritical (qt3ds::INVALID_OPERATION)
@@ -1076,7 +1076,7 @@ class SUICFNDTimer : public Q3DStudio::ITimeProvider
 
 qt3ds::foundation::MallocAllocator g_BaseAllocator;
 
-class CNDDStateEngineDefault : public uic::state::INDDStateEngine
+class CNDDStateEngineDefault : public qt3ds::state::INDDStateEngine
 {
 public:
     qt3ds::foundation::CAllocator m_Allocator;
@@ -1089,7 +1089,7 @@ public:
         , m_Foundation(NVCreateFoundation(QT3DS_FOUNDATION_VERSION, m_Allocator))
         , m_RealEngine(*QT3DS_NEW(m_Foundation->getAllocator(), CNDDStateEngine)(
               m_Foundation, &qt3ds::foundation::IStringTable::CreateStringTable(m_Allocator),
-              &uic::state::IInputStreamFactory::Create(*m_Foundation), m_TimeProvider))
+              &qt3ds::state::IInputStreamFactory::Create(*m_Foundation), m_TimeProvider))
     {
     }
     virtual ~CNDDStateEngineDefault() { NVDelete(m_Foundation->getAllocator(), &m_RealEngine); }
@@ -1117,13 +1117,13 @@ public:
 };
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     INDDStateEngine *INDDStateEngine::Create(
         qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> inFoundation,
         qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> inStringTable,
-        qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory> inInputStreamFactory,
+        qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory> inInputStreamFactory,
         Q3DStudio::ITimeProvider &inTimeProvider)
     {
         return QT3DS_NEW(inFoundation->getAllocator(), CNDDStateEngine)(

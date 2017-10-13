@@ -36,7 +36,7 @@ namespace Q3DStudio {
 class ILogicManager;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class ILogicSystem;
     class IAnimationSystem;

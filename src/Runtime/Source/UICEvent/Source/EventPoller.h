@@ -43,7 +43,7 @@ namespace qt3ds {
 class NVFoundationBase;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace evt {
 
     class CFactory;

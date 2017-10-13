@@ -30,7 +30,7 @@
 #include "UICTextRenderer.h"
 #include "render/Qt3DSRenderTexture2D.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 // http://acius2.blogspot.com/2007/11/calculating-next-power-of-2.html
 QT3DSU32 ITextRenderer::NextPowerOf2(QT3DSU32 input)

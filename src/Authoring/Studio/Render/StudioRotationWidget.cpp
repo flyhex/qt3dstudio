@@ -38,7 +38,7 @@
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
 
-using namespace uic::widgets;
+using namespace qt3ds::widgets;
 
 namespace {
 
@@ -206,12 +206,12 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
             return retval;
         }
 
-        uic::render::IShaderProgramGenerator &theGenerator(inWidgetContext.GetProgramGenerator());
+        qt3ds::render::IShaderProgramGenerator &theGenerator(inWidgetContext.GetProgramGenerator());
         theGenerator.BeginProgram();
-        uic::render::IShaderStageGenerator &theVertexGenerator(
-                    *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Vertex));
-        uic::render::IShaderStageGenerator &theFragmentGenerator(
-                    *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Fragment));
+        qt3ds::render::IShaderStageGenerator &theVertexGenerator(
+                    *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Vertex));
+        qt3ds::render::IShaderStageGenerator &theFragmentGenerator(
+                    *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Fragment));
         theVertexGenerator.AddIncoming("attr_pos", "vec3");
         theVertexGenerator.AddUniform("model_view_projection", "mat4");
         theVertexGenerator.Append("void main() {");
@@ -399,7 +399,7 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
     }
 
     void RenderPick(const QT3DSMat44 &inProjPremult, NVRenderContext &inRenderContext,
-                            uic::render::SWindowDimensions /*inWinDimensions*/) override
+                            qt3ds::render::SWindowDimensions /*inWinDimensions*/) override
     {
         if (m_XAxis && m_PickShader) {
             QT3DSMat44 theCameraMVP =

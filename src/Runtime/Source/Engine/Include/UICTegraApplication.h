@@ -59,7 +59,7 @@ Q_SIGNALS:
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
 };
 
-namespace uic {
+namespace qt3ds {
 class UICAssetVisitor;
 }
 
@@ -202,7 +202,7 @@ public:
     virtual bool AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction) = 0;
     virtual qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() = 0;
 
-    virtual void setAssetVisitor(uic::UICAssetVisitor *) = 0;
+    virtual void setAssetVisitor(qt3ds::UICAssetVisitor *) = 0;
 
 public:
     static INDDView &Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,

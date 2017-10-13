@@ -33,7 +33,7 @@
 #include "UICRenderNode.h"
 #include "UICRenderRay.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SCameraGlobalCalculationResult

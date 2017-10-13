@@ -35,7 +35,7 @@
 #include "render/Qt3DSRenderTexture2D.h"
 #include "render/Qt3DSRenderContext.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

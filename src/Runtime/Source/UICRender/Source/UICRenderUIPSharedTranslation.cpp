@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderUIPSharedTranslation.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
 #define WCHAR_T_Directional L"Directional"

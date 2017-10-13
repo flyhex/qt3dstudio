@@ -36,7 +36,7 @@
 #include "UICRenderLightmaps.h"
 #include "foundation/Qt3DSFlags.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // IMPORTANT: These flags matches the key produced by a MDL export file

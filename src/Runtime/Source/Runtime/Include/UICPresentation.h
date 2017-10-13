@@ -54,14 +54,14 @@ Q_SIGNALS:
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
 };
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
     class IActivityZone;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class ILoadedBuffer;
 }
@@ -83,9 +83,9 @@ class CPresentation : public IPresentation
 protected:
     QString m_Name; ///< Name of ths presentation
     QString m_FilePath; ///< The full path from which this presentation was loaded
-    uic::runtime::IApplication *m_Application; ///< Runtime object
+    qt3ds::runtime::IApplication *m_Application; ///< Runtime object
     IScene *m_Scene; ///< Connection to the associated scene (render) for this presentation
-    uic::runtime::IActivityZone *m_ActivityZone; ///< Controls element active status.
+    qt3ds::runtime::IActivityZone *m_ActivityZone; ///< Controls element active status.
     TElement *m_RootElement;
 
     CPresentationFrameData m_FrameData; ///< Storage of data of the current frame
@@ -94,7 +94,7 @@ protected:
     CEventCallbacks m_EventCallbacks; ///< Handles event callbacks on registered elements
     SPresentationSize m_Size; ///< Native width, height and mode exported from Studio
 
-    qt3ds::foundation::NVScopedRefCounted<uic::render::ILoadedBuffer>
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::render::ILoadedBuffer>
         m_LoadedBuffer; ///< Reference to loaded data when loading from binary.
 
     CComponentManager m_ComponentManager;
@@ -121,7 +121,7 @@ protected:
     //	Methods
     //==============================================================================
 public: // Construction
-    CPresentation(const CHAR *inName, uic::runtime::IApplication *inRuntime);
+    CPresentation(const CHAR *inName, qt3ds::runtime::IApplication *inRuntime);
     virtual ~CPresentation();
 
 public: // Execution
@@ -143,8 +143,8 @@ public: // Bridge Control
     IScriptBridge *GetScriptBridgeQml() override;
     void SetScene(IScene *inScene) override;
 
-    void SetActivityZone(uic::runtime::IActivityZone *inZone);
-    uic::runtime::IActivityZone *GetActivityZone() override { return m_ActivityZone; }
+    void SetActivityZone(qt3ds::runtime::IActivityZone *inZone);
+    qt3ds::runtime::IActivityZone *GetActivityZone() override { return m_ActivityZone; }
     void SetActive(bool inValue);
     bool GetActive() const;
     TElement *GetRoot() override { return m_RootElement; }
@@ -185,12 +185,12 @@ public: // Managers
     ILogicSystem &GetLogicSystem() override;
     IParametersSystem &GetParametersSystem() override;
     qt3ds::foundation::IStringTable &GetStringTable() override;
-    uic::runtime::IApplication &GetApplication() override
+    qt3ds::runtime::IApplication &GetApplication() override
     {
         QT3DS_ASSERT(m_Application);
         return *m_Application;
     }
-    void SetLoadedBuffer(uic::render::ILoadedBuffer &inBuffer);
+    void SetLoadedBuffer(qt3ds::render::ILoadedBuffer &inBuffer);
 
     void SetElementPath(TElement &inElement, const char8_t *inPath) override;
     qt3ds::foundation::CRegisteredString GetElementPath(TElement &inElement) override;

@@ -35,7 +35,7 @@
 //==============================================================================
 #include "UICTimer.h"
 #include "foundation/Qt3DSRefCounted.h"
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IInputStreamFactory;
     class IUICRenderContext;
@@ -43,20 +43,20 @@ namespace render {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
     class IApplicationCore;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     class IVisualStateContext;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace evt {
     class IEventSystem;
 }
@@ -102,18 +102,18 @@ public:
     virtual ISceneBinaryLoader &GetSceneLoader() = 0;
     virtual IScriptBridge &GetScriptEngine() = 0;
     virtual IScriptBridge &GetScriptEngineQml() = 0;
-    virtual uic::render::IUICRenderContextCore &GetUICRenderContextCore() = 0;
-    virtual uic::render::IInputStreamFactory &GetInputStreamFactory() = 0;
-    virtual uic::state::IVisualStateContext &GetVisualStateContext() = 0;
-    virtual uic::evt::IEventSystem &GetEventSystem() = 0;
+    virtual qt3ds::render::IUICRenderContextCore &GetUICRenderContextCore() = 0;
+    virtual qt3ds::render::IInputStreamFactory &GetInputStreamFactory() = 0;
+    virtual qt3ds::state::IVisualStateContext &GetVisualStateContext() = 0;
+    virtual qt3ds::evt::IEventSystem &GetEventSystem() = 0;
     virtual ITimeProvider &GetTimeProvider() = 0;
     virtual qt3ds::NVFoundationBase &GetFoundation() = 0;
     virtual qt3ds::foundation::IPerfTimer &GetPerfTimer() = 0;
     virtual qt3ds::foundation::IStringTable &GetStringTable() = 0;
     virtual void AddSearchPath(const char8_t *inFile) = 0;
     virtual void SetDllDir(const char *inDir) = 0;
-    virtual uic::runtime::IApplicationCore *GetApplicationCore() = 0;
-    virtual void SetApplicationCore(uic::runtime::IApplicationCore *app) = 0;
+    virtual qt3ds::runtime::IApplicationCore *GetApplicationCore() = 0;
+    virtual void SetApplicationCore(qt3ds::runtime::IApplicationCore *app) = 0;
 };
 //==============================================================================
 /**
@@ -129,9 +129,9 @@ protected:
     //==============================================================================
 public:
     virtual ISceneManager &GetSceneManager() = 0;
-    virtual uic::render::IUICRenderContext &GetUICRenderContext() = 0;
-    virtual uic::runtime::IApplication *GetApplication() = 0;
-    virtual void SetApplication(uic::runtime::IApplication *app) = 0;
+    virtual qt3ds::render::IUICRenderContext &GetUICRenderContext() = 0;
+    virtual qt3ds::runtime::IApplication *GetApplication() = 0;
+    virtual void SetApplication(qt3ds::runtime::IApplication *app) = 0;
 };
 
 } // namespace Q3DStudio

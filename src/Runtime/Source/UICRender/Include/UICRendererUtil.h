@@ -32,7 +32,7 @@
 #define UIC_RENDERER_UTIL_H
 #include "UICRender.h"
 #include "render/Qt3DSRenderBaseTypes.h"
-namespace uic {
+namespace qt3ds {
 namespace render {
     class CRendererUtil
     {

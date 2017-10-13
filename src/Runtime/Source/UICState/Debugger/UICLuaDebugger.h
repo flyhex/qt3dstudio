@@ -34,7 +34,7 @@
 
 struct lua_State;
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
         namespace lua {

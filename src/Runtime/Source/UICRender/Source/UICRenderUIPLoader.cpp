@@ -83,42 +83,42 @@ using qt3ds::QT3DSF32;
 using qt3ds::QT3DSVec3;
 using qt3ds::foundation::nvvector;
 using qt3ds::QT3DSU32;
-using uic::render::RenderLightTypes;
-using uic::render::DefaultMaterialLighting;
-using uic::render::ImageMappingModes;
-using uic::render::DefaultMaterialBlendMode;
+using qt3ds::render::RenderLightTypes;
+using qt3ds::render::DefaultMaterialLighting;
+using qt3ds::render::ImageMappingModes;
+using qt3ds::render::DefaultMaterialBlendMode;
 using qt3ds::render::NVRenderTextureCoordOp;
 using qt3ds::foundation::IStringTable;
 using qt3ds::NVFoundationBase;
 using namespace qt3ds;
 using namespace qt3ds::foundation;
-using uic::render::TIdObjectMap;
-using uic::render::IBufferManager;
-using uic::render::IEffectSystem;
-using uic::render::SPresentation;
-using uic::render::SScene;
-using uic::render::SLayer;
-using uic::render::SNode;
-using uic::render::SLight;
-using uic::render::SCamera;
-using uic::render::SModel;
-using uic::render::SText;
-using uic::render::SDefaultMaterial;
-using uic::render::SImage;
-using uic::render::SGraphObject;
-using uic::render::SDynamicObject;
-using uic::render::SEffect;
-using uic::render::SCustomMaterial;
-using uic::render::GraphObjectTypes;
-using uic::render::NodeFlags;
+using qt3ds::render::TIdObjectMap;
+using qt3ds::render::IBufferManager;
+using qt3ds::render::IEffectSystem;
+using qt3ds::render::SPresentation;
+using qt3ds::render::SScene;
+using qt3ds::render::SLayer;
+using qt3ds::render::SNode;
+using qt3ds::render::SLight;
+using qt3ds::render::SCamera;
+using qt3ds::render::SModel;
+using qt3ds::render::SText;
+using qt3ds::render::SDefaultMaterial;
+using qt3ds::render::SImage;
+using qt3ds::render::SGraphObject;
+using qt3ds::render::SDynamicObject;
+using qt3ds::render::SEffect;
+using qt3ds::render::SCustomMaterial;
+using qt3ds::render::GraphObjectTypes;
+using qt3ds::render::NodeFlags;
 using qt3ds::foundation::CRegisteredString;
-using uic::render::CRenderString;
+using qt3ds::render::CRenderString;
 using qt3ds::foundation::CFileTools;
-using uic::render::SReferencedMaterial;
-using uic::render::IUIPReferenceResolver;
-using uic::render::SPath;
-using uic::render::SPathSubPath;
-using uic::render::SLightmaps;
+using qt3ds::render::SReferencedMaterial;
+using qt3ds::render::IUIPReferenceResolver;
+using qt3ds::render::SPath;
+using qt3ds::render::SPathSubPath;
+using qt3ds::render::SLightmaps;
 
 namespace UICDM {
 template <>
@@ -454,7 +454,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     IStringTable &m_StrTable;
     NVFoundationBase &m_Foundation;
     NVAllocatorCallback &m_PresentationAllocator;
-    uic::render::TIdObjectMap &m_ObjectMap;
+    qt3ds::render::TIdObjectMap &m_ObjectMap;
     IBufferManager &m_BufferManager;
     SPresentation *m_Presentation;
     nvvector<char8_t> m_TempBuf;
@@ -462,10 +462,10 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     IEffectSystem &m_EffectSystem;
     const char8_t *m_PresentationDir;
     CRenderString m_PathString;
-    uic::render::IRenderPluginManager &m_RenderPluginManager;
-    uic::render::ICustomMaterialSystem &m_CustomMaterialSystem;
-    uic::render::IDynamicObjectSystem &m_DynamicObjectSystem;
-    uic::render::IPathManager &m_PathManager;
+    qt3ds::render::IRenderPluginManager &m_RenderPluginManager;
+    qt3ds::render::ICustomMaterialSystem &m_CustomMaterialSystem;
+    qt3ds::render::IDynamicObjectSystem &m_DynamicObjectSystem;
+    qt3ds::render::IPathManager &m_PathManager;
     TIdStringMap m_RenderPluginSourcePaths;
     IUIPReferenceResolver *m_ReferenceResolver;
     MemoryBuffer<RawAllocator> m_TempBuffer;
@@ -484,10 +484,10 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                      ,
                      TIdObjectMap &ioObjectMap, IBufferManager &inBufferManager,
                      IEffectSystem &inEffectSystem, const char8_t *inPresentationDir,
-                     uic::render::IRenderPluginManager &inRPM,
-                     uic::render::ICustomMaterialSystem &inCMS,
-                     uic::render::IDynamicObjectSystem &inDynamicSystem,
-                     uic::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver)
+                     qt3ds::render::IRenderPluginManager &inRPM,
+                     qt3ds::render::ICustomMaterialSystem &inCMS,
+                     qt3ds::render::IDynamicObjectSystem &inDynamicSystem,
+                     qt3ds::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver)
         : m_Reader(inReader)
         , m_MetaData(inMetaData)
         , m_StrTable(inStrTable)
@@ -519,7 +519,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
             CRegisteredString resolvedReference =
                 m_ReferenceResolver->ResolveReference(inRoot.m_Id, path);
             if (resolvedReference.IsValid()) {
-                uic::render::TIdObjectMap::iterator iter = m_ObjectMap.find(resolvedReference);
+                qt3ds::render::TIdObjectMap::iterator iter = m_ObjectMap.find(resolvedReference);
                 if (iter != m_ObjectMap.end())
                     return iter->second;
             }
@@ -573,7 +573,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                             QT3DSU32 &ioRotationOrder)
     {
         if (ParseProperty(inParser, inName, m_TempParseString))
-            ioRotationOrder = uic::render::MapRotationOrder(m_TempParseString.c_str());
+            ioRotationOrder = qt3ds::render::MapRotationOrder(m_TempParseString.c_str());
     }
     void ParseOrientation(IPropertyParser &inParser, const char8_t *inName, NodeFlags &ioFlags)
     {
@@ -594,8 +594,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     template <typename TEnumType>
     static bool ConvertEnumFromStr(const char8_t *inStr, TEnumType &ioEnum)
     {
-        uic::render::SEnumNameMap *theMap = uic::render::SEnumParseMap<TEnumType>::GetMap();
-        for (uic::render::SEnumNameMap *item = theMap; item->m_Name; ++item) {
+        qt3ds::render::SEnumNameMap *theMap = qt3ds::render::SEnumParseMap<TEnumType>::GetMap();
+        for (qt3ds::render::SEnumNameMap *item = theMap; item->m_Name; ++item) {
             if (UICDM::AreEqual(inStr, item->m_Name)) {
                 ioEnum = static_cast<TEnumType>(item->m_Enum);
                 return true;
@@ -637,8 +637,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     }
 
     void ParseNodeFlagsProperty(IPropertyParser &inParser, const char8_t *inName,
-                                uic::render::NodeFlags &ioFlags,
-                                uic::render::NodeFlagValues::Enum prop)
+                                qt3ds::render::NodeFlags &ioFlags,
+                                qt3ds::render::NodeFlagValues::Enum prop)
     {
         bool temp;
         if (ParseProperty(inParser, inName, temp))
@@ -646,8 +646,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     }
 
     void ParseNodeFlagsInverseProperty(IPropertyParser &inParser, const char8_t *inName,
-                                       uic::render::NodeFlags &ioFlags,
-                                       uic::render::NodeFlagValues::Enum prop)
+                                       qt3ds::render::NodeFlags &ioFlags,
+                                       qt3ds::render::NodeFlagValues::Enum prop)
     {
         bool temp;
         if (ParseProperty(inParser, inName, temp))
@@ -832,10 +832,10 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         inItem.m_##name = !inItem.m_##name;
 #define HANDLE_UIC_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
     ParseNodeFlagsProperty(inParser, type##_##name, inItem.m_Flags,                                \
-                           uic::render::NodeFlagValues::name);
+                           qt3ds::render::NodeFlagValues::name);
 #define HANDLE_UIC_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
     ParseNodeFlagsInverseProperty(inParser, type##_##name, inItem.m_Flags,                         \
-                                  uic::render::NodeFlagValues::name);
+                                  qt3ds::render::NodeFlagValues::name);
 #define HANDLE_UIC_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
     ParseEnumProperty(inParser, type##_##name, inItem.m_##name);
 #define HANDLE_UIC_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
@@ -924,14 +924,14 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     }
     template <typename TDataType>
     void SetDynamicObjectProperty(SDynamicObject &inEffect,
-                                  const uic::render::dynamic::SPropertyDefinition &inPropDesc,
+                                  const qt3ds::render::dynamic::SPropertyDefinition &inPropDesc,
                                   const TDataType &inProp)
     {
         memCopy(inEffect.GetDataSectionBegin() + inPropDesc.m_Offset, &inProp, sizeof(TDataType));
     }
     template <typename TDataType>
     void SetDynamicObjectProperty(SDynamicObject &inEffect,
-                                  const uic::render::dynamic::SPropertyDefinition &inPropDesc,
+                                  const qt3ds::render::dynamic::SPropertyDefinition &inPropDesc,
                                   Option<TDataType> inProp)
     {
         if (inProp.hasValue()) {
@@ -946,11 +946,11 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     }
     void ParseProperties(SDynamicObject &inDynamicObject, IPropertyParser &inParser)
     {
-        NVConstDataRef<uic::render::dynamic::SPropertyDefinition> theProperties =
+        NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> theProperties =
             m_DynamicObjectSystem.GetProperties(inDynamicObject.m_ClassName);
 
         for (QT3DSU32 idx = 0, end = theProperties.size(); idx < end; ++idx) {
-            const uic::render::dynamic::SPropertyDefinition &theDefinition(theProperties[idx]);
+            const qt3ds::render::dynamic::SPropertyDefinition &theDefinition(theProperties[idx]);
             switch (theDefinition.m_DataType) {
             case qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool:
                 SetDynamicObjectProperty(inDynamicObject, theDefinition,
@@ -1015,115 +1015,115 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         ITERATE_UIC_RENDER_PATH_SUBPATH_PROPERTIES
     }
 
-    void AddPluginPropertyUpdate(eastl::vector<uic::render::SRenderPropertyValueUpdate> &ioUpdates,
-                                 uic::render::IRenderPluginClass &,
-                                 const uic::render::SRenderPluginPropertyDeclaration &inDeclaration,
+    void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
+                                 qt3ds::render::IRenderPluginClass &,
+                                 const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
                                  Option<float> data)
     {
         if (data.hasValue()) {
             ioUpdates.push_back(
-                uic::render::SRenderPropertyValueUpdate(inDeclaration.m_Name, *data));
+                qt3ds::render::SRenderPropertyValueUpdate(inDeclaration.m_Name, *data));
         }
     }
-    void AddPluginPropertyUpdate(eastl::vector<uic::render::SRenderPropertyValueUpdate> &ioUpdates,
-                                 uic::render::IRenderPluginClass &inClass,
-                                 const uic::render::SRenderPluginPropertyDeclaration &inDeclaration,
+    void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
+                                 qt3ds::render::IRenderPluginClass &inClass,
+                                 const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
                                  Option<QT3DSVec2> data)
     {
         if (data.hasValue()) {
-            ioUpdates.push_back(uic::render::SRenderPropertyValueUpdate(
+            ioUpdates.push_back(qt3ds::render::SRenderPropertyValueUpdate(
                 inClass.GetPropertyValueInfo(inDeclaration.m_StartOffset).first, data->x));
-            ioUpdates.push_back(uic::render::SRenderPropertyValueUpdate(
+            ioUpdates.push_back(qt3ds::render::SRenderPropertyValueUpdate(
                 inClass.GetPropertyValueInfo(inDeclaration.m_StartOffset + 1).first, data->y));
         }
     }
-    void AddPluginPropertyUpdate(eastl::vector<uic::render::SRenderPropertyValueUpdate> &ioUpdates,
-                                 uic::render::IRenderPluginClass &inClass,
-                                 const uic::render::SRenderPluginPropertyDeclaration &inDeclaration,
+    void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
+                                 qt3ds::render::IRenderPluginClass &inClass,
+                                 const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
                                  Option<QT3DSVec3> data)
     {
         if (data.hasValue()) {
-            ioUpdates.push_back(uic::render::SRenderPropertyValueUpdate(
+            ioUpdates.push_back(qt3ds::render::SRenderPropertyValueUpdate(
                 inClass.GetPropertyValueInfo(inDeclaration.m_StartOffset).first, data->x));
-            ioUpdates.push_back(uic::render::SRenderPropertyValueUpdate(
+            ioUpdates.push_back(qt3ds::render::SRenderPropertyValueUpdate(
                 inClass.GetPropertyValueInfo(inDeclaration.m_StartOffset + 1).first, data->y));
-            ioUpdates.push_back(uic::render::SRenderPropertyValueUpdate(
+            ioUpdates.push_back(qt3ds::render::SRenderPropertyValueUpdate(
                 inClass.GetPropertyValueInfo(inDeclaration.m_StartOffset + 2).first, data->z));
         }
     }
-    void AddPluginPropertyUpdate(eastl::vector<uic::render::SRenderPropertyValueUpdate> &ioUpdates,
-                                 uic::render::IRenderPluginClass &,
-                                 const uic::render::SRenderPluginPropertyDeclaration &inDeclaration,
+    void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
+                                 qt3ds::render::IRenderPluginClass &,
+                                 const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
                                  Option<qt3ds::QT3DSI32> dataOpt)
     {
         if (dataOpt.hasValue()) {
             long data = static_cast<long>(*dataOpt);
             ioUpdates.push_back(
-                uic::render::SRenderPropertyValueUpdate(inDeclaration.m_Name, (QT3DSI32)data));
+                qt3ds::render::SRenderPropertyValueUpdate(inDeclaration.m_Name, (QT3DSI32)data));
         }
     }
-    void AddPluginPropertyUpdate(eastl::vector<uic::render::SRenderPropertyValueUpdate> &ioUpdates,
-                                 uic::render::IRenderPluginClass &,
-                                 const uic::render::SRenderPluginPropertyDeclaration &inDeclaration,
+    void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
+                                 qt3ds::render::IRenderPluginClass &,
+                                 const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
                                  Option<eastl::string> dataOpt)
     {
         if (dataOpt.hasValue()) {
             eastl::string &data = dataOpt.getValue();
-            ioUpdates.push_back(uic::render::SRenderPropertyValueUpdate(
+            ioUpdates.push_back(qt3ds::render::SRenderPropertyValueUpdate(
                 inDeclaration.m_Name, m_StrTable.RegisterStr(data.c_str())));
         }
     }
-    void AddPluginPropertyUpdate(eastl::vector<uic::render::SRenderPropertyValueUpdate> &ioUpdates,
-                                 uic::render::IRenderPluginClass &,
-                                 const uic::render::SRenderPluginPropertyDeclaration &inDeclaration,
+    void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
+                                 qt3ds::render::IRenderPluginClass &,
+                                 const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
                                  Option<bool> dataOpt)
     {
         if (dataOpt.hasValue()) {
             bool &data = dataOpt.getValue();
             ioUpdates.push_back(
-                uic::render::SRenderPropertyValueUpdate(inDeclaration.m_Name, data));
+                qt3ds::render::SRenderPropertyValueUpdate(inDeclaration.m_Name, data));
         }
     }
-    void ParseProperties(uic::render::SRenderPlugin &inRenderPlugin, IPropertyParser &inParser)
+    void ParseProperties(qt3ds::render::SRenderPlugin &inRenderPlugin, IPropertyParser &inParser)
     {
-        uic::render::IRenderPluginClass *theClass =
+        qt3ds::render::IRenderPluginClass *theClass =
             m_RenderPluginManager.GetRenderPlugin(inRenderPlugin.m_PluginPath);
         if (theClass) {
-            qt3ds::foundation::NVConstDataRef<uic::render::SRenderPluginPropertyDeclaration>
+            qt3ds::foundation::NVConstDataRef<qt3ds::render::SRenderPluginPropertyDeclaration>
                 theClassProps = theClass->GetRegisteredProperties();
             if (theClassProps.size()) {
-                uic::render::IRenderPluginInstance *theInstance =
+                qt3ds::render::IRenderPluginInstance *theInstance =
                     m_RenderPluginManager.GetOrCreateRenderPluginInstance(
                         inRenderPlugin.m_PluginPath, &inRenderPlugin);
                 if (theInstance) {
-                    eastl::vector<uic::render::SRenderPropertyValueUpdate> theUpdates;
+                    eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> theUpdates;
                     for (QT3DSU32 idx = 0, end = theClassProps.size(); idx < end; ++idx) {
-                        const uic::render::SRenderPluginPropertyDeclaration &theDec(
+                        const qt3ds::render::SRenderPluginPropertyDeclaration &theDec(
                             theClassProps[idx]);
                         eastl::string tempStr;
                         switch (theDec.m_Type) {
-                        case uic::render::SRenderPluginPropertyTypes::Float:
+                        case qt3ds::render::SRenderPluginPropertyTypes::Float:
                             AddPluginPropertyUpdate(theUpdates, *theClass, theDec,
                                                     inParser.ParseFloat(theDec.m_Name.c_str()));
                             break;
-                        case uic::render::SRenderPluginPropertyTypes::Vector2:
+                        case qt3ds::render::SRenderPluginPropertyTypes::Vector2:
                             AddPluginPropertyUpdate(theUpdates, *theClass, theDec,
                                                     inParser.ParseVec2(theDec.m_Name.c_str()));
                             break;
-                        case uic::render::SRenderPluginPropertyTypes::Color:
-                        case uic::render::SRenderPluginPropertyTypes::Vector3:
+                        case qt3ds::render::SRenderPluginPropertyTypes::Color:
+                        case qt3ds::render::SRenderPluginPropertyTypes::Vector3:
                             AddPluginPropertyUpdate(theUpdates, *theClass, theDec,
                                                     inParser.ParseVec3(theDec.m_Name.c_str()));
                             break;
-                        case uic::render::SRenderPluginPropertyTypes::Long:
+                        case qt3ds::render::SRenderPluginPropertyTypes::Long:
                             AddPluginPropertyUpdate(theUpdates, *theClass, theDec,
                                                     inParser.ParseI32(theDec.m_Name.c_str()));
                             break;
-                        case uic::render::SRenderPluginPropertyTypes::String:
+                        case qt3ds::render::SRenderPluginPropertyTypes::String:
                             AddPluginPropertyUpdate(theUpdates, *theClass, theDec,
                                                     inParser.ParseStr(theDec.m_Name.c_str()));
                             break;
-                        case uic::render::SRenderPluginPropertyTypes::Boolean:
+                        case qt3ds::render::SRenderPluginPropertyTypes::Boolean:
                             AddPluginPropertyUpdate(theUpdates, *theClass, theDec,
                                                     inParser.ParseBool(theDec.m_Name.c_str()));
                             break;
@@ -1231,11 +1231,11 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     m_RenderPluginSourcePaths.find(m_StrTable.RegisterStr(classId));
                 if (iter != m_RenderPluginSourcePaths.end()) {
                     CRegisteredString thePluginPath = m_StrTable.RegisterStr(iter->second.c_str());
-                    uic::render::IRenderPluginClass *theClass =
+                    qt3ds::render::IRenderPluginClass *theClass =
                         m_RenderPluginManager.GetRenderPlugin(thePluginPath);
                     if (theClass) {
-                        uic::render::SRenderPlugin *thePlugin =
-                            QT3DS_NEW(m_PresentationAllocator, uic::render::SRenderPlugin)();
+                        qt3ds::render::SRenderPlugin *thePlugin =
+                            QT3DS_NEW(m_PresentationAllocator, qt3ds::render::SRenderPlugin)();
                         thePlugin->m_PluginPath = thePluginPath;
                         thePlugin->m_Flags.SetActive(true);
                         theNewObject = thePlugin;
@@ -1347,8 +1347,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                                 }
                             } else {
                                 if (theNewObject->m_Type == GraphObjectTypes::RenderPlugin) {
-                                    uic::render::SRenderPlugin *childObj =
-                                        static_cast<uic::render::SRenderPlugin *>(theNewObject);
+                                    qt3ds::render::SRenderPlugin *childObj =
+                                        static_cast<qt3ds::render::SRenderPlugin *>(theNewObject);
                                     if (inParent->m_Type == GraphObjectTypes::Layer) {
                                         static_cast<SLayer *>(inParent)->m_RenderPlugin = childObj;
                                     } else {
@@ -1363,7 +1363,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         if (inParent->m_Type == GraphObjectTypes::Image
                             && theNewObject->m_Type == GraphObjectTypes::RenderPlugin) {
                             static_cast<SImage *>(inParent)->m_RenderPlugin =
-                                static_cast<uic::render::SRenderPlugin *>(theNewObject);
+                                static_cast<qt3ds::render::SRenderPlugin *>(theNewObject);
                         } else {
                             QT3DS_ASSERT(false);
                         }
@@ -1439,7 +1439,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                 ParsePass2Properties(*static_cast<SEffect *>(theObject->second), theClass);
                 break;
             case GraphObjectTypes::RenderPlugin:
-                ParsePass2Properties(*static_cast<uic::render::SRenderPlugin *>(theObject->second),
+                ParsePass2Properties(*static_cast<qt3ds::render::SRenderPlugin *>(theObject->second),
                                      theClass);
                 break;
             case GraphObjectTypes::CustomMaterial:
@@ -1529,20 +1529,20 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         break;
                     case GraphObjectTypes::RenderPlugin:
                         ParseProperties(
-                            *static_cast<uic::render::SRenderPlugin *>(theObject->second), parser);
+                            *static_cast<qt3ds::render::SRenderPlugin *>(theObject->second), parser);
                         break;
                     case GraphObjectTypes::CustomMaterial:
                         ParseProperties(
-                            *static_cast<uic::render::SCustomMaterial *>(theObject->second),
+                            *static_cast<qt3ds::render::SCustomMaterial *>(theObject->second),
                             parser);
                         break;
                     case GraphObjectTypes::Path:
-                        ParseProperties(*static_cast<uic::render::SPath *>(theObject->second),
+                        ParseProperties(*static_cast<qt3ds::render::SPath *>(theObject->second),
                                         parser);
                         break;
                     case GraphObjectTypes::PathSubPath:
                         ParseProperties(
-                            *static_cast<uic::render::SPathSubPath *>(theObject->second), parser);
+                            *static_cast<qt3ds::render::SPathSubPath *>(theObject->second), parser);
                         break;
                     default:
                         QT3DS_ASSERT(false);
@@ -1554,12 +1554,12 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     if (iter != m_AnchorIdToPathAndAnchorIndexMap.end()) {
                         SDomReaderPropertyParser parser(m_Reader, m_TempBuf, *this,
                                                         *iter->second.m_Segment);
-                        NVDataRef<uic::render::SPathAnchorPoint> thePathBuffer =
+                        NVDataRef<qt3ds::render::SPathAnchorPoint> thePathBuffer =
                             m_PathManager.GetPathSubPathBuffer(*iter->second.m_Segment);
                         QT3DSU32 anchorIndex = iter->second.m_AnchorIndex;
                         QT3DSU32 numAnchors = thePathBuffer.size();
                         if (anchorIndex < numAnchors) {
-                            uic::render::SPathAnchorPoint &thePoint(thePathBuffer[anchorIndex]);
+                            qt3ds::render::SPathAnchorPoint &thePoint(thePathBuffer[anchorIndex]);
                             ParseVec2(parser, "position", thePoint.m_Position);
                             ParseFloat(parser, "incomingangle", thePoint.m_IncomingAngle);
                             thePoint.m_OutgoingAngle = thePoint.m_IncomingAngle + 180.0f;
@@ -1572,12 +1572,12 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         }
     }
 
-    void AddPluginProperty(uic::render::IRenderPluginClass &pluginClass,
-                           uic::render::SRenderPluginPropertyTypes::Enum inPropType,
+    void AddPluginProperty(qt3ds::render::IRenderPluginClass &pluginClass,
+                           qt3ds::render::SRenderPluginPropertyTypes::Enum inPropType,
                            eastl::string &tempStr, const char *propName)
     {
         tempStr.assign(propName);
-        uic::render::SRenderPluginPropertyDeclaration theDec(
+        qt3ds::render::SRenderPluginPropertyDeclaration theDec(
             m_StrTable.RegisterStr(tempStr.c_str()), inPropType);
         pluginClass.RegisterProperty(theDec);
     }
@@ -1591,10 +1591,10 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                 m_Reader.Att("presentationHeight", m_Presentation->m_PresentationDimensions.y);
                 // Upsize them to a multiple of four.
                 m_Presentation->m_PresentationDimensions.x =
-                    (QT3DSF32)uic::render::ITextRenderer::NextMultipleOf4(
+                    (QT3DSF32)qt3ds::render::ITextRenderer::NextMultipleOf4(
                         (QT3DSU32)m_Presentation->m_PresentationDimensions.x);
                 m_Presentation->m_PresentationDimensions.y =
-                    (QT3DSF32)uic::render::ITextRenderer::NextMultipleOf4(
+                    (QT3DSF32)qt3ds::render::ITextRenderer::NextMultipleOf4(
                         (QT3DSU32)m_Presentation->m_PresentationDimensions.y);
                 const char8_t *thePresentationRotation = "";
                 if (m_Reader.Att("presentationRotation", thePresentationRotation)) {
@@ -1621,7 +1621,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                             Option<UICDM::SMetaDataEffect> theEffectMetaData =
                                 m_MetaData.GetEffectMetaDataBySourcePath(sourcepath);
                             if (theEffectMetaData.hasValue()) {
-                                uic::render::IUIPLoader::CreateEffectClassFromMetaEffect(
+                                qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
                                     theId, m_Foundation, m_EffectSystem, *theEffectMetaData,
                                     m_StrTable);
                             } else {
@@ -1635,7 +1635,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                             Option<UICDM::SMetaDataCustomMaterial> theMetaData =
                                 m_MetaData.GetMaterialMetaDataBySourcePath(sourcepath);
                             if (theMetaData.hasValue()) {
-                                uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
+                                qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
                                     theId, m_Foundation, m_CustomMaterialSystem, *theMetaData,
                                     m_StrTable);
                             } else {
@@ -1647,7 +1647,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         m_MetaData.LoadPluginXMLFile(m_Reader.GetNarrowElementName(), idStr, name,
                                                      sourcepath);
                         eastl::vector<Q3DStudio::TRuntimeMetaDataStrType> theProperties;
-                        uic::render::IRenderPluginClass *thePluginClass =
+                        qt3ds::render::IRenderPluginClass *thePluginClass =
                             m_RenderPluginManager.GetOrCreateRenderPlugin(
                                 m_StrTable.RegisterStr(sourcepath));
                         if (thePluginClass) {
@@ -1673,13 +1673,13 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                                 case ERuntimeDataModelDataTypeFloat:
                                     AddPluginProperty(
                                         *thePluginClass,
-                                        uic::render::SRenderPluginPropertyTypes::Float,
+                                        qt3ds::render::SRenderPluginPropertyTypes::Float,
                                         thePropertyStr, metaProp.c_str());
                                     break;
                                 case ERuntimeDataModelDataTypeFloat2:
                                     AddPluginProperty(
                                         *thePluginClass,
-                                        uic::render::SRenderPluginPropertyTypes::Vector2,
+                                        qt3ds::render::SRenderPluginPropertyTypes::Vector2,
                                         thePropertyStr, metaProp.c_str());
                                     break;
                                 case ERuntimeDataModelDataTypeFloat3:
@@ -1687,30 +1687,30 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                                         != ERuntimeAdditionalMetaDataTypeColor)
                                         AddPluginProperty(
                                             *thePluginClass,
-                                            uic::render::SRenderPluginPropertyTypes::Vector3,
+                                            qt3ds::render::SRenderPluginPropertyTypes::Vector3,
                                             thePropertyStr, metaProp.c_str());
                                     else
                                         AddPluginProperty(
                                             *thePluginClass,
-                                            uic::render::SRenderPluginPropertyTypes::Color,
+                                            qt3ds::render::SRenderPluginPropertyTypes::Color,
                                             thePropertyStr, metaProp.c_str());
                                     break;
                                 case ERuntimeDataModelDataTypeLong:
                                     AddPluginProperty(*thePluginClass,
-                                                      uic::render::SRenderPluginPropertyTypes::Long,
+                                                      qt3ds::render::SRenderPluginPropertyTypes::Long,
                                                       thePropertyStr, metaProp.c_str());
                                     break;
                                 case ERuntimeDataModelDataTypeString:
                                 case ERuntimeDataModelDataTypeStringRef:
                                     AddPluginProperty(
                                         *thePluginClass,
-                                        uic::render::SRenderPluginPropertyTypes::String,
+                                        qt3ds::render::SRenderPluginPropertyTypes::String,
                                         thePropertyStr, metaProp.c_str());
                                     break;
                                 case ERuntimeDataModelDataTypeBool:
                                     AddPluginProperty(
                                         *thePluginClass,
-                                        uic::render::SRenderPluginPropertyTypes::Boolean,
+                                        qt3ds::render::SRenderPluginPropertyTypes::Boolean,
                                         thePropertyStr, metaProp.c_str());
                                     break;
                                 default:
@@ -1784,7 +1784,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 };
 }
 
-SPresentation *uic::render::IUIPLoader::LoadUIPFile(
+SPresentation *qt3ds::render::IUIPLoader::LoadUIPFile(
     UICDM::IDOMReader &inReader, const char8_t *inFullPathToPresentationFile,
     Q3DStudio::IRuntimeMetaData &inMetaData, IStringTable &inStrTable,
     NVFoundationBase &inFoundation
@@ -1798,7 +1798,7 @@ SPresentation *uic::render::IUIPLoader::LoadUIPFile(
     TIdObjectMap &ioObjectMap, IBufferManager &inBufferManager, IEffectSystem &inEffectSystem,
     const char8_t *inPresentationDir, IRenderPluginManager &inPluginManager,
     ICustomMaterialSystem &inCMS, IDynamicObjectSystem &inDynamicSystem,
-    uic::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver,
+    qt3ds::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver,
     bool inSetValuesFromSlides)
 {
     SRenderUIPLoader theLoader(inReader, inFullPathToPresentationFile, inMetaData, inStrTable,
@@ -1888,11 +1888,11 @@ QString ConvertUTFtoQString(const wchar_t *string)
 
 // Re-register all strings because we can't be sure that the meta data system and the effect
 // system are sharing the same string table.
-void uic::render::IUIPLoader::CreateEffectClassFromMetaEffect(
+void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
     CRegisteredString inEffectName, NVFoundationBase &inFoundation, IEffectSystem &inEffectSystem,
     const UICDM::SMetaDataEffect &inMetaDataEffect, IStringTable &inStrTable)
 {
-    using namespace uic::render::dynamic;
+    using namespace qt3ds::render::dynamic;
     if (inEffectSystem.IsEffectRegistered(inEffectName)) {
         qCCritical(INVALID_OPERATION, "Effect %s is already registered",
             inEffectName.c_str());
@@ -1900,9 +1900,9 @@ void uic::render::IUIPLoader::CreateEffectClassFromMetaEffect(
         return;
     }
     nvvector<SPropertyDeclaration> thePropertyDeclarations(
-        inFoundation.getAllocator(), "uic::render::IUIPLoader::CreateEffectClassFromMetaEffect");
+        inFoundation.getAllocator(), "qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect");
     nvvector<CRegisteredString> theEnumNames(
-        inFoundation.getAllocator(), "uic::render::IUIPLoader::CreateEffectClassFromMetaEffect");
+        inFoundation.getAllocator(), "qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect");
     CRenderString theConvertStr;
     CRenderString theConvertShaderTypeStr;
     CRenderString theConvertShaderVersionStr;
@@ -1948,12 +1948,12 @@ void uic::render::IUIPLoader::CreateEffectClassFromMetaEffect(
     inEffectSystem.SetEffectCommands(inEffectName, inMetaDataEffect.m_EffectCommands);
 }
 
-void uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
+void qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
     CRegisteredString inClassName, NVFoundationBase &inFoundation,
     ICustomMaterialSystem &inMaterialSystem,
     const UICDM::SMetaDataCustomMaterial &inMetaDataMaterial, IStringTable &inStrTable)
 {
-    using namespace uic::render::dynamic;
+    using namespace qt3ds::render::dynamic;
     if (inMaterialSystem.IsMaterialRegistered(inClassName)) {
         qCCritical(INVALID_OPERATION, "Effect %s is already registered",
             inClassName.c_str());
@@ -1962,10 +1962,10 @@ void uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
     }
     nvvector<SPropertyDeclaration> thePropertyDeclarations(
         inFoundation.getAllocator(),
-        "uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial");
+        "qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial");
     nvvector<CRegisteredString> theEnumNames(
         inFoundation.getAllocator(),
-        "uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial");
+        "qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial");
     CRenderString theConvertStr;
     CRenderString theConvertShaderTypeStr;
     CRenderString theConvertShaderVersionStr;

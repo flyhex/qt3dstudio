@@ -35,7 +35,7 @@
 #include "UICRenderCamera.h"
 #include "UICRenderContext.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     /**	An independent, testable entity to encapsulate taking at least:
@@ -75,7 +75,7 @@ namespace render {
         SLayerRenderHelper(const NVRenderRectF &inPresentationViewport,
                            const NVRenderRectF &inPresentationScissor,
                            const QT3DSVec2 &inPresentationDesignDimensions, SLayer &inLayer,
-                           bool inOffscreen, uic::render::ScaleModes::Enum inScaleMode,
+                           bool inOffscreen, qt3ds::render::ScaleModes::Enum inScaleMode,
                            qt3ds::QT3DSVec2 inScaleFactor);
 
         NVRenderRectF GetPresentationViewport() const { return m_PresentationViewport; }

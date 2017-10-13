@@ -35,7 +35,7 @@
 #include "UICRenderNode.h"
 #include "EASTL/string.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     namespace dynamic {

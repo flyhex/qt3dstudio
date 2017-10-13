@@ -30,7 +30,7 @@
 #include "UICRenderPath.h"
 #include "UICRenderPathSubPath.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 void SPath::AddSubPath(SPathSubPath &inSegment)
 {

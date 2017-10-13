@@ -338,7 +338,7 @@ void UICViewerApp::setOffscreenId(int offscreenID)
 
 bool UICViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFormat &format,
                                  int offscreenID, const QString &source,
-                                 uic::UICAssetVisitor *assetVisitor)
+                                 qt3ds::UICAssetVisitor *assetVisitor)
 {
     bool hasValidPresentationFile = !source.isEmpty();
 

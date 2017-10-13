@@ -35,7 +35,7 @@
 #include "render/Qt3DSRenderShaderConstant.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using qt3ds::render::NVRenderContextScopedProperty;
 using qt3ds::render::NVRenderCachedShaderProperty;
 

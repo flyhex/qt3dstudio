@@ -36,7 +36,7 @@
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSVec2.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct TextHorizontalAlignment

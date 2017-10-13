@@ -32,7 +32,7 @@
 #include "UICRenderBufferManager.h"
 #include "UICRenderMesh.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SModel::SModel()
     : SNode(GraphObjectTypes::Model)

@@ -46,7 +46,7 @@
 
 #include <QSurfaceFormat>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 #if defined(_LINUX) || defined(_MACOSX) || defined(_LINUXPLATFORM) || defined(_INTEGRITYPLATFORM)
 namespace qt3ds {
@@ -137,13 +137,13 @@ int main(int c, char **v)
     theRenderFactory->GetUICRenderContext().GetShaderCache().SetShaderCompilationEnabled(false);
     Q3DStudio::CInputEngine theInputEngine;
 
-    NVScopedRefCounted<uic::runtime::IApplicationCore> theAppCore =
-        uic::runtime::IApplicationCore::CreateApplicationCore(*theRenderFactoryCore,
+    NVScopedRefCounted<qt3ds::runtime::IApplicationCore> theAppCore =
+        qt3ds::runtime::IApplicationCore::CreateApplicationCore(*theRenderFactoryCore,
                                                               theApplicationDirectory.c_str());
 
     bool loadStarted = theAppCore->BeginLoad(uiaFile.c_str());
     if (loadStarted) {
-        NVScopedRefCounted<uic::runtime::IApplication> theApp =
+        NVScopedRefCounted<qt3ds::runtime::IApplication> theApp =
             theAppCore->CreateApplication(theInputEngine, 0, *theRenderFactory);
         theApp->SaveBinary();
         return 0;

@@ -31,7 +31,7 @@
 #include "UICRenderLayer.h"
 #include "UICRenderEffect.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SLayer::SLayer()
     : SNode(GraphObjectTypes::Layer)

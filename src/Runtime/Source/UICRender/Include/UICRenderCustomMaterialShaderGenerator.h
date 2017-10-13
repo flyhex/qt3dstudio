@@ -32,7 +32,7 @@
 #define UIC_RENDER_CUSTOM_MATERIAL_SHADER_GENERATOR_H
 #include "UICRenderMaterialShaderGenerator.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class UICShadowMap;

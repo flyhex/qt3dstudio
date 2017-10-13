@@ -32,7 +32,7 @@
 #define UIC_RENDERABLE_IMAGE_H
 #include "UICRender.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct ImageMapTypes

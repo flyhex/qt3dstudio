@@ -34,7 +34,7 @@
 #include "UICUIADatamodelValue.h"
 #include "UICStateEditorValue.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
         struct SGPropertyValueTypes

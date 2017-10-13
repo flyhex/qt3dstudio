@@ -36,7 +36,7 @@
 
 #include "Qt3DSStateConfig.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class IRefCountedInputStream : public qt3ds::foundation::ISeekableIOStream,

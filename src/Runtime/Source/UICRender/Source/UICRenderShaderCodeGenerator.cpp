@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderShaderCodeGenerator.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 using eastl::make_pair;
 

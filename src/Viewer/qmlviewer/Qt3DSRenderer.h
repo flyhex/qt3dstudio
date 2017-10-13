@@ -48,7 +48,7 @@ class Q3DSRenderer : public QObject,
     Q_OBJECT
 
 public:
-    Q3DSRenderer(bool visibleFlag, uic::UICAssetVisitor *assetVisitor);
+    Q3DSRenderer(bool visibleFlag, qt3ds::UICAssetVisitor *assetVisitor);
     ~Q3DSRenderer();
 
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) override;
@@ -78,7 +78,7 @@ protected:
     QQuickWindow *m_window; // Window associated with the plugin; needed to reset OpenGL state.
 
     bool m_initialized; // Has the runtime and OpenGL state been initialized?
-    uic::UICAssetVisitor *m_visitor;
+    qt3ds::UICAssetVisitor *m_visitor;
 
     Q3DSViewerSettings *m_settings;
     Q3DSPresentation *m_presentation;

@@ -34,7 +34,7 @@
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "render/Qt3DSRenderProgramPipeline.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     using qt3ds::render::NVRenderCachedShaderProperty;
     using qt3ds::render::NVRenderCachedShaderBuffer;

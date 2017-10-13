@@ -33,8 +33,8 @@
 #include "foundation/Qt3DSAtomic.h"
 #include "foundation/IOStreams.h"
 
-using namespace uic::state::debugger;
-using namespace uic::state;
+using namespace qt3ds::state::debugger;
+using namespace qt3ds::state;
 
 namespace {
 

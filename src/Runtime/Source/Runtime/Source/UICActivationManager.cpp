@@ -46,9 +46,9 @@
 #include "foundation/Qt3DSSync.h"
 #include "UICRenderThreadPool.h"
 
-using namespace uic::runtime;
-using namespace uic::runtime::element;
-using uic::render::IThreadPool;
+using namespace qt3ds::runtime;
+using namespace qt3ds::runtime::element;
+using qt3ds::render::IThreadPool;
 using qt3ds::foundation::Time;
 
 namespace {

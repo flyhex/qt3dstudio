@@ -36,7 +36,7 @@
 #include "render/Qt3DSRenderFrameBuffer.h"
 #include "render/Qt3DSRenderRenderBuffer.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class CResourceFrameBuffer
     {

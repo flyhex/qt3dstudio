@@ -1577,7 +1577,7 @@ void CStudioApp::SaveUIAFile()
         list.append(r.m_argsOrSrc);
     }
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
-    uic::state::IApplication::EnsureApplicationFile(doc.GetCharStar(), list);
+    qt3ds::state::IApplication::EnsureApplicationFile(doc.GetCharStar(), list);
 }
 
 //=============================================================================

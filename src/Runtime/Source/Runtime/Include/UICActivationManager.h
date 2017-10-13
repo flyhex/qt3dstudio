@@ -52,13 +52,13 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IThreadPool;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     using namespace qt3ds::foundation;
     using namespace qt3ds;
@@ -67,7 +67,7 @@ namespace runtime {
     using Q3DStudio::IComponentTimeOverrideFinishedCallback;
     using Q3DStudio::CPresentation;
     using Q3DStudio::TTimeUnit;
-    using uic::render::IThreadPool;
+    using qt3ds::render::IThreadPool;
 
     class IActivationManager;
 

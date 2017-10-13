@@ -37,7 +37,7 @@
 #include "foundation/Qt3DSMat44.h"
 #include "UICRenderImage.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class IOffscreenRenderer;

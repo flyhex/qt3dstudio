@@ -124,7 +124,7 @@ struct DynLua : public IDynamicLua
 #undef HANDLE_LUA_FUNCTION
 
     NVFoundationBase &m_Foundation;
-    uic::render::CLoadedDynamicLibrary *m_LuaLibrary;
+    qt3ds::render::CLoadedDynamicLibrary *m_LuaLibrary;
     lua_State *m_LuaState;
     eastl::string m_TempStr;
 
@@ -160,7 +160,7 @@ struct DynLua : public IDynamicLua
 
     DynLua(NVFoundationBase &fnd, const char8_t *pathToLuaDll)
         : m_Foundation(fnd)
-        , m_LuaLibrary(uic::render::CLoadedDynamicLibrary::Create(pathToLuaDll, fnd))
+        , m_LuaLibrary(qt3ds::render::CLoadedDynamicLibrary::Create(pathToLuaDll, fnd))
         , m_LuaState(NULL)
     {
         if (m_LuaLibrary) {

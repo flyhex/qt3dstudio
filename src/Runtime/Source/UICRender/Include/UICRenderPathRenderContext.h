@@ -39,7 +39,7 @@
 #include "UICRenderShaderKeys.h"
 #include "UICRenderableImage.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SPathRenderContext

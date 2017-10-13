@@ -53,15 +53,15 @@
 #include "UICStateContext.h"
 #include "foundation/FastAllocator.h"
 
-using namespace uic::state;
-using namespace uic::state::debugger;
+using namespace qt3ds::state;
+using namespace qt3ds::state::debugger;
 
 #ifdef _DEBUG
 #define UIC_LOG_ENTER_EXIT 1
 #define UIC_LOG_ACTIVE_EVENT 1
 #endif
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     struct SInterpreterData
     {
@@ -991,7 +991,7 @@ struct StateSystem : public IStateInterpreter
                         if (m_Workspace.empty() == false) {
                             CRegisteredString stateId =
                                 m_StringTable->RegisterStr(m_Workspace.c_str());
-                            uic::state::SStateNode *transitionNode =
+                            qt3ds::state::SStateNode *transitionNode =
                                 m_Context->FindStateNode(stateId);
                             if (!transitionNode) {
                                 m_TempNodeList.clear();
@@ -1575,7 +1575,7 @@ struct StateSystem : public IStateInterpreter
                     STransition &theTransition = *iter->CastTo<STransition>();
                     if (IsTransitionValid(theTransition)) {
                         if (theTransition.m_Event.IsValid()) {
-                            if (uic::state::impl::NameMatches(theTransition.m_Event.c_str(),
+                            if (qt3ds::state::impl::NameMatches(theTransition.m_Event.c_str(),
                                                               inEvent.GetName().c_str())) {
                                 if (!isTrivial(theTransition.m_Condition)) {
                                     Option<bool> condResult = m_ScriptContext->ExecuteCondition(

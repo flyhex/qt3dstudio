@@ -34,7 +34,7 @@
 #include "UICRenderPlugin.h"
 #include "UICRenderPluginGraphObject.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SImage::SImage()
     : SGraphObject(GraphObjectTypes::Image)

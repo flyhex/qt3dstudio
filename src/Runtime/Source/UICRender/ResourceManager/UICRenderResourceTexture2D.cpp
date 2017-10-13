@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderResourceTexture2D.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 CResourceTexture2D::CResourceTexture2D(IResourceManager &mgr, NVRenderTexture2D *inTexture)
     : m_ResourceManager(mgr)

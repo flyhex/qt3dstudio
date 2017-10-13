@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include "UICRenderNode.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct PathCapping
     {

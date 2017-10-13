@@ -35,7 +35,7 @@
 
 struct lua_State;
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class ILuaScriptContext : public IScriptContext

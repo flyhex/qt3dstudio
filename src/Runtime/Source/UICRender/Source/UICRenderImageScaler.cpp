@@ -37,7 +37,7 @@
 #include "UICRenderImageScaler.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 //==============================================================================
 //	Namespace
 //==============================================================================

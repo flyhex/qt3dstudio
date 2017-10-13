@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include "foundation/Qt3DSSimpleTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SWindowDimensions
     {

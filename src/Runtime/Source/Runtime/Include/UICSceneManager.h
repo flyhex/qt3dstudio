@@ -47,7 +47,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IUICRenderContextCore;
     class ILoadedBuffer;
@@ -89,7 +89,7 @@ public:
     // threadsafe
     // returns a handle to the loaded object. Return value of zero means error.
     virtual qt3ds::QT3DSU32 LoadSceneStage1(qt3ds::foundation::CRegisteredString inPresentationDirectory,
-                                      uic::render::ILoadedBuffer &inData) = 0;
+                                      qt3ds::render::ILoadedBuffer &inData) = 0;
 
     // threadsafe
     // still does not require openGL context but has dependency on a few other things.

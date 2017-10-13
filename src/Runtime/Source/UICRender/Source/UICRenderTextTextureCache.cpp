@@ -38,13 +38,13 @@
 #include "foundation/Qt3DSInvasiveLinkedList.h"
 #include "foundation/Qt3DSPool.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace eastl {
 template <>
 struct hash<STextRenderInfo>
 {
-    size_t operator()(const uic::render::STextRenderInfo &inInfo) const
+    size_t operator()(const qt3ds::render::STextRenderInfo &inInfo) const
     {
         size_t retval = hash<size_t>()(reinterpret_cast<size_t>(inInfo.m_Text.c_str()));
         retval = retval ^ hash<size_t>()(reinterpret_cast<size_t>(inInfo.m_Font.c_str()));

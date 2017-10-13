@@ -32,7 +32,7 @@
 #define UIC_LOGIC_SYSTEM_H
 #include "UICElementSystem.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
 
     class ILogicSystem : public NVRefCounted

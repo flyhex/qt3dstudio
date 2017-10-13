@@ -44,7 +44,7 @@ namespace Q3DStudio {
 class ITimeProvider;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class INDDStateFactory;
@@ -54,7 +54,7 @@ namespace state {
         qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> m_Foundation;
         qt3ds::NVAllocatorCallback &m_Allocator;
         qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> m_StringTable;
-        qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory> m_InputStreamFactory;
+        qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory> m_InputStreamFactory;
         Q3DStudio::ITimeProvider &m_TimeProvider;
         qt3ds::foundation::NVScopedRefCounted<INDDStateFactory> m_Factory;
         eastl::string m_ProjectDir;
@@ -63,7 +63,7 @@ namespace state {
         SNDDStateContext(
             qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> inFoundation,
             qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> inStringTable,
-            qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory>
+            qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory>
                 inInputStreamFactory,
             Q3DStudio::ITimeProvider &inTimeProvider, const char *inProjectDir)
             : m_Foundation(inFoundation)

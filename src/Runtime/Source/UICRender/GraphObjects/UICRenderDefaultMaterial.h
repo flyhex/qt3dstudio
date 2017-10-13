@@ -38,7 +38,7 @@
 #include "UICRenderMaterialDirty.h"
 #include "UICRenderLightmaps.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct DefaultMaterialLighting
     {

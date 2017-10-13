@@ -41,10 +41,10 @@ namespace foundation {
 #pragma once
 namespace Q3DStudio {
 using qt3ds::QT3DSVec3;
-using uic::render::IBufferManager;
-using uic::render::ITextRenderer;
-using uic::render::SGraphObject;
-using uic::render::IPathManager;
+using qt3ds::render::IBufferManager;
+using qt3ds::render::ITextRenderer;
+using qt3ds::render::SGraphObject;
+using qt3ds::render::IPathManager;
 
 class IDocSceneGraph
 {

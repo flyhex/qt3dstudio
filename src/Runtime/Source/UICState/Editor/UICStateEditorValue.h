@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "foundation/Qt3DSVec3.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 
@@ -193,7 +193,7 @@ namespace foundation {
 }
 #endif
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

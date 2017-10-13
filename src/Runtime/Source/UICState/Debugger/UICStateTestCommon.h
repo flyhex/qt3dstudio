@@ -45,7 +45,7 @@ extern "C" {
 #include "lualib.h"
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace test {
 

@@ -61,8 +61,8 @@ extern "C" {
 #include "lualib.h"
 }
 
-using namespace uic::render;
-using namespace uic::render::dynamic;
+using namespace qt3ds::render;
+using namespace qt3ds::render::dynamic;
 using qt3ds::render::NVRenderContextScopedProperty;
 using qt3ds::render::NVRenderCachedShaderProperty;
 using qt3ds::render::NVRenderCachedShaderBuffer;

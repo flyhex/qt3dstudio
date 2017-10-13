@@ -43,7 +43,7 @@
 #include "foundation/Qt3DSPool.h"
 #include "UICRenderableObjects.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SLayerRenderData;
     class CUICRendererImpl;

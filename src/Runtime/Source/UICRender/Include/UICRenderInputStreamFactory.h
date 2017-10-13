@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "EASTL/string.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IRefCountedInputStream : public qt3ds::foundation::ISeekableIOStream, public NVRefCounted
     {

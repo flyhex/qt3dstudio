@@ -66,7 +66,7 @@
 #define UIC_CACHED_POST_EFFECT
 const float UIC3D_DEGREES_TO_RADIANS = 0.0174532925199f;
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     using eastl::reverse;
     using eastl::stable_sort;

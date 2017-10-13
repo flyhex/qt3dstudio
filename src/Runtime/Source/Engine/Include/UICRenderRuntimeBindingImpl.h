@@ -74,11 +74,11 @@
 #define stricmp strcasecmp
 #endif
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using eastl::make_pair;
 using eastl::pair;
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     extern qt3ds::foundation::MallocAllocator g_BaseAllocator;
@@ -131,7 +131,7 @@ namespace render {
             m_FlowData = NULL;
         }
 
-        void CreateRenderContext(uic::render::IRuntimeFactoryRenderFactory &inContextFactory)
+        void CreateRenderContext(qt3ds::render::IRuntimeFactoryRenderFactory &inContextFactory)
         {
             m_RenderContext = inContextFactory.CreateRenderContext(*m_Foundation, *m_StringTable);
             if (m_RenderContext)

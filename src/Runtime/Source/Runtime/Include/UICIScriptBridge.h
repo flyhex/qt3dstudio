@@ -37,20 +37,20 @@
 //==============================================================================
 //	Namespace
 //==============================================================================
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
     class IApplicationCore;
 }
 }
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
         class IMultiProtocolSocket;
     }
 }
 }
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IThreadPool;
 }
@@ -129,15 +129,15 @@ public: // thread
     virtual void DisableMultithreadedAccess() = 0;
 
 public: // Settings
-    virtual void SetApplicationCore(uic::runtime::IApplicationCore &inApplication) = 0;
-    virtual void SetApplication(uic::runtime::IApplication &inApplication) = 0;
+    virtual void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) = 0;
+    virtual void SetApplication(qt3ds::runtime::IApplication &inApplication) = 0;
 
 public: // Binary preloading
     // Starts preloading scripts offline.  This sets m_LuaState to NULL until after
     // EndPreloadScripts
     // This function is only used for binary loading, eg, .uiab
     virtual void BeginPreloadScripts(const eastl::vector<const char *> &inScripts,
-                                     uic::render::IThreadPool &inThreadPool,
+                                     qt3ds::render::IThreadPool &inThreadPool,
                                      const char *inProjectDir) = 0;
     // This function is blocking if m_LuaState == NULL, which only holds during binary loading
     virtual void EndPreloadScripts() = 0;
@@ -192,7 +192,7 @@ public: // Multimedia
     virtual bool PlaySoundFile(const char *soundPath) = 0;
 
 public: // Miscellaneous
-    virtual void EnableDebugging(uic::state::debugger::IMultiProtocolSocket &socket) = 0;
+    virtual void EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket &socket) = 0;
     virtual void EnableProfiling() = 0;
     virtual void StepGC() = 0;
 };

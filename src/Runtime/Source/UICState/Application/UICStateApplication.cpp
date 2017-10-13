@@ -38,7 +38,7 @@
 typedef eastl::string TAppStr;
 
 using namespace qt3ds::foundation;
-using namespace uic::state;
+using namespace qt3ds::state;
 using namespace eastl;
 
 bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,

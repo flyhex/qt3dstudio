@@ -37,7 +37,7 @@
 #include "UICRender.h"
 #include "UICRenderImageTextureData.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SRenderMesh;
     struct SImageTextureData;
@@ -49,12 +49,12 @@ class CDoc;
 namespace Q3DStudio {
 class CFilePath;
 class CString;
-using uic::render::SRenderMesh;
-using uic::render::SImageTextureData;
+using qt3ds::render::SRenderMesh;
+using qt3ds::render::SImageTextureData;
 
 struct SModelBufferAndPath
 {
-    uic::render::SRenderMesh *m_ModelBuffer;
+    qt3ds::render::SRenderMesh *m_ModelBuffer;
     Q3DStudio::CFilePath m_FilePath;
 
     SModelBufferAndPath(SRenderMesh *inBuffer, const Q3DStudio::CFilePath &inPath)

@@ -33,7 +33,7 @@
 #include <cstdlib>
 #include "EventSystemC.h"
 
-namespace uic {
+namespace qt3ds {
 namespace evt {
 
     typedef TUICEventSystemStr TEventStr;

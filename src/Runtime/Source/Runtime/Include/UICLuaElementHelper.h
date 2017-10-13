@@ -35,7 +35,7 @@
 //==============================================================================
 #include "UICLuaIncludes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
 }
@@ -62,7 +62,7 @@ private: // Constructors
     virtual ~CLuaElementHelper();
 
 public: // Lua Global Functions
-    static TElement *GetElement(uic::runtime::IApplication &inApplication,
+    static TElement *GetElement(qt3ds::runtime::IApplication &inApplication,
                                 IPresentation *inDefaultPresentation, const char *inPath,
                                 TElement *inStartElement = NULL);
     static int GetElement(lua_State *inLuaState);

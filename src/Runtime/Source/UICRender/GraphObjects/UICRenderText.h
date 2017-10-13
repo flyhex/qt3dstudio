@@ -34,7 +34,7 @@
 #include "UICRenderNode.h"
 #include "UICRenderTextTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SText : public SNode, public STextRenderInfo

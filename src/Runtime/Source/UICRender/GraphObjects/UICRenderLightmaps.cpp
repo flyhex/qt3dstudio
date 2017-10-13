@@ -30,7 +30,7 @@
 
 #include "UICRenderLightmaps.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SLightmaps::SLightmaps()
     : SGraphObject(GraphObjectTypes::Lightmaps)

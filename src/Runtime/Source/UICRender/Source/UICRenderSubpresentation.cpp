@@ -33,7 +33,7 @@
 #pragma warning(disable : 4355) // this used in initializer list.  I have never seen this result in
                                 // a physical error
 #endif
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     SUICRenderPickResult CSubPresentationPickQuery::Pick(const QT3DSVec2 &inMouseCoords,

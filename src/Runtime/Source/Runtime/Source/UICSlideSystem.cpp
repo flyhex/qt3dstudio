@@ -43,8 +43,8 @@
 #include "foundation/Qt3DSIndexableLinkedList.h"
 #include "UICBinarySerializationHelper.h"
 
-using namespace uic::runtime;
-using namespace uic::runtime::element;
+using namespace qt3ds::runtime;
+using namespace qt3ds::runtime::element;
 
 namespace {
 struct SSlideAttribute

@@ -40,7 +40,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSNoCopy.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SRenderSubsetBase

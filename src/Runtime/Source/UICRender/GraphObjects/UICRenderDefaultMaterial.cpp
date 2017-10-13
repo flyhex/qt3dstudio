@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderDefaultMaterial.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 SDefaultMaterial::SDefaultMaterial()
     : SGraphObject(GraphObjectTypes::DefaultMaterial)

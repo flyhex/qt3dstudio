@@ -63,7 +63,7 @@ CQmlElementHelper::~CQmlElementHelper()
 {
 }
 
-TElement *CQmlElementHelper::GetElement(uic::runtime::IApplication &inApplication,
+TElement *CQmlElementHelper::GetElement(qt3ds::runtime::IApplication &inApplication,
                                         IPresentation *inDefaultPresentation, const char *inPath,
                                         TElement *inStartElement)
 {
@@ -161,7 +161,7 @@ bool CQmlElementHelper::SetAttribute(TElement *theElement, const char *theAttNam
     }
 
     // first search if it is a static property
-    Option<uic::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
+    Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
         theElement->FindProperty(theAttributeKey.m_Hash);
 
     if (!thePropertyInfo.hasValue()) {
@@ -169,7 +169,7 @@ bool CQmlElementHelper::SetAttribute(TElement *theElement, const char *theAttNam
         thePropertyInfo = theElement->FindDynamicProperty(theAttributeKey.m_Hash);
         if (!thePropertyInfo.hasValue()) {
             // create a new dynamic porperty
-            uic::runtime::IElementAllocator &theElemAllocator(
+            qt3ds::runtime::IElementAllocator &theElemAllocator(
                 theElement->GetBelongedPresentation()->GetApplication().GetElementAllocator());
             qt3ds::foundation::IStringTable &theStringTable(
                 theElement->GetBelongedPresentation()->GetStringTable());
@@ -250,7 +250,7 @@ bool CQmlElementHelper::GetAttribute(TElement *inElement, const char *inAttribut
     SAttributeKey theAttributeKey;
     theAttributeKey.m_Hash = CHash::HashAttribute(inAttribute);
 
-    Option<uic::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
+    Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
         inElement->FindDynamicProperty(theAttributeKey.m_Hash);
 
     if (thePropertyInfo.hasValue()) {

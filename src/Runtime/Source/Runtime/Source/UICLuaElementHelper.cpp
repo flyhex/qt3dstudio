@@ -82,7 +82,7 @@ CLuaElementHelper::~CLuaElementHelper()
 {
 }
 
-TElement *CLuaElementHelper::GetElement(uic::runtime::IApplication &inApplication,
+TElement *CLuaElementHelper::GetElement(qt3ds::runtime::IApplication &inApplication,
                                         IPresentation *inDefaultPresentation, const char *inPath,
                                         TElement *inStartElement)
 {
@@ -192,8 +192,8 @@ int CLuaElementHelper::GetElement(lua_State *inLuaState)
         theElement = reinterpret_cast<TElement *>(lua_touserdata(inLuaState, ARG_START));
     }
     lua_getglobal(inLuaState, "UICApplication");
-    uic::runtime::IApplication *theApp =
-        static_cast<uic::runtime::IApplication *>(lua_touserdata(inLuaState, -1));
+    qt3ds::runtime::IApplication *theApp =
+        static_cast<qt3ds::runtime::IApplication *>(lua_touserdata(inLuaState, -1));
 
     if (theApp)
         theElement = GetElement(*theApp, thePresentation, thePath, theElement);
@@ -243,7 +243,7 @@ int CLuaElementHelper::GetAttribute(lua_State *inLuaState)
     theAttributeKey.m_Hash = CHash::HashAttribute(attName);
 
     IPresentation *thePresentation = theElement->GetBelongedPresentation();
-    uic::runtime::IApplication &theApplication = thePresentation->GetApplication();
+    qt3ds::runtime::IApplication &theApplication = thePresentation->GetApplication();
 
     if (theAttributeKey.m_Hash == SPECIAL_ATTRIBUTE_GLOBAL_ACTIVE)
         lua_pushboolean(inLuaState, theElement->GetActive());
@@ -254,7 +254,7 @@ int CLuaElementHelper::GetAttribute(lua_State *inLuaState)
     } else if (theAttributeKey.m_Hash == Q3DStudio::CHash::HashAttribute("path")) {
         lua_pushstring(inLuaState, theElement->m_Path.c_str());
     } else {
-        Option<uic::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
+        Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
             theElement->FindProperty(theAttributeKey.m_Hash);
         if (thePropertyInfo.hasValue()) {
             UVariant *theValuePtr = thePropertyInfo->second;
@@ -325,7 +325,7 @@ bool CLuaElementHelper::SetAttribute(lua_State *inLuaState, TElement *theElement
         theElement->SetFlag(ELEMENTFLAG_EXPLICITACTIVE,
                             (lua_toboolean(inLuaState, ARG_VALUE) ? true : false));
     } else {
-        Option<uic::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
+        Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
             theElement->FindProperty(theAttributeKey.m_Hash);
         if (thePropertyInfo.hasValue()) {
             UVariant theNewValue;

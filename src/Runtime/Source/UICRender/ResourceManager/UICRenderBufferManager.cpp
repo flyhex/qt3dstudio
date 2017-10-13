@@ -50,7 +50,7 @@
 #include "foundation/Qt3DSMutex.h"
 #include "UICRenderPrefilterTexture.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

@@ -44,9 +44,9 @@ extern "C" {
 #include "lualib.h"
 }
 
-using namespace uic;
-using namespace uic::state;
-using namespace uic::state::debugger;
+using namespace qt3ds;
+using namespace qt3ds::state;
+using namespace qt3ds::state::debugger;
 
 namespace {
 

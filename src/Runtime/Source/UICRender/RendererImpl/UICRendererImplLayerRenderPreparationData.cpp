@@ -63,7 +63,7 @@
 #ifdef _WIN32
 #pragma warning(disable : 4355)
 #endif
-namespace uic {
+namespace qt3ds {
 namespace render {
     using eastl::reverse;
     using eastl::stable_sort;

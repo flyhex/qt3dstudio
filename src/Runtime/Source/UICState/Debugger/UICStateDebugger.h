@@ -37,7 +37,7 @@
 #include "foundation/IOStreams.h"
 #include "UICStateEditor.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace debugger {
         using namespace editor;

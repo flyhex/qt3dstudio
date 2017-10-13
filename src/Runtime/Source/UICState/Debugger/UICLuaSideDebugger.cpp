@@ -43,8 +43,8 @@ extern "C" {
 }
 
 using namespace qt3ds::foundation;
-using namespace uic::state::debugger;
-using namespace uic::state::debugger::lua;
+using namespace qt3ds::state::debugger;
+using namespace qt3ds::state::debugger::lua;
 using namespace qt3ds;
 
 namespace {

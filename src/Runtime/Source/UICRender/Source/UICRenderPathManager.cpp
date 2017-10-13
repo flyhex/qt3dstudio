@@ -64,7 +64,7 @@
 #include "UICRenderInputStreamFactory.h"
 #include "foundation/Qt3DSMutex.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using qt3ds::render::NVRenderCachedShaderProperty;
 using qt3ds::render::NVRenderCachedShaderBuffer;
 using qt3ds::render::NVRenderStencilFunctionArgument;
@@ -73,7 +73,7 @@ using qt3ds::render::NVRenderStencilOperationArgument;
 using qt3ds::render::NVRenderStencilOp;
 
 typedef UICIMP::SPathBuffer TImportPathBuffer;
-using namespace uic::render::path;
+using namespace qt3ds::render::path;
 
 typedef eastl::pair<CRegisteredString, CRegisteredString> TStrStrPair;
 

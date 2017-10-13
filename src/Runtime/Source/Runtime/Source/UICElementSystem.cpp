@@ -45,7 +45,7 @@
 #include "foundation/Qt3DSIndexableLinkedList.h"
 #include "UICBinarySerializationHelper.h"
 
-using namespace uic::runtime::element;
+using namespace qt3ds::runtime::element;
 using namespace qt3ds;
 using namespace qt3ds::foundation;
 using namespace qt3ds::intrinsics;
@@ -73,7 +73,7 @@ QT3DSU32 GetNumValueAllocations(const STypeDesc &inTypeDesc)
     return ((inTypeDesc.m_Properties.size() + SPropertyValueGroup::NumValues - 1)
             / SPropertyValueGroup::NumValues);
 }
-struct SElementAllocator : public uic::runtime::IElementAllocator
+struct SElementAllocator : public qt3ds::runtime::IElementAllocator
 {
     typedef Pool<SElement, ForwardingAllocator> TElementPool;
     typedef Pool<SComponent, ForwardingAllocator> TComponentPool;
@@ -497,7 +497,7 @@ struct SElementAllocator : public uic::runtime::IElementAllocator
             inBuffer.write(theComponent);
         } else
             inBuffer.write(inElement);
-        uic::runtime::SaveIndexableList<TElementPropertyList>(
+        qt3ds::runtime::SaveIndexableList<TElementPropertyList>(
             inElement.UnsafeGetFirstPropertyGroup(), inBuffer);
         if (inElement.m_Child)
             SaveDFS(inBuffer, *inElement.m_Child, ioElementOffsets);
@@ -650,7 +650,7 @@ struct SElementAllocator : public uic::runtime::IElementAllocator
                         theElement->m_Child = RemapElement(theElement->m_Child, retval);
                         theElement->m_Sibling = RemapElement(theElement->m_Sibling, retval);
                         const STypeDesc &theTypeDescription = theElement->GetTypeDescription();
-                        uic::runtime::LoadIndexableList<TElementPropertyList>(
+                        qt3ds::runtime::LoadIndexableList<TElementPropertyList>(
                             theElement->UnsafeGetFirstPropertyGroup(),
                             theTypeDescription.m_Properties.size(), theReader);
                     }
@@ -919,7 +919,7 @@ bool SElement::HasActivityZone() const
     return m_BelongedPresentation->GetActivityZone() != NULL;
 }
 
-uic::runtime::IActivityZone &SElement::GetActivityZone() const
+qt3ds::runtime::IActivityZone &SElement::GetActivityZone() const
 {
     return *m_BelongedPresentation->GetActivityZone();
 }
@@ -989,8 +989,8 @@ const Q3DStudio::CTimePolicy &SComponent::GetTimePolicy() const
     return const_cast<SComponent *>(this)->GetTimePolicy();
 }
 
-uic::runtime::IElementAllocator &
-uic::runtime::IElementAllocator::CreateElementAllocator(NVFoundationBase &inFoundation,
+qt3ds::runtime::IElementAllocator &
+qt3ds::runtime::IElementAllocator::CreateElementAllocator(NVFoundationBase &inFoundation,
                                                         IStringTable &inStringTable)
 {
     return *QT3DS_NEW(inFoundation.getAllocator(), SElementAllocator)(inFoundation, inStringTable);

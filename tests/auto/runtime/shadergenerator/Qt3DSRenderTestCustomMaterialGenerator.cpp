@@ -54,7 +54,7 @@
 #include <QString>
 #include <QTextStream>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 #include <string>
 
@@ -115,7 +115,7 @@ struct CustomTestParams
     Option<UICDM::SMetaDataCustomMaterial> metaMaterial;
     SImage dummyImages[SShaderDefaultMaterialKeyProperties::ImageMapCount];
     eastl::vector<SRenderableImage*> renderableImages;
-    uic::render::CUICRendererImpl *render;
+    qt3ds::render::CUICRendererImpl *render;
     SImage iblLightProbe;
     NVRenderTexture2D *texture;
 
@@ -230,7 +230,7 @@ static CustomTestKey randomizeTestKey()
     return *reinterpret_cast<CustomTestKey*>(&v);
 }
 
-CustomTestParams *generateTest(uic::render::CUICRendererImpl *renderImpl,
+CustomTestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
                          NVRenderContext *context, CustomTestKey key, SCustomMaterial *material)
 {
     CustomTestParams *params = new CustomTestParams(*renderImpl);
@@ -442,7 +442,7 @@ bool Qt3DSRenderTestCustomMaterialGenerator::run(NVRenderContext *context,
                             metadata()->GetMaterialMetaDataBySourcePath("qrc:/copper.material");
 
         if (metaMaterial.hasValue()) {
-            uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
+            qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
                     name, context->GetFoundation(),
                     uicRenderer()->GetUICContext().GetCustomMaterialSystem(), *metaMaterial,
                     context->GetStringTable());

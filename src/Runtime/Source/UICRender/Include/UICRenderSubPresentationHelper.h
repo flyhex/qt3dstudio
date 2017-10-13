@@ -34,7 +34,7 @@
 #include "UICRenderer.h"
 #include "render/Qt3DSRenderContext.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // Small helper object to setup the state needed to render a sub presentation

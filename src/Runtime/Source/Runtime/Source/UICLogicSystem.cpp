@@ -39,10 +39,10 @@
 #include "foundation/SerializationTypes.h"
 #include "foundation/IOStreams.h"
 
-using namespace uic::runtime;
+using namespace qt3ds::runtime;
 using namespace qt3ds::foundation;
 using namespace qt3ds;
-using namespace uic::runtime::element;
+using namespace qt3ds::runtime::element;
 
 namespace {
 struct SLogicKey
@@ -195,8 +195,8 @@ struct SLogicSystem : public ILogicSystem
         SLogicKey theKey(inTarget.GetHandle(), inEventName);
         TLogicKeyHash::const_iterator iter = m_LogicKeys.find(theKey);
         if (iter != m_LogicKeys.end()) {
-            uic::runtime::IApplication &theApplication = inPresentation.GetApplication();
-            uic::runtime::IElementAllocator &theElemAllocator =
+            qt3ds::runtime::IApplication &theApplication = inPresentation.GetApplication();
+            qt3ds::runtime::IElementAllocator &theElemAllocator =
                 theApplication.GetElementAllocator();
             for (TLogicDataList::const_iterator listIter = iter->second.begin(),
                                                 endIter = iter->second.end();

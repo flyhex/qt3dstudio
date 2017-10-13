@@ -72,7 +72,7 @@
 #include "UICRenderPath.h"
 #include "UICRenderPathSubPath.h"
 
-namespace uic {
+namespace qt3ds {
 namespace studio {
     using Q3DStudio::IDocumentReader;
     using Q3DStudio::CUpdateableDocumentEditor;
@@ -97,31 +97,31 @@ namespace studio {
     using qt3ds::foundation::rotationArc;
     using qt3ds::foundation::Option;
     using qt3ds::foundation::Empty;
-    using uic::render::IUICRenderContext;
-    using uic::render::SScene;
-    using uic::render::SLayer;
-    using uic::render::SNode;
-    using uic::render::SGraphObject;
-    using uic::render::SLight;
-    using uic::render::SCamera;
-    using uic::render::SDefaultMaterial;
-    using uic::render::SImage;
-    using uic::render::SModel;
-    using uic::render::SText;
-    using uic::render::GraphObjectTypes;
-    using uic::render::SRay;
-    using uic::render::ITextRenderer;
-    using uic::render::SEffect;
-    using uic::render::IEffectSystem;
-    using uic::render::SDynamicObject;
-    using uic::render::SCustomMaterial;
-    using uic::render::IDynamicObjectSystem;
-    using uic::render::ICustomMaterialSystem;
-    using uic::render::IBufferManager;
-    using uic::render::IPathManager;
-    using uic::render::SPath;
-    using uic::render::SPathSubPath;
-    using uic::render::SReferencedMaterial;
+    using qt3ds::render::IUICRenderContext;
+    using qt3ds::render::SScene;
+    using qt3ds::render::SLayer;
+    using qt3ds::render::SNode;
+    using qt3ds::render::SGraphObject;
+    using qt3ds::render::SLight;
+    using qt3ds::render::SCamera;
+    using qt3ds::render::SDefaultMaterial;
+    using qt3ds::render::SImage;
+    using qt3ds::render::SModel;
+    using qt3ds::render::SText;
+    using qt3ds::render::GraphObjectTypes;
+    using qt3ds::render::SRay;
+    using qt3ds::render::ITextRenderer;
+    using qt3ds::render::SEffect;
+    using qt3ds::render::IEffectSystem;
+    using qt3ds::render::SDynamicObject;
+    using qt3ds::render::SCustomMaterial;
+    using qt3ds::render::IDynamicObjectSystem;
+    using qt3ds::render::ICustomMaterialSystem;
+    using qt3ds::render::IBufferManager;
+    using qt3ds::render::IPathManager;
+    using qt3ds::render::SPath;
+    using qt3ds::render::SPathSubPath;
+    using qt3ds::render::SReferencedMaterial;
     using qt3ds::render::CRegisteredString;
     using qt3ds::render::IStringTable;
     using UICDM::SFloat3;

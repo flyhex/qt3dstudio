@@ -34,7 +34,7 @@
 #include "UICRenderString.h"
 #include "foundation/FileTools.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 void SEffect::Initialize()
 {

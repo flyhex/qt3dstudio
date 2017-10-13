@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "UICStateVisualBindingContextCommands.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     template <typename TDataType>
@@ -213,39 +213,39 @@ namespace qt3ds {
 namespace foundation {
 
     template <>
-    struct DestructTraits<uic::state::SGotoSlide>
+    struct DestructTraits<qt3ds::state::SGotoSlide>
     {
-        void destruct(uic::state::SGotoSlide &) {}
+        void destruct(qt3ds::state::SGotoSlide &) {}
     };
     template <>
-    struct DestructTraits<uic::state::SCallFunction>
+    struct DestructTraits<qt3ds::state::SCallFunction>
     {
-        void destruct(uic::state::SCallFunction &) {}
+        void destruct(qt3ds::state::SCallFunction &) {}
     };
     template <>
-    struct DestructTraits<uic::state::SSetAttribute>
+    struct DestructTraits<qt3ds::state::SSetAttribute>
     {
-        void destruct(uic::state::SSetAttribute &) {}
+        void destruct(qt3ds::state::SSetAttribute &) {}
     };
     template <>
-    struct DestructTraits<uic::state::SGotoSlideRelative>
+    struct DestructTraits<qt3ds::state::SGotoSlideRelative>
     {
-        void destruct(uic::state::SGotoSlideRelative &) {}
+        void destruct(qt3ds::state::SGotoSlideRelative &) {}
     };
     template <>
-    struct DestructTraits<uic::state::SFireEvent>
+    struct DestructTraits<qt3ds::state::SFireEvent>
     {
-        void destruct(uic::state::SFireEvent &) {}
+        void destruct(qt3ds::state::SFireEvent &) {}
     };
     template <>
-    struct DestructTraits<uic::state::SPresentationAttribute>
+    struct DestructTraits<qt3ds::state::SPresentationAttribute>
     {
-        void destruct(uic::state::SPresentationAttribute &) {}
+        void destruct(qt3ds::state::SPresentationAttribute &) {}
     };
     template <>
-    struct DestructTraits<uic::state::SPlaySound>
+    struct DestructTraits<qt3ds::state::SPlaySound>
     {
-        void destruct(uic::state::SPlaySound &) {}
+        void destruct(qt3ds::state::SPlaySound &) {}
     };
 }
 }

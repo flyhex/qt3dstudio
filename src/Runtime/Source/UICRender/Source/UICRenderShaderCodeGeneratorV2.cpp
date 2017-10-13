@@ -39,7 +39,7 @@
 
 #include <QtGui/qopengl.h>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 struct SStageGeneratorBase : public IShaderStageGenerator
@@ -478,7 +478,7 @@ struct SProgramGenerator : public IShaderProgramGenerator
             return NULL;
         }
 
-        uic::render::IDynamicObjectSystem &theDynamicSystem(m_UICContext.GetDynamicObjectSystem());
+        qt3ds::render::IDynamicObjectSystem &theDynamicSystem(m_UICContext.GetDynamicObjectSystem());
         SShaderCacheProgramFlags theCacheFlags(inFlags);
         for (QT3DSU32 stageIdx = 0, stageEnd = ShaderGeneratorStages::StageCount; stageIdx < stageEnd;
              ++stageIdx) {

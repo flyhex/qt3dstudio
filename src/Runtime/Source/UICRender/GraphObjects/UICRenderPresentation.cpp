@@ -31,7 +31,7 @@
 #include "render/Qt3DSRenderContext.h"
 #include "UICRenderContext.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 void SPresentation::Render(IUICRenderContext &inContext)
 {

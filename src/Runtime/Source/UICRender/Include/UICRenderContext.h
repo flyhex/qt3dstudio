@@ -39,7 +39,7 @@
 
 #include <QPair>
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct ScaleModes
     {

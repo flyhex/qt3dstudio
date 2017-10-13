@@ -98,7 +98,7 @@ uip file data.
 #include "UICElementSystem.h"
 #include "UICSlideSystem.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IRefCountedInputStream;
 }
@@ -126,13 +126,13 @@ class IRuntimeMetaData;
 class CUIPParserActionHelper;
 class CUIPParserObjectRefHelper;
 
-typedef eastl::vector<uic::runtime::element::TPropertyDescAndValue> TPropertyDescAndValueList;
+typedef eastl::vector<qt3ds::runtime::element::TPropertyDescAndValue> TPropertyDescAndValueList;
 
-using uic::render::IInputStreamFactory;
-using uic::render::IRefCountedInputStream;
+using qt3ds::render::IInputStreamFactory;
+using qt3ds::render::IRefCountedInputStream;
 typedef NVScopedRefCounted<IRefCountedInputStream> TInputStreamPtr;
 typedef qt3ds::foundation::CRegisteredString TStrType;
-using uic::runtime::element::SElement;
+using qt3ds::runtime::element::SElement;
 
 struct SElementPropertyInfo
 {
@@ -232,7 +232,7 @@ struct SParseSlideActionEntry
     TStrType m_ActionId;
     qt3ds::QT3DSI32 m_ActionCount;
     bool m_Active;
-    uic::runtime::SSlideAnimAction *m_Actions[SElementPropertyInfo::MaxArity];
+    qt3ds::runtime::SSlideAnimAction *m_Actions[SElementPropertyInfo::MaxArity];
 
     SParseSlideActionEntry(TStrType inSlideId, TStrType inActionId, qt3ds::QT3DSI32 inActionCount,
                            bool inActive)
@@ -526,7 +526,7 @@ public: // Construction
 public: // Parse UIP file
     BOOL Load(IPresentation &inPresentation,
                       NVConstDataRef<SElementAttributeReference> inStateReferences,
-                      uic::state::debugger::ISceneGraphRuntimeDebugger &debugger) override;
+                      qt3ds::state::debugger::ISceneGraphRuntimeDebugger &debugger) override;
     UICDM::IDOMReader &GetDOMReader() override;
     IRuntimeMetaData &GetMetaData() override;
     SElementAndType GetElementForID(const char *inStringId) override;
@@ -541,7 +541,7 @@ protected: // Operation
     BOOL LoadClasses(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
     BOOL LoadGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
     BOOL LoadSceneGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader,
-                        uic::runtime::element::SElement *inNewStyleParent = NULL);
+                        qt3ds::runtime::element::SElement *inNewStyleParent = NULL);
     BOOL LoadLogic(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
     BOOL LoadStateGraph(IPresentation &inPresentation, UICDM::IDOMReader &inReader);
 
@@ -568,7 +568,7 @@ protected: // Scene graph heler
 protected: // Slide helper
     BOOL LoadState(IPresentation &inPresentation, SElement *inComponent, INT32 inSlideIndex,
                    UICDM::IDOMReader &inReader);
-    uic::runtime::SSlidePlayInformation GetPlayMode(UICDM::IDOMReader &inReader);
+    qt3ds::runtime::SSlidePlayInformation GetPlayMode(UICDM::IDOMReader &inReader);
     INT32 GetPlayThroughTo(INT32 inCurrentSlideIndex, UICDM::IDOMReader &inReader);
     eastl::string GetSlideName(UICDM::IDOMReader &inReader);
     eastl::string GetSlideId(UICDM::IDOMReader &inReader);

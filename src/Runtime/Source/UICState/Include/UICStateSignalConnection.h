@@ -32,7 +32,7 @@
 #pragma once
 #include "UICState.h"
 #include "foundation/Qt3DSRefCounted.h"
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class IStateSignalConnection : public NVRefCounted

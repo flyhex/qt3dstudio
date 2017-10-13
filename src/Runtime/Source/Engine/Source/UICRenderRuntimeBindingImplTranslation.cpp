@@ -61,7 +61,7 @@ QT3DSU32 g_PresentationTag;
 
 // Add specializations for the tagged pointer operations to make casting
 // a bit safer and more transparent.
-namespace uic {
+namespace qt3ds {
 namespace render {
     template <>
     struct SPointerTag<CUICTranslator>
@@ -974,7 +974,7 @@ struct SPathSubPathTranslator : public CUICTranslator
                              Q3DStudio::IPresentation & /*inStudioPresentation*/)
     {
         SPathSubPath &theItem = *static_cast<SPathSubPath *>(m_RenderObject);
-        uic::render::IPathManager &theManager = inParser.m_RenderContext.GetPathManager();
+        qt3ds::render::IPathManager &theManager = inParser.m_RenderContext.GetPathManager();
         QT3DSU32 numAnchors = 0;
         bool updatePath = false;
         CRegisteredString theAnchorType =
@@ -988,7 +988,7 @@ struct SPathSubPathTranslator : public CUICTranslator
             }
         }
         if (updatePath) {
-            NVDataRef<uic::render::SPathAnchorPoint> thePathBuffer =
+            NVDataRef<qt3ds::render::SPathAnchorPoint> thePathBuffer =
                 theManager.ResizePathSubPathBuffer(theItem, numAnchors);
             if (thePathBuffer.size()) {
                 QT3DSU32 anchorIndex = 0;
@@ -996,11 +996,11 @@ struct SPathSubPathTranslator : public CUICTranslator
                      theChild = theChild->GetSibling()) {
                     if (theChild->GetType() == theAnchorType) {
                         if (theChild->IsDirty()) {
-                            uic::render::SPathAnchorPoint &thePoint(thePathBuffer[anchorIndex]);
+                            qt3ds::render::SPathAnchorPoint &thePoint(thePathBuffer[anchorIndex]);
 
                             for (QT3DSI32 idx = 0, end = theChild->GetAttributeCount(); idx < end;
                                  ++idx) {
-                                uic::runtime::element::TPropertyDescAndValuePtr thePropInfo =
+                                qt3ds::runtime::element::TPropertyDescAndValuePtr thePropInfo =
                                     theChild->GetPropertyByIndex(idx);
                                 switch (thePropInfo.first.GetNameHash()) {
                                 case Q3DStudio::ATTRIBUTE_POSITION_X:
@@ -1189,7 +1189,7 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
     {
     }
     ~SDynamicObjectTranslatorContext() {}
-    void AddEffectExtendedProperty(const uic::render::dynamic::SPropertyDefinition &thePropDef,
+    void AddEffectExtendedProperty(const qt3ds::render::dynamic::SPropertyDefinition &thePropDef,
                                    const char *inExtension, Q3DStudio::EAttributeType inType,
                                    CRenderString &ioStringBuilder, QT3DSU32 inOffset, QT3DSU32 dataOffset)
     {
@@ -1199,12 +1199,12 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
         m_PropertyHashes.insert(
             eastl::make_pair(theHash, SEffectPropertyEntry(inType, inOffset, dataOffset)));
     }
-    void BuildPropertyHashes(NVConstDataRef<uic::render::dynamic::SPropertyDefinition> inProperties)
+    void BuildPropertyHashes(NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties)
     {
         if (m_PropertyHashes.size() == 0) {
-            uic::render::CRenderString theNameBuilder;
+            qt3ds::render::CRenderString theNameBuilder;
             for (QT3DSU32 idx = 0, end = inProperties.size(); idx < end; ++idx) {
-                const uic::render::dynamic::SPropertyDefinition &thePropDef = inProperties[idx];
+                const qt3ds::render::dynamic::SPropertyDefinition &thePropDef = inProperties[idx];
                 switch (thePropDef.m_DataType) {
                 case qt3ds::render::NVRenderShaderDataTypes::QT3DSF32:
                     m_PropertyHashes.insert(eastl::make_pair(
@@ -1278,18 +1278,18 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
                       IDynamicObjectSystem &inSystem)
     {
         if (element.GetActive()) {
-            NVConstDataRef<uic::render::dynamic::SPropertyDefinition> theProperties =
+            NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> theProperties =
                 inSystem.GetProperties(inObject.m_ClassName);
             BuildPropertyHashes(theProperties);
             SDynamicObject &theItem(inObject);
             for (long idx = 0, end = element.GetAttributeCount(); idx < end; ++idx) {
-                uic::runtime::element::TPropertyDescAndValuePtr thePropInfo =
+                qt3ds::runtime::element::TPropertyDescAndValuePtr thePropInfo =
                     *element.GetPropertyByIndex(idx);
                 THashToOffsetMap::iterator theFind =
                     m_PropertyHashes.find(thePropInfo.first.GetNameHash());
                 if (theFind != m_PropertyHashes.end()) {
                     const SEffectPropertyEntry &theEntry(theFind->second);
-                    const uic::render::dynamic::SPropertyDefinition &theDefinition(
+                    const qt3ds::render::dynamic::SPropertyDefinition &theDefinition(
                         theProperties[theEntry.m_PropertyOffset]);
                     if (theEntry.m_AttributeType
                         == (Q3DStudio::EAttributeType)thePropInfo.first.m_Type) {
@@ -1458,7 +1458,7 @@ struct SRenderPluginTranslator : public CUICTranslator
             } // ok, now we have an efficient mapping from attribute to plugin value name.
             theTransContext.m_PropertyUpdates.clear();
             for (long idx = 0, end = Element().GetAttributeCount(); idx < end; ++idx) {
-                uic::runtime::element::TPropertyDescAndValuePtr thePropInfo =
+                qt3ds::runtime::element::TPropertyDescAndValuePtr thePropInfo =
                     *Element().GetPropertyByIndex(idx);
                 nvhash_map<int, CRegisteredString>::iterator theFind =
                     theTransContext.m_AttribHashIndexMap.find(thePropInfo.first.GetNameHash());
@@ -1566,7 +1566,7 @@ struct STranslatorCreator
             // Don't push properties from inactive elements.
             for (long idx = 0, end = theTranslator.Element().GetAttributeCount(); idx < end;
                  ++idx) {
-                uic::runtime::element::TPropertyDescAndValuePtr thePropInfo =
+                qt3ds::runtime::element::TPropertyDescAndValuePtr thePropInfo =
                     *theTranslator.Element().GetPropertyByIndex(idx);
                 theParser.Setup(thePropInfo.first.GetNameHash(), *thePropInfo.second,
                                 (Q3DStudio::EAttributeType)thePropInfo.first.m_Type);
@@ -1577,7 +1577,7 @@ struct STranslatorCreator
             // same for dynamic properties
             for (long idx = 0, end = theTranslator.Element().GetDynamicAttributeCount(); idx < end;
                  ++idx) {
-                uic::runtime::element::TPropertyDescAndValuePtr thePropInfo =
+                qt3ds::runtime::element::TPropertyDescAndValuePtr thePropInfo =
                     *theTranslator.Element().GetDynamicPropertyByIndex(idx);
                 theParser.Setup(thePropInfo.first.GetNameHash(), *thePropInfo.second,
                                 (Q3DStudio::EAttributeType)thePropInfo.first.m_Type);

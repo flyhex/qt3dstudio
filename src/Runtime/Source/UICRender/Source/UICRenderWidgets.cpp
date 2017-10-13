@@ -34,7 +34,7 @@
 #include "UICRenderShaderCodeGeneratorV2.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 
@@ -62,12 +62,12 @@ struct SWidgetBBox : public IRenderWidget
     {
         m_BoxShader = inContext.GetShader(m_ItemName);
         if (!m_BoxShader) {
-            uic::render::IShaderProgramGenerator &theGenerator(inContext.GetProgramGenerator());
+            qt3ds::render::IShaderProgramGenerator &theGenerator(inContext.GetProgramGenerator());
             theGenerator.BeginProgram();
-            uic::render::IShaderStageGenerator &theVertexGenerator(
-                *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Vertex));
-            uic::render::IShaderStageGenerator &theFragmentGenerator(
-                *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Fragment));
+            qt3ds::render::IShaderStageGenerator &theVertexGenerator(
+                *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Vertex));
+            qt3ds::render::IShaderStageGenerator &theFragmentGenerator(
+                *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Fragment));
 
             theVertexGenerator.AddIncoming("attr_pos", "vec3");
             theVertexGenerator.AddUniform("model_view_projection", "mat4");
@@ -190,12 +190,12 @@ struct SWidgetAxis : public IRenderWidget
     {
         m_AxisShader = inContext.GetShader(m_ItemName);
         if (!m_AxisShader) {
-            uic::render::IShaderProgramGenerator &theGenerator(inContext.GetProgramGenerator());
+            qt3ds::render::IShaderProgramGenerator &theGenerator(inContext.GetProgramGenerator());
             theGenerator.BeginProgram();
-            uic::render::IShaderStageGenerator &theVertexGenerator(
-                *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Vertex));
-            uic::render::IShaderStageGenerator &theFragmentGenerator(
-                *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Fragment));
+            qt3ds::render::IShaderStageGenerator &theVertexGenerator(
+                *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Vertex));
+            qt3ds::render::IShaderStageGenerator &theFragmentGenerator(
+                *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Fragment));
             theVertexGenerator.AddIncoming("attr_pos", "vec3");
             theVertexGenerator.AddIncoming("attr_color", "vec3");
             theVertexGenerator.AddOutgoing("output_color", "vec3");

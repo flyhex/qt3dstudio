@@ -47,7 +47,7 @@ class IWindowSystem;
 class IAudioPlayer;
 }
 
-namespace uic {
+namespace qt3ds {
 class UICAssetVisitor
 {
 public:
@@ -115,7 +115,7 @@ public:
      */
     bool InitializeApp(int winWidth, int winHeight, const QSurfaceFormat& format,
                        int offscreenID, const QString &source,
-                       uic::UICAssetVisitor *assetVisitor = nullptr);
+                       qt3ds::UICAssetVisitor *assetVisitor = nullptr);
 
     bool IsInitialised(void);
     void setOffscreenId(int offscreenID);

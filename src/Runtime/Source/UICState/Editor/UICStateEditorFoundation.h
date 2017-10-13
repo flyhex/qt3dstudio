@@ -40,7 +40,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/IOStreams.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

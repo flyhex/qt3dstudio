@@ -53,12 +53,12 @@
 namespace {
 
 class CNDDStateFactory;
-struct SVisualStateHandler : public uic::state::IVisualStateInterpreterFactory,
-                             public uic::state::IVisualStateCommandHandler
+struct SVisualStateHandler : public qt3ds::state::IVisualStateInterpreterFactory,
+                             public qt3ds::state::IVisualStateCommandHandler
 {
     qt3ds::NVAllocatorCallback &m_Allocator;
     CNDDStateFactory &m_Factory;
-    uic::state::INDDStateFactory::IStateInterpreterCreateCallback *m_StateInterpreterCreateCallback;
+    qt3ds::state::INDDStateFactory::IStateInterpreterCreateCallback *m_StateInterpreterCreateCallback;
     qt3ds::QT3DSI32 mRefCount;
 
 public:
@@ -70,7 +70,7 @@ public:
     {
     }
     void
-    SetStateInterpreterCreateCallback(uic::state::INDDStateFactory::IStateInterpreterCreateCallback
+    SetStateInterpreterCreateCallback(qt3ds::state::INDDStateFactory::IStateInterpreterCreateCallback
                                           &inStateInterpreterCreateCallback)
     {
         m_StateInterpreterCreateCallback = &inStateInterpreterCreateCallback;
@@ -84,28 +84,28 @@ public:
         QT3DS_IMPLEMENT_REF_COUNT_RELEASE(m_Allocator);
     }
 
-    uic::state::IStateInterpreter *OnNewStateMachine(const char8_t *inPath,
+    qt3ds::state::IStateInterpreter *OnNewStateMachine(const char8_t *inPath,
                                                              const char8_t *inId,
                                                              const char8_t *inDatamodelFunction) override;
 
-    void Handle(const uic::state::SVisualStateCommand &inCommand,
-                        uic::state::IScriptContext &inScriptContext) override;
+    void Handle(const qt3ds::state::SVisualStateCommand &inCommand,
+                        qt3ds::state::IScriptContext &inScriptContext) override;
 };
 
-class CNDDStateFactory : public uic::state::INDDStateFactory
+class CNDDStateFactory : public qt3ds::state::INDDStateFactory
 {
 public:
-    uic::state::SNDDStateContext &m_Context;
-    qt3ds::foundation::NVScopedRefCounted<uic::state::INDDStateLuaEngine> m_ScriptBridge;
-    qt3ds::foundation::NVScopedRefCounted<uic::state::IVisualStateContext> m_VisualStateContext;
-    qt3ds::foundation::NVScopedRefCounted<uic::evt::IEventSystem> m_EventSystem;
-    uic::state::INDDStateApplication *m_Application;
+    qt3ds::state::SNDDStateContext &m_Context;
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::state::INDDStateLuaEngine> m_ScriptBridge;
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IVisualStateContext> m_VisualStateContext;
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::evt::IEventSystem> m_EventSystem;
+    qt3ds::state::INDDStateApplication *m_Application;
     SVisualStateHandler *m_VisualStateHandler;
-    uic::state::INDDStateFactory::IStateInterpreterCreateCallback *m_StateInterpreterCreateCallback;
+    qt3ds::state::INDDStateFactory::IStateInterpreterCreateCallback *m_StateInterpreterCreateCallback;
 
     qt3ds::QT3DSI32 m_RefCount;
 
-    CNDDStateFactory(uic::state::SNDDStateContext &inContext)
+    CNDDStateFactory(qt3ds::state::SNDDStateContext &inContext)
         : m_Context(inContext)
         , m_ScriptBridge(0)
         , m_VisualStateContext(0)
@@ -138,19 +138,19 @@ public:
         }
     }
 
-    uic::state::INDDStateScriptBridge &GetScriptEngine() override
+    qt3ds::state::INDDStateScriptBridge &GetScriptEngine() override
     {
         if (m_ScriptBridge == NULL) {
-            m_ScriptBridge = uic::state::INDDStateLuaEngine::Create(m_Context);
+            m_ScriptBridge = qt3ds::state::INDDStateLuaEngine::Create(m_Context);
             m_ScriptBridge->PreInitialize();
         }
         return *m_ScriptBridge;
     }
 
-    uic::state::IVisualStateContext &GetVisualStateContext() override
+    qt3ds::state::IVisualStateContext &GetVisualStateContext() override
     {
         if (!m_VisualStateContext) {
-            m_VisualStateContext = uic::state::IVisualStateContext::Create(
+            m_VisualStateContext = qt3ds::state::IVisualStateContext::Create(
                 *m_Context.m_Foundation, m_Context.GetStringTable());
             SVisualStateHandler *newHandle =
                 QT3DS_NEW(m_Context.m_Foundation->getAllocator(),
@@ -162,23 +162,23 @@ public:
         }
         return *m_VisualStateContext;
     }
-    uic::evt::IEventSystem &GetEventSystem() override
+    qt3ds::evt::IEventSystem &GetEventSystem() override
     {
         if (!m_EventSystem) {
-            m_EventSystem = uic::evt::IEventSystem::Create(*m_Context.m_Foundation);
+            m_EventSystem = qt3ds::evt::IEventSystem::Create(*m_Context.m_Foundation);
         }
         return *m_EventSystem;
     }
     qt3ds::foundation::IStringTable &GetStringTable() override { return m_Context.GetStringTable(); }
     qt3ds::NVFoundationBase &GetFoundation() override { return *m_Context.m_Foundation.mPtr; }
     Q3DStudio::ITimeProvider &GetTimeProvider() override { return m_Context.m_TimeProvider; }
-    uic::state::IInputStreamFactory &GetInputStreamFactory() override
+    qt3ds::state::IInputStreamFactory &GetInputStreamFactory() override
     {
         return *m_Context.m_InputStreamFactory;
     }
 
-    uic::state::INDDStateApplication *GetApplication() override { return m_Application; }
-    void SetApplication(uic::state::INDDStateApplication *inApplication) override
+    qt3ds::state::INDDStateApplication *GetApplication() override { return m_Application; }
+    void SetApplication(qt3ds::state::INDDStateApplication *inApplication) override
     {
         m_Application = inApplication;
         if (inApplication) {
@@ -200,11 +200,11 @@ public:
     }
 };
 
-uic::state::IStateInterpreter *
+qt3ds::state::IStateInterpreter *
 SVisualStateHandler::OnNewStateMachine(const char8_t *inPath, const char8_t *inId,
                                        const char8_t *inDatamodelFunction)
 {
-    uic::state::IStateInterpreter *theInterpreter =
+    qt3ds::state::IStateInterpreter *theInterpreter =
         m_Factory.m_ScriptBridge->CreateStateMachine(inPath, inId, inDatamodelFunction);
     if (m_StateInterpreterCreateCallback)
         m_StateInterpreterCreateCallback->OnCreate(
@@ -212,15 +212,15 @@ SVisualStateHandler::OnNewStateMachine(const char8_t *inPath, const char8_t *inI
     return theInterpreter;
 }
 
-void SVisualStateHandler::Handle(const uic::state::SVisualStateCommand &inCommand,
-                                 uic::state::IScriptContext &inScriptContext)
+void SVisualStateHandler::Handle(const qt3ds::state::SVisualStateCommand &inCommand,
+                                 qt3ds::state::IScriptContext &inScriptContext)
 {
     (void)inCommand;
     (void)inScriptContext;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     INDDStateFactory &INDDStateFactory::Create(SNDDStateContext &inContext)

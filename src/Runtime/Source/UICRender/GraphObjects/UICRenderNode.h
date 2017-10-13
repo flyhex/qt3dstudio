@@ -40,7 +40,7 @@
 #include "UICRenderEulerAngles.h"
 #include "foundation/StringTable.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SModel;

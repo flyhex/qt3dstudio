@@ -44,8 +44,8 @@ extern "C" {
 #include "lualib.h"
 }
 
-using namespace uic::state;
-using namespace uic::state::debugger;
+using namespace qt3ds::state;
+using namespace qt3ds::state::debugger;
 /**
  *	The caching system is fairly simple.  Basically, the sender side keeps track of table and
  *function info values and sends the entire table

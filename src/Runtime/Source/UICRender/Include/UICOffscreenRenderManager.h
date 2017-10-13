@@ -39,7 +39,7 @@
 #include "UICRenderScene.h"
 #include "UICRenderLayer.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IResourceManager;
     struct SUICRenderPickResult;

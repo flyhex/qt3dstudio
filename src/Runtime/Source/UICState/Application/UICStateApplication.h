@@ -32,7 +32,7 @@
 #include "EASTL/string.h"
 #include <QtCore/qvector.h>
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     // Shared code for dealing with .uia files.
     class IApplication

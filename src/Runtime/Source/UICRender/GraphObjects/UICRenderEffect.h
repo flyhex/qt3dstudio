@@ -36,7 +36,7 @@
 #include "EASTL/string.h"
 #include "UICRenderDynamicObject.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SLayer;
     struct SEffectContext;

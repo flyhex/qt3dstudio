@@ -94,8 +94,8 @@ namespace Q3DStudio {
 #define Q3DStudio_LOG_EVENT(S)
 #endif
 
-using uic::runtime::IApplicationCore;
-using uic::runtime::IApplication;
+using qt3ds::runtime::IApplicationCore;
+using qt3ds::runtime::IApplication;
 using namespace qt3ds;
 
 // forward declaration of exported lua global functions
@@ -212,7 +212,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
         void Release() override;
     };
 
-    struct SImageLoadCallback : public uic::render::IImageLoadListener
+    struct SImageLoadCallback : public qt3ds::render::IImageLoadListener
     {
         NVFoundationBase &m_Foundation;
         SLuaEngineImpl *m_Engine; // Note the engine may be null in the case of system shutdown.
@@ -227,7 +227,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
         }
 
         void OnImageLoadComplete(CRegisteredString inPath,
-                                         uic::render::ImageLoadResult::Enum inResult) override;
+                                         qt3ds::render::ImageLoadResult::Enum inResult) override;
 
         void OnImageBatchComplete(QT3DSU64) override {}
 
@@ -236,7 +236,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
         void release() override;
     };
 
-    struct SLuaEngineListener : public uic::state::debugger::ILuaSideListener
+    struct SLuaEngineListener : public qt3ds::state::debugger::ILuaSideListener
     {
         NVFoundationBase &m_Foundation;
         SLuaEngineImpl &m_Engine;
@@ -315,7 +315,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
     {
         bool m_EOF;
         FILE *m_File;
-        NVScopedRefCounted<uic::render::IRefCountedInputStream> m_InputStream;
+        NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> m_InputStream;
         eastl::vector<char8_t> m_Buffer;
 
         SUserFile()
@@ -328,7 +328,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
             , m_EOF(false)
         {
         }
-        SUserFile(uic::render::IRefCountedInputStream &stream)
+        SUserFile(qt3ds::render::IRefCountedInputStream &stream)
             : m_File(NULL)
             , m_InputStream(stream)
             , m_EOF(false)
@@ -447,7 +447,7 @@ eastl::string CScriptEngineCallFunctionArgRetriever::GetArgDescription()
 }
 
 namespace {
-    uic::render::IInputStreamFactory *g_InputStreamFactory;
+    qt3ds::render::IInputStreamFactory *g_InputStreamFactory;
 
     void *lua_user_fopen(const char *filename, const char *mode, char *absfilename)
     {
@@ -471,7 +471,7 @@ namespace {
                         return NULL;
                 }
         }*/
-        uic::render::IRefCountedInputStream *stream =
+        qt3ds::render::IRefCountedInputStream *stream =
             g_InputStreamFactory->GetStreamForFile(filename, true);
         if (stream) {
             if (absfilename) {
@@ -669,7 +669,7 @@ namespace {
     static int EnsureScriptIsLoaded(lua_State *inLuaState, const char *inRelativePath,
                                     const char *inBasePath, eastl::string &scriptBuffer,
                                     qt3ds::foundation::IPerfTimer &inPerfTimer,
-                                    uic::render::IInputStreamFactory &inStreamFactory,
+                                    qt3ds::render::IInputStreamFactory &inStreamFactory,
                                     eastl::vector<char8_t> &inLoadVec)
     {
         qt3ds::foundation::CFileTools::CombineBaseAndRelative(inBasePath, inRelativePath,
@@ -684,8 +684,8 @@ namespace {
         if (lua_isnil(inLuaState, -1)) {
             SStackPerfTimer __perfTimer(inPerfTimer, "Load Lua File");
             lua_pop(inLuaState, 1);
-            uic::render::IInputStreamFactory &theFactory(inStreamFactory);
-            NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream =
+            qt3ds::render::IInputStreamFactory &theFactory(inStreamFactory);
+            NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream =
                 theFactory.GetStreamForFile(inRelativePath, true);
 
             inLoadVec.clear();
@@ -735,7 +735,7 @@ struct SLuaEngineImpl : public CLuaEngine
     INT32 m_ServerPort; ///<port number of remote debugger
     eastl::string m_ScriptString;
     eastl::string m_ServerIP;
-    NVScopedRefCounted<uic::state::debugger::ILuaDebugger> m_LuaDebugger;
+    NVScopedRefCounted<qt3ds::state::debugger::ILuaDebugger> m_LuaDebugger;
     NVScopedRefCounted<SLuaEngineListener> m_LuaListener;
 
     lua_State *m_PreloadState;
@@ -762,11 +762,11 @@ struct SLuaEngineImpl : public CLuaEngine
     void EnableMultithreadedAccess() override;
     void DisableMultithreadedAccess() override;
 
-    void SetApplicationCore(uic::runtime::IApplicationCore &inApplication) override;
-    void SetApplication(uic::runtime::IApplication &inApplication) override;
+    void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) override;
+    void SetApplication(qt3ds::runtime::IApplication &inApplication) override;
 
     void BeginPreloadScripts(const eastl::vector<const char *> &inScripts,
-                                     uic::render::IThreadPool &inThreadPool,
+                                     qt3ds::render::IThreadPool &inThreadPool,
                                      const char *inProjectDir) override;
     void EndPreloadScripts() override;
     eastl::vector<eastl::string> GetLoadedScripts() override;
@@ -801,12 +801,12 @@ struct SLuaEngineImpl : public CLuaEngine
     bool PlaySoundFile(const char *soundPath) override;
 
     void AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction) override;
-    void EnableDebugging(uic::state::debugger::IMultiProtocolSocket &socket) override;
+    void EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket &socket) override;
     void EnableProfiling() override;
     void StepGC() override;
 
     // functions from CLuaEngine
-    uic::state::IStateInterpreter *CreateStateMachine(const char8_t *inPath,
+    qt3ds::state::IStateInterpreter *CreateStateMachine(const char8_t *inPath,
                                                               const char8_t *inId,
                                                               const char8_t *inDatamodelFunction) override;
     void PreInitialize() override;
@@ -841,7 +841,7 @@ namespace __SLuaEngineImpl_Static_Calls__ {
             eastl::string theLuaBinFile = theEngine->m_PreloadProjectDir;
             CFileTools::CombineBaseAndRelative(theEngine->m_PreloadProjectDir.c_str(),
                                                "binary/compiledlua.bin", theLuaBinFile);
-            NVScopedRefCounted<uic::render::IRefCountedInputStream> theBinFile =
+            NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theBinFile =
                 theEngine->m_ApplicationCore->GetRuntimeFactoryCore()
                     .GetInputStreamFactory()
                     .GetStreamForFile(theLuaBinFile.c_str());
@@ -955,11 +955,11 @@ namespace __SLuaEngineImpl_Static_Calls__ {
         lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
         SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
 
-        uic::state::debugger::IDebugger *theDebugger = NULL;
+        qt3ds::state::debugger::IDebugger *theDebugger = NULL;
         if (theEngine) {
             theDebugger = &theEngine->m_Application->GetStateDebugger();
         }
-        return uic::state::ILuaScriptContext::ParseSCXML(
+        return qt3ds::state::ILuaScriptContext::ParseSCXML(
             inLuaState, theDebugger, theEngine->m_Foundation,
             theEngine->m_ApplicationCore->GetRuntimeFactoryCore().GetStringTable());
     }
@@ -975,11 +975,11 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
     }
 
     void SImageLoadCallback::OnImageLoadComplete(CRegisteredString inPath,
-                                                 uic::render::ImageLoadResult::Enum inResult)
+                                                 qt3ds::render::ImageLoadResult::Enum inResult)
     {
         if (m_Engine) {
             m_Engine->CallImageLoadComplete(
-                inPath, inResult == uic::render::ImageLoadResult::Succeeded, m_CallbackId);
+                inPath, inResult == qt3ds::render::ImageLoadResult::Succeeded, m_CallbackId);
         }
     }
 
@@ -1120,7 +1120,7 @@ theEngine->m_ApplicationCore->GetRuntimeFactoryCore().GetInputStreamFactory()
         return 1;
 }*/
 
-void SLuaEngineImpl::SetApplicationCore(uic::runtime::IApplicationCore &inApplication)
+void SLuaEngineImpl::SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication)
 {
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_ApplicationCore = &inApplication;
@@ -1156,7 +1156,7 @@ void SLuaEngineImpl::SetApplicationCore(uic::runtime::IApplicationCore &inApplic
     }*/
 }
 
-void SLuaEngineImpl::SetApplication(uic::runtime::IApplication &inApplication)
+void SLuaEngineImpl::SetApplication(qt3ds::runtime::IApplication &inApplication)
 {
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_Application = &inApplication;
@@ -1167,7 +1167,7 @@ void SLuaEngineImpl::SetApplication(uic::runtime::IApplication &inApplication)
 // Starts preloading scripts offline.  This sets m_LuaState to NULL until after EndPreloadScripts to
 // avoid multithreaded lua state access.  Some calls may be queued till EndPreloadScripts
 void SLuaEngineImpl::BeginPreloadScripts(const eastl::vector<const char *> &inScripts,
-                                         uic::render::IThreadPool &inThreadPool,
+                                         qt3ds::render::IThreadPool &inThreadPool,
                                          const char *inProjDir)
 {
     m_PreloadScripts.assign(inScripts.begin(), inScripts.end());
@@ -1469,8 +1469,8 @@ void SLuaEngineImpl::CallFunction(const char *behavior, const char *handler,
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     int theTop = lua_gettop(m_LuaState);
     lua_getglobal(m_LuaState, "UICApplication");
-    uic::runtime::IApplication *theApp =
-        static_cast<uic::runtime::IApplication *>(lua_touserdata(m_LuaState, -1));
+    qt3ds::runtime::IApplication *theApp =
+        static_cast<qt3ds::runtime::IApplication *>(lua_touserdata(m_LuaState, -1));
     lua_pop(m_LuaState, 1);
 
     TElement *theBehavior = CLuaElementHelper::GetElement(*theApp, NULL, behavior, NULL);
@@ -1558,7 +1558,7 @@ void SLuaEngineImpl::CallFunction(const char *behavior, const char *handler,
 void SLuaEngineImpl::ProcessCustomActions(IPresentation *inPresentation,
                                           const SEventCommand &inCommand)
 {
-    using uic::runtime::TIdValuePair;
+    using qt3ds::runtime::TIdValuePair;
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     TElement *theBehavior = inCommand.m_Target; // the element that is a behavior
 
@@ -1764,8 +1764,8 @@ void SLuaEngineImpl::GotoSlide(const char *component, const char *slideName,
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     int theTop = lua_gettop(m_LuaState);
     lua_getglobal(m_LuaState, "UICApplication");
-    uic::runtime::IApplication *theApp =
-        static_cast<uic::runtime::IApplication *>(lua_touserdata(m_LuaState, -1));
+    qt3ds::runtime::IApplication *theApp =
+        static_cast<qt3ds::runtime::IApplication *>(lua_touserdata(m_LuaState, -1));
     lua_pop(m_LuaState, 1);
 
     TElement *theTarget = CLuaElementHelper::GetElement(*theApp, NULL, component, NULL);
@@ -1844,17 +1844,17 @@ void SLuaEngineImpl::AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction
     }
 }
 
-void SLuaEngineImpl::EnableDebugging(uic::state::debugger::IMultiProtocolSocket &socket)
+void SLuaEngineImpl::EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket &socket)
 {
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
-    using namespace uic::state::debugger;
+    using namespace qt3ds::state::debugger;
     QT3DS_ASSERT(m_ApplicationCore);
-    NVScopedRefCounted<uic::state::debugger::IMultiProtocolSocketStream> theStream =
-        socket.CreateProtocol(uic::state::debugger::ILuaArchitectDebugServer::LuaProtocolName(),
+    NVScopedRefCounted<qt3ds::state::debugger::IMultiProtocolSocketStream> theStream =
+        socket.CreateProtocol(qt3ds::state::debugger::ILuaArchitectDebugServer::LuaProtocolName(),
                               NULL);
     m_LuaListener = QT3DS_NEW(m_Foundation.getAllocator(), SLuaEngineListener)(m_Foundation, *this);
 
-    m_LuaDebugger = uic::state::debugger::ILuaDebugger::CreateLuaSideDebugger(
+    m_LuaDebugger = qt3ds::state::debugger::ILuaDebugger::CreateLuaSideDebugger(
         m_ApplicationCore->GetRuntimeFactoryCore().GetFoundation(), *theStream, m_LuaState,
         m_ApplicationCore->GetRuntimeFactoryCore().GetStringTable(),
         m_ApplicationCore->GetProjectDirectory().c_str(), m_LuaListener.mPtr);
@@ -1887,7 +1887,7 @@ void SLuaEngineImpl::StepGC()
  * ****************Inherited virtual functions from CLuaEngine **************
  */
 //=============================================================================
-uic::state::IStateInterpreter *
+qt3ds::state::IStateInterpreter *
 SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
                                    const char8_t *inDatamodelFunction)
 {
@@ -1907,7 +1907,7 @@ SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
     qt3ds::foundation::CFileTools::CombineBaseAndRelative(m_Application->GetProjectDirectory().c_str(),
                                                        inPath, fullPath);
     lua_pushstring(m_LuaState, fullPath.c_str());
-    uic::state::IStateInterpreter *theInterpreter = NULL;
+    qt3ds::state::IStateInterpreter *theInterpreter = NULL;
     int error = PCall(1, 1, 0);
     if (error) {
         qCCritical(INVALID_OPERATION, "Failed to load scxml file: %s", lua_tostring(m_LuaState, -1));
@@ -1954,11 +1954,11 @@ SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
         // If all that worked then we should have the state machine and the datatable on the stack
         // and only those two on the stack.
         // At which point we can call start, which will pop everything off the stack
-        uic::state::ILuaScriptContext::Initialize(m_LuaState, inId);
+        qt3ds::state::ILuaScriptContext::Initialize(m_LuaState, inId);
         // Now get the interpreter from the map so we can get its value
         lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_state_machines");
         lua_getfield(m_LuaState, -1, inId);
-        theInterpreter = uic::state::ILuaScriptContext::GetInterpreterFromBindings(m_LuaState);
+        theInterpreter = qt3ds::state::ILuaScriptContext::GetInterpreterFromBindings(m_LuaState);
     }
     return theInterpreter;
 }
@@ -2282,7 +2282,7 @@ int SLuaEngineImpl::PCall(int argcount, int retcount, int errorIndex)
 
 void SLuaEngineImpl::OnBreak()
 {
-    uic::state::debugger::IDebugger &theDebugger = m_ApplicationCore->GetStateDebugger();
+    qt3ds::state::debugger::IDebugger &theDebugger = m_ApplicationCore->GetStateDebugger();
     theDebugger.OnExternalBreak();
 }
 
@@ -2433,7 +2433,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
     int GetScreenInformation(lua_State *inLuaState)
     {
         CPresentation *thePresentation = CLuaEngine::GetCurrentPresentation(inLuaState);
-        uic::runtime::IApplication &theApp = thePresentation->GetApplication();
+        qt3ds::runtime::IApplication &theApp = thePresentation->GetApplication();
 
         INT32 theViewWidth;
         INT32 theViewHeight;
@@ -2710,7 +2710,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
     {
         TElement *theElement = reinterpret_cast<TElement *>(lua_touserdata(inLuaState, 1));
 
-        NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream =
+        NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream =
             theElement->GetBelongedPresentation()
                 ->GetApplication()
                 .GetRuntimeFactoryCore()
@@ -2768,7 +2768,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
 
         Q3DStudio::INT32 retval = 0;
 
-        uic::render::IImageLoadListener *theListener = NULL;
+        qt3ds::render::IImageLoadListener *theListener = NULL;
         if (lua_gettop(inLuaState) == 4) {
             SLuaEngineImpl *theEngine =
                 static_cast<SLuaEngineImpl *>(thePresentation->GetScriptBridge());
@@ -2876,9 +2876,9 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
             lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
             SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
             lua_pop(inLuaState, 1);
-            uic::evt::IEventSystem &theEventSystem =
+            qt3ds::evt::IEventSystem &theEventSystem =
                 theEngine->m_ApplicationCore->GetRuntimeFactoryCore().GetEventSystem();
-            uic::evt::SLuaEventPollerBinding::WrapEventPoller(inLuaState, theEventSystem);
+            qt3ds::evt::SLuaEventPollerBinding::WrapEventPoller(inLuaState, theEventSystem);
             lua_pushvalue(inLuaState, -1);
             lua_setfield(inLuaState, LUA_REGISTRYINDEX, "uic_event_system");
         }

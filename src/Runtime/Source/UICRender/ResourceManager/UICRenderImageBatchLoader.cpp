@@ -44,7 +44,7 @@
 #include "foundation/Qt3DSPool.h"
 #include "foundation/Qt3DSPerfTimer.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

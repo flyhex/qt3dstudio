@@ -32,7 +32,7 @@
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "UICUIADatamodel.h"
 
-namespace uic {
+namespace qt3ds {
 namespace app {
 
     using namespace Q3DStudio;
@@ -200,19 +200,19 @@ namespace qt3ds {
 namespace foundation {
 
     template <>
-    struct DestructTraits<uic::app::SGuid>
+    struct DestructTraits<qt3ds::app::SGuid>
     {
-        void destruct(uic::app::SGuid &) {}
+        void destruct(qt3ds::app::SGuid &) {}
     };
     template <>
-    struct DestructTraits<uic::app::SObjectRef>
+    struct DestructTraits<qt3ds::app::SObjectRef>
     {
-        void destruct(uic::app::SObjectRef &) {}
+        void destruct(qt3ds::app::SObjectRef &) {}
     };
     template <>
-    struct DestructTraits<uic::app::CStringOrInt>
+    struct DestructTraits<qt3ds::app::CStringOrInt>
     {
-        void destruct(uic::app::CStringOrInt &) {}
+        void destruct(qt3ds::app::CStringOrInt &) {}
     };
     template <>
     struct DestructTraits<CRegisteredString>
@@ -222,7 +222,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace app {
 
     typedef qt3ds::foundation::

@@ -33,7 +33,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "UICTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class INDDStateApplication : public qt3ds::foundation::NVRefCounted

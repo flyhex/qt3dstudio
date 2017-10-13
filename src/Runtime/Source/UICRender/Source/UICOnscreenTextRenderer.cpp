@@ -47,7 +47,7 @@
 #include <QtGui/qrawfont.h>
 #include <QtCore/qfile.h>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

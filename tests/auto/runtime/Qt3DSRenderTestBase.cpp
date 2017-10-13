@@ -28,7 +28,7 @@
 
 #include "Qt3DSRenderTestBase.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace qt3ds {
 namespace render {
@@ -40,11 +40,11 @@ NVRenderTestBase::~NVRenderTestBase()
 
 bool NVRenderTestBase::initializeUICRenderer(QSurfaceFormat format)
 {
-    m_coreFactory = uic::render::IUICRenderFactoryCore::CreateRenderFactoryCore("", m_windowSystem,
+    m_coreFactory = qt3ds::render::IUICRenderFactoryCore::CreateRenderFactoryCore("", m_windowSystem,
                                                                                 m_timeProvider);
     m_factory = m_coreFactory->CreateRenderFactory(format);
     m_rc = m_factory->GetUICRenderContext();
-    m_renderImpl = new uic::render::CUICRendererImpl(*m_rc);
+    m_renderImpl = new qt3ds::render::CUICRendererImpl(*m_rc);
 
     QString versionString;
     switch ((QT3DSU32)m_rc->GetRenderContext().GetRenderContextType()) {

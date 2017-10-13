@@ -43,7 +43,7 @@
 #include "foundation/Qt3DSInvasiveLinkedList.h"
 #include "UICRenderableImage.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct RenderPreparationResultFlagValues

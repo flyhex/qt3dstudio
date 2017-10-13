@@ -55,8 +55,8 @@
 #include "UICOffscreenRenderKey.h"
 #include "UICRenderDynamicObjectSystemUtil.h"
 
-using namespace uic::render;
-using namespace uic::render::dynamic;
+using namespace qt3ds::render;
+using namespace qt3ds::render::dynamic;
 using qt3ds::render::NVRenderContextScopedProperty;
 using qt3ds::render::NVRenderCachedShaderProperty;
 using qt3ds::render::NVRenderCachedShaderBuffer;
@@ -298,7 +298,7 @@ typedef eastl::pair<CRegisteredString, NVScopedRefCounted<SImageEntry>> TNamedIm
 typedef eastl::pair<CRegisteredString, NVScopedRefCounted<SDataBufferEntry>> TNamedDataBufferEntry;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SEffectContext

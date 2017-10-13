@@ -38,7 +38,7 @@
 #include "foundation/Utils.h"
 #include "EASTL/string.h"
 
-using namespace uic::state;
+using namespace qt3ds::state;
 
 namespace {
 struct SExecContext : public IExecutionContext

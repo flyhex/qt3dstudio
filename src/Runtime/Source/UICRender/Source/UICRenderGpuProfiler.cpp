@@ -44,7 +44,7 @@
 #define RECORDED_FRAME_DELAY 3
 #define RECORDED_FRAME_DELAY_MASK 0x0003
 
-using namespace uic::render;
+using namespace qt3ds::render;
 using namespace qt3ds::render;
 
 namespace {

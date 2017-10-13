@@ -37,7 +37,7 @@
 #include "UICTypes.h"
 #include "UICRenderLoadedTexture.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class UICRenderPrefilterTexture : public NVRefCounted

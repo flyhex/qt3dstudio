@@ -42,7 +42,7 @@
 //==============================================================================
 //	Namespace
 //==============================================================================
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
 }
@@ -70,7 +70,7 @@ protected:
     SInputFrame m_InputFrame; ///< The data describing the input state
     eastl::vector<eastl::pair<float, float>> m_PickInput;
     bool m_BeginPickInput;
-    uic::runtime::IApplication *m_Application; ///< The Runtime object
+    qt3ds::runtime::IApplication *m_Application; ///< The Runtime object
     qt3ds::foundation::NVScopedRefCounted<CInputEventProvider>
         m_InputEventProvider; ///< The event provider for keyboard
 
@@ -83,7 +83,7 @@ public: // Construction
     virtual ~CInputEngine();
 
 public: //	Runtime interfaces
-    void SetApplication(uic::runtime::IApplication *inApplication);
+    void SetApplication(qt3ds::runtime::IApplication *inApplication);
 
 public:
     // Access

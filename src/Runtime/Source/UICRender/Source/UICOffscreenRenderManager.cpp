@@ -46,7 +46,7 @@
 #include "UICRenderResourceBufferObjects.h"
 #include "UICRendererUtil.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace eastl {
 template <>

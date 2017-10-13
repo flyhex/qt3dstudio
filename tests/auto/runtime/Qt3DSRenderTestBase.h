@@ -43,7 +43,7 @@
 #include "UICRendererImpl.h"
 #include "UICMetadata.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 class IUICRenderer;
 class CUICRendererImpl;
@@ -144,16 +144,16 @@ namespace render {
         }
 
         bool initializeUICRenderer(QSurfaceFormat format);
-        uic::render::CUICRendererImpl *uicRenderer();
+        qt3ds::render::CUICRendererImpl *uicRenderer();
         Q3DStudio::IRuntimeMetaData *NVRenderTestBase::metadata();
 
     private:
 
-        NVScopedRefCounted<uic::render::IUICRenderFactoryCore> m_coreFactory;
-        NVScopedRefCounted<uic::render::IUICRenderFactory> m_factory;
-        NVScopedRefCounted<uic::render::IUICRenderContext> m_rc;
+        NVScopedRefCounted<qt3ds::render::IUICRenderFactoryCore> m_coreFactory;
+        NVScopedRefCounted<qt3ds::render::IUICRenderFactory> m_factory;
+        NVScopedRefCounted<qt3ds::render::IUICRenderContext> m_rc;
         qt3ds::foundation::NVScopedReleasable<Q3DStudio::IRuntimeMetaData> m_metaData;
-        uic::render::CUICRendererImpl *m_renderImpl;
+        qt3ds::render::CUICRendererImpl *m_renderImpl;
 
         SNullTimeProvider m_timeProvider;
         SNullWindowSystem m_windowSystem;

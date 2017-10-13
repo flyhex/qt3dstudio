@@ -44,7 +44,7 @@
 QT_BEGIN_NAMESPACE
 
 class Q_STUDIO3D_EXPORT ViewerQmlStreamProxy : public Q3DSQmlStreamProxy,
-        public uic::UICAssetVisitor
+        public qt3ds::UICAssetVisitor
 {
 public:
     ViewerQmlStreamProxy(QObject *parent = nullptr);

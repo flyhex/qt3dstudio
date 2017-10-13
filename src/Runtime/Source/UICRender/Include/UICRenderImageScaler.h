@@ -35,7 +35,7 @@
 #define __IMAGESCALER_H_
 #include "UICRender.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     //==============================================================================
     //	Class

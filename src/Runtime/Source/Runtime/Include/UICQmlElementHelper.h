@@ -50,7 +50,7 @@ private: // Constructors
     virtual ~CQmlElementHelper();
 
 public: // Lua Global Functions
-    static TElement *GetElement(uic::runtime::IApplication &inApplication,
+    static TElement *GetElement(qt3ds::runtime::IApplication &inApplication,
                                 IPresentation *inDefaultPresentation, const char *inPath,
                                 TElement *inStartElement = NULL);
 

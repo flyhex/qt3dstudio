@@ -36,7 +36,7 @@
 #include "foundation/Qt3DSMat33.h"
 #include "UICRenderShaderKeys.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SLayerRenderData;

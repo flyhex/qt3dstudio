@@ -36,7 +36,7 @@
 //	Includes
 //==============================================================================
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     namespace element {
         struct TElement;

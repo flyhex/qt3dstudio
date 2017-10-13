@@ -115,7 +115,7 @@ const char *KEY_ONUPDATE = "onUpdate";
 
 struct SLuaEngineImpl;
 namespace __SLuaEngineImpl_Basic_Structs__ {
-    struct SLuaEngineListener : public uic::state::debugger::ILuaSideListener
+    struct SLuaEngineListener : public qt3ds::state::debugger::ILuaSideListener
     {
         qt3ds::NVFoundationBase &m_Foundation;
         SLuaEngineImpl &m_Engine;
@@ -194,7 +194,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
     {
         FILE *m_File;
         bool m_EOF;
-        qt3ds::foundation::NVScopedRefCounted<uic::state::IRefCountedInputStream> m_InputStream;
+        qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IRefCountedInputStream> m_InputStream;
         eastl::vector<char8_t> m_Buffer;
 
         SUserFile()
@@ -207,7 +207,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
             , m_EOF(false)
         {
         }
-        SUserFile(uic::state::IRefCountedInputStream &stream)
+        SUserFile(qt3ds::state::IRefCountedInputStream &stream)
             : m_File(0)
             , m_InputStream(stream)
             , m_EOF(false)
@@ -330,7 +330,7 @@ using namespace __SLuaEngineImpl_Basic_Structs__;
 //}
 
 namespace {
-    uic::state::IInputStreamFactory *g_InputStreamFactory;
+    qt3ds::state::IInputStreamFactory *g_InputStreamFactory;
 
     void *lua_user_fopen(const char *filename, const char *mode, char *absfilename)
     {
@@ -354,7 +354,7 @@ namespace {
                         return 0;
                 }
         }*/
-        uic::state::IRefCountedInputStream *stream =
+        qt3ds::state::IRefCountedInputStream *stream =
             g_InputStreamFactory->GetStreamForFile(filename, true);
         if (stream) {
             if (absfilename) {
@@ -524,7 +524,7 @@ namespace {
                                     const char *inBasePath, eastl::string &scriptBuffer
                                     //, qt3ds::foundation::IPerfTimer& inPerfTimer
                                     ,
-                                    uic::state::IInputStreamFactory &inStreamFactory,
+                                    qt3ds::state::IInputStreamFactory &inStreamFactory,
                                     eastl::vector<char8_t> &inLoadVec)
     {
         qt3ds::foundation::CFileTools::CombineBaseAndRelative(inBasePath, inRelativePath,
@@ -539,8 +539,8 @@ namespace {
         if (lua_isnil(inLuaState, -1)) {
             // SStackPerfTimer __perfTimer( inPerfTimer, "Load Lua File" );
             lua_pop(inLuaState, 1);
-            uic::state::IInputStreamFactory &theFactory(inStreamFactory);
-            qt3ds::foundation::NVScopedRefCounted<uic::state::IRefCountedInputStream> theStream =
+            qt3ds::state::IInputStreamFactory &theFactory(inStreamFactory);
+            qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IRefCountedInputStream> theStream =
                 theFactory.GetStreamForFile(inRelativePath, true);
 
             inLoadVec.clear();
@@ -568,25 +568,25 @@ namespace {
 }
 
 eastl::vector<eastl::string> g_AdditionalSharedLibraryPaths;
-uic::state::TLuaLibraryLoader LoadLuaLibraries =
+qt3ds::state::TLuaLibraryLoader LoadLuaLibraries =
     luaL_openlibs; ///< Defaults to open all lua libraries
 lua_user_file_io g_engine_file_io;
 lua_Alloc g_engine_alloc = MemoryAllocator;
 
-struct SLuaEngineImpl : public uic::state::INDDStateLuaEngine
+struct SLuaEngineImpl : public qt3ds::state::INDDStateLuaEngine
 {
     typedef eastl::vector<eastl::string> TStringList;
-    uic::state::SNDDStateContext &m_Context;
+    qt3ds::state::SNDDStateContext &m_Context;
     lua_State *m_LuaState;
 
-    uic::state::INDDStateApplication *m_Application;
+    qt3ds::state::INDDStateApplication *m_Application;
 
     INT32 m_CallbackIndex;
 
     INT32 m_ServerPort; ///<port number of remote debugger
     eastl::string m_ScriptString;
     eastl::string m_ServerIP;
-    qt3ds::foundation::NVScopedRefCounted<uic::state::debugger::ILuaDebugger> m_LuaDebugger;
+    qt3ds::foundation::NVScopedRefCounted<qt3ds::state::debugger::ILuaDebugger> m_LuaDebugger;
     qt3ds::foundation::NVScopedRefCounted<SLuaEngineListener> m_LuaListener;
 
     lua_State *m_PreloadState;
@@ -605,7 +605,7 @@ struct SLuaEngineImpl : public uic::state::INDDStateLuaEngine
     bool m_ProfileActive;
     eastl::vector<SLuaPerfEvent> m_PerfStack;
 
-    SLuaEngineImpl(uic::state::SNDDStateContext &inContext);
+    SLuaEngineImpl(qt3ds::state::SNDDStateContext &inContext);
     virtual ~SLuaEngineImpl();
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Context.GetAllocator())
@@ -614,7 +614,7 @@ struct SLuaEngineImpl : public uic::state::INDDStateLuaEngine
     void EnableMultithreadedAccess() override;
     void DisableMultithreadedAccess() override;
 
-    void SetApplication(uic::state::INDDStateApplication &inApplication) override;
+    void SetApplication(qt3ds::state::INDDStateApplication &inApplication) override;
 
     //	virtual void		BeginPreloadScripts( const eastl::vector<const char*>& inScripts,
     //uic::render::IThreadPool& inThreadPool, const char* inProjectDir );
@@ -634,7 +634,7 @@ struct SLuaEngineImpl : public uic::state::INDDStateLuaEngine
     void StepGC() override;
 
     // functions from CLuaEngine
-    uic::state::IStateInterpreter *CreateStateMachine(const char8_t *inPath,
+    qt3ds::state::IStateInterpreter *CreateStateMachine(const char8_t *inPath,
                                                               const char8_t *inId,
                                                               const char8_t *inDatamodelFunction) override;
     void PreInitialize() override;
@@ -801,7 +801,7 @@ namespace __SLuaEngineImpl_Basic_Structs__ {
 /**
  *	Constructor
  */
-SLuaEngineImpl::SLuaEngineImpl(uic::state::SNDDStateContext &inContext)
+SLuaEngineImpl::SLuaEngineImpl(qt3ds::state::SNDDStateContext &inContext)
     : m_Context(inContext)
     , m_LuaState(0)
     , m_Application(0)
@@ -882,7 +882,7 @@ void SLuaEngineImpl::DisableMultithreadedAccess()
     m_MultithreadedMutex = 0;
 }
 
-void SLuaEngineImpl::SetApplication(uic::state::INDDStateApplication &inApplication)
+void SLuaEngineImpl::SetApplication(qt3ds::state::INDDStateApplication &inApplication)
 {
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_Application = &inApplication;
@@ -1120,7 +1120,7 @@ void SLuaEngineImpl::StepGC()
  * ****************Inherited virtual functions from CLuaEngine **************
  */
 //=============================================================================
-uic::state::IStateInterpreter *
+qt3ds::state::IStateInterpreter *
 SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
                                    const char8_t *inDatamodelFunction)
 {
@@ -1139,7 +1139,7 @@ SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
     eastl::string fullPath;
     qt3ds::foundation::CFileTools::CombineBaseAndRelative(m_Context.GetProjectDir(), inPath, fullPath);
     lua_pushstring(m_LuaState, fullPath.c_str());
-    uic::state::IStateInterpreter *theInterpreter = 0;
+    qt3ds::state::IStateInterpreter *theInterpreter = 0;
     int error = PCall(1, 1, 0);
     if (error) {
         qCCritical(qt3ds::INVALID_OPERATION, "Failed to load scxml file: %s",
@@ -1187,11 +1187,11 @@ SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
         // If all that worked then we should have the state machine and the datatable on the stack
         // and only those two on the stack.
         // At which point we can call start, which will pop everything off the stack
-        uic::state::ILuaScriptContext::Initialize(m_LuaState, inId);
+        qt3ds::state::ILuaScriptContext::Initialize(m_LuaState, inId);
         // Now get the interpreter from the map so we can get its value
         lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_state_machines");
         lua_getfield(m_LuaState, -1, inId);
-        theInterpreter = uic::state::ILuaScriptContext::GetInterpreterFromBindings(m_LuaState);
+        theInterpreter = qt3ds::state::ILuaScriptContext::GetInterpreterFromBindings(m_LuaState);
     }
     return theInterpreter;
 }
@@ -1490,12 +1490,12 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
         lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
         SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
 
-        uic::state::debugger::IDebugger *theDebugger = 0;
+        qt3ds::state::debugger::IDebugger *theDebugger = 0;
         // if ( theEngine )
         //{
         //	theDebugger = &theEngine->m_Application->GetStateDebugger();
         //}
-        return uic::state::ILuaScriptContext::ParseSCXML(inLuaState, theDebugger,
+        return qt3ds::state::ILuaScriptContext::ParseSCXML(inLuaState, theDebugger,
                                                          *theEngine->m_Context.m_Foundation,
                                                          theEngine->m_Context.GetStringTable());
     }
@@ -1524,9 +1524,9 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
             lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
             SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
             lua_pop(inLuaState, 1);
-            uic::evt::IEventSystem &theEventSystem =
+            qt3ds::evt::IEventSystem &theEventSystem =
                 theEngine->m_Context.m_Factory->GetEventSystem();
-            uic::evt::SLuaEventPollerBinding::WrapEventPoller(inLuaState, theEventSystem);
+            qt3ds::evt::SLuaEventPollerBinding::WrapEventPoller(inLuaState, theEventSystem);
             lua_pushvalue(inLuaState, -1);
             lua_setfield(inLuaState, LUA_REGISTRYINDEX, "uic_event_system");
         }
@@ -1558,7 +1558,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
  */
 //=============================================================================
 //==============================================================================
-namespace uic {
+namespace qt3ds {
 namespace state {
     INDDStateLuaEngine *INDDStateLuaEngine::Create(SNDDStateContext &inContext)
     {

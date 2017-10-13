@@ -37,7 +37,7 @@
 using namespace qt3ds;
 using namespace qt3ds::render;
 using namespace qt3ds::foundation;
-using namespace uic::render;
+using namespace qt3ds::render;
 
 UICRenderPrefilterTexture::UICRenderPrefilterTexture(NVRenderContext *inNVRenderContext,
                                                      QT3DSI32 inWidth, QT3DSI32 inHeight,

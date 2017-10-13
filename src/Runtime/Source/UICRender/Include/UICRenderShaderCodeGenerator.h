@@ -37,7 +37,7 @@
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "UICRenderString.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SEndlType

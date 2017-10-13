@@ -35,10 +35,10 @@
 #include "UICStateInterpreter.h"
 #include "UICStateEditorFoundation.h"
 
-namespace uic {
+namespace qt3ds {
 namespace app {
-    using namespace uic::state;
-    using namespace uic::state::editor;
+    using namespace qt3ds::state;
+    using namespace qt3ds::state::editor;
 
     typedef eastl::pair<Q3DStudio::ERuntimeDataModelDataType,
                         Q3DStudio::ERuntimeAdditionalMetaDataType>
@@ -158,11 +158,11 @@ namespace app {
         // inPath may either exist or not.  You can pass in a uip file as well as a uia file.
         // application dir is so we can find the meta data.
         // inStream provides a way to load from memory, it will be used if it's not NULL.
-        static IDatamodel &Create(uic::state::editor::TFoundationPtr inFoundation,
+        static IDatamodel &Create(qt3ds::state::editor::TFoundationPtr inFoundation,
                                   const TEditorStr &inPath, const TEditorStr &inApplicationDir,
                                   IStateMachineEditorManager &inStateMachineEditorManager,
                                   IInStream *inStream = 0);
-        static IDatamodel &Create(uic::state::editor::TFoundationPtr inFoundation,
+        static IDatamodel &Create(qt3ds::state::editor::TFoundationPtr inFoundation,
                                   const TEditorStr &inPath, const TEditorStr &inApplicationDir,
                                   IStateMachineEditorManager &inStateMachineEditorManager,
                                   IStringTable &inStringTable, IInStream *inStream = 0);

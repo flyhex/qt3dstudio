@@ -40,7 +40,7 @@
 #include "foundation/Qt3DSPool.h"
 #include "foundation/Qt3DSInvasiveLinkedList.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 struct STask

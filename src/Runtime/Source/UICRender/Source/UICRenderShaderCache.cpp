@@ -47,7 +47,7 @@
 #include <QRegularExpression>
 #include <QString>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 using qt3ds::render::NVRenderContextScopedProperty;
@@ -729,7 +729,7 @@ struct ShaderCache : public IShaderCache
 };
 }
 
-size_t uic::render::HashShaderFeatureSet(NVConstDataRef<SShaderPreprocessorFeature> inFeatureSet)
+size_t qt3ds::render::HashShaderFeatureSet(NVConstDataRef<SShaderPreprocessorFeature> inFeatureSet)
 {
     size_t retval(0);
     for (QT3DSU32 idx = 0, end = inFeatureSet.size(); idx < end; ++idx) {

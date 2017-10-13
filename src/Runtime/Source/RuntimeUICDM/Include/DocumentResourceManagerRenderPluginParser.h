@@ -54,12 +54,12 @@ struct CRenderPluginParser
     ParseFile(std::shared_ptr<UICDM::IDOMFactory> inFactory,
               std::shared_ptr<UICDM::IStringTable> inStringTable, const char8_t *inFileData,
               UICDM::CXmlErrorHandler &inErrorHandler,
-              uic::render::IInputStreamFactory &inStreamFactory)
+              qt3ds::render::IInputStreamFactory &inStreamFactory)
     {
         using namespace qt3ds;
         using namespace qt3ds::foundation;
 
-        NVScopedRefCounted<uic::render::IRefCountedInputStream> theStream(
+        NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
             inStreamFactory.GetStreamForFile(inFileData));
         if (!theStream) {
             QT3DS_ASSERT(0);

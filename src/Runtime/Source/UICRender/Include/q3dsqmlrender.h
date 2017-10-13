@@ -35,7 +35,7 @@
 
 class IQt3DS;
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 class IQ3DSQmlStreamService;
 class IQ3DSQmlStreamRenderer;

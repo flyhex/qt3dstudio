@@ -33,7 +33,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     //==============================================================================
     //	Description

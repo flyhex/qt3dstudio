@@ -29,8 +29,8 @@
 ****************************************************************************/
 #include "UICRenderPixelGraphicsTypes.h"
 
-using namespace uic;
-using namespace uic::render;
+using namespace qt3ds;
+using namespace qt3ds::render;
 
 SPGGraphObject::SPGGraphObject(SGTypes::Enum inType)
     : m_Type(inType)

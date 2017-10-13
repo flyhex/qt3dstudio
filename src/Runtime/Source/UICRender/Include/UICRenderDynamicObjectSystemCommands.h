@@ -36,7 +36,7 @@
 #include "foundation/Qt3DSIntrinsics.h"
 #include "foundation/Qt3DSFlags.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     namespace dynamic {
         using qt3ds::render::NVRenderBufferBarrierFlags;

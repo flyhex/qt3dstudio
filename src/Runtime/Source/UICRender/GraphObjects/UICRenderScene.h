@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSVec3.h"
 #include "UICRenderGraphObject.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SLayer;
     struct SPresentation;

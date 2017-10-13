@@ -42,7 +42,7 @@
 #include "UICActivationManager.h"
 #include "UICPresentation.h"
 
-using uic::runtime::SSlideKey;
+using qt3ds::runtime::SSlideKey;
 //==============================================================================
 //	Namespace
 //==============================================================================
@@ -178,7 +178,7 @@ void CComponentManager::GotoSlideIndex(TElement *inComponent,
 
     inComponent->SetDirty();
     m_Presentation.FireEvent(EVENT_ONSLIDEENTER, inComponent);
-    uic::runtime::IActivityZone *theZone = m_Presentation.GetActivityZone();
+    qt3ds::runtime::IActivityZone *theZone = m_Presentation.GetActivityZone();
     if (theZone)
         theZone->OnSlideChange(*inComponent);
 

@@ -34,7 +34,7 @@
 #include "UICRenderGraphObject.h"
 #include "UICRenderMaterialDirty.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SReferencedMaterial : SGraphObject

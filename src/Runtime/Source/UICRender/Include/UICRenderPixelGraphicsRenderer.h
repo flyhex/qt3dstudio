@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSDataRef.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     // Pixel graphics are graphics described in pixels.

@@ -37,7 +37,7 @@
                                 // a physical error
 #endif
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     COldNBustedPluginRenderer::COldNBustedPluginRenderer(IUICRenderContext &inRenderContext,

@@ -36,7 +36,7 @@
 #include "UICRenderShaderCache.h"
 #include "UICRenderShaderCodeGeneratorV2.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
 // these are our current shader limits

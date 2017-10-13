@@ -49,7 +49,7 @@ struct SMetaDataEffect;
 struct SMetaDataCustomMaterial;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IInputStreamFactory;
 }
@@ -384,7 +384,7 @@ public:
      *	This takes an input stream factory because on android the metadata is installed
      *	in the APK file, so we don't have exact access to it on the filesystem.
      */
-    static IRuntimeMetaData &Create(uic::render::IInputStreamFactory &inInputStreamFactory);
+    static IRuntimeMetaData &Create(qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 };
 
 } // namespace Q3DStudio

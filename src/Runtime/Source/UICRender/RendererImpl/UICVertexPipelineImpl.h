@@ -32,7 +32,7 @@
 #define UIC_VERTEX_PIPELINE_IMPL_H
 #include "UICRenderDefaultMaterialShaderGenerator.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     // Baseclass for the vertex pipelines to be sure we have consistent implementations.
     struct SVertexPipelineImpl : public IDefaultMaterialVertexPipeline

@@ -62,12 +62,12 @@
 
 #pragma warning(disable : 4100) // unreferenced formal parameter
 
-using namespace uic::studio;
-QT3DSU32 uic::studio::g_GraphObjectTranslatorTag;
-using uic::render::SPGGraphObject;
-using uic::render::SPGRect;
-using uic::render::SPGVertLine;
-using uic::render::SPGHorzLine;
+using namespace qt3ds::studio;
+QT3DSU32 qt3ds::studio::g_GraphObjectTranslatorTag;
+using qt3ds::render::SPGGraphObject;
+using qt3ds::render::SPGRect;
+using qt3ds::render::SPGVertLine;
+using qt3ds::render::SPGHorzLine;
 using qt3ds::render::NVRenderRectF;
 using qt3ds::render::NVRenderRect;
 
@@ -154,12 +154,12 @@ struct STranslatorUICDMParser
     {
         qt3ds::render::CRegisteredString temp;
         if (ParseProperty(inProperty, temp)) {
-            outValue = uic::render::MapRotationOrder(temp);
+            outValue = qt3ds::render::MapRotationOrder(temp);
             return true;
         }
         return false;
     }
-    bool ParseOrientation(CUICDMPropertyHandle inProperty, uic::render::NodeFlags &outValue)
+    bool ParseOrientation(CUICDMPropertyHandle inProperty, qt3ds::render::NodeFlags &outValue)
     {
         qt3ds::render::CRegisteredString temp;
         if (ParseProperty(inProperty, temp)) {
@@ -229,8 +229,8 @@ struct STranslatorUICDMParser
     {
         qt3ds::render::CRegisteredString temp;
         if (ParseProperty(inProperty, temp)) {
-            uic::render::SEnumNameMap *theNameMap(uic::render::SEnumParseMap<TEnumType>::GetMap());
-            for (uic::render::SEnumNameMap *theIter = theNameMap;
+            qt3ds::render::SEnumNameMap *theNameMap(qt3ds::render::SEnumParseMap<TEnumType>::GetMap());
+            for (qt3ds::render::SEnumNameMap *theIter = theNameMap;
                  theIter->m_Name && *theIter->m_Name; ++theIter) {
                 // hack to match advanced overlay types, whose name start with a '*'
                 const char8_t *p = temp;
@@ -246,8 +246,8 @@ struct STranslatorUICDMParser
     }
 
     bool ParseNodeFlagsProperty(UICDM::CUICDMPropertyHandle inProperty,
-                                uic::render::NodeFlags &outValue,
-                                uic::render::NodeFlagValues::Enum theFlag)
+                                qt3ds::render::NodeFlags &outValue,
+                                qt3ds::render::NodeFlagValues::Enum theFlag)
     {
         bool temp = false;
         if (ParseProperty(inProperty, temp)) {
@@ -257,8 +257,8 @@ struct STranslatorUICDMParser
         return false;
     }
     bool ParseNodeFlagsInverseProperty(UICDM::CUICDMPropertyHandle inProperty,
-                                       uic::render::NodeFlags &outValue,
-                                       uic::render::NodeFlagValues::Enum theFlag)
+                                       qt3ds::render::NodeFlags &outValue,
+                                       qt3ds::render::NodeFlagValues::Enum theFlag)
     {
         bool temp = false;
         if (ParseProperty(inProperty, temp)) {
@@ -267,7 +267,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseProperty(CUICDMPropertyHandle inProperty, uic::render::SImage *&ioImage)
+    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::SImage *&ioImage)
     {
         Option<SLong4> theData = GetPropertyValue<SLong4>(inProperty);
         if (theData.hasValue()) {
@@ -276,7 +276,7 @@ struct STranslatorUICDMParser
             SGraphObjectTranslator *imageTranslator = m_Context.GetOrCreateTranslator(theInstance);
             if (imageTranslator
                 && imageTranslator->GetGraphObject().m_Type
-                    == uic::render::GraphObjectTypes::Image) {
+                    == qt3ds::render::GraphObjectTypes::Image) {
                 SImage *theNewImage = static_cast<SImage *>(&imageTranslator->GetGraphObject());
                 ioImage = theNewImage;
             } else
@@ -286,7 +286,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, uic::render::SGraphObject *&ioObjRef)
+    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::SGraphObject *&ioObjRef)
     {
         Option<SObjectRefType> theData = GetPropertyValue<SObjectRefType>(inProperty);
         if (theData.hasValue()) {
@@ -300,7 +300,7 @@ struct STranslatorUICDMParser
         return true;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, uic::render::SNode *&ioNodePtr)
+    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::SNode *&ioNodePtr)
     {
         Option<SObjectRefType> theData = GetPropertyValue<SObjectRefType>(inProperty);
         SNode *theNewNodePtr = nullptr;
@@ -497,10 +497,10 @@ struct STranslatorUICDMParser
         theItem.m_##name = !theItem.m_##name;
 #define HANDLE_UIC_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
     theParser.ParseNodeFlagsProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_Flags, \
-                                     uic::render::NodeFlagValues::name);
+                                     qt3ds::render::NodeFlagValues::name);
 #define HANDLE_UIC_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
     theParser.ParseNodeFlagsInverseProperty(inContext.m_ObjectDefinitions.type##_##name,           \
-                                            theItem.m_Flags, uic::render::NodeFlagValues::name);
+                                            theItem.m_Flags, qt3ds::render::NodeFlagValues::name);
 #define HANDLE_UIC_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
     theParser.ParseEnumProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
 #define HANDLE_UIC_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
@@ -539,7 +539,7 @@ struct SSceneTranslator : public SGraphObjectTranslator
                 inContext.m_AssetGraph.GetChild(GetInstanceHandle(), idx);
             SGraphObjectTranslator *theTranslator = inContext.GetOrCreateTranslator(theLayer);
             if (theTranslator
-                && theTranslator->GetGraphObject().m_Type == uic::render::GraphObjectTypes::Layer) {
+                && theTranslator->GetGraphObject().m_Type == qt3ds::render::GraphObjectTypes::Layer) {
                 SLayer *theLayerObj = static_cast<SLayer *>(&theTranslator->GetGraphObject());
                 theLayerObj->m_NextSibling = nullptr;
                 if (theItem.m_FirstChild == nullptr)
@@ -597,9 +597,9 @@ struct SNodeTranslator : public SGraphObjectTranslator
         // Ensure the global transform is valid because we use this before we render sometimes.
         theNode.m_GlobalTransform = QT3DSMat44::createIdentity();
     }
-    static inline bool IsNodeType(uic::render::GraphObjectTypes::Enum inType)
+    static inline bool IsNodeType(qt3ds::render::GraphObjectTypes::Enum inType)
     {
-        return uic::render::GraphObjectTypes::IsNodeType(inType);
+        return qt3ds::render::GraphObjectTypes::IsNodeType(inType);
     }
     void PushTranslation(STranslation &inContext) override
     {
@@ -624,8 +624,8 @@ struct SNodeTranslator : public SGraphObjectTranslator
         SNode &theItem = static_cast<SNode &>(GetGraphObject());
         SNode &theChild = static_cast<SNode &>(inChild);
         theItem.AddChild(theChild);
-        theItem.MarkDirty(uic::render::NodeTransformDirtyFlag::TransformIsDirty);
-        theChild.MarkDirty(uic::render::NodeTransformDirtyFlag::TransformIsDirty);
+        theItem.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
+        theChild.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
     }
     void ClearChildren() override
     {
@@ -645,7 +645,7 @@ struct SNodeTranslator : public SGraphObjectTranslator
         SNode &theNode = static_cast<SNode &>(GetGraphObject());
         if (inActive != theNode.m_Flags.IsActive()) {
             theNode.m_Flags.SetActive(inActive);
-            theNode.MarkDirty(uic::render::NodeTransformDirtyFlag::TransformIsDirty);
+            theNode.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
         }
     }
 };
@@ -674,7 +674,7 @@ struct SLayerTranslator : public SNodeTranslator
             theItem.AddEffect(static_cast<SEffect &>(inChild));
         } else if (inChild.m_Type == GraphObjectTypes::RenderPlugin) {
             SLayer &theItem = static_cast<SLayer &>(GetGraphObject());
-            theItem.m_RenderPlugin = &static_cast<uic::render::SRenderPlugin &>(inChild);
+            theItem.m_RenderPlugin = &static_cast<qt3ds::render::SRenderPlugin &>(inChild);
         }
     }
     void ClearChildren() override
@@ -774,9 +774,9 @@ struct SModelTranslator : public SNodeTranslator
 
         SGraphObject *theLastMaterial = nullptr;
         for (SGraphObject *theMaterial = theItem.m_FirstMaterial; theMaterial;
-             theMaterial = uic::render::GetNextMaterialSibling(theMaterial)) {
+             theMaterial = qt3ds::render::GetNextMaterialSibling(theMaterial)) {
             if (theLastMaterial)
-                uic::render::SetNextMaterialSibling(*theLastMaterial, nullptr);
+                qt3ds::render::SetNextMaterialSibling(*theLastMaterial, nullptr);
             theLastMaterial = theMaterial;
         }
         theItem.m_FirstMaterial = nullptr;
@@ -799,7 +799,7 @@ static float ToFloat(const Option<SValue> &inValue)
 
 struct SPathSubPathTranslator : public SGraphObjectTranslator
 {
-    eastl::vector<uic::render::SPathAnchorPoint> m_PathBuffer;
+    eastl::vector<qt3ds::render::SPathAnchorPoint> m_PathBuffer;
     SPathSubPathTranslator(UICDM::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SPathSubPath)())
     {
@@ -838,7 +838,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
                 float theOutgoingDistance = ToFloat(theReader.GetInstancePropertyValue(
                     theAnchor,
                     inContext.m_ObjectDefinitions.m_PathAnchorPoint.m_OutgoingDistance.m_Property));
-                uic::render::SPathAnchorPoint thePoint(QT3DSVec2(theAnchorPos[0], theAnchorPos[1]),
+                qt3ds::render::SPathAnchorPoint thePoint(QT3DSVec2(theAnchorPos[0], theAnchorPos[1]),
                                                        theIncomingAngle, theIncomingAngle + 180.0f,
                                                        theIncomingDistance, theOutgoingDistance);
                 m_PathBuffer.push_back(thePoint);
@@ -947,7 +947,7 @@ struct SImageTranslator : public SGraphObjectTranslator
     {
         SImage &theItem = static_cast<SImage &>(GetGraphObject());
         if (child.m_Type == GraphObjectTypes::RenderPlugin)
-            theItem.m_RenderPlugin = &static_cast<uic::render::SRenderPlugin &>(child);
+            theItem.m_RenderPlugin = &static_cast<qt3ds::render::SRenderPlugin &>(child);
     }
     void ClearChildren() override
     {
@@ -1000,7 +1000,7 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
     {
         SDynamicObject &theItem = static_cast<SDynamicObject &>(GetGraphObject());
         IDynamicObjectSystem &theSystem = inContext.m_UICContext.GetDynamicObjectSystem();
-        using namespace uic::render::dynamic;
+        using namespace qt3ds::render::dynamic;
         using qt3ds::foundation::NVConstDataRef;
         NVConstDataRef<SPropertyDefinition> theProperties =
             theSystem.GetProperties(theItem.m_ClassName);
@@ -1209,10 +1209,10 @@ struct SReferencedMaterialTranslator : public SGraphObjectTranslator
 
     void SetActive(bool /*inActive*/) override {}
 };
-using uic::render::SRenderPlugin;
-using uic::render::SRenderPropertyValueUpdate;
-using uic::render::IRenderPluginClass;
-using uic::render::SRenderPluginPropertyDeclaration;
+using qt3ds::render::SRenderPlugin;
+using qt3ds::render::SRenderPropertyValueUpdate;
+using qt3ds::render::IRenderPluginClass;
+using qt3ds::render::SRenderPluginPropertyDeclaration;
 struct SRenderPluginPropertyUpdateFactory
 {
     static void Add(eastl::vector<SRenderPropertyValueUpdate> &ioUpdates, float value,
@@ -1293,7 +1293,7 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
         Q3DStudio::CFilePath theFullPath = inContext.m_Doc.GetResolvedPathToDoc(theData->GetData());
         qt3ds::foundation::IStringTable &theStrTable = inContext.m_UICContext.GetStringTable();
         theItem.m_PluginPath = theStrTable.RegisterStr(theFullPath);
-        uic::render::IRenderPluginInstance *theInstance =
+        qt3ds::render::IRenderPluginInstance *theInstance =
             inContext.m_UICContext.GetRenderPluginManager().GetOrCreateRenderPluginInstance(
                 theItem.m_PluginPath, &theItem);
 
@@ -1313,8 +1313,8 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
         eastl::string propStem;
         eastl::string propname;
         m_PropertyUpdates.clear();
-        uic::render::IRenderPluginClass &theClass = theInstance->GetPluginClass();
-        using uic::render::SRenderPluginPropertyDeclaration;
+        qt3ds::render::IRenderPluginClass &theClass = theInstance->GetPluginClass();
+        using qt3ds::render::SRenderPluginPropertyDeclaration;
         if (theClass.GetRegisteredProperties().size() == 0) {
             for (size_t idx = 0, end = theSpecificProperties.size(); idx < end; ++idx) {
                 SUICDMPropertyDefinition theProperty =
@@ -1326,33 +1326,33 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
                 switch (theProperty.m_Type) {
                 case DataModelDataType::Float:
                     theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                        thePropName, uic::render::SRenderPluginPropertyTypes::Float));
+                        thePropName, qt3ds::render::SRenderPluginPropertyTypes::Float));
                     break;
                 case DataModelDataType::Float2:
                     theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                        thePropName, uic::render::SRenderPluginPropertyTypes::Vector2));
+                        thePropName, qt3ds::render::SRenderPluginPropertyTypes::Vector2));
                     break;
                 case DataModelDataType::Float3:
                     if (theMetaType != AdditionalMetaDataType::Color) {
                         theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                            thePropName, uic::render::SRenderPluginPropertyTypes::Vector3));
+                            thePropName, qt3ds::render::SRenderPluginPropertyTypes::Vector3));
                     } else {
                         theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                            thePropName, uic::render::SRenderPluginPropertyTypes::Color));
+                            thePropName, qt3ds::render::SRenderPluginPropertyTypes::Color));
                     }
                     break;
                 case DataModelDataType::Long:
                     theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                        thePropName, uic::render::SRenderPluginPropertyTypes::Long));
+                        thePropName, qt3ds::render::SRenderPluginPropertyTypes::Long));
                     break;
                 case DataModelDataType::String:
                 case DataModelDataType::StringRef:
                     theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                        thePropName, uic::render::SRenderPluginPropertyTypes::String));
+                        thePropName, qt3ds::render::SRenderPluginPropertyTypes::String));
                     break;
                 case DataModelDataType::Bool:
                     theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
-                        thePropName, uic::render::SRenderPluginPropertyTypes::Boolean));
+                        thePropName, qt3ds::render::SRenderPluginPropertyTypes::Boolean));
                     break;
                 default:
                     // Unsupported plugin property.
@@ -1636,7 +1636,7 @@ SGraphObjectTranslator *STranslation::CreateTranslator(UICDM::CUICDMInstanceHand
                     theMetaData.GetEffectBySourcePath(
                         m_UICContext.GetStringTable().GetNarrowStr(theInstancePath));
                 if (theMetaEffect.hasValue()) {
-                    uic::render::IUIPLoader::CreateEffectClassFromMetaEffect(
+                    qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
                         theNameStr, m_UICContext.GetFoundation(), theSystem, theMetaEffect,
                         m_UICContext.GetStringTable());
                     theSystem.SetEffectRequiresCompilation(theNameStr, true);
@@ -1664,7 +1664,7 @@ SGraphObjectTranslator *STranslation::CreateTranslator(UICDM::CUICDMInstanceHand
                     theMetaData.GetMaterialBySourcePath(
                         m_UICContext.GetStringTable().GetNarrowStr(theInstancePath));
                 if (theMaterialData.hasValue()) {
-                    uic::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
+                    qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
                         theNameStr, m_UICContext.GetFoundation(), theSystem, theMaterialData,
                         m_UICContext.GetStringTable());
                 }
@@ -1780,7 +1780,7 @@ UICDM::CUICDMInstanceHandle STranslation::GetAnchorPoint(SPathPick &inPick)
     return GetAnchorPoint(inPick.m_AnchorIndex);
 }
 
-namespace uic {
+namespace qt3ds {
 namespace studio {
     struct SEditCameraLayerTranslator : public SLayerTranslator
     {
@@ -2025,13 +2025,13 @@ void STranslation::PreRender()
     TIdentifier theRoot = m_AssetGraph.GetRoot(0);
     ClearDirtySet();
     BuildRenderGraph(theRoot);
-    m_UICContext.SetScaleMode(uic::render::ScaleModes::ExactSize);
+    m_UICContext.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
     m_UICContext.SetMatteColor(QT3DSVec4(.13f, .13f, .13f, 1.0f));
     QT3DSVec2 theViewportDims(GetViewportDimensions());
     // Ensure the camera points where it should
     if (m_EditCameraEnabled) {
         m_EditCameraInfo.ApplyToCamera(m_EditCamera, GetViewportDimensions());
-        m_EditLight.MarkDirty(uic::render::NodeTransformDirtyFlag::TransformIsDirty);
+        m_EditLight.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
     }
 
     if (m_Scene) {
@@ -2044,9 +2044,9 @@ void STranslation::PreRender()
             QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
         QT3DSVec2 theViewportDims(GetViewportDimensions());
         m_UICContext.SetWindowDimensions(
-            uic::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
+            qt3ds::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
         m_UICContext.SetPresentationDimensions(
-            uic::render::SWindowDimensions((QT3DSU32)m_Presentation.m_PresentationDimensions.x,
+            qt3ds::render::SWindowDimensions((QT3DSU32)m_Presentation.m_PresentationDimensions.x,
                                            (QT3DSU32)m_Presentation.m_PresentationDimensions.y));
 
         // set if we draw geometry in wireframe mode
@@ -2055,7 +2055,7 @@ void STranslation::PreRender()
         if (m_EditCameraEnabled) {
             m_Presentation.m_PresentationDimensions = theViewportDims;
             m_UICContext.SetPresentationDimensions(
-                uic::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
+                qt3ds::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
             ::CColor theEditCameraBackground = CStudioPreferences::GetEditViewBackgroundColor();
             m_UICContext.SetSceneColor(QT3DSVec4(theEditCameraBackground.GetRed() / 255.0f,
                                               theEditCameraBackground.GetGreen() / 255.0f,
@@ -2076,7 +2076,7 @@ void STranslation::PreRender()
     if (m_EditCameraEnabled == false && g_StudioApp.IsAuthorZoom()) {
         if (m_Presentation.m_PresentationDimensions.x > theViewportDims.x
             || m_Presentation.m_PresentationDimensions.y > theViewportDims.y) {
-            m_UICContext.SetScaleMode(uic::render::ScaleModes::FitSelected);
+            m_UICContext.SetScaleMode(qt3ds::render::ScaleModes::FitSelected);
         }
     }
 }
@@ -2349,7 +2349,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                     if (theType == GraphObjectTypes::Path && selectedPath == false) {
                         selectedPath = true;
                         if (!m_PathWidget)
-                            m_PathWidget = uic::widgets::IPathWidget::CreatePathWidget(
+                            m_PathWidget = qt3ds::widgets::IPathWidget::CreatePathWidget(
                                 m_UICContext.GetAllocator(), m_UICContext);
                         m_PathWidget->SetNode(
                             static_cast<SNode &>(theTranslator->GetGraphObject()));
@@ -2362,12 +2362,12 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         if (theHandles.size() > 1)
             theTranslator = nullptr;
 
-        uic::widgets::IStudioWidget *theNextWidget(nullptr);
+        qt3ds::widgets::IStudioWidget *theNextWidget(nullptr);
         if (theTranslator && GraphObjectTypes::IsNodeType(theTranslator->GetGraphObject().m_Type)
             && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Layer) {
 
-            uic::render::SNode &theNode(
-                static_cast<uic::render::SNode &>(theTranslator->GetGraphObject()));
+            qt3ds::render::SNode &theNode(
+                static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
             SCamera *theRenderCamera = m_UICContext.GetRenderer().GetCameraForNode(theNode);
             bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
             if (shouldDisplayWidget && isActiveCamera == false) {
@@ -2378,20 +2378,20 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                 case STUDIO_TOOLMODE_MOVE:
                     // Render translation widget
                     if (!m_TranslationWidget)
-                        m_TranslationWidget = uic::widgets::IStudioWidget::CreateTranslationWidget(
+                        m_TranslationWidget = qt3ds::widgets::IStudioWidget::CreateTranslationWidget(
                             m_UICContext.GetAllocator());
                     theNextWidget = m_TranslationWidget.mPtr;
                     break;
                 case STUDIO_TOOLMODE_ROTATE:
                     if (!m_RotationWidget)
-                        m_RotationWidget = uic::widgets::IStudioWidget::CreateRotationWidget(
+                        m_RotationWidget = qt3ds::widgets::IStudioWidget::CreateRotationWidget(
                             m_UICContext.GetAllocator());
                     theNextWidget = m_RotationWidget.mPtr;
                     break;
 
                 case STUDIO_TOOLMODE_SCALE:
                     if (!m_ScaleWidget)
-                        m_ScaleWidget = uic::widgets::IStudioWidget::CreateScaleWidget(
+                        m_ScaleWidget = qt3ds::widgets::IStudioWidget::CreateScaleWidget(
                             m_UICContext.GetAllocator());
                     theNextWidget = m_ScaleWidget.mPtr;
                     break;
@@ -2410,10 +2410,10 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             m_LastRenderedWidget->SetSubComponentId(inWidgetId);
             switch (g_StudioApp.GetMinpulationMode()) {
             case StudioManipulationModes::Local:
-                m_LastRenderedWidget->SetRenderWidgetMode(uic::render::RenderWidgetModes::Local);
+                m_LastRenderedWidget->SetRenderWidgetMode(qt3ds::render::RenderWidgetModes::Local);
                 break;
             case StudioManipulationModes::Global:
-                m_LastRenderedWidget->SetRenderWidgetMode(uic::render::RenderWidgetModes::Global);
+                m_LastRenderedWidget->SetRenderWidgetMode(qt3ds::render::RenderWidgetModes::Global);
                 break;
             default:
                 QT3DS_ASSERT(false);
@@ -2516,8 +2516,8 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             qt3ds::render::STextureDetails thePickDetails = m_PickBuffer->GetTextureDetails();
             theRenderContext.SetViewport( qt3ds::render::NVRenderRect( 0, 0, thePickDetails.m_Width,
         thePickDetails.m_Height ) );
-            uic::render::SCamera theCamera;
-            theCamera.MarkDirty( uic::render::NodeTransformDirtyFlag::TransformIsDirty );
+            qt3ds::render::SCamera theCamera;
+            theCamera.MarkDirty( qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty );
             theCamera.m_Flags.SetOrthographic( true );
             QT3DSVec2 theDimensions( (QT3DSF32)thePickDetails.m_Width, (QT3DSF32)thePickDetails.m_Height );
             theCamera.CalculateGlobalVariables( render::NVRenderRectF( 0, 0, theDimensions.x,
@@ -2583,7 +2583,7 @@ bool STranslation::IsPathWidgetActive()
     return false;
 }
 
-inline uic::render::SLayer *GetLayerForNode(const uic::render::SNode &inNode)
+inline qt3ds::render::SLayer *GetLayerForNode(const qt3ds::render::SNode &inNode)
 {
     SNode *theNode;
     // empty loop intentional
@@ -2600,10 +2600,10 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
     SLayer *theLayer(inRender.m_Layer);
     CPt thePoint(inRender.m_Point);
     if (theLayer) {
-        uic::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
-        Option<uic::render::SLayerPickSetup> thePickSetup(
+        qt3ds::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
+        Option<qt3ds::render::SLayerPickSetup> thePickSetup(
             theRenderer.GetLayerPickSetup(*theLayer, QT3DSVec2((QT3DSF32)thePoint.x, (QT3DSF32)thePoint.y),
-                                          uic::render::SWindowDimensions(16, 16)));
+                                          qt3ds::render::SWindowDimensions(16, 16)));
         if (thePickSetup.hasValue()) {
             qt3ds::render::NVRenderContext &theRenderContext(m_UICContext.GetRenderContext());
             theRenderContext.SetViewport(qt3ds::render::NVRenderRect(0, 0, 100, 100));
@@ -2623,7 +2623,7 @@ void STranslation::DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor)
 {
     qt3ds::NVBounds3 theBounds = inNode.GetBounds(m_UICContext.GetBufferManager(),
                                                m_UICContext.GetPathManager(), true, this);
-    uic::render::IRenderWidget &theBBoxWidget = uic::render::IRenderWidget::CreateBoundingBoxWidget(
+    qt3ds::render::IRenderWidget &theBBoxWidget = qt3ds::render::IRenderWidget::CreateBoundingBoxWidget(
         inNode, theBounds, inColor, m_UICContext.GetRenderer().GetPerFrameAllocator());
     m_UICContext.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
@@ -2631,14 +2631,14 @@ void STranslation::DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor)
 void STranslation::DrawLightBoundingBox(SNode &inNode, QT3DSVec3 inColor)
 {
     SLight *theLight = reinterpret_cast<SLight *>(&inNode);
-    if (theLight->m_LightType != uic::render::RenderLightTypes::Area) {
+    if (theLight->m_LightType != qt3ds::render::RenderLightTypes::Area) {
         return;
     }
 
     qt3ds::NVBounds3 theBounds(
         qt3ds::QT3DSVec3(-theLight->m_AreaWidth * 0.5f, -theLight->m_AreaHeight * 0.5f, 0.0f),
         qt3ds::QT3DSVec3(theLight->m_AreaWidth * 0.5f, theLight->m_AreaHeight * 0.5f, 0.0f));
-    uic::render::IRenderWidget &theBBoxWidget = uic::render::IRenderWidget::CreateBoundingBoxWidget(
+    qt3ds::render::IRenderWidget &theBBoxWidget = qt3ds::render::IRenderWidget::CreateBoundingBoxWidget(
         inNode, theBounds, inColor, m_UICContext.GetRenderer().GetPerFrameAllocator());
     m_UICContext.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
@@ -2646,7 +2646,7 @@ void STranslation::DrawLightBoundingBox(SNode &inNode, QT3DSVec3 inColor)
 void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
 {
     if (GraphObjectTypes::IsNodeType(inTranslator.GetGraphObject().m_Type)) {
-        uic::render::IRenderWidget &theAxisWidget = uic::render::IRenderWidget::CreateAxisWidget(
+        qt3ds::render::IRenderWidget &theAxisWidget = qt3ds::render::IRenderWidget::CreateAxisWidget(
             static_cast<SNode &>(inTranslator.GetGraphObject()),
             m_UICContext.GetRenderer().GetPerFrameAllocator());
         m_UICContext.GetRenderer().AddRenderWidget(theAxisWidget);
@@ -2656,17 +2656,17 @@ void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
 }
 
 Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMode::Enum,
-                                       uic::widgets::IStudioWidgetBase &inWidget)
+                                       qt3ds::widgets::IStudioWidgetBase &inWidget)
 {
     SNode &theNode = inWidget.GetNode();
     SGraphObjectTranslator *theWidgetTranslator =
         theNode.m_UserData.DynamicCast<SGraphObjectTranslator>();
     SLayer *theLayer = GetLayerForNode(theNode);
     if (theLayer && theWidgetTranslator) {
-        Option<uic::render::SLayerPickSetup> thePickSetup(
+        Option<qt3ds::render::SLayerPickSetup> thePickSetup(
             m_UICContext.GetRenderer().GetLayerPickSetup(
                 *theLayer, QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y),
-                uic::render::SWindowDimensions(4, 4)));
+                qt3ds::render::SWindowDimensions(4, 4)));
         if (thePickSetup.hasValue()) {
             qt3ds::render::NVRenderContext &theContext(m_UICContext.GetRenderContext());
             qt3ds::render::NVRenderContextScopedProperty<qt3ds::render::NVRenderFrameBuffer *>
@@ -2698,7 +2698,7 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
             theContext.Clear(qt3ds::render::NVRenderClearFlags(
                 qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
             inWidget.RenderPick(thePickSetup->m_ProjectionPreMultiply, theContext,
-                                uic::render::SWindowDimensions(4, 4));
+                                qt3ds::render::SWindowDimensions(4, 4));
             // Now read the pixels back.
             m_PixelBuffer.resize(fboDims * fboDims * 3);
             theContext.ReadPixels(theViewport, qt3ds::render::NVRenderReadPixelFormats::RGB8,
@@ -2779,7 +2779,7 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         }
     }
     if (m_Scene && m_Scene->m_FirstChild) {
-        uic::render::SUICRenderPickResult thePickResult =
+        qt3ds::render::SUICRenderPickResult thePickResult =
             m_UICContext.GetRenderer().Pick(*m_Scene->m_FirstChild, GetViewportDimensions(),
                                             QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y));
         if (thePickResult.m_HitObject) {
@@ -2967,7 +2967,7 @@ void STranslation::TranslateSelectedInstance(CPt inOriginalCoords, CPt inMouseCo
     SNode *theNode = GetSelectedNode();
     if (theNode == nullptr)
         return;
-    uic::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
+    qt3ds::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
 
     QT3DSF32 theXDistance = QT3DSF32(inMouseCoords.x - inOriginalCoords.x);
     QT3DSF32 theYDistance = QT3DSF32(inMouseCoords.y - inOriginalCoords.y);
@@ -3059,7 +3059,7 @@ void STranslation::ApplyRotationToSelectedInstance(const QT3DSQuat &inFinalRotat
     QT3DSMat33 theFinalGlobal = theRotationMatrix * m_MouseDownGlobalRotation.getValue();
     QT3DSMat33 theLocalGlobal = m_MouseDownParentRotationInverse.getValue() * theFinalGlobal;
     QT3DSVec3 theRotations = inNode.GetRotationVectorFromRotationMatrix(theLocalGlobal);
-    theRotations = uic::render::SRotationHelper::ToNearestAngle(inNode.m_Rotation, theRotations,
+    theRotations = qt3ds::render::SRotationHelper::ToNearestAngle(inNode.m_Rotation, theRotations,
                                                                 inNode.m_RotationOrder);
     SetRotation(theRotations, inEditor);
     // Trackball rotation is relative to the previous mouse position.
@@ -3210,26 +3210,26 @@ static inline QT3DSF32 MakeNiceRotation(QT3DSF32 inAngle)
 
 static inline QT3DSF32 ShortestAngleDifference(QT3DSF32 inCumulative, QT3DSF32 inNewTotal)
 {
-    QT3DSF32 diff = uic::render::SRotationHelper::ToMinimalAngle(inNewTotal - inCumulative);
+    QT3DSF32 diff = qt3ds::render::SRotationHelper::ToMinimalAngle(inNewTotal - inCumulative);
     return inCumulative + diff;
 }
 
 Option<SDragPreparationResult>
-STranslation::PrepareWidgetDrag(uic::widgets::StudioWidgetComponentIds::Enum inComponentId,
-                                uic::widgets::StudioWidgetTypes::Enum inWidgetId,
-                                uic::render::RenderWidgetModes::Enum inWidgetMode, SNode &inNode,
+STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum inComponentId,
+                                qt3ds::widgets::StudioWidgetTypes::Enum inWidgetId,
+                                qt3ds::render::RenderWidgetModes::Enum inWidgetMode, SNode &inNode,
                                 CPt inOriginalCoords, CPt inPreviousMouseCoords, CPt inMouseCoords)
 {
     SDragPreparationResult retval;
     retval.m_ComponentId = inComponentId;
     retval.m_WidgetType = inWidgetId;
     retval.m_WidgetMode = inWidgetMode;
-    uic::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
+    qt3ds::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
     retval.m_Renderer = &theRenderer;
     retval.m_Node = &inNode;
     retval.m_Layer = GetLayerForNode(inNode);
     retval.m_Camera = theRenderer.GetCameraForNode(inNode);
-    uic::render::SWindowDimensions theUnsignedDimensions(m_UICContext.GetWindowDimensions());
+    qt3ds::render::SWindowDimensions theUnsignedDimensions(m_UICContext.GetWindowDimensions());
     QT3DSVec2 theWindowDimensions((QT3DSF32)theUnsignedDimensions.m_Width,
                                (QT3DSF32)theUnsignedDimensions.m_Height);
     if (retval.m_Camera == nullptr || retval.m_Layer == nullptr)
@@ -3249,7 +3249,7 @@ STranslation::PrepareWidgetDrag(uic::widgets::StudioWidgetComponentIds::Enum inC
         *retval.m_Layer, QT3DSVec2((QT3DSF32)inPreviousMouseCoords.x, (QT3DSF32)inPreviousMouseCoords.y),
         theWindowDimensions, true);
     QT3DSMat44 theGlobalTransform(QT3DSMat44::createIdentity());
-    if (inWidgetMode == uic::render::RenderWidgetModes::Local) {
+    if (inWidgetMode == qt3ds::render::RenderWidgetModes::Local) {
         theGlobalTransform = m_MouseDownNode.m_GlobalTransform;
     }
     retval.m_GlobalTransform = theGlobalTransform;
@@ -3288,43 +3288,43 @@ STranslation::PrepareWidgetDrag(uic::widgets::StudioWidgetComponentIds::Enum inC
     default:
         QT3DS_ASSERT(false);
         break;
-    case uic::widgets::StudioWidgetComponentIds::XAxis:
+    case qt3ds::widgets::StudioWidgetComponentIds::XAxis:
         theAxis = QT3DSVec3(1, 0, 0);
         break;
-    case uic::widgets::StudioWidgetComponentIds::YAxis:
+    case qt3ds::widgets::StudioWidgetComponentIds::YAxis:
         theAxis = QT3DSVec3(0, 1, 0);
         retval.m_AxisIndex = 1;
         break;
-    case uic::widgets::StudioWidgetComponentIds::ZAxis:
+    case qt3ds::widgets::StudioWidgetComponentIds::ZAxis:
         theAxis = QT3DSVec3(0, 0, -1);
         retval.m_AxisIndex = 2;
         break;
-    case uic::widgets::StudioWidgetComponentIds::XPlane:
+    case qt3ds::widgets::StudioWidgetComponentIds::XPlane:
         thePlaneNormal = QT3DSVec3(1, 0, 0);
         isPlane = true;
         break;
-    case uic::widgets::StudioWidgetComponentIds::YPlane:
+    case qt3ds::widgets::StudioWidgetComponentIds::YPlane:
         thePlaneNormal = QT3DSVec3(0, 1, 0);
         isPlane = true;
         break;
-    case uic::widgets::StudioWidgetComponentIds::ZPlane:
+    case qt3ds::widgets::StudioWidgetComponentIds::ZPlane:
         thePlaneNormal = QT3DSVec3(0, 0, -1);
         isPlane = true;
         break;
-    case uic::widgets::StudioWidgetComponentIds::CameraPlane: {
+    case qt3ds::widgets::StudioWidgetComponentIds::CameraPlane: {
         isPlane = true;
         thePlaneNormal = theCamDirection;
     } break;
     }
     retval.m_IsPlane = isPlane;
-    if (inWidgetId == uic::widgets::StudioWidgetTypes::Rotation) {
+    if (inWidgetId == qt3ds::widgets::StudioWidgetTypes::Rotation) {
         if (isPlane == false) {
             theAxis = theNormalMat.transform(theAxis);
             theAxis.normalize();
             thePlaneNormal = theAxis;
             retval.m_Plane = qt3ds::NVPlane(thePlaneNormal, -1.0f * thePlaneNormal.dot(globalPos));
         } else {
-            if (inComponentId != uic::widgets::StudioWidgetComponentIds::CameraPlane) {
+            if (inComponentId != qt3ds::widgets::StudioWidgetComponentIds::CameraPlane) {
                 thePlaneNormal = theNormalMat.transform(thePlaneNormal);
             }
             thePlaneNormal.normalize();
@@ -3374,7 +3374,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
         return;
     }
     Option<SDragPreparationResult> thePrepResult(PrepareWidgetDrag(
-        static_cast<uic::widgets::StudioWidgetComponentIds::Enum>(inWidgetSubComponent),
+        static_cast<qt3ds::widgets::StudioWidgetComponentIds::Enum>(inWidgetSubComponent),
         m_LastRenderedWidget->GetWidgetType(), m_LastRenderedWidget->GetRenderWidgetMode(),
         m_LastRenderedWidget->GetNode(), inOriginalCoords, inPreviousMouseCoords, inMouseCoords));
     if (!thePrepResult.hasValue())
@@ -3398,7 +3398,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
     default:
         QT3DS_ASSERT(false);
         return;
-    case uic::widgets::StudioWidgetTypes::Scale: {
+    case qt3ds::widgets::StudioWidgetTypes::Scale: {
         if (theOriginalPlaneCoords.hasValue() && theCurrentPlaneCoords.hasValue()) {
             QT3DSVec3 objToOriginal = globalPos - *theOriginalPlaneCoords;
             QT3DSVec3 objToCurrent = globalPos - *theCurrentPlaneCoords;
@@ -3444,7 +3444,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             SetScale(theScale, inEditor);
         }
     } break;
-    case uic::widgets::StudioWidgetTypes::Rotation: {
+    case qt3ds::widgets::StudioWidgetTypes::Rotation: {
         QT3DSF32 theIntersectionCosine = theOriginalRay.m_Direction.dot(thePlaneNormal);
         QT3DSVec3 objToPrevious;
         QT3DSVec3 objToCurrent;
@@ -3512,7 +3512,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             ApplyRotationToSelectedInstance(theRotation, *theNode, inEditor, false);
         }
     } break;
-    case uic::widgets::StudioWidgetTypes::Translation: {
+    case qt3ds::widgets::StudioWidgetTypes::Translation: {
         if (theOriginalPlaneCoords.hasValue() && theCurrentPlaneCoords.hasValue()) {
             QT3DSVec3 theDiff = *theCurrentPlaneCoords - *theOriginalPlaneCoords;
             if (isPlane) {
@@ -3594,13 +3594,13 @@ QT3DSF32 radToDeg(const QT3DSF32 a)
 }
 }
 
-void STranslation::PerformPathDrag(uic::studio::SPathPick &inPathPick, CPt inOriginalCoords,
+void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,
                                    CPt inPreviousMouseCoords, CPt inMouseCoords,
                                    CUpdateableDocumentEditor &inEditor)
 {
     Option<SDragPreparationResult> thePrepResult(PrepareWidgetDrag(
-        uic::widgets::StudioWidgetComponentIds::ZPlane,
-        uic::widgets::StudioWidgetTypes::Translation, uic::render::RenderWidgetModes::Local,
+        qt3ds::widgets::StudioWidgetComponentIds::ZPlane,
+        qt3ds::widgets::StudioWidgetTypes::Translation, qt3ds::render::RenderWidgetModes::Local,
         m_PathWidget->GetNode(), inOriginalCoords, inPreviousMouseCoords, inMouseCoords));
     if (!thePrepResult.hasValue())
         return;
@@ -3652,11 +3652,11 @@ void STranslation::PerformPathDrag(uic::studio::SPathPick &inPathPick, CPt inOri
                 theCurrentValue = lastValue.m_Position;
                 break;
             case SPathPick::IncomingControl:
-                theCurrentValue = uic::render::IPathManagerCore::GetControlPointFromAngleDistance(
+                theCurrentValue = qt3ds::render::IPathManagerCore::GetControlPointFromAngleDistance(
                     lastValue.m_Position, lastValue.m_IncomingAngle, lastValue.m_IncomingDistance);
                 break;
             case SPathPick::OutgoingControl:
-                theCurrentValue = uic::render::IPathManagerCore::GetControlPointFromAngleDistance(
+                theCurrentValue = qt3ds::render::IPathManagerCore::GetControlPointFromAngleDistance(
                     lastValue.m_Position, lastValue.m_IncomingAngle + 180.0f,
                     lastValue.m_OutgoingDistance);
                 break;
@@ -3675,11 +3675,11 @@ void STranslation::PerformPathDrag(uic::studio::SPathPick &inPathPick, CPt inOri
                 break;
             case SPathPick::IncomingControl: {
                 QT3DSVec2 angleDistance =
-                    uic::render::IPathManagerCore::GetAngleDistanceFromControlPoint(
+                    qt3ds::render::IPathManagerCore::GetAngleDistanceFromControlPoint(
                         anchorPosVec, theCurrentValue);
                 float angleDiff = angleDistance.x - lastValue.m_IncomingAngle;
                 float minimalDiff =
-                    radToDeg(uic::render::SRotationHelper::ToMinimalAngle(degToRad(angleDiff)));
+                    radToDeg(qt3ds::render::SRotationHelper::ToMinimalAngle(degToRad(angleDiff)));
                 float newAngle = lastValue.m_IncomingAngle + minimalDiff;
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theAngleProperty, newAngle);
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theIncomingDistanceProperty,
@@ -3687,12 +3687,12 @@ void STranslation::PerformPathDrag(uic::studio::SPathPick &inPathPick, CPt inOri
             } break;
             case SPathPick::OutgoingControl: {
                 QT3DSVec2 angleDistance =
-                    uic::render::IPathManagerCore::GetAngleDistanceFromControlPoint(
+                    qt3ds::render::IPathManagerCore::GetAngleDistanceFromControlPoint(
                         anchorPosVec, theCurrentValue);
                 angleDistance.x += 180.0f;
                 float angleDiff = angleDistance.x - lastValue.m_IncomingAngle;
                 float minimalDiff =
-                    radToDeg(uic::render::SRotationHelper::ToMinimalAngle(degToRad(angleDiff)));
+                    radToDeg(qt3ds::render::SRotationHelper::ToMinimalAngle(degToRad(angleDiff)));
                 float newAngle = lastValue.m_IncomingAngle + minimalDiff;
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theAngleProperty, newAngle);
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theOutgoingDistanceProperty,

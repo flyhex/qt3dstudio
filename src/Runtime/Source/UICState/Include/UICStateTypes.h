@@ -44,7 +44,7 @@
 #include "foundation/Utils.h"
 #include "UICStateIdValue.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     // Link list definitions.

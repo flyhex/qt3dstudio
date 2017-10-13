@@ -108,7 +108,7 @@ class NVPlane;
 namespace eastl {
 }
 
-namespace uic {
+namespace qt3ds {
 
 namespace render {
     using namespace qt3ds;

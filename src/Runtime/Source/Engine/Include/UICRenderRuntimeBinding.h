@@ -44,7 +44,7 @@ class ITimeProvider;
 class IWindowSystem;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class ITextRenderer;

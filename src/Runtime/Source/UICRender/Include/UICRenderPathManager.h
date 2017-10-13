@@ -38,7 +38,7 @@
 #include "foundation/Qt3DSBounds3.h"
 //#include "UICRenderDefaultMaterialShaderGenerator.h" //SLayerGlobalRenderProperties
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SLayerGlobalRenderProperties;

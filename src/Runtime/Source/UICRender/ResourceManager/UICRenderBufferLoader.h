@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/StringTable.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class IBufferLoaderCallback;

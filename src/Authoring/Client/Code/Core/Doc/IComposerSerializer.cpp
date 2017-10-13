@@ -112,7 +112,7 @@ struct WStrOps<GuideDirections::Enum>
 
 namespace {
 
-typedef qt3ds::foundation::NVScopedRefCounted<uic::render::IInputStreamFactory> TStreamFactoryPtr;
+typedef qt3ds::foundation::NVScopedRefCounted<qt3ds::render::IInputStreamFactory> TStreamFactoryPtr;
 
 using std::hash;
 
@@ -319,7 +319,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     SComposerObjectDefinitions &m_ObjectDefinitions;
     UICDM::IStringTable &m_StringTable;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
-    uic::render::IPathManager &m_PathManager;
+    qt3ds::render::IPathManager &m_PathManager;
 
     // The instances we have discovered when we are writing
     THandleToIdMap m_HandleToIdMap;
@@ -369,7 +369,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                             IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
                             SComposerObjectDefinitions &inObjectDefinitions,
                             std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-                            IGuideSystem &inGuideSystem, uic::render::IPathManager &inPathManager)
+                            IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager)
         : m_DataCore(inDataCore)
         , m_MetaData(inMetaData)
         , m_SlideCore(inSlideCore)
@@ -385,7 +385,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         , m_ImportFailedHandler(inFailedHandler)
         , m_PathManager(inPathManager)
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
-        , m_InputStreamFactory(uic::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
+        , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
         , m_PreserveFileIds(true)
     {
     }
@@ -2543,7 +2543,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                 if (theFullPath.Exists()) {
                                     std::vector<SMetaDataLoadWarning> warnings;
                                     // Now the magic section
-                                    NVScopedRefCounted<uic::render::IRefCountedInputStream>
+                                    NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>
                                             theStream = m_InputStreamFactory->GetStreamForFile(
                                                 QString::fromWCharArray(theFullPath));
                                     if (theStream) {
@@ -2574,7 +2574,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                            L"material", CString::ENDOFSTRING, false)) {
                                 if (theFullPath.Exists()) {
                                     std::vector<SMetaDataLoadWarning> warnings;
-                                    NVScopedRefCounted<uic::render::IRefCountedInputStream>
+                                    NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>
                                             theStream = m_InputStreamFactory->GetStreamForFile(
                                                 QString::fromWCharArray(theFullPath));
                                     if (theStream) {
@@ -2855,7 +2855,7 @@ std::shared_ptr<IComposerSerializer> IComposerSerializer::CreateGraphSlideSerial
         ISlideSystem &inSlideSystem, IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
         SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler, IGuideSystem &inGuideSystem,
-        uic::render::IPathManager &inPathManager)
+        qt3ds::render::IPathManager &inPathManager)
 {
     return std::shared_ptr<SComposerSerializerImpl>(new SComposerSerializerImpl(
                                                           inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore, inAssetGraph,

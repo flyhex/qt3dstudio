@@ -48,7 +48,7 @@
 #include "foundation/Qt3DSSync.h"
 #include "foundation/Qt3DSMutex.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     class IStateInterpreter;
 }
@@ -120,7 +120,7 @@ public:
     virtual ~CLuaEngine() {}
 
 public: // Public functions but not functions on the script bridge
-    virtual uic::state::IStateInterpreter *
+    virtual qt3ds::state::IStateInterpreter *
     CreateStateMachine(const char8_t *inPath, const char8_t *inId,
                        const char8_t *inDatamodelFunction) = 0;
     virtual void PreInitialize() = 0;

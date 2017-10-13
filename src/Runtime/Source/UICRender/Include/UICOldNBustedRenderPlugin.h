@@ -41,7 +41,7 @@
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "UICPluginDLL.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class COldNBustedPluginRenderer;

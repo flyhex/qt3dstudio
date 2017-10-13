@@ -45,7 +45,7 @@
 // We use a compatibility layer so we can easily convert freeimage code to load our texture formats
 // where necessary.
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     using namespace qt3ds::foundation;
 
@@ -408,6 +408,6 @@ namespace render {
 }
 }
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 #endif

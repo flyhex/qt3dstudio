@@ -31,7 +31,7 @@
 #ifndef UIC_RENDER_MATERIAL_DIRTY_H
 #define UIC_RENDER_MATERIAL_DIRTY_H
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class CMaterialDirty
     {

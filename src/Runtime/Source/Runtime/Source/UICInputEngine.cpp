@@ -47,7 +47,7 @@
 //==============================================================================
 namespace Q3DStudio {
 
-class CInputEventProvider : public uic::evt::IEventProvider
+class CInputEventProvider : public qt3ds::evt::IEventProvider
 {
     int m_RefCount;
 
@@ -73,7 +73,7 @@ public:
         EType m_Type;
 
         virtual SEvent *Clone() const = 0;
-        virtual SUICEventSystemEvent *GenEventSystemEvent(uic::evt::IEventFactory &inFactory) = 0;
+        virtual SUICEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) = 0;
     };
     struct SKeyboardEvent : public SEvent
     {
@@ -93,7 +93,7 @@ public:
         {
             return new SKeyboardEvent(this->m_KeyCode, this->m_KeyEvent);
         }
-        SUICEventSystemEvent *GenEventSystemEvent(uic::evt::IEventFactory &inFactory) override
+        SUICEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) override
         {
             if (m_KeyEvent == ON_KEYDOWN || m_KeyEvent == ON_KEYUP || m_KeyEvent == ON_KEYREPEAT) {
                 SUICEventSystemEvent &theEvent = inFactory.CreateEvent(3);
@@ -141,7 +141,7 @@ public:
         {
             return new SKeyboardEvent(this->m_ButtonCode, this->m_ButtonEvent);
         }
-        SUICEventSystemEvent *GenEventSystemEvent(uic::evt::IEventFactory &inFactory) override
+        SUICEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) override
         {
             if (m_ButtonEvent == ON_BUTTONDOWN || m_ButtonEvent == ON_BUTTONUP
                 || m_ButtonEvent == ON_BUTTONREPEAT) {
@@ -172,7 +172,7 @@ public:
         INT32 m_ButtonCode;
         UINT32 m_ButtonEvent;
     };
-    size_t GetNextEvents(uic::evt::IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
+    size_t GetNextEvents(qt3ds::evt::IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
                          size_t inBufLenInEvent) override
     {
         size_t theEventCount = 0;
@@ -242,7 +242,7 @@ CInputEngine::~CInputEngine()
  *	Set the top-level interface of the Runtime object
  *	@param inRuntime	the top-level interface of the Runtime object
  */
-void CInputEngine::SetApplication(uic::runtime::IApplication *inApplication)
+void CInputEngine::SetApplication(qt3ds::runtime::IApplication *inApplication)
 {
     m_Application = inApplication;
     // Create this here.  If we die before the application does, then the system will crash unless

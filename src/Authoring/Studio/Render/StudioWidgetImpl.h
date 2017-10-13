@@ -37,7 +37,7 @@
 #include "UICRenderNode.h"
 #include "UICRenderShaderCodeGeneratorV2.h"
 
-namespace uic {
+namespace qt3ds {
 namespace widgets {
 
     typedef nvvector<QT3DSVec4> TResultVecType;
@@ -116,9 +116,9 @@ namespace widgets {
         }
 
         StudioWidgetTypes::Enum GetWidgetType() const override { return TWidgetType; }
-        uic::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override
+        qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override
         {
-            return uic::studio::SWidgetPick((QT3DSI32)inPickIndex);
+            return qt3ds::studio::SWidgetPick((QT3DSI32)inPickIndex);
         }
 
         void SetupRender(IRenderWidgetContext &inWidgetContext, NVRenderContext &inRenderContext)
@@ -264,13 +264,13 @@ namespace widgets {
             m_ImmediateShader = inWidgetContext.GetShader(theShaderName);
 
             if (m_ImmediateShader == nullptr) {
-                uic::render::IShaderProgramGenerator &theGenerator(
+                qt3ds::render::IShaderProgramGenerator &theGenerator(
                     inWidgetContext.GetProgramGenerator());
                 theGenerator.BeginProgram();
-                uic::render::IShaderStageGenerator &theVertexGenerator(
-                    *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Vertex));
-                uic::render::IShaderStageGenerator &theFragmentGenerator(
-                    *theGenerator.GetStage(uic::render::ShaderGeneratorStages::Fragment));
+                qt3ds::render::IShaderStageGenerator &theVertexGenerator(
+                    *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Vertex));
+                qt3ds::render::IShaderStageGenerator &theFragmentGenerator(
+                    *theGenerator.GetStage(qt3ds::render::ShaderGeneratorStages::Fragment));
                 theVertexGenerator.AddIncoming("attr_pos", "vec3");
                 theVertexGenerator.AddIncoming("attr_color", "vec4");
                 theVertexGenerator.AddUniform("model_view_projection", "mat4");

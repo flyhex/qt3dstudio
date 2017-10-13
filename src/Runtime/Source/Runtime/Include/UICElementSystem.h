@@ -60,7 +60,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     using namespace qt3ds::foundation;
     using namespace qt3ds;
@@ -460,7 +460,7 @@ namespace runtime {
             {
                 SetFlag(inFlag, inValue ? true : false);
             }
-            uic::runtime::IActivityZone &GetActivityZone() const;
+            qt3ds::runtime::IActivityZone &GetActivityZone() const;
             bool HasActivityZone() const;
             // Floating point number differences above this trigger a setDirty call.
             static float SmallestDifference() { return 0.000001f; }

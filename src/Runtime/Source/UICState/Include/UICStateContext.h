@@ -32,7 +32,7 @@
 #include "UICState.h"
 #include "UICStateTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     // Thanks to the crazy world we live in, we have to store xml extension information

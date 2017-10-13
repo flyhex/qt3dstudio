@@ -32,13 +32,13 @@
 
 #include "foundation/Qt3DSRefCounted.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     class IVisualStateContext;
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace evt {
     class IEventSystem;
 }
@@ -57,7 +57,7 @@ namespace Q3DStudio {
 class ITimeProvider;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     struct SNDDStateContext;
@@ -77,16 +77,16 @@ namespace state {
             virtual void OnCreate(const qt3ds::foundation::CRegisteredString &inId,
                                   IStateInterpreter &inStateInterpreter) = 0;
         };
-        virtual uic::state::INDDStateScriptBridge &GetScriptEngine() = 0;
-        virtual uic::state::IVisualStateContext &GetVisualStateContext() = 0;
-        virtual uic::evt::IEventSystem &GetEventSystem() = 0;
+        virtual qt3ds::state::INDDStateScriptBridge &GetScriptEngine() = 0;
+        virtual qt3ds::state::IVisualStateContext &GetVisualStateContext() = 0;
+        virtual qt3ds::evt::IEventSystem &GetEventSystem() = 0;
         virtual qt3ds::NVFoundationBase &GetFoundation() = 0;
         virtual qt3ds::foundation::IStringTable &GetStringTable() = 0;
         virtual Q3DStudio::ITimeProvider &GetTimeProvider() = 0;
-        virtual uic::state::IInputStreamFactory &GetInputStreamFactory() = 0;
+        virtual qt3ds::state::IInputStreamFactory &GetInputStreamFactory() = 0;
 
-        virtual uic::state::INDDStateApplication *GetApplication() = 0;
-        virtual void SetApplication(uic::state::INDDStateApplication *inApplication) = 0;
+        virtual qt3ds::state::INDDStateApplication *GetApplication() = 0;
+        virtual void SetApplication(qt3ds::state::INDDStateApplication *inApplication) = 0;
         virtual void SetStateInterpreterCreateCallback(
             IStateInterpreterCreateCallback &inStateInterpreterCreateCallback) = 0;
 

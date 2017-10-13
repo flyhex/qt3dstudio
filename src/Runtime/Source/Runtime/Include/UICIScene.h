@@ -34,7 +34,7 @@
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSBounds3.h"
 #include "UICBoundingBox.h"
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IImageLoadListener;
 }
@@ -165,7 +165,7 @@ public: // Base Interface
     virtual Q3DStudio::INT32
     LoadImageBatch(qt3ds::foundation::CRegisteredString *inFullPaths, INT32 inNumPaths,
                    qt3ds::foundation::CRegisteredString inDefaultImage,
-                   uic::render::IImageLoadListener *inLoadCallback = NULL) = 0;
+                   qt3ds::render::IImageLoadListener *inLoadCallback = NULL) = 0;
 
     virtual SMousePosition WindowToPresentation(const SMousePosition &inWindowPos) = 0;
 

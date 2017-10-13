@@ -31,7 +31,7 @@
 #include "UICRenderLayer.h"
 #include "UICTextRenderer.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 // left/top
@@ -78,7 +78,7 @@ SLayerRenderHelper::SLayerRenderHelper(const NVRenderRectF &inPresentationViewpo
                                        const NVRenderRectF &inPresentationScissor,
                                        const QT3DSVec2 &inPresentationDesignDimensions,
                                        SLayer &inLayer, bool inOffscreen,
-                                       uic::render::ScaleModes::Enum inScaleMode,
+                                       qt3ds::render::ScaleModes::Enum inScaleMode,
                                        qt3ds::QT3DSVec2 inScaleFactor)
     : m_PresentationViewport(inPresentationViewport)
     , m_PresentationScissor(inPresentationScissor)
@@ -93,7 +93,7 @@ SLayerRenderHelper::SLayerRenderHelper(const NVRenderRectF &inPresentationViewpo
         QT3DSF32 right = m_Layer->m_Right;
         QT3DSF32 width = m_Layer->m_Width;
 
-        if (m_ScaleMode == uic::render::ScaleModes::FitSelected) {
+        if (m_ScaleMode == qt3ds::render::ScaleModes::FitSelected) {
             if (m_Layer->m_LeftUnits == LayerUnitTypes::Pixels)
                 left *= m_ScaleFactor.x;
 
@@ -130,7 +130,7 @@ SLayerRenderHelper::SLayerRenderHelper(const NVRenderRectF &inPresentationViewpo
         QT3DSF32 bottom = m_Layer->m_Bottom;
         QT3DSF32 height = m_Layer->m_Height;
 
-        if (m_ScaleMode == uic::render::ScaleModes::FitSelected) {
+        if (m_ScaleMode == qt3ds::render::ScaleModes::FitSelected) {
 
             if (m_Layer->m_TopUnits == LayerUnitTypes::Pixels)
                 top *= m_ScaleFactor.y;

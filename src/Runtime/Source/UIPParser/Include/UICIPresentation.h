@@ -35,7 +35,7 @@
 //==============================================================================
 #include "UICEventCallbacks.h"
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     class IApplication;
     class IActivityZone;
@@ -66,10 +66,10 @@ class IScene;
 class IScriptBridge;
 class CPresentationFrameData;
 class CTimePolicy;
-using uic::runtime::ISlideSystem;
-using uic::runtime::IAnimationSystem;
-using uic::runtime::ILogicSystem;
-using uic::runtime::IParametersSystem;
+using qt3ds::runtime::ISlideSystem;
+using qt3ds::runtime::IAnimationSystem;
+using qt3ds::runtime::ILogicSystem;
+using qt3ds::runtime::IParametersSystem;
 
 //==============================================================================
 //	Enumeration
@@ -146,8 +146,8 @@ public: // Manager Access
     virtual IParametersSystem &GetParametersSystem() = 0;
 
     virtual qt3ds::foundation::IStringTable &GetStringTable() = 0;
-    virtual uic::runtime::IApplication &GetApplication() = 0;
-    virtual uic::runtime::IActivityZone *GetActivityZone() = 0;
+    virtual qt3ds::runtime::IApplication &GetApplication() = 0;
+    virtual qt3ds::runtime::IActivityZone *GetActivityZone() = 0;
 
 public: // Hooks and callbacks
     virtual void OnPresentationLoaded() = 0;

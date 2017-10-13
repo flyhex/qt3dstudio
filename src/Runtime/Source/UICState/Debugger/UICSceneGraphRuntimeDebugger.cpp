@@ -37,8 +37,8 @@
 #include "foundation/AutoDeallocatorAllocator.h"
 #include "EASTL/sort.h"
 
-using namespace uic::state;
-using namespace uic::state::debugger;
+using namespace qt3ds::state;
+using namespace qt3ds::state::debugger;
 
 namespace {
 

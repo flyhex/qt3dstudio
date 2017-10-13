@@ -29,7 +29,7 @@
 #pragma once
 #include "UICDMMetaDataValue.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     namespace dynamic {
         struct SCommand;
@@ -294,11 +294,11 @@ struct SMetaDataDynamicObject
 {
     TCharStr m_Name;
     qt3ds::foundation::NVConstDataRef<SMetaDataShader> m_Shaders;
-    qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SPropertyDefinition> m_Properties;
+    qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> m_Properties;
     SMetaDataDynamicObject() {}
     SMetaDataDynamicObject(
         const TCharStr &inName, qt3ds::foundation::NVConstDataRef<SMetaDataShader> inShaders,
-        qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SPropertyDefinition> inProperties)
+        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties)
         : m_Name(inName)
         , m_Shaders(inShaders)
         , m_Properties(inProperties)
@@ -308,12 +308,12 @@ struct SMetaDataDynamicObject
 
 struct SMetaDataEffect : public SMetaDataDynamicObject
 {
-    qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SCommand *> m_EffectCommands;
+    qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> m_EffectCommands;
     SMetaDataEffect() {}
     SMetaDataEffect(
         const TCharStr &inName, qt3ds::foundation::NVConstDataRef<SMetaDataShader> inShaders,
-        qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SPropertyDefinition> inProperties,
-        qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SCommand *> inEffectCommands)
+        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties,
+        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> inEffectCommands)
         : SMetaDataDynamicObject(inName, inShaders, inProperties)
         , m_EffectCommands(inEffectCommands)
     {
@@ -322,7 +322,7 @@ struct SMetaDataEffect : public SMetaDataDynamicObject
 
 struct SMetaDataCustomMaterial : public SMetaDataDynamicObject
 {
-    qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SCommand *> m_CustomMaterialCommands;
+    qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> m_CustomMaterialCommands;
     bool m_HasTransparency;
     bool m_HasRefraction;
     bool m_AlwaysDirty;
@@ -331,8 +331,8 @@ struct SMetaDataCustomMaterial : public SMetaDataDynamicObject
     SMetaDataCustomMaterial() {}
     SMetaDataCustomMaterial(
         const TCharStr &inName, qt3ds::foundation::NVConstDataRef<SMetaDataShader> inShaders,
-        qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SPropertyDefinition> inProperties,
-        qt3ds::foundation::NVConstDataRef<uic::render::dynamic::SCommand *> inCustomMaterialCommands,
+        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties,
+        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> inCustomMaterialCommands,
         bool inHasTransparency, bool inHasRefraction, bool inIsAlwaysDirty,
         unsigned int inShaderKey, unsigned int inLayerCount)
         : SMetaDataDynamicObject(inName, inShaders, inProperties)

@@ -54,7 +54,7 @@
 #include <QtMath>
 #include <QRawFont>
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

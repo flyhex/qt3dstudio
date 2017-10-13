@@ -31,7 +31,7 @@
 #include "UICRenderResourceBufferObjects.h"
 #include "UICRenderResourceTexture2D.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 void CRendererUtil::ResolveMutisampleFBOColorOnly(IResourceManager &inManager,
                                                   CResourceTexture2D &ioResult,

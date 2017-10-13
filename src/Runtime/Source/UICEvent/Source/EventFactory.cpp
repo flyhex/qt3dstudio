@@ -34,7 +34,7 @@
 #include "foundation/StringTable.h"
 #include "foundation/Utils.h"
 
-using namespace uic::evt;
+using namespace qt3ds::evt;
 
 typedef char TEventChar;
 using qt3ds::QT3DSU32;

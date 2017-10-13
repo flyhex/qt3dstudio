@@ -42,7 +42,7 @@
 #include "render/Qt3DSRenderTextureCube.h"
 #endif
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SLayerRenderData;

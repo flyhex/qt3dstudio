@@ -31,9 +31,9 @@
 #include "UICRenderLoadedTextureDDS.h"
 #include "UICRenderLoadedTextureFreeImageCompat.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     static int s_exception_string;

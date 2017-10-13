@@ -36,7 +36,7 @@
 #include "foundation/StringTable.h"
 #include "UICRenderTextTypes.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SRendererFontEntry

@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "UICRenderText.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 STextRenderInfo::STextRenderInfo()
     : m_FontSize(24)

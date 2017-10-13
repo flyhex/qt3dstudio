@@ -55,7 +55,7 @@ namespace Q3DStudio {
 class ITimeProvider;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     struct SNDDStateContext;
@@ -77,7 +77,7 @@ namespace state {
         virtual ~INDDStateLuaEngine() {}
 
     public: // Public functions but not functions on the script bridge
-        virtual uic::state::IStateInterpreter *
+        virtual qt3ds::state::IStateInterpreter *
         CreateStateMachine(const char8_t *inPath, const char8_t *inId,
                            const char8_t *inDatamodelFunction) = 0;
         virtual void PreInitialize() = 0;
@@ -85,7 +85,7 @@ namespace state {
         virtual void Shutdown(qt3ds::NVFoundationBase &inFoundation) = 0;
 
     public:
-        static INDDStateLuaEngine *Create(uic::state::SNDDStateContext &inContext);
+        static INDDStateLuaEngine *Create(qt3ds::state::SNDDStateContext &inContext);
     };
 }
 }

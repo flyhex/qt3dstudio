@@ -34,9 +34,9 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "StudioPickValues.h"
 
-namespace uic {
+namespace qt3ds {
 namespace widgets {
-    using namespace uic::render;
+    using namespace qt3ds::render;
 
     struct StudioWidgetTypes
     {
@@ -70,8 +70,8 @@ namespace widgets {
     public:
         virtual void SetNode(SNode &inNode) = 0;
         virtual void RenderPick(const QT3DSMat44 &inProjPreMult, NVRenderContext &inRenderContext,
-                                uic::render::SWindowDimensions inWinDimensions) = 0;
-        virtual uic::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) = 0;
+                                qt3ds::render::SWindowDimensions inWinDimensions) = 0;
+        virtual qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) = 0;
     };
 
     typedef nvvector<QT3DSVec4> TResultVecType;

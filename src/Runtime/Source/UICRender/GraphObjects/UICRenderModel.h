@@ -35,7 +35,7 @@
 #include "foundation/StringTable.h"
 #include "UICRenderTessModeValues.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SDefaultMaterial;

@@ -40,7 +40,7 @@ struct lua_State;
 //==============================================================================
 //	Namespace
 //==============================================================================
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class INDDStateApplication;
@@ -84,7 +84,7 @@ namespace state {
         virtual void DisableMultithreadedAccess() = 0;
 
     public: // Settings
-        virtual void SetApplication(uic::state::INDDStateApplication &inApplication) = 0;
+        virtual void SetApplication(qt3ds::state::INDDStateApplication &inApplication) = 0;
 
     public: // Binary preloading
         // Starts preloading scripts offline.  This sets m_LuaState to NULL until after

@@ -34,7 +34,7 @@
 #include "UICDMHandles.h"
 #include "StaticMaxSize.h"
 
-namespace uic {
+namespace qt3ds {
 namespace studio {
     using UICDM::CUICDMInstanceHandle;
     using UICDM::CUICDMGuideHandle;

@@ -38,7 +38,7 @@
 #include "UICBinarySerializationHelper.h"
 #include "foundation/IOStreams.h"
 
-using namespace uic::runtime;
+using namespace qt3ds::runtime;
 
 namespace {
 

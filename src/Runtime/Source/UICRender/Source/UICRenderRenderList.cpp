@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSContainers.h"
 #include "render/Qt3DSRenderBaseTypes.h"
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 

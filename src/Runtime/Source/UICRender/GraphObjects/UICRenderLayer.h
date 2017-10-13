@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSContainers.h"
 #include "UICRenderer.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class IUICRenderContext;
     struct SPresentation;

@@ -39,7 +39,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
     using namespace qt3ds;
     using namespace qt3ds::foundation;

@@ -47,7 +47,7 @@ namespace Q3DStudio {
 class ITimeProvider;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class IInputStreamFactory;
@@ -93,7 +93,7 @@ namespace state {
         QT3DS_STATE_API static INDDStateEngine *
         Create(qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> inFoundation,
                qt3ds::foundation::NVScopedRefCounted<qt3ds::foundation::IStringTable> inStringTable,
-               qt3ds::foundation::NVScopedRefCounted<uic::state::IInputStreamFactory>
+               qt3ds::foundation::NVScopedRefCounted<qt3ds::state::IInputStreamFactory>
                    inInputStreamFactory,
                Q3DStudio::ITimeProvider &inTimeProvider);
 

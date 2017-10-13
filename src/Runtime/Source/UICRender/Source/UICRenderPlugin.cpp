@@ -54,7 +54,7 @@
 #error "Must define an operating system type (QT3DS_WINDOWS, QT3DS_ANDROID, QT3DS_LINUX, QT3DS_APPLE, QT3DS_QNX)"
 #endif
 
-using namespace uic::render;
+using namespace qt3ds::render;
 
 namespace {
 // Legacy definitions...

@@ -35,8 +35,8 @@
 
 #include <QtCore/qdir.h>
 
-using namespace uic;
-using namespace uic::render;
+using namespace qt3ds;
+using namespace qt3ds::render;
 
 SDynamicObject::SDynamicObject(GraphObjectTypes::Enum inType, CRegisteredString inObjName,
                                QT3DSU32 inDSByteSize, QT3DSU32 thisObjSize)

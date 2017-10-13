@@ -38,7 +38,7 @@ namespace qt3ds {
 class NVFoundationBase;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct SPresentation;
     class IEffectSystem;

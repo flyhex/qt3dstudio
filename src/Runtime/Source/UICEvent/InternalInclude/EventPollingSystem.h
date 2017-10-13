@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "EventSystem.h"
 
-namespace uic {
+namespace qt3ds {
 namespace evt {
 
     class CEventProviderRefCounted;

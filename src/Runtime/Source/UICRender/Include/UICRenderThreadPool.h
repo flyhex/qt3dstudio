@@ -33,7 +33,7 @@
 #include "UICRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     typedef void (*TTaskFunction)(void *inUserData);

@@ -34,7 +34,7 @@
 #include "UICStateTypes.h"
 #include "foundation/Qt3DSRefCounted.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     class IStateLogger : public NVRefCounted

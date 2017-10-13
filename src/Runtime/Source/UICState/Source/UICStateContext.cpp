@@ -33,7 +33,7 @@
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
 
-using namespace uic::state;
+using namespace qt3ds::state;
 
 namespace {
 

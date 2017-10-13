@@ -48,9 +48,9 @@
 #include "UICRenderShaderCodeGenerator.h"
 #include "foundation/Qt3DSMutex.h"
 
-using namespace uic;
-using namespace uic::render;
-using namespace uic::render::dynamic;
+using namespace qt3ds;
+using namespace qt3ds::render;
+using namespace qt3ds::render::dynamic;
 
 // QT3DS_COMPILE_TIME_ASSERT( sizeof(void*) == 4 );
 
@@ -69,7 +69,7 @@ struct hash<TStrStrPair>
 };
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     namespace dynamic {
 

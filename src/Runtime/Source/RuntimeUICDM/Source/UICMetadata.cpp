@@ -50,8 +50,8 @@
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/StringTable.h"
 
-using uic::render::IInputStreamFactory;
-using uic::render::IRefCountedInputStream;
+using qt3ds::render::IInputStreamFactory;
+using qt3ds::render::IRefCountedInputStream;
 
 using namespace UICDM;
 using namespace Q3DStudio;

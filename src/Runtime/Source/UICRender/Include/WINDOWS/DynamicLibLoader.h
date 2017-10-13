@@ -36,7 +36,7 @@
 
 #include <QLibrary>
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     using namespace qt3ds;
     // using namespace qt3ds::render;

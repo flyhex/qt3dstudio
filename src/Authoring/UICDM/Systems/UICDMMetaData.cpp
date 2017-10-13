@@ -426,7 +426,7 @@ public:
     TCharStr m_Name;
     TCharStr m_SourcePath;
     eastl::vector<SMetaDataShader> m_Shaders;
-    eastl::vector<uic::render::dynamic::SPropertyDefinition> m_Properties;
+    eastl::vector<qt3ds::render::dynamic::SPropertyDefinition> m_Properties;
     eastl::vector<eastl::vector<qt3ds::foundation::CRegisteredString> *> m_EnumValueNames;
     ~SMetaDataDynamicObjectImpl() { ClearEnumValueNames(); }
 
@@ -444,7 +444,7 @@ private:
     SMetaDataEffectImpl &operator=(const SMetaDataEffectImpl &inOther);
 
 public:
-    eastl::vector<uic::render::dynamic::SCommand *> m_EffectCommands;
+    eastl::vector<qt3ds::render::dynamic::SCommand *> m_EffectCommands;
 
     void ClearEffectCommands()
     {
@@ -465,7 +465,7 @@ private:
     SMetaDataCustomMaterialImpl &operator=(const SMetaDataCustomMaterialImpl &);
 
 public:
-    eastl::vector<uic::render::dynamic::SCommand *>
+    eastl::vector<qt3ds::render::dynamic::SCommand *>
     m_CustomerMaterialCommands; ///< our command stream used for rendering
     bool m_HasTransparency; ///< this material is transparent
     bool m_HasRefraction; ///< this material is refractive (e.g glass)
@@ -3072,7 +3072,7 @@ struct SNewMetaDataImpl : public IMetaData
                                      std::vector<SMetaDataLoadWarning> &outWarnings,
                                      eastl::string &shaderPrefix)
     {
-        using namespace uic::render::dynamic;
+        using namespace qt3ds::render::dynamic;
         ioObject.m_Properties.clear();
         ioObject.ClearEnumValueNames();
         IDOMReader::Scope __readerScope(inStream);
@@ -3333,11 +3333,11 @@ struct SNewMetaDataImpl : public IMetaData
         return inValue;
     }
 
-    static uic::render::dynamic::SDepthStencilFlags ParseDepthStencilFlags(const char8_t *inFlags)
+    static qt3ds::render::dynamic::SDepthStencilFlags ParseDepthStencilFlags(const char8_t *inFlags)
     {
         eastl::string parseStr(inFlags);
         eastl::string tokenStr;
-        uic::render::dynamic::SDepthStencilFlags retval;
+        qt3ds::render::dynamic::SDepthStencilFlags retval;
         for (uint32_t pos = parseStr.find('|'); parseStr.empty() == false;
              pos = parseStr.find('|')) {
             if (pos != eastl::string::npos) {
@@ -3348,9 +3348,9 @@ struct SNewMetaDataImpl : public IMetaData
                 parseStr.clear();
             }
             if (AreEqual(tokenStr.c_str(), "clear-stencil"))
-                retval |= uic::render::dynamic::DepthStencilFlagValues::ClearStencil;
+                retval |= qt3ds::render::dynamic::DepthStencilFlagValues::ClearStencil;
             if (AreEqual(tokenStr.c_str(), "clear-depth"))
-                retval |= uic::render::dynamic::DepthStencilFlagValues::ClearDepth;
+                retval |= qt3ds::render::dynamic::DepthStencilFlagValues::ClearDepth;
         }
         return retval;
     }
@@ -3408,7 +3408,7 @@ struct SNewMetaDataImpl : public IMetaData
                                std::vector<SMetaDataLoadWarning> &outWarnings,
                                const TCharStr &inSourcePath) override
     {
-        using namespace uic::render::dynamic;
+        using namespace qt3ds::render::dynamic;
         std::pair<TEffectMap::iterator, bool> theInserter =
                 m_EffectMap.insert(std::make_pair(Intern(inObjectName), SMetaDataEffectImpl()));
         /*if ( inStream.MoveToFirstChild( "Effect" ) == false )
@@ -3532,7 +3532,7 @@ struct SNewMetaDataImpl : public IMetaData
                                 // find the param and the type.
                                 qt3ds::foundation::CRegisteredString propName =
                                         m_StringTable.GetRenderStringTable().RegisterStr(name);
-                                uic::render::dynamic::SPropertyDefinition *theDefinition = NULL;
+                                qt3ds::render::dynamic::SPropertyDefinition *theDefinition = NULL;
                                 for (uint32_t propIdx = 0, propEnd = theEffect.m_Properties.size();
                                      propIdx < propEnd && theDefinition == NULL; ++propIdx) {
                                     if (theEffect.m_Properties[propIdx].m_Name == propName)
@@ -3627,7 +3627,7 @@ struct SNewMetaDataImpl : public IMetaData
                                 if (inStream.Att("stencil-function", temp))
                                     stencilFunction = ParseBoolOp(temp);
 
-                                uic::render::dynamic::SDepthStencilFlags flagValues =
+                                qt3ds::render::dynamic::SDepthStencilFlags flagValues =
                                         ParseDepthStencilFlags(flags);
                                 theEffect.m_EffectCommands.push_back(new SDepthStencil(
                                                                          m_StringTable.GetRenderStringTable().RegisterStr(bufferName),
@@ -3796,7 +3796,7 @@ struct SNewMetaDataImpl : public IMetaData
                                       std::vector<SMetaDataLoadWarning> &outWarnings,
                                       const TCharStr &inSourcePath) override
     {
-        using namespace uic::render::dynamic;
+        using namespace qt3ds::render::dynamic;
 
         std::pair<TCustomMaterialMap::iterator, bool> theInserter = m_CustomMaterials.insert(
                     std::make_pair(Intern(inObjectName), SMetaDataCustomMaterialImpl()));

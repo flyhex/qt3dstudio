@@ -45,7 +45,7 @@ namespace foundation {
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     struct OffscreenRendererKeyTypes
     {

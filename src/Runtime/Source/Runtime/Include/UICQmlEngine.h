@@ -204,7 +204,7 @@ public: // Public functions but not functions on the script bridge
     */
     virtual void Shutdown(qt3ds::NVFoundationBase &inFoundation) = 0;
 
-    virtual uic::runtime::IApplication *GetApplication() = 0;
+    virtual qt3ds::runtime::IApplication *GetApplication() = 0;
 
 public:
     /**

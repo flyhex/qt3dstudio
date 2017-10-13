@@ -44,7 +44,7 @@
 #include "foundation/SerializationTypes.h"
 #include "foundation/StringConversionImpl.h"
 
-using namespace uic::state;
+using namespace qt3ds::state;
 
 namespace {
 

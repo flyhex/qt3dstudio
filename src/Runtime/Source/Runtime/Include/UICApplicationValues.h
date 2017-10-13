@@ -32,7 +32,7 @@
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "foundation/StringTable.h"
 
-namespace uic {
+namespace qt3ds {
 
 class UICAssetVisitor
 {
@@ -204,29 +204,29 @@ namespace runtime {
 namespace qt3ds {
 namespace foundation {
     template <>
-    struct DestructTraits<uic::runtime::SPresentationAsset>
+    struct DestructTraits<qt3ds::runtime::SPresentationAsset>
     {
-        void destruct(uic::runtime::SPresentationAsset &) {}
+        void destruct(qt3ds::runtime::SPresentationAsset &) {}
     };
     template <>
-    struct DestructTraits<uic::runtime::SSCXMLAsset>
+    struct DestructTraits<qt3ds::runtime::SSCXMLAsset>
     {
-        void destruct(uic::runtime::SSCXMLAsset &) {}
+        void destruct(qt3ds::runtime::SSCXMLAsset &) {}
     };
     template <>
-    struct DestructTraits<uic::runtime::SRenderPluginAsset>
+    struct DestructTraits<qt3ds::runtime::SRenderPluginAsset>
     {
-        void destruct(uic::runtime::SRenderPluginAsset &) {}
+        void destruct(qt3ds::runtime::SRenderPluginAsset &) {}
     };
     template <>
-    struct DestructTraits<uic::runtime::SBehaviorAsset>
+    struct DestructTraits<qt3ds::runtime::SBehaviorAsset>
     {
-        void destruct(uic::runtime::SBehaviorAsset &) {}
+        void destruct(qt3ds::runtime::SBehaviorAsset &) {}
     };
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace runtime {
 
     // Force compile error if unsupported datatype requested

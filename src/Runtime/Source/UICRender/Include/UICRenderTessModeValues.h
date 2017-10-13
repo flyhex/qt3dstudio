@@ -32,7 +32,7 @@
 #define UIC_RENDER_TESS_MODE_VALUES_H
 #include "UICRender.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     struct SDefaultMaterial;

@@ -42,7 +42,7 @@
 // texture-based effects.
 #define UIC_RENDER_SUPPORT_DEPTH_TEXTURE 1
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     void STextShader::Render(NVRenderTexture2D &inTexture,

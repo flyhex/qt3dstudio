@@ -40,7 +40,7 @@
 
 #define MAX_EVENTS 256
 
-using namespace uic::evt;
+using namespace qt3ds::evt;
 using qt3ds::QT3DSU32;
 
 IEventSystem &IEventSystem::Create(qt3ds::NVFoundationBase &inFoundation)

@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 
 // Discriminated union to unify different things that may be identified by an id
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     struct IdValueTypes
@@ -116,19 +116,19 @@ namespace qt3ds {
 namespace foundation {
 
     template <>
-    struct DestructTraits<uic::state::SStateNode *>
+    struct DestructTraits<qt3ds::state::SStateNode *>
     {
-        void destruct(uic::state::SStateNode *) {}
+        void destruct(qt3ds::state::SStateNode *) {}
     };
     template <>
-    struct DestructTraits<uic::state::SSend *>
+    struct DestructTraits<qt3ds::state::SSend *>
     {
-        void destruct(uic::state::SSend *) {}
+        void destruct(qt3ds::state::SSend *) {}
     };
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
 
     typedef qt3ds::foundation::

@@ -59,7 +59,7 @@
 using qt3ds::foundation::atomicIncrement;
 using qt3ds::foundation::atomicDecrement;
 using qt3ds::QT3DSI32;
-using uic::runtime::ISlideSystem;
+using qt3ds::runtime::ISlideSystem;
 using qt3ds::foundation::SDataReader;
 
 //==============================================================================
@@ -69,7 +69,7 @@ namespace {
 
 using namespace qt3ds::foundation;
 using namespace qt3ds;
-using namespace uic::runtime;
+using namespace qt3ds::runtime;
 using Q3DStudio::CFileStream;
 
 struct SSerializerDataReadWrapper : public SDataReader
@@ -159,20 +159,20 @@ void LoadSystemFromBinary(SSerializerDataReadWrapper &inWrapper, TSystemType &in
 
 struct SLoadScript
 {
-    uic::runtime::element::SElement *m_Element;
+    qt3ds::runtime::element::SElement *m_Element;
     QT3DSU32 m_ScriptHandle;
     SLoadScript()
         : m_Element(NULL)
     {
     }
-    SLoadScript(uic::runtime::element::SElement *inElement, QT3DSU32 inStrHandle)
+    SLoadScript(qt3ds::runtime::element::SElement *inElement, QT3DSU32 inStrHandle)
         : m_Element(inElement)
         , m_ScriptHandle(inStrHandle)
     {
     }
 };
 
-struct SBinarySerializerAppRunnable : public uic::runtime::IAppRunnable
+struct SBinarySerializerAppRunnable : public qt3ds::runtime::IAppRunnable
 {
     qt3ds::NVFoundationBase &m_Foundation;
     Q3DStudio::IScriptBridge &m_Bridge;
@@ -195,7 +195,7 @@ struct SBinarySerializerAppRunnable : public uic::runtime::IAppRunnable
 
     void Run() override
     {
-        using uic::runtime::element::SElement;
+        using qt3ds::runtime::element::SElement;
         qt3ds::foundation::IStringTable &theStrTable(m_Presentation.GetStringTable());
         for (QT3DSU32 idx = 0, end = m_Scripts.size(); idx < end; ++idx) {
             SElement *theElement = reinterpret_cast<SElement *>(
@@ -207,7 +207,7 @@ struct SBinarySerializerAppRunnable : public uic::runtime::IAppRunnable
 };
 
 void SaveScripts(eastl::vector<SLoadScript> &presentationScripts,
-                 uic::runtime::element::SElement &inElement, CRegisteredString inSrcPathStr,
+                 qt3ds::runtime::element::SElement &inElement, CRegisteredString inSrcPathStr,
                  IElementAllocator &inAlloc)
 {
     if (inElement.HasScriptCallbacks()) {
@@ -259,7 +259,7 @@ void CBinarySerializer::BinarySave(CPresentation *inPresentation)
 
     NVFoundationBase &theFoundation =
         inPresentation->GetApplication().GetRuntimeFactoryCore().GetFoundation();
-    uic::runtime::IElementAllocator &theAllocator =
+    qt3ds::runtime::IElementAllocator &theAllocator =
         inPresentation->GetApplication().GetElementAllocator();
 
     SaveSystemToBinary(theStream, inPresentation->GetAnimationSystem(), theFoundation,

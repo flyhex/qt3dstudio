@@ -43,7 +43,7 @@
 #include "foundation/Qt3DSMutex.h"
 #include <QFile>
 
-using namespace uic::state;
+using namespace qt3ds::state;
 using qt3ds::foundation::CFileTools;
 
 namespace {

@@ -36,7 +36,7 @@
 #include "render/Qt3DSRenderTexture2DArray.h"
 #include "UICRenderResourceManager.h"
 
-namespace uic {
+namespace qt3ds {
 namespace render {
     class CResourceTexture2D
     {

@@ -49,7 +49,7 @@ struct SMetaDataEffect;
 struct SMetaDataCustomMaterial;
 }
 
-namespace uic {
+namespace qt3ds {
 namespace render {
 
     class IBufferManager;
@@ -97,7 +97,7 @@ namespace render {
                     ,
                     IEffectSystem &inEffectSystem, const char8_t *inPresentationDir,
                     IRenderPluginManager &inPluginManager, ICustomMaterialSystem &inMaterialSystem,
-                    IDynamicObjectSystem &inDynamicSystem, uic::render::IPathManager &inPathManager
+                    IDynamicObjectSystem &inDynamicSystem, qt3ds::render::IPathManager &inPathManager
                     // Resolve references to objects; this is done by the main uip loader during
                     // its normal mode of operation so we try to reuse that code.
                     ,

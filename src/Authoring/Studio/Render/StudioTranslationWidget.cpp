@@ -35,7 +35,7 @@
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
 
-using namespace uic::widgets;
+using namespace qt3ds::widgets;
 
 namespace {
 
@@ -138,7 +138,7 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
     }
 
     void RenderPick(const QT3DSMat44 &inProjPremult, NVRenderContext &inRenderContext,
-                            uic::render::SWindowDimensions /*inWinDimensions*/) override
+                            qt3ds::render::SWindowDimensions /*inWinDimensions*/) override
     {
         if (m_XAxis && m_PickShader) {
             inRenderContext.SetDepthWriteEnabled(true);
