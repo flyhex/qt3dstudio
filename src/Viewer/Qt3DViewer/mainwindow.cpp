@@ -50,43 +50,51 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(bool generatorMode, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_studio3D(0)
     , m_connectionInfo(0)
     , m_remoteDeploymentReceiver(0)
+    , m_generatorMode(generatorMode)
 {
     ui->setupUi(this);
 
-    ui->actionOpen->setShortcut(QKeySequence::Open);
-    QList<QKeySequence> shortcuts;
-    shortcuts.push_back(QKeySequence(QKeySequence::Quit));
-    shortcuts.push_back(QKeySequence("CTRL+Q"));
-    ui->actionQuit->setShortcuts(shortcuts);
-    ui->actionReload->setShortcut(QKeySequence::Refresh);
+    if (!m_generatorMode) {
+        resize(1280, 720);
+        ui->actionOpen->setShortcut(QKeySequence::Open);
+        QList<QKeySequence> shortcuts;
+        shortcuts.push_back(QKeySequence(QKeySequence::Quit));
+        shortcuts.push_back(QKeySequence("CTRL+Q"));
+        ui->actionQuit->setShortcuts(shortcuts);
+        ui->actionReload->setShortcut(QKeySequence::Refresh);
 
-    QStringList strArg = QApplication::arguments();
-    if (strArg.size() >= 2) {
-        QFileInfo theFilePath(strArg[1]);
-        if (theFilePath.exists()) {
-            m_openFileDir = theFilePath.path();
-            QSettings().setValue("DirectoryOfLastOpen", m_openFileDir);
+        QStringList strArg = QApplication::arguments();
+        if (strArg.size() >= 2) {
+            QFileInfo theFilePath(strArg[1]);
+            if (theFilePath.exists()) {
+                m_openFileDir = theFilePath.path();
+                QSettings().setValue("DirectoryOfLastOpen", m_openFileDir);
+            }
         }
-    }
 
 #ifdef Q_OS_ANDROID
-    m_openFileDir = QStringLiteral("/sdcard/qt3dviewer"); // Add default folder for Android
+        m_openFileDir = QStringLiteral("/sdcard/qt3dviewer"); // Add default folder for Android
 #else
-    // Allow drops. Not usable for Android.
-    setAcceptDrops(true);
+        // Allow drops. Not usable for Android.
+        setAcceptDrops(true);
 #endif
 
-    addAction(ui->actionFull_Screen);
-    addAction(ui->actionShowOnScreenStats);
-    addAction(ui->actionBorder);
-    addAction(ui->actionToggle_Scale_Mode);
-    addAction(ui->actionToggle_Shade_Mode);
+        addAction(ui->actionFull_Screen);
+        addAction(ui->actionShowOnScreenStats);
+        addAction(ui->actionBorder);
+        addAction(ui->actionToggle_Scale_Mode);
+        addAction(ui->actionToggle_Shade_Mode);
+    } else {
+        ui->menuBar->clear();
+        ui->menuBar->addAction(ui->actionQuit);
+        resize(500, 100);
+    }
 
     // Set import paths so that standalone installation works
     QString extraImportPath1(QStringLiteral("%1/qml"));
@@ -101,6 +109,9 @@ MainWindow::MainWindow(QWidget *parent)
                 extraImportPath2.arg(QGuiApplication::applicationDirPath()));
 
     ui->quickWidget->setSource(QUrl("qrc:/viewer.qml"));
+
+    if (m_generatorMode)
+        setupGeneratorUI();
 
     updateUI();
 }
@@ -379,6 +390,37 @@ QString MainWindow::convertMimeDataToFilename(const QMimeData *mimeData)
     return QString();
 }
 
+void MainWindow::setupGeneratorUI()
+{
+    QQmlEngine *engine = ui->quickWidget->engine();
+    QQuickItem *root = ui->quickWidget->rootObject();
+
+    QByteArray qml = "import QtQuick 2.7\n"
+                     "import QtQuick.Controls 2.2\n"
+                     "Label {\n"
+                     "    color: \"White\"\n"
+                     "    horizontalAlignment: Text.AlignHCenter\n"
+                     "    verticalAlignment: Text.AlignVCenter\n"
+                     "    anchors.fill: parent\n"
+                     "    font.pixelSize: width / 30\n"
+                     "    text: \"Image sequence generation initializing...\"\n"
+                     "}";
+
+    QQmlComponent component(engine);
+    component.setData(qml, QUrl());
+
+    if (component.isError()) {
+        qCritical() << "Error setting up generator UI:" << component.errors();
+        return;
+    }
+
+    m_generatorInfo = qobject_cast<QQuickItem *>(component.create());
+
+    QQmlEngine::setObjectOwnership(m_generatorInfo, QQmlEngine::CppOwnership);
+    m_generatorInfo->setParentItem(root);
+    m_generatorInfo->setParent(engine);
+}
+
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     if (convertMimeDataToFilename(event->mimeData()).isEmpty() == false)
@@ -395,19 +437,23 @@ void MainWindow::dropEvent(QDropEvent *event)
 void MainWindow::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
-    QSettings settings(QCoreApplication::organizationName(),
-                       QCoreApplication::applicationName());
-    restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-    restoreState(settings.value("mainWindowState").toByteArray());
+    if (!m_generatorMode) {
+        QSettings settings(QCoreApplication::organizationName(),
+                           QCoreApplication::applicationName());
+        restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+        restoreState(settings.value("mainWindowState").toByteArray());
+    }
     updateUI();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    QSettings settings(QCoreApplication::organizationName(),
-                       QCoreApplication::applicationName());
-    settings.setValue("mainWindowGeometry", saveGeometry());
-    settings.setValue("mainWindowState", saveState());
+    if (!m_generatorMode) {
+        QSettings settings(QCoreApplication::organizationName(),
+                           QCoreApplication::applicationName());
+        settings.setValue("mainWindowGeometry", saveGeometry());
+        settings.setValue("mainWindowState", saveState());
+    }
     QMainWindow::closeEvent(event);
 }
 
@@ -492,6 +538,22 @@ void MainWindow::remoteDisconnected()
 {
     m_connectionInfo->setProperty("text", "Remote Disconnected");
     updateUI(true);
+}
+
+void MainWindow::generatorProgress(int totalFrames, int frameCount)
+{
+    QString progressString;
+    if (frameCount >= totalFrames) {
+        progressString =
+                QCoreApplication::translate(
+                    "main", "Image sequence generation done! (%2 frames generated)")
+        .arg(totalFrames);
+    } else {
+        progressString =
+                QCoreApplication::translate("main", "Image sequence generation progress: %1 / %2")
+        .arg(frameCount).arg(totalFrames);
+    }
+    m_generatorInfo->setProperty("text", progressString);
 }
 
 void MainWindow::updateProgress(int percent)

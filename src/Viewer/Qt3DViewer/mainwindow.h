@@ -49,7 +49,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(bool generatorMode, QWidget *parent = nullptr);
     ~MainWindow();
 
     void loadFile(const QString &filename);
@@ -70,6 +70,10 @@ protected:
 private:
     Q3DSView *viewer() const;
     QString convertMimeDataToFilename(const QMimeData *mimeData);
+    void setupGeneratorUI();
+
+public Q_SLOTS:
+    void generatorProgress(int totalFrames, int frameCount);
 
 private Q_SLOTS:
     void on_actionToggle_Scale_Mode_triggered();
@@ -99,6 +103,8 @@ private:
     bool m_embeddedMode;
     QPoint m_swipeStart;
     RemoteDeploymentReceiver *m_remoteDeploymentReceiver = nullptr;
+    bool m_generatorMode;
+    QQuickItem *m_generatorInfo = nullptr;
 };
 
 #endif // MAINWINDOW_H

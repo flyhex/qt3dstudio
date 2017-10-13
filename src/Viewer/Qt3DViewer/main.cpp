@@ -30,9 +30,11 @@
 
 #include "mainwindow.h"
 
-#include <QApplication>
-#include <QCommandLineParser>
-#include <QFile>
+#include <QtWidgets/qapplication.h>
+#include <QtCore/qcommandlineparser.h>
+#include <QtCore/qfile.h>
+#include <QtStudio3D/q3dssurfaceviewer.h>
+#include <QtStudio3D/private/q3dsimagesequencegenerator_p.h>
 
 int main(int argc, char *argv[])
 {
@@ -62,19 +64,75 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.addHelpOption();
     parser.addPositionalArgument("file",
-        QCoreApplication::translate("main", "The file to open."));
+                                 QCoreApplication::translate("main", "The presentation file to open."),
+                                 QCoreApplication::translate("main", "[file]"));
+
+    parser.addOption({"sequence",
+                      QCoreApplication::translate("main", "Generates an image sequence without showing the UI. The file argument must be specified. Specifying any of the seq-* arguments implies setting this option.")});
+    parser.addOption({"seq-start",
+                      QCoreApplication::translate("main", "Start time of the sequence in milliseconds. The default value is 0."),
+                      QCoreApplication::translate("main", "ms"), QString::number(0)});
+    parser.addOption({"seq-end",
+                      QCoreApplication::translate("main", "End time of the sequence in milliseconds. The default value is 10000."),
+                      QCoreApplication::translate("main", "ms"), QString::number(1000)});
+    parser.addOption({"seq-fps",
+                      QCoreApplication::translate("main", "Frames per second for the sequence. The default value is 60."),
+                      QCoreApplication::translate("main", "fps"), QString::number(60)});
+    parser.addOption({"seq-interval",
+                      QCoreApplication::translate("main", "Time interval between frames in the sequence in milliseconds. The seq-fps argument is ignored if this argument is used."),
+                      QCoreApplication::translate("main", "ms"), QString::number(0)});
+    parser.addOption({"seq-width",
+                      QCoreApplication::translate("main", "Width of the image sequence. The default value is 1920."),
+                      QCoreApplication::translate("main", "pixels"), QString::number(1920)});
+    parser.addOption({"seq-height",
+                      QCoreApplication::translate("main", "Height of the image sequence. The default value is 1080."),
+                      QCoreApplication::translate("main", "pixels"), QString::number(1080)});
+    parser.addOption({"seq-outpath",
+                      QCoreApplication::translate("main", "Output path of the image sequence. The default value is the current directory."),
+                      QCoreApplication::translate("main", "path"), QStringLiteral(".")});
+    parser.addOption({"seq-outfile",
+                      QCoreApplication::translate("main", "Output filename base for the image sequence. The default value is derived from the presentation filename."),
+                      QCoreApplication::translate("main", "file"), QStringLiteral("")});
     parser.process(a);
 
     const QStringList files = parser.positionalArguments();
-    if (files.count() > 1)
+    if (files.count() > 1) {
+        qWarning() << "Only one presentation file can be given.";
         parser.showHelp(-1);
+    }
 
-    MainWindow w;
-    w.resize(1280, 720);
+    bool generateSequence = parser.isSet("sequence") || parser.isSet("seq-start")
+            || parser.isSet("seq-end") || parser.isSet("seq-fps")
+            || parser.isSet("seq-interval") || parser.isSet("seq-width")
+            || parser.isSet("seq-height") || parser.isSet("seq-outpath")
+            || parser.isSet("seq-outfile");
+
+    Q3DSImageSequenceGenerator *generator = nullptr;
+
+    MainWindow w(generateSequence);
     w.show();
 
-    if (!files.isEmpty())
+    if (generateSequence) {
+        if (files.count() != 1) {
+            qWarning() << "Presentation file is required for generating an image sequence.";
+            parser.showHelp(-1);
+        }
+        generator = new Q3DSImageSequenceGenerator;
+        QObject::connect(generator, &Q3DSImageSequenceGenerator::progress,
+                         &w, &MainWindow::generatorProgress);
+        generator->generateImageSequence(
+                    files.first(),
+                    parser.value("seq-start").toDouble(),
+                    parser.value("seq-end").toDouble(),
+                    parser.value("seq-fps").toDouble(),
+                    parser.value("seq-interval").toDouble(),
+                    parser.value("seq-width").toInt(),
+                    parser.value("seq-height").toInt(),
+                    parser.value("seq-outpath"),
+                    parser.value("seq-outfile"));
+    } else if (!files.isEmpty()) {
         w.loadFile(files.first());
+    }
 
 #ifndef Q_OS_ANDROID
     QFile styleFile(":/style.qss");
