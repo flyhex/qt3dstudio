@@ -359,7 +359,7 @@ void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inIte
 
 bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase) const
 {
-    if (inspectBase != m_inspectableBase)
+    if (inspectBase != m_inspectableBase || !inspectBase)
         return true;
 
     long theCount = m_inspectableBase->GetGroupCount();
