@@ -76,7 +76,13 @@ int main(int argc, char *argv[])
     if (!files.isEmpty())
         w.loadFile(files.first());
 
+#ifndef Q_OS_ANDROID
     QFile styleFile(":/style.qss");
+#else
+    // We need a different stylesheet for Android, or the controls are too small, and some of
+    // them aren't displayed correctly (see QTBUG-41773)
+    QFile styleFile(":/style_android.qss");
+#endif
     styleFile.open(QFile::ReadOnly);
 
     QString style(styleFile.readAll());

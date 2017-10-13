@@ -51,11 +51,6 @@ RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
     inputPort.setIntValue(m_serverPort);
     inputPort.setWindowFlags(Qt::Popup);
     connect(&inputPort, &QInputDialog::intValueSelected, this, &RemoteDeploymentReceiver::setPort);
-#ifdef Q_OS_ANDROID
-    // Android requires this weird stylesheet modification, or the contents of the spinbox are cut.
-    // Seems to be caused by QTBUG-41773
-    inputPort.setStyleSheet("QSpinBox { height: 40px; padding: -10px; }");
-#endif
     inputPort.exec();
 }
 

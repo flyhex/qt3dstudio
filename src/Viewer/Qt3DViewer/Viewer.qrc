@@ -4,6 +4,8 @@
         <file>viewer.qml</file>
         <file alias="style.qss">../../Authoring/Studio/style.qss</file>
         <file alias="res/arrow_down.png">../../Authoring/Studio/res/arrow_down.png</file>
+        <file alias="res/arrow_up.png">../../Authoring/Studio/res/arrow_up.png</file>
         <file alias="res/separator.png">../../Authoring/Studio/res/separator.png</file>
+        <file>style_android.qss</file>
     </qresource>
 </RCC>
