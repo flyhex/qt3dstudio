@@ -54,6 +54,8 @@ public:
 
     virtual QPainter* GetPainter() = 0;
     virtual void FillSolidRect(const QRect &inCoordinates, const QColor &inColor) = 0;
+    virtual void FillRoundedRect(const QRect &inCoordinates, const QColor &inColor,
+                                 bool vertical) = 0;
     virtual void MoveTo(const QPoint &inPoint) = 0;
     virtual void MoveTo(long inX, long inY) = 0;
     virtual void LineTo(const QPoint &inPoint) = 0;

@@ -76,57 +76,8 @@ void CScrollerThumb::Draw(CRenderer *inRenderer)
         CRct theRect(theSize);
 
         // Draw the thumb
-        inRenderer->FillSolidRect(theRect, CStudioPreferences::GetScrollThumbBGColor());
-        // Draw the highlight
-        inRenderer->Draw3dRect(CRct(theRect.position.x + 1, theRect.position.y + 1,
-                                    theRect.size.x - 1, theRect.size.y - 1),
-                               CStudioPreferences::GetScrollThumbHighlightColor(),
-                               CStudioPreferences::GetScrollThumbBGColor());
-        // Draw the black border
-        inRenderer->Draw3dRect(theRect, CStudioPreferences::GetScrollThumbShadowColor(),
-                               CStudioPreferences::GetScrollThumbShadowColor());
-
-        // Draw the 3 lines in the middle of the control, depending on orientation
-        if (m_ScrollerBar->GetOrientation() == CScrollerBar::VERTICAL) {
-            // Draw the light lines
-            inRenderer->PushPen(CStudioPreferences::GetScrollThumbGripHighlightColor());
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 3, theSize.y / 2 - 5));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 2, theSize.y / 2 - 5));
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 3, theSize.y / 2 - 2));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 2, theSize.y / 2 - 2));
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 3, theSize.y / 2 + 1));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 2, theSize.y / 2 + 1));
-            inRenderer->PopPen();
-            // Draw the dark lines
-            inRenderer->PushPen(CStudioPreferences::GetScrollThumbGripShadowColor());
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 2, theSize.y / 2 - 4));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 3, theSize.y / 2 - 4));
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 2, theSize.y / 2 - 1));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 3, theSize.y / 2 - 1));
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 2, theSize.y / 2 + 2));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 3, theSize.y / 2 + 2));
-            inRenderer->PopPen();
-        } else {
-            // Draw the light lines
-            inRenderer->PushPen(CStudioPreferences::GetScrollThumbGripHighlightColor());
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 4, theSize.y / 2 - 3));
-            inRenderer->LineTo(CPt(theSize.x / 2 - 4, theSize.y / 2 + 2));
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 1, theSize.y / 2 - 3));
-            inRenderer->LineTo(CPt(theSize.x / 2 - 1, theSize.y / 2 + 2));
-            inRenderer->MoveTo(CPt(theSize.x / 2 + 2, theSize.y / 2 - 3));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 2, theSize.y / 2 + 2));
-            inRenderer->PopPen();
-
-            // Draw the dark lines
-            inRenderer->PushPen(CStudioPreferences::GetScrollThumbGripShadowColor());
-            inRenderer->MoveTo(CPt(theSize.x / 2 - 3, theSize.y / 2 - 2));
-            inRenderer->LineTo(CPt(theSize.x / 2 - 3, theSize.y / 2 + 3));
-            inRenderer->MoveTo(CPt(theSize.x / 2, theSize.y / 2 - 2));
-            inRenderer->LineTo(CPt(theSize.x / 2, theSize.y / 2 + 3));
-            inRenderer->MoveTo(CPt(theSize.x / 2 + 3, theSize.y / 2 - 2));
-            inRenderer->LineTo(CPt(theSize.x / 2 + 3, theSize.y / 2 + 3));
-            inRenderer->PopPen();
-        }
+        inRenderer->FillRoundedRect(theRect, CStudioPreferences::GetScrollThumbBGColor(),
+                                    m_ScrollerBar->GetOrientation() == CScrollerBar::VERTICAL);
     }
 }
 

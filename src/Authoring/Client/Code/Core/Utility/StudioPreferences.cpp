@@ -46,11 +46,9 @@
 #include <QtQml/qqmlcontext.h>
 
 ::CColor s_BaseColor;
-::CColor s_LightBaseColor;
 ::CColor s_DarkBaseColor;
 ::CColor s_NormalColor;
 ::CColor s_MasterColor;
-::CColor s_InactiveColor;
 ::CColor s_MouseOverHighlightColor;
 ::CColor s_SelectColor;
 ::CColor s_ButtonDownColor;
@@ -59,11 +57,6 @@
 ::CColor s_LayerHighlightBGColor;
 ::CColor s_ExtendedLockedLightColor;
 ::CColor s_LockedBorderColor;
-::CColor s_ScrollThumbShadowColor;
-::CColor s_ScrollThumbGripHighlightColor;
-::CColor s_ScrollThumbGripShadowColor;
-::CColor s_ScrollThumbHighlightColor;
-::CColor s_ScrollBGOutlineColor;
 ::CColor s_ScrollBGColor;
 ::CColor s_TextBoxBGColorWithFocus;
 ::CColor s_ControlRectBottomLineDarkColor;
@@ -125,11 +118,6 @@ void CStudioPreferences::LoadPreferences()
     s_MasterColor = CPreferences::GetUserPreferences("Preferences")
                         .GetColorValue("MasterColor", ::CColor("#5caa15"));
 
-    s_InactiveColor = ::CColor("#727476");
-
-    s_LightBaseColor = s_BaseColor;
-    s_LightBaseColor.SetLuminance(s_LightBaseColor.GetLuminance() + 0.07f);
-
     s_DarkBaseColor = s_BaseColor;
     s_DarkBaseColor.SetLuminance(s_DarkBaseColor.GetLuminance() - 0.10f);
 
@@ -155,24 +143,7 @@ void CStudioPreferences::LoadPreferences()
     s_LockedBorderColor = s_BaseColor;
     s_LockedBorderColor.SetLuminance(s_LockedBorderColor.GetLuminance() - 0.07f);
 
-    s_ScrollThumbShadowColor = s_BaseColor;
-    s_ScrollThumbShadowColor.SetLuminance(s_ScrollThumbShadowColor.GetLuminance() - 0.50f);
-
-    s_ScrollThumbGripHighlightColor = s_BaseColor;
-    s_ScrollThumbGripHighlightColor.SetLuminance(s_ScrollThumbGripHighlightColor.GetLuminance()
-                                                 + 0.15f);
-
-    s_ScrollThumbGripShadowColor = s_BaseColor;
-    s_ScrollThumbGripShadowColor.SetLuminance(s_ScrollThumbGripShadowColor.GetLuminance() - 0.30f);
-
-    s_ScrollThumbHighlightColor = s_BaseColor;
-    s_ScrollThumbHighlightColor.SetLuminance(s_ScrollThumbHighlightColor.GetLuminance() + 0.15f);
-
-    s_ScrollBGOutlineColor = s_BaseColor;
-    s_ScrollBGOutlineColor.SetLuminance(s_ScrollBGOutlineColor.GetLuminance() - 0.30f);
-
     s_ScrollBGColor = s_BaseColor;
-    s_ScrollBGColor.SetLuminance(s_ScrollBGColor.GetLuminance() - 0.06f);
 
     s_TextBoxBGColorWithFocus = s_BaseColor;
     s_TextBoxBGColorWithFocus.SetLuminance(s_TextBoxBGColorWithFocus.GetLuminance() + 0.20f);
@@ -1159,7 +1130,7 @@ bool CStudioPreferences::IsDebugTimes()
 
 ::CColor CStudioPreferences::GetTimelineSelectColor()
 {
-    return ::CColor("#23516D"); // The normal select color (#46a2da) does not work with master color
+    return s_selectionColor; // The normal select color (#46a2da) does not work with master color
 }
 
 //==============================================================================
@@ -1233,15 +1204,6 @@ bool CStudioPreferences::IsDebugTimes()
 
 //=============================================================================
 /**
- * @return a lighter version of the base color
- */
-::CColor CStudioPreferences::GetLightBaseColor()
-{
-    return s_LightBaseColor;
-}
-
-//=============================================================================
-/**
  * @return a darker version of the base color
  */
 ::CColor CStudioPreferences::GetDarkBaseColor()
@@ -1273,7 +1235,7 @@ bool CStudioPreferences::IsDebugTimes()
  */
 ::CColor CStudioPreferences::GetInactiveColor()
 {
-    return s_InactiveColor;
+    return s_disabledColor;
 }
 
 //=============================================================================
@@ -1403,58 +1365,26 @@ bool CStudioPreferences::IsDebugTimes()
 
 //=============================================================================
 /**
- * @return color for outline of the scroll bar (outside the thumb area)
- */
-::CColor CStudioPreferences::GetScrollBGOutlineColor()
-{
-    return s_ScrollBGOutlineColor;
-}
-
-//=============================================================================
-/**
  * @return color of the scroll bar thumb
  */
 ::CColor CStudioPreferences::GetScrollThumbBGColor()
 {
-    return s_BaseColor;
+    return CColor("#999A9B");
 }
 
 //=============================================================================
 /**
- * @return color of the highlight on the top and side of the scroll bar thumb
+ * @return color of the scalable handle of the thumb
  */
 ::CColor CStudioPreferences::GetScrollThumbHighlightColor()
 {
-    return s_ScrollThumbHighlightColor;
-}
-
-//=============================================================================
-/**
- * @return color of the 3 light-lines in the middle of a scroll bar thumb
- */
-::CColor CStudioPreferences::GetScrollThumbGripHighlightColor()
-{
-    return s_ScrollThumbGripHighlightColor;
-}
-
-//=============================================================================
-/**
- * @return color of the 3 dark-lines in the middle of a scroll bar thumb
- */
-::CColor CStudioPreferences::GetScrollThumbGripShadowColor()
-{
-    return s_ScrollThumbGripShadowColor;
+    return s_studioColor2;
 }
 
 //=============================================================================
 /**
  * @return color for the outline of the scroll bar thumb (opposite side of the highlight)
  */
-::CColor CStudioPreferences::GetScrollThumbShadowColor()
-{
-    return s_ScrollThumbShadowColor;
-}
-
 ::CColor CStudioPreferences::GetLockedTimebarColor()
 {
     return GetBaseColor();
@@ -1481,7 +1411,7 @@ bool CStudioPreferences::IsDebugTimes()
  */
 ::CColor CStudioPreferences::GetLockedTextColor()
 {
-    return s_InactiveColor;
+    return s_disabledColor;
 }
 
 //=============================================================================
@@ -1490,7 +1420,7 @@ bool CStudioPreferences::IsDebugTimes()
  */
 ::CColor CStudioPreferences::GetLayerBackgroundColor()
 {
-    return ::CColor("#2e2f30");
+    return s_backgroundColor;
 }
 
 //=============================================================================
@@ -1499,7 +1429,7 @@ bool CStudioPreferences::IsDebugTimes()
  */
 ::CColor CStudioPreferences::GetGroupBackgroundColor()
 {
-    return ::CColor("#404244");
+    return s_studioColor2;
 }
 
 //=============================================================================
@@ -1509,7 +1439,7 @@ bool CStudioPreferences::IsDebugTimes()
  */
 ::CColor CStudioPreferences::GetObjectBackgroundColor()
 {
-    return ::CColor("#404244");
+    return s_studioColor2;
 }
 
 //=============================================================================
@@ -1618,12 +1548,12 @@ bool CStudioPreferences::IsDebugTimes()
  */
 ::CColor CStudioPreferences::GetRulerBackgroundColor()
 {
-    return ::CColor("#262829");
+    return s_studioColor1;
 }
 
 ::CColor CStudioPreferences::GetRulerTickColor()
 {
-    return ::CColor("#727476");
+    return s_studioColor3;
 }
 
 ::CColor CStudioPreferences::GetGuideColor()
@@ -1633,7 +1563,7 @@ bool CStudioPreferences::IsDebugTimes()
 
 ::CColor CStudioPreferences::GetGuideSelectedColor()
 {
-    return ::CColor("#f4be04");
+    return s_guideColor;
 }
 
 ::CColor CStudioPreferences::GetGuideFillColor()

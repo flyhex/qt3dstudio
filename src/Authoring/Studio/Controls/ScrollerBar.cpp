@@ -52,7 +52,7 @@
 //==============================================================================
 //	Static variables
 //==============================================================================
-const long CScrollerBar::DEFAULT_WIDTH = 16;
+const long CScrollerBar::DEFAULT_WIDTH = 6;
 const CColor CScrollerBar::DEFAULT_COLOR = CColor(196, 194, 189);
 const CColor CScrollerBar::SCROLLER_TOP = CColor(165, 162, 161);
 
@@ -144,25 +144,10 @@ void CScrollerBar::SetOrientation(EOrientation inOrientation)
     m_Orientation = inOrientation;
     m_Background->SetOrientation(inOrientation);
 
-    if (m_Orientation == VERTICAL) {
-        // Vertical buttons
+    if (m_Orientation == VERTICAL)
         SetFlowDirection(FLOW_VERTICAL);
-        m_ButtonBackward->SetUpImage("scrollbar-arrows-up-normal.png");
-        m_ButtonBackward->SetDownImage("scrollbar-arrows-up-depressed.png");
-        m_ButtonBackward->SetDisabledImage("scrollbar-arrows-up-disabled.png");
-        m_ButtonForward->SetUpImage("scrollbar-arrows-down-normal.png");
-        m_ButtonForward->SetDownImage("scrollbar-arrows-down-depressed.png");
-        m_ButtonForward->SetDisabledImage("scrollbar-arrows-down-disabled.png");
-    } else {
-        // Horizontal buttons
+    else
         SetFlowDirection(FLOW_HORIZONTAL);
-        m_ButtonBackward->SetUpImage("scrollbar-arrows-left-normal.png");
-        m_ButtonBackward->SetDownImage("scrollbar-arrows-left-depressed.png");
-        m_ButtonBackward->SetDisabledImage("scrollbar-arrows-left-disabled.png");
-        m_ButtonForward->SetUpImage("scrollbar-arrows-right-normal.png");
-        m_ButtonForward->SetDownImage("scrollbar-arrows-right-depressed.png");
-        m_ButtonForward->SetDisabledImage("scrollbar-arrows-right-disabled.png");
-    }
 }
 
 //=============================================================================

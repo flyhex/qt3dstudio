@@ -182,7 +182,6 @@ public:
     static bool IsDebugTimes();
 
     static ::CColor GetBaseColor();
-    static ::CColor GetLightBaseColor();
     static ::CColor GetDarkBaseColor();
 
     static ::CColor GetNormalColor();
@@ -217,12 +216,8 @@ public:
     static ::CColor GetTextBoxBGColorNoFocus();
     static ::CColor GetTextBoxBGColorWithFocus();
     static ::CColor GetScrollBGColor();
-    static ::CColor GetScrollBGOutlineColor();
     static ::CColor GetScrollThumbBGColor();
-    static ::CColor GetScrollThumbShadowColor();
     static ::CColor GetScrollThumbHighlightColor();
-    static ::CColor GetScrollThumbGripHighlightColor();
-    static ::CColor GetScrollThumbGripShadowColor();
     static ::CColor GetComboEditBoxGradientStartColor();
 
     static ::CColor GetLockedTimebarColor();

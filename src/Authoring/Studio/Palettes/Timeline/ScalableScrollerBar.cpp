@@ -155,18 +155,7 @@ void CScalableThumbTab::Draw(CRenderer *inRenderer)
     CPt theSize = GetSize();
     CRct theRect(theSize);
 
-    inRenderer->FillSolidRect(theRect, CStudioPreferences::GetScrollThumbBGColor());
-
-    // Draw the light colored highlight
-    inRenderer->PushPen(CStudioPreferences::GetScrollThumbHighlightColor());
-    inRenderer->MoveTo(CPt(1, theSize.y - 1));
-    inRenderer->LineTo(CPt(1, 1));
-    inRenderer->LineTo(CPt(theSize.x - 1, 1));
-    inRenderer->PopPen();
-
-    // Draw the dark bounding rectangle
-    CColor theGripBoundColor = CStudioPreferences::GetScrollThumbShadowColor();
-    inRenderer->Draw3dRect(theRect, theGripBoundColor, theGripBoundColor);
+    inRenderer->FillSolidRect(theRect, CStudioPreferences::GetScrollThumbHighlightColor());
 }
 
 //=============================================================================

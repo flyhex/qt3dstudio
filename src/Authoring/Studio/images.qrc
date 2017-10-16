@@ -100,18 +100,6 @@
         <file>images/Objects-Image-Normal@2.png</file>
         <file>images/Objects-Material-Normal@2x.png</file>
         <file>images/Objects-Model-Normal@2x.png</file>
-        <file>images/scrollbar-arrows-down-depressed.png</file>
-        <file>images/scrollbar-arrows-down-disabled.png</file>
-        <file>images/scrollbar-arrows-down-normal.png</file>
-        <file>images/scrollbar-arrows-left-depressed.png</file>
-        <file>images/scrollbar-arrows-left-disabled.png</file>
-        <file>images/scrollbar-arrows-left-normal.png</file>
-        <file>images/scrollbar-arrows-right-depressed.png</file>
-        <file>images/scrollbar-arrows-right-disabled.png</file>
-        <file>images/scrollbar-arrows-right-normal.png</file>
-        <file>images/scrollbar-arrows-up-depressed.png</file>
-        <file>images/scrollbar-arrows-up-disabled.png</file>
-        <file>images/scrollbar-arrows-up-normal.png</file>
         <file>images/Keyframe-Master-Disabled.png</file>
         <file>images/Keyframe-MasterDynamic-Normal.png</file>
         <file>images/Keyframe-MasterDynamic-Selected.png</file>

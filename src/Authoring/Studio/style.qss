@@ -30,13 +30,26 @@ QTabWidget::pane {
 }
 
 /* Scrollbar */
+
 QScrollBar:horizontal {
-    border: 1px solid #262829;
-    background: #404244;
+    height: 6px;
+}
+
+QScrollBar:vertical {
+    width: 6px;
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: #2e2f30;
 }
 
 QScrollBar::handle:horizontal {
-    background: #727476;
+    height: 6px;
+    border: 3px solid #999A9B;
+    border-radius: 3px;
 }
 
 QScrollBar::add-line:horizontal,
@@ -44,13 +57,10 @@ QScrollBar::sub-line:horizontal {
     width: 0px;
 }
 
-QScrollBar:vertical {
-    border: 1px solid #262829;
-    background: #404244;
-}
-
 QScrollBar::handle:vertical {
-    background: #727476;
+    width: 6px;
+    border: 3px solid #999A9B;
+    border-radius: 3px;
 }
 
 QScrollBar::add-line:vertical,

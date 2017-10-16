@@ -80,7 +80,36 @@ void CWinRenderer::FillSolidRect(const QRect &inCoordinates, const QColor &inCol
     QRect theRect(inCoordinates.topLeft() + m_Translation,
                   inCoordinates.size());
 
-    m_painter->fillRect(theRect, inColor);
+     m_painter->fillRect(theRect, inColor);
+}
+
+//=============================================================================
+/**
+ * Draws a rounded rectangle (which actually is just a line) and fills it with inColor.
+ * The coordinates are converted to global space using the current translation.
+ * @param inCoordinates the coordinates of the rectangle.
+ * @param inColor the color of the rectangle to draw.
+ */
+void CWinRenderer::FillRoundedRect(const QRect &inCoordinates, const QColor &inColor,
+                                   bool vertical)
+{
+    QPen previousPen = m_painter->pen();
+    QRect theRect(inCoordinates.topLeft() + m_Translation, inCoordinates.size());
+    QPointF startPoint = (theRect.bottomLeft() + theRect.topLeft()) / 2.0;
+    QPointF endPoint = (theRect.bottomRight() + theRect.topRight()) / 2.0;
+    qreal lineWidth = theRect.bottom() - theRect.top() + 1.0;
+
+    if (vertical) {
+        lineWidth = theRect.right() - theRect.left() + 1.0;
+        startPoint = (theRect.topRight() + theRect.topLeft()) / 2.0;
+        endPoint = (theRect.bottomRight() + theRect.bottomLeft()) / 2.0;
+    }
+
+    m_painter->setPen(QPen(inColor, lineWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    m_painter->drawLine(startPoint, endPoint);
+
+    // Restore previous pen
+    m_painter->setPen(previousPen);
 }
 
 //=============================================================================

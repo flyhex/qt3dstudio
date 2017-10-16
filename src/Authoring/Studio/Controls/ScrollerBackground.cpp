@@ -67,26 +67,6 @@ CScrollerBackground::~CScrollerBackground()
 void CScrollerBackground::Draw(CRenderer *inRenderer)
 {
     CBlankControl::Draw(inRenderer);
-
-    if (CScrollerBar::HORIZONTAL == m_Orientation) {
-        // Horizontal lines
-        inRenderer->PushPen(CStudioPreferences::GetScrollBGOutlineColor(), 1);
-        inRenderer->MoveTo(0, 0);
-        inRenderer->LineTo(GetSize().x, 0);
-        inRenderer->PopPen();
-        inRenderer->PushPen(CStudioPreferences::GetScrollBGOutlineColor(), 1);
-        inRenderer->MoveTo(0, GetSize().y - 1);
-        inRenderer->LineTo(GetSize().x, GetSize().y - 1);
-        inRenderer->PopPen();
-    } else {
-        // Vertical lines
-        inRenderer->PushPen(CStudioPreferences::GetScrollBGOutlineColor(), 1);
-        inRenderer->MoveTo(0, 0);
-        inRenderer->LineTo(0, GetSize().y - 1);
-        inRenderer->MoveTo(GetSize().x - 1, 0);
-        inRenderer->LineTo(GetSize().x - 1, GetSize().y - 1);
-        inRenderer->PopPen();
-    }
 }
 
 //=============================================================================

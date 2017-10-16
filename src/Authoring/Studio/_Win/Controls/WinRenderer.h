@@ -60,6 +60,8 @@ public:
     virtual ~CWinRenderer();
 
     void FillSolidRect(const QRect &inCoordinates, const QColor &inColor) override;
+    void FillRoundedRect(const QRect &inCoordinates, const QColor &inColor,
+                         bool vertical) override;
 
     void MoveTo(const QPoint &inPoint) override;
     void MoveTo(long inX, long inY) override;
