@@ -65,6 +65,7 @@ class WidgetControl : public QWidget, public CWinDropContainer
     friend class ::WidgetControlControlListener;
 public:
     explicit WidgetControl(CControl *control, QWidget *parent = nullptr);
+    virtual ~WidgetControl();
     void setContextMenuShown(bool shown) { m_isContextMenuShown = shown; }
 
 protected:

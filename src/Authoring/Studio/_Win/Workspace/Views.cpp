@@ -96,11 +96,8 @@ void CViews::CreateViews()
  */
 void CViews::DestroyViews()
 {
-    if (m_MainFrame) {
-        // Do NOT use delete to destroy a CFrameWnd object! Use DestroyWindow() instead.
-        m_MainFrame->deleteLater();
-        m_MainFrame = nullptr;
-    }
+    delete m_MainFrame;
+    m_MainFrame = nullptr;
 }
 
 //==============================================================================

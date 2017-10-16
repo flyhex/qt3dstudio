@@ -92,7 +92,6 @@ protected:
     long m_ActiveCameraIndex; ///< The index of the active camera in the list
 
     // UI Controls definition
-    QLabel* m_CameraText; ///< Static text showing the word "Camera"
     QComboBox* m_CameraSelector; ///< Combo box for selecting edit camera
 };
 

@@ -68,7 +68,6 @@ CEditCameraBar::CEditCameraBar(QWidget* parent)
 CEditCameraBar::~CEditCameraBar()
 {
     delete m_CameraSelector;
-    delete m_CameraText;
 }
 
 //==============================================================================

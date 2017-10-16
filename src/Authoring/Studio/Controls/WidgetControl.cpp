@@ -56,6 +56,11 @@ WidgetControl::WidgetControl(CControl *control, QWidget *parent)
     setControlSize(sizeHint());
 }
 
+WidgetControl::~WidgetControl()
+{
+    m_control->SetWindowListener(nullptr);
+}
+
 bool WidgetControl::event(QEvent *event)
 {
     if (event->type() == QEvent::ShortcutOverride) {

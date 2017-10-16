@@ -190,7 +190,6 @@ CStudioApp::CStudioApp()
  */
 CStudioApp::~CStudioApp()
 {
-
     delete m_SplashPalette;
     m_SplashPalette = nullptr;
     delete m_Views;
@@ -217,6 +216,15 @@ void CStudioApp::PerformShutdown()
         m_Renderer->Close();
         m_Renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
     }
+
+    delete m_SplashPalette;
+    m_SplashPalette = nullptr;
+    delete m_Views;
+    m_Views = nullptr;
+    delete m_Dialogs;
+    m_Dialogs = nullptr;
+    delete m_Core;
+    m_Core = nullptr;
 
     CStringLoader::UnloadStrings();
 
