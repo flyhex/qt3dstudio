@@ -97,12 +97,12 @@
 //==============================================================================
 //	Runtime
 //==============================================================================
-#include "UICAssert.h"
-#include "UICMacros.h"
-#include "UICElementSystem.h"
-#include "UICLuaEngine.h"
-#include "UICQmlEngine.h"
-#include "UICAttributeHashes.h"
+#include "Qt3DSAssert.h"
+#include "Qt3DSMacros.h"
+#include "Qt3DSElementSystem.h"
+#include "Qt3DSLuaEngine.h"
+#include "Qt3DSQmlEngine.h"
+#include "Qt3DSAttributeHashes.h"
 
 //==============================================================================
 //	Additional Linux only dependencies

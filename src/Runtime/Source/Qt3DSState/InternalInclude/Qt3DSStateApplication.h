@@ -31,7 +31,7 @@
 #pragma once
 
 #include "foundation/Qt3DSRefCounted.h"
-#include "UICTypes.h"
+#include "Qt3DSTypes.h"
 
 namespace qt3ds {
 namespace state {

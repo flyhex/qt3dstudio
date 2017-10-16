@@ -43,8 +43,8 @@
 #include "GUIDUtilities.h"
 #include "IDocumentEditor.h"
 #include "Q3DStudioNVFoundation.h"
-#include "UICRenderInputStreamFactory.h"
-#include "UICRenderPathManager.h"
+#include "Qt3DSRenderInputStreamFactory.h"
+#include "Qt3DSRenderPathManager.h"
 #include "UICDMGuides.h"
 #include "foundation/Qt3DSLogging.h"
 #include <unordered_map>

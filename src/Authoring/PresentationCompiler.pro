@@ -4,7 +4,7 @@ include($$PWD/../Runtime/commoninclude.pri)
 CONFIG += console
 
 SOURCES += \
-    $$PWD/../Runtime/Source/UICCompiler/Source/UICCompilerMain.cpp
+    $$PWD/../Runtime/Source/Qt3DSCompiler/Source/Qt3DSCompilerMain.cpp
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive

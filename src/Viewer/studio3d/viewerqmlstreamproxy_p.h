@@ -39,7 +39,7 @@
 
 #include "qstudio3dglobal.h"
 #include "q3dsqmlstreamproxy.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 
 QT_BEGIN_NAMESPACE
 

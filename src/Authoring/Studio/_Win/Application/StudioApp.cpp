@@ -37,7 +37,7 @@
 #endif
 #include "StudioApp.h"
 #include "SubPresentationsDlg.h"
-#include "UICStateApplication.h"
+#include "Qt3DSStateApplication.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>

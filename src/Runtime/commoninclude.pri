@@ -12,8 +12,7 @@ DEFINES += COMPILED_FROM_DSP \
 
 INCLUDEPATH += \
     $$PWD/Source \
-    $$PWD/Source/UICRender/Include \
-    $$PWD/Source/RuntimeUICDM/Include \
+    $$PWD/Source/DataModel/Include \
     $$PWD/Source/Runtime/Include \
     $$PWD/Source/System/Include \
     $$PWD/Source/Engine/Include \
@@ -24,13 +23,12 @@ INCLUDEPATH += \
     $$PWD/Source/Qt3DSRender/Source/gl3 \
     $$PWD/Source/Qt3DSRender/Source/glg \
     $$PWD/Source/UIPParser/Include \
-    $$PWD/Source/UICState/Include \
-    $$PWD/Source/UICState/Editor \
-    $$PWD/Source/UICState/Debugger \
-    $$PWD/Source/UICEvent/Include \
-    $$PWD/Source/UICEvent/InternalInclude \
-    $$PWD/Source/UICRender/GraphObjects \
-    $$PWD/Source/UICRender/ResourceManager \
+    $$PWD/Source/Qt3DSState/Include \
+    $$PWD/Source/Qt3DSStateApplication/Include \
+    $$PWD/Source/Qt3DSStateApplication/Editor \
+    $$PWD/Source/Qt3DSStateApplication/Debugger \
+    $$PWD/Source/Qt3DSEvent/Include \
+    $$PWD/Source/Qt3DSEvent/InternalInclude \
     $$PWD/Source/Viewer \
     $$PWD/Source/Viewer/PerfLog \
     $$PWD/../Authoring/UICIMP/UICImportLib \
@@ -42,7 +40,10 @@ INCLUDEPATH += \
     ../3rdparty/utf8cpp/2.3.2/source \
     ../3rdparty/color \
     ../3rdparty/RuntimePlatformSpecific/$$PlatformSpecificDir/PlatformLibs \
-    $$PWD/../QtExtras/qmlstreamer
+    $$PWD/../QtExtras/qmlstreamer \
+    $$PWD/Source/Qt3DSRuntimeRender/Include \
+    $$PWD/Source/Qt3DSRuntimeRender/GraphObjects \
+    $$PWD/Source/Qt3DSRuntimeRender/ResourceManager
 
 # TODO: Investigate whether these can be moved to commonplatform
 win32 {

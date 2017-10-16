@@ -29,7 +29,7 @@
 ****************************************************************************/
 
 #include "q3dswidget_p.h"
-#include "UICAudioPlayerImpl.h"
+#include "Qt3DSAudioPlayerImpl.h"
 #include "viewerqmlstreamproxy_p.h"
 #include "q3dsviewersettings_p.h"
 #include "q3dspresentation_p.h"

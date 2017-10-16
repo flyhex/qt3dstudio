@@ -29,14 +29,14 @@
 
 #include "q3dsqmlscript.h"
 
-#include "UICQmlEngine.h"
-#include "UICElementSystem.h"
-#include "UICApplication.h"
-#include "UICPresentation.h"
-#include "UICInputEngine.h"
-#include "UICInputFrame.h"
-#include "UICQmlElementHelper.h"
-#include "UICHash.h"
+#include "Qt3DSQmlEngine.h"
+#include "Qt3DSElementSystem.h"
+#include "Qt3DSApplication.h"
+#include "Qt3DSPresentation.h"
+#include "Qt3DSInputEngine.h"
+#include "Qt3DSInputFrame.h"
+#include "Qt3DSQmlElementHelper.h"
+#include "Qt3DSHash.h"
 
 using namespace Q3DStudio;
 

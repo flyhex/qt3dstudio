@@ -33,12 +33,12 @@
 //==============================================================================
 //	Lua Includes
 //==============================================================================
-#include "UICLuaIncludes.h"
+#include "Qt3DSLuaIncludes.h"
 
 //==============================================================================
 //	Studio Includes
 //==============================================================================
-#include "UICIScriptBridge.h"
+#include "Qt3DSIScriptBridge.h"
 #include "EASTL/map.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSPool.h"
@@ -46,7 +46,7 @@
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSSync.h"
 #include "foundation/Qt3DSMutex.h"
-#include "UICIComponentManager.h"
+#include "Qt3DSIComponentManager.h"
 #include "Qt3DSStateContext.h"
 
 #include "Qt3DSStateScriptBridge.h"

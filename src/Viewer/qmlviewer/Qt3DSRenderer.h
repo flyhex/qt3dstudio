@@ -34,7 +34,7 @@
 #include <QtGui/qopenglframebufferobject.h>
 #include <QtQuick/qquickframebufferobject.h>
 
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 #include "Qt3DSView.h"
 
 QT_BEGIN_NAMESPACE

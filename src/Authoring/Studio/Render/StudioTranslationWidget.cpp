@@ -30,8 +30,8 @@
 #include "StudioWidgetImpl.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "render/Qt3DSRenderContext.h"
-#include "UICRenderShaderCodeGenerator.h"
-#include "UICRenderNode.h"
+#include "Qt3DSRenderShaderCodeGenerator.h"
+#include "Qt3DSRenderNode.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
 

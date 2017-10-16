@@ -37,9 +37,9 @@
 #include <QtGui/qvector3d.h>
 #include <QtGui/qmatrix4x4.h>
 
-#include "UICTypes.h"
-#include "UICKernelTypes.h"
-#include "UICEvent.h"
+#include "Qt3DSTypes.h"
+#include "Qt3DSKernelTypes.h"
+#include "Qt3DSEvent.h"
 
 namespace Q3DStudio {
 class CQmlEngine;

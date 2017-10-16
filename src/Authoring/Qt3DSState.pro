@@ -8,13 +8,13 @@ INCLUDEPATH += \
     $$PWD/../Runtime/Source/Runtime/Include \
     $$PWD/../Runtime/Source/System/Include \
     $$PWD/../Runtime/Source/Qt3DSRender/Include \
-    $$PWD/../Runtime/Source/UICState/Include \
-    $$PWD/../Runtime/Source/UICState/Editor \
-    $$PWD/../Runtime/Source/UICState/Debugger \
+    $$PWD/../Runtime/Source/Qt3DSStateApplication/Include \
+    $$PWD/../Runtime/Source/Qt3DSStateApplication/Editor \
+    $$PWD/../Runtime/Source/Qt3DSStateApplication/Debugger \
     $$PWD/../Runtime/Source/Qt3DSState/Include \
     $$PWD/../Runtime/Source/Qt3DSState/InternalInclude \
-    $$PWD/../Runtime/Source/UICEvent/Include \
-    $$PWD/../Runtime/Source/UICEvent/InternalInclude \
+    $$PWD/../Runtime/Source/Qt3DSEvent/Include \
+    $$PWD/../Runtime/Source/Qt3DSEvent/InternalInclude \
     ../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/Lua/UnknownVersion/src
 

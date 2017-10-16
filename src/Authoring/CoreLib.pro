@@ -44,13 +44,13 @@ INCLUDEPATH += \
     Common/Code/Graph \
     Common/Code/EulerAngles \
     Common/Code/Serialize \
-    $$PWD/../Runtime/Source/RuntimeUICDM/Include \
+    $$PWD/../Runtime/Source/DataModel/Include \
     $$PWD/../Runtime/Source/Qt3DSRender/Include \
     $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
-    $$PWD/../Runtime/Source/UICRender/Include \
-    $$PWD/../Runtime/Source/UICRender/GraphObjects \
-    $$PWD/../Runtime/Source/UICRender/ResourceManager \
-    $$PWD/../Runtime/Source/UICState/Application \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/Include \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
+    $$PWD/../Runtime/Source/Qt3DSStateApplication/Application \
     ../3rdparty/Lua/UnknownVersion/src \
     ../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \

@@ -85,21 +85,21 @@
 //==============================================================================
 //	ROOT INCLUDES FOR FRAMEWORK
 //==============================================================================
-#include "UICTypes.h"
-#include "UICPlatformSpecific.h"
-#include "UICAssert.h"
-#include "UICMacros.h"
-#include "UICConfig.h"
-#include "UICMemorySettings.h"
-#include "UICMemory.h"
-#include "UICFrameworkTypes.h"
+#include "Qt3DSTypes.h"
+#include "Qt3DSPlatformSpecific.h"
+#include "Qt3DSAssert.h"
+#include "Qt3DSMacros.h"
+#include "Qt3DSConfig.h"
+#include "Qt3DSMemorySettings.h"
+#include "Qt3DSMemory.h"
+#include "Qt3DSFrameworkTypes.h"
 
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICTimer.h"
-#include "UICIScene.h"
-#include "UICSyncPrimitive.h"
+#include "Qt3DSTimer.h"
+#include "Qt3DSIScene.h"
+#include "Qt3DSSyncPrimitive.h"
 #include "foundation/Qt3DSRefCounted.h" //scoped releasable auto ptr.
 #include "EASTL/hash_map.h"
 #include "EASTL/string.h"

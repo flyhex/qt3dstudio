@@ -132,7 +132,7 @@ extern CComModule _Module;
 #include "Conditional.h"
 #include "STLHelpers.h"
 #include "GenericFunctor.h"
-#include "UICRender.h"
+#include "Qt3DSRender.h"
 
 #include <QtGlobal>
 

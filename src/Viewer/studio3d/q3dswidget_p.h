@@ -42,7 +42,7 @@
 #define Q3DSWIDGET_P_H
 
 #include "q3dswidget.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 
 #include <QtCore/qtimer.h>
 

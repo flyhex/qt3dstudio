@@ -28,16 +28,16 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "PathWidget.h"
-#include "UICRenderWidgets.h"
+#include "Qt3DSRenderWidgets.h"
 #include "render/Qt3DSRenderContext.h"
 #include "render/Qt3DSRenderVertexBuffer.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "render/Qt3DSRenderInputAssembler.h"
-#include "UICRenderPath.h"
-#include "UICRenderPathSubPath.h"
-#include "UICRenderPathManager.h"
-#include "UICRenderContext.h"
-#include "UICRenderShaderCodeGeneratorV2.h"
+#include "Qt3DSRenderPath.h"
+#include "Qt3DSRenderPathSubPath.h"
+#include "Qt3DSRenderPathManager.h"
+#include "Qt3DSRenderContextCore.h"
+#include "Qt3DSRenderShaderCodeGeneratorV2.h"
 
 using namespace qt3ds::widgets;
 

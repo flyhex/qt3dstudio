@@ -77,9 +77,9 @@
 #include "IDirectoryWatchingSystem.h"
 #include "StandardExtensions.h"
 #include "IDocSceneGraph.h"
-#include "UICTextRenderer.h"
+#include "Qt3DSTextRenderer.h"
 #include "SelectedValueImpl.h"
-#include "UICRenderPathManager.h"
+#include "Qt3DSRenderPathManager.h"
 #include "EASTL/sort.h"
 #include "foundation/Qt3DSLogging.h"
 

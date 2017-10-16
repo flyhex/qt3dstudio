@@ -28,7 +28,7 @@
 ****************************************************************************/
 
 #include "q3dsviewersettings_p.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 #include "q3dscommandqueue_p.h"
 
 #include <QtCore/qdebug.h>

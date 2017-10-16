@@ -34,26 +34,26 @@
 // Includes
 //==============================================================================
 #include "Qt3DSStateLuaEngine.h"
-#include "UICFileStream.h"
-#include "UICDataLogger.h"
+#include "Qt3DSFileStream.h"
+#include "Qt3DSDataLogger.h"
 #include "foundation/FileTools.h"
 #include "foundation/Qt3DSLogging.h"
 #include "foundation/Qt3DSSystem.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
-#include "UICStateLuaScriptContext.h"
-#include "UICStateDebugger.h"
+#include "Qt3DSStateLuaScriptContext.h"
+#include "Qt3DSStateDebugger.h"
 #include "EventPollingSystemLuaBinding.h"
-#include "UICHash.h"
+#include "Qt3DSHash.h"
 
 #include "EASTL/vector.h"
 #include <sys/stat.h>
 
-#include "UICStateDebugStreams.h"
+#include "Qt3DSStateDebugStreams.h"
 #include "foundation/Qt3DSPerfTimer.h"
-#include "UICLuaDebugger.h"
+#include "Qt3DSLuaDebugger.h"
 #include "foundation/Qt3DSAtomic.h"
-#include "UICParametersSystem.h"
-#include "UICTypes.h"
+#include "Qt3DSParametersSystem.h"
+#include "Qt3DSTypes.h"
 
 #include "Qt3DSStateInputStreamFactory.h"
 #include "Qt3DSStateApplication.h"

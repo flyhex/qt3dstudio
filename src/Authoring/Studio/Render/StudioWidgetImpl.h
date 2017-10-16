@@ -34,8 +34,8 @@
 #include "foundation/Qt3DSContainers.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 
-#include "UICRenderNode.h"
-#include "UICRenderShaderCodeGeneratorV2.h"
+#include "Qt3DSRenderNode.h"
+#include "Qt3DSRenderShaderCodeGeneratorV2.h"
 
 namespace qt3ds {
 namespace widgets {

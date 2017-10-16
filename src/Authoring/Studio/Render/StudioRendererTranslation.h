@@ -30,8 +30,8 @@
 #define UIC_STUDIO_RENDERER_TRANSLATION_H
 #pragma once
 #include "StudioRendererImpl.h"
-#include "UICRenderLayer.h"
-#include "UICRenderer.h"
+#include "Qt3DSRenderLayer.h"
+#include "Qt3DSRenderer.h"
 #include "StudioWidget.h"
 #include "render/Qt3DSRenderTexture2D.h"
 #include "foundation/AutoDeallocatorAllocator.h"

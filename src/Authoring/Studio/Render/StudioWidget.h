@@ -29,8 +29,8 @@
 #ifndef UIC_STUDIO_RENDERER_WIDGET_H
 #define UIC_STUDIO_RENDERER_WIDGET_H
 #pragma once
-#include "UICRenderWindowDimensions.h"
-#include "UICRenderWidgets.h"
+#include "Qt3DSRenderWindowDimensions.h"
+#include "Qt3DSRenderWidgets.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "StudioPickValues.h"
 

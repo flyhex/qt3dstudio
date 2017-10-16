@@ -42,7 +42,7 @@
 //
 
 #include "q3dssurfaceviewer.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 
 #include <QtCore/qtimer.h>
 

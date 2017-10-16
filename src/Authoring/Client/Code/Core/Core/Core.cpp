@@ -41,7 +41,7 @@
 #include "UICFileTools.h"
 #include "Cmd.h"
 #include "StudioPreferences.h"
-#include "UICStateApplication.h"
+#include "Qt3DSStateApplication.h"
 
 //==============================================================================
 // Construction

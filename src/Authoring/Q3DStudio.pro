@@ -65,10 +65,11 @@ INCLUDEPATH += \
     Client/Code/Shared/Log \
     $$PWD/../Runtime/Source/Qt3DSRender/Include \
     $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
-    $$PWD/../Runtime/Source/UICRender/Include \
-    $$PWD/../Runtime/Source/UICRender/GraphObjects \
-    $$PWD/../Runtime/Source/UICRender/ResourceManager \
-    $$PWD/../Runtime/Source/UICState/Application \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/Include \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
+    $$PWD/../Runtime/Source/Qt3DSStateApplication/Application \
+    $$PWD/../Runtime/Source/Qt3DSEvent/InternalInclude \
     ../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/color
 

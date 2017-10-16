@@ -43,7 +43,7 @@
 
 #include "q3dselement.h"
 #include "q3dscommandqueue_p.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 
 QT_BEGIN_NAMESPACE
 

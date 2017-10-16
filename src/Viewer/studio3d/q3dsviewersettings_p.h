@@ -42,7 +42,7 @@
 //
 
 #include "q3dsviewersettings.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 
 QT_BEGIN_NAMESPACE
 

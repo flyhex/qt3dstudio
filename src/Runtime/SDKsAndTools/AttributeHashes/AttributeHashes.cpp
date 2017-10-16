@@ -49,10 +49,10 @@
 #include <fstream>
 #include <string>
 
-#include "UICConfig.h"
-#include "UICTypes.h"
-#include "UICKernelTypes.h"
-#include "UICHash.h"
+#include "Qt3DSConfig.h"
+#include "Qt3DSTypes.h"
+#include "Qt3DSKernelTypes.h"
+#include "Qt3DSHash.h"
 
 //==============================================================================
 //    Types

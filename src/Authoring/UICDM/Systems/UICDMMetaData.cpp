@@ -45,8 +45,8 @@
 #include "UICDMDataCore.h"
 #include "DataCoreProducer.h"
 #include "UICDMWindowsCompatibility.h"
-#include "UICRenderEffectSystem.h"
-#include "UICRenderDynamicObjectSystemCommands.h"
+#include "Qt3DSRenderEffectSystem.h"
+#include "Qt3DSRenderDynamicObjectSystemCommands.h"
 #include "foundation/StringConversionImpl.h"
 #include <QtCore/qdir.h>
 

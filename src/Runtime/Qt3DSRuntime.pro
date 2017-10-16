@@ -17,14 +17,14 @@ RESOURCES += res.qrc
 }
 
 SOURCES += \
-    Source/Viewer/UICViewerApp.cpp \
-    Source/Viewer/UICAudioPlayerImpl.cpp
+    Source/Viewer/Qt3DSAudioPlayerImpl.cpp \
+    Source/Viewer/Qt3DSViewerApp.cpp
 
 HEADERS += \
     Source/Viewer/qt3dsruntimeglobal.h \
-    Source/Viewer/UICViewerApp.h \
-    Source/Viewer/UICAudioPlayerImpl.h \
-    Source/Viewer/UICViewerTimer.h
+    Source/Viewer/Qt3DSAudioPlayerImpl.h \
+    Source/Viewer/Qt3DSViewerApp.h \
+    Source/Viewer/Qt3DSViewerTimer.h
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive

@@ -44,11 +44,11 @@
 #include "foundation/Qt3DSBroadcastingAllocator.h"
 #include "foundation/Qt3DSTime.h"
 
-#include "UICKernelTypes.h"
-#include "UICStateVisualBindingContext.h"
-#include "UICTypes.h"
-#include "UICTimer.h"
-#include "UICStateInterpreter.h"
+#include "Qt3DSKernelTypes.h"
+#include "Qt3DSStateVisualBindingContext.h"
+#include "Qt3DSTypes.h"
+#include "Qt3DSTimer.h"
+#include "Qt3DSStateInterpreter.h"
 #include "EventPollingSystem.h"
 
 #include "Qt3DSStateContext.h"

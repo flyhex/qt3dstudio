@@ -29,8 +29,8 @@
 ****************************************************************************/
 
 #include "Qt3DSRenderer.h"
-#include "UICViewerApp.h"
-#include "UICAudioPlayerImpl.h"
+#include "Qt3DSViewerApp.h"
+#include "Qt3DSAudioPlayerImpl.h"
 
 #include <QtStudio3D/private/q3dscommandqueue_p.h>
 #include <QtStudio3D/private/q3dsviewersettings_p.h>

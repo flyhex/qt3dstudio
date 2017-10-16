@@ -40,9 +40,9 @@ struct SPerfLogEvent
 
 typedef SPerfLogEvent TPerfLogMathEvent1;
 
-#include "UICCubicRoots.h"
-#include "UICCubicRootsImpl.h"
-#include "UICBezierEval.h"
+#include "Qt3DSCubicRoots.h"
+#include "Qt3DSCubicRootsImpl.h"
+#include "Qt3DSBezierEval.h"
 #include <boost/unordered_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 using namespace std;

@@ -16,8 +16,8 @@ INCLUDEPATH += \
     UICDM/Systems/Cores \
     $$PWD/../Runtime/Source/System/Include \
     $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
-    $$PWD/../Runtime/Source/UICRender/Include \
-    $$PWD/../Runtime/Source/RuntimeUICDM/Include \
+    $$PWD/../Runtime/Source/Qt3DSRuntimeRender/Include \
+    $$PWD/../Runtime/Source/DataModel/Include \
     $$PWD/../Runtime/Source/Qt3DSRender/Include \
     ../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/utf8cpp/2.3.2/source \

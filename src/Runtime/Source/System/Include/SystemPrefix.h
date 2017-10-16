@@ -82,11 +82,11 @@
 
 //==============================================================================
 //	OUR INCLUDES
-#include "UICTypes.h"
-#include "UICPlatformSpecific.h"
-#include "UICAssert.h"
-#include "UICMacros.h"
-#include "UICConfig.h"
-#include "UICMemorySettings.h"
-#include "UICMemory.h"
-#include "UICArray.h"
+#include "Qt3DSTypes.h"
+#include "Qt3DSPlatformSpecific.h"
+#include "Qt3DSAssert.h"
+#include "Qt3DSMacros.h"
+#include "Qt3DSConfig.h"
+#include "Qt3DSMemorySettings.h"
+#include "Qt3DSMemory.h"
+#include "Qt3DSArray.h"

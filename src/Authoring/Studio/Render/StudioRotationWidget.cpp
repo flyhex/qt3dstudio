@@ -31,10 +31,10 @@
 #include "foundation/Qt3DSAtomic.h"
 #include "render/Qt3DSRenderContext.h"
 #include "render/Qt3DSRenderVertexBuffer.h"
-#include "UICRenderNode.h"
+#include "Qt3DSRenderNode.h"
 #include "foundation/Qt3DSContainers.h"
-#include "UICRenderShaderCodeGeneratorV2.h"
-#include "UICRenderCamera.h"
+#include "Qt3DSRenderShaderCodeGeneratorV2.h"
+#include "Qt3DSRenderCamera.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
 

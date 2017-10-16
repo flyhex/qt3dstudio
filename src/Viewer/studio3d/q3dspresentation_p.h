@@ -42,7 +42,7 @@
 //
 
 #include "q3dspresentation.h"
-#include "UICViewerApp.h"
+#include "Qt3DSViewerApp.h"
 #include <QtCore/QHash>
 #include <QtCore/QUrl>
 

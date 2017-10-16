@@ -28,11 +28,11 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "StudioWidget.h"
-#include "UICRenderWidgets.h"
-#include "UICRenderContext.h"
+#include "Qt3DSRenderWidgets.h"
+#include "Qt3DSRenderContextCore.h"
 #include "render/Qt3DSRenderContext.h"
 #include "foundation/Qt3DSContainers.h"
-#include "UICRenderShaderCodeGeneratorV2.h"
+#include "Qt3DSRenderShaderCodeGeneratorV2.h"
 
 using namespace qt3ds::widgets;
 

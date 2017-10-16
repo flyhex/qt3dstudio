@@ -32,9 +32,9 @@
 
 #include "EASTL/vector.h"
 #include "EASTL/string.h"
-#include "UICLuaIncludes.h"
+#include "Qt3DSLuaIncludes.h"
 #include "foundation/Qt3DSRefCounted.h"
-#include "UICTypes.h"
+#include "Qt3DSTypes.h"
 
 struct lua_State;
 //==============================================================================
