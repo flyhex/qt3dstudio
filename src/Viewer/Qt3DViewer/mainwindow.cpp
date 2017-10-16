@@ -275,7 +275,7 @@ void MainWindow::on_actionConnect_triggered()
     connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::projectChanged,
             this, &MainWindow::loadRemoteDeploymentReceiver);
 
-    updateUI();
+    updateUI(true);
 }
 
 void MainWindow::on_actionReload_triggered()
@@ -479,19 +479,19 @@ void MainWindow::loadRemoteDeploymentReceiver()
     Q_ASSERT(m_remoteDeploymentReceiver);
     const QString remote = m_remoteDeploymentReceiver->fileName();
     loadFile(remote);
-    updateUI(false);
+    updateUI();
 }
 
 void MainWindow::remoteConnected()
 {
     m_connectionInfo->setProperty("text", "Remote Connected");
-    updateUI();
+    updateUI(true);
 }
 
 void MainWindow::remoteDisconnected()
 {
     m_connectionInfo->setProperty("text", "Remote Disconnected");
-    updateUI();
+    updateUI(true);
 }
 
 void MainWindow::updateProgress(int percent)
@@ -504,4 +504,5 @@ void MainWindow::updateProgress(int percent)
         m_connectionInfo->setProperty("text", QStringLiteral("Loading"));
     else
         m_connectionInfo->setProperty("text", progress);
+    updateUI(true);
 }
