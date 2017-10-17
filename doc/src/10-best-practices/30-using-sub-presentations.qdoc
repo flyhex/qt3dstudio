@@ -94,4 +94,16 @@ or on an image element on an existing layer.
   \image add-diffuse-map-subpresentation.png
 \endlist
 
+\section1 Transparency
+
+To display the sub-presentation background as transparent in the main presentation there are two
+settings in the sub-presentation that needs to be set.
+
+\list 1
+\li
+  Layer property \uicontrol{Layer Background} needs to be set to \c{Transparent}.
+\li
+  Scene property \uicontrol{Set Background} needs to be unchecked.
+\endlist
+
 */
