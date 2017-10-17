@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_MESH_H
-#define UIC_RENDER_MESH_H
+#ifndef QT3DS_RENDER_MESH_H
+#define QT3DS_RENDER_MESH_H
 #include "Qt3DSRender.h"
 #include "render/Qt3DSRenderVertexBuffer.h"
 #include "render/Qt3DSRenderIndexBuffer.h"

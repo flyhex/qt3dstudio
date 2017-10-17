@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_REFERENCED_MATERIAL_H
-#define UIC_RENDER_REFERENCED_MATERIAL_H
+#ifndef QT3DS_RENDER_REFERENCED_MATERIAL_H
+#define QT3DS_RENDER_REFERENCED_MATERIAL_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderGraphObject.h"
 #include "Qt3DSRenderMaterialDirty.h"
@@ -60,4 +60,4 @@ namespace render {
 }
 }
 
-#endif // UIC_RENDER_REFERENCED_MATERIAL_H
+#endif // QT3DS_RENDER_REFERENCED_MATERIAL_H

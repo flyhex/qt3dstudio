@@ -57,8 +57,8 @@ using namespace qt3ds::state;
 using namespace qt3ds::state::debugger;
 
 #ifdef _DEBUG
-#define UIC_LOG_ENTER_EXIT 1
-#define UIC_LOG_ACTIVE_EVENT 1
+#define QT3DS_LOG_ENTER_EXIT 1
+#define QT3DS_LOG_ACTIVE_EVENT 1
 #endif
 
 namespace qt3ds {
@@ -1154,7 +1154,7 @@ struct StateSystem : public IStateInterpreter
         for (nvvector<SStateNode *>::reverse_iterator iter = m_StatesToExit.m_List.rbegin(),
                                                       end = m_StatesToExit.m_List.rend();
              iter != end; ++iter) {
-#ifdef UIC_LOG_ENTER_EXIT
+#ifdef QT3DS_LOG_ENTER_EXIT
             qCInfo(TRACE_INFO, "Exiting state: %s", (*iter)->m_Id.c_str());
 #endif
             TStateNodeList *children = (*iter)->GetChildren();
@@ -1324,7 +1324,7 @@ struct StateSystem : public IStateInterpreter
         DEBUGGER_CALL1(SetEnterSet, m_StatesToEnter);
         for (QT3DSU32 idx = 0, end = theEnterList.size(); idx < end; ++idx) {
             SStateNode *theEnterState(theEnterList[idx]);
-#ifdef UIC_LOG_ENTER_EXIT
+#ifdef QT3DS_LOG_ENTER_EXIT
             qCInfo(TRACE_INFO, "Entering state: %s", theEnterState->m_Id.c_str());
 #endif
             m_Configuration.insert(theEnterState);
@@ -1762,7 +1762,7 @@ struct StateSystem : public IStateInterpreter
                 m_ScriptContext->SetCurrentEvent(theEvent);
                 m_InternalQueue.pop_front();
                 DEBUGGER_CALL2(SetCurrentEvent, theEvent->GetName().c_str(), true);
-#ifdef UIC_LOG_ACTIVE_EVENT
+#ifdef QT3DS_LOG_ACTIVE_EVENT
                 qCInfo(TRACE_INFO, "Current event: %s", theEvent->GetName().c_str());
 #endif
                 SelectTransitions(*theEvent);
@@ -1773,7 +1773,7 @@ struct StateSystem : public IStateInterpreter
 
                 DEBUGGER_CALL2(SetCurrentEvent, theEvent->GetName().c_str(), false);
 
-#ifdef UIC_LOG_ACTIVE_EVENT
+#ifdef QT3DS_LOG_ACTIVE_EVENT
                 qCInfo(TRACE_INFO, "Current event: %s", theEvent->GetName().c_str());
 #endif
 

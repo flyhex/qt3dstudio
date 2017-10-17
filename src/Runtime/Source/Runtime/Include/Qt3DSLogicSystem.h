@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_LOGIC_SYSTEM_H
-#define UIC_LOGIC_SYSTEM_H
+#ifndef QT3DS_LOGIC_SYSTEM_H
+#define QT3DS_LOGIC_SYSTEM_H
 #include "Qt3DSElementSystem.h"
 
 namespace qt3ds {

@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_LUA_DEBUGGER_PROTOCOL_H
-#define UIC_LUA_DEBUGGER_PROTOCOL_H
+#ifndef QT3DS_LUA_DEBUGGER_PROTOCOL_H
+#define QT3DS_LUA_DEBUGGER_PROTOCOL_H
 #include "Qt3DSLuaDebugger.h"
 #include "foundation/Qt3DSTime.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
@@ -39,40 +39,40 @@ namespace state {
     namespace debugger {
         namespace lua {
 
-#define UIC_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES                                                 \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(Initialization)                                       \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(SetBreakpoint)                                        \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestBreak)                                         \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestAllBreakpoints)                                \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(AllBreakpoints)                                       \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(ClearBreakpoint)                                      \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(ClearAllBreakpoints)                                  \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(Continue)                                             \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(OnBreak)                                              \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(UpdateTable)                                          \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(UpdateFunction)                                       \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestStackTrace)                                    \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StackTrace)                                           \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StepInto)                                             \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StepOver)                                             \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StepOut)                                              \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(AddWatch)                                             \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RemoveWatch)                                          \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(WatchUpdated)                                         \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(ExecuteStatement)                                     \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StatementExecuted)                                    \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestPointerValue)                                  \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(UnknownPointerValue)                                  \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(EndPointerRequest)                                    \
-    UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(BeginCacheUpdate)
+#define QT3DS_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES                                                 \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(Initialization)                                       \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(SetBreakpoint)                                        \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestBreak)                                         \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestAllBreakpoints)                                \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(AllBreakpoints)                                       \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(ClearBreakpoint)                                      \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(ClearAllBreakpoints)                                  \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(Continue)                                             \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(OnBreak)                                              \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(UpdateTable)                                          \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(UpdateFunction)                                       \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestStackTrace)                                    \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StackTrace)                                           \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StepInto)                                             \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StepOver)                                             \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StepOut)                                              \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(AddWatch)                                             \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RemoveWatch)                                          \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(WatchUpdated)                                         \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(ExecuteStatement)                                     \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(StatementExecuted)                                    \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(RequestPointerValue)                                  \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(UnknownPointerValue)                                  \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(EndPointerRequest)                                    \
+    QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(BeginCacheUpdate)
 
             struct SProtocolMessageNames
             {
                 enum Enum {
                     UnknownMessageName = 0,
-#define UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(name) name,
-                    UIC_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES
-#undef UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE
+#define QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(name) name,
+                    QT3DS_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES
+#undef QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE
                 };
             };
 
@@ -199,7 +199,7 @@ namespace state {
                 }
             };
 
-#define UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(msgName)                                 \
+#define QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(msgName)                                 \
     struct S##msgName                                                                              \
     {                                                                                              \
         S##msgName() {}                                                                            \
@@ -216,7 +216,7 @@ namespace state {
         enum { MessageName = SProtocolMessageNames::msgName };                                     \
     };
 
-#define UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(msgName, ptype, pname)                         \
+#define QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(msgName, ptype, pname)                         \
     struct S##msgName                                                                              \
     {                                                                                              \
         ptype m_##pname;                                                                           \
@@ -238,35 +238,35 @@ namespace state {
         enum { MessageName = SProtocolMessageNames::msgName };                                     \
     };
 
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(Initialization, QT3DSU32, Version);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(SetBreakpoint, SLuaBreakpoint, Breakpoint);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(RequestAllBreakpoints);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(RequestBreak);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(AllBreakpoints, TBreakpointList,
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(Initialization, QT3DSU32, Version);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(SetBreakpoint, SLuaBreakpoint, Breakpoint);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(RequestAllBreakpoints);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(RequestBreak);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(AllBreakpoints, TBreakpointList,
                                                         Breakpoints);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(ClearBreakpoint, SLuaBreakpoint,
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(ClearBreakpoint, SLuaBreakpoint,
                                                         Breakpoint);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(ClearAllBreakpoints);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(Continue);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(OnBreak, SFileAndLine, Position);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(UpdateTable, STableData, Data);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(UpdateFunction, SFunctionInfo, Data);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(RequestStackTrace);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(StackTrace, SStackTraceData, Data);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(StepInto);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(StepOver);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(StepOut);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(AddWatch, CRegisteredString, Expression);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(RemoveWatch, CRegisteredString, Expression);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(WatchUpdated, SWatchUpdateData, Data);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(ExecuteStatement, CRegisteredString,
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(ClearAllBreakpoints);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(Continue);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(OnBreak, SFileAndLine, Position);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(UpdateTable, STableData, Data);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(UpdateFunction, SFunctionInfo, Data);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(RequestStackTrace);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(StackTrace, SStackTraceData, Data);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(StepInto);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(StepOver);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(StepOut);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(AddWatch, CRegisteredString, Expression);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(RemoveWatch, CRegisteredString, Expression);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(WatchUpdated, SWatchUpdateData, Data);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(ExecuteStatement, CRegisteredString,
                                                         Expression);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(StatementExecuted, SStatementExecuteData,
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(StatementExecuted, SStatementExecuteData,
                                                         Data);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(RequestPointerValue, SDatamodelValue, Data);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(UnknownPointerValue);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(EndPointerRequest);
-            UIC_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(BeginCacheUpdate);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_MESSAGE_1(RequestPointerValue, SDatamodelValue, Data);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(UnknownPointerValue);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(EndPointerRequest);
+            QT3DS_LUA_DEBUGGER_PROTOCOL_DECLARE_TRIVIAL_MESSAGE(BeginCacheUpdate);
 
             struct SLuaDebuggerProtocolWriter
             {

@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_XML_IO_H
-#define UIC_STATE_XML_IO_H
+#ifndef QT3DS_STATE_XML_IO_H
+#define QT3DS_STATE_XML_IO_H
 #pragma once
 #include "Qt3DSState.h"
 #include "foundation/Qt3DSDataRef.h"

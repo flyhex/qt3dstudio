@@ -466,13 +466,13 @@ struct SDynamicObjClassImpl : public IDynamicObjectClass
     static void RemapCommand(SCommand &inCommand, TRemapperType &inRemapper)
     {
         switch (inCommand.m_Type) {
-#define UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(type)                                              \
+#define QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(type)                                              \
     case CommandTypes::type:                                                                       \
         SCommandRemapping<S##type>::RemapCommandData(static_cast<S##type &>(inCommand),            \
                                                      inRemapper);                                  \
         break;
-            UIC_RENDER_EFFECTS_ITERATE_COMMAND_TYPES
-#undef UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES
+            QT3DS_RENDER_EFFECTS_ITERATE_COMMAND_TYPES
+#undef QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES
         default:
             QT3DS_ASSERT(false);
             break;

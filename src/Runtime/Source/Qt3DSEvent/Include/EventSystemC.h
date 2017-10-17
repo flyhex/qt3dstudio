@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_EVENT_SYSTEM_C_H
-#define UIC_EVENT_SYSTEM_C_H
+#ifndef QT3DS_EVENT_SYSTEM_C_H
+#define QT3DS_EVENT_SYSTEM_C_H
 #include <stddef.h> //size_t
 
 // Interface we expect plugins to use in order to interace with the event system.

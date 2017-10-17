@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_STATE_TYPES_H
-#define UIC_STATE_TYPES_H
+#ifndef QT3DS_STATE_TYPES_H
+#define QT3DS_STATE_TYPES_H
 #include "Qt3DSState.h"
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSInvasiveLinkedList.h"

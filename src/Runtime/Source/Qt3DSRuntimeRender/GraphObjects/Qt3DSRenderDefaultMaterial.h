@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_DEFAULT_MATERIAL_H
-#define UIC_RENDER_DEFAULT_MATERIAL_H
+#ifndef QT3DS_RENDER_DEFAULT_MATERIAL_H
+#define QT3DS_RENDER_DEFAULT_MATERIAL_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderGraphObject.h"
 #include "foundation/Qt3DSFlags.h"

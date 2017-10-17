@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_RENDER_PATH_MATH_H
-#define UIC_RENDER_PATH_MATH_H
+#ifndef QT3DS_RENDER_PATH_MATH_H
+#define QT3DS_RENDER_PATH_MATH_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSVec2.h"
 #include "foundation/Qt3DSVec3.h"

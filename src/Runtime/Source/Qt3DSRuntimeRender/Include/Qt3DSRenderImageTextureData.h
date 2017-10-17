@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_IMAGE_TEXTURE_DATA_H
-#define UIC_RENDER_IMAGE_TEXTURE_DATA_H
+#ifndef QT3DS_RENDER_IMAGE_TEXTURE_DATA_H
+#define QT3DS_RENDER_IMAGE_TEXTURE_DATA_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSFlags.h"
 

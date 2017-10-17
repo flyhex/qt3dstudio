@@ -63,7 +63,7 @@
 #pragma warning(disable : 4355)
 #endif
 
-#define UIC_CACHED_POST_EFFECT
+#define QT3DS_CACHED_POST_EFFECT
 const float UIC3D_DEGREES_TO_RADIANS = 0.0174532925199f;
 
 namespace qt3ds {
@@ -817,11 +817,11 @@ namespace render {
             SCustomMaterialRenderable &theObject =
                 static_cast<SCustomMaterialRenderable &>(inObject);
             if (!inData.m_Layer.m_LightProbe && theObject.m_Material.m_IblProbe)
-                inData.SetShaderFeature("UIC_ENABLE_LIGHT_PROBE",
+                inData.SetShaderFeature("QT3DS_ENABLE_LIGHT_PROBE",
                                         theObject.m_Material.m_IblProbe->m_TextureData.m_Texture
                                             != NULL);
             else if (inData.m_Layer.m_LightProbe)
-                inData.SetShaderFeature("UIC_ENABLE_LIGHT_PROBE",
+                inData.SetShaderFeature("QT3DS_ENABLE_LIGHT_PROBE",
                                         inData.m_Layer.m_LightProbe->m_TextureData.m_Texture
                                             != NULL);
 
@@ -1597,7 +1597,7 @@ namespace render {
                 ++m_ProgressiveAAPassIndex;
 
 // now we render all post effects
-#ifdef UIC_CACHED_POST_EFFECT
+#ifdef QT3DS_CACHED_POST_EFFECT
             ApplyLayerPostEffects();
 #endif
 
@@ -1715,7 +1715,7 @@ namespace render {
         } else {
 // First, render the layer along with whatever progressive AA is appropriate.
 // The render graph should have taken care of the render to texture step.
-#ifdef UIC_CACHED_POST_EFFECT
+#ifdef QT3DS_CACHED_POST_EFFECT
             NVRenderTexture2D *theLayerColorTexture =
                 (m_LayerCachedTexture) ? m_LayerCachedTexture : m_LayerTexture;
 #else
@@ -1860,7 +1860,7 @@ namespace render {
                 // Remember the camera we used so we can get a valid pick ray
                 m_SceneCamera = theTempCamera;
                 theContext.SetDepthTestEnabled(false);
-#ifndef UIC_CACHED_POST_EFFECT
+#ifndef QT3DS_CACHED_POST_EFFECT
                 if (thePrepResult.m_LastEffect && m_Camera) {
                     StartProfiling(thePrepResult.m_LastEffect->m_ClassName, false);
                     // inUseLayerMPV is true then we are rendering directly to the scene and thus we

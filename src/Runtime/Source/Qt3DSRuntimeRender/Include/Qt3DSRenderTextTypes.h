@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_TEXT_TYPES_H
-#define UIC_RENDER_TEXT_TYPES_H
+#ifndef QT3DS_RENDER_TEXT_TYPES_H
+#define QT3DS_RENDER_TEXT_TYPES_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSSimpleTypes.h"
 #include "foundation/Qt3DSDataRef.h"

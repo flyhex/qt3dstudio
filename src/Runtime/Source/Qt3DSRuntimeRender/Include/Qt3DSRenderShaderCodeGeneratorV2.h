@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_SHADER_CODE_GENERATOR_V2_H
-#define UIC_RENDER_SHADER_CODE_GENERATOR_V2_H
+#ifndef QT3DS_RENDER_SHADER_CODE_GENERATOR_V2_H
+#define QT3DS_RENDER_SHADER_CODE_GENERATOR_V2_H
 #include "Qt3DSRenderShaderCodeGenerator.h"
 #include "Qt3DSRenderShaderCache.h"
 #include "foundation/Qt3DSFlags.h"

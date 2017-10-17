@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_DEBUGGER_PROTOCOL_H
-#define UIC_STATE_DEBUGGER_PROTOCOL_H
+#ifndef QT3DS_STATE_DEBUGGER_PROTOCOL_H
+#define QT3DS_STATE_DEBUGGER_PROTOCOL_H
 #include "Qt3DSStateDebugger.h"
 #include "Qt3DSStateDebuggerValues.h"
 #include "foundation/StringConversion.h"

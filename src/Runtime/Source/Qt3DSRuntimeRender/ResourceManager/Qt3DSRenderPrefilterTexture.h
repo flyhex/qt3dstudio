@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PREFILTER_TEXTURE_H
-#define UIC_RENDER_PREFILTER_TEXTURE_H
+#ifndef QT3DS_RENDER_PREFILTER_TEXTURE_H
+#define QT3DS_RENDER_PREFILTER_TEXTURE_H
 #include "foundation/Qt3DSAtomic.h"
 #include "render/Qt3DSRenderTexture2D.h"
 #include "Qt3DSRender.h"

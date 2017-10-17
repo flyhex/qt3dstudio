@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_EDITOR_TRANSACTION_IMPL_H
-#define UIC_STATE_EDITOR_TRANSACTION_IMPL_H
+#ifndef QT3DS_STATE_EDITOR_TRANSACTION_IMPL_H
+#define QT3DS_STATE_EDITOR_TRANSACTION_IMPL_H
 #include "UICStateEditor.h"
 #include "UICStateEditorFoundation.h"
 #include "UICStateEditorProperties.h"

@@ -78,7 +78,7 @@ void CImageScaler::Scale(EScaleMethod inScaleMethod, unsigned char *inOldBuffer,
         break;
 
     default:
-        // UIC_THROW( RENDER_E_ILLEGALPARAMETER )
+        // QT3DS_THROW( RENDER_E_ILLEGALPARAMETER )
         break;
     }
 }
@@ -116,7 +116,7 @@ void CImageScaler::FastScale(EScaleMethod inScaleMethod, unsigned char *inOldBuf
         break;
 
     default:
-        // UIC_THROW( RENDER_E_ILLEGALPARAMETER )
+        // QT3DS_THROW( RENDER_E_ILLEGALPARAMETER )
         break;
     }
 }
@@ -142,8 +142,8 @@ void CImageScaler::Crop(unsigned char *inOldBuffer, unsigned long inOldWidth,
 {
     long theMinWidth = NVMin(inOldWidth, inNewWidth);
 
-    // UIC_THROWFALSE( inNewWidth <= inOldWidth, RENDER_E_SCALERNOEXPAND )
-    // UIC_THROWFALSE( inNewHeight <= inOldHeight, RENDER_E_SCALERNOEXPAND )
+    // QT3DS_THROWFALSE( inNewWidth <= inOldWidth, RENDER_E_SCALERNOEXPAND )
+    // QT3DS_THROWFALSE( inNewHeight <= inOldHeight, RENDER_E_SCALERNOEXPAND )
 
     outNewBuffer = new unsigned char[inNewWidth * inNewHeight * inPlanes];
     ::memset(outNewBuffer, 0, inNewWidth * inNewHeight * inPlanes);
@@ -175,7 +175,7 @@ void CImageScaler::Bilinear(unsigned char *inOldBuffer, unsigned long inOldWidth
                             unsigned long inNewWidth, unsigned long inNewHeight,
                             unsigned long inPlanes)
 {
-    // UIC_THROWFALSE( inPlanes > 0, RENDER_E_SCALERBADTYPE )
+    // QT3DS_THROWFALSE( inPlanes > 0, RENDER_E_SCALERBADTYPE )
 
     outNewBuffer = new unsigned char[inNewWidth * inNewHeight * inPlanes];
     CImageScaler::Resize(inOldBuffer, inOldWidth, inOldHeight, outNewBuffer, inNewWidth,
@@ -328,7 +328,7 @@ void CImageScaler::FastPointSample(unsigned char *inOldBuffer, unsigned long inO
     } break;
 
     default:
-        // UIC_THROW( RENDER_E_ILLEGALPARAMETER )
+        // QT3DS_THROW( RENDER_E_ILLEGALPARAMETER )
         break;
     }
 }
@@ -371,7 +371,7 @@ void CImageScaler::Resize(unsigned char *inOldBuffer, unsigned long inOldWidth,
                           unsigned long inNewWidth, unsigned long inNewHeight,
                           unsigned long inPlanes)
 {
-    // UIC_THROWFALSE( inPlanes == 4, RENDER_E_ILLEGALPARAMETER );
+    // QT3DS_THROWFALSE( inPlanes == 4, RENDER_E_ILLEGALPARAMETER );
 
     // only do the temporary allocation if necessary
     if (inOldWidth < inNewWidth || inOldHeight < inNewHeight) {
@@ -380,7 +380,7 @@ void CImageScaler::Resize(unsigned char *inOldBuffer, unsigned long inOldWidth,
         return;
     } else {
         // The downsampling algorithms *do* assume four planes.
-        // UIC_THROWFALSE( inPlanes == 4, RENDER_E_ILLEGALPARAMETER );
+        // QT3DS_THROWFALSE( inPlanes == 4, RENDER_E_ILLEGALPARAMETER );
         if (inOldWidth > inNewWidth && inOldHeight > inNewHeight) {
             MemoryBuffer<> theBuffer(ForwardingAllocator(m_Allocator, "ImageScaler::TempBuffer"));
             theBuffer.reserve(inNewWidth * inOldHeight * 4);

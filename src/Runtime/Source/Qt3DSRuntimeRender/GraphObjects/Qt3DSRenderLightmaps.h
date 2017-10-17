@@ -29,8 +29,8 @@
 ****************************************************************************/
 
 #pragma once
-#ifndef UIC_RENDER_LIGHTMAPS_H
-#define UIC_RENDER_LIGHTMAPS_H
+#ifndef QT3DS_RENDER_LIGHTMAPS_H
+#define QT3DS_RENDER_LIGHTMAPS_H
 
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderGraphObject.h"

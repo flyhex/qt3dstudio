@@ -83,15 +83,15 @@ const char *qt3ds::foundation::System::g_FloatingPointModel = "softfp";
 #endif
 
 #if defined(QT3DS_ARM)
-#if defined(UIC_GRAPHICS_API_GLES2)
+#if defined(QT3DS_GRAPHICS_API_GLES2)
 const char *qt3ds::foundation::System::g_GPUType = "gles2";
-#elif defined(UIC_GRAPHICS_API_GL)
+#elif defined(QT3DS_GRAPHICS_API_GL)
 const char *qt3ds::foundation::System::g_GPUType = "gl";
-#elif defined(UIC_GRAPHICS_API_GLES3)
+#elif defined(QT3DS_GRAPHICS_API_GLES3)
 const char *qt3ds::foundation::System::g_GPUType = "gles3";
 #else
 #error                                                                                             \
-    "Must define a GPU type for arm platforms (UIC_GRAPHICS_API_GLES2, UIC_GRAPHICS_API_GLES3, UIC_GRAPHICS_API_GL)"
+    "Must define a GPU type for arm platforms (QT3DS_GRAPHICS_API_GLES2, QT3DS_GRAPHICS_API_GLES3, QT3DS_GRAPHICS_API_GL)"
 #endif
 #elif defined(QT3DS_X86)
 const char *qt3ds::foundation::System::g_GPUType = "";

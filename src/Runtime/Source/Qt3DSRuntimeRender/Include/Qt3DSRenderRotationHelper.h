@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_ROTATION_HELPER_H
-#define UIC_RENDER_ROTATION_HELPER_H
+#ifndef QT3DS_RENDER_ROTATION_HELPER_H
+#define QT3DS_RENDER_ROTATION_HELPER_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderNode.h"
 #include "EASTL/utility.h"

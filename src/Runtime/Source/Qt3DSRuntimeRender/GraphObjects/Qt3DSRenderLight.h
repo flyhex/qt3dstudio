@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_LIGHT_H
-#define UIC_RENDER_LIGHT_H
+#ifndef QT3DS_RENDER_LIGHT_H
+#define QT3DS_RENDER_LIGHT_H
 #include "Qt3DSRenderNode.h"
 
 namespace qt3ds {

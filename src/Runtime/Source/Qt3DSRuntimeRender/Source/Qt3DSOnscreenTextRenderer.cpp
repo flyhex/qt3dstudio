@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#define UIC_RENDER_ONSCREEN_TEXT
-#ifdef UIC_RENDER_ONSCREEN_TEXT
+#define QT3DS_RENDER_ONSCREEN_TEXT
+#ifdef QT3DS_RENDER_ONSCREEN_TEXT
 
 #include "Qt3DSTextRenderer.h"
 #include "Qt3DSRenderTextureAtlas.h"
@@ -418,4 +418,4 @@ ITextRendererCore &ITextRendererCore::CreateOnscreenTextRenderer(NVFoundationBas
     return *QT3DS_NEW(inFnd.getAllocator(), UICOnscreenTextRenderer)(inFnd);
 }
 
-#endif // UIC_RENDER_ONSCREEN_TEXT
+#endif // QT3DS_RENDER_ONSCREEN_TEXT

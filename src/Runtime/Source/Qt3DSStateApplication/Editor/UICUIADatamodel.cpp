@@ -464,7 +464,7 @@ struct SGenericPropertyStringAccessor : public SPropertyAccessorBase<TEditorType
     {
     }
 
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
     virtual Option<SValue> DoGet(TEditorType &inObj)
     {
@@ -500,7 +500,7 @@ struct SGenericPropertyStringFunctionAccessor : public SPropertyAccessorBase<TEd
         , m_Setter(inSetter)
     {
     }
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
     virtual Option<SValue> DoGet(TEditorType &inObj)
     {
@@ -596,7 +596,7 @@ struct SGotoSlideEditor : public SVSEditorObject
     {
     }
 
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
 
     static const char8_t *ElementName() { return "goto-slide"; }
 
@@ -658,7 +658,7 @@ struct SRunHandlerEditor : public SVSEditorObject
         : SVSEditorObject(editor, parent, ElementName(), ioList)
     {
     }
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
     static const char8_t *ElementName() { return "call"; }
 };
 
@@ -694,7 +694,7 @@ struct SSetAttributeEditor : public SVSEditorObject
         : SVSEditorObject(editor, parent, ElementName(), ioList)
     {
     }
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
     static const char8_t *ElementName() { return "set-attribute"; }
 };
 
@@ -723,7 +723,7 @@ struct SFireEventEditor : public SVSEditorObject
         : SVSEditorObject(editor, parent, ElementName(), ioList)
     {
     }
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
     static const char8_t *ElementName() { return "fire-event"; }
 };
 
@@ -759,7 +759,7 @@ struct SSetPresentationEditor : public SVSEditorObject
         : SVSEditorObject(editor, parent, ElementName(), ioList)
     {
     }
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
     static const char8_t *ElementName() { return "set-presentation"; }
 };
 
@@ -782,7 +782,7 @@ struct SPlaySoundEditor : public SVSEditorObject
         : SVSEditorObject(editor, parent, ElementName(), ioList)
     {
     }
-    UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
+    QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Foundation, this->mRefCount);
     static const char8_t *ElementName() { return "play-sound"; }
 };
 

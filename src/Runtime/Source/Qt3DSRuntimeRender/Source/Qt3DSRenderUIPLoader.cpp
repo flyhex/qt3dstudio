@@ -27,7 +27,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifdef UIC_RENDER_ENABLE_LOAD_UIP
+#ifdef QT3DS_RENDER_ENABLE_LOAD_UIP
 
 #include "Qt3DSRenderUIPLoader.h"
 #include "Qt3DSRenderPresentation.h"
@@ -809,58 +809,58 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define SubPath_Closed "closed"
 
 // Fill in implementations for the actual parse tables.
-#define HANDLE_UIC_RENDER_PROPERTY(type, name, dirty)                                              \
+#define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     ParseProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                    \
+#define HANDLE_QT3DS_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                    \
     ParseProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_VEC3_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_VEC3_PROPERTY(type, name, dirty)                                         \
     ParseProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_COLOR_PROPERTY(type, name, dirty)                                        \
+#define HANDLE_QT3DS_RENDER_COLOR_PROPERTY(type, name, dirty)                                        \
     ParseProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_RADIAN_PROPERTY(type, name, dirty)                                       \
+#define HANDLE_QT3DS_RENDER_RADIAN_PROPERTY(type, name, dirty)                                       \
     ParseRadianProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                  \
+#define HANDLE_QT3DS_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                  \
     ParseRadianProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_OPACITY_PROPERTY(type, name, dirty)                                      \
+#define HANDLE_QT3DS_RENDER_OPACITY_PROPERTY(type, name, dirty)                                      \
     ParseOpacityProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_ROTATION_ORDER_PROPERTY(type, name, dirty)                                      \
+#define HANDLE_QT3DS_ROTATION_ORDER_PROPERTY(type, name, dirty)                                      \
     ParseRotationOrder(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                    \
+#define HANDLE_QT3DS_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                    \
     ParseOrientation(inParser, type##_##name, inItem.m_Flags);
-#define HANDLE_UIC_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                   \
     if (ParseProperty(inParser, type##_##name, inItem.m_##name))                                   \
         inItem.m_##name = !inItem.m_##name;
-#define HANDLE_UIC_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
+#define HANDLE_QT3DS_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
     ParseNodeFlagsProperty(inParser, type##_##name, inItem.m_Flags,                                \
                            qt3ds::render::NodeFlagValues::name);
-#define HANDLE_UIC_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
+#define HANDLE_QT3DS_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
     ParseNodeFlagsInverseProperty(inParser, type##_##name, inItem.m_Flags,                         \
                                   qt3ds::render::NodeFlagValues::name);
-#define HANDLE_UIC_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
     ParseEnumProperty(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
     ParseAndResolveSourcePath(inParser, type##_##name, inItem.m_##name);
-#define HANDLE_UIC_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                                 \
+#define HANDLE_QT3DS_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                                 \
     ParseProperty(inParser, type##_##name##_##index, inItem.m_##name[index]);
-#define HANDLE_UIC_RENDER_VEC2_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_VEC2_PROPERTY(type, name, dirty)                                         \
     ParseProperty(inParser, type##_##name##_##X, inItem.m_##name.x);                               \
     ParseProperty(inParser, type##_##name##_##Y, inItem.m_##name.y);
-#define HANDLE_UIC_RENDER_COLOR_VEC3_PROPERTY(                                                     \
-    type, name, dirty) // noop by intention already handled by HANDLE_UIC_RENDER_COLOR_PROPERTY
-#define HANDLE_UIC_RENDER_TRANSFORM_VEC3_PROPERTY(                                                 \
-    type, name, dirty) // noop by intention already handled by HANDLE_UIC_RENDER_VEC3_PROPERTY
+#define HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(                                                     \
+    type, name, dirty) // noop by intention already handled by HANDLE_QT3DS_RENDER_COLOR_PROPERTY
+#define HANDLE_QT3DS_RENDER_TRANSFORM_VEC3_PROPERTY(                                                 \
+    type, name, dirty) // noop by intention already handled by HANDLE_QT3DS_RENDER_VEC3_PROPERTY
 
     // Call the correct parser functions.
     void ParseProperties(SScene &inItem, IPropertyParser &inParser)
     {
-        ITERATE_UIC_RENDER_SCENE_PROPERTIES
+        ITERATE_QT3DS_RENDER_SCENE_PROPERTIES
     }
     void ParseProperties(SNode &inItem, IPropertyParser &inParser)
     {
         bool eyeball;
         if (ParseProperty(inParser, "eyeball", eyeball))
             inItem.m_Flags.SetActive(eyeball);
-        ITERATE_UIC_RENDER_NODE_PROPERTIES
+        ITERATE_QT3DS_RENDER_NODE_PROPERTIES
         ParseProperty(inParser, "boneid", inItem.m_SkeletonId);
         bool ignoreParent = false;
         if (ParseProperty(inParser, "ignoresparent", ignoreParent))
@@ -869,44 +869,44 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     void ParseProperties(SLayer &inItem, IPropertyParser &inParser)
     {
         ParseProperties(static_cast<SNode &>(inItem), inParser);
-        ITERATE_UIC_RENDER_LAYER_PROPERTIES
+        ITERATE_QT3DS_RENDER_LAYER_PROPERTIES
         ParseProperty(inParser, "aosamplerate", inItem.m_AoSamplerate);
     }
     void ParseProperties(SCamera &inItem, IPropertyParser &inParser)
     {
         ParseProperties(static_cast<SNode &>(inItem), inParser);
-        ITERATE_UIC_RENDER_CAMERA_PROPERTIES
+        ITERATE_QT3DS_RENDER_CAMERA_PROPERTIES
     }
     void ParseProperties(SLight &inItem, IPropertyParser &inParser)
     {
         ParseProperties(static_cast<SNode &>(inItem), inParser);
-        ITERATE_UIC_RENDER_LIGHT_PROPERTIES
+        ITERATE_QT3DS_RENDER_LIGHT_PROPERTIES
         ParseProperty(inParser, "shdwmapres", inItem.m_ShadowMapRes);
     }
     void ParseProperties(SModel &inItem, IPropertyParser &inParser)
     {
         ParseProperties(static_cast<SNode &>(inItem), inParser);
-        ITERATE_UIC_RENDER_MODEL_PROPERTIES
+        ITERATE_QT3DS_RENDER_MODEL_PROPERTIES
         ParseProperty(inParser, "poseroot", inItem.m_SkeletonRoot);
     }
 
     void ParseProperties(SText &inItem, IPropertyParser &inParser)
     {
         ParseProperties(static_cast<SNode &>(inItem), inParser);
-        ITERATE_UIC_RENDER_TEXT_PROPERTIES
+        ITERATE_QT3DS_RENDER_TEXT_PROPERTIES
     }
     void ParseProperties(SLightmaps &inItem, IPropertyParser &inParser)
     {
-        ITERATE_UIC_RENDER_LIGHTMAP_PROPERTIES
+        ITERATE_QT3DS_RENDER_LIGHTMAP_PROPERTIES
     }
     void ParseProperties(SDefaultMaterial &inItem, IPropertyParser &inParser)
     {
-        ITERATE_UIC_RENDER_MATERIAL_PROPERTIES
+        ITERATE_QT3DS_RENDER_MATERIAL_PROPERTIES
         ParseProperties(inItem.m_Lightmaps, inParser);
     }
     void ParseProperties(SReferencedMaterial &inItem, IPropertyParser &inParser)
     {
-        ITERATE_UIC_RENDER_REFERENCED_MATERIAL_PROPERTIES
+        ITERATE_QT3DS_RENDER_REFERENCED_MATERIAL_PROPERTIES
         // Propagate lightmaps
         if (inItem.m_ReferencedMaterial
             && inItem.m_ReferencedMaterial->m_Type == GraphObjectTypes::DefaultMaterial)
@@ -920,7 +920,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     }
     void ParseProperties(SImage &inItem, IPropertyParser &inParser)
     {
-        ITERATE_UIC_RENDER_IMAGE_PROPERTIES
+        ITERATE_QT3DS_RENDER_IMAGE_PROPERTIES
     }
     template <typename TDataType>
     void SetDynamicObjectProperty(SDynamicObject &inEffect,
@@ -942,7 +942,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     {
         ParseProperties(static_cast<SDynamicObject &>(inItem), inParser);
         ParseProperties(inItem.m_Lightmaps, inParser);
-        ITERATE_UIC_RENDER_CUSTOM_MATERIAL_PROPERTIES
+        ITERATE_QT3DS_RENDER_CUSTOM_MATERIAL_PROPERTIES
     }
     void ParseProperties(SDynamicObject &inDynamicObject, IPropertyParser &inParser)
     {
@@ -1008,11 +1008,11 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     void ParseProperties(SPath &inItem, IPropertyParser &inParser)
     {
         ParseProperties(static_cast<SNode &>(inItem), inParser);
-        ITERATE_UIC_RENDER_PATH_PROPERTIES
+        ITERATE_QT3DS_RENDER_PATH_PROPERTIES
     }
     void ParseProperties(SPathSubPath &inItem, IPropertyParser &inParser)
     {
-        ITERATE_UIC_RENDER_PATH_SUBPATH_PROPERTIES
+        ITERATE_QT3DS_RENDER_PATH_SUBPATH_PROPERTIES
     }
 
     void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
@@ -1138,17 +1138,17 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         }
     }
 
-#undef HANDLE_UIC_RENDER_PROPERTY
-#undef HANDLE_UIC_RENDER_ENUM_PROPERTY
-#undef HANDLE_UIC_RENDER_RADIAN_PROPERTY
-#undef HANDLE_UIC_RENDER_SOURCEPATH_PROPERTY
-#undef HANDLE_UIC_RENDER_ARRAY_PROPERTY
-#undef HANDLE_UIC_NODE_FLAGS_PROPERTY
-#undef HANDLE_UIC_ROTATION_ORDER_PROPERTY
-#undef HANDLE_UIC_RENDER_OPACITY_PROPERTY
-#undef HANDLE_UIC_NODE_ORIENTATION_PROPERTY
-#undef HANDLE_UIC_RENDER_DEPTH_TEST_PROPERTY
-#undef HANDLE_UIC_RENDER_VEC2_PROPERTY
+#undef HANDLE_QT3DS_RENDER_PROPERTY
+#undef HANDLE_QT3DS_RENDER_ENUM_PROPERTY
+#undef HANDLE_QT3DS_RENDER_RADIAN_PROPERTY
+#undef HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY
+#undef HANDLE_QT3DS_RENDER_ARRAY_PROPERTY
+#undef HANDLE_QT3DS_NODE_FLAGS_PROPERTY
+#undef HANDLE_QT3DS_ROTATION_ORDER_PROPERTY
+#undef HANDLE_QT3DS_RENDER_OPACITY_PROPERTY
+#undef HANDLE_QT3DS_NODE_ORIENTATION_PROPERTY
+#undef HANDLE_QT3DS_RENDER_DEPTH_TEST_PROPERTY
+#undef HANDLE_QT3DS_RENDER_VEC2_PROPERTY
 
     void ParseGraphPass1(SGraphObject *inParent)
     {

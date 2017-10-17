@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PROFILER_H
-#define UIC_RENDER_PROFILER_H
+#ifndef QT3DS_RENDER_PROFILER_H
+#define QT3DS_RENDER_PROFILER_H
 #include "Qt3DSRender.h"
 #include "EASTL/string.h"
 #include "foundation/StringTable.h"

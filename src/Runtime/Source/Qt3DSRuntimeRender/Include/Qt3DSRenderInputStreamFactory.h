@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_INPUT_STREAM_FACTORY_H
-#define UIC_RENDER_INPUT_STREAM_FACTORY_H
+#ifndef QT3DS_RENDER_INPUT_STREAM_FACTORY_H
+#define QT3DS_RENDER_INPUT_STREAM_FACTORY_H
 #include "Qt3DSRender.h"
 #include "foundation/IOStreams.h"
 #include "foundation/Qt3DSRefCounted.h"

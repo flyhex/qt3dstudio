@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STUDIO_RENDERER_IMPL_H
-#define UIC_STUDIO_RENDERER_IMPL_H
+#ifndef QT3DS_STUDIO_RENDERER_IMPL_H
+#define QT3DS_STUDIO_RENDERER_IMPL_H
 #pragma once
 #include "IStudioRenderer.h"
 #include "WGLRenderContext.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_IMPL_RENDERABLE_OBJECTS_H
-#define UIC_RENDER_IMPL_RENDERABLE_OBJECTS_H
+#ifndef QT3DS_RENDER_IMPL_RENDERABLE_OBJECTS_H
+#define QT3DS_RENDER_IMPL_RENDERABLE_OBJECTS_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSFlags.h"
 #include "Qt3DSRenderModel.h"

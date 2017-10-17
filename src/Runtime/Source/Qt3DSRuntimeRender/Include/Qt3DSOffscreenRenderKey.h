@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_OFFSCREEN_RENDER_KEY_H
-#define UIC_OFFSCREEN_RENDER_KEY_H
+#ifndef QT3DS_OFFSCREEN_RENDER_KEY_H
+#define QT3DS_OFFSCREEN_RENDER_KEY_H
 #include "Qt3DSRender.h"
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"

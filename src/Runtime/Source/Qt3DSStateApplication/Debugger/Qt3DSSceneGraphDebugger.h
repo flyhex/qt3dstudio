@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_SCENE_GRAPH_DEBUGGER_H
-#define UIC_SCENE_GRAPH_DEBUGGER_H
+#ifndef QT3DS_SCENE_GRAPH_DEBUGGER_H
+#define QT3DS_SCENE_GRAPH_DEBUGGER_H
 #pragma once
 #include "Qt3DSStateDebugger.h"
 #include "UICUIADatamodel.h"

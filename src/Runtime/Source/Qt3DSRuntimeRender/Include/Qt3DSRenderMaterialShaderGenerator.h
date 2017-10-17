@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_MATERIAL_SHADER_GENERATOR_H
-#define UIC_RENDER_MATERIAL_SHADER_GENERATOR_H
+#ifndef QT3DS_RENDER_MATERIAL_SHADER_GENERATOR_H
+#define QT3DS_RENDER_MATERIAL_SHADER_GENERATOR_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "Qt3DSRenderShaderKeys.h"
@@ -40,8 +40,8 @@ namespace qt3ds {
 namespace render {
 
 // these are our current shader limits
-#define UIC_MAX_NUM_LIGHTS 16
-#define UIC_MAX_NUM_SHADOWS 8
+#define QT3DS_MAX_NUM_LIGHTS 16
+#define QT3DS_MAX_NUM_SHADOWS 8
 
     // note this struct must exactly match the memory layout of the
     // struct sampleLight.glsllib and sampleArea.glsllib. If you make changes here you need

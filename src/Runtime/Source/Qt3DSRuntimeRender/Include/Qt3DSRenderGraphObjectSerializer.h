@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_GRAPH_OBJECT_SERIALZER_H
-#define UIC_RENDER_GRAPH_OBJECT_SERIALZER_H
+#ifndef QT3DS_RENDER_GRAPH_OBJECT_SERIALZER_H
+#define QT3DS_RENDER_GRAPH_OBJECT_SERIALZER_H
 
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSDataRef.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_MATERIAL_HELPERS_H
-#define UIC_RENDER_MATERIAL_HELPERS_H
+#ifndef QT3DS_RENDER_MATERIAL_HELPERS_H
+#define QT3DS_RENDER_MATERIAL_HELPERS_H
 #include "Qt3DSRenderCustomMaterial.h"
 #include "Qt3DSRenderDefaultMaterial.h"
 #include "Qt3DSRenderReferencedMaterial.h"

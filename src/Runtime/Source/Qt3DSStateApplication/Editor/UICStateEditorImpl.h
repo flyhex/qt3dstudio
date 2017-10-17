@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_EDITOR_IMPL_H
-#define UIC_STATE_EDITOR_IMPL_H
+#ifndef QT3DS_STATE_EDITOR_IMPL_H
+#define QT3DS_STATE_EDITOR_IMPL_H
 #include "UICStateEditor.h"
 #include "UICStateEditorValue.h"
 #include "UICStateTypes.h"
@@ -74,7 +74,7 @@ namespace state {
         typedef eastl::vector<TPropertyAccessorPtr> TPropertyAccessorList;
         typedef nvhash_map<int, TPropertyAccessorList> TAccessorMap;
 
-#define UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(foundationPtr, refcountVar)                   \
+#define QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(foundationPtr, refcountVar)                   \
     void addRef() { atomicIncrement(&(refcountVar)); }                                             \
     void release()                                                                                 \
     {                                                                                              \

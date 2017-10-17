@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_DEBUGGER_VALUES_H
-#define UIC_STATE_DEBUGGER_VALUES_H
+#ifndef QT3DS_STATE_DEBUGGER_VALUES_H
+#define QT3DS_STATE_DEBUGGER_VALUES_H
 #pragma once
 #include "Qt3DSStateDebugger.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"

@@ -29,8 +29,8 @@
 ****************************************************************************/
 
 #pragma once
-#ifndef UIC_ELEMENT_SYSTEM_H
-#define UIC_ELEMENT_SYSTEM_H
+#ifndef QT3DS_ELEMENT_SYSTEM_H
+#define QT3DS_ELEMENT_SYSTEM_H
 #include "foundation/Qt3DSRefCounted.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSAllocator.h"

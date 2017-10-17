@@ -29,8 +29,8 @@
 ****************************************************************************/
 
 #pragma once
-#ifndef UIC_QML_ENGINE_H
-#define UIC_QML_ENGINE_H
+#ifndef QT3DS_QML_ENGINE_H
+#define QT3DS_QML_ENGINE_H
 
 #include "Qt3DSIScriptBridge.h"
 #include "Qt3DSIComponentManager.h"

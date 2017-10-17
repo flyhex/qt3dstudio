@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_RESOURCE_BUFFER_OBJECTS_H
-#define UIC_RENDER_RESOURCE_BUFFER_OBJECTS_H
+#ifndef QT3DS_RENDER_RESOURCE_BUFFER_OBJECTS_H
+#define QT3DS_RENDER_RESOURCE_BUFFER_OBJECTS_H
 #include "Qt3DSRender.h"
 #include "render/Qt3DSRenderContext.h"
 #include "Qt3DSRenderResourceManager.h"

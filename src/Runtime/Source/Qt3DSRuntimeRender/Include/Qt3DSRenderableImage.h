@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDERABLE_IMAGE_H
-#define UIC_RENDERABLE_IMAGE_H
+#ifndef QT3DS_RENDERABLE_IMAGE_H
+#define QT3DS_RENDERABLE_IMAGE_H
 #include "Qt3DSRender.h"
 
 namespace qt3ds {

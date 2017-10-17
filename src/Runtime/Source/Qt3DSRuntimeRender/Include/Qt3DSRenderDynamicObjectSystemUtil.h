@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_DYNAMIC_OBJECT_SYSTEM_UTIL_H
-#define UIC_RENDER_DYNAMIC_OBJECT_SYSTEM_UTIL_H
+#ifndef QT3DS_RENDER_DYNAMIC_OBJECT_SYSTEM_UTIL_H
+#define QT3DS_RENDER_DYNAMIC_OBJECT_SYSTEM_UTIL_H
 #include "Qt3DSRender.h"
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSAllocatorCallback.h"

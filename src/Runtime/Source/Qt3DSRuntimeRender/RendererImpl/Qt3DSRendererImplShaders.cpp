@@ -40,7 +40,7 @@
 
 // This adds support for the depth buffers in the shader so we can do depth
 // texture-based effects.
-#define UIC_RENDER_SUPPORT_DEPTH_TEXTURE 1
+#define QT3DS_RENDER_SUPPORT_DEPTH_TEXTURE 1
 
 namespace qt3ds {
 namespace render {

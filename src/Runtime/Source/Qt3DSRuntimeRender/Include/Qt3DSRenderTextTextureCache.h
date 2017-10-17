@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_TEXT_TEXTURE_CACHE_H
-#define UIC_RENDER_TEXT_TEXTURE_CACHE_H
+#ifndef QT3DS_RENDER_TEXT_TEXTURE_CACHE_H
+#define QT3DS_RENDER_TEXT_TEXTURE_CACHE_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "Qt3DSRenderText.h"

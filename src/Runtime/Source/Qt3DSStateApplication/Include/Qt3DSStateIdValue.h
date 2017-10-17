@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_STATE_ID_TYPE_VALUE_H
-#define UIC_STATE_ID_TYPE_VALUE_H
+#ifndef QT3DS_STATE_ID_TYPE_VALUE_H
+#define QT3DS_STATE_ID_TYPE_VALUE_H
 #include "Qt3DSState.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 

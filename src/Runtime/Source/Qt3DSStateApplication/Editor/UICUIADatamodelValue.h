@@ -42,7 +42,7 @@ namespace app {
     {
     };
 
-#define UIC_UIA_DATAMODEL_TYPE_MAP(type, enumname)                                                 \
+#define QT3DS_UIA_DATAMODEL_TYPE_MAP(type, enumname)                                                 \
     template <>                                                                                    \
     struct SDatamodelValueTypeMap<type>                                                            \
     {                                                                                              \
@@ -104,16 +104,16 @@ namespace app {
         }
     };
 
-    UIC_UIA_DATAMODEL_TYPE_MAP(float, ERuntimeDataModelDataTypeFloat);
-    UIC_UIA_DATAMODEL_TYPE_MAP(QT3DSVec2, ERuntimeDataModelDataTypeFloat2);
-    UIC_UIA_DATAMODEL_TYPE_MAP(QT3DSVec3, ERuntimeDataModelDataTypeFloat3);
-    UIC_UIA_DATAMODEL_TYPE_MAP(QT3DSI32, ERuntimeDataModelDataTypeLong);
-    UIC_UIA_DATAMODEL_TYPE_MAP(eastl::string, ERuntimeDataModelDataTypeString);
-    UIC_UIA_DATAMODEL_TYPE_MAP(bool, ERuntimeDataModelDataTypeBool);
-    UIC_UIA_DATAMODEL_TYPE_MAP(SGuid, ERuntimeDataModelDataTypeLong4);
-    UIC_UIA_DATAMODEL_TYPE_MAP(CRegisteredString, ERuntimeDataModelDataTypeStringRef);
-    UIC_UIA_DATAMODEL_TYPE_MAP(SObjectRef, ERuntimeDataModelDataTypeObjectRef);
-    UIC_UIA_DATAMODEL_TYPE_MAP(CStringOrInt, ERuntimeDataModelDataTypeStringOrInt);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(float, ERuntimeDataModelDataTypeFloat);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(QT3DSVec2, ERuntimeDataModelDataTypeFloat2);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(QT3DSVec3, ERuntimeDataModelDataTypeFloat3);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(QT3DSI32, ERuntimeDataModelDataTypeLong);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(eastl::string, ERuntimeDataModelDataTypeString);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(bool, ERuntimeDataModelDataTypeBool);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(SGuid, ERuntimeDataModelDataTypeLong4);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(CRegisteredString, ERuntimeDataModelDataTypeStringRef);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(SObjectRef, ERuntimeDataModelDataTypeObjectRef);
+    QT3DS_UIA_DATAMODEL_TYPE_MAP(CStringOrInt, ERuntimeDataModelDataTypeStringOrInt);
 
     struct SDatamodelValueUnionTraits
     {

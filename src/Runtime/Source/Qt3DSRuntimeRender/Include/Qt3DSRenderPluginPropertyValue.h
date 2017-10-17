@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PLUGIN_PROPERTY_VALUE_H
-#define UIC_RENDER_PLUGIN_PROPERTY_VALUE_H
+#ifndef QT3DS_RENDER_PLUGIN_PROPERTY_VALUE_H
+#define QT3DS_RENDER_PLUGIN_PROPERTY_VALUE_H
 #include "Qt3DSRender.h"
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"

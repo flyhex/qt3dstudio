@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_TEST_COMMON_H
-#define UIC_STATE_TEST_COMMON_H
+#ifndef QT3DS_STATE_TEST_COMMON_H
+#define QT3DS_STATE_TEST_COMMON_H
 #include "Qt3DSState.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"

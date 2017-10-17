@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_MODEL_H
-#define UIC_RENDER_MODEL_H
+#ifndef QT3DS_RENDER_MODEL_H
+#define QT3DS_RENDER_MODEL_H
 
 #include "Qt3DSRenderNode.h"
 #include "foundation/StringTable.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_TESS_MODE_VALUES_H
-#define UIC_RENDER_TESS_MODE_VALUES_H
+#ifndef QT3DS_RENDER_TESS_MODE_VALUES_H
+#define QT3DS_RENDER_TESS_MODE_VALUES_H
 #include "Qt3DSRender.h"
 
 namespace qt3ds {

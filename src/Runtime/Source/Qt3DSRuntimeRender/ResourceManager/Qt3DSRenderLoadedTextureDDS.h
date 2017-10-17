@@ -29,17 +29,17 @@
 ****************************************************************************/
 
 #pragma once
-#ifndef UIC_RENDER_LOAD_DDS_H
-#define UIC_RENDER_LOAD_DDS_H
+#ifndef QT3DS_RENDER_LOAD_DDS_H
+#define QT3DS_RENDER_LOAD_DDS_H
 
 namespace qt3ds {
 namespace render {
 
 /** The maximum number of mipmap levels (per texture or per cubemap face) */
-#define UIC_DDS_MAX_MIPMAPS (16)
+#define QT3DS_DDS_MAX_MIPMAPS (16)
 
 /** The number of cubemap faces that must exist in a cubemap-bearing DDS file */
-#define UIC_DDS_NUM_CUBEMAP_FACES (6)
+#define QT3DS_DDS_NUM_CUBEMAP_FACES (6)
 
     /** The master DDS structure for loading and saving
 
@@ -72,13 +72,13 @@ namespace render {
         /** Base of the allocated block of all texel data */
         void *dataBlock;
         /** Pointers to the mipmap levels for the texture or each cubemap face */
-        void *data[UIC_DDS_MAX_MIPMAPS * UIC_DDS_NUM_CUBEMAP_FACES];
+        void *data[QT3DS_DDS_MAX_MIPMAPS * QT3DS_DDS_NUM_CUBEMAP_FACES];
         /** Array of sizes of the mipmap levels for the texture or each cubemap face */
-        int size[UIC_DDS_MAX_MIPMAPS * UIC_DDS_NUM_CUBEMAP_FACES];
+        int size[QT3DS_DDS_MAX_MIPMAPS * QT3DS_DDS_NUM_CUBEMAP_FACES];
         /** Array of widths of the mipmap levels for the texture or each cubemap face */
-        int mipwidth[UIC_DDS_MAX_MIPMAPS * UIC_DDS_NUM_CUBEMAP_FACES];
+        int mipwidth[QT3DS_DDS_MAX_MIPMAPS * QT3DS_DDS_NUM_CUBEMAP_FACES];
         /** Array of heights of the mipmap levels for the texture or each cubemap face */
-        int mipheight[UIC_DDS_MAX_MIPMAPS * UIC_DDS_NUM_CUBEMAP_FACES];
+        int mipheight[QT3DS_DDS_MAX_MIPMAPS * QT3DS_DDS_NUM_CUBEMAP_FACES];
     };
 }
 }

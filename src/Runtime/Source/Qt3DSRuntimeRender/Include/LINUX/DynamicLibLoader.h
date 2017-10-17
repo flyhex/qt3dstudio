@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_LINUX_DYNAMIC_LIB_LOADER_H
-#define UIC_LINUX_DYNAMIC_LIB_LOADER_H
+#ifndef QT3DS_LINUX_DYNAMIC_LIB_LOADER_H
+#define QT3DS_LINUX_DYNAMIC_LIB_LOADER_H
 #include <dlfcn.h>
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"

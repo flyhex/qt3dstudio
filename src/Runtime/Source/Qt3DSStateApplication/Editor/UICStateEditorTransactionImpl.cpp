@@ -143,7 +143,7 @@ namespace state {
             {
                 m_Editor.RemoveChangeListener(m_ChangeListener);
             }
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Alloc, mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Alloc, mRefCount);
         };
 
         void STransactionManagerImpl::addRef() { atomicIncrement(&mRefCount); }

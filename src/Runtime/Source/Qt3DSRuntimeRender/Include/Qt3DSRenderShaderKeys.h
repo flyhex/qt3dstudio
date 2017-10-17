@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_SHADER_KEY_H
-#define UIC_RENDER_SHADER_KEY_H
+#ifndef QT3DS_RENDER_SHADER_KEY_H
+#define QT3DS_RENDER_SHADER_KEY_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSSimpleTypes.h"
 #include "foundation/Qt3DSDataRef.h"

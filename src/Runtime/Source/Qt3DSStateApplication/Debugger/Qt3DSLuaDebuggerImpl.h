@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_LUA_DEBUGGER_IMPL_H
-#define UIC_LUA_DEBUGGER_IMPL_H
+#ifndef QT3DS_LUA_DEBUGGER_IMPL_H
+#define QT3DS_LUA_DEBUGGER_IMPL_H
 #include "Qt3DSLuaDebugger.h"
 #include "EASTL/hash_map.h"
 

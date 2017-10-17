@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef UIC_EMBEDDED_WATERMARK_H
-#define UIC_EMBEDDED_WATERMARK_H
+#ifndef QT3DS_EMBEDDED_WATERMARK_H
+#define QT3DS_EMBEDDED_WATERMARK_H
 #pragma once
 
 #include <stddef.h>

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_DYNAMIC_OBJECT_SYSTEM_H
-#define UIC_RENDER_DYNAMIC_OBJECT_SYSTEM_H
+#ifndef QT3DS_RENDER_DYNAMIC_OBJECT_SYSTEM_H
+#define QT3DS_RENDER_DYNAMIC_OBJECT_SYSTEM_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSSimpleTypes.h"
 #include "render/Qt3DSRenderBaseTypes.h"

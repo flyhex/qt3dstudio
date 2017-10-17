@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PATH_RENDER_CONTEXT_H
-#define UIC_RENDER_PATH_RENDER_CONTEXT_H
+#ifndef QT3DS_RENDER_PATH_RENDER_CONTEXT_H
+#define QT3DS_RENDER_PATH_RENDER_CONTEXT_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/StringTable.h"

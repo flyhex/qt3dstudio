@@ -136,7 +136,7 @@ namespace render {
         , m_ModelContexts(inRenderer.GetContext().GetAllocator(),
                           "SLayerRenderPreparationData::m_ModelContexts")
         , m_CGLightingFeatureName(
-              inRenderer.GetContext().GetStringTable().RegisterStr("UIC_ENABLE_CG_LIGHTING"))
+              inRenderer.GetContext().GetStringTable().RegisterStr("QT3DS_ENABLE_CG_LIGHTING"))
         , m_FeaturesDirty(true)
         , m_FeatureSetHash(0)
         , m_TooManyLightsError(false)
@@ -313,7 +313,7 @@ namespace render {
 
 #define RENDER_FRAME_NEW(type) QT3DS_NEW(m_Renderer.GetPerFrameAllocator(), type)
 
-#define UIC_RENDER_MINIMUM_RENDER_OPACITY .01f
+#define QT3DS_RENDER_MINIMUM_RENDER_OPACITY .01f
 
     SShaderDefaultMaterialKey
     SLayerRenderPreparationData::GenerateLightingKey(DefaultMaterialLighting::Enum inLightingType)
@@ -445,7 +445,7 @@ namespace render {
         inPath.CalculateMVPAndNormalMatrix(inViewProjection, theMVP, theNormalMatrix);
         NVBounds3 theBounds(this->m_Renderer.GetUICContext().GetPathManager().GetBounds(inPath));
 
-        if (inPath.m_GlobalOpacity >= UIC_RENDER_MINIMUM_RENDER_OPACITY
+        if (inPath.m_GlobalOpacity >= QT3DS_RENDER_MINIMUM_RENDER_OPACITY
             && inClipFrustum.hasValue()) {
             // Check bounding box against the clipping planes
             NVBounds3 theGlobalBounds = theBounds;
@@ -667,14 +667,14 @@ namespace render {
 
         if (!m_Renderer.DefaultMaterialShaderKeyProperties().m_HasIbl.GetValue(theGeneratedKey)) {
             bool lightProbeValid = HasValidLightProbe(theMaterial->m_IblProbe);
-            SetShaderFeature("UIC_ENABLE_LIGHT_PROBE", lightProbeValid);
+            SetShaderFeature("QT3DS_ENABLE_LIGHT_PROBE", lightProbeValid);
             m_Renderer.DefaultMaterialShaderKeyProperties().m_HasIbl.SetValue(theGeneratedKey,
                                                                               lightProbeValid);
-            // SetShaderFeature( "UIC_ENABLE_IBL_FOV",
+            // SetShaderFeature( "QT3DS_ENABLE_IBL_FOV",
             // m_Renderer.GetLayerRenderData()->m_Layer.m_ProbeFov < 180.0f );
         }
 
-        if (subsetOpacity >= UIC_RENDER_MINIMUM_RENDER_OPACITY) {
+        if (subsetOpacity >= QT3DS_RENDER_MINIMUM_RENDER_OPACITY) {
 
             if (theMaterial->m_BlendMode != DefaultMaterialBlendMode::Normal
                 || theMaterial->m_OpacityMap) {
@@ -739,7 +739,7 @@ namespace render {
         }
 #undef CHECK_IMAGE_AND_PREPARE
 
-        if (subsetOpacity < UIC_RENDER_MINIMUM_RENDER_OPACITY) {
+        if (subsetOpacity < QT3DS_RENDER_MINIMUM_RENDER_OPACITY) {
             subsetOpacity = 0.0f;
             // You can still pick against completely transparent objects(or rather their bounding
             // box)
@@ -772,7 +772,7 @@ namespace render {
         m_Renderer.DefaultMaterialShaderKeyProperties().m_WireframeMode.SetValue(
             theGeneratedKey, m_Renderer.GetUICContext().GetWireframeMode());
 
-        if (subsetOpacity < UIC_RENDER_MINIMUM_RENDER_OPACITY) {
+        if (subsetOpacity < QT3DS_RENDER_MINIMUM_RENDER_OPACITY) {
             subsetOpacity = 0.0f;
             // You can still pick against completely transparent objects(or rather their bounding
             // box)
@@ -840,7 +840,7 @@ namespace render {
                 QT3DSVec3 theModelCenter(theSubset.m_Bounds.getCenter());
                 theModelCenter = inModel.m_GlobalTransform.transform(theModelCenter);
 
-                if (subsetOpacity >= UIC_RENDER_MINIMUM_RENDER_OPACITY
+                if (subsetOpacity >= QT3DS_RENDER_MINIMUM_RENDER_OPACITY
                     && inClipFrustum.hasValue()) {
                     // Check bounding box against the clipping planes
                     NVBounds3 theGlobalBounds = theSubset.m_Bounds;
@@ -1124,10 +1124,10 @@ namespace render {
 
         bool SSAOEnabled = (m_Layer.m_AoStrength > 0.0f && m_Layer.m_AoDistance > 0.0f);
         bool SSDOEnabled = (m_Layer.m_ShadowStrength > 0.0f && m_Layer.m_ShadowDist > 0.0f);
-        SetShaderFeature("UIC_ENABLE_SSAO", SSAOEnabled);
-        SetShaderFeature("UIC_ENABLE_SSDO", SSDOEnabled);
+        SetShaderFeature("QT3DS_ENABLE_SSAO", SSAOEnabled);
+        SetShaderFeature("QT3DS_ENABLE_SSDO", SSDOEnabled);
         bool requiresDepthPrepass = (hasOffscreenRenderer == false) && (SSAOEnabled || SSDOEnabled);
-        SetShaderFeature("UIC_ENABLE_SSM", false); // by default no shadow map generation
+        SetShaderFeature("QT3DS_ENABLE_SSM", false); // by default no shadow map generation
 
         if (m_Layer.m_Flags.IsActive()) {
             // Get the layer's width and height.
@@ -1184,8 +1184,8 @@ namespace render {
 
                 bool lightProbeValid = HasValidLightProbe(m_Layer.m_LightProbe);
 
-                SetShaderFeature("UIC_ENABLE_LIGHT_PROBE", lightProbeValid);
-                SetShaderFeature("UIC_ENABLE_IBL_FOV", m_Layer.m_ProbeFov < 180.0f);
+                SetShaderFeature("QT3DS_ENABLE_LIGHT_PROBE", lightProbeValid);
+                SetShaderFeature("QT3DS_ENABLE_IBL_FOV", m_Layer.m_ProbeFov < 180.0f);
 
                 if (lightProbeValid && m_Layer.m_LightProbe2
                     && CheckLightProbeDirty(*m_Layer.m_LightProbe2)) {
@@ -1193,7 +1193,7 @@ namespace render {
                     wasDataDirty = true;
                 }
 
-                SetShaderFeature("UIC_ENABLE_LIGHT_PROBE_2",
+                SetShaderFeature("QT3DS_ENABLE_LIGHT_PROBE_2",
                                  lightProbeValid && HasValidLightProbe(m_Layer.m_LightProbe2));
 
                 // Push nodes in reverse depth first order
@@ -1266,7 +1266,7 @@ namespace render {
                                         NVRenderTextureFormats::R16, 1, mapMode,
                                         ShadowFilterValues::NONE);
                                     thePrepResult.m_Flags.SetRequiresShadowMapPass(true);
-                                    SetShaderFeature("UIC_ENABLE_SSM", true);
+                                    SetShaderFeature("QT3DS_ENABLE_SSM", true);
                                 }
                             }
                             TLightToNodeMap::iterator iter =

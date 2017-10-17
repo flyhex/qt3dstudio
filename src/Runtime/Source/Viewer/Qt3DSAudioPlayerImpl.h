@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef UIC_VIEWER_LIB_UIC_AUDIO_PLAYER_IMPL_H
-#define UIC_VIEWER_LIB_UIC_AUDIO_PLAYER_IMPL_H
+#ifndef QT3DS_VIEWER_LIB_QT3DS_AUDIO_PLAYER_IMPL_H
+#define QT3DS_VIEWER_LIB_QT3DS_AUDIO_PLAYER_IMPL_H
 
 #include "Qt3DSAudioPlayer.h"
 #include "qt3dsruntimeglobal.h"
@@ -45,4 +45,4 @@ public:
 };
 }
 
-#endif // !UIC_VIEWER_LIB_UIC_AUDIO_PLAYER_IMPL_H
+#endif // !QT3DS_VIEWER_LIB_QT3DS_AUDIO_PLAYER_IMPL_H

@@ -80,7 +80,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -129,7 +129,7 @@ namespace state {
                 m_LegalValues.push_back(inStrTable.RegisterStr(trueName));
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -174,7 +174,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -222,7 +222,7 @@ namespace state {
                 , m_Ptr(inPtr)
             {
             }
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual eastl::vector<CRegisteredString> GetLegalValues(IEditorObject & /*inObj*/)
             {
@@ -249,7 +249,7 @@ namespace state {
                 : TBaseType(inAlloc, inDec)
             {
             }
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -274,7 +274,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual eastl::vector<CRegisteredString> GetLegalValues(IEditorObject &inEditor)
             {
@@ -331,7 +331,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -362,7 +362,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual void DoSet(TEditorType &inObj, const Option<SValue> &inValue)
             {
@@ -395,7 +395,7 @@ namespace state {
                 , m_Ptr(inPtr)
             {
             }
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -434,7 +434,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -461,7 +461,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -488,7 +488,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual Option<SValue> DoGet(TEditorType &inObj)
             {
@@ -515,7 +515,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             virtual eastl::vector<CRegisteredString> GetLegalValues(IEditorObject &inEditor)
             {
@@ -563,7 +563,7 @@ namespace state {
             {
             }
 
-            UIC_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
+            QT3DS_STATE_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(this->m_Allocator, this->mRefCount);
 
             static const char *SCXMLParentName() { return "(none)"; }
 

@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_EGLINFO_H
-#define UIC_EGLINFO_H
+#ifndef QT3DS_EGLINFO_H
+#define QT3DS_EGLINFO_H
 #include <EGL/egl.h>
 
 namespace Q3DStudio {

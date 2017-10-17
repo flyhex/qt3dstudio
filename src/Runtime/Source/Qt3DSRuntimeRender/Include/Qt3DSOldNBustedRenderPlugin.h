@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_OLD_N_BUSTED_RENDER_PLUGIN_H
-#define UIC_OLD_N_BUSTED_RENDER_PLUGIN_H
+#ifndef QT3DS_OLD_N_BUSTED_RENDER_PLUGIN_H
+#define QT3DS_OLD_N_BUSTED_RENDER_PLUGIN_H
 
 #include "Qt3DSOffscreenRenderManager.h"
 #include "Qt3DSRenderContextCore.h"

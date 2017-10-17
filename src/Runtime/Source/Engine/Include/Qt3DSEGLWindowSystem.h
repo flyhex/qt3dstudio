@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_EGL_WINDOW_SYSTEM_H
-#define UIC_EGL_WINDOW_SYSTEM_H
+#ifndef QT3DS_EGL_WINDOW_SYSTEM_H
+#define QT3DS_EGL_WINDOW_SYSTEM_H
 #include "Qt3DSEGLInfo.h"
 #include "UICWindowSystem.h"
 #include "nv_main/nv_main.h"

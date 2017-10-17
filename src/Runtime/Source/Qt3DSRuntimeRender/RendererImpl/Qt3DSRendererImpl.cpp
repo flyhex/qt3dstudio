@@ -65,14 +65,14 @@
 
 // Quick tests you can run to find performance problems
 
-//#define UIC_RENDER_DISABLE_HARDWARE_BLENDING 1
-//#define UIC_RENDER_DISABLE_LIGHTING 1
-//#define UIC_RENDER_DISABLE_TEXTURING 1
-//#define UIC_RENDER_DISABLE_TRANSPARENCY 1
-//#define UIC_RENDER_DISABLE_FRUSTUM_CULLING 1
+//#define QT3DS_RENDER_DISABLE_HARDWARE_BLENDING 1
+//#define QT3DS_RENDER_DISABLE_LIGHTING 1
+//#define QT3DS_RENDER_DISABLE_TEXTURING 1
+//#define QT3DS_RENDER_DISABLE_TRANSPARENCY 1
+//#define QT3DS_RENDER_DISABLE_FRUSTUM_CULLING 1
 
 // If you are fillrate bound then sorting opaque objects can help in some circumstances
-//#define UIC_RENDER_DISABLE_OPAQUE_SORT 1
+//#define QT3DS_RENDER_DISABLE_OPAQUE_SORT 1
 
 using qt3ds::foundation::CRegisteredString;
 

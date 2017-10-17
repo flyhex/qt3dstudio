@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef UIC_BINARY_SERIALIZATION_HELPER_H
-#define UIC_BINARY_SERIALIZATION_HELPER_H
+#ifndef QT3DS_BINARY_SERIALIZATION_HELPER_H
+#define QT3DS_BINARY_SERIALIZATION_HELPER_H
 #pragma once
 #include "foundation/Qt3DSIndexableLinkedList.h"
 #include "foundation/SerializationTypes.h"

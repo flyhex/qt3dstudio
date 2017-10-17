@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_STATE_VISUAL_BINDING_CONTEXT_VALUES_H
-#define UIC_STATE_VISUAL_BINDING_CONTEXT_VALUES_H
+#ifndef QT3DS_STATE_VISUAL_BINDING_CONTEXT_VALUES_H
+#define QT3DS_STATE_VISUAL_BINDING_CONTEXT_VALUES_H
 #include "Qt3DSStateVisualBindingContext.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "Qt3DSStateVisualBindingContextCommands.h"

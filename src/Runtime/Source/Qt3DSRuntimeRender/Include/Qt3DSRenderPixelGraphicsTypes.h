@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PIXEL_GRAPHICS_TYPES_H
-#define UIC_RENDER_PIXEL_GRAPHICS_TYPES_H
+#ifndef QT3DS_RENDER_PIXEL_GRAPHICS_TYPES_H
+#define QT3DS_RENDER_PIXEL_GRAPHICS_TYPES_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSVec2.h"
 #include "foundation/Qt3DSVec4.h"

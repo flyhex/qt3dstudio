@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_TEST_H
-#define UIC_STATE_TEST_H
+#ifndef QT3DS_STATE_TEST_H
+#define QT3DS_STATE_TEST_H
 #include "Qt3DSState.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSOption.h"

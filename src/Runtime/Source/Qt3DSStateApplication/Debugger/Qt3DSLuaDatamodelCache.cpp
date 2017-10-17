@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_LUA_DATAMODLE_CACHE_H
-#define UIC_LUA_DATAMODLE_CACHE_H
+#ifndef QT3DS_LUA_DATAMODLE_CACHE_H
+#define QT3DS_LUA_DATAMODLE_CACHE_H
 #include "Qt3DSLuaDebugger.h"
 #include "Qt3DSLuaDebuggerProtocol.h"
 #include "foundation/Qt3DSFoundation.h"

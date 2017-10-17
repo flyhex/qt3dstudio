@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_LUA_DEBUGGER_H
-#define UIC_LUA_DEBUGGER_H
+#ifndef QT3DS_LUA_DEBUGGER_H
+#define QT3DS_LUA_DEBUGGER_H
 #include "Qt3DSStateDebugger.h"
 #include "Qt3DSStateDebuggerValues.h"
 

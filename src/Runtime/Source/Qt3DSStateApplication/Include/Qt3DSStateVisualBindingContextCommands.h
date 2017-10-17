@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_STATE_VISUAL_BINDING_CONTEXT_COMMANDS_H
-#define UIC_STATE_VISUAL_BINDING_CONTEXT_COMMANDS_H
+#ifndef QT3DS_STATE_VISUAL_BINDING_CONTEXT_COMMANDS_H
+#define QT3DS_STATE_VISUAL_BINDING_CONTEXT_COMMANDS_H
 #include "Qt3DSState.h"
 #include "foundation/StringTable.h"
 

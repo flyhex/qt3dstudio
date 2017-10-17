@@ -611,7 +611,7 @@ struct SBufferManager : public IBufferManager
 // format.  Either way it isn't going to happen here and it isn't going to happen this way but this
 // is a working
 // example of using the technique.
-#ifdef UIC_RENDER_GENERATE_SUB_SUBSETS
+#ifdef QT3DS_RENDER_GENERATE_SUB_SUBSETS
                 Option<qt3ds::render::NVRenderVertexBufferEntry> thePosAttrOpt =
                     theVertexBuffer->GetEntryByName("attr_pos");
                 bool hasPosAttr = thePosAttrOpt.hasValue()

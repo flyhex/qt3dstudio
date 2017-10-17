@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_SUB_PRESENTATION_HELPER_H
-#define UIC_RENDER_SUB_PRESENTATION_HELPER_H
+#ifndef QT3DS_RENDER_SUB_PRESENTATION_HELPER_H
+#define QT3DS_RENDER_SUB_PRESENTATION_HELPER_H
 #include "Qt3DSRenderContextCore.h"
 #include "Qt3DSRenderer.h"
 #include "render/Qt3DSRenderContext.h"

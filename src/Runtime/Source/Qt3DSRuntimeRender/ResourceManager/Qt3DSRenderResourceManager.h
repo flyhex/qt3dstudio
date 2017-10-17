@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_RESOURCE_MANAGER_H
-#define UIC_RENDER_RESOURCE_MANAGER_H
+#ifndef QT3DS_RENDER_RESOURCE_MANAGER_H
+#define QT3DS_RENDER_RESOURCE_MANAGER_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "render/Qt3DSRenderBaseTypes.h"

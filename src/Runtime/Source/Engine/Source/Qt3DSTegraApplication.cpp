@@ -703,7 +703,7 @@ CTegraApplication::~CTegraApplication()
 
 KDint CTegraApplication::BeginLoad(const QString &sourcePath)
 {
-#ifndef UIC_NO_SEARCH_PATH
+#ifndef QT3DS_NO_SEARCH_PATH
     // We need these later on in case we try to load any files
     // such as images
     NvFSAppendSearchPath("/res");

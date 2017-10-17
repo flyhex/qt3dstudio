@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_EDITOR_H
-#define UIC_STATE_EDITOR_H
+#ifndef QT3DS_STATE_EDITOR_H
+#define QT3DS_STATE_EDITOR_H
 #pragma once
 #include "Qt3DSState.h"
 #include "Qt3DSStateSignalConnection.h"

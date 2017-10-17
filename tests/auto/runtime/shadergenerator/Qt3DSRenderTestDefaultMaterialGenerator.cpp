@@ -37,10 +37,10 @@
 #include "Qt3DSInputEngine.h"
 #include "foundation/FileTools.h"
 #include "Qt3DSWindowSystem.h"
-#include "UICRenderContext.h"
-#include "UICRenderShaderCache.h"
-#include "UICRendererImpl.h"
-#include "UICRenderLight.h"
+#include "Qt3DSRenderContextCore.h"
+#include "Qt3DSRenderShaderCache.h"
+#include "Qt3DSRendererImpl.h"
+#include "Qt3DSRenderLight.h"
 
 #include <QTime>
 
@@ -204,7 +204,7 @@ struct TestParams
     SShaderDefaultMaterialKey shaderkey;
     SSubsetRenderable renderable;
     eastl::vector<SShaderPreprocessorFeature> features;
-    SLight light[UIC_MAX_NUM_LIGHTS];
+    SLight light[QT3DS_MAX_NUM_LIGHTS];
     SLayer layer;
     SLayerRenderData layerData;
     SImage dummyImages[SShaderDefaultMaterialKeyProperties::ImageMapCount];
@@ -318,7 +318,7 @@ TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
             params->shaderkey, true);
     }
     bool castShadow = false;
-    key.lights = qMin(int(key.lights), int(UIC_MAX_NUM_LIGHTS));
+    key.lights = qMin(int(key.lights), int(QT3DS_MAX_NUM_LIGHTS));
     for (unsigned int i = 0; i < key.lights; ++i) {
         params->light[i].m_LightType = static_cast<RenderLightTypes::Enum>((i%3)+1);
         if (params->light[i].m_LightType != RenderLightTypes::Directional) {

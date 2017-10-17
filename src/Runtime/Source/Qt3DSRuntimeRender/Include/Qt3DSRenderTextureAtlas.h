@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_TEXTURE_ATLAS_H
-#define UIC_RENDER_TEXTURE_ATLAS_H
+#ifndef QT3DS_RENDER_TEXTURE_ATLAS_H
+#define QT3DS_RENDER_TEXTURE_ATLAS_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "render/Qt3DSRenderBaseTypes.h"

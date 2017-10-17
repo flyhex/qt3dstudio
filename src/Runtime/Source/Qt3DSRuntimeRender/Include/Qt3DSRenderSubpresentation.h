@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_SUBPRESENTATION_H
-#define UIC_RENDER_SUBPRESENTATION_H
+#ifndef QT3DS_RENDER_SUBPRESENTATION_H
+#define QT3DS_RENDER_SUBPRESENTATION_H
 
 #include "Qt3DSOffscreenRenderManager.h"
 #include "Qt3DSRenderSubPresentationHelper.h"

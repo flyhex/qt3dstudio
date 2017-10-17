@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDERER_IMPL_LAYER_RENDER_DATA_H
-#define UIC_RENDERER_IMPL_LAYER_RENDER_DATA_H
+#ifndef QT3DS_RENDERER_IMPL_LAYER_RENDER_DATA_H
+#define QT3DS_RENDERER_IMPL_LAYER_RENDER_DATA_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRendererImplLayerRenderPreparationData.h"
 #include "Qt3DSRenderResourceBufferObjects.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_OFFSCREEN_RENDER_MANAGER_H
-#define UIC_OFFSCREEN_RENDER_MANAGER_H
+#ifndef QT3DS_OFFSCREEN_RENDER_MANAGER_H
+#define QT3DS_OFFSCREEN_RENDER_MANAGER_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSSimpleTypes.h"
 #include "foundation/Qt3DSRefCounted.h"

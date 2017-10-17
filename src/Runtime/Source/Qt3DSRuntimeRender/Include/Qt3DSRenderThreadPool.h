@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_THREAD_POOL_H
-#define UIC_RENDER_THREAD_POOL_H
+#ifndef QT3DS_RENDER_THREAD_POOL_H
+#define QT3DS_RENDER_THREAD_POOL_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 

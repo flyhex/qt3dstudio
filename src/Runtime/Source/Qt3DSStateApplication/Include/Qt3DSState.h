@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_STATE_H
-#define UIC_STATE_H
+#ifndef QT3DS_STATE_H
+#define QT3DS_STATE_H
 
 namespace qt3ds {
 class NVAllocatorCallback;

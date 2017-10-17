@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_OBJECT_RENDER_PLUGIN_H
-#define UIC_OBJECT_RENDER_PLUGIN_H
+#ifndef QT3DS_OBJECT_RENDER_PLUGIN_H
+#define QT3DS_OBJECT_RENDER_PLUGIN_H
 
 /*
  *	Below are the definitions required in order to write a render plugin for UIComposer.
@@ -82,7 +82,7 @@ typedef long TUICBOOL;
 #define UICTRUE 1
 #define UICFALSE 0
 
-#define UIC_CURRENT_RENDER_PLUGIN_API_VERSION 2
+#define QT3DS_CURRENT_RENDER_PLUGIN_API_VERSION 2
 
 typedef void *TRenderPluginInstancePtr;
 typedef void *TRenderPluginClassPtr;
@@ -244,7 +244,7 @@ typedef void (*TReleaseInstanceFunction)(TRenderPluginClassPtr cls,
 
 /*
  *	Get the plugin API version.  This allows the runtime to account for API changes over time or
- *	refuse to load the plugin.  Plugins should return UIC_CURRENT_RENDER_PLUGIN_API_VERSION
+ *	refuse to load the plugin.  Plugins should return QT3DS_CURRENT_RENDER_PLUGIN_API_VERSION
  *
  *	Required API function.
  */
@@ -296,7 +296,7 @@ typedef struct _RenderPluginClass
 } TRenderPluginClass;
 
 // We look for this function name in the shared library
-#define UIC_RENDER_PLUGIN_CREATE_CLASS_FUNCION_NAME "CreateRenderPlugin"
+#define QT3DS_RENDER_PLUGIN_CREATE_CLASS_FUNCION_NAME "CreateRenderPlugin"
 
 /*
  *	Function signature we expect mapped to "CreateRenderPlugin".  Example code:

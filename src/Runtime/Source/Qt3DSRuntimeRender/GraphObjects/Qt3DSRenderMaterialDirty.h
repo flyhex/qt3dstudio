@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_MATERIAL_DIRTY_H
-#define UIC_RENDER_MATERIAL_DIRTY_H
+#ifndef QT3DS_RENDER_MATERIAL_DIRTY_H
+#define QT3DS_RENDER_MATERIAL_DIRTY_H
 
 namespace qt3ds {
 namespace render {
@@ -58,4 +58,4 @@ namespace render {
 }
 }
 
-#endif // UIC_RENDER_MATERIAL_DIRTY_H
+#endif // QT3DS_RENDER_MATERIAL_DIRTY_H

@@ -306,12 +306,12 @@ struct SDebugServer : public ILuaArchitectDebugServer,
             client->m_DataCache->HandleCacheMessage(inReader, inHeader);
         } else {
             switch (inHeader.m_MessageName) {
-#define UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(msgname)                                          \
+#define QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(msgname)                                          \
     case SProtocolMessageNames::msgname:                                                           \
         Handle##msgname(inHeader.m_ClientId, inReader.ReadMessage<lua::S##msgname>());             \
         break;
-                UIC_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES;
-#undef UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE
+                QT3DS_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES;
+#undef QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE
             }
         }
     }

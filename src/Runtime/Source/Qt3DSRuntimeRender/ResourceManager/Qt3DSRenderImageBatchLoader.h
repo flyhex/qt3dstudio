@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_THREADED_IMAGE_LOADER_H
-#define UIC_RENDER_THREADED_IMAGE_LOADER_H
+#ifndef QT3DS_RENDER_THREADED_IMAGE_LOADER_H
+#define QT3DS_RENDER_THREADED_IMAGE_LOADER_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSDataRef.h"

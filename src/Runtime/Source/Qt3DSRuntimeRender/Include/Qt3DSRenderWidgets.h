@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_WIDGETS_H
-#define UIC_RENDER_WIDGETS_H
+#ifndef QT3DS_RENDER_WIDGETS_H
+#define QT3DS_RENDER_WIDGETS_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSOption.h"
 #include "foundation/Qt3DSMat44.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_LOADED_TEXTURE_FREEIMAGE_COMPAT_H
-#define UIC_RENDER_LOADED_TEXTURE_FREEIMAGE_COMPAT_H
+#ifndef QT3DS_RENDER_LOADED_TEXTURE_FREEIMAGE_COMPAT_H
+#define QT3DS_RENDER_LOADED_TEXTURE_FREEIMAGE_COMPAT_H
 #include "foundation/IOStreams.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"

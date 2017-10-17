@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PLUGIN_GRAPH_OBJECT_H
-#define UIC_RENDER_PLUGIN_GRAPH_OBJECT_H
+#ifndef QT3DS_RENDER_PLUGIN_GRAPH_OBJECT_H
+#define QT3DS_RENDER_PLUGIN_GRAPH_OBJECT_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderGraphObject.h"
 namespace qt3ds {

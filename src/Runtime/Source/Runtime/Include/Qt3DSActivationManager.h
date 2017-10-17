@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_ACTIVATION_MANAGER_H
-#define UIC_ACTIVATION_MANAGER_H
+#ifndef QT3DS_ACTIVATION_MANAGER_H
+#define QT3DS_ACTIVATION_MANAGER_H
 #include "foundation/Qt3DSRefCounted.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSAllocator.h"

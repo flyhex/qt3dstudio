@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_APPLICATION_H
-#define UIC_STATE_APPLICATION_H
+#ifndef QT3DS_STATE_APPLICATION_H
+#define QT3DS_STATE_APPLICATION_H
 #include "EASTL/string.h"
 #include <QtCore/qvector.h>
 

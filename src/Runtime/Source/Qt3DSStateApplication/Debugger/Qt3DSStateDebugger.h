@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_DEBUGGER_H
-#define UIC_STATE_DEBUGGER_H
+#ifndef QT3DS_STATE_DEBUGGER_H
+#define QT3DS_STATE_DEBUGGER_H
 #pragma once
 #include "Qt3DSState.h"
 #include "foundation/Qt3DSRefCounted.h"

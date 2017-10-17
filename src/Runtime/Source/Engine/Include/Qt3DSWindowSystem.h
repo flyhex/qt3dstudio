@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_WINDOW_SYSTEM_H
-#define UIC_WINDOW_SYSTEM_H
+#ifndef QT3DS_WINDOW_SYSTEM_H
+#define QT3DS_WINDOW_SYSTEM_H
 
 namespace Q3DStudio {
 struct SSize

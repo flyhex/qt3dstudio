@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_H
-#define UIC_RENDER_H
+#ifndef QT3DS_RENDER_H
+#define QT3DS_RENDER_H
 
 namespace qt3ds {
 class NVAllocatorCallback;

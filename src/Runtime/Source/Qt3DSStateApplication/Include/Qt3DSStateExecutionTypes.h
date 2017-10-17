@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_EXECUTION_TYPES_H
-#define UIC_STATE_EXECUTION_TYPES_H
+#ifndef QT3DS_STATE_EXECUTION_TYPES_H
+#define QT3DS_STATE_EXECUTION_TYPES_H
 #pragma once
 #include "Qt3DSStateTypes.h"
 

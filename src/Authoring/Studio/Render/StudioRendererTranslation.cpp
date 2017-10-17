@@ -474,49 +474,49 @@ struct STranslatorUICDMParser
 #define SubPath_Closed m_SubPath.m_Closed
 
 // Fill in implementations for the actual parse tables.
-#define HANDLE_UIC_RENDER_PROPERTY(type, name, dirty)                                              \
+#define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_VEC3_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_VEC3_PROPERTY(type, name, dirty)                                         \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                    \
+#define HANDLE_QT3DS_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                    \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_COLOR_PROPERTY(type, name, dirty)                                        \
+#define HANDLE_QT3DS_RENDER_COLOR_PROPERTY(type, name, dirty)                                        \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_RADIAN_PROPERTY(type, name, dirty)                                       \
+#define HANDLE_QT3DS_RENDER_RADIAN_PROPERTY(type, name, dirty)                                       \
     theParser.ParseRadianProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                  \
+#define HANDLE_QT3DS_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                  \
     theParser.ParseRadianProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_OPACITY_PROPERTY(type, name, dirty)                                      \
+#define HANDLE_QT3DS_RENDER_OPACITY_PROPERTY(type, name, dirty)                                      \
     theParser.ParseOpacityProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_ROTATION_ORDER_PROPERTY(type, name, dirty)                                      \
+#define HANDLE_QT3DS_ROTATION_ORDER_PROPERTY(type, name, dirty)                                      \
     theParser.ParseRotationOrder(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                    \
+#define HANDLE_QT3DS_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                    \
     theParser.ParseOrientation(inContext.m_ObjectDefinitions.type##_##name, theItem.m_Flags);
-#define HANDLE_UIC_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                   \
     if (theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name))    \
         theItem.m_##name = !theItem.m_##name;
-#define HANDLE_UIC_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
+#define HANDLE_QT3DS_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
     theParser.ParseNodeFlagsProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_Flags, \
                                      qt3ds::render::NodeFlagValues::name);
-#define HANDLE_UIC_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
+#define HANDLE_QT3DS_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
     theParser.ParseNodeFlagsInverseProperty(inContext.m_ObjectDefinitions.type##_##name,           \
                                             theItem.m_Flags, qt3ds::render::NodeFlagValues::name);
-#define HANDLE_UIC_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
     theParser.ParseEnumProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
-#define HANDLE_UIC_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
     theParser.ParseAndResolveSourcePath(inContext.m_ObjectDefinitions.type##_##name,               \
                                         theItem.m_##name);
-#define HANDLE_UIC_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                                 \
+#define HANDLE_QT3DS_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                                 \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name##_##index,                 \
                             theItem.m_##name[index]);
-#define HANDLE_UIC_RENDER_VEC2_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_VEC2_PROPERTY(type, name, dirty)                                         \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name##_##X,                     \
                             theItem.m_##name.x);                                                   \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name##_##Y, theItem.m_##name.y);
-#define HANDLE_UIC_RENDER_COLOR_VEC3_PROPERTY(                                                     \
-    type, name, dirty) // noop by intention already handled by HANDLE_UIC_RENDER_COLOR_PROPERTY
-#define HANDLE_UIC_RENDER_TRANSFORM_VEC3_PROPERTY(                                                 \
-    type, name, dirty) // noop by intention already handled by HANDLE_UIC_RENDER_VEC3_PROPERTY
+#define HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(                                                     \
+    type, name, dirty) // noop by intention already handled by HANDLE_QT3DS_RENDER_COLOR_PROPERTY
+#define HANDLE_QT3DS_RENDER_TRANSFORM_VEC3_PROPERTY(                                                 \
+    type, name, dirty) // noop by intention already handled by HANDLE_QT3DS_RENDER_VEC3_PROPERTY
 
 struct SSceneTranslator : public SGraphObjectTranslator
 {
@@ -529,7 +529,7 @@ struct SSceneTranslator : public SGraphObjectTranslator
     {
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_SCENE_PROPERTIES
+        ITERATE_QT3DS_RENDER_SCENE_PROPERTIES
         SLayer *theCurrentLayer = nullptr;
         theItem.m_FirstChild = nullptr;
         for (long idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
@@ -606,7 +606,7 @@ struct SNodeTranslator : public SGraphObjectTranslator
         SGraphObjectTranslator::PushTranslation(inContext);
         SNode &theItem = static_cast<SNode &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_NODE_PROPERTIES
+        ITERATE_QT3DS_RENDER_NODE_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Node.m_BoneId,
                                 theItem.m_SkeletonId);
         bool ignoresParent = false;
@@ -661,7 +661,7 @@ struct SLayerTranslator : public SNodeTranslator
         SNodeTranslator::PushTranslation(inContext);
         SLayer &theItem = static_cast<SLayer &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_LAYER_PROPERTIES
+        ITERATE_QT3DS_RENDER_LAYER_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Layer.m_AoSamplerate,
                                 theItem.m_AoSamplerate);
     }
@@ -707,7 +707,7 @@ struct SLightTranslator : public SNodeTranslator
         SNodeTranslator::PushTranslation(inContext);
         SLight &theItem = static_cast<SLight &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_LIGHT_PROPERTIES
+        ITERATE_QT3DS_RENDER_LIGHT_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Light.m_ShadowMapRes,
                                 theItem.m_ShadowMapRes);
     }
@@ -725,7 +725,7 @@ struct SCameraTranslator : public SNodeTranslator
         SNodeTranslator::PushTranslation(inContext);
         SCamera &theItem = static_cast<SCamera &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_CAMERA_PROPERTIES
+        ITERATE_QT3DS_RENDER_CAMERA_PROPERTIES
     }
 };
 struct SModelTranslator : public SNodeTranslator
@@ -739,7 +739,7 @@ struct SModelTranslator : public SNodeTranslator
         SNodeTranslator::PushTranslation(inContext);
         SModel &theItem = static_cast<SModel &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_MODEL_PROPERTIES
+        ITERATE_QT3DS_RENDER_MODEL_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Model.m_PoseRoot,
                                 theItem.m_SkeletonRoot);
 
@@ -809,7 +809,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
     {
         SPathSubPath &theItem = static_cast<SPathSubPath &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_PATH_SUBPATH_PROPERTIES
+        ITERATE_QT3DS_RENDER_PATH_SUBPATH_PROPERTIES
         m_PathBuffer.clear();
         Q3DStudio::IDocumentReader &theReader(inContext.m_Doc.GetDocumentReader());
         QT3DSU32 anchorCount = 0;
@@ -891,7 +891,7 @@ struct SPathTranslator : public SNodeTranslator
         SNodeTranslator::PushTranslation(inContext);
         SPath &theItem = static_cast<SPath &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_PATH_PROPERTIES
+        ITERATE_QT3DS_RENDER_PATH_PROPERTIES
     }
 };
 
@@ -908,7 +908,7 @@ struct SDefaultMaterialTranslator : public SGraphObjectTranslator
         SGraphObjectTranslator::PushTranslation(inContext);
         SDefaultMaterial &theItem = static_cast<SDefaultMaterial &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_MATERIAL_PROPERTIES
+        ITERATE_QT3DS_RENDER_MATERIAL_PROPERTIES
 
         // qt3dsdm::CUICDMInstanceHandle parent = inContext.m_AssetGraph.GetParent(
         // GetInstanceHandle() );
@@ -938,7 +938,7 @@ struct SImageTranslator : public SGraphObjectTranslator
         SGraphObjectTranslator::PushTranslation(inContext);
         SImage &theItem = static_cast<SImage &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_IMAGE_PROPERTIES
+        ITERATE_QT3DS_RENDER_IMAGE_PROPERTIES
 
         theItem.m_Flags.SetDirty(true);
         theItem.m_Flags.SetTransformDirty(true);
@@ -970,7 +970,7 @@ struct STextTranslator : public SNodeTranslator
         SNodeTranslator::PushTranslation(inContext);
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
         SText &theItem = static_cast<SText &>(GetGraphObject());
-        ITERATE_UIC_RENDER_TEXT_PROPERTIES
+        ITERATE_QT3DS_RENDER_TEXT_PROPERTIES
         theItem.m_Flags.SetTextDirty(true);
     }
 };
@@ -1141,7 +1141,7 @@ struct SCustomMaterialTranslator : public SDynamicObjectTranslator
         SDynamicObjectTranslator::PushTranslation(inContext);
         SCustomMaterial &theItem = static_cast<SCustomMaterial &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_CUSTOM_MATERIAL_PROPERTIES
+        ITERATE_QT3DS_RENDER_CUSTOM_MATERIAL_PROPERTIES
 
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Lightmaps.m_LightmapIndirect,
                                 theItem.m_Lightmaps.m_LightmapIndirect);
@@ -1174,7 +1174,7 @@ struct SReferencedMaterialTranslator : public SGraphObjectTranslator
         SGraphObjectTranslator::PushTranslation(inContext);
         SReferencedMaterial &theItem = static_cast<SReferencedMaterial &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
-        ITERATE_UIC_RENDER_REFERENCED_MATERIAL_PROPERTIES
+        ITERATE_QT3DS_RENDER_REFERENCED_MATERIAL_PROPERTIES
 
         theItem.m_Dirty.SetDirty();
         if (theItem.m_ReferencedMaterial == &theItem) {
@@ -1474,7 +1474,7 @@ struct SAliasTranslator : public SGraphObjectTranslator
     {
         SNode &theItem = static_cast<SNode &>(GetGraphObject());
         STranslatorUICDMParser theParser(inContext, m_InstanceHandle);
-        ITERATE_UIC_RENDER_NODE_PROPERTIES
+        ITERATE_QT3DS_RENDER_NODE_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Node.m_BoneId,
                                 theItem.m_SkeletonId);
         bool ignoresParent = false;

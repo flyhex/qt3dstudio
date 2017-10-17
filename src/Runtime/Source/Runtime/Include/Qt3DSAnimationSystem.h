@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_ANIMATION_SYSTEM_H
-#define UIC_ANIMATION_SYSTEM_H
+#ifndef QT3DS_ANIMATION_SYSTEM_H
+#define QT3DS_ANIMATION_SYSTEM_H
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSRefCounted.h"
 

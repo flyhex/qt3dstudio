@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_VERTEX_PIPELINE_IMPL_H
-#define UIC_VERTEX_PIPELINE_IMPL_H
+#ifndef QT3DS_VERTEX_PIPELINE_IMPL_H
+#define QT3DS_VERTEX_PIPELINE_IMPL_H
 #include "Qt3DSRenderDefaultMaterialShaderGenerator.h"
 
 namespace qt3ds {

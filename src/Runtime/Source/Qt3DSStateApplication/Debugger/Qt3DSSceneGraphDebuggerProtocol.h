@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_SCENE_GRAPH_DEBUGGER_PROTOCOL_H
-#define UIC_SCENE_GRAPH_DEBUGGER_PROTOCOL_H
+#ifndef QT3DS_SCENE_GRAPH_DEBUGGER_PROTOCOL_H
+#define QT3DS_SCENE_GRAPH_DEBUGGER_PROTOCOL_H
 #include "Qt3DSSceneGraphDebugger.h"
 #include "Qt3DSSceneGraphDebuggerValue.h"
 #include "foundation/Qt3DSMemoryBuffer.h"

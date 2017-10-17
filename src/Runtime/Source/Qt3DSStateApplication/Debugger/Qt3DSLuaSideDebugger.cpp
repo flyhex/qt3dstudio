@@ -454,12 +454,12 @@ struct SLuaSideDebugger : public ILuaDebugger, public IDebugStreamListener
             m_DataCache->HandleCacheMessage(m_BrokenState, inReader, inMessage);
         } else {
             switch (inMessage.m_MessageName) {
-#define UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(name)                                             \
+#define QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE(name)                                             \
     case SProtocolMessageNames::name:                                                              \
         Handle##name(inReader);                                                                    \
         break;
-                UIC_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES
-#undef UIC_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE
+                QT3DS_LUA_DEBUGGER_ITERATE_PROTOCOL_MESSAGES
+#undef QT3DS_LUA_DEBUGGER_HANDLE_PROTOCOL_MESSAGE
             default:
                 QT3DS_ASSERT(false);
                 break;
@@ -467,26 +467,26 @@ struct SLuaSideDebugger : public ILuaDebugger, public IDebugStreamListener
         }
     }
 
-#define UIC_LUA_IGNORE_MESSAGE(name)                                                               \
+#define QT3DS_LUA_IGNORE_MESSAGE(name)                                                               \
     void Handle##name(SLuaDebuggerProtocolReader &) { QT3DS_ASSERT(false); }
-    UIC_LUA_IGNORE_MESSAGE(Initialization)
-    UIC_LUA_IGNORE_MESSAGE(AllBreakpoints)
-    UIC_LUA_IGNORE_MESSAGE(Continue)
-    UIC_LUA_IGNORE_MESSAGE(OnBreak)
-    UIC_LUA_IGNORE_MESSAGE(OnClientConnect)
-    UIC_LUA_IGNORE_MESSAGE(UpdateTable)
-    UIC_LUA_IGNORE_MESSAGE(UpdateFunction)
-    UIC_LUA_IGNORE_MESSAGE(RequestStackTrace)
-    UIC_LUA_IGNORE_MESSAGE(StackTrace)
-    UIC_LUA_IGNORE_MESSAGE(StepInto)
-    UIC_LUA_IGNORE_MESSAGE(StepOver)
-    UIC_LUA_IGNORE_MESSAGE(StepOut)
-    UIC_LUA_IGNORE_MESSAGE(WatchUpdated)
-    UIC_LUA_IGNORE_MESSAGE(StatementExecuted)
-    UIC_LUA_IGNORE_MESSAGE(RequestPointerValue)
-    UIC_LUA_IGNORE_MESSAGE(UnknownPointerValue)
-    UIC_LUA_IGNORE_MESSAGE(EndPointerRequest)
-    UIC_LUA_IGNORE_MESSAGE(BeginCacheUpdate)
+    QT3DS_LUA_IGNORE_MESSAGE(Initialization)
+    QT3DS_LUA_IGNORE_MESSAGE(AllBreakpoints)
+    QT3DS_LUA_IGNORE_MESSAGE(Continue)
+    QT3DS_LUA_IGNORE_MESSAGE(OnBreak)
+    QT3DS_LUA_IGNORE_MESSAGE(OnClientConnect)
+    QT3DS_LUA_IGNORE_MESSAGE(UpdateTable)
+    QT3DS_LUA_IGNORE_MESSAGE(UpdateFunction)
+    QT3DS_LUA_IGNORE_MESSAGE(RequestStackTrace)
+    QT3DS_LUA_IGNORE_MESSAGE(StackTrace)
+    QT3DS_LUA_IGNORE_MESSAGE(StepInto)
+    QT3DS_LUA_IGNORE_MESSAGE(StepOver)
+    QT3DS_LUA_IGNORE_MESSAGE(StepOut)
+    QT3DS_LUA_IGNORE_MESSAGE(WatchUpdated)
+    QT3DS_LUA_IGNORE_MESSAGE(StatementExecuted)
+    QT3DS_LUA_IGNORE_MESSAGE(RequestPointerValue)
+    QT3DS_LUA_IGNORE_MESSAGE(UnknownPointerValue)
+    QT3DS_LUA_IGNORE_MESSAGE(EndPointerRequest)
+    QT3DS_LUA_IGNORE_MESSAGE(BeginCacheUpdate)
 
     void HandleRequestBreak(SLuaDebuggerProtocolReader &)
     {

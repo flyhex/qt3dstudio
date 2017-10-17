@@ -39,9 +39,9 @@
 #include "Qt3DSTimer.h"
 #include "Qt3DSRenderRuntimeBinding.h"
 #include "Qt3DSRenderRuntimeBindingImpl.h"
-#include "UICRenderContext.h"
-#include "UICRendererImpl.h"
-#include "UICMetadata.h"
+#include "Qt3DSRenderContextCore.h"
+#include "Qt3DSRendererImpl.h"
+#include "Qt3DSMetadata.h"
 
 namespace qt3ds {
 namespace render {

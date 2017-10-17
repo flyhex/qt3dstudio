@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_SIGNAL_CONNECTION_H
-#define UIC_STATE_SIGNAL_CONNECTION_H
+#ifndef QT3DS_STATE_SIGNAL_CONNECTION_H
+#define QT3DS_STATE_SIGNAL_CONNECTION_H
 #pragma once
 #include "Qt3DSState.h"
 #include "foundation/Qt3DSRefCounted.h"

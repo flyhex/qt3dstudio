@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDERER_IMPL_SHADERS_H
-#define UIC_RENDERER_IMPL_SHADERS_H
+#ifndef QT3DS_RENDERER_IMPL_SHADERS_H
+#define QT3DS_RENDERER_IMPL_SHADERS_H
 #include "Qt3DSRender.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "render/Qt3DSRenderProgramPipeline.h"

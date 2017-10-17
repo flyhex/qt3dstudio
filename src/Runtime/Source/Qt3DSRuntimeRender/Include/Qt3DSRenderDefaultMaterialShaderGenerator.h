@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_DEFAULT_MATERIAL_SHADER_GENERATOR_H
-#define UIC_RENDER_DEFAULT_MATERIAL_SHADER_GENERATOR_H
+#ifndef QT3DS_RENDER_DEFAULT_MATERIAL_SHADER_GENERATOR_H
+#define QT3DS_RENDER_DEFAULT_MATERIAL_SHADER_GENERATOR_H
 #include "Qt3DSRenderMaterialShaderGenerator.h"
 
 namespace qt3ds {

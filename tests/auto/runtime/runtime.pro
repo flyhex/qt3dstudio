@@ -11,7 +11,7 @@ RESOURCES += \
     $$PWD/../../../src/Runtime/platformres.qrc
 
 INCLUDEPATH += \
-    $$PWD/../../../src/Runtime/Source/UICRender/RendererImpl
+    $$PWD/../../../src/Runtime/Source/Qt3DSRuntimeRender/RendererImpl
 
 HEADERS += \
     base/Qt3DSRenderTestAtomicCounterBuffer.h \

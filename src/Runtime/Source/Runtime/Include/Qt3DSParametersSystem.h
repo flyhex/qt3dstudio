@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_PARAMETERS_SYSTEM_H
-#define UIC_PARAMETERS_SYSTEM_H
+#ifndef QT3DS_PARAMETERS_SYSTEM_H
+#define QT3DS_PARAMETERS_SYSTEM_H
 #pragma once
 #include "Qt3DSKernelTypes.h"
 #include "foundation/Qt3DSRefCounted.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_CUSTOM_MATERIAL_RENDER_CONTEXT_H
-#define UIC_RENDER_CUSTOM_MATERIAL_RENDER_CONTEXT_H
+#ifndef QT3DS_RENDER_CUSTOM_MATERIAL_RENDER_CONTEXT_H
+#define QT3DS_RENDER_CUSTOM_MATERIAL_RENDER_CONTEXT_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSMat44.h"

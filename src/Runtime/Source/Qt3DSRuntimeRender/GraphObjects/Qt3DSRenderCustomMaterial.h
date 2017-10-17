@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_CUSTOM_MATERIAL_H
-#define UIC_RENDER_CUSTOM_MATERIAL_H
+#ifndef QT3DS_RENDER_CUSTOM_MATERIAL_H
+#define QT3DS_RENDER_CUSTOM_MATERIAL_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderDynamicObject.h"
 #include "Qt3DSRenderImage.h"

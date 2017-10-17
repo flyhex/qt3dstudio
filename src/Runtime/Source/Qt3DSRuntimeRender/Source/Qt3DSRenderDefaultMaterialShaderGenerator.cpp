@@ -942,12 +942,12 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
         if (!pCB) {
             // create
-            SLightSourceShader s[UIC_MAX_NUM_LIGHTS];
-            NVDataRef<QT3DSU8> cBuffer((QT3DSU8 *)&s, (sizeof(SLightSourceShader) * UIC_MAX_NUM_LIGHTS)
+            SLightSourceShader s[QT3DS_MAX_NUM_LIGHTS];
+            NVDataRef<QT3DSU8> cBuffer((QT3DSU8 *)&s, (sizeof(SLightSourceShader) * QT3DS_MAX_NUM_LIGHTS)
                                         + (4 * sizeof(QT3DSI32)));
             pCB = theContext.CreateConstantBuffer(
                 theName, qt3ds::render::NVRenderBufferUsageType::Static,
-                (sizeof(SLightSourceShader) * UIC_MAX_NUM_LIGHTS) + (4 * sizeof(QT3DSI32)), cBuffer);
+                (sizeof(SLightSourceShader) * QT3DS_MAX_NUM_LIGHTS) + (4 * sizeof(QT3DSI32)), cBuffer);
             if (!pCB) {
                 QT3DS_ASSERT(false);
                 return NULL;
@@ -1123,11 +1123,11 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
         for (QT3DSU32 idx = 0; idx < FeatureSet().size(); ++idx) {
             eastl::string name(FeatureSet()[idx].m_Name.c_str());
-            if (name == "UIC_ENABLE_SSAO")
+            if (name == "QT3DS_ENABLE_SSAO")
                 enableSSAO = FeatureSet()[idx].m_Enabled;
-            else if (name == "UIC_ENABLE_SSDO")
+            else if (name == "QT3DS_ENABLE_SSDO")
                 enableSSDO = FeatureSet()[idx].m_Enabled;
-            else if (name == "UIC_ENABLE_SSM")
+            else if (name == "QT3DS_ENABLE_SSM")
                 enableShadowMaps = FeatureSet()[idx].m_Enabled;
         }
 
@@ -1723,13 +1723,13 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         size_t numShaderLights = shader.m_Lights.size();
         size_t numShadowLights = shader.m_ShadowMaps.size();
         for (QT3DSU32 lightIdx = 0, shadowMapIdx = 0, lightEnd = inLights.size();
-             lightIdx < lightEnd && lightIdx < UIC_MAX_NUM_LIGHTS; ++lightIdx) {
+             lightIdx < lightEnd && lightIdx < QT3DS_MAX_NUM_LIGHTS; ++lightIdx) {
             SLight *theLight(inLights[lightIdx]);
             if (lightIdx >= numShaderLights) {
                 shader.m_Lights.push_back(SShaderLightProperties());
                 ++numShaderLights;
             }
-            if (shadowMapIdx >= numShadowLights && numShadowLights < UIC_MAX_NUM_SHADOWS) {
+            if (shadowMapIdx >= numShadowLights && numShadowLights < QT3DS_MAX_NUM_SHADOWS) {
                 if (theLight->m_Scope == NULL && theLight->m_CastShadow) {
                     // PKC TODO : Fix multiple shadow issues.
                     // Need to know when the list of lights changes order, and clear shadow maps

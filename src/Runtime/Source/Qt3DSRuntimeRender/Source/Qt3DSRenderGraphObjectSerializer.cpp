@@ -504,13 +504,13 @@ void WriteGraphObject(const SGraphObject &inObject, SSerializerWriteContext &out
 {
     SGraphObject *newObject = NULL;
     switch (inObject.m_Type) {
-#define UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
+#define QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
     case GraphObjectTypes::type:                                                                   \
         newObject = SGraphObjectSerializerImpl<S##type>::Write(                                    \
             static_cast<const S##type &>(inObject), outSavedBuffer);                               \
         break;
-        UIC_RENDER_ITERATE_GRAPH_OBJECT_TYPES
-#undef UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE
+        QT3DS_RENDER_ITERATE_GRAPH_OBJECT_TYPES
+#undef QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE
     default:
         QT3DS_ASSERT(false);
         break;
@@ -539,12 +539,12 @@ SGraphObject *ReadGraphObject(SSerializerReadContext &inContext)
     if (inContext.m_CurrentPtr + sizeof(SGraphObject) < inContext.m_EndPtr) {
         SGraphObject *theObject = reinterpret_cast<SGraphObject *>(inContext.m_CurrentPtr);
         switch (theObject->m_Type) {
-#define UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
+#define QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
     case GraphObjectTypes::type:                                                                   \
         SGraphObjectSerializerImpl<S##type>::Read(inContext);                                      \
         break;
-            UIC_RENDER_ITERATE_GRAPH_OBJECT_TYPES
-#undef UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE
+            QT3DS_RENDER_ITERATE_GRAPH_OBJECT_TYPES
+#undef QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE
         default:
             QT3DS_ASSERT(false);
             theObject = NULL;
@@ -617,13 +617,13 @@ void SGraphObjectSerializer::Save(NVFoundationBase &inFoundation,
             QT3DSU8 *theDataPtr = outSavedData.begin() + theDataSectionStart + theIter->second;
             SGraphObject *theGraphObj = reinterpret_cast<SGraphObject *>(theDataPtr);
             switch (theGraphObj->m_Type) {
-#define UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
+#define QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
     case GraphObjectTypes::type:                                                                   \
         SGraphObjectSerializerImpl<S##type>::Remap(static_cast<S##type &>(*theGraphObj),           \
                                                    theWriteContext);                               \
         break;
-                UIC_RENDER_ITERATE_GRAPH_OBJECT_TYPES
-#undef UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE
+                QT3DS_RENDER_ITERATE_GRAPH_OBJECT_TYPES
+#undef QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE
             default:
                 QT3DS_ASSERT(false);
                 break;

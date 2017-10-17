@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_TEXT_RENDERER_H
-#define UIC_TEXT_RENDERER_H
+#ifndef QT3DS_TEXT_RENDERER_H
+#define QT3DS_TEXT_RENDERER_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "render/Qt3DSRenderBaseTypes.h"

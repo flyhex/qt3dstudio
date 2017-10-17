@@ -422,12 +422,12 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         if (!pCB) {
             // create with size of all structures + int for light count
-            SLightSourceShader s[UIC_MAX_NUM_LIGHTS];
-            NVDataRef<QT3DSU8> cBuffer((QT3DSU8 *)&s, (sizeof(SLightSourceShader) * UIC_MAX_NUM_LIGHTS)
+            SLightSourceShader s[QT3DS_MAX_NUM_LIGHTS];
+            NVDataRef<QT3DSU8> cBuffer((QT3DSU8 *)&s, (sizeof(SLightSourceShader) * QT3DS_MAX_NUM_LIGHTS)
                                         + (4 * sizeof(QT3DSI32)));
             pCB = theContext.CreateConstantBuffer(
                 name, qt3ds::render::NVRenderBufferUsageType::Static,
-                (sizeof(SLightSourceShader) * UIC_MAX_NUM_LIGHTS) + (4 * sizeof(QT3DSI32)), cBuffer);
+                (sizeof(SLightSourceShader) * QT3DS_MAX_NUM_LIGHTS) + (4 * sizeof(QT3DSI32)), cBuffer);
             if (!pCB) {
                 QT3DS_ASSERT(false);
                 return NULL;
@@ -523,7 +523,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     {
         if (inShadow) {
             eastl::string shadowName;
-            if (inShadow->m_DepthCube && (numShadowCubes < UIC_MAX_NUM_SHADOWS)) {
+            if (inShadow->m_DepthCube && (numShadowCubes < QT3DS_MAX_NUM_SHADOWS)) {
                 shadowName = "shadowCubes";
                 char buf[16];
                 _snprintf(buf, 16, "[%d]", numShadowCubes);
@@ -535,7 +535,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
                 m_ShadowCubeEntries.push_back(eastl::make_pair(numShadowCubes, theNewEntry));
 
                 ++numShadowCubes;
-            } else if (inShadow->m_DepthMap && (numShadowMaps < UIC_MAX_NUM_SHADOWS)) {
+            } else if (inShadow->m_DepthMap && (numShadowMaps < QT3DS_MAX_NUM_SHADOWS)) {
                 shadowName = "shadowMaps";
                 char buf[16];
                 _snprintf(buf, 16, "[%d]", numShadowMaps);
@@ -961,7 +961,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         else
             fragmentShader << "#define MATERIAL_IS_NON_DIELECTRIC 0\n\n";
 
-        fragmentShader << "#define UIC_ENABLE_RNM 0\n\n";
+        fragmentShader << "#define QT3DS_ENABLE_RNM 0\n\n";
 
         fragmentShader << fragSource << Endl;
 

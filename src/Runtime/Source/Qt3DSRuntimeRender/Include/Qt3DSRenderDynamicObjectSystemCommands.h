@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_EFFECT_SYSTEM_COMMANDS_H
-#define UIC_RENDER_EFFECT_SYSTEM_COMMANDS_H
+#ifndef QT3DS_RENDER_EFFECT_SYSTEM_COMMANDS_H
+#define QT3DS_RENDER_EFFECT_SYSTEM_COMMANDS_H
 #include "Qt3DSRender.h"
 #include "foundation/StringTable.h"
 #include "render/Qt3DSRenderBaseTypes.h"
@@ -67,25 +67,25 @@ namespace render {
             };
         };
 
-#define UIC_RENDER_EFFECTS_ITERATE_COMMAND_TYPES                                                   \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateBuffer)                                        \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(BindTarget)                                            \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(BindBuffer)                                            \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(BindShader)                                            \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyInstanceValue)                                    \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBufferValue)                                      \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyDepthValue)                                       \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(Render)                                                \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBlending)                                         \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyRenderState)                                      \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBlitFramebuffer)                                  \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyValue)                                            \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(DepthStencil)                                          \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(LuaCommand)                                            \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateImage)                                         \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyImageValue)                                       \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateDataBuffer)                                    \
-    UIC_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyDataBufferValue)
+#define QT3DS_RENDER_EFFECTS_ITERATE_COMMAND_TYPES                                                   \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateBuffer)                                        \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(BindTarget)                                            \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(BindBuffer)                                            \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(BindShader)                                            \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyInstanceValue)                                    \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBufferValue)                                      \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyDepthValue)                                       \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(Render)                                                \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBlending)                                         \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyRenderState)                                      \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBlitFramebuffer)                                  \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyValue)                                            \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(DepthStencil)                                          \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(LuaCommand)                                            \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateImage)                                         \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyImageValue)                                       \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateDataBuffer)                                    \
+    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyDataBufferValue)
 
         // All commands need at least two constructors.  One for when they are created that should
         // setup

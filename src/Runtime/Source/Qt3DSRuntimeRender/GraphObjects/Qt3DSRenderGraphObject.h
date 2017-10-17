@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_GRAPH_OBJECT_H
-#define UIC_RENDER_GRAPH_OBJECT_H
+#ifndef QT3DS_RENDER_GRAPH_OBJECT_H
+#define QT3DS_RENDER_GRAPH_OBJECT_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderTaggedPointer.h"
 #include "Qt3DSRenderGraphObjectTypes.h"

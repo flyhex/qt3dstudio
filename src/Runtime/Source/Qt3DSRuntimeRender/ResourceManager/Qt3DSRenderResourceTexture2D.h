@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_RESOURCE_TEXTURE_2D_H
-#define UIC_RENDER_RESOURCE_TEXTURE_2D_H
+#ifndef QT3DS_RENDER_RESOURCE_TEXTURE_2D_H
+#define QT3DS_RENDER_RESOURCE_TEXTURE_2D_H
 #include "Qt3DSRender.h"
 #include "render/Qt3DSRenderContext.h"
 #include "render/Qt3DSRenderTexture2D.h"

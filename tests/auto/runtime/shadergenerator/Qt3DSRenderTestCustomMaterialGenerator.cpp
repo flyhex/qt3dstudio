@@ -31,23 +31,22 @@
 #include "../Qt3DSRenderTestMathUtil.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "render/Qt3DSRenderContext.h"
-#include "UICRenderCustomMaterialSystem.h"
-#include "UICRenderCustomMaterialRenderContext.h"
-#include "UICRenderCustomMaterialShaderGenerator.h"
-#include "UICRenderDynamicObjectSystem.h"
-#include "UICRenderDynamicObjectSystemCommands.h"
-#include "UICRenderContext.h"
+#include "Qt3DSRenderCustomMaterialSystem.h"
+#include "Qt3DSRenderCustomMaterialRenderContext.h"
+#include "Qt3DSRenderCustomMaterialShaderGenerator.h"
+#include "Qt3DSRenderDynamicObjectSystem.h"
+#include "Qt3DSRenderDynamicObjectSystemCommands.h"
+#include "Qt3DSRenderContextCore.h"
 #include "Qt3DSTypes.h"
 #include "Qt3DSRenderRuntimeBinding.h"
 #include "Qt3DSApplication.h"
 #include "Qt3DSInputEngine.h"
 #include "foundation/FileTools.h"
 #include "Qt3DSWindowSystem.h"
-#include "UICRenderContext.h"
-#include "UICRenderShaderCache.h"
-#include "UICRendererImpl.h"
-#include "UICRenderLight.h"
-#include "UICRenderUIPLoader.h"
+#include "Qt3DSRenderShaderCache.h"
+#include "Qt3DSRendererImpl.h"
+#include "Qt3DSRenderLight.h"
+#include "Qt3DSRenderUIPLoader.h"
 #include "UICDMMetaDataTypes.h"
 
 #include <QTime>
@@ -106,7 +105,7 @@ struct CustomTestParams
     SLayer layer;
     SLayerRenderData layerData;
     SRenderableImage *images;
-    SLight light[UIC_MAX_NUM_LIGHTS];
+    SLight light[QT3DS_MAX_NUM_LIGHTS];
     SModel model;
     SRenderSubset subset;
     SShaderDefaultMaterialKey shaderkey;

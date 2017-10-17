@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_CONTEXT_H
-#define UIC_RENDER_CONTEXT_H
+#ifndef QT3DS_RENDER_CONTEXT_CORE_H
+#define QT3DS_RENDER_CONTEXT_CORE_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSAllocatorCallback.h"
 #include "foundation/Qt3DSRefCounted.h"

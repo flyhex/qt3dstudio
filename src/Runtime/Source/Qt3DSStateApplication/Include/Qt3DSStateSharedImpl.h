@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STATE_SHARED_IMPL_H
-#define UIC_STATE_SHARED_IMPL_H
+#ifndef QT3DS_STATE_SHARED_IMPL_H
+#define QT3DS_STATE_SHARED_IMPL_H
 #include "Qt3DSState.h"
 #include "foundation/Utils.h"
 

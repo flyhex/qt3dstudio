@@ -28,10 +28,10 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_UIP_LOADER_H
-#define UIC_RENDER_UIP_LOADER_H
+#ifndef QT3DS_RENDER_UIP_LOADER_H
+#define QT3DS_RENDER_UIP_LOADER_H
 
-#ifdef UIC_RENDER_ENABLE_LOAD_UIP
+#ifdef QT3DS_RENDER_ENABLE_LOAD_UIP
 
 #include "Qt3DSRender.h"
 #include "foundation/StringTable.h"

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_LAYER_H
-#define UIC_RENDER_LAYER_H
+#ifndef QT3DS_RENDER_LAYER_H
+#define QT3DS_RENDER_LAYER_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderNode.h"
 #include "foundation/Qt3DSContainers.h"

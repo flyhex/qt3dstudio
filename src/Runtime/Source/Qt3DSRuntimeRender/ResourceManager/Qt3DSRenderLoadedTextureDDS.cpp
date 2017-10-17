@@ -575,7 +575,7 @@ namespace render {
             image->height = ddsh.dwHeight;
             image->numMipmaps = ddsh.dwFlags & DDS_MIPMAPCOUNT ? ddsh.dwMipMapCount : 1;
 
-            if (image->numMipmaps > UIC_DDS_MAX_MIPMAPS) {
+            if (image->numMipmaps > QT3DS_DDS_MAX_MIPMAPS) {
                 throw "Too many mipmaps: max 16";
             }
 

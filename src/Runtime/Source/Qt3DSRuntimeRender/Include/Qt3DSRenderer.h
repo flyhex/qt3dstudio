@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDERER_H
-#define UIC_RENDERER_H
+#ifndef QT3DS_RENDERER_H
+#define QT3DS_RENDERER_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSDataRef.h"
 #include "foundation/Qt3DSFlags.h"

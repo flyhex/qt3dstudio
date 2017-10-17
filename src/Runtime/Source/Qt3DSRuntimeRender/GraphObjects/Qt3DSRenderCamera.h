@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_CAMERA_H
-#define UIC_RENDER_CAMERA_H
+#ifndef QT3DS_RENDER_CAMERA_H
+#define QT3DS_RENDER_CAMERA_H
 #include "Qt3DSRenderNode.h"
 #include "Qt3DSRenderRay.h"
 

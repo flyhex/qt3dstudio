@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_GRAPH_OBJECT_TYPES_H
-#define UIC_RENDER_GRAPH_OBJECT_TYPES_H
+#ifndef QT3DS_RENDER_GRAPH_OBJECT_TYPES_H
+#define QT3DS_RENDER_GRAPH_OBJECT_TYPES_H
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSAssert.h"
 
@@ -38,23 +38,23 @@ namespace render {
 
 // If you need a generic switch statement, then these macros will ensure
 // you get all the types the first time.
-#define UIC_RENDER_ITERATE_GRAPH_OBJECT_TYPES                                                      \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Presentation)                                               \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Scene)                                                      \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Node)                                                       \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Layer)                                                      \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Light)                                                      \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Camera)                                                     \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Model)                                                      \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(DefaultMaterial)                                            \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Image)                                                      \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Text)                                                       \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Effect)                                                     \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(RenderPlugin)                                               \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(CustomMaterial)                                             \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(ReferencedMaterial)                                         \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(Path)                                                       \
-    UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(PathSubPath)
+#define QT3DS_RENDER_ITERATE_GRAPH_OBJECT_TYPES                                                      \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Presentation)                                               \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Scene)                                                      \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Node)                                                       \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Layer)                                                      \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Light)                                                      \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Camera)                                                     \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Model)                                                      \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(DefaultMaterial)                                            \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Image)                                                      \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Text)                                                       \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Effect)                                                     \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(RenderPlugin)                                               \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(CustomMaterial)                                             \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(ReferencedMaterial)                                         \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Path)                                                       \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(PathSubPath)
 
     struct GraphObjectTypes
     {
@@ -148,11 +148,11 @@ namespace render {
         static const char *GetObjectTypeName(Enum inType)
         {
             switch (inType) {
-#define UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
+#define QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
     case type:                                                                                     \
         return #type;
-                UIC_RENDER_ITERATE_GRAPH_OBJECT_TYPES
-#undef UIC_RENDER_HANDL_GRAPH_OBJECT_TYPE
+                QT3DS_RENDER_ITERATE_GRAPH_OBJECT_TYPES
+#undef QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE
             default:
                 break;
             }
