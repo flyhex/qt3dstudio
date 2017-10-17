@@ -36,6 +36,8 @@
 #include <QtGui/qopenglfunctions.h>
 #include <QtGui/qoffscreensurface.h>
 #include <QtGui/qopenglframebufferobject.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qdir.h>
 
 bool Q3DSImageSequenceGeneratorThread::initialize(
         const QString &presentation, qreal start, qreal end, qreal fps, qreal frameInterval,
@@ -93,8 +95,9 @@ Q3DSImageSequenceGeneratorThread::~Q3DSImageSequenceGeneratorThread() {
 
 void Q3DSImageSequenceGeneratorThread::run() {
     if (!m_context->makeCurrent(m_surface)) {
-        qWarning("Generating image sequence failed - Couldn't make context current");
-        Q_EMIT generationFinished(false);
+        QString error = QObject::tr("Couldn't make context current.");
+        qWarning() << "Generating image sequence failed -" << error;
+        Q_EMIT generationFinished(false, error);
         cleanup();
         return;
     }
@@ -111,8 +114,9 @@ void Q3DSImageSequenceGeneratorThread::run() {
     viewer.setSize(size);
 
     if (!viewer.initialize(m_surface, m_context, fbo.handle())) {
-        qWarning("Generating image sequence failed - Viewer initialization failed.");
-        Q_EMIT generationFinished(false);
+        QString error = QObject::tr("Viewer initialization failed.");
+        qWarning() << "Generating image sequence failed -" << error;
+        Q_EMIT generationFinished(false, error);
         cleanup();
         return;
     }
@@ -131,6 +135,11 @@ void Q3DSImageSequenceGeneratorThread::run() {
     // Add a bit of time to the end time to ensure we don't lose the last frame to rounding errors
     m_end += m_frameInterval / 10000.0;
 
+    // Ensure directory exists
+    QFileInfo fi(m_outputFileName);
+    QDir dir = fi.absoluteDir();
+    dir.mkpath(".");
+
     int frameCount = 0;
     int totalFrames = qCeil((m_end - m_start) / m_frameInterval);
     for (qreal t = m_start; t <= m_end; t += m_frameInterval) {
@@ -138,16 +147,17 @@ void Q3DSImageSequenceGeneratorThread::run() {
         viewer.presentation()->setGlobalAnimationTime(qRound64(t));
         viewer.update();
         if (!fbo.toImage().save(m_outputFileName.arg(frameCount))) {
-            qWarning().nospace() << "Generating image sequence failed - Failed to write file: '"
-                                 << m_outputFileName.arg(frameCount) << "'";
-            Q_EMIT generationFinished(false);
+            QString error = QObject::tr("Failed to write output file: '%1'")
+                    .arg(m_outputFileName.arg(frameCount));
+            qWarning() << "Generating image sequence failed -" << error;
+            Q_EMIT generationFinished(false, error);
             cleanup();
             return;
         }
         Q_EMIT progress(totalFrames, frameCount);
     }
 
-    Q_EMIT generationFinished(true);
+    Q_EMIT generationFinished(true, m_outputFileName.arg("*"));
     cleanup();
 }
 

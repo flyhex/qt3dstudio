@@ -55,6 +55,7 @@ public:
     void loadFile(const QString &filename);
     void loadProject(const QByteArray &data);
     void updateProgress(int percent);
+    void setGeneratorDetails(const QString &filename);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -74,6 +75,7 @@ private:
 
 public Q_SLOTS:
     void generatorProgress(int totalFrames, int frameCount);
+    void generatorFinished(bool success, const QString &details);
 
 private Q_SLOTS:
     void on_actionToggle_Scale_Mode_triggered();

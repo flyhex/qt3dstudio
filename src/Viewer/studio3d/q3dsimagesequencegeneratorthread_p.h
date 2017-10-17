@@ -62,7 +62,7 @@ public:
 
 Q_SIGNALS:
     void progress(int totalFrames, int frameNumber);
-    void generationFinished(bool success);
+    void generationFinished(bool success, const QString &details);
 
 protected:
     void run() override;

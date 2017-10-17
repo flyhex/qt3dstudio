@@ -93,7 +93,7 @@ MainWindow::MainWindow(bool generatorMode, QWidget *parent)
     } else {
         ui->menuBar->clear();
         ui->menuBar->addAction(ui->actionQuit);
-        resize(500, 100);
+        resize(700, 100);
     }
 
     // Set import paths so that standalone installation works
@@ -397,13 +397,33 @@ void MainWindow::setupGeneratorUI()
 
     QByteArray qml = "import QtQuick 2.7\n"
                      "import QtQuick.Controls 2.2\n"
-                     "Label {\n"
-                     "    color: \"White\"\n"
-                     "    horizontalAlignment: Text.AlignHCenter\n"
-                     "    verticalAlignment: Text.AlignVCenter\n"
+                     "Item {\n"
+                     "    property alias mainText: mainLabel.text\n"
+                     "    property alias detailsText: detailsLabel.text\n"
                      "    anchors.fill: parent\n"
-                     "    font.pixelSize: width / 30\n"
-                     "    text: \"Image sequence generation initializing...\"\n"
+                     "    Label {\n"
+                     "        id: mainLabel\n"
+                     "        color: \"White\"\n"
+                     "        horizontalAlignment: Text.AlignHCenter\n"
+                     "        verticalAlignment: Text.AlignVCenter\n"
+                     "        anchors.top: parent.top\n"
+                     "        anchors.left: parent.left\n"
+                     "        anchors.right: parent.right\n"
+                     "        height: parent.height / 2\n"
+                     "        font.pixelSize: width / 40\n"
+                     "        text: \"Image sequence generation initializing...\"\n"
+                     "    }\n"
+                     "    Label {\n"
+                     "        id: detailsLabel\n"
+                     "        color: \"White\"\n"
+                     "        horizontalAlignment: Text.AlignHCenter\n"
+                     "        verticalAlignment: Text.AlignTop\n"
+                     "        anchors.top: mainLabel.bottom\n"
+                     "        anchors.left: parent.left\n"
+                     "        anchors.right: parent.right\n"
+                     "        height: parent.height / 2\n"
+                     "        font.pixelSize: width / 50\n"
+                     "    }\n"
                      "}";
 
     QQmlComponent component(engine);
@@ -553,7 +573,19 @@ void MainWindow::generatorProgress(int totalFrames, int frameCount)
                 QCoreApplication::translate("main", "Image sequence generation progress: %1 / %2")
         .arg(frameCount).arg(totalFrames);
     }
-    m_generatorInfo->setProperty("text", progressString);
+    m_generatorInfo->setProperty("mainText", progressString);
+}
+
+void MainWindow::generatorFinished(bool success, const QString &details)
+{
+    if (success) {
+        m_generatorInfo->setProperty("detailsText", details);
+    } else {
+        QString mainString =
+                QCoreApplication::translate("main", "Image sequence generation failed:");
+        m_generatorInfo->setProperty("mainText", mainString);
+        m_generatorInfo->setProperty("detailsText", details);
+    }
 }
 
 void MainWindow::updateProgress(int percent)
@@ -567,4 +599,9 @@ void MainWindow::updateProgress(int percent)
     else
         m_connectionInfo->setProperty("text", progress);
     updateUI(true);
+}
+
+void MainWindow::setGeneratorDetails(const QString &filename)
+{
+    m_generatorInfo->setProperty("detailsText", filename);
 }

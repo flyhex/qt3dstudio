@@ -68,30 +68,51 @@ int main(int argc, char *argv[])
                                  QCoreApplication::translate("main", "[file]"));
 
     parser.addOption({"sequence",
-                      QCoreApplication::translate("main", "Generates an image sequence without showing the UI. The file argument must be specified. Specifying any of the seq-* arguments implies setting this option.")});
+                      QCoreApplication::translate("main",
+                      "Generates an image sequence.\n"
+                      "The file argument must be specified.\n"""
+                      "Specifying any of the seq-* arguments\n"
+                      "implies setting this option.")});
     parser.addOption({"seq-start",
-                      QCoreApplication::translate("main", "Start time of the sequence in milliseconds. The default value is 0."),
+                      QCoreApplication::translate("main",
+                      "Start time of the sequence in milliseconds.\n"
+                      "The default value is 0."),
                       QCoreApplication::translate("main", "ms"), QString::number(0)});
     parser.addOption({"seq-end",
-                      QCoreApplication::translate("main", "End time of the sequence in milliseconds. The default value is 10000."),
+                      QCoreApplication::translate("main",
+                      "End time of the sequence in milliseconds.\n"
+                      "The default value is 10000."),
                       QCoreApplication::translate("main", "ms"), QString::number(1000)});
     parser.addOption({"seq-fps",
-                      QCoreApplication::translate("main", "Frames per second for the sequence. The default value is 60."),
+                      QCoreApplication::translate("main",
+                      "Frames per second for the sequence.\n"
+                      "The default value is 60."),
                       QCoreApplication::translate("main", "fps"), QString::number(60)});
     parser.addOption({"seq-interval",
-                      QCoreApplication::translate("main", "Time interval between frames in the sequence in milliseconds. The seq-fps argument is ignored if this argument is used."),
+                      QCoreApplication::translate("main",
+                      "Time interval between frames in the sequence\n"
+                      "in milliseconds. The seq-fps argument is ignored\n"
+                      "if this argument is used."),
                       QCoreApplication::translate("main", "ms"), QString::number(0)});
     parser.addOption({"seq-width",
-                      QCoreApplication::translate("main", "Width of the image sequence. The default value is 1920."),
+                      QCoreApplication::translate("main",
+                      "Width of the image sequence.\n"
+                      "The default value is 1920."),
                       QCoreApplication::translate("main", "pixels"), QString::number(1920)});
     parser.addOption({"seq-height",
-                      QCoreApplication::translate("main", "Height of the image sequence. The default value is 1080."),
+                      QCoreApplication::translate("main",
+                      "Height of the image sequence.\n"
+                      "The default value is 1080."),
                       QCoreApplication::translate("main", "pixels"), QString::number(1080)});
     parser.addOption({"seq-outpath",
-                      QCoreApplication::translate("main", "Output path of the image sequence. The default value is the current directory."),
+                      QCoreApplication::translate("main",
+                      "Output path of the image sequence.\n"
+                      "The default value is the current directory."),
                       QCoreApplication::translate("main", "path"), QStringLiteral(".")});
     parser.addOption({"seq-outfile",
-                      QCoreApplication::translate("main", "Output filename base for the image sequence. The default value is derived from the presentation filename."),
+                      QCoreApplication::translate("main",
+                      "Output filename base for the image sequence.\n"
+                      "The default value is derived from the presentation filename."),
                       QCoreApplication::translate("main", "file"), QStringLiteral("")});
     parser.process(a);
 
@@ -110,7 +131,6 @@ int main(int argc, char *argv[])
     Q3DSImageSequenceGenerator *generator = nullptr;
 
     MainWindow w(generateSequence);
-    w.show();
 
     if (generateSequence) {
         if (files.count() != 1) {
@@ -120,6 +140,9 @@ int main(int argc, char *argv[])
         generator = new Q3DSImageSequenceGenerator;
         QObject::connect(generator, &Q3DSImageSequenceGenerator::progress,
                          &w, &MainWindow::generatorProgress);
+        QObject::connect(generator, &Q3DSImageSequenceGenerator::finished,
+                         &w, &MainWindow::generatorFinished);
+        w.setGeneratorDetails(files.first());
         generator->generateImageSequence(
                     files.first(),
                     parser.value("seq-start").toDouble(),
@@ -134,6 +157,7 @@ int main(int argc, char *argv[])
         w.loadFile(files.first());
     }
 
+    w.show();
 #ifndef Q_OS_ANDROID
     QFile styleFile(":/style.qss");
 #else

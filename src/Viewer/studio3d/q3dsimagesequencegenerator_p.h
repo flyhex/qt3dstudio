@@ -58,7 +58,7 @@ public:
                                const QString &outPath, const QString &outFile);
 Q_SIGNALS:
     void progress(int totalFrames, int frameNumber);
-    void finished(bool success);
+    void finished(bool success, const QString &details);
 };
 
 QT_END_NAMESPACE
