@@ -1015,68 +1015,80 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
                     m_PropertyMap.push_back(eastl::make_pair(idx, theProperty.GetHandleValue()));
             }
         }
+        std::shared_ptr<IDataCore> theDataCore =
+            inContext.m_StudioSystem.GetFullSystem()->GetCoreSystem()->GetDataCore();
         for (TIdxToPropertyMap::iterator theIter = m_PropertyMap.begin(), end = m_PropertyMap.end();
              theIter != end; ++theIter) {
             const SPropertyDefinition &theDefinition(theProperties[theIter->first]);
             UICDM::CUICDMPropertyHandle theProperty = theIter->second;
-            Option<UICDM::SValue> theValueOpt =
-                inContext.m_Reader.GetInstancePropertyValue(GetInstanceHandle(), theProperty);
-            if (theValueOpt.hasValue()) {
-                UICDM::SValue &theValue(*theValueOpt);
-                switch (UICDM::GetValueType(theValue)) {
-                case UICDM::DataModelDataType::Long:
-                    if (theDefinition.m_DataType == qt3ds::render::NVRenderShaderDataTypes::QT3DSI32)
-                        theItem.SetPropertyValue(theDefinition, UICDM::get<qt3ds::QT3DSI32>(theValue));
-                    else {
+            // Sometimes it is possible to have dirty properties that no longer exist, e.g.
+            // when undoing standard material -> custom material change. We just ignore changes
+            // to such properties.
+            if (theDataCore->IsProperty(theProperty)) {
+                Option<UICDM::SValue> theValueOpt =
+                    inContext.m_Reader.GetInstancePropertyValue(GetInstanceHandle(), theProperty);
+                if (theValueOpt.hasValue()) {
+                    UICDM::SValue &theValue(*theValueOpt);
+                    switch (UICDM::GetValueType(theValue)) {
+                    case UICDM::DataModelDataType::Long:
+                        if (theDefinition.m_DataType
+                                == qt3ds::render::NVRenderShaderDataTypes::QT3DSI32) {
+                            theItem.SetPropertyValue(theDefinition,
+                                                     UICDM::get<qt3ds::QT3DSI32>(theValue));
+                        } else {
+                            QT3DS_ASSERT(false);
+                        }
+                        break;
+                    case UICDM::DataModelDataType::Bool:
+                        if (theDefinition.m_DataType
+                                == qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool) {
+                            theItem.SetPropertyValue(theDefinition, UICDM::get<bool>(theValue));
+                        } else {
+                            QT3DS_ASSERT(false);
+                        }
+                        break;
+                    case UICDM::DataModelDataType::Float:
+                        if (theDefinition.m_DataType
+                                == qt3ds::render::NVRenderShaderDataTypes::QT3DSF32) {
+                            theItem.SetPropertyValue(theDefinition, UICDM::get<float>(theValue));
+                        } else {
+                            QT3DS_ASSERT(false);
+                        }
+                        break;
+                    case UICDM::DataModelDataType::Float2:
+                        if (theDefinition.m_DataType
+                                == qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2) {
+                            theItem.SetPropertyValue(
+                                theDefinition, ToRenderType(UICDM::get<UICDM::SFloat2>(theValue)));
+                        } else {
+                            QT3DS_ASSERT(false);
+                        }
+                        break;
+                    case UICDM::DataModelDataType::Float3:
+                        if (theDefinition.m_DataType
+                                == qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3) {
+                            theItem.SetPropertyValue(
+                                theDefinition, ToRenderType(UICDM::get<UICDM::SFloat3>(theValue)));
+                        } else {
+                            QT3DS_ASSERT(false);
+                        }
+                        break;
+                    // Could be either an enum or a texture.
+                    case UICDM::DataModelDataType::String: {
+                        UICDM::TDataStrPtr theData = UICDM::get<UICDM::TDataStrPtr>(theValue);
+                        if (theData) {
+                            eastl::string theStr;
+                            qt3ds::render::ConvertWideUTF(theData->GetData(), 0, theStr);
+                            eastl::string theWorkspace;
+                            theItem.SetPropertyValue(
+                                theDefinition, theStr.c_str(),
+                                inContext.m_Doc.GetDocumentDirectory().GetCharStar(), theWorkspace,
+                                inContext.m_UICContext.GetStringTable());
+                        }
+                    } break;
+                    default:
                         QT3DS_ASSERT(false);
                     }
-                    break;
-                case UICDM::DataModelDataType::Bool:
-                    if (theDefinition.m_DataType
-                        == qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool)
-                        theItem.SetPropertyValue(theDefinition, UICDM::get<bool>(theValue));
-                    else {
-                        QT3DS_ASSERT(false);
-                    }
-                    break;
-                case UICDM::DataModelDataType::Float:
-                    if (theDefinition.m_DataType == qt3ds::render::NVRenderShaderDataTypes::QT3DSF32)
-                        theItem.SetPropertyValue(theDefinition, UICDM::get<float>(theValue));
-                    else {
-                        QT3DS_ASSERT(false);
-                    }
-                    break;
-                case UICDM::DataModelDataType::Float2:
-                    if (theDefinition.m_DataType == qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2)
-                        theItem.SetPropertyValue(
-                            theDefinition, ToRenderType(UICDM::get<UICDM::SFloat2>(theValue)));
-                    else {
-                        QT3DS_ASSERT(false);
-                    }
-                    break;
-                case UICDM::DataModelDataType::Float3:
-                    if (theDefinition.m_DataType == qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3)
-                        theItem.SetPropertyValue(
-                            theDefinition, ToRenderType(UICDM::get<UICDM::SFloat3>(theValue)));
-                    else {
-                        QT3DS_ASSERT(false);
-                    }
-                    break;
-                // Could be either an enum or a texture.
-                case UICDM::DataModelDataType::String: {
-                    UICDM::TDataStrPtr theData = UICDM::get<UICDM::TDataStrPtr>(theValue);
-                    if (theData) {
-                        eastl::string theStr;
-                        qt3ds::render::ConvertWideUTF(theData->GetData(), 0, theStr);
-                        eastl::string theWorkspace;
-                        theItem.SetPropertyValue(
-                            theDefinition, theStr.c_str(),
-                            inContext.m_Doc.GetDocumentDirectory().GetCharStar(), theWorkspace,
-                            inContext.m_UICContext.GetStringTable());
-                    }
-                } break;
-                default:
-                    QT3DS_ASSERT(false);
                 }
             }
         }
