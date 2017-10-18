@@ -62,9 +62,9 @@ typedef std::vector<std::string> TStringList;
 //==============================================================================
 //    Constants
 //==============================================================================
-const char g_Text[] = "UICAttributeHashes.txt";
-const char g_Include[] = "UICAttributeHashes.h";
-const char g_Source[] = "..\\Source\\UICAttributeHashes.cpp";
+const char g_Text[] = "Qt3DSAttributeHashes.txt";
+const char g_Include[] = "Qt3DSAttributeHashes.h";
+const char g_Source[] = "..\\Source\\Qt3DSAttributeHashes.cpp";
 const char g_TestString[] = "qt.io";
 
 //==============================================================================
@@ -316,7 +316,7 @@ int _tmain(int argc, char *argv[])
         "//==============================================================================\n"
         "//    Includes\n"
         "//==============================================================================\n"
-        "#include \"UICAttributeHashes.h\"\n"
+        "#include \"Qt3DSAttributeHashes.h\"\n"
         "\n"
         "//==============================================================================\n"
         "//    Namespace\n"
