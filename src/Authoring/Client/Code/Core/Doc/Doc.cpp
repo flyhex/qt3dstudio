@@ -226,12 +226,12 @@ qt3dsdm::IPropertySystem *CDoc::GetPropertySystem()
     return GetStudioSystem()->GetPropertySystem();
 }
 
-void CDoc::SetInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                     const std::wstring &inPropertyName,
                                     const qt3dsdm::SValue &inValue)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
-    qt3dsdm::CUICDMPropertyHandle theProperty =
+    qt3dsdm::Qt3DSDMPropertyHandle theProperty =
         thePropertySystem->GetAggregateInstancePropertyByName(inInstance, inPropertyName.c_str());
     if (theProperty.Valid())
         thePropertySystem->SetInstancePropertyValue(inInstance, theProperty, inValue);
@@ -386,12 +386,12 @@ bool CDoc::IsValid() const
 /**
  * Get the Asset from inSelectedItem, if exists
  */
-qt3dsdm::CUICDMInstanceHandle
+qt3dsdm::Qt3DSDMInstanceHandle
 CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem)
 {
     if (inSelectedItem.getType() == Q3DStudio::SelectedValueTypes::Instance) {
         // This is UICDM asset. Find corresponding CAsset if there is any
-        return inSelectedItem.getData<qt3dsdm::CUICDMInstanceHandle>();
+        return inSelectedItem.getData<qt3dsdm::Qt3DSDMInstanceHandle>();
     } else if (inSelectedItem.getType() == Q3DStudio::SelectedValueTypes::MultipleInstances) {
         const qt3dsdm::TInstanceHandleList &theData =
             *inSelectedItem.getDataPtr<qt3dsdm::TInstanceHandleList>();
@@ -402,7 +402,7 @@ CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem)
     return 0;
 }
 
-qt3dsdm::CUICDMInstanceHandle CDoc::GetSelectedInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance()
 {
     return GetInstanceFromSelectable(m_SelectedObject);
 }
@@ -487,7 +487,7 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
     // Record the last selected object in that slide
     ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
     theSlideSystem->SetSlideSelectedInstance(theLastActiveSlide, GetSelectedInstance());
-    qt3dsdm::CUICDMInstanceHandle theNextSelectedInstance = GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theNextSelectedInstance = GetSelectedInstance();
 
     // If we are forcing a refresh. and the incoming root is not valid, use the existing active time
     // context
@@ -546,7 +546,7 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
 /**
  * @returns the first enabled layer in the active time context
  */
-qt3dsdm::CUICDMInstanceHandle CDoc::GetFirstSelectableLayer()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetFirstSelectableLayer()
 {
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
 
@@ -555,7 +555,7 @@ qt3dsdm::CUICDMInstanceHandle CDoc::GetFirstSelectableLayer()
                             theBridge->GetComponentActiveSlide(m_SceneInstance), theLayers,
                             OBJTYPE_LAYER);
 
-    qt3dsdm::CUICDMInstanceHandle theFoundLayer = 0;
+    qt3dsdm::Qt3DSDMInstanceHandle theFoundLayer = 0;
 
     for (; !theLayers.IsDone(); ++theLayers) {
         if (!theBridge->IsLockedAtAll(theLayers.GetCurrent())
@@ -568,7 +568,7 @@ qt3dsdm::CUICDMInstanceHandle CDoc::GetFirstSelectableLayer()
     return theFoundLayer;
 }
 
-qt3dsdm::CUICDMInstanceHandle CDoc::GetActiveRootInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveRootInstance()
 {
     if (m_ActiveSlide.Valid())
         return m_StudioSystem->GetClientDataModelBridge()->GetOwningComponentInstance(
@@ -598,7 +598,7 @@ qt3dsdm::CUICDMSlideHandle CDoc::GetActiveSlide()
  * the slide is switched and is held onto mainly for determining which layer
  * to drop an object onto when dropping on the scene.
  */
-qt3dsdm::CUICDMInstanceHandle CDoc::GetActiveLayer()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveLayer()
 {
     if (m_ActiveLayer.Valid() == false)
         m_ActiveLayer = GetFirstSelectableLayer();
@@ -612,7 +612,7 @@ qt3dsdm::CUICDMInstanceHandle CDoc::GetActiveLayer()
  * the slide is switched and is held onto mainly for determining which layer
  * to drop an object onto when dropping on the scene.
  */
-void CDoc::SetActiveLayer(qt3dsdm::CUICDMInstanceHandle inLayerInstance)
+void CDoc::SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance)
 {
     m_ActiveLayer = inLayerInstance;
 }
@@ -622,7 +622,7 @@ void CDoc::SetActiveLayer(qt3dsdm::CUICDMInstanceHandle inLayerInstance)
  * Informs that a layer has been deleted. If this is the active one, try to promote another.
  */
 
-void CDoc::OnLayerDeleted(qt3dsdm::CUICDMInstanceHandle inLayerInstance)
+void CDoc::OnLayerDeleted(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance)
 {
     if (m_ActiveLayer == inLayerInstance)
         m_ActiveLayer = 0;
@@ -660,7 +660,7 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
         return;
     bool theContinueCutFlag = true;
     for (size_t idx = 0, end = inInstances.size(); idx < end && theContinueCutFlag; ++idx) {
-        qt3dsdm::CUICDMInstanceHandle inInstance(inInstances[idx]);
+        qt3dsdm::Qt3DSDMInstanceHandle inInstance(inInstances[idx]);
         if (!GetDocumentReader().IsInstance(inInstance))
             return;
 
@@ -700,10 +700,10 @@ void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
         m_StudioSystem->GetClientDataModelBridge()->GetObjectType(inInstances[0]));
 }
 
-void CDoc::PasteObject(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    qt3dsdm::CUICDMInstanceHandle theInstance(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
     qint64 dummy = 0;
     CUICFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
     SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
@@ -711,10 +711,10 @@ void CDoc::PasteObject(qt3dsdm::CUICDMInstanceHandle inInstance)
                                 DocumentEditorInsertType::LastChild, CPt());
 }
 
-void CDoc::PasteObjectMaster(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    qt3dsdm::CUICDMInstanceHandle theInstance(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
     qint64 dummy = 0;
     CUICFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
     SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
@@ -772,7 +772,7 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
  *	@inAsset				The asset to check for dependencies.
  *	@ioActionDependencies	String representation of objects that have actions referencing it.
  */
-void CDoc::GetActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                  Q3DStudio::CString &ioActionDependencies)
 {
     // Step 1 : Get all actions affecting myself and all my descendents
@@ -792,7 +792,7 @@ void CDoc::GetActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance,
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     for (; thePos != theEnd; ++thePos) {
         const qt3dsdm::SActionInfo &theActionInfo = theActionCore->GetActionInfo(*thePos);
-        qt3dsdm::CUICDMInstanceHandle theOwnerHandle = theActionInfo.m_Owner;
+        qt3dsdm::Qt3DSDMInstanceHandle theOwnerHandle = theActionInfo.m_Owner;
 
         if (theOwnerHandle != inInstance && theOwnerHandle.Valid()
             && !IsAscendant(theOwnerHandle, inInstance, m_AssetGraph))
@@ -816,7 +816,7 @@ void CDoc::GetActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance,
  *	@inAsset				The asset to check for dependencies.
  *	@ioActionList			List of actions.
  */
-void CDoc::GetActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                  qt3dsdm::TActionHandleList &ioActionList)
 {
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
@@ -868,7 +868,7 @@ void CDoc::SetChangedKeyframes()
 bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
 {
     if (inNewSelection != m_SelectedObject) {
-        qt3dsdm::CUICDMInstanceHandle theNewSelectedInstance =
+        qt3dsdm::Qt3DSDMInstanceHandle theNewSelectedInstance =
             GetInstanceFromSelectable(inNewSelection);
 
         if (theNewSelectedInstance.Valid()) {
@@ -889,9 +889,9 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
                 != theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
                 // If the newly selected object is in the scene then make the layer it belongs to
                 // the 'active' layer.
-                qt3dsdm::CUICDMInstanceHandle theActiveLayer = 0;
+                qt3dsdm::Qt3DSDMInstanceHandle theActiveLayer = 0;
 
-                qt3dsdm::CUICDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+                qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
                 theActiveLayer = theBridge->GetResidingLayer(theSelectedInstance);
 
                 if (theActiveLayer.Valid() && theBridge->IsLockedAtAll(theActiveLayer))
@@ -1032,7 +1032,7 @@ void CDoc::OnSlideDeleted(qt3dsdm::CUICDMSlideHandle inSlide)
         SetActiveSlideWithTransaction(theNewSlide);
     }
 }
-void CDoc::OnInstanceDeleted(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     qt3dsdm::TTransactionConsumerPtr theConsumer = m_StudioSystem->GetFullSystem()->GetConsumer();
     if (GetSelectedInstance() == inInstance)
@@ -1049,7 +1049,7 @@ void CDoc::OnInstanceDeleted(qt3dsdm::CUICDMInstanceHandle inInstance)
         CUICDMSlideHandle theSlide = theBridge.GetComponentActiveSlide(inInstance);
         if (theSlide == m_ActiveSlide) {
             // empty loop intentional, finding the next component parent.
-            CUICDMInstanceHandle theParent;
+            Qt3DSDMInstanceHandle theParent;
             for (theParent = m_AssetGraph->GetParent(inInstance); theParent.Valid()
                  && !theCore.IsInstanceOrDerivedFrom(theParent,
                                                      theDefinitions.m_SlideOwner.m_Instance);
@@ -1070,7 +1070,7 @@ void CDoc::OnInstanceDeleted(qt3dsdm::CUICDMInstanceHandle inInstance)
     }
 }
 
-Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::CUICDMInstanceHandle inInstance)
+Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (m_StudioSystem->IsInstance(inInstance)
         && !m_StudioSystem->GetClientDataModelBridge()->IsLockedAtAll(inInstance)) {
@@ -1084,7 +1084,7 @@ Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::CUICDMInstanceHa
  *	Select UICDM Object given its instance handle.
  *	@param inInstanceHandle The instance handle of the UICDM Object to be selected
  */
-void CDoc::SelectUICDMObject(qt3dsdm::CUICDMInstanceHandle inInstanceHandle)
+void CDoc::SelectUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     qt3dsdm::TInstanceHandleList theObjects = m_SelectedValue.GetSelectedInstances();
     if (std::find(theObjects.begin(), theObjects.end(), inInstanceHandle) == theObjects.end())
@@ -1093,15 +1093,15 @@ void CDoc::SelectUICDMObject(qt3dsdm::CUICDMInstanceHandle inInstanceHandle)
         NotifySelectionChanged(theObjects);
 }
 
-void CDoc::ToggleUICDMObjectToSelection(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDoc::ToggleUICDMObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (m_StudioSystem->GetClientDataModelBridge()->IsMultiSelectable(inInstance)) {
         qt3dsdm::TInstanceHandleList theNewHandles;
         if (m_SelectedValue.getType() != Q3DStudio::SelectedValueTypes::MultipleInstances) {
             // Attempt conversion if possible.
             if (m_SelectedValue.getType() == Q3DStudio::SelectedValueTypes::Instance) {
-                qt3dsdm::CUICDMInstanceHandle theCurrentlySelectedInstance =
-                    m_SelectedValue.getData<qt3dsdm::CUICDMInstanceHandle>();
+                qt3dsdm::Qt3DSDMInstanceHandle theCurrentlySelectedInstance =
+                    m_SelectedValue.getData<qt3dsdm::Qt3DSDMInstanceHandle>();
                 if (m_StudioSystem->GetClientDataModelBridge()->IsMultiSelectable(
                         theCurrentlySelectedInstance))
                     theNewHandles.push_back(theCurrentlySelectedInstance);
@@ -1119,7 +1119,7 @@ void CDoc::ToggleUICDMObjectToSelection(qt3dsdm::CUICDMInstanceHandle inInstance
     }
 }
 
-void CDoc::SelectAndNavigateToUICDMObject(qt3dsdm::CUICDMInstanceHandle inInstanceHandle)
+void CDoc::SelectAndNavigateToUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     if (inInstanceHandle.Valid() == false) {
         QT3DS_ASSERT(false);
@@ -1127,9 +1127,9 @@ void CDoc::SelectAndNavigateToUICDMObject(qt3dsdm::CUICDMInstanceHandle inInstan
     }
     Q3DStudio::IDocumentReader &theReader(GetDocumentReader());
     qt3dsdm::CUICDMSlideHandle theAssociatedSlide = theReader.GetAssociatedSlide(inInstanceHandle);
-    qt3dsdm::CUICDMInstanceHandle theNewComponent =
+    qt3dsdm::Qt3DSDMInstanceHandle theNewComponent =
         theReader.GetComponentForSlide(theAssociatedSlide);
-    qt3dsdm::CUICDMInstanceHandle theOldComponent = theReader.GetComponentForSlide(GetActiveSlide());
+    qt3dsdm::Qt3DSDMInstanceHandle theOldComponent = theReader.GetComponentForSlide(GetActiveSlide());
     if (theNewComponent.Valid() && theNewComponent != theOldComponent) {
         // Get the currently active slide for the new component.
         qt3dsdm::CUICDMSlideHandle theActiveSlide =
@@ -1150,7 +1150,7 @@ long CDoc::GetLatestEndTime()
     GetAssetChildrenInTimeParent(GetActiveRootInstance(), this, true, theChildren,
                                  GetActiveSlide());
     for (; !theChildren.IsDone(); ++theChildren) {
-        qt3dsdm::CUICDMInstanceHandle theChildAsset = theChildren.GetCurrent();
+        qt3dsdm::Qt3DSDMInstanceHandle theChildAsset = theChildren.GetCurrent();
         long theChildEnd = GetDocumentReader().GetTimeRange(theChildAsset).second;
         if ((theChildEnd > theTime))
             theTime = theChildEnd;
@@ -1211,7 +1211,7 @@ void CDoc::TruncateTimebar(bool inSetStart, bool inAffectsChildren)
 {
     Q_UNUSED(inAffectsChildren);
 
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
     // Cannot change the time bars for a material
     if (theSelectedInstance.Valid())
         Q3DStudio::ScopedDocumentEditor(*this, L"Truncate Time Range", __FILE__, __LINE__)
@@ -1511,7 +1511,7 @@ void CDoc::CreateNewDocument()
         m_StudioSystem->GetClientDataModelBridge()->GetObjectDefinitions());
     IMetaData &theMetaData(*m_StudioSystem->GetActionMetaData());
 
-    CUICDMInstanceHandle theLayer = IDocumentEditor::CreateSceneGraphInstance(
+    Qt3DSDMInstanceHandle theLayer = IDocumentEditor::CreateSceneGraphInstance(
         ComposerObjectTypes::Convert(ComposerObjectTypes::Layer), m_SceneInstance, theSlide,
         theDataCore, theSlideSystem, theObjectDefinitions, *m_AssetGraph, theMetaData);
 
@@ -1660,7 +1660,7 @@ void CDoc::HandleMasterPaste()
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
     } else if (CanPasteObject()) {
-        qt3dsdm::CUICDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
         long theTargetObjectType =
             GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance);
         qt3dsdm::ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
@@ -1770,7 +1770,7 @@ bool CDoc::CanPasteObject()
 {
     bool theCanPasteFlag = false;
 
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
     if (theSelectedInstance.Valid()) {
         // Check if there is object on clipboard and if the object type on clipboard can be attached
         // to theSelectedInstance
@@ -1882,7 +1882,7 @@ bool CDoc::CanCut()
  */
 void CDoc::HandleDuplicateCommand()
 {
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
 
     // If we have a valid object to duplicate
     if (m_StudioSystem->GetClientDataModelBridge()->IsDuplicateable(theSelectedInstance)) {
@@ -1897,7 +1897,7 @@ void CDoc::HandleDuplicateCommand()
  * Verify that an asset can be renamed. Only actions are affected by rename at this point, so prompt
  * user to proceed if the actions will be hosed.
  */
-bool CDoc::VerifyCanRename(qt3dsdm::CUICDMInstanceHandle inAsset)
+bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
 {
     bool theResult = true;
     std::set<Q3DStudio::CString> theAffectedList;
@@ -2381,7 +2381,7 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
             bool isInstance = false;
             for (size_t slideInstanceIdx = 0, slideInstanceEnd = theList.size();
                  slideInstanceIdx < slideInstanceEnd && !isInstance; ++slideInstanceIdx) {
-                CUICDMInstanceHandle theInstance = theList[slideInstanceIdx].second;
+                Qt3DSDMInstanceHandle theInstance = theList[slideInstanceIdx].second;
                 isInstance = m_StudioSystem->IsInstance(theInstance);
                 if (isInstance)
                     isImage = thePropertySystem.IsInstanceOrDerivedFrom(
@@ -2506,7 +2506,7 @@ void CDoc::DeselectAllKeyframes()
  *	I think the logic behind this is that once the parent will affect all children's path
  *reference, and hence all its descendants' action must be checked as well.
  */
-void CDoc::GetActionsAffectedByRename(qt3dsdm::CUICDMInstanceHandle inAsset,
+void CDoc::GetActionsAffectedByRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset,
                                       std::set<Q3DStudio::CString> &ioActionsAffected)
 {
     if (!inAsset)
@@ -2541,7 +2541,7 @@ void CDoc::GetActionsAffectedByRename(qt3dsdm::CUICDMInstanceHandle inAsset,
  * b. list the source GUID of the image if ( outImageIdList != NULL )
  * This is so that ScheduleRemoveImageInstances & GetImageInstancesSourceGUID can share code
  */
-void CDoc::IterateImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::IterateImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                  std::vector<Q3DStudio::CId> *outImageIdList)
 {
     CClientDataModelBridge *theClientBridge = GetStudioSystem()->GetClientDataModelBridge();
@@ -2560,14 +2560,14 @@ void CDoc::IterateImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
     GetAssetChildren(this, inInstance, theSourceChildIterator);
 
     for (; !theSourceChildIterator.IsDone(); ++theSourceChildIterator) {
-        qt3dsdm::CUICDMInstanceHandle theChildInstance = theSourceChildIterator.GetCurrent();
+        qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theSourceChildIterator.GetCurrent();
         if (theClientBridge->IsMaterialInstance(theChildInstance)) {
             qt3dsdm::TPropertyHandleList theProperties;
             thePropertySystem->GetAggregateInstanceProperties(theChildInstance, theProperties);
             size_t thePropertyCount = theProperties.size();
             for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount;
                  ++thePropertyIndex) {
-                qt3dsdm::CUICDMPropertyHandle theProperty = theProperties[thePropertyIndex];
+                qt3dsdm::Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
                 qt3dsdm::AdditionalMetaDataType::Value theAdditionalMetaDataType =
                     thePropertySystem->GetAdditionalMetaDataType(theChildInstance, theProperty);
 
@@ -2582,7 +2582,7 @@ void CDoc::IterateImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
                                                                     theValue);
                         qt3dsdm::SLong4 theDataModelImageGuid = qt3dsdm::get<qt3dsdm::SLong4>(theValue);
 
-                        qt3dsdm::CUICDMInstanceHandle theImageInstance =
+                        qt3dsdm::Qt3DSDMInstanceHandle theImageInstance =
                             theClientBridge->GetImageInstanceByGUID(theDataModelImageGuid);
                         if (theImageInstance.Valid()) {
                             // Get the image source guid
@@ -2606,7 +2606,7 @@ void CDoc::IterateImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
                                     theSlideIndex, theChildInstance, theProperty, theValue)) {
                                 qt3dsdm::SLong4 theDataModelImageGuid =
                                     qt3dsdm::get<qt3dsdm::SLong4>(theValue);
-                                qt3dsdm::CUICDMInstanceHandle theImageInstance =
+                                qt3dsdm::Qt3DSDMInstanceHandle theImageInstance =
                                     theClientBridge->GetImageInstanceByGUID(theDataModelImageGuid);
                                 if (theImageInstance.Valid()) {
                                     // Get the image source guid
@@ -2633,21 +2633,21 @@ void CDoc::IterateImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
 /**
  * @returns the object based on the selection mode
  */
-qt3dsdm::CUICDMInstanceHandle CDoc::GetObjectbySelectMode(qt3dsdm::CUICDMInstanceHandle inInstance,
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetObjectbySelectMode(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                         bool inGroupMode)
 {
-    qt3dsdm::CUICDMInstanceHandle theResult = inInstance;
+    qt3dsdm::Qt3DSDMInstanceHandle theResult = inInstance;
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     if (!theBridge->IsInActiveComponent(inInstance)) {
-        qt3dsdm::CUICDMInstanceHandle theParent = theBridge->GetParentInstance(inInstance);
+        qt3dsdm::Qt3DSDMInstanceHandle theParent = theBridge->GetParentInstance(inInstance);
         if (theParent.Valid())
             theResult = GetObjectbySelectMode(theParent, inGroupMode);
         else
             theResult = 0;
     } else {
         if (inGroupMode) {
-            qt3dsdm::CUICDMInstanceHandle theGroup = GetTopmostGroup(inInstance);
+            qt3dsdm::Qt3DSDMInstanceHandle theGroup = GetTopmostGroup(inInstance);
             if (theGroup.Valid())
                 theResult = theGroup;
         }
@@ -2659,17 +2659,17 @@ qt3dsdm::CUICDMInstanceHandle CDoc::GetObjectbySelectMode(qt3dsdm::CUICDMInstanc
 /**
  * @returns the topmost group object that owns this instance
  */
-qt3dsdm::CUICDMInstanceHandle CDoc::GetTopmostGroup(qt3dsdm::CUICDMInstanceHandle inInstance)
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetTopmostGroup(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
 
     if (theBridge->IsGroupInstance(inInstance)) {
-        qt3dsdm::CUICDMInstanceHandle theGroup = inInstance;
+        qt3dsdm::Qt3DSDMInstanceHandle theGroup = inInstance;
 
         // If this group has a parent
-        qt3dsdm::CUICDMInstanceHandle theParent = theBridge->GetParentInstance(inInstance);
+        qt3dsdm::Qt3DSDMInstanceHandle theParent = theBridge->GetParentInstance(inInstance);
         if (theParent.Valid()) {
-            qt3dsdm::CUICDMInstanceHandle theParentGroup;
+            qt3dsdm::Qt3DSDMInstanceHandle theParentGroup;
             // Get the group object of the parent
             if (GetActiveRootInstance()
                 == inInstance) { // check if this component is the active time context now
@@ -2686,7 +2686,7 @@ qt3dsdm::CUICDMInstanceHandle CDoc::GetTopmostGroup(qt3dsdm::CUICDMInstanceHandl
 
         return theGroup;
     } else {
-        qt3dsdm::CUICDMInstanceHandle theParent = theBridge->GetParentInstance(inInstance);
+        qt3dsdm::Qt3DSDMInstanceHandle theParent = theBridge->GetParentInstance(inInstance);
         if (theParent.Valid())
             return GetTopmostGroup(theParent);
         else
@@ -2699,7 +2699,7 @@ qt3dsdm::CUICDMInstanceHandle CDoc::GetTopmostGroup(qt3dsdm::CUICDMInstanceHandl
  * Image is a property of the material, find out all images involved by the delete
  * object and scehedule a remove instances.
  */
-void CDoc::ScheduleRemoveImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::ScheduleRemoveImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         CCmdBatch * /*outBatch*/)
 {
     IterateImageInstances(inInstance, NULL);
@@ -2709,7 +2709,7 @@ void CDoc::ScheduleRemoveImageInstances(qt3dsdm::CUICDMInstanceHandle inInstance
 /**
  * Remove all DataModel instances and schedule a delete
  */
-void CDoc::ScheduleRemoveDataModelInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::ScheduleRemoveDataModelInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                             CCmdBatch *outBatch)
 {
     // remove my children
@@ -2730,13 +2730,13 @@ void CDoc::ScheduleRemoveDataModelInstances(qt3dsdm::CUICDMInstanceHandle inInst
  * by the delete
  * object and scehedule a remove instances.
  */
-void CDoc::ScheduleRemoveComponentInstances(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CDoc::ScheduleRemoveComponentInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                             CCmdBatch *outBatch)
 {
     CClientDataModelBridge *theClientBridge = GetStudioSystem()->GetClientDataModelBridge();
     if (theClientBridge->IsComponentInstance(inInstance)) {
         Q3DStudio::CId theInstanceId = theClientBridge->GetGUID(inInstance);
-        qt3dsdm::CUICDMInstanceHandle theInstance =
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance =
             theClientBridge->GetComponentInstanceByGUID(theInstanceId);
         CCmd *theCmd = new CCmdDataModelDeleteComponentInstance(this, theInstance);
         outBatch->AddCommand(theCmd);
@@ -2755,8 +2755,8 @@ void CDoc::SetDefaultKeyframeInterpolation(bool inSmooth)
     GetStudioSystem()->GetAnimationSystem()->SetInterpolation(inSmooth);
 }
 
-void CDoc::AddToGraph(qt3dsdm::CUICDMInstanceHandle inParentInstance,
-                      qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDoc::AddToGraph(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
+                      qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (!inInstance.Valid())
         return;
@@ -2784,7 +2784,7 @@ void CDoc::OnPresentationDeactivated()
 {
 }
 
-void CDoc::CheckActionDependencies(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     Q3DStudio::CString theListOfTargets;
     GetActionDependencies(inInstance, theListOfTargets);

@@ -59,7 +59,7 @@ struct SSlideGraph : public CHandleObject
 class CSimpleSlideGraphCore : public CHandleBase, public ISlideGraphCore
 {
     TStringTablePtr m_StringTable;
-    typedef std::unordered_map<CUICDMInstanceHandle,
+    typedef std::unordered_map<Qt3DSDMInstanceHandle,
                                  pair<CUICDMSlideGraphHandle, CUICDMSlideHandle>, std::hash<int>>
         TInstanceToGraphMap;
     typedef std::unordered_map<CUICDMSlideGraphHandle, TSlideInstancePairList, std::hash<int>>
@@ -97,11 +97,11 @@ public:
      *	implicitly associated with any root-derived slides.
      */
     void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, CUICDMSlideHandle inSlide,
-                           CUICDMInstanceHandle inInstance) override;
+                           Qt3DSDMInstanceHandle inInstance) override;
     void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
                                 TSlideInstancePairList &outAssociations) const override;
-    TGraphSlidePair GetAssociatedGraph(CUICDMInstanceHandle inInstance) const override;
-    void DissociateInstance(CUICDMInstanceHandle inInstance) override;
+    TGraphSlidePair GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const override;
+    void DissociateInstance(Qt3DSDMInstanceHandle inInstance) override;
 
     /**
      *	All graphs always have an active slide.  This is assumed to be the root right off the bat.

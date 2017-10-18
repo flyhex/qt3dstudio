@@ -381,8 +381,8 @@ template <ComposerPropertyNames::Enum TPropName, typename TDataType>
 struct SComposerPropertyDefinition
 {
     qt3ds::foundation::Option<TDataType> m_DefaultValue;
-    CUICDMPropertyHandle m_Property;
-    SComposerPropertyDefinition(IDataCore &inDataCore, CUICDMInstanceHandle inInstance,
+    Qt3DSDMPropertyHandle m_Property;
+    SComposerPropertyDefinition(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance,
                                 const TDataType &inDefault)
         : m_DefaultValue(inDefault)
     {
@@ -392,13 +392,13 @@ struct SComposerPropertyDefinition
         if (m_DefaultValue.hasValue())
             inDataCore.SetInstancePropertyValue(inInstance, m_Property, m_DefaultValue.getValue());
     }
-    SComposerPropertyDefinition(IDataCore &inDataCore, CUICDMInstanceHandle inInstance)
+    SComposerPropertyDefinition(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance)
     {
         UICDM_LOG_FUNCTION("SComposerPropertyDefinition-2");
         m_Property = inDataCore.AddProperty(inInstance, ComposerPropertyNames::Convert(TPropName),
                                             TypeToDataType<TDataType>());
     }
-    operator CUICDMPropertyHandle() const { return m_Property; }
+    operator Qt3DSDMPropertyHandle() const { return m_Property; }
 };
 
 // Define all the objects with their properties
@@ -423,7 +423,7 @@ struct SComposerTypePropertyDefinition
     {                                                                                              \
         bool reserved;                                                               \
         propmacro SComposerTypePropertyDefinition(IDataCore &inCore,                               \
-                                                  CUICDMInstanceHandle inInstance);                \
+                                                  Qt3DSDMInstanceHandle inInstance);                \
     };
 
 ITERATE_COMPOSER_OBJECT_TYPES
@@ -436,21 +436,21 @@ ITERATE_COMPOSER_OBJECT_TYPES
 struct ComposerTypeDefinitionsHelper
 {
     // Functions here so we don't have to include UICDMDataCore.h or UICDMMetaData.h
-    static void SetInstanceAsCanonical(IMetaData &inMetaData, CUICDMInstanceHandle inInstance,
+    static void SetInstanceAsCanonical(IMetaData &inMetaData, Qt3DSDMInstanceHandle inInstance,
                                        ComposerObjectTypes::Enum inObjectType);
-    static void SetInstancePropertyValue(IDataCore &inDataCore, CUICDMInstanceHandle inInstance,
-                                         CUICDMPropertyHandle inProperty,
+    static void SetInstancePropertyValue(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance,
+                                         Qt3DSDMPropertyHandle inProperty,
                                          const wchar_t *inPropValue);
-    static void DeriveInstance(IDataCore &inDataCore, CUICDMInstanceHandle inInstance,
-                               CUICDMInstanceHandle inParent);
+    static void DeriveInstance(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance,
+                               Qt3DSDMInstanceHandle inParent);
 };
 
 template <ComposerObjectTypes::Enum TEnumType>
 struct SComposerBaseObjectDefinition : public SComposerTypePropertyDefinition<TEnumType>
 {
-    CUICDMInstanceHandle m_Instance;
+    Qt3DSDMInstanceHandle m_Instance;
     SComposerBaseObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                                  CUICDMInstanceHandle inInstance)
+                                  Qt3DSDMInstanceHandle inInstance)
         : SComposerTypePropertyDefinition<TEnumType>(inCore, inInstance)
         , m_Instance(inInstance)
     {
@@ -484,7 +484,7 @@ template <ComposerObjectTypes::Enum TEnumType>
 struct SComposerObjectDefinition : public SComposerBaseObjectDefinition<TEnumType>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance)
+                              Qt3DSDMInstanceHandle inInstance)
         : SComposerBaseObjectDefinition<TEnumType>(inCore, inMetaData, inInstance)
     {
     }
@@ -496,7 +496,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Slide>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Slide>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Named> &inNamed)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Slide>(inCore, inMetaData, inInstance)
@@ -512,7 +512,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Action>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Action>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Action>(inCore, inMetaData, inInstance)
     {
@@ -526,7 +526,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Asset>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Asset>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Guided> &inGuided,
                               SComposerObjectDefinition<ComposerObjectTypes::Named> &inNamed)
@@ -543,7 +543,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Scene>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Scene>
 {
     SComposerObjectDefinition(
-        IDataCore &inCore, IMetaData &inMetaData, CUICDMInstanceHandle inInstance,
+        IDataCore &inCore, IMetaData &inMetaData, Qt3DSDMInstanceHandle inInstance,
         SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
         SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset,
         SComposerObjectDefinition<ComposerObjectTypes::SlideOwner> &inSlideOwner)
@@ -560,7 +560,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Image>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Image>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Image>(inCore, inMetaData, inInstance)
@@ -576,7 +576,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Lightmaps>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Lightmaps>(inCore, inMetaData,
@@ -593,7 +593,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::MaterialBase>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Lightmaps> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::MaterialBase>(inCore, inMetaData,
@@ -610,7 +610,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Material>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Material>(inCore, inMetaData,
@@ -627,7 +627,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::CustomMaterial>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::CustomMaterial>(inCore, inMetaData,
@@ -644,7 +644,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::ReferencedMaterial>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::ReferencedMaterial>(inCore, inMetaData,
@@ -661,7 +661,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Behavior>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Behavior>(inCore, inMetaData,
@@ -678,7 +678,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Effect>
 
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Effect>(inCore, inMetaData, inInstance)
@@ -693,7 +693,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Node>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Node>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Node>(inCore, inMetaData, inInstance)
@@ -708,7 +708,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Layer>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Layer>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Layer>(inCore, inMetaData, inInstance)
@@ -723,7 +723,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Model>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Model>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Model>(inCore, inMetaData, inInstance)
@@ -738,7 +738,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Group>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Group>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Group>(inCore, inMetaData, inInstance)
@@ -753,7 +753,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Light>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Light>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Light>(inCore, inMetaData, inInstance)
@@ -768,7 +768,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Camera>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Camera>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Camera>(inCore, inMetaData, inInstance)
@@ -783,7 +783,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Text>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Text>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Text>(inCore, inMetaData, inInstance)
@@ -798,7 +798,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Component>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Component>
 {
     SComposerObjectDefinition(
-        IDataCore &inCore, IMetaData &inMetaData, CUICDMInstanceHandle inInstance,
+        IDataCore &inCore, IMetaData &inMetaData, Qt3DSDMInstanceHandle inInstance,
         SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
         SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode,
         SComposerObjectDefinition<ComposerObjectTypes::SlideOwner> &inSlideOwner)
@@ -816,7 +816,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::RenderPlugin>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::RenderPlugin>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::RenderPlugin>(inCore, inMetaData,
@@ -832,7 +832,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Alias>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Alias>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Alias>(inCore, inMetaData, inInstance)
@@ -847,7 +847,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Path>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::Path>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Node> &inNode)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Path>(inCore, inMetaData, inInstance)
@@ -862,7 +862,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::PathAnchorPoint>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::PathAnchorPoint>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::PathAnchorPoint>(inCore, inMetaData,
@@ -878,7 +878,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::SubPath>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::SubPath>
 {
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              CUICDMInstanceHandle inInstance,
+                              Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
                               SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::SubPath>(inCore, inMetaData,
@@ -907,13 +907,13 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // RTTI API
-    bool IsA(CUICDMInstanceHandle inInstance, ComposerObjectTypes::Enum inType);
+    bool IsA(Qt3DSDMInstanceHandle inInstance, ComposerObjectTypes::Enum inType);
     // Could easily return None, meaning we can't identify the object type.
     // Checks the type of the first derivation parent, so this won't ever return
     // SlideOwner, for instance.
-    ComposerObjectTypes::Enum GetType(CUICDMInstanceHandle inInstance);
+    ComposerObjectTypes::Enum GetType(Qt3DSDMInstanceHandle inInstance);
 
-    CUICDMInstanceHandle GetInstanceForType(ComposerObjectTypes::Enum inType);
+    Qt3DSDMInstanceHandle GetInstanceForType(ComposerObjectTypes::Enum inType);
     SComposerObjectDefinitions() = default;
     ~SComposerObjectDefinitions() = default;
 private:

@@ -44,10 +44,10 @@ class CCmdDataModelDeleteInstance : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
 
 public: // Construction
-    CCmdDataModelDeleteInstance(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance)
+    CCmdDataModelDeleteInstance(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
@@ -93,10 +93,10 @@ class CCmdDataModelDeleteComponentInstance : public CCmd, public qt3dsdm::CmdDat
 {
 protected: // Members
     CDoc *m_Doc;
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
 
 public: // Construction
-    CCmdDataModelDeleteComponentInstance(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance)
+    CCmdDataModelDeleteComponentInstance(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         : CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)

@@ -86,8 +86,8 @@ void NotifySlideRearranged(TTransactionConsumerPtr &inConsumer,
 }
 
 void SendInstancePropertyValueChanged(TDataCorePtr inCore, IStudioFullSystemSignalSender *inSender,
-                                      CUICDMInstanceHandle inInstance,
-                                      CUICDMPropertyHandle inProperty)
+                                      Qt3DSDMInstanceHandle inInstance,
+                                      Qt3DSDMPropertyHandle inProperty)
 {
     // Ignore when the instance is not an instance (undoing an add operation may create this, as
     // transactions are run first and notifications second).
@@ -97,7 +97,7 @@ void SendInstancePropertyValueChanged(TDataCorePtr inCore, IStudioFullSystemSign
 
 void NotifyInstancePropertyChanged(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                                    IStudioFullSystemSignalSender *inSender,
-                                   CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+                                   Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                    bool inIsAggregate)
 {
     if (inConsumer) {
@@ -146,7 +146,7 @@ void NotifyComponentSeconds(TTransactionConsumerPtr &inConsumer,
 
 void NotifyPropertyLinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                           IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inMaster,
-                          CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+                          Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                           bool inAggregate)
 {
     if (inAggregate == false) {
@@ -161,7 +161,7 @@ void NotifyPropertyLinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCo
 
 void NotifyPropertyUnlinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                             IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inMaster,
-                            CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+                            Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                             bool inAggregate)
 {
     if (inAggregate == false) {
@@ -190,8 +190,8 @@ void NotifyActiveSlide(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
 
 void NotifyAnimationCreated(TTransactionConsumerPtr &inConsumer,
                             IStudioFullSystemSignalSender *inSender,
-                            CUICDMAnimationHandle inAnimation, CUICDMInstanceHandle inInstance,
-                            CUICDMPropertyHandle inProperty, bool inIsAggregate)
+                            CUICDMAnimationHandle inAnimation, Qt3DSDMInstanceHandle inInstance,
+                            Qt3DSDMPropertyHandle inProperty, bool inIsAggregate)
 {
     if (!inIsAggregate) {
         NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendAnimationCreated,
@@ -203,8 +203,8 @@ void NotifyAnimationCreated(TTransactionConsumerPtr &inConsumer,
 
 void NotifyAnimationDeleted(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                             IStudioFullSystemSignalSender *inSender,
-                            CUICDMAnimationHandle inAnimation, CUICDMInstanceHandle inInstance,
-                            CUICDMPropertyHandle inProperty)
+                            CUICDMAnimationHandle inAnimation, Qt3DSDMInstanceHandle inInstance,
+                            Qt3DSDMPropertyHandle inProperty)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendAnimationDeleted, inSender,
                                     inAnimation, inInstance, inProperty),
@@ -281,7 +281,7 @@ inline ISlideCoreSignalProvider *GetSlideSignaller(TSlideCorePtr inSlideCore)
 }
 
 void NotifyInstanceCreated(TTransactionConsumerPtr &inConsumer,
-                           IStudioFullSystemSignalSender *inSender, CUICDMInstanceHandle instance)
+                           IStudioFullSystemSignalSender *inSender, Qt3DSDMInstanceHandle instance)
 {
     NotifyConsumer(inConsumer,
                    bind(&IStudioFullSystemSignalSender::SendInstanceCreated, inSender, instance),
@@ -289,7 +289,7 @@ void NotifyInstanceCreated(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifyInstanceDeleted(TTransactionConsumerPtr &inConsumer,
-                           IStudioFullSystemSignalSender *inSender, CUICDMInstanceHandle instance)
+                           IStudioFullSystemSignalSender *inSender, Qt3DSDMInstanceHandle instance)
 {
     NotifyConsumer(inConsumer,
                    bind(&IStudioFullSystemSignalSender::SendInstanceDeleted, inSender, instance),
@@ -298,7 +298,7 @@ void NotifyInstanceDeleted(TTransactionConsumerPtr &inConsumer,
 
 void NotifyActionCreated(TTransactionConsumerPtr &inConsumer,
                          IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
-                         CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance)
+                         CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendActionCreated, inSender,
                                     inAction, inSlide, inInstance),
@@ -308,7 +308,7 @@ void NotifyActionCreated(TTransactionConsumerPtr &inConsumer,
 
 void NotifyActionDestroyed(TTransactionConsumerPtr &inConsumer,
                            IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
-                           CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance)
+                           CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendActionDeleted, inSender,
                                     inAction, inSlide, inInstance),
@@ -390,10 +390,10 @@ void NotifyAllKeyframesErased(TTransactionConsumerPtr &inConsumer,
 }
 
 CStudioFullSystem::CStudioFullSystem(std::shared_ptr<CStudioCoreSystem> inCoreSystem,
-                                     CUICDMInstanceHandle inSlideInstance,
-                                     CUICDMPropertyHandle inComponentGuidProperty,
-                                     CUICDMInstanceHandle inActionInstance,
-                                     CUICDMPropertyHandle inActionEyeball)
+                                     Qt3DSDMInstanceHandle inSlideInstance,
+                                     Qt3DSDMPropertyHandle inComponentGuidProperty,
+                                     Qt3DSDMInstanceHandle inActionInstance,
+                                     Qt3DSDMPropertyHandle inActionEyeball)
     : m_CoreSystem(inCoreSystem)
     , m_SlideSystem(new SSlideSystem(m_CoreSystem->GetDataCore(), m_CoreSystem->GetSlideCore(),
                                      m_CoreSystem->GetSlideGraphCore(),
@@ -610,8 +610,8 @@ std::shared_ptr<CStudioCoreSystem> CStudioFullSystem::GetCoreSystem()
     return m_CoreSystem;
 }
 
-bool CStudioFullSystem::GetCanonicalInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                          CUICDMPropertyHandle inProperty,
+bool CStudioFullSystem::GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                          Qt3DSDMPropertyHandle inProperty,
                                                           SValue &outValue) const
 {
     SValue theTemp;
@@ -622,7 +622,7 @@ bool CStudioFullSystem::GetCanonicalInstancePropertyValue(CUICDMInstanceHandle i
     return retval;
 }
 
-CUICDMInstanceHandle CStudioFullSystem::FindInstanceByName(CUICDMPropertyHandle inNameProperty,
+Qt3DSDMInstanceHandle CStudioFullSystem::FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
                                                            const TCharStr &inName) const
 {
     return m_CoreSystem->FindInstanceByName(inNameProperty, inName);

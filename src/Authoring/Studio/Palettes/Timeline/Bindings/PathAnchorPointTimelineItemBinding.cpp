@@ -33,7 +33,7 @@
 using namespace qt3dsdm;
 
 CPathAnchorPointTimelineItemBinding::CPathAnchorPointTimelineItemBinding(
-    CTimelineTranslationManager *inMgr, CUICDMInstanceHandle inDataHandle)
+    CTimelineTranslationManager *inMgr, Qt3DSDMInstanceHandle inDataHandle)
     : CUICDMTimelineItemBinding(inMgr, inDataHandle)
 {
 }

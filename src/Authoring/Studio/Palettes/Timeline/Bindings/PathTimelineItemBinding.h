@@ -51,7 +51,7 @@ class CPathTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public: // Construction
     CPathTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                             qt3dsdm::CUICDMInstanceHandle inDataHandle)
+                             qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
         : CUICDMTimelineItemBinding(inMgr, inDataHandle)
     {
     }

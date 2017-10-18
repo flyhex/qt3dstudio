@@ -77,13 +77,13 @@ CTimelineTranslationManager::~CTimelineTranslationManager()
     delete m_BreadCrumbProvider;
 }
 
-ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(CUICDMInstanceHandle inInstance)
+ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHandle inInstance)
 {
     ITimelineItemBinding *theBinding = GetBinding(inInstance);
     if (!theBinding) {
         CUICDMTimelineItemBinding *theReturn = nullptr;
         qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
-        CUICDMPropertyHandle theTypeProperty =
+        Qt3DSDMPropertyHandle theTypeProperty =
             thePropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
 
         SValue theTypeValue;
@@ -185,7 +185,7 @@ void CTimelineTranslationManager::Unregister(ITimelineItemBinding *inTimelineIte
     for (; theInstanceIter != m_InstanceHandleBindingMap.end(); ++theInstanceIter) {
         if (theInstanceIter->second == inTimelineItem) {
             // If this is the currently selected object and make sure that is cleared.
-            qt3dsdm::CUICDMInstanceHandle theSelectedInstance =
+            qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance =
                 g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
             if (theSelectedInstance.Valid() && theSelectedInstance == theInstanceIter->first)
                 theDeselectItem = true;
@@ -226,7 +226,7 @@ long CTimelineTranslationManager::GetCurrentViewTime() const
  * @return the Binding object that corresponds to this instance.
  */
 CUICDMTimelineItemBinding *
-CTimelineTranslationManager::GetBinding(CUICDMInstanceHandle inHandle) const
+CTimelineTranslationManager::GetBinding(Qt3DSDMInstanceHandle inHandle) const
 {
     TInstanceHandleBindingMap::const_iterator theIter = m_InstanceHandleBindingMap.find(inHandle);
     if (theIter != m_InstanceHandleBindingMap.end())
@@ -236,7 +236,7 @@ CTimelineTranslationManager::GetBinding(CUICDMInstanceHandle inHandle) const
 
 CUICDMTimelineItemBinding *CTimelineTranslationManager::GetSelectedBinding() const
 {
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance =
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance =
         g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
     if (theSelectedInstance.Valid()) {
         CUICDMTimelineItemBinding *theBinding = GetBinding(theSelectedInstance);
@@ -348,8 +348,8 @@ CStudioSystem *CTimelineTranslationManager::GetStudioSystem() const
     return g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
 }
 
-void CTimelineTranslationManager::OnAnimationCreated(CUICDMInstanceHandle inInstance,
-                                                     CUICDMPropertyHandle inProperty)
+void CTimelineTranslationManager::OnAnimationCreated(Qt3DSDMInstanceHandle inInstance,
+                                                     Qt3DSDMPropertyHandle inProperty)
 {
     CUICDMTimelineItemBinding *theTimelineBinding =
         dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
@@ -357,8 +357,8 @@ void CTimelineTranslationManager::OnAnimationCreated(CUICDMInstanceHandle inInst
         theTimelineBinding->AddPropertyRow(inProperty);
 }
 
-void CTimelineTranslationManager::OnAnimationDeleted(CUICDMInstanceHandle inInstance,
-                                                     CUICDMPropertyHandle inProperty)
+void CTimelineTranslationManager::OnAnimationDeleted(Qt3DSDMInstanceHandle inInstance,
+                                                     Qt3DSDMPropertyHandle inProperty)
 {
     CUICDMTimelineItemBinding *theTimelineBinding =
         dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
@@ -366,8 +366,8 @@ void CTimelineTranslationManager::OnAnimationDeleted(CUICDMInstanceHandle inInst
         theTimelineBinding->RemovePropertyRow(inProperty);
 }
 
-void CTimelineTranslationManager::OnPropertyLinked(CUICDMInstanceHandle inInstance,
-                                                   CUICDMPropertyHandle inProperty)
+void CTimelineTranslationManager::OnPropertyLinked(Qt3DSDMInstanceHandle inInstance,
+                                                   Qt3DSDMPropertyHandle inProperty)
 {
     CUICDMTimelineItemBinding *theTimelineBinding =
         dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
@@ -375,8 +375,8 @@ void CTimelineTranslationManager::OnPropertyLinked(CUICDMInstanceHandle inInstan
         theTimelineBinding->OnPropertyLinked(inProperty);
 }
 
-void CTimelineTranslationManager::OnPropertyUnlinked(CUICDMInstanceHandle inInstance,
-                                                     CUICDMPropertyHandle inProperty)
+void CTimelineTranslationManager::OnPropertyUnlinked(Qt3DSDMInstanceHandle inInstance,
+                                                     Qt3DSDMPropertyHandle inProperty)
 {
     OnPropertyLinked(inInstance, inProperty);
 }
@@ -422,8 +422,8 @@ void CTimelineTranslationManager::OnKeyframeUpdated(CUICDMKeyframeHandle inKeyfr
     // else, keyframe has been nuked, ignore this event, we'll get a KeyframeDeleted
 }
 
-void CTimelineTranslationManager::OnPropertyChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
-                                                    qt3dsdm::CUICDMPropertyHandle inProperty)
+void CTimelineTranslationManager::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                    qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     CUICDMTimelineItemBinding *theTimelineBinding =
         dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
@@ -448,7 +448,7 @@ void CTimelineTranslationManager::OnDynamicKeyframeChanged(qt3dsdm::CUICDMAnimat
     }
 }
 
-void CTimelineTranslationManager::OnAssetCreated(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CTimelineTranslationManager::OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     CClientDataModelBridge *theDataModelBridge = GetStudioSystem()->GetClientDataModelBridge();
 
@@ -456,7 +456,7 @@ void CTimelineTranslationManager::OnAssetCreated(qt3dsdm::CUICDMInstanceHandle i
         EnsureLoaded(inInstance);
 }
 
-void CTimelineTranslationManager::OnAssetDeleted(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CTimelineTranslationManager::OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     // You can't assume the instance is valid.  Someone may have deleted a large number of items
     // from the model and then decided to send notifications after the fact.
@@ -495,7 +495,7 @@ void CTimelineTranslationManager::OnChildMoved(int /*inParent*/, int inChild, lo
  */
 void CTimelineTranslationManager::OnActionEvent(qt3dsdm::CUICDMActionHandle inAction,
                                                 qt3dsdm::CUICDMSlideHandle inSlide,
-                                                qt3dsdm::CUICDMInstanceHandle inOwner)
+                                                qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     Q_UNUSED(inAction);
 
@@ -528,7 +528,7 @@ void CTimelineTranslationManager::SetSelected(Q3DStudio::SSelectedValue inSelect
 {
     qt3dsdm::TInstanceHandleList theInstances = inSelectable.GetSelectedInstances();
     for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
-        CUICDMInstanceHandle theInstance(theInstances[idx]);
+        Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
         if (GetStudioSystem()->IsInstance(theInstance)) {
             ITimelineItemBinding *theBinding = EnsureLoaded(theInstance);
             if (theBinding) {
@@ -540,14 +540,14 @@ void CTimelineTranslationManager::SetSelected(Q3DStudio::SSelectedValue inSelect
     }
 }
 
-ITimelineItemBinding *CTimelineTranslationManager::EnsureLoaded(CUICDMInstanceHandle inHandle)
+ITimelineItemBinding *CTimelineTranslationManager::EnsureLoaded(Qt3DSDMInstanceHandle inHandle)
 {
     ITimelineItemBinding *theBinding = GetBinding(inHandle);
     bool rowLoaded = theBinding != nullptr && theBinding->GetRow() != nullptr;
     if (rowLoaded == false) {
         // tell my parent to load me
         CClientDataModelBridge *theDataModelBridge = GetStudioSystem()->GetClientDataModelBridge();
-        CUICDMInstanceHandle theParent = theDataModelBridge->GetParentInstance(inHandle);
+        Qt3DSDMInstanceHandle theParent = theDataModelBridge->GetParentInstance(inHandle);
         if (theParent.Valid()) {
             ITimelineItemBinding *theParentBinding = EnsureLoaded(theParent);
             if (theParentBinding)
@@ -576,7 +576,7 @@ ITimelineItemBinding *CTimelineTranslationManager::EnsureLoaded(CUICDMInstanceHa
 /**
  * remember the expanded state for the current presentation
  */
-bool CTimelineTranslationManager::IsExpanded(CUICDMInstanceHandle inInstance) const
+bool CTimelineTranslationManager::IsExpanded(Qt3DSDMInstanceHandle inInstance) const
 {
     TInstanceHandleExpandedMap::const_iterator theIter =
         m_InstanceHandleExpandedMap.find(inInstance);
@@ -590,7 +590,7 @@ bool CTimelineTranslationManager::IsExpanded(CUICDMInstanceHandle inInstance) co
 /**
  * remember the expanded state for the current presentation
  */
-void CTimelineTranslationManager::SetExpanded(CUICDMInstanceHandle inInstance, bool inExpanded)
+void CTimelineTranslationManager::SetExpanded(Qt3DSDMInstanceHandle inInstance, bool inExpanded)
 {
     TInstanceHandleExpandedMap::iterator theIter = m_InstanceHandleExpandedMap.find(inInstance);
     if (theIter != m_InstanceHandleExpandedMap.end()) {

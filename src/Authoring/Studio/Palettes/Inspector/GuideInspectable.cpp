@@ -318,5 +318,5 @@ void SGuideInspectableImpl::Rollback()
 
 void SGuideInspectableImpl::FireRefresh()
 {
-    m_Editor.FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle());
+    m_Editor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }

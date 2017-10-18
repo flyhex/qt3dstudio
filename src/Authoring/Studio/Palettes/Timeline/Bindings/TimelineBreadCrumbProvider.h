@@ -62,10 +62,10 @@ public:
 
 protected:
     void ClearSlideList();
-    void FillSlideList(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void FillSlideList(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
 protected:
-    std::vector<qt3dsdm::CUICDMInstanceHandle> m_BreadCrumbList;
+    std::vector<qt3dsdm::Qt3DSDMInstanceHandle> m_BreadCrumbList;
     CDoc *m_Doc;
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the UICDM

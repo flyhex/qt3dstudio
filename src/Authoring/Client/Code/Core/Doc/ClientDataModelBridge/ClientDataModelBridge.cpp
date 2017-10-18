@@ -110,7 +110,7 @@ CUICDMSlideHandle CClientDataModelBridge::CreateNonMasterSlide(CUICDMSlideHandle
                                                                Q3DStudio::CId inGuid,
                                                                const Q3DStudio::CString &inName)
 {
-    CUICDMInstanceHandle theInstance = m_DataCore->CreateInstance();
+    Qt3DSDMInstanceHandle theInstance = m_DataCore->CreateInstance();
     m_DataCore->DeriveInstance(theInstance, m_SlideItem.m_Instance);
     m_DataCore->SetInstancePropertyValue(theInstance, m_SlideItem.m_ComponentId,
                                          GuidToLong4(inGuid));
@@ -121,8 +121,8 @@ CUICDMSlideHandle CClientDataModelBridge::CreateNonMasterSlide(CUICDMSlideHandle
 }
 
 // Get the Scene or Component Asset of inAsset by querying the Parent
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetSceneOrComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetSceneOrComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (IsSceneInstance(inInstance) || IsComponentInstance(inInstance))
         return inInstance;
@@ -133,8 +133,8 @@ CClientDataModelBridge::GetSceneOrComponentInstance(qt3dsdm::CUICDMInstanceHandl
         // Special case for Image because Image is a property of Material. Find which Material uses
         // this image.
         // This portion of code may never get executed though, but just in case...
-        qt3dsdm::CUICDMInstanceHandle theParentInstance;
-        qt3dsdm::CUICDMPropertyHandle theProperty;
+        qt3dsdm::Qt3DSDMInstanceHandle theParentInstance;
+        qt3dsdm::Qt3DSDMPropertyHandle theProperty;
         if (!GetMaterialFromImageInstance(inInstance, theParentInstance, theProperty)) {
             GetLayerFromImageProbeInstance(inInstance, theParentInstance, theProperty);
         }
@@ -147,11 +147,11 @@ CClientDataModelBridge::GetSceneOrComponentInstance(qt3dsdm::CUICDMInstanceHandl
 }
 
 CUICDMSlideGraphHandle
-CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::CUICDMInstanceHandle inInstance)
+CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    qt3dsdm::CUICDMInstanceHandle theSceneComponentInstance = GetSceneOrComponentInstance(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theSceneComponentInstance = GetSceneOrComponentInstance(inInstance);
     Q3DStudio::CId theGuid = GetGUID(theSceneComponentInstance);
-    CUICDMInstanceHandle existing = GetInstanceByGUIDDerivedFrom(
+    Qt3DSDMInstanceHandle existing = GetInstanceByGUIDDerivedFrom(
         GuidToLong4(theGuid), m_SlideItem.m_Instance, m_SlideItem.m_ComponentId);
     if (existing.Valid()) {
         // There is an implicit assumption here that the slide graph is one level deep, i.e. only
@@ -163,7 +163,7 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::CUICDMInstanceHandle inInstanc
         return m_SlideGraphCore->GetSlideGraph(theSlide);
     }
     ClearCache();
-    CUICDMInstanceHandle rootInstance = m_DataCore->CreateInstance();
+    Qt3DSDMInstanceHandle rootInstance = m_DataCore->CreateInstance();
     m_DataCore->DeriveInstance(rootInstance, m_SlideItem.m_Instance);
     m_DataCore->SetInstancePropertyValue(rootInstance, m_SlideItem.m_ComponentId,
                                          GuidToLong4(theGuid));
@@ -180,7 +180,7 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::CUICDMInstanceHandle inInstanc
 }
 
 CUICDMSlideHandle
-CClientDataModelBridge::GetOrCreateGraphRoot(qt3dsdm::CUICDMInstanceHandle inInstance)
+CClientDataModelBridge::GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     return m_SlideGraphCore->GetGraphRoot(GetOrCreateGraph(inInstance));
 }
@@ -197,15 +197,15 @@ CUICDMSlideHandle GetSlideByIndex(CUICDMSlideGraphHandle inGraph, int inIndex,
     return theSlides.at(inIndex);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId &inId,
+Qt3DSDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId &inId,
                                                                  EStudioObjectType inObjectType)
 {
-    CUICDMInstanceHandle existing = GetInstanceByGUID(inId);
+    Qt3DSDMInstanceHandle existing = GetInstanceByGUID(inId);
     if (existing.Valid())
         return existing;
 
     ClearCache();
-    CUICDMInstanceHandle theNewInstance = m_DataCore->CreateInstance();
+    Qt3DSDMInstanceHandle theNewInstance = m_DataCore->CreateInstance();
     switch (inObjectType) {
     case OBJTYPE_MATERIAL:
         m_DataCore->DeriveInstance(theNewInstance, m_DefaultMaterial.m_Instance);
@@ -266,43 +266,43 @@ CUICDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId 
     return theNewInstance;
 }
 
-qt3dsdm::CUICDMInstanceHandle CClientDataModelBridge::GetSlideInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetSlideInstance()
 {
     return m_SlideItem.m_Instance;
 }
 
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetSlideComponentIdProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetSlideComponentIdProperty()
 {
     return m_SlideItem.m_ComponentId;
 }
 
-qt3dsdm::CUICDMInstanceHandle CClientDataModelBridge::GetActionInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetActionInstance()
 {
     return m_ActionItem.m_Instance;
 }
 
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetActionEyeball()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetActionEyeball()
 {
     return m_ActionItem.m_ActionEyeball;
 }
 
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetImportId()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetImportId()
 {
     return m_SceneAsset.m_ImportId;
 }
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetNameProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetNameProperty()
 {
     return GetObjectDefinitions().m_Named.m_NameProp;
 }
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetIdProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetIdProperty()
 {
     return GetObjectDefinitions().m_Guided.m_GuidProp;
 }
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetTypeProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetTypeProperty()
 {
     return GetObjectDefinitions().m_Typed.m_TypeProp;
 }
-qt3dsdm::CUICDMPropertyHandle CClientDataModelBridge::GetSourcePathProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetSourcePathProperty()
 {
     return m_SceneAsset.m_SourcePath;
 }
@@ -321,8 +321,8 @@ bool CClientDataModelBridge::IsInternalProperty(const TCharStr &inPropertyName) 
 // Find the owning component. Note: inInstanceHandle may or may not have a client representation,
 // e.g. Images do not, so we can't use CAsset::GetControllingComponent.
 // Returns NULL if can't find one or its in the scene.
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstanceHandle)
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     int theSlideIndex;
     return GetOwningComponentInstance(inInstanceHandle, theSlideIndex);
@@ -331,8 +331,8 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMInstanceHandle
 // Find the owning component. Note: inInstanceHandle may or may not have a client representation,
 // e.g. Images do not, so we can't use CAsset::GetControllingComponent.
 // Returns NULL if can't find one or its in the scene.
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstanceHandle,
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
                                                    int &outSlideIndex)
 {
     if (!inInstanceHandle.Valid())
@@ -349,7 +349,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMInstanceHandle
 
 // Find the owning component of the Slide Handle
 // Returns NULL if can't find one.
-qt3dsdm::CUICDMInstanceHandle
+qt3dsdm::Qt3DSDMInstanceHandle
 CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle,
                                                    int &outSlideIndex)
 {
@@ -366,7 +366,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle in
 
 // Find the owning component of the Slide Handle
 // Returns NULL if can't find one.
-qt3dsdm::CUICDMInstanceHandle
+qt3dsdm::Qt3DSDMInstanceHandle
 CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle)
 {
     int theSlideIndex;
@@ -384,7 +384,7 @@ SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::CUICDMSlideHandle inSli
     if (!theMasterSlideHandle.Valid())
         return theComponentGuid;
 
-    CUICDMInstanceHandle theOwningComponentInstance =
+    Qt3DSDMInstanceHandle theOwningComponentInstance =
         theSlideSystem->GetSlideInstance(theMasterSlideHandle);
     if (!theOwningComponentInstance.Valid())
         return theComponentGuid;
@@ -404,7 +404,7 @@ SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::CUICDMSlideHandle inSli
  *	1. It's eyeball is on
  *	2. the current time falls within it's timebar
  */
-bool CClientDataModelBridge::IsActive(qt3dsdm::CUICDMInstanceHandle inInstanceHandle,
+bool CClientDataModelBridge::IsActive(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
                                       long inCurrentTime)
 {
     // Check the eyeball
@@ -435,7 +435,7 @@ bool CClientDataModelBridge::IsActive(qt3dsdm::CUICDMInstanceHandle inInstanceHa
  *	@param	inAsset		the controlling component (component or scene)
  */
 qt3dsdm::CUICDMSlideHandle
-CClientDataModelBridge::GetComponentActiveSlide(qt3dsdm::CUICDMInstanceHandle inComponent)
+CClientDataModelBridge::GetComponentActiveSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent)
 {
     ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = GetGUID(inComponent);
@@ -445,7 +445,7 @@ CClientDataModelBridge::GetComponentActiveSlide(qt3dsdm::CUICDMInstanceHandle in
 }
 
 qt3dsdm::CUICDMSlideHandle
-CClientDataModelBridge::GetComponentSlide(qt3dsdm::CUICDMInstanceHandle inComponent, long inIndex)
+CClientDataModelBridge::GetComponentSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent, long inIndex)
 {
     ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = GetGUID(inComponent);
@@ -455,7 +455,7 @@ CClientDataModelBridge::GetComponentSlide(qt3dsdm::CUICDMInstanceHandle inCompon
 }
 
 //
-void CClientDataModelBridge::SetName(qt3dsdm::CUICDMInstanceHandle inInstanceHandle,
+void CClientDataModelBridge::SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
                                      const Q3DStudio::CString &inName)
 {
     TDataStrPtr theName(new CDataStr(inName));
@@ -472,7 +472,7 @@ void CClientDataModelBridge::SetName(qt3dsdm::CUICDMInstanceHandle inInstanceHan
     }
 }
 
-Q3DStudio::CString CClientDataModelBridge::GetName(qt3dsdm::CUICDMInstanceHandle inInstanceHandle)
+Q3DStudio::CString CClientDataModelBridge::GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     TDataStrPtr theString;
@@ -486,12 +486,12 @@ Q3DStudio::CString CClientDataModelBridge::GetName(qt3dsdm::CUICDMInstanceHandle
     return (theString) ? Q3DStudio::CString(theString->GetData()) : "";
 }
 
-bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace qt3dsdm;
     using namespace Q3DStudio;
     CDoc &theDoc(*m_Doc);
-    CUICDMInstanceHandle theInstance = inInstance;
+    Qt3DSDMInstanceHandle theInstance = inInstance;
     CUICDMSlideHandle theSlide = theDoc.GetActiveSlide();
     SLong4 theGuid = GetComponentGuid(theSlide);
     CId theActiveComponentId(theGuid.m_Longs[0], theGuid.m_Longs[1], theGuid.m_Longs[2],
@@ -501,11 +501,11 @@ bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::CUICDMInstanceHandle inI
 }
 
 // Helper for getting the type as a wstring... returns "" if it can't figure things out
-std::wstring GetInstanceType(IPropertySystem *inPropertySystem, CUICDMInstanceHandle inInstance)
+std::wstring GetInstanceType(IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle inInstance)
 {
     std::wstring theReturn(L"");
     try {
-        CUICDMPropertyHandle theProperty =
+        Qt3DSDMPropertyHandle theProperty =
             inPropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
         SValue theTypeValue;
         if (theProperty
@@ -521,8 +521,8 @@ std::wstring GetInstanceType(IPropertySystem *inPropertySystem, CUICDMInstanceHa
 
 // Find which material that uses this image instance
 bool CClientDataModelBridge::GetMaterialFromImageInstance(
-    qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::CUICDMInstanceHandle &outMaterialInstance,
-    qt3dsdm::CUICDMPropertyHandle &outProperty)
+    qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle &outMaterialInstance,
+    qt3dsdm::Qt3DSDMPropertyHandle &outProperty)
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SLong4 theDeletedImageLong4 =
@@ -533,7 +533,7 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
         theInstances, m_DefaultMaterial.m_Instance); // Get all default material instances
     size_t theInstanceCount = theInstances.size();
     for (size_t theInstanceIndex = 0; theInstanceIndex < theInstanceCount; ++theInstanceIndex) {
-        CUICDMInstanceHandle theInstance = theInstances[theInstanceIndex];
+        Qt3DSDMInstanceHandle theInstance = theInstances[theInstanceIndex];
         std::wstring theWideTypeString(GetInstanceType(thePropertySystem, theInstance));
         if (theWideTypeString == L"Material") {
             TPropertyHandleList theProperties;
@@ -541,7 +541,7 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
             size_t thePropertyCount = theProperties.size();
             for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount;
                  ++thePropertyIndex) {
-                CUICDMPropertyHandle theProperty = theProperties[thePropertyIndex];
+                Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
                 AdditionalMetaDataType::Value theAdditionalMetaDataType =
                     thePropertySystem->GetAdditionalMetaDataType(theInstance, theProperty);
 
@@ -562,7 +562,7 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
         theInstances, m_CustomMaterial.m_Instance); // Get all custom material instances
     theInstanceCount = theInstances.size();
     for (size_t theInstanceIndex = 0; theInstanceIndex < theInstanceCount; ++theInstanceIndex) {
-        CUICDMInstanceHandle theInstance = theInstances[theInstanceIndex];
+        Qt3DSDMInstanceHandle theInstance = theInstances[theInstanceIndex];
         std::wstring theWideTypeString(GetInstanceType(thePropertySystem, theInstance));
         if (theWideTypeString == L"CustomMaterial") {
             TPropertyHandleList theProperties;
@@ -570,7 +570,7 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
             size_t thePropertyCount = theProperties.size();
             for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount;
                  ++thePropertyIndex) {
-                CUICDMPropertyHandle theProperty = theProperties[thePropertyIndex];
+                Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
                 AdditionalMetaDataType::Value theAdditionalMetaDataType =
                     thePropertySystem->GetAdditionalMetaDataType(theInstance, theProperty);
 
@@ -590,8 +590,8 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
 }
 
 bool CClientDataModelBridge::GetLayerFromImageProbeInstance(
-    qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::CUICDMInstanceHandle &outLayerInstance,
-    qt3dsdm::CUICDMPropertyHandle &outProperty)
+    qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle &outLayerInstance,
+    qt3dsdm::Qt3DSDMPropertyHandle &outProperty)
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SLong4 theDeletedImageLong4 =
@@ -603,7 +603,7 @@ bool CClientDataModelBridge::GetLayerFromImageProbeInstance(
     size_t theInstanceCount = theInstances.size();
 
     for (size_t theInstanceIndex = 0; theInstanceIndex < theInstanceCount; ++theInstanceIndex) {
-        CUICDMInstanceHandle theInstance = theInstances[theInstanceIndex];
+        Qt3DSDMInstanceHandle theInstance = theInstances[theInstanceIndex];
         std::wstring theWideTypeString(GetInstanceType(thePropertySystem, theInstance));
         if (theWideTypeString == L"Layer") {
             // Layer should have only one image property, which is the light probe, but this is a
@@ -614,7 +614,7 @@ bool CClientDataModelBridge::GetLayerFromImageProbeInstance(
             size_t thePropertyCount = theProperties.size();
             for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount;
                  ++thePropertyIndex) {
-                CUICDMPropertyHandle theProperty = theProperties[thePropertyIndex];
+                Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
                 AdditionalMetaDataType::Value theAdditionalMetaDataType =
                     thePropertySystem->GetAdditionalMetaDataType(theInstance, theProperty);
 
@@ -656,8 +656,8 @@ void CClientDataModelBridge::ClearCache()
 
 // requirement: inInstance must be derived from instance that has Guid property!
 bool CClientDataModelBridge::DerivedGuidMatches(IDataCore &inDataCore,
-                                                CUICDMInstanceHandle inInstance,
-                                                CUICDMPropertyHandle inProperty, SLong4 inGuid)
+                                                Qt3DSDMInstanceHandle inInstance,
+                                                Qt3DSDMPropertyHandle inProperty, SLong4 inGuid)
 {
     SValue theLong4;
     if (inDataCore.GetInstancePropertyValue(inInstance, inProperty, theLong4)
@@ -667,13 +667,13 @@ bool CClientDataModelBridge::DerivedGuidMatches(IDataCore &inDataCore,
     return false;
 }
 
-qt3dsdm::CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(const Q3DStudio::CId &inId)
+qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(const Q3DStudio::CId &inId)
 {
     return GetInstanceByGUID(GuidToLong4(inId));
 }
 
-void CClientDataModelBridge::ClearInstanceGUIDCache(qt3dsdm::CUICDMInstanceHandle inInstance,
-                                                    qt3dsdm::CUICDMPropertyHandle inProperty)
+void CClientDataModelBridge::ClearInstanceGUIDCache(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                    qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     if (inProperty == GetObjectDefinitions().m_Guided.m_GuidProp) {
         TInstanceToGUIDHash::iterator theEntry(m_CachedInstanceToGUIDHash.find(inInstance));
@@ -684,7 +684,7 @@ void CClientDataModelBridge::ClearInstanceGUIDCache(qt3dsdm::CUICDMInstanceHandl
     }
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(SLong4 inLong4)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(SLong4 inLong4)
 {
     if (inLong4 == SLong4(0, 0, 0, 0))
         return 0;
@@ -708,7 +708,7 @@ CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(SLong4 inLong4)
             m_CachedGUIDToInstancesHash.erase(theEntry);
         }
     }
-    CUICDMInstanceHandle retval = MaybeCacheGetInstanceByGUIDDerivedFrom(
+    Qt3DSDMInstanceHandle retval = MaybeCacheGetInstanceByGUIDDerivedFrom(
         inLong4, m_CachedGuidInstances, GetObjectDefinitions().m_Guided.m_Instance,
         GetObjectDefinitions().m_Guided.m_GuidProp);
     m_CachedGUIDToInstancesHash.insert(std::make_pair(inLong4, retval));
@@ -716,7 +716,7 @@ CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(SLong4 inLong4)
     return retval;
 }
 
-qt3dsdm::SLong4 CClientDataModelBridge::GetInstanceGUID(qt3dsdm::CUICDMInstanceHandle inInstance)
+qt3dsdm::SLong4 CClientDataModelBridge::GetInstanceGUID(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     std::pair<TInstanceToGUIDHash::iterator, bool> theEntry(
         m_CachedInstanceToGUIDHash.insert(std::make_pair(inInstance, SLong4())));
@@ -739,7 +739,7 @@ qt3dsdm::SLong4 CClientDataModelBridge::GetInstanceGUID(qt3dsdm::CUICDMInstanceH
     return theEntry.first->second;
 }
 
-void CClientDataModelBridge::SetInstanceGUID(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CClientDataModelBridge::SetInstanceGUID(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                              qt3dsdm::SLong4 inGuid)
 {
     m_DataCore->SetInstancePropertyValue(inInstance, GetObjectDefinitions().m_Guided.m_GuidProp,
@@ -747,68 +747,68 @@ void CClientDataModelBridge::SetInstanceGUID(qt3dsdm::CUICDMInstanceHandle inIns
     m_CachedGUIDToInstancesHash.clear();
     m_CachedInstanceToGUIDHash.clear();
     erase_if(m_CachedGuidInstances,
-             std::bind(std::equal_to<qt3dsdm::CUICDMInstanceHandle>(), inInstance,
+             std::bind(std::equal_to<qt3dsdm::Qt3DSDMInstanceHandle>(), inInstance,
                        std::placeholders::_1));
     erase_if(m_CacheImageInstances,
-             std::bind(std::equal_to<qt3dsdm::CUICDMInstanceHandle>(), inInstance,
+             std::bind(std::equal_to<qt3dsdm::Qt3DSDMInstanceHandle>(), inInstance,
                        std::placeholders::_1));
     erase_if(m_CacheMaterialInstances,
-             std::bind(std::equal_to<qt3dsdm::CUICDMInstanceHandle>(), inInstance,
+             std::bind(std::equal_to<qt3dsdm::Qt3DSDMInstanceHandle>(), inInstance,
                        std::placeholders::_1));
     erase_if(m_CacheModelInstances,
-             std::bind(std::equal_to<qt3dsdm::CUICDMInstanceHandle>(), inInstance,
+             std::bind(std::equal_to<qt3dsdm::Qt3DSDMInstanceHandle>(), inInstance,
                        std::placeholders::_1));
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetImageInstanceByGUID(const Q3DStudio::CId &inId)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetImageInstanceByGUID(const Q3DStudio::CId &inId)
 {
     return GetImageInstanceByGUID(GuidToLong4(inId));
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetImageInstanceByGUID(SLong4 inLong4)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetImageInstanceByGUID(SLong4 inLong4)
 {
     if (inLong4 == SLong4(0, 0, 0, 0)) // invalid GUID
         return 0;
     return GetInstanceByGUID(inLong4);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetMaterialInstanceByGUID(const Q3DStudio::CId &inId)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetMaterialInstanceByGUID(const Q3DStudio::CId &inId)
 {
     return GetMaterialInstanceByGUID(GuidToLong4(inId));
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetMaterialInstanceByGUID(SLong4 inLong4)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetMaterialInstanceByGUID(SLong4 inLong4)
 {
     return MaybeCacheGetInstanceByGUIDDerivedFrom(inLong4, m_CacheMaterialInstances,
                                                   m_DefaultMaterial.m_Instance,
                                                   GetObjectDefinitions().m_Guided.m_GuidProp);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetModelInstanceByGUID(const Q3DStudio::CId &inId)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetModelInstanceByGUID(const Q3DStudio::CId &inId)
 {
     return GetModelInstanceByGUID(GuidToLong4(inId));
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetModelInstanceByGUID(SLong4 inLong4)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetModelInstanceByGUID(SLong4 inLong4)
 {
     return MaybeCacheGetInstanceByGUIDDerivedFrom(inLong4, m_CacheModelInstances,
                                                   m_Model.m_Instance,
                                                   GetObjectDefinitions().m_Guided.m_GuidProp);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetComponentInstanceByGUID(const Q3DStudio::CId &inId)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetComponentInstanceByGUID(const Q3DStudio::CId &inId)
 {
     return GetComponentInstanceByGUID(GuidToLong4(inId));
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetComponentInstanceByGUID(SLong4 inLong4)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetComponentInstanceByGUID(SLong4 inLong4)
 {
     return GetInstanceByGUIDDerivedFrom(inLong4, m_SlideItem.m_Instance, m_SlideItem.m_ComponentId);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::MaybeCacheGetInstanceByGUIDDerivedFrom(
-    SLong4 inLong4, TInstanceHandleList &ioCacheInstances, CUICDMInstanceHandle inParentHandle,
-    CUICDMPropertyHandle inProperty)
+Qt3DSDMInstanceHandle CClientDataModelBridge::MaybeCacheGetInstanceByGUIDDerivedFrom(
+    SLong4 inLong4, TInstanceHandleList &ioCacheInstances, Qt3DSDMInstanceHandle inParentHandle,
+    Qt3DSDMPropertyHandle inProperty)
 {
     if (m_CacheEnabled) {
         if (ioCacheInstances.empty())
@@ -818,8 +818,8 @@ CUICDMInstanceHandle CClientDataModelBridge::MaybeCacheGetInstanceByGUIDDerivedF
         return GetInstanceByGUIDDerivedFrom(inLong4, inParentHandle, inProperty);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUIDDerivedFrom(
-    SLong4 inLong4, CUICDMInstanceHandle inParentHandle, CUICDMPropertyHandle inProperty)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstanceByGUIDDerivedFrom(
+    SLong4 inLong4, Qt3DSDMInstanceHandle inParentHandle, Qt3DSDMPropertyHandle inProperty)
 {
     // Run through all the instances derived from parent, and if a guid matches return that
     // instance.
@@ -828,8 +828,8 @@ CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUIDDerivedFrom(
     return GetInstanceByGUIDDerivedFrom(inLong4, instances, inProperty);
 }
 
-CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUIDDerivedFrom(
-    SLong4 inLong4, const TInstanceHandleList &instances, CUICDMPropertyHandle inProperty)
+Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstanceByGUIDDerivedFrom(
+    SLong4 inLong4, const TInstanceHandleList &instances, Qt3DSDMPropertyHandle inProperty)
 {
     // Run through all the instances derived from parent, and if a guid matches return that
     // instance.
@@ -842,8 +842,8 @@ CUICDMInstanceHandle CClientDataModelBridge::GetInstanceByGUIDDerivedFrom(
     return 0;
 }
 
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetInstance(qt3dsdm::CUICDMInstanceHandle inRoot,
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
                                     const qt3dsdm::SObjectRefType &inValue)
 {
     using namespace qt3dsdm;
@@ -869,7 +869,7 @@ CClientDataModelBridge::GetInstance(qt3dsdm::CUICDMInstanceHandle inRoot,
 // if it's long, it's the instance handle stored as long
 // if it's long4, it's the GUID
 // if it's a string, it's a path and so we need to decode the path to find the asset
-qt3dsdm::CUICDMInstanceHandle CClientDataModelBridge::GetInstance(qt3dsdm::CUICDMInstanceHandle inRoot,
+qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
                                                                 const qt3dsdm::SValue &inValue)
 {
     using namespace qt3dsdm;
@@ -877,12 +877,12 @@ qt3dsdm::CUICDMInstanceHandle CClientDataModelBridge::GetInstance(qt3dsdm::CUICD
     return GetInstance(inRoot, ConvertToObjectRef(inValue));
 }
 
-std::pair<qt3dsdm::CUICDMInstanceHandle, qt3dsdm::SLong4>
-CClientDataModelBridge::CreateImageInstance(qt3dsdm::CUICDMInstanceHandle inSourceInstance,
-                                            CUICDMPropertyHandle inSlot,
+std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4>
+CClientDataModelBridge::CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSourceInstance,
+                                            Qt3DSDMPropertyHandle inSlot,
                                             CUICDMSlideHandle inUICDMSlide)
 {
-    CUICDMInstanceHandle theNewInstance =
+    Qt3DSDMInstanceHandle theNewInstance =
         m_Doc->GetStudioSystem()
             ->GetPropertySystem()
             ->CreateInstance(); // this should call CDataCoreProducer::CreateInstance(). If there is
@@ -929,8 +929,8 @@ CClientDataModelBridge::CreateImageInstance(qt3dsdm::CUICDMInstanceHandle inSour
     return std::make_pair(theNewInstance, theInstanceLong4);
 }
 
-Q3DStudio::CId CClientDataModelBridge::GetId(qt3dsdm::CUICDMInstanceHandle inInstance,
-                                             qt3dsdm::CUICDMPropertyHandle inProperty) const
+Q3DStudio::CId CClientDataModelBridge::GetId(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                             qt3dsdm::Qt3DSDMPropertyHandle inProperty) const
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SValue theSourceValue;
@@ -949,15 +949,15 @@ Q3DStudio::CId CClientDataModelBridge::GetId(qt3dsdm::CUICDMInstanceHandle inIns
 }
 
 // Check whether this instance is inside the current active component
-bool CClientDataModelBridge::IsInActiveComponent(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsInActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    qt3dsdm::CUICDMInstanceHandle theActiveRoot = m_Doc->GetActiveRootInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theActiveRoot = m_Doc->GetActiveRootInstance();
     return (theActiveRoot == GetOwningComponentInstance(inInstance));
 }
 
 // Check whether inInstance is inside inComponentInstance
-bool CClientDataModelBridge::IsInComponent(qt3dsdm::CUICDMInstanceHandle inInstance,
-                                           qt3dsdm::CUICDMInstanceHandle inComponentInstance)
+bool CClientDataModelBridge::IsInComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                           qt3dsdm::Qt3DSDMInstanceHandle inComponentInstance)
 {
     return (GetOwningComponentInstance(inInstance) == inComponentInstance);
 }
@@ -970,14 +970,14 @@ bool CClientDataModelBridge::IsInComponent(qt3dsdm::CUICDMInstanceHandle inInsta
  * @param inIsFirstCall true if the child is to be ignored as being a component.
  * @return the parent component, or this if the parent is NULL.
  */
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetParentComponent(qt3dsdm::CUICDMInstanceHandle inInstance,
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetParentComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                            bool inIsFirstCall /*= true*/)
 {
     if (!inIsFirstCall && (IsSceneInstance(inInstance) || IsComponentInstance(inInstance)))
         return inInstance;
 
-    qt3dsdm::CUICDMInstanceHandle theParentInstance = GetParentInstance(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theParentInstance = GetParentInstance(inInstance);
     if (theParentInstance.Valid())
         return GetParentComponent(theParentInstance, false);
     else
@@ -994,8 +994,8 @@ CClientDataModelBridge::GetParentComponent(qt3dsdm::CUICDMInstanceHandle inInsta
  *	@return a unique name that no other child has.
  */
 Q3DStudio::CString
-CClientDataModelBridge::GetUniqueChildName(qt3dsdm::CUICDMInstanceHandle inParent,
-                                           qt3dsdm::CUICDMInstanceHandle inInstance,
+CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                                           qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                            Q3DStudio::CString inDesiredName)
 {
     // fyi, if we get abc123, theBaseName gets abc and theBaseIndex gets 123
@@ -1023,7 +1023,7 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::CUICDMInstanceHandle inParen
         }
     }
 
-    qt3dsdm::CUICDMInstanceHandle theExistingChild = 0;
+    qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
     // If there is a base name then use it
     if (theBaseName.Length() > 0)
         theExistingChild = GetChildByName(inParent, inDesiredName);
@@ -1050,10 +1050,10 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::CUICDMInstanceHandle inParen
     return theUniqueName;
 }
 
-bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::CUICDMInstanceHandle inInstance,
+bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                              Q3DStudio::CString inDesiredName)
 {
-    qt3dsdm::CUICDMInstanceHandle theExistingChild = 0;
+    qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
     if (inDesiredName.Length() > 0)
         theExistingChild = GetChildByName(GetParentInstance(inInstance), inDesiredName);
 
@@ -1065,7 +1065,7 @@ bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::CUICDMInstanceHandle inIns
  *	Get SourcePath value for this instance
  */
 Q3DStudio::CString
-CClientDataModelBridge::GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance) const
+CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     if (inInstance.Valid()) {
         qt3dsdm::SValue theValue;
@@ -1101,8 +1101,8 @@ inline void AddSourcePathToList(std::set<Q3DStudio::CString> &ioSourcePathList,
 /**
  *	Get list of values from all instances derived from inParentInstance
  */
-std::vector<SValue> CClientDataModelBridge::GetValueList(CUICDMInstanceHandle inParentInstance,
-                                                         CUICDMPropertyHandle inProperty,
+std::vector<SValue> CClientDataModelBridge::GetValueList(Qt3DSDMInstanceHandle inParentInstance,
+                                                         Qt3DSDMPropertyHandle inProperty,
                                                          IValueFilter *inFilter) const
 {
     std::vector<SValue> theValueList;
@@ -1127,8 +1127,8 @@ std::vector<SValue> CClientDataModelBridge::GetValueList(CUICDMInstanceHandle in
 /**
  *	Get list of values from all slides
  */
-void CClientDataModelBridge::GetValueListFromAllSlides(CUICDMInstanceHandle inInstance,
-                                                       CUICDMPropertyHandle inProperty,
+void CClientDataModelBridge::GetValueListFromAllSlides(Qt3DSDMInstanceHandle inInstance,
+                                                       Qt3DSDMPropertyHandle inProperty,
                                                        std::vector<SValue> &outValueList,
                                                        IValueFilter *inFilter) const
 {
@@ -1173,8 +1173,8 @@ struct SValueListFilter : public IValueFilter
         : m_Bridge(bridge)
     {
     }
-    bool KeepValue(qt3dsdm::CUICDMInstanceHandle inInstance,
-                           qt3dsdm::CUICDMPropertyHandle /*inProperty*/,
+    bool KeepValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle /*inProperty*/,
                            const qt3dsdm::SValue & /*inValue*/) override
     {
         return !m_Bridge.IsLayerInstance(inInstance);
@@ -1255,7 +1255,7 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
 }
 
 static void GetDynamicObjecTextures(IDataCore &inDataCore, IPropertySystem &inPropertySystem,
-                                    CUICDMInstanceHandle inBaseInstance,
+                                    Qt3DSDMInstanceHandle inBaseInstance,
                                     std::vector<SValue> &outValues,
                                     const CClientDataModelBridge &inBridge)
 {
@@ -1268,7 +1268,7 @@ static void GetDynamicObjecTextures(IDataCore &inDataCore, IPropertySystem &inPr
     IPropertySystem *thePropertySystem = &inPropertySystem;
     for (TInstanceHandleList::const_iterator theIter = theDerivedInstances.begin();
          theIter != theDerivedInstances.end(); ++theIter) {
-        CUICDMInstanceHandle theInstance = *theIter;
+        Qt3DSDMInstanceHandle theInstance = *theIter;
 
         // Skip the parent instance
         // This works because when we import a custom material, we create a new class that is
@@ -1289,7 +1289,7 @@ static void GetDynamicObjecTextures(IDataCore &inDataCore, IPropertySystem &inPr
         thePropertySystem->GetAggregateInstanceProperties(theInstance, theProperties);
         size_t thePropertyCount = theProperties.size();
         for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount; ++thePropertyIndex) {
-            CUICDMPropertyHandle theProperty = theProperties[thePropertyIndex];
+            Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
             qt3dsdm::AdditionalMetaDataType::Value theAdditionalMetaDataType =
                 thePropertySystem->GetAdditionalMetaDataType(theInstance, theProperty);
             if (theAdditionalMetaDataType == AdditionalMetaDataType::Texture) {
@@ -1326,7 +1326,7 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetDynamicObjectTextureList
     return theSourcePathList;
 }
 
-bool CClientDataModelBridge::IsLockedAtAll(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     qt3dsdm::SValue theValue;
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
@@ -1337,7 +1337,7 @@ bool CClientDataModelBridge::IsLockedAtAll(qt3dsdm::CUICDMInstanceHandle inInsta
     return false;
 }
 
-bool CClientDataModelBridge::IsDuplicateable(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (!inInstance.Valid())
         return false;
@@ -1354,7 +1354,7 @@ bool CClientDataModelBridge::IsDuplicateable(qt3dsdm::CUICDMInstanceHandle inIns
         return !IsLockedAtAll(inInstance);
 }
 
-bool CClientDataModelBridge::IsMultiSelectable(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsMultiSelectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (!m_DataCore->IsInstance(inInstance))
         return false;
@@ -1376,7 +1376,7 @@ bool CClientDataModelBridge::IsMultiSelectable(qt3dsdm::CUICDMInstanceHandle inI
     return !IsLockedAtAll(inInstance);
 }
 
-bool CClientDataModelBridge::CanDelete(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (!inInstance.Valid())
         return false;
@@ -1434,7 +1434,7 @@ bool CClientDataModelBridge::CanDelete(qt3dsdm::CUICDMInstanceHandle inInstance)
     }
 }
 
-bool CClientDataModelBridge::IsMaster(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (IsSceneInstance(inInstance))
         return true;
@@ -1449,8 +1449,8 @@ bool CClientDataModelBridge::IsMaster(qt3dsdm::CUICDMInstanceHandle inInstance)
 /**
  *	Get the layer that this instance lies in.
  */
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetResidingLayer(qt3dsdm::CUICDMInstanceHandle inInstance)
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetResidingLayer(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (!inInstance.Valid())
         return 0;
@@ -1458,7 +1458,7 @@ CClientDataModelBridge::GetResidingLayer(qt3dsdm::CUICDMInstanceHandle inInstanc
     if (IsLayerInstance(inInstance))
         return inInstance;
     else {
-        qt3dsdm::CUICDMInstanceHandle theParent = GetParentInstance(inInstance);
+        qt3dsdm::Qt3DSDMInstanceHandle theParent = GetParentInstance(inInstance);
         if (theParent.Valid())
             return GetResidingLayer(theParent);
         else
@@ -1474,32 +1474,32 @@ CClientDataModelBridge::GetResidingLayer(qt3dsdm::CUICDMInstanceHandle inInstanc
  *	@param inName the name of the child object to fetch.
  *	@return the child that was found.
  */
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetChildByName(qt3dsdm::CUICDMInstanceHandle inParent,
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetChildByName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
                                        Q3DStudio::CString inName)
 {
     Q3DStudio::CGraphIterator theChildren;
     GetAssetChildren(m_Doc, inParent, theChildren);
 
     for (; !theChildren.IsDone(); ++theChildren) {
-        qt3dsdm::CUICDMInstanceHandle theChildInstance = theChildren.GetCurrent();
+        qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
         if (GetName(theChildInstance) == inName)
             return theChildInstance;
     }
     return 0;
 }
 
-Q3DStudio::CId CClientDataModelBridge::GetGUID(qt3dsdm::CUICDMInstanceHandle inInstance) const
+Q3DStudio::CId CClientDataModelBridge::GetGUID(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return GetId(inInstance, GetObjectDefinitions().m_Guided.m_GuidProp);
 }
 
-qt3dsdm::CUICDMInstanceHandle
-CClientDataModelBridge::GetParentInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
+qt3dsdm::Qt3DSDMInstanceHandle
+CClientDataModelBridge::GetParentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (IsImageInstance(inInstance)) {
-        qt3dsdm::CUICDMInstanceHandle theParentInstance;
-        qt3dsdm::CUICDMPropertyHandle theProperty;
+        qt3dsdm::Qt3DSDMInstanceHandle theParentInstance;
+        qt3dsdm::Qt3DSDMPropertyHandle theProperty;
         if (!GetMaterialFromImageInstance(inInstance, theParentInstance, theProperty))
             this->GetLayerFromImageProbeInstance(inInstance, theParentInstance, theProperty);
         return theParentInstance;
@@ -1512,7 +1512,7 @@ CClientDataModelBridge::GetParentInstance(qt3dsdm::CUICDMInstanceHandle inInstan
     }
 }
 
-EStudioObjectType CClientDataModelBridge::GetObjectType(qt3dsdm::CUICDMInstanceHandle inInstance)
+EStudioObjectType CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     SValue theTypeValue;
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
@@ -1567,102 +1567,102 @@ EStudioObjectType CClientDataModelBridge::GetObjectType(qt3dsdm::CUICDMInstanceH
     }
 }
 
-bool CClientDataModelBridge::IsBehaviorInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsBehaviorInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Behavior.m_Instance);
 }
 
-bool CClientDataModelBridge::IsCameraInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsCameraInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Camera.m_Instance);
 }
 
-bool CClientDataModelBridge::IsGroupInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsGroupInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Group.m_Instance);
 }
 
-bool CClientDataModelBridge::IsActionInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsActionInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_ActionItem.m_Instance);
 }
 
-bool CClientDataModelBridge::IsComponentInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Component.m_Instance);
 }
 
-bool CClientDataModelBridge::IsLayerInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsLayerInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Layer.m_Instance);
 }
 
-bool CClientDataModelBridge::IsLightInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsLightInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Light.m_Instance);
 }
-bool CClientDataModelBridge::IsModelInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsModelInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Model.m_Instance);
 }
 
-bool CClientDataModelBridge::IsMaterialBaseInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsMaterialBaseInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_MaterialBase.m_Instance);
 }
 
-bool CClientDataModelBridge::IsMaterialInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_DefaultMaterial.m_Instance);
 }
 
-bool CClientDataModelBridge::IsImageInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_SceneImage.m_Instance);
 }
 
-bool CClientDataModelBridge::IsSceneInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsSceneInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Scene.m_Instance);
 }
 
-bool CClientDataModelBridge::IsTextInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsTextInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Text.m_Instance);
 }
 
-bool CClientDataModelBridge::IsEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Effect.m_Instance);
 }
 
-bool CClientDataModelBridge::IsRenderPluginInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsRenderPluginInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_RenderPlugin.m_Instance);
 }
 
-bool CClientDataModelBridge::IsCustomMaterialInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsCustomMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_CustomMaterial.m_Instance);
 }
 
 bool CClientDataModelBridge::IsReferencedMaterialInstance(
-    qt3dsdm::CUICDMInstanceHandle inInstance) const
+    qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(
         inInstance, m_ObjectDefinitions->m_ReferencedMaterial.m_Instance);
 }
 
-bool CClientDataModelBridge::IsLightmapsInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsLightmapsInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Lightmaps.m_Instance);
 }
 
-bool CClientDataModelBridge::IsNodeType(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsNodeType(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_Node.m_Instance);
 }
-bool CClientDataModelBridge::IsSceneGraphInstance(qt3dsdm::CUICDMInstanceHandle inInstance) const
+bool CClientDataModelBridge::IsSceneGraphInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     if (m_DataCore->IsInstance(inInstance) == false)
         return false;
@@ -1672,7 +1672,7 @@ bool CClientDataModelBridge::IsSceneGraphInstance(qt3dsdm::CUICDMInstanceHandle 
         || IsEffectInstance(inInstance) || IsBehaviorInstance(inInstance);
 }
 
-bool SActionInvalidProperty::operator()(qt3dsdm::CUICDMPropertyHandle inProperty)
+bool SActionInvalidProperty::operator()(qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     using namespace qt3dsdm;
     AdditionalMetaDataType::Value theType =
@@ -1685,7 +1685,7 @@ bool SActionInvalidProperty::operator()(qt3dsdm::CUICDMPropertyHandle inProperty
 }
 
 // Get all actions that used this instance as either the trigger or target object
-void CClientDataModelBridge::GetReferencedActions(CUICDMInstanceHandle inReferencedInstance,
+void CClientDataModelBridge::GetReferencedActions(Qt3DSDMInstanceHandle inReferencedInstance,
                                                   long inReferencedMode,
                                                   TActionHandleList &outActions)
 {
@@ -1713,7 +1713,7 @@ void CClientDataModelBridge::GetReferencedActions(CUICDMInstanceHandle inReferen
 }
 
 void CClientDataModelBridge::UpdateHandlerArgumentValue(qt3dsdm::HandlerArgumentType::Value inArgType,
-                                                        qt3dsdm::CUICDMInstanceHandle inTargetObject,
+                                                        qt3dsdm::Qt3DSDMInstanceHandle inTargetObject,
                                                         qt3dsdm::SValue inOrigValue,
                                                         qt3dsdm::SValue inNewValue)
 {
@@ -1736,7 +1736,7 @@ void CClientDataModelBridge::UpdateHandlerArgumentValue(qt3dsdm::HandlerArgument
     }
 }
 
-std::wstring CClientDataModelBridge::GetDefaultHandler(CUICDMInstanceHandle inInstance,
+std::wstring CClientDataModelBridge::GetDefaultHandler(Qt3DSDMInstanceHandle inInstance,
                                                        std::wstring inOldHandler)
 {
     IMetaData *theMetaData = m_Doc->GetStudioSystem()->GetActionMetaData();
@@ -1768,7 +1768,7 @@ std::wstring CClientDataModelBridge::GetDefaultHandler(CUICDMInstanceHandle inIn
     return theHandlerName;
 }
 
-std::wstring CClientDataModelBridge::GetDefaultEvent(CUICDMInstanceHandle inInstance,
+std::wstring CClientDataModelBridge::GetDefaultEvent(Qt3DSDMInstanceHandle inInstance,
                                                      std::wstring inOldEvent)
 {
     IMetaData *theMetaData = m_Doc->GetStudioSystem()->GetActionMetaData();
@@ -1827,7 +1827,7 @@ void CClientDataModelBridge::ResetHandlerArguments(CUICDMActionHandle inAction,
                 break;
             case HandlerArgumentType::Property: {
                 SActionInfo theActionInfo = theActionCore->GetActionInfo(inAction);
-                CUICDMInstanceHandle theTargetObject =
+                Qt3DSDMInstanceHandle theTargetObject =
                     GetInstance(theActionInfo.m_Owner, theActionInfo.m_TargetObject);
                 qt3dsdm::TPropertyHandleList theProperties;
                 m_DataCore->GetAggregateInstanceProperties(theTargetObject, theProperties);
@@ -1855,8 +1855,8 @@ void CClientDataModelBridge::ResetHandlerArguments(CUICDMActionHandle inAction,
         const SActionInfo &theActionInfo = theActionCore->GetActionInfo(inAction);
         DataModelDataType::Value theDataType = DataModelDataType::None;
         CUICDMHandlerArgHandle theDependentArg = 0;
-        CUICDMInstanceHandle theDependentInstance;
-        CUICDMPropertyHandle theDependentProperty;
+        Qt3DSDMInstanceHandle theDependentInstance;
+        Qt3DSDMPropertyHandle theDependentProperty;
         for (THandlerArgHandleList::const_iterator theIterator =
                  theActionInfo.m_HandlerArgs.begin();
              theIterator != theActionInfo.m_HandlerArgs.end(); ++theIterator) {
@@ -1894,11 +1894,11 @@ void CClientDataModelBridge::ResetHandlerArguments(qt3dsdm::CUICDMActionHandle i
 }
 
 qt3dsdm::CUICDMEventHandle
-CClientDataModelBridge::ResolveEvent(qt3dsdm::CUICDMInstanceHandle inResolveRoot,
+CClientDataModelBridge::ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                      const qt3dsdm::SObjectRefType &inResolution,
                                      const std::wstring &inEventName)
 {
-    CUICDMInstanceHandle theInstance = GetInstance(inResolveRoot, inResolution);
+    Qt3DSDMInstanceHandle theInstance = GetInstance(inResolveRoot, inResolution);
     if (theInstance.Valid() == false)
         return 0;
     IMetaData &theMetaData(*m_Doc->GetStudioSystem()->GetActionMetaData());
@@ -1906,11 +1906,11 @@ CClientDataModelBridge::ResolveEvent(qt3dsdm::CUICDMInstanceHandle inResolveRoot
 }
 
 qt3dsdm::CUICDMHandlerHandle
-CClientDataModelBridge::ResolveHandler(qt3dsdm::CUICDMInstanceHandle inResolveRoot,
+CClientDataModelBridge::ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                        const qt3dsdm::SObjectRefType &inResolution,
                                        const std::wstring &inHandlerName)
 {
-    CUICDMInstanceHandle theInstance = GetInstance(inResolveRoot, inResolution);
+    Qt3DSDMInstanceHandle theInstance = GetInstance(inResolveRoot, inResolution);
     if (theInstance.Valid() == false)
         return 0;
     IMetaData &theMetaData(*m_Doc->GetStudioSystem()->GetActionMetaData());
@@ -1941,11 +1941,11 @@ void CClientDataModelBridge::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHa
         // this property
         const SActionInfo &theActionInfo =
             theActionCore->GetActionInfo(theHandlerArgument.m_Action);
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             GetInstance(theActionInfo.m_Owner, theActionInfo.m_TargetObject);
         TCharStr thePropertyName =
             qt3dsdm::get<qt3dsdm::TDataStrPtr>(theHandlerArgument.m_Value)->GetData();
-        CUICDMPropertyHandle thePropertyHandle =
+        Qt3DSDMPropertyHandle thePropertyHandle =
             GetAggregateInstancePropertyByName(theInstance, thePropertyName);
         DataModelDataType::Value theDataType = thePropertySystem->GetDataType(thePropertyHandle);
 
@@ -1965,8 +1965,8 @@ void CClientDataModelBridge::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHa
 }
 
 void CClientDataModelBridge::GetActionDependentProperty(CUICDMActionHandle inAction,
-                                                        CUICDMInstanceHandle &outInstance,
-                                                        CUICDMPropertyHandle &outProperty)
+                                                        Qt3DSDMInstanceHandle &outInstance,
+                                                        Qt3DSDMPropertyHandle &outProperty)
 {
     IActionCore *theActionCore = m_Doc->GetStudioSystem()->GetActionCore();
     const SActionInfo &theActionInfo = theActionCore->GetActionInfo(inAction);
@@ -1988,7 +1988,7 @@ void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle i
                                                    std::list<Q3DStudio::CString> &outSlideNames)
 {
     SActionInfo theActionInfo = m_Doc->GetStudioSystem()->GetActionCore()->GetActionInfo(inAction);
-    CUICDMInstanceHandle theTargetInstance =
+    Qt3DSDMInstanceHandle theTargetInstance =
         GetInstance(theActionInfo.m_Owner, theActionInfo.m_TargetObject);
     Q3DStudio::CId theTargetId = GetGUID(theTargetInstance);
 
@@ -2002,14 +2002,14 @@ void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle i
     {
         CUICDMSlideHandle theSlideHandle =
             theSlideSystem->GetSlideByIndex(theMasterSlide, theSlideIndex);
-        CUICDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theSlideHandle);
+        Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theSlideHandle);
         outSlideNames.push_back(GetName(theInstanceHandle));
     }
 }
 
 void CClientDataModelBridge::SetArgTypeDependentDefaultValue(
     CUICDMHandlerArgHandle inHandlerArgument, DataModelDataType::Value inDataType,
-    CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty)
+    Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
 {
     SValue theValue;
     SetDefault(inDataType, theValue);
@@ -2028,7 +2028,7 @@ void CClientDataModelBridge::SetArgTypeDependentDefaultValue(
     m_Doc->GetStudioSystem()->GetActionCore()->SetHandlerArgumentValue(inHandlerArgument, theValue);
 }
 
-void CClientDataModelBridge::GetEvents(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CClientDataModelBridge::GetEvents(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                        qt3dsdm::TEventHandleList &outEvents)
 {
     if (m_Doc->GetStudioSystem()->IsInstance(inInstance))
@@ -2042,7 +2042,7 @@ qt3dsdm::SEventInfo CClientDataModelBridge::GetEventInfo(qt3dsdm::CUICDMEventHan
     return m_Doc->GetStudioSystem()->GetActionMetaData()->GetEventInfo(inEvent);
 }
 
-void CClientDataModelBridge::GetHandlers(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CClientDataModelBridge::GetHandlers(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                          qt3dsdm::THandlerHandleList &outHandles)
 {
     if (m_Doc->GetStudioSystem()->IsInstance(inInstance))
@@ -2056,8 +2056,8 @@ qt3dsdm::SHandlerInfo CClientDataModelBridge::GetHandlerInfo(qt3dsdm::CUICDMHand
     return m_Doc->GetStudioSystem()->GetActionMetaData()->GetHandlerInfo(inHandler);
 }
 
-CUICDMPropertyHandle
-CClientDataModelBridge::GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle
+CClientDataModelBridge::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                                            const TCharStr &inPropertyName)
 {
     return m_DataCore->GetAggregateInstancePropertyByName(inInstance, inPropertyName);

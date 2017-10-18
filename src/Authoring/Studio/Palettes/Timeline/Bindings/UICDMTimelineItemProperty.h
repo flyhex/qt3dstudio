@@ -51,8 +51,8 @@ class CUICDMTimelineItemProperty : public ITimelineItemProperty
 {
 public:
     CUICDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
-                               qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
-                               qt3dsdm::CUICDMInstanceHandle inInstance);
+                               qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
+                               qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual ~CUICDMTimelineItemProperty();
 
     // ITimelineProperty
@@ -91,12 +91,12 @@ public:
     void RefreshKeyFrames(void);
 
 protected:
-    void InitializeCachedVariables(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool CreateKeyframeIfNonExistent(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                                      qt3dsdm::CUICDMAnimationHandle inOwningAnimation);
     void OnPropertyLinkStatusChanged(qt3dsdm::CUICDMSlideHandle inSlide,
-                                     qt3dsdm::CUICDMInstanceHandle inInstance,
-                                     qt3dsdm::CUICDMPropertyHandle inProperty);
+                                     qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                     qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void CreateKeyframes();
     void ReleaseKeyframes();
 
@@ -104,8 +104,8 @@ protected:
     typedef std::vector<CUICDMTimelineKeyframe *> TKeyframeList;
 
     CPropertyRow *m_Row;
-    qt3dsdm::CUICDMInstanceHandle m_InstanceHandle;
-    qt3dsdm::CUICDMPropertyHandle m_PropertyHandle;
+    qt3dsdm::Qt3DSDMInstanceHandle m_InstanceHandle;
+    qt3dsdm::Qt3DSDMPropertyHandle m_PropertyHandle;
     CTimelineTranslationManager *m_TransMgr;
     std::vector<qt3dsdm::CUICDMAnimationHandle> m_AnimationHandles;
     TKeyframeList m_Keyframes;

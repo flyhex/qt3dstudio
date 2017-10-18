@@ -55,7 +55,7 @@
 using namespace qt3dsdm;
 
 CGroupTimelineItemBinding::CGroupTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                                     CUICDMInstanceHandle inDataHandle)
+                                                     Qt3DSDMInstanceHandle inDataHandle)
     : CUICDMTimelineItemBinding(inMgr, inDataHandle)
 {
 }
@@ -71,7 +71,7 @@ bool CGroupTimelineItemBinding::OpenAssociatedEditor()
     if (GetObjectType() == OBJTYPE_COMPONENT) {
         ISlideSystem *theSlideSystem = m_StudioSystem->GetSlideSystem();
 
-        qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
         Q3DStudio::CId theId = m_StudioSystem->GetClientDataModelBridge()->GetGUID(theInstance);
         qt3dsdm::CUICDMSlideHandle theMasterSlide =
             theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
@@ -94,7 +94,7 @@ bool CGroupTimelineItemBinding::OpenAssociatedEditor()
 bool CGroupTimelineItemBinding::IsImported() const
 {
 
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     qt3dsdm::IPropertySystem *thePropertySystem =
         m_TransMgr->GetDoc()->GetStudioSystem()->GetPropertySystem();
     qt3dsdm::SValue theValue;

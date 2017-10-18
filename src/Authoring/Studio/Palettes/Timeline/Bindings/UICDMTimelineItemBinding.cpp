@@ -75,7 +75,7 @@
 using namespace qt3dsdm;
 
 CUICDMTimelineItemBinding::CUICDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                                     CUICDMInstanceHandle inDataHandle)
+                                                     Qt3DSDMInstanceHandle inDataHandle)
     : m_Row(nullptr)
     , m_TransMgr(inMgr)
     , m_DataHandle(inDataHandle)
@@ -106,7 +106,7 @@ CUICDMTimelineItemBinding::~CUICDMTimelineItemBinding()
 }
 
 // helpers
-bool CUICDMTimelineItemBinding::UICDMGetBoolean(qt3dsdm::CUICDMPropertyHandle inProperty) const
+bool CUICDMTimelineItemBinding::UICDMGetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_StudioSystem->GetPropertySystem();
     SValue theValue;
@@ -114,7 +114,7 @@ bool CUICDMTimelineItemBinding::UICDMGetBoolean(qt3dsdm::CUICDMPropertyHandle in
     return qt3dsdm::get<bool>(theValue);
 }
 
-void CUICDMTimelineItemBinding::UICDMSetBoolean(qt3dsdm::CUICDMPropertyHandle inProperty,
+void CUICDMTimelineItemBinding::UICDMSetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
                                                 bool inValue, const QString &inNiceText) const
 {
     CDoc *theDoc = dynamic_cast<CDoc *>(g_StudioApp.GetCore()->GetDoc());
@@ -122,7 +122,7 @@ void CUICDMTimelineItemBinding::UICDMSetBoolean(qt3dsdm::CUICDMPropertyHandle in
         ->SetInstancePropertyValue(m_DataHandle, inProperty, inValue);
 }
 
-void CUICDMTimelineItemBinding::SetInstanceHandle(qt3dsdm::CUICDMInstanceHandle inDataHandle)
+void CUICDMTimelineItemBinding::SetInstanceHandle(qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
 {
     m_DataHandle = inDataHandle;
 }
@@ -138,8 +138,8 @@ bool CUICDMTimelineItemBinding::IsMaster() const
     Q3DStudio::IDocumentReader &theReader(theDoc->GetDocumentReader());
     if (GetObjectType() == OBJTYPE_IMAGE) {
         CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
-        CUICDMInstanceHandle theParent;
-        CUICDMPropertyHandle theProperty;
+        Qt3DSDMInstanceHandle theParent;
+        Qt3DSDMPropertyHandle theProperty;
         bool isPropertyLinked;
 
         theBridge->GetMaterialFromImageInstance(GetInstance(), theParent, theProperty);
@@ -153,12 +153,12 @@ bool CUICDMTimelineItemBinding::IsMaster() const
 
         return isPropertyLinked;
     }
-    CUICDMInstanceHandle theQueryHandle(m_DataHandle);
+    Qt3DSDMInstanceHandle theQueryHandle(m_DataHandle);
     if (GetObjectType() == OBJTYPE_PATHANCHORPOINT)
         theQueryHandle = theReader.GetParent(m_DataHandle);
 
     // logic: you can't unlink name, so if name is linked then, this is master.
-    CUICDMPropertyHandle theNamePropHandle =
+    Qt3DSDMPropertyHandle theNamePropHandle =
         m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(theQueryHandle,
                                                                                 L"name");
     return theReader.IsPropertyLinked(theQueryHandle, theNamePropHandle);
@@ -264,7 +264,7 @@ bool CUICDMTimelineItemBinding::ChildrenHasAction(bool inMaster)
         TSlideInstancePairList theGraphInstances;
         m_StudioSystem->GetSlideSystem()->GetAssociatedInstances(theSlide, theGraphInstances);
 
-        qt3dsdm::CUICDMInstanceHandle theObservedInstance = GetInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theObservedInstance = GetInstance();
         if (theObservedInstance.Valid()) {
             for (TSlideInstancePairList::const_iterator theIter = theGraphInstances.begin();
                  theIter != theGraphInstances.end(); ++theIter) {
@@ -272,7 +272,7 @@ bool CUICDMTimelineItemBinding::ChildrenHasAction(bool inMaster)
                     CUICDMActionHandle theAction =
                         theActionCore->GetActionByInstance(theIter->second);
                     SActionInfo theActionInfo = theActionCore->GetActionInfo(theAction);
-                    CUICDMInstanceHandle theAcionOwner = theActionInfo.m_Owner;
+                    Qt3DSDMInstanceHandle theAcionOwner = theActionInfo.m_Owner;
                     if (theAcionOwner.Valid()
                         && IsAscendant(theAcionOwner, theObservedInstance, theDoc->GetAssetGraph()))
                         return true;
@@ -322,7 +322,7 @@ Q3DStudio::CString CUICDMTimelineItemBinding::GetName() const
 {
     if (m_StudioSystem->IsInstance(m_DataHandle) == false)
         return L"";
-    CUICDMPropertyHandle theNamePropHandle =
+    Qt3DSDMPropertyHandle theNamePropHandle =
         m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
                                                                                 L"name");
     SValue theNameValue;
@@ -360,7 +360,7 @@ void CUICDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
         }
     }
     // Set the name no matter it's unique or not
-    CUICDMPropertyHandle theNamePropHandle =
+    Qt3DSDMPropertyHandle theNamePropHandle =
         m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
                                                                                 L"name");
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
@@ -391,10 +391,10 @@ void CUICDMTimelineItemBinding::OnCollapsed()
     // Preserves legacy behavior where collapsing a tree will select that root, if any of its
     // descendant was selected
     // TODO: This won't work for Image (because Image is Material's property, not child)
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         CDoc *theDoc = m_TransMgr->GetDoc();
-        qt3dsdm::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
         if (theSelectedInstance.Valid()
             && IsAscendant(theSelectedInstance, theInstance, theDoc->GetAssetGraph()))
             SetSelected(false);
@@ -416,20 +416,20 @@ void CUICDMTimelineItemBinding::DoStartDrag(CControlWindowListener *inWndListene
     inWndListener->DoStartDrag(this);
 }
 
-inline qt3dsdm::CUICDMInstanceHandle CUICDMTimelineItemBinding::GetInstance() const
+inline qt3dsdm::Qt3DSDMInstanceHandle CUICDMTimelineItemBinding::GetInstance() const
 {
     return m_DataHandle;
 }
 
 void CUICDMTimelineItemBinding::SetDropTarget(CDropTarget *inTarget)
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     inTarget->SetInstance(theInstance);
 }
 
 long CUICDMTimelineItemBinding::GetChildrenCount()
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
         CUICDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
@@ -442,7 +442,7 @@ long CUICDMTimelineItemBinding::GetChildrenCount()
 
 ITimelineItemBinding *CUICDMTimelineItemBinding::GetChild(long inIndex)
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
         CUICDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
@@ -450,7 +450,7 @@ ITimelineItemBinding *CUICDMTimelineItemBinding::GetChild(long inIndex)
                                      theChildren, theActiveSlide);
         theChildren += inIndex;
 
-        qt3dsdm::CUICDMInstanceHandle theChildInstance = theChildren.GetCurrent();
+        qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
         if (theChildInstance.Valid())
             return m_TransMgr->GetOrCreate(theChildInstance);
     }
@@ -537,7 +537,7 @@ void CUICDMTimelineItemBinding::Bind(CBaseStateRow *inRow)
     }
 
     // Set selection status
-    CUICDMInstanceHandle theSelectedInstance = m_TransMgr->GetDoc()->GetSelectedInstance();
+    Qt3DSDMInstanceHandle theSelectedInstance = m_TransMgr->GetDoc()->GetSelectedInstance();
     m_Row->OnSelected(m_DataHandle == theSelectedInstance);
 }
 
@@ -550,7 +550,7 @@ void CUICDMTimelineItemBinding::Release()
 
 bool CUICDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     switch (inTransaction) {
     case EUserTransaction_Rename:
         return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE);
@@ -585,7 +585,7 @@ bool CUICDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransactio
                 // component.
                 // This may include behavior assets which may be directly attached to the Scene.
                 // This is because by principal, components cannot exist on the Scene directly.
-                qt3dsdm::CUICDMInstanceHandle theParentInstance =
+                qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
                     theBridge->GetParentInstance(theInstance);
                 if (theObjectType != OBJTYPE_LAYER && theObjectType != OBJTYPE_SCENE
                     && theObjectType != OBJTYPE_MATERIAL && theObjectType != OBJTYPE_IMAGE
@@ -688,7 +688,7 @@ void CUICDMTimelineItemBinding::RemoveProperty(ITimelineItemProperty *inProperty
 {
     Q_UNUSED(inProperty);
     // TODO: This function has no use in UICDM world. This is replaced by RemovePropertyRow(
-    // CUICDMPropertyHandle inPropertyHandle ).
+    // Qt3DSDMPropertyHandle inPropertyHandle ).
     // Decide if this function should be removed from ITimelineItemBinding.
 }
 
@@ -779,7 +779,7 @@ void CUICDMTimelineItemBinding::SelectKeyframes(bool inSelected, long inTime /*=
     DoSelectKeyframes(inSelected, inTime, false);
 }
 
-CUICDMInstanceHandle CUICDMTimelineItemBinding::GetInstanceHandle() const
+Qt3DSDMInstanceHandle CUICDMTimelineItemBinding::GetInstanceHandle() const
 {
     return m_DataHandle;
 }
@@ -797,13 +797,13 @@ void CUICDMTimelineItemBinding::OnEndDataModelNotifications()
     RefreshStateRow();
 }
 void CUICDMTimelineItemBinding::OnImmediateRefreshInstanceSingle(
-    qt3dsdm::CUICDMInstanceHandle inInstance)
+    qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (inInstance == m_DataHandle)
         RefreshStateRow(true);
 }
 void CUICDMTimelineItemBinding::OnImmediateRefreshInstanceMultiple(
-    qt3dsdm::CUICDMInstanceHandle *inInstance, long inInstanceCount)
+    qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
 {
     for (long idx = 0; idx < inInstanceCount; ++idx)
         if (inInstance[idx] == m_DataHandle) {
@@ -837,7 +837,7 @@ ITimelineTimebar *CUICDMTimelineItemBinding::CreateTimelineTimebar()
 }
 
 ITimelineItemProperty *
-CUICDMTimelineItemBinding::GetPropertyBinding(CUICDMPropertyHandle inPropertyHandle)
+CUICDMTimelineItemBinding::GetPropertyBinding(Qt3DSDMPropertyHandle inPropertyHandle)
 {
     TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.find(inPropertyHandle);
     // check if it already exists
@@ -847,7 +847,7 @@ CUICDMTimelineItemBinding::GetPropertyBinding(CUICDMPropertyHandle inPropertyHan
 }
 
 ITimelineItemProperty *
-CUICDMTimelineItemBinding::GetOrCreatePropertyBinding(CUICDMPropertyHandle inPropertyHandle)
+CUICDMTimelineItemBinding::GetOrCreatePropertyBinding(Qt3DSDMPropertyHandle inPropertyHandle)
 {
     ITimelineItemProperty *theProperty = GetPropertyBinding(inPropertyHandle);
     // check if it already exists
@@ -868,7 +868,7 @@ CUICDMTimelineItemBinding::GetOrCreatePropertyBinding(CUICDMPropertyHandle inPro
  * @param inAppend true to skip the check to find where to insert. ( true if this is a
  * loading/initializing step, where the call is already done in order )
  */
-void CUICDMTimelineItemBinding::AddPropertyRow(CUICDMPropertyHandle inPropertyHandle,
+void CUICDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inPropertyHandle,
                                                bool inAppend /*= false */)
 {
     ITimelineItemProperty *theTimelineProperty = GetPropertyBinding(inPropertyHandle);
@@ -912,7 +912,7 @@ void CUICDMTimelineItemBinding::AddPropertyRow(CUICDMPropertyHandle inPropertyHa
     AddKeyframes(theTimelineProperty);
 }
 
-void CUICDMTimelineItemBinding::RemovePropertyRow(CUICDMPropertyHandle inPropertyHandle)
+void CUICDMTimelineItemBinding::RemovePropertyRow(Qt3DSDMPropertyHandle inPropertyHandle)
 {
     TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.find(inPropertyHandle);
     if (theIter != m_PropertyBindingMap.end()) {
@@ -933,7 +933,7 @@ void CUICDMTimelineItemBinding::RemovePropertyRow(CUICDMPropertyHandle inPropert
 
 // called when a keyframe is inserted, deleted or updated in the data model
 void CUICDMTimelineItemBinding::RefreshPropertyKeyframe(
-    qt3dsdm::CUICDMPropertyHandle inPropertyHandle, qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+    qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle, qt3dsdm::CUICDMKeyframeHandle inKeyframe,
     ETimelineKeyframeTransaction inTransaction)
 {
     TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.find(inPropertyHandle);
@@ -984,7 +984,7 @@ void CUICDMTimelineItemBinding::UIRefreshPropertyKeyframe(long inOffset)
     m_Row->GetTimebar()->SetDirty(true);
 }
 
-void CUICDMTimelineItemBinding::OnPropertyChanged(CUICDMPropertyHandle inPropertyHandle)
+void CUICDMTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPropertyHandle)
 { // Refresh UI
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     if (m_Row && (inPropertyHandle == theBridge->GetNameProperty()
@@ -996,7 +996,7 @@ void CUICDMTimelineItemBinding::OnPropertyChanged(CUICDMPropertyHandle inPropert
         m_Row->OnDirty();
 }
 
-void CUICDMTimelineItemBinding::OnPropertyLinked(CUICDMPropertyHandle inPropertyHandle)
+void CUICDMTimelineItemBinding::OnPropertyLinked(Qt3DSDMPropertyHandle inPropertyHandle)
 {
     if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(m_DataHandle, inPropertyHandle)) {
         // Refresh property row by delete and recreate
@@ -1191,7 +1191,7 @@ void CUICDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
         m_Row->GetTimebar()->SetDirty(true);
 }
 
-void CUICDMTimelineItemBinding::OnAddChild(CUICDMInstanceHandle inInstance)
+void CUICDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
 {
     CDoc *theDoc = m_TransMgr->GetDoc();
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
@@ -1203,7 +1203,7 @@ void CUICDMTimelineItemBinding::OnAddChild(CUICDMInstanceHandle inInstance)
         // Only add if the asset is in the current active component, and it's a master asset or in
         // the current slide
         ITimelineItemBinding *theNextItem = nullptr;
-        qt3dsdm::CUICDMInstanceHandle theParentInstance = GetInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theParentInstance = GetInstance();
         // Figure out where to insert this row, if applicable.
         // CAsset has a list of children, and not necessarily all are active in this slide (e.g.
         // non-master children)
@@ -1223,7 +1223,7 @@ void CUICDMTimelineItemBinding::OnAddChild(CUICDMInstanceHandle inInstance)
     }
 }
 
-void CUICDMTimelineItemBinding::OnDeleteChild(CUICDMInstanceHandle inInstance)
+void CUICDMTimelineItemBinding::OnDeleteChild(Qt3DSDMInstanceHandle inInstance)
 {
     ITimelineItemBinding *theChild = m_TransMgr->GetOrCreate(inInstance);
     if (theChild) {

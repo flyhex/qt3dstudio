@@ -43,8 +43,8 @@
 #include "UICDMStudioSystem.h"
 
 CUICDMSceneInspectable::CUICDMSceneInspectable(
-    CStudioApp &inApp, CCore *inCore, qt3dsdm::CUICDMInstanceHandle inInstance,
-    qt3dsdm::CUICDMInstanceHandle inCurrentActiveSlideInstance)
+    CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+    qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance)
     : CUICDMInspectable(inApp, inCore, inInstance)
     , m_CurrentActiveSlideInstance(inCurrentActiveSlideInstance)
 {
@@ -71,7 +71,7 @@ Q3DStudio::CString CUICDMSceneInspectable::GetGroupName(long inGroupIndex)
                                : ::LoadResourceString(IDS_PROPERTIES_SHARED);
 }
 
-qt3dsdm::CUICDMInstanceHandle CUICDMSceneInspectable::GetGroupInstance(long inGroupIndex)
+qt3dsdm::Qt3DSDMInstanceHandle CUICDMSceneInspectable::GetGroupInstance(long inGroupIndex)
 {
     return (inGroupIndex == 0) ? m_CurrentActiveSlideInstance : m_Instance;
 }

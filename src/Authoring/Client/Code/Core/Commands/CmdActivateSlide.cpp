@@ -45,7 +45,7 @@ CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inS
 {
 }
 
-CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance)
+CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     : m_Doc(inDoc)
     , m_ForceRefresh(true)
 {

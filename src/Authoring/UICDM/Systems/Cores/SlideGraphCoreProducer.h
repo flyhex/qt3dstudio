@@ -60,11 +60,11 @@ public:
     void DeleteSlideGraph(CUICDMSlideGraphHandle inHandle) override;
 
     void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, CUICDMSlideHandle inSlide,
-                           CUICDMInstanceHandle inInstance) override;
+                           Qt3DSDMInstanceHandle inInstance) override;
     void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
                                 TSlideInstancePairList &outAssociations) const override;
-    TGraphSlidePair GetAssociatedGraph(CUICDMInstanceHandle inInstance) const override;
-    void DissociateInstance(CUICDMInstanceHandle inInstance) override;
+    TGraphSlidePair GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const override;
+    void DissociateInstance(Qt3DSDMInstanceHandle inInstance) override;
 
     void SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide) override;
     CUICDMSlideHandle GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const override;
@@ -80,10 +80,10 @@ public:
     TSignalConnectionPtr ConnectGraphDeleted(
         const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectInstanceAssociated(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, CUICDMInstanceHandle)>
+        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override;
     TSignalConnectionPtr ConnectInstanceDissociated(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, CUICDMInstanceHandle)>
+        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override;
     TSignalConnectionPtr ConnectGraphActiveSlide(
         const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback) override;

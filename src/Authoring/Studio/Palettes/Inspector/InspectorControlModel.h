@@ -84,8 +84,8 @@ public:
     QString m_title;
     QString m_tooltip;
 
-    qt3dsdm::CUICDMInstanceHandle m_instance;
-    qt3dsdm::CUICDMPropertyHandle m_property;
+    qt3dsdm::Qt3DSDMInstanceHandle m_instance;
+    qt3dsdm::Qt3DSDMPropertyHandle m_property;
 
     bool m_animatable  = false;
     bool m_animated = false;
@@ -157,7 +157,7 @@ private:
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();
-    void notifyInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle, qt3dsdm::CUICDMPropertyHandle inProperty);
+    void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase* inItem);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;

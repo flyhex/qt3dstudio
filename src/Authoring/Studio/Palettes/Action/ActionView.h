@@ -100,7 +100,7 @@ public:
 
     QSize sizeHint() const override;
 
-    void setItem(const qt3dsdm::CUICDMInstanceHandle &handle);
+    void setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
     QString itemIcon() const;
     QString itemText() const;
     QColor itemColor() const;
@@ -136,13 +136,13 @@ public:
 
     // Action callback
     void OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
-                       qt3dsdm::CUICDMInstanceHandle inOwner);
+                       qt3dsdm::Qt3DSDMInstanceHandle inOwner);
     void OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
-                         qt3dsdm::CUICDMInstanceHandle inOwner);
+                         qt3dsdm::Qt3DSDMInstanceHandle inOwner);
     void OnActionModified(qt3dsdm::CUICDMActionHandle inAction);
     void OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument);
-    void OnInstancePropertyValueChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
-                                        qt3dsdm::CUICDMPropertyHandle inProperty);
+    void OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
 Q_SIGNALS:
     void itemChanged();
@@ -175,7 +175,7 @@ private:
     void initialize();
     QColor m_baseColor = QColor::fromRgb(75, 75, 75);
     QColor m_selectColor = Qt::transparent;
-    qt3dsdm::CUICDMInstanceHandle m_itemHandle;
+    qt3dsdm::Qt3DSDMInstanceHandle m_itemHandle;
     IObjectReferenceHelper *m_objRefHelper = nullptr;
     ActionModel *m_actionsModel = nullptr;
     PropertyModel *m_propertyModel = nullptr;

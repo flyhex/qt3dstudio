@@ -53,7 +53,7 @@ public: // Construction
     ~CPasteKeyframeCommandHelper() {}
 
     // inTime should be relative to the earliest keyframe time in this list
-    void AddKeyframeData(qt3dsdm::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+    void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
                          qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
     {
         m_CopiedKeyframeList.push_back(CCmdDataModelInsertKeyframe::STimeKeyframeData(
@@ -72,7 +72,7 @@ public: // Construction
     //
     // 2. The first pasted keyframe is at current view time and the rest are offset accordingly.
     CCmdDataModelInsertKeyframe *GetCommand(CDoc *inDoc, long inTimeOffsetInMilliseconds,
-                                            qt3dsdm::CUICDMInstanceHandle inTargetInstance)
+                                            qt3dsdm::Qt3DSDMInstanceHandle inTargetInstance)
     {
         using namespace qt3dsdm;
 
@@ -85,7 +85,7 @@ public: // Construction
             TCharStr thePropertyName = thePropertySystem->GetName(theIter->m_Property);
             DataModelDataType::Value thePropertyType =
                 thePropertySystem->GetDataType(theIter->m_Property);
-            CUICDMPropertyHandle theTargetPropertyHandle =
+            Qt3DSDMPropertyHandle theTargetPropertyHandle =
                 theBridge->GetAggregateInstancePropertyByName(inTargetInstance, thePropertyName);
             if (theTargetPropertyHandle.Valid()) // property exists on target
             {

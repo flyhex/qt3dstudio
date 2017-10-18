@@ -35,8 +35,8 @@ namespace qt3dsdm {
 
 CActionSystem::CActionSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
                              TSlideGraphCorePtr inSlideGraphCore, TActionCorePtr inActionCore,
-                             TSlideSystemPtr inSlideSystem, CUICDMInstanceHandle inActionInstance,
-                             CUICDMPropertyHandle inActionEyeball)
+                             TSlideSystemPtr inSlideSystem, Qt3DSDMInstanceHandle inActionInstance,
+                             Qt3DSDMPropertyHandle inActionEyeball)
     : m_DataCore(inDataCore)
     , m_SlideCore(inSlideCore)
     , m_SlideGraphCore(inSlideGraphCore)
@@ -49,13 +49,13 @@ CActionSystem::CActionSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
 }
 
 CUICDMActionHandle CActionSystem::CreateAction(CUICDMSlideHandle inSlide,
-                                               CUICDMInstanceHandle inOwner,
+                                               Qt3DSDMInstanceHandle inOwner,
                                                SLong4 inTriggerTargetObjects)
 {
     Q_ASSERT(inSlide.Valid() && inOwner.Valid());
 
     // Create Action instance handle that derives from Action instance
-    CUICDMInstanceHandle theActionInstance = m_DataCore->CreateInstance();
+    Qt3DSDMInstanceHandle theActionInstance = m_DataCore->CreateInstance();
     m_DataCore->DeriveInstance(theActionInstance, m_ActionInstance);
 
     // Associate Action instance handle with Slide
@@ -74,14 +74,14 @@ CUICDMActionHandle CActionSystem::CreateAction(CUICDMSlideHandle inSlide,
 
 void CActionSystem::DeleteAction(CUICDMActionHandle inAction)
 {
-    CUICDMInstanceHandle theActionInstance;
+    Qt3DSDMInstanceHandle theActionInstance;
     SActionInfo theActionInfo = m_ActionCore->GetActionInfo(inAction);
     m_ActionCore->DeleteAction(inAction, theActionInstance);
     m_DataCore->DeleteInstance(theActionInstance);
     GetSignalSender()->SendActionDeleted(inAction, theActionInfo.m_Slide, theActionInfo.m_Owner);
 }
 
-void CActionSystem::GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+void CActionSystem::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                TActionHandleList &outActions) const
 {
     // Get all actions that exist in inSlide
@@ -101,7 +101,7 @@ bool CActionSystem::GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
                                           CUICDMActionHandle inAction) const
 {
     SValue theValue;
-    CUICDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);
+    Qt3DSDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);
     // Get the eyeball property value from SlideCore. There is no animation on eyeball so we can
     // query SlideCore directly.
     m_SlideCore->GetInstancePropertyValue(inActiveSlide, theInstance, m_ActionEyeball, theValue);
@@ -113,7 +113,7 @@ bool CActionSystem::GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
 void CActionSystem::SetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
                                           CUICDMActionHandle inAction, bool inValue)
 {
-    CUICDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);
+    Qt3DSDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);
     // Set the eyeball property value to SlideCore.
     m_SlideCore->ForceSetInstancePropertyValue(inActiveSlide, theInstance, m_ActionEyeball,
                                                inValue);

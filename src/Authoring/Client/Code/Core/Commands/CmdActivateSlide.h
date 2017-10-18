@@ -46,7 +46,7 @@ class CCmdActivateSlide : public CNonModifyingCmd
 {
 public:
     CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlideHandle);
-    CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance);
+    CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual ~CCmdActivateSlide();
 
     unsigned long Do() override;

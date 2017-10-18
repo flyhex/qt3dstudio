@@ -42,7 +42,7 @@ ActionModel::ActionModel(QObject *parent)
 {
 }
 
-void ActionModel::setInstanceHandle(const qt3dsdm::CUICDMInstanceHandle &handle)
+void ActionModel::setInstanceHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
 {
     beginResetModel();
     m_handle = handle;

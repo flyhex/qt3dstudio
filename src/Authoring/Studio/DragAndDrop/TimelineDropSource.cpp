@@ -116,7 +116,7 @@ bool CTimeLineDropSource::ValidateTarget(CDropTarget *inTarget)
         (EStudioObjectType)GetObjectType(), (EStudioObjectType)inTarget->GetObjectType());
 
     for (size_t idx = 0, end = m_Instances.size(); idx < end && theValidTarget; ++idx) {
-        qt3dsdm::CUICDMInstanceHandle theHandle(m_Instances[idx]);
+        qt3dsdm::Qt3DSDMInstanceHandle theHandle(m_Instances[idx]);
 
         if (theValidTarget && theHandle.Valid()) {
             theValidTarget &= (!inTarget->IsSelf(theHandle) && !inTarget->IsRelative(theHandle));
@@ -138,13 +138,13 @@ using namespace qt3dsdm;
 using namespace Q3DStudio;
 
 inline void Rearrange(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances,
-                      CUICDMInstanceHandle inTarget, DocumentEditorInsertType::Enum inInsertType)
+                      Qt3DSDMInstanceHandle inTarget, DocumentEditorInsertType::Enum inInsertType)
 {
     SCOPED_DOCUMENT_EDITOR(inDoc, QObject::tr("Rearrange Object"))
         ->RearrangeObjects(inInstances, inTarget, inInsertType);
 }
 
-CCmd *CTimeLineDropSource::GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
+CCmd *CTimeLineDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                                 EDROPDESTINATION inDestType,
                                                 qt3dsdm::CUICDMSlideHandle inSlide)
 {

@@ -41,7 +41,7 @@ class ObjectListModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    ObjectListModel(CCore *core, const qt3dsdm::CUICDMInstanceHandle &baseHandle, QObject *parent = nullptr);
+    ObjectListModel(CCore *core, const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -61,21 +61,21 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    qt3dsdm::CUICDMInstanceHandle baseHandle() const {return m_baseHandle;}
+    qt3dsdm::Qt3DSDMInstanceHandle baseHandle() const {return m_baseHandle;}
 
 private:
-    qt3dsdm::CUICDMInstanceHandle handleForIndex(const QModelIndex &index) const;
+    qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
     qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::CUICDMSlideHandle &slideHandle,
-                                                    const qt3dsdm::CUICDMInstanceHandle &handle) const;
+                                                    const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
-    QString nameForHandle(const qt3dsdm::CUICDMInstanceHandle &handle) const;
+    QString nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
-    QModelIndex indexForHandle(const qt3dsdm::CUICDMInstanceHandle &handle, const QModelIndex &startIndex = {}) const;
+    QModelIndex indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle, const QModelIndex &startIndex = {}) const;
 
     CCore *m_core;
     qt3dsdm::CUICDMSlideHandle m_slideHandle;
-    qt3dsdm::CUICDMInstanceHandle m_baseHandle;
+    qt3dsdm::Qt3DSDMInstanceHandle m_baseHandle;
     IObjectReferenceHelper *m_objRefHelper;
 };
 

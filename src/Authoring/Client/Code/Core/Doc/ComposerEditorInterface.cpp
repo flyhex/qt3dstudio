@@ -86,10 +86,10 @@ struct SComposerImportBase
 
 struct SComposerImportInterface : public SComposerImportBase, public IComposerEditorInterface
 {
-    typedef eastl::hash_map<TImportId, CUICDMInstanceHandle, STCharPtrHash, STCharPtrEqualTo>
+    typedef eastl::hash_map<TImportId, Qt3DSDMInstanceHandle, STCharPtrHash, STCharPtrEqualTo>
         TImportInstanceMap;
-    CUICDMInstanceHandle m_Parent;
-    CUICDMInstanceHandle m_Root;
+    Qt3DSDMInstanceHandle m_Parent;
+    Qt3DSDMInstanceHandle m_Root;
     CUICDMSlideHandle m_Slide;
     Q3DStudio::CString m_TypeBuffer;
     qt3ds::QT3DSI32 m_StartTime;
@@ -134,7 +134,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             std::make_shared<CDataStr>((const wchar_t *)m_Relativeimportfile));
     }
 
-    CUICDMInstanceHandle FindInstance(TImportId inImportHdl) override
+    Qt3DSDMInstanceHandle FindInstance(TImportId inImportHdl) override
     {
         TImportInstanceMap::const_iterator entry(m_ImportToInstanceMap.find(inImportHdl));
         if (entry != m_ImportToInstanceMap.end())
@@ -142,7 +142,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         return 0;
     }
 
-    void AddInstanceMap(CUICDMInstanceHandle instanceHandle, TImportId inImportId) override
+    void AddInstanceMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId) override
     {
         if (inImportId == NULL || *inImportId == 0) {
             assert(0);
@@ -155,7 +155,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         (void)success;
         assert(success);
     }
-    CUICDMInstanceHandle GetRoot() override { return m_Root; }
+    Qt3DSDMInstanceHandle GetRoot() override { return m_Root; }
 
     const Q3DStudio::CFilePath &GetDestImportFile() override { return m_DestImportFile; }
 
@@ -167,10 +167,10 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void RemoveChild(TImportId parent, TImportId child) override
     {
-        CUICDMInstanceHandle childHandle = FindInstance(child);
-        CUICDMInstanceHandle parentHandle = FindInstance(parent);
+        Qt3DSDMInstanceHandle childHandle = FindInstance(child);
+        Qt3DSDMInstanceHandle parentHandle = FindInstance(parent);
         if (childHandle.Valid() && parentHandle.Valid()) {
-            CUICDMInstanceHandle parentId = m_Editor.GetParent(childHandle);
+            Qt3DSDMInstanceHandle parentId = m_Editor.GetParent(childHandle);
             // If the child was moved, we don't remove it.  Only on the case where
             // it has it's original parent.
             if (parentId == parentHandle)
@@ -180,12 +180,12 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void RemoveInstance(TImportId inInstance) override
     {
-        CUICDMInstanceHandle instance = FindInstance(inInstance);
+        Qt3DSDMInstanceHandle instance = FindInstance(inInstance);
         if (instance.Valid())
             m_Editor.DeleteInstance(instance);
     }
 
-    CUICDMInstanceHandle CreateInstance(ComposerObjectTypes::Enum type, CUICDMInstanceHandle parent,
+    Qt3DSDMInstanceHandle CreateInstance(ComposerObjectTypes::Enum type, Qt3DSDMInstanceHandle parent,
                                         TImportId inImportId)
     {
         if (parent.Valid() == false) {
@@ -194,7 +194,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         }
 
         // Map the type to the object type.
-        CUICDMInstanceHandle retval = m_Editor.CreateSceneGraphInstance(type, parent, m_Slide);
+        Qt3DSDMInstanceHandle retval = m_Editor.CreateSceneGraphInstance(type, parent, m_Slide);
         m_Editor.SetSpecificInstancePropertyValue(0, retval, L"importid",
                                                   std::make_shared<CDataStr>(inImportId));
         m_Editor.SetSpecificInstancePropertyValue(
@@ -212,7 +212,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
      */
     void CreateRootInstance(TImportId inImportId, ComposerObjectTypes::Enum type) override
     {
-        CUICDMInstanceHandle retval = m_Root;
+        Qt3DSDMInstanceHandle retval = m_Root;
         if (m_Root.Valid() == false) {
             retval = CreateInstance(type, m_Parent, inImportId);
             m_Root = retval;
@@ -227,7 +227,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     void CreateInstance(TImportId inImportId, ComposerObjectTypes::Enum type,
                                 TImportId inParent) override
     {
-        CUICDMInstanceHandle theParent(FindInstance(inParent));
+        Qt3DSDMInstanceHandle theParent(FindInstance(inParent));
         if (theParent.Valid())
             CreateInstance(type, theParent, inImportId);
     }
@@ -235,7 +235,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     void UpdateInstanceProperties(TImportId inInstance, const PropertyValue *propertBuffer,
                                           QT3DSU32 propertyBufferSize) override
     {
-        CUICDMInstanceHandle hdl(FindInstance(inInstance));
+        Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid() == false)
             return;
 
@@ -262,7 +262,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             } else if (theType == DataModelDataType::StringRef) {
                 SStringRef theRef = get<SStringRef>(theValue);
                 SLong4 theGuid;
-                CUICDMInstanceHandle target = FindInstance(theRef.m_Id);
+                Qt3DSDMInstanceHandle target = FindInstance(theRef.m_Id);
                 if (target.Valid())
                     theGuid = m_Editor.GetGuidForInstance(target);
                 theValue = theGuid;
@@ -276,9 +276,9 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     }
     void AddChild(TImportId parent, TImportId child, TImportId inSibling) override
     {
-        CUICDMInstanceHandle theParent(FindInstance(parent));
-        CUICDMInstanceHandle theChild(FindInstance(child));
-        CUICDMInstanceHandle theSibling(FindInstance(inSibling));
+        Qt3DSDMInstanceHandle theParent(FindInstance(parent));
+        Qt3DSDMInstanceHandle theChild(FindInstance(child));
+        Qt3DSDMInstanceHandle theSibling(FindInstance(inSibling));
 
         if (theParent.Valid() && theChild.Valid())
             m_Editor.AddChild(theParent, theChild, theSibling);
@@ -286,14 +286,14 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void RemoveAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex) override
     {
-        CUICDMInstanceHandle hdl(FindInstance(inInstance));
+        Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid())
             m_Editor.RemoveAnimation(m_Slide, hdl, propName, propSubIndex);
     }
     void UpdateAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex,
                                  EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
     {
-        CUICDMInstanceHandle hdl(FindInstance(inInstance));
+        Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid()) {
             if (m_Editor.IsAnimationArtistEdited(m_Slide, hdl, propName, propSubIndex) == false) {
                 CUICDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
@@ -319,7 +319,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     struct SSlideInstanceIdMapIterator
     {
-        const vector<pair<CUICDMSlideHandle, CUICDMInstanceHandle>> *m_CurrentItems;
+        const vector<pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>> *m_CurrentItems;
         size_t m_CurrentTreeIdx;
         size_t m_CurrentTreeEnd;
         TCharPtr m_Id;
@@ -359,7 +359,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         }
         CUICDMSlideHandle GetCurrentSlide() { return (*m_CurrentItems)[m_CurrentTreeIdx].first; }
 
-        CUICDMInstanceHandle GetCurrentInstance()
+        Qt3DSDMInstanceHandle GetCurrentInstance()
         {
             return (*m_CurrentItems)[m_CurrentTreeIdx].second;
         }
@@ -384,9 +384,9 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         for (SSlideInstanceIdMapIterator theIterator(inParentId, m_IdToSlideInstances,
                                                      m_StringTable);
              theIterator.IsDone() == false; theIterator.Next()) {
-            CUICDMInstanceHandle theParent = theIterator.GetCurrentInstance();
+            Qt3DSDMInstanceHandle theParent = theIterator.GetCurrentInstance();
             for (long idx = 0; idx < m_AssetGraph.GetChildCount(theParent); ++idx) {
-                CUICDMInstanceHandle theChild = m_AssetGraph.GetChild(theParent, idx);
+                Qt3DSDMInstanceHandle theChild = m_AssetGraph.GetChild(theParent, idx);
                 CString theImportId = m_Editor.GetImportId(theChild);
                 if (m_Editor.GetAssociatedSlide(theChild) == theIterator.GetCurrentSlide()
                     && theImportId == inChildId) {
@@ -422,12 +422,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     {
         const wchar_t *theInsertId(m_StringTable.GetWideStr(inImportId));
         pair<TIdMultiMap::iterator, bool> theInserter(m_IdToSlideInstances.insert(
-            make_pair(theInsertId, vector<pair<CUICDMSlideHandle, CUICDMInstanceHandle>>())));
+            make_pair(theInsertId, vector<pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>>())));
 
         for (SSlideInstanceIdMapIterator theIterator(inParent, m_IdToSlideInstances, m_StringTable);
              theIterator.IsDone() == false; theIterator.Next()) {
-            CUICDMInstanceHandle theParent = theIterator.GetCurrentInstance();
-            CUICDMInstanceHandle newInstance =
+            Qt3DSDMInstanceHandle theParent = theIterator.GetCurrentInstance();
+            Qt3DSDMInstanceHandle newInstance =
                 m_Editor.CreateSceneGraphInstance(type, theParent, theIterator.GetCurrentSlide());
             if (m_StartTime >= 0)
                 m_Editor.SetSpecificInstancePropertyValue(0, newInstance, L"starttime",
@@ -449,7 +449,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances,
                                                      m_StringTable);
              theIterator.IsDone() == false; theIterator.Next()) {
-            CUICDMInstanceHandle hdl = theIterator.GetCurrentInstance();
+            Qt3DSDMInstanceHandle hdl = theIterator.GetCurrentInstance();
             for (QT3DSU32 idx = 0; idx < propertyBufferSize; ++idx) {
                 const PropertyValue &value(propertBuffer[idx]);
                 SValue theValue(value.m_Value);
@@ -474,7 +474,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                     // in the current slide who has the same import id;
                     for (long childIdx = 0, childCount = m_AssetGraph.GetChildCount(hdl);
                          childIdx < childCount; ++childIdx) {
-                        CUICDMInstanceHandle target = m_AssetGraph.GetChild(hdl, childIdx);
+                        Qt3DSDMInstanceHandle target = m_AssetGraph.GetChild(hdl, childIdx);
                         if (m_Editor.GetAssociatedSlide(hdl) == theIterator.GetCurrentSlide()
                             && m_Editor.GetImportId(target).Compare(theRef.m_Id)) {
                             theGuid = m_Editor.GetGuidForInstance(target);
@@ -504,13 +504,13 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         size_t numItems = NVMin(theParentList->second.size(), theChildList->second.size());
         for (size_t idx = 0; idx < numItems; ++idx) {
             CUICDMSlideHandle theParentSlide = theParentList->second[idx].first;
-            CUICDMInstanceHandle theParent(theParentList->second[idx].second);
-            CUICDMInstanceHandle theChild(theChildList->second[idx].second);
-            CUICDMInstanceHandle nextSibling;
+            Qt3DSDMInstanceHandle theParent(theParentList->second[idx].second);
+            Qt3DSDMInstanceHandle theChild(theChildList->second[idx].second);
+            Qt3DSDMInstanceHandle nextSibling;
             if (!IsTrivial(nextSiblingId)) {
                 for (long childIdx = 0, childCount = m_AssetGraph.GetChildCount(theParent);
                      childIdx < childCount; ++childIdx) {
-                    CUICDMInstanceHandle theSibling = m_AssetGraph.GetChild(theParent, childIdx);
+                    Qt3DSDMInstanceHandle theSibling = m_AssetGraph.GetChild(theParent, childIdx);
                     if (m_Editor.GetAssociatedSlide(theSibling) == theParentSlide
                         && m_Editor.GetImportId(theSibling).Compare(nextSiblingId)) {
                         nextSibling = theSibling;

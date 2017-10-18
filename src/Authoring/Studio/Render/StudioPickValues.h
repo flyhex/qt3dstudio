@@ -36,7 +36,7 @@
 
 namespace qt3ds {
 namespace studio {
-    using qt3dsdm::CUICDMInstanceHandle;
+    using qt3dsdm::Qt3DSDMInstanceHandle;
     using qt3dsdm::CUICDMGuideHandle;
 
     struct StudioPickValueTypes
@@ -89,7 +89,7 @@ namespace studio {
     };
 
     template <>
-    struct SStudioPickValueTypeMap<CUICDMInstanceHandle>
+    struct SStudioPickValueTypeMap<Qt3DSDMInstanceHandle>
     {
         static StudioPickValueTypes::Enum GetType() { return StudioPickValueTypes::Instance; }
     };
@@ -116,7 +116,7 @@ namespace studio {
     {
         typedef StudioPickValueTypes::Enum TIdType;
         enum {
-            TBufferSize = Q3DStudio::StaticMaxSize<qt3dsdm::CUICDMInstanceHandle,
+            TBufferSize = Q3DStudio::StaticMaxSize<qt3dsdm::Qt3DSDMInstanceHandle,
                                                    SWidgetPick,
                                                    qt3dsdm::CUICDMGuideHandle,
                                                    SPathPick>::value
@@ -135,7 +135,7 @@ namespace studio {
         {
             switch (inType) {
             case StudioPickValueTypes::Instance:
-                return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMInstanceHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::Qt3DSDMInstanceHandle *>(inData));
             case StudioPickValueTypes::Widget:
                 return inVisitor(*qt3ds::NVUnionCast<SWidgetPick *>(inData));
             case StudioPickValueTypes::Guide:
@@ -154,7 +154,7 @@ namespace studio {
         {
             switch (inType) {
             case StudioPickValueTypes::Instance:
-                return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMInstanceHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::Qt3DSDMInstanceHandle *>(inData));
             case StudioPickValueTypes::Widget:
                 return inVisitor(*qt3ds::NVUnionCast<const SWidgetPick *>(inData));
             case StudioPickValueTypes::Guide:
@@ -179,7 +179,7 @@ namespace studio {
     struct SStudioPickValue : public TStudioPickValueType
     {
         SStudioPickValue() {}
-        SStudioPickValue(CUICDMInstanceHandle inst)
+        SStudioPickValue(Qt3DSDMInstanceHandle inst)
             : TStudioPickValueType(inst)
         {
         }

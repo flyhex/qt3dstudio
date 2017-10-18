@@ -77,8 +77,8 @@ public:
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
-    void OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance) override;
-    void OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance,
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
                                                     long inInstanceCount) override;
 
 

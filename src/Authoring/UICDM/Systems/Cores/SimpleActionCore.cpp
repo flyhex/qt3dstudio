@@ -31,9 +31,9 @@
 
 namespace qt3dsdm {
 
-CUICDMActionHandle CSimpleActionCore::CreateAction(CUICDMInstanceHandle inInstance,
+CUICDMActionHandle CSimpleActionCore::CreateAction(Qt3DSDMInstanceHandle inInstance,
                                                    CUICDMSlideHandle inSlide,
-                                                   CUICDMInstanceHandle inOwner,
+                                                   Qt3DSDMInstanceHandle inOwner,
                                                    SLong4 inTriggerTargetObjects)
 {
     int nextId = GetNextId();
@@ -43,7 +43,7 @@ CUICDMActionHandle CSimpleActionCore::CreateAction(CUICDMInstanceHandle inInstan
     return retval;
 }
 
-void CSimpleActionCore::DeleteAction(CUICDMActionHandle inAction, CUICDMInstanceHandle &outInstance)
+void CSimpleActionCore::DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     outInstance = theAction->m_ActionInfo.m_Instance;
@@ -59,7 +59,7 @@ const SActionInfo &CSimpleActionCore::GetActionInfo(CUICDMActionHandle inAction)
 }
 
 inline void AddIfActionMatches(const THandleObjectPair &inPair, CUICDMSlideHandle inSlide,
-                               CUICDMInstanceHandle inOwner, TActionHandleList &outActions)
+                               Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions)
 {
     if (inPair.second->GetType() == CHandleObject::EHandleObjectTypeAction) {
         const SAction *theAction = static_cast<SAction *>(inPair.second.get());
@@ -70,7 +70,7 @@ inline void AddIfActionMatches(const THandleObjectPair &inPair, CUICDMSlideHandl
 }
 
 // Return all actions that belong to a certain instance in a certain slide
-void CSimpleActionCore::GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+void CSimpleActionCore::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                    TActionHandleList &outActions) const
 {
     outActions.clear();
@@ -86,7 +86,7 @@ void CSimpleActionCore::GetActions(CUICDMSlideHandle inSlide, TActionHandleList 
 }
 
 // Return all actions that belong to a certain instance
-void CSimpleActionCore::GetActions(CUICDMInstanceHandle inOwner,
+void CSimpleActionCore::GetActions(Qt3DSDMInstanceHandle inOwner,
                                    TActionHandleList &outActions) const
 {
     GetActions(0, inOwner, outActions);
@@ -103,12 +103,12 @@ void CSimpleActionCore::GetActions(TActionHandleList &outActions) const
 }
 
 // Return the instance that was allocated for this action.
-CUICDMInstanceHandle CSimpleActionCore::GetActionInstance(CUICDMActionHandle inAction) const
+Qt3DSDMInstanceHandle CSimpleActionCore::GetActionInstance(CUICDMActionHandle inAction) const
 {
     return GetActionNF(inAction, m_Objects)->m_ActionInfo.m_Instance;
 }
 
-inline bool ActionInstanceMatches(const THandleObjectPair &inPair, CUICDMInstanceHandle inInstance)
+inline bool ActionInstanceMatches(const THandleObjectPair &inPair, Qt3DSDMInstanceHandle inInstance)
 {
     if (inPair.second->GetType() == CHandleObject::EHandleObjectTypeAction) {
         const SAction *theAction = static_cast<SAction *>(inPair.second.get());
@@ -120,7 +120,7 @@ inline bool ActionInstanceMatches(const THandleObjectPair &inPair, CUICDMInstanc
 
 // Reverse lookup into the action system so you can match actions to instances.
 CUICDMActionHandle
-CSimpleActionCore::GetActionByInstance(CUICDMInstanceHandle inActionInstance) const
+CSimpleActionCore::GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const
 {
     THandleObjectMap::const_iterator theAction =
         find_if(m_Objects.begin(), m_Objects.end(),
@@ -213,9 +213,9 @@ void CSimpleActionCore::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandler
 
 // Helper functions
 CUICDMActionHandle CSimpleActionCore::CreateActionWithHandle(int inHandle,
-                                                             CUICDMInstanceHandle inInstance,
+                                                             Qt3DSDMInstanceHandle inInstance,
                                                              CUICDMSlideHandle inSlide,
-                                                             CUICDMInstanceHandle inOwner)
+                                                             Qt3DSDMInstanceHandle inOwner)
 {
     if (HandleValid(inHandle))
         throw HandleExists(L"");

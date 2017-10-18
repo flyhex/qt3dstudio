@@ -31,19 +31,19 @@
 #define UICDMOPSH
 
 namespace UICDM {
-inline const TCharStr &GetPropertyName(const IDataCore &inModel, CUICDMPropertyHandle inProperty)
+inline const TCharStr &GetPropertyName(const IDataCore &inModel, Qt3DSDMPropertyHandle inProperty)
 {
     return inModel.GetProperty(inProperty).m_Name;
 }
 
 inline bool PropertyNameMatches(const IDataCore &inModel, const TCharStr &inName,
-                                CUICDMPropertyHandle inProperty)
+                                Qt3DSDMPropertyHandle inProperty)
 {
     return inName == GetPropertyName(inModel, inProperty);
 }
 
-inline const CUICDMPropertyHandle
-GetPropertyByName(const IDataCore &inModel, CUICDMInstanceHandle inInstance, const TCharStr &inName)
+inline const Qt3DSDMPropertyHandle
+GetPropertyByName(const IDataCore &inModel, Qt3DSDMInstanceHandle inInstance, const TCharStr &inName)
 {
     using namespace std;
     TPropertyHandleList properties;

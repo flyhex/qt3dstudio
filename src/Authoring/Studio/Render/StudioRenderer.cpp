@@ -125,7 +125,7 @@ struct SRendererImpl : public IStudioRenderer,
     }
 
     // IDocSceneGraph
-    QT3DSVec3 GetIntendedPosition(qt3dsdm::CUICDMInstanceHandle inHandle, CPt inPoint) override
+    QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) override
     {
         if (m_Translation)
             return m_Translation->GetIntendedPosition(inHandle, inPoint);
@@ -339,7 +339,7 @@ struct SRendererImpl : public IStudioRenderer,
 
     void EditCameraZoomToFit() override
     {
-        qt3dsdm::CUICDMInstanceHandle theInstance = m_Doc.GetSelectedInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance = m_Doc.GetSelectedInstance();
         if (!m_Translation || m_Translation->m_EditCameraEnabled == false)
             return;
         // If we aren't pointed at a node then bounce up the asset graph till we are.
@@ -420,7 +420,7 @@ struct SRendererImpl : public IStudioRenderer,
 
     // Fired during 3d drag or mouse move events (or keyframe drag) or likewise
     // events so that views that need to update based on the new data can.
-    void OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance) override
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override
     {
         if (m_Translation) {
             m_Translation->MarkDirty(inInstance);
@@ -429,7 +429,7 @@ struct SRendererImpl : public IStudioRenderer,
         }
     }
     // Same thing, but fired when more than one instance is being refreshed.
-    void OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance,
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
                                                     long inInstanceCount) override
     {
         // Pass to translation system
@@ -441,7 +441,7 @@ struct SRendererImpl : public IStudioRenderer,
         Render();
     }
 
-    void OnReloadEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance) override
+    void OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override
     {
         if (m_Translation)
             m_Translation->ReleaseEffect(inInstance);
@@ -544,7 +544,7 @@ struct SRendererImpl : public IStudioRenderer,
 
     void OnSelectionChange() { RequestRender(); }
 
-    qt3dsdm::CUICDMInstanceHandle GetAnchorPointFromPick(SPathPick &inPick)
+    qt3dsdm::Qt3DSDMInstanceHandle GetAnchorPointFromPick(SPathPick &inPick)
     {
         return m_Translation->GetAnchorPoint(inPick);
     }
@@ -580,7 +580,7 @@ struct SRendererImpl : public IStudioRenderer,
             m_RenderContext->EndRender();
             // If we definitely did not pick a widget.
             if (m_PickResult.getType() == StudioPickValueTypes::Instance) {
-                qt3dsdm::CUICDMInstanceHandle theHandle(m_PickResult.getData<CUICDMInstanceHandle>());
+                qt3dsdm::Qt3DSDMInstanceHandle theHandle(m_PickResult.getData<Qt3DSDMInstanceHandle>());
 
                 if (theHandle != m_Doc.GetSelectedInstance())
                     m_Doc.SelectUICDMObject(theHandle);
@@ -588,7 +588,7 @@ struct SRendererImpl : public IStudioRenderer,
                 m_Doc.NotifySelectionChanged(m_PickResult.getData<qt3dsdm::CUICDMGuideHandle>());
             else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
                 SPathPick thePick = m_PickResult.getData<SPathPick>();
-                qt3dsdm::CUICDMInstanceHandle theAnchorHandle =
+                qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle =
                     m_Translation->GetAnchorPoint(thePick);
                 if (theAnchorHandle.Valid() && theAnchorHandle != m_Doc.GetSelectedInstance()) {
                     m_Doc.SelectUICDMObject(theAnchorHandle);
@@ -836,10 +836,10 @@ struct SRendererImpl : public IStudioRenderer,
             m_RenderContext->EndRender();
 
             if (theResult.getType() == StudioPickValueTypes::Instance)
-                m_Doc.SelectAndNavigateToUICDMObject(theResult.getData<CUICDMInstanceHandle>());
+                m_Doc.SelectAndNavigateToUICDMObject(theResult.getData<Qt3DSDMInstanceHandle>());
             else if (theResult.getType() == StudioPickValueTypes::Path) {
                 SPathPick thePickValue = theResult.getData<SPathPick>();
-                qt3dsdm::CUICDMInstanceHandle theAnchorHandle =
+                qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle =
                     m_Translation->GetAnchorPoint(thePickValue);
                 if (theAnchorHandle.Valid() && theAnchorHandle != m_Doc.GetSelectedInstance()) {
                     m_Doc.SelectUICDMObject(theAnchorHandle);

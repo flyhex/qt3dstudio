@@ -63,8 +63,8 @@ public:
     bool Drop(CDropSource &inSource) override;
     long GetObjectType() override;
 
-    bool IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance) override;
-    bool IsSelf(qt3dsdm::CUICDMInstanceHandle inInstance) override;
+    bool IsRelative(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    bool IsSelf(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     bool IsMaster() override;
 
     void SetDestination(EDROPDESTINATION inDestination);
@@ -77,7 +77,7 @@ public:
     void SetInsertionMarkerIndent(long inIndent) { m_InsertionMarkedIndent = inIndent; }
 
 protected:
-    qt3dsdm::CUICDMInstanceHandle GetTargetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle GetTargetInstance();
 
 protected:
     EDROPDESTINATION m_Destination;

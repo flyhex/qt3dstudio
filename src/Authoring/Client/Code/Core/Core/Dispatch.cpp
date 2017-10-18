@@ -120,13 +120,13 @@ void CDispatch::FireEndDataModelNotifications()
     }
 }
 
-void CDispatch::FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDispatch::FireImmediateRefreshInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     m_DataModelListeners.FireEvent(&IDataModelListener::OnImmediateRefreshInstanceSingle,
                                    inInstance);
 }
 
-void CDispatch::FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle *inInstances,
+void CDispatch::FireImmediateRefreshInstance(qt3dsdm::Qt3DSDMInstanceHandle *inInstances,
                                              long inInstanceCount)
 {
     m_DataModelListeners.FireEvent(&IDataModelListener::OnImmediateRefreshInstanceMultiple,
@@ -143,7 +143,7 @@ void CDispatch::RemoveReloadListener(IReloadListener *inListener)
     m_ReloadListeners.RemoveListener(inListener);
 }
 
-void CDispatch::FireReloadEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDispatch::FireReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     m_ReloadListeners.FireEvent(&IReloadListener::OnReloadEffectInstance, inInstance);
 }
@@ -335,7 +335,7 @@ void CDispatch::FireOnSavingPresentation(const CUICFile *inNewPresentationFile)
                                             inNewPresentationFile);
 }
 
-void CDispatch::FireOnExportingAsset(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CDispatch::FireOnExportingAsset(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnExportingAsset,
                                             inInstance);

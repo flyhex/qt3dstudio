@@ -69,8 +69,8 @@ using std::ref;
 using std::get;
 using qt3ds::foundation::Empty;
 
-typedef CUICDMInstanceHandle TInstanceHandle;
-typedef CUICDMPropertyHandle TPropertyHandle;
+typedef Qt3DSDMInstanceHandle TInstanceHandle;
+typedef Qt3DSDMPropertyHandle TPropertyHandle;
 typedef CUICDMEventHandle TEventHandle;
 typedef CUICDMHandlerHandle THandlerHandle;
 typedef CUICDMHandlerArgHandle THandlerArgHandle;
@@ -370,13 +370,13 @@ struct InstanceHandleVecHash
 
 struct SEventAndHandlerBase
 {
-    CUICDMInstanceHandle m_Instance;
+    Qt3DSDMInstanceHandle m_Instance;
     TStrType m_Name;
     TStrType m_FormalName;
     TStrType m_Category;
     TStrType m_Description;
     SEventAndHandlerBase() {}
-    SEventAndHandlerBase(CUICDMInstanceHandle hdl)
+    SEventAndHandlerBase(Qt3DSDMInstanceHandle hdl)
         : m_Instance(hdl)
     {
     }
@@ -385,7 +385,7 @@ struct SEventAndHandlerBase
 struct SEvent : public SEventAndHandlerBase
 {
     SEvent() {}
-    SEvent(CUICDMInstanceHandle hdl)
+    SEvent(Qt3DSDMInstanceHandle hdl)
         : SEventAndHandlerBase(hdl)
     {
     }
@@ -394,7 +394,7 @@ struct SEvent : public SEventAndHandlerBase
 struct SHandler : public SEventAndHandlerBase
 {
     SHandler() {}
-    SHandler(CUICDMInstanceHandle hdl)
+    SHandler(Qt3DSDMInstanceHandle hdl)
         : SEventAndHandlerBase(hdl)
     {
     }
@@ -738,7 +738,7 @@ struct SNewMetaDataImpl : public IMetaData
 
     template <typename THandleType, typename TValueType, typename TMapType,
               typename TInstanceListMapType>
-    THandleType CreateItem(const char *inFile, int inLine, CUICDMInstanceHandle inInstance,
+    THandleType CreateItem(const char *inFile, int inLine, Qt3DSDMInstanceHandle inInstance,
                            TMapType &inMap, TInstanceListMapType &inInstanceListMap)
     {
         int retval = GetNextId();
@@ -916,7 +916,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     template <typename TListMapType, typename TSizeTOpType, typename TVectorType>
-    void DoGetHandleList(CUICDMInstanceHandle inInstance, TListMapType &inMap,
+    void DoGetHandleList(Qt3DSDMInstanceHandle inInstance, TListMapType &inMap,
                          TVectorType &outHandles, TSizeTOpType inOperator)
     {
         typename TListMapType::iterator find;
@@ -966,7 +966,7 @@ struct SNewMetaDataImpl : public IMetaData
 
     // Ensure we don't return two items of the same name.
     template <typename THandleType, typename TListMapType, typename TMapType>
-    void GetHandleList(CUICDMInstanceHandle inInstance, TListMapType &inMap, TMapType &inTypeName,
+    void GetHandleList(Qt3DSDMInstanceHandle inInstance, TListMapType &inMap, TMapType &inTypeName,
                        vector<THandleType> &outHandles)
     {
         DoGetHandleList(inInstance, inMap, outHandles,
@@ -993,7 +993,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     template <typename THandleType, typename TListMapType>
-    void ForEachItem(CUICDMInstanceHandle inInstance, TListMapType &ioMap,
+    void ForEachItem(Qt3DSDMInstanceHandle inInstance, TListMapType &ioMap,
                      function<void(THandleType)> inOperation)
     {
         typename TListMapType::iterator find = ioMap.find(inInstance);
@@ -1032,7 +1032,7 @@ struct SNewMetaDataImpl : public IMetaData
         return NULL;
     }
 
-    void OnPropertyRemoved(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty)
+    void OnPropertyRemoved(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
     {
         if (m_IgnorePropertyDeleted)
             return;
@@ -1048,7 +1048,7 @@ struct SNewMetaDataImpl : public IMetaData
             DestroyMetaDataProperty(propertiesToDestroy[idx]);
     }
 
-    void OnInstanceRemoved(CUICDMInstanceHandle inInstance) { DestroyMetaData(inInstance); }
+    void OnInstanceRemoved(Qt3DSDMInstanceHandle inInstance) { DestroyMetaData(inInstance); }
     template <typename TEntryType, typename TMapType>
     void InsertWithTransaction(const char *inFile, int inLine, const TEntryType &inEntry,
                                TMapType &inMap)
@@ -1093,7 +1093,7 @@ struct SNewMetaDataImpl : public IMetaData
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Canonical Instances
-    void SetInstanceAsCanonical(CUICDMInstanceHandle inInstance, TStrType inTypename) override
+    void SetInstanceAsCanonical(Qt3DSDMInstanceHandle inInstance, TStrType inTypename) override
     {
         const wchar_t *theTypename(Intern(inTypename));
         if (g_UICDMDebugLogger)
@@ -1112,7 +1112,7 @@ struct SNewMetaDataImpl : public IMetaData
             g_UICDMDebugLogger("IMetaData::SetInstanceAsCanonical Leave");
     }
 
-    CUICDMInstanceHandle GetCanonicalInstanceForType(TStrType inTypename) override
+    Qt3DSDMInstanceHandle GetCanonicalInstanceForType(TStrType inTypename) override
     {
         TStrInstanceMap::iterator find = m_CanonicalTypeToInstances.find(Intern(inTypename));
         if (find != m_CanonicalTypeToInstances.end())
@@ -1120,7 +1120,7 @@ struct SNewMetaDataImpl : public IMetaData
         return 0;
     }
 
-    Option<TCharStr> GetTypeForCanonicalInstance(CUICDMInstanceHandle inInstance) override
+    Option<TCharStr> GetTypeForCanonicalInstance(Qt3DSDMInstanceHandle inInstance) override
     {
         TInstanceStrMap::iterator find = m_InstancesToCanonicalType.find(inInstance);
         if (find != m_InstancesToCanonicalType.end())
@@ -1128,7 +1128,7 @@ struct SNewMetaDataImpl : public IMetaData
         return Empty();
     }
 
-    Option<TCharStr> GetTypeForInstance(CUICDMInstanceHandle inInstance) override
+    Option<TCharStr> GetTypeForInstance(Qt3DSDMInstanceHandle inInstance) override
     {
         Option<TCharStr> theType = GetTypeForCanonicalInstance(inInstance);
         if (theType.hasValue())
@@ -1142,14 +1142,14 @@ struct SNewMetaDataImpl : public IMetaData
         return Empty();
     }
 
-    QT3DSU32 GetGroupCountForInstance(CUICDMInstanceHandle inInstance) override
+    QT3DSU32 GetGroupCountForInstance(Qt3DSDMInstanceHandle inInstance) override
     {
         std::vector<TCharStr> outNames;
         QT3DSU32 count = GetGroupNamesForInstance(inInstance, outNames);
         return (count == 0) ? 1 : count;
     }
 
-    QT3DSU32 GetGroupNamesForInstance(CUICDMInstanceHandle inInstance,
+    QT3DSU32 GetGroupNamesForInstance(Qt3DSDMInstanceHandle inInstance,
                                               std::vector<TCharStr> &outNames) override
     {
         TInstanceStrMap::iterator canonicalFind = m_InstancesToCanonicalType.find(inInstance);
@@ -1204,7 +1204,7 @@ struct SNewMetaDataImpl : public IMetaData
         return (QT3DSU32)outNames.size();
     }
 
-    Option<TCharStr> GetGroupFilterNameForInstance(CUICDMInstanceHandle inInstance,
+    Option<TCharStr> GetGroupFilterNameForInstance(Qt3DSDMInstanceHandle inInstance,
                                                            long inIndex) override
     {
         std::vector<TCharStr> outNames;
@@ -1296,7 +1296,7 @@ struct SNewMetaDataImpl : public IMetaData
     ////////////////////////////////////////////////////////////////////////////////////
     // Properties
 
-    CUICDMMetaDataPropertyHandle CreateMetaDataProperty(CUICDMInstanceHandle inInstance) override
+    CUICDMMetaDataPropertyHandle CreateMetaDataProperty(Qt3DSDMInstanceHandle inInstance) override
     {
         return CreateItem<CUICDMMetaDataPropertyHandle, SMetaDataPropertyInfo>(
                     __FILE__, __LINE__, inInstance, m_Properties, m_InstanceToProperties);
@@ -1307,7 +1307,7 @@ struct SNewMetaDataImpl : public IMetaData
         m_IgnorePropertyDeleted = true;
         // If the existing property under the new name doesn't match
         // the new info, then we also have to delete the property
-        CUICDMPropertyHandle theExistingProperty =
+        Qt3DSDMPropertyHandle theExistingProperty =
                 m_DataCore->GetAggregateInstancePropertyByName(newInfo.m_Instance, newInfo.m_Name);
         // Ensure the types match.
         if (theExistingProperty.Valid()) {
@@ -1424,14 +1424,14 @@ struct SNewMetaDataImpl : public IMetaData
         RemoveMetaDataPropertyFilters(inProperty);
     }
 
-    CUICDMMetaDataPropertyHandle GetMetaDataProperty(CUICDMInstanceHandle inInstance,
+    CUICDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                                              TStrType inPropertyName) override
     {
         return FindItemByName<CUICDMMetaDataPropertyHandle>(inInstance, Intern(inPropertyName),
                                                             m_InstanceNameToProperties);
     }
-    CUICDMMetaDataPropertyHandle GetMetaDataProperty(CUICDMInstanceHandle inInstance,
-                                                             CUICDMPropertyHandle inProperty) override
+    CUICDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
+                                                             Qt3DSDMPropertyHandle inProperty) override
     {
         SUICDMPropertyDefinition propDef(m_DataCore->GetProperty(inProperty));
         return GetMetaDataProperty(inInstance, propDef.m_Name);
@@ -1447,14 +1447,14 @@ struct SNewMetaDataImpl : public IMetaData
         return *infoPtr;
     }
 
-    void GetMetaDataProperties(CUICDMInstanceHandle inInstance,
+    void GetMetaDataProperties(Qt3DSDMInstanceHandle inInstance,
                                        vector<CUICDMMetaDataPropertyHandle> &outProperties) override
     {
         return GetHandleList<CUICDMMetaDataPropertyHandle>(inInstance, m_InstanceToProperties,
                                                            m_Properties, outProperties);
     }
     virtual CUICDMMetaDataPropertyHandle
-    GetSpecificMetaDataProperty(CUICDMInstanceHandle inInstance, TStrType inPropertyName)
+    GetSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance, TStrType inPropertyName)
     {
         TInstancePropertyNamePropertyMap::iterator theFind = m_InstanceNameToProperties.find(
                     make_pair(inInstance, m_StringTable.RegisterStr(inPropertyName.wide_str())));
@@ -1463,7 +1463,7 @@ struct SNewMetaDataImpl : public IMetaData
         return 0;
     }
     virtual CUICDMMetaDataPropertyHandle
-    GetOrCreateSpecificMetaDataProperty(CUICDMInstanceHandle inInstance, TStrType inPropertyName) override
+    GetOrCreateSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance, TStrType inPropertyName) override
     {
         CUICDMMetaDataPropertyHandle theProp(
                     GetSpecificMetaDataProperty(inInstance, inPropertyName));
@@ -1472,7 +1472,7 @@ struct SNewMetaDataImpl : public IMetaData
         return CreateMetaDataProperty(inInstance);
     }
 
-    void GetSpecificMetaDataProperties(CUICDMInstanceHandle inInstance,
+    void GetSpecificMetaDataProperties(Qt3DSDMInstanceHandle inInstance,
                                                vector<CUICDMMetaDataPropertyHandle> &outProperties) override
     {
         TInstancePropertyMap::iterator find = m_InstanceToProperties.find(inInstance);
@@ -1480,7 +1480,7 @@ struct SNewMetaDataImpl : public IMetaData
             outProperties.insert(outProperties.end(), find->second.begin(), find->second.end());
     }
 
-    TCharStr GetFormalName(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override
+    TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override
     {
         CUICDMMetaDataPropertyHandle propHandle(GetMetaDataProperty(inInstance, inProperty));
         SMetaDataPropertyInfo *infoPtr = FindProperty(propHandle);
@@ -1488,8 +1488,8 @@ struct SNewMetaDataImpl : public IMetaData
             return infoPtr->m_FormalName;
         return TCharStr();
     }
-    AdditionalMetaDataType::Value GetAdditionalMetaDataType(CUICDMInstanceHandle inInstance,
-                                                              CUICDMPropertyHandle inProperty) override
+    AdditionalMetaDataType::Value GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
+                                                              Qt3DSDMPropertyHandle inProperty) override
     {
         CUICDMMetaDataPropertyHandle propHandle(GetMetaDataProperty(inInstance, inProperty));
         SMetaDataPropertyInfo *infoPtr = FindProperty(propHandle);
@@ -1497,8 +1497,8 @@ struct SNewMetaDataImpl : public IMetaData
             return infoPtr->GetAdditionalType();
         return AdditionalMetaDataType::None;
     }
-    TMetaDataData GetAdditionalMetaDataData(CUICDMInstanceHandle inInstance,
-                                                    CUICDMPropertyHandle inProperty) override
+    TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
+                                                    Qt3DSDMPropertyHandle inProperty) override
     {
         CUICDMMetaDataPropertyHandle propHandle(GetMetaDataProperty(inInstance, inProperty));
         SMetaDataPropertyInfo *infoPtr = FindProperty(propHandle);
@@ -1507,12 +1507,12 @@ struct SNewMetaDataImpl : public IMetaData
         return TMetaDataData();
     }
 
-    bool IsCustomInstance(CUICDMInstanceHandle inInstance)
+    bool IsCustomInstance(Qt3DSDMInstanceHandle inInstance)
     {
         return m_InstancesToCanonicalType.find(inInstance) == m_InstancesToCanonicalType.end();
     }
 
-    SValue GetDefaultValue(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override
+    SValue GetDefaultValue(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override
     {
         CUICDMMetaDataPropertyHandle theProperty(GetMetaDataProperty(inInstance, inProperty));
         if (theProperty.Valid() == false) {
@@ -1522,7 +1522,7 @@ struct SNewMetaDataImpl : public IMetaData
         return FindProperty(theProperty)->m_DefaultValue;
     }
 
-    bool IsCustomProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override
+    bool IsCustomProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override
     {
         CUICDMMetaDataPropertyHandle propHandle(GetMetaDataProperty(inInstance, inProperty));
         SMetaDataPropertyInfo *infoPtr = FindProperty(propHandle);
@@ -1541,7 +1541,7 @@ struct SNewMetaDataImpl : public IMetaData
         }
 
         SUICDMPropertyDefinition theProp(m_DataCore->GetProperty(inFilter.m_FilterProperty));
-        CUICDMPropertyHandle propCheck =
+        Qt3DSDMPropertyHandle propCheck =
                 m_DataCore->GetAggregateInstancePropertyByName(infoPtr->m_Instance, theProp.m_Name);
         if (propCheck != inFilter.m_FilterProperty) {
             QT3DS_ASSERT(false);
@@ -1624,13 +1624,13 @@ struct SNewMetaDataImpl : public IMetaData
                     m_InstanceNameToEvents, m_InstanceToEvents);
     }
 
-    void GetEvents(CUICDMInstanceHandle inInstance, TEventHandleList &outEvents) override
+    void GetEvents(Qt3DSDMInstanceHandle inInstance, TEventHandleList &outEvents) override
     {
         return GetHandleList<CUICDMEventHandle>(inInstance, m_InstanceToEvents, m_Events,
                                                 outEvents);
     }
 
-    CUICDMEventHandle FindEvent(CUICDMInstanceHandle inInstance, TStrType inName) override
+    CUICDMEventHandle FindEvent(Qt3DSDMInstanceHandle inInstance, TStrType inName) override
     {
         return FindItemByName<CUICDMEventHandle>(inInstance, Intern(inName),
                                                  m_InstanceNameToEvents);
@@ -1658,14 +1658,14 @@ struct SNewMetaDataImpl : public IMetaData
         return false;
     }
 
-    void GetSpecificEvents(CUICDMInstanceHandle inInstance, TEventHandleList &outEvents) override
+    void GetSpecificEvents(Qt3DSDMInstanceHandle inInstance, TEventHandleList &outEvents) override
     {
         TInstanceEventMap::iterator theFind(m_InstanceToEvents.find(inInstance));
         if (theFind != m_InstanceToEvents.end())
             outEvents.insert(outEvents.end(), theFind->second.begin(), theFind->second.end());
     }
 
-    CUICDMEventHandle GetOrCreateSpecificEvent(CUICDMInstanceHandle inInstance,
+    CUICDMEventHandle GetOrCreateSpecificEvent(Qt3DSDMInstanceHandle inInstance,
                                                        TStrType inName) override
     {
         TInstanceEventNameEventMap::iterator theFind(
@@ -1678,7 +1678,7 @@ struct SNewMetaDataImpl : public IMetaData
     ////////////////////////////////////////////////////////////////////////////////////
     // Handlers
 
-    CUICDMHandlerHandle CreateHandler(CUICDMInstanceHandle inInstance) override
+    CUICDMHandlerHandle CreateHandler(Qt3DSDMInstanceHandle inInstance) override
     {
         return CreateItem<CUICDMHandlerHandle, SHandler>(__FILE__, __LINE__, inInstance, m_Handlers,
                                                          m_InstanceToHandlers);
@@ -1716,7 +1716,7 @@ struct SNewMetaDataImpl : public IMetaData
                     m_InstanceNameToHandlers, m_InstanceToHandlers);
     }
 
-    CUICDMHandlerHandle FindHandlerByName(CUICDMInstanceHandle inInstance, TStrType inName) override
+    CUICDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance, TStrType inName) override
     {
         return FindItemByName<CUICDMHandlerHandle>(inInstance, Intern(inName),
                                                    m_InstanceNameToHandlers);
@@ -1737,7 +1737,7 @@ struct SNewMetaDataImpl : public IMetaData
         return retval;
     }
 
-    void GetHandlers(CUICDMInstanceHandle inInstance, THandlerHandleList &outHandlers) override
+    void GetHandlers(Qt3DSDMInstanceHandle inInstance, THandlerHandleList &outHandlers) override
     {
         return GetHandleList<CUICDMHandlerHandle>(inInstance, m_InstanceToHandlers, m_Handlers,
                                                   outHandlers);
@@ -1751,7 +1751,7 @@ struct SNewMetaDataImpl : public IMetaData
         return false;
     }
 
-    void GetSpecificHandlers(CUICDMInstanceHandle inInstance,
+    void GetSpecificHandlers(Qt3DSDMInstanceHandle inInstance,
                                      THandlerHandleList &outHandlers) override
     {
         TInstanceHandlerMap::iterator theFind = m_InstanceToHandlers.find(inInstance);
@@ -1759,7 +1759,7 @@ struct SNewMetaDataImpl : public IMetaData
             outHandlers.insert(outHandlers.end(), theFind->second.begin(), theFind->second.end());
     }
 
-    CUICDMHandlerHandle GetOrCreateSpecificHandler(CUICDMInstanceHandle inInstance,
+    CUICDMHandlerHandle GetOrCreateSpecificHandler(Qt3DSDMInstanceHandle inInstance,
                                                            TStrType inName) override
     {
         TInstanceHandlerNameHandlerMap::iterator theFind =
@@ -1986,7 +1986,7 @@ struct SNewMetaDataImpl : public IMetaData
 
     ////////////////////////////////////////////////////////////////////////////////////
     // References
-    void AddReference(CUICDMInstanceHandle inInstance, TStrType inRefString) override
+    void AddReference(Qt3DSDMInstanceHandle inInstance, TStrType inRefString) override
     {
         // trim whitespace from the beginning and the end of the string
         TCharStr::size_type startPos = inRefString.find_first_not_of(L"\n\r\t ");
@@ -2008,7 +2008,7 @@ struct SNewMetaDataImpl : public IMetaData
         }
     }
 
-    void DestroyReferences(CUICDMInstanceHandle inInstance) override
+    void DestroyReferences(Qt3DSDMInstanceHandle inInstance) override
     {
         TInstanceStringListMap::iterator find = m_InstanceToReferences.find(inInstance);
 
@@ -2034,7 +2034,7 @@ struct SNewMetaDataImpl : public IMetaData
         }
     };
 
-    void GetReferences(CUICDMInstanceHandle inInstance, vector<TCharStr> &outReferences) override
+    void GetReferences(Qt3DSDMInstanceHandle inInstance, vector<TCharStr> &outReferences) override
     {
         DoGetHandleList(inInstance, m_InstanceToReferences, outReferences,
                         InternSizeTOpType(*this));
@@ -2046,7 +2046,7 @@ struct SNewMetaDataImpl : public IMetaData
     // Calling this on a derived instance does nothing, this only works if this specific
     // instance was mapped to a type.
     // This function must be completely undoable.
-    void DestroyMetaData(CUICDMInstanceHandle inInstance) override
+    void DestroyMetaData(Qt3DSDMInstanceHandle inInstance) override
     {
         ForEachItem<TMetaDataPropertyHandle>(
                     inInstance, m_InstanceToProperties,
@@ -2315,7 +2315,7 @@ struct SNewMetaDataImpl : public IMetaData
             if (AreEqual(inArchive.GetElementName(), L"ShowIfEqual")) {
                 TCharStr theName;
                 inArchive.Att(L"property", theName);
-                CUICDMPropertyHandle theProperty =
+                Qt3DSDMPropertyHandle theProperty =
                         m_DataCore->GetAggregateInstancePropertyByName(inItem.m_Instance, theName);
                 if (theProperty.Valid() == false) {
                     QT3DS_ASSERT(false);
@@ -2331,7 +2331,7 @@ struct SNewMetaDataImpl : public IMetaData
             } else if (AreEqual(inArchive.GetElementName(), L"HideIfEqual")) {
                 TCharStr theName;
                 inArchive.Att(L"property", theName);
-                CUICDMPropertyHandle theProperty =
+                Qt3DSDMPropertyHandle theProperty =
                         m_DataCore->GetAggregateInstancePropertyByName(inItem.m_Instance, theName);
                 if (theProperty.Valid() == false) {
                     QT3DS_ASSERT(false);
@@ -2666,8 +2666,8 @@ struct SNewMetaDataImpl : public IMetaData
 
     template <typename THandleType, typename TMapType>
     void RemoveOldItemsAndSetOrder(
-            CUICDMInstanceHandle inInstance, vector<THandleType> &inNewHandles,
-            void (SNewMetaDataImpl::*inGetSpecificFun)(CUICDMInstanceHandle, vector<THandleType> &),
+            Qt3DSDMInstanceHandle inInstance, vector<THandleType> &inNewHandles,
+            void (SNewMetaDataImpl::*inGetSpecificFun)(Qt3DSDMInstanceHandle, vector<THandleType> &),
             void (SNewMetaDataImpl::*inDestroyFun)(THandleType), TMapType &inListMap)
     {
         vector<THandleType> theHandles;
@@ -2683,7 +2683,7 @@ struct SNewMetaDataImpl : public IMetaData
     // Load meta data and apply it to just this instance
     // This needs to be undoable so we have to do this through a slightly different
     // system than we did before.
-    void LoadInstance(IDOMReader &inReader, CUICDMInstanceHandle inInstance,
+    void LoadInstance(IDOMReader &inReader, Qt3DSDMInstanceHandle inInstance,
                               const TCharStr &inObjectName,
                               std::vector<SMetaDataLoadWarning> &outWarnings) override
     {
@@ -2779,7 +2779,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     // Save just this instances meta data out to the writer
-    void SaveInstance(IDOMWriter &inWriter, CUICDMInstanceHandle inInstance) override
+    void SaveInstance(IDOMWriter &inWriter, Qt3DSDMInstanceHandle inInstance) override
     {
         SerializeInstance(inWriter, inInstance);
     }
@@ -2795,7 +2795,7 @@ struct SNewMetaDataImpl : public IMetaData
         return NULL;
     }
 
-    void LoadEffectInstance(const char *inShaderFile, CUICDMInstanceHandle inInstance,
+    void LoadEffectInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
                                     const TCharStr &inObjectName,
                                     std::vector<SMetaDataLoadWarning> &outWarnings,
                                     qt3ds::foundation::IInStream &inStream) override
@@ -3045,7 +3045,7 @@ struct SNewMetaDataImpl : public IMetaData
         qt3ds::foundation::ConvertUTF(inCode, 0, inConvertBuffer);
         ioStr.append(inConvertBuffer);
     }
-    void HideEffectProperty(CUICDMInstanceHandle inInstance, const char8_t *inParamName)
+    void HideEffectProperty(Qt3DSDMInstanceHandle inInstance, const char8_t *inParamName)
     {
         CUICDMMetaDataPropertyHandle theProp =
                 GetSpecificMetaDataProperty(inInstance, Intern(inParamName));
@@ -3068,7 +3068,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     void LoadDynamicObjectProperties(IDOMReader &inStream, SMetaDataDynamicObjectImpl &ioObject,
-                                     CUICDMInstanceHandle inInstance, const TCharStr &inObjectName,
+                                     Qt3DSDMInstanceHandle inInstance, const TCharStr &inObjectName,
                                      std::vector<SMetaDataLoadWarning> &outWarnings,
                                      eastl::string &shaderPrefix)
     {
@@ -3403,7 +3403,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     // Reloads an effect if one is already loaded so we can replace the existing effect definition
-    void LoadEffectXML(IDOMReader &inStream, CUICDMInstanceHandle inInstance,
+    void LoadEffectXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
                                const TCharStr &inObjectName,
                                std::vector<SMetaDataLoadWarning> &outWarnings,
                                const TCharStr &inSourcePath) override
@@ -3741,7 +3741,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     bool LoadEffectXMLFromSourcePath(const char *inSourcePath,
-                                             CUICDMInstanceHandle inInstance,
+                                             Qt3DSDMInstanceHandle inInstance,
                                              const TCharStr &inObjectName,
                                              std::vector<SMetaDataLoadWarning> &outWarnings,
                                              qt3ds::foundation::IInStream &inStream) override
@@ -3772,7 +3772,7 @@ struct SNewMetaDataImpl : public IMetaData
         return Empty();
     }
 
-    void LoadMaterialInstance(const char *inShaderFile, CUICDMInstanceHandle inInstance,
+    void LoadMaterialInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
                                       const TCharStr &inName,
                                       std::vector<SMetaDataLoadWarning> &outWarnings,
                                       qt3ds::foundation::IInStream &inStream) override
@@ -3791,7 +3791,7 @@ struct SNewMetaDataImpl : public IMetaData
         return m_CustomMaterials.find(Intern(inName)) != m_CustomMaterials.end();
     }
 
-    void LoadMaterialClassXML(IDOMReader &inStream, CUICDMInstanceHandle inInstance,
+    void LoadMaterialClassXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
                                       const TCharStr &inObjectName,
                                       std::vector<SMetaDataLoadWarning> &outWarnings,
                                       const TCharStr &inSourcePath) override
@@ -4024,7 +4024,7 @@ struct SNewMetaDataImpl : public IMetaData
     }
 
     bool LoadMaterialClassFromSourcePath(const char *inSourcePath,
-                                                 CUICDMInstanceHandle inInstance,
+                                                 Qt3DSDMInstanceHandle inInstance,
                                                  const TCharStr &inObjectName,
                                                  std::vector<SMetaDataLoadWarning> &outWarnings,
                                                  qt3ds::foundation::IInStream &inStream) override

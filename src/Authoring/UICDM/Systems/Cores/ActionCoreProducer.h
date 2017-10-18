@@ -59,17 +59,17 @@ public:
     IStringTable &GetStringTable() const override { return m_Data->GetStringTable(); }
     TStringTablePtr GetStringTablePtr() const override { return m_Data->GetStringTablePtr(); }
     // Action
-    CUICDMActionHandle CreateAction(CUICDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
-                                    CUICDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
-    void DeleteAction(CUICDMActionHandle inAction, CUICDMInstanceHandle &outInstance) override;
+    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+                                    Qt3DSDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
+    void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
     const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const override;
-    void GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                     TActionHandleList &outActions) const override;
     void GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const override;
-    void GetActions(CUICDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
+    void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
     void GetActions(TActionHandleList &outActions) const override;
-    CUICDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;
-    CUICDMActionHandle GetActionByInstance(CUICDMInstanceHandle inActionInstance) const override;
+    Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;
+    CUICDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const override;
 
     // Action Properties
     void SetTriggerObject(CUICDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;

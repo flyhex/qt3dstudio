@@ -50,12 +50,12 @@ class CCmdDataModelInsertKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 public:
     struct STimeKeyframeData
     {
-        qt3dsdm::CUICDMPropertyHandle m_Property;
+        qt3dsdm::Qt3DSDMPropertyHandle m_Property;
         float m_KeyframeTime;
         qt3dsdm::SGetOrSetKeyframeInfo m_Infos[3];
         size_t m_ValidInfoCount;
 
-        STimeKeyframeData(qt3dsdm::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+        STimeKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
                           qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
             : m_Property(inProperty)
             , m_KeyframeTime(inKeyframeTime)
@@ -72,13 +72,13 @@ protected:
 
 protected: // Members
     CDoc *m_Doc;
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
     TKeyframeDataList m_KeyframeDataList;
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelInsertKeyframe(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
-                                qt3dsdm::CUICDMPropertyHandle inProperty, float inKeyframeTime,
+    CCmdDataModelInsertKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
                                 qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
@@ -88,7 +88,7 @@ public: // Construction
     }
     ~CCmdDataModelInsertKeyframe() {}
 
-    void AddKeyframeData(qt3dsdm::CUICDMPropertyHandle inProperty, float inTime,
+    void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inTime,
                          qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
     {
         m_KeyframeDataList.push_back(STimeKeyframeData(inProperty, inTime, inInfos, inInfoCount));

@@ -55,13 +55,13 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
         Q3DStudio::CString m_RelativePath;
         bool operator<(const SMaterialEntry &inOther) const { return m_Name < inOther.m_Name; }
     };
-    CUICDMInstanceHandle m_Instance;
+    Qt3DSDMInstanceHandle m_Instance;
     Q3DStudio::CAutoMemPtr<CGenericEditCommitListener> m_CommitListener;
     vector<SMaterialEntry> m_Materials;
     CDoc &m_Doc;
     TSignalConnectionPtr m_FileListPtr;
 
-    SMaterialTypeDropDown(CDoc &inDoc, CUICDMInstanceHandle inInstance)
+    SMaterialTypeDropDown(CDoc &inDoc, Qt3DSDMInstanceHandle inInstance)
         : m_Instance(inInstance)
         , m_Doc(inDoc)
     {
@@ -154,7 +154,7 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
     // Note that the this object is probably deleted when this happens or will be during its
     // execution.
     static void DoChangeObjectType(CDoc *inDoc, const Q3DStudio::CString &inNewType,
-                                   CUICDMInstanceHandle instance)
+                                   Qt3DSDMInstanceHandle instance)
     {
         using namespace Q3DStudio;
         SCOPED_DOCUMENT_EDITOR(*inDoc, QObject::tr("Set Property"))->SetMaterialType(instance, inNewType);

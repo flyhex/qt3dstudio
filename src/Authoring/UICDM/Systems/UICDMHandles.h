@@ -86,62 +86,62 @@ inline bool CDataModelHandle::operator<(const CDataModelHandle &other) const
     return m_Handle < other.m_Handle;
 }
 
-class CUICDMInstanceHandle : public CDataModelHandle
+class Qt3DSDMInstanceHandle : public CDataModelHandle
 {
 public:
-    CUICDMInstanceHandle(int inHandle = 0)
+    Qt3DSDMInstanceHandle(int inHandle = 0)
         : CDataModelHandle(inHandle)
     {
     }
 
-    CUICDMInstanceHandle(const CDataModelHandle &inOther)
+    Qt3DSDMInstanceHandle(const CDataModelHandle &inOther)
         : CDataModelHandle(inOther)
     {
     }
 
-    CUICDMInstanceHandle(const CUICDMInstanceHandle &inOther)
+    Qt3DSDMInstanceHandle(const Qt3DSDMInstanceHandle &inOther)
         : CDataModelHandle(inOther)
     {
     }
 
-    CUICDMInstanceHandle &operator=(const CUICDMInstanceHandle &inOther)
+    Qt3DSDMInstanceHandle &operator=(const Qt3DSDMInstanceHandle &inOther)
     {
-        return static_cast<CUICDMInstanceHandle &>(CDataModelHandle::operator=(inOther));
+        return static_cast<Qt3DSDMInstanceHandle &>(CDataModelHandle::operator=(inOther));
     }
 
-    inline bool operator==(const CUICDMInstanceHandle &other) const
+    inline bool operator==(const Qt3DSDMInstanceHandle &other) const
     {
         return CDataModelHandle::operator==(other);
     }
 };
 
-typedef std::vector<CUICDMInstanceHandle> TInstanceHandleList;
+typedef std::vector<Qt3DSDMInstanceHandle> TInstanceHandleList;
 
-class CUICDMPropertyHandle : public CDataModelHandle
+class Qt3DSDMPropertyHandle : public CDataModelHandle
 {
 public:
-    CUICDMPropertyHandle(int inHandle = 0)
+    Qt3DSDMPropertyHandle(int inHandle = 0)
         : CDataModelHandle(inHandle)
     {
     }
 
-    CUICDMPropertyHandle(const CDataModelHandle &inOther)
+    Qt3DSDMPropertyHandle(const CDataModelHandle &inOther)
         : CDataModelHandle(inOther)
     {
     }
 
-    CUICDMPropertyHandle(const CUICDMInstanceHandle &inOther)
+    Qt3DSDMPropertyHandle(const Qt3DSDMInstanceHandle &inOther)
         : CDataModelHandle(inOther)
     {
     }
 
-    CUICDMPropertyHandle &operator=(const CUICDMPropertyHandle &inOther)
+    Qt3DSDMPropertyHandle &operator=(const Qt3DSDMPropertyHandle &inOther)
     {
-        return static_cast<CUICDMPropertyHandle &>(CDataModelHandle::operator=(inOther));
+        return static_cast<Qt3DSDMPropertyHandle &>(CDataModelHandle::operator=(inOther));
     }
 };
 
-typedef std::vector<CUICDMPropertyHandle> TPropertyHandleList;
+typedef std::vector<Qt3DSDMPropertyHandle> TPropertyHandleList;
 
 class CUICDMSlideHandle : public CDataModelHandle
 {

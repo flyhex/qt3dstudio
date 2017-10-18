@@ -43,14 +43,14 @@ namespace qt3dsdm {
 
 inline bool AnimationInstanceMatches(CUICDMAnimationHandle inAnimation,
                                      TAnimationCorePtr inAnimationCore,
-                                     CUICDMInstanceHandle inInstance)
+                                     Qt3DSDMInstanceHandle inInstance)
 {
     return inInstance == inAnimationCore->GetAnimationInfo(inAnimation).m_Instance;
 }
 
 inline bool AnimationPropertyMatches(CUICDMAnimationHandle inAnimation,
                                      TAnimationCorePtr inAnimationCore,
-                                     CUICDMPropertyHandle inProperty)
+                                     Qt3DSDMPropertyHandle inProperty)
 {
     return inProperty == inAnimationCore->GetAnimationInfo(inAnimation).m_Property;
 }
@@ -64,8 +64,8 @@ inline bool AnimationSlideMatches(CUICDMAnimationHandle inAnimation,
 inline bool AnimationSlideInstancePropertyMatch(CUICDMAnimationHandle inAnimation,
                                                 TAnimationCorePtr inAnimationCore,
                                                 CUICDMSlideHandle inSlide,
-                                                CUICDMInstanceHandle inInstance,
-                                                CUICDMPropertyHandle inProperty)
+                                                Qt3DSDMInstanceHandle inInstance,
+                                                Qt3DSDMPropertyHandle inProperty)
 {
     SAnimationInfo theInfo = inAnimationCore->GetAnimationInfo(inAnimation);
     return theInfo.m_Slide == inSlide && theInfo.m_Instance == inInstance
@@ -103,13 +103,13 @@ void EraseActions(TDataCorePtr inDataCore, TActionCorePtr inActionCore,
 {
     for (TActionHandleList::const_iterator theActionIter = inActions.begin();
          theActionIter != inActions.end(); ++theActionIter) {
-        CUICDMInstanceHandle theActionInstance;
+        Qt3DSDMInstanceHandle theActionInstance;
         inActionCore->DeleteAction(*theActionIter, theActionInstance);
         inDataCore->DeleteInstance(theActionInstance);
     }
 }
 
-void CascadeInstanceDelete(CUICDMInstanceHandle inInstance, TDataCorePtr inDataCore,
+void CascadeInstanceDelete(Qt3DSDMInstanceHandle inInstance, TDataCorePtr inDataCore,
                            TSlideCorePtr inSlideCore, TSlideGraphCorePtr inSlideGraphCore,
                            TAnimationCorePtr inAnimationCore, TActionCorePtr inActionCore)
 {
@@ -126,7 +126,7 @@ void CascadeInstanceDelete(CUICDMInstanceHandle inInstance, TDataCorePtr inDataC
     EraseActions(inDataCore, inActionCore, theActions);
 }
 
-void CascadePropertyRemove(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+void CascadePropertyRemove(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                            TSlideCorePtr inSlideCore, TSlideGraphCorePtr inSlideGraphCore,
                            TAnimationCorePtr inAnimationCore)
 {
@@ -202,8 +202,8 @@ void CascadeSlideDelete(CUICDMSlideHandle inSlide, TDataCorePtr inDataCore,
     EraseActions(inDataCore, inActionCore, theActions);
 }
 
-void CascadeSlidePropertyRemove(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,
-                                CUICDMPropertyHandle inProperty, TAnimationCorePtr inAnimationCore)
+void CascadeSlidePropertyRemove(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+                                Qt3DSDMPropertyHandle inProperty, TAnimationCorePtr inAnimationCore)
 {
     EraseAnimationsThatMatch(inAnimationCore,
                              std::bind(AnimationSlideInstancePropertyMatch,
@@ -211,7 +211,7 @@ void CascadeSlidePropertyRemove(CUICDMSlideHandle inSlide, CUICDMInstanceHandle 
                                        inSlide, inInstance, inProperty));
 }
 
-void CascadeInstanceParentRemoved(CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inParent,
+void CascadeInstanceParentRemoved(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent,
                                   TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
                                   TAnimationCorePtr inAnimationCore)
 {
@@ -219,11 +219,11 @@ void CascadeInstanceParentRemoved(CUICDMInstanceHandle inInstance, CUICDMInstanc
     inDataCore->GetInstanceProperties(inParent, theProperties);
     TInstanceHandleList allInstances;
     inDataCore->GetInstances(allInstances);
-    function<bool(CUICDMInstanceHandle)> InstanceOrDerived(
+    function<bool(Qt3DSDMInstanceHandle)> InstanceOrDerived(
         std::bind(&IDataCore::IsInstanceOrDerivedFrom, inDataCore,
                   std::placeholders::_1, inInstance));
-    function<bool(CUICDMInstanceHandle)> DerivedComplement(
-        std::bind(complement<function<bool(CUICDMInstanceHandle)>, CUICDMInstanceHandle>,
+    function<bool(Qt3DSDMInstanceHandle)> DerivedComplement(
+        std::bind(complement<function<bool(Qt3DSDMInstanceHandle)>, Qt3DSDMInstanceHandle>,
                     InstanceOrDerived, std::placeholders::_1));
     TInstanceHandleList::iterator all_derived =
         remove_if(allInstances.begin(), allInstances.end(), DerivedComplement);
@@ -364,8 +364,8 @@ std::shared_ptr<IActionCore> CStudioCoreSystem::GetTransactionlessActionCore()
     return dynamic_cast<CActionCoreProducer *>(m_ActionCore.get())->GetTransactionlessActionCore();
 }
 
-inline bool InstanceSpecificNameMatches(CUICDMInstanceHandle inInstance,
-                                        CUICDMPropertyHandle inProperty, const TCharStr &inName,
+inline bool InstanceSpecificNameMatches(Qt3DSDMInstanceHandle inInstance,
+                                        Qt3DSDMPropertyHandle inProperty, const TCharStr &inName,
                                         const CSimpleDataCore &inData)
 {
     TPropertyHandleList theProperties;
@@ -378,7 +378,7 @@ inline bool InstanceSpecificNameMatches(CUICDMInstanceHandle inInstance,
     return false;
 }
 
-CUICDMInstanceHandle CStudioCoreSystem::FindInstanceByName(CUICDMPropertyHandle inNameProperty,
+Qt3DSDMInstanceHandle CStudioCoreSystem::FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
                                                            const TCharStr &inName) const
 {
     TInstanceHandleList theInstances;

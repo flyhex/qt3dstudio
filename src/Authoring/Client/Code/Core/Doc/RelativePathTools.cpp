@@ -107,8 +107,8 @@ CRelativePathTools::GetPathType(const qt3dsdm::SObjectRefType &inObjectRefValue)
  *	Build a object reference path, via Ids
  */
 Q3DStudio::CString
-CRelativePathTools::BuildReferenceString(const qt3dsdm::CUICDMInstanceHandle inInstance,
-                                         const qt3dsdm::CUICDMInstanceHandle inRootInstance,
+CRelativePathTools::BuildReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                         const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
                                          EPathType inPathType, CDoc *inDoc)
 {
     switch (inPathType) {
@@ -126,7 +126,7 @@ CRelativePathTools::BuildReferenceString(const qt3dsdm::CUICDMInstanceHandle inI
  *property names, in the runtime.
  */
 Q3DStudio::CString
-CRelativePathTools::BuildAbsoluteReferenceString(const qt3dsdm::CUICDMInstanceHandle inInstance,
+CRelativePathTools::BuildAbsoluteReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                  CDoc *inDoc)
 {
     if (inInstance.Valid() == false)
@@ -135,7 +135,7 @@ CRelativePathTools::BuildAbsoluteReferenceString(const qt3dsdm::CUICDMInstanceHa
     Q3DStudio::CString theNameEnd(
         CPathConstructionHelper::EscapeAssetName(LookupObjectName(inInstance, inDoc)));
 
-    qt3dsdm::CUICDMInstanceHandle theParentInstance =
+    qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
         inDoc->GetStudioSystem()->GetClientDataModelBridge()->GetParentInstance(inInstance);
     if (theParentInstance.Valid())
         theNameStart = BuildAbsoluteReferenceString(theParentInstance, inDoc) + ".";
@@ -144,8 +144,8 @@ CRelativePathTools::BuildAbsoluteReferenceString(const qt3dsdm::CUICDMInstanceHa
 }
 
 Q3DStudio::CString
-CRelativePathTools::BuildRelativeReferenceString(const qt3dsdm::CUICDMInstanceHandle inInstance,
-                                                 const qt3dsdm::CUICDMInstanceHandle inRootInstance,
+CRelativePathTools::BuildRelativeReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                 const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
                                                  CDoc *inDoc)
 {
     Q3DStudio::CString theAbsRelPath(BuildAbsoluteReferenceString(inInstance, inDoc));
@@ -165,8 +165,8 @@ CRelativePathTools::BuildRelativeReferenceString(const qt3dsdm::CUICDMInstanceHa
  *	@return theId of the object (or the object it manages to traverse to) N.B. this is required
  *	for the Object Ref Picker to highlight that parent object if that token is invalid.
  */
-qt3dsdm::CUICDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
-    CDoc *inDoc, const qt3dsdm::CUICDMInstanceHandle &inRootInstance,
+qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
+    CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
     const Q3DStudio::CString &inString, EPathType &outPathType, bool &outIsResolved,
     const IObjectReferenceHelper *inHelper /*= NULL */)
 {
@@ -175,7 +175,7 @@ qt3dsdm::CUICDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
     CStackTokenizer theTokenizer(inString, CPathConstructionHelper::GetPathDelimiter().GetAt(0),
                                  CPathConstructionHelper::GetEscapeChar().GetAt(0));
     // Default to the scene if asset cannot be found.
-    qt3dsdm::CUICDMInstanceHandle theFoundInstance;
+    qt3dsdm::Qt3DSDMInstanceHandle theFoundInstance;
 
     if (theTokenizer.HasNextPartition()) {
         Q3DStudio::CString theCurrentToken(theTokenizer.GetCurrentPartition());
@@ -205,7 +205,7 @@ qt3dsdm::CUICDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
     }
 
     if (theFoundInstance.Valid()) {
-        qt3dsdm::CUICDMInstanceHandle theTimeParent =
+        qt3dsdm::Qt3DSDMInstanceHandle theTimeParent =
             theBridge->GetOwningComponentInstance(theFoundInstance);
         if (theTimeParent.Valid()) {
             qt3dsdm::CUICDMSlideHandle theCurrentSlide =
@@ -222,8 +222,8 @@ qt3dsdm::CUICDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
 }
 
 qt3dsdm::SObjectRefType
-CRelativePathTools::CreateAssetRefValue(const qt3dsdm::CUICDMInstanceHandle inInstance,
-                                        const qt3dsdm::CUICDMInstanceHandle inRootInstance,
+CRelativePathTools::CreateAssetRefValue(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                        const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
                                         EPathType inPathType, CDoc *inDoc)
 {
     qt3dsdm::SObjectRefType theAssetRefValue;
@@ -256,14 +256,14 @@ CRelativePathTools::CreateAssetRefValue(const qt3dsdm::CUICDMInstanceHandle inIn
  *	@return	the source ID of the final asset
  *	@see	FindAssetInstanceByObjectPath
  */
-qt3dsdm::CUICDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPath(
-    CDoc *inDoc, const qt3dsdm::CUICDMInstanceHandle &inRootInstance,
-    const qt3dsdm::CUICDMInstanceHandle inTimeParentInstance, qt3dsdm::CUICDMSlideHandle inSlide,
+qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPath(
+    CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
+    const qt3dsdm::Qt3DSDMInstanceHandle inTimeParentInstance, qt3dsdm::CUICDMSlideHandle inSlide,
     CStackTokenizer &ioTokenizer, bool &outIsResolved, const IObjectReferenceHelper *inHelper)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
-    qt3dsdm::CUICDMInstanceHandle theFoundInstance = inRootInstance;
+    qt3dsdm::Qt3DSDMInstanceHandle theFoundInstance = inRootInstance;
     // There is another object to parse
     if (inRootInstance.Valid() && ioTokenizer.HasNextPartition()) {
         Q3DStudio::CString theCurrentToken(ioTokenizer.GetCurrentPartition());
@@ -272,7 +272,7 @@ qt3dsdm::CUICDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPat
             // Parent asset
             if (theCurrentToken.Compare(CPathConstructionHelper::GetParentString(), false)) {
                 ++ioTokenizer;
-                qt3dsdm::CUICDMInstanceHandle theParentInstance =
+                qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
                     theBridge->GetParentInstance(inRootInstance);
                 if (theParentInstance.Valid()) {
                     outIsResolved = true;
@@ -307,7 +307,7 @@ qt3dsdm::CUICDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPat
         }
     }
 
-    return outIsResolved ? theFoundInstance : qt3dsdm::CUICDMInstanceHandle(0);
+    return outIsResolved ? theFoundInstance : qt3dsdm::Qt3DSDMInstanceHandle(0);
 }
 
 //==============================================================================
@@ -315,13 +315,13 @@ qt3dsdm::CUICDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPat
  * Figures out the object name, used for script access. so that paths are valid in the runtime.
  */
 Q3DStudio::CString
-CRelativePathTools::LookupObjectName(const qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc)
+CRelativePathTools::LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = inDoc->GetStudioSystem()->GetPropertySystem();
     CClientDataModelBridge *theClientBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
     if (theClientBridge->IsImageInstance(inInstance)) {
-        qt3dsdm::CUICDMInstanceHandle theParentInstance;
-        qt3dsdm::CUICDMPropertyHandle theProperty;
+        qt3dsdm::Qt3DSDMInstanceHandle theParentInstance;
+        qt3dsdm::Qt3DSDMPropertyHandle theProperty;
         if (!theClientBridge->GetMaterialFromImageInstance(inInstance, theParentInstance,
                                                            theProperty))
             theClientBridge->GetLayerFromImageProbeInstance(inInstance, theParentInstance,

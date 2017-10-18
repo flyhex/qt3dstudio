@@ -51,13 +51,13 @@
 class CUICDMInspectable : public CInspectableBase
 {
 protected: // Fields
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
-    qt3dsdm::CUICDMInstanceHandle m_DualPersonalityInstance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_DualPersonalityInstance;
     CStudioApp &m_App;
 
 public: // Constructor
-    CUICDMInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::CUICDMInstanceHandle inInstance,
-                      qt3dsdm::CUICDMInstanceHandle inDualPersonalityInstance = 0);
+    CUICDMInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                      qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance = 0);
 
 public: // CInspectableBase
     Q3DStudio::CString GetName() override;
@@ -68,7 +68,7 @@ public: // CInspectableBase
     bool IsValid() const override;
     bool IsMaster() override;
     virtual qt3dsdm::TMetaDataPropertyHandleList GetGroupProperties(long inGroupIndex);
-    virtual qt3dsdm::CUICDMInstanceHandle GetGroupInstance(long inGroupIndex);
+    virtual qt3dsdm::Qt3DSDMInstanceHandle GetGroupInstance(long inGroupIndex);
 
 protected:
     virtual Q3DStudio::CString GetGroupName(long inGroupIndex);

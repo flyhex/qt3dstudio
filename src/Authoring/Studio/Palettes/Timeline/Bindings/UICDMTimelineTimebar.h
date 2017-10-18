@@ -56,20 +56,20 @@ class CUICDMTimelineTimebar : public ITimelineTimebar, public Q3DStudio::CUpdate
 {
 public:
     CUICDMTimelineTimebar(CTimelineTranslationManager *inTimelineTranslationManager,
-                          qt3dsdm::CUICDMInstanceHandle inDataHandle);
+                          qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     virtual ~CUICDMTimelineTimebar();
 
 protected:
     CTimelineTranslationManager *m_TimelineTranslationManager;
     qt3dsdm::IPropertySystem *m_PropertySystem;
-    qt3dsdm::CUICDMInstanceHandle m_DataHandle; // The Instance Handle for this Timeline Timeber.
-    qt3dsdm::CUICDMPropertyHandle m_StartTime;
-    qt3dsdm::CUICDMPropertyHandle m_EndTime;
+    qt3dsdm::Qt3DSDMInstanceHandle m_DataHandle; // The Instance Handle for this Timeline Timeber.
+    qt3dsdm::Qt3DSDMPropertyHandle m_StartTime;
+    qt3dsdm::Qt3DSDMPropertyHandle m_EndTime;
     ::CColor m_Color; // Timebar color
     Q3DStudio::CString m_Comment; // Timebar comment text
     std::shared_ptr<qt3dsdm::ISignalConnection> m_PropertyChangedSignal;
-    void OnPropertyChanged(qt3dsdm::CUICDMInstanceHandle inInstance,
-                           qt3dsdm::CUICDMPropertyHandle inProperty);
+    void OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
 public:
     // ITimelineTimebar

@@ -138,20 +138,20 @@ public:
     // If this object is canonical, then we expect this mapping setup before loading the
     // canonical data, and we will use a type lookup instead of a direct handle lookup
     // when loading canonical information.
-    virtual void SetInstanceAsCanonical(CUICDMInstanceHandle inInstance, TStrType inTypename) = 0;
+    virtual void SetInstanceAsCanonical(Qt3DSDMInstanceHandle inInstance, TStrType inTypename) = 0;
 
-    virtual CUICDMInstanceHandle GetCanonicalInstanceForType(TStrType inTypename) = 0;
+    virtual Qt3DSDMInstanceHandle GetCanonicalInstanceForType(TStrType inTypename) = 0;
     // If this instance wasn't registered as canonical, then we return empty.
-    virtual Option<TCharStr> GetTypeForCanonicalInstance(CUICDMInstanceHandle inInstance) = 0;
+    virtual Option<TCharStr> GetTypeForCanonicalInstance(Qt3DSDMInstanceHandle inInstance) = 0;
     // Gets the type for this instance via derivation
-    virtual Option<TCharStr> GetTypeForInstance(CUICDMInstanceHandle inInstance) = 0;
+    virtual Option<TCharStr> GetTypeForInstance(Qt3DSDMInstanceHandle inInstance) = 0;
     // Get group count for instance
-    virtual QT3DSU32 GetGroupCountForInstance(CUICDMInstanceHandle inInstance) = 0;
+    virtual QT3DSU32 GetGroupCountForInstance(Qt3DSDMInstanceHandle inInstance) = 0;
     // Get all group names
-    virtual QT3DSU32 GetGroupNamesForInstance(CUICDMInstanceHandle inInstance,
+    virtual QT3DSU32 GetGroupNamesForInstance(Qt3DSDMInstanceHandle inInstance,
                                            std::vector<TCharStr> &outNames) = 0;
     // Get group count for instance
-    virtual Option<TCharStr> GetGroupFilterNameForInstance(CUICDMInstanceHandle inInstance,
+    virtual Option<TCharStr> GetGroupFilterNameForInstance(Qt3DSDMInstanceHandle inInstance,
                                                            long inIndex) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ public:
     // the parent definition.  We currently use this to give different formal names and description
     // to the sourcepath property (for models it is mesh, for materials it is image).
     virtual CUICDMMetaDataPropertyHandle
-    CreateMetaDataProperty(CUICDMInstanceHandle inInstance) = 0;
+    CreateMetaDataProperty(Qt3DSDMInstanceHandle inInstance) = 0;
 
     // For properties, you set the default values separately
     // This may delete the underlying data model property rebuild it.
@@ -196,34 +196,34 @@ public:
     // this property.
     virtual void DestroyMetaDataProperty(CUICDMMetaDataPropertyHandle inProperty) = 0;
 
-    virtual CUICDMMetaDataPropertyHandle GetMetaDataProperty(CUICDMInstanceHandle inInstance,
+    virtual CUICDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                                              TStrType inPropertyName) = 0;
-    virtual CUICDMMetaDataPropertyHandle GetMetaDataProperty(CUICDMInstanceHandle inInstance,
-                                                             CUICDMPropertyHandle inProperty) = 0;
+    virtual CUICDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
+                                                             Qt3DSDMPropertyHandle inProperty) = 0;
     virtual Option<SMetaDataPropertyInfo>
     GetMetaDataPropertyInfo(CUICDMMetaDataPropertyHandle inProperty) = 0;
     // Get all of the meta data properties defined on this object or its derivation parents
-    virtual void GetMetaDataProperties(CUICDMInstanceHandle inInstance,
+    virtual void GetMetaDataProperties(Qt3DSDMInstanceHandle inInstance,
                                        vector<CUICDMMetaDataPropertyHandle> &outProperties) = 0;
 
     // Get the meta data properties defined on *only* this object, don't search parents
     virtual CUICDMMetaDataPropertyHandle
-    GetOrCreateSpecificMetaDataProperty(CUICDMInstanceHandle inInstance,
+    GetOrCreateSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                         TStrType inPropertyName) = 0;
     virtual void
-    GetSpecificMetaDataProperties(CUICDMInstanceHandle inInstance,
+    GetSpecificMetaDataProperties(Qt3DSDMInstanceHandle inInstance,
                                   vector<CUICDMMetaDataPropertyHandle> &outProperties) = 0;
 
-    virtual TCharStr GetFormalName(CUICDMInstanceHandle inInstance,
-                                   CUICDMPropertyHandle inProperty) = 0;
-    virtual AdditionalMetaDataType::Value GetAdditionalMetaDataType(CUICDMInstanceHandle inInstance,
-                                                              CUICDMPropertyHandle inProperty) = 0;
-    virtual TMetaDataData GetAdditionalMetaDataData(CUICDMInstanceHandle inInstance,
-                                                    CUICDMPropertyHandle inProperty) = 0;
-    virtual bool IsCustomProperty(CUICDMInstanceHandle inInstance,
-                                  CUICDMPropertyHandle inProperty) = 0;
-    virtual SValue GetDefaultValue(CUICDMInstanceHandle inInstance,
-                                   CUICDMPropertyHandle inProperty) = 0;
+    virtual TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
+                                   Qt3DSDMPropertyHandle inProperty) = 0;
+    virtual AdditionalMetaDataType::Value GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
+                                                              Qt3DSDMPropertyHandle inProperty) = 0;
+    virtual TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
+                                                    Qt3DSDMPropertyHandle inProperty) = 0;
+    virtual bool IsCustomProperty(Qt3DSDMInstanceHandle inInstance,
+                                  Qt3DSDMPropertyHandle inProperty) = 0;
+    virtual SValue GetDefaultValue(Qt3DSDMInstanceHandle inInstance,
+                                   Qt3DSDMPropertyHandle inProperty) = 0;
 
     virtual void
     SetMetaDataPropertyFilters(CUICDMMetaDataPropertyHandle inProperty,
@@ -236,41 +236,41 @@ public:
     // Events
     // CreateMetaDataEvent was original named CreateEvent but this collides with
     // the microsoft macro CreateEvent which expands to CreateEventA or CreateEventW
-    virtual CUICDMEventHandle CreateMetaDataEvent(CUICDMInstanceHandle inInstance) = 0;
+    virtual CUICDMEventHandle CreateMetaDataEvent(Qt3DSDMInstanceHandle inInstance) = 0;
     virtual void SetEventInfo(CUICDMEventHandle inEventHandle, TStrType inName,
                               TStrType inFormalName, TStrType inCategory,
                               TStrType inDescription) = 0;
 
     virtual void DestroyEvent(CUICDMEventHandle inEventHandle) = 0;
 
-    virtual void GetEvents(CUICDMInstanceHandle inInstance, TEventHandleList &outEvents) = 0;
-    virtual CUICDMEventHandle FindEvent(CUICDMInstanceHandle inInstance, TStrType inName) = 0;
+    virtual void GetEvents(Qt3DSDMInstanceHandle inInstance, TEventHandleList &outEvents) = 0;
+    virtual CUICDMEventHandle FindEvent(Qt3DSDMInstanceHandle inInstance, TStrType inName) = 0;
     virtual Option<SEventInfo> GetEventInfo(CUICDMEventHandle inEventHandle) = 0;
     virtual bool IsCustomEvent(CUICDMEventHandle inEventHandle) = 0;
 
     // Get/Find an event that occurs on just this instance, don't search parent instances
-    virtual void GetSpecificEvents(CUICDMInstanceHandle inInstance,
+    virtual void GetSpecificEvents(Qt3DSDMInstanceHandle inInstance,
                                    TEventHandleList &outEvents) = 0;
-    virtual CUICDMEventHandle GetOrCreateSpecificEvent(CUICDMInstanceHandle inInstance,
+    virtual CUICDMEventHandle GetOrCreateSpecificEvent(Qt3DSDMInstanceHandle inInstance,
                                                        TStrType inName) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Handlers
-    virtual CUICDMHandlerHandle CreateHandler(CUICDMInstanceHandle inInstance) = 0;
+    virtual CUICDMHandlerHandle CreateHandler(Qt3DSDMInstanceHandle inInstance) = 0;
     virtual void SetHandlerInfo(CUICDMHandlerHandle inHandle, TStrType inName,
                                 TStrType inFormalName, TStrType inCategory,
                                 TStrType inDescription) = 0;
     virtual void DestroyHandler(CUICDMHandlerHandle inHandlerHandle) = 0;
 
-    virtual CUICDMHandlerHandle FindHandlerByName(CUICDMInstanceHandle inInstance,
+    virtual CUICDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance,
                                                   TStrType inName) = 0;
     virtual Option<SHandlerInfo> GetHandlerInfo(CUICDMHandlerHandle inHandlerHandle) = 0;
-    virtual void GetHandlers(CUICDMInstanceHandle inInstance, THandlerHandleList &outHandlers) = 0;
+    virtual void GetHandlers(Qt3DSDMInstanceHandle inInstance, THandlerHandleList &outHandlers) = 0;
     virtual bool IsCustomHandler(CUICDMHandlerHandle inEventHandle) = 0;
 
-    virtual void GetSpecificHandlers(CUICDMInstanceHandle inInstance,
+    virtual void GetSpecificHandlers(Qt3DSDMInstanceHandle inInstance,
                                      THandlerHandleList &outHandlers) = 0;
-    virtual CUICDMHandlerHandle GetOrCreateSpecificHandler(CUICDMInstanceHandle inInstance,
+    virtual CUICDMHandlerHandle GetOrCreateSpecificHandler(Qt3DSDMInstanceHandle inInstance,
                                                            TStrType inName) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -295,12 +295,12 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////
     // References
     // Duplicate references are removed from this instance
-    virtual void AddReference(CUICDMInstanceHandle inInstance, TStrType inRefString) = 0;
-    virtual void DestroyReferences(CUICDMInstanceHandle inInstance) = 0;
+    virtual void AddReference(Qt3DSDMInstanceHandle inInstance, TStrType inRefString) = 0;
+    virtual void DestroyReferences(Qt3DSDMInstanceHandle inInstance) = 0;
 
     // Does the recursive gather from all the parents.  Duplicate references are removed from the
     // final list.
-    virtual void GetReferences(CUICDMInstanceHandle inInstance,
+    virtual void GetReferences(Qt3DSDMInstanceHandle inInstance,
                                std::vector<TCharStr> &outReferences) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +308,7 @@ public:
     // Destroy all meta data that relates to this instance.
     // Calling this on a derived instance does nothing, this only works if this specific
     // instance was mapped directly to meta data.
-    virtual void DestroyMetaData(CUICDMInstanceHandle inInstance) = 0;
+    virtual void DestroyMetaData(Qt3DSDMInstanceHandle inInstance) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Serialization
@@ -325,43 +325,43 @@ public:
     virtual void Load(IDOMReader &ioStream) = 0;
 
     // Load meta data and apply it to just this instance
-    virtual void LoadInstance(IDOMReader &inReader, CUICDMInstanceHandle inInstance,
+    virtual void LoadInstance(IDOMReader &inReader, Qt3DSDMInstanceHandle inInstance,
                               const TCharStr &inName,
                               std::vector<SMetaDataLoadWarning> &outWarnings) = 0;
 
     // Save just this instances meta data out to the writer
-    virtual void SaveInstance(IDOMWriter &inWriter, CUICDMInstanceHandle inInstance) = 0;
+    virtual void SaveInstance(IDOMWriter &inWriter, Qt3DSDMInstanceHandle inInstance) = 0;
 
     // Load effect meta data from file and apply it to just this instance
-    virtual void LoadEffectInstance(const char *inShaderFile, CUICDMInstanceHandle inInstance,
+    virtual void LoadEffectInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
                                     const TCharStr &inName,
                                     std::vector<SMetaDataLoadWarning> &outWarnings,
                                     qt3ds::foundation::IInStream &inStream) = 0;
 
     virtual bool IsEffectInstanceRegistered(const char *inName) = 0;
-    virtual void LoadEffectXML(IDOMReader &inStream, CUICDMInstanceHandle inInstance,
+    virtual void LoadEffectXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
                                const TCharStr &inObjectName,
                                std::vector<SMetaDataLoadWarning> &outWarnings,
                                const TCharStr &inSourcePath) = 0;
     virtual bool LoadEffectXMLFromSourcePath(const char *inSourcePath,
-                                             CUICDMInstanceHandle inInstance,
+                                             Qt3DSDMInstanceHandle inInstance,
                                              const TCharStr &inObjectName,
                                              std::vector<SMetaDataLoadWarning> &outWarnings,
                                              qt3ds::foundation::IInStream &inStream) = 0;
     virtual Option<SMetaDataEffect> GetEffectBySourcePath(const char *inName) = 0;
 
     virtual void LoadMaterialInstance(const char *inShaderFile,
-                                      CUICDMInstanceHandle inInstance,
+                                      Qt3DSDMInstanceHandle inInstance,
                                       const TCharStr &inName,
                                       std::vector<SMetaDataLoadWarning> &outWarnings,
                                       qt3ds::foundation::IInStream &inStream) = 0;
     virtual bool IsMaterialClassRegistered(const char *inName) = 0;
-    virtual void LoadMaterialClassXML(IDOMReader &inStream, CUICDMInstanceHandle inInstance,
+    virtual void LoadMaterialClassXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
                                       const TCharStr &inObjectName,
                                       std::vector<SMetaDataLoadWarning> &outWarnings,
                                       const TCharStr &inSourcePath) = 0;
     virtual bool LoadMaterialClassFromSourcePath(const char *inSourcePath,
-                                                 CUICDMInstanceHandle inInstance,
+                                                 Qt3DSDMInstanceHandle inInstance,
                                                  const TCharStr &inObjectName,
                                                  std::vector<SMetaDataLoadWarning> &outWarnings,
                                                  qt3ds::foundation::IInStream &inStream) = 0;

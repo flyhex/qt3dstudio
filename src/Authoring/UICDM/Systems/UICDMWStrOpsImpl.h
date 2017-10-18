@@ -634,8 +634,8 @@ struct WStrOps<CDataModelHandle>
     struct WStrOps<HandleType> : public WStrOps<CDataModelHandle>                                  \
     {                                                                                              \
     };
-IMPLEMENT_HANDLE_WSTROPS(CUICDMInstanceHandle);
-IMPLEMENT_HANDLE_WSTROPS(CUICDMPropertyHandle);
+IMPLEMENT_HANDLE_WSTROPS(Qt3DSDMInstanceHandle);
+IMPLEMENT_HANDLE_WSTROPS(Qt3DSDMPropertyHandle);
 IMPLEMENT_HANDLE_WSTROPS(CUICDMSlideHandle);
 IMPLEMENT_HANDLE_WSTROPS(CUICDMSlideGraphHandle);
 IMPLEMENT_HANDLE_WSTROPS(CUICDMAnimationHandle);

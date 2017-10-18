@@ -433,7 +433,7 @@ ComposerPropertyNames::Enum ComposerPropertyNames::Convert(const char8_t *inType
 
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
     SComposerTypePropertyDefinition<ComposerObjectTypes::name>::SComposerTypePropertyDefinition(   \
-        IDataCore &inCore, CUICDMInstanceHandle inInstance)                                        \
+        IDataCore &inCore, Qt3DSDMInstanceHandle inInstance)                                        \
         : reserved(false) propmacro                                                  \
     { \
         Q_UNUSED(inCore);\
@@ -446,23 +446,23 @@ ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
 
 void ComposerTypeDefinitionsHelper::SetInstanceAsCanonical(IMetaData &inMetaData,
-                                                           CUICDMInstanceHandle inInstance,
+                                                           Qt3DSDMInstanceHandle inInstance,
                                                            ComposerObjectTypes::Enum inObjectType)
 {
     inMetaData.SetInstanceAsCanonical(inInstance, ComposerObjectTypes::Convert(inObjectType));
 }
 
 void ComposerTypeDefinitionsHelper::SetInstancePropertyValue(IDataCore &inDataCore,
-                                                             CUICDMInstanceHandle inInstance,
-                                                             CUICDMPropertyHandle inProperty,
+                                                             Qt3DSDMInstanceHandle inInstance,
+                                                             Qt3DSDMPropertyHandle inProperty,
                                                              const wchar_t *inPropValue)
 {
     inDataCore.SetInstancePropertyValue(inInstance, inProperty, make_shared<CDataStr>(inPropValue));
 }
 
 void ComposerTypeDefinitionsHelper::DeriveInstance(IDataCore &inDataCore,
-                                                   CUICDMInstanceHandle inInstance,
-                                                   CUICDMInstanceHandle inParent)
+                                                   Qt3DSDMInstanceHandle inInstance,
+                                                   Qt3DSDMInstanceHandle inParent)
 {
     inDataCore.DeriveInstance(inInstance, inParent);
 }
@@ -507,7 +507,7 @@ SComposerObjectDefinitions::SComposerObjectDefinitions(
 {
 }
 
-bool SComposerObjectDefinitions::IsA(CUICDMInstanceHandle inInstance,
+bool SComposerObjectDefinitions::IsA(Qt3DSDMInstanceHandle inInstance,
                                      ComposerObjectTypes::Enum inType)
 {
     if (m_DataCore.IsInstance(inInstance) == false)
@@ -527,12 +527,12 @@ bool SComposerObjectDefinitions::IsA(CUICDMInstanceHandle inInstance,
 // Could easily return None, meaning we can't identify the object type.
 // Checks the type of the first derivation parent, so this won't ever return
 // SlideOwner, for instance.
-ComposerObjectTypes::Enum SComposerObjectDefinitions::GetType(CUICDMInstanceHandle inInstance)
+ComposerObjectTypes::Enum SComposerObjectDefinitions::GetType(Qt3DSDMInstanceHandle inInstance)
 {
     if (m_DataCore.IsInstance(inInstance) == false)
         return ComposerObjectTypes::Unknown;
 
-    CUICDMInstanceHandle theTargetInstance = inInstance;
+    Qt3DSDMInstanceHandle theTargetInstance = inInstance;
     TInstanceHandleList theHandleList;
     m_DataCore.GetInstanceParents(inInstance, theHandleList);
     if (theHandleList.empty() == false)
@@ -547,7 +547,7 @@ ComposerObjectTypes::Enum SComposerObjectDefinitions::GetType(CUICDMInstanceHand
     return ComposerObjectTypes::Unknown;
 }
 
-CUICDMInstanceHandle
+Qt3DSDMInstanceHandle
 SComposerObjectDefinitions::GetInstanceForType(ComposerObjectTypes::Enum inType)
 {
     switch (inType) {

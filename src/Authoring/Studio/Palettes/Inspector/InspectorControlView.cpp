@@ -427,12 +427,12 @@ void InspectorControlView::OnEndDataModelNotifications()
     m_inspectorControlModel->refresh();
 }
 
-void InspectorControlView::OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance)
+void InspectorControlView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     m_inspectorControlModel->refresh();
 }
 
-void InspectorControlView::OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance, long inInstanceCount)
+void InspectorControlView::OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
 {
     m_inspectorControlModel->refresh();
 }

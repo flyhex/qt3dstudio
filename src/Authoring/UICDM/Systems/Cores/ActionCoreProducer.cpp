@@ -36,9 +36,9 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMActionHandle CActionCoreProducer::CreateAction(CUICDMInstanceHandle inInstance,
+CUICDMActionHandle CActionCoreProducer::CreateAction(Qt3DSDMInstanceHandle inInstance,
                                                      CUICDMSlideHandle inSlide,
-                                                     CUICDMInstanceHandle inOwner,
+                                                     Qt3DSDMInstanceHandle inOwner,
                                                      SLong4 inTriggerTargetObjects)
 {
     CUICDMActionHandle retval =
@@ -48,7 +48,7 @@ CUICDMActionHandle CActionCoreProducer::CreateAction(CUICDMInstanceHandle inInst
 }
 
 void CActionCoreProducer::DeleteAction(CUICDMActionHandle inAction,
-                                       CUICDMInstanceHandle &outInstance)
+                                       Qt3DSDMInstanceHandle &outInstance)
 {
     // Ensure action exists
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
@@ -64,7 +64,7 @@ const SActionInfo &CActionCoreProducer::GetActionInfo(CUICDMActionHandle inActio
     return m_Data->GetActionInfo(inAction);
 }
 
-void CActionCoreProducer::GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+void CActionCoreProducer::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                      TActionHandleList &outActions) const
 {
     return m_Data->GetActions(inSlide, inOwner, outActions);
@@ -75,7 +75,7 @@ void CActionCoreProducer::GetActions(CUICDMSlideHandle inSlide, TActionHandleLis
     return m_Data->GetActions(inSlide, outActions);
 }
 
-void CActionCoreProducer::GetActions(CUICDMInstanceHandle inOwner,
+void CActionCoreProducer::GetActions(Qt3DSDMInstanceHandle inOwner,
                                      TActionHandleList &outActions) const
 {
     return m_Data->GetActions(inOwner, outActions);
@@ -86,13 +86,13 @@ void CActionCoreProducer::GetActions(TActionHandleList &outActions) const
     return m_Data->GetActions(outActions);
 }
 
-CUICDMInstanceHandle CActionCoreProducer::GetActionInstance(CUICDMActionHandle inAction) const
+Qt3DSDMInstanceHandle CActionCoreProducer::GetActionInstance(CUICDMActionHandle inAction) const
 {
     return m_Data->GetActionInstance(inAction);
 }
 
 CUICDMActionHandle
-CActionCoreProducer::GetActionByInstance(CUICDMInstanceHandle inActionInstance) const
+CActionCoreProducer::GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const
 {
     return m_Data->GetActionByInstance(inActionInstance);
 }

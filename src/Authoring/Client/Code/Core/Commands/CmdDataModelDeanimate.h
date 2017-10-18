@@ -48,12 +48,12 @@ class CCmdDataModelAnimate : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
-    qt3dsdm::CUICDMPropertyHandle m_Property;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMPropertyHandle m_Property;
 
 public: // Construction
-    CCmdDataModelAnimate(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
-                         qt3dsdm::CUICDMPropertyHandle inProperty)
+    CCmdDataModelAnimate(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                         qt3dsdm::Qt3DSDMPropertyHandle inProperty)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)
@@ -104,12 +104,12 @@ class CCmdDataModelDeanimate : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
-    qt3dsdm::CUICDMPropertyHandle m_Property;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMPropertyHandle m_Property;
 
 public: // Construction
-    CCmdDataModelDeanimate(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
-                           qt3dsdm::CUICDMPropertyHandle inProperty)
+    CCmdDataModelDeanimate(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
         , m_Instance(inInstance)

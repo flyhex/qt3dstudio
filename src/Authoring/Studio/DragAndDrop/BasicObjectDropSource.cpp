@@ -93,7 +93,7 @@ bool CBasicObjectDropSource::ValidateTarget(CDropTarget *inTarget)
     } else {
         if (CHotKeys::IsKeyDown(Qt::AltModifier) && targetType != OBJTYPE_SCENE
             && targetType != OBJTYPE_COMPONENT) {
-            qt3dsdm::CUICDMInstanceHandle theTarget = inTarget->GetInstance();
+            qt3dsdm::Qt3DSDMInstanceHandle theTarget = inTarget->GetInstance();
             CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
             IDocumentReader &theReader(theDoc->GetDocumentReader());
             qt3dsdm::CUICDMSlideHandle toSlide = theReader.GetAssociatedSlide(theTarget);
@@ -126,7 +126,7 @@ bool CBasicObjectDropSource::CanCopy()
     return true;
 }
 
-CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
+CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                                    EDROPDESTINATION inDestType,
                                                    qt3dsdm::CUICDMSlideHandle inSlide)
 {

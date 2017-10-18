@@ -37,14 +37,14 @@ namespace qt3dsdm {
 struct SUICDMPropertyDefinition
 {
     TCharStr m_Name;
-    CUICDMInstanceHandle m_Instance;
+    Qt3DSDMInstanceHandle m_Instance;
     DataModelDataType::Value m_Type;
 
     SUICDMPropertyDefinition()
         : m_Type(DataModelDataType::None)
     {
     }
-    SUICDMPropertyDefinition(CUICDMInstanceHandle inInstanceHandle, TCharPtr inName,
+    SUICDMPropertyDefinition(Qt3DSDMInstanceHandle inInstanceHandle, TCharPtr inName,
                              DataModelDataType::Value inType)
         : m_Name(inName)
         , m_Instance(inInstanceHandle)

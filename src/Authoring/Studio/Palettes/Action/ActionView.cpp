@@ -100,7 +100,7 @@ QSize ActionView::sizeHint() const
     return {500, 500};
 }
 
-void ActionView::setItem(const qt3dsdm::CUICDMInstanceHandle &handle)
+void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
 {
     m_objRefHelper = GetDoc()->GetDataModelObjectReferenceHelper();
     m_itemHandle = handle;
@@ -547,15 +547,15 @@ void ActionView::OnNewPresentation()
 
 void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance;
-    std::vector<qt3dsdm::CUICDMInstanceHandle> instances;
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance;
+    std::vector<qt3dsdm::Qt3DSDMInstanceHandle> instances;
 
     switch (inSelectable.getType()) {
     case Q3DStudio::SelectedValueTypes::Instance:
-        theInstance = inSelectable.getData<qt3dsdm::CUICDMInstanceHandle>();
+        theInstance = inSelectable.getData<qt3dsdm::Qt3DSDMInstanceHandle>();
         break;
     case Q3DStudio::SelectedValueTypes::MultipleInstances:
-        instances = inSelectable.getData<std::vector<qt3dsdm::CUICDMInstanceHandle>>();
+        instances = inSelectable.getData<std::vector<qt3dsdm::Qt3DSDMInstanceHandle>>();
         // handling only if we have one selected element.
         if (instances.size() == 1)
             theInstance = instances[0];
@@ -575,7 +575,7 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
     setItem(theInstance);
 }
 
-void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::CUICDMInstanceHandle inOwner)
+void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     CDoc *theDoc = GetDoc();
     qt3dsdm::CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
@@ -597,7 +597,7 @@ void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CU
     }
 }
 
-void ActionView::OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::CUICDMInstanceHandle inOwner)
+void ActionView::OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
@@ -617,7 +617,7 @@ void ActionView::OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHan
     emitActionChanged();
 }
 
-void ActionView::OnInstancePropertyValueChanged(qt3dsdm::CUICDMInstanceHandle inInstance, qt3dsdm::CUICDMPropertyHandle inProperty)
+void ActionView::OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     emitActionChanged();
 }
@@ -657,9 +657,9 @@ void ActionView::setTriggerObject(const qt3dsdm::SObjectRefType &object)
     auto theCmd = new CCmdDataModelActionSetTriggerObject(GetDoc(), action, object);
     const SActionInfo &theActionInfo = GetDoc()->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
 
-    CUICDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
-    CUICDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
-    CUICDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance, theActionInfo.m_TargetObject);
+    Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
+    Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
+    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance, theActionInfo.m_TargetObject);
     // old instance and object instance could be the same, for example if user changes the type
     // from Absolute to Path. In this case we don't need to reset handler or event.
     if (theOldInstance != theObjectInstance)
@@ -683,9 +683,9 @@ void ActionView::setTargetObject(const qt3dsdm::SObjectRefType &object)
     auto theCmd = new CCmdDataModelActionSetTargetObject(doc, action, object);
     const SActionInfo &theActionInfo = doc->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
 
-    CUICDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
-    CUICDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
-    CUICDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance, theActionInfo.m_TargetObject);
+    Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
+    Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
+    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance, theActionInfo.m_TargetObject);
     // old instance and object instance could be the same, for example if user changes the type
     // from Absolute to Path. In this case we don't need to reset handler or event.
     if (theOldInstance != theObjectInstance)

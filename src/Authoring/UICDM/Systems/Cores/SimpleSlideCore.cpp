@@ -36,13 +36,13 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMSlideHandle CSimpleSlideCore::CreateSlide(CUICDMInstanceHandle inInstance)
+CUICDMSlideHandle CSimpleSlideCore::CreateSlide(Qt3DSDMInstanceHandle inInstance)
 {
     int nextId = GetNextId();
     return CreateSlideWithHandle(nextId, inInstance);
 }
 
-CUICDMInstanceHandle CSimpleSlideCore::GetSlideInstance(CUICDMSlideHandle inSlide) const
+Qt3DSDMInstanceHandle CSimpleSlideCore::GetSlideInstance(CUICDMSlideHandle inSlide) const
 {
     return GetSlideNF(inSlide, m_Objects)->m_Instance;
 }
@@ -55,7 +55,7 @@ inline bool SlideInstanceMatches(const THandleObjectPair &inPair, int inInstance
     return false;
 }
 
-CUICDMSlideHandle CSimpleSlideCore::GetSlideByInstance(CUICDMInstanceHandle inInstance) const
+CUICDMSlideHandle CSimpleSlideCore::GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const
 {
     THandleObjectMap::const_iterator theSlide =
         find_if(m_Objects.begin(), m_Objects.end(),
@@ -156,8 +156,8 @@ int CSimpleSlideCore::GetChildIndex(CUICDMSlideHandle inParent, CUICDMSlideHandl
 }
 
 bool CSimpleSlideCore::GetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                CUICDMInstanceHandle inHandle,
-                                                CUICDMPropertyHandle inProperty,
+                                                Qt3DSDMInstanceHandle inHandle,
+                                                Qt3DSDMPropertyHandle inProperty,
                                                 SValue &outValue) const
 {
     const SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
@@ -172,7 +172,7 @@ bool CSimpleSlideCore::GetInstancePropertyValue(CUICDMSlideHandle inSlide,
 }
 
 std::pair<SSlide *, SInternValue *> CSimpleSlideCore::ResolveSetInstancePropertyValue(
-    CUICDMSlideHandle inSlide, CUICDMInstanceHandle inHandle, CUICDMPropertyHandle inProperty)
+    CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle, Qt3DSDMPropertyHandle inProperty)
 {
     SSlide *theSlide = CSimpleSlideCore::GetSlideNF(inSlide, m_Objects);
     SInternValue *theValue = theSlide->GetInstancePropertyValue(inHandle, inProperty);
@@ -184,8 +184,8 @@ std::pair<SSlide *, SInternValue *> CSimpleSlideCore::ResolveSetInstanceProperty
 }
 
 void CSimpleSlideCore::SetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                CUICDMInstanceHandle inHandle,
-                                                CUICDMPropertyHandle inProperty,
+                                                Qt3DSDMInstanceHandle inHandle,
+                                                Qt3DSDMPropertyHandle inProperty,
                                                 const SValue &inValue)
 {
     std::pair<SSlide *, SInternValue *> theTarget(
@@ -198,8 +198,8 @@ void CSimpleSlideCore::SetInstancePropertyValue(CUICDMSlideHandle inSlide,
 }
 
 void CSimpleSlideCore::ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                     CUICDMInstanceHandle inHandle,
-                                                     CUICDMPropertyHandle inProperty,
+                                                     Qt3DSDMInstanceHandle inHandle,
+                                                     Qt3DSDMPropertyHandle inProperty,
                                                      const SValue &inValue)
 {
     CSimpleSlideCore::ForceSetPropertyValue(GetStringTable(), m_Objects, inSlide, inHandle,
@@ -207,8 +207,8 @@ void CSimpleSlideCore::ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
 }
 
 bool CSimpleSlideCore::GetSpecificInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                        CUICDMInstanceHandle inInstance,
-                                                        CUICDMPropertyHandle inProperty,
+                                                        Qt3DSDMInstanceHandle inInstance,
+                                                        Qt3DSDMPropertyHandle inProperty,
                                                         SValue &outValue) const
 {
     const SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
@@ -221,7 +221,7 @@ bool CSimpleSlideCore::GetSpecificInstancePropertyValue(CUICDMSlideHandle inSlid
 }
 
 void CSimpleSlideCore::GetSpecificInstancePropertyValues(CUICDMSlideHandle inSlide,
-                                                         CUICDMInstanceHandle inInstance,
+                                                         Qt3DSDMInstanceHandle inInstance,
                                                          TPropertyHandleValuePairList &outValues)
 {
     const SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
@@ -235,15 +235,15 @@ void CSimpleSlideCore::GetSlidePropertyEntries(CUICDMSlideHandle inSlide,
     theSlide->ToSlideEntryList(outEntries);
 }
 
-bool CSimpleSlideCore::ContainsProperty(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inHandle,
-                                        CUICDMPropertyHandle inProperty) const
+bool CSimpleSlideCore::ContainsProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+                                        Qt3DSDMPropertyHandle inProperty) const
 {
     const SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
     return theSlide->GetInstancePropertyValue(inHandle, inProperty) != NULL;
 }
 
 CUICDMSlideHandle CSimpleSlideCore::CreateSlideWithHandle(int inHandle,
-                                                          CUICDMInstanceHandle inInstance)
+                                                          Qt3DSDMInstanceHandle inInstance)
 {
     if (HandleValid(inHandle))
         throw HandleExists(L"");
@@ -265,16 +265,16 @@ bool CSimpleSlideCore::IsSlide(CUICDMSlideHandle inSlide) const
 
 void CSimpleSlideCore::ForceSetPropertyValue(IStringTable &inStringTable,
                                              THandleObjectMap &inObjects, CUICDMSlideHandle inSlide,
-                                             CUICDMInstanceHandle inHandle,
-                                             CUICDMPropertyHandle inProperty, const SValue &inValue)
+                                             Qt3DSDMInstanceHandle inHandle,
+                                             Qt3DSDMPropertyHandle inProperty, const SValue &inValue)
 {
     CSimpleSlideCore::GetSlideNF(inSlide, inObjects)
         ->SetInstancePropertyValue(inHandle, inProperty, SInternValue(inValue, inStringTable));
 }
 
 void CSimpleSlideCore::PushPropertyValueToChildren(CUICDMSlideHandle inParent,
-                                                   CUICDMInstanceHandle inHandle,
-                                                   CUICDMPropertyHandle inProperty,
+                                                   Qt3DSDMInstanceHandle inHandle,
+                                                   Qt3DSDMPropertyHandle inProperty,
                                                    const SValue &inValue)
 {
     ForceSetPropertyValue(GetStringTable(), m_Objects, inParent, inHandle, inProperty, inValue);
@@ -283,8 +283,8 @@ void CSimpleSlideCore::PushPropertyValueToChildren(CUICDMSlideHandle inParent,
                        std::placeholders::_1, inHandle, inProperty, inValue));
 }
 
-inline void AddIntersectingEntry(TSlideEntryList &outEntries, CUICDMInstanceHandle inst,
-                                 CUICDMPropertyHandle prop, const SInternValue &inValue)
+inline void AddIntersectingEntry(TSlideEntryList &outEntries, Qt3DSDMInstanceHandle inst,
+                                 Qt3DSDMPropertyHandle prop, const SInternValue &inValue)
 {
     outEntries.push_back(TSlideEntry(inst, prop, inValue.GetValue()));
 }
@@ -315,8 +315,8 @@ void CSimpleSlideCore::PushIntersectingProperties(CUICDMSlideHandle inSlide1,
 }
 
 void CSimpleSlideCore::ClearPropertyValue(THandleObjectMap &inObjects, CUICDMSlideHandle inSlide,
-                                          CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty)
+                                          Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty)
 {
     CSimpleSlideCore::GetSlideNF(inSlide, inObjects)
         ->RemoveInstancePropertyValue(inInstance, inProperty);
@@ -346,43 +346,43 @@ void CSimpleSlideCore::ForEachChild(CUICDMSlideHandle inParent,
            std::bind(LookupSlideAndDoSomething, std::placeholders::_1, m_Objects, inFunction));
 }
 
-bool InstanceMatches(CUICDMInstanceHandle inTarget, CUICDMInstanceHandle inHandle,
-                     CUICDMPropertyHandle)
+bool InstanceMatches(Qt3DSDMInstanceHandle inTarget, Qt3DSDMInstanceHandle inHandle,
+                     Qt3DSDMPropertyHandle)
 {
     return inTarget == inHandle;
 }
 
-bool PropertyMatches(CUICDMPropertyHandle inTarget, CUICDMInstanceHandle,
-                     CUICDMPropertyHandle inProp)
+bool PropertyMatches(Qt3DSDMPropertyHandle inTarget, Qt3DSDMInstanceHandle,
+                     Qt3DSDMPropertyHandle inProp)
 {
     return inTarget == inProp;
 }
 
 bool InstancePropertyMatchesVector(const TInstanceHandleList &inInstances,
                                    const TPropertyHandleList &inProperties,
-                                   CUICDMInstanceHandle slideInst, CUICDMPropertyHandle slideProp)
+                                   Qt3DSDMInstanceHandle slideInst, Qt3DSDMPropertyHandle slideProp)
 {
     return std::find(inInstances.begin(), inInstances.end(), slideInst) != inInstances.end()
         && std::find(inProperties.begin(), inProperties.end(), slideProp) != inProperties.end();
 }
 
-bool InstancePropertyMatches(const CUICDMInstanceHandle inInstance,
-                             const CUICDMPropertyHandle inProperty, CUICDMInstanceHandle slideInst,
-                             CUICDMPropertyHandle slideProp)
+bool InstancePropertyMatches(const Qt3DSDMInstanceHandle inInstance,
+                             const Qt3DSDMPropertyHandle inProperty, Qt3DSDMInstanceHandle slideInst,
+                             Qt3DSDMPropertyHandle slideProp)
 {
     return inInstance == slideInst && inProperty == slideProp;
 }
 
-void CSimpleSlideCore::DeleteAllInstanceEntries(CUICDMInstanceHandle inHandle)
+void CSimpleSlideCore::DeleteAllInstanceEntries(Qt3DSDMInstanceHandle inHandle)
 {
-    std::function<bool(CUICDMInstanceHandle, CUICDMPropertyHandle)> predicate(
+    std::function<bool(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> predicate(
         std::bind(InstanceMatches, inHandle, std::placeholders::_1, std::placeholders::_2));
     ForEachSlide(std::bind(&SSlide::ClearPropertiesIf, std::placeholders::_1, predicate));
 }
 
-void CSimpleSlideCore::DeleteAllPropertyEntries(CUICDMPropertyHandle inHandle)
+void CSimpleSlideCore::DeleteAllPropertyEntries(Qt3DSDMPropertyHandle inHandle)
 {
-    std::function<bool(CUICDMInstanceHandle, CUICDMPropertyHandle)> predicate(
+    std::function<bool(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> predicate(
         std::bind(PropertyMatches, inHandle, std::placeholders::_1, std::placeholders::_2));
     ForEachSlide(std::bind(&SSlide::ClearPropertiesIf, std::placeholders::_1, predicate));
 }
@@ -390,17 +390,17 @@ void CSimpleSlideCore::DeleteAllPropertyEntries(CUICDMPropertyHandle inHandle)
 void CSimpleSlideCore::DeleteAllInstancePropertyEntries(const TInstanceHandleList &inInstances,
                                                         const TPropertyHandleList &inProperties)
 {
-    std::function<bool(CUICDMInstanceHandle, CUICDMPropertyHandle)> predicate(
+    std::function<bool(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> predicate(
         std::bind(InstancePropertyMatchesVector, inInstances, inProperties,
                   std::placeholders::_1, std::placeholders::_2));
     ForEachSlide(std::bind(&SSlide::ClearPropertiesIf, std::placeholders::_1, predicate));
 }
 
 void CSimpleSlideCore::ClearChildrenPropertyValues(CUICDMSlideHandle inParent,
-                                                   CUICDMInstanceHandle inHandle,
-                                                   CUICDMPropertyHandle inProperty)
+                                                   Qt3DSDMInstanceHandle inHandle,
+                                                   Qt3DSDMPropertyHandle inProperty)
 {
-    std::function<bool(CUICDMInstanceHandle, CUICDMPropertyHandle)> predicate(
+    std::function<bool(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> predicate(
         std::bind(InstancePropertyMatches, inHandle, inProperty,
                   std::placeholders::_1, std::placeholders::_2));
     ForEachChild(inParent, std::bind(&SSlide::ClearPropertiesIf, std::placeholders::_1, predicate));

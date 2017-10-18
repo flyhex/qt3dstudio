@@ -50,7 +50,7 @@
 using namespace qt3dsdm;
 
 CSlideTimelineItemBinding::CSlideTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                                     CUICDMInstanceHandle inDataHandle)
+                                                     Qt3DSDMInstanceHandle inDataHandle)
     : CUICDMTimelineItemBinding(inMgr)
 {
     qt3dsdm::CUICDMSlideHandle theSlideHandle =
@@ -58,17 +58,17 @@ CSlideTimelineItemBinding::CSlideTimelineItemBinding(CTimelineTranslationManager
 
     // Get the owning component of m_SlideHandle.
     // This should return CAsset OBJTYPE_SCENE or OBJTYPE_COMPONENT.
-    qt3dsdm::CUICDMInstanceHandle theInstance =
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance =
         m_StudioSystem->GetClientDataModelBridge()->GetOwningComponentInstance(theSlideHandle);
     SetInstanceHandle(theInstance);
 
     // Listen to change on Asset name
     IStudioFullSystemSignalProvider *theEngine = m_StudioSystem->GetFullSystemSignalProvider();
-    std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle)> theSetter(
+    std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> theSetter(
         std::bind(&CSlideTimelineItemBinding::OnPropertyChanged, this, std::placeholders::_2));
     m_Connection = theEngine->ConnectInstancePropertyValue(
         std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
-                        CUICDMInstanceHandle, CUICDMPropertyHandle)>>,
+                        Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
                     std::placeholders::_1, std::placeholders::_2, theInstance,
                     m_StudioSystem->GetClientDataModelBridge()->GetNameProperty(), theSetter));
 }
@@ -91,7 +91,7 @@ void CSlideTimelineItemBinding::Bind(CBaseStateRow *inRow)
 
 bool CSlideTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     switch (inTransaction) {
     // Disable the following context menus
     case EUserTransaction_Rename:

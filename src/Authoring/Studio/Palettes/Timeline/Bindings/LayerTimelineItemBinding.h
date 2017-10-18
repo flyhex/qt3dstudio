@@ -48,7 +48,7 @@ class CStudioSystem;
 class CLayerTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public: // Types
-    typedef std::tuple<qt3dsdm::TCharStr, qt3dsdm::TCharStr, qt3dsdm::CUICDMPropertyHandle>
+    typedef std::tuple<qt3dsdm::TCharStr, qt3dsdm::TCharStr, qt3dsdm::Qt3DSDMPropertyHandle>
         TNameFormalNamePair;
     typedef std::vector<TNameFormalNamePair> TNameFormalNamePairList;
 
@@ -57,20 +57,20 @@ protected: // Members
 
 public: // Construction
     CLayerTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              qt3dsdm::CUICDMInstanceHandle inDataHandle);
+                              qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     virtual ~CLayerTimelineItemBinding();
 
 public: // CUICDMTimelineItemBinding
     EStudioObjectType GetObjectType() const override;
     // Hierarchy
     ITimelineItemBinding *GetChild(long inIndex) override;
-    void OnAddChild(qt3dsdm::CUICDMInstanceHandle inInstance) override;
+    void OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     // Event callback
-    void OnPropertyChanged(qt3dsdm::CUICDMPropertyHandle inPropertyHandle) override;
+    void OnPropertyChanged(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle) override;
 
 protected:
-    qt3dsdm::CUICDMInstanceHandle GetImage(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
-    ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
+    qt3dsdm::Qt3DSDMInstanceHandle GetImage(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
+    ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                                   const wchar_t *inName);
 };
 

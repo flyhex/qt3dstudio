@@ -71,35 +71,35 @@ bool FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide,
 const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide);
 
 bool FilterForControllingTimeParent(CDoc *inDoc,
-                                    qt3dsdm::CUICDMInstanceHandle inControllingTimeParent,
+                                    qt3dsdm::Qt3DSDMInstanceHandle inControllingTimeParent,
                                     Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter
-FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inControllingTimeParent);
+FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inControllingTimeParent);
 
 bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inActiveComponentSlide,
                               Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter FilterForActiveComponent(CDoc *inDoc,
                                                   qt3dsdm::CUICDMSlideHandle inActiveComponentSlide);
 
-bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inTimeParent,
+bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inTimeParent,
                            Q3DStudio::TIdentifier inGraphable);
 const Q3DStudio::TFilter FilterForCurrentSlide(CDoc *inDoc,
-                                               qt3dsdm::CUICDMInstanceHandle inTimeParent);
+                                               qt3dsdm::Qt3DSDMInstanceHandle inTimeParent);
 
 //==============================================================================
 //	Helper functions to get children from the graph
 //==============================================================================
-void GetAssetChildren(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+void GetAssetChildren(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                       Q3DStudio::CGraphIterator &outIterator,
                       EStudioObjectType inObjectType = OBJTYPE_UNKNOWN);
-void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                              qt3dsdm::CUICDMSlideHandle inSlide,
                              Q3DStudio::CGraphIterator &outIterator,
                              EStudioObjectType inObjectType = OBJTYPE_UNKNOWN);
-void GetAssetChildrenInTimeParent(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc,
+void GetAssetChildrenInTimeParent(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc,
                                   bool inIsAssetTimeParent, Q3DStudio::CGraphIterator &outIterator,
                                   qt3dsdm::CUICDMSlideHandle inActiveComponentSlide = 0);
-void GetAssetChildrenInCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+void GetAssetChildrenInCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                     Q3DStudio::CGraphIterator &outIterator,
                                     EStudioObjectType inObjectType = OBJTYPE_UNKNOWN);
 
@@ -112,7 +112,7 @@ bool IsAscendant(Q3DStudio::TIdentifier inDescendant, Q3DStudio::TIdentifier inA
 Q3DStudio::TIdentifier GetSibling(const Q3DStudio::TIdentifier inNode, bool inAfter,
                                   const Q3DStudio::CGraphIterator &inIterator);
 
-void PrintAssetSubTree(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *m_Doc, char *prefix);
+void PrintAssetSubTree(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *m_Doc, char *prefix);
 void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::CUICDMSlideHandle theMasterSlide);
 
 #endif // INCLUDED_GRAPH_UTILS_H

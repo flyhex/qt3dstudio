@@ -49,7 +49,7 @@ public:
     /**
      *	Return the instance that relates to this property
      */
-    virtual CUICDMInstanceHandle GetInstanceForProperty(const SValue &inValue) = 0;
+    virtual Qt3DSDMInstanceHandle GetInstanceForProperty(const SValue &inValue) = 0;
 
     /**
      *	Duplicate this instance and whichever properties and animations you desire,
@@ -59,7 +59,7 @@ public:
      */
     virtual SValue CreateInstanceForProperty(CUICDMSlideHandle inSourceSlide,
                                              CUICDMSlideHandle inDestSlide,
-                                             CUICDMInstanceHandle inInstance) = 0;
+                                             Qt3DSDMInstanceHandle inInstance) = 0;
 };
 
 typedef std::shared_ptr<IPropertyInstanceInfo> TPropertyInstanceInfoPtr;
@@ -117,11 +117,11 @@ public:
      */
     virtual float GetComponentSeconds(CUICDMSlideHandle inSlide) const = 0;
     virtual long GetComponentSecondsLong(CUICDMSlideHandle inSlide) const = 0;
-    virtual long GetComponentSecondsLong(CUICDMInstanceHandle inInstance) const = 0;
+    virtual long GetComponentSecondsLong(Qt3DSDMInstanceHandle inInstance) const = 0;
 
     // The fastest way possible, get all of the slide information for this instance.
     virtual SInstanceSlideInformation
-    GetInstanceSlideInformation(CUICDMInstanceHandle inInstance) const = 0;
+    GetInstanceSlideInformation(Qt3DSDMInstanceHandle inInstance) const = 0;
     /**
      *	Slide count includes the master slide;
      */
@@ -130,60 +130,60 @@ public:
      * Use the instance for storing information such as name, or the GUID of the object
      * this slide links to.
      */
-    virtual CUICDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inSlide) const = 0;
+    virtual Qt3DSDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inSlide) const = 0;
     /**
      *	Reverse lookup into the slide system so you can match slides to instances.
      */
-    virtual CUICDMSlideHandle GetSlideByInstance(CUICDMInstanceHandle inInstance) const = 0;
+    virtual CUICDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const = 0;
     /**
      *	Slide may be either a master slide
      */
     virtual void AssociateInstanceWithSlide(CUICDMSlideHandle inSlide,
-                                            CUICDMInstanceHandle inInstance) = 0;
-    virtual CUICDMSlideHandle GetAssociatedSlide(CUICDMInstanceHandle inInstance) const = 0;
+                                            Qt3DSDMInstanceHandle inInstance) = 0;
+    virtual CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance) const = 0;
     virtual void GetAssociatedInstances(
         CUICDMSlideHandle inMaster,
-        std::vector<std::pair<CUICDMSlideHandle, CUICDMInstanceHandle>> &outAssociations) const = 0;
+        std::vector<std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>> &outAssociations) const = 0;
     virtual void GetAssociatedInstances(CUICDMSlideHandle inSlide,
                                         TInstanceHandleList &outAssociations) const = 0;
-    virtual void LinkProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) = 0;
-    virtual void UnlinkProperty(CUICDMInstanceHandle inInstance,
-                                CUICDMPropertyHandle inProperty) = 0;
-    virtual bool IsPropertyLinked(CUICDMInstanceHandle inInstance,
-                                  CUICDMPropertyHandle inProperty) const = 0;
-    virtual bool CanPropertyBeLinked(CUICDMInstanceHandle inInstance,
-                                     CUICDMPropertyHandle inProperty) const = 0;
+    virtual void LinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) = 0;
+    virtual void UnlinkProperty(Qt3DSDMInstanceHandle inInstance,
+                                Qt3DSDMPropertyHandle inProperty) = 0;
+    virtual bool IsPropertyLinked(Qt3DSDMInstanceHandle inInstance,
+                                  Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual bool CanPropertyBeLinked(Qt3DSDMInstanceHandle inInstance,
+                                     Qt3DSDMPropertyHandle inProperty) const = 0;
     virtual void GetUnionOfProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide,
                                       TInstancePropertyPairList &outProperties) const = 0;
 
-    virtual bool GetSlidePropertyValue(size_t inSlide, CUICDMInstanceHandle inInstance,
-                                       CUICDMPropertyHandle inProperty, SValue &outValue) = 0;
+    virtual bool GetSlidePropertyValue(size_t inSlide, Qt3DSDMInstanceHandle inInstance,
+                                       Qt3DSDMPropertyHandle inProperty, SValue &outValue) = 0;
 
     virtual void SetActiveSlide(CUICDMSlideHandle inSlide) = 0;
-    virtual CUICDMSlideHandle GetAssociatedSlide(CUICDMInstanceHandle inInstance,
-                                                 CUICDMPropertyHandle inProperty) const = 0;
+    virtual CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance,
+                                                 Qt3DSDMPropertyHandle inProperty) const = 0;
 
     virtual bool SlideValid(CUICDMSlideHandle inSlide) const = 0;
     virtual int GetSlideIndex(CUICDMSlideHandle inSlide) const = 0;
     virtual int GetActiveSlideIndex(CUICDMSlideHandle inMaster) const = 0;
     virtual CUICDMSlideHandle GetActiveSlide(CUICDMSlideHandle inMaster) const = 0;
-    virtual CUICDMInstanceHandle GetSlideSelectedInstance(CUICDMSlideHandle inSlide) const = 0;
+    virtual Qt3DSDMInstanceHandle GetSlideSelectedInstance(CUICDMSlideHandle inSlide) const = 0;
     virtual void SetSlideSelectedInstance(CUICDMSlideHandle inSlide,
-                                          CUICDMInstanceHandle inInstance) = 0;
+                                          Qt3DSDMInstanceHandle inInstance) = 0;
 
-    virtual CUICDMSlideHandle GetApplicableSlide(CUICDMInstanceHandle inHandle,
-                                                 CUICDMPropertyHandle inProperty) = 0;
+    virtual CUICDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
+                                                 Qt3DSDMPropertyHandle inProperty) = 0;
 
     virtual bool GetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                          CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty,
+                                          Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty,
                                           SValue &outValue) const = 0;
-    virtual bool GetCanonicalInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                   CUICDMPropertyHandle inProperty,
+    virtual bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                   Qt3DSDMPropertyHandle inProperty,
                                                    SValue &outValue) const = 0;
     virtual void ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                               CUICDMInstanceHandle inInstance,
-                                               CUICDMPropertyHandle inProperty,
+                                               Qt3DSDMInstanceHandle inInstance,
+                                               Qt3DSDMPropertyHandle inProperty,
                                                const SValue &inValue) = 0;
 
     /**
@@ -191,7 +191,7 @@ public:
      *	and give an outside entity the chance to create new objects and properties when
      *	the property is unlinked and linked.
      */
-    virtual void RegisterPropertyInstance(CUICDMPropertyHandle inPropertyHandle,
+    virtual void RegisterPropertyInstance(Qt3DSDMPropertyHandle inPropertyHandle,
                                           TPropertyInstanceInfoPtr inPropertyInfo) = 0;
 };
 

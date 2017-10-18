@@ -79,7 +79,7 @@ bool CTimeLineDropTarget::Accept(CDropSource &inSource)
  */
 bool CTimeLineDropTarget::Drop(CDropSource &inSource)
 {
-    qt3dsdm::CUICDMInstanceHandle theTargetInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theTargetInstance = GetInstance();
 
     if (theTargetInstance.Valid()) {
         CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
@@ -110,7 +110,7 @@ bool CTimeLineDropTarget::Drop(CDropSource &inSource)
  */
 long CTimeLineDropTarget::GetObjectType()
 {
-    qt3dsdm::CUICDMInstanceHandle theTargetInstance = GetTargetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theTargetInstance = GetTargetInstance();
     if (theTargetInstance.Valid()) {
         CClientDataModelBridge *theBridge =
             g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
@@ -125,10 +125,10 @@ long CTimeLineDropTarget::GetObjectType()
  *		Check to see if the Asset is a relative of our asset.
  * 		@return true if the inAsset is a parent grandparent...etc. of this asset.
  */
-bool CTimeLineDropTarget::IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CTimeLineDropTarget::IsRelative(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     bool theReturn = false; ///< Default return value.
-    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theThisInstance = GetInstance();
 
     // This will check to see if the inAsset is already some sort of parent grandparent....etc.
     if (theThisInstance.Valid())
@@ -144,9 +144,9 @@ bool CTimeLineDropTarget::IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance)
  *	 @param inAsset The Asset to check.
  *	 @return true if we are the same.
  */
-bool CTimeLineDropTarget::IsSelf(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CTimeLineDropTarget::IsSelf(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theThisInstance = GetInstance();
     // true if self.....
     return (theThisInstance == inInstance);
 }
@@ -196,9 +196,9 @@ EDROPDESTINATION CTimeLineDropTarget::GetDestination() const
  *of m_Asset
  *	Otherwise, this m_Asset ends up being a sibling
  */
-qt3dsdm::CUICDMInstanceHandle CTimeLineDropTarget::GetTargetInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CTimeLineDropTarget::GetTargetInstance()
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (!theInstance.Valid())
         return 0;
 

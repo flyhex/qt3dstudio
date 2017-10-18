@@ -184,7 +184,7 @@ public:
         Q_UNUSED(inNewPresentationFile);
     }
 
-    virtual void OnExportingAsset(qt3dsdm::CUICDMInstanceHandle inInstance)
+    virtual void OnExportingAsset(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     {
         Q_UNUSED(inInstance);
     }
@@ -307,16 +307,16 @@ public:
 
     // Fired during 3d drag or mouse move events (or keyframe drag) or likewise
     // events so that views that need to update based on the new data can.
-    virtual void OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance) = 0;
+    virtual void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) = 0;
     // Same thing, but fired when more than one instance is being refreshed.
-    virtual void OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance,
+    virtual void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
                                                     long inInstanceCount) = 0;
 };
 
 class IReloadListener
 {
 public:
-    virtual void OnReloadEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance) = 0;
+    virtual void OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) = 0;
 };
 
 class IDocumentBufferCacheListener

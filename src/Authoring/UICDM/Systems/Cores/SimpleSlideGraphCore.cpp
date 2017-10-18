@@ -83,7 +83,7 @@ void CSimpleSlideGraphCore::DeleteSlideGraph(CUICDMSlideGraphHandle inHandle)
 
 void CSimpleSlideGraphCore::AssociateInstance(CUICDMSlideGraphHandle inSlideGraph,
                                               CUICDMSlideHandle inSlide,
-                                              CUICDMInstanceHandle inInstance)
+                                              Qt3DSDMInstanceHandle inInstance)
 {
     pair<TInstanceToGraphMap::iterator, bool> theResult =
         m_InstanceToGraph.insert(make_pair(inInstance, make_pair(inSlideGraph, inSlide)));
@@ -106,7 +106,7 @@ void CSimpleSlideGraphCore::GetAssociatedInstances(CUICDMSlideGraphHandle inSlid
                                theFind->second.end());
 }
 
-TGraphSlidePair CSimpleSlideGraphCore::GetAssociatedGraph(CUICDMInstanceHandle inInstance) const
+TGraphSlidePair CSimpleSlideGraphCore::GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const
 {
     TInstanceToGraphMap::const_iterator theResult = m_InstanceToGraph.find(inInstance);
     if (theResult != m_InstanceToGraph.end())
@@ -116,18 +116,18 @@ TGraphSlidePair CSimpleSlideGraphCore::GetAssociatedGraph(CUICDMInstanceHandle i
 
 struct SInstanceMatcher
 {
-    CUICDMInstanceHandle m_Instance;
-    SInstanceMatcher(CUICDMInstanceHandle inInst)
+    Qt3DSDMInstanceHandle m_Instance;
+    SInstanceMatcher(Qt3DSDMInstanceHandle inInst)
         : m_Instance(inInst)
     {
     }
-    bool operator()(const pair<CUICDMSlideHandle, CUICDMInstanceHandle> &inItem) const
+    bool operator()(const pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> &inItem) const
     {
         return m_Instance == inItem.second;
     }
 };
 
-void CSimpleSlideGraphCore::DissociateInstance(CUICDMInstanceHandle inInstance)
+void CSimpleSlideGraphCore::DissociateInstance(Qt3DSDMInstanceHandle inInstance)
 {
     TGraphSlidePair theAssociatedGraph(GetAssociatedGraph(inInstance));
 

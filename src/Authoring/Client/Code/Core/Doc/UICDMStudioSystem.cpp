@@ -67,12 +67,12 @@ CStudioSystem::CStudioSystem(CDoc *inDoc)
 struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
 {
     std::shared_ptr<CClientDataModelBridge> m_Bridge;
-    CUICDMPropertyHandle m_Slot;
+    Qt3DSDMPropertyHandle m_Slot;
     TDataCorePtr m_DataCore;
     TSlideCorePtr m_SlideCore;
     TAnimationCorePtr m_AnimationCore;
     MaterialImagePropertyInfo(std::shared_ptr<CClientDataModelBridge> inBridge,
-                              CUICDMPropertyHandle inSlot, TDataCorePtr inDataCore,
+                              Qt3DSDMPropertyHandle inSlot, TDataCorePtr inDataCore,
                               TSlideCorePtr inSlideCore, TAnimationCorePtr inAnimationCore)
         : m_Bridge(inBridge)
         , m_Slot(inSlot)
@@ -84,19 +84,19 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
     /**
      *	Return the instance that relates to this property
      */
-    CUICDMInstanceHandle GetInstanceForProperty(const SValue &inValue) override
+    Qt3DSDMInstanceHandle GetInstanceForProperty(const SValue &inValue) override
     {
         SLong4 theId(get<SLong4>(inValue));
         if (theId.m_Longs[0] && theId.m_Longs[1] && theId.m_Longs[2] && theId.m_Longs[3]) {
-            CUICDMInstanceHandle theImageInstance = m_Bridge->GetImageInstanceByGUID(theId);
+            Qt3DSDMInstanceHandle theImageInstance = m_Bridge->GetImageInstanceByGUID(theId);
             return theImageInstance;
         }
         return 0;
     }
 
     static inline void SetPropertyIfOnInstance(const TSlideEntry &inEntry,
-                                               CUICDMInstanceHandle inInstance,
-                                               CUICDMInstanceHandle inDestInstance,
+                                               Qt3DSDMInstanceHandle inInstance,
+                                               Qt3DSDMInstanceHandle inDestInstance,
                                                CUICDMSlideHandle inDestSlide,
                                                TSlideCorePtr inSlideCore)
     {
@@ -107,7 +107,7 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
 
     static inline void
     CopyAnimationIfOnInstance(CUICDMAnimationHandle inAnimation, CUICDMSlideHandle inSourceSlide,
-                              CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inDestInstance,
+                              Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inDestInstance,
                               CUICDMSlideHandle inDestSlide, TAnimationCorePtr inAnimationCore)
     {
         SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
@@ -122,11 +122,11 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
      */
     SValue CreateInstanceForProperty(CUICDMSlideHandle inSourceSlide,
                                              CUICDMSlideHandle inDestSlide,
-                                             CUICDMInstanceHandle inInstance) override
+                                             Qt3DSDMInstanceHandle inInstance) override
     {
-        std::pair<qt3dsdm::CUICDMInstanceHandle, qt3dsdm::SLong4> theInstanceGuidPair(
+        std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4> theInstanceGuidPair(
             m_Bridge->CreateImageInstance(inInstance, m_Slot, inDestSlide));
-        CUICDMInstanceHandle theNewInstance(theInstanceGuidPair.first);
+        Qt3DSDMInstanceHandle theNewInstance(theInstanceGuidPair.first);
         TSlideEntryList theEntries;
         m_SlideCore->GetSlidePropertyEntries(inSourceSlide, theEntries);
         do_all(theEntries, std::bind(SetPropertyIfOnInstance, std::placeholders::_1,
@@ -234,7 +234,7 @@ void CStudioSystem::SetConsumer(TTransactionConsumerPtr inConsumer)
     m_StudioSystem->SetConsumer(inConsumer);
 }
 
-bool CStudioSystem::IsInstance(CUICDMInstanceHandle inInstance) const
+bool CStudioSystem::IsInstance(Qt3DSDMInstanceHandle inInstance) const
 {
     return m_StudioSystem->GetCoreSystem()->GetDataCore()->IsInstance(inInstance);
 }

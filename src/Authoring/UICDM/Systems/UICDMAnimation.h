@@ -186,8 +186,8 @@ typedef std::vector<TKeyframe> TKeyframeList;
 struct SAnimationInfo
 {
     CUICDMSlideHandle m_Slide;
-    CUICDMInstanceHandle m_Instance;
-    CUICDMPropertyHandle m_Property;
+    Qt3DSDMInstanceHandle m_Instance;
+    Qt3DSDMPropertyHandle m_Property;
     size_t m_Index;
     EAnimationType m_AnimationType;
     // Use the existing value for the value of the first keyframe.
@@ -205,8 +205,8 @@ struct SAnimationInfo
 
     {
     }
-    SAnimationInfo(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,
-                   CUICDMPropertyHandle inProperty, size_t inIndex, EAnimationType inAnimationType,
+    SAnimationInfo(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+                   Qt3DSDMPropertyHandle inProperty, size_t inIndex, EAnimationType inAnimationType,
                    bool inDynamicFirstKeyframe, bool inArtistEdited)
         : m_Slide(inSlide)
         , m_Instance(inInstance)
@@ -231,14 +231,14 @@ class IAnimationCore
 public:
     virtual ~IAnimationCore() {}
     virtual CUICDMAnimationHandle CreateAnimation(CUICDMSlideHandle inSlide,
-                                                  CUICDMInstanceHandle inInstance,
-                                                  CUICDMPropertyHandle inProperty, size_t inIndex,
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                                   EAnimationType inAnimationType,
                                                   bool inFirstKeyframeDynamic) = 0;
     virtual void DeleteAnimation(CUICDMAnimationHandle inAnimation) = 0;
     virtual CUICDMAnimationHandle GetAnimation(CUICDMSlideHandle inSlide,
-                                               CUICDMInstanceHandle inInstance,
-                                               CUICDMPropertyHandle inProperty,
+                                               Qt3DSDMInstanceHandle inInstance,
+                                               Qt3DSDMPropertyHandle inProperty,
                                                size_t inIndex) const = 0;
     virtual SAnimationInfo GetAnimationInfo(CUICDMAnimationHandle inAnimation) const = 0;
     virtual void GetAnimations(TAnimationHandleList &outAnimations) const = 0;
@@ -247,7 +247,7 @@ public:
                                CUICDMSlideHandle inSlide = CUICDMSlideHandle()) const = 0;
 
     virtual void GetSpecificInstanceAnimations(CUICDMSlideHandle inSlide,
-                                               CUICDMInstanceHandle inInstance,
+                                               Qt3DSDMInstanceHandle inInstance,
                                                TAnimationHandleList &outAnimations) = 0;
 
     virtual void SetFirstKeyframeDynamic(CUICDMAnimationHandle inAnimation, bool inValue) = 0;
@@ -269,7 +269,7 @@ public:
     virtual size_t GetKeyframeCount(CUICDMAnimationHandle inAnimation) const = 0;
     virtual bool IsFirstKeyframe(CUICDMKeyframeHandle inKeyframe) const = 0;
 
-    virtual void OffsetAnimations(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,
+    virtual void OffsetAnimations(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                   long inOffset) = 0;
 
     // Direct mutators of the artist edited feature of animations
@@ -283,9 +283,9 @@ public:
     virtual bool AnimationValid(CUICDMAnimationHandle inAnimation) const = 0;
 
     virtual void CopyAnimations(CUICDMSlideHandle inSourceSlide,
-                                CUICDMInstanceHandle inSourceInstance,
+                                Qt3DSDMInstanceHandle inSourceInstance,
                                 CUICDMSlideHandle inDestSlide,
-                                CUICDMInstanceHandle inDestInstance) = 0;
+                                Qt3DSDMInstanceHandle inDestInstance) = 0;
 };
 
 typedef std::shared_ptr<IAnimationCore> TAnimationCorePtr;
@@ -335,32 +335,32 @@ public:
      *keyframes previously,
      *	this function will also set the keyframes accordingly.
      */
-    virtual void Animate(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) = 0;
+    virtual void Animate(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) = 0;
     /**
      *	Delete animation on the property on this instance
      */
-    virtual void Deanimate(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) = 0;
+    virtual void Deanimate(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) = 0;
     /**
      *	Set a keyframe on this property.  Uses the current time of the slide graph.
      *	If the keyframe is within a given time distance of another, this function will simply change
      *	the keyframed value of the other property to match the current value of this property.
      */
-    virtual void KeyframeProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+    virtual void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                   bool inDoDiffValue) = 0;
     /**
      *	Set the value of a existing a keyframe or create a new one, on this property, at the given
      *time.
      *  If ease in or ease out are unset then the keyframe gets the default ease in or out.
      */
-    virtual void SetOrCreateKeyframe(CUICDMInstanceHandle inInstance,
-                                     CUICDMPropertyHandle inProperty, float inTimeInSeconds,
+    virtual void SetOrCreateKeyframe(Qt3DSDMInstanceHandle inInstance,
+                                     Qt3DSDMPropertyHandle inProperty, float inTimeInSeconds,
                                      SGetOrSetKeyframeInfo *inKeyframeInfo, size_t inNumInfos) = 0;
     /**
      *	Return the animation that is currently controlling this property.  This function will return
      *	an invalid handle value if there is currently no animation controlling this property.
      */
-    virtual CUICDMAnimationHandle GetControllingAnimation(CUICDMInstanceHandle inInstance,
-                                                          CUICDMPropertyHandle inProperty,
+    virtual CUICDMAnimationHandle GetControllingAnimation(Qt3DSDMInstanceHandle inInstance,
+                                                          Qt3DSDMPropertyHandle inProperty,
                                                           size_t inIndex) const = 0;
 
     /**
@@ -369,16 +369,16 @@ public:
      *	by setting auto keyframe to on and setting a property value through the
      *IInstancePropertyCore system.
      */
-    virtual bool IsPropertyAnimatable(CUICDMInstanceHandle inInstance,
-                                      CUICDMPropertyHandle inProperty) const = 0;
+    virtual bool IsPropertyAnimatable(Qt3DSDMInstanceHandle inInstance,
+                                      Qt3DSDMPropertyHandle inProperty) const = 0;
 
     /**
      *	Return true if the given property is animated. Currently, either 0 or ALL channels are
      *animated. Hence, checking for index = 0 suffices.
      *	And if that changes, this function can be updated accordingly.
      */
-    virtual bool IsPropertyAnimated(CUICDMInstanceHandle inInstance,
-                                    CUICDMPropertyHandle inProperty) const = 0;
+    virtual bool IsPropertyAnimated(Qt3DSDMInstanceHandle inInstance,
+                                    Qt3DSDMPropertyHandle inProperty) const = 0;
 
     /**
      *	Specify if new keyframes should be created with smooth ( ie Ease In/Out values = 100 ) or
@@ -391,8 +391,8 @@ public:
      *property is animated.
      */
     virtual bool GetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                  CUICDMInstanceHandle inInstance,
-                                                  CUICDMPropertyHandle inProperty,
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty,
                                                   SValue &outValue) const = 0;
     /**
      *	Set an instance property value.  Will return true in the cases where
@@ -400,8 +400,8 @@ public:
      *value.
      */
     virtual bool SetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                  CUICDMInstanceHandle inInstance,
-                                                  CUICDMPropertyHandle inProperty,
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty,
                                                   const SValue &inValue) = 0;
 };
 
@@ -439,8 +439,8 @@ inline SEaseInEaseOutKeyframe CreateEaseInEaseOutKeyframe(float inSeconds, float
 }
 
 inline SAnimationInfo CreateAnimationInfo(CUICDMSlideHandle inSlide,
-                                          CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty, size_t inIndex,
+                                          Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                           EAnimationType inAnimationType,
                                           bool inFirstKeyframeDynamic, bool inArtistEdited)
 {
@@ -742,8 +742,8 @@ void CopyKeyframes(const IAnimationCore &inSourceAnimationCore, IAnimationCore &
 
 CUICDMAnimationHandle CopyAnimation(TAnimationCorePtr inSourceAnimationCore,
                                     CUICDMAnimationHandle inAnimation, CUICDMSlideHandle inNewSlide,
-                                    CUICDMInstanceHandle inNewInstance,
-                                    CUICDMPropertyHandle inNewProperty, size_t inNewIndex);
+                                    Qt3DSDMInstanceHandle inNewInstance,
+                                    Qt3DSDMPropertyHandle inNewProperty, size_t inNewIndex);
 
 struct SEaseInGetter
 {

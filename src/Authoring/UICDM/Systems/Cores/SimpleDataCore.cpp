@@ -32,7 +32,7 @@
 namespace qt3dsdm {
 TUICDMDebugLogFunction g_UICDMDebugLogger = NULL;
 // Instances
-CUICDMInstanceHandle CSimpleDataCore::CreateInstance(CUICDMInstanceHandle hdl)
+Qt3DSDMInstanceHandle CSimpleDataCore::CreateInstance(Qt3DSDMInstanceHandle hdl)
 {
     int nextId = hdl;
     if (hdl.Valid() == false)
@@ -48,7 +48,7 @@ inline void RemoveParentFromClass(int inParent, int inChild, THandleObjectMap &i
     // Cascade the delete operation
 }
 
-void CSimpleDataCore::DeleteInstance(CUICDMInstanceHandle inHandle)
+void CSimpleDataCore::DeleteInstance(Qt3DSDMInstanceHandle inHandle)
 {
     // Ensure it exists in the first place.
     CSimpleDataCore::GetInstanceNF(inHandle, m_Objects); // Check for instance existance
@@ -69,13 +69,13 @@ void CSimpleDataCore::GetInstances(TInstanceHandleList &outInstances) const
     // the exact no of instances = m_Objects.size() - the no of properties as added by
     // CClientDataModelBridge::InitializeDataCore (as of now, we have 31 properties)
     outInstances.reserve(m_Objects.size());
-    do_all(m_Objects, std::bind(MaybeAddObject<CDataModelInstance, CUICDMInstanceHandle>,
+    do_all(m_Objects, std::bind(MaybeAddObject<CDataModelInstance, Qt3DSDMInstanceHandle>,
                                 std::placeholders::_1, std::ref(outInstances)));
 }
 
 // Get instances that are derived from a specific parent
 void CSimpleDataCore::GetInstancesDerivedFrom(TInstanceHandleList &outInstances,
-                                              CUICDMInstanceHandle inParentHandle) const
+                                              Qt3DSDMInstanceHandle inParentHandle) const
 {
     do_all(m_Objects, std::bind(&CSimpleDataCore::AddInstanceIfDerivedFrom, this,
                                 std::placeholders::_1,
@@ -85,7 +85,7 @@ void CSimpleDataCore::GetInstancesDerivedFrom(TInstanceHandleList &outInstances,
 // add instance that is derived from a specific parent
 void CSimpleDataCore::AddInstanceIfDerivedFrom(const std::pair<int, THandleObjectPtr> &inItem,
                                                TInstanceHandleList &outInstances,
-                                               CUICDMInstanceHandle inParentHandle) const
+                                               Qt3DSDMInstanceHandle inParentHandle) const
 {
     if (inItem.second->GetType() == CHandleObject::EHandleObjectTypeCDataModelInstance) {
         TDataModelInstancePtr theInstance = static_pointer_cast<CDataModelInstance>(inItem.second);
@@ -95,7 +95,7 @@ void CSimpleDataCore::AddInstanceIfDerivedFrom(const std::pair<int, THandleObjec
 }
 
 // Derivation
-void CSimpleDataCore::DeriveInstance(CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inParent)
+void CSimpleDataCore::DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent)
 {
     if (g_UICDMDebugLogger)
         g_UICDMDebugLogger("CSimpleDataCore::DeriveInstance Enter");
@@ -108,7 +108,7 @@ void CSimpleDataCore::DeriveInstance(CUICDMInstanceHandle inInstance, CUICDMInst
         g_UICDMDebugLogger("CSimpleDataCore::DeriveInstance Leave");
 }
 
-void CSimpleDataCore::GetInstanceParents(CUICDMInstanceHandle inHandle,
+void CSimpleDataCore::GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
                                          TInstanceHandleList &outParents) const
 {
     const TDataModelInstancePtr theInstance = GetInstanceNF(inHandle, m_Objects);
@@ -133,7 +133,7 @@ inline const wchar_t *SafeStrPtr(const wchar_t *inData)
 }
 
 // Properties
-CUICDMPropertyHandle CSimpleDataCore::AddProperty(CUICDMInstanceHandle inInstance, TCharPtr inName,
+Qt3DSDMPropertyHandle CSimpleDataCore::AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                                   DataModelDataType::Value inPropType)
 {
     UICDM_LOG_FUNCTION("CSimpleDataCore::AddProperty");
@@ -153,20 +153,20 @@ CUICDMPropertyHandle CSimpleDataCore::AddProperty(CUICDMInstanceHandle inInstanc
     return AddPropertyWithHandle(nextId, inInstance, inName, inPropType);
 }
 
-void CSimpleDataCore::GetInstanceProperties(CUICDMInstanceHandle inInstance,
+void CSimpleDataCore::GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                             TPropertyHandleList &outProperties) const
 {
     transformv_all(GetInstanceNF(inInstance, m_Objects)->m_Properties, outProperties);
 }
 
-const SUICDMPropertyDefinition &CSimpleDataCore::GetProperty(CUICDMPropertyHandle inProperty) const
+const SUICDMPropertyDefinition &CSimpleDataCore::GetProperty(Qt3DSDMPropertyHandle inProperty) const
 {
     const CDataModelPropertyDefinitionObject *theProp =
         GetPropertyDefinitionNF(inProperty, m_Objects);
     return theProp->m_Definition;
 }
 
-void CSimpleDataCore::RemoveProperty(CUICDMPropertyHandle inProperty)
+void CSimpleDataCore::RemoveProperty(Qt3DSDMPropertyHandle inProperty)
 {
     CDataModelPropertyDefinitionObject *theProp =
         CSimpleDataCore::GetPropertyDefinitionNF(inProperty, m_Objects);
@@ -177,13 +177,13 @@ void CSimpleDataCore::RemoveProperty(CUICDMPropertyHandle inProperty)
     CSimpleDataCore::EraseHandle(inProperty, m_Objects);
 }
 
-inline bool PropertyMatches(int inProperty, CUICDMPropertyHandle inTarget)
+inline bool PropertyMatches(int inProperty, Qt3DSDMPropertyHandle inTarget)
 {
     return inProperty == inTarget.GetHandleValue();
 }
 
-inline bool GetInstanceValue(CUICDMInstanceHandle inInstanceHandle,
-                             CUICDMPropertyHandle inPropertyHandle, CSimpleDataCore &inDataCore,
+inline bool GetInstanceValue(Qt3DSDMInstanceHandle inInstanceHandle,
+                             Qt3DSDMPropertyHandle inPropertyHandle, CSimpleDataCore &inDataCore,
                              SValue &outValue)
 {
     const TDataModelInstancePtr theInstance =
@@ -198,13 +198,13 @@ inline bool GetInstanceValue(CUICDMInstanceHandle inInstanceHandle,
     return false;
 }
 
-inline void CopyInstanceProperty(CUICDMPropertyHandle inSrcPropertyHandle,
-                                 CUICDMInstanceHandle inSrcInstanceHandle,
-                                 CUICDMInstanceHandle inInstanceHandle, CSimpleDataCore &inDataCore)
+inline void CopyInstanceProperty(Qt3DSDMPropertyHandle inSrcPropertyHandle,
+                                 Qt3DSDMInstanceHandle inSrcInstanceHandle,
+                                 Qt3DSDMInstanceHandle inInstanceHandle, CSimpleDataCore &inDataCore)
 {
     // create the property definition that matches the source
     const SUICDMPropertyDefinition &theProperty = inDataCore.GetProperty(inSrcPropertyHandle);
-    CUICDMPropertyHandle theNewProperty =
+    Qt3DSDMPropertyHandle theNewProperty =
         inDataCore.AddProperty(inInstanceHandle, theProperty.m_Name.wide_str(), theProperty.m_Type);
     // copy the value if one exists on the src.
     SValue theValue;
@@ -214,9 +214,9 @@ inline void CopyInstanceProperty(CUICDMPropertyHandle inSrcPropertyHandle,
 
 // logic : if destination property is one gained through derivation in inSrcInstanceHandle, copy the
 // value over.
-inline void CopyAggregatedPropertyValues(CUICDMPropertyHandle inDestPropertyHandle,
-                                         CUICDMInstanceHandle inSrcInstanceHandle,
-                                         CUICDMInstanceHandle inInstanceHandle,
+inline void CopyAggregatedPropertyValues(Qt3DSDMPropertyHandle inDestPropertyHandle,
+                                         Qt3DSDMInstanceHandle inSrcInstanceHandle,
+                                         Qt3DSDMInstanceHandle inInstanceHandle,
                                          const TPropertyHandleList &inSrcNonAggregateList,
                                          CSimpleDataCore &inDataCore)
 {
@@ -230,8 +230,8 @@ inline void CopyAggregatedPropertyValues(CUICDMPropertyHandle inDestPropertyHand
     }
 }
 
-void CSimpleDataCore::CopyInstanceProperties(CUICDMInstanceHandle inSrcInstance,
-                                             CUICDMInstanceHandle inDestInstance)
+void CSimpleDataCore::CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
+                                             Qt3DSDMInstanceHandle inDestInstance)
 {
     TPropertyHandleList theList;
     GetInstanceProperties(inSrcInstance, theList);
@@ -245,7 +245,7 @@ void CSimpleDataCore::CopyInstanceProperties(CUICDMInstanceHandle inSrcInstance,
                                   theList, std::ref(*this)));
 }
 
-void CSimpleDataCore::RemoveCachedValues(CUICDMInstanceHandle inInstance)
+void CSimpleDataCore::RemoveCachedValues(Qt3DSDMInstanceHandle inInstance)
 {
     const TDataModelInstancePtr theInstance = CSimpleDataCore::GetInstanceNF(inInstance, m_Objects);
     theInstance->RemoveCachedValues();
@@ -268,7 +268,7 @@ void GetAggregateProperties(const TDataModelInstancePtr inInstance, TIntList &in
 }
 
 template <typename TPredicate>
-inline std::tuple<bool, CUICDMInstanceHandle, CUICDMPropertyHandle>
+inline std::tuple<bool, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle>
 RecurseFindProperty(const TDataModelInstancePtr inInstance, TPredicate inPredicate)
 {
     TIntList::const_iterator theFind = eastl::find_if(inInstance->m_Properties.begin(),
@@ -279,7 +279,7 @@ RecurseFindProperty(const TDataModelInstancePtr inInstance, TPredicate inPredica
     for (CDataModelInstance::TInstancePairList::const_iterator theParent =
              inInstance->m_Parents.begin();
          theParent != inInstance->m_Parents.end(); ++theParent) {
-        std::tuple<bool, CUICDMInstanceHandle, CUICDMPropertyHandle> theValue =
+        std::tuple<bool, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle> theValue =
             RecurseFindProperty(theParent->second, inPredicate);
         if (get<0>(theValue))
             return theValue;
@@ -295,8 +295,8 @@ inline bool PropertyNameMatches(int inProperty, const THandleObjectMap &inObject
     return (theProp->m_Definition.m_Name == inStr);
 }
 
-CUICDMPropertyHandle
-CSimpleDataCore::GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle
+CSimpleDataCore::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                                     const TCharStr &inStr) const
 {
     const TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
@@ -308,7 +308,7 @@ CSimpleDataCore::GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInsta
 
 // A simplified RecurseFindProperty function
 bool RecurseFindPropertyMatches(const TDataModelInstancePtr inInstance,
-                                CUICDMPropertyHandle inProperty)
+                                Qt3DSDMPropertyHandle inProperty)
 {
     TIntList::const_iterator theFind =
         find(inInstance->m_Properties.begin(), inInstance->m_Properties.end(),
@@ -325,8 +325,8 @@ bool RecurseFindPropertyMatches(const TDataModelInstancePtr inInstance,
     return false;
 }
 
-bool CSimpleDataCore::HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                                   CUICDMPropertyHandle inProperty) const
+bool CSimpleDataCore::HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                                   Qt3DSDMPropertyHandle inProperty) const
 {
     const TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
     if (theInstance->m_PropertyValues.find(inProperty.GetHandleValue())
@@ -336,7 +336,7 @@ bool CSimpleDataCore::HasAggregateInstanceProperty(CUICDMInstanceHandle inInstan
     return RecurseFindPropertyMatches(theInstance, inProperty);
 }
 
-void CSimpleDataCore::GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+void CSimpleDataCore::GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                      TPropertyHandleList &outProperties) const
 {
     TIntList inVisited;
@@ -344,7 +344,7 @@ void CSimpleDataCore::GetAggregateInstanceProperties(CUICDMInstanceHandle inInst
     GetAggregateProperties(theInstance, inVisited, outProperties);
 }
 
-void CSimpleDataCore::CheckValue(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+void CSimpleDataCore::CheckValue(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                  const SValue &inValue) const
 {
     CheckPropertyExistence(GetInstanceNF(inInstance, m_Objects), inProperty, m_Objects);
@@ -354,7 +354,7 @@ void CSimpleDataCore::CheckValue(CUICDMInstanceHandle inInstance, CUICDMProperty
 }
 
 bool CSimpleDataCore::GetInstancePropertyValueHelper(const TDataModelInstancePtr inInstance,
-                                                     CUICDMPropertyHandle inProperty,
+                                                     Qt3DSDMPropertyHandle inProperty,
                                                      SValue &outValue) const
 {
     TPropertyPairHash::const_iterator theInstanceProp =
@@ -388,8 +388,8 @@ bool CSimpleDataCore::GetInstancePropertyValueHelper(const TDataModelInstancePtr
     return false;
 }
 
-bool CSimpleDataCore::GetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                               CUICDMPropertyHandle inProperty,
+bool CSimpleDataCore::GetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                               Qt3DSDMPropertyHandle inProperty,
                                                SValue &outValue) const
 {
     if (IsInstance(inHandle) == false || IsProperty(inProperty) == false) {
@@ -400,8 +400,8 @@ bool CSimpleDataCore::GetInstancePropertyValue(CUICDMInstanceHandle inHandle,
     return GetInstancePropertyValueHelper(theInstance, inProperty, outValue);
 }
 
-void CSimpleDataCore::SetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                               CUICDMPropertyHandle inProperty,
+void CSimpleDataCore::SetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                               Qt3DSDMPropertyHandle inProperty,
                                                const SValue &inValue)
 {
     if (IsInstance(inHandle) == false || IsProperty(inProperty) == false) {
@@ -412,7 +412,7 @@ void CSimpleDataCore::SetInstancePropertyValue(CUICDMInstanceHandle inHandle,
     UncheckedSetSpecificInstancePropertyValue(inHandle, inProperty, inValue, PropertyValueFlags());
 }
 
-void CSimpleDataCore::GetSpecificInstancePropertyValues(CUICDMInstanceHandle inHandle,
+void CSimpleDataCore::GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inHandle,
                                                         TPropertyHandleValuePairList &outValues)
 {
     if (IsInstance(inHandle) == false)
@@ -424,7 +424,7 @@ void CSimpleDataCore::GetSpecificInstancePropertyValues(CUICDMInstanceHandle inH
          theIter != theEnd; ++theIter) {
         const pair<int, TPropertyValuePair> &thePair(*theIter);
         if (thePair.second.first.IsSetViaAutoPropagation() == false) {
-            CUICDMPropertyHandle thePropertyHandle(thePair.first);
+            Qt3DSDMPropertyHandle thePropertyHandle(thePair.first);
             SValue theValue(thePair.second.second.GetValue());
             outValues.push_back(make_pair(thePair.first, theValue));
         }
@@ -440,7 +440,7 @@ bool CSimpleDataCore::IsProperty(int inHandle) const
     return HandleObjectValid<CDataModelPropertyDefinitionObject>(inHandle, m_Objects);
 }
 
-CUICDMInstanceHandle CSimpleDataCore::CreateInstanceWithHandle(int inHandle)
+Qt3DSDMInstanceHandle CSimpleDataCore::CreateInstanceWithHandle(int inHandle)
 {
     if (g_UICDMDebugLogger)
         g_UICDMDebugLogger("CSimpleDataCore::CreateInstance Enter");
@@ -464,8 +464,8 @@ CUICDMInstanceHandle CSimpleDataCore::CreateInstanceWithHandle(int inHandle)
     return inHandle;
 }
 
-CUICDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
-                                                            CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
+                                                            Qt3DSDMInstanceHandle inInstance,
                                                             TCharPtr inName,
                                                             DataModelDataType::Value inPropType)
 {
@@ -494,8 +494,8 @@ CUICDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
     return inHandle;
 }
 
-bool CSimpleDataCore::GetSpecificInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                       CUICDMPropertyHandle inProperty,
+bool CSimpleDataCore::GetSpecificInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                       Qt3DSDMPropertyHandle inProperty,
                                                        SValue &outValue) const
 {
     const TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
@@ -508,15 +508,15 @@ bool CSimpleDataCore::GetSpecificInstancePropertyValue(CUICDMInstanceHandle inIn
     return false;
 }
 
-void CSimpleDataCore::GetSpecificInstancePropertyValues(CUICDMInstanceHandle inInstance,
+void CSimpleDataCore::GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inInstance,
                                                         TPropertyPairHash &outValues) const
 {
     const TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
     outValues = theInstance->m_PropertyValues;
 }
 
-void CSimpleDataCore::UncheckedSetSpecificInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                                CUICDMPropertyHandle inProperty,
+void CSimpleDataCore::UncheckedSetSpecificInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                                Qt3DSDMPropertyHandle inProperty,
                                                                 const SValue &inValue,
                                                                 PropertyValueFlags inIsUserSet)
 {
@@ -554,15 +554,15 @@ void CSimpleDataCore::CheckPropertyExistence(const TDataModelInstancePtr inInsta
 }
 
 bool CSimpleDataCore::IsInstanceOrDerivedFromHelper(const TDataModelInstancePtr inInstance,
-                                                    CUICDMInstanceHandle inParent) const
+                                                    Qt3DSDMInstanceHandle inParent) const
 {
     if (inInstance->m_Handle == inParent) // Am I this object?
         return true;
     return inInstance->IsDerivedFrom(inParent);
 }
 
-bool CSimpleDataCore::IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                              CUICDMInstanceHandle inParent) const
+bool CSimpleDataCore::IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                              Qt3DSDMInstanceHandle inParent) const
 {
     if (IsInstance(inInstance) == false || IsInstance(inParent) == false)
         return false;

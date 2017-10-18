@@ -51,21 +51,21 @@ public:
     virtual TStringTablePtr GetStringTablePtr() const = 0;
     virtual IStringTable &GetStringTable() const = 0;
     // Action
-    virtual CUICDMActionHandle CreateAction(CUICDMInstanceHandle inInstance,
-                                            CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    virtual CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance,
+                                            CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                             SLong4 inTriggerTargetObjects) = 0;
-    virtual void DeleteAction(CUICDMActionHandle inAction, CUICDMInstanceHandle &outInstance) = 0;
+    virtual void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) = 0;
     virtual const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const = 0;
-    virtual void GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    virtual void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                             TActionHandleList &outActions) const = 0;
     virtual void GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const = 0;
-    virtual void GetActions(CUICDMInstanceHandle inOwner, TActionHandleList &outActions) const = 0;
+    virtual void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const = 0;
     virtual void GetActions(TActionHandleList &outActions) const = 0;
 
     // Return the instance that was allocated for this action.
-    virtual CUICDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const = 0;
+    virtual Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const = 0;
     // Reverse lookup into the action system so you can match actions to instances.
-    virtual CUICDMActionHandle GetActionByInstance(CUICDMInstanceHandle inActionInstance) const = 0;
+    virtual CUICDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const = 0;
 
     // Action Properties
     virtual void SetTriggerObject(CUICDMActionHandle inAction,

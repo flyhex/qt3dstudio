@@ -72,7 +72,7 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     } else {
         if (CHotKeys::IsKeyDown(Qt::AltModifier) && targetType != OBJTYPE_SCENE
             && targetType != OBJTYPE_COMPONENT) {
-            qt3dsdm::CUICDMInstanceHandle theTarget = inTarget->GetInstance();
+            qt3dsdm::Qt3DSDMInstanceHandle theTarget = inTarget->GetInstance();
             CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
             IDocumentReader &theReader(theDoc->GetDocumentReader());
             qt3dsdm::CUICDMSlideHandle toSlide = theReader.GetAssociatedSlide(theTarget);
@@ -138,11 +138,11 @@ bool CFileDropSource::CanCopy()
     return true;
 }
 
-CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
+CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                             EDROPDESTINATION inDestType,
                                             qt3dsdm::CUICDMSlideHandle inSlide)
 {
-    qt3dsdm::CUICDMInstanceHandle theTarget = inTarget;
+    qt3dsdm::Qt3DSDMInstanceHandle theTarget = inTarget;
 
     CDoc &theDoc(*g_StudioApp.GetCore()->GetDoc());
     Q3DStudio::CFilePath theFilePath(m_File.GetAbsolutePath());

@@ -66,7 +66,7 @@ public:
     bool GetHasValidTarget();
     void SetHasValidTarget(bool inValid) override;
 
-    CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
+    CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                        EDROPDESTINATION inDestType,
                                        qt3dsdm::CUICDMSlideHandle inSlide) override;
 };

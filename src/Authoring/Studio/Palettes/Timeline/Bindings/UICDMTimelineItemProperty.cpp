@@ -73,8 +73,8 @@ inline float UICDMToColor(float inValue)
 }
 
 CUICDMTimelineItemProperty::CUICDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
-                                                       CUICDMPropertyHandle inPropertyHandle,
-                                                       CUICDMInstanceHandle inInstance)
+                                                       Qt3DSDMPropertyHandle inPropertyHandle,
+                                                       Qt3DSDMInstanceHandle inInstance)
     : m_Row(nullptr)
     , m_InstanceHandle(inInstance)
     , m_PropertyHandle(inPropertyHandle)
@@ -145,7 +145,7 @@ void CUICDMTimelineItemProperty::ReleaseKeyframes()
 }
 
 // Type doesn't change and due to the logic required to figure this out, cache it.
-void CUICDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CUICDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
@@ -563,8 +563,8 @@ bool CUICDMTimelineItemProperty::CreateKeyframeIfNonExistent(
 }
 
 void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::CUICDMSlideHandle inSlide,
-                                                             qt3dsdm::CUICDMInstanceHandle inInstance,
-                                                             qt3dsdm::CUICDMPropertyHandle inProperty)
+                                                             qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                             qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     if (inInstance == m_InstanceHandle && inProperty == m_PropertyHandle) {
         // Re-bind to keyframes because the ones we should be pointing to will have changed.

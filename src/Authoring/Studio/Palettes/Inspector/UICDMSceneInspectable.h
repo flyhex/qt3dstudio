@@ -49,8 +49,8 @@
 class CUICDMSceneInspectable : public CUICDMInspectable
 {
 public:
-    CUICDMSceneInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::CUICDMInstanceHandle inInstance,
-                           qt3dsdm::CUICDMInstanceHandle inCurrentActiveSlideInstance);
+    CUICDMSceneInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance);
 
     bool IsValid() const override;
     // CUICDMInspectable
@@ -58,9 +58,9 @@ public:
 
 protected:
     inline Q3DStudio::CString GetGroupName(long inGroupIndex) override;
-    inline qt3dsdm::CUICDMInstanceHandle GetGroupInstance(long inGroupIndex) override;
+    inline qt3dsdm::Qt3DSDMInstanceHandle GetGroupInstance(long inGroupIndex) override;
 
-    qt3dsdm::CUICDMInstanceHandle m_CurrentActiveSlideInstance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_CurrentActiveSlideInstance;
 };
 
 #endif

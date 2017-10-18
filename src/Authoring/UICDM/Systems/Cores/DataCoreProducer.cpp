@@ -36,29 +36,29 @@
 #endif
 namespace qt3dsdm {
 
-CUICDMInstanceHandle CDataCoreProducer::CreateInstance(CUICDMInstanceHandle inTargetId)
+Qt3DSDMInstanceHandle CDataCoreProducer::CreateInstance(Qt3DSDMInstanceHandle inTargetId)
 {
-    CUICDMInstanceHandle retval = m_Data->CreateInstance(inTargetId);
+    Qt3DSDMInstanceHandle retval = m_Data->CreateInstance(inTargetId);
     CREATE_HANDLE_CREATE_TRANSACTION(m_Consumer, retval, m_Data->m_Objects);
     GetDataCoreSender()->SignalInstanceCreated(retval);
     return retval;
 }
 
-inline tuple<CUICDMPropertyHandle, SUICDMPropertyDefinition>
-TransformProperty(CUICDMPropertyHandle inProperty, CSimpleDataCore &inData)
+inline tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition>
+TransformProperty(Qt3DSDMPropertyHandle inProperty, CSimpleDataCore &inData)
 {
     return make_tuple(inProperty, inData.GetProperty(inProperty));
 }
 
-inline void SignalPropertyRemoved(CUICDMInstanceHandle inInstance,
-                                  tuple<CUICDMPropertyHandle, SUICDMPropertyDefinition> inData,
+inline void SignalPropertyRemoved(Qt3DSDMInstanceHandle inInstance,
+                                  tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition> inData,
                                   IDataCoreSignalSender *inSender)
 {
     inSender->SignalPropertyRemoved(inInstance, get<0>(inData), get<1>(inData).m_Name.wide_str(),
                                     get<1>(inData).m_Type);
 }
 
-void CDataCoreProducer::DeleteInstance(CUICDMInstanceHandle inInstance)
+void CDataCoreProducer::DeleteInstance(Qt3DSDMInstanceHandle inInstance)
 {
     TIntList theProperties;
     TIntList theInstances;
@@ -77,10 +77,10 @@ void CDataCoreProducer::DeleteInstance(CUICDMInstanceHandle inInstance)
                                         std::ref(m_Data->m_Objects), m_Consumer));
     }
 
-    vector<tuple<CUICDMPropertyHandle, SUICDMPropertyDefinition>> theDefinitionList;
+    vector<tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition>> theDefinitionList;
     theDefinitionList.resize(theProperties.size());
 
-    function<tuple<CUICDMPropertyHandle, SUICDMPropertyDefinition>(CUICDMPropertyHandle)>
+    function<tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition>(Qt3DSDMPropertyHandle)>
         thePropertyTransform(bind(TransformProperty, std::placeholders::_1, ref(*m_Data)));
     transform(theProperties.begin(), theProperties.end(), theDefinitionList.begin(),
               thePropertyTransform);
@@ -93,8 +93,8 @@ void CDataCoreProducer::DeleteInstance(CUICDMInstanceHandle inInstance)
                                    std::placeholders::_1, GetDataCoreSender()));
 }
 
-bool CDataCoreProducer::IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                                CUICDMInstanceHandle inParent) const
+bool CDataCoreProducer::IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                                Qt3DSDMInstanceHandle inParent) const
 {
     return m_Data->IsInstanceOrDerivedFrom(inInstance, inParent);
 }
@@ -104,7 +104,7 @@ void CDataCoreProducer::GetInstances(TInstanceHandleList &outInstances) const
     m_Data->GetInstances(outInstances);
 }
 void CDataCoreProducer::GetInstancesDerivedFrom(TInstanceHandleList &outInstances,
-                                                CUICDMInstanceHandle inParentHandle) const
+                                                Qt3DSDMInstanceHandle inParentHandle) const
 {
     m_Data->GetInstancesDerivedFrom(outInstances, inParentHandle);
 }
@@ -122,8 +122,8 @@ struct ClearInstanceParentCacheTransaction : public ITransaction
     void Undo() override { m_Instance.ClearParentCache(); }
 };
 
-void CDataCoreProducer::DeriveInstance(CUICDMInstanceHandle inInstance,
-                                       CUICDMInstanceHandle inParent)
+void CDataCoreProducer::DeriveInstance(Qt3DSDMInstanceHandle inInstance,
+                                       Qt3DSDMInstanceHandle inParent)
 {
     m_Data->DeriveInstance(inInstance, inParent);
     TDataModelInstancePtr theInstance =
@@ -141,16 +141,16 @@ void CDataCoreProducer::DeriveInstance(CUICDMInstanceHandle inInstance,
     GetDataCoreSender()->SignalInstanceDerived(inInstance, inParent);
 }
 
-void CDataCoreProducer::GetInstanceParents(CUICDMInstanceHandle inHandle,
+void CDataCoreProducer::GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
                                            TInstanceHandleList &outParents) const
 {
     m_Data->GetInstanceParents(inHandle, outParents);
 }
 
-CUICDMPropertyHandle CDataCoreProducer::AddProperty(CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle CDataCoreProducer::AddProperty(Qt3DSDMInstanceHandle inInstance,
                                                     TCharPtr inName, DataModelDataType::Value inPropType)
 {
-    CUICDMPropertyHandle retval = m_Data->AddProperty(inInstance, inName, inPropType);
+    Qt3DSDMPropertyHandle retval = m_Data->AddProperty(inInstance, inName, inPropType);
     TDataModelInstancePtr theInstance =
         CSimpleDataCore::GetInstanceNF(inInstance, m_Data->m_Objects);
     CreateVecInsertTransaction<int>(__FILE__, __LINE__, m_Consumer, retval,
@@ -160,19 +160,19 @@ CUICDMPropertyHandle CDataCoreProducer::AddProperty(CUICDMInstanceHandle inInsta
     return retval;
 }
 
-void CDataCoreProducer::GetInstanceProperties(CUICDMInstanceHandle inInstance,
+void CDataCoreProducer::GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                               TPropertyHandleList &outProperties) const
 {
     m_Data->GetInstanceProperties(inInstance, outProperties);
 }
 
 const SUICDMPropertyDefinition &
-CDataCoreProducer::GetProperty(CUICDMPropertyHandle inProperty) const
+CDataCoreProducer::GetProperty(Qt3DSDMPropertyHandle inProperty) const
 {
     return m_Data->GetProperty(inProperty);
 }
 
-void CDataCoreProducer::RemoveProperty(CUICDMPropertyHandle inProperty)
+void CDataCoreProducer::RemoveProperty(Qt3DSDMPropertyHandle inProperty)
 {
     SUICDMPropertyDefinition theDef = GetProperty(inProperty);
     TDataModelInstancePtr theInstance =
@@ -201,7 +201,7 @@ inline void AddCopyInstancePropertyTransaction(int inProperty, const TIntList &i
                                                     std::placeholders::_1))
         == inOriginalList.end())
         CreateVecInsertTransaction<int>(__FILE__, __LINE__, inConsumer,
-                                        CUICDMPropertyHandle(inProperty), inInstance.m_Properties);
+                                        Qt3DSDMPropertyHandle(inProperty), inInstance.m_Properties);
 }
 
 inline void AddCopyInstanceValuePropertyTransaction(const TPropertyPair &inProperty,
@@ -251,8 +251,8 @@ struct InstancePropertyValuesTransaction : public ITransaction
     }
 };
 
-void CDataCoreProducer::CopyInstanceProperties(CUICDMInstanceHandle inSrcInstance,
-                                               CUICDMInstanceHandle inDestInstance)
+void CDataCoreProducer::CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
+                                               Qt3DSDMInstanceHandle inDestInstance)
 {
     TDataModelInstancePtr theInstance =
         CSimpleDataCore::GetInstanceNF(inDestInstance, m_Data->m_Objects);
@@ -275,39 +275,39 @@ void CDataCoreProducer::CopyInstanceProperties(CUICDMInstanceHandle inSrcInstanc
     }
 }
 
-CUICDMPropertyHandle
-CDataCoreProducer::GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle
+CDataCoreProducer::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                                       const TCharStr &inStr) const
 {
     return m_Data->GetAggregateInstancePropertyByName(inInstance, inStr);
 }
 
-void CDataCoreProducer::GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+void CDataCoreProducer::GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                        TPropertyHandleList &outProperties) const
 {
     m_Data->GetAggregateInstanceProperties(inInstance, outProperties);
 }
 
-void CDataCoreProducer::GetSpecificInstancePropertyValues(CUICDMInstanceHandle inHandle,
+void CDataCoreProducer::GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inHandle,
                                                           TPropertyHandleValuePairList &outValues)
 {
     m_Data->GetSpecificInstancePropertyValues(inHandle, outValues);
 }
 
-bool CDataCoreProducer::HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                                     CUICDMPropertyHandle inProperty) const
+bool CDataCoreProducer::HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                                     Qt3DSDMPropertyHandle inProperty) const
 {
     return m_Data->HasAggregateInstanceProperty(inInstance, inProperty);
 }
 
-void CDataCoreProducer::CheckValue(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+void CDataCoreProducer::CheckValue(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                    const SValue &inValue) const
 {
     return m_Data->CheckValue(inInstance, inProperty, inValue);
 }
 
-bool CDataCoreProducer::GetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                                 CUICDMPropertyHandle inProperty,
+bool CDataCoreProducer::GetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                                 Qt3DSDMPropertyHandle inProperty,
                                                  SValue &outValue) const
 {
     return m_Data->GetInstancePropertyValue(inHandle, inProperty, outValue);
@@ -321,8 +321,8 @@ inline void EraseProperty(TPropertyPairHash &inProperties, int inProperty)
                           std::placeholders::_1)));
 }
 
-void CDataCoreProducer::SetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                                 CUICDMPropertyHandle inProperty,
+void CDataCoreProducer::SetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                                 Qt3DSDMPropertyHandle inProperty,
                                                  const SValue &inValue)
 {
     // Two possible courses of actions.  The property exists, in which case
@@ -378,51 +378,51 @@ void CDataCoreProducer::SetConsumer(TTransactionConsumerPtr inConsumer)
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectInstancePropertyValue(
-    const std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle, const SValue &)>
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue &)>
         &inCallback)
 {
     return GetPropertyCoreProvider()->ConnectInstancePropertyValue(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectInstanceCreated(
-    const std::function<void(CUICDMInstanceHandle)> &inCallback)
+    const std::function<void(Qt3DSDMInstanceHandle)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectInstanceCreated(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectInstanceDeleted(
-    const std::function<void(CUICDMInstanceHandle)> &inCallback)
+    const std::function<void(Qt3DSDMInstanceHandle)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectInstanceDeleted(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectBeforeInstanceDeleted(
-    const std::function<void(CUICDMInstanceHandle)> &inCallback)
+    const std::function<void(Qt3DSDMInstanceHandle)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectBeforeInstanceDeleted(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectInstanceDerived(
-    const std::function<void(CUICDMInstanceHandle, CUICDMInstanceHandle)> &inCallback)
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMInstanceHandle)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectInstanceDerived(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectInstanceParentRemoved(
-    const std::function<void(CUICDMInstanceHandle, CUICDMInstanceHandle)> &inCallback)
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMInstanceHandle)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectInstanceParentRemoved(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectPropertyAdded(
-    const std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle, TCharPtr,
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, TCharPtr,
                                DataModelDataType::Value)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectPropertyAdded(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectPropertyRemoved(
-    const std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle, TCharPtr,
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, TCharPtr,
                                DataModelDataType::Value)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectPropertyRemoved(inCallback);

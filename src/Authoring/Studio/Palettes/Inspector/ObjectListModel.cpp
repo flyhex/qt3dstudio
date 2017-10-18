@@ -42,7 +42,7 @@
 #include <QColor>
 
 ObjectListModel::ObjectListModel(CCore *core,
-                                 const qt3dsdm::CUICDMInstanceHandle &baseHandle, QObject *parent)
+                                 const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent)
     : QAbstractItemModel(parent)
     , m_core(core)
     , m_baseHandle(baseHandle)
@@ -141,12 +141,12 @@ QModelIndex ObjectListModel::parent(const QModelIndex &index) const
         return {};
 
     const auto handle = handleForIndex(index);
-    qt3dsdm::CUICDMInstanceHandle parentHandle = m_core->GetDoc()->GetAssetGraph()->GetParent(handle);
+    qt3dsdm::Qt3DSDMInstanceHandle parentHandle = m_core->GetDoc()->GetAssetGraph()->GetParent(handle);
     if (!parentHandle.Valid())
         return {};
 
     int row = 0;
-    qt3dsdm::CUICDMInstanceHandle grandParentHandle = m_core->GetDoc()->GetAssetGraph()
+    qt3dsdm::Qt3DSDMInstanceHandle grandParentHandle = m_core->GetDoc()->GetAssetGraph()
             ->GetParent(handle);
     const auto children = childrenList(m_slideHandle, grandParentHandle);
     const auto it = std::find(children.begin(), children.end(), parentHandle);
@@ -156,12 +156,12 @@ QModelIndex ObjectListModel::parent(const QModelIndex &index) const
     return createIndex(row, 0, (quintptr)(parentHandle));
 }
 
-qt3dsdm::CUICDMInstanceHandle ObjectListModel::handleForIndex(const QModelIndex &index) const
+qt3dsdm::Qt3DSDMInstanceHandle ObjectListModel::handleForIndex(const QModelIndex &index) const
 {
-    return static_cast<qt3dsdm::CUICDMInstanceHandle>(index.internalId());
+    return static_cast<qt3dsdm::Qt3DSDMInstanceHandle>(index.internalId());
 }
 
-qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::CUICDMSlideHandle &slideHandle, const qt3dsdm::CUICDMInstanceHandle &handle) const
+qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::CUICDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
     auto slideSystem = m_core->GetDoc()->GetStudioSystem()->GetSlideSystem();
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);
@@ -170,7 +170,7 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::CUICDM
     m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle);
     children.erase(
     std::remove_if(children.begin(), children.end(),
-                   [&slideHandle, slideSystem, &currentMaster](const qt3dsdm::CUICDMInstanceHandle &h) {
+                   [&slideHandle, slideSystem, &currentMaster](const qt3dsdm::Qt3DSDMInstanceHandle &h) {
                         const auto childSlide = slideSystem->GetAssociatedSlide(h);
                         if (!childSlide.Valid())
                             return true;
@@ -184,13 +184,13 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::CUICDM
     return children;
 }
 
-QString ObjectListModel::nameForHandle(const qt3dsdm::CUICDMInstanceHandle &handle) const
+QString ObjectListModel::nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
     const auto data = m_objRefHelper->GetInfo(handle);
     return data.m_Name.toQString();
 }
 
-QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::CUICDMInstanceHandle &handle,
+QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle,
                                             const QModelIndex &startIndex) const
 {
     if (handle == m_baseHandle)
@@ -198,7 +198,7 @@ QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::CUICDMInstanceHandle 
 
     for (int i = 0; i < rowCount(startIndex); i++) {
         auto idx = index(i, 0, startIndex);
-        if (static_cast<qt3dsdm::CUICDMInstanceHandle>(idx.internalId()) == handle)
+        if (static_cast<qt3dsdm::Qt3DSDMInstanceHandle>(idx.internalId()) == handle)
             return idx;
         if (rowCount(idx) > 0)
             return indexForHandle(handle, idx);

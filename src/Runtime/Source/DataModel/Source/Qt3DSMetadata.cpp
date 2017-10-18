@@ -250,12 +250,12 @@ public:
     inline const wchar_t *Convert2(const char *inName) { return ConvertChar(inName, 2); }
     inline const wchar_t *Convert3(const char *inName) { return ConvertChar(inName, 3); }
 
-    inline CUICDMInstanceHandle GetInstanceForType(const wchar_t *inType)
+    inline Qt3DSDMInstanceHandle GetInstanceForType(const wchar_t *inType)
     {
         return m_Objects->GetInstanceForType(ComposerObjectTypes::Convert(inType));
     }
 
-    CUICDMInstanceHandle GetInstanceById(const wchar_t *inId)
+    Qt3DSDMInstanceHandle GetInstanceById(const wchar_t *inId)
     {
         if (IsTrivial(inId))
             return 0;
@@ -271,10 +271,10 @@ public:
     virtual bool IsPropertyExist(const wchar_t *inType, const wchar_t *inProperty,
                                  const wchar_t *inId)
     {
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             IsTrivial(inId) ? GetInstanceForType(inType) : GetInstanceById(inId);
         if (theInstance.Valid()) {
-            CUICDMPropertyHandle theProperty =
+            Qt3DSDMPropertyHandle theProperty =
                 m_DataCore->GetAggregateInstancePropertyByName(theInstance, inProperty);
 
             return theProperty.Valid();
@@ -316,9 +316,9 @@ public:
     virtual ERuntimeDataModelDataType
     GetPropertyType(const wchar_t *inType, const wchar_t *inProperty, const wchar_t *inId)
     {
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             IsTrivial(inId) ? GetInstanceForType(inType) : GetInstanceById(inId);
-        CUICDMPropertyHandle theProperty =
+        Qt3DSDMPropertyHandle theProperty =
             m_DataCore->GetAggregateInstancePropertyByName(theInstance, inProperty);
         return Convert(m_DataCore->GetProperty(theProperty).m_Type);
     }
@@ -367,9 +367,9 @@ public:
     virtual ERuntimeAdditionalMetaDataType
     GetAdditionalType(const wchar_t *inType, const wchar_t *inProperty, const wchar_t *inId)
     {
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             IsTrivial(inId) ? GetInstanceForType(inType) : GetInstanceById(inId);
-        CUICDMPropertyHandle theProperty =
+        Qt3DSDMPropertyHandle theProperty =
             m_DataCore->GetAggregateInstancePropertyByName(theInstance, inProperty);
         return Convert(m_NewMetaData->GetAdditionalMetaDataType(theInstance, theProperty));
     }
@@ -377,10 +377,10 @@ public:
     bool GetPropertyValue(const wchar_t *inType, const wchar_t *inProperty, const wchar_t *inId,
                           SValue &outValue)
     {
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             IsTrivial(inId) ? GetInstanceForType(inType) : GetInstanceById(inId);
         if (theInstance.Valid()) {
-            CUICDMPropertyHandle theProperty =
+            Qt3DSDMPropertyHandle theProperty =
                 m_DataCore->GetAggregateInstancePropertyByName(theInstance, inProperty);
             return m_DataCore->GetInstancePropertyValue(theInstance, theProperty, outValue);
         } else {
@@ -534,7 +534,7 @@ public:
                                eastl::vector<TRuntimeMetaDataStrType> &outReferences,
                                const wchar_t *inId)
     {
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             IsTrivial(inId) ? GetInstanceForType(inType) : GetInstanceById(inId);
 
         if (theInstance.Valid()) {
@@ -557,8 +557,8 @@ public:
 
     virtual bool IsCustomProperty(const wchar_t *inId, const wchar_t *inProperty)
     {
-        CUICDMInstanceHandle theInstance = GetInstanceById(inId);
-        CUICDMPropertyHandle theProperty =
+        Qt3DSDMInstanceHandle theInstance = GetInstanceById(inId);
+        Qt3DSDMPropertyHandle theProperty =
             m_DataCore->GetAggregateInstancePropertyByName(theInstance, inProperty);
         return m_NewMetaData->IsCustomProperty(theInstance, theProperty);
     }
@@ -570,7 +570,7 @@ public:
 
     virtual bool IsCustomHandler(const wchar_t *inId, const wchar_t *inHandlerName)
     {
-        CUICDMInstanceHandle theInstance = GetInstanceById(inId);
+        Qt3DSDMInstanceHandle theInstance = GetInstanceById(inId);
         CUICDMHandlerHandle theHandle =
             m_NewMetaData->FindHandlerByName(theInstance, inHandlerName);
         return m_NewMetaData->IsCustomHandler(theHandle);
@@ -604,7 +604,7 @@ public:
     THandlerList GetCustomHandlers(const char *inId) override
     {
         THandlerList retval;
-        CUICDMInstanceHandle theInstance = GetInstanceById(Convert0(inId));
+        Qt3DSDMInstanceHandle theInstance = GetInstanceById(Convert0(inId));
         THandlerHandleList handlerList;
         m_NewMetaData->GetHandlers(theInstance, handlerList);
         retval.reserve((uint32_t)handlerList.size());
@@ -634,7 +634,7 @@ public:
     TVisualEventList GetVisualEvents(const char *inId) override
     {
         TVisualEventList theRetval;
-        CUICDMInstanceHandle theInstance = GetInstanceById(Convert0(inId));
+        Qt3DSDMInstanceHandle theInstance = GetInstanceById(Convert0(inId));
         TEventHandleList theEventList;
         m_NewMetaData->GetEvents(theInstance, theEventList);
         theRetval.reserve((uint32_t)theEventList.size());
@@ -672,8 +672,8 @@ public:
     SElementInfo LoadElement(const char *clsName, const char *clsRef, const char *inId) override
     {
         SElementInfo retval;
-        CUICDMInstanceHandle theInstance;
-        CUICDMInstanceHandle parentInstance;
+        Qt3DSDMInstanceHandle theInstance;
+        Qt3DSDMInstanceHandle parentInstance;
         if (!qt3ds::foundation::isTrivial(clsRef)) {
             if (clsRef[0] == '#')
                 ++clsRef;
@@ -689,7 +689,7 @@ public:
         m_DataCore->DeriveInstance(theInstance, parentInstance);
         m_IdToHandleMap.insert(std::make_pair(TCharStr(Convert0(inId)), theInstance));
         // setup isComponent
-        CUICDMInstanceHandle slideOwner = m_NewMetaData->GetCanonicalInstanceForType(L"SlideOwner");
+        Qt3DSDMInstanceHandle slideOwner = m_NewMetaData->GetCanonicalInstanceForType(L"SlideOwner");
         retval.m_IsComponent = m_DataCore->IsInstanceOrDerivedFrom(theInstance, slideOwner);
         TCharStr type = m_NewMetaData->GetTypeForInstance(theInstance);
         qt3ds::foundation::ConvertUTF(type.c_str(), type.size(), retval.m_ClassName);
@@ -702,7 +702,7 @@ public:
     TAttOrArgList GetSlideAttributes() override
     {
         TAttOrArgList retval;
-        CUICDMInstanceHandle slideOwner = m_NewMetaData->GetCanonicalInstanceForType(L"Slide");
+        Qt3DSDMInstanceHandle slideOwner = m_NewMetaData->GetCanonicalInstanceForType(L"Slide");
         vector<CUICDMMetaDataPropertyHandle> theProperties;
         m_NewMetaData->GetSpecificMetaDataProperties(slideOwner, theProperties);
         MetaPropertiesToAttList(theProperties, retval);
@@ -722,7 +722,7 @@ public:
         outType = ERuntimeDataModelDataTypeNone;
         outAdditionalType = ERuntimeAdditionalMetaDataTypeNone;
 
-        CUICDMInstanceHandle theInstance = GetInstanceById(inId);
+        Qt3DSDMInstanceHandle theInstance = GetInstanceById(inId);
         CUICDMHandlerHandle theHandle =
             m_NewMetaData->FindHandlerByName(theInstance, inHandlerName);
         Option<SMetaDataHandlerArgumentInfo> theArgMetaData(
@@ -787,19 +787,19 @@ public:
         return theReaderPtr;
     }
 
-    CUICDMInstanceHandle CreateAndDeriveInstance(const wchar_t *inType, const wchar_t *inId)
+    Qt3DSDMInstanceHandle CreateAndDeriveInstance(const wchar_t *inType, const wchar_t *inId)
     {
         // Make sure that the same id has not been created before
         TCharStr theId(inId);
         QT3DS_ASSERT(m_IdToHandleMap.find(theId) == m_IdToHandleMap.end());
 
-        CUICDMInstanceHandle theCanonicalType(m_NewMetaData->GetCanonicalInstanceForType(inType));
+        Qt3DSDMInstanceHandle theCanonicalType(m_NewMetaData->GetCanonicalInstanceForType(inType));
         if (theCanonicalType.Valid() == false) {
             QT3DS_ASSERT(false);
             return 0;
         }
 
-        CUICDMInstanceHandle theMaster = m_DataCore->CreateInstance();
+        Qt3DSDMInstanceHandle theMaster = m_DataCore->CreateInstance();
         m_DataCore->DeriveInstance(theMaster, theCanonicalType);
         m_IdToHandleMap.insert(std::make_pair(theId, theMaster));
         return theMaster;
@@ -813,7 +813,7 @@ public:
         if (m_IdToHandleMap.find(theId) != m_IdToHandleMap.end())
             return true;
 
-        CUICDMInstanceHandle theMaster = CreateAndDeriveInstance(inType, inId);
+        Qt3DSDMInstanceHandle theMaster = CreateAndDeriveInstance(inType, inId);
         if (!theMaster.Valid())
             return false;
 
@@ -826,7 +826,7 @@ public:
             m_NewMetaData->LoadInstance(*theLuaPtr, theMaster, inName, warnings);
 
             // Set the name
-            CUICDMPropertyHandle theProperty =
+            Qt3DSDMPropertyHandle theProperty =
                 m_DataCore->GetAggregateInstancePropertyByName(theMaster, L"name");
             m_DataCore->SetInstancePropertyValue(theMaster, theProperty,
                                                  std::make_shared<CDataStr>(inName));
@@ -843,7 +843,7 @@ public:
         if (m_IdToHandleMap.find(theId) != m_IdToHandleMap.end())
             return true;
 
-        CUICDMInstanceHandle theMaster = CreateAndDeriveInstance(inType, inId);
+        Qt3DSDMInstanceHandle theMaster = CreateAndDeriveInstance(inType, inId);
         if (!theMaster.Valid())
             return false;
 
@@ -855,7 +855,7 @@ public:
             m_NewMetaData->LoadInstance(*theScriptPtr, theMaster, inName, warnings);
 
             // Set the name
-            CUICDMPropertyHandle theProperty =
+            Qt3DSDMPropertyHandle theProperty =
                 m_DataCore->GetAggregateInstancePropertyByName(theMaster, L"name");
             m_DataCore->SetInstancePropertyValue(theMaster, theProperty,
                                                  std::make_shared<CDataStr>(inName));
@@ -888,7 +888,7 @@ public:
         if (m_IdToHandleMap.find(theId) != m_IdToHandleMap.end())
             return true;
 
-        CUICDMInstanceHandle theMaster = CreateAndDeriveInstance(theType, theId);
+        Qt3DSDMInstanceHandle theMaster = CreateAndDeriveInstance(theType, theId);
         if (!theMaster.Valid())
             return false;
         NVScopedRefCounted<IRefCountedInputStream> theStream(
@@ -914,7 +914,7 @@ public:
         if (m_IdToHandleMap.find(theId) != m_IdToHandleMap.end())
             return true;
 
-        CUICDMInstanceHandle theMaster = CreateAndDeriveInstance(theType, theId);
+        Qt3DSDMInstanceHandle theMaster = CreateAndDeriveInstance(theType, theId);
         if (!theMaster.Valid())
             return false;
 
@@ -945,7 +945,7 @@ public:
         if (m_IdToHandleMap.find(theId) != m_IdToHandleMap.end())
             return true;
 
-        CUICDMInstanceHandle theMaster = CreateAndDeriveInstance(theType, theId);
+        Qt3DSDMInstanceHandle theMaster = CreateAndDeriveInstance(theType, theId);
         if (!theMaster.Valid())
             return false;
 
@@ -959,7 +959,7 @@ public:
             Q3DStudio::CRenderPluginParser::NavigateToMetadata(theReader);
             std::vector<SMetaDataLoadWarning> theWarnings;
             m_NewMetaData->LoadInstance(*theReader, theMaster, theName, theWarnings);
-            CUICDMPropertyHandle theProperty =
+            Qt3DSDMPropertyHandle theProperty =
                 m_DataCore->GetAggregateInstancePropertyByName(theMaster, L"name");
             m_DataCore->SetInstancePropertyValue(theMaster, theProperty,
                                                  std::make_shared<CDataStr>(theName));
@@ -984,7 +984,7 @@ public:
                                        bool inSearchParent)
     {
         // Get the instance handle given the type or id
-        CUICDMInstanceHandle theInstance =
+        Qt3DSDMInstanceHandle theInstance =
             IsTrivial(inId) ? GetInstanceForType(inType) : GetInstanceById(inId);
         if (!theInstance.Valid()) {
             QT3DS_ASSERT(false);

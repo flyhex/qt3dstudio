@@ -161,7 +161,7 @@ void CTimelineControl::ViewSlide(qt3dsdm::CUICDMSlideHandle inSlide)
     m_ActiveSlide = inSlide;
 
     qt3dsdm::ISlideSystem *theSlideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
-    qt3dsdm::CUICDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
+    qt3dsdm::Qt3DSDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
     CSlideRow *theSlideRow = new CSlideRow(m_TranslationManager->GetOrCreate(theSlideInstance));
     theSlideRow->SetTimelineControl(this);
 

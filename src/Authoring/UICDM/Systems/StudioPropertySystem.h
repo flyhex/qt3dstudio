@@ -37,7 +37,7 @@
 
 namespace qt3dsdm {
 
-typedef std::tuple<CUICDMInstanceHandle, CUICDMPropertyHandle, SValue> TTemporaryPropertyValue;
+typedef std::tuple<Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, SValue> TTemporaryPropertyValue;
 typedef std::vector<TTemporaryPropertyValue> TTemporaryPropertyValueList;
 
 /**
@@ -77,50 +77,50 @@ public:
         return dynamic_cast<IInstancePropertyCoreSignalSender *>(m_PropertyCoreSignaller.get());
     }
 
-    DataModelDataType::Value GetDataType(CUICDMPropertyHandle inProperty) const override;
-    TCharStr GetName(CUICDMPropertyHandle inProperty) const override;
-    TCharStr GetFormalName(CUICDMInstanceHandle inInstance,
-                                   CUICDMPropertyHandle inProperty) const override;
+    DataModelDataType::Value GetDataType(Qt3DSDMPropertyHandle inProperty) const override;
+    TCharStr GetName(Qt3DSDMPropertyHandle inProperty) const override;
+    TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
+                                   Qt3DSDMPropertyHandle inProperty) const override;
     virtual AdditionalMetaDataType::Value
-    GetAdditionalMetaDataType(CUICDMInstanceHandle inInstance,
-                              CUICDMPropertyHandle inProperty) const override;
-    TMetaDataData GetAdditionalMetaDataData(CUICDMInstanceHandle inInstance,
-                                                    CUICDMPropertyHandle inProperty) const override;
-    CUICDMInstanceHandle GetPropertyOwner(CUICDMPropertyHandle inProperty) const override;
+    GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
+                              Qt3DSDMPropertyHandle inProperty) const override;
+    TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
+                                                    Qt3DSDMPropertyHandle inProperty) const override;
+    Qt3DSDMInstanceHandle GetPropertyOwner(Qt3DSDMPropertyHandle inProperty) const override;
 
-    CUICDMPropertyHandle GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+    Qt3DSDMPropertyHandle GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                                                     const TCharStr &inStr) const override;
-    void GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+    void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                 TPropertyHandleList &outProperties) const override;
-    bool HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                              CUICDMPropertyHandle inProperty) const override;
+    bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                              Qt3DSDMPropertyHandle inProperty) const override;
 
-    bool GetInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty, SValue &outValue) const override;
-    void SetInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty, const SValue &inValue) override;
+    bool GetInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
+    void SetInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
 
-    CUICDMInstanceHandle CreateInstance() override;
+    Qt3DSDMInstanceHandle CreateInstance() override;
     void GetInstances(TInstanceHandleList &outInstances) const override;
-    void DeleteInstance(CUICDMInstanceHandle inHandle) override;
+    void DeleteInstance(Qt3DSDMInstanceHandle inHandle) override;
 
-    void DeriveInstance(CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inParent) override;
-    bool IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                         CUICDMInstanceHandle inParent) const override;
+    void DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent) override;
+    bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                         Qt3DSDMInstanceHandle inParent) const override;
 
-    CUICDMPropertyHandle AddProperty(CUICDMInstanceHandle inInstance, TCharPtr inName,
+    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                              DataModelDataType::Value inPropType) override;
     bool HandleValid(int inHandle) const override;
 
     // Get the instance property value from the slide that owns the instance or the data core if the
     // slide doesn't have the value
-    bool GetCanonicalInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                           CUICDMPropertyHandle inProperty, SValue &outValue) const;
+    bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                           Qt3DSDMPropertyHandle inProperty, SValue &outValue) const;
 
 private:
     static bool DerivedGuidMatches(qt3dsdm::IDataCore &inDataCore,
-                                   qt3dsdm::CUICDMInstanceHandle inInstance,
-                                   qt3dsdm::CUICDMPropertyHandle inProperty, qt3dsdm::SLong4 inGuid);
+                                   qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                   qt3dsdm::Qt3DSDMPropertyHandle inProperty, qt3dsdm::SLong4 inGuid);
     CStudioPropertySystem(const CStudioPropertySystem&) = delete;
     CStudioPropertySystem& operator=(const CStudioPropertySystem&) = delete;
 };

@@ -37,7 +37,7 @@
 
 namespace qt3dsdm {
 
-typedef std::pair<CUICDMPropertyHandle, SValue> TPropertyHandleValuePair;
+typedef std::pair<Qt3DSDMPropertyHandle, SValue> TPropertyHandleValuePair;
 typedef std::vector<TPropertyHandleValuePair> TPropertyHandleValuePairList;
 
 class IInstancePropertyCore
@@ -48,29 +48,29 @@ public:
     /**
      *	Find a given instance property by name. May return an invalid handle.
      */
-    virtual CUICDMPropertyHandle
-    GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+    virtual Qt3DSDMPropertyHandle
+    GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                        const TCharStr &inStr) const = 0;
     /**
      *	Get the entire list of instance properties;
      */
-    virtual void GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+    virtual void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                 TPropertyHandleList &outProperties) const = 0;
     // Get the properties that are stored only on this instance, not on any parents.
-    virtual void GetSpecificInstancePropertyValues(CUICDMInstanceHandle inHandle,
+    virtual void GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inHandle,
                                                    TPropertyHandleValuePairList &outValues) = 0;
     /**
      *	Return true if this property is on this instance or one of its parents.
      */
-    virtual bool HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                              CUICDMPropertyHandle inProperty) const = 0;
+    virtual bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                              Qt3DSDMPropertyHandle inProperty) const = 0;
 
     /**
      *	Does this value match the approperty property type.
      *	error - PropertyNotFound
      *	error - ValueTypeError
      */
-    virtual void CheckValue(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+    virtual void CheckValue(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                             const SValue &inValue) const = 0;
     /**
      *	Get this property from this instance.   This includes looking up the default value.  If the
@@ -79,8 +79,8 @@ public:
      *	error - InstanceNotFound
      *	error - PropertyNotFound if this property doesn't exist on this instance or doesn't exist.
      */
-    virtual bool GetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                          CUICDMPropertyHandle inProperty,
+    virtual bool GetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                          Qt3DSDMPropertyHandle inProperty,
                                           SValue &outValue) const = 0;
     /**
      *	Set this property on this instance.
@@ -88,8 +88,8 @@ public:
      *	error - PropertyNotFound if this property doesn't exist on this instance or doesn't exist.
      *	error - ValueTypeError if this value is of the wrong type
      */
-    virtual void SetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                          CUICDMPropertyHandle inProperty,
+    virtual void SetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                          Qt3DSDMPropertyHandle inProperty,
                                           const SValue &inValue) = 0;
 };
 
@@ -125,13 +125,13 @@ public:
      *	May use a target id to specify what the ideal id is; id must not exist.
      *	- error DuplicateInstanceName
      */
-    virtual CUICDMInstanceHandle
-    CreateInstance(CUICDMInstanceHandle inTargetId = CUICDMInstanceHandle()) = 0;
+    virtual Qt3DSDMInstanceHandle
+    CreateInstance(Qt3DSDMInstanceHandle inTargetId = Qt3DSDMInstanceHandle()) = 0;
     /**
      *	Delete an instance.
      *	error - InstanceNotFound
      */
-    virtual void DeleteInstance(CUICDMInstanceHandle inHandle) = 0;
+    virtual void DeleteInstance(Qt3DSDMInstanceHandle inHandle) = 0;
     /**
      *	Return all the instances in the system.
      */
@@ -140,7 +140,7 @@ public:
      *	Return all the instances in the system that is derived from parent.
      */
     virtual void GetInstancesDerivedFrom(TInstanceHandleList &outInstances,
-                                         CUICDMInstanceHandle inParentHandle) const = 0;
+                                         Qt3DSDMInstanceHandle inParentHandle) const = 0;
 
     //===============================================================
     //	Instance Derivation
@@ -150,19 +150,19 @@ public:
      *	the aggregate properties of a given instance.
      *	error - InstanceNotFound if either instance or parent aren't found
      */
-    virtual void DeriveInstance(CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inParent) = 0;
+    virtual void DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent) = 0;
     /**
      *	Return a count of the parent's of a given instance.
      *	error - InstanceNotFound
      */
-    virtual void GetInstanceParents(CUICDMInstanceHandle inHandle,
+    virtual void GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
                                     TInstanceHandleList &outParents) const = 0;
 
     /**
      *	Returns true if the instance is derived from the parent somehow.
      */
-    virtual bool IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                         CUICDMInstanceHandle inParent) const = 0;
+    virtual bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                         Qt3DSDMInstanceHandle inParent) const = 0;
     //===============================================================
 
     //===============================================================
@@ -177,30 +177,30 @@ public:
      *	error - ValueTypeError if the default value exists and is if a different type than
      *inPropType
      */
-    virtual CUICDMPropertyHandle AddProperty(CUICDMInstanceHandle inInstance, TCharPtr inName,
+    virtual Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                              DataModelDataType::Value inPropType) = 0;
     /**
      *	Return the property definition that corresponds to a given property value.
      */
-    virtual const SUICDMPropertyDefinition &GetProperty(CUICDMPropertyHandle inProperty) const = 0;
+    virtual const SUICDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const = 0;
     /**
      *	Return the properties specific to this instance, not including properties
      *	gained by derivation
      */
-    virtual void GetInstanceProperties(CUICDMInstanceHandle inInstance,
+    virtual void GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                        TPropertyHandleList &outProperties) const = 0;
     /**
      *	Remove a property from an instance.  Instances will no long have this property accessible
      *nor will
      *	child instances.
      */
-    virtual void RemoveProperty(CUICDMPropertyHandle inProperty) = 0;
+    virtual void RemoveProperty(Qt3DSDMPropertyHandle inProperty) = 0;
     /**
      *	Copy properties (definitions & values) specific to one instance, not including properties
      *	gained by derivation, to another instance.
      */
-    virtual void CopyInstanceProperties(CUICDMInstanceHandle inSrcInstance,
-                                        CUICDMInstanceHandle inDestInstance) = 0;
+    virtual void CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
+                                        Qt3DSDMInstanceHandle inDestInstance) = 0;
     /**
      *	Removed cached intermediate values from the instance.  UICDM pull properties from the
      *inheritance hierarchy chain
@@ -211,7 +211,7 @@ public:
      *	save/load the file).
      */
     //===============================================================
-    virtual void RemoveCachedValues(CUICDMInstanceHandle inInstance) = 0;
+    virtual void RemoveCachedValues(Qt3DSDMInstanceHandle inInstance) = 0;
 
     //===============================================================
     //	Handle validation
@@ -233,49 +233,49 @@ class IPropertySystem : public IHandleBase
 public:
     virtual ~IPropertySystem() {}
 
-    virtual CUICDMInstanceHandle CreateInstance() = 0;
-    virtual void DeleteInstance(CUICDMInstanceHandle inHandle) = 0;
-    virtual void DeriveInstance(CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inParent) = 0;
+    virtual Qt3DSDMInstanceHandle CreateInstance() = 0;
+    virtual void DeleteInstance(Qt3DSDMInstanceHandle inHandle) = 0;
+    virtual void DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent) = 0;
 
     virtual void GetInstances(TInstanceHandleList &outInstances) const = 0;
 
-    virtual CUICDMPropertyHandle AddProperty(CUICDMInstanceHandle inInstance, TCharPtr inName,
+    virtual Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                              DataModelDataType::Value inPropType) = 0;
 
-    virtual CUICDMPropertyHandle
-    GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+    virtual Qt3DSDMPropertyHandle
+    GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                        const TCharStr &inStr) const = 0;
-    virtual void GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+    virtual void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                 TPropertyHandleList &outProperties) const = 0;
-    virtual bool HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                              CUICDMPropertyHandle inProperty) const = 0;
+    virtual bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                              Qt3DSDMPropertyHandle inProperty) const = 0;
 
-    virtual bool GetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                          CUICDMPropertyHandle inProperty,
+    virtual bool GetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                          Qt3DSDMPropertyHandle inProperty,
                                           SValue &outValue) const = 0;
-    virtual void SetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                          CUICDMPropertyHandle inProperty,
+    virtual void SetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                          Qt3DSDMPropertyHandle inProperty,
                                           const SValue &inValue) = 0;
 
-    virtual bool IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                         CUICDMInstanceHandle inParent) const = 0;
+    virtual bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                         Qt3DSDMInstanceHandle inParent) const = 0;
 
-    virtual DataModelDataType::Value GetDataType(CUICDMPropertyHandle inProperty) const = 0;
-    virtual TCharStr GetName(CUICDMPropertyHandle inProperty) const = 0;
-    virtual TCharStr GetFormalName(CUICDMInstanceHandle inInstance,
-                                   CUICDMPropertyHandle inProperty) const = 0;
+    virtual DataModelDataType::Value GetDataType(Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual TCharStr GetName(Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
+                                   Qt3DSDMPropertyHandle inProperty) const = 0;
     virtual AdditionalMetaDataType::Value
-    GetAdditionalMetaDataType(CUICDMInstanceHandle inInstance,
-                              CUICDMPropertyHandle inProperty) const = 0;
-    virtual TMetaDataData GetAdditionalMetaDataData(CUICDMInstanceHandle inInstance,
-                                                    CUICDMPropertyHandle inProperty) const = 0;
-    virtual CUICDMInstanceHandle GetPropertyOwner(CUICDMPropertyHandle inProperty) const = 0;
+    GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
+                              Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
+                                                    Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual Qt3DSDMInstanceHandle GetPropertyOwner(Qt3DSDMPropertyHandle inProperty) const = 0;
 };
 typedef std::shared_ptr<IPropertySystem> TPropertySystemPtr;
 
 template <typename TCoreType>
-inline SValue GetInstancePropertyValue(TCoreType inCore, CUICDMInstanceHandle inInstance,
-                                       CUICDMPropertyHandle inProperty)
+inline SValue GetInstancePropertyValue(TCoreType inCore, Qt3DSDMInstanceHandle inInstance,
+                                       Qt3DSDMPropertyHandle inProperty)
 {
     SValue retval;
     if (!inCore->GetInstancePropertyValue(inInstance, inProperty, retval))
@@ -285,29 +285,29 @@ inline SValue GetInstancePropertyValue(TCoreType inCore, CUICDMInstanceHandle in
 
 template <typename TDataType, typename TCoreType>
 inline TDataType GetSpecificInstancePropertyValue(TCoreType inDataCore,
-                                                  CUICDMInstanceHandle inInstance,
-                                                  CUICDMPropertyHandle inProperty)
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty)
 {
     return qt3dsdm::get<TDataType>(GetInstancePropertyValue(inDataCore, inInstance, inProperty));
 }
 
 template <typename TDataType, typename TCoreType>
 inline TDataType GetNamedInstancePropertyValue(TCoreType inDataCore,
-                                               CUICDMInstanceHandle inInstance,
+                                               Qt3DSDMInstanceHandle inInstance,
                                                const TCharStr &inName)
 {
-    CUICDMPropertyHandle theProperty =
+    Qt3DSDMPropertyHandle theProperty =
         inDataCore->GetAggregateInstancePropertyByName(inInstance, inName);
     return GetSpecificInstancePropertyValue<TDataType, TCoreType>(inDataCore, inInstance,
                                                                   theProperty);
 }
 
-inline CUICDMPropertyHandle AddPropertyWithValue(IPropertySystem &inPropertySystem,
-                                                 CUICDMInstanceHandle inInstance, TCharPtr inName,
+inline Qt3DSDMPropertyHandle AddPropertyWithValue(IPropertySystem &inPropertySystem,
+                                                 Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                                  DataModelDataType::Value inDataType,
                                                  const SValue &inValue)
 {
-    CUICDMPropertyHandle theProperty(inPropertySystem.AddProperty(inInstance, inName, inDataType));
+    Qt3DSDMPropertyHandle theProperty(inPropertySystem.AddProperty(inInstance, inName, inDataType));
     inPropertySystem.SetInstancePropertyValue(inInstance, theProperty, inValue);
     return theProperty;
 }

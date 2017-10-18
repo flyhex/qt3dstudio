@@ -100,13 +100,13 @@ public:
     // is dragged (or when multiple keyframes are dragged.
     // Most views should ignore this or ensure they filter the message by at least their instance.
     // Inproperty may be 0 in which case it should be assumed all properties may have changed
-    void FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
-    void FireImmediateRefreshInstance(qt3dsdm::CUICDMInstanceHandle *inInstance,
+    void FireImmediateRefreshInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void FireImmediateRefreshInstance(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
                                       long inInstanceCount);
 
     void AddReloadListener(IReloadListener *inListener);
     void RemoveReloadListener(IReloadListener *inListener);
-    void FireReloadEffectInstance(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void FireReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
     void AddDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
     void RemoveDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
@@ -138,7 +138,7 @@ public:
     void FireOnNewPresentation();
     void FireOnClosingPresentation();
     void FireOnSavingPresentation(const CUICFile *inNewPresentationFile = NULL);
-    void FireOnExportingAsset(qt3dsdm::CUICDMInstanceHandle inInstance);
+    void FireOnExportingAsset(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void FireOnPresentationModifiedExternally();
 
     void AddClientPlayChangeListener(CClientPlayChangeListener *inListener);
@@ -250,9 +250,9 @@ struct CDispatchDataModelNotificationScope
 struct CDispatchDataModelImmediateScope
 {
     CDispatch &m_Dispatch;
-    qt3dsdm::CUICDMInstanceHandle m_Instance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
 
-    CDispatchDataModelImmediateScope(CDispatch &dispatch, qt3dsdm::CUICDMInstanceHandle instance)
+    CDispatchDataModelImmediateScope(CDispatch &dispatch, qt3dsdm::Qt3DSDMInstanceHandle instance)
         : m_Dispatch(dispatch)
         , m_Instance(instance)
     {

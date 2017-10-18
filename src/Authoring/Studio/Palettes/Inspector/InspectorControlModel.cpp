@@ -135,7 +135,7 @@ static QStringList renderableItems()
     return renderables;
 }
 
-static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::CUICDMInstanceHandle instance,
+static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHandle instance,
                                                      const qt3dsdm::ISlideCore &slideCore,
                                                      const qt3dsdm::ISlideSystem &slideSystem)
 {
@@ -180,8 +180,8 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
     }
 }
 
-void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle inHandle,
-                                                        qt3dsdm::CUICDMPropertyHandle inProperty)
+void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inHandle,
+                                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     auto doc = g_StudioApp.GetCore()->GetDoc();
     bool changed = false;
@@ -190,7 +190,7 @@ void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::CUICDMInstanceH
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            qt3dsdm::CUICDMInstanceHandle imageInstance;
+            qt3dsdm::Qt3DSDMInstanceHandle imageInstance;
             if (property->m_dataType == qt3dsdm::DataModelDataType::Long4
                 && property->m_property.Valid()) {
                 imageInstance = doc->GetDocumentReader().GetImageInstanceForProperty(
@@ -600,7 +600,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     case qt3dsdm::DataModelDataType::Long4:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Image) {
             qt3dsdm::Option<qt3dsdm::SLong4> guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
-            qt3dsdm::CUICDMInstanceHandle imageInstance = doc->GetDocumentReader()
+            qt3dsdm::Qt3DSDMInstanceHandle imageInstance = doc->GetDocumentReader()
                     .GetInstanceForGuid(guid);
             if (imageInstance.Valid()) {
                 Q3DStudio::CString path = doc->GetDocumentReader().GetSourcePath(imageInstance);
@@ -657,7 +657,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::ObjectRef) {
             IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
             if (objRefHelper) {
-                qt3dsdm::CUICDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
+                qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
                 element->m_value = objRefHelper->LookupObjectFormalName(refInstance).toQString();
             }
         }

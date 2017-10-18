@@ -77,7 +77,7 @@ public:
 class IInspectableObject
 {
 public:
-    virtual qt3dsdm::CUICDMInstanceHandle GetInspectableBaseInstance() = 0;
+    virtual qt3dsdm::Qt3DSDMInstanceHandle GetInspectableBaseInstance() = 0;
     virtual void SetInspectableObject(const qt3dsdm::SObjectRefType &) = 0;
     virtual qt3dsdm::SObjectRefType GetInspectableObject() = 0;
 };
@@ -85,7 +85,7 @@ public:
 class IInspectableEvent
 {
 public:
-    virtual qt3dsdm::CUICDMInstanceHandle GetInspectableInstance() = 0;
+    virtual qt3dsdm::Qt3DSDMInstanceHandle GetInspectableInstance() = 0;
     virtual qt3dsdm::CUICDMEventHandle GetInspectableEvent() = 0;
     virtual void SetInspectableEvent(const qt3dsdm::CUICDMEventHandle &inEventHandle) = 0;
 };
@@ -156,7 +156,7 @@ class IInspectablePropertyItem : public IInspectableItem
 public:
     EInspectableItemTypes GetInspectableKind() override { return INSPECTABLEITEMTYPE_PROPERTY; }
     virtual void GetInspectablePropertyList(qt3dsdm::TPropertyHandleList &outList) = 0;
-    virtual qt3dsdm::CUICDMInstanceHandle GetInspectableInstance() = 0;
+    virtual qt3dsdm::Qt3DSDMInstanceHandle GetInspectableInstance() = 0;
 };
 
 //==============================================================================

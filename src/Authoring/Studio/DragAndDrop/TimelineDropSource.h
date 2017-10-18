@@ -58,7 +58,7 @@ public:
     bool ValidateTarget(CDropTarget *inTarget) override;
     void InterpretKeyFlags(long inModifyerKeys) override;
 
-    CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle inTarget,
+    CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                        EDROPDESTINATION inDestType,
                                        qt3dsdm::CUICDMSlideHandle inSlide) override;
 };

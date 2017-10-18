@@ -45,7 +45,7 @@
 
 namespace qt3dsdm {
 
-typedef std::pair<CUICDMPropertyHandle, TPropertyInstanceInfoPtr> TPropertyHandlePropertyInfoPair;
+typedef std::pair<Qt3DSDMPropertyHandle, TPropertyInstanceInfoPtr> TPropertyHandlePropertyInfoPair;
 typedef std::vector<TPropertyHandlePropertyInfoPair> TPropertyHandlePropertyInfoPairList;
 /**
  *	Provides more thorough checking and will return an appropriate
@@ -61,8 +61,8 @@ struct SSlideSystem : public ISlideSystem
     TSlideCorePtr m_SlideCore;
     TSlideGraphCorePtr m_SlideGraphCore;
     TAnimationCorePtr m_AnimationCore;
-    CUICDMInstanceHandle m_SlideInstance;
-    CUICDMPropertyHandle m_ComponentGuid;
+    Qt3DSDMInstanceHandle m_SlideInstance;
+    Qt3DSDMPropertyHandle m_ComponentGuid;
     std::shared_ptr<ISignalItem> m_Signaller;
     TPropertyHandlePropertyInfoPairList m_PropertyInfoPairList;
     typedef std::unordered_map<int, int> TIntIntMap;
@@ -70,8 +70,8 @@ struct SSlideSystem : public ISlideSystem
 
     SSlideSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
                  TSlideGraphCorePtr inSlideGraphCore, TAnimationCorePtr inAnimationCore,
-                 CUICDMInstanceHandle inSlideInstance,
-                 CUICDMPropertyHandle inComponentGuidProperty);
+                 Qt3DSDMInstanceHandle inSlideInstance,
+                 Qt3DSDMPropertyHandle inComponentGuidProperty);
 
     void SetPropertySystem(TPropertySystemPtr inPropertySystem);
 
@@ -96,18 +96,18 @@ struct SSlideSystem : public ISlideSystem
     // For any given instance, find the current seconds via backtracking to the graph, finding the
     // active
     // slide, and return.
-    long GetComponentSecondsLong(CUICDMInstanceHandle inInstance) const override;
+    long GetComponentSecondsLong(Qt3DSDMInstanceHandle inInstance) const override;
     virtual SInstanceSlideInformation
-    GetInstanceSlideInformation(CUICDMInstanceHandle inInstance) const override;
+    GetInstanceSlideInformation(Qt3DSDMInstanceHandle inInstance) const override;
     /**
      * Use the instance for storing information such as name, or the GUID of the object
      * this slide links to.
      */
-    CUICDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inInstance) const override;
+    Qt3DSDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inInstance) const override;
     /**
      *	Reverse lookup into the slide system so you can match slides to instances.
      */
-    CUICDMSlideHandle GetSlideByInstance(CUICDMInstanceHandle inInstance) const override;
+    CUICDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const override;
 
     /**
      *	Slide may be either a master slide or a normal slide.  This will associate this instance
@@ -115,50 +115,50 @@ struct SSlideSystem : public ISlideSystem
      *	will now run through the slide set before hitting the main data core database.
      */
     void AssociateInstanceWithSlide(CUICDMSlideHandle inSlide,
-                                            CUICDMInstanceHandle inInstance) override;
-    CUICDMSlideHandle GetAssociatedSlide(CUICDMInstanceHandle inInstance) const override;
+                                            Qt3DSDMInstanceHandle inInstance) override;
+    CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance) const override;
     void GetAssociatedInstances(
         CUICDMSlideHandle inMaster,
-        std::vector<std::pair<CUICDMSlideHandle, CUICDMInstanceHandle>> &outAssociations) const override;
+        std::vector<std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>> &outAssociations) const override;
     void GetAssociatedInstances(CUICDMSlideHandle inSlide,
                                         TInstanceHandleList &outAssociations) const override;
-    void LinkProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override;
-    void UnlinkProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override;
-    bool IsPropertyLinked(CUICDMInstanceHandle inInstance,
-                                  CUICDMPropertyHandle inProperty) const override;
-    bool CanPropertyBeLinked(CUICDMInstanceHandle inInstance,
-                                     CUICDMPropertyHandle inProperty) const override;
-    bool GetSlidePropertyValue(size_t inSlide, CUICDMInstanceHandle inInstance,
-                                       CUICDMPropertyHandle inProperty, SValue &outValue) override;
+    void LinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override;
+    void UnlinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override;
+    bool IsPropertyLinked(Qt3DSDMInstanceHandle inInstance,
+                                  Qt3DSDMPropertyHandle inProperty) const override;
+    bool CanPropertyBeLinked(Qt3DSDMInstanceHandle inInstance,
+                                     Qt3DSDMPropertyHandle inProperty) const override;
+    bool GetSlidePropertyValue(size_t inSlide, Qt3DSDMInstanceHandle inInstance,
+                                       Qt3DSDMPropertyHandle inProperty, SValue &outValue) override;
     void GetUnionOfProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide,
                                       TInstancePropertyPairList &outProperties) const override;
 
     void SetActiveSlide(CUICDMSlideHandle inSlide) override;
-    CUICDMSlideHandle GetAssociatedSlide(CUICDMInstanceHandle inInstance,
-                                                 CUICDMPropertyHandle inProperty) const override;
+    CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance,
+                                                 Qt3DSDMPropertyHandle inProperty) const override;
 
     bool SlideValid(CUICDMSlideHandle inSlide) const override;
     int GetSlideIndex(CUICDMSlideHandle inSlide) const override;
     int GetActiveSlideIndex(CUICDMSlideHandle inMaster) const override;
     CUICDMSlideHandle GetActiveSlide(CUICDMSlideHandle inMaster) const override;
-    CUICDMInstanceHandle GetSlideSelectedInstance(CUICDMSlideHandle inSlide) const override;
-    void SetSlideSelectedInstance(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance) override;
+    Qt3DSDMInstanceHandle GetSlideSelectedInstance(CUICDMSlideHandle inSlide) const override;
+    void SetSlideSelectedInstance(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance) override;
 
-    CUICDMSlideHandle GetApplicableSlide(CUICDMInstanceHandle inHandle,
-                                                 CUICDMPropertyHandle inProperty) override;
+    CUICDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
+                                                 Qt3DSDMPropertyHandle inProperty) override;
 
     bool GetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                          CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty, SValue &outValue) const override;
-    bool GetCanonicalInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                   CUICDMPropertyHandle inProperty,
+                                          Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
+    bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                   Qt3DSDMPropertyHandle inProperty,
                                                    SValue &outValue) const override;
     void ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                               CUICDMInstanceHandle inInstance,
-                                               CUICDMPropertyHandle inProperty,
+                                               Qt3DSDMInstanceHandle inInstance,
+                                               Qt3DSDMPropertyHandle inProperty,
                                                const SValue &inValue) override;
 
-    void RegisterPropertyInstance(CUICDMPropertyHandle inPropertyHandle,
+    void RegisterPropertyInstance(Qt3DSDMPropertyHandle inPropertyHandle,
                                           TPropertyInstanceInfoPtr inPropertyInfo) override;
 
     virtual ISlideSystemSignalProvider *GetSignalProvider();

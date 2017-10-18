@@ -106,7 +106,7 @@ private:
     // state.
     TIntIntMap m_MasterSlideReturnPointers;
 
-    qt3dsdm::CUICDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
+    qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
     qt3dsdm::CUICDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
 };
 

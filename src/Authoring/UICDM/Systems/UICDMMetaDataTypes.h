@@ -151,13 +151,13 @@ struct SMetaPropertyBase
 
 struct SMetaDataPropertyInfo : SMetaPropertyBase
 {
-    CUICDMInstanceHandle m_Instance;
-    CUICDMPropertyHandle m_Property;
+    Qt3DSDMInstanceHandle m_Instance;
+    Qt3DSDMPropertyHandle m_Property;
     bool m_IsHidden; // Is this property visible in the UI
     bool m_Animatable; // Is this property visible in the UI
     TCharStr m_GroupName; // Name of the group this property belongs to or "default"
 
-    SMetaDataPropertyInfo(CUICDMInstanceHandle inInstance)
+    SMetaDataPropertyInfo(Qt3DSDMInstanceHandle inInstance)
         : m_Instance(inInstance)
     {
         init();
@@ -249,13 +249,13 @@ struct PropertyFilterTypes
 struct SPropertyFilterInfo
 {
     PropertyFilterTypes::Enum m_FilterType;
-    CUICDMPropertyHandle m_FilterProperty;
+    Qt3DSDMPropertyHandle m_FilterProperty;
     SValue m_Value;
     SPropertyFilterInfo()
         : m_FilterType(PropertyFilterTypes::Unknown)
     {
     }
-    SPropertyFilterInfo(PropertyFilterTypes::Enum inFilterType, CUICDMPropertyHandle inProp,
+    SPropertyFilterInfo(PropertyFilterTypes::Enum inFilterType, Qt3DSDMPropertyHandle inProp,
                         const SValue &inValue)
         : m_FilterType(inFilterType)
         , m_FilterProperty(inProp)

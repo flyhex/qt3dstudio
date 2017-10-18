@@ -68,7 +68,7 @@ CTimelineBreadCrumbProvider::~CTimelineBreadCrumbProvider()
  * determine the color and text string for this breadcrumb
  */
 static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
-                                  qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc)
+                                  qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc)
 {
     // Get the MasterSlide Handle associated with inAsset
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
@@ -95,7 +95,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
     else {
         CUICDMSlideHandle theActiveSlide =
             theSlideSystem->GetSlideByIndex(theMasterSlide, theActiveIndex);
-        CUICDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theActiveSlide);
+        Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theActiveSlide);
         ASSERT(theInstanceHandle.Valid());
         outBreadCrumb.m_String += theBridge->GetName(theInstanceHandle).toQString();
     }
@@ -166,7 +166,7 @@ void CTimelineBreadCrumbProvider::RefreshSlideList()
 {
     ClearSlideList();
 
-    qt3dsdm::CUICDMInstanceHandle theActiveRoot = m_Doc->GetActiveRootInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theActiveRoot = m_Doc->GetActiveRootInstance();
     if (!theActiveRoot.Valid())
         return;
     FillSlideList(theActiveRoot);
@@ -196,7 +196,7 @@ void CTimelineBreadCrumbProvider::ClearSlideList()
  * This will recurse up the time context tree, so that we can fill the list in a top-down (i.e
  * Scene) first manner
  */
-void CTimelineBreadCrumbProvider::FillSlideList(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CTimelineBreadCrumbProvider::FillSlideList(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (!inInstance.Valid())
         return;
@@ -210,17 +210,17 @@ void CTimelineBreadCrumbProvider::FillSlideList(qt3dsdm::CUICDMInstanceHandle in
 
     m_BreadCrumbList.push_back(inInstance);
 
-    CUICDMPropertyHandle theNameProp =
+    Qt3DSDMPropertyHandle theNameProp =
         m_Doc->GetStudioSystem()->GetClientDataModelBridge()->GetNameProperty();
     IStudioFullSystemSignalProvider *theEngine =
         m_Doc->GetStudioSystem()->GetFullSystemSignalProvider();
-    std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle)> theSetter(
+    std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> theSetter(
         std::bind(&CTimelineBreadCrumbProvider::OnNameDirty, this));
 
     // Listen to name changes on the Asset
     m_Connections.push_back(theEngine->ConnectInstancePropertyValue(
         std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
-                        CUICDMInstanceHandle, CUICDMPropertyHandle)>>,
+                        Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
                     std::placeholders::_1, std::placeholders::_2, inInstance, theNameProp, theSetter)));
 
     // Listen to name changes on the non-master Slides
@@ -230,10 +230,10 @@ void CTimelineBreadCrumbProvider::FillSlideList(qt3dsdm::CUICDMInstanceHandle in
 
     for (long theIndex = 1; theIndex < theSlideCount; ++theIndex) {
         CUICDMSlideHandle theSlide = theSlideSystem->GetSlideByIndex(theMasterSlide, theIndex);
-        CUICDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(theSlide);
+        Qt3DSDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(theSlide);
         m_Connections.push_back(theEngine->ConnectInstancePropertyValue(
             std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
-                            CUICDMInstanceHandle, CUICDMPropertyHandle)>>,
+                            Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
                         std::placeholders::_1, std::placeholders::_2, theSlideInstance, theNameProp, theSetter)));
     }
 }

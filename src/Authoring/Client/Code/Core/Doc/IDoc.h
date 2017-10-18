@@ -56,7 +56,7 @@ namespace foundation {
 }
 }
 namespace qt3dsdm {
-class CUICDMInstanceHandle;
+class Qt3DSDMInstanceHandle;
 class CUICDMSlideHandle;
 class CStudioSystem;
 class IPropertySystem;
@@ -102,7 +102,7 @@ public:
 
     virtual qt3dsdm::IPropertySystem *GetPropertySystem() = 0;
     virtual qt3dsdm::IAnimationCore *GetAnimationCore() = 0;
-    virtual void SetInstancePropertyValue(qt3dsdm::CUICDMInstanceHandle inInstance,
+    virtual void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                           const std::wstring &inPropertyName,
                                           const qt3dsdm::SValue &inValue) = 0;
     // Return an editor to editing the scene graph of the document.

@@ -41,8 +41,8 @@ struct SAction : public CHandleObject
 
     SAction() {}
 
-    SAction(int inHandle, CUICDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
-            CUICDMInstanceHandle inOwner)
+    SAction(int inHandle, Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+            Qt3DSDMInstanceHandle inOwner)
         : CHandleObject(inHandle)
         , m_ActionInfo(inInstance, inSlide, inOwner)
     {
@@ -82,20 +82,20 @@ public: // Use
     IStringTable &GetStringTable() const override { return *m_StringTable.get(); }
     TStringTablePtr GetStringTablePtr() const override { return m_StringTable; }
     // Action
-    CUICDMActionHandle CreateAction(CUICDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
-                                    CUICDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
-    void DeleteAction(CUICDMActionHandle inAction, CUICDMInstanceHandle &outInstance) override;
+    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+                                    Qt3DSDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
+    void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
     const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const override;
-    void GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                     TActionHandleList &outActions) const override;
     void GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const override;
-    void GetActions(CUICDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
+    void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
     void GetActions(TActionHandleList &outActions) const override;
 
     // Return the instance that was allocated for this action.
-    CUICDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;
+    Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;
     // Reverse lookup into the action system so you can match actions to instances.
-    CUICDMActionHandle GetActionByInstance(CUICDMInstanceHandle inActionInstance) const override;
+    CUICDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const override;
 
     // Action Properties
     void SetTriggerObject(CUICDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
@@ -121,9 +121,9 @@ public: // Use
     bool HandleValid(int inHandle) const override { return CHandleBase::HandleValid(inHandle); }
 
     // Helper functions
-    CUICDMActionHandle CreateActionWithHandle(int inHandle, CUICDMInstanceHandle inInstance,
+    CUICDMActionHandle CreateActionWithHandle(int inHandle, Qt3DSDMInstanceHandle inInstance,
                                               CUICDMSlideHandle inSlide,
-                                              CUICDMInstanceHandle inOwner);
+                                              Qt3DSDMInstanceHandle inOwner);
     CUICDMHandlerArgHandle AddHandlerArgumentWithHandle(int inHandle, CUICDMActionHandle inAction,
                                                         const TCharStr &inName,
                                                         HandlerArgumentType::Value inArgType,

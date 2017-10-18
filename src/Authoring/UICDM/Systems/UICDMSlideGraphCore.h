@@ -35,7 +35,7 @@
 
 namespace qt3dsdm {
 
-typedef std::pair<CUICDMSlideHandle, CUICDMInstanceHandle> TSlideInstancePair;
+typedef std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> TSlideInstancePair;
 typedef std::vector<TSlideInstancePair> TSlideInstancePairList;
 typedef std::pair<CUICDMSlideGraphHandle, CUICDMSlideHandle> TGraphSlidePair;
 
@@ -70,11 +70,11 @@ public:
      *	implicitly associated with any root-derived slides.
      */
     virtual void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, CUICDMSlideHandle inSlide,
-                                   CUICDMInstanceHandle inInstance) = 0;
+                                   Qt3DSDMInstanceHandle inInstance) = 0;
     virtual void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
                                         TSlideInstancePairList &outAssociations) const = 0;
-    virtual TGraphSlidePair GetAssociatedGraph(CUICDMInstanceHandle inInstance) const = 0;
-    virtual void DissociateInstance(CUICDMInstanceHandle inInstance) = 0;
+    virtual TGraphSlidePair GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const = 0;
+    virtual void DissociateInstance(Qt3DSDMInstanceHandle inInstance) = 0;
 
     /**
      *	All graphs always have an active slide.  This is assumed to be the root right off the bat.

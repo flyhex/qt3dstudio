@@ -1065,7 +1065,7 @@ Q3DStudio::CString CStudioApp::GetPasteType()
 bool CStudioApp::CanChangeTimebarColor()
 {
     bool theRetVal = true;
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
     if (!theSelectedInstance.Valid()
         || m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsSceneInstance(
                theSelectedInstance))
@@ -1108,7 +1108,7 @@ void CStudioApp::HandleDuplicateCommand()
 bool CStudioApp::CanDuplicateObject()
 {
     // Get the currently selected object
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
     if (!theSelectedInstance.Valid())
         return false;
 
@@ -1334,7 +1334,7 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
             CDoc *theDoc = m_Core->GetDoc();
             qt3dsdm::TInstanceHandleList theSelectedInstances =
                 theDoc->GetSelectedValue().GetSelectedInstances();
-            qt3dsdm::CUICDMInstanceHandle theSelectedInstance;
+            qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance;
             if (theSelectedInstances.size() == 1)
                 theSelectedInstance = theSelectedInstances[0];
 
@@ -1346,7 +1346,7 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
                 // Slide, scene or component
                 if (theSelectedInstance
                     == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
-                    CUICDMInstanceHandle theCurrentActiveSlideInstance =
+                    Qt3DSDMInstanceHandle theCurrentActiveSlideInstance =
                         theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
                             theCurrentActiveSlide);
 

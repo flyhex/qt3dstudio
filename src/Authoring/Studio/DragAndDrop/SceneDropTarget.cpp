@@ -71,7 +71,7 @@ CSceneViewDropTarget::CSceneViewDropTarget()
  */
 long CSceneViewDropTarget::GetObjectType()
 {
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
 
     if (theInstance.Valid()) {
         CClientDataModelBridge *theBridge =
@@ -144,7 +144,7 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
     // We have to set this so we can adjust the Target to accept this source.
     SetDropSourceObjectType(inSource.GetObjectType());
 
-    qt3dsdm::CUICDMInstanceHandle theTargetInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theTargetInstance = GetInstance();
     if (theTargetInstance.Valid()) {
         CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
         qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
@@ -171,10 +171,10 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
 /**
  * 	 @return the Asset that we would like the DropSource to drop on to.
  */
-qt3dsdm::CUICDMInstanceHandle CSceneViewDropTarget::GetInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CSceneViewDropTarget::GetInstance()
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    qt3dsdm::CUICDMInstanceHandle theRootObject = theDoc->GetActiveRootInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theRootObject = theDoc->GetActiveRootInstance();
     EStudioObjectType theRootObjType =
         theDoc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theRootObject);
 
@@ -196,11 +196,11 @@ qt3dsdm::CUICDMInstanceHandle CSceneViewDropTarget::GetInstance()
  *		Check to see if the Asset is a relative of our asset.
  * 		@return true if the inAsset is a parent grandparent...etc. of this asset.
  */
-bool CSceneViewDropTarget::IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CSceneViewDropTarget::IsRelative(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     bool theReturn = false;
 
-    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theThisInstance = GetInstance();
     // This will check to see if the inAsset is already a parent, grandparent....etc.
     if (theThisInstance.Valid())
         theReturn = IsAscendant(theThisInstance, inInstance,
@@ -214,9 +214,9 @@ bool CSceneViewDropTarget::IsRelative(qt3dsdm::CUICDMInstanceHandle inInstance)
  *	 @param inAsset The Asset to check.
  *	 @return true if we are the same.
  */
-bool CSceneViewDropTarget::IsSelf(qt3dsdm::CUICDMInstanceHandle inInstance)
+bool CSceneViewDropTarget::IsSelf(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    qt3dsdm::CUICDMInstanceHandle theThisInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theThisInstance = GetInstance();
     return (theThisInstance == inInstance);
 }
 

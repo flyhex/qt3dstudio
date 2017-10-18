@@ -81,7 +81,7 @@ public:
     virtual void SetCurrentFlags(Qt::KeyboardModifiers inFlags) { m_CurrentFlags = inFlags; }
     virtual Qt::KeyboardModifiers GetCurrentFlags() const { return m_CurrentFlags; }
 
-    virtual CCmd *GenerateAssetCommand(qt3dsdm::CUICDMInstanceHandle, EDROPDESTINATION,
+    virtual CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle, EDROPDESTINATION,
                                        qt3dsdm::CUICDMSlideHandle)
     {
         return nullptr;

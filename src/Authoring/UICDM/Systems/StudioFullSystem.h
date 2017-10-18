@@ -58,7 +58,7 @@ public:
      *	for other serialized instances.  There is another implicit assumption that the system
      *	can name any instances used a base.
      */
-    virtual bool GetInstanceName(CUICDMInstanceHandle inInstance, TCharStr &outName) = 0;
+    virtual bool GetInstanceName(Qt3DSDMInstanceHandle inInstance, TCharStr &outName) = 0;
 };
 
 typedef std::shared_ptr<IStudioFullSystemSerializeHelper> TStudioFullSystemSerializeHelperPtr;
@@ -74,19 +74,19 @@ public:
      *	Return an instance by name.  Whatever method was used above to name instances
      *	should be used to find a given instance by name.
      */
-    virtual CUICDMInstanceHandle FindInstanceByName(const TCharStr &inName) = 0;
+    virtual Qt3DSDMInstanceHandle FindInstanceByName(const TCharStr &inName) = 0;
     /**
      *	Translate a given guid.  For pass 1, you should only translate ids and just return identity
      *	for anything that isn't an id.
      */
-    virtual void TranslateGuidPass1(CUICDMPropertyHandle inProperty, SLong4 inValue) = 0;
+    virtual void TranslateGuidPass1(Qt3DSDMPropertyHandle inProperty, SLong4 inValue) = 0;
     /**
      *	Now translate guids that are used as data variables.  These are links to other objects and
      *the GUID
      *	information should come from what was created in pass 1.
      */
-    virtual SLong4 TranslateGuidPass2(CUICDMInstanceHandle inInstance,
-                                      CUICDMPropertyHandle inProperty, SLong4 inValue) = 0;
+    virtual SLong4 TranslateGuidPass2(Qt3DSDMInstanceHandle inInstance,
+                                      Qt3DSDMPropertyHandle inProperty, SLong4 inValue) = 0;
 };
 
 typedef std::shared_ptr<IStudioFullSystemDeserializeHelper> TStudioFullSystemDeserializeHelperPtr;
@@ -112,9 +112,9 @@ class CStudioFullSystem : public ITransactionProducer
 
 public:
     CStudioFullSystem(std::shared_ptr<CStudioCoreSystem> inCoreSystem,
-                      CUICDMInstanceHandle inSlideInstance,
-                      CUICDMPropertyHandle inComponentGuidProperty,
-                      CUICDMInstanceHandle inActionInstance, CUICDMPropertyHandle inActionEyeball);
+                      Qt3DSDMInstanceHandle inSlideInstance,
+                      Qt3DSDMPropertyHandle inComponentGuidProperty,
+                      Qt3DSDMInstanceHandle inActionInstance, Qt3DSDMPropertyHandle inActionEyeball);
     virtual ~CStudioFullSystem();
 
     void BeginAggregateOperation() { m_AggregateOperation = true; }
@@ -142,9 +142,9 @@ public:
 
     // Ignoring animation and the currently active slide, get the canonical instance property value
     // for this instance.
-    bool GetCanonicalInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                           CUICDMPropertyHandle inProperty, SValue &outValue) const;
-    CUICDMInstanceHandle FindInstanceByName(CUICDMPropertyHandle inNameProperty,
+    bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                           Qt3DSDMPropertyHandle inProperty, SValue &outValue) const;
+    Qt3DSDMInstanceHandle FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
                                             const TCharStr &inName) const;
 
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;

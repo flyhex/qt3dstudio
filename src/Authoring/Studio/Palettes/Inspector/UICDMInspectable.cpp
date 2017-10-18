@@ -60,8 +60,8 @@ using namespace qt3dsdm;
  *	Constructor
  */
 CUICDMInspectable::CUICDMInspectable(CStudioApp &inApp, CCore *inCore,
-                                     qt3dsdm::CUICDMInstanceHandle inInstance,
-                                     qt3dsdm::CUICDMInstanceHandle inDualPersonalityInstance /*= 0*/)
+                                     qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                     qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance /*= 0*/)
     : CInspectableBase(inCore)
     , m_Instance(inInstance)
     , m_DualPersonalityInstance((inDualPersonalityInstance != 0) ? inDualPersonalityInstance
@@ -211,7 +211,7 @@ Q3DStudio::CString CUICDMInspectable::GetGroupName(long inGroupIndex)
 /**
  *	Return the Inspectable Instance Handle for the Group, given the group index
  */
-CUICDMInstanceHandle CUICDMInspectable::GetGroupInstance(long inGroupIndex)
+Qt3DSDMInstanceHandle CUICDMInspectable::GetGroupInstance(long inGroupIndex)
 {
     Q_UNUSED(inGroupIndex);
     return m_DualPersonalityInstance;
@@ -229,7 +229,7 @@ EStudioObjectType CUICDMInspectable::GetObjectType()
             CDoc *theDoc = m_Core->GetDoc();
             CClientDataModelBridge *theBridge =
                 theDoc->GetStudioSystem()->GetClientDataModelBridge();
-            qt3dsdm::CUICDMInstanceHandle theInstance =
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance =
                 theBridge->GetOwningComponentInstance(theDoc->GetActiveSlide());
             Option<TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(theInstance);
             if (theObjTypeName.hasValue()) {
@@ -307,7 +307,7 @@ bool CUICDMInspectable::IsMaster()
 //	{
 //		IPropertySystem* thePropertySystem = m_Core->GetDoc( )->GetStudioSystem(
 //)->GetPropertySystem( );
-//		CUICDMPropertyHandle theProperty =
+//		Qt3DSDMPropertyHandle theProperty =
 //thePropertySystem->GetAggregateInstancePropertyByName( m_Instance, L"type" );
 //		SValue theTypeValue;
 //		if ( theProperty && thePropertySystem->GetInstancePropertyValue( m_Instance,

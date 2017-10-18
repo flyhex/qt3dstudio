@@ -76,16 +76,16 @@ using namespace qt3dsdm;
 struct STranslatorUICDMParser
 {
     STranslation &m_Context;
-    CUICDMInstanceHandle m_InstanceHandle;
-    STranslatorUICDMParser(STranslation &inContext, CUICDMInstanceHandle inInstance)
+    Qt3DSDMInstanceHandle m_InstanceHandle;
+    STranslatorUICDMParser(STranslation &inContext, Qt3DSDMInstanceHandle inInstance)
         : m_Context(inContext)
         , m_InstanceHandle(inInstance)
     {
     }
-    CUICDMInstanceHandle GetInstanceHandle() { return m_InstanceHandle; }
+    Qt3DSDMInstanceHandle GetInstanceHandle() { return m_InstanceHandle; }
 
     template <typename TDataType>
-    inline Option<TDataType> GetPropertyValue(qt3dsdm::CUICDMPropertyHandle inProperty)
+    inline Option<TDataType> GetPropertyValue(qt3dsdm::Qt3DSDMPropertyHandle inProperty)
     {
         Option<SValue> theValue =
             m_Context.m_Reader.GetRawInstancePropertyValue(GetInstanceHandle(), inProperty);
@@ -94,7 +94,7 @@ struct STranslatorUICDMParser
         return Empty();
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, QT3DSF32 &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, QT3DSF32 &outValue)
     {
         Option<float> theValue = GetPropertyValue<float>(inProperty);
         if (theValue.hasValue()) {
@@ -104,7 +104,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, QT3DSU32 &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, QT3DSU32 &outValue)
     {
         auto theValue = GetPropertyValue<qt3ds::QT3DSI32>(inProperty);
         if (theValue.hasValue()) {
@@ -114,7 +114,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, QT3DSI32 &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, QT3DSI32 &outValue)
     {
         auto theValue = GetPropertyValue<qt3ds::QT3DSI32>(inProperty);
         if (theValue.hasValue()) {
@@ -124,7 +124,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseRadianProperty(CUICDMPropertyHandle inProperty, QT3DSF32 &outValue)
+    bool ParseRadianProperty(Qt3DSDMPropertyHandle inProperty, QT3DSF32 &outValue)
     {
         if (ParseProperty(inProperty, outValue)) {
             TORAD(outValue);
@@ -132,7 +132,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseRadianProperty(CUICDMPropertyHandle inProperty, QT3DSVec3 &outValue)
+    bool ParseRadianProperty(Qt3DSDMPropertyHandle inProperty, QT3DSVec3 &outValue)
     {
         if (ParseProperty(inProperty, outValue)) {
             TORAD(outValue.x);
@@ -142,7 +142,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseOpacityProperty(CUICDMPropertyHandle inProperty, QT3DSF32 &outValue)
+    bool ParseOpacityProperty(Qt3DSDMPropertyHandle inProperty, QT3DSF32 &outValue)
     {
         if (ParseProperty(inProperty, outValue)) {
             outValue = (1.0f / 100.0f) * outValue;
@@ -150,7 +150,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseRotationOrder(CUICDMPropertyHandle inProperty, QT3DSU32 &outValue)
+    bool ParseRotationOrder(Qt3DSDMPropertyHandle inProperty, QT3DSU32 &outValue)
     {
         qt3ds::render::CRegisteredString temp;
         if (ParseProperty(inProperty, temp)) {
@@ -159,7 +159,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseOrientation(CUICDMPropertyHandle inProperty, qt3ds::render::NodeFlags &outValue)
+    bool ParseOrientation(Qt3DSDMPropertyHandle inProperty, qt3ds::render::NodeFlags &outValue)
     {
         qt3ds::render::CRegisteredString temp;
         if (ParseProperty(inProperty, temp)) {
@@ -170,7 +170,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, bool &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, bool &outValue)
     {
         Option<bool> theValue = GetPropertyValue<bool>(inProperty);
         if (theValue.hasValue()) {
@@ -179,7 +179,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseProperty(CUICDMPropertyHandle inProperty, QT3DSVec2 &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, QT3DSVec2 &outValue)
     {
         Option<qt3dsdm::SFloat2> theValue = GetPropertyValue<qt3dsdm::SFloat2>(inProperty);
         if (theValue.hasValue()) {
@@ -188,7 +188,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseProperty(CUICDMPropertyHandle inProperty, QT3DSVec3 &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, QT3DSVec3 &outValue)
     {
         Option<SFloat3> theValue = GetPropertyValue<SFloat3>(inProperty);
         if (theValue.hasValue()) {
@@ -197,7 +197,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::CRegisteredString &outValue)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, qt3ds::render::CRegisteredString &outValue)
     {
         Option<qt3dsdm::TDataStrPtr> theValue = GetPropertyValue<qt3dsdm::TDataStrPtr>(inProperty);
         if (theValue.hasValue() && *theValue) {
@@ -208,7 +208,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseAndResolveSourcePath(qt3dsdm::CUICDMPropertyHandle inProperty,
+    bool ParseAndResolveSourcePath(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
                                    qt3ds::render::CRegisteredString &outValue)
     {
         if (ParseProperty(inProperty, outValue)) {
@@ -225,7 +225,7 @@ struct STranslatorUICDMParser
     }
 
     template <typename TEnumType>
-    bool ParseEnumProperty(qt3dsdm::CUICDMPropertyHandle inProperty, TEnumType &ioValue)
+    bool ParseEnumProperty(qt3dsdm::Qt3DSDMPropertyHandle inProperty, TEnumType &ioValue)
     {
         qt3ds::render::CRegisteredString temp;
         if (ParseProperty(inProperty, temp)) {
@@ -245,7 +245,7 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseNodeFlagsProperty(qt3dsdm::CUICDMPropertyHandle inProperty,
+    bool ParseNodeFlagsProperty(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
                                 qt3ds::render::NodeFlags &outValue,
                                 qt3ds::render::NodeFlagValues::Enum theFlag)
     {
@@ -256,7 +256,7 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseNodeFlagsInverseProperty(qt3dsdm::CUICDMPropertyHandle inProperty,
+    bool ParseNodeFlagsInverseProperty(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
                                        qt3ds::render::NodeFlags &outValue,
                                        qt3ds::render::NodeFlagValues::Enum theFlag)
     {
@@ -267,11 +267,11 @@ struct STranslatorUICDMParser
         }
         return false;
     }
-    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::SImage *&ioImage)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, qt3ds::render::SImage *&ioImage)
     {
         Option<SLong4> theData = GetPropertyValue<SLong4>(inProperty);
         if (theData.hasValue()) {
-            qt3dsdm::CUICDMInstanceHandle theInstance(
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance(
                 m_Context.m_Reader.GetInstanceForGuid(*theData));
             SGraphObjectTranslator *imageTranslator = m_Context.GetOrCreateTranslator(theInstance);
             if (imageTranslator
@@ -286,11 +286,11 @@ struct STranslatorUICDMParser
         return false;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::SGraphObject *&ioObjRef)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, qt3ds::render::SGraphObject *&ioObjRef)
     {
         Option<SObjectRefType> theData = GetPropertyValue<SObjectRefType>(inProperty);
         if (theData.hasValue()) {
-            qt3dsdm::CUICDMInstanceHandle theInstance(
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance(
                 m_Context.m_Reader.GetInstanceForObjectRef(m_InstanceHandle, *theData));
             SGraphObjectTranslator *theItemTranslator =
                 m_Context.GetOrCreateTranslator(theInstance);
@@ -300,12 +300,12 @@ struct STranslatorUICDMParser
         return true;
     }
 
-    bool ParseProperty(CUICDMPropertyHandle inProperty, qt3ds::render::SNode *&ioNodePtr)
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, qt3ds::render::SNode *&ioNodePtr)
     {
         Option<SObjectRefType> theData = GetPropertyValue<SObjectRefType>(inProperty);
         SNode *theNewNodePtr = nullptr;
         if (theData.hasValue()) {
-            qt3dsdm::CUICDMInstanceHandle theInstance(
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance(
                 m_Context.m_Reader.GetInstanceForObjectRef(m_InstanceHandle, *theData));
             SGraphObjectTranslator *theItemTranslator =
                 m_Context.GetOrCreateTranslator(theInstance);
@@ -520,7 +520,7 @@ struct STranslatorUICDMParser
 
 struct SSceneTranslator : public SGraphObjectTranslator
 {
-    SSceneTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SSceneTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SScene)())
     {
     }
@@ -535,7 +535,7 @@ struct SSceneTranslator : public SGraphObjectTranslator
         for (long idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
              idx < end; ++idx) {
             SGraphObjectTranslator::PushTranslation(inContext);
-            qt3dsdm::CUICDMInstanceHandle theLayer =
+            qt3dsdm::Qt3DSDMInstanceHandle theLayer =
                 inContext.m_AssetGraph.GetChild(GetInstanceHandle(), idx);
             SGraphObjectTranslator *theTranslator = inContext.GetOrCreateTranslator(theLayer);
             if (theTranslator
@@ -581,12 +581,12 @@ struct SSceneTranslator : public SGraphObjectTranslator
 
 struct SNodeTranslator : public SGraphObjectTranslator
 {
-    SNodeTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SNodeTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SNode)())
     {
         Initialize();
     }
-    SNodeTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, SNode &inNode)
+    SNodeTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, SNode &inNode)
         : SGraphObjectTranslator(inInstance, inNode)
     {
         Initialize();
@@ -652,7 +652,7 @@ struct SNodeTranslator : public SGraphObjectTranslator
 
 struct SLayerTranslator : public SNodeTranslator
 {
-    SLayerTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SLayerTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SNodeTranslator(inInstance, *QT3DS_NEW(inAlloc, SLayer)())
     {
     }
@@ -698,7 +698,7 @@ struct SLayerTranslator : public SNodeTranslator
 };
 struct SLightTranslator : public SNodeTranslator
 {
-    SLightTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SLightTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SNodeTranslator(inInstance, *QT3DS_NEW(inAlloc, SLight)())
     {
     }
@@ -716,7 +716,7 @@ struct SLightTranslator : public SNodeTranslator
 };
 struct SCameraTranslator : public SNodeTranslator
 {
-    SCameraTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SCameraTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SNodeTranslator(inInstance, *QT3DS_NEW(inAlloc, SCamera)())
     {
     }
@@ -730,7 +730,7 @@ struct SCameraTranslator : public SNodeTranslator
 };
 struct SModelTranslator : public SNodeTranslator
 {
-    SModelTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SModelTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SNodeTranslator(inInstance, *QT3DS_NEW(inAlloc, SModel)())
     {
     }
@@ -746,7 +746,7 @@ struct SModelTranslator : public SNodeTranslator
         theItem.m_FirstMaterial = nullptr;
         for (long idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
              idx < end; ++idx) {
-            qt3dsdm::CUICDMInstanceHandle theItemHandle =
+            qt3dsdm::Qt3DSDMInstanceHandle theItemHandle =
                 inContext.m_AssetGraph.GetChild(GetInstanceHandle(), idx);
             SGraphObjectTranslator *theTranslator = inContext.GetOrCreateTranslator(theItemHandle);
             if (theTranslator && IsMaterial(theTranslator->GetGraphObject())) {
@@ -800,7 +800,7 @@ static float ToFloat(const Option<SValue> &inValue)
 struct SPathSubPathTranslator : public SGraphObjectTranslator
 {
     eastl::vector<qt3ds::render::SPathAnchorPoint> m_PathBuffer;
-    SPathSubPathTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SPathSubPathTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SPathSubPath)())
     {
     }
@@ -815,7 +815,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
         QT3DSU32 anchorCount = 0;
         for (QT3DSI32 idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
              idx < end; ++idx) {
-            qt3dsdm::CUICDMInstanceHandle theAnchor =
+            qt3dsdm::Qt3DSDMInstanceHandle theAnchor =
                 inContext.m_AssetGraph.GetChild(GetInstanceHandle(), idx);
             if (theReader.GetObjectTypeName(theAnchor) == L"PathAnchorPoint")
                 ++anchorCount;
@@ -823,7 +823,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
         QT3DSU32 anchorIdx = 0;
         for (QT3DSI32 idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
              idx < end; ++idx) {
-            qt3dsdm::CUICDMInstanceHandle theAnchor =
+            qt3dsdm::Qt3DSDMInstanceHandle theAnchor =
                 inContext.m_AssetGraph.GetChild(GetInstanceHandle(), idx);
             if (theReader.GetObjectTypeName(theAnchor) == L"PathAnchorPoint") {
                 SFloat2 theAnchorPos = ToFloat2(theReader.GetInstancePropertyValue(
@@ -859,7 +859,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
 
 struct SPathTranslator : public SNodeTranslator
 {
-    SPathTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SPathTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SNodeTranslator(inInstance, *QT3DS_NEW(inAlloc, SPath)())
     {
     }
@@ -897,7 +897,7 @@ struct SPathTranslator : public SNodeTranslator
 
 struct SDefaultMaterialTranslator : public SGraphObjectTranslator
 {
-    SDefaultMaterialTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
+    SDefaultMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SDefaultMaterial)())
     {
@@ -910,7 +910,7 @@ struct SDefaultMaterialTranslator : public SGraphObjectTranslator
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_MATERIAL_PROPERTIES
 
-        // qt3dsdm::CUICDMInstanceHandle parent = inContext.m_AssetGraph.GetParent(
+        // qt3dsdm::Qt3DSDMInstanceHandle parent = inContext.m_AssetGraph.GetParent(
         // GetInstanceHandle() );
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Lightmaps.m_LightmapIndirect,
                                 theItem.m_Lightmaps.m_LightmapIndirect);
@@ -928,7 +928,7 @@ struct SDefaultMaterialTranslator : public SGraphObjectTranslator
 
 struct SImageTranslator : public SGraphObjectTranslator
 {
-    SImageTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    SImageTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SImage)())
     {
     }
@@ -960,7 +960,7 @@ struct SImageTranslator : public SGraphObjectTranslator
 
 struct STextTranslator : public SNodeTranslator
 {
-    STextTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    STextTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SNodeTranslator(inInstance, *QT3DS_NEW(inAlloc, SText)())
     {
     }
@@ -990,7 +990,7 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
     eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType> m_ConvertStr;
     TIdxToPropertyMap m_PropertyMap;
 
-    SDynamicObjectTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &,
+    SDynamicObjectTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &,
                              SDynamicObject &inObject)
         : SGraphObjectTranslator(inInstance, inObject)
     {
@@ -1010,7 +1010,7 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
                 qt3ds::foundation::ConvertUTF(theDefinition.m_Name.c_str(), 0, m_ConvertStr);
                 const wchar_t *thePropName =
                     reinterpret_cast<const wchar_t *>(m_ConvertStr.c_str());
-                qt3dsdm::CUICDMPropertyHandle theProperty =
+                qt3dsdm::Qt3DSDMPropertyHandle theProperty =
                     inContext.m_Reader.FindProperty(GetInstanceHandle(), thePropName);
                 if (theProperty.Valid())
                     m_PropertyMap.push_back(eastl::make_pair(idx, theProperty.GetHandleValue()));
@@ -1021,7 +1021,7 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
         for (TIdxToPropertyMap::iterator theIter = m_PropertyMap.begin(), end = m_PropertyMap.end();
              theIter != end; ++theIter) {
             const SPropertyDefinition &theDefinition(theProperties[theIter->first]);
-            qt3dsdm::CUICDMPropertyHandle theProperty = theIter->second;
+            qt3dsdm::Qt3DSDMPropertyHandle theProperty = theIter->second;
             // Sometimes it is possible to have dirty properties that no longer exist, e.g.
             // when undoing standard material -> custom material change. We just ignore changes
             // to such properties.
@@ -1104,7 +1104,7 @@ struct SEffectTranslator : public SDynamicObjectTranslator
     // TODO - move this map to inContext and have it looked up by name.
     IEffectSystem *m_EffectSystem;
 
-    SEffectTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc,
+    SEffectTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc,
                       SEffect &inEffect)
         : SDynamicObjectTranslator(inInstance, inAlloc, inEffect)
         , m_EffectSystem(nullptr)
@@ -1129,7 +1129,7 @@ struct SCustomMaterialTranslator : public SDynamicObjectTranslator
 {
     ICustomMaterialSystem *m_MaterialSystem;
 
-    SCustomMaterialTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
+    SCustomMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                               qt3ds::NVAllocatorCallback &inAlloc, SCustomMaterial &inMaterial)
         : SDynamicObjectTranslator(inInstance, inAlloc, inMaterial)
         , m_MaterialSystem(nullptr)
@@ -1164,7 +1164,7 @@ struct SCustomMaterialTranslator : public SDynamicObjectTranslator
 };
 struct SReferencedMaterialTranslator : public SGraphObjectTranslator
 {
-    SReferencedMaterialTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
+    SReferencedMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                   qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SReferencedMaterial)())
     {
@@ -1272,7 +1272,7 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
 {
     eastl::vector<SRenderPropertyValueUpdate> m_PropertyUpdates;
 
-    SRenderPluginTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
+    SRenderPluginTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                             qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SRenderPlugin)())
     {
@@ -1282,7 +1282,7 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
     {
         SRenderPlugin &theItem = static_cast<SRenderPlugin &>(GetGraphObject());
         // First, get the instance via resolving the source path.
-        CUICDMPropertyHandle sourcepath =
+        Qt3DSDMPropertyHandle sourcepath =
             inContext.m_Reader.FindProperty(GetInstanceHandle(), L"sourcepath");
         Option<SValue> theSourcePath =
             inContext.m_Reader.GetInstancePropertyValue(GetInstanceHandle(), sourcepath);
@@ -1428,18 +1428,18 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
 struct SAliasTranslator : public SGraphObjectTranslator
 {
     SGraphObjectTranslator *m_ReferenceTree;
-    CUICDMInstanceHandle m_ReferencedInstance;
-    SAliasTranslator(qt3dsdm::CUICDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
+    Qt3DSDMInstanceHandle m_ReferencedInstance;
+    SAliasTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3ds::NVAllocatorCallback &inAlloc)
         : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, SNode)())
         , m_ReferenceTree(nullptr)
     {
     }
     void RecurseAndCreateTranslators(STranslation &inContext,
-                                     qt3dsdm::CUICDMInstanceHandle inInstance)
+                                     qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     {
         for (QT3DSI32 idx = 0, end = inContext.m_AssetGraph.GetChildCount(inInstance); idx < end;
              ++idx) {
-            qt3dsdm::CUICDMInstanceHandle theChild = inContext.m_AssetGraph.GetChild(inInstance, idx);
+            qt3dsdm::Qt3DSDMInstanceHandle theChild = inContext.m_AssetGraph.GetChild(inInstance, idx);
             inContext.GetOrCreateTranslator(theChild, m_InstanceHandle);
             RecurseAndCreateTranslators(inContext, theChild);
         }
@@ -1449,7 +1449,7 @@ struct SAliasTranslator : public SGraphObjectTranslator
         STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
         Option<SObjectRefType> theData = theParser.GetPropertyValue<SObjectRefType>(
             inContext.m_ObjectDefinitions.m_Alias.m_ReferencedNode);
-        m_ReferencedInstance = CUICDMInstanceHandle();
+        m_ReferencedInstance = Qt3DSDMInstanceHandle();
         m_ReferenceTree = nullptr;
         ((SNode *)m_GraphObject)->m_Flags.SetDirty(true);
         if (theData.hasValue()) {
@@ -1462,7 +1462,7 @@ struct SAliasTranslator : public SGraphObjectTranslator
                     && !GraphObjectTypes::IsNodeType(m_ReferenceTree->GetGraphObject().m_Type)) {
                     QT3DS_ASSERT(false);
                     m_ReferenceTree = nullptr;
-                    m_ReferencedInstance = CUICDMInstanceHandle();
+                    m_ReferencedInstance = Qt3DSDMInstanceHandle();
                 } else {
                     RecurseAndCreateTranslators(inContext, m_ReferencedInstance);
                 }
@@ -1504,13 +1504,13 @@ struct SAliasTranslator : public SGraphObjectTranslator
             return *m_ReferenceTree->m_GraphObject;
         return *m_GraphObject;
     }
-    qt3dsdm::CUICDMInstanceHandle GetSceneGraphInstanceHandle() override
+    qt3dsdm::Qt3DSDMInstanceHandle GetSceneGraphInstanceHandle() override
     {
         if (m_ReferencedInstance.Valid())
             return m_ReferencedInstance;
         return m_InstanceHandle;
     }
-    CUICDMInstanceHandle GetInstanceHandle() override { return m_InstanceHandle; }
+    Qt3DSDMInstanceHandle GetInstanceHandle() override { return m_InstanceHandle; }
 
     SGraphObject &GetNonAliasedGraphObject() override { return *m_GraphObject; }
 };
@@ -1533,13 +1533,13 @@ bool STranslation::IncludeNode(const SNode &inNode)
     return false;
 }
 
-void STranslation::ReleaseEffect(qt3dsdm::CUICDMInstanceHandle inInstance)
+void STranslation::ReleaseEffect(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (m_Reader.IsInstance(inInstance) == false)
         return;
 
     qt3dsdm::ComposerObjectTypes::Enum theType = m_ObjectDefinitions.GetType(inInstance);
-    qt3dsdm::CUICDMInstanceHandle theParentClass = m_Reader.GetFirstBaseClass(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theParentClass = m_Reader.GetFirstBaseClass(inInstance);
 
     if (theType == NULL && theParentClass.Valid())
         theType = m_ObjectDefinitions.GetType(theParentClass);
@@ -1562,11 +1562,11 @@ void STranslation::ReleaseEffect(qt3dsdm::CUICDMInstanceHandle inInstance)
     }
 }
 
-SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance)
+SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     SGraphObjectTranslator *theNewTranslator = nullptr;
     qt3dsdm::ComposerObjectTypes::Enum theType = m_ObjectDefinitions.GetType(inInstance);
-    qt3dsdm::CUICDMInstanceHandle theParentClass = m_Reader.GetFirstBaseClass(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theParentClass = m_Reader.GetFirstBaseClass(inInstance);
     if (theType == NULL && theParentClass.Valid())
         theType = m_ObjectDefinitions.GetType(theParentClass);
 
@@ -1693,8 +1693,8 @@ bool CompareTranslator(const STranslation::THandleTranslatorPair &first,
 
 struct STranslatorPredicate
 {
-    CUICDMInstanceHandle m_Instance;
-    STranslatorPredicate(CUICDMInstanceHandle &ins)
+    Qt3DSDMInstanceHandle m_Instance;
+    STranslatorPredicate(Qt3DSDMInstanceHandle &ins)
         : m_Instance(ins)
     {
     }
@@ -1706,7 +1706,7 @@ struct STranslatorPredicate
 
 Option<STranslation::THandleTranslatorPair>
 FindTranslator(STranslation::THandleTranslatorPairList &inList,
-               CUICDMInstanceHandle inInstance = CUICDMInstanceHandle())
+               Qt3DSDMInstanceHandle inInstance = Qt3DSDMInstanceHandle())
 {
     STranslation::THandleTranslatorPairList::iterator iter =
         eastl::find_if(inList.begin(), inList.end(), STranslatorPredicate(inInstance));
@@ -1715,14 +1715,14 @@ FindTranslator(STranslation::THandleTranslatorPairList &inList,
     return Empty();
 }
 
-SGraphObjectTranslator *STranslation::GetOrCreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance)
+SGraphObjectTranslator *STranslation::GetOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    return GetOrCreateTranslator(inInstance, CUICDMInstanceHandle());
+    return GetOrCreateTranslator(inInstance, Qt3DSDMInstanceHandle());
 }
 
 SGraphObjectTranslator *
-STranslation::GetOrCreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
-                                    qt3dsdm::CUICDMInstanceHandle inAliasInstance)
+STranslation::GetOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                    qt3dsdm::Qt3DSDMInstanceHandle inAliasInstance)
 {
     TInstanceToTranslatorMap::iterator theTranslatorList =
         m_TranslatorMap.insert(eastl::make_pair(inInstance, THandleTranslatorPairList())).first;
@@ -1747,22 +1747,22 @@ STranslation::GetOrCreateTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
 }
 
 STranslation::THandleTranslatorPairList &
-STranslation::GetTranslatorsForInstance(qt3dsdm::CUICDMInstanceHandle inInstance)
+STranslation::GetTranslatorsForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     return m_TranslatorMap.insert(eastl::make_pair(inInstance, THandleTranslatorPairList()))
         .first->second;
 }
 
-qt3dsdm::CUICDMInstanceHandle STranslation::GetAnchorPoint(QT3DSU32 inAnchorIndex)
+qt3dsdm::Qt3DSDMInstanceHandle STranslation::GetAnchorPoint(QT3DSU32 inAnchorIndex)
 {
     SGraphObjectTranslator *thePathTranslator =
         static_cast<SGraphObjectTranslator *>(m_PathWidget->GetNode().m_UserData.m_UserData);
     if (thePathTranslator == nullptr)
-        return qt3dsdm::CUICDMInstanceHandle();
-    qt3dsdm::CUICDMInstanceHandle thePathHandle = thePathTranslator->GetInstanceHandle();
+        return qt3dsdm::Qt3DSDMInstanceHandle();
+    qt3dsdm::Qt3DSDMInstanceHandle thePathHandle = thePathTranslator->GetInstanceHandle();
     QT3DSU32 theAnchorIndex = 0;
     for (QT3DSI32 idx = 0, end = m_AssetGraph.GetChildCount(thePathHandle); idx < end; ++idx) {
-        qt3dsdm::CUICDMInstanceHandle theChildInstance = m_AssetGraph.GetChild(thePathHandle, idx);
+        qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = m_AssetGraph.GetChild(thePathHandle, idx);
         if (m_Doc.GetDocumentReader().GetObjectTypeName(theChildInstance) == L"SubPath") {
             QT3DSI32 numAnchors = m_AssetGraph.GetChildCount(theChildInstance);
             QT3DSU32 endIndex = theAnchorIndex + (QT3DSU32)numAnchors;
@@ -1772,10 +1772,10 @@ qt3dsdm::CUICDMInstanceHandle STranslation::GetAnchorPoint(QT3DSU32 inAnchorInde
                 theAnchorIndex = endIndex;
         }
     }
-    return qt3dsdm::CUICDMInstanceHandle();
+    return qt3dsdm::Qt3DSDMInstanceHandle();
 }
 
-qt3dsdm::CUICDMInstanceHandle STranslation::GetAnchorPoint(SPathPick &inPick)
+qt3dsdm::Qt3DSDMInstanceHandle STranslation::GetAnchorPoint(SPathPick &inPick)
 {
     return GetAnchorPoint(inPick.m_AnchorIndex);
 }
@@ -1784,7 +1784,7 @@ namespace qt3ds {
 namespace studio {
     struct SEditCameraLayerTranslator : public SLayerTranslator
     {
-        SEditCameraLayerTranslator(qt3dsdm::CUICDMInstanceHandle inInstance,
+        SEditCameraLayerTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                    qt3ds::NVAllocatorCallback &inAlloc)
             : SLayerTranslator(inInstance, inAlloc)
         {
@@ -1830,11 +1830,11 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IUICRenderContext &inCon
 {
     m_EditCamera.m_Flags.SetActive(true);
     m_EditLight.m_Flags.SetActive(true);
-    qt3dsdm::CUICDMInstanceHandle theScene = m_AssetGraph.GetRoot(0);
+    qt3dsdm::Qt3DSDMInstanceHandle theScene = m_AssetGraph.GetRoot(0);
     m_GraphIterator.ClearResults();
     m_AssetGraph.GetDepthFirst(m_GraphIterator, theScene);
     for (; !m_GraphIterator.IsDone(); ++m_GraphIterator) {
-        qt3dsdm::CUICDMInstanceHandle theInstance(m_GraphIterator.GetCurrent());
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance(m_GraphIterator.GetCurrent());
         GetOrCreateTranslator(theInstance);
     }
     qt3dsdm::IStudioFullSystemSignalProvider *theProvider = m_FullSystem.GetSignalProvider();
@@ -1888,7 +1888,7 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IUICRenderContext &inCon
 }
 
 void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
-                                    CUICDMInstanceHandle inAliasHandle)
+                                    Qt3DSDMInstanceHandle inAliasHandle)
 {
     SGraphObjectTranslator &theParentTranslator(inParent);
     theParentTranslator.ClearChildren();
@@ -1908,7 +1908,7 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
         inAliasHandle = inParent.GetInstanceHandle();
     for (long idx = 0, end = m_AssetGraph.GetChildCount(inParent.GetSceneGraphInstanceHandle());
          idx < end; ++idx) {
-        qt3dsdm::CUICDMInstanceHandle theChild(
+        qt3dsdm::Qt3DSDMInstanceHandle theChild(
             m_AssetGraph.GetChild(inParent.GetSceneGraphInstanceHandle(), idx));
         SGraphObjectTranslator *theTranslator = GetOrCreateTranslator(theChild, inAliasHandle);
         if (theTranslator == nullptr)
@@ -1964,7 +1964,7 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
 }
 
 void STranslation::DeactivateScan(SGraphObjectTranslator &inParent,
-                                  CUICDMInstanceHandle inAliasHandle)
+                                  Qt3DSDMInstanceHandle inAliasHandle)
 {
     SGraphObjectTranslator &theParentTranslator(inParent);
     // Alias handles propagate down the scene graph.
@@ -1972,7 +1972,7 @@ void STranslation::DeactivateScan(SGraphObjectTranslator &inParent,
         inAliasHandle = inParent.GetInstanceHandle();
     for (long idx = 0, end = m_AssetGraph.GetChildCount(inParent.GetSceneGraphInstanceHandle());
          idx < end; ++idx) {
-        qt3dsdm::CUICDMInstanceHandle theChild(
+        qt3dsdm::Qt3DSDMInstanceHandle theChild(
             m_AssetGraph.GetChild(inParent.GetSceneGraphInstanceHandle(), idx));
         SGraphObjectTranslator *theTranslator = GetOrCreateTranslator(theChild, inAliasHandle);
         if (theTranslator == nullptr)
@@ -1983,8 +1983,8 @@ void STranslation::DeactivateScan(SGraphObjectTranslator &inParent,
 }
 
 // We build the render graph every time we render.  This may seem wasteful
-void STranslation::BuildRenderGraph(qt3dsdm::CUICDMInstanceHandle inParent,
-                                    CUICDMInstanceHandle inAliasHandle)
+void STranslation::BuildRenderGraph(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                                    Qt3DSDMInstanceHandle inAliasHandle)
 {
     SGraphObjectTranslator *theParentTranslator = GetOrCreateTranslator(inParent, inAliasHandle);
     if (theParentTranslator == nullptr)
@@ -2001,7 +2001,7 @@ void STranslation::ReleaseTranslation(Q3DStudio::TIdentifier inInstance)
     m_TranslatorMap.erase(inInstance);
 }
 
-void STranslation::MarkDirty(qt3dsdm::CUICDMInstanceHandle inInstance)
+void STranslation::MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     // Anchor points are not handled individually.
     if (m_Reader.GetObjectTypeName(inInstance) == L"PathAnchorPoint")
@@ -2309,7 +2309,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
 
         for (size_t selectedIdx = 0, selectedEnd = theHandles.size(); selectedIdx < selectedEnd;
              ++selectedIdx) {
-            qt3dsdm::CUICDMInstanceHandle theInstance = theHandles[selectedIdx];
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance = theHandles[selectedIdx];
             if (theInstance
                 != m_Doc.GetDocumentReader().GetComponentForSlide(m_Doc.GetActiveSlide())) {
                 if (m_Doc.GetDocumentReader().GetObjectTypeName(theInstance)
@@ -2573,7 +2573,7 @@ bool STranslation::IsPathWidgetActive()
     qt3dsdm::TInstanceHandleList theHandles = m_Doc.GetSelectedValue().GetSelectedInstances();
     for (size_t selectedIdx = 0, selectedEnd = theHandles.size(); selectedIdx < selectedEnd;
          ++selectedIdx) {
-        qt3dsdm::CUICDMInstanceHandle theInstance(theHandles[selectedIdx]);
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance(theHandles[selectedIdx]);
         if (m_Doc.GetDocumentReader().GetObjectTypeName(theInstance) == L"PathAnchorPoint")
             theInstance = m_AssetGraph.GetParent(m_AssetGraph.GetParent(theInstance));
         SGraphObjectTranslator *theTranslator = GetOrCreateTranslator(theInstance);
@@ -2798,7 +2798,7 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
                     theModelPtr =
                         static_cast<const SNode *>(&theTranslator->GetNonAliasedGraphObject());
                 }
-                CUICDMInstanceHandle theActiveComponent =
+                Qt3DSDMInstanceHandle theActiveComponent =
                     m_Reader.GetComponentForSlide(m_Doc.GetActiveSlide());
                 if (inSelectMode == TranslationSelectMode::Group) {
                     // Bounce up the hierarchy till one of two conditions are met
@@ -2814,9 +2814,9 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
                         SNode *parentNode = myNode->m_Parent;
                         SGraphObjectTranslator *theParentTranslator =
                             parentNode->m_UserData.DynamicCast<SGraphObjectTranslator>();
-                        CUICDMInstanceHandle myComponent =
+                        Qt3DSDMInstanceHandle myComponent =
                             m_Reader.GetAssociatedComponent(theTranslator->GetInstanceHandle());
-                        CUICDMInstanceHandle myParentComponent = m_Reader.GetAssociatedComponent(
+                        Qt3DSDMInstanceHandle myParentComponent = m_Reader.GetAssociatedComponent(
                             theParentTranslator->GetInstanceHandle());
                         if (parentNode->m_Type == GraphObjectTypes::Layer) {
                             if (myParentComponent != theActiveComponent)
@@ -2877,7 +2877,7 @@ qt3ds::foundation::Option<qt3dsdm::SGuideInfo> STranslation::PickRulers(CPt inMo
     return qt3ds::foundation::Option<qt3dsdm::SGuideInfo>();
 }
 
-QT3DSVec3 STranslation::GetIntendedPosition(qt3dsdm::CUICDMInstanceHandle inInstance, CPt inPos)
+QT3DSVec3 STranslation::GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CPt inPos)
 {
     ClearDirtySet();
     SGraphObjectTranslator *theTranslator = GetOrCreateTranslator(inInstance);
@@ -2889,7 +2889,7 @@ QT3DSVec3 STranslation::GetIntendedPosition(qt3dsdm::CUICDMInstanceHandle inInst
     SCamera *theCamera = m_UICContext.GetRenderer().GetCameraForNode(*theNode);
     {
         // Get the node's parent
-        CUICDMInstanceHandle theParent = m_AssetGraph.GetParent(inInstance);
+        Qt3DSDMInstanceHandle theParent = m_AssetGraph.GetParent(inInstance);
         SGraphObjectTranslator *theParentTranslator = GetOrCreateTranslator(theParent);
         if (theParentTranslator
             && GraphObjectTypes::IsNodeType(theParentTranslator->GetGraphObject().m_Type))
@@ -3556,7 +3556,7 @@ void STranslation::PerformGuideDrag(CUICDMGuideHandle inGuide, CPt inPoint,
         break;
     }
     inEditor.EnsureEditor(L"Drag Guide", __FILE__, __LINE__).UpdateGuide(inGuide, theInfo);
-    inEditor.FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle());
+    inEditor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }
 
 void STranslation::CheckGuideInPresentationRect(CUICDMGuideHandle inGuide,
@@ -3617,17 +3617,17 @@ void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inO
         // Now find the anchor point; nontrivial.
         SPathTranslator *theTranslator =
             reinterpret_cast<SPathTranslator *>(thePrepResult->m_Node->m_UserData.m_UserData);
-        qt3dsdm::CUICDMInstanceHandle thePathHandle = theTranslator->GetInstanceHandle();
-        qt3dsdm::CUICDMInstanceHandle theAnchorHandle = GetAnchorPoint(inPathPick);
+        qt3dsdm::Qt3DSDMInstanceHandle thePathHandle = theTranslator->GetInstanceHandle();
+        qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle = GetAnchorPoint(inPathPick);
 
         if (theAnchorHandle.Valid()) {
-            qt3dsdm::CUICDMPropertyHandle thePosProperty =
+            qt3dsdm::Qt3DSDMPropertyHandle thePosProperty =
                 m_ObjectDefinitions.m_PathAnchorPoint.m_Position.m_Property;
-            qt3dsdm::CUICDMPropertyHandle theAngleProperty =
+            qt3dsdm::Qt3DSDMPropertyHandle theAngleProperty =
                 m_ObjectDefinitions.m_PathAnchorPoint.m_IncomingAngle.m_Property;
-            qt3dsdm::CUICDMPropertyHandle theIncomingDistanceProperty =
+            qt3dsdm::Qt3DSDMPropertyHandle theIncomingDistanceProperty =
                 m_ObjectDefinitions.m_PathAnchorPoint.m_IncomingDistance.m_Property;
-            qt3dsdm::CUICDMPropertyHandle theOutgoingDistanceProperty =
+            qt3dsdm::Qt3DSDMPropertyHandle theOutgoingDistanceProperty =
                 m_ObjectDefinitions.m_PathAnchorPoint.m_OutgoingDistance.m_Property;
 
             IDocumentReader &theReader(m_Doc.GetDocumentReader());
@@ -3721,10 +3721,10 @@ void STranslation::OnNudge(ENudgeDirection inDirection, int inToolmode, int inFl
     // Increment the acceleration for every 5 key presses
     float theAcceleration = static_cast<float>(qt3ds::foundation::floor(m_KeyRepeat / 5.0)) + 1.0f;
 
-    CUICDMPropertyHandle thePropertyHandle;
+    Qt3DSDMPropertyHandle thePropertyHandle;
     SFloat3 theValue;
     const wchar_t *theCommandName = L"";
-    qt3dsdm::CUICDMInstanceHandle theInstanceHandle = m_Doc.GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle = m_Doc.GetSelectedInstance();
     CDispatchDataModelImmediateScope __dispatchScope(*m_Doc.GetCore()->GetDispatch(),
                                                      theInstanceHandle);
     // See what tool mode we are in

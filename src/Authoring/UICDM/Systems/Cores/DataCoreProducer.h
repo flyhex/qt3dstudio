@@ -72,47 +72,47 @@ public:
 
     // IInstancePropertyCore
     //===============================================================
-    CUICDMPropertyHandle GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+    Qt3DSDMPropertyHandle GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                                             const TCharStr &inStr) const override;
-    void GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+    void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                 TPropertyHandleList &outProperties) const override;
-    void GetSpecificInstancePropertyValues(CUICDMInstanceHandle inHandle,
+    void GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inHandle,
                                                    TPropertyHandleValuePairList &outValues) override;
-    bool HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                              CUICDMPropertyHandle inProperty) const override;
+    bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                              Qt3DSDMPropertyHandle inProperty) const override;
 
-    void CheckValue(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+    void CheckValue(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                     const SValue &inValue) const override;
-    bool GetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                          CUICDMPropertyHandle inProperty, SValue &outValue) const override;
-    void SetInstancePropertyValue(CUICDMInstanceHandle inHandle,
-                                          CUICDMPropertyHandle inProperty, const SValue &inValue) override;
+    bool GetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                          Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
+    void SetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
+                                          Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
     //===============================================================
 
     // IDataCore
     //===============================================================
-    CUICDMInstanceHandle CreateInstance(CUICDMInstanceHandle hdl = CUICDMInstanceHandle()) override;
+    Qt3DSDMInstanceHandle CreateInstance(Qt3DSDMInstanceHandle hdl = Qt3DSDMInstanceHandle()) override;
     void GetInstances(TInstanceHandleList &outInstances) const override;
     void GetInstancesDerivedFrom(TInstanceHandleList &outInstances,
-                                         CUICDMInstanceHandle inParent) const override;
-    void DeleteInstance(CUICDMInstanceHandle inHandle) override;
+                                         Qt3DSDMInstanceHandle inParent) const override;
+    void DeleteInstance(Qt3DSDMInstanceHandle inHandle) override;
 
-    void DeriveInstance(CUICDMInstanceHandle inInstance, CUICDMInstanceHandle inParent) override;
-    void GetInstanceParents(CUICDMInstanceHandle inHandle,
+    void DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent) override;
+    void GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
                                     TInstanceHandleList &outParents) const override;
-    bool IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                         CUICDMInstanceHandle inParent) const override;
+    bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                         Qt3DSDMInstanceHandle inParent) const override;
 
-    CUICDMPropertyHandle AddProperty(CUICDMInstanceHandle inInstance, TCharPtr inName,
+    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                              DataModelDataType::Value inPropType) override;
-    void GetInstanceProperties(CUICDMInstanceHandle inInstance,
+    void GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                        TPropertyHandleList &outProperties) const override;
-    const SUICDMPropertyDefinition &GetProperty(CUICDMPropertyHandle inProperty) const override;
-    void RemoveProperty(CUICDMPropertyHandle inProperty) override;
-    void CopyInstanceProperties(CUICDMInstanceHandle inSrcInstance,
-                                        CUICDMInstanceHandle inDestInstance) override;
+    const SUICDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const override;
+    void RemoveProperty(Qt3DSDMPropertyHandle inProperty) override;
+    void CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
+                                        Qt3DSDMInstanceHandle inDestInstance) override;
 
-    void RemoveCachedValues(CUICDMInstanceHandle inInstance) override
+    void RemoveCachedValues(Qt3DSDMInstanceHandle inInstance) override
     {
         m_Data->RemoveCachedValues(inInstance);
     }
@@ -135,23 +135,23 @@ public:
     //	Signal provider implementation
     //===============================================================
     TSignalConnectionPtr ConnectInstancePropertyValue(
-        const std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle, const SValue &)>
+        const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue &)>
             &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectInstanceCreated(const std::function<void(CUICDMInstanceHandle)> &inCallback) override;
+    ConnectInstanceCreated(const std::function<void(Qt3DSDMInstanceHandle)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectInstanceDeleted(const std::function<void(CUICDMInstanceHandle)> &inCallback) override;
+    ConnectInstanceDeleted(const std::function<void(Qt3DSDMInstanceHandle)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectBeforeInstanceDeleted(const std::function<void(CUICDMInstanceHandle)> &inCallback) override;
+    ConnectBeforeInstanceDeleted(const std::function<void(Qt3DSDMInstanceHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectInstanceDerived(
-        const std::function<void(CUICDMInstanceHandle, CUICDMInstanceHandle)> &inCallback) override;
+        const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMInstanceHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectInstanceParentRemoved(
-        const std::function<void(CUICDMInstanceHandle, CUICDMInstanceHandle)> &inCallback) override;
+        const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMInstanceHandle)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectPropertyAdded(const std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle,
+    ConnectPropertyAdded(const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                                     TCharPtr, DataModelDataType::Value)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectPropertyRemoved(const std::function<void(CUICDMInstanceHandle, CUICDMPropertyHandle,
+    ConnectPropertyRemoved(const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                                       TCharPtr, DataModelDataType::Value)> &inCallback) override;
 
 private:

@@ -48,22 +48,22 @@ CStudioPropertySystem::CStudioPropertySystem(std::shared_ptr<IMetaData> inMetaDa
     m_ImmediateModePropertyCoreSignaller = CreatePropertyCoreSignaller();
 }
 
-DataModelDataType::Value CStudioPropertySystem::GetDataType(CUICDMPropertyHandle inProperty) const
+DataModelDataType::Value CStudioPropertySystem::GetDataType(Qt3DSDMPropertyHandle inProperty) const
 {
     if (m_DataCore->IsProperty(inProperty))
         return m_DataCore->GetProperty(inProperty).m_Type;
     return DataModelDataType::None;
 }
 
-TCharStr CStudioPropertySystem::GetName(CUICDMPropertyHandle inProperty) const
+TCharStr CStudioPropertySystem::GetName(Qt3DSDMPropertyHandle inProperty) const
 {
     if (m_DataCore->IsProperty(inProperty))
         return m_DataCore->GetProperty(inProperty).m_Name;
     return TCharStr();
 }
 
-TCharStr CStudioPropertySystem::GetFormalName(CUICDMInstanceHandle inInstance,
-                                              CUICDMPropertyHandle inProperty) const
+TCharStr CStudioPropertySystem::GetFormalName(Qt3DSDMInstanceHandle inInstance,
+                                              Qt3DSDMPropertyHandle inProperty) const
 {
     if (inInstance.Valid() && inProperty.Valid())
         return m_MetaData->GetFormalName(inInstance, inProperty);
@@ -71,41 +71,41 @@ TCharStr CStudioPropertySystem::GetFormalName(CUICDMInstanceHandle inInstance,
 }
 
 AdditionalMetaDataType::Value
-CStudioPropertySystem::GetAdditionalMetaDataType(CUICDMInstanceHandle inInstance,
-                                                 CUICDMPropertyHandle inProperty) const
+CStudioPropertySystem::GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
+                                                 Qt3DSDMPropertyHandle inProperty) const
 {
     return m_MetaData->GetAdditionalMetaDataType(inInstance, inProperty);
 }
 
 TMetaDataData
-CStudioPropertySystem::GetAdditionalMetaDataData(CUICDMInstanceHandle inInstance,
-                                                 CUICDMPropertyHandle inProperty) const
+CStudioPropertySystem::GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
+                                                 Qt3DSDMPropertyHandle inProperty) const
 {
     return m_MetaData->GetAdditionalMetaDataData(inInstance, inProperty);
 }
 
-CUICDMInstanceHandle CStudioPropertySystem::GetPropertyOwner(CUICDMPropertyHandle inProperty) const
+Qt3DSDMInstanceHandle CStudioPropertySystem::GetPropertyOwner(Qt3DSDMPropertyHandle inProperty) const
 {
 
     qt3dsdm::SUICDMPropertyDefinition thePropDef = m_DataCore->GetProperty(inProperty);
     return thePropDef.m_Instance;
 }
 
-CUICDMPropertyHandle
-CStudioPropertySystem::GetAggregateInstancePropertyByName(CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle
+CStudioPropertySystem::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
                                                           const TCharStr &inStr) const
 {
     return m_DataCore->GetAggregateInstancePropertyByName(inInstance, inStr);
 }
 
-void CStudioPropertySystem::GetAggregateInstanceProperties(CUICDMInstanceHandle inInstance,
+void CStudioPropertySystem::GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                            TPropertyHandleList &outProperties) const
 {
     m_DataCore->GetAggregateInstanceProperties(inInstance, outProperties);
 }
 
-bool CStudioPropertySystem::HasAggregateInstanceProperty(CUICDMInstanceHandle inInstance,
-                                                         CUICDMPropertyHandle inProperty) const
+bool CStudioPropertySystem::HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                                         Qt3DSDMPropertyHandle inProperty) const
 {
     return m_DataCore->HasAggregateInstanceProperty(inInstance, inProperty);
 }
@@ -116,8 +116,8 @@ bool ApplyValueAndReturnTrue(const SValue &inValue, SValue &outValue)
     return true;
 }
 
-bool CStudioPropertySystem::GetInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                     CUICDMPropertyHandle inProperty,
+bool CStudioPropertySystem::GetInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                     Qt3DSDMPropertyHandle inProperty,
                                                      SValue &outValue) const
 {
     if (!m_DataCore->IsInstance(inInstance))
@@ -140,8 +140,8 @@ bool CStudioPropertySystem::GetInstancePropertyValue(CUICDMInstanceHandle inInst
     return m_DataCore->GetInstancePropertyValue(inInstance, inProperty, outValue);
 }
 
-void CStudioPropertySystem::SetInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                     CUICDMPropertyHandle inProperty,
+void CStudioPropertySystem::SetInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                     Qt3DSDMPropertyHandle inProperty,
                                                      const SValue &inValue)
 {
     m_DataCore->CheckValue(inInstance, inProperty, inValue);
@@ -160,7 +160,7 @@ void CStudioPropertySystem::SetInstancePropertyValue(CUICDMInstanceHandle inInst
     }
 }
 
-CUICDMInstanceHandle CStudioPropertySystem::CreateInstance()
+Qt3DSDMInstanceHandle CStudioPropertySystem::CreateInstance()
 {
     return m_DataCore->CreateInstance();
 }
@@ -170,24 +170,24 @@ void CStudioPropertySystem::GetInstances(TInstanceHandleList &outInstances) cons
     m_DataCore->GetInstances(outInstances);
 }
 
-void CStudioPropertySystem::DeleteInstance(CUICDMInstanceHandle inHandle)
+void CStudioPropertySystem::DeleteInstance(Qt3DSDMInstanceHandle inHandle)
 {
     m_DataCore->DeleteInstance(inHandle);
 }
 
-void CStudioPropertySystem::DeriveInstance(CUICDMInstanceHandle inInstance,
-                                           CUICDMInstanceHandle inParent)
+void CStudioPropertySystem::DeriveInstance(Qt3DSDMInstanceHandle inInstance,
+                                           Qt3DSDMInstanceHandle inParent)
 {
     m_DataCore->DeriveInstance(inInstance, inParent);
 }
 
-bool CStudioPropertySystem::IsInstanceOrDerivedFrom(CUICDMInstanceHandle inInstance,
-                                                    CUICDMInstanceHandle inParent) const
+bool CStudioPropertySystem::IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
+                                                    Qt3DSDMInstanceHandle inParent) const
 {
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, inParent);
 }
 
-CUICDMPropertyHandle CStudioPropertySystem::AddProperty(CUICDMInstanceHandle inInstance,
+Qt3DSDMPropertyHandle CStudioPropertySystem::AddProperty(Qt3DSDMInstanceHandle inInstance,
                                                         TCharPtr inName,
                                                         DataModelDataType::Value inPropType)
 {
@@ -199,8 +199,8 @@ bool CStudioPropertySystem::HandleValid(int inHandle) const
     return m_DataCore->HandleValid(inHandle);
 }
 
-bool CStudioPropertySystem::GetCanonicalInstancePropertyValue(CUICDMInstanceHandle inInstance,
-                                                              CUICDMPropertyHandle inProperty,
+bool CStudioPropertySystem::GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
+                                                              Qt3DSDMPropertyHandle inProperty,
                                                               SValue &outValue) const
 {
     SValue theTempValue;

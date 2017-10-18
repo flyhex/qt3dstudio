@@ -15,7 +15,7 @@ struct PropertyInfo {
     Q_PROPERTY(qt3dsdm::AdditionalMetaDataType::Value additionalType MEMBER m_additionalType CONSTANT FINAL)
     Q_PROPERTY(QStringList possibleValues MEMBER m_possibleValues CONSTANT FINAL)
 
-    qt3dsdm::CUICDMPropertyHandle m_handle;
+    qt3dsdm::Qt3DSDMPropertyHandle m_handle;
     QString m_name;
     QString m_nameId;
     qt3dsdm::DataModelDataType::Value m_type;

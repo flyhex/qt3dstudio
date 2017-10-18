@@ -59,7 +59,7 @@ protected: // Members
 
 public: // Construction
     CMaterialTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                 qt3dsdm::CUICDMInstanceHandle inDataHandle);
+                                 qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     virtual ~CMaterialTimelineItemBinding();
 
 public: // CUICDMTimelineItemBinding
@@ -69,14 +69,14 @@ public: // CUICDMTimelineItemBinding
     // Hierarchy
     long GetChildrenCount() override;
     ITimelineItemBinding *GetChild(long inIndex) override;
-    void OnAddChild(qt3dsdm::CUICDMInstanceHandle inInstance) override;
+    void OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     // Event callback
-    void OnPropertyChanged(qt3dsdm::CUICDMPropertyHandle inPropertyHandle) override;
-    void OnPropertyLinked(qt3dsdm::CUICDMPropertyHandle inPropertyHandle) override;
+    void OnPropertyChanged(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle) override;
+    void OnPropertyLinked(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle) override;
 
 protected:
-    qt3dsdm::CUICDMInstanceHandle GetImage(qt3dsdm::CUICDMPropertyHandle inPropertyHandle);
-    ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
+    qt3dsdm::Qt3DSDMInstanceHandle GetImage(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
+    ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                                   const wchar_t *inName);
 };
 

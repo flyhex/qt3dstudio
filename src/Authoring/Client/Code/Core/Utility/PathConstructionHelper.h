@@ -54,10 +54,10 @@ class CPathConstructionHelper
     //==============================================================================
 public:
     static Q3DStudio::CString BuildAbsoluteReferenceString(CDoc *inDoc,
-                                                           qt3dsdm::CUICDMInstanceHandle inInstance);
+                                                           qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     static Q3DStudio::CString
-    BuildRelativeReferenceString(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
-                                 qt3dsdm::CUICDMInstanceHandle inRootInstance);
+    BuildRelativeReferenceString(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                 qt3dsdm::Qt3DSDMInstanceHandle inRootInstance);
     static Q3DStudio::CString BuildRelativeReferenceString(Q3DStudio::CString &inAbsObjPath,
                                                            Q3DStudio::CString &inAbsRootPath);
     static Q3DStudio::CString EscapeAssetName(Q3DStudio::CString inAssetName);

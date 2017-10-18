@@ -97,9 +97,9 @@ public:
     TSimpleSlideCorePtr GetTransactionlessSlideCore() { return m_Data; }
     TSimpleSlideCorePtr GetTransactionlessSlideCore() const { return m_Data; }
 
-    CUICDMSlideHandle CreateSlide(CUICDMInstanceHandle inInstance) override;
-    CUICDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inSlide) const override;
-    CUICDMSlideHandle GetSlideByInstance(CUICDMInstanceHandle inSlide) const override;
+    CUICDMSlideHandle CreateSlide(Qt3DSDMInstanceHandle inInstance) override;
+    Qt3DSDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inSlide) const override;
+    CUICDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inSlide) const override;
     void DeleteSlide(CUICDMSlideHandle inSlide, TInstanceHandleList &outInstances) override;
     void GetSlides(TSlideHandleList &outSlides) const override;
 
@@ -111,31 +111,31 @@ public:
     void GetChildSlides(CUICDMSlideHandle inSlide, TSlideHandleList &outChildren) const override;
     int GetChildIndex(CUICDMSlideHandle inParent, CUICDMSlideHandle inChild) const override;
 
-    bool GetInstancePropertyValue(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inHandle,
-                                  CUICDMPropertyHandle inProperty, SValue &outValue) const override;
-    void SetInstancePropertyValue(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inHandle,
-                                  CUICDMPropertyHandle inProperty, const SValue &inValue) override;
-    void ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inHandle,
-                                       CUICDMPropertyHandle inProperty, const SValue &inValue) override;
+    bool GetInstancePropertyValue(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+                                  Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
+    void SetInstancePropertyValue(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+                                  Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
+    void ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+                                       Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
     bool GetSpecificInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                          CUICDMInstanceHandle inInstance,
-                                          CUICDMPropertyHandle inProperty, SValue &outValue) const override;
+                                          Qt3DSDMInstanceHandle inInstance,
+                                          Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
     void GetSpecificInstancePropertyValues(CUICDMSlideHandle inSlide,
-                                           CUICDMInstanceHandle inInstance,
+                                           Qt3DSDMInstanceHandle inInstance,
                                            TPropertyHandleValuePairList &outValues) override
     {
         return m_Data->GetSpecificInstancePropertyValues(inSlide, inInstance, outValues);
     }
-    bool ContainsProperty(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inHandle,
-                          CUICDMPropertyHandle inProperty) const override;
+    bool ContainsProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+                          Qt3DSDMPropertyHandle inProperty) const override;
     void GetSlidePropertyEntries(CUICDMSlideHandle inSlide, TSlideEntryList &outEntries) const override;
 
-    void PushPropertyValueToChildren(CUICDMSlideHandle inParent, CUICDMInstanceHandle inHandle,
-                                     CUICDMPropertyHandle inProperty, const SValue &inValue) override;
-    void ClearChildrenPropertyValues(CUICDMSlideHandle inParent, CUICDMInstanceHandle inHandle,
-                                     CUICDMPropertyHandle inProperty) override;
-    void DeleteAllInstanceEntries(CUICDMInstanceHandle inHandle) override;
-    void DeleteAllPropertyEntries(CUICDMPropertyHandle inHandle) override;
+    void PushPropertyValueToChildren(CUICDMSlideHandle inParent, Qt3DSDMInstanceHandle inHandle,
+                                     Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
+    void ClearChildrenPropertyValues(CUICDMSlideHandle inParent, Qt3DSDMInstanceHandle inHandle,
+                                     Qt3DSDMPropertyHandle inProperty) override;
+    void DeleteAllInstanceEntries(Qt3DSDMInstanceHandle inHandle) override;
+    void DeleteAllPropertyEntries(Qt3DSDMPropertyHandle inHandle) override;
     void DeleteAllInstancePropertyEntries(const TInstanceHandleList &inInstances,
                                           const TPropertyHandleList &inProperties) override;
 
@@ -143,8 +143,8 @@ public:
                                    TSlideEntryList &outEntries) const override;
     void PushIntersectingProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide2,
                                     CUICDMSlideHandle inDestination) override;
-    void CopyProperties(CUICDMSlideHandle inSourceSlide, CUICDMInstanceHandle inSourceInstance,
-                        CUICDMSlideHandle inDestSlide, CUICDMInstanceHandle inDestInstance) override;
+    void CopyProperties(CUICDMSlideHandle inSourceSlide, Qt3DSDMInstanceHandle inSourceInstance,
+                        CUICDMSlideHandle inDestSlide, Qt3DSDMInstanceHandle inDestInstance) override;
 
     bool IsSlide(CUICDMSlideHandle inSlide) const override;
 
@@ -165,18 +165,18 @@ public:
     TSignalConnectionPtr ConnectSlideDerived(
         const std::function<void(CUICDMSlideHandle, CUICDMSlideHandle, int)> &inCallback) override;
     TSignalConnectionPtr ConnectInstancePropertyValueSet(
-        const std::function<void(CUICDMSlideHandle, CUICDMInstanceHandle, CUICDMPropertyHandle,
+        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                    const SValue &)> &inCallback) override;
     TSignalConnectionPtr ConnectInstancePropertyValueRemoved(
-        const std::function<void(CUICDMSlideHandle, CUICDMInstanceHandle, CUICDMPropertyHandle,
+        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                    const SValue &)> &inCallback) override;
     virtual TSignalConnectionPtr
     ConnectSlideTimeChanged(const std::function<void(CUICDMSlideHandle)> &inCallback) override;
 
 private:
     inline void DoForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                CUICDMInstanceHandle inHandle,
-                                                CUICDMPropertyHandle inProperty,
+                                                Qt3DSDMInstanceHandle inHandle,
+                                                Qt3DSDMPropertyHandle inProperty,
                                                 const SValue &inValue);
     void InitSignaller();
     ISlideCoreSignalProvider *GetSignalProvider();

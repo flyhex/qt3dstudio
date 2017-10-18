@@ -60,10 +60,10 @@ using namespace qt3dsdm;
 
 namespace {
 
-bool ImageSlotIsFilled(qt3dsdm::IPropertySystem *inPropertySystem, CUICDMInstanceHandle inInstance,
+bool ImageSlotIsFilled(qt3dsdm::IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle inInstance,
                        const TCharStr &inStr)
 {
-    CUICDMPropertyHandle theProperty =
+    Qt3DSDMPropertyHandle theProperty =
         inPropertySystem->GetAggregateInstancePropertyByName(inInstance, inStr);
     SValue theValue;
     inPropertySystem->GetInstancePropertyValue(inInstance, theProperty, theValue);
@@ -77,7 +77,7 @@ bool ImageSlotIsFilled(qt3dsdm::IPropertySystem *inPropertySystem, CUICDMInstanc
 
 // helper function to find the image binding class that 'represents' this property
 inline CImageTimelineItemBinding *FindImageBindingByProperty(CBaseStateRow *inRow,
-                                                             CUICDMPropertyHandle inProperty)
+                                                             Qt3DSDMPropertyHandle inProperty)
 {
     if (!inRow || !inProperty.Valid())
         return nullptr;
@@ -96,7 +96,7 @@ inline CImageTimelineItemBinding *FindImageBindingByProperty(CBaseStateRow *inRo
 }
 
 CLayerTimelineItemBinding::CLayerTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                                     qt3dsdm::CUICDMInstanceHandle inDataHandle)
+                                                     qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
     : CUICDMTimelineItemBinding(inMgr, inDataHandle)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
@@ -105,7 +105,7 @@ CLayerTimelineItemBinding::CLayerTimelineItemBinding(CTimelineTranslationManager
 
     size_t thePropertyCount = theProperties.size();
     for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount; ++thePropertyIndex) {
-        CUICDMPropertyHandle theProperty = theProperties[thePropertyIndex];
+        Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
 
         AdditionalMetaDataType::Value theAdditionalMetaDataType =
             thePropertySystem->GetAdditionalMetaDataType(inDataHandle, theProperty);
@@ -134,7 +134,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
     static const TCharStr theLayerPrefix(L"Layer_");
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
 
-    qt3dsdm::CUICDMInstanceHandle theInstance = GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
         CUICDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
@@ -142,7 +142,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
                                      theChildren, theActiveSlide);
         theChildren += inIndex;
 
-        qt3dsdm::CUICDMInstanceHandle theChildInstance = theChildren.GetCurrent();
+        qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
         if (theChildInstance.Valid()) {
             std::shared_ptr<IDataCore> theDataCore =
                 m_TransMgr->GetStudioSystem()->GetFullSystem()->GetCoreSystem()->GetDataCore();
@@ -156,7 +156,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
                     m_TransMgr->GetStudioSystem()->GetPropertySystem();
                 qt3dsdm::SLong4 theGuid;
                 {
-                    CUICDMPropertyHandle theTypeProperty =
+                    Qt3DSDMPropertyHandle theTypeProperty =
                         thePropertySystem->GetAggregateInstancePropertyByName(theChildInstance,
                                                                               L"id");
                     SValue theIdValue;
@@ -167,7 +167,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
                 for (size_t theSlotIndex = 0, theSlotCount = m_ImageNameFormalNamePairs.size();
                      theSlotIndex < theSlotCount; ++theSlotIndex) {
                     bool theIsMatch = false;
-                    qt3dsdm::CUICDMPropertyHandle theProperty =
+                    qt3dsdm::Qt3DSDMPropertyHandle theProperty =
                         std::get<2>(m_ImageNameFormalNamePairs[theSlotIndex]);
                     SValue theValue;
                     const SUICDMPropertyDefinition &theDefinition(
@@ -198,7 +198,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
                 }
             }
             if (theSlotCursor != (size_t)-1) {
-                CUICDMPropertyHandle theImageProperty =
+                Qt3DSDMPropertyHandle theImageProperty =
                     thePropertySystem->GetAggregateInstancePropertyByName(
                         m_DataHandle, std::get<0>(m_ImageNameFormalNamePairs[theSlotCursor]));
                 return GetOrCreateImageBinding(
@@ -211,7 +211,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
     return nullptr;
 }
 
-void CLayerTimelineItemBinding::OnAddChild(qt3dsdm::CUICDMInstanceHandle inInstance)
+void CLayerTimelineItemBinding::OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace qt3dsdm;
     CClientDataModelBridge *theBridge = m_TransMgr->GetStudioSystem()->GetClientDataModelBridge();
@@ -222,7 +222,7 @@ void CLayerTimelineItemBinding::OnAddChild(qt3dsdm::CUICDMInstanceHandle inInsta
         CUICDMTimelineItemBinding::OnAddChild(inInstance);
 }
 
-void CLayerTimelineItemBinding::OnPropertyChanged(CUICDMPropertyHandle inPropertyHandle)
+void CLayerTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPropertyHandle)
 {
     bool theHandled = false;
     if (m_Row) {
@@ -254,7 +254,7 @@ void CLayerTimelineItemBinding::OnPropertyChanged(CUICDMPropertyHandle inPropert
                         qt3dsdm::TCharStr theTempName =
                             std::get<0>(m_ImageNameFormalNamePairs[theNextImage]);
                         if (ImageSlotIsFilled(thePropertySystem, m_DataHandle, theTempName)) {
-                            CUICDMPropertyHandle theNextImageProperty =
+                            Qt3DSDMPropertyHandle theNextImageProperty =
                                 theBridge->GetAggregateInstancePropertyByName(m_DataHandle,
                                                                               theTempName);
                             theNextImageBinding =
@@ -286,8 +286,8 @@ void CLayerTimelineItemBinding::OnPropertyChanged(CUICDMPropertyHandle inPropert
         CUICDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
 }
 
-qt3dsdm::CUICDMInstanceHandle
-CLayerTimelineItemBinding::GetImage(qt3dsdm::CUICDMPropertyHandle inPropertyHandle)
+qt3dsdm::Qt3DSDMInstanceHandle
+CLayerTimelineItemBinding::GetImage(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
     SValue theImageValue;
@@ -298,10 +298,10 @@ CLayerTimelineItemBinding::GetImage(qt3dsdm::CUICDMPropertyHandle inPropertyHand
 }
 
 ITimelineItemBinding *
-CLayerTimelineItemBinding::GetOrCreateImageBinding(qt3dsdm::CUICDMPropertyHandle inPropertyHandle,
+CLayerTimelineItemBinding::GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                                    const wchar_t *inName)
 {
-    qt3dsdm::CUICDMInstanceHandle theImageInstance = GetImage(inPropertyHandle);
+    qt3dsdm::Qt3DSDMInstanceHandle theImageInstance = GetImage(inPropertyHandle);
     ITimelineItemBinding *theImageTimelineRow = m_TransMgr->GetBinding(theImageInstance);
     if (!theImageTimelineRow) // create
     {

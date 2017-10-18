@@ -87,29 +87,29 @@ public:
     //====================================================================
     void SetAutoKeyframe(bool inAutoKeyframe) override;
     bool GetAutoKeyframe() const override;
-    void Animate(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override;
-    void Deanimate(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty) override;
-    void KeyframeProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+    void Animate(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override;
+    void Deanimate(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override;
+    void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                   bool inDoDiffValue) override;
-    void SetOrCreateKeyframe(CUICDMInstanceHandle inInstance,
-                                     CUICDMPropertyHandle inProperty, float inTimeInSeconds,
+    void SetOrCreateKeyframe(Qt3DSDMInstanceHandle inInstance,
+                                     Qt3DSDMPropertyHandle inProperty, float inTimeInSeconds,
                                      SGetOrSetKeyframeInfo *inKeyframeInfo, size_t inNumInfos) override;
-    CUICDMAnimationHandle GetControllingAnimation(CUICDMInstanceHandle inInstance,
-                                                          CUICDMPropertyHandle inProperty,
+    CUICDMAnimationHandle GetControllingAnimation(Qt3DSDMInstanceHandle inInstance,
+                                                          Qt3DSDMPropertyHandle inProperty,
                                                           size_t inIndex) const override;
-    bool IsPropertyAnimatable(CUICDMInstanceHandle inInstance,
-                                      CUICDMPropertyHandle inProperty) const override;
-    bool IsPropertyAnimated(CUICDMInstanceHandle inInstance,
-                                    CUICDMPropertyHandle inProperty) const override;
+    bool IsPropertyAnimatable(Qt3DSDMInstanceHandle inInstance,
+                                      Qt3DSDMPropertyHandle inProperty) const override;
+    bool IsPropertyAnimated(Qt3DSDMInstanceHandle inInstance,
+                                    Qt3DSDMPropertyHandle inProperty) const override;
     void SetInterpolation(bool inSmooth) override { m_SmoothInterpolation = inSmooth; }
 
     bool GetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                  CUICDMInstanceHandle inInstance,
-                                                  CUICDMPropertyHandle inProperty,
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty,
                                                   SValue &outValue) const override;
     bool SetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
-                                                  CUICDMInstanceHandle inInstance,
-                                                  CUICDMPropertyHandle inProperty,
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty,
                                                   const SValue &inValue) override;
     //====================================================================
 
@@ -118,12 +118,12 @@ public:
 private:
     void OnAnimationDeleted(CUICDMAnimationHandle inAnimation);
 
-    CUICDMSlideHandle GetApplicableGraphAndSlide(CUICDMInstanceHandle inInstance,
-                                                 CUICDMPropertyHandle inProperty,
+    CUICDMSlideHandle GetApplicableGraphAndSlide(Qt3DSDMInstanceHandle inInstance,
+                                                 Qt3DSDMPropertyHandle inProperty,
                                                  const SValue &inValue);
 
-    void OverrideChannelIfAnimated(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,
-                                   CUICDMPropertyHandle inProperty, size_t inIndex, float inSeconds,
+    void OverrideChannelIfAnimated(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+                                   Qt3DSDMPropertyHandle inProperty, size_t inIndex, float inSeconds,
                                    bool &ioAnimated, SValue &outValue) const;
 };
 }

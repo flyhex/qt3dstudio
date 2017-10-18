@@ -127,8 +127,8 @@ namespace studio {
     using qt3dsdm::SFloat3;
     using qt3dsdm::SLong4;
     using qt3dsdm::SComposerObjectDefinitions;
-    using qt3dsdm::CUICDMInstanceHandle;
-    using qt3dsdm::CUICDMPropertyHandle;
+    using qt3dsdm::Qt3DSDMInstanceHandle;
+    using qt3dsdm::Qt3DSDMPropertyHandle;
 }
 }
 #endif

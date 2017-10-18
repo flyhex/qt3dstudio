@@ -77,7 +77,7 @@ public:
     CStudioFullSystem *GetFullSystem() { return m_StudioSystem.get(); }
 
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
-    bool IsInstance(CUICDMInstanceHandle inInstance) const;
+    bool IsInstance(Qt3DSDMInstanceHandle inInstance) const;
 };
 };
 

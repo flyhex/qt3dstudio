@@ -79,8 +79,8 @@ public:
     // These are used during drag operations or during operations which
     // require immediate user feedback.  So they are unimplemented, effectively,
     // we ignore them.
-    void OnImmediateRefreshInstanceSingle(qt3dsdm::CUICDMInstanceHandle inInstance) override;
-    void OnImmediateRefreshInstanceMultiple(qt3dsdm::CUICDMInstanceHandle *inInstance,
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
                                                     long inInstanceCount) override;
 
 Q_SIGNALS:

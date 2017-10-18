@@ -49,7 +49,7 @@ typedef std::list<Q3DStudio::CString> TFingerprint;
 // Functions
 //==============================================================================
 
-qt3dsdm::CUICDMInstanceHandle TestCmdUtilsAddObject(CAsset *inParent, CAsset *inChild,
+qt3dsdm::Qt3DSDMInstanceHandle TestCmdUtilsAddObject(CAsset *inParent, CAsset *inChild,
                                                   long inSlideIndex);
 
 TFingerprint TestCmdUtilsMakeFingerprint(CNode *inNode);

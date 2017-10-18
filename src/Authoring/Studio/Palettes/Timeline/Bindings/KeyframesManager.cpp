@@ -117,7 +117,7 @@ bool CKeyframesManager::CanPerformKeyframeCopy()
 bool CKeyframesManager::CanPerformKeyframePaste()
 {
     if (m_PasteKeyframeCommandHelper && m_PasteKeyframeCommandHelper->HasCopiedKeyframes()) {
-        qt3dsdm::CUICDMInstanceHandle theSelectedInstance =
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance =
             g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
         if (theSelectedInstance.Valid()) {
             return true;
@@ -184,7 +184,7 @@ void CKeyframesManager::PasteKeyframes()
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
 
     if (m_PasteKeyframeCommandHelper && m_PasteKeyframeCommandHelper->HasCopiedKeyframes()) {
-        qt3dsdm::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
         if (theSelectedInstance.Valid()) {
             long theCurrentViewTimeInMilliseconds = theDoc->GetCurrentViewTime();
             CCmdDataModelInsertKeyframe *theInsertKeyframesCommand =
@@ -276,7 +276,7 @@ void CKeyframesManager::SetChangedKeyframes()
 {
 
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    qt3dsdm::CUICDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
     if (theSelectedInstance.Valid()) {
         using namespace Q3DStudio;
         Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Set Changed Keyframes", __FILE__,

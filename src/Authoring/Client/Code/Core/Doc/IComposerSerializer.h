@@ -82,14 +82,14 @@ public:
     // new root.
     virtual qt3dsdm::TInstanceHandleList SerializeSceneGraphObject(
         qt3dsdm::IDOMReader &inReader, const Q3DStudio::CFilePath &inDocumentDirectory,
-        qt3dsdm::CUICDMInstanceHandle inNewRoot, qt3dsdm::CUICDMSlideHandle inActiveSlide) = 0;
+        qt3dsdm::Qt3DSDMInstanceHandle inNewRoot, qt3dsdm::CUICDMSlideHandle inActiveSlide) = 0;
 
     // Save and load just a single action
     virtual void SerializeAction(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide,
                                  qt3dsdm::CUICDMActionHandle inAction) = 0;
     // Load a new action onto this root object
     virtual qt3dsdm::CUICDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
-                                                      qt3dsdm::CUICDMInstanceHandle inNewRoot,
+                                                      qt3dsdm::Qt3DSDMInstanceHandle inNewRoot,
                                                       qt3dsdm::CUICDMSlideHandle inSlide) = 0;
 
     virtual void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide) = 0;

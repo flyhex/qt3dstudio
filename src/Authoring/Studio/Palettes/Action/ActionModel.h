@@ -45,7 +45,7 @@ class ActionModel : public QAbstractListModel
 public:
     explicit ActionModel(QObject *parent = nullptr);
 
-    void setInstanceHandle(const qt3dsdm::CUICDMInstanceHandle &handle);
+    void setInstanceHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
 
     enum Roles {
         DescriptionRole = Qt::DisplayRole,
@@ -70,7 +70,7 @@ private:
     qt3dsdm::CUICDMSlideHandle activeSlide() const;
     QString actionString(const qt3dsdm::CUICDMActionHandle &action) const;
 
-    qt3dsdm::CUICDMInstanceHandle m_handle;
+    qt3dsdm::Qt3DSDMInstanceHandle m_handle;
     qt3dsdm::TActionHandleList m_actions;
 };
 

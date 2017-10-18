@@ -43,9 +43,9 @@ struct CTransactionConsumer;
 struct SApplicationState
 {
     bool m_Dirty;
-    qt3dsdm::CUICDMInstanceHandle m_SelectedInstance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_SelectedInstance;
     qt3dsdm::CUICDMSlideHandle m_ActiveSlide;
-    qt3dsdm::CUICDMInstanceHandle m_ActiveLayer;
+    qt3dsdm::Qt3DSDMInstanceHandle m_ActiveLayer;
 
     SApplicationState()
         : m_Dirty(false)
@@ -76,8 +76,8 @@ public:
     void DataModelRollback();
     void RunDoNotifications();
     void RunUndoNotifications();
-    void CheckForSelectionChange(CUICDMInstanceHandle inOldInstance,
-                                 CUICDMInstanceHandle inNewInstance);
+    void CheckForSelectionChange(Qt3DSDMInstanceHandle inOldInstance,
+                                 Qt3DSDMInstanceHandle inNewInstance);
 
 protected:
     std::shared_ptr<CTransactionConsumer> m_Consumer;

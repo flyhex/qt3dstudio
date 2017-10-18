@@ -37,12 +37,12 @@ namespace qt3dsdm {
 using std::wstring;
 struct SActionInfo
 {
-    CUICDMInstanceHandle m_Instance; // InstanceHandle corresponding to this action (to store other
+    Qt3DSDMInstanceHandle m_Instance; // InstanceHandle corresponding to this action (to store other
                                      // properties not listed here)
 
     // Where the action is added to
     CUICDMSlideHandle m_Slide; // the slide that the action is added to
-    CUICDMInstanceHandle
+    Qt3DSDMInstanceHandle
         m_Owner; // the object that the action is added to (the owner of the action)
 
     // Trigger object
@@ -59,8 +59,8 @@ struct SActionInfo
 
     SActionInfo() {}
 
-    SActionInfo(CUICDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
-                CUICDMInstanceHandle inOwner)
+    SActionInfo(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+                Qt3DSDMInstanceHandle inOwner)
         : m_Instance(inInstance)
         , m_Slide(inSlide)
         , m_Owner(inOwner)

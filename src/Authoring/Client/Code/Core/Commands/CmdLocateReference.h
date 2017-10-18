@@ -89,12 +89,12 @@ public:
 
 protected:
     void LocateReference();
-    void UpdateSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+    void UpdateSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                           qt3dsdm::CUICDMSlideHandle inSpecificSlide = 0);
-    void GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+    void GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                        qt3dsdm::CUICDMSlideHandle inSpecificSlide, Q3DStudio::CFilePath &outPath,
                        Q3DStudio::CString &outIdentifier);
-    void SetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+    void SetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                        qt3dsdm::CUICDMSlideHandle inSpecificSlide, const Q3DStudio::CFilePath &inPath,
                        const Q3DStudio::CString &inIdentifier);
 

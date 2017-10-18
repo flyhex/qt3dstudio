@@ -145,7 +145,7 @@ void CCmdLocateReference::LocateReference()
  * @param inInstance		the instance to update
  * @param inSpecificSlide	the slide to update, if valid
  */
-void CCmdLocateReference::UpdateSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CCmdLocateReference::UpdateSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                            qt3dsdm::CUICDMSlideHandle inSpecificSlide)
 {
     // Get the sourcepath value
@@ -168,7 +168,7 @@ void CCmdLocateReference::UpdateSourcePath(qt3dsdm::CUICDMInstanceHandle inInsta
  * @param outPath			the sourcepath without the identifier
  * @param outIdentifier		the identifier
  */
-void CCmdLocateReference::GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CCmdLocateReference::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         qt3dsdm::CUICDMSlideHandle inSpecificSlide,
                                         Q3DStudio::CFilePath &outPath,
                                         Q3DStudio::CString &outIdentifier)
@@ -208,7 +208,7 @@ void CCmdLocateReference::GetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance
  * @param inPath			the sourcepath without the identifier
  * @param inIdentifier		the identifier
  */
-void CCmdLocateReference::SetSourcePath(qt3dsdm::CUICDMInstanceHandle inInstance,
+void CCmdLocateReference::SetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         qt3dsdm::CUICDMSlideHandle inSpecificSlide,
                                         const Q3DStudio::CFilePath &inPath,
                                         const Q3DStudio::CString &inIdentifier)

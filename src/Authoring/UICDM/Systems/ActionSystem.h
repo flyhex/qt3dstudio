@@ -49,21 +49,21 @@ class CActionSystem : public IActionSystem
 
     TSlideSystemPtr m_SlideSystem;
 
-    CUICDMInstanceHandle m_ActionInstance;
-    CUICDMPropertyHandle m_ActionEyeball;
+    Qt3DSDMInstanceHandle m_ActionInstance;
+    Qt3DSDMPropertyHandle m_ActionEyeball;
 
     std::shared_ptr<ISignalItem> m_Signaller;
 
 public:
     CActionSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
                   TSlideGraphCorePtr inSlideGraphCore, TActionCorePtr inActionCore,
-                  TSlideSystemPtr inSlideSystem, CUICDMInstanceHandle inActionInstance,
-                  CUICDMPropertyHandle inActionEyeball);
+                  TSlideSystemPtr inSlideSystem, Qt3DSDMInstanceHandle inActionInstance,
+                  Qt3DSDMPropertyHandle inActionEyeball);
 
-    CUICDMActionHandle CreateAction(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    CUICDMActionHandle CreateAction(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                             SLong4 inTriggerTargetObjects) override;
     void DeleteAction(CUICDMActionHandle inAction) override;
-    void GetActions(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                             TActionHandleList &outActions) const override;
 
     bool GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,

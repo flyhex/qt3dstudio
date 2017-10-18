@@ -52,7 +52,7 @@ class CSlideTimelineItemBinding : public CUICDMTimelineItemBinding
 {
 public:
     CSlideTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              qt3dsdm::CUICDMInstanceHandle inDataHandle);
+                              qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     ~CSlideTimelineItemBinding() {}
 
     // CUICDMTimelineItemBinding

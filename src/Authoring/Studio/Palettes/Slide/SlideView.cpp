@@ -82,7 +82,7 @@ void SlideView::setShowMasterSlide(bool show)
 
     // We need to get the first slide in the correct master mode
     CDoc *theDoc = GetDoc();
-    qt3dsdm::CUICDMInstanceHandle theRoot = theDoc->GetActiveRootInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle theRoot = theDoc->GetActiveRootInstance();
     CClientDataModelBridge *theBridge = GetBridge();
     qt3dsdm::CUICDMSlideHandle theNewActiveSlide =
         theBridge->GetOrCreateGraphRoot(theRoot); // this will return the master slide

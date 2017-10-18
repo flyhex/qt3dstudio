@@ -156,11 +156,11 @@ const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle 
  *	Excludes those whose controlling timeparent are different from inControllingTimeParent
  */
 bool FilterForControllingTimeParent(CDoc *inDoc,
-                                    qt3dsdm::CUICDMInstanceHandle inControllingTimeParent,
+                                    qt3dsdm::Qt3DSDMInstanceHandle inControllingTimeParent,
                                     Q3DStudio::TIdentifier inGraphable)
 {
     return inDoc->GetStudioSystem()->GetClientDataModelBridge()->GetOwningComponentInstance(
-               static_cast<qt3dsdm::CUICDMInstanceHandle>(inGraphable))
+               static_cast<qt3dsdm::Qt3DSDMInstanceHandle>(inGraphable))
         != inControllingTimeParent;
 }
 
@@ -169,7 +169,7 @@ bool FilterForControllingTimeParent(CDoc *inDoc,
  *	Excludes those whose controlling timeparent are different from inControllingTimeParent
  */
 const Q3DStudio::TFilter
-FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inControllingTimeParent)
+FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inControllingTimeParent)
 {
     return boost::bind(FilterForControllingTimeParent, inDoc, inControllingTimeParent, _1);
 }
@@ -205,7 +205,7 @@ const Q3DStudio::TFilter FilterForActiveComponent(CDoc *inDoc,
 /**
  *	Excludes those that don't exist in current slide
  */
-bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inTimeParent,
+bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inTimeParent,
                            Q3DStudio::TIdentifier inGraphable)
 {
     qt3dsdm::ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
@@ -226,7 +226,7 @@ bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inTimePare
  *	Excludes those that don't exist in current slide
  */
 const Q3DStudio::TFilter FilterForCurrentSlide(CDoc *inDoc,
-                                               qt3dsdm::CUICDMInstanceHandle inTimeParent)
+                                               qt3dsdm::Qt3DSDMInstanceHandle inTimeParent)
 {
     return boost::bind(FilterForCurrentSlide, inDoc, inTimeParent, _1);
 }
@@ -266,7 +266,7 @@ inline void GetReverseChildrenFromGraph(Q3DStudio::TGraphPtr inGraph,
  *	This queries AssetGraph and applies filter to get only EGRAPHABLE_TYPE_ASSET children
  *	An optional filter is applied to get asset of a certain type
  */
-void GetAssetChildren(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+void GetAssetChildren(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                       Q3DStudio::CGraphIterator &outIterator, EStudioObjectType inObjectType)
 {
     TAssetGraphPtr theGraph = inDoc->GetAssetGraph();
@@ -281,7 +281,7 @@ void GetAssetChildren(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
  *	check if it exists in inSlide or Master.
  *	Used primarily for displaying objects in the timeline in the correct order.
  */
-void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                              qt3dsdm::CUICDMSlideHandle inSlide,
                              Q3DStudio::CGraphIterator &outIterator, EStudioObjectType inObjectType)
 {
@@ -297,7 +297,7 @@ void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstan
  *	This is similar to GetAssetChildren with additional filter:
  *	check if the controlling timeparent is the same
  */
-void GetAssetChildrenInTimeParent(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc,
+void GetAssetChildrenInTimeParent(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc,
                                   bool inIsAssetTimeParent, Q3DStudio::CGraphIterator &outIterator,
                                   qt3dsdm::CUICDMSlideHandle inActiveComponentSlide)
 {
@@ -319,7 +319,7 @@ void GetAssetChildrenInTimeParent(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc
  *be rendered
  *	The children are returned in reverse order
  */
-void GetAssetChildrenInCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle inInstance,
+void GetAssetChildrenInCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                     Q3DStudio::CGraphIterator &outIterator,
                                     EStudioObjectType inObjectType)
 {
@@ -327,7 +327,7 @@ void GetAssetChildrenInCurrentSlide(CDoc *inDoc, qt3dsdm::CUICDMInstanceHandle i
     TAssetGraphPtr theGraph = inDoc->GetAssetGraph();
     ApplyDefaultAssetCriterias(inDoc, outIterator, inObjectType);
     // get the asset from the active slide of the containing Component
-    qt3dsdm::CUICDMInstanceHandle theTimeParentInstance =
+    qt3dsdm::Qt3DSDMInstanceHandle theTimeParentInstance =
         (theBridge->IsSceneInstance(inInstance) || theBridge->IsComponentInstance(inInstance))
         ? inInstance
         : theBridge->GetOwningComponentInstance(inInstance);
@@ -397,7 +397,7 @@ Q3DStudio::TIdentifier GetSibling(const Q3DStudio::TIdentifier inNode, bool inAf
 /**
  *	Prints the subtree of the asset
  */
-void PrintAssetSubTree(qt3dsdm::CUICDMInstanceHandle inInstance, CDoc *inDoc, char *prefix)
+void PrintAssetSubTree(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc, char *prefix)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
     std::cout << prefix << theBridge->GetName(inInstance).GetCharStar() << std::endl;
@@ -425,7 +425,7 @@ void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::CUICDMSlideHandle theMas
             m_Doc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(slideHdl));
         std::cout << "    : " << name.GetCharStar() << std::endl;
 
-        qt3dsdm::CUICDMInstanceHandle slideInstance =
+        qt3dsdm::Qt3DSDMInstanceHandle slideInstance =
             m_Doc->GetStudioSystem()->GetClientDataModelBridge()->GetOwningComponentInstance(
                 slideHdl);
         PrintAssetSubTree(slideInstance, m_Doc, prefix);

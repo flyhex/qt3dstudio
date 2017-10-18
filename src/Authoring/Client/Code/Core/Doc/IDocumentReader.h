@@ -56,13 +56,13 @@ namespace Q3DStudio {
 using std::shared_ptr;
 class IDynamicLua;
 
-typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, qt3dsdm::CUICDMInstanceHandle>>
+typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, qt3dsdm::Qt3DSDMInstanceHandle>>
     TSlideInstanceList;
 typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
 typedef std::unordered_map<const wchar_t *, TSlideInstanceList> TCharPtrToSlideInstanceMap;
 using qt3ds::foundation::Option;
-using qt3dsdm::CUICDMInstanceHandle;
-using qt3dsdm::CUICDMPropertyHandle;
+using qt3dsdm::Qt3DSDMInstanceHandle;
+using qt3dsdm::Qt3DSDMPropertyHandle;
 using qt3dsdm::CUICDMSlideHandle;
 using qt3dsdm::CUICDMKeyframeHandle;
 using qt3dsdm::CUICDMActionHandle;
@@ -79,8 +79,8 @@ class IDocumentReader
 protected:
     virtual ~IDocumentReader() {}
 public:
-    typedef CUICDMInstanceHandle TInstanceHandle;
-    typedef CUICDMPropertyHandle TPropertyHandle;
+    typedef Qt3DSDMInstanceHandle TInstanceHandle;
+    typedef Qt3DSDMPropertyHandle TPropertyHandle;
     typedef CUICDMSlideHandle TSlideHandle;
     typedef CUICDMKeyframeHandle TKeyframeHandle;
     typedef qt3dsdm::SValue SValue;
@@ -114,9 +114,9 @@ public:
 
     virtual Q3DStudio::CString GetObjectTypeName(TInstanceHandle instance) const = 0;
 
-    virtual CString GetName(CUICDMInstanceHandle inInstance) const = 0;
-    virtual TInstanceHandle GetFirstBaseClass(CUICDMInstanceHandle inInstance) const = 0;
-    virtual CString GetSourcePath(CUICDMInstanceHandle inInstance) const = 0;
+    virtual CString GetName(Qt3DSDMInstanceHandle inInstance) const = 0;
+    virtual TInstanceHandle GetFirstBaseClass(Qt3DSDMInstanceHandle inInstance) const = 0;
+    virtual CString GetSourcePath(Qt3DSDMInstanceHandle inInstance) const = 0;
 
     template <typename TDataType>
     inline Option<TDataType> GetTypedInstancePropertyValue(TInstanceHandle instance,
@@ -218,7 +218,7 @@ public:
     // to that temporary file.
     virtual CFilePath CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances) = 0;
 
-    CFilePath CopySceneGraphObject(CUICDMInstanceHandle inInstance)
+    CFilePath CopySceneGraphObject(Qt3DSDMInstanceHandle inInstance)
     {
         qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
@@ -227,7 +227,7 @@ public:
 
     // Copy the object just to a DOM representation, don't serialize to file.
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
-    CopySceneGraphObjectToMemory(CUICDMInstanceHandle inInstance) = 0;
+    CopySceneGraphObjectToMemory(Qt3DSDMInstanceHandle inInstance) = 0;
 
     virtual CFilePath CopyAction(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide) = 0;
 

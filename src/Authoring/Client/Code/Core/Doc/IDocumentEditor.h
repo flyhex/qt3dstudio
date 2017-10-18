@@ -119,17 +119,17 @@ public:
                              TInstanceHandle inTargetId = TInstanceHandle());
 
     static TInstanceHandle CreateSceneGraphInstance(
-        CUICDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
+        Qt3DSDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
         qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
         qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
         qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle());
 
-    static void UnlinkAlwaysUnlinkedProperties(qt3dsdm::CUICDMInstanceHandle inInstance,
+    static void UnlinkAlwaysUnlinkedProperties(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                qt3dsdm::SComposerObjectDefinitions &inDefs,
                                                qt3dsdm::ISlideSystem &inSlideSystem);
 
     // Returns valid properties followed by exactly one invalid property.
-    static CUICDMPropertyHandle *
+    static Qt3DSDMPropertyHandle *
     GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions &inDefs);
 
     // Create a new instance in the scene under this slide and such
@@ -204,7 +204,7 @@ public:
     virtual void SetSlideName(TInstanceHandle instance, TPropertyHandle propName,
                               const wchar_t *inOldName, const wchar_t *inNewName) = 0;
 
-    virtual void SetName(CUICDMInstanceHandle inInstance, const CString &inName,
+    virtual void SetName(Qt3DSDMInstanceHandle inInstance, const CString &inName,
                          bool inMakeUnique = false) = 0;
 
     // Linking/unlinking properties.  Functions take care of creating/destroying
@@ -244,7 +244,7 @@ public:
                                  const wchar_t *propName, long subIndex) = 0;
     virtual void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTimeInMilliseconds) = 0;
     virtual void DeleteAllKeyframes(CUICDMAnimationHandle inAnimation) = 0;
-    virtual void KeyframeProperty(CUICDMInstanceHandle inInstance, CUICDMPropertyHandle inProperty,
+    virtual void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                   bool inDoDiffValue) = 0;
 
     // Only the import interface needs to worry about this.  The animation system automatically
@@ -254,12 +254,12 @@ public:
     // Paste a scene graph object into this system at this location.  Returns the new object
     //(but it sets the new object as the selected object so clients probably don't need this)
     virtual qt3dsdm::TInstanceHandleList
-    PasteSceneGraphObject(const CFilePath &inFilePath, CUICDMInstanceHandle inNewRoot,
+    PasteSceneGraphObject(const CFilePath &inFilePath, Qt3DSDMInstanceHandle inNewRoot,
                           bool inGenerateUniqueName, DocumentEditorInsertType::Enum inInsertType,
                           const CPt &inPosition) = 0;
 
     virtual qt3dsdm::TInstanceHandleList PasteSceneGraphObjectMaster(
-        const CFilePath &inFilePath, CUICDMInstanceHandle inNewRoot, bool inGenerateUniqueName,
+        const CFilePath &inFilePath, Qt3DSDMInstanceHandle inNewRoot, bool inGenerateUniqueName,
         DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition) = 0;
 
     virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
@@ -300,14 +300,14 @@ public:
         return DuplicateInstances(theInstances);
     }
 
-    virtual CUICDMActionHandle AddAction(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inOwner,
+    virtual CUICDMActionHandle AddAction(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                          const wstring &inEvent, const wstring &inHandler) = 0;
 
     virtual void DeleteAction(CUICDMActionHandle inAction) = 0;
 
     // Paste a given action into this new root object.
     virtual CUICDMActionHandle PasteAction(const CFilePath &inFilePath,
-                                           CUICDMInstanceHandle inNewRoot) = 0;
+                                           Qt3DSDMInstanceHandle inNewRoot) = 0;
 
     virtual CUICDMSlideHandle AddSlide(CUICDMSlideHandle inMasterSlide, int inIndex = -1) = 0;
 
@@ -454,8 +454,8 @@ public:
     IDoc &GetEditorDoc() { return m_EditorIDocDoc; }
     bool HasEditor() const;
     IDocumentEditor &EnsureEditor(const wchar_t *inCommandName, const char *inFile, int inLine);
-    void FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle *inInstances, long inInstanceCount);
-    void FireImmediateRefresh(qt3dsdm::CUICDMInstanceHandle inInstance)
+    void FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle *inInstances, long inInstanceCount);
+    void FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     {
         FireImmediateRefresh(&inInstance, 1);
     }

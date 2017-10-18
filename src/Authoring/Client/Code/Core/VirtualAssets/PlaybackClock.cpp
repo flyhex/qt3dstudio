@@ -119,7 +119,7 @@ void CPlaybackClock::OnReachedUpperBound()
 {
     qt3dsdm::CUICDMSlideHandle theActiveSlide(m_Doc->GetActiveSlide());
     // clock has passed the end, check whether needs to switch slide
-    qt3dsdm::CUICDMInstanceHandle theInstanceHandle =
+    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle =
         GetSlideSystem()->GetSlideInstance(theActiveSlide);
 
     // Get the play through state
@@ -214,7 +214,7 @@ void CPlaybackClock::Reset()
  */
 void CPlaybackClock::UpdateClockProperties()
 {
-    qt3dsdm::CUICDMInstanceHandle theInstanceHandle =
+    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle =
         GetSlideSystem()->GetSlideInstance(m_Doc->GetActiveSlide());
     ASSERT(theInstanceHandle.Valid());
 

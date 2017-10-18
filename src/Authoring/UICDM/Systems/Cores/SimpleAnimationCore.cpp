@@ -51,8 +51,8 @@ using namespace boost;
 namespace qt3dsdm {
 
 CUICDMAnimationHandle
-CSimpleAnimationCore::CreateAnimation(CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,
-                                      CUICDMPropertyHandle inProperty, size_t inIndex,
+CSimpleAnimationCore::CreateAnimation(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+                                      Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                       EAnimationType inAnimationType, bool inFirstKeyframeDynamic)
 {
     if (GetAnimation(inSlide, inInstance, inProperty, inIndex).Valid())
@@ -86,8 +86,8 @@ void CSimpleAnimationCore::EnsureAnimationCache() const
 }
 
 CUICDMAnimationHandle CSimpleAnimationCore::GetAnimation(CUICDMSlideHandle inSlide,
-                                                         CUICDMInstanceHandle inInstance,
-                                                         CUICDMPropertyHandle inProperty,
+                                                         Qt3DSDMInstanceHandle inInstance,
+                                                         Qt3DSDMPropertyHandle inProperty,
                                                          size_t inIndex) const
 {
     EnsureAnimationCache();
@@ -154,7 +154,7 @@ void CSimpleAnimationCore::GetAnimations(TAnimationInfoList &outAnimations,
 }
 
 inline void AddSpecificAnimationsIf(const THandleObjectPair &inPair, CUICDMSlideHandle inSlide,
-                                    CUICDMInstanceHandle inInstance,
+                                    Qt3DSDMInstanceHandle inInstance,
                                     TAnimationHandleList &outAnimations)
 {
     if (inPair.second->GetType() == CHandleObject::EHandleObjectTypeSAnimationTrack) {
@@ -165,7 +165,7 @@ inline void AddSpecificAnimationsIf(const THandleObjectPair &inPair, CUICDMSlide
 }
 
 void CSimpleAnimationCore::GetSpecificInstanceAnimations(CUICDMSlideHandle inSlide,
-                                                         CUICDMInstanceHandle inInstance,
+                                                         Qt3DSDMInstanceHandle inInstance,
                                                          TAnimationHandleList &outAnimations)
 {
     EnsureAnimationCache();
@@ -303,7 +303,7 @@ bool CSimpleAnimationCore::IsFirstKeyframe(CUICDMKeyframeHandle inKeyframe) cons
 }
 
 void CSimpleAnimationCore::OffsetAnimations(CUICDMSlideHandle /*inSlide*/,
-                                            CUICDMInstanceHandle /*inInstance*/, long /*inOffset*/)
+                                            Qt3DSDMInstanceHandle /*inInstance*/, long /*inOffset*/)
 {
     throw std::runtime_error("unimplemented");
 }
@@ -436,8 +436,8 @@ bool CSimpleAnimationCore::AnimationValid(CUICDMAnimationHandle inAnimation) con
 }
 
 CUICDMAnimationHandle CSimpleAnimationCore::CreateAnimationWithHandle(
-    int inHandle, CUICDMSlideHandle inSlide, CUICDMInstanceHandle inInstance,
-    CUICDMPropertyHandle inProperty, size_t inIndex, EAnimationType inAnimationType,
+    int inHandle, CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    Qt3DSDMPropertyHandle inProperty, size_t inIndex, EAnimationType inAnimationType,
     bool inFirstKeyframeDynamic)
 {
     if (HandleValid(inHandle))
@@ -466,7 +466,7 @@ void CSimpleAnimationCore::AddAnimationToLookupCache(
     std::shared_ptr<SAnimationTrack> inAnimation) const
 {
     CUICDMSlideHandle theSlide = inAnimation->m_Slide;
-    CUICDMInstanceHandle theInstance = inAnimation->m_Instance;
+    Qt3DSDMInstanceHandle theInstance = inAnimation->m_Instance;
     pair<TStateInstanceAnimationMap::iterator, TStateInstanceAnimationMap::iterator> theRange =
         m_AnimationMatchesCache.equal_range(
             make_pair(theSlide.GetHandleValue(), theInstance.GetHandleValue()));
@@ -485,7 +485,7 @@ void CSimpleAnimationCore::RemoveAnimationFromLookupCache(
 {
     TStateInstanceAnimationMap &theMap(m_AnimationMatchesCache);
     CUICDMSlideHandle theSlide = inAnimation->m_Slide;
-    CUICDMInstanceHandle theInstance = inAnimation->m_Instance;
+    Qt3DSDMInstanceHandle theInstance = inAnimation->m_Instance;
     pair<TStateInstanceAnimationMap::iterator, TStateInstanceAnimationMap::iterator> theRange =
         theMap.equal_range(make_pair(theSlide.GetHandleValue(), theInstance.GetHandleValue()));
     for (TStateInstanceAnimationMap::iterator theIter = theRange.first; theIter != theRange.second;
@@ -518,8 +518,8 @@ void CopyKeyframes(const IAnimationCore &inSourceAnimationCore, IAnimationCore &
 
 CUICDMAnimationHandle CopyAnimation(TAnimationCorePtr inAnimationCore,
                                     CUICDMAnimationHandle inAnimation, CUICDMSlideHandle inNewSlide,
-                                    CUICDMInstanceHandle inNewInstance,
-                                    CUICDMPropertyHandle inNewProperty, size_t inNewIndex)
+                                    Qt3DSDMInstanceHandle inNewInstance,
+                                    Qt3DSDMPropertyHandle inNewProperty, size_t inNewIndex)
 {
     TKeyframeHandleList theKeyframes;
     inAnimationCore->GetKeyframes(inAnimation, theKeyframes);
