@@ -46,9 +46,9 @@ class CDropTarget;
 //==============================================================================
 /**
  *	@class	CFileDropSource
- *	@brief	Drop Source for EUIC_FLAVOR_ASSET_UICFILE
+ *	@brief	Drop Source for QT3DS_FLAVOR_ASSET_UICFILE
  *
- *	This class is meant to handle drag and drop for EUIC_FLAVOR_ASSET_UICFILE,
+ *	This class is meant to handle drag and drop for QT3DS_FLAVOR_ASSET_UICFILE,
  *	for example when user drags a file from within Studio.
  */
 class CFileDropSource : public CDropSource

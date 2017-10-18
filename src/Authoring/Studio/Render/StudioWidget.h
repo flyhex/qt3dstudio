@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STUDIO_RENDERER_WIDGET_H
-#define UIC_STUDIO_RENDERER_WIDGET_H
+#ifndef QT3DS_STUDIO_RENDERER_WIDGET_H
+#define QT3DS_STUDIO_RENDERER_WIDGET_H
 #pragma once
 #include "Qt3DSRenderWindowDimensions.h"
 #include "Qt3DSRenderWidgets.h"

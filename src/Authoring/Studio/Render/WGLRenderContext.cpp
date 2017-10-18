@@ -43,7 +43,7 @@
 #include <QtGui/QSurfaceFormat>
 #include <QOpenGLWidget>
 
-//UIC_DEFINE_THISFILE;
+//QT3DS_DEFINE_THISFILE;
 
 //=============================================================================
 /**

@@ -177,7 +177,7 @@ public:
     /*
     void ReplacePtr( T* inNewPtr, T*& outOldPtr )
     {
-            UIC_THROWNULL( m_Object, E_FAIL );
+            QT3DS_THROWNULL( m_Object, E_FAIL );
             outOldPtr = m_Object->m_Pointer;
             m_Object->m_Pointer = inNewPtr;
             //And the damage has been done...
@@ -185,8 +185,8 @@ public:
     */
     void SwapPtr(CSharedPtr<T> &inSwapPtr)
     {
-        UIC_THROWNULL(m_Object, E_FAIL);
-        UIC_THROWNULL(inSwapPtr.m_Object, E_FAIL);
+        QT3DS_THROWNULL(m_Object, E_FAIL);
+        QT3DS_THROWNULL(inSwapPtr.m_Object, E_FAIL);
 
         // If the incoming ptr is not us
         if (&inSwapPtr != this) {
@@ -267,7 +267,7 @@ public:
     void Copy(const CSharedPtr<T> &inSource)
     {
         // Throw on NULL
-        UIC_THROWFALSE(m_Object != NULL && inSource.m_Object != NULL, E_FAIL);
+        QT3DS_THROWFALSE(m_Object != NULL && inSource.m_Object != NULL, E_FAIL);
         if (m_Object != inSource.m_Object) {
             *m_Object->m_Pointer = *inSource.m_Object->m_Pointer;
         }

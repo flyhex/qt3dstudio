@@ -409,7 +409,7 @@ int CStudioApp::Run()
 #endif
 
     try {
-        UIC_LOGSTART;
+        QT3DS_LOGSTART;
 
 #ifdef KDAB_TEMPORARILY_REMOVED
         // Set the crash handler for all unhandled exceptions.
@@ -443,7 +443,7 @@ int CStudioApp::Run()
         }
         PerformShutdown();
 
-        UIC_LOGSTOP;
+        QT3DS_LOGSTOP;
     } catch (CUICExceptionClass &inException) {
         g_UICErrorCode = inException.GetErrorCode();
         throw;

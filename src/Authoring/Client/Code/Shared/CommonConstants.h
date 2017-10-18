@@ -34,58 +34,58 @@
 const float CURRENT_PLAYER_VERSION = 1.0f;
 
 // Current User Registry Keys
-const char UIC_CLIENT_PREFERENCES_VALUE[] = "Preferences";
-const char UIC_CLIENT_REGISTRY_KEY_BASE[] = "Software\\Qt3DStudio\\Client";
-const char UIC_CLIENT_REGISTRY_KEY_ROOT[] = "Software\\Qt3DStudio\\Client\\1.0";
-const char UIC_CLIENT_REGISTRY_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Preferences";
-const char UIC_CLIENT_MESSAGES_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Preferences\\Messages";
+const char QT3DS_CLIENT_PREFERENCES_VALUE[] = "Preferences";
+const char QT3DS_CLIENT_REGISTRY_KEY_BASE[] = "Software\\Qt3DStudio\\Client";
+const char QT3DS_CLIENT_REGISTRY_KEY_ROOT[] = "Software\\Qt3DStudio\\Client\\1.0";
+const char QT3DS_CLIENT_REGISTRY_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Preferences";
+const char QT3DS_CLIENT_MESSAGES_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Preferences\\Messages";
 
 // Local Machine Registry Keys
-const char UIC_CLIENT_PLUGINS_VALUE[] = "Plugins";
-const char UIC_CLIENT_EXTENSIONS_VALUE[] = "Extensions";
-const char UIC_CLIENT_LATESTVERSION_VALUE[] = "LatestVersion";
-const char UIC_CLIENT_CURRENTVERSION_VALUE[] = "CurrentVersion";
+const char QT3DS_CLIENT_PLUGINS_VALUE[] = "Plugins";
+const char QT3DS_CLIENT_EXTENSIONS_VALUE[] = "Extensions";
+const char QT3DS_CLIENT_LATESTVERSION_VALUE[] = "LatestVersion";
+const char QT3DS_CLIENT_CURRENTVERSION_VALUE[] = "CurrentVersion";
 
-const char UIC_CLIENT_PLUGINS_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Plugins";
-const char UIC_CLIENT_EXTENSIONS_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Extensions";
-const char UIC_CLIENT_LATESTVERSION_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\LatestVersion";
-const char UIC_CLIENT_CURRENTVERSION_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\CurrentVersion";
+const char QT3DS_CLIENT_PLUGINS_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Plugins";
+const char QT3DS_CLIENT_EXTENSIONS_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\Extensions";
+const char QT3DS_CLIENT_LATESTVERSION_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\LatestVersion";
+const char QT3DS_CLIENT_CURRENTVERSION_KEY[] = "Software\\Qt3DStudio\\Client\\1.0\\CurrentVersion";
 
 // Preference Registry Keys
-const char UIC_CLIENT_INITIALIZED_VALUE[] = "Initialized";
-const char UIC_CLIENT_AUTOMATICUPDATE_VALUE[] = "AutomaticallyUpdate";
-const char UIC_CLIENT_FORCENOINSTALL_VALUE[] = "ForceNoInstall";
-const char UIC_CLIENT_FORCEINSTALL_VALUE[] = "ForceInstall";
-const char UIC_CLIENT_NOREGISTER_VALUE[] = "NoRegister";
-const char UIC_CLIENT_LOGMODE_VALUE[] = "LogMode"; // REG_DWORD, 0, 1, 2, 3
-const char UIC_CLIENT_LOGLEVEL_VALUE[] = "LogLevel"; // REG_DWORD, 0, 1, 2, 3
-const char UIC_CLIENT_LOGTHRESHOLD_VALUE[] = "LogThreshold"; // REG_DWORD, # of entries
-const char UIC_CLIENT_CONTEXTMENU_VALUE[] = "ContextMenu";
+const char QT3DS_CLIENT_INITIALIZED_VALUE[] = "Initialized";
+const char QT3DS_CLIENT_AUTOMATICUPDATE_VALUE[] = "AutomaticallyUpdate";
+const char QT3DS_CLIENT_FORCENOINSTALL_VALUE[] = "ForceNoInstall";
+const char QT3DS_CLIENT_FORCEINSTALL_VALUE[] = "ForceInstall";
+const char QT3DS_CLIENT_NOREGISTER_VALUE[] = "NoRegister";
+const char QT3DS_CLIENT_LOGMODE_VALUE[] = "LogMode"; // REG_DWORD, 0, 1, 2, 3
+const char QT3DS_CLIENT_LOGLEVEL_VALUE[] = "LogLevel"; // REG_DWORD, 0, 1, 2, 3
+const char QT3DS_CLIENT_LOGTHRESHOLD_VALUE[] = "LogThreshold"; // REG_DWORD, # of entries
+const char QT3DS_CLIENT_CONTEXTMENU_VALUE[] = "ContextMenu";
 
-const char UIC_CLIENT_TRACKERRORTYPES_VALUE[] = "TrackErrorTypes";
-const char UIC_CLIENT_REPORTINGLEVEL_VALUE[] = "ReportingLevel";
-const char UIC_CLIENT_ERRORACTION_VALUE[] = "ErrorAction";
-const char UIC_CLIENT_FILENAMELINENO_VALUE[] = "FileNameLineNo";
+const char QT3DS_CLIENT_TRACKERRORTYPES_VALUE[] = "TrackErrorTypes";
+const char QT3DS_CLIENT_REPORTINGLEVEL_VALUE[] = "ReportingLevel";
+const char QT3DS_CLIENT_ERRORACTION_VALUE[] = "ErrorAction";
+const char QT3DS_CLIENT_FILENAMELINENO_VALUE[] = "FileNameLineNo";
 
-const char UIC_CLIENT_ENABLESCRIPTDEBUGGER_VALUE[] = "EnableScriptDebugger";
-const char UIC_CLIENT_DEBUGMODE_VALUE[] = "DebugMode";
-const char UIC_CLIENT_MINTIMEPERFRAME_VALUE[] = "MinTimePerFrame";
-const char UIC_CLIENT_UPDATEURL_VALUE[] = "DebugUpdateUrl";
-const char UIC_CLIENT_LASTUPDATECHECK_VALUE[] = "LastUpdateCheck";
-const char UIC_CLIENT_OVERRIDELASTUPDATE_VALUE[] = "LastUpdateCheckOverride";
-const char UIC_CLIENT_UPDATEINTERVAL_VALUE[] = "UpdateInterval";
-const char UIC_CLIENT_DEPRECATEDPRESENTATION_VALUE[] = "DeprecatedPresentationWarning";
-const char UIC_CLIENT_OPENGLDRIVER_VALUE[] = "OpenGLDriverWarning";
-const char UIC_CLIENT_GRAPHICSRENDERER_VALUE[] = "ClientRenderer";
-const char UIC_CLIENT_LICENSEKEY_VALUE[] = "LicenseKey";
+const char QT3DS_CLIENT_ENABLESCRIPTDEBUGGER_VALUE[] = "EnableScriptDebugger";
+const char QT3DS_CLIENT_DEBUGMODE_VALUE[] = "DebugMode";
+const char QT3DS_CLIENT_MINTIMEPERFRAME_VALUE[] = "MinTimePerFrame";
+const char QT3DS_CLIENT_UPDATEURL_VALUE[] = "DebugUpdateUrl";
+const char QT3DS_CLIENT_LASTUPDATECHECK_VALUE[] = "LastUpdateCheck";
+const char QT3DS_CLIENT_OVERRIDELASTUPDATE_VALUE[] = "LastUpdateCheckOverride";
+const char QT3DS_CLIENT_UPDATEINTERVAL_VALUE[] = "UpdateInterval";
+const char QT3DS_CLIENT_DEPRECATEDPRESENTATION_VALUE[] = "DeprecatedPresentationWarning";
+const char QT3DS_CLIENT_OPENGLDRIVER_VALUE[] = "OpenGLDriverWarning";
+const char QT3DS_CLIENT_GRAPHICSRENDERER_VALUE[] = "ClientRenderer";
+const char QT3DS_CLIENT_LICENSEKEY_VALUE[] = "LicenseKey";
 
 /*
-const char UIC_CLIENT_AGREEEULA_VALUE []				= "AgreeEULA";
-const char UIC_CLIENT_LASTNAME_VALUE []				= "LastName";
-const char UIC_CLIENT_FIRSTNAME_VALUE []				= "FirstName";
-const char UIC_CLIENT_USEREMAIL_VALUE []				= "UserEmail";
-const char UIC_CLIENT_OVER13_VALUE []					= "UserOver13";
-const char UIC_CLIENT_MAILINGLIST_VALUE []			= "MailingList";
+const char QT3DS_CLIENT_AGREEEULA_VALUE[] = "AgreeEULA";
+const char QT3DS_CLIENT_LASTNAME_VALUE[] = "LastName";
+const char QT3DS_CLIENT_FIRSTNAME_VALUE[] = "FirstName";
+const char QT3DS_CLIENT_USEREMAIL_VALUE[] = "UserEmail";
+const char QT3DS_CLIENT_OVER13_VALUE[] = "UserOver13";
+const char QT3DS_CLIENT_MAILINGLIST_VALUE[] = "MailingList";
 */
 
 // Uninstall Registry Keys
@@ -99,13 +99,13 @@ const char UNINSTALL_COMMANDLINE_VALUE[] = "UninstallString";
 // File Names
 const char INSTALL_LOG_FILE_NAME[] = "Install.log";
 const char UNINSTALL_DATA_FILE_NAME[] = "Uninstal.dat";
-const char UIC_AUTO_UPDATER_EXE[] = "AMInstal.exe";
-const char UIC_CONTROL_PANEL[] = "AKCPanel.cpl";
+const char QT3DS_AUTO_UPDATER_EXE[] = "AMInstal.exe";
+const char QT3DS_CONTROL_PANEL[] = "AKCPanel.cpl";
 
 // Directory Names
-const char UIC_DIRECTORY[] = "\\The Qt Company\\";
-const char UIC_CLIENT_DIRECTORY[] = "Qt 3D Studio\\";
-const char UIC_TEMP_DIRECTORY[] = "Install\\";
+const char QT3DS_DIRECTORY[] = "\\The Qt Company\\";
+const char QT3DS_CLIENT_DIRECTORY[] = "Qt 3D Studio\\";
+const char QT3DS_TEMP_DIRECTORY[] = "Install\\";
 
 // Installer command line options
 const char REMOTE_COMMAND_LINE_OPTION[] = "remote";

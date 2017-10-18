@@ -47,7 +47,7 @@
 //	Static Member Initialization
 //==============================================================================
 
-UIC_DEFINE_THISFILE;
+QT3DS_DEFINE_THISFILE;
 
 using namespace qt3dsdm;
 using namespace std;

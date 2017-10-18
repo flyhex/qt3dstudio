@@ -44,14 +44,14 @@
 //==============================================================================
 //	Enums
 //==============================================================================
-enum EUIC_FLAVOR {
-    EUIC_FLAVOR_FILE = 15,
-    EUIC_FLAVOR_TEXT = 1,
-    EUIC_FLAVOR_LISTBOX = 'LBOX',
-    EUIC_FLAVOR_BASIC_OBJECTS = 'UIBO',
-    EUIC_FLAVOR_ASSET_LIB = 'UILB',
-    EUIC_FLAVOR_ASSET_TL = 'UITL',
-    EUIC_FLAVOR_ASSET_UICFILE = 'UIFI',
+enum QT3DS_FLAVOR {
+    QT3DS_FLAVOR_FILE = 15,
+    QT3DS_FLAVOR_TEXT = 1,
+    QT3DS_FLAVOR_LISTBOX = 'LBOX',
+    QT3DS_FLAVOR_BASIC_OBJECTS = 'UIBO',
+    QT3DS_FLAVOR_ASSET_LIB = 'UILB',
+    QT3DS_FLAVOR_ASSET_TL = 'UITL',
+    QT3DS_FLAVOR_ASSET_UICFILE = 'UIFI',
 };
 
 //==============================================================================

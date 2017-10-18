@@ -60,14 +60,14 @@ CDropSource *CDropSourceFactory::Create(long inFlavor, void *inData, unsigned lo
     CDropSource *theDropSource(nullptr);
     switch (inFlavor) {
 
-    case EUIC_FLAVOR_FILE: {
+    case QT3DS_FLAVOR_FILE: {
         theDropSource = new CExplorerFileDropSource(inFlavor, inData, inSize);
     } break;
-    case EUIC_FLAVOR_TEXT:
+    case QT3DS_FLAVOR_TEXT:
         // Don't do anythiing for this
         break;
 
-    case EUIC_FLAVOR_ASSET_UICFILE:
+    case QT3DS_FLAVOR_ASSET_UICFILE:
         // make an Aset out of this.
         theDropSource = new CFileDropSource(inFlavor, inData, inSize);
         break;
@@ -80,15 +80,15 @@ CDropSource *CDropSourceFactory::Create(long inFlavor, IDragable *inDragable)
 {
     CDropSource *theDropSource(nullptr);
     switch (inFlavor) {
-    case EUIC_FLAVOR_LISTBOX:
+    case QT3DS_FLAVOR_LISTBOX:
         theDropSource = new CListBoxDropSource(inFlavor, inDragable);
         break;
 
-    case EUIC_FLAVOR_BASIC_OBJECTS:
+    case QT3DS_FLAVOR_BASIC_OBJECTS:
         theDropSource = new CBasicObjectDropSource(inFlavor, inDragable);
         break;
 
-    case EUIC_FLAVOR_ASSET_TL:
+    case QT3DS_FLAVOR_ASSET_TL:
         theDropSource = new CTimeLineDropSource(inFlavor, inDragable);
         break;
 
@@ -104,22 +104,22 @@ CDropSource *CDropSourceFactory::Extract(long inFlavor, void *inData, unsigned l
     CDropSource *theDropSource(nullptr);
     switch (inFlavor) {
     // For all of the Studio Flavors we just need to extract the dropsource out of it.
-    case EUIC_FLAVOR_LISTBOX:
+    case QT3DS_FLAVOR_LISTBOX:
         // make an Aset out of this.
         theDropSource = static_cast<CListBoxDropSource *>(inData);
         break;
 
-    case EUIC_FLAVOR_BASIC_OBJECTS:
+    case QT3DS_FLAVOR_BASIC_OBJECTS:
         // make an Aset out of this.
         theDropSource = static_cast<CBasicObjectDropSource *>(inData);
         break;
 
-    case EUIC_FLAVOR_ASSET_TL:
+    case QT3DS_FLAVOR_ASSET_TL:
         // cast it to the right type just so we don't loose the virtual table.
         theDropSource = static_cast<CTimeLineDropSource *>(inData);
         break;
 
-    case EUIC_FLAVOR_ASSET_UICFILE:
+    case QT3DS_FLAVOR_ASSET_UICFILE:
         theDropSource = static_cast<CFileDropSource *>(inData);
 
         break;

@@ -98,12 +98,12 @@ LRESULT CMasterView::OnInitializePalettes(WPARAM inwParam, LPARAM)
 
         m_WndControl->RegiserForDnd(this);
 
-        m_WndControl->AddMainFlavor(EUIC_FLAVOR_LISTBOX);
-        m_WndControl->AddMainFlavor(EUIC_FLAVOR_FILE);
-        m_WndControl->AddMainFlavor(EUIC_FLAVOR_ASSET_UICFILE);
-        m_WndControl->AddMainFlavor(EUIC_FLAVOR_ASSET_LIB);
-        m_WndControl->AddMainFlavor(EUIC_FLAVOR_ASSET_TL);
-        m_WndControl->AddMainFlavor(EUIC_FLAVOR_BASIC_OBJECTS);
+        m_WndControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
+        m_WndControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
+        m_WndControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
+        m_WndControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
+        m_WndControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_TL);
+        m_WndControl->AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 
         CRect theClientRect;
         GetClientRect(&theClientRect);

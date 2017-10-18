@@ -114,11 +114,11 @@ struct StateLogger : public IStateLogger
     void Log(const char8_t *inLabel, const char8_t *inExpression) override
     {
         int theTop = lua_gettop(m_LuaState);
-        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_test_logger");
+        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_test_logger");
         IDataLogger *theLogger = (IDataLogger *)lua_touserdata(m_LuaState, -1);
-        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_test_line");
+        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_test_line");
         int line = (int)lua_tonumber(m_LuaState, -1);
-        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_test_file");
+        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_test_file");
         const char *file = lua_tostring(m_LuaState, -1);
         lua_settop(m_LuaState, theTop);
         m_LogString.assign(nonNull(inLabel));
@@ -134,11 +134,11 @@ int Output(lua_State *inState)
 {
     lua_concat(inState, lua_gettop(inState));
     const char *message = lua_tostring(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_logger");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_logger");
     IDataLogger *theLogger = (IDataLogger *)lua_touserdata(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_line");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_line");
     int line = (int)lua_tonumber(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_file");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_file");
     const char *file = lua_tostring(inState, -1);
     if (theLogger) {
         theLogger->Log(LogType::Info, file, line, message);
@@ -165,7 +165,7 @@ int SetCurrentLine(NVScopedRefCounted<IDOMReader> domReader, lua_State *inContex
     int line = domReader->GetElement()->m_Line;
     int theTop = lua_gettop(inContext);
     lua_pushnumber(inContext, line);
-    lua_setfield(inContext, LUA_REGISTRYINDEX, "uic_test_line");
+    lua_setfield(inContext, LUA_REGISTRYINDEX, "qt3ds_test_line");
     lua_settop(inContext, theTop);
     return line;
 }
@@ -259,11 +259,11 @@ Option<STestResults> RunTest(const char8_t *inFullPath, const char8_t *inRoot,
         }
         // create an output functions
         lua_pushlightuserdata(theContext, &inLogger);
-        lua_setfield(theContext, LUA_REGISTRYINDEX, "uic_test_logger");
+        lua_setfield(theContext, LUA_REGISTRYINDEX, "qt3ds_test_logger");
         lua_pushstring(theContext, fname);
-        lua_setfield(theContext, LUA_REGISTRYINDEX, "uic_test_file");
+        lua_setfield(theContext, LUA_REGISTRYINDEX, "qt3ds_test_file");
         lua_pushnumber(theContext, 0.f);
-        lua_setfield(theContext, LUA_REGISTRYINDEX, "uic_test_line");
+        lua_setfield(theContext, LUA_REGISTRYINDEX, "qt3ds_test_line");
         lua_pushcfunction(theContext, Output);
         lua_pushvalue(theContext, -1);
         lua_setfield(theContext, theDMStackIdx, "output");

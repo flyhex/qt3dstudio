@@ -205,32 +205,32 @@ struct WStrOps<QT3DSF64>
         return true;
     }
 };
-#define UIC_WCHAR_T_None L"None"
-#define UIC_WCHAR_T_Float L"Float"
-#define UIC_WCHAR_T_Float2 L"Float2"
-#define UIC_WCHAR_T_Float3 L"Float3"
-#define UIC_WCHAR_T_Long L"Long"
-#define UIC_WCHAR_T_String L"String"
-#define UIC_WCHAR_T_Bool L"Bool"
-#define UIC_WCHAR_T_Long4 L"Long4"
-#define UIC_WCHAR_T_StringRef L"StringRef"
-#define UIC_WCHAR_T_ObjectRef L"ObjectRef"
-#define UIC_WCHAR_T_StringOrInt L"StringOrInt"
-#define UIC_WCHAR_T_FloatList L"FloatList"
+#define QT3DS_WCHAR_T_None L"None"
+#define QT3DS_WCHAR_T_Float L"Float"
+#define QT3DS_WCHAR_T_Float2 L"Float2"
+#define QT3DS_WCHAR_T_Float3 L"Float3"
+#define QT3DS_WCHAR_T_Long L"Long"
+#define QT3DS_WCHAR_T_String L"String"
+#define QT3DS_WCHAR_T_Bool L"Bool"
+#define QT3DS_WCHAR_T_Long4 L"Long4"
+#define QT3DS_WCHAR_T_StringRef L"StringRef"
+#define QT3DS_WCHAR_T_ObjectRef L"ObjectRef"
+#define QT3DS_WCHAR_T_StringOrInt L"StringOrInt"
+#define QT3DS_WCHAR_T_FloatList L"FloatList"
 
-#define UIC_IMPORT_ITERATE_DMTYPE                                                                  \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::None, None, QT3DSF32)                                  \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float, Float, QT3DSF32)                                \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float2, Float2, SFloat2)                            \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float3, Float3, SFloat3)                            \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long, Long, QT3DSI32)                                   \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::String, String, TDataStrPtr)                        \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::Bool, Bool, bool)                                   \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long4, Long4, SLong4)                               \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringRef, StringRef, SStringRef)                   \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::ObjectRef, ObjectRef, SObjectRefType)               \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringOrInt, StringOrInt, SStringOrInt)             \
-    UIC_IMPORT_HANDLE_DMTYPE(DataModelDataType::FloatList, FloatList, TFloatList)
+#define QT3DS_IMPORT_ITERATE_DMTYPE                                                                  \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::None, None, QT3DSF32)                                  \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float, Float, QT3DSF32)                                \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float2, Float2, SFloat2)                            \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float3, Float3, SFloat3)                            \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long, Long, QT3DSI32)                                   \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::String, String, TDataStrPtr)                        \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Bool, Bool, bool)                                   \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long4, Long4, SLong4)                               \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringRef, StringRef, SStringRef)                   \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::ObjectRef, ObjectRef, SObjectRefType)               \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringOrInt, StringOrInt, SStringOrInt)             \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::FloatList, FloatList, TFloatList)
 
 template <>
 struct WStrOps<DataModelDataType::Value>
@@ -239,12 +239,12 @@ struct WStrOps<DataModelDataType::Value>
     {
         const wchar_t *data = NULL;
         switch (item) {
-#define UIC_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
+#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
     case x:                                                                                        \
-        data = UIC_WCHAR_T_##y;                                                                    \
+        data = QT3DS_WCHAR_T_##y;                                                                    \
         break;
-            UIC_IMPORT_ITERATE_DMTYPE
-#undef UIC_IMPORT_HANDLE_DMTYPE
+            QT3DS_IMPORT_ITERATE_DMTYPE
+#undef QT3DS_IMPORT_HANDLE_DMTYPE
         }
         if (data == NULL) {
             QT3DS_ASSERT(false);
@@ -255,13 +255,13 @@ struct WStrOps<DataModelDataType::Value>
     bool StrTo(const wchar_t *buffer, DataModelDataType::Value &item)
     {
 
-#define UIC_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
-    if (AreEqual(buffer, UIC_WCHAR_T_##y)) {                                                       \
+#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##y)) {                                                       \
         item = x;                                                                                  \
         return true;                                                                               \
     }
-        UIC_IMPORT_ITERATE_DMTYPE
-#undef UIC_IMPORT_HANDLE_DMTYPE
+        QT3DS_IMPORT_ITERATE_DMTYPE
+#undef QT3DS_IMPORT_HANDLE_DMTYPE
         item = DataModelDataType::None;
         return false;
     }
@@ -312,14 +312,14 @@ struct WStrOps<SValue>
     SValue BufTo(DataModelDataType::Value type, TBufferType &inReader)
     {
         switch (type) {
-#define UIC_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
+#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
     case x: {                                                                                      \
         z retval;                                                                                  \
         Read(inReader, retval);                                                                    \
         return retval;                                                                             \
     }
-            UIC_IMPORT_ITERATE_DMTYPE
-#undef UIC_IMPORT_HANDLE_DMTYPE
+            QT3DS_IMPORT_ITERATE_DMTYPE
+#undef QT3DS_IMPORT_HANDLE_DMTYPE
         }
         QT3DS_ASSERT(false);
         return SValue();

@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STUDIO_RENDERER_TRANSLATION_H
-#define UIC_STUDIO_RENDERER_TRANSLATION_H
+#ifndef QT3DS_STUDIO_RENDERER_TRANSLATION_H
+#define QT3DS_STUDIO_RENDERER_TRANSLATION_H
 #pragma once
 #include "StudioRendererImpl.h"
 #include "Qt3DSRenderLayer.h"

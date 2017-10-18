@@ -141,7 +141,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(lightmapshadow, m_LightmapShadow, SLong4, 0)
 
 #define ITERATE_COMPOSER_CUSTOM_MATERIAL_PROPERTIES                                                \
-    HANDLE_UIC_RENDER_PROPERTY(iblprobe, m_IblProbe, SLong4, 0)
+    HANDLE_QT3DS_RENDER_PROPERTY(iblprobe, m_IblProbe, SLong4, 0)
 
 #define ITERATE_COMPOSER_MATERIAL_BASE_PROPERTIES                                                  \
     HANDLE_COMPOSER_PROPERTY(iblprobe, m_IblProbe, SLong4, 0)

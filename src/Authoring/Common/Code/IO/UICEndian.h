@@ -33,12 +33,12 @@
 #include <QtEndian>
 
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
-#define UIC_BIG_ENDIAN
+#define QT3DS_BIG_ENDIAN
 #else
-#define UIC_LITTLE_ENDIAN
+#define QT3DS_LITTLE_ENDIAN
 #endif
 
-#ifdef UIC_LITTLE_ENDIAN
+#ifdef QT3DS_LITTLE_ENDIAN
 #define LTOH2(in, out) out = in;
 #define HTOL2(in, out) out = in;
 
@@ -58,7 +58,7 @@
 #define HTOB8(in, out) SWAP8BYTES(in, out)
 
 #endif
-#ifdef UIC_BIG_ENDIAN
+#ifdef QT3DS_BIG_ENDIAN
 #undef LTOH2
 #define LTOH2(in, out) SWAP2BYTES(in, out)
 #undef HTOL2
@@ -90,8 +90,8 @@
 #define HTOB8(in, out) out = in;
 #endif // ENDIANH
 
-#if !defined(UIC_LITTLE_ENDIAN) && !defined(UIC_BIG_ENDIAN)
-#error You must define either UIC_LITTLE_ENDIAN or UIC_BIG_ENDIAN
+#if !defined(QT3DS_LITTLE_ENDIAN) && !defined(QT3DS_BIG_ENDIAN)
+#error You must define either QT3DS_LITTLE_ENDIAN or QT3DS_BIG_ENDIAN
 #endif
 
 #endif

@@ -57,7 +57,7 @@ public:
     void setObjectType(EStudioObjectType type) { m_objectType = type; }
     void setPrimitveType(EPrimitiveType type) { m_primitiveType = type; }
 
-    long GetFlavor() const override {return EUIC_FLAVOR_BASIC_OBJECTS;}
+    long GetFlavor() const override {return QT3DS_FLAVOR_BASIC_OBJECTS;}
 
 private:
     QString m_name;

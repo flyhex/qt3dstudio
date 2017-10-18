@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STUDIO_RENDERER
-#define UIC_STUDIO_RENDERER
+#ifndef QT3DS_STUDIO_RENDERER
+#define QT3DS_STUDIO_RENDERER
 #pragma once
 
 #include "IDocSceneGraph.h"

@@ -54,7 +54,7 @@ bool CExplorerFileDropSource::ValidateTarget(CDropTarget *inTarget)
 {
     // Check the type is valid and if target can accept
     bool theValidTarget =
-        ((m_ObjectType != OBJTYPE_UNKNOWN) && (inTarget->GetObjectType() == EUIC_FLAVOR_FILE));
+        ((m_ObjectType != OBJTYPE_UNKNOWN) && (inTarget->GetObjectType() == QT3DS_FLAVOR_FILE));
     SetHasValidTarget(theValidTarget);
 
     return theValidTarget;

@@ -98,7 +98,7 @@ CDropSource *CDropProxy::GetDropSource(const QMimeData *inDataObject, long inFla
 {
     const CDropSource *theDropSource = nullptr;
     switch (inFlavor) {
-    case EUIC_FLAVOR_FILE: {
+    case QT3DS_FLAVOR_FILE: {
         // Check if we have a Drop File on our hands.
         if (inDataObject->hasUrls()) {
             // Get the number of files being dragged
@@ -112,21 +112,21 @@ CDropSource *CDropProxy::GetDropSource(const QMimeData *inDataObject, long inFla
                 CUICFile theFile(Q3DStudio::CString::fromQString(theFilename));
                 // Dragging a single file
                 theDropSource =
-                    CDropSourceFactory::Create(EUIC_FLAVOR_FILE, &theFile, sizeof(CUICFile *));
+                    CDropSourceFactory::Create(QT3DS_FLAVOR_FILE, &theFile, sizeof(CUICFile *));
             }
         }
     } break;
-    case EUIC_FLAVOR_TEXT:
+    case QT3DS_FLAVOR_TEXT:
     // Don't do anythiing for this
-    case EUIC_FLAVOR_LISTBOX:
+    case QT3DS_FLAVOR_LISTBOX:
     // Don't do anythiing for this
-    case EUIC_FLAVOR_BASIC_OBJECTS:
+    case QT3DS_FLAVOR_BASIC_OBJECTS:
     // Don't do anythiing for this
-    case EUIC_FLAVOR_ASSET_LIB:
+    case QT3DS_FLAVOR_ASSET_LIB:
     // make an Aset out of this.
-    case EUIC_FLAVOR_ASSET_TL:
+    case QT3DS_FLAVOR_ASSET_TL:
     // make an Aset out of this.
-    case EUIC_FLAVOR_ASSET_UICFILE:
+    case QT3DS_FLAVOR_ASSET_UICFILE:
         // make an Aset out of this.
         // Get a pointer to the object
         theDropSource = dynamic_cast<const CDropSource *>(inDataObject);
@@ -167,7 +167,7 @@ long CDropProxy::GetDragItemCount(const QMimeData *inDataObject)
  */
 bool CDropProxy::HasMainFlavor(const QMimeData *inDataObject, long inFlavor)
 {
-    if (inFlavor == EUIC_FLAVOR_FILE)
+    if (inFlavor == QT3DS_FLAVOR_FILE)
         return inDataObject->hasUrls();
     auto source = dynamic_cast<const CDropSource *>(inDataObject);
     return source != nullptr && source->GetFlavor() == inFlavor;
@@ -227,7 +227,7 @@ void CDropProxy::dragMoveEvent(QDragMoveEvent *event)
                         }
 
                         // delete the drop source if it was a file
-                        if (EUIC_FLAVOR_FILE == theDropSource->GetFlavor()) {
+                        if (QT3DS_FLAVOR_FILE == theDropSource->GetFlavor()) {
                             delete theDropSource;
                         }
                         break;

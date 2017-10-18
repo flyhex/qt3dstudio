@@ -786,7 +786,7 @@ CUICDMInstanceHandle CUICDMTimelineItemBinding::GetInstanceHandle() const
 
 long CUICDMTimelineItemBinding::GetFlavor() const
 {
-    return EUIC_FLAVOR_ASSET_TL;
+    return QT3DS_FLAVOR_ASSET_TL;
 }
 
 void CUICDMTimelineItemBinding::OnBeginDataModelNotifications()

@@ -103,7 +103,7 @@ bool CListBoxDropTarget::Drop(CDropSource &inSource)
  */
 long CListBoxDropTarget::GetObjectType()
 {
-    return EUIC_FLAVOR_LISTBOX;
+    return QT3DS_FLAVOR_LISTBOX;
 }
 
 //===============================================================================

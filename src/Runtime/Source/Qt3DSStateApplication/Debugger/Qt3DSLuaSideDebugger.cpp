@@ -417,7 +417,7 @@ struct SLuaSideDebugger : public ILuaDebugger, public IDebugStreamListener
         , mRefCount(0)
     {
         lua_pushlightuserdata(m_LuaState, this);
-        lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "uic_lua_debugger_impl");
+        lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_lua_debugger_impl");
         lua_sethook(m_LuaState, DebugHook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE, 0);
         m_BaseStr.assign(m_ApplicationDir.c_str());
         m_Stream->SetListener(this);
@@ -1062,7 +1062,7 @@ struct SLuaSideDebugger : public ILuaDebugger, public IDebugStreamListener
     {
         lua_sethook(m_LuaState, DebugHook, 0, 0);
         lua_pushlightuserdata(m_LuaState, NULL);
-        lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "uic_lua_debugger_impl");
+        lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_lua_debugger_impl");
     }
 
     template <typename TMsgType>
@@ -1110,7 +1110,7 @@ struct SLuaSideDebugger : public ILuaDebugger, public IDebugStreamListener
 
     static SLuaSideDebugger *GetThisFromLua(lua_State *state)
     {
-        lua_getfield(state, LUA_REGISTRYINDEX, "uic_lua_debugger_impl");
+        lua_getfield(state, LUA_REGISTRYINDEX, "qt3ds_lua_debugger_impl");
         SLuaSideDebugger *retval = reinterpret_cast<SLuaSideDebugger *>(lua_touserdata(state, -1));
         lua_pop(state, 1);
         return retval;
@@ -1118,7 +1118,7 @@ struct SLuaSideDebugger : public ILuaDebugger, public IDebugStreamListener
 
     static int DebuggerPrint(lua_State *state)
     {
-        lua_getfield(state, LUA_REGISTRYINDEX, "uic_lua_debugger_impl");
+        lua_getfield(state, LUA_REGISTRYINDEX, "qt3ds_lua_debugger_impl");
         SLuaSideDebugger &theDebugger =
             *reinterpret_cast<SLuaSideDebugger *>(lua_touserdata(state, -1));
         lua_pop(state, 1);

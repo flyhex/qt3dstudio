@@ -123,7 +123,7 @@ public:
       */
     T &operator*() const
     {
-        UIC_THROWNULL(m_T, -1);
+        QT3DS_THROWNULL(m_T, -1);
         return *m_T;
     }
     //=======================================================================
@@ -132,7 +132,7 @@ public:
       */
     T *operator->() const
     {
-        UIC_THROWNULL(m_T, -1);
+        QT3DS_THROWNULL(m_T, -1);
         return m_T;
     }
     //=======================================================================
@@ -142,7 +142,7 @@ public:
     T** operator&() const
     {
             //This usually indicates an error
-            //UIC_THROWFALSE( m_T == NULL, AUTO_PTR_ERROR );
+            //QT3DS_THROWFALSE( m_T == NULL, AUTO_PTR_ERROR );
             return &m_T;
     }
     CAutoPtr< handler, T >* operator&()

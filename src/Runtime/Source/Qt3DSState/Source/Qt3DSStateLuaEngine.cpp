@@ -742,7 +742,7 @@ namespace __SLuaEngineImpl_Static_Calls__ {
 
     //		if ( !validFunction ) return;
     //
-    //		lua_getfield( inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine" );
+    //		lua_getfield( inLuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine" );
     //		SLuaEngineImpl* theEngine = (SLuaEngineImpl*)( lua_touserdata( inLuaState, -1 ) );
     //		lua_pop( inLuaState, 1 );
     //		theEngine->m_PerfNameBuilder.assign( stackInfo.source + 1 );
@@ -837,7 +837,7 @@ SLuaEngineImpl::SLuaEngineImpl(qt3ds::state::SNDDStateContext &inContext)
     lua_rawseti(m_LuaState, LUA_REGISTRYINDEX, KEY_REGISTEREDCALLBACKS);
 
     lua_pushlightuserdata(m_LuaState, this);
-    lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
+    lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine");
 
     lua_getglobal(m_LuaState, "math"); // 2 = "math" table
     lua_pushstring(m_LuaState, "randomseed"); // 3 = "randomseed"
@@ -1151,12 +1151,12 @@ SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
         QT3DS_ASSERT(isTable);
         (void)isTable;
         // shove it in the global table under its path.  We will get to this again in a second
-        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_state_machines");
+        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_state_machines");
         if (lua_isnil(m_LuaState, -1)) {
             lua_pop(m_LuaState, 1);
             lua_newtable(m_LuaState);
             lua_pushvalue(m_LuaState, -1);
-            lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "uic_state_machines");
+            lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_state_machines");
         }
         lua_pushvalue(m_LuaState, -2);
         lua_setfield(m_LuaState, -2, inId);
@@ -1189,7 +1189,7 @@ SLuaEngineImpl::CreateStateMachine(const char8_t *inPath, const char8_t *inId,
         // At which point we can call start, which will pop everything off the stack
         qt3ds::state::ILuaScriptContext::Initialize(m_LuaState, inId);
         // Now get the interpreter from the map so we can get its value
-        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uic_state_machines");
+        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "qt3ds_state_machines");
         lua_getfield(m_LuaState, -1, inId);
         theInterpreter = qt3ds::state::ILuaScriptContext::GetInterpreterFromBindings(m_LuaState);
     }
@@ -1389,7 +1389,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
 
     SLuaEngineImpl *GetLuaEngineFromLua(lua_State *inLuaState)
     {
-        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
+        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine");
         SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
         lua_pop(inLuaState, 1);
         return theEngine;
@@ -1453,7 +1453,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
 
     int GetDirectory(lua_State *inLuaState)
     {
-        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
+        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine");
         SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
         lua_pop(inLuaState, 1);
         if (theEngine) {
@@ -1487,7 +1487,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
 
     int ParseSCXML(lua_State *inLuaState)
     {
-        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
+        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine");
         SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
 
         qt3ds::state::debugger::IDebugger *theDebugger = 0;
@@ -1508,7 +1508,7 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
             return 1;
         }
         // shove it in the global table under its path.  We will get to this again in a second
-        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_state_machines");
+        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_state_machines");
         if (lua_isnil(inLuaState, -1))
             return 1;
 
@@ -1518,24 +1518,24 @@ namespace __SLuaEngineImpl_Static_Global_Lua_Exporter_Declaration__ {
 
     int GetEventSystem(lua_State *inLuaState)
     {
-        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_event_system");
+        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_event_system");
         if (!lua_istable(inLuaState, -1)) {
             lua_pop(inLuaState, 1);
-            lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
+            lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine");
             SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
             lua_pop(inLuaState, 1);
             qt3ds::evt::IEventSystem &theEventSystem =
                 theEngine->m_Context.m_Factory->GetEventSystem();
             qt3ds::evt::SLuaEventPollerBinding::WrapEventPoller(inLuaState, theEventSystem);
             lua_pushvalue(inLuaState, -1);
-            lua_setfield(inLuaState, LUA_REGISTRYINDEX, "uic_event_system");
+            lua_setfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_event_system");
         }
         return 1;
     }
 
     int GetMillisecondsSinceLastFrame(lua_State *inLuaState)
     {
-        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "uic_lua_engine");
+        lua_getfield(inLuaState, LUA_REGISTRYINDEX, "qt3ds_lua_engine");
         SLuaEngineImpl *theEngine = (SLuaEngineImpl *)(lua_touserdata(inLuaState, -1));
         lua_pop(inLuaState, 1);
         if (theEngine) {

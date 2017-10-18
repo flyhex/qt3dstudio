@@ -86,7 +86,7 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
     // Folder
     // - The destination copy must NOT be read-only even if the source is read-only
     // For DAE, it will import the file.
-    if (inSource.GetFlavor() == EUIC_FLAVOR_FILE) {
+    if (inSource.GetFlavor() == QT3DS_FLAVOR_FILE) {
         // Create target directory if it doesn't exist
         if (!m_TargetDir.Exists())
             m_TargetDir.CreateDir(true);
@@ -225,5 +225,5 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
  */
 long CProjectDropTarget::GetObjectType()
 {
-    return EUIC_FLAVOR_FILE;
+    return QT3DS_FLAVOR_FILE;
 }

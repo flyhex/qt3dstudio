@@ -38,7 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#if defined UIC_PLATFORM_NEEDS_WCHAR_T
+#if defined QT3DS_PLATFORM_NEEDS_WCHAR_T
 
 inline size_t wcslen(const wchar_t *inStr)
 {

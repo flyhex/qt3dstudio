@@ -139,12 +139,12 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, inspectorDock));
 
     w->RegiserForDnd(w);
-    w->AddMainFlavor(EUIC_FLAVOR_LISTBOX);
-    w->AddMainFlavor(EUIC_FLAVOR_FILE);
-    w->AddMainFlavor(EUIC_FLAVOR_ASSET_UICFILE);
-    w->AddMainFlavor(EUIC_FLAVOR_ASSET_LIB);
-    w->AddMainFlavor(EUIC_FLAVOR_ASSET_TL);
-    w->AddMainFlavor(EUIC_FLAVOR_BASIC_OBJECTS);
+    w->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
+    w->AddMainFlavor(QT3DS_FLAVOR_FILE);
+    w->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
+    w->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
+    w->AddMainFlavor(QT3DS_FLAVOR_ASSET_TL);
+    w->AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 
     // Set to a default state
     Reset();

@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UIC_RENDER_PATH_H
-#define UIC_RENDER_PATH_H
+#ifndef QT3DS_RENDER_PATH_H
+#define QT3DS_RENDER_PATH_H
 #include "Qt3DSRender.h"
 #include "Qt3DSRenderNode.h"
 

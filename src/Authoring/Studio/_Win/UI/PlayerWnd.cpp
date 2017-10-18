@@ -73,10 +73,10 @@ CPlayerWnd::CPlayerWnd(QWidget *parent)
 
     setAcceptDrops(true);
     RegiserForDnd(this);
-    AddMainFlavor(EUIC_FLAVOR_FILE);
-    AddMainFlavor(EUIC_FLAVOR_ASSET_UICFILE);
-    AddMainFlavor(EUIC_FLAVOR_ASSET_LIB);
-    AddMainFlavor(EUIC_FLAVOR_BASIC_OBJECTS);
+    AddMainFlavor(QT3DS_FLAVOR_FILE);
+    AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
+    AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
+    AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 
     setFormat(CWGLRenderContext::selectSurfaceFormat(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

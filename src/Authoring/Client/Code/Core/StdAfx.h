@@ -56,7 +56,7 @@
 //	Windows Includes
 //==============================================================================
 #include <winsock2.h> //must include before windows.h to avoid winsock.h defines.
-#define UIC_LITTLE_ENDIAN
+#define QT3DS_LITTLE_ENDIAN
 #include <windows.h>
 //==============================================================================
 //	ATL Includes
@@ -139,7 +139,7 @@ extern CComModule _Module;
 //==============================================================================
 //	Global Variables
 //==============================================================================
-UIC_LOGEXTERN; // Enables access to the logger for all files.  See UICLog for more info.
+QT3DS_LOGEXTERN; // Enables access to the logger for all files.  See UICLog for more info.
 
 // I put these in to help with some of the data model compile times.
 #ifdef _WIN32

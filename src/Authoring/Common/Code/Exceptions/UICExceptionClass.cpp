@@ -286,7 +286,7 @@ void CUICExceptionClass::Initialize()
             DWORD	theDataSize;
 
             // Open Key
-            theReturn = ::RegOpenKeyEx( HKEY_CURRENT_USER, UIC_CLIENT_REGISTRY_KEY, 0, KEY_READ,
+            theReturn = ::RegOpenKeyEx( HKEY_CURRENT_USER, QT3DS_CLIENT_REGISTRY_KEY, 0, KEY_READ,
     &theKey );
 
             if ( ERROR_SUCCESS == theReturn && theKey )
@@ -294,19 +294,19 @@ void CUICExceptionClass::Initialize()
                     // Query the registry for the TrackErrorTypes value
                     theValueType = REG_DWORD;
                     theDataSize = sizeof(DWORD);
-                    theReturn = ::RegQueryValueEx( theKey, UIC_CLIENT_TRACKERRORTYPES_VALUE, NULL,
+                    theReturn = ::RegQueryValueEx( theKey, QT3DS_CLIENT_TRACKERRORTYPES_VALUE, NULL,
     &theValueType, reinterpret_cast<BYTE*>(&s_HandlingTypes), &theDataSize );
 
                     // Query the registry for the ReportingLevel value
                     theValueType = REG_DWORD;
                     theDataSize = sizeof(DWORD);
-                    theReturn = ::RegQueryValueEx( theKey, UIC_CLIENT_REPORTINGLEVEL_VALUE, NULL,
+                    theReturn = ::RegQueryValueEx( theKey, QT3DS_CLIENT_REPORTINGLEVEL_VALUE, NULL,
     &theValueType,  reinterpret_cast<BYTE*>(&s_ReportingLevel), &theDataSize );
 
                     // Query the registry for the ErrorAction value
                     theValueType = REG_DWORD;
                     theDataSize = sizeof(DWORD);
-                    theReturn = ::RegQueryValueEx( theKey, UIC_CLIENT_ERRORACTION_VALUE, NULL,
+                    theReturn = ::RegQueryValueEx( theKey, QT3DS_CLIENT_ERRORACTION_VALUE, NULL,
     &theValueType,  reinterpret_cast<BYTE*>(&s_Actions), &theDataSize );
 
                     // Close reg file

@@ -78,30 +78,30 @@ typedef CUICDMMetaDataPropertyHandle TMetaDataPropertyHandle;
 typedef CUICDMCategoryHandle TCategoryHandle;
 
 namespace qt3dsdm {
-#define UIC_WCHAR_T_None L"None"
-#define UIC_WCHAR_T_StringList L"StringList"
-#define UIC_WCHAR_T_Range L"Range"
-#define UIC_WCHAR_T_Image L"Image"
-#define UIC_WCHAR_T_Color L"Color"
-#define UIC_WCHAR_T_Rotation L"Rotation"
-#define UIC_WCHAR_T_Font L"Font"
-#define UIC_WCHAR_T_FontSize L"FontSize"
-#define UIC_WCHAR_T_MultiLine L"MultiLine"
-#define UIC_WCHAR_T_ObjectRef L"ObjectRef"
-#define UIC_WCHAR_T_Mesh L"Mesh"
-#define UIC_WCHAR_T_Import L"Import"
-#define UIC_WCHAR_T_Texture L"Texture"
-#define UIC_WCHAR_T_Image2D L"Image2D"
-#define UIC_WCHAR_T_Buffer L"Buffer"
-#define UIC_WCHAR_T_Property L"Property"
-#define UIC_WCHAR_T_Dependent L"Dependent"
-#define UIC_WCHAR_T_Slide L"Slide"
-#define UIC_WCHAR_T_Event L"Event"
-#define UIC_WCHAR_T_Object L"Object"
-#define UIC_WCHAR_T_Signal L"Signal"
-#define UIC_WCHAR_T_Renderable L"Renderable"
-#define UIC_WCHAR_T_PathBuffer L"PathBuffer"
-#define UIC_WCHAR_T_ShadowMapResolution L"ShadowMapResolution"
+#define QT3DS_WCHAR_T_None L"None"
+#define QT3DS_WCHAR_T_StringList L"StringList"
+#define QT3DS_WCHAR_T_Range L"Range"
+#define QT3DS_WCHAR_T_Image L"Image"
+#define QT3DS_WCHAR_T_Color L"Color"
+#define QT3DS_WCHAR_T_Rotation L"Rotation"
+#define QT3DS_WCHAR_T_Font L"Font"
+#define QT3DS_WCHAR_T_FontSize L"FontSize"
+#define QT3DS_WCHAR_T_MultiLine L"MultiLine"
+#define QT3DS_WCHAR_T_ObjectRef L"ObjectRef"
+#define QT3DS_WCHAR_T_Mesh L"Mesh"
+#define QT3DS_WCHAR_T_Import L"Import"
+#define QT3DS_WCHAR_T_Texture L"Texture"
+#define QT3DS_WCHAR_T_Image2D L"Image2D"
+#define QT3DS_WCHAR_T_Buffer L"Buffer"
+#define QT3DS_WCHAR_T_Property L"Property"
+#define QT3DS_WCHAR_T_Dependent L"Dependent"
+#define QT3DS_WCHAR_T_Slide L"Slide"
+#define QT3DS_WCHAR_T_Event L"Event"
+#define QT3DS_WCHAR_T_Object L"Object"
+#define QT3DS_WCHAR_T_Signal L"Signal"
+#define QT3DS_WCHAR_T_Renderable L"Renderable"
+#define QT3DS_WCHAR_T_PathBuffer L"PathBuffer"
+#define QT3DS_WCHAR_T_ShadowMapResolution L"ShadowMapResolution"
 
 #define ITERATE_ADDITIONAL_META_DATA_TYPES                                                         \
     HANDLE_ADDITIONAL_META_DATA_TYPE(None)                                                         \
@@ -128,7 +128,7 @@ struct WStrOps<AdditionalMetaDataType::Value>
         switch (item) {
 #define HANDLE_ADDITIONAL_META_DATA_TYPE(name)                                                     \
         case AdditionalMetaDataType::name:                                                             \
-    wcscpy_s(buffer.begin(), buffer.size(), UIC_WCHAR_T_##name);                               \
+    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
     return 1;
         ITERATE_ADDITIONAL_META_DATA_TYPES
         #undef HANDLE_ADDITIONAL_META_DATA_TYPE
@@ -138,7 +138,7 @@ struct WStrOps<AdditionalMetaDataType::Value>
     bool StrTo(const wchar_t *buffer, AdditionalMetaDataType::Value &item)
     {
 #define HANDLE_ADDITIONAL_META_DATA_TYPE(name)                                                     \
-    if (AreEqual(buffer, UIC_WCHAR_T_##name)) {                                                    \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
     item = AdditionalMetaDataType::name;                                                       \
     return true;                                                                               \
     }
@@ -164,7 +164,7 @@ QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value i
     switch (item) {
 #define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
     case HandlerArgumentType::name:                                                               \
-    wcscpy_s(buffer.begin(), buffer.size(), UIC_WCHAR_T_##name);                               \
+    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
     return 1;
     ITERATE_HANDLER_ARG_TYPES
         #undef HANDLE_HANDLER_ARG_TYPE
@@ -175,7 +175,7 @@ QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value i
 bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerArgumentType::Value &item)
 {
 #define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
-    if (AreEqual(buffer, UIC_WCHAR_T_##name)) {                                                    \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
     item = HandlerArgumentType::name;                                                              \
     return true;                                                                               \
 }
@@ -184,14 +184,14 @@ bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerAr
             return false;
 }
 
-#define UIC_WCHAR_T_FloatRange L"FloatRange"
-#define UIC_WCHAR_T_LongRange L"LongRange"
-#define UIC_WCHAR_T_Vector L"Vector"
-#define UIC_WCHAR_T_MultiLineString L"MultiLineString"
-#define UIC_WCHAR_T_Boolean L"Boolean"
-#define UIC_WCHAR_T_Guid L"Guid"
-#define UIC_WCHAR_T_StringListOrInt L"StringListOrInt"
-#define UIC_WCHAR_T_Scale L"Scale"
+#define QT3DS_WCHAR_T_FloatRange L"FloatRange"
+#define QT3DS_WCHAR_T_LongRange L"LongRange"
+#define QT3DS_WCHAR_T_Vector L"Vector"
+#define QT3DS_WCHAR_T_MultiLineString L"MultiLineString"
+#define QT3DS_WCHAR_T_Boolean L"Boolean"
+#define QT3DS_WCHAR_T_Guid L"Guid"
+#define QT3DS_WCHAR_T_StringListOrInt L"StringListOrInt"
+#define QT3DS_WCHAR_T_Scale L"Scale"
 
 #define ITERATE_UICDM_COMPLETE_TYPES                                                               \
     HANDLE_UIDM_COMPLETE_NONE_TYPE                                                                 \
@@ -288,7 +288,7 @@ QT3DSU32 WStrOps<CompleteMetaDataType::Enum>::ToStr(CompleteMetaDataType::Enum i
     return 1;
 #define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
     case CompleteMetaDataType::name:                                                               \
-    wcscpy_s(buffer.begin(), buffer.size(), UIC_WCHAR_T_##name);                               \
+    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
     return 1;
 
     ITERATE_UICDM_COMPLETE_TYPES
@@ -308,7 +308,7 @@ bool WStrOps<CompleteMetaDataType::Enum>::StrTo(const wchar_t *buffer,
     return true;                                                                               \
 }
 #define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
-    if (AreEqual(buffer, UIC_WCHAR_T_##name)) {                                                    \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
     item = CompleteMetaDataType::name;                                                         \
     return true;                                                                               \
 }

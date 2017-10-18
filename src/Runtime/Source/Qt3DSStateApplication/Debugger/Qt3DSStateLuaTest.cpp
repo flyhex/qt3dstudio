@@ -78,11 +78,11 @@ int Output(lua_State *inState)
 {
     lua_concat(inState, lua_gettop(inState));
     const char *message = lua_tostring(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_logger");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_logger");
     IDataLogger *theLogger = (IDataLogger *)lua_touserdata(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_line");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_line");
     int line = (int)lua_tonumber(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_file");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_file");
     const char *file = lua_tostring(inState, -1);
     if (theLogger) {
         theLogger->Log(LogType::Info, file, line, message);
@@ -95,9 +95,9 @@ int TestError(lua_State *inState)
 {
     const char *message = lua_tostring(inState, -2);
     int stackDepth = (int)lua_tonumber(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_logger");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_logger");
     IDataLogger *theLogger = (IDataLogger *)lua_touserdata(inState, -1);
-    lua_getfield(inState, LUA_REGISTRYINDEX, "uic_test_file");
+    lua_getfield(inState, LUA_REGISTRYINDEX, "qt3ds_test_file");
     const char *file = lua_tostring(inState, -1);
 
     lua_Debug ar;
@@ -138,11 +138,11 @@ Option<STestResults> RunTest(const char8_t *inFullPath, const char8_t *inRootDir
 
     // setup the test output system.
     lua_pushlightuserdata(theContext, &inLogger);
-    lua_setfield(theContext, LUA_REGISTRYINDEX, "uic_test_logger");
+    lua_setfield(theContext, LUA_REGISTRYINDEX, "qt3ds_test_logger");
     lua_pushstring(theContext, fname);
-    lua_setfield(theContext, LUA_REGISTRYINDEX, "uic_test_file");
+    lua_setfield(theContext, LUA_REGISTRYINDEX, "qt3ds_test_file");
     lua_pushnumber(theContext, 0.f);
-    lua_setfield(theContext, LUA_REGISTRYINDEX, "uic_test_line");
+    lua_setfield(theContext, LUA_REGISTRYINDEX, "qt3ds_test_line");
     lua_pushcfunction(theContext, Output);
     lua_setfield(theContext, LUA_GLOBALSINDEX, "output");
     lua_pushcfunction(theContext, Output);

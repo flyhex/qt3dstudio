@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UIC_MESSAGE_BOX_H
-#define INCLUDED_UIC_MESSAGE_BOX_H 1
+#ifndef INCLUDED_QT3DS_MESSAGE_BOX_H
+#define INCLUDED_QT3DS_MESSAGE_BOX_H 1
 
 #pragma once
 
@@ -86,4 +86,4 @@ public:
 protected:
 };
 
-#endif // INCLUDED_UIC_MESSAGE_BOX_H
+#endif // INCLUDED_QT3DS_MESSAGE_BOX_H

@@ -52,13 +52,13 @@ CListBoxDropSource::CListBoxDropSource(long inFlavor, IDragable *inDragable)
 
 //===============================================================================
 /**
- * 	Validate that the drop target is EUIC_FLAVOR_LISTBOX type.
+ * 	Validate that the drop target is QT3DS_FLAVOR_LISTBOX type.
  *	@param inTarget	Drop target for validation
- *	@return true if inTarget is EUIC_FLAVOR_LISTBOX; false if otherwise
+ *	@return true if inTarget is QT3DS_FLAVOR_LISTBOX; false if otherwise
  */
 bool CListBoxDropSource::ValidateTarget(CDropTarget *inTarget)
 {
-    bool theValidTarget = (inTarget->GetObjectType() == EUIC_FLAVOR_LISTBOX);
+    bool theValidTarget = (inTarget->GetObjectType() == QT3DS_FLAVOR_LISTBOX);
     SetHasValidTarget(theValidTarget);
 
     return theValidTarget;

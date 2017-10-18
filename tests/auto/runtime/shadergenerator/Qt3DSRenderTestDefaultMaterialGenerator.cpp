@@ -447,17 +447,17 @@ TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
 
     if (key.ssm) {
         CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
-                              .RegisterStr("UIC_ENABLE_SSM"));
+                              .RegisterStr("QT3DS_ENABLE_SSM"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
     if (key.ssao) {
         CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
-                              .RegisterStr("UIC_ENABLE_SSAO"));
+                              .RegisterStr("QT3DS_ENABLE_SSAO"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
     if (key.ssdo) {
         CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
-                              .RegisterStr("UIC_ENABLE_SSDO"));
+                              .RegisterStr("QT3DS_ENABLE_SSDO"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
 
@@ -465,11 +465,11 @@ TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
         renderImpl->DefaultMaterialShaderKeyProperties().m_HasIbl.SetValue(
             params->shaderkey, true);
         CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
-                              .RegisterStr("UIC_ENABLE_LIGHT_PROBE"));
+                              .RegisterStr("QT3DS_ENABLE_LIGHT_PROBE"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
         if (key.iblfow) {
             CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
-                                  .RegisterStr("UIC_ENABLE_IBL_FOV"));
+                                  .RegisterStr("QT3DS_ENABLE_IBL_FOV"));
             params->features.push_back(SShaderPreprocessorFeature(str, true));
         }
     }

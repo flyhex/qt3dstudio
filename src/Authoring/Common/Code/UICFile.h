@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef INCLUDED_UIC_FILE_H
-#define INCLUDED_UIC_FILE_H 1
+#ifndef INCLUDED_QT3DS_FILE_H
+#define INCLUDED_QT3DS_FILE_H 1
 
 #pragma once
 
@@ -113,4 +113,4 @@ protected:
     Q3DStudio::CString m_Path;
 };
 
-#endif // INCLUDED_UIC_FILE_H
+#endif // INCLUDED_QT3DS_FILE_H

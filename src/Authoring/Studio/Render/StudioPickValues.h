@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STUDIO_PICK_VALUES_H
-#define UIC_STUDIO_PICK_VALUES_H
+#ifndef QT3DS_STUDIO_PICK_VALUES_H
+#define QT3DS_STUDIO_PICK_VALUES_H
 #pragma once
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "foundation/Qt3DSUnionCast.h"

@@ -234,8 +234,8 @@ void WidgetControl::DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameL
             if (theDragFileName.Length() > 0) {
                 theDragFile = new CUICFile(theDragFileName);
                 CDropSource *theDropSource = CDropSourceFactory::Create(
-                    EUIC_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));
-                // Add the UIC_GESTURE_FLAVOR.  This will allow us to drag to StudioControls.
+                    QT3DS_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));
+                // Add the QT3DS_GESTURE_FLAVOR.  This will allow us to drag to StudioControls.
                 drag.setMimeData(theDropSource);
                 break;
             }

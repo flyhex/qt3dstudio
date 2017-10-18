@@ -93,7 +93,7 @@ void CTreeControl::Draw(CRenderer *inRenderer)
 CTreeItem *CTreeControl::FindPrevSortSibling(CTreeItem *, CTreeItem *)
 {
 #ifdef KDAB_TEMPORARILY_REMOVED
-    UIC_THROW(E_FAIL); // this is ass
+    QT3DS_THROW(E_FAIL); // this is ass
 #endif
     return NULL;
 }
@@ -479,7 +479,7 @@ void CTreeControl::ExpandFrom(CTreeItem *inItem)
 void CTreeControl::CollapseAll()
 {
     // Not implemented
-    UIC_THROW(STUDIO_E_FAIL);
+    QT3DS_THROW(STUDIO_E_FAIL);
 }
 
 //=============================================================================

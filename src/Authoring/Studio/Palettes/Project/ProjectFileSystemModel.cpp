@@ -109,7 +109,7 @@ QMimeData *ProjectFileSystemModel::mimeData(const QModelIndexList &indexes) cons
 {
     const auto path = filePath(indexes.first().row()); // can only drag one item
     CUICFile dragFile(Q3DStudio::CString::fromQString(path));
-    return CDropSourceFactory::Create(EUIC_FLAVOR_ASSET_UICFILE,
+    return CDropSourceFactory::Create(QT3DS_FLAVOR_ASSET_UICFILE,
                                       reinterpret_cast<void *>(&dragFile),
                                       sizeof(dragFile));
 }

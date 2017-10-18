@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UIC_STUDIO_PATH_WIDGET_H
-#define UIC_STUDIO_PATH_WIDGET_H
+#ifndef QT3DS_STUDIO_PATH_WIDGET_H
+#define QT3DS_STUDIO_PATH_WIDGET_H
 #pragma once
 #include "StudioWidget.h"
 #include "UICDMHandles.h"
