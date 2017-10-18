@@ -38,8 +38,6 @@
 #include "PlatformTypes.h"
 
 #include "DropTarget.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/trackable.hpp>
 #include "ControlGraphIterators.h"
 
 class CRenderer;
@@ -94,7 +92,7 @@ namespace Control {
 }
 }
 
-class CControl : public boost::BOOST_SIGNALS_NAMESPACE::trackable
+class CControl
 {
 
     CControl(CControl &inOther);

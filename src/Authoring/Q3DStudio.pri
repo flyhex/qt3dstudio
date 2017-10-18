@@ -18,7 +18,12 @@ HEADERS += \
     Studio/_Win/DragNDrop/DropProxy.h \
     Studio/Palettes/Inspector/ObjectListModel.h \
     Studio/Palettes/Inspector/ObjectBrowserView.h \
-    $$PWD/Studio/_Win/Application/SubPresentationsDlg.h
+    $$PWD/Studio/_Win/Application/SubPresentationsDlg.h \
+    Studio/Controls/ButtonControl.h \
+    Studio/Controls/ToggleButton.h \
+    Studio/Palettes/Timeline/IBreadCrumbProvider.h \
+    Studio/Controls/BreadCrumbControl.h \
+    Studio/Controls/TreeItem.h
 
 FORMS += \
     Studio/_Win/UI/timeeditdlg.ui \
@@ -277,4 +282,5 @@ HEADERS += \
     Studio/Palettes/Project/ProjectView.h \
     Studio/Palettes/Project/ProjectFileSystemModel.h \
     Studio/Palettes/Project/ProjectContextMenu.h \
+    Common/Code/Graph/GraphPosition.h
 

@@ -51,10 +51,6 @@
 #endif
 
 #if defined(_LINUX) || defined(_MACOSX) || defined(_LINUXPLATFORM)
-// Boost insists this be defined
-namespace boost {
-void throw_exception(std::exception const & e) {}
-}
 
 namespace qt3ds {
 void NVAssert(const char *exp, const char *file, int line, bool *igonore)

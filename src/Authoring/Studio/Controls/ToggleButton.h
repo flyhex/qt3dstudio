@@ -54,6 +54,7 @@
  */
 class CToggleButton : public CButtonControl
 {
+    Q_OBJECT
 public:
     CToggleButton();
     virtual ~CToggleButton();
@@ -77,7 +78,8 @@ public:
     * @param CToggleButton* pointer to the button that generated the event
     * @param EButtonState the state of the button as a result of this event
     */
-    boost::signal2<void, CToggleButton *, CButtonControl::EButtonState> SigToggle;
+Q_SIGNALS:
+    void SigToggle(CToggleButton*, CButtonControl::EButtonState);
 
 protected:
     // protected to make fools use SetToggleState instead.

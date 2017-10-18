@@ -72,8 +72,9 @@ CMasterControl::CMasterControl(IMasterControlProvider *inProvider)
     m_MenuButton->SetFillStyleAll(CProceduralButton<CButtonControl>::EFILLSTYLE_FLOOD);
     CProceduralButton<CButtonControl>::SBorderOptions theBorders(false, false, false, false);
     m_MenuButton->SetBorderVisibilityAll(theBorders);
-    m_MenuButton->SigButtonDown.connect(std::bind(&CMasterControl::OnMenuButtonDown, this,
-                                                  std::placeholders::_1));
+    QObject::connect(m_MenuButton,&CButtonControl::SigButtonDown,
+                     std::bind(&CMasterControl::OnMenuButtonDown, this,
+                               std::placeholders::_1) );
     m_TabControl->SetTabBarSibling(m_MenuButton);
 }
 

@@ -4,7 +4,6 @@ load(qt_build_paths)
 # Common defines across platforms that should be checked if/where they are used
 # as we remove dependencies to see where we can reduce
 DEFINES += \
-    BOOST_SIGNALS_NO_DEPRECATION_WARNING \
     QT3DS_FOUNDATION_NO_EXPORTS \
     _CRT_SECURE_NO_DEPRECATE \
     _CRT_NONSTDC_NO_DEPRECATE \
@@ -64,21 +63,8 @@ linux-clang {
     DEFINES += __STRICT_ANSI__
 }
 
-integrity {
-    exists($$THIRDPARTY_DIR/boost/1.65.0) {
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.65.0
-    } else {
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.55.0
-    }
-}
-
 macos {
     DEFINES += _MACOSX _LINUXPLATFORM WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
-
-    BOOSTDIR = /usr/local/lib
-    BOOSTSIGNALLIB = boost_signals-mt
-    BOOSTSYSTEMLIB = boost_system-mt
-    BOOSTFILESYSTEMLIB = boost_filesystem-mt
 
     contains(QT_ARCH, x86_64) {
         BINDIR = $$PWD/../Bin/Macosx64
@@ -87,33 +73,14 @@ macos {
     }
 
     INCLUDEPATH += /usr/local/include
-    # macOS uses GLog from Homebrew, the thirdparty one doesn't work
-    # which also means we use Boost from Homebrew
 
     QMAKE_CXXFLAGS += -Wno-unused-local-typedef
     QMAKE_CFLAGS += -Wno-unused-local-typedef
 }
 
-linux:!android {
-    BOOSTDIR = /usr/lib/x86_64-linux-gnu/
-    BOOSTSIGNALLIB = boost_signals
-    BOOSTSYSTEMLIB = boost_system
-    BOOSTFILESYSTEMLIB = boost_filesystem
-    exists($$THIRDPARTY_DIR/boost/1.65.0) {
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.65.0
-    } else {
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.55.0
-    }
-}
-
 android {
     QMAKE_CXXFLAGS -= -fstack-protector-strong
     QMAKE_CFLAGS -= -fstack-protector-strong
-    exists($$THIRDPARTY_DIR/boost/1.65.0) {
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.65.0
-    } else {
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.55.0
-    }
     # TODO: Should be done using this instead of copying the GLES headers, but including this
     # causes lots of conflicting definitions in signal.h for some reason. Feel free to fix it if
     # you know how. After this works, GLES3 and GLES2 folders can be deleted from
@@ -145,42 +112,6 @@ win32 {
 
     contains(QT_ARCH, x86_64) {
         DEFINES += _WIN64
-    }
-
-    exists($$THIRDPARTY_DIR/boost/1.65.0) {
-        contains(QT_ARCH, x86_64) {
-            BOOSTDIR = $$THIRDPARTY_DIR/boost/1.65.0/msvc14/lib64
-        } else {
-            BOOSTDIR = $$THIRDPARTY_DIR/boost/1.65.0/msvc14/lib
-        }
-
-        CONFIG(debug, debug|release) {
-            BOOSTSIGNALLIB = libboost_signals-vc140-mt-gd-1_65
-            BOOSTSYSTEMLIB = libboost_system-vc140-mt-gd-1_65
-            BOOSTFILESYSTEMLIB = libboost_filesystem-vc140-mt-gd-1_65
-        } else {
-            BOOSTSIGNALLIB = libboost_signals-vc140-mt-1_65
-            BOOSTSYSTEMLIB = libboost_system-vc140-mt-1_65
-            BOOSTFILESYSTEMLIB = libboost_filesystem-vc140-mt-1_65
-        }
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.65.0
-    } else {
-        contains(QT_ARCH, x86_64) {
-            BOOSTDIR = $$THIRDPARTY_DIR/boost/1.55.0/msvc14/lib64
-        } else {
-            BOOSTDIR = $$THIRDPARTY_DIR/boost/1.55.0/msvc14/lib
-        }
-
-        CONFIG(debug, debug|release) {
-            BOOSTSIGNALLIB = libboost_signals-vc120-mt-gd-1_55
-            BOOSTSYSTEMLIB = libboost_system-vc120-mt-gd-1_55
-            BOOSTFILESYSTEMLIB = libboost_filesystem-vc120-mt-gd-1_55
-        } else {
-            BOOSTSIGNALLIB = libboost_signals-vc120-mt-1_55
-            BOOSTSYSTEMLIB = libboost_system-vc120-mt-1_55
-            BOOSTFILESYSTEMLIB = libboost_filesystem-vc120-mt-1_55
-        }
-        INCLUDEPATH += $$THIRDPARTY_DIR/boost/1.55.0
     }
 }
 

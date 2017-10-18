@@ -58,7 +58,6 @@
 #include "Qt3DSDMPropertyDefinition.h"
 #include "Qt3DSDMDataCore.h"
 #include "StudioFullSystem.h"
-#include <boost/bind.hpp>
 using namespace qt3dsdm;
 
 bool SortKeyframeByTime(const Qt3DSDMTimelineKeyframe *inLHS, const Qt3DSDMTimelineKeyframe *inRHS)
@@ -88,15 +87,16 @@ Qt3DSDMTimelineItemProperty::Qt3DSDMTimelineItemProperty(CTimelineTranslationMan
     InitializeCachedVariables(inInstance);
     m_Signals.push_back(
         m_TransMgr->GetStudioSystem()->GetFullSystem()->GetSignalProvider()->ConnectPropertyLinked(
-            boost::bind(&Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged, this, _1, _2,
-                        _3)));
+            std::bind(&Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged, this,
+                      std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 
     m_Signals.push_back(
         m_TransMgr->GetStudioSystem()
             ->GetFullSystem()
             ->GetSignalProvider()
-            ->ConnectPropertyUnlinked(boost::bind(
-                &Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged, this, _1, _2, _3)));
+            ->ConnectPropertyUnlinked(std::bind(
+                &Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged, this,
+                std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 }
 
 Qt3DSDMTimelineItemProperty::~Qt3DSDMTimelineItemProperty()
@@ -208,7 +208,7 @@ void CompareAndSet(const Qt3DSDMTimelineKeyframe *inKeyframe, float &outRetValue
 float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
 {
     float theRetVal = FLT_MIN;
-    do_all(m_Keyframes, boost::bind(CompareAndSet, _1, boost::ref(theRetVal), true));
+    do_all(m_Keyframes, std::bind(CompareAndSet, std::placeholders::_1, std::ref(theRetVal), true));
     if (m_Type.first == DataModelDataType::Float3 && m_Type.second == AdditionalMetaDataType::Color)
         theRetVal = DataModelToColor(theRetVal);
     return theRetVal;
@@ -218,7 +218,7 @@ float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
 float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
 {
     float theRetVal = FLT_MAX;
-    do_all(m_Keyframes, boost::bind(CompareAndSet, _1, boost::ref(theRetVal), false));
+    do_all(m_Keyframes, std::bind(CompareAndSet, std::placeholders::_1, std::ref(theRetVal), false));
     if (m_Type.first == DataModelDataType::Float3 && m_Type.second == AdditionalMetaDataType::Color)
         theRetVal = DataModelToColor(theRetVal);
     return theRetVal;
@@ -359,7 +359,6 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
 void Qt3DSDMTimelineItemProperty::SetChannelValueAtTime(long inChannelIndex, long inTime,
                                                        float inValue)
 {
-    using namespace boost;
     Qt3DSDMTimelineKeyframe *theKeyframeWrapper =
         dynamic_cast<Qt3DSDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
     if (theKeyframeWrapper) {

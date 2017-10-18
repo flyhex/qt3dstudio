@@ -29,8 +29,6 @@
 #include "stdafx.h"
 #include "ClientDataModelBridge.h"
 #include "Doc.h"
-#include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
 #include "StandardExtensions.h"
 #include <fstream>
 #include "Qt3DSDMSlideCore.h"
@@ -51,11 +49,9 @@
 #include "FormattedOutputStream.h"
 #include "Dispatch.h"
 #include "Qt3DSFileTools.h"
-#include <boost/make_shared.hpp>
 
 using namespace qt3dsdm;
 using namespace std;
-using namespace boost;
 
 inline SLong4 GuidToLong4(Q3DStudio::CId inGuid)
 {
@@ -847,7 +843,6 @@ CClientDataModelBridge::GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
                                     const qt3dsdm::SObjectRefType &inValue)
 {
     using namespace qt3dsdm;
-    using namespace boost;
     switch (inValue.GetReferenceType()) {
     case ObjectReferenceType::Absolute:
         return GetInstanceByGUID(get<SLong4>(inValue.m_Value));
@@ -873,7 +868,6 @@ qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstance(qt3dsdm::Qt3D
                                                                 const qt3dsdm::SValue &inValue)
 {
     using namespace qt3dsdm;
-    using namespace boost;
     return GetInstance(inRoot, ConvertToObjectRef(inValue));
 }
 

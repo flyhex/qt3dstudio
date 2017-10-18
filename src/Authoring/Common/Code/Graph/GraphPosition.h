@@ -29,44 +29,37 @@
 #pragma once
 #ifndef GRAPHPOSITIONH
 #define GRAPHPOSITIONH
-#include <boost/variant.hpp>
-#include <boost/operators.hpp>
+#include <QtCore/qvariant.h>
+#include <QDebug>
 
 namespace Q3DStudio {
 namespace Graph {
-
-    using namespace boost;
     using namespace std;
 
-    struct SGraphPosition : public equality_comparable<SGraphPosition>
+    struct SGraphPosition
     {
         struct SInvalid
         {
             SInvalid() {}
+            ~SInvalid() {}
         };
         struct SBegin
         {
             SBegin() {}
+            ~SBegin() {}
         };
         struct SEnd
         {
             SEnd() {}
+            ~SEnd() {}
         };
-        typedef boost::variant<SEnd, SBegin, long, SInvalid> TPositionType;
+        typedef QVariant TPositionType;
 
         enum Enum {
             Invalid,
             Begin,
             End,
             Index,
-        };
-
-        struct SPosTypeVisitor : boost::static_visitor<Enum>
-        {
-            Enum operator()(SBegin) const { return Begin; }
-            Enum operator()(SEnd) const { return End; }
-            Enum operator()(SInvalid) const { return Invalid; }
-            Enum operator()(long) const { return Index; }
         };
 
         TPositionType m_Position;
@@ -78,17 +71,32 @@ namespace Graph {
         }
         template <typename TDataType>
         SGraphPosition(const TDataType &dtype)
-            : m_Position(dtype)
         {
+            m_Position = QVariant::fromValue(dtype);
         }
 
-        Enum GetType() const { return boost::apply_visitor(SPosTypeVisitor(), m_Position); }
+        Enum GetType() const {
+            Q_ASSERT((QMetaType::Type)m_Position.type() >= QMetaType::User ||
+                     (QMetaType::Type)m_Position.type() == QMetaType::Long);
+            if (Q_LIKELY(QMetaType::Long == m_Position.type()))
+                return Index;
+            else if (QString(m_Position.typeName()) ==
+                     QStringLiteral("Q3DStudio::Graph::SGraphPosition::SBegin")) {
+                return Begin;
+            }
+            else if (QString(m_Position.typeName()) ==
+                     QStringLiteral("Q3DStudio::Graph::SGraphPosition::SEnd")) {
+                return End;
+            }
+            else
+                return Invalid;
+        }
         bool operator==(const SGraphPosition &inOther)
         {
             if (GetType() != inOther.GetType())
                 return false;
             if (GetType() == Index)
-                return get<long>(m_Position) == get<long>(inOther.m_Position);
+                return m_Position.toInt() == m_Position.toInt();
             return true;
         }
         long GetIndex() const
@@ -99,14 +107,18 @@ namespace Graph {
             case End:
                 return LONG_MAX;
             case Index:
-                return get<long>(m_Position);
+                return m_Position.toInt();
             default:;
             }
-            assert(0);
+            Q_ASSERT(0);
             return 0;
         }
     };
 }
 }
+
+Q_DECLARE_METATYPE(Q3DStudio::Graph::SGraphPosition::SBegin)
+Q_DECLARE_METATYPE(Q3DStudio::Graph::SGraphPosition::SEnd)
+Q_DECLARE_METATYPE(Q3DStudio::Graph::SGraphPosition::SInvalid)
 
 #endif

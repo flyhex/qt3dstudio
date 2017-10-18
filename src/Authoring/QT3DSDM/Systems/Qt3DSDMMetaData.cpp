@@ -50,13 +50,6 @@
 #include "foundation/StringConversionImpl.h"
 #include <QtCore/qdir.h>
 
-#ifndef QT3DSDM_META_DATA_NO_SIGNALS
-#include <boost/signal.hpp>
-#include <boost/signals/connection.hpp>
-using boost::BOOST_SIGNALS_NAMESPACE::scoped_connection;
-using boost::BOOST_SIGNALS_NAMESPACE::connection;
-#endif
-
 using namespace qt3dsdm;
 using std::shared_ptr;
 using std::make_shared;
@@ -323,21 +316,8 @@ bool WStrOps<CompleteMetaDataType::Enum>::StrTo(const wchar_t *buffer,
 namespace {
 
 #ifndef QT3DSDM_META_DATA_NO_SIGNALS
-
-struct SBoostSignalConnection : public ISignalConnection
-{
-    Q_DISABLE_COPY(SBoostSignalConnection)
-
-    scoped_connection m_connection;
-    SBoostSignalConnection(const connection &inConnection)
-        : m_connection(inConnection)
-    {
-    }
-};
-
-#define CONNECT(x) std::make_shared<SBoostSignalConnection>(x.connect(inCallback))
+#define CONNECT(x) std::make_shared<qt3dsdm::QtSignalConnection>(QObject::connect(this, x, inCallback))
 #else
-
 #define CONNECT(x) std::shared_ptr<qt3dsdm::ISignalConnection>()
 
 struct SNullFunc
@@ -490,8 +470,15 @@ public:
     }
 };
 
-struct SNewMetaDataImpl : public IMetaData
+#ifndef QT3DSDM_META_DATA_NO_SIGNALS
+class SNewMetaDataImpl : public QObject, public IMetaData
 {
+    Q_OBJECT
+#else
+class SNewMetaDataImpl : public IMetaData
+{
+#endif
+public:
     typedef unordered_map<TCharPtr, TInstanceHandle> TStrInstanceMap;
     typedef unordered_map<TInstanceHandle, TCharPtr, hash<int>> TInstanceStrMap;
     // Caching the derivation chain lookup so we can quickly lookup the entire list of
@@ -574,20 +561,20 @@ struct SNewMetaDataImpl : public IMetaData
     TCustomMaterialMap m_CustomMaterials;
 
 #ifndef QT3DSDM_META_DATA_NO_SIGNALS
-
-    boost::signal<void(Qt3DSDMCategoryHandle)> m_InternalCategoryDestroyed;
-    boost::signal<void(Qt3DSDMMetaDataPropertyHandle)> m_InternalMetaDataPropertyDestroyed;
-    boost::signal<void(Qt3DSDMEventHandle)> m_InternalEventDestroyed;
-    boost::signal<void(Qt3DSDMHandlerHandle)> m_InternalHandlerDestroyed;
-    boost::signal<void(Qt3DSDMHandlerHandle, QT3DSU32)> m_InternalHandlerArgDestroyed;
+Q_SIGNALS:
+    void internalCategoryDestroyed(Qt3DSDMCategoryHandle);
+    void internalMetaDataPropertyDestroyed(Qt3DSDMMetaDataPropertyHandle);
+    void internalEventDestroyed(Qt3DSDMEventHandle);
+    void internalHandlerDestroyed(Qt3DSDMHandlerHandle);
+    void internalHandlerArgDestroyed(Qt3DSDMHandlerHandle, QT3DSU32);
 #else
-    SNullFunc m_InternalCategoryDestroyed;
-    SNullFunc m_InternalMetaDataPropertyDestroyed;
-    SNullFunc m_InternalEventDestroyed;
-    SNullFunc m_InternalHandlerDestroyed;
-    SNullFunc m_InternalHandlerArgDestroyed;
+    SNullFunc internalCategoryDestroyed;
+    SNullFunc internalMetaDataPropertyDestroyed;
+    SNullFunc internalEventDestroyed;
+    SNullFunc internalHandlerDestroyed;
+    SNullFunc internalHandlerArgDestroyed;
 #endif
-
+public:
     TSignalConnectionPtr m_PropertyDeletedConnection;
     bool m_IgnorePropertyDeleted;
     TSignalConnectionPtr m_InstanceDeletedConnection;
@@ -924,14 +911,12 @@ struct SNewMetaDataImpl : public IMetaData
         for (size_t idx = 0, end = m_DerivationChain.size(); idx < end; ++idx) {
             // Add base classes to the list first
             find = inMap.find(m_DerivationChain[end - idx - 1]);
-            if (find != inMap.end()) {
+            if (find != inMap.end())
                 AddListMapItems(find->second, outHandles);
-            }
         }
         find = inMap.find(inInstance);
-        if (find != inMap.end()) {
+        if (find != inMap.end())
             AddListMapItems(find->second, outHandles);
-        }
         m_SizeTSet.clear();
         for (size_t ridx = 0; ridx < outHandles.size(); ++ridx) {
             size_t idx = outHandles.size() - ridx - 1;
@@ -973,23 +958,21 @@ struct SNewMetaDataImpl : public IMetaData
                         NameSizeTOpType<THandleType, TMapType>(*this, inTypeName));
     }
 
-    template <typename THandleType, typename TSignalType, typename TMapType, typename TNameMapType,
+    template <typename THandleType, typename TMapType, typename TNameMapType,
               typename TListMapType>
-    void DestroyItem(const char *inFile, int inLine, THandleType inItem, TSignalType &inSignal,
+    bool DestroyItem(const char *inFile, int inLine, THandleType inItem,
                      TMapType &inMap, TNameMapType &inNameMap, TListMapType &inListMap)
     {
         typename TMapType::iterator find(inMap.find(inItem));
-        if (find == inMap.end()) {
-            return;
-        }
-        inSignal(inItem);
-
+        if (find == inMap.end())
+            return false;
         DestroyNamedItem<THandleType>(inFile, inLine, find->second.m_Instance,
                                       Intern(find->second.m_Name.wide_str()), inNameMap);
         RemoveItemFromInstanceList(inFile, inLine, find->second.m_Instance, inItem, inListMap);
         CreateHashMapEraseTransaction(inFile, inLine, m_Consumer,
                                       make_pair(find->first, find->second), inMap);
         inMap.erase(find);
+        return true;
     }
 
     template <typename THandleType, typename TListMapType>
@@ -1406,9 +1389,10 @@ struct SNewMetaDataImpl : public IMetaData
     void SetPropertyDefault(SMetaDataPropertyInfo &newInfo, DataModelDataType::Value inDataType)
     {
         if (newInfo.m_DefaultValue.empty() == false
-                && GetValueType(newInfo.m_DefaultValue) == inDataType)
+                && GetValueType(newInfo.m_DefaultValue) == inDataType) {
             m_DataCore->SetInstancePropertyValue(newInfo.m_Instance, newInfo.m_Property,
                                                  newInfo.m_DefaultValue);
+        }
     }
 
     // Destroy just this meta data property
@@ -1419,8 +1403,11 @@ struct SNewMetaDataImpl : public IMetaData
             QT3DS_ASSERT(false);
             return;
         }
-        DestroyItem(__FILE__, __LINE__, inProperty, m_InternalMetaDataPropertyDestroyed,
-                    m_Properties, m_InstanceNameToProperties, m_InstanceToProperties);
+        if (DestroyItem(__FILE__, __LINE__, inProperty,
+                    m_Properties, m_InstanceNameToProperties, m_InstanceToProperties)) {
+            Q_EMIT internalMetaDataPropertyDestroyed(inProperty);
+        }
+
         RemoveMetaDataPropertyFilters(inProperty);
     }
 
@@ -1620,8 +1607,10 @@ struct SNewMetaDataImpl : public IMetaData
 
     void DestroyEvent(Qt3DSDMEventHandle inEventHandle) override
     {
-        DestroyItem(__FILE__, __LINE__, inEventHandle, m_InternalEventDestroyed, m_Events,
-                    m_InstanceNameToEvents, m_InstanceToEvents);
+        if (DestroyItem(__FILE__, __LINE__, inEventHandle, m_Events,
+                    m_InstanceNameToEvents, m_InstanceToEvents)) {
+            Q_EMIT internalEventDestroyed(inEventHandle);
+        }
     }
 
     void GetEvents(Qt3DSDMInstanceHandle inInstance, TEventHandleList &outEvents) override
@@ -1711,9 +1700,11 @@ struct SNewMetaDataImpl : public IMetaData
             return;
         }
         while (infoPtr->m_Arguments.empty() == false)
-            DestroyHanderArgument(inHandlerHandle, (QT3DSU32)infoPtr->m_Arguments.size() - 1);
-        DestroyItem(__FILE__, __LINE__, inHandlerHandle, m_InternalHandlerDestroyed, m_Handlers,
-                    m_InstanceNameToHandlers, m_InstanceToHandlers);
+            DestroyHandlerArgument(inHandlerHandle, (QT3DSU32)infoPtr->m_Arguments.size() - 1);
+        if (DestroyItem(__FILE__, __LINE__, inHandlerHandle, m_Handlers,
+                    m_InstanceNameToHandlers, m_InstanceToHandlers)) {
+            Q_EMIT internalHandlerDestroyed(inHandlerHandle);
+        }
     }
 
     Qt3DSDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance, TStrType inName) override
@@ -1918,7 +1909,7 @@ struct SNewMetaDataImpl : public IMetaData
                                           __FILE__, __LINE__, ref(*this), inHandler, inIdx, newInfo, oldInfo));
     }
 
-    void DestroyHanderArgument(THandlerHandle inHandler, QT3DSU32 inIdx) override
+    void DestroyHandlerArgument(THandlerHandle inHandler, QT3DSU32 inIdx) override
     {
         SHandler *ownerPtr = FindHandler(inHandler);
         SMetaDataHandlerArgumentInfo *infoPtr(FindHandlerArg(inHandler, inIdx));
@@ -1931,7 +1922,7 @@ struct SNewMetaDataImpl : public IMetaData
             return;
         }
 
-        m_InternalHandlerArgDestroyed(inHandler, inIdx);
+        Q_EMIT internalHandlerArgDestroyed(inHandler, inIdx);
 
         if (m_Consumer)
             m_Consumer->OnTransaction(make_shared<HandlerArgumentAddRemoveTransaction>(
@@ -2755,7 +2746,7 @@ struct SNewMetaDataImpl : public IMetaData
                         }
                     }
                     while (GetNumHandlerArguments(theHandler) > argIdx)
-                        DestroyHanderArgument(theHandler, GetNumHandlerArguments(theHandler) - 1);
+                        DestroyHandlerArgument(theHandler, GetNumHandlerArguments(theHandler) - 1);
                     theHandlers.push_back(theHandler);
                 } else
                     outWarnings.push_back(
@@ -4063,27 +4054,27 @@ struct SNewMetaDataImpl : public IMetaData
     virtual TSignalConnectionPtr
     ConnectInternalCategoryDestroyed(function<void(Qt3DSDMCategoryHandle)> inCallback)
     {
-        return CONNECT(m_InternalCategoryDestroyed);
+        return CONNECT(&SNewMetaDataImpl::internalCategoryDestroyed);
     }
     virtual TSignalConnectionPtr
     ConnectInternalPropertyDestroyed(function<void(Qt3DSDMMetaDataPropertyHandle)> inCallback)
     {
-        return CONNECT(m_InternalMetaDataPropertyDestroyed);
+        return CONNECT(&SNewMetaDataImpl::internalMetaDataPropertyDestroyed);
     }
     virtual TSignalConnectionPtr
     ConnectInternalEventDestroyed(function<void(Qt3DSDMEventHandle)> inCallback)
     {
-        return CONNECT(m_InternalEventDestroyed);
+        return CONNECT(&SNewMetaDataImpl::internalEventDestroyed);
     }
     virtual TSignalConnectionPtr
     ConnectInternalHandlerDestroyed(function<void(Qt3DSDMHandlerHandle)> inCallback)
     {
-        return CONNECT(m_InternalHandlerDestroyed);
+        return CONNECT(&SNewMetaDataImpl::internalHandlerDestroyed);
     }
     virtual TSignalConnectionPtr
     ConnectInternalHandlerArgDestroyed(function<void(Qt3DSDMHandlerHandle, QT3DSU32)> inCallback)
     {
-        return CONNECT(m_InternalHandlerArgDestroyed);
+        return CONNECT(&SNewMetaDataImpl::internalHandlerArgDestroyed);
     }
 };
 }
@@ -4092,3 +4083,6 @@ std::shared_ptr<IMetaData> IMetaData::CreateNewMetaData(std::shared_ptr<IDataCor
 {
     return std::make_shared<SNewMetaDataImpl>(inDataCore);
 }
+#ifndef QT3DSDM_META_DATA_NO_SIGNALS
+#include "Qt3DSDMMetaData.moc"
+#endif

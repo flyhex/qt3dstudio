@@ -39,8 +39,6 @@
 #include "BreadCrumbControl.h"
 #include "StudioPreferences.h"
 #include "IBreadCrumbProvider.h"
-//#include "Cmd.h"
-#include <boost/bind.hpp>
 
 #include <QPixmap>
 
@@ -177,7 +175,7 @@ void CBreadCrumbControl::RefreshTrail(IBreadCrumbProvider *inBreadCrumbProvider)
 {
     bool theChangedProvider = m_BreadCrumbProvider != inBreadCrumbProvider;
     if (theChangedProvider && m_BreadCrumbProvider)
-        m_BreadCrumbProvider->SigBreadCrumbUpdate.disconnect(boost::bind(&CBreadCrumbControl::OnUpdateBreadCrumb, this));
+        QObject::disconnect(m_BreadCrumbProvider, &IBreadCrumbProvider::SigBreadCrumbUpdate, 0, 0);
 
     m_BreadCrumbProvider = inBreadCrumbProvider;
 
@@ -186,8 +184,10 @@ void CBreadCrumbControl::RefreshTrail(IBreadCrumbProvider *inBreadCrumbProvider)
 
     if (m_BreadCrumbProvider) {
         // listen for single breadcrumb update (i.e. name changes)
-        if (theChangedProvider)
-            m_BreadCrumbProvider->SigBreadCrumbUpdate.connect(boost::bind(&CBreadCrumbControl::OnUpdateBreadCrumb, this));
+        if (theChangedProvider) {
+            QObject::connect(m_BreadCrumbProvider, &IBreadCrumbProvider::SigBreadCrumbUpdate,
+                             std::bind(&CBreadCrumbControl::OnUpdateBreadCrumb, this));
+        }
 
         const IBreadCrumbProvider::TTrailList &theList = m_BreadCrumbProvider->GetTrail();
         // By design, if this is only 1 item in the list, nothing is shown.
@@ -201,7 +201,9 @@ void CBreadCrumbControl::RefreshTrail(IBreadCrumbProvider *inBreadCrumbProvider)
                     theButton =
                         CreateButton((theIndex == 0) ? m_BreadCrumbProvider->GetRootImage()
                                                      : m_BreadCrumbProvider->GetBreadCrumbImage());
-                    theButton->SigToggle.connect(boost::bind(&CBreadCrumbControl::OnButtonToggled, this, _1, _2));
+                    QObject::connect(theButton,&CToggleButton::SigToggle,
+                                     std::bind(&CBreadCrumbControl::OnButtonToggled, this,
+                                               std::placeholders::_1, std::placeholders::_2));
 
                     TSeparatorButtonType *theSeparator =
                         CreateSeparatorButton(m_BreadCrumbProvider->GetSeparatorImage());
@@ -284,7 +286,7 @@ void CBreadCrumbControl::OnUpdateBreadCrumb()
  */
 void CBreadCrumbControl::RemoveButton(SBreadCrumbItem &inBreadCrumb)
 {
-    inBreadCrumb.m_BreadCrumb->SigToggle.disconnect(boost::bind(&CBreadCrumbControl::OnButtonToggled, this, _1, _2));
+    QObject::disconnect(inBreadCrumb.m_BreadCrumb, &CToggleButton::SigToggle, 0, 0);
     RemoveChild(inBreadCrumb.m_BreadCrumb);
     RemoveChild(inBreadCrumb.m_Separator);
     delete inBreadCrumb.m_BreadCrumb;

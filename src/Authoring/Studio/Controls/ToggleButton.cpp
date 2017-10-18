@@ -126,7 +126,7 @@ void CToggleButton::Toggle()
     else
         SetButtonState(EBUTTONSTATE_UP);
 
-    SigToggle(this, GetButtonState());
+    Q_EMIT SigToggle(this, GetButtonState());
 
     Invalidate();
 }

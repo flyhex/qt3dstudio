@@ -282,7 +282,7 @@ public:
                            CompleteMetaDataType::Enum inDataType, const SValue &inDefaultValue,
                            const TMetaDataData &inMetaData, HandlerArgumentType::Value inArgType) = 0;
 
-    virtual void DestroyHanderArgument(Qt3DSDMHandlerHandle inHandler, QT3DSU32 inArgIndex) = 0;
+    virtual void DestroyHandlerArgument(Qt3DSDMHandlerHandle inHandler, QT3DSU32 inArgIndex) = 0;
 
     virtual Option<SMetaDataHandlerArgumentInfo>
     FindHandlerArgumentByName(Qt3DSDMHandlerHandle inHandler, TStrType inName) = 0;

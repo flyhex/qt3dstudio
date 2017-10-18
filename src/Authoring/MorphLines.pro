@@ -13,7 +13,6 @@ INCLUDEPATH += \
     ../3rdparty/EASTL/UnknownVersion/include
 
 LIBS += \
-    -L"$$BOOSTDIR" \
     $$QMAKE_LIBS_FBX \
     -lws2_32 \
     -lLua$$qtPlatformTargetSuffix() \
@@ -24,9 +23,6 @@ LIBS += \
     -lUserenv \
     -lWbemuuid \
     -lWinmm \
-    -l$$BOOSTSIGNALLIB \
-    -l$$BOOSTSYSTEMLIB \
-    -l$$BOOSTFILESYSTEMLIB \
     -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
     -lCoreLib$$qtPlatformTargetSuffix() \
     -lCommonLib$$qtPlatformTargetSuffix()

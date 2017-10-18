@@ -41,8 +41,6 @@
 
 #include <QPixmap>
 
-#include <boost/signals.hpp>
-
 //==============================================================================
 //	Forwards
 //==============================================================================
@@ -51,8 +49,9 @@
 /**
  * Base class for creating button controls.
  */
-class CButtonControl : public CControl
+class CButtonControl : public QObject, public CControl
 {
+    Q_OBJECT
 public:
     /// States for procedural buttons that might result in drawing changes
     enum EButtonState {
@@ -110,10 +109,10 @@ public:
     void OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void Invalidate(bool inIsInvalidated = true)  override;
-
-    boost::signal1<void, CControl *> SigButtonDown;
-    boost::signal1<void, CControl *> SigButtonUp;
-    boost::signal1<void, CControl *> SigClicked;
+Q_SIGNALS:
+    void SigButtonDown(CControl*);
+    void SigButtonUp(CControl*);
+    void SigClicked(CControl*);
 
 protected:
     virtual void Render(CRenderer *inRenderer);

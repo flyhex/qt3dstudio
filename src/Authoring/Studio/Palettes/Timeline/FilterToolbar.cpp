@@ -105,17 +105,21 @@ CFilterToolbar::CFilterToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE2));
 
     // Callback for one of the Filter buttons being clicked on
-    m_FltrBehaviorsBtn->SigToggle.connect(std::bind(&CFilterToolbar::OnButtonToggled, this,
-                                                    std::placeholders::_1, std::placeholders::_2));
-    m_FltrPropertiesBtn->SigToggle.connect(std::bind(&CFilterToolbar::OnButtonToggled, this,
-                                                     std::placeholders::_1, std::placeholders::_2));
-    m_FltrMaterialsBtn->SigToggle.connect(std::bind(&CFilterToolbar::OnButtonToggled, this,
-                                                    std::placeholders::_1, std::placeholders::_2));
-    m_FltrShyBtn->SigToggle.connect(std::bind(&CFilterToolbar::OnButtonToggled, this,
-                                              std::placeholders::_1, std::placeholders::_2));
-    m_FltrVisibleBtn->SigToggle.connect(std::bind(&CFilterToolbar::OnButtonToggled, this,
-                                                  std::placeholders::_1, std::placeholders::_2));
-
+    QObject::connect(m_FltrBehaviorsBtn,&CToggleButton::SigToggle,
+                     std::bind(&CFilterToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrPropertiesBtn,&CToggleButton::SigToggle,
+                     std::bind(&CFilterToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrMaterialsBtn,&CToggleButton::SigToggle,
+                     std::bind(&CFilterToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrShyBtn,&CToggleButton::SigToggle,
+                     std::bind(&CFilterToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrVisibleBtn,&CToggleButton::SigToggle,
+                     std::bind(&CFilterToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
     // Add the buttons to this layout
     AddChild(m_FltrMaterialsBtn);
     AddChild(m_FltrPropertiesBtn);

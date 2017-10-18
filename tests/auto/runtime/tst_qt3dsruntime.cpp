@@ -80,11 +80,6 @@ void EASTL_DEBUG_BREAK()
 }
 #endif
 
-// Boost insists this be defined
-namespace boost {
-void throw_exception(std::exception const & e) {}
-}
-
 namespace qt3ds {
 void NVAssert(const char *exp, const char *file, int line, bool *ignore)
 {

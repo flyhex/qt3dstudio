@@ -58,7 +58,6 @@
 #include "Qt3DSRenderLightmaps.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
-#include <boost/bind.hpp>
 
 #pragma warning(disable : 4100) // unreferenced formal parameter
 
@@ -1839,21 +1838,26 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inC
     }
     qt3dsdm::IStudioFullSystemSignalProvider *theProvider = m_FullSystem.GetSignalProvider();
     m_SignalConnections.push_back(
-        theProvider->ConnectInstanceCreated(boost::bind(&STranslation::MarkDirty, this, _1)));
+        theProvider->ConnectInstanceCreated(std::bind(&STranslation::DoMarkDirty,
+                                                      this, std::placeholders::_1)));
     m_SignalConnections.push_back(theProvider->ConnectInstanceDeleted(
-        boost::bind(&STranslation::ReleaseTranslation, this, _1)));
+        std::bind(&STranslation::ReleaseTranslation, this, std::placeholders::_1)));
     m_SignalConnections.push_back(
-        theProvider->ConnectInstancePropertyValue(boost::bind(&STranslation::MarkDirty, this, _1)));
+        theProvider->ConnectInstancePropertyValue(std::bind(&STranslation::DoMarkDirty,
+                                                            this, std::placeholders::_1)));
     m_SignalConnections.push_back(m_AssetGraph.ConnectChildAdded(
-        boost::bind(&STranslation::MarkGraphInstanceDirty, this, _1, _2)));
+        std::bind(&STranslation::MarkGraphInstanceDirty, this, std::placeholders::_1,
+                  std::placeholders::_2)));
     m_SignalConnections.push_back(m_AssetGraph.ConnectChildMoved(
-        boost::bind(&STranslation::MarkGraphInstanceDirty, this, _1, _2)));
+        std::bind(&STranslation::MarkGraphInstanceDirty, this, std::placeholders::_1,
+                  std::placeholders::_2)));
     m_SignalConnections.push_back(m_AssetGraph.ConnectChildRemoved(
-        boost::bind(&STranslation::MarkGraphInstanceDirty, this, _1, _2)));
+        std::bind(&STranslation::MarkGraphInstanceDirty, this, std::placeholders::_1,
+                  std::placeholders::_2)));
     m_SignalConnections.push_back(theProvider->ConnectBeginComponentSeconds(
-        boost::bind(&STranslation::MarkBeginComponentSeconds, this, _1)));
+        std::bind(&STranslation::MarkBeginComponentSeconds, this, std::placeholders::_1)));
     m_SignalConnections.push_back(theProvider->ConnectComponentSeconds(
-        boost::bind(&STranslation::MarkComponentSeconds, this, _1)));
+        std::bind(&STranslation::MarkComponentSeconds, this, std::placeholders::_1)));
 
     ::CColor color = CStudioPreferences::GetRulerBackgroundColor(); // Rectangles under tick marks
     m_rectColor = QT3DSVec4(color.GetRed() / 255.f,

@@ -73,12 +73,17 @@ CToggleControl::CToggleControl(CStateRow *inStateRow, ITimelineItemBinding *inTi
     SetAbsoluteSize(CPt(theShySize.x + theVisibleSize.x + theLockedSize.x + 1, theShySize.y));
 
     // Button down listeners
-    m_Shy->SigToggle.connect(std::bind(&CToggleControl::OnShyClicked, this,
-                                       std::placeholders::_1, std::placeholders::_2));
-    m_Visible->SigToggle.connect(std::bind(&CToggleControl::OnVisibleClicked, this,
-                                           std::placeholders::_1, std::placeholders::_2));
-    m_Locked->SigToggle.connect(std::bind(&CToggleControl::OnLockClicked, this,
-                                          std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_Shy,&CToggleButton::SigToggle,
+                     std::bind(&CToggleControl::OnShyClicked, this,
+                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_Visible,&CToggleButton::SigToggle,
+                     std::bind(&CToggleControl::OnVisibleClicked, this,
+                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_Locked,&CToggleButton::SigToggle,
+                     std::bind(&CToggleControl::OnLockClicked, this,
+                               std::placeholders::_1, std::placeholders::_2));
+
+
 
     ITimelineItem *theTimelineItem = m_TimelineItemBinding->GetTimelineItem();
     // Initial toggle state of the eye visibility button

@@ -29,17 +29,11 @@
 
 #include "stdafx.h"
 #include "Qt3DSDMPrefix.h"
-#include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 #include "Qt3DSDMTransactions.h"
 #include "Qt3DSDMSignals.h"
-#include <boost/signal.hpp>
-#include <boost/signals/connection.hpp>
 #include "Graph.h"
 #include "GraphImpl.h"
 
-using namespace boost;
-using namespace boost::BOOST_SIGNALS_NAMESPACE;
 using namespace Q3DStudio;
 using namespace qt3dsdm;
 
@@ -50,17 +44,9 @@ const COpaquePosition COpaquePosition::FIRST = COpaquePosition(0);
 const COpaquePosition COpaquePosition::LAST = COpaquePosition(-1);
 
 namespace {
-struct SBoostSignalConnection : public ISignalConnection, noncopyable
-{
-    boost::BOOST_SIGNALS_NAMESPACE::scoped_connection m_connection;
-    SBoostSignalConnection(const boost::BOOST_SIGNALS_NAMESPACE::connection &inConnection)
-        : m_connection(inConnection)
-    {
-    }
-};
 
-#define CONNECT(x) TSignalConnectionPtr(new SBoostSignalConnection(x))
-#define CONNECT_SIGNAL(x) CONNECT(x.connect(inCallback))
+#define CONNECT(x) TSignalConnectionPtr(new qt3dsdm::QtSignalConnection(x))
+#define CONNECT_SIGNAL(x) CONNECT(QObject::connect(this,x,inCallback))
 
 typedef Q3DStudio::Graph::SGraphNode<int, int> SGraphableImpl;
 typedef SGraphableImpl *TGraphableImplPtr;
@@ -160,7 +146,7 @@ static inline COpaquePosition FromGraph(Graph::SGraphPosition inPos)
     case Graph::SGraphPosition::Index:
         return inPos.GetIndex();
     }
-    assert(0);
+    Q_ASSERT(0);
     return COpaquePosition::s_Invalid;
 }
 
@@ -175,8 +161,9 @@ static inline COpaquePosition FromGraph(Graph::SGraphPosition inPos)
  *	Methods start with "Do" are the internal interface used by the graph and by
  *	transactions to change graph state.
  */
-struct SGraphImpl : public CGraph
+class SGraphImpl : public QObject, public CGraph
 {
+    Q_OBJECT
 public:
     typedef std::map<TIdentifier, TGraphableImplPtr> TLookupMap;
     SGraphImpl(TIdentifier inRoot)
@@ -202,7 +189,7 @@ public:
     TGraphableImplPtr CreateImpl(const TIdentifier inGraphable)
     {
         std::pair<TGraphableImplPtr, bool> result = m_Graph.CreateImpl(inGraphable);
-        assert(result.second);
+        Q_ASSERT(result.second);
         return result.first;
     }
 
@@ -223,7 +210,7 @@ public:
         }
         if (parent)
             return parent->m_Children.end();
-        assert(0);
+        Q_ASSERT(0);
         return TGraphableImplList::const_iterator();
     }
 
@@ -309,7 +296,7 @@ public:
             theChild = CreateImpl(inChild);
             created = true;
         }
-        assert(theChild->m_Parent == NULL);
+        Q_ASSERT(theChild->m_Parent == NULL);
         if (theChild) {
             long theIndex = ResolveOpaquePosition(inParent, inPosition);
             theIndex = DoAddChild(inParent, inChild, theIndex);
@@ -404,7 +391,7 @@ public:
             }
             return;
         }
-        assert(0);
+        Q_ASSERT(0);
     }
 
     void MoveBefore(const TIdentifier inNode, const TIdentifier inOther) override
@@ -519,7 +506,7 @@ public:
     void GetDepthFirst(CGraphIterator &outIterator, const TGraphableImplPtr inRoot) const
     {
         if (inRoot == NULL) {
-            assert(0);
+            Q_ASSERT(0);
             return;
         }
         outIterator.AddResult(inRoot->m_GraphableID);
@@ -534,7 +521,7 @@ public:
             if (root)
                 GetDepthFirst(outIterator, root);
             else {
-                assert(0);
+                Q_ASSERT(0);
             }
         } else {
             for (size_t idx = 0, size = m_Graph.m_Roots.size(); idx < size; ++idx)
@@ -545,40 +532,40 @@ public:
 
     void SignalChildAdded(TIdentifier inParent, TIdentifier inChild, long inPos)
     {
-        m_ChildAddedSignal(inParent, inChild, inPos);
+        Q_EMIT childAddedSignal(inParent, inChild, inPos);
     }
     void SignalChildRemoved(TIdentifier inParent, TIdentifier inChild, long inPos)
     {
-        m_ChildRemoveSignal(inParent, inChild, inPos);
+        Q_EMIT childRemoveSignal(inParent, inChild, inPos);
     }
     void SignalChildMoved(TIdentifier inParent, TIdentifier inChild, long inOldIdx, long inNewIdx)
     {
-        m_ChildMoved(inParent, inChild, inOldIdx, inNewIdx);
+        Q_EMIT childMoved(inParent, inChild, inOldIdx, inNewIdx);
     }
     // Signals
     // Always in the form of parent,child.
     virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildAdded(std::function<void(TIdentifier, TIdentifier, long)> inCallback) override
     {
-        return CONNECT(m_ChildAddedSignal.connect(inCallback));
+        return CONNECT_SIGNAL(&SGraphImpl::childAddedSignal);
     }
     virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildRemoved(std::function<void(TIdentifier, TIdentifier, long)> inCallback) override
     {
-        return CONNECT(m_ChildRemoveSignal.connect(inCallback));
+        return CONNECT_SIGNAL(&SGraphImpl::childRemoveSignal);
     }
     virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     ConnectChildMoved(std::function<void(TIdentifier, TIdentifier, long, long)> inCallback) override
     {
-        return CONNECT(m_ChildMoved.connect(inCallback));
+        return CONNECT_SIGNAL(&SGraphImpl::childMoved);
     }
 
     Graph::SGraphImpl<int, int> m_Graph;
     std::shared_ptr<qt3dsdm::ITransactionConsumer> m_Consumer;
-
-    signal<void(TIdentifier, TIdentifier, long)> m_ChildAddedSignal;
-    signal<void(TIdentifier, TIdentifier, long)> m_ChildRemoveSignal;
-    signal<void(TIdentifier, TIdentifier, long, long)> m_ChildMoved;
+Q_SIGNALS:
+    void childAddedSignal(TIdentifier, TIdentifier, long);
+    void childRemoveSignal(TIdentifier, TIdentifier, long);
+    void childMoved(TIdentifier, TIdentifier, long, long);
 };
 
 // Implementation of the transaction helpers.
@@ -769,3 +756,6 @@ std::shared_ptr<CGraph> CGraph::CreateGraph(TIdentifier inRoot)
 {
     return std::static_pointer_cast<CGraph>(std::make_shared<SGraphImpl>(inRoot));
 }
+
+#include "Graph.moc"
+

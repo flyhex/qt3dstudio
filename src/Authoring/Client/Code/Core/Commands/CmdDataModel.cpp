@@ -28,22 +28,14 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "CmdDataModel.h"
-#include <boost/bind.hpp>
-#include <boost/utility.hpp>
-#include <boost/function.hpp>
-#include <boost/bind/apply.hpp>
 #include "Qt3DSDMTransactions.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Doc.h"
 #include "Core.h"
 #include "Dispatch.h"
-#include <boost/make_shared.hpp>
 #include "foundation/Qt3DSLogging.h"
 
-using namespace boost;
-
 namespace qt3dsdm {
-
 void SApplicationState::Store(CDoc &inDoc)
 {
     m_Dirty = inDoc.IsModified();

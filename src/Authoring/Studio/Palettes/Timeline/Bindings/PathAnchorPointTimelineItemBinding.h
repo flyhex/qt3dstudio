@@ -36,7 +36,6 @@
 
 #include "Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSDMDataTypes.h"
-#include <boost/tuple/tuple.hpp>
 
 //==============================================================================
 //	Classes

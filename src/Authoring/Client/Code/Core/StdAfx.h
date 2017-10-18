@@ -120,23 +120,7 @@
 
 #include <QtGlobal>
 
-// I put these in to help with some of the data model compile times.
 #ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#pragma warning(disable : 4512)
-#pragma warning(disable : 4702)
-#pragma warning(disable : 4996)
-#endif
-#include <boost/shared_ptr.hpp>
-#include <boost/variant.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
-#include <boost/bind.hpp>
-#include <boost/tuple/tuple.hpp>
-#ifdef _WIN32
-#pragma warning(pop)
-
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #pragma warning(disable : 4127) // conditional expression is constant
 #pragma warning(disable : 4189) // local variable is initialized but not referenced

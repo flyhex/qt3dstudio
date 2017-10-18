@@ -29,11 +29,8 @@
 #include "Qt3DSDMPrefix.h"
 #include "StudioAnimationSystem.h"
 #include "StudioPropertySystem.h"
-#include <boost/iterator/transform_iterator.hpp>
-#include <boost/bind.hpp>
 
 using namespace std;
-using namespace boost;
 
 namespace qt3dsdm {
 
@@ -171,26 +168,21 @@ Qt3DSDMKeyframeHandle CreateKeyframeExplicit(Qt3DSDMAnimationHandle inAnimation,
                                             float inEaseIn, float inEaseOut)
 {
     TKeyframeHandleList theKeyframes;
-    SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
     float theValue = inValue;
     inAnimationCore->GetKeyframes(inAnimation, theKeyframes);
     function<TKeyframe(Qt3DSDMKeyframeHandle)> theConverter(
         std::bind(&IAnimationCore::GetKeyframeData, inAnimationCore, std::placeholders::_1));
 
-    //TODO  no transform iterator in STL
-    typedef transform_iterator<function<TKeyframe(Qt3DSDMKeyframeHandle)>,
-                               TKeyframeHandleList::iterator>
-        TKeyframeDataTransformIterator;
-    TKeyframeDataTransformIterator theFind =
-        find_if(make_transform_iterator(theKeyframes.begin(), theConverter),
-                make_transform_iterator(theKeyframes.end(), theConverter),
-                std::bind(KeyframeNear, std::placeholders::_1, inSeconds));
+   TKeyframeHandleList::iterator theFind =
+           std::find_if(theKeyframes.begin(), theKeyframes.end(),
+                        [theConverter, inSeconds](const Qt3DSDMKeyframeHandle &handle)
+   { return KeyframeNear(theConverter(handle), inSeconds); });
 
     float theEaseIn = inEaseIn;
     float theEaseOut = inEaseOut;
     Qt3DSDMKeyframeHandle theKeyframe;
-    if (theFind.base() != theKeyframes.end()) {
-        theKeyframe = *theFind.base();
+    if (theFind != theKeyframes.end()) {
+        theKeyframe = *theFind;
 
     inAnimationCore->SetKeyframeData(
             theKeyframe, CreateEaseInEaseOutKeyframe(inSeconds, theValue, theEaseIn, theEaseOut));
@@ -230,15 +222,15 @@ void GetPresentAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inIn
                           const TAnimationFloatPairList &inAnimationPairs,
                           TAnimationCorePtr inAnimationCore, TAnimationHandleList &outAnimations)
 {
-    function<Qt3DSDMAnimationHandle(TAnimationFloatPair)> theTransform(
-        std::bind(&TAnimationFloatPair::first, std::placeholders::_1));
     function<void(Qt3DSDMAnimationHandle)> theOperation(
         std::bind(MaybeAddAnimation, inSlide, inInstance, inProperty,
                   std::placeholders::_1, inAnimationCore,
                   std::ref(outAnimations)));
 
-    for_each(boost::make_transform_iterator(inAnimationPairs.begin(), theTransform),
-             boost::make_transform_iterator(inAnimationPairs.end(), theTransform), theOperation);
+    for (auto animation : inAnimationPairs) {
+        MaybeAddAnimation(inSlide, inInstance, inProperty, animation.first, inAnimationCore,
+                          std::ref(outAnimations));
+    }
 
     if (outAnimations.empty()) {
         TAnimationHandleList theAnimationHandles;

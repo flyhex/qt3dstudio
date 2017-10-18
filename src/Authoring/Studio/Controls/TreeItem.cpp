@@ -95,9 +95,9 @@ CTreeItem::CTreeItem(CTreeControl *inTreeControl)
     m_Name->AddCommitListener(m_NameChangeListener);
 
     // Toggle listener
-    m_Toggle->SigToggle.connect(std::bind(&CTreeItem::OnToggleExpansion, this,
-                                          std::placeholders::_1, std::placeholders::_2));
-
+    QObject::connect(m_Toggle,&CToggleButton::SigToggle,
+                     std::bind(&CTreeItem::OnToggleExpansion, this,
+                               std::placeholders::_1, std::placeholders::_2));
     // Add all the controls to the flow
     AddChild(m_Toggle);
     AddChild(m_Icon);

@@ -29,9 +29,6 @@
 #include "stdafx.h"
 #include "Doc.h"
 #undef placeholder
-#include <boost/function.hpp>
-#include <boost/signal.hpp>
-#include <boost/signals/connection.hpp>
 #include "Qt3DSDMStudioSystem.h"
 #include "DataCoreProducer.h"
 #include "SlideCoreProducer.h"

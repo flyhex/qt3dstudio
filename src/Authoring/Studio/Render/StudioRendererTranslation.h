@@ -409,6 +409,8 @@ namespace studio {
 
         void MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
+        void DoMarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance) {MarkDirty(inInstance);}
+
         void MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
         {
             for (long idx = 0; idx < inInstanceCount; ++idx)

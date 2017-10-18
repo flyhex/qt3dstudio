@@ -32,11 +32,6 @@
 #include "Qt3DSImportLibPrecompile.h"
 #include "Qt3DSImportMesh.h"
 
-// This file is compiled for both studio and the runtime so you can't
-// add boost or much DataModel.  Note that the only DataModel file included is
-// UICDMStreams and this file does not include UICDMDatatypes or anything
-// like that.
-
 using namespace qt3dsimp;
 
 #ifdef QT3DS_X86

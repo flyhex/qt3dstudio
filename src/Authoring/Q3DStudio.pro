@@ -3,8 +3,9 @@ TARGET = Qt3DStudio
 include($$PWD/commoninclude.pri)
 include($$OUT_PWD/qtAuthoring-config.pri)
 CONFIG += nostrictstrings
+
 DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
-    PCRE_STATIC BOOST_SIGNALS_NO_DEPRECATION_WARNING EASTL_MINMAX_ENABLED=0 \
+    PCRE_STATIC EASTL_MINMAX_ENABLED=0 \
     EASTL_NOMINMAX=0 DOM_DYNAMIC DRIVE_DESIGN_STUDIO
 
 win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
@@ -73,10 +74,6 @@ INCLUDEPATH += \
     ../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/color
 
-
-LIBS += \
-    -L"$$BOOSTDIR"
-
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive
     END_ARCHIVE = -Wl,--no-whole-archive
@@ -107,9 +104,6 @@ STATICRUNTIME = \
 
 LIBS += \
       -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
-      -l$$BOOSTSIGNALLIB \
-      -l$$BOOSTSYSTEMLIB \
-      -l$$BOOSTFILESYSTEMLIB \
        $$QMAKE_LIBS_FBX
 
 linux {

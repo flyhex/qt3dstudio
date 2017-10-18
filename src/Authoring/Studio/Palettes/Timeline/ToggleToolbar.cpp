@@ -68,8 +68,9 @@ CToggleToolbar::CToggleToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrShyBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrShyBtn->SetAbsoluteSize(m_FltrShyBtn->GetSize());
     m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY2));
-    m_FltrShyBtn->SigToggle.connect(std::bind(&CToggleToolbar::OnButtonToggled, this,
-                                              std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrShyBtn,&CToggleButton::SigToggle,
+                     std::bind(&CToggleToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
     AddChild(m_FltrShyBtn);
     m_FltrShyBtn->SetToggleState(false);
 
@@ -79,8 +80,9 @@ CToggleToolbar::CToggleToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrVisibleBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrVisibleBtn->SetAbsoluteSize(m_FltrVisibleBtn->GetSize());
     m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE2));
-    m_FltrVisibleBtn->SigToggle.connect(std::bind(&CToggleToolbar::OnButtonToggled, this,
-                                                  std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrVisibleBtn,&CToggleButton::SigToggle,
+                     std::bind(&CToggleToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
     AddChild(m_FltrVisibleBtn);
     m_FltrVisibleBtn->SetToggleState(false);
 
@@ -90,8 +92,9 @@ CToggleToolbar::CToggleToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrLockBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrLockBtn->SetAbsoluteSize(m_FltrLockBtn->GetSize());
     m_FltrLockBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_LOCK2));
-    m_FltrLockBtn->SigToggle.connect(std::bind(&CToggleToolbar::OnButtonToggled, this,
-                                               std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_FltrLockBtn,&CToggleButton::SigToggle,
+                     std::bind(&CToggleToolbar::OnButtonToggled, this,
+                               std::placeholders::_1, std::placeholders::_2));
     AddChild(m_FltrLockBtn);
     m_FltrLockBtn->SetToggleState(false);
 }

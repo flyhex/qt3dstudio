@@ -35,16 +35,15 @@
 
 #define FBXSDK_NEW_API 1
 
-#include <boost/filesystem.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
+#include <tuple>
 #include <memory>
 #include <map>
 #include <fbxsdk.h>
 #include "Qt3DSImportFbxDomUtils.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "foundation/Qt3DSVec3.h"
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_set>
+#include <unordered_map>
 
 using namespace qt3dsimp;
 
@@ -52,7 +51,7 @@ namespace {
 
 #define IOSREF FbxIOSettings::IOSettingsRef()
 
-typedef boost::unordered_set<FbxNode *> TNodeSet;
+typedef std::unordered_set<FbxNode *> TNodeSet;
 
 //==============================================================================
 //	Loads FBX document and processes it.
@@ -68,7 +67,7 @@ public:
     typedef std::vector<SFaceMaterialInfo> TFaceMaterialIndices;
     typedef std::vector<_SVertexWeightInfo> TPerVertexWeightInfo;
     typedef std::vector<_SJointInfo> TJointInfoList;
-    typedef boost::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector4, SVector4,
+    typedef std::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector4, SVector4,
                          SVector2>
         TVertexInfoTuple;
     typedef std::pair<std::map<TVertexInfoTuple, long>,
@@ -78,9 +77,9 @@ public:
     typedef std::vector<TPerVertexWeightInfo> TVertexWeigthList;
     typedef std::vector<FbxAnimCurve *> TAnimCurveList;
     typedef std::multimap<const FbxNode *, long> TNodeToIndicesMap;
-    typedef boost::unordered_map<const FbxNode *, bool> TNodeIsAnimatedMap;
-    typedef boost::unordered_map<const FbxNode *, long> TJointNodeHierarchyMap;
-    typedef boost::unordered_set<const FbxNode *> TJointNodeRootSet;
+    typedef std::unordered_map<const FbxNode *, bool> TNodeIsAnimatedMap;
+    typedef std::unordered_map<const FbxNode *, long> TJointNodeHierarchyMap;
+    typedef std::unordered_set<const FbxNode *> TJointNodeRootSet;
 
 public:
     bool LoadDocument(const std::string &inFilePath);
@@ -1261,22 +1260,22 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
         for (int i = 0; i < theFbxCtrlPointCount; ++i) {
             TVertexInfoTuple theFaceTupleValues;
 
-            ReadVertex(theFbxCtrlPoints, i, theFaceTupleValues.get<0>(), geomTransform);
+            ReadVertex(theFbxCtrlPoints, i, get<0>(theFaceTupleValues), geomTransform);
 
             if (theFbxNormals)
-                ReadNormal(theFbxNormals, i, theFaceTupleValues.get<1>());
+                ReadNormal(theFbxNormals, i, get<1>(theFaceTupleValues));
             if (theFbxUVs)
-                ReadTexCoord(theFbxUVs, i, theFaceTupleValues.get<2>());
+                ReadTexCoord(theFbxUVs, i, get<2>(theFaceTupleValues));
 
             if (theFbxTangents)
-                ReadTexTangent(theFbxTangents, i, theFaceTupleValues.get<3>());
+                ReadTexTangent(theFbxTangents, i, get<3>(theFaceTupleValues));
             else if (newTangents.size() > 0)
-                ReadTexTangent(newTangents, theFbxNormals, i, theFaceTupleValues.get<3>());
+                ReadTexTangent(newTangents, theFbxNormals, i, get<3>(theFaceTupleValues));
 
             if (theFbxBinormals)
-                ReadTexBinormal(theFbxBinormals, i, theFaceTupleValues.get<4>());
+                ReadTexBinormal(theFbxBinormals, i, get<4>(theFaceTupleValues));
             else if (newBinormals.size() > 0)
-                ReadTexBinormal(newBinormals, theFbxNormals, i, theFaceTupleValues.get<4>());
+                ReadTexBinormal(newBinormals, theFbxNormals, i, get<4>(theFaceTupleValues));
 
             long theFaceIndex = RetrieveFaceIndex(theFaceIndices, theFaceTupleValues);
             theMaterialFaceIndicies.push_back(theFaceIndex);
@@ -1308,7 +1307,7 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                 QT3DS_ASSERT(theFbxCtrlPointIndex < theFbxCtrlPointCount
                           && theFbxCtrlPointIndex != -1);
 
-                ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex, theFaceTupleValues.get<0>(),
+                ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex, get<0>(theFaceTupleValues),
                            geomTransform);
 
                 if (theFbxNormals) {
@@ -1316,21 +1315,21 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                                (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
                                    ? theVertexID
                                    : theFbxCtrlPointIndex,
-                               theFaceTupleValues.get<1>());
+                               get<1>(theFaceTupleValues));
                 }
                 if (theFbxUVs) {
                     ReadTexCoord(theFbxUVs,
                                  (theFbxUVsMappingMode == FbxGeometryElement::eByPolygonVertex)
                                      ? theVertexID
                                      : theFbxCtrlPointIndex,
-                                 theFaceTupleValues.get<2>());
+                                 get<2>(theFaceTupleValues));
                 }
                 if (theFbxTangents) {
                     ReadTexTangent(theFbxTangents, (theFbxTangentsMappingMode
                                                     == FbxGeometryElement::eByPolygonVertex)
                                        ? theVertexID
                                        : theFbxCtrlPointIndex,
-                                   theFaceTupleValues.get<3>());
+                                   get<3>(theFaceTupleValues));
                 } else if (newTangents.size() > 0) {
                     // we use the mapping as the normals
                     ReadTexTangent(
@@ -1338,28 +1337,28 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                         (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
                             ? theVertexID
                             : theFbxCtrlPointIndex,
-                        theFaceTupleValues.get<3>());
+                        get<3>(theFaceTupleValues));
                 }
                 if (theFbxBinormals) {
                     ReadTexBinormal(theFbxBinormals, (theFbxBinormalsMappingMode
                                                       == FbxGeometryElement::eByPolygonVertex)
                                         ? theVertexID
                                         : theFbxCtrlPointIndex,
-                                    theFaceTupleValues.get<4>());
+                                    get<4>(theFaceTupleValues));
                 } else if (newBinormals.size() > 0) {
                     ReadTexBinormal(
                         newBinormals, theFbxNormals,
                         (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
                             ? theVertexID
                             : theFbxCtrlPointIndex,
-                        theFaceTupleValues.get<4>());
+                        get<4>(theFaceTupleValues));
                 }
 
                 if (theVertexWeights.size() > 0) {
                     ReadWeight(theVertexWeights[theFbxCtrlPointIndex], theFbxCtrlPointIndex,
-                               theFaceTupleValues.get<5>());
+                               get<5>(theFaceTupleValues));
                     ReadBoneIndex(theVertexWeights[theFbxCtrlPointIndex], theFbxCtrlPointIndex,
-                                  theFaceTupleValues.get<6>(), theJointInfoList);
+                                  get<6>(theFaceTupleValues), theJointInfoList);
                 }
 
                 if (theFbxUV2s) {
@@ -1367,7 +1366,7 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                                  (theFbxUV2sMappingMode == FbxGeometryElement::eByPolygonVertex)
                                      ? theVertexID
                                      : theFbxCtrlPointIndex,
-                                 theFaceTupleValues.get<7>());
+                                 get<7>(theFaceTupleValues));
                 }
 
                 long theFaceIndex = RetrieveFaceIndex(theFaceIndices, theFaceTupleValues);
@@ -1434,22 +1433,22 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
         long theFaceIndex = theIter->second;
         const TVertexInfoTuple &thePointTuple = theIter->first;
 
-        WriteFloat3(theVertices, theFaceIndex, thePointTuple.get<0>());
+        WriteFloat3(theVertices, theFaceIndex, get<0>(thePointTuple));
 
         if (theFbxNormals)
-            WriteFloat3(theNormals, theFaceIndex, thePointTuple.get<1>());
+            WriteFloat3(theNormals, theFaceIndex, get<1>(thePointTuple));
         if (theFbxUVs)
-            WriteFloat2(theTexCoords, theFaceIndex, thePointTuple.get<2>());
+            WriteFloat2(theTexCoords, theFaceIndex, get<2>(thePointTuple));
         if (theFbxTangents || newTangents.size() > 0)
-            WriteFloat3(theTexTangents, theFaceIndex, thePointTuple.get<3>());
+            WriteFloat3(theTexTangents, theFaceIndex, get<3>(thePointTuple));
         if (theFbxBinormals || newBinormals.size() > 0)
-            WriteFloat3(theTexBinormals, theFaceIndex, thePointTuple.get<4>());
+            WriteFloat3(theTexBinormals, theFaceIndex, get<4>(thePointTuple));
         if (theVertexWeights.size() > 0) {
-            WriteFloat4(theWeights, theFaceIndex, thePointTuple.get<5>());
-            WriteFloat4(theBoneIndex, theFaceIndex, thePointTuple.get<6>());
+            WriteFloat4(theWeights, theFaceIndex, get<5>(thePointTuple));
+            WriteFloat4(theBoneIndex, theFaceIndex, get<6>(thePointTuple));
         }
         if (theFbxUV2s)
-            WriteFloat2(theTexCoords2, theFaceIndex, thePointTuple.get<7>());
+            WriteFloat2(theTexCoords2, theFaceIndex, get<7>(thePointTuple));
     }
 
     m_Translator->SetGeometry(theVertices, theNormals, theTexCoords, theTexCoords2, theTexTangents,

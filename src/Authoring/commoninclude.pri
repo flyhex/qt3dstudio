@@ -7,9 +7,6 @@ contains(TEMPLATE, lib) {
     QT += core gui
 }
 
-# Prevents problems with boost signals and qt signals macros conflicting
-CONFIG += no_keywords
-
 # TODO: Investigate whether these can be moved to commonplatform
 win32 {
     QMAKE_CXXFLAGS += /EHsc /GA

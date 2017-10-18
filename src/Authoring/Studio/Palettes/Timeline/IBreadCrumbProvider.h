@@ -34,8 +34,7 @@
 
 #include <QColor>
 #include <QString>
-
-#include <boost/signals.hpp>
+#include <QObject>
 
 class QPixmap;
 
@@ -50,8 +49,9 @@ struct SBreadCrumb
  * A interface class for the breadcrumb control, to walk down the breadcrumb trail, without having
  * to know any underlying implementations.
  */
-class IBreadCrumbProvider
+class IBreadCrumbProvider : public QObject
 {
+    Q_OBJECT
 public:
     typedef std::vector<SBreadCrumb> TTrailList;
 
@@ -65,8 +65,8 @@ public:
     virtual QPixmap GetBreadCrumbImage() const = 0;
     virtual QPixmap GetSeparatorImage() const = 0;
     virtual QPixmap GetActiveBreadCrumbImage() const = 0;
-
-    boost::signal0<void> SigBreadCrumbUpdate;
+Q_SIGNALS:
+    void SigBreadCrumbUpdate();
 };
 
 #endif // INCLUDED_IBREADCRUMBPROVIDER_H

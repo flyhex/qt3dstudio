@@ -31,7 +31,19 @@
 #define ANIMATIONCOREH
 #include "Qt3DSDMAnimation.h"
 #include "HandleSystemBase.h"
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
+
+namespace {
+struct pair_hash {
+       template <class T1, class T2>
+       std::size_t operator () (const std::pair<T1, T2> &p) const {
+           auto h1 = std::hash<T1>{}(p.first);
+           auto h2 = std::hash<T2>{}(p.second);
+
+           return h1 ^ h2;
+       }
+   };
+}
 
 namespace qt3dsdm {
 struct SAnimationTrack : public CHandleObject
@@ -98,8 +110,8 @@ class CAnimationCoreProducer;
 class CSimpleAnimationCore : public CHandleBase, public IAnimationCore
 {
     TStringTablePtr m_StringTable;
-    typedef boost::unordered_multimap<std::pair<int, int>, std::shared_ptr<SAnimationTrack>>
-        TStateInstanceAnimationMap;
+    typedef std::unordered_multimap<std::pair<int, int>,
+    std::shared_ptr<SAnimationTrack>, pair_hash> TStateInstanceAnimationMap;
     // state,instance pair map to animation handle to speed up querying if a particular
     // property is animated.
     mutable TStateInstanceAnimationMap m_AnimationMatchesCache;

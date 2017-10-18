@@ -38,14 +38,7 @@
 #include <string>
 
 namespace qt3dsdm {
-// One may notice this looks a lot like std::signals.
-// One may also notice that I chose to hide the implementation completely instead
-// taking the route of boost/function.hpp instead.
 
-// This is because boost/signal.hpp includes boost/any.hpp and boost/any.hpp
-// doesn't currently compile in studio due to a #define problem.
-// Strings.h defines placeholder to be a number and boost/any.hpp uses
-// an inner class named placeholder...
 class ISignalConnection
 {
 public:
@@ -61,6 +54,23 @@ public:
 typedef std::shared_ptr<ISignalItem> TSignalItemPtr;
 
 typedef std::shared_ptr<ISignalConnection> TSignalConnectionPtr;
+
+class QtSignalConnection : public ISignalConnection
+{
+    Q_DISABLE_COPY(QtSignalConnection)
+private:
+    QMetaObject::Connection m_connection;
+public:
+    QtSignalConnection(const QMetaObject::Connection &inConnection)
+        : m_connection(inConnection)
+    {
+    }
+    ~QtSignalConnection() override
+    {
+        QObject::disconnect(m_connection);
+    }
+};
+
 
 class IInstancePropertyCoreSignalProvider : public ISignalItem
 {

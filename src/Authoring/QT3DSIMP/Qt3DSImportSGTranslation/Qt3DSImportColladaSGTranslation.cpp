@@ -36,8 +36,6 @@
 #include "dom/domConstants.h"
 #include "dom/domCommon_float_or_param_type.h"
 #include "dom/domCommon_transparent_type.h"
-#include <boost/bind.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
 #include "Qt3DSMath.h"
 #include "Qt3DSImportColladaDOMUtils.h"
 #include "Qt3DSImportColladaTransformUtils.h"
@@ -45,8 +43,7 @@
 #include "foundation/Qt3DSVec3.h"
 #include <memory>
 #include <map>
-#include <boost/function.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <functional>
 #include "dom/domElements.h"
 #include "dom/domProfile_COMMON.h"
 #include "dom/domCommon_color_or_texture_type.h"
@@ -54,7 +51,8 @@
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportTranslation.h"
 
-#include <QByteArray>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qfileinfo.h>
 
 using namespace qt3dsimp;
 
@@ -73,7 +71,7 @@ public:
     ~ColladaDOMWalker();
 
 public:
-    typedef boost::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector2>
+    typedef std::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector2>
         TVertexInfoTuple;
     typedef std::vector<std::pair<std::string, daeURI>> TURIList;
     typedef std::pair<std::map<TVertexInfoTuple, long>,
@@ -141,34 +139,34 @@ protected:
     bool ApplyAnimation(const daeElement *inContainerElement);
 
 protected:
-    boost::function<void(const char *)> PushGroup;
-    boost::function<void()> PopGroup;
-    boost::function<void(const char *)> PushModel;
-    boost::function<void()> PopModel;
-    boost::function<void(const char *)> PushMaterial;
-    boost::function<void(long, long)> PopMaterial;
-    boost::function<void(const char *, const char *, long)> PushTexture;
-    boost::function<void()> PopTexture;
-    boost::function<void(daeElement *inElement)> CacheAnimationTrack;
-    boost::function<void(long)> ApplyAnimationTrack;
+    std::function<void(const char *)> PushGroup;
+    std::function<void()> PopGroup;
+    std::function<void(const char *)> PushModel;
+    std::function<void()> PopModel;
+    std::function<void(const char *)> PushMaterial;
+    std::function<void(long, long)> PopMaterial;
+    std::function<void(const char *, const char *, long)> PushTexture;
+    std::function<void()> PopTexture;
+    std::function<void(daeElement *inElement)> CacheAnimationTrack;
+    std::function<void(long)> ApplyAnimationTrack;
 
 protected:
-    boost::function<void()> MarkInvalid;
+    std::function<void()> MarkInvalid;
 
 protected:
-    boost::function<void(EAuthoringToolType, long)> SetAuthoringTool;
-    boost::function<void(const TTransformList &inTransforms)> SetTransforms;
-    boost::function<void(const SMaterialParameters &inMaterialParameters)> SetMaterial;
-    boost::function<void(long inMapType, const STextureParameters &inTextureParameters)> SetTexture;
+    std::function<void(EAuthoringToolType, long)> SetAuthoringTool;
+    std::function<void(const TTransformList &inTransforms)> SetTransforms;
+    std::function<void(const SMaterialParameters &inMaterialParameters)> SetMaterial;
+    std::function<void(long inMapType, const STextureParameters &inTextureParameters)> SetTexture;
 
-    boost::function<void(const char *, const char *)> SetAnimationTrack;
-    boost::function<void(const char *, const char *, const SKeyframeParameters &)>
+    std::function<void(const char *, const char *)> SetAnimationTrack;
+    std::function<void(const char *, const char *, const SKeyframeParameters &)>
         CacheAnimationKey;
 
     static void dummy() {}
 
 protected:
-    boost::function<void(ESceneGraphWarningCode, const char *)> LogWarning;
+    std::function<void(ESceneGraphWarningCode, const char *)> LogWarning;
 
 protected:
     std::auto_ptr<DAE> m_DAE;
@@ -254,37 +252,48 @@ ColladaDOMWalker::ColladaDOMWalker(ISceneGraphTranslation *inTranslation)
     : m_ColladaRoot(NULL)
     , m_Translator(inTranslation)
 {
-    PushGroup = boost::bind(&ISceneGraphTranslation::PushGroup, m_Translator, _1);
-    PopGroup = boost::bind(&ISceneGraphTranslation::PopGroup, m_Translator);
-    PushModel = boost::bind(&ISceneGraphTranslation::PushModel, m_Translator, _1);
-    PopModel = boost::bind(&ISceneGraphTranslation::PopModel, m_Translator);
+    PushGroup = std::bind(&ISceneGraphTranslation::PushGroup, m_Translator, std::placeholders::_1);
+    PopGroup = std::bind(&ISceneGraphTranslation::PopGroup, m_Translator);
+    PushModel = std::bind(&ISceneGraphTranslation::PushModel, m_Translator, std::placeholders::_1);
+    PopModel = std::bind(&ISceneGraphTranslation::PopModel, m_Translator);
 
-    PushMaterial = boost::bind(&ISceneGraphTranslation::PushMaterial, m_Translator, _1);
-    PopMaterial = boost::bind(&ISceneGraphTranslation::PopMaterial, m_Translator, _1, _2);
-    PushTexture = boost::bind(&ISceneGraphTranslation::PushTexture, m_Translator, _1, _2, _3);
-    PopTexture = boost::bind(&ISceneGraphTranslation::PopTexture, m_Translator);
+    PushMaterial = std::bind(&ISceneGraphTranslation::PushMaterial, m_Translator,
+                             std::placeholders::_1);
+    PopMaterial = std::bind(&ISceneGraphTranslation::PopMaterial, m_Translator,
+                            std::placeholders::_1, std::placeholders::_2);
+    PushTexture = std::bind(&ISceneGraphTranslation::PushTexture, m_Translator,
+                            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    PopTexture = std::bind(&ISceneGraphTranslation::PopTexture, m_Translator);
 
     CacheAnimationTrack =
-        boost::bind(&ColladaDOMWalker::TrackObjectIndex, this, _1,
-                    boost::bind(&ISceneGraphTranslation::CacheAnimationTrack, m_Translator));
+        std::bind(&ColladaDOMWalker::TrackObjectIndex, this, std::placeholders::_1,
+                    std::bind(&ISceneGraphTranslation::CacheAnimationTrack, m_Translator));
     ApplyAnimationTrack =
-        boost::bind(&ISceneGraphTranslation::ApplyAnimationTrack, m_Translator, _1);
+        std::bind(&ISceneGraphTranslation::ApplyAnimationTrack, m_Translator,
+                  std::placeholders::_1);
 
-    MarkInvalid = boost::bind(&ISceneGraphTranslation::MarkInvalid, m_Translator);
+    MarkInvalid = std::bind(&ISceneGraphTranslation::MarkInvalid, m_Translator);
 
-    SetAuthoringTool = boost::bind(&ISceneGraphTranslation::SetAuthoringTool, m_Translator, _1, _2);
+    SetAuthoringTool = std::bind(&ISceneGraphTranslation::SetAuthoringTool, m_Translator,
+                                 std::placeholders::_1, std::placeholders::_2);
 
-    SetTransforms = boost::bind(&ISceneGraphTranslation::SetTransforms, m_Translator, _1);
+    SetTransforms = std::bind(&ISceneGraphTranslation::SetTransforms, m_Translator,
+                              std::placeholders::_1);
 
-    SetMaterial = boost::bind(&ISceneGraphTranslation::SetMaterial, m_Translator, _1);
-    SetTexture = boost::bind(&ISceneGraphTranslation::SetTexture, m_Translator, _1, _2);
+    SetMaterial = std::bind(&ISceneGraphTranslation::SetMaterial, m_Translator,
+                            std::placeholders::_1);
+    SetTexture = std::bind(&ISceneGraphTranslation::SetTexture, m_Translator,
+                           std::placeholders::_1, std::placeholders::_2);
 
     SetAnimationTrack =
-        boost::bind(&ISceneGraphTranslation::SetAnimationTrack, m_Translator, _1, _2);
+        std::bind(&ISceneGraphTranslation::SetAnimationTrack, m_Translator,
+                  std::placeholders::_1, std::placeholders::_2);
     CacheAnimationKey =
-        boost::bind(&ISceneGraphTranslation::CacheAnimationKey, m_Translator, _1, _2, _3);
+        std::bind(&ISceneGraphTranslation::CacheAnimationKey, m_Translator,
+                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
-    LogWarning = boost::bind(&ISceneGraphTranslation::LogWarning, m_Translator, _1, _2);
+    LogWarning = std::bind(&ISceneGraphTranslation::LogWarning, m_Translator,
+                           std::placeholders::_1, std::placeholders::_2);
 }
 
 //==============================================================================
@@ -301,9 +310,12 @@ ColladaDOMWalker::~ColladaDOMWalker()
  */
 bool ColladaDOMWalker::LoadDocument(const std::string &inFilePath)
 {
-    if (boost::filesystem::exists(inFilePath)) {
+    if (QFileInfo(QString::fromStdString(inFilePath)).exists()) {
         m_DAE.reset(new DAE);
-        m_ColladaRoot = m_DAE->open141(inFilePath);
+        QFile file(QString::fromStdString(inFilePath));
+        file.open(QIODevice::ReadOnly);
+        m_ColladaRoot = m_DAE->openFromMemory141(inFilePath,file.readAll().constData());
+        file.close();
         m_DAEFilename = inFilePath.c_str();
 
         // Extract authoring_tool information
@@ -685,18 +697,18 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
         long theFaceIndex = theIter->second;
         const TVertexInfoTuple &thePointTuple = theIter->first;
 
-        Push3Floats(theVertices, theFaceIndex, thePointTuple.get<0>());
+        Push3Floats(theVertices, theFaceIndex, get<0>(thePointTuple));
 
         if (theHasNormals)
-            Push3Floats(theNormals, theFaceIndex, thePointTuple.get<1>());
+            Push3Floats(theNormals, theFaceIndex, get<1>(thePointTuple));
         if (theHasTexCoords)
-            Push2Floats(theTexCoords, theFaceIndex, thePointTuple.get<2>());
+            Push2Floats(theTexCoords, theFaceIndex, get<2>(thePointTuple));
         if (theHasTexTangents)
-            Push3Floats(theTexTangents, theFaceIndex, thePointTuple.get<3>());
+            Push3Floats(theTexTangents, theFaceIndex, get<3>(thePointTuple));
         if (theHasTexBinormals)
-            Push3Floats(theTexBinormals, theFaceIndex, thePointTuple.get<4>());
+            Push3Floats(theTexBinormals, theFaceIndex, get<4>(thePointTuple));
         if (theHasTexCoords2)
-            Push2Floats(theTexCoords2, theFaceIndex, thePointTuple.get<5>());
+            Push2Floats(theTexCoords2, theFaceIndex, get<5>(thePointTuple));
     }
 
     // Lump all acquired face indicies from different materials, into a single list
@@ -829,42 +841,42 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
     for (long theIndex = 0; theIndex < thePIntsCount; theIndex += theMaxOffset) {
         TVertexInfoTuple theFaceTupleValues;
 
-        GetFaceTupleValue(theFaceTupleValues.get<0>(), theVertexArrayInfo,
+        GetFaceTupleValue(get<0>(theFaceTupleValues), theVertexArrayInfo,
                           (unsigned long)theListOfPInts[theIndex + theVertexArrayInfo.m_POffset]);
 
         if (outHasNormals)
             GetFaceTupleValue(
-                theFaceTupleValues.get<1>(), theNormalArrayInfo,
+                get<1>(theFaceTupleValues), theNormalArrayInfo,
                 (unsigned long)theListOfPInts[theIndex + theNormalArrayInfo.m_POffset]);
 
         if (outHasTexCoords)
             GetFaceTupleValue(
-                theFaceTupleValues.get<2>(), theTexCoordArrayInfo,
+                get<2>(theFaceTupleValues), theTexCoordArrayInfo,
                 (unsigned long)theListOfPInts[theIndex + theTexCoordArrayInfo.m_POffset]);
 
         // first check if we generated the tangents
         if (newTangents.size() > 0)
             GetFaceTupleValue(
-                theFaceTupleValues.get<3>(), newTangents,
+                get<3>(theFaceTupleValues), newTangents,
                 (unsigned long)theListOfPInts[theIndex + theVertexArrayInfo.m_POffset]);
         else if (outHasTexTangents)
             GetFaceTupleValue(
-                theFaceTupleValues.get<3>(), theTexTangentArrayInfo,
+                get<3>(theFaceTupleValues), theTexTangentArrayInfo,
                 (unsigned long)theListOfPInts[theIndex + theTexTangentArrayInfo.m_POffset]);
 
         // first check if we generated the binormals
         if (newBinormals.size() > 0)
             GetFaceTupleValue(
-                theFaceTupleValues.get<4>(), newBinormals,
+                get<4>(theFaceTupleValues), newBinormals,
                 (unsigned long)theListOfPInts[theIndex + theVertexArrayInfo.m_POffset]);
         else if (outHasTexBinormals)
             GetFaceTupleValue(
-                theFaceTupleValues.get<4>(), theTexBinormalArrayInfo,
+                get<4>(theFaceTupleValues), theTexBinormalArrayInfo,
                 (unsigned long)theListOfPInts[theIndex + theTexBinormalArrayInfo.m_POffset]);
 
         if (outHasTexCoords2)
             GetFaceTupleValue(
-                theFaceTupleValues.get<5>(), theTexCoord2ArrayInfo,
+                get<5>(theFaceTupleValues), theTexCoord2ArrayInfo,
                 (unsigned long)theListOfPInts[theIndex + theTexCoord2ArrayInfo.m_POffset]);
 
         long theFaceIndex = RetrieveFaceIndex(ioFaceIndicies, theFaceTupleValues);

@@ -42,27 +42,13 @@
 #include "MasterP.h"
 #include "Qt3DSFile.h"
 #include "Cmd.h"
-#include "boost/signals.hpp"
-#include "boost/signals/connection.hpp"
-#include "boost/make_shared.hpp"
 #include "SelectedValueImpl.h"
 
-namespace {
-struct SSignalConnection : public qt3dsdm::ISignalConnection, boost::noncopyable
+class SDispatchSignalSystem : public QObject
 {
-    boost::BOOST_SIGNALS_NAMESPACE::scoped_connection m_connection;
-    SSignalConnection(const boost::BOOST_SIGNALS_NAMESPACE::connection &inConnection)
-        : m_connection(inConnection)
-    {
-    }
-};
-}
-
-#define CONNECT(x) std::make_shared<SSignalConnection>(x.connect(inCallback))
-
-struct SDispatchSignalSystem
-{
-    boost::signal<void(Q3DStudio::SSelectedValue)> m_SelectionChanged;
+    Q_OBJECT
+Q_SIGNALS:
+    void selectionChanged(Q3DStudio::SSelectedValue);
 };
 
 //=============================================================================
@@ -260,12 +246,14 @@ void CDispatch::FireOnNudgeDone()
 qt3dsdm::TSignalConnectionPtr
 CDispatch::ConnectSelectionChange(std::function<void(Q3DStudio::SSelectedValue)> inCallback)
 {
-    return CONNECT(m_SignalSystem->m_SelectionChanged);
+    return std::make_shared<qt3dsdm::QtSignalConnection>(
+                QObject::connect(m_SignalSystem.get(),
+                                 &SDispatchSignalSystem::selectionChanged,inCallback));
 }
 
 void CDispatch::FireSelectionChange(Q3DStudio::SSelectedValue inValue)
 {
-    m_SignalSystem->m_SelectionChanged(inValue);
+    Q_EMIT m_SignalSystem->selectionChanged(inValue);
 }
 
 //=============================================================================
@@ -690,3 +678,5 @@ void CDispatch::FireOnRendererInitialized()
 {
     m_RendererListeners.FireEvent(&CRendererListener::OnRendererInitialized);
 }
+
+#include "Dispatch.moc"

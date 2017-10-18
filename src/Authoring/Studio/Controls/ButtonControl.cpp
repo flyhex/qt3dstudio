@@ -258,7 +258,7 @@ bool CButtonControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
     if (!CControl::OnMouseDown(inPoint, inFlags)) {
         m_IsMouseDown = true;
         SetButtonState(EBUTTONSTATE_DOWN);
-        SigButtonDown(this);
+        Q_EMIT SigButtonDown(this);
         Invalidate();
     }
 
@@ -279,9 +279,9 @@ void CButtonControl::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
     SetButtonState(EBUTTONSTATE_UP);
 
     if (IsMouseOver()) {
-        SigButtonUp(this);
+        Q_EMIT SigButtonUp(this);
         if (m_IsMouseDown)
-            SigClicked(this);
+            Q_EMIT SigClicked(this);
     }
     m_IsMouseDown = false;
 

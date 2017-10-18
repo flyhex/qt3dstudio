@@ -129,7 +129,7 @@ namespace Graph {
                 }
                 return make_pair(theResult.first->second, theResult.second);
             }
-            assert(0);
+            Q_ASSERT(0);
             return make_pair(TNodePtr(NULL), false);
         }
 
@@ -191,10 +191,10 @@ namespace Graph {
         long AddChild(TKeyType inParent, TKeyType inChild, SGraphPosition inIndex)
         {
             TNodePtr theChild(CreateImpl(inChild).first);
-            assert(theChild->m_Parent == NULL);
+            Q_ASSERT(theChild->m_Parent == NULL);
             if (inParent) {
                 TNodePtr theParent(GetImpl(inParent));
-                assert(theParent);
+                Q_ASSERT(theParent);
                 if (theParent == NULL)
                     return 0;
                 theChild->m_Parent = theParent;
@@ -228,11 +228,11 @@ namespace Graph {
                 while (theChild->m_Children.size())
                     RemoveChild(inChild, theChild->m_Children.back()->m_GraphableID, deleteChild);
 
-                assert(theChild->m_Children.size() == 0);
+                Q_ASSERT(theChild->m_Children.size() == 0);
             }
 
             TNodeList &childList = theChild->GetParentList(m_Roots);
-            assert(theChild->m_Parent == GetImpl(inParent));
+            Q_ASSERT(theChild->m_Parent == GetImpl(inParent));
             theChild->m_Parent = NULL;
 
             long findIdx = FindNode(theChild, childList);
@@ -257,12 +257,12 @@ namespace Graph {
             TNodePtr node(GetImpl(inNode));
             if (node) {
                 TNodeList &childList(node->GetParentList(m_Roots));
-                assert(oldIdx < (long)childList.size());
-                assert(newIdx < (long)childList.size());
-                assert(childList.at(oldIdx) == node);
+                Q_ASSERT(oldIdx < (long)childList.size());
+                Q_ASSERT(newIdx < (long)childList.size());
+                Q_ASSERT(childList.at(oldIdx) == node);
                 childList.erase(childList.begin() + oldIdx);
                 childList.insert(childList.begin() + newIdx, node);
-                assert(childList.at(newIdx) == node);
+                Q_ASSERT(childList.at(newIdx) == node);
             }
         }
 

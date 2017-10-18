@@ -60,8 +60,9 @@ CBaseTimelineTreeControl::CBaseTimelineTreeControl(CBaseStateRow *inStateRow, bo
 
     // Add the button and initialize all the listeners for the events on it.
     AddChild(m_ExpandButton);
-    m_ExpandButton->SigToggle.connect(std::bind(&CBaseStateRow::ToggleExpansion, m_StateRow,
-                                                std::placeholders::_1, std::placeholders::_2));
+    QObject::connect(m_ExpandButton,&CToggleButton::SigToggle,
+                     std::bind(&CBaseStateRow::ToggleExpansion, m_StateRow,
+                               std::placeholders::_1, std::placeholders::_2));
     m_ExpandButton->SetVisible(false);
 
     m_Icon = new CSIcon(m_StateRow->GetIcon(), m_StateRow->GetDisabledIcon());

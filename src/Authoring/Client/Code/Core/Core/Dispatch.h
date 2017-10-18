@@ -74,7 +74,7 @@ class IDataModelListener;
 class IDocumentBufferCacheListener;
 class IDocumentResourcesListener;
 class CRendererListener;
-struct SDispatchSignalSystem;
+class SDispatchSignalSystem;
 
 //==============================================================================
 /**

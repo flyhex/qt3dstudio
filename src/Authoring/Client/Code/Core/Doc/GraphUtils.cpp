@@ -41,8 +41,6 @@
 #include "ClientDataModelBridge.h"
 #include "Qt3DSDMSlides.h"
 
-#include <boost/bind.hpp>
-
 //==============================================================================
 //	Filters
 //==============================================================================
@@ -51,7 +49,7 @@
 /**
  *	Excludes those which are not inGraphableType
  */
-bool FilterForGraphableType(CDoc * /*inDoc*/, EGraphableType inGraphableType,
+bool FilterForGraphableTypeFun(CDoc * /*inDoc*/, EGraphableType inGraphableType,
                             Q3DStudio::TIdentifier /*inGraphable*/)
 {
     EGraphableType theGraphableType = EGRAPHABLE_TYPE_ASSET;
@@ -64,14 +62,14 @@ bool FilterForGraphableType(CDoc * /*inDoc*/, EGraphableType inGraphableType,
  */
 const Q3DStudio::TFilter FilterForGraphableType(CDoc *inDoc, EGraphableType inGraphableType)
 {
-    return boost::bind(FilterForGraphableType, inDoc, inGraphableType, _1);
+    return std::bind(FilterForGraphableTypeFun, inDoc, inGraphableType, std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those which are not inAssetType
  */
-bool FilterForAssetType(CDoc *inDoc, EStudioObjectType inObjectType,
+bool FilterForAssetTypeFun(CDoc *inDoc, EStudioObjectType inObjectType,
                         Q3DStudio::TIdentifier inGraphable)
 {
     return inDoc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(inGraphable)
@@ -84,14 +82,14 @@ bool FilterForAssetType(CDoc *inDoc, EStudioObjectType inObjectType,
  */
 const Q3DStudio::TFilter FilterForAssetType(CDoc *inDoc, EStudioObjectType inObjectType)
 {
-    return boost::bind(FilterForAssetType, inDoc, inObjectType, _1);
+    return std::bind(FilterForAssetTypeFun, inDoc, inObjectType, std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those which are inAssetType
  */
-bool FilterAwayAssetType(CDoc *inDoc, EStudioObjectType inObjectType,
+bool FilterAwayAssetTypeFun(CDoc *inDoc, EStudioObjectType inObjectType,
                          Q3DStudio::TIdentifier inGraphable)
 {
     return inDoc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(inGraphable)
@@ -104,14 +102,14 @@ bool FilterAwayAssetType(CDoc *inDoc, EStudioObjectType inObjectType,
  */
 const Q3DStudio::TFilter FilterAwayAssetType(CDoc *inDoc, EStudioObjectType inObjectType)
 {
-    return boost::bind(FilterAwayAssetType, inDoc, inObjectType, _1);
+    return std::bind(FilterAwayAssetTypeFun, inDoc, inObjectType, std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those which are not node. This compares the high bit of the type ID
  */
-bool FilterForNodeType(CDoc *inDoc, Q3DStudio::TIdentifier inGraphable)
+bool FilterForNodeTypeFun(CDoc *inDoc, Q3DStudio::TIdentifier inGraphable)
 {
     return !inDoc->GetStudioSystem()->GetClientDataModelBridge()->IsNodeType(inGraphable);
 }
@@ -122,14 +120,14 @@ bool FilterForNodeType(CDoc *inDoc, Q3DStudio::TIdentifier inGraphable)
  */
 const Q3DStudio::TFilter FilterForNodeType(CDoc *inDoc)
 {
-    return boost::bind(FilterForNodeType, inDoc, _1);
+    return std::bind(FilterForNodeTypeFun, inDoc, std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those who doesn't exist in SlideIndex
  */
-bool FilterForSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlide,
+bool FilterForSlideFun(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                     Q3DStudio::TIdentifier inGraphable)
 {
     try {
@@ -148,14 +146,14 @@ bool FilterForSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlide,
  */
 const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
-    return boost::bind(FilterForSlide, inDoc, inSlide, _1);
+    return std::bind(FilterForSlideFun, inDoc, inSlide, std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those whose controlling timeparent are different from inControllingTimeParent
  */
-bool FilterForControllingTimeParent(CDoc *inDoc,
+bool FilterForControllingTimeParentFun(CDoc *inDoc,
                                     qt3dsdm::Qt3DSDMInstanceHandle inControllingTimeParent,
                                     Q3DStudio::TIdentifier inGraphable)
 {
@@ -171,14 +169,15 @@ bool FilterForControllingTimeParent(CDoc *inDoc,
 const Q3DStudio::TFilter
 FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inControllingTimeParent)
 {
-    return boost::bind(FilterForControllingTimeParent, inDoc, inControllingTimeParent, _1);
+    return std::bind(FilterForControllingTimeParentFun, inDoc, inControllingTimeParent,
+                     std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those that are not in active component
  */
-bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inActiveComponentSlide,
+bool FilterForActiveComponentFun(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inActiveComponentSlide,
                               Q3DStudio::TIdentifier inGraphable)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
@@ -198,14 +197,15 @@ bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inActiveC
 const Q3DStudio::TFilter FilterForActiveComponent(CDoc *inDoc,
                                                   qt3dsdm::Qt3DSDMSlideHandle inActiveComponentSlide)
 {
-    return boost::bind(FilterForActiveComponent, inDoc, inActiveComponentSlide, _1);
+    return std::bind(FilterForActiveComponentFun, inDoc, inActiveComponentSlide,
+                     std::placeholders::_1);
 }
 
 //==============================================================================
 /**
  *	Excludes those that don't exist in current slide
  */
-bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inTimeParent,
+bool FilterForCurrentSlideFun(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inTimeParent,
                            Q3DStudio::TIdentifier inGraphable)
 {
     qt3dsdm::ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
@@ -228,7 +228,7 @@ bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inTimePar
 const Q3DStudio::TFilter FilterForCurrentSlide(CDoc *inDoc,
                                                qt3dsdm::Qt3DSDMInstanceHandle inTimeParent)
 {
-    return boost::bind(FilterForCurrentSlide, inDoc, inTimeParent, _1);
+    return std::bind(FilterForCurrentSlideFun, inDoc, inTimeParent, std::placeholders::_1);
 }
 
 //==============================================================================

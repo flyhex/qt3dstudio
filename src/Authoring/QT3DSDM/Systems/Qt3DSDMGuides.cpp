@@ -29,28 +29,18 @@
 #include "Qt3DSDMPrefix.h"
 #include "Qt3DSDMGuides.h"
 #include <unordered_map>
-#include "boost/signals.hpp"
-#include <boost/signals/connection.hpp>
 #include "VectorTransactions.h"
 
 using namespace qt3dsdm;
 
 namespace {
 
-struct SBoostSignalConnection : public ISignalConnection
-{
-    Q_DISABLE_COPY(SBoostSignalConnection)
-    boost::BOOST_SIGNALS_NAMESPACE::scoped_connection m_connection;
-    SBoostSignalConnection(const boost::BOOST_SIGNALS_NAMESPACE::connection &inConnection)
-        : m_connection(inConnection)
-    {
-    }
-};
+#define CONNECT(x) std::make_shared<qt3dsdm::QtSignalConnection>(QObject::connect(this, x, inCallback))
 
-#define CONNECT(x) std::make_shared<SBoostSignalConnection>(x.connect(inCallback))
-
-struct SGuideSystem : public IGuideSystem
+class SGuideSystem : public QObject, public IGuideSystem
 {
+    Q_OBJECT
+public:
     typedef std::unordered_map<long, SGuideInfo> TGuideMap;
     typedef std::shared_ptr<IMergeableTransaction<SGuideInfo>> TMergeableTransaction;
     typedef std::unordered_map<long, TMergeableTransaction> TGuideInfoMergeMap;
@@ -61,23 +51,23 @@ struct SGuideSystem : public IGuideSystem
 
     std::shared_ptr<ITransactionConsumer> m_CurrentTransaction;
     TGuideInfoMergeMap m_GuideMergeMap;
-
-    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideCreated;
-    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideDestroyed;
-    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideModified;
-    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideModifiedImmediate;
-
+Q_SIGNALS:
+    void guideCreated(Qt3DSDMGuideHandle, SGuideInfo);
+    void guideDestroyed(Qt3DSDMGuideHandle, SGuideInfo);
+    void guideModified(Qt3DSDMGuideHandle, SGuideInfo);
+    void guideModifiedImmediate(Qt3DSDMGuideHandle, SGuideInfo);
+public:
     SGuideSystem()
         : m_NextHandleValue(0)
         , m_GuidesEditable(true)
     {
     }
 
-    void SignalGuideCreated(long hdl, const SGuideInfo &inInfo) { m_GuideCreated(hdl, inInfo); }
+    void SignalGuideCreated(long hdl, const SGuideInfo &inInfo) { Q_EMIT guideCreated(hdl, inInfo); }
 
-    void SignalGuideDestroyed(long hdl, const SGuideInfo &inInfo) { m_GuideDestroyed(hdl, inInfo); }
+    void SignalGuideDestroyed(long hdl, const SGuideInfo &inInfo) { Q_EMIT guideDestroyed(hdl, inInfo); }
 
-    void SignalGuideModified(long hdl, const SGuideInfo &inInfo) { m_GuideModified(hdl, inInfo); }
+    void SignalGuideModified(long hdl, const SGuideInfo &inInfo) { Q_EMIT guideModified(hdl, inInfo); }
 
     Qt3DSDMGuideHandle CreateGuide() override
     {
@@ -136,7 +126,7 @@ struct SGuideSystem : public IGuideSystem
             }
         }
         if (AreDataModelSignalsEnabled())
-            m_GuideModifiedImmediate(theHdlValue, info);
+            Q_EMIT guideModifiedImmediate(theHdlValue, info);
     }
 
     SGuideInfo GetGuideInfo(Qt3DSDMGuideHandle inGuideHandle) const override
@@ -199,19 +189,19 @@ struct SGuideSystem : public IGuideSystem
     virtual TSignalConnectionPtr
     ConnectGuideCreated(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
-        return CONNECT(m_GuideCreated);
+        return CONNECT(&SGuideSystem::guideCreated);
     }
 
     virtual TSignalConnectionPtr
     ConnectGuideDestroyed(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
-        return CONNECT(m_GuideDestroyed);
+        return CONNECT(&SGuideSystem::guideDestroyed);
     }
 
     virtual TSignalConnectionPtr
     ConnectGuideModified(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
-        return CONNECT(m_GuideModified);
+        return CONNECT(&SGuideSystem::guideModified);
     }
 
     // Signal happens immediately instead of on undo/redo, used for live-update of the inspector
@@ -219,7 +209,7 @@ struct SGuideSystem : public IGuideSystem
     TSignalConnectionPtr ConnectGuideModifiedImmediate(
         const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
-        return CONNECT(m_GuideModifiedImmediate);
+        return CONNECT(&SGuideSystem::guideModifiedImmediate);
     }
 };
 }
@@ -228,3 +218,5 @@ shared_ptr<IGuideSystem> IGuideSystem::CreateGuideSystem()
 {
     return std::make_shared<SGuideSystem>();
 }
+
+#include "Qt3DSDMGuides.moc"

@@ -30,4 +30,5 @@ SOURCES += \
 HEADERS += \
     QT3DSDM/Systems/Qt3DSDMDataTypes.h \
     QT3DSDM/Systems/Qt3DSDMMetaDataTypes.h \
-    QT3DSDM/Systems/Qt3DSDMMetaDataValue.h
+    QT3DSDM/Systems/Qt3DSDMMetaDataValue.h \
+    QT3DSDM/Systems/Qt3DSDMMetaData.h

@@ -182,7 +182,7 @@ void CTimelineBreadCrumbProvider::RefreshSlideList()
  */
 void CTimelineBreadCrumbProvider::OnNameDirty()
 {
-    SigBreadCrumbUpdate();
+    Q_EMIT SigBreadCrumbUpdate();
 }
 
 void CTimelineBreadCrumbProvider::ClearSlideList()

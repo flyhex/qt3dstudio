@@ -59,8 +59,9 @@ class CTest_TreeControl;
  * associate it with a tree control.  Then you can specify it's parent when you
  * call AddItem( ).
  */
-class CTreeItem : public CFlowLayout
+class CTreeItem : public QObject, public CFlowLayout
 {
+    Q_OBJECT
 public:
     typedef std::vector<CTreeItem *> TItemList;
 
@@ -122,8 +123,8 @@ public:
 
     void SetVisibleSelection(bool inValue);
     bool GetVisibleSelection() const;
-
-    boost::signal1<void, CControl *> SigToggle;
+Q_SIGNALS:
+    void SigToggle(CControl *);
 
 protected:
     // Member Vars

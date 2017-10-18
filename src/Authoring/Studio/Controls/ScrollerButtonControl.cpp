@@ -64,21 +64,20 @@ CScrollerButtonControl::~CScrollerButtonControl()
 {
 }
 
-//=============================================================================
-/**
- * Destructor
- */
 void CScrollerButtonControl::Initialize() {
     // Add the button down listeners
     if (m_Direction == FORWARD) {
-        SigButtonDown.connect(std::bind(&CScrollerButtonControl::OnScrollForward,
-            static_cast<CScrollController *>(this), std::placeholders::_1));
+        QObject::connect(this, &CButtonControl::SigButtonDown,
+                         std::bind(&CScrollerButtonControl::OnScrollForward,
+                                   static_cast<CScrollController *>(this), std::placeholders::_1));
     } else {
-        SigButtonDown.connect(std::bind(&CScrollerButtonControl::OnScrollBackward,
-            static_cast<CScrollController *>(this), std::placeholders::_1));
+        QObject::connect(this, &CButtonControl::SigButtonDown,
+                         std::bind(&CScrollerButtonControl::OnScrollBackward,
+                                   static_cast<CScrollController *>(this), std::placeholders::_1));
     }
-    SigClicked.connect(std::bind(&CScrollerButtonControl::OnCancelScrolling,
-        static_cast<CScrollController *>(this), std::placeholders::_1));
+    QObject::connect(this, &CButtonControl::SigClicked,
+                     std::bind(&CScrollerButtonControl::OnCancelScrolling,
+                                   static_cast<CScrollController *>(this), std::placeholders::_1));
 }
 
 //=============================================================================

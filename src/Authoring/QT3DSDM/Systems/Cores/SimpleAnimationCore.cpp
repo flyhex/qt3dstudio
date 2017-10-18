@@ -43,10 +43,7 @@ typedef SPerfLogEvent TPerfLogMathEvent1;
 #include "Qt3DSCubicRoots.h"
 #include "Qt3DSCubicRootsImpl.h"
 #include "Qt3DSBezierEval.h"
-#include <boost/unordered_map.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 using namespace std;
-using namespace boost;
 
 namespace qt3dsdm {
 
@@ -386,38 +383,40 @@ float CSimpleAnimationCore::EvaluateAnimation(Qt3DSDMAnimationHandle inAnimation
     TKeyframe theSearchKey(theKeyframe);
     function<TKeyframe(int)> theIntToKeyframe(
         std::bind(IntToKeyframe, std::placeholders::_1, std::ref(m_Objects)));
-    typedef transform_iterator<function<TKeyframe(int)>, TKeyframeHandleList::const_iterator>
-        TTransformIterator;
-    TTransformIterator theBound =
-        lower_bound(make_transform_iterator(theItem->m_Keyframes.begin(), theIntToKeyframe),
-                    make_transform_iterator(theItem->m_Keyframes.end(), theIntToKeyframe),
-                    theSearchKey, KeyframeValueTimeLessThan);
-    if (theBound.base() == theItem->m_Keyframes.end())
+
+    TKeyframeHandleList::const_iterator theBound =
+            lower_bound(theItem->m_Keyframes.begin(), theItem->m_Keyframes.end(), theSearchKey,
+                        [theIntToKeyframe](const Qt3DSDMKeyframeHandle &inLeft,
+                                           const TKeyframe &inRight)
+    {return KeyframeTime(theIntToKeyframe(inLeft)) < KeyframeTime(inRight);});
+
+    if (theBound == theItem->m_Keyframes.end())
         return KeyframeValue(theItem->m_Keyframes.back(), m_Objects);
-    if (theBound.base() == theItem->m_Keyframes.begin())
+    if (theBound == theItem->m_Keyframes.begin())
         return KeyframeValue(*theItem->m_Keyframes.begin(), m_Objects);
-    TTransformIterator theStartIter = theBound;
+
+    TKeyframeHandleList::const_iterator theStartIter = theBound;
     --theStartIter;
 
     // Both iterators must be valid at this point...
-    TKeyframe theStart = *theStartIter;
-    TKeyframe theFinish = *theBound;
+    Qt3DSDMKeyframeHandle theStart = *theStartIter;
+    Qt3DSDMKeyframeHandle theFinish = *theBound;
     switch (theItem->m_AnimationType) {
     default:
         throw AnimationEvaluationError(L"");
     case EAnimationTypeLinear: {
-        SLinearKeyframe k1 = get<SLinearKeyframe>(theStart);
-        SLinearKeyframe k2 = get<SLinearKeyframe>(theFinish);
+        SLinearKeyframe k1 = get<SLinearKeyframe>(theIntToKeyframe(theStart));
+        SLinearKeyframe k2 = get<SLinearKeyframe>(theIntToKeyframe(theFinish));
         return EvaluateLinearKeyframe(k1, k2, inSeconds);
     }
     case EAnimationTypeBezier: {
-        SBezierKeyframe k1 = get<SBezierKeyframe>(theStart);
-        SBezierKeyframe k2 = get<SBezierKeyframe>(theFinish);
+        SBezierKeyframe k1 = get<SBezierKeyframe>(theIntToKeyframe(theStart));
+        SBezierKeyframe k2 = get<SBezierKeyframe>(theIntToKeyframe(theFinish));
         return DoBezierEvaluation(inSeconds, k1, k2);
     }
     case EAnimationTypeEaseInOut: {
-        SEaseInEaseOutKeyframe k1 = get<SEaseInEaseOutKeyframe>(theStart);
-        SEaseInEaseOutKeyframe k2 = get<SEaseInEaseOutKeyframe>(theFinish);
+        SEaseInEaseOutKeyframe k1 = get<SEaseInEaseOutKeyframe>(theIntToKeyframe(theStart));
+        SEaseInEaseOutKeyframe k2 = get<SEaseInEaseOutKeyframe>(theIntToKeyframe(theFinish));
         return DoBezierEvaluation(
             inSeconds, CreateBezierKeyframeFromEaseInEaseOutKeyframe(NULL, k1, &k2.m_KeyframeValue),
             CreateBezierKeyframeFromEaseInEaseOutKeyframe(&k1.m_KeyframeValue, k2, NULL));
@@ -572,45 +571,42 @@ void GetKeyframesAsBezier(Qt3DSDMAnimationHandle inAnimation, const IAnimationCo
         TConvertFunc theDataConverter(
             std::bind(GetEaseInEaseOutKeyframeData, std::placeholders::_1,
                       std::cref(inAnimationCore)));
-        typedef boost::transform_iterator<TConvertFunc, TKeyframeHandleList::iterator>
-            TTransformIterator;
-        TTransformIterator thePreviousKeyframe(
-            make_transform_iterator(theKeyframes.begin(), theDataConverter));
-        TTransformIterator theCurrentKeyframe(make_transform_iterator(
-            SafeIncrementIterator(thePreviousKeyframe.base(), theEndKeyframe), theDataConverter));
-        TTransformIterator theNextKeyframe(make_transform_iterator(
-            SafeIncrementIterator(theCurrentKeyframe.base(), theEndKeyframe), theDataConverter));
+
+        TKeyframeHandleList::iterator thePreviousKeyframe = theKeyframes.begin();
+
+        TKeyframeHandleList::iterator theCurrentKeyframe =
+                SafeIncrementIterator(thePreviousKeyframe, theEndKeyframe);
+
+        TKeyframeHandleList::iterator theNextKeyframe =
+                SafeIncrementIterator(theNextKeyframe, theEndKeyframe);
 
         TBezierKeyframeList::iterator theResult(outKeyframes.begin());
 
-        if (thePreviousKeyframe.base() != theEndKeyframe) {
+        if (thePreviousKeyframe != theEndKeyframe) {
             float *theNextValuePtr = NULL;
             float theNextValue;
-            if (theCurrentKeyframe.base() != theEndKeyframe) {
-                theNextValue = theCurrentKeyframe->m_KeyframeValue;
-                theNextValuePtr = &theNextValue;
-            }
-            *theResult = CreateBezierKeyframeFromEaseInEaseOutKeyframe(NULL, *thePreviousKeyframe,
-                                                                       theNextValuePtr);
-            theResult = theResult + 1;
-        }
-        for (; theCurrentKeyframe.base() != theEndKeyframe;
-             ++thePreviousKeyframe,
-             theCurrentKeyframe = make_transform_iterator(
-                 SafeIncrementIterator(theCurrentKeyframe.base(), theEndKeyframe),
-                 theDataConverter),
-             theNextKeyframe = make_transform_iterator(
-                 SafeIncrementIterator(theNextKeyframe.base(), theEndKeyframe), theDataConverter),
-             ++theResult) {
-            float theLastValue(thePreviousKeyframe->m_KeyframeValue);
-            float *theNextValuePtr = NULL;
-            float theNextValue;
-            if (theNextKeyframe.base() != theEndKeyframe) {
-                theNextValue = theNextKeyframe->m_KeyframeValue;
+            if (theCurrentKeyframe != theEndKeyframe) {
+                theNextValue = theDataConverter(*theCurrentKeyframe).m_KeyframeValue;
                 theNextValuePtr = &theNextValue;
             }
             *theResult = CreateBezierKeyframeFromEaseInEaseOutKeyframe(
-                &theLastValue, *theCurrentKeyframe, theNextValuePtr);
+                        NULL, theDataConverter(*thePreviousKeyframe), theNextValuePtr);
+            theResult = theResult + 1;
+        }
+        for (; theCurrentKeyframe != theEndKeyframe;
+             ++thePreviousKeyframe,
+             theCurrentKeyframe = SafeIncrementIterator(theCurrentKeyframe, theEndKeyframe),
+             theNextKeyframe = SafeIncrementIterator(theNextKeyframe, theEndKeyframe),
+             ++theResult) {
+            float theLastValue(theDataConverter(*thePreviousKeyframe).m_KeyframeValue);
+            float *theNextValuePtr = NULL;
+            float theNextValue;
+            if (theNextKeyframe != theEndKeyframe) {
+                theNextValue = theDataConverter(*theNextKeyframe).m_KeyframeValue;
+                theNextValuePtr = &theNextValue;
+            }
+            *theResult = CreateBezierKeyframeFromEaseInEaseOutKeyframe(
+                &theLastValue, theDataConverter(*theCurrentKeyframe), theNextValuePtr);
         }
     } break;
     }
