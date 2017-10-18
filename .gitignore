@@ -13,6 +13,9 @@ Makefile.*
 .moc/
 .uic/
 .rcc/
+.obj/
+lib/
 moc_*.cpp
 .DS_Store
 *.qmlc
+*.so
