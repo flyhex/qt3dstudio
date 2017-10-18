@@ -30,8 +30,8 @@
 
 #ifndef DEFAULT_MATERIAL_PHYS_GLOSSY_BSDF_GLSLLIB
 #define DEFAULT_MATERIAL_PHYS_GLOSSY_BSDF_GLSLLIB
-#ifndef UIC_DEFINE_API
-#define UIC_DEFINE_API
+#ifndef QT3DS_DEFINE_API
+#define QT3DS_DEFINE_API
 #endif
 
 #include "luminance.glsllib"

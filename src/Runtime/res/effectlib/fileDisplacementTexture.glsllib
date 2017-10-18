@@ -31,7 +31,7 @@
 #ifndef FILE_DISPLACEMENT_TEXTURE_GLSLLIB
 #define FILE_DISPLACEMENT_TEXTURE_GLSLLIB
 
-#ifdef UIC_DEFINE_API
+#ifdef QT3DS_DEFINE_API
 
 #include "luminance.glsllib"
 #include "monoChannel.glsllib"
