@@ -4,7 +4,7 @@ include($$PWD/commoninclude.pri)
 include($$OUT_PWD/qtAuthoring-config.pri)
 CONFIG += console nostrictstrings
 QT -= gui
-DEFINES += _UNICODE UIC_AUTHORING _AFXDLL PCRE_STATIC
+DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC
 
 INCLUDEPATH += \
     UICIMP/UICImportLib \
