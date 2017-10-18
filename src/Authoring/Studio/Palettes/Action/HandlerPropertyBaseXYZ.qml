@@ -48,6 +48,7 @@ GridLayout {
     rowSpacing: 1
 
     signal editingFinished
+    signal previewValueChanged
 
     StyledLabel {
         Layout.preferredWidth: 10
@@ -59,7 +60,7 @@ GridLayout {
 
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
-        onWheelEventFinished: root.editingFinished()
+        onPreviewValueChanged: root.previewValueChanged()
     }
 
     StyledLabel {
@@ -72,7 +73,7 @@ GridLayout {
 
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
-        onWheelEventFinished: root.editingFinished()
+        onPreviewValueChanged: root.previewValueChanged()
     }
 
     StyledLabel {
@@ -85,7 +86,7 @@ GridLayout {
 
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
-        onWheelEventFinished: root.editingFinished()
+        onPreviewValueChanged: root.previewValueChanged()
     }
 }
 

@@ -62,9 +62,9 @@ void TabOrderHandler::tabNavigate(bool tabForward)
         for (int j = 0; j < items.size(); j++) {
             if (items[j]->hasActiveFocus()) {
                 if (tabForward)
-                    nextItem(i, j)->forceActiveFocus();
+                    nextItem(i, j)->forceActiveFocus(Qt::TabFocusReason);
                 else
-                    previousItem(i, j)->forceActiveFocus();
+                    previousItem(i, j)->forceActiveFocus(Qt::BacktabFocusReason);
                 return;
             }
         }
@@ -72,7 +72,7 @@ void TabOrderHandler::tabNavigate(bool tabForward)
     // Activate the first item if could not find currently focused item
     for (int i = 0; i < m_itemMap.size(); i++) {
         if (m_itemMap[i].size() > 0)
-            m_itemMap[i][0]->forceActiveFocus();
+            m_itemMap[i][0]->forceActiveFocus(Qt::TabFocusReason);
     }
 }
 

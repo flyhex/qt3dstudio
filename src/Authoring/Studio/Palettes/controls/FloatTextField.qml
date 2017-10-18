@@ -36,7 +36,7 @@ TextField {
     id: floatTextFieldId
     property alias decimalValue: validator.decimals
 
-    signal wheelEventFinished
+    signal previewValueChanged
 
     selectByMouse: true
     text: "0.000"
@@ -46,6 +46,8 @@ TextField {
     topPadding: 0
     bottomPadding: 0
     rightPadding: 6
+
+    activeFocusOnPress: false
 
     horizontalAlignment: TextInput.AlignRight
     verticalAlignment: TextInput.AlignVCenter
@@ -65,34 +67,97 @@ TextField {
         border.color: floatTextFieldId.activeFocus ? _selectionColor : _disabledColor
     }
 
-    MouseArea {
-        property int _clickedPos
-        id: mouseAreaBaseId
+    Timer {
+        id: rateLimiter
+        interval: 10
+        onTriggered: {
+            floatTextFieldId.previewValueChanged();
+        }
+    }
 
+    cursorVisible: false
+    onActiveFocusChanged: {
+        if (focusReason === Qt.OtherFocusReason) {
+            select(0, 0);
+            cursorVisible = false;
+        }
+    }
+
+    Item {
+        id: focusEater
+        // Used to eat keyboard focus after drag-modifying the text is finished
+    }
+
+    MouseArea {
+        id: mouseArea
+        property int clickedPos: 0
+        property int pressedX: 0
+        property bool draggingActive: false
+
+        preventStealing: true
         anchors.fill: parent
         onPressed: {
-            parent.forceActiveFocus()
-            _clickedPos = parent.positionAt(mouse.x, mouse.y)
-            parent.cursorPosition = _clickedPos
+            pressedX = mouse.x;
+            draggingActive = false;
+            if (parent.activeFocus) {
+                clickedPos = parent.positionAt(mouse.x, mouse.y);
+                parent.cursorPosition = clickedPos;
+            }
+            parent.forceActiveFocus();
         }
-        onDoubleClicked: parent.selectAll()
-        onPositionChanged: {
-            parent.cursorPosition = parent.positionAt(mouse.x, mouse.y)
-            parent.select(_clickedPos, parent.cursorPosition)
+        onClicked: {
+            if (!draggingActive && !parent.cursorVisible) {
+                clickedPos = parent.positionAt(mouse.x, mouse.y);
+                parent.cursorPosition = clickedPos;
+                parent.cursorVisible = true;
+            }
+        }
+        onReleased: {
+            if (draggingActive) {
+                _mouseHelper.endUnboundedDrag();
+                rateLimiter.stop();
+                floatTextFieldId.onEditingFinished();
+                focusEater.forceActiveFocus();
+            }
         }
 
-        onWheel: {
-            if (!floatTextFieldId.activeFocus) {
-                wheel.accepted = false
-                return
+        onCanceled: {
+            if (draggingActive) {
+                _mouseHelper.endUnboundedDrag();
+                rateLimiter.stop();
+                floatTextFieldId.onEditingFinished();
+                focusEater.forceActiveFocus();
             }
-            if (wheel.angleDelta.y > 0) {
-                floatTextFieldId.text++
+        }
+
+        onDoubleClicked: {
+            parent.selectAll();
+            parent.cursorVisible = true;
+        }
+
+        onPositionChanged: {
+            if (parent.cursorVisible) {
+                parent.cursorPosition = parent.positionAt(mouse.x, mouse.y);
+                parent.select(clickedPos, parent.cursorPosition);
             } else {
-                floatTextFieldId.text--
+                if (!draggingActive) {
+                    var startDelta = (pressedX - mouse.x) / 2.0;
+                    if (startDelta > 4.0 || startDelta < -4.0) {
+                        _mouseHelper.startUnboundedDrag();
+                        draggingActive = true;
+                    }
+                }
+                if (draggingActive) {
+                    var delta = _mouseHelper.delta().x;
+                    if (delta !== 0) {
+                        floatTextFieldId.text =
+                                Number(parseFloat(floatTextFieldId.text)
+                                       + delta).toFixed(validator.decimals);
+                        if (!rateLimiter.running)
+                            rateLimiter.start();
+                    }
+                }
             }
-            wheel.accepted=true
-            floatTextFieldId.wheelEventFinished();
         }
     }
 }

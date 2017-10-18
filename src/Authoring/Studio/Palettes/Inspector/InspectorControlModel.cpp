@@ -153,6 +153,8 @@ InspectorControlModel::InspectorControlModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
+    m_modifiedProperty.first = 0;
+    m_modifiedProperty.second = 0;
 }
 
 void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
@@ -759,8 +761,18 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     UICDM::SValue oldValue = currentPropertyValue(instance, handle);
     UICDM::SValue v = value;
 
-    if (v == oldValue)
+    // If this set is a commit for property that was previously changed without
+    // committing, we must let the set go through even if the value hasn't changed
+    // to finish the transaction.
+    if (v == oldValue && !(commit && (m_modifiedProperty.first == instance
+                                      && m_modifiedProperty.second == handle))) {
         return;
+    }
+
+    if (!commit && m_modifiedProperty.first == 0) {
+        m_modifiedProperty.first = instance;
+        m_modifiedProperty.second = handle;
+    }
 
     // some properties may initialize OpenGL resources (e.g. loading meshes will
     // initialize vertex buffers), so the renderer's OpenGL context must be current
@@ -775,6 +787,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     m_UpdatableEditor.FireImmediateRefresh(instance);
 
     if (commit) {
+        m_modifiedProperty.first = 0;
+        m_modifiedProperty.second = 0;
         m_UpdatableEditor.CommitEditor();
         refreshTree();
     }

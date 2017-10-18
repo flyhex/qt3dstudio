@@ -146,6 +146,7 @@ SOURCES += \
     Studio/Palettes/Inspector/ObjectReferenceModel.cpp \
     Studio/Palettes/Inspector/ObjectReferenceView.cpp \
     Studio/Palettes/Inspector/TabOrderHandler.cpp \
+    Studio/Palettes/Inspector/MouseHelper.cpp \
     #Studio/Palettes/Master/MasterControl.cpp \
     #Studio/Palettes/Master/MasterView.cpp \
     Studio/Palettes/Project/ProjectView.cpp \
@@ -278,6 +279,7 @@ HEADERS += \
     Studio/Palettes/Inspector/FileChooserModel.h \
     Studio/Palettes/Inspector/TextureChooserView.h \
     Studio/Palettes/Inspector/TabOrderHandler.h \
+    Studio/Palettes/Inspector/MouseHelper.h \
     Studio/Palettes/Project/ProjectView.h \
     Studio/Palettes/Project/ProjectFileSystemModel.h \
     Studio/Palettes/Project/ProjectContextMenu.h \

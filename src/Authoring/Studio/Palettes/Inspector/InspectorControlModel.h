@@ -152,6 +152,8 @@ private:
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
+    QPair<long, int> m_modifiedProperty;
+
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();

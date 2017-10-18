@@ -454,17 +454,30 @@ Rectangle {
             property alias tabItem2: xyzHandler.tabItem2
             property alias tabItem3: xyzHandler.tabItem3
             spacing: 0
+
+            onValuesChanged: {
+                // FloatTextField can set its text internally, thus breaking the binding, so
+                // let's set the text value explicitly each time value changes
+                xyzHandler.valueX = Number(values[0]).toFixed(xyzHandler.numberOfDecimal);
+                xyzHandler.valueY = Number(values[1]).toFixed(xyzHandler.numberOfDecimal);
+                xyzHandler.valueZ = Number(values[2]).toFixed(xyzHandler.numberOfDecimal);
+            }
+
             Item {
                 width: _valueWidth - xyzHandler.width
             }
             HandlerPropertyBaseXYZ {
                 id: xyzHandler
-                valueX: Number(values[0]).toFixed(3)
-                valueY: Number(values[1]).toFixed(3)
-                valueZ: Number(values[2]).toFixed(3)
+                valueX: Number(values[0]).toFixed(numberOfDecimal)
+                valueY: Number(values[1]).toFixed(numberOfDecimal)
+                valueZ: Number(values[2]).toFixed(numberOfDecimal)
                 onEditingFinished: {
                     _inspectorModel.setPropertyValue(parent.instance, parent.handle,
-                                                     Qt.vector3d(valueX, valueY, valueZ))
+                                                     Qt.vector3d(valueX, valueY, valueZ), true);
+                }
+                onPreviewValueChanged: {
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Qt.vector3d(valueX, valueY, valueZ), false);
                 }
             }
         }
@@ -476,24 +489,33 @@ Rectangle {
         RowLayout {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
-            property real value: Number(parent.modelData.value).toFixed(3)
+            property real value: Number(parent.modelData.value).toFixed(floatField.decimalValue)
             property Item tabItem1: floatField
+
+            onValueChanged: {
+                // FloatTextField can set its text internally, thus breaking the binding, so
+                // let's set the text value explicitly each time value changes
+                floatField.text = Number(value).toFixed(floatField.decimalValue);
+            }
+
             spacing: 0
             Item {
                 width: _valueWidth - floatField.width
             }
             FloatTextField {
                 id: floatField
-                text: parent.value
+                text: Number(parent.value).toFixed(decimalValue)
                 implicitHeight: _controlBaseHeight
                 implicitWidth: _valueWidth / 2
 
-                onWheelEventFinished: {
-                    _inspectorModel.setPropertyValue(parent.instance, parent.handle, Number(text));
+                onPreviewValueChanged: {
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Number(text), false);
                 }
 
                 onEditingFinished: {
-                    _inspectorModel.setPropertyValue(parent.instance, parent.handle, Number(text));
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Number(text), true);
                 }
             }
         }
@@ -506,20 +528,13 @@ Rectangle {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
-            property real oldValue: 0.0
 
             value: parent.modelData.value
             sliderMin: values[0]
             sliderMax: values[1]
 
-            onEditingStarted: {
-                oldValue = value
-            }
             onEditingFinished: {
-                // make sure the undo step is created, therefore resetting it to the old value
-                var val = value
-                _inspectorModel.setPropertyValue(instance, handle, oldValue, false)
-                _inspectorModel.setPropertyValue(instance, handle, val, true)
+                _inspectorModel.setPropertyValue(instance, handle, value, true)
             }
             onSliderMoved: {
                 _inspectorModel.setPropertyValue(instance, handle, value, false)
@@ -705,7 +720,10 @@ Rectangle {
             sliderMax: values[1]
 
             onEditingFinished: {
-                _inspectorModel.setPropertyValue(instance, handle, intValue)
+                _inspectorModel.setPropertyValue(instance, handle, intValue, true)
+            }
+            onSliderMoved: {
+                _inspectorModel.setPropertyValue(instance, handle, intValue, false)
             }
         }
     }

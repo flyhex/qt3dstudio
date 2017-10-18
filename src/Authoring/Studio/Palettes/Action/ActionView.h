@@ -47,6 +47,7 @@
 #include "UICDMStudioSystem.h"
 #include "UICDMMetaDataTypes.h"
 #include "TabOrderHandler.h"
+#include "MouseHelper.h"
 
 class ActionModel;
 class CClientDataModelBridge;
@@ -196,6 +197,7 @@ private:
     QVariantList m_handlerArguments;
     QTimer m_actionChangedCompressionTimer;
     QString m_firedEvent;
+    MouseHelper m_mouseHelper;
 };
 
 #endif // ACTIONVIEW_H

@@ -25,40 +25,27 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef MOUSEHELPER_H
+#define MOUSEHELPER_H
 
-import QtQuick 2.6
-import QtQuick.Controls 2.1
-import QtQuick.Layouts 1.3
-import "../controls"
+#include <QtCore/qobject.h>
+#include <QtCore/qpoint.h>
 
-/* Use for: Position, Rotation, Scale, Pivot ... */
+class MouseHelper : public QObject
+{
+    Q_OBJECT
 
-RowLayout {
-    id: root
+public:
+    explicit MouseHelper(QObject *parent = nullptr) {};
+    ~MouseHelper() {};
 
-    property alias valueX: propertyXYZ.valueX
-    property alias valueY: propertyXYZ.valueY
-    property alias valueZ: propertyXYZ.valueZ
-    property alias label: labelItem.text
-    property alias tabItem1: propertyXYZ.tabItem1
-    property alias tabItem2: propertyXYZ.tabItem2
-    property alias tabItem3: propertyXYZ.tabItem3
-    property alias numberOfDecimal: propertyXYZ.numberOfDecimal
+    Q_INVOKABLE void startUnboundedDrag();
+    Q_INVOKABLE void endUnboundedDrag();
+    Q_INVOKABLE QPoint delta();
 
-    signal editingFinished
-    signal previewValueChanged
+private:
+    QPoint m_startPos;
+    QPoint m_referencePoint;
+};
 
-    StyledLabel {
-        id: labelItem
-        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-        text: qsTr("New Value")
-    }
-
-    HandlerPropertyBaseXYZ {
-        id: propertyXYZ
-        Layout.alignment: Qt.AlignRight
-
-        onEditingFinished: root.editingFinished()
-        onPreviewValueChanged: root.previewValueChanged()
-    }
-}
+#endif // MOUSEHELPER_H

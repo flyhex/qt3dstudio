@@ -48,7 +48,6 @@ Row {
 
     signal editingFinished
     signal sliderMoved
-    signal editingStarted
 
     spacing: 5
     width: _valueWidth
@@ -88,9 +87,7 @@ Row {
         }
 
         onPressedChanged: {
-            if (pressed)
-                root.editingStarted();
-            else
+            if (!pressed)
                 root.editingFinished();
         }
 
@@ -116,7 +113,7 @@ Row {
 
     Timer {
         id: rateLimiter
-        interval: 50
+        interval: 10
         onTriggered: {
             root.sliderMoved();
         }
@@ -146,11 +143,6 @@ Row {
         text: intSlider ? slider.value.toFixed(0) : slider.value.toFixed(decimalSlider)
 
         validator: intSlider ? intValidator : doubleValidator
-
-        onActiveFocusChanged: {
-            if (activeFocus)
-                root.editingStarted();
-        }
 
         onEditingFinished: {
             if (textField.text > sliderMax)

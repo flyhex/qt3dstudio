@@ -35,6 +35,7 @@
 #include "Dispatch.h"
 #include "UICFileTools.h"
 #include "TabOrderHandler.h"
+#include "MouseHelper.h"
 
 class InspectorControlModel;
 class QAbstractItemModel;
@@ -119,6 +120,7 @@ private:
     QPointer<ObjectBrowserView> m_objectReferenceView;
     QPointer<ObjectListModel> m_objectReferenceModel;
     std::vector<Q3DStudio::CFilePath> m_fileList;
+    MouseHelper m_mouseHelper;
 
     int m_instance;
     int m_handle;

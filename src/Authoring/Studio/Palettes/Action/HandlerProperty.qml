@@ -92,12 +92,26 @@ ColumnLayout {
                                              propertyModel.value
                                              : undefined
             label: parent ? parent.label : ""
-            valueX: propValue !== undefined ? propValue.x : 0
-            valueY: propValue !== undefined ? propValue.y : 0
-            valueZ: propValue !== undefined ? propValue.z : 0
+            valueX: propValue !== undefined ? Number(propValue.x).toFixed(numberOfDecimal) : 0
+            valueY: propValue !== undefined ? Number(propValue.y).toFixed(numberOfDecimal) : 0
+            valueZ: propValue !== undefined ? Number(propValue.z).toFixed(numberOfDecimal) : 0
 
-            onEditingFinished: _actionView.setArgumentValue(propertyModel.valueHandle,
-                                                            Qt.vector3d(valueX, valueY, valueZ))
+            onPropValueChanged: {
+                // FloatTextField can set its text internally, thus breaking the binding, so
+                // let's set the text value explicitly each time value changes
+                valueX = Number(propValue.x).toFixed(numberOfDecimal);
+                valueY = Number(propValue.y).toFixed(numberOfDecimal);
+                valueZ = Number(propValue.z).toFixed(numberOfDecimal);
+            }
+
+            onEditingFinished: {
+                _actionView.setArgumentValue(propertyModel.valueHandle,
+                                             Qt.vector3d(valueX, valueY, valueZ), true);
+            }
+            onPreviewValueChanged: {
+                _actionView.setArgumentValue(propertyModel.valueHandle,
+                                             Qt.vector3d(valueX, valueY, valueZ), false);
+            }
         }
     }
 

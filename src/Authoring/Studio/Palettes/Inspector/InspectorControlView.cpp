@@ -176,6 +176,7 @@ void InspectorControlView::initialize()
     rootContext()->setContextProperty("_inspectorModel"_L1, m_inspectorControlModel);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
+    rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
     qmlRegisterUncreatableType<UICDM::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
                                                          "DataModelDataType is an enum container");
     qmlRegisterUncreatableType<UICDM::AdditionalMetaDataType>(
