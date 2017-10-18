@@ -173,7 +173,7 @@ void StudioTutorialWidget::handleCreateNew()
 
 void StudioTutorialWidget::getImageList()
 {
-    QDirIterator *it = new QDirIterator(":/res/Tutorial/screens/",
+    QDirIterator *it = new QDirIterator(":/images/Tutorial/screens/",
                                         QDirIterator::NoIteratorFlags);
 
     while (it->hasNext())

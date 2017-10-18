@@ -19,7 +19,7 @@
      <widget class="CStudioAppPrefsPage" name="m_AppPrefsPage">
       <attribute name="icon">
        <iconset resource="../../MainFrm.qrc">
-        <normaloff>:/res/prefstab-00.png</normaloff>:/res/prefstab-00.png</iconset>
+        <normaloff>:/images/prefstab-00.png</normaloff>:/images/prefstab-00.png</iconset>
       </attribute>
       <attribute name="title">
        <string>Studio</string>
@@ -28,7 +28,7 @@
      <widget class="CStudioProjectSettingsPage" name="m_ProjectSettingsPage">
       <attribute name="icon">
        <iconset resource="../../MainFrm.qrc">
-        <normaloff>:/res/prefstab-01.png</normaloff>:/res/prefstab-01.png</iconset>
+        <normaloff>:/images/prefstab-01.png</normaloff>:/images/prefstab-01.png</iconset>
       </attribute>
       <attribute name="title">
        <string>Presentation Settings</string>

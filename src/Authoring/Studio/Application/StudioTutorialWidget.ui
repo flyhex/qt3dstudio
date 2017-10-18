@@ -116,7 +116,7 @@
       </property>
       <property name="icon">
        <iconset resource="../qt3dstudio.qrc">
-        <normaloff>:/res/Tutorial/button_back.png</normaloff>:/res/Tutorial/button_back.png</iconset>
+        <normaloff>:/images/Tutorial/button_back.png</normaloff>:/images/Tutorial/button_back.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -161,7 +161,7 @@
       </property>
       <property name="icon">
        <iconset resource="../qt3dstudio.qrc">
-        <normaloff>:/res/Tutorial/button_next.png</normaloff>:/res/Tutorial/button_next.png</iconset>
+        <normaloff>:/images/Tutorial/button_next.png</normaloff>:/images/Tutorial/button_next.png</iconset>
       </property>
       <property name="iconSize">
        <size>

@@ -3,9 +3,9 @@
         <file>resources/images/viewer_icon.png</file>
         <file>viewer.qml</file>
         <file alias="style.qss">../../Authoring/Studio/style.qss</file>
-        <file alias="res/arrow_down.png">../../Authoring/Studio/res/arrow_down.png</file>
-        <file alias="res/arrow_up.png">../../Authoring/Studio/res/arrow_up.png</file>
-        <file alias="res/separator.png">../../Authoring/Studio/res/separator.png</file>
+        <file alias="images/arrow_down.png">../../Authoring/Studio/images/arrow_down.png</file>
+        <file alias="images/arrow_up.png">../../Authoring/Studio/images/arrow_up.png</file>
+        <file alias="images/separator.png">../../Authoring/Studio/images/separator.png</file>
         <file>style_android.qss</file>
     </qresource>
 </RCC>

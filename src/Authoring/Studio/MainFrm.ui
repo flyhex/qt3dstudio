@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="MainFrm.qrc">
-    <normaloff>:/res/Studio.png</normaloff>:/res/Studio.png</iconset>
+    <normaloff>:/images/Studio.png</normaloff>:/images/Studio.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -260,7 +260,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-06.png</normaloff>:/res/client_tools_hi_color-06.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-06.png</normaloff>:/images/client_tools_hi_color-06.png</iconset>
    </property>
    <property name="text">
     <string>Autoset Keyframes</string>
@@ -363,8 +363,8 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/editcamera_tools_hi-05.png</normaloff>
-     <disabledoff>:/res/editcamera_tools_hi-05_disabled.png</disabledoff>:/res/editcamera_tools_hi-05.png</iconset>
+     <normaloff>:/images/editcamera_tools_hi-05.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-05_disabled.png</disabledoff>:/images/editcamera_tools_hi-05.png</iconset>
    </property>
    <property name="text">
     <string>Wireframe</string>
@@ -411,7 +411,7 @@
   <action name="action_Undo">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-06.png</normaloff>:/res/Toolbar-06.png</iconset>
+     <normaloff>:/images/Toolbar-06.png</normaloff>:/images/Toolbar-06.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Undo</string>
@@ -423,7 +423,7 @@
   <action name="action_Redo">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-07.png</normaloff>:/res/Toolbar-07.png</iconset>
+     <normaloff>:/images/Toolbar-07.png</normaloff>:/images/Toolbar-07.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Redo</string>
@@ -435,7 +435,7 @@
   <action name="action_Cut">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-03.png</normaloff>:/res/Toolbar-03.png</iconset>
+     <normaloff>:/images/Toolbar-03.png</normaloff>:/images/Toolbar-03.png</iconset>
    </property>
    <property name="text">
     <string>Cu&amp;t</string>
@@ -447,7 +447,7 @@
   <action name="action_Copy">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-04.png</normaloff>:/res/Toolbar-04.png</iconset>
+     <normaloff>:/images/Toolbar-04.png</normaloff>:/images/Toolbar-04.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -459,7 +459,7 @@
   <action name="action_Paste">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-05.png</normaloff>:/res/Toolbar-05.png</iconset>
+     <normaloff>:/images/Toolbar-05.png</normaloff>:/images/Toolbar-05.png</iconset>
    </property>
    <property name="text">
     <string>P&amp;aste</string>
@@ -495,7 +495,7 @@
   <action name="action_New">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-00.png</normaloff>:/res/Toolbar-00.png</iconset>
+     <normaloff>:/images/Toolbar-00.png</normaloff>:/images/Toolbar-00.png</iconset>
    </property>
    <property name="text">
     <string>&amp;New</string>
@@ -507,7 +507,7 @@
   <action name="action_Open">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-01.png</normaloff>:/res/Toolbar-01.png</iconset>
+     <normaloff>:/images/Toolbar-01.png</normaloff>:/images/Toolbar-01.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -519,7 +519,7 @@
   <action name="action_Save">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/Toolbar-02.png</normaloff>:/res/Toolbar-02.png</iconset>
+     <normaloff>:/images/Toolbar-02.png</normaloff>:/images/Toolbar-02.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -573,7 +573,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-00.png</normaloff>:/res/client_tools_hi_color-00.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-00.png</normaloff>:/images/client_tools_hi_color-00.png</iconset>
    </property>
    <property name="text">
     <string>Group Select Tool</string>
@@ -588,7 +588,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-01.png</normaloff>:/res/client_tools_hi_color-01.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-01.png</normaloff>:/images/client_tools_hi_color-01.png</iconset>
    </property>
    <property name="text">
     <string>Item Select Tool</string>
@@ -603,7 +603,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-04.png</normaloff>:/res/client_tools_hi_color-04.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-04.png</normaloff>:/images/client_tools_hi_color-04.png</iconset>
    </property>
    <property name="text">
     <string>Rotation Tool</string>
@@ -618,7 +618,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-02.png</normaloff>:/res/client_tools_hi_color-02.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-02.png</normaloff>:/images/client_tools_hi_color-02.png</iconset>
    </property>
    <property name="text">
     <string>Position Tool</string>
@@ -633,7 +633,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-03.png</normaloff>:/res/client_tools_hi_color-03.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-03.png</normaloff>:/images/client_tools_hi_color-03.png</iconset>
    </property>
    <property name="text">
     <string>Scale Tool</string>
@@ -648,7 +648,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/client_tools_hi_color-05.png</normaloff>:/res/client_tools_hi_color-05.png</iconset>
+     <normaloff>:/images/client_tools_hi_color-05.png</normaloff>:/images/client_tools_hi_color-05.png</iconset>
    </property>
    <property name="text">
     <string>Local/Global Manipulators</string>
@@ -663,8 +663,8 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/editcamera_tools_hi-00.png</normaloff>
-     <disabledoff>:/res/editcamera_tools_hi-00_disabled.png</disabledoff>:/res/editcamera_tools_hi-00.png</iconset>
+     <normaloff>:/images/editcamera_tools_hi-00.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-00_disabled.png</disabledoff>:/images/editcamera_tools_hi-00.png</iconset>
    </property>
    <property name="text">
     <string>Fit Selected (F)</string>
@@ -679,8 +679,8 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/editcamera_tools_hi-01.png</normaloff>
-     <disabledoff>:/res/editcamera_tools_hi-01_disabled.png</disabledoff>:/res/editcamera_tools_hi-01.png</iconset>
+     <normaloff>:/images/editcamera_tools_hi-01.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-01_disabled.png</disabledoff>:/images/editcamera_tools_hi-01.png</iconset>
    </property>
    <property name="text">
     <string>Pan Tool (Middle Mouse Drag)</string>
@@ -695,8 +695,8 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/editcamera_tools_hi-02.png</normaloff>
-     <disabledoff>:/res/editcamera_tools_hi-02_disabled.png</disabledoff>:/res/editcamera_tools_hi-02.png</iconset>
+     <normaloff>:/images/editcamera_tools_hi-02.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-02_disabled.png</disabledoff>:/images/editcamera_tools_hi-02.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Tool (Mouse Wheel)</string>
@@ -711,8 +711,8 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/editcamera_tools_hi-03.png</normaloff>
-     <disabledoff>:/res/editcamera_tools_hi-03_disabled.png</disabledoff>:/res/editcamera_tools_hi-03.png</iconset>
+     <normaloff>:/images/editcamera_tools_hi-03.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-03_disabled.png</disabledoff>:/images/editcamera_tools_hi-03.png</iconset>
    </property>
    <property name="text">
     <string>Orbit Tool (Alt+Middle Mouse Drag)</string>
@@ -727,8 +727,8 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/editcamera_tools_hi-04.png</normaloff>
-     <disabledoff>:/res/editcamera_tools_hi-04_disabled.png</disabledoff>:/res/editcamera_tools_hi-04.png</iconset>
+     <normaloff>:/images/editcamera_tools_hi-04.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-04_disabled.png</disabledoff>:/images/editcamera_tools_hi-04.png</iconset>
    </property>
    <property name="text">
     <string>Shading Mode (F3)</string>
@@ -743,7 +743,7 @@
   <action name="actionRewind">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/playback_tools_low-00.png</normaloff>:/res/playback_tools_low-00.png</iconset>
+     <normaloff>:/images/playback_tools_low-00.png</normaloff>:/images/playback_tools_low-00.png</iconset>
    </property>
    <property name="text">
     <string>Rewind</string>
@@ -752,7 +752,7 @@
   <action name="actionStop">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/playback_tools_low-01.png</normaloff>:/res/playback_tools_low-01.png</iconset>
+     <normaloff>:/images/playback_tools_low-01.png</normaloff>:/images/playback_tools_low-01.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -764,7 +764,7 @@
    </property>
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/playback_tools_low-02.png</normaloff>:/res/playback_tools_low-02.png</iconset>
+     <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
    </property>
    <property name="text">
     <string>Play</string>
@@ -773,7 +773,7 @@
   <action name="actionPreview">
    <property name="icon">
     <iconset resource="MainFrm.qrc">
-     <normaloff>:/res/playback_tools_low-03.png</normaloff>:/res/playback_tools_low-03.png</iconset>
+     <normaloff>:/images/playback_tools_low-03.png</normaloff>:/images/playback_tools_low-03.png</iconset>
    </property>
    <property name="text">
     <string>Preview</string>

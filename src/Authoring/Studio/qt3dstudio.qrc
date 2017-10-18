@@ -1,16 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/Tutorial/button_back.png</file>
-        <file>res/Tutorial/button_next.png</file>
-        <file>res/Tutorial/screens/1.png</file>
-        <file>res/Tutorial/screens/2.png</file>
-        <file>res/Tutorial/screens/3.png</file>
-        <file>res/Tutorial/screens/4.png</file>
-        <file>res/Tutorial/screens/5.png</file>
-        <file>res/Tutorial/screens/6.png</file>
-        <file>res/Tutorial/screens/7.png</file>
-        <file>res/Tutorial/button_back@2x.png</file>
-        <file>res/Tutorial/button_next@2x.png</file>
         <file alias="res/strings/Static.stro">English.lproj/Strings/Static.stro</file>
     </qresource>
 </RCC>

@@ -120,7 +120,7 @@
       </property>
       <property name="icon">
        <iconset resource="../../MainFrm.qrc">
-        <normaloff>:/res/Toolbar-00.png</normaloff>:/res/Toolbar-00.png</iconset>
+        <normaloff>:/images/Toolbar-00.png</normaloff>:/images/Toolbar-00.png</iconset>
       </property>
       <property name="flat">
        <bool>true</bool>
@@ -134,7 +134,7 @@
       </property>
       <property name="icon">
        <iconset resource="../../MainFrm.qrc">
-        <normaloff>:/res/Toolbar-01.png</normaloff>:/res/Toolbar-01.png</iconset>
+        <normaloff>:/images/Toolbar-01.png</normaloff>:/images/Toolbar-01.png</iconset>
       </property>
       <property name="flat">
        <bool>true</bool>

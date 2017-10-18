@@ -104,11 +104,11 @@ QComboBox::drop-down {
 
 QComboBox::down-arrow,
 QSpinBox::down-arrow {
-    image: url(:/res/arrow_down.png);
+    image: url(:/images/arrow_down.png);
 }
 
 QSpinBox::up-arrow {
-    image: url(:/res/arrow_up.png);
+    image: url(:/images/arrow_up.png);
 }
 
 QPushButton {

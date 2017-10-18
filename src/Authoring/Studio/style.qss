@@ -116,7 +116,7 @@ QToolBar {
 }
 
 QToolBar::handle {
-    image: url(:/res/separator.png);
+    image: url(:/images/separator.png);
 }
 
 QToolBar::separator {
@@ -178,7 +178,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    image: url(:/res/arrow_down.png);
+    image: url(:/images/arrow_down.png);
 }
 
 QGroupBox {
