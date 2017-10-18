@@ -726,6 +726,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Light_ShadowFactor "shdwfactor"
 #define Light_ShadowMapRes "shdwmapres"
 #define Light_ShadowMapFar "shdwmapfar"
+#define Light_ShadowMapFov "shdwmapfov"
 #define Light_ShadowFilter "shdwfilter"
 #define Model_MeshPath "sourcepath"
 #define Model_TessellationMode "tessellation"

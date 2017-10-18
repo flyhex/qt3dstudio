@@ -202,6 +202,7 @@ struct DataConstructor<SObjectRefType>
 #define UIC_WCHAR_T_shdwfactor L"shdwfactor"
 #define UIC_WCHAR_T_shdwmapres L"shdwmapres"
 #define UIC_WCHAR_T_shdwmapfar L"shdwmapfar"
+#define UIC_WCHAR_T_shdwmapfov L"shdwmapfov"
 #define UIC_WCHAR_T_shdwfilter L"shdwfilter"
 #define UIC_WCHAR_T_orthographic L"orthographic"
 #define UIC_WCHAR_T_fov L"fov"

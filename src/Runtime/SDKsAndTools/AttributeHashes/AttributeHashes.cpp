@@ -35,7 +35,7 @@
 #endif
 
 //==============================================================================
-//	Includes
+//    Includes
 //==============================================================================
 #include <stdio.h>
 
@@ -55,12 +55,12 @@
 #include "UICHash.h"
 
 //==============================================================================
-//	Types
+//    Types
 //==============================================================================
 typedef std::vector<std::string> TStringList;
 
 //==============================================================================
-//	Constants
+//    Constants
 //==============================================================================
 const char g_Text[] = "UICAttributeHashes.txt";
 const char g_Include[] = "UICAttributeHashes.h";
@@ -68,14 +68,14 @@ const char g_Source[] = "..\\Source\\UICAttributeHashes.cpp";
 const char g_TestString[] = "qt.io";
 
 //==============================================================================
-//	Globals
+//    Globals
 //==============================================================================
 TStringList g_StringList;
 TStringList g_EnumList;
 
 //==============================================================================
 /**
- *	Convert a string to an enum entry and write it out
+ *    Convert a string to an enum entry and write it out
  */
 void WriteEnumEntry(FILE *inDestination, const char *inEnum, const char *inString)
 {
@@ -88,7 +88,7 @@ void WriteEnumEntry(FILE *inDestination, const char *inEnum, const char *inStrin
         thePadding[30 - theLength] = '\0';
 
         // "ATTRIBUTE_NAME =          0x04CECA21, // name"
-        fprintf(inDestination, "\t%s = %s0x%08X, // %s\n", inEnum, thePadding,
+        fprintf(inDestination, "    %s = %s0x%08X, // %s\n", inEnum, thePadding,
                 Q3DStudio::CHash::HashAttribute(inString), inString);
     } else
         fprintf(inDestination, "\n");
@@ -96,14 +96,13 @@ void WriteEnumEntry(FILE *inDestination, const char *inEnum, const char *inStrin
 
 //==============================================================================
 /**
- *	Write out the enum section
+ *    Write out the enum section
  */
 void WriteEnum(FILE *inDestination)
 {
     // Enum entry
     fprintf(inDestination, "/// Key for the CElement attribute-value pair\n"
-                           "enum EAttribute\n"
-                           "{\n");
+                           "enum EAttribute {\n");
 
     // Write all enums
     for (TStringList::size_type theIndex = 0; theIndex < g_EnumList.size(); ++theIndex)
@@ -120,7 +119,7 @@ void WriteEnum(FILE *inDestination)
 
 //==============================================================================
 /**
- *	Convert strings to enums
+ *    Convert strings to enums
  */
 void ProcessEnums()
 {
@@ -149,7 +148,7 @@ void ProcessEnums()
 
 //==============================================================================
 /**
- *	Write out lookup function section
+ *    Write out lookup function section
  */
 void WriteLookup(FILE *inDestination)
 {
@@ -157,32 +156,30 @@ void WriteLookup(FILE *inDestination)
     fprintf(inDestination, "\n"
                            "\n"
                            "/// Function providing reverse hash lookup\n"
-                           "const char* GetAttributeString( const EAttribute inAttribute )\n"
+                           "const char *GetAttributeString(const EAttribute inAttribute)\n"
                            "{\n"
-                           "	switch ( inAttribute )\n"
-                           "	{\n");
+                           "    switch (inAttribute) {\n");
 
     // Write all enums
     for (TStringList::size_type theIndex = 0; theIndex < g_EnumList.size(); ++theIndex)
         if (!g_StringList[theIndex].empty())
-            fprintf(inDestination, "\t\tcase %s: return \"%s\";\n", g_EnumList[theIndex].c_str(),
+            fprintf(inDestination, "        case %s: return \"%s\";\n", g_EnumList[theIndex].c_str(),
                     g_StringList[theIndex].c_str());
 
     // End function
     fprintf(inDestination,
-            "		default:\n"
-            "		{\n"
-            "			static char s_UnknownHash[16];\n"
-            "			sprintf( s_UnknownHash, \"(0x%%08X)\", inAttribute );\n"
-            "			return s_UnknownHash;\n"
-            "		}\n"
-            "	}\n"
+            "        default: {\n"
+            "            static char s_UnknownHash[16];\n"
+            "            sprintf(s_UnknownHash, \"(0x%%08X)\", inAttribute);\n"
+            "            return s_UnknownHash;\n"
+            "        }\n"
+            "    }\n"
             "}\n");
 }
 
 //==============================================================================
 /**
- *	Single lookup to check new strings
+ *    Single lookup to check new strings
  */
 int SingleLookup(const char *inString)
 {
@@ -193,8 +190,8 @@ int SingleLookup(const char *inString)
 
 //==============================================================================
 /**
- *	Main function.
- *	Open two files, read lines from source and write enum entry to destination.
+ *    Main function.
+ *    Open two files, read lines from source and write enum entry to destination.
  */
 int _tmain(int argc, char *argv[])
 {
@@ -279,20 +276,13 @@ int _tmain(int argc, char *argv[])
         "#pragma once\n"
         "\n"
         "//==============================================================================\n"
-        "//	Namespace\n"
+        "//    Namespace\n"
         "//==============================================================================\n"
-        "namespace Q3DStudio\n"
-        "{\n"
+        "namespace Q3DStudio {\n"
         "\n"
-        "// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! AUTOGENERATED CODE "
-        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+        "// !!!!! AUTOGENERATED CODE - DO NOT MODIFY MANUALLY !!!!!\n"
         "\n"
         "// Run the AttributeHashes project to regenerate this file from Attributehashes.txt list\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
         "\n");
 
     WriteEnum(theInclude);
@@ -300,7 +290,7 @@ int _tmain(int argc, char *argv[])
     // Footer
     fprintf(theInclude, "\n"
                         "/// Function providing reverse hash lookup\n"
-                        "const char* GetAttributeString( const EAttribute inAttribute );\n"
+                        "const char *GetAttributeString(const EAttribute inAttribute);\n"
                         "\n"
                         "} // namespace Q3DStudio\n"
                         "\n");
@@ -324,25 +314,18 @@ int _tmain(int argc, char *argv[])
         "#include \"RuntimePrefix.h\"\n"
         "\n"
         "//==============================================================================\n"
-        "//	Includes\n"
+        "//    Includes\n"
         "//==============================================================================\n"
         "#include \"UICAttributeHashes.h\"\n"
         "\n"
         "//==============================================================================\n"
-        "//	Namespace\n"
+        "//    Namespace\n"
         "//==============================================================================\n"
-        "namespace Q3DStudio\n"
-        "{\n"
+        "namespace Q3DStudio {\n"
         "\n"
-        "// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! AUTOGENERATED CODE "
-        "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+        "// !!!!! AUTOGENERATED CODE - DO NOT MODIFY MANUALLY !!!!!\n"
         "\n"
         "// Run the AttributeHashes project to regenerate this file from Attributehashes.txt list\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
         "\n");
 
     WriteLookup(theSource);

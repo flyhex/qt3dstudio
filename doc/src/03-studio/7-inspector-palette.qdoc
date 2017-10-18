@@ -559,6 +559,8 @@ in the Inspector palette (in addition to the
 \li
   \b{Shadow Far Clip} - Maximum distance for the shadow map;
   smaller values may improve the precision and effects of the map.
+\li
+  \b{Shadow Field of View} - Shadow camera field of view.
 \endlist
 
 \b Notes:

@@ -61,6 +61,7 @@ shdwbias
 shdwfactor
 shdwmapres
 shdwmapfar
+shdwmapfov
 shdwfilter
 
 lightmapindirect

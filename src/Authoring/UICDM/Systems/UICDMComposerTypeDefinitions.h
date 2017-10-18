@@ -239,6 +239,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(shdwfactor, m_ShadowFactor, float, 5.0f)                              \
     HANDLE_COMPOSER_PROPERTY(shdwmapres, m_ShadowMapRes, qt3ds::QT3DSI32, 9)                                  \
     HANDLE_COMPOSER_PROPERTY(shdwmapfar, m_ShadowMapFar, float, 5000.0f)                           \
+    HANDLE_COMPOSER_PROPERTY(shdwmapfov, m_ShadowMapFov, float, 90.0f)                             \
     HANDLE_COMPOSER_PROPERTY(shdwfilter, m_ShadowFilter, float, 35.0f)
 
 #define ITERATE_COMPOSER_CAMERA_PROPERTIES                                                         \

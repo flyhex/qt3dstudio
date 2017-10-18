@@ -48,6 +48,7 @@ SLight::SLight()
     , m_ShadowFactor(5.0f)
     , m_ShadowMapRes(9)
     , m_ShadowMapFar(5000.0f)
+    , m_ShadowMapFov(90.0f)
     , m_ShadowFilter(35.0f)
 {
     m_Flags.SetPointLight(0);

@@ -256,6 +256,9 @@
                 <Property name="shdwmapfar" formalName="Shadow Far Clip" description="Affects the maximum distance for the shadow depth map" default="5000">
                         <ShowIfEqual property="castshadow" value="True"/>
                 </Property>
+                <Property name="shdwmapfov" formalName="Shadow Field of View" description="Affects the field of view of the shadow camera" default="90" min="1" max="179">
+                        <ShowIfEqual property="castshadow" value="True"/>
+                </Property>
         </Light>
         <Lightmaps>
                 <Property name="name" formalName="Name" type="String" default="Lightmaps" hidden="True" category="Lighting" />

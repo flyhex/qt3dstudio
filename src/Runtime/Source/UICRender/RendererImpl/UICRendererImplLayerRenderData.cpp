@@ -64,6 +64,7 @@
 #endif
 
 #define UIC_CACHED_POST_EFFECT
+const float UIC3D_DEGREES_TO_RADIANS = 0.0174532925199f;
 
 namespace uic {
 namespace render {
@@ -354,6 +355,7 @@ namespace render {
                 inLightPos.z = -inLightPos.z;
 
             inLightPos -= inLightDir * inCamera.m_ClipNear;
+            theCamera.m_FOV = inLight->m_ShadowMapFov * UIC3D_DEGREES_TO_RADIANS;
 
             if (inLight->m_LightType == RenderLightTypes::Directional) {
                 QT3DSVec3 frustBounds[8], boundCtr;
@@ -389,7 +391,6 @@ namespace render {
                 theCamera.LookAt(inLightPos, QT3DSVec3(0, 1.0, 0), QT3DSVec3(0, 0, 0));
             }
 
-            theCamera.m_FOV = 1.57079f;
             theCamera.CalculateGlobalVariables(theViewport,
                                                QT3DSVec2(theViewport.m_Width, theViewport.m_Height));
         }
@@ -424,7 +425,7 @@ namespace render {
             inCameras[i].m_Pivot = inLight->m_Pivot;
             inCameras[i].m_ClipNear = 1.0f;
             inCameras[i].m_ClipFar = NVMax<QT3DSF32>(2.0f, inLight->m_ShadowMapFar);
-            inCameras[i].m_FOV = NVHalfPi;
+            inCameras[i].m_FOV = inLight->m_ShadowMapFov * UIC3D_DEGREES_TO_RADIANS;
 
             inCameras[i].m_Position = inLightPos;
             inCameras[i].m_Rotation = rotOfs[i];

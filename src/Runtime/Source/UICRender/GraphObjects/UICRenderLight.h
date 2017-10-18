@@ -69,6 +69,7 @@ namespace render {
         QT3DSF32 m_ShadowFactor; // Darkening factor for ESMs
         QT3DSU32 m_ShadowMapRes; // Resolution of shadow map
         QT3DSF32 m_ShadowMapFar; // Far clip plane for the shadow map
+        QT3DSF32 m_ShadowMapFov; // Field of View for the shadow map
         QT3DSF32 m_ShadowFilter; // Shadow map filter step size
 
         // Defaults to directional light

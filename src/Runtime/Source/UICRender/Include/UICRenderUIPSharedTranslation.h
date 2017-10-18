@@ -360,6 +360,7 @@ namespace render {
     HANDLE_UIC_RENDER_PROPERTY(Light, ShadowBias, Dirty)                                           \
     HANDLE_UIC_RENDER_PROPERTY(Light, ShadowFactor, Dirty)                                         \
     HANDLE_UIC_RENDER_PROPERTY(Light, ShadowMapFar, Dirty)                                         \
+    HANDLE_UIC_RENDER_PROPERTY(Light, ShadowMapFov, Dirty)                                         \
     HANDLE_UIC_RENDER_PROPERTY(Light, ShadowFilter, Dirty)
 
 #define ITERATE_UIC_RENDER_MODEL_PROPERTIES                                                        \

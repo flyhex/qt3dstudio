@@ -395,6 +395,7 @@ struct STranslatorUICDMParser
 #define Light_ShadowFactor m_Light.m_ShadowFactor
 #define Light_ShadowMapRes m_Light.m_ShadowMapRes
 #define Light_ShadowMapFar m_Light.m_ShadowMapFar
+#define Light_ShadowMapFov m_Light.m_ShadowMapFov
 #define Light_ShadowFilter m_Light.m_ShadowFilter
 #define Model_MeshPath m_Asset.m_SourcePath
 #define Model_TessellationMode m_Model.m_Tessellation
