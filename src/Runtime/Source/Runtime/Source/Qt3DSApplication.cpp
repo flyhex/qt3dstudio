@@ -482,7 +482,7 @@ struct SApp : public IApplication
 
     SAudioPlayerWrapper m_AudioPlayer;
 
-    UICAssetVisitor *m_visitor;
+    Qt3DSAssetVisitor *m_visitor;
 
     QT3DSI32 mRefCount;
     SApp(Q3DStudio::IRuntimeFactoryCore &inFactory, const char8_t *inAppDir)
@@ -570,7 +570,7 @@ struct SApp : public IApplication
         }
     }
 
-    void setAssetVisitor(qt3ds::UICAssetVisitor *v) override
+    void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v) override
     {
         m_visitor = v;
     }

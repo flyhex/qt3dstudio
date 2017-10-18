@@ -34,7 +34,7 @@
 
 namespace qt3ds {
 
-class UICAssetVisitor
+class Qt3DSAssetVisitor
 {
 public:
     virtual void visit(const char *path) = 0;

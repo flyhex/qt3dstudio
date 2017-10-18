@@ -64,7 +64,7 @@ public:
     ~Q3DSPresentationPrivate();
 
     void setSource(const QUrl &source);
-    void setViewerApp(UICViewer::UICViewerApp *app, bool connectApp = true);
+    void setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp = true);
     void setCommandQueue(CommandQueue *queue);
 
     void registerElement(Q3DSElement *element);
@@ -81,7 +81,7 @@ public:
     Q3DSPresentation *q_ptr;
 
 private:
-    UICViewer::UICViewerApp *m_viewerApp; // Not owned
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp; // Not owned
     CommandQueue *m_commandQueue; // Not owned
     ElementMap m_elements;
     QUrl m_source;

@@ -62,7 +62,7 @@ Q_SIGNALS:
 };
 
 namespace qt3ds {
-class UICAssetVisitor;
+class Qt3DSAssetVisitor;
 }
 
 namespace qt3ds {
@@ -204,7 +204,7 @@ public:
     virtual bool AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction) = 0;
     virtual qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() = 0;
 
-    virtual void setAssetVisitor(qt3ds::UICAssetVisitor *) = 0;
+    virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
 
 public:
     static INDDView &Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,

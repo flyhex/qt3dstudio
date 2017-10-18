@@ -191,7 +191,7 @@ void Q3DSSceneElementPrivate::goToTime(float time)
         qWarning() << __FUNCTION__ << "Element is not registered to any presentation!";
 }
 
-void Q3DSSceneElementPrivate::setViewerApp(UICViewer::UICViewerApp *app)
+void Q3DSSceneElementPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
 {
     Q_Q(Q3DSSceneElement);
 

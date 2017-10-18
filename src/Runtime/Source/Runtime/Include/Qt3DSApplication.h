@@ -56,7 +56,7 @@ class ISceneGraphRuntimeDebugger;
 }
 
 namespace qt3ds {
-class UICAssetVisitor;
+class Qt3DSAssetVisitor;
 namespace runtime {
 using namespace qt3ds::foundation;
 using namespace qt3ds;
@@ -140,7 +140,7 @@ public:
     // Runs any queued runnables.
     virtual bool HasCompletedLoading() = 0;
 
-    virtual void setAssetVisitor(qt3ds::UICAssetVisitor *) = 0;
+    virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
 
     // will force loading to end if endLoad hasn't been called yet.  Will fire off loading
     // of resources that need to be uploaded to opengl.  Maintains reference to runtime factory

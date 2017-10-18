@@ -161,7 +161,7 @@ private:
 
     volatile QT3DSI32 mRefCount;
 
-    qt3ds::UICAssetVisitor *m_visitor;
+    qt3ds::Qt3DSAssetVisitor *m_visitor;
     bool m_showOnScreenStats;
 
 public:
@@ -186,7 +186,7 @@ public:
     void Pause() override;
     void UnPause() override;
     bool IsPaused() override;
-    void setAssetVisitor(qt3ds::UICAssetVisitor *) override;
+    void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) override;
 
     INT32 GetFrameCount() override;
     void showOnScreenStats(bool) override;
@@ -668,7 +668,7 @@ void CNDDView::BootupPreGraphicsInitObjects()
     qCInfo(TRACE_INFO) << "CNDDView::DoInitialize: Successfully initialized!";
 }
 
-void CNDDView::setAssetVisitor(qt3ds::UICAssetVisitor *v)
+void CNDDView::setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v)
 {
     m_visitor = v;
     if (m_ApplicationCore)

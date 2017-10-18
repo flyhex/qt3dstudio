@@ -233,7 +233,7 @@ void initResource() {
     Q_INIT_RESOURCE(res);
 }
 
-namespace UICViewer {
+namespace Q3DSViewer {
 
 struct SWindowSystemImpl : public Q3DStudio::IWindowSystem
 {
@@ -257,10 +257,10 @@ struct SWindowSystemImpl : public Q3DStudio::IWindowSystem
     int GetDepthBitCount() override { return m_DepthBitCount; }
 };
 
-class CUICViewerAppImpl
+class Q3DSViewerAppImpl
 {
 public:
-    CUICViewerAppImpl(Q3DStudio::IAudioPlayer *inAudioPlayer)
+    Q3DSViewerAppImpl(Q3DStudio::IAudioPlayer *inAudioPlayer)
         : m_tegraApp(0)
         , m_appInitSuccessful(false)
         , m_WatermarkX(-1.0f)
@@ -300,15 +300,15 @@ public:
 };
 
 ///< @brief contructor
-UICViewerApp::UICViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)
-    : m_Impl(*new CUICViewerAppImpl(inAudioPlayer))
+Q3DSViewerApp::Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)
+    : m_Impl(*new Q3DSViewerAppImpl(inAudioPlayer))
 {
     Q_UNUSED(glContext)
     m_Impl.m_WindowSystem = new SWindowSystemImpl();
 }
 
 ///< @brief destructor
-UICViewerApp::~UICViewerApp()
+Q3DSViewerApp::~Q3DSViewerApp()
 {
     qDeleteAll(m_Impl.m_pendingEvents);
 
@@ -328,7 +328,7 @@ UICViewerApp::~UICViewerApp()
     delete static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem);
 }
 
-void UICViewerApp::setOffscreenId(int offscreenID)
+void Q3DSViewerApp::setOffscreenId(int offscreenID)
 {
     static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_OffscreenID
             = offscreenID;
@@ -336,9 +336,9 @@ void UICViewerApp::setOffscreenId(int offscreenID)
         m_Impl.m_tegraApp->GetTegraRenderEngine()->ensureRenderTarget();
 }
 
-bool UICViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFormat &format,
+bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFormat &format,
                                  int offscreenID, const QString &source,
-                                 qt3ds::UICAssetVisitor *assetVisitor)
+                                 qt3ds::Qt3DSAssetVisitor *assetVisitor)
 {
     bool hasValidPresentationFile = !source.isEmpty();
 
@@ -400,9 +400,9 @@ bool UICViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceForm
 
         // Connect signals
         connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
-                &QINDDViewSignalProxy::SigSlideEntered, this, &UICViewerApp::SigSlideEntered);
+                &QINDDViewSignalProxy::SigSlideEntered, this, &Q3DSViewerApp::SigSlideEntered);
         connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
-                &QINDDViewSignalProxy::SigSlideExited, this, &UICViewerApp::SigSlideExited);
+                &QINDDViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
 
         DoEnableWatermark();
         DoSetWatermarkLocation();
@@ -412,22 +412,22 @@ bool UICViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceForm
     return true;
 }
 
-bool UICViewerApp::IsInitialised(void)
+bool Q3DSViewerApp::IsInitialised(void)
 {
     return m_Impl.m_tegraApp != NULL && m_Impl.m_appInitSuccessful == true;
 }
 
-int UICViewerApp::GetWindowHeight()
+int Q3DSViewerApp::GetWindowHeight()
 {
     return m_Impl.m_WindowSystem->GetWindowDimensions().m_Height;
 }
 
-int UICViewerApp::GetWindowWidth()
+int Q3DSViewerApp::GetWindowWidth()
 {
     return m_Impl.m_WindowSystem->GetWindowDimensions().m_Width;
 }
 
-void UICViewerApp::setupSearchPath(std::vector<std::string> &cmdLineArgs)
+void Q3DSViewerApp::setupSearchPath(std::vector<std::string> &cmdLineArgs)
 {
     // setup some additional search path
     // index 0 contains the module directory
@@ -450,7 +450,7 @@ void UICViewerApp::setupSearchPath(std::vector<std::string> &cmdLineArgs)
     //NvFAppendSearchPath(theModuleDirectory.c_str());
 }
 
-void UICViewerApp::Render()
+void Q3DSViewerApp::Render()
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         if (m_Impl.m_appInitSuccessful) {
@@ -468,7 +468,7 @@ void UICViewerApp::Render()
     }
 }
 
-void UICViewerApp::SaveState()
+void Q3DSViewerApp::SaveState()
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -481,7 +481,7 @@ void UICViewerApp::SaveState()
     }
 }
 
-void UICViewerApp::RestoreState()
+void Q3DSViewerApp::RestoreState()
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -494,27 +494,27 @@ void UICViewerApp::RestoreState()
     }
 }
 
-void UICViewerApp::EnableWatermarkDDS(const unsigned char *inData, size_t inDataSize)
+void Q3DSViewerApp::EnableWatermarkDDS(const unsigned char *inData, size_t inDataSize)
 {
     m_Impl.m_WatermarkData.assign(inData, inData + inDataSize);
     DoEnableWatermark();
 }
 
-void UICViewerApp::SetWatermarkLocation(float x, float y)
+void Q3DSViewerApp::SetWatermarkLocation(float x, float y)
 {
     m_Impl.m_WatermarkX = x;
     m_Impl.m_WatermarkY = y;
     DoSetWatermarkLocation();
 }
 
-bool UICViewerApp::WasLastFrameDirty()
+bool Q3DSViewerApp::WasLastFrameDirty()
 {
     if (m_Impl.m_tegraApp)
         return m_Impl.m_tegraApp->WasLastFrameDirty();
     return false;
 }
 
-void UICViewerApp::DoEnableWatermark()
+void Q3DSViewerApp::DoEnableWatermark()
 {
     if (m_Impl.m_WatermarkData.size() && m_Impl.m_tegraApp
             && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
@@ -523,7 +523,7 @@ void UICViewerApp::DoEnableWatermark()
     }
 }
 
-void UICViewerApp::DoSetWatermarkLocation()
+void Q3DSViewerApp::DoSetWatermarkLocation()
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()
             && m_Impl.m_WatermarkX >= 0.0f) {
@@ -532,7 +532,7 @@ void UICViewerApp::DoSetWatermarkLocation()
     }
 }
 
-void UICViewerApp::Resize(int width, int height)
+void Q3DSViewerApp::Resize(int width, int height)
 {
     WindowRect &theWindowRect = static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_Rect;
     theWindowRect.width = width;
@@ -550,7 +550,7 @@ void UICViewerApp::Resize(int width, int height)
 #endif
 }
 
-void UICViewerApp::HandleKeyInput(Q3DStudio::EKeyCode inKeyCode, bool isPressed)
+void Q3DSViewerApp::HandleKeyInput(Q3DStudio::EKeyCode inKeyCode, bool isPressed)
 {
     if (!m_Impl.m_tegraApp || inKeyCode == Q3DStudio::KEY_NOKEY)
         return;
@@ -560,7 +560,7 @@ void UICViewerApp::HandleKeyInput(Q3DStudio::EKeyCode inKeyCode, bool isPressed)
         input->HandleKeyboard(inKeyCode, isPressed);
 }
 
-void UICViewerApp::HandleMouseMove(int x, int y, bool isPressed)
+void Q3DSViewerApp::HandleMouseMove(int x, int y, bool isPressed)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -575,7 +575,7 @@ void UICViewerApp::HandleMouseMove(int x, int y, bool isPressed)
 
 }
 
-void UICViewerApp::HandleMousePress(int x, int y, int mouseButton, bool isPressed)
+void Q3DSViewerApp::HandleMousePress(int x, int y, int mouseButton, bool isPressed)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -621,7 +621,7 @@ void UICViewerApp::HandleMousePress(int x, int y, int mouseButton, bool isPresse
     }
 }
 
-void UICViewerApp::HandleMouseWheel(int x, int y, int orientation, int numSteps)
+void Q3DSViewerApp::HandleMouseWheel(int x, int y, int orientation, int numSteps)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -633,7 +633,7 @@ void UICViewerApp::HandleMouseWheel(int x, int y, int orientation, int numSteps)
     }
 }
 
-void UICViewerApp::GoToSlideByName(const char *elementPath, const char *slideName)
+void Q3DSViewerApp::GoToSlideByName(const char *elementPath, const char *slideName)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -641,7 +641,7 @@ void UICViewerApp::GoToSlideByName(const char *elementPath, const char *slideNam
     m_Impl.m_tegraApp->GoToSlideByName(elementPath, slideName);
 }
 
-void UICViewerApp::GoToSlideByIndex(const char *elementPath, const int slideIndex)
+void Q3DSViewerApp::GoToSlideByIndex(const char *elementPath, const int slideIndex)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -649,7 +649,7 @@ void UICViewerApp::GoToSlideByIndex(const char *elementPath, const int slideInde
     m_Impl.m_tegraApp->GoToSlideByIndex(elementPath, slideIndex);
 }
 
-void UICViewerApp::GoToSlideRelative(const char *elementPath, const bool next, const bool wrap)
+void Q3DSViewerApp::GoToSlideRelative(const char *elementPath, const bool next, const bool wrap)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -657,7 +657,7 @@ void UICViewerApp::GoToSlideRelative(const char *elementPath, const bool next, c
     m_Impl.m_tegraApp->GoToSlideRelative(elementPath, next, wrap);
 }
 
-bool UICViewerApp::GetSlideInfo(const char *elementPath, int &currentIndex, int &previousIndex,
+bool Q3DSViewerApp::GetSlideInfo(const char *elementPath, int &currentIndex, int &previousIndex,
                                 QString &currentName, QString &previousName)
 {
     if (!m_Impl.m_tegraApp)
@@ -667,7 +667,7 @@ bool UICViewerApp::GetSlideInfo(const char *elementPath, int &currentIndex, int 
                                            currentName, previousName);
 }
 
-void UICViewerApp::SetPresentationActive(const char *presId, const bool active)
+void Q3DSViewerApp::SetPresentationActive(const char *presId, const bool active)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -675,7 +675,7 @@ void UICViewerApp::SetPresentationActive(const char *presId, const bool active)
     m_Impl.m_tegraApp->SetPresentationAttribute(presId, nullptr, active ? "True" : "False");
 }
 
-void UICViewerApp::GoToTime(const char *elementPath, const float time)
+void Q3DSViewerApp::GoToTime(const char *elementPath, const float time)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -683,7 +683,7 @@ void UICViewerApp::GoToTime(const char *elementPath, const float time)
     m_Impl.m_tegraApp->GoToTime(elementPath, time);
 }
 
-void UICViewerApp::PlaySoundFile(const char *soundPath)
+void Q3DSViewerApp::PlaySoundFile(const char *soundPath)
 {
     if (!m_Impl.m_AudioPlayer || !soundPath)
         return;
@@ -691,7 +691,7 @@ void UICViewerApp::PlaySoundFile(const char *soundPath)
     m_Impl.m_AudioPlayer->PlaySoundFile(soundPath);
 }
 
-void UICViewerApp::SetAttribute(const char *elementPath, const char *attributeName,
+void Q3DSViewerApp::SetAttribute(const char *elementPath, const char *attributeName,
                                 const char *value)
 {
     if (!m_Impl.m_tegraApp)
@@ -700,7 +700,7 @@ void UICViewerApp::SetAttribute(const char *elementPath, const char *attributeNa
     m_Impl.m_tegraApp->SetAttribute(elementPath, attributeName, value);
 }
 
-bool UICViewerApp::GetAttribute(const char *elementPath, const char *attributeName, void *value)
+bool Q3DSViewerApp::GetAttribute(const char *elementPath, const char *attributeName, void *value)
 {
     if (!m_Impl.m_tegraApp)
         return false;
@@ -708,7 +708,7 @@ bool UICViewerApp::GetAttribute(const char *elementPath, const char *attributeNa
     return m_Impl.m_tegraApp->GetAttribute(elementPath, attributeName, value);
 }
 
-void UICViewerApp::FireEvent(const char *elementPath, const char *evtName)
+void Q3DSViewerApp::FireEvent(const char *elementPath, const char *evtName)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -716,7 +716,7 @@ void UICViewerApp::FireEvent(const char *elementPath, const char *evtName)
     m_Impl.m_tegraApp->FireEvent(elementPath, evtName);
 }
 
-bool UICViewerApp::PeekCustomAction(std::string &outElementPath, std::string &outActionName)
+bool Q3DSViewerApp::PeekCustomAction(std::string &outElementPath, std::string &outActionName)
 {
     if (!m_Impl.m_tegraApp)
         return false;
@@ -733,7 +733,7 @@ bool UICViewerApp::PeekCustomAction(std::string &outElementPath, std::string &ou
     return retVal;
 }
 
-bool UICViewerApp::RegisterScriptCallback(ViewerCallbackType::Enum inCallbackType,
+bool Q3DSViewerApp::RegisterScriptCallback(ViewerCallbackType::Enum inCallbackType,
                                           const qml_Function inCallback, void *inUserData)
 {
     if (!m_Impl.m_tegraApp)
@@ -741,9 +741,9 @@ bool UICViewerApp::RegisterScriptCallback(ViewerCallbackType::Enum inCallbackTyp
 
     // convert to int
     int callbackType = 0;
-    if (inCallbackType == UICViewer::ViewerCallbackType::CALLBACK_ON_INIT)
+    if (inCallbackType == Q3DSViewer::ViewerCallbackType::CALLBACK_ON_INIT)
         callbackType = 1;
-    else if (inCallbackType == UICViewer::ViewerCallbackType::CALLBACK_ON_UPDATE)
+    else if (inCallbackType == Q3DSViewer::ViewerCallbackType::CALLBACK_ON_UPDATE)
         callbackType = 2;
     else
         return false;
@@ -753,7 +753,7 @@ bool UICViewerApp::RegisterScriptCallback(ViewerCallbackType::Enum inCallbackTyp
     return retVal;
 }
 
-void UICViewerApp::SetScaleMode(ViewerScaleModes::Enum inScale)
+void Q3DSViewerApp::SetScaleMode(ViewerScaleModes::Enum inScale)
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         m_Impl.m_tegraApp->GetTegraRenderEngine()->SetScaleMode(
@@ -761,7 +761,7 @@ void UICViewerApp::SetScaleMode(ViewerScaleModes::Enum inScale)
     }
 }
 
-ViewerScaleModes::Enum UICViewerApp::GetScaleMode()
+ViewerScaleModes::Enum Q3DSViewerApp::GetScaleMode()
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         return static_cast<ViewerScaleModes::Enum>(
@@ -771,7 +771,7 @@ ViewerScaleModes::Enum UICViewerApp::GetScaleMode()
     return ViewerScaleModes::ExactSize;
 }
 
-void UICViewerApp::setMatteColor(const QColor &color)
+void Q3DSViewerApp::setMatteColor(const QColor &color)
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         m_Impl.m_tegraApp->GetTegraRenderEngine()->SetMatteColor(
@@ -780,13 +780,13 @@ void UICViewerApp::setMatteColor(const QColor &color)
     }
 }
 
-void UICViewerApp::setShowOnScreenStats(bool inShow)
+void Q3DSViewerApp::setShowOnScreenStats(bool inShow)
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine())
         m_Impl.m_tegraApp->getNDDView()->showOnScreenStats(inShow);
 }
 
-void UICViewerApp::SetShadeMode(ViewerShadeModes::Enum inShadeMode)
+void Q3DSViewerApp::SetShadeMode(ViewerShadeModes::Enum inShadeMode)
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         StaticAssert<ViewerShadeModes::Shaded == TegraRenderShadeModes::Shaded>::valid_expression();
@@ -800,7 +800,7 @@ void UICViewerApp::SetShadeMode(ViewerShadeModes::Enum inShadeMode)
     }
 }
 
-void UICViewerApp::SetGlobalAnimationTime(qint64 inMilliSecs)
+void Q3DSViewerApp::SetGlobalAnimationTime(qint64 inMilliSecs)
 {
     if (!m_Impl.m_tegraApp)
         return;
@@ -808,14 +808,14 @@ void UICViewerApp::SetGlobalAnimationTime(qint64 inMilliSecs)
     m_Impl.m_tegraApp->SetGlobalAnimationTime(inMilliSecs);
 }
 
-UICViewerApp &UICViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)
+Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)
 {
-    return *Q3DStudio_virtual_new(UICViewerApp) UICViewerApp(glContext, inAudioPlayer);
+    return *Q3DStudio_virtual_new(Q3DSViewerApp) Q3DSViewerApp(glContext, inAudioPlayer);
 }
 
-void UICViewerApp::Release()
+void Q3DSViewerApp::Release()
 {
-    Q3DStudio_virtual_delete(this, UICViewerApp);
+    Q3DStudio_virtual_delete(this, Q3DSViewerApp);
 }
 
 } // end namespace

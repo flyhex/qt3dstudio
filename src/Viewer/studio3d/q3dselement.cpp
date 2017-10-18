@@ -127,7 +127,7 @@ void Q3DSElementPrivate::setElementPath(const QString &elementPath)
         m_presentation->registerElement(q_ptr);
 }
 
-void Q3DSElementPrivate::setViewerApp(UICViewer::UICViewerApp *app)
+void Q3DSElementPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
 {
     m_viewerApp = app;
 }

@@ -287,7 +287,7 @@ void Q3DSPresentationPrivate::setSource(const QUrl &source)
     }
 }
 
-void Q3DSPresentationPrivate::setViewerApp(UICViewer::UICViewerApp *app, bool connectApp)
+void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp)
 {
 
     for (Q3DSElement *element : m_elements.values())
@@ -295,15 +295,15 @@ void Q3DSPresentationPrivate::setViewerApp(UICViewer::UICViewerApp *app, bool co
 
     if (connectApp) {
         if (app) {
-            connect(app, &UICViewer::UICViewerApp::SigSlideEntered,
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
                     this, &Q3DSPresentationPrivate::handleSlideEntered);
-            connect(app, &UICViewer::UICViewerApp::SigSlideExited,
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                     q_ptr, &Q3DSPresentation::slideExited);
         }
         if (m_viewerApp) {
-            disconnect(m_viewerApp, &UICViewer::UICViewerApp::SigSlideEntered,
+            disconnect(m_viewerApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
                        this, &Q3DSPresentationPrivate::handleSlideEntered);
-            disconnect(m_viewerApp, &UICViewer::UICViewerApp::SigSlideExited,
+            disconnect(m_viewerApp, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                        q_ptr, &Q3DSPresentation::slideExited);
         }
     }

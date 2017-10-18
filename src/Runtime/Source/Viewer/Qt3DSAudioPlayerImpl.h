@@ -34,7 +34,7 @@
 #include "Qt3DSAudioPlayer.h"
 #include "qt3dsruntimeglobal.h"
 
-namespace UICViewer {
+namespace Q3DSViewer {
 
 class QT3DS_RUNTIME_API CUICAudioPlayerImpl : public Q3DStudio::IAudioPlayer
 {

@@ -427,7 +427,7 @@ public:
 
     void SetPresentationAttribute(const char *, const char *, const char *) override;
 
-    // No need to implement here, as sound playing is done in UICViewerApp
+    // No need to implement here, as sound playing is done in Qt3DSViewerApp
     bool PlaySoundFile(const char *) override { return false; }
 
     void EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket &) override {}

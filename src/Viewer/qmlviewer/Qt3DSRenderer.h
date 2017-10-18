@@ -48,7 +48,7 @@ class Q3DSRenderer : public QObject,
     Q_OBJECT
 
 public:
-    Q3DSRenderer(bool visibleFlag, qt3ds::UICAssetVisitor *assetVisitor);
+    Q3DSRenderer(bool visibleFlag, qt3ds::Qt3DSAssetVisitor *assetVisitor);
     ~Q3DSRenderer();
 
     QOpenGLFramebufferObject *createFramebufferObject(const QSize &size) override;
@@ -74,11 +74,11 @@ protected:
     bool m_visibleFlag; // Is the plugin visible? Prevents rendering hidden content.
     CommandQueue m_commands; // A list of commands retrieved by the plugin to be applied.
     bool m_initElements; // Flag set when the runtime is first ready to render.
-    UICViewer::UICViewerApp *m_runtime; // The Qt3DS viewer that renders all content.
+    Q3DSViewer::Q3DSViewerApp *m_runtime; // The Qt3DS viewer that renders all content.
     QQuickWindow *m_window; // Window associated with the plugin; needed to reset OpenGL state.
 
     bool m_initialized; // Has the runtime and OpenGL state been initialized?
-    qt3ds::UICAssetVisitor *m_visitor;
+    qt3ds::Qt3DSAssetVisitor *m_visitor;
 
     Q3DSViewerSettings *m_settings;
     Q3DSPresentation *m_presentation;

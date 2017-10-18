@@ -32,7 +32,7 @@
 #define UICELAPSED_TIMER_H
 #include <QElapsedTimer>
 
-namespace UICViewer {
+namespace Q3DSViewer {
 
 ///< @brief this class implementes a elapsed timer using QElapsedTimer
 class UICElapsedTimer

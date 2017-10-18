@@ -36,7 +36,7 @@
 #include <QSound>
 #endif // PLATFORM_HAS_QT_MULTIMEDIA_LIB
 
-namespace UICViewer {
+namespace Q3DSViewer {
 
 CUICAudioPlayerImpl::CUICAudioPlayerImpl()
 {

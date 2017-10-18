@@ -78,7 +78,7 @@ private:
 
     Q3DSWidget *q_ptr;
 
-    UICViewer::UICViewerApp *m_viewerApp;
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp;
     QTimer *m_timer;
     int m_updateInterval;
     qreal m_pixelRatio;

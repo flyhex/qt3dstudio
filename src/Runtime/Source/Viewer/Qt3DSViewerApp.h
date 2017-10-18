@@ -48,7 +48,7 @@ class IAudioPlayer;
 }
 
 namespace qt3ds {
-class UICAssetVisitor
+class Qt3DSAssetVisitor
 {
 public:
     virtual void visit(const char *path) = 0;
@@ -56,7 +56,7 @@ public:
 };
 }
 
-namespace UICViewer {
+namespace Q3DSViewer {
 
 typedef void (*qml_Function)(void *inUserData);
 
@@ -93,13 +93,13 @@ struct ViewerShadeModes
     };
 };
 
-class CUICViewerAppImpl;
-class QT3DS_RUNTIME_API UICViewerApp : public QObject
+class Q3DSViewerAppImpl;
+class QT3DS_RUNTIME_API Q3DSViewerApp : public QObject
 {
     Q_OBJECT
 private:
-    UICViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer);
-    ~UICViewerApp();
+    Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer);
+    ~Q3DSViewerApp();
 
 public:
     /**
@@ -115,7 +115,7 @@ public:
      */
     bool InitializeApp(int winWidth, int winHeight, const QSurfaceFormat& format,
                        int offscreenID, const QString &source,
-                       qt3ds::UICAssetVisitor *assetVisitor = nullptr);
+                       qt3ds::Qt3DSAssetVisitor *assetVisitor = nullptr);
 
     bool IsInitialised(void);
     void setOffscreenId(int offscreenID);
@@ -377,10 +377,10 @@ private:
     void DoSetWatermarkLocation();
 
 private:
-    CUICViewerAppImpl &m_Impl;
+    Q3DSViewerAppImpl &m_Impl;
 
 public:
-    static UICViewerApp &Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer = 0);
+    static Q3DSViewerApp &Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer = 0);
     void Release();
 
 Q_SIGNALS:

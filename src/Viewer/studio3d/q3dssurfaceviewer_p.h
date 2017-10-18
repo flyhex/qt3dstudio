@@ -83,7 +83,7 @@ private:
 
     Q3DSSurfaceViewer *q_ptr;
 
-    UICViewer::UICViewerApp *m_viewerApp;
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp;
     QSize m_size;
     QTimer *m_timer;
     int m_updateInterval;

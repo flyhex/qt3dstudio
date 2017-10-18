@@ -129,7 +129,7 @@ Q3DSViewerSettingsPrivate::~Q3DSViewerSettingsPrivate()
 {
 }
 
-void Q3DSViewerSettingsPrivate::setViewerApp(UICViewer::UICViewerApp *app)
+void Q3DSViewerSettingsPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
 {
     m_viewerApp = app;
     if (m_viewerApp) {
@@ -202,9 +202,9 @@ void Q3DSViewerSettingsPrivate::setShadeMode(Q3DSViewerSettings::ShadeMode mode)
     m_shadeMode = mode;
     if (m_viewerApp) {
         if (mode == Q3DSViewerSettings::ShadeModeShaded)
-            m_viewerApp->SetShadeMode(UICViewer::ViewerShadeModes::Shaded);
+            m_viewerApp->SetShadeMode(Q3DSViewer::ViewerShadeModes::Shaded);
         else
-            m_viewerApp->SetShadeMode(UICViewer::ViewerShadeModes::ShadedWireframe);
+            m_viewerApp->SetShadeMode(Q3DSViewer::ViewerShadeModes::ShadedWireframe);
     } else if (m_commandQueue) {
         m_commandQueue->m_shadeMode = mode;
         m_commandQueue->m_shadeModeChanged = true;
@@ -216,11 +216,11 @@ void Q3DSViewerSettingsPrivate::setScaleMode(Q3DSViewerSettings::ScaleMode mode)
     m_scaleMode = mode;
     if (m_viewerApp) {
         if (mode == Q3DSViewerSettings::ScaleModeFit)
-            m_viewerApp->SetScaleMode(UICViewer::ViewerScaleModes::ScaleToFit);
+            m_viewerApp->SetScaleMode(Q3DSViewer::ViewerScaleModes::ScaleToFit);
         else if (mode == Q3DSViewerSettings::ScaleModeFill)
-            m_viewerApp->SetScaleMode(UICViewer::ViewerScaleModes::ScaleToFill);
+            m_viewerApp->SetScaleMode(Q3DSViewer::ViewerScaleModes::ScaleToFill);
         else
-            m_viewerApp->SetScaleMode(UICViewer::ViewerScaleModes::ExactSize);
+            m_viewerApp->SetScaleMode(Q3DSViewer::ViewerScaleModes::ExactSize);
     } else if (m_commandQueue) {
         m_commandQueue->m_scaleMode = mode;
         m_commandQueue->m_scaleModeChanged = true;

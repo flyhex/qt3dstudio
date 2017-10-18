@@ -42,11 +42,11 @@
 #include <QtGui/qopenglcontext.h>
 #include <QtQuick/qquickwindow.h>
 
-using namespace UICViewer;
+using namespace Q3DSViewer;
 
 QT_BEGIN_NAMESPACE
 
-Q3DSRenderer::Q3DSRenderer(bool visibleFlag, qt3ds::UICAssetVisitor *assetVisitor)
+Q3DSRenderer::Q3DSRenderer(bool visibleFlag, qt3ds::Qt3DSAssetVisitor *assetVisitor)
     : m_visibleFlag(visibleFlag)
     , m_initElements(false)
     , m_runtime(0)
@@ -150,7 +150,7 @@ void Q3DSRenderer::draw()
 
 bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
 {
-    m_runtime = &UICViewerApp::Create(nullptr, new CUICAudioPlayerImpl());
+    m_runtime = &Q3DSViewerApp::Create(nullptr, new CUICAudioPlayerImpl());
     Q_ASSERT(m_runtime);
 
     int theWidth = inFbo->width();
@@ -164,10 +164,10 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
         return false;
     }
 
-    m_runtime->RegisterScriptCallback(UICViewer::ViewerCallbackType::Enum::CALLBACK_ON_INIT,
+    m_runtime->RegisterScriptCallback(Q3DSViewer::ViewerCallbackType::Enum::CALLBACK_ON_INIT,
                                       reinterpret_cast<qml_Function>(Q3DSRenderer::onInitHandler),
                                       this);
-    m_runtime->RegisterScriptCallback(UICViewer::ViewerCallbackType::Enum::CALLBACK_ON_UPDATE,
+    m_runtime->RegisterScriptCallback(Q3DSViewer::ViewerCallbackType::Enum::CALLBACK_ON_UPDATE,
                                       reinterpret_cast<qml_Function>(Q3DSRenderer::onUpdateHandler),
                                       this);
 
@@ -175,9 +175,9 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
     m_presentation->d_ptr->setViewerApp(m_runtime, false);
 
     // Connect signals
-    connect(m_runtime, &UICViewer::UICViewerApp::SigSlideEntered,
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
             this, &Q3DSRenderer::enterSlide);
-    connect(m_runtime, &UICViewer::UICViewerApp::SigSlideExited,
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
             this, &Q3DSRenderer::exitSlide);
 
     return true;

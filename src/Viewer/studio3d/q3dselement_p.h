@@ -58,7 +58,7 @@ public:
 
     void setElementPath(const QString &elementPath);
 
-    virtual void setViewerApp(UICViewer::UICViewerApp *app);
+    virtual void setViewerApp(Q3DSViewer::Q3DSViewerApp *app);
     virtual void setCommandQueue(CommandQueue *queue);
     virtual void setPresentation(Q3DSPresentationPrivate *presentation);
 
@@ -66,7 +66,7 @@ public:
 
 protected:
     Q3DSElement *q_ptr;
-    UICViewer::UICViewerApp *m_viewerApp; // Not owned
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp; // Not owned
     CommandQueue *m_commandQueue; // Not owned
     Q3DSPresentationPrivate *m_presentation; // Not owned
     QString m_elementPath;

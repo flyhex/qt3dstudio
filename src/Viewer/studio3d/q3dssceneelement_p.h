@@ -61,7 +61,7 @@ public:
     void goToSlide(bool next, bool wrap);
     void goToTime(float time);
 
-    void setViewerApp(UICViewer::UICViewerApp *app) override;
+    void setViewerApp(Q3DSViewer::Q3DSViewerApp *app) override;
     void setCommandQueue(CommandQueue *queue) override;
 
     void requestResponseHandler(CommandType commandType, void *requestData) override;

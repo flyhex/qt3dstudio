@@ -41,7 +41,7 @@
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qdebug.h>
 
-using namespace UICViewer;
+using namespace Q3DSViewer;
 
 QT_BEGIN_NAMESPACE
 
@@ -272,7 +272,7 @@ bool Q3DSWidgetPrivate::initializeRuntime()
 
     q_ptr->makeCurrent();
 
-    m_viewerApp = &UICViewerApp::Create(q_ptr->context(), new CUICAudioPlayerImpl());
+    m_viewerApp = &Q3DSViewerApp::Create(q_ptr->context(), new CUICAudioPlayerImpl());
 
     Q_ASSERT(m_viewerApp);
 

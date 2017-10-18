@@ -57,7 +57,7 @@ public:
     explicit Q3DSViewerSettingsPrivate(Q3DSViewerSettings *parent);
     ~Q3DSViewerSettingsPrivate();
 
-    void setViewerApp(UICViewer::UICViewerApp *app);
+    void setViewerApp(Q3DSViewer::Q3DSViewerApp *app);
     void setCommandQueue(CommandQueue *queue);
     void save(const QString &group, const QString &organization, const QString &application);
     void load(const QString &group, const QString &organization, const QString &application);
@@ -74,7 +74,7 @@ private:
     void initSettingsStore(const QString &group, const QString &organization,
                            const QString &application);
 
-    UICViewer::UICViewerApp *m_viewerApp; // Not owned
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp; // Not owned
     CommandQueue *m_commandQueue; // Not owned
     QColor m_matteColor;
     bool m_showRenderStats;
