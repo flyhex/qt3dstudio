@@ -130,7 +130,8 @@ FORMS += \
     Studio/MainFrm.ui \
     Studio/_Win/Application/AboutDlg.ui \
     Studio/_Win/UI/StartupDlg.ui \
-    Studio/_Win/Application/SubPresentationsDlg.ui
+    Studio/_Win/Application/SubPresentationsDlg.ui \
+    Studio/_Win/Palettes/Progress/ProgressDlg.ui
 
 RESOURCES += \
     Studio/MainFrm.qrc \

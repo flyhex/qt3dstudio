@@ -80,9 +80,9 @@ enum EStudioObjectType;
 struct SubPresentationRecord;
 
 class CStudioApp : public CCoreAsynchronousEventListener,
-                   public CAppStatusListener,
-                   public CFailListener,
-                   public CPresentationChangeListener // to setup auto set keyframes
+        public CAppStatusListener,
+        public CFailListener,
+        public CPresentationChangeListener // to setup auto set keyframes
 {
 public:
     CStudioApp();
@@ -127,13 +127,13 @@ protected:
     CViews *m_Views;
     long m_ToolMode;
     StudioManipulationModes::Enum
-        m_ManipulationMode; ///< Controls what space the tras,rot,and scale manipulations work in.
+    m_ManipulationMode; ///< Controls what space the tras,rot,and scale manipulations work in.
     long m_SelectMode;
     CDialogs *m_Dialogs;
     long m_PlaybackTime; ///< Stores the playhead's starting position so that it can be restored
-                         ///after playing the presentation for a little while
+    ///after playing the presentation for a little while
     UICDM::CUICDMSlideHandle
-        m_PlaybackOriginalSlide; ///< Stores the current slide handle before playback started.
+    m_PlaybackOriginalSlide; ///< Stores the current slide handle before playback started.
 
     std::shared_ptr<Q3DStudio::ITickTock> m_TickTock;
     std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
@@ -210,8 +210,7 @@ public:
     // CAppStatusListener
     void OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg) override;
     void OnProgressBegin(const Q3DStudio::CString &inActionText,
-                                 const Q3DStudio::CString &inFileName,
-                                 const Q3DStudio::CString &inWindowTitle) override;
+                         const Q3DStudio::CString &inAdditionalText) override;
     void OnProgressEnd() override;
 
     // CFailListener
@@ -222,7 +221,7 @@ public:
     void OnProjectVariableFail(const Q3DStudio::CString &inMessage) override;
     void OnErrorFail(const Q3DStudio::CString &inText) override;
     void OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                                       const Q3DStudio::CString &inDescription) override;
+                               const Q3DStudio::CString &inDescription) override;
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

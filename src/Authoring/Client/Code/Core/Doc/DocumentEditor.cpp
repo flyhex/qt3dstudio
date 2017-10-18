@@ -2688,8 +2688,8 @@ public:
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         CFilePath theDestFile(importToComposer->GetDestImportFile());
         try {
-            theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Loading...")), importSrc,
-                                            Q3DStudio::CString::fromQString(QObject::tr("Loading...")));
+            theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(
+                                                QObject::tr("Importing ")), importSrc);
             SImportResult result = inImportFunction(*importToComposer, theDestFile);
             bool forceError = importToComposer->HasError();
             if (!forceError)
@@ -4006,8 +4006,8 @@ public:
     void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) override
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
-        theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Refreshing Import File")), inOldFile,
-                                        Q3DStudio::CString::fromQString(QObject::tr("Refreshing Import File")));
+        theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(
+                                            QObject::tr("Refreshing Import ")), inOldFile);
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();
@@ -4365,7 +4365,7 @@ public:
 
 #define ENSURE_PROGRESS                                                                            \
     if (!hasProgressFired) {                                                                       \
-        theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Updating project")), L"", L"");                            \
+        theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Updating project")), L"");                            \
         hasProgressFired = true;                                                                   \
     }
 

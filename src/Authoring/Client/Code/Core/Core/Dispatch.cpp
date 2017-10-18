@@ -617,11 +617,10 @@ void CDispatch::FireOnDisplayAppStatus(Q3DStudio::CString &inStatusMsg)
 }
 
 void CDispatch::FireOnProgressBegin(const Q3DStudio::CString &inActionText,
-                                    const Q3DStudio::CString &inFileName,
-                                    const Q3DStudio::CString &inWindowTitle)
+                                    const Q3DStudio::CString &inAdditionalText)
 {
-    m_AppStatusListeners.FireEvent(&CAppStatusListener::OnProgressBegin, inActionText, inFileName,
-                                   inWindowTitle);
+    m_AppStatusListeners.FireEvent(&CAppStatusListener::OnProgressBegin, inActionText,
+                                   inAdditionalText);
 }
 
 void CDispatch::FireOnProgressEnd()

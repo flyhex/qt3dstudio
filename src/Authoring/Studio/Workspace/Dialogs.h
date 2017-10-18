@@ -53,7 +53,6 @@ class IDoc;
 class CStudioApp;
 class CControl;
 class CDialogControl;
-class IProgressCallback;
 
 class CProgressView;
 
@@ -142,15 +141,13 @@ public:
     bool ConfirmRevert();
 
     void DisplayProgressScreen(const Q3DStudio::CString &inActionText,
-                               const Q3DStudio::CString &inFileName,
-                               const Q3DStudio::CString &inWindowTitle);
+                               const Q3DStudio::CString &inAdditionalText);
     void DestroyProgressScreen();
 
     bool PromptObjectTimebarColor(CColor &ioColor);
     void DisplayProfilingStatistics();
     /*void DisplayMultilineTextEdit(Q3DStudio::CString &ioText,
                                   CMultilineEditDlg::INotification *inNotifiction = NULL);*/
-    IProgressCallback *GetProgressScreen() const;
 
     void DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErrorMessage);
 

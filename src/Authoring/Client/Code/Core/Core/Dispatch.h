@@ -186,8 +186,7 @@ public:
     void RemoveAppStatusListener(CAppStatusListener *inListener);
     void FireOnDisplayAppStatus(Q3DStudio::CString &inStatusMsg);
     void FireOnProgressBegin(const Q3DStudio::CString &inActionText,
-                             const Q3DStudio::CString &inFileName,
-                             const Q3DStudio::CString &inWindowTitle);
+                             const Q3DStudio::CString &inAdditionalText);
     void FireOnProgressEnd();
 
     // Failure notification

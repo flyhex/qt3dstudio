@@ -1466,8 +1466,8 @@ bool CStudioApp::OnSaveCopy()
  */
 bool CStudioApp::OnLoadDocument(const CUICFile &inDocument, bool inShowStartupDialogOnError)
 {
-    m_Core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading...")), inDocument.GetName(),
-                                               CString::fromQString(QObject::tr("Loading...")));
+    m_Core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading ")),
+                                               inDocument.GetName());
 
     bool theLoadResult = false;
     int theLoadErrorParameter = -1;
@@ -1625,10 +1625,9 @@ void CStudioApp::OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg)
 }
 
 void CStudioApp::OnProgressBegin(const Q3DStudio::CString &inActionText,
-                                 const Q3DStudio::CString &inFileName,
-                                 const Q3DStudio::CString &inWindowTitle)
+                                 const Q3DStudio::CString &inAdditionalText)
 {
-    m_Dialogs->DisplayProgressScreen(inActionText, inFileName, inWindowTitle);
+    m_Dialogs->DisplayProgressScreen(inActionText, inAdditionalText);
 }
 
 void CStudioApp::OnProgressEnd()

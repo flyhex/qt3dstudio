@@ -290,8 +290,8 @@ void CCore::OnSaveDocument(const CUICFile &inDocument, bool inSaveCopy /*= false
 */
 void CCore::OnSaveDocumentCatcher(const CUICFile &inDocument, bool inSaveCopy /*= false*/)
 {
-    m_Dispatch->FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Saving...")), inDocument.GetName(),
-                                    Q3DStudio::CString::fromQString(QObject::tr("Saving...")));
+    m_Dispatch->FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Saving ")),
+                                    inDocument.GetName());
 
     bool theDisplaySaveFailDialog = false;
     bool theFileExists = inDocument.Exists();

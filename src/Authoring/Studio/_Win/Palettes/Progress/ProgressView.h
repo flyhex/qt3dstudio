@@ -26,51 +26,41 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-//==============================================================================
-// Prefix
-//==============================================================================
 #ifndef INCLUDED_PROGRESS_VIEW_H
 #define INCLUDED_PROGRESS_VIEW_H 1
 
 #pragma once
 
-//==============================================================================
-// Includes
-//==============================================================================
+#include <QtWidgets/qdialog.h>
 
-#include <QWidget>
+#include "UICString.h"
 
-#include "ProgressCallback.h"
+#ifdef QT_NAMESPACE
+using namespace QT_NAMESPACE;
+#endif
 
-//==============================================================================
-// Forwards
-//==============================================================================
-class WidgetControl;
-class CProgressControl;
-class CStudioApp;
+QT_BEGIN_NAMESPACE
+namespace Ui {
+    class ProgressDlg;
+}
+QT_END_NAMESPACE
 
 //=============================================================================
 /**
  * Windows view encapsulating the splash screen.
  */
-class CProgressView : public QWidget, public IProgressCallback
+class CProgressView : public QDialog
 {
 public:
     CProgressView(QWidget *parent = nullptr);
 
-    void OnInitializePalettes();
-
-    void SetActionText(const Q3DStudio::CString &inText) override;
-    void SetProgress(long inPercent) override;
-    void SetFileName(const Q3DStudio::CString &inFileName);
+    void SetActionText(const Q3DStudio::CString &inActionText);
+    void SetAdditionalText(const Q3DStudio::CString &inAdditionalText);
 
 protected:
-    WidgetControl *m_WndControl;
-    CProgressControl *m_ProgressControl;
+    Ui::ProgressDlg *m_ui;
 
     virtual ~CProgressView();
-    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // INCLUDED_PROGRESS_VIEW_H

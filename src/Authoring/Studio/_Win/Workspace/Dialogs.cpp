@@ -906,31 +906,19 @@ bool CDialogs::ConfirmRevert()
  * Displays a progress screen, if there is not one aleady being shown.  The
  * progress screen doesn't get dismissed until you call
  * CDialogs::DestroyProgressScreen().
- * @param inActionText text to be displayed above the file name on the screen
- * @param inFileName name of the file that you are loading
- * @param inWindowTitle the window's title
+ * @param inActionText text to be displayed as the action
+ * @param inAdditionalText additional text, for example a file name
  */
 void CDialogs::DisplayProgressScreen(const Q3DStudio::CString &inActionText,
-                                     const Q3DStudio::CString &inFileName,
-                                     const Q3DStudio::CString &inWindowTitle)
+                                     const Q3DStudio::CString &inAdditionalText)
 {
     if (m_ShowGUI && !m_ProgressPalette) {
         m_ProgressPalette = new CProgressView(qApp->activeWindow());
-        m_ProgressPalette->setWindowTitle(inWindowTitle.toQString());
         m_ProgressPalette->SetActionText(inActionText);
-        m_ProgressPalette->SetFileName(inFileName);
+        m_ProgressPalette->SetAdditionalText(inAdditionalText);
         m_ProgressPalette->show();
+        qApp->processEvents();
     }
-}
-
-//==============================================================================
-/**
- * Retrieve the pointer to the progress screen.
- * @return m_ProgressPalette
- */
-IProgressCallback *CDialogs::GetProgressScreen() const
-{
-    return m_ProgressPalette;
 }
 
 //==============================================================================

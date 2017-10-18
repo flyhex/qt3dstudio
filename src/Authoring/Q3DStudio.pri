@@ -148,7 +148,6 @@ SOURCES += \
     Studio/Palettes/Inspector/TabOrderHandler.cpp \
     #Studio/Palettes/Master/MasterControl.cpp \
     #Studio/Palettes/Master/MasterView.cpp \
-    Studio/Palettes/Progress/ProgressControl.cpp \
     Studio/Palettes/Project/ProjectView.cpp \
     Studio/Palettes/Project/ProjectFileSystemModel.cpp \
     Studio/Palettes/Project/ProjectContextMenu.cpp \

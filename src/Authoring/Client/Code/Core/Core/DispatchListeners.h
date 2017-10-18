@@ -274,8 +274,7 @@ public:
     virtual ~CAppStatusListener() {}
     virtual void OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg) = 0;
     virtual void OnProgressBegin(const Q3DStudio::CString &inActionText,
-                                 const Q3DStudio::CString &inFileName,
-                                 const Q3DStudio::CString &inWindowTitle) = 0;
+                                 const Q3DStudio::CString &inAdditionalText) = 0;
     virtual void OnProgressEnd() = 0;
 };
 

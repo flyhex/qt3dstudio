@@ -1037,9 +1037,8 @@ void CMainFrame::OnPlaybackPreview()
 {
     if (m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                    "Deploying to",
-                    "remote device",
-                    "Deploying...");
+                    Q3DStudio::CString::fromQString(QObject::tr("Deploying to remote device...")),
+                    "");
         CPreviewHelper::OnDeploy(*m_remoteDeploymentSender);
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
     } else {
@@ -1790,15 +1789,13 @@ void CMainFrame::OnFileConnectToDevice()
 {
     if (m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                    "Disconnecting from",
-                    "remote device",
-                    "Disconnecting...");
+                    Q3DStudio::CString::fromQString(
+                        QObject::tr("Disconnecting from remote device...")), "");
         m_remoteDeploymentSender->disconnect();
     } else {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                    "Connecting to",
-                    "remote device",
-                    "Connecting...");
+                    Q3DStudio::CString::fromQString(QObject::tr("Connecting to remote device...")),
+                    "");
         m_remoteDeploymentSender->connect();
     }
 }

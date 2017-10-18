@@ -27,19 +27,10 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-// Includes
-//==============================================================================
-#include "UICString.h"
 #include "ProgressView.h"
-#include "WidgetControl.h"
-#include "StudioApp.h"
-#include "ProgressControl.h"
+#include "ui_ProgressDlg.h"
+
+#include <QtCore/qtimer.h>
 
 //=============================================================================
 /**
@@ -47,11 +38,11 @@
  * You must call Initialize() before trying to use this class.
  */
 CProgressView::CProgressView(QWidget *parent)
-    : QWidget(parent, Qt::Dialog)
-    , m_WndControl(nullptr)
-    , m_ProgressControl(nullptr)
+    : QDialog(parent, Qt::SplashScreen)
+    , m_ui(new Ui::ProgressDlg)
 {
-    OnInitializePalettes();
+    m_ui->setupUi(this);
+    m_ui->progressActionText->setStyleSheet("font-size: 16px;");
 }
 
 //=============================================================================
@@ -60,52 +51,15 @@ CProgressView::CProgressView(QWidget *parent)
  */
 CProgressView::~CProgressView()
 {
-    delete m_WndControl;
-    m_WndControl = nullptr;
-
-    delete m_ProgressControl;
+    delete m_ui;
 }
 
-//==============================================================================
-/**
- *	Handles the WM_INITIALUPDATE message.  Responsible for preparing the view
- *	before it is displayed for the first time.
- */
-void CProgressView::OnInitializePalettes()
+void CProgressView::SetActionText(const Q3DStudio::CString &inActionText)
 {
-    if (!m_WndControl) {
-        m_ProgressControl = new CProgressControl;
-        m_WndControl = new WidgetControl(m_ProgressControl, this);
-        m_ProgressControl->SetName("Progress Control");
-
-        setFixedSize(m_WndControl->sizeHint());
-    }
+    m_ui->progressActionText->setText(inActionText.toQString());
 }
 
-//=============================================================================
-/**
- * Resizes the wnd control to fill the whole view.
- */
-void CProgressView::resizeEvent(QResizeEvent *event)
+void CProgressView::SetAdditionalText(const Q3DStudio::CString &inAdditionalText)
 {
-    Q_UNUSED(event);
-    m_WndControl->setGeometry(rect());
-}
-
-void CProgressView::SetActionText(const Q3DStudio::CString &inText)
-{
-    m_ProgressControl->SetActionText(inText);
-    qApp->processEvents();
-}
-
-void CProgressView::SetProgress(long inPercent)
-{
-    m_ProgressControl->SetProgress(inPercent);
-    qApp->processEvents();
-}
-
-void CProgressView::SetFileName(const Q3DStudio::CString &inFileName)
-{
-    m_ProgressControl->SetFileName(inFileName);
-    qApp->processEvents();
+    m_ui->progressAdditionalText->setText(inAdditionalText.toQString());
 }
