@@ -199,7 +199,8 @@
         <file>images/Toolbar-06.png</file>
         <file>images/Toolbar-07.png</file>
         <file>images/About Icon.bmp</file>
-        <file>images/Studio.png</file>
+        <file>images/icon_256x256.png</file>
+        <file>images/icon_256x256@2x.png</file>
         <file>images/separator.png</file>
         <file>images/editcamera_tools_hi-00_disabled.png</file>
         <file>images/editcamera_tools_hi-01_disabled.png</file>

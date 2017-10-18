@@ -225,4 +225,4 @@ RESOURCES += \
 target.path = $$[QT_INSTALL_BINS]
 INSTALLS += target
 
-RC_ICONS = Studio/images/Studio.ico
+RC_ICONS = Studio/images/3D-studio.ico

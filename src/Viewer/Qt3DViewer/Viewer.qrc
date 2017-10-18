@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/images/viewer_icon.png</file>
+        <file>resources/images/icon_256x256.png</file>
+        <file>resources/images/icon_256x256@2x.png</file>
         <file>viewer.qml</file>
         <file alias="style.qss">../../Authoring/Studio/style.qss</file>
         <file alias="images/arrow_down.png">../../Authoring/Studio/images/arrow_down.png</file>
