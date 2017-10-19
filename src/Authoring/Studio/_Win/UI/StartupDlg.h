@@ -80,6 +80,7 @@ protected:
 
     void paintEvent(QPaintEvent *event) override;
     void showEvent(QShowEvent *) override;
+    void reject() override;
 
 protected Q_SLOTS:
     void OnNewDocClicked();

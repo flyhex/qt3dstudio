@@ -81,6 +81,12 @@ void CStartupDlg::showEvent(QShowEvent *ev)
     QDialog::showEvent(ev);
 }
 
+void CStartupDlg::reject()
+{
+    m_Choice = EStartupChoice_Exit;
+    QDialog::reject();
+}
+
 void CStartupDlg::OnInitDialog()
 {
     connect(m_ui->newDocument, &QPushButton::clicked, this, &CStartupDlg::OnNewDocClicked);
@@ -163,7 +169,6 @@ void CStartupDlg::paintEvent(QPaintEvent *event)
     if (m_palette)
         return;
 
-    delete m_palette;
     m_palette = new QPalette;
     QPixmap pic = QPixmap(":/startup/open_dialog.png");
     pic.setDevicePixelRatio(devicePixelRatio());

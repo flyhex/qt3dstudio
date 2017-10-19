@@ -568,7 +568,7 @@ bool CStudioApp::ShowStartupDialog()
 
         switch (theChoice) {
         case CStartupDlg::EStartupChoice_Exit:
-            theReturn = false;
+            theReturn = true;
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {

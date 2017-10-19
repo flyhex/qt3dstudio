@@ -10,6 +10,9 @@
     <height>650</height>
    </rect>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::NoFocus</enum>
+  </property>
   <widget class="QLabel" name="recentDocLabel">
    <property name="geometry">
     <rect>
@@ -119,7 +122,7 @@
        <string>Create Project...</string>
       </property>
       <property name="icon">
-       <iconset resource="../../MainFrm.qrc">
+       <iconset resource="../../images.qrc">
         <normaloff>:/images/Toolbar-00.png</normaloff>:/images/Toolbar-00.png</iconset>
       </property>
       <property name="flat">
@@ -133,7 +136,7 @@
        <string>Open Project...</string>
       </property>
       <property name="icon">
-       <iconset resource="../../MainFrm.qrc">
+       <iconset resource="../../images.qrc">
         <normaloff>:/images/Toolbar-01.png</normaloff>:/images/Toolbar-01.png</iconset>
       </property>
       <property name="flat">
@@ -165,7 +168,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../MainFrm.qrc"/>
+  <include location="../../images.qrc"/>
  </resources>
  <connections/>
 </ui>
