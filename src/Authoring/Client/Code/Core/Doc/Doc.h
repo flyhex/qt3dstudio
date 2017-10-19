@@ -246,7 +246,7 @@ public:
 
     qt3dsdm::Qt3DSDMInstanceHandle GetActiveLayer();
     void SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance);
-    qt3dsdm::CUICDMSlideHandle GetActiveSlide();
+    qt3dsdm::Qt3DSDMSlideHandle GetActiveSlide();
     void OnLayerDeleted(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance);
 
     void SetPlayMode(EPlayMode inPlayMode, long inRestoreTime = -1);
@@ -265,8 +265,8 @@ public:
     void NotifyTimeChanged(long inNewTime) override;
     // Notify time changed.
     virtual void DoNotifyTimeChanged(long inNewTime);
-    void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide) override;
-    void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
+    void NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide) override;
+    void NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide,
                                           bool inForceRefresh,
                                           bool inIgnoreLastDisplayTime = false) override;
     virtual void
@@ -359,7 +359,7 @@ public:
     bool PreUndo() override;
 
     void CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    void SetActiveSlideWithTransaction(qt3dsdm::CUICDMSlideHandle inNewActiveSlide);
+    void SetActiveSlideWithTransaction(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
 
     void SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph);
     Q3DStudio::IDocSceneGraph *GetSceneGraph() { return m_SceneGraph.get(); }
@@ -373,8 +373,8 @@ public:
 
 protected:
     // Set the active slide, return true if delving
-    void SetActiveSlideChange(qt3dsdm::CUICDMSlideHandle inNewActiveSlide);
-    void OnSlideDeleted(qt3dsdm::CUICDMSlideHandle inSlide);
+    void SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
+    void OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide);
     void OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     Q3DStudio::SSelectedValue SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     // Set the selection, but don't send an event.
@@ -417,7 +417,7 @@ protected:
     long m_CurrentViewTime; ///< The current time that is displayed by the playhead, not necessarily
                             ///the client time.
     qt3dsdm::Qt3DSDMInstanceHandle m_SceneInstance; ///< Pointer to the root level Scene object.
-    qt3dsdm::CUICDMSlideHandle m_ActiveSlide; ///< The currently active Slide Handle.
+    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlide; ///< The currently active Slide Handle.
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveLayer; ///< The currently active layer.
     CPlaybackClock *m_PlaybackClock; ///< Playback clock. This is used when user clicks "Play"
     CCore *m_Core;

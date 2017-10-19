@@ -60,7 +60,7 @@ inline void NotifyConsumer(TTransactionConsumerPtr inConsumer, TDoTransaction in
 }
 
 void NotifySlideCreated(TTransactionConsumerPtr &inConsumer,
-                        IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inSlide)
+                        IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inSlide)
 {
     NotifyConsumer(inConsumer,
                    bind(&IStudioFullSystemSignalSender::SendSlideCreated, inSender, inSlide),
@@ -68,7 +68,7 @@ void NotifySlideCreated(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifySlideDeleted(TTransactionConsumerPtr &inConsumer,
-                        IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inSlide)
+                        IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inSlide)
 {
     NotifyConsumer(inConsumer,
                    bind(&IStudioFullSystemSignalSender::SendSlideDeleted, inSender, inSlide),
@@ -76,7 +76,7 @@ void NotifySlideDeleted(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifySlideRearranged(TTransactionConsumerPtr &inConsumer,
-                           IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inSlide,
+                           IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inSlide,
                            int inOldIndex, int inNewIndex)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendSlideRearranged, inSender,
@@ -112,8 +112,8 @@ void NotifyInstancePropertyChanged(TTransactionConsumerPtr &inConsumer, TDataCor
     }
 }
 
-void RunAnimations(IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inMaster,
-                   CUICDMSlideHandle inSlide, TAnimationCorePtr inAnimationCore,
+void RunAnimations(IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inMaster,
+                   Qt3DSDMSlideHandle inSlide, TAnimationCorePtr inAnimationCore,
                    TDataCorePtr inDataCore, TTransactionConsumerPtr &inConsumer)
 {
     TAnimationInfoList theAnimations;
@@ -127,12 +127,12 @@ void RunAnimations(IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle in
 }
 
 void NotifyComponentSeconds(TTransactionConsumerPtr &inConsumer,
-                            IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inSlide,
+                            IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inSlide,
                             TDataCorePtr inCore, TAnimationCorePtr inAnimationCore,
                             TStudioAnimationSystemPtr inAnimationSystem,
                             TSlideSystemPtr inSlideSystem)
 {
-    CUICDMSlideHandle theMaster = inSlideSystem->GetMasterSlide(inSlide);
+    Qt3DSDMSlideHandle theMaster = inSlideSystem->GetMasterSlide(inSlide);
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendBeginComponentSeconds,
                                     inSender, theMaster),
                    bind(&IStudioFullSystemSignalSender::SendComponentSeconds, inSender, theMaster));
@@ -145,7 +145,7 @@ void NotifyComponentSeconds(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifyPropertyLinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
-                          IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inMaster,
+                          IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inMaster,
                           Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                           bool inAggregate)
 {
@@ -160,7 +160,7 @@ void NotifyPropertyLinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCo
 }
 
 void NotifyPropertyUnlinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
-                            IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inMaster,
+                            IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inMaster,
                             Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                             bool inAggregate)
 {
@@ -175,8 +175,8 @@ void NotifyPropertyUnlinked(TTransactionConsumerPtr &inConsumer, TDataCorePtr in
 }
 
 void NotifyActiveSlide(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
-                       IStudioFullSystemSignalSender *inSender, CUICDMSlideHandle inMaster,
-                       int /*inIndex*/, CUICDMSlideHandle inOldSlide, CUICDMSlideHandle inNewSlide,
+                       IStudioFullSystemSignalSender *inSender, Qt3DSDMSlideHandle inMaster,
+                       int /*inIndex*/, Qt3DSDMSlideHandle inOldSlide, Qt3DSDMSlideHandle inNewSlide,
                        TAnimationCorePtr inAnimationCore, TSlideSystemPtr inSlideSystem)
 {
     TInstancePropertyPairList thePropertyList;
@@ -298,7 +298,7 @@ void NotifyInstanceDeleted(TTransactionConsumerPtr &inConsumer,
 
 void NotifyActionCreated(TTransactionConsumerPtr &inConsumer,
                          IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
-                         CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
+                         Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendActionCreated, inSender,
                                     inAction, inSlide, inInstance),
@@ -308,7 +308,7 @@ void NotifyActionCreated(TTransactionConsumerPtr &inConsumer,
 
 void NotifyActionDestroyed(TTransactionConsumerPtr &inConsumer,
                            IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
-                           CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
+                           Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendActionDeleted, inSender,
                                     inAction, inSlide, inInstance),

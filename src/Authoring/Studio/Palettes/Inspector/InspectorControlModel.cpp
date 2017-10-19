@@ -140,8 +140,8 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
                                                      const qt3dsdm::ISlideSystem &slideSystem)
 {
     // Get the slide from the instance.
-    qt3dsdm::CUICDMSlideHandle slide = slideCore.GetSlideByInstance(instance);
-    qt3dsdm::CUICDMSlideHandle master = slideSystem.GetMasterSlide(slide);
+    qt3dsdm::Qt3DSDMSlideHandle slide = slideCore.GetSlideByInstance(instance);
+    qt3dsdm::Qt3DSDMSlideHandle master = slideSystem.GetMasterSlide(slide);
     int index = (int)slideSystem.GetSlideIndex(slide);
     int count = (int)slideSystem.GetSlideCount(master);
     bool hasNextSlide = index > 0 && index < count - 1;
@@ -844,7 +844,7 @@ void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool 
     g_StudioApp.GetCore()->ExecuteCommand(cmd);
 }
 
-void InspectorControlModel::onSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster,
+void InspectorControlModel::onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster,
                                               int inOldIndex, int inNewIndex)
 {
     Q_UNUSED(inMaster);

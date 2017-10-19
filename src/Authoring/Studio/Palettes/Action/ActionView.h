@@ -47,7 +47,6 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMMetaDataTypes.h"
 #include "TabOrderHandler.h"
-#include "MouseHelper.h"
 
 class ActionModel;
 class CClientDataModelBridge;
@@ -135,9 +134,9 @@ public:
     void OnSelectionSet(Q3DStudio::SSelectedValue inSelectable);
 
     // Action callback
-    void OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
+    void OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
-    void OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
+    void OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                          qt3dsdm::Qt3DSDMInstanceHandle inOwner);
     void OnActionModified(qt3dsdm::CUICDMActionHandle inAction);
     void OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument);
@@ -197,7 +196,6 @@ private:
     QVariantList m_handlerArguments;
     QTimer m_actionChangedCompressionTimer;
     QString m_firedEvent;
-    MouseHelper m_mouseHelper;
 };
 
 #endif // ACTIONVIEW_H

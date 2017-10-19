@@ -76,7 +76,7 @@ public:
     GetSlideList(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const = 0;
     virtual bool
     GetChildInstanceList(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
-                         qt3dsdm::TInstanceHandleList &outlist, qt3dsdm::CUICDMSlideHandle inSlide,
+                         qt3dsdm::TInstanceHandleList &outlist, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                          const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance) const = 0;
     virtual Q3DStudio::CString
     LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const = 0;

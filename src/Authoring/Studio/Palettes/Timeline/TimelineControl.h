@@ -107,8 +107,8 @@ public:
     ISnappingListProvider *GetSnappingListProvider() const override;
 
     void ClearView();
-    void ViewSlide(qt3dsdm::CUICDMSlideHandle inSlide);
-    qt3dsdm::CUICDMSlideHandle GetActiveSlide();
+    void ViewSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide);
+    qt3dsdm::Qt3DSDMSlideHandle GetActiveSlide();
 
     CTimelineTimelineLayout *GetTimelineLayout();
     CTimelineTreeLayout *GetTreeLayout();
@@ -132,8 +132,8 @@ protected:
     void HideInsertionMarkers();
 
     // UICDM callbacks
-    void OnActiveSlide(qt3dsdm::CUICDMSlideHandle inSlide);
-    void OnDeleteSlide(qt3dsdm::CUICDMSlideHandle inSlide);
+    void OnActiveSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide);
+    void OnDeleteSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
     // Helper functions
     inline CDoc *GetDoc();
@@ -142,7 +142,7 @@ protected:
     CTimelineSplitter *m_Splitter;
     CTimelineTreeLayout *m_TreeLayout;
     CTimelineTimelineLayout *m_TimelineLayout;
-    qt3dsdm::CUICDMSlideHandle m_ActiveSlide;
+    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlide;
     CInsertionLine
         *m_InsertionLine; ///< Drag-and-drop insertion line for dropping between timeline items
     CInsertionOverlay

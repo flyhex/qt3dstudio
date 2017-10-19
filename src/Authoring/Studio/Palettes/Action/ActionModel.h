@@ -67,7 +67,7 @@ public:
 
 private:
     qt3dsdm::IActionSystem *actionSystem() const;
-    qt3dsdm::CUICDMSlideHandle activeSlide() const;
+    qt3dsdm::Qt3DSDMSlideHandle activeSlide() const;
     QString actionString(const qt3dsdm::CUICDMActionHandle &action) const;
 
     qt3dsdm::Qt3DSDMInstanceHandle m_handle;

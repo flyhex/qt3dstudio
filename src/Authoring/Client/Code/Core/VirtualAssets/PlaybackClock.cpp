@@ -117,7 +117,7 @@ void CPlaybackClock::UpdateTime()
 
 void CPlaybackClock::OnReachedUpperBound()
 {
-    qt3dsdm::CUICDMSlideHandle theActiveSlide(m_Doc->GetActiveSlide());
+    qt3dsdm::Qt3DSDMSlideHandle theActiveSlide(m_Doc->GetActiveSlide());
     // clock has passed the end, check whether needs to switch slide
     qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle =
         GetSlideSystem()->GetSlideInstance(theActiveSlide);
@@ -135,13 +135,13 @@ void CPlaybackClock::OnReachedUpperBound()
         SStringOrInt thePlaythroughTo = qt3dsdm::get<SStringOrInt>(theValue);
 
         qt3dsdm::ISlideSystem *theSlideSystem = GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle thePlaythroughToSlide;
+        qt3dsdm::Qt3DSDMSlideHandle thePlaythroughToSlide;
 
         if (thePlaythroughTo.GetType() == SStringOrIntTypes::String) {
             Q3DStudio::CString theValue(get<TDataStrPtr>(thePlaythroughTo.m_Value)->GetData());
             if (theValue == L"Next") {
                 size_t theNextSlideIndex = theSlideSystem->GetSlideIndex(theActiveSlide) + 1;
-                qt3dsdm::CUICDMSlideHandle theMasterSlide =
+                qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
                     theSlideSystem->GetMasterSlide(theActiveSlide);
                 size_t theSlideCount = theSlideSystem->GetSlideCount(theMasterSlide);
                 if (theNextSlideIndex < theSlideCount) {
@@ -151,7 +151,7 @@ void CPlaybackClock::OnReachedUpperBound()
                 }
             } else if (theValue == L"Previous") {
                 int thePrevSlideIndex = theSlideSystem->GetSlideIndex(theActiveSlide) - 1;
-                qt3dsdm::CUICDMSlideHandle theMasterSlide =
+                qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
                     theSlideSystem->GetMasterSlide(theActiveSlide);
                 if (thePrevSlideIndex > 0) // Index 0 refers to MasterSlide, so we check > 0
                 {

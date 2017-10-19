@@ -55,11 +55,11 @@ void SSlideSystem::SetPropertySystem(TPropertySystemPtr inPropertySystem)
     m_PropertySystem = inPropertySystem;
 }
 
-CUICDMSlideHandle SSlideSystem::CreateMasterSlide()
+Qt3DSDMSlideHandle SSlideSystem::CreateMasterSlide()
 {
     Qt3DSDMInstanceHandle theSlideInstance = m_DataCore->CreateInstance();
     m_DataCore->DeriveInstance(theSlideInstance, m_SlideInstance);
-    CUICDMSlideHandle retval = m_SlideCore->CreateSlide(theSlideInstance);
+    Qt3DSDMSlideHandle retval = m_SlideCore->CreateSlide(theSlideInstance);
     m_SlideGraphCore->CreateSlideGraph(retval);
     GetSignalSender()->SendMasterCreated(retval);
     return retval;
@@ -73,7 +73,7 @@ inline bool PropertyHandlePairEquals(const TPropertyHandlePropertyInfoPair &inPa
 
 void AddReferencedInstance(const TSlideEntry &inEntry,
                            const TPropertyHandlePropertyInfoPairList &inInfoPairList,
-                           CUICDMSlideHandle inSourceSlide, CUICDMSlideHandle inDestSlide,
+                           Qt3DSDMSlideHandle inSourceSlide, Qt3DSDMSlideHandle inDestSlide,
                            TInstanceHandleList &outInstances, TSlideEntryList &outReferencedEntries)
 {
     TPropertyHandlePropertyInfoPairList::const_iterator theFind =
@@ -95,7 +95,7 @@ void AddReferencedInstance(const TSlideEntry &inEntry,
     }
 }
 
-void CopySpecificAnimation(CUICDMSlideHandle inMaster, CUICDMSlideHandle inTarget,
+void CopySpecificAnimation(Qt3DSDMSlideHandle inMaster, Qt3DSDMSlideHandle inTarget,
                            TInstancePropertyPair inPropertyPair, TAnimationCorePtr inAnimationCore,
                            size_t inIndex)
 {
@@ -106,7 +106,7 @@ void CopySpecificAnimation(CUICDMSlideHandle inMaster, CUICDMSlideHandle inTarge
                       inPropertyPair.second, inIndex);
 }
 
-void CopyAnimationIfExist(CUICDMSlideHandle inMaster, CUICDMSlideHandle inTarget,
+void CopyAnimationIfExist(Qt3DSDMSlideHandle inMaster, Qt3DSDMSlideHandle inTarget,
                           TInstancePropertyPair inPropertyPair, TPropertySystemPtr inPropertySystem,
                           TAnimationCorePtr inAnimationCore)
 {
@@ -121,7 +121,7 @@ void CopyAnimationIfExist(CUICDMSlideHandle inMaster, CUICDMSlideHandle inTarget
 void SetEntryValueIfNotReferenced(const TSlideEntry &inEntry,
                                   const TInstanceHandleList &inReferencedInstances,
                                   const TSlideEntryList &inReferencedEntries,
-                                  CUICDMSlideHandle inSource, CUICDMSlideHandle inDestSlide,
+                                  Qt3DSDMSlideHandle inSource, Qt3DSDMSlideHandle inDestSlide,
                                   TPropertySystemPtr inPropertySystem, TSlideCorePtr inDestCore,
                                   TAnimationCorePtr inAnimationCore)
 {
@@ -143,17 +143,17 @@ void SetEntryValueIfNotReferenced(const TSlideEntry &inEntry,
                          inPropertySystem, inAnimationCore);
 }
 
-CUICDMSlideHandle SSlideSystem::CreateSlide(CUICDMSlideHandle inMaster, int inIndex)
+Qt3DSDMSlideHandle SSlideSystem::CreateSlide(Qt3DSDMSlideHandle inMaster, int inIndex)
 {
     return DuplicateSlide(inMaster, inIndex);
 }
 
-CUICDMSlideHandle SSlideSystem::DuplicateSlide(CUICDMSlideHandle inSourceSlide, int inIndex)
+Qt3DSDMSlideHandle SSlideSystem::DuplicateSlide(Qt3DSDMSlideHandle inSourceSlide, int inIndex)
 {
-    CUICDMSlideHandle theMaster = GetMasterSlide(inSourceSlide);
+    Qt3DSDMSlideHandle theMaster = GetMasterSlide(inSourceSlide);
     Qt3DSDMInstanceHandle theSlideInstance = m_DataCore->CreateInstance();
     m_DataCore->DeriveInstance(theSlideInstance, m_SlideInstance);
-    CUICDMSlideHandle retval = m_SlideCore->CreateSlide(theSlideInstance);
+    Qt3DSDMSlideHandle retval = m_SlideCore->CreateSlide(theSlideInstance);
 
     TSlideHandleList theChildren;
     m_SlideCore->GetChildSlides(theMaster, theChildren);
@@ -193,10 +193,10 @@ CUICDMSlideHandle SSlideSystem::DuplicateSlide(CUICDMSlideHandle inSourceSlide, 
     return retval;
 }
 
-CUICDMSlideHandle SSlideSystem::GetMasterSlide(CUICDMSlideHandle inSlide) const
+Qt3DSDMSlideHandle SSlideSystem::GetMasterSlide(Qt3DSDMSlideHandle inSlide) const
 {
     if (inSlide.Valid() && m_SlideCore->IsSlide(inSlide)) {
-        CUICDMSlideHandle theParent = m_SlideCore->GetParentSlide(inSlide);
+        Qt3DSDMSlideHandle theParent = m_SlideCore->GetParentSlide(inSlide);
         if (theParent.Valid())
             return theParent;
         return inSlide;
@@ -204,9 +204,9 @@ CUICDMSlideHandle SSlideSystem::GetMasterSlide(CUICDMSlideHandle inSlide) const
     return 0;
 }
 
-bool SSlideSystem::IsMasterSlide(CUICDMSlideHandle inSlide) const
+bool SSlideSystem::IsMasterSlide(Qt3DSDMSlideHandle inSlide) const
 {
-    CUICDMSlideHandle theParent = m_SlideCore->GetParentSlide(inSlide);
+    Qt3DSDMSlideHandle theParent = m_SlideCore->GetParentSlide(inSlide);
     if (!theParent.Valid())
         return true;
     else
@@ -217,7 +217,7 @@ inline bool GraphGuidMatches(CUICDMSlideGraphHandle inGraph, TSlideGraphCorePtr 
                              TSlideCorePtr inSlideCore, TDataCorePtr inDataCore,
                              Qt3DSDMPropertyHandle inProperty, SValue inValue)
 {
-    CUICDMSlideHandle theMaster = inSlideGraph->GetGraphRoot(inGraph);
+    Qt3DSDMSlideHandle theMaster = inSlideGraph->GetGraphRoot(inGraph);
     Qt3DSDMInstanceHandle theInstance = inSlideCore->GetSlideInstance(theMaster);
     SValue theValue;
     if (inDataCore->GetInstancePropertyValue(theInstance, inProperty, theValue)
@@ -226,7 +226,7 @@ inline bool GraphGuidMatches(CUICDMSlideGraphHandle inGraph, TSlideGraphCorePtr 
     return false;
 }
 
-CUICDMSlideHandle SSlideSystem::GetMasterSlideByComponentGuid(SLong4 inGuid) const
+Qt3DSDMSlideHandle SSlideSystem::GetMasterSlideByComponentGuid(SLong4 inGuid) const
 {
     TSlideGraphHandleList theGraphs;
     m_SlideGraphCore->GetSlideGraphs(theGraphs);
@@ -255,7 +255,7 @@ void InsertIfReferencedProperty(const TSlideEntry &inEntry,
 
 void SSlideSystem::InsertEntryAndPropertyInstance(const TSlideEntry &inEntry,
                                                   TInstanceHandleList &inInstances,
-                                                  CUICDMSlideHandle inSlide)
+                                                  Qt3DSDMSlideHandle inSlide)
 {
     Qt3DSDMInstanceHandle theEntryInstance = get<0>(inEntry);
     if (find(inInstances.begin(), inInstances.end(), theEntryInstance) == inInstances.end()) {
@@ -290,7 +290,7 @@ void SSlideSystem::InsertEntryAndPropertyInstance(const TSlideEntry &inEntry,
 // Delete the referenced instances of this slide
 // This function is very similar to GetReferencedInstances
 // You change one function, you need to change the other function
-void SSlideSystem::DeleteReferencedInstances(CUICDMSlideHandle inSlide)
+void SSlideSystem::DeleteReferencedInstances(Qt3DSDMSlideHandle inSlide)
 {
     // Recursively delete the children of this slide
     // Usually the slide has children if it is a Master slide (for example when deleting a
@@ -329,7 +329,7 @@ void SSlideSystem::DeleteReferencedInstances(CUICDMSlideHandle inSlide)
 // Get the referenced instances of this slide
 // This function is very similar to DeleteReferencedInstances
 // You change one function, you need to change the other function
-void SSlideSystem::GetReferencedInstances(CUICDMSlideHandle inSlide,
+void SSlideSystem::GetReferencedInstances(Qt3DSDMSlideHandle inSlide,
                                           TInstanceHandleList &outReferencedInstances)
 {
     // Recursively get the children of this slide
@@ -360,9 +360,9 @@ void SSlideSystem::GetReferencedInstances(CUICDMSlideHandle inSlide,
                                  std::ref(outReferencedInstances), inSlide));
 }
 
-void SSlideSystem::DeleteSlideByIndex(CUICDMSlideHandle inMaster, size_t inIndex)
+void SSlideSystem::DeleteSlideByIndex(Qt3DSDMSlideHandle inMaster, size_t inIndex)
 {
-    CUICDMSlideHandle theChild = GetSlideByIndex(inMaster, inIndex);
+    Qt3DSDMSlideHandle theChild = GetSlideByIndex(inMaster, inIndex);
     TInstanceHandleList theInstances;
     if (theChild.Valid()) {
         DeleteReferencedInstances(theChild);
@@ -376,17 +376,17 @@ void SSlideSystem::DeleteSlideByIndex(CUICDMSlideHandle inMaster, size_t inIndex
         GetSignalSender()->SendSlideDeleted(inMaster, (int)inIndex, theChild);
 }
 
-void SSlideSystem::GetSlideReferencedInstances(CUICDMSlideHandle inMaster, size_t inIndex,
+void SSlideSystem::GetSlideReferencedInstances(Qt3DSDMSlideHandle inMaster, size_t inIndex,
                                                TInstanceHandleList &outReferencedInstances)
 {
     outReferencedInstances.clear();
-    CUICDMSlideHandle theChild = GetSlideByIndex(inMaster, inIndex);
+    Qt3DSDMSlideHandle theChild = GetSlideByIndex(inMaster, inIndex);
     if (theChild.Valid()) {
         GetReferencedInstances(theChild, outReferencedInstances);
     }
 }
 
-CUICDMSlideHandle SSlideSystem::GetSlideByIndex(CUICDMSlideHandle inMaster, size_t inIndex) const
+Qt3DSDMSlideHandle SSlideSystem::GetSlideByIndex(Qt3DSDMSlideHandle inMaster, size_t inIndex) const
 {
     if (inIndex == 0)
         return inMaster;
@@ -395,51 +395,51 @@ CUICDMSlideHandle SSlideSystem::GetSlideByIndex(CUICDMSlideHandle inMaster, size
     m_SlideCore->GetChildSlides(inMaster, theChildren);
     if (inIndex < theChildren.size())
         return theChildren[inIndex];
-    return CUICDMSlideHandle();
+    return Qt3DSDMSlideHandle();
 }
 
-void SSlideSystem::SetActiveSlide(CUICDMSlideHandle inMaster, size_t inIndex)
+void SSlideSystem::SetActiveSlide(Qt3DSDMSlideHandle inMaster, size_t inIndex)
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetSlideGraph(inMaster);
-    CUICDMSlideHandle theActiveSlide = inMaster;
+    Qt3DSDMSlideHandle theActiveSlide = inMaster;
     if (inIndex > 0)
         theActiveSlide = GetSlideByIndex(inMaster, inIndex);
-    CUICDMSlideHandle theOldSlide = m_SlideGraphCore->GetGraphActiveSlide(theGraph);
+    Qt3DSDMSlideHandle theOldSlide = m_SlideGraphCore->GetGraphActiveSlide(theGraph);
     m_SlideGraphCore->SetGraphActiveSlide(theGraph, theActiveSlide);
     GetSignalSender()->SendActiveSlide(inMaster, (int)inIndex, theOldSlide, theActiveSlide);
 }
 
-size_t SSlideSystem::GetSlideCount(CUICDMSlideHandle inMaster) const
+size_t SSlideSystem::GetSlideCount(Qt3DSDMSlideHandle inMaster) const
 {
     TSlideHandleList theChildren;
     m_SlideCore->GetChildSlides(inMaster, theChildren);
     return 1 + theChildren.size();
 }
 
-void SSlideSystem::RearrangeSlide(CUICDMSlideHandle inMaster, size_t inOldIndex, size_t inNewIndex)
+void SSlideSystem::RearrangeSlide(Qt3DSDMSlideHandle inMaster, size_t inOldIndex, size_t inNewIndex)
 {
     if (inOldIndex == 0)
         throw RearrangeSlideArgumentsMustNotBeZero(L"");
     TSlideHandleList theChildren;
     m_SlideCore->GetChildSlides(inMaster, theChildren);
-    CUICDMSlideHandle theChild = theChildren.at(inOldIndex - 1);
+    Qt3DSDMSlideHandle theChild = theChildren.at(inOldIndex - 1);
     m_SlideCore->DeriveSlide(theChild, inMaster, (int)inNewIndex - 1);
     GetSignalSender()->SendSlideRearranged(inMaster, (int)inOldIndex, (int)inNewIndex);
 }
 
-void SSlideSystem::SetComponentSeconds(CUICDMSlideHandle inSlide, float inSeconds)
+void SSlideSystem::SetComponentSeconds(Qt3DSDMSlideHandle inSlide, float inSeconds)
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetSlideGraph(GetMasterSlide(inSlide));
     m_SlideCore->SetSlideTime(m_SlideGraphCore->GetGraphActiveSlide(theGraph), inSeconds);
 }
 
-float SSlideSystem::GetComponentSeconds(CUICDMSlideHandle inSlide) const
+float SSlideSystem::GetComponentSeconds(Qt3DSDMSlideHandle inSlide) const
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetSlideGraph(GetMasterSlide(inSlide));
     return m_SlideCore->GetSlideTime(m_SlideGraphCore->GetGraphActiveSlide(theGraph));
 }
 
-long SSlideSystem::GetComponentSecondsLong(CUICDMSlideHandle inSlide) const
+long SSlideSystem::GetComponentSecondsLong(Qt3DSDMSlideHandle inSlide) const
 {
     float seconds(GetComponentSeconds(inSlide));
     return static_cast<long>((seconds * 1000) + .5f);
@@ -456,11 +456,11 @@ SInstanceSlideInformation
 SSlideSystem::GetInstanceSlideInformation(Qt3DSDMInstanceHandle inInstance) const
 {
     TGraphSlidePair theGraphSlidePair = m_SlideGraphCore->GetAssociatedGraph(inInstance);
-    CUICDMSlideHandle theAssociatedSlide(theGraphSlidePair.second);
+    Qt3DSDMSlideHandle theAssociatedSlide(theGraphSlidePair.second);
     if (theAssociatedSlide.Valid() == false)
         return SInstanceSlideInformation();
-    CUICDMSlideHandle theMasterSlide(GetMasterSlide(theGraphSlidePair.second));
-    CUICDMSlideHandle theActiveSlide(
+    Qt3DSDMSlideHandle theMasterSlide(GetMasterSlide(theGraphSlidePair.second));
+    Qt3DSDMSlideHandle theActiveSlide(
         m_SlideGraphCore->GetGraphActiveSlide(theGraphSlidePair.first));
     float seconds = m_SlideCore->GetSlideTime(theActiveSlide);
     long theMilliseconds = static_cast<long>((seconds * 1000) + .5f);
@@ -472,14 +472,14 @@ SSlideSystem::GetInstanceSlideInformation(Qt3DSDMInstanceHandle inInstance) cons
  * Use the instance for storing information such as name, or the GUID of the object
  * this slide links to.
  */
-Qt3DSDMInstanceHandle SSlideSystem::GetSlideInstance(CUICDMSlideHandle inSlide) const
+Qt3DSDMInstanceHandle SSlideSystem::GetSlideInstance(Qt3DSDMSlideHandle inSlide) const
 {
     return m_SlideCore->GetSlideInstance(inSlide);
 }
 /**
  *	Reverse lookup into the slide system so you can match slides to instances.
  */
-CUICDMSlideHandle SSlideSystem::GetSlideByInstance(Qt3DSDMInstanceHandle inSlide) const
+Qt3DSDMSlideHandle SSlideSystem::GetSlideByInstance(Qt3DSDMInstanceHandle inSlide) const
 {
     return m_SlideCore->GetSlideByInstance(inSlide);
 }
@@ -487,7 +487,7 @@ CUICDMSlideHandle SSlideSystem::GetSlideByInstance(Qt3DSDMInstanceHandle inSlide
 /**
  *	Slide may be either a master slide
  */
-void SSlideSystem::AssociateInstanceWithSlide(CUICDMSlideHandle inSlide,
+void SSlideSystem::AssociateInstanceWithSlide(Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inInstance)
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetSlideGraph(GetMasterSlide(inSlide));
@@ -495,7 +495,7 @@ void SSlideSystem::AssociateInstanceWithSlide(CUICDMSlideHandle inSlide,
     GetSignalSender()->SendInstanceAssociated(inSlide, inInstance);
 }
 
-CUICDMSlideHandle SSlideSystem::GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance) const
+Qt3DSDMSlideHandle SSlideSystem::GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance) const
 {
     return m_SlideGraphCore->GetAssociatedGraph(inInstance).second;
 }
@@ -505,7 +505,7 @@ CUICDMSlideHandle SSlideSystem::GetAssociatedSlide(Qt3DSDMInstanceHandle inInsta
  *slides for this component/scene
  *	TODO rename this to make it more clear
  */
-void SSlideSystem::GetAssociatedInstances(CUICDMSlideHandle inMaster,
+void SSlideSystem::GetAssociatedInstances(Qt3DSDMSlideHandle inMaster,
                                           TSlideInstancePairList &outAssociations) const
 {
     m_SlideGraphCore->GetAssociatedInstances(
@@ -515,10 +515,10 @@ void SSlideSystem::GetAssociatedInstances(CUICDMSlideHandle inMaster,
 /**
  *	Gets all the instances in this slide
  */
-void SSlideSystem::GetAssociatedInstances(CUICDMSlideHandle inSlide,
+void SSlideSystem::GetAssociatedInstances(Qt3DSDMSlideHandle inSlide,
                                           TInstanceHandleList &outAssociations) const
 {
-    CUICDMSlideHandle theMasterSlide = GetMasterSlide(inSlide);
+    Qt3DSDMSlideHandle theMasterSlide = GetMasterSlide(inSlide);
     TSlideInstancePairList theGraphInstances;
     m_SlideGraphCore->GetAssociatedInstances(m_SlideGraphCore->GetSlideGraph(theMasterSlide),
                                              theGraphInstances);
@@ -531,7 +531,7 @@ void SSlideSystem::GetAssociatedInstances(CUICDMSlideHandle inSlide,
     }
 }
 
-void DeleteInstanceIfExistsAsProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void DeleteInstanceIfExistsAsProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty, TSlideCorePtr inSlideCore,
                                       TPropertyInstanceInfoPtr inPropertyInfoPtr,
                                       TDataCorePtr inDataCore)
@@ -547,7 +547,7 @@ void DeleteInstanceIfExistsAsProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstance
 void SSlideSystem::LinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetAssociatedGraph(inInstance).first;
-    CUICDMSlideHandle theSlide = m_SlideGraphCore->GetGraphRoot(theGraph);
+    Qt3DSDMSlideHandle theSlide = m_SlideGraphCore->GetGraphRoot(theGraph);
     TPropertyHandlePropertyInfoPairList::const_iterator theFind =
         find_if<TPropertyHandlePropertyInfoPairList::const_iterator>(
             m_PropertyInfoPairList, std::bind(PropertyHandlePairEquals,
@@ -562,7 +562,7 @@ void SSlideSystem::LinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropert
     GetSignalSender()->SendPropertyLinked(theSlide, inInstance, inProperty);
 }
 
-void ClearPropertyValueIfLinked(CUICDMSlideHandle inMaster, const TSlideHandleList &inChildren,
+void ClearPropertyValueIfLinked(Qt3DSDMSlideHandle inMaster, const TSlideHandleList &inChildren,
                                 Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                 TSlideCorePtr inSlideCore)
 {
@@ -575,7 +575,7 @@ void ClearPropertyValueIfLinked(CUICDMSlideHandle inMaster, const TSlideHandleLi
                                                  inProperty); // get it off non-master slides
 }
 
-void SetReferencedEntryValue(CUICDMSlideHandle inMaster, CUICDMSlideHandle inDestSlide,
+void SetReferencedEntryValue(Qt3DSDMSlideHandle inMaster, Qt3DSDMSlideHandle inDestSlide,
                              TPropertyInstanceInfoPtr inInfo, Qt3DSDMInstanceHandle inInstance,
                              Qt3DSDMPropertyHandle inProperty,
                              Qt3DSDMInstanceHandle inReferencedInstance, TSlideCorePtr inSlideCore)
@@ -588,7 +588,7 @@ void SetReferencedEntryValue(CUICDMSlideHandle inMaster, CUICDMSlideHandle inDes
 void SSlideSystem::UnlinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetAssociatedGraph(inInstance).first;
-    CUICDMSlideHandle theSlide = m_SlideGraphCore->GetGraphRoot(theGraph);
+    Qt3DSDMSlideHandle theSlide = m_SlideGraphCore->GetGraphRoot(theGraph);
     SValue theValue;
     SValue theTempValue;
     if (!m_SlideCore->GetInstancePropertyValue(theSlide, inInstance, inProperty, theValue)) {
@@ -643,7 +643,7 @@ bool SSlideSystem::IsPropertyLinked(Qt3DSDMInstanceHandle inInstance,
     if (!theGraph.Valid())
         return false;
 
-    CUICDMSlideHandle theSlide = m_SlideGraphCore->GetGraphRoot(theGraph);
+    Qt3DSDMSlideHandle theSlide = m_SlideGraphCore->GetGraphRoot(theGraph);
     if (theGraphSlidePair.second != theSlide)
         return false;
 
@@ -676,7 +676,7 @@ bool SSlideSystem::GetSlidePropertyValue(size_t inSlide, Qt3DSDMInstanceHandle i
     CUICDMSlideGraphHandle theGraph = theGraphSlidePair.first;
     if (!theGraph.Valid())
         return false;
-    CUICDMSlideHandle theSlide = GetSlideByIndex(m_SlideGraphCore->GetGraphRoot(theGraph), inSlide);
+    Qt3DSDMSlideHandle theSlide = GetSlideByIndex(m_SlideGraphCore->GetGraphRoot(theGraph), inSlide);
     if (!theSlide.Valid())
         return false;
     return m_SlideCore->GetSpecificInstancePropertyValue(theSlide, inInstance, inProperty,
@@ -696,7 +696,7 @@ void AddEntriesToHash(const TSlideEntryList &theSlideEntries, TSlideEntryHash &t
     }
 }
 
-void SSlideSystem::GetUnionOfProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide2,
+void SSlideSystem::GetUnionOfProperties(Qt3DSDMSlideHandle inSlide1, Qt3DSDMSlideHandle inSlide2,
                                         TInstancePropertyPairList &outProperties) const
 {
     TSlideEntryHash theEntryHash;
@@ -711,21 +711,21 @@ void SSlideSystem::GetUnionOfProperties(CUICDMSlideHandle inSlide1, CUICDMSlideH
     }
 }
 
-void SSlideSystem::SetActiveSlide(CUICDMSlideHandle inSlide)
+void SSlideSystem::SetActiveSlide(Qt3DSDMSlideHandle inSlide)
 {
-    CUICDMSlideHandle theMaster = GetMasterSlide(inSlide);
+    Qt3DSDMSlideHandle theMaster = GetMasterSlide(inSlide);
     int theIndex = GetSlideIndex(inSlide);
     SetActiveSlide(theMaster, theIndex);
 }
 
-CUICDMSlideHandle SSlideSystem::GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance,
+Qt3DSDMSlideHandle SSlideSystem::GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance,
                                                    Qt3DSDMPropertyHandle inProperty) const
 {
     TGraphSlidePair theGraphSlidePair = m_SlideGraphCore->GetAssociatedGraph(inInstance);
     CUICDMSlideGraphHandle theGraph = theGraphSlidePair.first;
     if (!theGraph.Valid())
         return 0;
-    CUICDMSlideHandle theSlide = m_SlideGraphCore->GetGraphActiveSlide(theGraph);
+    Qt3DSDMSlideHandle theSlide = m_SlideGraphCore->GetGraphActiveSlide(theGraph);
     if (theSlide.Valid()) {
         if (m_SlideCore->ContainsProperty(theSlide, inInstance, inProperty))
             return theSlide;
@@ -737,35 +737,35 @@ CUICDMSlideHandle SSlideSystem::GetAssociatedSlide(Qt3DSDMInstanceHandle inInsta
     return 0;
 }
 
-bool SSlideSystem::SlideValid(CUICDMSlideHandle inSlide) const
+bool SSlideSystem::SlideValid(Qt3DSDMSlideHandle inSlide) const
 {
     return m_SlideCore->HandleValid(inSlide);
 }
 
-int SSlideSystem::GetSlideIndex(CUICDMSlideHandle inSlide) const
+int SSlideSystem::GetSlideIndex(Qt3DSDMSlideHandle inSlide) const
 {
-    CUICDMSlideHandle theMaster = GetMasterSlide(inSlide);
+    Qt3DSDMSlideHandle theMaster = GetMasterSlide(inSlide);
     if (inSlide.Valid() && inSlide != theMaster)
         return m_SlideCore->GetChildIndex(theMaster, inSlide) + 1;
     return 0;
 }
 
-int SSlideSystem::GetActiveSlideIndex(CUICDMSlideHandle inMaster) const
+int SSlideSystem::GetActiveSlideIndex(Qt3DSDMSlideHandle inMaster) const
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetSlideGraph(inMaster);
-    CUICDMSlideHandle theActiveSlide = m_SlideGraphCore->GetGraphActiveSlide(theGraph);
+    Qt3DSDMSlideHandle theActiveSlide = m_SlideGraphCore->GetGraphActiveSlide(theGraph);
     if (theActiveSlide == inMaster)
         return 0;
     return GetSlideIndex(theActiveSlide);
 }
 
-CUICDMSlideHandle SSlideSystem::GetActiveSlide(CUICDMSlideHandle inMaster) const
+Qt3DSDMSlideHandle SSlideSystem::GetActiveSlide(Qt3DSDMSlideHandle inMaster) const
 {
     CUICDMSlideGraphHandle theGraph = m_SlideGraphCore->GetSlideGraph(inMaster);
     return m_SlideGraphCore->GetGraphActiveSlide(theGraph);
 }
 
-Qt3DSDMInstanceHandle SSlideSystem::GetSlideSelectedInstance(CUICDMSlideHandle inSlide) const
+Qt3DSDMInstanceHandle SSlideSystem::GetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide) const
 {
     TIntIntMap::const_iterator theIter = m_SlideSelectedInstances.find(inSlide);
     if (theIter != m_SlideSelectedInstances.end() && m_DataCore->IsInstance(theIter->second))
@@ -773,7 +773,7 @@ Qt3DSDMInstanceHandle SSlideSystem::GetSlideSelectedInstance(CUICDMSlideHandle i
     return 0;
 }
 
-void SSlideSystem::SetSlideSelectedInstance(CUICDMSlideHandle inSlide,
+void SSlideSystem::SetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide,
                                             Qt3DSDMInstanceHandle inInstance)
 {
     m_SlideSelectedInstances[inSlide] = inInstance;
@@ -795,25 +795,25 @@ ISlideSystemSignalSender *SSlideSystem::GetSignalSender()
     return dynamic_cast<ISlideSystemSignalSender *>(m_Signaller.get());
 }
 
-qt3dsdm::CUICDMSlideHandle SSlideSystem::GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
+qt3dsdm::Qt3DSDMSlideHandle SSlideSystem::GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
                                                           Qt3DSDMPropertyHandle inProperty)
 {
     TGraphSlidePair theGraphSlidePair = m_SlideGraphCore->GetAssociatedGraph(inHandle);
     if (!theGraphSlidePair.first.Valid())
-        return CUICDMSlideHandle();
+        return Qt3DSDMSlideHandle();
 
-    CUICDMSlideHandle theMaster = m_SlideGraphCore->GetGraphRoot(theGraphSlidePair.first);
+    Qt3DSDMSlideHandle theMaster = m_SlideGraphCore->GetGraphRoot(theGraphSlidePair.first);
     if (theGraphSlidePair.second != theMaster)
         return theGraphSlidePair.second;
 
-    CUICDMSlideHandle theActive = m_SlideGraphCore->GetGraphActiveSlide(theGraphSlidePair.first);
+    Qt3DSDMSlideHandle theActive = m_SlideGraphCore->GetGraphActiveSlide(theGraphSlidePair.first);
     if (m_SlideCore->ContainsProperty(theActive, inHandle, inProperty))
         return theActive;
 
     return theMaster;
 }
 
-bool SSlideSystem::GetInstancePropertyValue(CUICDMSlideHandle inSlide,
+bool SSlideSystem::GetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                             Qt3DSDMInstanceHandle inInstance,
                                             Qt3DSDMPropertyHandle inProperty, SValue &outValue) const
 {
@@ -844,7 +844,7 @@ bool SSlideSystem::GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inIns
     return false;
 }
 
-void SSlideSystem::ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
+void SSlideSystem::ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                  Qt3DSDMInstanceHandle inInstance,
                                                  Qt3DSDMPropertyHandle inProperty,
                                                  const SValue &inValue)

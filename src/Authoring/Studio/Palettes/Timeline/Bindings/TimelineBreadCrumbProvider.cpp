@@ -74,7 +74,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
     ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = theBridge->GetGUID(inInstance);
-    qt3dsdm::CUICDMSlideHandle theMasterSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     ASSERT(theMasterSlide.Valid()); // it should be valid because inAsset should be OBJTYPE_SCENE or
                                     // non-library OBJTYPE_COMPONENT
@@ -93,7 +93,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
     if (theIsMaster)
         outBreadCrumb.m_String += ::LoadResourceString(IDS_OBJTYPE_MASTER).toQString();
     else {
-        CUICDMSlideHandle theActiveSlide =
+        Qt3DSDMSlideHandle theActiveSlide =
             theSlideSystem->GetSlideByIndex(theMasterSlide, theActiveIndex);
         Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theActiveSlide);
         ASSERT(theInstanceHandle.Valid());
@@ -224,12 +224,12 @@ void CTimelineBreadCrumbProvider::FillSlideList(qt3dsdm::Qt3DSDMInstanceHandle i
                     std::placeholders::_1, std::placeholders::_2, inInstance, theNameProp, theSetter)));
 
     // Listen to name changes on the non-master Slides
-    qt3dsdm::CUICDMSlideHandle theMasterSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     long theSlideCount = (long)theSlideSystem->GetSlideCount(theMasterSlide);
 
     for (long theIndex = 1; theIndex < theSlideCount; ++theIndex) {
-        CUICDMSlideHandle theSlide = theSlideSystem->GetSlideByIndex(theMasterSlide, theIndex);
+        Qt3DSDMSlideHandle theSlide = theSlideSystem->GetSlideByIndex(theMasterSlide, theIndex);
         Qt3DSDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(theSlide);
         m_Connections.push_back(theEngine->ConnectInstancePropertyValue(
             std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(

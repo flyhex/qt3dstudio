@@ -208,7 +208,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath
         qt3dsdm::Qt3DSDMInstanceHandle theTimeParent =
             theBridge->GetOwningComponentInstance(theFoundInstance);
         if (theTimeParent.Valid()) {
-            qt3dsdm::CUICDMSlideHandle theCurrentSlide =
+            qt3dsdm::Qt3DSDMSlideHandle theCurrentSlide =
                 theBridge->GetComponentActiveSlide(theTimeParent);
             return DoFindAssetInstanceByObjectPath(inDoc, theFoundInstance, theTimeParent,
                                                    theCurrentSlide, theTokenizer, outIsResolved,
@@ -258,7 +258,7 @@ CRelativePathTools::CreateAssetRefValue(const qt3dsdm::Qt3DSDMInstanceHandle inI
  */
 qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPath(
     CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
-    const qt3dsdm::Qt3DSDMInstanceHandle inTimeParentInstance, qt3dsdm::CUICDMSlideHandle inSlide,
+    const qt3dsdm::Qt3DSDMInstanceHandle inTimeParentInstance, qt3dsdm::Qt3DSDMSlideHandle inSlide,
     CStackTokenizer &ioTokenizer, bool &outIsResolved, const IObjectReferenceHelper *inHelper)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();

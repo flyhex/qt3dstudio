@@ -38,7 +38,7 @@ namespace Q3DStudio {
 struct SSlideInstanceWrapper
 {
     qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
-    qt3dsdm::CUICDMSlideHandle m_Slide;
+    qt3dsdm::Qt3DSDMSlideHandle m_Slide;
 #ifdef _WIN32
     // We have a multiple unions which needs to be big enough
     // This is strange on 32 bit systems but wrong on 64 bit.
@@ -46,7 +46,7 @@ struct SSlideInstanceWrapper
     size_t m_Padding;
 #endif
     SSlideInstanceWrapper() {}
-    SSlideInstanceWrapper(qt3dsdm::Qt3DSDMInstanceHandle inst, qt3dsdm::CUICDMSlideHandle slide)
+    SSlideInstanceWrapper(qt3dsdm::Qt3DSDMInstanceHandle inst, qt3dsdm::Qt3DSDMSlideHandle slide)
         : m_Instance(inst)
         , m_Slide(slide)
     {

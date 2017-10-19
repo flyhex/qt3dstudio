@@ -56,14 +56,14 @@ namespace Q3DStudio {
 using std::shared_ptr;
 class IDynamicLua;
 
-typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, qt3dsdm::Qt3DSDMInstanceHandle>>
+typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, qt3dsdm::Qt3DSDMInstanceHandle>>
     TSlideInstanceList;
-typedef std::vector<std::pair<qt3dsdm::CUICDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
+typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
 typedef std::unordered_map<const wchar_t *, TSlideInstanceList> TCharPtrToSlideInstanceMap;
 using qt3ds::foundation::Option;
 using qt3dsdm::Qt3DSDMInstanceHandle;
 using qt3dsdm::Qt3DSDMPropertyHandle;
-using qt3dsdm::CUICDMSlideHandle;
+using qt3dsdm::Qt3DSDMSlideHandle;
 using qt3dsdm::CUICDMKeyframeHandle;
 using qt3dsdm::CUICDMActionHandle;
 using qt3dsdm::CUICDMAnimationHandle;
@@ -81,7 +81,7 @@ protected:
 public:
     typedef Qt3DSDMInstanceHandle TInstanceHandle;
     typedef Qt3DSDMPropertyHandle TPropertyHandle;
-    typedef CUICDMSlideHandle TSlideHandle;
+    typedef Qt3DSDMSlideHandle TSlideHandle;
     typedef CUICDMKeyframeHandle TKeyframeHandle;
     typedef qt3dsdm::SValue SValue;
     typedef std::pair<TSlideHandle, SValue> TSlideValuePair;
@@ -180,7 +180,7 @@ public:
 
     // Return (start,end), inclusive, that represent this instance's lifetime.
     virtual std::pair<long, long> GetTimeRange(TInstanceHandle instance) const = 0;
-    virtual std::pair<long, long> GetTimeRangeInSlide(CUICDMSlideHandle inSlide,
+    virtual std::pair<long, long> GetTimeRangeInSlide(Qt3DSDMSlideHandle inSlide,
                                                       TInstanceHandle instance) const = 0;
     // Get the GUID for a given instance.
     virtual qt3dsdm::SLong4 GetGuidForInstance(TInstanceHandle instance) const = 0;
@@ -229,7 +229,7 @@ public:
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CopySceneGraphObjectToMemory(Qt3DSDMInstanceHandle inInstance) = 0;
 
-    virtual CFilePath CopyAction(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide) = 0;
+    virtual CFilePath CopyAction(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
 
     virtual void ParseSourcePathsOutOfEffectFile(Q3DStudio::CString inFile,
                                                  std::vector<Q3DStudio::CString> &outFilePaths) = 0;
@@ -237,7 +237,7 @@ public:
     virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
 
     // Must not be a master slide.  Used during duplicate slide.
-    virtual std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(CUICDMSlideHandle inSlide) = 0;
+    virtual std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(Qt3DSDMSlideHandle inSlide) = 0;
 
     // Don't release this, it is owned and cached by the document.  Also, reset top to 0 with a
     // scope, please.

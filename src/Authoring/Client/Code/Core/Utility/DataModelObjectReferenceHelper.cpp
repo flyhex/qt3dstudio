@@ -55,7 +55,7 @@ inline void GetAllowableParentSlides(CClientDataModelBridge *inBridge,
     if (!inInstance.Valid())
         return;
 
-    qt3dsdm::CUICDMSlideHandle theSlide = 0;
+    qt3dsdm::Qt3DSDMSlideHandle theSlide = 0;
     qt3dsdm::Qt3DSDMInstanceHandle theTimeParent = inBridge->GetOwningComponentInstance(inInstance);
     if (theTimeParent.Valid()) {
         if (inBridge->IsMaster(inInstance)) {
@@ -129,7 +129,7 @@ CObjectReferenceHelper::GetSlideList(const qt3dsdm::Qt3DSDMInstanceHandle inInst
     qt3dsdm::TSlideHandleList theList;
     if (inInstance.Valid()) {
         CClientDataModelBridge *theBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();
-        qt3dsdm::CUICDMSlideHandle theCurrentSlide = m_Doc->GetActiveSlide();
+        qt3dsdm::Qt3DSDMSlideHandle theCurrentSlide = m_Doc->GetActiveSlide();
         if (theBridge->IsComponentInstance(inInstance)) {
             // if selected object is a component, and we are inside it
             GetAllowableParentSlides(theBridge, inInstance, theList);
@@ -146,7 +146,7 @@ CObjectReferenceHelper::GetSlideList(const qt3dsdm::Qt3DSDMInstanceHandle inInst
 // Return all children under inSlideIndex
 bool CObjectReferenceHelper::GetChildInstanceList(
     const qt3dsdm::Qt3DSDMInstanceHandle &inInstance, qt3dsdm::TInstanceHandleList &outList,
-    qt3dsdm::CUICDMSlideHandle inSlide, const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance) const
+    qt3dsdm::Qt3DSDMSlideHandle inSlide, const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance) const
 {
     (void)inOwningInstance;
     CClientDataModelBridge *theClientBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();

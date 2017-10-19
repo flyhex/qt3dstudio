@@ -90,12 +90,12 @@ public:
 protected:
     void LocateReference();
     void UpdateSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                          qt3dsdm::CUICDMSlideHandle inSpecificSlide = 0);
+                          qt3dsdm::Qt3DSDMSlideHandle inSpecificSlide = 0);
     void GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                       qt3dsdm::CUICDMSlideHandle inSpecificSlide, Q3DStudio::CFilePath &outPath,
+                       qt3dsdm::Qt3DSDMSlideHandle inSpecificSlide, Q3DStudio::CFilePath &outPath,
                        Q3DStudio::CString &outIdentifier);
     void SetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                       qt3dsdm::CUICDMSlideHandle inSpecificSlide, const Q3DStudio::CFilePath &inPath,
+                       qt3dsdm::Qt3DSDMSlideHandle inSpecificSlide, const Q3DStudio::CFilePath &inPath,
                        const Q3DStudio::CString &inIdentifier);
 
     // subclasses should implement the following methods

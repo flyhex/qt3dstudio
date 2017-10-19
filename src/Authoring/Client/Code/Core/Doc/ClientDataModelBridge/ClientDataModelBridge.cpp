@@ -106,7 +106,7 @@ CClientDataModelBridge::~CClientDataModelBridge()
 {
 }
 
-CUICDMSlideHandle CClientDataModelBridge::CreateNonMasterSlide(CUICDMSlideHandle inMasterSlide,
+Qt3DSDMSlideHandle CClientDataModelBridge::CreateNonMasterSlide(Qt3DSDMSlideHandle inMasterSlide,
                                                                Q3DStudio::CId inGuid,
                                                                const Q3DStudio::CString &inName)
 {
@@ -115,7 +115,7 @@ CUICDMSlideHandle CClientDataModelBridge::CreateNonMasterSlide(CUICDMSlideHandle
     m_DataCore->SetInstancePropertyValue(theInstance, m_SlideItem.m_ComponentId,
                                          GuidToLong4(inGuid));
     SetName(theInstance, inName);
-    CUICDMSlideHandle theSlide = m_SlideCore->CreateSlide(theInstance);
+    Qt3DSDMSlideHandle theSlide = m_SlideCore->CreateSlide(theInstance);
     m_SlideCore->DeriveSlide(theSlide, inMasterSlide);
     return theSlide;
 }
@@ -157,7 +157,7 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstan
         // There is an implicit assumption here that the slide graph is one level deep, i.e. only
         // the
         // root has children.
-        CUICDMSlideHandle theSlide = m_SlideCore->GetSlideByInstance(existing);
+        Qt3DSDMSlideHandle theSlide = m_SlideCore->GetSlideByInstance(existing);
         if (m_SlideCore->GetParentSlide(theSlide).Valid())
             theSlide = m_SlideCore->GetParentSlide(theSlide);
         return m_SlideGraphCore->GetSlideGraph(theSlide);
@@ -168,9 +168,9 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstan
     m_DataCore->SetInstancePropertyValue(rootInstance, m_SlideItem.m_ComponentId,
                                          GuidToLong4(theGuid));
     SetName(rootInstance, Q3DStudio::CString::fromQString(QObject::tr("Master Slide")));
-    CUICDMSlideHandle masterSlide = m_SlideCore->CreateSlide(rootInstance);
+    Qt3DSDMSlideHandle masterSlide = m_SlideCore->CreateSlide(rootInstance);
     CUICDMSlideGraphHandle retval(m_SlideGraphCore->CreateSlideGraph(masterSlide));
-    CUICDMSlideHandle theSlide1Handle =
+    Qt3DSDMSlideHandle theSlide1Handle =
         CreateNonMasterSlide(masterSlide, theGuid, Q3DStudio::CString::fromQString(QObject::tr("Slide1")));
 
     // always activate slide 1 on create
@@ -179,16 +179,16 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstan
     return retval;
 }
 
-CUICDMSlideHandle
+Qt3DSDMSlideHandle
 CClientDataModelBridge::GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     return m_SlideGraphCore->GetGraphRoot(GetOrCreateGraph(inInstance));
 }
 
-CUICDMSlideHandle GetSlideByIndex(CUICDMSlideGraphHandle inGraph, int inIndex,
+Qt3DSDMSlideHandle GetSlideByIndex(CUICDMSlideGraphHandle inGraph, int inIndex,
                                   ISlideCore &inSlideCore, ISlideGraphCore &inSlideGraphCore)
 {
-    CUICDMSlideHandle theRoot = inSlideGraphCore.GetGraphRoot(inGraph);
+    Qt3DSDMSlideHandle theRoot = inSlideGraphCore.GetGraphRoot(inGraph);
     if (inIndex == 0)
         return theRoot;
     --inIndex;
@@ -339,7 +339,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMInstanceHandl
         return {};
 
     // get the slide this instance is in
-    CUICDMSlideHandle theSlideHandle =
+    Qt3DSDMSlideHandle theSlideHandle =
         m_SlideGraphCore->GetAssociatedGraph(inInstanceHandle).second;
     if (!theSlideHandle.Valid())
         return {};
@@ -350,7 +350,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMInstanceHandl
 // Find the owning component of the Slide Handle
 // Returns NULL if can't find one.
 qt3dsdm::Qt3DSDMInstanceHandle
-CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle,
+CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle,
                                                    int &outSlideIndex)
 {
     SLong4 theComponentGuid = GetComponentGuid(inSlideHandle);
@@ -367,20 +367,20 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle in
 // Find the owning component of the Slide Handle
 // Returns NULL if can't find one.
 qt3dsdm::Qt3DSDMInstanceHandle
-CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle)
+CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle)
 {
     int theSlideIndex;
     return GetOwningComponentInstance(inSlideHandle, theSlideIndex);
 }
 
 // Find the component Guid of the Slide Handle
-SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::CUICDMSlideHandle inSlideHandle)
+SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle)
 {
     qt3dsdm::SLong4 theComponentGuid;
 
     // get the master slide (because only master knows which component instance)
     ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
-    CUICDMSlideHandle theMasterSlideHandle = theSlideSystem->GetMasterSlide(inSlideHandle);
+    Qt3DSDMSlideHandle theMasterSlideHandle = theSlideSystem->GetMasterSlide(inSlideHandle);
     if (!theMasterSlideHandle.Valid())
         return theComponentGuid;
 
@@ -434,22 +434,22 @@ bool CClientDataModelBridge::IsActive(qt3dsdm::Qt3DSDMInstanceHandle inInstanceH
  *	Get the active slide index of this component (or scene)
  *	@param	inAsset		the controlling component (component or scene)
  */
-qt3dsdm::CUICDMSlideHandle
+qt3dsdm::Qt3DSDMSlideHandle
 CClientDataModelBridge::GetComponentActiveSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent)
 {
     ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = GetGUID(inComponent);
-    CUICDMSlideHandle theMasterSlide =
+    Qt3DSDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     return theSlideSystem->GetActiveSlide(theMasterSlide);
 }
 
-qt3dsdm::CUICDMSlideHandle
+qt3dsdm::Qt3DSDMSlideHandle
 CClientDataModelBridge::GetComponentSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent, long inIndex)
 {
     ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = GetGUID(inComponent);
-    CUICDMSlideHandle theMasterSlide =
+    Qt3DSDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     return theSlideSystem->GetSlideByIndex(theMasterSlide, inIndex);
 }
@@ -459,7 +459,7 @@ void CClientDataModelBridge::SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHa
                                      const Q3DStudio::CString &inName)
 {
     TDataStrPtr theName(new CDataStr(inName));
-    CUICDMSlideHandle theAssociatedSlide =
+    Qt3DSDMSlideHandle theAssociatedSlide =
         m_Doc->GetStudioSystem()->GetFullSystem()->GetSlideSystem()->GetAssociatedSlide(
             inInstanceHandle);
     if (theAssociatedSlide.Valid())
@@ -492,7 +492,7 @@ bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle in
     using namespace Q3DStudio;
     CDoc &theDoc(*m_Doc);
     Qt3DSDMInstanceHandle theInstance = inInstance;
-    CUICDMSlideHandle theSlide = theDoc.GetActiveSlide();
+    Qt3DSDMSlideHandle theSlide = theDoc.GetActiveSlide();
     SLong4 theGuid = GetComponentGuid(theSlide);
     CId theActiveComponentId(theGuid.m_Longs[0], theGuid.m_Longs[1], theGuid.m_Longs[2],
                              theGuid.m_Longs[3]);
@@ -880,7 +880,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstance(qt3dsdm::Qt3D
 std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4>
 CClientDataModelBridge::CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSourceInstance,
                                             Qt3DSDMPropertyHandle inSlot,
-                                            CUICDMSlideHandle inUICDMSlide)
+                                            Qt3DSDMSlideHandle inUICDMSlide)
 {
     Qt3DSDMInstanceHandle theNewInstance =
         m_Doc->GetStudioSystem()
@@ -1138,7 +1138,7 @@ void CClientDataModelBridge::GetValueListFromAllSlides(Qt3DSDMInstanceHandle inI
 
     // Check if the instance is in master slide and if the property is unlinked.
     // This will determine how we should query the value.
-    qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inInstance);
+    qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inInstance);
     if (theSlide.Valid() && theSlideSystem->IsMasterSlide(theSlide)
         && !theSlideSystem->IsPropertyLinked(inInstance, inProperty)) {
         // If the instance is in master slide and the property is unlinked, we need to query the
@@ -1147,7 +1147,7 @@ void CClientDataModelBridge::GetValueListFromAllSlides(Qt3DSDMInstanceHandle inI
             theSlideSystem->GetSlideCount(theSlideSystem->GetAssociatedSlide(inInstance));
         for (size_t theSlideIndex = 0; theSlideIndex < theSlideCount; ++theSlideIndex) {
             qt3dsdm::SValue theValue;
-            CUICDMSlideHandle theSpecificSlide =
+            Qt3DSDMSlideHandle theSpecificSlide =
                 theSlideSystem->GetSlideByIndex(theSlide, theSlideIndex);
             if (theSlideCore->GetSpecificInstancePropertyValue(theSpecificSlide, inInstance,
                                                                inProperty, theValue)
@@ -1405,7 +1405,7 @@ bool CClientDataModelBridge::CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         if (IsMaster(inInstance)) {
             qt3dsdm::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
             qt3dsdm::TInstanceHandleList theInstanceList;
-            qt3dsdm::CUICDMSlideHandle theMasterSlide =
+            qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
                 theSlideSystem->GetAssociatedSlide(inInstance);
             theSlideSystem->GetAssociatedInstances(theMasterSlide, theInstanceList);
             long theMasterLayerCount = 0;
@@ -1440,7 +1440,7 @@ bool CClientDataModelBridge::IsMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return true;
     else {
         ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(inInstance);
+        qt3dsdm::Qt3DSDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(inInstance);
         return theSlideSystem->IsMasterSlide(theSlideHandle);
     }
 }
@@ -1993,14 +1993,14 @@ void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle i
     Q3DStudio::CId theTargetId = GetGUID(theTargetInstance);
 
     ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
-    CUICDMSlideHandle theMasterSlide =
+    Qt3DSDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theTargetId));
     size_t theSlideCount = theSlideSystem->GetSlideCount(theMasterSlide);
 
     for (size_t theSlideIndex = 1; theSlideIndex < theSlideCount;
          ++theSlideIndex) // Index 0 refers to Master Slide, so start from index 1
     {
-        CUICDMSlideHandle theSlideHandle =
+        Qt3DSDMSlideHandle theSlideHandle =
             theSlideSystem->GetSlideByIndex(theMasterSlide, theSlideIndex);
         Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theSlideHandle);
         outSlideNames.push_back(GetName(theInstanceHandle));

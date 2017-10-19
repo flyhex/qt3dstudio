@@ -200,92 +200,92 @@ TSignalItemPtr CreateDataCoreSignaller()
 
 class CSlideCoreSignaller : public ISlideCoreSignalProvider, public ISlideCoreSignalSender
 {
-    boost::signal<void(CUICDMSlideHandle)> m_SlideCreated;
-    boost::signal<void(CUICDMSlideHandle)> m_BeforeSlideDeleted;
-    boost::signal<void(CUICDMSlideHandle)> m_SlideDeleted;
-    boost::signal<void(CUICDMSlideHandle, CUICDMSlideHandle, int)> m_SlideDerived;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue &)>
+    boost::signal<void(Qt3DSDMSlideHandle)> m_SlideCreated;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_BeforeSlideDeleted;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_SlideDeleted;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMSlideHandle, int)> m_SlideDerived;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue &)>
         m_InstancePropertyValueSet;
-    boost::signal<SValue(CUICDMSlideHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
+    boost::signal<SValue(Qt3DSDMSlideHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                   const SValue &)>
         m_InstancePropertyValueAdded;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue &)>
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue &)>
         m_InstancePropertyValueRemoved;
-    boost::signal<void(CUICDMSlideHandle)> m_SlideTimeChanged;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_SlideTimeChanged;
 
 public:
     virtual TSignalConnectionPtr
-    ConnectSlideCreated(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectSlideCreated(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideCreated);
     }
     virtual TSignalConnectionPtr
-    ConnectBeforeSlideDeleted(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectBeforeSlideDeleted(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_BeforeSlideDeleted);
     }
     virtual TSignalConnectionPtr
-    ConnectSlideDeleted(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectSlideDeleted(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideDeleted);
     }
     TSignalConnectionPtr ConnectSlideDerived(
-        const std::function<void(CUICDMSlideHandle, CUICDMSlideHandle, int)> &inCallback) override
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMSlideHandle, int)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideDerived);
     }
     TSignalConnectionPtr ConnectInstancePropertyValueSet(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                    const SValue &)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_InstancePropertyValueSet);
     }
     virtual TSignalConnectionPtr ConnectInstancePropertyValueAdded(
-        const std::function<SValue(CUICDMSlideHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+        const std::function<SValue(Qt3DSDMSlideHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                      Qt3DSDMPropertyHandle, const SValue &)> &inCallback)
     {
         return CONNECT_SIGNAL(m_InstancePropertyValueAdded);
     }
     TSignalConnectionPtr ConnectInstancePropertyValueRemoved(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                    const SValue &)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_InstancePropertyValueRemoved);
     }
     virtual TSignalConnectionPtr
-    ConnectSlideTimeChanged(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectSlideTimeChanged(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideTimeChanged);
     }
 
-    void SendSlideCreated(CUICDMSlideHandle inSlide) override
+    void SendSlideCreated(Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideCreated(inSlide);
     }
-    void SendBeforeSlideDeleted(CUICDMSlideHandle inSlide) override
+    void SendBeforeSlideDeleted(Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_BeforeSlideDeleted(inSlide);
     }
-    void SendSlideDeleted(CUICDMSlideHandle inSlide) override
+    void SendSlideDeleted(Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideDeleted(inSlide);
     }
-    void SendSlideDerived(CUICDMSlideHandle inSlide, CUICDMSlideHandle inParent,
+    void SendSlideDerived(Qt3DSDMSlideHandle inSlide, Qt3DSDMSlideHandle inParent,
                                   int inIndex) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideDerived(inSlide, inParent, inIndex);
     }
-    void SendPropertyValueSet(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    void SendPropertyValueSet(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override
     {
         CHECK_SIGNALS_ENABLED();
         m_InstancePropertyValueSet(inSlide, inInstance, inProperty, inValue);
     }
-    virtual SValue SendPropertyValueAdded(CUICDMSlideHandle inSource, CUICDMSlideHandle inDest,
+    virtual SValue SendPropertyValueAdded(Qt3DSDMSlideHandle inSource, Qt3DSDMSlideHandle inDest,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, const SValue &inValue)
     {
@@ -298,13 +298,13 @@ public:
             return m_InstancePropertyValueAdded(inSource, inDest, inInstance, inProperty, inValue);
         return inValue;
     }
-    void SendPropertyValueRemoved(CUICDMSlideHandle inSlide,
+    void SendPropertyValueRemoved(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override
     {
         m_InstancePropertyValueRemoved(inSlide, inInstance, inProperty, inValue);
     }
-    void SendSlideTimeChanged(CUICDMSlideHandle inSlide) override
+    void SendSlideTimeChanged(Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideTimeChanged(inSlide);
@@ -319,40 +319,40 @@ TSignalItemPtr CreateSlideCoreSignaller()
 class CSlideGraphCoreSignaller : public ISlideGraphCoreSignalProvider,
                                  public ISlideGraphCoreSignalSender
 {
-    boost::signal<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> m_GraphCreated;
-    boost::signal<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> m_GraphDeleted;
-    boost::signal<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+    boost::signal<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> m_GraphCreated;
+    boost::signal<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> m_GraphDeleted;
+    boost::signal<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
         m_InstanceAssociated;
-    boost::signal<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+    boost::signal<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
         m_InstanceDissociated;
-    boost::signal<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> m_GraphActiveSlide;
+    boost::signal<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> m_GraphActiveSlide;
     boost::signal<void(CUICDMSlideGraphHandle, float)> m_GraphSeconds;
 
 public:
     TSignalConnectionPtr ConnectGraphCreated(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback) override
+        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_GraphCreated);
     }
     TSignalConnectionPtr ConnectGraphDeleted(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback) override
+        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_GraphDeleted);
     }
     TSignalConnectionPtr ConnectInstanceAssociated(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_InstanceAssociated);
     }
     TSignalConnectionPtr ConnectInstanceDissociated(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_InstanceDissociated);
     }
     TSignalConnectionPtr ConnectGraphActiveSlide(
-        const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback) override
+        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_GraphActiveSlide);
     }
@@ -362,29 +362,29 @@ public:
         return CONNECT_SIGNAL(m_GraphSeconds);
     }
 
-    void SendGraphCreated(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide) override
+    void SendGraphCreated(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_GraphCreated(inGraph, inSlide);
     }
-    void SendGraphDeleted(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide) override
+    void SendGraphDeleted(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_GraphDeleted(inGraph, inSlide);
     }
-    void SendInstanceAssociated(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide,
+    void SendInstanceAssociated(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide,
                                         Qt3DSDMInstanceHandle inInstance) override
     {
         CHECK_SIGNALS_ENABLED();
         m_InstanceAssociated(inGraph, inSlide, inInstance);
     }
-    void SendInstanceDissociated(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide,
+    void SendInstanceDissociated(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide,
                                          Qt3DSDMInstanceHandle inInstance) override
     {
         CHECK_SIGNALS_ENABLED();
         m_InstanceDissociated(inGraph, inSlide, inInstance);
     }
-    void SendGraphActiveSlide(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide) override
+    void SendGraphActiveSlide(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_GraphActiveSlide(inGraph, inSlide);
@@ -405,11 +405,11 @@ TSignalItemPtr CreateSlideGraphCoreSignaller()
 class CAnimationCoreSignaller : public IAnimationCoreSignalProvider,
                                 public IAnimationCoreSignalSender
 {
-    boost::signal<void(CUICDMAnimationHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+    boost::signal<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                 Qt3DSDMPropertyHandle, size_t, EAnimationType)>
         m_AnimationCreated;
     boost::signal<void(CUICDMAnimationHandle)> m_BeforeAnimationDeleted;
-    boost::signal<void(CUICDMAnimationHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+    boost::signal<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                 Qt3DSDMPropertyHandle, size_t, EAnimationType)>
         m_AnimationDeleted;
     boost::signal<void(CUICDMAnimationHandle, CUICDMKeyframeHandle, const TKeyframe &)> m_KeyframeInserted;
@@ -421,7 +421,7 @@ class CAnimationCoreSignaller : public IAnimationCoreSignalProvider,
 
 public:
     TSignalConnectionPtr ConnectAnimationCreated(
-        const std::function<void(CUICDMAnimationHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+        const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                    Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_AnimationCreated);
@@ -432,7 +432,7 @@ public:
         return CONNECT_SIGNAL(m_BeforeAnimationDeleted);
     }
     TSignalConnectionPtr ConnectAnimationDeleted(
-        const std::function<void(CUICDMAnimationHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+        const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                    Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_AnimationDeleted);
@@ -470,7 +470,7 @@ public:
         return CONNECT_SIGNAL(m_FirstKeyframeDynamic);
     }
 
-    void SendAnimationCreated(CUICDMAnimationHandle inAnimation, CUICDMSlideHandle inSlide,
+    void SendAnimationCreated(CUICDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inSlide,
                                       Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                       EAnimationType inAnimationType) override
@@ -483,7 +483,7 @@ public:
         CHECK_SIGNALS_ENABLED();
         m_BeforeAnimationDeleted(inAnimation);
     }
-    void SendAnimationDeleted(CUICDMAnimationHandle inAnimation, CUICDMSlideHandle inSlide,
+    void SendAnimationDeleted(CUICDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inSlide,
                                       Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                       EAnimationType inAnimationType) override
@@ -639,30 +639,30 @@ TSignalItemPtr CreateActionCoreSignaller()
 
 class CActionSystemSignaller : public IActionSystemSignalProvider, public IActionSystemSignalSender
 {
-    boost::signal<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionCreated;
-    boost::signal<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionDeleted;
+    boost::signal<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionCreated;
+    boost::signal<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionDeleted;
 
 public:
     TSignalConnectionPtr ConnectActionCreated(
-        const std::function<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_ActionCreated);
     }
     TSignalConnectionPtr ConnectActionDeleted(
-        const std::function<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_ActionDeleted);
     }
 
-    void SendActionCreated(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide,
+    void SendActionCreated(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inOwner) override
     {
         CHECK_SIGNALS_ENABLED();
         m_ActionCreated(inAction, inSlide, inOwner);
     }
-    void SendActionDeleted(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide,
+    void SendActionDeleted(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inOwner) override
     {
         CHECK_SIGNALS_ENABLED();
@@ -677,158 +677,158 @@ TSignalItemPtr CreateActionSystemSignaller()
 
 class CSlideSystemSignaller : public ISlideSystemSignalProvider, public ISlideSystemSignalSender
 {
-    boost::signal<void(CUICDMSlideHandle)> m_MasterCreated;
-    boost::signal<void(CUICDMSlideHandle)> m_MasterDeleted;
-    boost::signal<void(CUICDMSlideHandle, int, CUICDMSlideHandle)> m_SlideCreated;
-    boost::signal<void(CUICDMSlideHandle, int, CUICDMSlideHandle)> m_SlideDeleted;
-    boost::signal<void(CUICDMSlideHandle, int, int)> m_SlideRearranged;
-    boost::signal<void(CUICDMSlideHandle, float)> m_ComponentSeconds;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle)> m_InstanceAssociated;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle)> m_InstanceDissociated;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyLinked;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyUnlinked;
-    boost::signal<void(CUICDMSlideHandle, int, CUICDMSlideHandle, CUICDMSlideHandle)> m_ActiveSlide;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_MasterCreated;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_MasterDeleted;
+    boost::signal<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle)> m_SlideCreated;
+    boost::signal<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle)> m_SlideDeleted;
+    boost::signal<void(Qt3DSDMSlideHandle, int, int)> m_SlideRearranged;
+    boost::signal<void(Qt3DSDMSlideHandle, float)> m_ComponentSeconds;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> m_InstanceAssociated;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> m_InstanceDissociated;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyLinked;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyUnlinked;
+    boost::signal<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle, Qt3DSDMSlideHandle)> m_ActiveSlide;
 
-    boost::signal<SValue(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue)>
+    boost::signal<SValue(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue)>
         m_ValueCreated;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue)>
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const SValue)>
         m_ValueDestroyed;
 
 public:
     virtual TSignalConnectionPtr
-    ConnectMasterCreated(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectMasterCreated(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_MasterCreated);
     }
     virtual TSignalConnectionPtr
-    ConnectMasterDeleted(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectMasterDeleted(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_MasterDeleted);
     }
     TSignalConnectionPtr ConnectSlideCreated(
-        const std::function<void(CUICDMSlideHandle, int, CUICDMSlideHandle)> &inCallback) override
+        const std::function<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideCreated);
     }
     TSignalConnectionPtr ConnectSlideDeleted(
-        const std::function<void(CUICDMSlideHandle, int, CUICDMSlideHandle)> &inCallback) override
+        const std::function<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideDeleted);
     }
     virtual TSignalConnectionPtr
-    ConnectSlideRearranged(const std::function<void(CUICDMSlideHandle, int, int)> &inCallback) override
+    ConnectSlideRearranged(const std::function<void(Qt3DSDMSlideHandle, int, int)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideRearranged);
     }
     virtual TSignalConnectionPtr
-    ConnectComponentSeconds(const std::function<void(CUICDMSlideHandle, float)> &inCallback)
+    ConnectComponentSeconds(const std::function<void(Qt3DSDMSlideHandle, float)> &inCallback)
     {
         return CONNECT_SIGNAL(m_ComponentSeconds);
     }
     TSignalConnectionPtr ConnectInstanceAssociated(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle)> &inCallback) override
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_InstanceAssociated);
     }
     TSignalConnectionPtr ConnectInstanceDissociated(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle)> &inCallback) override
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_InstanceDissociated);
     }
     TSignalConnectionPtr ConnectPropertyLinked(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_PropertyLinked);
     }
     TSignalConnectionPtr ConnectPropertyUnlinked(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_PropertyUnlinked);
     }
     TSignalConnectionPtr ConnectActiveSlide(
-        const std::function<void(CUICDMSlideHandle, int, CUICDMSlideHandle, CUICDMSlideHandle)>
+        const std::function<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle, Qt3DSDMSlideHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_ActiveSlide);
     }
     virtual TSignalConnectionPtr ConnectPropertyValueCreated(
-        const std::function<SValue(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
+        const std::function<SValue(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                      const SValue &)> &inCallback)
     {
         return CONNECT_SIGNAL(m_ValueCreated);
     }
     virtual TSignalConnectionPtr ConnectPropertyValueDestroyed(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
                                    const SValue &)> &inCallback)
     {
         return CONNECT_SIGNAL(m_ValueDestroyed);
     }
 
-    void SendMasterCreated(CUICDMSlideHandle inMaster) override
+    void SendMasterCreated(Qt3DSDMSlideHandle inMaster) override
     {
         CHECK_SIGNALS_ENABLED();
         m_MasterCreated(inMaster);
     }
-    void SendMasterDeleted(CUICDMSlideHandle inMaster) override
+    void SendMasterDeleted(Qt3DSDMSlideHandle inMaster) override
     {
         CHECK_SIGNALS_ENABLED();
         m_MasterDeleted(inMaster);
     }
-    void SendSlideCreated(CUICDMSlideHandle inMaster, int inIndex,
-                                  CUICDMSlideHandle inSlide) override
+    void SendSlideCreated(Qt3DSDMSlideHandle inMaster, int inIndex,
+                                  Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideCreated(inMaster, inIndex, inSlide);
     }
-    void SendSlideDeleted(CUICDMSlideHandle inMaster, int inIndex,
-                                  CUICDMSlideHandle inSlide) override
+    void SendSlideDeleted(Qt3DSDMSlideHandle inMaster, int inIndex,
+                                  Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideDeleted(inMaster, inIndex, inSlide);
     }
-    void SendSlideRearranged(CUICDMSlideHandle inMaster, int inOldIndex, int inNewIndex) override
+    void SendSlideRearranged(Qt3DSDMSlideHandle inMaster, int inOldIndex, int inNewIndex) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideRearranged(inMaster, inOldIndex, inNewIndex);
     }
-    virtual void SendComponentSeconds(CUICDMSlideHandle inMaster, float inSeconds)
+    virtual void SendComponentSeconds(Qt3DSDMSlideHandle inMaster, float inSeconds)
     {
         CHECK_SIGNALS_ENABLED();
         m_ComponentSeconds(inMaster, inSeconds);
     }
-    void SendInstanceAssociated(CUICDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance) override
+    void SendInstanceAssociated(Qt3DSDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance) override
     {
         CHECK_SIGNALS_ENABLED();
         m_InstanceAssociated(inMaster, inInstance);
     }
-    void SendInstanceDissociated(CUICDMSlideHandle inMaster,
+    void SendInstanceDissociated(Qt3DSDMSlideHandle inMaster,
                                          Qt3DSDMInstanceHandle inInstance) override
     {
         CHECK_SIGNALS_ENABLED();
         m_InstanceDissociated(inMaster, inInstance);
     }
-    void SendPropertyLinked(CUICDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
+    void SendPropertyLinked(Qt3DSDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
                                     Qt3DSDMPropertyHandle inProperty) override
     {
         CHECK_SIGNALS_ENABLED();
         m_PropertyLinked(inMaster, inInstance, inProperty);
     }
-    void SendPropertyUnlinked(CUICDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
+    void SendPropertyUnlinked(Qt3DSDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty) override
     {
         CHECK_SIGNALS_ENABLED();
         m_PropertyUnlinked(inMaster, inInstance, inProperty);
     }
-    void SendActiveSlide(CUICDMSlideHandle inMaster, int inIndex,
-                                 CUICDMSlideHandle inOldSlide, CUICDMSlideHandle inNewSlide) override
+    void SendActiveSlide(Qt3DSDMSlideHandle inMaster, int inIndex,
+                                 Qt3DSDMSlideHandle inOldSlide, Qt3DSDMSlideHandle inNewSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_ActiveSlide(inMaster, inIndex, inOldSlide, inNewSlide);
     }
 
-    virtual SValue SendPropertyValueCreated(CUICDMSlideHandle inSlide,
+    virtual SValue SendPropertyValueCreated(Qt3DSDMSlideHandle inSlide,
                                             Qt3DSDMInstanceHandle inInstance,
                                             Qt3DSDMPropertyHandle inProperty, const SValue &inValue)
     {
@@ -837,7 +837,7 @@ public:
             return m_ValueCreated(inSlide, inInstance, inProperty, inValue);
         return inValue;
     }
-    virtual void SendPropertyValueDestroyed(CUICDMSlideHandle inSlide,
+    virtual void SendPropertyValueDestroyed(Qt3DSDMSlideHandle inSlide,
                                             Qt3DSDMInstanceHandle inInstance,
                                             Qt3DSDMPropertyHandle inProperty, const SValue &inValue)
     {
@@ -1022,14 +1022,14 @@ class CStudioFullSystemSignaller : public IStudioFullSystemSignalProvider,
     boost::signal<void()> m_ChangeSetEnd;
     boost::signal<void()> m_AnimationBegin;
     boost::signal<void()> m_AnimationEnd;
-    boost::signal<void(CUICDMSlideHandle)> m_SlideCreated;
-    boost::signal<void(CUICDMSlideHandle)> m_SlideDeleted;
-    boost::signal<void(CUICDMSlideHandle, int, int)> m_SlideRearranged;
-    boost::signal<void(CUICDMSlideHandle)> m_ComponentSeconds;
-    boost::signal<void(CUICDMSlideHandle)> m_BeginComponentSeconds;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyLinked;
-    boost::signal<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyUnlinked;
-    boost::signal<void(CUICDMSlideHandle, int, CUICDMSlideHandle)> m_ActiveSlide;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_SlideCreated;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_SlideDeleted;
+    boost::signal<void(Qt3DSDMSlideHandle, int, int)> m_SlideRearranged;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_ComponentSeconds;
+    boost::signal<void(Qt3DSDMSlideHandle)> m_BeginComponentSeconds;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyLinked;
+    boost::signal<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_PropertyUnlinked;
+    boost::signal<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle)> m_ActiveSlide;
     boost::signal<void(Qt3DSDMInstanceHandle)> m_InstanceCreated;
     boost::signal<void(Qt3DSDMInstanceHandle)> m_InstanceDeleted;
     boost::signal<void(CUICDMAnimationHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
@@ -1041,8 +1041,8 @@ class CStudioFullSystemSignaller : public IStudioFullSystemSignalProvider,
     boost::signal<void(CUICDMKeyframeHandle)> m_KeyframeUpdated;
     boost::signal<void(CUICDMAnimationHandle, bool)> m_ConnectFirstKeyframeDynamicSet;
     boost::signal<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> m_InstancePropertyValue;
-    boost::signal<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionCreated;
-    boost::signal<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionDeleted;
+    boost::signal<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionCreated;
+    boost::signal<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)> m_ActionDeleted;
     boost::signal<void(CUICDMActionHandle)> m_TriggerObjectSet;
     boost::signal<void(CUICDMActionHandle)> m_TargetObjectSet;
     boost::signal<void(CUICDMActionHandle)> m_EventHandleSet;
@@ -1090,44 +1090,44 @@ public:
     }
 
     virtual TSignalConnectionPtr
-    ConnectSlideCreated(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectSlideCreated(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideCreated);
     }
     virtual TSignalConnectionPtr
-    ConnectSlideDeleted(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectSlideDeleted(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideDeleted);
     }
     virtual TSignalConnectionPtr
-    ConnectSlideRearranged(const std::function<void(CUICDMSlideHandle, int, int)> &inCallback) override
+    ConnectSlideRearranged(const std::function<void(Qt3DSDMSlideHandle, int, int)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_SlideRearranged);
     }
     virtual TSignalConnectionPtr
-    ConnectBeginComponentSeconds(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectBeginComponentSeconds(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_BeginComponentSeconds);
     }
     virtual TSignalConnectionPtr
-    ConnectComponentSeconds(const std::function<void(CUICDMSlideHandle)> &inCallback) override
+    ConnectComponentSeconds(const std::function<void(Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_ComponentSeconds);
     }
     TSignalConnectionPtr ConnectPropertyLinked(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_PropertyLinked);
     }
     TSignalConnectionPtr ConnectPropertyUnlinked(
-        const std::function<void(CUICDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
+        const std::function<void(Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_PropertyUnlinked);
     }
     TSignalConnectionPtr ConnectActiveSlide(
-        const std::function<void(CUICDMSlideHandle, int, CUICDMSlideHandle)> &inCallback) override
+        const std::function<void(Qt3DSDMSlideHandle, int, Qt3DSDMSlideHandle)> &inCallback) override
     {
         return CONNECT_SIGNAL(m_ActiveSlide);
     }
@@ -1182,13 +1182,13 @@ public:
     }
 
     TSignalConnectionPtr ConnectActionCreated(
-        const std::function<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_ActionCreated);
     }
     TSignalConnectionPtr ConnectActionDeleted(
-        const std::function<void(CUICDMActionHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(CUICDMActionHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override
     {
         return CONNECT_SIGNAL(m_ActionDeleted);
@@ -1307,44 +1307,44 @@ public:
         m_AnimationEnd();
     }
 
-    void SendSlideCreated(CUICDMSlideHandle inSlide) override
+    void SendSlideCreated(Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideCreated(inSlide);
     }
-    void SendSlideDeleted(CUICDMSlideHandle inSlide) override
+    void SendSlideDeleted(Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideDeleted(inSlide);
     }
-    void SendSlideRearranged(CUICDMSlideHandle inMaster, int inOldIndex, int inNewIndex) override
+    void SendSlideRearranged(Qt3DSDMSlideHandle inMaster, int inOldIndex, int inNewIndex) override
     {
         CHECK_SIGNALS_ENABLED();
         m_SlideRearranged(inMaster, inOldIndex, inNewIndex);
     }
-    void SendBeginComponentSeconds(CUICDMSlideHandle inMaster) override
+    void SendBeginComponentSeconds(Qt3DSDMSlideHandle inMaster) override
     {
         CHECK_SIGNALS_ENABLED();
         m_BeginComponentSeconds(inMaster);
     }
-    void SendComponentSeconds(CUICDMSlideHandle inMaster) override
+    void SendComponentSeconds(Qt3DSDMSlideHandle inMaster) override
     {
         CHECK_SIGNALS_ENABLED();
         m_ComponentSeconds(inMaster);
     }
-    void SendPropertyLinked(CUICDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
+    void SendPropertyLinked(Qt3DSDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
                                     Qt3DSDMPropertyHandle inProperty) override
     {
         CHECK_SIGNALS_ENABLED();
         m_PropertyLinked(inMaster, inInstance, inProperty);
     }
-    void SendPropertyUnlinked(CUICDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
+    void SendPropertyUnlinked(Qt3DSDMSlideHandle inMaster, Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty) override
     {
         CHECK_SIGNALS_ENABLED();
         m_PropertyUnlinked(inMaster, inInstance, inProperty);
     }
-    void SendActiveSlide(CUICDMSlideHandle inMaster, int inIndex, CUICDMSlideHandle inSlide) override
+    void SendActiveSlide(Qt3DSDMSlideHandle inMaster, int inIndex, Qt3DSDMSlideHandle inSlide) override
     {
         CHECK_SIGNALS_ENABLED();
         m_ActiveSlide(inMaster, inIndex, inSlide);
@@ -1406,13 +1406,13 @@ public:
         m_InstancePropertyValue(inInstance, inProperty);
     }
 
-    void SendActionCreated(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide,
+    void SendActionCreated(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inOwner) override
     {
         CHECK_SIGNALS_ENABLED();
         m_ActionCreated(inAction, inSlide, inOwner);
     }
-    void SendActionDeleted(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide,
+    void SendActionDeleted(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inOwner) override
     {
         CHECK_SIGNALS_ENABLED();

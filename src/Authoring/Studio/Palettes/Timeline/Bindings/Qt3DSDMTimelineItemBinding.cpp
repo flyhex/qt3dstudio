@@ -233,7 +233,7 @@ bool CUICDMTimelineItemBinding::HasAction(bool inMaster)
     TActionHandleList theActions;
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
 
-    CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
+    Qt3DSDMSlideHandle theSlide = theDoc->GetActiveSlide();
     qt3dsdm::ISlideCore &theSlideCore(*m_StudioSystem->GetSlideCore());
     if (theSlideCore.IsSlide(theSlide)) {
         if (inMaster)
@@ -254,7 +254,7 @@ bool CUICDMTimelineItemBinding::ChildrenHasAction(bool inMaster)
     IActionCore *theActionCore(m_StudioSystem->GetActionCore());
     CClientDataModelBridge *theBridge(m_StudioSystem->GetClientDataModelBridge());
 
-    CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
+    Qt3DSDMSlideHandle theSlide = theDoc->GetActiveSlide();
     qt3dsdm::ISlideCore &theSlideCore(*m_StudioSystem->GetSlideCore());
     if (theSlideCore.IsSlide(theSlide)) {
         if (inMaster)
@@ -295,7 +295,7 @@ bool CUICDMTimelineItemBinding::ComponentHasAction(bool inMaster)
         return false;
 
     Q3DStudio::CId theAssetId = theBridge->GetGUID(m_DataHandle);
-    CUICDMSlideHandle theMasterSlide =
+    Qt3DSDMSlideHandle theMasterSlide =
         m_StudioSystem->GetSlideSystem()->GetMasterSlideByComponentGuid(GuidtoSLong4(theAssetId));
 
     TSlideInstancePairList theGraphInstances;
@@ -432,7 +432,7 @@ long CUICDMTimelineItemBinding::GetChildrenCount()
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
-        CUICDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        Qt3DSDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
         GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
                                      theChildren, theActiveSlide);
         return (long)theChildren.GetCount();
@@ -445,7 +445,7 @@ ITimelineItemBinding *CUICDMTimelineItemBinding::GetChild(long inIndex)
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
-        CUICDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        Qt3DSDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
         GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
                                      theChildren, theActiveSlide);
         theChildren += inIndex;
@@ -1197,7 +1197,7 @@ void CUICDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     ISlideSystem *theSlideSystem = m_StudioSystem->GetSlideSystem();
 
-    qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inInstance);
+    qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inInstance);
     if (theBridge->IsInActiveComponent(inInstance)
         && (theSlideSystem->IsMasterSlide(theSlide) || theSlide == theDoc->GetActiveSlide())) {
         // Only add if the asset is in the current active component, and it's a master asset or in

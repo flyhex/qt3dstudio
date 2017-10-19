@@ -75,24 +75,24 @@ struct SSlideSystem : public ISlideSystem
 
     void SetPropertySystem(TPropertySystemPtr inPropertySystem);
 
-    CUICDMSlideHandle CreateMasterSlide() override;
-    CUICDMSlideHandle CreateSlide(CUICDMSlideHandle inMaster, int inIndex = -1) override;
-    CUICDMSlideHandle DuplicateSlide(CUICDMSlideHandle inSourceSlide, int inDestIndex = -1) override;
-    CUICDMSlideHandle GetMasterSlide(CUICDMSlideHandle inSlide) const override;
-    bool IsMasterSlide(CUICDMSlideHandle inSlide) const override;
-    CUICDMSlideHandle GetMasterSlideByComponentGuid(SLong4 inGuid) const override;
+    Qt3DSDMSlideHandle CreateMasterSlide() override;
+    Qt3DSDMSlideHandle CreateSlide(Qt3DSDMSlideHandle inMaster, int inIndex = -1) override;
+    Qt3DSDMSlideHandle DuplicateSlide(Qt3DSDMSlideHandle inSourceSlide, int inDestIndex = -1) override;
+    Qt3DSDMSlideHandle GetMasterSlide(Qt3DSDMSlideHandle inSlide) const override;
+    bool IsMasterSlide(Qt3DSDMSlideHandle inSlide) const override;
+    Qt3DSDMSlideHandle GetMasterSlideByComponentGuid(SLong4 inGuid) const override;
     // Indexes are 1 based.  Index 0 refers to the master slide; you can't delete this.
-    void DeleteSlideByIndex(CUICDMSlideHandle inMaster, size_t inIndex) override;
-    void GetSlideReferencedInstances(CUICDMSlideHandle inMaster, size_t inIndex,
+    void DeleteSlideByIndex(Qt3DSDMSlideHandle inMaster, size_t inIndex) override;
+    void GetSlideReferencedInstances(Qt3DSDMSlideHandle inMaster, size_t inIndex,
                                              TInstanceHandleList &outReferencedInstances) override;
-    CUICDMSlideHandle GetSlideByIndex(CUICDMSlideHandle inMaster, size_t inIndex) const override;
-    void SetActiveSlide(CUICDMSlideHandle inMaster, size_t inIndex) override;
-    size_t GetSlideCount(CUICDMSlideHandle inMaster) const override;
-    void RearrangeSlide(CUICDMSlideHandle inMaster, size_t inOldIndex, size_t inNewIndex) override;
+    Qt3DSDMSlideHandle GetSlideByIndex(Qt3DSDMSlideHandle inMaster, size_t inIndex) const override;
+    void SetActiveSlide(Qt3DSDMSlideHandle inMaster, size_t inIndex) override;
+    size_t GetSlideCount(Qt3DSDMSlideHandle inMaster) const override;
+    void RearrangeSlide(Qt3DSDMSlideHandle inMaster, size_t inOldIndex, size_t inNewIndex) override;
 
-    void SetComponentSeconds(CUICDMSlideHandle inSlide, float inSeconds) override;
-    float GetComponentSeconds(CUICDMSlideHandle inSlide) const override;
-    long GetComponentSecondsLong(CUICDMSlideHandle inSlide) const override;
+    void SetComponentSeconds(Qt3DSDMSlideHandle inSlide, float inSeconds) override;
+    float GetComponentSeconds(Qt3DSDMSlideHandle inSlide) const override;
+    long GetComponentSecondsLong(Qt3DSDMSlideHandle inSlide) const override;
     // For any given instance, find the current seconds via backtracking to the graph, finding the
     // active
     // slide, and return.
@@ -103,24 +103,24 @@ struct SSlideSystem : public ISlideSystem
      * Use the instance for storing information such as name, or the GUID of the object
      * this slide links to.
      */
-    Qt3DSDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inInstance) const override;
+    Qt3DSDMInstanceHandle GetSlideInstance(Qt3DSDMSlideHandle inInstance) const override;
     /**
      *	Reverse lookup into the slide system so you can match slides to instances.
      */
-    CUICDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const override;
+    Qt3DSDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const override;
 
     /**
      *	Slide may be either a master slide or a normal slide.  This will associate this instance
      *	with this set of slides.  Property lookups (using the above IInstancePropertyCore interface)
      *	will now run through the slide set before hitting the main data core database.
      */
-    void AssociateInstanceWithSlide(CUICDMSlideHandle inSlide,
+    void AssociateInstanceWithSlide(Qt3DSDMSlideHandle inSlide,
                                             Qt3DSDMInstanceHandle inInstance) override;
-    CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance) const override;
+    Qt3DSDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance) const override;
     void GetAssociatedInstances(
-        CUICDMSlideHandle inMaster,
-        std::vector<std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>> &outAssociations) const override;
-    void GetAssociatedInstances(CUICDMSlideHandle inSlide,
+        Qt3DSDMSlideHandle inMaster,
+        std::vector<std::pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> &outAssociations) const override;
+    void GetAssociatedInstances(Qt3DSDMSlideHandle inSlide,
                                         TInstanceHandleList &outAssociations) const override;
     void LinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override;
     void UnlinkProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override;
@@ -130,30 +130,30 @@ struct SSlideSystem : public ISlideSystem
                                      Qt3DSDMPropertyHandle inProperty) const override;
     bool GetSlidePropertyValue(size_t inSlide, Qt3DSDMInstanceHandle inInstance,
                                        Qt3DSDMPropertyHandle inProperty, SValue &outValue) override;
-    void GetUnionOfProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide,
+    void GetUnionOfProperties(Qt3DSDMSlideHandle inSlide1, Qt3DSDMSlideHandle inSlide,
                                       TInstancePropertyPairList &outProperties) const override;
 
-    void SetActiveSlide(CUICDMSlideHandle inSlide) override;
-    CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance,
+    void SetActiveSlide(Qt3DSDMSlideHandle inSlide) override;
+    Qt3DSDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance,
                                                  Qt3DSDMPropertyHandle inProperty) const override;
 
-    bool SlideValid(CUICDMSlideHandle inSlide) const override;
-    int GetSlideIndex(CUICDMSlideHandle inSlide) const override;
-    int GetActiveSlideIndex(CUICDMSlideHandle inMaster) const override;
-    CUICDMSlideHandle GetActiveSlide(CUICDMSlideHandle inMaster) const override;
-    Qt3DSDMInstanceHandle GetSlideSelectedInstance(CUICDMSlideHandle inSlide) const override;
-    void SetSlideSelectedInstance(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance) override;
+    bool SlideValid(Qt3DSDMSlideHandle inSlide) const override;
+    int GetSlideIndex(Qt3DSDMSlideHandle inSlide) const override;
+    int GetActiveSlideIndex(Qt3DSDMSlideHandle inMaster) const override;
+    Qt3DSDMSlideHandle GetActiveSlide(Qt3DSDMSlideHandle inMaster) const override;
+    Qt3DSDMInstanceHandle GetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide) const override;
+    void SetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance) override;
 
-    CUICDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
+    Qt3DSDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
                                                  Qt3DSDMPropertyHandle inProperty) override;
 
-    bool GetInstancePropertyValue(CUICDMSlideHandle inSlide,
+    bool GetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
     bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
                                                    Qt3DSDMPropertyHandle inProperty,
                                                    SValue &outValue) const override;
-    void ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
+    void ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                Qt3DSDMInstanceHandle inInstance,
                                                Qt3DSDMPropertyHandle inProperty,
                                                const SValue &inValue) override;
@@ -168,9 +168,9 @@ private:
     // helper method
     void InsertEntryAndPropertyInstance(const TSlideEntry &inEntry,
                                         TInstanceHandleList &inInstances,
-                                        CUICDMSlideHandle inSlide);
-    void DeleteReferencedInstances(CUICDMSlideHandle inSlide);
-    void GetReferencedInstances(CUICDMSlideHandle inSlide,
+                                        Qt3DSDMSlideHandle inSlide);
+    void DeleteReferencedInstances(Qt3DSDMSlideHandle inSlide);
+    void GetReferencedInstances(Qt3DSDMSlideHandle inSlide,
                                 TInstanceHandleList &outReferencedInstances);
 };
 }

@@ -57,7 +57,7 @@ namespace foundation {
 }
 namespace qt3dsdm {
 class Qt3DSDMInstanceHandle;
-class CUICDMSlideHandle;
+class Qt3DSDMSlideHandle;
 class CStudioSystem;
 class IPropertySystem;
 class IAnimationCore;
@@ -83,8 +83,8 @@ class IDoc
 public:
     virtual long GetCurrentViewTime() const = 0;
     virtual void NotifyTimeChanged(long inNewTime) = 0;
-    virtual void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide) = 0;
-    virtual void NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
+    virtual void NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide) = 0;
+    virtual void NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide,
                                           bool inForceRefresh,
                                           bool inIgnoreLastDisplayTime = false) = 0;
     virtual void NotifySelectionChanged(

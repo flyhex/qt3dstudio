@@ -36,13 +36,13 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMSlideHandle CSimpleSlideCore::CreateSlide(Qt3DSDMInstanceHandle inInstance)
+Qt3DSDMSlideHandle CSimpleSlideCore::CreateSlide(Qt3DSDMInstanceHandle inInstance)
 {
     int nextId = GetNextId();
     return CreateSlideWithHandle(nextId, inInstance);
 }
 
-Qt3DSDMInstanceHandle CSimpleSlideCore::GetSlideInstance(CUICDMSlideHandle inSlide) const
+Qt3DSDMInstanceHandle CSimpleSlideCore::GetSlideInstance(Qt3DSDMSlideHandle inSlide) const
 {
     return GetSlideNF(inSlide, m_Objects)->m_Instance;
 }
@@ -55,7 +55,7 @@ inline bool SlideInstanceMatches(const THandleObjectPair &inPair, int inInstance
     return false;
 }
 
-CUICDMSlideHandle CSimpleSlideCore::GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const
+Qt3DSDMSlideHandle CSimpleSlideCore::GetSlideByInstance(Qt3DSDMInstanceHandle inInstance) const
 {
     THandleObjectMap::const_iterator theSlide =
         find_if(m_Objects.begin(), m_Objects.end(),
@@ -66,7 +66,7 @@ CUICDMSlideHandle CSimpleSlideCore::GetSlideByInstance(Qt3DSDMInstanceHandle inI
     throw SlideNotFound(L"");
 }
 
-void RecurseDeleteSlide(CUICDMSlideHandle inSlide, THandleObjectMap &inObjects,
+void RecurseDeleteSlide(Qt3DSDMSlideHandle inSlide, THandleObjectMap &inObjects,
                         TInstanceHandleList &outInstances)
 {
     SSlide *theSlide = CSimpleSlideCore::GetSlideNF(inSlide, inObjects);
@@ -77,7 +77,7 @@ void RecurseDeleteSlide(CUICDMSlideHandle inSlide, THandleObjectMap &inObjects,
     CHandleBase::EraseHandle(inSlide, inObjects);
 }
 
-void CSimpleSlideCore::DeleteSlide(CUICDMSlideHandle inSlide, TInstanceHandleList &outInstances)
+void CSimpleSlideCore::DeleteSlide(Qt3DSDMSlideHandle inSlide, TInstanceHandleList &outInstances)
 {
     SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
     if (theSlide->m_Parent) {
@@ -98,21 +98,21 @@ inline void MaybeAddObject(const THandleObjectPair &inPair, vector<TVectorType> 
 void CSimpleSlideCore::GetSlides(TSlideHandleList &outSlides) const
 {
     do_all(m_Objects,
-           std::bind(MaybeAddObject<SSlide, CUICDMSlideHandle>,
+           std::bind(MaybeAddObject<SSlide, Qt3DSDMSlideHandle>,
                      std::placeholders::_1, std::ref(outSlides)));
 }
 
-float CSimpleSlideCore::GetSlideTime(CUICDMSlideHandle inSlide) const
+float CSimpleSlideCore::GetSlideTime(Qt3DSDMSlideHandle inSlide) const
 {
     return GetSlideNF(inSlide, m_Objects)->m_Time;
 }
 
-void CSimpleSlideCore::SetSlideTime(CUICDMSlideHandle inSlide, float inNewTime)
+void CSimpleSlideCore::SetSlideTime(Qt3DSDMSlideHandle inSlide, float inNewTime)
 {
     GetSlideNF(inSlide, m_Objects)->m_Time = inNewTime;
 }
 
-void CSimpleSlideCore::DeriveSlide(CUICDMSlideHandle inSlide, CUICDMSlideHandle inParent,
+void CSimpleSlideCore::DeriveSlide(Qt3DSDMSlideHandle inSlide, Qt3DSDMSlideHandle inParent,
                                    int inIndex)
 {
     int oldParent = GetSlideNF(inSlide, m_Objects)->m_Parent;
@@ -132,18 +132,18 @@ void CSimpleSlideCore::DeriveSlide(CUICDMSlideHandle inSlide, CUICDMSlideHandle 
     GetSlideNF(inSlide, m_Objects)->m_Parent = inParent;
 }
 
-CUICDMSlideHandle CSimpleSlideCore::GetParentSlide(CUICDMSlideHandle inSlide) const
+Qt3DSDMSlideHandle CSimpleSlideCore::GetParentSlide(Qt3DSDMSlideHandle inSlide) const
 {
     return GetSlideNF(inSlide, m_Objects)->m_Parent;
 }
 
-void CSimpleSlideCore::GetChildSlides(CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::GetChildSlides(Qt3DSDMSlideHandle inSlide,
                                       TSlideHandleList &outChildren) const
 {
     transformv_all(GetSlideNF(inSlide, m_Objects)->m_Children, outChildren);
 }
 
-int CSimpleSlideCore::GetChildIndex(CUICDMSlideHandle inParent, CUICDMSlideHandle inChild) const
+int CSimpleSlideCore::GetChildIndex(Qt3DSDMSlideHandle inParent, Qt3DSDMSlideHandle inChild) const
 {
     const SSlide *theSlide = GetSlideNF(inParent, m_Objects);
     size_t dist = distance(theSlide->m_Children.begin(),
@@ -155,7 +155,7 @@ int CSimpleSlideCore::GetChildIndex(CUICDMSlideHandle inParent, CUICDMSlideHandl
     return (int)dist;
 }
 
-bool CSimpleSlideCore::GetInstancePropertyValue(CUICDMSlideHandle inSlide,
+bool CSimpleSlideCore::GetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                 Qt3DSDMInstanceHandle inHandle,
                                                 Qt3DSDMPropertyHandle inProperty,
                                                 SValue &outValue) const
@@ -172,7 +172,7 @@ bool CSimpleSlideCore::GetInstancePropertyValue(CUICDMSlideHandle inSlide,
 }
 
 std::pair<SSlide *, SInternValue *> CSimpleSlideCore::ResolveSetInstancePropertyValue(
-    CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle, Qt3DSDMPropertyHandle inProperty)
+    Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle, Qt3DSDMPropertyHandle inProperty)
 {
     SSlide *theSlide = CSimpleSlideCore::GetSlideNF(inSlide, m_Objects);
     SInternValue *theValue = theSlide->GetInstancePropertyValue(inHandle, inProperty);
@@ -183,7 +183,7 @@ std::pair<SSlide *, SInternValue *> CSimpleSlideCore::ResolveSetInstanceProperty
     return ResolveSetInstancePropertyValue(theSlide->m_Parent, inHandle, inProperty);
 }
 
-void CSimpleSlideCore::SetInstancePropertyValue(CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::SetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                 Qt3DSDMInstanceHandle inHandle,
                                                 Qt3DSDMPropertyHandle inProperty,
                                                 const SValue &inValue)
@@ -197,7 +197,7 @@ void CSimpleSlideCore::SetInstancePropertyValue(CUICDMSlideHandle inSlide,
         theTarget.first->SetInstancePropertyValue(inHandle, inProperty, theValue);
 }
 
-void CSimpleSlideCore::ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                      Qt3DSDMInstanceHandle inHandle,
                                                      Qt3DSDMPropertyHandle inProperty,
                                                      const SValue &inValue)
@@ -206,7 +206,7 @@ void CSimpleSlideCore::ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
                                             inProperty, inValue);
 }
 
-bool CSimpleSlideCore::GetSpecificInstancePropertyValue(CUICDMSlideHandle inSlide,
+bool CSimpleSlideCore::GetSpecificInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                         Qt3DSDMInstanceHandle inInstance,
                                                         Qt3DSDMPropertyHandle inProperty,
                                                         SValue &outValue) const
@@ -220,7 +220,7 @@ bool CSimpleSlideCore::GetSpecificInstancePropertyValue(CUICDMSlideHandle inSlid
     return false;
 }
 
-void CSimpleSlideCore::GetSpecificInstancePropertyValues(CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::GetSpecificInstancePropertyValues(Qt3DSDMSlideHandle inSlide,
                                                          Qt3DSDMInstanceHandle inInstance,
                                                          TPropertyHandleValuePairList &outValues)
 {
@@ -228,21 +228,21 @@ void CSimpleSlideCore::GetSpecificInstancePropertyValues(CUICDMSlideHandle inSli
     theSlide->GetSpecificInstancePropertyValues(inInstance, outValues);
 }
 
-void CSimpleSlideCore::GetSlidePropertyEntries(CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::GetSlidePropertyEntries(Qt3DSDMSlideHandle inSlide,
                                                TSlideEntryList &outEntries) const
 {
     const SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
     theSlide->ToSlideEntryList(outEntries);
 }
 
-bool CSimpleSlideCore::ContainsProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+bool CSimpleSlideCore::ContainsProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
                                         Qt3DSDMPropertyHandle inProperty) const
 {
     const SSlide *theSlide = GetSlideNF(inSlide, m_Objects);
     return theSlide->GetInstancePropertyValue(inHandle, inProperty) != NULL;
 }
 
-CUICDMSlideHandle CSimpleSlideCore::CreateSlideWithHandle(int inHandle,
+Qt3DSDMSlideHandle CSimpleSlideCore::CreateSlideWithHandle(int inHandle,
                                                           Qt3DSDMInstanceHandle inInstance)
 {
     if (HandleValid(inHandle))
@@ -251,20 +251,20 @@ CUICDMSlideHandle CSimpleSlideCore::CreateSlideWithHandle(int inHandle,
     return inHandle;
 }
 
-void CSimpleSlideCore::GetSlideProperties(CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::GetSlideProperties(Qt3DSDMSlideHandle inSlide,
                                           TSlideEntryList &outProperties) const
 {
     outProperties.clear();
     GetSlidePropertyEntries(inSlide, outProperties);
 }
 
-bool CSimpleSlideCore::IsSlide(CUICDMSlideHandle inSlide) const
+bool CSimpleSlideCore::IsSlide(Qt3DSDMSlideHandle inSlide) const
 {
     return m_Objects.find(inSlide) != m_Objects.end();
 }
 
 void CSimpleSlideCore::ForceSetPropertyValue(IStringTable &inStringTable,
-                                             THandleObjectMap &inObjects, CUICDMSlideHandle inSlide,
+                                             THandleObjectMap &inObjects, Qt3DSDMSlideHandle inSlide,
                                              Qt3DSDMInstanceHandle inHandle,
                                              Qt3DSDMPropertyHandle inProperty, const SValue &inValue)
 {
@@ -272,7 +272,7 @@ void CSimpleSlideCore::ForceSetPropertyValue(IStringTable &inStringTable,
         ->SetInstancePropertyValue(inHandle, inProperty, SInternValue(inValue, inStringTable));
 }
 
-void CSimpleSlideCore::PushPropertyValueToChildren(CUICDMSlideHandle inParent,
+void CSimpleSlideCore::PushPropertyValueToChildren(Qt3DSDMSlideHandle inParent,
                                                    Qt3DSDMInstanceHandle inHandle,
                                                    Qt3DSDMPropertyHandle inProperty,
                                                    const SValue &inValue)
@@ -289,8 +289,8 @@ inline void AddIntersectingEntry(TSlideEntryList &outEntries, Qt3DSDMInstanceHan
     outEntries.push_back(TSlideEntry(inst, prop, inValue.GetValue()));
 }
 
-void CSimpleSlideCore::GetIntersectingProperties(CUICDMSlideHandle inSlide1,
-                                                 CUICDMSlideHandle inSlide2,
+void CSimpleSlideCore::GetIntersectingProperties(Qt3DSDMSlideHandle inSlide1,
+                                                 Qt3DSDMSlideHandle inSlide2,
                                                  TSlideEntryList &outEntries) const
 {
     const SSlide *theSlide1 = GetSlideNF(inSlide1, m_Objects);
@@ -301,9 +301,9 @@ void CSimpleSlideCore::GetIntersectingProperties(CUICDMSlideHandle inSlide1,
                               std::placeholders::_3));
 }
 
-void CSimpleSlideCore::PushIntersectingProperties(CUICDMSlideHandle inSlide1,
-                                                  CUICDMSlideHandle inSlide2,
-                                                  CUICDMSlideHandle inDestination)
+void CSimpleSlideCore::PushIntersectingProperties(Qt3DSDMSlideHandle inSlide1,
+                                                  Qt3DSDMSlideHandle inSlide2,
+                                                  Qt3DSDMSlideHandle inDestination)
 {
     const SSlide *theSlide1 = GetSlideNF(inSlide1, m_Objects);
     const SSlide *theSlide2 = GetSlideNF(inSlide2, m_Objects);
@@ -314,7 +314,7 @@ void CSimpleSlideCore::PushIntersectingProperties(CUICDMSlideHandle inSlide1,
                               std::placeholders::_3));
 }
 
-void CSimpleSlideCore::ClearPropertyValue(THandleObjectMap &inObjects, CUICDMSlideHandle inSlide,
+void CSimpleSlideCore::ClearPropertyValue(THandleObjectMap &inObjects, Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty)
 {
@@ -333,13 +333,13 @@ void CSimpleSlideCore::ForEachSlide(std::function<void(SSlide *)> inFunction)
     do_all(m_Objects, std::bind(DoForEachSlide, std::placeholders::_1, inFunction));
 }
 
-void LookupSlideAndDoSomething(CUICDMSlideHandle inSlide, THandleObjectMap &inObjects,
+void LookupSlideAndDoSomething(Qt3DSDMSlideHandle inSlide, THandleObjectMap &inObjects,
                                std::function<void(SSlide *)> inFunction)
 {
     inFunction(CSimpleSlideCore::GetSlideNF(inSlide, inObjects));
 }
 
-void CSimpleSlideCore::ForEachChild(CUICDMSlideHandle inParent,
+void CSimpleSlideCore::ForEachChild(Qt3DSDMSlideHandle inParent,
                                     std::function<void(SSlide *)> inFunction)
 {
     do_all(GetSlideNF(inParent, m_Objects)->m_Children,
@@ -396,7 +396,7 @@ void CSimpleSlideCore::DeleteAllInstancePropertyEntries(const TInstanceHandleLis
     ForEachSlide(std::bind(&SSlide::ClearPropertiesIf, std::placeholders::_1, predicate));
 }
 
-void CSimpleSlideCore::ClearChildrenPropertyValues(CUICDMSlideHandle inParent,
+void CSimpleSlideCore::ClearChildrenPropertyValues(Qt3DSDMSlideHandle inParent,
                                                    Qt3DSDMInstanceHandle inHandle,
                                                    Qt3DSDMPropertyHandle inProperty)
 {

@@ -35,9 +35,9 @@
 
 namespace qt3dsdm {
 
-typedef std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> TSlideInstancePair;
+typedef std::pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> TSlideInstancePair;
 typedef std::vector<TSlideInstancePair> TSlideInstancePairList;
-typedef std::pair<CUICDMSlideGraphHandle, CUICDMSlideHandle> TGraphSlidePair;
+typedef std::pair<CUICDMSlideGraphHandle, Qt3DSDMSlideHandle> TGraphSlidePair;
 
 /**
  *	Binding instances to slide graphs.
@@ -54,9 +54,9 @@ public:
      *	of one and only one graph (i.e. it does not derive from another slide outside of the graph).
      *	Second is that an instance is a member of one and only one graph.
      */
-    virtual CUICDMSlideGraphHandle CreateSlideGraph(CUICDMSlideHandle inRoot) = 0;
-    virtual CUICDMSlideHandle GetGraphRoot(CUICDMSlideGraphHandle inGraph) const = 0;
-    virtual CUICDMSlideGraphHandle GetSlideGraph(CUICDMSlideHandle inSlide) const = 0;
+    virtual CUICDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) = 0;
+    virtual Qt3DSDMSlideHandle GetGraphRoot(CUICDMSlideGraphHandle inGraph) const = 0;
+    virtual CUICDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const = 0;
     virtual void GetSlideGraphs(TSlideGraphHandleList &outGraphs) const = 0;
     virtual void DeleteSlideGraph(CUICDMSlideGraphHandle inHandle) = 0;
 
@@ -69,7 +69,7 @@ public:
      *is
      *	implicitly associated with any root-derived slides.
      */
-    virtual void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, CUICDMSlideHandle inSlide,
+    virtual void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inInstance) = 0;
     virtual void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
                                         TSlideInstancePairList &outAssociations) const = 0;
@@ -79,8 +79,8 @@ public:
     /**
      *	All graphs always have an active slide.  This is assumed to be the root right off the bat.
      */
-    virtual void SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph, CUICDMSlideHandle inSlide) = 0;
-    virtual CUICDMSlideHandle GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const = 0;
+    virtual void SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) = 0;
+    virtual Qt3DSDMSlideHandle GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const = 0;
 };
 
 typedef std::shared_ptr<ISlideGraphCore> TSlideGraphCorePtr;

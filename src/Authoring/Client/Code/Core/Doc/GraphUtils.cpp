@@ -129,12 +129,12 @@ const Q3DStudio::TFilter FilterForNodeType(CDoc *inDoc)
 /**
  *	Excludes those who doesn't exist in SlideIndex
  */
-bool FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide,
+bool FilterForSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                     Q3DStudio::TIdentifier inGraphable)
 {
     try {
         qt3dsdm::ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inGraphable);
+        qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inGraphable);
         return !(theSlideSystem->IsMasterSlide(theSlide) || inSlide == theSlide);
     } catch (qt3dsdm::SlideNotFound &error) {
         Q_UNUSED(error);
@@ -146,7 +146,7 @@ bool FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide,
 /**
  *	Excludes those who doesn't exist in SlideIndex
  */
-const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlide)
+const Q3DStudio::TFilter FilterForSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     return boost::bind(FilterForSlide, inDoc, inSlide, _1);
 }
@@ -178,13 +178,13 @@ FilterForControllingTimeParent(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inCon
 /**
  *	Excludes those that are not in active component
  */
-bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inActiveComponentSlide,
+bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inActiveComponentSlide,
                               Q3DStudio::TIdentifier inGraphable)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
 
-    qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inGraphable);
+    qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inGraphable);
     if (theBridge->IsInActiveComponent(inGraphable)
         && (theSlideSystem->IsMasterSlide(theSlide) || theSlide == inActiveComponentSlide))
         return false; // I'm in the active component and on the right slide, don't filter me!
@@ -196,7 +196,7 @@ bool FilterForActiveComponent(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inActiveCo
  *	Excludes those that are not in active component
  */
 const Q3DStudio::TFilter FilterForActiveComponent(CDoc *inDoc,
-                                                  qt3dsdm::CUICDMSlideHandle inActiveComponentSlide)
+                                                  qt3dsdm::Qt3DSDMSlideHandle inActiveComponentSlide)
 {
     return boost::bind(FilterForActiveComponent, inDoc, inActiveComponentSlide, _1);
 }
@@ -210,10 +210,10 @@ bool FilterForCurrentSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inTimePar
 {
     qt3dsdm::ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
 
-    qt3dsdm::CUICDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(inGraphable);
+    qt3dsdm::Qt3DSDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(inGraphable);
 
     // Get the current slide index
-    qt3dsdm::CUICDMSlideHandle theCurrentSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theCurrentSlide =
         inDoc->GetStudioSystem()->GetClientDataModelBridge()->GetComponentActiveSlide(inTimeParent);
     if (theSlideSystem->IsMasterSlide(theSlideHandle) || (theCurrentSlide == theSlideHandle))
         return false;
@@ -282,7 +282,7 @@ void GetAssetChildren(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
  *	Used primarily for displaying objects in the timeline in the correct order.
  */
 void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                             qt3dsdm::CUICDMSlideHandle inSlide,
+                             qt3dsdm::Qt3DSDMSlideHandle inSlide,
                              Q3DStudio::CGraphIterator &outIterator, EStudioObjectType inObjectType)
 {
     TAssetGraphPtr theGraph = inDoc->GetAssetGraph();
@@ -299,7 +299,7 @@ void GetAssetChildrenInSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInsta
  */
 void GetAssetChildrenInTimeParent(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc,
                                   bool inIsAssetTimeParent, Q3DStudio::CGraphIterator &outIterator,
-                                  qt3dsdm::CUICDMSlideHandle inActiveComponentSlide)
+                                  qt3dsdm::Qt3DSDMSlideHandle inActiveComponentSlide)
 {
     // TODO: for inFilterActiveComponentSlideIndex, just pass in the SlideHandle
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
@@ -414,12 +414,12 @@ void PrintAssetSubTree(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc, c
 /**
  *	Prints all the slides under a master slide
  */
-void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::CUICDMSlideHandle theMasterSlide)
+void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::Qt3DSDMSlideHandle theMasterSlide)
 {
     size_t slideCountBefore =
         m_Doc->GetStudioSystem()->GetSlideSystem()->GetSlideCount(theMasterSlide);
     for (size_t i = 0; i < slideCountBefore; ++i) {
-        qt3dsdm::CUICDMSlideHandle slideHdl =
+        qt3dsdm::Qt3DSDMSlideHandle slideHdl =
             m_Doc->GetStudioSystem()->GetSlideSystem()->GetSlideByIndex(theMasterSlide, i);
         Q3DStudio::CString name = m_Doc->GetStudioSystem()->GetClientDataModelBridge()->GetName(
             m_Doc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(slideHdl));

@@ -141,7 +141,7 @@ public:
     void OnChildRemoved(int inParent, int inChild, long inIndex);
     void OnChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);
 
-    void OnActionEvent(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide,
+    void OnActionEvent(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
 
     // Helper function to iterate over all bindings

@@ -90,7 +90,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         TImportInstanceMap;
     Qt3DSDMInstanceHandle m_Parent;
     Qt3DSDMInstanceHandle m_Root;
-    CUICDMSlideHandle m_Slide;
+    Qt3DSDMSlideHandle m_Slide;
     Q3DStudio::CString m_TypeBuffer;
     qt3ds::QT3DSI32 m_StartTime;
     Import *m_ImportObj;
@@ -100,7 +100,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     SComposerImportInterface(
         Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
         ,
-        qt3dsdm::CDataModelHandle root, qt3dsdm::CUICDMSlideHandle slide,
+        qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
         const Q3DStudio::CFilePath &docPath /// Root directory where the studio file sits.
         ,
         const Q3DStudio::CFilePath &inFullPathToImportFile, long inStartTime,
@@ -319,7 +319,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     struct SSlideInstanceIdMapIterator
     {
-        const vector<pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>> *m_CurrentItems;
+        const vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> *m_CurrentItems;
         size_t m_CurrentTreeIdx;
         size_t m_CurrentTreeEnd;
         TCharPtr m_Id;
@@ -357,7 +357,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                 ++m_CurrentTreeIdx;
             }
         }
-        CUICDMSlideHandle GetCurrentSlide() { return (*m_CurrentItems)[m_CurrentTreeIdx].first; }
+        Qt3DSDMSlideHandle GetCurrentSlide() { return (*m_CurrentItems)[m_CurrentTreeIdx].first; }
 
         Qt3DSDMInstanceHandle GetCurrentInstance()
         {
@@ -422,7 +422,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     {
         const wchar_t *theInsertId(m_StringTable.GetWideStr(inImportId));
         pair<TIdMultiMap::iterator, bool> theInserter(m_IdToSlideInstances.insert(
-            make_pair(theInsertId, vector<pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>>())));
+            make_pair(theInsertId, vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>())));
 
         for (SSlideInstanceIdMapIterator theIterator(inParent, m_IdToSlideInstances, m_StringTable);
              theIterator.IsDone() == false; theIterator.Next()) {
@@ -503,7 +503,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             return;
         size_t numItems = NVMin(theParentList->second.size(), theChildList->second.size());
         for (size_t idx = 0; idx < numItems; ++idx) {
-            CUICDMSlideHandle theParentSlide = theParentList->second[idx].first;
+            Qt3DSDMSlideHandle theParentSlide = theParentList->second[idx].first;
             Qt3DSDMInstanceHandle theParent(theParentList->second[idx].second);
             Qt3DSDMInstanceHandle theChild(theChildList->second[idx].second);
             Qt3DSDMInstanceHandle nextSibling;
@@ -577,7 +577,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 std::shared_ptr<IComposerEditorInterface> IComposerEditorInterface::CreateEditorInterface(
     Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
     ,
-    qt3dsdm::CDataModelHandle root, qt3dsdm::CUICDMSlideHandle slide,
+    qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
     const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &destimportfile,
     long inStartTime, qt3dsdm::IStringTable &inStringTable)
 {

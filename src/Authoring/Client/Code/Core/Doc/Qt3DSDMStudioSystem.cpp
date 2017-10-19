@@ -97,7 +97,7 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
     static inline void SetPropertyIfOnInstance(const TSlideEntry &inEntry,
                                                Qt3DSDMInstanceHandle inInstance,
                                                Qt3DSDMInstanceHandle inDestInstance,
-                                               CUICDMSlideHandle inDestSlide,
+                                               Qt3DSDMSlideHandle inDestSlide,
                                                TSlideCorePtr inSlideCore)
     {
         if (get<0>(inEntry) == inInstance)
@@ -106,9 +106,9 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
     }
 
     static inline void
-    CopyAnimationIfOnInstance(CUICDMAnimationHandle inAnimation, CUICDMSlideHandle inSourceSlide,
+    CopyAnimationIfOnInstance(CUICDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inSourceSlide,
                               Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inDestInstance,
-                              CUICDMSlideHandle inDestSlide, TAnimationCorePtr inAnimationCore)
+                              Qt3DSDMSlideHandle inDestSlide, TAnimationCorePtr inAnimationCore)
     {
         SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
         if (theInfo.m_Instance == inInstance && theInfo.m_Slide == inSourceSlide)
@@ -120,8 +120,8 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
      *	Duplicate this instance and whichever properties and animations you desire,
      *	returning a new data model value that will be set on the newly created property.
      */
-    SValue CreateInstanceForProperty(CUICDMSlideHandle inSourceSlide,
-                                             CUICDMSlideHandle inDestSlide,
+    SValue CreateInstanceForProperty(Qt3DSDMSlideHandle inSourceSlide,
+                                             Qt3DSDMSlideHandle inDestSlide,
                                              Qt3DSDMInstanceHandle inInstance) override
     {
         std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4> theInstanceGuidPair(

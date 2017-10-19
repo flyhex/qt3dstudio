@@ -122,7 +122,7 @@ bool CTimeLineDropSource::ValidateTarget(CDropTarget *inTarget)
             theValidTarget &= (!inTarget->IsSelf(theHandle) && !inTarget->IsRelative(theHandle));
             qt3dsdm::ISlideSystem *theSlideSystem =
                 g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetSlideSystem();
-            qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(theHandle);
+            qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(theHandle);
             bool theIsMaster = theSlideSystem->IsMasterSlide(theSlide);
 
             theValidTarget &= !(theIsMaster && !inTarget->IsMaster());
@@ -146,7 +146,7 @@ inline void Rearrange(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstanc
 
 CCmd *CTimeLineDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                                 EDROPDESTINATION inDestType,
-                                                qt3dsdm::CUICDMSlideHandle inSlide)
+                                                qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *theBridge = theDoc->GetStudioSystem()->GetClientDataModelBridge();

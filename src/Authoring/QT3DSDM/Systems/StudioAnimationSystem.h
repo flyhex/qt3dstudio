@@ -103,11 +103,11 @@ public:
                                     Qt3DSDMPropertyHandle inProperty) const override;
     void SetInterpolation(bool inSmooth) override { m_SmoothInterpolation = inSmooth; }
 
-    bool GetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
+    bool GetAnimatedInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                   Qt3DSDMInstanceHandle inInstance,
                                                   Qt3DSDMPropertyHandle inProperty,
                                                   SValue &outValue) const override;
-    bool SetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
+    bool SetAnimatedInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                   Qt3DSDMInstanceHandle inInstance,
                                                   Qt3DSDMPropertyHandle inProperty,
                                                   const SValue &inValue) override;
@@ -118,11 +118,11 @@ public:
 private:
     void OnAnimationDeleted(CUICDMAnimationHandle inAnimation);
 
-    CUICDMSlideHandle GetApplicableGraphAndSlide(Qt3DSDMInstanceHandle inInstance,
+    Qt3DSDMSlideHandle GetApplicableGraphAndSlide(Qt3DSDMInstanceHandle inInstance,
                                                  Qt3DSDMPropertyHandle inProperty,
                                                  const SValue &inValue);
 
-    void OverrideChannelIfAnimated(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    void OverrideChannelIfAnimated(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                    Qt3DSDMPropertyHandle inProperty, size_t inIndex, float inSeconds,
                                    bool &ioAnimated, SValue &outValue) const;
 };

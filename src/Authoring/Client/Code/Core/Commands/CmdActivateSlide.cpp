@@ -38,7 +38,7 @@
 
 #include <QObject>
 
-CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlideHandle)
+CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlideHandle)
     : m_Doc(inDoc)
     , m_SlideHandle(inSlideHandle)
     , m_ForceRefresh(true)
@@ -52,7 +52,7 @@ CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle
     CClientDataModelBridge *theBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = theBridge->GetGUID(inInstance);
-    qt3dsdm::CUICDMSlideHandle theMasterSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
         theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     m_SlideHandle = theSlideSystem->GetActiveSlide(theMasterSlide);
 }

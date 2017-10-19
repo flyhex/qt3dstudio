@@ -59,13 +59,13 @@ public:
     IStringTable &GetStringTable() const override { return m_Data->GetStringTable(); }
     TStringTablePtr GetStringTablePtr() const override { return m_Data->GetStringTablePtr(); }
     // Action
-    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
                                     Qt3DSDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
     void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
     const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const override;
-    void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                     TActionHandleList &outActions) const override;
-    void GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const override;
+    void GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const override;
     void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
     void GetActions(TActionHandleList &outActions) const override;
     Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;

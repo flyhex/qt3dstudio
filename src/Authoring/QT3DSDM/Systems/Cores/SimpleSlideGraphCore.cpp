@@ -33,18 +33,18 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraph(CUICDMSlideHandle inRoot)
+CUICDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraph(Qt3DSDMSlideHandle inRoot)
 {
     int nextId = GetNextId();
     return CreateSlideGraphWithHandle(nextId, inRoot);
 }
 
-CUICDMSlideHandle CSimpleSlideGraphCore::GetGraphRoot(CUICDMSlideGraphHandle inGraph) const
+Qt3DSDMSlideHandle CSimpleSlideGraphCore::GetGraphRoot(CUICDMSlideGraphHandle inGraph) const
 {
     return GetSlideGraphNF(inGraph, m_Objects)->m_Root;
 }
 
-inline bool RootSlideMatches(const THandleObjectPair &inPair, CUICDMSlideHandle inSlide)
+inline bool RootSlideMatches(const THandleObjectPair &inPair, Qt3DSDMSlideHandle inSlide)
 {
     const SSlideGraph *theGraph = static_cast<SSlideGraph *>(inPair.second.get());
     if (theGraph->m_Root == inSlide)
@@ -52,7 +52,7 @@ inline bool RootSlideMatches(const THandleObjectPair &inPair, CUICDMSlideHandle 
     return false;
 }
 
-CUICDMSlideGraphHandle CSimpleSlideGraphCore::GetSlideGraph(CUICDMSlideHandle inSlide) const
+CUICDMSlideGraphHandle CSimpleSlideGraphCore::GetSlideGraph(Qt3DSDMSlideHandle inSlide) const
 {
     THandleObjectMap::const_iterator theFind = find_if<THandleObjectMap::const_iterator>(
         m_Objects, std::bind(RootSlideMatches, std::placeholders::_1, inSlide));
@@ -82,7 +82,7 @@ void CSimpleSlideGraphCore::DeleteSlideGraph(CUICDMSlideGraphHandle inHandle)
 }
 
 void CSimpleSlideGraphCore::AssociateInstance(CUICDMSlideGraphHandle inSlideGraph,
-                                              CUICDMSlideHandle inSlide,
+                                              Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inInstance)
 {
     pair<TInstanceToGraphMap::iterator, bool> theResult =
@@ -121,7 +121,7 @@ struct SInstanceMatcher
         : m_Instance(inInst)
     {
     }
-    bool operator()(const pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> &inItem) const
+    bool operator()(const pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> &inItem) const
     {
         return m_Instance == inItem.second;
     }
@@ -142,12 +142,12 @@ void CSimpleSlideGraphCore::DissociateInstance(Qt3DSDMInstanceHandle inInstance)
 }
 
 void CSimpleSlideGraphCore::SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph,
-                                                CUICDMSlideHandle inSlide)
+                                                Qt3DSDMSlideHandle inSlide)
 {
     GetSlideGraphNF(inGraph, m_Objects)->m_ActiveSlide = inSlide;
 }
 
-CUICDMSlideHandle CSimpleSlideGraphCore::GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const
+Qt3DSDMSlideHandle CSimpleSlideGraphCore::GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const
 {
     const SSlideGraph *theSlide = GetSlideGraphNF(inGraph, m_Objects);
     if (theSlide->m_ActiveSlide)
@@ -161,7 +161,7 @@ bool CSimpleSlideGraphCore::HandleValid(int inHandle) const
 }
 
 CUICDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraphWithHandle(int inHandle,
-                                                                         CUICDMSlideHandle inRoot)
+                                                                         Qt3DSDMSlideHandle inRoot)
 {
     m_Objects.insert(make_pair(inHandle, (THandleObjectPtr) new SSlideGraph(inHandle, inRoot)));
     return inHandle;

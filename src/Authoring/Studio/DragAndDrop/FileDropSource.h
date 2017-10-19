@@ -68,7 +68,7 @@ public:
 
     CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                        EDROPDESTINATION inDestType,
-                                       qt3dsdm::CUICDMSlideHandle inSlide) override;
+                                       qt3dsdm::Qt3DSDMSlideHandle inSlide) override;
 };
 
 #endif // #ifndef __FILEDROPSOURCE_H__

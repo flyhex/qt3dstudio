@@ -94,7 +94,7 @@ protected:
     void InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool CreateKeyframeIfNonExistent(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
                                      qt3dsdm::CUICDMAnimationHandle inOwningAnimation);
-    void OnPropertyLinkStatusChanged(qt3dsdm::CUICDMSlideHandle inSlide,
+    void OnPropertyLinkStatusChanged(qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                      qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                      qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void CreateKeyframes();

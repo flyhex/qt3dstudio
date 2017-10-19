@@ -55,30 +55,30 @@ public:
     /**
      *	Create a new slide.  Slides must have an instance allocated for them.
      */
-    virtual CUICDMSlideHandle CreateSlide(Qt3DSDMInstanceHandle inInstance) = 0;
+    virtual Qt3DSDMSlideHandle CreateSlide(Qt3DSDMInstanceHandle inInstance) = 0;
     /**
      *	Return the instance that was allocated for this slide.
      */
-    virtual Qt3DSDMInstanceHandle GetSlideInstance(CUICDMSlideHandle inSlide) const = 0;
+    virtual Qt3DSDMInstanceHandle GetSlideInstance(Qt3DSDMSlideHandle inSlide) const = 0;
     /**
      *	Reverse lookup into the slide system so you can match slides to instances.
      */
-    virtual CUICDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inSlide) const = 0;
+    virtual Qt3DSDMSlideHandle GetSlideByInstance(Qt3DSDMInstanceHandle inSlide) const = 0;
     /**
      *	Delete a given slide.  This recursively deletes all children.  All associated instances
      *	are returned in the outInstances list so the caller can further delete them.
      *	The deleted object is removed from the parent's list of children.  Child objects are
      *	also deleted.
      */
-    virtual void DeleteSlide(CUICDMSlideHandle inSlide, TInstanceHandleList &outInstances) = 0;
+    virtual void DeleteSlide(Qt3DSDMSlideHandle inSlide, TInstanceHandleList &outInstances) = 0;
     /**
      *	Return all of the slides in the core.
      */
     virtual void GetSlides(TSlideHandleList &outSlides) const = 0;
 
-    virtual float GetSlideTime(CUICDMSlideHandle inSlide) const = 0;
+    virtual float GetSlideTime(Qt3DSDMSlideHandle inSlide) const = 0;
 
-    virtual void SetSlideTime(CUICDMSlideHandle inSlide, float inNewTime) = 0;
+    virtual void SetSlideTime(Qt3DSDMSlideHandle inSlide, float inNewTime) = 0;
 
     //===============================================================
     // Slide derivation
@@ -89,21 +89,21 @@ public:
      *	if it isn't found on this slide.  OK for parent to be an invalid handle.  It is also fine
      *	for the slide to have a valid parent; all involved parties are notified and updated.
      */
-    virtual void DeriveSlide(CUICDMSlideHandle inSlide, CUICDMSlideHandle inParent,
+    virtual void DeriveSlide(Qt3DSDMSlideHandle inSlide, Qt3DSDMSlideHandle inParent,
                              int inIndex = -1) = 0;
     /**
      *	Return the parent slide for this slide.  Invalid handle if no parent.
      */
-    virtual CUICDMSlideHandle GetParentSlide(CUICDMSlideHandle inSlide) const = 0;
+    virtual Qt3DSDMSlideHandle GetParentSlide(Qt3DSDMSlideHandle inSlide) const = 0;
     /**
      *	Return a list of derived slides for this slide.
      */
-    virtual void GetChildSlides(CUICDMSlideHandle inSlide, TSlideHandleList &outChildren) const = 0;
+    virtual void GetChildSlides(Qt3DSDMSlideHandle inSlide, TSlideHandleList &outChildren) const = 0;
 
     /**
      *	Return the index of this child.  Exception if child isn't found
      */
-    virtual int GetChildIndex(CUICDMSlideHandle inParent, CUICDMSlideHandle inChild) const = 0;
+    virtual int GetChildIndex(Qt3DSDMSlideHandle inParent, Qt3DSDMSlideHandle inChild) const = 0;
     //===============================================================
 
     //===============================================================
@@ -112,7 +112,7 @@ public:
     /**
      *	Get this property from this instance in this slide.  Includes lookup into any parent slides.
      */
-    virtual bool GetInstancePropertyValue(CUICDMSlideHandle inSlide,
+    virtual bool GetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty,
                                           SValue &outValue) const = 0;
@@ -124,7 +124,7 @@ public:
      *if
      *	it already has a property entry then it sets the value locally.
      */
-    virtual void SetInstancePropertyValue(CUICDMSlideHandle inSlide,
+    virtual void SetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty,
                                           const SValue &inValue) = 0;
@@ -133,7 +133,7 @@ public:
      *	Set this property on this slide; do not try to set on parent slide under any circumstances.
      *Always adds entry to this slide.
      */
-    virtual void ForceSetInstancePropertyValue(CUICDMSlideHandle inSlide,
+    virtual void ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                Qt3DSDMInstanceHandle inInstance,
                                                Qt3DSDMPropertyHandle inProperty,
                                                const SValue &inValue) = 0;
@@ -141,7 +141,7 @@ public:
     /**
      *	Return the value for this property if it exists on this slide.
      */
-    virtual bool GetSpecificInstancePropertyValue(CUICDMSlideHandle inSlide,
+    virtual bool GetSpecificInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                   Qt3DSDMInstanceHandle inInstance,
                                                   Qt3DSDMPropertyHandle inProperty,
                                                   SValue &outValue) const = 0;
@@ -149,20 +149,20 @@ public:
     /**
      *	Return all of the properties for this instance stored on this slide.
      */
-    virtual void GetSpecificInstancePropertyValues(CUICDMSlideHandle inSlide,
+    virtual void GetSpecificInstancePropertyValues(Qt3DSDMSlideHandle inSlide,
                                                    Qt3DSDMInstanceHandle inInstance,
                                                    TPropertyHandleValuePairList &outValues) = 0;
 
     /**
      *	Get all of the property entries for the slide.
      */
-    virtual void GetSlidePropertyEntries(CUICDMSlideHandle inSlide,
+    virtual void GetSlidePropertyEntries(Qt3DSDMSlideHandle inSlide,
                                          TSlideEntryList &outEntries) const = 0;
 
     /**
      *	Set this property value on all my child slides.
      */
-    virtual void PushPropertyValueToChildren(CUICDMSlideHandle inParent,
+    virtual void PushPropertyValueToChildren(Qt3DSDMSlideHandle inParent,
                                              Qt3DSDMInstanceHandle inInstance,
                                              Qt3DSDMPropertyHandle inProperty,
                                              const SValue &inValue) = 0;
@@ -172,7 +172,7 @@ public:
      *with slide 2,
      *	add said property entry from slide1 to outEntries;
      */
-    virtual void GetIntersectingProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide2,
+    virtual void GetIntersectingProperties(Qt3DSDMSlideHandle inSlide1, Qt3DSDMSlideHandle inSlide2,
                                            TSlideEntryList &outEntries) const = 0;
 
     /**
@@ -180,13 +180,13 @@ public:
     *destination.
     *	Used for new slide operations.
     */
-    virtual void PushIntersectingProperties(CUICDMSlideHandle inSlide1, CUICDMSlideHandle inSlide2,
-                                            CUICDMSlideHandle inDestination) = 0;
+    virtual void PushIntersectingProperties(Qt3DSDMSlideHandle inSlide1, Qt3DSDMSlideHandle inSlide2,
+                                            Qt3DSDMSlideHandle inDestination) = 0;
 
     /**
      *	Ensure the children of this parent item do not contain entries for a given property.
      */
-    virtual void ClearChildrenPropertyValues(CUICDMSlideHandle inParent,
+    virtual void ClearChildrenPropertyValues(Qt3DSDMSlideHandle inParent,
                                              Qt3DSDMInstanceHandle inHandle,
                                              Qt3DSDMPropertyHandle inProperty) = 0;
 
@@ -210,7 +210,7 @@ public:
     /**
      *	Does this slide contain this property?
      */
-    virtual bool ContainsProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
+    virtual bool ContainsProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
                                   Qt3DSDMPropertyHandle inProperty) const = 0;
 
     /**
@@ -218,12 +218,12 @@ public:
      *destination
      *	instance.
      */
-    virtual void CopyProperties(CUICDMSlideHandle inSourceSlide,
+    virtual void CopyProperties(Qt3DSDMSlideHandle inSourceSlide,
                                 Qt3DSDMInstanceHandle inSourceInstance,
-                                CUICDMSlideHandle inDestSlide,
+                                Qt3DSDMSlideHandle inDestSlide,
                                 Qt3DSDMInstanceHandle inDestInstance) = 0;
 
-    virtual bool IsSlide(CUICDMSlideHandle inSlide) const = 0;
+    virtual bool IsSlide(Qt3DSDMSlideHandle inSlide) const = 0;
 };
 
 typedef std::shared_ptr<ISlideCore> TSlideCorePtr;

@@ -52,6 +52,6 @@ bool CDropTarget::CanAddToMaster()
         return true;
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
-    qt3dsdm::CUICDMSlideHandle theTargetSlide = theSlideSystem->GetAssociatedSlide(GetInstance());
+    qt3dsdm::Qt3DSDMSlideHandle theTargetSlide = theSlideSystem->GetAssociatedSlide(GetInstance());
     return theTargetSlide && theSlideSystem->IsMasterSlide(theTargetSlide);
 }

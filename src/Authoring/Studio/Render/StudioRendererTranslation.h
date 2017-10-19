@@ -390,9 +390,9 @@ namespace studio {
         QT3DSVec4 m_selectedGuideFillColor;
 
         STranslation(IStudioRenderer &inRenderer, IUICRenderContext &inContext);
-        void MarkBeginComponentSeconds(qt3dsdm::CUICDMSlideHandle) { ++m_ComponentSecondsDepth; }
+        void MarkBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle) { ++m_ComponentSecondsDepth; }
 
-        void MarkComponentSeconds(qt3dsdm::CUICDMSlideHandle)
+        void MarkComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle)
         {
             m_ComponentSecondsDepth = NVMax(0, m_ComponentSecondsDepth - 1);
             if (m_ComponentSecondsDepth == 0)

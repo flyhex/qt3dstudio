@@ -36,7 +36,7 @@ struct SelectedValueTypes
     enum Enum {
         UnknownSelectedValueType = 0,
         Instance, // Qt3DSDMInstanceHandle
-        Slide, // CUICDMSlideHandle
+        Slide, // Qt3DSDMSlideHandle
         SlideInsertion, // void*
         Guide, // CUICDMGuideHandle
         MultipleInstances, // std::vector<Qt3DSDMInstanceHandle>

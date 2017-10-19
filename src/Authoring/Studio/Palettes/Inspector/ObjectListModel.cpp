@@ -161,7 +161,7 @@ qt3dsdm::Qt3DSDMInstanceHandle ObjectListModel::handleForIndex(const QModelIndex
     return static_cast<qt3dsdm::Qt3DSDMInstanceHandle>(index.internalId());
 }
 
-qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::CUICDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
+qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
     auto slideSystem = m_core->GetDoc()->GetStudioSystem()->GetSlideSystem();
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);

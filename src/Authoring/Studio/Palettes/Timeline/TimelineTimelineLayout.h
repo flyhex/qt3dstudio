@@ -71,7 +71,7 @@ class CTimelineTimelineLayout : public CControl,
                                 public ISnappingListProvider
 {
     typedef std::vector<CTimelineRow *> TTimelineRowList;
-    typedef std::map<qt3dsdm::CUICDMSlideHandle, double> TSlideRatioMap;
+    typedef std::map<qt3dsdm::Qt3DSDMSlideHandle, double> TSlideRatioMap;
 
 public:
     static const long END_BUFFER_SIZE = 20;
@@ -116,15 +116,15 @@ public:
     void SetTimeRatio(double inTimeRatio);
     void OnTimelineLayoutChanged();
 
-    void DeleteTimelineRatio(qt3dsdm::CUICDMSlideHandle inSlide);
+    void DeleteTimelineRatio(qt3dsdm::Qt3DSDMSlideHandle inSlide);
     void ClearAllTimeRatios();
-    double GetTimelineRatio(qt3dsdm::CUICDMSlideHandle inSlide);
+    double GetTimelineRatio(qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
     // ISnappingListProvider
     void PopulateSnappingList(CSnapper *inSnappingList) override;
 
 protected:
-    void SetTimelineRatio(qt3dsdm::CUICDMSlideHandle inSlide, double inRatio);
+    void SetTimelineRatio(qt3dsdm::Qt3DSDMSlideHandle inSlide, double inRatio);
 
     long GetMaximumTimebarTime();
     void OnScalingZoomIn();

@@ -132,7 +132,7 @@ protected:
     CDialogs *m_Dialogs;
     long m_PlaybackTime; ///< Stores the playhead's starting position so that it can be restored
     ///after playing the presentation for a little while
-    qt3dsdm::CUICDMSlideHandle
+    qt3dsdm::Qt3DSDMSlideHandle
         m_PlaybackOriginalSlide; ///< Stores the current slide handle before playback started.
 
     std::shared_ptr<Q3DStudio::ITickTock> m_TickTock;

@@ -48,7 +48,7 @@ CActionSystem::CActionSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
     m_Signaller = CreateActionSystemSignaller();
 }
 
-CUICDMActionHandle CActionSystem::CreateAction(CUICDMSlideHandle inSlide,
+CUICDMActionHandle CActionSystem::CreateAction(Qt3DSDMSlideHandle inSlide,
                                                Qt3DSDMInstanceHandle inOwner,
                                                SLong4 inTriggerTargetObjects)
 {
@@ -81,14 +81,14 @@ void CActionSystem::DeleteAction(CUICDMActionHandle inAction)
     GetSignalSender()->SendActionDeleted(inAction, theActionInfo.m_Slide, theActionInfo.m_Owner);
 }
 
-void CActionSystem::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+void CActionSystem::GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                TActionHandleList &outActions) const
 {
     // Get all actions that exist in inSlide
     m_ActionCore->GetActions(inSlide, inOwner, outActions);
 
     // if inSlide is not master, get all actions that exist in master slide
-    CUICDMSlideHandle theMaster = m_SlideSystem->GetMasterSlide(inSlide);
+    Qt3DSDMSlideHandle theMaster = m_SlideSystem->GetMasterSlide(inSlide);
     if (theMaster != inSlide) {
         TActionHandleList theMasterActions;
         m_ActionCore->GetActions(theMaster, inOwner, theMasterActions);
@@ -97,7 +97,7 @@ void CActionSystem::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle 
     }
 }
 
-bool CActionSystem::GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
+bool CActionSystem::GetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
                                           CUICDMActionHandle inAction) const
 {
     SValue theValue;
@@ -110,7 +110,7 @@ bool CActionSystem::GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
     return false;
 }
 
-void CActionSystem::SetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
+void CActionSystem::SetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
                                           CUICDMActionHandle inAction, bool inValue)
 {
     Qt3DSDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);

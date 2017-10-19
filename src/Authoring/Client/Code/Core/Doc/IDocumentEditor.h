@@ -300,7 +300,7 @@ public:
         return DuplicateInstances(theInstances);
     }
 
-    virtual CUICDMActionHandle AddAction(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    virtual CUICDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                          const wstring &inEvent, const wstring &inHandler) = 0;
 
     virtual void DeleteAction(CUICDMActionHandle inAction) = 0;
@@ -309,14 +309,14 @@ public:
     virtual CUICDMActionHandle PasteAction(const CFilePath &inFilePath,
                                            Qt3DSDMInstanceHandle inNewRoot) = 0;
 
-    virtual CUICDMSlideHandle AddSlide(CUICDMSlideHandle inMasterSlide, int inIndex = -1) = 0;
+    virtual Qt3DSDMSlideHandle AddSlide(Qt3DSDMSlideHandle inMasterSlide, int inIndex = -1) = 0;
 
     // Only valid if the master slide has more than one slide.
-    virtual void DeleteSlide(CUICDMSlideHandle inSlide) = 0;
+    virtual void DeleteSlide(Qt3DSDMSlideHandle inSlide) = 0;
 
-    virtual void RearrangeSlide(CUICDMSlideHandle inSlide, int inNewIndex) = 0;
+    virtual void RearrangeSlide(Qt3DSDMSlideHandle inSlide, int inNewIndex) = 0;
 
-    virtual CUICDMSlideHandle DuplicateSlide(CUICDMSlideHandle inSlide) = 0;
+    virtual Qt3DSDMSlideHandle DuplicateSlide(Qt3DSDMSlideHandle inSlide) = 0;
 
     virtual qt3dsdm::CUICDMGuideHandle CreateGuide(const qt3dsdm::SGuideInfo &inInfo) = 0;
     virtual void UpdateGuide(qt3dsdm::CUICDMGuideHandle hdl, const qt3dsdm::SGuideInfo &inInfo) = 0;

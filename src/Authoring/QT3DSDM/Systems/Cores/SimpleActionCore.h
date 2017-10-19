@@ -41,7 +41,7 @@ struct SAction : public CHandleObject
 
     SAction() {}
 
-    SAction(int inHandle, Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+    SAction(int inHandle, Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
             Qt3DSDMInstanceHandle inOwner)
         : CHandleObject(inHandle)
         , m_ActionInfo(inInstance, inSlide, inOwner)
@@ -82,13 +82,13 @@ public: // Use
     IStringTable &GetStringTable() const override { return *m_StringTable.get(); }
     TStringTablePtr GetStringTablePtr() const override { return m_StringTable; }
     // Action
-    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
                                     Qt3DSDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
     void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
     const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const override;
-    void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                     TActionHandleList &outActions) const override;
-    void GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const override;
+    void GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const override;
     void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
     void GetActions(TActionHandleList &outActions) const override;
 
@@ -122,7 +122,7 @@ public: // Use
 
     // Helper functions
     CUICDMActionHandle CreateActionWithHandle(int inHandle, Qt3DSDMInstanceHandle inInstance,
-                                              CUICDMSlideHandle inSlide,
+                                              Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inOwner);
     CUICDMHandlerArgHandle AddHandlerArgumentWithHandle(int inHandle, CUICDMActionHandle inAction,
                                                         const TCharStr &inName,

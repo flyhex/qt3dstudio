@@ -125,7 +125,7 @@ public:
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
 
 private:
-    void onSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster, int inOldIndex,
+    void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
                            int inNewIndex);
 
 

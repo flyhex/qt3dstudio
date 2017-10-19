@@ -284,10 +284,10 @@ class CCmdDataModelActionSetEyeball : public CCmdDataModelActionSetValue
 {
 protected: // Members
     bool m_Value;
-    CUICDMSlideHandle m_ActiveSlide;
+    Qt3DSDMSlideHandle m_ActiveSlide;
 
 public: // Construction
-    CCmdDataModelActionSetEyeball(CDoc *inDoc, CUICDMSlideHandle inActiveSlide,
+    CCmdDataModelActionSetEyeball(CDoc *inDoc, Qt3DSDMSlideHandle inActiveSlide,
                                   CUICDMActionHandle inAction, bool inValue)
         : CCmdDataModelActionSetValue(inDoc, inAction, "Set Action Eyeball")
         , m_Value(inValue)

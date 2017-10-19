@@ -125,7 +125,7 @@ bool CStudioPropertySystem::GetInstancePropertyValue(Qt3DSDMInstanceHandle inIns
     if (!m_DataCore->IsProperty(inProperty))
         return false;
 
-    CUICDMSlideHandle theAnimationSlide;
+    Qt3DSDMSlideHandle theAnimationSlide;
     theAnimationSlide = m_SlideSystem->GetApplicableSlide(inInstance, inProperty);
     SValue theTemp;
     bool retval = SetDefault(GetDataType(inProperty), theTemp);
@@ -146,7 +146,7 @@ void CStudioPropertySystem::SetInstancePropertyValue(Qt3DSDMInstanceHandle inIns
 {
     m_DataCore->CheckValue(inInstance, inProperty, inValue);
 
-    CUICDMSlideHandle theApplicableSlide;
+    Qt3DSDMSlideHandle theApplicableSlide;
     theApplicableSlide = m_SlideSystem->GetApplicableSlide(inInstance, inProperty);
     if (theApplicableSlide.Valid()) {
         if (!m_StudioAnimationSystem->SetAnimatedInstancePropertyValue(

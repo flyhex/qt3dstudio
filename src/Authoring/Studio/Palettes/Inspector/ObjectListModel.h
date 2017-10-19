@@ -66,7 +66,7 @@ public:
 private:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
-    qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::CUICDMSlideHandle &slideHandle,
+    qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
                                                     const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
     QString nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
@@ -74,7 +74,7 @@ private:
     QModelIndex indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle, const QModelIndex &startIndex = {}) const;
 
     CCore *m_core;
-    qt3dsdm::CUICDMSlideHandle m_slideHandle;
+    qt3dsdm::Qt3DSDMSlideHandle m_slideHandle;
     qt3dsdm::Qt3DSDMInstanceHandle m_baseHandle;
     IObjectReferenceHelper *m_objRefHelper;
 };

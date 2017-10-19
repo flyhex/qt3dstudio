@@ -78,7 +78,7 @@ void CStudioAnimationSystem::ClearTemporaryAnimationValues(CUICDMAnimationHandle
              std::bind(AnimationFloatPairContainsAnimation, inAnimation, std::placeholders::_1));
 }
 
-inline bool IsAnimationInfoEqual(const SAnimationInfo &inInfo, CUICDMSlideHandle inSlide,
+inline bool IsAnimationInfoEqual(const SAnimationInfo &inInfo, Qt3DSDMSlideHandle inSlide,
                                  Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
 {
     if (inInfo.m_Slide == inSlide && inInfo.m_Instance == inInstance
@@ -86,7 +86,7 @@ inline bool IsAnimationInfoEqual(const SAnimationInfo &inInfo, CUICDMSlideHandle
         return true;
     return false;
 }
-inline bool IsAnimationInfoEqual(const SAnimationInfo &inInfo, CUICDMSlideHandle inSlide,
+inline bool IsAnimationInfoEqual(const SAnimationInfo &inInfo, Qt3DSDMSlideHandle inSlide,
                                  Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                  size_t inIndex)
 {
@@ -96,7 +96,7 @@ inline bool IsAnimationInfoEqual(const SAnimationInfo &inInfo, CUICDMSlideHandle
 }
 
 inline bool ApplyIfAnimationMatches(TAnimationFloatPair inAnimationFloatPair,
-                                    CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+                                    Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                     Qt3DSDMPropertyHandle inProperty,
                                     TAnimationCorePtr inAnimationCore, SValue &outValue)
 {
@@ -108,7 +108,7 @@ inline bool ApplyIfAnimationMatches(TAnimationFloatPair inAnimationFloatPair,
     return false;
 }
 
-void CStudioAnimationSystem::OverrideChannelIfAnimated(CUICDMSlideHandle inSlide,
+void CStudioAnimationSystem::OverrideChannelIfAnimated(Qt3DSDMSlideHandle inSlide,
                                                        Qt3DSDMInstanceHandle inInstance,
                                                        Qt3DSDMPropertyHandle inProperty,
                                                        size_t inIndex, float inSeconds,
@@ -124,7 +124,7 @@ void CStudioAnimationSystem::OverrideChannelIfAnimated(CUICDMSlideHandle inSlide
 }
 
 // Value must be *primed* first.
-bool CStudioAnimationSystem::GetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
+bool CStudioAnimationSystem::GetAnimatedInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                               Qt3DSDMInstanceHandle inInstance,
                                                               Qt3DSDMPropertyHandle inProperty,
                                                               SValue &outValue) const
@@ -210,7 +210,7 @@ CUICDMKeyframeHandle CreateKeyframe(CUICDMAnimationHandle inAnimation, const SVa
                                   inSeconds, inAnimationCore, inEaseIn, inEaseOut);
 }
 
-void MaybeAddAnimation(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void MaybeAddAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                        Qt3DSDMPropertyHandle inProperty, CUICDMAnimationHandle inAnimation,
                        TAnimationCorePtr inAnimationCore, TAnimationHandleList &outAnimations)
 {
@@ -225,7 +225,7 @@ bool SortAnimationHandlesByIndex(CUICDMAnimationHandle lhs, CUICDMAnimationHandl
     return inCore->GetAnimationInfo(lhs).m_Index < inCore->GetAnimationInfo(rhs).m_Index;
 }
 
-void GetPresentAnimations(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void GetPresentAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                           Qt3DSDMPropertyHandle inProperty,
                           const TAnimationFloatPairList &inAnimationPairs,
                           TAnimationCorePtr inAnimationCore, TAnimationHandleList &outAnimations)
@@ -250,7 +250,7 @@ void GetPresentAnimations(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inIns
                         std::placeholders::_1, std::placeholders::_2, inAnimationCore));
 }
 
-void CreateAnimationAndAdd(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void CreateAnimationAndAdd(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                            Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                            TAnimationCorePtr inAnimationCore, TAnimationHandleList &outAnimations)
 {
@@ -277,7 +277,7 @@ bool AnimationExistsInPresentAnimations(const TAnimationFloatPair &inAnimation,
                             std::placeholders::_1));
 }
 
-void DoKeyframeProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void DoKeyframeProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                         Qt3DSDMPropertyHandle inProperty, const SValue &inValue, float inTimeInSecs,
                         bool inDoDiffValue, TAnimationCorePtr inAnimationCore,
                         TAnimationFloatPairList &inAnimationFloatPairs, float inEaseIn,
@@ -306,7 +306,7 @@ void DoKeyframeProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInsta
     }
 }
 
-void DoKeyframeProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void DoKeyframeProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                         Qt3DSDMPropertyHandle inProperty, const SValue &inValue, bool inDoDiffValue,
                         TAnimationCorePtr inAnimationCore, TSlideGraphCorePtr inSlideGraphCore,
                         TSlideCorePtr inSlideCore, TAnimationFloatPairList &inAnimationFloatPairs,
@@ -319,7 +319,7 @@ void DoKeyframeProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInsta
                        inAnimationCore, inAnimationFloatPairs, inEaseIn, inEaseOut);
 }
 
-void DoKeyframeProperty(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void DoKeyframeProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                         Qt3DSDMPropertyHandle inProperty, const SValue &inValue, bool inDoDiffValue,
                         TAnimationCorePtr inAnimationCore, TSlideGraphCorePtr inSlideGraphCore,
                         TSlideCorePtr inSlideCore, TAnimationFloatPairList &inAnimationFloatPairs,
@@ -350,7 +350,7 @@ void InsertUniqueAnimationFloatPair(CUICDMAnimationHandle inAnimation,
                      std::bind(AnimationFloatPairContainsAnimation, inAnimation, std::placeholders::_1));
 }
 
-bool CStudioAnimationSystem::SetAnimatedInstancePropertyValue(CUICDMSlideHandle inSlide,
+bool CStudioAnimationSystem::SetAnimatedInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                               Qt3DSDMInstanceHandle inInstance,
                                                               Qt3DSDMPropertyHandle inProperty,
                                                               const SValue &inValue)
@@ -397,10 +397,10 @@ bool CStudioAnimationSystem::GetAutoKeyframe() const
     return m_AutoKeyframe;
 }
 
-CUICDMSlideHandle CStudioAnimationSystem::GetApplicableGraphAndSlide(
+Qt3DSDMSlideHandle CStudioAnimationSystem::GetApplicableGraphAndSlide(
     Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty, const SValue &inValue)
 {
-    CUICDMSlideHandle theApplicableSlide;
+    Qt3DSDMSlideHandle theApplicableSlide;
     tuple<bool, size_t> arity = GetVariantAnimatableAndArity(inValue);
     if (get<0>(arity))
         theApplicableSlide = m_SlideSystem->GetApplicableSlide(inInstance, inProperty);
@@ -434,7 +434,7 @@ void CStudioAnimationSystem::Animate(Qt3DSDMInstanceHandle inInstance,
 {
     SValue theValue;
     m_PropertySystem->GetInstancePropertyValue(inInstance, inProperty, theValue);
-    CUICDMSlideHandle theApplicableSlide =
+    Qt3DSDMSlideHandle theApplicableSlide =
         GetApplicableGraphAndSlide(inInstance, inProperty, theValue.toOldSkool());
     if (theApplicableSlide.Valid()) {
         // Check if previously we have set animation & keyframes
@@ -505,7 +505,7 @@ void CStudioAnimationSystem::KeyframeProperty(Qt3DSDMInstanceHandle inInstance,
 {
     SValue theValue;
     m_PropertySystem->GetInstancePropertyValue(inInstance, inProperty, theValue);
-    CUICDMSlideHandle theApplicableSlide =
+    Qt3DSDMSlideHandle theApplicableSlide =
         GetApplicableGraphAndSlide(inInstance, inProperty, theValue.toOldSkool());
     if (theApplicableSlide.Valid())
         DoKeyframeProperty(theApplicableSlide, inInstance, inProperty, theValue.toOldSkool(),
@@ -519,7 +519,7 @@ void CStudioAnimationSystem::SetOrCreateKeyframe(Qt3DSDMInstanceHandle inInstanc
                                                  size_t inNumInfos)
 {
     qt3dsdm::DataModelDataType::Value thePropertyType = m_PropertySystem->GetDataType(inProperty);
-    CUICDMSlideHandle theApplicableSlide;
+    Qt3DSDMSlideHandle theApplicableSlide;
     std::tuple<bool, size_t> arity = GetDatatypeAnimatableAndArity(thePropertyType);
     if (std::get<0>(arity)) {
         theApplicableSlide = m_SlideSystem->GetApplicableSlide(inInstance, inProperty);
@@ -559,7 +559,7 @@ inline bool FindMatchingAnimation(CUICDMAnimationHandle inAnimation,
 CUICDMAnimationHandle CStudioAnimationSystem::GetControllingAnimation(
     Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty, size_t inIndex) const
 {
-    CUICDMSlideHandle theApplicableSlide =
+    Qt3DSDMSlideHandle theApplicableSlide =
         m_SlideSystem->GetApplicableSlide(inInstance, inProperty);
     // first check our anim float pairs
     for (size_t idx = 0, end = m_AnimationFloatPairs.size(); idx < end; ++idx) {

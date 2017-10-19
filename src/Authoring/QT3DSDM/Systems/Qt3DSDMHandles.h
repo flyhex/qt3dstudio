@@ -143,31 +143,31 @@ public:
 
 typedef std::vector<Qt3DSDMPropertyHandle> TPropertyHandleList;
 
-class CUICDMSlideHandle : public CDataModelHandle
+class Qt3DSDMSlideHandle : public CDataModelHandle
 {
 public:
-    CUICDMSlideHandle(int inHandle = 0)
+    Qt3DSDMSlideHandle(int inHandle = 0)
         : CDataModelHandle(inHandle)
     {
     }
 
-    CUICDMSlideHandle(const CDataModelHandle &inOther)
+    Qt3DSDMSlideHandle(const CDataModelHandle &inOther)
         : CDataModelHandle(inOther)
     {
     }
 
-    CUICDMSlideHandle(const CUICDMSlideHandle &inOther)
+    Qt3DSDMSlideHandle(const Qt3DSDMSlideHandle &inOther)
         : CDataModelHandle(inOther)
     {
     }
 
-    CUICDMSlideHandle &operator=(const CUICDMSlideHandle &inOther)
+    Qt3DSDMSlideHandle &operator=(const Qt3DSDMSlideHandle &inOther)
     {
-        return static_cast<CUICDMSlideHandle &>(CDataModelHandle::operator=(inOther));
+        return static_cast<Qt3DSDMSlideHandle &>(CDataModelHandle::operator=(inOther));
     }
 };
 
-typedef std::vector<CUICDMSlideHandle> TSlideHandleList;
+typedef std::vector<Qt3DSDMSlideHandle> TSlideHandleList;
 
 class CUICDMSlideGraphHandle : public CDataModelHandle
 {
@@ -454,6 +454,6 @@ public:
 typedef std::vector<CUICDMGuideHandle> TGuideHandleList;
 }
 
-Q_DECLARE_METATYPE(qt3dsdm::CUICDMSlideHandle);
+Q_DECLARE_METATYPE(qt3dsdm::Qt3DSDMSlideHandle);
 
 #endif

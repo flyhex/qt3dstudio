@@ -414,17 +414,17 @@ CCore *CDoc::GetCore()
 
 //=============================================================================
 /**
- *	Calls NotifyActiveSlideChanged( UICDM::CUICDMSlideHandle inNewActiveSlide, bool
+ *	Calls NotifyActiveSlideChanged( UICDM::Qt3DSDMSlideHandle inNewActiveSlide, bool
  *inForceRefresh )
  *	Could not make this on optional param because someone is calling from CGenericCmd that
  *	seems to only allow 1 param.
  */
-void CDoc::NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide)
+void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide)
 {
     NotifyActiveSlideChanged(inNewActiveSlide, false);
 }
 
-void CDoc::SetActiveSlideChange(qt3dsdm::CUICDMSlideHandle inNewActiveSlide)
+void CDoc::SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide)
 {
     if (!inNewActiveSlide.Valid())
         inNewActiveSlide = GetActiveSlide();
@@ -440,7 +440,7 @@ void CDoc::SetActiveSlideChange(qt3dsdm::CUICDMSlideHandle inNewActiveSlide)
         m_ActiveLayer = 0;
 
         qt3dsdm::ISlideSystem *theSlideSystem = m_StudioSystem->GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle theMasterSlide = theSlideSystem->GetMasterSlide(inNewActiveSlide);
+        qt3dsdm::Qt3DSDMSlideHandle theMasterSlide = theSlideSystem->GetMasterSlide(inNewActiveSlide);
 
         long theNewIndex = theSlideSystem->GetSlideIndex(inNewActiveSlide);
         theSlideSystem->SetActiveSlide(theMasterSlide, theNewIndex);
@@ -477,12 +477,12 @@ void CDoc::SetActiveSlideChange(qt3dsdm::CUICDMSlideHandle inNewActiveSlide)
  * was active. E.g. when this would be true is when we are playing through, time should always start
  * from 0 then.
  */
-void CDoc::NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide, bool inForceRefresh,
+void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide, bool inForceRefresh,
                                     bool inIgnoreLastDisplayTime /*= false */)
 {
     using namespace qt3dsdm;
 
-    qt3dsdm::CUICDMSlideHandle theLastActiveSlide = m_ActiveSlide;
+    qt3dsdm::Qt3DSDMSlideHandle theLastActiveSlide = m_ActiveSlide;
 
     // Record the last selected object in that slide
     ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
@@ -506,9 +506,9 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::CUICDMSlideHandle inNewActiveSlide,
                     m_StudioSystem->GetSlideSystem()->GetMasterSlide(inNewActiveSlide), 0);
         }
 
-        CUICDMSlideHandle theLastMasterSlide =
+        Qt3DSDMSlideHandle theLastMasterSlide =
             m_StudioSystem->GetSlideSystem()->GetMasterSlide(theLastActiveSlide);
-        CUICDMSlideHandle theNewMasterSlide =
+        Qt3DSDMSlideHandle theNewMasterSlide =
             m_StudioSystem->GetSlideSystem()->GetMasterSlide(inNewActiveSlide);
 
         int theIndex = m_StudioSystem->GetSlideSystem()->GetSlideIndex(inNewActiveSlide);
@@ -581,7 +581,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveRootInstance()
  *	Returns the current active slide
  *	The timeline is always displaying the active root.
  */
-qt3dsdm::CUICDMSlideHandle CDoc::GetActiveSlide()
+qt3dsdm::Qt3DSDMSlideHandle CDoc::GetActiveSlide()
 {
     if (m_ActiveSlide.Valid())
         return m_ActiveSlide;
@@ -884,7 +884,7 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
         if (theNewSelectedInstance.Valid()) {
             // Check if we do not select a SlideInspectable. Refer to
             // CStudioApp::GetInspectableFromSelectable.
-            qt3dsdm::CUICDMSlideHandle theCurrentActiveSlide = GetActiveSlide();
+            qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = GetActiveSlide();
             if (theNewSelectedInstance
                 != theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
                 // If the newly selected object is in the scene then make the layer it belongs to
@@ -938,14 +938,14 @@ struct SReferenceTransaction : public qt3dsdm::ITransaction
     void Undo() override { m_TargetData = m_OldData; }
 };
 
-void CDoc::SetActiveSlideWithTransaction(qt3dsdm::CUICDMSlideHandle inNewActiveSlide)
+void CDoc::SetActiveSlideWithTransaction(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide)
 {
     using namespace qt3dsdm;
-    CUICDMSlideHandle theActiveSlide = m_ActiveSlide;
+    Qt3DSDMSlideHandle theActiveSlide = m_ActiveSlide;
     m_ActiveSlide = inNewActiveSlide;
     TTransactionConsumerPtr theConsumer = m_StudioSystem->GetFullSystem()->GetConsumer();
     if (theConsumer)
-        theConsumer->OnTransaction(std::make_shared<SReferenceTransaction<CUICDMSlideHandle>>(
+        theConsumer->OnTransaction(std::make_shared<SReferenceTransaction<Qt3DSDMSlideHandle>>(
             __FILE__, __LINE__, ref(m_ActiveSlide), theActiveSlide, inNewActiveSlide));
 }
 
@@ -1017,14 +1017,14 @@ Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPa
     return theFont;
 }
 
-void CDoc::OnSlideDeleted(qt3dsdm::CUICDMSlideHandle inSlide)
+void CDoc::OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     using namespace qt3dsdm;
     if (inSlide == m_ActiveSlide) {
         ISlideSystem &theSlideSystem = *m_StudioSystem->GetFullSystem()->GetSlideSystem();
-        CUICDMSlideHandle theMaster = theSlideSystem.GetMasterSlide(inSlide);
-        CUICDMSlideHandle theFirstSlide = theSlideSystem.GetSlideByIndex(theMaster, 1);
-        CUICDMSlideHandle theNewSlide;
+        Qt3DSDMSlideHandle theMaster = theSlideSystem.GetMasterSlide(inSlide);
+        Qt3DSDMSlideHandle theFirstSlide = theSlideSystem.GetSlideByIndex(theMaster, 1);
+        Qt3DSDMSlideHandle theNewSlide;
         if (theFirstSlide == inSlide)
             theNewSlide = theSlideSystem.GetSlideByIndex(theMaster, 2);
         else
@@ -1046,7 +1046,7 @@ void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     SComposerObjectDefinitions &theDefinitions(theBridge.GetObjectDefinitions());
     IDataCore &theCore(*m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore());
     if (theCore.IsInstanceOrDerivedFrom(inInstance, theDefinitions.m_SlideOwner.m_Instance)) {
-        CUICDMSlideHandle theSlide = theBridge.GetComponentActiveSlide(inInstance);
+        Qt3DSDMSlideHandle theSlide = theBridge.GetComponentActiveSlide(inInstance);
         if (theSlide == m_ActiveSlide) {
             // empty loop intentional, finding the next component parent.
             Qt3DSDMInstanceHandle theParent;
@@ -1126,13 +1126,13 @@ void CDoc::SelectAndNavigateToUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInsta
         return;
     }
     Q3DStudio::IDocumentReader &theReader(GetDocumentReader());
-    qt3dsdm::CUICDMSlideHandle theAssociatedSlide = theReader.GetAssociatedSlide(inInstanceHandle);
+    qt3dsdm::Qt3DSDMSlideHandle theAssociatedSlide = theReader.GetAssociatedSlide(inInstanceHandle);
     qt3dsdm::Qt3DSDMInstanceHandle theNewComponent =
         theReader.GetComponentForSlide(theAssociatedSlide);
     qt3dsdm::Qt3DSDMInstanceHandle theOldComponent = theReader.GetComponentForSlide(GetActiveSlide());
     if (theNewComponent.Valid() && theNewComponent != theOldComponent) {
         // Get the currently active slide for the new component.
-        qt3dsdm::CUICDMSlideHandle theActiveSlide =
+        qt3dsdm::Qt3DSDMSlideHandle theActiveSlide =
             theReader.GetComponentActiveSlide(theNewComponent);
         NotifyActiveSlideChanged(theActiveSlide, true);
     }
@@ -1195,7 +1195,7 @@ void CDoc::DoNotifyTimeChanged(long inNewTime)
     }
 
     // Update UICDM
-    qt3dsdm::CUICDMSlideHandle theMasterSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
         m_StudioSystem->GetSlideSystem()->GetMasterSlide(GetActiveSlide());
     // TODO: fix precision issue from converting to/from float & long. choose 1 type
     m_StudioSystem->GetSlideSystem()->SetComponentSeconds(theMasterSlide, (float)inNewTime / 1000);
@@ -1502,7 +1502,7 @@ void CDoc::CreateNewDocument()
     CreatePresentation();
 
     // Create the default objects in the scene
-    CUICDMSlideHandle theSlide =
+    Qt3DSDMSlideHandle theSlide =
         m_StudioSystem->GetClientDataModelBridge()->GetOrCreateGraphRoot(m_SceneInstance);
     IDataCore &theDataCore(
         *m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetTransactionlessDataCore());
@@ -1664,12 +1664,12 @@ void CDoc::HandleMasterPaste()
         long theTargetObjectType =
             GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance);
         qt3dsdm::ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle theTargetSlide =
+        qt3dsdm::Qt3DSDMSlideHandle theTargetSlide =
             theSlideSystem->GetAssociatedSlide(theSelectedInstance);
 
         if (theTargetObjectType != OBJTYPE_SCENE && theTargetObjectType != OBJTYPE_COMPONENT) {
             if (theTargetSlide && theSlideSystem->IsMasterSlide(theTargetSlide)) {
-                qt3dsdm::CUICDMSlideHandle theMasterSlideHandle =
+                qt3dsdm::Qt3DSDMSlideHandle theMasterSlideHandle =
                     theSlideSystem->GetMasterSlide(theTargetSlide);
                 if (theMasterSlideHandle.Valid())
                     theTargetSlide = theMasterSlideHandle;
@@ -1677,7 +1677,7 @@ void CDoc::HandleMasterPaste()
             } else
                 PasteObject(theSelectedInstance);
         } else {
-            qt3dsdm::CUICDMSlideHandle theMasterSlideHandle =
+            qt3dsdm::Qt3DSDMSlideHandle theMasterSlideHandle =
                 theSlideSystem->GetMasterSlide(theTargetSlide);
             if (theMasterSlideHandle.Valid())
                 theTargetSlide = theMasterSlideHandle;
@@ -1940,9 +1940,9 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
 
     // We have a new presentation and a new active time context (scene)
     OnNewPresentation();
-    qt3dsdm::CUICDMSlideHandle theMasterSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
         m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 0);
-    qt3dsdm::CUICDMSlideHandle theChildSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theChildSlide =
         m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 1);
     m_StudioSystem->GetFullSystem()->GetSignalSender()->SendActiveSlide(theMasterSlide, 1,
                                                                         theChildSlide);
@@ -2572,7 +2572,7 @@ void CDoc::IterateImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                     thePropertySystem->GetAdditionalMetaDataType(theChildInstance, theProperty);
 
                 if (theAdditionalMetaDataType == qt3dsdm::AdditionalMetaDataType::Image) {
-                    qt3dsdm::CUICDMSlideHandle theSlide =
+                    qt3dsdm::Qt3DSDMSlideHandle theSlide =
                         theSlideSystem->GetAssociatedSlide(theChildInstance);
                     bool theIsMaster = theSlideSystem->IsMasterSlide(theSlide);
                     if (!theIsMaster
@@ -2596,7 +2596,7 @@ void CDoc::IterateImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                         }
                     } else {
                         qt3dsdm::SValue theValue;
-                        qt3dsdm::CUICDMSlideHandle theMasterSlide =
+                        qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
                             theClientBridge->GetOrCreateGraphRoot(theChildInstance);
 
                         size_t theNumSlides = theSlideSystem->GetSlideCount(theMasterSlide);

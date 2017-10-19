@@ -108,7 +108,7 @@ struct SLookupCacheDoUndoOp : public ITransaction
 };
 
 CUICDMAnimationHandle
-CAnimationCoreProducer::CreateAnimation(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+CAnimationCoreProducer::CreateAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                         Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                         EAnimationType inAnimationType, bool inFirstKeyframeDynamic)
 {
@@ -144,7 +144,7 @@ void CAnimationCoreProducer::DeleteAnimation(CUICDMAnimationHandle inAnimation)
                                             theInfo.m_AnimationType);
 }
 
-CUICDMAnimationHandle CAnimationCoreProducer::GetAnimation(CUICDMSlideHandle inSlide,
+CUICDMAnimationHandle CAnimationCoreProducer::GetAnimation(Qt3DSDMSlideHandle inSlide,
                                                            Qt3DSDMInstanceHandle inInstance,
                                                            Qt3DSDMPropertyHandle inProperty,
                                                            size_t inIndex) const
@@ -163,8 +163,8 @@ void CAnimationCoreProducer::GetAnimations(TAnimationHandleList &outAnimations) 
 }
 
 void CAnimationCoreProducer::GetAnimations(TAnimationInfoList &outAnimations,
-                                           CUICDMSlideHandle inMaster,
-                                           CUICDMSlideHandle inSlide) const
+                                           Qt3DSDMSlideHandle inMaster,
+                                           Qt3DSDMSlideHandle inSlide) const
 {
     return m_Data->GetAnimations(outAnimations, inMaster, inSlide);
 }
@@ -338,7 +338,7 @@ size_t CAnimationCoreProducer::GetKeyframeCount(CUICDMAnimationHandle inAnimatio
     return m_Data->GetKeyframeCount(inAnimation);
 }
 
-void CAnimationCoreProducer::OffsetAnimations(CUICDMSlideHandle inSlide,
+void CAnimationCoreProducer::OffsetAnimations(Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inInstance,
                                               long inMillisecondOffset)
 {
@@ -391,9 +391,9 @@ bool CAnimationCoreProducer::AnimationValid(CUICDMAnimationHandle inAnimation) c
     return m_Data->AnimationValid(inAnimation);
 }
 
-void CAnimationCoreProducer::CopyAnimations(CUICDMSlideHandle inSourceSlide,
+void CAnimationCoreProducer::CopyAnimations(Qt3DSDMSlideHandle inSourceSlide,
                                             Qt3DSDMInstanceHandle inSourceInstance,
-                                            CUICDMSlideHandle inDestSlide,
+                                            Qt3DSDMSlideHandle inDestSlide,
                                             Qt3DSDMInstanceHandle inDestInstance)
 {
     std::vector<SAnimationTrack *> theAnimations;
@@ -422,7 +422,7 @@ void CAnimationCoreProducer::SetConsumer(TTransactionConsumerPtr inConsumer)
 }
 
 TSignalConnectionPtr CAnimationCoreProducer::ConnectAnimationCreated(
-    const std::function<void(CUICDMAnimationHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+    const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback)
 {
     return GetSignalProvider()->ConnectAnimationCreated(inCallback);
@@ -433,7 +433,7 @@ TSignalConnectionPtr CAnimationCoreProducer::ConnectBeforeAnimationDeleted(
     return GetSignalProvider()->ConnectBeforeAnimationDeleted(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectAnimationDeleted(
-    const std::function<void(CUICDMAnimationHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle,
+    const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback)
 {
     return GetSignalProvider()->ConnectAnimationDeleted(inCallback);

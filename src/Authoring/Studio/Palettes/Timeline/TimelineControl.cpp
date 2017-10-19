@@ -156,7 +156,7 @@ void CTimelineControl::ClearView()
  * root of the doc.
  * @param inState the state to be viewed as the root asset.
  */
-void CTimelineControl::ViewSlide(qt3dsdm::CUICDMSlideHandle inSlide)
+void CTimelineControl::ViewSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     m_ActiveSlide = inSlide;
 
@@ -190,7 +190,7 @@ void CTimelineControl::ViewSlide(qt3dsdm::CUICDMSlideHandle inSlide)
  * Notification from the StudioFullSystem signal provider that a we have a new active slide.
  * This will populate this view with the new context.
  */
-void CTimelineControl::OnActiveSlide(qt3dsdm::CUICDMSlideHandle inSlide)
+void CTimelineControl::OnActiveSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     ClearView();
     ViewSlide(inSlide);
@@ -238,7 +238,7 @@ void CTimelineControl::OnClosingPresentation()
 /**
  * Accessor for the root object being displayed in this view.
  */
-qt3dsdm::CUICDMSlideHandle CTimelineControl::GetActiveSlide()
+qt3dsdm::Qt3DSDMSlideHandle CTimelineControl::GetActiveSlide()
 {
     return m_ActiveSlide;
 }
@@ -561,7 +561,7 @@ void CTimelineControl::OnSavingPresentation(const CUICFile *inNewPresentationFil
 /**
  * Notification from the StudioFullSystem signal provider that a slide has been deleted.
  */
-void CTimelineControl::OnDeleteSlide(qt3dsdm::CUICDMSlideHandle inSlide)
+void CTimelineControl::OnDeleteSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     m_TimelineLayout->DeleteTimelineRatio(inSlide);
 }

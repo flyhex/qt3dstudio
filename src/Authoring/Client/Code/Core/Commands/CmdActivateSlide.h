@@ -39,13 +39,13 @@ class CDoc;
 
 namespace qt3dsdm {
 class ISlideSystem;
-class CUICDMSlideHandle;
+class Qt3DSDMSlideHandle;
 };
 
 class CCmdActivateSlide : public CNonModifyingCmd
 {
 public:
-    CCmdActivateSlide(CDoc *inDoc, qt3dsdm::CUICDMSlideHandle inSlideHandle);
+    CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlideHandle);
     CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual ~CCmdActivateSlide();
 
@@ -58,7 +58,7 @@ public:
 
 protected:
     CDoc *m_Doc;
-    qt3dsdm::CUICDMSlideHandle m_SlideHandle;
+    qt3dsdm::Qt3DSDMSlideHandle m_SlideHandle;
     bool m_ForceRefresh;
 };
 #endif // INCLUDED_CMD_ACTIVATE_SLIDE_H

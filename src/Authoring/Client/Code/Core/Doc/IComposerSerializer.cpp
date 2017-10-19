@@ -296,7 +296,7 @@ using std::tuple;
 struct SComposerSerializerImpl : public IComposerSerializer
 {
     typedef unordered_set<Qt3DSDMInstanceHandle, hash<int>> TInstanceSet;
-    typedef unordered_set<CUICDMSlideHandle, hash<int>> TSlideSet;
+    typedef unordered_set<Qt3DSDMSlideHandle, hash<int>> TSlideSet;
     typedef unordered_set<CUICDMActionHandle, hash<int>> TActionSet;
     typedef vector<Qt3DSDMInstanceHandle> TInstanceList;
     typedef unordered_map<int, TCharPtr> THandleToIdMap;
@@ -328,8 +328,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
     TGUIDToHandleMap m_GUIDToHandleMap;
     THandleToGUIDMap m_HandleToGUIDMap;
 
-    CUICDMSlideHandle m_ActiveSlide;
-    CUICDMSlideHandle m_ActiveSlideParent;
+    Qt3DSDMSlideHandle m_ActiveSlide;
+    Qt3DSDMSlideHandle m_ActiveSlideParent;
 
     THandleToIdMap m_ActionToIdMap;
     TIdToHandleMap m_IdToActionMap;
@@ -453,7 +453,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return theIdStr;
     }
 
-    TCharPtr AddSlideId(const wstring &inId, CUICDMSlideHandle inHandle)
+    TCharPtr AddSlideId(const wstring &inId, Qt3DSDMSlideHandle inHandle)
     {
         TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
         m_IdToSlideMap.insert(make_pair(theIdStr, inHandle));
@@ -475,7 +475,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return 0;
     }
 
-    CUICDMSlideHandle GetSlideById(TCharPtr inId)
+    Qt3DSDMSlideHandle GetSlideById(TCharPtr inId)
     {
         if (IsTrivial(inId))
             return 0;
@@ -526,7 +526,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     TCharPtr GetInstanceName(Qt3DSDMInstanceHandle inInstance)
     {
-        CUICDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
+        Qt3DSDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
         SValue theValue;
         if (theAssociatedSlide.Valid()
                 && m_SlideCore.GetSpecificInstancePropertyValue(theAssociatedSlide, inInstance,
@@ -552,7 +552,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return L"";
     }
 
-    TCharPtr GetInstanceName(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide)
+    TCharPtr GetInstanceName(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide)
     {
         SValue theValue;
         if (m_SlideCore.GetSpecificInstancePropertyValue(
@@ -631,7 +631,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                             if (thePropGuid == theGuid)
                                 theProperty = theProperties[propIdx];
                         }
-                        CUICDMSlideHandle theSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
+                        Qt3DSDMSlideHandle theSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
                         if (theProperty.Valid() == false && theSlide.Valid()
                                 && m_SlideCore.GetSpecificInstancePropertyValue(
                                     theSlide, theMaterial, theProperties[propIdx], theValue)) {
@@ -653,7 +653,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return AddId(theNewId, inInstance);
     }
 
-    TCharPtr GetActionId(CUICDMActionHandle inAction, CUICDMSlideHandle inSlide,
+    TCharPtr GetActionId(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                          Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inAction.Valid());
@@ -670,7 +670,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     // If this function is called with an invalid instance and we don't already have an id
     // then we assume we have an external reference and lookup the instance via the component id.
-    TCharPtr GetSlideId(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
+    TCharPtr GetSlideId(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inSlide.Valid());
         THandleToIdMap::iterator theFind(m_SlideToIdMap.find(inSlide));
@@ -679,7 +679,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         if (inInstance.Valid() == false) {
             m_ExternalSlides.insert(inSlide);
-            CUICDMSlideHandle theMaster = m_SlideSystem.GetMasterSlide(inSlide);
+            Qt3DSDMSlideHandle theMaster = m_SlideSystem.GetMasterSlide(inSlide);
             Qt3DSDMInstanceHandle theSlideData = m_SlideCore.GetSlideInstance(theMaster);
             SValue theValue;
             m_DataCore.GetInstancePropertyValue(
@@ -706,7 +706,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     || theLongValue.m_Longs[3])
                 return theLongValue;
         }
-        CUICDMSlideHandle theSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
+        Qt3DSDMSlideHandle theSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
         SValue theSlideValue;
         if (theSlide.Valid()
                 && m_SlideCore.GetInstancePropertyValue(theSlide, inInstance, inProperty,
@@ -808,7 +808,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         } else if (theValueType == DataModelDataType::StringOrInt) {
             const SStringOrInt &theData(get<SStringOrInt>(theValue));
             if (theData.GetType() == SStringOrIntTypes::Int) {
-                CUICDMSlideHandle theHandle(get<long>(theData.m_Value));
+                Qt3DSDMSlideHandle theHandle(get<long>(theData.m_Value));
                 wstring theSlideId(L"#");
                 theSlideId.append(GetSlideId(theHandle, 0));
                 theValue = std::make_shared<CDataStr>(theSlideId.c_str());
@@ -854,7 +854,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         if (inType == DataModelDataType::StringOrInt) {
             if (inValue[0] == '#') {
-                CUICDMSlideHandle theSlide = GetSlideById(inValue + 1);
+                Qt3DSDMSlideHandle theSlide = GetSlideById(inValue + 1);
                 QT3DS_ASSERT(theSlide.Valid());
                 return SStringOrInt((long)theSlide.GetHandleValue());
             } else
@@ -1023,7 +1023,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    void ParseAnimation(IDOMReader &inReader, CUICDMSlideHandle inSlide,
+    void ParseAnimation(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide,
                         Qt3DSDMInstanceHandle inInstance)
     {
         IDOMReader::Scope __animScope(inReader);
@@ -1135,7 +1135,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         m_AnimationCore.SetIsArtistEdited(theAnimation, artistEdited);
     }
 
-    void SerializeAction(IDOMWriter &inWriter, CUICDMSlideHandle inSlide,
+    void SerializeAction(IDOMWriter &inWriter, Qt3DSDMSlideHandle inSlide,
                          Qt3DSDMInstanceHandle inInstance, CUICDMActionHandle inAction)
     {
         TCharStr valueStr;
@@ -1190,7 +1190,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    void SerializeActions(IDOMWriter &inWriter, CUICDMSlideHandle inSlide,
+    void SerializeActions(IDOMWriter &inWriter, Qt3DSDMSlideHandle inSlide,
                           Qt3DSDMInstanceHandle inInstance, TActionHandleList &inActions)
     {
         // We sort the actions just by action handle.  This keeps the file in the same order because
@@ -1258,7 +1258,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return theSourceInstance;
     }
 
-    CUICDMActionHandle ParseAction(IDOMReader &inReader, CUICDMSlideHandle inSlide,
+    CUICDMActionHandle ParseAction(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inInstance)
     {
         IDOMReader::Scope __actionScope(inReader);
@@ -1329,8 +1329,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return theAction;
     }
 
-    void GetInstanceSlideInformation(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
-                                     CUICDMSlideHandle inSlideParent,
+    void GetInstanceSlideInformation(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
+                                     Qt3DSDMSlideHandle inSlideParent,
                                      TPropertyHandleValuePairList &ioValues,
                                      TAnimationHandleList &ioAnimations,
                                      TActionHandleList &ioActions)
@@ -1383,7 +1383,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    TCharPtr GetSlideName(CUICDMSlideHandle inSlide)
+    TCharPtr GetSlideName(Qt3DSDMSlideHandle inSlide)
     {
         if (inSlide.Valid() == false)
             return L"";
@@ -1398,11 +1398,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return L"";
     }
 
-    CUICDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance)
+    Qt3DSDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance)
     {
         if (inInstance.Valid() == false)
             return 0;
-        CUICDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
+        Qt3DSDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
         if (theAssociatedSlide == m_ActiveSlideParent)
             return m_ActiveSlide;
         return theAssociatedSlide;
@@ -1451,7 +1451,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         m_DataCore.GetSpecificInstancePropertyValues(inInstance, outList);
         SanitizeHandleValuePairList(inInstance, outList);
     }
-    void GetSlidePropertyValues(CUICDMSlideHandle inSlide, TPropertyHandleValuePairList &outList)
+    void GetSlidePropertyValues(Qt3DSDMSlideHandle inSlide, TPropertyHandleValuePairList &outList)
     {
         Qt3DSDMInstanceHandle theSlideInstance(m_SlideCore.GetSlideInstance(inSlide));
         if (theSlideInstance.Valid() == false)
@@ -1533,7 +1533,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    void ParseAndSetInstanceProperties(IDOMReader &inReader, CUICDMSlideHandle inSlide,
+    void ParseAndSetInstanceProperties(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide,
                                        Qt3DSDMInstanceHandle inInstance,
                                        vector<pair<TCharPtr, TCharPtr>> &outExtraAttributes,
                                        TPropertyHandleValuePairList &ioProperties)
@@ -1554,11 +1554,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> CreateSlide()
+    pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> CreateSlide()
     {
         Qt3DSDMInstanceHandle slideInstance = m_DataCore.CreateInstance();
         m_DataCore.DeriveInstance(slideInstance, m_ObjectDefinitions.m_Slide.m_Instance);
-        CUICDMSlideHandle masterSlide = m_SlideCore.CreateSlide(slideInstance);
+        Qt3DSDMSlideHandle masterSlide = m_SlideCore.CreateSlide(slideInstance);
         return make_pair(masterSlide, slideInstance);
     }
 
@@ -1613,7 +1613,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         m_InstanceSet.insert(inInstance);
 
-        CUICDMSlideHandle theAssociatedSlide = GetAssociatedSlide(inInstance);
+        Qt3DSDMSlideHandle theAssociatedSlide = GetAssociatedSlide(inInstance);
 
         if (theAssociatedSlide.Valid())
             m_SlideSet.insert(theAssociatedSlide);
@@ -1623,7 +1623,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         if (isSlideOwner) {
             // Ensure we mark all of those slides.
             SLong4 theGuid = GetGuid(inInstance, m_ObjectDefinitions.m_Guided.m_GuidProp);
-            CUICDMSlideHandle theMasterSlide = m_SlideSystem.GetMasterSlideByComponentGuid(theGuid);
+            Qt3DSDMSlideHandle theMasterSlide = m_SlideSystem.GetMasterSlideByComponentGuid(theGuid);
             if (theMasterSlide.Valid()) {
                 TSlideHandleList theChildSlides;
                 m_SlideCore.GetChildSlides(theMasterSlide, theChildSlides);
@@ -1680,7 +1680,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 // If we a copying from a master slide, we don't want nonmaster
                 // only children of this object.
                 Qt3DSDMInstanceHandle theChildHandle = theChildren.GetCurrent();
-                CUICDMSlideHandle theChildAssociatedSlide = GetAssociatedSlide(theChildHandle);
+                Qt3DSDMSlideHandle theChildAssociatedSlide = GetAssociatedSlide(theChildHandle);
                 isNonmasterActiveSlideChild =
                         std::find(theActiveSlideChildren.begin(), theActiveSlideChildren.end(),
                                   theChildAssociatedSlide)
@@ -1784,7 +1784,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     void WriteSlideMasterOverrides(IDOMWriter &inWriter, Qt3DSDMInstanceHandle inInstance,
-                                   CUICDMSlideHandle inSlide, CUICDMSlideHandle inParent)
+                                   Qt3DSDMSlideHandle inSlide, Qt3DSDMSlideHandle inParent)
     {
         TPropertyHandleValuePairList theValues;
         TAnimationHandleList theAnimations;
@@ -1843,7 +1843,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     void WriteSlideInstance(IDOMWriter &inWriter, Qt3DSDMInstanceHandle inInstance,
-                            CUICDMSlideHandle inSlide, CUICDMSlideHandle inParent)
+                            Qt3DSDMSlideHandle inSlide, Qt3DSDMSlideHandle inParent)
     {
         TPropertyHandleValuePairList theValues;
         TAnimationHandleList theAnimations;
@@ -1892,16 +1892,16 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // Get the set of instances associated with a slide but filtered by our
     // m_InstanceSet, meaning ignore instances that aren't scene graph instances
     // and that haven't been written out.
-    void GetFilteredAssociatedInstances(CUICDMSlideHandle inSlide,
+    void GetFilteredAssociatedInstances(Qt3DSDMSlideHandle inSlide,
                                         TInstanceHandleList &outInstances)
     {
         m_SlideSystem.GetAssociatedInstances(inSlide, outInstances);
         erase_if(outInstances, SInstanceNotInSet(m_InstanceSet));
     }
 
-    Qt3DSDMInstanceHandle GetSlideComponent(CUICDMSlideHandle inSlide)
+    Qt3DSDMInstanceHandle GetSlideComponent(Qt3DSDMSlideHandle inSlide)
     {
-        CUICDMSlideHandle theMasterSlide = m_SlideSystem.GetMasterSlide(inSlide);
+        Qt3DSDMSlideHandle theMasterSlide = m_SlideSystem.GetMasterSlide(inSlide);
         Qt3DSDMInstanceHandle theMasterInstance(m_SlideCore.GetSlideInstance(theMasterSlide));
         SLong4 theComponentGuid =
                 GetGuid(theMasterInstance, m_ObjectDefinitions.m_Slide.m_ComponentId);
@@ -1927,8 +1927,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
         {
             return GetInstanceOrder(lhs) < GetInstanceOrder(rhs);
         }
-        bool operator()(const std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> &lhs,
-                        const std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> &rhs) const
+        bool operator()(const std::pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> &lhs,
+                        const std::pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> &rhs) const
         {
             return GetInstanceOrder(lhs.second) < GetInstanceOrder(rhs.second);
         }
@@ -1985,13 +1985,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 }
             }
         } // m_ActiveSlide.valid;
-        std::vector<std::pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>> theSerializationSlides;
+        std::vector<std::pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> theSerializationSlides;
         theSerializationSlides.reserve(m_SlideSet.size());
         TSlideSet theMasterSlideSet;
         for (TSlideSet::iterator theIter = m_SlideSet.begin(), end = m_SlideSet.end();
              theIter != end; ++theIter) {
-            CUICDMSlideHandle theSlide = *theIter;
-            CUICDMSlideHandle theMasterSlide = m_SlideCore.GetParentSlide(theSlide);
+            Qt3DSDMSlideHandle theSlide = *theIter;
+            Qt3DSDMSlideHandle theMasterSlide = m_SlideCore.GetParentSlide(theSlide);
             if (theMasterSlide.Valid() && theMasterSlideSet.insert(theMasterSlide).second) {
                 Qt3DSDMInstanceHandle theSlideOwner(GetSlideComponent(theMasterSlide));
                 if (theSlideOwner.Valid())
@@ -2003,7 +2003,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                          SInstanceOrderSorter(m_InstanceToGraphDepthMap));
         for (size_t slideSetIdx = 0, slideSetEnd = theSerializationSlides.size();
              slideSetIdx < slideSetEnd; ++slideSetIdx) {
-            CUICDMSlideHandle theMasterSlide = theSerializationSlides[slideSetIdx].first;
+            Qt3DSDMSlideHandle theMasterSlide = theSerializationSlides[slideSetIdx].first;
             Qt3DSDMInstanceHandle theComponent = theSerializationSlides[slideSetIdx].second;
             IDOMWriter::Scope __masterScope(inWriter, L"State");
 
@@ -2033,11 +2033,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
             // else a reference to a further slide may generate an external slide reference
             // which wouldn't be our intention.
             for (size_t idx = 0, end = theChildren.size(); idx < end; ++idx) {
-                CUICDMSlideHandle theChildSlide(theChildren[idx]);
+                Qt3DSDMSlideHandle theChildSlide(theChildren[idx]);
                 GetSlideId(theChildSlide, theComponent);
             }
             for (size_t idx = 0, end = theChildren.size(); idx < end; ++idx) {
-                CUICDMSlideHandle theChildSlide(theChildren[idx]);
+                Qt3DSDMSlideHandle theChildSlide(theChildren[idx]);
                 m_SlideSet.erase(theChildSlide);
                 IDOMWriter::Scope __childSlideScope(inWriter, L"State");
                 inWriter.Att(L"id", GetSlideId(theChildSlide, theComponent));
@@ -2077,13 +2077,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
     struct SActionParseRecord
     {
         void *m_ReaderScope;
-        CUICDMSlideHandle m_Slide;
+        Qt3DSDMSlideHandle m_Slide;
         Qt3DSDMInstanceHandle m_Instance;
         SActionParseRecord()
             : m_ReaderScope(NULL)
         {
         }
-        SActionParseRecord(void *inReaderScope, CUICDMSlideHandle inSlide,
+        SActionParseRecord(void *inReaderScope, Qt3DSDMSlideHandle inSlide,
                            Qt3DSDMInstanceHandle inInstance)
             : m_ReaderScope(inReaderScope)
             , m_Slide(inSlide)
@@ -2092,7 +2092,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     };
 
-    void ParseSlide(IDOMReader &inReader, CUICDMSlideHandle inSlide, SLong4 inComponentId,
+    void ParseSlide(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide, SLong4 inComponentId,
                     vector<SActionParseRecord> &inUnparsedActions)
     {
         IDOMReader::Scope __stateScope(inReader);
@@ -2112,7 +2112,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 {
                     const wchar_t *theId = L"";
                     inReader.Att(L"Id", theId);
-                    pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> theChildSlideInstPair =
+                    pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> theChildSlideInstPair =
                             CreateSlide();
                     m_SlideCore.DeriveSlide(theChildSlideInstPair.first, inSlide);
                     m_DataCore.SetInstancePropertyValue(theChildSlideInstPair.second,
@@ -2171,7 +2171,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             } else if (AreEqual(inReader.GetElementName(), L"State")) {
                 const wchar_t *theId = L"";
                 inReader.Att(L"Id", theId);
-                CUICDMSlideHandle theSlide;
+                Qt3DSDMSlideHandle theSlide;
                 if (!IsTrivial(theId))
                     theSlide = GetSlideById(theId);
                 else
@@ -2223,7 +2223,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 bool foundDuplicateGraph = false;
                 for (size_t idx = 0, end = theGraphs.size();
                      idx < end && foundDuplicateGraph == false; ++idx) {
-                    CUICDMSlideHandle theMaster = m_SlideGraphCore.GetGraphRoot(theGraphs[idx]);
+                    Qt3DSDMSlideHandle theMaster = m_SlideGraphCore.GetGraphRoot(theGraphs[idx]);
                     Qt3DSDMInstanceHandle theSlideInstance = m_SlideCore.GetSlideInstance(theMaster);
                     SValue theValue;
                     if (m_DataCore.GetInstancePropertyValue(
@@ -2240,7 +2240,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     }
                 }
                 if (foundDuplicateGraph == false) {
-                    pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle> theSlideInstPair = CreateSlide();
+                    pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> theSlideInstPair = CreateSlide();
                     m_SlideGraphCore.CreateSlideGraph(theSlideInstPair.first);
                     m_DataCore.SetInstancePropertyValue(theSlideInstPair.second,
                                                         m_ObjectDefinitions.m_Slide.m_ComponentId,
@@ -2306,7 +2306,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         for (TSlideSet::iterator theIter = m_ExternalSlides.begin(),
              theEnd = m_ExternalSlides.end();
              theIter != theEnd; ++theIter) {
-            CUICDMSlideHandle theSlide(*theIter);
+            Qt3DSDMSlideHandle theSlide(*theIter);
             IDOMWriter::Scope __refScope(inWriter, L"SlideReference");
             theId.assign(L"#");
             theId.append(GetSlideId(theSlide, 0));
@@ -2454,7 +2454,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     inReader.Att(L"ref", theRef);
                     inReader.Att(L"handle", theGuidBuf);
                     long theHandleValue(wcstol(theGuidBuf.wide_str(), NULL, 10));
-                    CUICDMSlideHandle theSlide(theHandleValue);
+                    Qt3DSDMSlideHandle theSlide(theHandleValue);
                     QT3DS_ASSERT(m_SlideCore.IsSlide(theSlide));
                     AddSlideId(theRef.wide_str() + 1, theSlide);
                 }
@@ -2720,7 +2720,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // new root.
     virtual qt3dsdm::TInstanceHandleList
     SerializeSceneGraphObject(IDOMReader &inReader, const CFilePath &inDocumentDirectory,
-                              Qt3DSDMInstanceHandle inNewRoot, CUICDMSlideHandle inActiveSlide) override
+                              Qt3DSDMInstanceHandle inNewRoot, Qt3DSDMSlideHandle inActiveSlide) override
     {
         reset();
         m_ActiveSlide = inActiveSlide;
@@ -2732,7 +2732,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // Equivalent to the older partial serialization system
     void SerializeSceneGraphObjects(IDOMWriter &inWriter,
                                             const TInstanceHandleList &inInstances,
-                                            CUICDMSlideHandle inActiveSlide) override
+                                            Qt3DSDMSlideHandle inActiveSlide) override
     {
         if (inInstances.empty())
             return;
@@ -2746,7 +2746,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     // Save and load just a single action
-    void SerializeAction(qt3dsdm::IDOMWriter &inWriter, CUICDMSlideHandle inSlide,
+    void SerializeAction(qt3dsdm::IDOMWriter &inWriter, Qt3DSDMSlideHandle inSlide,
                                  CUICDMActionHandle inAction) override
     {
         reset();
@@ -2759,7 +2759,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // Load a new action onto this root object
     qt3dsdm::CUICDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
                                                       qt3dsdm::Qt3DSDMInstanceHandle inNewRoot,
-                                                      qt3dsdm::CUICDMSlideHandle inSlide) override
+                                                      qt3dsdm::Qt3DSDMSlideHandle inSlide) override
     {
         reset();
         m_PreserveFileIds = false;
@@ -2784,11 +2784,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     struct SParentInSlide
     {
-        CUICDMSlideHandle m_Slide;
+        Qt3DSDMSlideHandle m_Slide;
         ISlideSystem &m_SlideSystem;
         CGraph &m_AssetGraph;
 
-        SParentInSlide(CUICDMSlideHandle inSlide, ISlideSystem &inSystem, CGraph &inAssetGraph)
+        SParentInSlide(Qt3DSDMSlideHandle inSlide, ISlideSystem &inSystem, CGraph &inAssetGraph)
             : m_Slide(inSlide)
             , m_SlideSystem(inSystem)
             , m_AssetGraph(inAssetGraph)
@@ -2804,7 +2804,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     };
 
-    void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide) override
+    void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::Qt3DSDMSlideHandle inSlide) override
     {
         reset();
         m_PreserveFileIds = false;
@@ -2828,14 +2828,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
         DoSerializeScene(inWriter, theInstancePtr, (QT3DSU32)theSlideInstances.size(), true);
     }
 
-    CUICDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
+    Qt3DSDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
                                              const CFilePath &inDocumentDirectory,
-                                             qt3dsdm::CUICDMSlideHandle inMaster, int newIndex) override
+                                             qt3dsdm::Qt3DSDMSlideHandle inMaster, int newIndex) override
     {
         reset();
         m_PreserveFileIds = false;
         m_ActiveSlideParent = inMaster;
-        CUICDMSlideHandle retval = m_SlideSystem.DuplicateSlide(inMaster, newIndex + 1);
+        Qt3DSDMSlideHandle retval = m_SlideSystem.DuplicateSlide(inMaster, newIndex + 1);
         m_ActiveSlide = retval;
         Qt3DSDMInstanceHandle theSlideInstance = m_SlideCore.GetSlideInstance(retval);
         Qt3DSDMInstanceHandle theMasterInstance(m_SlideSystem.GetSlideInstance(inMaster));

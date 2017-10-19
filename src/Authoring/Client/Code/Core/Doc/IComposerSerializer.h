@@ -76,27 +76,27 @@ public:
     // Equivalent to the older partial serialization system
     virtual void SerializeSceneGraphObjects(qt3dsdm::IDOMWriter &inWriter,
                                             const qt3dsdm::TInstanceHandleList &inInstances,
-                                            qt3dsdm::CUICDMSlideHandle inActiveSlide) = 0;
+                                            qt3dsdm::Qt3DSDMSlideHandle inActiveSlide) = 0;
 
     // Read a partial serialization into this slide, attaching the instance as the last child of the
     // new root.
     virtual qt3dsdm::TInstanceHandleList SerializeSceneGraphObject(
         qt3dsdm::IDOMReader &inReader, const Q3DStudio::CFilePath &inDocumentDirectory,
-        qt3dsdm::Qt3DSDMInstanceHandle inNewRoot, qt3dsdm::CUICDMSlideHandle inActiveSlide) = 0;
+        qt3dsdm::Qt3DSDMInstanceHandle inNewRoot, qt3dsdm::Qt3DSDMSlideHandle inActiveSlide) = 0;
 
     // Save and load just a single action
-    virtual void SerializeAction(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide,
+    virtual void SerializeAction(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                  qt3dsdm::CUICDMActionHandle inAction) = 0;
     // Load a new action onto this root object
     virtual qt3dsdm::CUICDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
                                                       qt3dsdm::Qt3DSDMInstanceHandle inNewRoot,
-                                                      qt3dsdm::CUICDMSlideHandle inSlide) = 0;
+                                                      qt3dsdm::Qt3DSDMSlideHandle inSlide) = 0;
 
-    virtual void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::CUICDMSlideHandle inSlide) = 0;
+    virtual void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::Qt3DSDMSlideHandle inSlide) = 0;
 
-    virtual qt3dsdm::CUICDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
+    virtual qt3dsdm::Qt3DSDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
                                                     const CFilePath &inDocumentDirectory,
-                                                    qt3dsdm::CUICDMSlideHandle inMaster,
+                                                    qt3dsdm::Qt3DSDMSlideHandle inMaster,
                                                     int inNewIndex = -1) = 0;
 
     friend class std::shared_ptr<IComposerSerializer>;

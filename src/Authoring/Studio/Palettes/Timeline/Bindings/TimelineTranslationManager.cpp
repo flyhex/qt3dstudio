@@ -494,7 +494,7 @@ void CTimelineTranslationManager::OnChildMoved(int /*inParent*/, int inChild, lo
  * update the icon that shows action association status
  */
 void CTimelineTranslationManager::OnActionEvent(qt3dsdm::CUICDMActionHandle inAction,
-                                                qt3dsdm::CUICDMSlideHandle inSlide,
+                                                qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                                 qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     Q_UNUSED(inAction);

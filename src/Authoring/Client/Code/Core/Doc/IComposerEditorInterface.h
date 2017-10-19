@@ -50,7 +50,7 @@ namespace ComposerImport {
 
     // For the children of this instance that are associated with this slide,
     // update their information.
-    typedef unordered_map<const wchar_t *, vector<pair<CUICDMSlideHandle, Qt3DSDMInstanceHandle>>>
+    typedef unordered_map<const wchar_t *, vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>>
         TIdMultiMap;
 
     // Interface between the import library (which defines IComposerEditor)
@@ -74,7 +74,7 @@ namespace ComposerImport {
         static std::shared_ptr<IComposerEditorInterface> CreateEditorInterface(
             Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
             ,
-            qt3dsdm::CDataModelHandle root, qt3dsdm::CUICDMSlideHandle slide,
+            qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
             const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &fullPathToImportFile,
             long inStartTime, qt3dsdm::IStringTable &inStringTable);
 

@@ -176,7 +176,7 @@ public:
     virtual qt3dsdm::Qt3DSDMInstanceHandle CreateAssetInstance(Q3DStudio::CId &inId,
                                                             EStudioObjectType inObjectType);
     virtual qt3dsdm::CUICDMSlideGraphHandle GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    virtual qt3dsdm::CUICDMSlideHandle GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    virtual qt3dsdm::Qt3DSDMSlideHandle GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetSlideInstance();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetSlideComponentIdProperty();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetNameProperty();
@@ -203,16 +203,16 @@ public:
     virtual qt3dsdm::Qt3DSDMInstanceHandle
     GetOwningComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, int &outSlideIndex);
     virtual qt3dsdm::Qt3DSDMInstanceHandle
-    GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle, int &outSlideIndex);
+    GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle, int &outSlideIndex);
     virtual qt3dsdm::Qt3DSDMInstanceHandle
-    GetOwningComponentInstance(qt3dsdm::CUICDMSlideHandle inSlideHandle);
-    virtual qt3dsdm::SLong4 GetComponentGuid(qt3dsdm::CUICDMSlideHandle inSlideHandle);
+    GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle);
+    virtual qt3dsdm::SLong4 GetComponentGuid(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle);
 
     virtual bool IsActive(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, long inCurrentTime);
 
-    virtual qt3dsdm::CUICDMSlideHandle
+    virtual qt3dsdm::Qt3DSDMSlideHandle
     GetComponentActiveSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent);
-    virtual qt3dsdm::CUICDMSlideHandle GetComponentSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent,
+    virtual qt3dsdm::Qt3DSDMSlideHandle GetComponentSlide(qt3dsdm::Qt3DSDMInstanceHandle inComponent,
                                                        long inIndex);
 
     const SDataModelDefaultMaterial &GetDefaultMaterial() const { return m_DefaultMaterial; }
@@ -310,7 +310,7 @@ private:
                                    qt3dsdm::Qt3DSDMPropertyHandle inProperty, qt3dsdm::SLong4 inGuid);
     void ClearCache();
     qt3dsdm::Qt3DSDMInstanceHandle GetSceneOrComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    qt3dsdm::CUICDMSlideHandle CreateNonMasterSlide(qt3dsdm::CUICDMSlideHandle inMasterSlide,
+    qt3dsdm::Qt3DSDMSlideHandle CreateNonMasterSlide(qt3dsdm::Qt3DSDMSlideHandle inMasterSlide,
                                                   Q3DStudio::CId inGuid,
                                                   const Q3DStudio::CString &inName);
 
@@ -340,7 +340,7 @@ public: // helpers
 
     std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4>
     CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSourceInstance,
-                        qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::CUICDMSlideHandle inUICDMSlide);
+                        qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::Qt3DSDMSlideHandle inUICDMSlide);
 
     void SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, const Q3DStudio::CString &inName);
     Q3DStudio::CString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);

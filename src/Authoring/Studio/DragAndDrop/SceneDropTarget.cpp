@@ -148,11 +148,11 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
     if (theTargetInstance.Valid()) {
         CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
         qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle theSlide = theDoc->GetActiveSlide();
+        qt3dsdm::Qt3DSDMSlideHandle theSlide = theDoc->GetActiveSlide();
         if (!theSlideSystem->IsMasterSlide(theSlide)
             && (inSource.GetCurrentFlags() & CHotKeys::MODIFIER_ALT)) {
             if (CanAddToMaster()) {
-                qt3dsdm::CUICDMSlideHandle theMasterSlideHandle =
+                qt3dsdm::Qt3DSDMSlideHandle theMasterSlideHandle =
                     theSlideSystem->GetMasterSlide(theSlide);
                 if (theMasterSlideHandle.Valid())
                     theSlide = theMasterSlideHandle;

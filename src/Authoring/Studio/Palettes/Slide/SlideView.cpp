@@ -84,7 +84,7 @@ void SlideView::setShowMasterSlide(bool show)
     CDoc *theDoc = GetDoc();
     qt3dsdm::Qt3DSDMInstanceHandle theRoot = theDoc->GetActiveRootInstance();
     CClientDataModelBridge *theBridge = GetBridge();
-    qt3dsdm::CUICDMSlideHandle theNewActiveSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theNewActiveSlide =
         theBridge->GetOrCreateGraphRoot(theRoot); // this will return the master slide
     qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
     if (m_CurrentModel != m_MasterSlideModel) {
@@ -177,8 +177,8 @@ void SlideView::OnClosingPresentation()
     clearSlideList();
 }
 
-void SlideView::OnActiveSlide(const qt3dsdm::CUICDMSlideHandle &inMaster, int inIndex,
-                              const qt3dsdm::CUICDMSlideHandle &inSlide)
+void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
+                              const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
     // When the active slide changes, we need to update our button and mode
     if (inMaster.Valid()) {
@@ -188,17 +188,17 @@ void SlideView::OnActiveSlide(const qt3dsdm::CUICDMSlideHandle &inMaster, int in
     }
 }
 
-void SlideView::OnNewSlide(const qt3dsdm::CUICDMSlideHandle &inSlide)
+void SlideView::OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
 
 }
 
-void SlideView::OnDeleteSlide(const qt3dsdm::CUICDMSlideHandle &inSlide)
+void SlideView::OnDeleteSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
 
 }
 
-void SlideView::OnSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster, int inOldIndex, int inNewIndex)
+void SlideView::OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex, int inNewIndex)
 {
 }
 
@@ -218,7 +218,7 @@ void SlideView::clearSlideList()
     m_SlidesModel->clear();
 }
 
-void SlideView::setActiveSlide(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHandle)
+void SlideView::setActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle)
 {
     // Make sure we are in the correct master mode based on the inActiveSlideHandle
     // If we changed mode, then we need to force a rebuild
@@ -238,7 +238,7 @@ void SlideView::setActiveSlide(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHa
     }
 }
 
-void SlideView::rebuildSlideList(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHandle)
+void SlideView::rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle)
 {
     // Clear out the existing slides
     clearSlideList();
@@ -250,11 +250,11 @@ void SlideView::rebuildSlideList(const qt3dsdm::CUICDMSlideHandle &inActiveSlide
 
         // Get the Master Slide handle and the slide count
         qt3dsdm::ISlideSystem *theSlideSystem = GetSlideSystem();
-        qt3dsdm::CUICDMSlideHandle theMasterSlide =
+        qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
             theSlideSystem->GetMasterSlide(inActiveSlideHandle);
 
         // update handle for master slide
-        qt3dsdm::CUICDMSlideHandle theMasterSlideHandle =
+        qt3dsdm::Qt3DSDMSlideHandle theMasterSlideHandle =
                 theSlideSystem->GetSlideByIndex(theMasterSlide, 0);
         m_MasterSlideModel->setData(m_MasterSlideModel->index(0, 0),
                                     QVariant::fromValue(theMasterSlideHandle),
@@ -267,7 +267,7 @@ void SlideView::rebuildSlideList(const qt3dsdm::CUICDMSlideHandle &inActiveSlide
         m_SlidesModel->insertRows(0, theSlideCount - 1, {});
         int row = 0;
         for (long theSlideIndex = 1; theSlideIndex < theSlideCount; ++theSlideIndex) {
-            qt3dsdm::CUICDMSlideHandle theSlideHandle =
+            qt3dsdm::Qt3DSDMSlideHandle theSlideHandle =
                     theSlideSystem->GetSlideByIndex(theMasterSlide, theSlideIndex);
             auto index = m_SlidesModel->index(row, 0);
             m_SlidesModel->setData(index,
@@ -302,12 +302,12 @@ qt3dsdm::ISlideSystem *SlideView::GetSlideSystem()
     return GetDoc()->GetStudioSystem()->GetSlideSystem();
 }
 
-long SlideView::GetSlideIndex(const qt3dsdm::CUICDMSlideHandle &inSlideHandle)
+long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 {
     return GetSlideSystem()->GetSlideIndex(inSlideHandle);
 }
 
-bool SlideView::isMaster(const qt3dsdm::CUICDMSlideHandle &inSlideHandle)
+bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 {
     return (0 == GetSlideIndex(inSlideHandle));
 }

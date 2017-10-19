@@ -32,7 +32,7 @@
 namespace qt3dsdm {
 
 CUICDMActionHandle CSimpleActionCore::CreateAction(Qt3DSDMInstanceHandle inInstance,
-                                                   CUICDMSlideHandle inSlide,
+                                                   Qt3DSDMSlideHandle inSlide,
                                                    Qt3DSDMInstanceHandle inOwner,
                                                    SLong4 inTriggerTargetObjects)
 {
@@ -58,7 +58,7 @@ const SActionInfo &CSimpleActionCore::GetActionInfo(CUICDMActionHandle inAction)
     return theAction->m_ActionInfo;
 }
 
-inline void AddIfActionMatches(const THandleObjectPair &inPair, CUICDMSlideHandle inSlide,
+inline void AddIfActionMatches(const THandleObjectPair &inPair, Qt3DSDMSlideHandle inSlide,
                                Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions)
 {
     if (inPair.second->GetType() == CHandleObject::EHandleObjectTypeAction) {
@@ -70,7 +70,7 @@ inline void AddIfActionMatches(const THandleObjectPair &inPair, CUICDMSlideHandl
 }
 
 // Return all actions that belong to a certain instance in a certain slide
-void CSimpleActionCore::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+void CSimpleActionCore::GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                    TActionHandleList &outActions) const
 {
     outActions.clear();
@@ -80,7 +80,7 @@ void CSimpleActionCore::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHan
 }
 
 // Return all actions that exist in a certain slide
-void CSimpleActionCore::GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const
+void CSimpleActionCore::GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const
 {
     GetActions(inSlide, 0, outActions);
 }
@@ -214,7 +214,7 @@ void CSimpleActionCore::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandler
 // Helper functions
 CUICDMActionHandle CSimpleActionCore::CreateActionWithHandle(int inHandle,
                                                              Qt3DSDMInstanceHandle inInstance,
-                                                             CUICDMSlideHandle inSlide,
+                                                             Qt3DSDMSlideHandle inSlide,
                                                              Qt3DSDMInstanceHandle inOwner)
 {
     if (HandleValid(inHandle))

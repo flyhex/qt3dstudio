@@ -137,7 +137,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
-        CUICDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        Qt3DSDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
         GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
                                      theChildren, theActiveSlide);
         theChildren += inIndex;
@@ -180,9 +180,9 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
                             if (thePropGuid == theGuid)
                                 theIsMatch = true;
                         }
-                        CUICDMSlideHandle theSlide =
+                        Qt3DSDMSlideHandle theSlide =
                             theSlideSystem->GetAssociatedSlide(theChildInstance);
-                        CUICDMSlideHandle theMasterSlide = theSlideSystem->GetMasterSlide(theSlide);
+                        Qt3DSDMSlideHandle theMasterSlide = theSlideSystem->GetMasterSlide(theSlide);
                         if (theIsMatch == false && theSlide.Valid()
                             && theSlideCore->GetSpecificInstancePropertyValue(
                                    theSlide, theInstance, theProperty, theValue)) {

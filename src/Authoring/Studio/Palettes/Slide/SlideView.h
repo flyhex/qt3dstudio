@@ -76,23 +76,23 @@ Q_SIGNALS:
 
 protected:
     // UICDM callbacks
-    virtual void OnActiveSlide(const qt3dsdm::CUICDMSlideHandle &inMaster, int inIndex,
-                               const qt3dsdm::CUICDMSlideHandle &inSlide);
-    virtual void OnNewSlide(const qt3dsdm::CUICDMSlideHandle &inSlide);
-    virtual void OnDeleteSlide(const qt3dsdm::CUICDMSlideHandle &inSlide);
-    virtual void OnSlideRearranged(const qt3dsdm::CUICDMSlideHandle &inMaster, int inOldIndex,
+    virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
+                               const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
+    virtual void OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
+    virtual void OnDeleteSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
+    virtual void OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
                                    int inNewIndex);
 
 private:
     void initialize();
     void clearSlideList();
-    void setActiveSlide(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHandle);
+    void setActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
     inline CDoc *GetDoc();
     inline CClientDataModelBridge *GetBridge();
     inline qt3dsdm::ISlideSystem *GetSlideSystem();
-    long GetSlideIndex(const qt3dsdm::CUICDMSlideHandle &inSlideHandle);
-    bool isMaster(const qt3dsdm::CUICDMSlideHandle &inSlideHandle);
-    void rebuildSlideList(const qt3dsdm::CUICDMSlideHandle &inActiveSlideHandle);
+    long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
+    bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
+    void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
 
     SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
@@ -107,7 +107,7 @@ private:
     TIntIntMap m_MasterSlideReturnPointers;
 
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
-    qt3dsdm::CUICDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
+    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
 };
 
 #endif // SLIDEVIEW_H

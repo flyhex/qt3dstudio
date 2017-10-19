@@ -159,7 +159,7 @@ qt3dsdm::IActionSystem *ActionModel::actionSystem() const
     return g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetActionSystem();
 }
 
-qt3dsdm::CUICDMSlideHandle ActionModel::activeSlide() const
+qt3dsdm::Qt3DSDMSlideHandle ActionModel::activeSlide() const
 {
     return g_StudioApp.GetCore()->GetDoc()->GetActiveSlide();
 }

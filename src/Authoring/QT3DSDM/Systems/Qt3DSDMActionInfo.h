@@ -41,7 +41,7 @@ struct SActionInfo
                                      // properties not listed here)
 
     // Where the action is added to
-    CUICDMSlideHandle m_Slide; // the slide that the action is added to
+    Qt3DSDMSlideHandle m_Slide; // the slide that the action is added to
     Qt3DSDMInstanceHandle
         m_Owner; // the object that the action is added to (the owner of the action)
 
@@ -59,7 +59,7 @@ struct SActionInfo
 
     SActionInfo() {}
 
-    SActionInfo(Qt3DSDMInstanceHandle inInstance, CUICDMSlideHandle inSlide,
+    SActionInfo(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
                 Qt3DSDMInstanceHandle inOwner)
         : m_Instance(inInstance)
         , m_Slide(inSlide)

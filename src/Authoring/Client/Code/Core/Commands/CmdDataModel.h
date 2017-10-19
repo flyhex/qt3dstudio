@@ -44,7 +44,7 @@ struct SApplicationState
 {
     bool m_Dirty;
     qt3dsdm::Qt3DSDMInstanceHandle m_SelectedInstance;
-    qt3dsdm::CUICDMSlideHandle m_ActiveSlide;
+    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlide;
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveLayer;
 
     SApplicationState()

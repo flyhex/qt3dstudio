@@ -1341,7 +1341,7 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
             if (m_Core->GetDoc()->GetDocumentReader().IsInstance(theSelectedInstance)) {
                 CClientDataModelBridge *theBridge =
                     theDoc->GetStudioSystem()->GetClientDataModelBridge();
-                qt3dsdm::CUICDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
+                qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
 
                 // Slide, scene or component
                 if (theSelectedInstance

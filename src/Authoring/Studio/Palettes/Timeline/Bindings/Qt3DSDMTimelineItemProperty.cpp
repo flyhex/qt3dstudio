@@ -562,7 +562,7 @@ bool CUICDMTimelineItemProperty::CreateKeyframeIfNonExistent(
     return true;
 }
 
-void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::CUICDMSlideHandle inSlide,
+void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                                              qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {

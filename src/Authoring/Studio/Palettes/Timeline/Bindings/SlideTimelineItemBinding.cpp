@@ -53,7 +53,7 @@ CSlideTimelineItemBinding::CSlideTimelineItemBinding(CTimelineTranslationManager
                                                      Qt3DSDMInstanceHandle inDataHandle)
     : CUICDMTimelineItemBinding(inMgr)
 {
-    qt3dsdm::CUICDMSlideHandle theSlideHandle =
+    qt3dsdm::Qt3DSDMSlideHandle theSlideHandle =
         m_StudioSystem->GetSlideSystem()->GetSlideByInstance(inDataHandle);
 
     // Get the owning component of m_SlideHandle.

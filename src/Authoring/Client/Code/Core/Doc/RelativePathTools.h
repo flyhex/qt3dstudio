@@ -82,7 +82,7 @@ protected:
     static qt3dsdm::Qt3DSDMInstanceHandle
     DoFindAssetInstanceByObjectPath(CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
                                     const qt3dsdm::Qt3DSDMInstanceHandle inTimeParentInstance,
-                                    qt3dsdm::CUICDMSlideHandle inSlide, CStackTokenizer &ioTokenizer,
+                                    qt3dsdm::Qt3DSDMSlideHandle inSlide, CStackTokenizer &ioTokenizer,
                                     bool &outIsResolved, const IObjectReferenceHelper *inHelper);
     static Q3DStudio::CString LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                CDoc *inDoc);

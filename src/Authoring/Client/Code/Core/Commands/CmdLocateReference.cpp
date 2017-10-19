@@ -120,7 +120,7 @@ void CCmdLocateReference::LocateReference()
          theIter != theInstances.end(); ++theIter) {
         // Check if the instance is in master slide and if the property is unlinked.
         // This will determine how we should update the value.
-        CUICDMSlideHandle theSlide = m_SlideSystem->GetAssociatedSlide(*theIter);
+        Qt3DSDMSlideHandle theSlide = m_SlideSystem->GetAssociatedSlide(*theIter);
         if (theSlide.Valid() && m_SlideSystem->IsMasterSlide(theSlide)
             && !m_SlideSystem->IsPropertyLinked(*theIter, m_Bridge->GetSourcePathProperty())) {
             // If the instance is in master slide and the property is unlinked, we need to update
@@ -128,7 +128,7 @@ void CCmdLocateReference::LocateReference()
             size_t theSlideCount =
                 m_SlideSystem->GetSlideCount(m_SlideSystem->GetAssociatedSlide(*theIter));
             for (size_t theSlideIndex = 0; theSlideIndex < theSlideCount; ++theSlideIndex) {
-                CUICDMSlideHandle theSpecificSlide =
+                Qt3DSDMSlideHandle theSpecificSlide =
                     m_SlideSystem->GetSlideByIndex(theSlide, theSlideIndex);
                 UpdateSourcePath(*theIter, theSpecificSlide);
             }
@@ -146,7 +146,7 @@ void CCmdLocateReference::LocateReference()
  * @param inSpecificSlide	the slide to update, if valid
  */
 void CCmdLocateReference::UpdateSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                           qt3dsdm::CUICDMSlideHandle inSpecificSlide)
+                                           qt3dsdm::Qt3DSDMSlideHandle inSpecificSlide)
 {
     // Get the sourcepath value
     Q3DStudio::CFilePath thePath;
@@ -169,7 +169,7 @@ void CCmdLocateReference::UpdateSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInst
  * @param outIdentifier		the identifier
  */
 void CCmdLocateReference::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                        qt3dsdm::CUICDMSlideHandle inSpecificSlide,
+                                        qt3dsdm::Qt3DSDMSlideHandle inSpecificSlide,
                                         Q3DStudio::CFilePath &outPath,
                                         Q3DStudio::CString &outIdentifier)
 {
@@ -209,7 +209,7 @@ void CCmdLocateReference::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
  * @param inIdentifier		the identifier
  */
 void CCmdLocateReference::SetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                        qt3dsdm::CUICDMSlideHandle inSpecificSlide,
+                                        qt3dsdm::Qt3DSDMSlideHandle inSpecificSlide,
                                         const Q3DStudio::CFilePath &inPath,
                                         const Q3DStudio::CString &inIdentifier)
 {

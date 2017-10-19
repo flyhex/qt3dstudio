@@ -35,7 +35,7 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMSlideGraphHandle CSlideGraphCoreProducer::CreateSlideGraph(CUICDMSlideHandle inRoot)
+CUICDMSlideGraphHandle CSlideGraphCoreProducer::CreateSlideGraph(Qt3DSDMSlideHandle inRoot)
 {
     CUICDMSlideGraphHandle retval(m_Data->CreateSlideGraph(inRoot));
     CREATE_HANDLE_CREATE_TRANSACTION(m_Consumer, retval, m_Data->m_Objects);
@@ -43,12 +43,12 @@ CUICDMSlideGraphHandle CSlideGraphCoreProducer::CreateSlideGraph(CUICDMSlideHand
     return retval;
 }
 
-CUICDMSlideHandle CSlideGraphCoreProducer::GetGraphRoot(CUICDMSlideGraphHandle inGraph) const
+Qt3DSDMSlideHandle CSlideGraphCoreProducer::GetGraphRoot(CUICDMSlideGraphHandle inGraph) const
 {
     return m_Data->GetGraphRoot(inGraph);
 }
 
-CUICDMSlideGraphHandle CSlideGraphCoreProducer::GetSlideGraph(CUICDMSlideHandle inSlide) const
+CUICDMSlideGraphHandle CSlideGraphCoreProducer::GetSlideGraph(Qt3DSDMSlideHandle inSlide) const
 {
     return m_Data->GetSlideGraph(inSlide);
 }
@@ -87,7 +87,7 @@ struct DissocateAllInstanceTrans : public ITransaction
 void CSlideGraphCoreProducer::DeleteSlideGraph(CUICDMSlideGraphHandle inHandle)
 {
     SSlideGraph *theGraph = CSimpleSlideGraphCore::GetSlideGraphNF(inHandle, m_Data->m_Objects);
-    CUICDMSlideHandle theRootSlide(theGraph->m_Root);
+    Qt3DSDMSlideHandle theRootSlide(theGraph->m_Root);
     if (m_Consumer)
         m_Consumer->OnTransaction(
             make_shared<DissocateAllInstanceTrans>(__FILE__, __LINE__, m_Data, inHandle));
@@ -100,12 +100,12 @@ struct SInstanceAssociateTrans : public ITransaction
 {
     std::shared_ptr<CSimpleSlideGraphCore> m_Graph;
     CUICDMSlideGraphHandle m_GraphHandle;
-    CUICDMSlideHandle m_Slide;
+    Qt3DSDMSlideHandle m_Slide;
     Qt3DSDMInstanceHandle m_Instance;
     bool m_InsertOnDo;
     SInstanceAssociateTrans(const char *inFile, int inLine,
                             std::shared_ptr<CSimpleSlideGraphCore> inGraph,
-                            CUICDMSlideGraphHandle inGraphHandle, CUICDMSlideHandle inSlideHandle,
+                            CUICDMSlideGraphHandle inGraphHandle, Qt3DSDMSlideHandle inSlideHandle,
                             Qt3DSDMInstanceHandle inInstance, bool inInsertOnDo)
         : ITransaction(inFile, inLine)
         , m_Graph(inGraph)
@@ -135,7 +135,7 @@ struct SInstanceAssociateTrans : public ITransaction
 };
 
 void CSlideGraphCoreProducer::AssociateInstance(CUICDMSlideGraphHandle inSlideGraph,
-                                                CUICDMSlideHandle inSlide,
+                                                Qt3DSDMSlideHandle inSlide,
                                                 Qt3DSDMInstanceHandle inInstance)
 {
     m_Data->AssociateInstance(inSlideGraph, inSlide, inInstance);
@@ -172,10 +172,10 @@ void CSlideGraphCoreProducer::DissociateInstance(Qt3DSDMInstanceHandle inInstanc
 }
 
 void CSlideGraphCoreProducer::SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph,
-                                                  CUICDMSlideHandle inSlide)
+                                                  Qt3DSDMSlideHandle inSlide)
 {
     if (m_Consumer) {
-        CUICDMSlideHandle current = m_Data->GetGraphActiveSlide(inGraph);
+        Qt3DSDMSlideHandle current = m_Data->GetGraphActiveSlide(inGraph);
         TTransactionPtr theTransaction(CREATE_GENERIC_TRANSACTION(
             bind(&CSimpleSlideGraphCore::SetGraphActiveSlide, m_Data, inGraph, inSlide),
             bind(&CSimpleSlideGraphCore::SetGraphActiveSlide, m_Data, inGraph, current)));
@@ -185,7 +185,7 @@ void CSlideGraphCoreProducer::SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph
     GetSignalSender()->SendGraphActiveSlide(inGraph, inSlide);
 }
 
-CUICDMSlideHandle CSlideGraphCoreProducer::GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const
+Qt3DSDMSlideHandle CSlideGraphCoreProducer::GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const
 {
     return m_Data->GetGraphActiveSlide(inGraph);
 }
@@ -201,29 +201,29 @@ void CSlideGraphCoreProducer::SetConsumer(TTransactionConsumerPtr inConsumer)
 }
 
 TSignalConnectionPtr CSlideGraphCoreProducer::ConnectGraphCreated(
-    const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback)
+    const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback)
 {
     return GetSignalProvider()->ConnectGraphCreated(inCallback);
 }
 TSignalConnectionPtr CSlideGraphCoreProducer::ConnectGraphDeleted(
-    const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback)
+    const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback)
 {
     return GetSignalProvider()->ConnectGraphDeleted(inCallback);
 }
 TSignalConnectionPtr CSlideGraphCoreProducer::ConnectInstanceAssociated(
-    const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+    const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
         &inCallback)
 {
     return GetSignalProvider()->ConnectInstanceAssociated(inCallback);
 }
 TSignalConnectionPtr CSlideGraphCoreProducer::ConnectInstanceDissociated(
-    const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle, Qt3DSDMInstanceHandle)>
+    const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
         &inCallback)
 {
     return GetSignalProvider()->ConnectInstanceDissociated(inCallback);
 }
 TSignalConnectionPtr CSlideGraphCoreProducer::ConnectGraphActiveSlide(
-    const std::function<void(CUICDMSlideGraphHandle, CUICDMSlideHandle)> &inCallback)
+    const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback)
 {
     return GetSignalProvider()->ConnectGraphActiveSlide(inCallback);
 }

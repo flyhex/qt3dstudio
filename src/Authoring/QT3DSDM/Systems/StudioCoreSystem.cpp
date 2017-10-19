@@ -56,14 +56,14 @@ inline bool AnimationPropertyMatches(CUICDMAnimationHandle inAnimation,
 }
 
 inline bool AnimationSlideMatches(CUICDMAnimationHandle inAnimation,
-                                  TAnimationCorePtr inAnimationCore, CUICDMSlideHandle inSlide)
+                                  TAnimationCorePtr inAnimationCore, Qt3DSDMSlideHandle inSlide)
 {
     return inSlide == inAnimationCore->GetAnimationInfo(inAnimation).m_Slide;
 }
 
 inline bool AnimationSlideInstancePropertyMatch(CUICDMAnimationHandle inAnimation,
                                                 TAnimationCorePtr inAnimationCore,
-                                                CUICDMSlideHandle inSlide,
+                                                Qt3DSDMSlideHandle inSlide,
                                                 Qt3DSDMInstanceHandle inInstance,
                                                 Qt3DSDMPropertyHandle inProperty)
 {
@@ -136,7 +136,7 @@ void CascadePropertyRemove(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHand
     EraseAnimationsThatMatch(inAnimationCore, thePredicate);
 }
 
-void CascadeSlideDelete(CUICDMSlideHandle inSlide, TDataCorePtr inDataCore,
+void CascadeSlideDelete(Qt3DSDMSlideHandle inSlide, TDataCorePtr inDataCore,
                         TSlideCorePtr inSlideCore, TSlideGraphCorePtr inSlideGraphCore,
                         TAnimationCorePtr inAnimationCore, TActionCorePtr inActionCore)
 {
@@ -155,7 +155,7 @@ void CascadeSlideDelete(CUICDMSlideHandle inSlide, TDataCorePtr inDataCore,
     }
 
     else {
-        CUICDMSlideHandle theMaster(inSlideCore->GetParentSlide(inSlide));
+        Qt3DSDMSlideHandle theMaster(inSlideCore->GetParentSlide(inSlide));
         if (theMaster.Valid()) {
             CUICDMSlideGraphHandle theGraph = inSlideGraphCore->GetSlideGraph(theMaster);
             if (theGraph.Valid()) {
@@ -174,7 +174,7 @@ void CascadeSlideDelete(CUICDMSlideHandle inSlide, TDataCorePtr inDataCore,
                 because the slide getting deleted is not currently active.  This is the mirror
                 of the fact that new slide *always* sets the active slide so it does make
                 logical sense.*/
-                CUICDMSlideHandle theNewActiveSlide =
+                Qt3DSDMSlideHandle theNewActiveSlide =
                     inSlideGraphCore->GetGraphActiveSlide(theGraph);
                 if (theNewActiveSlide == inSlide) {
                     TSlideHandleList theChildren;
@@ -202,7 +202,7 @@ void CascadeSlideDelete(CUICDMSlideHandle inSlide, TDataCorePtr inDataCore,
     EraseActions(inDataCore, inActionCore, theActions);
 }
 
-void CascadeSlidePropertyRemove(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+void CascadeSlidePropertyRemove(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                 Qt3DSDMPropertyHandle inProperty, TAnimationCorePtr inAnimationCore)
 {
     EraseAnimationsThatMatch(inAnimationCore,

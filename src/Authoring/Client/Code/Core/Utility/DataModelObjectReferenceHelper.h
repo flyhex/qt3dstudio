@@ -61,7 +61,7 @@ public:
     GetSlideList(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const override;
     bool GetChildInstanceList(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
                                       qt3dsdm::TInstanceHandleList &outList,
-                                      qt3dsdm::CUICDMSlideHandle inSlide,
+                                      qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                       const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance) const override;
     virtual Q3DStudio::CString
     LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const override;

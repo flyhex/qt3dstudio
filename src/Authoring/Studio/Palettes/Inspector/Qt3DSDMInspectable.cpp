@@ -292,7 +292,7 @@ bool CUICDMInspectable::IsValid() const
 bool CUICDMInspectable::IsMaster()
 {
     ISlideSystem *theSlideSystem = m_Core->GetDoc()->GetStudioSystem()->GetSlideSystem();
-    qt3dsdm::CUICDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(m_Instance);
+    qt3dsdm::Qt3DSDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(m_Instance);
     if (theSlideHandle.Valid())
         return theSlideSystem->IsMasterSlide(theSlideHandle);
     // Slide handle may not be valid if we are selecting the Scene or if we are inside Component and

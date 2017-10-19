@@ -111,7 +111,7 @@ public: // Construction
         if (!ConsumerExists()) {
             SetConsumer();
             qt3dsdm::ISlideSystem *theSlideSystem = m_Doc->GetStudioSystem()->GetSlideSystem();
-            qt3dsdm::CUICDMSlideHandle theSlide = theSlideSystem->GetSlideByInstance(m_Instance);
+            qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetSlideByInstance(m_Instance);
             theSlideSystem->DeleteSlideByIndex(theSlide, 0);
 
             ReleaseConsumer();

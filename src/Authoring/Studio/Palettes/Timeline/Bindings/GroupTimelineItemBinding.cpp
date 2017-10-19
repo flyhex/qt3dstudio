@@ -73,13 +73,13 @@ bool CGroupTimelineItemBinding::OpenAssociatedEditor()
 
         qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
         Q3DStudio::CId theId = m_StudioSystem->GetClientDataModelBridge()->GetGUID(theInstance);
-        qt3dsdm::CUICDMSlideHandle theMasterSlide =
+        qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
             theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
 
         if (theMasterSlide.Valid()) {
-            CUICDMSlideHandle theActiveSlide = theSlideSystem->GetActiveSlide(theMasterSlide);
+            Qt3DSDMSlideHandle theActiveSlide = theSlideSystem->GetActiveSlide(theMasterSlide);
 
-            CCmd *theCmd = new CCmdGeneric<CDoc, CUICDMSlideHandle>(
+            CCmd *theCmd = new CCmdGeneric<CDoc, Qt3DSDMSlideHandle>(
                 m_TransMgr->GetDoc(), &CDoc::NotifyActiveSlideChanged,
                 &CDoc::NotifyActiveSlideChanged, theActiveSlide, NULL, "");
             theCmd->SetUndoable(false);

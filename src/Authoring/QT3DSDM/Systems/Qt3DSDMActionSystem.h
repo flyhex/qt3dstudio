@@ -47,18 +47,18 @@ public:
 
     // CreateAction will create Action's InstanceHandle and Action's ActionHandle and do some
     // necessary setup
-    virtual CUICDMActionHandle CreateAction(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    virtual CUICDMActionHandle CreateAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                             SLong4 inTriggerTargetObjects) = 0;
     // DeleteAction will delete both Action's ActionHandle and Action's InstanceHandle
     virtual void DeleteAction(CUICDMActionHandle inAction) = 0;
     // Return all actions that belong to a certain instance in a certain slide + the master slide
-    virtual void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    virtual void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                             TActionHandleList &outActions) const = 0;
 
     // Get/set action eyeball property value
-    virtual bool GetActionEyeballValue(CUICDMSlideHandle inActiveSlide,
+    virtual bool GetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
                                        CUICDMActionHandle inAction) const = 0;
-    virtual void SetActionEyeballValue(CUICDMSlideHandle inActiveSlide, CUICDMActionHandle inAction,
+    virtual void SetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide, CUICDMActionHandle inAction,
                                        bool inValue) = 0;
 };
 

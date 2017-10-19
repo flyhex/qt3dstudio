@@ -58,7 +58,7 @@ struct SAnimationTrack : public CHandleObject
     {
     }
 
-    SAnimationTrack(int inHandle, CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    SAnimationTrack(int inHandle, Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                     Qt3DSDMPropertyHandle inProperty, size_t inIndex, EAnimationType inAnimationType,
                     bool inFirstKeyframeDynamic, bool inArtistEdited)
         : CHandleObject(inHandle)
@@ -116,19 +116,19 @@ public: // Use
     }
     TStringTablePtr GetStringTablePtr() const { return m_StringTable; }
 
-    CUICDMAnimationHandle CreateAnimation(CUICDMSlideHandle inSlide,
+    CUICDMAnimationHandle CreateAnimation(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                           EAnimationType inAnimationType,
                                           bool inFirstKeyframeDynamic) override;
     void DeleteAnimation(CUICDMAnimationHandle inAnimation) override;
-    CUICDMAnimationHandle GetAnimation(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    CUICDMAnimationHandle GetAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                        Qt3DSDMPropertyHandle inProperty, size_t inIndex) const override;
     SAnimationInfo GetAnimationInfo(CUICDMAnimationHandle inAnimation) const override;
     void GetAnimations(TAnimationHandleList &outAnimations) const override;
-    void GetAnimations(TAnimationInfoList &outAnimations, CUICDMSlideHandle inMaster,
-                       CUICDMSlideHandle inSlide) const override;
-    void GetSpecificInstanceAnimations(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    void GetAnimations(TAnimationInfoList &outAnimations, Qt3DSDMSlideHandle inMaster,
+                       Qt3DSDMSlideHandle inSlide) const override;
+    void GetSpecificInstanceAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                        TAnimationHandleList &outAnimations) override;
 
     void SetFirstKeyframeDynamic(CUICDMAnimationHandle inAnimation, bool inValue) override;
@@ -148,7 +148,7 @@ public: // Use
     size_t GetKeyframeCount(CUICDMAnimationHandle inAnimation) const override;
     bool IsFirstKeyframe(CUICDMKeyframeHandle inKeyframe) const override;
     // Only implemented in the producer for now.
-    void OffsetAnimations(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    void OffsetAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                           long inOffset) override;
 
     void SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited = true) override;
@@ -161,9 +161,9 @@ public: // Use
     bool AnimationValid(CUICDMAnimationHandle inAnimation) const override;
 
     // Only implemented at the producer level, not at the simple core level.
-    void CopyAnimations(CUICDMSlideHandle /*inSourceSlide*/,
+    void CopyAnimations(Qt3DSDMSlideHandle /*inSourceSlide*/,
                         Qt3DSDMInstanceHandle /*inSourceInstance*/,
-                        CUICDMSlideHandle /*inDestSlide*/, Qt3DSDMInstanceHandle /*inDestInstance*/) override
+                        Qt3DSDMSlideHandle /*inDestSlide*/, Qt3DSDMInstanceHandle /*inDestInstance*/) override
     {
         throw AnimationNotFound(L"");
     }
@@ -177,7 +177,7 @@ public: // Use
 
     void EnsureAnimationCache() const;
 
-    CUICDMAnimationHandle CreateAnimationWithHandle(int inHandle, CUICDMSlideHandle inSlide,
+    CUICDMAnimationHandle CreateAnimationWithHandle(int inHandle, Qt3DSDMSlideHandle inSlide,
                                                     Qt3DSDMInstanceHandle inInstance,
                                                     Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                                     EAnimationType inAnimationType,

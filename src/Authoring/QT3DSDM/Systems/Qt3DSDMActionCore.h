@@ -52,13 +52,13 @@ public:
     virtual IStringTable &GetStringTable() const = 0;
     // Action
     virtual CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance,
-                                            CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+                                            Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                             SLong4 inTriggerTargetObjects) = 0;
     virtual void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) = 0;
     virtual const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const = 0;
-    virtual void GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    virtual void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                             TActionHandleList &outActions) const = 0;
-    virtual void GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const = 0;
+    virtual void GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const = 0;
     virtual void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const = 0;
     virtual void GetActions(TActionHandleList &outActions) const = 0;
 

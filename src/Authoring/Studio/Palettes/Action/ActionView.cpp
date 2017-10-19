@@ -561,7 +561,7 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
             theInstance = instances[0];
         break;
     case Q3DStudio::SelectedValueTypes::Slide: {
-        qt3dsdm::CUICDMSlideHandle theSlideHandle =
+        qt3dsdm::Qt3DSDMSlideHandle theSlideHandle =
             inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Slide;
         // Get the owning component instance
         CClientDataModelBridge *theBridge = GetBridge();
@@ -575,15 +575,15 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
     setItem(theInstance);
 }
 
-void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     CDoc *theDoc = GetDoc();
     qt3dsdm::CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
 
-    qt3dsdm::CUICDMSlideHandle theCurrentSlide = theDoc->GetActiveSlide();
-    qt3dsdm::CUICDMSlideHandle theMasterSlideOfAction =
+    qt3dsdm::Qt3DSDMSlideHandle theCurrentSlide = theDoc->GetActiveSlide();
+    qt3dsdm::Qt3DSDMSlideHandle theMasterSlideOfAction =
         theStudioSystem->GetSlideSystem()->GetMasterSlide(inSlide);
-    qt3dsdm::CUICDMSlideHandle theMasterOfCurrentSlide =
+    qt3dsdm::Qt3DSDMSlideHandle theMasterOfCurrentSlide =
         theStudioSystem->GetSlideSystem()->GetMasterSlide(theCurrentSlide);
 
     if (inOwner == m_itemHandle && // the action is added to current viewed instance
@@ -597,7 +597,7 @@ void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CU
     }
 }
 
-void ActionView::OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::CUICDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+void ActionView::OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
@@ -811,8 +811,6 @@ void ActionView::initialize()
     rootContext()->setContextProperty("_actionView"_L1, this);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
-    rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
-
     qmlRegisterUncreatableType<qt3dsdm::HandlerArgumentType>("Qt3DStudio", 1, 0, "HandlerArgumentType",
                                                           "HandlerArgumentType is an enum container"_L1);
     qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",

@@ -96,7 +96,7 @@ bool CBasicObjectDropSource::ValidateTarget(CDropTarget *inTarget)
             qt3dsdm::Qt3DSDMInstanceHandle theTarget = inTarget->GetInstance();
             CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
             IDocumentReader &theReader(theDoc->GetDocumentReader());
-            qt3dsdm::CUICDMSlideHandle toSlide = theReader.GetAssociatedSlide(theTarget);
+            qt3dsdm::Qt3DSDMSlideHandle toSlide = theReader.GetAssociatedSlide(theTarget);
             ;
 
             if (!theReader.IsMasterSlide(toSlide))
@@ -128,7 +128,7 @@ bool CBasicObjectDropSource::CanCopy()
 
 CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
                                                    EDROPDESTINATION inDestType,
-                                                   qt3dsdm::CUICDMSlideHandle inSlide)
+                                                   qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     using namespace Q3DStudio;
     using qt3dsdm::ComposerObjectTypes;

@@ -37,7 +37,7 @@ using namespace std;
 namespace qt3dsdm {
 
 CUICDMActionHandle CActionCoreProducer::CreateAction(Qt3DSDMInstanceHandle inInstance,
-                                                     CUICDMSlideHandle inSlide,
+                                                     Qt3DSDMSlideHandle inSlide,
                                                      Qt3DSDMInstanceHandle inOwner,
                                                      SLong4 inTriggerTargetObjects)
 {
@@ -64,13 +64,13 @@ const SActionInfo &CActionCoreProducer::GetActionInfo(CUICDMActionHandle inActio
     return m_Data->GetActionInfo(inAction);
 }
 
-void CActionCoreProducer::GetActions(CUICDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+void CActionCoreProducer::GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                      TActionHandleList &outActions) const
 {
     return m_Data->GetActions(inSlide, inOwner, outActions);
 }
 
-void CActionCoreProducer::GetActions(CUICDMSlideHandle inSlide, TActionHandleList &outActions) const
+void CActionCoreProducer::GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const
 {
     return m_Data->GetActions(inSlide, outActions);
 }
