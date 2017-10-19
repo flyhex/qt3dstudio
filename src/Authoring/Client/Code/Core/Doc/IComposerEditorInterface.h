@@ -30,7 +30,7 @@
 #ifndef ICOMPOSERIMPORTINTERFACEH
 #define ICOMPOSERIMPORTINTERFACEH
 #include "IDocumentEditor.h"
-#include "UICImportPerformImport.h"
+#include "Qt3DSImportPerformImport.h"
 
 namespace qt3dsdm {
 class IStringTable;
@@ -43,7 +43,7 @@ namespace ComposerImport {
 
     using namespace Q3DStudio;
     using namespace qt3dsdm;
-    using namespace UICIMP;
+    using namespace qt3dsimp;
     using std::unordered_map;
     using std::vector;
     using std::pair;

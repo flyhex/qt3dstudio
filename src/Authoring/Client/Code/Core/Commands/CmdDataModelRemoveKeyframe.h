@@ -38,10 +38,10 @@
 #include "Cmd.h"
 #include "CmdDataModel.h"
 #include "Doc.h"
-#include "UICDMHandles.h"
-#include "UICDMAnimation.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMAnimation.h"
 #include "CmdDataModelBase.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 
 class CCmdDataModelRemoveKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {

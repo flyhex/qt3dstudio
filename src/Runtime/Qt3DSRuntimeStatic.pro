@@ -649,28 +649,28 @@ HEADERS += \
 # DataModel
 SOURCES += \
     Source/DataModel/Source/Qt3DSMetadata.cpp \
-    $$PWD/../Authoring/UICIMP/UICImportLib/UICImportMesh.cpp \
-    $$PWD/../Authoring/UICIMP/UICImportLib/UICImportPath.cpp \
-    $$PWD/../Authoring/UICDM/Systems/UICDMMetaData.cpp \
-    $$PWD/../Authoring/UICDM/Systems/UICDMXML.cpp \
-    $$PWD/../Authoring/UICDM/Systems/UICDMStringTable.cpp \
-    $$PWD/../Authoring/UICDM/Systems/UICDMHandles.cpp \
-    $$PWD/../Authoring/UICDM/Systems/UICDMComposerTypeDefinitions.cpp \
-    $$PWD/../Authoring/UICDM/Systems/UICDMValue.cpp \
-    $$PWD/../Authoring/UICDM/Systems/Cores/SimpleDataCore.cpp
+    $$PWD/../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
+    $$PWD/../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMMetaData.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMXML.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMStringTable.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMHandles.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMComposerTypeDefinitions.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMValue.cpp \
+    $$PWD/../Authoring/QT3DSDM/Systems/Cores/SimpleDataCore.cpp
 
 HEADERS += \
     Source/DataModel/Include/Qt3DSMetadata.h \
     Source/DataModel/Include/DocumentResourceManagerScriptParser.h \
-    $$PWD/../Authoring/UICIMP/UICImportLib/UICImportMesh.h \
-    $$PWD/../Authoring/UICIMP/UICImportLib/UICImportPath.h \
-    $$PWD/../Authoring/UICDM/Systems/UICDMMetaData.h \
-    $$PWD/../Authoring/UICDM/Systems/UICDMXML.h \
-    $$PWD/../Authoring/UICDM/Systems/UICDMStringTable.h \
-    $$PWD/../Authoring/UICDM/Systems/UICDMHandles.h \
-    $$PWD/../Authoring/UICDM/Systems/UICDMComposerTypeDefinitions.h \
-    $$PWD/../Authoring/UICDM/Systems/UICDMValue.h \
-    $$PWD/../Authoring/UICDM/Systems/Cores/SimpleDataCore.h
+    $$PWD/../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.h \
+    $$PWD/../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMMetaData.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMXML.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMStringTable.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMHandles.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMComposerTypeDefinitions.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/QT3DSDMValue.h \
+    $$PWD/../Authoring/QT3DSDM/Systems/Cores/SimpleDataCore.h
 
 # Engine
 HEADERS += \

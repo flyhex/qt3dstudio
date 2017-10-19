@@ -32,16 +32,16 @@
 //==============================================================================
 #ifndef INCLUDED_IDOCUMENTEDITOR_H
 #define INCLUDED_IDOCUMENTEDITOR_H
-#include "UICDMDataTypes.h"
-#include "UICDMAnimation.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMAnimation.h"
 #include "StudioObjectTypes.h"
 #include "Pt.h"
-#include "UICImportErrorCodes.h"
+#include "Qt3DSImportErrorCodes.h"
 #include "DocumentEditorEnumerations.h"
 #include "IDocumentReader.h"
-#include "UICDMComposerTypeDefinitions.h"
+#include "Qt3DSDMComposerTypeDefinitions.h"
 #include "CColor.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 #pragma once
 
@@ -57,7 +57,7 @@ class SComposerObjectDefinitions;
 struct SGuideInfo;
 }
 
-namespace UICIMP {
+namespace qt3dsimp {
 struct STranslationLog;
 }
 
@@ -419,9 +419,9 @@ public:
                             qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static void DisplayImportErrors(const QString &inImportSource,
-                                    UICIMP::ImportErrorCodes::Enum inImportError,
+                                    qt3dsimp::ImportErrorCodes::Enum inImportError,
                                     std::shared_ptr<IImportFailedHandler> inHandler,
-                                    UICIMP::STranslationLog &inLog, bool inForceError = false);
+                                    qt3dsimp::STranslationLog &inLog, bool inForceError = false);
 };
 
 struct ScopedDocumentEditor

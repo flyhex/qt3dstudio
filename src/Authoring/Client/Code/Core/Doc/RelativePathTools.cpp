@@ -40,10 +40,10 @@
 #include "StackTokenizer.h"
 #include "Doc.h"
 #include "IObjectReferenceHelper.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMDataCore.h"
 
 namespace {
 bool IsEmpty(const qt3dsdm::SObjectRefType &inObjectRefValue)

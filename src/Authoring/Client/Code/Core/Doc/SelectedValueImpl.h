@@ -30,7 +30,7 @@
 #define SELECTED_VALUE_IMPL_H
 #include "SelectedValue.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "foundation/Qt3DSUnionCast.h"
 
 namespace Q3DStudio {

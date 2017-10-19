@@ -31,7 +31,7 @@
 #include "foundation/IOStreams.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
-#include "UICDMWindowsCompatibility.h"
+#include "Qt3DSDMWindowsCompatibility.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"

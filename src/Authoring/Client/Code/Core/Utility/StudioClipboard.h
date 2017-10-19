@@ -33,7 +33,7 @@
 #ifndef INCLUDED_STUDIOCLIPBOARD_H
 #define INCLUDED_STUDIOCLIPBOARD_H 1
 
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 #include "StudioObjectTypes.h"
 
 class COleDataObject;

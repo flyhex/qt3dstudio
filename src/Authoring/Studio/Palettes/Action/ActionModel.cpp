@@ -34,8 +34,8 @@
 #include "Core.h"
 #include "Doc.h"
 #include "StudioApp.h"
-#include "UICDMActionSystem.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMActionSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 
 ActionModel::ActionModel(QObject *parent)
     : QAbstractListModel(parent)

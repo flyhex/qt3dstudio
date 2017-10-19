@@ -35,7 +35,7 @@
 #include <qglobal.h>
 
 #include "CoreConst.h"
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 #include "Preferences.h"
 #include "Rct.h"
 

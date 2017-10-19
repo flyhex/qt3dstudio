@@ -30,7 +30,7 @@
 #ifndef QT3DS_STATE_EDITOR_TRANSITION_PATH_H
 #define QT3DS_STATE_EDITOR_TRANSITION_PATH_H
 #pragma once
-#include "UICState.h"
+#include "Qt3DSState.h"
 #include "foundation/Qt3DSVec2.h"
 #include "EASTL/vector.h"
 #include "foundation/Qt3DSOption.h"

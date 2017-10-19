@@ -38,10 +38,10 @@
 #include "Cmd.h"
 #include "CmdDataModel.h"
 #include "Doc.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "CmdDataModelBase.h"
-#include "UICDMPropertyDefinition.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMPropertyDefinition.h"
+#include "Qt3DSDMDataCore.h"
 
 // Keyframes are always set at the property level, never for individual animation handle.
 class CCmdDataModelAnimate : public CCmd, public qt3dsdm::CmdDataModel

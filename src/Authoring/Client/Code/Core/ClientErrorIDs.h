@@ -34,7 +34,7 @@
 #ifndef __CLIENTERRORIDS_H__
 #define __CLIENTERRORIDS_H__
 
-#include "UICExceptions.h"
+#include "Qt3DSExceptions.h"
 
 //==============================================================================
 //	Defines

@@ -134,11 +134,11 @@ SOURCES += \
     Studio/Palettes/Inspector/MeshChooserModel.cpp \
     Studio/Palettes/Inspector/MeshChooserView.cpp \
     Studio/Palettes/Inspector/TextureChooserView.cpp \
-    Studio/Palettes/Inspector/UICDMInspectable.cpp \
-    Studio/Palettes/Inspector/UICDMInspectorGroup.cpp \
-    Studio/Palettes/Inspector/UICDMInspectorRow.cpp \
-    Studio/Palettes/Inspector/UICDMMaterialInspectable.cpp \
-    Studio/Palettes/Inspector/UICDMSceneInspectable.cpp \
+    Studio/Palettes/Inspector/Qt3DSDMInspectable.cpp \
+    Studio/Palettes/Inspector/Qt3DSDMInspectorGroup.cpp \
+    Studio/Palettes/Inspector/Qt3DSDMInspectorRow.cpp \
+    Studio/Palettes/Inspector/Qt3DSDMMaterialInspectable.cpp \
+    Studio/Palettes/Inspector/Qt3DSDMSceneInspectable.cpp \
     Studio/Palettes/Inspector/InspectorControlView.cpp \
     Studio/Palettes/Inspector/InspectorControlModel.cpp \
     Studio/Palettes/Inspector/ObjectListModel.cpp \
@@ -213,11 +213,11 @@ SOURCES += \
     Studio/Palettes/Timeline/Bindings/SlideTimelineItemBinding.cpp \
     Studio/Palettes/Timeline/Bindings/TimelineBreadCrumbProvider.cpp \
     Studio/Palettes/Timeline/Bindings/TimelineTranslationManager.cpp \
-    Studio/Palettes/Timeline/Bindings/UICDMAssetTimelineKeyframe.cpp \
-    Studio/Palettes/Timeline/Bindings/UICDMTimelineItemBinding.cpp \
-    Studio/Palettes/Timeline/Bindings/UICDMTimelineItemProperty.cpp \
-    Studio/Palettes/Timeline/Bindings/UICDMTimelineKeyframe.cpp \
-    Studio/Palettes/Timeline/Bindings/UICDMTimelineTimebar.cpp \
+    Studio/Palettes/Timeline/Bindings/Qt3DSDMAssetTimelineKeyframe.cpp \
+    Studio/Palettes/Timeline/Bindings/Qt3DSDMTimelineItemBinding.cpp \
+    Studio/Palettes/Timeline/Bindings/Qt3DSDMTimelineItemProperty.cpp \
+    Studio/Palettes/Timeline/Bindings/Qt3DSDMTimelineKeyframe.cpp \
+    Studio/Palettes/Timeline/Bindings/Qt3DSDMTimelineTimebar.cpp \
     Studio/Render/PathWidget.cpp \
     Studio/Render/StudioRenderer.cpp \
     Studio/Render/StudioRendererTranslation.cpp \

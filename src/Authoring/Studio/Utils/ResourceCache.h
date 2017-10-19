@@ -33,7 +33,7 @@
 #pragma once
 
 #include "MouseCursor.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include <map>
 
 #include <QCursor>

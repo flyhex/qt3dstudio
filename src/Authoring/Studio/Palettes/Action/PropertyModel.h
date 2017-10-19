@@ -3,9 +3,9 @@
 
 #include <QAbstractListModel>
 
-#include "UICDMHandles.h"
-#include "UICDMDataTypes.h"
-#include "UICDMMetaDataTypes.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMMetaDataTypes.h"
 
 struct PropertyInfo {
     Q_PROPERTY(QString name MEMBER m_name CONSTANT FINAL)

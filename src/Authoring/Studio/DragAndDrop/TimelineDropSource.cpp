@@ -43,10 +43,10 @@
 #include "HotKeys.h"
 #include "Core.h"
 #include "Doc.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
-#include "Bindings/UICDMTimelineItemBinding.h"
+#include "Qt3DSDMSlides.h"
+#include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "IDocumentEditor.h"
 #include "ImportUtils.h"
 

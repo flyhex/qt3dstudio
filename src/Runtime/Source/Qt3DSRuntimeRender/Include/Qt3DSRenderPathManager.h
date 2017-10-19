@@ -36,7 +36,7 @@
 #include "Qt3DSRenderShaderCache.h" //TShaderFeatureSet
 #include "foundation/Qt3DSVec2.h"
 #include "foundation/Qt3DSBounds3.h"
-//#include "UICRenderDefaultMaterialShaderGenerator.h" //SLayerGlobalRenderProperties
+//#include "Qt3DSRenderDefaultMaterialShaderGenerator.h" //SLayerGlobalRenderProperties
 
 namespace qt3ds {
 namespace render {

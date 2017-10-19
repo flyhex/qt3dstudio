@@ -31,7 +31,7 @@
 #include <QQuickWidget>
 
 #include "RelativePathTools.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 #include <QColor>
 

@@ -36,7 +36,7 @@
 #include "StudioApp.h"
 #include "StudioClipboard.h"
 #include "StudioPreferences.h"
-#include "UICImport.h"
+#include "Qt3DSImport.h"
 #include "Dialogs.h"
 #include "IDocumentEditor.h"
 #include "ProjectContextMenu.h"
@@ -232,7 +232,7 @@ void ProjectView::refreshImport(int row) const
         return;
     using namespace Q3DStudio;
     const auto path = m_ProjectModel->filePath(row);
-    UICIMP::ImportPtrOrError importPtr = UICIMP::Import::Load(path.toStdWString().c_str());
+    qt3dsimp::ImportPtrOrError importPtr = qt3dsimp::Import::Load(path.toStdWString().c_str());
     if (importPtr.m_Value) {
         const auto destDir = QString::fromWCharArray(importPtr.m_Value->GetDestDir());
         const auto srcFile = QString::fromWCharArray(importPtr.m_Value->GetSrcFile());

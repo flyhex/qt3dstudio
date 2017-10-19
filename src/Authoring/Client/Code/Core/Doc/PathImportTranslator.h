@@ -28,11 +28,11 @@
 ****************************************************************************/
 #ifndef PATH_IMPORT_TRANSLATOR_H
 #define PATH_IMPORT_TRANSLATOR_H
-#include "UICImportTranslation.h"
-#include "UICImportComposerTypes.h"
-#include "UICImport.h"
+#include "Qt3DSImportTranslation.h"
+#include "Qt3DSImportComposerTypes.h"
+#include "Qt3DSImport.h"
 #include "foundation/Qt3DSRefCounted.h"
-namespace UICIMP {
+namespace qt3dsimp {
 class IPathBufferBuilder;
 }
 
@@ -42,19 +42,19 @@ class NVFoundationBase;
 
 namespace Q3DStudio {
 class IDynamicLua;
-struct SPathImportTranslator : public UICIMP::ITranslator
+struct SPathImportTranslator : public qt3dsimp::ITranslator
 {
     typedef eastl::vector<Q3DStudio::CString> TNameList;
     typedef QT3DSU64 TInstanceHandle;
 
     qt3ds::NVFoundationBase &m_Foundation;
     QString m_SourceFile;
-    UICIMP::STranslationLog m_TranslationLog;
+    qt3dsimp::STranslationLog m_TranslationLog;
     IDynamicLua &m_LuaState;
-    UICIMP::Import *m_Import;
-    UICIMP::SImportComposerTypes m_ObjectTypes;
-    eastl::vector<UICIMP::InstanceDesc> m_ChildVector;
-    qt3ds::foundation::NVScopedRefCounted<UICIMP::IPathBufferBuilder> m_Builder;
+    qt3dsimp::Import *m_Import;
+    qt3dsimp::SImportComposerTypes m_ObjectTypes;
+    eastl::vector<qt3dsimp::InstanceDesc> m_ChildVector;
+    qt3ds::foundation::NVScopedRefCounted<qt3dsimp::IPathBufferBuilder> m_Builder;
 
     SPathImportTranslator(const QString &srcFile, IDynamicLua &inLuaState,
                           qt3ds::NVFoundationBase &inFoundation);
@@ -66,7 +66,7 @@ struct SPathImportTranslator : public UICIMP::ITranslator
     const QString &GetSourceFile() override { return m_SourceFile; }
     // Returning false causes the rest of the import or refresh process
     // to fail.
-    bool PerformTranslation(UICIMP::Import &import) override;
+    bool PerformTranslation(qt3dsimp::Import &import) override;
 
 protected:
     void SetName(TInstanceHandle inItem, const wchar_t *inNameBase);

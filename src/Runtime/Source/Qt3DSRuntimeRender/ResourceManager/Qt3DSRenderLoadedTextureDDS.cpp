@@ -379,7 +379,7 @@ namespace render {
             QT3DSI32 size = total_image_data_size(image);
             image->dataBlock =
                 QT3DS_ALLOC(io->m_Allocator, size,
-                         "UICDDSAllocDataBlock"); // no need to calloc, as we fill every bit...
+                         "Qt3DSDDSAllocDataBlock"); // no need to calloc, as we fill every bit...
             if (image->dataBlock == NULL) {
                 return NULL;
             }
@@ -418,7 +418,7 @@ namespace render {
 
             image = (UICDDSImage *)QT3DS_ALLOC(io->m_Allocator, sizeof(UICDDSImage), "DoLoadDDS");
             if (image == NULL) {
-                throw "UICDDSImage allocation failed";
+                throw "Qt3DSDDSImage allocation failed";
             }
             memset(image, 0, sizeof(UICDDSImage));
 

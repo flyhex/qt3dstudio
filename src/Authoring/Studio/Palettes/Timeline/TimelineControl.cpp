@@ -58,8 +58,8 @@
 #include "TimelineDropTarget.h"
 
 #include "ClientDataModelBridge.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
 
 IMPLEMENT_OBJECT_COUNTER(CTimelineControl)
 

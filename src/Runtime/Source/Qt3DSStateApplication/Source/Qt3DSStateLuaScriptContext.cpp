@@ -214,7 +214,7 @@ struct SScriptContext : public ILuaScriptContext
     {
         int top = lua_gettop(m_LuaState);
         GetGlobalTable();
-        lua_getfield(m_LuaState, -1, "uicstate_scriptcache");
+        lua_getfield(m_LuaState, -1, "Qt3DSstate_scriptcache");
         if (lua_isnil(m_LuaState, -1)) {
             lua_pop(m_LuaState, 1); // pop the nil
             lua_newtable(m_LuaState);
@@ -222,7 +222,7 @@ struct SScriptContext : public ILuaScriptContext
             // stack layout -
             // newtable,newtable,globaltable
             // store it in our global table.
-            lua_setfield(m_LuaState, -3, "uicstate_scriptcache");
+            lua_setfield(m_LuaState, -3, "Qt3DSstate_scriptcache");
         }
         // stack layout - newtable, globaltable
         // pop the global table off now that we have the script cache table.
@@ -269,7 +269,7 @@ struct SScriptContext : public ILuaScriptContext
         // set the function wrapper to that script.
         lua_setfield(m_LuaState, -2, "In");
         lua_pushlightuserdata(m_LuaState, this);
-        lua_setfield(m_LuaState, -2, "uicstate_scriptcontext");
+        lua_setfield(m_LuaState, -2, "Qt3DSstate_scriptcontext");
 
         // Set the function environment for the lua table.
         int top = lua_gettop(m_LuaState);
@@ -285,12 +285,12 @@ struct SScriptContext : public ILuaScriptContext
 
         // store the global table somewhere we can get to it.  WE get the global table of all lua
         // contexts
-        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "uicstate_luacontexts");
+        lua_getfield(m_LuaState, LUA_REGISTRYINDEX, "Qt3DSstate_luacontexts");
         if (lua_isnil(m_LuaState, -1)) {
             lua_pop(m_LuaState, 1);
             lua_newtable(m_LuaState);
             lua_pushvalue(m_LuaState, -1);
-            lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "uicstate_luacontexts");
+            lua_setfield(m_LuaState, LUA_REGISTRYINDEX, "Qt3DSstate_luacontexts");
         }
         (void)top;
         // move the table of all lua contexts before the global table.
@@ -339,7 +339,7 @@ struct SScriptContext : public ILuaScriptContext
 
     void GetGlobalTable(lua_State *inState)
     {
-        lua_getfield(inState, LUA_REGISTRYINDEX, "uicstate_luacontexts");
+        lua_getfield(inState, LUA_REGISTRYINDEX, "Qt3DSstate_luacontexts");
         lua_getfield(inState, -1, m_ContextName);
         lua_insert(inState, -2);
         // pop the registery table off the system.
@@ -639,12 +639,12 @@ struct SScriptContext : public ILuaScriptContext
     {
         STopScope __stackScope(m_LuaState);
         GetGlobalTable();
-        lua_getfield(m_LuaState, -1, "uicstate_scriptids");
+        lua_getfield(m_LuaState, -1, "Qt3DSstate_scriptids");
         if (lua_isnil(m_LuaState, -1)) {
             lua_pop(m_LuaState, 1);
             lua_newtable(m_LuaState);
             lua_pushvalue(m_LuaState, -1);
-            lua_setfield(m_LuaState, -3, "uicstate_scriptids");
+            lua_setfield(m_LuaState, -3, "Qt3DSstate_scriptids");
         }
         lua_rawgeti(m_LuaState, -1, m_NextScriptId);
         while (!lua_isnil(m_LuaState, -1)) {
@@ -664,7 +664,7 @@ struct SScriptContext : public ILuaScriptContext
         STopScope __stackScope(m_LuaState);
         int topOfStack = lua_gettop(m_LuaState);
         GetGlobalTable();
-        lua_getfield(m_LuaState, -1, "uicstate_scriptids");
+        lua_getfield(m_LuaState, -1, "Qt3DSstate_scriptids");
         if (!lua_istable(m_LuaState, -1)) {
             QT3DS_ASSERT(false);
             return;
@@ -677,7 +677,7 @@ struct SScriptContext : public ILuaScriptContext
     void GetScriptIdItem(QT3DSI32 inId)
     {
         GetGlobalTable();
-        lua_getfield(m_LuaState, -1, "uicstate_scriptids");
+        lua_getfield(m_LuaState, -1, "Qt3DSstate_scriptids");
         if (!lua_istable(m_LuaState, -1)) {
             QT3DS_ASSERT(false);
             lua_pop(m_LuaState, 2);
@@ -691,7 +691,7 @@ struct SScriptContext : public ILuaScriptContext
     {
         STopScope __stackScope(m_LuaState);
         GetGlobalTable();
-        lua_getfield(m_LuaState, -1, "uicstate_scriptids");
+        lua_getfield(m_LuaState, -1, "Qt3DSstate_scriptids");
         if (!lua_isnil(m_LuaState, -1)) {
             lua_pushnil(m_LuaState);
             lua_rawseti(m_LuaState, -2, inId);
@@ -1004,7 +1004,7 @@ struct SLuaInterpreterObject : public IStateInterpreterEventHandler
         }
         int top = lua_gettop(m_ScriptContext->m_LuaState);
         m_ScriptContext->GetGlobalTable();
-        lua_getfield(m_ScriptContext->m_LuaState, -1, "uicstate_interpreterobject");
+        lua_getfield(m_ScriptContext->m_LuaState, -1, "Qt3DSstate_interpreterobject");
         QT3DS_ASSERT(lua_istable(m_ScriptContext->m_LuaState, -1));
         lua_getfield(m_ScriptContext->m_LuaState, -1, functionName);
         if (lua_isfunction(m_ScriptContext->m_LuaState, -1)) {
@@ -1055,7 +1055,7 @@ struct SLuaInterpreterObject : public IStateInterpreterEventHandler
         m_ScriptContext->SetId(inId);
         // This first argument was the 'this' table.
         lua_pushvalue(inState, 1);
-        lua_setfield(inState, -2, "uicstate_interpreterobject");
+        lua_setfield(inState, -2, "Qt3DSstate_interpreterobject");
         lua_pop(inState, 1);
         m_Interpreter = IStateInterpreter::Create(
             GetFoundation(), *m_StateContext->GetDOMFactory()->GetStringTable(), *m_ScriptContext,
@@ -1076,7 +1076,7 @@ struct SLuaInterpreterObject : public IStateInterpreterEventHandler
         m_ScriptContext = static_cast<SScriptContext &>(inInterpreter.GetScriptContext());
         m_ScriptContext->GetGlobalTable();
         lua_pushvalue(inState, theTop);
-        lua_setfield(inState, -2, "uicstate_interpreterobject");
+        lua_setfield(inState, -2, "Qt3DSstate_interpreterobject");
         m_Interpreter = inInterpreter;
         m_EventConnection = m_Interpreter->RegisterEventHandler(*this);
         lua_settop(inState, theTop);
@@ -1327,13 +1327,13 @@ struct SLuaInterpreterObject : public IStateInterpreterEventHandler
         const char *path = lua_tostring(inState, 1);
         CFileSeekableIOStream theStream(path, FileReadFlags());
         if (theStream.IsOpen() == false)
-            luaL_error(inState, "UICState::parse - Failed to open %s", path);
+            luaL_error(inState, "Qt3DSState::parse - Failed to open %s", path);
         SLuaInterpreterObject *retval = CreateInterpreter(inState, inDebugger, inFoundation);
         int top = lua_gettop(inState);
         retval->m_StateContext = IStateContext::Load(
             retval->graphAllocator, retval->GetFoundation(), theStream, path, inStrTable);
         if (retval->m_StateContext.mPtr == NULL) {
-            luaL_error(inState, "UICState::parse - Failed to parse %s", path);
+            luaL_error(inState, "Qt3DSState::parse - Failed to parse %s", path);
         }
         BindCFunctions(inState);
         QT3DS_ASSERT(top == lua_gettop(inState));

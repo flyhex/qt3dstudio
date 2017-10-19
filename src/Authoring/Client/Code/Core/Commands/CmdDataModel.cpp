@@ -32,8 +32,8 @@
 #include <boost/utility.hpp>
 #include <boost/function.hpp>
 #include <boost/bind/apply.hpp>
-#include "UICDMTransactions.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMTransactions.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "Doc.h"
 #include "Core.h"
 #include "Dispatch.h"

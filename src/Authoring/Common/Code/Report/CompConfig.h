@@ -43,7 +43,7 @@
 
 #include <iostream>
 #include <string>
-#include "UICString.h"
+#include "Qt3DSString.h"
 //#include <string>
 //#include <vector>
 //#include <Wbemidl.h>

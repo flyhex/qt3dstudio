@@ -29,7 +29,7 @@
 #pragma once
 #ifndef __GUIDEINSPECTABLE_H__
 #define __GUIDEINSPECTABLE_H__
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "Core.h"
 #include "InspectableBase.h"
 #include "Doc.h"

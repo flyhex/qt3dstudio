@@ -1125,7 +1125,7 @@ void SLuaEngineImpl::SetApplicationCore(qt3ds::runtime::IApplicationCore &inAppl
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_ApplicationCore = &inApplication;
     lua_pushlightuserdata(m_LuaState, m_Application);
-    lua_setglobal(m_LuaState, "UICApplicationCore");
+    lua_setglobal(m_LuaState, "Qt3DSApplicationCore");
     g_InputStreamFactory = &m_ApplicationCore->GetRuntimeFactoryCore()
                                 .GetUICRenderContextCore()
                                 .GetInputStreamFactory();
@@ -1161,7 +1161,7 @@ void SLuaEngineImpl::SetApplication(qt3ds::runtime::IApplication &inApplication)
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_Application = &inApplication;
     lua_pushlightuserdata(m_LuaState, m_Application);
-    lua_setglobal(m_LuaState, "UICApplication");
+    lua_setglobal(m_LuaState, "Qt3DSApplication");
 }
 
 // Starts preloading scripts offline.  This sets m_LuaState to NULL until after EndPreloadScripts to
@@ -1468,7 +1468,7 @@ void SLuaEngineImpl::CallFunction(const char *behavior, const char *handler,
 {
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     int theTop = lua_gettop(m_LuaState);
-    lua_getglobal(m_LuaState, "UICApplication");
+    lua_getglobal(m_LuaState, "Qt3DSApplication");
     qt3ds::runtime::IApplication *theApp =
         static_cast<qt3ds::runtime::IApplication *>(lua_touserdata(m_LuaState, -1));
     lua_pop(m_LuaState, 1);
@@ -1763,7 +1763,7 @@ void SLuaEngineImpl::GotoSlide(const char *component, const char *slideName,
 {
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     int theTop = lua_gettop(m_LuaState);
-    lua_getglobal(m_LuaState, "UICApplication");
+    lua_getglobal(m_LuaState, "Qt3DSApplication");
     qt3ds::runtime::IApplication *theApp =
         static_cast<qt3ds::runtime::IApplication *>(lua_touserdata(m_LuaState, -1));
     lua_pop(m_LuaState, 1);
@@ -2357,7 +2357,7 @@ CPresentation *CLuaEngine::GetCurrentPresentation(lua_State *inLuaState)
     }
 
     if (thePresentation == NULL) {
-        lua_getglobal(inLuaState, "UICApplication");
+        lua_getglobal(inLuaState, "Qt3DSApplication");
         IApplication *appInterface =
             reinterpret_cast<IApplication *>(lua_touserdata(inLuaState, -1));
         if (appInterface != NULL)

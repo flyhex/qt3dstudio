@@ -43,7 +43,7 @@
 #include "CmdDataModelChangeKeyframe.h"
 #include "IDocumentEditor.h"
 
-#include "UICDMTimelineKeyframe.h" //TODO: remove once we resolve the precision issue
+#include "Qt3DSDMTimelineKeyframe.h" //TODO: remove once we resolve the precision issue
 
 using namespace qt3dsdm;
 

@@ -35,14 +35,14 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICOptions.h"
+#include "Qt3DSOptions.h"
 #include "Doc.h"
 #include "Core.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMActionCore.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMActionCore.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMSignals.h"
 #include "IKeyframesManager.h"
 #include "FileInputStream.h"
 #include "FileOutputStream.h"
@@ -59,7 +59,7 @@
 #include "StudioProjectSettings.h"
 #include "StudioPreferences.h"
 #include "StudioFullSystem.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMDataCore.h"
 #include "CmdDataModelDeleteInstance.h"
 #include "PlaybackClock.h"
 #include "ColorConversion.h"
@@ -67,11 +67,11 @@
 #include "IDocumentEditor.h"
 #include "IDocumentBufferCache.h"
 #include "StudioCoreSystem.h"
-#include "UICDMXML.h"
+#include "Qt3DSDMXML.h"
 #include "foundation/IOStreams.h"
-#include "UICDMWStrOpsImpl.h"
+#include "Qt3DSDMWStrOpsImpl.h"
 #include "IComposerSerializer.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "ProjectSettingsSerializer.h"
 #include "CmdBatch.h"
 #include "IDirectoryWatchingSystem.h"
@@ -1329,7 +1329,7 @@ CUICFile CDoc::CreateUntitledDocument() const
 {
     Q3DStudio::CFilePath theAppDirectory = Q3DStudio::CFilePath::GetUserApplicationDirectory();
     Q3DStudio::CFilePath theUICDirectory = Q3DStudio::CFilePath::CombineBaseAndRelative(
-        theAppDirectory, Q3DStudio::CFilePath(L"UIComposer/Untitled"));
+        theAppDirectory, Q3DStudio::CFilePath(L"Qt3DSomposer/Untitled"));
     theUICDirectory.CreateDir(true);
     Q3DStudio::CFilePath theUICFilePath = Q3DStudio::CFilePath::CombineBaseAndRelative(
         theUICDirectory, Q3DStudio::CFilePath(L"Untitled.uip"));

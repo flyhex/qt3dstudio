@@ -138,7 +138,7 @@ void SCustomMaterialVertexPipeline::InitializeTessEvaluationShader()
     SetupTessIncludes(ShaderGeneratorStages::TessEval, m_TessMode);
 
     if (m_TessMode == TessModeValues::TessLinear && m_DisplacementImage) {
-        tessEvalShader.AddInclude("uicDefaultMaterialFileDisplacementTexture.glsllib");
+        tessEvalShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
         tessEvalShader.AddUniform("model_matrix", "mat4");
         tessEvalShader.AddUniform("displace_tiling", "vec3");
         tessEvalShader.AddUniform("displaceAmount", "float");
@@ -294,7 +294,7 @@ void SCustomMaterialVertexPipeline::BeginVertexGeneration(QT3DSU32 displacementI
             SetCode(GenerationFlagValues::WorldPosition);
             vertexShader.AddUniform("model_matrix", "mat4");
 
-            vertexShader.AddInclude("uicDefaultMaterialFileDisplacementTexture.glsllib");
+            vertexShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
             vertexShader.AddUniform(displacementImage->m_Image.m_ImageShaderName.c_str(),
                                     "sampler2D");
 

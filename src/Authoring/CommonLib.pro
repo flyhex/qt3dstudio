@@ -17,8 +17,8 @@ INCLUDEPATH += \
     Common/Code/_Win32/Include \
     Common/Code/Report \
     Common/Code/Serialize \
-    UICDM \
-    UICDM/Systems \
+    QT3DSDM \
+    QT3DSDM/Systems \
     $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
     ../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/color

@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include "OutputStream.h"
 
 class CFormattedOutputStream : public CSeekOutputStream

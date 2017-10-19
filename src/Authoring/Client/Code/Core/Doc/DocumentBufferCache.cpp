@@ -34,7 +34,7 @@
 #include "IDocumentBufferCache.h"
 #include "Doc.h"
 #include "foundation/Qt3DS.h"
-#include "UICDMStringTable.h"
+#include "Qt3DSDMStringTable.h"
 #include "EASTL/hash_map.h"
 #include "Qt3DSRenderBufferManager.h"
 #include "foundation/StringTable.h"

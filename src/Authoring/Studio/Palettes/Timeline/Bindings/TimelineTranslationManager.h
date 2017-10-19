@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include "UICDMHandles.h"
-#include "UICDMTimeline.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMTimeline.h"
 
 #include "Doc.h"
 

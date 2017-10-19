@@ -40,9 +40,9 @@
 //#ifndef INCLUDED_CMD_BATCH_H
 #include "CmdBatch.h"
 #include "Doc.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSignals.h"
 #include "Core.h"
 #include "Dispatch.h"
 //#endif

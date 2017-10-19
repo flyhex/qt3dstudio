@@ -8,7 +8,7 @@ SOURCES += \
     Client/Code/Core/Types/Pixel.cpp \
     Client/Code/Core/Types/Plane.cpp \
     Client/Code/Core/Types/Rotation3.cpp \
-    Client/Code/Core/Types/UICColor.cpp \
+    Client/Code/Core/Types/Qt3DSColor.cpp \
     Client/Code/Core/Types/Vector2.cpp \
     Client/Code/Core/Types/Vector3.cpp \
     Client/Code/Core/Utility/BuildConfigParser.cpp \
@@ -42,23 +42,23 @@ SOURCES += \
     Client/Code/Core/Doc/PathImportTranslator.cpp \
     Client/Code/Core/Doc/RelativePathTools.cpp \
     Client/Code/Core/Doc/StudioProjectSettings.cpp \
-    Client/Code/Core/Doc/UICDMStudioSystem.cpp \
+    Client/Code/Core/Doc/Qt3DSDMStudioSystem.cpp \
     Client/Code/Core/Doc/ClientDataModelBridge/ClientDataModelBridge.cpp \
     Client/Code/Core/Timer/Timer.cpp \
     Client/Code/Core/VirtualAssets/PlaybackClock.cpp \
     Client/Code/Core/VirtualAssets/VClockPolicy.cpp \
     Client/Code/Shared/Log/LogHelper.cpp \
-    UICIMP/UICImportLib/UICImport.cpp \
-    UICIMP/UICImportLib/UICImportComposerTypes.cpp \
-    UICIMP/UICImportLib/UICImportLibPrecompile.cpp \
-    UICIMP/UICImportLib/UICImportMesh.cpp \
-    UICIMP/UICImportLib/UICImportMeshBuilder.cpp \
-    UICIMP/UICImportLib/UICImportMeshStudioOnly.cpp \
-    UICIMP/UICImportLib/UICImportPath.cpp \
-    UICIMP/UICImportLib/UICImportPerformImport.cpp \
-    UICIMP/UICImportSGTranslation/UICImportColladaSGTranslation.cpp \
-    UICIMP/UICImportSGTranslation/UICImportFbxSGTranslation.cpp \
-    UICIMP/UICImportSGTranslation/UICImportSceneGraphTranslation.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImport.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportComposerTypes.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportLibPrecompile.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshBuilder.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshStudioOnly.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.cpp \
+    QT3DSIMP/Qt3DSImportLib/Qt3DSImportPerformImport.cpp \
+    QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportColladaSGTranslation.cpp \
+    QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportFbxSGTranslation.cpp \
+    QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportSceneGraphTranslation.cpp \
     $$PWD/Client/Code/Core/Utility/q3dsdirsystem.cpp \
     $$PWD/Client/Code/Core/Utility/q3dsdirwatcher.cpp
 

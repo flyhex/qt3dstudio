@@ -45,8 +45,8 @@
 //	Includes
 //==============================================================================
 
-#include "UICRectBase.h"
-#include "UICPointBase.h"
+#include "Qt3DSRectBase.h"
+#include "Qt3DSPointBase.h"
 
 #ifndef __PLATFORMTYPES_H__
 #include "PlatformTypes.h"

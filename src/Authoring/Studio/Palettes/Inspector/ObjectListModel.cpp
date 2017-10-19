@@ -36,7 +36,7 @@
 #include "SlideSystem.h"
 #include "StudioObjectTypes.h"
 #include "StudioPreferences.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 
 #include <QCoreApplication>
 #include <QColor>

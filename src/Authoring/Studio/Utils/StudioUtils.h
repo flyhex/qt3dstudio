@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include <QPoint>
 #include <QSize>
 

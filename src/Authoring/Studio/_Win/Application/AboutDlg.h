@@ -34,7 +34,7 @@
 
 #include <QDialog>
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;

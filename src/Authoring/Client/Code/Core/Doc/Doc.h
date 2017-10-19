@@ -39,14 +39,14 @@
 //	Includes
 //==============================================================================
 #include "Conditional.h"
-#include "UICFile.h"
-#include "UICRect.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSRect.h"
 #include "IDoc.h"
 #include "GUIDUtilities.h"
 #include "StudioErrorIDs.h"
 #include "GraphUtils.h"
 #include "CmdStackModifier.h"
-#include "UICColor.h"
+#include "Qt3DSColor.h"
 #include "SelectedValueImpl.h"
 #include "Utility/CoreConst.h"
 #include <quuid.h>

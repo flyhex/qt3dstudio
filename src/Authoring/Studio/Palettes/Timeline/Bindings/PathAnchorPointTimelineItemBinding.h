@@ -34,8 +34,8 @@
 #define PATH_ANCHOR_POINT_TIMELINE_ITEM_BINDING
 #pragma once
 
-#include "UICDMTimelineItemBinding.h"
-#include "UICDMDataTypes.h"
+#include "Qt3DSDMTimelineItemBinding.h"
+#include "Qt3DSDMDataTypes.h"
 #include <boost/tuple/tuple.hpp>
 
 //==============================================================================

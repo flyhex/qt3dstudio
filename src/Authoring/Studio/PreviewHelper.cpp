@@ -45,7 +45,7 @@
 #include "StudioProjectSettings.h"
 #include "StudioProjectVariables.h"
 #include "Core.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 
 #include <QInputDialog>
 #include <QMessageBox>

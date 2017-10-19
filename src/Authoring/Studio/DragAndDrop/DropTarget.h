@@ -36,7 +36,7 @@
 //	Includes
 //==============================================================================
 #include "StudioObjectTypes.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 class CDropSource;
 class CStudioApp;

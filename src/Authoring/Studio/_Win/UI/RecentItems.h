@@ -34,8 +34,8 @@
 
 #include <QObject>
 
-#include "UICString.h"
-#include "UICFile.h"
+#include "Qt3DSString.h"
+#include "Qt3DSFile.h"
 
 #include <vector>
 

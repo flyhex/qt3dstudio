@@ -8,7 +8,7 @@ contains(TEMPLATE, lib) {
 QT += core gui openglextensions
 
 DEFINES += COMPILED_FROM_DSP \
-    UICDM_USE_NVLOG UICDM_META_DATA_NO_SIGNALS
+    QT3DSDM_USE_NVLOG QT3DSDM_META_DATA_NO_SIGNALS
 
 INCLUDEPATH += \
     $$PWD/Source \
@@ -31,10 +31,10 @@ INCLUDEPATH += \
     $$PWD/Source/Qt3DSEvent/InternalInclude \
     $$PWD/Source/Viewer \
     $$PWD/Source/Viewer/PerfLog \
-    $$PWD/../Authoring/UICIMP/UICImportLib \
-    $$PWD/../Authoring/UICDM \
-    $$PWD/../Authoring/UICDM/Systems \
-    $$PWD/../Authoring/UICDM/Systems/Cores \
+    $$PWD/../Authoring/QT3DSIMP/Qt3DSImportLib \
+    $$PWD/../Authoring/QT3DSDM \
+    $$PWD/../Authoring/QT3DSDM/Systems \
+    $$PWD/../Authoring/QT3DSDM/Systems/Cores \
     $$PWD/../3rdparty/EASTL/UnknownVersion/include \
     ../3rdparty/Lua/UnknownVersion/src \
     ../3rdparty/utf8cpp/2.3.2/source \

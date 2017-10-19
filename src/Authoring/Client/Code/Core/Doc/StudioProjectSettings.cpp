@@ -45,10 +45,10 @@
 #include "Dispatch.h"
 #include "CommonConstants.h"
 #include "StudioPreferences.h"
-#include "UICDESKey.h"
-#include "UICLargeInteger.h"
+#include "Qt3DSDESKey.h"
+#include "Qt3DSLargeInteger.h"
 #include "CColor.h"
-#include "UICColor.h"
+#include "Qt3DSColor.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CStudioProjectSettings property page

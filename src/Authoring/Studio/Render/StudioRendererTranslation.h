@@ -37,7 +37,7 @@
 #include "foundation/AutoDeallocatorAllocator.h"
 #include "foundation/FastAllocator.h"
 #include "StudioPickValues.h"
-#include "UICDMGuides.h"
+#include "Qt3DSDMGuides.h"
 #include "PathWidget.h"
 #include "StudioPreferences.h"
 

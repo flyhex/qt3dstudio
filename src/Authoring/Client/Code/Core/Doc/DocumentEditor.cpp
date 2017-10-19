@@ -30,44 +30,44 @@
 #include "qtAuthoring-config.h"
 #include "IDocumentEditor.h"
 #include "Doc.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "StudioFullSystem.h"
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
 #include "StudioCoreSystem.h"
 #include "StudioFullSystem.h"
 #include "CmdDataModel.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "SlideSystem.h"
-#include "UICDMAnimation.h"
+#include "Qt3DSDMAnimation.h"
 #include "ClientDataModelBridge.h"
 #include "Cmd.h"
 #include "Core.h"
 #include "Dispatch.h"
-#include "UICImportPerformImport.h"
-#include "UICImportTranslation.h"
-#include "UICImport.h"
-#include "UICFileTools.h"
+#include "Qt3DSImportPerformImport.h"
+#include "Qt3DSImportTranslation.h"
+#include "Qt3DSImport.h"
+#include "Qt3DSFileTools.h"
 #include "StudioFullSystem.h"
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
 #include "StudioCoreSystem.h"
 #include "IDocumentBufferCache.h"
-#include "UICImportMesh.h"
-#include "UICDMSlideGraphCore.h"
+#include "Qt3DSImportMesh.h"
+#include "Qt3DSDMSlideGraphCore.h"
 #include "IComposerEditorInterface.h"
-#include "UICDMXML.h"
+#include "Qt3DSDMXML.h"
 #include "foundation/IOStreams.h"
 #include "IComposerSerializer.h"
-#include "UICDMWStrOpsImpl.h"
-#include "UICDMMetaData.h"
+#include "Qt3DSDMWStrOpsImpl.h"
+#include "Qt3DSDMMetaData.h"
 #include "DocumentResourceManagerLuaParser.h"
 #include "DocumentResourceManagerScriptParser.h"
 #include "DocumentResourceManagerRenderPluginParser.h"
 #include "DocumentResourceManagerCustomMaterialParser.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "IDirectoryWatchingSystem.h"
-#include "UICDMActionCore.h"
+#include "Qt3DSDMActionCore.h"
 #include "ActionSystem.h"
 #include "StandardExtensions.h"
 #include "Qt3DSRenderMesh.h"
@@ -76,9 +76,9 @@
 #include "Qt3DSTextRenderer.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "Q3DStudioNVFoundation.h"
-#include "UICDMGuides.h"
+#include "Qt3DSDMGuides.h"
 #include "Qt3DSRenderPathManager.h"
-#include "UICImportPath.h"
+#include "Qt3DSImportPath.h"
 #include "DynamicLua.h"
 #include "Dialogs.h"
 #include "foundation/Qt3DSLogging.h"
@@ -97,7 +97,7 @@ namespace {
 
 using namespace Q3DStudio;
 using namespace qt3dsdm;
-using namespace UICIMP;
+using namespace qt3dsimp;
 using namespace Q3DStudio::ComposerImport;
 using namespace qt3ds;
 using namespace qt3ds::foundation;
@@ -773,7 +773,7 @@ public:
     CFilePath WriteWriterToFile(IDOMWriter &inWriter, const CString &inStem)
     {
         CFilePath theTempFileDir = CFilePath::CombineBaseAndRelative(
-            CFilePath::GetUserApplicationDirectory(), CFilePath(L"UIComposer\\temp_files"));
+            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DSomposer\\temp_files"));
         theTempFileDir.CreateDir(true);
         CFilePath theFinalPath;
         {
@@ -2746,7 +2746,7 @@ public:
         if (docPath.size() == 0) {
             if (theHandler)
                 theHandler->DisplayImportFailed(importSrc.toQString(),
-                                                QObject::tr("UIComposer Document Has No Path"),
+                                                QObject::tr("Qt3DSomposer Document Has No Path"),
                                                 false);
             return 0;
         }
@@ -3949,7 +3949,7 @@ public:
             // OK, we have distinct maps sorted on a per-slide basis for all trees of children
             // of this asset.  We now need to attempt to run the refresh algorithm.
 
-            UICIMP::ImportPtrOrError theImportPtr = UICIMP::Import::Load(theImportFilePath);
+            qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theImportFilePath);
             if (theImportPtr.m_Value == NULL) {
                 QT3DS_ASSERT(false);
                 continue;
@@ -4130,8 +4130,8 @@ public:
         CFileSeekableIOStream theReader(thePathToPathFile, FileReadFlags());
         if (theReader.IsOpen() == false)
             return;
-        UICIMP::SPathBuffer *theLoadedBuffer =
-            UICIMP::SPathBuffer::Load(theReader, *m_Foundation.m_Foundation);
+        qt3dsimp::SPathBuffer *theLoadedBuffer =
+            qt3dsimp::SPathBuffer::Load(theReader, *m_Foundation.m_Foundation);
         if (theLoadedBuffer == NULL)
             return;
 
@@ -4172,7 +4172,7 @@ public:
 
         for (QT3DSU32 idx = 0, end = theLoadedBuffer->m_Commands.size(); idx < end; ++idx) {
             switch (theLoadedBuffer->m_Commands[idx]) {
-            case UICIMP::PathCommand::MoveTo:
+            case qt3dsimp::PathCommand::MoveTo:
                 theCurrentSubPath = CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::SubPath,
                                                              path, theCurrentSlide);
                 if (subPathIndex)
@@ -4190,7 +4190,7 @@ public:
                                                            ToUICDM(theCurrentPosition));
                 ++subPathIndex;
                 break;
-            case UICIMP::PathCommand::CubicCurveTo: {
+            case qt3dsimp::PathCommand::CubicCurveTo: {
                 QT3DSVec2 c1 = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
                 QT3DSVec2 c2 = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
                 QT3DSVec2 p2 = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
@@ -4219,7 +4219,7 @@ public:
                     theSlideCore.ForceSetInstancePropertyValue(
                         theCurrentSlide, theCurrentAnchorPoint, angleProp, incoming.x);
             } break;
-            case UICIMP::PathCommand::Close:
+            case qt3dsimp::PathCommand::Close:
                 theSlideCore.ForceSetInstancePropertyValue(theCurrentSlide, theCurrentSubPath,
                                                            closedProp, true);
                 break;
@@ -4303,7 +4303,7 @@ public:
                 continue;
             }
             if (isImport) {
-                UICIMP::ImportPtrOrError theImportPtr = UICIMP::Import::Load(theRecord.m_File);
+                qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theRecord.m_File);
                 if (theImportPtr.m_Value) {
                     CFilePath theDestDir = theImportPtr.m_Value->GetDestDir();
                     CFilePath theSrcFile = theImportPtr.m_Value->GetSrcFile();
@@ -4483,7 +4483,7 @@ public:
                       << ModificationTypeToString(theRecord.m_ModificationType);
 
             if (isImport) {
-                UICIMP::ImportPtrOrError theImportPtr = UICIMP::Import::Load(theRecord.m_File);
+                qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theRecord.m_File);
                 if (theImportPtr.m_Value) {
                     ENSURE_PROGRESS;
                     CFilePath theDestDir = theImportPtr.m_Value->GetDestDir();

@@ -38,9 +38,9 @@
 #include "render/Qt3DSRenderTexture2D.h"
 #include "render/backends/gl/Qt3DSOpenGLUtil.h"
 
-#include "UICRenderLoadedTexture.h"
+#include "Qt3DSRenderLoadedTexture.h"
 
-#include "UICTypes.h"
+#include "Qt3DSTypes.h"
 #ifdef _LINUXPLATFORM
 #define __declspec(dllexport)
 #define __cdecl

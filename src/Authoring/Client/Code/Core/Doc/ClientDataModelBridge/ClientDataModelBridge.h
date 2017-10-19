@@ -30,15 +30,15 @@
 #ifndef CLIENTDATAMODELBRIDGEH
 #define CLIENTDATAMODELBRIDGEH
 
-#include "UICDMHandles.h"
-#include "UICDMDataTypes.h"
-#include "UICId.h"
-#include "UICDMActionInfo.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSId.h"
+#include "Qt3DSDMActionInfo.h"
 #include "StudioObjectTypes.h"
 #include "Graph.h"
 #include "Pt.h"
-#include "UICDMMetaData.h"
-#include "UICDMComposerTypeDefinitions.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMComposerTypeDefinitions.h"
 
 class CDoc;
 

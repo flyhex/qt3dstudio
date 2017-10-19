@@ -38,7 +38,7 @@
 #include "Cmd.h"
 #include "CmdDataModel.h"
 #include "Doc.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 //==============================================================================
 /**

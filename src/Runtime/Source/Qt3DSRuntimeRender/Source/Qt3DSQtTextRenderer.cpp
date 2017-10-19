@@ -131,7 +131,7 @@ struct UICQtTextRenderer : public ITextRenderer
         : m_foundation(inFoundation)
         , m_stringTable(inStrTable)
         , mRefCount(0)
-        , m_installedFonts(inFoundation.getAllocator(), "UICQtTextRenderer::m_installedFonts")
+        , m_installedFonts(inFoundation.getAllocator(), "Qt3DSQtTextRenderer::m_installedFonts")
         , m_PreloadSync(inFoundation.getAllocator())
         , m_systemFontsInitialized(false)
         , m_projectFontsInitialized(false)

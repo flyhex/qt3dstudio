@@ -27,7 +27,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICStateEditorTransactionImpl.h"
+#include "Qt3DSStateEditorTransactionImpl.h"
 
 namespace uic {
 namespace state {

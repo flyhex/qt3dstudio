@@ -38,8 +38,8 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICString.h"
-#include "UICObjectCounter.h"
+#include "Qt3DSString.h"
+#include "Qt3DSObjectCounter.h"
 
 #include <QtGlobal>
 

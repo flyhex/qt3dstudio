@@ -431,7 +431,7 @@ struct SRenderContext : public IUICRenderContext
 
     void SetWatermark(NVRenderTexture2D &inTexture) override
     {
-        qCInfo(TRACE_INFO, "UICContext -- Setting watermark texture");
+        qCInfo(TRACE_INFO, "Qt3DSContext -- Setting watermark texture");
         m_Watermark = inTexture;
     }
 

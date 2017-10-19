@@ -41,7 +41,7 @@
 #include "EventPollingSystem.h"
 
 #include "CanProviderDemo.h"
-#include "UICLuaIncludes.h"
+#include "Qt3DSLuaIncludes.h"
 #include "EventPollingSystemLuaBinding.h"
 
 void TestCPPBindings()

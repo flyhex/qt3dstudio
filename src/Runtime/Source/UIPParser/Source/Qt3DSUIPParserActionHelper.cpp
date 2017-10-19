@@ -41,9 +41,9 @@
 #include "Qt3DSIPresentation.h"
 #include "Qt3DSCommandEventTypes.h"
 
-#include "UICDMPrefix.h"
-#include "UICDMXML.h"
-#include "UICDMWStrOpsImpl.h"
+#include "Qt3DSDMPrefix.h"
+#include "Qt3DSDMXML.h"
+#include "Qt3DSDMWStrOpsImpl.h"
 #include "Qt3DSMetadata.h"
 #include "Qt3DSEulerAngles.h"
 #include "Qt3DSLogicSystem.h"

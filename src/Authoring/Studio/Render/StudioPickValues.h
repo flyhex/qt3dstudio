@@ -31,7 +31,7 @@
 #pragma once
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "foundation/Qt3DSUnionCast.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "StaticMaxSize.h"
 
 namespace qt3ds {

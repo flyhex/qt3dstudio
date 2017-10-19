@@ -118,7 +118,7 @@ struct SThreadPoolThread : public Thread
     }
     void execute(void) override
     {
-        setName("UICRender Thread manager thread");
+        setName("Qt3DSRender Thread manager thread");
         while (!quitIsSignalled()) {
             STask task = m_Mgr.GetNextTask();
             if (task.m_Function) {

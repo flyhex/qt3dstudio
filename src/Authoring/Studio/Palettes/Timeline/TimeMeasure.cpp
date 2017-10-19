@@ -35,7 +35,7 @@
 #include "StudioUtils.h"
 #include "TimelineTimelineLayout.h"
 #include "Snapper.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSignals.h"
 
 const long AUTO_TICK_AMNT = 60;
 using namespace Q3DStudio;

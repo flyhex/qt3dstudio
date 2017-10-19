@@ -59,7 +59,7 @@
 #include "render/Qt3DSRenderPathRender.h"
 #include "render/Qt3DSRenderPathSpecification.h"
 #include "Qt3DSRenderPathSubPath.h"
-#include "UICImportPath.h"
+#include "Qt3DSImportPath.h"
 #include "Qt3DSRenderPathMath.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "foundation/Qt3DSMutex.h"
@@ -72,7 +72,7 @@ using qt3ds::render::NVRenderBoolOp;
 using qt3ds::render::NVRenderStencilOperationArgument;
 using qt3ds::render::NVRenderStencilOp;
 
-typedef UICIMP::SPathBuffer TImportPathBuffer;
+typedef qt3dsimp::SPathBuffer TImportPathBuffer;
 using namespace qt3ds::render::path;
 
 typedef eastl::pair<CRegisteredString, CRegisteredString> TStrStrPair;
@@ -149,10 +149,10 @@ struct SPathSubPathBuffer
 struct SImportPathWrapper
 {
     NVAllocatorCallback &m_Alloc;
-    UICIMP::SPathBuffer *m_Path;
+    qt3dsimp::SPathBuffer *m_Path;
     QT3DSI32 m_RefCount;
 
-    SImportPathWrapper(NVAllocatorCallback &inAlloc, UICIMP::SPathBuffer &inPath)
+    SImportPathWrapper(NVAllocatorCallback &inAlloc, qt3dsimp::SPathBuffer &inPath)
         : m_Alloc(inAlloc)
         , m_Path(&inPath)
         , m_RefCount(0)
@@ -231,7 +231,7 @@ struct SPathBuffer
 
     void ClearPaintedPathData() { m_PathRender = NULL; }
 
-    UICIMP::SPathBuffer GetPathData(UICIMP::IPathBufferBuilder &inSpec)
+    qt3dsimp::SPathBuffer GetPathData(qt3dsimp::IPathBufferBuilder &inSpec)
     {
         if (m_SubPaths.size()) {
             inSpec.Clear();
@@ -261,7 +261,7 @@ struct SPathBuffer
             return inSpec.GetPathBuffer();
         } else if (m_PathBuffer.mPtr)
             return *m_PathBuffer.mPtr->m_Path;
-        return UICIMP::SPathBuffer();
+        return qt3dsimp::SPathBuffer();
     }
 
     void SetPathType(PathTypes::Enum inPathType)
@@ -454,7 +454,7 @@ struct SPathVertexPipeline : public SVertexPipelineImpl
                                                            *m_DisplacementImage);
             theTessEval.AddUniform("displaceAmount", "float");
             theTessEval.AddUniform("model_matrix", "mat4");
-            theTessEval.AddInclude("uicDefaultMaterialFileDisplacementTexture.glsllib");
+            theTessEval.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
             IDefaultMaterialShaderGenerator::SImageVariableNames theVarNames =
                 MaterialGenerator().GetImageVariableNames(m_DisplacementIdx);
 
@@ -807,7 +807,7 @@ struct SPathManager : public IPathManager
     nvvector<NVScopedRefCounted<NVRenderDepthStencilState>> m_DepthStencilStates;
 
     NVScopedRefCounted<NVRenderPathSpecification> m_PathSpecification;
-    NVScopedRefCounted<UICIMP::IPathBufferBuilder> m_PathBuilder;
+    NVScopedRefCounted<qt3dsimp::IPathBufferBuilder> m_PathBuilder;
 
     QT3DSI32 m_RefCount;
 
@@ -1028,7 +1028,7 @@ struct SPathManager : public IPathManager
         bool retval = false;
         if (!inPathBuffer.m_PatchData
             || (((QT3DSU32)inPathBuffer.m_Flags) & (QT3DSU32)geomDirtyFlags) != 0) {
-            UICIMP::SPathBuffer thePathData = inPathBuffer.GetPathData(*m_PathBuilder);
+            qt3dsimp::SPathBuffer thePathData = inPathBuffer.GetPathData(*m_PathBuilder);
 
             QT3DSU32 dataIdx = 0;
             QT3DSVec2 prevPoint(0, 0);
@@ -1036,12 +1036,12 @@ struct SPathManager : public IPathManager
             for (QT3DSU32 commandIdx = 0, commandEnd = thePathData.m_Commands.size();
                  commandIdx < commandEnd; ++commandIdx) {
                 switch (thePathData.m_Commands[commandIdx]) {
-                case UICIMP::PathCommand::MoveTo:
+                case qt3dsimp::PathCommand::MoveTo:
                     prevPoint =
                         QT3DSVec2(thePathData.m_Data[dataIdx], thePathData.m_Data[dataIdx + 1]);
                     dataIdx += 2;
                     break;
-                case UICIMP::PathCommand::CubicCurveTo: {
+                case qt3dsimp::PathCommand::CubicCurveTo: {
                     QT3DSVec2 c1(thePathData.m_Data[dataIdx], thePathData.m_Data[dataIdx + 1]);
                     dataIdx += 2;
                     QT3DSVec2 c2(thePathData.m_Data[dataIdx], thePathData.m_Data[dataIdx + 1]);
@@ -1054,7 +1054,7 @@ struct SPathManager : public IPathManager
                     ++equationIdx;
                     prevPoint = p2;
                 } break;
-                case UICIMP::PathCommand::Close:
+                case qt3dsimp::PathCommand::Close:
                     break;
 
                 default:
@@ -1281,19 +1281,19 @@ struct SPathManager : public IPathManager
             }
 
             m_PathSpecification->Reset();
-            UICIMP::SPathBuffer thePathData = inPathBuffer.GetPathData(*m_PathBuilder);
+            qt3dsimp::SPathBuffer thePathData = inPathBuffer.GetPathData(*m_PathBuilder);
 
             QT3DSU32 dataIdx = 0;
             for (QT3DSU32 commandIdx = 0, commandEnd = thePathData.m_Commands.size();
                  commandIdx < commandEnd; ++commandIdx) {
 
                 switch (thePathData.m_Commands[commandIdx]) {
-                case UICIMP::PathCommand::MoveTo:
+                case qt3dsimp::PathCommand::MoveTo:
                     m_PathSpecification->MoveTo(
                         QT3DSVec2(thePathData.m_Data[dataIdx], thePathData.m_Data[dataIdx + 1]));
                     dataIdx += 2;
                     break;
-                case UICIMP::PathCommand::CubicCurveTo: {
+                case qt3dsimp::PathCommand::CubicCurveTo: {
                     QT3DSVec2 c1(thePathData.m_Data[dataIdx], thePathData.m_Data[dataIdx + 1]);
                     dataIdx += 2;
                     QT3DSVec2 c2(thePathData.m_Data[dataIdx], thePathData.m_Data[dataIdx + 1]);
@@ -1302,7 +1302,7 @@ struct SPathManager : public IPathManager
                     dataIdx += 2;
                     m_PathSpecification->CubicCurveTo(c1, c2, p2);
                 } break;
-                case UICIMP::PathCommand::Close:
+                case qt3dsimp::PathCommand::Close:
                     m_PathSpecification->ClosePath();
                     break;
                 default:
@@ -1336,7 +1336,7 @@ struct SPathManager : public IPathManager
         if (!m_PathSpecification)
             return false;
         if (!m_PathBuilder)
-            m_PathBuilder = UICIMP::IPathBufferBuilder::CreateBuilder(GetFoundation());
+            m_PathBuilder = qt3dsimp::IPathBufferBuilder::CreateBuilder(GetFoundation());
 
         thePathBuffer->SetPathType(inPath.m_PathType);
         bool retval = false;
@@ -1384,8 +1384,8 @@ struct SPathManager : public IPathManager
                     m_CoreContext.GetInputStreamFactory().GetStreamForFile(
                         inPath.m_PathBuffer.c_str());
                 if (theStream) {
-                    UICIMP::SPathBuffer *theNewBuffer =
-                        UICIMP::SPathBuffer::Load(*theStream, GetFoundation());
+                    qt3dsimp::SPathBuffer *theNewBuffer =
+                        qt3dsimp::SPathBuffer::Load(*theStream, GetFoundation());
                     if (theNewBuffer)
                         inserter.first->second = QT3DS_NEW(GetAllocator(), SImportPathWrapper)(
                             GetAllocator(), *theNewBuffer);

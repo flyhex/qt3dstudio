@@ -30,7 +30,7 @@
 #ifndef QT3DS_EGL_WINDOW_SYSTEM_H
 #define QT3DS_EGL_WINDOW_SYSTEM_H
 #include "Qt3DSEGLInfo.h"
-#include "UICWindowSystem.h"
+#include "Qt3DSWindowSystem.h"
 #include "nv_main/nv_main.h"
 
 namespace Q3DStudio {

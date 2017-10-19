@@ -29,7 +29,7 @@
 #include "InspectorControlView.h"
 #include "Literals.h"
 #include "CColor.h"
-#include "UICDMValue.h"
+#include "Qt3DSDMValue.h"
 #include "StudioUtils.h"
 #include "InspectorControlModel.h"
 #include "StudioPreferences.h"
@@ -52,7 +52,7 @@
 #include "StandardExtensions.h"
 #include "FileChooserView.h"
 #include "IObjectReferenceHelper.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 
 InspectorControlView::InspectorControlView(QWidget *parent)

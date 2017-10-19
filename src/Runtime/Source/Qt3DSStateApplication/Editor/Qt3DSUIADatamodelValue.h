@@ -30,7 +30,7 @@
 #ifndef UIA_DATAMODEL_VALUE_H
 #define UIA_DATAMODEL_VALUE_H
 #include "foundation/Qt3DSDiscriminatedUnion.h"
-#include "UICUIADatamodel.h"
+#include "Qt3DSUIADatamodel.h"
 
 namespace qt3ds {
 namespace app {

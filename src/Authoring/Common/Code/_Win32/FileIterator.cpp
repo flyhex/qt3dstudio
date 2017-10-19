@@ -36,7 +36,7 @@
 //	Includes
 //==============================================================================
 #include "FileIterator.h"
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 
 #include <QDirIterator>
 

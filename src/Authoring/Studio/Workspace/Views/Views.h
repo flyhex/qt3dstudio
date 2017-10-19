@@ -52,7 +52,7 @@ class CRuntimeClass;
 class CFrameWnd;
 #endif
 
-#include <UICString.h>
+#include "Qt3DSString.h"
 
 //==============================================================================
 //	Class

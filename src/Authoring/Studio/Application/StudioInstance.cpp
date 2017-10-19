@@ -36,7 +36,7 @@
 
 CProductInstance *CStudioInstance::GenerateProductInstance()
 {
-    CProductInstance *theRetVal = new CProductInstance("UIComposer Studio");
+    CProductInstance *theRetVal = new CProductInstance("Qt3DSComposer Studio");
     //	CProductInstance* theClient = new CProductInstance( "Client" );
 
     //	theRetVal->AddProduct( "AKPluWAV.dll" );

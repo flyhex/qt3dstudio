@@ -38,7 +38,7 @@
 #include "FileOutputStream.h"
 #include "FormattedOutputStream.h"
 #include "Exceptions.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "Cmd.h"
 #include "StudioPreferences.h"
 #include "Qt3DSStateApplication.h"

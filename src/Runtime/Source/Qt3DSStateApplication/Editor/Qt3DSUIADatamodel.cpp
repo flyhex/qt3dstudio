@@ -27,20 +27,20 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICUIADatamodel.h"
+#include "Qt3DSUIADatamodel.h"
 #include "foundation/IOStreams.h"
 #include "foundation/XML.h"
 #include "foundation/FileTools.h"
-#include "UICStateEditorFoundation.h"
-#include "UICStateApplication.h"
-#include "UICRenderInputStreamFactory.h"
+#include "Qt3DSStateEditorFoundation.h"
+#include "Qt3DSStateApplication.h"
+#include "Qt3DSRenderInputStreamFactory.h"
 #include "EASTL/map.h"
 #include "EASTL/sort.h"
-#include "UICStateEditorTransactionImpl.h"
-#include "UICUIADatamodelValue.h"
+#include "Qt3DSStateEditorTransactionImpl.h"
+#include "Qt3DSUIADatamodelValue.h"
 #include "foundation/StringConversion.h"
 #include "foundation/StringConversionImpl.h"
-#include "UICDMStringTable.h"
+#include "Qt3DSDMStringTable.h"
 
 using namespace uic::app;
 using uic::render::IInputStreamFactory;

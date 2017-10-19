@@ -113,7 +113,7 @@ struct STextAtlasFont
         , mRefCount(0)
         , m_FontSize(fontSize)
         , m_AtlasEntries(inFoundation.getAllocator(),
-                         "UICOnscreenRenderer::STextAtlasFont::m_AtlasEntrys")
+                         "Qt3DSOnscreenRenderer::STextAtlasFont::m_AtlasEntrys")
     {
     }
 
@@ -309,7 +309,7 @@ public:
             QT3DSF32 *vertexData =
                 (QT3DSF32 *)QT3DS_ALLOC(m_Foundation.getAllocator(),
                                         length * 6 * 5 * sizeof(QT3DSF32),
-                                        "UICOnscreenTextRenderer");
+                                        "Qt3DSOnscreenTextRenderer");
             QT3DSF32 *bufPtr = vertexData;
             if (vertexData) {
                 for (size_t i = 0; i < length; ++i) {

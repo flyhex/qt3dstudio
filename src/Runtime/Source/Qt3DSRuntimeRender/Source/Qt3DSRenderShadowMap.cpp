@@ -42,7 +42,7 @@ using qt3ds::render::NVRenderCachedShaderProperty;
 UICShadowMap::UICShadowMap(IUICRenderContext &inContext)
     : m_UICContext(inContext)
     , mRefCount(0)
-    , m_ShadowMapList(inContext.GetAllocator(), "UICShadowMap::m_ShadowMapList")
+    , m_ShadowMapList(inContext.GetAllocator(), "Qt3DSShadowMap::m_ShadowMapList")
 {
 }
 

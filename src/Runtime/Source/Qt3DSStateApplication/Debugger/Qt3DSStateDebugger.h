@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSDataRef.h"
 #include "foundation/StringTable.h"
 #include "foundation/IOStreams.h"
-#include "UICStateEditor.h"
+#include "Qt3DSStateEditor.h"
 
 namespace qt3ds {
 namespace state {

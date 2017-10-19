@@ -40,15 +40,15 @@
 //	Includes
 //==============================================================================
 #include "Bindings/TimelineTranslationManager.h"
-#include "Bindings/UICDMTimelineItemBinding.h"
+#include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
 #include "SceneView.h"
 #include "Strings.h"
 #include "StringLoader.h"
 #include "StudioApp.h"
 #include "TimelineControl.h"
-#include "UICOptions.h"
-#include "UICColor.h"
+#include "Qt3DSOptions.h"
+#include "Qt3DSColor.h"
 
 #include "Doc.h"
 #include "IKeyframesManager.h"
@@ -935,7 +935,7 @@ void CMainFrame::EditPreferences(short inPageIndex)
         // Also clear out the viewer's settings file
         Q3DStudio::CFilePath theFilePath(Q3DStudio::CFilePath::CombineBaseAndRelative(
                                              Q3DStudio::CFilePath::GetUserApplicationDirectory(),
-                                             "UIComposer\\UICViewerSettings.txt"));
+                                             "Qt3DSomposer\\UICViewerSettings.txt"));
         theFilePath.DeleteThisFile();
     }
 }

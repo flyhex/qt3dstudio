@@ -390,7 +390,7 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         }*/
 
         if (m_Impl.m_appInitSuccessful == false) {
-            qCritical() << "UICViewer Launch failure!! Failed to load" << source;
+            qCritical() << "Qt3DSViewer Launch failure!! Failed to load" << source;
             return false;
         }
 

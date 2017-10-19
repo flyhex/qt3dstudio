@@ -33,7 +33,7 @@
 #include <QtCore/qpointer.h>
 #include "DispatchListeners.h"
 #include "Dispatch.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "TabOrderHandler.h"
 #include "MouseHelper.h"
 

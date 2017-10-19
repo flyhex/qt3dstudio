@@ -31,7 +31,7 @@
 
 #include <QAbstractListModel>
 
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 class CClientDataModelBridge;
 class CDoc;

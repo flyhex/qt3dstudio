@@ -30,9 +30,9 @@
 #ifndef QT3DS_SCENE_GRAPH_DEBUGGER_VALUE_H
 #define QT3DS_SCENE_GRAPH_DEBUGGER_VALUE_H
 #include "Qt3DSSceneGraphDebugger.h"
-#include "UICUIADatamodel.h"
-#include "UICUIADatamodelValue.h"
-#include "UICStateEditorValue.h"
+#include "Qt3DSUIADatamodel.h"
+#include "Qt3DSUIADatamodelValue.h"
+#include "Qt3DSStateEditorValue.h"
 
 namespace qt3ds {
 namespace state {

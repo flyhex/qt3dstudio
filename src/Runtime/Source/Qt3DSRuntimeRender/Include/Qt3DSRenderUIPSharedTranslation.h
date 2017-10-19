@@ -35,7 +35,7 @@
 #include "Qt3DSRenderDefaultMaterial.h"
 #include "Qt3DSRenderImage.h"
 #include "Qt3DSRenderText.h"
-#include "UICDMWindowsCompatibility.h"
+#include "Qt3DSDMWindowsCompatibility.h"
 #include "Qt3DSRenderLayer.h"
 #include "Qt3DSRenderModel.h"
 #include "Qt3DSRenderPath.h"

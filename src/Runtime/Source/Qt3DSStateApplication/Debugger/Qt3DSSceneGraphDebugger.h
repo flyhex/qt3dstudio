@@ -31,7 +31,7 @@
 #define QT3DS_SCENE_GRAPH_DEBUGGER_H
 #pragma once
 #include "Qt3DSStateDebugger.h"
-#include "UICUIADatamodel.h"
+#include "Qt3DSUIADatamodel.h"
 
 namespace qt3ds {
 namespace state {

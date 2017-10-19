@@ -7,7 +7,7 @@ QT -= gui
 DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC
 
 INCLUDEPATH += \
-    UICIMP/UICImportLib \
+    QT3DSIMP/Qt3DSImportLib \
     $$PWD/../Runtime/Source/Qt3DSRender/Include \
     $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
     ../3rdparty/EASTL/UnknownVersion/include

@@ -37,8 +37,8 @@
 #include "foundation/Qt3DSBroadcastingAllocator.h"
 #include "EASTL/hash_map.h"
 #include "Qt3DSStateExecutionTypes.h"
-#include "UICStateEditor.h"
-#include "UICStateEditorValue.h"
+#include "Qt3DSStateEditor.h"
+#include "Qt3DSStateEditorValue.h"
 
 using namespace qt3ds::state;
 using namespace qt3ds::state::editor;
@@ -1846,7 +1846,7 @@ namespace state {
         thePairs.push_back(
             SNamespacePair(inStringTable.RegisterStr(GetSCXMLNamespace()), CRegisteredString()));
         thePairs.push_back(SNamespacePair(inStringTable.RegisterStr(GetStudioStateNamespace()),
-                                          inStringTable.RegisterStr("uic")));
+                                          inStringTable.RegisterStr("Qt3DS")));
 
         for (SNamespacePairNode *theNode = inContext.GetFirstNSNode(); theNode;
              theNode = theNode->m_NextNode) {
@@ -1907,7 +1907,7 @@ namespace state {
         outNamespaces.push_back(
             SNamespacePair(inStringTable.RegisterStr(GetSCXMLNamespace()), CRegisteredString()));
         outNamespaces.push_back(SNamespacePair(inStringTable.RegisterStr(GetStudioStateNamespace()),
-                                               inStringTable.RegisterStr("uic")));
+                                               inStringTable.RegisterStr("Qt3DS")));
         return theRoots;
     }
 

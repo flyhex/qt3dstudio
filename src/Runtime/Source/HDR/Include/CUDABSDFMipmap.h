@@ -37,9 +37,9 @@
 #include "render/backends/Qt3DSRenderBackend.h"
 #include "MipmapBSDF.h"
 
-#include "UICRenderLoadedTexture.h"
+#include "Qt3DSRenderLoadedTexture.h"
 
-#include "UICTypes.h"
+#include "Qt3DSTypes.h"
 struct cudaGraphicsResource;
 #ifdef _LINUXPLATFORM
 #define __declspec(dllexport)

@@ -31,7 +31,7 @@
 #define INCLUDED_STRING_LOADER_H 1
 #pragma once
 
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 
 class CStringLoader
 {

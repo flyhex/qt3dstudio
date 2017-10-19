@@ -36,9 +36,9 @@
 //	Includes
 //==============================================================================
 #include "CoreConst.h"
-#include "UICId.h"
+#include "Qt3DSId.h"
 #include "Pt.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include <QPoint>
 
 //==============================================================================

@@ -36,8 +36,8 @@
 //	Include
 //==============================================================================
 #include "CmdDataModelInsertKeyframe.h"
-#include "UICDMPropertyDefinition.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMPropertyDefinition.h"
+#include "Qt3DSDMDataCore.h"
 
 // This caches all copied keyframes' time and data, for a paste action.
 // This has to deal with the actual data and not keyframe handles, because a prior Cut can

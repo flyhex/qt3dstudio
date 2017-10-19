@@ -27,14 +27,14 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICLuaDebugger.h"
-#include "UICStateEditorFoundation.h"
-#include "UICLuaDebuggerProtocol.h"
+#include "Qt3DSLuaDebugger.h"
+#include "Qt3DSStateEditorFoundation.h"
+#include "Qt3DSLuaDebuggerProtocol.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
 #include "foundation/FileTools.h"
 #include "foundation/Qt3DSContainers.h"
-#include "UICLuaDebuggerImpl.h"
+#include "Qt3DSLuaDebuggerImpl.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "foundation/TrackingAllocator.h"
 #include "foundation/ErrorStream.h"

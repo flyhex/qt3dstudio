@@ -38,9 +38,9 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICDMXML.h"
+#include "Qt3DSDMXML.h"
 #include "StringTokenizer.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 
 using namespace qt3dsdm;
 

@@ -38,7 +38,7 @@
 #include "foundation/Qt3DSAtomic.h"
 #include "EASTL/hash_map.h"
 #include "foundation/FileTools.h"
-#include "UICImportMesh.h"
+#include "Qt3DSImportMesh.h"
 #include "Qt3DSRenderMesh.h"
 #include "foundation/Qt3DSAllocatorCallback.h"
 #include "Qt3DSRenderLoadedTexture.h"
@@ -358,7 +358,7 @@ struct SBufferManager : public IBufferManager
         return theIter->second;
     }
 
-    UICIMP::SMultiLoadResult LoadPrimitive(const char8_t *inRelativePath)
+    qt3dsimp::SMultiLoadResult LoadPrimitive(const char8_t *inRelativePath)
     {
         CRegisteredString theName(m_StrTable->RegisterStr(inRelativePath));
         if (m_PrimitiveNames[0].m_PrimitiveName.IsValid() == false) {
@@ -382,18 +382,18 @@ struct SBufferManager : public IBufferManager
                 NVScopedRefCounted<IRefCountedInputStream> theInStream(
                     m_InputStreamFactory->GetStreamForFile(m_PathBuilder.c_str()));
                 if (theInStream)
-                    return UICIMP::Mesh::LoadMulti(m_Context->GetAllocator(), *theInStream, id);
+                    return qt3dsimp::Mesh::LoadMulti(m_Context->GetAllocator(), *theInStream, id);
                 else {
                     qCCritical(INTERNAL_ERROR, "Unable to find mesh primitive %s",
                         m_PathBuilder.c_str());
-                    return UICIMP::SMultiLoadResult();
+                    return qt3dsimp::SMultiLoadResult();
                 }
             }
         }
-        return UICIMP::SMultiLoadResult();
+        return qt3dsimp::SMultiLoadResult();
     }
 
-    virtual NVConstDataRef<QT3DSU8> CreatePackedPositionDataArray(UICIMP::SMultiLoadResult *inResult)
+    virtual NVConstDataRef<QT3DSU8> CreatePackedPositionDataArray(qt3dsimp::SMultiLoadResult *inResult)
     {
         // we assume a position consists of 3 floats
         QT3DSU32 vertexCount = inResult->m_Mesh->m_VertexBuffer.m_Data.size()
@@ -433,7 +433,7 @@ struct SBufferManager : public IBufferManager
         if (theMesh.second == true) {
             // check to see if this is primitive
 
-            UICIMP::SMultiLoadResult theResult = LoadPrimitive(inMeshPath);
+            qt3dsimp::SMultiLoadResult theResult = LoadPrimitive(inMeshPath);
 
             // Attempt a load from the filesystem if this mesh isn't a primitive.
             if (theResult.m_Mesh == NULL) {
@@ -447,7 +447,7 @@ struct SBufferManager : public IBufferManager
                 NVScopedRefCounted<IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(m_PathBuilder.c_str()));
                 if (theStream) {
-                    theResult = UICIMP::Mesh::LoadMulti(m_Context->GetAllocator(), *theStream, id);
+                    theResult = qt3dsimp::Mesh::LoadMulti(m_Context->GetAllocator(), *theStream, id);
                 }
                 if (theResult.m_Mesh == NULL)
                     qCWarning(WARNING, "Failed to load mesh: %s", m_PathBuilder.c_str());
@@ -556,7 +556,7 @@ struct SBufferManager : public IBufferManager
                 theNewMesh->m_Joints.resize(theResult.m_Mesh->m_Joints.size());
                 for (QT3DSU32 jointIdx = 0, jointEnd = theResult.m_Mesh->m_Joints.size();
                      jointIdx < jointEnd; ++jointIdx) {
-                    const UICIMP::Joint &theImportJoint(
+                    const qt3dsimp::Joint &theImportJoint(
                         theResult.m_Mesh->m_Joints.index(baseAddress, jointIdx));
                     SRenderJoint &theNewJoint(theNewMesh->m_Joints[jointIdx]);
                     theNewJoint.m_JointID = theImportJoint.m_JointID;
@@ -570,7 +570,7 @@ struct SBufferManager : public IBufferManager
                 for (QT3DSU32 subsetIdx = 0, subsetEnd = theResult.m_Mesh->m_Subsets.size();
                      subsetIdx < subsetEnd; ++subsetIdx) {
                     SRenderSubset theSubset(m_Context->GetAllocator());
-                    const UICIMP::MeshSubset &source(
+                    const qt3dsimp::MeshSubset &source(
                         theResult.m_Mesh->m_Subsets.index(baseAddress, subsetIdx));
                     theSubset.m_Bounds = source.m_Bounds;
                     theSubset.m_Count = source.m_Count;

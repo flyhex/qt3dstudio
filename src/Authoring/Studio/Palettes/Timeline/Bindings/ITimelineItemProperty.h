@@ -33,8 +33,8 @@
 #pragma once
 
 #include "IKeyframeSelector.h"
-#include "UICDMMetaData.h"
-#include "UICString.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSString.h"
 
 class CPropertyRow;
 class IKeyframe;

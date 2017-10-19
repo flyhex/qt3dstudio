@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "UICLargeInteger.h"
+#include "Qt3DSLargeInteger.h"
 
 #include <QElapsedTimer>
 

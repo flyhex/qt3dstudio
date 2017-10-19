@@ -39,7 +39,7 @@
 #include "cpuid.h"
 #endif
 
-#include "UICMath.h"
+#include "Qt3DSMath.h"
 
 void SSE_MatrixMultiply(const float *inSource1, const float *inSource2, float *outDest);
 void C_MatrixMultiply(const float *inSource1, const float *inSource2, float *outDest);

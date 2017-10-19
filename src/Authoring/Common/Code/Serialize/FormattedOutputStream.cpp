@@ -28,7 +28,7 @@
 ****************************************************************************/
 
 #include "stdafx.h"
-#include "UICEndian.h"
+#include "Qt3DSEndian.h"
 
 #include "FormattedOutputStream.h"
 

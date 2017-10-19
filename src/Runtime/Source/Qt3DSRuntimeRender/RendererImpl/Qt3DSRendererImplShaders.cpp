@@ -399,7 +399,7 @@ namespace render {
                     SetCode(GenerationFlagValues::WorldPosition);
                     vertexShader.AddUniform("model_matrix", "mat4");
 
-                    vertexShader.AddInclude("uicDefaultMaterialFileDisplacementTexture.glsllib");
+                    vertexShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
                     IDefaultMaterialShaderGenerator::SImageVariableNames theVarNames =
                         MaterialGenerator().GetImageVariableNames(displacementImageIdx);
 
@@ -1631,7 +1631,7 @@ namespace render {
                 if (inDisplaced) {
                     tessEvalShader.AddUniform("displacementSampler", "sampler2D");
                     tessEvalShader.AddUniform("displaceAmount", "float");
-                    tessEvalShader.AddInclude("uicDefaultMaterialFileDisplacementTexture.glsllib");
+                    tessEvalShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
                 }
                 tessEvalShader.AddOutgoing("outUV", "vec2");
                 tessEvalShader.AddOutgoing("outNormal", "vec3");

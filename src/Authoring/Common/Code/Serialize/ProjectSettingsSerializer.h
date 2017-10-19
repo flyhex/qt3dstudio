@@ -40,8 +40,8 @@
 //==============================================================================
 #include "StudioProjectSettings.h"
 #include "StudioProjectVariables.h"
-#include "UICDMXML.h"
-#include "UICDMWStrOpsImpl.h"
+#include "Qt3DSDMXML.h"
+#include "Qt3DSDMWStrOpsImpl.h"
 
 #include <QtWidgets/qcolordialog.h>
 

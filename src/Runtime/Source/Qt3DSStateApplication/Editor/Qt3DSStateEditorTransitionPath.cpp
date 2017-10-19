@@ -27,7 +27,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICStateEditorTransitionPath.h"
+#include "Qt3DSStateEditorTransitionPath.h"
 
 namespace {
 

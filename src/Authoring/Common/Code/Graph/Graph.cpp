@@ -28,11 +28,11 @@
 ****************************************************************************/
 
 #include "stdafx.h"
-#include "UICDMPrefix.h"
+#include "Qt3DSDMPrefix.h"
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
-#include "UICDMTransactions.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMTransactions.h"
+#include "Qt3DSDMSignals.h"
 #include <boost/signal.hpp>
 #include <boost/signals/connection.hpp>
 #include "Graph.h"

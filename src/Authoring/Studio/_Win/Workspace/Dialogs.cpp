@@ -37,7 +37,7 @@
 
 #include "InterpolationDlg.h"
 
-#include "UICMessageBox.h"
+#include "Qt3DSMessageBox.h"
 #include "StringTokenizer.h"
 #include "Preferences.h"
 #include "ProgressView.h"
@@ -48,9 +48,9 @@
 #include "ResetKeyframeValuesDlg.h"
 #include "GLVersionDlg.h"
 #include "Core.h"
-#include "UICMacros.h"
+#include "Qt3DSMacros.h"
 #include "IDocumentEditor.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 
 #include "StringLoader.h"

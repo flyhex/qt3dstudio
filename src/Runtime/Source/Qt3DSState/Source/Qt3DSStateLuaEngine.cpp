@@ -887,7 +887,7 @@ void SLuaEngineImpl::SetApplication(qt3ds::state::INDDStateApplication &inApplic
     LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_Application = &inApplication;
     lua_pushlightuserdata(m_LuaState, m_Application);
-    lua_setglobal(m_LuaState, "UICApplication");
+    lua_setglobal(m_LuaState, "Qt3DSApplication");
 }
 
 // Starts preloading scripts offline.  This sets m_LuaState to NULL until after EndPreloadScripts to

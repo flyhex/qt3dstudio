@@ -44,7 +44,7 @@
 #include "ResourceCache.h"
 #include "StudioClipboard.h"
 #include "ControlData.h"
-#include "UICMath.h"
+#include "Qt3DSMath.h"
 
 #include <QApplication>
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make

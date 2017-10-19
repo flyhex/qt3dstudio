@@ -32,8 +32,8 @@
 
 #pragma once
 
-#include "UICFile.h"
-#include "UICString.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSString.h"
 #include "InputStream.h"
 
 class CFormattedInputStream : public CInputStream

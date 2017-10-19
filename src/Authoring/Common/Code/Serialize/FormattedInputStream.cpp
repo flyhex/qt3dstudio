@@ -29,7 +29,7 @@
 
 #include "stdafx.h"
 #include "FormattedInputStream.h"
-#include "UICEndian.h"
+#include "Qt3DSEndian.h"
 #include "FileOutputStream.h"
 //#include "BufferedOutputStream.h"
 

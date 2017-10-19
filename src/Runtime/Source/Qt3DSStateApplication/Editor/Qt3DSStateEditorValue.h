@@ -31,7 +31,7 @@
 #define QT3DS_STATE_EDITOR_VALUE_H
 #pragma once
 #include "Qt3DSState.h"
-#include "UICStateEditor.h"
+#include "Qt3DSStateEditor.h"
 #include "foundation/Qt3DSDiscriminatedUnion.h"
 #include "foundation/Qt3DSVec3.h"
 

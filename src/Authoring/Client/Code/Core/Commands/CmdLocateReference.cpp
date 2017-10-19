@@ -37,11 +37,11 @@
 //==============================================================================
 #include "CmdLocateReference.h"
 #include "Doc.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMDataCore.h"
-#include "UICDMSlides.h"
-#include "UICDMSlideCore.h"
+#include "Qt3DSDMDataCore.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMSlideCore.h"
 
 //=============================================================================
 /**

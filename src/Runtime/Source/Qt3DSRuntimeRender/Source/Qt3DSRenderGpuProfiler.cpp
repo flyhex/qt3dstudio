@@ -186,8 +186,8 @@ public:
         , m_RenderContext(inRenderContext)
         , m_UICContext(inContext)
         , mRefCount(0)
-        , m_StrToGpuTimerMap(inContext.GetAllocator(), "UICRenderGpuProfiler::m_StrToGpuTimerMap")
-        , m_StrToIDVec(inContext.GetAllocator(), "UICRenderGpuProfiler::m_StrToIDVec")
+        , m_StrToGpuTimerMap(inContext.GetAllocator(), "Qt3DSRenderGpuProfiler::m_StrToGpuTimerMap")
+        , m_StrToIDVec(inContext.GetAllocator(), "Qt3DSRenderGpuProfiler::m_StrToIDVec")
         , m_VertexCount(0)
     {
     }

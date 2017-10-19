@@ -33,8 +33,8 @@
 #ifndef INCLUDED_PATHCONSTRUCTIONHELPER_H
 #define INCLUDED_PATHCONSTRUCTIONHELPER_H 1
 
-#include "UICDMHandles.h"
-#include "UICString.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSString.h"
 
 //==============================================================================
 //	Forwards

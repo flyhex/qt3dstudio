@@ -31,7 +31,7 @@
 
 #include <QtGlobal>
 
-#include "UICId.h"
+#include "Qt3DSId.h"
 
 /// Update masks. Each view will check their mask against the HINT passed in via UpdateAllViews (in
 /// their OnUpdate). If

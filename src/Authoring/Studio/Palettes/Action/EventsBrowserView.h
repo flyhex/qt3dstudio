@@ -30,7 +30,7 @@
 
 #include <QQuickWidget>
 
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 class EventsModel;
 

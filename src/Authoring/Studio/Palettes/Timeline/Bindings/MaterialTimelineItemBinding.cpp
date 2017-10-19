@@ -46,11 +46,11 @@
 #include "ClientDataModelBridge.h"
 #include "DropSource.h"
 
-#include "UICDMHandles.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMStudioSystem.h"
 
-#include "UICDMMetaData.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMDataCore.h"
 #include "StudioFullSystem.h"
 #include "StudioCoreSystem.h"
 

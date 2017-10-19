@@ -29,8 +29,8 @@
 #pragma once
 #ifndef CMDDATAMODELH
 #define CMDDATAMODELH
-#include "UICDMHandles.h"
-#include "UICString.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSString.h"
 
 class CDoc;
 class CDispatch;

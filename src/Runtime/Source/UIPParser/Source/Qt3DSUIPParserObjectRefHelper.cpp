@@ -39,8 +39,8 @@
 //==============================================================================
 #include "Qt3DSUIPParserObjectRefHelper.h"
 
-#include "UICDMPrefix.h"
-#include "UICDMXML.h"
+#include "Qt3DSDMPrefix.h"
+#include "Qt3DSDMXML.h"
 #include "Qt3DSMetadata.h"
 
 using namespace qt3dsdm;

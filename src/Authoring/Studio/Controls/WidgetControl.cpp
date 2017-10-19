@@ -34,7 +34,7 @@
 #include "OffscreenRenderer.h"
 #include "Pt.h"
 #include "Rct.h"
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 
 #include <QDrag>
 #include <QFocusEvent>

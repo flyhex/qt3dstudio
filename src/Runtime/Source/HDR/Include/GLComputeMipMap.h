@@ -35,8 +35,8 @@
 #include "render/backends/Qt3DSRenderBackend.h"
 #include "MipmapBSDF.h"
 
-#include "UICRenderLoadedTexture.h"
-#include "UICTypes.h"
+#include "Qt3DSRenderLoadedTexture.h"
+#include "Qt3DSTypes.h"
 
 using namespace qt3ds::render;
 using namespace uic::render;

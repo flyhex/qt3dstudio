@@ -33,7 +33,7 @@
 #include "stdafx.h"
 
 #include "BuildConfigParser.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 
 namespace Q3DStudio {
 

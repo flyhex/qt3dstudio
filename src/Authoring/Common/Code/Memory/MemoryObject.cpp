@@ -33,8 +33,8 @@
 //	Includes
 //==============================================================================
 #include "MemoryObject.h"
-#include "UICString.h"
-#include "UICFunctor.h"
+#include "Qt3DSString.h"
+#include "Qt3DSFunctor.h"
 #include "Multicaster.h"
 
 //==============================================================================

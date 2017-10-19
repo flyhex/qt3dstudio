@@ -33,7 +33,7 @@
 #pragma once
 
 #include "IBreadCrumbProvider.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSignals.h"
 
 // Link to data model
 class CDoc;

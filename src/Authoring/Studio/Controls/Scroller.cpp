@@ -39,7 +39,7 @@
 #include "Renderer.h"
 #include "ButtonControl.h"
 #include "MasterP.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSignals.h"
 #include "ControlData.h"
 
 #include <QDateTime>

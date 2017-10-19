@@ -7,26 +7,26 @@ SOURCES += \
     Common/Code/StackTokenizer.cpp \
     Common/Code/StringTokenizer.cpp \
     Common/Code/StrUtilities.cpp \
-    Common/Code/UICAtomic.cpp \
-    Common/Code/UICFileTools.cpp \
-    Common/Code/UICId.cpp \
-    Common/Code/UICMath.cpp \
-    Common/Code/UICMemory.cpp \
-    Common/Code/UICMessageBox.cpp \
-    Common/Code/UICObjectCounter.cpp \
-    Common/Code/UICString.cpp \
-    Common/Code/UICTime.cpp \
+    Common/Code/Qt3DSAtomic.cpp \
+    Common/Code/Qt3DSFileTools.cpp \
+    Common/Code/Qt3DSId.cpp \
+    Common/Code/Qt3DSMath.cpp \
+    Common/Code/Qt3DSMemory.cpp \
+    Common/Code/Qt3DSMessageBox.cpp \
+    Common/Code/Qt3DSObjectCounter.cpp \
+    Common/Code/Qt3DSString.cpp \
+    Common/Code/Qt3DSTime.cpp \
     Common/Code/Thread/Mutex.cpp \
     Common/Code/Thread/Thread.cpp \
-    Common/Code/Exceptions/UICExceptionClass.cpp \
+    Common/Code/Exceptions/Qt3DSExceptionClass.cpp \
     Common/Code/Exceptions/XMLException.cpp \
     Common/Code/_Win32/DLLVersion.cpp \
     Common/Code/_Win32/FileIterator.cpp \
     Common/Code/_Win32/Preferences.cpp \
     Common/Code/_Win32/stdafx.cpp \
     Common/Code/_Win32/SystemInfo.cpp \
-   # Common/Code/_Win32/UICFile.cpp \
-    Common/Code/_Win32/UICRegistry.cpp \
+   # Common/Code/_Win32/Qt3DSFile.cpp \
+    Common/Code/_Win32/Qt3DSRegistry.cpp \
     Common/Code/_Win32/Win32Config.cpp \
     Common/Code/Graph/Graph.cpp \
     Common/Code/InfoDump/CoutSink.cpp \

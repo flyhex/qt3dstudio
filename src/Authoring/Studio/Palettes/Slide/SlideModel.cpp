@@ -36,8 +36,8 @@
 #include "IDocumentEditor.h"
 
 #include "ClientDataModelBridge.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
 
 SlideModel::SlideModel(int slideCount, QObject *parent) : QAbstractListModel(parent)
   , m_slides(slideCount)

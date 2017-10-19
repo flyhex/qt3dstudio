@@ -29,13 +29,13 @@
 #pragma once
 #ifndef IDOCUMENTREADERH
 #define IDOCUMENTREADERH
-#include "UICDMDataTypes.h"
+#include "Qt3DSDMDataTypes.h"
 #include "foundation/Qt3DSOption.h"
 #include <vector>
 #include <utility>
 #include "StudioObjectTypes.h"
-#include "UICDMComposerTypeDefinitions.h"
-#include "UICFileTools.h"
+#include "Qt3DSDMComposerTypeDefinitions.h"
+#include "Qt3DSFileTools.h"
 
 namespace qt3dsdm {
 class IDOMWriter;
@@ -43,7 +43,7 @@ class IDOMReader;
 struct SGuideInfo;
 }
 
-namespace UICIMP {
+namespace qt3dsimp {
 class ITranslator;
 struct STranslationLog;
 }

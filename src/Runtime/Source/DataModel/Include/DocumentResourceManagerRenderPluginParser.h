@@ -33,10 +33,10 @@
 
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
-#include "UICDMXML.h"
-#include "UICDMDataTypes.h"
-#include "UICDMMetaData.h"
-#include "UICDMWStrOpsImpl.h"
+#include "Qt3DSDMXML.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMWStrOpsImpl.h"
 #include "foundation/StrConvertUTF.h"
 #include <EASTL/string.h>
 #include "Qt3DSRenderInputStreamFactory.h"

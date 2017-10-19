@@ -33,7 +33,7 @@
 #include "Doc.h"
 #include "StudioUtils.h"
 #include "StudioApp.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 
 EventsModel::EventsModel(QObject *parent)
     : QAbstractListModel(parent)

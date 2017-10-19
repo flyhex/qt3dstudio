@@ -34,7 +34,7 @@
 #include "Pt.h"
 #include "Rct.h"
 #include "Multicaster.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 class CControl;
 class CControlWindowListener;

@@ -5,11 +5,11 @@
 #include "Doc.h"
 #include "StudioApp.h"
 
-#include "UICDMActionCore.h"
-#include "UICDMActionInfo.h"
-#include "UICDMDataCore.h"
-#include "UICDMMetaData.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMActionCore.h"
+#include "Qt3DSDMActionInfo.h"
+#include "Qt3DSDMDataCore.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMStudioSystem.h"
 
 
 PropertyModel::PropertyModel(QObject *parent)

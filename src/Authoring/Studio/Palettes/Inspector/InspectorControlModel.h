@@ -32,10 +32,10 @@
 #include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qvector.h>
 
-#include "UICDMValue.h"
-#include "UICDMMetaDataValue.h"
-#include "UICDMMetaDataTypes.h"
-#include "UICFileTools.h"
+#include "Qt3DSDMValue.h"
+#include "Qt3DSDMMetaDataValue.h"
+#include "Qt3DSDMMetaDataTypes.h"
+#include "Qt3DSFileTools.h"
 
 #include "IDocumentEditor.h"
 

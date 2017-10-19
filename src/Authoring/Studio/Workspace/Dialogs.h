@@ -38,11 +38,11 @@
 //=============================================================================
 // Includes
 //=============================================================================
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 #include "StudioObjectTypes.h"
-#include "UICMessageBox.h"
+#include "Qt3DSMessageBox.h"
 //#include "MultilineEditDlg.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "CColor.h"
 #include <QMessageBox>
 

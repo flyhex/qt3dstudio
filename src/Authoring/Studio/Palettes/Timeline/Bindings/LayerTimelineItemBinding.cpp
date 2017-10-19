@@ -47,14 +47,14 @@
 #include "DropSource.h"
 #include "Doc.h"
 
-#include "UICDMHandles.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMStudioSystem.h"
 
-#include "UICDMMetaData.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMDataCore.h"
 #include "StudioFullSystem.h"
 #include "StudioCoreSystem.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMSlides.h"
 
 using namespace qt3dsdm;
 

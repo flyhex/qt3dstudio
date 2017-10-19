@@ -34,7 +34,7 @@
 #include "Dispatch.h"
 #include "Doc.h"
 #include "StudioUtils.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 #include "StudioApp.h"
 

@@ -35,8 +35,8 @@
 //==============================================================================
 // Includes
 //==============================================================================
-#include "UICFile.h"
-#include "UICFileTools.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSFileTools.h"
 
 #include "IOLibraryException.h"
 

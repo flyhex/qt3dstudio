@@ -29,7 +29,7 @@
 #include "stdafx.h" //Where the defines for big or little endian must lie
 #include "LEndianStreams.h"
 #include "IOLibraryException.h"
-#include "UICEndian.h"
+#include "Qt3DSEndian.h"
 
 CLEndianInStream::CLEndianInStream()
 {

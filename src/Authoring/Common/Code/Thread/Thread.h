@@ -34,7 +34,7 @@
 //	Includes
 //==============================================================================
 #include "Runnable.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 //==============================================================================
 //	Platform dependent includes

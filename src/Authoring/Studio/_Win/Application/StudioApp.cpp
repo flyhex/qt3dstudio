@@ -114,12 +114,12 @@ int main(int argc, char *argv[])
 #include "MsgRouter.h"
 #include "SplashView.h"
 #include "Views.h"
-#include "UICLog.h"
+#include "Qt3DSLog.h"
 #ifdef KDAB_TEMPORARILY_REMOVED
 #include "CrashDlg.h"
 #endif
-#include "UICFile.h"
-#include "UICFileTools.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSFileTools.h"
 #include "ITickTock.h"
 #include "IStudioRenderer.h"
 #include "IDocumentEditor.h"
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 #include "CommonConstants.h"
 #include "IOLibraryException.h"
 
-#include "UICDMErrors.h"
+#include "Qt3DSDMErrors.h"
 
 #include <iostream>
 #include <fstream>
@@ -145,22 +145,22 @@ int main(int argc, char *argv[])
 #include "..\Build\versionnumber.h"
 #endif
 
-#include "UICDESKey.h" // g_DESKey
+#include "Qt3DSDESKey.h" // g_DESKey
 
 #include "Core.h"
 #include "HotKeys.h"
 #include "StudioTutorialWidget.h"
 #include "GuideInspectable.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMInspectable.h"
-#include "UICDMSlides.h"
-#include "UICDMMaterialInspectable.h"
-#include "UICDMSceneInspectable.h"
-#include "UICDMAnimation.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMInspectable.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMMaterialInspectable.h"
+#include "Qt3DSDMSceneInspectable.h"
+#include "Qt3DSDMAnimation.h"
+#include "Qt3DSDMDataCore.h"
 #include "IDirectoryWatchingSystem.h"
 #include "ITickTock.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "foundation/Qt3DSLogging.h"
 
 #ifdef USE_LICENSE_HANDLER
@@ -314,7 +314,7 @@ BOOL CStudioApp::InitInstance(int argc, char* argv[])
 
     CFilePath thePreferencesPath = CFilePath::GetUserApplicationDirectory();
     thePreferencesPath = CFilePath::CombineBaseAndRelative(
-        thePreferencesPath, CFilePath(L"UIComposer\\Preferences.setting"));
+        thePreferencesPath, CFilePath(L"Qt3DSomposer\\Preferences.setting"));
     CPreferences::SetPreferencesFile(thePreferencesPath);
 
 #ifdef KDAB_TEMPORARILY_REMOVED

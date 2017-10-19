@@ -33,8 +33,8 @@
 #ifndef PATH_TIMELINE_ITEM_BINDING
 #define PATH_TIMELINE_ITEM_BINDING
 #pragma once
-#include "UICDMTimelineItemBinding.h"
-#include "UICDMDataTypes.h"
+#include "Qt3DSDMTimelineItemBinding.h"
+#include "Qt3DSDMDataTypes.h"
 #include <boost/tuple/tuple.hpp>
 
 //==============================================================================

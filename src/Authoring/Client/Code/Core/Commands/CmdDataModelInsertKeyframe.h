@@ -38,11 +38,11 @@
 #include "Cmd.h"
 #include "CmdDataModel.h"
 #include "Doc.h"
-#include "UICDMHandles.h"
-#include "UICDMAnimation.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMAnimation.h"
 #include "CmdDataModelBase.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMAnimation.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMAnimation.h"
 
 // This will animate the property if it is not already animated
 class CCmdDataModelInsertKeyframe : public CCmd, public qt3dsdm::CmdDataModel

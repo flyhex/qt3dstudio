@@ -135,7 +135,7 @@ struct SRuntimeDataCache : public ILuaRuntimeDataCache
         }
     }
 
-    static const char *GetPointerMapName() { return "uic-runtime-cache-ptr-map"; }
+    static const char *GetPointerMapName() { return "Qt3DS-runtime-cache-ptr-map"; }
 
     const char *PtrToKey(const void *ptr)
     {

@@ -112,7 +112,7 @@ TEventStr CFactory::AllocateStr(TEventStr inSrc)
     theSizeInByte = qt3ds::NVMin(theSizeInByte, TEventAllocator::getSlabSize());
 
     TEventChar *theNewString = (TEventChar *)m_Allocator.allocate(
-        theSizeInByte, "uic::evt::CFactory::UnManagedString", __FILE__, __LINE__);
+        theSizeInByte, "Qt3DS::evt::CFactory::UnManagedString", __FILE__, __LINE__);
 
     if (theNewString)
         memcpy(theNewString, inSrc, theSizeInByte);
@@ -131,7 +131,7 @@ TEventStr CFactory::AllocateStr(int inLength)
         return NULL;
 
     void *retval = m_Allocator.allocate(inLength * sizeof(TEventChar),
-                                        "uic::evt::CFactory::UnManagedString", __FILE__, __LINE__);
+                                        "Qt3DS::evt::CFactory::UnManagedString", __FILE__, __LINE__);
     qt3ds::intrinsics::memZero(retval, inLength);
     return (TEventStr)retval;
 }

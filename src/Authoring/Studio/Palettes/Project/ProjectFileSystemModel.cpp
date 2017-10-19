@@ -35,11 +35,11 @@
 #include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "Doc.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 #include "Dialogs.h"
-#include "UICDMStudioSystem.h"
-#include "UICImportTranslation.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSImportTranslation.h"
 #include "IDocumentEditor.h"
 #include "PathImportTranslator.h"
 #include "IDragable.h"
@@ -298,7 +298,7 @@ void ProjectFileSystemModel::dropUrls(const QList<QUrl> &urls, int row)
 void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) const
 {
     using namespace Q3DStudio;
-    using namespace UICIMP;
+    using namespace qt3dsimp;
     // Drag and Drop - From Explorer window to Project Palette
     // For all valid Project File Types:
     // - This performs a file copy from the source Explorer location to the selected Project Palette

@@ -31,8 +31,8 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICDMDataTypes.h"
-#include "UICDMMetaData.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMMetaData.h"
 #include "Vector2.h"
 #include "Rotation3.h"
 #include "Vector3.h"

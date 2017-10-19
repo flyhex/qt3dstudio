@@ -31,9 +31,9 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-//#include "UICTime.h"
-#include "UICString.h"
-#include "UICId.h"
+//#include "Qt3DSTime.h"
+#include "Qt3DSString.h"
+#include "Qt3DSId.h"
 #include <stdio.h>
 
 /*

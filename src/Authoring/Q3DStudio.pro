@@ -42,9 +42,9 @@ INCLUDEPATH += \
     Studio/Workspace/Views \
     Studio \
     Studio/English.lproj/Strings \
-    UICIMP/UICImportLib \
-    UICIMP/UICImportSGTranslation \
-    UICDM/Systems \
+    QT3DSIMP/Qt3DSImportLib \
+    QT3DSIMP/Qt3DSImportSGTranslation \
+    QT3DSDM/Systems \
     Common/Code/Thread \
     Common/Code/IO \
     Common/Code \
@@ -89,7 +89,7 @@ STATICRUNTIME = \
     -lpcre$$qtPlatformTargetSuffix() \
     -lTinyXML$$qtPlatformTargetSuffix() \
     -lColladaDOM$$qtPlatformTargetSuffix() \
-    -lUICDM$$qtPlatformTargetSuffix() \
+    -lQT3DSDM$$qtPlatformTargetSuffix() \
     -lCommonLib$$qtPlatformTargetSuffix() \
     -lCoreLib$$qtPlatformTargetSuffix() \
     $$END_ARCHIVE
@@ -141,7 +141,7 @@ RESOURCES += \
 
 PREDEPS_LIBS += \
     qt3dsruntimestatic \
-    UICDM \
+    QT3DSDM \
     CommonLib \
     CoreLib
 

@@ -37,8 +37,8 @@
 
 #include "RelativePathTools.h"
 #include "StudioObjectTypes.h"
-#include "UICDMHandles.h"
-#include "UICDMValue.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMValue.h"
 
 //==============================================================================
 /**

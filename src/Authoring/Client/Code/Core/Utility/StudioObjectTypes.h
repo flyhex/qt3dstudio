@@ -32,7 +32,7 @@
 #pragma once
 
 #include "PropertyPublishLevels.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 //
 //	*******************************************************************
 //	IMPORTANT:	These object types (EStudioObjectType) line up with the

@@ -30,10 +30,10 @@
 #ifndef UIA_DATAMODEL_H
 #define UIA_DATAMODEL_H
 #include "Qt3DSState.h"
-#include "UICStateEditor.h"
+#include "Qt3DSStateEditor.h"
 #include "Qt3DSMetadata.h"
 #include "Qt3DSStateInterpreter.h"
-#include "UICStateEditorFoundation.h"
+#include "Qt3DSStateEditorFoundation.h"
 
 namespace qt3ds {
 namespace app {

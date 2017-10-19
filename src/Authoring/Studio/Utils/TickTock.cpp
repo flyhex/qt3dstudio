@@ -28,7 +28,7 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "ITickTock.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSignals.h"
 #include "Thread.h"
 #include "Mutex.h"
 #include "Conditional.h"

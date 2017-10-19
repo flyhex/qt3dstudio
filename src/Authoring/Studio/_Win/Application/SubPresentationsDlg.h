@@ -31,7 +31,7 @@
 
 #include <QtWidgets/qdialog.h>
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include "Doc.h"
 
 #ifdef QT_NAMESPACE

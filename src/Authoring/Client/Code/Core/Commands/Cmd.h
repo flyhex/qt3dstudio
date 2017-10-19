@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 class CCmd
 {

@@ -17,7 +17,7 @@ Hinweis: (c) 1999 by Christian Rodemeyer
 
 typedef unsigned long COLORTYPE;
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include <QColor>
 
 class CColor

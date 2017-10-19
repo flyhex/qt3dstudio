@@ -43,9 +43,9 @@
 #include "Doc.h"
 #include "IDropTargetHelper.h"
 #include "GraphUtils.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMSlides.h"
 
 // Timeline stuff
 

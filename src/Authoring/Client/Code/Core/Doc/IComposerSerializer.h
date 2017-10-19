@@ -29,7 +29,7 @@
 #pragma once
 #ifndef COMPOSERSERIALIZERH
 #define COMPOSERSERIALIZERH
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 namespace qt3ds {
 namespace render {
     class IPathManager;

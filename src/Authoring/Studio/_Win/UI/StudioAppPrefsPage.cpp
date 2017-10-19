@@ -38,7 +38,7 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICOptions.h"
+#include "Qt3DSOptions.h"
 #include "Doc.h"
 #include "StudioAppPrefsPage.h"
 #include "StudioConst.h"
@@ -49,7 +49,7 @@
 #include "StringLoader.h"
 #include "CommonConstants.h"
 #include "Views.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "IStudioRenderer.h"

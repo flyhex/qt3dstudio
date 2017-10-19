@@ -38,11 +38,11 @@
 #include "Cmd.h"
 #include "CmdDataModel.h"
 #include "Doc.h"
-#include "UICDMHandles.h"
-#include "UICDMActionCore.h"
-#include "UICDMActionSystem.h"
-#include "UICDMMetaData.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMActionCore.h"
+#include "Qt3DSDMActionSystem.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 
 using namespace qt3dsdm;

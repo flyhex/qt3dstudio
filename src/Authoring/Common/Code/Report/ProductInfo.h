@@ -32,7 +32,7 @@
 
 #include <string>
 #include <ostream>
-#include "UICId.h"
+#include "Qt3DSId.h"
 
 class CProductInfo
 {

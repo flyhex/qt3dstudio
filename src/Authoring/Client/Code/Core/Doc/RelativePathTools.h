@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "UICDMDataTypes.h"
-#include "UICDMHandles.h"
-#include "UICString.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSString.h"
 
 class CAsset;
 class CStackTokenizer;

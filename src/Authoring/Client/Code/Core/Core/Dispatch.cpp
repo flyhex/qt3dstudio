@@ -40,7 +40,7 @@
 #include "Dispatch.h"
 #include "DispatchListeners.h"
 #include "MasterP.h"
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 #include "Cmd.h"
 #include "boost/signals.hpp"
 #include "boost/signals/connection.hpp"

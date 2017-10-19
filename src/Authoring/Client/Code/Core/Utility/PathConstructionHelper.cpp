@@ -37,7 +37,7 @@
 //==============================================================================
 #include "PathConstructionHelper.h"
 #include "Doc.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "StackTokenizer.h"
 

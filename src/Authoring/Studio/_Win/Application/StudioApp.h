@@ -41,7 +41,7 @@
 #include "CmdLineParser.h"
 #include "StudioObjectTypes.h"
 #include "DispatchListeners.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 #include <QApplication>
 

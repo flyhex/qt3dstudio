@@ -37,7 +37,7 @@
 //==============================================================================
 #include "Graph.h"
 #include "StudioObjectTypes.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "IGraphable.h"
 
 //==============================================================================

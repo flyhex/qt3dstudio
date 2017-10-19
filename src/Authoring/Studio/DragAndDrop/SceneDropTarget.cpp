@@ -46,10 +46,10 @@
 #include "IDropTargetHelper.h"
 #include "Core.h"
 #include "GraphUtils.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMDataCore.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMDataCore.h"
+#include "Qt3DSDMSlides.h"
 
 // Sceneview stuff
 //===============================================================================

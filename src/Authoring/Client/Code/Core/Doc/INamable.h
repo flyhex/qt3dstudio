@@ -33,7 +33,7 @@
 #ifndef __INAMABLE_H__
 #define __INAMABLE_H__
 
-#include <UICString.h>
+#include "Qt3DSString.h"
 
 //==============================================================================
 /**

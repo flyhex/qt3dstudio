@@ -31,7 +31,7 @@
 
 #include <QAbstractListModel>
 
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 /** Model for both action events and action handlers */
 class EventsModel : public QAbstractListModel

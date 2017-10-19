@@ -41,7 +41,7 @@
 #include <list>
 
 #include <QMetaType>
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 #include <QtCore/qxmlstream.h>
 
 

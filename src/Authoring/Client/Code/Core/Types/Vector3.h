@@ -30,7 +30,7 @@
 #ifndef __VECTOR3_H_
 #define __VECTOR3_H_
 
-#include "UICObjectCounter.h"
+#include "Qt3DSObjectCounter.h"
 
 namespace Q3DStudio {
 

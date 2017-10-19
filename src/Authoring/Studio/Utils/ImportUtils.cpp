@@ -30,7 +30,7 @@
 #include "stdafx.h"
 #include "ImportUtils.h"
 #include "Dialogs.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 
 namespace Q3DStudio {
 

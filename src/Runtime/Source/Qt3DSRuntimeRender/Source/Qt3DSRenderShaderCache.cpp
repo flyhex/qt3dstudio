@@ -584,7 +584,7 @@ struct ShaderCache : public IShaderCache
         NVScopedRefCounted<IStringTable> theStringTable(
             IStringTable::CreateStringTable(m_RenderContext.GetAllocator()));
         m_ShaderCache = IDOMWriter::CreateDOMWriter(m_RenderContext.GetAllocator(),
-                                                    "UICShaderCache", theStringTable)
+                                                    "Qt3DSShaderCache", theStringTable)
                             .first;
         m_ShaderCache->Att("cache_version", IShaderCache::GetShaderVersion());
     }

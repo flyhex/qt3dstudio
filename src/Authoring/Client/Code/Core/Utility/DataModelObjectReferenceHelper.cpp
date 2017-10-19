@@ -41,11 +41,11 @@
 #include "GraphUtils.h"
 
 // UICDM
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMSlides.h"
 #include "StudioFullSystem.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMDataCore.h"
 #include "Graph.h"
 
 inline void GetAllowableParentSlides(CClientDataModelBridge *inBridge,

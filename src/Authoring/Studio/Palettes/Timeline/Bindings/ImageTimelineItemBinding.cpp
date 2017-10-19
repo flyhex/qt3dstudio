@@ -37,7 +37,7 @@
 //==============================================================================
 #include "ImageTimelineItemBinding.h"
 #include "TimelineTranslationManager.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "BaseStateRow.h"
 #include "Doc.h"
 #include "IObjectReferenceHelper.h"

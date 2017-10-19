@@ -39,8 +39,8 @@
 #include "SlideContextMenu.h"
 
 #include "ClientDataModelBridge.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
 
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qtimer.h>

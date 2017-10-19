@@ -43,8 +43,8 @@
 #include "CmdGeneric.h"
 #include "EmptyTimelineTimebar.h"
 
-#include "UICDMStudioSystem.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
 #include "ClientDataModelBridge.h"
 
 using namespace qt3dsdm;

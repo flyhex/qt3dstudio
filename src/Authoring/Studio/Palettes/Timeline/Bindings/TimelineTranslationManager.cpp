@@ -49,13 +49,13 @@
 #include "BaseStateRow.h"
 #include "PropertyRow.h"
 #include "IDoc.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMSlides.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMSignals.h"
 
 // Link to Data model
 #include "ClientDataModelBridge.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMDataCore.h"
 #include "Doc.h" //Because we need to access Client Data Model Bridge
 #include "StudioApp.h"
 #include "Core.h"

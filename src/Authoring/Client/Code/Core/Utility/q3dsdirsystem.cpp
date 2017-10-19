@@ -28,7 +28,7 @@
 
 #include "q3dsdirsystem.h"
 #include "q3dsdirwatcher.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMSignals.h"
 
 using namespace qt3dsdm;
 using namespace Q3DStudio;

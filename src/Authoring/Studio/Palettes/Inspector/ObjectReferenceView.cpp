@@ -31,7 +31,7 @@
 #include "StudioUtils.h"
 #include "StudioPreferences.h"
 #include "IDocumentEditor.h"
-#include "UICDMValue.h"
+#include "Qt3DSDMValue.h"
 #include "Core.h"
 #include "Doc.h"
 #include "StudioApp.h"

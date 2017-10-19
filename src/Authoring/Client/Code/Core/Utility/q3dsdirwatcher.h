@@ -31,7 +31,7 @@
 
 #include <QtCore/qfilesystemwatcher.h>
 #include "IDirectoryWatchingSystem.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 
 class Q3DSDirWatcher : public QObject
 {

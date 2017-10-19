@@ -39,8 +39,8 @@
 #include "DropProxy.h"
 #include "DropContainer.h"
 #include "DropSource.h"
-#include "UICFile.h"
-#include "UICString.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSString.h"
 #include "IDragable.h"
 
 #include <QDragEnterEvent>

@@ -35,7 +35,7 @@
 #ifdef PERFORM_PROFILE
 
 #include "HiResTimer.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include <vector>
 
 class CMethProf

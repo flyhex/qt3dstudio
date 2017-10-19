@@ -27,9 +27,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICState.h"
-#include "UICStateEditorEditorsImpl.h"
-#include "UICStateExecutionContext.h"
+#include "Qt3DSState.h"
+#include "Qt3DSStateEditorEditorsImpl.h"
+#include "Qt3DSStateExecutionContext.h"
 #include "EASTL/sort.h"
 
 using namespace uic::state;
@@ -856,7 +856,7 @@ namespace state {
                         m_StringTable->RegisterStr("http://www.w3.org/2005/07/scxml")));
                     theNamespaces.push_back(
                         SNamespacePair(m_StringTable->RegisterStr("http://qt.io/qt3dstudio/uicstate"),
-                                       m_StringTable->RegisterStr("uic")));
+                                       m_StringTable->RegisterStr("Qt3DS")));
                 }
                 CDOMSerializer::Write(
                     m_EditorFoundation->getAllocator(), *xmlElem, theStream, *m_StringTable,
@@ -890,7 +890,7 @@ namespace state {
                     SNamespacePair(m_StringTable->RegisterStr("http://www.w3.org/2005/07/scxml")));
                 theNamespaces.push_back(
                     SNamespacePair(m_StringTable->RegisterStr("http://qt.io/qt3dstudio/uicstate"),
-                                   m_StringTable->RegisterStr("uic")));
+                                   m_StringTable->RegisterStr("Qt3DS")));
             }
             for (size_t idx = 0, end = theNamespaces.size(); idx < end; ++idx) {
                 SNamespacePair &theNode(theNamespaces[idx]);

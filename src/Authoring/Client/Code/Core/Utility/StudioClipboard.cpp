@@ -39,7 +39,7 @@
 
 #include "Literals.h"
 #include "StudioObjectTypes.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 #include <QClipboard>
 #include <QDataStream>

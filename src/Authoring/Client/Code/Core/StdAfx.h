@@ -31,7 +31,7 @@
 //==============================================================================
 #ifdef __cplusplus
 #pragma once
-#include "UICMacros.h"
+#include "Qt3DSMacros.h"
 
 #ifdef _WIN32
 //==============================================================================
@@ -112,20 +112,20 @@ extern CComModule _Module;
 //==============================================================================
 //	Common Player Includes
 //==============================================================================
-#include "UICMath.h"
-#include "UICPoint.h"
-#include "UICRect.h"
-#include "UICString.h"
-#include "UICMessageBox.h"
-#include "UICObjectCounter.h"
+#include "Qt3DSMath.h"
+#include "Qt3DSPoint.h"
+#include "Qt3DSRect.h"
+#include "Qt3DSString.h"
+#include "Qt3DSMessageBox.h"
+#include "Qt3DSObjectCounter.h"
 #include "PlatformTypes.h"
 #include "PlatformMacros.h"
 #include "PlatformStrings.h"
 #include "PlatformConversion.h"
 #include "CommonConstants.h"
-#include "UICExceptions.h"
-#include "UICExceptionConstants.h"
-#include "UICLog.h"
+#include "Qt3DSExceptions.h"
+#include "Qt3DSExceptionConstants.h"
+#include "Qt3DSLog.h"
 #include "Mutex.h"
 #include "Guard.h"
 #include "Thread.h"

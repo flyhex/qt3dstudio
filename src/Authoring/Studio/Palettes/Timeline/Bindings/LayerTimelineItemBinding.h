@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include "UICDMTimelineItemBinding.h"
+#include "Qt3DSDMTimelineItemBinding.h"
 
 namespace qt3dsdm {
 class CStudioSystem;

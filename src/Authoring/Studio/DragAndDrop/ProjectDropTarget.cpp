@@ -37,10 +37,10 @@
 #include "Core.h"
 #include "Dialogs.h"
 #include "Doc.h"
-#include "UICFile.h"
-#include "UICFileTools.h"
-#include "UICImportPerformImport.h"
-#include "UICImportTranslation.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSFileTools.h"
+#include "Qt3DSImportPerformImport.h"
+#include "Qt3DSImportTranslation.h"
 #include "IDocumentEditor.h"
 #include "PathImportTranslator.h"
 
@@ -79,7 +79,7 @@ bool CProjectDropTarget::Accept(CDropSource &inSource)
 bool CProjectDropTarget::Drop(CDropSource &inSource)
 {
     using namespace Q3DStudio;
-    using namespace UICIMP;
+    using namespace qt3dsimp;
     // Drag and Drop - From Explorer window to Project Palette
     // For all valid Project File Types:
     // - This performs a file copy from the source Explorer location to the selected Project Palette

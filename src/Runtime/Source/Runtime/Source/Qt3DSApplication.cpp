@@ -382,7 +382,7 @@ struct SDummyAudioPlayer : public IAudioPlayer
     {
         (void *)inFilePath;
         qCWarning(qt3ds::TRACE_INFO)
-                << "UICTegraApplication: Unimplemented method IAudioPlayer::PlaySoundFile";
+                << "Qt3DSTegraApplication: Unimplemented method IAudioPlayer::PlaySoundFile";
         return false;
     }
 } g_DummyAudioPlayer;
@@ -1007,7 +1007,7 @@ struct SApp : public IApplication
         /*if ( millis > 30.0 )
         {
                 m_CoreFactory->GetFoundation().error( NVErrorCode::eDEBUG_INFO, __FILE__, __LINE__,
-        "UIC Long Frame: %3.2fms", millis );
+        "Qt3DS Long Frame: %3.2fms", millis );
                 //Useful for figuring out where the frame time comes from.
                 m_CoreFactory->GetPerfTimer().OutputTimerData();
 

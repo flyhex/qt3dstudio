@@ -39,9 +39,9 @@
 #include "PlaybackClock.h"
 #include "Doc.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMSlides.h"
-#include "UICDMDataCore.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMDataCore.h"
 
 //==============================================================================
 //	Static Member Initialization

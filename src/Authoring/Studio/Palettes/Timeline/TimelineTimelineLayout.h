@@ -46,7 +46,7 @@
 #include "Snapper.h"
 #include "AreaBoundingRect.h"
 #include "Playhead.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 //=============================================================================
 // Forwards

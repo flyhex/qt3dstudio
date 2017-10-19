@@ -28,8 +28,8 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "IComposerEditorInterface.h"
-#include "UICImport.h"
-#include "UICImportTranslation.h"
+#include "Qt3DSImport.h"
+#include "Qt3DSImportTranslation.h"
 #include "Graph.h"
 #include "StandardExtensions.h"
 #include "EASTL/hash_map.h"

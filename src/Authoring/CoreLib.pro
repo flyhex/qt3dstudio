@@ -26,10 +26,10 @@ INCLUDEPATH += \
     Client/Code/Shared/Log \
     Client/Code/Core/Timer \
     Client/Code/Core/VirtualAssets \
-    UICIMP/UICImportLib \
-    UICDM/Systems \
-    UICDM/Systems/Cores \
-    UICIMP/UICImportSGTranslation \
+    QT3DSIMP/Qt3DSImportLib \
+    QT3DSDM/Systems \
+    QT3DSDM/Systems/Cores \
+    QT3DSIMP/Qt3DSImportSGTranslation \
     Studio/DragAndDrop \
     Studio/Render \
     Studio/Workspace \

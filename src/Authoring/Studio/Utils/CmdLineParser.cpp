@@ -41,8 +41,8 @@
 
 #include "CmdLineParser.h"
 #include "StudioObjectTypes.h"
-#include "UICFile.h"
-#include "UICString.h"
+#include "Qt3DSFile.h"
+#include "Qt3DSString.h"
 
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
 // the template generator go blah

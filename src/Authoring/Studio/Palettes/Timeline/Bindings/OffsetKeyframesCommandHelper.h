@@ -36,7 +36,7 @@
 #pragma once
 
 // Data model
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "IDocumentEditor.h"
 
 namespace Q3DStudio {

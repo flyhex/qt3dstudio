@@ -37,7 +37,7 @@
 //	Includes
 //==============================================================================
 #include "DropTarget.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 
 class CDropSource;
 

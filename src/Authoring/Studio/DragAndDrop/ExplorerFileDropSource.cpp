@@ -41,7 +41,7 @@
 #include "DropTarget.h"
 #include "StudioObjectTypes.h"
 #include "IDragable.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 
 bool CExplorerFileDropSource::s_FileHasValidTarget = false;

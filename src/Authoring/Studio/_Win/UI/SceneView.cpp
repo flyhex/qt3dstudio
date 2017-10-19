@@ -38,7 +38,7 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICOptions.h"
+#include "Qt3DSOptions.h"
 #include "SceneView.h"
 //#include "InterpolationDlg.h"
 #include "MainFrm.h"
@@ -55,7 +55,7 @@
 #include "WndControl.h"
 #endif
 #include "Core.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "IStudioRenderer.h"
 #include "ClientDataModelBridge.h"
 

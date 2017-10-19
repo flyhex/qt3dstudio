@@ -33,7 +33,7 @@
 #ifndef INCLUDED_DROPSOURCE
 #define INCLUDED_DROPSOURCE
 
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "Pt.h"
 #include "Cmd.h"
 

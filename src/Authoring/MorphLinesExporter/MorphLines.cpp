@@ -33,7 +33,7 @@
 #include "foundation/StringConversionImpl.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSVec3.h"
-#include "UICImportMesh.h"
+#include "Qt3DSImportMesh.h"
 
 using namespace qt3ds;
 using namespace qt3ds::foundation;
@@ -109,7 +109,7 @@ int main(int c, char **v)
     QT3DS_ASSERT(!endData.empty());
     QT3DS_ASSERT(startData.size() == endData.size());
 
-    UICIMP::MeshBuilder &theBuilder = UICIMP::MeshBuilder::CreateMeshBuilder();
+    qt3dsimp::MeshBuilder &theBuilder = qt3dsimp::MeshBuilder::CreateMeshBuilder();
     eastl::vector<QT3DSVec3> meshBuffer;
 
     NVBounds3 theBounds(NVBounds3::empty());
@@ -122,12 +122,12 @@ int main(int c, char **v)
     theBuilder.SetDrawParameters(qt3ds::render::NVRenderDrawMode::Lines,
                                  qt3ds::render::NVRenderWinding::CounterClockwise);
     NVDataRef<QT3DSU8> theData = qt3ds::foundation::toU8DataRef(meshBuffer.data(), meshBuffer.size());
-    UICIMP::MeshBuilderVBufEntry theBuilderEntry("attr_pos", theData,
+    qt3dsimp::MeshBuilderVBufEntry theBuilderEntry("attr_pos", theData,
                                                  qt3ds::render::NVRenderComponentTypes::QT3DSF32, 3);
     theBuilder.SetVertexBuffer(toConstDataRef(theBuilderEntry));
     theBuilder.AddMeshSubset(L"points", (QT3DSU32)meshBuffer.size(), 0,
                              theBounds);
-    UICIMP::Mesh &theMesh(theBuilder.GetMesh());
+    qt3dsimp::Mesh &theMesh(theBuilder.GetMesh());
     theMesh.SaveMulti(v[3]);
     return 0;
 }

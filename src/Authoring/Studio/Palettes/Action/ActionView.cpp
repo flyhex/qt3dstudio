@@ -44,10 +44,10 @@
 #include "StudioClipboard.h"
 #include "StudioObjectTypes.h"
 #include "StudioPreferences.h"
-#include "UICFileTools.h"
-#include "UICDMActionCore.h"
-#include "UICDMDataTypes.h"
-#include "UICDMSlides.h"
+#include "Qt3DSFileTools.h"
+#include "Qt3DSDMActionCore.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMSlides.h"
 
 #include <QCoreApplication>
 #include <QQmlContext>

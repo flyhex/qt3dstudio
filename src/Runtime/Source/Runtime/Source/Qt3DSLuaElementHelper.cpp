@@ -191,7 +191,7 @@ int CLuaElementHelper::GetElement(lua_State *inLuaState)
         luaL_checktype(inLuaState, ARG_START, LUA_TLIGHTUSERDATA);
         theElement = reinterpret_cast<TElement *>(lua_touserdata(inLuaState, ARG_START));
     }
-    lua_getglobal(inLuaState, "UICApplication");
+    lua_getglobal(inLuaState, "Qt3DSApplication");
     qt3ds::runtime::IApplication *theApp =
         static_cast<qt3ds::runtime::IApplication *>(lua_touserdata(inLuaState, -1));
 

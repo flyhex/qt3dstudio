@@ -29,16 +29,16 @@
 ****************************************************************************/
 #ifndef QT3DS_STATE_EDITOR_IMPL_H
 #define QT3DS_STATE_EDITOR_IMPL_H
-#include "UICStateEditor.h"
-#include "UICStateEditorValue.h"
-#include "UICStateTypes.h"
-#include "UICStateEditorFoundation.h"
+#include "Qt3DSStateEditor.h"
+#include "Qt3DSStateEditorValue.h"
+#include "Qt3DSStateTypes.h"
+#include "Qt3DSStateEditorFoundation.h"
 #include "foundation/Utils.h"
 #include "foundation/XML.h"
-#include "UICStateXMLIO.h"
+#include "Qt3DSStateXMLIO.h"
 #include "foundation/IOStreams.h"
-#include "UICStateExecutionTypes.h"
-#include "UICStateContext.h"
+#include "Qt3DSStateExecutionTypes.h"
+#include "Qt3DSStateContext.h"
 
 namespace uic {
 namespace state {

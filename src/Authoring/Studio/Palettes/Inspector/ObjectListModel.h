@@ -32,7 +32,7 @@
 #include <QAbstractItemModel>
 #include <QAbstractListModel>
 
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 class IObjectReferenceHelper;
 class CCore;

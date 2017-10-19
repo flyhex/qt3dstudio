@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 #ifdef WIN32
 typedef void (*CrashProc)(EXCEPTION_POINTERS *pExPtrs);

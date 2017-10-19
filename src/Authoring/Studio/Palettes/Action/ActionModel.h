@@ -31,8 +31,8 @@
 
 #include <QAbstractListModel>
 
-#include "UICDMActionInfo.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMActionInfo.h"
+#include "Qt3DSDMHandles.h"
 
 namespace qt3dsdm {
     class IActionSystem;

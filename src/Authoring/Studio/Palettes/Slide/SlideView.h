@@ -34,8 +34,8 @@
 #include "DispatchListeners.h"
 #include "SlideModel.h"
 
-#include "UICDMHandles.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMSignals.h"
 #include <unordered_map>
 class CClientDataModelBridge;
 class CDoc;

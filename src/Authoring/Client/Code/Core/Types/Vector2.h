@@ -30,7 +30,7 @@
 #ifndef __VECTOR2_H_
 #define __VECTOR2_H_
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 namespace Q3DStudio {
 // TODO Remove these soon.

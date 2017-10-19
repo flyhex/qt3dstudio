@@ -32,9 +32,9 @@
 
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
-#include "UICDMXML.h"
-#include "UICDMDataTypes.h"
-#include "UICDMMetaData.h"
+#include "Qt3DSDMXML.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMMetaData.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 
 namespace Q3DStudio {

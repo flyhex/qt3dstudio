@@ -29,9 +29,9 @@
 ****************************************************************************/
 #ifndef QT3DS_STATE_EDITOR_TRANSACTION_IMPL_H
 #define QT3DS_STATE_EDITOR_TRANSACTION_IMPL_H
-#include "UICStateEditor.h"
-#include "UICStateEditorFoundation.h"
-#include "UICStateEditorProperties.h"
+#include "Qt3DSStateEditor.h"
+#include "Qt3DSStateEditorFoundation.h"
+#include "Qt3DSStateEditorProperties.h"
 
 namespace uic {
 namespace state {

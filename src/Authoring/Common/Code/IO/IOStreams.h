@@ -30,7 +30,7 @@
 #ifndef INCLUDED_IO_STREAMS_H
 #define INCLUDED_IO_STREAMS_H 1
 
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include "InputStream.h"
 #include "OutputStream.h"
 #include "IOLibraryException.h"

@@ -28,16 +28,16 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "PathImportTranslator.h"
-#include "UICImportComposerTypes.h"
+#include "Qt3DSImportComposerTypes.h"
 #include "foundation/IOStreams.h"
 #include "DynamicLua.h"
-#include "UICImport.h"
-#include "UICImportPath.h"
+#include "Qt3DSImport.h"
+#include "Qt3DSImportPath.h"
 
 using namespace Q3DStudio;
 using namespace qt3ds;
 using namespace qt3ds::foundation;
-using namespace UICIMP;
+using namespace qt3dsimp;
 
 SPathImportTranslator::SPathImportTranslator(const QString &srcFile, IDynamicLua &inLuaState,
                                              qt3ds::NVFoundationBase &inFoundation)
@@ -185,7 +185,7 @@ QT3DSU64 SPathImportTranslator::ParseSVGPath(TInstanceHandle inParent,
     }
     eastl::vector<qt3ds::QT3DSVec2> thePoints;
     if (!m_Builder)
-        m_Builder = UICIMP::IPathBufferBuilder::CreateBuilder(m_Foundation);
+        m_Builder = qt3dsimp::IPathBufferBuilder::CreateBuilder(m_Foundation);
     else
         m_Builder->Clear();
 
@@ -221,8 +221,8 @@ QT3DSU64 SPathImportTranslator::ParseSVGPath(TInstanceHandle inParent,
     }
 
     Q3DStudio::CString relativePath;
-    UICIMP::InstanceDesc thePathItem = m_Import->GetInstanceByHandle(retval);
-    UICIMP::SPathBuffer theBuffer(m_Builder->GetPathBuffer());
+    qt3dsimp::InstanceDesc thePathItem = m_Import->GetInstanceByHandle(retval);
+    qt3dsimp::SPathBuffer theBuffer(m_Builder->GetPathBuffer());
     relativePath = m_Import->AddPathBuffer(theBuffer, thePathItem.m_Id).m_Value;
     m_Import->SetInstancePropertyValue(retval, m_ObjectTypes.m_Asset.m_SourcePath, relativePath);
     m_Import->SetInstancePropertyValue(retval, m_ObjectTypes.m_Node.m_Opacity, pathOpacity);
@@ -269,7 +269,7 @@ QT3DSU64 SPathImportTranslator::ParseSVGItem(TInstanceHandle inParent,
         return ParseSVGPath(inParent, inExistingNames);
 }
 
-bool SPathImportTranslator::PerformTranslation(UICIMP::Import &import)
+bool SPathImportTranslator::PerformTranslation(qt3dsimp::Import &import)
 {
     m_Import = &import;
     eastl::vector<QT3DSU8> fileData;

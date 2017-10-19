@@ -32,7 +32,7 @@
 
 #include "MethProf.h"
 #include "MasterP.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 using namespace Q3DStudio;
 

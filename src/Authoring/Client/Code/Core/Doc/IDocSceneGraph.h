@@ -29,7 +29,7 @@
 #ifndef IDOC_SCENE_GRAPH_H
 #define IDOC_SCENE_GRAPH_H
 #include "Qt3DSRender.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "foundation/Qt3DSVec3.h"
 #include "Pt.h"
 namespace qt3ds {

@@ -36,7 +36,7 @@
 
 #include <stdio.h>
 #include "InputStream.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 #include <QFile>
 

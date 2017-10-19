@@ -27,18 +27,18 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICSceneGraphDebugger.h"
-#include "UICSceneGraphDebuggerValue.h"
-#include "UICSceneGraphDebuggerProtocol.h"
-#include "UICUIADatamodel.h"
-#include "UICStateEditorValue.h"
-#include "UICUIADatamodelValue.h"
+#include "Qt3DSSceneGraphDebugger.h"
+#include "Qt3DSSceneGraphDebuggerValue.h"
+#include "Qt3DSSceneGraphDebuggerProtocol.h"
+#include "Qt3DSUIADatamodel.h"
+#include "Qt3DSStateEditorValue.h"
+#include "Qt3DSUIADatamodelValue.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
 #include "foundation/Qt3DSContainers.h"
-#include "UICKernelTypes.h"
-#include "UICHash.h" //we need to duplicate the hash attribute calls
+#include "Qt3DSKernelTypes.h"
+#include "Qt3DSHash.h" //we need to duplicate the hash attribute calls
 #include "EASTL/set.h"
 
 using namespace uic;

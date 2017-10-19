@@ -43,10 +43,10 @@
 #include "Doc.h"
 #include "StudioApp.h"
 #include "Core.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "IDocumentEditor.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 
 bool CFileDropSource::s_FileHasValidTarget = false;

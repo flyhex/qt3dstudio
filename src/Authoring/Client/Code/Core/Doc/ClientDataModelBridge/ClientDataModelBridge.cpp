@@ -33,15 +33,15 @@
 #include <boost/scoped_ptr.hpp>
 #include "StandardExtensions.h"
 #include <fstream>
-#include "UICDMSlideCore.h"
-#include "UICDMSlideGraphCore.h"
+#include "Qt3DSDMSlideCore.h"
+#include "Qt3DSDMSlideGraphCore.h"
 
 #include "StudioFullSystem.h"
-#include "UICDMStudioSystem.h"
-#include "UICDMAnimation.h"
-#include "UICDMSlides.h"
-#include "UICDMDataCore.h"
-#include "UICDMActionCore.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMAnimation.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMDataCore.h"
+#include "Qt3DSDMActionCore.h"
 #include "GraphUtils.h"
 #include "StudioCoreSystem.h"
 
@@ -50,7 +50,7 @@
 #include "FormattedInputStream.h"
 #include "FormattedOutputStream.h"
 #include "Dispatch.h"
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include <boost/make_shared.hpp>
 
 using namespace qt3dsdm;

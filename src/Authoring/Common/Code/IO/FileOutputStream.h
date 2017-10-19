@@ -35,7 +35,7 @@
 #define INCLUDED_FILE_OUTPUT_STREAM_H
 
 #include "OutputStream.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 #include <stdio.h>
 
 #ifdef WIN32

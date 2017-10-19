@@ -40,7 +40,7 @@
 #include "MasterP.h"
 #include "ControlData.h"
 #include "CoreUtils.h"
-#include "UICMath.h"
+#include "Qt3DSMath.h"
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
 // the template generator go blah
 

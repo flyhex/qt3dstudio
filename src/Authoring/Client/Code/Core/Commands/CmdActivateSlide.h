@@ -33,7 +33,7 @@
 #pragma once
 
 #include "Cmd.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 
 class CDoc;
 

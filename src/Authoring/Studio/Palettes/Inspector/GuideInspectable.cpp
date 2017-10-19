@@ -31,12 +31,12 @@
 #include "InspectableBase.h"
 #include "Core.h"
 #include "Doc.h"
-#include "UICDMGuides.h"
+#include "Qt3DSDMGuides.h"
 #include "EasyInspectorGroup.h"
 #include "IDocumentEditor.h"
-#include "UICDMDataTypes.h"
+#include "Qt3DSDMDataTypes.h"
 #include "IInspectableItem.h"
-#include "UICDMValue.h"
+#include "Qt3DSDMValue.h"
 
 typedef std::function<qt3dsdm::SValue()> TGetterFunc;
 typedef std::function<void(qt3dsdm::SValue)> TSetterFunc;

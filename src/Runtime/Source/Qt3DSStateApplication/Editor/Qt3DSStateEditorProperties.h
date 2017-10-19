@@ -31,8 +31,8 @@
 #define UICSTATE_EDITOR_PROPERTIES_H
 #pragma once
 
-#include "UICStateEditorFoundation.h"
-#include "UICStateEditorImpl.h"
+#include "Qt3DSStateEditorFoundation.h"
+#include "Qt3DSStateEditorImpl.h"
 
 namespace uic {
 namespace state {

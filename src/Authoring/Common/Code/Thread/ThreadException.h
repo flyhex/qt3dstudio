@@ -33,7 +33,7 @@
 #pragma once
 
 #include "StudioException.h"
-#include "UICString.h"
+#include "Qt3DSString.h"
 
 class CThreadException : public CStudioException
 {

@@ -37,10 +37,10 @@
 //==============================================================================
 #include "CoreConst.h"
 #include "StudioObjectTypes.h"
-#include "UICId.h"
+#include "Qt3DSId.h"
 #include "Multicaster.h"
-#include "UICDMHandles.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMSignals.h"
 #include "SelectedValue.h"
 
 #include <QPoint>

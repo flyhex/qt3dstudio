@@ -29,7 +29,7 @@
 #ifndef AMXSMARTPTRH
 #define AMXSMARTPTRH
 #include <memory>
-#include "UICExceptions.h"
+#include "Qt3DSExceptions.h"
 #include "PlatformMacros.h"
 #ifdef WIN32
 #pragma warning(disable : 4284)

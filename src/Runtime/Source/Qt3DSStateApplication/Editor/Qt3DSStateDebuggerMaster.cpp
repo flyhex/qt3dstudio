@@ -27,8 +27,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "UICStateDebugger.h"
-#include "UICStateDebuggerProtocol.h"
+#include "Qt3DSStateDebugger.h"
+#include "Qt3DSStateDebuggerProtocol.h"
 #include "foundation/IOStreams.h"
 #include "foundation/Qt3DSAtomic.h"
 

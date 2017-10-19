@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "StdAfx.h"
 
 class CAsset;

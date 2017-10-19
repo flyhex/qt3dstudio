@@ -31,14 +31,14 @@
 //==============================================================================
 // Includes
 //==============================================================================
-#include "UICDMPrefix.h"
+#include "Qt3DSDMPrefix.h"
 #include "Qt3DSMetadata.h"
 #include "SimpleDataCore.h"
-#include "UICDMXML.h"
+#include "Qt3DSDMXML.h"
 #include "foundation/IOStreams.h"
 #include "Qt3DSEulerAngles.h"
-#include "UICDMWindowsCompatibility.h"
-#include "UICDMComposerTypeDefinitions.h"
+#include "Qt3DSDMWindowsCompatibility.h"
+#include "Qt3DSDMComposerTypeDefinitions.h"
 #include "DocumentResourceManagerScriptParser.h"
 #include "DocumentResourceManagerLuaParser.h"
 #include "foundation/StrConvertUTF.h"

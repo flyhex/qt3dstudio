@@ -29,12 +29,12 @@
 #include <winsock2.h>
 #include <Windows.h>
 #include <stdio.h>
-#include "UICFileTools.h"
+#include "Qt3DSFileTools.h"
 #include "StandardExtensions.h"
 #include <map>
-#include "UICImportMesh.h"
-#include "UICDMXML.h"
-#include "UICDMStringTable.h"
+#include "Qt3DSImportMesh.h"
+#include "Qt3DSDMXML.h"
+#include "Qt3DSDMStringTable.h"
 #include "foundation/IOStreams.h"
 #include "render/NvRenderBaseTypes.h"
 #include "foundation/TrackingAllocator.h"
@@ -131,8 +131,8 @@ void FindMeshFiles(const CFilePath &inUIPPath, TMeshFileToIdMap &inMeshMap,
 
 struct SMeshScope
 {
-    UICIMP::Mesh *m_Mesh;
-    SMeshScope(UICIMP::Mesh *mesh)
+    qt3dsimp::Mesh *m_Mesh;
+    SMeshScope(qt3dsimp::Mesh *mesh)
         : m_Mesh(mesh)
     {
     }
@@ -178,7 +178,7 @@ int main(int c, char **v)
 
     qCInfo(qt3ds::TRACE_INFO) << "Found " << theMeshMap.size() << " mesh files";
 
-    UICIMP::MeshBuilder &theBuilder = UICIMP::MeshBuilder::CreateMeshBuilder();
+    qt3dsimp::MeshBuilder &theBuilder = qt3dsimp::MeshBuilder::CreateMeshBuilder();
     vector<QT3DSU16> theIndexes;
     MallocAllocator theAllocator;
     QT3DSU32 theFileIndex = 1;
@@ -194,7 +194,7 @@ int main(int c, char **v)
             theBuilder.Reset();
             QT3DSU32 theMeshId(theIdList[meshIdx]);
             qCInfo(qt3ds::TRACE_INFO) << "Optimizing mesh: " << theMeshId;
-            UICIMP::Mesh *theMesh = UICIMP::Mesh::LoadMulti(theIter->first.GetMulti(), theMeshId);
+            qt3dsimp::Mesh *theMesh = qt3dsimp::Mesh::LoadMulti(theIter->first.GetMulti(), theMeshId);
             if (!theMesh) {
                 qCWarning(qt3ds::WARNING) << "Failed to load mesh";
                 QT3DS_ASSERT(false);
@@ -211,7 +211,7 @@ int main(int c, char **v)
 
             for (QT3DSU32 jointIdx = 0, jointEnd = theMesh->m_Joints.size(); jointIdx < jointEnd;
                  ++jointIdx) {
-                const UICIMP::Joint &theJoint = theMesh->m_Joints[jointIdx];
+                const qt3dsimp::Joint &theJoint = theMesh->m_Joints[jointIdx];
                 theBuilder.AddJoint(theJoint.m_JointID, theJoint.m_ParentID, theJoint.m_invBindPose,
                                     theJoint.m_localToGlobalBoneSpace);
             }
@@ -224,7 +224,7 @@ int main(int c, char **v)
             }
             theBuilder.SetDrawParameters(theMesh->m_DrawMode, theMesh->m_Winding);
             theBuilder.OptimizeMesh();
-            UICIMP::Mesh theOptimizedMesh(theBuilder.GetMesh());
+            qt3dsimp::Mesh theOptimizedMesh(theBuilder.GetMesh());
             FileOpenFlags theFlags = FileWriteFlags();
             if (meshIdx)
                 theFlags = FileAppendFlags();

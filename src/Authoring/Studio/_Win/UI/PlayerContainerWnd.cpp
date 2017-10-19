@@ -32,7 +32,7 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "UICOptions.h"
+#include "Qt3DSOptions.h"
 #include "SceneView.h"
 #include "Doc.h"
 #include "StudioProjectSettings.h"
@@ -48,7 +48,7 @@
 
 #include "PlatformStrings.h"
 #include "PlayerContainerWnd.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "Core.h"
 #include "MainFrm.h"
 #include "StudioUtils.h"

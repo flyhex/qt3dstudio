@@ -31,7 +31,7 @@
 #define __ROTATION3_H_
 
 #include "Vector3.h"
-#include "UICObjectCounter.h"
+#include "Qt3DSObjectCounter.h"
 
 namespace Q3DStudio {
 

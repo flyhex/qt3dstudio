@@ -32,7 +32,7 @@
 
 #include <deque>
 
-#include <UICString.h>
+#include "Qt3DSString.h"
 
 class CCmdLineParser
 {

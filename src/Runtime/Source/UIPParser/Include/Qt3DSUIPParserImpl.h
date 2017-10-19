@@ -90,7 +90,7 @@ uip file data.
 #include "Qt3DSMetadata.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "Qt3DSSlideSystem.h"
-#include "UICDMDataTypes.h"
+#include "Qt3DSDMDataTypes.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include <EASTL/map.h>
 #include <EASTL/set.h>

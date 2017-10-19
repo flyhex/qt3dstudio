@@ -38,7 +38,7 @@
 //==============================================================================
 // This should go into its own FileDropSourceFile.
 #include "DropSource.h"
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 
 class CStudioApp;
 class CDropTarget;

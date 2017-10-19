@@ -36,11 +36,11 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "UICDMDataTypes.h"
-#include "UICDMHandles.h"
-#include "UICDMActionInfo.h"
-#include "UICDMMetaData.h"
-#include "UICString.h"
+#include "Qt3DSDMDataTypes.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMActionInfo.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSString.h"
 
 //==============================================================================
 //	Forwards

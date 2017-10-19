@@ -29,7 +29,7 @@
 #define PROJECTVIEW_H
 
 #include "DispatchListeners.h"
-#include "UICFile.h"
+#include "Qt3DSFile.h"
 
 #include <QQuickWidget>
 #include <QModelIndex>

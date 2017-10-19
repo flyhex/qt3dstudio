@@ -32,8 +32,8 @@
 //	Includes
 //==============================================================================
 #include "TCPPerfLogClient.h"
-#include "UICMacros.h"
-#include "UICPlatformSpecific.h"
+#include "Qt3DSMacros.h"
+#include "Qt3DSPlatformSpecific.h"
 #include <stdio.h>
 #include <string.h>
 

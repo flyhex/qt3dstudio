@@ -35,8 +35,8 @@
 
 #pragma once
 
-#include "UICDMTimelineItemBinding.h"
-#include "UICDMDataTypes.h"
+#include "Qt3DSDMTimelineItemBinding.h"
+#include "Qt3DSDMDataTypes.h"
 
 //==============================================================================
 //	Classes

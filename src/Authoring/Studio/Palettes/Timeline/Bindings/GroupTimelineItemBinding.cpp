@@ -46,11 +46,11 @@
 #include "Doc.h"
 #include "CmdGeneric.h"
 
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
-#include "UICDMDataCore.h"
-#include "UICFileTools.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMDataCore.h"
+#include "Qt3DSFileTools.h"
 
 using namespace qt3dsdm;
 

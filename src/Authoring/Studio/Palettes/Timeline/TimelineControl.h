@@ -43,8 +43,8 @@
 #include "TimelineRow.h"
 #include "ITimelineControl.h"
 
-#include "UICDMHandles.h"
-#include "UICDMSignals.h"
+#include "Qt3DSDMHandles.h"
+#include "Qt3DSDMSignals.h"
 #include "SelectedValueImpl.h"
 
 //==============================================================================

@@ -30,7 +30,7 @@
 #define QT3DS_STUDIO_PATH_WIDGET_H
 #pragma once
 #include "StudioWidget.h"
-#include "UICDMHandles.h"
+#include "Qt3DSDMHandles.h"
 #include "StudioPickValues.h"
 
 namespace qt3ds {

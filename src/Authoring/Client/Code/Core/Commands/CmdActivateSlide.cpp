@@ -31,8 +31,8 @@
 
 #include "CmdActivateSlide.h"
 #include "Doc.h"
-#include "UICDMSlides.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "SlideSystem.h"
 #include "ClientDataModelBridge.h"
 

@@ -37,9 +37,9 @@
 //==============================================================================
 #include "GraphUtils.h"
 #include "Doc.h"
-#include "UICDMStudioSystem.h"
+#include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
-#include "UICDMSlides.h"
+#include "Qt3DSDMSlides.h"
 
 #include <boost/bind.hpp>
 
