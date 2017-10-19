@@ -47,7 +47,7 @@
 #include "Qt3DSRendererImpl.h"
 #include "Qt3DSRenderLight.h"
 #include "Qt3DSRenderUIPLoader.h"
-#include "UICDMMetaDataTypes.h"
+#include "Qt3DSDMMetaDataTypes.h"
 
 #include <QTime>
 #include <QString>
