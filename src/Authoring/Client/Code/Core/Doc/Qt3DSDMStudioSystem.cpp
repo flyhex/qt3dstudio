@@ -106,7 +106,7 @@ struct MaterialImagePropertyInfo : public IPropertyInstanceInfo
     }
 
     static inline void
-    CopyAnimationIfOnInstance(CUICDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inSourceSlide,
+    CopyAnimationIfOnInstance(Qt3DSDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inSourceSlide,
                               Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inDestInstance,
                               Qt3DSDMSlideHandle inDestSlide, TAnimationCorePtr inAnimationCore)
     {

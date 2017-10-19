@@ -46,7 +46,7 @@ using namespace qt3dsdm;
 
 CBehaviorTimelineItemBinding::CBehaviorTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                            Qt3DSDMInstanceHandle inDataHandle)
-    : CUICDMTimelineItemBinding(inMgr, inDataHandle)
+    : Qt3DSDMTimelineItemBinding(inMgr, inDataHandle)
 {
 }
 

@@ -190,7 +190,7 @@ void NotifyActiveSlide(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
 
 void NotifyAnimationCreated(TTransactionConsumerPtr &inConsumer,
                             IStudioFullSystemSignalSender *inSender,
-                            CUICDMAnimationHandle inAnimation, Qt3DSDMInstanceHandle inInstance,
+                            Qt3DSDMAnimationHandle inAnimation, Qt3DSDMInstanceHandle inInstance,
                             Qt3DSDMPropertyHandle inProperty, bool inIsAggregate)
 {
     if (!inIsAggregate) {
@@ -203,7 +203,7 @@ void NotifyAnimationCreated(TTransactionConsumerPtr &inConsumer,
 
 void NotifyAnimationDeleted(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                             IStudioFullSystemSignalSender *inSender,
-                            CUICDMAnimationHandle inAnimation, Qt3DSDMInstanceHandle inInstance,
+                            Qt3DSDMAnimationHandle inAnimation, Qt3DSDMInstanceHandle inInstance,
                             Qt3DSDMPropertyHandle inProperty)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendAnimationDeleted, inSender,
@@ -215,7 +215,7 @@ void NotifyAnimationDeleted(TTransactionConsumerPtr &inConsumer, TDataCorePtr in
 
 void NotifyAnimationChanged(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                             IStudioFullSystemSignalSender *inSender,
-                            CUICDMAnimationHandle inAnimation, TAnimationCorePtr inAnimationCore,
+                            Qt3DSDMAnimationHandle inAnimation, TAnimationCorePtr inAnimationCore,
                             bool inIsAggregate)
 {
     if (!inIsAggregate) {
@@ -227,7 +227,7 @@ void NotifyAnimationChanged(TTransactionConsumerPtr &inConsumer, TDataCorePtr in
 
 void NotifyKeyframeInserted(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                             IStudioFullSystemSignalSender *inSender,
-                            CUICDMAnimationHandle inAnimation, CUICDMKeyframeHandle inKeyframe,
+                            Qt3DSDMAnimationHandle inAnimation, Qt3DSDMKeyframeHandle inKeyframe,
                             TAnimationCorePtr inAnimationCore, bool inIsAggregate)
 {
     if (!inIsAggregate) {
@@ -241,7 +241,7 @@ void NotifyKeyframeInserted(TTransactionConsumerPtr &inConsumer, TDataCorePtr in
 
 void NotifyKeyframeErased(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                           IStudioFullSystemSignalSender *inSender,
-                          CUICDMAnimationHandle inAnimation, CUICDMKeyframeHandle inKeyframe,
+                          Qt3DSDMAnimationHandle inAnimation, Qt3DSDMKeyframeHandle inKeyframe,
                           TAnimationCorePtr inAnimationCore)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendKeyframeErased, inSender,
@@ -252,19 +252,19 @@ void NotifyKeyframeErased(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCo
 }
 
 void NotifyKeyframeUpdated(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
-                           IStudioFullSystemSignalSender *inSender, CUICDMKeyframeHandle inKeyframe,
+                           IStudioFullSystemSignalSender *inSender, Qt3DSDMKeyframeHandle inKeyframe,
                            TAnimationCorePtr inAnimationCore)
 {
     NotifyConsumer(inConsumer,
                    bind(&IStudioFullSystemSignalSender::SendKeyframeUpdated, inSender, inKeyframe),
                    bind(&IStudioFullSystemSignalSender::SendKeyframeUpdated, inSender, inKeyframe));
-    CUICDMAnimationHandle theAnimation(inAnimationCore->GetAnimationForKeyframe(inKeyframe));
+    Qt3DSDMAnimationHandle theAnimation(inAnimationCore->GetAnimationForKeyframe(inKeyframe));
     NotifyAnimationChanged(inConsumer, inCore, inSender, theAnimation, inAnimationCore, false);
 }
 
 void NotifyConnectFirstKeyframeDynamicSet(TTransactionConsumerPtr &inConsumer, TDataCorePtr inCore,
                                           IStudioFullSystemSignalSender *inSender,
-                                          CUICDMAnimationHandle inAnimation, bool inDynamic,
+                                          Qt3DSDMAnimationHandle inAnimation, bool inDynamic,
                                           TAnimationCorePtr inAnimationCore)
 {
     NotifyConsumer(inConsumer,
@@ -297,7 +297,7 @@ void NotifyInstanceDeleted(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifyActionCreated(TTransactionConsumerPtr &inConsumer,
-                         IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
+                         IStudioFullSystemSignalSender *inSender, Qt3DSDMActionHandle inAction,
                          Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendActionCreated, inSender,
@@ -307,7 +307,7 @@ void NotifyActionCreated(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifyActionDestroyed(TTransactionConsumerPtr &inConsumer,
-                           IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
+                           IStudioFullSystemSignalSender *inSender, Qt3DSDMActionHandle inAction,
                            Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
 {
     NotifyConsumer(inConsumer, bind(&IStudioFullSystemSignalSender::SendActionDeleted, inSender,
@@ -316,7 +316,7 @@ void NotifyActionDestroyed(TTransactionConsumerPtr &inConsumer,
                         inSlide, inInstance));
 }
 
-void SendActionEvent(CUICDMActionHandle inAction, TActionCorePtr inCore,
+void SendActionEvent(Qt3DSDMActionHandle inAction, TActionCorePtr inCore,
                      function<void()> inFunction)
 {
     if (inCore->HandleValid(inAction))
@@ -324,7 +324,7 @@ void SendActionEvent(CUICDMActionHandle inAction, TActionCorePtr inCore,
 }
 
 void NotifyTriggerObjectSet(TTransactionConsumerPtr &inConsumer,
-                            IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
+                            IStudioFullSystemSignalSender *inSender, Qt3DSDMActionHandle inAction,
                             TActionCorePtr inCore)
 {
     function<void()> theFunc(
@@ -334,7 +334,7 @@ void NotifyTriggerObjectSet(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifyTargetObjectSet(TTransactionConsumerPtr &inConsumer,
-                           IStudioFullSystemSignalSender *inSender, CUICDMActionHandle inAction,
+                           IStudioFullSystemSignalSender *inSender, Qt3DSDMActionHandle inAction,
                            TActionCorePtr inCore)
 {
     function<void()> theFunc(
@@ -344,7 +344,7 @@ void NotifyTargetObjectSet(TTransactionConsumerPtr &inConsumer,
 }
 
 void NotifyEventSet(TTransactionConsumerPtr &inConsumer, IStudioFullSystemSignalSender *inSender,
-                    CUICDMActionHandle inAction, TActionCorePtr inCore)
+                    Qt3DSDMActionHandle inAction, TActionCorePtr inCore)
 {
     function<void()> theFunc(
         bind(&IStudioFullSystemSignalSender::SendEventSet, inSender, inAction));
@@ -353,7 +353,7 @@ void NotifyEventSet(TTransactionConsumerPtr &inConsumer, IStudioFullSystemSignal
 }
 
 void NotifyHandlerSet(TTransactionConsumerPtr &inConsumer, IStudioFullSystemSignalSender *inSender,
-                      CUICDMActionHandle inAction, TActionCorePtr inCore)
+                      Qt3DSDMActionHandle inAction, TActionCorePtr inCore)
 {
     function<void()> theFunc(
         bind(&IStudioFullSystemSignalSender::SendHandlerSet, inSender, inAction));
@@ -363,18 +363,18 @@ void NotifyHandlerSet(TTransactionConsumerPtr &inConsumer, IStudioFullSystemSign
 
 void NotifyHandlerArgumentValueSet(TTransactionConsumerPtr &inConsumer,
                                    IStudioFullSystemSignalSender *inSender,
-                                   CUICDMHandlerArgHandle inAction, TActionCorePtr inCore)
+                                   Qt3DSDMHandlerArgHandle inAction, TActionCorePtr inCore)
 {
     function<void()> theFunc(
         bind(&IStudioFullSystemSignalSender::SendHandlerArgumentValueSet, inSender, inAction));
-    CUICDMActionHandle theActionHdl(inCore->GetHandlerArgumentInfo(inAction).m_Action);
+    Qt3DSDMActionHandle theActionHdl(inCore->GetHandlerArgumentInfo(inAction).m_Action);
     NotifyConsumer(inConsumer, bind(SendActionEvent, theActionHdl, inCore, theFunc),
                    bind(SendActionEvent, theActionHdl, inCore, theFunc));
 }
 
 void NotifyAllKeyframesErased(TTransactionConsumerPtr &inConsumer,
                               IStudioFullSystemSignalSender *inSender,
-                              TAnimationCorePtr inAnimationCore, CUICDMAnimationHandle inAnimation)
+                              TAnimationCorePtr inAnimationCore, Qt3DSDMAnimationHandle inAnimation)
 {
     if (inConsumer) {
         TKeyframeHandleList theKeyframes;

@@ -60,15 +60,15 @@ public:
                   TSlideSystemPtr inSlideSystem, Qt3DSDMInstanceHandle inActionInstance,
                   Qt3DSDMPropertyHandle inActionEyeball);
 
-    CUICDMActionHandle CreateAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    Qt3DSDMActionHandle CreateAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                             SLong4 inTriggerTargetObjects) override;
-    void DeleteAction(CUICDMActionHandle inAction) override;
+    void DeleteAction(Qt3DSDMActionHandle inAction) override;
     void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                             TActionHandleList &outActions) const override;
 
     bool GetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
-                                       CUICDMActionHandle inAction) const override;
-    void SetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide, CUICDMActionHandle inAction,
+                                       Qt3DSDMActionHandle inAction) const override;
+    void SetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide, Qt3DSDMActionHandle inAction,
                                        bool inValue) override;
 
     virtual IActionSystemSignalProvider *GetSignalProvider();

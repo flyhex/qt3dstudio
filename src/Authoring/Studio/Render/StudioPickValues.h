@@ -37,7 +37,7 @@
 namespace qt3ds {
 namespace studio {
     using qt3dsdm::Qt3DSDMInstanceHandle;
-    using qt3dsdm::CUICDMGuideHandle;
+    using qt3dsdm::Qt3DSDMGuideHandle;
 
     struct StudioPickValueTypes
     {
@@ -101,7 +101,7 @@ namespace studio {
     };
 
     template <>
-    struct SStudioPickValueTypeMap<CUICDMGuideHandle>
+    struct SStudioPickValueTypeMap<Qt3DSDMGuideHandle>
     {
         static StudioPickValueTypes::Enum GetType() { return StudioPickValueTypes::Guide; }
     };
@@ -118,7 +118,7 @@ namespace studio {
         enum {
             TBufferSize = Q3DStudio::StaticMaxSize<qt3dsdm::Qt3DSDMInstanceHandle,
                                                    SWidgetPick,
-                                                   qt3dsdm::CUICDMGuideHandle,
+                                                   qt3dsdm::Qt3DSDMGuideHandle,
                                                    SPathPick>::value
         };
 
@@ -139,7 +139,7 @@ namespace studio {
             case StudioPickValueTypes::Widget:
                 return inVisitor(*qt3ds::NVUnionCast<SWidgetPick *>(inData));
             case StudioPickValueTypes::Guide:
-                return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMGuideHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::Qt3DSDMGuideHandle *>(inData));
             case StudioPickValueTypes::Path:
                 return inVisitor(*qt3ds::NVUnionCast<SPathPick *>(inData));
             default:
@@ -158,7 +158,7 @@ namespace studio {
             case StudioPickValueTypes::Widget:
                 return inVisitor(*qt3ds::NVUnionCast<const SWidgetPick *>(inData));
             case StudioPickValueTypes::Guide:
-                return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMGuideHandle *>(inData));
+                return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::Qt3DSDMGuideHandle *>(inData));
             case StudioPickValueTypes::Path:
                 return inVisitor(*qt3ds::NVUnionCast<const SPathPick *>(inData));
             default:
@@ -187,7 +187,7 @@ namespace studio {
             : TStudioPickValueType(inst)
         {
         }
-        SStudioPickValue(CUICDMGuideHandle inst)
+        SStudioPickValue(Qt3DSDMGuideHandle inst)
             : TStudioPickValueType(inst)
         {
         }

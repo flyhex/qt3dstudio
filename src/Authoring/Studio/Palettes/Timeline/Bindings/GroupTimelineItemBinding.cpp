@@ -56,7 +56,7 @@ using namespace qt3dsdm;
 
 CGroupTimelineItemBinding::CGroupTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      Qt3DSDMInstanceHandle inDataHandle)
-    : CUICDMTimelineItemBinding(inMgr, inDataHandle)
+    : Qt3DSDMTimelineItemBinding(inMgr, inDataHandle)
 {
 }
 

@@ -238,7 +238,7 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
     }
 }
 
-InspectorControlBase* InspectorControlModel::createMaterialItem(CUICDMInspectable *inspectable,
+InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectable *inspectable,
                                                         int groupIndex)
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
@@ -283,14 +283,14 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(CUICDMInspectabl
     return item;
 }
 
-InspectorControlBase* InspectorControlModel::createItem(CUICDMInspectable *inspectable,
-                                                        Q3DStudio::CUICDMInspectorRow *row,
+InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *inspectable,
+                                                        Q3DStudio::Qt3DSDMInspectorRow *row,
                                                         int groupIndex)
 {
     return createItem(inspectable, row->GetMetaDataPropertyInfo(), groupIndex);
 }
 
-InspectorControlBase* InspectorControlModel::createItem(CUICDMInspectable *inspectable,
+InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *inspectable,
                                                         const qt3dsdm::SMetaDataPropertyInfo &metaProperty,
                                                         int groupIndex)
 {
@@ -385,9 +385,9 @@ bool InspectorControlModel::isGroupRebuildRequired(CInspectableBase* inspectable
     if (existingGroup.groupTitle != theInspectorGroup->GetName())
         return true;
 
-    if (const auto cdmInspectable = dynamic_cast<CUICDMInspectable *>(inspectable)) {
+    if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectable)) {
         int existingIndex = 0;
-        if (const auto group = dynamic_cast<const CUICDMInspectorGroup *>(theInspectorGroup)) {
+        if (const auto group = dynamic_cast<const Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
                     = dynamic_cast<const UICDMMaterialInspectorGroup *>(group);
             if (materialGroup && materialGroup->isMaterialGroup()) {
@@ -436,8 +436,8 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
     GroupInspectorControl result;
     result.groupTitle = theInspectorGroup->GetName();
 
-    if (const auto cdmInspectable = dynamic_cast<CUICDMInspectable *>(inspectable)) {
-        if (const auto group = dynamic_cast<CUICDMInspectorGroup *>(theInspectorGroup)) {
+    if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectable)) {
+        if (const auto group = dynamic_cast<Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
                     = dynamic_cast<UICDMMaterialInspectorGroup *>(group);
             if (materialGroup && materialGroup->isMaterialGroup()) {

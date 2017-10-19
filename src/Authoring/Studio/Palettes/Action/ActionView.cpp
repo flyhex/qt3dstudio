@@ -385,7 +385,7 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
-        setEvent(qt3dsdm::CUICDMEventHandle(m_eventsBrowser->selectedHandle()));
+        setEvent(qt3dsdm::Qt3DSDMEventHandle(m_eventsBrowser->selectedHandle()));
     });
 
     return m_eventsBrowser;
@@ -417,7 +417,7 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
-        setHandler(qt3dsdm::CUICDMHandlerHandle(m_handlerBrowser->selectedHandle()));
+        setHandler(qt3dsdm::Qt3DSDMHandlerHandle(m_handlerBrowser->selectedHandle()));
     });
 
     return m_handlerBrowser;
@@ -449,7 +449,7 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this, handle] {
-          setArgumentValue(handle, qt3dsdm::CUICDMEventHandle(m_fireEventsBrowser->selectedHandle()).GetHandleValue());
+          setArgumentValue(handle, qt3dsdm::Qt3DSDMEventHandle(m_fireEventsBrowser->selectedHandle()).GetHandleValue());
     });
 
     return m_fireEventsBrowser;
@@ -575,7 +575,7 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
     setItem(theInstance);
 }
 
-void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+void ActionView::OnActionAdded(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     CDoc *theDoc = GetDoc();
     qt3dsdm::CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
@@ -597,14 +597,14 @@ void ActionView::OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt
     }
 }
 
-void ActionView::OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+void ActionView::OnActionDeleted(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
     m_actionsModel->removeAction(inAction);
 }
 
-void ActionView::OnActionModified(qt3dsdm::CUICDMActionHandle inAction)
+void ActionView::OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction)
 {
     if (GetDoc()->GetStudioSystem()->GetActionCore()->HandleValid(inAction)) {
            m_actionsModel->updateAction(inAction);
@@ -612,7 +612,7 @@ void ActionView::OnActionModified(qt3dsdm::CUICDMActionHandle inAction)
     }
 }
 
-void ActionView::OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument)
+void ActionView::OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument)
 {
     emitActionChanged();
 }
@@ -696,7 +696,7 @@ void ActionView::setTargetObject(const qt3dsdm::SObjectRefType &object)
     emitActionChanged();
 }
 
-void ActionView::setEvent(const CUICDMEventHandle &event)
+void ActionView::setEvent(const Qt3DSDMEventHandle &event)
 {
     if (!event.Valid())
         return;
@@ -711,7 +711,7 @@ void ActionView::setEvent(const CUICDMEventHandle &event)
     g_StudioApp.GetCore()->ExecuteCommand(theCmd);
 }
 
-void ActionView::setHandler(const CUICDMHandlerHandle &handler)
+void ActionView::setHandler(const Qt3DSDMHandlerHandle &handler)
 {
     if (!handler.Valid())
         return;

@@ -45,7 +45,7 @@ class CStudioSystem;
 /**
  * Binding to generic UICDM object
  */
-class CLayerTimelineItemBinding : public CUICDMTimelineItemBinding
+class CLayerTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public: // Types
     typedef std::tuple<qt3dsdm::TCharStr, qt3dsdm::TCharStr, qt3dsdm::Qt3DSDMPropertyHandle>
@@ -60,7 +60,7 @@ public: // Construction
                               qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     virtual ~CLayerTimelineItemBinding();
 
-public: // CUICDMTimelineItemBinding
+public: // Qt3DSDMTimelineItemBinding
     EStudioObjectType GetObjectType() const override;
     // Hierarchy
     ITimelineItemBinding *GetChild(long inIndex) override;

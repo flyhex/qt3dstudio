@@ -37,7 +37,7 @@ namespace qt3dsdm {
 
 typedef std::pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> TSlideInstancePair;
 typedef std::vector<TSlideInstancePair> TSlideInstancePairList;
-typedef std::pair<CUICDMSlideGraphHandle, Qt3DSDMSlideHandle> TGraphSlidePair;
+typedef std::pair<Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle> TGraphSlidePair;
 
 /**
  *	Binding instances to slide graphs.
@@ -54,11 +54,11 @@ public:
      *	of one and only one graph (i.e. it does not derive from another slide outside of the graph).
      *	Second is that an instance is a member of one and only one graph.
      */
-    virtual CUICDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) = 0;
-    virtual Qt3DSDMSlideHandle GetGraphRoot(CUICDMSlideGraphHandle inGraph) const = 0;
-    virtual CUICDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const = 0;
+    virtual Qt3DSDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) = 0;
+    virtual Qt3DSDMSlideHandle GetGraphRoot(Qt3DSDMSlideGraphHandle inGraph) const = 0;
+    virtual Qt3DSDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const = 0;
     virtual void GetSlideGraphs(TSlideGraphHandleList &outGraphs) const = 0;
-    virtual void DeleteSlideGraph(CUICDMSlideGraphHandle inHandle) = 0;
+    virtual void DeleteSlideGraph(Qt3DSDMSlideGraphHandle inHandle) = 0;
 
     /**
      *	Associate a given instance handle with a given graph.  This will ensure that property
@@ -69,9 +69,9 @@ public:
      *is
      *	implicitly associated with any root-derived slides.
      */
-    virtual void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
+    virtual void AssociateInstance(Qt3DSDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inInstance) = 0;
-    virtual void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
+    virtual void GetAssociatedInstances(Qt3DSDMSlideGraphHandle inSlideGraph,
                                         TSlideInstancePairList &outAssociations) const = 0;
     virtual TGraphSlidePair GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const = 0;
     virtual void DissociateInstance(Qt3DSDMInstanceHandle inInstance) = 0;
@@ -79,8 +79,8 @@ public:
     /**
      *	All graphs always have an active slide.  This is assumed to be the root right off the bat.
      */
-    virtual void SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) = 0;
-    virtual Qt3DSDMSlideHandle GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const = 0;
+    virtual void SetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) = 0;
+    virtual Qt3DSDMSlideHandle GetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph) const = 0;
 };
 
 typedef std::shared_ptr<ISlideGraphCore> TSlideGraphCorePtr;

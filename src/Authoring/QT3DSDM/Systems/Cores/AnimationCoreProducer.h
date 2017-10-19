@@ -64,15 +64,15 @@ public:
 
     // IAnimationManger implementation
 
-    CUICDMAnimationHandle CreateAnimation(Qt3DSDMSlideHandle inSlide,
+    Qt3DSDMAnimationHandle CreateAnimation(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                           EAnimationType inAnimationType,
                                           bool inFirstKeyframeDynamic) override;
-    void DeleteAnimation(CUICDMAnimationHandle inAnimation) override;
-    CUICDMAnimationHandle GetAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    void DeleteAnimation(Qt3DSDMAnimationHandle inAnimation) override;
+    Qt3DSDMAnimationHandle GetAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                        Qt3DSDMPropertyHandle inProperty, size_t inIndex) const override;
-    SAnimationInfo GetAnimationInfo(CUICDMAnimationHandle inAnimation) const override;
+    SAnimationInfo GetAnimationInfo(Qt3DSDMAnimationHandle inAnimation) const override;
     void GetAnimations(TAnimationHandleList &outAnimations) const override;
     void GetAnimations(TAnimationInfoList &outAnimations, Qt3DSDMSlideHandle inMaster,
                        Qt3DSDMSlideHandle inSlide) const override;
@@ -82,32 +82,32 @@ public:
         m_Data->GetSpecificInstanceAnimations(inSlide, inInstance, outAnimations);
     }
 
-    void SetFirstKeyframeDynamic(CUICDMAnimationHandle inAnimation, bool inValue) override;
+    void SetFirstKeyframeDynamic(Qt3DSDMAnimationHandle inAnimation, bool inValue) override;
 
-    CUICDMKeyframeHandle InsertKeyframe(CUICDMAnimationHandle inAnimation,
+    Qt3DSDMKeyframeHandle InsertKeyframe(Qt3DSDMAnimationHandle inAnimation,
                                         const TKeyframe &inKeyframe) override;
-    void EraseKeyframe(CUICDMKeyframeHandle) override;
-    void DeleteAllKeyframes(CUICDMAnimationHandle inAnimation) override;
-    CUICDMAnimationHandle GetAnimationForKeyframe(CUICDMKeyframeHandle inKeyframe) const override;
-    TKeyframe GetKeyframeData(CUICDMKeyframeHandle inKeyframe) const override;
-    void SetKeyframeData(CUICDMKeyframeHandle inKeyframe, const TKeyframe &inData) override;
-    void GetKeyframes(CUICDMAnimationHandle inAnimation, TKeyframeHandleList &outKeyframes) const override;
-    size_t GetKeyframeCount(CUICDMAnimationHandle inAnimation) const override;
-    bool IsFirstKeyframe(CUICDMKeyframeHandle inKeyframe) const override
+    void EraseKeyframe(Qt3DSDMKeyframeHandle) override;
+    void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) override;
+    Qt3DSDMAnimationHandle GetAnimationForKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const override;
+    TKeyframe GetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe) const override;
+    void SetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe, const TKeyframe &inData) override;
+    void GetKeyframes(Qt3DSDMAnimationHandle inAnimation, TKeyframeHandleList &outKeyframes) const override;
+    size_t GetKeyframeCount(Qt3DSDMAnimationHandle inAnimation) const override;
+    bool IsFirstKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const override
     {
         return m_Data->IsFirstKeyframe(inKeyframe);
     }
     void OffsetAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                           long inMillisecondOffset) override;
 
-    void SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited = true) override;
-    bool IsArtistEdited(CUICDMAnimationHandle inAnimation) const override;
+    void SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited = true) override;
+    bool IsArtistEdited(Qt3DSDMAnimationHandle inAnimation) const override;
 
     // Animation Evaluation.
-    float EvaluateAnimation(CUICDMAnimationHandle inAnimation, float inSeconds) const override;
+    float EvaluateAnimation(Qt3DSDMAnimationHandle inAnimation, float inSeconds) const override;
 
-    bool KeyframeValid(CUICDMKeyframeHandle inKeyframe) const override;
-    bool AnimationValid(CUICDMAnimationHandle inAnimation) const override;
+    bool KeyframeValid(Qt3DSDMKeyframeHandle inKeyframe) const override;
+    bool AnimationValid(Qt3DSDMAnimationHandle inAnimation) const override;
 
     void CopyAnimations(Qt3DSDMSlideHandle inSourceSlide, Qt3DSDMInstanceHandle inSourceInstance,
                         Qt3DSDMSlideHandle inDestSlide, Qt3DSDMInstanceHandle inDestInstance) override;
@@ -116,27 +116,27 @@ public:
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
 
     TSignalConnectionPtr ConnectAnimationCreated(
-        const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
+        const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                    Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectBeforeAnimationDeleted(const std::function<void(CUICDMAnimationHandle)> &inCallback) override;
+    ConnectBeforeAnimationDeleted(const std::function<void(Qt3DSDMAnimationHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectAnimationDeleted(
-        const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
+        const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                    Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback) override;
     TSignalConnectionPtr ConnectKeyframeInserted(
-        const std::function<void(CUICDMAnimationHandle, CUICDMKeyframeHandle, const TKeyframe &)>
+        const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMKeyframeHandle, const TKeyframe &)>
             &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectBeforeKeyframeErased(const std::function<void(CUICDMKeyframeHandle)> &inCallback) override;
+    ConnectBeforeKeyframeErased(const std::function<void(Qt3DSDMKeyframeHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectKeyframeErased(
-        const std::function<void(CUICDMAnimationHandle, CUICDMKeyframeHandle, const TKeyframe &)>
+        const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMKeyframeHandle, const TKeyframe &)>
             &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectBeforeAllKeyframesErased(const std::function<void(CUICDMAnimationHandle)> &inCallback) override;
+    ConnectBeforeAllKeyframesErased(const std::function<void(Qt3DSDMAnimationHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectKeyframeUpdated(
-        const std::function<void(CUICDMKeyframeHandle, const TKeyframe &)> &inCallback) override;
+        const std::function<void(Qt3DSDMKeyframeHandle, const TKeyframe &)> &inCallback) override;
     TSignalConnectionPtr ConnectFirstKeyframeDynamicSet(
-        const std::function<void(CUICDMAnimationHandle, bool)> &inCallback) override;
+        const std::function<void(Qt3DSDMAnimationHandle, bool)> &inCallback) override;
 
 private:
     void InitSignaller();

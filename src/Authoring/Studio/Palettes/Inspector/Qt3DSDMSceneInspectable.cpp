@@ -42,21 +42,21 @@
 #include "Doc.h"
 #include "Qt3DSDMStudioSystem.h"
 
-CUICDMSceneInspectable::CUICDMSceneInspectable(
+Qt3DSDMSceneInspectable::Qt3DSDMSceneInspectable(
     CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance)
-    : CUICDMInspectable(inApp, inCore, inInstance)
+    : Qt3DSDMInspectable(inApp, inCore, inInstance)
     , m_CurrentActiveSlideInstance(inCurrentActiveSlideInstance)
 {
 }
 
-bool CUICDMSceneInspectable::IsValid() const
+bool Qt3DSDMSceneInspectable::IsValid() const
 {
-    return CUICDMInspectable::IsValid()
+    return Qt3DSDMInspectable::IsValid()
         && m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_CurrentActiveSlideInstance);
 }
 
-long CUICDMSceneInspectable::GetGroupCount()
+long Qt3DSDMSceneInspectable::GetGroupCount()
 {
     return 2; // hard-coded to basic and shared
 }
@@ -65,13 +65,13 @@ long CUICDMSceneInspectable::GetGroupCount()
 /**
  *	Return the Resource String ID for the Group Name, given the group index
  */
-Q3DStudio::CString CUICDMSceneInspectable::GetGroupName(long inGroupIndex)
+Q3DStudio::CString Qt3DSDMSceneInspectable::GetGroupName(long inGroupIndex)
 {
     return (inGroupIndex == 0) ? ::LoadResourceString(IDS_PROPERTIES_BASIC)
                                : ::LoadResourceString(IDS_PROPERTIES_SHARED);
 }
 
-qt3dsdm::Qt3DSDMInstanceHandle CUICDMSceneInspectable::GetGroupInstance(long inGroupIndex)
+qt3dsdm::Qt3DSDMInstanceHandle Qt3DSDMSceneInspectable::GetGroupInstance(long inGroupIndex)
 {
     return (inGroupIndex == 0) ? m_CurrentActiveSlideInstance : m_Instance;
 }

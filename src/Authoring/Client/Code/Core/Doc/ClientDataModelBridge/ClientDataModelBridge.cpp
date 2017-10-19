@@ -146,7 +146,7 @@ CClientDataModelBridge::GetSceneOrComponentInstance(qt3dsdm::Qt3DSDMInstanceHand
     return 0;
 }
 
-CUICDMSlideGraphHandle
+Qt3DSDMSlideGraphHandle
 CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theSceneComponentInstance = GetSceneOrComponentInstance(inInstance);
@@ -169,7 +169,7 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstan
                                          GuidToLong4(theGuid));
     SetName(rootInstance, Q3DStudio::CString::fromQString(QObject::tr("Master Slide")));
     Qt3DSDMSlideHandle masterSlide = m_SlideCore->CreateSlide(rootInstance);
-    CUICDMSlideGraphHandle retval(m_SlideGraphCore->CreateSlideGraph(masterSlide));
+    Qt3DSDMSlideGraphHandle retval(m_SlideGraphCore->CreateSlideGraph(masterSlide));
     Qt3DSDMSlideHandle theSlide1Handle =
         CreateNonMasterSlide(masterSlide, theGuid, Q3DStudio::CString::fromQString(QObject::tr("Slide1")));
 
@@ -185,7 +185,7 @@ CClientDataModelBridge::GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inIn
     return m_SlideGraphCore->GetGraphRoot(GetOrCreateGraph(inInstance));
 }
 
-Qt3DSDMSlideHandle GetSlideByIndex(CUICDMSlideGraphHandle inGraph, int inIndex,
+Qt3DSDMSlideHandle GetSlideByIndex(Qt3DSDMSlideGraphHandle inGraph, int inIndex,
                                   ISlideCore &inSlideCore, ISlideGraphCore &inSlideGraphCore)
 {
     Qt3DSDMSlideHandle theRoot = inSlideGraphCore.GetGraphRoot(inGraph);
@@ -1793,8 +1793,8 @@ std::wstring CClientDataModelBridge::GetDefaultEvent(Qt3DSDMInstanceHandle inIns
 // The long represents the property id which is what we really need. using the name, we need to do
 // all those conversion
 
-void CClientDataModelBridge::ResetHandlerArguments(CUICDMActionHandle inAction,
-                                                   CUICDMHandlerHandle inHandler)
+void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
+                                                   Qt3DSDMHandlerHandle inHandler)
 {
     // Remove old args
     IActionCore *theActionCore = m_Doc->GetStudioSystem()->GetActionCore();
@@ -1817,7 +1817,7 @@ void CClientDataModelBridge::ResetHandlerArguments(CUICDMActionHandle inAction,
         for (THandlerArgMetaDataList::const_iterator theIter = theNewArgs.begin();
              theIter != theNewArgs.end(); ++theIter) {
             const SMetaDataHandlerArgumentInfo &theArgMetaData(*theIter);
-            CUICDMHandlerArgHandle theArgument = theActionCore->AddHandlerArgument(
+            Qt3DSDMHandlerArgHandle theArgument = theActionCore->AddHandlerArgument(
                 inAction, theArgMetaData.m_Name, theArgMetaData.m_ArgType,
                 theArgMetaData.GetDataType());
             SValue theValue = theArgMetaData.m_DefaultValue;
@@ -1854,7 +1854,7 @@ void CClientDataModelBridge::ResetHandlerArguments(CUICDMActionHandle inAction,
         // Property which is true for all our use cases
         const SActionInfo &theActionInfo = theActionCore->GetActionInfo(inAction);
         DataModelDataType::Value theDataType = DataModelDataType::None;
-        CUICDMHandlerArgHandle theDependentArg = 0;
+        Qt3DSDMHandlerArgHandle theDependentArg = 0;
         Qt3DSDMInstanceHandle theDependentInstance;
         Qt3DSDMPropertyHandle theDependentProperty;
         for (THandlerArgHandleList::const_iterator theIterator =
@@ -1884,7 +1884,7 @@ void CClientDataModelBridge::ResetHandlerArguments(CUICDMActionHandle inAction,
     }
 }
 // Resolve the path
-void CClientDataModelBridge::ResetHandlerArguments(qt3dsdm::CUICDMActionHandle inAction,
+void CClientDataModelBridge::ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction,
                                                    const std::wstring &inHandler)
 {
     IActionCore &theActionCore = *m_Doc->GetStudioSystem()->GetActionCore();
@@ -1893,7 +1893,7 @@ void CClientDataModelBridge::ResetHandlerArguments(qt3dsdm::CUICDMActionHandle i
                           ResolveHandler(theInfo.m_Owner, theInfo.m_TargetObject, inHandler));
 }
 
-qt3dsdm::CUICDMEventHandle
+qt3dsdm::Qt3DSDMEventHandle
 CClientDataModelBridge::ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                      const qt3dsdm::SObjectRefType &inResolution,
                                      const std::wstring &inEventName)
@@ -1905,7 +1905,7 @@ CClientDataModelBridge::ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoo
     return theMetaData.FindEvent(theInstance, inEventName.c_str());
 }
 
-qt3dsdm::CUICDMHandlerHandle
+qt3dsdm::Qt3DSDMHandlerHandle
 CClientDataModelBridge::ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                        const qt3dsdm::SObjectRefType &inResolution,
                                        const std::wstring &inHandlerName)
@@ -1917,17 +1917,17 @@ CClientDataModelBridge::ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveR
     return theMetaData.FindHandlerByName(theInstance, inHandlerName.c_str());
 }
 
-qt3dsdm::CUICDMEventHandle CClientDataModelBridge::ResolveEvent(const qt3dsdm::SActionInfo &inInfo)
+qt3dsdm::Qt3DSDMEventHandle CClientDataModelBridge::ResolveEvent(const qt3dsdm::SActionInfo &inInfo)
 {
     return ResolveEvent(inInfo.m_Owner, inInfo.m_TriggerObject, inInfo.m_Event);
 }
 
-qt3dsdm::CUICDMHandlerHandle CClientDataModelBridge::ResolveHandler(const qt3dsdm::SActionInfo &inInfo)
+qt3dsdm::Qt3DSDMHandlerHandle CClientDataModelBridge::ResolveHandler(const qt3dsdm::SActionInfo &inInfo)
 {
     return ResolveHandler(inInfo.m_Owner, inInfo.m_TargetObject, inInfo.m_Handler);
 }
 
-void CClientDataModelBridge::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+void CClientDataModelBridge::SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                                      const SValue &inValue)
 {
     IActionCore *theActionCore = m_Doc->GetStudioSystem()->GetActionCore();
@@ -1964,7 +1964,7 @@ void CClientDataModelBridge::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHa
     }
 }
 
-void CClientDataModelBridge::GetActionDependentProperty(CUICDMActionHandle inAction,
+void CClientDataModelBridge::GetActionDependentProperty(Qt3DSDMActionHandle inAction,
                                                         Qt3DSDMInstanceHandle &outInstance,
                                                         Qt3DSDMPropertyHandle &outProperty)
 {
@@ -1984,7 +1984,7 @@ void CClientDataModelBridge::GetActionDependentProperty(CUICDMActionHandle inAct
     }
 }
 
-void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle inAction,
+void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::Qt3DSDMActionHandle inAction,
                                                    std::list<Q3DStudio::CString> &outSlideNames)
 {
     SActionInfo theActionInfo = m_Doc->GetStudioSystem()->GetActionCore()->GetActionInfo(inAction);
@@ -2008,7 +2008,7 @@ void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle i
 }
 
 void CClientDataModelBridge::SetArgTypeDependentDefaultValue(
-    CUICDMHandlerArgHandle inHandlerArgument, DataModelDataType::Value inDataType,
+    Qt3DSDMHandlerArgHandle inHandlerArgument, DataModelDataType::Value inDataType,
     Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
 {
     SValue theValue;
@@ -2035,7 +2035,7 @@ void CClientDataModelBridge::GetEvents(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         m_Doc->GetStudioSystem()->GetActionMetaData()->GetEvents(inInstance, outEvents);
 }
 
-qt3dsdm::SEventInfo CClientDataModelBridge::GetEventInfo(qt3dsdm::CUICDMEventHandle inEvent)
+qt3dsdm::SEventInfo CClientDataModelBridge::GetEventInfo(qt3dsdm::Qt3DSDMEventHandle inEvent)
 {
     if (inEvent.Valid() == false)
         return SEventInfo();
@@ -2049,7 +2049,7 @@ void CClientDataModelBridge::GetHandlers(qt3dsdm::Qt3DSDMInstanceHandle inInstan
         m_Doc->GetStudioSystem()->GetActionMetaData()->GetHandlers(inInstance, outHandles);
 }
 
-qt3dsdm::SHandlerInfo CClientDataModelBridge::GetHandlerInfo(qt3dsdm::CUICDMHandlerHandle inHandler)
+qt3dsdm::SHandlerInfo CClientDataModelBridge::GetHandlerInfo(qt3dsdm::Qt3DSDMHandlerHandle inHandler)
 {
     if (inHandler.Valid() == false)
         return SHandlerInfo();

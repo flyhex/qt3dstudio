@@ -53,21 +53,21 @@ public:
     TSimpleSlideGraphCorePtr GetTransactionlessSlideGraphCore() { return m_Data; }
     TSimpleSlideGraphCorePtr GetTransactionlessSlideGraphCore() const { return m_Data; }
 
-    CUICDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) override;
-    Qt3DSDMSlideHandle GetGraphRoot(CUICDMSlideGraphHandle inGraph) const override;
-    CUICDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const override;
+    Qt3DSDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) override;
+    Qt3DSDMSlideHandle GetGraphRoot(Qt3DSDMSlideGraphHandle inGraph) const override;
+    Qt3DSDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const override;
     void GetSlideGraphs(TSlideGraphHandleList &outGraphs) const override;
-    void DeleteSlideGraph(CUICDMSlideGraphHandle inHandle) override;
+    void DeleteSlideGraph(Qt3DSDMSlideGraphHandle inHandle) override;
 
-    void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
+    void AssociateInstance(Qt3DSDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
                            Qt3DSDMInstanceHandle inInstance) override;
-    void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
+    void GetAssociatedInstances(Qt3DSDMSlideGraphHandle inSlideGraph,
                                 TSlideInstancePairList &outAssociations) const override;
     TGraphSlidePair GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const override;
     void DissociateInstance(Qt3DSDMInstanceHandle inInstance) override;
 
-    void SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override;
-    Qt3DSDMSlideHandle GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const override;
+    void SetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override;
+    Qt3DSDMSlideHandle GetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph) const override;
 
     bool HandleValid(int inHandle) const override;
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
@@ -76,17 +76,17 @@ public:
     // Signals
     //===================================================================
     TSignalConnectionPtr ConnectGraphCreated(
-        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override;
+        const std::function<void(Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectGraphDeleted(
-        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override;
+        const std::function<void(Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override;
     TSignalConnectionPtr ConnectInstanceAssociated(
-        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override;
     TSignalConnectionPtr ConnectInstanceDissociated(
-        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
+        const std::function<void(Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle)>
             &inCallback) override;
     TSignalConnectionPtr ConnectGraphActiveSlide(
-        const std::function<void(CUICDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override;
+        const std::function<void(Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle)> &inCallback) override;
 
 private:
     void InitSignaller();

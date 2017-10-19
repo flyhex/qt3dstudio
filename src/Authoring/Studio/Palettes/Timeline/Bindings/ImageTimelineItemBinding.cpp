@@ -47,7 +47,7 @@ using namespace qt3dsdm;
 
 CImageTimelineItemBinding::CImageTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      Qt3DSDMInstanceHandle inDataHandle)
-    : CUICDMTimelineItemBinding(inMgr, inDataHandle)
+    : Qt3DSDMTimelineItemBinding(inMgr, inDataHandle)
 {
 }
 
@@ -83,7 +83,7 @@ bool CImageTimelineItemBinding::ShowToggleControls() const
 
 void CImageTimelineItemBinding::Bind(CBaseStateRow *inRow)
 {
-    CUICDMTimelineItemBinding::Bind(inRow);
+    Qt3DSDMTimelineItemBinding::Bind(inRow);
     GetRow()->SetNameReadOnly(true);
 }
 

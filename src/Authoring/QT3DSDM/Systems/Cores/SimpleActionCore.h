@@ -58,7 +58,7 @@ struct SHandlerArgument : public CHandleObject
 
     SHandlerArgument() {}
 
-    SHandlerArgument(int inHandle, CUICDMActionHandle inAction, const TCharStr &inName,
+    SHandlerArgument(int inHandle, Qt3DSDMActionHandle inAction, const TCharStr &inName,
                      HandlerArgumentType::Value inArgType, DataModelDataType::Value inValueType)
         : CHandleObject(inHandle)
         , m_HandlerArgInfo(inAction, inName, inArgType, inValueType)
@@ -82,10 +82,10 @@ public: // Use
     IStringTable &GetStringTable() const override { return *m_StringTable.get(); }
     TStringTablePtr GetStringTablePtr() const override { return m_StringTable; }
     // Action
-    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
+    Qt3DSDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
                                     Qt3DSDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
-    void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
-    const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const override;
+    void DeleteAction(Qt3DSDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
+    const SActionInfo &GetActionInfo(Qt3DSDMActionHandle inAction) const override;
     void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                     TActionHandleList &outActions) const override;
     void GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const override;
@@ -93,38 +93,38 @@ public: // Use
     void GetActions(TActionHandleList &outActions) const override;
 
     // Return the instance that was allocated for this action.
-    Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;
+    Qt3DSDMInstanceHandle GetActionInstance(Qt3DSDMActionHandle inAction) const override;
     // Reverse lookup into the action system so you can match actions to instances.
-    CUICDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const override;
+    Qt3DSDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const override;
 
     // Action Properties
-    void SetTriggerObject(CUICDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
-    void SetTargetObject(CUICDMActionHandle inAction, const SObjectRefType &inTargetObject) override;
-    void SetEvent(CUICDMActionHandle inAction, const wstring &inEvent) override;
-    void SetHandler(CUICDMActionHandle inAction, const wstring &inHandler) override;
+    void SetTriggerObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
+    void SetTargetObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTargetObject) override;
+    void SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEvent) override;
+    void SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandler) override;
 
     // Action Argument
-    CUICDMHandlerArgHandle AddHandlerArgument(CUICDMActionHandle inAction, const TCharStr &inName,
+    Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction, const TCharStr &inName,
                                               HandlerArgumentType::Value inArgType,
                                               DataModelDataType::Value inValueType) override;
-    void RemoveHandlerArgument(CUICDMHandlerArgHandle inHandlerArgument) override;
+    void RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument) override;
     const SHandlerArgumentInfo &
-    GetHandlerArgumentInfo(CUICDMHandlerArgHandle inHandlerArgument) const override;
-    void GetHandlerArguments(CUICDMActionHandle inAction,
+    GetHandlerArgumentInfo(Qt3DSDMHandlerArgHandle inHandlerArgument) const override;
+    void GetHandlerArguments(Qt3DSDMActionHandle inAction,
                              THandlerArgHandleList &outHandlerArguments) const override;
 
     // Action Argument Properties
-    void GetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument, SValue &outValue) const override;
-    void SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument, const SValue &inValue) override;
+    void GetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument, SValue &outValue) const override;
+    void SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument, const SValue &inValue) override;
 
     // CHandleBase
     bool HandleValid(int inHandle) const override { return CHandleBase::HandleValid(inHandle); }
 
     // Helper functions
-    CUICDMActionHandle CreateActionWithHandle(int inHandle, Qt3DSDMInstanceHandle inInstance,
+    Qt3DSDMActionHandle CreateActionWithHandle(int inHandle, Qt3DSDMInstanceHandle inInstance,
                                               Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inOwner);
-    CUICDMHandlerArgHandle AddHandlerArgumentWithHandle(int inHandle, CUICDMActionHandle inAction,
+    Qt3DSDMHandlerArgHandle AddHandlerArgumentWithHandle(int inHandle, Qt3DSDMActionHandle inAction,
                                                         const TCharStr &inName,
                                                         HandlerArgumentType::Value inArgType,
                                                         DataModelDataType::Value inValueType);

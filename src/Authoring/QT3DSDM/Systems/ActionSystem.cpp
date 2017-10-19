@@ -48,7 +48,7 @@ CActionSystem::CActionSystem(TDataCorePtr inDataCore, TSlideCorePtr inSlideCore,
     m_Signaller = CreateActionSystemSignaller();
 }
 
-CUICDMActionHandle CActionSystem::CreateAction(Qt3DSDMSlideHandle inSlide,
+Qt3DSDMActionHandle CActionSystem::CreateAction(Qt3DSDMSlideHandle inSlide,
                                                Qt3DSDMInstanceHandle inOwner,
                                                SLong4 inTriggerTargetObjects)
 {
@@ -65,14 +65,14 @@ CUICDMActionHandle CActionSystem::CreateAction(Qt3DSDMSlideHandle inSlide,
     m_SlideSystem->UnlinkProperty(theActionInstance, m_ActionEyeball);
 
     // Create the Action handle
-    CUICDMActionHandle retval =
+    Qt3DSDMActionHandle retval =
         m_ActionCore->CreateAction(theActionInstance, inSlide, inOwner, inTriggerTargetObjects);
 
     GetSignalSender()->SendActionCreated(retval, inSlide, inOwner);
     return retval;
 }
 
-void CActionSystem::DeleteAction(CUICDMActionHandle inAction)
+void CActionSystem::DeleteAction(Qt3DSDMActionHandle inAction)
 {
     Qt3DSDMInstanceHandle theActionInstance;
     SActionInfo theActionInfo = m_ActionCore->GetActionInfo(inAction);
@@ -98,7 +98,7 @@ void CActionSystem::GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle
 }
 
 bool CActionSystem::GetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
-                                          CUICDMActionHandle inAction) const
+                                          Qt3DSDMActionHandle inAction) const
 {
     SValue theValue;
     Qt3DSDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);
@@ -111,7 +111,7 @@ bool CActionSystem::GetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
 }
 
 void CActionSystem::SetActionEyeballValue(Qt3DSDMSlideHandle inActiveSlide,
-                                          CUICDMActionHandle inAction, bool inValue)
+                                          Qt3DSDMActionHandle inAction, bool inValue)
 {
     Qt3DSDMInstanceHandle theInstance = m_ActionCore->GetActionInstance(inAction);
     // Set the eyeball property value to SlideCore.

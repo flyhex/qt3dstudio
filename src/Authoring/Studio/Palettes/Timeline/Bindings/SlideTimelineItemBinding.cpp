@@ -51,7 +51,7 @@ using namespace qt3dsdm;
 
 CSlideTimelineItemBinding::CSlideTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      Qt3DSDMInstanceHandle inDataHandle)
-    : CUICDMTimelineItemBinding(inMgr)
+    : Qt3DSDMTimelineItemBinding(inMgr)
 {
     qt3dsdm::Qt3DSDMSlideHandle theSlideHandle =
         m_StudioSystem->GetSlideSystem()->GetSlideByInstance(inDataHandle);
@@ -85,7 +85,7 @@ void CSlideTimelineItemBinding::SetName(const Q3DStudio::CString & /*inName*/)
 
 void CSlideTimelineItemBinding::Bind(CBaseStateRow *inRow)
 {
-    CUICDMTimelineItemBinding::Bind(inRow);
+    Qt3DSDMTimelineItemBinding::Bind(inRow);
     GetRow()->SetNameReadOnly(true);
 }
 
@@ -100,5 +100,5 @@ bool CSlideTimelineItemBinding::IsValidTransaction(EUserTransaction inTransactio
         return false;
     }
 
-    return CUICDMTimelineItemBinding::IsValidTransaction(inTransaction);
+    return Qt3DSDMTimelineItemBinding::IsValidTransaction(inTransaction);
 }

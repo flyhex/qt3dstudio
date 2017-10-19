@@ -62,10 +62,10 @@ struct SGuideSystem : public IGuideSystem
     std::shared_ptr<ITransactionConsumer> m_CurrentTransaction;
     TGuideInfoMergeMap m_GuideMergeMap;
 
-    boost::signal<void(CUICDMGuideHandle, SGuideInfo)> m_GuideCreated;
-    boost::signal<void(CUICDMGuideHandle, SGuideInfo)> m_GuideDestroyed;
-    boost::signal<void(CUICDMGuideHandle, SGuideInfo)> m_GuideModified;
-    boost::signal<void(CUICDMGuideHandle, SGuideInfo)> m_GuideModifiedImmediate;
+    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideCreated;
+    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideDestroyed;
+    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideModified;
+    boost::signal<void(Qt3DSDMGuideHandle, SGuideInfo)> m_GuideModifiedImmediate;
 
     SGuideSystem()
         : m_NextHandleValue(0)
@@ -79,7 +79,7 @@ struct SGuideSystem : public IGuideSystem
 
     void SignalGuideModified(long hdl, const SGuideInfo &inInfo) { m_GuideModified(hdl, inInfo); }
 
-    CUICDMGuideHandle CreateGuide() override
+    Qt3DSDMGuideHandle CreateGuide() override
     {
         ++m_NextHandleValue;
         std::pair<long, SGuideInfo> entry(std::make_pair(m_NextHandleValue, SGuideInfo()));
@@ -96,7 +96,7 @@ struct SGuideSystem : public IGuideSystem
         return m_NextHandleValue;
     }
 
-    SGuideInfo *InternalGetGuideInfo(CUICDMGuideHandle inGuideHandle)
+    SGuideInfo *InternalGetGuideInfo(Qt3DSDMGuideHandle inGuideHandle)
     {
         TGuideMap::iterator theFind = m_Guides.find((long)inGuideHandle.GetHandleValue());
         if (theFind != m_Guides.end())
@@ -104,12 +104,12 @@ struct SGuideSystem : public IGuideSystem
         return NULL;
     }
 
-    const SGuideInfo *InternalGetGuideInfo(CUICDMGuideHandle inGuideHandle) const
+    const SGuideInfo *InternalGetGuideInfo(Qt3DSDMGuideHandle inGuideHandle) const
     {
         return const_cast<SGuideSystem &>(*this).InternalGetGuideInfo(inGuideHandle);
     }
 
-    void SetGuideInfo(CUICDMGuideHandle inGuideHandle, const SGuideInfo &info) override
+    void SetGuideInfo(Qt3DSDMGuideHandle inGuideHandle, const SGuideInfo &info) override
     {
         SGuideInfo *existing = InternalGetGuideInfo(inGuideHandle);
         long theHdlValue = (long)inGuideHandle.GetHandleValue();
@@ -139,7 +139,7 @@ struct SGuideSystem : public IGuideSystem
             m_GuideModifiedImmediate(theHdlValue, info);
     }
 
-    SGuideInfo GetGuideInfo(CUICDMGuideHandle inGuideHandle) const override
+    SGuideInfo GetGuideInfo(Qt3DSDMGuideHandle inGuideHandle) const override
     {
         const SGuideInfo *existing = InternalGetGuideInfo(inGuideHandle);
         if (existing)
@@ -148,7 +148,7 @@ struct SGuideSystem : public IGuideSystem
         return SGuideInfo();
     }
 
-    void DeleteGuide(CUICDMGuideHandle inGuideHandle) override
+    void DeleteGuide(Qt3DSDMGuideHandle inGuideHandle) override
     {
 
         SGuideInfo *existing = InternalGetGuideInfo(inGuideHandle);
@@ -180,7 +180,7 @@ struct SGuideSystem : public IGuideSystem
         return retval;
     }
 
-    bool IsGuideValid(CUICDMGuideHandle inGuideHandle) const override
+    bool IsGuideValid(Qt3DSDMGuideHandle inGuideHandle) const override
     {
         return InternalGetGuideInfo(inGuideHandle) != NULL;
     }
@@ -197,19 +197,19 @@ struct SGuideSystem : public IGuideSystem
     // These are events coming from undo/redo operations, not events coming directly from the
     // modification of the guides
     virtual TSignalConnectionPtr
-    ConnectGuideCreated(const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) override
+    ConnectGuideCreated(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
         return CONNECT(m_GuideCreated);
     }
 
     virtual TSignalConnectionPtr
-    ConnectGuideDestroyed(const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) override
+    ConnectGuideDestroyed(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
         return CONNECT(m_GuideDestroyed);
     }
 
     virtual TSignalConnectionPtr
-    ConnectGuideModified(const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) override
+    ConnectGuideModified(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
         return CONNECT(m_GuideModified);
     }
@@ -217,7 +217,7 @@ struct SGuideSystem : public IGuideSystem
     // Signal happens immediately instead of on undo/redo, used for live-update of the inspector
     // palette
     TSignalConnectionPtr ConnectGuideModifiedImmediate(
-        const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) override
+        const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) override
     {
         return CONNECT(m_GuideModifiedImmediate);
     }

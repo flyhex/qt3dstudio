@@ -48,14 +48,14 @@ class ITimelineTimebar;
 /**
  * Binding to a UICDM object of Image type
  */
-class CImageTimelineItemBinding : public CUICDMTimelineItemBinding
+class CImageTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public:
     CImageTimelineItemBinding(CTimelineTranslationManager *inMgr,
                               qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     virtual ~CImageTimelineItemBinding();
 
-    // CUICDMTimelineItemBinding
+    // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
     Q3DStudio::CString GetName() const override;
     void SetName(const Q3DStudio::CString &inName) override;

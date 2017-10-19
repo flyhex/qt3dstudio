@@ -33,13 +33,13 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraph(Qt3DSDMSlideHandle inRoot)
+Qt3DSDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraph(Qt3DSDMSlideHandle inRoot)
 {
     int nextId = GetNextId();
     return CreateSlideGraphWithHandle(nextId, inRoot);
 }
 
-Qt3DSDMSlideHandle CSimpleSlideGraphCore::GetGraphRoot(CUICDMSlideGraphHandle inGraph) const
+Qt3DSDMSlideHandle CSimpleSlideGraphCore::GetGraphRoot(Qt3DSDMSlideGraphHandle inGraph) const
 {
     return GetSlideGraphNF(inGraph, m_Objects)->m_Root;
 }
@@ -52,7 +52,7 @@ inline bool RootSlideMatches(const THandleObjectPair &inPair, Qt3DSDMSlideHandle
     return false;
 }
 
-CUICDMSlideGraphHandle CSimpleSlideGraphCore::GetSlideGraph(Qt3DSDMSlideHandle inSlide) const
+Qt3DSDMSlideGraphHandle CSimpleSlideGraphCore::GetSlideGraph(Qt3DSDMSlideHandle inSlide) const
 {
     THandleObjectMap::const_iterator theFind = find_if<THandleObjectMap::const_iterator>(
         m_Objects, std::bind(RootSlideMatches, std::placeholders::_1, inSlide));
@@ -61,7 +61,7 @@ CUICDMSlideGraphHandle CSimpleSlideGraphCore::GetSlideGraph(Qt3DSDMSlideHandle i
     return 0;
 }
 
-inline CUICDMSlideGraphHandle ToGraphHandle(const THandleObjectPair &inPair)
+inline Qt3DSDMSlideGraphHandle ToGraphHandle(const THandleObjectPair &inPair)
 {
     return inPair.first;
 }
@@ -72,7 +72,7 @@ void CSimpleSlideGraphCore::GetSlideGraphs(TSlideGraphHandleList &outGraphs) con
     transform(m_Objects.begin(), m_Objects.end(), outGraphs.begin(), ToGraphHandle);
 }
 
-void CSimpleSlideGraphCore::DeleteSlideGraph(CUICDMSlideGraphHandle inHandle)
+void CSimpleSlideGraphCore::DeleteSlideGraph(Qt3DSDMSlideGraphHandle inHandle)
 {
     TSlideInstancePairList theAssociatedInstances;
     GetAssociatedInstances(inHandle, theAssociatedInstances);
@@ -81,7 +81,7 @@ void CSimpleSlideGraphCore::DeleteSlideGraph(CUICDMSlideGraphHandle inHandle)
     EraseHandle(inHandle, m_Objects);
 }
 
-void CSimpleSlideGraphCore::AssociateInstance(CUICDMSlideGraphHandle inSlideGraph,
+void CSimpleSlideGraphCore::AssociateInstance(Qt3DSDMSlideGraphHandle inSlideGraph,
                                               Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inInstance)
 {
@@ -97,7 +97,7 @@ void CSimpleSlideGraphCore::AssociateInstance(CUICDMSlideGraphHandle inSlideGrap
     insert_unique(theGraphResult.first->second, make_pair(inSlide, inInstance));
 }
 
-void CSimpleSlideGraphCore::GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
+void CSimpleSlideGraphCore::GetAssociatedInstances(Qt3DSDMSlideGraphHandle inSlideGraph,
                                                    TSlideInstancePairList &outAssociations) const
 {
     TGraphToInstanceMap::const_iterator theFind = m_GraphToInstances.find(inSlideGraph);
@@ -141,13 +141,13 @@ void CSimpleSlideGraphCore::DissociateInstance(Qt3DSDMInstanceHandle inInstance)
     m_InstanceToGraph.erase(inInstance);
 }
 
-void CSimpleSlideGraphCore::SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph,
+void CSimpleSlideGraphCore::SetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph,
                                                 Qt3DSDMSlideHandle inSlide)
 {
     GetSlideGraphNF(inGraph, m_Objects)->m_ActiveSlide = inSlide;
 }
 
-Qt3DSDMSlideHandle CSimpleSlideGraphCore::GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const
+Qt3DSDMSlideHandle CSimpleSlideGraphCore::GetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph) const
 {
     const SSlideGraph *theSlide = GetSlideGraphNF(inGraph, m_Objects);
     if (theSlide->m_ActiveSlide)
@@ -160,7 +160,7 @@ bool CSimpleSlideGraphCore::HandleValid(int inHandle) const
     return CHandleBase::HandleValid(inHandle);
 }
 
-CUICDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraphWithHandle(int inHandle,
+Qt3DSDMSlideGraphHandle CSimpleSlideGraphCore::CreateSlideGraphWithHandle(int inHandle,
                                                                          Qt3DSDMSlideHandle inRoot)
 {
     m_Objects.insert(make_pair(inHandle, (THandleObjectPtr) new SSlideGraph(inHandle, inRoot)));

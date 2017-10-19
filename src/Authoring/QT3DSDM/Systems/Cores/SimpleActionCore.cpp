@@ -31,19 +31,19 @@
 
 namespace qt3dsdm {
 
-CUICDMActionHandle CSimpleActionCore::CreateAction(Qt3DSDMInstanceHandle inInstance,
+Qt3DSDMActionHandle CSimpleActionCore::CreateAction(Qt3DSDMInstanceHandle inInstance,
                                                    Qt3DSDMSlideHandle inSlide,
                                                    Qt3DSDMInstanceHandle inOwner,
                                                    SLong4 inTriggerTargetObjects)
 {
     int nextId = GetNextId();
-    CUICDMActionHandle retval = CreateActionWithHandle(nextId, inInstance, inSlide, inOwner);
+    Qt3DSDMActionHandle retval = CreateActionWithHandle(nextId, inInstance, inSlide, inOwner);
     SetTriggerObject(retval, inTriggerTargetObjects);
     SetTargetObject(retval, inTriggerTargetObjects);
     return retval;
 }
 
-void CSimpleActionCore::DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance)
+void CSimpleActionCore::DeleteAction(Qt3DSDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     outInstance = theAction->m_ActionInfo.m_Instance;
@@ -52,7 +52,7 @@ void CSimpleActionCore::DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanc
     EraseHandle(inAction, m_Objects);
 }
 
-const SActionInfo &CSimpleActionCore::GetActionInfo(CUICDMActionHandle inAction) const
+const SActionInfo &CSimpleActionCore::GetActionInfo(Qt3DSDMActionHandle inAction) const
 {
     const SAction *theAction = GetActionNF(inAction, m_Objects);
     return theAction->m_ActionInfo;
@@ -98,12 +98,12 @@ void CSimpleActionCore::GetActions(TActionHandleList &outActions) const
     outActions.clear();
     outActions.reserve(m_Objects.size());
     do_all(m_Objects,
-           std::bind(MaybeAddObject<SAction, CUICDMActionHandle>,
+           std::bind(MaybeAddObject<SAction, Qt3DSDMActionHandle>,
                      std::placeholders::_1, std::ref(outActions)));
 }
 
 // Return the instance that was allocated for this action.
-Qt3DSDMInstanceHandle CSimpleActionCore::GetActionInstance(CUICDMActionHandle inAction) const
+Qt3DSDMInstanceHandle CSimpleActionCore::GetActionInstance(Qt3DSDMActionHandle inAction) const
 {
     return GetActionNF(inAction, m_Objects)->m_ActionInfo.m_Instance;
 }
@@ -119,7 +119,7 @@ inline bool ActionInstanceMatches(const THandleObjectPair &inPair, Qt3DSDMInstan
 }
 
 // Reverse lookup into the action system so you can match actions to instances.
-CUICDMActionHandle
+Qt3DSDMActionHandle
 CSimpleActionCore::GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const
 {
     THandleObjectMap::const_iterator theAction =
@@ -131,34 +131,34 @@ CSimpleActionCore::GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) c
 }
 
 // Action Properties
-void CSimpleActionCore::SetTriggerObject(CUICDMActionHandle inAction,
+void CSimpleActionCore::SetTriggerObject(Qt3DSDMActionHandle inAction,
                                          const SObjectRefType &inTriggerObject)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     theAction->m_ActionInfo.m_TriggerObject = inTriggerObject;
 }
 
-void CSimpleActionCore::SetTargetObject(CUICDMActionHandle inAction,
+void CSimpleActionCore::SetTargetObject(Qt3DSDMActionHandle inAction,
                                         const SObjectRefType &inTargetObject)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     theAction->m_ActionInfo.m_TargetObject = inTargetObject;
 }
 
-void CSimpleActionCore::SetEvent(CUICDMActionHandle inAction, const wstring &inEventHandle)
+void CSimpleActionCore::SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventHandle)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     theAction->m_ActionInfo.m_Event = inEventHandle;
 }
 
-void CSimpleActionCore::SetHandler(CUICDMActionHandle inAction, const wstring &inHandlerHandle)
+void CSimpleActionCore::SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerHandle)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     theAction->m_ActionInfo.m_Handler = inHandlerHandle;
 }
 
 // Action Argument
-CUICDMHandlerArgHandle CSimpleActionCore::AddHandlerArgument(CUICDMActionHandle inAction,
+Qt3DSDMHandlerArgHandle CSimpleActionCore::AddHandlerArgument(Qt3DSDMActionHandle inAction,
                                                              const TCharStr &inName,
                                                              HandlerArgumentType::Value inArgType,
                                                              DataModelDataType::Value inValueType)
@@ -167,7 +167,7 @@ CUICDMHandlerArgHandle CSimpleActionCore::AddHandlerArgument(CUICDMActionHandle 
     return AddHandlerArgumentWithHandle(nextId, inAction, inName, inArgType, inValueType);
 }
 
-void CSimpleActionCore::RemoveHandlerArgument(CUICDMHandlerArgHandle inHandlerArgument)
+void CSimpleActionCore::RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument)
 {
     SHandlerArgument *theHandlerArgument = GetHandlerArgumentNF(inHandlerArgument, m_Objects);
     SAction *theAction = GetActionNF(theHandlerArgument->m_HandlerArgInfo.m_Action, m_Objects);
@@ -177,7 +177,7 @@ void CSimpleActionCore::RemoveHandlerArgument(CUICDMHandlerArgHandle inHandlerAr
 }
 
 const SHandlerArgumentInfo &
-CSimpleActionCore::GetHandlerArgumentInfo(CUICDMHandlerArgHandle inHandlerArgument) const
+CSimpleActionCore::GetHandlerArgumentInfo(Qt3DSDMHandlerArgHandle inHandlerArgument) const
 {
     if (HandleValid(inHandlerArgument)) {
         const SHandlerArgument *theHandlerArgument =
@@ -189,7 +189,7 @@ CSimpleActionCore::GetHandlerArgumentInfo(CUICDMHandlerArgHandle inHandlerArgume
     }
 }
 
-void CSimpleActionCore::GetHandlerArguments(CUICDMActionHandle inAction,
+void CSimpleActionCore::GetHandlerArguments(Qt3DSDMActionHandle inAction,
                                             THandlerArgHandleList &outHandlerArguments) const
 {
     const SAction *theAction = GetActionNF(inAction, m_Objects);
@@ -197,14 +197,14 @@ void CSimpleActionCore::GetHandlerArguments(CUICDMActionHandle inAction,
 }
 
 // Action Argument Properties
-void CSimpleActionCore::GetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+void CSimpleActionCore::GetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                                 SValue &outValue) const
 {
     const SHandlerArgument *theHandlerArgument = GetHandlerArgumentNF(inHandlerArgument, m_Objects);
     outValue = theHandlerArgument->m_HandlerArgInfo.m_Value;
 }
 
-void CSimpleActionCore::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+void CSimpleActionCore::SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                                 const SValue &inValue)
 {
     SHandlerArgument *theHandlerArgument = GetHandlerArgumentNF(inHandlerArgument, m_Objects);
@@ -212,7 +212,7 @@ void CSimpleActionCore::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandler
 }
 
 // Helper functions
-CUICDMActionHandle CSimpleActionCore::CreateActionWithHandle(int inHandle,
+Qt3DSDMActionHandle CSimpleActionCore::CreateActionWithHandle(int inHandle,
                                                              Qt3DSDMInstanceHandle inInstance,
                                                              Qt3DSDMSlideHandle inSlide,
                                                              Qt3DSDMInstanceHandle inOwner)
@@ -224,8 +224,8 @@ CUICDMActionHandle CSimpleActionCore::CreateActionWithHandle(int inHandle,
     return inHandle;
 }
 
-CUICDMHandlerArgHandle
-CSimpleActionCore::AddHandlerArgumentWithHandle(int inHandle, CUICDMActionHandle inAction,
+Qt3DSDMHandlerArgHandle
+CSimpleActionCore::AddHandlerArgumentWithHandle(int inHandle, Qt3DSDMActionHandle inAction,
                                                 const TCharStr &inName, HandlerArgumentType::Value inArgType,
                                                 DataModelDataType::Value inValueType)
 {

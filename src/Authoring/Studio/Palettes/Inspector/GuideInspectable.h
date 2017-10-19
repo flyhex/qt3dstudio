@@ -41,13 +41,13 @@ class CInspectableBase;
 class CGuideInspectable
 {
 public:
-    static CInspectableBase *CreateInspectable(CCore &inCore, qt3dsdm::CUICDMGuideHandle inGuide);
+    static CInspectableBase *CreateInspectable(CCore &inCore, qt3dsdm::Qt3DSDMGuideHandle inGuide);
 };
 
 class SGuideInspectableImpl : public CInspectableBase
 {
 public:
-    SGuideInspectableImpl(CCore &inCore, qt3dsdm::CUICDMGuideHandle inGuide);
+    SGuideInspectableImpl(CCore &inCore, qt3dsdm::Qt3DSDMGuideHandle inGuide);
 
     Q3DStudio::IDocumentReader &Reader() const;
     // Interface
@@ -77,7 +77,7 @@ public:
     void Rollback();
     void FireRefresh();
 private:
-    qt3dsdm::CUICDMGuideHandle m_Guide;
+    qt3dsdm::Qt3DSDMGuideHandle m_Guide;
     Q3DStudio::CUpdateableDocumentEditor m_Editor;
     std::vector<std::shared_ptr<IInspectableAttributeItem>> m_Properties;
 };

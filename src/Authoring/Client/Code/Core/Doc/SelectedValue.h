@@ -38,7 +38,7 @@ struct SelectedValueTypes
         Instance, // Qt3DSDMInstanceHandle
         Slide, // Qt3DSDMSlideHandle
         SlideInsertion, // void*
-        Guide, // CUICDMGuideHandle
+        Guide, // Qt3DSDMGuideHandle
         MultipleInstances, // std::vector<Qt3DSDMInstanceHandle>
     };
 };

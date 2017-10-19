@@ -40,7 +40,7 @@
 
 namespace qt3dsdm {
 
-typedef std::pair<CUICDMAnimationHandle, float> TAnimationFloatPair;
+typedef std::pair<Qt3DSDMAnimationHandle, float> TAnimationFloatPair;
 typedef std::vector<TAnimationFloatPair> TAnimationFloatPairList;
 
 class CStudioAnimationSystem : public IStudioAnimationSystem,
@@ -74,7 +74,7 @@ public:
                            TAnimationCorePtr inAnimationCore);
 
     void ClearTemporaryAnimationValues();
-    void ClearTemporaryAnimationValues(CUICDMAnimationHandle inAnimation);
+    void ClearTemporaryAnimationValues(Qt3DSDMAnimationHandle inAnimation);
 
     void SetPropertySystem(TPropertySystemPtr inPropertySystem)
     {
@@ -94,7 +94,7 @@ public:
     void SetOrCreateKeyframe(Qt3DSDMInstanceHandle inInstance,
                                      Qt3DSDMPropertyHandle inProperty, float inTimeInSeconds,
                                      SGetOrSetKeyframeInfo *inKeyframeInfo, size_t inNumInfos) override;
-    CUICDMAnimationHandle GetControllingAnimation(Qt3DSDMInstanceHandle inInstance,
+    Qt3DSDMAnimationHandle GetControllingAnimation(Qt3DSDMInstanceHandle inInstance,
                                                           Qt3DSDMPropertyHandle inProperty,
                                                           size_t inIndex) const override;
     bool IsPropertyAnimatable(Qt3DSDMInstanceHandle inInstance,
@@ -116,7 +116,7 @@ public:
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
 
 private:
-    void OnAnimationDeleted(CUICDMAnimationHandle inAnimation);
+    void OnAnimationDeleted(Qt3DSDMAnimationHandle inAnimation);
 
     Qt3DSDMSlideHandle GetApplicableGraphAndSlide(Qt3DSDMInstanceHandle inInstance,
                                                  Qt3DSDMPropertyHandle inProperty,

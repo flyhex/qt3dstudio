@@ -719,7 +719,7 @@ public:
             inSlide = theSlide;
         }
 
-        CUICDMAnimationHandle animHandle =
+        Qt3DSDMAnimationHandle animHandle =
             m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex);
         if (animHandle.Valid() == false)
             return false;
@@ -804,7 +804,7 @@ public:
         return DoCopySceneGraphObject(inInstances).second;
     }
 
-    CFilePath CopyAction(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) override
+    CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) override
     {
         std::shared_ptr<IComposerSerializer> theSerializer(m_Doc.CreateSerializer());
         std::shared_ptr<qt3dsdm::IDOMWriter> theWriter(
@@ -1686,14 +1686,14 @@ public:
              ++actionIdx) {
             const SActionInfo &theSourceInfo(theActionData[actionIdx]);
 
-            CUICDMActionHandle theNewAction = AddAction(
+            Qt3DSDMActionHandle theNewAction = AddAction(
                 theSourceInfo.m_Slide, newMaterial, theSourceInfo.m_Event, theSourceInfo.m_Handler);
             m_ActionCore.SetTriggerObject(theNewAction, theSourceInfo.m_TriggerObject);
             m_ActionCore.SetTargetObject(theNewAction, theSourceInfo.m_TargetObject);
             std::vector<SHandlerArgumentInfo> &theInfoList(theActionDataArgs[actionIdx]);
             for (size_t argIdx = 0, argEnd = theInfoList.size(); argIdx < argEnd; ++argIdx) {
                 const SHandlerArgumentInfo &theArgData(theInfoList[argIdx]);
-                CUICDMHandlerArgHandle theParamHandle = m_ActionCore.AddHandlerArgument(
+                Qt3DSDMHandlerArgHandle theParamHandle = m_ActionCore.AddHandlerArgument(
                     theNewAction, theArgData.m_Name, theArgData.m_ArgType, theArgData.m_ValueType);
                 m_ActionCore.SetHandlerArgumentValue(theParamHandle, theArgData.m_Value);
             }
@@ -1736,7 +1736,7 @@ public:
             Qt3DSDMInstanceHandle theTargetInstance =
                 m_Bridge.GetInstance(theActionInfo.m_Owner, theActionInfo.m_TargetObject);
             if (theTargetInstance == theComponentInstance) {
-                CUICDMHandlerHandle theHandler = m_Bridge.ResolveHandler(theActionInfo);
+                Qt3DSDMHandlerHandle theHandler = m_Bridge.ResolveHandler(theActionInfo);
                 if (theHandler.Valid()) {
                     for (THandlerArgHandleList::const_iterator theArgHandle =
                              theActionInfo.m_HandlerArgs.begin();
@@ -2014,7 +2014,7 @@ public:
     }
 
     template <typename TKeyframeType>
-    void AddKeyframes(CUICDMAnimationHandle animHandle, const float *keyframeValues, long numValues,
+    void AddKeyframes(Qt3DSDMAnimationHandle animHandle, const float *keyframeValues, long numValues,
                       long inOffsetInSeconds)
     {
         long numFloatsPerKeyframe = sizeof(TKeyframeType) / sizeof(float);
@@ -2043,7 +2043,7 @@ public:
         m_AnimationCore.SetKeyframeData(inKeyframe, theData);
     }
 
-    void DeleteAllKeyframes(CUICDMAnimationHandle inAnimation) override
+    void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) override
     {
         m_AnimationCore.DeleteAllKeyframes(inAnimation);
     }
@@ -2054,7 +2054,7 @@ public:
         m_AnimationSystem.KeyframeProperty(inInstance, inProperty, inDoDiffValue);
     }
 
-    virtual CUICDMAnimationHandle
+    virtual Qt3DSDMAnimationHandle
     CreateOrSetAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle instance,
                          const wchar_t *propName, long subIndex, EAnimationType animType,
                          const float *keyframeValues, long numValues, bool /*inUserEdited*/) override
@@ -2076,7 +2076,7 @@ public:
             inSlide = theSlide;
         }
 
-        CUICDMAnimationHandle animHandle =
+        Qt3DSDMAnimationHandle animHandle =
             m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex);
 
         if (animHandle.Valid() == true)
@@ -2118,7 +2118,7 @@ public:
             QT3DS_ASSERT(false);
             return false;
         }
-        CUICDMAnimationHandle animHandle =
+        Qt3DSDMAnimationHandle animHandle =
             m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex);
         if (animHandle.Valid()) {
             m_AnimationCore.DeleteAnimation(animHandle);
@@ -2127,7 +2127,7 @@ public:
         return false;
     }
 
-    void SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited = true) override
+    void SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited = true) override
     {
         m_AnimationCore.SetIsArtistEdited(inAnimation, inEdited);
     }
@@ -2415,14 +2415,14 @@ public:
         return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt());
     }
 
-    CUICDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    Qt3DSDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                          const wstring &inEvent, const wstring &inHandler) override
     {
         Q3DStudio::CId theGuid = m_Bridge.GetGUID(inOwner);
         Q3DStudio::TGUIDPacked thePacked(theGuid);
         SLong4 theInitialTriggerTarget(thePacked.Data1, thePacked.Data2, thePacked.Data3,
                                        thePacked.Data4);
-        CUICDMActionHandle theAction =
+        Qt3DSDMActionHandle theAction =
             m_ActionSystem.CreateAction(inSlide, inOwner, theInitialTriggerTarget);
         m_ActionCore.SetEvent(theAction, inEvent);
         m_ActionCore.SetHandler(theAction, inHandler);
@@ -2430,12 +2430,12 @@ public:
         return theAction;
     }
 
-    void DeleteAction(CUICDMActionHandle inAction) override
+    void DeleteAction(Qt3DSDMActionHandle inAction) override
     {
         m_ActionSystem.DeleteAction(inAction);
     }
 
-    CUICDMActionHandle PasteAction(const CFilePath &inFilePath,
+    Qt3DSDMActionHandle PasteAction(const CFilePath &inFilePath,
                                            Qt3DSDMInstanceHandle inNewRoot) override
     {
         CFileSeekableIOStream theStream(inFilePath, FileReadFlags());
@@ -2621,19 +2621,19 @@ public:
         return theNewSlide;
     }
 
-    CUICDMGuideHandle CreateGuide(const qt3dsdm::SGuideInfo &inInfo) override
+    Qt3DSDMGuideHandle CreateGuide(const qt3dsdm::SGuideInfo &inInfo) override
     {
-        CUICDMGuideHandle retval = m_GuideSystem.CreateGuide();
+        Qt3DSDMGuideHandle retval = m_GuideSystem.CreateGuide();
         m_GuideSystem.SetGuideInfo(retval, inInfo);
         return retval;
     }
 
-    void UpdateGuide(CUICDMGuideHandle hdl, const qt3dsdm::SGuideInfo &inInfo) override
+    void UpdateGuide(Qt3DSDMGuideHandle hdl, const qt3dsdm::SGuideInfo &inInfo) override
     {
         m_GuideSystem.SetGuideInfo(hdl, inInfo);
     }
 
-    void DeleteGuide(CUICDMGuideHandle hdl) override { m_GuideSystem.DeleteGuide(hdl); }
+    void DeleteGuide(Qt3DSDMGuideHandle hdl) override { m_GuideSystem.DeleteGuide(hdl); }
 
     void ClearGuides() override
     {
@@ -2644,12 +2644,12 @@ public:
 
     qt3dsdm::TGuideHandleList GetGuides() const override { return m_GuideSystem.GetAllGuides(); }
 
-    qt3dsdm::SGuideInfo GetGuideInfo(qt3dsdm::CUICDMGuideHandle inGuide) const override
+    qt3dsdm::SGuideInfo GetGuideInfo(qt3dsdm::Qt3DSDMGuideHandle inGuide) const override
     {
         return m_GuideSystem.GetGuideInfo(inGuide);
     }
 
-    bool IsGuideValid(qt3dsdm::CUICDMGuideHandle inGuide) const override
+    bool IsGuideValid(qt3dsdm::Qt3DSDMGuideHandle inGuide) const override
     {
         return m_GuideSystem.IsGuideValid(inGuide);
     }
@@ -3010,7 +3010,7 @@ public:
         std::vector<SMetaDataLoadWarning> theWarnings;
         // For all of the object std::ref properties, check if they have an absolute path
         // reference (path starts with "Scene".  If they do, then attempt to resolve the reference.
-        vector<CUICDMMetaDataPropertyHandle> theProperties;
+        vector<Qt3DSDMMetaDataPropertyHandle> theProperties;
         m_MetaData.GetSpecificMetaDataProperties(inDynamic, theProperties);
         for (size_t propIdx = 0, propEnd = theProperties.size(); propIdx < propEnd; ++propIdx) {
             SMetaDataPropertyInfo theInfo(

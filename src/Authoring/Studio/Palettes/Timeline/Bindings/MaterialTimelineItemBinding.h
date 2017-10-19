@@ -48,7 +48,7 @@ class CBaseStateRow;
 /**
  * Binding to a UICDM object of Material type
  */
-class CMaterialTimelineItemBinding : public CUICDMTimelineItemBinding
+class CMaterialTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public: // Types
     typedef std::tuple<qt3dsdm::TCharStr, qt3dsdm::TCharStr> TNameFormalNamePair;
@@ -62,7 +62,7 @@ public: // Construction
                                  qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     virtual ~CMaterialTimelineItemBinding();
 
-public: // CUICDMTimelineItemBinding
+public: // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
     EStudioObjectType GetObjectType() const override;
     bool ShowToggleControls() const override;

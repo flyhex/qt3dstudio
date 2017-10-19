@@ -46,14 +46,14 @@ class CTimelineTranslationManager;
 /**
  * Binding to a UICDM object of Behavior type
  */
-class CBehaviorTimelineItemBinding : public CUICDMTimelineItemBinding
+class CBehaviorTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public:
     CBehaviorTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                  qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     ~CBehaviorTimelineItemBinding() {}
 
-    // CUICDMTimelineItemBinding
+    // Qt3DSDMTimelineItemBinding
     EStudioObjectType GetObjectType() const override;
     bool OpenAssociatedEditor() override;
 };

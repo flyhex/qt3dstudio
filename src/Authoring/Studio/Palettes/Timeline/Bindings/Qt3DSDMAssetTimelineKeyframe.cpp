@@ -33,7 +33,7 @@
 
 using namespace qt3dsdm;
 
-CUICDMAssetTimelineKeyframe::CUICDMAssetTimelineKeyframe(CUICDMTimelineItemBinding *inOwningBinding,
+Qt3DSDMAssetTimelineKeyframe::Qt3DSDMAssetTimelineKeyframe(Qt3DSDMTimelineItemBinding *inOwningBinding,
                                                          long inTime)
     : m_OwningBinding(inOwningBinding)
     , m_Time(inTime)
@@ -41,21 +41,21 @@ CUICDMAssetTimelineKeyframe::CUICDMAssetTimelineKeyframe(CUICDMTimelineItemBindi
 {
 }
 
-CUICDMAssetTimelineKeyframe::~CUICDMAssetTimelineKeyframe()
+Qt3DSDMAssetTimelineKeyframe::~Qt3DSDMAssetTimelineKeyframe()
 {
 }
 
-bool CUICDMAssetTimelineKeyframe::IsSelected() const
+bool Qt3DSDMAssetTimelineKeyframe::IsSelected() const
 {
     return m_Selected;
 }
 
-long CUICDMAssetTimelineKeyframe::GetTime() const
+long Qt3DSDMAssetTimelineKeyframe::GetTime() const
 {
     return m_Time;
 }
 
-void CUICDMAssetTimelineKeyframe::SetTime(const long inNewTime)
+void Qt3DSDMAssetTimelineKeyframe::SetTime(const long inNewTime)
 {
     Q_UNUSED(inNewTime);
     // note: this is not used. because setting time is currently only done through offsetting by
@@ -63,18 +63,18 @@ void CUICDMAssetTimelineKeyframe::SetTime(const long inNewTime)
     ASSERT(0);
 }
 
-void CUICDMAssetTimelineKeyframe::SetDynamic(bool inIsDynamic)
+void Qt3DSDMAssetTimelineKeyframe::SetDynamic(bool inIsDynamic)
 {
     m_OwningBinding->SetDynamicKeyframes(m_Time, inIsDynamic);
 }
 
-bool CUICDMAssetTimelineKeyframe::IsDynamic() const
+bool Qt3DSDMAssetTimelineKeyframe::IsDynamic() const
 {
     // return true if any of its property keyframes is dynamic
     return m_OwningBinding->HasDynamicKeyframes(m_Time);
 }
 
-void CUICDMAssetTimelineKeyframe::SetSelected(bool inSelected)
+void Qt3DSDMAssetTimelineKeyframe::SetSelected(bool inSelected)
 {
     m_Selected = inSelected;
 }

@@ -236,20 +236,20 @@ public:
     // CreateOrSetAnimation will offset each keyframe by the object's start time; thus the keyframe
     // time space is expected to be normalized to the object's start time when being input to this
     // function.
-    virtual CUICDMAnimationHandle
+    virtual Qt3DSDMAnimationHandle
     CreateOrSetAnimation(TSlideHandle inSlide, TInstanceHandle instance, const wchar_t *propName,
                          long subIndex, qt3dsdm::EAnimationType animType, const float *keyframeValues,
                          long numValues, bool inUserEdited = true) = 0;
     virtual bool RemoveAnimation(TSlideHandle inSlide, TInstanceHandle instance,
                                  const wchar_t *propName, long subIndex) = 0;
     virtual void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTimeInMilliseconds) = 0;
-    virtual void DeleteAllKeyframes(CUICDMAnimationHandle inAnimation) = 0;
+    virtual void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) = 0;
     virtual void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                   bool inDoDiffValue) = 0;
 
     // Only the import interface needs to worry about this.  The animation system automatically
     // sets the flag upon any change to an animation.
-    virtual void SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited = true) = 0;
+    virtual void SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited = true) = 0;
 
     // Paste a scene graph object into this system at this location.  Returns the new object
     //(but it sets the new object as the selected object so clients probably don't need this)
@@ -300,13 +300,13 @@ public:
         return DuplicateInstances(theInstances);
     }
 
-    virtual CUICDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
+    virtual Qt3DSDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                          const wstring &inEvent, const wstring &inHandler) = 0;
 
-    virtual void DeleteAction(CUICDMActionHandle inAction) = 0;
+    virtual void DeleteAction(Qt3DSDMActionHandle inAction) = 0;
 
     // Paste a given action into this new root object.
-    virtual CUICDMActionHandle PasteAction(const CFilePath &inFilePath,
+    virtual Qt3DSDMActionHandle PasteAction(const CFilePath &inFilePath,
                                            Qt3DSDMInstanceHandle inNewRoot) = 0;
 
     virtual Qt3DSDMSlideHandle AddSlide(Qt3DSDMSlideHandle inMasterSlide, int inIndex = -1) = 0;
@@ -318,9 +318,9 @@ public:
 
     virtual Qt3DSDMSlideHandle DuplicateSlide(Qt3DSDMSlideHandle inSlide) = 0;
 
-    virtual qt3dsdm::CUICDMGuideHandle CreateGuide(const qt3dsdm::SGuideInfo &inInfo) = 0;
-    virtual void UpdateGuide(qt3dsdm::CUICDMGuideHandle hdl, const qt3dsdm::SGuideInfo &inInfo) = 0;
-    virtual void DeleteGuide(qt3dsdm::CUICDMGuideHandle hdl) = 0;
+    virtual qt3dsdm::Qt3DSDMGuideHandle CreateGuide(const qt3dsdm::SGuideInfo &inInfo) = 0;
+    virtual void UpdateGuide(qt3dsdm::Qt3DSDMGuideHandle hdl, const qt3dsdm::SGuideInfo &inInfo) = 0;
+    virtual void DeleteGuide(qt3dsdm::Qt3DSDMGuideHandle hdl) = 0;
     virtual void ClearGuides() = 0;
 
     // Imports a colladafile and, if successful, returns the instance handle from the imported

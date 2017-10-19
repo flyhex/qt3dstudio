@@ -86,9 +86,9 @@ public:
 
     // Save and load just a single action
     virtual void SerializeAction(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::Qt3DSDMSlideHandle inSlide,
-                                 qt3dsdm::CUICDMActionHandle inAction) = 0;
+                                 qt3dsdm::Qt3DSDMActionHandle inAction) = 0;
     // Load a new action onto this root object
-    virtual qt3dsdm::CUICDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
+    virtual qt3dsdm::Qt3DSDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
                                                       qt3dsdm::Qt3DSDMInstanceHandle inNewRoot,
                                                       qt3dsdm::Qt3DSDMSlideHandle inSlide) = 0;
 

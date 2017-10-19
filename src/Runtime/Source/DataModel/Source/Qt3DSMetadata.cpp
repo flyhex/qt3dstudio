@@ -571,7 +571,7 @@ public:
     virtual bool IsCustomHandler(const wchar_t *inId, const wchar_t *inHandlerName)
     {
         Qt3DSDMInstanceHandle theInstance = GetInstanceById(inId);
-        CUICDMHandlerHandle theHandle =
+        Qt3DSDMHandlerHandle theHandle =
             m_NewMetaData->FindHandlerByName(theInstance, inHandlerName);
         return m_NewMetaData->IsCustomHandler(theHandle);
     }
@@ -650,7 +650,7 @@ public:
         return theRetval;
     }
 
-    void MetaPropertiesToAttList(vector<CUICDMMetaDataPropertyHandle> &theProperties,
+    void MetaPropertiesToAttList(vector<Qt3DSDMMetaDataPropertyHandle> &theProperties,
                                  TAttOrArgList &outAtts)
     {
         outAtts.reserve((uint32_t)theProperties.size());
@@ -693,7 +693,7 @@ public:
         retval.m_IsComponent = m_DataCore->IsInstanceOrDerivedFrom(theInstance, slideOwner);
         TCharStr type = m_NewMetaData->GetTypeForInstance(theInstance);
         qt3ds::foundation::ConvertUTF(type.c_str(), type.size(), retval.m_ClassName);
-        vector<CUICDMMetaDataPropertyHandle> theProperties;
+        vector<Qt3DSDMMetaDataPropertyHandle> theProperties;
         m_NewMetaData->GetMetaDataProperties(theInstance, theProperties);
         MetaPropertiesToAttList(theProperties, retval.m_Attributes);
         return retval;
@@ -703,7 +703,7 @@ public:
     {
         TAttOrArgList retval;
         Qt3DSDMInstanceHandle slideOwner = m_NewMetaData->GetCanonicalInstanceForType(L"Slide");
-        vector<CUICDMMetaDataPropertyHandle> theProperties;
+        vector<Qt3DSDMMetaDataPropertyHandle> theProperties;
         m_NewMetaData->GetSpecificMetaDataProperties(slideOwner, theProperties);
         MetaPropertiesToAttList(theProperties, retval);
         return retval;
@@ -723,7 +723,7 @@ public:
         outAdditionalType = ERuntimeAdditionalMetaDataTypeNone;
 
         Qt3DSDMInstanceHandle theInstance = GetInstanceById(inId);
-        CUICDMHandlerHandle theHandle =
+        Qt3DSDMHandlerHandle theHandle =
             m_NewMetaData->FindHandlerByName(theInstance, inHandlerName);
         Option<SMetaDataHandlerArgumentInfo> theArgMetaData(
             m_NewMetaData->FindHandlerArgumentByName(theHandle, inArgumentName));
@@ -991,7 +991,7 @@ public:
             return;
         }
 
-        vector<CUICDMMetaDataPropertyHandle> theProperties;
+        vector<Qt3DSDMMetaDataPropertyHandle> theProperties;
         if (inSearchParent)
             // Get the meta data properties defined on this object or its derivation parents
             m_NewMetaData->GetMetaDataProperties(theInstance, theProperties);

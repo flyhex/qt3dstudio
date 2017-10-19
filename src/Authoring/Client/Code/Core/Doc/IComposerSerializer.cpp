@@ -191,7 +191,7 @@ static void WriteKeyframes(TKeyframeHandleList &inKeyframes, IAnimationCore &inC
 }
 
 template <typename TKeyframeType>
-static void ReadKeyframes(CUICDMAnimationHandle inAnimation, IAnimationCore &inCore,
+static void ReadKeyframes(Qt3DSDMAnimationHandle inAnimation, IAnimationCore &inCore,
                           const float *inStart, const float *inEnd)
 {
     SMemReadOperator<float> theOperator(inStart, inEnd);
@@ -231,13 +231,13 @@ struct SPropertyMatches
 struct SAnimationMatcher
 {
     IAnimationCore &m_Core;
-    CUICDMAnimationHandle rhs;
-    SAnimationMatcher(IAnimationCore &impl, CUICDMAnimationHandle _rhs)
+    Qt3DSDMAnimationHandle rhs;
+    SAnimationMatcher(IAnimationCore &impl, Qt3DSDMAnimationHandle _rhs)
         : m_Core(impl)
         , rhs(_rhs)
     {
     }
-    bool operator()(CUICDMAnimationHandle lhs) const
+    bool operator()(Qt3DSDMAnimationHandle lhs) const
     {
         SAnimationInfo lhsInfo(m_Core.GetAnimationInfo(lhs));
         SAnimationInfo rhsInfo(m_Core.GetAnimationInfo(rhs));
@@ -297,7 +297,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 {
     typedef unordered_set<Qt3DSDMInstanceHandle, hash<int>> TInstanceSet;
     typedef unordered_set<Qt3DSDMSlideHandle, hash<int>> TSlideSet;
-    typedef unordered_set<CUICDMActionHandle, hash<int>> TActionSet;
+    typedef unordered_set<Qt3DSDMActionHandle, hash<int>> TActionSet;
     typedef vector<Qt3DSDMInstanceHandle> TInstanceList;
     typedef unordered_map<int, TCharPtr> THandleToIdMap;
     typedef unordered_map<TCharPtr, int> TIdToHandleMap;
@@ -445,7 +445,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return theIdStr;
     }
 
-    TCharPtr AddActionId(const wstring &inId, CUICDMActionHandle inHandle)
+    TCharPtr AddActionId(const wstring &inId, Qt3DSDMActionHandle inHandle)
     {
         TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
         m_IdToActionMap.insert(make_pair(theIdStr, inHandle));
@@ -489,7 +489,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return 0;
     }
 
-    CUICDMActionHandle GetActionById(TCharPtr inId)
+    Qt3DSDMActionHandle GetActionById(TCharPtr inId)
     {
         if (IsTrivial(inId))
             return 0;
@@ -653,7 +653,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return AddId(theNewId, inInstance);
     }
 
-    TCharPtr GetActionId(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
+    TCharPtr GetActionId(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                          Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inAction.Valid());
@@ -934,7 +934,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         {
         }
 
-        inline bool operator()(CUICDMAnimationHandle lhs, CUICDMAnimationHandle rhs) const
+        inline bool operator()(Qt3DSDMAnimationHandle lhs, Qt3DSDMAnimationHandle rhs) const
         {
             SAnimationInfo lhsInfo(m_AnimationCore.GetAnimationInfo(lhs));
             SAnimationInfo rhsInfo(m_AnimationCore.GetAnimationInfo(rhs));
@@ -960,7 +960,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             IDOMWriter::Scope __animScope(inWriter, L"AnimationTrack");
 
             SAnimationInfo theInfo(m_AnimationCore.GetAnimationInfo(inAnimations[idx]));
-            CUICDMMetaDataPropertyHandle theMetaDataProperty =
+            Qt3DSDMMetaDataPropertyHandle theMetaDataProperty =
                     m_MetaData.GetMetaDataProperty(theInfo.m_Instance, theInfo.m_Property);
             if (theMetaDataProperty.Valid() == false)
                 continue;
@@ -1065,7 +1065,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 break;
             }
         }
-        CUICDMMetaDataPropertyHandle theProperty =
+        Qt3DSDMMetaDataPropertyHandle theProperty =
                 m_MetaData.GetMetaDataProperty(inInstance, thePropertyName);
         if (theProperty.Valid() == false) {
             QT3DS_ASSERT(false);
@@ -1093,12 +1093,12 @@ struct SComposerSerializerImpl : public IComposerSerializer
         // duplicate slide).
         if (m_ActiveSlide == inSlide) {
             // Simple way of overriding all animation info:  Delete the object and re-create.
-            CUICDMAnimationHandle animHandle =
+            Qt3DSDMAnimationHandle animHandle =
                     m_AnimationCore.GetAnimation(inSlide, inInstance, theInfo.m_Property, subIndex);
             if (animHandle.Valid() == true)
                 m_AnimationCore.DeleteAnimation(animHandle);
         }
-        CUICDMAnimationHandle theAnimation =
+        Qt3DSDMAnimationHandle theAnimation =
                 m_AnimationCore.CreateAnimation(inSlide, inInstance, theInfo.m_Property, subIndex,
                                                 theAnimationType, firstKeyframeDynamic);
         m_ValueBuffer.clear();
@@ -1136,12 +1136,12 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     void SerializeAction(IDOMWriter &inWriter, Qt3DSDMSlideHandle inSlide,
-                         Qt3DSDMInstanceHandle inInstance, CUICDMActionHandle inAction)
+                         Qt3DSDMInstanceHandle inInstance, Qt3DSDMActionHandle inAction)
     {
         TCharStr valueStr;
         IDOMWriter::Scope __actionScope(inWriter, L"Action");
 
-        CUICDMActionHandle theAction(inAction);
+        Qt3DSDMActionHandle theAction(inAction);
         SActionInfo theInfo(m_ActionCore.GetActionInfo(theAction));
         inWriter.Att(L"id", GetActionId(theAction, inSlide, inInstance));
         bool eyeball = m_ActionSystem.GetActionEyeballValue(inSlide, theAction);
@@ -1258,11 +1258,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return theSourceInstance;
     }
 
-    CUICDMActionHandle ParseAction(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide,
+    Qt3DSDMActionHandle ParseAction(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide,
                                    Qt3DSDMInstanceHandle inInstance)
     {
         IDOMReader::Scope __actionScope(inReader);
-        CUICDMActionHandle theAction;
+        Qt3DSDMActionHandle theAction;
         TCharPtr theActionId;
         bool isRef = false;
         if (inReader.Att(L"id", theActionId)) {
@@ -1291,7 +1291,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             m_ActionCore.SetTargetObject(theAction, theTargetRef);
         }
 
-        CUICDMHandlerHandle theHandler;
+        Qt3DSDMHandlerHandle theHandler;
         if (inReader.Att(L"handler", tempStr)) {
             m_ActionCore.SetHandler(theAction, tempStr);
 
@@ -1314,14 +1314,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     if (theStr) {
                         Qt3DSDMInstanceHandle theTargetInstance =
                                 ResolveObjectRef(inInstance, theTargetRef);
-                        CUICDMEventHandle theEvent = 0;
+                        Qt3DSDMEventHandle theEvent = 0;
                         if (theTargetInstance.Valid())
                             theEvent = m_MetaData.FindEvent(theTargetInstance, theStr->GetData());
                         theValue = SValue((qt3ds::QT3DSI32) theEvent);
                     }
                 }
 
-                CUICDMHandlerArgHandle theArgHandle = m_ActionCore.AddHandlerArgument(
+                Qt3DSDMHandlerArgHandle theArgHandle = m_ActionCore.AddHandlerArgument(
                             theAction, theName.wide_str(), theArgType, theDataType);
                 m_ActionCore.SetHandlerArgumentValue(theArgHandle, theValue);
             }
@@ -1829,7 +1829,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             SerializeAnimations(inWriter, theAnimations);
             SerializeActions(inWriter, inSlide, inInstance, theActions);
             for (size_t idx = 0, end = theEyeballChanges.size(); idx < end; ++idx) {
-                CUICDMActionHandle theAction(theMasterActions[theEyeballChanges[idx].first]);
+                Qt3DSDMActionHandle theAction(theMasterActions[theEyeballChanges[idx].first]);
                 IDOMWriter::Scope __actionScope(inWriter, L"Action");
                 wstring theRef(L"#");
                 bool hadAction = m_ActionToIdMap.find(theAction) != m_ActionToIdMap.end();
@@ -2295,7 +2295,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         for (TActionSet::iterator theIter = m_ExternalActions.begin(),
              theEnd = m_ExternalActions.end();
              theIter != theEnd; ++theIter) {
-            CUICDMActionHandle theAction(*theIter);
+            Qt3DSDMActionHandle theAction(*theIter);
             IDOMWriter::Scope __refScope(inWriter, L"ActionReference");
             theId.assign(L"#");
             theId.append(GetActionId(theAction, 0, 0));
@@ -2447,7 +2447,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     inReader.Att(L"ref", theRef);
                     inReader.Att(L"handle", theGuidBuf);
                     long theHandleValue(wcstol(theGuidBuf.wide_str(), NULL, 10));
-                    CUICDMActionHandle theAction(theHandleValue);
+                    Qt3DSDMActionHandle theAction(theHandleValue);
                     QT3DS_ASSERT(m_ActionCore.HandleValid(theAction));
                     AddActionId(theRef.wide_str() + 1, theAction);
                 } else if (AreEqual(inReader.GetElementName(), L"SlideReference")) {
@@ -2747,7 +2747,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     // Save and load just a single action
     void SerializeAction(qt3dsdm::IDOMWriter &inWriter, Qt3DSDMSlideHandle inSlide,
-                                 CUICDMActionHandle inAction) override
+                                 Qt3DSDMActionHandle inAction) override
     {
         reset();
         m_PreserveFileIds = false;
@@ -2757,7 +2757,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     // Load a new action onto this root object
-    qt3dsdm::CUICDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
+    qt3dsdm::Qt3DSDMActionHandle SerializeAction(qt3dsdm::IDOMReader &inReader,
                                                       qt3dsdm::Qt3DSDMInstanceHandle inNewRoot,
                                                       qt3dsdm::Qt3DSDMSlideHandle inSlide) override
     {

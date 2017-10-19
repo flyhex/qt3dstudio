@@ -48,14 +48,14 @@ class CBaseStateRow;
 /**
  * Binding to a UICDM object of Slide type
  */
-class CSlideTimelineItemBinding : public CUICDMTimelineItemBinding
+class CSlideTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public:
     CSlideTimelineItemBinding(CTimelineTranslationManager *inMgr,
                               qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     ~CSlideTimelineItemBinding() {}
 
-    // CUICDMTimelineItemBinding
+    // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
     void SetName(const Q3DStudio::CString &inName) override;
     void Bind(CBaseStateRow *inRow) override;

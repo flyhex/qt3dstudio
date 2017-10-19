@@ -60,9 +60,9 @@ class CSimpleSlideGraphCore : public CHandleBase, public ISlideGraphCore
 {
     TStringTablePtr m_StringTable;
     typedef std::unordered_map<Qt3DSDMInstanceHandle,
-                                 pair<CUICDMSlideGraphHandle, Qt3DSDMSlideHandle>, std::hash<int>>
+                                 pair<Qt3DSDMSlideGraphHandle, Qt3DSDMSlideHandle>, std::hash<int>>
         TInstanceToGraphMap;
-    typedef std::unordered_map<CUICDMSlideGraphHandle, TSlideInstancePairList, std::hash<int>>
+    typedef std::unordered_map<Qt3DSDMSlideGraphHandle, TSlideInstancePairList, std::hash<int>>
         TGraphToInstanceMap;
 
     TInstanceToGraphMap m_InstanceToGraph;
@@ -81,11 +81,11 @@ public:
      *	of one and only one graph (i.e. it does not derive from another slide outside of the graph).
      *	Second is that an instance is a member of one and only one graph.
      */
-    CUICDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) override;
-    Qt3DSDMSlideHandle GetGraphRoot(CUICDMSlideGraphHandle inGraph) const override;
-    CUICDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const override;
+    Qt3DSDMSlideGraphHandle CreateSlideGraph(Qt3DSDMSlideHandle inRoot) override;
+    Qt3DSDMSlideHandle GetGraphRoot(Qt3DSDMSlideGraphHandle inGraph) const override;
+    Qt3DSDMSlideGraphHandle GetSlideGraph(Qt3DSDMSlideHandle inSlide) const override;
     void GetSlideGraphs(TSlideGraphHandleList &outGraphs) const override;
-    void DeleteSlideGraph(CUICDMSlideGraphHandle inHandle) override;
+    void DeleteSlideGraph(Qt3DSDMSlideGraphHandle inHandle) override;
 
     /**
      *	Associate a given instance handle with a given graph.  This will ensure that property
@@ -96,9 +96,9 @@ public:
      *is
      *	implicitly associated with any root-derived slides.
      */
-    void AssociateInstance(CUICDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
+    void AssociateInstance(Qt3DSDMSlideGraphHandle inSlideGraph, Qt3DSDMSlideHandle inSlide,
                            Qt3DSDMInstanceHandle inInstance) override;
-    void GetAssociatedInstances(CUICDMSlideGraphHandle inSlideGraph,
+    void GetAssociatedInstances(Qt3DSDMSlideGraphHandle inSlideGraph,
                                 TSlideInstancePairList &outAssociations) const override;
     TGraphSlidePair GetAssociatedGraph(Qt3DSDMInstanceHandle inInstance) const override;
     void DissociateInstance(Qt3DSDMInstanceHandle inInstance) override;
@@ -106,12 +106,12 @@ public:
     /**
      *	All graphs always have an active slide.  This is assumed to be the root right off the bat.
      */
-    void SetGraphActiveSlide(CUICDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override;
-    Qt3DSDMSlideHandle GetGraphActiveSlide(CUICDMSlideGraphHandle inGraph) const override;
+    void SetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph, Qt3DSDMSlideHandle inSlide) override;
+    Qt3DSDMSlideHandle GetGraphActiveSlide(Qt3DSDMSlideGraphHandle inGraph) const override;
 
     bool HandleValid(int inHandle) const override;
 
-    CUICDMSlideGraphHandle CreateSlideGraphWithHandle(int inHandle, Qt3DSDMSlideHandle inRoot);
+    Qt3DSDMSlideGraphHandle CreateSlideGraphWithHandle(int inHandle, Qt3DSDMSlideHandle inRoot);
 
     static SSlideGraph *GetSlideGraphNF(int inHandle, THandleObjectMap &inObjects)
     {

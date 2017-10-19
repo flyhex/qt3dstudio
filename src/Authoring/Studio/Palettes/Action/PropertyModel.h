@@ -42,9 +42,9 @@ public:
         HandleRole = Qt::UserRole + 1
     };
 
-    void setAction(const qt3dsdm::CUICDMActionHandle &action);
-    void setNameHandle(const qt3dsdm::CUICDMHandlerArgHandle &valueHandle);
-    void setValueHandle(const qt3dsdm::CUICDMHandlerArgHandle &valueHandle);
+    void setAction(const qt3dsdm::Qt3DSDMActionHandle &action);
+    void setNameHandle(const qt3dsdm::Qt3DSDMHandlerArgHandle &valueHandle);
+    void setValueHandle(const qt3dsdm::Qt3DSDMHandlerArgHandle &valueHandle);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -52,7 +52,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     PropertyInfo property(int index) const;
-    qt3dsdm::CUICDMActionHandle action() const { return m_action; }
+    qt3dsdm::Qt3DSDMActionHandle action() const { return m_action; }
     int valueHandle() const;
 
     QVariant value() const;
@@ -68,9 +68,9 @@ private:
     void updateDefaultPropertyIndex();
 
     QVector<PropertyInfo> m_properties;
-    qt3dsdm::CUICDMActionHandle m_action;
-    qt3dsdm::CUICDMHandlerArgHandle m_nameHandle;
-    qt3dsdm::CUICDMHandlerArgHandle m_valueHandle;
+    qt3dsdm::Qt3DSDMActionHandle m_action;
+    qt3dsdm::Qt3DSDMHandlerArgHandle m_nameHandle;
+    qt3dsdm::Qt3DSDMHandlerArgHandle m_valueHandle;
     int m_defaultPropertyIndex = -1;
     QVariant m_value;
 };

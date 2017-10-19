@@ -159,15 +159,15 @@ public:
     // Categories appear in the UI to divide up large lists of events, actions, and properties.
     // Returns <handle,true> if a category was created
     // else returns <handle,false>
-    virtual pair<CUICDMCategoryHandle, bool> GetOrCreateCategory(TStrType inName) = 0;
+    virtual pair<Qt3DSDMCategoryHandle, bool> GetOrCreateCategory(TStrType inName) = 0;
 
-    virtual void SetCategoryInfo(CUICDMCategoryHandle inCategory, TStrType inIcon,
+    virtual void SetCategoryInfo(Qt3DSDMCategoryHandle inCategory, TStrType inIcon,
                                  TStrType inHighlight, TStrType inDescription) = 0;
-    virtual void DestroyCategory(CUICDMCategoryHandle inCategory) = 0;
+    virtual void DestroyCategory(Qt3DSDMCategoryHandle inCategory) = 0;
 
-    virtual Option<SCategoryInfo> GetCategoryInfo(CUICDMCategoryHandle inCategory) = 0;
-    virtual CUICDMCategoryHandle FindCategoryByName(TStrType inName) = 0;
-    virtual void GetCategories(vector<CUICDMCategoryHandle> &outCategories) = 0;
+    virtual Option<SCategoryInfo> GetCategoryInfo(Qt3DSDMCategoryHandle inCategory) = 0;
+    virtual Qt3DSDMCategoryHandle FindCategoryByName(TStrType inName) = 0;
+    virtual void GetCategories(vector<Qt3DSDMCategoryHandle> &outCategories) = 0;
     virtual Option<SCategoryInfo> GetEventCategory(TStrType inName) = 0;
     virtual Option<SCategoryInfo> GetHandlerCategory(TStrType inName) = 0;
 
@@ -177,12 +177,12 @@ public:
     // Metadata properties can be redifined for child instances and this re-definition will override
     // the parent definition.  We currently use this to give different formal names and description
     // to the sourcepath property (for models it is mesh, for materials it is image).
-    virtual CUICDMMetaDataPropertyHandle
+    virtual Qt3DSDMMetaDataPropertyHandle
     CreateMetaDataProperty(Qt3DSDMInstanceHandle inInstance) = 0;
 
     // For properties, you set the default values separately
     // This may delete the underlying data model property rebuild it.
-    virtual void SetMetaDataPropertyInfo(CUICDMMetaDataPropertyHandle inPropertyHandle,
+    virtual void SetMetaDataPropertyInfo(Qt3DSDMMetaDataPropertyHandle inPropertyHandle,
                                          TStrType inName, TStrType inFormalName,
                                          TStrType inDescription, TStrType inUsage,
                                          CompleteMetaDataType::Enum inDataType,
@@ -194,25 +194,25 @@ public:
     // Does not destroy the underlying data core property, so this function isn't a perfect
     // reverse of the above system.  This *just* destroyed the meta data pointed to by
     // this property.
-    virtual void DestroyMetaDataProperty(CUICDMMetaDataPropertyHandle inProperty) = 0;
+    virtual void DestroyMetaDataProperty(Qt3DSDMMetaDataPropertyHandle inProperty) = 0;
 
-    virtual CUICDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
+    virtual Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                                              TStrType inPropertyName) = 0;
-    virtual CUICDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
+    virtual Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                                              Qt3DSDMPropertyHandle inProperty) = 0;
     virtual Option<SMetaDataPropertyInfo>
-    GetMetaDataPropertyInfo(CUICDMMetaDataPropertyHandle inProperty) = 0;
+    GetMetaDataPropertyInfo(Qt3DSDMMetaDataPropertyHandle inProperty) = 0;
     // Get all of the meta data properties defined on this object or its derivation parents
     virtual void GetMetaDataProperties(Qt3DSDMInstanceHandle inInstance,
-                                       vector<CUICDMMetaDataPropertyHandle> &outProperties) = 0;
+                                       vector<Qt3DSDMMetaDataPropertyHandle> &outProperties) = 0;
 
     // Get the meta data properties defined on *only* this object, don't search parents
-    virtual CUICDMMetaDataPropertyHandle
+    virtual Qt3DSDMMetaDataPropertyHandle
     GetOrCreateSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                         TStrType inPropertyName) = 0;
     virtual void
     GetSpecificMetaDataProperties(Qt3DSDMInstanceHandle inInstance,
-                                  vector<CUICDMMetaDataPropertyHandle> &outProperties) = 0;
+                                  vector<Qt3DSDMMetaDataPropertyHandle> &outProperties) = 0;
 
     virtual TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
                                    Qt3DSDMPropertyHandle inProperty) = 0;
@@ -226,71 +226,71 @@ public:
                                    Qt3DSDMPropertyHandle inProperty) = 0;
 
     virtual void
-    SetMetaDataPropertyFilters(CUICDMMetaDataPropertyHandle inProperty,
+    SetMetaDataPropertyFilters(Qt3DSDMMetaDataPropertyHandle inProperty,
                                qt3ds::foundation::NVConstDataRef<SPropertyFilterInfo> inFilters) = 0;
     virtual qt3ds::foundation::NVConstDataRef<SPropertyFilterInfo>
-    GetMetaDataPropertyFilters(CUICDMMetaDataPropertyHandle inProperty) = 0;
-    virtual void RemoveMetaDataPropertyFilters(CUICDMMetaDataPropertyHandle inProperty) = 0;
+    GetMetaDataPropertyFilters(Qt3DSDMMetaDataPropertyHandle inProperty) = 0;
+    virtual void RemoveMetaDataPropertyFilters(Qt3DSDMMetaDataPropertyHandle inProperty) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Events
     // CreateMetaDataEvent was original named CreateEvent but this collides with
     // the microsoft macro CreateEvent which expands to CreateEventA or CreateEventW
-    virtual CUICDMEventHandle CreateMetaDataEvent(Qt3DSDMInstanceHandle inInstance) = 0;
-    virtual void SetEventInfo(CUICDMEventHandle inEventHandle, TStrType inName,
+    virtual Qt3DSDMEventHandle CreateMetaDataEvent(Qt3DSDMInstanceHandle inInstance) = 0;
+    virtual void SetEventInfo(Qt3DSDMEventHandle inEventHandle, TStrType inName,
                               TStrType inFormalName, TStrType inCategory,
                               TStrType inDescription) = 0;
 
-    virtual void DestroyEvent(CUICDMEventHandle inEventHandle) = 0;
+    virtual void DestroyEvent(Qt3DSDMEventHandle inEventHandle) = 0;
 
     virtual void GetEvents(Qt3DSDMInstanceHandle inInstance, TEventHandleList &outEvents) = 0;
-    virtual CUICDMEventHandle FindEvent(Qt3DSDMInstanceHandle inInstance, TStrType inName) = 0;
-    virtual Option<SEventInfo> GetEventInfo(CUICDMEventHandle inEventHandle) = 0;
-    virtual bool IsCustomEvent(CUICDMEventHandle inEventHandle) = 0;
+    virtual Qt3DSDMEventHandle FindEvent(Qt3DSDMInstanceHandle inInstance, TStrType inName) = 0;
+    virtual Option<SEventInfo> GetEventInfo(Qt3DSDMEventHandle inEventHandle) = 0;
+    virtual bool IsCustomEvent(Qt3DSDMEventHandle inEventHandle) = 0;
 
     // Get/Find an event that occurs on just this instance, don't search parent instances
     virtual void GetSpecificEvents(Qt3DSDMInstanceHandle inInstance,
                                    TEventHandleList &outEvents) = 0;
-    virtual CUICDMEventHandle GetOrCreateSpecificEvent(Qt3DSDMInstanceHandle inInstance,
+    virtual Qt3DSDMEventHandle GetOrCreateSpecificEvent(Qt3DSDMInstanceHandle inInstance,
                                                        TStrType inName) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Handlers
-    virtual CUICDMHandlerHandle CreateHandler(Qt3DSDMInstanceHandle inInstance) = 0;
-    virtual void SetHandlerInfo(CUICDMHandlerHandle inHandle, TStrType inName,
+    virtual Qt3DSDMHandlerHandle CreateHandler(Qt3DSDMInstanceHandle inInstance) = 0;
+    virtual void SetHandlerInfo(Qt3DSDMHandlerHandle inHandle, TStrType inName,
                                 TStrType inFormalName, TStrType inCategory,
                                 TStrType inDescription) = 0;
-    virtual void DestroyHandler(CUICDMHandlerHandle inHandlerHandle) = 0;
+    virtual void DestroyHandler(Qt3DSDMHandlerHandle inHandlerHandle) = 0;
 
-    virtual CUICDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance,
+    virtual Qt3DSDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance,
                                                   TStrType inName) = 0;
-    virtual Option<SHandlerInfo> GetHandlerInfo(CUICDMHandlerHandle inHandlerHandle) = 0;
+    virtual Option<SHandlerInfo> GetHandlerInfo(Qt3DSDMHandlerHandle inHandlerHandle) = 0;
     virtual void GetHandlers(Qt3DSDMInstanceHandle inInstance, THandlerHandleList &outHandlers) = 0;
-    virtual bool IsCustomHandler(CUICDMHandlerHandle inEventHandle) = 0;
+    virtual bool IsCustomHandler(Qt3DSDMHandlerHandle inEventHandle) = 0;
 
     virtual void GetSpecificHandlers(Qt3DSDMInstanceHandle inInstance,
                                      THandlerHandleList &outHandlers) = 0;
-    virtual CUICDMHandlerHandle GetOrCreateSpecificHandler(Qt3DSDMInstanceHandle inInstance,
+    virtual Qt3DSDMHandlerHandle GetOrCreateSpecificHandler(Qt3DSDMInstanceHandle inInstance,
                                                            TStrType inName) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Handler Arguments
-    virtual QT3DSU32 AddHandlerArgument(CUICDMHandlerHandle inHandler) = 0;
+    virtual QT3DSU32 AddHandlerArgument(Qt3DSDMHandlerHandle inHandler) = 0;
     virtual void
-    SetHandlerArgumentInfo(CUICDMHandlerHandle inHandler, QT3DSU32 inArgIndex, TStrType inName,
+    SetHandlerArgumentInfo(Qt3DSDMHandlerHandle inHandler, QT3DSU32 inArgIndex, TStrType inName,
                            TStrType inFormalName, TStrType inDescription,
                            CompleteMetaDataType::Enum inDataType, const SValue &inDefaultValue,
                            const TMetaDataData &inMetaData, HandlerArgumentType::Value inArgType) = 0;
 
-    virtual void DestroyHanderArgument(CUICDMHandlerHandle inHandler, QT3DSU32 inArgIndex) = 0;
+    virtual void DestroyHanderArgument(Qt3DSDMHandlerHandle inHandler, QT3DSU32 inArgIndex) = 0;
 
     virtual Option<SMetaDataHandlerArgumentInfo>
-    FindHandlerArgumentByName(CUICDMHandlerHandle inHandler, TStrType inName) = 0;
-    virtual void GetHandlerArguments(CUICDMHandlerHandle inHandler,
+    FindHandlerArgumentByName(Qt3DSDMHandlerHandle inHandler, TStrType inName) = 0;
+    virtual void GetHandlerArguments(Qt3DSDMHandlerHandle inHandler,
                                      vector<SMetaDataHandlerArgumentInfo> &outArguments) = 0;
     virtual Option<SMetaDataHandlerArgumentInfo>
-    GetHandlerArgumentInfo(CUICDMHandlerHandle inHandle, QT3DSU32 inIndex) = 0;
-    virtual QT3DSU32 GetNumHandlerArguments(CUICDMHandlerHandle inHandler) = 0;
+    GetHandlerArgumentInfo(Qt3DSDMHandlerHandle inHandle, QT3DSU32 inIndex) = 0;
+    virtual QT3DSU32 GetNumHandlerArguments(Qt3DSDMHandlerHandle inHandler) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // References
@@ -380,15 +380,15 @@ public:
     // Also, the objects in these messages are still valid so you can query information about them
     // at this time.  They will be destroyed subsequent to the event.
     virtual std::shared_ptr<ISignalConnection>
-    ConnectInternalCategoryDestroyed(std::function<void(CUICDMCategoryHandle)> inCallback) = 0;
+    ConnectInternalCategoryDestroyed(std::function<void(Qt3DSDMCategoryHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection> ConnectInternalPropertyDestroyed(
-        std::function<void(CUICDMMetaDataPropertyHandle)> inCallback) = 0;
+        std::function<void(Qt3DSDMMetaDataPropertyHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection>
-    ConnectInternalEventDestroyed(std::function<void(CUICDMEventHandle)> inCallback) = 0;
+    ConnectInternalEventDestroyed(std::function<void(Qt3DSDMEventHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection>
-    ConnectInternalHandlerDestroyed(std::function<void(CUICDMHandlerHandle)> inCallback) = 0;
+    ConnectInternalHandlerDestroyed(std::function<void(Qt3DSDMHandlerHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection> ConnectInternalHandlerArgDestroyed(
-        std::function<void(CUICDMHandlerHandle, QT3DSU32)> inCallback) = 0;
+        std::function<void(Qt3DSDMHandlerHandle, QT3DSU32)> inCallback) = 0;
 #endif
 
     ////////////////////////////////////////////////////////////////////////////////////

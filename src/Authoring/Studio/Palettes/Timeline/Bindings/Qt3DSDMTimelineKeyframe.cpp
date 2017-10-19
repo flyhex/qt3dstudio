@@ -42,17 +42,17 @@
 using namespace qt3dsdm;
 
 // TODO: figure out if we can just use IDoc instead of CDoc
-CUICDMTimelineKeyframe::CUICDMTimelineKeyframe(IDoc *inDoc)
+Qt3DSDMTimelineKeyframe::Qt3DSDMTimelineKeyframe(IDoc *inDoc)
     : m_Doc(dynamic_cast<CDoc *>(inDoc))
     , m_Selected(false)
 {
 }
 
-CUICDMTimelineKeyframe::~CUICDMTimelineKeyframe()
+Qt3DSDMTimelineKeyframe::~Qt3DSDMTimelineKeyframe()
 {
 }
 
-bool CUICDMTimelineKeyframe::IsSelected() const
+bool Qt3DSDMTimelineKeyframe::IsSelected() const
 {
     return m_Selected;
 }
@@ -62,11 +62,11 @@ float my_roundf(float r)
     return (r > 0.0f) ? floorf(r + 0.5f) : ceilf(r - 0.5f);
 }
 
-long CUICDMTimelineKeyframe::GetTime() const
+long Qt3DSDMTimelineKeyframe::GetTime() const
 {
     if (!m_KeyframeHandles.empty()) {
         IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
-        CUICDMKeyframeHandle theKeyframeHandle = *m_KeyframeHandles.begin();
+        Qt3DSDMKeyframeHandle theKeyframeHandle = *m_KeyframeHandles.begin();
         if (theAnimationCore->KeyframeValid(theKeyframeHandle)) {
             float theTimeinSecs =
                 KeyframeTime(theAnimationCore->GetKeyframeData(theKeyframeHandle));
@@ -78,7 +78,7 @@ long CUICDMTimelineKeyframe::GetTime() const
     return -1; // keyframe was deleted, and data cannot be retrieved.
 }
 
-float CUICDMTimelineKeyframe::GetTimeInSecs(long inTime)
+float Qt3DSDMTimelineKeyframe::GetTimeInSecs(long inTime)
 {
     float theTimeinSecs = static_cast<float>(inTime) / 1000.f;
     // round off to 4 decimal place to workaround precision issues
@@ -87,7 +87,7 @@ float CUICDMTimelineKeyframe::GetTimeInSecs(long inTime)
     return theTimeinSecs;
 }
 
-void CUICDMTimelineKeyframe::SetTime(const long inNewTime)
+void Qt3DSDMTimelineKeyframe::SetTime(const long inNewTime)
 {
     float theTimeinSecs = GetTimeInSecs(inNewTime);
     CCmd *theCmd = nullptr;
@@ -112,7 +112,7 @@ void CUICDMTimelineKeyframe::SetTime(const long inNewTime)
 #endif
 }
 
-inline CUICDMAnimationHandle GetAnimationHandle(qt3dsdm::IAnimationCore *inAnimationCore,
+inline Qt3DSDMAnimationHandle GetAnimationHandle(qt3dsdm::IAnimationCore *inAnimationCore,
                                                 const TKeyframeHandleList &inKeyframes)
 {
     if (!inKeyframes.empty())
@@ -120,10 +120,10 @@ inline CUICDMAnimationHandle GetAnimationHandle(qt3dsdm::IAnimationCore *inAnima
     return 0;
 }
 
-void CUICDMTimelineKeyframe::SetDynamic(bool inIsDynamic)
+void Qt3DSDMTimelineKeyframe::SetDynamic(bool inIsDynamic)
 {
     if (!m_KeyframeHandles.empty()) {
-        CUICDMAnimationHandle theAnimation =
+        Qt3DSDMAnimationHandle theAnimation =
             GetAnimationHandle(m_Doc->GetStudioSystem()->GetAnimationCore(), m_KeyframeHandles);
         if (theAnimation.Valid())
             m_Doc->GetCore()->ExecuteCommand(
@@ -132,10 +132,10 @@ void CUICDMTimelineKeyframe::SetDynamic(bool inIsDynamic)
 }
 
 // Only the first key of a track can be dynamic.
-bool CUICDMTimelineKeyframe::IsDynamic() const
+bool Qt3DSDMTimelineKeyframe::IsDynamic() const
 {
     qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
-    CUICDMAnimationHandle theAnimation = GetAnimationHandle(theAnimationCore, m_KeyframeHandles);
+    Qt3DSDMAnimationHandle theAnimation = GetAnimationHandle(theAnimationCore, m_KeyframeHandles);
     if (theAnimation.Valid()) {
         SAnimationInfo theInfo = theAnimationCore->GetAnimationInfo(theAnimation);
         if (theInfo.m_DynamicFirstKeyframe) {
@@ -150,12 +150,12 @@ bool CUICDMTimelineKeyframe::IsDynamic() const
     return false;
 }
 
-void CUICDMTimelineKeyframe::AddKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle)
+void Qt3DSDMTimelineKeyframe::AddKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle)
 {
     m_KeyframeHandles.push_back(inHandle);
 }
 
-bool CUICDMTimelineKeyframe::HasKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle) const
+bool Qt3DSDMTimelineKeyframe::HasKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle) const
 {
     TKeyframeHandleList::const_iterator theIter = m_KeyframeHandles.begin();
     for (; theIter != m_KeyframeHandles.end(); ++theIter) {
@@ -165,25 +165,25 @@ bool CUICDMTimelineKeyframe::HasKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inH
     return false;
 }
 
-void CUICDMTimelineKeyframe::SetSelected(bool inSelected)
+void Qt3DSDMTimelineKeyframe::SetSelected(bool inSelected)
 {
     m_Selected = inSelected;
 }
 
 // For colors, there would be 3 keyframe handles
-void CUICDMTimelineKeyframe::UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper,
+void Qt3DSDMTimelineKeyframe::UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper,
                                                  long inTime)
 {
     for (size_t i = 0; i < m_KeyframeHandles.size(); ++i)
         inCommandHelper->SetCommandTime(m_KeyframeHandles[i], inTime);
 }
 
-void CUICDMTimelineKeyframe::GetKeyframeHandles(TKeyframeHandleList &outList) const
+void Qt3DSDMTimelineKeyframe::GetKeyframeHandles(TKeyframeHandleList &outList) const
 {
     outList = m_KeyframeHandles;
 }
 
-void CompareAndSet(CUICDMKeyframeHandle inKeyframe, IAnimationCore *inAnimationCore,
+void CompareAndSet(Qt3DSDMKeyframeHandle inKeyframe, IAnimationCore *inAnimationCore,
                    float &outRetValue, bool inGreaterThan)
 {
     TKeyframe theKeyframeData = inAnimationCore->GetKeyframeData(inKeyframe);
@@ -192,7 +192,7 @@ void CompareAndSet(CUICDMKeyframeHandle inKeyframe, IAnimationCore *inAnimationC
         outRetValue = theValue;
 }
 
-float CUICDMTimelineKeyframe::GetMaxValue() const
+float Qt3DSDMTimelineKeyframe::GetMaxValue() const
 {
     IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     float theRetVal = FLT_MIN;
@@ -202,7 +202,7 @@ float CUICDMTimelineKeyframe::GetMaxValue() const
     return theRetVal;
 }
 
-float CUICDMTimelineKeyframe::GetMinValue() const
+float Qt3DSDMTimelineKeyframe::GetMinValue() const
 {
     IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     float theRetVal = FLT_MAX;

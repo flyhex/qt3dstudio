@@ -59,7 +59,7 @@ using namespace qt3dsdm;
 /**
  *	Constructor
  */
-CUICDMInspectable::CUICDMInspectable(CStudioApp &inApp, CCore *inCore,
+Qt3DSDMInspectable::Qt3DSDMInspectable(CStudioApp &inApp, CCore *inCore,
                                      qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                      qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance /*= 0*/)
     : CInspectableBase(inCore)
@@ -75,7 +75,7 @@ CUICDMInspectable::CUICDMInspectable(CStudioApp &inApp, CCore *inCore,
 /**
  *	Query the name of the inspectable item
  */
-Q3DStudio::CString CUICDMInspectable::GetName()
+Q3DStudio::CString Qt3DSDMInspectable::GetName()
 {
     CClientDataModelBridge *theBridge =
         m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
@@ -95,7 +95,7 @@ Q3DStudio::CString CUICDMInspectable::GetName()
 /**
  *	Query the number of groups to display
  */
-long CUICDMInspectable::GetGroupCount()
+long Qt3DSDMInspectable::GetGroupCount()
 {
     // If you have a dual personality inspectable then you may overwrite
     QT3DS_ASSERT(
@@ -111,10 +111,10 @@ long CUICDMInspectable::GetGroupCount()
 /**
  *	Return the property group for display
  */
-CInspectorGroup *CUICDMInspectable::GetGroup(long inIndex)
+CInspectorGroup *Qt3DSDMInspectable::GetGroup(long inIndex)
 {
-    CUICDMInspectorGroup *theGroup =
-        new CUICDMInspectorGroup(m_App, GetGroupName(inIndex).toQString(), *this, inIndex);
+    Qt3DSDMInspectorGroup *theGroup =
+        new Qt3DSDMInspectorGroup(m_App, GetGroupName(inIndex).toQString(), *this, inIndex);
 
     TMetaDataPropertyHandleList theProperties = GetGroupProperties(inIndex);
 
@@ -129,7 +129,7 @@ CInspectorGroup *CUICDMInspectable::GetGroup(long inIndex)
 /**
  *	Return the property handles for display, given the group index
  */
-TMetaDataPropertyHandleList CUICDMInspectable::GetGroupProperties(long inIndex)
+TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
 {
     TMetaDataPropertyHandleList retval;
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
@@ -192,7 +192,7 @@ TMetaDataPropertyHandleList CUICDMInspectable::GetGroupProperties(long inIndex)
 /**
  *	Return the Resource String ID for the Group Name, given the group index
  */
-Q3DStudio::CString CUICDMInspectable::GetGroupName(long inGroupIndex)
+Q3DStudio::CString Qt3DSDMInspectable::GetGroupName(long inGroupIndex)
 {
     std::vector<TCharStr> theGroupNames;
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
@@ -211,13 +211,13 @@ Q3DStudio::CString CUICDMInspectable::GetGroupName(long inGroupIndex)
 /**
  *	Return the Inspectable Instance Handle for the Group, given the group index
  */
-Qt3DSDMInstanceHandle CUICDMInspectable::GetGroupInstance(long inGroupIndex)
+Qt3DSDMInstanceHandle Qt3DSDMInspectable::GetGroupInstance(long inGroupIndex)
 {
     Q_UNUSED(inGroupIndex);
     return m_DualPersonalityInstance;
 }
 
-EStudioObjectType CUICDMInspectable::GetObjectType()
+EStudioObjectType Qt3DSDMInspectable::GetObjectType()
 {
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
     Option<qt3dsdm::TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(m_Instance);
@@ -283,13 +283,13 @@ EStudioObjectType CUICDMInspectable::GetObjectType()
     return OBJTYPE_UNKNOWN;
 }
 
-bool CUICDMInspectable::IsValid() const
+bool Qt3DSDMInspectable::IsValid() const
 {
     return m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_Instance)
         && m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_DualPersonalityInstance);
 }
 
-bool CUICDMInspectable::IsMaster()
+bool Qt3DSDMInspectable::IsMaster()
 {
     ISlideSystem *theSlideSystem = m_Core->GetDoc()->GetStudioSystem()->GetSlideSystem();
     qt3dsdm::Qt3DSDMSlideHandle theSlideHandle = theSlideSystem->GetAssociatedSlide(m_Instance);
@@ -300,7 +300,7 @@ bool CUICDMInspectable::IsMaster()
     return false;
 }
 
-// std::wstring CUICDMInspectable::GetTypeString( ) const
+// std::wstring Qt3DSDMInspectable::GetTypeString( ) const
 //{
 //	std::wstring theReturn(L"");
 //	try

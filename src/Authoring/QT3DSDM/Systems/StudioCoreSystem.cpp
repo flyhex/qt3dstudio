@@ -41,27 +41,27 @@ using namespace std;
 
 namespace qt3dsdm {
 
-inline bool AnimationInstanceMatches(CUICDMAnimationHandle inAnimation,
+inline bool AnimationInstanceMatches(Qt3DSDMAnimationHandle inAnimation,
                                      TAnimationCorePtr inAnimationCore,
                                      Qt3DSDMInstanceHandle inInstance)
 {
     return inInstance == inAnimationCore->GetAnimationInfo(inAnimation).m_Instance;
 }
 
-inline bool AnimationPropertyMatches(CUICDMAnimationHandle inAnimation,
+inline bool AnimationPropertyMatches(Qt3DSDMAnimationHandle inAnimation,
                                      TAnimationCorePtr inAnimationCore,
                                      Qt3DSDMPropertyHandle inProperty)
 {
     return inProperty == inAnimationCore->GetAnimationInfo(inAnimation).m_Property;
 }
 
-inline bool AnimationSlideMatches(CUICDMAnimationHandle inAnimation,
+inline bool AnimationSlideMatches(Qt3DSDMAnimationHandle inAnimation,
                                   TAnimationCorePtr inAnimationCore, Qt3DSDMSlideHandle inSlide)
 {
     return inSlide == inAnimationCore->GetAnimationInfo(inAnimation).m_Slide;
 }
 
-inline bool AnimationSlideInstancePropertyMatch(CUICDMAnimationHandle inAnimation,
+inline bool AnimationSlideInstancePropertyMatch(Qt3DSDMAnimationHandle inAnimation,
                                                 TAnimationCorePtr inAnimationCore,
                                                 Qt3DSDMSlideHandle inSlide,
                                                 Qt3DSDMInstanceHandle inInstance,
@@ -72,7 +72,7 @@ inline bool AnimationSlideInstancePropertyMatch(CUICDMAnimationHandle inAnimatio
         && theInfo.m_Property == inProperty;
 }
 
-inline bool AnimationInstancesPropertiesMatch(CUICDMAnimationHandle inAnimation,
+inline bool AnimationInstancesPropertiesMatch(Qt3DSDMAnimationHandle inAnimation,
                                               TAnimationCorePtr inAnimationCore,
                                               const TInstanceHandleList &inInstances,
                                               const TPropertyHandleList &inProperties)
@@ -85,12 +85,12 @@ inline bool AnimationInstancesPropertiesMatch(CUICDMAnimationHandle inAnimation,
 }
 
 void EraseAnimationsThatMatch(TAnimationCorePtr inAnimationCore,
-                              function<bool(CUICDMAnimationHandle)> inPredicate)
+                              function<bool(Qt3DSDMAnimationHandle)> inPredicate)
 {
     TAnimationHandleList theAnimations;
     inAnimationCore->GetAnimations(theAnimations);
-    function<bool(CUICDMAnimationHandle)> theComp(std::bind(
-        complement<function<bool(CUICDMAnimationHandle)>, CUICDMAnimationHandle>, inPredicate,
+    function<bool(Qt3DSDMAnimationHandle)> theComp(std::bind(
+        complement<function<bool(Qt3DSDMAnimationHandle)>, Qt3DSDMAnimationHandle>, inPredicate,
                                                       std::placeholders::_1));
     TAnimationHandleList::iterator theRemovals =
         remove_if(theAnimations.begin(), theAnimations.end(), theComp);
@@ -117,7 +117,7 @@ void CascadeInstanceDelete(Qt3DSDMInstanceHandle inInstance, TDataCorePtr inData
 
     inSlideGraphCore->DissociateInstance(inInstance);
 
-    function<bool(CUICDMAnimationHandle)> thePredicate(
+    function<bool(Qt3DSDMAnimationHandle)> thePredicate(
         std::bind(AnimationInstanceMatches, std::placeholders::_1, inAnimationCore, inInstance));
     EraseAnimationsThatMatch(inAnimationCore, thePredicate);
 
@@ -131,7 +131,7 @@ void CascadePropertyRemove(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHand
                            TAnimationCorePtr inAnimationCore)
 {
     inSlideCore->DeleteAllPropertyEntries(inProperty);
-    function<bool(CUICDMAnimationHandle)> thePredicate(
+    function<bool(Qt3DSDMAnimationHandle)> thePredicate(
         std::bind(AnimationPropertyMatches, std::placeholders::_1, inAnimationCore, inProperty));
     EraseAnimationsThatMatch(inAnimationCore, thePredicate);
 }
@@ -140,7 +140,7 @@ void CascadeSlideDelete(Qt3DSDMSlideHandle inSlide, TDataCorePtr inDataCore,
                         TSlideCorePtr inSlideCore, TSlideGraphCorePtr inSlideGraphCore,
                         TAnimationCorePtr inAnimationCore, TActionCorePtr inActionCore)
 {
-    CUICDMSlideGraphHandle theGraph = inSlideGraphCore->GetSlideGraph(inSlide);
+    Qt3DSDMSlideGraphHandle theGraph = inSlideGraphCore->GetSlideGraph(inSlide);
     if (theGraph.Valid()) {
         TSlideHandleList theChildren;
         inSlideCore->GetChildSlides(inSlide, theChildren);
@@ -157,7 +157,7 @@ void CascadeSlideDelete(Qt3DSDMSlideHandle inSlide, TDataCorePtr inDataCore,
     else {
         Qt3DSDMSlideHandle theMaster(inSlideCore->GetParentSlide(inSlide));
         if (theMaster.Valid()) {
-            CUICDMSlideGraphHandle theGraph = inSlideGraphCore->GetSlideGraph(theMaster);
+            Qt3DSDMSlideGraphHandle theGraph = inSlideGraphCore->GetSlideGraph(theMaster);
             if (theGraph.Valid()) {
                 /*
                 tricky stuff.  The slide change was recorded in the transaction system when the
@@ -235,7 +235,7 @@ void CascadeInstanceParentRemoved(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInsta
                                    std::cref(derivedInstances), std::cref(theProperties)));
 }
 
-void CascadeBeforeAnimationDeleted(CUICDMAnimationHandle inAnimation,
+void CascadeBeforeAnimationDeleted(Qt3DSDMAnimationHandle inAnimation,
                                    TAnimationCorePtr inAnimationCore, TDataCorePtr inDataCore,
                                    TSlideCorePtr inSlideCore)
 {
@@ -253,10 +253,10 @@ void CascadeBeforeAnimationDeleted(CUICDMAnimationHandle inAnimation,
     }
 }
 
-void CascadeBeforeKeyframeErased(CUICDMKeyframeHandle inKeyframe, TAnimationCorePtr inAnimationCore,
+void CascadeBeforeKeyframeErased(Qt3DSDMKeyframeHandle inKeyframe, TAnimationCorePtr inAnimationCore,
                                  TDataCorePtr inDataCore, TSlideCorePtr inSlideCore)
 {
-    CUICDMAnimationHandle theAnimation = inAnimationCore->GetAnimationForKeyframe(inKeyframe);
+    Qt3DSDMAnimationHandle theAnimation = inAnimationCore->GetAnimationForKeyframe(inKeyframe);
     if (inAnimationCore->GetKeyframeCount(theAnimation) == 1)
         CascadeBeforeAnimationDeleted(theAnimation, inAnimationCore, inDataCore, inSlideCore);
 }

@@ -102,7 +102,7 @@ bool CKeyframesManager::CanPerformKeyframeCopy()
     if (!m_SelectedKeyframes.empty()) {
         theCanCopyNewData = true;
         if (m_SelectedKeyframes.size() > 1) {
-            CUICDMTimelineItemBinding *theInstance = m_SelectedKeyframes[0].m_Instance;
+            Qt3DSDMTimelineItemBinding *theInstance = m_SelectedKeyframes[0].m_Instance;
             TSelectedKeyframeList::iterator theIter = m_SelectedKeyframes.begin();
             ++theIter;
             for (; theIter != m_SelectedKeyframes.end() && theCanCopyNewData; ++theIter) {
@@ -156,10 +156,10 @@ bool CKeyframesManager::RemoveKeyframes(bool inPerformCopy)
     if (!m_SelectedKeyframes.empty()) {
         TSelectedKeyframeList::iterator theKeyIter = m_SelectedKeyframes.begin();
         for (; theKeyIter != m_SelectedKeyframes.end(); ++theKeyIter) {
-            CUICDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
             theKeyIter->m_Keyframe->GetKeyframeHandles(theKeyframeHandles);
             ASSERT(!theKeyframeHandles.empty());
-            CUICDMTimelineKeyframe::TKeyframeHandleList::iterator theIter =
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList::iterator theIter =
                 theKeyframeHandles.begin();
             if (!theCmd) {
                 theCmd = new CCmdDataModelRemoveKeyframe(theDoc, *theIter);
@@ -218,8 +218,8 @@ void CKeyframesManager::SetKeyframeInterpolation()
     if (!m_SelectedKeyframes.empty()) // this is a sorted list, so we only need to grab tge ease
                                       // in/out values from the first item in this list.
     {
-        CUICDMTimelineKeyframe *theTimelineKeyframe = m_SelectedKeyframes.front().m_Keyframe;
-        CUICDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+        Qt3DSDMTimelineKeyframe *theTimelineKeyframe = m_SelectedKeyframes.front().m_Keyframe;
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
         theTimelineKeyframe->GetKeyframeHandles(theKeyframeHandles);
         TKeyframe theKeyframeData = theAnimationCore->GetKeyframeData(theKeyframeHandles[0]);
         GetEaseInOutValues(theKeyframeData, theEaseIn, theEaseOut);
@@ -231,8 +231,8 @@ void CKeyframesManager::SetKeyframeInterpolation()
                                                __LINE__);
         TSelectedKeyframeList::iterator theKeyIter = m_SelectedKeyframes.begin();
         for (; theKeyIter != m_SelectedKeyframes.end(); ++theKeyIter) {
-            CUICDMTimelineKeyframe *theTimelineKeyframe = theKeyIter->m_Keyframe;
-            CUICDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+            Qt3DSDMTimelineKeyframe *theTimelineKeyframe = theKeyIter->m_Keyframe;
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
             theTimelineKeyframe->GetKeyframeHandles(theKeyframeHandles);
             for (size_t i = 0; i < theKeyframeHandles.size(); ++i) {
                 TKeyframe theKeyframeData =
@@ -246,7 +246,7 @@ void CKeyframesManager::SetKeyframeInterpolation()
 
 bool CKeyframesManager::HasDynamicKeyframes()
 {
-    CUICDMTimelineItemBinding *theBinding = m_TransMgr->GetSelectedBinding();
+    Qt3DSDMTimelineItemBinding *theBinding = m_TransMgr->GetSelectedBinding();
     if (theBinding) {
         return theBinding->HasDynamicKeyframes(-1);
     }
@@ -303,7 +303,7 @@ void CKeyframesManager::SetKeyframeTime(long inTime)
     theTimeEditDlg.ShowDialog(inTime, 0, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
 }
 
-void CKeyframesManager::SetKeyframeDynamic(CUICDMTimelineKeyframe *inKeyframe, bool inDynamic)
+void CKeyframesManager::SetKeyframeDynamic(Qt3DSDMTimelineKeyframe *inKeyframe, bool inDynamic)
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::TKeyframeHandleList theKeyframeHandle;
@@ -314,7 +314,7 @@ void CKeyframesManager::SetKeyframeDynamic(CUICDMTimelineKeyframe *inKeyframe, b
 
     qt3dsdm::IAnimationCore *theAnimationCore = theDoc->GetStudioSystem()->GetAnimationCore();
     for (size_t theKeyframe = 0; theKeyframe < theKeyframeHandle.size(); ++theKeyframe) {
-        qt3dsdm::CUICDMAnimationHandle theAnimation(
+        qt3dsdm::Qt3DSDMAnimationHandle theAnimation(
             theAnimationCore->GetAnimationForKeyframe(theKeyframeHandle.at(theKeyframe)));
         if (!theCmd)
             theCmd = new CCmdDataModelChangeDynamicKeyframe(theDoc, theAnimation, inDynamic);
@@ -329,12 +329,12 @@ void CKeyframesManager::SetKeyframeDynamic(CUICDMTimelineKeyframe *inKeyframe, b
 void CKeyframesManager::SetKeyframesDynamic(bool inDynamic)
 {
 
-    CUICDMTimelineKeyframe *theKeyframe;
+    Qt3DSDMTimelineKeyframe *theKeyframe;
 
     if (m_SelectedKeyframes.size() == 0) {
-        CUICDMTimelineItemBinding *theBinding = m_TransMgr->GetSelectedBinding();
+        Qt3DSDMTimelineItemBinding *theBinding = m_TransMgr->GetSelectedBinding();
         IKeyframe *key = theBinding->GetKeyframeByIndex(0);
-        theKeyframe = dynamic_cast<CUICDMTimelineKeyframe *>(key);
+        theKeyframe = dynamic_cast<Qt3DSDMTimelineKeyframe *>(key);
         SetKeyframeDynamic(theKeyframe, inDynamic);
     } else {
         for (int i = 0; i < (int)m_SelectedKeyframes.size(); ++i) {
@@ -348,7 +348,7 @@ long CKeyframesManager::OffsetSelectedKeyframes(long inOffset)
 {
     m_InstanceSet.clear();
     m_InstanceList.clear();
-    std::set<CUICDMTimelineItemBinding *> &theInstances(m_InstanceSet);
+    std::set<Qt3DSDMTimelineItemBinding *> &theInstances(m_InstanceSet);
 
     TSelectedKeyframeList::iterator theKeyIter = m_SelectedKeyframes.begin();
     for (; theKeyIter != m_SelectedKeyframes.end(); ++theKeyIter) {
@@ -366,7 +366,7 @@ long CKeyframesManager::OffsetSelectedKeyframes(long inOffset)
     }
 
     // UI update, explicitly because this doesn't generate any events till action is committed
-    std::set<CUICDMTimelineItemBinding *>::iterator theInstanceIter = theInstances.begin();
+    std::set<Qt3DSDMTimelineItemBinding *>::iterator theInstanceIter = theInstances.begin();
     for (; theInstanceIter != theInstances.end(); ++theInstanceIter)
         (*theInstanceIter)->UIRefreshPropertyKeyframe(inOffset);
 
@@ -401,8 +401,8 @@ bool CKeyframesManager::CanMakeSelectedKeyframesDynamic()
         m_SelectedKeyframes.at(idx).m_Keyframe->GetKeyframeHandles(theKeyframes);
         for (size_t specificKeyframeIdx = 0, specificKeyframeEnd = theKeyframes.size();
              specificKeyframeIdx < specificKeyframeEnd; ++specificKeyframeIdx) {
-            CUICDMKeyframeHandle theKeyframe = theKeyframes[specificKeyframeIdx];
-            CUICDMAnimationHandle theAnimation =
+            Qt3DSDMKeyframeHandle theKeyframe = theKeyframes[specificKeyframeIdx];
+            Qt3DSDMAnimationHandle theAnimation =
                 theAnimationCore.GetAnimationForKeyframe(theKeyframe);
             allTheKeyframes.clear();
             theAnimationCore.GetKeyframes(theAnimation, allTheKeyframes);
@@ -415,8 +415,8 @@ bool CKeyframesManager::CanMakeSelectedKeyframesDynamic()
 
 // keeps track of selected keyframes so that we don't have to iterate through the entire hierarchy
 // to find them
-void CKeyframesManager::SetKeyframeSelected(CUICDMTimelineKeyframe *inKeyframe, bool inSelected,
-                                            CUICDMTimelineItemBinding *inOwningInstance /*= nullptr */)
+void CKeyframesManager::SetKeyframeSelected(Qt3DSDMTimelineKeyframe *inKeyframe, bool inSelected,
+                                            Qt3DSDMTimelineItemBinding *inOwningInstance /*= nullptr */)
 {
     TSelectedKeyframeList::iterator theKeyIter = m_SelectedKeyframes.begin();
     for (; theKeyIter != m_SelectedKeyframes.end(); ++theKeyIter) {
@@ -435,7 +435,7 @@ void CKeyframesManager::SetKeyframeSelected(CUICDMTimelineKeyframe *inKeyframe, 
     }
 }
 
-qt3dsdm::SGetOrSetKeyframeInfo SetupKeyframeInfo(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+qt3dsdm::SGetOrSetKeyframeInfo SetupKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                                qt3dsdm::IAnimationCore &inCore)
 {
     TKeyframe theKeyframeData = inCore.GetKeyframeData(inKeyframe);
@@ -461,13 +461,13 @@ void CKeyframesManager::CopySelectedKeyframes()
 
         // note: m_SelectedKeyframes is already sorted by time
         float theEarliestKeyframeTimeInSecs =
-            CUICDMTimelineKeyframe::GetTimeInSecs(m_SelectedKeyframes[0].m_Keyframe->GetTime());
+            Qt3DSDMTimelineKeyframe::GetTimeInSecs(m_SelectedKeyframes[0].m_Keyframe->GetTime());
 
         IAnimationCore *theAnimationCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
         TSelectedKeyframeList::iterator theIter = m_SelectedKeyframes.begin();
         for (; theIter != m_SelectedKeyframes.end(); ++theIter) {
-            CUICDMTimelineKeyframe *theKeyframe = (*theIter).m_Keyframe;
-            CUICDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+            Qt3DSDMTimelineKeyframe *theKeyframe = (*theIter).m_Keyframe;
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
             theKeyframe->GetKeyframeHandles(theKeyframeHandles);
             qt3dsdm::SGetOrSetKeyframeInfo theInfos[3];
             size_t theValidInfos = 0;
@@ -492,10 +492,10 @@ void CKeyframesManager::CopySelectedKeyframes()
                 }
                 // time is relative to the earliest keyframe time.
                 float theRelativeTimeInSecs =
-                    CUICDMTimelineKeyframe::GetTimeInSecs(theKeyframe->GetTime())
+                    Qt3DSDMTimelineKeyframe::GetTimeInSecs(theKeyframe->GetTime())
                     - theEarliestKeyframeTimeInSecs;
 
-                CUICDMAnimationHandle theAnimation =
+                Qt3DSDMAnimationHandle theAnimation =
                     theAnimationCore->GetAnimationForKeyframe(theKeyframeHandles[0]);
                 m_PasteKeyframeCommandHelper->AddKeyframeData(
                     theAnimationCore->GetAnimationInfo(theAnimation).m_Property,

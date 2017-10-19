@@ -2462,10 +2462,10 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                                          (QT3DSF32)innerBottom, (QT3DSF32)innerTop,
                                          (QT3DSF32)outerLeft, (QT3DSF32)outerRight, m_lineColor);
             qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();
-            qt3dsdm::CUICDMGuideHandle theSelectedGuide;
+            qt3dsdm::Qt3DSDMGuideHandle theSelectedGuide;
             Q3DStudio::SSelectedValue theSelection = m_Doc.GetSelectedValue();
             if (theSelection.getType() == Q3DStudio::SelectedValueTypes::Guide)
-                theSelectedGuide = theSelection.getData<qt3dsdm::CUICDMGuideHandle>();
+                theSelectedGuide = theSelection.getData<qt3dsdm::Qt3DSDMGuideHandle>();
 
             // Draw guides
             for (size_t guideIdx = 0, guideEnd = theGuides.size(); guideIdx < guideEnd;
@@ -3536,7 +3536,7 @@ static float RoundToNearest(float inValue, float inMin, float inMax, float inRou
     return inValue;
 }
 
-void STranslation::PerformGuideDrag(CUICDMGuideHandle inGuide, CPt inPoint,
+void STranslation::PerformGuideDrag(Qt3DSDMGuideHandle inGuide, CPt inPoint,
                                     CUpdateableDocumentEditor &inEditor)
 {
     qt3dsdm::SGuideInfo theInfo = m_Doc.GetDocumentReader().GetGuideInfo(inGuide);
@@ -3559,7 +3559,7 @@ void STranslation::PerformGuideDrag(CUICDMGuideHandle inGuide, CPt inPoint,
     inEditor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }
 
-void STranslation::CheckGuideInPresentationRect(CUICDMGuideHandle inGuide,
+void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
                                                 CUpdateableDocumentEditor &inEditor)
 {
     qt3dsdm::SGuideInfo theInfo = m_Doc.GetDocumentReader().GetGuideInfo(inGuide);

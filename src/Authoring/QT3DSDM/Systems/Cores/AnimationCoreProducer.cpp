@@ -42,10 +42,10 @@ namespace qt3dsdm {
 struct SArtistEditedUndoRedoScope
 {
     TSimpleAnimationCorePtr m_AnimationCore;
-    CUICDMAnimationHandle m_Animation;
+    Qt3DSDMAnimationHandle m_Animation;
     TTransactionConsumerPtr m_Consumer;
     bool m_ArtistEdited;
-    SArtistEditedUndoRedoScope(TSimpleAnimationCorePtr inAnimCore, CUICDMAnimationHandle inAnim,
+    SArtistEditedUndoRedoScope(TSimpleAnimationCorePtr inAnimCore, Qt3DSDMAnimationHandle inAnim,
                                TTransactionConsumerPtr inConsumer)
         : m_AnimationCore(inAnimCore)
         , m_Animation(inAnim)
@@ -71,7 +71,7 @@ struct SLookupCacheDoUndoOp : public ITransaction
     std::shared_ptr<SAnimationTrack> m_Animation;
     TSimpleAnimationCorePtr m_AnimationCore;
     bool m_AddOnDo;
-    SLookupCacheDoUndoOp(const char *inFile, int inLine, CUICDMAnimationHandle inAnimHandle,
+    SLookupCacheDoUndoOp(const char *inFile, int inLine, Qt3DSDMAnimationHandle inAnimHandle,
                          TSimpleAnimationCorePtr inCore, bool addOnDo)
         : ITransaction(inFile, inLine)
         , m_AnimationCore(inCore)
@@ -107,12 +107,12 @@ struct SLookupCacheDoUndoOp : public ITransaction
     }
 };
 
-CUICDMAnimationHandle
+Qt3DSDMAnimationHandle
 CAnimationCoreProducer::CreateAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                         Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                         EAnimationType inAnimationType, bool inFirstKeyframeDynamic)
 {
-    CUICDMAnimationHandle retval = m_Data->CreateAnimation(inSlide, inInstance, inProperty, inIndex,
+    Qt3DSDMAnimationHandle retval = m_Data->CreateAnimation(inSlide, inInstance, inProperty, inIndex,
                                                            inAnimationType, inFirstKeyframeDynamic);
 
     CREATE_HANDLE_CREATE_TRANSACTION(m_Consumer, retval, m_Data->m_Objects);
@@ -124,7 +124,7 @@ CAnimationCoreProducer::CreateAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInsta
     return retval;
 }
 
-void CAnimationCoreProducer::DeleteAnimation(CUICDMAnimationHandle inAnimation)
+void CAnimationCoreProducer::DeleteAnimation(Qt3DSDMAnimationHandle inAnimation)
 {
     // Ensure animation exists
     SAnimationTrack *theAnimation =
@@ -144,7 +144,7 @@ void CAnimationCoreProducer::DeleteAnimation(CUICDMAnimationHandle inAnimation)
                                             theInfo.m_AnimationType);
 }
 
-CUICDMAnimationHandle CAnimationCoreProducer::GetAnimation(Qt3DSDMSlideHandle inSlide,
+Qt3DSDMAnimationHandle CAnimationCoreProducer::GetAnimation(Qt3DSDMSlideHandle inSlide,
                                                            Qt3DSDMInstanceHandle inInstance,
                                                            Qt3DSDMPropertyHandle inProperty,
                                                            size_t inIndex) const
@@ -152,7 +152,7 @@ CUICDMAnimationHandle CAnimationCoreProducer::GetAnimation(Qt3DSDMSlideHandle in
     return m_Data->GetAnimation(inSlide, inInstance, inProperty, inIndex);
 }
 
-SAnimationInfo CAnimationCoreProducer::GetAnimationInfo(CUICDMAnimationHandle inAnimation) const
+SAnimationInfo CAnimationCoreProducer::GetAnimationInfo(Qt3DSDMAnimationHandle inAnimation) const
 {
     return m_Data->GetAnimationInfo(inAnimation);
 }
@@ -169,7 +169,7 @@ void CAnimationCoreProducer::GetAnimations(TAnimationInfoList &outAnimations,
     return m_Data->GetAnimations(outAnimations, inMaster, inSlide);
 }
 
-void CAnimationCoreProducer::SetFirstKeyframeDynamic(CUICDMAnimationHandle inAnimation,
+void CAnimationCoreProducer::SetFirstKeyframeDynamic(Qt3DSDMAnimationHandle inAnimation,
                                                      bool inValue)
 {
     SAnimationInfo theInfo(m_Data->GetAnimationInfo(inAnimation));
@@ -185,14 +185,14 @@ void CAnimationCoreProducer::SetFirstKeyframeDynamic(CUICDMAnimationHandle inAni
     GetSignalSender()->SendFirstKeyframeDynamicSet(inAnimation, inValue);
 }
 
-inline void DirtyKeyframes(CUICDMAnimationHandle inAnimation, THandleObjectMap &inObjects)
+inline void DirtyKeyframes(Qt3DSDMAnimationHandle inAnimation, THandleObjectMap &inObjects)
 {
     SAnimationTrack *theAnimation = CSimpleAnimationCore::GetAnimationNF(inAnimation, inObjects);
     theAnimation->m_KeyframesDirty = true;
 }
 
 inline void CreateDirtyKeyframesTransaction(TTransactionConsumerPtr inConsumer,
-                                            CUICDMAnimationHandle inAnimation,
+                                            Qt3DSDMAnimationHandle inAnimation,
                                             THandleObjectMap &inObjects)
 {
     if (inConsumer) {
@@ -202,14 +202,14 @@ inline void CreateDirtyKeyframesTransaction(TTransactionConsumerPtr inConsumer,
     }
 }
 
-CUICDMKeyframeHandle CAnimationCoreProducer::InsertKeyframe(CUICDMAnimationHandle inAnimation,
+Qt3DSDMKeyframeHandle CAnimationCoreProducer::InsertKeyframe(Qt3DSDMAnimationHandle inAnimation,
                                                             const TKeyframe &inKeyframe)
 {
     SArtistEditedUndoRedoScope __editedScope(m_Data, inAnimation, m_Consumer);
-    CUICDMKeyframeHandle retval = m_Data->InsertKeyframe(inAnimation, inKeyframe);
+    Qt3DSDMKeyframeHandle retval = m_Data->InsertKeyframe(inAnimation, inKeyframe);
     SAnimationTrack *theAnimation =
         CSimpleAnimationCore::GetAnimationNF(inAnimation, m_Data->m_Objects);
-    CreateVecInsertTransaction<CUICDMKeyframeHandle>(__FILE__, __LINE__, m_Consumer, retval,
+    CreateVecInsertTransaction<Qt3DSDMKeyframeHandle>(__FILE__, __LINE__, m_Consumer, retval,
                                                      theAnimation->m_Keyframes);
     CREATE_HANDLE_CREATE_TRANSACTION(m_Consumer, retval, m_Data->m_Objects);
     CreateDirtyKeyframesTransaction(m_Consumer, inAnimation, m_Data->m_Objects);
@@ -217,7 +217,7 @@ CUICDMKeyframeHandle CAnimationCoreProducer::InsertKeyframe(CUICDMAnimationHandl
     return retval;
 }
 
-void CAnimationCoreProducer::EraseKeyframe(CUICDMKeyframeHandle inKeyframe)
+void CAnimationCoreProducer::EraseKeyframe(Qt3DSDMKeyframeHandle inKeyframe)
 {
     SKeyframe *theKeyframe = CSimpleAnimationCore::GetKeyframeNF(inKeyframe, m_Data->m_Objects);
     SArtistEditedUndoRedoScope __editedScope(m_Data, theKeyframe->m_Animation, m_Consumer);
@@ -226,7 +226,7 @@ void CAnimationCoreProducer::EraseKeyframe(CUICDMKeyframeHandle inKeyframe)
         CSimpleAnimationCore::GetAnimationNF(theKeyframe->m_Animation, m_Data->m_Objects);
     if (exists(theAnimation->m_Keyframes, std::bind(equal_to<int>(), inKeyframe,
                                                     std::placeholders::_1))) {
-        CreateVecEraseTransaction<CUICDMKeyframeHandle>(__FILE__, __LINE__, m_Consumer, inKeyframe,
+        CreateVecEraseTransaction<Qt3DSDMKeyframeHandle>(__FILE__, __LINE__, m_Consumer, inKeyframe,
                                                         theAnimation->m_Keyframes);
         CREATE_HANDLE_DELETE_TRANSACTION(m_Consumer, inKeyframe, m_Data->m_Objects);
         CreateDirtyKeyframesTransaction(m_Consumer, theKeyframe->m_Animation, m_Data->m_Objects);
@@ -252,7 +252,7 @@ struct VectorSwapTransaction : public ITransaction
     void Undo() override { Do(); }
 };
 
-void CAnimationCoreProducer::DeleteAllKeyframes(CUICDMAnimationHandle inAnimation)
+void CAnimationCoreProducer::DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation)
 {
     // Ensure animation exists
     SAnimationTrack *theAnimation =
@@ -263,13 +263,13 @@ void CAnimationCoreProducer::DeleteAllKeyframes(CUICDMAnimationHandle inAnimatio
            std::bind(DoCreateHandleDeleteTransaction, __FILE__, __LINE__, m_Consumer,
                      std::placeholders::_1, std::ref(m_Data->m_Objects)));
     if (m_Consumer)
-        m_Consumer->OnTransaction(std::make_shared<VectorSwapTransaction<CUICDMKeyframeHandle>>(
+        m_Consumer->OnTransaction(std::make_shared<VectorSwapTransaction<Qt3DSDMKeyframeHandle>>(
             __FILE__, __LINE__, std::ref(theAnimation->m_Keyframes)));
     theAnimation->m_Keyframes.clear();
 }
 
-CUICDMAnimationHandle
-CAnimationCoreProducer::GetAnimationForKeyframe(CUICDMKeyframeHandle inKeyframe) const
+Qt3DSDMAnimationHandle
+CAnimationCoreProducer::GetAnimationForKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const
 {
     return m_Data->GetAnimationForKeyframe(inKeyframe);
 }
@@ -277,12 +277,12 @@ CAnimationCoreProducer::GetAnimationForKeyframe(CUICDMKeyframeHandle inKeyframe)
 struct KeyframeDataTransaction : public ITransaction, public IMergeableTransaction<TKeyframe>
 {
     TSimpleAnimationCorePtr m_AnimationCore;
-    CUICDMKeyframeHandle m_Keyframe;
+    Qt3DSDMKeyframeHandle m_Keyframe;
     TKeyframe m_OldData;
     TKeyframe m_NewData;
 
     KeyframeDataTransaction(const char *inFile, int inLine, TSimpleAnimationCorePtr animCore,
-                            CUICDMKeyframeHandle keyframe, TKeyframe oldData, TKeyframe newData)
+                            Qt3DSDMKeyframeHandle keyframe, TKeyframe oldData, TKeyframe newData)
         : ITransaction(inFile, inLine)
         , m_AnimationCore(animCore)
         , m_Keyframe(keyframe)
@@ -297,7 +297,7 @@ struct KeyframeDataTransaction : public ITransaction, public IMergeableTransacti
     void Update(const TKeyframe &inKeyframe) override { m_NewData = inKeyframe; }
 };
 
-void CAnimationCoreProducer::SetKeyframeData(CUICDMKeyframeHandle inKeyframe,
+void CAnimationCoreProducer::SetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe,
                                              const TKeyframe &inData)
 {
     SKeyframe *theKeyframe = CSimpleAnimationCore::GetKeyframeNF(inKeyframe, m_Data->m_Objects);
@@ -322,18 +322,18 @@ void CAnimationCoreProducer::SetKeyframeData(CUICDMKeyframeHandle inKeyframe,
     }
 }
 
-TKeyframe CAnimationCoreProducer::GetKeyframeData(CUICDMKeyframeHandle inKeyframe) const
+TKeyframe CAnimationCoreProducer::GetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe) const
 {
     return m_Data->GetKeyframeData(inKeyframe);
 }
 
-void CAnimationCoreProducer::GetKeyframes(CUICDMAnimationHandle inAnimation,
+void CAnimationCoreProducer::GetKeyframes(Qt3DSDMAnimationHandle inAnimation,
                                           TKeyframeHandleList &outKeyframes) const
 {
     return m_Data->GetKeyframes(inAnimation, outKeyframes);
 }
 
-size_t CAnimationCoreProducer::GetKeyframeCount(CUICDMAnimationHandle inAnimation) const
+size_t CAnimationCoreProducer::GetKeyframeCount(Qt3DSDMAnimationHandle inAnimation) const
 {
     return m_Data->GetKeyframeCount(inAnimation);
 }
@@ -350,7 +350,7 @@ void CAnimationCoreProducer::OffsetAnimations(Qt3DSDMSlideHandle inSlide,
         if (theTrack->m_Slide == inSlide && theTrack->m_Instance == inInstance) {
             for (size_t keyframeIdx = 0, keyframeEnd = theTrack->m_Keyframes.size();
                  keyframeIdx < keyframeEnd; ++keyframeIdx) {
-                CUICDMKeyframeHandle theKeyframeHandle(theTrack->m_Keyframes[keyframeIdx]);
+                Qt3DSDMKeyframeHandle theKeyframeHandle(theTrack->m_Keyframes[keyframeIdx]);
                 TKeyframe theCurrentKeyframe = m_Data->GetKeyframeData(theKeyframeHandle);
 
                 float seconds = qt3dsdm::GetKeyframeSeconds(theCurrentKeyframe);
@@ -364,29 +364,29 @@ void CAnimationCoreProducer::OffsetAnimations(Qt3DSDMSlideHandle inSlide,
     }
 }
 
-void CAnimationCoreProducer::SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited)
+void CAnimationCoreProducer::SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited)
 {
     SArtistEditedUndoRedoScope __editedScope(m_Data, inAnimation, m_Consumer);
     m_Data->SetIsArtistEdited(inAnimation, inEdited);
 }
 
-bool CAnimationCoreProducer::IsArtistEdited(CUICDMAnimationHandle inAnimation) const
+bool CAnimationCoreProducer::IsArtistEdited(Qt3DSDMAnimationHandle inAnimation) const
 {
     return m_Data->IsArtistEdited(inAnimation);
 }
 // Animation Evaluation.
-float CAnimationCoreProducer::EvaluateAnimation(CUICDMAnimationHandle inAnimation,
+float CAnimationCoreProducer::EvaluateAnimation(Qt3DSDMAnimationHandle inAnimation,
                                                 float inSeconds) const
 {
     return m_Data->EvaluateAnimation(inAnimation, inSeconds);
 }
 
-bool CAnimationCoreProducer::KeyframeValid(CUICDMKeyframeHandle inKeyframe) const
+bool CAnimationCoreProducer::KeyframeValid(Qt3DSDMKeyframeHandle inKeyframe) const
 {
     return m_Data->KeyframeValid(inKeyframe);
 }
 
-bool CAnimationCoreProducer::AnimationValid(CUICDMAnimationHandle inAnimation) const
+bool CAnimationCoreProducer::AnimationValid(Qt3DSDMAnimationHandle inAnimation) const
 {
     return m_Data->AnimationValid(inAnimation);
 }
@@ -406,7 +406,7 @@ void CAnimationCoreProducer::CopyAnimations(Qt3DSDMSlideHandle inSourceSlide,
     }
     for (size_t idx = 0, end = theAnimations.size(); idx < end; ++idx) {
         const SAnimationTrack &newTrack(*theAnimations[idx]);
-        CUICDMAnimationHandle theNewAnimation(
+        Qt3DSDMAnimationHandle theNewAnimation(
             CreateAnimation(inDestSlide, inDestInstance, newTrack.m_Property, newTrack.m_Index,
                             newTrack.m_AnimationType, newTrack.m_FirstKeyframeDynamic));
         for (size_t keyIdx = 0, keyEnd = newTrack.m_Keyframes.size(); keyIdx < keyEnd; ++keyIdx)
@@ -422,51 +422,51 @@ void CAnimationCoreProducer::SetConsumer(TTransactionConsumerPtr inConsumer)
 }
 
 TSignalConnectionPtr CAnimationCoreProducer::ConnectAnimationCreated(
-    const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
+    const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback)
 {
     return GetSignalProvider()->ConnectAnimationCreated(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectBeforeAnimationDeleted(
-    const std::function<void(CUICDMAnimationHandle)> &inCallback)
+    const std::function<void(Qt3DSDMAnimationHandle)> &inCallback)
 {
     return GetSignalProvider()->ConnectBeforeAnimationDeleted(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectAnimationDeleted(
-    const std::function<void(CUICDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
+    const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle,
                                Qt3DSDMPropertyHandle, size_t, EAnimationType)> &inCallback)
 {
     return GetSignalProvider()->ConnectAnimationDeleted(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectKeyframeInserted(
-    const std::function<void(CUICDMAnimationHandle, CUICDMKeyframeHandle, const TKeyframe &)>
+    const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMKeyframeHandle, const TKeyframe &)>
         &inCallback)
 {
     return GetSignalProvider()->ConnectKeyframeInserted(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectBeforeKeyframeErased(
-    const std::function<void(CUICDMKeyframeHandle)> &inCallback)
+    const std::function<void(Qt3DSDMKeyframeHandle)> &inCallback)
 {
     return GetSignalProvider()->ConnectBeforeKeyframeErased(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectKeyframeErased(
-    const std::function<void(CUICDMAnimationHandle, CUICDMKeyframeHandle, const TKeyframe &)>
+    const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMKeyframeHandle, const TKeyframe &)>
         &inCallback)
 {
     return GetSignalProvider()->ConnectKeyframeErased(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectBeforeAllKeyframesErased(
-    const std::function<void(CUICDMAnimationHandle)> &inCallback)
+    const std::function<void(Qt3DSDMAnimationHandle)> &inCallback)
 {
     return GetSignalProvider()->ConnectBeforeAllKeyframesErased(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectKeyframeUpdated(
-    const std::function<void(CUICDMKeyframeHandle, const TKeyframe &)> &inCallback)
+    const std::function<void(Qt3DSDMKeyframeHandle, const TKeyframe &)> &inCallback)
 {
     return GetSignalProvider()->ConnectKeyframeUpdated(inCallback);
 }
 TSignalConnectionPtr CAnimationCoreProducer::ConnectFirstKeyframeDynamicSet(
-    const std::function<void(CUICDMAnimationHandle, bool)> &inCallback)
+    const std::function<void(Qt3DSDMAnimationHandle, bool)> &inCallback)
 {
     return GetSignalProvider()->ConnectFirstKeyframeDynamicSet(inCallback);
 }

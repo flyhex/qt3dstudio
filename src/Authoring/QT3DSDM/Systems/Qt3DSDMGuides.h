@@ -67,12 +67,12 @@ protected:
 public:
     friend class std::shared_ptr<IGuideSystem>;
 
-    virtual CUICDMGuideHandle CreateGuide() = 0;
-    virtual void SetGuideInfo(CUICDMGuideHandle inGuideHandle, const SGuideInfo &info) = 0;
-    virtual SGuideInfo GetGuideInfo(CUICDMGuideHandle inGuideHandle) const = 0;
-    virtual void DeleteGuide(CUICDMGuideHandle inGuideHandle) = 0;
+    virtual Qt3DSDMGuideHandle CreateGuide() = 0;
+    virtual void SetGuideInfo(Qt3DSDMGuideHandle inGuideHandle, const SGuideInfo &info) = 0;
+    virtual SGuideInfo GetGuideInfo(Qt3DSDMGuideHandle inGuideHandle) const = 0;
+    virtual void DeleteGuide(Qt3DSDMGuideHandle inGuideHandle) = 0;
     virtual TGuideHandleList GetAllGuides() const = 0;
-    virtual bool IsGuideValid(CUICDMGuideHandle inGuideHandle) const = 0;
+    virtual bool IsGuideValid(Qt3DSDMGuideHandle inGuideHandle) const = 0;
     // No real effect on datamodel because you can still create guides when they are locked.
     // Just used in the UI.
     virtual bool AreGuidesEditable() const = 0;
@@ -84,16 +84,16 @@ public:
     // These are events coming from undo/redo operations, not events coming directly from the
     // modification of the guides
     virtual TSignalConnectionPtr
-    ConnectGuideCreated(const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) = 0;
+    ConnectGuideCreated(const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectGuideDestroyed(
-        const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectGuideModified(
-        const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) = 0;
 
     // Signal happens immediately instead of on undo/redo, used for live-update of the inspector
     // palette
     virtual TSignalConnectionPtr ConnectGuideModifiedImmediate(
-        const std::function<void(CUICDMGuideHandle, SGuideInfo)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMGuideHandle, SGuideInfo)> &inCallback) = 0;
 
     static std::shared_ptr<IGuideSystem> CreateGuideSystem();
 };

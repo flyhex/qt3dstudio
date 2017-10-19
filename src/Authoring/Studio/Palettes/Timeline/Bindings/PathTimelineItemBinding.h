@@ -47,12 +47,12 @@ class CBaseStateRow;
 /**
  * Binding to a UICDM object of Material type
  */
-class CPathTimelineItemBinding : public CUICDMTimelineItemBinding
+class CPathTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public: // Construction
     CPathTimelineItemBinding(CTimelineTranslationManager *inMgr,
                              qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
-        : CUICDMTimelineItemBinding(inMgr, inDataHandle)
+        : Qt3DSDMTimelineItemBinding(inMgr, inDataHandle)
     {
     }
 

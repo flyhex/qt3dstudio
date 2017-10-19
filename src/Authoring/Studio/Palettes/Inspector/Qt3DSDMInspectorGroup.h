@@ -44,35 +44,35 @@
 
 class CDoc;
 namespace Q3DStudio {
-class CUICDMInspectorRow;
+class Qt3DSDMInspectorRow;
 };
 
-class CUICDMInspectable;
+class Qt3DSDMInspectable;
 
 //==============================================================================
 /**
  *
  */
-class CUICDMInspectorGroup: public CEasyInspectorGroup
+class Qt3DSDMInspectorGroup: public CEasyInspectorGroup
 {
 protected: // Members
     CStudioApp &m_App;
-    std::vector<Q3DStudio::CUICDMInspectorRow *> m_UICDMInspectorRows;
-    CUICDMInspectable &m_Inspectable;
+    std::vector<Q3DStudio::Qt3DSDMInspectorRow *> m_UICDMInspectorRows;
+    Qt3DSDMInspectable &m_Inspectable;
     long m_Index;
 
 public: // Construction
-    CUICDMInspectorGroup(CStudioApp &inApp, const QString &inName,
-                         CUICDMInspectable &inInspectable, long inIndex);
-    ~CUICDMInspectorGroup();
+    Qt3DSDMInspectorGroup(CStudioApp &inApp, const QString &inName,
+                         Qt3DSDMInspectable &inInspectable, long inIndex);
+    ~Qt3DSDMInspectorGroup();
 
-    const std::vector<Q3DStudio::CUICDMInspectorRow *> &GetRows() const
+    const std::vector<Q3DStudio::Qt3DSDMInspectorRow *> &GetRows() const
     {
         return m_UICDMInspectorRows;
     }
 
 public: // Use
-    void CreateRow(CDoc *inDoc, qt3dsdm::CUICDMMetaDataPropertyHandle inProperty);
+    void CreateRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty);
 };
 
 #endif

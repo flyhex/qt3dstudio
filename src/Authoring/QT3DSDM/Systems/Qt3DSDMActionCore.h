@@ -51,11 +51,11 @@ public:
     virtual TStringTablePtr GetStringTablePtr() const = 0;
     virtual IStringTable &GetStringTable() const = 0;
     // Action
-    virtual CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance,
+    virtual Qt3DSDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance,
                                             Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                                             SLong4 inTriggerTargetObjects) = 0;
-    virtual void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) = 0;
-    virtual const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const = 0;
+    virtual void DeleteAction(Qt3DSDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) = 0;
+    virtual const SActionInfo &GetActionInfo(Qt3DSDMActionHandle inAction) const = 0;
     virtual void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                             TActionHandleList &outActions) const = 0;
     virtual void GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const = 0;
@@ -63,33 +63,33 @@ public:
     virtual void GetActions(TActionHandleList &outActions) const = 0;
 
     // Return the instance that was allocated for this action.
-    virtual Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const = 0;
+    virtual Qt3DSDMInstanceHandle GetActionInstance(Qt3DSDMActionHandle inAction) const = 0;
     // Reverse lookup into the action system so you can match actions to instances.
-    virtual CUICDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const = 0;
+    virtual Qt3DSDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const = 0;
 
     // Action Properties
-    virtual void SetTriggerObject(CUICDMActionHandle inAction,
+    virtual void SetTriggerObject(Qt3DSDMActionHandle inAction,
                                   const SObjectRefType &inTriggerObject) = 0;
-    virtual void SetTargetObject(CUICDMActionHandle inAction,
+    virtual void SetTargetObject(Qt3DSDMActionHandle inAction,
                                  const SObjectRefType &inTargetObject) = 0;
-    virtual void SetEvent(CUICDMActionHandle inAction, const wstring &inEventName) = 0;
-    virtual void SetHandler(CUICDMActionHandle inAction, const wstring &inHandlerName) = 0;
+    virtual void SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventName) = 0;
+    virtual void SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerName) = 0;
 
     // Handler Argument
-    virtual CUICDMHandlerArgHandle AddHandlerArgument(CUICDMActionHandle inAction,
+    virtual Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction,
                                                       const TCharStr &inName,
                                                       HandlerArgumentType::Value inArgType,
                                                       DataModelDataType::Value inValueType) = 0;
-    virtual void RemoveHandlerArgument(CUICDMHandlerArgHandle inHandlerArgument) = 0;
+    virtual void RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument) = 0;
     virtual const SHandlerArgumentInfo &
-    GetHandlerArgumentInfo(CUICDMHandlerArgHandle inHandlerArgument) const = 0;
-    virtual void GetHandlerArguments(CUICDMActionHandle inAction,
+    GetHandlerArgumentInfo(Qt3DSDMHandlerArgHandle inHandlerArgument) const = 0;
+    virtual void GetHandlerArguments(Qt3DSDMActionHandle inAction,
                                      THandlerArgHandleList &outHandlerArguments) const = 0;
 
     // Handler Argument Properties
-    virtual void GetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+    virtual void GetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                          SValue &outValue) const = 0;
-    virtual void SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+    virtual void SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                          const SValue &inValue) = 0;
 };
 

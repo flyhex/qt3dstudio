@@ -116,49 +116,49 @@ public: // Use
     }
     TStringTablePtr GetStringTablePtr() const { return m_StringTable; }
 
-    CUICDMAnimationHandle CreateAnimation(Qt3DSDMSlideHandle inSlide,
+    Qt3DSDMAnimationHandle CreateAnimation(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                           EAnimationType inAnimationType,
                                           bool inFirstKeyframeDynamic) override;
-    void DeleteAnimation(CUICDMAnimationHandle inAnimation) override;
-    CUICDMAnimationHandle GetAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
+    void DeleteAnimation(Qt3DSDMAnimationHandle inAnimation) override;
+    Qt3DSDMAnimationHandle GetAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                        Qt3DSDMPropertyHandle inProperty, size_t inIndex) const override;
-    SAnimationInfo GetAnimationInfo(CUICDMAnimationHandle inAnimation) const override;
+    SAnimationInfo GetAnimationInfo(Qt3DSDMAnimationHandle inAnimation) const override;
     void GetAnimations(TAnimationHandleList &outAnimations) const override;
     void GetAnimations(TAnimationInfoList &outAnimations, Qt3DSDMSlideHandle inMaster,
                        Qt3DSDMSlideHandle inSlide) const override;
     void GetSpecificInstanceAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                        TAnimationHandleList &outAnimations) override;
 
-    void SetFirstKeyframeDynamic(CUICDMAnimationHandle inAnimation, bool inValue) override;
+    void SetFirstKeyframeDynamic(Qt3DSDMAnimationHandle inAnimation, bool inValue) override;
 
     // keyframe manipulation
-    CUICDMKeyframeHandle InsertKeyframe(CUICDMAnimationHandle inAnimation,
+    Qt3DSDMKeyframeHandle InsertKeyframe(Qt3DSDMAnimationHandle inAnimation,
                                         const TKeyframe &inKeyframe) override;
-    void EraseKeyframe(CUICDMKeyframeHandle inKeyframe) override;
-    void DeleteAllKeyframes(CUICDMAnimationHandle inAnimation) override;
-    CUICDMAnimationHandle GetAnimationForKeyframe(CUICDMKeyframeHandle inKeyframe) const override;
-    TKeyframe GetKeyframeData(CUICDMKeyframeHandle inKeyframe) const override;
-    void SetKeyframeData(CUICDMKeyframeHandle inKeyframe, const TKeyframe &inData) override;
+    void EraseKeyframe(Qt3DSDMKeyframeHandle inKeyframe) override;
+    void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) override;
+    Qt3DSDMAnimationHandle GetAnimationForKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const override;
+    TKeyframe GetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe) const override;
+    void SetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe, const TKeyframe &inData) override;
     // Set the keyframe data, but don't set the artist edited flag.  Used for undo/redo operations
     // where the artist edited flag has handeled by a different transaction
-    void DoSetKeyframeData(CUICDMKeyframeHandle inKeyframe, const TKeyframe &inData);
-    void GetKeyframes(CUICDMAnimationHandle inAnimation, TKeyframeHandleList &outKeyframes) const override;
-    size_t GetKeyframeCount(CUICDMAnimationHandle inAnimation) const override;
-    bool IsFirstKeyframe(CUICDMKeyframeHandle inKeyframe) const override;
+    void DoSetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe, const TKeyframe &inData);
+    void GetKeyframes(Qt3DSDMAnimationHandle inAnimation, TKeyframeHandleList &outKeyframes) const override;
+    size_t GetKeyframeCount(Qt3DSDMAnimationHandle inAnimation) const override;
+    bool IsFirstKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const override;
     // Only implemented in the producer for now.
     void OffsetAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                           long inOffset) override;
 
-    void SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited = true) override;
-    bool IsArtistEdited(CUICDMAnimationHandle inAnimation) const override;
+    void SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited = true) override;
+    bool IsArtistEdited(Qt3DSDMAnimationHandle inAnimation) const override;
 
     // Animation Evaluation.
-    float EvaluateAnimation(CUICDMAnimationHandle inAnimation, float inSeconds) const override;
+    float EvaluateAnimation(Qt3DSDMAnimationHandle inAnimation, float inSeconds) const override;
 
-    bool KeyframeValid(CUICDMKeyframeHandle inKeyframe) const override;
-    bool AnimationValid(CUICDMAnimationHandle inAnimation) const override;
+    bool KeyframeValid(Qt3DSDMKeyframeHandle inKeyframe) const override;
+    bool AnimationValid(Qt3DSDMAnimationHandle inAnimation) const override;
 
     // Only implemented at the producer level, not at the simple core level.
     void CopyAnimations(Qt3DSDMSlideHandle /*inSourceSlide*/,
@@ -170,14 +170,14 @@ public: // Use
 
     // Lookup cache management so we can find particular animations quickly.
     void ClearAnimationMatchesLookupCache() const { m_AnimationMatchesCache.clear(); }
-    void AddAnimationToLookupCache(CUICDMAnimationHandle inAnimation) const;
-    void RemoveAnimationFromLookupCache(CUICDMAnimationHandle inAnimation) const;
+    void AddAnimationToLookupCache(Qt3DSDMAnimationHandle inAnimation) const;
+    void RemoveAnimationFromLookupCache(Qt3DSDMAnimationHandle inAnimation) const;
     void AddAnimationToLookupCache(std::shared_ptr<SAnimationTrack> inAnimation) const;
     void RemoveAnimationFromLookupCache(std::shared_ptr<SAnimationTrack> inAnimation) const;
 
     void EnsureAnimationCache() const;
 
-    CUICDMAnimationHandle CreateAnimationWithHandle(int inHandle, Qt3DSDMSlideHandle inSlide,
+    Qt3DSDMAnimationHandle CreateAnimationWithHandle(int inHandle, Qt3DSDMSlideHandle inSlide,
                                                     Qt3DSDMInstanceHandle inInstance,
                                                     Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                                     EAnimationType inAnimationType,

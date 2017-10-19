@@ -585,7 +585,7 @@ struct SRendererImpl : public IStudioRenderer,
                 if (theHandle != m_Doc.GetSelectedInstance())
                     m_Doc.SelectUICDMObject(theHandle);
             } else if (m_PickResult.getType() == StudioPickValueTypes::Guide)
-                m_Doc.NotifySelectionChanged(m_PickResult.getData<qt3dsdm::CUICDMGuideHandle>());
+                m_Doc.NotifySelectionChanged(m_PickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>());
             else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
                 SPathPick thePick = m_PickResult.getData<SPathPick>();
                 qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle =
@@ -603,7 +603,7 @@ struct SRendererImpl : public IStudioRenderer,
             else {
                 Q3DStudio::IDocumentEditor &docEditor(
                     m_UpdatableEditor.EnsureEditor(L"Create Guide", __FILE__, __LINE__));
-                CUICDMGuideHandle newGuide = docEditor.CreateGuide(*pickResult);
+                Qt3DSDMGuideHandle newGuide = docEditor.CreateGuide(*pickResult);
                 m_PickResult = SStudioPickValue(newGuide);
                 m_Doc.NotifySelectionChanged(newGuide);
             }
@@ -793,7 +793,7 @@ struct SRendererImpl : public IStudioRenderer,
             m_Translation->PerformWidgetDrag(m_PickResult.GetWidgetId(), m_MouseDownPoint,
                                              m_PreviousMousePoint, inPoint, m_UpdatableEditor);
         } else if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
-            m_Translation->PerformGuideDrag(m_PickResult.getData<CUICDMGuideHandle>(), inPoint,
+            m_Translation->PerformGuideDrag(m_PickResult.getData<Qt3DSDMGuideHandle>(), inPoint,
                                             m_UpdatableEditor);
         } else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
             SPathPick thePick = m_PickResult.getData<SPathPick>();
@@ -806,9 +806,9 @@ struct SRendererImpl : public IStudioRenderer,
     void OnSceneMouseUp(SceneDragSenderType::Enum) override
     {
         m_MaybeDragStart = false;
-        CUICDMGuideHandle theSelectedGuide;
+        Qt3DSDMGuideHandle theSelectedGuide;
         if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
-            theSelectedGuide = m_PickResult.getData<CUICDMGuideHandle>();
+            theSelectedGuide = m_PickResult.getData<Qt3DSDMGuideHandle>();
             m_Translation->CheckGuideInPresentationRect(theSelectedGuide, m_UpdatableEditor);
         }
         m_UpdatableEditor.CommitEditor();

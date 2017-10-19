@@ -48,7 +48,7 @@ class CBaseStateRow;
 /**
  * Binding to a UICDM object of Material type
  */
-class CPathAnchorPointTimelineItemBinding : public CUICDMTimelineItemBinding
+class CPathAnchorPointTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public: // Construction
     CPathAnchorPointTimelineItemBinding(CTimelineTranslationManager *inMgr,

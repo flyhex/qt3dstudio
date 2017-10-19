@@ -296,7 +296,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid()) {
             if (m_Editor.IsAnimationArtistEdited(m_Slide, hdl, propName, propSubIndex) == false) {
-                CUICDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
+                Qt3DSDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
                     m_Slide, hdl, propName, propSubIndex, animType, animData, numFloats, false);
                 m_Editor.SetIsArtistEdited(anim, false);
             }
@@ -545,7 +545,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                                                     theIterator.GetCurrentInstance(), propName,
                                                     propSubIndex)
                     == false) {
-                CUICDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
+                Qt3DSDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
                     theIterator.GetCurrentSlide(), theIterator.GetCurrentInstance(), propName,
                     propSubIndex, animType, animData, numFloats, false);
                 m_Editor.SetIsArtistEdited(anim, false);
@@ -562,7 +562,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             if (!m_Editor.AnimationExists(theIterator.GetCurrentSlide(),
                                           theIterator.GetCurrentInstance(), propName,
                                           propSubIndex)) {
-                CUICDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
+                Qt3DSDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
                     theIterator.GetCurrentSlide(), theIterator.GetCurrentInstance(), propName,
                     propSubIndex, animType, animData, numFloats, false);
                 m_Editor.SetIsArtistEdited(anim, false);

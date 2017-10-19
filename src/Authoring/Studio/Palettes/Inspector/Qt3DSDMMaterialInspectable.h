@@ -36,21 +36,21 @@
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMInspectorGroup.h"
 
-class UICDMMaterialInspectorGroup : public CUICDMInspectorGroup
+class UICDMMaterialInspectorGroup : public Qt3DSDMInspectorGroup
 {
 public:
     UICDMMaterialInspectorGroup(CStudioApp &inApp, const Q3DStudio::CString &inName,
-                                CUICDMInspectable &inInspectable, long inIndex);
+                                Qt3DSDMInspectable &inInspectable, long inIndex);
 
     virtual bool isMaterialGroup() const = 0;
 };
 
-class CUICDMMaterialInspectable : public CUICDMInspectable
+class Qt3DSDMMaterialInspectable : public Qt3DSDMInspectable
 {
 public:
-    CUICDMMaterialInspectable(CStudioApp &inApp, CCore *inCore,
+    Qt3DSDMMaterialInspectable(CStudioApp &inApp, CCore *inCore,
                               qt3dsdm::Qt3DSDMInstanceHandle inInstance)
-        : CUICDMInspectable(inApp, inCore, inInstance)
+        : Qt3DSDMInspectable(inApp, inCore, inInstance)
     {
     }
 

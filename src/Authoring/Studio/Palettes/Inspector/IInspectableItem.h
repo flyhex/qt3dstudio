@@ -86,28 +86,28 @@ class IInspectableEvent
 {
 public:
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInspectableInstance() = 0;
-    virtual qt3dsdm::CUICDMEventHandle GetInspectableEvent() = 0;
-    virtual void SetInspectableEvent(const qt3dsdm::CUICDMEventHandle &inEventHandle) = 0;
+    virtual qt3dsdm::Qt3DSDMEventHandle GetInspectableEvent() = 0;
+    virtual void SetInspectableEvent(const qt3dsdm::Qt3DSDMEventHandle &inEventHandle) = 0;
 };
 
 class IInspectableTargetSection : public IInspectableObject
 {
 public:
-    virtual qt3dsdm::CUICDMActionHandle GetInspectableAction() const = 0;
+    virtual qt3dsdm::Qt3DSDMActionHandle GetInspectableAction() const = 0;
 };
 
 class IInspectableEventSection : public IInspectableObject, public IInspectableEvent
 {
 public:
-    virtual qt3dsdm::CUICDMActionHandle GetInspectableAction() const = 0;
+    virtual qt3dsdm::Qt3DSDMActionHandle GetInspectableAction() const = 0;
 };
 
 class IInspectableHandlerSection
 {
 public:
-    virtual qt3dsdm::CUICDMActionHandle GetInspectableAction() const = 0;
-    virtual qt3dsdm::CUICDMHandlerHandle GetInspectableHandler() = 0;
-    virtual void SetInspectableHandler(const qt3dsdm::CUICDMHandlerHandle &inHandlerHandle) = 0;
+    virtual qt3dsdm::Qt3DSDMActionHandle GetInspectableAction() const = 0;
+    virtual qt3dsdm::Qt3DSDMHandlerHandle GetInspectableHandler() = 0;
+    virtual void SetInspectableHandler(const qt3dsdm::Qt3DSDMHandlerHandle &inHandlerHandle) = 0;
 
     virtual qt3dsdm::THandlerHandleList GetInspectableHandlerList() = 0;
     virtual long GetArgumentCount() = 0;

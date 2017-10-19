@@ -55,8 +55,8 @@ namespace Q3DStudio {
 /**
  *	Constructor
  */
-CUICDMInspectorRow::CUICDMInspectorRow(CDoc *inDoc,
-                                       CUICDMMetaDataPropertyHandle inProperty)
+Qt3DSDMInspectorRow::Qt3DSDMInspectorRow(CDoc *inDoc,
+                                       Qt3DSDMMetaDataPropertyHandle inProperty)
     : m_MetaProperty(inProperty)
 {
     IMetaData *theMetaData = inDoc->GetStudioSystem()->GetActionMetaData();
@@ -68,7 +68,7 @@ CUICDMInspectorRow::CUICDMInspectorRow(CDoc *inDoc,
 /**
  *	Destructor
  */
-CUICDMInspectorRow::~CUICDMInspectorRow()
+Qt3DSDMInspectorRow::~Qt3DSDMInspectorRow()
 {
 }
 

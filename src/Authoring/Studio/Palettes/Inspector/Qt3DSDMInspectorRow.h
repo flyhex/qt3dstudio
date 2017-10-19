@@ -59,27 +59,27 @@ namespace Q3DStudio {
 /**
  * This is a binding between a DataModelInspectable and an EasyInspectorRow
  */
-class CUICDMInspectorRow
+class Qt3DSDMInspectorRow
 {
     //==============================================================================
     //	Members
     //==============================================================================
 protected:
-    qt3dsdm::CUICDMMetaDataPropertyHandle m_MetaProperty;
+    qt3dsdm::Qt3DSDMMetaDataPropertyHandle m_MetaProperty;
     qt3dsdm::SMetaDataPropertyInfo m_MetaDataPropertyInfo;
 
     //==============================================================================
     //	Methods
     //==============================================================================
 public: // Construction
-    CUICDMInspectorRow(CDoc *inDoc, qt3dsdm::CUICDMMetaDataPropertyHandle inProperty);
-    virtual ~CUICDMInspectorRow();
+    Qt3DSDMInspectorRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty);
+    virtual ~Qt3DSDMInspectorRow();
 
 private: // Disabled parameterless construction
-    CUICDMInspectorRow();
+    Qt3DSDMInspectorRow();
 
 public: // Use
-    qt3dsdm::CUICDMMetaDataPropertyHandle GetMetaDataProperty() const
+    qt3dsdm::Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty() const
     {
       return m_MetaProperty;
     }

@@ -70,7 +70,7 @@ struct SActionInfo
 
 struct SHandlerArgumentInfo
 {
-    CUICDMActionHandle m_Action; // Action that owns this Action Argument
+    Qt3DSDMActionHandle m_Action; // Action that owns this Action Argument
     TCharStr m_Name; // Name of the Action Argument
     HandlerArgumentType::Value m_ArgType; // m_ArgType will override m_ValueType
     DataModelDataType::Value m_ValueType; // m_ValueType is ignored if ArgType is specified
@@ -82,7 +82,7 @@ struct SHandlerArgumentInfo
     {
     }
 
-    SHandlerArgumentInfo(CUICDMActionHandle inAction, const TCharStr &inName,
+    SHandlerArgumentInfo(Qt3DSDMActionHandle inAction, const TCharStr &inName,
                          HandlerArgumentType::Value inArgType, DataModelDataType::Value inValueType)
         : m_Action(inAction)
         , m_Name(inName)

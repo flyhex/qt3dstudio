@@ -81,7 +81,7 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
 {
     ITimelineItemBinding *theBinding = GetBinding(inInstance);
     if (!theBinding) {
-        CUICDMTimelineItemBinding *theReturn = nullptr;
+        Qt3DSDMTimelineItemBinding *theReturn = nullptr;
         qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
         Qt3DSDMPropertyHandle theTypeProperty =
             thePropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
@@ -112,7 +112,7 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
                  || theWideTypeString == L"Camera" || theWideTypeString == L"Effect"
                  || theWideTypeString == L"Light" || theWideTypeString == L"RenderPlugin"
                  || theWideTypeString == L"Alias" || theWideTypeString == L"SubPath")
-            theReturn = new CUICDMTimelineItemBinding(this, inInstance);
+            theReturn = new Qt3DSDMTimelineItemBinding(this, inInstance);
         else {
             // Add support for additional UICDM types here.
             ASSERT(0);
@@ -225,7 +225,7 @@ long CTimelineTranslationManager::GetCurrentViewTime() const
 /**
  * @return the Binding object that corresponds to this instance.
  */
-CUICDMTimelineItemBinding *
+Qt3DSDMTimelineItemBinding *
 CTimelineTranslationManager::GetBinding(Qt3DSDMInstanceHandle inHandle) const
 {
     TInstanceHandleBindingMap::const_iterator theIter = m_InstanceHandleBindingMap.find(inHandle);
@@ -234,12 +234,12 @@ CTimelineTranslationManager::GetBinding(Qt3DSDMInstanceHandle inHandle) const
     return nullptr;
 }
 
-CUICDMTimelineItemBinding *CTimelineTranslationManager::GetSelectedBinding() const
+Qt3DSDMTimelineItemBinding *CTimelineTranslationManager::GetSelectedBinding() const
 {
     qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance =
         g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
     if (theSelectedInstance.Valid()) {
-        CUICDMTimelineItemBinding *theBinding = GetBinding(theSelectedInstance);
+        Qt3DSDMTimelineItemBinding *theBinding = GetBinding(theSelectedInstance);
         return theBinding;
     }
     return nullptr;
@@ -351,8 +351,8 @@ CStudioSystem *CTimelineTranslationManager::GetStudioSystem() const
 void CTimelineTranslationManager::OnAnimationCreated(Qt3DSDMInstanceHandle inInstance,
                                                      Qt3DSDMPropertyHandle inProperty)
 {
-    CUICDMTimelineItemBinding *theTimelineBinding =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
+    Qt3DSDMTimelineItemBinding *theTimelineBinding =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(inInstance));
     if (theTimelineBinding)
         theTimelineBinding->AddPropertyRow(inProperty);
 }
@@ -360,8 +360,8 @@ void CTimelineTranslationManager::OnAnimationCreated(Qt3DSDMInstanceHandle inIns
 void CTimelineTranslationManager::OnAnimationDeleted(Qt3DSDMInstanceHandle inInstance,
                                                      Qt3DSDMPropertyHandle inProperty)
 {
-    CUICDMTimelineItemBinding *theTimelineBinding =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
+    Qt3DSDMTimelineItemBinding *theTimelineBinding =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(inInstance));
     if (theTimelineBinding)
         theTimelineBinding->RemovePropertyRow(inProperty);
 }
@@ -369,8 +369,8 @@ void CTimelineTranslationManager::OnAnimationDeleted(Qt3DSDMInstanceHandle inIns
 void CTimelineTranslationManager::OnPropertyLinked(Qt3DSDMInstanceHandle inInstance,
                                                    Qt3DSDMPropertyHandle inProperty)
 {
-    CUICDMTimelineItemBinding *theTimelineBinding =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
+    Qt3DSDMTimelineItemBinding *theTimelineBinding =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(inInstance));
     if (theTimelineBinding)
         theTimelineBinding->OnPropertyLinked(inProperty);
 }
@@ -381,16 +381,16 @@ void CTimelineTranslationManager::OnPropertyUnlinked(Qt3DSDMInstanceHandle inIns
     OnPropertyLinked(inInstance, inProperty);
 }
 
-void CTimelineTranslationManager::RefreshKeyframe(CUICDMAnimationHandle inAnimation,
-                                                  CUICDMKeyframeHandle inKeyframe,
+void CTimelineTranslationManager::RefreshKeyframe(Qt3DSDMAnimationHandle inAnimation,
+                                                  Qt3DSDMKeyframeHandle inKeyframe,
                                                   ETimelineKeyframeTransaction inTransaction)
 {
-    CUICDMTimelineItemBinding *theTimelineBinding = nullptr;
+    Qt3DSDMTimelineItemBinding *theTimelineBinding = nullptr;
     if (GetStudioSystem()->GetAnimationCore()->AnimationValid(inAnimation)) {
         SAnimationInfo theAnimationInfo =
             GetStudioSystem()->GetAnimationCore()->GetAnimationInfo(inAnimation);
         theTimelineBinding =
-            dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(theAnimationInfo.m_Instance));
+            dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(theAnimationInfo.m_Instance));
 
         if (theTimelineBinding)
             theTimelineBinding->RefreshPropertyKeyframe(theAnimationInfo.m_Property, inKeyframe,
@@ -399,23 +399,23 @@ void CTimelineTranslationManager::RefreshKeyframe(CUICDMAnimationHandle inAnimat
     // else, animation has been nuked, ignore this event, we'll get a AnimationDelete
 }
 
-void CTimelineTranslationManager::OnKeyframeInserted(CUICDMAnimationHandle inAnimation,
-                                                     CUICDMKeyframeHandle inKeyframe)
+void CTimelineTranslationManager::OnKeyframeInserted(Qt3DSDMAnimationHandle inAnimation,
+                                                     Qt3DSDMKeyframeHandle inKeyframe)
 {
     RefreshKeyframe(inAnimation, inKeyframe, ETimelineKeyframeTransaction_Add);
 }
 
-void CTimelineTranslationManager::OnKeyframeDeleted(CUICDMAnimationHandle inAnimation,
-                                                    CUICDMKeyframeHandle inKeyframe)
+void CTimelineTranslationManager::OnKeyframeDeleted(Qt3DSDMAnimationHandle inAnimation,
+                                                    Qt3DSDMKeyframeHandle inKeyframe)
 {
     RefreshKeyframe(inAnimation, inKeyframe, ETimelineKeyframeTransaction_Delete);
 }
 
-void CTimelineTranslationManager::OnKeyframeUpdated(CUICDMKeyframeHandle inKeyframe)
+void CTimelineTranslationManager::OnKeyframeUpdated(Qt3DSDMKeyframeHandle inKeyframe)
 {
     IAnimationCore *theAnimationCore = GetStudioSystem()->GetAnimationCore();
     if (theAnimationCore->KeyframeValid(inKeyframe)) {
-        CUICDMAnimationHandle theAnimationHandle =
+        Qt3DSDMAnimationHandle theAnimationHandle =
             theAnimationCore->GetAnimationForKeyframe(inKeyframe);
         RefreshKeyframe(theAnimationHandle, inKeyframe, ETimelineKeyframeTransaction_Update);
     }
@@ -425,23 +425,23 @@ void CTimelineTranslationManager::OnKeyframeUpdated(CUICDMKeyframeHandle inKeyfr
 void CTimelineTranslationManager::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                     qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
-    CUICDMTimelineItemBinding *theTimelineBinding =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
+    Qt3DSDMTimelineItemBinding *theTimelineBinding =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(inInstance));
     if (theTimelineBinding)
         theTimelineBinding->OnPropertyChanged(inProperty);
 }
 
-void CTimelineTranslationManager::OnDynamicKeyframeChanged(qt3dsdm::CUICDMAnimationHandle inAnimation,
+void CTimelineTranslationManager::OnDynamicKeyframeChanged(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
                                                            bool inDynamic)
 {
     Q_UNUSED(inDynamic);
 
-    CUICDMTimelineItemBinding *theTimelineBinding = nullptr;
+    Qt3DSDMTimelineItemBinding *theTimelineBinding = nullptr;
     if (GetStudioSystem()->GetAnimationCore()->AnimationValid(inAnimation)) {
         SAnimationInfo theAnimationInfo =
             GetStudioSystem()->GetAnimationCore()->GetAnimationInfo(inAnimation);
         theTimelineBinding =
-            dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(theAnimationInfo.m_Instance));
+            dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(theAnimationInfo.m_Instance));
         if (theTimelineBinding)
             theTimelineBinding->RefreshPropertyKeyframe(
                 theAnimationInfo.m_Property, 0, ETimelineKeyframeTransaction_DynamicChanged);
@@ -462,11 +462,11 @@ void CTimelineTranslationManager::OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle 
     // from the model and then decided to send notifications after the fact.
     // if the created asset is library asset, do nothing
     // start to add the scene asset to the timeline
-    CUICDMTimelineItemBinding *theItemBinding =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inInstance));
+    Qt3DSDMTimelineItemBinding *theItemBinding =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(inInstance));
     if (theItemBinding) {
-        CUICDMTimelineItemBinding *theParentBinding =
-            dynamic_cast<CUICDMTimelineItemBinding *>(theItemBinding->GetParent());
+        Qt3DSDMTimelineItemBinding *theParentBinding =
+            dynamic_cast<Qt3DSDMTimelineItemBinding *>(theItemBinding->GetParent());
         if (theParentBinding)
             theParentBinding->OnDeleteChild(inInstance);
     }
@@ -493,7 +493,7 @@ void CTimelineTranslationManager::OnChildMoved(int /*inParent*/, int inChild, lo
  * Basically, it tells the owner of the action to update its timeline control to
  * update the icon that shows action association status
  */
-void CTimelineTranslationManager::OnActionEvent(qt3dsdm::CUICDMActionHandle inAction,
+void CTimelineTranslationManager::OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
                                                 qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                                 qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
@@ -501,8 +501,8 @@ void CTimelineTranslationManager::OnActionEvent(qt3dsdm::CUICDMActionHandle inAc
 
     // the slide that action is added to is the current slide or
     // is added to the master slide of the current slide
-    CUICDMTimelineItemBinding *theTimelineBinding =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetBinding(inOwner));
+    Qt3DSDMTimelineItemBinding *theTimelineBinding =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetBinding(inOwner));
     if (theTimelineBinding)
         theTimelineBinding->UpdateActionStatus();
 }
@@ -562,8 +562,8 @@ ITimelineItemBinding *CTimelineTranslationManager::EnsureLoaded(Qt3DSDMInstanceH
             bool rowLoaded = theBinding != nullptr && theBinding->GetRow() != nullptr;
             if (theParentBinding && rowLoaded == false) {
                 // start to add the scene asset to the timeline
-                CUICDMTimelineItemBinding *theUICDMBinding =
-                    dynamic_cast<CUICDMTimelineItemBinding *>(theParentBinding);
+                Qt3DSDMTimelineItemBinding *theUICDMBinding =
+                    dynamic_cast<Qt3DSDMTimelineItemBinding *>(theParentBinding);
                 theUICDMBinding->OnAddChild(inHandle);
                 theBinding = GetBinding(inHandle);
             }

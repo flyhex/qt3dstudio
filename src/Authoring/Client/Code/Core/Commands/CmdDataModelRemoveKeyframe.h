@@ -47,11 +47,11 @@ class CCmdDataModelRemoveKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    std::vector<qt3dsdm::CUICDMKeyframeHandle> m_Keyframes; // 1..n keyframes to be deleted
+    std::vector<qt3dsdm::Qt3DSDMKeyframeHandle> m_Keyframes; // 1..n keyframes to be deleted
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelRemoveKeyframe(CDoc *inDoc, qt3dsdm::CUICDMKeyframeHandle inKeyframe)
+    CCmdDataModelRemoveKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
     {
@@ -59,7 +59,7 @@ public: // Construction
     }
     ~CCmdDataModelRemoveKeyframe() {}
 
-    void AddKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inKeyframe)
+    void AddKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
     {
         m_Keyframes.push_back(inKeyframe);
     }

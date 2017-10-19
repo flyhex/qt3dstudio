@@ -46,14 +46,14 @@
 /**
 *	For inspecting scene data model instances
 */
-class CUICDMSceneInspectable : public CUICDMInspectable
+class Qt3DSDMSceneInspectable : public Qt3DSDMInspectable
 {
 public:
-    CUICDMSceneInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+    Qt3DSDMSceneInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                            qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance);
 
     bool IsValid() const override;
-    // CUICDMInspectable
+    // Qt3DSDMInspectable
     long GetGroupCount() override;
 
 protected:

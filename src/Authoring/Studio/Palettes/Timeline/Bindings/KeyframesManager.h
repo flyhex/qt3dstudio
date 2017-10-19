@@ -36,8 +36,8 @@
 #include "OffsetKeyframesCommandHelper.h"
 
 class CTimelineTranslationManager;
-class CUICDMTimelineKeyframe;
-class CUICDMTimelineItemBinding;
+class Qt3DSDMTimelineKeyframe;
+class Qt3DSDMTimelineItemBinding;
 class CPasteKeyframeCommandHelper;
 
 //=============================================================================
@@ -71,21 +71,21 @@ public:
     void CommitChangedKeyframes() override;
     void RollbackChangedKeyframes() override;
 
-    void SetKeyframeSelected(CUICDMTimelineKeyframe *inKeyframe, bool inSelected,
-                             CUICDMTimelineItemBinding *inOwningInstance = nullptr);
+    void SetKeyframeSelected(Qt3DSDMTimelineKeyframe *inKeyframe, bool inSelected,
+                             Qt3DSDMTimelineItemBinding *inOwningInstance = nullptr);
 
 protected:
-    void SetKeyframeDynamic(CUICDMTimelineKeyframe *inKeyframe, bool inDynamic);
+    void SetKeyframeDynamic(Qt3DSDMTimelineKeyframe *inKeyframe, bool inDynamic);
     void CopySelectedKeyframes();
 
 public:
     struct SKeyframeInstancePair
     {
-        CUICDMTimelineKeyframe *m_Keyframe;
-        CUICDMTimelineItemBinding *m_Instance;
+        Qt3DSDMTimelineKeyframe *m_Keyframe;
+        Qt3DSDMTimelineItemBinding *m_Instance;
 
-        SKeyframeInstancePair(CUICDMTimelineKeyframe *inKeyframe,
-                              CUICDMTimelineItemBinding *inInstance)
+        SKeyframeInstancePair(Qt3DSDMTimelineKeyframe *inKeyframe,
+                              Qt3DSDMTimelineItemBinding *inInstance)
         {
             m_Keyframe = inKeyframe;
             m_Instance = inInstance;
@@ -101,7 +101,7 @@ protected:
     TSelectedKeyframeList m_SelectedKeyframes;
     COffsetKeyframesCommandHelper m_OffsetKeyframeCommandHelper; // so that we can commit on mouseup
     CPasteKeyframeCommandHelper *m_PasteKeyframeCommandHelper;
-    std::set<CUICDMTimelineItemBinding *> m_InstanceSet;
+    std::set<Qt3DSDMTimelineItemBinding *> m_InstanceSet;
     std::vector<qt3dsdm::Qt3DSDMInstanceHandle> m_InstanceList;
 };
 

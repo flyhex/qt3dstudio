@@ -61,7 +61,7 @@
 #include <boost/bind.hpp>
 using namespace qt3dsdm;
 
-bool SortKeyframeByTime(const CUICDMTimelineKeyframe *inLHS, const CUICDMTimelineKeyframe *inRHS)
+bool SortKeyframeByTime(const Qt3DSDMTimelineKeyframe *inLHS, const Qt3DSDMTimelineKeyframe *inRHS)
 {
     return inLHS->GetTime() < inRHS->GetTime();
 }
@@ -72,7 +72,7 @@ inline float UICDMToColor(float inValue)
     return inValue * 255;
 }
 
-CUICDMTimelineItemProperty::CUICDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
+Qt3DSDMTimelineItemProperty::Qt3DSDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
                                                        Qt3DSDMPropertyHandle inPropertyHandle,
                                                        Qt3DSDMInstanceHandle inInstance)
     : m_Row(nullptr)
@@ -88,7 +88,7 @@ CUICDMTimelineItemProperty::CUICDMTimelineItemProperty(CTimelineTranslationManag
     InitializeCachedVariables(inInstance);
     m_Signals.push_back(
         m_TransMgr->GetStudioSystem()->GetFullSystem()->GetSignalProvider()->ConnectPropertyLinked(
-            boost::bind(&CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged, this, _1, _2,
+            boost::bind(&Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged, this, _1, _2,
                         _3)));
 
     m_Signals.push_back(
@@ -96,16 +96,16 @@ CUICDMTimelineItemProperty::CUICDMTimelineItemProperty(CTimelineTranslationManag
             ->GetFullSystem()
             ->GetSignalProvider()
             ->ConnectPropertyUnlinked(boost::bind(
-                &CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged, this, _1, _2, _3)));
+                &Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged, this, _1, _2, _3)));
 }
 
-CUICDMTimelineItemProperty::~CUICDMTimelineItemProperty()
+Qt3DSDMTimelineItemProperty::~Qt3DSDMTimelineItemProperty()
 {
     ReleaseKeyframes();
     Release();
 }
 
-void CUICDMTimelineItemProperty::CreateKeyframes()
+void Qt3DSDMTimelineItemProperty::CreateKeyframes()
 {
     // Cache all the animation handles because we need them for any keyframes manipulation.
     // the assumption is that all associated handles are created all at once (i.e. we do not need to
@@ -116,7 +116,7 @@ void CUICDMTimelineItemProperty::CreateKeyframes()
         m_TransMgr->GetStudioSystem()->GetAnimationSystem();
     std::tuple<bool, size_t> theArity = GetDatatypeAnimatableAndArity(theDataType);
     for (size_t i = 0; i < std::get<1>(theArity); ++i) {
-        CUICDMAnimationHandle theAnimationHandle =
+        Qt3DSDMAnimationHandle theAnimationHandle =
             theAnimationSystem->GetControllingAnimation(m_InstanceHandle, m_PropertyHandle, i);
         if (theAnimationHandle.Valid())
             m_AnimationHandles.push_back(theAnimationHandle);
@@ -131,7 +131,7 @@ void CUICDMTimelineItemProperty::CreateKeyframes()
     }
 }
 
-void CUICDMTimelineItemProperty::ReleaseKeyframes()
+void Qt3DSDMTimelineItemProperty::ReleaseKeyframes()
 {
     // clear any selection from m_TransMgr
     TKeyframeList::iterator theIter = m_Keyframes.begin();
@@ -145,7 +145,7 @@ void CUICDMTimelineItemProperty::ReleaseKeyframes()
 }
 
 // Type doesn't change and due to the logic required to figure this out, cache it.
-void CUICDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+void Qt3DSDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
@@ -161,7 +161,7 @@ void CUICDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInsta
     m_Name = theFormalName.c_str();
 }
 
-Q3DStudio::CString CUICDMTimelineItemProperty::GetName() const
+Q3DStudio::CString Qt3DSDMTimelineItemProperty::GetName() const
 {
     return m_Name;
 }
@@ -181,23 +181,23 @@ inline ITimelineItemBinding *GetParentBinding(CPropertyRow *inRow)
     return theParentBinding;
 }
 
-bool CUICDMTimelineItemProperty::IsMaster() const
+bool Qt3DSDMTimelineItemProperty::IsMaster() const
 {
     if (m_Row) {
-        if (CUICDMTimelineItemBinding *theParentBinding =
-                dynamic_cast<CUICDMTimelineItemBinding *>(GetParentBinding(m_Row)))
+        if (Qt3DSDMTimelineItemBinding *theParentBinding =
+                dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row)))
             return m_TransMgr->GetDoc()->GetDocumentReader().IsPropertyLinked(
                 theParentBinding->GetInstanceHandle(), m_PropertyHandle);
     }
     return false;
 }
 
-qt3dsdm::TDataTypePair CUICDMTimelineItemProperty::GetType() const
+qt3dsdm::TDataTypePair Qt3DSDMTimelineItemProperty::GetType() const
 {
     return m_Type;
 }
 
-void CompareAndSet(const CUICDMTimelineKeyframe *inKeyframe, float &outRetValue, bool inGreaterThan)
+void CompareAndSet(const Qt3DSDMTimelineKeyframe *inKeyframe, float &outRetValue, bool inGreaterThan)
 {
     float theValue = (inGreaterThan) ? inKeyframe->GetMaxValue() : inKeyframe->GetMinValue();
     if ((inGreaterThan && theValue > outRetValue) || (!inGreaterThan && theValue < outRetValue))
@@ -205,7 +205,7 @@ void CompareAndSet(const CUICDMTimelineKeyframe *inKeyframe, float &outRetValue,
 }
 
 // return the max value of the current set of keyframes
-float CUICDMTimelineItemProperty::GetMaximumValue() const
+float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
 {
     float theRetVal = FLT_MIN;
     do_all(m_Keyframes, boost::bind(CompareAndSet, _1, boost::ref(theRetVal), true));
@@ -215,7 +215,7 @@ float CUICDMTimelineItemProperty::GetMaximumValue() const
 }
 
 // return the min value of the current set of keyframes
-float CUICDMTimelineItemProperty::GetMinimumValue() const
+float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
 {
     float theRetVal = FLT_MAX;
     do_all(m_Keyframes, boost::bind(CompareAndSet, _1, boost::ref(theRetVal), false));
@@ -224,20 +224,20 @@ float CUICDMTimelineItemProperty::GetMinimumValue() const
     return theRetVal;
 }
 
-void CUICDMTimelineItemProperty::Bind(CPropertyRow *inRow)
+void Qt3DSDMTimelineItemProperty::Bind(CPropertyRow *inRow)
 {
     ASSERT(!m_Row);
 
     m_Row = inRow;
 }
 
-void CUICDMTimelineItemProperty::Release()
+void Qt3DSDMTimelineItemProperty::Release()
 {
     m_Row = nullptr;
 }
 
 // Ensures the object that owns this property is selected.
-void CUICDMTimelineItemProperty::SetSelected()
+void Qt3DSDMTimelineItemProperty::SetSelected()
 {
     if (m_Row) {
         ITimelineItemBinding *theParentBinding = GetParentBinding(m_Row);
@@ -246,12 +246,12 @@ void CUICDMTimelineItemProperty::SetSelected()
     }
 }
 
-void CUICDMTimelineItemProperty::ClearKeySelection()
+void Qt3DSDMTimelineItemProperty::ClearKeySelection()
 {
     m_TransMgr->ClearKeyframeSelection();
 }
 
-void CUICDMTimelineItemProperty::DeleteAllKeys()
+void Qt3DSDMTimelineItemProperty::DeleteAllKeys()
 {
     if (m_Keyframes.empty())
         return;
@@ -263,12 +263,12 @@ void CUICDMTimelineItemProperty::DeleteAllKeys()
         editor->DeleteAllKeyframes(m_AnimationHandles[idx]);
 }
 
-ITimelineKeyframesManager *CUICDMTimelineItemProperty::GetKeyframesManager() const
+ITimelineKeyframesManager *Qt3DSDMTimelineItemProperty::GetKeyframesManager() const
 {
     return m_TransMgr->GetKeyframesManager();
 }
 
-IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByTime(long inTime) const
+IKeyframe *Qt3DSDMTimelineItemProperty::GetKeyframeByTime(long inTime) const
 {
     std::vector<long> theTest;
     TKeyframeList::const_iterator theIter = m_Keyframes.begin();
@@ -282,7 +282,7 @@ IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByTime(long inTime) const
     return nullptr;
 }
 
-IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByIndex(long inIndex) const
+IKeyframe *Qt3DSDMTimelineItemProperty::GetKeyframeByIndex(long inIndex) const
 {
     if (inIndex >= 0 && inIndex < (long)m_Keyframes.size())
         return m_Keyframes[inIndex];
@@ -291,23 +291,23 @@ IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByIndex(long inIndex) const
     return nullptr;
 }
 
-long CUICDMTimelineItemProperty::GetKeyframeCount() const
+long Qt3DSDMTimelineItemProperty::GetKeyframeCount() const
 {
     // this list is updated in constructor and when keyframes are added or deleted.
     return (long)m_Keyframes.size();
 }
 
-long CUICDMTimelineItemProperty::GetChannelCount() const
+long Qt3DSDMTimelineItemProperty::GetChannelCount() const
 {
     return (long)m_AnimationHandles.size();
 }
 
-float CUICDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, long inTime)
+float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, long inTime)
 {
     // if no keyframes, get current property value.
     if (m_Keyframes.empty()) {
-        CUICDMTimelineItemBinding *theParentBinding =
-            dynamic_cast<CUICDMTimelineItemBinding *>(GetParentBinding(m_Row));
+        Qt3DSDMTimelineItemBinding *theParentBinding =
+            dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row));
         if (theParentBinding) {
 
             SValue theValue;
@@ -346,7 +346,7 @@ float CUICDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lon
     if (!m_AnimationHandles.empty() && inChannelIndex >= 0
         && inChannelIndex < (long)m_AnimationHandles.size()) {
         float theValue = theAnimationCore->EvaluateAnimation(
-            m_AnimationHandles[inChannelIndex], CUICDMTimelineKeyframe::GetTimeInSecs(inTime));
+            m_AnimationHandles[inChannelIndex], Qt3DSDMTimelineKeyframe::GetTimeInSecs(inTime));
         if (m_Type.first == DataModelDataType::Float3
             && m_Type.second == AdditionalMetaDataType::Color)
             theValue = UICDMToColor(theValue);
@@ -356,14 +356,14 @@ float CUICDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lon
     return 0.f;
 }
 
-void CUICDMTimelineItemProperty::SetChannelValueAtTime(long inChannelIndex, long inTime,
+void Qt3DSDMTimelineItemProperty::SetChannelValueAtTime(long inChannelIndex, long inTime,
                                                        float inValue)
 {
     using namespace boost;
-    CUICDMTimelineKeyframe *theKeyframeWrapper =
-        dynamic_cast<CUICDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
+    Qt3DSDMTimelineKeyframe *theKeyframeWrapper =
+        dynamic_cast<Qt3DSDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
     if (theKeyframeWrapper) {
-        CUICDMTimelineKeyframe::TKeyframeHandleList theKeyframes;
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframes;
         theKeyframeWrapper->GetKeyframeHandles(theKeyframes);
         if (!theKeyframes.empty() && inChannelIndex < (long)theKeyframes.size()) {
             inValue /= 255;
@@ -375,7 +375,7 @@ void CUICDMTimelineItemProperty::SetChannelValueAtTime(long inChannelIndex, long
     }
 }
 
-long CUICDMTimelineItemProperty::OffsetSelectedKeyframes(long inOffset)
+long Qt3DSDMTimelineItemProperty::OffsetSelectedKeyframes(long inOffset)
 {
     long theRetVal = m_TransMgr->GetKeyframesManager()->OffsetSelectedKeyframes(inOffset);
     if (m_Row) // UI update, since the data model sends no event while the change isn't commited.
@@ -385,7 +385,7 @@ long CUICDMTimelineItemProperty::OffsetSelectedKeyframes(long inOffset)
     return theRetVal;
 }
 
-void CUICDMTimelineItemProperty::CommitChangedKeyframes()
+void Qt3DSDMTimelineItemProperty::CommitChangedKeyframes()
 {
     if (m_SetKeyframeValueCommand) { // if this is moving a keyframe value
         g_StudioApp.GetCore()->ExecuteCommand(m_SetKeyframeValueCommand, false);
@@ -394,7 +394,7 @@ void CUICDMTimelineItemProperty::CommitChangedKeyframes()
         m_TransMgr->GetKeyframesManager()->CommitChangedKeyframes();
 }
 
-void CUICDMTimelineItemProperty::OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation)
+void Qt3DSDMTimelineItemProperty::OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation)
 {
     (void)inObjectAssociation;
     CTimeEditDlg theTimeEditDlg;
@@ -402,19 +402,19 @@ void CUICDMTimelineItemProperty::OnEditKeyframeTime(long inCurrentTime, long inO
     theTimeEditDlg.ShowDialog(inCurrentTime, 0, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
 }
 
-void CUICDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /*= -1 */)
+void Qt3DSDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /*= -1 */)
 {
-    CUICDMTimelineItemBinding *theParent =
-        dynamic_cast<CUICDMTimelineItemBinding *>(GetParentBinding(m_Row));
+    Qt3DSDMTimelineItemBinding *theParent =
+        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row));
     DoSelectKeyframes(inSelected, inTime, false, theParent);
 }
 
-CPropertyRow *CUICDMTimelineItemProperty::GetRow()
+CPropertyRow *Qt3DSDMTimelineItemProperty::GetRow()
 {
     return m_Row;
 }
 
-bool CUICDMTimelineItemProperty::IsDynamicAnimation()
+bool Qt3DSDMTimelineItemProperty::IsDynamicAnimation()
 {
     return m_Keyframes.size() > 0 && m_Keyframes[0]->IsDynamic();
 }
@@ -423,7 +423,7 @@ bool CUICDMTimelineItemProperty::IsDynamicAnimation()
 /**
  * For updating the UI when keyframes are added/updated/deleted.
  */
-bool CUICDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+bool Qt3DSDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                                  ETimelineKeyframeTransaction inTransaction)
 {
     bool theHandled = false;
@@ -431,7 +431,7 @@ bool CUICDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::CUICDMKeyframeHandle i
     case ETimelineKeyframeTransaction_Delete: {
         TKeyframeList::iterator theIter = m_Keyframes.begin();
         for (; theIter != m_Keyframes.end(); ++theIter) {
-            CUICDMTimelineKeyframe *theKeyframe = *theIter;
+            Qt3DSDMTimelineKeyframe *theKeyframe = *theIter;
             if (theKeyframe->HasKeyframeHandle(inKeyframe)) { // clear selection
                 m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(theKeyframe, false);
                 m_Keyframes.erase(theIter);
@@ -444,7 +444,7 @@ bool CUICDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::CUICDMKeyframeHandle i
     case ETimelineKeyframeTransaction_Add: {
         ASSERT(!m_AnimationHandles.empty());
         IAnimationCore *theAnimationCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
-        CUICDMAnimationHandle theAnimationHandle =
+        Qt3DSDMAnimationHandle theAnimationHandle =
             theAnimationCore->GetAnimationForKeyframe(inKeyframe);
         // only create for the first animation handle.
         if (theAnimationHandle == m_AnimationHandles[0]) { // for undo/redo, the keyframes can be
@@ -468,11 +468,11 @@ bool CUICDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::CUICDMKeyframeHandle i
     return theHandled;
 }
 
-IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByHandle(qt3dsdm::CUICDMKeyframeHandle inKeyframe)
+IKeyframe *Qt3DSDMTimelineItemProperty::GetKeyframeByHandle(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
 {
     TKeyframeList::iterator theIter = m_Keyframes.begin();
     for (; theIter != m_Keyframes.end(); ++theIter) {
-        CUICDMTimelineKeyframe *theKeyframe = *theIter;
+        Qt3DSDMTimelineKeyframe *theKeyframe = *theIter;
         if (theKeyframe->HasKeyframeHandle(inKeyframe))
             return *theIter;
     }
@@ -481,9 +481,9 @@ IKeyframe *CUICDMTimelineItemProperty::GetKeyframeByHandle(qt3dsdm::CUICDMKeyfra
 
 // This is either triggered from this property's keyframe selection OR from a parent's keyframe
 // selection.
-void CUICDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime,
+void Qt3DSDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime,
                                                    bool inParentTriggered,
-                                                   CUICDMTimelineItemBinding *inParent)
+                                                   Qt3DSDMTimelineItemBinding *inParent)
 {
     // this is what it used to do before the refactor. selecting a keyframe always selects the
     // asset.
@@ -501,8 +501,8 @@ void CUICDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime,
             m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(*theIter, inSelected, inParent);
         }
     } else {
-        CUICDMTimelineKeyframe *theKeyframe =
-            dynamic_cast<CUICDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
+        Qt3DSDMTimelineKeyframe *theKeyframe =
+            dynamic_cast<Qt3DSDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
         if (theKeyframe) {
             theKeyframe->SetSelected(inSelected);
             m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(theKeyframe, inSelected,
@@ -526,18 +526,18 @@ void CUICDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime,
  * Create a wrapper for this keyframe if doesn't exists.
  * @return true if created, false if already exists.
  */
-bool CUICDMTimelineItemProperty::CreateKeyframeIfNonExistent(
-    qt3dsdm::CUICDMKeyframeHandle inKeyframeHandle, CUICDMAnimationHandle inOwningAnimation)
+bool Qt3DSDMTimelineItemProperty::CreateKeyframeIfNonExistent(
+    qt3dsdm::Qt3DSDMKeyframeHandle inKeyframeHandle, Qt3DSDMAnimationHandle inOwningAnimation)
 {
     TKeyframeList::iterator theIter = m_Keyframes.begin();
     for (; theIter != m_Keyframes.end(); ++theIter) {
-        CUICDMTimelineKeyframe *theKeyframe = *theIter;
+        Qt3DSDMTimelineKeyframe *theKeyframe = *theIter;
         if (theKeyframe->HasKeyframeHandle(inKeyframeHandle))
             return false;
     }
-    // check for multiple channels => only create 1 CUICDMTimelineKeyframe
-    CUICDMTimelineKeyframe *theNewKeyframe =
-        new CUICDMTimelineKeyframe(g_StudioApp.GetCore()->GetDoc());
+    // check for multiple channels => only create 1 Qt3DSDMTimelineKeyframe
+    Qt3DSDMTimelineKeyframe *theNewKeyframe =
+        new Qt3DSDMTimelineKeyframe(g_StudioApp.GetCore()->GetDoc());
     theNewKeyframe->AddKeyframeHandle(inKeyframeHandle);
     if (m_AnimationHandles.size()
         > 1) { // assert assumption that is only called for the first handle
@@ -562,7 +562,7 @@ bool CUICDMTimelineItemProperty::CreateKeyframeIfNonExistent(
     return true;
 }
 
-void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::Qt3DSDMSlideHandle inSlide,
+void Qt3DSDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                                              qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
@@ -573,7 +573,7 @@ void CUICDMTimelineItemProperty::OnPropertyLinkStatusChanged(qt3dsdm::Qt3DSDMSli
     }
 }
 
-void CUICDMTimelineItemProperty::RefreshKeyFrames(void)
+void Qt3DSDMTimelineItemProperty::RefreshKeyFrames(void)
 {
     std::stable_sort(m_Keyframes.begin(), m_Keyframes.end(), SortKeyframeByTime);
 }

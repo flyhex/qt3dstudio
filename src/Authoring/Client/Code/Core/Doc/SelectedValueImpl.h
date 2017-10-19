@@ -90,7 +90,7 @@ struct SSelectedValueTypeMap<SSlideInstanceWrapper>
 };
 
 template <>
-struct SSelectedValueTypeMap<qt3dsdm::CUICDMGuideHandle>
+struct SSelectedValueTypeMap<qt3dsdm::Qt3DSDMGuideHandle>
 {
     static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::Guide; }
 };
@@ -131,7 +131,7 @@ struct SSelectedValueTraits
         case SelectedValueTypes::Slide:
             return inVisitor(*qt3ds::NVUnionCast<SSlideInstanceWrapper *>(inData));
         case SelectedValueTypes::Guide:
-            return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::CUICDMGuideHandle *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::Qt3DSDMGuideHandle *>(inData));
         case SelectedValueTypes::SlideInsertion:
             return inVisitor(*qt3ds::NVUnionCast<void **>(inData));
         case SelectedValueTypes::MultipleInstances:
@@ -152,7 +152,7 @@ struct SSelectedValueTraits
         case SelectedValueTypes::Slide:
             return inVisitor(*qt3ds::NVUnionCast<const SSlideInstanceWrapper *>(inData));
         case SelectedValueTypes::Guide:
-            return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::CUICDMGuideHandle *>(inData));
+            return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::Qt3DSDMGuideHandle *>(inData));
         case SelectedValueTypes::SlideInsertion:
             return inVisitor(*qt3ds::NVUnionCast<const void **>(inData));
         case SelectedValueTypes::MultipleInstances:
@@ -188,7 +188,7 @@ struct SSelectedValue : public TSelectedValueUnionType
         : TSelectedValueUnionType(val)
     {
     }
-    SSelectedValue(qt3dsdm::CUICDMGuideHandle val)
+    SSelectedValue(qt3dsdm::Qt3DSDMGuideHandle val)
         : TSelectedValueUnionType(val)
     {
     }

@@ -603,9 +603,9 @@ namespace studio {
                                CPt inPreviousMouseCoords, CPt inMouseCoords,
                                CUpdateableDocumentEditor &inEditor);
 
-        void PerformGuideDrag(CUICDMGuideHandle inGuide, CPt inPoint,
+        void PerformGuideDrag(Qt3DSDMGuideHandle inGuide, CPt inPoint,
                               CUpdateableDocumentEditor &inEditor);
-        void CheckGuideInPresentationRect(CUICDMGuideHandle inGuide,
+        void CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
                                           CUpdateableDocumentEditor &inEditor);
 
         void PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,

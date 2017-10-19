@@ -48,7 +48,7 @@
 /**
 *	For inspecting data model instances
 */
-class CUICDMInspectable : public CInspectableBase
+class Qt3DSDMInspectable : public CInspectableBase
 {
 protected: // Fields
     qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
@@ -56,7 +56,7 @@ protected: // Fields
     CStudioApp &m_App;
 
 public: // Constructor
-    CUICDMInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+    Qt3DSDMInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                       qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance = 0);
 
 public: // CInspectableBase

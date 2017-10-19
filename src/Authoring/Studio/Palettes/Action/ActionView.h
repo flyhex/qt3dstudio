@@ -63,7 +63,7 @@ struct HandlerArgument {
     Q_PROPERTY(QVariant value MEMBER m_value FINAL)
     Q_PROPERTY(qt3dsdm::CompleteMetaDataType::Enum completeType MEMBER m_completeType FINAL)
 
-    qt3dsdm::CUICDMHandlerArgHandle m_handle;
+    qt3dsdm::Qt3DSDMHandlerArgHandle m_handle;
     qt3dsdm::HandlerArgumentType::Value m_type;
     qt3dsdm::CompleteMetaDataType::Enum m_completeType;
     QString m_name;
@@ -134,12 +134,12 @@ public:
     void OnSelectionSet(Q3DStudio::SSelectedValue inSelectable);
 
     // Action callback
-    void OnActionAdded(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
+    void OnActionAdded(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
-    void OnActionDeleted(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
+    void OnActionDeleted(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                          qt3dsdm::Qt3DSDMInstanceHandle inOwner);
-    void OnActionModified(qt3dsdm::CUICDMActionHandle inAction);
-    void OnHandlerArgumentModified(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument);
+    void OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction);
+    void OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument);
     void OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
@@ -158,8 +158,8 @@ private Q_SLOTS:
 private:
     void setTriggerObject(const qt3dsdm::SObjectRefType &object);
     void setTargetObject(const qt3dsdm::SObjectRefType &object);
-    void setEvent(const qt3dsdm::CUICDMEventHandle &event);
-    void setHandler(const qt3dsdm::CUICDMHandlerHandle &handler);
+    void setEvent(const qt3dsdm::Qt3DSDMEventHandle &event);
+    void setHandler(const qt3dsdm::Qt3DSDMHandlerHandle &handler);
     QVariant handlerArgumentValue(int handle) const;
     void updateHandlerArguments();
     void emitActionChanged();
@@ -191,8 +191,8 @@ private:
     QPointer<EventsBrowserView> m_fireEventsBrowser;
     int m_currentActionIndex = -1;
     int m_currentPropertyIndex = -1;
-    qt3dsdm::CUICDMHandlerArgHandle m_currentPropertyNameHandle;
-    qt3dsdm::CUICDMHandlerArgHandle m_currentPropertyValueHandle;
+    qt3dsdm::Qt3DSDMHandlerArgHandle m_currentPropertyNameHandle;
+    qt3dsdm::Qt3DSDMHandlerArgHandle m_currentPropertyValueHandle;
     QVariantList m_handlerArguments;
     QTimer m_actionChangedCompressionTimer;
     QString m_firedEvent;

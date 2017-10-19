@@ -64,9 +64,9 @@ using qt3ds::foundation::Option;
 using qt3dsdm::Qt3DSDMInstanceHandle;
 using qt3dsdm::Qt3DSDMPropertyHandle;
 using qt3dsdm::Qt3DSDMSlideHandle;
-using qt3dsdm::CUICDMKeyframeHandle;
-using qt3dsdm::CUICDMActionHandle;
-using qt3dsdm::CUICDMAnimationHandle;
+using qt3dsdm::Qt3DSDMKeyframeHandle;
+using qt3dsdm::Qt3DSDMActionHandle;
+using qt3dsdm::Qt3DSDMAnimationHandle;
 using qt3dsdm::SValue;
 using qt3dsdm::IDOMReader;
 using qt3dsdm::IDOMWriter;
@@ -82,7 +82,7 @@ public:
     typedef Qt3DSDMInstanceHandle TInstanceHandle;
     typedef Qt3DSDMPropertyHandle TPropertyHandle;
     typedef Qt3DSDMSlideHandle TSlideHandle;
-    typedef CUICDMKeyframeHandle TKeyframeHandle;
+    typedef Qt3DSDMKeyframeHandle TKeyframeHandle;
     typedef qt3dsdm::SValue SValue;
     typedef std::pair<TSlideHandle, SValue> TSlideValuePair;
     typedef std::vector<TSlideValuePair> TSlideValuePairList;
@@ -206,8 +206,8 @@ public:
                                          const wchar_t *propName, long subIndex) = 0;
 
     virtual qt3dsdm::TGuideHandleList GetGuides() const = 0;
-    virtual qt3dsdm::SGuideInfo GetGuideInfo(qt3dsdm::CUICDMGuideHandle inGuide) const = 0;
-    virtual bool IsGuideValid(qt3dsdm::CUICDMGuideHandle inGuide) const = 0;
+    virtual qt3dsdm::SGuideInfo GetGuideInfo(qt3dsdm::Qt3DSDMGuideHandle inGuide) const = 0;
+    virtual bool IsGuideValid(qt3dsdm::Qt3DSDMGuideHandle inGuide) const = 0;
     virtual bool AreGuidesEditable() const = 0;
     // This can be done outside a transaction, hence it is an operation on the reader
     // not on the editor.
@@ -229,7 +229,7 @@ public:
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CopySceneGraphObjectToMemory(Qt3DSDMInstanceHandle inInstance) = 0;
 
-    virtual CFilePath CopyAction(CUICDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
+    virtual CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
 
     virtual void ParseSourcePathsOutOfEffectFile(Q3DStudio::CString inFile,
                                                  std::vector<Q3DStudio::CString> &outFilePaths) = 0;

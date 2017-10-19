@@ -52,7 +52,7 @@
 //==============================================================================
 class CTimelineTranslationManager;
 class CBaseStateRow;
-class CUICDMTimelineItemProperty;
+class Qt3DSDMTimelineItemProperty;
 class CCmdDataModelSetKeyframeTime;
 
 namespace qt3dsdm {
@@ -63,15 +63,15 @@ class CStudioSystem;
 /**
  * Binding to generic UICDM object
  */
-class CUICDMTimelineItemBinding : public ITimelineItemBinding,
+class Qt3DSDMTimelineItemBinding : public ITimelineItemBinding,
                                   public ITimelineItem,
                                   public IDragable,
                                   public IDataModelListener
 
 {
 protected: // Typedef
-    typedef std::map<qt3dsdm::Qt3DSDMPropertyHandle, CUICDMTimelineItemProperty *> TPropertyBindingMap;
-    typedef std::vector<CUICDMAssetTimelineKeyframe> TAssetKeyframeList;
+    typedef std::map<qt3dsdm::Qt3DSDMPropertyHandle, Qt3DSDMTimelineItemProperty *> TPropertyBindingMap;
+    typedef std::vector<Qt3DSDMAssetTimelineKeyframe> TAssetKeyframeList;
 
 protected:
     CBaseStateRow *m_Row;
@@ -87,10 +87,10 @@ protected:
     qt3dsdm::TSignalConnectionPtr m_EndTimeConnection;
 
 public:
-    CUICDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
+    Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
                               qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
-    CUICDMTimelineItemBinding(CTimelineTranslationManager *inMgr);
-    virtual ~CUICDMTimelineItemBinding();
+    Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr);
+    virtual ~Qt3DSDMTimelineItemBinding();
 
 protected:
     bool UICDMGetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const;
@@ -183,7 +183,7 @@ public:
                                 bool inAppend = false);
     virtual void RemovePropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     virtual void RefreshPropertyKeyframe(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                                         qt3dsdm::CUICDMKeyframeHandle,
+                                         qt3dsdm::Qt3DSDMKeyframeHandle,
                                          ETimelineKeyframeTransaction inTransaction);
     virtual void OnPropertyChanged(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     virtual void OnPropertyLinked(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);

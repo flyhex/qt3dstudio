@@ -59,16 +59,16 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &data, int role = Qt::EditRole) override;
 
-    void addAction(const qt3dsdm::CUICDMActionHandle &action);
-    void removeAction(const qt3dsdm::CUICDMActionHandle &action);
-    void updateAction(const qt3dsdm::CUICDMActionHandle &action);
-    const qt3dsdm::CUICDMActionHandle actionAt(int row);
+    void addAction(const qt3dsdm::Qt3DSDMActionHandle &action);
+    void removeAction(const qt3dsdm::Qt3DSDMActionHandle &action);
+    void updateAction(const qt3dsdm::Qt3DSDMActionHandle &action);
+    const qt3dsdm::Qt3DSDMActionHandle actionAt(int row);
     const qt3dsdm::SActionInfo actionInfoAt(int row);
 
 private:
     qt3dsdm::IActionSystem *actionSystem() const;
     qt3dsdm::Qt3DSDMSlideHandle activeSlide() const;
-    QString actionString(const qt3dsdm::CUICDMActionHandle &action) const;
+    QString actionString(const qt3dsdm::Qt3DSDMActionHandle &action) const;
 
     qt3dsdm::Qt3DSDMInstanceHandle m_handle;
     qt3dsdm::TActionHandleList m_actions;

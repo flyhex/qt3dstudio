@@ -181,9 +181,9 @@ struct SMetaDataPropertyInfo : SMetaPropertyBase
 
 struct SMetaDataHandlerArgumentInfo : SMetaPropertyBase
 {
-    CUICDMHandlerHandle m_Handler;
+    Qt3DSDMHandlerHandle m_Handler;
     HandlerArgumentType::Value m_ArgType;
-    SMetaDataHandlerArgumentInfo(CUICDMHandlerHandle inHandler = CUICDMHandlerHandle())
+    SMetaDataHandlerArgumentInfo(Qt3DSDMHandlerHandle inHandler = Qt3DSDMHandlerHandle())
         : m_Handler(inHandler)
         , m_ArgType(HandlerArgumentType::None)
     {

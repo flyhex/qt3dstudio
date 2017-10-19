@@ -51,11 +51,11 @@ class CCmdDataModelActionSetValue : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
     CDoc *m_Doc;
-    CUICDMActionHandle m_Action;
+    Qt3DSDMActionHandle m_Action;
     QString m_NiceText;
 
 public: // Construction
-    CCmdDataModelActionSetValue(CDoc *inDoc, CUICDMActionHandle inAction,
+    CCmdDataModelActionSetValue(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                 const QString &inNiceText)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
@@ -106,7 +106,7 @@ protected: // Members
     wstring m_Event;
 
 public: // Construction
-    CCmdDataModelActionSetTriggerObject(CDoc *inDoc, CUICDMActionHandle inAction,
+    CCmdDataModelActionSetTriggerObject(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                         const SObjectRefType &inObject)
         : CCmdDataModelActionSetValue(inDoc, inAction, "Set Trigger Object")
         , m_Object(inObject)
@@ -135,7 +135,7 @@ protected: // Members
     wstring m_Event;
 
 public: // Construction
-    CCmdDataModelActionSetEvent(CDoc *inDoc, CUICDMActionHandle inAction, const wstring &inEvent)
+    CCmdDataModelActionSetEvent(CDoc *inDoc, Qt3DSDMActionHandle inAction, const wstring &inEvent)
         : CCmdDataModelActionSetValue(inDoc, inAction, "Set Event")
         , m_Event(inEvent)
     {
@@ -167,7 +167,7 @@ protected: // helper functions
     }
 
 public: // Construction
-    CCmdDataModelActionResetHandler(CDoc *inDoc, CUICDMActionHandle inAction,
+    CCmdDataModelActionResetHandler(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                     const QString &inNiceText)
         : CCmdDataModelActionSetValue(inDoc, inAction, inNiceText)
         , m_ResetHandler(false)
@@ -190,7 +190,7 @@ protected: // Members
     SObjectRefType m_Object;
 
 public: // Construction
-    CCmdDataModelActionSetTargetObject(CDoc *inDoc, CUICDMActionHandle inAction,
+    CCmdDataModelActionSetTargetObject(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                        const SObjectRefType &inObject)
         : CCmdDataModelActionResetHandler(inDoc, inAction, "Set Target Object")
         , m_Object(inObject)
@@ -213,7 +213,7 @@ protected: // Members
     qt3dsdm::wstring m_Handler;
 
 public: // Construction
-    CCmdDataModelActionSetHandler(CDoc *inDoc, CUICDMActionHandle inAction,
+    CCmdDataModelActionSetHandler(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                   qt3dsdm::wstring inHandler)
         : CCmdDataModelActionResetHandler(inDoc, inAction, "Set Handler")
         , m_Handler(inHandler)
@@ -232,11 +232,11 @@ class CCmdDataModelActionSetArgumentValue : public CCmd, public qt3dsdm::CmdData
 {
 protected: // Members
     CDoc *m_Doc;
-    CUICDMHandlerArgHandle m_HandlerArgument;
+    Qt3DSDMHandlerArgHandle m_HandlerArgument;
     SValue m_Value;
 
 public: // Construction
-    CCmdDataModelActionSetArgumentValue(CDoc *inDoc, CUICDMHandlerArgHandle inHandlerArgument,
+    CCmdDataModelActionSetArgumentValue(CDoc *inDoc, Qt3DSDMHandlerArgHandle inHandlerArgument,
                                         SValue inValue)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
@@ -288,7 +288,7 @@ protected: // Members
 
 public: // Construction
     CCmdDataModelActionSetEyeball(CDoc *inDoc, Qt3DSDMSlideHandle inActiveSlide,
-                                  CUICDMActionHandle inAction, bool inValue)
+                                  Qt3DSDMActionHandle inAction, bool inValue)
         : CCmdDataModelActionSetValue(inDoc, inAction, "Set Action Eyeball")
         , m_Value(inValue)
         , m_ActiveSlide(inActiveSlide)

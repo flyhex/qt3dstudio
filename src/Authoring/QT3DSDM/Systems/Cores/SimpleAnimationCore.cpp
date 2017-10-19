@@ -50,7 +50,7 @@ using namespace boost;
 
 namespace qt3dsdm {
 
-CUICDMAnimationHandle
+Qt3DSDMAnimationHandle
 CSimpleAnimationCore::CreateAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
                                       Qt3DSDMPropertyHandle inProperty, size_t inIndex,
                                       EAnimationType inAnimationType, bool inFirstKeyframeDynamic)
@@ -59,13 +59,13 @@ CSimpleAnimationCore::CreateAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanc
         throw AnimationExists(L"");
 
     int nextId = GetNextId();
-    CUICDMAnimationHandle retval = CreateAnimationWithHandle(
+    Qt3DSDMAnimationHandle retval = CreateAnimationWithHandle(
         nextId, inSlide, inInstance, inProperty, inIndex, inAnimationType, inFirstKeyframeDynamic);
     AddAnimationToLookupCache(retval);
     return retval;
 }
 
-void CSimpleAnimationCore::DeleteAnimation(CUICDMAnimationHandle inAnimation)
+void CSimpleAnimationCore::DeleteAnimation(Qt3DSDMAnimationHandle inAnimation)
 {
     RemoveAnimationFromLookupCache(inAnimation);
     SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
@@ -85,7 +85,7 @@ void CSimpleAnimationCore::EnsureAnimationCache() const
     }
 }
 
-CUICDMAnimationHandle CSimpleAnimationCore::GetAnimation(Qt3DSDMSlideHandle inSlide,
+Qt3DSDMAnimationHandle CSimpleAnimationCore::GetAnimation(Qt3DSDMSlideHandle inSlide,
                                                          Qt3DSDMInstanceHandle inInstance,
                                                          Qt3DSDMPropertyHandle inProperty,
                                                          size_t inIndex) const
@@ -106,7 +106,7 @@ CUICDMAnimationHandle CSimpleAnimationCore::GetAnimation(Qt3DSDMSlideHandle inSl
     return 0;
 }
 
-SAnimationInfo CSimpleAnimationCore::GetAnimationInfo(CUICDMAnimationHandle inAnimation) const
+SAnimationInfo CSimpleAnimationCore::GetAnimationInfo(Qt3DSDMAnimationHandle inAnimation) const
 {
     if (m_Objects.find(inAnimation) != m_Objects.end()) {
         const SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
@@ -177,7 +177,7 @@ void CSimpleAnimationCore::GetSpecificInstanceAnimations(Qt3DSDMSlideHandle inSl
         outAnimations.push_back(iter->second->m_Handle);
 }
 
-void CSimpleAnimationCore::SetFirstKeyframeDynamic(CUICDMAnimationHandle inAnimation, bool inValue)
+void CSimpleAnimationCore::SetFirstKeyframeDynamic(Qt3DSDMAnimationHandle inAnimation, bool inValue)
 {
     SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
     theItem->m_FirstKeyframeDynamic = inValue;
@@ -191,7 +191,7 @@ inline void CheckKeyframeType(EAnimationType inExpected, const TKeyframe &inKeyf
 }
 
 // keyframe manipulation
-CUICDMKeyframeHandle CSimpleAnimationCore::InsertKeyframe(CUICDMAnimationHandle inAnimation,
+Qt3DSDMKeyframeHandle CSimpleAnimationCore::InsertKeyframe(Qt3DSDMAnimationHandle inAnimation,
                                                           const TKeyframe &inKeyframe)
 {
     SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
@@ -205,7 +205,7 @@ CUICDMKeyframeHandle CSimpleAnimationCore::InsertKeyframe(CUICDMAnimationHandle 
     return nextId;
 }
 
-void CSimpleAnimationCore::EraseKeyframe(CUICDMKeyframeHandle inKeyframe)
+void CSimpleAnimationCore::EraseKeyframe(Qt3DSDMKeyframeHandle inKeyframe)
 {
     SKeyframe *theKeyframe = GetKeyframeNF(inKeyframe, m_Objects);
     int theAnimHandle(theKeyframe->m_Animation);
@@ -216,7 +216,7 @@ void CSimpleAnimationCore::EraseKeyframe(CUICDMKeyframeHandle inKeyframe)
     SetIsArtistEdited(theAnimHandle);
 }
 
-void CSimpleAnimationCore::DeleteAllKeyframes(CUICDMAnimationHandle inAnimation)
+void CSimpleAnimationCore::DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation)
 {
     SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
     do_all(theItem->m_Keyframes, std::bind(EraseHandle,
@@ -225,27 +225,27 @@ void CSimpleAnimationCore::DeleteAllKeyframes(CUICDMAnimationHandle inAnimation)
     SetIsArtistEdited(inAnimation);
 }
 
-CUICDMAnimationHandle
-CSimpleAnimationCore::GetAnimationForKeyframe(CUICDMKeyframeHandle inKeyframe) const
+Qt3DSDMAnimationHandle
+CSimpleAnimationCore::GetAnimationForKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const
 {
     const SKeyframe *theKeyframe = GetKeyframeNF(inKeyframe, m_Objects);
     return theKeyframe->m_Animation;
 }
 
-TKeyframe CSimpleAnimationCore::GetKeyframeData(CUICDMKeyframeHandle inKeyframe) const
+TKeyframe CSimpleAnimationCore::GetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe) const
 {
     const SKeyframe *theKeyframe = GetKeyframeNF(inKeyframe, m_Objects);
     return theKeyframe->m_Keyframe;
 }
 
-void CSimpleAnimationCore::SetKeyframeData(CUICDMKeyframeHandle inKeyframe, const TKeyframe &inData)
+void CSimpleAnimationCore::SetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe, const TKeyframe &inData)
 {
     DoSetKeyframeData(inKeyframe, inData);
     SKeyframe *theKeyframe = GetKeyframeNF(inKeyframe, m_Objects);
     SetIsArtistEdited(theKeyframe->m_Animation);
 }
 
-void CSimpleAnimationCore::DoSetKeyframeData(CUICDMKeyframeHandle inKeyframe,
+void CSimpleAnimationCore::DoSetKeyframeData(Qt3DSDMKeyframeHandle inKeyframe,
                                              const TKeyframe &inData)
 {
     SKeyframe *theKeyframe = GetKeyframeNF(inKeyframe, m_Objects);
@@ -278,7 +278,7 @@ void CheckKeyframesSorted(const SAnimationTrack *theItem, const THandleObjectMap
     }
 }
 
-void CSimpleAnimationCore::GetKeyframes(CUICDMAnimationHandle inAnimation,
+void CSimpleAnimationCore::GetKeyframes(Qt3DSDMAnimationHandle inAnimation,
                                         TKeyframeHandleList &outKeyframes) const
 {
     const SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
@@ -286,15 +286,15 @@ void CSimpleAnimationCore::GetKeyframes(CUICDMAnimationHandle inAnimation,
     outKeyframes = theItem->m_Keyframes;
 }
 
-size_t CSimpleAnimationCore::GetKeyframeCount(CUICDMAnimationHandle inAnimation) const
+size_t CSimpleAnimationCore::GetKeyframeCount(Qt3DSDMAnimationHandle inAnimation) const
 {
     const SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
     return theItem->m_Keyframes.size();
 }
 
-bool CSimpleAnimationCore::IsFirstKeyframe(CUICDMKeyframeHandle inKeyframe) const
+bool CSimpleAnimationCore::IsFirstKeyframe(Qt3DSDMKeyframeHandle inKeyframe) const
 {
-    CUICDMAnimationHandle theAnimation = GetAnimationForKeyframe(inKeyframe);
+    Qt3DSDMAnimationHandle theAnimation = GetAnimationForKeyframe(inKeyframe);
     if (theAnimation.Valid()) {
         const SAnimationTrack *theItem = GetAnimationNF(theAnimation, m_Objects);
         return theItem->m_Keyframes.size() && theItem->m_Keyframes[0] == inKeyframe;
@@ -308,7 +308,7 @@ void CSimpleAnimationCore::OffsetAnimations(Qt3DSDMSlideHandle /*inSlide*/,
     throw std::runtime_error("unimplemented");
 }
 
-void CSimpleAnimationCore::SetIsArtistEdited(CUICDMAnimationHandle inAnimation, bool inEdited)
+void CSimpleAnimationCore::SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited)
 {
     if (m_Objects.find(inAnimation) == m_Objects.end()) {
         Q_ASSERT(false);
@@ -319,7 +319,7 @@ void CSimpleAnimationCore::SetIsArtistEdited(CUICDMAnimationHandle inAnimation, 
         theItem->m_ArtistEdited = inEdited;
 }
 
-bool CSimpleAnimationCore::IsArtistEdited(CUICDMAnimationHandle inAnimation) const
+bool CSimpleAnimationCore::IsArtistEdited(Qt3DSDMAnimationHandle inAnimation) const
 {
     if (m_Objects.find(inAnimation) == m_Objects.end()) {
         return false;
@@ -373,7 +373,7 @@ inline float DoBezierEvaluation(float inSeconds, const SBezierKeyframe &inK1,
 }
 
 // Animation Evaluation.
-float CSimpleAnimationCore::EvaluateAnimation(CUICDMAnimationHandle inAnimation,
+float CSimpleAnimationCore::EvaluateAnimation(Qt3DSDMAnimationHandle inAnimation,
                                               float inSeconds) const
 {
     const SAnimationTrack *theItem = GetAnimationNF(inAnimation, m_Objects);
@@ -425,17 +425,17 @@ float CSimpleAnimationCore::EvaluateAnimation(CUICDMAnimationHandle inAnimation,
     }
 }
 
-bool CSimpleAnimationCore::KeyframeValid(CUICDMKeyframeHandle inKeyframe) const
+bool CSimpleAnimationCore::KeyframeValid(Qt3DSDMKeyframeHandle inKeyframe) const
 {
     return HandleObjectValid<SKeyframe>(inKeyframe, m_Objects);
 }
 
-bool CSimpleAnimationCore::AnimationValid(CUICDMAnimationHandle inAnimation) const
+bool CSimpleAnimationCore::AnimationValid(Qt3DSDMAnimationHandle inAnimation) const
 {
     return HandleObjectValid<SAnimationTrack>(inAnimation, m_Objects);
 }
 
-CUICDMAnimationHandle CSimpleAnimationCore::CreateAnimationWithHandle(
+Qt3DSDMAnimationHandle CSimpleAnimationCore::CreateAnimationWithHandle(
     int inHandle, Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
     Qt3DSDMPropertyHandle inProperty, size_t inIndex, EAnimationType inAnimationType,
     bool inFirstKeyframeDynamic)
@@ -448,13 +448,13 @@ CUICDMAnimationHandle CSimpleAnimationCore::CreateAnimationWithHandle(
     return inHandle;
 }
 
-void CSimpleAnimationCore::AddAnimationToLookupCache(CUICDMAnimationHandle inAnimation) const
+void CSimpleAnimationCore::AddAnimationToLookupCache(Qt3DSDMAnimationHandle inAnimation) const
 {
     THandleObjectMap::const_iterator theAnim = m_Objects.find(inAnimation);
     if (theAnim != m_Objects.end())
         AddAnimationToLookupCache(static_pointer_cast<SAnimationTrack>(theAnim->second));
 }
-void CSimpleAnimationCore::RemoveAnimationFromLookupCache(CUICDMAnimationHandle inAnimation) const
+void CSimpleAnimationCore::RemoveAnimationFromLookupCache(Qt3DSDMAnimationHandle inAnimation) const
 {
     THandleObjectMap::const_iterator theAnim = m_Objects.find(inAnimation);
     if (theAnim != m_Objects.end())
@@ -501,7 +501,7 @@ void CSimpleAnimationCore::RemoveAnimationFromLookupCache(
 // UICDMAnimation.h function implementations
 //================================================================================
 
-void CopyKeyframe(CUICDMAnimationHandle inAnimation, CUICDMKeyframeHandle inKeyframe,
+void CopyKeyframe(Qt3DSDMAnimationHandle inAnimation, Qt3DSDMKeyframeHandle inKeyframe,
                   const IAnimationCore &inSourceAnimationCore, IAnimationCore &inDestAnimationCore)
 {
     TKeyframe theData = inSourceAnimationCore.GetKeyframeData(inKeyframe);
@@ -509,35 +509,35 @@ void CopyKeyframe(CUICDMAnimationHandle inAnimation, CUICDMKeyframeHandle inKeyf
 }
 
 void CopyKeyframes(const IAnimationCore &inSourceAnimationCore, IAnimationCore &inDestAnimationCore,
-                   CUICDMAnimationHandle inDestAnimation, const TKeyframeHandleList &inKeyframes)
+                   Qt3DSDMAnimationHandle inDestAnimation, const TKeyframeHandleList &inKeyframes)
 {
     do_all(inKeyframes,
            std::bind(CopyKeyframe, inDestAnimation, std::placeholders::_1,
                      std::cref(inSourceAnimationCore), std::ref(inDestAnimationCore)));
 }
 
-CUICDMAnimationHandle CopyAnimation(TAnimationCorePtr inAnimationCore,
-                                    CUICDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inNewSlide,
+Qt3DSDMAnimationHandle CopyAnimation(TAnimationCorePtr inAnimationCore,
+                                    Qt3DSDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inNewSlide,
                                     Qt3DSDMInstanceHandle inNewInstance,
                                     Qt3DSDMPropertyHandle inNewProperty, size_t inNewIndex)
 {
     TKeyframeHandleList theKeyframes;
     inAnimationCore->GetKeyframes(inAnimation, theKeyframes);
     SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
-    CUICDMAnimationHandle theAnimation =
+    Qt3DSDMAnimationHandle theAnimation =
         inAnimationCore->CreateAnimation(inNewSlide, inNewInstance, inNewProperty, inNewIndex,
                                          theInfo.m_AnimationType, theInfo.m_DynamicFirstKeyframe);
     CopyKeyframes(*inAnimationCore, *inAnimationCore, theAnimation, theKeyframes);
     return theAnimation;
 }
 
-SBezierKeyframe GetBezierKeyframeData(CUICDMKeyframeHandle inKeyframe,
+SBezierKeyframe GetBezierKeyframeData(Qt3DSDMKeyframeHandle inKeyframe,
                                       const IAnimationCore &inAnimationCore)
 {
     return get<SBezierKeyframe>(inAnimationCore.GetKeyframeData(inKeyframe));
 }
 
-SEaseInEaseOutKeyframe GetEaseInEaseOutKeyframeData(CUICDMKeyframeHandle inKeyframe,
+SEaseInEaseOutKeyframe GetEaseInEaseOutKeyframeData(Qt3DSDMKeyframeHandle inKeyframe,
                                                     const IAnimationCore &inAnimationCore)
 {
     return get<SEaseInEaseOutKeyframe>(inAnimationCore.GetKeyframeData(inKeyframe));
@@ -549,7 +549,7 @@ TKeyframeHandleList::iterator SafeIncrementIterator(TKeyframeHandleList::iterato
     return inIter == inEnd ? inEnd : inIter + 1;
 }
 
-void GetKeyframesAsBezier(CUICDMAnimationHandle inAnimation, const IAnimationCore &inAnimationCore,
+void GetKeyframesAsBezier(Qt3DSDMAnimationHandle inAnimation, const IAnimationCore &inAnimationCore,
                           TBezierKeyframeList &outKeyframes)
 {
     SAnimationInfo theInfo(inAnimationCore.GetAnimationInfo(inAnimation));
@@ -568,7 +568,7 @@ void GetKeyframesAsBezier(CUICDMAnimationHandle inAnimation, const IAnimationCor
 
         TKeyframeHandleList::iterator theEndKeyframe = theKeyframes.end();
 
-        typedef std::function<SEaseInEaseOutKeyframe(CUICDMKeyframeHandle)> TConvertFunc;
+        typedef std::function<SEaseInEaseOutKeyframe(Qt3DSDMKeyframeHandle)> TConvertFunc;
         TConvertFunc theDataConverter(
             std::bind(GetEaseInEaseOutKeyframeData, std::placeholders::_1,
                       std::cref(inAnimationCore)));

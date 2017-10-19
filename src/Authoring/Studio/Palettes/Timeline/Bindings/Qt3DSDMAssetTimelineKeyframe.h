@@ -36,7 +36,7 @@
 // Data model specific
 #include "Qt3DSDMHandles.h"
 
-class CUICDMTimelineItemBinding;
+class Qt3DSDMTimelineItemBinding;
 
 //==============================================================================
 /**
@@ -44,16 +44,16 @@ class CUICDMTimelineItemBinding;
  *animated properties) at time t.
  */
 //==============================================================================
-class CUICDMAssetTimelineKeyframe : public IKeyframe
+class Qt3DSDMAssetTimelineKeyframe : public IKeyframe
 {
 protected:
-    CUICDMTimelineItemBinding *m_OwningBinding;
+    Qt3DSDMTimelineItemBinding *m_OwningBinding;
     long m_Time;
     bool m_Selected;
 
 public:
-    CUICDMAssetTimelineKeyframe(CUICDMTimelineItemBinding *inOwningBinding, long inTime);
-    virtual ~CUICDMAssetTimelineKeyframe();
+    Qt3DSDMAssetTimelineKeyframe(Qt3DSDMTimelineItemBinding *inOwningBinding, long inTime);
+    virtual ~Qt3DSDMAssetTimelineKeyframe();
 
     // IKeyframe
     bool IsSelected() const override;

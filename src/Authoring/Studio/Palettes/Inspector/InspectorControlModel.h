@@ -40,7 +40,7 @@
 #include "IDocumentEditor.h"
 
 class CInspectableBase;
-class CUICDMInspectable;
+class Qt3DSDMInspectable;
 class SGuideInspectableImpl;
 
 namespace qt3dsdm {
@@ -50,7 +50,7 @@ typedef std::shared_ptr<ISignalConnection> TSignalConnectionPtr;
 
 namespace Q3DStudio
 {
-class CUICDMInspectorRow;
+class Qt3DSDMInspectorRow;
 }
 
 class InspectorControlBase : public QObject
@@ -163,10 +163,10 @@ private:
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
 
-    InspectorControlBase *createMaterialItem(CUICDMInspectable *inspectable, int groupIndex);
-    InspectorControlBase *createItem(CUICDMInspectable *inspectable,
-                                     Q3DStudio::CUICDMInspectorRow *row, int groupIndex);
-    InspectorControlBase *createItem(CUICDMInspectable *inspectable,
+    InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);
+    InspectorControlBase *createItem(Qt3DSDMInspectable *inspectable,
+                                     Q3DStudio::Qt3DSDMInspectorRow *row, int groupIndex);
+    InspectorControlBase *createItem(Qt3DSDMInspectable *inspectable,
                                      const qt3dsdm::SMetaDataPropertyInfo &metaProperty,
                                      int groupIndex);
 

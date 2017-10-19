@@ -59,37 +59,37 @@ public:
     IStringTable &GetStringTable() const override { return m_Data->GetStringTable(); }
     TStringTablePtr GetStringTablePtr() const override { return m_Data->GetStringTablePtr(); }
     // Action
-    CUICDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
+    Qt3DSDMActionHandle CreateAction(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide,
                                     Qt3DSDMInstanceHandle inOwner, SLong4 inTriggerTargetObjects) override;
-    void DeleteAction(CUICDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
-    const SActionInfo &GetActionInfo(CUICDMActionHandle inAction) const override;
+    void DeleteAction(Qt3DSDMActionHandle inAction, Qt3DSDMInstanceHandle &outInstance) override;
+    const SActionInfo &GetActionInfo(Qt3DSDMActionHandle inAction) const override;
     void GetActions(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
                     TActionHandleList &outActions) const override;
     void GetActions(Qt3DSDMSlideHandle inSlide, TActionHandleList &outActions) const override;
     void GetActions(Qt3DSDMInstanceHandle inOwner, TActionHandleList &outActions) const override;
     void GetActions(TActionHandleList &outActions) const override;
-    Qt3DSDMInstanceHandle GetActionInstance(CUICDMActionHandle inAction) const override;
-    CUICDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const override;
+    Qt3DSDMInstanceHandle GetActionInstance(Qt3DSDMActionHandle inAction) const override;
+    Qt3DSDMActionHandle GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const override;
 
     // Action Properties
-    void SetTriggerObject(CUICDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
-    void SetTargetObject(CUICDMActionHandle inAction, const SObjectRefType &inTargetObject) override;
-    void SetEvent(CUICDMActionHandle inAction, const wstring &inEventHandle) override;
-    void SetHandler(CUICDMActionHandle inAction, const wstring &inHandlerHandle) override;
+    void SetTriggerObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
+    void SetTargetObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTargetObject) override;
+    void SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventHandle) override;
+    void SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerHandle) override;
 
     // Action Argument
-    CUICDMHandlerArgHandle AddHandlerArgument(CUICDMActionHandle inAction, const TCharStr &inName,
+    Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction, const TCharStr &inName,
                                               HandlerArgumentType::Value inArgType,
                                               DataModelDataType::Value inValueType) override;
-    void RemoveHandlerArgument(CUICDMHandlerArgHandle inHandlerArgument) override;
+    void RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument) override;
     const SHandlerArgumentInfo &
-    GetHandlerArgumentInfo(CUICDMHandlerArgHandle inHandlerArgument) const override;
-    void GetHandlerArguments(CUICDMActionHandle inAction,
+    GetHandlerArgumentInfo(Qt3DSDMHandlerArgHandle inHandlerArgument) const override;
+    void GetHandlerArguments(Qt3DSDMActionHandle inAction,
                              THandlerArgHandleList &outHandlerArguments) const override;
 
     // Action Argument Properties
-    void GetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument, SValue &outValue) const override;
-    void SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument, const SValue &inValue) override;
+    void GetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument, SValue &outValue) const override;
+    void SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument, const SValue &inValue) override;
 
     // CHandleBase
     bool HandleValid(int inHandle) const override;
@@ -98,22 +98,22 @@ public:
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
 
     TSignalConnectionPtr ConnectTriggerObjectSet(
-        const std::function<void(CUICDMActionHandle, SObjectRefType &)> &inCallback) override;
+        const std::function<void(Qt3DSDMActionHandle, SObjectRefType &)> &inCallback) override;
     TSignalConnectionPtr ConnectTargetObjectSet(
-        const std::function<void(CUICDMActionHandle, SObjectRefType &)> &inCallback) override;
+        const std::function<void(Qt3DSDMActionHandle, SObjectRefType &)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectEventSet(const std::function<void(CUICDMActionHandle, const wstring &)> &inCallback) override;
+    ConnectEventSet(const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectHandlerSet(const std::function<void(CUICDMActionHandle, const wstring &)> &inCallback) override;
+    ConnectHandlerSet(const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback) override;
 
     TSignalConnectionPtr ConnectHandlerArgumentAdded(
-        const std::function<void(CUICDMActionHandle, CUICDMHandlerArgHandle, const TCharStr &,
+        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
                                    HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) override;
     TSignalConnectionPtr ConnectHandlerArgumentRemoved(
-        const std::function<void(CUICDMActionHandle, CUICDMHandlerArgHandle, const TCharStr &,
+        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
                                    HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) override;
     TSignalConnectionPtr ConnectHandlerArgumentValueSet(
-        const std::function<void(CUICDMHandlerArgHandle, const SValue &)> &inCallback) override;
+        const std::function<void(Qt3DSDMHandlerArgHandle, const SValue &)> &inCallback) override;
 
 private:
     void InitSignaller();

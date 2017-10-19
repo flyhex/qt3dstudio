@@ -36,18 +36,18 @@ using namespace std;
 
 namespace qt3dsdm {
 
-CUICDMActionHandle CActionCoreProducer::CreateAction(Qt3DSDMInstanceHandle inInstance,
+Qt3DSDMActionHandle CActionCoreProducer::CreateAction(Qt3DSDMInstanceHandle inInstance,
                                                      Qt3DSDMSlideHandle inSlide,
                                                      Qt3DSDMInstanceHandle inOwner,
                                                      SLong4 inTriggerTargetObjects)
 {
-    CUICDMActionHandle retval =
+    Qt3DSDMActionHandle retval =
         m_Data->CreateAction(inInstance, inSlide, inOwner, inTriggerTargetObjects);
     CREATE_HANDLE_CREATE_TRANSACTION(m_Consumer, retval, m_Data->m_Objects);
     return retval;
 }
 
-void CActionCoreProducer::DeleteAction(CUICDMActionHandle inAction,
+void CActionCoreProducer::DeleteAction(Qt3DSDMActionHandle inAction,
                                        Qt3DSDMInstanceHandle &outInstance)
 {
     // Ensure action exists
@@ -59,7 +59,7 @@ void CActionCoreProducer::DeleteAction(CUICDMActionHandle inAction,
     m_Data->DeleteAction(inAction, outInstance);
 }
 
-const SActionInfo &CActionCoreProducer::GetActionInfo(CUICDMActionHandle inAction) const
+const SActionInfo &CActionCoreProducer::GetActionInfo(Qt3DSDMActionHandle inAction) const
 {
     return m_Data->GetActionInfo(inAction);
 }
@@ -86,18 +86,18 @@ void CActionCoreProducer::GetActions(TActionHandleList &outActions) const
     return m_Data->GetActions(outActions);
 }
 
-Qt3DSDMInstanceHandle CActionCoreProducer::GetActionInstance(CUICDMActionHandle inAction) const
+Qt3DSDMInstanceHandle CActionCoreProducer::GetActionInstance(Qt3DSDMActionHandle inAction) const
 {
     return m_Data->GetActionInstance(inAction);
 }
 
-CUICDMActionHandle
+Qt3DSDMActionHandle
 CActionCoreProducer::GetActionByInstance(Qt3DSDMInstanceHandle inActionInstance) const
 {
     return m_Data->GetActionByInstance(inActionInstance);
 }
 
-void CActionCoreProducer::SetTriggerObject(CUICDMActionHandle inAction,
+void CActionCoreProducer::SetTriggerObject(Qt3DSDMActionHandle inAction,
                                            const SObjectRefType &inTriggerObject)
 {
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
@@ -111,7 +111,7 @@ void CActionCoreProducer::SetTriggerObject(CUICDMActionHandle inAction,
     GetSignalSender()->SendTriggerObjectSet(inAction, theAction->m_ActionInfo.m_TriggerObject);
 }
 
-void CActionCoreProducer::SetTargetObject(CUICDMActionHandle inAction,
+void CActionCoreProducer::SetTargetObject(Qt3DSDMActionHandle inAction,
                                           const SObjectRefType &inTargetObject)
 {
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
@@ -125,7 +125,7 @@ void CActionCoreProducer::SetTargetObject(CUICDMActionHandle inAction,
     GetSignalSender()->SendTargetObjectSet(inAction, theAction->m_ActionInfo.m_TargetObject);
 }
 
-void CActionCoreProducer::SetEvent(CUICDMActionHandle inAction, const wstring &inEventHandle)
+void CActionCoreProducer::SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventHandle)
 {
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
     if (m_Consumer) {
@@ -138,7 +138,7 @@ void CActionCoreProducer::SetEvent(CUICDMActionHandle inAction, const wstring &i
     GetSignalSender()->SendEventSet(inAction, inEventHandle);
 }
 
-void CActionCoreProducer::SetHandler(CUICDMActionHandle inAction, const wstring &inHandlerHandle)
+void CActionCoreProducer::SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerHandle)
 {
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
     if (m_Consumer) {
@@ -151,31 +151,31 @@ void CActionCoreProducer::SetHandler(CUICDMActionHandle inAction, const wstring 
     GetSignalSender()->SendHandlerSet(inAction, inHandlerHandle);
 }
 
-CUICDMHandlerArgHandle CActionCoreProducer::AddHandlerArgument(CUICDMActionHandle inAction,
+Qt3DSDMHandlerArgHandle CActionCoreProducer::AddHandlerArgument(Qt3DSDMActionHandle inAction,
                                                                const TCharStr &inName,
                                                                HandlerArgumentType::Value inArgType,
                                                                DataModelDataType::Value inValueType)
 {
-    CUICDMHandlerArgHandle retval =
+    Qt3DSDMHandlerArgHandle retval =
         m_Data->AddHandlerArgument(inAction, inName, inArgType, inValueType);
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
-    CreateVecInsertTransaction<CUICDMHandlerArgHandle>(__FILE__, __LINE__, m_Consumer, retval,
+    CreateVecInsertTransaction<Qt3DSDMHandlerArgHandle>(__FILE__, __LINE__, m_Consumer, retval,
                                                        theAction->m_ActionInfo.m_HandlerArgs);
     CREATE_HANDLE_CREATE_TRANSACTION(m_Consumer, retval, m_Data->m_Objects);
     GetSignalSender()->SendHandlerArgumentAdded(inAction, retval, inName, inArgType, inValueType);
     return retval;
 }
 
-void CActionCoreProducer::RemoveHandlerArgument(CUICDMHandlerArgHandle inHandlerArgument)
+void CActionCoreProducer::RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument)
 {
     SHandlerArgument *theHandlerArgument =
         CSimpleActionCore::GetHandlerArgumentNF(inHandlerArgument, m_Data->m_Objects);
     SAction *theAction = CSimpleActionCore::GetActionNF(
         theHandlerArgument->m_HandlerArgInfo.m_Action, m_Data->m_Objects);
     if (exists(theAction->m_ActionInfo.m_HandlerArgs,
-               std::bind(equal_to<CUICDMHandlerArgHandle>(), inHandlerArgument,
+               std::bind(equal_to<Qt3DSDMHandlerArgHandle>(), inHandlerArgument,
                          std::placeholders::_1))) {
-        CreateVecEraseTransaction<CUICDMHandlerArgHandle>(__FILE__, __LINE__, m_Consumer,
+        CreateVecEraseTransaction<Qt3DSDMHandlerArgHandle>(__FILE__, __LINE__, m_Consumer,
                                                           inHandlerArgument,
                                                           theAction->m_ActionInfo.m_HandlerArgs);
         CREATE_HANDLE_DELETE_TRANSACTION(m_Consumer, inHandlerArgument, m_Data->m_Objects);
@@ -188,24 +188,24 @@ void CActionCoreProducer::RemoveHandlerArgument(CUICDMHandlerArgHandle inHandler
 }
 
 const SHandlerArgumentInfo &
-CActionCoreProducer::GetHandlerArgumentInfo(CUICDMHandlerArgHandle inHandlerArgument) const
+CActionCoreProducer::GetHandlerArgumentInfo(Qt3DSDMHandlerArgHandle inHandlerArgument) const
 {
     return m_Data->GetHandlerArgumentInfo(inHandlerArgument);
 }
 
-void CActionCoreProducer::GetHandlerArguments(CUICDMActionHandle inAction,
+void CActionCoreProducer::GetHandlerArguments(Qt3DSDMActionHandle inAction,
                                               THandlerArgHandleList &outHandlerArguments) const
 {
     return m_Data->GetHandlerArguments(inAction, outHandlerArguments);
 }
 
-void CActionCoreProducer::GetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+void CActionCoreProducer::GetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                                   SValue &outValue) const
 {
     return m_Data->GetHandlerArgumentValue(inHandlerArgument, outValue);
 }
 
-void CActionCoreProducer::SetHandlerArgumentValue(CUICDMHandlerArgHandle inHandlerArgument,
+void CActionCoreProducer::SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                                   const SValue &inValue)
 {
     SHandlerArgument *theHandlerArgument =
@@ -234,40 +234,40 @@ void CActionCoreProducer::SetConsumer(TTransactionConsumerPtr inConsumer)
 }
 
 TSignalConnectionPtr CActionCoreProducer::ConnectTriggerObjectSet(
-    const std::function<void(CUICDMActionHandle, SObjectRefType &)> &inCallback)
+    const std::function<void(Qt3DSDMActionHandle, SObjectRefType &)> &inCallback)
 {
     return GetSignalProvider()->ConnectTriggerObjectSet(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectTargetObjectSet(
-    const std::function<void(CUICDMActionHandle, SObjectRefType &)> &inCallback)
+    const std::function<void(Qt3DSDMActionHandle, SObjectRefType &)> &inCallback)
 {
     return GetSignalProvider()->ConnectTargetObjectSet(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectEventSet(
-    const std::function<void(CUICDMActionHandle, const wstring &)> &inCallback)
+    const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback)
 {
     return GetSignalProvider()->ConnectEventSet(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerSet(
-    const std::function<void(CUICDMActionHandle, const wstring &)> &inCallback)
+    const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerSet(inCallback);
 }
 
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerArgumentAdded(
-    const std::function<void(CUICDMActionHandle, CUICDMHandlerArgHandle, const TCharStr &,
+    const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
                                HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerArgumentAdded(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerArgumentRemoved(
-    const std::function<void(CUICDMActionHandle, CUICDMHandlerArgHandle, const TCharStr &,
+    const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
                                HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerArgumentRemoved(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerArgumentValueSet(
-    const std::function<void(CUICDMHandlerArgHandle, const SValue &)> &inCallback)
+    const std::function<void(Qt3DSDMHandlerArgHandle, const SValue &)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerArgumentValueSet(inCallback);
 }

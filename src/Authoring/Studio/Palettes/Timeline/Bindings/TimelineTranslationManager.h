@@ -44,7 +44,7 @@
 //==============================================================================
 class ITimelineItemBinding;
 class ITimelineItemProperty;
-class CUICDMTimelineItemBinding;
+class Qt3DSDMTimelineItemBinding;
 class CBaseStateRow;
 class CPropertyRow;
 class CKeyframesManager;
@@ -71,7 +71,7 @@ class CTimelineTranslationManager
 {
 protected: // Typedefs
     // UICDM support
-    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, CUICDMTimelineItemBinding *>
+    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, Qt3DSDMTimelineItemBinding *>
         TInstanceHandleBindingMap;
 
     // Store expanded state
@@ -105,8 +105,8 @@ public:
     IBreadCrumbProvider *GetBreadCrumbProvider() const;
     CBaseStateRow *GetSelectedRow() const;
     long GetCurrentViewTime() const;
-    CUICDMTimelineItemBinding *GetBinding(qt3dsdm::Qt3DSDMInstanceHandle inHandle) const;
-    CUICDMTimelineItemBinding *GetSelectedBinding() const;
+    Qt3DSDMTimelineItemBinding *GetBinding(qt3dsdm::Qt3DSDMInstanceHandle inHandle) const;
+    Qt3DSDMTimelineItemBinding *GetSelectedBinding() const;
 
     void ClearKeyframeSelection();
     void OnNewPresentation();
@@ -123,17 +123,17 @@ public:
                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void OnPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void RefreshKeyframe(qt3dsdm::CUICDMAnimationHandle inAnimation,
-                         qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+    void RefreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
-    void OnKeyframeInserted(qt3dsdm::CUICDMAnimationHandle inAnimation,
-                            qt3dsdm::CUICDMKeyframeHandle inKeyframe);
-    void OnKeyframeDeleted(qt3dsdm::CUICDMAnimationHandle inAnimation,
-                           qt3dsdm::CUICDMKeyframeHandle inKeyframe);
-    void OnKeyframeUpdated(qt3dsdm::CUICDMKeyframeHandle inKeyframe);
+    void OnKeyframeInserted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                            qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
+    void OnKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                           qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
+    void OnKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
     void OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void OnDynamicKeyframeChanged(qt3dsdm::CUICDMAnimationHandle inAnimation, bool inDynamic);
+    void OnDynamicKeyframeChanged(qt3dsdm::Qt3DSDMAnimationHandle inAnimation, bool inDynamic);
 
     void OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
@@ -141,7 +141,7 @@ public:
     void OnChildRemoved(int inParent, int inChild, long inIndex);
     void OnChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);
 
-    void OnActionEvent(qt3dsdm::CUICDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
+    void OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
 
     // Helper function to iterate over all bindings

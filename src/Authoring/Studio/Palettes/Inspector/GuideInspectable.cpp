@@ -166,12 +166,12 @@ struct SFloatIntItem : public IInspectableAttributeItem
 
 
 CInspectableBase *CGuideInspectable::CreateInspectable(CCore &inCore,
-                                                       qt3dsdm::CUICDMGuideHandle inGuide)
+                                                       qt3dsdm::Qt3DSDMGuideHandle inGuide)
 {
     return new SGuideInspectableImpl(inCore, inGuide);
 }
 
-SGuideInspectableImpl::SGuideInspectableImpl(CCore &inCore, qt3dsdm::CUICDMGuideHandle inGuide)
+SGuideInspectableImpl::SGuideInspectableImpl(CCore &inCore, qt3dsdm::Qt3DSDMGuideHandle inGuide)
     : CInspectableBase(&inCore)
     , m_Guide(inGuide)
     , m_Editor(*inCore.GetDoc())

@@ -17,7 +17,7 @@ PropertyModel::PropertyModel(QObject *parent)
 {
 }
 
-void PropertyModel::setAction(const qt3dsdm::CUICDMActionHandle &action)
+void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
 {
     beginResetModel();
     m_action = action;
@@ -90,12 +90,12 @@ void PropertyModel::setAction(const qt3dsdm::CUICDMActionHandle &action)
     Q_EMIT valueHandleChanged();
 }
 
-void PropertyModel::setNameHandle(const qt3dsdm::CUICDMHandlerArgHandle &handle)
+void PropertyModel::setNameHandle(const qt3dsdm::Qt3DSDMHandlerArgHandle &handle)
 {
     m_nameHandle = handle;
 }
 
-void PropertyModel::setValueHandle(const qt3dsdm::CUICDMHandlerArgHandle &handle)
+void PropertyModel::setValueHandle(const qt3dsdm::Qt3DSDMHandlerArgHandle &handle)
 {
     m_valueHandle = handle;
 

@@ -48,8 +48,8 @@
 /**
  * Constructor
  */
-CUICDMInspectorGroup::CUICDMInspectorGroup(CStudioApp &inApp, const QString &inName,
-                                           CUICDMInspectable &inInspectable, long inIndex)
+Qt3DSDMInspectorGroup::Qt3DSDMInspectorGroup(CStudioApp &inApp, const QString &inName,
+                                           Qt3DSDMInspectable &inInspectable, long inIndex)
     : CEasyInspectorGroup(inName)
     , m_App(inApp)
     , m_Inspectable(inInspectable)
@@ -61,9 +61,9 @@ CUICDMInspectorGroup::CUICDMInspectorGroup(CStudioApp &inApp, const QString &inN
 /**
  *	clean up
  */
-CUICDMInspectorGroup::~CUICDMInspectorGroup()
+Qt3DSDMInspectorGroup::~Qt3DSDMInspectorGroup()
 {
-    std::vector<Q3DStudio::CUICDMInspectorRow *>::iterator theIterator =
+    std::vector<Q3DStudio::Qt3DSDMInspectorRow *>::iterator theIterator =
         m_UICDMInspectorRows.begin();
     for (; theIterator != m_UICDMInspectorRows.end(); ++theIterator)
         delete (*theIterator);
@@ -73,11 +73,11 @@ CUICDMInspectorGroup::~CUICDMInspectorGroup()
 /**
  * Method to create a new InspectorRowBase.
  */
-void CUICDMInspectorGroup::CreateRow(CDoc *inDoc, qt3dsdm::CUICDMMetaDataPropertyHandle inProperty)
+void Qt3DSDMInspectorGroup::CreateRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty)
 {
-    Q3DStudio::CUICDMInspectorRow *theUICDMRow =
-        new Q3DStudio::CUICDMInspectorRow(inDoc, inProperty);
+    Q3DStudio::Qt3DSDMInspectorRow *theUICDMRow =
+        new Q3DStudio::Qt3DSDMInspectorRow(inDoc, inProperty);
     m_UICDMInspectorRows.push_back(
-        theUICDMRow); // this CUICDMInspectorRow is now owned by this class
+        theUICDMRow); // this Qt3DSDMInspectorRow is now owned by this class
 
 }

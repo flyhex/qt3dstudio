@@ -175,7 +175,7 @@ public:
 
     virtual qt3dsdm::Qt3DSDMInstanceHandle CreateAssetInstance(Q3DStudio::CId &inId,
                                                             EStudioObjectType inObjectType);
-    virtual qt3dsdm::CUICDMSlideGraphHandle GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    virtual qt3dsdm::Qt3DSDMSlideGraphHandle GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual qt3dsdm::Qt3DSDMSlideHandle GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetSlideInstance();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetSlideComponentIdProperty();
@@ -257,28 +257,28 @@ public: // Bridging to Actions. These needs to be here as UICDM has no hierarchy
                                    std::wstring inOldHandler = L"");
     std::wstring GetDefaultEvent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                  std::wstring inOldEvent = L"");
-    void ResetHandlerArguments(qt3dsdm::CUICDMActionHandle inAction,
-                               qt3dsdm::CUICDMHandlerHandle inHandler);
+    void ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction,
+                               qt3dsdm::Qt3DSDMHandlerHandle inHandler);
     // Resolve the path
-    void ResetHandlerArguments(qt3dsdm::CUICDMActionHandle inAction, const std::wstring &inHandler);
-    qt3dsdm::CUICDMEventHandle ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
+    void ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction, const std::wstring &inHandler);
+    qt3dsdm::Qt3DSDMEventHandle ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                           const qt3dsdm::SObjectRefType &inResolution,
                                           const std::wstring &inEventName);
-    qt3dsdm::CUICDMHandlerHandle ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
+    qt3dsdm::Qt3DSDMHandlerHandle ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                               const qt3dsdm::SObjectRefType &inResolution,
                                               const std::wstring &inHandlerName);
-    qt3dsdm::CUICDMEventHandle ResolveEvent(const qt3dsdm::SActionInfo &inInfo);
-    qt3dsdm::CUICDMHandlerHandle ResolveHandler(const qt3dsdm::SActionInfo &inInfo);
-    void SetHandlerArgumentValue(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument,
+    qt3dsdm::Qt3DSDMEventHandle ResolveEvent(const qt3dsdm::SActionInfo &inInfo);
+    qt3dsdm::Qt3DSDMHandlerHandle ResolveHandler(const qt3dsdm::SActionInfo &inInfo);
+    void SetHandlerArgumentValue(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument,
                                  const qt3dsdm::SValue &inValue);
-    void GetActionDependentProperty(qt3dsdm::CUICDMActionHandle inAction,
+    void GetActionDependentProperty(qt3dsdm::Qt3DSDMActionHandle inAction,
                                     qt3dsdm::Qt3DSDMInstanceHandle &outInstance,
                                     qt3dsdm::Qt3DSDMPropertyHandle &outProperty);
-    void GetSlideNamesOfAction(qt3dsdm::CUICDMActionHandle inAction,
+    void GetSlideNamesOfAction(qt3dsdm::Qt3DSDMActionHandle inAction,
                                std::list<Q3DStudio::CString> &outSlideNames);
 
 protected:
-    void SetArgTypeDependentDefaultValue(qt3dsdm::CUICDMHandlerArgHandle inHandlerArgument,
+    void SetArgTypeDependentDefaultValue(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument,
                                          qt3dsdm::DataModelDataType::Value inDataType,
                                          qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                          qt3dsdm::Qt3DSDMPropertyHandle inProperty);
@@ -286,10 +286,10 @@ protected:
 public: // TODO: We should really consider having CStudioCoreSystem or CStudioFullSystem manages the
         // MetaData, so that we can query directly from within
     void GetEvents(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::TEventHandleList &outEvents);
-    qt3dsdm::SEventInfo GetEventInfo(qt3dsdm::CUICDMEventHandle inEvent);
+    qt3dsdm::SEventInfo GetEventInfo(qt3dsdm::Qt3DSDMEventHandle inEvent);
 
     void GetHandlers(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::THandlerHandleList &outHandles);
-    qt3dsdm::SHandlerInfo GetHandlerInfo(qt3dsdm::CUICDMHandlerHandle inHandler);
+    qt3dsdm::SHandlerInfo GetHandlerInfo(qt3dsdm::Qt3DSDMHandlerHandle inHandler);
 
     qt3dsdm::Qt3DSDMPropertyHandle
     GetAggregateInstancePropertyByName(qt3dsdm::Qt3DSDMInstanceHandle inInstance,

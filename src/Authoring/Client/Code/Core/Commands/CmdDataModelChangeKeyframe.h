@@ -46,11 +46,11 @@
 class CCmdDataModelSetKeyframeTime : public CCmdDataModelBase<float>
 {
 protected: // Members
-    qt3dsdm::CUICDMKeyframeHandle m_Keyframe;
+    qt3dsdm::Qt3DSDMKeyframeHandle m_Keyframe;
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelSetKeyframeTime(CDoc *inDoc, qt3dsdm::CUICDMKeyframeHandle inKeyframe, float inTime)
+    CCmdDataModelSetKeyframeTime(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe, float inTime)
         : CCmdDataModelBase(inDoc, inTime)
         , m_Keyframe(inKeyframe)
     {
@@ -77,11 +77,11 @@ public: // Construction
 class CCmdDataModelSetKeyframeValue : public CCmdDataModelBase<float>
 {
 protected: // Members
-    qt3dsdm::CUICDMKeyframeHandle m_Keyframe;
+    qt3dsdm::Qt3DSDMKeyframeHandle m_Keyframe;
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelSetKeyframeValue(CDoc *inDoc, qt3dsdm::CUICDMKeyframeHandle inKeyframe,
+    CCmdDataModelSetKeyframeValue(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                   float inValue)
         : CCmdDataModelBase(inDoc, inValue)
         , m_Keyframe(inKeyframe)
@@ -109,13 +109,13 @@ public: // Construction
 class CCmdDataModelChangeDynamicKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {
 protected: // Members
-    typedef std::set<qt3dsdm::CUICDMAnimationHandle> TTrackList;
+    typedef std::set<qt3dsdm::Qt3DSDMAnimationHandle> TTrackList;
     CDoc *m_Doc;
     TTrackList m_Tracks; // 1..n tracks affected, unique list
     bool m_Dynamic;
 
 public: // Construction
-    CCmdDataModelChangeDynamicKeyframe(CDoc *inDoc, qt3dsdm::CUICDMAnimationHandle inHandle,
+    CCmdDataModelChangeDynamicKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMAnimationHandle inHandle,
                                        bool inDynamic)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
@@ -125,7 +125,7 @@ public: // Construction
     }
     ~CCmdDataModelChangeDynamicKeyframe() {}
 
-    void AddHandle(qt3dsdm::CUICDMAnimationHandle inHandle) { m_Tracks.insert(inHandle); }
+    void AddHandle(qt3dsdm::Qt3DSDMAnimationHandle inHandle) { m_Tracks.insert(inHandle); }
 
     //======================================================================
     //	Do/Redo

@@ -1916,7 +1916,7 @@ CTimelineControl *CMainFrame::GetTimelineControl()
 
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
 {
-    CUICDMTimelineItemBinding *theTimelineItemBinding =
+    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
             GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
     if (theTimelineItemBinding == NULL)
         return NULL;

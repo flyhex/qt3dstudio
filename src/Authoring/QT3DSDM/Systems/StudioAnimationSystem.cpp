@@ -37,7 +37,7 @@ using namespace boost;
 
 namespace qt3dsdm {
 
-bool AnimationFloatPairContainsAnimation(CUICDMAnimationHandle inAnimation,
+bool AnimationFloatPairContainsAnimation(Qt3DSDMAnimationHandle inAnimation,
                                          const TAnimationFloatPair &inPair)
 {
     return inAnimation == inPair.first;
@@ -62,7 +62,7 @@ CStudioAnimationSystem::CStudioAnimationSystem(TPropertySystemPtr inPropertySyst
         std::bind(&CStudioAnimationSystem::OnAnimationDeleted, this, std::placeholders::_1)));
 }
 
-void CStudioAnimationSystem::OnAnimationDeleted(CUICDMAnimationHandle inAnimation)
+void CStudioAnimationSystem::OnAnimationDeleted(Qt3DSDMAnimationHandle inAnimation)
 {
     ClearTemporaryAnimationValues(inAnimation);
 }
@@ -72,7 +72,7 @@ void CStudioAnimationSystem::ClearTemporaryAnimationValues()
     m_AnimationFloatPairs.clear();
 }
 
-void CStudioAnimationSystem::ClearTemporaryAnimationValues(CUICDMAnimationHandle inAnimation)
+void CStudioAnimationSystem::ClearTemporaryAnimationValues(Qt3DSDMAnimationHandle inAnimation)
 {
     erase_if(m_AnimationFloatPairs,
              std::bind(AnimationFloatPairContainsAnimation, inAnimation, std::placeholders::_1));
@@ -114,7 +114,7 @@ void CStudioAnimationSystem::OverrideChannelIfAnimated(Qt3DSDMSlideHandle inSlid
                                                        size_t inIndex, float inSeconds,
                                                        bool &ioAnimated, SValue &outValue) const
 {
-    CUICDMAnimationHandle theAnimation =
+    Qt3DSDMAnimationHandle theAnimation =
         m_AnimationCore->GetAnimation(inSlide, inInstance, inProperty, inIndex);
     if (theAnimation.Valid() && m_AnimationCore->GetKeyframeCount(theAnimation)) {
         float theValue = m_AnimationCore->EvaluateAnimation(theAnimation, inSeconds);
@@ -166,7 +166,7 @@ bool KeyframeNear(const TKeyframe &inKeyframe, float inSeconds)
 {
     return fabs(KeyframeTime(inKeyframe) - inSeconds) < .01;
 }
-CUICDMKeyframeHandle CreateKeyframeExplicit(CUICDMAnimationHandle inAnimation, float inValue,
+Qt3DSDMKeyframeHandle CreateKeyframeExplicit(Qt3DSDMAnimationHandle inAnimation, float inValue,
                                             float inSeconds, TAnimationCorePtr inAnimationCore,
                                             float inEaseIn, float inEaseOut)
 {
@@ -174,11 +174,11 @@ CUICDMKeyframeHandle CreateKeyframeExplicit(CUICDMAnimationHandle inAnimation, f
     SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
     float theValue = inValue;
     inAnimationCore->GetKeyframes(inAnimation, theKeyframes);
-    function<TKeyframe(CUICDMKeyframeHandle)> theConverter(
+    function<TKeyframe(Qt3DSDMKeyframeHandle)> theConverter(
         std::bind(&IAnimationCore::GetKeyframeData, inAnimationCore, std::placeholders::_1));
 
     //TODO  no transform iterator in STL
-    typedef transform_iterator<function<TKeyframe(CUICDMKeyframeHandle)>,
+    typedef transform_iterator<function<TKeyframe(Qt3DSDMKeyframeHandle)>,
                                TKeyframeHandleList::iterator>
         TKeyframeDataTransformIterator;
     TKeyframeDataTransformIterator theFind =
@@ -188,7 +188,7 @@ CUICDMKeyframeHandle CreateKeyframeExplicit(CUICDMAnimationHandle inAnimation, f
 
     float theEaseIn = inEaseIn;
     float theEaseOut = inEaseOut;
-    CUICDMKeyframeHandle theKeyframe;
+    Qt3DSDMKeyframeHandle theKeyframe;
     if (theFind.base() != theKeyframes.end()) {
         theKeyframe = *theFind.base();
 
@@ -201,7 +201,7 @@ CUICDMKeyframeHandle CreateKeyframeExplicit(CUICDMAnimationHandle inAnimation, f
     return theKeyframe;
 }
 
-CUICDMKeyframeHandle CreateKeyframe(CUICDMAnimationHandle inAnimation, const SValue &inValue,
+Qt3DSDMKeyframeHandle CreateKeyframe(Qt3DSDMAnimationHandle inAnimation, const SValue &inValue,
                                     float inSeconds, TAnimationCorePtr inAnimationCore,
                                     float inEaseIn, float inEaseOut)
 {
@@ -211,7 +211,7 @@ CUICDMKeyframeHandle CreateKeyframe(CUICDMAnimationHandle inAnimation, const SVa
 }
 
 void MaybeAddAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance,
-                       Qt3DSDMPropertyHandle inProperty, CUICDMAnimationHandle inAnimation,
+                       Qt3DSDMPropertyHandle inProperty, Qt3DSDMAnimationHandle inAnimation,
                        TAnimationCorePtr inAnimationCore, TAnimationHandleList &outAnimations)
 {
     SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
@@ -219,7 +219,7 @@ void MaybeAddAnimation(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInsta
         outAnimations.push_back(inAnimation);
 }
 
-bool SortAnimationHandlesByIndex(CUICDMAnimationHandle lhs, CUICDMAnimationHandle rhs,
+bool SortAnimationHandlesByIndex(Qt3DSDMAnimationHandle lhs, Qt3DSDMAnimationHandle rhs,
                                  TAnimationCorePtr inCore)
 {
     return inCore->GetAnimationInfo(lhs).m_Index < inCore->GetAnimationInfo(rhs).m_Index;
@@ -230,9 +230,9 @@ void GetPresentAnimations(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inIn
                           const TAnimationFloatPairList &inAnimationPairs,
                           TAnimationCorePtr inAnimationCore, TAnimationHandleList &outAnimations)
 {
-    function<CUICDMAnimationHandle(TAnimationFloatPair)> theTransform(
+    function<Qt3DSDMAnimationHandle(TAnimationFloatPair)> theTransform(
         std::bind(&TAnimationFloatPair::first, std::placeholders::_1));
-    function<void(CUICDMAnimationHandle)> theOperation(
+    function<void(Qt3DSDMAnimationHandle)> theOperation(
         std::bind(MaybeAddAnimation, inSlide, inInstance, inProperty,
                   std::placeholders::_1, inAnimationCore,
                   std::ref(outAnimations)));
@@ -258,7 +258,7 @@ void CreateAnimationAndAdd(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inI
         inSlide, inInstance, inProperty, inIndex, EAnimationTypeEaseInOut, false));
 }
 
-bool AnimationValueDiffers(CUICDMAnimationHandle inAnimation, const SValue &inValue,
+bool AnimationValueDiffers(Qt3DSDMAnimationHandle inAnimation, const SValue &inValue,
                            float inSeconds, TAnimationCorePtr inAnimationCore)
 {
     SAnimationInfo theInfo(inAnimationCore->GetAnimationInfo(inAnimation));
@@ -273,7 +273,7 @@ bool AnimationExistsInPresentAnimations(const TAnimationFloatPair &inAnimation,
                                         TAnimationHandleList &inPresentAnimations)
 {
     return exists(inPresentAnimations,
-                  std::bind(equal_to<CUICDMAnimationHandle>(), inAnimation.first,
+                  std::bind(equal_to<Qt3DSDMAnimationHandle>(), inAnimation.first,
                             std::placeholders::_1));
 }
 
@@ -332,7 +332,7 @@ void DoKeyframeProperty(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInst
                        inSlideGraphCore, inSlideCore, inAnimationFloatPairs, theEaseIn, theEaseOut);
 }
 
-TAnimationFloatPair CreateAnimationFloatPair(CUICDMAnimationHandle inAnimation,
+TAnimationFloatPair CreateAnimationFloatPair(Qt3DSDMAnimationHandle inAnimation,
                                              const SValue &inValue,
                                              TAnimationCorePtr inAnimationCore)
 {
@@ -341,7 +341,7 @@ TAnimationFloatPair CreateAnimationFloatPair(CUICDMAnimationHandle inAnimation,
     return make_pair(inAnimation, theValue);
 }
 
-void InsertUniqueAnimationFloatPair(CUICDMAnimationHandle inAnimation,
+void InsertUniqueAnimationFloatPair(Qt3DSDMAnimationHandle inAnimation,
                                     TAnimationFloatPairList &inList, const SValue &inValue,
                                     TAnimationCorePtr inAnimationCore)
 {
@@ -453,7 +453,7 @@ void CStudioAnimationSystem::Animate(Qt3DSDMInstanceHandle inInstance,
                     // We use previously set animation & keyframes to create new animation &
                     // keyframe
                     SAnimationInfo &theInfo = theAnimationKeyframeIter->first;
-                    CUICDMAnimationHandle theAnimation = m_AnimationCore->CreateAnimation(
+                    Qt3DSDMAnimationHandle theAnimation = m_AnimationCore->CreateAnimation(
                         theInfo.m_Slide, theInfo.m_Instance, theInfo.m_Property, theInfo.m_Index,
                         theInfo.m_AnimationType, theInfo.m_DynamicFirstKeyframe);
 
@@ -480,7 +480,7 @@ void CStudioAnimationSystem::Deanimate(Qt3DSDMInstanceHandle inInstance,
     DataModelDataType::Value theDataType = m_PropertySystem->GetDataType(inProperty);
     std::tuple<bool, size_t> theArity = GetDatatypeAnimatableAndArity(theDataType);
     for (size_t i = 0; i < std::get<1>(theArity); ++i) {
-        CUICDMAnimationHandle theAnimationHandle =
+        Qt3DSDMAnimationHandle theAnimationHandle =
             GetControllingAnimation(inInstance, inProperty, i);
 
         if (theAnimationHandle.Valid()) {
@@ -550,13 +550,13 @@ void CStudioAnimationSystem::SetOrCreateKeyframe(Qt3DSDMInstanceHandle inInstanc
     }
 }
 
-inline bool FindMatchingAnimation(CUICDMAnimationHandle inAnimation,
+inline bool FindMatchingAnimation(Qt3DSDMAnimationHandle inAnimation,
                                   TAnimationCorePtr inAnimationCore, size_t inIndex)
 {
     return inAnimationCore->GetAnimationInfo(inAnimation).m_Index == inIndex;
 }
 
-CUICDMAnimationHandle CStudioAnimationSystem::GetControllingAnimation(
+Qt3DSDMAnimationHandle CStudioAnimationSystem::GetControllingAnimation(
     Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty, size_t inIndex) const
 {
     Qt3DSDMSlideHandle theApplicableSlide =

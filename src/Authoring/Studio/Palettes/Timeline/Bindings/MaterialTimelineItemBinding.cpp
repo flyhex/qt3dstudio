@@ -58,7 +58,7 @@ using namespace qt3dsdm;
 
 CMaterialTimelineItemBinding::CMaterialTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                            Qt3DSDMInstanceHandle inDataHandle)
-    : CUICDMTimelineItemBinding(inMgr, inDataHandle)
+    : Qt3DSDMTimelineItemBinding(inMgr, inDataHandle)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
     TPropertyHandleList theProperties;
@@ -168,7 +168,7 @@ void CMaterialTimelineItemBinding::OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inI
     if (theBridge->IsImageInstance(inInstance))
         return;
     else
-        CUICDMTimelineItemBinding::OnAddChild(inInstance);
+        Qt3DSDMTimelineItemBinding::OnAddChild(inInstance);
 }
 
 // helper function to find the image binding class that 'represents' this property
@@ -251,7 +251,7 @@ void CMaterialTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPro
         }
     }
     if (!theHandled)
-        CUICDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
+        Qt3DSDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
 }
 
 void CMaterialTimelineItemBinding::OnPropertyLinked(Qt3DSDMPropertyHandle inPropertyHandle)
@@ -302,7 +302,7 @@ void CMaterialTimelineItemBinding::OnPropertyLinked(Qt3DSDMPropertyHandle inProp
         }
     }
     if (!theHandled)
-        CUICDMTimelineItemBinding::OnPropertyLinked(inPropertyHandle);
+        Qt3DSDMTimelineItemBinding::OnPropertyLinked(inPropertyHandle);
 }
 
 qt3dsdm::Qt3DSDMInstanceHandle

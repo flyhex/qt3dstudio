@@ -52,7 +52,7 @@
 #include "StudioPreferences.h"
 #include "ITimelineItemBinding.h"
 
-CUICDMTimelineTimebar::CUICDMTimelineTimebar(
+Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,
     qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
     : Q3DStudio::CUpdateableDocumentEditor(*inTimelineTranslationManager->GetDoc())
@@ -76,14 +76,14 @@ CUICDMTimelineTimebar::CUICDMTimelineTimebar(
     qt3dsdm::IStudioFullSystemSignalProvider *theProvider =
         inTimelineTranslationManager->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
     m_PropertyChangedSignal = theProvider->ConnectInstancePropertyValue(
-        std::bind(&CUICDMTimelineTimebar::OnPropertyChanged, this,
+        std::bind(&Qt3DSDMTimelineTimebar::OnPropertyChanged, this,
                   std::placeholders::_1, std::placeholders::_2));
 
     OnPropertyChanged(m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarColor);
     OnPropertyChanged(m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarText);
 }
 
-void CUICDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                               qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     if (m_DataHandle == inInstance) {
@@ -158,7 +158,7 @@ void CUICDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inI
     }
 }
 
-CUICDMTimelineTimebar::~CUICDMTimelineTimebar()
+Qt3DSDMTimelineTimebar::~Qt3DSDMTimelineTimebar()
 {
 }
 
@@ -173,17 +173,17 @@ T GetInstancePropertyValue(qt3dsdm::IPropertySystem *inPropertySystem,
     return qt3dsdm::get<T>(theValue);
 }
 
-long CUICDMTimelineTimebar::GetStartTime() const
+long Qt3DSDMTimelineTimebar::GetStartTime() const
 {
     return GetInstancePropertyValue<qt3ds::QT3DSI32>(m_PropertySystem, m_DataHandle, m_StartTime);
 }
 
-long CUICDMTimelineTimebar::GetEndTime() const
+long Qt3DSDMTimelineTimebar::GetEndTime() const
 {
     return GetInstancePropertyValue<qt3ds::QT3DSI32>(m_PropertySystem, m_DataHandle, m_EndTime);
 }
 
-long CUICDMTimelineTimebar::GetDuration() const
+long Qt3DSDMTimelineTimebar::GetDuration() const
 {
     auto theStartTime = GetInstancePropertyValue<qt3ds::QT3DSI32>(m_PropertySystem, m_DataHandle, m_StartTime);
     auto theEndTime = GetInstancePropertyValue<qt3ds::QT3DSI32>(m_PropertySystem, m_DataHandle, m_EndTime);
@@ -191,17 +191,17 @@ long CUICDMTimelineTimebar::GetDuration() const
     return theEndTime - theStartTime;
 }
 
-bool CUICDMTimelineTimebar::ShowHandleBars() const
+bool Qt3DSDMTimelineTimebar::ShowHandleBars() const
 {
     return true;
 }
 
-void CUICDMTimelineTimebar::OnBeginDrag()
+void Qt3DSDMTimelineTimebar::OnBeginDrag()
 { // Really? TODO: Figure out why this is here.
     // ASSERT(0);
 }
 
-void CUICDMTimelineTimebar::OffsetTime(long inDiff)
+void Qt3DSDMTimelineTimebar::OffsetTime(long inDiff)
 {
     if (m_DataHandle.Valid()) {
         ENSURE_EDITOR(L"Time Bar Move").OffsetTimeRange(m_DataHandle, inDiff);
@@ -212,7 +212,7 @@ void CUICDMTimelineTimebar::OffsetTime(long inDiff)
     }
 }
 
-void CUICDMTimelineTimebar::ChangeTime(long inTime, bool inSetStart)
+void Qt3DSDMTimelineTimebar::ChangeTime(long inTime, bool inSetStart)
 {
     if (m_DataHandle.Valid()) {
         ENSURE_EDITOR(L"Time Bar Resize").ResizeTimeRange(m_DataHandle, inTime, inSetStart);
@@ -223,17 +223,17 @@ void CUICDMTimelineTimebar::ChangeTime(long inTime, bool inSetStart)
     }
 }
 
-void CUICDMTimelineTimebar::CommitTimeChange()
+void Qt3DSDMTimelineTimebar::CommitTimeChange()
 {
     CommitEditor();
 }
 
-void CUICDMTimelineTimebar::RollbackTimeChange()
+void Qt3DSDMTimelineTimebar::RollbackTimeChange()
 {
     RollbackEditor();
 }
 
-void CUICDMTimelineTimebar::SetTimebarColor(const ::CColor &inColor)
+void Qt3DSDMTimelineTimebar::SetTimebarColor(const ::CColor &inColor)
 {
     using namespace Q3DStudio;
     if (inColor != m_Color) {
@@ -243,7 +243,7 @@ void CUICDMTimelineTimebar::SetTimebarColor(const ::CColor &inColor)
     }
 }
 
-void CUICDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComment)
+void Qt3DSDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComment)
 {
     using namespace Q3DStudio;
     if (inComment != m_Comment) {
@@ -253,7 +253,7 @@ void CUICDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inCommen
     }
 }
 
-void CUICDMTimelineTimebar::SetTimebarTime(ITimeChangeCallback *inCallback /*= nullptr*/)
+void Qt3DSDMTimelineTimebar::SetTimebarTime(ITimeChangeCallback *inCallback /*= nullptr*/)
 {
     long theStartTime = GetStartTime();
     long theEndTime = GetEndTime();

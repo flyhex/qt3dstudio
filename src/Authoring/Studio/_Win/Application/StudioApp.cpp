@@ -1321,7 +1321,7 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
     if (inSelectable.empty() == false) {
         switch (inSelectable.getType()) {
         case Q3DStudio::SelectedValueTypes::Slide:
-            theInspectableBase = new CUICDMInspectable(
+            theInspectableBase = new Qt3DSDMInspectable(
                 *this, m_Core, inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Instance);
             break;
         case Q3DStudio::SelectedValueTypes::MultipleInstances:
@@ -1351,24 +1351,24 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
                             theCurrentActiveSlide);
 
                     if (theBridge->IsSceneInstance(theSelectedInstance))
-                        theInspectableBase = new CUICDMSceneInspectable(
+                        theInspectableBase = new Qt3DSDMSceneInspectable(
                             *this, m_Core, theSelectedInstance, theCurrentActiveSlideInstance);
                     else if (theBridge->IsComponentInstance(theSelectedInstance))
-                        theInspectableBase = new CUICDMInspectable(
+                        theInspectableBase = new Qt3DSDMInspectable(
                             *this, m_Core, theSelectedInstance, theCurrentActiveSlideInstance);
                 }
                 if (theInspectableBase == nullptr) {
                     if (theBridge->IsMaterialBaseInstance(theSelectedInstance))
                         theInspectableBase =
-                            new CUICDMMaterialInspectable(*this, m_Core, theSelectedInstance);
+                            new Qt3DSDMMaterialInspectable(*this, m_Core, theSelectedInstance);
                     else
                         theInspectableBase =
-                            new CUICDMInspectable(*this, m_Core, theSelectedInstance);
+                            new Qt3DSDMInspectable(*this, m_Core, theSelectedInstance);
                 }
             }
         } break;
         case Q3DStudio::SelectedValueTypes::Guide: {
-            qt3dsdm::CUICDMGuideHandle theGuide = inSelectable.getData<qt3dsdm::CUICDMGuideHandle>();
+            qt3dsdm::Qt3DSDMGuideHandle theGuide = inSelectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
             theInspectableBase = CGuideInspectable::CreateInspectable(*m_Core, theGuide);
         } break;
         };

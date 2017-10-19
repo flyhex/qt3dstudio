@@ -46,10 +46,10 @@ class COffsetKeyframesCommandHelper;
  *	Wrapper for a keyframe in UICDM.
  */
 //==============================================================================
-class CUICDMTimelineKeyframe : public IKeyframe
+class Qt3DSDMTimelineKeyframe : public IKeyframe
 {
 public:
-    typedef std::vector<qt3dsdm::CUICDMKeyframeHandle> TKeyframeHandleList;
+    typedef std::vector<qt3dsdm::Qt3DSDMKeyframeHandle> TKeyframeHandleList;
 
 protected:
     TKeyframeHandleList
@@ -58,8 +58,8 @@ protected:
     bool m_Selected;
 
 public:
-    CUICDMTimelineKeyframe(IDoc *inDoc);
-    virtual ~CUICDMTimelineKeyframe();
+    Qt3DSDMTimelineKeyframe(IDoc *inDoc);
+    virtual ~Qt3DSDMTimelineKeyframe();
 
     // IKeyframe
     bool IsSelected() const override;
@@ -68,8 +68,8 @@ public:
     void SetDynamic(bool inIsDynamic) override;
     bool IsDynamic() const override;
 
-    void AddKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle);
-    bool HasKeyframeHandle(qt3dsdm::CUICDMKeyframeHandle inHandle) const;
+    void AddKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle);
+    bool HasKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle) const;
     void SetSelected(bool inSelected);
     void UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper, long inTime);
     void GetKeyframeHandles(TKeyframeHandleList &outList) const;

@@ -48,14 +48,14 @@ class CBaseStateRow;
 /**
  * Binding to a UICDM object of Group type
  */
-class CGroupTimelineItemBinding : public CUICDMTimelineItemBinding
+class CGroupTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public:
     CGroupTimelineItemBinding(CTimelineTranslationManager *inMgr,
                               qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     ~CGroupTimelineItemBinding() {}
 
-    // CUICDMTimelineItemBinding
+    // Qt3DSDMTimelineItemBinding
     bool OpenAssociatedEditor() override;
     bool IsImported() const override;
 };

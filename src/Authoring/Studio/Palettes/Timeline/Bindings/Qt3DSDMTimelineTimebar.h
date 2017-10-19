@@ -52,12 +52,12 @@ class ISignalConnection;
 /**
  * General timebar implementation for UICDM objects
  */
-class CUICDMTimelineTimebar : public ITimelineTimebar, public Q3DStudio::CUpdateableDocumentEditor
+class Qt3DSDMTimelineTimebar : public ITimelineTimebar, public Q3DStudio::CUpdateableDocumentEditor
 {
 public:
-    CUICDMTimelineTimebar(CTimelineTranslationManager *inTimelineTranslationManager,
+    Qt3DSDMTimelineTimebar(CTimelineTranslationManager *inTimelineTranslationManager,
                           qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
-    virtual ~CUICDMTimelineTimebar();
+    virtual ~Qt3DSDMTimelineTimebar();
 
 protected:
     CTimelineTranslationManager *m_TimelineTranslationManager;

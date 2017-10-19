@@ -97,7 +97,7 @@ inline CImageTimelineItemBinding *FindImageBindingByProperty(CBaseStateRow *inRo
 
 CLayerTimelineItemBinding::CLayerTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                      qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
-    : CUICDMTimelineItemBinding(inMgr, inDataHandle)
+    : Qt3DSDMTimelineItemBinding(inMgr, inDataHandle)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
     TPropertyHandleList theProperties;
@@ -219,7 +219,7 @@ void CLayerTimelineItemBinding::OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInst
     if (theBridge->IsImageInstance(inInstance))
         return;
     else
-        CUICDMTimelineItemBinding::OnAddChild(inInstance);
+        Qt3DSDMTimelineItemBinding::OnAddChild(inInstance);
 }
 
 void CLayerTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPropertyHandle)
@@ -283,7 +283,7 @@ void CLayerTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inProper
         }
     }
     if (!theHandled)
-        CUICDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
+        Qt3DSDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
 }
 
 qt3dsdm::Qt3DSDMInstanceHandle

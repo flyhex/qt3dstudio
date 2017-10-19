@@ -183,16 +183,16 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
 UICDMMaterialInspectorGroup::UICDMMaterialInspectorGroup(
         CStudioApp &inApp,
         const Q3DStudio::CString &inName,
-        CUICDMInspectable &inInspectable,
+        Qt3DSDMInspectable &inInspectable,
         long inIndex)
-    : CUICDMInspectorGroup(inApp, inName.toQString(), inInspectable, inIndex)
+    : Qt3DSDMInspectorGroup(inApp, inName.toQString(), inInspectable, inIndex)
 {
 }
 
 struct SUICDMMaterialInspectorGroup : public UICDMMaterialInspectorGroup
 {
     SUICDMMaterialInspectorGroup(CStudioApp &inApp, const Q3DStudio::CString &inName,
-                                 CUICDMInspectable &inInspectable, long inIndex)
+                                 Qt3DSDMInspectable &inInspectable, long inIndex)
         : UICDMMaterialInspectorGroup(inApp, inName, inInspectable, inIndex)
     {
         Q3DStudio::CString theMaterialGroupName = L"Material";
@@ -208,12 +208,12 @@ private:
     bool m_isMaterialGroup;
 };
 
-CInspectorGroup *CUICDMMaterialInspectable::GetGroup(long inIndex)
+CInspectorGroup *Qt3DSDMMaterialInspectable::GetGroup(long inIndex)
 {
     Q3DStudio::CString theGroupName = GetGroupName(inIndex);
     Q3DStudio::CString theMaterialGroupName = L"Material";
 
-    CUICDMInspectorGroup *theGroup =
+    Qt3DSDMInspectorGroup *theGroup =
         new SUICDMMaterialInspectorGroup(m_App, theGroupName, *this, inIndex);
 
     TMetaDataPropertyHandleList theProperties = GetGroupProperties(inIndex);

@@ -109,7 +109,7 @@ bool ActionModel::setData(const QModelIndex &index, const QVariant &data, int ro
     return false;
 }
 
-void ActionModel::addAction(const CUICDMActionHandle &action)
+void ActionModel::addAction(const Qt3DSDMActionHandle &action)
 {
     if (std::find(m_actions.begin(), m_actions.end(), action) == m_actions.end()) {
         const auto count = rowCount();
@@ -119,7 +119,7 @@ void ActionModel::addAction(const CUICDMActionHandle &action)
     }
 }
 
-void ActionModel::removeAction(const CUICDMActionHandle &action)
+void ActionModel::removeAction(const Qt3DSDMActionHandle &action)
 {
     // KDAB_FIXME use beginRemoveRows
     beginResetModel();
@@ -127,7 +127,7 @@ void ActionModel::removeAction(const CUICDMActionHandle &action)
     endResetModel();
 }
 
-void ActionModel::updateAction(const CUICDMActionHandle &action)
+void ActionModel::updateAction(const Qt3DSDMActionHandle &action)
 {
     for (unsigned i = 0; i < m_actions.size(); i++) {
         if (m_actions[i] == action) {
@@ -137,7 +137,7 @@ void ActionModel::updateAction(const CUICDMActionHandle &action)
     }
 }
 
-const CUICDMActionHandle ActionModel::actionAt(int row)
+const Qt3DSDMActionHandle ActionModel::actionAt(int row)
 {
     if (row >= 0 && static_cast<unsigned>(row) < m_actions.size())
         return m_actions[row];
@@ -164,7 +164,7 @@ qt3dsdm::Qt3DSDMSlideHandle ActionModel::activeSlide() const
     return g_StudioApp.GetCore()->GetDoc()->GetActiveSlide();
 }
 
-QString ActionModel::actionString(const CUICDMActionHandle &action) const
+QString ActionModel::actionString(const Qt3DSDMActionHandle &action) const
 {
     QString result;
     if (action.Valid()) {
@@ -177,7 +177,7 @@ QString ActionModel::actionString(const CUICDMActionHandle &action) const
 
         // Query the event name
         QString eventFormalName(tr("[Unknown Event]"));
-        CUICDMEventHandle eventHandle = bridge->ResolveEvent(actionInfo);
+        Qt3DSDMEventHandle eventHandle = bridge->ResolveEvent(actionInfo);
         if (eventHandle.Valid())
             eventFormalName =
                 QString::fromWCharArray(bridge->GetEventInfo(eventHandle).m_FormalName.wide_str());
