@@ -228,3 +228,22 @@ QDialog#StartupDlg QWidget {
     border: 0px;
     font-size: 16px;
 }
+
+/* About Dialog */
+QDialog#AboutDlg,
+QDialog#AboutDlg QWidget {
+    background-color: transparent;
+    border: 0px;
+}
+
+QDialog#AboutDlg QPushButton:!pressed,
+QDialog#AboutDlg QPushButton:!pressed {
+    background: transparent;
+    border: 1px solid #41cd52;
+}
+
+QDialog#AboutDlg QPushButton:pressed,
+QDialog#AboutDlg QPushButton:pressed {
+    background: #41cd52;
+    border: 1px solid #41cd52;
+}

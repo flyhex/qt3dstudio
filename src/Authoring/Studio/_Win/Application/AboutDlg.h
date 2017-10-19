@@ -53,43 +53,21 @@ public:
     CAboutDlg(QWidget* parent = nullptr);
     ~CAboutDlg();
 
-    // Implementation
 protected:
-    bool m_ScrollingCreditsFlag = false; // TRUE if credits are being scrolled
-    QRect m_IconRect; // bounding rectangle to display the about image
-    QRect m_CreditsRect; // bounding rectangle for the scrolling credits
-    QColor m_ColorFade; // fade-out color to fade to the credits window
-    QFont m_Font; // Font for text
-    QFont m_BoldFont; // Font for Studio/Client version number
-
-    QColor m_Color_Background;
-    QColor m_Color_Text;
-    QBrush m_Brush;
-
-    void BeginCreditsTransition();
-
-    void DrawFadeRect();
-
-    void FadeOut();
-
-    void ResizeAbout();
-
-    //{{AFX_MSG(CAboutDlg)
     void paintEvent(QPaintEvent* event) override;
+
+private:
     void OnInitDialog();
 
-    void mouseDoubleClickEvent(QMouseEvent* event) override;
+private:
+    QScopedPointer<Ui::AboutDlg> m_ui;
+
+    QPalette *m_palette;
 
     Q3DStudio::CString m_ProductVersionStr;
     Q3DStudio::CString m_CopyrightStr;
     Q3DStudio::CString m_Credit1Str;
     Q3DStudio::CString m_Credit2Str;
-
-public:
-    void OnStnClickedAboutboxProdver();
-
-private:
-    QScopedPointer<Ui::AboutDlg> m_ui;
 };
 
 #endif // INCLUDED_ABOUT_DLG_H
