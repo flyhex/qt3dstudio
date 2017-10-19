@@ -338,7 +338,7 @@ namespace render {
                         m_Renderer.GetUICContext()
                             .GetDefaultMaterialShaderGenerator()
                             .GetImageVariableNames(m_DisplacementIdx);
-                    tessEvalShader << "\tpos.xyz = uicDefaultMaterialFileDisplacementTexture( "
+                    tessEvalShader << "\tpos.xyz = defaultMaterialFileDisplacementTexture( "
                                    << theNames.m_ImageSampler << ", displaceAmount, "
                                    << theNames.m_ImageFragCoords << outExt.c_str();
                     tessEvalShader << ", varObjectNormal" << outExt.c_str() << ", pos.xyz );"
@@ -399,14 +399,14 @@ namespace render {
                     SetCode(GenerationFlagValues::WorldPosition);
                     vertexShader.AddUniform("model_matrix", "mat4");
 
-                    vertexShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+                    vertexShader.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
                     IDefaultMaterialShaderGenerator::SImageVariableNames theVarNames =
                         MaterialGenerator().GetImageVariableNames(displacementImageIdx);
 
                     vertexShader.AddUniform(theVarNames.m_ImageSampler, "sampler2D");
 
                     vertexShader
-                        << "\tvec3 displacedPos = uicDefaultMaterialFileDisplacementTexture( "
+                        << "\tvec3 displacedPos = defaultMaterialFileDisplacementTexture( "
                         << theVarNames.m_ImageSampler << ", displaceAmount, "
                         << theVarNames.m_ImageFragCoords << ", attr_norm, attr_pos );" << Endl;
                     AddInterpolationParameter("varWorldPos", "vec3");
@@ -1631,7 +1631,7 @@ namespace render {
                 if (inDisplaced) {
                     tessEvalShader.AddUniform("displacementSampler", "sampler2D");
                     tessEvalShader.AddUniform("displaceAmount", "float");
-                    tessEvalShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+                    tessEvalShader.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
                 }
                 tessEvalShader.AddOutgoing("outUV", "vec2");
                 tessEvalShader.AddOutgoing("outNormal", "vec3");
@@ -1647,7 +1647,7 @@ namespace render {
                            "outNormalTC[1] + gl_TessCoord.z * outNormalTC[2];"
                         << Endl;
                     tessEvalShader
-                        << "\tvec3 displacedPos = uicDefaultMaterialFileDisplacementTexture( "
+                        << "\tvec3 displacedPos = defaultMaterialFileDisplacementTexture( "
                            "displacementSampler , displaceAmount, outUV , outNormal, pos.xyz );"
                         << Endl;
                     tessEvalShader.Append(

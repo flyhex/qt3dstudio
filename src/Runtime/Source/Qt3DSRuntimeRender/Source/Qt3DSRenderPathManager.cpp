@@ -454,14 +454,14 @@ struct SPathVertexPipeline : public SVertexPipelineImpl
                                                            *m_DisplacementImage);
             theTessEval.AddUniform("displaceAmount", "float");
             theTessEval.AddUniform("model_matrix", "mat4");
-            theTessEval.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+            theTessEval.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
             IDefaultMaterialShaderGenerator::SImageVariableNames theVarNames =
                 MaterialGenerator().GetImageVariableNames(m_DisplacementIdx);
 
             theTessEval.AddUniform(theVarNames.m_ImageSampler, "sampler2D");
             IDefaultMaterialShaderGenerator::SImageVariableNames theNames =
                 MaterialGenerator().GetImageVariableNames(m_DisplacementIdx);
-            theTessEval << "\tpos = uicDefaultMaterialFileDisplacementTexture( "
+            theTessEval << "\tpos = defaultMaterialFileDisplacementTexture( "
                         << theNames.m_ImageSampler << ", displaceAmount, "
                         << theNames.m_ImageFragCoords << outExt.c_str() << ", vec3( 0.0, 0.0, 1.0 )"
                         << ", pos.xyz );" << Endl;

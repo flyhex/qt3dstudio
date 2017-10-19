@@ -138,7 +138,7 @@ void SCustomMaterialVertexPipeline::InitializeTessEvaluationShader()
     SetupTessIncludes(ShaderGeneratorStages::TessEval, m_TessMode);
 
     if (m_TessMode == TessModeValues::TessLinear && m_DisplacementImage) {
-        tessEvalShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+        tessEvalShader.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
         tessEvalShader.AddUniform("model_matrix", "mat4");
         tessEvalShader.AddUniform("displace_tiling", "vec3");
         tessEvalShader.AddUniform("displaceAmount", "float");
@@ -230,7 +230,7 @@ void SCustomMaterialVertexPipeline::FinalizeTessEvaluationShader()
                               "0.000000 ), displace_tiling ), tmp);"
                            << Endl;
 
-            tessEvalShader << "\tpos.xyz = uicDefaultMaterialFileDisplacementTexture( "
+            tessEvalShader << "\tpos.xyz = defaultMaterialFileDisplacementTexture( "
                            << m_DisplacementImage->m_Image.m_ImageShaderName.c_str()
                            << ", displaceAmount, "
                            << "tmp.position.xy";
@@ -294,7 +294,7 @@ void SCustomMaterialVertexPipeline::BeginVertexGeneration(QT3DSU32 displacementI
             SetCode(GenerationFlagValues::WorldPosition);
             vertexShader.AddUniform("model_matrix", "mat4");
 
-            vertexShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+            vertexShader.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
             vertexShader.AddUniform(displacementImage->m_Image.m_ImageShaderName.c_str(),
                                     "sampler2D");
 
@@ -306,7 +306,7 @@ void SCustomMaterialVertexPipeline::BeginVertexGeneration(QT3DSU32 displacementI
                             "0.000000 ), displace_tiling ), tmp);"
                          << Endl;
 
-            vertexShader << "\tvec3 displacedPos = uicDefaultMaterialFileDisplacementTexture( "
+            vertexShader << "\tvec3 displacedPos = defaultMaterialFileDisplacementTexture( "
                          << displacementImage->m_Image.m_ImageShaderName.c_str()
                          << ", displaceAmount, "
                          << "tmp.position.xy"

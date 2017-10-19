@@ -766,7 +766,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         inShader.AddUniform("displaceAmount", "float");
         inShader.AddUniform("displacementMap_rot", "vec4");
         inShader.AddUniform("displacementMap_offset", "vec3");
-        inShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+        inShader.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
 
         inShader.Append("\tvec3 uTransform = vec3( displacementMap_rot.x, displacementMap_rot.y, "
                         "displacementMap_offset.x );");
@@ -776,7 +776,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         inShader.Append("\tvec2 uv_coords = attr_uv0;");
         inShader << "\tuv_coords = getTransformedUVCoords( vec3( uv_coords, 1.0), uTransform, "
                     "vTransform );\n";
-        inShader << "\tvec3 displacedPos = uicDefaultMaterialFileDisplacementTexture( "
+        inShader << "\tvec3 displacedPos = defaultMaterialFileDisplacementTexture( "
                     "displacementSampler , displaceAmount, uv_coords , attr_norm, attr_pos );"
                  << Endl;
         inShader.Append("\tgl_Position = model_view_projection * vec4(displacedPos, 1.0);");
@@ -788,7 +788,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     {
         if (displacementImage) {
             SetupImageVariableNames(displacementImageIdx);
-            inGenerator.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+            inGenerator.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
             inGenerator.AddUniform("model_matrix", "mat4");
             inGenerator.AddUniform("camera_position", "vec3");
             inGenerator.AddUniform("displaceAmount", "float");
@@ -881,7 +881,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         inShader.AddUniform("displaceAmount", "float");
         inShader.AddUniform("displacementMap_rot", "vec4");
         inShader.AddUniform("displacementMap_offset", "vec3");
-        inShader.AddInclude("Qt3DSDefaultMaterialFileDisplacementTexture.glsllib");
+        inShader.AddInclude("defaultMaterialFileDisplacementTexture.glsllib");
 
         inShader.Append("\tvec3 uTransform = vec3( displacementMap_rot.x, displacementMap_rot.y, "
                         "displacementMap_offset.x );");
@@ -891,7 +891,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         inShader.GenerateUVCoords();
         inShader << "\tvarTexCoord0 = getTransformedUVCoords( vec3( varTexCoord0, 1.0), "
                     "uTransform, vTransform );\n";
-        inShader << "\tvec3 displacedPos = uicDefaultMaterialFileDisplacementTexture( "
+        inShader << "\tvec3 displacedPos = defaultMaterialFileDisplacementTexture( "
                     "displacementSampler , displaceAmount, varTexCoord0 , attr_norm, attr_pos );"
                  << Endl;
         inShader.Append("\tgl_Position = model_view_projection * vec4(displacedPos, 1.0);");
@@ -1196,7 +1196,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                                << ", tangent, binormal, world_normal, "
                                << m_ImageSamplerSize << ");" << Endl;
             } else {
-                fragmentShader.AddInclude("Qt3DSDefaultMaterialFileBumpTexture.glsllib");
+                fragmentShader.AddInclude("defaultMaterialFileBumpTexture.glsllib");
                 // vec3 simplerFileBumpTexture( in sampler2D sampler, in float factor, vec2
                 // texCoord, vec3 tangent, vec3 binormal, vec3 normal )
 
@@ -1211,10 +1211,10 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         } else if (normalImage != NULL) {
             GenerateImageUVCoordinates(normalImageIdx, *normalImage);
 
-            fragmentShader.AddInclude("Qt3DSDefaultMaterialFileNormalTexture.glsllib");
+            fragmentShader.AddInclude("defaultMaterialFileNormalTexture.glsllib");
             fragmentShader.AddUniform("bumpAmount", "float");
 
-            fragmentShader << "\tworld_normal = uicDefaultMaterialFileNormalTexture( "
+            fragmentShader << "\tworld_normal = defaultMaterialFileNormalTexture( "
                            << m_ImageSampler << ", bumpAmount, " << m_ImageFragCoords
                            << ", tangent, binormal );" << Endl;
         }
