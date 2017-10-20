@@ -33,6 +33,7 @@
 #include "StudioDefs.h"
 #include "Strings.h"
 #include "StringLoader.h"
+#include "qtAuthoring-config.h"
 
 //==============================================================================
 //	Includes
