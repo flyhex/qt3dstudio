@@ -38,7 +38,7 @@ Rectangle {
 
     function handleMouseClicks(mouse) {
         if (mouse.button === Qt.RightButton) {
-            const coords = mapToItem(root, mouse.x, mouse.y);
+            const coords = slideList.mapToItem(root, mouse.x, mouse.y);
             _slideView.showContextMenu(coords.x, coords.y, -1);
         } else {
             root.focus = true;
@@ -128,6 +128,10 @@ Rectangle {
                     if (slideList.indexAt(mouse.x, mouse.y) === -1)
                         root.handleMouseClicks(mouse);
                     else
+                        mouse.accepted = false;
+                }
+                onPressed: {
+                    if (slideList.indexAt(mouse.x, mouse.y) !== -1)
                         mouse.accepted = false;
                 }
             }
