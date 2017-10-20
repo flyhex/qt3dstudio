@@ -27,12 +27,8 @@
 **
 ****************************************************************************/
 
-#if !defined(AFX_STUDIOAPPPREFSPAGE_H__FA329789_EEDD_4439_B6F6_AAD0FED5285F__INCLUDED_)
-#define AFX_STUDIOAPPPREFSPAGE_H__FA329789_EEDD_4439_B6F6_AAD0FED5285F__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
+#ifndef STUDIOAPPPREFSPAGE_H_
+#define STUDIOAPPPREFSPAGE_H_
 
 //==============================================================================
 //	Includes
@@ -74,7 +70,6 @@ public:
 public:
     bool OnApply() override;
     void OnOK() override;
-    void OnCancel() override;
 
     // Implementation
 protected:
@@ -115,7 +110,4 @@ private:
     void updateColorButton();
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_STUDIOAPPPREFSPAGE_H__FA329789_EEDD_4439_B6F6_AAD0FED5285F__INCLUDED_)
+#endif

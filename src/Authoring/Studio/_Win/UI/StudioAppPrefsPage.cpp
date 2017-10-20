@@ -31,7 +31,6 @@
 //	Prefix
 //==============================================================================
 
-#include "stdafx.h"
 #include "Strings.h"
 
 #include "ui_StudioAppPrefsPage.h"
@@ -57,9 +56,6 @@
 
 #include <QColorDialog>
 #include <QMessageBox>
-
-#define WM_PREVIEW_DYNAMIC_CONTROLS WM_USER + 1200
-const long MIN_PAGESIZE = 380;
 
 /////////////////////////////////////////////////////////////////////////////
 // CStudioAppPrefsPage property page
@@ -184,8 +180,6 @@ void CStudioAppPrefsPage::LoadSettings()
     m_ui->m_SnapRangeCombo->setCurrentIndex(theResolution);
 
 #ifdef INCLUDE_EDIT_CAMERA
-    // Edit View Background color
-    // TODO: Visualize selected color on the bg color change button
     InitEditStartViewCombo();
 #endif
 
@@ -200,9 +194,8 @@ void CStudioAppPrefsPage::LoadSettings()
 
 void CStudioAppPrefsPage::updateColorButton()
 {
-    QPalette pal = m_ui->m_EditViewBGColor->palette();
-    pal.setColor(QPalette::Button, m_bgColor);
-    m_ui->m_EditViewBGColor->setPalette(pal);
+    QString bgColorStyle = QStringLiteral("background-color: ") + m_bgColor.name();
+    m_ui->m_EditViewBGColor->setStyleSheet(bgColorStyle);
 }
 
 //==============================================================================
@@ -230,15 +223,12 @@ void CStudioAppPrefsPage::SaveSettings()
 #ifdef INCLUDE_EDIT_CAMERA
     // Edit View Background Color
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    //
-    // g_StudioApp.GetCore()->GetDoc( )->SetEditViewBackgroundColor( theColor );
 
     // Preferred Startup View
     long theSel = m_ui->m_EditViewStartupView->currentIndex();
     long theNumItems = m_ui->m_EditViewStartupView->count();
     CStudioPreferences::SetPreferredStartupView(
         (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
-// g_StudioApp.GetCore()->GetDoc( )->UpdateClientScene( false );
 #endif
 
     SavePreviewSettings();
@@ -274,27 +264,6 @@ bool CStudioAppPrefsPage::OnApply()
 void CStudioAppPrefsPage::OnOK()
 {
     CStudioPreferencesPropPage::OnOK();
-}
-
-//==============================================================================
-/**
- *	OnCancel: Handler for the Cancel button
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioAppPrefsPage::OnCancel()
-{
-#ifdef INCLUDE_EDIT_CAMERA
-    // if the edit view background color was changed, reset it back to the original
-    // value
-    CColor theOrigColor = CStudioPreferences::GetEditViewBackgroundColor();
-    if (m_bgColor != theOrigColor) {
-        // g_StudioApp.GetCore()->GetDoc( )->SetEditViewBackgroundColor( theOrigColor );
-        // g_StudioApp.GetCore()->GetDoc( )->UpdateClientScene( false );
-    }
-#endif
-    CStudioPreferencesPropPage::OnCancel();
 }
 
 //==============================================================================
