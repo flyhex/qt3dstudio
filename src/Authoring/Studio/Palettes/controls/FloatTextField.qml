@@ -80,6 +80,8 @@ TextField {
         if (focusReason === Qt.OtherFocusReason) {
             select(0, 0);
             cursorVisible = false;
+        } else if (activeFocus) {
+            selectAll();
         }
     }
 
@@ -102,14 +104,14 @@ TextField {
             if (parent.activeFocus) {
                 clickedPos = parent.positionAt(mouse.x, mouse.y);
                 parent.cursorPosition = clickedPos;
+            } else {
+                parent.forceActiveFocus();
             }
-            parent.forceActiveFocus();
         }
         onClicked: {
             if (!draggingActive && !parent.cursorVisible) {
-                clickedPos = parent.positionAt(mouse.x, mouse.y);
-                parent.cursorPosition = clickedPos;
                 parent.cursorVisible = true;
+                parent.selectAll();
             }
         }
         onReleased: {

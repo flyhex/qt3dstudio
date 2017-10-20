@@ -56,4 +56,9 @@ TextField {
         border.width: styledTextFieldId.activeFocus ? 1 : 0
         border.color: styledTextFieldId.activeFocus ? _selectionColor : _disabledColor
     }
+
+    onActiveFocusChanged: {
+        if (activeFocus)
+            selectAll();
+    }
 }
