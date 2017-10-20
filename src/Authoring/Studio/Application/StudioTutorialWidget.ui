@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>StudioTutorialWidget</class>
  <widget class="QDialog" name="StudioTutorialWidget">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,175 +13,263 @@
     <height>900</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Welcome to Qt 3D Studio</string>
   </property>
   <property name="accessibleName">
    <string>StudioTutorialWidget</string>
   </property>
-  <widget class="QCheckBox" name="studioTutorialShowAgain">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>701</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="accessibleName">
-    <string>studioTutorialShowAgain</string>
-   </property>
-   <property name="text">
-    <string>Do Not Show This Again</string>
-   </property>
-  </widget>
-  <widget class="QWidget" name="horizontalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>820</y>
-     <width>1421</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="bottomBar">
-    <item>
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="buttons">
-      <item>
-       <widget class="QPushButton" name="studioTutorialOpen">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="accessibleName">
-         <string>studioTutorialOpen</string>
-        </property>
-        <property name="text">
-         <string>Open Sample Project</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="studioTutorialNew">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="accessibleName">
-         <string>studioTutorialNew</string>
-        </property>
-        <property name="text">
-         <string>Create New</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="horizontalLayoutWidget_2">
+  <widget class="QWidget" name="verticalWidget" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>40</y>
-     <width>1441</width>
-     <height>51</height>
+     <y>0</y>
+     <width>1440</width>
+     <height>900</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="topBar">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item>
-     <widget class="QPushButton" name="studioTutorialBack">
-      <property name="maximumSize">
-       <size>
-        <width>90</width>
-        <height>90</height>
-       </size>
+     <layout class="QHBoxLayout" name="checkboxLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
       </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="accessibleName">
-       <string>studioTutorialBack</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../qt3dstudio.qrc">
-        <normaloff>:/images/Tutorial/button_back.png</normaloff>:/images/Tutorial/button_back.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>39</width>
-        <height>39</height>
-       </size>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
+      <item>
+       <widget class="QCheckBox" name="studioTutorialShowAgain">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>studioTutorialShowAgain</string>
+        </property>
+        <property name="text">
+         <string>Do Not Show This Again</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>16</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>16</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QWidget" name="topBar" native="true">
+      <layout class="QHBoxLayout" name="topBarLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMaximumSize</enum>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="studioTutorialBack">
+         <property name="maximumSize">
+          <size>
+           <width>39</width>
+           <height>39</height>
+          </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="accessibleName">
+          <string>studioTutorialBack</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../images.qrc">
+           <normaloff>:/images/Tutorial/button_back.png</normaloff>:/images/Tutorial/button_back.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>39</width>
+           <height>39</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>323</width>
+           <height>46</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="studioTutorialForward">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>39</width>
+           <height>39</height>
+          </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="accessibleName">
+          <string>StudioTutorialWidget</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../images.qrc">
+           <normaloff>:/images/Tutorial/button_next.png</normaloff>:/images/Tutorial/button_next.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>39</width>
+           <height>39</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
-     <spacer name="horizontalSpacer_2">
+     <spacer name="verticalSpacer">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Vertical</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>40</width>
-        <height>20</height>
+        <width>20</width>
+        <height>40</height>
        </size>
       </property>
      </spacer>
     </item>
     <item>
-     <widget class="QPushButton" name="studioTutorialForward">
-      <property name="maximumSize">
-       <size>
-        <width>90</width>
-        <height>90</height>
-       </size>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="accessibleName">
-       <string>StudioTutorialWidget</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../qt3dstudio.qrc">
-        <normaloff>:/images/Tutorial/button_next.png</normaloff>:/images/Tutorial/button_next.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>39</width>
-        <height>39</height>
-       </size>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
+     <widget class="QWidget" name="bottomBar" native="true">
+      <layout class="QHBoxLayout" name="bottomBarLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMaximumSize</enum>
+       </property>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="buttons">
+         <item>
+          <widget class="QPushButton" name="studioTutorialOpen">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="accessibleName">
+            <string>studioTutorialOpen</string>
+           </property>
+           <property name="text">
+            <string>Open Sample Project</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="studioTutorialNew">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="accessibleName">
+            <string>studioTutorialNew</string>
+           </property>
+           <property name="text">
+            <string>Create New</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
   </widget>
  </widget>
  <resources>
-  <include location="../qt3dstudio.qrc"/>
+  <include location="../images.qrc"/>
  </resources>
  <connections/>
 </ui>

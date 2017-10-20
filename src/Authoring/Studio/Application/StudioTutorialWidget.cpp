@@ -30,6 +30,7 @@
 #include "StudioUtils.h"
 
 StudioTutorialWidget::StudioTutorialWidget(bool goToFileDialog) :
+    QDialog(nullptr, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint),
     m_ui(new Ui::StudioTutorialWidget),
     m_welcomeImages(0),
     m_imgIter(0),
@@ -72,6 +73,7 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
     // based on first PNG, get the scale that we need to fit welcome
     // screen and buttons comfortably on display
     m_displayScale = getDisplayScalingForImage(m_imgIter);
+    m_ui->verticalWidget->setMaximumSize(m_displayScale * size());
 
     if (!m_welcomeImages->isEmpty()) {
         for (int i = 0; i < page && m_imgIter != m_welcomeImages->end(); ++i)
@@ -114,6 +116,15 @@ void StudioTutorialWidget::paintEvent(QPaintEvent *event)
     // assume all welcome screen images are sized the same
     resize(pic.size());
     setFixedSize(size());
+
+    // If the dialog was originally larger than the screen, it will be placed into the
+    // top-left corner. Adjust its position after resizing.
+    if (m_displayScale < 1.0) {
+        QSize windowSize = GetAvailableDisplaySize(getWidgetScreen(this));
+        QSize welcomeSize = size();
+        move((windowSize.width() - welcomeSize.width()) / 2,
+             (windowSize.height() - welcomeSize.height()) / 2);
+    }
 }
 
 void StudioTutorialWidget::handleFwd()
