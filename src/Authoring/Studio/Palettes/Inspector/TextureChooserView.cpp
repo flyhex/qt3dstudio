@@ -56,6 +56,7 @@ TextureChooserView::TextureChooserView(QWidget *parent)
 void TextureChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
+    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_textureChooserView"_L1, this);
     rootContext()->setContextProperty("_textureChooserModel"_L1, m_model);
     engine()->addImportPath(qmlImportPath());
