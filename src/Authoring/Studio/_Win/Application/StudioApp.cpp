@@ -49,6 +49,13 @@ int main(int argc, char *argv[])
     // to enable QOpenGLWidget to work on macOS, we must set the default
     // QSurfaceFormat before QApplication is created. Otherwise context-sharing
     // fails and QOpenGLWidget breaks.
+    // Creating QOpenGLContext requires QApplication so it needs to be created
+    // beforehand then.
+
+    // init runtime static resources
+    Q_INIT_RESOURCE(res);
+
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     // fortunately, we know which OpenGL version we can use on macOS, so we
     // can simply hard-code it here.
@@ -60,15 +67,11 @@ int main(int argc, char *argv[])
     openGL33Format.setMinorVersion(3);
     openGL33Format.setStencilBufferSize(8);
     QSurfaceFormat::setDefaultFormat(openGL33Format);
-#elif defined(QT_OPENGL_ES_2)
-    QSurfaceFormat format;
-    format.setRenderableType(QSurfaceFormat::OpenGLES);
-    format.setMajorVersion(2);
-    format.setMinorVersion(0);
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-    QSurfaceFormat::setDefaultFormat(format);
+
+    QApplication guiApp(argc, argv);
 #else
+    QApplication guiApp(argc, argv);
+
     QSurfaceFormat format;
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
@@ -83,11 +86,6 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    // init runtime static resources
-    Q_INIT_RESOURCE(res);
-
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication guiApp(argc, argv);
     // Load and apply stylesheet for the application
     QFile styleFile(":/style.qss");
     styleFile.open(QFile::ReadOnly);
