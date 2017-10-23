@@ -26,9 +26,9 @@
                 <Handler name="Fire Event" category="Asset" description="Fire an event on the target.">
                         <Argument name="Event" description="The event to fire" type="None" argumentType="Event" />
                 </Handler>
-    <Handler name="Emit Signal" category="Asset" description="Emit a Signal.">
-      <Argument name="Signal Name" description="The signal to emit" type="String" argumentType="Signal" />
-    </Handler>
+                <Handler name="Emit Signal" category="Asset" description="Emit a Signal.">
+                        <Argument name="Signal Name" description="The signal to emit" type="String" argumentType="Signal" />
+                </Handler>
                 <Handler name="Play Sound" category="Asset" description="Play a sound file.">
                         <Argument name="Sound File" description="The sound file to play" type="String" argumentType="Sound" />
                 </Handler>
@@ -37,7 +37,6 @@
                 <Property name="name" formalName="Name" type="String" default="Behavior" hidden="True" />
         </Behavior>
         <Camera>
-
                 <Property name="name" formalName="Name" type="String" default="Camera" hidden="True" />
                 <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" />
                 <Property name="orthographic" formalName="Orthographic" description="Remove all perspective from the camera?" type="Boolean" animatable="False" />
@@ -154,23 +153,18 @@
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="aodistance" formalName="AO Distance" description="Size of the ambient occlusion shading" default="5">
-                        <HideIfEqual property="aostrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="aosoftness" formalName="AO Softness" description="Magnitude of the blurring used to soften shading" min="0" max="50" default="50">
-                        <HideIfEqual property="aostrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="aobias" formalName="AO Threshold" description="Remove AO from flat surfaces to prevent artifacts" default="0">
-                        <HideIfEqual property="aostrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="aosamplerate" formalName="AO Sampling Rate" description="Quality of AO sampling" type="Long" default="2" min="2" max="4">
-                        <HideIfEqual property="aostrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="aodither" formalName="AO Detail" description="Use close-range detail AO" type="Boolean" default="True">
-                        <HideIfEqual property="aostrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
 
@@ -178,42 +172,24 @@
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="shadowdist" formalName="Shadow Distance" description="Maximum distance to ray march for shadows test" default="10" hidden="True">
-                        <HideIfEqual property="shadowstrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="shadowsoftness" formalName="Shadow Softness" description="Amount of softening of the shadow edges" min="0" max="100" default="100" hidden="True">
-                        <HideIfEqual property="shadowstrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
                 <Property name="shadowbias" formalName="Shadow Threshold" description="Remove self-shadowing from flat surfaces" default="0" hidden="True">
-                        <HideIfEqual property="shadowstrength" value="0"/>
                         <ShowIfEqual property="sourcepath" value=""/>
                 </Property>
 
                 <Property name="lightprobe" formalName="Light Probe" description="Image used for image-based lighting and reflections" type="Image" />
                 <Property name="probebright" formalName="IBL Brightness" description="Amount of light emitted by the light probe." default="100" />
                 <Property name="fastibl" formalName="Fast IBL" description="Use a faster approximation to image-based lighting" type="Boolean" default="True" hidden="True" />
-                <Property name="probehorizon" formalName="IBL Horizon Cutoff" description="Upper limit for horizon darkening of the light probe" min="-1" max="-0.001" default="-1">
-                        <HideIfEqual property="lightprobe" value=""/>
-                </Property>
-                <Property name="probefov" formalName="IBL FOV Angle" description="Image source FOV for the case of using a camera-source as the IBL probe" min="1.0" max="180" default="180">
-                        <HideIfEqual property="lightprobe" value=""/>
-                </Property>
-                <Property name="lightprobe2" formalName="Secondary Light Probe" description="Image to blend over the primary light probe" type="Image">
-                        <HideIfEqual property="lightprobe" value=""/>
-                </Property>
-                <Property name="probe2fade" formalName="Probe Crossfade" description="Blend amount between the primary and seconary probes" min="0.0" max="1.0" default="1.0">
-                        <HideIfEqual property="lightprobe" value=""/>
-                        <HideIfEqual property="lightprobe2" value=""/>
-                </Property>
-                <Property name="probe2window" formalName="Secondary Probe Window" description="Texture-U window size used for the moving window (for scrolling textures" min="0.01" max="1.0" default="1.0" hidden="True">
-                        <HideIfEqual property="lightprobe" value=""/>
-                        <HideIfEqual property="lightprobe2" value=""/>
-                </Property>
-                <Property name="probe2pos" formalName="Secondary Probe Offset" description="Texture-U window offset used for the moving window" default="0.5" hidden="True">
-                        <HideIfEqual property="lightprobe" value=""/>
-                        <HideIfEqual property="lightprobe2" value=""/>
-                </Property>
+                <Property name="probehorizon" formalName="IBL Horizon Cutoff" description="Upper limit for horizon darkening of the light probe" min="-1" max="-0.001" default="-1" />
+                <Property name="probefov" formalName="IBL FOV Angle" description="Image source FOV for the case of using a camera-source as the IBL probe" min="1.0" max="180" default="180" />
+                <Property name="lightprobe2" formalName="Secondary Light Probe" description="Image to blend over the primary light probe" type="Image" />
+                <Property name="probe2fade" formalName="Probe Crossfade" description="Blend amount between the primary and seconary probes" min="0.0" max="1.0" default="1.0" />
+                <Property name="probe2window" formalName="Secondary Probe Window" description="Texture-U window size used for the moving window (for scrolling textures" min="0.01" max="1.0" default="1.0" hidden="True" />
+                <Property name="probe2pos" formalName="Secondary Probe Offset" description="Texture-U window offset used for the moving window" default="0.5" hidden="True" />
         </Layer>
         <Light>
                 <Property name="name" formalName="Name" type="String" default="Light" hidden="True" />
@@ -241,24 +217,12 @@
                         <ShowIfEqual property="lighttype" value="Area"/>
                 </Property>
                 <Property name="castshadow" formalName="Cast Shadows?" description="Enable shadow casting for this light" type="Boolean" default="False"/>
-                <Property name="shdwfactor" formalName="Shadow Darkness" description="Factor used to darken shadows" default="10.0" min="1.0" max="100.0">
-                        <ShowIfEqual property="castshadow" value="True"/>
-                </Property>
-                <Property name="shdwfilter" formalName="Shadow Softness" description="Width of the blur filter on the shadow map" min="1" max="100" default="35">
-                        <ShowIfEqual property="castshadow" value="True"/>
-                </Property>
-                <Property name="shdwmapres" formalName="Shadow Resolution" description="Resolution of shadow map (powers of two)" type="ShadowMapResolution">
-                        <ShowIfEqual property="castshadow" value="True"/>
-                </Property>
-                <Property name="shdwbias" formalName="Shadow Depth Bias" description="Slight offset to avoid self-shadowing artifacts" default="0" min="-1.0" max="1.0">
-                        <ShowIfEqual property="castshadow" value="True"/>
-                </Property>
-                <Property name="shdwmapfar" formalName="Shadow Far Clip" description="Affects the maximum distance for the shadow depth map" default="5000">
-                        <ShowIfEqual property="castshadow" value="True"/>
-                </Property>
-                <Property name="shdwmapfov" formalName="Shadow Field of View" description="Affects the field of view of the shadow camera" default="90" min="1" max="179">
-                        <ShowIfEqual property="castshadow" value="True"/>
-                </Property>
+                <Property name="shdwfactor" formalName="Shadow Darkness" description="Factor used to darken shadows" default="10.0" min="1.0" max="100.0" />
+                <Property name="shdwfilter" formalName="Shadow Softness" description="Width of the blur filter on the shadow map" min="1" max="100" default="35" />
+                <Property name="shdwmapres" formalName="Shadow Resolution" description="Resolution of shadow map (powers of two)" type="ShadowMapResolution" />
+                <Property name="shdwbias" formalName="Shadow Depth Bias" description="Slight offset to avoid self-shadowing artifacts" default="0" min="-1.0" max="1.0" />
+                <Property name="shdwmapfar" formalName="Shadow Far Clip" description="Affects the maximum distance for the shadow depth map" default="5000" />
+                <Property name="shdwmapfov" formalName="Shadow Field of View" description="Affects the field of view of the shadow camera" default="90" min="1" max="179" />
         </Light>
         <Lightmaps>
                 <Property name="name" formalName="Name" type="String" default="Lightmaps" hidden="True" category="Lighting" />
@@ -281,26 +245,16 @@
                 <Property name="specularreflection" formalName="Specular Reflection" description="Image to use as a faked reflection" type="Image" category="Material" />
                 <Property name="speculartint" formalName="Specular Tint" type="Color" description="Coloration applied to specular reflections" default="1 1 1" category="Material" />
                 <Property name="specularamount" formalName="Specular Amount" description="Amount of shine/gloss" category="Material" />
-                <Property name="specularmap" formalName="Specular Map" description="Image to vary the specular amount across the material" type="Image" category="Material" >
-                        <HideIfEqual property="specularamount" value='0'/>
-                </Property>
-                <Property name="specularmodel" formalName="Specular Model" description="Equation to use when calculating specular highlights for CG lights" list="Default:KGGX:KWard" default="Default" category="Material" >
-                        <HideIfEqual property="specularamount" value='0'/>
-                </Property>
-                <Property name="specularroughness" formalName="Specular Roughness" description="Softening applied to reflections and highlights" min='0.001' max='1' category="Material" >
-                        <HideIfEqual property="specularamount" value='0'/>
-                </Property>
+                <Property name="specularmap" formalName="Specular Map" description="Image to vary the specular amount across the material" type="Image" category="Material" />
+                <Property name="specularmodel" formalName="Specular Model" description="Equation to use when calculating specular highlights for CG lights" list="Default:KGGX:KWard" default="Default" category="Material" />
+                <Property name="specularroughness" formalName="Specular Roughness" description="Softening applied to reflections and highlights" min='0.001' max='1' category="Material" />
                 <Property name="fresnelPower" formalName="Fresnel Power" description="Damping of head-on reflections" category="Material" />
-                <Property name="ior" formalName="Index of Refraction" description="Angle at which fresnel reflection damping applies" min="0" max="1" default=".2" category="Material" >
-                        <HideIfEqual property="fresnelPower" value="0"/>
-                </Property>
+                <Property name="ior" formalName="Index of Refraction" description="Angle at which fresnel reflection damping applies" min="0" max="1" default=".2" category="Material" />
                 <Property name="bumpmap" formalName="Bump Map" description="Grayscale image simulating roughness in the lighting" type="Image" category="Material" />
                 <Property name="normalmap" formalName="Normal Map" description="Special RGB image describing surface roughness" type="Image" category="Material" />
                 <Property name="bumpamount" formalName="Bump Amount" description="Strength of bump/normal map effect" type="float" default=".5" category="Material" />
                 <Property name="displacementmap" formalName="Displacement Map" description="Grayscale image used to offset vertices of the geometry" type="Image" category="Material" />
-                <Property name="displaceamount" formalName="Displacement Amount" description="Distance to offset vertices" type="float" default="20" category="Material" >
-                        <HideIfEqual property="displacementmap" value=""/>
-                </Property>
+                <Property name="displaceamount" formalName="Displacement Amount" description="Distance to offset vertices" type="float" default="20" category="Material" />
                 <Property name="opacity" formalName="Opacity" description="Visibility of the geometry for this material." min="0" max="100" default="100" category="Material" />
                 <Property name="opacitymap" formalName="Opacity Map" description="Image to vary the opacity across the material" type="Image" category="Material" />
                 <Property name="emissivecolor" formalName="Emissive Color" description="Color of self-illumination for this material" type="Color" default="1 1 1" category="Material" />
@@ -308,12 +262,8 @@
                 <Property name="emissivemap" formalName="Emissive Map" description="Image to vary the emissive power across the material" type="Image" category="Material" />
                 <Property name="emissivemap2" formalName="Emissive Map 2" description="Second image to modulate the emissive power across the material" type="Image" category="Material" />
                 <Property name="translucencymap" formalName="Translucency Map" description="Grayscale image controlling how much light can pass through the material from behind" type="Image" category="Material" />
-                <Property name="translucentfalloff" formalName="Translucent Falloff" type="float" default="1" category="Material" >
-                        <HideIfEqual property="translucencymap" value=""/>
-                </Property>
-                <Property name="diffuselightwrap" formalName="Diffuse Light Wrap" type="float" min='0.0' max='1.0' category="Material" >
-                        <HideIfEqual property="translucencymap" value=""/>
-                </Property>
+                <Property name="translucentfalloff" formalName="Translucent Falloff" type="float" default="1" category="Material" />
+                <Property name="diffuselightwrap" formalName="Diffuse Light Wrap" type="float" min='0.0' max='1.0' category="Material" />
         </Material>
         <ReferencedMaterial>
                 <Property name="name" formalName="Name" type="String" default="Material" hidden="True" category="Material" />
@@ -324,12 +274,8 @@
                 <Property name="sourcepath" formalName="Mesh" description="Geometry to use for this model" type="Mesh" />
                 <Property name="poseroot" hidden="True" type="Long" default="-1" />
                 <Property name="tessellation" formalName="Tessellation Mode" description="Type of tessellation to subdivide the geometry" list="None:Linear:Phong:NPatch" default="None" />
-                <Property name="edgetess" formalName="Edge Tessellation Value" description="Max Tessellation amount" min="1" max="64" default="4">
-                        <HideIfEqual property="tessellation" value="None"/>
-                </Property>
-                <Property name="innertess" formalName="Inner Tessellation Value" description="Min Tessellation amount" min="1" max="64" default="4">
-                        <HideIfEqual property="tessellation" value="None"/>
-                </Property>
+                <Property name="edgetess" formalName="Edge Tessellation Value" description="Max Tessellation amount" min="1" max="64" default="4" />
+                <Property name="innertess" formalName="Inner Tessellation Value" description="Min Tessellation amount" min="1" max="64" default="4" />
         </Model>
         <Node>
                 <Event name="onPressureDown" category="Gesture" />
@@ -441,9 +387,7 @@
         <Scene>
                 <Property name="name" formalName="Name" type="String" default="Scene" hidden="True" />
                 <Property name="bgcolorenable" formalName="Use Background" description="Clear the contents to a solid color before each frame?" type="Boolean" default="True" />
-                <Property name="backgroundcolor" formalName="Background Color" description="Color to use for the background" type="Color" animatable="False">
-                        <ShowIfEqual property="bgcolorenable" value="True"/>
-                </Property>
+                <Property name="backgroundcolor" formalName="Background Color" description="Color to use for the background" type="Color" animatable="False" />
                 <Event name="onPressureDown" category="Gesture" />
                 <Event name="onPressureUp" category="Gesture" />
                 <Event name="onTap" category="Gesture" />
