@@ -27,11 +27,11 @@
 **
 ****************************************************************************/
 
-#define FILEVER 0, 2, 1, 0
-#define PRODUCTVER 0, 2, 1, 0
-#define STRFILEVER "0,2,1,0\0"
-#define STRMAJVER "0.2.1\0"
-#define STRPRODUCTVER "0.2.1\0"
+#define FILEVER 0, 2, 2, 0
+#define PRODUCTVER 0, 2, 2, 0
+#define STRFILEVER "0,2,2,0\0"
+#define STRMAJVER "0.2.2\0"
+#define STRPRODUCTVER "0.2.2\0"
 
 #define STRCOMMENTS "\0"
 #define STRCOMPANYNAME "The Qt Company Ltd\0"
