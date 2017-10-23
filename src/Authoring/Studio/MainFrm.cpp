@@ -1755,7 +1755,7 @@ void CMainFrame::OnHelpVisitQt()
  */
 void CMainFrame::OnHelpOpenTutorial()
 {
-    StudioTutorialWidget tutorial(false);
+    StudioTutorialWidget tutorial(this, false, false);
     tutorial.exec();
 }
 

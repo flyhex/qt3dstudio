@@ -29,25 +29,26 @@
 #include "ui_StudioTutorialWidget.h"
 #include "StudioUtils.h"
 
-StudioTutorialWidget::StudioTutorialWidget(bool goToFileDialog) :
-    QDialog(nullptr, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint),
+StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog, bool showProjectButtons) :
+    QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint),
     m_ui(new Ui::StudioTutorialWidget),
     m_welcomeImages(0),
     m_imgIter(0),
     m_palette(0),
-    m_displayScale(1.0)
+    m_displayScale(1.0),
+    m_showProjectButtons(showProjectButtons)
 {
     m_ui->setupUi(this);
 
-    connect(m_ui->studioTutorialBack, &QPushButton::released, this,
+    connect(m_ui->studioTutorialBack, &QPushButton::clicked, this,
             &StudioTutorialWidget::handleBack);
-    connect(m_ui->studioTutorialForward, &QPushButton::released, this,
+    connect(m_ui->studioTutorialForward, &QPushButton::clicked, this,
             &StudioTutorialWidget::handleFwd);
     connect(m_ui->studioTutorialShowAgain, &QCheckBox::stateChanged, this,
             &StudioTutorialWidget::handleDoNotShowAgainChange);
-    connect(m_ui->studioTutorialNew, &QPushButton::released, this,
+    connect(m_ui->studioTutorialNew, &QPushButton::clicked, this,
             &StudioTutorialWidget::handleCreateNew);
-    connect(m_ui->studioTutorialOpen, &QPushButton::released, this,
+    connect(m_ui->studioTutorialOpen, &QPushButton::clicked, this,
             &StudioTutorialWidget::handleOpenSample);
 
     OnInitDialog(goToFileDialog);
@@ -140,7 +141,11 @@ void StudioTutorialWidget::handleFwd()
 
     if (*m_imgIter == m_welcomeImages->last()) {
         m_ui->studioTutorialForward->setVisible(false);
-        m_ui->studioTutorialOpen->setVisible(true);
+        m_ui->studioTutorialOpen->setVisible(m_showProjectButtons);
+        if (m_showProjectButtons)
+            m_ui->studioTutorialNew->setText(tr("Create New"));
+        else
+            m_ui->studioTutorialNew->setText(tr("OK"));
         m_ui->studioTutorialNew->setVisible(true);
     }
 }

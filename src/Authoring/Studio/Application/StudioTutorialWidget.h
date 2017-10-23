@@ -50,7 +50,7 @@ class StudioTutorialWidget : public QDialog
 {
     Q_OBJECT
 public:
-    explicit StudioTutorialWidget(bool goToFileDialog);
+    explicit StudioTutorialWidget(QWidget *parent, bool goToFileDialog, bool showProjectButtons);
 
     ~StudioTutorialWidget();
 
@@ -82,6 +82,8 @@ private:
     QPalette *m_palette;
 
     qreal m_displayScale;
+
+    bool m_showProjectButtons;
 
     void getImageList();
 

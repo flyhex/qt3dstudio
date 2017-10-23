@@ -559,7 +559,7 @@ bool CStudioApp::ShowStartupDialog()
         }
 
         if (show) {
-            StudioTutorialWidget tutorial(m_goStraightToWelcomeFileDialog);
+            StudioTutorialWidget tutorial(m_pMainWnd, m_goStraightToWelcomeFileDialog, true);
             welcomeRes = tutorial.exec();
         }
     }
