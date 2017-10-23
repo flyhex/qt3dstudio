@@ -112,6 +112,7 @@ QPair<QString, int> RemoteDeploymentSender::initConnection()
 
     delete m_tcpSocket;
     m_tcpSocket = new QTcpSocket(this);
+    m_lastUpdate = QDateTime();
 
     QObject::connect(m_tcpSocket, &QTcpSocket::connected, this,
                      &RemoteDeploymentSender::checkConnection);
@@ -182,6 +183,10 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
         return;
     }
 
+    // If we have a new project file, then reset the time
+    if (projectFile != m_projectFile)
+        m_lastUpdate = QDateTime();
+
     const QDir projectDirectory(fileInfo.absolutePath());
 
     // The file to be loaded
@@ -194,6 +199,16 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
     while (it.hasNext()) {
         const QString filePath = it.next();
         QFile file(filePath);
+
+        QFileInfo info(file);
+        QDateTime lastModified = info.lastModified();
+#ifdef Q_OS_DARWIN
+        // Resolution on macOS is not guaranteed below second granularity
+        lastModified.addSecs(1);
+#endif
+        if (!m_lastUpdate.isNull() && lastModified < m_lastUpdate)
+            continue;
+
         if (!file.open(QIODevice::ReadOnly)) {
             qWarning() << "could not open file " << filePath;
             return;
@@ -212,6 +227,10 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
     metaOut << block.size();
     metaOut << fileCount;
     metaOut << relativePath;
+
+    // Record the current time to compare against on next update
+    m_lastUpdate = QDateTime::currentDateTime();
+    m_projectFile = projectFile;
 
     m_tcpSocket->write(metaBlock);
     m_tcpSocket->write(block);

@@ -31,6 +31,7 @@
 #define REMOTEDEPLOYMENTSENDER_H
 
 #include <QtCore/qobject.h>
+#include <QtCore/qdatetime.h>
 #include <QtWidgets/qwidget.h>
 #include <QtNetwork/qtcpsocket.h>
 
@@ -61,6 +62,8 @@ private:
     QTcpSocket *m_tcpSocket;
     QWidget *m_mainWindow;
     QMessageBox *m_connectionError;
+    QDateTime m_lastUpdate;
+    QString m_projectFile;
 };
 
 #endif // REMOTEDEPLOYMENTSENDER_H

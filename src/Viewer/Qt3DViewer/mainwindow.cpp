@@ -283,10 +283,13 @@ void MainWindow::on_actionConnect_triggered()
     connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::remoteDisconnected,
             this, &MainWindow::remoteDisconnected);
 
+    connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::projectChanging,
+            this, &MainWindow::remoteProjectChanging);
+
     connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::projectChanged,
             this, &MainWindow::loadRemoteDeploymentReceiver);
 
-    updateUI(true);
+    updateUI();
 }
 
 void MainWindow::on_actionReload_triggered()
@@ -312,6 +315,7 @@ void MainWindow::loadFile(const QString &filename)
 
     if (m_studio3D) {
         viewer()->presentation()->setSource(sourceUrl);
+        viewer()->reset();
         return;
     }
 
@@ -515,16 +519,18 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 }
 #endif
 
-void MainWindow::updateUI(bool statusVisible)
+void MainWindow::updateUI()
 {
     ui->actionConnect->setChecked(m_remoteDeploymentReceiver);
 
-    if (m_remoteDeploymentReceiver) {
-        if (m_connectionInfo)
-            m_connectionInfo->setVisible(statusVisible);
-        if (m_studio3D)
-            m_studio3D->setVisible(!statusVisible && m_remoteDeploymentReceiver->isConnected());
-    }
+    bool displayConnection = m_remoteDeploymentReceiver
+        && !m_remoteDeploymentReceiver->isProjectDeployed();
+
+    if (m_connectionInfo)
+        m_connectionInfo->setVisible(displayConnection);
+
+    if (m_studio3D)
+        m_studio3D->setVisible(!displayConnection);
 
     Q3DSView *view = viewer();
     if (!view)
@@ -548,16 +554,21 @@ void MainWindow::loadRemoteDeploymentReceiver()
     updateUI();
 }
 
+void MainWindow::remoteProjectChanging()
+{
+    updateUI();
+}
+
 void MainWindow::remoteConnected()
 {
     m_connectionInfo->setProperty("text", "Remote Connected");
-    updateUI(true);
+    updateUI();
 }
 
 void MainWindow::remoteDisconnected()
 {
     m_connectionInfo->setProperty("text", "Remote Disconnected");
-    updateUI(true);
+    updateUI();
 }
 
 void MainWindow::generatorProgress(int totalFrames, int frameCount)
@@ -598,7 +609,7 @@ void MainWindow::updateProgress(int percent)
         m_connectionInfo->setProperty("text", QStringLiteral("Loading"));
     else
         m_connectionInfo->setProperty("text", progress);
-    updateUI(true);
+    updateUI();
 }
 
 void MainWindow::setGeneratorDetails(const QString &filename)

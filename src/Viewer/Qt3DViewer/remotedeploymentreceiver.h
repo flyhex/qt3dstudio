@@ -50,10 +50,12 @@ public:
     int serverPort() const { return m_serverPort; }
     void setServerPort(int port) { m_serverPort = port; }
     bool isConnected() const { return m_connection; }
+    bool isProjectDeployed() const { return m_connection && m_projectDeployed; }
     QString fileName() const { return m_projectFile; }
 
 Q_SIGNALS:
     void projectChanged();
+    void projectChanging();
     void remoteConnected();
     void remoteDisconnected();
 
@@ -71,6 +73,7 @@ private:
     QDataStream m_incoming;
     QTemporaryDir *m_temporaryDir = nullptr;
     QString m_projectFile;
+    bool m_projectDeployed;
     int m_serverPort;
 };
 

@@ -40,6 +40,7 @@ RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
     , m_connection(0)
     , m_temporaryDir(0)
     , m_serverPort(36000)
+    , m_projectDeployed(false)
 {
     m_incoming.setVersion(QDataStream::Qt_5_8);
 
@@ -131,6 +132,9 @@ void RemoteDeploymentReceiver::acceptRemoteDisconnection()
 
 void RemoteDeploymentReceiver::readProject()
 {
+    m_projectDeployed = false;
+    Q_EMIT(projectChanging());
+
     m_incoming.startTransaction();
 
     int totalBytes = 0;
@@ -164,8 +168,15 @@ void RemoteDeploymentReceiver::readProject()
         return;
     }
 
-    delete m_temporaryDir;
-    m_temporaryDir = new QTemporaryDir;
+    QFileInfo currentProject(m_projectFile);
+    if (projectFile != currentProject.fileName()) {
+        delete m_temporaryDir;
+        m_temporaryDir = 0;
+    }
+
+    if (!m_temporaryDir)
+        m_temporaryDir = new QTemporaryDir;
+
     Q_ASSERT(m_temporaryDir->isValid());
 
     for (const auto &file : qAsConst(files)) {
@@ -189,5 +200,6 @@ void RemoteDeploymentReceiver::readProject()
         tmpFile.close();
     }
 
+    m_projectDeployed = true;
     Q_EMIT(projectChanged());
 }

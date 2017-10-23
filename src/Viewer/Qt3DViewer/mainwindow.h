@@ -91,9 +91,10 @@ private Q_SLOTS:
     void on_actionScale_To_Fit_triggered();
     void on_actionScale_To_Fill_triggered();
 
-    void updateUI(bool statusVisible = false);
+    void updateUI();
 
     void loadRemoteDeploymentReceiver();
+    void remoteProjectChanging();
     void remoteConnected();
     void remoteDisconnected();
 
