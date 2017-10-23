@@ -89,7 +89,9 @@ protected:
     void OnCheckTimelineAbsoluteSnapping();
     void OnChangeEditNudgeAmount();
     void OnSelChangeStartupView();
+#if 0 // Removed until we have some other Preview configurations that just Viewer
     void OnChangePreviewConfiguration();
+#endif
     void OnBgColorButtonClicked();
 
 protected: // helper functions
@@ -99,11 +101,12 @@ protected:
     std::list<TBuildNameControlPair>
         m_BuildProperties; ///< List of build properties, either ComboBox or Static
 
+#if 0 // Removed until we have some other Preview configurations that just Viewer
     void LoadPreviewSelections();
     void LoadBuildProperties();
     void SavePreviewSettings();
     void RemovePreviewPropertyControls();
-
+#endif
     QScopedPointer<Ui::StudioAppPrefsPage> m_ui;
 
 private:

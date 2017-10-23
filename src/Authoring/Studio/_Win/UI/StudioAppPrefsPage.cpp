@@ -124,6 +124,9 @@ void CStudioAppPrefsPage::OnInitDialog()
     m_ui->m_groupBoxEditingView->setVisible(false);
 #endif
 
+    // Hidden until we have some other Preview configurations than just Viewer
+    m_ui->groupBoxPreview->setVisible(false);
+
     // Load the settings for the controls
     LoadSettings();
 
@@ -135,7 +138,9 @@ void CStudioAppPrefsPage::OnInitDialog()
     connect(m_ui->m_EditViewBGColor, &QPushButton::clicked, this, &CStudioAppPrefsPage::OnBgColorButtonClicked);
     connect(m_ui->m_editNudgeAmount, &QLineEdit::textEdited, this, &CStudioAppPrefsPage::OnChangeEditNudgeAmount);
     connect(m_ui->m_EditViewStartupView, activated, this, &CStudioAppPrefsPage::OnSelChangeStartupView);
+#if 0 // Removed until we have some other Preview configurations than just Viewer
     connect(m_ui->m_PreviewSelector, activated, this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
+#endif
 }
 
 //==============================================================================
@@ -185,7 +190,9 @@ void CStudioAppPrefsPage::LoadSettings()
 
     EnableOptions();
 
+#if 0 // Removed until we have some other Preview configurations than just Viewer
     LoadPreviewSelections();
+#endif
 
     m_ui->m_editNudgeAmount->setText(QString::number(m_nudgeValue));
     m_bgColor = CStudioPreferences::GetEditViewBackgroundColor();
@@ -231,7 +238,9 @@ void CStudioAppPrefsPage::SaveSettings()
         (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
 #endif
 
+#if 0 // Removed until we have some other Preview configurations than just Viewer
     SavePreviewSettings();
+#endif
 }
 
 //==============================================================================
@@ -403,6 +412,7 @@ void CStudioAppPrefsPage::InitEditStartViewCombo()
         m_ui->m_EditViewStartupView->setCurrentIndex(0);
 }
 
+#if 0 // Removed until we have some other Preview configurations than just Viewer
 void CStudioAppPrefsPage::LoadPreviewSelections()
 {
     // Load the configurations from all the .build files
@@ -444,6 +454,7 @@ void CStudioAppPrefsPage::OnChangePreviewConfiguration()
 {
     LoadBuildProperties();
 }
+#endif
 
 void CStudioAppPrefsPage::OnBgColorButtonClicked() 
 {
@@ -462,6 +473,7 @@ void CStudioAppPrefsPage::OnBgColorButtonClicked()
  *	Load the build properties for the current preview application selected
  */
 //==============================================================================
+#if 0 // Removed until we have some other Preview configurations than just Viewer
 void CStudioAppPrefsPage::LoadBuildProperties()
 {
     // Remove those dynamic controls
@@ -557,3 +569,4 @@ void CStudioAppPrefsPage::RemovePreviewPropertyControls()
     }
     m_BuildProperties.clear();
 }
+#endif
