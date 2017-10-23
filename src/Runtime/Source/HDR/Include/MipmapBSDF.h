@@ -47,7 +47,6 @@
 
 #endif
 using namespace qt3ds::render;
-using namespace uic::render;
 
 class BSDFMipMap : public NVRefCounted
 {

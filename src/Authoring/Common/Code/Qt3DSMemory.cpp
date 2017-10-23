@@ -148,7 +148,7 @@ void *CSharedMemory::Allocate(long inSize)
     theSharedMemory->m_Size = inSize;
     theSharedMemory->m_RefCount = 1;
 #ifdef DEBUG
-    theSharedMemory->m_Signature = UICMEM_HEADERSIG;
+    theSharedMemory->m_Signature = QT3DS_MEM_HEADERSIG;
 #endif
 
     // NULL terminate manually.  Quantization ensures there is space for it.

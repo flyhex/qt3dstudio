@@ -57,21 +57,21 @@ namespace render {
         CreateRenderContext(qt3ds::NVFoundationBase &foundat, qt3ds::foundation::IStringTable &strt) = 0;
     };
 
-    class IUICRenderFactory;
+    class IQt3DSRenderFactory;
 
-    class IUICRenderFactoryCore : public Q3DStudio::IRuntimeFactoryCore
+    class IQt3DSRenderFactoryCore : public Q3DStudio::IRuntimeFactoryCore
     {
     public:
-        virtual IUICRenderFactory &
+        virtual IQt3DSRenderFactory &
         CreateRenderFactory(const QSurfaceFormat &format) = 0;
 
-        static IUICRenderFactoryCore &
+        static IQt3DSRenderFactoryCore &
         CreateRenderFactoryCore(const char8_t *inApplicationDirectory,
                                 Q3DStudio::IWindowSystem &inWindowSystem,
                                 Q3DStudio::ITimeProvider &inTimeProvider);
     };
 
-    class IUICRenderFactory : public Q3DStudio::IRuntimeFactory
+    class IQt3DSRenderFactory : public Q3DStudio::IRuntimeFactory
     {
     public:
         virtual Q3DStudio::ITegraApplicationRenderEngine &CreateRenderEngine() = 0;

@@ -28,8 +28,8 @@
 ****************************************************************************/
 
 #pragma once
-#ifndef __UICSTRING_H__
-#define __UICSTRING_H__
+#ifndef __QT3DS_STRING_H__
+#define __QT3DS_STRING_H__
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -49,15 +49,15 @@
 #include <QDebug>
 
 namespace Q3DStudio {
-#define _UIC(string) L##string
+#define _LSTR(string) L##string
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1400 // VS2005 = 1400
-typedef wchar_t UICChar;
+typedef wchar_t Qt3DSChar;
 #else
-typedef unsigned short UICChar;
+typedef unsigned short Qt3DSChar;
 #endif
 
-extern UICChar *s_EmptyUICString;
+extern Qt3DSChar *s_EmptyString;
 
 template <class T>
 long StrLen(const T *inChars);
@@ -65,29 +65,29 @@ long StrLen(const T *inChars);
 template <class T, class U>
 void StrToStr(const T *inChars, long inLength, U *outChars);
 
-// Stack based conversion from any array to UICChar*.  Treat like a cast operator.
-// UICChar* memory valid for the duration of scope.
-class CUICStr
+// Stack based conversion from any array to Qt3DSChar*.  Treat like a cast operator.
+// Qt3DSChar* memory valid for the duration of scope.
+class Qt3DSStr
 {
-    UICChar *m_UICBuffer;
+    Qt3DSChar *m_Buffer;
     enum {
         ENDOFSTRING = -2, /// End of String - used in extract and insert. Also returned as position
                           /// when the wanted string was not found
     };
 
 public:
-    operator UICChar *() { return m_UICBuffer; }
-    ~CUICStr() { delete[] m_UICBuffer; }
+    operator Qt3DSChar *() { return m_Buffer; }
+    ~Qt3DSStr() { delete[] m_Buffer; }
     template <class T>
-    CUICStr(const T *inString, long inLength = ENDOFSTRING)
-        : m_UICBuffer(NULL)
+    Qt3DSStr(const T *inString, long inLength = ENDOFSTRING)
+        : m_Buffer(NULL)
     {
         if (ENDOFSTRING == inLength)
             inLength = StrLen(inString);
 
-        m_UICBuffer = new UICChar[inLength + 1];
-        m_UICBuffer[inLength] = 0;
-        StrToStr(inString, inLength, m_UICBuffer);
+        m_Buffer = new Qt3DSChar[inLength + 1];
+        m_Buffer[inLength] = 0;
+        StrToStr(inString, inLength, m_Buffer);
     }
 };
 
@@ -106,7 +106,7 @@ public:
 
 protected:
     // Fields
-    UICChar *m_UICData;
+    Qt3DSChar *m_Data;
     mutable CAutoArrayPtr<wchar_t> m_WideData; ///< Mutable to allow const buffer access operators
     mutable CAutoArrayPtr<char> m_CharData;
 #ifdef WIN32
@@ -125,10 +125,10 @@ protected:
     void DirtyBuffers();
 
     // Implementation of operators and templates
-    void UICInsert(long inPosition, const UICChar *inChars, long inLength = ENDOFSTRING);
-    void UICConcat(const UICChar *inChars, long inLength = ENDOFSTRING);
-    void UICAssign(const UICChar *inChars, long inLength = ENDOFSTRING);
-    bool UICCompare(const UICChar *inChars, long inLength = ENDOFSTRING,
+    void StrInsert(long inPosition, const Qt3DSChar *inChars, long inLength = ENDOFSTRING);
+    void StrConcat(const Qt3DSChar *inChars, long inLength = ENDOFSTRING);
+    void StrAssign(const Qt3DSChar *inChars, long inLength = ENDOFSTRING);
+    bool StrCompare(const Qt3DSChar *inChars, long inLength = ENDOFSTRING,
                     bool inCaseSensitive = true) const;
 
 public:
@@ -146,25 +146,25 @@ public:
     template <class T>
     void Insert(long inPosition, const T *inChars, long inLength = ENDOFSTRING)
     {
-        UICInsert(inPosition, CUICStr(inChars, inLength), inLength);
+        StrInsert(inPosition, Qt3DSStr(inChars, inLength), inLength);
     }
     void Insert(long inPosition, const CString &inString)
     {
-        UICInsert(inPosition, inString.m_UICData, inString.Length());
+        StrInsert(inPosition, inString.m_Data, inString.Length());
     }
 
     template <class T>
     void Concat(const T *inChars, long inLength = ENDOFSTRING)
     {
-        UICConcat(CUICStr(inChars, inLength), inLength);
+        StrConcat(Qt3DSStr(inChars, inLength), inLength);
     }
     void Concat(const CString &inString);
     void Concat(char inChar);
-    void Concat(UICChar inChar);
+    void Concat(Qt3DSChar inChar);
     void append(const CString &inString) { Concat(inString); }
     void append(char inChar) { Concat(inChar); }
-    void append(UICChar inChar) { Concat(inChar); }
-    void append(const UICChar *inChars, long inLength) { Concat<UICChar>(inChars, inLength); }
+    void append(Qt3DSChar inChar) { Concat(inChar); }
+    void append(const Qt3DSChar *inChars, long inLength) { Concat<Qt3DSChar>(inChars, inLength); }
     void append(const CString &inString, long inOffset, long inLength)
     {
         append(inString.Extract(inOffset, inLength));
@@ -179,11 +179,11 @@ public:
     template <class T>
     bool Compare(const T *inChars, long inLength = ENDOFSTRING, bool inCaseSensitive = true) const
     {
-        return UICCompare(CUICStr(inChars, inLength), inLength, inCaseSensitive);
+        return StrCompare(Qt3DSStr(inChars, inLength), inLength, inCaseSensitive);
     }
     bool Compare(const CString &inString, bool inCaseSensitive = true) const
     {
-        return UICCompare(inString.m_UICData, inString.Length(), inCaseSensitive);
+        return StrCompare(inString.m_Data, inString.Length(), inCaseSensitive);
     }
 
 private:
@@ -196,15 +196,15 @@ public:
     // Construction
     CString(char inChar);
     CString(const CString &inString);
-    CString(UICChar inChar);
+    CString(Qt3DSChar inChar);
     CString(void)
-        : m_UICData(s_EmptyUICString)
+        : m_Data(s_EmptyString)
     {
         ADDTO_OBJECT_COUNTER(CString);
     }
     template <class T>
     CString(const T *inChars, long inLength = ENDOFSTRING)
-        : m_UICData(s_EmptyUICString)
+        : m_Data(s_EmptyString)
     {
         ADDTO_OBJECT_COUNTER(CString);
         Assign(inChars, inLength);
@@ -217,7 +217,7 @@ public:
     }
 
 protected:
-    CString(const UICChar *inString1, long inLength1, const UICChar *inString2, long inLength2);
+    CString(const Qt3DSChar *inString1, long inLength1, const Qt3DSChar *inString2, long inLength2);
 
 public:
     // Operators
@@ -231,7 +231,7 @@ public:
         Assign(inChar);
         return *this;
     }
-    CString &operator=(const UICChar inChar)
+    CString &operator=(const Qt3DSChar inChar)
     {
         Assign(inChar);
         return *this;
@@ -278,25 +278,25 @@ public:
 
     CString operator+(const CString &inString) const
     {
-        return CString(m_UICData, Length(), inString.m_UICData, inString.Length());
+        return CString(m_Data, Length(), inString.m_Data, inString.Length());
     }
     CString operator+(char inChar) const
     {
-        UICChar theChar = inChar;
-        return CString(m_UICData, Length(), &theChar, 1);
+        Qt3DSChar theChar = inChar;
+        return CString(m_Data, Length(), &theChar, 1);
     }
     template <class T>
     CString operator+(const T *inChars) const
     {
-        return CString(m_UICData, Length(), CUICStr(inChars), StrLen(inChars));
+        return CString(m_Data, Length(), Qt3DSStr(inChars), StrLen(inChars));
     }
 
     bool operator==(const CString &inString) const { return Compare(inString); }
-    bool operator==(char inChar) const { return (1 == Length()) && (m_UICData[0] == inChar); }
+    bool operator==(char inChar) const { return (1 == Length()) && (m_Data[0] == inChar); }
     template <class T>
     bool operator==(const T *inChars) const
     {
-        return UICCompare(CUICStr(inChars));
+        return StrCompare(Qt3DSStr(inChars));
     }
 
     bool operator!=(const CString &inString) const { return !(*this == inString); }
@@ -310,15 +310,15 @@ public:
     bool operator<(const CString &inString) const;
 
     // this also covers wchar_t on 2 byte wchar_t systems (win)
-    operator const UICChar *() const { return m_UICData; }
+    operator const Qt3DSChar *() const { return m_Data; }
 //			operator long( ) const;
 
 #ifdef CHECK_BOUNDS
-    UICChar &operator[](long inIndex);
+    Qt3DSChar &operator[](long inIndex);
 #else
-    inline UICChar &operator[](long inIndex) { return Unique()[inIndex]; }
+    inline Qt3DSChar &operator[](long inIndex) { return Unique()[inIndex]; }
 #endif
-    inline UICChar &operator[](int inIndex) { return this->operator[]((long)inIndex); }
+    inline Qt3DSChar &operator[](int inIndex) { return this->operator[]((long)inIndex); }
 
     /// IMPORTANT NOTE! the char* cast operator is intentionally unimplemented.
     /// this has been done so that the caller must explicitly call GetCharStar( ) (which flattens
@@ -340,7 +340,7 @@ public:
 public:
     // Utililty
     void Clear();
-    UICChar *Unique();
+    Qt3DSChar *Unique();
     void SetLength(long inLength);
     long RefCount() const;
     bool IsEmpty() const { return 0 == Length(); }
@@ -359,8 +359,8 @@ public:
     CString Right(int nCount) const;
 
     // Searching
-    UICChar GetAt(long inIndex) const;
-    UICChar at(long inIndex) const { return GetAt(inIndex); }
+    Qt3DSChar GetAt(long inIndex) const;
+    Qt3DSChar at(long inIndex) const { return GetAt(inIndex); }
     long Find(const CString &inString) const;
     long Find(const CString &inString, long inStart) const;
     long Find(char inChar) const;
@@ -387,17 +387,17 @@ public:
 
     long Replace(const CString &inString, const CString &inReplacement);
 
-    const UICChar *c_str() const { return (const wchar_t *)*this; }
+    const Qt3DSChar *c_str() const { return (const wchar_t *)*this; }
 
     // Format and Scan
     void Format(const wchar_t *inFormat, ...);
     long Scan(const char *inFormat, ...) const;
 
     // Static utilities
-    static void AssertChar(const UICChar *inString); ///< Throw if any UICChar is greater than 255
-    static UICChar ToLower(UICChar inChar)
+    static void AssertChar(const Qt3DSChar *inString); ///< Throw if any Qt3DSChar is greater than 255
+    static Qt3DSChar ToLower(Qt3DSChar inChar)
     {
-        return inChar >= 'A' && inChar <= 'Z' ? static_cast<UICChar>(inChar + 'a' - 'A') : inChar;
+        return inChar >= 'A' && inChar <= 'Z' ? static_cast<Qt3DSChar>(inChar + 'a' - 'A') : inChar;
     }
 
     /// Everything below this line (within the same class) is handlers for os or library specific
@@ -414,7 +414,7 @@ public:
     /// Methods and operators for MFC CStrings
 public:
     CString(::CString inString)
-        : m_UICData(s_EmptyUICString)
+        : m_Data(s_EmptyString)
     {
         ADDTO_OBJECT_COUNTER(CString);
         Assign(inString.GetBuffer(0));
@@ -490,10 +490,10 @@ void CString::Assign(const T *inChars, long inLength)
     if (ENDOFSTRING == inLength)
         inLength = StrLen(inChars);
 
-    if (reinterpret_cast<const UICChar *>(inChars) != m_UICData) {
+    if (reinterpret_cast<const Qt3DSChar *>(inChars) != m_Data) {
         SetLength(inLength);
-        StrToStr(inChars, inLength, m_UICData);
-        m_UICData[inLength] = 0;
+        StrToStr(inChars, inLength, m_Data);
+        m_Data[inLength] = 0;
     }
 
     DirtyBuffers();
@@ -508,7 +508,7 @@ T *CString::CreateBuffer() const
     T *outBuffer = new T[theLength + 1];
 
     outBuffer[theLength] = 0;
-    StrToStr(m_UICData, theLength, outBuffer);
+    StrToStr(m_Data, theLength, outBuffer);
 
     return outBuffer;
 }
@@ -522,4 +522,4 @@ void AppendString(eastl::string &str, const char *delim, const char *string);
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
-#endif // __UICSTRING_H__
+#endif // __QT3DS_STRING_H__

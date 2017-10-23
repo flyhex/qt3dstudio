@@ -104,7 +104,7 @@ namespace render {
 #define MAX_AA_LEVELS 8
 
     SLayerRenderPreparationData::SLayerRenderPreparationData(SLayer &inLayer,
-                                                             CUICRendererImpl &inRenderer)
+                                                             Qt3DSRendererImpl &inRenderer)
         : m_Layer(inLayer)
         , m_Renderer(inRenderer)
         , m_Allocator(inRenderer.GetContext().GetAllocator())
@@ -175,7 +175,7 @@ namespace render {
 
     void SLayerRenderPreparationData::SetShaderFeature(const char *inName, bool inValue)
     {
-        CRegisteredString theStr(m_Renderer.GetUICContext().GetStringTable().RegisterStr(inName));
+        CRegisteredString theStr(m_Renderer.GetQt3DSContext().GetStringTable().RegisterStr(inName));
         SetShaderFeature(theStr, inValue);
     }
 
@@ -200,7 +200,7 @@ namespace render {
         if (m_ShadowMapManager.mPtr)
             return true;
 
-        m_ShadowMapManager.mPtr = UICShadowMap::Create(m_Renderer.GetUICContext());
+        m_ShadowMapManager.mPtr = Qt3DSShadowMap::Create(m_Renderer.GetQt3DSContext());
 
         return m_ShadowMapManager.mPtr != NULL;
     }
@@ -212,10 +212,10 @@ namespace render {
 
         if (m_Layer.m_RenderPlugin && m_Layer.m_RenderPlugin->m_Flags.IsActive()) {
             IRenderPluginInstance *theInstance =
-                m_Renderer.GetUICContext().GetRenderPluginManager().GetOrCreateRenderPluginInstance(
+                m_Renderer.GetQt3DSContext().GetRenderPluginManager().GetOrCreateRenderPluginInstance(
                     m_Layer.m_RenderPlugin->m_PluginPath, m_Layer.m_RenderPlugin);
             if (theInstance) {
-                m_Renderer.GetUICContext()
+                m_Renderer.GetQt3DSContext()
                     .GetOffscreenRenderManager()
                     .MaybeRegisterOffscreenRenderer(&theInstance, *theInstance);
                 m_LastFrameOffscreenRenderer = theInstance;
@@ -223,7 +223,7 @@ namespace render {
         }
         if (m_LastFrameOffscreenRenderer.mPtr == NULL)
             m_LastFrameOffscreenRenderer =
-                m_Renderer.GetUICContext().GetOffscreenRenderManager().GetOffscreenRenderer(
+                m_Renderer.GetQt3DSContext().GetOffscreenRenderManager().GetOffscreenRenderer(
                     m_Layer.m_TexturePath);
         return m_LastFrameOffscreenRenderer.mPtr != NULL;
     }
@@ -360,7 +360,7 @@ namespace render {
         SText &inText, const QT3DSMat44 &inViewProjection, QT3DSF32 inTextScaleFactor,
         SLayerRenderPreparationResultFlags &ioFlags)
     {
-        ITextTextureCache *theTextRenderer = m_Renderer.GetUICContext().GetTextureCache();
+        ITextTextureCache *theTextRenderer = m_Renderer.GetQt3DSContext().GetTextureCache();
         if (theTextRenderer == NULL)
             return false;
 
@@ -443,7 +443,7 @@ namespace render {
         QT3DSMat33 theNormalMatrix;
 
         inPath.CalculateMVPAndNormalMatrix(inViewProjection, theMVP, theNormalMatrix);
-        NVBounds3 theBounds(this->m_Renderer.GetUICContext().GetPathManager().GetBounds(inPath));
+        NVBounds3 theBounds(this->m_Renderer.GetQt3DSContext().GetPathManager().GetBounds(inPath));
 
         if (inPath.m_GlobalOpacity >= QT3DS_RENDER_MINIMUM_RENDER_OPACITY
             && inClipFrustum.hasValue()) {
@@ -508,11 +508,11 @@ namespace render {
                     prepResult.m_MaterialKey, isStroke);
                 theRenderable->m_FirstImage = prepResult.m_FirstImage;
 
-                IUICRenderContext &theUICContext(m_Renderer.GetUICContext());
-                IPathManager &thePathManager = theUICContext.GetPathManager();
+                IQt3DSRenderContext &qt3dsContext(m_Renderer.GetQt3DSContext());
+                IPathManager &thePathManager = qt3dsContext.GetPathManager();
                 retval = thePathManager.PrepareForRender(inPath) || retval;
-                retval |= (inPath.m_WireframeMode != theUICContext.GetWireframeMode());
-                inPath.m_WireframeMode = theUICContext.GetWireframeMode();
+                retval |= (inPath.m_WireframeMode != qt3dsContext.GetWireframeMode());
+                inPath.m_WireframeMode = qt3dsContext.GetWireframeMode();
 
                 if (theFlags.HasTransparency())
                     m_TransparentObjects.push_back(theRenderable);
@@ -551,11 +551,11 @@ namespace render {
                     prepResult.m_MaterialKey, isStroke);
                 theRenderable->m_FirstImage = prepResult.m_FirstImage;
 
-                IUICRenderContext &theUICContext(m_Renderer.GetUICContext());
-                IPathManager &thePathManager = theUICContext.GetPathManager();
+                IQt3DSRenderContext &qt3dsContext(m_Renderer.GetQt3DSContext());
+                IPathManager &thePathManager = qt3dsContext.GetPathManager();
                 retval = thePathManager.PrepareForRender(inPath) || retval;
-                retval |= (inPath.m_WireframeMode != theUICContext.GetWireframeMode());
-                inPath.m_WireframeMode = theUICContext.GetWireframeMode();
+                retval |= (inPath.m_WireframeMode != qt3dsContext.GetWireframeMode());
+                inPath.m_WireframeMode = qt3dsContext.GetWireframeMode();
 
                 if (theFlags.HasTransparency())
                     m_TransparentObjects.push_back(theRenderable);
@@ -571,11 +571,11 @@ namespace render {
         SRenderableImage *&ioNextImage, SRenderableObjectFlags &ioFlags,
         SShaderDefaultMaterialKey &inShaderKey, QT3DSU32 inImageIndex)
     {
-        IUICRenderContext &theUICContext(m_Renderer.GetUICContext());
-        IBufferManager &bufferManager = theUICContext.GetBufferManager();
+        IQt3DSRenderContext &qt3dsContext(m_Renderer.GetQt3DSContext());
+        IBufferManager &bufferManager = qt3dsContext.GetBufferManager();
         IOffscreenRenderManager &theOffscreenRenderManager(
-            theUICContext.GetOffscreenRenderManager());
-        IRenderPluginManager &theRenderPluginManager(theUICContext.GetRenderPluginManager());
+            qt3dsContext.GetOffscreenRenderManager());
+        IRenderPluginManager &theRenderPluginManager(qt3dsContext.GetRenderPluginManager());
         if (inImage.ClearDirty(bufferManager, theOffscreenRenderManager, theRenderPluginManager))
             ioFlags |= RenderPreparationResultFlagValues::Dirty;
 
@@ -659,7 +659,7 @@ namespace render {
 
         // set wireframe mode
         m_Renderer.DefaultMaterialShaderKeyProperties().m_WireframeMode.SetValue(
-            theGeneratedKey, m_Renderer.GetUICContext().GetWireframeMode());
+            theGeneratedKey, m_Renderer.GetQt3DSContext().GetWireframeMode());
 
         if (theMaterial->m_IblProbe && CheckLightProbeDirty(*theMaterial->m_IblProbe)) {
             m_Renderer.PrepareImageForIbl(*theMaterial->m_IblProbe);
@@ -770,7 +770,7 @@ namespace render {
 
         // set wireframe mode
         m_Renderer.DefaultMaterialShaderKeyProperties().m_WireframeMode.SetValue(
-            theGeneratedKey, m_Renderer.GetUICContext().GetWireframeMode());
+            theGeneratedKey, m_Renderer.GetQt3DSContext().GetWireframeMode());
 
         if (subsetOpacity < QT3DS_RENDER_MINIMUM_RENDER_OPACITY) {
             subsetOpacity = 0.0f;
@@ -813,8 +813,8 @@ namespace render {
         SModel &inModel, const QT3DSMat44 &inViewProjection,
         const Option<SClippingFrustum> &inClipFrustum, TNodeLightEntryList &inScopedLights)
     {
-        IUICRenderContext &theUICContext(m_Renderer.GetUICContext());
-        IBufferManager &bufferManager = theUICContext.GetBufferManager();
+        IQt3DSRenderContext &qt3dsContext(m_Renderer.GetQt3DSContext());
+        IBufferManager &bufferManager = qt3dsContext.GetBufferManager();
         SRenderMesh *theMesh = bufferManager.LoadMesh(inModel.m_MeshPath);
         if (theMesh == NULL)
             return false;
@@ -879,11 +879,11 @@ namespace render {
                     theSubset.m_InputAssembler->SetPatchVertexCount(3);
                     theSubset.m_InputAssemblerDepth->SetPatchVertexCount(3);
                     // check wireframe mode
-                    theSubset.m_WireframeMode = theUICContext.GetWireframeMode();
+                    theSubset.m_WireframeMode = qt3dsContext.GetWireframeMode();
 
                     subsetDirty =
                         subsetDirty | (theSubset.m_WireframeMode != inModel.m_WireframeMode);
-                    inModel.m_WireframeMode = theUICContext.GetWireframeMode();
+                    inModel.m_WireframeMode = qt3dsContext.GetWireframeMode();
                 } else {
                     theSubset.m_PrimitiveType = theSubset.m_InputAssembler->GetPrimitiveType();
                     theSubset.m_InputAssembler->SetPatchVertexCount(1);
@@ -935,7 +935,7 @@ namespace render {
                         static_cast<SCustomMaterial &>(*theMaterialObject));
 
                     ICustomMaterialSystem &theMaterialSystem(
-                        theUICContext.GetCustomMaterialSystem());
+                        qt3dsContext.GetCustomMaterialSystem());
                     subsetDirty |= theMaterialSystem.PrepareForRender(
                         theModelContext.m_Model, theSubset, theMaterial, clearMaterialDirtyFlags);
 
@@ -987,12 +987,12 @@ namespace render {
         const QT3DSMat44 &inViewProjection, const Option<SClippingFrustum> &inClipFrustum,
         QT3DSF32 inTextScaleFactor, SLayerRenderPreparationResultFlags &ioFlags)
     {
-        SStackPerfTimer __timer(m_Renderer.GetUICContext().GetPerfTimer(),
+        SStackPerfTimer __timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                 "SLayerRenderData::PrepareRenderablesForRender");
         m_ViewProjection = inViewProjection;
         QT3DSF32 theTextScaleFactor = inTextScaleFactor;
         bool wasDataDirty = false;
-        bool hasTextRenderer = m_Renderer.GetUICContext().GetTextRenderer() != NULL;
+        bool hasTextRenderer = m_Renderer.GetQt3DSContext().GetTextRenderer() != NULL;
         for (QT3DSU32 idx = 0, end = m_RenderableNodes.size(); idx < end; ++idx) {
             SRenderableNodeEntry &theNodeEntry(m_RenderableNodes[idx]);
             SNode *theNode = theNodeEntry.m_Node;
@@ -1037,7 +1037,7 @@ namespace render {
 
     bool SLayerRenderPreparationData::CheckLightProbeDirty(SImage &inLightProbe)
     {
-        IUICRenderContext &theContext(m_Renderer.GetUICContext());
+        IQt3DSRenderContext &theContext(m_Renderer.GetQt3DSContext());
         return inLightProbe.ClearDirty(theContext.GetBufferManager(),
                                        theContext.GetOffscreenRenderManager(),
                                        theContext.GetRenderPluginManager(), true);
@@ -1093,7 +1093,7 @@ namespace render {
     void
     SLayerRenderPreparationData::PrepareForRender(const SWindowDimensions &inViewportDimensions)
     {
-        SStackPerfTimer __timer(m_Renderer.GetUICContext().GetPerfTimer(),
+        SStackPerfTimer __timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                 "SLayerRenderData::PrepareForRender");
         if (m_LayerPrepResult.hasValue())
             return;
@@ -1102,7 +1102,7 @@ namespace render {
         m_FeatureSetHash = 0;
         QT3DSVec2 thePresentationDimensions((QT3DSF32)inViewportDimensions.m_Width,
                                          (QT3DSF32)inViewportDimensions.m_Height);
-        IRenderList &theGraph(m_Renderer.GetUICContext().GetRenderList());
+        IRenderList &theGraph(m_Renderer.GetQt3DSContext().GetRenderList());
         NVRenderRect theViewport(theGraph.GetViewport());
         NVRenderRect theScissor(theGraph.GetViewport());
         if (theGraph.IsScissorTestEnabled())
@@ -1131,7 +1131,7 @@ namespace render {
 
         if (m_Layer.m_Flags.IsActive()) {
             // Get the layer's width and height.
-            IEffectSystem &theEffectSystem(m_Renderer.GetUICContext().GetEffectSystem());
+            IEffectSystem &theEffectSystem(m_Renderer.GetQt3DSContext().GetEffectSystem());
             for (SEffect *theEffect = m_Layer.m_FirstEffect; theEffect;
                  theEffect = theEffect->m_NextEffect) {
                 if (theEffect->m_Flags.IsDirty()) {
@@ -1162,8 +1162,8 @@ namespace render {
 
             thePrepResult = SLayerRenderPreparationResult(SLayerRenderHelper(
                 theViewport, theScissor, m_Layer.m_Scene->m_Presentation->m_PresentationDimensions,
-                m_Layer, shouldRenderToTexture, m_Renderer.GetUICContext().GetScaleMode(),
-                m_Renderer.GetUICContext().GetPresentationScaleFactor()));
+                m_Layer, shouldRenderToTexture, m_Renderer.GetQt3DSContext().GetScaleMode(),
+                m_Renderer.GetQt3DSContext().GetPresentationScaleFactor()));
             thePrepResult.m_LastEffect = theLastEffect;
             thePrepResult.m_MaxAAPassIndex = maxNumAAPasses;
             thePrepResult.m_Flags.SetRequiresDepthTexture(requiresDepthPrepass
@@ -1174,7 +1174,7 @@ namespace render {
 
             if (thePrepResult.IsLayerVisible()) {
                 if (shouldRenderToTexture) {
-                    m_Renderer.GetUICContext().GetRenderList().AddRenderTask(
+                    m_Renderer.GetQt3DSContext().GetRenderList().AddRenderTask(
                         CreateRenderToTextureRunnable());
                 }
                 if (m_Layer.m_LightProbe && CheckLightProbeDirty(*m_Layer.m_LightProbe)) {
@@ -1371,7 +1371,7 @@ namespace render {
                     NVRenderRect theScissorRect =
                         thePrepResult.GetLayerToPresentationScissorRect().ToIntegerRect();
                     // This happens here because if there are any fancy render steps
-                    IRenderList &theRenderList(m_Renderer.GetUICContext().GetRenderList());
+                    IRenderList &theRenderList(m_Renderer.GetQt3DSContext().GetRenderList());
                     NVRenderContext &theContext(m_Renderer.GetContext());
                     SRenderListScopedProperty<bool> _listScissorEnabled(
                         theRenderList, &IRenderList::IsScissorTestEnabled,
@@ -1395,7 +1395,7 @@ namespace render {
                         theViewport);
                     SOffscreenRenderFlags theResult = m_LastFrameOffscreenRenderer->NeedsRender(
                         CreateOffscreenRenderEnvironment(),
-                        m_Renderer.GetUICContext().GetPresentationScaleFactor());
+                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor());
                     wasDataDirty = wasDataDirty || theResult.m_HasChangedSinceLastFrame;
                 }
             }

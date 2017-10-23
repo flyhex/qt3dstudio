@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef INCLUDED_UICDMTIMELINE_ITEM_PROPERTY_H
-#define INCLUDED_UICDMTIMELINE_ITEM_PROPERTY_H 1
+#ifndef QT3DSDM_TIMELINE_ITEM_PROPERTY_H
+#define QT3DSDM_TIMELINE_ITEM_PROPERTY_H 1
 
 #pragma once
 
@@ -116,4 +116,4 @@ protected:
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Signals;
 };
 
-#endif // INCLUDED_UICDMTIMELINE_ITEM_PROPERTY_H
+#endif // QT3DSDM_TIMELINE_ITEM_PROPERTY_H

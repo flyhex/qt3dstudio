@@ -75,7 +75,7 @@ public:
     CMasterControl(IMasterControlProvider *inProvider);
     ~CMasterControl();
 
-    void SetRenderDevice(UICRenderDevice inDevice) { m_RenderDevice = inDevice; }
+    void SetRenderDevice(Qt3DSRenderDevice inDevice) { m_RenderDevice = inDevice; }
 
     void AddControl(const Q3DStudio::CString &inName, long inType, CControl *inControl);
     void RemoveControl(CControl *inControl);
@@ -93,7 +93,7 @@ public:
     void Draw(CRenderer *inRenderer) override;
     void SetSize(CPt inSize) override;
     bool OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
-    UICRenderDevice GetPlatformDevice() override;
+    Qt3DSRenderDevice GetPlatformDevice() override;
     void GrabFocus(CControl *inControl) override;
 
 protected:
@@ -108,7 +108,7 @@ protected:
     Q3DStudio::CAutoMemPtr<CProceduralButton<CButtonControl>>
         m_MenuButton; ///< menu button for the storage palette
     TControlMap m_ControlList; ///< the list of controls to display
-    UICRenderDevice m_RenderDevice; ///<
+    Qt3DSRenderDevice m_RenderDevice; ///<
 };
 
 #endif //#ifndef INCLUDED_MASTER_CONTROL_H

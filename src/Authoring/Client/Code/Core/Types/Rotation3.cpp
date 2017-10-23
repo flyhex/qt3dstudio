@@ -90,15 +90,15 @@ bool CRotation3::operator==(const CVector3 &inOther) const
 
 void CRotation3::SetXDegrees(const float &inX)
 {
-    x = (float)(inX * UIC3D_DEGREES_TO_RADIANS);
+    x = (float)(inX * QT3DS_DEGREES_TO_RADIANS);
 }
 void CRotation3::SetYDegrees(const float &inY)
 {
-    y = (float)(inY * UIC3D_DEGREES_TO_RADIANS);
+    y = (float)(inY * QT3DS_DEGREES_TO_RADIANS);
 }
 void CRotation3::SetZDegrees(const float &inZ)
 {
-    z = (float)(inZ * UIC3D_DEGREES_TO_RADIANS);
+    z = (float)(inZ * QT3DS_DEGREES_TO_RADIANS);
 }
 
 void CRotation3::SetXRadians(const float &inX)
@@ -116,15 +116,15 @@ void CRotation3::SetZRadians(const float &inZ)
 
 float CRotation3::GetXDegrees() const
 {
-    return (float)(x * UIC3D_RADIANS_TO_DEGREES);
+    return (float)(x * QT3DS_RADIANS_TO_DEGREES);
 }
 float CRotation3::GetYDegrees() const
 {
-    return (float)(y * UIC3D_RADIANS_TO_DEGREES);
+    return (float)(y * QT3DS_RADIANS_TO_DEGREES);
 }
 float CRotation3::GetZDegrees() const
 {
-    return (float)(z * UIC3D_RADIANS_TO_DEGREES);
+    return (float)(z * QT3DS_RADIANS_TO_DEGREES);
 }
 
 float CRotation3::GetXRadians() const
@@ -179,9 +179,9 @@ void CRotation3::Get(float &outXRotation, float &outYRotation, float &outZRotati
 void CRotation3::SetAngles(const float &inXRotation, const float &inYRotation,
                            const float &inZRotation)
 {
-    x = (float)(inXRotation * UIC3D_DEGREES_TO_RADIANS);
-    y = (float)(inYRotation * UIC3D_DEGREES_TO_RADIANS);
-    z = (float)(inZRotation * UIC3D_DEGREES_TO_RADIANS);
+    x = (float)(inXRotation * QT3DS_DEGREES_TO_RADIANS);
+    y = (float)(inYRotation * QT3DS_DEGREES_TO_RADIANS);
+    z = (float)(inZRotation * QT3DS_DEGREES_TO_RADIANS);
 }
 
 //==============================================================================
@@ -196,9 +196,9 @@ void CRotation3::SetAngles(const float &inXRotation, const float &inYRotation,
  */
 void CRotation3::GetAngles(float &outXRotation, float &outYRotation, float &outZRotation) const
 {
-    outXRotation = (float)(x * UIC3D_RADIANS_TO_DEGREES);
-    outYRotation = (float)(y * UIC3D_RADIANS_TO_DEGREES);
-    outZRotation = (float)(z * UIC3D_RADIANS_TO_DEGREES);
+    outXRotation = (float)(x * QT3DS_RADIANS_TO_DEGREES);
+    outYRotation = (float)(y * QT3DS_RADIANS_TO_DEGREES);
+    outZRotation = (float)(z * QT3DS_RADIANS_TO_DEGREES);
 }
 
 //==============================================================================

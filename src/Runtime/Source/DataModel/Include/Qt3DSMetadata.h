@@ -63,7 +63,7 @@ namespace Q3DStudio {
 using namespace qt3ds::foundation;
 
 //==============================================================================
-// Redifinition of UICDM::DataModelDataType::Value
+// Redifinition of qt3dsdm::DataModelDataType::Value
 //==============================================================================
 enum ERuntimeDataModelDataType {
     ERuntimeDataModelDataTypeNone,
@@ -80,7 +80,7 @@ enum ERuntimeDataModelDataType {
 };
 
 //==============================================================================
-// Redifinition of UICDM::EAdditionalMetaDataType
+// Redifinition of qt3dsdm::AdditionalMetaDataType
 //==============================================================================
 enum ERuntimeAdditionalMetaDataType {
     ERuntimeAdditionalMetaDataTypeNone,

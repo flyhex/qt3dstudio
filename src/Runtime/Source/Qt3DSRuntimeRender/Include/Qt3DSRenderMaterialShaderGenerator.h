@@ -76,7 +76,7 @@ namespace render {
         QT3DSVec3 m_CameraDirection;
         NVDataRef<SLight *> m_Lights;
         NVDataRef<QT3DSVec3> m_LightDirections;
-        UICShadowMap *m_ShadowMapManager;
+        Qt3DSShadowMap *m_ShadowMapManager;
         NVRenderTexture2D *m_DepthTexture;
         NVRenderTexture2D *m_SSaoTexture;
         SImage *m_LightProbe;
@@ -91,7 +91,7 @@ namespace render {
         SLayerGlobalRenderProperties(const SLayer &inLayer, SCamera &inCamera,
                                      QT3DSVec3 inCameraDirection, NVDataRef<SLight *> inLights,
                                      NVDataRef<QT3DSVec3> inLightDirections,
-                                     UICShadowMap *inShadowMapManager,
+                                     Qt3DSShadowMap *inShadowMapManager,
                                      NVRenderTexture2D *inDepthTexture,
                                      NVRenderTexture2D *inSSaoTexture, SImage *inLightProbe,
                                      SImage *inLightProbe2, QT3DSF32 inProbeHorizon,

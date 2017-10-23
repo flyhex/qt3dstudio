@@ -37,4 +37,4 @@
 //==============================================================================
 #include "Qt3DSObjectCounter.h"
 
-TObjectCounterTracker UICObjectCounter::s_ObjectVector;
+TObjectCounterTracker Qt3DSObjectCounter::s_ObjectVector;

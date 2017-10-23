@@ -173,7 +173,7 @@ namespace render {
             QT3DSI32 elementCount, binding;
             NVRenderShaderDataTypes::Enum type;
 
-            UICBASE_FOREACH(idx, paramCount)
+            QT3DS_FOREACH(idx, paramCount)
             {
                 m_Backend->GetConstantInfoByID(pProgram->GetShaderProgramHandle(), theIndices[idx],
                                                512, &elementCount, &type, &binding, nameBuf);

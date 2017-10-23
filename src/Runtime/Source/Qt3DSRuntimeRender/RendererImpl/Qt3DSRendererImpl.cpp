@@ -88,15 +88,15 @@ namespace render {
 
     SEndlType Endl;
 
-    CUICRendererImpl::CUICRendererImpl(IUICRenderContext &ctx)
-        : m_UICContext(ctx)
+    Qt3DSRendererImpl::Qt3DSRendererImpl(IQt3DSRenderContext &ctx)
+        : m_qt3dsContext(ctx)
         , m_Context(ctx.GetRenderContext())
         , m_BufferManager(ctx.GetBufferManager())
         , m_OffscreenRenderManager(ctx.GetOffscreenRenderManager())
         , m_StringTable(IStringTable::CreateStringTable(ctx.GetAllocator()))
-        , m_LayerShaders(ctx.GetAllocator(), "CUICRendererImpl::m_LayerShaders")
-        , m_Shaders(ctx.GetAllocator(), "CUICRendererImpl::m_Shaders")
-        , m_ConstantBuffers(ctx.GetAllocator(), "CUICRendererImpl::m_ConstantBuffers")
+        , m_LayerShaders(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LayerShaders")
+        , m_Shaders(ctx.GetAllocator(), "Qt3DSRendererImpl::m_Shaders")
+        , m_ConstantBuffers(ctx.GetAllocator(), "Qt3DSRendererImpl::m_ConstantBuffers")
         , m_TextShader(ctx.GetAllocator())
         , m_TextPathShader(ctx.GetAllocator())
         , m_TextWidgetShader(ctx.GetAllocator())
@@ -105,22 +105,22 @@ namespace render {
         , m_LayerBlendTexture(ctx.GetResourceManager())
         , m_BlendFB(NULL)
 #endif
-        , m_LayerToRenderMap(ctx.GetAllocator(), "CUICRendererImpl::m_LayerToRenderMap")
-        , m_LastFrameLayers(ctx.GetAllocator(), "CUICRendererImpl::m_LastFrameLayers")
+        , m_LayerToRenderMap(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LayerToRenderMap")
+        , m_LastFrameLayers(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LastFrameLayers")
         , mRefCount(0)
-        , m_LastPickResults(ctx.GetAllocator(), "CUICRendererImpl::m_LastPickResults")
+        , m_LastPickResults(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LastPickResults")
         , m_CurrentLayer(NULL)
-        , m_WidgetVertexBuffers(ctx.GetAllocator(), "CUICRendererImpl::m_WidgetVertexBuffers")
-        , m_WidgetIndexBuffers(ctx.GetAllocator(), "CUICRendererImpl::m_WidgetIndexBuffers")
-        , m_WidgetShaders(ctx.GetAllocator(), "CUICRendererImpl::m_WidgetShaders")
-        , m_WidgetInputAssembler(ctx.GetAllocator(), "CUICRendererImpl::m_WidgetInputAssembler")
-        , m_BoneIdNodeMap(ctx.GetAllocator(), "CUICRendererImpl::m_BoneIdNodeMap")
+        , m_WidgetVertexBuffers(ctx.GetAllocator(), "Qt3DSRendererImpl::m_WidgetVertexBuffers")
+        , m_WidgetIndexBuffers(ctx.GetAllocator(), "Qt3DSRendererImpl::m_WidgetIndexBuffers")
+        , m_WidgetShaders(ctx.GetAllocator(), "Qt3DSRendererImpl::m_WidgetShaders")
+        , m_WidgetInputAssembler(ctx.GetAllocator(), "Qt3DSRendererImpl::m_WidgetInputAssembler")
+        , m_BoneIdNodeMap(ctx.GetAllocator(), "Qt3DSRendererImpl::m_BoneIdNodeMap")
         , m_PickRenderPlugins(true)
         , m_LayerCachingEnabled(true)
         , m_LayerGPuProfilingEnabled(false)
     {
     }
-    CUICRendererImpl::~CUICRendererImpl()
+    Qt3DSRendererImpl::~Qt3DSRendererImpl()
     {
         m_LayerShaders.clear();
         for (TShaderMap::iterator iter = m_Shaders.begin(), end = m_Shaders.end(); iter != end;
@@ -132,11 +132,11 @@ namespace render {
         m_ConstantBuffers.clear();
     }
 
-    void CUICRendererImpl::addRef() { atomicIncrement(&mRefCount); }
+    void Qt3DSRendererImpl::addRef() { atomicIncrement(&mRefCount); }
 
-    void CUICRendererImpl::release() { QT3DS_IMPLEMENT_REF_COUNT_RELEASE(m_Context->GetAllocator()); }
+    void Qt3DSRendererImpl::release() { QT3DS_IMPLEMENT_REF_COUNT_RELEASE(m_Context->GetAllocator()); }
 
-    void CUICRendererImpl::ChildrenUpdated(SNode &inParent)
+    void Qt3DSRendererImpl::ChildrenUpdated(SNode &inParent)
     {
         if (inParent.m_Type == GraphObjectTypes::Layer) {
             TLayerRenderMap::iterator theIter =
@@ -149,7 +149,7 @@ namespace render {
             ChildrenUpdated(*inParent.m_Parent);
     }
 
-    QT3DSF32 CUICRendererImpl::GetTextScale(const SText &inText)
+    QT3DSF32 Qt3DSRendererImpl::GetTextScale(const SText &inText)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inText);
         if (theData)
@@ -181,12 +181,12 @@ namespace render {
         }
     }
 
-    bool CUICRendererImpl::PrepareLayerForRender(SLayer &inLayer,
+    bool Qt3DSRendererImpl::PrepareLayerForRender(SLayer &inLayer,
                                                  const QT3DSVec2 &inViewportDimensions,
                                                  bool inRenderSiblings)
     {
         (void)inViewportDimensions;
-        nvvector<SLayer *> renderableLayers(m_UICContext.GetPerFrameAllocator(), "LayerVector");
+        nvvector<SLayer *> renderableLayers(m_qt3dsContext.GetPerFrameAllocator(), "LayerVector");
         // Found by fair roll of the dice.
         renderableLayers.reserve(4);
 
@@ -212,17 +212,17 @@ namespace render {
         return retval;
     }
 
-    void CUICRendererImpl::RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
+    void Qt3DSRendererImpl::RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
                                        bool clear, QT3DSVec3 clearColor, bool inRenderSiblings)
     {
         (void)inViewportDimensions;
-        nvvector<SLayer *> renderableLayers(m_UICContext.GetPerFrameAllocator(), "LayerVector");
+        nvvector<SLayer *> renderableLayers(m_qt3dsContext.GetPerFrameAllocator(), "LayerVector");
         // Found by fair roll of the dice.
         renderableLayers.reserve(4);
 
         BuildRenderableLayers(inLayer, renderableLayers, inRenderSiblings);
 
-        NVRenderContext &theRenderContext(m_UICContext.GetRenderContext());
+        NVRenderContext &theRenderContext(m_qt3dsContext.GetRenderContext());
         qt3ds::render::NVRenderFrameBuffer *theFB = theRenderContext.GetRenderTarget();
         for (nvvector<SLayer *>::reverse_iterator iter = renderableLayers.rbegin(),
              end = renderableLayers.rend();
@@ -280,7 +280,7 @@ namespace render {
         }
     }
 
-    SLayer *CUICRendererImpl::GetLayerForNode(const SNode &inNode) const
+    SLayer *Qt3DSRendererImpl::GetLayerForNode(const SNode &inNode) const
     {
         if (inNode.m_Type == GraphObjectTypes::Layer) {
             return &const_cast<SLayer &>(static_cast<const SLayer &>(inNode));
@@ -290,7 +290,7 @@ namespace render {
         return NULL;
     }
 
-    SLayerRenderData *CUICRendererImpl::GetOrCreateLayerRenderDataForNode(const SNode &inNode)
+    SLayerRenderData *Qt3DSRendererImpl::GetOrCreateLayerRenderDataForNode(const SNode &inNode)
     {
         const SLayer *theLayer = GetLayerForNode(inNode);
         if (theLayer) {
@@ -311,16 +311,16 @@ namespace render {
         return NULL;
     }
 
-    SCamera *CUICRendererImpl::GetCameraForNode(const SNode &inNode) const
+    SCamera *Qt3DSRendererImpl::GetCameraForNode(const SNode &inNode) const
     {
         SLayerRenderData *theLayer =
-            const_cast<CUICRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
+            const_cast<Qt3DSRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
         if (theLayer)
             return theLayer->m_Camera;
         return NULL;
     }
 
-    Option<SCuboidRect> CUICRendererImpl::GetCameraBounds(const SGraphObject &inObject)
+    Option<SCuboidRect> Qt3DSRendererImpl::GetCameraBounds(const SGraphObject &inObject)
     {
         if (GraphObjectTypes::IsNodeType(inObject.m_Type)) {
             const SNode &theNode = static_cast<const SNode &>(inObject);
@@ -336,7 +336,7 @@ namespace render {
         return Option<SCuboidRect>();
     }
 
-    void CUICRendererImpl::DrawScreenRect(NVRenderRectF inRect, const QT3DSVec3 &inColor)
+    void Qt3DSRendererImpl::DrawScreenRect(NVRenderRectF inRect, const QT3DSVec3 &inColor)
     {
         SCamera theScreenCamera;
         theScreenCamera.MarkDirty(NodeTransformDirtyFlag::TransformIsDirty);
@@ -428,12 +428,12 @@ namespace render {
         m_Context->Draw(NVRenderDrawMode::Lines, m_RectIndexBuffer->GetNumIndices(), 0);
     }
 
-    void CUICRendererImpl::SetupWidgetLayer()
+    void Qt3DSRendererImpl::SetupWidgetLayer()
     {
-        NVRenderContext &theContext = m_UICContext.GetRenderContext();
+        NVRenderContext &theContext = m_qt3dsContext.GetRenderContext();
 
         if (!m_WidgetTexture) {
-            IResourceManager &theManager = m_UICContext.GetResourceManager();
+            IResourceManager &theManager = m_qt3dsContext.GetResourceManager();
             m_WidgetTexture = theManager.AllocateTexture2D(m_BeginFrameViewport.m_Width,
                                                            m_BeginFrameViewport.m_Height,
                                                            NVRenderTextureFormats::RGBA8);
@@ -456,14 +456,14 @@ namespace render {
             theContext.SetRenderTarget(m_WidgetFBO);
     }
 
-    void CUICRendererImpl::BeginFrame()
+    void Qt3DSRendererImpl::BeginFrame()
     {
         for (QT3DSU32 idx = 0, end = m_LastFrameLayers.size(); idx < end; ++idx)
             m_LastFrameLayers[idx]->ResetForFrame();
         m_LastFrameLayers.clear();
-        m_BeginFrameViewport = m_UICContext.GetRenderList().GetViewport();
+        m_BeginFrameViewport = m_qt3dsContext.GetRenderList().GetViewport();
     }
-    void CUICRendererImpl::EndFrame()
+    void Qt3DSRendererImpl::EndFrame()
     {
         if (m_WidgetTexture) {
             using qt3ds::render::NVRenderContextScopedProperty;
@@ -493,7 +493,7 @@ namespace render {
             theCamera.CalculateViewProjectionMatrix(theViewProj);
             RenderQuad(theTextureDims, theViewProj, *m_WidgetTexture);
 
-            IResourceManager &theManager(m_UICContext.GetResourceManager());
+            IResourceManager &theManager(m_qt3dsContext.GetResourceManager());
             theManager.Release(*m_WidgetFBO);
             theManager.Release(*m_WidgetTexture);
             m_WidgetTexture = NULL;
@@ -501,7 +501,7 @@ namespace render {
         }
     }
 
-    inline bool PickResultLessThan(const SUICRenderPickResult &lhs, const SUICRenderPickResult &rhs)
+    inline bool PickResultLessThan(const Qt3DSRenderPickResult &lhs, const Qt3DSRenderPickResult &rhs)
     {
         return FloatLessThan(lhs.m_CameraDistanceSq, rhs.m_CameraDistanceSq);
     }
@@ -549,7 +549,7 @@ namespace render {
 
     static eastl::pair<QT3DSVec2, QT3DSVec2>
     GetMouseCoordsAndViewportFromSubObject(QT3DSVec2 inLocalHitUVSpace,
-                                           SUICRenderPickSubResult &inSubResult)
+                                           Qt3DSRenderPickSubResult &inSubResult)
     {
         QT3DSMat44 theTextureMatrix(inSubResult.m_TextureMatrix);
         QT3DSVec3 theNewUVCoords(
@@ -564,7 +564,7 @@ namespace render {
         return eastl::make_pair(theMouseCoords, theViewportDimensions);
     }
 
-    SPickResultProcessResult CUICRendererImpl::ProcessPickResultList(bool inPickEverything)
+    SPickResultProcessResult Qt3DSRendererImpl::ProcessPickResultList(bool inPickEverything)
     {
         if (m_LastPickResults.empty())
             return SPickResultProcessResult();
@@ -580,11 +580,11 @@ namespace render {
         // onto the next object.
 
         QT3DSU32 maxPerFrameAllocationPickResultCount =
-            SFastAllocator<>::SlabSize / sizeof(SUICRenderPickResult);
+            SFastAllocator<>::SlabSize / sizeof(Qt3DSRenderPickResult);
         QT3DSU32 numToCopy =
             NVMin(maxPerFrameAllocationPickResultCount, (QT3DSU32)m_LastPickResults.size());
-        QT3DSU32 numCopyBytes = numToCopy * sizeof(SUICRenderPickResult);
-        SUICRenderPickResult *thePickResults = reinterpret_cast<SUICRenderPickResult *>(
+        QT3DSU32 numCopyBytes = numToCopy * sizeof(Qt3DSRenderPickResult);
+        Qt3DSRenderPickResult *thePickResults = reinterpret_cast<Qt3DSRenderPickResult *>(
             GetPerFrameAllocator().allocate(numCopyBytes, "tempPickData", __FILE__, __LINE__));
         memCopy(thePickResults, m_LastPickResults.data(), numCopyBytes);
         m_LastPickResults.clear();
@@ -608,7 +608,7 @@ namespace render {
                 QT3DSVec2 theViewportDimensions = mouseAndViewport.second;
                 IGraphObjectPickQuery *theQuery = theSubRenderer->GetGraphObjectPickQuery();
                 if (theQuery) {
-                    SUICRenderPickResult theInnerPickResult =
+                    Qt3DSRenderPickResult theInnerPickResult =
                         theQuery->Pick(theMouseCoords, theViewportDimensions, inPickEverything);
                     if (theInnerPickResult.m_HitObject) {
                         thePickResult = theInnerPickResult;
@@ -642,7 +642,7 @@ namespace render {
         return thePickResult;
     }
 
-    SUICRenderPickResult CUICRendererImpl::Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
+    Qt3DSRenderPickResult Qt3DSRendererImpl::Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
                                                 const QT3DSVec2 &inMouseCoords, bool inPickSiblings,
                                                 bool inPickEverything)
     {
@@ -674,7 +674,7 @@ namespace render {
                 theLayer = NULL;
         } while (theLayer != NULL);
 
-        return SUICRenderPickResult();
+        return Qt3DSRenderPickResult();
     }
 
     static inline Option<QT3DSVec2> IntersectRayWithNode(const SNode &inNode,
@@ -703,16 +703,16 @@ namespace render {
         return Empty();
     }
 
-    static inline SUICRenderPickSubResult ConstructSubResult(SImage &inImage)
+    static inline Qt3DSRenderPickSubResult ConstructSubResult(SImage &inImage)
     {
         STextureDetails theDetails = inImage.m_TextureData.m_Texture->GetTextureDetails();
-        return SUICRenderPickSubResult(*inImage.m_LastFrameOffscreenRenderer,
+        return Qt3DSRenderPickSubResult(*inImage.m_LastFrameOffscreenRenderer,
                                        inImage.m_TextureTransform, inImage.m_HorizontalTilingMode,
                                        inImage.m_VerticalTilingMode, theDetails.m_Width,
                                        theDetails.m_Height);
     }
 
-    Option<QT3DSVec2> CUICRendererImpl::FacePosition(SNode &inNode, NVBounds3 inBounds,
+    Option<QT3DSVec2> Qt3DSRendererImpl::FacePosition(SNode &inNode, NVBounds3 inBounds,
                                                   const QT3DSMat44 &inGlobalTransform,
                                                   const QT3DSVec2 &inViewportDimensions,
                                                   const QT3DSVec2 &inMouseCoords,
@@ -755,7 +755,7 @@ namespace render {
                     return Empty();
                 }
                 NVBounds3 theModelBounds = theParentModel->GetBounds(
-                    GetUICContext().GetBufferManager(), GetUICContext().GetPathManager(), false);
+                    GetQt3DSContext().GetBufferManager(), GetQt3DSContext().GetPathManager(), false);
 
                 if (theModelBounds.isEmpty()) {
                     QT3DS_ASSERT(false);
@@ -768,7 +768,7 @@ namespace render {
                 if (relativeHit.isEmpty()) {
                     return Empty();
                 }
-                SUICRenderPickSubResult theResult = ConstructSubResult(theImage);
+                Qt3DSRenderPickSubResult theResult = ConstructSubResult(theImage);
                 QT3DSVec2 hitInUVSpace = (*relativeHit) + QT3DSVec2(.5f, .5f);
                 eastl::pair<QT3DSVec2, QT3DSVec2> mouseAndViewport =
                     GetMouseCoordsAndViewportFromSubObject(hitInUVSpace, theResult);
@@ -788,8 +788,8 @@ namespace render {
         return newValue;
     }
 
-    SUICRenderPickResult
-    CUICRendererImpl::PickOffscreenLayer(SLayer &inLayer, const QT3DSVec2 & /*inViewportDimensions*/
+    Qt3DSRenderPickResult
+    Qt3DSRendererImpl::PickOffscreenLayer(SLayer &inLayer, const QT3DSVec2 & /*inViewportDimensions*/
                                          ,
                                          const QT3DSVec2 & /*inMouseCoords*/
                                          ,
@@ -809,20 +809,20 @@ namespace render {
                 // QT3DS_ASSERT( false );
             }
         }
-        return SUICRenderPickResult();
+        return Qt3DSRenderPickResult();
     }
 
-    QT3DSVec3 CUICRendererImpl::UnprojectToPosition(SNode &inNode, QT3DSVec3 &inPosition,
+    QT3DSVec3 Qt3DSRendererImpl::UnprojectToPosition(SNode &inNode, QT3DSVec3 &inPosition,
                                                  const QT3DSVec2 &inMouseVec) const
     {
         // Translate mouse into layer's coordinates
         SLayerRenderData *theData =
-            const_cast<CUICRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
+            const_cast<Qt3DSRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
         if (theData == NULL || theData->m_Camera == NULL) {
             return QT3DSVec3(0, 0, 0);
         } // QT3DS_ASSERT( false ); return QT3DSVec3(0,0,0); }
 
-        SWindowDimensions theWindow = m_UICContext.GetWindowDimensions();
+        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
         QT3DSVec2 theDims((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height);
 
         SLayerRenderPreparationResult &thePrepResult(*theData->m_LayerPrepResult);
@@ -831,12 +831,12 @@ namespace render {
         return theData->m_Camera->UnprojectToPosition(inPosition, theRay);
     }
 
-    QT3DSVec3 CUICRendererImpl::UnprojectWithDepth(SNode &inNode, QT3DSVec3 &,
+    QT3DSVec3 Qt3DSRendererImpl::UnprojectWithDepth(SNode &inNode, QT3DSVec3 &,
                                                 const QT3DSVec3 &inMouseVec) const
     {
         // Translate mouse into layer's coordinates
         SLayerRenderData *theData =
-            const_cast<CUICRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
+            const_cast<Qt3DSRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
         if (theData == NULL || theData->m_Camera == NULL) {
             return QT3DSVec3(0, 0, 0);
         } // QT3DS_ASSERT( false ); return QT3DSVec3(0,0,0); }
@@ -846,7 +846,7 @@ namespace render {
         NVReal theDepth = inMouseVec.z;
 
         SLayerRenderPreparationResult &thePrepResult(*theData->m_LayerPrepResult);
-        SWindowDimensions theWindow = m_UICContext.GetWindowDimensions();
+        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
         SRay theRay = thePrepResult.GetPickRay(
             theMouse, QT3DSVec2((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height), true);
         QT3DSVec3 theTargetPosition = theRay.m_Origin + theRay.m_Direction * theDepth;
@@ -860,11 +860,11 @@ namespace render {
         return theTargetPosition;
     }
 
-    QT3DSVec3 CUICRendererImpl::ProjectPosition(SNode &inNode, const QT3DSVec3 &inPosition) const
+    QT3DSVec3 Qt3DSRendererImpl::ProjectPosition(SNode &inNode, const QT3DSVec3 &inPosition) const
     {
         // Translate mouse into layer's coordinates
         SLayerRenderData *theData =
-            const_cast<CUICRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
+            const_cast<Qt3DSRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inNode);
         if (theData == NULL || theData->m_Camera == NULL) {
             return QT3DSVec3(0, 0, 0);
         }
@@ -891,13 +891,13 @@ namespace render {
         mouseVec.y += theViewport.m_Y;
 
         // Flip the y into window coordinates so it matches the mouse.
-        SWindowDimensions theWindow = m_UICContext.GetWindowDimensions();
+        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
         mouseVec.y = theWindow.m_Height - mouseVec.y;
 
         return mouseVec;
     }
 
-    Option<SLayerPickSetup> CUICRendererImpl::GetLayerPickSetup(SLayer &inLayer,
+    Option<SLayerPickSetup> Qt3DSRendererImpl::GetLayerPickSetup(SLayer &inLayer,
                                                                 const QT3DSVec2 &inMouseCoords,
                                                                 const SWindowDimensions &inPickDims)
     {
@@ -906,7 +906,7 @@ namespace render {
             QT3DS_ASSERT(false);
             return Empty();
         }
-        SWindowDimensions theWindow = m_UICContext.GetWindowDimensions();
+        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
         QT3DSVec2 theDims((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height);
         // The mouse is relative to the layer
         Option<QT3DSVec2> theLocalMouse = GetLayerMouseCoords(*theData, inMouseCoords, theDims, false);
@@ -953,7 +953,7 @@ namespace render {
                                             (QT3DSU32)layerToPresentation.m_Height));
     }
 
-    Option<NVRenderRectF> CUICRendererImpl::GetLayerRect(SLayer &inLayer)
+    Option<NVRenderRectF> Qt3DSRendererImpl::GetLayerRect(SLayer &inLayer)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
         if (theData == NULL || theData->m_Camera == NULL) {
@@ -965,7 +965,7 @@ namespace render {
     }
 
     // This doesn't have to be cheap.
-    void CUICRendererImpl::RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inViewProjection)
+    void Qt3DSRendererImpl::RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inViewProjection)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
         if (theData == NULL || theData->m_Camera == NULL) {
@@ -975,21 +975,21 @@ namespace render {
         theData->PrepareAndRender(inViewProjection);
     }
 
-    void CUICRendererImpl::AddRenderWidget(IRenderWidget &inWidget)
+    void Qt3DSRendererImpl::AddRenderWidget(IRenderWidget &inWidget)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inWidget.GetNode());
         if (theData)
             theData->AddRenderWidget(inWidget);
     }
 
-    void CUICRendererImpl::RenderLayerRect(SLayer &inLayer, const QT3DSVec3 &inColor)
+    void Qt3DSRendererImpl::RenderLayerRect(SLayer &inLayer, const QT3DSVec3 &inColor)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
         if (theData)
             theData->m_BoundingRectColor = inColor;
     }
 
-    SScaleAndPosition CUICRendererImpl::GetWorldToPixelScaleFactor(const SCamera &inCamera,
+    SScaleAndPosition Qt3DSRendererImpl::GetWorldToPixelScaleFactor(const SCamera &inCamera,
                                                                    const QT3DSVec3 &inWorldPoint,
                                                                    SLayerRenderData &inRenderData)
     {
@@ -1020,7 +1020,7 @@ namespace render {
         }
     }
 
-    SScaleAndPosition CUICRendererImpl::GetWorldToPixelScaleFactor(SLayer &inLayer,
+    SScaleAndPosition Qt3DSRendererImpl::GetWorldToPixelScaleFactor(SLayer &inLayer,
                                                                    const QT3DSVec3 &inWorldPoint)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
@@ -1031,7 +1031,7 @@ namespace render {
         return GetWorldToPixelScaleFactor(*theData->m_Camera, inWorldPoint, *theData);
     }
 
-    void CUICRendererImpl::ReleaseLayerRenderResources(SLayer &inLayer)
+    void Qt3DSRendererImpl::ReleaseLayerRenderResources(SLayer &inLayer)
     {
         TLayerRenderMap::iterator theIter = m_LayerToRenderMap.find(&inLayer);
         if (theIter != m_LayerToRenderMap.end()) {
@@ -1045,7 +1045,7 @@ namespace render {
         }
     }
 
-    void CUICRendererImpl::RenderQuad(const QT3DSVec2 inDimensions, const QT3DSMat44 &inMVP,
+    void Qt3DSRendererImpl::RenderQuad(const QT3DSVec2 inDimensions, const QT3DSMat44 &inMVP,
                                       NVRenderTexture2D &inQuadTexture)
     {
         m_Context->SetCullingEnabled(false);
@@ -1061,7 +1061,7 @@ namespace render {
         theContext.Draw(NVRenderDrawMode::Triangles, m_QuadIndexBuffer->GetNumIndices(), 0);
     }
 
-    void CUICRendererImpl::RenderQuad()
+    void Qt3DSRendererImpl::RenderQuad()
     {
         m_Context->SetCullingEnabled(false);
         GenerateXYQuad();
@@ -1069,7 +1069,7 @@ namespace render {
         m_Context->Draw(NVRenderDrawMode::Triangles, m_QuadIndexBuffer->GetNumIndices(), 0);
     }
 
-    void CUICRendererImpl::RenderPointsIndirect()
+    void Qt3DSRendererImpl::RenderPointsIndirect()
     {
         m_Context->SetCullingEnabled(false);
         GenerateXYZPoint();
@@ -1077,19 +1077,19 @@ namespace render {
         m_Context->DrawIndirect(NVRenderDrawMode::Points, 0);
     }
 
-    void CUICRendererImpl::LayerNeedsFrameClear(SLayerRenderData &inLayer)
+    void Qt3DSRendererImpl::LayerNeedsFrameClear(SLayerRenderData &inLayer)
     {
         m_LastFrameLayers.push_back(&inLayer);
     }
 
-    void CUICRendererImpl::BeginLayerDepthPassRender(SLayerRenderData &inLayer)
+    void Qt3DSRendererImpl::BeginLayerDepthPassRender(SLayerRenderData &inLayer)
     {
         m_CurrentLayer = &inLayer;
     }
 
-    void CUICRendererImpl::EndLayerDepthPassRender() { m_CurrentLayer = NULL; }
+    void Qt3DSRendererImpl::EndLayerDepthPassRender() { m_CurrentLayer = NULL; }
 
-    void CUICRendererImpl::BeginLayerRender(SLayerRenderData &inLayer)
+    void Qt3DSRendererImpl::BeginLayerRender(SLayerRenderData &inLayer)
     {
         m_CurrentLayer = &inLayer;
         // Remove all of the shaders from the layer shader set
@@ -1097,13 +1097,13 @@ namespace render {
         // shaders that are in the layer.
         m_LayerShaders.clear();
     }
-    void CUICRendererImpl::EndLayerRender() { m_CurrentLayer = NULL; }
+    void Qt3DSRendererImpl::EndLayerRender() { m_CurrentLayer = NULL; }
 
 // Allocate an object that lasts only this frame.
 #define RENDER_FRAME_NEW(type)                                                                     \
     new (m_PerFrameAllocator.m_FastAllocator.allocate(sizeof(type), __FILE__, __LINE__)) type
 
-    void CUICRendererImpl::PrepareImageForIbl(SImage &inImage)
+    void Qt3DSRendererImpl::PrepareImageForIbl(SImage &inImage)
     {
         if (inImage.m_TextureData.m_Texture && inImage.m_TextureData.m_Texture->GetNumMipmaps() < 1)
             inImage.m_TextureData.m_Texture->GenerateMipmaps();
@@ -1129,9 +1129,9 @@ namespace render {
             FillBoneIdNodeMap(*childChild, ioMap);
     }
 
-    bool CUICRendererImpl::PrepareTextureAtlasForRender()
+    bool Qt3DSRendererImpl::PrepareTextureAtlasForRender()
     {
-        ITextTextureAtlas *theTextureAtlas = m_UICContext.GetTextureAtlas();
+        ITextTextureAtlas *theTextureAtlas = m_qt3dsContext.GetTextureAtlas();
         if (theTextureAtlas == NULL)
             return false;
 
@@ -1146,7 +1146,7 @@ namespace render {
             NVRenderContextScopedProperty<NVRenderFrameBuffer *> __fbo(
                 *m_Context, &NVRenderContext::GetRenderTarget, &NVRenderContext::SetRenderTarget);
 
-            ITextRenderer &theTextRenderer(*m_UICContext.GetOnscreenTextRenderer());
+            ITextRenderer &theTextRenderer(*m_qt3dsContext.GetOnscreenTextRenderer());
             TTextTextureAtlasDetailsAndTexture theResult = theTextureAtlas->PrepareTextureAtlas();
             if (!theResult.first.m_EntryCount) {
                 QT3DS_ASSERT(theResult.first.m_EntryCount);
@@ -1167,17 +1167,17 @@ namespace render {
             mAttribLayout = m_Context->CreateAttributeLayout(toConstDataRef(theEntries, 2));
 
             NVRenderFrameBuffer *theAtlasFB(
-                m_UICContext.GetResourceManager().AllocateFrameBuffer());
+                m_qt3dsContext.GetResourceManager().AllocateFrameBuffer());
             theAtlasFB->Attach(NVRenderFrameBufferAttachments::Color0, *theResult.second);
-            m_UICContext.GetRenderContext().SetRenderTarget(theAtlasFB);
+            m_qt3dsContext.GetRenderContext().SetRenderTarget(theAtlasFB);
 
             // this texture contains our single entries
             NVRenderTexture2D *theTexture = nullptr;
             if (m_Context->GetRenderContextType() == NVRenderContextValues::GLES2) {
-                theTexture = m_UICContext.GetResourceManager()
+                theTexture = m_qt3dsContext.GetResourceManager()
                         .AllocateTexture2D(32, 32, NVRenderTextureFormats::RGBA8);
             } else {
-                theTexture = m_UICContext.GetResourceManager()
+                theTexture = m_qt3dsContext.GetResourceManager()
                         .AllocateTexture2D(32, 32, NVRenderTextureFormats::Alpha8);
             }
             m_Context->SetClearColor(QT3DSVec4(0, 0, 0, 0));
@@ -1255,8 +1255,8 @@ namespace render {
                 }
             }
 
-            m_UICContext.GetResourceManager().Release(*theTexture);
-            m_UICContext.GetResourceManager().Release(*theAtlasFB);
+            m_qt3dsContext.GetResourceManager().Release(*theTexture);
+            m_qt3dsContext.GetResourceManager().Release(*theAtlasFB);
 
             return true;
         }
@@ -1264,7 +1264,7 @@ namespace render {
         return theTextureAtlas->IsInitialized();
     }
 
-    Option<QT3DSVec2> CUICRendererImpl::GetLayerMouseCoords(SLayerRenderData &inLayerRenderData,
+    Option<QT3DSVec2> Qt3DSRendererImpl::GetLayerMouseCoords(SLayerRenderData &inLayerRenderData,
                                                          const QT3DSVec2 &inMouseCoords,
                                                          const QT3DSVec2 &inViewportDimensions,
                                                          bool forceImageIntersect) const
@@ -1275,7 +1275,7 @@ namespace render {
         return Empty();
     }
 
-    void CUICRendererImpl::GetLayerHitObjectList(SLayerRenderData &inLayerRenderData,
+    void Qt3DSRendererImpl::GetLayerHitObjectList(SLayerRenderData &inLayerRenderData,
                                                  const QT3DSVec2 &inViewportDimensions,
                                                  const QT3DSVec2 &inPresCoords, bool inPickEverything,
                                                  TPickResultArray &outIntersectionResult,
@@ -1319,7 +1319,7 @@ namespace render {
                 IGraphObjectPickQuery *theQuery =
                     inLayerRenderData.m_LastFrameOffscreenRenderer->GetGraphObjectPickQuery();
                 if (theQuery) {
-                    SUICRenderPickResult theResult =
+                    Qt3DSRenderPickResult theResult =
                         theQuery->Pick(inPresCoords, inViewportDimensions, inPickEverything);
                     if (theResult.m_HitObject) {
                         theResult.m_OffscreenRenderer =
@@ -1333,12 +1333,12 @@ namespace render {
         }
     }
 
-    static inline SUICRenderPickSubResult ConstructSubResult(SRenderableImage &inImage)
+    static inline Qt3DSRenderPickSubResult ConstructSubResult(SRenderableImage &inImage)
     {
         return ConstructSubResult(inImage.m_Image);
     }
 
-    void CUICRendererImpl::IntersectRayWithSubsetRenderable(
+    void Qt3DSRendererImpl::IntersectRayWithSubsetRenderable(
         const SRay &inRay, SRenderableObject &inRenderableObject,
         TPickResultArray &outIntersectionResultList, NVAllocatorCallback &inTempAllocator)
     {
@@ -1362,24 +1362,24 @@ namespace render {
             thePickObject = &static_cast<SPathRenderable *>(&inRenderableObject)->m_Path;
 
         if (thePickObject != NULL) {
-            outIntersectionResultList.push_back(SUICRenderPickResult(
+            outIntersectionResultList.push_back(Qt3DSRenderPickResult(
                 *thePickObject, theResult.m_RayLengthSquared, theResult.m_RelXY));
 
             // For subsets, we know we can find images on them which may have been the result
             // of rendering a sub-presentation.
             if (inRenderableObject.m_RenderableFlags.IsDefaultMaterialMeshSubset()) {
-                SUICRenderPickSubResult *theLastResult = NULL;
+                Qt3DSRenderPickSubResult *theLastResult = NULL;
                 for (SRenderableImage *theImage =
                          static_cast<SSubsetRenderable *>(&inRenderableObject)->m_FirstImage;
                      theImage != NULL; theImage = theImage->m_NextImage) {
                     if (theImage->m_Image.m_LastFrameOffscreenRenderer != NULL
                         && theImage->m_Image.m_TextureData.m_Texture != NULL) {
-                        SUICRenderPickSubResult *theSubResult =
-                            (SUICRenderPickSubResult *)inTempAllocator.allocate(
-                                sizeof(SUICRenderPickSubResult), "SUICRenderPickSubResult",
+                        Qt3DSRenderPickSubResult *theSubResult =
+                            (Qt3DSRenderPickSubResult *)inTempAllocator.allocate(
+                                sizeof(Qt3DSRenderPickSubResult), "Qt3DSRenderPickSubResult",
                                 __FILE__, __LINE__);
 
-                        new (theSubResult) SUICRenderPickSubResult(ConstructSubResult(*theImage));
+                        new (theSubResult) Qt3DSRenderPickSubResult(ConstructSubResult(*theImage));
                         if (theLastResult == NULL)
                             outIntersectionResultList.back().m_FirstSubObject = theSubResult;
                         else
@@ -1395,7 +1395,7 @@ namespace render {
 #define _snprintf snprintf
 #endif
 
-    NVRenderShaderProgram *CUICRendererImpl::CompileShader(CRegisteredString inName,
+    NVRenderShaderProgram *Qt3DSRendererImpl::CompileShader(CRegisteredString inName,
                                                            const char8_t *inVert,
                                                            const char8_t *inFrag)
     {
@@ -1427,7 +1427,7 @@ namespace render {
         return attenuation * 0.0000001f;
     }
 
-    SShaderGeneratorGeneratedShader *CUICRendererImpl::GetShader(SSubsetRenderable &inRenderable,
+    SShaderGeneratorGeneratedShader *Qt3DSRendererImpl::GetShader(SSubsetRenderable &inRenderable,
                                                                  TShaderFeatureSet inFeatureSet)
     {
         if (m_CurrentLayer == NULL) {
@@ -1476,7 +1476,7 @@ namespace render {
     static QT3DSVec2 g_fullScreenRectUVs[] = { QT3DSVec2(0, 0), QT3DSVec2(0, 1), QT3DSVec2(1, 1),
                                             QT3DSVec2(1, 0) };
 
-    void CUICRendererImpl::GenerateXYQuad()
+    void Qt3DSRendererImpl::GenerateXYQuad()
     {
         if (m_QuadInputAssembler)
             return;
@@ -1521,7 +1521,7 @@ namespace render {
             toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     }
 
-    void CUICRendererImpl::GenerateXYZPoint()
+    void Qt3DSRendererImpl::GenerateXYZPoint()
     {
         if (m_PointInputAssembler)
             return;
@@ -1552,7 +1552,7 @@ namespace render {
             toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     }
 
-    eastl::pair<NVRenderVertexBuffer *, NVRenderIndexBuffer *> CUICRendererImpl::GetXYQuad()
+    eastl::pair<NVRenderVertexBuffer *, NVRenderIndexBuffer *> Qt3DSRendererImpl::GetXYQuad()
     {
         if (!m_QuadInputAssembler)
             GenerateXYQuad();
@@ -1560,7 +1560,7 @@ namespace render {
         return eastl::make_pair(m_QuadVertexBuffer.mPtr, m_QuadIndexBuffer.mPtr);
     }
 
-    SLayerGlobalRenderProperties CUICRendererImpl::GetLayerGlobalRenderProperties()
+    SLayerGlobalRenderProperties Qt3DSRendererImpl::GetLayerGlobalRenderProperties()
     {
         SLayerRenderData &theData = *m_CurrentLayer;
         SLayer &theLayer = theData.m_Layer;
@@ -1575,7 +1575,7 @@ namespace render {
             theLayer.m_Probe2Pos, theLayer.m_Probe2Fade, theLayer.m_ProbeFov);
     }
 
-    void CUICRendererImpl::GenerateXYQuadStrip()
+    void Qt3DSRendererImpl::GenerateXYQuadStrip()
     {
         if (m_QuadStripInputAssembler)
             return;
@@ -1605,7 +1605,7 @@ namespace render {
             toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     }
 
-    void CUICRendererImpl::UpdateCbAoShadow(const SLayer *pLayer, const SCamera *pCamera,
+    void Qt3DSRendererImpl::UpdateCbAoShadow(const SLayer *pLayer, const SCamera *pCamera,
                                             CResourceTexture2D &inDepthTexture)
     {
         if (m_Context->GetConstantBufferSupport()) {
@@ -1669,7 +1669,7 @@ namespace render {
 
     // widget context implementation
 
-    NVRenderVertexBuffer &CUICRendererImpl::GetOrCreateVertexBuffer(CRegisteredString &inStr,
+    NVRenderVertexBuffer &Qt3DSRendererImpl::GetOrCreateVertexBuffer(CRegisteredString &inStr,
                                                                     QT3DSU32 stride,
                                                                     NVConstDataRef<QT3DSU8> bufferData)
     {
@@ -1685,7 +1685,7 @@ namespace render {
         return *retval;
     }
     NVRenderIndexBuffer &
-    CUICRendererImpl::GetOrCreateIndexBuffer(CRegisteredString &inStr,
+    Qt3DSRendererImpl::GetOrCreateIndexBuffer(CRegisteredString &inStr,
                                              qt3ds::render::NVRenderComponentTypes::Enum componentType,
                                              size_t size, NVConstDataRef<QT3DSU8> bufferData)
     {
@@ -1702,7 +1702,7 @@ namespace render {
         return *retval;
     }
 
-    NVRenderAttribLayout &CUICRendererImpl::CreateAttributeLayout(
+    NVRenderAttribLayout &Qt3DSRendererImpl::CreateAttributeLayout(
         NVConstDataRef<qt3ds::render::NVRenderVertexBufferEntry> attribs)
     {
         // create our attribute layout
@@ -1710,7 +1710,7 @@ namespace render {
         return *theAttribLAyout;
     }
 
-    NVRenderInputAssembler &CUICRendererImpl::GetOrCreateInputAssembler(
+    NVRenderInputAssembler &Qt3DSRendererImpl::GetOrCreateInputAssembler(
         CRegisteredString &inStr, NVRenderAttribLayout *attribLayout,
         NVConstDataRef<NVRenderVertexBuffer *> buffers, const NVRenderIndexBuffer *indexBuffer,
         NVConstDataRef<QT3DSU32> strides, NVConstDataRef<QT3DSU32> offsets)
@@ -1725,7 +1725,7 @@ namespace render {
         return *retval;
     }
 
-    NVRenderVertexBuffer *CUICRendererImpl::GetVertexBuffer(CRegisteredString &inStr)
+    NVRenderVertexBuffer *Qt3DSRendererImpl::GetVertexBuffer(CRegisteredString &inStr)
     {
         TStrVertBufMap::iterator theIter = m_WidgetVertexBuffers.find(inStr);
         if (theIter != m_WidgetVertexBuffers.end())
@@ -1733,7 +1733,7 @@ namespace render {
         return NULL;
     }
 
-    NVRenderIndexBuffer *CUICRendererImpl::GetIndexBuffer(CRegisteredString &inStr)
+    NVRenderIndexBuffer *Qt3DSRendererImpl::GetIndexBuffer(CRegisteredString &inStr)
     {
         TStrIndexBufMap::iterator theIter = m_WidgetIndexBuffers.find(inStr);
         if (theIter != m_WidgetIndexBuffers.end())
@@ -1741,7 +1741,7 @@ namespace render {
         return NULL;
     }
 
-    NVRenderInputAssembler *CUICRendererImpl::GetInputAssembler(CRegisteredString &inStr)
+    NVRenderInputAssembler *Qt3DSRendererImpl::GetInputAssembler(CRegisteredString &inStr)
     {
         TStrIAMap::iterator theIter = m_WidgetInputAssembler.find(inStr);
         if (theIter != m_WidgetInputAssembler.end())
@@ -1749,7 +1749,7 @@ namespace render {
         return NULL;
     }
 
-    NVRenderShaderProgram *CUICRendererImpl::GetShader(CRegisteredString inStr)
+    NVRenderShaderProgram *Qt3DSRendererImpl::GetShader(CRegisteredString inStr)
     {
         TStrShaderMap::iterator theIter = m_WidgetShaders.find(inStr);
         if (theIter != m_WidgetShaders.end())
@@ -1757,7 +1757,7 @@ namespace render {
         return NULL;
     }
 
-    NVRenderShaderProgram *CUICRendererImpl::CompileAndStoreShader(CRegisteredString inStr)
+    NVRenderShaderProgram *Qt3DSRendererImpl::CompileAndStoreShader(CRegisteredString inStr)
     {
         NVRenderShaderProgram *newProgram = GetProgramGenerator().CompileGeneratedShader(inStr);
         if (newProgram)
@@ -1765,30 +1765,30 @@ namespace render {
         return newProgram;
     }
 
-    IShaderProgramGenerator &CUICRendererImpl::GetProgramGenerator()
+    IShaderProgramGenerator &Qt3DSRendererImpl::GetProgramGenerator()
     {
-        return m_UICContext.GetShaderProgramGenerator();
+        return m_qt3dsContext.GetShaderProgramGenerator();
     }
 
-    STextDimensions CUICRendererImpl::MeasureText(const STextRenderInfo &inText)
+    STextDimensions Qt3DSRendererImpl::MeasureText(const STextRenderInfo &inText)
     {
-        if (m_UICContext.GetTextRenderer() != NULL)
-            return m_UICContext.GetTextRenderer()->MeasureText(inText, 0);
+        if (m_qt3dsContext.GetTextRenderer() != NULL)
+            return m_qt3dsContext.GetTextRenderer()->MeasureText(inText, 0);
         return STextDimensions();
     }
 
-    void CUICRendererImpl::RenderText(const STextRenderInfo &inText, const QT3DSVec3 &inTextColor,
+    void Qt3DSRendererImpl::RenderText(const STextRenderInfo &inText, const QT3DSVec3 &inTextColor,
                                       const QT3DSVec3 &inBackgroundColor, const QT3DSMat44 &inMVP)
     {
-        if (m_UICContext.GetTextRenderer() != NULL) {
-            ITextRenderer &theTextRenderer(*m_UICContext.GetTextRenderer());
-            NVRenderTexture2D *theTexture = m_UICContext.GetResourceManager().AllocateTexture2D(
+        if (m_qt3dsContext.GetTextRenderer() != NULL) {
+            ITextRenderer &theTextRenderer(*m_qt3dsContext.GetTextRenderer());
+            NVRenderTexture2D *theTexture = m_qt3dsContext.GetResourceManager().AllocateTexture2D(
                 32, 32, NVRenderTextureFormats::RGBA8);
             STextTextureDetails theTextTextureDetails =
                 theTextRenderer.RenderText(inText, *theTexture);
             STextRenderHelper theTextHelper(GetTextWidgetShader());
             if (theTextHelper.m_Shader != NULL) {
-                m_UICContext.GetRenderContext().SetBlendingEnabled(false);
+                m_qt3dsContext.GetRenderContext().SetBlendingEnabled(false);
                 STextScaleAndOffset theScaleAndOffset(*theTexture, theTextTextureDetails, inText);
                 theTextHelper.m_Shader->Render(*theTexture, theScaleAndOffset,
                                                QT3DSVec4(inTextColor, 1.0f), inMVP, QT3DSVec2(0, 0),
@@ -1796,21 +1796,21 @@ namespace render {
                                                theTextHelper.m_QuadInputAssembler.GetIndexCount(),
                                                theTextTextureDetails, inBackgroundColor);
             }
-            m_UICContext.GetResourceManager().Release(*theTexture);
+            m_qt3dsContext.GetResourceManager().Release(*theTexture);
         }
     }
 
-    void CUICRendererImpl::RenderText2D(QT3DSF32 x, QT3DSF32 y,
+    void Qt3DSRendererImpl::RenderText2D(QT3DSF32 x, QT3DSF32 y,
                                         qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor,
                                         const char *text)
     {
-        if (m_UICContext.GetOnscreenTextRenderer() != NULL) {
+        if (m_qt3dsContext.GetOnscreenTextRenderer() != NULL) {
             GenerateXYQuadStrip();
 
             if (PrepareTextureAtlasForRender()) {
                 TTextRenderAtlasDetailsAndTexture theRenderTextDetails;
-                ITextTextureAtlas *theTextureAtlas = m_UICContext.GetTextureAtlas();
-                SWindowDimensions theWindow = m_UICContext.GetWindowDimensions();
+                ITextTextureAtlas *theTextureAtlas = m_qt3dsContext.GetTextureAtlas();
+                SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
 
                 const wchar_t *wText = m_StringTable->GetWideStr(text);
                 STextRenderInfo theInfo;
@@ -1859,7 +1859,7 @@ namespace render {
         }
     }
 
-    void CUICRendererImpl::RenderGpuProfilerStats(QT3DSF32 x, QT3DSF32 y,
+    void Qt3DSRendererImpl::RenderGpuProfilerStats(QT3DSF32 x, QT3DSF32 y,
                                                   qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor)
     {
         if (!IsLayerGpuProfilingEnabled())
@@ -1899,7 +1899,7 @@ namespace render {
     // a new position and a floating point scale factor so you can render in 1/2 perspective mode
     // or orthographic mode if you would like to.
     SWidgetRenderInformation
-    CUICRendererImpl::GetWidgetRenderInformation(SNode &inNode, const QT3DSVec3 &inPos,
+    Qt3DSRendererImpl::GetWidgetRenderInformation(SNode &inNode, const QT3DSVec3 &inPos,
                                                  RenderWidgetModes::Enum inWidgetMode)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inNode);
@@ -1964,18 +1964,18 @@ namespace render {
             theScaleAndPos.m_Scale, *theCamera);
     }
 
-    Option<QT3DSVec2> CUICRendererImpl::GetLayerMouseCoords(SLayer &inLayer,
+    Option<QT3DSVec2> Qt3DSRendererImpl::GetLayerMouseCoords(SLayer &inLayer,
                                                          const QT3DSVec2 &inMouseCoords,
                                                          const QT3DSVec2 &inViewportDimensions,
                                                          bool forceImageIntersect) const
     {
         SLayerRenderData *theData =
-            const_cast<CUICRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inLayer);
+            const_cast<Qt3DSRendererImpl &>(*this).GetOrCreateLayerRenderDataForNode(inLayer);
         return GetLayerMouseCoords(*theData, inMouseCoords, inViewportDimensions,
                                    forceImageIntersect);
     }
 
-    bool IUICRenderer::IsGlEsContext(qt3ds::render::NVRenderContextType inContextType)
+    bool IQt3DSRenderer::IsGlEsContext(qt3ds::render::NVRenderContextType inContextType)
     {
         qt3ds::render::NVRenderContextType esContextTypes(NVRenderContextValues::GLES2
                                                        | NVRenderContextValues::GLES3
@@ -1987,7 +1987,7 @@ namespace render {
         return false;
     }
 
-    bool IUICRenderer::IsGlEs3Context(qt3ds::render::NVRenderContextType inContextType)
+    bool IQt3DSRenderer::IsGlEs3Context(qt3ds::render::NVRenderContextType inContextType)
     {
         if (inContextType == NVRenderContextValues::GLES3
             || inContextType == NVRenderContextValues::GLES3PLUS)
@@ -1996,7 +1996,7 @@ namespace render {
         return false;
     }
 
-    bool IUICRenderer::IsGl2Context(qt3ds::render::NVRenderContextType inContextType)
+    bool IQt3DSRenderer::IsGl2Context(qt3ds::render::NVRenderContextType inContextType)
     {
         if (inContextType == NVRenderContextValues::GL2)
             return true;
@@ -2004,9 +2004,9 @@ namespace render {
         return false;
     }
 
-    IUICRenderer &IUICRenderer::CreateRenderer(IUICRenderContext &inContext)
+    IQt3DSRenderer &IQt3DSRenderer::CreateRenderer(IQt3DSRenderContext &inContext)
     {
-        return *QT3DS_NEW(inContext.GetAllocator(), CUICRendererImpl)(inContext);
+        return *QT3DS_NEW(inContext.GetAllocator(), Qt3DSRendererImpl)(inContext);
     }
 }
 }

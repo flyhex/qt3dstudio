@@ -27,11 +27,11 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSIGNALSTRUCTIMPLH
-#define UICDMSIGNALSTRUCTIMPLH
+#ifndef QT3DSDM_SIGNAL_STRUCT_IMPL_H
+#define QT3DSDM_SIGNAL_STRUCT_IMPL_H
 #include "Qt3DSDMSignalStructs.h"
 
-namespace UICDM {
+namespace qt3dsdm {
 
 struct SSignalDataStruct0
 {
@@ -65,7 +65,7 @@ struct SSignalDataStruct0
     }
 };
 
-#define UICDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT0(name)                                         \
+#define QT3DSDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT0(name)                                         \
     std::shared_ptr<ISignalConnection> Sig##name::AddListener(                                   \
         ISignalSystem &inSystem, void *inSender, std::function<void()> inHandler)                \
     {                                                                                              \
@@ -118,7 +118,7 @@ struct SSignalDataStruct1
     }
 };
 
-#define UICDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT1(name, d1)                                     \
+#define QT3DSDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT1(name, d1)                                     \
     std::shared_ptr<ISignalConnection> Sig##name::AddListener(                                   \
         ISignalSystem &inSystem, void *inSender, std::function<void(d1)> inHandler)              \
     {                                                                                              \
@@ -174,7 +174,7 @@ struct SSignalDataStruct2
     }
 };
 
-#define UICDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT2(name, d1, d2)                                 \
+#define QT3DSDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT2(name, d1, d2)                                 \
     std::shared_ptr<ISignalConnection> Sig##name::AddListener(                                   \
         ISignalSystem &inSystem, void *inSender, std::function<void(d1, d2)> inHandler)          \
     {                                                                                              \
@@ -230,7 +230,7 @@ struct SSignalDataStruct3
     }
 };
 
-#define UICDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT3(name, d1, d2, d3)                             \
+#define QT3DSDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT3(name, d1, d2, d3)                             \
     std::shared_ptr<ISignalConnection> Sig##name::AddListener(                                   \
         ISignalSystem &inSystem, void *inSender, std::function<void(d1, d2, d3)> inHandler)      \
     {                                                                                              \
@@ -289,7 +289,7 @@ struct SSignalDataStruct4
     }
 };
 
-#define UICDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT4(name, d1, d2, d3, d4)                         \
+#define QT3DSDM_SIGNALS_DEFINE_SPECIFIC_SIGNAL_STRUCT4(name, d1, d2, d3, d4)                         \
     std::shared_ptr<ISignalConnection> Sig##name::AddListener(                                   \
         ISignalSystem &inSystem, void *inSender, std::function<void(d1, d2, d3, d4)> inHandler)  \
     {                                                                                              \

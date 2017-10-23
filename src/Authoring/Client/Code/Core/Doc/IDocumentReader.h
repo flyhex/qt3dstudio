@@ -71,7 +71,7 @@ using qt3dsdm::SValue;
 using qt3dsdm::IDOMReader;
 using qt3dsdm::IDOMWriter;
 
-// Reader class to read complex information from the document.  Encapsulates the various UICDM
+// Reader class to read complex information from the document.  Encapsulates the various DataModel
 // subsystems
 // Implemented in DocumentEditor.cpp
 class IDocumentReader
@@ -214,7 +214,7 @@ public:
     virtual void SetGuidesEditable(bool inEditable) = 0;
 
     // Given the active slide on the document (which we query) and an instance,
-    // produce a temporary file (CUICFile::GetTemporaryFile) and serialize this object
+    // produce a temporary file (Qt3DSFile::GetTemporaryFile) and serialize this object
     // to that temporary file.
     virtual CFilePath CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances) = 0;
 

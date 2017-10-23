@@ -79,7 +79,7 @@ protected:
 
     // Construction
 public:
-    CWGLRenderContext(UICWindow inRenderWindow);
+    CWGLRenderContext(Qt3DSWindow inRenderWindow);
     ~CWGLRenderContext();
 
     // Access
@@ -98,7 +98,7 @@ public:
 
     // Implementation
 protected:
-    void Open(UICWindow inRenderWindow);
+    void Open(Qt3DSWindow inRenderWindow);
 
     void OpenNormalContext(QOpenGLWidget* inRenderWindow);
     void Close();

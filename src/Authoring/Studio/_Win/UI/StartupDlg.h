@@ -99,14 +99,14 @@ private:
     EStartupChoice m_Choice = EStartupChoice_Invalid;
 
     // Recent Docs
-    std::vector<CUICFile> m_RecentDocs;
-    CUICFile m_RecentDocSelected;
+    std::vector<Qt3DSFile> m_RecentDocs;
+    Qt3DSFile m_RecentDocSelected;
 
 public:
     void OnInitDialog();
-    void AddRecentItem(const CUICFile &inRecentItem);
+    void AddRecentItem(const Qt3DSFile &inRecentItem);
     EStartupChoice GetChoice();
-    CUICFile GetRecentDoc() const;
+    Qt3DSFile GetRecentDoc() const;
 
 private:
     QScopedPointer<Ui::StartupDlg> m_ui;

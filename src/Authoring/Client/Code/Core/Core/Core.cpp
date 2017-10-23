@@ -113,16 +113,16 @@ bool CCore::LoadBuildConfigurations()
 {
     using namespace Q3DStudio;
     // See if we can find the build configurations where they are located first
-    CFilePath theCurrentPath(CUICFile::GetApplicationDirectory().GetAbsolutePath());
+    CFilePath theCurrentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
     CFilePath theMainDir = theCurrentPath.GetDirectory()
             .GetDirectory()
             .GetDirectory(); //.GetDirectory();	// Developing directory
     CFilePath theStudioDir =
             CFilePath::CombineBaseAndRelative(theMainDir, CFilePath(L"Studio/Build Configurations"));
-    CUICFile theConfigurationDirectory(theStudioDir);
+    Qt3DSFile theConfigurationDirectory(theStudioDir);
     if (!theStudioDir.IsDirectory())
-        theConfigurationDirectory = CUICFile(
-                    CUICFile::GetApplicationDirectory().GetAbsolutePath(),
+        theConfigurationDirectory = Qt3DSFile(
+                    Qt3DSFile::GetApplicationDirectory().GetAbsolutePath(),
                     Q3DStudio::CString(L"Build Configurations")); // Installed directory // TODO: Localize
 
     Q3DStudio::CBuildConfigParser theParser(m_BuildConfigurations);
@@ -207,7 +207,7 @@ void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
                 Qt::Key_BracketRight);
 }
 
-void CCore::GetCreateDirectoryFileName(const CUICFile &inDocument,
+void CCore::GetCreateDirectoryFileName(const Qt3DSFile &inDocument,
                                        Q3DStudio::CFilePath &outFinalDir,
                                        Q3DStudio::CFilePath &outFinalDoc)
 {
@@ -225,7 +225,7 @@ void CCore::GetCreateDirectoryFileName(const CUICFile &inDocument,
  * Call to create a new document.
  * This will clear out the current doc (if there is one) then create a new one.
  */
-void CCore::OnNewDocument(const CUICFile &inDocument, bool inCreateDirectory)
+void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
 {
     CDispatchDataModelNotificationScope __dispatchScope(*m_Dispatch);
 
@@ -263,7 +263,7 @@ void CCore::OnNewDocument(const CUICFile &inDocument, bool inCreateDirectory)
  * This will do all the prompting, directory stuff necessary and perform the
  * saving of the document.
  */
-void CCore::OnSaveDocument(const CUICFile &inDocument, bool inSaveCopy /*= false*/)
+void CCore::OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy /*= false*/)
 {
     m_JustSaved = true;
     GetDispatch()->FireOnSavingPresentation(&inDocument);
@@ -288,14 +288,14 @@ void CCore::OnSaveDocument(const CUICFile &inDocument, bool inSaveCopy /*= false
  * leave the document in a dirty state and not update it to point to the new
  * file path.
 */
-void CCore::OnSaveDocumentCatcher(const CUICFile &inDocument, bool inSaveCopy /*= false*/)
+void CCore::OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy /*= false*/)
 {
     m_Dispatch->FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Saving ")),
                                     inDocument.GetName());
 
     bool theDisplaySaveFailDialog = false;
     bool theFileExists = inDocument.Exists();
-    CUICFile theTempFile(inDocument);
+    Qt3DSFile theTempFile(inDocument);
 
     // Test for readonly files
     if (theFileExists && inDocument.CanWrite() == false)
@@ -305,7 +305,7 @@ void CCore::OnSaveDocumentCatcher(const CUICFile &inDocument, bool inSaveCopy /*
             // if file already exists, write to a temp file first, to prevent corrupting the
             // original file.
             if (theFileExists) {
-                theTempFile = CUICFile::GetTemporaryFile();
+                theTempFile = Qt3DSFile::GetTemporaryFile();
                 // sanity check: if we fail to get a temporary file
                 if (theTempFile.GetAbsolutePosixPath().IsEmpty()) { // too bad, we'll have to use
                     // the original (which might be

@@ -70,7 +70,7 @@
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
     : m_ProgressPalette(nullptr)
     , m_ShowGUI(inShowGUI)
-    , m_LastSaveFile(CUICFile::GetApplicationDirectory().GetAbsolutePath())
+    , m_LastSaveFile(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath())
 {
 }
 
@@ -147,7 +147,7 @@ void CDialogs::DisplayAssetDeleteFailed()
     Q3DStudio::CString theTitle = ::LoadResourceString(IDS_ERROR_MSGTITLE);
 
     if (m_ShowGUI)
-        CUICMessageBox::Show(theTitle, theMessage, CUICMessageBox::ICON_ERROR, false,
+        Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
                              qApp->activeWindow());
     else {
         std::cout << theTitle.GetCharStar() << ": " << theMessage.GetCharStar() << std::endl;
@@ -158,10 +158,10 @@ void CDialogs::DisplayAssetDeleteFailed()
 /**
  *	Get the export choice.
  */
-CUICFile CDialogs::GetExportChoice(const Q3DStudio::CString &, const Q3DStudio::CString &)
+Qt3DSFile CDialogs::GetExportChoice(const Q3DStudio::CString &, const Q3DStudio::CString &)
 {
     // Need to fix this for windows if we decide to use it
-    return CUICFile("", false, false);
+    return Qt3DSFile("", false, false);
 }
 
 //==============================================================================
@@ -181,7 +181,7 @@ void CDialogs::DisplayRefreshResourceFailed(const Q3DStudio::CString &inResource
         theText += inDescription;
 
     if (m_ShowGUI)
-        CUICMessageBox::Show(theTitle, theText, CUICMessageBox::ICON_WARNING, false,
+        Qt3DSMessageBox::Show(theTitle, theText, Qt3DSMessageBox::ICON_WARNING, false,
                              qApp->activeWindow());
     else {
         std::cout << theTitle.GetCharStar() << ": " << theText.GetCharStar() << std::endl << std::endl;
@@ -264,14 +264,14 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
     Q3DStudio::CString theFormatString(
         !inWarningsOnly ? ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT_FAILED)
                         : ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT_COMPLETEWITHWARNING));
-    theFormatString += _UIC("\n%ls\n\n");
+    theFormatString += _LSTR("\n%ls\n\n");
     std::wstring wstr = inURL.path().toStdWString();
     theMsgText.Format(theFormatString, static_cast<const wchar_t *>(wstr.c_str()));
     theMsgText += theText;
 
     // Display the failed import resource message.
     if (m_ShowGUI)
-        CUICMessageBox::Show(theTitle, theMsgText, CUICMessageBox::ICON_WARNING, false,
+        Qt3DSMessageBox::Show(theTitle, theMsgText, Qt3DSMessageBox::ICON_WARNING, false,
                              qApp->activeWindow());
     else {
         std::cout << theTitle.GetCharStar() << ": " << theMsgText.GetCharStar() << std::endl;
@@ -385,7 +385,7 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
  *	Notify the user that the presentation we tried to load has failed.
  *	@param	inPresentation	The AKFile that we failed to load.
  */
-void CDialogs::DisplayLoadingPresentationFailed(const CUICFile &inPresentation,
+void CDialogs::DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
                                                 long inErrorIDS /*= -1 */)
 {
     Q_UNUSED(inPresentation);
@@ -398,7 +398,7 @@ void CDialogs::DisplayLoadingPresentationFailed(const CUICFile &inPresentation,
     Q3DStudio::CString theErrorTitle(::LoadResourceString(IDS_ERROR_LOADPRESENTATION_TITLE));
 
     if (m_ShowGUI)
-        CUICMessageBox::Show(theErrorTitle, theErrorMessage, CUICMessageBox::ICON_WARNING, false,
+        Qt3DSMessageBox::Show(theErrorTitle, theErrorMessage, Qt3DSMessageBox::ICON_WARNING, false,
                              qApp->activeWindow());
     else {
         std::cout << theErrorTitle.GetCharStar() << ": " << theErrorMessage.GetCharStar() << std::endl;
@@ -417,7 +417,7 @@ void CDialogs::DisplaySavingPresentationFailed()
     Q3DStudio::CString theErrorTitle = ::LoadResourceString(IDS_PROJNAME);
 
     if (m_ShowGUI)
-        CUICMessageBox::Show(theErrorTitle, theErrorMessage, CUICMessageBox::ICON_WARNING, false,
+        Qt3DSMessageBox::Show(theErrorTitle, theErrorMessage, Qt3DSMessageBox::ICON_WARNING, false,
                              qApp->activeWindow());
     else {
         std::cout << theErrorTitle.GetCharStar() << ": " << theErrorMessage.GetCharStar() << std::endl;
@@ -433,7 +433,7 @@ void CDialogs::DisplaySavingPresentationFailed()
  *
  *	@return	void
  */
-void CDialogs::DisplaySaveReadOnlyFailed(const CUICFile &inSavedLocation)
+void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
 {
     Q3DStudio::CString theMsg = ::LoadResourceString(IDS_SAVE_READONLY_WARNING);
     Q3DStudio::CString theTitle = ::LoadResourceString(IDS_PROJNAME);
@@ -442,7 +442,7 @@ void CDialogs::DisplaySaveReadOnlyFailed(const CUICFile &inSavedLocation)
     theFormattedText.Format(theMsg, static_cast<const wchar_t *>(inSavedLocation.GetName()));
 
     if (m_ShowGUI)
-        CUICMessageBox::Show(theTitle, theFormattedText, CUICMessageBox::ICON_WARNING, false,
+        Qt3DSMessageBox::Show(theTitle, theFormattedText, Qt3DSMessageBox::ICON_WARNING, false,
                              qApp->activeWindow());
     else {
         std::cout << theTitle.GetCharStar() << ": " << theFormattedText.GetCharStar() << std::endl;
@@ -451,7 +451,7 @@ void CDialogs::DisplaySaveReadOnlyFailed(const CUICFile &inSavedLocation)
 
 //==============================================================================
 /**
- *	Displays a CUICMessageBox using the specified parameters.  The message box
+ *	Displays a Qt3DSMessageBox using the specified parameters.  The message box
  *	is modal to the main frame.  This provides an easy way to place modal dialogs
  * 	to the user, without requiring your class to know about the main frame or
  *	window refs.
@@ -461,18 +461,18 @@ void CDialogs::DisplaySaveReadOnlyFailed(const CUICFile &inSavedLocation)
  *	@param inShowCancel true to show a Cancel button, false only show an OK button
  *	@return Indication of which button was pressed to dismiss the dialog
  */
-CUICMessageBox::EMessageBoxReturn
+Qt3DSMessageBox::EMessageBoxReturn
 CDialogs::DisplayMessageBox(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
-                            CUICMessageBox::EMessageBoxIcon inIcon, bool inShowCancel)
+                            Qt3DSMessageBox::EMessageBoxIcon inIcon, bool inShowCancel)
 {
-    CUICMessageBox::EMessageBoxReturn theUserChoice;
+    Qt3DSMessageBox::EMessageBoxReturn theUserChoice;
 
     if (m_ShowGUI) {
         theUserChoice =
-            CUICMessageBox::Show(inTitle, inText, inIcon, inShowCancel, qApp->activeWindow());
+            Qt3DSMessageBox::Show(inTitle, inText, inIcon, inShowCancel, qApp->activeWindow());
     } else {
         std::cout << inTitle.GetCharStar() << ": " << inText.GetCharStar() << std::endl;
-        theUserChoice = CUICMessageBox::MSGBX_OK;
+        theUserChoice = Qt3DSMessageBox::MSGBX_OK;
     }
 
     return theUserChoice;
@@ -486,13 +486,13 @@ int CDialogs::DisplayChoiceBox(const Q3DStudio::CString &inTitle, const Q3DStudi
         box.setWindowTitle(inTitle.toQString());
         box.setText(inText.toQString());
         switch (inIcon) {
-        case CUICMessageBox::ICON_WARNING:
+        case Qt3DSMessageBox::ICON_WARNING:
             box.setIcon(QMessageBox::Warning);
             break;
-        case CUICMessageBox::ICON_ERROR:
+        case Qt3DSMessageBox::ICON_ERROR:
             box.setIcon(QMessageBox::Critical);
             break;
-        case CUICMessageBox::ICON_INFO:
+        case Qt3DSMessageBox::ICON_INFO:
             box.setIcon(QMessageBox::Information);
             break;
         default:
@@ -704,7 +704,7 @@ void CDialogs::DisplayKnownErrorDialog(const Q3DStudio::CString &inErrorText)
     {
         Q3DStudio::CString theTitle(::LoadResourceString(IDS_PROJNAME));
         if (m_ShowGUI)
-            CUICMessageBox::Show(theTitle, inErrorText, CUICMessageBox::ICON_ERROR, false,
+            Qt3DSMessageBox::Show(theTitle, inErrorText, Qt3DSMessageBox::ICON_ERROR, false,
                                  qApp->activeWindow());
         else
             std::cout << inErrorText.GetCharStar() << ": " << inErrorText.GetCharStar() << std::endl;
@@ -722,7 +722,7 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
 {
     Q3DStudio::CString theDocTitle;
 
-    CUICFile theCurrentDoc = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
+    Qt3DSFile theCurrentDoc = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
     if (theCurrentDoc.IsFile())
         theDocTitle = theCurrentDoc.GetName();
     else // if the current doc has not been saved then use the default title.
@@ -758,10 +758,10 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  *	Prompt the user for a file to save to from the SaveAs menu option.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-std::pair<CUICFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &inDialogTitle,
+std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &inDialogTitle,
                                                     bool inFilenameUntitled)
 {
-    CUICFile theFile("");
+    Qt3DSFile theFile("");
     Q3DStudio::CString theFileExt;
     Q3DStudio::CString theImportFilter;
 
@@ -789,7 +789,7 @@ std::pair<CUICFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &in
 
     while (theShowDialog && theFileDlg.exec()) {
         theShowDialog = false;
-        theFile = CUICFile(Q3DStudio::CString::fromQString(theFileDlg.selectedFiles().front()));
+        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(theFileDlg.selectedFiles().front()));
 
         m_LastSaveFile = theFile.GetAbsolutePath();
         // customising a dialog box will force us to use non-native.
@@ -818,7 +818,7 @@ std::pair<CUICFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &in
                 auto result = QMessageBox::question(nullptr, theTitle, theString);
                 if (result != QMessageBox::Yes) {
                     // Reset the file and show the file dialog again
-                    theFile = CUICFile("");
+                    theFile = Qt3DSFile("");
                     theShowDialog = true;
                     continue;
                 }
@@ -834,7 +834,7 @@ std::pair<CUICFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &in
  *	Prompt the user for a file to create.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-std::pair<CUICFile, bool>
+std::pair<Qt3DSFile, bool>
 CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory)
 {
     if (inInitialDirectory.size())
@@ -847,9 +847,9 @@ CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory)
  * Prompt the user for a file to open.
  * This will return an invalid file if the user cancels the save dialog.
  */
-CUICFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory)
+Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory)
 {
-    CUICFile theFile("");
+    Qt3DSFile theFile("");
     Q3DStudio::CString theFileExt;
     Q3DStudio::CString theImportFilter;
 
@@ -865,7 +865,7 @@ CUICFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirector
         QFileInfo fi(theFileDlg.selectedFiles().first());
         Q3DStudio::CString thePath = Q3DStudio::CString::fromQString(fi.absolutePath());
         Q3DStudio::CString theName = Q3DStudio::CString::fromQString(fi.fileName());
-        theFile = CUICFile(thePath, theName);
+        theFile = Qt3DSFile(thePath, theName);
 
         m_LastSaveFile = theFile.GetAbsolutePath();
     }
@@ -884,18 +884,18 @@ bool CDialogs::ConfirmRevert()
     Q3DStudio::CString thePrompt = ::LoadResourceString(IDS_PROMPT_FOR_REVERT);
     Q3DStudio::CString theTitle = ::LoadResourceString(IDS_PROJNAME);
 
-    CUICMessageBox::EMessageBoxReturn theChoice;
+    Qt3DSMessageBox::EMessageBoxReturn theChoice;
 
     if (m_ShowGUI)
-        theChoice = CUICMessageBox::Show(theTitle, thePrompt, CUICMessageBox::ICON_WARNING, true,
+        theChoice = Qt3DSMessageBox::Show(theTitle, thePrompt, Qt3DSMessageBox::ICON_WARNING, true,
                                          qApp->activeWindow());
     else {
         std::cout << theTitle.GetCharStar() << ": " << thePrompt.GetCharStar() << std::endl;
-        theChoice = CUICMessageBox::MSGBX_OK;
+        theChoice = Qt3DSMessageBox::MSGBX_OK;
     }
 
     // user decided to go ahead and delete all unused resources
-    if (theChoice == CUICMessageBox::MSGBX_OK)
+    if (theChoice == Qt3DSMessageBox::MSGBX_OK)
         theConfirmation = true;
 
     return theConfirmation;
@@ -970,7 +970,7 @@ void CDialogs::DisplayProfilingStatistics()
     }
 #endif // #ifdef PERFORM_PROFILE
     if (m_ShowGUI)
-        CUICMessageBox::Show("Profiling Statistics", theStatistics, CUICMessageBox::ICON_INFO);
+        Qt3DSMessageBox::Show("Profiling Statistics", theStatistics, Qt3DSMessageBox::ICON_INFO);
     else {
         std::cout << "Profiling Statistics"
                   << ": " << theStatistics.GetCharStar() << std::endl;
@@ -990,7 +990,7 @@ void CDialogs::DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErro
     theMessage += inErrorMessage;
     theMessage += ::LoadResourceString(IDS_PROJECT_VARIABLES_FORMAT);
     if (m_ShowGUI)
-        CUICMessageBox::Show(theTitle, theMessage, CUICMessageBox::ICON_ERROR, false,
+        Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
                              qApp->activeWindow());
     else {
         std::cout << theTitle.GetCharStar() << ": " << theMessage.GetCharStar() << std::endl;
@@ -1033,7 +1033,7 @@ void CDialogs::DisplayPasteFailed()
     Q3DStudio::CString theMessage(::LoadResourceString(IDS_ERROR_PATHOLOGICAL_PASTE_MESSAGE));
 
     if (m_ShowGUI)
-        CUICMessageBox::Show(theTitle, theMessage, CUICMessageBox::ICON_ERROR, false,
+        Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
                              qApp->activeWindow());
     else
         std::cout << theTitle.GetCharStar() << ": " << theMessage.GetCharStar() << std::endl;

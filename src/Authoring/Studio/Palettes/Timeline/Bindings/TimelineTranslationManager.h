@@ -55,7 +55,7 @@ class CAsset;
 class IUICDMSelectable;
 class CClientDataModelBridge;
 
-// UICDM
+// DataModel
 namespace qt3dsdm {
 class CStudioSystem;
 class ISignalConnection;
@@ -70,21 +70,21 @@ class CDoc;
 class CTimelineTranslationManager
 {
 protected: // Typedefs
-    // UICDM support
+    // DataModel support
     typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, Qt3DSDMTimelineItemBinding *>
         TInstanceHandleBindingMap;
 
     // Store expanded state
-    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, bool> TInstanceHandleExpandedMap; // UICDM support
+    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, bool> TInstanceHandleExpandedMap; // DataModel support
 
 protected: // Properties
-    // UICDM support
+    // DataModel support
     TInstanceHandleBindingMap m_InstanceHandleBindingMap;
 
     CKeyframesManager *m_KeyframesManager;
     IBreadCrumbProvider *m_BreadCrumbProvider;
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_Connections; /// connections to the UICDM
+        m_Connections; /// connections to the DataModel
 
     TInstanceHandleExpandedMap m_InstanceHandleExpandedMap;
 
@@ -114,7 +114,7 @@ public:
 
     qt3dsdm::CStudioSystem *GetStudioSystem() const;
 
-    // UICDM callback
+    // DataModel callback
     void OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance,

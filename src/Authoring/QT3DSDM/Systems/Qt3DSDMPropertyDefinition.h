@@ -27,38 +27,38 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMPROPERTYDEFINITIONH
-#define UICDMPROPERTYDEFINITIONH
+#ifndef QT3DSDM_PROPERTY_DEFINITION_H
+#define QT3DSDM_PROPERTY_DEFINITION_H
 
 #include "Qt3DSDMDataTypes.h"
 
 namespace qt3dsdm {
 
-struct SUICDMPropertyDefinition
+struct Qt3DSDMPropertyDefinition
 {
     TCharStr m_Name;
     Qt3DSDMInstanceHandle m_Instance;
     DataModelDataType::Value m_Type;
 
-    SUICDMPropertyDefinition()
+    Qt3DSDMPropertyDefinition()
         : m_Type(DataModelDataType::None)
     {
     }
-    SUICDMPropertyDefinition(Qt3DSDMInstanceHandle inInstanceHandle, TCharPtr inName,
+    Qt3DSDMPropertyDefinition(Qt3DSDMInstanceHandle inInstanceHandle, TCharPtr inName,
                              DataModelDataType::Value inType)
         : m_Name(inName)
         , m_Instance(inInstanceHandle)
         , m_Type(inType)
     {
     }
-    SUICDMPropertyDefinition(const SUICDMPropertyDefinition &inOther)
+    Qt3DSDMPropertyDefinition(const Qt3DSDMPropertyDefinition &inOther)
         : m_Name(inOther.m_Name)
         , m_Instance(inOther.m_Instance)
         , m_Type(inOther.m_Type)
     {
     }
 
-    SUICDMPropertyDefinition &operator=(const SUICDMPropertyDefinition &inOther)
+    Qt3DSDMPropertyDefinition &operator=(const Qt3DSDMPropertyDefinition &inOther)
     {
         if (this != &inOther) {
             m_Name = inOther.m_Name;
@@ -69,7 +69,7 @@ struct SUICDMPropertyDefinition
     }
 };
 
-typedef std::vector<SUICDMPropertyDefinition> TPropertyDefinitionList;
+typedef std::vector<Qt3DSDMPropertyDefinition> TPropertyDefinitionList;
 }
 
 #endif

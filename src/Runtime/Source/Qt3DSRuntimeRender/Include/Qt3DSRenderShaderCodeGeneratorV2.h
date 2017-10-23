@@ -114,7 +114,7 @@ namespace render {
                                           TShaderFeatureSet(), separableProgram);
         }
 
-        static IShaderProgramGenerator &CreateProgramGenerator(IUICRenderContext &inContext);
+        static IShaderProgramGenerator &CreateProgramGenerator(IQt3DSRenderContext &inContext);
 
         static void OutputParaboloidDepthVertex(IShaderStageGenerator &inGenerator);
         // By convention, the local space result of the TE is stored in vec4 pos local variable.

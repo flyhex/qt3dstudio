@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef __UICMATH_H__
-#define __UICMATH_H__
+#ifndef __QT3DS_MATH_H__
+#define __QT3DS_MATH_H__
 
 //==============================================================================
 //	Includes
@@ -431,4 +431,4 @@ public: // Static common matrices
 
 } // namespace Q3DStudio
 
-#endif //__UICMATH_H_
+#endif //__QT3DS_MATH_H_

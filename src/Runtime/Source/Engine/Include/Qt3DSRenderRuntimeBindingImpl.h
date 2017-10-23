@@ -90,9 +90,9 @@ namespace render {
         QT3DSU8 *m_FlowData;
         NVScopedRefCounted<NVFoundation> m_Foundation;
         NVScopedRefCounted<IStringTable> m_StringTable;
-        NVScopedRefCounted<IUICRenderContextCore> m_CoreContext;
+        NVScopedRefCounted<IQt3DSRenderContextCore> m_CoreContext;
         NVScopedRefCounted<NVRenderContext> m_RenderContext;
-        NVScopedRefCounted<IUICRenderContext> m_UICContext;
+        NVScopedRefCounted<IQt3DSRenderContext> m_Context;
         SWindowDimensions m_WindowDimensions;
         eastl::string m_PrimitivePath;
         bool m_RenderRotationsEnabled;
@@ -107,7 +107,7 @@ namespace render {
             , m_FlowData(NULL)
             , m_Foundation(NVCreateFoundation(QT3DS_FOUNDATION_VERSION, m_Allocator))
             , m_StringTable(IStringTable::CreateStringTable(m_Foundation->getAllocator()))
-            , m_CoreContext(IUICRenderContextCore::Create(*m_Foundation, *m_StringTable))
+            , m_CoreContext(IQt3DSRenderContextCore::Create(*m_Foundation, *m_StringTable))
             , m_PrimitivePath(inPrimitivePath)
             , m_RenderRotationsEnabled(false)
             , m_WriteOutShaderCache(false)
@@ -124,7 +124,7 @@ namespace render {
         virtual ~SBindingCore()
         {
             m_CoreContext = NULL;
-            m_UICContext = NULL;
+            m_Context = NULL;
             m_RenderContext = NULL;
             if (m_FlowData)
                 m_Allocator.deallocate(m_FlowData);
@@ -135,7 +135,7 @@ namespace render {
         {
             m_RenderContext = inContextFactory.CreateRenderContext(*m_Foundation, *m_StringTable);
             if (m_RenderContext)
-                m_UICContext =
+                m_Context =
                     m_CoreContext->CreateRenderContext(*m_RenderContext, m_PrimitivePath.c_str());
         }
 
@@ -155,7 +155,7 @@ namespace render {
     //  TODO - get rid of the virtual functions and just do dispatch
     //	on the m_RenderObject.m_Type.
     ////////////////////////////////////////
-    class CUICTranslator
+    class Qt3DSTranslator
     {
     public:
         QT3DSU32 m_DirtyIndex;
@@ -163,25 +163,25 @@ namespace render {
         SGraphObject *m_RenderObject;
         STranslatorContext *m_TranslatorContext;
 
-        CUICTranslator(Q3DStudio::TElement &inElement, SGraphObject &inRenderObject);
+        Qt3DSTranslator(Q3DStudio::TElement &inElement, SGraphObject &inRenderObject);
         GraphObjectTypes::Enum GetUIPType() const { return m_RenderObject->m_Type; }
         Q3DStudio::TElement &Element() { return *m_Element; }
         SGraphObject &RenderObject() { return *m_RenderObject; }
 
         // This function is done via a dispatch mechanism on the graph object type.
-        void OnElementChanged(SPresentation &inPresentation, IUICRenderContext &inRenderContext,
+        void OnElementChanged(SPresentation &inPresentation, IQt3DSRenderContext &inRenderContext,
                               Q3DStudio::IPresentation &inStudioPresentation);
 
         void Save(SWriteBuffer &inWriteBuffer, QT3DSU32 inGraphObjectOffset);
         // Most translators don't need an extra allocation but effects due because the mapping from
         // effect property
         // to runtime property is too complex to do quickly.
-        static CUICTranslator *LoadTranslator(SDataReader &inReader, size_t inElemOffset,
+        static Qt3DSTranslator *LoadTranslator(SDataReader &inReader, size_t inElemOffset,
                                               NVDataRef<QT3DSU8> inSGSection,
                                               NVAllocatorCallback &inAllocator);
 
-        static CUICTranslator *GetTranslatorFromGraphNode(SGraphObject &inObject);
-        static CUICTranslator *CreateTranslatorForElement(Q3DStudio::TElement &inElement,
+        static Qt3DSTranslator *GetTranslatorFromGraphNode(SGraphObject &inObject);
+        static Qt3DSTranslator *CreateTranslatorForElement(Q3DStudio::TElement &inElement,
                                                           SGraphObject &inGraphObject,
                                                           NVAllocatorCallback &inAlloc);
         static Q3DStudio::IPresentation *
@@ -193,17 +193,17 @@ namespace render {
 
     struct STranslatorGetOp
     {
-        QT3DSU32 operator()(const CUICTranslator &translator) { return translator.m_DirtyIndex; }
+        QT3DSU32 operator()(const Qt3DSTranslator &translator) { return translator.m_DirtyIndex; }
     };
     struct STranslatorSetOp
     {
-        void operator()(CUICTranslator &translator, QT3DSU32 value)
+        void operator()(Qt3DSTranslator &translator, QT3DSU32 value)
         {
             translator.m_DirtyIndex = value;
         }
     };
 
-    typedef InvasiveSet<CUICTranslator, STranslatorGetOp, STranslatorSetOp> TTranslatorDirytSet;
+    typedef InvasiveSet<Qt3DSTranslator, STranslatorGetOp, STranslatorSetOp> TTranslatorDirytSet;
 }
 }
 

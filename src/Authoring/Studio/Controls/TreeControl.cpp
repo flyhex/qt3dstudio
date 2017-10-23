@@ -522,7 +522,7 @@ bool CTreeControl::GetAllowRefresh()
  */
 CTreeItem *CTreeControl::GetSiblingAfter(CTreeItem *inItem)
 {
-    UICPROFILE(GetSiblingAfter);
+    QT3DS_PROFILE(GetSiblingAfter);
 
     ASSERT(inItem);
 
@@ -580,7 +580,7 @@ CTreeItem *CTreeControl::GetSiblingAfter(CTreeItem *inItem)
  */
 CTreeItem *CTreeControl::RecurseGetControlAfter(CTreeItem *inItem)
 {
-    UICPROFILE(RecurseGetControlAfter);
+    QT3DS_PROFILE(RecurseGetControlAfter);
 
     ASSERT(inItem);
 

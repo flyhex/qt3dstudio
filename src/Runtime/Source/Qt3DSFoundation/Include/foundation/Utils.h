@@ -171,7 +171,7 @@ namespace foundation {
         QT3DS_ASSERT(false);                                                                          \
     }
 
-#define UICBASE_FOREACH(varname, stop) for (QT3DSU32 varname = 0, end = stop; varname < end; ++varname)
+#define QT3DS_FOREACH(varname, stop) for (QT3DSU32 varname = 0, end = stop; varname < end; ++varname)
 
     template <typename TKeyType, typename TValueType, typename THashType, typename TPredicate,
               typename TBufType, typename TOperator>
@@ -263,7 +263,7 @@ namespace foundation {
 
         startIdx = NVMin(numItems - 1, startIdx);
         QT3DSU32 available = NVMin(numItems - startIdx, bufSize);
-        UICBASE_FOREACH(idx, available)
+        QT3DS_FOREACH(idx, available)
         buffer[idx] = data[idx + startIdx];
         return available;
     }
@@ -278,7 +278,7 @@ namespace foundation {
 
         startIdx = NVMin(numItems - 1, startIdx);
         QT3DSU32 available = NVMin(numItems - startIdx, bufSize);
-        UICBASE_FOREACH(idx, available)
+        QT3DS_FOREACH(idx, available)
         buffer[idx] = data.mData[idx + startIdx];
         return available;
     }
@@ -293,7 +293,7 @@ namespace foundation {
 
         startIdx = NVMin(numItems - 1, startIdx);
         QT3DSU32 available = NVMin(numItems - startIdx, bufSize);
-        UICBASE_FOREACH(idx, available)
+        QT3DS_FOREACH(idx, available)
         buffer[idx] = data.mData[idx + startIdx];
         return available;
     }

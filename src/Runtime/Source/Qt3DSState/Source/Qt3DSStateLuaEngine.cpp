@@ -617,7 +617,7 @@ struct SLuaEngineImpl : public qt3ds::state::INDDStateLuaEngine
     void SetApplication(qt3ds::state::INDDStateApplication &inApplication) override;
 
     //	virtual void		BeginPreloadScripts( const eastl::vector<const char*>& inScripts,
-    //uic::render::IThreadPool& inThreadPool, const char* inProjectDir );
+    //qt3ds::render::IThreadPool& inThreadPool, const char* inProjectDir );
     //	virtual void		EndPreloadScripts();
     eastl::vector<eastl::string> GetLoadedScripts() override;
 
@@ -628,7 +628,7 @@ struct SLuaEngineImpl : public qt3ds::state::INDDStateLuaEngine
     //CScriptEngineCallFunctionArgRetriever &inArgRetriever );
 
     void AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction) override;
-    //	virtual void		EnableDebugging(uic::state::debugger::IMultiProtocolSocket& socket
+    //	virtual void		EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket& socket
     //);
     //	virtual void		EnableProfiling();
     void StepGC() override;
@@ -662,7 +662,7 @@ namespace __SLuaEngineImpl_Static_Calls__ {
     //		eastl::string theLuaBinFile = theEngine->m_PreloadProjectDir;
     //		CFileTools::CombineBaseAndRelative( theEngine->m_PreloadProjectDir.c_str(),
     //"binary/compiledlua.bin", theLuaBinFile );
-    //		NVScopedRefCounted<uic::render::IRefCountedInputStream> theBinFile
+    //		NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theBinFile
     //			=
     //theEngine->m_ApplicationCore->GetRuntimeFactoryCore().GetInputStreamFactory().GetStreamForFile(
     //theLuaBinFile.c_str() );
@@ -893,7 +893,7 @@ void SLuaEngineImpl::SetApplication(qt3ds::state::INDDStateApplication &inApplic
 // Starts preloading scripts offline.  This sets m_LuaState to NULL until after EndPreloadScripts to
 // avoid multithreaded lua state access.  Some calls may be queued till EndPreloadScripts
 // void SLuaEngineImpl::BeginPreloadScripts( const eastl::vector<const char*>& inScripts,
-// uic::render::IThreadPool& inThreadPool, const char* inProjDir )
+// qt3ds::render::IThreadPool& inThreadPool, const char* inProjDir )
 //{
 //	m_PreloadScripts.assign( inScripts.begin(), inScripts.end() );
 //	m_PreloadState = m_LuaState;
@@ -1073,18 +1073,18 @@ void SLuaEngineImpl::AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction
     }
 }
 
-// void SLuaEngineImpl::EnableDebugging(uic::state::debugger::IMultiProtocolSocket& socket)
+// void SLuaEngineImpl::EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket& socket)
 //{
 //	LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
-//	using namespace uic::state::debugger;
+//	using namespace qt3ds::state::debugger;
 //	QT3DS_ASSERT( m_ApplicationCore );
-//	NVScopedRefCounted<uic::state::debugger::IMultiProtocolSocketStream> theStream
+//	NVScopedRefCounted<qt3ds::state::debugger::IMultiProtocolSocketStream> theStream
 //		= socket.CreateProtocol(
-//uic::state::debugger::ILuaArchitectDebugServer::LuaProtocolName(), 0 );
+//qt3ds::state::debugger::ILuaArchitectDebugServer::LuaProtocolName(), 0 );
 //	m_LuaListener = QT3DS_NEW( m_Foundation.getAllocator(), SLuaEngineListener)( m_Foundation,
 //*this );
 //
-//	m_LuaDebugger = uic::state::debugger::ILuaDebugger::CreateLuaSideDebugger(
+//	m_LuaDebugger = qt3ds::state::debugger::ILuaDebugger::CreateLuaSideDebugger(
 //		  m_ApplicationCore->GetRuntimeFactoryCore().GetFoundation()
 //		, *theStream
 //		, m_LuaState
@@ -1369,7 +1369,7 @@ int SLuaEngineImpl::PCall(int argcount, int retcount, int errorIndex)
 
 // void SLuaEngineImpl::OnBreak()
 //{
-//	uic::state::debugger::IDebugger& theDebugger = m_ApplicationCore->GetStateDebugger();
+//	qt3ds::state::debugger::IDebugger& theDebugger = m_ApplicationCore->GetStateDebugger();
 //	theDebugger.OnExternalBreak();
 //}
 

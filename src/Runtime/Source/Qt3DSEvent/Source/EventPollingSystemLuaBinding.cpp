@@ -56,13 +56,13 @@ int GetCInterface(lua_State *inState);
 // the input count, less events will be returned; if no event, an empty array will be returned.
 int GetNextEvents(lua_State *inState);
 
-void TranslateEventValue(lua_State *inState, const SUICEventSystemEventValue &theValue)
+void TranslateEventValue(lua_State *inState, const Qt3DSEventSystemEventValue &theValue)
 {
     switch (theValue.m_Type) {
-    case EUICEventSystemEventTypesNumber:
+    case QT3DSEventSystemEventTypesNumber:
         lua_pushnumber(inState, theValue.m_Number);
         break;
-    case EUICEventSystemEventTypesString:
+    case QT3DSEventSystemEventTypesString:
         lua_pushstring(inState, theValue.m_String ? theValue.m_String : "");
         break;
     default:
@@ -70,7 +70,7 @@ void TranslateEventValue(lua_State *inState, const SUICEventSystemEventValue &th
     }
 }
 
-void TranslateEvent(lua_State *inState, SUICEventSystemEvent &theEvent)
+void TranslateEvent(lua_State *inState, Qt3DSEventSystemEvent &theEvent)
 {
     int top = lua_gettop(inState);
     // Put the result table of event on top of the lua stack
@@ -79,7 +79,7 @@ void TranslateEvent(lua_State *inState, SUICEventSystemEvent &theEvent)
     // otherwise just a string or number object.
     lua_newtable(inState); // The result table of event
     for (int i = 0; i < theEvent.m_NumData; ++i) {
-        const SUICEventSystemEventData &theValue(theEvent.m_Data[i]);
+        const Qt3DSEventSystemEventData &theValue(theEvent.m_Data[i]);
         const char *theFetchableString(theValue.m_Name.m_Data);
         lua_getfield(inState, -1, theFetchableString);
         // Is the string already in the table?
@@ -140,15 +140,15 @@ int GetNextEvents(lua_State *inState)
     lua_getfield(inState, 1, POLLER_TABLE_ENTRY);
     luaL_checktype(inState, -1, LUA_TLIGHTUSERDATA);
 
-    SUICEventSystemEventPoller *thePollerC =
-        (SUICEventSystemEventPoller *)lua_touserdata(inState, -1);
+    Qt3DSEventSystemEventPoller *thePollerC =
+        (Qt3DSEventSystemEventPoller *)lua_touserdata(inState, -1);
     IEventSystem *thePoller = 0;
     lua_newtable(inState);
     if (!thePollerC || (thePoller = reinterpret_cast<IEventSystem *>(thePollerC->m_Poller)) == 0
         || theMaxCount <= 0)
         return 1;
 
-    SUICEventSystemEvent *theEvents[MAX_EVENTS_ONCE];
+    Qt3DSEventSystemEvent *theEvents[MAX_EVENTS_ONCE];
     size_t theCount = thePoller->GetNextEvents(theEvents, theMaxCount);
     for (qt3ds::QT3DSU32 theIndex = 0; theIndex < theCount; ++theIndex) {
         TranslateEvent(inState, *theEvents[theIndex]);

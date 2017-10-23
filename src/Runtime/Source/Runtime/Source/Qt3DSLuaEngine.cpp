@@ -1127,7 +1127,7 @@ void SLuaEngineImpl::SetApplicationCore(qt3ds::runtime::IApplicationCore &inAppl
     lua_pushlightuserdata(m_LuaState, m_Application);
     lua_setglobal(m_LuaState, "Qt3DSApplicationCore");
     g_InputStreamFactory = &m_ApplicationCore->GetRuntimeFactoryCore()
-                                .GetUICRenderContextCore()
+                                .GetRenderContextCore()
                                 .GetInputStreamFactory();
     // re-route lua through our file handling system.  This allows us to load data from an APK file
     // directly without needing

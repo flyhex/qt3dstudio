@@ -268,9 +268,9 @@ namespace render {
         // Get the bounds of us and our children in our local space.
         NVBounds3 GetBounds(IBufferManager &inManager, IPathManager &inPathManager,
                             bool inIncludeChildren = true,
-                            IUICRenderNodeFilter *inChildFilter = NULL) const;
+                            IQt3DSRenderNodeFilter *inChildFilter = NULL) const;
         NVBounds3 GetChildBounds(IBufferManager &inManager, IPathManager &inPathManager,
-                                 IUICRenderNodeFilter *inChildFilter = NULL) const;
+                                 IQt3DSRenderNodeFilter *inChildFilter = NULL) const;
         // Assumes CalculateGlobalVariables has already been called.
         QT3DSVec3 GetGlobalPos() const;
         QT3DSVec3 GetGlobalPivot() const;

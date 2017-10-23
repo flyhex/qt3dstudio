@@ -42,7 +42,7 @@
 
 //==============================================================================
 /**
- * Base class that provide basic Update/Finalize functionality, when changing UICDM data.
+ * Base class that provide basic Update/Finalize functionality, when changing DataModel data.
  */
 template <class TDataType>
 class CCmdDataModelBase : public CCmd, public qt3dsdm::CmdDataModel

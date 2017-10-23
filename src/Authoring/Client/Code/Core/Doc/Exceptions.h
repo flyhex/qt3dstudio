@@ -60,7 +60,7 @@ public:
     virtual ~CNoClientException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Client is not installed"));
+        return Q3DStudio::CString(_LSTR("Client is not installed"));
     }
 };
 
@@ -71,7 +71,7 @@ public:
     virtual ~CClientCreationException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Unable to create Client"));
+        return Q3DStudio::CString(_LSTR("Unable to create Client"));
     }
 };
 
@@ -82,7 +82,7 @@ public:
     virtual ~CInvalidFileFormatException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Invalid file format"));
+        return Q3DStudio::CString(_LSTR("Invalid file format"));
     }
 };
 
@@ -93,7 +93,7 @@ public:
     virtual ~CUnsupportedFileFormatException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Unsupported file format"));
+        return Q3DStudio::CString(_LSTR("Unsupported file format"));
     }
 };
 
@@ -102,7 +102,7 @@ class CENotImplException : public CStudioException
 public:
     CENotImplException() {}
     virtual ~CENotImplException() {}
-    const wchar_t *GetDescription() const override { return Q3DStudio::CString(_UIC("ENOTIMPL")); }
+    const wchar_t *GetDescription() const override { return Q3DStudio::CString(_LSTR("ENOTIMPL")); }
 };
 
 class CInvalidArgumentsException : public CStudioException
@@ -112,7 +112,7 @@ public:
     virtual ~CInvalidArgumentsException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Invalid Argument"));
+        return Q3DStudio::CString(_LSTR("Invalid Argument"));
     }
 };
 
@@ -123,7 +123,7 @@ public:
     virtual ~CNullPointerException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Null Pointer Error"));
+        return Q3DStudio::CString(_LSTR("Null Pointer Error"));
     }
 };
 
@@ -134,7 +134,7 @@ public:
     virtual ~CUnexpectedResultException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Unexpected Result"));
+        return Q3DStudio::CString(_LSTR("Unexpected Result"));
     }
 };
 
@@ -145,7 +145,7 @@ public:
     virtual ~CClientFailException() {}
     const wchar_t *GetDescription() const override
     {
-        return Q3DStudio::CString(_UIC("Client Failure"));
+        return Q3DStudio::CString(_LSTR("Client Failure"));
     }
 };
 

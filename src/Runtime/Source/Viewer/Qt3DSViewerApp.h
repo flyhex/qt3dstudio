@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef UICVIEWER_H
-#define UICVIEWER_H
+#ifndef QT3DS_VIEWER_H
+#define QT3DS_VIEWER_H
 
 #include "qt3dsruntimeglobal.h"
 
@@ -391,4 +391,4 @@ Q_SIGNALS:
 
 } // end namespace
 
-#endif // UICVIEWER_H
+#endif // QT3DS_VIEWER_H

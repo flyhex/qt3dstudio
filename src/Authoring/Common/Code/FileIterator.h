@@ -38,18 +38,18 @@
 #include <vector>
 #include "Qt3DSString.h"
 
-class CUICFile;
+class Qt3DSFile;
 
 class CFileIterator
 {
 public:
-    CFileIterator(const CUICFile *inFile);
+    CFileIterator(const Qt3DSFile *inFile);
     virtual ~CFileIterator();
     virtual bool IsDone();
     virtual void operator++();
 
     virtual void operator+=(const long inNumToInc);
-    virtual CUICFile GetCurrent();
+    virtual Qt3DSFile GetCurrent();
 
     virtual size_t GetTotal();
 

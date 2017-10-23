@@ -41,7 +41,7 @@ namespace evt {
     {
         // Returns with an object with on the top of the stack.
         // The object has two methods, getCInterface and getNextEvents
-        // getCInterface returns userdata that is a pointer to a SUICEventSystemEventPoller (the 'c'
+        // getCInterface returns userdata that is a pointer to a Qt3DSEventSystemEventPoller (the 'c'
         // interface).
         // getNextEvents returns an array of the next events.
         static void WrapEventPoller(lua_State *inState, IEventSystem &inPoller);

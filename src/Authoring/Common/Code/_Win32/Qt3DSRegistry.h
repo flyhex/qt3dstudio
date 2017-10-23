@@ -38,18 +38,18 @@
 
 //==============================================================================
 /**
- *		@class	CUICRegistry
+ *		@class	Qt3DSRegistry
  *		@brief	Studio Client Registry Functions.
  *
  *		Registry entries:
  *		-	Stores the latest installed version.
  */
 //==============================================================================
-class CUICRegistry
+class Qt3DSRegistry
 {
 public:
-    CUICRegistry();
-    virtual ~CUICRegistry();
+    Qt3DSRegistry();
+    virtual ~Qt3DSRegistry();
 
 #ifdef KDAB_TEMPORARILY_REMOVED
     static BOOL GetValueKey(const Q3DStudio::CString &inKeyName,

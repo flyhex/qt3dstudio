@@ -274,7 +274,7 @@ bool CMasterControl::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 /**
  *	Return the window handle to the master view
  */
-UICRenderDevice CMasterControl::GetPlatformDevice()
+Qt3DSRenderDevice CMasterControl::GetPlatformDevice()
 {
     return m_RenderDevice;
 }

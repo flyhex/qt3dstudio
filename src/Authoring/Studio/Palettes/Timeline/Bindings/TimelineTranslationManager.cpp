@@ -114,7 +114,7 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
                  || theWideTypeString == L"Alias" || theWideTypeString == L"SubPath")
             theReturn = new Qt3DSDMTimelineItemBinding(this, inInstance);
         else {
-            // Add support for additional UICDM types here.
+            // Add support for additional DataModel types here.
             ASSERT(0);
         }
 
@@ -179,7 +179,7 @@ void CTimelineTranslationManager::Clear()
  */
 void CTimelineTranslationManager::Unregister(ITimelineItemBinding *inTimelineItem)
 {
-    // UICDM
+    // DataModel
     bool theDeselectItem = false;
     TInstanceHandleBindingMap::iterator theInstanceIter = m_InstanceHandleBindingMap.begin();
     for (; theInstanceIter != m_InstanceHandleBindingMap.end(); ++theInstanceIter) {
@@ -513,7 +513,7 @@ void CTimelineTranslationManager::OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inA
  */
 void CTimelineTranslationManager::ClearBindingsKeyframeSelection()
 {
-    // UICDM bindings handle their own selections
+    // DataModel bindings handle their own selections
     TInstanceHandleBindingMap::const_iterator theIter = m_InstanceHandleBindingMap.begin();
     for (; theIter != m_InstanceHandleBindingMap.end(); ++theIter)
         theIter->second->DoSelectKeyframes(false, -1, true);
@@ -562,9 +562,9 @@ ITimelineItemBinding *CTimelineTranslationManager::EnsureLoaded(Qt3DSDMInstanceH
             bool rowLoaded = theBinding != nullptr && theBinding->GetRow() != nullptr;
             if (theParentBinding && rowLoaded == false) {
                 // start to add the scene asset to the timeline
-                Qt3DSDMTimelineItemBinding *theUICDMBinding =
+                Qt3DSDMTimelineItemBinding *theDMBinding =
                     dynamic_cast<Qt3DSDMTimelineItemBinding *>(theParentBinding);
-                theUICDMBinding->OnAddChild(inHandle);
+                theDMBinding->OnAddChild(inHandle);
                 theBinding = GetBinding(inHandle);
             }
         }

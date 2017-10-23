@@ -473,7 +473,7 @@ unsigned char CColor::ToRGB1(float rm1, float rm2, float rh)
 Q3DStudio::CString CColor::GetString() const
 {
     Q3DStudio::CString color;
-	color.Format( _UIC( "%02X%02X%02X" ), GetRed(), GetGreen(), GetBlue());
+    color.Format( _LSTR( "%02X%02X%02X" ), GetRed(), GetGreen(), GetBlue());
 
 	return color;
 }

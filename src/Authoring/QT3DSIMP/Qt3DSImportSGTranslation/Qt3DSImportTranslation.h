@@ -28,8 +28,8 @@
 ****************************************************************************/
 #pragma once
 
-#ifndef UICIMPORTTRANSLATIONH
-#define UICIMPORTTRANSLATIONH
+#ifndef QT3DS_IMPORT_TRANSLATION_H
+#define QT3DS_IMPORT_TRANSLATION_H
 
 #include "qtAuthoring-config.h"
 #include "Qt3DSImportPerformImport.h"
@@ -63,7 +63,7 @@ public:
                            const wchar_t *inAssociatedName) = 0;
 };
 
-#ifdef UICIMPORT_TRANSLATION_INTERNAL
+#ifdef QT3DS_IMPORT_TRANSLATION_INTERNAL
 #define EXPORT_FUNCTION
 #else
 #define EXPORT_FUNCTION
@@ -119,7 +119,7 @@ struct SColladaTranslator : public qt3dsimp::ITranslator
 };
 
 #ifdef QT_3DSTUDIO_FBX
-struct SFbxTranslator : public UICIMP::ITranslator
+struct SFbxTranslator : public qt3dsimp::ITranslator
 {
     QString m_SourceFile;
     STranslationLog m_TranslationLog;

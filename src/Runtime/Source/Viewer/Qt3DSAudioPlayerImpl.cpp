@@ -38,22 +38,22 @@
 
 namespace Q3DSViewer {
 
-CUICAudioPlayerImpl::CUICAudioPlayerImpl()
+Qt3DSAudioPlayerImpl::Qt3DSAudioPlayerImpl()
 {
 }
 
-CUICAudioPlayerImpl::~CUICAudioPlayerImpl()
+Qt3DSAudioPlayerImpl::~Qt3DSAudioPlayerImpl()
 {
 }
 
-bool CUICAudioPlayerImpl::PlaySoundFile(const char *inFilePath)
+bool Qt3DSAudioPlayerImpl::PlaySoundFile(const char *inFilePath)
 {
 #ifdef PLATFORM_HAS_QT_MULTIMEDIA_LIB
     QSound::play(QString(inFilePath));
     return true;
 #else
     Q_UNUSED(inFilePath)
-    qCWarning(qt3ds::WARNING, "CUICAudioPlayerImpl::PlaySoundFile: no QT multimedia lib on this platform");
+    qCWarning(qt3ds::WARNING, "Qt3DSAudioPlayerImpl::PlaySoundFile: no QT multimedia lib on this platform");
     return false;
 #endif // PLATFORM_HAS_QT_MULTIMEDIA_LIB
 }

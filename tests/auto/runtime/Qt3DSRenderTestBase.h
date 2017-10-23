@@ -45,19 +45,19 @@
 
 namespace qt3ds {
 namespace render {
-class IUICRenderer;
-class CUICRendererImpl;
-class IUICRenderFactoryCore;
-class IUICRenderFactory;
+class IQt3DSRenderer;
+class Qt3DSRendererImpl;
+class IQt3DSRenderFactoryCore;
+class IQt3DSRenderFactory;
 }
 }
 
 namespace qt3ds {
 namespace render {
 
-    class IUICRenderFactoryCore;
-    class IUICRenderFactory;
-    class UICRenderer;
+    class IQt3DSRenderFactoryCore;
+    class IQt3DSRenderFactory;
+    class Qt3DSRenderer;
 
     typedef struct SUSER_CONTEXT_DATA
     {
@@ -143,17 +143,17 @@ namespace render {
             return false;
         }
 
-        bool initializeUICRenderer(QSurfaceFormat format);
-        qt3ds::render::CUICRendererImpl *uicRenderer();
+        bool initializeQt3DSRenderer(QSurfaceFormat format);
+        qt3ds::render::Qt3DSRendererImpl *qt3dsRenderer();
         Q3DStudio::IRuntimeMetaData *NVRenderTestBase::metadata();
 
     private:
 
-        NVScopedRefCounted<qt3ds::render::IUICRenderFactoryCore> m_coreFactory;
-        NVScopedRefCounted<qt3ds::render::IUICRenderFactory> m_factory;
-        NVScopedRefCounted<qt3ds::render::IUICRenderContext> m_rc;
+        NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactoryCore> m_coreFactory;
+        NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactory> m_factory;
+        NVScopedRefCounted<qt3ds::render::IQt3DSRenderContext> m_rc;
         qt3ds::foundation::NVScopedReleasable<Q3DStudio::IRuntimeMetaData> m_metaData;
-        qt3ds::render::CUICRendererImpl *m_renderImpl;
+        qt3ds::render::Qt3DSRendererImpl *m_renderImpl;
 
         SNullTimeProvider m_timeProvider;
         SNullWindowSystem m_windowSystem;

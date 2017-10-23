@@ -252,7 +252,7 @@ CId &CId::operator=(const CId &inRVal)
 Q3DStudio::CString CId::ToString() const
 {
     Q3DStudio::CString theGuidStr;
-    theGuidStr.Format(_UIC("{%08X-%04hX-%04hX-%02X%02X-%02X%02X%02X%02X%02X%02X}"),
+    theGuidStr.Format(_LSTR("{%08X-%04hX-%04hX-%02X%02X-%02X%02X%02X%02X%02X%02X}"),
                       m_Key.GuidStd.Data1, m_Key.GuidStd.Data2, m_Key.GuidStd.Data3,
                       m_Key.GuidStd.Data4[0], (unsigned long)m_Key.GuidStd.Data4[1],
                       (unsigned long)m_Key.GuidStd.Data4[2], (unsigned long)m_Key.GuidStd.Data4[3],

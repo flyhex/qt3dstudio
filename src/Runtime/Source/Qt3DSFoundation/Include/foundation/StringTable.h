@@ -46,8 +46,8 @@
 
 namespace qt3ds {
 namespace foundation {
-    typedef char8_t UICBChar;
-    typedef const char8_t *UICBCharPtr;
+    typedef char8_t Qt3DSBChar;
+    typedef const char8_t *Qt3DSBCharPtr;
     class IStringTable;
 
     // Serialization types, NVRenderSerializationTypes.h
@@ -102,7 +102,7 @@ namespace foundation {
     // These strings are valid utf-8 strings
     class CRegisteredString
     {
-        UICBCharPtr m_String;
+        Qt3DSBCharPtr m_String;
 
     public:
         CRegisteredString()
@@ -139,8 +139,8 @@ namespace foundation {
             return answer < 0;
         }
         size_t hash() const { return eastl::hash<size_t>()(reinterpret_cast<size_t>(m_String)); }
-        operator UICBCharPtr() const { return c_str(); }
-        UICBCharPtr c_str() const { return m_String ? m_String : ""; }
+        operator Qt3DSBCharPtr() const { return c_str(); }
+        Qt3DSBCharPtr c_str() const { return m_String ? m_String : ""; }
         bool IsValid() const { return m_String && *m_String; }
 
         // If this string is in the map, changes it to the map value.
@@ -163,7 +163,7 @@ namespace foundation {
             }
         }
 
-        static CRegisteredString ISwearThisHasBeenRegistered(UICBCharPtr str)
+        static CRegisteredString ISwearThisHasBeenRegistered(Qt3DSBCharPtr str)
         {
             CRegisteredString retval;
             retval.m_String = str;
@@ -221,22 +221,22 @@ namespace foundation {
         virtual void EnableMultithreadedAccess() = 0;
         virtual void DisableMultithreadedAccess() = 0;
 
-        virtual CRegisteredString RegisterStr(UICBCharPtr str) = 0;
+        virtual CRegisteredString RegisterStr(Qt3DSBCharPtr str) = 0;
         // utf-16->utf-8
         virtual CRegisteredString RegisterStr(const char16_t *str) = 0;
         // utf-32->utf-8
         virtual CRegisteredString RegisterStr(const char32_t *str) = 0;
 
-        virtual CStringHandle GetHandle(UICBCharPtr str) = 0;
+        virtual CStringHandle GetHandle(Qt3DSBCharPtr str) = 0;
         virtual CRegisteredString HandleToStr(QT3DSU32 strHandle) = 0;
 
         virtual CRegisteredString RegisterStr(const wchar_t *str) = 0;
 
-        virtual const wchar_t *GetWideStr(UICBCharPtr src) = 0;
+        virtual const wchar_t *GetWideStr(Qt3DSBCharPtr src) = 0;
         virtual const wchar_t *GetWideStr(const wchar_t *str) = 0;
 
-        UICBCharPtr GetNarrowStr(const wchar_t *src) { return RegisterStr(src); }
-        UICBCharPtr GetNarrowStr(UICBCharPtr src) { return RegisterStr(src); }
+        Qt3DSBCharPtr GetNarrowStr(const wchar_t *src) { return RegisterStr(src); }
+        Qt3DSBCharPtr GetNarrowStr(Qt3DSBCharPtr src) { return RegisterStr(src); }
 
         // The string table maintains a map that will tell clients where their strings will be
         // in terms of offsets into the data that the string table writes.

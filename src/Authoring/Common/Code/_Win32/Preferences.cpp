@@ -138,7 +138,7 @@ void CPreferences::SetLongValue(const Q3DStudio::CString &inKey, long inValue)
     s_PreferencesSerializer.Revert();
     s_PreferencesSerializer.Begin(m_TagPath);
     Q3DStudio::CString theStrValue;
-    theStrValue.Format(_UIC("%ld"), inValue);
+    theStrValue.Format(_LSTR("%ld"), inValue);
 
     s_PreferencesSerializer.SetSubElemValue(inKey, theStrValue);
 }
@@ -202,7 +202,7 @@ void CPreferences::SetValue(const Q3DStudio::CString &inKey, double inValue)
     s_PreferencesSerializer.Revert();
     s_PreferencesSerializer.Begin(m_TagPath);
     Q3DStudio::CString theStrValue;
-    theStrValue.Format(_UIC("%20.2f"), inValue);
+    theStrValue.Format(_LSTR("%20.2f"), inValue);
 
     s_PreferencesSerializer.SetSubElemValue(inKey, theStrValue);
 }
@@ -263,7 +263,7 @@ void CPreferences::SetColorValue(const Q3DStudio::CString &inKey, CColor inValue
     s_PreferencesSerializer.Revert();
     s_PreferencesSerializer.Begin(m_TagPath);
     Q3DStudio::CString theStrValue;
-    theStrValue.Format(_UIC("%i %i %i"), inValue.GetRed(), inValue.GetGreen(), inValue.GetBlue());
+    theStrValue.Format(_LSTR("%i %i %i"), inValue.GetRed(), inValue.GetGreen(), inValue.GetBlue());
     s_PreferencesSerializer.SetSubElemValue(inKey, theStrValue);
 }
 

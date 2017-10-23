@@ -28,20 +28,20 @@
 **
 ****************************************************************************/
 
-#ifndef UICELAPSED_TIMER_H
-#define UICELAPSED_TIMER_H
+#ifndef QT3DS_ELAPSED_TIMER_H
+#define QT3DS_ELAPSED_TIMER_H
 #include <QElapsedTimer>
 
 namespace Q3DSViewer {
 
 ///< @brief this class implementes a elapsed timer using QElapsedTimer
-class UICElapsedTimer
+class Qt3DSElapsedTimer
 {
 public:
     QElapsedTimer m_elapsedTimer;
     QElapsedTimer::ClockType m_clockType;
 
-    UICElapsedTimer()
+    Qt3DSElapsedTimer()
     {
         m_clockType = QElapsedTimer::clockType();
         reset();
@@ -58,12 +58,12 @@ public:
 };
 
 ///< @brief this class implementes a timer using QElapsedTimer
-class UICTimer
+class Qt3DSTimer
 {
 public:
     QElapsedTimer m_timer;
 
-    UICTimer() { start(); }
+    Qt3DSTimer() { start(); }
 
     void start() { m_timer.start(); }
 
@@ -117,4 +117,4 @@ struct NumericCircularBuffer
 
 } // end namspace
 
-#endif // UICELAPSED_TIMER_H
+#endif // QT3DS_ELAPSED_TIMER_H

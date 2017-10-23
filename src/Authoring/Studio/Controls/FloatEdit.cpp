@@ -108,9 +108,9 @@ void CFloatEdit::FormatString()
 {
     Q3DStudio::CString theFormatString;
     if (m_FixedPlaces == -1)
-        theFormatString.Format(_UIC("%%.%df"), m_NumDecimalPlaces);
+        theFormatString.Format(_LSTR("%%.%df"), m_NumDecimalPlaces);
     else
-        theFormatString.Format(_UIC("%%0%d.%df"), m_FixedPlaces, m_NumDecimalPlaces);
+        theFormatString.Format(_LSTR("%%0%d.%df"), m_FixedPlaces, m_NumDecimalPlaces);
 
     m_ValueString.Format(theFormatString, m_Value);
 }

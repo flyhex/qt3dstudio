@@ -235,11 +235,11 @@ void CUIPParserObjectRefHelper::CacheGraph(qt3dsdm::IDOMReader &inReader, qt3dsd
         /*
 #if defined _DEBUG && defined _WIN32
         {
-                UICDM::SDOMElement* theElem = inWriter.GetTopElement();
+                qt3dsdm::SDOMElement* theElem = inWriter.GetTopElement();
                 {
                         qt3ds::foundation::CFileSeekableIOStream theWriter( "c:\\temp.xml",
 FileWriteFlags() );
-                        UICDM::CDOMSerializer::Write( *theElem, theWriter );
+                        qt3dsdm::CDOMSerializer::Write( *theElem, theWriter );
                 }
         }
 #endif

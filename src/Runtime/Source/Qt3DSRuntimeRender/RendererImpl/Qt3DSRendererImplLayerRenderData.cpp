@@ -64,7 +64,7 @@
 #endif
 
 #define QT3DS_CACHED_POST_EFFECT
-const float UIC3D_DEGREES_TO_RADIANS = 0.0174532925199f;
+const float QT3DS_DEGREES_TO_RADIANS = 0.0174532925199f;
 
 namespace qt3ds {
 namespace render {
@@ -73,17 +73,17 @@ namespace render {
     using qt3ds::render::NVRenderContextScopedProperty;
     using qt3ds::QT3DSVec2;
 
-    SLayerRenderData::SLayerRenderData(SLayer &inLayer, CUICRendererImpl &inRenderer)
+    SLayerRenderData::SLayerRenderData(SLayer &inLayer, Qt3DSRendererImpl &inRenderer)
         : SLayerRenderPreparationData(inLayer, inRenderer)
-        , m_LayerTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_TemporalAATexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerDepthTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerPrepassDepthTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerWidgetTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerSsaoTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerMultisampleTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerMultisamplePrepassDepthTexture(inRenderer.GetUICContext().GetResourceManager())
-        , m_LayerMultisampleWidgetTexture(inRenderer.GetUICContext().GetResourceManager())
+        , m_LayerTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_TemporalAATexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerDepthTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerPrepassDepthTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerWidgetTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerSsaoTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerMultisampleTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerMultisamplePrepassDepthTexture(inRenderer.GetQt3DSContext().GetResourceManager())
+        , m_LayerMultisampleWidgetTexture(inRenderer.GetQt3DSContext().GetResourceManager())
         , m_LayerCachedTexture(NULL)
         , m_AdvancedBlendDrawTexture(NULL)
         , m_AdvancedBlendBlendTexture(NULL)
@@ -100,7 +100,7 @@ namespace render {
 
     SLayerRenderData::~SLayerRenderData()
     {
-        IResourceManager &theResourceManager(m_Renderer.GetUICContext().GetResourceManager());
+        IResourceManager &theResourceManager(m_Renderer.GetQt3DSContext().GetResourceManager());
         if (m_LayerCachedTexture && m_LayerCachedTexture != m_LayerTexture)
             theResourceManager.Release(*m_LayerCachedTexture);
         if (m_AdvancedModeDrawFB) {
@@ -120,7 +120,7 @@ namespace render {
     {
         SLayerRenderPreparationData::PrepareForRender(inViewportDimensions);
         SLayerRenderPreparationResult &thePrepResult(*m_LayerPrepResult);
-        IResourceManager &theResourceManager(m_Renderer.GetUICContext().GetResourceManager());
+        IResourceManager &theResourceManager(m_Renderer.GetQt3DSContext().GetResourceManager());
         // at that time all values shoud be updated
         m_Renderer.UpdateCbAoShadow(&m_Layer, m_Camera, m_LayerDepthTexture);
 
@@ -176,7 +176,7 @@ namespace render {
             theResourceManager.DestroyFreeSizedResources();
 
             // Effect system uses different resource manager, so clean that up too
-            m_Renderer.GetUICContext().GetEffectSystem().GetResourceManager()
+            m_Renderer.GetQt3DSContext().GetEffectSystem().GetResourceManager()
                     .DestroyFreeSizedResources();
         }
     }
@@ -359,7 +359,7 @@ namespace render {
                 inLightPos.z = -inLightPos.z;
 
             inLightPos -= inLightDir * inCamera.m_ClipNear;
-            theCamera.m_FOV = inLight->m_ShadowMapFov * UIC3D_DEGREES_TO_RADIANS;
+            theCamera.m_FOV = inLight->m_ShadowMapFov * QT3DS_DEGREES_TO_RADIANS;
 
             if (inLight->m_LightType == RenderLightTypes::Directional) {
                 QT3DSVec3 frustBounds[8], boundCtr;
@@ -429,7 +429,7 @@ namespace render {
             inCameras[i].m_Pivot = inLight->m_Pivot;
             inCameras[i].m_ClipNear = 1.0f;
             inCameras[i].m_ClipFar = NVMax<QT3DSF32>(2.0f, inLight->m_ShadowMapFar);
-            inCameras[i].m_FOV = inLight->m_ShadowMapFov * UIC3D_DEGREES_TO_RADIANS;
+            inCameras[i].m_FOV = inLight->m_ShadowMapFov * QT3DS_DEGREES_TO_RADIANS;
 
             inCameras[i].m_Position = inLightPos;
             inCameras[i].m_Rotation = rotOfs[i];
@@ -629,7 +629,7 @@ namespace render {
 
     void SLayerRenderData::RenderShadowMapPass(CResourceFrameBuffer *theFB)
     {
-        SStackPerfTimer ___timer(m_Renderer.GetUICContext().GetPerfTimer(),
+        SStackPerfTimer ___timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                  "SLayerRenderData::RenderShadowMapPass");
 
         if (m_Camera == NULL || !GetShadowMapManager())
@@ -771,7 +771,7 @@ namespace render {
 
     void SLayerRenderData::RenderDepthPass(bool inEnableTransparentDepthWrite)
     {
-        SStackPerfTimer ___timer(m_Renderer.GetUICContext().GetPerfTimer(),
+        SStackPerfTimer ___timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                  "SLayerRenderData::RenderDepthPass");
         if (m_Camera == NULL)
             return;
@@ -965,7 +965,7 @@ namespace render {
 
     void SLayerRenderData::Render(CResourceFrameBuffer *theFB)
     {
-        SStackPerfTimer ___timer(m_Renderer.GetUICContext().GetPerfTimer(),
+        SStackPerfTimer ___timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                  "SLayerRenderData::Render");
         if (m_Camera == NULL)
             return;
@@ -980,7 +980,7 @@ namespace render {
     {
         if (m_Renderer.GetContext().IsTimerQuerySupported()) {
             m_LayerProfilerGpu = IRenderProfiler::CreateGpuProfiler(
-                m_Renderer.GetContext().GetFoundation(), m_Renderer.GetUICContext(),
+                m_Renderer.GetContext().GetFoundation(), m_Renderer.GetQt3DSContext(),
                 m_Renderer.GetContext());
         }
     }
@@ -1003,7 +1003,7 @@ namespace render {
     {
         if (m_LayerProfilerGpu.mPtr) {
             CRegisteredString theStr(
-                m_Renderer.GetUICContext().GetStringTable().RegisterStr(nameID));
+                m_Renderer.GetQt3DSContext().GetStringTable().RegisterStr(nameID));
             m_LayerProfilerGpu->StartTimer(theStr, false, sync);
         }
     }
@@ -1012,7 +1012,7 @@ namespace render {
     {
         if (m_LayerProfilerGpu.mPtr) {
             CRegisteredString theStr(
-                m_Renderer.GetUICContext().GetStringTable().RegisterStr(nameID));
+                m_Renderer.GetQt3DSContext().GetStringTable().RegisterStr(nameID));
             m_LayerProfilerGpu->EndTimer(theStr);
         }
     }
@@ -1062,7 +1062,7 @@ namespace render {
             m_AdvancedModeDrawFB = theRenderContext.CreateFrameBuffer();
         if (!m_AdvancedBlendDrawTexture) {
             m_AdvancedBlendDrawTexture = theRenderContext.CreateTexture2D();
-            NVRenderRect theViewport = m_Renderer.GetUICContext().GetRenderList().GetViewport();
+            NVRenderRect theViewport = m_Renderer.GetQt3DSContext().GetRenderList().GetViewport();
             m_AdvancedBlendDrawTexture->SetTextureData(NVDataRef<QT3DSU8>(), 0,
                                                        theViewport.m_Width,
                                                        theViewport.m_Height,
@@ -1091,7 +1091,7 @@ namespace render {
                                              bool depthEnabled, CResourceFrameBuffer *theFB)
     {
         NVRenderContext &theRenderContext(m_Renderer.GetContext());
-        NVRenderRect theViewport = m_Renderer.GetUICContext().GetRenderList().GetViewport();
+        NVRenderRect theViewport = m_Renderer.GetQt3DSContext().GetRenderList().GetViewport();
         AdvancedBlendModes::Enum advancedMode;
 
         switch (blendMode) {
@@ -1147,7 +1147,7 @@ namespace render {
             if (GetOffscreenRenderer()) {
                 m_LastFrameOffscreenRenderer->Render(
                     CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
-                    m_Renderer.GetUICContext().GetPresentationScaleFactor(),
+                    m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
                     SScene::ClearIsOptional);
             } else {
                 RenderDepthPass(false);
@@ -1280,7 +1280,7 @@ namespace render {
         // If our pass index == thePreResult.m_MaxAAPassIndex then
         // we shouldn't get into here.
 
-        IResourceManager &theResourceManager = m_Renderer.GetUICContext().GetResourceManager();
+        IResourceManager &theResourceManager = m_Renderer.GetQt3DSContext().GetResourceManager();
         bool hadLayerTexture = true;
 
         if (renderColorTexture->EnsureTexture(theLayerTextureDimensions.m_Width,
@@ -1617,15 +1617,15 @@ namespace render {
     {
         if (m_Layer.m_FirstEffect == NULL) {
             if (m_LayerCachedTexture) {
-                IResourceManager &theResourceManager(m_Renderer.GetUICContext().GetResourceManager());
+                IResourceManager &theResourceManager(m_Renderer.GetQt3DSContext().GetResourceManager());
                 theResourceManager.Release(*m_LayerCachedTexture);
                 m_LayerCachedTexture = NULL;
             }
             return;
         }
 
-        IEffectSystem &theEffectSystem(m_Renderer.GetUICContext().GetEffectSystem());
-        IResourceManager &theResourceManager(m_Renderer.GetUICContext().GetResourceManager());
+        IEffectSystem &theEffectSystem(m_Renderer.GetQt3DSContext().GetEffectSystem());
+        IResourceManager &theResourceManager(m_Renderer.GetQt3DSContext().GetResourceManager());
         // we use the non MSAA buffer for the effect
         NVRenderTexture2D *theLayerColorTexture = m_LayerTexture;
         NVRenderTexture2D *theLayerDepthTexture = m_LayerDepthTexture;
@@ -1720,8 +1720,8 @@ namespace render {
                 (m_LayerCachedTexture) ? m_LayerCachedTexture : m_LayerTexture;
 #else
             // Then render all but the last effect
-            IEffectSystem &theEffectSystem(m_Renderer.GetUICContext().GetEffectSystem());
-            IResourceManager &theResourceManager(m_Renderer.GetUICContext().GetResourceManager());
+            IEffectSystem &theEffectSystem(m_Renderer.GetQt3DSContext().GetEffectSystem());
+            IResourceManager &theResourceManager(m_Renderer.GetQt3DSContext().GetResourceManager());
             // we use the non MSAA buffer for the effect
             NVRenderTexture2D *theLayerColorTexture = m_LayerTexture;
             NVRenderTexture2D *theLayerDepthTexture = m_LayerDepthTexture;
@@ -2034,13 +2034,13 @@ namespace render {
 
     void SLayerRenderData::AddLayerRenderStep()
     {
-        SStackPerfTimer __perfTimer(m_Renderer.GetUICContext().GetPerfTimer(),
+        SStackPerfTimer __perfTimer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                     "SLayerRenderData::AddLayerRenderStep");
         QT3DS_ASSERT(m_Camera);
         if (!m_Camera)
             return;
 
-        IRenderList &theGraph(m_Renderer.GetUICContext().GetRenderList());
+        IRenderList &theGraph(m_Renderer.GetQt3DSContext().GetRenderList());
 
         qt3ds::render::NVRenderRect theCurrentViewport = theGraph.GetViewport();
         if (!m_LayerPrepResult.hasValue())
@@ -2052,7 +2052,7 @@ namespace render {
     {
         // When we render to the scene itself (as opposed to an offscreen buffer somewhere)
         // then we use the MVP of the layer somewhat.
-        NVRenderRect theViewport = m_Renderer.GetUICContext().GetRenderList().GetViewport();
+        NVRenderRect theViewport = m_Renderer.GetQt3DSContext().GetRenderList().GetViewport();
         PrepareForRender(
             SWindowDimensions((QT3DSU32)theViewport.m_Width, (QT3DSU32)theViewport.m_Height));
     }
@@ -2108,7 +2108,7 @@ namespace render {
     {
         OffscreenRendererDepthValues::Enum theOffscreenDepth(
             GetOffscreenRendererDepthValue(GetDepthBufferFormat()));
-        NVRenderRect theViewport = m_Renderer.GetUICContext().GetRenderList().GetViewport();
+        NVRenderRect theViewport = m_Renderer.GetQt3DSContext().GetRenderList().GetViewport();
         return SOffscreenRendererEnvironment(theViewport.m_Width, theViewport.m_Height,
                                              NVRenderTextureFormats::RGBA8, theOffscreenDepth,
                                              false, AAModeValues::NoAA);

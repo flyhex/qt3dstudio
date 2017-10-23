@@ -53,7 +53,7 @@ class CDropTarget;
 class CExplorerFileDropSource : public CDropSource
 {
 protected:
-    CUICFile m_File;
+    Qt3DSFile m_File;
     static bool s_FileHasValidTarget;
 
 public:
@@ -64,7 +64,7 @@ public:
     bool ValidateTarget(CDropTarget *inTarget) override;
     bool GetHasValidTarget();
     void SetHasValidTarget(bool inValid) override;
-    CUICFile GetFile() const { return m_File; }
+    Qt3DSFile GetFile() const { return m_File; }
 };
 
 #endif // #ifndef __EXPLORERFILEDROPSOURCE_H__

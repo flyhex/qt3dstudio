@@ -35,13 +35,13 @@
 #include "Qt3DSExceptions.h"
 #include "Qt3DSExceptionClass.h"
 
-bool CUICExceptionClass::s_HandlingTypes = true;
+bool Qt3DSExceptionClass::s_HandlingTypes = true;
 
 //==============================================================================
 /**
- *	Constructs a CUICExceptionClass object.
+ *	Constructs a Qt3DSExceptionClass object.
  *
- *	This method creates a CUICExceptionClass object.
+ *	This method creates a Qt3DSExceptionClass object.
  *
  *	@param	<long>			inlong			The long to check for failure
  *	@param	<const char*>	inFileName		The name of the file of the calling function
@@ -52,7 +52,7 @@ bool CUICExceptionClass::s_HandlingTypes = true;
  *	@param	<va_list>		inParameters	A pointer to the optional arugments for
  *string formatting purposes
  */
-CUICExceptionClass::CUICExceptionClass(const wchar_t *inFileName, const unsigned long inLineNumber,
+Qt3DSExceptionClass::Qt3DSExceptionClass(const wchar_t *inFileName, const unsigned long inLineNumber,
                                        const long inErrorCode, const long inlong,
                                        va_list inParameters)
 #ifdef KDAB_TEMPORARILY_REMOVED
@@ -84,10 +84,10 @@ CUICExceptionClass::CUICExceptionClass(const wchar_t *inFileName, const unsigned
 /**
  *	Handles the exception
  */
-void CUICExceptionClass::HandleException()
+void Qt3DSExceptionClass::HandleException()
 {
     // Check registry for changes
-    CUICExceptionClass::Initialize();
+    Qt3DSExceptionClass::Initialize();
 
     // Are we handling this type of exception?
     //
@@ -116,7 +116,7 @@ void CUICExceptionClass::HandleException()
  *
  *	@return bool	TRUE	the description was formatted correctly.
  */
-bool CUICExceptionClass::FormatDescription()
+bool Qt3DSExceptionClass::FormatDescription()
 {
 #ifdef KDAB_TEMPORARILY_REMOVED
     bool theResult = false;
@@ -192,7 +192,7 @@ bool CUICExceptionClass::FormatDescription()
 /**
  *	Breaks immediately in the debugger.
  */
-void CUICExceptionClass::BreakInDebugger()
+void Qt3DSExceptionClass::BreakInDebugger()
 {
 #ifdef _DEBUG
 #ifdef WIN32
@@ -206,7 +206,7 @@ void CUICExceptionClass::BreakInDebugger()
 /**
  *	Displays the exception description in a windows message box.
  */
-void CUICExceptionClass::DisplayMessageBox()
+void Qt3DSExceptionClass::DisplayMessageBox()
 {
 #ifdef KDAB_TEMPORARILY_REMOVED
     // Display the exception in a message box?
@@ -249,7 +249,7 @@ void CUICExceptionClass::DisplayMessageBox()
 /**
  *	Output the exception description to the development environment debug window.
  */
-void CUICExceptionClass::Output2Debugger()
+void Qt3DSExceptionClass::Output2Debugger()
 {
 #ifdef KDAB_TEMPORARILY_REMOVED
 #ifdef _DEBUG
@@ -276,7 +276,7 @@ void CUICExceptionClass::Output2Debugger()
  *	Method opens up the key at HKEY_CURRENT_USER/m_RegistryPreferencePath.
  *	The three DWORD values looked up are: TrackErrorTypes, ReportingLevel and ErrorAction
  */
-void CUICExceptionClass::Initialize()
+void Qt3DSExceptionClass::Initialize()
 {
     /*
     #ifdef WIN32
@@ -336,7 +336,7 @@ void CUICExceptionClass::Initialize()
  *	@param	<...>							Optional arugments for string
  *formatting purposes
  */
-void CUICExceptionClass::Throw(const wchar_t *inFileName, const unsigned long inLineNumber,
+void Qt3DSExceptionClass::Throw(const wchar_t *inFileName, const unsigned long inLineNumber,
                                const long inErrorCode, ...)
 {
     // Define a parameter list
@@ -347,7 +347,7 @@ void CUICExceptionClass::Throw(const wchar_t *inFileName, const unsigned long in
 
 #ifdef KDAB_TEMPORARILY_REMOVED
     // Throw an exception
-    throw CUICExceptionClass(inFileName, inLineNumber, inErrorCode, S_FALSE, theParameters);
+    throw Qt3DSExceptionClass(inFileName, inLineNumber, inErrorCode, S_FALSE, theParameters);
 #endif
 }
 
@@ -370,7 +370,7 @@ void CUICExceptionClass::Throw(const wchar_t *inFileName, const unsigned long in
  *	@param	<...>								Optional arugments for
  *string formatting purposes
  */
-void CUICExceptionClass::ThrowFail(const long inlong, const wchar_t *inFileName,
+void Qt3DSExceptionClass::ThrowFail(const long inlong, const wchar_t *inFileName,
                                    const unsigned long inLineNumber, const long inErrorCode, ...)
 {
     // Define a parameter list
@@ -383,7 +383,7 @@ void CUICExceptionClass::ThrowFail(const long inlong, const wchar_t *inFileName,
 #ifdef KDAB_TEMPORARILY_REMOVED
     if (FAILED(inlong)) {
         // Throw an exception
-        throw CUICExceptionClass(inFileName, inLineNumber, inErrorCode, inlong, theParameters);
+        throw Qt3DSExceptionClass(inFileName, inLineNumber, inErrorCode, inlong, theParameters);
     }
 #endif
 }
@@ -406,7 +406,7 @@ void CUICExceptionClass::ThrowFail(const long inlong, const wchar_t *inFileName,
  *	@param	<...>							Optional arugments for string
  *formatting purposes
  */
-void CUICExceptionClass::ThrowFalse(bool inCondition, const wchar_t *inFileName,
+void Qt3DSExceptionClass::ThrowFalse(bool inCondition, const wchar_t *inFileName,
                                     const unsigned long inLineNumber, const long inErrorCode, ...)
 {
     // Define a parameter list
@@ -419,7 +419,7 @@ void CUICExceptionClass::ThrowFalse(bool inCondition, const wchar_t *inFileName,
     if (!inCondition) {
         // Throw an exception
 #ifdef KDAB_TEMPORARILY_REMOVED
-        throw CUICExceptionClass(inFileName, inLineNumber, inErrorCode, S_FALSE, theParameters);
+        throw Qt3DSExceptionClass(inFileName, inLineNumber, inErrorCode, S_FALSE, theParameters);
 #endif
     }
 }

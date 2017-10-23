@@ -44,7 +44,7 @@
 #include "foundation/Qt3DSInvasiveSet.h"
 #include "Qt3DSMetadata.h"
 
-// The uic runtime element system contains the element graph and the data in the element
+// The qt3ds runtime element system contains the element graph and the data in the element
 // graph.
 
 namespace Q3DStudio {

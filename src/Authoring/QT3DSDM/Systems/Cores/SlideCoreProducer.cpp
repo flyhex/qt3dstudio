@@ -233,7 +233,7 @@ inline void CSlideCoreProducer::DoForceSetInstancePropertyValue(Qt3DSDMSlideHand
         iter->second->Update(theNewValue);
         if (GetValueType(theTempValue) == DataModelDataType::String) {
             TDataStrPtr theStrPtr = qt3dsdm::get<TDataStrPtr>(theTempValue);
-            UICDM_DEBUG_LOG(m_Data->GetStringTable().GetNarrowStr(theStrPtr->GetData()));
+            QT3DSDM_DEBUG_LOG(m_Data->GetStringTable().GetNarrowStr(theStrPtr->GetData()));
         }
         return; // don't signal
     } else {

@@ -880,7 +880,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstance(qt3dsdm::Qt3D
 std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4>
 CClientDataModelBridge::CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSourceInstance,
                                             Qt3DSDMPropertyHandle inSlot,
-                                            Qt3DSDMSlideHandle inUICDMSlide)
+                                            Qt3DSDMSlideHandle inSlide)
 {
     Qt3DSDMInstanceHandle theNewInstance =
         m_Doc->GetStudioSystem()
@@ -908,8 +908,8 @@ CClientDataModelBridge::CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSou
                                          SValue(theInstanceLong4));
 
     // Library objects does not need to be associated with any slide.
-    if (inUICDMSlide.Valid())
-        m_Doc->GetStudioSystem()->GetSlideSystem()->AssociateInstanceWithSlide(inUICDMSlide,
+    if (inSlide.Valid())
+        m_Doc->GetStudioSystem()->GetSlideSystem()->AssociateInstanceWithSlide(inSlide,
                                                                                theNewInstance);
 
     if (m_DefaultMaterial.m_SpecularReflection.m_Property
@@ -1041,7 +1041,7 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inPare
 
         // If the name is in use then increment the index until one is found.
         while (theExistingChild != 0 && theExistingChild != inInstance) {
-            theUniqueName.Format(_UIC("%ls%d"), static_cast<const wchar_t *>(theBaseName), theIndex);
+            theUniqueName.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(theBaseName), theIndex);
             ++theIndex;
             theExistingChild = GetChildByName(inParent, theUniqueName);
         }

@@ -36,8 +36,8 @@
 namespace Q3DStudio {
 
 #ifndef __CommonConstants_H__
-const double UIC3D_DEGREES_TO_RADIANS = (6.2831856f / 360.0f);
-const double UIC3D_RADIANS_TO_DEGREES = (360.0f / 6.2831856f);
+const double QT3DS_DEGREES_TO_RADIANS = (6.2831856f / 360.0f);
+const double QT3DS_RADIANS_TO_DEGREES = (360.0f / 6.2831856f);
 #endif
 
 class CRotation3 : public CVector3

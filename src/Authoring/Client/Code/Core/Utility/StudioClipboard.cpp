@@ -47,7 +47,7 @@
 #include <QGuiApplication>
 #include <QMimeData>
 
-CUICFile CStudioClipboard::s_InternalClipObject("");
+Qt3DSFile CStudioClipboard::s_InternalClipObject("");
 qint64 CStudioClipboard::s_InternalContextData = 0;
 EStudioObjectType CStudioClipboard::s_AssetType(OBJTYPE_UNKNOWN);
 qint64 CStudioClipboard::s_CopyProcessID = 0;
@@ -68,7 +68,7 @@ CStudioClipboard::~CStudioClipboard()
  *  @param  outContextData  arbitrary data saved earlier
  *  @return  the object that was retrieved from the respective clipboard.
  */
-CUICFile CStudioClipboard::GetObjectFromClipboard(bool inIsInternal, qint64 &outContextData)
+Qt3DSFile CStudioClipboard::GetObjectFromClipboard(bool inIsInternal, qint64 &outContextData)
 {
     if (inIsInternal)
         return GetObjectFromInternalClipboard(outContextData);
@@ -86,7 +86,7 @@ CUICFile CStudioClipboard::GetObjectFromClipboard(bool inIsInternal, qint64 &out
  *CmdMakeComponent or CmdDuplicateObject
  *  @param  inAssetType    asset type of object
  */
-void CStudioClipboard::CopyObjectToClipboard(CUICFile &inFile, qint64 inContextData,
+void CStudioClipboard::CopyObjectToClipboard(Qt3DSFile &inFile, qint64 inContextData,
                                              bool inIsInternal, EStudioObjectType inObjectType)
 {
     s_AssetType = inObjectType;
@@ -130,9 +130,9 @@ bool CStudioClipboard::CanPasteObject(EStudioObjectType inDestType, bool inIsInt
 /**
  *  Retrieve the object from the internal Clipboard.
  *  @param  outContextData  arbitrary data saved earlier
- *  @return  CUICFile object that was retrieved from the internal Clipboard.
+ *  @return  Qt3DSFile object that was retrieved from the internal Clipboard.
  */
-CUICFile CStudioClipboard::GetObjectFromInternalClipboard(qint64 &outContextData)
+Qt3DSFile CStudioClipboard::GetObjectFromInternalClipboard(qint64 &outContextData)
 {
     // Don't have to delete the InternalClipObject as the CmdPasteObject would delete the file later
     outContextData = s_InternalContextData;
@@ -145,7 +145,7 @@ CUICFile CStudioClipboard::GetObjectFromInternalClipboard(qint64 &outContextData
  *  @param  inFile  The object to copy to the internal clipboard.
  *  @param  inContextData  any arbitrary data to be retrieved later
  */
-void CStudioClipboard::CopyObjectToInternalClipboard(CUICFile &inFile, qint64 inContextData)
+void CStudioClipboard::CopyObjectToInternalClipboard(Qt3DSFile &inFile, qint64 inContextData)
 {
     s_InternalClipObject = inFile;
     s_InternalContextData = inContextData;
@@ -155,12 +155,12 @@ void CStudioClipboard::CopyObjectToInternalClipboard(CUICFile &inFile, qint64 in
 /**
  *  Retrieve the object from the global Clipboard.
  *  @param  outContextData  arbitrary data saved earlier
- *  @return  CUICFile object that was retrieved from the global Clipboard.
+ *  @return  Qt3DSFile object that was retrieved from the global Clipboard.
  */
-CUICFile CStudioClipboard::GetObjectFromGlobalClipboard(qint64 &outContextData,
+Qt3DSFile CStudioClipboard::GetObjectFromGlobalClipboard(qint64 &outContextData,
                                                         const QString &inMimeType)
 {
-    CUICFile theTempAPFile = CUICFile::GetTemporaryFile();
+    Qt3DSFile theTempAPFile = Qt3DSFile::GetTemporaryFile();
     GetObjectFromGlobalClipboard(inMimeType, &theTempAPFile, &outContextData);
     return theTempAPFile;
 }
@@ -171,7 +171,7 @@ CUICFile CStudioClipboard::GetObjectFromGlobalClipboard(qint64 &outContextData,
  *  @param  inFile  The object to copy to the global clipboard.
  *  @param  inContextData  any arbitrary data to be retrieved later
  */
-void CStudioClipboard::CopyObjectToGlobalClipboard(CUICFile &inFile, qint64 inContextData,
+void CStudioClipboard::CopyObjectToGlobalClipboard(Qt3DSFile &inFile, qint64 inContextData,
                                                    const QString &inMimeType)
 {
     QByteArray data;
@@ -243,7 +243,7 @@ void CStudioClipboard::ClearClipboard()
  *  Retrieve a previously stored action from the global clipboard.
  *  @return  the object that was retrieved from the respective clipboard.
  */
-CUICFile CStudioClipboard::GetActionFromClipboard()
+Qt3DSFile CStudioClipboard::GetActionFromClipboard()
 {
     qint64 theContextData = 0;
     return GetObjectFromGlobalClipboard(theContextData, "application/x-qt3dstudio-action"_L1);
@@ -254,7 +254,7 @@ CUICFile CStudioClipboard::GetActionFromClipboard()
  *  Copy an Action to the Clipboard.
  *  @param  inFile  The object to store to clipboard.
  */
-void CStudioClipboard::CopyActionToClipboard(CUICFile &inFile)
+void CStudioClipboard::CopyActionToClipboard(Qt3DSFile &inFile)
 {
     s_CopyProcessID = qApp->applicationPid();
     CopyObjectToGlobalClipboard(inFile, 0, "application/x-qt3dstudio-action"_L1);
@@ -281,7 +281,7 @@ bool CStudioClipboard::CanPasteAction()
  *  @param  outFile      file to write clipboard data to, if any.
  */
 void CStudioClipboard::GetObjectFromGlobalClipboard(const QString &inMimeType,
-                                                    CUICFile *outFile /*= NULL */,
+                                                    Qt3DSFile *outFile /*= NULL */,
                                                     qint64 *outContextData /*= NULL */)
 {
     QClipboard *clipboard = QGuiApplication::clipboard();

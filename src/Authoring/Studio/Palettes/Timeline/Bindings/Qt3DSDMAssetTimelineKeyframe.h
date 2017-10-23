@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef INCLUDED_UICDMASSETKEYFRAME_H
-#define INCLUDED_UICDMASSETKEYFRAME_H 1
+#ifndef QT3DSDM_ASSET_KEYFRAME_H
+#define QT3DSDM_ASSET_KEYFRAME_H 1
 
 #pragma once
 
@@ -66,4 +66,4 @@ public:
     void UpdateTime(const long inTime) { m_Time = inTime; }
 };
 
-#endif // INCLUDED_UICDMKEYFRAME_H
+#endif // QT3DSDM_ASSET_KEYFRAME_H

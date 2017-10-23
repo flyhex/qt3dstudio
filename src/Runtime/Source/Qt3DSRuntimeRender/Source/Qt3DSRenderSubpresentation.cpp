@@ -36,14 +36,14 @@
 namespace qt3ds {
 namespace render {
 
-    SUICRenderPickResult CSubPresentationPickQuery::Pick(const QT3DSVec2 &inMouseCoords,
+    Qt3DSRenderPickResult CSubPresentationPickQuery::Pick(const QT3DSVec2 &inMouseCoords,
                                                          const QT3DSVec2 &inViewportDimensions,
                                                          bool inPickEverything)
     {
         return m_Renderer.DoGraphQueryPick(inMouseCoords, inViewportDimensions, inPickEverything);
     }
 
-    CSubPresentationRenderer::CSubPresentationRenderer(IUICRenderContext &inRenderContext,
+    CSubPresentationRenderer::CSubPresentationRenderer(IQt3DSRenderContext &inRenderContext,
                                                        SPresentation &inPresentation)
         : m_RenderContext(inRenderContext)
         , m_Presentation(inPresentation)
@@ -95,10 +95,10 @@ namespace render {
     }
 
     // You know the viewport dimensions because
-    SUICRenderPickResult CSubPresentationRenderer::DoGraphQueryPick(
+    Qt3DSRenderPickResult CSubPresentationRenderer::DoGraphQueryPick(
         const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions, bool inPickEverything)
     {
-        SUICRenderPickResult thePickResult;
+        Qt3DSRenderPickResult thePickResult;
 
         if (m_Presentation.m_Scene && m_Presentation.m_Scene->m_FirstChild) {
             thePickResult = m_RenderContext.GetRenderer().Pick(

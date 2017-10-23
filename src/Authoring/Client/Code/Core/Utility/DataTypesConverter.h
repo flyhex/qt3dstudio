@@ -40,84 +40,84 @@
 #include "foundation/Qt3DSVec3.h"
 
 // Convenience functions to convert from CoreLibProject/Types Files to UICDMDataTypes
-inline UICDM::SValue ConvertToSValue(const Q3DStudio::CVector2 &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const Q3DStudio::CVector2 &inValue)
 {
-    UICDM::SFloat2 theFloat2;
+    qt3dsdm::SFloat2 theFloat2;
     theFloat2.m_Floats[0] = inValue.GetX();
     theFloat2.m_Floats[1] = inValue.GetY();
-    return (UICDM::SValue(theFloat2));
+    return (qt3dsdm::SValue(theFloat2));
 }
-inline UICDM::SValue ConvertToSValue(const Q3DStudio::CVector3 &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const Q3DStudio::CVector3 &inValue)
 {
-    UICDM::SFloat3 theFloat3;
+    qt3dsdm::SFloat3 theFloat3;
     theFloat3.m_Floats[0] = inValue.GetX();
     theFloat3.m_Floats[1] = inValue.GetY();
     theFloat3.m_Floats[2] = inValue.GetZ();
-    return (UICDM::SValue(theFloat3));
+    return (qt3dsdm::SValue(theFloat3));
 }
 
-inline UICDM::SValue ConvertToSValue(const Q3DStudio::CRotation3 &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const Q3DStudio::CRotation3 &inValue)
 {
-    UICDM::SFloat3 theFloat3;
+    qt3dsdm::SFloat3 theFloat3;
     theFloat3.m_Floats[0] = inValue.GetXDegrees();
     theFloat3.m_Floats[1] = inValue.GetYDegrees();
     theFloat3.m_Floats[2] = inValue.GetZDegrees();
-    return (UICDM::SValue(theFloat3));
+    return (qt3dsdm::SValue(theFloat3));
 }
 
-inline UICDM::SValue ConvertToSValue(float inX, float inY)
+inline qt3dsdm::SValue ConvertToSValue(float inX, float inY)
 {
-    return (UICDM::SValue(UICDM::SFloat2(inX, inY)));
+    return (qt3dsdm::SValue(qt3dsdm::SFloat2(inX, inY)));
 }
 
-inline UICDM::SValue ConvertToSValue(float inX, float inY, float inZ)
+inline qt3dsdm::SValue ConvertToSValue(float inX, float inY, float inZ)
 {
-    return (UICDM::SValue(UICDM::SFloat3(inX, inY, inZ)));
+    return (qt3dsdm::SValue(qt3dsdm::SFloat3(inX, inY, inZ)));
 }
 
-inline UICDM::SValue ConvertToSValue(const qt3ds::QT3DSVec2 &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const qt3ds::QT3DSVec2 &inValue)
 {
-    UICDM::SFloat2 theFloat2;
+    qt3dsdm::SFloat2 theFloat2;
     theFloat2.m_Floats[0] = inValue.x;
     theFloat2.m_Floats[1] = inValue.y;
-    return (UICDM::SValue(theFloat2));
+    return (qt3dsdm::SValue(theFloat2));
 }
 
-inline UICDM::SValue ConvertToSValue(const qt3ds::QT3DSVec3 &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const qt3ds::QT3DSVec3 &inValue)
 {
-    UICDM::SFloat3 theFloat3;
+    qt3dsdm::SFloat3 theFloat3;
     theFloat3.m_Floats[0] = inValue.x;
     theFloat3.m_Floats[1] = inValue.y;
     theFloat3.m_Floats[2] = inValue.z;
-    return (UICDM::SValue(theFloat3));
+    return (qt3dsdm::SValue(theFloat3));
 }
 
-inline UICDM::SValue ConvertToSValue(const wchar_t *inValue)
+inline qt3dsdm::SValue ConvertToSValue(const wchar_t *inValue)
 {
-    return UICDM::TDataStrPtr(new UICDM::CDataStr(inValue));
+    return qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(inValue));
 }
 
-inline UICDM::SValue ConvertToSValue(const std::wstring &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const std::wstring &inValue)
 {
-    return UICDM::TDataStrPtr(new UICDM::CDataStr(inValue.c_str()));
+    return qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(inValue.c_str()));
 }
 
-inline UICDM::SValue ConvertToSValue(const char *inValue)
+inline qt3dsdm::SValue ConvertToSValue(const char *inValue)
 {
-    return UICDM::TDataStrPtr(new UICDM::CDataStr(Q3DStudio::CString(inValue)));
+    return qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(Q3DStudio::CString(inValue)));
 }
 
-inline UICDM::SValue ConvertToSValue(const Q3DStudio::CString &inValue)
+inline qt3dsdm::SValue ConvertToSValue(const Q3DStudio::CString &inValue)
 {
-    return UICDM::TDataStrPtr(new UICDM::CDataStr(inValue));
+    return qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(inValue));
 }
 
-inline UICDM::TMetaDataStringList ConvertToStringList(Q3DStudio::CString inValue)
+inline qt3dsdm::TMetaDataStringList ConvertToStringList(Q3DStudio::CString inValue)
 {
     // Convert the incoming string attribute into a list
-    UICDM::TMetaDataStringList theList;
+    qt3dsdm::TMetaDataStringList theList;
 
-    Q3DStudio::CString theDelimiter(_UIC(","));
+    Q3DStudio::CString theDelimiter(QStringLiteral(","));
     long theStartIndex = 0;
     long theEndIndex = theStartIndex;
     for (;;) {
@@ -134,16 +134,16 @@ inline UICDM::TMetaDataStringList ConvertToStringList(Q3DStudio::CString inValue
     return theList;
 }
 
-inline Q3DStudio::CString ConvertFromStringList(UICDM::TMetaDataStringList inList)
+inline Q3DStudio::CString ConvertFromStringList(qt3dsdm::TMetaDataStringList inList)
 {
     size_t theNumListItems = inList.size();
     Q3DStudio::CString theData = "";
     if (theNumListItems > 0) {
-        for (UICDM::TMetaDataStringList::iterator theIterator = inList.begin();
+        for (qt3dsdm::TMetaDataStringList::iterator theIterator = inList.begin();
              theIterator != inList.end(); ++theIterator) {
             theData += theIterator->c_str();
             if (theIterator + 1 != inList.end())
-                theData += _UIC(",");
+                theData += QStringLiteral(",");
         }
     }
     return theData;

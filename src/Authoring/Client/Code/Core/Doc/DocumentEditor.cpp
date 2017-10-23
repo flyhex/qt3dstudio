@@ -109,12 +109,12 @@ inline float ToDeg(float numberRad)
     return (QT3DSF32)57.29577951308232286465 * numberRad;
 }
 
-inline SFloat3 ToUICDM(QT3DSVec3 inData)
+inline SFloat3 ToDataModel(QT3DSVec3 inData)
 {
     return SFloat3(inData.x, inData.y, inData.z);
 }
 
-inline SFloat2 ToUICDM(QT3DSVec2 inData)
+inline SFloat2 ToDataModel(QT3DSVec2 inData)
 {
     return SFloat2(inData.x, inData.y);
 }
@@ -124,14 +124,14 @@ inline QT3DSVec2 ToFnd(SFloat2 value)
     return QT3DSVec2(value.m_Floats[0], value.m_Floats[1]);
 }
 
-inline QT3DSF32 ToUICDM(Option<QT3DSF32> inValue, QT3DSF32 inDefault)
+inline QT3DSF32 ToDataModel(Option<QT3DSF32> inValue, QT3DSF32 inDefault)
 {
     if (inValue.hasValue())
         return *inValue;
     return inDefault;
 }
 
-inline bool ToUICDM(Option<bool> inValue, bool inDefault)
+inline bool ToDataModel(Option<bool> inValue, bool inDefault)
 {
     if (inValue.hasValue())
         return *inValue;
@@ -773,7 +773,7 @@ public:
     CFilePath WriteWriterToFile(IDOMWriter &inWriter, const CString &inStem)
     {
         CFilePath theTempFileDir = CFilePath::CombineBaseAndRelative(
-            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DSomposer\\temp_files"));
+            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DSComposer\\temp_files"));
         theTempFileDir.CreateDir(true);
         CFilePath theFinalPath;
         {
@@ -781,7 +781,7 @@ public:
 
             theFinalPath = theFile->m_Path;
 
-            CUICFile::AddTempFile(theFile->m_Path);
+            Qt3DSFile::AddTempFile(theFile->m_Path);
 
             SFilePtrOutStream theFileStream(theFile);
 
@@ -1698,7 +1698,7 @@ public:
                 m_ActionCore.SetHandlerArgumentValue(theParamHandle, theArgData.m_Value);
             }
         }
-        m_Doc.SelectUICDMObject(newMaterial);
+        m_Doc.SelectDataModelObject(newMaterial);
     }
 
     void SetSlideName(TInstanceHandle inSlideInstance, TPropertyHandle propName,
@@ -2151,7 +2151,7 @@ public:
         if (inSetTimeRangeToParent)
             SetTimeRangeToParent(inInstance);
         if (inSelectInstanceWhenFinished)
-            m_Doc.SelectUICDMObject(inInstance);
+            m_Doc.SelectDataModelObject(inInstance);
         return inInstance;
     }
 
@@ -2392,7 +2392,7 @@ public:
         SetTimeRange(component, theStartEndTimes.first, theStartEndTimes.second);
         SetName(component, theName);
 
-        m_Doc.SelectUICDMObject(component);
+        m_Doc.SelectDataModelObject(component);
         return component;
     }
 
@@ -2549,7 +2549,7 @@ public:
         CheckSlideGroupPlayThroughTo(theNewSlide);
         Qt3DSDMInstanceHandle theInstance = m_Doc.GetSelectedInstance();
         if (theInstance.Valid() && GetAssociatedSlide(theInstance) != inMasterSlide)
-            m_Doc.SelectUICDMObject(0);
+            m_Doc.SelectDataModelObject(0);
         return theNewSlide;
     }
 
@@ -2560,7 +2560,7 @@ public:
         m_SlideSystem.GetAssociatedInstances(inSlide, theInstances);
         for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
             // Action instances are also associated with slides but they need to be deleted
-            // by UICDM when the action itself is deleted rather than by us right here.
+            // by DataModel when the action itself is deleted rather than by us right here.
             TInstanceHandle theInstance(theInstances[idx]);
             if (m_SlideSystem.GetAssociatedSlide(theInstance) == inSlide && IsInstance(theInstance)
                 && m_DataCore.IsInstanceOrDerivedFrom(
@@ -2746,7 +2746,7 @@ public:
         if (docPath.size() == 0) {
             if (theHandler)
                 theHandler->DisplayImportFailed(importSrc.toQString(),
-                                                QObject::tr("Qt3DSomposer Document Has No Path"),
+                                                QObject::tr("Qt3DSComposer Document Has No Path"),
                                                 false);
             return 0;
         }
@@ -3533,11 +3533,11 @@ public:
     TInstanceHandle ParseSVGPath(TInstanceHandle inParent, TSlideHandle inSlide,
                                  eastl::vector<Q3DStudio::CString> &inExistingNames)
     {
-        QT3DSF32 strokeWidth = ToUICDM(m_LuaState->NumberFromTopOfStackTable("stroke-width"), 1.0f);
-        QT3DSF32 pathOpacity = ToUICDM(m_LuaState->NumberFromTopOfStackTable("opacity"), 100.0f);
-        QT3DSF32 fillOpacity = ToUICDM(m_LuaState->NumberFromTopOfStackTable("fill-opacity"), 100.0f);
+        QT3DSF32 strokeWidth = ToDataModel(m_LuaState->NumberFromTopOfStackTable("stroke-width"), 1.0f);
+        QT3DSF32 pathOpacity = ToDataModel(m_LuaState->NumberFromTopOfStackTable("opacity"), 100.0f);
+        QT3DSF32 fillOpacity = ToDataModel(m_LuaState->NumberFromTopOfStackTable("fill-opacity"), 100.0f);
         QT3DSF32 strokeOpacity =
-            ToUICDM(m_LuaState->NumberFromTopOfStackTable("stroke-opacity"), 100.0f);
+            ToDataModel(m_LuaState->NumberFromTopOfStackTable("stroke-opacity"), 100.0f);
         Option<QT3DSVec3> fillColor = m_LuaState->Vec3FromTopOfStackTable("fill");
         Option<QT3DSVec3> strokeColor = m_LuaState->Vec3FromTopOfStackTable("stroke");
         eastl::string pathName = m_LuaState->StringFromTopOfStackTable("name");
@@ -3566,7 +3566,7 @@ public:
             wchar_t theNameBuffer[256];
             swprintf(theNameBuffer, 256, L"SubPath_%d", childIndex);
             SetName(subpath, theNameBuffer);
-            bool isClosed = ToUICDM(m_LuaState->BooleanFromTopOfStackTable("closepath"), true);
+            bool isClosed = ToDataModel(m_LuaState->BooleanFromTopOfStackTable("closepath"), true);
             theSlideCore.ForceSetInstancePropertyValue(inSlide, subpath, theDefs.m_SubPath.m_Closed,
                                                        isClosed);
             // Note that this pops the child off the stack so it is no longer available as it is the
@@ -3674,7 +3674,7 @@ public:
                 m_AssetGraph.GetChild(retval, fillMaterialIndex);
             theSlideCore.ForceSetInstancePropertyValue(
                 inSlide, theFillMaterial, m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseColor,
-                ToUICDM(*fillColor));
+                ToDataModel(*fillColor));
             theSlideCore.ForceSetInstancePropertyValue(
                 inSlide, theFillMaterial, m_Bridge.GetObjectDefinitions().m_Material.m_Opacity,
                 fillOpacity);
@@ -3683,7 +3683,7 @@ public:
             qt3dsdm::Qt3DSDMInstanceHandle theStrokeMaterial = m_AssetGraph.GetChild(retval, 0);
             theSlideCore.ForceSetInstancePropertyValue(
                 inSlide, theStrokeMaterial,
-                m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseColor, ToUICDM(*strokeColor));
+                m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseColor, ToDataModel(*strokeColor));
             theSlideCore.ForceSetInstancePropertyValue(
                 inSlide, theStrokeMaterial, m_Bridge.GetObjectDefinitions().m_Material.m_Opacity,
                 strokeOpacity);
@@ -4187,7 +4187,7 @@ public:
                 theCurrentPosition = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
                 theSlideCore.ForceSetInstancePropertyValue(theCurrentSlide, theCurrentAnchorPoint,
                                                            positionProp,
-                                                           ToUICDM(theCurrentPosition));
+                                                           ToDataModel(theCurrentPosition));
                 ++subPathIndex;
                 break;
             case qt3dsimp::PathCommand::CubicCurveTo: {
@@ -4212,7 +4212,7 @@ public:
                 SetName(theCurrentAnchorPoint, L"PathAnchorPoint");
                 theSlideCore.ForceSetInstancePropertyValue(theCurrentSlide, theCurrentAnchorPoint,
                                                            positionProp,
-                                                           ToUICDM(theCurrentPosition));
+                                                           ToDataModel(theCurrentPosition));
                 theSlideCore.ForceSetInstancePropertyValue(theCurrentSlide, theCurrentAnchorPoint,
                                                            incomingdistanceProp, incoming.y);
                 if (fabs(incoming.y) > .01f)

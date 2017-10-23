@@ -390,7 +390,7 @@ qt3dsdm::Qt3DSDMInstanceHandle
 CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem)
 {
     if (inSelectedItem.getType() == Q3DStudio::SelectedValueTypes::Instance) {
-        // This is UICDM asset. Find corresponding CAsset if there is any
+        // This is DataModel asset. Find corresponding CAsset if there is any
         return inSelectedItem.getData<qt3dsdm::Qt3DSDMInstanceHandle>();
     } else if (inSelectedItem.getType() == Q3DStudio::SelectedValueTypes::MultipleInstances) {
         const qt3dsdm::TInstanceHandleList &theData =
@@ -414,7 +414,7 @@ CCore *CDoc::GetCore()
 
 //=============================================================================
 /**
- *	Calls NotifyActiveSlideChanged( UICDM::Qt3DSDMSlideHandle inNewActiveSlide, bool
+ *	Calls NotifyActiveSlideChanged( qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide, bool
  *inForceRefresh )
  *	Could not make this on optional param because someone is calling from CGenericCmd that
  *	seems to only allow 1 param.
@@ -449,7 +449,7 @@ void CDoc::SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide)
 
         // Disable the active layer and set it lazily.
 
-        // Set active slide to UICDM
+        // Set active slide to DataModel
     }
 }
 
@@ -538,7 +538,7 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
         if (theNextSelectedInstance.Valid() == false)
             theNextSelectedInstance = GetDocumentReader().GetComponentForSlide(inNewActiveSlide);
 
-        SelectUICDMObject(theNextSelectedInstance);
+        SelectDataModelObject(theNextSelectedInstance);
     }
 }
 
@@ -678,7 +678,7 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
 
     if (theContinueCutFlag) {
         CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
-        CUICFile theFile(thePath);
+        Qt3DSFile theFile(thePath);
         CStudioClipboard::CopyObjectToClipboard(
             theFile, false, false,
             m_StudioSystem->GetClientDataModelBridge()->GetObjectType(inInstances[0]));
@@ -694,7 +694,7 @@ void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
         return;
     using namespace Q3DStudio;
     CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
-    CUICFile theFile(thePath);
+    Qt3DSFile theFile(thePath);
     CStudioClipboard::CopyObjectToClipboard(
         theFile, false, false,
         m_StudioSystem->GetClientDataModelBridge()->GetObjectType(inInstances[0]));
@@ -705,7 +705,7 @@ void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     using namespace Q3DStudio;
     qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
     qint64 dummy = 0;
-    CUICFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
+    Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
     SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
         ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
                                 DocumentEditorInsertType::LastChild, CPt());
@@ -716,7 +716,7 @@ void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     using namespace Q3DStudio;
     qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
     qint64 dummy = 0;
-    CUICFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
+    Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
     SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
         ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
                                       DocumentEditorInsertType::LastChild, CPt());
@@ -1081,10 +1081,10 @@ Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceH
 
 //==============================================================================
 /**
- *	Select UICDM Object given its instance handle.
- *	@param inInstanceHandle The instance handle of the UICDM Object to be selected
+ *	Select DataModel Object given its instance handle.
+ *	@param inInstanceHandle The instance handle of the DataModel Object to be selected
  */
-void CDoc::SelectUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
+void CDoc::SelectDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     qt3dsdm::TInstanceHandleList theObjects = m_SelectedValue.GetSelectedInstances();
     if (std::find(theObjects.begin(), theObjects.end(), inInstanceHandle) == theObjects.end())
@@ -1093,7 +1093,7 @@ void CDoc::SelectUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
         NotifySelectionChanged(theObjects);
 }
 
-void CDoc::ToggleUICDMObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+void CDoc::ToggleDataModelObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (m_StudioSystem->GetClientDataModelBridge()->IsMultiSelectable(inInstance)) {
         qt3dsdm::TInstanceHandleList theNewHandles;
@@ -1119,7 +1119,7 @@ void CDoc::ToggleUICDMObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
     }
 }
 
-void CDoc::SelectAndNavigateToUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
+void CDoc::SelectAndNavigateToDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     if (inInstanceHandle.Valid() == false) {
         QT3DS_ASSERT(false);
@@ -1163,7 +1163,7 @@ void CDoc::OnComponentSeconds()
     long theTime = GetCurrentClientTime();
 
     m_CurrentViewTime = theTime;
-    UICPROFILE(NotifyTimeChanged_UpdateAllViews);
+    QT3DS_PROFILE(NotifyTimeChanged_UpdateAllViews);
 
     m_Core->GetDispatch()->FireOnTimeChanged(m_CurrentViewTime);
 }
@@ -1182,7 +1182,7 @@ void CDoc::NotifyTimeChanged(long inNewTime)
 
 void CDoc::DoNotifyTimeChanged(long inNewTime)
 {
-    UICPROFILE(NotifyTimeChanged);
+    QT3DS_PROFILE(NotifyTimeChanged);
 
     // Make sure time is within valid range
     long theMinTime = 0; // min time is always 0
@@ -1194,7 +1194,7 @@ void CDoc::DoNotifyTimeChanged(long inNewTime)
             inNewTime = theLatestEndTime;
     }
 
-    // Update UICDM
+    // Update DataModel
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
         m_StudioSystem->GetSlideSystem()->GetMasterSlide(GetActiveSlide());
     // TODO: fix precision issue from converting to/from float & long. choose 1 type
@@ -1298,7 +1298,7 @@ Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem()
     return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : NULL;
 }
 
-void CDoc::SetDocumentPath(const CUICFile &inDocumentPath)
+void CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
 {
     Q3DStudio::CString theDocPath = inDocumentPath.GetName();
     // We always need to have a document path.
@@ -1314,7 +1314,7 @@ void CDoc::SetDocumentPath(const CUICFile &inDocumentPath)
     }
 
     // Document path should always be absolute path
-    ASSERT(!CUICFile::IsPathRelative(m_DocumentPath.GetPath()));
+    ASSERT(!Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()));
     // Document path should exist.
     Q_ASSERT(m_DocumentPath.Exists());
 
@@ -1325,21 +1325,21 @@ void CDoc::SetDocumentPath(const CUICFile &inDocumentPath)
 /**
  * Create Untitled document in user directory
  */
-CUICFile CDoc::CreateUntitledDocument() const
+Qt3DSFile CDoc::CreateUntitledDocument() const
 {
     Q3DStudio::CFilePath theAppDirectory = Q3DStudio::CFilePath::GetUserApplicationDirectory();
-    Q3DStudio::CFilePath theUICDirectory = Q3DStudio::CFilePath::CombineBaseAndRelative(
-        theAppDirectory, Q3DStudio::CFilePath(L"Qt3DSomposer/Untitled"));
-    theUICDirectory.CreateDir(true);
-    Q3DStudio::CFilePath theUICFilePath = Q3DStudio::CFilePath::CombineBaseAndRelative(
-        theUICDirectory, Q3DStudio::CFilePath(L"Untitled.uip"));
+    Q3DStudio::CFilePath theDirectory = Q3DStudio::CFilePath::CombineBaseAndRelative(
+        theAppDirectory, Q3DStudio::CFilePath(L"Qt3DSComposer/Untitled"));
+    theDirectory.CreateDir(true);
+    Q3DStudio::CFilePath theFilePath = Q3DStudio::CFilePath::CombineBaseAndRelative(
+        theDirectory, Q3DStudio::CFilePath(L"Untitled.uip"));
     // Keep jokers from screwing with our system.
-    if (theUICFilePath.IsDirectory())
-        theUICFilePath.DeleteThisDirectory(true);
+    if (theFilePath.IsDirectory())
+        theFilePath.DeleteThisDirectory(true);
 
-    if (!theUICFilePath.IsFile())
-        theUICFilePath.Touch();
-    return CUICFile(theUICFilePath);
+    if (!theFilePath.IsFile())
+        theFilePath.Touch();
+    return Qt3DSFile(theFilePath);
 }
 
 void CDoc::SetImportFailedHandler(std::shared_ptr<Q3DStudio::IImportFailedHandler> inHandler)
@@ -1358,7 +1358,7 @@ void CDoc::SetDocMessageBoxHandler(
     m_DeletingReferencedObjectHandler = inHandler;
 }
 
-CUICFile CDoc::GetDocumentPath() const
+Qt3DSFile CDoc::GetDocumentPath() const
 {
     return m_DocumentPath;
 }
@@ -1461,7 +1461,7 @@ void CDoc::CloseDocument()
 /**
  * Called when the core opens a UIP file.
  */
-void CDoc::LoadDocument(const CUICFile &inDocument)
+void CDoc::LoadDocument(const Qt3DSFile &inDocument)
 {
     ResetData();
 
@@ -1476,7 +1476,7 @@ void CDoc::LoadDocument(const CUICFile &inDocument)
 /**
  * Save Document
  */
-void CDoc::SaveDocument(const CUICFile &inDocument)
+void CDoc::SaveDocument(const Qt3DSFile &inDocument)
 {
     CFileOutputStream theFileStream(inDocument.GetAbsolutePosixPath());
     // Exceptions here get propagated to the crash dialog.
@@ -1919,7 +1919,7 @@ bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
         // theMessage.Format( theFormat, static_cast<const wchar_t*>( theFormulatedString ) );
         //
         // if ( m_StudioApp->GetDialogs( )->DisplayMessageBox( theTitle, theMessage,
-        // CUICMessageBox::ICON_WARNING, true ) == CUICMessageBox::MSGBX_CANCEL )
+        // Qt3DSMessageBox::ICON_WARNING, true ) == Qt3DSMessageBox::MSGBX_CANCEL )
         theResult = false;
     }
     return theResult;
@@ -2083,7 +2083,7 @@ void CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
     using namespace qt3dsdm;
     using namespace Q3DStudio;
 
-    UICPROFILE(LoadStudioData);
+    QT3DS_PROFILE(LoadStudioData);
     bool theModifiedFlag = false;
 
     try {

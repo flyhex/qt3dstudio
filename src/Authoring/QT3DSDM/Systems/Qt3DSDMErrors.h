@@ -27,15 +27,15 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMERRORSH
-#define UICDMERRORSH
+#ifndef QT3DSDM_ERRORS_H
+#define QT3DSDM_ERRORS_H
 #include "Qt3DSDMWindowsCompatibility.h"
 
 namespace qt3dsdm {
-class UICDMError : public std::exception
+class Qt3DSDMError : public std::exception
 {
 public:
-    UICDMError(const wchar_t *inMessage)
+    Qt3DSDMError(const wchar_t *inMessage)
         : std::exception()
     {
         wcscpy_s(m_Message, inMessage);
@@ -43,263 +43,263 @@ public:
     wchar_t m_Message[1024];
 };
 
-class HandleExists : public UICDMError
+class HandleExists : public Qt3DSDMError
 {
 public:
     HandleExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class PropertyNotFound : public UICDMError
+class PropertyNotFound : public Qt3DSDMError
 {
 public:
     PropertyNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class PropertyExists : public UICDMError
+class PropertyExists : public Qt3DSDMError
 {
 public:
     PropertyExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class DuplicateInstanceName : public UICDMError
+class DuplicateInstanceName : public Qt3DSDMError
 {
 public:
     DuplicateInstanceName(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class InstanceNotFound : public UICDMError
+class InstanceNotFound : public Qt3DSDMError
 {
 public:
     InstanceNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class ValueTypeError : public UICDMError
+class ValueTypeError : public Qt3DSDMError
 {
 public:
     ValueTypeError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SerializationError : public UICDMError
+class SerializationError : public Qt3DSDMError
 {
 public:
     SerializationError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SlideNotFound : public UICDMError
+class SlideNotFound : public Qt3DSDMError
 {
 public:
     SlideNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SlideExists : public UICDMError
+class SlideExists : public Qt3DSDMError
 {
 public:
     SlideExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SlideDerivationError : public UICDMError
+class SlideDerivationError : public Qt3DSDMError
 {
 public:
     SlideDerivationError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SlideChildNotFoundError : public UICDMError
+class SlideChildNotFoundError : public Qt3DSDMError
 {
 public:
     SlideChildNotFoundError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SlideGraphNotFound : public UICDMError
+class SlideGraphNotFound : public Qt3DSDMError
 {
 public:
     SlideGraphNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class SlideGraphExists : public UICDMError
+class SlideGraphExists : public Qt3DSDMError
 {
 public:
     SlideGraphExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class PropertyLinkError : public UICDMError
+class PropertyLinkError : public Qt3DSDMError
 {
 public:
     PropertyLinkError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class RearrangeSlideArgumentsMustNotBeZero : public UICDMError
+class RearrangeSlideArgumentsMustNotBeZero : public Qt3DSDMError
 {
 public:
     RearrangeSlideArgumentsMustNotBeZero(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class AnimationNotFound : public UICDMError
+class AnimationNotFound : public Qt3DSDMError
 {
 public:
     AnimationNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class AnimationExists : public UICDMError
+class AnimationExists : public Qt3DSDMError
 {
 public:
     AnimationExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class AnimationKeyframeTypeError : public UICDMError
+class AnimationKeyframeTypeError : public Qt3DSDMError
 {
 public:
     AnimationKeyframeTypeError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class AnimationKeyframeNotFound : public UICDMError
+class AnimationKeyframeNotFound : public Qt3DSDMError
 {
 public:
     AnimationKeyframeNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class AnimationEvaluationError : public UICDMError
+class AnimationEvaluationError : public Qt3DSDMError
 {
 public:
     AnimationEvaluationError(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class ActionNotFound : public UICDMError
+class ActionNotFound : public Qt3DSDMError
 {
 public:
     ActionNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class ActionExists : public UICDMError
+class ActionExists : public Qt3DSDMError
 {
 public:
     ActionExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class HandlerArgumentNotFound : public UICDMError
+class HandlerArgumentNotFound : public Qt3DSDMError
 {
 public:
     HandlerArgumentNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class HandlerArgumentExists : public UICDMError
+class HandlerArgumentExists : public Qt3DSDMError
 {
 public:
     HandlerArgumentExists(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class CustomPropertyNotFound : public UICDMError
+class CustomPropertyNotFound : public Qt3DSDMError
 {
 public:
     CustomPropertyNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class CustomEventNotFound : public UICDMError
+class CustomEventNotFound : public Qt3DSDMError
 {
 public:
     CustomEventNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class CustomHandlerNotFound : public UICDMError
+class CustomHandlerNotFound : public Qt3DSDMError
 {
 public:
     CustomHandlerNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class CustomHandlerParamNotFound : public UICDMError
+class CustomHandlerParamNotFound : public Qt3DSDMError
 {
 public:
     CustomHandlerParamNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };
 
-class AttributeTypeNotFound : public UICDMError
+class AttributeTypeNotFound : public Qt3DSDMError
 {
 public:
     AttributeTypeNotFound(const wchar_t *inMessage)
-        : UICDMError(inMessage)
+        : Qt3DSDMError(inMessage)
     {
     }
 };

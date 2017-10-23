@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef __UICSHAREDPTR_H__
-#define __UICSHAREDPTR_H__
+#ifndef __QT3DS_SHAREDPTR_H__
+#define __QT3DS_SHAREDPTR_H__
 
 #pragma once
 
@@ -343,4 +343,4 @@ protected:
 
 } // namespace Q3DStudio
 
-#endif // __UICSHAREDPTR_H__
+#endif // __QT3DS_SHAREDPTR_H__

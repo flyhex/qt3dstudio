@@ -157,11 +157,11 @@ namespace render {
         virtual void Load(NVDataRef<QT3DSU8> inData, CStrTableOrDataRef inStrDataBlock,
                           const char8_t *inProjectDir) = 0;
 
-        virtual IEffectSystem &GetEffectSystem(IUICRenderContext &context) = 0;
+        virtual IEffectSystem &GetEffectSystem(IQt3DSRenderContext &context) = 0;
 
         virtual IResourceManager &GetResourceManager() = 0;
 
-        static IEffectSystemCore &CreateEffectSystemCore(IUICRenderContextCore &context);
+        static IEffectSystemCore &CreateEffectSystemCore(IQt3DSRenderContextCore &context);
     };
 
     /**

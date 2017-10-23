@@ -349,7 +349,7 @@ void CAssetTimelineKeyframe::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlag
 void CAssetTimelineKeyframe::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseMove(inPoint, inFlags);
-    UICPROFILE(OnMouseMove);
+    QT3DS_PROFILE(OnMouseMove);
     // If the mouse is down and this is slected, then offst the keys
     if (m_IsMouseDown && m_Selected) {
         // If we are not yet dragging the keyframe

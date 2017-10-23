@@ -146,12 +146,12 @@ private:
     ITegraApplicationRenderEngine *m_RenderEngine; ///< Handles all rendering functions
     CTegraInputEngine *m_InputEngine; ///< Handles all user input events
     // Pre graphics init objects
-    NVScopedRefCounted<qt3ds::render::IUICRenderFactoryCore> m_RuntimeFactoryCore;
+    NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactoryCore> m_RuntimeFactoryCore;
     NVScopedRefCounted<qt3ds::runtime::IApplicationCore>
     m_ApplicationCore; ///< Base application before graphis
 
     // Post graphics init objects
-    NVScopedRefCounted<qt3ds::render::IUICRenderFactory> m_RuntimeFactory;
+    NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactory> m_RuntimeFactory;
     NVScopedRefCounted<qt3ds::runtime::IApplication> m_Application; ///< Application after graphics
     CPresentation *m_Presentation; ///< Currently loaded presentation, this should be removed in the future
 
@@ -341,7 +341,7 @@ void CNDDView::Render()
         manager.SetViewport(0, 0, dim.m_Width, dim.m_Height);
 
         QPair<QT3DSF32, QT3DSF32> fps
-                = m_RuntimeFactory->GetUICRenderContext().GetFPS();
+                = m_RuntimeFactory->GetQt3DSRenderContext().GetFPS();
 
         QString text;
         QTextStream stream(&text);
@@ -654,7 +654,7 @@ void CNDDView::BootupPreGraphicsInitObjects()
     // Create engines and runtime
     const eastl::string &theAppDir = QCoreApplication::applicationDirPath().toLatin1().constData();
 
-    m_RuntimeFactoryCore = qt3ds::render::IUICRenderFactoryCore::CreateRenderFactoryCore(
+    m_RuntimeFactoryCore = qt3ds::render::IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
                 theAppDir.c_str(), m_WindowSystem, m_TimeProvider);
     m_ApplicationCore = qt3ds::runtime::IApplicationCore::CreateApplicationCore(*m_RuntimeFactoryCore,
                                                                               theAppDir.c_str());

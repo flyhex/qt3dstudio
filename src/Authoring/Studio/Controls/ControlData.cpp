@@ -621,14 +621,14 @@ CPt CControlData::GetGlobalPosition(CPt inChildPoint) const
     }
     return CPt();
 }
-UICRenderDevice CControlData::GetPlatformDevice()
+Qt3DSRenderDevice CControlData::GetPlatformDevice()
 {
     if (m_Control) {
         return m_Control->GetPlatformDevice();
     }
     return nullptr;
 }
-bool CControlData::IsChildPlatformDevice(UICRenderDevice inDevice)
+bool CControlData::IsChildPlatformDevice(Qt3DSRenderDevice inDevice)
 {
     if (m_Control) {
         return m_Control->IsChildPlatformDevice(inDevice);

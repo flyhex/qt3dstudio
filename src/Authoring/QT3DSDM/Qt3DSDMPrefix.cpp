@@ -28,7 +28,7 @@
 ****************************************************************************/
 
 // stdafx.cpp : source file that includes just the standard includes
-// UICDM.pch will be the pre-compiled header
+// DataModel.pch will be the pre-compiled header
 // stdafx.obj will contain the pre-compiled type information
 
 #include "Qt3DSDMPrefix.h"

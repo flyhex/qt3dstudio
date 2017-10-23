@@ -41,8 +41,8 @@
 #include "foundation/StringTable.h"
 
 using namespace qt3ds::foundation;
-using namespace uic::state::debugger;
-using namespace uic::state::debugger::lua;
+using namespace qt3ds::state::debugger;
+using namespace qt3ds::state::debugger::lua;
 using namespace qt3ds;
 
 namespace {
@@ -129,7 +129,7 @@ struct SDebugClient : public ILuaArchitectDebugClient,
         return toConstDataRef(m_OutgoingStackTrace.data(), (QT3DSU32)m_OutgoingStackTrace.size());
     }
 
-    virtual uic::state::debugger::SFunctionInfo GetFunctionInfo(SDatamodelFunction &inFunction)
+    virtual qt3ds::state::debugger::SFunctionInfo GetFunctionInfo(SDatamodelFunction &inFunction)
     {
         return m_DataCache->GetFunctionInfo(inFunction);
     }

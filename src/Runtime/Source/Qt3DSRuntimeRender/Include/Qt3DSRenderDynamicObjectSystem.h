@@ -246,9 +246,9 @@ namespace render {
         virtual void Load(NVDataRef<QT3DSU8> inData, CStrTableOrDataRef inStrDataBlock,
                           const char8_t *inProjectDir) = 0;
 
-        virtual IDynamicObjectSystem &CreateDynamicSystem(IUICRenderContext &rc) = 0;
+        virtual IDynamicObjectSystem &CreateDynamicSystem(IQt3DSRenderContext &rc) = 0;
 
-        static IDynamicObjectSystemCore &CreateDynamicSystemCore(IUICRenderContextCore &rc);
+        static IDynamicObjectSystemCore &CreateDynamicSystemCore(IQt3DSRenderContextCore &rc);
     };
 
     typedef eastl::pair<NVScopedRefCounted<NVRenderShaderProgram>,

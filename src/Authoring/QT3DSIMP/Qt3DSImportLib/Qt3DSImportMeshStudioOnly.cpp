@@ -96,19 +96,19 @@ QT3DSU32 Mesh::GetHighestMultiVersion(const char *inFilePath)
     return GetHighestMultiVersion(allocator, stream);
 }
 
-void CUICFileToolsSeekableMeshBufIOStream::SetPosition(QT3DSI64 inOffset, SeekPosition::Enum inEnum)
+void Qt3DSFileToolsSeekableMeshBufIOStream::SetPosition(QT3DSI64 inOffset, SeekPosition::Enum inEnum)
 {
     m_File->SetPosition(inOffset, (Q3DStudio::SeekPosition::Enum)inEnum);
 }
-QT3DSI64 CUICFileToolsSeekableMeshBufIOStream::GetPosition() const
+QT3DSI64 Qt3DSFileToolsSeekableMeshBufIOStream::GetPosition() const
 {
     return m_File->GetPosition();
 }
-QT3DSU32 CUICFileToolsSeekableMeshBufIOStream::Read(NVDataRef<QT3DSU8> data)
+QT3DSU32 Qt3DSFileToolsSeekableMeshBufIOStream::Read(NVDataRef<QT3DSU8> data)
 {
     return m_File->Read(data.begin(), data.size());
 }
-bool CUICFileToolsSeekableMeshBufIOStream::Write(NVConstDataRef<QT3DSU8> data)
+bool Qt3DSFileToolsSeekableMeshBufIOStream::Write(NVConstDataRef<QT3DSU8> data)
 {
     return m_File->Write(data.begin(), data.size()) == data.size();
 }

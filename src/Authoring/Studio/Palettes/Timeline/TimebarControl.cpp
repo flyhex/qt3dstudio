@@ -477,7 +477,7 @@ void CTimebarControl::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
     // If we are in edit Comment mode or locked, then we do not drag the timebar.
     if (!theCommentEditMode && m_IsMouseDown && !m_TimelineItemBinding->IsLockedEnabled()) {
-        UICPROFILE(OnMouseMove);
+        QT3DS_PROFILE(OnMouseMove);
 
         if (m_MaybeDragStart) {
             // Dragging in the first 5 pixels will be ignored to avoid unconsciously accidental

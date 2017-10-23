@@ -53,8 +53,6 @@
 #include <QString>
 #include <QTextStream>
 
-using namespace qt3ds::render;
-
 #include <string>
 
 using namespace qt3ds;
@@ -114,11 +112,11 @@ struct CustomTestParams
     Option<qt3dsdm::SMetaDataCustomMaterial> metaMaterial;
     SImage dummyImages[SShaderDefaultMaterialKeyProperties::ImageMapCount];
     eastl::vector<SRenderableImage*> renderableImages;
-    qt3ds::render::CUICRendererImpl *render;
+    qt3ds::render::Qt3DSRendererImpl *render;
     SImage iblLightProbe;
     NVRenderTexture2D *texture;
 
-    CustomTestParams(CUICRendererImpl &impl)
+    CustomTestParams(Qt3DSRendererImpl &impl)
         : layerData(layer, impl)
         , images(NULL)
         , subset(impl.GetContext().GetAllocator())
@@ -229,7 +227,7 @@ static CustomTestKey randomizeTestKey()
     return *reinterpret_cast<CustomTestKey*>(&v);
 }
 
-CustomTestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
+CustomTestParams *generateTest(qt3ds::render::Qt3DSRendererImpl *renderImpl,
                          NVRenderContext *context, CustomTestKey key, SCustomMaterial *material)
 {
     CustomTestParams *params = new CustomTestParams(*renderImpl);
@@ -306,7 +304,7 @@ CustomTestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
         params->material->m_DisplacementMap
                 = &params->dummyImages[SShaderDefaultMaterialKeyProperties::DisplacementMap];
         params->material->m_DisplacementMap->m_ImageShaderName
-                = renderImpl->GetUICContext().GetStringTable()
+                = renderImpl->GetQt3DSContext().GetStringTable()
                     .RegisterStr("DisplacementMap");
         params->material->m_DisplaceAmount = 1.0f;
         params->addRenderableImage(ImageMapTypes::Displacement,
@@ -318,7 +316,7 @@ CustomTestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
     if (key.iblprobe) {
         renderImpl->DefaultMaterialShaderKeyProperties().m_HasIbl.SetValue(
             params->shaderkey, true);
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_LIGHT_PROBE"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
 
@@ -350,17 +348,17 @@ CustomTestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
         params->material->m_ShaderKeyValues &= SCustomMaterialShaderKeyValues::transmissive;
 
     if (key.ssm) {
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_SSM"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
     if (key.ssao) {
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_SSAO"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
     if (key.ssdo) {
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_SSDO"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
@@ -369,12 +367,12 @@ CustomTestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
     return params;
 }
 
-bool GenShader(IUICRenderContext &UICContext, CustomTestParams &params)
+bool GenShader(IQt3DSRenderContext &qt3dsContext, CustomTestParams &params)
 {
     bool success = true;
-    ICustomMaterialShaderGenerator &theMaterialGenerator(UICContext.GetCustomMaterialShaderGenerator());
+    ICustomMaterialShaderGenerator &theMaterialGenerator(qt3dsContext.GetCustomMaterialShaderGenerator());
 
-    SCustomMaterialVertexPipeline thePipeline(&UICContext,
+    SCustomMaterialVertexPipeline thePipeline(&qt3dsContext,
                                               params.model.m_TessellationMode);
 
     for (int i = 0; i < params.metaMaterial->m_CustomMaterialCommands.size(); i++) {
@@ -443,15 +441,15 @@ bool Qt3DSRenderTestCustomMaterialGenerator::run(NVRenderContext *context,
         if (metaMaterial.hasValue()) {
             qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
                     name, context->GetFoundation(),
-                    uicRenderer()->GetUICContext().GetCustomMaterialSystem(), *metaMaterial,
+                    qt3dsRenderer()->GetQt3DSContext().GetCustomMaterialSystem(), *metaMaterial,
                     context->GetStringTable());
-             SCustomMaterial *material = uicRenderer()->GetUICContext().GetCustomMaterialSystem()
-                    .CreateCustomMaterial(name, uicRenderer()->GetContext().GetAllocator());
+             SCustomMaterial *material = qt3dsRenderer()->GetQt3DSContext().GetCustomMaterialSystem()
+                    .CreateCustomMaterial(name, qt3dsRenderer()->GetContext().GetAllocator());
 
             for (CustomTestKey key : testKeys) {
-                CustomTestParams *params = generateTest(uicRenderer(), context, key, material);
+                CustomTestParams *params = generateTest(qt3dsRenderer(), context, key, material);
                 params->metaMaterial = metaMaterial;
-                success &= GenShader(uicRenderer()->GetUICContext(), *params);
+                success &= GenShader(qt3dsRenderer()->GetQt3DSContext(), *params);
                 if (!success)
                     qDebug () << "failing key: " << key.toString();
                 delete params;

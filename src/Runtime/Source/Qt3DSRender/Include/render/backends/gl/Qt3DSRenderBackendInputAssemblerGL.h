@@ -66,7 +66,7 @@ namespace render {
 
         NVRenderBackendLayoutEntryGL *getEntryByName(CRegisteredString entryName) const
         {
-            UICBASE_FOREACH(idx, m_LayoutAttribEntries.size())
+            QT3DS_FOREACH(idx, m_LayoutAttribEntries.size())
             {
                 if (m_LayoutAttribEntries[idx].m_AttribName == entryName)
                     return &m_LayoutAttribEntries.mData[idx];
@@ -76,7 +76,7 @@ namespace render {
 
         Option<NVRenderBackendLayoutEntryGL> getEntryByAttribIndex(QT3DSU32 attribIndex) const
         {
-            UICBASE_FOREACH(idx, m_LayoutAttribEntries.size())
+            QT3DS_FOREACH(idx, m_LayoutAttribEntries.size())
             {
                 if (m_LayoutAttribEntries[idx].m_AttribIndex == attribIndex)
                     return m_LayoutAttribEntries[idx];
@@ -112,7 +112,7 @@ namespace render {
             QT3DSU32 *offsetMem = (QT3DSU32 *)QT3DS_ALLOC(fnd.getAllocator(), strides.mSize * sizeof(QT3DSU32),
                                                  "BackendAttributeLayoutGL:m_strides");
             // copy offsets and strides
-            UICBASE_FOREACH(idx, strides.size())
+            QT3DS_FOREACH(idx, strides.size())
             {
                 strideMem[idx] = strides.mData[idx];
                 offsetMem[idx] = offsets.mData[idx];

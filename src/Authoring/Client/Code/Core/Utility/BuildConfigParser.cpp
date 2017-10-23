@@ -77,13 +77,13 @@ CBuildConfigParser::~CBuildConfigParser()
  *	@param inDirectory		the directory to look for all the configuration files
  *	@return true if all files parsed successfully, else false
  */
-bool CBuildConfigParser::LoadConfigurations(CUICFile &inDirectory)
+bool CBuildConfigParser::LoadConfigurations(Qt3DSFile &inDirectory)
 {
     m_ErrorMessage.clear();
 
     CFileIterator theFileIter = inDirectory.GetSubItems();
     while (!theFileIter.IsDone()) {
-        CUICFile theCurrentFile(theFileIter.GetCurrent());
+        Qt3DSFile theCurrentFile(theFileIter.GetCurrent());
         m_CurrentFile = theCurrentFile.GetAbsolutePath();
 
         if (theCurrentFile.GetExtension().CompareNoCase(L"build")) {

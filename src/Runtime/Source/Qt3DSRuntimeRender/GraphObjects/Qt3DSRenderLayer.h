@@ -37,7 +37,7 @@
 
 namespace qt3ds {
 namespace render {
-    class IUICRenderContext;
+    class IQt3DSRenderContext;
     struct SPresentation;
     struct SScene;
     struct SEffect;

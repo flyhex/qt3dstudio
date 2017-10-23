@@ -33,7 +33,7 @@
 
 using namespace qt3ds::render;
 
-void SPresentation::Render(IUICRenderContext &inContext)
+void SPresentation::Render(IQt3DSRenderContext &inContext)
 {
     if (m_Scene) {
         NVRenderRect theViewportSize(inContext.GetRenderContext().GetViewport());

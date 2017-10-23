@@ -28,8 +28,8 @@
 ****************************************************************************/
 
 #pragma once
-#ifndef __UICTIME_H__
-#define __UICTIME_H__
+#ifndef __QT3DS_TIME_H__
+#define __QT3DS_TIME_H__
 
 #include "Qt3DSLargeInteger.h"
 
@@ -153,4 +153,4 @@ protected:
 };
 }
 
-#endif // __UICTIME_H__
+#endif // __QT3DS_TIME_H__

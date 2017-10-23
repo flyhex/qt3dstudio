@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef _UICEXCEPTIONS_H__
-#define _UICEXCEPTIONS_H__
+#ifndef _QT3DS_EXCEPTIONS_H__
+#define _QT3DS_EXCEPTIONS_H__
 
 //==============================================================================
 //	Includes
@@ -55,7 +55,7 @@ const unsigned long LEVEL_ERROR = 0x00000003;
 #define QT3DS_DEFINE_THISFILE static wchar_t QT3DS_THIS_FILE[] = __WFILE__;
 
 // The class
-#define QT3DS_EXCEPTION CUICExceptionClass
+#define QT3DS_EXCEPTION Qt3DSExceptionClass
 
 // An exception with no extra parameters.
 #define QT3DS_THROW(inErrorCode) QT3DS_EXCEPTION::Throw(__WFILE__, __LINE__, inErrorCode);
@@ -141,4 +141,4 @@ const unsigned long LEVEL_ERROR = 0x00000003;
 #define E_FAIL 0x80004005L
 #endif
 
-#endif // #ifndef _UICEXCEPTIONS_H__
+#endif // #ifndef _QT3DS_EXCEPTIONS_H__

@@ -289,7 +289,7 @@ namespace studio {
 
     struct SDragPreparationResult
     {
-        qt3ds::render::IUICRenderer *m_Renderer;
+        qt3ds::render::IQt3DSRenderer *m_Renderer;
         SNode *m_Node;
         SLayer *m_Layer;
         SCamera *m_Camera;
@@ -323,7 +323,7 @@ namespace studio {
         SPathAnchorDragInitialValue() {}
     };
 
-    struct STranslation : public qt3ds::render::IUICRenderNodeFilter
+    struct STranslation : public qt3ds::render::IQt3DSRenderNodeFilter
     {
         typedef eastl::pair<qt3dsdm::Qt3DSDMInstanceHandle, SGraphObjectTranslator *>
             THandleTranslatorPair;
@@ -334,7 +334,7 @@ namespace studio {
         typedef nvhash_map<qt3dsdm::Qt3DSDMInstanceHandle, THandleTranslatorPairList, eastl::hash<int>>
             TInstanceToTranslatorMap;
         IStudioRenderer &m_Renderer;
-        IUICRenderContext &m_UICContext;
+        IQt3DSRenderContext &m_Context;
         CDoc &m_Doc;
         IDocumentReader &m_Reader;
         SComposerObjectDefinitions &m_ObjectDefinitions;
@@ -389,7 +389,7 @@ namespace studio {
         QT3DSVec4 m_guideFillColor;
         QT3DSVec4 m_selectedGuideFillColor;
 
-        STranslation(IStudioRenderer &inRenderer, IUICRenderContext &inContext);
+        STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inContext);
         void MarkBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle) { ++m_ComponentSecondsDepth; }
 
         void MarkComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle)
@@ -466,7 +466,7 @@ namespace studio {
                 QT3DSVec3 colorVec(color.GetRed() / 255.f,
                                    color.GetGreen() / 255.f,
                                    color.GetBlue() / 255.f);
-                m_UICContext.GetRenderer().RenderLayerRect(
+                m_Context.GetRenderer().RenderLayerRect(
                     static_cast<SLayer &>(inTranslator.GetGraphObject()), colorVec);
             }
         }
@@ -626,7 +626,7 @@ namespace studio {
 
         void RenderZoomRender(SZoomRender &inRender);
 
-        // IUICRenderNodeFilter
+        // IQt3DSRenderNodeFilter
         bool IncludeNode(const SNode &inNode) override;
 
         PickTargetAreas::Enum GetPickArea(CPt inPoint);

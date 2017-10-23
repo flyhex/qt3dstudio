@@ -99,10 +99,10 @@ namespace render {
         virtual void Load(NVDataRef<QT3DSU8> inData, CStrTableOrDataRef inStrDataBlock,
                           const char8_t *inProjectDir) = 0;
 
-        virtual ICustomMaterialSystem &GetCustomMaterialSystem(IUICRenderContext &inContext) = 0;
+        virtual ICustomMaterialSystem &GetCustomMaterialSystem(IQt3DSRenderContext &inContext) = 0;
 
         static ICustomMaterialSystemCore &
-        CreateCustomMaterialSystemCore(IUICRenderContextCore &inContext);
+        CreateCustomMaterialSystemCore(IQt3DSRenderContextCore &inContext);
     };
     // How to handle blend modes?
     class ICustomMaterialSystem : public ICustomMaterialSystemCore
@@ -131,10 +131,10 @@ namespace render {
 
     struct SCustomMaterialVertexPipeline : public SVertexPipelineImpl
     {
-        IUICRenderContext *m_UICContext;
+        IQt3DSRenderContext *m_Context;
         TessModeValues::Enum m_TessMode;
 
-        SCustomMaterialVertexPipeline(IUICRenderContext *inContext, TessModeValues::Enum inTessMode);
+        SCustomMaterialVertexPipeline(IQt3DSRenderContext *inContext, TessModeValues::Enum inTessMode);
         void InitializeTessControlShader();
         void InitializeTessEvaluationShader();
         void FinalizeTessControlShader();

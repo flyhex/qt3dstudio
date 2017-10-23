@@ -87,9 +87,9 @@ namespace render {
         // Returns angle in x, distance in y.
         static QT3DSVec2 GetAngleDistanceFromControlPoint(QT3DSVec2 inPosition, QT3DSVec2 inControlPoint);
 
-        virtual IPathManager &OnRenderSystemInitialize(IUICRenderContext &context) = 0;
+        virtual IPathManager &OnRenderSystemInitialize(IQt3DSRenderContext &context) = 0;
 
-        static IPathManagerCore &CreatePathManagerCore(IUICRenderContextCore &inContext);
+        static IPathManagerCore &CreatePathManagerCore(IQt3DSRenderContextCore &inContext);
     };
 
     struct SPathRenderContext; // UICRenderPathRenderContext.h

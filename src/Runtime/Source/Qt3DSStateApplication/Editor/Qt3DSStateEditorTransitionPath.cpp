@@ -31,8 +31,8 @@
 
 namespace {
 
-using namespace uic::state::editor;
-using namespace uic::state;
+using namespace qt3ds::state::editor;
+using namespace qt3ds::state;
 
 bool inBounds(QT3DSF32 item, QT3DSF32 lower, QT3DSF32 upper)
 {
@@ -97,7 +97,7 @@ inline bool RectDiffers(const Option<SRect> &inLhs, const SRect &inRhs)
 }
 }
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

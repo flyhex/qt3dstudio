@@ -251,7 +251,7 @@ namespace render {
 
         context.SetActiveShader(&shader->m_Shader);
 
-        m_Generator.GetUICContext().GetDefaultMaterialShaderGenerator().SetMaterialProperties(
+        m_Generator.GetQt3DSContext().GetDefaultMaterialShaderGenerator().SetMaterialProperties(
             shader->m_Shader, m_Material, inCameraVec, m_ModelContext.m_ModelViewProjection,
             m_ModelContext.m_NormalMatrix, m_ModelContext.m_Model.m_GlobalTransform, m_FirstImage,
             m_Opacity, m_Generator.GetLayerGlobalRenderProperties());
@@ -438,13 +438,13 @@ namespace render {
                                            const NVRenderTexture2D *inSsaoTexture,
                                            TShaderFeatureSet inFeatureSet)
     {
-        IUICRenderContext &uicContext(m_Generator.GetUICContext());
+        IQt3DSRenderContext &qt3dsContext(m_Generator.GetQt3DSContext());
         SCustomMaterialRenderContext theRenderContext(
             inLayer, inLayerData, inLights, inCamera, m_ModelContext.m_Model, m_Subset,
             m_ModelContext.m_ModelViewProjection, m_GlobalTransform, m_ModelContext.m_NormalMatrix,
             m_Material, inDepthTexture, inSsaoTexture, m_ShaderDescription, m_FirstImage);
 
-        uicContext.GetCustomMaterialSystem().RenderSubset(theRenderContext, inFeatureSet);
+        qt3dsContext.GetCustomMaterialSystem().RenderSubset(theRenderContext, inFeatureSet);
     }
 
     void SCustomMaterialRenderable::RenderDepthPass(const QT3DSVec2 &inCameraVec,
@@ -455,8 +455,8 @@ namespace render {
                                                     const NVRenderTexture2D * /*inDepthTexture*/)
     {
 
-        IUICRenderContext &uicContext(m_Generator.GetUICContext());
-        if (!uicContext.GetCustomMaterialSystem().RenderDepthPrepass(
+        IQt3DSRenderContext &qt3dsContext(m_Generator.GetQt3DSContext());
+        if (!qt3dsContext.GetCustomMaterialSystem().RenderDepthPrepass(
                 m_ModelContext.m_ModelViewProjection, m_Material, m_Subset)) {
             SRenderableImage *displacementImage = NULL;
             for (SRenderableImage *theImage = m_FirstImage;
@@ -475,13 +475,13 @@ namespace render {
                                           const SCamera &inCamera,
                                           const NVRenderTexture2D * /*inDepthTexture*/)
     {
-        IUICRenderContext &uicContext(m_Generator.GetUICContext());
+        IQt3DSRenderContext &qt3dsContext(m_Generator.GetQt3DSContext());
         SPathRenderContext theRenderContext(
             inLights, inCamera, m_Path, m_ModelViewProjection, m_GlobalTransform, m_NormalMatrix,
-            m_Opacity, m_Material, m_ShaderDescription, m_FirstImage, uicContext.GetWireframeMode(),
+            m_Opacity, m_Material, m_ShaderDescription, m_FirstImage, qt3dsContext.GetWireframeMode(),
             inCameraVec, false, m_IsStroke);
 
-        uicContext.GetPathManager().RenderDepthPrepass(
+        qt3dsContext.GetPathManager().RenderDepthPrepass(
             theRenderContext, m_Generator.GetLayerGlobalRenderProperties(), TShaderFeatureSet());
     }
 
@@ -493,13 +493,13 @@ namespace render {
                                  ,
                                  TShaderFeatureSet inFeatureSet)
     {
-        IUICRenderContext &uicContext(m_Generator.GetUICContext());
+        IQt3DSRenderContext &qt3dsContext(m_Generator.GetQt3DSContext());
         SPathRenderContext theRenderContext(
             inLights, inCamera, m_Path, m_ModelViewProjection, m_GlobalTransform, m_NormalMatrix,
-            m_Opacity, m_Material, m_ShaderDescription, m_FirstImage, uicContext.GetWireframeMode(),
+            m_Opacity, m_Material, m_ShaderDescription, m_FirstImage, qt3dsContext.GetWireframeMode(),
             inCameraVec, m_RenderableFlags.HasTransparency(), m_IsStroke);
 
-        uicContext.GetPathManager().RenderPath(
+        qt3dsContext.GetPathManager().RenderPath(
             theRenderContext, m_Generator.GetLayerGlobalRenderProperties(), inFeatureSet);
     }
 
@@ -508,20 +508,20 @@ namespace render {
                                               SShadowMapEntry *inShadowMapEntry)
     {
         NVConstDataRef<SLight *> theLights;
-        IUICRenderContext &uicContext(m_Generator.GetUICContext());
+        IQt3DSRenderContext &qt3dsContext(m_Generator.GetQt3DSContext());
 
         QT3DSMat44 theModelViewProjection = inShadowMapEntry->m_LightVP * m_GlobalTransform;
         SPathRenderContext theRenderContext(
             theLights, inCamera, m_Path, theModelViewProjection, m_GlobalTransform, m_NormalMatrix,
-            m_Opacity, m_Material, m_ShaderDescription, m_FirstImage, uicContext.GetWireframeMode(),
+            m_Opacity, m_Material, m_ShaderDescription, m_FirstImage, qt3dsContext.GetWireframeMode(),
             inCameraVec, false, m_IsStroke);
 
         if (inLight->m_LightType != RenderLightTypes::Directional) {
-            uicContext.GetPathManager().RenderCubeFaceShadowPass(
+            qt3dsContext.GetPathManager().RenderCubeFaceShadowPass(
                 theRenderContext, m_Generator.GetLayerGlobalRenderProperties(),
                 TShaderFeatureSet());
         } else
-            uicContext.GetPathManager().RenderShadowMapPass(
+            qt3dsContext.GetPathManager().RenderShadowMapPass(
                 theRenderContext, m_Generator.GetLayerGlobalRenderProperties(),
                 TShaderFeatureSet());
     }

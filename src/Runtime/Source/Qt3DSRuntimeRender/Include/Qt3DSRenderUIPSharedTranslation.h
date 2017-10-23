@@ -41,7 +41,7 @@
 #include "Qt3DSRenderPath.h"
 #include "Qt3DSRenderPresentation.h"
 
-// map from UICDM to UIC::RENDER
+// map from qt3dsdm to qt3ds::render
 namespace qt3ds {
 namespace render {
 
@@ -260,7 +260,7 @@ namespace render {
     // object
     // along with some information about what portion of the object model this property affects.
 
-    struct UICRenderDirtyFlags
+    struct Qt3DSRenderDirtyFlags
     {
         enum Enum {
             Unknown = 0,

@@ -179,13 +179,13 @@ namespace render {
     using qt3ds::render::NVRenderTextureTypeValue;
     using qt3ds::render::NVRenderProgramPipeline;
 
-    class IUICRenderContextCore;
-    class IUICRenderContext;
-    class IUICRenderer;
+    class IQt3DSRenderContextCore;
+    class IQt3DSRenderContext;
+    class IQt3DSRenderer;
     class IBufferManager;
     struct SRenderMesh;
     class IRenderableObject;
-    class IUICRenderer;
+    class IQt3DSRenderer;
     class IBufferManager;
     class IResourceManager;
     class IOffscreenRenderManager;
@@ -199,7 +199,7 @@ namespace render {
     class IEffectSystemCore;
     class CRenderString;
     class IShaderCache;
-    class IUICRenderNodeFilter;
+    class IQt3DSRenderNodeFilter;
     class IRenderWidget;
     class IRenderWidgetContext;
     struct SShaderVertexCodeGenerator;
@@ -246,7 +246,7 @@ namespace render {
     class IDefaultMaterialShaderGenerator;
     class ICustomMaterialShaderGenerator;
     struct SRenderableImage;
-    class UICShadowMap;
+    class Qt3DSShadowMap;
     struct SLightmaps;
 }
 }

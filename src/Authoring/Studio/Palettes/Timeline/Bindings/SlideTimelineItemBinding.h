@@ -46,7 +46,7 @@ class CBaseStateRow;
 
 //=============================================================================
 /**
- * Binding to a UICDM object of Slide type
+ * Binding to a DataModel object of Slide type
  */
 class CSlideTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {

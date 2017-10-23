@@ -504,7 +504,7 @@ namespace render {
 
             QT3DSI32 constantCount = m_Backend->GetConstantCount(m_ProgramHandle);
 
-            UICBASE_FOREACH(idx, constantCount)
+            QT3DS_FOREACH(idx, constantCount)
             {
                 location = m_Backend->GetConstantInfoByID(m_ProgramHandle, idx, 512, &elementCount,
                                                           &type, &binding, nameBuf);
@@ -522,7 +522,7 @@ namespace render {
             // next query constant buffers info
             QT3DSI32 length, bufferSize, paramCount;
             QT3DSI32 constantBufferCount = m_Backend->GetConstantBufferCount(m_ProgramHandle);
-            UICBASE_FOREACH(idx, constantBufferCount)
+            QT3DS_FOREACH(idx, constantBufferCount)
             {
                 location = m_Backend->GetConstantBufferInfoByID(
                     m_ProgramHandle, idx, 512, &paramCount, &bufferSize, &length, nameBuf);
@@ -547,7 +547,7 @@ namespace render {
 
             // next query storage buffers
             QT3DSI32 storageBufferCount = m_Backend->GetStorageBufferCount(m_ProgramHandle);
-            UICBASE_FOREACH(idx, storageBufferCount)
+            QT3DS_FOREACH(idx, storageBufferCount)
             {
                 location = m_Backend->GetStorageBufferInfoByID(
                     m_ProgramHandle, idx, 512, &paramCount, &bufferSize, &length, nameBuf);
@@ -571,7 +571,7 @@ namespace render {
 
             // next query atomic counter buffers
             QT3DSI32 atomicBufferCount = m_Backend->GetAtomicCounterBufferCount(m_ProgramHandle);
-            UICBASE_FOREACH(idx, atomicBufferCount)
+            QT3DS_FOREACH(idx, atomicBufferCount)
             {
                 location = m_Backend->GetAtomicCounterBufferInfoByID(
                     m_ProgramHandle, idx, 512, &paramCount, &bufferSize, &length, nameBuf);

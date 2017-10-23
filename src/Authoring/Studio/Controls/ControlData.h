@@ -235,8 +235,8 @@ namespace Control {
         void OffsetPosition(CPt inOffset);
 
         CPt GetGlobalPosition(CPt inChildPoint) const;
-        UICRenderDevice GetPlatformDevice();
-        bool IsChildPlatformDevice(UICRenderDevice inDevice);
+        Qt3DSRenderDevice GetPlatformDevice();
+        bool IsChildPlatformDevice(Qt3DSRenderDevice inDevice);
         void ShowMoveableWindow(CPt inLocation, Q3DStudio::CString inText, CRct inBoundingRct);
         void HideMoveableWindow();
         CControl *GetFirstChild();

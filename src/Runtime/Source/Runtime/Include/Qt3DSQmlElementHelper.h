@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef UICQMLELEMENTHELPER_H
-#define UICQMLELEMENTHELPER_H
+#ifndef QT3DS_QML_ELEMENT_HELPER_H
+#define QT3DS_QML_ELEMENT_HELPER_H
 
 #include "Qt3DSApplication.h"
 #include "Qt3DSPresentation.h"
@@ -62,4 +62,4 @@ public: // Lua Global Functions
 };
 }
 
-#endif // UICQMLELEMENTHELPER_H
+#endif // QT3DS_QML_ELEMENT_HELPER_H

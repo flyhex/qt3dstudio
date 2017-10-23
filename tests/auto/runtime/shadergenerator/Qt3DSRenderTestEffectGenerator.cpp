@@ -91,7 +91,7 @@ void Qt3DSRenderTestEffectGenerator::cleanup(NVRenderContext *context,
     Q_UNUSED(pUserData);
 }
 
-bool GenShader(IUICRenderContext &UICContext, SEffect &effect, qt3dsdm::SMetaDataEffect *metaEffect)
+bool GenShader(IQt3DSRenderContext &qt3dsContext, SEffect &effect, qt3dsdm::SMetaDataEffect *metaEffect)
 {
     bool success = true;
     for (int i = 0; i < metaEffect->m_EffectCommands.size(); i++) {
@@ -99,7 +99,7 @@ bool GenShader(IUICRenderContext &UICContext, SEffect &effect, qt3dsdm::SMetaDat
         if (command.m_Type == dynamic::CommandTypes::Enum::BindShader) {
             dynamic::SBindShader *bindShader = static_cast<dynamic::SBindShader *>(&command);
             NVRenderShaderProgram *theProgram =
-                UICContext.GetDynamicObjectSystem()
+                qt3dsContext.GetDynamicObjectSystem()
                     .GetShaderProgram(bindShader->m_ShaderPath, bindShader->m_ShaderDefine,
                                       TShaderFeatureSet(), dynamic::SDynamicShaderProgramFlags())
                     .first;
@@ -135,13 +135,13 @@ bool Qt3DSRenderTestEffectGenerator::run(NVRenderContext *context, userContextDa
         if (metaEffect.hasValue()) {
             qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
                 name, context->GetFoundation(),
-                uicRenderer()->GetUICContext().GetEffectSystem(), *metaEffect,
+                qt3dsRenderer()->GetQt3DSContext().GetEffectSystem(), *metaEffect,
                 context->GetStringTable());
 
-             SEffect *effect = uicRenderer()->GetUICContext().GetEffectSystem()
-                    .CreateEffectInstance(name, uicRenderer()->GetContext().GetAllocator());
+             SEffect *effect = qt3dsRenderer()->GetQt3DSContext().GetEffectSystem()
+                    .CreateEffectInstance(name, qt3dsRenderer()->GetContext().GetAllocator());
 
-            success &= GenShader(uicRenderer()->GetUICContext(), *effect, &metaEffect.getValue());
+            success &= GenShader(qt3dsRenderer()->GetQt3DSContext(), *effect, &metaEffect.getValue());
             if (!success)
                 qDebug () << "failed effect: " << effectName;
             delete effect;

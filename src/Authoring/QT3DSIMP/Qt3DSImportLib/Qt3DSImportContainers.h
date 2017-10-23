@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTCONTAINERSH
-#define UICIMPORTCONTAINERSH
+#ifndef QT3DS_IMPORT_CONTAINERS_H
+#define QT3DS_IMPORT_CONTAINERS_H
 
 #include "EASTL/hash_map.h"
 #include "EASTL/hash_set.h"

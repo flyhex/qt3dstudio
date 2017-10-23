@@ -67,10 +67,10 @@ class CPlatformConversion
 public:
     //==============================================================================
     /**
-     *	Convert an UICRect to a Q3DStudio::CRect
+     *	Convert an Qt3DSRect to a Q3DStudio::CRect
      */
     //==============================================================================
-    static void UICRectToCRect(const UICRect &inPlatform, Q3DStudio::CRectBase &outRect)
+    static void Qt3DSRectToCRect(const Qt3DSRect &inPlatform, Q3DStudio::CRectBase &outRect)
     {
         outRect.left = inPlatform.left;
         outRect.top = inPlatform.top;
@@ -80,10 +80,10 @@ public:
 
     //==============================================================================
     /**
-     *	Convert a Q3DStudio::CRect to an UICRect
+     *	Convert a Q3DStudio::CRect to an Qt3DSRect
      */
     //==============================================================================
-    static void CRectToUICRect(const Q3DStudio::CRectBase &inRect, UICRect &outPlatform)
+    static void CRectToQt3DSRect(const Q3DStudio::CRectBase &inRect, Qt3DSRect &outPlatform)
     {
         outPlatform.left = inRect.left;
         outPlatform.top = inRect.top;
@@ -93,10 +93,10 @@ public:
 
     //==============================================================================
     /**
-     *	Convert an UICPoint to an Q3DStudio::CPoint
+     *	Convert an Qt3DSPoint to an Q3DStudio::CPoint
      */
     //==============================================================================
-    static void UICPointToCPoint(const UICPoint &inPlatform, Q3DStudio::CPointBase &outPoint)
+    static void Qt3DSPointToCPoint(const Qt3DSPoint &inPlatform, Q3DStudio::CPointBase &outPoint)
     {
         outPoint.x = inPlatform.x;
         outPoint.y = inPlatform.y;
@@ -104,10 +104,10 @@ public:
 
     //==============================================================================
     /**
-     *	Convert a Q3DStudio::CPoint to an UICPoint
+     *	Convert a Q3DStudio::CPoint to an Qt3DSPoint
      */
     //==============================================================================
-    static void CPointToUICPoint(const Q3DStudio::CPointBase &inPoint, UICPoint &outPlatform)
+    static void CPointToQt3DSPoint(const Q3DStudio::CPointBase &inPoint, Qt3DSPoint &outPlatform)
     {
         outPlatform.x = inPoint.x;
         outPlatform.y = inPoint.y;

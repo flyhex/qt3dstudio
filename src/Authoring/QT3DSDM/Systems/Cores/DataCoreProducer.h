@@ -107,7 +107,7 @@ public:
                                              DataModelDataType::Value inPropType) override;
     void GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                        TPropertyHandleList &outProperties) const override;
-    const SUICDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const override;
+    const Qt3DSDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const override;
     void RemoveProperty(Qt3DSDMPropertyHandle inProperty) override;
     void CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
                                         Qt3DSDMInstanceHandle inDestInstance) override;

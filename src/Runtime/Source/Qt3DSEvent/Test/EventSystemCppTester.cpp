@@ -57,25 +57,25 @@ void TestCPPBindings()
         IEventSystem::Create(*theFoundation);
 
     const int theProviderCount = 128;
-    uic::evt::IEventProvider *theProviders[theProviderCount];
+    qt3ds::evt::IEventProvider *theProviders[theProviderCount];
     for (int i = 0; i < theProviderCount; ++i) {
         theProviders[i] = new CCanProviderDemo();
         theEventSystem->AddProvider(*theProviders[i]);
     }
     unsigned long theCount = 0;
     while (theCount < 500) {
-        SUICEventSystemEvent *evtBuffer[64];
+        Qt3DSEventSystemEvent *evtBuffer[64];
         size_t numEvents = theEventSystem->GetNextEvents(evtBuffer, 64);
         for (size_t evtIdx = 0; evtIdx < numEvents; ++evtIdx) {
-            SUICEventSystemEvent *theEvent = evtBuffer[evtIdx];
+            Qt3DSEventSystemEvent *theEvent = evtBuffer[evtIdx];
             if (theEvent) {
                 std::cout << "************ event " << ++theCount << " received ************"
                           << std::endl;
                 std::cout << "number of data: " << theEvent->m_NumData << std::endl;
-                SUICEventSystemEventData *theData = theEvent->m_Data;
+                Qt3DSEventSystemEventData *theData = theEvent->m_Data;
                 for (int i = 0; i < theEvent->m_NumData; ++i) {
                     std::cout << "data " << i << ":\t";
-                    if (EUICEventSystemEventTypesString == theData->m_Value.m_Type) {
+                    if (QT3DSEventSystemEventTypesString == theData->m_Value.m_Type) {
                         std::cout << theData->m_Value.m_String;
                     } else {
                         std::cout << theData->m_Value.m_Number;
@@ -122,13 +122,13 @@ const char *luaScript =
 
 struct SCToCppFactory : public IEventFactory
 {
-    SUICEventSystemEventFactory m_Factory;
-    SCToCppFactory(SUICEventSystemEventFactory inFactory)
+    Qt3DSEventSystemEventFactory m_Factory;
+    SCToCppFactory(Qt3DSEventSystemEventFactory inFactory)
         : m_Factory(inFactory)
     {
     }
 
-    virtual SUICEventSystemEvent &CreateEvent(int inNumData)
+    virtual Qt3DSEventSystemEvent &CreateEvent(int inNumData)
     {
         return *m_Factory.createEvent(m_Factory.m_Factory, inNumData);
     }
@@ -138,7 +138,7 @@ struct SCToCppFactory : public IEventFactory
     }
     virtual size_t GetMaxStrLength() { return m_Factory.getMaxStrLength(m_Factory.m_Factory); }
 
-    virtual SUICEventSystemRegisteredStr RegisterStr(TEventStr inSrc)
+    virtual Qt3DSEventSystemRegisteredStr RegisterStr(TEventStr inSrc)
     {
         return m_Factory.registerStr(m_Factory.m_Factory, inSrc);
     }
@@ -155,8 +155,8 @@ struct SCToCppFactory : public IEventFactory
     }
 };
 
-static size_t GetNextEventsFn(void *inProvider, SUICEventSystemEventFactory inFactory,
-                              SUICEventSystemEvent **outBuffer, size_t outBufLen)
+static size_t GetNextEventsFn(void *inProvider, Qt3DSEventSystemEventFactory inFactory,
+                              Qt3DSEventSystemEvent **outBuffer, size_t outBufLen)
 {
     IEventProvider *provider = reinterpret_cast<IEventProvider *>(inProvider);
     SCToCppFactory theFactory(inFactory);
@@ -172,10 +172,10 @@ static void ReleaseFn(void *inProvider)
 static int registerCANProvider(lua_State *inState)
 {
     luaL_checktype(inState, 1, LUA_TLIGHTUSERDATA);
-    SUICEventSystemEventPoller *thePoller =
-        reinterpret_cast<SUICEventSystemEventPoller *>(lua_touserdata(inState, 1));
+    Qt3DSEventSystemEventPoller *thePoller =
+        reinterpret_cast<Qt3DSEventSystemEventPoller *>(lua_touserdata(inState, 1));
     if (thePoller) {
-        SUICEventSystemEventProvider provider;
+        Qt3DSEventSystemEventProvider provider;
         provider.m_Provider = static_cast<IEventProvider *>(new CCanProviderDemo());
         provider.getNextEvents = GetNextEventsFn;
         provider.release = ReleaseFn;

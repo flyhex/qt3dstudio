@@ -35,7 +35,7 @@
 namespace qt3ds {
 namespace render {
 
-    class UICShadowMap;
+    class Qt3DSShadowMap;
     struct SShaderGeneratorGeneratedShader;
     struct SLightConstantProperties;
 
@@ -111,7 +111,7 @@ namespace render {
                               SLayerGlobalRenderProperties inRenderProperties) override = 0;
 
         static IDefaultMaterialShaderGenerator &
-        CreateDefaultMaterialShaderGenerator(IUICRenderContext &inRenderContext);
+        CreateDefaultMaterialShaderGenerator(IQt3DSRenderContext &inRenderContext);
 
         SLightConstantProperties *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader);
     };

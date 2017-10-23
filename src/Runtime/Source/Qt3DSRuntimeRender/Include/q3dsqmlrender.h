@@ -43,7 +43,7 @@ class IQ3DSQmlStreamRenderer;
 class Q3DSQmlRender : public IOffscreenRenderer
 {
 public:
-    Q3DSQmlRender(IUICRenderContext &inRenderContext, const char *asset);
+    Q3DSQmlRender(IQt3DSRenderContext &inRenderContext, const char *asset);
     ~Q3DSQmlRender();
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_RenderContext.GetAllocator())
@@ -75,7 +75,7 @@ private:
 
     void initializeRenderer();
 
-    IUICRenderContext &m_RenderContext;
+    IQt3DSRenderContext &m_RenderContext;
     IQ3DSQmlStreamRenderer *m_qmlStreamRenderer;
     CRegisteredString m_offscreenRenderType;
     CRegisteredString m_assetString;

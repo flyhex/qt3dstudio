@@ -73,7 +73,7 @@ public:
         EType m_Type;
 
         virtual SEvent *Clone() const = 0;
-        virtual SUICEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) = 0;
+        virtual Qt3DSEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) = 0;
     };
     struct SKeyboardEvent : public SEvent
     {
@@ -93,21 +93,21 @@ public:
         {
             return new SKeyboardEvent(this->m_KeyCode, this->m_KeyEvent);
         }
-        SUICEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) override
+        Qt3DSEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) override
         {
             if (m_KeyEvent == ON_KEYDOWN || m_KeyEvent == ON_KEYUP || m_KeyEvent == ON_KEYREPEAT) {
-                SUICEventSystemEvent &theEvent = inFactory.CreateEvent(3);
+                Qt3DSEventSystemEvent &theEvent = inFactory.CreateEvent(3);
                 int theIndex = 0;
                 theEvent.m_Data[theIndex].m_Name = inFactory.RegisterStr("category");
-                theEvent.m_Data[theIndex].m_Value.m_Type = EUICEventSystemEventTypesString;
+                theEvent.m_Data[theIndex].m_Value.m_Type = QT3DSEventSystemEventTypesString;
                 theEvent.m_Data[theIndex].m_Value.m_String = inFactory.AllocateStr("kb");
                 ++theIndex;
                 theEvent.m_Data[theIndex].m_Name = inFactory.RegisterStr("code");
-                theEvent.m_Data[theIndex].m_Value.m_Type = EUICEventSystemEventTypesNumber;
+                theEvent.m_Data[theIndex].m_Value.m_Type = QT3DSEventSystemEventTypesNumber;
                 theEvent.m_Data[theIndex].m_Value.m_Number = m_KeyCode;
                 ++theIndex;
                 theEvent.m_Data[theIndex].m_Name = inFactory.RegisterStr("action");
-                theEvent.m_Data[theIndex].m_Value.m_Type = EUICEventSystemEventTypesString;
+                theEvent.m_Data[theIndex].m_Value.m_Type = QT3DSEventSystemEventTypesString;
                 if (m_KeyEvent == ON_KEYDOWN)
                     theEvent.m_Data[theIndex].m_Value.m_String = inFactory.AllocateStr("down");
                 else if (m_KeyEvent == ON_KEYUP)
@@ -141,22 +141,22 @@ public:
         {
             return new SKeyboardEvent(this->m_ButtonCode, this->m_ButtonEvent);
         }
-        SUICEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) override
+        Qt3DSEventSystemEvent *GenEventSystemEvent(qt3ds::evt::IEventFactory &inFactory) override
         {
             if (m_ButtonEvent == ON_BUTTONDOWN || m_ButtonEvent == ON_BUTTONUP
                 || m_ButtonEvent == ON_BUTTONREPEAT) {
-                SUICEventSystemEvent &theEvent = inFactory.CreateEvent(3);
+                Qt3DSEventSystemEvent &theEvent = inFactory.CreateEvent(3);
                 int theIndex = 0;
                 theEvent.m_Data[theIndex].m_Name = inFactory.RegisterStr("category");
-                theEvent.m_Data[theIndex].m_Value.m_Type = EUICEventSystemEventTypesString;
+                theEvent.m_Data[theIndex].m_Value.m_Type = QT3DSEventSystemEventTypesString;
                 theEvent.m_Data[theIndex].m_Value.m_String = inFactory.AllocateStr("button");
                 ++theIndex;
                 theEvent.m_Data[theIndex].m_Name = inFactory.RegisterStr("code");
-                theEvent.m_Data[theIndex].m_Value.m_Type = EUICEventSystemEventTypesNumber;
+                theEvent.m_Data[theIndex].m_Value.m_Type = QT3DSEventSystemEventTypesNumber;
                 theEvent.m_Data[theIndex].m_Value.m_Number = m_ButtonCode;
                 ++theIndex;
                 theEvent.m_Data[theIndex].m_Name = inFactory.RegisterStr("action");
-                theEvent.m_Data[theIndex].m_Value.m_Type = EUICEventSystemEventTypesString;
+                theEvent.m_Data[theIndex].m_Value.m_Type = QT3DSEventSystemEventTypesString;
                 if (m_ButtonEvent == ON_BUTTONDOWN)
                     theEvent.m_Data[theIndex].m_Value.m_String = inFactory.AllocateStr("down");
                 else if (m_ButtonEvent == ON_BUTTONUP)
@@ -172,13 +172,13 @@ public:
         INT32 m_ButtonCode;
         UINT32 m_ButtonEvent;
     };
-    size_t GetNextEvents(qt3ds::evt::IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
+    size_t GetNextEvents(qt3ds::evt::IEventFactory &inFactory, Qt3DSEventSystemEvent **outBuffer,
                          size_t inBufLenInEvent) override
     {
         size_t theEventCount = 0;
         while (!m_Events.empty() && inBufLenInEvent--) {
             SEvent *theBufferedEvent = m_Events.front();
-            SUICEventSystemEvent *theEventSystemEvent =
+            Qt3DSEventSystemEvent *theEventSystemEvent =
                 theBufferedEvent->GenEventSystemEvent(inFactory);
             if (theEventSystemEvent)
                 outBuffer[theEventCount++] = theEventSystemEvent;

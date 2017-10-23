@@ -87,7 +87,7 @@ CStudioPropertySystem::GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstanc
 Qt3DSDMInstanceHandle CStudioPropertySystem::GetPropertyOwner(Qt3DSDMPropertyHandle inProperty) const
 {
 
-    qt3dsdm::SUICDMPropertyDefinition thePropDef = m_DataCore->GetProperty(inProperty);
+    qt3dsdm::Qt3DSDMPropertyDefinition thePropDef = m_DataCore->GetProperty(inProperty);
     return thePropDef.m_Instance;
 }
 

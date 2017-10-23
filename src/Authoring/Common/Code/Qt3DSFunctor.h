@@ -33,8 +33,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UICFUNCTOR
-#define INCLUDED_UICFUNCTOR
+#ifndef _QT3DS_FUNCTOR_
+#define _QT3DS_FUNCTOR_
 
 #include <typeinfo>
 
@@ -428,4 +428,4 @@ protected:
 };
 } // namespace Q3DStudio
 
-#endif // __UICFunctor_H__
+#endif // __QT3DS_Functor_H__

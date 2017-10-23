@@ -73,16 +73,16 @@ public: // Methods
     bool LoadBuildConfigurations();
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
 
-    void OnNewDocument(const CUICFile &inDocument, bool inCreateDirectory);
-    void OnSaveDocument(const CUICFile &inDocument, bool inSaveCopy = false);
-    void OnSaveDocumentCatcher(const CUICFile &inDocument, bool inSaveCopy = false);
+    void OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory);
+    void OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy = false);
+    void OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void SetCommandStackModifier(ICmdStackModifier *inModifier);
     bool ExecuteCommand(CCmd *inCommand, bool inIsSynchronous = true);
     void CommitCurrentCommand();
     void SetCommandModifiedFlag(bool inModified) override;
     void CommandUpdate(unsigned long inUpdateFlags) override;
 
-    void GetCreateDirectoryFileName(const CUICFile &inDocument, Q3DStudio::CFilePath &outFinalDir,
+    void GetCreateDirectoryFileName(const Qt3DSFile &inDocument, Q3DStudio::CFilePath &outFinalDir,
                                     Q3DStudio::CFilePath &outFinalDoc);
 
     // CPresentationListener

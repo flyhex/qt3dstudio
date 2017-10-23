@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMACTIONINFOH
-#define UICDMACTIONINFOH
+#ifndef QT3DSDM_ACTION_INFO_H
+#define QT3DSDM_ACTION_INFO_H
 
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMMetaDataTypes.h"

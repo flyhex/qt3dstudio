@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTERRORCODESH
-#define UICIMPORTERRORCODESH
+#ifndef QT3DS_IMPORT_ERROR_CODES_H
+#define QT3DS_IMPORT_ERROR_CODES_H
 
 namespace qt3dsimp {
 

@@ -41,10 +41,10 @@
 #include "Qt3DSHash.h" //we need to duplicate the hash attribute calls
 #include "EASTL/set.h"
 
-using namespace uic;
-using namespace uic::state;
-using namespace uic::app;
-using namespace uic::state::debugger;
+using namespace qt3ds;
+using namespace qt3ds::state;
+using namespace qt3ds::app;
+using namespace qt3ds::state::debugger;
 
 namespace {
 
@@ -332,7 +332,7 @@ struct SArchitectDebuggerImpl : public ISceneGraphArchitectDebugger
         newValue.m_FormalName = formalName;
         newValue.m_DataType = dtype;
         theEntry.m_AttList.push_back(newValue);
-        theEntry.m_RuntimeValues.push_back(uic::app::SDatamodelValue());
+        theEntry.m_RuntimeValues.push_back(qt3ds::app::SDatamodelValue());
     }
 
     void LoadAppElement(SAppElement &elem, SPresentationEntry &entry)
@@ -565,7 +565,7 @@ struct SArchitectDebuggerImpl : public ISceneGraphArchitectDebugger
 }
 
 ISceneGraphArchitectDebugger &
-ISceneGraphArchitectDebugger::Create(uic::app::IDatamodel &inDatamodel)
+ISceneGraphArchitectDebugger::Create(qt3ds::app::IDatamodel &inDatamodel)
 {
     SArchitectDebuggerImpl &retval =
         *QT3DS_NEW(inDatamodel.GetFoundation().getAllocator(), SArchitectDebuggerImpl)(inDatamodel);

@@ -129,7 +129,7 @@ struct STextAtlasFont
 
 // This class is only for rendering 2D screen aligned text
 // it uses a predefined true type font and character set with various sizes
-struct UICOnscreenTextRenderer : public ITextRenderer
+struct Qt3DSOnscreenTextRenderer : public ITextRenderer
 {
 
     static const QT3DSI32 TEXTURE_ATLAS_DIM =
@@ -144,7 +144,7 @@ private:
     NVScopedRefCounted<STextAtlasFont> m_TextFont;
     QRawFont *m_font;
 public:
-    UICOnscreenTextRenderer(NVFoundationBase &inFoundation)
+    Qt3DSOnscreenTextRenderer(NVFoundationBase &inFoundation)
         : m_Foundation(inFoundation)
         , mRefCount(0)
         , m_TextureAtlasInitialized(false)
@@ -152,7 +152,7 @@ public:
     {
     }
 
-    virtual ~UICOnscreenTextRenderer()
+    virtual ~Qt3DSOnscreenTextRenderer()
     {
     }
 
@@ -415,7 +415,7 @@ public:
 
 ITextRendererCore &ITextRendererCore::CreateOnscreenTextRenderer(NVFoundationBase &inFnd)
 {
-    return *QT3DS_NEW(inFnd.getAllocator(), UICOnscreenTextRenderer)(inFnd);
+    return *QT3DS_NEW(inFnd.getAllocator(), Qt3DSOnscreenTextRenderer)(inFnd);
 }
 
 #endif // QT3DS_RENDER_ONSCREEN_TEXT

@@ -49,7 +49,7 @@
 /**
  *	Constructor:	Creates the object
  */
-CWGLRenderContext::CWGLRenderContext(UICWindow inWindow)
+CWGLRenderContext::CWGLRenderContext(Qt3DSWindow inWindow)
     : m_qtContext(0)
     , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
 {
@@ -71,7 +71,7 @@ CWGLRenderContext::~CWGLRenderContext()
  *	@param	inRenderWindow		window handle
  *	@param	inWindowSize		window size
  */
-void CWGLRenderContext::Open(UICWindow inRenderWindow)
+void CWGLRenderContext::Open(Qt3DSWindow inRenderWindow)
 {
     // needed because NVidia cards will fail all the system functions below if there is no window.
     // note: the only time inRenderWindow is nullptr is when CThumbnailGenerator is used. Bug3075.

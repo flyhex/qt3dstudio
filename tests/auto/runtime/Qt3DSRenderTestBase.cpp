@@ -38,13 +38,13 @@ NVRenderTestBase::~NVRenderTestBase()
     delete m_renderImpl;
 }
 
-bool NVRenderTestBase::initializeUICRenderer(QSurfaceFormat format)
+bool NVRenderTestBase::initializeQt3DSRenderer(QSurfaceFormat format)
 {
-    m_coreFactory = qt3ds::render::IUICRenderFactoryCore::CreateRenderFactoryCore("", m_windowSystem,
+    m_coreFactory = qt3ds::render::IQt3DSRenderFactoryCore::CreateRenderFactoryCore("", m_windowSystem,
                                                                                 m_timeProvider);
     m_factory = m_coreFactory->CreateRenderFactory(format);
-    m_rc = m_factory->GetUICRenderContext();
-    m_renderImpl = new qt3ds::render::CUICRendererImpl(*m_rc);
+    m_rc = m_factory->GetQt3DSRenderContext();
+    m_renderImpl = new qt3ds::render::Qt3DSRendererImpl(*m_rc);
 
     QString versionString;
     switch ((QT3DSU32)m_rc->GetRenderContext().GetRenderContextType()) {
@@ -75,7 +75,7 @@ bool NVRenderTestBase::initializeUICRenderer(QSurfaceFormat format)
     return true;
 }
 
-CUICRendererImpl *NVRenderTestBase::uicRenderer()
+Qt3DSRendererImpl *NVRenderTestBase::qt3dsRenderer()
 {
     return m_renderImpl;
 }

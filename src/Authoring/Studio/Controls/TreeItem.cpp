@@ -401,7 +401,7 @@ void CTreeItem::ToggleExpansion()
  */
 void CTreeItem::Expand()
 {
-    UICPROFILE(Expand);
+    QT3DS_PROFILE(Expand);
 
     if (!m_IsExpanded) {
         m_TreeControl->OnItemExpanding(this);
@@ -648,7 +648,7 @@ void CTreeItem::RemoveItem()
  */
 void CTreeItem::UpdateToggle()
 {
-    UICPROFILE(UpdateToggle);
+    QT3DS_PROFILE(UpdateToggle);
 
     bool theEnableToggle = IsContainer();
     bool theToggleIsEnabled = m_Toggle->IsEnabled();

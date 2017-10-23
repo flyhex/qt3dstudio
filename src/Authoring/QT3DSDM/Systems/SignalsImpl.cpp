@@ -40,24 +40,24 @@ using namespace std;
 using namespace boost::BOOST_SIGNALS_NAMESPACE;
 
 namespace {
-bool g_UICDMSignalsEnabled = true;
+bool g_DataModelSignalsEnabled = true;
 
 #define CHECK_SIGNALS_ENABLED()                                                                    \
     {                                                                                              \
-        if (g_UICDMSignalsEnabled == false)                                                        \
+        if (g_DataModelSignalsEnabled == false)                                                        \
             return;                                                                                \
     }
 }
 
 namespace qt3dsdm {
-void SetUICDMSignalsEnabled(bool inEnabled)
+void SetDataModelSignalsEnabled(bool inEnabled)
 {
-    g_UICDMSignalsEnabled = inEnabled;
+    g_DataModelSignalsEnabled = inEnabled;
 }
 // Defaults to true
-bool AreUICDMSignalsEnabled()
+bool AreDataModelSignalsEnabled()
 {
-    return g_UICDMSignalsEnabled;
+    return g_DataModelSignalsEnabled;
 }
 struct SBoostSignalConnection : public ISignalConnection
 {

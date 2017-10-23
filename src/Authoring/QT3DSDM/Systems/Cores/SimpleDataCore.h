@@ -77,9 +77,9 @@ typedef std::vector<TPropertyPair> TPropertyPairList;
 class CDataModelPropertyDefinitionObject : public CHandleObject
 {
 public:
-    SUICDMPropertyDefinition m_Definition;
+    Qt3DSDMPropertyDefinition m_Definition;
 
-    CDataModelPropertyDefinitionObject(int inHandle, const SUICDMPropertyDefinition &inDefinition)
+    CDataModelPropertyDefinitionObject(int inHandle, const Qt3DSDMPropertyDefinition &inDefinition)
         : CHandleObject(inHandle)
         , m_Definition(inDefinition)
     {
@@ -243,7 +243,7 @@ public:
 
     Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inClass, TCharPtr inName,
                                              DataModelDataType::Value inPropType) override;
-    const SUICDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const override;
+    const Qt3DSDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const override;
     void GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                        TPropertyHandleList &outProperties) const override;
     void RemoveProperty(Qt3DSDMPropertyHandle inProperty) override;

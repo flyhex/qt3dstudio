@@ -142,8 +142,8 @@ const unsigned long ACTION_DEBUGGEROUTPUT_BITMASK = 0x00000004; ///< Output to d
 const unsigned long ACTION_DEBUGBREAK_BITMASK = 0x00000008; ///< Break at the spot
 
 // 3D constants
-const float UIC3D_DEGREES_TO_RADIANS = (float)0.0174532925199;
-const float UIC3D_RADIANS_TO_DEGREES = (float)57.2957795131;
+const float QT3DS_DEGREES_TO_RADIANS = (float)0.0174532925199;
+const float QT3DS_RADIANS_TO_DEGREES = (float)57.2957795131;
 
 // Fullscreen anti-aliasing modes
 const long FSAA_OFF = 0x00000000; ///< No fullscreen anti-aliasing

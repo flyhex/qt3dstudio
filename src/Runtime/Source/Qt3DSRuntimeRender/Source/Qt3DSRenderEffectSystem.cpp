@@ -304,7 +304,7 @@ namespace render {
     struct SEffectContext
     {
         CRegisteredString m_ClassName;
-        IUICRenderContext &m_Context;
+        IQt3DSRenderContext &m_Context;
         IResourceManager *m_ResourceManager;
         nvvector<SAllocatedBufferEntry> m_AllocatedBuffers;
         nvvector<SAllocatedImageEntry> m_AllocatedImages;
@@ -313,7 +313,7 @@ namespace render {
         nvvector<TNamedImageEntry> m_ImageEntries;
         nvvector<TNamedDataBufferEntry> m_DataBufferEntries;
 
-        SEffectContext(CRegisteredString inName, IUICRenderContext &ctx, IResourceManager *inManager)
+        SEffectContext(CRegisteredString inName, IQt3DSRenderContext &ctx, IResourceManager *inManager)
             : m_ClassName(inName)
             , m_Context(ctx)
             , m_ResourceManager(inManager)
@@ -497,8 +497,8 @@ struct SEffectSystem : public IEffectSystem
     typedef nvhash_map<TStrStrPair, NVScopedRefCounted<SEffectShader>> TShaderMap;
     typedef nvvector<SEffectContext *> TContextList;
 
-    IUICRenderContextCore &m_CoreContext;
-    IUICRenderContext *m_UICContext;
+    IQt3DSRenderContextCore &m_CoreContext;
+    IQt3DSRenderContext *m_Context;
     NVScopedRefCounted<IResourceManager> m_ResourceManager;
     mutable qt3ds::render::SPreAllocatedAllocator m_Allocator;
     // Keep from dual-including headers.
@@ -512,15 +512,15 @@ struct SEffectSystem : public IEffectSystem
     nvvector<NVScopedRefCounted<NVRenderDepthStencilState>> m_DepthStencilStates;
     volatile QT3DSI32 mRefCount;
 
-    SEffectSystem(IUICRenderContextCore &inUICContext)
-        : m_CoreContext(inUICContext)
-        , m_UICContext(NULL)
-        , m_Allocator(inUICContext.GetAllocator())
-        , m_EffectClasses(inUICContext.GetAllocator(), "SEffectSystem::m_EffectClasses")
-        , m_EffectList(inUICContext.GetAllocator(), "SEffectSystem::m_EffectList")
-        , m_Contexts(inUICContext.GetAllocator(), "SEffectSystem::m_Contexts")
-        , m_ShaderMap(inUICContext.GetAllocator(), "SEffectSystem::m_ShaderMap")
-        , m_DepthStencilStates(inUICContext.GetAllocator(), "SEffectSystem::m_DepthStencilStates")
+    SEffectSystem(IQt3DSRenderContextCore &inContext)
+        : m_CoreContext(inContext)
+        , m_Context(NULL)
+        , m_Allocator(inContext.GetAllocator())
+        , m_EffectClasses(inContext.GetAllocator(), "SEffectSystem::m_EffectClasses")
+        , m_EffectList(inContext.GetAllocator(), "SEffectSystem::m_EffectList")
+        , m_Contexts(inContext.GetAllocator(), "SEffectSystem::m_Contexts")
+        , m_ShaderMap(inContext.GetAllocator(), "SEffectSystem::m_ShaderMap")
+        , m_DepthStencilStates(inContext.GetAllocator(), "SEffectSystem::m_DepthStencilStates")
         , mRefCount(0)
     {
     }
@@ -537,7 +537,7 @@ struct SEffectSystem : public IEffectSystem
         if (inEffect.m_Context == NULL) {
             inEffect.m_Context =
                 QT3DS_NEW(m_Allocator, SEffectContext)(inEffect.m_ClassName,
-                                                       *m_UICContext, m_ResourceManager);
+                                                       *m_Context, m_ResourceManager);
             m_Contexts.push_back(inEffect.m_Context);
         }
         return *inEffect.m_Context;
@@ -910,7 +910,7 @@ struct SEffectSystem : public IEffectSystem
 
         if (theDataBuffer == NULL) {
             SEffectContext &theContext(GetEffectContext(inEffect));
-            NVRenderContext &theRenderContext(m_UICContext->GetRenderContext());
+            NVRenderContext &theRenderContext(m_Context->GetRenderContext());
             QT3DSU8 *initialData = (QT3DSU8 *)theContext.m_Context.GetAllocator().allocate(
                 theBufferSize, "SEffectContext::AllocateDataBuffer", __FILE__, __LINE__);
             NVDataRef<QT3DSU8> data((QT3DSU8 *)initialData, theBufferSize);
@@ -987,7 +987,7 @@ struct SEffectSystem : public IEffectSystem
         if (theTexture) {
             SCamera::SetupOrthographicCameraForOffscreenRender(*theTexture, outMVP);
             STextureDetails theDetails(theTexture->GetTextureDetails());
-            m_UICContext->GetRenderContext().SetViewport(
+            m_Context->GetRenderContext().SetViewport(
                 NVRenderRect(0, 0, (QT3DSU32)theDetails.m_Width, (QT3DSU32)theDetails.m_Height));
             outDestSize = QT3DSVec2((QT3DSF32)theDetails.m_Width, (QT3DSF32)theDetails.m_Height);
         }
@@ -1012,7 +1012,7 @@ struct SEffectSystem : public IEffectSystem
 
         if (theInsertResult.second || forceCompilation) {
             NVRenderShaderProgram *theProgram =
-                m_UICContext->GetDynamicObjectSystem()
+                m_Context->GetDynamicObjectSystem()
                     .GetShaderProgram(inCommand.m_ShaderPath, inCommand.m_ShaderDefine,
                                       TShaderFeatureSet(), SDynamicShaderProgramFlags(),
                                       forceCompilation).first;
@@ -1020,7 +1020,7 @@ struct SEffectSystem : public IEffectSystem
                 theInsertResult.first->second = QT3DS_NEW(m_Allocator, SEffectShader)(*theProgram);
         }
         if (theInsertResult.first->second) {
-            NVRenderContext &theContext(m_UICContext->GetRenderContext());
+            NVRenderContext &theContext(m_Context->GetRenderContext());
             theContext.SetActiveShader(theInsertResult.first->second->m_Shader);
         }
 
@@ -1041,9 +1041,9 @@ struct SEffectSystem : public IEffectSystem
                     StaticAssert<sizeof(CRegisteredString)
                                  == sizeof(NVRenderTexture2DPtr)>::valid_expression();
                     CRegisteredString *theStrPtr = reinterpret_cast<CRegisteredString *>(inDataPtr);
-                    IBufferManager &theBufferManager(m_UICContext->GetBufferManager());
+                    IBufferManager &theBufferManager(m_Context->GetBufferManager());
                     IOffscreenRenderManager &theOffscreenRenderer(
-                        m_UICContext->GetOffscreenRenderManager());
+                        m_Context->GetOffscreenRenderManager());
                     bool needsAlphaMultiply = true;
                     NVRenderTexture2D *theTexture = NULL;
                     if (theStrPtr->IsValid()) {
@@ -1142,7 +1142,7 @@ struct SEffectSystem : public IEffectSystem
 
     bool ApplyBlending(const SApplyBlending &inCommand)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
 
         theContext.SetBlendingEnabled(true);
 
@@ -1174,7 +1174,7 @@ struct SEffectSystem : public IEffectSystem
                 if (bufferIdx < theContext.m_AllocatedBuffers.size()) {
                     SAllocatedBufferEntry &theEntry(theContext.m_AllocatedBuffers[bufferIdx]);
                     if (theEntry.m_NeedsClear) {
-                        NVRenderContext &theRenderContext(m_UICContext->GetRenderContext());
+                        NVRenderContext &theRenderContext(m_Context->GetRenderContext());
 
                         theRenderContext.SetRenderTarget(theEntry.m_FrameBuffer);
                         // Note that depth/stencil buffers need an explicit clear in their bind
@@ -1352,7 +1352,7 @@ struct SEffectSystem : public IEffectSystem
                                NVRenderTexture2D *inDepthStencilTexture,
                                const SApplyRenderState &theCommand)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
         QT3DSU32 inState = (QT3DSU32)theCommand.m_RenderState;
         bool inEnable = theCommand.m_Enabled;
 
@@ -1396,7 +1396,7 @@ struct SEffectSystem : public IEffectSystem
                     NVRenderTexture2D *inDepthStencil, Option<SDepthStencil> inDepthStencilCommand,
                     bool drawIndirect)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
         theContext.SetRenderTarget(inFrameBuffer);
         if (inDepthStencil && inFrameBuffer) {
             inFrameBuffer->Attach(NVRenderFrameBufferAttachments::DepthStencil, *inDepthStencil);
@@ -1447,16 +1447,16 @@ struct SEffectSystem : public IEffectSystem
         inShader.m_FragColorAlphaSettings.Set(QT3DSVec2(1.0f, 0.0f));
         inShader.m_DestSize.Set(inDestSize);
         if (inShader.m_AppFrame.IsValid())
-            inShader.m_AppFrame.Set((QT3DSF32)m_UICContext->GetFrameCount());
+            inShader.m_AppFrame.Set((QT3DSF32)m_Context->GetFrameCount());
         if (inShader.m_FPS.IsValid())
-            inShader.m_FPS.Set((QT3DSF32)m_UICContext->GetFPS().first);
+            inShader.m_FPS.Set((QT3DSF32)m_Context->GetFPS().first);
         if (inShader.m_CameraClipRange.IsValid())
             inShader.m_CameraClipRange.Set(inCameraClipRange);
 
         if (!drawIndirect)
-            m_UICContext->GetRenderer().RenderQuad();
+            m_Context->GetRenderer().RenderQuad();
         else
-            m_UICContext->GetRenderer().RenderPointsIndirect();
+            m_Context->GetRenderer().RenderPointsIndirect();
 
         if (inDepthStencil && inFrameBuffer) {
             inFrameBuffer->Attach(NVRenderFrameBufferAttachments::DepthStencil,
@@ -1473,7 +1473,7 @@ struct SEffectSystem : public IEffectSystem
     {
         // Run through the effect commands and render the effect.
         // NVRenderTexture2D* theCurrentTexture(&inSourceTexture);
-        NVRenderContext &theContext = m_UICContext->GetRenderContext();
+        NVRenderContext &theContext = m_Context->GetRenderContext();
 
         // Context variables that are updated during the course of a pass.
         SEffectTextureData theCurrentSourceTexture(&inSourceTexture, false);
@@ -1544,7 +1544,7 @@ struct SEffectSystem : public IEffectSystem
                     break;
 
                 case CommandTypes::BindTarget: {
-                    m_UICContext->GetRenderContext().SetRenderTarget(inTarget);
+                    m_Context->GetRenderContext().SetRenderTarget(inTarget);
                     theCurrentRenderTarget = inTarget;
                     theMVP = inMVP;
                     theContext.SetViewport(theOriginalViewport);
@@ -1681,8 +1681,8 @@ struct SEffectSystem : public IEffectSystem
         QT3DSMat44 theMVP;
         SCamera::SetupOrthographicCameraForOffscreenRender(inRenderArgument.m_ColorBuffer, theMVP);
         // setup a render target
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
-        IResourceManager &theManager(m_UICContext->GetResourceManager());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
+        IResourceManager &theManager(m_Context->GetResourceManager());
         NVRenderContextScopedProperty<NVRenderFrameBuffer *> __framebuffer(
             theContext, &NVRenderContext::GetRenderTarget, &NVRenderContext::SetRenderTarget);
         STextureDetails theDetails(inRenderArgument.m_ColorBuffer.GetTextureDetails());
@@ -1707,7 +1707,7 @@ struct SEffectSystem : public IEffectSystem
             &NVRenderContext::SetScissorTestEnabled, false);
 
         DoRenderEffect(inRenderArgument.m_Effect, *theClass, inRenderArgument.m_ColorBuffer, theMVP,
-                       m_UICContext->GetRenderContext().GetRenderTarget(), false,
+                       m_Context->GetRenderContext().GetRenderTarget(), false,
                        inRenderArgument.m_DepthTexture, inRenderArgument.m_DepthStencilBuffer,
                        inRenderArgument.m_CameraClipRange);
 
@@ -1727,7 +1727,7 @@ struct SEffectSystem : public IEffectSystem
         }
 
         DoRenderEffect(inRenderArgument.m_Effect, *theClass, inRenderArgument.m_ColorBuffer, inMVP,
-                       m_UICContext->GetRenderContext().GetRenderTarget(),
+                       m_Context->GetRenderContext().GetRenderTarget(),
                        inEnableBlendWhenRenderToTarget, inRenderArgument.m_DepthTexture,
                        inRenderArgument.m_DepthStencilBuffer, inRenderArgument.m_CameraClipRange);
         return true;
@@ -1810,11 +1810,11 @@ struct SEffectSystem : public IEffectSystem
         }
     }
 
-    IEffectSystem &GetEffectSystem(IUICRenderContext &context) override
+    IEffectSystem &GetEffectSystem(IQt3DSRenderContext &context) override
     {
-        m_UICContext = &context;
+        m_Context = &context;
 
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
 
         m_ResourceManager = &IResourceManager::CreateResourceManager(theContext);
 
@@ -1839,7 +1839,7 @@ struct SEffectSystem : public IEffectSystem
 };
 }
 
-IEffectSystemCore &IEffectSystemCore::CreateEffectSystemCore(IUICRenderContextCore &inContext)
+IEffectSystemCore &IEffectSystemCore::CreateEffectSystemCore(IQt3DSRenderContextCore &inContext)
 {
     return *QT3DS_NEW(inContext.GetAllocator(), SEffectSystem)(inContext);
 }

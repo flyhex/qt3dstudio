@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef __UICRECTBASE_H__
-#define __UICRECTBASE_H__
+#ifndef __QT3DS_RECTBASE_H__
+#define __QT3DS_RECTBASE_H__
 
 namespace Q3DStudio {
 //==============================================================================
@@ -55,4 +55,4 @@ public:
 
 } // namespace Q3DStudio
 
-#endif // __UICRECTBASE_H__
+#endif // __QT3DS_RECTBASE_H__

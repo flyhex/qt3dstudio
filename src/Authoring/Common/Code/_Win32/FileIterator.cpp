@@ -48,7 +48,7 @@ using namespace Q3DStudio;
  * iterations refer to this snapshot.
  * @param inFile directory to iterate through
  */
-CFileIterator::CFileIterator(const CUICFile *inFile)
+CFileIterator::CFileIterator(const Qt3DSFile *inFile)
 {
     m_File = inFile->GetAbsolutePath();
 
@@ -106,9 +106,9 @@ void CFileIterator::operator+=(const long inNumToInc)
 /**
  * @return the file or directory currently pointed to by this iterator
  */
-CUICFile CFileIterator::GetCurrent()
+Qt3DSFile CFileIterator::GetCurrent()
 {
-    return CUICFile(m_FileNames[m_Index]);
+    return Qt3DSFile(m_FileNames[m_Index]);
 }
 
 //=============================================================================

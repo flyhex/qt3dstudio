@@ -62,15 +62,15 @@
 #endif
 
 //==============================================================================
-//	UICTODO Development Macro
+//	QT3DS_TODO Development Macro
 //	Usage:
 //
-//	"#pragma UICTODO(Message)" yields "__FILE__>(__LINE__) : To Do - <Message>"
+//	"#pragma QT3DS_TODO(Message)" yields "__FILE__>(__LINE__) : To Do - <Message>"
 //
 //	in the Build Pane of the Output Window
 //
 //	For example:
-//		#pragma UICTODO(SDJ, 11/12/00, Clean up this code) might result in
+//		#pragma QT3DS_TODO(SDJ, 11/12/00, Clean up this code) might result in
 //		C:\Code\Project\File.cpp(20) : [ 11/12/00 ] SDJ - Clean up this code
 //
 //	Double-clicking this line opens the specified file to the specified line in
@@ -82,7 +82,7 @@
 //==============================================================================
 #define chSTR(x) #x
 #define chSTR2(x) chSTR(x)
-#define UICTODO(author, date, description)                                                         \
+#define QT3DS_TODO(author, date, description)                                                         \
     message(__FILE__ "(" chSTR2(__LINE__) "): [ " #date " ] " #author " - " #description)
 
 template <typename T, size_t N>

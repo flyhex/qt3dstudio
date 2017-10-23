@@ -196,7 +196,7 @@ void CPresentation::BeginUpdate()
     if (m_ActivityZone) {
         m_ActivityZone->BeginUpdate(
             m_LocalTime, m_Application->GetRuntimeFactory().GetPerfTimer(),
-            m_Application->GetRuntimeFactory().GetUICRenderContext().GetThreadPool());
+            m_Application->GetRuntimeFactory().GetQt3DSRenderContext().GetThreadPool());
     }
 }
 

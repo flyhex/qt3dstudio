@@ -34,7 +34,7 @@
 #include "foundation/Qt3DSTime.h"
 
 namespace Q3DStudio {
-class SUICFNDTimer : public ITimeProvider
+class Qt3DSFNDTimer : public ITimeProvider
 {
     Q3DStudio::INT64 GetCurrentTimeMicroSeconds() override
     {

@@ -70,7 +70,7 @@ using namespace qt3ds::render;
 
 namespace {
 
-struct SRenderContextCore : public IUICRenderContextCore
+struct SRenderContextCore : public IQt3DSRenderContextCore
 {
     NVFoundationBase &m_Foundation;
     NVScopedRefCounted<IStringTable> m_StringTable;
@@ -123,7 +123,7 @@ struct SRenderContextCore : public IUICRenderContextCore
     IBufferLoader &GetBufferLoader() override { return *m_BufferLoader; }
     IRenderPluginManagerCore &GetRenderPluginCore() override { return *m_RenderPluginManagerCore; }
     IPathManagerCore &GetPathManagerCore() override { return *m_PathManagerCore; }
-    IUICRenderContext &CreateRenderContext(NVRenderContext &inContext,
+    IQt3DSRenderContext &CreateRenderContext(NVRenderContext &inContext,
                                                    const char8_t *inPrimitivesDirectory) override;
     void SetTextRendererCore(ITextRendererCore &inRenderer) override { m_TextRenderer = inRenderer; }
     ITextRendererCore *GetTextRendererCore() override { return m_TextRenderer.mPtr; }
@@ -201,17 +201,17 @@ struct SPerFrameAllocator : public NVAllocatorCallback
     void deallocate(void *) override {}
 };
 
-struct SRenderContext : public IUICRenderContext
+struct SRenderContext : public IQt3DSRenderContext
 {
     NVScopedRefCounted<NVRenderContext> m_RenderContext;
-    NVScopedRefCounted<IUICRenderContextCore> m_CoreContext;
+    NVScopedRefCounted<IQt3DSRenderContextCore> m_CoreContext;
     NVScopedRefCounted<IStringTable> m_StringTable;
     NVScopedRefCounted<IPerfTimer> m_PerfTimer;
     NVScopedRefCounted<IInputStreamFactory> m_InputStreamFactory;
     NVScopedRefCounted<IBufferManager> m_BufferManager;
     NVScopedRefCounted<IResourceManager> m_ResourceManager;
     NVScopedRefCounted<IOffscreenRenderManager> m_OffscreenRenderManager;
-    NVScopedRefCounted<IUICRenderer> m_Renderer;
+    NVScopedRefCounted<IQt3DSRenderer> m_Renderer;
     NVScopedRefCounted<ITextRenderer> m_TextRenderer;
     NVScopedRefCounted<ITextRenderer> m_OnscreenTextRenderer;
     NVScopedRefCounted<ITextTextureCache> m_TextTextureCache;
@@ -256,7 +256,7 @@ struct SRenderContext : public IUICRenderContext
     QPair<QT3DSF32, int> m_FPS;
     bool m_AuthoringMode;
 
-    SRenderContext(NVRenderContext &ctx, IUICRenderContextCore &inCore,
+    SRenderContext(NVRenderContext &ctx, IQt3DSRenderContextCore &inCore,
                    const char8_t *inApplicationDirectory)
         : m_RenderContext(ctx)
         , m_CoreContext(inCore)
@@ -285,7 +285,7 @@ struct SRenderContext : public IUICRenderContext
     {
         m_OffscreenRenderManager = IOffscreenRenderManager::CreateOffscreenRenderManager(
             ctx.GetAllocator(), *m_StringTable, *m_ResourceManager, *this);
-        m_Renderer = IUICRenderer::CreateRenderer(*this);
+        m_Renderer = IQt3DSRenderer::CreateRenderer(*this);
         if (inApplicationDirectory && *inApplicationDirectory)
             m_InputStreamFactory->AddSearchDirectory(inApplicationDirectory);
 
@@ -361,7 +361,7 @@ struct SRenderContext : public IUICRenderContext
     IStringTable &GetStringTable() override { return *m_StringTable; }
     NVFoundationBase &GetFoundation() override { return m_RenderContext->GetFoundation(); }
     NVAllocatorCallback &GetAllocator() override { return m_RenderContext->GetAllocator(); }
-    IUICRenderer &GetRenderer() override { return *m_Renderer; }
+    IQt3DSRenderer &GetRenderer() override { return *m_Renderer; }
     IBufferManager &GetBufferManager() override { return *m_BufferManager; }
     IResourceManager &GetResourceManager() override { return *m_ResourceManager; }
     NVRenderContext &GetRenderContext() override { return *m_RenderContext; }
@@ -914,7 +914,7 @@ struct SRenderContext : public IUICRenderContext
     }
 };
 
-IUICRenderContext &SRenderContextCore::CreateRenderContext(NVRenderContext &inContext,
+IQt3DSRenderContext &SRenderContextCore::CreateRenderContext(NVRenderContext &inContext,
                                                            const char8_t *inPrimitivesDirectory)
 {
     return *QT3DS_NEW(m_Foundation.getAllocator(), SRenderContext)(inContext, *this,
@@ -922,7 +922,7 @@ IUICRenderContext &SRenderContextCore::CreateRenderContext(NVRenderContext &inCo
 }
 }
 
-IUICRenderContextCore &IUICRenderContextCore::Create(NVFoundationBase &fnd, IStringTable &strt)
+IQt3DSRenderContextCore &IQt3DSRenderContextCore::Create(NVFoundationBase &fnd, IStringTable &strt)
 {
     return *QT3DS_NEW(fnd.getAllocator(), SRenderContextCore)(fnd, strt);
 }

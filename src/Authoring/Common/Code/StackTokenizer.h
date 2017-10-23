@@ -46,14 +46,14 @@
  *	@class CStackTokenizer seperates a string out using a delimiter; Difference
  *						   between it and CStringTokenizer is that the
  *delimiter
- *						   is a single UICChar and there is an escape char as
+ *						   is a single Qt3DSChar and there is an escape char as
  *well.
  */
 class CStackTokenizer
 {
 public:
-    CStackTokenizer(const Q3DStudio::CString &inString, Q3DStudio::UICChar inDelimiter,
-                    Q3DStudio::UICChar inEscapeChar);
+    CStackTokenizer(const Q3DStudio::CString &inString, Q3DStudio::Qt3DSChar inDelimiter,
+                    Q3DStudio::Qt3DSChar inEscapeChar);
     virtual ~CStackTokenizer();
 
     bool HasNextPartition();
@@ -62,8 +62,8 @@ public:
 
 protected:
     Q3DStudio::CString m_String; ///< contains the string to tokenize
-    Q3DStudio::UICChar m_Delimiter; ///< single char delimiter
-    Q3DStudio::UICChar m_EscapeChar; ///< single char escape char
+    Q3DStudio::Qt3DSChar m_Delimiter; ///< single char delimiter
+    Q3DStudio::Qt3DSChar m_EscapeChar; ///< single char escape char
     long m_Index; ///< index to begin tokenizing the string from
     long m_LastIndex; ///< index of the string since last tokenize operation
     const long m_StringLength; ///< length of the string to tokenize

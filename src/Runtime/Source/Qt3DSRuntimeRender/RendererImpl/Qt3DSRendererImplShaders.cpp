@@ -180,16 +180,16 @@ namespace render {
     // Should be completely possible to use for custom materials with a bit of refactoring.
     struct SSubsetMaterialVertexPipeline : public SVertexPipelineImpl
     {
-        CUICRendererImpl &m_Renderer;
+        Qt3DSRendererImpl &m_Renderer;
         SSubsetRenderable &m_Renderable;
         TessModeValues::Enum m_TessMode;
 
-        SSubsetMaterialVertexPipeline(CUICRendererImpl &renderer, SSubsetRenderable &renderable,
+        SSubsetMaterialVertexPipeline(Qt3DSRendererImpl &renderer, SSubsetRenderable &renderable,
                                       bool inWireframeRequested)
-            : SVertexPipelineImpl(renderer.GetUICContext().GetAllocator(),
-                                  renderer.GetUICContext().GetDefaultMaterialShaderGenerator(),
-                                  renderer.GetUICContext().GetShaderProgramGenerator(),
-                                  renderer.GetUICContext().GetStringTable(), false)
+            : SVertexPipelineImpl(renderer.GetQt3DSContext().GetAllocator(),
+                                  renderer.GetQt3DSContext().GetDefaultMaterialShaderGenerator(),
+                                  renderer.GetQt3DSContext().GetShaderProgramGenerator(),
+                                  renderer.GetQt3DSContext().GetStringTable(), false)
             , m_Renderer(renderer)
             , m_Renderable(renderable)
             , m_TessMode(TessModeValues::NoTess)
@@ -251,7 +251,7 @@ namespace render {
             SetupTessIncludes(ShaderGeneratorStages::TessEval, m_TessMode);
 
             if (m_TessMode == TessModeValues::TessLinear)
-                m_Renderer.GetUICContext()
+                m_Renderer.GetQt3DSContext()
                     .GetDefaultMaterialShaderGenerator()
                     .AddDisplacementImageUniforms(tessEvalShader, m_DisplacementIdx,
                                                   m_DisplacementImage);
@@ -335,7 +335,7 @@ namespace render {
                 // displacement mapping makes only sense with linear tessellation
                 if (m_TessMode == TessModeValues::TessLinear && m_DisplacementImage) {
                     IDefaultMaterialShaderGenerator::SImageVariableNames theNames =
-                        m_Renderer.GetUICContext()
+                        m_Renderer.GetQt3DSContext()
                             .GetDefaultMaterialShaderGenerator()
                             .GetImageVariableNames(m_DisplacementIdx);
                     tessEvalShader << "\tpos.xyz = defaultMaterialFileDisplacementTexture( "
@@ -547,7 +547,7 @@ namespace render {
         IShaderStageGenerator &ActiveStage() override { return Vertex(); }
     };
 
-    NVRenderShaderProgram *CUICRendererImpl::GenerateShader(SSubsetRenderable &inRenderable,
+    NVRenderShaderProgram *Qt3DSRendererImpl::GenerateShader(SSubsetRenderable &inRenderable,
                                                             TShaderFeatureSet inFeatureSet)
     {
         // build a string that allows us to print out the shader we are generating to the log.
@@ -557,9 +557,9 @@ namespace render {
         m_GeneratedShaderString.clear();
         SShaderDefaultMaterialKey theKey(inRenderable.m_ShaderDescription);
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
-        IShaderCache &theCache = m_UICContext.GetShaderCache();
+        IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
         CRegisteredString theCacheKey =
-            m_UICContext.GetStringTable().RegisterStr(m_GeneratedShaderString.c_str());
+            m_qt3dsContext.GetStringTable().RegisterStr(m_GeneratedShaderString.c_str());
         NVRenderShaderProgram *cachedProgram = theCache.GetProgram(theCacheKey, inFeatureSet);
         if (cachedProgram)
             return cachedProgram;
@@ -567,7 +567,7 @@ namespace render {
         SSubsetMaterialVertexPipeline pipeline(
             *this, inRenderable,
             m_DefaultMaterialShaderKeyProperties.m_WireframeMode.GetValue(theKey));
-        return m_UICContext.GetDefaultMaterialShaderGenerator().GenerateShader(
+        return m_qt3dsContext.GetDefaultMaterialShaderGenerator().GenerateShader(
             inRenderable.m_Material, inRenderable.m_ShaderDescription, pipeline, inFeatureSet,
             m_CurrentLayer->m_Lights, inRenderable.m_FirstImage,
             inRenderable.m_RenderableFlags.HasTransparency(), "mesh subset pipeline-- ");
@@ -576,9 +576,9 @@ namespace render {
     // --------------  Special cases for shadows  -------------------
 
     SRenderableDepthPrepassShader *
-    CUICRendererImpl::GetParaboloidDepthShader(TessModeValues::Enum inTessMode)
+    Qt3DSRendererImpl::GetParaboloidDepthShader(TessModeValues::Enum inTessMode)
     {
-        if (!m_UICContext.GetRenderContext().IsTessellationSupported()
+        if (!m_qt3dsContext.GetRenderContext().IsTessellationSupported()
             || inTessMode == TessModeValues::NoTess) {
             return GetParaboloidDepthNoTessShader();
         } else if (inTessMode == TessModeValues::TessLinear) {
@@ -592,7 +592,7 @@ namespace render {
         return GetParaboloidDepthNoTessShader();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetParaboloidDepthNoTessShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetParaboloidDepthNoTessShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_ParaboloidDepthShader;
@@ -601,8 +601,8 @@ namespace render {
             TStrType name;
             name.assign("paraboloid depth shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -630,7 +630,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetParaboloidDepthTessLinearShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetParaboloidDepthTessLinearShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_ParaboloidDepthTessLinearShader;
@@ -639,8 +639,8 @@ namespace render {
             TStrType name;
             name.assign("paraboloid depth tess linear shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -704,7 +704,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetParaboloidDepthTessPhongShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetParaboloidDepthTessPhongShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_ParaboloidDepthTessPhongShader;
@@ -713,8 +713,8 @@ namespace render {
             TStrType name;
             name.assign("paraboloid depth tess phong shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -778,7 +778,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetParaboloidDepthTessNPatchShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetParaboloidDepthTessNPatchShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_ParaboloidDepthTessNPatchShader;
@@ -787,8 +787,8 @@ namespace render {
             TStrType name;
             name.assign("paraboloid depth tess NPatch shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -853,9 +853,9 @@ namespace render {
     }
 
     SRenderableDepthPrepassShader *
-    CUICRendererImpl::GetCubeShadowDepthShader(TessModeValues::Enum inTessMode)
+    Qt3DSRendererImpl::GetCubeShadowDepthShader(TessModeValues::Enum inTessMode)
     {
-        if (!m_UICContext.GetRenderContext().IsTessellationSupported()
+        if (!m_qt3dsContext.GetRenderContext().IsTessellationSupported()
             || inTessMode == TessModeValues::NoTess) {
             return GetCubeDepthNoTessShader();
         } else if (inTessMode == TessModeValues::TessLinear) {
@@ -869,7 +869,7 @@ namespace render {
         return GetCubeDepthNoTessShader();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetCubeDepthNoTessShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetCubeDepthNoTessShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_CubemapDepthShader;
@@ -878,8 +878,8 @@ namespace render {
             TStrType name;
             name.assign("cubemap face depth shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
 
@@ -918,7 +918,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetCubeDepthTessLinearShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetCubeDepthTessLinearShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_CubemapDepthTessLinearShader;
@@ -927,8 +927,8 @@ namespace render {
             TStrType name;
             name.assign("cubemap face depth linear tess shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
 
@@ -994,7 +994,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetCubeDepthTessPhongShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetCubeDepthTessPhongShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_CubemapDepthTessPhongShader;
@@ -1003,8 +1003,8 @@ namespace render {
             TStrType name;
             name.assign("cubemap face depth phong tess shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
 
@@ -1076,7 +1076,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetCubeDepthTessNPatchShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetCubeDepthTessNPatchShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_CubemapDepthTessNPatchShader;
@@ -1085,8 +1085,8 @@ namespace render {
             TStrType name;
             name.assign("cubemap face depth npatch tess shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
 
@@ -1165,9 +1165,9 @@ namespace render {
     }
 
     SRenderableDepthPrepassShader *
-    CUICRendererImpl::GetOrthographicDepthShader(TessModeValues::Enum inTessMode)
+    Qt3DSRendererImpl::GetOrthographicDepthShader(TessModeValues::Enum inTessMode)
     {
-        if (!m_UICContext.GetRenderContext().IsTessellationSupported()
+        if (!m_qt3dsContext.GetRenderContext().IsTessellationSupported()
             || inTessMode == TessModeValues::NoTess) {
             return GetOrthographicDepthNoTessShader();
         } else if (inTessMode == TessModeValues::TessLinear) {
@@ -1181,7 +1181,7 @@ namespace render {
         return GetOrthographicDepthNoTessShader();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetOrthographicDepthNoTessShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetOrthographicDepthNoTessShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_OrthographicDepthShader;
@@ -1190,8 +1190,8 @@ namespace render {
             TStrType name;
             name.assign("orthographic depth shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1229,7 +1229,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetOrthographicDepthTessLinearShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetOrthographicDepthTessLinearShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_OrthographicDepthTessLinearShader;
@@ -1238,8 +1238,8 @@ namespace render {
             TStrType name;
             name.assign("orthographic depth tess linear shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1300,7 +1300,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetOrthographicDepthTessPhongShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetOrthographicDepthTessPhongShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_OrthographicDepthTessPhongShader;
@@ -1309,8 +1309,8 @@ namespace render {
             TStrType name;
             name.assign("orthographic depth tess phong shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1377,7 +1377,7 @@ namespace render {
         return theDepthShader.getValue();
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetOrthographicDepthTessNPatchShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetOrthographicDepthTessNPatchShader()
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthShader =
             m_OrthographicDepthTessNPatchShader;
@@ -1386,8 +1386,8 @@ namespace render {
             TStrType name;
             name.assign("orthographic depth tess npatch shader");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1465,7 +1465,7 @@ namespace render {
 
     // ---------------------------------
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetDepthPrepassShader(bool inDisplaced)
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetDepthPrepassShader(bool inDisplaced)
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthPrePassShader =
             (!inDisplaced) ? m_DepthPrepassShader : m_DepthPrepassShaderDisplaced;
@@ -1477,8 +1477,8 @@ namespace render {
             if (inDisplaced)
                 name.append(" displacement");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1493,7 +1493,7 @@ namespace render {
                 vertexShader.Append("void main() {");
 
                 if (inDisplaced) {
-                    GetUICContext()
+                    GetQt3DSContext()
                         .GetDefaultMaterialShaderGenerator()
                         .AddDisplacementMappingForDepthPass(vertexShader);
                 } else {
@@ -1524,9 +1524,9 @@ namespace render {
     }
 
     SRenderableDepthPrepassShader *
-    CUICRendererImpl::GetDepthTessPrepassShader(TessModeValues::Enum inTessMode, bool inDisplaced)
+    Qt3DSRendererImpl::GetDepthTessPrepassShader(TessModeValues::Enum inTessMode, bool inDisplaced)
     {
-        if (!m_UICContext.GetRenderContext().IsTessellationSupported()
+        if (!m_qt3dsContext.GetRenderContext().IsTessellationSupported()
             || inTessMode == TessModeValues::NoTess) {
             return GetDepthPrepassShader(inDisplaced);
         } else if (inTessMode == TessModeValues::TessLinear) {
@@ -1541,7 +1541,7 @@ namespace render {
     }
 
     SRenderableDepthPrepassShader *
-    CUICRendererImpl::GetDepthTessLinearPrepassShader(bool inDisplaced)
+    Qt3DSRendererImpl::GetDepthTessLinearPrepassShader(bool inDisplaced)
     {
         Option<NVScopedRefCounted<SRenderableDepthPrepassShader>> &theDepthPrePassShader =
             (!inDisplaced) ? m_DepthTessLinearPrepassShader
@@ -1554,8 +1554,8 @@ namespace render {
             if (inDisplaced)
                 name.append(" displacement");
 
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
-            CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(name.c_str());
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
+            CRegisteredString theCacheKey = m_qt3dsContext.GetStringTable().RegisterStr(name.c_str());
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1680,12 +1680,12 @@ namespace render {
         return theDepthPrePassShader->mPtr;
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetDepthTessPhongPrepassShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetDepthTessPhongPrepassShader()
     {
         if (m_DepthTessPhongPrepassShader.hasValue() == false) {
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
             CRegisteredString theCacheKey =
-                m_UICContext.GetStringTable().RegisterStr("depth tess phong prepass shader");
+                m_qt3dsContext.GetStringTable().RegisterStr("depth tess phong prepass shader");
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1760,12 +1760,12 @@ namespace render {
         return m_DepthTessPhongPrepassShader->mPtr;
     }
 
-    SRenderableDepthPrepassShader *CUICRendererImpl::GetDepthTessNPatchPrepassShader()
+    SRenderableDepthPrepassShader *Qt3DSRendererImpl::GetDepthTessNPatchPrepassShader()
     {
         if (m_DepthTessNPatchPrepassShader.hasValue() == false) {
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
             CRegisteredString theCacheKey =
-                m_UICContext.GetStringTable().RegisterStr("depth tess npatch prepass shader");
+                m_qt3dsContext.GetStringTable().RegisterStr("depth tess npatch prepass shader");
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -1855,12 +1855,12 @@ namespace render {
         return m_DepthTessNPatchPrepassShader->mPtr;
     }
 
-    SDefaultAoPassShader *CUICRendererImpl::GetDefaultAoPassShader(TShaderFeatureSet inFeatureSet)
+    SDefaultAoPassShader *Qt3DSRendererImpl::GetDefaultAoPassShader(TShaderFeatureSet inFeatureSet)
     {
         if (m_DefaultAoPassShader.hasValue() == false) {
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
             CRegisteredString theCacheKey =
-                m_UICContext.GetStringTable().RegisterStr("fullscreen AO pass shader");
+                m_qt3dsContext.GetStringTable().RegisterStr("fullscreen AO pass shader");
             NVRenderShaderProgram *aoPassShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!aoPassShaderProgram) {
@@ -1979,12 +1979,12 @@ namespace render {
         return m_DefaultAoPassShader->mPtr;
     }
 
-    SDefaultAoPassShader *CUICRendererImpl::GetFakeDepthShader(TShaderFeatureSet inFeatureSet)
+    SDefaultAoPassShader *Qt3DSRendererImpl::GetFakeDepthShader(TShaderFeatureSet inFeatureSet)
     {
         if (m_FakeDepthShader.hasValue() == false) {
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
             CRegisteredString theCacheKey =
-                m_UICContext.GetStringTable().RegisterStr("depth display shader");
+                m_qt3dsContext.GetStringTable().RegisterStr("depth display shader");
             NVRenderShaderProgram *depthShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!depthShaderProgram) {
@@ -2026,12 +2026,12 @@ namespace render {
         return m_FakeDepthShader->mPtr;
     }
 
-    SDefaultAoPassShader *CUICRendererImpl::GetFakeCubeDepthShader(TShaderFeatureSet inFeatureSet)
+    SDefaultAoPassShader *Qt3DSRendererImpl::GetFakeCubeDepthShader(TShaderFeatureSet inFeatureSet)
     {
         if (!m_FakeCubemapDepthShader.hasValue()) {
-            IShaderCache &theCache = m_UICContext.GetShaderCache();
+            IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
             CRegisteredString theCacheKey =
-                m_UICContext.GetStringTable().RegisterStr("cube depth display shader");
+                m_qt3dsContext.GetStringTable().RegisterStr("cube depth display shader");
             NVRenderShaderProgram *cubeShaderProgram =
                 theCache.GetProgram(theCacheKey, TShaderFeatureSet());
             if (!cubeShaderProgram) {
@@ -2071,7 +2071,7 @@ namespace render {
         return m_FakeCubemapDepthShader.getValue();
     }
 
-    STextRenderHelper CUICRendererImpl::GetTextShader(bool inUsePathRendering)
+    STextRenderHelper Qt3DSRendererImpl::GetTextShader(bool inUsePathRendering)
     {
         STextShaderPtr &thePtr = (!inUsePathRendering) ? m_TextShader : m_TextPathShader;
         if (thePtr.HasGeneratedShader())
@@ -2163,7 +2163,7 @@ namespace render {
         return STextRenderHelper(thePtr, *m_QuadInputAssembler);
     }
 
-    STextDepthShader *CUICRendererImpl::GetTextDepthShader()
+    STextDepthShader *Qt3DSRendererImpl::GetTextDepthShader()
     {
         if (m_TextDepthPrepassShader.hasValue() == false) {
             GetProgramGenerator().BeginProgram();
@@ -2217,7 +2217,7 @@ namespace render {
         return m_TextDepthPrepassShader->mPtr;
     }
 
-    STextRenderHelper CUICRendererImpl::GetTextWidgetShader()
+    STextRenderHelper Qt3DSRendererImpl::GetTextWidgetShader()
     {
         if (m_TextWidgetShader.HasGeneratedShader())
             return STextRenderHelper(m_TextWidgetShader, *m_QuadInputAssembler);
@@ -2275,7 +2275,7 @@ namespace render {
         return STextRenderHelper(m_TextWidgetShader, *m_QuadInputAssembler);
     }
 
-    STextRenderHelper CUICRendererImpl::GetOnscreenTextShader()
+    STextRenderHelper Qt3DSRendererImpl::GetOnscreenTextShader()
     {
         if (m_TextOnscreenShader.HasGeneratedShader())
             return STextRenderHelper(m_TextOnscreenShader, *m_QuadStripInputAssembler);
@@ -2319,7 +2319,7 @@ namespace render {
         return STextRenderHelper(m_TextOnscreenShader, *m_QuadStripInputAssembler);
     }
 
-    NVRenderShaderProgram *CUICRendererImpl::GetTextAtlasEntryShader()
+    NVRenderShaderProgram *Qt3DSRendererImpl::GetTextAtlasEntryShader()
     {
         GetProgramGenerator().BeginProgram();
 
@@ -2350,13 +2350,13 @@ namespace render {
         return theShader;
     }
 
-    STextRenderHelper CUICRendererImpl::GetShader(STextRenderable & /*inRenderable*/,
+    STextRenderHelper Qt3DSRendererImpl::GetShader(STextRenderable & /*inRenderable*/,
                                                   bool inUsePathRendering)
     {
         return GetTextShader(inUsePathRendering);
     }
 
-    SLayerSceneShader *CUICRendererImpl::GetSceneLayerShader()
+    SLayerSceneShader *Qt3DSRendererImpl::GetSceneLayerShader()
     {
         if (m_SceneLayerShader.hasValue())
             return m_SceneLayerShader.getValue();
@@ -2399,7 +2399,7 @@ namespace render {
         return m_SceneLayerShader.getValue();
     }
 
-    SLayerProgAABlendShader *CUICRendererImpl::GetLayerProgAABlendShader()
+    SLayerProgAABlendShader *Qt3DSRendererImpl::GetLayerProgAABlendShader()
     {
         if (m_LayerProgAAShader.hasValue())
             return m_LayerProgAAShader.getValue();
@@ -2435,7 +2435,7 @@ namespace render {
         return m_LayerProgAAShader.getValue();
     }
 
-    SShadowmapPreblurShader *CUICRendererImpl::GetCubeShadowBlurXShader()
+    SShadowmapPreblurShader *Qt3DSRendererImpl::GetCubeShadowBlurXShader()
     {
         if (m_CubeShadowBlurXShader.hasValue())
             return m_CubeShadowBlurXShader.getValue();
@@ -2566,7 +2566,7 @@ namespace render {
         return m_CubeShadowBlurXShader.getValue();
     }
 
-    SShadowmapPreblurShader *CUICRendererImpl::GetCubeShadowBlurYShader()
+    SShadowmapPreblurShader *Qt3DSRendererImpl::GetCubeShadowBlurYShader()
     {
         if (m_CubeShadowBlurYShader.hasValue())
             return m_CubeShadowBlurYShader.getValue();
@@ -2697,7 +2697,7 @@ namespace render {
         return m_CubeShadowBlurYShader.getValue();
     }
 
-    SShadowmapPreblurShader *CUICRendererImpl::GetOrthoShadowBlurXShader()
+    SShadowmapPreblurShader *Qt3DSRendererImpl::GetOrthoShadowBlurXShader()
     {
         if (m_OrthoShadowBlurXShader.hasValue())
             return m_OrthoShadowBlurXShader.getValue();
@@ -2740,7 +2740,7 @@ namespace render {
         return m_OrthoShadowBlurXShader.getValue();
     }
 
-    SShadowmapPreblurShader *CUICRendererImpl::GetOrthoShadowBlurYShader()
+    SShadowmapPreblurShader *Qt3DSRendererImpl::GetOrthoShadowBlurYShader()
     {
         if (m_OrthoShadowBlurYShader.hasValue())
             return m_OrthoShadowBlurYShader.getValue();
@@ -2785,7 +2785,7 @@ namespace render {
 
 #ifdef ADVANCED_BLEND_SW_FALLBACK
     SAdvancedModeBlendShader *
-    CUICRendererImpl::GetAdvancedBlendModeShader(AdvancedBlendModes::Enum blendMode)
+    Qt3DSRendererImpl::GetAdvancedBlendModeShader(AdvancedBlendModes::Enum blendMode)
     {
         // Select between blend equations.
         if (blendMode == AdvancedBlendModes::Overlay) {
@@ -2798,7 +2798,7 @@ namespace render {
         return {};
     }
 
-    SAdvancedModeBlendShader *CUICRendererImpl::GetOverlayBlendModeShader()
+    SAdvancedModeBlendShader *Qt3DSRendererImpl::GetOverlayBlendModeShader()
     {
         if (m_AdvancedModeOverlayBlendShader.hasValue())
             return m_AdvancedModeOverlayBlendShader.getValue();
@@ -2862,7 +2862,7 @@ namespace render {
         return m_AdvancedModeOverlayBlendShader.getValue();
     }
 
-    SAdvancedModeBlendShader *CUICRendererImpl::GetColorBurnBlendModeShader()
+    SAdvancedModeBlendShader *Qt3DSRendererImpl::GetColorBurnBlendModeShader()
     {
         if (m_AdvancedModeColorBurnBlendShader.hasValue())
             return m_AdvancedModeColorBurnBlendShader.getValue();
@@ -2925,7 +2925,7 @@ namespace render {
 
     }
 
-    SAdvancedModeBlendShader *CUICRendererImpl::GetColorDodgeBlendModeShader()
+    SAdvancedModeBlendShader *Qt3DSRendererImpl::GetColorDodgeBlendModeShader()
     {
         if (m_AdvancedModeColorDodgeBlendShader.hasValue())
             return m_AdvancedModeColorDodgeBlendShader.getValue();

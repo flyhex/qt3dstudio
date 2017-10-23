@@ -92,13 +92,13 @@ CFormattedOutputStream &CFormattedOutputStream::operator<<(short inValue)
     return *this;
 }
 
-CFormattedOutputStream &CFormattedOutputStream::operator<<(Q3DStudio::UICChar inValue)
+CFormattedOutputStream &CFormattedOutputStream::operator<<(Q3DStudio::Qt3DSChar inValue)
 {
 #ifdef WIN32
-    m_OutputStream->Write(&inValue, sizeof(Q3DStudio::UICChar));
+    m_OutputStream->Write(&inValue, sizeof(Q3DStudio::Qt3DSChar));
 #else
     SWAP2BYTES(inValue, inValue);
-    m_OutputStream->Write(&inValue, sizeof(Q3DStudio::UICChar));
+    m_OutputStream->Write(&inValue, sizeof(Q3DStudio::Qt3DSChar));
 #endif
 
     return *this;

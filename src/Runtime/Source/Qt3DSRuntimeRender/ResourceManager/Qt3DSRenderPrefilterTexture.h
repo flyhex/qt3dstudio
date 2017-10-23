@@ -40,19 +40,19 @@
 namespace qt3ds {
 namespace render {
 
-    class UICRenderPrefilterTexture : public NVRefCounted
+    class Qt3DSRenderPrefilterTexture : public NVRefCounted
     {
     public:
-        UICRenderPrefilterTexture(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth, QT3DSI32 inHeight,
+        Qt3DSRenderPrefilterTexture(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth, QT3DSI32 inHeight,
                                   NVRenderTexture2D &inTexture,
                                   NVRenderTextureFormats::Enum inDestFormat,
                                   qt3ds::NVFoundationBase &inFnd);
-        virtual ~UICRenderPrefilterTexture();
+        virtual ~Qt3DSRenderPrefilterTexture();
 
         virtual void Build(void *inTextureData, QT3DSI32 inTextureDataSize,
                            NVRenderTextureFormats::Enum inFormat) = 0;
 
-        static UICRenderPrefilterTexture *Create(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth,
+        static Qt3DSRenderPrefilterTexture *Create(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth,
                                                  QT3DSI32 inHeight, NVRenderTexture2D &inTexture,
                                                  NVRenderTextureFormats::Enum inDestFormat,
                                                  qt3ds::NVFoundationBase &inFnd);
@@ -75,10 +75,10 @@ namespace render {
         NVRenderContext *m_NVRenderContext;
     };
 
-    class UICRenderPrefilterTextureCPU : public UICRenderPrefilterTexture
+    class Qt3DSRenderPrefilterTextureCPU : public Qt3DSRenderPrefilterTexture
     {
     public:
-        UICRenderPrefilterTextureCPU(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth,
+        Qt3DSRenderPrefilterTextureCPU(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth,
                                      QT3DSI32 inHeight, NVRenderTexture2D &inTexture,
                                      NVRenderTextureFormats::Enum inDestFormat,
                                      qt3ds::NVFoundationBase &inFnd);
@@ -94,14 +94,14 @@ namespace render {
         void getWrappedCoords(int &sX, int &sY, int width, int height);
     };
 
-    class UICRenderPrefilterTextureCompute : public UICRenderPrefilterTexture
+    class Qt3DSRenderPrefilterTextureCompute : public Qt3DSRenderPrefilterTexture
     {
     public:
-        UICRenderPrefilterTextureCompute(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth,
+        Qt3DSRenderPrefilterTextureCompute(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth,
                                          QT3DSI32 inHeight, NVRenderTexture2D &inTexture,
                                          NVRenderTextureFormats::Enum inDestFormat,
                                          qt3ds::NVFoundationBase &inFnd);
-        ~UICRenderPrefilterTextureCompute();
+        ~Qt3DSRenderPrefilterTextureCompute();
 
         void Build(void *inTextureData, QT3DSI32 inTextureDataSize,
                    NVRenderTextureFormats::Enum inFormat) override;

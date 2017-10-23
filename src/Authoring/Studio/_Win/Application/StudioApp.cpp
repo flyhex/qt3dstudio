@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 #endif
 
 CStudioApp g_StudioApp;
-long g_UICErrorCode = 0;
+long g_ErrorCode = 0;
 
 using namespace Q3DStudio;
 
@@ -249,7 +249,7 @@ void CStudioApp::PerformShutdown()
     CStringLoader::UnloadStrings();
 
     // Get rid of the temp files
-    CUICFile::ClearCurrentTempCache();
+    Qt3DSFile::ClearCurrentTempCache();
 
     qApp->exit();
 }
@@ -273,7 +273,7 @@ BOOL CStudioApp::InitInstance(int argc, char* argv[])
     // Load the strings used by the app gui
     // This needs to occur prior to parsing command line arguments
     // since access to the strings are required by some of the cases
-    CUICFile theResDir(CString::fromQString(resourcePath() + QStringLiteral("/strings")));
+    Qt3DSFile theResDir(CString::fromQString(resourcePath() + QStringLiteral("/strings")));
     CStringLoader::LoadStrings(theResDir);
     qCInfo(qt3ds::TRACE_INFO) << "Version: "
                               << CStudioPreferences::GetVersionString().GetCharStar();
@@ -314,7 +314,7 @@ BOOL CStudioApp::InitInstance(int argc, char* argv[])
 
     CFilePath thePreferencesPath = CFilePath::GetUserApplicationDirectory();
     thePreferencesPath = CFilePath::CombineBaseAndRelative(
-        thePreferencesPath, CFilePath(L"Qt3DSomposer\\Preferences.setting"));
+        thePreferencesPath, CFilePath(L"Qt3DSComposer\\Preferences.setting"));
     CPreferences::SetPreferencesFile(thePreferencesPath);
 
 #ifdef KDAB_TEMPORARILY_REMOVED
@@ -444,10 +444,10 @@ int CStudioApp::Run()
         PerformShutdown();
 
         QT3DS_LOGSTOP;
-    } catch (CUICExceptionClass &inException) {
-        g_UICErrorCode = inException.GetErrorCode();
+    } catch (Qt3DSExceptionClass &inException) {
+        g_ErrorCode = inException.GetErrorCode();
         throw;
-    } catch (qt3dsdm::UICDMError &uicdmError) {
+    } catch (qt3dsdm::Qt3DSDMError &uicdmError) {
         Q_UNUSED(uicdmError);
 
 #ifdef KDAB_TEMPORARILY_REMOVED
@@ -468,7 +468,7 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
     int theReturn = true;
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
-        std::pair<CUICFile, bool> theFile = m_Dialogs->
+        std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
             GetNewDocumentChoice(Q3DStudio::CString("."));
         if (theFile.first.GetPath() != "") {
             m_Core->OnNewDocument(theFile.first, theFile.second);
@@ -493,19 +493,19 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
         // - failing all previous, show Qt3DStudio dir
         Q3DStudio::CFilePath filePath;
 
-        filePath = CUICFile::GetApplicationDirectory().GetPath()+
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
                 Q3DStudio::CString("../examples/qmldynamickeyframes/presentation");
 
         if (!filePath.Exists()) {
-            filePath = CUICFile::GetApplicationDirectory().GetPath()+
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
                     Q3DStudio::CString("../examples");
         }
         if (!filePath.Exists()) {
-            filePath =  CUICFile::GetApplicationDirectory().GetPath()+
+            filePath =  Qt3DSFile::GetApplicationDirectory().GetPath()+
                     Q3DStudio::CString(".");
         }
 
-        CUICFile theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        Qt3DSFile theFile = m_Dialogs->GetFileOpenChoice(filePath);
 
         if (theFile.GetPath() != "") {
             OnLoadDocument(theFile);
@@ -592,7 +592,7 @@ bool CStudioApp::ShowStartupDialog()
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {
-            std::pair<CUICFile, bool> theFile = m_Dialogs->
+            std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
                 GetNewDocumentChoice(theMostRecentDirectory);
             if (theFile.first.GetPath() != "") {
                 m_Core->OnNewDocument(theFile.first, theFile.second);
@@ -604,7 +604,7 @@ bool CStudioApp::ShowStartupDialog()
         } break;
 
         case CStartupDlg::EStartupChoice_OpenDoc: {
-            CUICFile theFile = m_Dialogs->GetFileOpenChoice(theMostRecentDirectory);
+            Qt3DSFile theFile = m_Dialogs->GetFileOpenChoice(theMostRecentDirectory);
             if (theFile.GetPath() != "") {
                 OnLoadDocument(theFile);
                 theReturn = true;
@@ -615,7 +615,7 @@ bool CStudioApp::ShowStartupDialog()
         } break;
 
         case CStartupDlg::EStartupChoice_OpenRecent: {
-            CUICFile theFile = theStartupDlg.GetRecentDoc();
+            Qt3DSFile theFile = theStartupDlg.GetRecentDoc();
             if (theFile.GetPath() != "") {
                 OnLoadDocument(theFile);
                 // throw SlideNotFound( L"");
@@ -773,7 +773,7 @@ struct SIDeletingReferencedObjectHandler : public Q3DStudio::IDeletingReferenced
         Q3DStudio::CString theMessage;
         theMessage.Format(theFormat, static_cast<const wchar_t *>(inDescription));
 
-        m_Dialogs.DisplayMessageBox(theTitle, theMessage, CUICMessageBox::ICON_WARNING, false);
+        m_Dialogs.DisplayMessageBox(theTitle, theMessage, Qt3DSMessageBox::ICON_WARNING, false);
     }
 };
 
@@ -841,12 +841,12 @@ void CStudioApp::StudioUnhandledCrashHandler(EXCEPTION_POINTERS *pExPtrs)
 
     CStackOps::GetExceptionStackTrace(theTraceBuffer, sizeof(theTraceBuffer),
                                       pExPtrs->ContextRecord);
-    if (g_UICErrorCode != 0) {
-        // switch (g_UICErrorCode)
+    if (g_ErrorCode != 0) {
+        // switch (g_ErrorCode)
         //{
         //	default:
         Q3DStudio::CString description;
-        description.Format(_UIC("Custom error 0x%X "), g_UICErrorCode);
+        description.Format(_LSTR("Custom error 0x%X "), g_ErrorCode);
         errorMessage = CStackOps::GetExceptionDescription(description, pExPtrs);
         //		break;
         //}
@@ -869,7 +869,7 @@ void CStudioApp::StudioUnhandledCrashHandler(EXCEPTION_POINTERS *pExPtrs)
         theSaveFile = theSaveFilePtr->m_Path;
     }
     theSaveFile.DeleteThisFile();
-    theDoc.SaveDocument(CUICFile(theSaveFile));
+    theDoc.SaveDocument(Qt3DSFile(theSaveFile));
     qCInfo(qt3ds::TRACE_INFO) << "Project successfully saved: " << theSaveFile.GetCharStar();
 
     ::CString fileSaveLocationMessage;
@@ -1188,7 +1188,7 @@ void CStudioApp::PlaybackRewind()
 void CStudioApp::OnRevert()
 {
     if (!m_Core->GetDoc()->IsModified() || m_Dialogs->ConfirmRevert()) {
-        CUICFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
+        Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);
     }
 }
@@ -1206,7 +1206,7 @@ bool CStudioApp::CanRevert()
 /**
  * Handles the recent list.
  */
-void CStudioApp::OnFileOpenRecent(const CUICFile &inDocument)
+void CStudioApp::OnFileOpenRecent(const Qt3DSFile &inDocument)
 {
     if (PerformSavePrompt())
         OnLoadDocument(inDocument);
@@ -1429,7 +1429,7 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
  */
 bool CStudioApp::OnSave()
 {
-    CUICFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
+    Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
     if (!theCurrentDoc.IsFile()) {
         return OnSaveAs();
     } else if (!theCurrentDoc.CanWrite()) {
@@ -1450,7 +1450,7 @@ bool CStudioApp::OnSave()
  */
 bool CStudioApp::OnSaveAs()
 {
-    CUICFile theFile = m_Dialogs->GetSaveAsChoice().first;
+    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
     if (theFile.GetPath() != "") {
         m_Core->OnSaveDocument(theFile);
         return true;
@@ -1467,7 +1467,7 @@ bool CStudioApp::OnSaveAs()
  */
 bool CStudioApp::OnSaveCopy()
 {
-    CUICFile theFile = m_Dialogs->GetSaveAsChoice().first;
+    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
     if (theFile.GetPath() != "") {
         // Send in a "true" to teh save function to indicate this is a copy
         m_Core->OnSaveDocument(theFile, true);
@@ -1484,7 +1484,7 @@ bool CStudioApp::OnSaveCopy()
  * @param inShowStartupDialogOnError true to show startup dialog if loading document is error
  * @return true if loading was successful
  */
-bool CStudioApp::OnLoadDocument(const CUICFile &inDocument, bool inShowStartupDialogOnError)
+bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError)
 {
     m_Core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading ")),
                                                inDocument.GetName());
@@ -1586,7 +1586,7 @@ void CStudioApp::SaveUIAFile()
  * Because of the nature of the error reporting, OnLoadDocument has to have
  * a certain structure that limits it (C type variables, no object destructors).
  */
-void CStudioApp::OnLoadDocumentCatcher(const CUICFile &inDocument)
+void CStudioApp::OnLoadDocumentCatcher(const Qt3DSFile &inDocument)
 {
     {
         CDispatchDataModelNotificationScope __scope(*m_Core->GetDispatch());
@@ -1602,7 +1602,7 @@ void CStudioApp::OnLoadDocumentCatcher(const CUICFile &inDocument)
 void CStudioApp::OnFileOpen()
 {
     if (PerformSavePrompt()) {
-        CUICFile theFile = m_Dialogs->GetFileOpenChoice();
+        Qt3DSFile theFile = m_Dialogs->GetFileOpenChoice();
         if (theFile.GetPath() != "")
             OnLoadDocument(theFile);
     }
@@ -1612,7 +1612,7 @@ using namespace std;
 void CStudioApp::OnFileNew()
 {
     if (PerformSavePrompt()) {
-        pair<CUICFile, bool> theFile = m_Dialogs->GetNewDocumentChoice();
+        pair<Qt3DSFile, bool> theFile = m_Dialogs->GetNewDocumentChoice();
         if (theFile.first.GetPath() != "")
             m_Core->OnNewDocument(theFile.first, theFile.second);
     }
@@ -1668,7 +1668,7 @@ void CStudioApp::OnPasteFail()
 void CStudioApp::OnBuildconfigurationFileParseFail(const Q3DStudio::CString &inMessage)
 {
     m_Dialogs->DisplayMessageBox(::LoadResourceString(IDS_BUILDCONFIGS_ERROR_TITLE), inMessage,
-                                 CUICMessageBox::ICON_ERROR, false);
+                                 Qt3DSMessageBox::ICON_ERROR, false);
 }
 
 void CStudioApp::OnSaveFail(bool inKnownError)
@@ -1691,7 +1691,7 @@ void CStudioApp::OnErrorFail(const Q3DStudio::CString &inText)
 {
     qCCritical(qt3ds::INTERNAL_ERROR) << inText.GetCharStar();
     m_Dialogs->DisplayMessageBox(::LoadResourceString(IDS_PROJNAME), inText,
-                                 CUICMessageBox::ICON_ERROR, false);
+                                 Qt3DSMessageBox::ICON_ERROR, false);
 }
 
 void CStudioApp::OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
@@ -1715,9 +1715,9 @@ void CStudioApp::OnPresentationModifiedExternally()
 {
     int theUserChoice = m_Dialogs->DisplayChoiceBox(
         ::LoadResourceString(IDS_TITLE_WARNING),
-        ::LoadResourceString(IDS_PRESENTATION_MODIFIED_EXTERNALLY), CUICMessageBox::ICON_WARNING);
+        ::LoadResourceString(IDS_PRESENTATION_MODIFIED_EXTERNALLY), Qt3DSMessageBox::ICON_WARNING);
     if (theUserChoice == IDYES) {
-        CUICFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
+        Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);
     }
 }

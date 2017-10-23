@@ -49,26 +49,26 @@
 class CMouseCursor
 {
 public:
-    typedef long TUICMouseCursor;
+    typedef long Qt3DSMouseCursor;
 
-    static const TUICMouseCursor CURSOR_ARROW;
-    static const TUICMouseCursor CURSOR_WAIT;
-    static const TUICMouseCursor CURSOR_RESIZE_LEFTRIGHT;
-    static const TUICMouseCursor CURSOR_RESIZE_UPDOWN;
-    static const TUICMouseCursor CURSOR_GROUP_MOVE;
-    static const TUICMouseCursor CURSOR_GROUP_ROTATE;
-    static const TUICMouseCursor CURSOR_GROUP_SCALE;
-    static const TUICMouseCursor CURSOR_ITEM_MOVE;
-    static const TUICMouseCursor CURSOR_ITEM_ROTATE;
-    static const TUICMouseCursor CURSOR_ITEM_SCALE;
-    static const TUICMouseCursor CURSOR_EDIT_CAMERA_PAN;
-    static const TUICMouseCursor CURSOR_EDIT_CAMERA_ROTATE;
-    static const TUICMouseCursor CURSOR_EDIT_CAMERA_ZOOM;
-    static const TUICMouseCursor CURSOR_BLANK;
-    static const TUICMouseCursor CURSOR_DROP_INVALID;
-    static const TUICMouseCursor CURSOR_DROP_MOVE;
-    static const TUICMouseCursor CURSOR_DROP_COPY;
-    static const TUICMouseCursor CURSOR_IBEAM;
+    static const Qt3DSMouseCursor CURSOR_ARROW;
+    static const Qt3DSMouseCursor CURSOR_WAIT;
+    static const Qt3DSMouseCursor CURSOR_RESIZE_LEFTRIGHT;
+    static const Qt3DSMouseCursor CURSOR_RESIZE_UPDOWN;
+    static const Qt3DSMouseCursor CURSOR_GROUP_MOVE;
+    static const Qt3DSMouseCursor CURSOR_GROUP_ROTATE;
+    static const Qt3DSMouseCursor CURSOR_GROUP_SCALE;
+    static const Qt3DSMouseCursor CURSOR_ITEM_MOVE;
+    static const Qt3DSMouseCursor CURSOR_ITEM_ROTATE;
+    static const Qt3DSMouseCursor CURSOR_ITEM_SCALE;
+    static const Qt3DSMouseCursor CURSOR_EDIT_CAMERA_PAN;
+    static const Qt3DSMouseCursor CURSOR_EDIT_CAMERA_ROTATE;
+    static const Qt3DSMouseCursor CURSOR_EDIT_CAMERA_ZOOM;
+    static const Qt3DSMouseCursor CURSOR_BLANK;
+    static const Qt3DSMouseCursor CURSOR_DROP_INVALID;
+    static const Qt3DSMouseCursor CURSOR_DROP_MOVE;
+    static const Qt3DSMouseCursor CURSOR_DROP_COPY;
+    static const Qt3DSMouseCursor CURSOR_IBEAM;
 
     CMouseCursor();
     virtual ~CMouseCursor();
@@ -76,7 +76,7 @@ public:
     void Show();
     void Hide();
     void SetCursorPos(long inXPos, long inYPos);
-    bool Load(TUICMouseCursor inCursor);
+    bool Load(Qt3DSMouseCursor inCursor);
 
 protected:
     void Destroy();

@@ -231,7 +231,7 @@ void CFilePath::SetIdentifier(unsigned long inIdentifier)
 bool CFilePath::GetTempDirectory()
 {
     CString path = QDir::tempPath().toLatin1().data();
-    UICAssign(path);
+    StrAssign(path);
 
     return TRUE;
 }
@@ -259,7 +259,7 @@ bool CFilePath::GetTemporaryFileName(const CString &inPrefix, const CString &inD
 
 bool CFilePath::GetModuleFilePath(/*HMODULE inModuleHandle*/)
 {
-    UICAssign(CString::fromQString(qApp->applicationFilePath()));
+    StrAssign(CString::fromQString(qApp->applicationFilePath()));
     return true;
 }
 
@@ -354,7 +354,7 @@ bool CFilePath::GetCurrentDir()
 #ifdef KDAB_TEMPORARILY_REMOVED
     wchar_t szPath[_MAX_PATH] = L"\0";
     ::GetCurrentDirectoryW(sizeof(szPath) / sizeof(wchar_t), szPath);
-    UICAssign(szPath);
+    StrAssign(szPath);
 #ifdef _WIN32
     *this += L"\\";
 #else

@@ -995,7 +995,7 @@ struct SApp : public IApplication
                 * (1.0 / 100000);
         if (floor(m_FrameTimer.GetElapsedSeconds()) > 0.0f) {
             QPair<QT3DSF32, int> fps = m_FrameTimer.GetFPS(m_FrameCount);
-            m_RuntimeFactory->GetUICRenderContext().SetFPS(fps);
+            m_RuntimeFactory->GetQt3DSRenderContext().SetFPS(fps);
             if (m_ProfileLogging || !m_HideFPS) {
                 qCInfo(PERF_INFO, "Render Statistics: %3.2ffps, frame count %d",
                        fps.first, fps.second);
@@ -1049,7 +1049,7 @@ struct SApp : public IApplication
         // Check if the file event exists
         eastl::string fullPath;
         NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream
-                = m_CoreFactory->GetUICRenderContextCore().GetInputStreamFactory().GetStreamForFile(
+                = m_CoreFactory->GetRenderContextCore().GetInputStreamFactory().GetStreamForFile(
                     theFile.c_str());
         if (theStream) {
             theStream = NULL;
@@ -1285,12 +1285,12 @@ struct SApp : public IApplication
 
         NVFoundationBase &fnd(m_CoreFactory->GetFoundation());
 
-        if (m_CoreFactory->GetUICRenderContextCore().GetTextRendererCore()) {
-            m_CoreFactory->GetUICRenderContextCore().GetTextRendererCore()->AddProjectFontDirectory(
+        if (m_CoreFactory->GetRenderContextCore().GetTextRendererCore()) {
+            m_CoreFactory->GetRenderContextCore().GetTextRendererCore()->AddProjectFontDirectory(
                         projectDirectory.c_str());
-            m_CoreFactory->GetUICRenderContextCore().GetTextRendererCore()->BeginPreloadFonts(
-                        m_CoreFactory->GetUICRenderContextCore().GetThreadPool(),
-                        m_CoreFactory->GetUICRenderContextCore().GetPerfTimer());
+            m_CoreFactory->GetRenderContextCore().GetTextRendererCore()->BeginPreloadFonts(
+                        m_CoreFactory->GetRenderContextCore().GetThreadPool(),
+                        m_CoreFactory->GetRenderContextCore().GetPerfTimer());
         }
         m_Filename = filename;
         bool retval = false;
@@ -1404,8 +1404,8 @@ struct SApp : public IApplication
             {
                 SStackPerfTimer __loadTimer(m_CoreFactory->GetPerfTimer(),
                                             "Application: End Font Preload");
-                if (m_CoreFactory->GetUICRenderContextCore().GetTextRendererCore())
-                    m_CoreFactory->GetUICRenderContextCore()
+                if (m_CoreFactory->GetRenderContextCore().GetTextRendererCore())
+                    m_CoreFactory->GetRenderContextCore()
                             .GetTextRendererCore()
                             ->EndPreloadFonts();
             }
@@ -1439,11 +1439,11 @@ struct SApp : public IApplication
         }
         SApplicationSettings finalSettings(/*m_CommandLineSettings, */m_UIAFileSettings);
         if (finalSettings.m_LayerCacheEnabled.hasValue()) {
-            inFactory.GetUICRenderContext().GetRenderer().EnableLayerCaching(
+            inFactory.GetQt3DSRenderContext().GetRenderer().EnableLayerCaching(
                         *finalSettings.m_LayerCacheEnabled);
         }
         if (finalSettings.m_LayerGpuProfilingEnabled.hasValue()) {
-            inFactory.GetUICRenderContext().GetRenderer().EnableLayerGpuProfiling(
+            inFactory.GetQt3DSRenderContext().GetRenderer().EnableLayerGpuProfiling(
                         *finalSettings.m_LayerGpuProfilingEnabled);
         }
         if (finalSettings.m_ShaderCachePersistenceEnabled.hasValue()
@@ -1451,12 +1451,12 @@ struct SApp : public IApplication
             eastl::string binaryDir;
             CFileTools::CombineBaseAndRelative(this->GetProjectDirectory(), "binary", binaryDir);
             CFileTools::CreateDir(binaryDir.c_str());
-            inFactory.GetUICRenderContext().GetShaderCache().SetShaderCachePersistenceEnabled(
+            inFactory.GetQt3DSRenderContext().GetShaderCache().SetShaderCachePersistenceEnabled(
                         binaryDir.c_str());
         }
 
         m_CoreFactory->GetPerfTimer().OutputTimerData();
-        m_RuntimeFactory->GetUICRenderContext().SetWatermarkLocation(m_WatermarkCoordinates);
+        m_RuntimeFactory->GetQt3DSRenderContext().SetWatermarkLocation(m_WatermarkCoordinates);
 
         m_AudioPlayer.SetPlayer(inAudioPlayer);
 
@@ -1587,7 +1587,7 @@ struct SApp : public IApplication
             if (primaryIdSize)
                 theOutStream.Write(m_InitialPresentationId.c_str(), primaryIdSize);
             QT3DSU32 theScaleMode
-                    = static_cast<QT3DSU32>(m_RuntimeFactory->GetUICRenderContext().GetScaleMode());
+                    = static_cast<QT3DSU32>(m_RuntimeFactory->GetQt3DSRenderContext().GetScaleMode());
             theOutStream.Write(theScaleMode);
             theOutStream.Write(m_WatermarkCoordinates);
             m_UIAFileSettings.Save(theOutStream);
@@ -1673,7 +1673,7 @@ struct SApp : public IApplication
             m_CoreFactory->GetScriptEngine().EnableMultithreadedAccess();
             m_CoreFactory->GetStringTable().EnableMultithreadedAccess();
             m_CoreFactory->GetScriptEngine().BeginPreloadScripts(
-                        scripts, m_CoreFactory->GetUICRenderContextCore().GetThreadPool(),
+                        scripts, m_CoreFactory->GetRenderContextCore().GetThreadPool(),
                         m_ProjectDir.c_str());
             NVDataRef<QT3DSU8> stringTableData
                     = m_CoreFactory->GetSceneLoader().BinaryLoadManagerData(theInStream,
@@ -1999,11 +1999,11 @@ struct SXMLLoader : public IAppLoadContext
             const char8_t *initialScaleMode(m_ScaleMode.c_str());
             // Force loading to finish here, just like used to happen.
             if (AreEqual(initialScaleMode, "center")) {
-                inFactory.GetUICRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
+                inFactory.GetQt3DSRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
             } else if (AreEqual(initialScaleMode, "fit")) {
-                inFactory.GetUICRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ScaleToFit);
+                inFactory.GetQt3DSRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ScaleToFit);
             } else if (AreEqual(initialScaleMode, "fill")) {
-                inFactory.GetUICRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ScaleToFill);
+                inFactory.GetQt3DSRenderContext().SetScaleMode(qt3ds::render::ScaleModes::ScaleToFill);
             } else {
                 qCCritical(INVALID_PARAMETER, "Unrecognized scale mode attribute value: ",
                            initialScaleMode);
@@ -2242,7 +2242,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
         , mRefCount(0)
     {
         using qt3ds::render::IBufferLoader;
-        IBufferLoader &theLoader(m_App.m_CoreFactory->GetUICRenderContextCore().GetBufferLoader());
+        IBufferLoader &theLoader(m_App.m_CoreFactory->GetRenderContextCore().GetBufferLoader());
         eastl::string fullpath, directory, filename, extension, sceneGraphPath, presentationPath;
         IStringTable &theStringTable(m_App.m_CoreFactory->GetStringTable());
         for (QT3DSU32 idx = 0, end = app.m_OrderedAssets.size(); idx < end; ++idx) {
@@ -2298,8 +2298,8 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
     ~SBinaryLoader()
     {
         using qt3ds::render::IBufferLoader;
-        NVFoundationBase &theBase = m_App.m_CoreFactory->GetUICRenderContextCore().GetFoundation();
-        IBufferLoader &theLoader(m_App.m_CoreFactory->GetUICRenderContextCore().GetBufferLoader());
+        NVFoundationBase &theBase = m_App.m_CoreFactory->GetRenderContextCore().GetFoundation();
+        IBufferLoader &theLoader(m_App.m_CoreFactory->GetRenderContextCore().GetBufferLoader());
         (void)theBase;
         // theBase.error( QT3DS_WARN, "Binary Loader -cancel load" );
         {
@@ -2342,7 +2342,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
     void EndLoad() override
     {
         using qt3ds::render::IBufferLoader;
-        IBufferLoader &theLoader(m_App.m_CoreFactory->GetUICRenderContextCore().GetBufferLoader());
+        IBufferLoader &theLoader(m_App.m_CoreFactory->GetRenderContextCore().GetBufferLoader());
         while (theLoader.WillLoadedBuffersBeAvailable())
             theLoader.NextLoadedBuffer();
     }
@@ -2382,7 +2382,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
             }
         }
 
-        inRuntimeFactory.GetUICRenderContext().SetScaleMode(m_ScaleMode);
+        inRuntimeFactory.GetQt3DSRenderContext().SetScaleMode(m_ScaleMode);
 
         for (QT3DSU32 idx = 0, end = m_App.m_OrderedAssets.size(); idx < end; ++idx) {
             if (m_App.m_OrderedAssets[idx].second->getType() == AssetValueTypes::Presentation) {

@@ -45,7 +45,7 @@ class CBaseStateRow;
 
 //=============================================================================
 /**
- * Binding to a UICDM object of Material type
+ * Binding to a DataModel object of Material type
  */
 class CPathTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {

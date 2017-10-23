@@ -220,7 +220,7 @@ struct SWriteRemapper
     // traversal.
     void Remap(const SNode *) {}
 #ifdef _INTEGRITYPLATFORM
-    // explicit specialization of class "<unnamed>::SGraphObjectSerializerImpl<uic::render::SCustomMaterial>"
+    // explicit specialization of class "<unnamed>::SGraphObjectSerializerImpl<qt3ds::render::SCustomMaterial>"
     // must precede its first use struct SGraphObjectSerializerImpl<SCustomMaterial>
     template <typename TObjType>
     void Remap(const TObjType *inObj);

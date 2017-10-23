@@ -37,9 +37,8 @@
 using namespace qt3ds;
 using namespace qt3ds::render;
 using namespace qt3ds::foundation;
-using namespace qt3ds::render;
 
-UICRenderPrefilterTexture::UICRenderPrefilterTexture(NVRenderContext *inNVRenderContext,
+Qt3DSRenderPrefilterTexture::Qt3DSRenderPrefilterTexture(NVRenderContext *inNVRenderContext,
                                                      QT3DSI32 inWidth, QT3DSI32 inHeight,
                                                      NVRenderTexture2D &inTexture2D,
                                                      NVRenderTextureFormats::Enum inDestFormat,
@@ -61,21 +60,21 @@ UICRenderPrefilterTexture::UICRenderPrefilterTexture(NVRenderContext *inNVRender
     m_NoOfComponent = NVRenderTextureFormats::getNumberOfComponent(m_DestinationFormat);
 }
 
-UICRenderPrefilterTexture *
-UICRenderPrefilterTexture::Create(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth, QT3DSI32 inHeight,
+Qt3DSRenderPrefilterTexture *
+Qt3DSRenderPrefilterTexture::Create(NVRenderContext *inNVRenderContext, QT3DSI32 inWidth, QT3DSI32 inHeight,
                                   NVRenderTexture2D &inTexture2D,
                                   NVRenderTextureFormats::Enum inDestFormat,
                                   qt3ds::NVFoundationBase &inFnd)
 {
-    UICRenderPrefilterTexture *theBSDFMipMap = NULL;
+    Qt3DSRenderPrefilterTexture *theBSDFMipMap = NULL;
 
     if (inNVRenderContext->IsComputeSupported()) {
-        theBSDFMipMap = QT3DS_NEW(inFnd.getAllocator(), UICRenderPrefilterTextureCompute)(
+        theBSDFMipMap = QT3DS_NEW(inFnd.getAllocator(), Qt3DSRenderPrefilterTextureCompute)(
             inNVRenderContext, inWidth, inHeight, inTexture2D, inDestFormat, inFnd);
     }
 
     if (!theBSDFMipMap) {
-        theBSDFMipMap = QT3DS_NEW(inFnd.getAllocator(), UICRenderPrefilterTextureCPU)(
+        theBSDFMipMap = QT3DS_NEW(inFnd.getAllocator(), Qt3DSRenderPrefilterTextureCPU)(
             inNVRenderContext, inWidth, inHeight, inTexture2D, inDestFormat, inFnd);
     }
 
@@ -85,7 +84,7 @@ UICRenderPrefilterTexture::Create(NVRenderContext *inNVRenderContext, QT3DSI32 i
     return theBSDFMipMap;
 }
 
-UICRenderPrefilterTexture::~UICRenderPrefilterTexture()
+Qt3DSRenderPrefilterTexture::~Qt3DSRenderPrefilterTexture()
 {
 }
 
@@ -93,20 +92,20 @@ UICRenderPrefilterTexture::~UICRenderPrefilterTexture()
 // CPU based filtering
 //------------------------------------------------------------------------------------
 
-UICRenderPrefilterTextureCPU::UICRenderPrefilterTextureCPU(
+Qt3DSRenderPrefilterTextureCPU::Qt3DSRenderPrefilterTextureCPU(
     NVRenderContext *inNVRenderContext, int inWidth, int inHeight, NVRenderTexture2D &inTexture2D,
     NVRenderTextureFormats::Enum inDestFormat, NVFoundationBase &inFnd)
-    : UICRenderPrefilterTexture(inNVRenderContext, inWidth, inHeight, inTexture2D, inDestFormat,
+    : Qt3DSRenderPrefilterTexture(inNVRenderContext, inWidth, inHeight, inTexture2D, inDestFormat,
                                 inFnd)
 {
 }
 
-inline int UICRenderPrefilterTextureCPU::wrapMod(int a, int base)
+inline int Qt3DSRenderPrefilterTextureCPU::wrapMod(int a, int base)
 {
     return (a >= 0) ? a % base : (a % base) + base;
 }
 
-inline void UICRenderPrefilterTextureCPU::getWrappedCoords(int &sX, int &sY, int width, int height)
+inline void Qt3DSRenderPrefilterTextureCPU::getWrappedCoords(int &sX, int &sY, int width, int height)
 {
     if (sY < 0) {
         sX -= width >> 1;
@@ -120,7 +119,7 @@ inline void UICRenderPrefilterTextureCPU::getWrappedCoords(int &sX, int &sY, int
 }
 
 STextureData
-UICRenderPrefilterTextureCPU::CreateBsdfMipLevel(STextureData &inCurMipLevel,
+Qt3DSRenderPrefilterTextureCPU::CreateBsdfMipLevel(STextureData &inCurMipLevel,
                                                  STextureData &inPrevMipLevel, int width,
                                                  int height) //, IPerfTimer& inPerfTimer )
 {
@@ -198,7 +197,7 @@ UICRenderPrefilterTextureCPU::CreateBsdfMipLevel(STextureData &inCurMipLevel,
     return retval;
 }
 
-void UICRenderPrefilterTextureCPU::Build(void *inTextureData, QT3DSI32 inTextureDataSize,
+void Qt3DSRenderPrefilterTextureCPU::Build(void *inTextureData, QT3DSI32 inTextureDataSize,
                                          NVRenderTextureFormats::Enum inFormat)
 {
 
@@ -417,11 +416,11 @@ static bool isGLESContext(NVRenderContext *context)
 
 #define WORKGROUP_SIZE 16
 
-UICRenderPrefilterTextureCompute::UICRenderPrefilterTextureCompute(
+Qt3DSRenderPrefilterTextureCompute::Qt3DSRenderPrefilterTextureCompute(
     NVRenderContext *inNVRenderContext, QT3DSI32 inWidth, QT3DSI32 inHeight,
     NVRenderTexture2D &inTexture2D, NVRenderTextureFormats::Enum inDestFormat,
     NVFoundationBase &inFnd)
-    : UICRenderPrefilterTexture(inNVRenderContext, inWidth, inHeight, inTexture2D, inDestFormat,
+    : Qt3DSRenderPrefilterTexture(inNVRenderContext, inWidth, inHeight, inTexture2D, inDestFormat,
                                 inFnd)
     , m_BSDFProgram(NULL)
     , m_UploadProgram_RGBA8(NULL)
@@ -431,7 +430,7 @@ UICRenderPrefilterTextureCompute::UICRenderPrefilterTextureCompute(
 {
 }
 
-UICRenderPrefilterTextureCompute::~UICRenderPrefilterTextureCompute()
+Qt3DSRenderPrefilterTextureCompute::~Qt3DSRenderPrefilterTextureCompute()
 {
     m_UploadProgram_RGB8 = NULL;
     m_UploadProgram_RGBA8 = NULL;
@@ -439,7 +438,7 @@ UICRenderPrefilterTextureCompute::~UICRenderPrefilterTextureCompute()
     m_Level0Tex = NULL;
 }
 
-void UICRenderPrefilterTextureCompute::createComputeProgram(NVRenderContext *context)
+void Qt3DSRenderPrefilterTextureCompute::createComputeProgram(NVRenderContext *context)
 {
     std::string computeProg;
 
@@ -452,7 +451,7 @@ void UICRenderPrefilterTextureCompute::createComputeProgram(NVRenderContext *con
     }
 }
 
-NVRenderShaderProgram *UICRenderPrefilterTextureCompute::getOrCreateUploadComputeProgram(
+NVRenderShaderProgram *Qt3DSRenderPrefilterTextureCompute::getOrCreateUploadComputeProgram(
     NVRenderContext *context, NVRenderTextureFormats::Enum inFormat)
 {
     std::string computeProg;
@@ -482,7 +481,7 @@ NVRenderShaderProgram *UICRenderPrefilterTextureCompute::getOrCreateUploadComput
     }
 }
 
-void UICRenderPrefilterTextureCompute::CreateLevel0Tex(void *inTextureData, QT3DSI32 inTextureDataSize,
+void Qt3DSRenderPrefilterTextureCompute::CreateLevel0Tex(void *inTextureData, QT3DSI32 inTextureDataSize,
                                                        NVRenderTextureFormats::Enum inFormat)
 {
     NVRenderTextureFormats::Enum theFormat = inFormat;
@@ -507,7 +506,7 @@ void UICRenderPrefilterTextureCompute::CreateLevel0Tex(void *inTextureData, QT3D
     }
 }
 
-void UICRenderPrefilterTextureCompute::Build(void *inTextureData, QT3DSI32 inTextureDataSize,
+void Qt3DSRenderPrefilterTextureCompute::Build(void *inTextureData, QT3DSI32 inTextureDataSize,
                                              NVRenderTextureFormats::Enum inFormat)
 {
     bool needMipUpload = (inFormat != m_DestinationFormat);

@@ -135,7 +135,7 @@ struct SGuideSystem : public IGuideSystem
                     std::bind(&SGuideSystem::SignalGuideModified, this, theHdlValue, oldValue));
             }
         }
-        if (AreUICDMSignalsEnabled())
+        if (AreDataModelSignalsEnabled())
             m_GuideModifiedImmediate(theHdlValue, info);
     }
 

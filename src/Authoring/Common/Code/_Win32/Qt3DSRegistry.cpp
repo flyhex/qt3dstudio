@@ -34,11 +34,11 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CUICRegistry::CUICRegistry()
+Qt3DSRegistry::Qt3DSRegistry()
 {
 }
 
-CUICRegistry::~CUICRegistry()
+Qt3DSRegistry::~Qt3DSRegistry()
 {
 }
 
@@ -62,7 +62,7 @@ CUICRegistry::~CUICRegistry()
  */
 #ifdef KDAB_TEMPORARILY_REMOVED
 //==============================================================================
-BOOL CUICRegistry::GetValueKey(const Q3DStudio::CString &inKeyName,
+BOOL Qt3DSRegistry::GetValueKey(const Q3DStudio::CString &inKeyName,
                                const Q3DStudio::CString &inValueName,
                                Q3DStudio::CString &outValueString, HKEY inKeyRoot)
 {
@@ -108,7 +108,7 @@ BOOL CUICRegistry::GetValueKey(const Q3DStudio::CString &inKeyName,
  *		@return HRESULT
  */
 //==============================================================================
-BOOL CUICRegistry::SetValueKey(const Q3DStudio::CString &inKeyName,
+BOOL Qt3DSRegistry::SetValueKey(const Q3DStudio::CString &inKeyName,
                                const Q3DStudio::CString &inValueName,
                                const Q3DStudio::CString &inValueString, HKEY inKeyRoot)
 {
@@ -145,7 +145,7 @@ BOOL CUICRegistry::SetValueKey(const Q3DStudio::CString &inKeyName,
  *		@return HRESULT
  */
 //==============================================================================
-BOOL CUICRegistry::GetValueKey(const Q3DStudio::CString &inKeyName,
+BOOL Qt3DSRegistry::GetValueKey(const Q3DStudio::CString &inKeyName,
                                const Q3DStudio::CString &inValueName, long &outValue,
                                HKEY inKeyRoot)
 {
@@ -184,7 +184,7 @@ BOOL CUICRegistry::GetValueKey(const Q3DStudio::CString &inKeyName,
  *		@return HRESULT
  */
 //==============================================================================
-BOOL CUICRegistry::SetValueKey(const Q3DStudio::CString &inKeyName,
+BOOL Qt3DSRegistry::SetValueKey(const Q3DStudio::CString &inKeyName,
                                const Q3DStudio::CString &inValueName, long inValue, HKEY inKeyRoot)
 {
     BOOL theResult = FALSE;

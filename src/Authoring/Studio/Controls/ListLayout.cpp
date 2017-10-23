@@ -171,7 +171,7 @@ void CListLayout::OnChildSizeChanged(CControl *inControl)
 
     // If we are not actively resizing then redo the layout.
     if (!m_IsResizing) {
-        UICPROFILE(OnChildSizeChanged);
+        QT3DS_PROFILE(OnChildSizeChanged);
 
         RecalcLayout();
     }

@@ -193,49 +193,49 @@ bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerAr
 #define QT3DS_WCHAR_T_StringListOrInt L"StringListOrInt"
 #define QT3DS_WCHAR_T_Scale L"Scale"
 
-#define ITERATE_UICDM_COMPLETE_TYPES                                                               \
-    HANDLE_UIDM_COMPLETE_NONE_TYPE                                                                 \
-    HANDLE_UIDM_COMPLETE_TYPE(StringList, StringList, DataModelDataType::String)                                      \
-    HANDLE_UIDM_COMPLETE_TYPE(FloatRange, Range, DataModelDataType::Float)                                            \
-    HANDLE_UIDM_COMPLETE_TYPE(LongRange, Range, DataModelDataType::Long)                                              \
-    HANDLE_UIDM_COMPLETE_TYPE(Float, None, DataModelDataType::Float)                                                  \
-    HANDLE_UIDM_COMPLETE_TYPE(Long, None, DataModelDataType::Long)                                                    \
-    HANDLE_UIDM_COMPLETE_TYPE(Float2, None, DataModelDataType::Float2)                                                \
-    HANDLE_UIDM_COMPLETE_TYPE(Vector, None, DataModelDataType::Float3)                                                \
-    HANDLE_UIDM_COMPLETE_TYPE(Scale, None, DataModelDataType::Float3)                                                 \
-    HANDLE_UIDM_COMPLETE_TYPE(Rotation, Rotation, DataModelDataType::Float3)                                          \
-    HANDLE_UIDM_COMPLETE_TYPE(Color, Color, DataModelDataType::Float3)                                                \
-    HANDLE_UIDM_COMPLETE_TYPE(Boolean, None, DataModelDataType::Bool)                                                 \
-    HANDLE_UIDM_COMPLETE_TYPE(Slide, None, DataModelDataType::String)                                                 \
-    HANDLE_UIDM_COMPLETE_TYPE(Font, Font, DataModelDataType::String)                                                  \
-    HANDLE_UIDM_COMPLETE_TYPE(FontSize, FontSize, DataModelDataType::Float)                                           \
-    HANDLE_UIDM_COMPLETE_TYPE(String, None, DataModelDataType::String)                                                \
-    HANDLE_UIDM_COMPLETE_TYPE(MultiLineString, MultiLine, DataModelDataType::String)                                  \
-    HANDLE_UIDM_COMPLETE_TYPE(ObjectRef, ObjectRef, DataModelDataType::ObjectRef)                                     \
-    HANDLE_UIDM_COMPLETE_TYPE(Image, Image, DataModelDataType::Long4)                                                 \
-    HANDLE_UIDM_COMPLETE_TYPE(Mesh, Mesh, DataModelDataType::String)                                                  \
-    HANDLE_UIDM_COMPLETE_TYPE(Import, Import, DataModelDataType::String)                                              \
-    HANDLE_UIDM_COMPLETE_TYPE(Texture, Texture, DataModelDataType::String)                                            \
-    HANDLE_UIDM_COMPLETE_TYPE(Image2D, Texture, DataModelDataType::String)                                            \
-    HANDLE_UIDM_COMPLETE_TYPE(Buffer, Texture, DataModelDataType::String)                                             \
-    HANDLE_UIDM_COMPLETE_TYPE(Guid, None, DataModelDataType::Long4)                                                   \
-    HANDLE_UIDM_COMPLETE_TYPE(StringListOrInt, StringList, DataModelDataType::StringOrInt)                            \
-    HANDLE_UIDM_COMPLETE_TYPE(Renderable, Renderable, DataModelDataType::String)                                      \
-    HANDLE_UIDM_COMPLETE_TYPE(PathBuffer, PathBuffer, DataModelDataType::String)                                      \
-    HANDLE_UIDM_COMPLETE_TYPE(ShadowMapResolution, ShadowMapResolution, DataModelDataType::Long)
+#define ITERATE_QT3DSDM_COMPLETE_TYPES                                                               \
+    HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                                 \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(StringList, StringList, DataModelDataType::String)                                      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(FloatRange, Range, DataModelDataType::Float)                                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(LongRange, Range, DataModelDataType::Long)                                              \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Float, None, DataModelDataType::Float)                                                  \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Long, None, DataModelDataType::Long)                                                    \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Float2, None, DataModelDataType::Float2)                                                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Vector, None, DataModelDataType::Float3)                                                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Scale, None, DataModelDataType::Float3)                                                 \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Rotation, Rotation, DataModelDataType::Float3)                                          \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Color, Color, DataModelDataType::Float3)                                                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Boolean, None, DataModelDataType::Bool)                                                 \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Slide, None, DataModelDataType::String)                                                 \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Font, Font, DataModelDataType::String)                                                  \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(FontSize, FontSize, DataModelDataType::Float)                                           \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(String, None, DataModelDataType::String)                                                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(MultiLineString, MultiLine, DataModelDataType::String)                                  \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(ObjectRef, ObjectRef, DataModelDataType::ObjectRef)                                     \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Image, Image, DataModelDataType::Long4)                                                 \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Mesh, Mesh, DataModelDataType::String)                                                  \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Import, Import, DataModelDataType::String)                                              \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Texture, Texture, DataModelDataType::String)                                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Image2D, Texture, DataModelDataType::String)                                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Buffer, Texture, DataModelDataType::String)                                             \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Guid, None, DataModelDataType::Long4)                                                   \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(StringListOrInt, StringList, DataModelDataType::StringOrInt)                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Renderable, Renderable, DataModelDataType::String)                                      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(PathBuffer, PathBuffer, DataModelDataType::String)                                      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(ShadowMapResolution, ShadowMapResolution, DataModelDataType::Long)
 
 DataModelDataType::Value CompleteMetaDataType::ToDataType(CompleteMetaDataType::Enum inCompleteType)
 {
     switch (inCompleteType) {
-#define HANDLE_UIDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
     case Unknown:                                                                                  \
     return DataModelDataType::None;
-#define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
     case name:                                                                                     \
     return dtype;
-    ITERATE_UICDM_COMPLETE_TYPES
-        #undef HANDLE_UIDM_COMPLETE_NONE_TYPE
-        #undef HANDLE_UIDM_COMPLETE_TYPE
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
     }
     QT3DS_ASSERT(false);
     return DataModelDataType::None;
@@ -245,15 +245,15 @@ AdditionalMetaDataType::Value
 CompleteMetaDataType::ToAdditionalType(CompleteMetaDataType::Enum inCompleteType)
 {
     switch (inCompleteType) {
-#define HANDLE_UIDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
     case Unknown:                                                                                  \
     return AdditionalMetaDataType::None;
-#define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
     case name:                                                                                     \
     return AdditionalMetaDataType::addtype;
-    ITERATE_UICDM_COMPLETE_TYPES
-        #undef HANDLE_UIDM_COMPLETE_NONE_TYPE
-        #undef HANDLE_UIDM_COMPLETE_TYPE
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
     }
     QT3DS_ASSERT(false);
     return AdditionalMetaDataType::None;
@@ -263,17 +263,17 @@ CompleteMetaDataType::Enum
 CompleteMetaDataType::ToCompleteType(DataModelDataType::Value inDataType,
                                      AdditionalMetaDataType::Value inAdditionalType)
 {
-#define HANDLE_UIDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
     if (inDataType == DataModelDataType::None)                                                      \
     return CompleteMetaDataType::Unknown;
-#define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
     if (inDataType == dtype                                                    \
     && inAdditionalType == AdditionalMetaDataType::addtype)                                    \
     return CompleteMetaDataType::name;
 
-    ITERATE_UICDM_COMPLETE_TYPES
-        #undef HANDLE_UIDM_COMPLETE_NONE_TYPE
-        #undef HANDLE_UIDM_COMPLETE_TYPE
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
             QT3DS_ASSERT(false);
     return CompleteMetaDataType::Unknown;
 }
@@ -282,18 +282,18 @@ QT3DSU32 WStrOps<CompleteMetaDataType::Enum>::ToStr(CompleteMetaDataType::Enum i
                                                     NVDataRef<wchar_t> buffer)
 {
     switch (item) {
-#define HANDLE_UIDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
     case CompleteMetaDataType::Unknown:                                                            \
     wcscpy_s(buffer.begin(), buffer.size(), L"None");                                          \
     return 1;
-#define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
     case CompleteMetaDataType::name:                                                               \
     wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
     return 1;
 
-    ITERATE_UICDM_COMPLETE_TYPES
-        #undef HANDLE_UIDM_COMPLETE_NONE_TYPE
-        #undef HANDLE_UIDM_COMPLETE_TYPE
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
     }
     QT3DS_ASSERT(false);
     return 0;
@@ -302,20 +302,20 @@ bool WStrOps<CompleteMetaDataType::Enum>::StrTo(const wchar_t *buffer,
                                                 CompleteMetaDataType::Enum &item)
 {
 
-#define HANDLE_UIDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
     if (AreEqual(buffer, L"None")) {                                                               \
     item = CompleteMetaDataType::Unknown;                                                      \
     return true;                                                                               \
 }
-#define HANDLE_UIDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
     if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
     item = CompleteMetaDataType::name;                                                         \
     return true;                                                                               \
 }
 
-    ITERATE_UICDM_COMPLETE_TYPES
-        #undef HANDLE_UIDM_COMPLETE_NONE_TYPE
-        #undef HANDLE_UIDM_COMPLETE_TYPE
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
             return false;
 }
 }
@@ -1096,10 +1096,10 @@ struct SNewMetaDataImpl : public IMetaData
     void SetInstanceAsCanonical(Qt3DSDMInstanceHandle inInstance, TStrType inTypename) override
     {
         const wchar_t *theTypename(Intern(inTypename));
-        if (g_UICDMDebugLogger)
-            g_UICDMDebugLogger("IMetaData::SetInstanceAsCanonical Enter");
-        if (g_UICDMDebugLogger)
-            g_UICDMDebugLogger(GetStringTable().GetNarrowStr(inTypename.wide_str()));
+        if (g_DataModelDebugLogger)
+            g_DataModelDebugLogger("IMetaData::SetInstanceAsCanonical Enter");
+        if (g_DataModelDebugLogger)
+            g_DataModelDebugLogger(GetStringTable().GetNarrowStr(inTypename.wide_str()));
         m_CanonicalTypeToInstances.insert(make_pair(theTypename, inInstance));
         m_InstancesToCanonicalType.insert(make_pair(inInstance, theTypename));
         CreateHashMapInsertTransaction(__FILE__, __LINE__, m_Consumer,
@@ -1108,8 +1108,8 @@ struct SNewMetaDataImpl : public IMetaData
         CreateHashMapInsertTransaction(__FILE__, __LINE__, m_Consumer,
                                        make_pair(inInstance, theTypename),
                                        m_InstancesToCanonicalType);
-        if (g_UICDMDebugLogger)
-            g_UICDMDebugLogger("IMetaData::SetInstanceAsCanonical Leave");
+        if (g_DataModelDebugLogger)
+            g_DataModelDebugLogger("IMetaData::SetInstanceAsCanonical Leave");
     }
 
     Qt3DSDMInstanceHandle GetCanonicalInstanceForType(TStrType inTypename) override
@@ -1311,7 +1311,7 @@ struct SNewMetaDataImpl : public IMetaData
                 m_DataCore->GetAggregateInstancePropertyByName(newInfo.m_Instance, newInfo.m_Name);
         // Ensure the types match.
         if (theExistingProperty.Valid()) {
-            SUICDMPropertyDefinition theDefinition(m_DataCore->GetProperty(theExistingProperty));
+            Qt3DSDMPropertyDefinition theDefinition(m_DataCore->GetProperty(theExistingProperty));
             if (theDefinition.m_Name != newInfo.m_Name
                     || theDefinition.m_Type != newInfo.GetDataType()) {
                 m_DataCore->RemoveProperty(theExistingProperty);
@@ -1433,7 +1433,7 @@ struct SNewMetaDataImpl : public IMetaData
     Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
                                                              Qt3DSDMPropertyHandle inProperty) override
     {
-        SUICDMPropertyDefinition propDef(m_DataCore->GetProperty(inProperty));
+        Qt3DSDMPropertyDefinition propDef(m_DataCore->GetProperty(inProperty));
         return GetMetaDataProperty(inInstance, propDef.m_Name);
     }
     // Sets the value in the data core
@@ -1540,7 +1540,7 @@ struct SNewMetaDataImpl : public IMetaData
             return false;
         }
 
-        SUICDMPropertyDefinition theProp(m_DataCore->GetProperty(inFilter.m_FilterProperty));
+        Qt3DSDMPropertyDefinition theProp(m_DataCore->GetProperty(inFilter.m_FilterProperty));
         Qt3DSDMPropertyHandle propCheck =
                 m_DataCore->GetAggregateInstancePropertyByName(infoPtr->m_Instance, theProp.m_Name);
         if (propCheck != inFilter.m_FilterProperty) {
@@ -2278,7 +2278,7 @@ struct SNewMetaDataImpl : public IMetaData
         NVConstDataRef<SPropertyFilterInfo> theInfos = GetMetaDataPropertyFilters(inHandle);
         for (QT3DSU32 idx = 0, end = theInfos.size(); idx < end; ++idx) {
             const SPropertyFilterInfo &theInfo(theInfos[idx]);
-            SUICDMPropertyDefinition thePropertyInfo(
+            Qt3DSDMPropertyDefinition thePropertyInfo(
                         m_DataCore->GetProperty(theInfo.m_FilterProperty));
 
             const wchar_t *theFilterName;
@@ -2321,7 +2321,7 @@ struct SNewMetaDataImpl : public IMetaData
                     QT3DS_ASSERT(false);
                     return;
                 }
-                SUICDMPropertyDefinition thePropDef(m_DataCore->GetProperty(theProperty));
+                Qt3DSDMPropertyDefinition thePropDef(m_DataCore->GetProperty(theProperty));
 
                 SPropertyFilterInfo theInfo;
                 theInfo.m_FilterType = PropertyFilterTypes::ShowIfEqual;
@@ -2337,7 +2337,7 @@ struct SNewMetaDataImpl : public IMetaData
                     QT3DS_ASSERT(false);
                     return;
                 }
-                SUICDMPropertyDefinition thePropDef(m_DataCore->GetProperty(theProperty));
+                Qt3DSDMPropertyDefinition thePropDef(m_DataCore->GetProperty(theProperty));
 
                 SPropertyFilterInfo theInfo;
                 theInfo.m_FilterType = PropertyFilterTypes::HideIfEqual;
@@ -3039,7 +3039,7 @@ struct SNewMetaDataImpl : public IMetaData
         shaderPrefix.append(";\n");
     }
     static inline void AppendShaderCode(
-            const char8_t *inCode, SUICDMStr &ioStr,
+            const char8_t *inCode, Qt3DSDMStr &ioStr,
             eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType> &inConvertBuffer)
     {
         qt3ds::foundation::ConvertUTF(inCode, 0, inConvertBuffer);

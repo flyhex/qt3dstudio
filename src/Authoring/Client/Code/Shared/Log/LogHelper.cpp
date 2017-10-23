@@ -44,7 +44,7 @@
 //	Statics
 //==============================================================================
 
-IUICLog2 *CLogHelper::s_UICLog2;
+IQt3DSLog2 *CLogHelper::s_qt3dsLog2;
 
 //==============================================================================
 //	Methods
@@ -55,7 +55,7 @@ IUICLog2 *CLogHelper::s_UICLog2;
 void CLogHelper::Log(long inLogType, const wchar_t *inFileName, long inLineNumber,
                      long inCategoryType, const wchar_t *inLogString, ...)
 {
-    if (s_UICLog2 != NULL) {
+    if (s_qt3dsLog2 != NULL) {
         TSAddEntryIndirect theAddEntryIndirectStruct = { 0 };
 
         theAddEntryIndirectStruct.m_StructSize = sizeof(theAddEntryIndirectStruct);
@@ -66,12 +66,12 @@ void CLogHelper::Log(long inLogType, const wchar_t *inFileName, long inLineNumbe
         wcsncpy(theAddEntryIndirectStruct.m_FileNameString, inFileName,
                 Q3DStudio::MIN((size_t)MAX_PATH, wcslen(inFileName)));
         theAddEntryIndirectStruct.m_LineNumberLong = inLineNumber;
-        theAddEntryIndirectStruct.m_Mask = UICLOG_STRING;
+        theAddEntryIndirectStruct.m_Mask = QT3DS_LOG_STRING;
         theAddEntryIndirectStruct.m_Level = LOGLEVEL_CRITICAL;
         theAddEntryIndirectStruct.m_LogType = inLogType;
         theAddEntryIndirectStruct.m_CategoryType = inCategoryType;
 
-        s_UICLog2->AddEntryIndirect((long)&theAddEntryIndirectStruct);
+        s_qt3dsLog2->AddEntryIndirect((long)&theAddEntryIndirectStruct);
 
         va_end(theAddEntryIndirectStruct.m_LogParamList);
     }
@@ -80,7 +80,7 @@ void CLogHelper::Log(long inLogType, const wchar_t *inFileName, long inLineNumbe
 void CLogHelper::Log(long inLogType, const wchar_t *inFileName, long inLineNumber,
                      long inCategoryType, long inStringId, ...)
 {
-    if (s_UICLog2 != NULL) {
+    if (s_qt3dsLog2 != NULL) {
         TSAddEntryIndirect theAddEntryIndirectStruct = { 0 };
 
         theAddEntryIndirectStruct.m_StructSize = sizeof(theAddEntryIndirectStruct);
@@ -90,12 +90,12 @@ void CLogHelper::Log(long inLogType, const wchar_t *inFileName, long inLineNumbe
         wcsncpy(theAddEntryIndirectStruct.m_FileNameString, inFileName,
                 Q3DStudio::MIN((size_t)MAX_PATH, wcslen(inFileName)));
         theAddEntryIndirectStruct.m_LineNumberLong = inLineNumber;
-        theAddEntryIndirectStruct.m_Mask = UICLOG_ID;
+        theAddEntryIndirectStruct.m_Mask = QT3DS_LOG_ID;
         theAddEntryIndirectStruct.m_Level = LOGLEVEL_CRITICAL;
         theAddEntryIndirectStruct.m_LogType = inLogType;
         theAddEntryIndirectStruct.m_CategoryType = inCategoryType;
 
-        s_UICLog2->AddEntryIndirect((long)&theAddEntryIndirectStruct);
+        s_qt3dsLog2->AddEntryIndirect((long)&theAddEntryIndirectStruct);
 
         va_end(theAddEntryIndirectStruct.m_LogParamList);
     }
@@ -104,18 +104,18 @@ void CLogHelper::Log(long inLogType, const wchar_t *inFileName, long inLineNumbe
 void CLogHelper::Trace(long inCategoryType, const wchar_t *inLogString, ...)
 {
     try {
-        if (s_UICLog2 != NULL) {
+        if (s_qt3dsLog2 != NULL) {
             TSAddEntryIndirect theAddEntryIndirectStruct = { 0 };
 
             theAddEntryIndirectStruct.m_StructSize = sizeof(theAddEntryIndirectStruct);
             wcsncpy(theAddEntryIndirectStruct.m_LogString, inLogString,
                     Q3DStudio::MIN((size_t)MAX_PATH, wcslen(inLogString)));
             va_start(theAddEntryIndirectStruct.m_LogParamList, inLogString);
-            theAddEntryIndirectStruct.m_Mask = UICLOG_STRING;
+            theAddEntryIndirectStruct.m_Mask = QT3DS_LOG_STRING;
             theAddEntryIndirectStruct.m_Level = LOGLEVEL_INFO;
             theAddEntryIndirectStruct.m_CategoryType = inCategoryType;
 
-            s_UICLog2->AddEntryIndirect((long)&theAddEntryIndirectStruct);
+            s_qt3dsLog2->AddEntryIndirect((long)&theAddEntryIndirectStruct);
 
             va_end(theAddEntryIndirectStruct.m_LogParamList);
         }
@@ -127,8 +127,8 @@ void CLogHelper::Trace(long inCategoryType, const wchar_t *inLogString, ...)
 
 void CLogHelper::AddEntry(long inType, const wchar_t *inMsg)
 {
-    if (s_UICLog2 != NULL) {
-        s_UICLog2->AddEntry(inType, (BYTE *)inMsg);
+    if (s_qt3dsLog2 != NULL) {
+        s_qt3dsLog2->AddEntry(inType, (BYTE *)inMsg);
     }
 }
 
@@ -137,12 +137,12 @@ void CLogHelper::Start()
     ::CoInitialize(NULL);
 
     try {
-        if (s_UICLog2 == NULL) {
+        if (s_qt3dsLog2 == NULL) {
             HRESULT theResult =
-                ::CoCreateInstance(__uuidof(UICLog), NULL, CLSCTX_INPROC_SERVER, __uuidof(IUICLog2),
-                                   reinterpret_cast<void **>(&s_UICLog2));
-            if (!s_UICLog2 || S_OK != theResult) {
-                ::OutputDebugString(L"FAILED to create UICLog2 interface.\n");
+                ::CoCreateInstance(__uuidof(Qt3DSLog), NULL, CLSCTX_INPROC_SERVER, __uuidof(IQt3DSLog2),
+                                   reinterpret_cast<void **>(&s_qt3dsLog2));
+            if (!s_qt3dsLog2 || S_OK != theResult) {
+                ::OutputDebugString(L"FAILED to create Qt3DSLog2 interface.\n");
             }
         }
     }
@@ -154,10 +154,10 @@ void CLogHelper::Start()
 void CLogHelper::Stop()
 {
     try {
-        if (s_UICLog2) {
-            s_UICLog2->Terminate();
-            s_UICLog2->Release();
-            s_UICLog2 = NULL;
+        if (s_qt3dsLog2) {
+            s_qt3dsLog2->Terminate();
+            s_qt3dsLog2->Release();
+            s_qt3dsLog2 = NULL;
         }
 
         ::CoUninitialize();

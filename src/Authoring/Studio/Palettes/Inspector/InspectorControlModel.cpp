@@ -389,7 +389,7 @@ bool InspectorControlModel::isGroupRebuildRequired(CInspectableBase* inspectable
         int existingIndex = 0;
         if (const auto group = dynamic_cast<const Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
-                    = dynamic_cast<const UICDMMaterialInspectorGroup *>(group);
+                    = dynamic_cast<const Qt3DSDMMaterialInspectorGroup *>(group);
             if (materialGroup && materialGroup->isMaterialGroup()) {
                 auto i = existingGroup.controlElements.at(existingIndex++).value<InspectorControlBase*>();
                 if (i->m_instance != cdmInspectable->GetGroupInstance(theIndex))
@@ -439,7 +439,7 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
     if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectable)) {
         if (const auto group = dynamic_cast<Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
-                    = dynamic_cast<UICDMMaterialInspectorGroup *>(group);
+                    = dynamic_cast<Qt3DSDMMaterialInspectorGroup *>(group);
             if (materialGroup && materialGroup->isMaterialGroup()) {
                 InspectorControlBase *item = createMaterialItem(cdmInspectable, theIndex);
                 if (item) {

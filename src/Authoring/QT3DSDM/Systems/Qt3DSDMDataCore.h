@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMDATACOREH
-#define UICDMDATACOREH
+#ifndef QT3DSDM_DATACORE_H
+#define QT3DSDM_DATACORE_H
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMPropertyDefinition.h"
 #include "HandleSystemBase.h"
@@ -182,7 +182,7 @@ public:
     /**
      *	Return the property definition that corresponds to a given property value.
      */
-    virtual const SUICDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual const Qt3DSDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const = 0;
     /**
      *	Return the properties specific to this instance, not including properties
      *	gained by derivation
@@ -202,7 +202,7 @@ public:
     virtual void CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
                                         Qt3DSDMInstanceHandle inDestInstance) = 0;
     /**
-     *	Removed cached intermediate values from the instance.  UICDM pull properties from the
+     *	Removed cached intermediate values from the instance.  DataModel pull properties from the
      *inheritance hierarchy chain
      *  up to the current instance when someone requests a property in order to make the next
      *request quicker.  This breaks

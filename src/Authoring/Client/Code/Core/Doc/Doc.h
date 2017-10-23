@@ -66,7 +66,6 @@ class CBufferedInputStream;
 class CBufferedOutputStream;
 class CDataManager;
 class CClientDataModelBridge;
-class IUICDMSerializer;
 class IKeyframesManager;
 class IObjectReferenceHelper;
 class CCore;
@@ -163,18 +162,18 @@ public:
 
     // The system may be null in the case where we are running without a UI.
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
-    void SetDocumentPath(const CUICFile &inFile);
-    CUICFile GetDocumentPath() const;
+    void SetDocumentPath(const Qt3DSFile &inFile);
+    Qt3DSFile GetDocumentPath() const;
     bool IsInDocSubDirectory(const Q3DStudio::CString &inPath) const;
     Q3DStudio::CString GetDocumentDirectory() const;
     Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
     Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
 
-    CUICFile CreateUntitledDocument() const;
+    Qt3DSFile CreateUntitledDocument() const;
 
     void CloseDocument();
-    void LoadDocument(const CUICFile &inDocument);
-    void SaveDocument(const CUICFile &inDocument);
+    void LoadDocument(const Qt3DSFile &inDocument);
+    void SaveDocument(const Qt3DSFile &inDocument);
     void CreateNewDocument();
     QString GetDocumentUIAFile();
     void LoadUIASubpresentations(const QString &uiaFile,
@@ -305,10 +304,10 @@ public:
     virtual std::shared_ptr<qt3dsdm::IDOMReader> CreateDOMReader(CBufferedInputStream &inStream,
                                                                  qt3ds::QT3DSI32 &outVersion);
 
-    void SelectUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
+    void SelectDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
     // multiselect support
-    void ToggleUICDMObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
-    void SelectAndNavigateToUICDMObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
+    void ToggleDataModelObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
+    void SelectAndNavigateToDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
     long GetLatestEndTime();
 
     CCore *GetCore() override;
@@ -423,7 +422,7 @@ protected:
     CCore *m_Core;
     bool m_IsModified;
     bool m_IsTemporary;
-    CUICFile m_DocumentPath;
+    Qt3DSFile m_DocumentPath;
 
     CDataManager *m_DataManager; ///< Manager for handling data properties.
 
@@ -458,7 +457,7 @@ public:
 
 protected:
     CRenderContext *m_RenderContext; ///< The render context attached to this player's window.
-    UICRenderDevice m_WindowHandle; ///< The window handle to which to render
+    Qt3DSRenderDevice m_WindowHandle; ///< The window handle to which to render
     Q3DStudio::CRect m_ClientSize;
     Q3DStudio::CRect m_SceneRect; ///< The dimensions of the active scene view
 };

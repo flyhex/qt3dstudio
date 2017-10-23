@@ -562,7 +562,7 @@ public:
 
     void DisableMultithreadedAccess() override { m_MultithreadMutex = NULL; }
 
-    CRegisteredString RegisterStr(UICBCharPtr str) override
+    CRegisteredString RegisterStr(Qt3DSBCharPtr str) override
     {
         STRING_TABLE_MULTITHREADED_METHOD;
         if (isTrivial(str))
@@ -595,7 +595,7 @@ public:
         return RegisterStr(m_ConvertBuffer.c_str());
     }
 
-    CStringHandle GetHandle(UICBCharPtr str) override
+    CStringHandle GetHandle(Qt3DSBCharPtr str) override
     {
         STRING_TABLE_MULTITHREADED_METHOD;
         return m_FileData.FindStrHandle(str);
@@ -617,7 +617,7 @@ public:
         return reinterpret_cast<const wchar_t *>(pair_iter.first->second.c_str());
     }
 
-    const wchar_t *GetWideStr(UICBCharPtr src) override
+    const wchar_t *GetWideStr(Qt3DSBCharPtr src) override
     {
         STRING_TABLE_MULTITHREADED_METHOD;
         if (isTrivial(src))

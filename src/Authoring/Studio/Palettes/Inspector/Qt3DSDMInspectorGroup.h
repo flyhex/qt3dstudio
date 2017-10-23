@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UICDM_INSPECTORGROUP_H
-#define INCLUDED_UICDM_INSPECTORGROUP_H 1
+#ifndef INCLUDED_QT3DSDM_INSPECTORGROUP_H
+#define INCLUDED_QT3DSDM_INSPECTORGROUP_H 1
 
 #pragma once
 
@@ -57,7 +57,7 @@ class Qt3DSDMInspectorGroup: public CEasyInspectorGroup
 {
 protected: // Members
     CStudioApp &m_App;
-    std::vector<Q3DStudio::Qt3DSDMInspectorRow *> m_UICDMInspectorRows;
+    std::vector<Q3DStudio::Qt3DSDMInspectorRow *> m_DMInspectorRows;
     Qt3DSDMInspectable &m_Inspectable;
     long m_Index;
 
@@ -68,7 +68,7 @@ public: // Construction
 
     const std::vector<Q3DStudio::Qt3DSDMInspectorRow *> &GetRows() const
     {
-        return m_UICDMInspectorRows;
+        return m_DMInspectorRows;
     }
 
 public: // Use

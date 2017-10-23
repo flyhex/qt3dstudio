@@ -105,10 +105,10 @@ QPixmap CResourceCache::GetBitmap(const QString &inName)
  * @param inResourceID ID of the cursor to be loaded (see SCursor.h)
  * @return Pointer to the cursor, or NULL if the cursor could not be loaded
  */
-QCursor CResourceCache::GetCursor(CMouseCursor::TUICMouseCursor inResourceID)
+QCursor CResourceCache::GetCursor(CMouseCursor::Qt3DSMouseCursor inResourceID)
 {
     CMouseCursor *theCursor = NULL;
-    CMouseCursor::TUICMouseCursor theKey = inResourceID;
+    CMouseCursor::Qt3DSMouseCursor theKey = inResourceID;
 
     TCursorMap::iterator thePos = m_Cursors.find(theKey);
     if (thePos != m_Cursors.end()) {

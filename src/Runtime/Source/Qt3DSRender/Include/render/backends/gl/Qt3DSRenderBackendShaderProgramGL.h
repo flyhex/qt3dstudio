@@ -60,7 +60,7 @@ namespace render {
 
         NVRenderBackendShaderInputEntryGL *getEntryByName(CRegisteredString entryName) const
         {
-            UICBASE_FOREACH(idx, m_ShaderInputEntries.size())
+            QT3DS_FOREACH(idx, m_ShaderInputEntries.size())
             {
                 if (m_ShaderInputEntries[idx].m_AttribName == entryName)
                     return &m_ShaderInputEntries.mData[idx];
@@ -71,7 +71,7 @@ namespace render {
         Option<NVRenderBackendShaderInputEntryGL>
         getEntryByAttribLocation(QT3DSU32 attribLocation) const
         {
-            UICBASE_FOREACH(idx, m_ShaderInputEntries.size())
+            QT3DS_FOREACH(idx, m_ShaderInputEntries.size())
             {
                 if (m_ShaderInputEntries[idx].m_AttribLocation == attribLocation)
                     return m_ShaderInputEntries[idx];

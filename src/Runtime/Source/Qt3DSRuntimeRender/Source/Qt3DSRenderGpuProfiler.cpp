@@ -45,7 +45,6 @@
 #define RECORDED_FRAME_DELAY_MASK 0x0003
 
 using namespace qt3ds::render;
-using namespace qt3ds::render;
 
 namespace {
 
@@ -165,14 +164,14 @@ struct SGpuTimerInfo
     }
 };
 
-class UICRenderGpuProfiler : public IRenderProfiler
+class Qt3DSCRenderGpuProfiler : public IRenderProfiler
 {
     typedef nvhash_map<CRegisteredString, NVScopedRefCounted<SGpuTimerInfo>> TStrGpuTimerInfoMap;
 
 private:
     NVFoundationBase &m_Foundation;
     NVScopedRefCounted<NVRenderContext> m_RenderContext;
-    IUICRenderContext &m_UICContext;
+    IQt3DSRenderContext &m_Context;
     volatile QT3DSI32 mRefCount;
 
     TStrGpuTimerInfoMap m_StrToGpuTimerMap;
@@ -180,11 +179,11 @@ private:
     mutable QT3DSU32 m_VertexCount;
 
 public:
-    UICRenderGpuProfiler(NVFoundationBase &inFoundation, IUICRenderContext &inContext,
+    Qt3DSCRenderGpuProfiler(NVFoundationBase &inFoundation, IQt3DSRenderContext &inContext,
                          NVRenderContext &inRenderContext)
         : m_Foundation(inFoundation)
         , m_RenderContext(inRenderContext)
-        , m_UICContext(inContext)
+        , m_Context(inContext)
         , mRefCount(0)
         , m_StrToGpuTimerMap(inContext.GetAllocator(), "Qt3DSRenderGpuProfiler::m_StrToGpuTimerMap")
         , m_StrToIDVec(inContext.GetAllocator(), "Qt3DSRenderGpuProfiler::m_StrToIDVec")
@@ -192,7 +191,7 @@ public:
     {
     }
 
-    virtual ~UICRenderGpuProfiler() { m_StrToGpuTimerMap.clear(); }
+    virtual ~Qt3DSCRenderGpuProfiler() { m_StrToGpuTimerMap.clear(); }
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Foundation.getAllocator())
 
@@ -205,7 +204,7 @@ public:
                 theGpuTimerData->AddSync();
 
             theGpuTimerData->m_AbsoluteTime = absoluteTime;
-            theGpuTimerData->StartTimerQuery(m_UICContext.GetFrameCount());
+            theGpuTimerData->StartTimerQuery(m_Context.GetFrameCount());
         }
     }
 
@@ -224,7 +223,7 @@ public:
         SGpuTimerInfo *theGpuTimerData = GetGpuTimerInfo(nameID);
 
         if (theGpuTimerData) {
-            time = theGpuTimerData->GetElapsedTimeInMs(m_UICContext.GetFrameCount());
+            time = theGpuTimerData->GetElapsedTimeInMs(m_Context.GetFrameCount());
         }
 
         return time;
@@ -249,7 +248,7 @@ private:
             return const_cast<SGpuTimerInfo *>(theIter->second.mPtr);
 
         SGpuTimerInfo *theGpuTimerData =
-            QT3DS_NEW(m_UICContext.GetAllocator(), SGpuTimerInfo)(m_Foundation);
+            QT3DS_NEW(m_Context.GetAllocator(), SGpuTimerInfo)(m_Foundation);
 
         if (theGpuTimerData) {
             // create queries
@@ -278,8 +277,8 @@ private:
 }
 
 IRenderProfiler &IRenderProfiler::CreateGpuProfiler(NVFoundationBase &inFnd,
-                                                    IUICRenderContext &inContext,
+                                                    IQt3DSRenderContext &inContext,
                                                     NVRenderContext &inRenderContext)
 {
-    return *QT3DS_NEW(inFnd.getAllocator(), UICRenderGpuProfiler)(inFnd, inContext, inRenderContext);
+    return *QT3DS_NEW(inFnd.getAllocator(), Qt3DSCRenderGpuProfiler)(inFnd, inContext, inRenderContext);
 }

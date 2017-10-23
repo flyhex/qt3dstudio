@@ -27,13 +27,13 @@
 **
 ****************************************************************************/
 
-#ifndef __UICLOGHELPER_H_
-#define __UICLOGHELPER_H_
+#ifndef __QT3DS_LOG_HELPER_H_
+#define __QT3DS_LOG_HELPER_H_
 
 #ifdef WIN32
 #include "LogProject.h"
 #else
-typedef long IUICLog2;
+typedef long IQt3DSLog2;
 #endif
 
 //==============================================================================
@@ -54,7 +54,7 @@ public:
     static void Start();
     static void Stop();
 
-    static IUICLog2 *s_UICLog2;
+    static IQt3DSLog2 *s_qt3dsLog2;
 };
 
-#endif // __UICLOGHELPER_H_
+#endif // __QT3DS_LOG_HELPER_H_

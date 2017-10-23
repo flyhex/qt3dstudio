@@ -32,10 +32,10 @@
 #include "Qt3DSStateExecutionContext.h"
 #include "EASTL/sort.h"
 
-using namespace uic::state;
-using namespace uic::state::editor;
+using namespace qt3ds::state;
+using namespace qt3ds::state::editor;
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

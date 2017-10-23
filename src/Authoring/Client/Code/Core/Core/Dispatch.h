@@ -51,7 +51,7 @@
 class CSceneDragListener;
 class CSelectionChangeListener;
 class CAsset;
-class CUICFile;
+class Qt3DSFile;
 class CURL;
 class CPresentationChangeListener;
 class CResourceChangeListener;
@@ -137,7 +137,7 @@ public:
     void FireOnLoadedSubPresentation();
     void FireOnNewPresentation();
     void FireOnClosingPresentation();
-    void FireOnSavingPresentation(const CUICFile *inNewPresentationFile = NULL);
+    void FireOnSavingPresentation(const Qt3DSFile *inNewPresentationFile = NULL);
     void FireOnExportingAsset(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void FireOnPresentationModifiedExternally();
 
@@ -153,9 +153,9 @@ public:
 
     void AddFileOpenListener(CFileOpenListener *inListener);
     void RemoveFileOpenListener(CFileOpenListener *inListener);
-    void FireOnOpenDocument(const CUICFile &inFile, bool inSucceeded);
-    void FireOnSaveDocument(const CUICFile &inFile, bool inSucceeded, bool inSaveCopy);
-    void FireOnDocumentPathChanged(const CUICFile &inNewPath);
+    void FireOnOpenDocument(const Qt3DSFile &inFile, bool inSucceeded);
+    void FireOnSaveDocument(const Qt3DSFile &inFile, bool inSucceeded, bool inSaveCopy);
+    void FireOnDocumentPathChanged(const Qt3DSFile &inNewPath);
 
     // Toolbar changes
     void AddToolbarChangeListener(CToolbarChangeListener *inListener);

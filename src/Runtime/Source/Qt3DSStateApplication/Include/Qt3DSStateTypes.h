@@ -353,17 +353,17 @@ namespace state {
         SScript *m_Script;
         SSCXMLFlags m_Flags;
         SDataModel *m_DataModel;
-        QT3DSI32 m_UICVersion;
+        QT3DSI32 m_Version;
         const char8_t *m_Filename;
         const char8_t *m_InitialExpr;
 
-        static QT3DSI32 GetCurrentUICVersion() { return 1; }
+        static QT3DSI32 GetCurrentVersion() { return 1; }
         SSCXML()
             : SStateNode(StateNodeTypes::SCXML)
             , m_Initial(NULL)
             , m_Script(NULL)
             , m_DataModel(NULL)
-            , m_UICVersion(GetCurrentUICVersion())
+            , m_Version(GetCurrentVersion())
             , m_InitialExpr(NULL)
         {
         }

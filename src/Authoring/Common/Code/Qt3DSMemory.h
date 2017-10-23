@@ -27,13 +27,13 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef __UICMEMORY_H__
-#define __UICMEMORY_H__
+#ifndef __QT3DS_MEMORY_H__
+#define __QT3DS_MEMORY_H__
 
 #include "Qt3DSMacros.h"
 
 namespace Q3DStudio {
-#define UICMEM_HEADERSIG 0xF00D
+#define QT3DS_MEM_HEADERSIG 0xF00D
 
 //==============================================================================
 /**
@@ -81,7 +81,7 @@ protected:
     static void Validate(void *inMemory)
     {
         if ((reinterpret_cast<SSharedHeader *>(inMemory) - 1)->m_Size < 0
-            || UICMEM_HEADERSIG != (reinterpret_cast<SSharedHeader *>(inMemory) - 1)->m_Signature)
+            || QT3DS_MEM_HEADERSIG != (reinterpret_cast<SSharedHeader *>(inMemory) - 1)->m_Signature)
             CMemory::Error();
     }
     static SSharedHeader *Header(void *inMemory)
@@ -111,4 +111,4 @@ public:
     static void Free(void *inMemory);
 };
 } // namespace Q3DStudio
-#endif // __UICMEMORY_H__
+#endif // __QT3DS_MEMORY_H__

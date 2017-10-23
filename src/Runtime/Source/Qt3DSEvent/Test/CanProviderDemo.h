@@ -35,7 +35,7 @@
 
 #include <EventSystem.h>
 
-using namespace uic::evt;
+using namespace qt3ds::evt;
 
 class CCanProviderDemo : public IEventProvider
 {
@@ -43,8 +43,8 @@ public:
     CCanProviderDemo();
     virtual ~CCanProviderDemo();
 
-    SUICEventSystemEvent *GetNextEvent(IEventFactory &inFactory);
-    virtual size_t GetNextEvents(IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
+    Qt3DSEventSystemEvent *GetNextEvent(IEventFactory &inFactory);
+    virtual size_t GetNextEvents(IEventFactory &inFactory, Qt3DSEventSystemEvent **outBuffer,
                                  size_t bufLen);
     virtual void Release();
 

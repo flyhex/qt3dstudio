@@ -30,7 +30,7 @@
 #include "SimpleDataCore.h"
 
 namespace qt3dsdm {
-TUICDMDebugLogFunction g_UICDMDebugLogger = NULL;
+Qt3DSDMDebugLogFunction g_DataModelDebugLogger = NULL;
 // Instances
 Qt3DSDMInstanceHandle CSimpleDataCore::CreateInstance(Qt3DSDMInstanceHandle hdl)
 {
@@ -97,15 +97,15 @@ void CSimpleDataCore::AddInstanceIfDerivedFrom(const std::pair<int, THandleObjec
 // Derivation
 void CSimpleDataCore::DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent)
 {
-    if (g_UICDMDebugLogger)
-        g_UICDMDebugLogger("CSimpleDataCore::DeriveInstance Enter");
+    if (g_DataModelDebugLogger)
+        g_DataModelDebugLogger("CSimpleDataCore::DeriveInstance Enter");
     TDataModelInstancePtr theInstance = CSimpleDataCore::GetInstanceNF(inInstance, m_Objects);
     if (theInstance->m_Parents.find(inParent) == theInstance->m_Parents.end()) {
         std::shared_ptr<CDataModelInstance> theParent(GetInstanceNF(inParent, m_Objects));
         theInstance->m_Parents.insert(make_pair(inParent, theParent));
     }
-    if (g_UICDMDebugLogger)
-        g_UICDMDebugLogger("CSimpleDataCore::DeriveInstance Leave");
+    if (g_DataModelDebugLogger)
+        g_DataModelDebugLogger("CSimpleDataCore::DeriveInstance Leave");
 }
 
 void CSimpleDataCore::GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
@@ -136,8 +136,8 @@ inline const wchar_t *SafeStrPtr(const wchar_t *inData)
 Qt3DSDMPropertyHandle CSimpleDataCore::AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
                                                   DataModelDataType::Value inPropType)
 {
-    UICDM_LOG_FUNCTION("CSimpleDataCore::AddProperty");
-    UICDM_DEBUG_LOG(m_StringTable->GetNarrowStr(inName));
+    QT3DSDM_LOG_FUNCTION("CSimpleDataCore::AddProperty");
+    QT3DSDM_DEBUG_LOG(m_StringTable->GetNarrowStr(inName));
     TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
     TCharStr theName(inName);
     if (find_if<TIntList::iterator>(
@@ -145,7 +145,7 @@ Qt3DSDMPropertyHandle CSimpleDataCore::AddProperty(Qt3DSDMInstanceHandle inInsta
             std::bind(ComparePropertyNames, std::ref(theName),
                       std::placeholders::_1, std::ref(m_Objects)))
         != theInstance->m_Properties.end()) {
-        UICDM_DEBUG_LOG("Property Exists!!");
+        QT3DSDM_DEBUG_LOG("Property Exists!!");
         throw PropertyExists(L"");
     }
 
@@ -159,7 +159,7 @@ void CSimpleDataCore::GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
     transformv_all(GetInstanceNF(inInstance, m_Objects)->m_Properties, outProperties);
 }
 
-const SUICDMPropertyDefinition &CSimpleDataCore::GetProperty(Qt3DSDMPropertyHandle inProperty) const
+const Qt3DSDMPropertyDefinition &CSimpleDataCore::GetProperty(Qt3DSDMPropertyHandle inProperty) const
 {
     const CDataModelPropertyDefinitionObject *theProp =
         GetPropertyDefinitionNF(inProperty, m_Objects);
@@ -203,7 +203,7 @@ inline void CopyInstanceProperty(Qt3DSDMPropertyHandle inSrcPropertyHandle,
                                  Qt3DSDMInstanceHandle inInstanceHandle, CSimpleDataCore &inDataCore)
 {
     // create the property definition that matches the source
-    const SUICDMPropertyDefinition &theProperty = inDataCore.GetProperty(inSrcPropertyHandle);
+    const Qt3DSDMPropertyDefinition &theProperty = inDataCore.GetProperty(inSrcPropertyHandle);
     Qt3DSDMPropertyHandle theNewProperty =
         inDataCore.AddProperty(inInstanceHandle, theProperty.m_Name.wide_str(), theProperty.m_Type);
     // copy the value if one exists on the src.
@@ -442,14 +442,14 @@ bool CSimpleDataCore::IsProperty(int inHandle) const
 
 Qt3DSDMInstanceHandle CSimpleDataCore::CreateInstanceWithHandle(int inHandle)
 {
-    if (g_UICDMDebugLogger)
-        g_UICDMDebugLogger("CSimpleDataCore::CreateInstance Enter");
+    if (g_DataModelDebugLogger)
+        g_DataModelDebugLogger("CSimpleDataCore::CreateInstance Enter");
     if (HandleValid(inHandle)) {
-        if (g_UICDMDebugLogger) {
-            g_UICDMDebugLogger("CSimpleDataCore::CreateInstance Handle Exists!!");
+        if (g_DataModelDebugLogger) {
+            g_DataModelDebugLogger("CSimpleDataCore::CreateInstance Handle Exists!!");
             char buf[32];
             sprintf(buf, "%d", inHandle);
-            g_UICDMDebugLogger(buf);
+            g_DataModelDebugLogger(buf);
         }
         throw HandleExists(L"");
     }
@@ -458,8 +458,8 @@ Qt3DSDMInstanceHandle CSimpleDataCore::CreateInstanceWithHandle(int inHandle)
     const pair<int, THandleObjectPtr> thePair(std::make_pair(inHandle, theHandleObjectPtr));
     m_Objects.insert(thePair);
 
-    if (g_UICDMDebugLogger)
-        g_UICDMDebugLogger("CSimpleDataCore::CreateInstance Leave");
+    if (g_DataModelDebugLogger)
+        g_DataModelDebugLogger("CSimpleDataCore::CreateInstance Leave");
 
     return inHandle;
 }
@@ -469,14 +469,14 @@ Qt3DSDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
                                                             TCharPtr inName,
                                                             DataModelDataType::Value inPropType)
 {
-    UICDM_DEBUG_LOG("CSimpleDataCore::AddPropertyWithHandle Enter");
-    UICDM_DEBUG_LOG(m_StringTable->GetNarrowStr(inName));
+    QT3DSDM_DEBUG_LOG("CSimpleDataCore::AddPropertyWithHandle Enter");
+    QT3DSDM_DEBUG_LOG(m_StringTable->GetNarrowStr(inName));
     if (HandleValid(inHandle)) {
-        if (g_UICDMDebugLogger) {
-            g_UICDMDebugLogger("CSimpleDataCore::AddPropertyWithHandle Handle Exists!!");
+        if (g_DataModelDebugLogger) {
+            g_DataModelDebugLogger("CSimpleDataCore::AddPropertyWithHandle Handle Exists!!");
             char buf[32];
             sprintf(buf, "%d", inHandle);
-            g_UICDMDebugLogger(buf);
+            g_DataModelDebugLogger(buf);
         }
 
         throw HandleExists(L"");
@@ -484,13 +484,13 @@ Qt3DSDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
 
     TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
 
-    SUICDMPropertyDefinition theDefinition(inInstance, SafeStrPtr(inName), inPropType);
+    Qt3DSDMPropertyDefinition theDefinition(inInstance, SafeStrPtr(inName), inPropType);
     THandleObjectPtr theHandleObjectPtr(
         new CDataModelPropertyDefinitionObject(inHandle, theDefinition));
     const pair<int, THandleObjectPtr> thePair(std::make_pair(inHandle, theHandleObjectPtr));
     m_Objects.insert(thePair);
     theInstance->m_Properties.push_back(inHandle);
-    UICDM_DEBUG_LOG("CSimpleDataCore::AddPropertyWithHandle Leave");
+    QT3DSDM_DEBUG_LOG("CSimpleDataCore::AddPropertyWithHandle Leave");
     return inHandle;
 }
 

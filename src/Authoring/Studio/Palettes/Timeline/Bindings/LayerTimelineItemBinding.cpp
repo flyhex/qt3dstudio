@@ -170,7 +170,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
                     qt3dsdm::Qt3DSDMPropertyHandle theProperty =
                         std::get<2>(m_ImageNameFormalNamePairs[theSlotIndex]);
                     SValue theValue;
-                    const SUICDMPropertyDefinition &theDefinition(
+                    const Qt3DSDMPropertyDefinition &theDefinition(
                         theDataCore->GetProperty(theProperty));
                     if (theDefinition.m_Type == DataModelDataType::Long4) {
                         SValue theDCValue;

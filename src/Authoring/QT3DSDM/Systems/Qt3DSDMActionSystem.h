@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMACTIONSYSTEMH
-#define UICDMACTIONSYSTEMH
+#ifndef QT3DSDM_ACTION_SYSTEM_H
+#define QT3DSDM_ACTION_SYSTEM_H
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMActionCore.h"
 

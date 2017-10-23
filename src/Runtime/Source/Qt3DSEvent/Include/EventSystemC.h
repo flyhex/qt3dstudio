@@ -40,94 +40,94 @@ extern "C" {
 #endif
 
 // Obnoxious long names to void namespace conflicts
-enum EUICEventSystemEventTypes {
-    EUICEventSystemEventTypesNoData = 0,
-    EUICEventSystemEventTypesString = 1,
-    EUICEventSystemEventTypesNumber = 2,
+enum QT3DSEventSystemEventTypes {
+    QT3DSEventSystemEventTypesNoData = 0,
+    QT3DSEventSystemEventTypesString = 1,
+    QT3DSEventSystemEventTypesNumber = 2,
 };
 
-typedef const char *TUICEventSystemStr;
+typedef const char *Qt3DSEventSystemStr;
 
-typedef struct _SUICEventSystemEventValue
+typedef struct _Qt3DSEventSystemEventValue
 {
-    EUICEventSystemEventTypes m_Type;
+    QT3DSEventSystemEventTypes m_Type;
     double m_Number;
-    TUICEventSystemStr m_String;
-} SUICEventSystemEventValue;
+    Qt3DSEventSystemStr m_String;
+} Qt3DSEventSystemEventValue;
 
-typedef struct _SUICEventSystemRegisteredStr
+typedef struct _Qt3DSEventSystemRegisteredStr
 {
-    TUICEventSystemStr m_Data;
-} SUICEventSystemRegisteredStr;
+    Qt3DSEventSystemStr m_Data;
+} Qt3DSEventSystemRegisteredStr;
 
-typedef struct _SUICEventSystemEventData
+typedef struct _Qt3DSEventSystemEventData
 {
-    SUICEventSystemRegisteredStr m_Name;
-    SUICEventSystemEventValue m_Value;
-} SUICEventSystemEventData;
+    Qt3DSEventSystemRegisteredStr m_Name;
+    Qt3DSEventSystemEventValue m_Value;
+} Qt3DSEventSystemEventData;
 
-typedef struct _SUICEventSystemEvent
+typedef struct _Qt3DSEventSystemEvent
 {
-    SUICEventSystemEventData *m_Data; // contiguous block of event data.
+    Qt3DSEventSystemEventData *m_Data; // contiguous block of event data.
     int m_NumData;
-} SUICEventSystemEvent;
+} Qt3DSEventSystemEvent;
 
-typedef SUICEventSystemEvent *(*TUICEventSystemEventFactoryCreateEventFn)(void *inFactory,
+typedef Qt3DSEventSystemEvent *(*Qt3DSEventSystemEventFactoryCreateEventFn)(void *inFactory,
                                                                           int numData);
-typedef size_t (*TUICEventSystemEventFactoryMaxNumEventDataFn)(void *inFactory);
-typedef size_t (*TUICEventSystemEventFactoryMaxStrLenFn)(void *inFactory);
-typedef SUICEventSystemRegisteredStr (*TUICEventSystemEventFactoryRegisterStrFn)(
-    void *inFactory, TUICEventSystemStr inStr);
-typedef TUICEventSystemStr (*TUICEventSystemEventFactoryAllocateStrFn)(void *inFactory,
-                                                                       TUICEventSystemStr inStr);
-typedef TUICEventSystemStr (*TUICEventSystemEventFactoryAllocateStrLenFn)(void *inFactory, int len);
+typedef size_t (*Qt3DSEventSystemEventFactoryMaxNumEventDataFn)(void *inFactory);
+typedef size_t (*Qt3DSEventSystemEventFactoryMaxStrLenFn)(void *inFactory);
+typedef Qt3DSEventSystemRegisteredStr (*Qt3DSEventSystemEventFactoryRegisterStrFn)(
+    void *inFactory, Qt3DSEventSystemStr inStr);
+typedef Qt3DSEventSystemStr (*Qt3DSEventSystemEventFactoryAllocateStrFn)(void *inFactory,
+                                                                       Qt3DSEventSystemStr inStr);
+typedef Qt3DSEventSystemStr (*Qt3DSEventSystemEventFactoryAllocateStrLenFn)(void *inFactory, int len);
 
 // Factory from the provider's perspective.
-typedef struct _SUICEventSystemEventFactory
+typedef struct _Qt3DSEventSystemEventFactory
 {
     void *m_Factory;
-    TUICEventSystemEventFactoryCreateEventFn createEvent;
-    TUICEventSystemEventFactoryMaxNumEventDataFn getMaxNumEventData;
-    TUICEventSystemEventFactoryMaxStrLenFn getMaxStrLength;
-    TUICEventSystemEventFactoryRegisterStrFn registerStr;
-    TUICEventSystemEventFactoryAllocateStrFn allocateStr;
-    TUICEventSystemEventFactoryAllocateStrLenFn allocateStrLen;
+    Qt3DSEventSystemEventFactoryCreateEventFn createEvent;
+    Qt3DSEventSystemEventFactoryMaxNumEventDataFn getMaxNumEventData;
+    Qt3DSEventSystemEventFactoryMaxStrLenFn getMaxStrLength;
+    Qt3DSEventSystemEventFactoryRegisterStrFn registerStr;
+    Qt3DSEventSystemEventFactoryAllocateStrFn allocateStr;
+    Qt3DSEventSystemEventFactoryAllocateStrLenFn allocateStrLen;
 
-} SUICEventSystemEventFactory;
+} Qt3DSEventSystemEventFactory;
 
-typedef size_t (*TUICEventSystemProviderGetNextEventsFn)(void *inProvider,
-                                                         SUICEventSystemEventFactory inFactory,
-                                                         SUICEventSystemEvent **outBuffer,
+typedef size_t (*Qt3DSEventSystemProviderGetNextEventsFn)(void *inProvider,
+                                                         Qt3DSEventSystemEventFactory inFactory,
+                                                         Qt3DSEventSystemEvent **outBuffer,
                                                          size_t outBufLen);
-typedef void (*TUICEventSystemProviderReleaseFn)(void *inProvider);
+typedef void (*Qt3DSEventSystemProviderReleaseFn)(void *inProvider);
 
-typedef struct _SUICEventSystemEventProvider
+typedef struct _Qt3DSEventSystemEventProvider
 {
     void *m_Provider;
-    TUICEventSystemProviderGetNextEventsFn getNextEvents;
-    TUICEventSystemProviderReleaseFn release;
-} SUICEventSystemEventProvider;
+    Qt3DSEventSystemProviderGetNextEventsFn getNextEvents;
+    Qt3DSEventSystemProviderReleaseFn release;
+} Qt3DSEventSystemEventProvider;
 
-typedef void (*TUICEventSystemPollerAddProviderFn)(void *inPoller,
-                                                   SUICEventSystemEventProvider inProvider);
-typedef void (*TUICEventSystemPollerRemoveProviderFn)(void *inPoller,
-                                                      SUICEventSystemEventProvider inProvider);
-typedef int (*TUICEventSystemPollerignoreProviderFn)(void *inPoller,
-                                                     SUICEventSystemEventProvider inProvider);
-typedef int (*TUICEventSystemPolleractivateProviderFn)(void *inPoller,
-                                                       SUICEventSystemEventProvider inProvider);
+typedef void (*Qt3DSEventSystemPollerAddProviderFn)(void *inPoller,
+                                                   Qt3DSEventSystemEventProvider inProvider);
+typedef void (*Qt3DSEventSystemPollerRemoveProviderFn)(void *inPoller,
+                                                      Qt3DSEventSystemEventProvider inProvider);
+typedef int (*Qt3DSEventSystemPollerignoreProviderFn)(void *inPoller,
+                                                     Qt3DSEventSystemEventProvider inProvider);
+typedef int (*Qt3DSEventSystemPolleractivateProviderFn)(void *inPoller,
+                                                       Qt3DSEventSystemEventProvider inProvider);
 
-typedef struct _SUICEventSystemEventPoller
+typedef struct _Qt3DSEventSystemEventPoller
 {
     void *m_Poller;
     // Providers, once added, will be released by the event poller unless removed
-    TUICEventSystemPollerAddProviderFn addProvider;
+    Qt3DSEventSystemPollerAddProviderFn addProvider;
     // Callers are responsible for releasing removed providers.
-    TUICEventSystemPollerRemoveProviderFn removeProvider;
-    TUICEventSystemPollerignoreProviderFn ignoreProvider;
-    TUICEventSystemPolleractivateProviderFn activateProvider;
+    Qt3DSEventSystemPollerRemoveProviderFn removeProvider;
+    Qt3DSEventSystemPollerignoreProviderFn ignoreProvider;
+    Qt3DSEventSystemPolleractivateProviderFn activateProvider;
 
-} SUICEventSystemEventPoller;
+} Qt3DSEventSystemEventPoller;
 
 extern const char *PROVIDER_TABLE_ENTRY;
 extern const char *POLLER_TABLE_ENTRY;

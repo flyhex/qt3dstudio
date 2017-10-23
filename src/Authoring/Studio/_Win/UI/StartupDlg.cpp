@@ -66,7 +66,7 @@ CStartupDlg::~CStartupDlg()
     delete m_palette;
 }
 
-static QString GetFileTimeReadable(const CUICFile &inFile)
+static QString GetFileTimeReadable(const Qt3DSFile &inFile)
 {
     QFileInfo finfo(inFile.GetAbsolutePath().toQString());
     if (!finfo.exists())
@@ -121,7 +121,7 @@ void CStartupDlg::OnInitDialog()
     }
 }
 
-void CStartupDlg::AddRecentItem(const CUICFile &inRecentItem)
+void CStartupDlg::AddRecentItem(const Qt3DSFile &inRecentItem)
 {
     m_RecentDocs.push_back(inRecentItem);
 }
@@ -131,7 +131,7 @@ CStartupDlg::EStartupChoice CStartupDlg::GetChoice()
     return m_Choice;
 }
 
-CUICFile CStartupDlg::GetRecentDoc() const
+Qt3DSFile CStartupDlg::GetRecentDoc() const
 {
     return m_RecentDocSelected;
 }

@@ -27,16 +27,16 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSIGNALSTRUCTSH
-#define UICDMSIGNALSTRUCTSH
+#ifndef QT3DSDM_SIGNAL_STRUCTS_H
+#define QT3DSDM_SIGNAL_STRUCTS_H
 #include "Qt3DSDMSignalSystem.h"
 // Helper structs for signals of different arity.
-namespace UICDM {
+namespace qt3dsdm {
 // Helper defines to create static tables of signals
 // Macros with the same number of args but with 'declare' replaced by 'define
 // are available in UICDMSignalStructImpl.h.  You will need to place these somewhere but
 // they rely on std::bind so I don't place them here.
-#define UICDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT0(name)                                        \
+#define QT3DSDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT0(name)                                        \
     struct Sig##name                                                                               \
     {                                                                                              \
         static std::shared_ptr<ISignalConnection>                                                \
@@ -45,7 +45,7 @@ namespace UICDM {
     };
 
 // Helper defines to create static tables of signals
-#define UICDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT1(name, d1)                                    \
+#define QT3DSDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT1(name, d1)                                    \
     struct Sig##name                                                                               \
     {                                                                                              \
         static std::shared_ptr<ISignalConnection>                                                \
@@ -54,7 +54,7 @@ namespace UICDM {
     };
 
 // Helper defines to create static tables of signals
-#define UICDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT2(name, d1, d2)                                \
+#define QT3DSDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT2(name, d1, d2)                                \
     struct Sig##name                                                                               \
     {                                                                                              \
         static std::shared_ptr<ISignalConnection>                                                \
@@ -64,7 +64,7 @@ namespace UICDM {
     };
 
 // Helper defines to create static tables of signals
-#define UICDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT3(name, d1, d2, d3)                            \
+#define QT3DSDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT3(name, d1, d2, d3)                            \
     struct Sig##name                                                                               \
     {                                                                                              \
         static std::shared_ptr<ISignalConnection>                                                \
@@ -75,7 +75,7 @@ namespace UICDM {
     };
 
 // Helper defines to create static tables of signals
-#define UICDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT4(name, d1, d2, d3, d4)                        \
+#define QT3DSDM_SIGNALS_DECLARE_SPECIFIC_SIGNAL_STRUCT4(name, d1, d2, d3, d4)                        \
     struct Sig##name                                                                               \
     {                                                                                              \
         static std::shared_ptr<ISignalConnection>                                                \

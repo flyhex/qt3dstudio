@@ -58,7 +58,7 @@ public:
 struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 {
     NVScopedRefCounted<SBindingCore> m_BindingCore;
-    NVScopedRefCounted<IUICRenderContext> m_UICContext;
+    NVScopedRefCounted<IQt3DSRenderContext> m_Context;
     NVRenderRect m_Viewport;
     nvvector<NVRenderRect> m_StateStack;
     SWindowDimensions m_PresentationDimensions;
@@ -67,12 +67,12 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 
     SRenderer(SBindingCore &inCore, Q3DStudio::IWindowSystem &inWindowSystem)
         : m_BindingCore(inCore)
-        , m_UICContext(*inCore.m_UICContext)
-        , m_StateStack(inCore.m_UICContext->GetAllocator(), "SRenderer::m_StateStack")
+        , m_Context(*inCore.m_Context)
+        , m_StateStack(inCore.m_Context->GetAllocator(), "SRenderer::m_StateStack")
         , m_RSM(*this)
         , m_WindowSystem(inWindowSystem)
     {
-        m_UICContext->SetSceneColor(QT3DSVec4(0, 0, 0, 0.0f));
+        m_Context->SetSceneColor(QT3DSVec4(0, 0, 0, 0.0f));
         if (m_BindingCore->m_RenderContext) {
             m_BindingCore->m_RenderContext->SetDefaultRenderTarget(
                 m_WindowSystem.GetDefaultRenderTargetID());
@@ -92,7 +92,7 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
         Q3DStudio::SSize theWindowDims(m_WindowSystem.GetWindowDimensions());
         m_BindingCore->m_WindowDimensions =
             SWindowDimensions(theWindowDims.m_Width, theWindowDims.m_Height);
-        m_BindingCore->m_UICContext->SetWindowDimensions(m_BindingCore->m_WindowDimensions);
+        m_BindingCore->m_Context->SetWindowDimensions(m_BindingCore->m_WindowDimensions);
     }
     Q3DStudio::BOOL LoadShaderCache(const char * /*inFilePath*/) override { return true; }
 
@@ -114,14 +114,14 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 
     void SetScaleMode(Q3DStudio::TegraRenderScaleModes::Enum inScale) override
     {
-        if (m_BindingCore && m_BindingCore->m_UICContext)
-            m_BindingCore->m_UICContext->SetScaleMode(static_cast<ScaleModes::Enum>(inScale));
+        if (m_BindingCore && m_BindingCore->m_Context)
+            m_BindingCore->m_Context->SetScaleMode(static_cast<ScaleModes::Enum>(inScale));
     }
     Q3DStudio::TegraRenderScaleModes::Enum GetScaleMode() const override
     {
-        if (m_BindingCore && m_BindingCore->m_UICContext)
+        if (m_BindingCore && m_BindingCore->m_Context)
             return static_cast<Q3DStudio::TegraRenderScaleModes::Enum>(
-                const_cast<SRenderer &>(*this).m_BindingCore->m_UICContext->GetScaleMode());
+                const_cast<SRenderer &>(*this).m_BindingCore->m_Context->GetScaleMode());
 
         QT3DS_ASSERT(false);
         return Q3DStudio::TegraRenderScaleModes::ExactSize;
@@ -129,8 +129,8 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 
     void SetShadeMode(Q3DStudio::TegraRenderShadeModes::Enum inShade) override
     {
-        if (m_BindingCore && m_BindingCore->m_UICContext) {
-            m_BindingCore->m_UICContext->SetWireframeMode(
+        if (m_BindingCore && m_BindingCore->m_Context) {
+            m_BindingCore->m_Context->SetWireframeMode(
                 (inShade == Q3DStudio::TegraRenderShadeModes::Shaded) ? false : true);
         }
     }
@@ -155,7 +155,7 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
     {
         // Ensure the core doesn't die until after we do.
         NVScopedRefCounted<SBindingCore> theContext(m_BindingCore);
-        NVDelete(m_UICContext->GetAllocator(), this);
+        NVDelete(m_Context->GetAllocator(), this);
     }
 
     void SetViewport(Q3DStudio::INT32 inX, Q3DStudio::INT32 inY, Q3DStudio::INT32 inWidth,
@@ -166,10 +166,10 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
     }
     void SetApplicationViewport(const qt3ds::render::NVRenderRect &inViewport) override
     {
-        m_BindingCore->m_UICContext->SetViewport(inViewport);
+        m_BindingCore->m_Context->SetViewport(inViewport);
     }
 
-    void SetMatteColor(Option<QT3DSVec4> inColor) override { m_UICContext->SetMatteColor(inColor); }
+    void SetMatteColor(Option<QT3DSVec4> inColor) override { m_Context->SetMatteColor(inColor); }
     virtual void PushState() { m_StateStack.push_back(m_Viewport); }
     virtual void PopState()
     {
@@ -181,13 +181,13 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
     void RenderText2D(Q3DStudio::FLOAT x, Q3DStudio::FLOAT y,
                               qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor, const char *text) override
     {
-        m_UICContext->RenderText2D(x, y, inColor, text);
+        m_Context->RenderText2D(x, y, inColor, text);
     }
 
     void RenderGpuProfilerStats(Q3DStudio::FLOAT x, Q3DStudio::FLOAT y,
                                         qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor) override
     {
-        m_UICContext->RenderGpuProfilerStats(x, y, inColor);
+        m_Context->RenderGpuProfilerStats(x, y, inColor);
     }
 
     bool SetWatermarkTextureDataDDS(const unsigned char *inTextureData, size_t inDataSize) override
@@ -240,7 +240,7 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
                         theTexture->SetMinFilter(NVRenderTextureMinifyingOp::Linear);
 
                     theLoadedTexture->ReleaseDecompressedTexture(theDecompressedImage);
-                    m_BindingCore->m_UICContext->SetWatermark(*theTexture);
+                    m_BindingCore->m_Context->SetWatermark(*theTexture);
                     retval = true;
                 }
                 theLoadedTexture->release();
@@ -251,7 +251,7 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 
     void SetWatermarkLocation(float x, float y) override
     {
-        m_BindingCore->m_UICContext->SetWatermarkLocation(QT3DSVec2(x, y));
+        m_BindingCore->m_Context->SetWatermarkLocation(QT3DSVec2(x, y));
     }
 };
 
@@ -284,8 +284,8 @@ void SRendererRSM::RestoreAllState()
 Q3DStudio::ITegraApplicationRenderEngine &SBindingCore::CreateRenderer()
 {
     SRenderer *retval = NULL;
-    if (m_UICContext)
-        retval = QT3DS_NEW(m_UICContext->GetAllocator(), SRenderer)(*this, this->m_WindowSystem);
+    if (m_Context)
+        retval = QT3DS_NEW(m_Context->GetAllocator(), SRenderer)(*this, this->m_WindowSystem);
 
     return *retval;
 }

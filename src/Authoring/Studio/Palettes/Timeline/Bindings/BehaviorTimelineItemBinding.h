@@ -44,7 +44,7 @@ class CTimelineTranslationManager;
 
 //=============================================================================
 /**
- * Binding to a UICDM object of Behavior type
+ * Binding to a DataModel object of Behavior type
  */
 class CBehaviorTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {

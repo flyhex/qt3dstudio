@@ -57,7 +57,7 @@ public:
     CFormattedOutputStream &operator<<(long inValue);
     CFormattedOutputStream &operator<<(bool inValue);
     CFormattedOutputStream &operator<<(short inValue);
-    CFormattedOutputStream &operator<<(Q3DStudio::UICChar inValue);
+    CFormattedOutputStream &operator<<(Q3DStudio::Qt3DSChar inValue);
 
 protected:
     CSeekOutputStream *m_OutputStream;

@@ -294,7 +294,7 @@ struct ShaderCache : public IShaderCache
                 m_InsertStr += "#extension GL_OES_standard_derivatives : disable\n";
         }
 
-        if (IUICRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
+        if (IQt3DSRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
             if (shaderType == ShaderType::TessControl || shaderType == ShaderType::TessEval) {
                 m_InsertStr += "#extension GL_EXT_tessellation_shader : enable\n";
             } else if (shaderType == ShaderType::Geometry) {
@@ -333,7 +333,7 @@ struct ShaderCache : public IShaderCache
         // Don't use shading language version returned by the driver as it might
         // differ from the context version. Instead use the context type to specify
         // the version string.
-        bool isGlES = IUICRenderer::IsGlEsContext(m_RenderContext.GetRenderContextType());
+        bool isGlES = IQt3DSRenderer::IsGlEsContext(m_RenderContext.GetRenderContextType());
         m_InsertStr.clear();
         int minor = m_RenderContext.format().minorVersion();
         QString versionStr;
@@ -368,7 +368,7 @@ struct ShaderCache : public IShaderCache
         m_InsertStr.append(versionStr.toLatin1().data());
 
         if (isGlES) {
-            if (!IUICRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
+            if (!IQt3DSRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
                 if (shaderType == ShaderType::Fragment) {
                     m_InsertStr += "#define fragOutput gl_FragData[0]\n";
                 }
@@ -380,7 +380,7 @@ struct ShaderCache : public IShaderCache
             AddShaderExtensionStrings(shaderType, isGlES);
 
             // add precision qualifier depending on backend
-            if (IUICRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
+            if (IQt3DSRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
                 m_InsertStr.append("precision highp float;\n"
                                    "precision highp int;\n");
                 if( m_RenderContext.GetRenderBackendCap(render::NVRenderBackend::NVRenderBackendCaps::gpuShader5) ) {
@@ -404,7 +404,7 @@ struct ShaderCache : public IShaderCache
                     m_InsertStr.append("#define textureLod(s, co, lod) texture2D(s, co)\n");
             }
         } else {
-            if (!IUICRenderer::IsGl2Context(m_RenderContext.GetRenderContextType())) {
+            if (!IQt3DSRenderer::IsGl2Context(m_RenderContext.GetRenderContextType())) {
                 m_InsertStr += "#define texture2D texture\n";
 
                 AddShaderExtensionStrings(shaderType, isGlES);

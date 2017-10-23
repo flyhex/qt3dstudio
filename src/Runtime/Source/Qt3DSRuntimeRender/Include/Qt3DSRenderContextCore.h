@@ -52,7 +52,7 @@ namespace render {
     };
 
     // Part of render context that does not require the render system.
-    class IUICRenderContextCore : public NVRefCounted
+    class IQt3DSRenderContextCore : public NVRefCounted
     {
     public:
         virtual IStringTable &GetStringTable() = 0;
@@ -74,21 +74,21 @@ namespace render {
         virtual void SetOnscreenTextRendererCore(ITextRendererCore &inRenderer) = 0;
         virtual ITextRendererCore *GetOnscreenTextRendererCore() = 0;
         // The render context maintains a reference to this object.
-        virtual IUICRenderContext &CreateRenderContext(NVRenderContext &inContext,
+        virtual IQt3DSRenderContext &CreateRenderContext(NVRenderContext &inContext,
                                                        const char8_t *inPrimitivesDirectory) = 0;
 
-        static IUICRenderContextCore &Create(NVFoundationBase &fnd, IStringTable &strt);
+        static IQt3DSRenderContextCore &Create(NVFoundationBase &fnd, IStringTable &strt);
     };
 
-    class IUICRenderContext : public NVRefCounted
+    class IQt3DSRenderContext : public NVRefCounted
     {
     protected:
-        virtual ~IUICRenderContext() {}
+        virtual ~IQt3DSRenderContext() {}
     public:
         virtual IStringTable &GetStringTable() = 0;
         virtual NVFoundationBase &GetFoundation() = 0;
         virtual NVAllocatorCallback &GetAllocator() = 0;
-        virtual IUICRenderer &GetRenderer() = 0;
+        virtual IQt3DSRenderer &GetRenderer() = 0;
         virtual IBufferManager &GetBufferManager() = 0;
         virtual IResourceManager &GetResourceManager() = 0;
         virtual NVRenderContext &GetRenderContext() = 0;

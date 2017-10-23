@@ -31,7 +31,7 @@
 #pragma once
 
 #pragma message(                                                                                   \
-    "AKCubicRoots.h -- Changes to this file necessitate rebuilding the studio UICDM project and running the unit tests")
+    "AKCubicRoots.h -- Changes to this file necessitate rebuilding the studio DataModel project and running the unit tests")
 //==============================================================================
 //	Namespace
 //==============================================================================

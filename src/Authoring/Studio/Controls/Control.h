@@ -44,7 +44,7 @@
 
 class CRenderer;
 class CContextMenu;
-class CUICFile;
+class Qt3DSFile;
 class IDragable;
 class CAsset;
 class CStudioApp;
@@ -209,8 +209,8 @@ public:
     virtual void OffsetPosition(CPt inOffset);
 
     virtual CPt GetGlobalPosition(CPt inChildPoint) const;
-    virtual UICRenderDevice GetPlatformDevice();
-    bool IsChildPlatformDevice(UICRenderDevice inDevice);
+    virtual Qt3DSRenderDevice GetPlatformDevice();
+    bool IsChildPlatformDevice(Qt3DSRenderDevice inDevice);
     virtual void ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText, CRct inBoundingRct);
     virtual void HideMoveableWindow();
     CControl *GetFirstChild();

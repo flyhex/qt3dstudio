@@ -42,7 +42,7 @@
 namespace qt3ds {
 namespace render {
     class IResourceManager;
-    struct SUICRenderPickResult;
+    struct Qt3DSRenderPickResult;
     class IGraphObjectPickQuery;
     struct OffscreenRendererDepthValues
     {
@@ -227,7 +227,7 @@ namespace render {
 
         static IOffscreenRenderManager &
         CreateOffscreenRenderManager(NVAllocatorCallback &inCallback, IStringTable &inStringTable,
-                                     IResourceManager &inManager, IUICRenderContext &inContext);
+                                     IResourceManager &inManager, IQt3DSRenderContext &inContext);
     };
 }
 }

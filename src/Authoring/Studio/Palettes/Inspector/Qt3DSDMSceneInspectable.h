@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UICDM_SCENE_INSPECTABLE_H
-#define INCLUDED_UICDM_SCENE_INSPECTABLE_H 1
+#ifndef INCLUDED_QT3DSDM_SCENE_INSPECTABLE_H
+#define INCLUDED_QT3DSDM_SCENE_INSPECTABLE_H 1
 
 //==============================================================================
 //	Includes

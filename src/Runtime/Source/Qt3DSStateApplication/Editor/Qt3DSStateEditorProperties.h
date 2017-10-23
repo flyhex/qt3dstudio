@@ -27,14 +27,14 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef UICSTATE_EDITOR_PROPERTIES_H
-#define UICSTATE_EDITOR_PROPERTIES_H
+#ifndef QT3DS_STATE_EDITOR_PROPERTIES_H
+#define QT3DS_STATE_EDITOR_PROPERTIES_H
 #pragma once
 
 #include "Qt3DSStateEditorFoundation.h"
 #include "Qt3DSStateEditorImpl.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

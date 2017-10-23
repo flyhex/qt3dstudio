@@ -228,11 +228,11 @@ void WidgetControl::DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameL
         auto thePos = inDragFileNameList.begin();
         auto theEndPos = inDragFileNameList.end();
 
-        Q3DStudio::CAutoMemPtr<CUICFile> theDragFile;
+        Q3DStudio::CAutoMemPtr<Qt3DSFile> theDragFile;
         for (; thePos != theEndPos; ++thePos) {
             Q3DStudio::CString theDragFileName = *thePos;
             if (theDragFileName.Length() > 0) {
-                theDragFile = new CUICFile(theDragFileName);
+                theDragFile = new Qt3DSFile(theDragFileName);
                 CDropSource *theDropSource = CDropSourceFactory::Create(
                     QT3DS_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));
                 // Add the QT3DS_GESTURE_FLAVOR.  This will allow us to drag to StudioControls.

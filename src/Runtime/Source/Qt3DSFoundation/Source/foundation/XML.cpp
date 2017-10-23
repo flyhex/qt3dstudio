@@ -394,7 +394,7 @@ struct SimpleXmlWriter
     void Write(char8_t data) { m_Stream.Write(data); }
     void Tabs()
     {
-        UICBASE_FOREACH(idx, (m_OpenElements.size() + m_Tabs))
+        QT3DS_FOREACH(idx, (m_OpenElements.size() + m_Tabs))
         Write('\t');
     }
     void Close(bool newline)
@@ -742,7 +742,7 @@ public:
 
     ~SimpleDomFactory()
     {
-        UICBASE_FOREACH(idx, m_BigStrings.size())
+        QT3DS_FOREACH(idx, m_BigStrings.size())
         m_Allocator.deallocate(m_BigStrings[idx]);
         m_BigStrings.clear();
     }

@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef __UICLOGTYPES_H_
-#define __UICLOGTYPES_H_
+#ifndef __QT3DS_LOG_TYPES_H_
+#define __QT3DS_LOG_TYPES_H_
 
 #ifndef MAX_PATH
 #define MAX_PATH 1024
@@ -60,8 +60,8 @@ typedef struct _TSAddEntryIndirect
 //	TSAddEntryIndirect mask ids
 //==============================================================================
 
-const unsigned long UICLOG_STRING = 0x00000001; ///<
-const unsigned long UICLOG_ID = 0x00000002; ///<
+const unsigned long QT3DS_LOG_STRING = 0x00000001; ///<
+const unsigned long QT3DS_LOG_ID = 0x00000002; ///<
 
 //==============================================================================
 //	Log Modes
@@ -85,4 +85,4 @@ enum ELogLevel {
     LOGLEVEL_INFO = 3,
 };
 
-#endif // __UICLOGTYPES_H_
+#endif // __QT3DS_LOG_TYPES_H_

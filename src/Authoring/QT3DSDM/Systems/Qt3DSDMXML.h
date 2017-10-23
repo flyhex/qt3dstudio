@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTXMLH
-#define UICIMPORTXMLH
+#ifndef QT3DS_IMPORT_XML_H
+#define QT3DS_IMPORT_XML_H
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "Qt3DSDMDataTypes.h"

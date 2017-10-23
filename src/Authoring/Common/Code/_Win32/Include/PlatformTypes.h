@@ -46,11 +46,11 @@
 #include <winsock2.h>
 #include <windows.h>
 
-typedef RECT UICRect;
-typedef POINT UICPoint;
-typedef void *UICWindow;
-typedef HWND UICRenderDevice;
-typedef HCURSOR UICCursor;
+typedef RECT Qt3DSRect;
+typedef POINT Qt3DSPoint;
+typedef void *Qt3DSWindow;
+typedef HWND Qt3DSRenderDevice;
+typedef HCURSOR Qt3DSCursor;
 
 typedef unsigned __int64 __uint64;
 typedef unsigned long __uint32;
@@ -91,8 +91,8 @@ struct GUID
 };
 typedef const GUID& REFGUID;
 
-typedef void* UICWindow;
-typedef void* UICRenderDevice;
+typedef void* Qt3DSWindow;
+typedef void* Qt3DSRenderDevice;
 
 typedef union _LARGE_INTEGER {
   struct {

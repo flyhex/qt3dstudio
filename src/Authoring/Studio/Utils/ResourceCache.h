@@ -44,7 +44,7 @@ class CResImage;
 class CResourceCache
 {
     typedef std::map<QString, QPixmap> TImageMap;
-    typedef std::map<CMouseCursor::TUICMouseCursor, CMouseCursor *> TCursorMap;
+    typedef std::map<CMouseCursor::Qt3DSMouseCursor, CMouseCursor *> TCursorMap;
 
 public:
     CResourceCache();
@@ -53,7 +53,7 @@ public:
     static CResourceCache *GetInstance();
 
     QPixmap GetBitmap(const QString &inName);
-    QCursor GetCursor(CMouseCursor::TUICMouseCursor inResourceID);
+    QCursor GetCursor(CMouseCursor::Qt3DSMouseCursor inResourceID);
 
     void Clear();
 

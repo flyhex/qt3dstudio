@@ -90,7 +90,7 @@ public:
     // Presentation Change Listener
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
-    void OnSavingPresentation(const CUICFile *inNewPresentationFile) override;
+    void OnSavingPresentation(const Qt3DSFile *inNewPresentationFile) override;
 
     // ClientPlayChangeListener
     void OnPlayStart() override;
@@ -131,7 +131,7 @@ protected:
 
     void HideInsertionMarkers();
 
-    // UICDM callbacks
+    // DataModel callbacks
     void OnActiveSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide);
     void OnDeleteSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
@@ -153,6 +153,6 @@ protected:
     CTimelineTranslationManager *m_TranslationManager;
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_Connections; /// connections to the UICDM
+        m_Connections; /// connections to the DataModel
 };
 #endif // INCLUDED_TIMELINE_CONTROL_H

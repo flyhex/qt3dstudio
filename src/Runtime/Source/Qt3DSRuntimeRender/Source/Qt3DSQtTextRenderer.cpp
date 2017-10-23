@@ -58,7 +58,7 @@ using namespace qt3ds::render;
 
 namespace {
 
-struct UICQtTextRenderer : public ITextRenderer
+struct Qt3DSQtTextRenderer : public ITextRenderer
 {
     struct FontInfo
     {
@@ -127,7 +127,7 @@ struct UICQtTextRenderer : public ITextRenderer
     QStringList m_nameFilters;
     qreal m_pixelRatio;
 
-    UICQtTextRenderer(NVFoundationBase &inFoundation, IStringTable &inStrTable)
+    Qt3DSQtTextRenderer(NVFoundationBase &inFoundation, IStringTable &inStrTable)
         : m_foundation(inFoundation)
         , m_stringTable(inStrTable)
         , mRefCount(0)
@@ -145,7 +145,7 @@ struct UICQtTextRenderer : public ITextRenderer
         m_nameFilters << QStringLiteral("*.ttf");
         m_nameFilters << QStringLiteral("*.otf");
     }
-    virtual ~UICQtTextRenderer()
+    virtual ~Qt3DSQtTextRenderer()
     {
         QFontDatabase::removeAllApplicationFonts();
     }
@@ -308,7 +308,7 @@ struct UICQtTextRenderer : public ITextRenderer
 
     static void PreloadThreadCallback(void *inData)
     {
-        UICQtTextRenderer *theRenderer(reinterpret_cast<UICQtTextRenderer *>(inData));
+        Qt3DSQtTextRenderer *theRenderer(reinterpret_cast<Qt3DSQtTextRenderer *>(inData));
         theRenderer->PreloadFonts();
         theRenderer->m_PreloadSync.set();
     }
@@ -605,5 +605,5 @@ struct UICQtTextRenderer : public ITextRenderer
 ITextRendererCore &ITextRendererCore::CreateQtTextRenderer(NVFoundationBase &inFnd,
                                                            IStringTable &inStrTable)
 {
-    return *QT3DS_NEW(inFnd.getAllocator(), UICQtTextRenderer)(inFnd, inStrTable);
+    return *QT3DS_NEW(inFnd.getAllocator(), Qt3DSQtTextRenderer)(inFnd, inStrTable);
 }

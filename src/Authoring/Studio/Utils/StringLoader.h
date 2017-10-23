@@ -40,11 +40,11 @@ public:
     virtual ~CStringLoader();
 
     static Q3DStudio::CString LoadString(long inStringID);
-    static void LoadStrings(const CUICFile &inDirectory);
+    static void LoadStrings(const Qt3DSFile &inDirectory);
     static void UnloadStrings();
 
     Q3DStudio::CString LoadResourceString(long inStringID);
-    void LoadResourceStrings(const CUICFile &inDirectory);
+    void LoadResourceStrings(const Qt3DSFile &inDirectory);
     void UnloadResourceStrings();
 
 protected:

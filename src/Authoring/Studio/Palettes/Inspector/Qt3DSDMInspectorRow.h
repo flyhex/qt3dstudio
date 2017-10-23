@@ -44,7 +44,7 @@
 class CDoc;
 class CEasyInspectorRow;
 
-// UICDM
+// DataModel
 namespace qt3dsdm {
 class ISignalConnection;
 }

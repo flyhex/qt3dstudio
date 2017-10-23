@@ -227,7 +227,7 @@ void CScroller::AddChild(CControl *inControl, CControl *inInsertBefore /*= nullp
  */
 void CScroller::RecalcLayout()
 {
-    UICPROFILE(RecalcLayout);
+    QT3DS_PROFILE(RecalcLayout);
 
     m_ResizingChildren = true;
 
@@ -417,7 +417,7 @@ CPt CScroller::GetVisibleSize()
  */
 CPt CScroller::GetContaineeSize()
 {
-    UICPROFILE(GetContaineeSize);
+    QT3DS_PROFILE(GetContaineeSize);
 
     CControl *theControl = GetControl();
     CPt theSize;
@@ -511,7 +511,7 @@ CPt CScroller::GetMaxVisiblePosition()
 
 void CScroller::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation)
 {
-    UICPROFILE(OnDraw);
+    QT3DS_PROFILE(OnDraw);
 
     CRct theDirtyRect;
     bool isInvalidated = IsInvalidated();
@@ -560,7 +560,7 @@ void CScroller::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreVa
  */
 void CScroller::Draw(CRenderer *inRenderer)
 {
-    UICPROFILE(Draw);
+    QT3DS_PROFILE(Draw);
 
     CRct theDirtyRct;
     // Only draw the side bar if it's visible
@@ -648,7 +648,7 @@ CScroller::EScrollMode CScroller::GetHorizontalScrollMode()
 
 void CScroller::OnChildSizeChanged(CControl *inControl)
 {
-    UICPROFILE(OnChildSizeChanged);
+    QT3DS_PROFILE(OnChildSizeChanged);
 
     CControl *theChild = GetControl();
 

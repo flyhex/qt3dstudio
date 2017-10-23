@@ -47,7 +47,6 @@ struct cudaGraphicsResource;
 
 #endif
 using namespace qt3ds::render;
-using namespace uic::render;
 
 class CUDABSDFMipMap : public BSDFMipMap
 {
@@ -62,7 +61,7 @@ public:
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Foundation);
 
 private:
-    void CreateBsdfMipMaps(uic::render::SLoadedTexture &inLoadedImage, void **result, int width,
+    void CreateBsdfMipMaps(qt3ds::render::SLoadedTexture &inLoadedImage, void **result, int width,
                            int height); //, qt3ds::foundation::IPerfTimer& inPerfTimer);
 
     void BindTexture();

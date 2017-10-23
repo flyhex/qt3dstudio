@@ -92,12 +92,12 @@ private:
 
     ProjectFileSystemModel *m_ProjectModel = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
-    CUICFile m_BehaviorDir{""};
-    CUICFile m_EffectDir{""};
-    CUICFile m_FontDir{""};
-    CUICFile m_ImageDir{""};
-    CUICFile m_MaterialDir{""};
-    CUICFile m_ModelDir{""};
+    Qt3DSFile m_BehaviorDir{""};
+    Qt3DSFile m_EffectDir{""};
+    Qt3DSFile m_FontDir{""};
+    Qt3DSFile m_ImageDir{""};
+    Qt3DSFile m_MaterialDir{""};
+    Qt3DSFile m_ModelDir{""};
 };
 
 #endif // PROJECTVIEW_H

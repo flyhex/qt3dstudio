@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMDATAH
-#define UICDMDATAH
+#ifndef QT3DSDM_DATA_H
+#define QT3DSDM_DATA_H
 
 #include <memory>
 #include <functional>
@@ -51,23 +51,23 @@
 namespace qt3dsdm {
 
 typedef const wchar_t *TCharPtr;
-struct SUICDMStr : public eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType>
+struct Qt3DSDMStr : public eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType>
 {
     typedef qt3ds::foundation::TWCharEASTLConverter::TCharType TCharType;
     typedef eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType> TStrType;
-    SUICDMStr() {}
-    SUICDMStr(const wchar_t *inStr)
+    Qt3DSDMStr() {}
+    Qt3DSDMStr(const wchar_t *inStr)
         : TStrType(qt3ds::NVUnionCast<const TCharType *>(inStr))
     {
     }
-    SUICDMStr(const TStrType &inOther)
+    Qt3DSDMStr(const TStrType &inOther)
         : TStrType(inOther)
     {
     }
 
     const wchar_t *wide_str() const { return reinterpret_cast<const wchar_t *>(c_str()); }
-    bool operator==(const SUICDMStr &inOther) const { return TStrType::compare(inOther) == 0; }
-    bool operator!=(const SUICDMStr &inOther) const { return TStrType::compare(inOther) != 0; }
+    bool operator==(const Qt3DSDMStr &inOther) const { return TStrType::compare(inOther) == 0; }
+    bool operator!=(const Qt3DSDMStr &inOther) const { return TStrType::compare(inOther) != 0; }
     bool operator==(const wchar_t *inOther) const
     {
         return TStrType::compare(reinterpret_cast<const TCharType *>(inOther)) == 0;
@@ -106,7 +106,7 @@ struct SUICDMStr : public eastl::basic_string<qt3ds::foundation::TWCharEASTLConv
     {
         return TStrType::rfind(p, position);
     }
-    SUICDMStr replace(size_type position, size_type length, const wchar_t *inNewStr)
+    Qt3DSDMStr replace(size_type position, size_type length, const wchar_t *inNewStr)
     {
         return TStrType::replace(position, length, reinterpret_cast<const TCharType *>(inNewStr));
     }
@@ -116,11 +116,11 @@ struct SUICDMStr : public eastl::basic_string<qt3ds::foundation::TWCharEASTLConv
     {
         TStrType::append(reinterpret_cast<const TCharType *>(p), position, n);
     }
-    void append(const SUICDMStr &p) { TStrType::append(p); }
+    void append(const Qt3DSDMStr &p) { TStrType::append(p); }
     void assign(const wchar_t *p) { TStrType::assign(reinterpret_cast<const TCharType *>(p)); }
-    void assign(const SUICDMStr &p) { TStrType::assign(p); }
+    void assign(const Qt3DSDMStr &p) { TStrType::assign(p); }
 };
-typedef SUICDMStr TCharStr;
+typedef Qt3DSDMStr TCharStr;
 typedef std::vector<wchar_t> TCharList;
 typedef eastl::vector<TCharStr> TCharStrList;
 typedef std::map<TCharStr, int> TCharStrIntMap;
@@ -578,18 +578,18 @@ typedef qt3ds::foundation::
         TObjRefUnionType;
 
 template <typename TDataType>
-struct SUICDMGetter
+struct Qt3DSDMGetter
 {
 };
 
 template <typename TRetType, typename TDataType>
 TRetType get(const TDataType &inType)
 {
-    return SUICDMGetter<TDataType>().template doGet<TRetType>(inType);
+    return Qt3DSDMGetter<TDataType>().template doGet<TRetType>(inType);
 }
 
 template <>
-struct SUICDMGetter<TObjRefUnionType>
+struct Qt3DSDMGetter<TObjRefUnionType>
 {
     template <typename TRetType>
     TRetType doGet(const TObjRefUnionType &inValue)
@@ -714,7 +714,7 @@ typedef qt3ds::foundation::
         TStringOrIntUnionType;
 
 template <>
-struct SUICDMGetter<TStringOrIntUnionType>
+struct Qt3DSDMGetter<TStringOrIntUnionType>
 {
     template <typename TRetType>
     TRetType doGet(const TStringOrIntUnionType &inValue)
@@ -792,14 +792,14 @@ struct DataModelDataType {
 class IStringTable;
 
 template <typename TDataType>
-struct SUICDMValueTyper
+struct Qt3DSDMValueTyper
 {
 };
 
 template <typename TDataType>
 inline DataModelDataType::Value GetValueType(const TDataType &inValue)
 {
-    return SUICDMValueTyper<TDataType>().Get(inValue);
+    return Qt3DSDMValueTyper<TDataType>().Get(inValue);
 }
 
 template <typename TDataType>
@@ -813,28 +813,28 @@ inline bool SetDefault(DataModelDataType::Value inDataType, TDataType &outValue)
     return SDefaulter<TDataType>().SetDefault(inDataType, outValue);
 }
 
-typedef void (*TUICDMDebugLogFunction)(const char *message);
+typedef void (*Qt3DSDMDebugLogFunction)(const char *message);
 // UICDMSimpleDataCore.cpp
-extern TUICDMDebugLogFunction g_UICDMDebugLogger;
+extern Qt3DSDMDebugLogFunction g_DataModelDebugLogger;
 
-#define UICDM_DEBUG_LOG(msg)                                                                       \
+#define QT3DSDM_DEBUG_LOG(msg)                                                                       \
     {                                                                                              \
-        if (g_UICDMDebugLogger) {                                                                  \
-            g_UICDMDebugLogger(msg);                                                               \
+        if (g_DataModelDebugLogger) {                                                                  \
+            g_DataModelDebugLogger(msg);                                                               \
         }                                                                                          \
     }
-struct SUICDMLogScope
+struct Qt3DSDMLogScope
 {
     const char *m_EndMessage;
-    SUICDMLogScope(const char *inStartMessage, const char *inEndMessage)
+    Qt3DSDMLogScope(const char *inStartMessage, const char *inEndMessage)
         : m_EndMessage(inEndMessage)
     {
-        UICDM_DEBUG_LOG(inStartMessage);
+        QT3DSDM_DEBUG_LOG(inStartMessage);
     }
-    ~SUICDMLogScope() { UICDM_DEBUG_LOG(m_EndMessage); }
+    ~Qt3DSDMLogScope() { QT3DSDM_DEBUG_LOG(m_EndMessage); }
 };
 
-#define UICDM_LOG_FUNCTION(fnname) SUICDMLogScope __fn_scope(fnname " Enter", fnname " Leave");
+#define QT3DSDM_LOG_FUNCTION(fnname) Qt3DSDMLogScope __fn_scope(fnname " Enter", fnname " Leave");
 }
 
 #endif

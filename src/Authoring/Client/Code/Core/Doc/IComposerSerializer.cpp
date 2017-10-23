@@ -621,7 +621,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 for (size_t propIdx = 0, propEnd = theProperties.size();
                      propIdx < propEnd && theProperty.Valid() == false; ++propIdx) {
                     SValue theValue;
-                    const SUICDMPropertyDefinition &theDefinition(
+                    const Qt3DSDMPropertyDefinition &theDefinition(
                                 m_DataCore.GetProperty(theProperties[propIdx]));
                     if (theDefinition.m_Type == DataModelDataType::Long4) {
                         SValue theDCValue;
@@ -938,8 +938,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
         {
             SAnimationInfo lhsInfo(m_AnimationCore.GetAnimationInfo(lhs));
             SAnimationInfo rhsInfo(m_AnimationCore.GetAnimationInfo(rhs));
-            const SUICDMPropertyDefinition &theLhsDef(m_DataCore.GetProperty(lhsInfo.m_Property));
-            const SUICDMPropertyDefinition &theRhsDef(m_DataCore.GetProperty(rhsInfo.m_Property));
+            const Qt3DSDMPropertyDefinition &theLhsDef(m_DataCore.GetProperty(lhsInfo.m_Property));
+            const Qt3DSDMPropertyDefinition &theRhsDef(m_DataCore.GetProperty(rhsInfo.m_Property));
             int theComparison = theLhsDef.m_Name.compare(theRhsDef.m_Name);
             if (theComparison == 0)
                 return lhsInfo.m_Index < rhsInfo.m_Index;
@@ -2648,16 +2648,16 @@ struct SComposerSerializerImpl : public IComposerSerializer
         {
             m_PreserveFileIds = inPreserveVariable;
             // The act of preserving file ids means that we have to write information
-            // into UICDM.  Nothing expects this at this time and this information really shouldn't
+            // into DataModel.  Nothing expects this at this time and this information really shouldn't
             // be transmitted into the universe.  Transmitting the changes could cause the rendering
             // system to render the scene a bunch.
             m_PreserveFileIds = true;
-            SetUICDMSignalsEnabled(false);
+            SetDataModelSignalsEnabled(false);
         }
         ~ScopedPreserveFileIds()
         {
             m_PreserveFileIds = false;
-            SetUICDMSignalsEnabled(true);
+            SetDataModelSignalsEnabled(true);
         }
     };
 

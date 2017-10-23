@@ -177,7 +177,7 @@ Q3DStudio::CString CStackOps::GetExceptionDescription(EXCEPTION_POINTERS *pExPtr
         theException = "a Stack Overflow";
         break;
     default:
-        theException.Format(_UIC("an Error:0x%X"), pExPtrs->ExceptionRecord->ExceptionCode);
+        theException.Format(_LSTR("an Error:0x%X"), pExPtrs->ExceptionRecord->ExceptionCode);
         break;
     }
     return GetExceptionDescription(theException, pExPtrs);
@@ -202,7 +202,7 @@ Q3DStudio::CString CStackOps::GetExceptionDescription(Q3DStudio::CString theExce
     theDescription += " Caused ";
     theDescription += theException;
 
-    theException.Format(_UIC(" at 0x%X"), pExPtrs->ExceptionRecord->ExceptionAddress);
+    theException.Format(_LSTR(" at 0x%X"), pExPtrs->ExceptionRecord->ExceptionAddress);
 
     theDescription += theException;
 

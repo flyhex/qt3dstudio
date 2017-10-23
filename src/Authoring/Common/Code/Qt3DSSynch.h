@@ -55,8 +55,8 @@ C++ Portable Types Library (PTypes)
 */
 
 #pragma once
-#ifndef __UICSYNC_H__
-#define __UICSYNC_H__
+#ifndef __QT3DS_SYNC_H__
+#define __QT3DS_SYNC_H__
 
 #ifdef WIN32
 #define _WINSOCKAPI_ // prevent inclusion of winsock.h in windows.h
@@ -427,4 +427,4 @@ public:
     long send(long id, long param = 0);
 };
 
-#endif // __UICSYNC_H__
+#endif // __QT3DS_SYNC_H__

@@ -35,7 +35,7 @@
 #include "EASTL/vector.h"
 #include "foundation/Qt3DSOption.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

@@ -250,7 +250,7 @@ void matrixFromAxisAngle(float inDegreeAngle, float inXAxis, float inYAxis, floa
         return;
     }
 
-    inDegreeAngle *= (float)UIC3D_DEGREES_TO_RADIANS;
+    inDegreeAngle *= (float)QT3DS_DEGREES_TO_RADIANS;
 
     Q3DStudio::CVector3 theAxis(inXAxis, inYAxis, inZAxis);
     if (theAxis.LengthSquared() != 1.0f)
@@ -896,7 +896,7 @@ public:
                 // EulerAngleConverter::CEulerAngleConverter theConverter;
                 // EulerAngleConverter::EulerAngles theAxisAngle ={ ( *theTransform )[0], (
                 // *theTransform )[1], ( *theTransform )[2], ( *theTransform )[3] *
-                // (float)Q3DStudio::UIC3D_DEGREES_TO_RADIANS };
+                // (float)Q3DStudio::QT3DS_DEGREES_TO_RADIANS };
                 // theConverter.Eul_ToHMatrix( theAxisAngle, theMatrix.GetArray( ) );
                 matrixFromAxisAngle((*theTransform)[3], (*theTransform)[0], (*theTransform)[1],
                                     (*theTransform)[2], theMatrix.GetArray());

@@ -53,24 +53,24 @@ ProjectView::ProjectView(QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
 {
     const QString theApplicationPath =
-            CUICFile::GetApplicationDirectory().GetAbsolutePath().toQString();
+            Qt3DSFile::GetApplicationDirectory().GetAbsolutePath().toQString();
 
-    m_BehaviorDir = CUICFile(
+    m_BehaviorDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath
                                                 + QLatin1String("/Content/Behavior Library")));
-    m_EffectDir = CUICFile(
+    m_EffectDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath
                                                 + QLatin1String("/Content/Effect Library")));
-    m_FontDir = CUICFile(
+    m_FontDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath
                                                 + QLatin1String("/Content/Font Library")));
-    m_ImageDir = CUICFile(
+    m_ImageDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath
                                                 + QLatin1String("/Content/Maps Library")));
-    m_MaterialDir = CUICFile(
+    m_MaterialDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath
                                                 + QLatin1String("/Content/Material Library")));
-    m_ModelDir = CUICFile(
+    m_ModelDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath
                                                 + QLatin1String("/Content/Models Library")));
 

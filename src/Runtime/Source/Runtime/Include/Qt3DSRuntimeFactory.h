@@ -38,8 +38,8 @@
 namespace qt3ds {
 namespace render {
     class IInputStreamFactory;
-    class IUICRenderContext;
-    class IUICRenderContextCore;
+    class IQt3DSRenderContext;
+    class IQt3DSRenderContextCore;
 }
 }
 
@@ -102,7 +102,7 @@ public:
     virtual ISceneBinaryLoader &GetSceneLoader() = 0;
     virtual IScriptBridge &GetScriptEngine() = 0;
     virtual IScriptBridge &GetScriptEngineQml() = 0;
-    virtual qt3ds::render::IUICRenderContextCore &GetUICRenderContextCore() = 0;
+    virtual qt3ds::render::IQt3DSRenderContextCore &GetRenderContextCore() = 0;
     virtual qt3ds::render::IInputStreamFactory &GetInputStreamFactory() = 0;
     virtual qt3ds::state::IVisualStateContext &GetVisualStateContext() = 0;
     virtual qt3ds::evt::IEventSystem &GetEventSystem() = 0;
@@ -129,7 +129,7 @@ protected:
     //==============================================================================
 public:
     virtual ISceneManager &GetSceneManager() = 0;
-    virtual qt3ds::render::IUICRenderContext &GetUICRenderContext() = 0;
+    virtual qt3ds::render::IQt3DSRenderContext &GetQt3DSRenderContext() = 0;
     virtual qt3ds::runtime::IApplication *GetApplication() = 0;
     virtual void SetApplication(qt3ds::runtime::IApplication *app) = 0;
 };

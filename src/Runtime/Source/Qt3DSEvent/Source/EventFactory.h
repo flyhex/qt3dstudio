@@ -58,11 +58,11 @@ namespace evt {
         CFactory &operator=(const CFactory &) { return *this; }
     public:
         // Interfaces from IEventFactory
-        SUICEventSystemEvent &CreateEvent(int inNumData) override;
+        Qt3DSEventSystemEvent &CreateEvent(int inNumData) override;
         size_t GetMaxNumEventData() override;
         size_t GetMaxStrLength() override;
 
-        SUICEventSystemRegisteredStr RegisterStr(TEventStr inSrc) override;
+        Qt3DSEventSystemRegisteredStr RegisterStr(TEventStr inSrc) override;
         // Null terminates if strlen(inSrc) > getMaxStrLength
         TEventStr AllocateStr(TEventStr inSrc) override;
 

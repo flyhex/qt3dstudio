@@ -31,8 +31,8 @@
 //    Prefix
 //==============================================================================
 
-#ifndef _UICLOG_H__
-#define _UICLOG_H__
+#ifndef _QT3DS_LOG_H__
+#define _QT3DS_LOG_H__
 
 #pragma once
 
@@ -89,8 +89,8 @@
 
 /*
 #define QT3DS_LOGGLOBAL                             \
-        IUICLog2*    CLogHelper::s_UICLog2 = NULL;  \
-        long        CLogHelper::s_UICLogCount = 0;
+        IQt3DSLog2*    CLogHelper::s_Qt3DSLog2 = NULL;  \
+        long        CLogHelper::s_Qt3DSLogCount = 0;
 */
 
 // Publish global log variable.  Add this to every file, preferably in stdafx.h
@@ -116,4 +116,4 @@
 #define QT3DS_TRACE CLogHelper::Trace
 
 #endif // #ifndef QT3DS_NO_LOGGING
-#endif // #ifndef _UICLOG_H__
+#endif // #ifndef _QT3DS_LOG_H__

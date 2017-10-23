@@ -778,8 +778,8 @@ struct SPathManager : public IPathManager
         TPaintedShaderMap;
     typedef nvhash_map<CRegisteredString, TPathBufferPtr> TStringPathBufferMap;
 
-    IUICRenderContextCore &m_CoreContext;
-    IUICRenderContext *m_RenderContext;
+    IQt3DSRenderContextCore &m_CoreContext;
+    IQt3DSRenderContext *m_RenderContext;
     eastl::string m_IdBuilder;
     TPathSubPathBufferHash m_SubPathBuffers;
     TPathBufferHash m_Buffers;
@@ -811,7 +811,7 @@ struct SPathManager : public IPathManager
 
     QT3DSI32 m_RefCount;
 
-    SPathManager(IUICRenderContextCore &inRC)
+    SPathManager(IQt3DSRenderContextCore &inRC)
         : m_CoreContext(inRC)
         , m_RenderContext(NULL)
         , m_SubPathBuffers(inRC.GetAllocator(), "m_SubPathBuffers")
@@ -944,7 +944,7 @@ struct SPathManager : public IPathManager
         return retval;
     }
 
-    IPathManager &OnRenderSystemInitialize(IUICRenderContext &context) override
+    IPathManager &OnRenderSystemInitialize(IQt3DSRenderContext &context) override
     {
         m_RenderContext = &context;
         return *this;
@@ -1942,7 +1942,7 @@ QT3DSVec2 IPathManagerCore::GetAngleDistanceFromControlPoint(QT3DSVec2 inPositio
     return QT3DSVec2(radToDeg(angleRad), distance);
 }
 
-IPathManagerCore &IPathManagerCore::CreatePathManagerCore(IUICRenderContextCore &ctx)
+IPathManagerCore &IPathManagerCore::CreatePathManagerCore(IQt3DSRenderContextCore &ctx)
 {
     return *QT3DS_NEW(ctx.GetAllocator(), SPathManager)(ctx);
 }

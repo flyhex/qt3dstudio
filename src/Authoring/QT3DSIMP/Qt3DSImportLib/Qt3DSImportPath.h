@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTPATHH
-#define UICIMPORTPATHH
+#ifndef QT3DS_IMPORT_PATH_H
+#define QT3DS_IMPORT_PATH_H
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSDataRef.h"
 #include "render/Qt3DSRenderBaseTypes.h"

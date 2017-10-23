@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "Qt3DSStateEditorTransactionImpl.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

@@ -627,7 +627,7 @@ void ActionView::copyAction()
     auto theTempAPFile =
         GetDoc()->GetDocumentReader().CopyAction(m_actionsModel->actionAt(m_currentActionIndex),
                                                  GetDoc()->GetActiveSlide());
-    CUICFile theFile(theTempAPFile);
+    Qt3DSFile theFile(theTempAPFile);
     CStudioClipboard::CopyActionToClipboard(theFile);
 }
 
@@ -640,7 +640,7 @@ void ActionView::cutAction()
 
 void ActionView::pasteAction()
 {
-    CUICFile theTempAPFile = CStudioClipboard::GetActionFromClipboard();
+    Qt3DSFile theTempAPFile = CStudioClipboard::GetActionFromClipboard();
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Paste Action"))
         ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
 }

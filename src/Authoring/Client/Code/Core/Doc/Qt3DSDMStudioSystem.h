@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSTUDIOSYSTEMH
-#define UICDMSTUDIOSYSTEMH
+#ifndef QT3DSDM_STUDIOSYSTEM_H
+#define QT3DSDM_STUDIOSYSTEM_H
 #include "Qt3DSDMTransactions.h"
 #include "Qt3DSDMHandles.h"
 
@@ -81,4 +81,4 @@ public:
 };
 };
 
-#endif
+#endif // QT3DSDM_STUDIOSYSTEM_H

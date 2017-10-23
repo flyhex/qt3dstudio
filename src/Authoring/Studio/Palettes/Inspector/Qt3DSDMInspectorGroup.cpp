@@ -64,8 +64,8 @@ Qt3DSDMInspectorGroup::Qt3DSDMInspectorGroup(CStudioApp &inApp, const QString &i
 Qt3DSDMInspectorGroup::~Qt3DSDMInspectorGroup()
 {
     std::vector<Q3DStudio::Qt3DSDMInspectorRow *>::iterator theIterator =
-        m_UICDMInspectorRows.begin();
-    for (; theIterator != m_UICDMInspectorRows.end(); ++theIterator)
+        m_DMInspectorRows.begin();
+    for (; theIterator != m_DMInspectorRows.end(); ++theIterator)
         delete (*theIterator);
 }
 
@@ -75,9 +75,9 @@ Qt3DSDMInspectorGroup::~Qt3DSDMInspectorGroup()
  */
 void Qt3DSDMInspectorGroup::CreateRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty)
 {
-    Q3DStudio::Qt3DSDMInspectorRow *theUICDMRow =
+    Q3DStudio::Qt3DSDMInspectorRow *theRow =
         new Q3DStudio::Qt3DSDMInspectorRow(inDoc, inProperty);
-    m_UICDMInspectorRows.push_back(
-        theUICDMRow); // this Qt3DSDMInspectorRow is now owned by this class
+    m_DMInspectorRows.push_back(
+        theRow); // this Qt3DSDMInspectorRow is now owned by this class
 
 }

@@ -82,9 +82,9 @@ public:
     void OnClosingPresentation() override;
 
     // CFileOpenListener
-    void OnOpenDocument(const CUICFile &inFilename, bool inSucceeded) override;
-    void OnSaveDocument(const CUICFile &inFilename, bool inSucceeded, bool inSaveCopy) override;
-    void OnDocumentPathChanged(const CUICFile &inNewPath) override;
+    void OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded) override;
+    void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) override;
+    void OnDocumentPathChanged(const Qt3DSFile &inNewPath) override;
 
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
     void RecheckSizingMode();

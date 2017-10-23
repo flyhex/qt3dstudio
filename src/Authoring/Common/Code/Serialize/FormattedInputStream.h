@@ -54,13 +54,13 @@ public:
     CFormattedInputStream &operator>>(unsigned long &);
     CFormattedInputStream &operator>>(float &);
     CFormattedInputStream &operator>>(short &);
-    CFormattedInputStream &operator>>(Q3DStudio::UICChar &);
+    CFormattedInputStream &operator>>(Q3DStudio::Qt3DSChar &);
     CFormattedInputStream &operator>>(bool &);
 
     unsigned char ReadUnsignedChar();
     unsigned short ReadUnsignedShort();
 
-    void CopyToFile(const CUICFile &inFilename, long inLength, bool inCloseStream = true);
+    void CopyToFile(const Qt3DSFile &inFilename, long inLength, bool inCloseStream = true);
 
 protected:
     CInputStream *m_InputStream;

@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMWINDOWSCOMPATIBILITYH
-#define UICDMWINDOWSCOMPATIBILITYH
+#ifndef QT3DSDM_WINDOWS_COMPATIBILITY_H
+#define QT3DSDM_WINDOWS_COMPATIBILITY_H
 #include "EABase/config/eaplatform.h"
 #include "EABase/eabase.h"
 #include <string>

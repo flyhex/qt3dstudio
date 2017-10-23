@@ -264,9 +264,9 @@ struct SBufferManager : public IBufferManager
             if (inBsdfMipmaps
                 && NVRenderTextureFormats::isUncompressedTextureFormat(inLoadedImage.format)) {
                 theTexture->SetMinFilter(NVRenderTextureMinifyingOp::LinearMipmapLinear);
-                UICRenderPrefilterTexture *theBSDFMipMap = theImage.first->second.m_BSDFMipMap;
+                Qt3DSRenderPrefilterTexture *theBSDFMipMap = theImage.first->second.m_BSDFMipMap;
                 if (theBSDFMipMap == NULL) {
-                    theBSDFMipMap = UICRenderPrefilterTexture::Create(
+                    theBSDFMipMap = Qt3DSRenderPrefilterTexture::Create(
                         m_Context, inLoadedImage.width, inLoadedImage.height, *theTexture,
                         destFormat, m_Context->GetFoundation());
                     theImage.first->second.m_BSDFMipMap = theBSDFMipMap;
@@ -675,7 +675,7 @@ struct SBufferManager : public IBufferManager
         return theMesh.first->second;
     }
 
-    SRenderMesh *CreateMesh(UICBCharPtr inSourcePath, QT3DSU8 *inVertData, QT3DSU32 inNumVerts,
+    SRenderMesh *CreateMesh(Qt3DSBCharPtr inSourcePath, QT3DSU8 *inVertData, QT3DSU32 inNumVerts,
                             QT3DSU32 inVertStride, QT3DSU32 *inIndexData, QT3DSU32 inIndexCount,
                             qt3ds::NVBounds3 inBounds) override
     {

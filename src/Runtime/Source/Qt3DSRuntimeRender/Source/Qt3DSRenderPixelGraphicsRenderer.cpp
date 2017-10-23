@@ -89,7 +89,7 @@ struct SPGRectShader
 
 struct SPGRenderer : public IPixelGraphicsRenderer
 {
-    IUICRenderContext &m_RenderContext;
+    IQt3DSRenderContext &m_RenderContext;
     IStringTable &m_StringTable;
     NVScopedRefCounted<NVRenderVertexBuffer> m_QuadVertexBuffer;
     NVScopedRefCounted<NVRenderIndexBuffer> m_QuadIndexBuffer;
@@ -100,7 +100,7 @@ struct SPGRenderer : public IPixelGraphicsRenderer
     SPGRectShader m_RectShader;
     QT3DSI32 mRefCount;
 
-    SPGRenderer(IUICRenderContext &ctx, IStringTable &strt)
+    SPGRenderer(IQt3DSRenderContext &ctx, IStringTable &strt)
         : m_RenderContext(ctx)
         , m_StringTable(strt)
         , m_VertexGenerator(m_StringTable, ctx.GetAllocator(),
@@ -304,7 +304,7 @@ struct SPGRenderer : public IPixelGraphicsRenderer
 };
 }
 
-IPixelGraphicsRenderer &IPixelGraphicsRenderer::CreateRenderer(IUICRenderContext &ctx,
+IPixelGraphicsRenderer &IPixelGraphicsRenderer::CreateRenderer(IQt3DSRenderContext &ctx,
                                                                IStringTable &strt)
 {
     return *QT3DS_NEW(ctx.GetAllocator(), SPGRenderer)(ctx, strt);

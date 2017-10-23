@@ -46,7 +46,7 @@ using namespace Q3DStudio;
 /**
  * Constructor
  */
-CUICMessageBox::CUICMessageBox()
+Qt3DSMessageBox::Qt3DSMessageBox()
 {
 }
 
@@ -54,7 +54,7 @@ CUICMessageBox::CUICMessageBox()
 /**
  * Destructor
  */
-CUICMessageBox::~CUICMessageBox()
+Qt3DSMessageBox::~Qt3DSMessageBox()
 {
 }
 
@@ -66,10 +66,10 @@ CUICMessageBox::~CUICMessageBox()
  * @param inIcon Icon to be displayed on the message box
  * @param inParentWindow window to attach this dialog to.
  */
-CUICMessageBox::EMessageBoxReturn
-CUICMessageBox::Show(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText, EMessageBoxIcon inIcon,
+Qt3DSMessageBox::EMessageBoxReturn
+Qt3DSMessageBox::Show(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText, EMessageBoxIcon inIcon,
                      bool inShowCancel /*false*/,
-                     CUICMessageBox::TPlatformWindow inParentWindow /*NULL*/)
+                     Qt3DSMessageBox::TPlatformWindow inParentWindow /*NULL*/)
 {
     QMessageBox box(inParentWindow);
     box.setWindowTitle(inTitle.toQString());

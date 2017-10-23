@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef __UICRECT_H__
-#define __UICRECT_H__
+#ifndef __QT3DS_RECT_H__
+#define __QT3DS_RECT_H__
 
 #ifndef __PLATFORMCONVERSION_H__
 #include "PlatformConversion.h"
@@ -55,8 +55,8 @@ public:
     CRect(const CRect &srcRect);
     CRect(const CRect *lpSrcRect);
 #ifndef __PLATFORMCONVERSION_H__
-    CRect(const UICRect &inRect);
-    CRect(const UICRect *inRect);
+    CRect(const Qt3DSRect &inRect);
+    CRect(const Qt3DSRect *inRect);
 #endif
     CRect(CPoint &topLeft, CPoint &bottomRight);
 
@@ -109,7 +109,7 @@ public:
     // Additional Operations
     void operator=(const CRect &srcRect);
 #ifndef __PLATFORMCONVERSION_H__
-    void operator=(const UICRect &srcRect);
+    void operator=(const Qt3DSRect &srcRect);
 #endif
     bool operator==(const CRect &rect) const;
     bool operator!=(const CRect &rect) const;
@@ -149,13 +149,13 @@ inline CRect::CRect(const CRect *lpSrcRect)
     CopyRect(lpSrcRect);
 }
 #ifndef __PLATFORMCONVERSION_H__
-inline CRect::CRect(const UICRect &inRect)
+inline CRect::CRect(const Qt3DSRect &inRect)
 {
-    CPlatformConversion::UICRectToCRect(inRect, *this);
+    CPlatformConversion::Qt3DSRectToCRect(inRect, *this);
 }
-inline CRect::CRect(const UICRect *inRect)
+inline CRect::CRect(const Qt3DSRect *inRect)
 {
-    CPlatformConversion::UICRectToCRect(*inRect, *this);
+    CPlatformConversion::Qt3DSRectToCRect(*inRect, *this);
 }
 #endif
 inline CRect::CRect(CPoint &topLeft, CPoint &bottomRight)
@@ -270,9 +270,9 @@ inline void CRect::operator=(const CRect &srcRect)
     CopyRect(&srcRect);
 }
 #ifndef __PLATFORMCONVERSION_H__
-inline void CRect::operator=(const UICRect &srcRect)
+inline void CRect::operator=(const Qt3DSRect &srcRect)
 {
-    CPlatformConversion::UICRectToCRect(srcRect, *this);
+    CPlatformConversion::Qt3DSRectToCRect(srcRect, *this);
 }
 #endif
 inline bool CRect::operator==(const CRect &rect) const
@@ -414,4 +414,4 @@ inline void CRect::DeflateRect(int l, int t, int r, int b)
 
 } // namespace Q3DStudio
 
-#endif // __UICRECT_H__
+#endif // __QT3DS_RECT_H__

@@ -240,7 +240,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
                                        NVScopedRefCounted<qt3ds::render::NVRenderConstantBuffer>>
         TStrConstanBufMap;
 
-    IUICRenderContext &m_RenderContext;
+    IQt3DSRenderContext &m_RenderContext;
     IShaderProgramGenerator &m_ProgramGenerator;
 
     const SCustomMaterial *m_CurrentMaterial;
@@ -270,7 +270,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
     QT3DSI32 m_RefCount;
 
-    SShaderGenerator(IUICRenderContext &inRc)
+    SShaderGenerator(IQt3DSRenderContext &inRc)
         : m_RenderContext(inRc)
         , m_ProgramGenerator(m_RenderContext.GetShaderProgramGenerator())
         , m_CurrentMaterial(NULL)
@@ -554,7 +554,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     void SetGlobalProperties(NVRenderShaderProgram &inProgram, const SLayer & /*inLayer*/
                              ,
                              SCamera &inCamera, QT3DSVec3, NVDataRef<SLight *> inLights,
-                             NVDataRef<QT3DSVec3>, UICShadowMap *inShadowMaps)
+                             NVDataRef<QT3DSVec3>, Qt3DSShadowMap *inShadowMaps)
     {
         SShaderGeneratorGeneratedShader &theShader(GetShaderForProgram(inProgram));
         m_RenderContext.GetRenderContext().SetActiveShader(&inProgram);
@@ -1095,7 +1095,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 }
 
 ICustomMaterialShaderGenerator &
-ICustomMaterialShaderGenerator::CreateCustomMaterialShaderGenerator(IUICRenderContext &inRc)
+ICustomMaterialShaderGenerator::CreateCustomMaterialShaderGenerator(IQt3DSRenderContext &inRc)
 {
     return *QT3DS_NEW(inRc.GetAllocator(), SShaderGenerator)(inRc);
 }

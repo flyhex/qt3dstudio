@@ -152,7 +152,7 @@ struct SOffscreenRunnable : public IRenderTask
 struct SOffscreenRenderManager : public IOffscreenRenderManager
 {
     typedef nvhash_map<SOffscreenRendererKey, SRenderDataReleaser> TRendererMap;
-    IUICRenderContext &m_Context;
+    IQt3DSRenderContext &m_Context;
     NVAllocatorCallback &m_Allocator;
     NVScopedRefCounted<IStringTable> m_StringTable;
     NVScopedRefCounted<IResourceManager> m_ResourceManager;
@@ -163,7 +163,7 @@ struct SOffscreenRenderManager : public IOffscreenRenderManager
     volatile QT3DSI32 mRefCount;
 
     SOffscreenRenderManager(NVAllocatorCallback &inCallback, IStringTable &inStringTable,
-                            IResourceManager &inManager, IUICRenderContext &inContext)
+                            IResourceManager &inManager, IQt3DSRenderContext &inContext)
         : m_Context(inContext)
         , m_Allocator(inCallback)
         , m_StringTable(inStringTable)
@@ -490,7 +490,7 @@ void SOffscreenRunnable::Run()
 
 IOffscreenRenderManager &IOffscreenRenderManager::CreateOffscreenRenderManager(
     NVAllocatorCallback &inCallback, IStringTable &inStringTable, IResourceManager &inManager,
-    IUICRenderContext &inContext)
+    IQt3DSRenderContext &inContext)
 {
     return *QT3DS_NEW(inCallback, SOffscreenRenderManager)(inCallback, inStringTable, inManager,
                                                         inContext);

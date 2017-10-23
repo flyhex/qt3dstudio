@@ -103,7 +103,7 @@ namespace render {
         virtual QT3DSU32 GetAndResetTriangleCount() const = 0;
 
         static IRenderProfiler &CreateGpuProfiler(NVFoundationBase &inFoundation,
-                                                  IUICRenderContext &inContext,
+                                                  IQt3DSRenderContext &inContext,
                                                   NVRenderContext &inRenderContext);
     };
 }

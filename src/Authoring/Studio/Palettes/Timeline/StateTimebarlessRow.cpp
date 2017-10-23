@@ -84,7 +84,7 @@ void CStateTimebarlessRow::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool
  */
 void CStateTimebarlessRow::Draw(CRenderer *inRenderer)
 {
-    UICPROFILE(Draw);
+    QT3DS_PROFILE(Draw);
 
     if (m_DirtyFlag) {
         RefreshKeyframes();
@@ -189,7 +189,7 @@ bool CStateTimebarlessRow::PropertiesHaveKeyframe(long inTime)
  */
 void CStateTimebarlessRow::RefreshKeyframes()
 {
-    UICPROFILE(RefreshKeyframes);
+    QT3DS_PROFILE(RefreshKeyframes);
 
     m_Refreshing = true;
 

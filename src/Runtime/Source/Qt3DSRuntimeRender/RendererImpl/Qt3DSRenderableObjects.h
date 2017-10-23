@@ -226,19 +226,19 @@ namespace render {
 
     typedef nvvector<SModelContext *> TModelContextPtrList;
 
-    class CUICRendererImpl;
+    class Qt3DSRendererImpl;
     struct SLayerRenderData;
     struct SShadowMapEntry;
 
     struct SSubsetRenderableBase : public SRenderableObject
     {
-        CUICRendererImpl &m_Generator;
+        Qt3DSRendererImpl &m_Generator;
         const SModelContext &m_ModelContext;
         SRenderSubset m_Subset;
         QT3DSF32 m_Opacity;
 
         SSubsetRenderableBase(SRenderableObjectFlags inFlags, QT3DSVec3 inWorldCenterPt,
-                              CUICRendererImpl &gen, const SRenderSubset &subset,
+                              Qt3DSRendererImpl &gen, const SRenderSubset &subset,
                               const SModelContext &modelContext, QT3DSF32 inOpacity)
 
             : SRenderableObject(inFlags, inWorldCenterPt, modelContext.m_Model.m_GlobalTransform,
@@ -269,7 +269,7 @@ namespace render {
         NVConstDataRef<QT3DSMat44> m_Bones;
 
         SSubsetRenderable(SRenderableObjectFlags inFlags, QT3DSVec3 inWorldCenterPt,
-                          CUICRendererImpl &gen, const SRenderSubset &subset,
+                          Qt3DSRendererImpl &gen, const SRenderSubset &subset,
                           const SDefaultMaterial &mat, const SModelContext &modelContext,
                           QT3DSF32 inOpacity, SRenderableImage *inFirstImage,
                           SShaderDefaultMaterialKey inShaderKey,
@@ -303,7 +303,7 @@ namespace render {
         SShaderDefaultMaterialKey m_ShaderDescription;
 
         SCustomMaterialRenderable(SRenderableObjectFlags inFlags, QT3DSVec3 inWorldCenterPt,
-                                  CUICRendererImpl &gen, const SRenderSubset &subset,
+                                  Qt3DSRendererImpl &gen, const SRenderSubset &subset,
                                   const SCustomMaterial &mat, const SModelContext &modelContext,
                                   QT3DSF32 inOpacity, SRenderableImage *inFirstImage,
                                   SShaderDefaultMaterialKey inShaderKey)
@@ -340,14 +340,14 @@ namespace render {
 
     struct STextRenderable : public SRenderableObject, public STextScaleAndOffset
     {
-        CUICRendererImpl &m_Generator;
+        Qt3DSRendererImpl &m_Generator;
         const SText &m_Text;
         NVRenderTexture2D &m_Texture;
         QT3DSMat44 m_ModelViewProjection;
         QT3DSMat44 m_ViewProjection;
 
         STextRenderable(SRenderableObjectFlags inFlags, QT3DSVec3 inWorldCenterPt,
-                        CUICRendererImpl &gen, const SText &inText, const NVBounds3 &inBounds,
+                        Qt3DSRendererImpl &gen, const SText &inText, const NVBounds3 &inBounds,
                         const QT3DSMat44 &inModelViewProjection, const QT3DSMat44 &inViewProjection,
                         NVRenderTexture2D &inTextTexture, const QT3DSVec2 &inTextOffset,
                         const QT3DSVec2 &inTextScale)
@@ -370,7 +370,7 @@ namespace render {
 
     struct SPathRenderable : public SRenderableObject
     {
-        CUICRendererImpl &m_Generator;
+        Qt3DSRendererImpl &m_Generator;
         SPath &m_Path;
         NVBounds3 m_Bounds;
         QT3DSMat44 m_ModelViewProjection;
@@ -382,7 +382,7 @@ namespace render {
         bool m_IsStroke;
 
         SPathRenderable(SRenderableObjectFlags inFlags, QT3DSVec3 inWorldCenterPt,
-                        CUICRendererImpl &gen, const QT3DSMat44 &inGlobalTransform,
+                        Qt3DSRendererImpl &gen, const QT3DSMat44 &inGlobalTransform,
                         NVBounds3 &inBounds, SPath &inPath, const QT3DSMat44 &inModelViewProjection,
                         const QT3DSMat33 inNormalMat, const SGraphObject &inMaterial, QT3DSF32 inOpacity,
                         SShaderDefaultMaterialKey inShaderKey, bool inIsStroke)

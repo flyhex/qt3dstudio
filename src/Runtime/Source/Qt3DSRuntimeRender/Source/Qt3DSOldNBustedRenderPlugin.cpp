@@ -40,7 +40,7 @@
 namespace qt3ds {
 namespace render {
 
-    COldNBustedPluginRenderer::COldNBustedPluginRenderer(IUICRenderContext &inRenderContext,
+    COldNBustedPluginRenderer::COldNBustedPluginRenderer(IQt3DSRenderContext &inRenderContext,
                                                          long inDLLHandle)
         : m_RenderContext(inRenderContext)
         , m_DLLHandle(inDLLHandle)

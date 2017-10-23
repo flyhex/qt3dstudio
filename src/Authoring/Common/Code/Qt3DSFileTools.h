@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UICFILETOOLS_H
-#define INCLUDED_UICFILETOOLS_H 1
+#ifndef INCLUDED_QT3DS_FILETOOLS_H
+#define INCLUDED_QT3DS_FILETOOLS_H 1
 
 #pragma once
 
@@ -485,4 +485,4 @@ struct SFileTools
 
 QDebug operator<<(QDebug stream, const Q3DStudio::CFilePath &s);
 
-#endif // INCLUDED_UICFILETOOLS_H
+#endif // INCLUDED_QT3DS_FILETOOLS_H

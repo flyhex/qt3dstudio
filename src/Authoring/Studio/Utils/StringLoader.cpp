@@ -80,7 +80,7 @@ Q3DStudio::CString CStringLoader::LoadResourceString(long inStringID)
  * All .stro files in the directory will be processed for strings.
  * @param inDirectory the directory that should be read for strings.
  */
-void CStringLoader::LoadStrings(const CUICFile &inDirectory)
+void CStringLoader::LoadStrings(const Qt3DSFile &inDirectory)
 {
     s_GlobalInstance.LoadResourceStrings(inDirectory);
 }
@@ -91,7 +91,7 @@ void CStringLoader::LoadStrings(const CUICFile &inDirectory)
  * All .stro files in the directory will be processed for strings.
  * @param inDirectory the directory that should be read for strings.
  */
-void CStringLoader::LoadResourceStrings(const CUICFile &inDirectory)
+void CStringLoader::LoadResourceStrings(const Qt3DSFile &inDirectory)
 {
     UnloadResourceStrings();
 
@@ -104,7 +104,7 @@ void CStringLoader::LoadResourceStrings(const CUICFile &inDirectory)
     // Go through all the files in the directory and process them.
     CFileIterator theFiles = inDirectory.GetSubItems();
     for (; !theFiles.IsDone(); ++theFiles) {
-        CUICFile theFile = theFiles.GetCurrent();
+        Qt3DSFile theFile = theFiles.GetCurrent();
         Q3DStudio::CString theFilename = theFile.GetAbsolutePath();
         // Only process .stro files.
         if (theFilename.Find(theExtension) == theFilename.Length() - theExtension.Length()) {

@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTH
-#define UICIMPORTH
+#ifndef QT3DS_IMPORT_H
+#define QT3DS_IMPORT_H
 #include "Qt3DSImportLibPrecompile.h"
 #include "Qt3DSImportMesh.h"
 #include "Qt3DSImportPath.h"

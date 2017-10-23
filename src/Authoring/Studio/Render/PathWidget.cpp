@@ -72,7 +72,7 @@ struct SPathWidget : public IPathWidget
         TReverseAnchorBuffer;
 
     NVAllocatorCallback &m_Allocator;
-    IUICRenderContext &m_UICContext;
+    IQt3DSRenderContext &m_Context;
 
     NVScopedRefCounted<NVRenderVertexBuffer> m_PointVertexBuffer;
     NVScopedRefCounted<NVRenderInputAssembler> m_PointAssembler;
@@ -91,9 +91,9 @@ struct SPathWidget : public IPathWidget
     QT3DSMat44 m_PointMVP;
 
     QT3DSI32 m_RefCount;
-    SPathWidget(NVAllocatorCallback &inAlloc, IUICRenderContext &inRc)
+    SPathWidget(NVAllocatorCallback &inAlloc, IQt3DSRenderContext &inRc)
         : m_Allocator(inAlloc)
-        , m_UICContext(inRc)
+        , m_Context(inRc)
         , m_LineBuffer(inAlloc, "m_LineBuffer")
         , m_PointBuffer(inAlloc, "m_PointBuffer")
         , m_AnchorIndexBuffer(inAlloc, "m_AnchorIndexBuffer")
@@ -338,7 +338,7 @@ struct SPathWidget : public IPathWidget
         if (!m_Node)
             return;
         SPath &thePath = static_cast<SPath &>(*m_Node);
-        IPathManager &theManager = m_UICContext.GetPathManager();
+        IPathManager &theManager = m_Context.GetPathManager();
 
         QT3DSVec3 anchorColor(0, 1, 0);
         QT3DSVec3 controlColor(0, 0, 1);
@@ -506,7 +506,7 @@ struct SPathWidget : public IPathWidget
 };
 }
 
-IPathWidget &IPathWidget::CreatePathWidget(NVAllocatorCallback &inCallback, IUICRenderContext &inRc)
+IPathWidget &IPathWidget::CreatePathWidget(NVAllocatorCallback &inCallback, IQt3DSRenderContext &inRc)
 {
     return *QT3DS_NEW(inCallback, SPathWidget)(inCallback, inRc);
 }

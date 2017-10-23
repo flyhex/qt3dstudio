@@ -64,12 +64,12 @@ namespace evt {
         // provider
         // for events and then begin returning the set of events.
         // Note: this interface needs to set the event fetched flag.
-        virtual size_t GetNextEvents(SUICEventSystemEvent **outBuffer, size_t bufLen) = 0;
+        virtual size_t GetNextEvents(Qt3DSEventSystemEvent **outBuffer, size_t bufLen) = 0;
 
         // Get the event factory used for this poller.
         virtual IEventFactory &GetEventFactory() = 0;
 
-        virtual SUICEventSystemEventPoller *GetCInterface() = 0;
+        virtual Qt3DSEventSystemEventPoller *GetCInterface() = 0;
 
         // Get and clear the flag indicates whether GetNextEvents has been called after last call of
         // this interface

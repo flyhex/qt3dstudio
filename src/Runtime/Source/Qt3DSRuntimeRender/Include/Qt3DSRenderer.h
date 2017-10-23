@@ -55,10 +55,10 @@ namespace render {
 
     using qt3ds::foundation::NVConstDataRef;
 
-    class IUICRenderNodeFilter
+    class IQt3DSRenderNodeFilter
     {
     protected:
-        virtual ~IUICRenderNodeFilter() {}
+        virtual ~IQt3DSRenderNodeFilter() {}
     public:
         virtual bool IncludeNode(const SNode &inNode) = 0;
     };
@@ -89,10 +89,10 @@ namespace render {
         SScaleAndPosition() {}
     };
 
-    class IUICRenderer : public NVRefCounted
+    class IQt3DSRenderer : public NVRefCounted
     {
     protected:
-        virtual ~IUICRenderer() {}
+        virtual ~IQt3DSRenderer() {}
 
     public:
         virtual void EnableLayerCaching(bool inEnabled) = 0;
@@ -107,7 +107,7 @@ namespace render {
         virtual void ChildrenUpdated(SNode &inParent) = 0;
         virtual QT3DSF32 GetTextScale(const SText &inText) = 0;
 
-        // The IUICRenderContext calls these, clients should not.
+        // The IQt3DSRenderContext calls these, clients should not.
         virtual void BeginFrame() = 0;
         virtual void EndFrame() = 0;
 
@@ -139,7 +139,7 @@ namespace render {
         // that have handlers
         // in some cases and just pick everything in other things.
         virtual void PickRenderPlugins(bool inPick) = 0;
-        virtual SUICRenderPickResult Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
+        virtual Qt3DSRenderPickResult Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
                                           const QT3DSVec2 &inMouseCoords, bool inPickSiblings = true,
                                           bool inPickEverything = false) = 0;
 
@@ -236,7 +236,7 @@ namespace render {
         static bool IsGl2Context(qt3ds::render::NVRenderContextType inContextType);
         static const char *GetGlslVesionString(qt3ds::render::NVRenderContextType inContextType);
 
-        static IUICRenderer &CreateRenderer(IUICRenderContext &inContext);
+        static IQt3DSRenderer &CreateRenderer(IQt3DSRenderContext &inContext);
     };
 }
 }

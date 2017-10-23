@@ -41,7 +41,7 @@
 
 namespace qt3ds {
 namespace render {
-    class IUICRenderContext;
+    class IQt3DSRenderContext;
     class IOffscreenRenderManager;
     class IOffscreenRenderer;
     struct ImageMappingModes

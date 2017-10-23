@@ -97,7 +97,7 @@ namespace studio {
     using qt3ds::foundation::rotationArc;
     using qt3ds::foundation::Option;
     using qt3ds::foundation::Empty;
-    using qt3ds::render::IUICRenderContext;
+    using qt3ds::render::IQt3DSRenderContext;
     using qt3ds::render::SScene;
     using qt3ds::render::SLayer;
     using qt3ds::render::SNode;

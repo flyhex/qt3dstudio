@@ -50,7 +50,7 @@ class ISignalConnection;
 
 //=============================================================================
 /**
- * General timebar implementation for UICDM objects
+ * General timebar implementation for DataModel objects
  */
 class Qt3DSDMTimelineTimebar : public ITimelineTimebar, public Q3DStudio::CUpdateableDocumentEditor
 {

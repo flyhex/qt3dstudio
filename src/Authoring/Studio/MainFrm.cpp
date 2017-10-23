@@ -290,7 +290,7 @@ int CMainFrame::OnCreate()
         if (m_RecentItems && m_RecentItems->GetItemCount() > 0)
             theMostRecentOpen = m_RecentItems->GetItem(0).GetPath();
         if (theMostRecentOpen.IsEmpty()) // default to exe
-            theMostRecentOpen = CUICFile::GetApplicationDirectory().GetPath();
+            theMostRecentOpen = Qt3DSFile::GetApplicationDirectory().GetPath();
 
         theDialogs->ResetSettings(theMostRecentOpen);
     }
@@ -935,7 +935,7 @@ void CMainFrame::EditPreferences(short inPageIndex)
         // Also clear out the viewer's settings file
         Q3DStudio::CFilePath theFilePath(Q3DStudio::CFilePath::CombineBaseAndRelative(
                                              Q3DStudio::CFilePath::GetUserApplicationDirectory(),
-                                             "Qt3DSomposer\\UICViewerSettings.txt"));
+                                             "Qt3DSComposer\\Qt3DSViewerSettings.txt"));
         theFilePath.DeleteThisFile();
     }
 }
@@ -1724,7 +1724,7 @@ void CMainFrame::OnViewTooltips()
  */
 void CMainFrame::OnUpdateHelpIndex()
 {
-    CUICFile theFile(g_StudioApp.m_pszHelpFilePath);
+    Qt3DSFile theFile(g_StudioApp.m_pszHelpFilePath);
     m_ui->action_Reference_Manual->setEnabled(theFile.Exists());
 }
 
@@ -1734,7 +1734,7 @@ void CMainFrame::OnUpdateHelpIndex()
  */
 void CMainFrame::OnHelpIndex()
 {
-    CUICFile theFile(g_StudioApp.m_pszHelpFilePath);
+    Qt3DSFile theFile(g_StudioApp.m_pszHelpFilePath);
     if (theFile.Exists())
         QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.GetAbsolutePath().toQString()));
 }
@@ -1767,7 +1767,7 @@ void CMainFrame::OnHelpOpenTutorial()
  */
 void CMainFrame::OnHelpBehaviorReference()
 {
-    CUICFile theFile(CUICFile::GetApplicationDirectory(),
+    Qt3DSFile theFile(Qt3DSFile::GetApplicationDirectory(),
                      ::LoadResourceString(IDS_HELP_BEHAVIORREFERENCE));
     if (theFile.Exists()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnNavigate(
@@ -1825,7 +1825,7 @@ void CMainFrame::RecheckSizingMode()
 /**
  * Callback when a Core is opened or fails to open.
  */
-void CMainFrame::OnOpenDocument(const CUICFile &inFilename, bool inSucceeded)
+void CMainFrame::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
 {
     if (inSucceeded)
         m_RecentItems->AddRecentItem(inFilename);
@@ -1837,7 +1837,7 @@ void CMainFrame::OnOpenDocument(const CUICFile &inFilename, bool inSucceeded)
 /**
  * Callback when a Core is saved or fails to save.
  */
-void CMainFrame::OnSaveDocument(const CUICFile &inFilename, bool inSucceeded, bool inSaveCopy)
+void CMainFrame::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy)
 {
     if (!inSaveCopy)
         OnOpenDocument(inFilename, inSucceeded);
@@ -1847,7 +1847,7 @@ void CMainFrame::OnSaveDocument(const CUICFile &inFilename, bool inSucceeded, bo
 /**
  * Callback for when a the doc gets a new path
  */
-void CMainFrame::OnDocumentPathChanged(const CUICFile &inNewPath)
+void CMainFrame::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
 {
     QString theTitle = inNewPath.GetName().toQString();
     if (theTitle.isEmpty())
@@ -1868,7 +1868,7 @@ void CMainFrame::OnDocumentPathChanged(const CUICFile &inNewPath)
  */
 void CMainFrame::OnOpenMostRecentlyUsedDocument()
 {
-    CUICFile theDocument = m_RecentItems->GetItem(0);
+    Qt3DSFile theDocument = m_RecentItems->GetItem(0);
     if (theDocument.Exists())
         g_StudioApp.OnLoadDocument(theDocument);
 }

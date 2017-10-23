@@ -67,19 +67,19 @@ using qt3ds::render::NVRenderContextScopedProperty;
 using qt3ds::render::NVRenderCachedShaderProperty;
 using qt3ds::render::NVRenderCachedShaderBuffer;
 
-SCustomMaterialVertexPipeline::SCustomMaterialVertexPipeline(IUICRenderContext *inContext,
+SCustomMaterialVertexPipeline::SCustomMaterialVertexPipeline(IQt3DSRenderContext *inContext,
                                                              TessModeValues::Enum inTessMode)
     : SVertexPipelineImpl(
           inContext->GetAllocator(), inContext->GetCustomMaterialShaderGenerator(),
           inContext->GetShaderProgramGenerator(), inContext->GetStringTable(), false)
-    , m_UICContext(inContext)
+    , m_Context(inContext)
     , m_TessMode(TessModeValues::NoTess)
 {
-    if (m_UICContext->GetRenderContext().IsTessellationSupported()) {
+    if (m_Context->GetRenderContext().IsTessellationSupported()) {
         m_TessMode = inTessMode;
     }
 
-    if (m_UICContext->GetRenderContext().IsGeometryStageSupported()
+    if (m_Context->GetRenderContext().IsGeometryStageSupported()
         && m_TessMode != TessModeValues::NoTess) {
         m_Wireframe = inContext->GetWireframeMode();
     }
@@ -946,8 +946,8 @@ struct SMaterialSystem : public ICustomMaterialSystem
         TMaterialLuaContextMap;
     typedef eastl::pair<CRegisteredString, SImage *> TAllocatedImageEntry;
 
-    IUICRenderContextCore &m_CoreContext;
-    IUICRenderContext *m_UICContext;
+    IQt3DSRenderContextCore &m_CoreContext;
+    IQt3DSRenderContext *m_Context;
     mutable qt3ds::render::SPreAllocatedAllocator m_Allocator;
     TStringMaterialMap m_StringMaterialMap;
     TShaderMap m_ShaderMap;
@@ -962,9 +962,9 @@ struct SMaterialSystem : public ICustomMaterialSystem
     QT3DSF32 m_MillisecondsSinceLastFrame;
     QT3DSI32 mRefCount;
 
-    SMaterialSystem(IUICRenderContextCore &ct)
+    SMaterialSystem(IQt3DSRenderContextCore &ct)
         : m_CoreContext(ct)
-        , m_UICContext(NULL)
+        , m_Context(NULL)
         , m_Allocator(ct.GetAllocator())
         , m_StringMaterialMap(ct.GetAllocator(), "SMaterialSystem::m_StringMaterialMap")
         , m_ShaderMap(ct.GetAllocator(), "SMaterialSystem::m_ShaderMap")
@@ -1001,7 +1001,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         // Don't call this on MaterialSystem destroy.
         // This causes issues for scene liftime buffers
         // because the resource manager is destroyed before
-        IResourceManager &theManager(m_UICContext->GetResourceManager());
+        IResourceManager &theManager(m_Context->GetResourceManager());
         SCustomMaterialBuffer &theEntry(m_AllocatedBuffers[inIdx]);
         theEntry.m_FrameBuffer->Attach(NVRenderFrameBufferAttachments::Color0,
                                        NVRenderTextureOrRenderBuffer());
@@ -1257,14 +1257,14 @@ struct SMaterialSystem : public ICustomMaterialSystem
                                      const dynamic::SDynamicShaderProgramFlags &inFlags)
     {
         ICustomMaterialShaderGenerator &theMaterialGenerator(
-            m_UICContext->GetCustomMaterialShaderGenerator());
+            m_Context->GetCustomMaterialShaderGenerator());
 
         // generate key
         CRenderString theShaderKeyBuffer;
         CRegisteredString theKey = GetShaderCacheKey(theShaderKeyBuffer, inCommand.m_ShaderPath,
                                                      inCommand.m_ShaderDefine, inFlags);
 
-        SCustomMaterialVertexPipeline thePipeline(m_UICContext,
+        SCustomMaterialVertexPipeline thePipeline(m_Context,
                                                   inRenderContext.m_Model.m_TessellationMode);
 
         NVRenderShaderProgram *theProgram = theMaterialGenerator.GenerateShader(
@@ -1308,13 +1308,13 @@ struct SMaterialSystem : public ICustomMaterialSystem
         if (theProgram) {
             if (theProgram->GetProgramType() == NVRenderShaderProgram::ProgramType::Graphics) {
                 if (theInsertResult.first->second) {
-                    NVRenderContext &theContext(m_UICContext->GetRenderContext());
+                    NVRenderContext &theContext(m_Context->GetRenderContext());
                     theContext.SetActiveShader(theInsertResult.first->second->m_Shader);
                 }
 
                 return *theInsertResult.first->second;
             } else {
-                NVRenderContext &theContext(m_UICContext->GetRenderContext());
+                NVRenderContext &theContext(m_Context->GetRenderContext());
                 theContext.SetActiveShader(theProgram);
                 return *(static_cast<NVRenderShaderProgram *>(theProgram));
             }
@@ -1333,7 +1333,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         theFlags.SetGeometryShaderEnabled(inRenderContext.m_Subset.m_WireframeMode);
 
         TShaderAndFlags theProgramAndFlags =
-            m_UICContext->GetDynamicObjectSystem().GetShaderProgram(
+            m_Context->GetDynamicObjectSystem().GetShaderProgram(
                 inCommand.m_ShaderPath, inCommand.m_ShaderDefine, inFeatureSet, theFlags);
 
         NVRenderShaderProgram *theProgram = theProgramAndFlags.first;
@@ -1353,13 +1353,13 @@ struct SMaterialSystem : public ICustomMaterialSystem
                 }
 
                 if (theInsertResult.first->second) {
-                    NVRenderContext &theContext(m_UICContext->GetRenderContext());
+                    NVRenderContext &theContext(m_Context->GetRenderContext());
                     theContext.SetActiveShader(theInsertResult.first->second->m_Shader);
                 }
 
                 return *theInsertResult.first->second;
             } else {
-                NVRenderContext &theContext(m_UICContext->GetRenderContext());
+                NVRenderContext &theContext(m_Context->GetRenderContext());
                 theContext.SetActiveShader(theProgram);
                 return *(static_cast<NVRenderShaderProgram *>(theProgram));
             }
@@ -1382,7 +1382,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
                     StaticAssert<sizeof(CRegisteredString)
                                  == sizeof(NVRenderTexture2DPtr)>::valid_expression();
                     CRegisteredString *theStrPtr = reinterpret_cast<CRegisteredString *>(inDataPtr);
-                    IBufferManager &theBufferManager(m_UICContext->GetBufferManager());
+                    IBufferManager &theBufferManager(m_Context->GetBufferManager());
                     NVRenderTexture2D *theTexture = NULL;
 
                     if (theStrPtr->IsValid()) {
@@ -1454,7 +1454,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
 
     void ApplyBlending(const SApplyBlending &inCommand)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
 
         theContext.SetBlendingEnabled(true);
 
@@ -1531,7 +1531,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
                 return;
             }
         } else {
-            NVRenderContext &theContext = m_UICContext->GetRenderContext();
+            NVRenderContext &theContext = m_Context->GetRenderContext();
             // if we allocate a buffer based on the default target use viewport to get the dimension
             NVRenderRect theViewport(theContext.GetViewport());
             theSourceTextureDetails.m_Height = theViewport.m_Height;
@@ -1543,7 +1543,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         NVRenderTextureFormats::Enum theFormat = inCommand.m_Format;
         if (theFormat == NVRenderTextureFormats::Unknown)
             theFormat = theSourceTextureDetails.m_Format;
-        IResourceManager &theResourceManager(m_UICContext->GetResourceManager());
+        IResourceManager &theResourceManager(m_Context->GetResourceManager());
         // size intentionally requiried every loop;
         QT3DSU32 bufferIdx = FindBuffer(inCommand.m_Name);
         if (bufferIdx < m_AllocatedBuffers.size()) {
@@ -1594,7 +1594,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
 
         if (theTexture) {
             STextureDetails theDetails(theTexture->GetTextureDetails());
-            m_UICContext->GetRenderContext().SetViewport(
+            m_Context->GetRenderContext().SetViewport(
                 NVRenderRect(0, 0, (QT3DSU32)theDetails.m_Width, (QT3DSU32)theDetails.m_Height));
             outDestSize = QT3DSVec2((QT3DSF32)theDetails.m_Width, (QT3DSF32)theDetails.m_Height);
             outClearTarget = inCommand.m_NeedsClear;
@@ -1606,7 +1606,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
     void computeScreenCoverage(SCustomMaterialRenderContext &inRenderContext, QT3DSI32 *xMin,
                                QT3DSI32 *yMin, QT3DSI32 *xMax, QT3DSI32 *yMax)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
         TNVBounds2BoxPoints outPoints;
         QT3DSVec4 projMin(QT3DS_MAX_REAL);
         QT3DSVec4 projMax(-QT3DS_MAX_REAL);
@@ -1663,7 +1663,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
     void BlitFramebuffer(SCustomMaterialRenderContext &inRenderContext,
                          const SApplyBlitFramebuffer &inCommand, NVRenderFrameBuffer *inTarget)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
         // we change the read/render targets here
         NVRenderContextScopedProperty<NVRenderFrameBuffer *> __framebuffer(
             theContext, &NVRenderContext::GetRenderTarget, &NVRenderContext::SetRenderTarget);
@@ -1752,7 +1752,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
                     NVRenderFrameBuffer *inFrameBuffer, bool inRenderTargetNeedsClear,
                     NVRenderInputAssembler &inAssembler, QT3DSU32 inCount, QT3DSU32 inOffset)
     {
-        NVRenderContext &theContext(m_UICContext->GetRenderContext());
+        NVRenderContext &theContext(m_Context->GetRenderContext());
         theContext.SetRenderTarget(inFrameBuffer);
 
         QT3DSVec4 clearColor(0.0);
@@ -1764,7 +1764,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         }
 
         ICustomMaterialShaderGenerator &theMaterialGenerator(
-            m_UICContext->GetCustomMaterialShaderGenerator());
+            m_Context->GetCustomMaterialShaderGenerator());
 
         theMaterialGenerator.SetMaterialProperties(
             *inShader.m_Shader, inRenderContext.m_Material, QT3DSVec2(1.0, 1.0),
@@ -1819,7 +1819,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
                                 const SCustomMaterial &inMaterial, SMaterialClass &inClass,
                                 NVRenderFrameBuffer *inTarget, TShaderFeatureSet inFeatureSet)
     {
-        NVRenderContext &theContext = m_UICContext->GetRenderContext();
+        NVRenderContext &theContext = m_Context->GetRenderContext();
         SCustomMaterialShader *theCurrentShader(NULL);
 
         NVRenderFrameBuffer *theCurrentRenderTarget(inTarget);
@@ -2153,20 +2153,20 @@ struct SMaterialSystem : public ICustomMaterialSystem
 
         // Ensure that our overall render context comes back no matter what the client does.
         qt3ds::render::NVRenderContextScopedProperty<qt3ds::render::NVRenderBlendFunctionArgument>
-            __blendFunction(m_UICContext->GetRenderContext(), &NVRenderContext::GetBlendFunction,
+            __blendFunction(m_Context->GetRenderContext(), &NVRenderContext::GetBlendFunction,
                             &NVRenderContext::SetBlendFunction,
                             qt3ds::render::NVRenderBlendFunctionArgument());
         qt3ds::render::NVRenderContextScopedProperty<qt3ds::render::NVRenderBlendEquationArgument>
-            __blendEquation(m_UICContext->GetRenderContext(), &NVRenderContext::GetBlendEquation,
+            __blendEquation(m_Context->GetRenderContext(), &NVRenderContext::GetBlendEquation,
                             &NVRenderContext::SetBlendEquation,
                             qt3ds::render::NVRenderBlendEquationArgument());
 
-        NVRenderContextScopedProperty<bool> theBlendEnabled(m_UICContext->GetRenderContext(),
+        NVRenderContextScopedProperty<bool> theBlendEnabled(m_Context->GetRenderContext(),
                                                             &NVRenderContext::IsBlendingEnabled,
                                                             &NVRenderContext::SetBlendingEnabled);
 
         DoRenderCustomMaterial(inRenderContext, inRenderContext.m_Material, *theClass,
-                               m_UICContext->GetRenderContext().GetRenderTarget(), inFeatureSet);
+                               m_Context->GetRenderContext().GetRenderTarget(), inFeatureSet);
     }
 
     bool RenderDepthPrepass(const QT3DSMat44 &inMVP, const SCustomMaterial &inMaterial,
@@ -2180,7 +2180,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
             const SCommand &theCommand = *theCommands[idx];
             if (theCommand.m_Type == CommandTypes::BindShader) {
                 const SBindShader &theBindCommand = static_cast<const SBindShader &>(theCommand);
-                thePrepassShader = m_UICContext->GetDynamicObjectSystem().GetDepthPrepassShader(
+                thePrepassShader = m_Context->GetDynamicObjectSystem().GetDepthPrepassShader(
                     theBindCommand.m_ShaderPath, CRegisteredString(), TShaderFeatureSet());
             }
         }
@@ -2188,7 +2188,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         if (thePrepassShader.first.mPtr == NULL)
             return false;
 
-        NVRenderContext &theContext = m_UICContext->GetRenderContext();
+        NVRenderContext &theContext = m_Context->GetRenderContext();
         NVRenderShaderProgram &theProgram = *thePrepassShader.first;
         theContext.SetActiveShader(&theProgram);
         theProgram.SetPropertyValue("model_view_projection", inMVP);
@@ -2271,12 +2271,12 @@ struct SMaterialSystem : public ICustomMaterialSystem
         }
     }
 
-    ICustomMaterialSystem &GetCustomMaterialSystem(IUICRenderContext &inContext) override
+    ICustomMaterialSystem &GetCustomMaterialSystem(IQt3DSRenderContext &inContext) override
     {
-        m_UICContext = &inContext;
+        m_Context = &inContext;
 
         // check for fast blits
-        NVRenderContext &theContext = m_UICContext->GetRenderContext();
+        NVRenderContext &theContext = m_Context->GetRenderContext();
         m_UseFastBlits = theContext.GetRenderBackendCap(
             qt3ds::render::NVRenderBackend::NVRenderBackendCaps::FastBlits);
 
@@ -2338,7 +2338,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         lua_register(m_LuaState, "setUniform", LuaSetUniform);
         lua_register(m_LuaState, "invertMatrix", LuaInvertMatrix);
         lua_register(m_LuaState, "getAttribute", LuaGetAttribute);
-        lua_pushboolean(m_LuaState, m_UICContext->IsAuthoringMode() ? 1 : 0);
+        lua_pushboolean(m_LuaState, m_Context->IsAuthoringMode() ? 1 : 0);
         lua_setfield(m_LuaState, LUA_GLOBALSINDEX, "authoring_mode");
     }
 
@@ -2468,7 +2468,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
 
         if (currentContext->m_CurrentShader.IsComputeShader()) {
             NVRenderContext &theContext =
-                currentContext->m_MaterialSystem.m_UICContext->GetRenderContext();
+                currentContext->m_MaterialSystem.m_Context->GetRenderContext();
             theContext.DispatchCompute(&currentContext->m_CurrentShader.ComputeShader(), workgroupX,
                                        workgroupY, workgroupZ);
         }
@@ -2497,7 +2497,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         if (flags == 0)
             flags = (QT3DSU32)qt3ds::render::NVRenderBufferBarrierValues::All;
         NVRenderContext &theContext =
-            currentContext->m_MaterialSystem.m_UICContext->GetRenderContext();
+            currentContext->m_MaterialSystem.m_Context->GetRenderContext();
         theContext.SetMemoryBarrier(qt3ds::render::NVRenderBufferBarrierFlags(flags));
         return 0;
     }
@@ -2513,7 +2513,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         const char *assemblerIdStr = lua_tostring(inState, 1);
         IStringTable &theStrTable(currentContext->m_MaterialSystem.m_CoreContext.GetStringTable());
         NVRenderContext &theRenderContext =
-            currentContext->m_MaterialSystem.m_UICContext->GetRenderContext();
+            currentContext->m_MaterialSystem.m_Context->GetRenderContext();
         CRegisteredString assemblerId = theStrTable.RegisterStr(assemblerIdStr);
         eastl::pair<TStringAssemblerMap::iterator, bool> inserter =
             currentContext->m_InputAssemblers.insert(
@@ -2627,7 +2627,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
             return 0;
         }
         NVRenderContext &theContext(
-            currentContext->m_MaterialSystem.m_UICContext->GetRenderContext());
+            currentContext->m_MaterialSystem.m_Context->GetRenderContext());
         if (lua_gettop(inState) == 0) {
             theContext.SetBlendingEnabled(false);
         } else {
@@ -2764,7 +2764,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
             return 0;
         }
         CRegisteredString propName =
-            currentContext->m_MaterialSystem.m_UICContext->GetStringTable().RegisterStr(attName);
+            currentContext->m_MaterialSystem.m_Context->GetStringTable().RegisterStr(attName);
         NVConstDataRef<dynamic::SPropertyDefinition> props =
             currentContext->m_Class.m_Class->GetProperties();
         for (QT3DSU32 idx = 0, end = props.size(); idx < end; ++idx) {
@@ -2883,7 +2883,7 @@ bool SMaterialLuaContext::GetOrCreateVertexBuffer(const char *inIdStr, QT3DSU32 
         eastl::make_pair(mapKey, NVScopedRefCounted<NVRenderVertexBuffer>()));
     if (inserter.second) {
         inserter.first->second =
-            m_MaterialSystem.m_UICContext->GetRenderContext().CreateVertexBuffer(
+            m_MaterialSystem.m_Context->GetRenderContext().CreateVertexBuffer(
                 qt3ds::render::NVRenderBufferUsageType::Dynamic, inSize, inStride);
     }
     return inserter.second;
@@ -2903,7 +2903,7 @@ NVRenderVertexBuffer *SMaterialLuaContext::GetVertexBuffer(const char *inIdStr)
 }
 
 ICustomMaterialSystemCore &
-ICustomMaterialSystemCore::CreateCustomMaterialSystemCore(IUICRenderContextCore &ctx)
+ICustomMaterialSystemCore::CreateCustomMaterialSystemCore(IQt3DSRenderContextCore &ctx)
 {
     return *QT3DS_NEW(ctx.GetAllocator(), SMaterialSystem)(ctx);
 }

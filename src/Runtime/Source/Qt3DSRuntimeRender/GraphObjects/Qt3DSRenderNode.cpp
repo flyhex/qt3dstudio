@@ -406,7 +406,7 @@ void SNode::RemoveFromGraph()
 }
 
 NVBounds3 SNode::GetBounds(IBufferManager &inManager, IPathManager &inPathManager,
-                           bool inIncludeChildren, IUICRenderNodeFilter *inChildFilter) const
+                           bool inIncludeChildren, IQt3DSRenderNodeFilter *inChildFilter) const
 {
     NVBounds3 retval;
     retval.setEmpty();
@@ -423,7 +423,7 @@ NVBounds3 SNode::GetBounds(IBufferManager &inManager, IPathManager &inPathManage
 }
 
 NVBounds3 SNode::GetChildBounds(IBufferManager &inManager, IPathManager &inPathManager,
-                                IUICRenderNodeFilter *inChildFilter) const
+                                IQt3DSRenderNodeFilter *inChildFilter) const
 {
     NVBounds3 retval;
     retval.setEmpty();

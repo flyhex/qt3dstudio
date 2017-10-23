@@ -313,7 +313,7 @@ bool Qt3DSDMInspectable::IsMaster()
 //		if ( theProperty && thePropertySystem->GetInstancePropertyValue( m_Instance,
 //theProperty, theTypeValue ) )
 //		{
-//			theReturn.assign( UICDM::get<TDataStrPtr>( theTypeValue )->GetData() );
+//			theReturn.assign( qt3dsdm::get<TDataStrPtr>( theTypeValue )->GetData() );
 //		}
 //	}
 //	catch( ... )

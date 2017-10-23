@@ -46,8 +46,8 @@ using namespace Q3DStudio;
  *		@param inToken single char token
  *		@param	inEscapeChar single char escape char
  */
-CStackTokenizer::CStackTokenizer(const Q3DStudio::CString &inString, Q3DStudio::UICChar inDelimiter,
-                                 Q3DStudio::UICChar inEscapeChar)
+CStackTokenizer::CStackTokenizer(const Q3DStudio::CString &inString, Q3DStudio::Qt3DSChar inDelimiter,
+                                 Q3DStudio::Qt3DSChar inEscapeChar)
     : m_String(inString)
     , m_Delimiter(inDelimiter)
     , m_EscapeChar(inEscapeChar)
@@ -87,7 +87,7 @@ bool CStackTokenizer::HasNextPartition()
 Q3DStudio::CString CStackTokenizer::GetCurrentPartition()
 
 {
-    std::deque<Q3DStudio::UICChar> theStack;
+    std::deque<Q3DStudio::Qt3DSChar> theStack;
     bool theIgnoreEscapeChar = false;
     bool theFoundToken = false;
     long theCurrentIndex = m_Index;
@@ -96,7 +96,7 @@ Q3DStudio::CString CStackTokenizer::GetCurrentPartition()
     if (!m_String.IsEmpty()) {
         while (!theFoundToken) {
             // get the char at this index
-            Q3DStudio::UICChar theChar = m_String.GetAt(theCurrentIndex++);
+            Q3DStudio::Qt3DSChar theChar = m_String.GetAt(theCurrentIndex++);
 
             if (theChar == m_Delimiter) {
                 if (theStack.size() != 0) {

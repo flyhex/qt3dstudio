@@ -83,7 +83,7 @@ namespace render {
             inRemapper.Remap(m_PresentationDirectory);
         }
 
-        void Render(IUICRenderContext &inContext);
+        void Render(IQt3DSRenderContext &inContext);
     };
 }
 }

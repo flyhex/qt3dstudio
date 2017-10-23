@@ -46,7 +46,7 @@ class ITimelineTimebar;
 
 //=============================================================================
 /**
- * Binding to a UICDM object of Image type
+ * Binding to a DataModel object of Image type
  */
 class CImageTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {

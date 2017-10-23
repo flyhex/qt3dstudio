@@ -44,14 +44,14 @@ Qt3DSDMInstanceHandle CDataCoreProducer::CreateInstance(Qt3DSDMInstanceHandle in
     return retval;
 }
 
-inline tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition>
+inline tuple<Qt3DSDMPropertyHandle, Qt3DSDMPropertyDefinition>
 TransformProperty(Qt3DSDMPropertyHandle inProperty, CSimpleDataCore &inData)
 {
     return make_tuple(inProperty, inData.GetProperty(inProperty));
 }
 
 inline void SignalPropertyRemoved(Qt3DSDMInstanceHandle inInstance,
-                                  tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition> inData,
+                                  tuple<Qt3DSDMPropertyHandle, Qt3DSDMPropertyDefinition> inData,
                                   IDataCoreSignalSender *inSender)
 {
     inSender->SignalPropertyRemoved(inInstance, get<0>(inData), get<1>(inData).m_Name.wide_str(),
@@ -77,10 +77,10 @@ void CDataCoreProducer::DeleteInstance(Qt3DSDMInstanceHandle inInstance)
                                         std::ref(m_Data->m_Objects), m_Consumer));
     }
 
-    vector<tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition>> theDefinitionList;
+    vector<tuple<Qt3DSDMPropertyHandle, Qt3DSDMPropertyDefinition>> theDefinitionList;
     theDefinitionList.resize(theProperties.size());
 
-    function<tuple<Qt3DSDMPropertyHandle, SUICDMPropertyDefinition>(Qt3DSDMPropertyHandle)>
+    function<tuple<Qt3DSDMPropertyHandle, Qt3DSDMPropertyDefinition>(Qt3DSDMPropertyHandle)>
         thePropertyTransform(bind(TransformProperty, std::placeholders::_1, ref(*m_Data)));
     transform(theProperties.begin(), theProperties.end(), theDefinitionList.begin(),
               thePropertyTransform);
@@ -166,7 +166,7 @@ void CDataCoreProducer::GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
     m_Data->GetInstanceProperties(inInstance, outProperties);
 }
 
-const SUICDMPropertyDefinition &
+const Qt3DSDMPropertyDefinition &
 CDataCoreProducer::GetProperty(Qt3DSDMPropertyHandle inProperty) const
 {
     return m_Data->GetProperty(inProperty);
@@ -174,7 +174,7 @@ CDataCoreProducer::GetProperty(Qt3DSDMPropertyHandle inProperty) const
 
 void CDataCoreProducer::RemoveProperty(Qt3DSDMPropertyHandle inProperty)
 {
-    SUICDMPropertyDefinition theDef = GetProperty(inProperty);
+    Qt3DSDMPropertyDefinition theDef = GetProperty(inProperty);
     TDataModelInstancePtr theInstance =
         CSimpleDataCore::GetInstanceNF(theDef.m_Instance, m_Data->m_Objects);
     if (find_if<TIntList::iterator>(theInstance->m_Properties,

@@ -34,7 +34,7 @@
 #include <QSize>
 #include <QOpenGLContext>
 
-Q3DSQmlRender::Q3DSQmlRender(IUICRenderContext &inRenderContext, const char *asset)
+Q3DSQmlRender::Q3DSQmlRender(IQt3DSRenderContext &inRenderContext, const char *asset)
     : m_RenderContext(inRenderContext)
     , m_qmlStreamRenderer(nullptr)
     , m_offscreenRenderType(inRenderContext.GetStringTable().RegisterStr(GetRendererName()))

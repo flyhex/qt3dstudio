@@ -410,7 +410,7 @@ static void DecompressDDS(void *inSrc, QT3DSU32 inDataSize, QT3DSU32 inWidth, QT
     }
 }
 
-bool ScanDDSForAlpha(UICDDSImage *dds)
+bool ScanDDSForAlpha(Qt3DSDDSImage *dds)
 {
     bool hasAlpha = false;
     switch (dds->format) {

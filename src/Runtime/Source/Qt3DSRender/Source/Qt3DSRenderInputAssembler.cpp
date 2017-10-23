@@ -61,7 +61,7 @@ namespace render {
             (NVRenderBackend::NVRenderBackendBufferObject *)QT3DS_ALLOC(
                 m_Foundation.getAllocator(), entrySize, "NVRenderInputAssembler");
         // setup vertex buffer backend handle array
-        UICBASE_FOREACH(idx, buffers.size())
+        QT3DS_FOREACH(idx, buffers.size())
         {
             m_VertexBuffers.push_back(buffers.mData[idx]);
             bufferHandle[idx] = buffers.mData[idx]->GetBuffertHandle();

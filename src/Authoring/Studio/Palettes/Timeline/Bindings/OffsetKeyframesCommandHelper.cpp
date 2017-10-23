@@ -62,7 +62,7 @@ COffsetKeyframesCommandHelper::~COffsetKeyframesCommandHelper()
 void COffsetKeyframesCommandHelper::SetCommandTime(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                                    long inTime)
 {
-    // The UICDM system will take care of merging these under the hood.
+    // The DataModel system will take care of merging these under the hood.
     ENSURE_EDITOR(L"Set Keyframe Time").SetKeyframeTime(inKeyframe, inTime);
 }
 

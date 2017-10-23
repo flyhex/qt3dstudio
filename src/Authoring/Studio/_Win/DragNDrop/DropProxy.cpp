@@ -109,10 +109,10 @@ CDropSource *CDropProxy::GetDropSource(const QMimeData *inDataObject, long inFla
                 // Get the filename of the object being dragged
                 QString theFilename = inDataObject->urls().at(inItem).toLocalFile();
 
-                CUICFile theFile(Q3DStudio::CString::fromQString(theFilename));
+                Qt3DSFile theFile(Q3DStudio::CString::fromQString(theFilename));
                 // Dragging a single file
                 theDropSource =
-                    CDropSourceFactory::Create(QT3DS_FLAVOR_FILE, &theFile, sizeof(CUICFile *));
+                    CDropSourceFactory::Create(QT3DS_FLAVOR_FILE, &theFile, sizeof(Qt3DSFile *));
             }
         }
     } break;

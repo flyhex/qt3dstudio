@@ -156,19 +156,19 @@ Q3DStudio::CString CTimeMeasure::FormatTime(long inTime)
     Q3DStudio::CString theTime;
     // If only hours are being displayed then format it as hours.
     if (theHoursOnlyFlag) {
-        theTime.Format(_UIC("%dh"), theHours);
+        theTime.Format(_LSTR("%dh"), theHours);
     }
     // If only minutes are being displayed then format it as minutes.
     else if (theMinutesOnlyFlag) {
-        theTime.Format(_UIC("%dm"), theMinutes);
+        theTime.Format(_LSTR("%dm"), theMinutes);
     }
     // If only seconds are being displayed then format as seconds
     else if (theSecondsOnlyFlag) {
-        theTime.Format(_UIC("%ds"), theSeconds);
+        theTime.Format(_LSTR("%ds"), theSeconds);
     }
     // If the intervals are correct then this should only be tenths of seconds, so do that.
     else {
-        theTime.Format(_UIC("0.%ds"), theMillis / 100);
+        theTime.Format(_LSTR("0.%ds"), theMillis / 100);
     }
 
     return theTime;

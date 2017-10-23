@@ -68,8 +68,8 @@ namespace render {
             inRemapper.Remap(m_FirstChild);
         }
         // returns true if any of the layers were dirty or if this object was dirty
-        bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IUICRenderContext &inContext);
-        void Render(const QT3DSVec2 &inViewportDimensions, IUICRenderContext &inContext,
+        bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext);
+        void Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
                     RenderClearCommand command = ClearIsOptional);
     };
 }

@@ -47,7 +47,7 @@ class IDataCore;
 class ISlideGraphCore;
 class ISlideCore;
 class IAnimationCore;
-struct SUICDMPropertyDefinition;
+struct Qt3DSDMPropertyDefinition;
 class IPropertySystem;
 class IInstancePropertyCore;
 class ISignalConnection;
@@ -245,9 +245,9 @@ public: // Operations which likely don't belong on this class
                                                 qt3dsdm::Qt3DSDMInstanceHandle &outLayerInstance,
                                                 qt3dsdm::Qt3DSDMPropertyHandle &outProperty);
 
-public: // Bridging to Actions. These needs to be here as UICDM has no hierarchy info and we need to
+public: // Bridging to Actions. These needs to be here as DataModel has no hierarchy info and we need to
         // resolve the path to idenitfy the object referenced
-    // We should really reconsider to have the hierachcy store outside of UICDM.
+    // We should really reconsider to have the hierachcy store outside of DataModel.
     void GetReferencedActions(qt3dsdm::Qt3DSDMInstanceHandle inReferencedInstance,
                               long inReferencedMode, qt3dsdm::TActionHandleList &outActions);
     void UpdateHandlerArgumentValue(qt3dsdm::HandlerArgumentType::Value inArgType,
@@ -340,7 +340,7 @@ public: // helpers
 
     std::pair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::SLong4>
     CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSourceInstance,
-                        qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::Qt3DSDMSlideHandle inUICDMSlide);
+                        qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
     void SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, const Q3DStudio::CString &inName);
     Q3DStudio::CString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);

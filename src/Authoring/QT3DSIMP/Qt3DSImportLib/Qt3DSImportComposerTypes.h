@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTCOMPOSERTYPESH
-#define UICIMPORTCOMPOSERTYPESH
+#ifndef QT3DS_IMPORT_COMPOSER_TYPES_H
+#define QT3DS_IMPORT_COMPOSER_TYPES_H
 #include "Qt3DSDMComposerTypeDefinitions.h"
 
 // Define the subset of types that the import library supports.

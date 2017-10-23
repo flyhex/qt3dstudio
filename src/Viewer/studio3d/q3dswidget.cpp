@@ -272,7 +272,7 @@ bool Q3DSWidgetPrivate::initializeRuntime()
 
     q_ptr->makeCurrent();
 
-    m_viewerApp = &Q3DSViewerApp::Create(q_ptr->context(), new CUICAudioPlayerImpl());
+    m_viewerApp = &Q3DSViewerApp::Create(q_ptr->context(), new Qt3DSAudioPlayerImpl());
 
     Q_ASSERT(m_viewerApp);
 

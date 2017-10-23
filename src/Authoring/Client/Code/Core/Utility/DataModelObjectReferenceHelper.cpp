@@ -40,7 +40,7 @@
 #include "Doc.h"
 #include "GraphUtils.h"
 
-// UICDM
+// DataModel
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "Qt3DSDMSlides.h"
@@ -84,7 +84,7 @@ CObjectReferenceHelper::~CObjectReferenceHelper()
 IObjectReferenceHelper::SObjectRefInfo
 CObjectReferenceHelper::GetInfo(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance) const
 {
-    // UICDM
+    // DataModel
     using namespace qt3dsdm;
     CClientDataModelBridge *theClientBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();
 
@@ -152,7 +152,7 @@ bool CObjectReferenceHelper::GetChildInstanceList(
     CClientDataModelBridge *theClientBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();
     if (inInstance.Valid()) {
         //		ASSERT(0); // Should this work for more than Materials?
-        if (theClientBridge->IsMaterialInstance(inInstance)) { // UICDM objects
+        if (theClientBridge->IsMaterialInstance(inInstance)) { // DataModel objects
             long theSlideIndex = m_Doc->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(inSlide);
             GetPropertyAsChildrenList(inInstance, outList, theSlideIndex);
             return true;
@@ -212,7 +212,7 @@ Q3DStudio::CString CObjectReferenceHelper::GetObjectReferenceString(
 
 //==============================================================================
 /**
- * NOTE: inId is never a UICDM object, till we support dynamic properties OR actions for UICDM
+ * NOTE: inId is never a DataModel object, till we support dynamic properties OR actions for DataModel
  * objects.
  */
 bool CObjectReferenceHelper::ResolvePath(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
@@ -254,7 +254,7 @@ CObjectReferenceHelper::Resolve(const qt3dsdm::SValue &inObjectRefValue,
         }
         if (theValueType == qt3dsdm::DataModelDataType::String) // route it through the function that
                                                              // can determine both old client and
-                                                             // new UICDM objects
+                                                             // new DataModel objects
         {
             bool theFullResolvedFlag = false;
             CRelativePathTools::EPathType theUnusedPathType;

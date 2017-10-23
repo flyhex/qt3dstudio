@@ -315,7 +315,7 @@ void CDispatch::FireOnLoadedSubPresentation()
  */
 void CDispatch::FireOnNewPresentation()
 {
-    UICPROFILE(FireOnNewPresentation);
+    QT3DS_PROFILE(FireOnNewPresentation);
 
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnNewPresentation);
 }
@@ -329,7 +329,7 @@ void CDispatch::FireOnClosingPresentation()
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnClosingPresentation);
 }
 
-void CDispatch::FireOnSavingPresentation(const CUICFile *inNewPresentationFile)
+void CDispatch::FireOnSavingPresentation(const Qt3DSFile *inNewPresentationFile)
 {
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnSavingPresentation,
                                             inNewPresentationFile);
@@ -428,7 +428,7 @@ void CDispatch::RemoveFileOpenListener(CFileOpenListener *inListener)
 /**
  * Fire an event to all the file open listeners that a has been opened.
  */
-void CDispatch::FireOnOpenDocument(const CUICFile &inFile, bool inSucceeded)
+void CDispatch::FireOnOpenDocument(const Qt3DSFile &inFile, bool inSucceeded)
 {
     m_FileOpenListeners.FireEvent(&CFileOpenListener::OnOpenDocument, inFile, inSucceeded);
 }
@@ -437,7 +437,7 @@ void CDispatch::FireOnOpenDocument(const CUICFile &inFile, bool inSucceeded)
 /**
  * Fire an event to all the file open listeners that a has been saved.
  */
-void CDispatch::FireOnSaveDocument(const CUICFile &inFile, bool inSucceeded, bool inSaveCopy)
+void CDispatch::FireOnSaveDocument(const Qt3DSFile &inFile, bool inSucceeded, bool inSaveCopy)
 {
     m_FileOpenListeners.FireEvent(&CFileOpenListener::OnSaveDocument, inFile, inSucceeded,
                                   inSaveCopy);
@@ -447,7 +447,7 @@ void CDispatch::FireOnSaveDocument(const CUICFile &inFile, bool inSucceeded, boo
 /**
  * Fire an event to all the file open listeners that a has been saved.
  */
-void CDispatch::FireOnDocumentPathChanged(const CUICFile &inNewPath)
+void CDispatch::FireOnDocumentPathChanged(const Qt3DSFile &inNewPath)
 {
     m_FileOpenListeners.FireEvent(&CFileOpenListener::OnDocumentPathChanged, inNewPath);
 }

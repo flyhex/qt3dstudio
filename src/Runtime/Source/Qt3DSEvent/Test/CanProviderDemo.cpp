@@ -174,7 +174,7 @@ unsigned short g_VehicleSpeedData[] = {
     35,   30,   25,   20,   15,   10,   5,    0
 };
 
-SUICEventSystemEvent *CCanProviderDemo::GetNextEvent(IEventFactory &inFactory)
+Qt3DSEventSystemEvent *CCanProviderDemo::GetNextEvent(IEventFactory &inFactory)
 {
     clock_t theCurClock = clock();
     if (theCurClock > m_LastClock
@@ -218,23 +218,23 @@ SUICEventSystemEvent *CCanProviderDemo::GetNextEvent(IEventFactory &inFactory)
         return 0;
     }
     ++m_Frame;
-    SUICEventSystemEvent &theEvent = inFactory.CreateEvent(9);
-    SUICEventSystemEventData *theCurrentData = theEvent.m_Data;
+    Qt3DSEventSystemEvent &theEvent = inFactory.CreateEvent(9);
+    Qt3DSEventSystemEventData *theCurrentData = theEvent.m_Data;
     theCurrentData->m_Name = inFactory.RegisterStr("device_type");
-    theCurrentData->m_Value.m_Type = EUICEventSystemEventTypesString;
+    theCurrentData->m_Value.m_Type = QT3DSEventSystemEventTypesString;
     theCurrentData->m_Value.m_String = inFactory.AllocateStr("CAN");
     ++theCurrentData;
     theCurrentData->m_Name = inFactory.RegisterStr("id");
-    theCurrentData->m_Value.m_Type = EUICEventSystemEventTypesNumber;
+    theCurrentData->m_Value.m_Type = QT3DSEventSystemEventTypesNumber;
     theCurrentData->m_Value.m_Number = 101;
     ++theCurrentData;
     theCurrentData->m_Name = inFactory.RegisterStr("length");
-    theCurrentData->m_Value.m_Type = EUICEventSystemEventTypesNumber;
+    theCurrentData->m_Value.m_Type = QT3DSEventSystemEventTypesNumber;
     theCurrentData->m_Value.m_Number = 6;
     ++theCurrentData;
     for (int i = 0; i < theLength; ++i) {
         theCurrentData->m_Name = inFactory.RegisterStr("data");
-        theCurrentData->m_Value.m_Type = EUICEventSystemEventTypesNumber;
+        theCurrentData->m_Value.m_Type = QT3DSEventSystemEventTypesNumber;
         theCurrentData->m_Value.m_Number = theData[i];
         ++theCurrentData;
     }
@@ -242,11 +242,11 @@ SUICEventSystemEvent *CCanProviderDemo::GetNextEvent(IEventFactory &inFactory)
     return &theEvent;
 }
 
-size_t CCanProviderDemo::GetNextEvents(IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
+size_t CCanProviderDemo::GetNextEvents(IEventFactory &inFactory, Qt3DSEventSystemEvent **outBuffer,
                                        size_t bufLen)
 {
     size_t bufIdx = 0;
-    SUICEventSystemEvent *evt = NULL;
+    Qt3DSEventSystemEvent *evt = NULL;
     for (evt = GetNextEvent(inFactory); evt && bufIdx < bufLen;
          evt = GetNextEvent(inFactory), ++bufIdx)
         outBuffer[bufIdx] = evt;

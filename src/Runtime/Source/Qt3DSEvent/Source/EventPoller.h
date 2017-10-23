@@ -53,7 +53,7 @@ namespace evt {
     public:
         typedef IEventProvider *TProvider;
         typedef qt3ds::foundation::nvvector<eastl::pair<TProvider, bool>> TProviderList;
-        typedef qt3ds::foundation::nvvector<SUICEventSystemEvent *> TEventList;
+        typedef qt3ds::foundation::nvvector<Qt3DSEventSystemEvent *> TEventList;
         typedef eastl::pair<void *, TProvider> TCEventProviderPair;
         typedef eastl::vector<TCEventProviderPair> TCEventProviderList;
 
@@ -67,9 +67,9 @@ namespace evt {
         void RemoveProvider(IEventProvider &inProvider) override;
         bool IgnoreProvider(IEventProvider &inProvider) override;
         bool ActivateProvider(IEventProvider &inProvider) override;
-        size_t GetNextEvents(SUICEventSystemEvent **outBuffer, size_t bufLen) override;
+        size_t GetNextEvents(Qt3DSEventSystemEvent **outBuffer, size_t bufLen) override;
         IEventFactory &GetEventFactory() override;
-        SUICEventSystemEventPoller *GetCInterface() override;
+        Qt3DSEventSystemEventPoller *GetCInterface() override;
         bool GetAndClearEventFetchedFlag() override;
         void PurgeEvents() override;
 
@@ -78,14 +78,14 @@ namespace evt {
         void addRef() override;
         void release() override;
 
-        TProvider GetEventProviderWrapper(SUICEventSystemEventProvider inProvider);
-        TProvider GetOrCreateEventProviderWrapper(SUICEventSystemEventProvider inProvider);
-        void ReleaseEventProviderWrapper(SUICEventSystemEventProvider inProvider);
+        TProvider GetEventProviderWrapper(Qt3DSEventSystemEventProvider inProvider);
+        TProvider GetOrCreateEventProviderWrapper(Qt3DSEventSystemEventProvider inProvider);
+        void ReleaseEventProviderWrapper(Qt3DSEventSystemEventProvider inProvider);
 
         static CPoller &Create(qt3ds::NVFoundationBase &inFoundation);
 
     private:
-        SUICEventSystemEvent *GetNextEvent(bool inAllowResetBuffer /* = true*/);
+        Qt3DSEventSystemEvent *GetNextEvent(bool inAllowResetBuffer /* = true*/);
 
         qt3ds::QT3DSI32 mRefCount;
         qt3ds::NVFoundationBase &m_Foundation;
@@ -93,7 +93,7 @@ namespace evt {
         TProviderList m_Providers;
         TEventList m_EventList;
         qt3ds::QT3DSU32 m_EventIndex;
-        SUICEventSystemEventPoller m_CInterface;
+        Qt3DSEventSystemEventPoller m_CInterface;
         TCEventProviderList m_CEventProviders;
         bool m_EventFetched;
     };

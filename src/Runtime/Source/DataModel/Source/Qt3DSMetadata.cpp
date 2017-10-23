@@ -158,9 +158,9 @@ private:
     eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType> m_Buf[4];
 
 public:
-    static void SimpleUICDMLogger(const char *inMessage)
+    static void SimpleDataModelLogger(const char *inMessage)
     {
-        qCInfo(TRACE_INFO) << SRuntimeMetaDataImpl::SimpleUICDMLogger
+        qCInfo(TRACE_INFO) << SRuntimeMetaDataImpl::SimpleDataModelLogger
                                << inMessage;
     }
     //==============================================================================
@@ -171,7 +171,7 @@ public:
         : m_InputStreamFactory(inFactory)
     {
         // Use this to enable some simple uicdm debug logging.  Beware of a *lot* of log output.
-        // g_UICDMDebugLogger = SimpleUICDMLogger;
+        // g_DataModelDebugLogger = SimpleDataModelLogger;
         try {
             // need to pause here to hook up the debugger
             m_StrTable = qt3dsdm::IStringTable::CreateStringTable();
@@ -180,8 +180,8 @@ public:
 
             m_Objects = std::make_shared<SComposerObjectDefinitions>(std::ref(*m_DataCore),
                                                                        std::ref(*m_NewMetaData));
-        } catch (qt3dsdm::UICDMError &error) {
-            qCCritical(INTERNAL_ERROR) << "SRuntimeMetaDataImpl UICDMError: "
+        } catch (qt3dsdm::Qt3DSDMError &error) {
+            qCCritical(INTERNAL_ERROR) << "SRuntimeMetaDataImpl Qt3DSDMError: "
                                        << m_StrTable->GetNarrowStr(error.m_Message);
         } catch (std::runtime_error &exc) {
             if (exc.what()) {

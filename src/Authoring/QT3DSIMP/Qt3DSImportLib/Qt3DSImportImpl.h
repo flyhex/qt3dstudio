@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTIMPLH
-#define UICIMPORTIMPLH
+#ifndef QT3DS_IMPORT_IMPL_H
+#define QT3DS_IMPORT_IMPL_H
 #include "Qt3DSImport.h"
 #include "Qt3DSImportContainers.h"
 #include "EASTL/functional.h"

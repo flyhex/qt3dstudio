@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMGUIDESH
-#define UICDMGUIDESH
+#ifndef QT3DSDM_GUIDES_H
+#define QT3DSDM_GUIDES_H
 #include "Qt3DSDMDataTypes.h"
 #include "foundation/Qt3DSSimpleTypes.h"
 #include "Qt3DSDMSignals.h"

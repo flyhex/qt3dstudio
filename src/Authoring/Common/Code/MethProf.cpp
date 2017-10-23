@@ -149,7 +149,7 @@ float CMethProf::GetMaxMillis()
 Q3DStudio::CString CMethProf::GetDescription()
 {
     Q3DStudio::CString theString;
-    theString.Format(_UIC("%ls      cc: %d      tt: %d      mt: %8.2f      at: %8.2f"),
+    theString.Format(_LSTR("%ls      cc: %d      tt: %d      mt: %8.2f      at: %8.2f"),
                      (const wchar_t *)m_Name, m_CallCount, GetTotalMillis(), GetMaxMillis(),
                      GetAverageMillis());
     return theString;

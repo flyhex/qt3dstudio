@@ -138,12 +138,12 @@ Q3DStudio::CString CCrashInfo::GetXMLifiedInfo()
     Q3DStudio::CString theInfo = "<crashreport>\n";
 
     Q3DStudio::CString theEmailAddress;
-    theEmailAddress.Format(_UIC("\t<contact emailAddress=\"%ls\"/>\n"),
+    theEmailAddress.Format(_LSTR("\t<contact emailAddress=\"%ls\"/>\n"),
                            static_cast<const wchar_t *>(m_EmailAddress));
 
     Q3DStudio::CString theDescription;
     theDescription.Format(
-        _UIC("\t<description errorString=\"%ls\">\n\t\t<![CDATA[\n%ls\n\t\t]]>\n\t</description>\n"),
+        _LSTR("\t<description errorString=\"%ls\">\n\t\t<![CDATA[\n%ls\n\t\t]]>\n\t</description>\n"),
         static_cast<const wchar_t *>(m_ErrorString), static_cast<const wchar_t *>(m_Description));
 
     Q3DStudio::CString theProductInstance;
@@ -171,7 +171,7 @@ Q3DStudio::CString CCrashInfo::GetXMLifiedInfo()
     }
 
     Q3DStudio::CString theStackTrace;
-    theStackTrace.Format(_UIC("\t<stacktrace>\n\t\t<![CDATA[\n%ls\n\t\t]]>\n\t</stacktrace>\n"),
+    theStackTrace.Format(_LSTR("\t<stacktrace>\n\t\t<![CDATA[\n%ls\n\t\t]]>\n\t</stacktrace>\n"),
                          static_cast<const wchar_t *>(m_StackTrace));
 
     theInfo += theEmailAddress;

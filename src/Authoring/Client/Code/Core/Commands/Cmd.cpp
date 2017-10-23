@@ -87,7 +87,7 @@ bool CCmd::IsCommitted()
 QString CCmd::ToString()
 {
     Q3DStudio::CString theString;
-    theString.Format(_UIC("Command - %d"), GetType());
+    theString.Format(_LSTR("Command - %d"), GetType());
 
     return theString.toQString();
 }

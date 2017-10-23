@@ -141,17 +141,17 @@ QT3DSU64 SPathImportTranslator::ParseSVGGroup(TInstanceHandle inParent,
 }
 
 namespace {
-QT3DSF32 ToUICDM(Option<QT3DSF32> inData, QT3DSF32 inDefault)
+QT3DSF32 ToDataModel(Option<QT3DSF32> inData, QT3DSF32 inDefault)
 {
     if (inData.hasValue())
         return *inData;
     return inDefault;
 }
-SFloat3 ToUICDM(const QT3DSVec3 &inData)
+SFloat3 ToDataModel(const QT3DSVec3 &inData)
 {
     return SFloat3(inData.x, inData.y, inData.z);
 }
-bool ToUICDM(Option<bool> inData, bool inDefault)
+bool ToDataModel(Option<bool> inData, bool inDefault)
 {
     if (inData.hasValue())
         return *inData;
@@ -162,10 +162,10 @@ bool ToUICDM(Option<bool> inData, bool inDefault)
 QT3DSU64 SPathImportTranslator::ParseSVGPath(TInstanceHandle inParent,
                                           eastl::vector<Q3DStudio::CString> &inExistingNames)
 {
-    QT3DSF32 strokeWidth = ToUICDM(m_LuaState.NumberFromTopOfStackTable("stroke-width"), 1.0f);
-    QT3DSF32 pathOpacity = ToUICDM(m_LuaState.NumberFromTopOfStackTable("opacity"), 100.0f);
-    QT3DSF32 fillOpacity = ToUICDM(m_LuaState.NumberFromTopOfStackTable("fill-opacity"), 100.0f);
-    QT3DSF32 strokeOpacity = ToUICDM(m_LuaState.NumberFromTopOfStackTable("stroke-opacity"), 100.0f);
+    QT3DSF32 strokeWidth = ToDataModel(m_LuaState.NumberFromTopOfStackTable("stroke-width"), 1.0f);
+    QT3DSF32 pathOpacity = ToDataModel(m_LuaState.NumberFromTopOfStackTable("opacity"), 100.0f);
+    QT3DSF32 fillOpacity = ToDataModel(m_LuaState.NumberFromTopOfStackTable("fill-opacity"), 100.0f);
+    QT3DSF32 strokeOpacity = ToDataModel(m_LuaState.NumberFromTopOfStackTable("stroke-opacity"), 100.0f);
     Option<QT3DSVec3> fillColor = m_LuaState.Vec3FromTopOfStackTable("fill");
     Option<QT3DSVec3> strokeColor = m_LuaState.Vec3FromTopOfStackTable("stroke");
     eastl::string pathName = m_LuaState.StringFromTopOfStackTable("name");
@@ -191,7 +191,7 @@ QT3DSU64 SPathImportTranslator::ParseSVGPath(TInstanceHandle inParent,
 
     for (bool success = m_LuaState.GetChildFromTopOfStackTable(childIndex); success;
          ++childIndex, success = m_LuaState.GetChildFromTopOfStackTable(childIndex)) {
-        bool isClosed = ToUICDM(m_LuaState.BooleanFromTopOfStackTable("closepath"), true);
+        bool isClosed = ToDataModel(m_LuaState.BooleanFromTopOfStackTable("closepath"), true);
         // Note that this pops the child off the stack so it is no longer available as it is the
         // first argument
         // to the coordinates function.
@@ -243,14 +243,14 @@ QT3DSU64 SPathImportTranslator::ParseSVGPath(TInstanceHandle inParent,
 
         TInstanceHandle theFillMaterial = GetChild(retval, fillMaterialIndex);
         m_Import->SetInstancePropertyValue(theFillMaterial, m_ObjectTypes.m_Material.m_DiffuseColor,
-                                           ToUICDM(*fillColor));
+                                           ToDataModel(*fillColor));
         m_Import->SetInstancePropertyValue(theFillMaterial, m_ObjectTypes.m_Material.m_Opacity,
                                            fillOpacity);
     }
     if (hasStroke) {
         TInstanceHandle theStrokeMaterial = GetChild(retval, 0);
         m_Import->SetInstancePropertyValue(
-            theStrokeMaterial, m_ObjectTypes.m_Material.m_DiffuseColor, ToUICDM(*strokeColor));
+            theStrokeMaterial, m_ObjectTypes.m_Material.m_DiffuseColor, ToDataModel(*strokeColor));
         m_Import->SetInstancePropertyValue(theStrokeMaterial, m_ObjectTypes.m_Material.m_Opacity,
                                            strokeOpacity);
     }

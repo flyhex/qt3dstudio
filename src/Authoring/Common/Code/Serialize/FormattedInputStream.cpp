@@ -104,13 +104,13 @@ CFormattedInputStream &CFormattedInputStream::operator>>(short &inShort)
     return *this;
 }
 
-CFormattedInputStream &CFormattedInputStream::operator>>(Q3DStudio::UICChar &inUICChar)
+CFormattedInputStream &CFormattedInputStream::operator>>(Q3DStudio::Qt3DSChar &inChar)
 {
-    m_Count += sizeof(Q3DStudio::UICChar);
+    m_Count += sizeof(Q3DStudio::Qt3DSChar);
 
-    m_InputStream->Read(&inUICChar, sizeof(Q3DStudio::UICChar));
-    BTOH2(inUICChar, inUICChar);
-    SWAP2BYTES(inUICChar, inUICChar);
+    m_InputStream->Read(&inChar, sizeof(Q3DStudio::Qt3DSChar));
+    BTOH2(inChar, inChar);
+    SWAP2BYTES(inChar, inChar);
     return *this;
 }
 
@@ -143,7 +143,7 @@ unsigned short CFormattedInputStream::ReadUnsignedShort()
     return theShort;
 }
 
-void CFormattedInputStream::CopyToFile(const CUICFile &inFile, long inLength,
+void CFormattedInputStream::CopyToFile(const Qt3DSFile &inFile, long inLength,
                                        bool inCloseStream /*= true */)
 {
     Q3DStudio::CString thePath = inFile.GetAbsolutePosixPath();

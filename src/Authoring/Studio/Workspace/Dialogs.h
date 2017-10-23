@@ -111,25 +111,25 @@ public:
     static bool IsPathBufferExtension(const wchar_t *inExt);
     static bool IsSoundFileExtension(const wchar_t *inExt);
 
-    CUICFile GetExportChoice(const Q3DStudio::CString &inExtension,
+    Qt3DSFile GetExportChoice(const Q3DStudio::CString &inExtension,
                              const Q3DStudio::CString &inDefaultName);
 
-    std::pair<CUICFile, bool> GetSaveAsChoice(const Q3DStudio::CString &inDialogTitle = "",
+    std::pair<Qt3DSFile, bool> GetSaveAsChoice(const Q3DStudio::CString &inDialogTitle = "",
                                               bool inFilenameUntitled = false);
     // Returns pair of file along with a boolean indicating the state of the create
     // new directory checkbox.
-    std::pair<CUICFile, bool>
+    std::pair<Qt3DSFile, bool>
     GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory = Q3DStudio::CString());
-    CUICFile GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory = Q3DStudio::CString());
+    Qt3DSFile GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory = Q3DStudio::CString());
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription,
                              bool inWarningsOnly);
-    void DisplayLoadingPresentationFailed(const CUICFile &inPresentation, long inErrorIDS = -1);
+    void DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation, long inErrorIDS = -1);
     void DisplaySavingPresentationFailed();
-    void DisplaySaveReadOnlyFailed(const CUICFile &inSavedLocation);
-    CUICMessageBox::EMessageBoxReturn DisplayMessageBox(const Q3DStudio::CString &inTitle,
+    void DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation);
+    Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const Q3DStudio::CString &inTitle,
                                                         const Q3DStudio::CString &inText,
-                                                        CUICMessageBox::EMessageBoxIcon inIcon,
+                                                        Qt3DSMessageBox::EMessageBoxIcon inIcon,
                                                         bool inShowCancel);
     int DisplayChoiceBox(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
                          int inIcon);

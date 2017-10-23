@@ -39,7 +39,7 @@ using namespace qt3ds::evt;
 typedef char TEventChar;
 using qt3ds::QT3DSU32;
 
-class CInitableRegisteredStr : public SUICEventSystemRegisteredStr
+class CInitableRegisteredStr : public Qt3DSEventSystemRegisteredStr
 {
 public:
     CInitableRegisteredStr(const TEventStr inString) { m_Data = inString; }
@@ -61,24 +61,24 @@ CFactory::~CFactory()
 {
 }
 
-SUICEventSystemEvent &CFactory::CreateEvent(int inNumData)
+Qt3DSEventSystemEvent &CFactory::CreateEvent(int inNumData)
 {
     // Ensure num data is in range
     inNumData = qt3ds::NVMax(0, inNumData);
     // Ensure we can actually allocate something that big
     QT3DSU32 dataSize = static_cast<QT3DSU32>(
-        qt3ds::NVMin((size_t)inNumData * sizeof(SUICEventSystemEventData),
-                  TEventAllocator::getSlabSize() - sizeof(SUICEventSystemEvent)));
+        qt3ds::NVMin((size_t)inNumData * sizeof(Qt3DSEventSystemEventData),
+                  TEventAllocator::getSlabSize() - sizeof(Qt3DSEventSystemEvent)));
     // get the actual num data after safety checks.
-    inNumData = (int)(dataSize / sizeof(SUICEventSystemEventData));
+    inNumData = (int)(dataSize / sizeof(Qt3DSEventSystemEventData));
 
-    QT3DSU32 allocSize = sizeof(SUICEventSystemEvent) + inNumData * sizeof(SUICEventSystemEventData);
+    QT3DSU32 allocSize = sizeof(Qt3DSEventSystemEvent) + inNumData * sizeof(Qt3DSEventSystemEventData);
 
-    SUICEventSystemEvent *theEvent = (SUICEventSystemEvent *)m_Allocator.allocate(
+    Qt3DSEventSystemEvent *theEvent = (Qt3DSEventSystemEvent *)m_Allocator.allocate(
         allocSize, "Event allocation", __FILE__, __LINE__);
     theEvent->m_NumData = inNumData;
-    theEvent->m_Data = reinterpret_cast<SUICEventSystemEventData *>(((qt3ds::QT3DSU8 *)theEvent)
-                                                                    + sizeof(SUICEventSystemEvent));
+    theEvent->m_Data = reinterpret_cast<Qt3DSEventSystemEventData *>(((qt3ds::QT3DSU8 *)theEvent)
+                                                                    + sizeof(Qt3DSEventSystemEvent));
 
     // Initialize the event data to zero so that a free event won't cause a calamity.
     qt3ds::intrinsics::memZero(theEvent->m_Data, dataSize);
@@ -88,7 +88,7 @@ SUICEventSystemEvent &CFactory::CreateEvent(int inNumData)
 
 size_t CFactory::GetMaxNumEventData()
 {
-    return m_Allocator.getSlabSize() - sizeof(SUICEventSystemEvent);
+    return m_Allocator.getSlabSize() - sizeof(Qt3DSEventSystemEvent);
 }
 
 size_t CFactory::GetMaxStrLength()
@@ -101,7 +101,7 @@ void CFactory::ReleaseOutstandingEvents()
     m_Allocator.reset();
 }
 
-SUICEventSystemRegisteredStr CFactory::RegisterStr(TEventStr inSrc)
+Qt3DSEventSystemRegisteredStr CFactory::RegisterStr(TEventStr inSrc)
 {
     return CInitableRegisteredStr(m_StringTable->RegisterStr(inSrc));
 }

@@ -44,9 +44,9 @@
 //==============================================================================
 /**
  *	Implementation of IObjectReferenceHelper
- *	For now, this cross from the old client to new UICDM boundaries, and shield that logic from
+ *	For now, this cross from the old client to new DataModel boundaries, and shield that logic from
  *the actual control classes.
- *	Eventually, when all assets is converted to UICDM land, the meat of all these functions can
+ *	Eventually, when all assets is converted to DataModel land, the meat of all these functions can
  *change accordingly.
  */
 class CObjectReferenceHelper : public IObjectReferenceHelper
@@ -83,7 +83,7 @@ public:
                      const qt3dsdm::Qt3DSDMInstanceHandle &inBaseInstance,
                      CRelativePathTools::EPathType inPathType) const override;
 
-protected: // UICDM
+protected: // DataModel
     void GetPropertyAsChildrenList(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
                                    qt3dsdm::TInstanceHandleList &outList, long inSlideIndex) const;
 

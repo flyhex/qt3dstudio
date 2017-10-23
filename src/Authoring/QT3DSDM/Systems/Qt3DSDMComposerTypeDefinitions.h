@@ -345,7 +345,7 @@ struct DataTypeToTypeMap
     bool force_compile_error;
 };
 
-#define UICDM_DEFINE_TYPE_TO_DATA_TYPE(enumName, type)                                             \
+#define QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(enumName, type)                                             \
     template <>                                                                                    \
     struct TypeToDataTypeMap<type>                                                                 \
     {                                                                                              \
@@ -357,19 +357,19 @@ struct DataTypeToTypeMap
         typedef type TDataType;                                                                    \
     };
 
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float, float)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float2, SFloat2)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float3, SFloat3)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Long, qt3ds::QT3DSI32)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::String, TDataStrPtr)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Bool, bool)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Long4, SLong4)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::StringRef, SStringRef)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::StringOrInt, SStringOrInt)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::ObjectRef, SObjectRefType)
-UICDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::FloatList, TFloatList)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float, float)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float2, SFloat2)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float3, SFloat3)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Long, qt3ds::QT3DSI32)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::String, TDataStrPtr)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Bool, bool)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Long4, SLong4)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::StringRef, SStringRef)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::StringOrInt, SStringOrInt)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::ObjectRef, SObjectRefType)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::FloatList, TFloatList)
 
-#undef UICDM_DEFINE_TYPE_TO_DATA_TYPE
+#undef QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE
 
 template <typename TDataType>
 inline DataModelDataType::Value TypeToDataType()
@@ -386,7 +386,7 @@ struct SComposerPropertyDefinition
                                 const TDataType &inDefault)
         : m_DefaultValue(inDefault)
     {
-        UICDM_LOG_FUNCTION("SComposerPropertyDefinition-1");
+        QT3DSDM_LOG_FUNCTION("SComposerPropertyDefinition-1");
         m_Property = inDataCore.AddProperty(inInstance, ComposerPropertyNames::Convert(TPropName),
                                             TypeToDataType<TDataType>());
         if (m_DefaultValue.hasValue())
@@ -394,7 +394,7 @@ struct SComposerPropertyDefinition
     }
     SComposerPropertyDefinition(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance)
     {
-        UICDM_LOG_FUNCTION("SComposerPropertyDefinition-2");
+        QT3DSDM_LOG_FUNCTION("SComposerPropertyDefinition-2");
         m_Property = inDataCore.AddProperty(inInstance, ComposerPropertyNames::Convert(TPropName),
                                             TypeToDataType<TDataType>());
     }
@@ -454,27 +454,27 @@ struct SComposerBaseObjectDefinition : public SComposerTypePropertyDefinition<TE
         : SComposerTypePropertyDefinition<TEnumType>(inCore, inInstance)
         , m_Instance(inInstance)
     {
-        UICDM_LOG_FUNCTION("SComposerBaseObjectDefinition");
+        QT3DSDM_LOG_FUNCTION("SComposerBaseObjectDefinition");
         ComposerTypeDefinitionsHelper::SetInstanceAsCanonical(inMetaData, inInstance, TEnumType);
     }
 
     template <ComposerObjectTypes::Enum TBaseType>
     void Derive(IDataCore &inCore, const SComposerBaseObjectDefinition<TBaseType> &inParent)
     {
-        UICDM_LOG_FUNCTION("SComposerBaseObjectDefinition::Derive");
+        QT3DSDM_LOG_FUNCTION("SComposerBaseObjectDefinition::Derive");
         ComposerTypeDefinitionsHelper::DeriveInstance(inCore, m_Instance, inParent.m_Instance);
     }
     void SetType(IDataCore &inCore,
                  const SComposerBaseObjectDefinition<ComposerObjectTypes::Typed> &inParent)
     {
-        UICDM_LOG_FUNCTION("SComposerBaseObjectDefinition::SetInstancePropertyValue");
+        QT3DSDM_LOG_FUNCTION("SComposerBaseObjectDefinition::SetInstancePropertyValue");
         ComposerTypeDefinitionsHelper::SetInstancePropertyValue(
             inCore, m_Instance, inParent.m_TypeProp, ComposerObjectTypes::Convert(TEnumType));
     }
     void TypedDerive(IDataCore &inCore,
                      const SComposerBaseObjectDefinition<ComposerObjectTypes::Typed> &inParent)
     {
-        UICDM_LOG_FUNCTION("SComposerBaseObjectDefinition::TypedDerive");
+        QT3DSDM_LOG_FUNCTION("SComposerBaseObjectDefinition::TypedDerive");
         Derive(inCore, inParent);
         SetType(inCore, inParent);
     }

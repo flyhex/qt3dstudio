@@ -257,7 +257,7 @@ namespace render {
     }
 
     static void flip_data_vertical(FreeImageIO *io, QT3DSI8 *image, QT3DSI32 width, QT3DSI32 height,
-                                   UICDDSImage *info)
+                                   Qt3DSDDSImage *info)
     {
         if (info->compressed) {
             QT3DSI32 linesize, j;
@@ -333,7 +333,7 @@ namespace render {
         }
     }
 
-    static QT3DSI32 size_image(QT3DSI32 width, QT3DSI32 height, const UICDDSImage *image)
+    static QT3DSI32 size_image(QT3DSI32 width, QT3DSI32 height, const Qt3DSDDSImage *image)
     {
         if (image->compressed) {
             return ((width + 3) / 4) * ((height + 3) / 4)
@@ -343,7 +343,7 @@ namespace render {
         }
     }
 
-    static QT3DSI32 total_image_data_size(UICDDSImage *image)
+    static QT3DSI32 total_image_data_size(Qt3DSDDSImage *image)
     {
         QT3DSI32 i, j, index = 0, size = 0, w, h;
         QT3DSI32 cubeCount = image->cubemap ? 6 : 1;
@@ -372,7 +372,7 @@ namespace render {
         return (size);
     }
 
-    void *UICDDSAllocDataBlock(FreeImageIO *io, UICDDSImage *image)
+    void *Qt3DSDDSAllocDataBlock(FreeImageIO *io, Qt3DSDDSImage *image)
     {
         if (image) {
             QT3DSI32 i;
@@ -404,7 +404,7 @@ namespace render {
         FIBITMAP *dib = NULL;
         DDS_HEADER ddsh;
         QT3DSI8 filecode[4];
-        UICDDSImage *image = NULL;
+        Qt3DSDDSImage *image = NULL;
         bool needsBGRASwap = false;
         ;
         bool isAllreadyFlipped = false;
@@ -416,11 +416,11 @@ namespace render {
                 throw "Invalid DDS file";
             }
 
-            image = (UICDDSImage *)QT3DS_ALLOC(io->m_Allocator, sizeof(UICDDSImage), "DoLoadDDS");
+            image = (Qt3DSDDSImage *)QT3DS_ALLOC(io->m_Allocator, sizeof(Qt3DSDDSImage), "DoLoadDDS");
             if (image == NULL) {
                 throw "Qt3DSDDSImage allocation failed";
             }
-            memset(image, 0, sizeof(UICDDSImage));
+            memset(image, 0, sizeof(Qt3DSDDSImage));
 
             // read in DDS header
             inStream.Read(&ddsh, 1);
@@ -580,7 +580,7 @@ namespace render {
             }
 
             // allocate the meta datablock for all mip storage.
-            UICDDSAllocDataBlock(io, image);
+            Qt3DSDDSAllocDataBlock(io, image);
             if (image->dataBlock == NULL) {
                 throw "Failed to allocate memory for image data storage";
             }

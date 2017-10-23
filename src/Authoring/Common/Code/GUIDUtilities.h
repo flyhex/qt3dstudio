@@ -182,7 +182,7 @@ public:
     {
         Q3DStudio::CString theGuidStr;
 
-        // theGuidStr.Format( _UIC( "{%08X-%04hX-%04hX-%02X%02X-%02X%02X%02X%02X%02X%02X}" ),
+        // theGuidStr.Format( _LSTR( "{%08X-%04hX-%04hX-%02X%02X-%02X%02X%02X%02X%02X%02X}" ),
         //										inGuid.Data1,
         //										inGuid.Data2,
         //										inGuid.Data3,

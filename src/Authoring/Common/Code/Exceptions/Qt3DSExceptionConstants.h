@@ -31,8 +31,8 @@
 //	Prefix
 //==============================================================================
 
-#ifndef __UICEXCEPTIONCONSTANTS_H__
-#define __UICEXCEPTIONCONSTANTS_H__
+#ifndef __QT3DS_EXCEPTION_CONSTANTS_H__
+#define __QT3DS_EXCEPTION_CONSTANTS_H__
 
 const unsigned long ERROR_TYPE_PLAYER = 0x00000001;
 const unsigned long ERROR_TYPE_LIBRARY = 0x00000002;
@@ -50,4 +50,4 @@ const unsigned long ERROR_TYPE_UTILITY = 0x00001000;
 const unsigned long ERROR_TYPE_TRANSM = 0x00002000;
 const unsigned long ERROR_TYPE_INSTALLER = 0x00004000;
 
-#endif // #ifndef __UICEXCEPTIONCONSTANTS_H__
+#endif // #ifndef __QT3DS_EXCEPTION_CONSTANTS_H__

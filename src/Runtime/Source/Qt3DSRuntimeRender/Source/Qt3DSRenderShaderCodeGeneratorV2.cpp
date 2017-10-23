@@ -373,7 +373,7 @@ struct SShaderGeneratedProgramOutput
 
 struct SProgramGenerator : public IShaderProgramGenerator
 {
-    IUICRenderContext &m_UICContext;
+    IQt3DSRenderContext &m_Context;
     SVertexShaderGenerator m_VS;
     STessControlShaderGenerator m_TC;
     STessEvalShaderGenerator m_TE;
@@ -384,8 +384,8 @@ struct SProgramGenerator : public IShaderProgramGenerator
 
     QT3DSI32 m_RefCount;
 
-    SProgramGenerator(IUICRenderContext &inContext)
-        : m_UICContext(inContext)
+    SProgramGenerator(IQt3DSRenderContext &inContext)
+        : m_Context(inContext)
         , m_VS(inContext.GetFoundation(), inContext.GetStringTable())
         , m_TC(inContext.GetFoundation(), inContext.GetStringTable())
         , m_TE(inContext.GetFoundation(), inContext.GetStringTable())
@@ -400,7 +400,7 @@ struct SProgramGenerator : public IShaderProgramGenerator
     {
         atomicDecrement(&m_RefCount);
         if (m_RefCount <= 0) {
-            NVFoundationBase &theFoundation(m_UICContext.GetFoundation());
+            NVFoundationBase &theFoundation(m_Context.GetFoundation());
             NVDelete(theFoundation.getAllocator(), this);
         }
     }
@@ -478,7 +478,7 @@ struct SProgramGenerator : public IShaderProgramGenerator
             return NULL;
         }
 
-        qt3ds::render::IDynamicObjectSystem &theDynamicSystem(m_UICContext.GetDynamicObjectSystem());
+        qt3ds::render::IDynamicObjectSystem &theDynamicSystem(m_Context.GetDynamicObjectSystem());
         SShaderCacheProgramFlags theCacheFlags(inFlags);
         for (QT3DSU32 stageIdx = 0, stageEnd = ShaderGeneratorStages::StageCount; stageIdx < stageEnd;
              ++stageIdx) {
@@ -499,8 +499,8 @@ struct SProgramGenerator : public IShaderProgramGenerator
         const char *geShaderSource = m_GS.m_FinalBuilder.c_str();
         const char *fragmentShaderSource = m_FS.m_FinalBuilder.c_str();
 
-        IShaderCache &theCache = m_UICContext.GetShaderCache();
-        CRegisteredString theCacheKey = m_UICContext.GetStringTable().RegisterStr(inShaderName);
+        IShaderCache &theCache = m_Context.GetShaderCache();
+        CRegisteredString theCacheKey = m_Context.GetStringTable().RegisterStr(inShaderName);
         return theCache.CompileProgram(theCacheKey, vertexShaderSource, fragmentShaderSource,
                                        tcShaderSource, teShaderSource, geShaderSource,
                                        theCacheFlags, inFeatureSet, separableProgram);
@@ -509,7 +509,7 @@ struct SProgramGenerator : public IShaderProgramGenerator
 };
 
 IShaderProgramGenerator &
-IShaderProgramGenerator::CreateProgramGenerator(IUICRenderContext &inContext)
+IShaderProgramGenerator::CreateProgramGenerator(IQt3DSRenderContext &inContext)
 {
     return *QT3DS_NEW(inContext.GetAllocator(), SProgramGenerator)(inContext);
 }

@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMWSTROPSH
-#define UICDMWSTROPSH
+#ifndef QT3DSDM_WSTR_OPS_H
+#define QT3DSDM_WSTR_OPS_H
 namespace qt3dsdm {
 // Template base class so that we can convert items to and from wide string
 template <typename TDataType>

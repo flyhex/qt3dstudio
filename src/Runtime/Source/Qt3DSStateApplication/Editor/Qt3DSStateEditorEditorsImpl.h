@@ -44,7 +44,7 @@
 #include "Qt3DSStateContext.h"
 #include "Qt3DSStateEditorImpl.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 
@@ -191,7 +191,7 @@ namespace state {
             virtual IEditor &GetEditor() { return m_Editor; }
         };
 
-#define UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE                                            \
+#define QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE                                            \
     void addRef() { atomicIncrement(&mRefCount); }                                                 \
     void release()                                                                                 \
     {                                                                                              \
@@ -288,7 +288,7 @@ namespace state {
 
             virtual CRegisteredString GetId() const { return m_Data.m_Id; }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -578,7 +578,7 @@ namespace state {
                     m_Editor.GetStateContext().InsertId(m_Data.m_Id, &m_Data);
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -850,7 +850,7 @@ namespace state {
             }
             virtual CRegisteredString GetId() const { return m_Data.m_Id; }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -928,7 +928,7 @@ namespace state {
             }
             virtual CRegisteredString GetId() const { return m_Data.m_Id; }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -1028,7 +1028,7 @@ namespace state {
 
             virtual CRegisteredString GetId() const { return m_Data.m_Id; }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -1136,7 +1136,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -1342,7 +1342,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1373,7 +1373,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1406,7 +1406,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1439,7 +1439,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1471,7 +1471,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1503,7 +1503,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1524,7 +1524,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1557,7 +1557,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1592,7 +1592,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual SExecutableContent &GetContent() { return m_Data; }
             virtual void *GetWrappedObject() { return &m_Data; }
@@ -1626,7 +1626,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 
@@ -1661,7 +1661,7 @@ namespace state {
             {
             }
 
-            UICSTATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
+            QT3DS_STATE_EDITOR_OBJECT_IMPLEMENT_ADDREF_RELEASE;
 
             virtual void *GetWrappedObject() { return &m_Data; }
 

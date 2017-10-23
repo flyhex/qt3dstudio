@@ -115,7 +115,7 @@ void CPropertyTimebarRow::Draw(CRenderer *inRenderer)
  */
 void CPropertyTimebarRow::DrawColor(CRenderer *inRenderer)
 {
-    UICPROFILE(DrawColor);
+    QT3DS_PROFILE(DrawColor);
 
     ITimelineItemProperty *theProperty = m_PropertyRow->GetProperty();
     ASSERT(theProperty->GetChannelCount() == 3); // sanity check
@@ -211,7 +211,7 @@ bool CPropertyTimebarRow::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlag
  */
 void CPropertyTimebarRow::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
-    UICPROFILE(OnMouseMove);
+    QT3DS_PROFILE(OnMouseMove);
     CControl::OnMouseMove(inPoint, inFlags);
 }
 //=============================================================================
@@ -284,7 +284,7 @@ void CPropertyTimebarRow::SetSize(CPt inSize)
 void CPropertyTimebarRow::RefreshKeyframes()
 {
     m_Refreshing = true;
-    UICPROFILE(RefreshKeyframes);
+    QT3DS_PROFILE(RefreshKeyframes);
 
     // First Loop clears any keys that do not correlate to a supersetkey
     TTimelineKeyframeList::iterator thePos = m_Keyframes.begin();

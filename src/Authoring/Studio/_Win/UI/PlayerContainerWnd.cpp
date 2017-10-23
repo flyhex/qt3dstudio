@@ -349,7 +349,7 @@ void CPlayerContainerWnd::mouseReleaseEvent(QMouseEvent *event)
 void CPlayerContainerWnd::mouseMoveEvent(QMouseEvent* event)
 {
     if (m_IsMouseDown) {
-        UICPROFILE(OnMouseMove);
+        QT3DS_PROFILE(OnMouseMove);
 
         long theModifierKeys = 0;
         if (event->buttons() & Qt::LeftButton)

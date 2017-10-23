@@ -42,7 +42,7 @@ namespace render {
 
     class IOffscreenRenderer;
 
-    struct SUICRenderPickSubResult
+    struct Qt3DSRenderPickSubResult
     {
         IOffscreenRenderer *m_SubRenderer;
         QT3DSMat44 m_TextureMatrix;
@@ -50,14 +50,14 @@ namespace render {
         NVRenderTextureCoordOp::Enum m_VerticalTilingMode;
         QT3DSU32 m_ViewportWidth;
         QT3DSU32 m_ViewportHeight;
-        SUICRenderPickSubResult *m_NextSibling;
+        Qt3DSRenderPickSubResult *m_NextSibling;
 
-        SUICRenderPickSubResult()
+        Qt3DSRenderPickSubResult()
             : m_SubRenderer(NULL)
             , m_NextSibling(NULL)
         {
         }
-        SUICRenderPickSubResult(IOffscreenRenderer &inSubRenderer, QT3DSMat44 inTextureMatrix,
+        Qt3DSRenderPickSubResult(IOffscreenRenderer &inSubRenderer, QT3DSMat44 inTextureMatrix,
                                 NVRenderTextureCoordOp::Enum inHorizontalTilingMode,
                                 NVRenderTextureCoordOp::Enum inVerticalTilingMode, QT3DSU32 width,
                                 QT3DSU32 height)
@@ -72,19 +72,19 @@ namespace render {
         }
     };
 
-    struct SUICRenderPickResult
+    struct Qt3DSRenderPickResult
     {
         const SGraphObject *m_HitObject;
         QT3DSF32 m_CameraDistanceSq;
         // The local coordinates in X,Y UV space where the hit occured
         QT3DSVec2 m_LocalUVCoords;
         // The local mouse coordinates will be the same on all of the sub objects.
-        SUICRenderPickSubResult *m_FirstSubObject;
+        Qt3DSRenderPickSubResult *m_FirstSubObject;
         // The offscreen renderer that was used to render the scene graph this result was produced
         // from.
         IOffscreenRenderer *m_OffscreenRenderer;
 
-        SUICRenderPickResult(const SGraphObject &inHitObject, QT3DSF32 inCameraDistance,
+        Qt3DSRenderPickResult(const SGraphObject &inHitObject, QT3DSF32 inCameraDistance,
                              const QT3DSVec2 &inLocalUVCoords)
             : m_HitObject(&inHitObject)
             , m_CameraDistanceSq(inCameraDistance)
@@ -93,7 +93,7 @@ namespace render {
             , m_OffscreenRenderer(NULL)
         {
         }
-        SUICRenderPickResult()
+        Qt3DSRenderPickResult()
             : m_HitObject(NULL)
             , m_CameraDistanceSq(QT3DS_MAX_F32)
             , m_LocalUVCoords(0, 0)
@@ -115,7 +115,7 @@ namespace render {
         // If the return value has size of zero then we assume nothing more can be picked and the
         // pick
         // is finished.
-        virtual SUICRenderPickResult Pick(const QT3DSVec2 &inMouseCoords,
+        virtual Qt3DSRenderPickResult Pick(const QT3DSVec2 &inMouseCoords,
                                           const QT3DSVec2 &inViewportDimensions,
                                           bool inPickEverything) = 0;
     };

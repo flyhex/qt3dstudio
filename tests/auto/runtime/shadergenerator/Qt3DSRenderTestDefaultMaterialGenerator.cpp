@@ -44,8 +44,6 @@
 
 #include <QTime>
 
-using namespace qt3ds::render;
-
 #include <string>
 
 using namespace qt3ds;
@@ -210,9 +208,9 @@ struct TestParams
     SImage dummyImages[SShaderDefaultMaterialKeyProperties::ImageMapCount];
     NVRenderTexture2D *textures[4];
     eastl::vector<SRenderableImage*> renderableImages;
-    qt3ds::render::CUICRendererImpl *render;
+    qt3ds::render::Qt3DSRendererImpl *render;
 
-    TestParams(NVRenderContext *context, qt3ds::render::CUICRendererImpl *renderImpl)
+    TestParams(NVRenderContext *context, qt3ds::render::Qt3DSRendererImpl *renderImpl)
         : subset(context->GetAllocator())
         , modelContext(model, viewProjection)
         , images(NULL)
@@ -272,7 +270,7 @@ TestKey randomizeTestKey()
 }
 
 
-TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
+TestParams *generateTest(qt3ds::render::Qt3DSRendererImpl *renderImpl,
                          NVRenderContext *context, TestKey key)
 {
     // TODO: light probes
@@ -446,17 +444,17 @@ TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
     }
 
     if (key.ssm) {
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_SSM"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
     if (key.ssao) {
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_SSAO"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
     if (key.ssdo) {
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_SSDO"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
     }
@@ -464,11 +462,11 @@ TestParams *generateTest(qt3ds::render::CUICRendererImpl *renderImpl,
     if (key.iblLightProbe) {
         renderImpl->DefaultMaterialShaderKeyProperties().m_HasIbl.SetValue(
             params->shaderkey, true);
-        CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                               .RegisterStr("QT3DS_ENABLE_LIGHT_PROBE"));
         params->features.push_back(SShaderPreprocessorFeature(str, true));
         if (key.iblfow) {
-            CRegisteredString str(renderImpl->GetUICContext().GetStringTable()
+            CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
                                   .RegisterStr("QT3DS_ENABLE_IBL_FOV"));
             params->features.push_back(SShaderPreprocessorFeature(str, true));
         }
@@ -538,15 +536,15 @@ bool Qt3DSRenderTestDefaultMaterialGenerator::run(NVRenderContext *context,
     }
     // generated programs must be unique
     QVector<NVRenderShaderProgram *> programs;
-    success = initializeUICRenderer(context->format());
+    success = initializeQt3DSRenderer(context->format());
     if (success) {
         for (TestKey key : testKeys) {
             qDebug () << "testing key: " << key.toInt();
-            TestParams *params = generateTest(uicRenderer(), context, key);
+            TestParams *params = generateTest(qt3dsRenderer(), context, key);
 
-            uicRenderer()->BeginLayerRender(params->layerData);
+            qt3dsRenderer()->BeginLayerRender(params->layerData);
             NVRenderShaderProgram *program
-                    = uicRenderer()->GenerateShader(params->renderable,
+                    = qt3dsRenderer()->GenerateShader(params->renderable,
                                                    toConstDataRef(params->features.data(),
                                                                   (QT3DSU32)params->features.size()));
             if (!program) {
@@ -564,7 +562,7 @@ bool Qt3DSRenderTestDefaultMaterialGenerator::run(NVRenderContext *context,
             if (!success)
                 qDebug () << "failing test key: " << key.toString();
 
-            uicRenderer()->EndLayerRender();
+            qt3dsRenderer()->EndLayerRender();
             delete params;
         }
     }

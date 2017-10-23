@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMHANDLESH
-#define UICDMHANDLESH
+#ifndef QT3DSDM_HANDLES_H
+#define QT3DSDM_HANDLES_H
 
 #include <QMetaType>
 

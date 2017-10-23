@@ -46,7 +46,7 @@ namespace render {
         // Renders the node to the current viewport.
         virtual void Render(NVConstDataRef<SPGGraphObject *> inObjects) = 0;
 
-        static IPixelGraphicsRenderer &CreateRenderer(IUICRenderContext &ctx, IStringTable &strt);
+        static IPixelGraphicsRenderer &CreateRenderer(IQt3DSRenderContext &ctx, IStringTable &strt);
     };
 }
 }

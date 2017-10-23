@@ -41,7 +41,7 @@ namespace widgets {
     public:
         qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override = 0;
         static IPathWidget &CreatePathWidget(NVAllocatorCallback &inAlloc,
-                                             IUICRenderContext &inRenderContext);
+                                             IQt3DSRenderContext &inRenderContext);
     };
 }
 }

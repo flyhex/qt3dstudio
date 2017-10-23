@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMANIMATIONH
-#define UICDMANIMATIONH
+#ifndef QT3DSDM_ANIMATION_H
+#define QT3DSDM_ANIMATION_H
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMValue.h"
@@ -172,7 +172,7 @@ typedef qt3ds::foundation::
         TKeyframe;
 
 template <>
-struct SUICDMGetter<TKeyframe>
+struct Qt3DSDMGetter<TKeyframe>
 {
     template <typename TRetType>
     TRetType doGet(const TKeyframe &inValue)

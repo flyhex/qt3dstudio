@@ -63,7 +63,7 @@ bool SortKeyframeInstancePairByTime(const CKeyframesManager::SKeyframeInstancePa
 
 //==============================================================================
 //	Keyframe specific.
-//  UICDM selection is handled by CTimelineTranslationManager.
+//  DataModel selection is handled by CTimelineTranslationManager.
 //==============================================================================
 CKeyframesManager::CKeyframesManager(CTimelineTranslationManager *inTransMgr)
     : m_TransMgr(inTransMgr)

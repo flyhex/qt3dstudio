@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef INCLUDED_UICDMTIMELINE_H
-#define INCLUDED_UICDMTIMELINE_H 1
+#ifndef QT3DSDM_TIMELINE_H
+#define QT3DSDM_TIMELINE_H 1
 
 #pragma once
 

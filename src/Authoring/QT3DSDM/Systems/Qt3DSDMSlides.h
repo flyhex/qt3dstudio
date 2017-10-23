@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSLIDESH
-#define UICDMSLIDESH
+#ifndef QT3DSDM_SLIDES_H
+#define QT3DSDM_SLIDES_H
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSlideCore.h"
 

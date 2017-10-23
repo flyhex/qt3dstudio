@@ -126,15 +126,15 @@ int main(int c, char **v)
     SNullTimeProvider theNullTimeProvider;
     SNullWindowSystem theNullWindowSystem;
 
-    NVScopedRefCounted<IUICRenderFactoryCore> theRenderFactoryCore =
-        IUICRenderFactoryCore::CreateRenderFactoryCore(theApplicationDirectory.c_str(),
+    NVScopedRefCounted<IQt3DSRenderFactoryCore> theRenderFactoryCore =
+        IQt3DSRenderFactoryCore::CreateRenderFactoryCore(theApplicationDirectory.c_str(),
                                                        theNullWindowSystem, theNullTimeProvider);
 
-    NVScopedRefCounted<IUICRenderFactory> theRenderFactory(
+    NVScopedRefCounted<IQt3DSRenderFactory> theRenderFactory(
         theRenderFactoryCore->CreateRenderFactory(QSurfaceFormat::defaultFormat()));
 
     // Ensure we aren't compiling any shaders.
-    theRenderFactory->GetUICRenderContext().GetShaderCache().SetShaderCompilationEnabled(false);
+    theRenderFactory->GetQt3DSRenderContext().GetShaderCache().SetShaderCompilationEnabled(false);
     Q3DStudio::CInputEngine theInputEngine;
 
     NVScopedRefCounted<qt3ds::runtime::IApplicationCore> theAppCore =

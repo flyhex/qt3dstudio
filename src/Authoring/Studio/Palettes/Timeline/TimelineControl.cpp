@@ -300,8 +300,8 @@ void CTimelineControl::OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectab
     bool theLoseFocus = !inNewSelectable.empty();
     if (!theLoseFocus) {
         Q3DStudio::SelectedValueTypes::Enum theSelectionType = inNewSelectable.getType();
-        // for now, its just UICDM objects
-        theLoseFocus = theSelectionType != Q3DStudio::SelectedValueTypes::Instance; // UICDM objects
+        // for now, its just DataModel objects
+        theLoseFocus = theSelectionType != Q3DStudio::SelectedValueTypes::Instance; // DataModel objects
     }
     if (theLoseFocus)
         m_TreeLayout->OnLoseFocus();
@@ -405,7 +405,7 @@ void CTimelineControl::SetScrollPositionY(CScroller *inSource, long inPositionY)
  */
 void CTimelineControl::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation)
 {
-    UICPROFILE(OnDraw);
+    QT3DS_PROFILE(OnDraw);
     CControl::OnDraw(inRenderer, inDirtyRect, inIgnoreValidation);
 }
 
@@ -551,7 +551,7 @@ void CTimelineControl::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandl
  * event that takes place just before a save or export, on lose focus will commit changes
  * in text boxes
  */
-void CTimelineControl::OnSavingPresentation(const CUICFile *inNewPresentationFile)
+void CTimelineControl::OnSavingPresentation(const Qt3DSFile *inNewPresentationFile)
 {
     Q_UNUSED(inNewPresentationFile);
     OnLoseFocus();

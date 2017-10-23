@@ -43,7 +43,7 @@ class CStudioSystem;
 
 //=============================================================================
 /**
- * Binding to generic UICDM object
+ * Binding to generic DataModel object
  */
 class CLayerTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {

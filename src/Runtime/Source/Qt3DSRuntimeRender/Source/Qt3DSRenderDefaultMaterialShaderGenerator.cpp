@@ -398,12 +398,12 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                                        NVScopedRefCounted<qt3ds::render::NVRenderConstantBuffer>>
         TStrConstanBufMap;
 
-    IUICRenderContext &m_RenderContext;
+    IQt3DSRenderContext &m_RenderContext;
     IShaderProgramGenerator &m_ProgramGenerator;
 
     const SDefaultMaterial *m_CurrentMaterial;
     SShaderDefaultMaterialKey *m_CurrentKey;
-    UICShadowMap *m_ShadowMapManager;
+    Qt3DSShadowMap *m_ShadowMapManager;
     IDefaultMaterialVertexPipeline *m_CurrentPipeline;
     TShaderFeatureSet m_CurrentFeatureSet;
     NVDataRef<SLight *> m_Lights;
@@ -453,7 +453,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
     QT3DSI32 m_RefCount;
 
-    SShaderGenerator(IUICRenderContext &inRc)
+    SShaderGenerator(IQt3DSRenderContext &inRc)
         : m_RenderContext(inRc)
         , m_ProgramGenerator(m_RenderContext.GetShaderProgramGenerator())
         , m_CurrentMaterial(NULL)
@@ -1694,7 +1694,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                              ,
                              SCamera &inCamera, QT3DSVec3 inCameraDirection,
                              NVDataRef<SLight *> inLights, NVDataRef<QT3DSVec3> inLightDirections,
-                             UICShadowMap *inShadowMapManager)
+                             Qt3DSShadowMap *inShadowMapManager)
     {
         SShaderGeneratorGeneratedShader &shader(GetShaderForProgram(inProgram));
         m_RenderContext.GetRenderContext().SetActiveShader(&inProgram);
@@ -2060,7 +2060,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 }
 
 IDefaultMaterialShaderGenerator &
-IDefaultMaterialShaderGenerator::CreateDefaultMaterialShaderGenerator(IUICRenderContext &inRc)
+IDefaultMaterialShaderGenerator::CreateDefaultMaterialShaderGenerator(IQt3DSRenderContext &inRc)
 {
     return *QT3DS_NEW(inRc.GetAllocator(), SShaderGenerator)(inRc);
 }

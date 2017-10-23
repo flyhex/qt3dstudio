@@ -46,7 +46,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 
-using namespace UICIMP;
+using namespace qt3dsimp;
 
 namespace {
 
@@ -2195,7 +2195,7 @@ void FbxDomWalker::FilterAnimCurve(FbxAnimCurve *inAnimCurve, std::vector<int> &
 * @return no return.
 */
 inline void WriteKeyframe(const FbxAnimCurveKey &inKey, const char *transformType,
-                          const char *channelName, UICIMP::ISceneGraphTranslation *inTranslator)
+                          const char *channelName, qt3dsimp::ISceneGraphTranslation *inTranslator)
 {
     // Create a key
     SKeyframeParameters theKeyframeInfo((float)inKey.GetTime().GetSecondDouble(), inKey.GetValue(),

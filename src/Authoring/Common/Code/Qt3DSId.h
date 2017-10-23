@@ -31,8 +31,8 @@
 //	Prefix
 //==============================================================================
 
-#ifndef INCLUDEED_UICID
-#define INCLUDEED_UICID
+#ifndef _QT3DS_ID_
+#define _QT3DS_ID_
 
 #pragma once
 

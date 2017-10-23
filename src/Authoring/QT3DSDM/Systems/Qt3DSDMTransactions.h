@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMTRANSACTIONSH
-#define UICDMTRANSACTIONSH
+#ifndef QT3DSDM_TRANSACTIONS_H
+#define QT3DSDM_TRANSACTIONS_H
 #include "Qt3DSDMDataTypes.h"
 #include "StandardExtensions.h"
 #include <functional>

@@ -863,7 +863,7 @@ public:
 
         Q3DStudio::TFilePtr handf =
             Q3DStudio::SFileTools::FindUniqueDestFile(m_MeshDir, name, L"mesh");
-        CUICFileToolsSeekableMeshBufIOStream output(handf);
+        Qt3DSFileToolsSeekableMeshBufIOStream output(handf);
         MallocAllocator alloc;
         QT3DSU32 meshId = meshBuffer.SaveMulti(alloc, output);
         CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
@@ -885,7 +885,7 @@ public:
                 CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(srcMesh.getValue()));
 
             meshPath = meshPath.GetPathWithoutIdentifier();
-            CUICFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
+            Qt3DSFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
                 SFile::OpenForWrite(
                     meshPath, FileOpenFlags(FileOpenFlagValues::Open | FileOpenFlagValues::Create)),
                 meshPath));
@@ -964,7 +964,7 @@ public:
 
         Q3DStudio::TFilePtr handf =
             Q3DStudio::SFileTools::FindUniqueDestFile(m_PathBufferDir, name, L"path");
-        CUICFileToolsSeekableMeshBufIOStream output(handf);
+        Qt3DSFileToolsSeekableMeshBufIOStream output(handf);
         MallocAllocator alloc;
         pathBuffer.Save(output);
         CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
@@ -988,7 +988,7 @@ public:
                 m_DestDirectory, CString(srcPathBuffer.getValue()));
 
             pathBufferPath = pathBufferPath.GetPathWithoutIdentifier();
-            CUICFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
+            Qt3DSFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
                 SFile::OpenForWrite(pathBufferPath, FileOpenFlags(FileOpenFlagValues::Open
                                                                   | FileOpenFlagValues::Create)),
                 pathBufferPath));
@@ -1472,7 +1472,7 @@ public:
         std::shared_ptr<IDOMFactory> factory(IDOMFactory::CreateDOMFactory(m_StringTablePtr));
         SDOMElement *topElement = NULL;
         {
-            CUICFileToolsSeekableMeshBufIOStream stream(
+            Qt3DSFileToolsSeekableMeshBufIOStream stream(
                 SFile::Wrap(SFile::OpenForRead(fname), fname));
             if (stream.IsOpen() == false) {
                 QT3DS_ASSERT(false);

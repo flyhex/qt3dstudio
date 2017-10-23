@@ -49,7 +49,7 @@ namespace render {
     class COldNBustedPluginRenderer : public IOffscreenRenderer
     {
     public:
-        IUICRenderContext &m_RenderContext;
+        IQt3DSRenderContext &m_RenderContext;
         long m_DLLHandle;
         volatile QT3DSI32 mRefCount;
         SOffscreenRendererEnvironment m_LastRenderedEnvironment;
@@ -58,7 +58,7 @@ namespace render {
         PROC_GetDesiredTextureSize m_GetTextureSizeProc;
         PROC_Render m_RenderProc;
 
-        COldNBustedPluginRenderer(IUICRenderContext &inRenderContext, long inDLLHandle);
+        COldNBustedPluginRenderer(IQt3DSRenderContext &inRenderContext, long inDLLHandle);
 
         QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_RenderContext.GetAllocator())
 

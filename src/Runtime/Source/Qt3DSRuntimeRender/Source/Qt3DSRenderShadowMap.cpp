@@ -39,14 +39,14 @@ using namespace qt3ds::render;
 using qt3ds::render::NVRenderContextScopedProperty;
 using qt3ds::render::NVRenderCachedShaderProperty;
 
-UICShadowMap::UICShadowMap(IUICRenderContext &inContext)
-    : m_UICContext(inContext)
+Qt3DSShadowMap::Qt3DSShadowMap(IQt3DSRenderContext &inContext)
+    : m_Context(inContext)
     , mRefCount(0)
     , m_ShadowMapList(inContext.GetAllocator(), "Qt3DSShadowMap::m_ShadowMapList")
 {
 }
 
-UICShadowMap::~UICShadowMap()
+Qt3DSShadowMap::~Qt3DSShadowMap()
 {
     m_ShadowMapList.clear();
 }
@@ -66,11 +66,11 @@ bool IsDepthFormat(NVRenderTextureFormats::Enum format)
 }
 }
 
-void UICShadowMap::AddShadowMapEntry(QT3DSU32 index, QT3DSU32 width, QT3DSU32 height,
+void Qt3DSShadowMap::AddShadowMapEntry(QT3DSU32 index, QT3DSU32 width, QT3DSU32 height,
                                      NVRenderTextureFormats::Enum format, QT3DSU32 samples,
                                      ShadowMapModes::Enum mode, ShadowFilterValues::Enum filter)
 {
-    IResourceManager &theManager(m_UICContext.GetResourceManager());
+    IResourceManager &theManager(m_Context.GetResourceManager());
     SShadowMapEntry *pEntry = NULL;
 
     if (index < m_ShadowMapList.size())
@@ -200,7 +200,7 @@ void UICShadowMap::AddShadowMapEntry(QT3DSU32 index, QT3DSU32 width, QT3DSU32 he
     }
 }
 
-SShadowMapEntry *UICShadowMap::GetShadowMapEntry(QT3DSU32 index)
+SShadowMapEntry *Qt3DSShadowMap::GetShadowMapEntry(QT3DSU32 index)
 {
     SShadowMapEntry *pEntry = NULL;
 
@@ -213,7 +213,7 @@ SShadowMapEntry *UICShadowMap::GetShadowMapEntry(QT3DSU32 index)
     return NULL;
 }
 
-UICShadowMap *UICShadowMap::Create(IUICRenderContext &inContext)
+Qt3DSShadowMap *Qt3DSShadowMap::Create(IQt3DSRenderContext &inContext)
 {
-    return QT3DS_NEW(inContext.GetFoundation().getAllocator(), UICShadowMap)(inContext);
+    return QT3DS_NEW(inContext.GetFoundation().getAllocator(), Qt3DSShadowMap)(inContext);
 }

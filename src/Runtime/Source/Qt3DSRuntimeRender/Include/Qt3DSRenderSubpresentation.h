@@ -53,7 +53,7 @@ namespace render {
             : m_Renderer(renderer)
         {
         }
-        SUICRenderPickResult Pick(const QT3DSVec2 &inMouseCoords,
+        Qt3DSRenderPickResult Pick(const QT3DSVec2 &inMouseCoords,
                                           const QT3DSVec2 &inViewportDimensions,
                                           bool inPickEverything) override;
     };
@@ -61,14 +61,14 @@ namespace render {
     class CSubPresentationRenderer : public IOffscreenRenderer
     {
     public:
-        IUICRenderContext &m_RenderContext;
+        IQt3DSRenderContext &m_RenderContext;
         SPresentation &m_Presentation;
         volatile QT3DSI32 mRefCount;
         SOffscreenRendererEnvironment m_LastRenderedEnvironment;
         CSubPresentationPickQuery m_PickQuery;
         CRegisteredString m_OffscreenRendererType;
 
-        CSubPresentationRenderer(IUICRenderContext &inRenderContext, SPresentation &inPresentation);
+        CSubPresentationRenderer(IQt3DSRenderContext &inRenderContext, SPresentation &inPresentation);
 
         QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_RenderContext.GetAllocator())
 
@@ -89,7 +89,7 @@ namespace render {
         static const char *GetRendererName() { return "SubPresentation"; }
         CRegisteredString GetOffscreenRendererType() override { return m_OffscreenRendererType; }
 
-        SUICRenderPickResult DoGraphQueryPick(const QT3DSVec2 &inMouseCoords,
+        Qt3DSRenderPickResult DoGraphQueryPick(const QT3DSVec2 &inMouseCoords,
                                               const QT3DSVec2 &inViewportDimensions,
                                               bool inPickEverything);
     };

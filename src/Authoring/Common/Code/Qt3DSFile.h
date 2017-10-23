@@ -44,7 +44,7 @@
 typedef std::set<Q3DStudio::CString> TFilePathList;
 typedef TFilePathList::iterator TFilePathListIterator;
 
-class CUICFile
+class Qt3DSFile
 {
 
 public:
@@ -53,17 +53,17 @@ public:
     static const Q3DStudio::CString CURRENT_DIR;
     static const Q3DStudio::CString PARENT_DIR;
 
-    CUICFile(const Q3DStudio::CString &inPathName, bool inIsPosix = false, bool inAddBase = true);
-    CUICFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CString &inName);
-    CUICFile(const CUICFile &inBasePath, const Q3DStudio::CString &inPathname,
+    Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix = false, bool inAddBase = true);
+    Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CString &inName);
+    Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname,
              bool inIsPosix = false);
-    CUICFile(const CUICFile &inFile);
+    Qt3DSFile(const Qt3DSFile &inFile);
 
     CFileIterator GetSubItems() const;
 
-    ~CUICFile();
+    ~Qt3DSFile();
 
-    bool operator==(const CUICFile &inRHS) const;
+    bool operator==(const Qt3DSFile &inRHS) const;
 
     bool CanRead() const;
     bool CanWrite() const;
@@ -81,24 +81,24 @@ public:
     bool IsHidden() const;
     long Length() const;
 
-    OSErr MoveTo(const CUICFile &inDestination);
-    void CopyTo(const CUICFile &inDestination);
+    OSErr MoveTo(const Qt3DSFile &inDestination);
+    void CopyTo(const Qt3DSFile &inDestination);
 
     void Execute() const;
 
     OSErr SetReadOnly(bool inReadOnlyFlag);
 
-    static CUICFile GetApplicationDirectory();
-    static CUICFile GetTemporaryFile(const Q3DStudio::CString &inExtension);
-    static CUICFile GetTemporaryFile();
+    static Qt3DSFile GetApplicationDirectory();
+    static Qt3DSFile GetTemporaryFile(const Q3DStudio::CString &inExtension);
+    static Qt3DSFile GetTemporaryFile();
     static bool IsPathRelative(const Q3DStudio::CString &inPath);
 
     QUrl GetURL() const;
 
-    static CUICFile Combine(const CUICFile &inFile, const Q3DStudio::CString &inRelPath);
+    static Qt3DSFile Combine(const Qt3DSFile &inFile, const Q3DStudio::CString &inRelPath);
     HANDLE OpenFileReadHandle() const;
     HANDLE OpenFileWriteHandle() const;
-    void RenameTo(const CUICFile &inDestination);
+    void RenameTo(const Qt3DSFile &inDestination);
     bool GetFileStat(struct _stat *inStat) const;
 
     static void ClearCurrentTempCache();

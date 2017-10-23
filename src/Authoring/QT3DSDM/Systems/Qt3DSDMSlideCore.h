@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSLIDECOREH
-#define UICDMSLIDECOREH
+#ifndef QT3DSDM_SLIDE_CORE_H
+#define QT3DSDM_SLIDE_CORE_H
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMDataTypes.h"
 #include "HandleSystemBase.h"

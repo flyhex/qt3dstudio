@@ -64,7 +64,7 @@ void SApplicationState::Notify(const SApplicationState &inOther, CDoc &inDoc)
         inDoc.NotifyActiveSlideChanged(m_ActiveSlide, true);
 
     if (m_SelectedInstance != inOther.m_SelectedInstance)
-        inDoc.SelectUICDMObject(m_SelectedInstance);
+        inDoc.SelectDataModelObject(m_SelectedInstance);
 }
 
 // We clear the selection just as a precaution because we want to be sure that

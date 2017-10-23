@@ -89,7 +89,7 @@ protected:
     void UpdateClockProperties();
     void OnReachedUpperBound();
 
-    // UICDM Helper functions.
+    // DataModel Helper functions.
     inline qt3dsdm::IPropertySystem *GetPropertySystem() const;
     inline qt3dsdm::ISlideSystem *GetSlideSystem() const;
     inline CClientDataModelBridge *GetClientDataModelBridge() const;

@@ -73,11 +73,11 @@ using qt3ds::render::NVRenderRect;
 
 namespace {
 using namespace qt3dsdm;
-struct STranslatorUICDMParser
+struct STranslatorDataModelParser
 {
     STranslation &m_Context;
     Qt3DSDMInstanceHandle m_InstanceHandle;
-    STranslatorUICDMParser(STranslation &inContext, Qt3DSDMInstanceHandle inInstance)
+    STranslatorDataModelParser(STranslation &inContext, Qt3DSDMInstanceHandle inInstance)
         : m_Context(inContext)
         , m_InstanceHandle(inInstance)
     {
@@ -201,7 +201,7 @@ struct STranslatorUICDMParser
     {
         Option<qt3dsdm::TDataStrPtr> theValue = GetPropertyValue<qt3dsdm::TDataStrPtr>(inProperty);
         if (theValue.hasValue() && *theValue) {
-            qt3ds::render::IStringTable &theStrTable(m_Context.m_UICContext.GetStringTable());
+            qt3ds::render::IStringTable &theStrTable(m_Context.m_Context.GetStringTable());
             outValue = theStrTable.RegisterStr((*theValue)->GetData());
             return true;
         }
@@ -217,7 +217,7 @@ struct STranslatorUICDMParser
                 Q3DStudio::CFilePath theResolvedPath =
                     Q3DStudio::CFilePath::CombineBaseAndRelative(theDirectory, outValue.c_str());
                 outValue =
-                    m_Context.m_UICContext.GetStringTable().RegisterStr(theResolvedPath.c_str());
+                    m_Context.m_Context.GetStringTable().RegisterStr(theResolvedPath.c_str());
             }
             return true;
         }
@@ -528,7 +528,7 @@ struct SSceneTranslator : public SGraphObjectTranslator
     void PushTranslation(STranslation &inContext) override
     {
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_SCENE_PROPERTIES
         SLayer *theCurrentLayer = nullptr;
         theItem.m_FirstChild = nullptr;
@@ -605,7 +605,7 @@ struct SNodeTranslator : public SGraphObjectTranslator
     {
         SGraphObjectTranslator::PushTranslation(inContext);
         SNode &theItem = static_cast<SNode &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_NODE_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Node.m_BoneId,
                                 theItem.m_SkeletonId);
@@ -660,7 +660,7 @@ struct SLayerTranslator : public SNodeTranslator
     {
         SNodeTranslator::PushTranslation(inContext);
         SLayer &theItem = static_cast<SLayer &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_LAYER_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Layer.m_AoSamplerate,
                                 theItem.m_AoSamplerate);
@@ -706,7 +706,7 @@ struct SLightTranslator : public SNodeTranslator
     {
         SNodeTranslator::PushTranslation(inContext);
         SLight &theItem = static_cast<SLight &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_LIGHT_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Light.m_ShadowMapRes,
                                 theItem.m_ShadowMapRes);
@@ -724,7 +724,7 @@ struct SCameraTranslator : public SNodeTranslator
     {
         SNodeTranslator::PushTranslation(inContext);
         SCamera &theItem = static_cast<SCamera &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_CAMERA_PROPERTIES
     }
 };
@@ -738,7 +738,7 @@ struct SModelTranslator : public SNodeTranslator
     {
         SNodeTranslator::PushTranslation(inContext);
         SModel &theItem = static_cast<SModel &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_MODEL_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Model.m_PoseRoot,
                                 theItem.m_SkeletonRoot);
@@ -808,7 +808,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
     void PushTranslation(STranslation &inContext) override
     {
         SPathSubPath &theItem = static_cast<SPathSubPath &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_PATH_SUBPATH_PROPERTIES
         m_PathBuffer.clear();
         Q3DStudio::IDocumentReader &theReader(inContext.m_Doc.GetDocumentReader());
@@ -845,7 +845,7 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
                 ++anchorIdx;
             }
         }
-        inContext.m_UICContext.GetPathManager().SetPathSubPathData(
+        inContext.m_Context.GetPathManager().SetPathSubPathData(
             theItem,
             qt3ds::foundation::toConstDataRef(m_PathBuffer.begin(), (QT3DSU32)m_PathBuffer.size()));
     }
@@ -890,7 +890,7 @@ struct SPathTranslator : public SNodeTranslator
     {
         SNodeTranslator::PushTranslation(inContext);
         SPath &theItem = static_cast<SPath &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_PATH_PROPERTIES
     }
 };
@@ -907,7 +907,7 @@ struct SDefaultMaterialTranslator : public SGraphObjectTranslator
     {
         SGraphObjectTranslator::PushTranslation(inContext);
         SDefaultMaterial &theItem = static_cast<SDefaultMaterial &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_MATERIAL_PROPERTIES
 
         // qt3dsdm::Qt3DSDMInstanceHandle parent = inContext.m_AssetGraph.GetParent(
@@ -937,7 +937,7 @@ struct SImageTranslator : public SGraphObjectTranslator
     {
         SGraphObjectTranslator::PushTranslation(inContext);
         SImage &theItem = static_cast<SImage &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_IMAGE_PROPERTIES
 
         theItem.m_Flags.SetDirty(true);
@@ -968,7 +968,7 @@ struct STextTranslator : public SNodeTranslator
     void PushTranslation(STranslation &inContext) override
     {
         SNodeTranslator::PushTranslation(inContext);
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         SText &theItem = static_cast<SText &>(GetGraphObject());
         ITERATE_QT3DS_RENDER_TEXT_PROPERTIES
         theItem.m_Flags.SetTextDirty(true);
@@ -999,7 +999,7 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
     void PushTranslation(STranslation &inContext) override
     {
         SDynamicObject &theItem = static_cast<SDynamicObject &>(GetGraphObject());
-        IDynamicObjectSystem &theSystem = inContext.m_UICContext.GetDynamicObjectSystem();
+        IDynamicObjectSystem &theSystem = inContext.m_Context.GetDynamicObjectSystem();
         using namespace qt3ds::render::dynamic;
         using qt3ds::foundation::NVConstDataRef;
         NVConstDataRef<SPropertyDefinition> theProperties =
@@ -1084,7 +1084,7 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
                             theItem.SetPropertyValue(
                                 theDefinition, theStr.c_str(),
                                 inContext.m_Doc.GetDocumentDirectory().GetCharStar(), theWorkspace,
-                                inContext.m_UICContext.GetStringTable());
+                                inContext.m_Context.GetStringTable());
                         }
                     } break;
                     default:
@@ -1112,7 +1112,7 @@ struct SEffectTranslator : public SDynamicObjectTranslator
     }
     void PushTranslation(STranslation &inContext) override
     {
-        m_EffectSystem = &inContext.m_UICContext.GetEffectSystem();
+        m_EffectSystem = &inContext.m_Context.GetEffectSystem();
         SDynamicObjectTranslator::PushTranslation(inContext);
     }
 
@@ -1140,7 +1140,7 @@ struct SCustomMaterialTranslator : public SDynamicObjectTranslator
     {
         SDynamicObjectTranslator::PushTranslation(inContext);
         SCustomMaterial &theItem = static_cast<SCustomMaterial &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_CUSTOM_MATERIAL_PROPERTIES
 
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Lightmaps.m_LightmapIndirect,
@@ -1173,7 +1173,7 @@ struct SReferencedMaterialTranslator : public SGraphObjectTranslator
     {
         SGraphObjectTranslator::PushTranslation(inContext);
         SReferencedMaterial &theItem = static_cast<SReferencedMaterial &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_REFERENCED_MATERIAL_PROPERTIES
 
         theItem.m_Dirty.SetDirty();
@@ -1291,10 +1291,10 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
             return;
 
         Q3DStudio::CFilePath theFullPath = inContext.m_Doc.GetResolvedPathToDoc(theData->GetData());
-        qt3ds::foundation::IStringTable &theStrTable = inContext.m_UICContext.GetStringTable();
+        qt3ds::foundation::IStringTable &theStrTable = inContext.m_Context.GetStringTable();
         theItem.m_PluginPath = theStrTable.RegisterStr(theFullPath);
         qt3ds::render::IRenderPluginInstance *theInstance =
-            inContext.m_UICContext.GetRenderPluginManager().GetOrCreateRenderPluginInstance(
+            inContext.m_Context.GetRenderPluginManager().GetOrCreateRenderPluginInstance(
                 theItem.m_PluginPath, &theItem);
 
         // Couldn't load the instance, so we can't render the instance.
@@ -1317,7 +1317,7 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
         using qt3ds::render::SRenderPluginPropertyDeclaration;
         if (theClass.GetRegisteredProperties().size() == 0) {
             for (size_t idx = 0, end = theSpecificProperties.size(); idx < end; ++idx) {
-                SUICDMPropertyDefinition theProperty =
+                Qt3DSDMPropertyDefinition theProperty =
                     theDataCore->GetProperty(theSpecificProperties[idx]);
                 qt3dsdm::AdditionalMetaDataType::Value theMetaType =
                     inContext.m_StudioSystem.GetActionMetaData()->GetAdditionalMetaDataType(
@@ -1366,7 +1366,7 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
                 GetInstanceHandle(), theSpecificProperties[idx]);
             if (thePropValueOpt.hasValue()) {
                 SValue &thePropValue = thePropValueOpt.getValue();
-                SUICDMPropertyDefinition theProperty =
+                Qt3DSDMPropertyDefinition theProperty =
                     theDataCore->GetProperty(theSpecificProperties[idx]);
                 SRenderPluginPropertyDeclaration theDeclaration(theClass.GetPropertyDeclaration(
                     theStrTable.RegisterStr(theProperty.m_Name.c_str())));
@@ -1446,7 +1446,7 @@ struct SAliasTranslator : public SGraphObjectTranslator
     }
     void PushTranslation(STranslation &inContext) override
     {
-        STranslatorUICDMParser theParser(inContext, GetInstanceHandle());
+        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         Option<SObjectRefType> theData = theParser.GetPropertyValue<SObjectRefType>(
             inContext.m_ObjectDefinitions.m_Alias.m_ReferencedNode);
         m_ReferencedInstance = Qt3DSDMInstanceHandle();
@@ -1473,7 +1473,7 @@ struct SAliasTranslator : public SGraphObjectTranslator
     void AfterRenderGraphIsBuilt(STranslation &inContext) override
     {
         SNode &theItem = static_cast<SNode &>(GetGraphObject());
-        STranslatorUICDMParser theParser(inContext, m_InstanceHandle);
+        STranslatorDataModelParser theParser(inContext, m_InstanceHandle);
         ITERATE_QT3DS_RENDER_NODE_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Node.m_BoneId,
                                 theItem.m_SkeletonId);
@@ -1521,7 +1521,7 @@ void SGraphObjectTranslator::PushTranslation(STranslation &inTranslatorContext)
     Q3DStudio::CString theId = inTranslatorContext.m_Reader.GetFileId(GetInstanceHandle());
     if (theId.size())
         GetGraphObject().m_Id =
-            inTranslatorContext.m_UICContext.GetStringTable().RegisterStr(theId.c_str());
+            inTranslatorContext.m_Context.GetStringTable().RegisterStr(theId.c_str());
 }
 
 bool STranslation::IncludeNode(const SNode &inNode)
@@ -1545,11 +1545,11 @@ void STranslation::ReleaseEffect(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         theType = m_ObjectDefinitions.GetType(theParentClass);
 
     if (theType == qt3dsdm::ComposerObjectTypes::Effect) {
-        IEffectSystem &theSystem = m_UICContext.GetEffectSystem();
+        IEffectSystem &theSystem = m_Context.GetEffectSystem();
         if (theParentClass.Valid()) {
             Q3DStudio::CString theInstanceName = m_Reader.GetName(theParentClass);
             CRegisteredString theNameStr =
-                m_UICContext.GetStringTable().RegisterStr(theInstanceName);
+                m_Context.GetStringTable().RegisterStr(theInstanceName);
 
             if (theSystem.IsEffectRegistered(theNameStr)) {
                 TInstanceToTranslatorMap::iterator theTranslatorList =
@@ -1617,11 +1617,11 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
         theNewTranslator = QT3DS_NEW(m_Allocator, SPathSubPathTranslator)(inInstance, m_Allocator);
         break;
     case qt3dsdm::ComposerObjectTypes::Effect: {
-        IEffectSystem &theSystem = m_UICContext.GetEffectSystem();
+        IEffectSystem &theSystem = m_Context.GetEffectSystem();
         if (theParentClass.Valid()) {
             Q3DStudio::CString theInstanceName = m_Reader.GetName(theParentClass);
             CRegisteredString theNameStr =
-                m_UICContext.GetStringTable().RegisterStr(theInstanceName);
+                m_Context.GetStringTable().RegisterStr(theInstanceName);
 
             if (theSystem.IsEffectRegistered(theNameStr)
                 && theSystem.DoesEffectRequireCompilation(theNameStr)) {
@@ -1634,11 +1634,11 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
                 Q3DStudio::CString theInstancePath = m_Reader.GetSourcePath(theParentClass);
                 Option<qt3dsdm::SMetaDataEffect> theMetaEffect =
                     theMetaData.GetEffectBySourcePath(
-                        m_UICContext.GetStringTable().GetNarrowStr(theInstancePath));
+                        m_Context.GetStringTable().GetNarrowStr(theInstancePath));
                 if (theMetaEffect.hasValue()) {
                     qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
-                        theNameStr, m_UICContext.GetFoundation(), theSystem, theMetaEffect,
-                        m_UICContext.GetStringTable());
+                        theNameStr, m_Context.GetFoundation(), theSystem, theMetaEffect,
+                        m_Context.GetStringTable());
                     theSystem.SetEffectRequiresCompilation(theNameStr, true);
                 }
             }
@@ -1651,22 +1651,22 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
         }
     } break;
     case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
-        ICustomMaterialSystem &theSystem = m_UICContext.GetCustomMaterialSystem();
+        ICustomMaterialSystem &theSystem = m_Context.GetCustomMaterialSystem();
         if (theParentClass.Valid()) {
             Q3DStudio::CString theInstanceName = m_Reader.GetName(theParentClass);
             CRegisteredString theNameStr =
-                m_UICContext.GetStringTable().RegisterStr(theInstanceName);
+                m_Context.GetStringTable().RegisterStr(theInstanceName);
             if (!theSystem.IsMaterialRegistered(theNameStr)) {
                 // We assume the effect has already been registered and such.
                 qt3dsdm::IMetaData &theMetaData(*m_StudioSystem.GetActionMetaData());
                 Q3DStudio::CString theInstancePath = m_Reader.GetSourcePath(theParentClass);
                 Option<qt3dsdm::SMetaDataCustomMaterial> theMaterialData =
                     theMetaData.GetMaterialBySourcePath(
-                        m_UICContext.GetStringTable().GetNarrowStr(theInstancePath));
+                        m_Context.GetStringTable().GetNarrowStr(theInstancePath));
                 if (theMaterialData.hasValue()) {
                     qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
-                        theNameStr, m_UICContext.GetFoundation(), theSystem, theMaterialData,
-                        m_UICContext.GetStringTable());
+                        theNameStr, m_Context.GetFoundation(), theSystem, theMaterialData,
+                        m_Context.GetStringTable());
                 }
             }
             if (theSystem.IsMaterialRegistered(theNameStr)) {
@@ -1804,9 +1804,9 @@ namespace studio {
 }
 }
 
-STranslation::STranslation(IStudioRenderer &inRenderer, IUICRenderContext &inContext)
+STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inContext)
     : m_Renderer(inRenderer)
-    , m_UICContext(inContext)
+    , m_Context(inContext)
     , m_Doc(*g_StudioApp.GetCore()->GetDoc())
     , m_Reader(m_Doc.GetDocumentReader())
     , m_ObjectDefinitions(
@@ -1956,7 +1956,7 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
         }
     }
     if (GraphObjectTypes::Layer == theParentTranslator.GetGraphObject().m_Type)
-        m_UICContext.GetRenderer().ChildrenUpdated(
+        m_Context.GetRenderer().ChildrenUpdated(
             static_cast<SLayer &>(theParentTranslator.GetGraphObject()));
 
     // Allow certain nodes to override their children.
@@ -2025,8 +2025,8 @@ void STranslation::PreRender()
     TIdentifier theRoot = m_AssetGraph.GetRoot(0);
     ClearDirtySet();
     BuildRenderGraph(theRoot);
-    m_UICContext.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
-    m_UICContext.SetMatteColor(QT3DSVec4(.13f, .13f, .13f, 1.0f));
+    m_Context.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
+    m_Context.SetMatteColor(QT3DSVec4(.13f, .13f, .13f, 1.0f));
     QT3DSVec2 theViewportDims(GetViewportDimensions());
     // Ensure the camera points where it should
     if (m_EditCameraEnabled) {
@@ -2043,21 +2043,21 @@ void STranslation::PreRender()
         m_Presentation.m_PresentationDimensions =
             QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
         QT3DSVec2 theViewportDims(GetViewportDimensions());
-        m_UICContext.SetWindowDimensions(
+        m_Context.SetWindowDimensions(
             qt3ds::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
-        m_UICContext.SetPresentationDimensions(
+        m_Context.SetPresentationDimensions(
             qt3ds::render::SWindowDimensions((QT3DSU32)m_Presentation.m_PresentationDimensions.x,
                                            (QT3DSU32)m_Presentation.m_PresentationDimensions.y));
 
         // set if we draw geometry in wireframe mode
-        m_UICContext.SetWireframeMode(CStudioPreferences::IsWireframeModeOn());
+        m_Context.SetWireframeMode(CStudioPreferences::IsWireframeModeOn());
 
         if (m_EditCameraEnabled) {
             m_Presentation.m_PresentationDimensions = theViewportDims;
-            m_UICContext.SetPresentationDimensions(
+            m_Context.SetPresentationDimensions(
                 qt3ds::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
             ::CColor theEditCameraBackground = CStudioPreferences::GetEditViewBackgroundColor();
-            m_UICContext.SetSceneColor(QT3DSVec4(theEditCameraBackground.GetRed() / 255.0f,
+            m_Context.SetSceneColor(QT3DSVec4(theEditCameraBackground.GetRed() / 255.0f,
                                               theEditCameraBackground.GetGreen() / 255.0f,
                                               theEditCameraBackground.GetBlue() / 255.0f, 1.0f));
         } else {
@@ -2067,16 +2067,16 @@ void STranslation::PreRender()
             if (theSceneTranslator) {
                 SScene &theScene = static_cast<SScene &>(theSceneTranslator->GetGraphObject());
                 if (theScene.m_UseClearColor)
-                    m_UICContext.SetSceneColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
+                    m_Context.SetSceneColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
                 else
-                    m_UICContext.SetSceneColor(QT3DSVec4(QT3DSVec3(0.0f), 1.0f));
+                    m_Context.SetSceneColor(QT3DSVec4(QT3DSVec3(0.0f), 1.0f));
             }
         }
     }
     if (m_EditCameraEnabled == false && g_StudioApp.IsAuthorZoom()) {
         if (m_Presentation.m_PresentationDimensions.x > theViewportDims.x
             || m_Presentation.m_PresentationDimensions.y > theViewportDims.y) {
-            m_UICContext.SetScaleMode(qt3ds::render::ScaleModes::FitSelected);
+            m_Context.SetScaleMode(qt3ds::render::ScaleModes::FitSelected);
         }
     }
 }
@@ -2279,7 +2279,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
     if (m_Scene) {
         // Note that begin frame is called before we allocate the bounding box and axis widgets so
         // that we can take advantage of the renderer's per-frame-allocator.
-        m_UICContext.BeginFrame();
+        m_Context.BeginFrame();
         // Render the bounding boxes and extra widgets.
         // This is called *before* the render because these sort of appendages need to be added
         // to the layer renderables.
@@ -2350,10 +2350,10 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                         selectedPath = true;
                         if (!m_PathWidget)
                             m_PathWidget = qt3ds::widgets::IPathWidget::CreatePathWidget(
-                                m_UICContext.GetAllocator(), m_UICContext);
+                                m_Context.GetAllocator(), m_Context);
                         m_PathWidget->SetNode(
                             static_cast<SNode &>(theTranslator->GetGraphObject()));
-                        m_UICContext.GetRenderer().AddRenderWidget(*m_PathWidget);
+                        m_Context.GetRenderer().AddRenderWidget(*m_PathWidget);
                     }
                 }
             }
@@ -2368,7 +2368,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
 
             qt3ds::render::SNode &theNode(
                 static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
-            SCamera *theRenderCamera = m_UICContext.GetRenderer().GetCameraForNode(theNode);
+            SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
             bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
             if (shouldDisplayWidget && isActiveCamera == false) {
                 switch (theToolMode) {
@@ -2379,26 +2379,26 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                     // Render translation widget
                     if (!m_TranslationWidget)
                         m_TranslationWidget = qt3ds::widgets::IStudioWidget::CreateTranslationWidget(
-                            m_UICContext.GetAllocator());
+                            m_Context.GetAllocator());
                     theNextWidget = m_TranslationWidget.mPtr;
                     break;
                 case STUDIO_TOOLMODE_ROTATE:
                     if (!m_RotationWidget)
                         m_RotationWidget = qt3ds::widgets::IStudioWidget::CreateRotationWidget(
-                            m_UICContext.GetAllocator());
+                            m_Context.GetAllocator());
                     theNextWidget = m_RotationWidget.mPtr;
                     break;
 
                 case STUDIO_TOOLMODE_SCALE:
                     if (!m_ScaleWidget)
                         m_ScaleWidget = qt3ds::widgets::IStudioWidget::CreateScaleWidget(
-                            m_UICContext.GetAllocator());
+                            m_Context.GetAllocator());
                     theNextWidget = m_ScaleWidget.mPtr;
                     break;
                 }
                 if (theNextWidget) {
                     theNextWidget->SetNode(static_cast<SNode &>(theTranslator->GetGraphObject()));
-                    m_UICContext.GetRenderer().AddRenderWidget(*theNextWidget);
+                    m_Context.GetRenderer().AddRenderWidget(*theNextWidget);
                 }
             }
         }
@@ -2421,18 +2421,18 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             }
         }
 
-        m_Scene->PrepareForRender(GetViewportDimensions(), m_UICContext);
+        m_Scene->PrepareForRender(GetViewportDimensions(), m_Context);
 
-        m_UICContext.RunRenderTasks();
+        m_Context.RunRenderTasks();
 
-        m_Scene->Render(GetViewportDimensions(), m_UICContext, SScene::DoNotClear);
+        m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
 
         if (inDrawGuides && m_EditCameraEnabled == false && g_StudioApp.IsAuthorZoom() == false) {
             m_GuideContainer.clear();
             // Figure out the matte area.
-            NVRenderRect theContextViewport = m_UICContext.GetContextViewport();
-            NVRenderRect thePresentationViewport = m_UICContext.GetPresentationViewport();
-            m_UICContext.GetRenderContext().SetViewport(theContextViewport);
+            NVRenderRect theContextViewport = m_Context.GetContextViewport();
+            NVRenderRect thePresentationViewport = m_Context.GetPresentationViewport();
+            m_Context.GetRenderContext().SetViewport(theContextViewport);
             QT3DSI32 innerLeft = thePresentationViewport.m_X;
             QT3DSI32 innerRight = thePresentationViewport.m_X + thePresentationViewport.m_Width;
             QT3DSI32 innerBottom = thePresentationViewport.m_Y;
@@ -2494,14 +2494,14 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                     break;
                 }
             }
-            m_UICContext.GetPixelGraphicsRenderer().Render(
+            m_Context.GetPixelGraphicsRenderer().Render(
                 qt3ds::foundation::toDataRef(m_GuideContainer.data(), m_GuideContainer.size()));
 
             m_GuideContainer.clear();
             m_GuideAllocator.reset();
         }
 
-        m_UICContext.EndFrame();
+        m_Context.EndFrame();
 
         if (m_ZoomRender.hasValue()) {
             RenderZoomRender(*m_ZoomRender);
@@ -2512,7 +2512,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         /*
         if ( m_PickBuffer )
         {
-            qt3ds::render::NVRenderContext& theRenderContext( m_UICContext.GetRenderContext() );
+            qt3ds::render::NVRenderContext& theRenderContext( m_Context.GetRenderContext() );
             qt3ds::render::STextureDetails thePickDetails = m_PickBuffer->GetTextureDetails();
             theRenderContext.SetViewport( qt3ds::render::NVRenderRect( 0, 0, thePickDetails.m_Width,
         thePickDetails.m_Height ) );
@@ -2528,7 +2528,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             theRenderContext.SetBlendingEnabled( false );
             theRenderContext.SetDepthTestEnabled( false );
             theRenderContext.SetDepthWriteEnabled( false );
-            m_UICContext.GetRenderer().RenderQuad( theDimensions, theVP, *m_PickBuffer );
+            m_Context.GetRenderer().RenderQuad( theDimensions, theVP, *m_PickBuffer );
         }*/
     }
 }
@@ -2555,7 +2555,7 @@ void STranslation::DoPrepareForDrag(SNode *inSelectedNode)
     m_MouseDownNode.m_Parent = nullptr;
     m_MouseDownNode.m_FirstChild = nullptr;
     m_MouseDownNode.m_NextSibling = nullptr;
-    SCamera *theCamera = m_UICContext.GetRenderer().GetCameraForNode(*inSelectedNode);
+    SCamera *theCamera = m_Context.GetRenderer().GetCameraForNode(*inSelectedNode);
     m_CumulativeRotation = 0.0f;
     if (theCamera == nullptr)
         return;
@@ -2600,12 +2600,12 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
     SLayer *theLayer(inRender.m_Layer);
     CPt thePoint(inRender.m_Point);
     if (theLayer) {
-        qt3ds::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
+        qt3ds::render::IQt3DSRenderer &theRenderer(m_Context.GetRenderer());
         Option<qt3ds::render::SLayerPickSetup> thePickSetup(
             theRenderer.GetLayerPickSetup(*theLayer, QT3DSVec2((QT3DSF32)thePoint.x, (QT3DSF32)thePoint.y),
                                           qt3ds::render::SWindowDimensions(16, 16)));
         if (thePickSetup.hasValue()) {
-            qt3ds::render::NVRenderContext &theRenderContext(m_UICContext.GetRenderContext());
+            qt3ds::render::NVRenderContext &theRenderContext(m_Context.GetRenderContext());
             theRenderContext.SetViewport(qt3ds::render::NVRenderRect(0, 0, 100, 100));
             theRenderContext.SetScissorRect(qt3ds::render::NVRenderRect(0, 0, 100, 100));
             theRenderContext.SetDepthWriteEnabled(true);
@@ -2621,11 +2621,11 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
 
 void STranslation::DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor)
 {
-    qt3ds::NVBounds3 theBounds = inNode.GetBounds(m_UICContext.GetBufferManager(),
-                                               m_UICContext.GetPathManager(), true, this);
+    qt3ds::NVBounds3 theBounds = inNode.GetBounds(m_Context.GetBufferManager(),
+                                               m_Context.GetPathManager(), true, this);
     qt3ds::render::IRenderWidget &theBBoxWidget = qt3ds::render::IRenderWidget::CreateBoundingBoxWidget(
-        inNode, theBounds, inColor, m_UICContext.GetRenderer().GetPerFrameAllocator());
-    m_UICContext.GetRenderer().AddRenderWidget(theBBoxWidget);
+        inNode, theBounds, inColor, m_Context.GetRenderer().GetPerFrameAllocator());
+    m_Context.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
 
 void STranslation::DrawLightBoundingBox(SNode &inNode, QT3DSVec3 inColor)
@@ -2639,8 +2639,8 @@ void STranslation::DrawLightBoundingBox(SNode &inNode, QT3DSVec3 inColor)
         qt3ds::QT3DSVec3(-theLight->m_AreaWidth * 0.5f, -theLight->m_AreaHeight * 0.5f, 0.0f),
         qt3ds::QT3DSVec3(theLight->m_AreaWidth * 0.5f, theLight->m_AreaHeight * 0.5f, 0.0f));
     qt3ds::render::IRenderWidget &theBBoxWidget = qt3ds::render::IRenderWidget::CreateBoundingBoxWidget(
-        inNode, theBounds, inColor, m_UICContext.GetRenderer().GetPerFrameAllocator());
-    m_UICContext.GetRenderer().AddRenderWidget(theBBoxWidget);
+        inNode, theBounds, inColor, m_Context.GetRenderer().GetPerFrameAllocator());
+    m_Context.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
 
 void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
@@ -2648,8 +2648,8 @@ void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
     if (GraphObjectTypes::IsNodeType(inTranslator.GetGraphObject().m_Type)) {
         qt3ds::render::IRenderWidget &theAxisWidget = qt3ds::render::IRenderWidget::CreateAxisWidget(
             static_cast<SNode &>(inTranslator.GetGraphObject()),
-            m_UICContext.GetRenderer().GetPerFrameAllocator());
-        m_UICContext.GetRenderer().AddRenderWidget(theAxisWidget);
+            m_Context.GetRenderer().GetPerFrameAllocator());
+        m_Context.GetRenderer().AddRenderWidget(theAxisWidget);
     } else {
         QT3DS_ASSERT(false);
     }
@@ -2664,16 +2664,16 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
     SLayer *theLayer = GetLayerForNode(theNode);
     if (theLayer && theWidgetTranslator) {
         Option<qt3ds::render::SLayerPickSetup> thePickSetup(
-            m_UICContext.GetRenderer().GetLayerPickSetup(
+            m_Context.GetRenderer().GetLayerPickSetup(
                 *theLayer, QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y),
                 qt3ds::render::SWindowDimensions(4, 4)));
         if (thePickSetup.hasValue()) {
-            qt3ds::render::NVRenderContext &theContext(m_UICContext.GetRenderContext());
+            qt3ds::render::NVRenderContext &theContext(m_Context.GetRenderContext());
             qt3ds::render::NVRenderContextScopedProperty<qt3ds::render::NVRenderFrameBuffer *>
                 __currentrt(theContext, &qt3ds::render::NVRenderContext::GetRenderTarget,
                             &qt3ds::render::NVRenderContext::SetRenderTarget);
             qt3ds::render::NVRenderFrameBuffer *theFBO =
-                m_UICContext.GetResourceManager().AllocateFrameBuffer();
+                m_Context.GetResourceManager().AllocateFrameBuffer();
             const QT3DSU32 fboDims = 8;
             if (!m_PickBuffer) {
                 m_PickBuffer = theContext.CreateTexture2D();
@@ -2682,7 +2682,7 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
                                              qt3ds::render::NVRenderTextureFormats::LuminanceAlpha8);
             }
             qt3ds::render::NVRenderRenderBuffer *theRenderBuffer =
-                m_UICContext.GetResourceManager().AllocateRenderBuffer(
+                m_Context.GetResourceManager().AllocateRenderBuffer(
                     fboDims, fboDims, qt3ds::render::NVRenderRenderBufferFormats::Depth16);
             theFBO->Attach(qt3ds::render::NVRenderFrameBufferAttachments::Color0,
                            qt3ds::render::NVRenderTextureOrRenderBuffer(*m_PickBuffer));
@@ -2703,8 +2703,8 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
             m_PixelBuffer.resize(fboDims * fboDims * 3);
             theContext.ReadPixels(theViewport, qt3ds::render::NVRenderReadPixelFormats::RGB8,
                                   m_PixelBuffer);
-            m_UICContext.GetResourceManager().Release(*theFBO);
-            m_UICContext.GetResourceManager().Release(*theRenderBuffer);
+            m_Context.GetResourceManager().Release(*theFBO);
+            m_Context.GetResourceManager().Release(*theRenderBuffer);
             eastl::hash_map<QT3DSU32, QT3DSU32> tallies;
             QT3DSU32 numPixels = fboDims * fboDims;
             for (QT3DSU32 idx = 0; idx < numPixels; ++idx) {
@@ -2779,8 +2779,8 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         }
     }
     if (m_Scene && m_Scene->m_FirstChild) {
-        qt3ds::render::SUICRenderPickResult thePickResult =
-            m_UICContext.GetRenderer().Pick(*m_Scene->m_FirstChild, GetViewportDimensions(),
+        qt3ds::render::Qt3DSRenderPickResult thePickResult =
+            m_Context.GetRenderer().Pick(*m_Scene->m_FirstChild, GetViewportDimensions(),
                                             QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y));
         if (thePickResult.m_HitObject) {
             const SGraphObject &theObject = *thePickResult.m_HitObject;
@@ -2886,21 +2886,21 @@ QT3DSVec3 STranslation::GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inIns
     if (GraphObjectTypes::IsNodeType(theTranslator->GetGraphObject().m_Type) == false)
         return QT3DSVec3(0, 0, 0);
     SNode *theNode = static_cast<SNode *>(&theTranslator->GetGraphObject());
-    SCamera *theCamera = m_UICContext.GetRenderer().GetCameraForNode(*theNode);
+    SCamera *theCamera = m_Context.GetRenderer().GetCameraForNode(*theNode);
     {
         // Get the node's parent
         Qt3DSDMInstanceHandle theParent = m_AssetGraph.GetParent(inInstance);
         SGraphObjectTranslator *theParentTranslator = GetOrCreateTranslator(theParent);
         if (theParentTranslator
             && GraphObjectTypes::IsNodeType(theParentTranslator->GetGraphObject().m_Type))
-            theCamera = m_UICContext.GetRenderer().GetCameraForNode(
+            theCamera = m_Context.GetRenderer().GetCameraForNode(
                 *static_cast<SNode *>(&theParentTranslator->GetGraphObject()));
     }
     if (theCamera == nullptr)
         return QT3DSVec3(0, 0, 0);
 
     QT3DSVec3 theGlobalPos(theNode->GetGlobalPos());
-    return m_UICContext.GetRenderer().UnprojectToPosition(*theCamera, theGlobalPos,
+    return m_Context.GetRenderer().UnprojectToPosition(*theCamera, theGlobalPos,
                                                           QT3DSVec2((QT3DSF32)inPos.x, (QT3DSF32)inPos.y));
 }
 
@@ -2946,7 +2946,7 @@ void STranslation::TranslateSelectedInstanceAlongCameraDirection(
     SNode *theNode = GetSelectedNode();
     if (theNode == nullptr)
         return;
-    SCamera *theCamera = m_UICContext.GetRenderer().GetCameraForNode(*theNode);
+    SCamera *theCamera = m_Context.GetRenderer().GetCameraForNode(*theNode);
     if (theCamera == nullptr)
         return;
     QT3DSF32 theYDistance = QT3DSF32(inMouseCoords.y - inOriginalCoords.y);
@@ -2967,7 +2967,7 @@ void STranslation::TranslateSelectedInstance(CPt inOriginalCoords, CPt inMouseCo
     SNode *theNode = GetSelectedNode();
     if (theNode == nullptr)
         return;
-    qt3ds::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
+    qt3ds::render::IQt3DSRenderer &theRenderer(m_Context.GetRenderer());
 
     QT3DSF32 theXDistance = QT3DSF32(inMouseCoords.x - inOriginalCoords.x);
     QT3DSF32 theYDistance = QT3DSF32(inMouseCoords.y - inOriginalCoords.y);
@@ -3076,7 +3076,7 @@ void STranslation::RotateSelectedInstanceAboutCameraDirectionVector(
     SNode *theNode = GetSelectedNode();
     if (theNode == nullptr)
         return;
-    SCamera *theCamera = m_UICContext.GetRenderer().GetCameraForNode(*theNode);
+    SCamera *theCamera = m_Context.GetRenderer().GetCameraForNode(*theNode);
     if (theCamera == nullptr)
         return;
 
@@ -3097,7 +3097,7 @@ void STranslation::RotateSelectedInstance(CPt inOriginalCoords, CPt inPreviousCo
     SNode *theNode = GetSelectedNode();
     if (theNode == nullptr)
         return;
-    SCamera *theCamera = m_UICContext.GetRenderer().GetCameraForNode(*theNode);
+    SCamera *theCamera = m_Context.GetRenderer().GetCameraForNode(*theNode);
     if (theCamera == nullptr)
         return;
     // We want to do a similar translation to what we did below but we need to calculate the
@@ -3224,12 +3224,12 @@ STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum i
     retval.m_ComponentId = inComponentId;
     retval.m_WidgetType = inWidgetId;
     retval.m_WidgetMode = inWidgetMode;
-    qt3ds::render::IUICRenderer &theRenderer(m_UICContext.GetRenderer());
+    qt3ds::render::IQt3DSRenderer &theRenderer(m_Context.GetRenderer());
     retval.m_Renderer = &theRenderer;
     retval.m_Node = &inNode;
     retval.m_Layer = GetLayerForNode(inNode);
     retval.m_Camera = theRenderer.GetCameraForNode(inNode);
-    qt3ds::render::SWindowDimensions theUnsignedDimensions(m_UICContext.GetWindowDimensions());
+    qt3ds::render::SWindowDimensions theUnsignedDimensions(m_Context.GetWindowDimensions());
     QT3DSVec2 theWindowDimensions((QT3DSF32)theUnsignedDimensions.m_Width,
                                (QT3DSF32)theUnsignedDimensions.m_Height);
     if (retval.m_Camera == nullptr || retval.m_Layer == nullptr)
@@ -3237,15 +3237,15 @@ STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum i
 
     SCamera &theCamera(*retval.m_Camera);
     SLayer &theLayer(*retval.m_Layer);
-    QT3DSVec2 theLayerOriginalCoords = m_UICContext.GetRenderer().GetLayerMouseCoords(
+    QT3DSVec2 theLayerOriginalCoords = m_Context.GetRenderer().GetLayerMouseCoords(
         *retval.m_Layer, QT3DSVec2((QT3DSF32)inOriginalCoords.x, (QT3DSF32)inOriginalCoords.y),
         theWindowDimensions, true);
 
-    QT3DSVec2 theLayerMouseCoords = m_UICContext.GetRenderer().GetLayerMouseCoords(
+    QT3DSVec2 theLayerMouseCoords = m_Context.GetRenderer().GetLayerMouseCoords(
         *retval.m_Layer, QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y),
         theWindowDimensions, true);
 
-    QT3DSVec2 thePreviousLayerMouseCoords = m_UICContext.GetRenderer().GetLayerMouseCoords(
+    QT3DSVec2 thePreviousLayerMouseCoords = m_Context.GetRenderer().GetLayerMouseCoords(
         *retval.m_Layer, QT3DSVec2((QT3DSF32)inPreviousMouseCoords.x, (QT3DSF32)inPreviousMouseCoords.y),
         theWindowDimensions, true);
     QT3DSMat44 theGlobalTransform(QT3DSMat44::createIdentity());
@@ -3831,9 +3831,9 @@ SNode *STranslation::GetEditCameraLayer()
 
 PickTargetAreas::Enum STranslation::GetPickArea(CPt inPoint)
 {
-    qt3ds::render::NVRenderRectF displayViewport = m_UICContext.GetDisplayViewport();
+    qt3ds::render::NVRenderRectF displayViewport = m_Context.GetDisplayViewport();
     QT3DSVec2 thePickPoint((QT3DSF32)inPoint.x,
-                        m_UICContext.GetWindowDimensions().m_Height - (QT3DSF32)inPoint.y);
+                        m_Context.GetWindowDimensions().m_Height - (QT3DSF32)inPoint.y);
     QT3DSF32 left = displayViewport.m_X;
     QT3DSF32 right = displayViewport.m_X + displayViewport.m_Width;
     QT3DSF32 top = displayViewport.m_Y + displayViewport.m_Height;

@@ -126,7 +126,7 @@ void CCmdLineParser::ParseArguments(int inArgc, wchar_t **inArgv)
     // If there were no switches modifying m_ExecutionMode, default execution mode
     // according to the file extension found on m_Filename.
     if (0 == m_ExecutionQueue.size()) {
-        CUICFile theFile(m_Filename);
+        Qt3DSFile theFile(m_Filename);
         Q3DStudio::CString theExtension = "." + theFile.GetExtension();
         if (theExtension.CompareNoCase(::LoadResourceString(IDS_FILE_EXT_UIP)))
             m_ExecutionQueue.push_back(OPEN_FILE);

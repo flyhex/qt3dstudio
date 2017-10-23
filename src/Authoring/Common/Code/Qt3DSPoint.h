@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef __UICPOINT_H__
-#define __UICPOINT_H__
+#ifndef __QT3DS_POINT_H__
+#define __QT3DS_POINT_H__
 
 #ifndef __PLATFORMCONVERSION_H__
 #include "PlatformConversion.h"
@@ -52,15 +52,15 @@ public:
     CPoint(int initX, int initY);
     CPoint(const CPoint &initPt);
 #ifndef __PLATFORMCONVERSION_H__
-    CPoint(const UICPoint &initPt);
-    CPoint(const UICPoint *initPt);
+    CPoint(const Qt3DSPoint &initPt);
+    CPoint(const Qt3DSPoint *initPt);
 #endif
 
     // Operations
     void Offset(int xOffset, int yOffset);
     void Offset(CPoint &point);
 #ifndef __PLATFORMCONVERSION_H__
-    void operator=(const UICPoint &srcPt);
+    void operator=(const Qt3DSPoint &srcPt);
 #endif
     bool operator==(CPoint &point) const;
     bool operator!=(CPoint &point) const;
@@ -87,13 +87,13 @@ inline CPoint::CPoint(const CPoint &initPt)
     *(CPoint *)this = initPt;
 }
 #ifndef __PLATFORMCONVERSION_H__
-inline CPoint::CPoint(const UICPoint &initPt)
+inline CPoint::CPoint(const Qt3DSPoint &initPt)
 {
-    CPlatformConversion::UICPointToCPoint(initPt, *this);
+    CPlatformConversion::Qt3DSPointToCPoint(initPt, *this);
 }
-inline CPoint::CPoint(const UICPoint *initPt)
+inline CPoint::CPoint(const Qt3DSPoint *initPt)
 {
-    CPlatformConversion::UICPointToCPoint(*initPt, *this);
+    CPlatformConversion::Qt3DSPointToCPoint(*initPt, *this);
 }
 #endif
 inline void CPoint::Offset(int xOffset, int yOffset)
@@ -107,9 +107,9 @@ inline void CPoint::Offset(CPoint &point)
     y += point.y;
 }
 #ifndef __PLATFORMCONVERSION_H__
-inline void CPoint::operator=(const UICPoint &srcPt)
+inline void CPoint::operator=(const Qt3DSPoint &srcPt)
 {
-    CPlatformConversion::UICPointToCPoint(srcPt, *this);
+    CPlatformConversion::Qt3DSPointToCPoint(srcPt, *this);
 }
 #endif
 inline bool CPoint::operator==(CPoint &point) const
@@ -146,4 +146,4 @@ inline CPoint CPoint::operator+(CPoint &point) const
 
 } // namespace Q3DStudio
 
-#endif // __UICPOINT_H__
+#endif // __QT3DS_POINT_H__

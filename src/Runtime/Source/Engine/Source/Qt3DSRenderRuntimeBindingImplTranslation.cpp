@@ -64,7 +64,7 @@ QT3DSU32 g_PresentationTag;
 namespace qt3ds {
 namespace render {
     template <>
-    struct SPointerTag<CUICTranslator>
+    struct SPointerTag<Qt3DSTranslator>
     {
         static QT3DSU32 GetTag() { return g_TranslatorTag; }
     };
@@ -78,18 +78,18 @@ namespace render {
 
 namespace {
 
-template <UICRenderDirtyFlags::Enum TDirtyType>
+template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
 struct SDirtySetter
 {
 };
 
 template <>
-struct SDirtySetter<UICRenderDirtyFlags::Dirty>
+struct SDirtySetter<Qt3DSRenderDirtyFlags::Dirty>
 {
     static void Set(bool &dirty, bool & /*transformDirty*/, bool & /*textDirty*/) { dirty = true; }
 };
 template <>
-struct SDirtySetter<UICRenderDirtyFlags::TransformDirty>
+struct SDirtySetter<Qt3DSRenderDirtyFlags::TransformDirty>
 {
     static void Set(bool &dirty, bool &transformDirty, bool & /*textDirty*/)
     {
@@ -98,7 +98,7 @@ struct SDirtySetter<UICRenderDirtyFlags::TransformDirty>
     }
 };
 template <>
-struct SDirtySetter<UICRenderDirtyFlags::TextDirty>
+struct SDirtySetter<Qt3DSRenderDirtyFlags::TextDirty>
 {
     static void Set(bool &dirty, bool & /*transformDirty*/, bool &textDirty)
     {
@@ -107,7 +107,7 @@ struct SDirtySetter<UICRenderDirtyFlags::TextDirty>
     }
 };
 template <>
-struct SDirtySetter<UICRenderDirtyFlags::Unknown>
+struct SDirtySetter<Qt3DSRenderDirtyFlags::Unknown>
 {
     static void Set(bool & /*dirty*/, bool & /*transformDirty*/, bool & /*textDirty*/) {}
 };
@@ -120,12 +120,12 @@ struct SRuntimePropertyParser
     Q3DStudio::EAttributeType m_Type;
     Q3DStudio::TElement &m_Element;
     SPresentation &m_Presentation;
-    IUICRenderContext &m_RenderContext;
+    IQt3DSRenderContext &m_RenderContext;
     bool m_Dirty;
     bool m_TransformDirty;
     bool m_TextDirty;
 
-    SRuntimePropertyParser(SPresentation &inPresentation, IUICRenderContext &inRenderContext,
+    SRuntimePropertyParser(SPresentation &inPresentation, IQt3DSRenderContext &inRenderContext,
                            Q3DStudio::TElement &inElement)
         : m_PropertyName(0)
         , m_Type((Q3DStudio::EAttributeType)0)
@@ -144,12 +144,12 @@ struct SRuntimePropertyParser
         m_Value = inValue;
         m_Type = inType;
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     void SetDirty()
     {
         SDirtySetter<TDirtyType>::Set(m_Dirty, m_TransformDirty, m_TextDirty);
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(QT3DSF32 &outValue)
     {
         if (m_Type == Q3DStudio::ATTRIBUTETYPE_FLOAT) {
@@ -164,7 +164,7 @@ struct SRuntimePropertyParser
         }
         return false;
     };
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(QT3DSU32 &outValue)
     {
         if (m_Type == Q3DStudio::ATTRIBUTETYPE_INT32) {
@@ -179,7 +179,7 @@ struct SRuntimePropertyParser
         }
         return false;
     };
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(SGraphObject *&outValue)
     {
         Q3DStudio::TElement *theElem = NULL;
@@ -196,8 +196,8 @@ struct SRuntimePropertyParser
 
         SGraphObject *newValue = NULL;
         if (theElem) {
-            CUICTranslator *theTranslator =
-                reinterpret_cast<CUICTranslator *>(theElem->GetAssociation());
+            Qt3DSTranslator *theTranslator =
+                reinterpret_cast<Qt3DSTranslator *>(theElem->GetAssociation());
             if (theTranslator)
                 newValue = theTranslator->m_RenderObject;
         }
@@ -208,7 +208,7 @@ struct SRuntimePropertyParser
         }
         return false;
     };
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseRadianProperty(QT3DSF32 &outValue)
     {
         if (ParseProperty<TDirtyType>(outValue)) {
@@ -217,7 +217,7 @@ struct SRuntimePropertyParser
         }
         return false;
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseOpacityProperty(QT3DSF32 &outValue)
     {
         if (ParseProperty<TDirtyType>(outValue)) {
@@ -227,7 +227,7 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseOrientationProperty(bool &ioCurrent)
     {
         if (m_Type == Q3DStudio::ATTRIBUTETYPE_STRING) {
@@ -245,7 +245,7 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(bool &ioCurrent)
     {
         if (m_Type == Q3DStudio::ATTRIBUTETYPE_BOOL || m_Type == Q3DStudio::ATTRIBUTETYPE_INT32) {
@@ -260,7 +260,7 @@ struct SRuntimePropertyParser
         }
         return false;
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseInverseBoolean(bool &ioCurrent)
     {
         bool temp = !ioCurrent;
@@ -270,7 +270,7 @@ struct SRuntimePropertyParser
         }
         return false;
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(QT3DSVec3 &outValue)
     {
         if (m_Type == Q3DStudio::ATTRIBUTETYPE_FLOAT3) {
@@ -286,7 +286,7 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(CRegisteredString &outValue)
     {
         if (m_Type == Q3DStudio::ATTRIBUTETYPE_STRING) {
@@ -303,11 +303,11 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseRotationOrder(QT3DSU32 &outValue)
     {
         CRegisteredString theString;
-        ParseProperty<UICRenderDirtyFlags::Unknown>(theString);
+        ParseProperty<Qt3DSRenderDirtyFlags::Unknown>(theString);
         if (theString.IsValid()) {
             QT3DSU32 newRotationOrder = MapRotationOrder(theString);
             if (newRotationOrder != outValue) {
@@ -319,7 +319,7 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseOrientation(NodeFlags &outValue)
     {
         bool temp = false;
@@ -332,11 +332,11 @@ struct SRuntimePropertyParser
         }
         return false;
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseNodeFlagsProperty(NodeFlags &outValue, NodeFlagValues::Enum inFlag)
     {
         bool temp = false;
-        ParseProperty<UICRenderDirtyFlags::Unknown>(temp);
+        ParseProperty<Qt3DSRenderDirtyFlags::Unknown>(temp);
         bool wasSet = outValue & inFlag;
         if (temp != wasSet) {
             outValue.ClearOrSet(temp, inFlag);
@@ -346,11 +346,11 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseNodeFlagsInverseProperty(NodeFlags &outValue, NodeFlagValues::Enum inFlag)
     {
         bool temp = false;
-        ParseProperty<UICRenderDirtyFlags::Unknown>(temp);
+        ParseProperty<Qt3DSRenderDirtyFlags::Unknown>(temp);
         temp = !temp;
         bool wasSet = outValue & inFlag;
         if (temp != wasSet) {
@@ -361,11 +361,11 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType, typename TEnumType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType, typename TEnumType>
     bool ParseEnumProperty(TEnumType &outValue)
     {
         CRegisteredString theString;
-        ParseProperty<UICRenderDirtyFlags::Unknown>(theString);
+        ParseProperty<Qt3DSRenderDirtyFlags::Unknown>(theString);
         if (theString.IsValid()) {
             SEnumNameMap *theMap = SEnumParseMap<TEnumType>::GetMap();
             for (SEnumNameMap *theItem = theMap; theItem->m_Name && *theItem->m_Name; ++theItem) {
@@ -381,11 +381,11 @@ struct SRuntimePropertyParser
         }
         return false;
     }
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseAndResolveSourcePath(CRegisteredString &outValue)
     {
         CRegisteredString theTemp;
-        ParseProperty<UICRenderDirtyFlags::Unknown>(theTemp);
+        ParseProperty<Qt3DSRenderDirtyFlags::Unknown>(theTemp);
         CRegisteredString theNewStr = theTemp;
         if (outValue.c_str() != theNewStr.c_str()) {
             SetDirty<TDirtyType>();
@@ -395,7 +395,7 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(SImage *&ioImagePtr)
     {
         Q3DStudio::TElement *theElem =
@@ -404,8 +404,8 @@ struct SRuntimePropertyParser
         // Try to be very careful in here as casting things around like crazy is a sure
         // way to crash the runtime at a bad point.
         if (theElem != NULL) {
-            CUICTranslator *theTranslator =
-                reinterpret_cast<CUICTranslator *>(theElem->GetAssociation());
+            Qt3DSTranslator *theTranslator =
+                reinterpret_cast<Qt3DSTranslator *>(theElem->GetAssociation());
             if (theTranslator != NULL && theTranslator->GetUIPType() == GraphObjectTypes::Image) {
                 SImage *theImage = static_cast<SImage *>(theTranslator->m_RenderObject);
                 if (ioImagePtr != theImage) {
@@ -418,7 +418,7 @@ struct SRuntimePropertyParser
         return false;
     }
 
-    template <UICRenderDirtyFlags::Enum TDirtyType>
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(SNode *&ioNodePtr)
     {
         Q3DStudio::TElement *theElem =
@@ -429,8 +429,8 @@ struct SRuntimePropertyParser
         SNode *theNode = NULL;
         if (theElem != NULL
             && theElem->GetBelongedPresentation() == m_Element.GetBelongedPresentation()) {
-            CUICTranslator *theTranslator =
-                reinterpret_cast<CUICTranslator *>(theElem->GetAssociation());
+            Qt3DSTranslator *theTranslator =
+                reinterpret_cast<Qt3DSTranslator *>(theElem->GetAssociation());
             if (theTranslator != NULL
                 && GraphObjectTypes::IsNodeType(theTranslator->GetUIPType())) {
                 theNode = static_cast<SNode *>(theTranslator->m_RenderObject);
@@ -646,128 +646,128 @@ struct SRuntimePropertyParser
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name);                      \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                      \
         break;
 
 #define HANDLE_QT3DS_RENDER_VEC3_PROPERTY(type, name, dirty)                                         \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Z:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
         break;
 
 #define HANDLE_QT3DS_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                    \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
         break;
 
 #define HANDLE_QT3DS_RENDER_COLOR_PROPERTY(type, name, dirty)                                        \
     case Q3DStudio::type##_##name##_R:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_G:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_B:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
         break;
 
 #define HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(type, name, dirty)                                   \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name);                      \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                      \
         break;
 
 #define HANDLE_QT3DS_RENDER_TRANSFORM_VEC3_PROPERTY(type, name, dirty)                               \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name);                      \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                      \
         break;
 
 #define HANDLE_QT3DS_RENDER_RADIAN_PROPERTY(type, name, dirty)                                       \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseRadianProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name);                \
+        inParser.ParseRadianProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                \
         break;
 
 // The runtime converts rotations for us.
 #define HANDLE_QT3DS_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                  \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Z:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
         break;
 
 #define HANDLE_QT3DS_RENDER_OPACITY_PROPERTY(type, name, dirty)                                      \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseOpacityProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name);               \
+        inParser.ParseOpacityProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);               \
         break;
 
 #define HANDLE_QT3DS_ROTATION_ORDER_PROPERTY(type, name, dirty)                                      \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseRotationOrder<UICRenderDirtyFlags::dirty>(theItem.m_##name);                 \
+        inParser.ParseRotationOrder<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                 \
         break;
 
 #define HANDLE_QT3DS_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                    \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseOrientation<UICRenderDirtyFlags::dirty>(theItem.m_Flags);                    \
+        inParser.ParseOrientation<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags);                    \
         break;
 
 #define HANDLE_QT3DS_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                   \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseInverseBoolean<UICRenderDirtyFlags::dirty>(theItem.m_##name);                \
+        inParser.ParseInverseBoolean<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                \
         break;
 
 #define HANDLE_QT3DS_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseNodeFlagsProperty<UICRenderDirtyFlags::dirty>(theItem.m_Flags,               \
+        inParser.ParseNodeFlagsProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags,               \
                                                                     NodeFlagValues::name);         \
         break;
 
 #define HANDLE_QT3DS_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseNodeFlagsInverseProperty<UICRenderDirtyFlags::dirty>(theItem.m_Flags,        \
+        inParser.ParseNodeFlagsInverseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags,        \
                                                                            NodeFlagValues::name);  \
         break;
 
 #define HANDLE_QT3DS_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseEnumProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name);                  \
+        inParser.ParseEnumProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                  \
         break;
 
 #define HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseAndResolveSourcePath<UICRenderDirtyFlags::dirty>(theItem.m_##name);          \
+        inParser.ParseAndResolveSourcePath<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);          \
         break;
 
 #define HANDLE_QT3DS_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                                 \
     case Q3DStudio::type##_##name##_##index:                                                       \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name[index]);               \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name[index]);               \
         break;
 
 #define HANDLE_QT3DS_RENDER_VEC2_PROPERTY(type, name, dirty)                                         \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<UICRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
         break;
 
 const float g_DegToRad = float(M_PI / 180.0);
 
-struct SSceneTranslator : public CUICTranslator
+struct SSceneTranslator : public Qt3DSTranslator
 {
     typedef SScene TNodeType;
     SSceneTranslator(Q3DStudio::TElement &inElement, SScene &inRenderObject)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
     }
     // Ignored, scenes are always active
@@ -794,11 +794,11 @@ struct SSceneTranslator : public CUICTranslator
     void PostPropertyChanged(const SRuntimePropertyParser &, Q3DStudio::IPresentation &) {}
 };
 
-struct SNodeTranslator : public CUICTranslator
+struct SNodeTranslator : public Qt3DSTranslator
 {
     typedef SNode TNodeType;
     SNodeTranslator(Q3DStudio::TElement &inElement, SNode &inRenderObject)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
         SNode &theItem = *static_cast<SNode *>(m_RenderObject);
         theItem.m_Flags.SetLocallyPickable(false);
@@ -950,13 +950,13 @@ struct SPathTranslator : public SNodeTranslator
     }
 };
 
-struct SPathSubPathTranslator : public CUICTranslator
+struct SPathSubPathTranslator : public Qt3DSTranslator
 {
 
     typedef SPathSubPath TNodeType;
 
     SPathSubPathTranslator(Q3DStudio::TElement &inElement, SPathSubPath &inRenderObject)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
     }
 
@@ -1032,11 +1032,11 @@ struct SPathSubPathTranslator : public CUICTranslator
     }
 };
 
-struct SDefaultMaterialTranslator : public CUICTranslator
+struct SDefaultMaterialTranslator : public Qt3DSTranslator
 {
     typedef SDefaultMaterial TNodeType;
     SDefaultMaterialTranslator(Q3DStudio::TElement &inElement, SDefaultMaterial &inRenderObject)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
     }
     // Right now materials do not respect the active flag
@@ -1069,11 +1069,11 @@ struct SDefaultMaterialTranslator : public CUICTranslator
     }
 };
 
-struct SImageTranslator : public CUICTranslator
+struct SImageTranslator : public Qt3DSTranslator
 {
     typedef SImage TNodeType;
     SImageTranslator(Q3DStudio::TElement &inElement, SImage &inRenderObject)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
     }
 
@@ -1103,11 +1103,11 @@ struct SImageTranslator : public CUICTranslator
     }
 };
 
-struct SReferencedMaterialTranslator : public CUICTranslator
+struct SReferencedMaterialTranslator : public Qt3DSTranslator
 {
     typedef SReferencedMaterial TNodeType;
     SReferencedMaterialTranslator(Q3DStudio::TElement &inElement, TNodeType &inRenderObject)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
     }
 
@@ -1273,7 +1273,7 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
             }
         }
     }
-    void ApplyChanges(SPresentation &inPresentation, IUICRenderContext &inRenderContext,
+    void ApplyChanges(SPresentation &inPresentation, IQt3DSRenderContext &inRenderContext,
                       SDynamicObject &inObject, Q3DStudio::TElement &element,
                       IDynamicObjectSystem &inSystem)
     {
@@ -1328,17 +1328,17 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
     }
 };
 
-struct SEffectTranslator : public CUICTranslator
+struct SEffectTranslator : public Qt3DSTranslator
 {
     typedef SEffect TNodeType;
     SEffectTranslator(Q3DStudio::TElement &inElement, SEffect &inRenderObject,
                       NVAllocatorCallback &inCallback)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
         m_TranslatorContext = QT3DS_NEW(inCallback, SDynamicObjectTranslatorContext)(inCallback);
     }
 
-    void OnElementChanged(SPresentation &inPresentation, IUICRenderContext &inRenderContext,
+    void OnElementChanged(SPresentation &inPresentation, IQt3DSRenderContext &inRenderContext,
                           Q3DStudio::IPresentation &)
     {
         SRuntimePropertyParser theParser(inPresentation, inRenderContext, *m_Element);
@@ -1350,17 +1350,17 @@ struct SEffectTranslator : public CUICTranslator
     }
 };
 
-struct SCustomMaterialTranslator : public CUICTranslator
+struct SCustomMaterialTranslator : public Qt3DSTranslator
 {
     typedef SCustomMaterial TNodeType;
     SCustomMaterialTranslator(Q3DStudio::TElement &inElement, SCustomMaterial &inRenderObject,
                               NVAllocatorCallback &inCallback)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
         m_TranslatorContext = QT3DS_NEW(inCallback, SDynamicObjectTranslatorContext)(inCallback);
     }
 
-    void OnElementChanged(SPresentation &inPresentation, IUICRenderContext &inRenderContext,
+    void OnElementChanged(SPresentation &inPresentation, IQt3DSRenderContext &inRenderContext,
                           Q3DStudio::IPresentation &)
     {
         SRuntimePropertyParser theParser(inPresentation, inRenderContext, *m_Element);
@@ -1395,17 +1395,17 @@ struct SRenderPluginTranslatorContext : public STranslatorContext
     }
 };
 
-struct SRenderPluginTranslator : public CUICTranslator
+struct SRenderPluginTranslator : public Qt3DSTranslator
 {
     typedef SRenderPlugin TNodeType;
     SRenderPluginTranslator(Q3DStudio::TElement &inElement, SRenderPlugin &inRenderObject,
                             NVAllocatorCallback &inCallback)
-        : CUICTranslator(inElement, inRenderObject)
+        : Qt3DSTranslator(inElement, inRenderObject)
     {
         m_TranslatorContext = QT3DS_NEW(inCallback, SRenderPluginTranslatorContext)(inCallback);
     }
 
-    void OnElementChanged(SPresentation & /*inPresentation*/, IUICRenderContext &inRenderContext,
+    void OnElementChanged(SPresentation & /*inPresentation*/, IQt3DSRenderContext &inRenderContext,
                           Q3DStudio::IPresentation &)
     {
         SRenderPlugin &theItem = *static_cast<SRenderPlugin *>(m_RenderObject);
@@ -1500,7 +1500,7 @@ struct SRenderPluginTranslator : public CUICTranslator
 };
 }
 
-CUICTranslator::CUICTranslator(Q3DStudio::TElement &inElement, SGraphObject &inRenderObject)
+Qt3DSTranslator::Qt3DSTranslator(Q3DStudio::TElement &inElement, SGraphObject &inRenderObject)
     : m_DirtyIndex(QT3DS_MAX_U32)
     , m_Element(&inElement)
     , m_RenderObject(&inRenderObject)
@@ -1510,14 +1510,14 @@ CUICTranslator::CUICTranslator(Q3DStudio::TElement &inElement, SGraphObject &inR
     inRenderObject.m_UserData = STaggedPointer(this);
 }
 
-void CUICTranslator::Save(SWriteBuffer &inWriteBuffer, QT3DSU32 inGraphObjectOffset)
+void Qt3DSTranslator::Save(SWriteBuffer &inWriteBuffer, QT3DSU32 inGraphObjectOffset)
 {
     // We have to start on pointer aligned boundaries.
     QT3DS_ASSERT(inWriteBuffer.size() % sizeof(void *) == 0);
     QT3DSU32 theOffset = inWriteBuffer.size();
     inWriteBuffer.write(*this);
-    CUICTranslator *theNewTranslator =
-        reinterpret_cast<CUICTranslator *>(inWriteBuffer.begin() + theOffset);
+    Qt3DSTranslator *theNewTranslator =
+        reinterpret_cast<Qt3DSTranslator *>(inWriteBuffer.begin() + theOffset);
     theNewTranslator->m_DirtyIndex = QT3DS_MAX_U32;
     if (theNewTranslator->m_Element)
         theNewTranslator->m_Element = m_Element->GetBelongedPresentation()
@@ -1528,9 +1528,9 @@ void CUICTranslator::Save(SWriteBuffer &inWriteBuffer, QT3DSU32 inGraphObjectOff
     *graphObjPtr = inGraphObjectOffset;
 }
 
-CUICTranslator *CUICTranslator::GetTranslatorFromGraphNode(SGraphObject &inObject)
+Qt3DSTranslator *Qt3DSTranslator::GetTranslatorFromGraphNode(SGraphObject &inObject)
 {
-    return inObject.m_UserData.DynamicCast<CUICTranslator>();
+    return inObject.m_UserData.DynamicCast<Qt3DSTranslator>();
 }
 
 namespace {
@@ -1545,10 +1545,10 @@ struct STranslatorCreator
         typedef typename TTranslatorType::TNodeType TNodeType;
         // This assert needs to be here because we serialize all translators generically without
         // regard for type.
-        StaticAssert<sizeof(TTranslatorType) == sizeof(CUICTranslator)>::valid_expression();
+        StaticAssert<sizeof(TTranslatorType) == sizeof(Qt3DSTranslator)>::valid_expression();
         return QT3DS_NEW(inAllocator, TTranslatorType)(inElement, static_cast<TNodeType &>(inObject));
     }
-    static void InitializeTranslator(CUICTranslator &inTranslator, NVAllocatorCallback &)
+    static void InitializeTranslator(Qt3DSTranslator &inTranslator, NVAllocatorCallback &)
     {
         typedef typename TTranslatorType::TNodeType TNodeType;
         // Initialize the vtable.
@@ -1556,8 +1556,8 @@ struct STranslatorCreator
                                             static_cast<TNodeType &>(inTranslator.RenderObject()));
     }
 
-    static void OnElementChanged(CUICTranslator &inTranslator, SPresentation &inPresentation,
-                                 IUICRenderContext &inRenderContext,
+    static void OnElementChanged(Qt3DSTranslator &inTranslator, SPresentation &inPresentation,
+                                 IQt3DSRenderContext &inRenderContext,
                                  Q3DStudio::IPresentation &inStudioPresentation)
     {
         TTranslatorType &theTranslator(static_cast<TTranslatorType &>(inTranslator));
@@ -1594,15 +1594,15 @@ struct STranslatorCreator
 template <>
 struct STranslatorCreator<SPresentationTranslator>
 {
-    static CUICTranslator *Create(Q3DStudio::TElement &, SGraphObject &, NVAllocatorCallback &)
+    static Qt3DSTranslator *Create(Q3DStudio::TElement &, SGraphObject &, NVAllocatorCallback &)
     {
         return NULL;
     }
-    static void InitializeTranslator(CUICTranslator &, NVAllocatorCallback &) {}
-    static void OnElementChanged(CUICTranslator & /*inTranslator*/,
+    static void InitializeTranslator(Qt3DSTranslator &, NVAllocatorCallback &) {}
+    static void OnElementChanged(Qt3DSTranslator & /*inTranslator*/,
                                  SPresentation & /*inPresentation*/
                                  ,
-                                 IUICRenderContext & /*inRenderContext*/,
+                                 IQt3DSRenderContext & /*inRenderContext*/,
                                  Q3DStudio::IPresentation & /*inStudioPresentation*/)
     {
         QT3DS_ASSERT(false);
@@ -1618,12 +1618,12 @@ struct STranslatorCreator<SEffectTranslator>
         typedef SEffectTranslator::TNodeType TNodeType;
         // This assert needs to be here because we serialize all translators generically without
         // regard for type.
-        StaticAssert<sizeof(SEffectTranslator) == sizeof(CUICTranslator)>::valid_expression();
+        StaticAssert<sizeof(SEffectTranslator) == sizeof(Qt3DSTranslator)>::valid_expression();
         return QT3DS_NEW(inAllocator, SEffectTranslator)(inElement, static_cast<TNodeType &>(inObject),
                                                       inAllocator);
     }
 
-    static void InitializeTranslator(CUICTranslator &inTranslator, NVAllocatorCallback &inAllocator)
+    static void InitializeTranslator(Qt3DSTranslator &inTranslator, NVAllocatorCallback &inAllocator)
     {
         typedef SEffectTranslator::TNodeType TNodeType;
         // Initialize the vtable.
@@ -1631,8 +1631,8 @@ struct STranslatorCreator<SEffectTranslator>
             SEffectTranslator(inTranslator.Element(),
                               static_cast<TNodeType &>(inTranslator.RenderObject()), inAllocator);
     }
-    static void OnElementChanged(CUICTranslator &inTranslator, SPresentation &inPresentation,
-                                 IUICRenderContext &inRenderContext,
+    static void OnElementChanged(Qt3DSTranslator &inTranslator, SPresentation &inPresentation,
+                                 IQt3DSRenderContext &inRenderContext,
                                  Q3DStudio::IPresentation &inStudioPresentation)
     {
         static_cast<SEffectTranslator &>(inTranslator)
@@ -1650,12 +1650,12 @@ struct STranslatorCreator<SCustomMaterialTranslator>
         // This assert needs to be here because we serialize all translators generically without
         // regard for type.
         StaticAssert<sizeof(SCustomMaterialTranslator)
-                     == sizeof(CUICTranslator)>::valid_expression();
+                     == sizeof(Qt3DSTranslator)>::valid_expression();
         return QT3DS_NEW(inAllocator, SCustomMaterialTranslator)(
             inElement, static_cast<TNodeType &>(inObject), inAllocator);
     }
 
-    static void InitializeTranslator(CUICTranslator &inTranslator, NVAllocatorCallback &inAllocator)
+    static void InitializeTranslator(Qt3DSTranslator &inTranslator, NVAllocatorCallback &inAllocator)
     {
         typedef SCustomMaterialTranslator::TNodeType TNodeType;
         // Initialize the vtable.
@@ -1664,8 +1664,8 @@ struct STranslatorCreator<SCustomMaterialTranslator>
             inAllocator);
     }
 
-    static void OnElementChanged(CUICTranslator &inTranslator, SPresentation &inPresentation,
-                                 IUICRenderContext &inRenderContext,
+    static void OnElementChanged(Qt3DSTranslator &inTranslator, SPresentation &inPresentation,
+                                 IQt3DSRenderContext &inRenderContext,
                                  Q3DStudio::IPresentation &inStudioPresentation)
     {
         static_cast<SCustomMaterialTranslator &>(inTranslator)
@@ -1682,12 +1682,12 @@ struct STranslatorCreator<SRenderPluginTranslator>
         typedef SRenderPluginTranslator::TNodeType TNodeType;
         // This assert needs to be here because we serialize all translators generically without
         // regard for type.
-        StaticAssert<sizeof(SRenderPluginTranslator) == sizeof(CUICTranslator)>::valid_expression();
+        StaticAssert<sizeof(SRenderPluginTranslator) == sizeof(Qt3DSTranslator)>::valid_expression();
         return QT3DS_NEW(inAllocator, SRenderPluginTranslator)(
             inElement, static_cast<TNodeType &>(inObject), inAllocator);
     }
 
-    static void InitializeTranslator(CUICTranslator &inTranslator, NVAllocatorCallback &inAllocator)
+    static void InitializeTranslator(Qt3DSTranslator &inTranslator, NVAllocatorCallback &inAllocator)
     {
         typedef SRenderPluginTranslator::TNodeType TNodeType;
         // Initialize the vtable.
@@ -1695,8 +1695,8 @@ struct STranslatorCreator<SRenderPluginTranslator>
             inTranslator.Element(), static_cast<TNodeType &>(inTranslator.RenderObject()),
             inAllocator);
     }
-    static void OnElementChanged(CUICTranslator &inTranslator, SPresentation &inPresentation,
-                                 IUICRenderContext &inRenderContext,
+    static void OnElementChanged(Qt3DSTranslator &inTranslator, SPresentation &inPresentation,
+                                 IQt3DSRenderContext &inRenderContext,
                                  Q3DStudio::IPresentation &inStudioPresentation)
     {
         static_cast<SRenderPluginTranslator &>(inTranslator)
@@ -1704,11 +1704,11 @@ struct STranslatorCreator<SRenderPluginTranslator>
     }
 };
 }
-CUICTranslator *CUICTranslator::CreateTranslatorForElement(Q3DStudio::TElement &inElement,
+Qt3DSTranslator *Qt3DSTranslator::CreateTranslatorForElement(Q3DStudio::TElement &inElement,
                                                            SGraphObject &inObject,
                                                            NVAllocatorCallback &inAlloc)
 {
-    CUICTranslator *theTranslator = NULL;
+    Qt3DSTranslator *theTranslator = NULL;
     switch (inObject.m_Type) {
 #define QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(type)                                                   \
     case GraphObjectTypes::type:                                                                   \
@@ -1724,8 +1724,8 @@ CUICTranslator *CUICTranslator::CreateTranslatorForElement(Q3DStudio::TElement &
     return theTranslator;
 }
 
-void CUICTranslator::OnElementChanged(SPresentation &inPresentation,
-                                      IUICRenderContext &inRenderContext,
+void Qt3DSTranslator::OnElementChanged(SPresentation &inPresentation,
+                                      IQt3DSRenderContext &inRenderContext,
                                       Q3DStudio::IPresentation &inStudioPresentation)
 {
     switch (m_RenderObject->m_Type) {
@@ -1742,7 +1742,7 @@ void CUICTranslator::OnElementChanged(SPresentation &inPresentation,
     }
 }
 
-CUICTranslator *CUICTranslator::LoadTranslator(SDataReader &inReader, size_t inElemOffset,
+Qt3DSTranslator *Qt3DSTranslator::LoadTranslator(SDataReader &inReader, size_t inElemOffset,
                                                NVDataRef<QT3DSU8> inSGSection,
                                                NVAllocatorCallback &inAllocator)
 {
@@ -1751,7 +1751,7 @@ CUICTranslator *CUICTranslator::LoadTranslator(SDataReader &inReader, size_t inE
     // Make sure things are aligned
     (void)theTranslatorStart;
     QT3DS_ASSERT((size_t)theTranslatorStart % sizeof(void *) == 0);
-    CUICTranslator *theTranslator = inReader.Load<CUICTranslator>();
+    Qt3DSTranslator *theTranslator = inReader.Load<Qt3DSTranslator>();
     if (theTranslator) {
         size_t *elemPtr = reinterpret_cast<size_t *>(&theTranslator->m_Element);
         *elemPtr += inElemOffset;
@@ -1775,18 +1775,18 @@ CUICTranslator *CUICTranslator::LoadTranslator(SDataReader &inReader, size_t inE
     return theTranslator;
 }
 Q3DStudio::IPresentation *
-CUICTranslator::GetPresentationFromPresentation(SPresentation &inPresentation)
+Qt3DSTranslator::GetPresentationFromPresentation(SPresentation &inPresentation)
 {
     return inPresentation.m_UserData.DynamicCast<Q3DStudio::IPresentation>();
 }
 
-void CUICTranslator::InitializePointerTags(IStringTable &)
+void Qt3DSTranslator::InitializePointerTags(IStringTable &)
 {
     g_TranslatorTag = 0x0044FEED;
     g_PresentationTag = 0x0022ABBA;
 }
 
-void CUICTranslator::AssignUserData(Q3DStudio::IPresentation &inPresentation,
+void Qt3DSTranslator::AssignUserData(Q3DStudio::IPresentation &inPresentation,
                                     SPresentation &inGraphPresentation)
 {
     inGraphPresentation.m_UserData = STaggedPointer(&inPresentation);

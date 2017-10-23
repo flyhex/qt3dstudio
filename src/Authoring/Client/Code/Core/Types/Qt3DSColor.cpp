@@ -579,7 +579,7 @@ Q3DStudio::CString CColor::toString()
     unsigned char theAlpha;
 
     GetRGB(theRed, theGreen, theBlue, theAlpha);
-    theStringBuffer.Format(_UIC("%.3hd %.3hd %.3hd %.3hd"), theRed, theGreen, theBlue, theAlpha);
+    theStringBuffer.Format(_LSTR("%.3hd %.3hd %.3hd %.3hd"), theRed, theGreen, theBlue, theAlpha);
 
     return theStringBuffer;
 }

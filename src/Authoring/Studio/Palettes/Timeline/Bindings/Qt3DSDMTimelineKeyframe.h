@@ -26,8 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef INCLUDED_UICDMKEYFRAME_H
-#define INCLUDED_UICDMKEYFRAME_H 1
+#ifndef QT3DSDM_KEYFRAME_H
+#define QT3DSDM_KEYFRAME_H 1
 
 #pragma once
 
@@ -43,7 +43,7 @@ class COffsetKeyframesCommandHelper;
 
 //==============================================================================
 /**
- *	Wrapper for a keyframe in UICDM.
+ *	Wrapper for a keyframe in DataModel.
  */
 //==============================================================================
 class Qt3DSDMTimelineKeyframe : public IKeyframe
@@ -81,4 +81,4 @@ public:
     static float GetTimeInSecs(long inTime);
 };
 
-#endif // INCLUDED_UICDMKEYFRAME_H
+#endif // QT3DSDM_KEYFRAME_H

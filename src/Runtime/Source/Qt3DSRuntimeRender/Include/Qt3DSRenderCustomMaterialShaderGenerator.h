@@ -35,7 +35,7 @@
 namespace qt3ds {
 namespace render {
 
-    class UICShadowMap;
+    class Qt3DSShadowMap;
 
     class ICustomMaterialShaderGenerator : public IMaterialShaderGenerator
     {
@@ -61,7 +61,7 @@ namespace render {
                               SLayerGlobalRenderProperties inRenderProperties) override = 0;
 
         static ICustomMaterialShaderGenerator &
-        CreateCustomMaterialShaderGenerator(IUICRenderContext &inRenderContext);
+        CreateCustomMaterialShaderGenerator(IQt3DSRenderContext &inRenderContext);
     };
 }
 }

@@ -46,7 +46,7 @@
 //==============================================================================
 
 class CAsset;
-class CUICFile;
+class Qt3DSFile;
 class CURL;
 class ISelectable;
 class CCmd;
@@ -179,7 +179,7 @@ public:
     /**
      * The current presentation is being saved.
      */
-    virtual void OnSavingPresentation(const CUICFile *inNewPresentationFile)
+    virtual void OnSavingPresentation(const Qt3DSFile *inNewPresentationFile)
     {
         Q_UNUSED(inNewPresentationFile);
     }
@@ -226,9 +226,9 @@ public:
 class CFileOpenListener
 {
 public:
-    virtual void OnOpenDocument(const CUICFile &inFilename, bool inSucceeded) = 0;
-    virtual void OnSaveDocument(const CUICFile &inFilename, bool inSucceeded, bool inSaveCopy) = 0;
-    virtual void OnDocumentPathChanged(const CUICFile &inNewPath) = 0;
+    virtual void OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded) = 0;
+    virtual void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) = 0;
+    virtual void OnDocumentPathChanged(const Qt3DSFile &inNewPath) = 0;
 };
 
 class CSelectedNodePropChangeListener

@@ -56,7 +56,7 @@ CRecentItems::~CRecentItems()
 {
 }
 
-void CRecentItems::AddRecentItem(const CUICFile &inItem)
+void CRecentItems::AddRecentItem(const Qt3DSFile &inItem)
 {
     RemoveRecentItem(inItem);
 
@@ -68,7 +68,7 @@ void CRecentItems::AddRecentItem(const CUICFile &inItem)
     RebuildList();
 }
 
-void CRecentItems::RemoveRecentItem(const CUICFile &inItem)
+void CRecentItems::RemoveRecentItem(const Qt3DSFile &inItem)
 {
     TFileList::iterator thePos = m_RecentItems.begin();
     for (; thePos != m_RecentItems.end(); ++thePos) {
@@ -92,11 +92,11 @@ void CRecentItems::ReconstructList()
 
     for (long theIndex = 0; theIndex < (m_ValidItems > 10 ? 10 : m_ValidItems); ++theIndex) {
         Q3DStudio::CString theKey;
-        theKey.Format(_UIC("%ls%d"), static_cast<const wchar_t *>(m_PreferenceKey), theIndex);
+        theKey.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(m_PreferenceKey), theIndex);
 
         Q3DStudio::CString theFilename = thePrefs.GetStringValue(theKey, "");
         if (theFilename != "") {
-            CUICFile theFile(theFilename);
+            Qt3DSFile theFile(theFilename);
 
             QAction *act = m_Menu->addAction(theFile.GetName().toQString(),
                                              this, &CRecentItems::onTriggerRecent);
@@ -121,7 +121,7 @@ void CRecentItems::RebuildList()
         act->setData(static_cast<int>(theIndex));
 
         Q3DStudio::CString theKey;
-        theKey.Format(_UIC("%ls%d"), static_cast<const wchar_t *>(m_PreferenceKey), theIndex);
+        theKey.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(m_PreferenceKey), theIndex);
 
         thePrefs.SetStringValue(theKey, (*thePos).GetAbsolutePath());
     }
@@ -132,7 +132,7 @@ void CRecentItems::ClearMenu()
     m_Menu->clear();
 }
 
-CUICFile CRecentItems::GetItem(long inIndex)
+Qt3DSFile CRecentItems::GetItem(long inIndex)
 {
     return m_RecentItems.at(inIndex);
 }

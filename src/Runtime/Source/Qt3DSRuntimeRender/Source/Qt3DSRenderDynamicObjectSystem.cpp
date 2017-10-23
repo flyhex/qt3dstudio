@@ -611,8 +611,8 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
 {
     NVFoundationBase &m_Foundation;
     mutable qt3ds::render::SPreAllocatedAllocator m_Allocator;
-    IUICRenderContextCore &m_CoreContext;
-    IUICRenderContext *m_UICContext;
+    IQt3DSRenderContextCore &m_CoreContext;
+    IQt3DSRenderContext *m_Context;
     TStringClassMap m_Classes;
     TPathDataMap m_ExpandedFiles;
     CRenderString m_ShaderKeyBuilder;
@@ -628,11 +628,11 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
     mutable Mutex m_PropertyLoadMutex;
     QT3DSI32 mRefCount;
 
-    SDynamicObjectSystemImpl(IUICRenderContextCore &inCore)
+    SDynamicObjectSystemImpl(IQt3DSRenderContextCore &inCore)
         : m_Foundation(inCore.GetFoundation())
         , m_Allocator(inCore.GetAllocator())
         , m_CoreContext(inCore)
-        , m_UICContext(NULL)
+        , m_Context(NULL)
         , m_Classes(inCore.GetAllocator(), "Classes")
         , m_ExpandedFiles(inCore.GetAllocator(), "ExpandedShaderFiles")
         , m_ShaderMap(inCore.GetAllocator(), "ShaderMap")
@@ -994,11 +994,11 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
         CRenderString &theReadBuffer(outShaderData);
         if (theInsert.second) {
 
-            const QString defaultDir = m_UICContext->GetDynamicObjectSystem()
+            const QString defaultDir = m_Context->GetDynamicObjectSystem()
                     .GetShaderCodeLibraryDirectory();
-            const QString platformDir = m_UICContext->GetDynamicObjectSystem()
+            const QString platformDir = m_Context->GetDynamicObjectSystem()
                     .shaderCodeLibraryPlatformDirectory();
-            const QString ver = m_UICContext->GetDynamicObjectSystem()
+            const QString ver = m_Context->GetDynamicObjectSystem()
                     .shaderCodeLibraryVersion();
 
             QString fullPath;
@@ -1247,9 +1247,9 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
         }
     }
 
-    IDynamicObjectSystem &CreateDynamicSystem(IUICRenderContext &rc) override
+    IDynamicObjectSystem &CreateDynamicSystem(IQt3DSRenderContext &rc) override
     {
-        m_UICContext = &rc;
+        m_Context = &rc;
         return *this;
     }
 
@@ -1394,9 +1394,9 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             m_FragShader.append(inProgramSource);
         }
 
-        IShaderCache &theShaderCache = m_UICContext->GetShaderCache();
+        IShaderCache &theShaderCache = m_Context->GetShaderCache();
 
-        CRegisteredString theKey = m_UICContext->GetStringTable().RegisterStr(
+        CRegisteredString theKey = m_Context->GetStringTable().RegisterStr(
             GetShaderCacheKey(inId, inProgramMacroName, inFlags));
 
         if (inForceCompilation) {
@@ -1432,7 +1432,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             TShaderAndFlags());
         eastl::pair<TShaderMap::iterator, bool> theInsertResult(m_ShaderMap.insert(theInserter));
         if (theInsertResult.second || inForceCompilation) {
-            NVRenderShaderProgram *theProgram = m_UICContext->GetShaderCache().GetProgram(
+            NVRenderShaderProgram *theProgram = m_Context->GetShaderCache().GetProgram(
                 GetShaderCacheKey(inPath, inProgramMacro, inFlags), inFeatureSet);
             SDynamicShaderProgramFlags theFlags(inFlags);
             if (!theProgram || inForceCompilation) {
@@ -1449,7 +1449,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                 } else {
                     CRenderString theShaderBuffer;
                     const char8_t *shaderVersionStr = "#version 430\n";
-                    if ((QT3DSU32)m_UICContext->GetRenderContext().GetRenderContextType()
+                    if ((QT3DSU32)m_Context->GetRenderContext().GetRenderContextType()
                         == NVRenderContextValues::GLES3PLUS)
                         shaderVersionStr = "#version 310 es\n";
                     DoLoadShader(inPath, theShaderBuffer);
@@ -1457,7 +1457,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                     const char8_t *programSource = theShaderBuffer.c_str();
                     QT3DSU32 len = (QT3DSU32)strlen(nonNull(programSource)) + 1;
                     theProgram =
-                        m_UICContext->GetRenderContext()
+                        m_Context->GetRenderContext()
                             .CompileComputeSource(inPath.c_str(),
                                                   NVConstDataRef<QT3DSI8>((QT3DSI8 *)programSource, len))
                             .mShader;
@@ -1483,7 +1483,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
         m_ShaderKeyBuilder.append("depthprepass");
 
         CRegisteredString theProgramMacro =
-            m_UICContext->GetStringTable().RegisterStr(m_ShaderKeyBuilder.c_str());
+            m_Context->GetStringTable().RegisterStr(m_ShaderKeyBuilder.c_str());
 
         eastl::pair<const SShaderMapKey, TShaderAndFlags> theInserter(
             SShaderMapKey(TStrStrPair(inPath, theProgramMacro), inFeatureSet, theFlags.m_TessMode,
@@ -1491,18 +1491,18 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             TShaderAndFlags());
         eastl::pair<TShaderMap::iterator, bool> theInsertResult(m_ShaderMap.insert(theInserter));
         if (theInsertResult.second) {
-            NVRenderShaderProgram *theProgram = m_UICContext->GetShaderCache().GetProgram(
+            NVRenderShaderProgram *theProgram = m_Context->GetShaderCache().GetProgram(
                 GetShaderCacheKey(inPath, theProgramMacro, theFlags), inFeatureSet);
             SDynamicShaderProgramFlags theFlags(theFlags);
             if (!theProgram) {
                 CRenderString theShaderBuffer;
                 const char8_t *geomSource = DoLoadShader(inPath, theShaderBuffer);
                 SShaderVertexCodeGenerator vertexShader(
-                    m_UICContext->GetStringTable(), m_Allocator,
-                    m_UICContext->GetRenderContext().GetRenderContextType());
+                    m_Context->GetStringTable(), m_Allocator,
+                    m_Context->GetRenderContext().GetRenderContextType());
                 SShaderFragmentCodeGenerator fragmentShader(
                     vertexShader, m_Allocator,
-                    m_UICContext->GetRenderContext().GetRenderContextType());
+                    m_Context->GetRenderContext().GetRenderContextType());
 
                 vertexShader.AddAttribute("attr_pos", "vec3");
                 vertexShader.AddUniform("model_view_projection", "mat4");
@@ -1554,7 +1554,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
 }
 
 IDynamicObjectSystemCore &
-IDynamicObjectSystemCore::CreateDynamicSystemCore(IUICRenderContextCore &rc)
+IDynamicObjectSystemCore::CreateDynamicSystemCore(IQt3DSRenderContextCore &rc)
 {
     return *QT3DS_NEW(rc.GetAllocator(), SDynamicObjectSystemImpl)(rc);
 }

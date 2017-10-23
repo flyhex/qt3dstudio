@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UICDM_TIMELINEITEM_BINDING_H
-#define INCLUDED_UICDM_TIMELINEITEM_BINDING_H 1
+#ifndef INCLUDED_QT3DSDM_TIMELINEITEM_BINDING_H
+#define INCLUDED_QT3DSDM_TIMELINEITEM_BINDING_H 1
 
 #pragma once
 
@@ -61,7 +61,7 @@ class CStudioSystem;
 
 //=============================================================================
 /**
- * Binding to generic UICDM object
+ * Binding to generic DataModel object
  */
 class Qt3DSDMTimelineItemBinding : public ITimelineItemBinding,
                                   public ITimelineItem,
@@ -93,8 +93,8 @@ public:
     virtual ~Qt3DSDMTimelineItemBinding();
 
 protected:
-    bool UICDMGetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const;
-    void UICDMSetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty, bool inValue,
+    bool GetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const;
+    void SetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty, bool inValue,
                          const QString &inNiceText) const;
     void SetInstanceHandle(qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
 
@@ -202,7 +202,7 @@ public:
 
     Q3DStudio::CId GetGuid() const;
 
-    // Bridge between asset & UICDM. Ideally we should be fully UICDM
+    // Bridge between asset & DataModel. Ideally we should be fully DataModel
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstance() const;
 
 protected:
@@ -222,4 +222,4 @@ protected:
     virtual bool OpenSourcePathFile();
 };
 
-#endif // INCLUDED_UICDM_TIMELINEITEM_BINDING_H
+#endif // INCLUDED_QT3DSDM_TIMELINEITEM_BINDING_H

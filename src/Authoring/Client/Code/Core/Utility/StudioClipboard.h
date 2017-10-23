@@ -46,17 +46,17 @@ protected:
 public:
     virtual ~CStudioClipboard();
 
-    static CUICFile GetObjectFromClipboard(bool inIsInternal, qint64 &outContextData);
-    static void CopyObjectToClipboard(CUICFile &inFile, qint64 inContextData, bool inIsInternal,
+    static Qt3DSFile GetObjectFromClipboard(bool inIsInternal, qint64 &outContextData);
+    static void CopyObjectToClipboard(Qt3DSFile &inFile, qint64 inContextData, bool inIsInternal,
                                       EStudioObjectType inObjectType);
     static bool CanPasteObject(EStudioObjectType inDestType, bool inIsInternal = false);
     static bool IsPastingAcrossInstances();
 
 protected:
-    static CUICFile GetObjectFromInternalClipboard(qint64 &outContextData);
-    static void CopyObjectToInternalClipboard(CUICFile &inFile, qint64 inContextData);
-    static CUICFile GetObjectFromGlobalClipboard(qint64 &outContextData, const QString &inMimeType);
-    static void CopyObjectToGlobalClipboard(CUICFile &inFile, qint64 inContextData,
+    static Qt3DSFile GetObjectFromInternalClipboard(qint64 &outContextData);
+    static void CopyObjectToInternalClipboard(Qt3DSFile &inFile, qint64 inContextData);
+    static Qt3DSFile GetObjectFromGlobalClipboard(qint64 &outContextData, const QString &inMimeType);
+    static void CopyObjectToGlobalClipboard(Qt3DSFile &inFile, qint64 inContextData,
                                             const QString &inMimeType);
 
 public:
@@ -67,16 +67,16 @@ public:
     static void ClearClipboard(); ///< clears the global clipboard
 
     // Copy/paste Actions
-    static CUICFile GetActionFromClipboard();
-    static void CopyActionToClipboard(CUICFile &inFile);
+    static Qt3DSFile GetActionFromClipboard();
+    static void CopyActionToClipboard(Qt3DSFile &inFile);
     static bool CanPasteAction();
 
 protected:
     static void GetObjectFromGlobalClipboard(const QString &inMimeType,
-                                             CUICFile *outFile = NULL, qint64 *outContextData = NULL);
+                                             Qt3DSFile *outFile = NULL, qint64 *outContextData = NULL);
 
 private:
-    static CUICFile s_InternalClipObject; ///< the cache for internal clipboard operations
+    static Qt3DSFile s_InternalClipObject; ///< the cache for internal clipboard operations
     static qint64 s_InternalContextData; ///< any arbitrary data for internal copy cmds.
     static EStudioObjectType s_AssetType; ///< asset type of the clipobject
     static qint64

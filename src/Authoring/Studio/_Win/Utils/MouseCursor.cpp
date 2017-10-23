@@ -42,24 +42,24 @@
 #include <QDebug>
 
 //#ifdef WIN32
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_ARROW = 0; // IDC_ARROW
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_WAIT = 1; // IDC_WAIT
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_RESIZE_LEFTRIGHT = 2; // IDC_SIZEWE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_RESIZE_UPDOWN = 3; // IDC_SIZENS
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_GROUP_MOVE = 4; // IDC_GROUP_MOVE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_GROUP_ROTATE = 5; // IDC_GROUP_ROTATE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_GROUP_SCALE = 6; // IDC_GROUP_SCALE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_ITEM_MOVE = 7; // IDC_ITEM_MOVE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_ITEM_ROTATE = 8; // IDC_ITEM_ROTATE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_ITEM_SCALE = 9; // IDC_ITEM_SCALE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_EDIT_CAMERA_PAN =
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_ARROW = 0; // IDC_ARROW
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_WAIT = 1; // IDC_WAIT
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_RESIZE_LEFTRIGHT = 2; // IDC_SIZEWE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_RESIZE_UPDOWN = 3; // IDC_SIZENS
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_GROUP_MOVE = 4; // IDC_GROUP_MOVE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_GROUP_ROTATE = 5; // IDC_GROUP_ROTATE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_GROUP_SCALE = 6; // IDC_GROUP_SCALE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_ITEM_MOVE = 7; // IDC_ITEM_MOVE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_ITEM_ROTATE = 8; // IDC_ITEM_ROTATE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_ITEM_SCALE = 9; // IDC_ITEM_SCALE
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_EDIT_CAMERA_PAN =
     10; // IDC_EDIT_CAMERA_PAN
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_EDIT_CAMERA_ROTATE =
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_EDIT_CAMERA_ROTATE =
     11; // IDC_EDIT_CAMERA_ROTATE
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM =
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM =
     12; // IDC_EDIT_CAMERA_ZOOM
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_BLANK = 13; // blank cursor
-const CMouseCursor::TUICMouseCursor CMouseCursor::CURSOR_IBEAM = 14;
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_BLANK = 13; // blank cursor
+const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_IBEAM = 14;
 
 //=============================================================================
 /**
@@ -129,7 +129,7 @@ void CMouseCursor::Destroy()
  * @param inCursor ID of the cursor to be loaded
  * @return true if the cursor was successfully loaded, otherwise false
  */
-bool CMouseCursor::Load(TUICMouseCursor inCursor)
+bool CMouseCursor::Load(Qt3DSMouseCursor inCursor)
 {
     // Convert from our cursors to Windows specific cursors
     switch (inCursor) {

@@ -46,7 +46,7 @@ class CBaseStateRow;
 
 //=============================================================================
 /**
- * Binding to a UICDM object of Group type
+ * Binding to a DataModel object of Group type
  */
 class CGroupTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {

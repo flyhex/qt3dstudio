@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMVALUEH
-#define UICDMVALUEH
+#ifndef QT3DSDM_VALUE_H
+#define QT3DSDM_VALUE_H
 #include "Qt3DSDMDataTypes.h"
 
 #include <QColor>
@@ -50,7 +50,7 @@ struct SEnumToDataTypeMap
 {
 };
 
-#define DEFINE_UICDM_DATA_TYPE_MAP(dtype, enumName)                                                \
+#define DEFINE_QT3DSDM_DATA_TYPE_MAP(dtype, enumName)                                                \
     template <>                                                                                    \
     struct SDataTypeToEnumMap<dtype>                                                               \
     {                                                                                              \
@@ -62,24 +62,24 @@ struct SEnumToDataTypeMap
         typedef dtype TDataType;                                                                   \
     };
 
-#define ITERATE_UICDM_DATA_TYPES                                                                   \
-    HANDLE_UICDM_DATA_TYPE(float, DataModelDataType::Float);                                        \
-    HANDLE_UICDM_DATA_TYPE(SFloat2, DataModelDataType::Float2);                                     \
-    HANDLE_UICDM_DATA_TYPE(SFloat3, DataModelDataType::Float3);                                     \
-    HANDLE_UICDM_DATA_TYPE(qt3ds::QT3DSI32, DataModelDataType::Long);                                          \
-    HANDLE_UICDM_DATA_TYPE(TDataStrPtr, DataModelDataType::String);                                 \
-    HANDLE_UICDM_DATA_TYPE(bool, DataModelDataType::Bool);                                          \
-    HANDLE_UICDM_DATA_TYPE(SLong4, DataModelDataType::Long4);                                       \
-    HANDLE_UICDM_DATA_TYPE(SStringRef, DataModelDataType::StringRef);                               \
-    HANDLE_UICDM_DATA_TYPE(SObjectRefType, DataModelDataType::ObjectRef);                           \
-    HANDLE_UICDM_DATA_TYPE(SStringOrInt, DataModelDataType::StringOrInt);                           \
-    HANDLE_UICDM_DATA_TYPE(TFloatList, DataModelDataType::FloatList);
+#define ITERATE_QT3DSDM_DATA_TYPES                                                                   \
+    HANDLE_QT3DSDM_DATA_TYPE(float, DataModelDataType::Float);                                        \
+    HANDLE_QT3DSDM_DATA_TYPE(SFloat2, DataModelDataType::Float2);                                     \
+    HANDLE_QT3DSDM_DATA_TYPE(SFloat3, DataModelDataType::Float3);                                     \
+    HANDLE_QT3DSDM_DATA_TYPE(qt3ds::QT3DSI32, DataModelDataType::Long);                                          \
+    HANDLE_QT3DSDM_DATA_TYPE(TDataStrPtr, DataModelDataType::String);                                 \
+    HANDLE_QT3DSDM_DATA_TYPE(bool, DataModelDataType::Bool);                                          \
+    HANDLE_QT3DSDM_DATA_TYPE(SLong4, DataModelDataType::Long4);                                       \
+    HANDLE_QT3DSDM_DATA_TYPE(SStringRef, DataModelDataType::StringRef);                               \
+    HANDLE_QT3DSDM_DATA_TYPE(SObjectRefType, DataModelDataType::ObjectRef);                           \
+    HANDLE_QT3DSDM_DATA_TYPE(SStringOrInt, DataModelDataType::StringOrInt);                           \
+    HANDLE_QT3DSDM_DATA_TYPE(TFloatList, DataModelDataType::FloatList);
 
-#define HANDLE_UICDM_DATA_TYPE(a, b) DEFINE_UICDM_DATA_TYPE_MAP(a, b)
-ITERATE_UICDM_DATA_TYPES
-#undef HANDLE_UICDM_DATA_TYPE
+#define HANDLE_QT3DSDM_DATA_TYPE(a, b) DEFINE_QT3DSDM_DATA_TYPE_MAP(a, b)
+ITERATE_QT3DSDM_DATA_TYPES
+#undef HANDLE_QT3DSDM_DATA_TYPE
 
-struct SUICDMDataTypeUnionTraits
+struct Qt3DSDMDataTypeUnionTraits
 {
     typedef DataModelDataType::Value TIdType;
 
@@ -99,11 +99,11 @@ struct SUICDMDataTypeUnionTraits
     static TRetType visit(char *inData, DataModelDataType::Value inType, TVisitorType inVisitor)
     {
         switch (inType) {
-#define HANDLE_UICDM_DATA_TYPE(dtype, enumType)                                                    \
+#define HANDLE_QT3DSDM_DATA_TYPE(dtype, enumType)                                                    \
     case enumType:                                                                                 \
         return inVisitor(*NVUnionCast<dtype *>(inData));
-            ITERATE_UICDM_DATA_TYPES
-#undef HANDLE_UICDM_DATA_TYPE
+            ITERATE_QT3DSDM_DATA_TYPES
+#undef HANDLE_QT3DSDM_DATA_TYPE
 
         default:
             QT3DS_ASSERT(false);
@@ -116,11 +116,11 @@ struct SUICDMDataTypeUnionTraits
     static TRetType visit(const char *inData, DataModelDataType::Value inType, TVisitorType inVisitor)
     {
         switch (inType) {
-#define HANDLE_UICDM_DATA_TYPE(dtype, enumType)                                                    \
+#define HANDLE_QT3DSDM_DATA_TYPE(dtype, enumType)                                                    \
     case enumType:                                                                                 \
         return inVisitor(*NVUnionCast<const dtype *>(inData));
-            ITERATE_UICDM_DATA_TYPES
-#undef HANDLE_UICDM_DATA_TYPE
+            ITERATE_QT3DSDM_DATA_TYPES
+#undef HANDLE_QT3DSDM_DATA_TYPE
 
         default:
             QT3DS_ASSERT(false);
@@ -132,9 +132,9 @@ struct SUICDMDataTypeUnionTraits
 
 typedef qt3ds::foundation::
     DiscriminatedUnion<qt3ds::foundation::
-                           DiscriminatedUnionGenericBase<SUICDMDataTypeUnionTraits,
-                                                         SUICDMDataTypeUnionTraits::TBufferSize>,
-                       SUICDMDataTypeUnionTraits::TBufferSize>
+                           DiscriminatedUnionGenericBase<Qt3DSDMDataTypeUnionTraits,
+                                                         Qt3DSDMDataTypeUnionTraits::TBufferSize>,
+                       Qt3DSDMDataTypeUnionTraits::TBufferSize>
         TValue;
 
 struct SValue : public TValue
@@ -169,7 +169,7 @@ struct SValue : public TValue
 typedef std::shared_ptr<SValue> SValuePtr;
 
 template <>
-struct SUICDMGetter<SValue>
+struct Qt3DSDMGetter<SValue>
 {
     template <typename TRetType>
     TRetType doGet(const SValue &inValue)
@@ -179,7 +179,7 @@ struct SUICDMGetter<SValue>
 };
 
 template <>
-struct SUICDMValueTyper<SValue>
+struct Qt3DSDMValueTyper<SValue>
 {
     DataModelDataType::Value Get(const SValue &inValue) { return inValue.getType(); }
 };

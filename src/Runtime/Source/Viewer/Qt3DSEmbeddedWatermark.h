@@ -34,20 +34,20 @@
 
 #include <stddef.h>
 
-namespace uic {
+namespace qt3ds {
 namespace viewer {
-    struct SUICEmbeddedFile
+    struct Qt3DSEmbeddedFile
     {
         const char *name;
         const unsigned char *data;
         size_t size;
-        SUICEmbeddedFile()
+        Qt3DSEmbeddedFile()
             : name(NULL)
             , data(NULL)
             , size(0)
         {
         }
-        SUICEmbeddedFile(const char *n, const unsigned char *d, size_t s)
+        Qt3DSEmbeddedFile(const char *n, const unsigned char *d, size_t s)
             : name(n)
             , data(d)
             , size(s)
@@ -57,7 +57,7 @@ namespace viewer {
 
     inline const char *GetWatermarkFileName() { return "AutoworksWatermark.dds"; }
 
-    SUICEmbeddedFile FindEmbeddedFile(const char *inName = GetWatermarkFileName());
+    Qt3DSEmbeddedFile FindEmbeddedFile(const char *inName = GetWatermarkFileName());
 }
 }
 

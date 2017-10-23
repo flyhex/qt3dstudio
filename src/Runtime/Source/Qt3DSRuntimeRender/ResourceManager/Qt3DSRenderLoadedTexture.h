@@ -85,7 +85,7 @@ namespace render {
         QImage image;
         QT3DSU32 dataSizeInBytes;
         qt3ds::render::NVRenderTextureFormats::Enum format;
-        UICDDSImage *dds;
+        Qt3DSDDSImage *dds;
         ExtendedTextureFormats::Enum m_ExtendedFormat;
         // Used for palettized images.
         void *m_Palette;

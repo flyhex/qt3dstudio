@@ -40,12 +40,12 @@
 namespace Q3DStudio {
 
 #ifdef DEBUG
-SSharedHeader s_EmptyUICStringBuffer[2] = { { UICMEM_HEADERSIG, 0, sizeof(UICChar) }, { 0, 0, 0 } };
+SSharedHeader s_EmptyStringBuffer[2] = { { QT3DS_MEM_HEADERSIG, 0, sizeof(Qt3DSChar) }, { 0, 0, 0 } };
 #else
-SSharedHeader s_EmptyUICStringBuffer[2] = { { 0, sizeof(UICChar) }, { 0, 0 } };
+SSharedHeader s_EmptyStringBuffer[2] = { { 0, sizeof(Qt3DSChar) }, { 0, 0 } };
 #endif
 
-UICChar *s_EmptyUICString = reinterpret_cast<UICChar *>(s_EmptyUICStringBuffer + 1);
+Qt3DSChar *s_EmptyString = reinterpret_cast<Qt3DSChar *>(s_EmptyStringBuffer + 1);
 
 IMPLEMENT_OBJECT_COUNTER(CString)
 
@@ -56,11 +56,11 @@ IMPLEMENT_OBJECT_COUNTER(CString)
  */
 void CString::Allocate(long inLength)
 {
-    m_UICData =
-        reinterpret_cast<UICChar *>(CSharedMemory::Allocate((inLength + 1) * sizeof(UICChar)));
+    m_Data =
+        reinterpret_cast<Qt3DSChar *>(CSharedMemory::Allocate((inLength + 1) * sizeof(Qt3DSChar)));
 
     // NULL terminate string and dirty
-    m_UICData[inLength] = 0;
+    m_Data[inLength] = 0;
     DirtyBuffers();
 }
 
@@ -71,11 +71,11 @@ void CString::Allocate(long inLength)
  */
 void CString::Reallocate(long inLength)
 {
-    m_UICData = reinterpret_cast<UICChar *>(
-        CSharedMemory::Reallocate(m_UICData, (inLength + 1) * sizeof(UICChar)));
+    m_Data = reinterpret_cast<Qt3DSChar *>(
+        CSharedMemory::Reallocate(m_Data, (inLength + 1) * sizeof(Qt3DSChar)));
 
     // NULL terminate string and dirty
-    m_UICData[inLength] = 0;
+    m_Data[inLength] = 0;
     DirtyBuffers();
 }
 
@@ -85,9 +85,9 @@ void CString::Reallocate(long inLength)
  */
 void CString::Free()
 {
-    if (m_UICData != s_EmptyUICString) {
-        CSharedMemory::Free(m_UICData);
-        m_UICData = s_EmptyUICString;
+    if (m_Data != s_EmptyString) {
+        CSharedMemory::Free(m_Data);
+        m_Data = s_EmptyString;
         DirtyBuffers();
     }
 }
@@ -140,8 +140,8 @@ void CString::DirtyBuffers()
   * @param inString2 is the second part of the string
   * @param inLength2 is the length of the second string
   */
-CString::CString(const UICChar *inString1, long inLength1, const UICChar *inString2, long inLength2)
-    : m_UICData(s_EmptyUICString)
+CString::CString(const Qt3DSChar *inString1, long inLength1, const Qt3DSChar *inString2, long inLength2)
+    : m_Data(s_EmptyString)
 {
     ADDTO_OBJECT_COUNTER(CString)
 
@@ -151,20 +151,20 @@ CString::CString(const UICChar *inString1, long inLength1, const UICChar *inStri
         Assign(inString1, inLength1);
     } else {
         Allocate(inLength1 + inLength2);
-        ::memcpy(m_UICData, inString1, inLength1 * sizeof(UICChar));
-        ::memcpy(m_UICData + inLength1, inString2, inLength2 * sizeof(UICChar));
+        ::memcpy(m_Data, inString1, inLength1 * sizeof(Qt3DSChar));
+        ::memcpy(m_Data + inLength1, inString2, inLength2 * sizeof(Qt3DSChar));
     }
     DirtyBuffers();
 }
 
 //====================================================================
 /**
-* Insert an UICChar string into this string.
+* Insert an Qt3DSChar string into this string.
 * @param inPosition is the offset into this string where the char string should be inserted
 * @param inString is the string to be inserted
 * @param inLength is the length of the desired string
 */
-void CString::UICInsert(long inPosition, const UICChar *inCharString, long inLength)
+void CString::StrInsert(long inPosition, const Qt3DSChar *inCharString, long inLength)
 {
     if (ENDOFSTRING == inLength)
         inLength = StrLen(inCharString);
@@ -177,11 +177,11 @@ void CString::UICInsert(long inPosition, const UICChar *inCharString, long inLen
             SetLength(theCurrentLength + inLength);
 
             long t = Length() - inPosition - inLength;
-            UICChar *p = m_UICData + inPosition;
+            Qt3DSChar *p = m_Data + inPosition;
 
             if (t > 0)
-                ::memmove(p + inLength, p, t * sizeof(UICChar));
-            ::memmove(p, inCharString, inLength * sizeof(UICChar));
+                ::memmove(p + inLength, p, t * sizeof(Qt3DSChar));
+            ::memmove(p, inCharString, inLength * sizeof(Qt3DSChar));
         }
     }
     DirtyBuffers();
@@ -189,11 +189,11 @@ void CString::UICInsert(long inPosition, const UICChar *inCharString, long inLen
 
 //====================================================================
 /**
- * Add the given UICChar string at the end of this string.
+ * Add the given Qt3DSChar string at the end of this string.
  * @param inCharString is the pointer to the string to be added
  * @param inLength is the length of the string to be added
  */
-void CString::UICConcat(const UICChar *inCharString, long inLength)
+void CString::StrConcat(const Qt3DSChar *inCharString, long inLength)
 {
     if (ENDOFSTRING == inLength)
         inLength = StrLen(inCharString);
@@ -205,12 +205,12 @@ void CString::UICConcat(const UICChar *inCharString, long inLength)
 
         // We must check this before calling SetLength(), since
         // the buffer pointer may be changed during reallocation
-        if (m_UICData == inCharString) {
+        if (m_Data == inCharString) {
             SetLength(theOldLength + inLength);
-            ::memmove(m_UICData + theOldLength, m_UICData, inLength * sizeof(UICChar));
+            ::memmove(m_Data + theOldLength, m_Data, inLength * sizeof(Qt3DSChar));
         } else {
             SetLength(theOldLength + inLength);
-            ::memmove(m_UICData + theOldLength, inCharString, inLength * sizeof(UICChar));
+            ::memmove(m_Data + theOldLength, inCharString, inLength * sizeof(Qt3DSChar));
         }
     }
     DirtyBuffers();
@@ -226,7 +226,7 @@ void CString::Concat(const CString &inString)
     if (IsEmpty()) {
         Assign(inString);
     } else if (inString.Length() > 0) {
-        UICConcat(inString.m_UICData, inString.Length());
+        StrConcat(inString.m_Data, inString.Length());
     }
     DirtyBuffers();
 }
@@ -242,7 +242,7 @@ void CString::Concat(char inChar) // char = bad
         Assign(&inChar, 1);
     } else {
         SetLength(Length() + 1);
-        m_UICData[Length() - 1] = inChar;
+        m_Data[Length() - 1] = inChar;
     }
     DirtyBuffers();
 }
@@ -252,13 +252,13 @@ void CString::Concat(char inChar) // char = bad
  * Add the given char at the end of this string.
  * @param inChar is the char to be added
  */
-void CString::Concat(UICChar inChar) // char = bad
+void CString::Concat(Qt3DSChar inChar) // char = bad
 {
     if (IsEmpty()) {
         Assign(&inChar, 1);
     } else {
         SetLength(Length() + 1);
-        m_UICData[Length() - 1] = inChar;
+        m_Data[Length() - 1] = inChar;
     }
     DirtyBuffers();
 }
@@ -273,26 +273,26 @@ void CString::Concat(UICChar inChar) // char = bad
  * @param inCharString is the pointer to the string
  * @param inLength is the length of the string
  */
-void CString::UICAssign(const UICChar *inCharString, long inLength)
+void CString::StrAssign(const Qt3DSChar *inCharString, long inLength)
 {
     if (ENDOFSTRING == inLength)
         inLength = StrLen(inCharString);
 
     if (!IsEmpty() && inLength > 0) {
-        if (CSharedMemory::RefCountAddress(m_UICData)[0] > 1) {
-            UICChar *theOldData = m_UICData;
+        if (CSharedMemory::RefCountAddress(m_Data)[0] > 1) {
+            Qt3DSChar *theOldData = m_Data;
             Allocate(inLength);
-            ::memcpy(m_UICData, inCharString, inLength * sizeof(UICChar));
+            ::memcpy(m_Data, inCharString, inLength * sizeof(Qt3DSChar));
             --(CSharedMemory::RefCountAddress(theOldData)[0]);
         } else {
             Reallocate(inLength);
-            ::memmove(m_UICData, inCharString, inLength * sizeof(UICChar));
+            ::memmove(m_Data, inCharString, inLength * sizeof(Qt3DSChar));
         }
     } else {
         Clear();
         if (inLength != 0) {
             Allocate(inLength);
-            ::memmove(m_UICData, inCharString, inLength * sizeof(UICChar));
+            ::memmove(m_Data, inCharString, inLength * sizeof(Qt3DSChar));
         }
     }
     DirtyBuffers();
@@ -305,11 +305,11 @@ void CString::UICAssign(const UICChar *inCharString, long inLength)
  */
 void CString::Assign(const CString &inString)
 {
-    if (m_UICData != inString.m_UICData) {
+    if (m_Data != inString.m_Data) {
         Clear();
-        if (inString.m_UICData != NULL) {
-            m_UICData = inString.m_UICData;
-            CSharedMemory::AddRef(m_UICData);
+        if (inString.m_Data != NULL) {
+            m_Data = inString.m_Data;
+            CSharedMemory::AddRef(m_Data);
             DirtyBuffers();
         }
     }
@@ -325,7 +325,7 @@ void CString::Assign(const CString &inString)
  * @param inCharString is the pointer to the string
  * @param inLength is the length of the string
  */
-bool CString::UICCompare(const UICChar *inCharString, long inLength, bool inCaseSensitive) const
+bool CString::StrCompare(const Qt3DSChar *inCharString, long inLength, bool inCaseSensitive) const
 {
     if (ENDOFSTRING == inLength)
         inLength = StrLen(inCharString);
@@ -342,11 +342,11 @@ bool CString::UICCompare(const UICChar *inCharString, long inLength, bool inCase
         return true;
 
     if (inCaseSensitive) {
-        while (theIndex < theMinLength && inCharString[theIndex] == m_UICData[theIndex])
+        while (theIndex < theMinLength && inCharString[theIndex] == m_Data[theIndex])
             ++theIndex;
     } else {
         while (theIndex < theMinLength
-               && ToLower(inCharString[theIndex]) == ToLower(m_UICData[theIndex]))
+               && ToLower(inCharString[theIndex]) == ToLower(m_Data[theIndex]))
             ++theIndex;
     }
 
@@ -360,7 +360,7 @@ bool CString::UICCompare(const UICChar *inCharString, long inLength, bool inCase
  * @param inString is the length of the string
  */
 CString::CString(const CString &inString)
-    : m_UICData(s_EmptyUICString)
+    : m_Data(s_EmptyString)
 {
     ADDTO_OBJECT_COUNTER(CString)
 
@@ -373,7 +373,7 @@ CString::CString(const CString &inString)
  * @param inString is the length of the string
  */
 CString::CString(char inChar)
-    : m_UICData(s_EmptyUICString)
+    : m_Data(s_EmptyString)
 {
     ADDTO_OBJECT_COUNTER(CString)
 
@@ -385,8 +385,8 @@ CString::CString(char inChar)
  * Copy constructor
  * @param inString is the length of the string
  */
-CString::CString(UICChar inChar)
-    : m_UICData(s_EmptyUICString)
+CString::CString(Qt3DSChar inChar)
+    : m_Data(s_EmptyString)
 {
     ADDTO_OBJECT_COUNTER(CString)
 
@@ -401,7 +401,7 @@ CString::CString(UICChar inChar)
 bool CString::operator<(const CString &inString) const
 {
     long theMinLength = MIN(inString.Length(), Length());
-    return (::memcmp(m_UICData, inString.m_UICData, (theMinLength + 1) * sizeof(UICChar)) < 0);
+    return (::memcmp(m_Data, inString.m_Data, (theMinLength + 1) * sizeof(Qt3DSChar)) < 0);
 }
 
 #ifdef CHECK_BOUNDS
@@ -412,10 +412,10 @@ bool CString::operator<(const CString &inString) const
  * @param inIndex is the location of the desired char
  * @return a char at the indecated index.
  */
-UICChar &CString::operator[](long inIndex)
+Qt3DSChar &CString::operator[](long inIndex)
 {
     Unique();
-    return m_UICData[inIndex];
+    return m_Data[inIndex];
 }
 #endif
 
@@ -426,10 +426,10 @@ UICChar &CString::operator[](long inIndex)
  */
 void CString::Clear()
 {
-    if (!IsEmpty() && 0 == CSharedMemory::SubRef(m_UICData))
+    if (!IsEmpty() && 0 == CSharedMemory::SubRef(m_Data))
         Free();
 
-    m_UICData = s_EmptyUICString;
+    m_Data = s_EmptyString;
     DirtyBuffers();
 }
 
@@ -439,17 +439,17 @@ void CString::Clear()
  * Single-threaded version.
  * @return a pointer to the new buffer
  */
-UICChar *CString::Unique()
+Qt3DSChar *CString::Unique()
 {
-    if (!IsEmpty() && CSharedMemory::RefCountAddress(m_UICData)[0] > 1) {
-        UICChar *theOldData = m_UICData;
+    if (!IsEmpty() && CSharedMemory::RefCountAddress(m_Data)[0] > 1) {
+        Qt3DSChar *theOldData = m_Data;
         Allocate(Length());
-        ::memcpy(m_UICData, theOldData, Length() * sizeof(UICChar));
+        ::memcpy(m_Data, theOldData, Length() * sizeof(Qt3DSChar));
         --(CSharedMemory::RefCountAddress(theOldData)[0]);
     }
 
     DirtyBuffers();
-    return m_UICData;
+    return m_Data;
 }
 
 //====================================================================
@@ -478,10 +478,10 @@ void CString::SetLength(long inNewLength)
         Unique();
 
     else {
-        if (CSharedMemory::RefCountAddress(m_UICData)[0] > 1) {
-            UICChar *theOldData = m_UICData;
+        if (CSharedMemory::RefCountAddress(m_Data)[0] > 1) {
+            Qt3DSChar *theOldData = m_Data;
             Allocate(inNewLength);
-            ::memcpy(m_UICData, theOldData, MIN(theCurrentLength, inNewLength) * sizeof(UICChar));
+            ::memcpy(m_Data, theOldData, MIN(theCurrentLength, inNewLength) * sizeof(Qt3DSChar));
             --(CSharedMemory::RefCountAddress(theOldData)[0]);
         } else {
             Reallocate(inNewLength);
@@ -497,7 +497,7 @@ void CString::SetLength(long inNewLength)
  */
 long CString::Length() const
 {
-    return CSharedMemory::GetSize(m_UICData) / sizeof(UICChar) - 1;
+    return CSharedMemory::GetSize(m_Data) / sizeof(Qt3DSChar) - 1;
 }
 
 //====================================================================
@@ -507,7 +507,7 @@ long CString::Length() const
  */
 long CString::RefCount() const
 {
-    return CSharedMemory::RefCountAddress(m_UICData)[0];
+    return CSharedMemory::RefCountAddress(m_Data)[0];
 }
 
 //====================================================================
@@ -534,8 +534,8 @@ CString CString::Extract(long inStart, long inLength) const
             theReturn.Clear();
             theReturn.SetLength(theMinLength);
             // theReturn.Allocate( theMinLength );
-            ::memmove(theReturn.m_UICData, m_UICData + inStart, theMinLength * sizeof(UICChar));
-            // theReturn.m_UICData[ theMinLength ] = 0;
+            ::memmove(theReturn.m_Data, m_Data + inStart, theMinLength * sizeof(Qt3DSChar));
+            // theReturn.m_Data[ theMinLength ] = 0;
         }
     }
     return theReturn;
@@ -579,8 +579,8 @@ void CString::Delete(long inStart, long inLength)
             inLength = theCurrentLength - inStart;
 
         Unique();
-        ::memmove(m_UICData + inStart, m_UICData + inStart + inLength,
-                  (theCurrentLength - inStart - inLength) * sizeof(UICChar));
+        ::memmove(m_Data + inStart, m_Data + inStart + inLength,
+                  (theCurrentLength - inStart - inLength) * sizeof(Qt3DSChar));
 
         SetLength(theCurrentLength - inLength);
     }
@@ -597,8 +597,8 @@ CString &CString::ToUpper()
 
     long theLength = Length();
     for (long theScanner = 0; theScanner < theLength; ++theScanner)
-        if (m_UICData[theScanner] >= 'a' && m_UICData[theScanner] <= 'z')
-            m_UICData[theScanner] = static_cast<UICChar>(m_UICData[theScanner] + 'A' - 'a');
+        if (m_Data[theScanner] >= 'a' && m_Data[theScanner] <= 'z')
+            m_Data[theScanner] = static_cast<Qt3DSChar>(m_Data[theScanner] + 'A' - 'a');
     DirtyBuffers();
     return *this;
 }
@@ -613,8 +613,8 @@ CString &CString::ToLower()
 
     long theLength = Length();
     for (long theScanner = 0; theScanner < theLength; ++theScanner)
-        if (m_UICData[theScanner] >= 'A' && m_UICData[theScanner] <= 'Z')
-            m_UICData[theScanner] = static_cast<UICChar>(m_UICData[theScanner] + 'a' - 'A');
+        if (m_Data[theScanner] >= 'A' && m_Data[theScanner] <= 'Z')
+            m_Data[theScanner] = static_cast<Qt3DSChar>(m_Data[theScanner] + 'a' - 'A');
     DirtyBuffers();
     return *this;
 }
@@ -670,7 +670,7 @@ void CString::TrimLeft()
  * @param inIndex index of the character to get
  * @return the character located at inIndex
  */
-UICChar CString::GetAt(long inIndex) const
+Qt3DSChar CString::GetAt(long inIndex) const
 {
     // Index must be positive
     if (inIndex < 0)
@@ -692,26 +692,26 @@ UICChar CString::GetAt(long inIndex) const
  */
 long CString::Find(const CString &inString) const
 {
-    UICChar *theSource = m_UICData;
+    Qt3DSChar *theSource = m_Data;
     long theSubLength = inString.Length() - 1;
 
     // Finding an empty string is easy
-    if (0 != *inString.m_UICData) {
+    if (0 != *inString.m_Data) {
         // Spin until the whole string matches
         do {
             // But first spin until first char matches
-            UICChar theSourceChar;
+            Qt3DSChar theSourceChar;
             do {
                 theSourceChar = *theSource++;
                 if (0 == theSourceChar)
                     return ENDOFSTRING;
 
-            } while (theSourceChar != *inString.m_UICData);
-        } while (0 != StrNCmp(theSource, inString.m_UICData + 1, theSubLength));
+            } while (theSourceChar != *inString.m_Data);
+        } while (0 != StrNCmp(theSource, inString.m_Data + 1, theSubLength));
         --theSource;
     }
 
-    return static_cast<long>(theSource - m_UICData);
+    return static_cast<long>(theSource - m_Data);
 }
 
 //====================================================================
@@ -747,7 +747,7 @@ long CString::Find(char inChar) const // char = bad?
     long theLength = Length();
     long theIndex;
 
-    for (theIndex = 0; theIndex < theLength && m_UICData[theIndex] != inChar; ++theIndex) {
+    for (theIndex = 0; theIndex < theLength && m_Data[theIndex] != inChar; ++theIndex) {
         // Empty
     }
 
@@ -761,8 +761,8 @@ long CString::find_first_of(const CString &inString, long inStart) const
 {
     for (long idx = inStart, len = Length(); idx < len; ++idx) {
         for (long strIdx = 0, strLen = inString.Length(); strIdx < strLen; ++strIdx) {
-            UICChar mine(m_UICData[idx]);
-            UICChar theirs(inString.m_UICData[strIdx]);
+            Qt3DSChar mine(m_Data[idx]);
+            Qt3DSChar theirs(inString.m_Data[strIdx]);
             if (mine == theirs)
                 return idx;
         }
@@ -850,7 +850,7 @@ void CString::reserve(long numChars)
 long CString::ReverseFind(char inChar) const
 {
     long theIndex;
-    for (theIndex = Length() - 1; theIndex >= 0 && m_UICData[theIndex] != inChar; --theIndex) {
+    for (theIndex = Length() - 1; theIndex >= 0 && m_Data[theIndex] != inChar; --theIndex) {
         // Empty
     }
 
@@ -932,7 +932,7 @@ long CString::Scan(const char *inFormat, ...) const
     va_list theArgs;
     va_start(theArgs, inFormat);
 
-    AssertChar(m_UICData); // ok?
+    AssertChar(m_Data); // ok?
     SyncCharBuffer();
     return 0; // Bastard Microsoft doesn't implement an sscanf with va_arg...  will have to copy
               // some code over.
@@ -942,7 +942,7 @@ long CString::Scan(const char *inFormat, ...) const
 /**
  * Make sure that no characters are unicode.
  */
-void CString::AssertChar(const UICChar *inString)
+void CString::AssertChar(const Qt3DSChar *inString)
 {
     while (*inString) {
         if (*inString > 255)

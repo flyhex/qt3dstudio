@@ -111,10 +111,10 @@ namespace render {
         }
     };
 
-    struct SPickResultProcessResult : public SUICRenderPickResult
+    struct SPickResultProcessResult : public Qt3DSRenderPickResult
     {
-        SPickResultProcessResult(const SUICRenderPickResult &inSrc)
-            : SUICRenderPickResult(inSrc)
+        SPickResultProcessResult(const Qt3DSRenderPickResult &inSrc)
+            : Qt3DSRenderPickResult(inSrc)
             , m_WasPickConsumed(false)
         {
         }
@@ -150,14 +150,14 @@ namespace render {
         operator STextShader *() { return m_Shader; }
     };
 
-    class CUICRendererImpl : public IUICRenderer, public IRenderWidgetContext
+    class Qt3DSRendererImpl : public IQt3DSRenderer, public IRenderWidgetContext
     {
         typedef nvhash_map<SShaderDefaultMaterialKey, SShaderGeneratorGeneratedShader *> TShaderMap;
         typedef nvhash_map<CRegisteredString, NVScopedRefCounted<NVRenderConstantBuffer>>
             TStrConstanBufMap;
         typedef nvhash_map<const SLayer *, NVScopedRefCounted<SLayerRenderData>> TLayerRenderMap;
         typedef nvvector<SLayerRenderData *> TLayerRenderList;
-        typedef nvvector<SUICRenderPickResult> TPickResultArray;
+        typedef nvvector<Qt3DSRenderPickResult> TPickResultArray;
 
         // Items to implement the widget context.
         typedef nvhash_map<CRegisteredString, NVScopedRefCounted<NVRenderVertexBuffer>>
@@ -170,7 +170,7 @@ namespace render {
 
         typedef nvhash_map<long, SNode *> TBoneIdNodeMap;
 
-        IUICRenderContext &m_UICContext;
+        IQt3DSRenderContext &m_qt3dsContext;
         NVScopedRefCounted<NVRenderContext> m_Context;
         NVScopedRefCounted<IBufferManager> m_BufferManager;
         NVScopedRefCounted<IOffscreenRenderManager> m_OffscreenRenderManager;
@@ -292,8 +292,8 @@ namespace render {
         SShaderDefaultMaterialKeyProperties m_DefaultMaterialShaderKeyProperties;
 
     public:
-        CUICRendererImpl(IUICRenderContext &ctx);
-        virtual ~CUICRendererImpl();
+        Qt3DSRendererImpl(IQt3DSRenderContext &ctx);
+        virtual ~Qt3DSRendererImpl();
         SShaderDefaultMaterialKeyProperties &DefaultMaterialShaderKeyProperties()
         {
             return m_DefaultMaterialShaderKeyProperties;
@@ -330,7 +330,7 @@ namespace render {
         void EndFrame() override;
 
         void PickRenderPlugins(bool inPick) override { m_PickRenderPlugins = inPick; }
-        SUICRenderPickResult Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
+        Qt3DSRenderPickResult Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
                                           const QT3DSVec2 &inMouseCoords, bool inPickSiblings,
                                           bool inPickEverything) override;
 
@@ -339,7 +339,7 @@ namespace render {
                      const QT3DSVec2 &inViewportDimensions, const QT3DSVec2 &inMouseCoords,
                      NVDataRef<SGraphObject *> inMapperObjects, SBasisPlanes::Enum inPlane) override;
 
-        virtual SUICRenderPickResult PickOffscreenLayer(SLayer &inLayer,
+        virtual Qt3DSRenderPickResult PickOffscreenLayer(SLayer &inLayer,
                                                         const QT3DSVec2 &inViewportDimensions,
                                                         const QT3DSVec2 &inMouseCoords,
                                                         bool inPickEverything);
@@ -361,7 +361,7 @@ namespace render {
         // Note that this allocator is completely reset on BeginFrame.
         NVAllocatorCallback &GetPerFrameAllocator() override
         {
-            return m_UICContext.GetPerFrameAllocator();
+            return m_qt3dsContext.GetPerFrameAllocator();
         }
         void RenderLayerRect(SLayer &inLayer, const QT3DSVec3 &inColor) override;
         void AddRenderWidget(IRenderWidget &inWidget) override;
@@ -462,7 +462,7 @@ namespace render {
 
         NVRenderContext &GetContext() { return *m_Context; }
 
-        IUICRenderContext &GetUICContext() { return m_UICContext; }
+        IQt3DSRenderContext &GetQt3DSContext() { return m_qt3dsContext; }
 
         void DrawScreenRect(NVRenderRectF inRect, const QT3DSVec3 &inColor);
         // Binds an offscreen texture.  Widgets are rendered last.

@@ -96,7 +96,7 @@ struct AdvancedBlendModes
 
         QSize m_previousDimensions;
 
-        SLayerRenderData(SLayer &inLayer, CUICRendererImpl &inRenderer);
+        SLayerRenderData(SLayer &inLayer, Qt3DSRendererImpl &inRenderer);
 
         virtual ~SLayerRenderData();
 

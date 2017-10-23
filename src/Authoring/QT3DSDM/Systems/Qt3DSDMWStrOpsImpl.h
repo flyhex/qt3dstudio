@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTWSTROPSIMPLH
-#define UICIMPORTWSTROPSIMPLH
+#ifndef QT3DS_IMPORT_WSTR_OPS_IMPL_H
+#define QT3DS_IMPORT_WSTR_OPS_IMPL_H
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMWStrOps.h"
 #include "foundation/Qt3DSMemoryBuffer.h"

@@ -54,7 +54,7 @@ class CDropTarget;
 class CFileDropSource : public CDropSource
 {
 protected:
-    CUICFile m_File;
+    Qt3DSFile m_File;
     static bool s_FileHasValidTarget;
 
 public:

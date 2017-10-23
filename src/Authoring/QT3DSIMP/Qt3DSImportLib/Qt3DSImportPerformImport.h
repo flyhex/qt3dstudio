@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTPERFORMIMPORTH
-#define UICIMPORTPERFORMIMPORTH
+#ifndef QT3DS_IMPORT_PERFORM_IMPORT_H
+#define QT3DS_IMPORT_PERFORM_IMPORT_H
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMHandles.h"
 #include "foundation/Qt3DS.h"

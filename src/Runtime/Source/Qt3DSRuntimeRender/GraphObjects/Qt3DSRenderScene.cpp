@@ -65,7 +65,7 @@ SLayer *SScene::GetLastChild()
     return child;
 }
 
-bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IUICRenderContext &inContext)
+bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext)
 {
     // We need to iterate through the layers in reverse order and ask them to render.
     bool wasDirty = m_Dirty;
@@ -77,7 +77,7 @@ bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IUICRenderC
     return wasDirty;
 }
 
-void SScene::Render(const QT3DSVec2 &inViewportDimensions, IUICRenderContext &inContext,
+void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
                     RenderClearCommand inClearColorBuffer)
 {
     if ((inClearColorBuffer == SScene::ClearIsOptional && m_UseClearColor)

@@ -70,13 +70,13 @@ void CPoller::ReleaseEvents()
     m_EventIndex = 0;
 }
 
-static void AddProviderFn(void *inPoller, SUICEventSystemEventProvider inProvider)
+static void AddProviderFn(void *inPoller, Qt3DSEventSystemEventProvider inProvider)
 {
     CPoller *thePoller = reinterpret_cast<CPoller *>(inPoller);
     thePoller->AddProvider(*thePoller->GetOrCreateEventProviderWrapper(inProvider));
 }
 
-static void RemoveProviderFn(void *inPoller, SUICEventSystemEventProvider inProvider)
+static void RemoveProviderFn(void *inPoller, Qt3DSEventSystemEventProvider inProvider)
 {
     CPoller *thePoller = reinterpret_cast<CPoller *>(inPoller);
     CPoller::TProvider theProvider = thePoller->GetEventProviderWrapper(inProvider);
@@ -85,7 +85,7 @@ static void RemoveProviderFn(void *inPoller, SUICEventSystemEventProvider inProv
     thePoller->ReleaseEventProviderWrapper(inProvider);
 }
 
-static int IgnoreProviderFn(void *inPoller, SUICEventSystemEventProvider inProvider)
+static int IgnoreProviderFn(void *inPoller, Qt3DSEventSystemEventProvider inProvider)
 {
     CPoller *thePoller = reinterpret_cast<CPoller *>(inPoller);
     CPoller::TProvider theProvider = thePoller->GetEventProviderWrapper(inProvider);
@@ -94,7 +94,7 @@ static int IgnoreProviderFn(void *inPoller, SUICEventSystemEventProvider inProvi
     return 0;
 }
 
-static int ActivateProviderFn(void *inPoller, SUICEventSystemEventProvider inProvider)
+static int ActivateProviderFn(void *inPoller, Qt3DSEventSystemEventProvider inProvider)
 {
     CPoller *thePoller = reinterpret_cast<CPoller *>(inPoller);
     CPoller::TProvider theProvider = thePoller->GetEventProviderWrapper(inProvider);
@@ -170,10 +170,10 @@ bool CPoller::ActivateProvider(IEventProvider &inProvider)
     return false;
 }
 
-SUICEventSystemEvent *CPoller::GetNextEvent(bool inAllowResetBuffer)
+Qt3DSEventSystemEvent *CPoller::GetNextEvent(bool inAllowResetBuffer)
 {
     if (m_EventIndex < m_EventList.size()) {
-        SUICEventSystemEvent *retval = m_EventList[m_EventIndex];
+        Qt3DSEventSystemEvent *retval = m_EventList[m_EventIndex];
         ++m_EventIndex;
         return retval;
     }
@@ -183,7 +183,7 @@ SUICEventSystemEvent *CPoller::GetNextEvent(bool inAllowResetBuffer)
     size_t theNewEventCount = 0;
     for (QT3DSU32 idx = 0, end = m_Providers.size(); idx < end; ++idx) {
         if (m_Providers[idx].second) {
-            SUICEventSystemEvent *evtBuffer[MAX_EVENTS];
+            Qt3DSEventSystemEvent *evtBuffer[MAX_EVENTS];
             for (QT3DSU32 numEvents = (QT3DSU32)(m_Providers[idx].first)
                                        ->GetNextEvents(m_EventFactory, evtBuffer, MAX_EVENTS);
                  numEvents;
@@ -200,13 +200,13 @@ SUICEventSystemEvent *CPoller::GetNextEvent(bool inAllowResetBuffer)
     return NULL;
 }
 
-size_t CPoller::GetNextEvents(SUICEventSystemEvent **outBuffer, size_t bufLen)
+size_t CPoller::GetNextEvents(Qt3DSEventSystemEvent **outBuffer, size_t bufLen)
 {
     m_EventFetched = true;
     size_t bufIdx = 0;
     bool theAllowResetBuffer = true;
     for (; bufIdx < bufLen; ++bufIdx) {
-        SUICEventSystemEvent *evt = GetNextEvent(theAllowResetBuffer);
+        Qt3DSEventSystemEvent *evt = GetNextEvent(theAllowResetBuffer);
         if (!evt)
             break;
         theAllowResetBuffer = false;
@@ -220,7 +220,7 @@ IEventFactory &CPoller::GetEventFactory()
     return m_EventFactory;
 }
 
-SUICEventSystemEventPoller *CPoller::GetCInterface()
+Qt3DSEventSystemEventPoller *CPoller::GetCInterface()
 {
     return &m_CInterface;
 }
@@ -237,7 +237,7 @@ void CPoller::PurgeEvents()
     // Get events from providers and drop,
     // so the providers need not to provide an additional interface for clear events
     static const size_t EVENTS_NUM_ONCE_CLEAR = 512;
-    SUICEventSystemEvent *theEvents[EVENTS_NUM_ONCE_CLEAR];
+    Qt3DSEventSystemEvent *theEvents[EVENTS_NUM_ONCE_CLEAR];
     GetNextEvents(theEvents, EVENTS_NUM_ONCE_CLEAR);
     ReleaseEvents();
 }
@@ -272,7 +272,7 @@ struct SProviderFinder
     }
 };
 
-static SUICEventSystemEvent *CreateEventFn(void *inFactory, int numData)
+static Qt3DSEventSystemEvent *CreateEventFn(void *inFactory, int numData)
 {
     IEventFactory *theFactory = reinterpret_cast<IEventFactory *>(inFactory);
     return &theFactory->CreateEvent(numData);
@@ -290,19 +290,19 @@ static size_t MaxStrLenFn(void *inFactory)
     return theFactory->GetMaxStrLength();
 }
 
-static SUICEventSystemRegisteredStr RegisterStrFn(void *inFactory, TUICEventSystemStr inStr)
+static Qt3DSEventSystemRegisteredStr RegisterStrFn(void *inFactory, Qt3DSEventSystemStr inStr)
 {
     IEventFactory *theFactory = reinterpret_cast<IEventFactory *>(inFactory);
     return theFactory->RegisterStr(inStr);
 }
 
-static TUICEventSystemStr AllocateStrFn(void *inFactory, TUICEventSystemStr inStr)
+static Qt3DSEventSystemStr AllocateStrFn(void *inFactory, Qt3DSEventSystemStr inStr)
 {
     IEventFactory *theFactory = reinterpret_cast<IEventFactory *>(inFactory);
     return theFactory->AllocateStr(inStr);
 }
 
-static TUICEventSystemStr AllocateStrLenFn(void *inFactory, int len)
+static Qt3DSEventSystemStr AllocateStrLenFn(void *inFactory, int len)
 {
     IEventFactory *theFactory = reinterpret_cast<IEventFactory *>(inFactory);
     return theFactory->AllocateStr(len);
@@ -310,17 +310,17 @@ static TUICEventSystemStr AllocateStrLenFn(void *inFactory, int len)
 
 struct SWrappedProvider : public IEventProvider
 {
-    SUICEventSystemEventProvider m_Provider;
-    SWrappedProvider(SUICEventSystemEventProvider prov)
+    Qt3DSEventSystemEventProvider m_Provider;
+    SWrappedProvider(Qt3DSEventSystemEventProvider prov)
         : m_Provider(prov)
     {
     }
 
-    size_t GetNextEvents(IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
+    size_t GetNextEvents(IEventFactory &inFactory, Qt3DSEventSystemEvent **outBuffer,
                                  size_t bufLen) override
     {
         if (m_Provider.m_Provider) {
-            SUICEventSystemEventFactory theFactory;
+            Qt3DSEventSystemEventFactory theFactory;
             theFactory.m_Factory = &inFactory;
             theFactory.createEvent = CreateEventFn;
             theFactory.getMaxNumEventData = MaxNumEventDataFn;
@@ -341,7 +341,7 @@ struct SWrappedProvider : public IEventProvider
     }
 };
 
-CPoller::TProvider CPoller::GetEventProviderWrapper(SUICEventSystemEventProvider inProvider)
+CPoller::TProvider CPoller::GetEventProviderWrapper(Qt3DSEventSystemEventProvider inProvider)
 {
     TCEventProviderList::iterator iter = eastl::find_if(
         m_CEventProviders.begin(), m_CEventProviders.end(), SProviderFinder(inProvider.m_Provider));
@@ -350,7 +350,7 @@ CPoller::TProvider CPoller::GetEventProviderWrapper(SUICEventSystemEventProvider
     return TProvider();
 }
 
-CPoller::TProvider CPoller::GetOrCreateEventProviderWrapper(SUICEventSystemEventProvider inProvider)
+CPoller::TProvider CPoller::GetOrCreateEventProviderWrapper(Qt3DSEventSystemEventProvider inProvider)
 {
     TCEventProviderList::iterator iter = eastl::find_if(
         m_CEventProviders.begin(), m_CEventProviders.end(), SProviderFinder(inProvider.m_Provider));
@@ -362,7 +362,7 @@ CPoller::TProvider CPoller::GetOrCreateEventProviderWrapper(SUICEventSystemEvent
     return iter->second;
 }
 
-void CPoller::ReleaseEventProviderWrapper(SUICEventSystemEventProvider inProvider)
+void CPoller::ReleaseEventProviderWrapper(Qt3DSEventSystemEventProvider inProvider)
 {
     TCEventProviderList::iterator iter = eastl::find_if(
         m_CEventProviders.begin(), m_CEventProviders.end(), SProviderFinder(inProvider.m_Provider));

@@ -35,15 +35,15 @@
 
 /**
 To use it just add to the start of the section you are looking to profile:
-        UICPROFILE( MethodName );
+        QT3DS_PROFILE( MethodName );
 
-UICPROFILE is defined in MasterP.h
+QT3DS_PROFILE is defined in MasterP.h
 
 The profiler uses a stack variable to start and stop, so it will automatically stop when it gets
 destructed.
 To profile sub sections of a method you can do:
 {
-        UICPROFILE( MethodName_Subsection );
+        QT3DS_PROFILE( MethodName_Subsection );
         CodeToBeProfiled( );
 }
 
@@ -132,14 +132,14 @@ protected:
 // function.
 
 #ifdef PERFORM_PROFILE
-#define UICPROFILE(inName)                                                                         \
+#define QT3DS_PROFILE(inName)                                                                         \
     static CMethProf the##inName##StaticProf(Q3DStudio::CString(__FUNCTION__)                      \
                                              + Q3DStudio::CString("::")                            \
                                              + Q3DStudio::CString(#inName));                       \
     CProfiler the##inName##Prof(&the##inName##StaticProf)
 
 #else
-#define UICPROFILE(inName)
+#define QT3DS_PROFILE(inName)
 #endif
 
 #endif // INCLUDED_MASTER_PROF_H

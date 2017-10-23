@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSIGNALSH
-#define UICDMSIGNALSH
+#ifndef QT3DSDM_SIGNALS_H
+#define QT3DSDM_SIGNALS_H
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMAnimation.h"
@@ -589,9 +589,9 @@ inline void MaybackCallbackInstancePropertyValue(Qt3DSDMInstanceHandle inInstanc
         inCallback(inInstance, inProperty);
 }
 
-void SetUICDMSignalsEnabled(bool inEnabled);
+void SetDataModelSignalsEnabled(bool inEnabled);
 // Defaults to true
-bool AreUICDMSignalsEnabled();
+bool AreDataModelSignalsEnabled();
 }
 
 #endif

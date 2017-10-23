@@ -115,7 +115,7 @@ void HandleController(Q3DStudio::CTegraApplication &inApplication)
     static const struct ButtonEntry
     {
         WORD XBoxButton;
-        Q3DStudio::INT32 UICButton;
+        Q3DStudio::INT32 button;
     } buttonMap[] = {
     { XINPUT_GAMEPAD_START, Q3DStudio::BUTTON_START },
     { XINPUT_GAMEPAD_BACK, Q3DStudio::BUTTON_SELECT },
@@ -152,7 +152,7 @@ void HandleController(Q3DStudio::CTegraApplication &inApplication)
                      buttonMapIndex < sizeof(buttonMap) / sizeof(buttonMap[0]); ++buttonMapIndex) {
                     const ButtonEntry &buttonEntry = buttonMap[buttonMapIndex];
                     if (buttonEntry.XBoxButton & buttonChanges) {
-                        input->HandleButton(buttonEntry.UICButton,
+                        input->HandleButton(buttonEntry.button,
                                             buttons & buttonEntry.XBoxButton);
                     }
                 }
@@ -216,7 +216,7 @@ void kdHandleAssertion(const KDchar *condition, const KDchar *filename, KDint li
                                   << " " << filename << " " << linenumber;
 }
 
-Q3DStudio::SUICFNDTimer g_GlobalTimeProvider;
+Q3DStudio::Qt3DSFNDTimer g_GlobalTimeProvider;
 
 KDust GetTimeUST()
 {

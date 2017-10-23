@@ -43,7 +43,7 @@
 #include "IOLibraryException.h"
 #include <sys/stat.h> // _stat
 
-// CUICFile originally uses ***W for file ops
+// Qt3DSFile originally uses ***W for file ops
 // but this only works for win2k and above (Bug2994)
 // if using plain version is giving too much problem, uncomment the line below
 //#define USE_WIDE_VERSION
@@ -51,14 +51,14 @@
 //==============================================================================
 //	Static variables
 //==============================================================================
-TFilePathList CUICFile::s_TempFilePathList;
+TFilePathList Qt3DSFile::s_TempFilePathList;
 
 //==============================================================================
 //	Constants
 //==============================================================================
 #ifdef KDAB_TEMPORARILY_REMOVED
-const Q3DStudio::CString CUICFile::CURRENT_DIR(".\\");
-const Q3DStudio::CString CUICFile::PARENT_DIR("..\\");
+const Q3DStudio::CString Qt3DSFile::CURRENT_DIR(".\\");
+const Q3DStudio::CString Qt3DSFile::PARENT_DIR("..\\");
 
 //=============================================================================
 /**
@@ -66,7 +66,7 @@ const Q3DStudio::CString CUICFile::PARENT_DIR("..\\");
  * @param inIsPosix ignored.
  * @param inAddBase ignored.
  */
-CUICFile::CUICFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool inAddBase)
+Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool inAddBase)
 {
     Q_UNUSED(inIsPosix);
     Q_UNUSED(inAddBase);
@@ -78,10 +78,10 @@ CUICFile::CUICFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool in
 /**
  * Create a file by combining the two paths.
  */
-CUICFile::CUICFile(Q3DStudio::CString inPathName, Q3DStudio::CString inName)
+Qt3DSFile::Qt3DSFile(Q3DStudio::CString inPathName, Q3DStudio::CString inName)
 {
-    CUICFile theBasePath(inPathName);
-    CUICFile theFile = Combine(theBasePath, inName);
+    Qt3DSFile theBasePath(inPathName);
+    Qt3DSFile theFile = Combine(theBasePath, inName);
     m_Path = theFile.GetPath();
 }
 
@@ -89,15 +89,15 @@ CUICFile::CUICFile(Q3DStudio::CString inPathName, Q3DStudio::CString inName)
 /**
  * Create a file by combining the base path with a relative path.
  */
-CUICFile::CUICFile(const CUICFile &inBasePath, const Q3DStudio::CString &inPathname, bool inIsPosix)
+Qt3DSFile::Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname, bool inIsPosix)
 {
     Q_UNUSED(inIsPosix);
 
-    CUICFile theFile(Combine(inBasePath, inPathname));
+    Qt3DSFile theFile(Combine(inBasePath, inPathname));
     m_Path = theFile.GetPath();
 }
 
-CUICFile::CUICFile(const CUICFile &inFile)
+Qt3DSFile::Qt3DSFile(const Qt3DSFile &inFile)
 {
     m_Path = inFile.m_Path;
 }
@@ -106,7 +106,7 @@ CUICFile::CUICFile(const CUICFile &inFile)
 /**
  * Get an iterator for all the sub-files of this directory.
  */
-CFileIterator CUICFile::GetSubItems() const
+CFileIterator Qt3DSFile::GetSubItems() const
 {
     return CFileIterator(this);
 }
@@ -115,11 +115,11 @@ CFileIterator CUICFile::GetSubItems() const
 /**
  * Destructor
  */
-CUICFile::~CUICFile()
+Qt3DSFile::~Qt3DSFile()
 {
 }
 
-bool CUICFile::operator==(const CUICFile &inRHS) const
+bool Qt3DSFile::operator==(const Qt3DSFile &inRHS) const
 {
 #ifdef _WIN32
     return GetAbsolutePath().CompareNoCase(inRHS.GetAbsolutePath());
@@ -132,7 +132,7 @@ bool CUICFile::operator==(const CUICFile &inRHS) const
 /**
  * Returns true if this is a file and can be read.
  */
-bool CUICFile::CanRead() const
+bool Qt3DSFile::CanRead() const
 {
     return IsFile();
 }
@@ -141,7 +141,7 @@ bool CUICFile::CanRead() const
 /**
  * Returns true if this is a file and can be written to.
  */
-bool CUICFile::CanWrite() const
+bool Qt3DSFile::CanWrite() const
 {
     long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
     return (theAttributes != INVALID_FILE_ATTRIBUTES) && !(theAttributes & FILE_ATTRIBUTE_READONLY);
@@ -154,7 +154,7 @@ bool CUICFile::CanWrite() const
  *
  *	@return	true if the deletion of file/folder is successful, else false
  */
-bool CUICFile::DeleteFile() const
+bool Qt3DSFile::DeleteFile() const
 {
     BOOL theFileDeleted = FALSE;
 
@@ -164,7 +164,7 @@ bool CUICFile::DeleteFile() const
         CFileIterator theIterator = GetSubItems();
 
         for (; !theIterator.IsDone(); ++theIterator) {
-            CUICFile theFile = theIterator.GetCurrent();
+            Qt3DSFile theFile = theIterator.GetCurrent();
             theFile.DeleteFile();
         }
         theFileDeleted = ::RemoveDirectory(m_Path);
@@ -183,7 +183,7 @@ bool CUICFile::DeleteFile() const
 /**
  * Check to see if this file or directory exists.
  */
-bool CUICFile::Exists() const
+bool Qt3DSFile::Exists() const
 {
 #ifdef USE_WIDE_VERSION
     long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
@@ -198,7 +198,7 @@ bool CUICFile::Exists() const
  * Get the fully qualified absolute path.
  * This should resolve all relative parts of the path.
  */
-Q3DStudio::CString CUICFile::GetAbsolutePath() const
+Q3DStudio::CString Qt3DSFile::GetAbsolutePath() const
 {
     return m_Path;
 }
@@ -207,7 +207,7 @@ Q3DStudio::CString CUICFile::GetAbsolutePath() const
 /**
  * @see GetAbsolutePath.
  */
-Q3DStudio::CString CUICFile::GetAbsolutePosixPath() const
+Q3DStudio::CString Qt3DSFile::GetAbsolutePosixPath() const
 {
     return GetAbsolutePath();
 }
@@ -216,7 +216,7 @@ Q3DStudio::CString CUICFile::GetAbsolutePosixPath() const
 /**
  * Get the filename section of this file, ignoring all drives and directories.
  */
-Q3DStudio::CString CUICFile::GetName() const
+Q3DStudio::CString Qt3DSFile::GetName() const
 {
     // back/forward slashes counts in a file path (a badly formed, but still acceptable in win32)
     // apparently, m_Path.ReverseFind( "\\/" ); doesnt work as required
@@ -260,7 +260,7 @@ Q3DStudio::CString CUICFile::GetName() const
 /**
  * Get the file extension, without the period.
  */
-Q3DStudio::CString CUICFile::GetExtension() const
+Q3DStudio::CString Qt3DSFile::GetExtension() const
 {
     long theIdx = m_Path.ReverseFind('.');
     if (theIdx != Q3DStudio::CString::ENDOFSTRING)
@@ -273,7 +273,7 @@ Q3DStudio::CString CUICFile::GetExtension() const
 /**
  * Get the underlying path for this file, this may include relativity.
  */
-Q3DStudio::CString CUICFile::GetPath() const
+Q3DStudio::CString Qt3DSFile::GetPath() const
 {
     return m_Path;
 }
@@ -283,7 +283,7 @@ Q3DStudio::CString CUICFile::GetPath() const
  * Returns true if this file exists and is not a directory.
  * The param inCheckForAlias is not used in Windows
  */
-bool CUICFile::IsFile(bool inCheckForAlias /*true*/) const
+bool Qt3DSFile::IsFile(bool inCheckForAlias /*true*/) const
 {
     Q_UNUSED(inCheckForAlias);
 #ifdef USE_WIDE_VERSION
@@ -299,7 +299,7 @@ bool CUICFile::IsFile(bool inCheckForAlias /*true*/) const
 /**
  * Check to see if this file or directory is hidden.
  */
-bool CUICFile::IsHidden() const
+bool Qt3DSFile::IsHidden() const
 {
 #ifdef USE_WIDE_VERSION
     long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
@@ -313,7 +313,7 @@ bool CUICFile::IsHidden() const
 /**
  * Get the size of this file in bytes.
  */
-long CUICFile::Length() const
+long Qt3DSFile::Length() const
 {
     HANDLE theFile = OpenFileReadHandle();
     long theFilesize = ::GetFileSize(theFile, NULL);
@@ -326,7 +326,7 @@ long CUICFile::Length() const
 /**
  * Rename (or move) this file to the other file.
  */
-void CUICFile::RenameTo(const CUICFile &inDestination)
+void Qt3DSFile::RenameTo(const Qt3DSFile &inDestination)
 {
 #ifdef USE_WIDE_VERSION
 
@@ -343,7 +343,7 @@ void CUICFile::RenameTo(const CUICFile &inDestination)
 /**
  * Copy this file to the other file, leaving this file intact.
  */
-void CUICFile::CopyTo(const CUICFile &inDestination)
+void Qt3DSFile::CopyTo(const Qt3DSFile &inDestination)
 {
 #ifdef USE_WIDE_VERSION
     if (!::CopyFileW(GetAbsolutePath(), inDestination.GetAbsolutePath(), FALSE))
@@ -357,7 +357,7 @@ void CUICFile::CopyTo(const CUICFile &inDestination)
 /**
  * Make this file read only. or unmark the read only
  */
-void CUICFile::SetReadOnly(bool inReadOnlyFlag)
+void Qt3DSFile::SetReadOnly(bool inReadOnlyFlag)
 {
 #ifdef USE_WIDE_VERSION
 
@@ -384,7 +384,7 @@ void CUICFile::SetReadOnly(bool inReadOnlyFlag)
 /**
  * Get the location of where this application resides.
  */
-CUICFile CUICFile::GetApplicationDirectory()
+Qt3DSFile Qt3DSFile::GetApplicationDirectory()
 {
     Q3DStudio::CString theModuleDir;
     wchar_t theModulePath[MAX_PATH] = { '\0' };
@@ -406,7 +406,7 @@ CUICFile CUICFile::GetApplicationDirectory()
  * Create a temporary file from where the system holds it's temp files.
  * @param inExtension the file extension that should be used.
  */
-CUICFile CUICFile::GetTemporaryFile(const Q3DStudio::CString &inExtension)
+Qt3DSFile Qt3DSFile::GetTemporaryFile(const Q3DStudio::CString &inExtension)
 {
     wchar_t theTempPath[MAX_PATH] = { '\0' };
     // char theTempFileName[MAX_PATH] = {'\0'};
@@ -430,10 +430,10 @@ CUICFile CUICFile::GetTemporaryFile(const Q3DStudio::CString &inExtension)
 
     s_TempFilePathList.insert(theTempFile);
 
-    return CUICFile(theTempFile);
+    return Qt3DSFile(theTempFile);
 }
 
-CUICFile CUICFile::GetTemporaryFile()
+Qt3DSFile Qt3DSFile::GetTemporaryFile()
 {
     wchar_t theTempPath[MAX_PATH] = { '\0' };
     wchar_t theTempFileName[MAX_PATH] = { '\0' };
@@ -445,17 +445,17 @@ CUICFile CUICFile::GetTemporaryFile()
     if (::GetTempFileName(theTempPath, L"~ui", 0, theTempFileName) != 0) {
         Q3DStudio::CString theTempFile(theTempFileName);
         s_TempFilePathList.insert(theTempFile);
-        return CUICFile(theTempFile);
+        return Qt3DSFile(theTempFile);
     }
     // return "" if the system fails us.
-    return CUICFile("");
+    return Qt3DSFile("");
 }
 
 //=============================================================================
 /**
  * Get the URL representing this file.
  */
-CURL CUICFile::GetURL() const
+CURL Qt3DSFile::GetURL() const
 {
     Q3DStudio::CString thePath(m_Path);
 
@@ -464,7 +464,7 @@ CURL CUICFile::GetURL() const
         if (thePath.Find(CURRENT_DIR) == 0)
             thePath.Delete(0, CURRENT_DIR.Length());
 
-        thePath.Insert(0, CUICFile::GetApplicationDirectory().GetAbsolutePosixPath());
+        thePath.Insert(0, Qt3DSFile::GetApplicationDirectory().GetAbsolutePosixPath());
     }
 
     return CURL(thePath);
@@ -475,7 +475,7 @@ CURL CUICFile::GetURL() const
  * Request the filesystem to open this file in whatever manner it chooses with
  * the associated application.
  */
-void CUICFile::Execute() const
+void Qt3DSFile::Execute() const
 {
     Q3DStudio::CString sFile = GetAbsolutePath();
 
@@ -493,7 +493,7 @@ void CUICFile::Execute() const
 /**
  * Combine the file and relative path together into another file.
  */
-CUICFile CUICFile::Combine(const CUICFile &inBasePath, const Q3DStudio::CString &inRelativePath)
+Qt3DSFile Qt3DSFile::Combine(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inRelativePath)
 {
     Q3DStudio::CString theFullPath;
 
@@ -530,7 +530,7 @@ CUICFile CUICFile::Combine(const CUICFile &inBasePath, const Q3DStudio::CString 
  * Get a file handle for this file that can be used for reading.
  * The handle must be closed with CloseHandle when finished.
  */
-HANDLE CUICFile::OpenFileReadHandle() const
+HANDLE Qt3DSFile::OpenFileReadHandle() const
 {
 #ifdef USE_WIDE_VERSION
 
@@ -550,7 +550,7 @@ HANDLE CUICFile::OpenFileReadHandle() const
  * Get a file handle for this file that can be used for writing.
  * The handle must be closed with CloseHandle when finished.
  */
-HANDLE CUICFile::OpenFileWriteHandle() const
+HANDLE Qt3DSFile::OpenFileWriteHandle() const
 {
 #ifdef USE_WIDE_VERSION
 
@@ -571,7 +571,7 @@ HANDLE CUICFile::OpenFileWriteHandle() const
  *	This would only clear the temp files that were created during the current program session,
  *	and not any previous files created by anything prior to this session.
  */
-void CUICFile::ClearCurrentTempCache()
+void Qt3DSFile::ClearCurrentTempCache()
 {
     TFilePathListIterator theTempFileIterator;
 
@@ -585,7 +585,7 @@ void CUICFile::ClearCurrentTempCache()
     }
 }
 
-void CUICFile::AddTempFile(const Q3DStudio::CString &inFile)
+void Qt3DSFile::AddTempFile(const Q3DStudio::CString &inFile)
 {
     s_TempFilePathList.insert(inFile);
 }
@@ -597,7 +597,7 @@ void CUICFile::AddTempFile(const Q3DStudio::CString &inFile)
  *  @param inPath path to check
  *  @return bool true to indicate this is a relative path
  */
-bool CUICFile::IsPathRelative(const Q3DStudio::CString &inPath)
+bool Qt3DSFile::IsPathRelative(const Q3DStudio::CString &inPath)
 {
     bool theIsRelative = false;
 
@@ -616,7 +616,7 @@ bool CUICFile::IsPathRelative(const Q3DStudio::CString &inPath)
  * @param inStat stat struct to fill
  * @return true if file stats are successfully obtained
  */
-bool CUICFile::GetFileStat(struct _stat *inStat) const
+bool Qt3DSFile::GetFileStat(struct _stat *inStat) const
 {
     return ::_wstat(m_Path, inStat) == 0;
 }

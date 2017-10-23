@@ -1212,7 +1212,7 @@ namespace render {
         QT3DSU32 maxInputSlot = 0;
 
         // copy data
-        UICBASE_FOREACH(idx, attribs.size())
+        QT3DS_FOREACH(idx, attribs.size())
         {
             entryRef[idx].m_AttribName = m_StringTable->RegisterStr(attribs.mData[idx].m_Name);
             entryRef[idx].m_Normalize = 0;
@@ -1610,7 +1610,7 @@ namespace render {
 
                 // fill in data
                 QT3DSU32 count = 0;
-                UICBASE_FOREACH(idx, numAttribs)
+                QT3DS_FOREACH(idx, numAttribs)
                 {
                     GLint size = 0;
                     GLenum glType;
@@ -1645,7 +1645,7 @@ namespace render {
                     PtrAtOffset<NVRenderBackendShaderInputEntryGL>(newMem, shaderInputSize,
                                                                    entrySize);
                 // fill data
-                UICBASE_FOREACH(idx, count)
+                QT3DS_FOREACH(idx, count)
                 {
                     entryRef[idx].m_AttribName = tempShaderInputEntry[idx].m_AttribName;
                     entryRef[idx].m_AttribLocation = tempShaderInputEntry[idx].m_AttribLocation;

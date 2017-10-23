@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMSIGNALSYSTEMH
-#define UICDMSIGNALSYSTEMH
+#ifndef QT3DSDM_SIGNAL_SYSTEM_H
+#define QT3DSDM_SIGNAL_SYSTEM_H
 #include <functional>
 #include "Qt3DSDMSignals.h"
 

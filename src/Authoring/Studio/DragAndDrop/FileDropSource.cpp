@@ -96,7 +96,7 @@ CFileDropSource::CFileDropSource(long inFlavor, void *inData, unsigned long inSi
     , m_File("")
 {
     // Pull out all of the SDropItemData and build a file.
-    m_File = *(CUICFile *)inData;
+    m_File = *(Qt3DSFile *)inData;
     m_ObjectType =
         Q3DStudio::ImportUtils::GetObjectFileTypeForFile(m_File.GetAbsolutePath()).m_ObjectType;
 }

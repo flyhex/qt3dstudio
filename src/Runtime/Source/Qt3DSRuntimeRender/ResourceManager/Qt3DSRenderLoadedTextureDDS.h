@@ -47,7 +47,7 @@ namespace render {
             always use NVHHDDSAlloc/NVHHDDSAllocData/NVHHDDSFree to manage them properly.
     */
 
-    struct UICDDSImage
+    struct Qt3DSDDSImage
     {
         /** Width of the overall texture in texels */
         int width;

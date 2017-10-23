@@ -44,12 +44,12 @@ namespace render {
     // set to 1
     struct SSubPresentationHelper
     {
-        IUICRenderContext &m_RenderContext;
+        IQt3DSRenderContext &m_RenderContext;
         SWindowDimensions m_PreviousPresentationDimensions;
 
         bool m_WasInSubPresentation;
 
-        SSubPresentationHelper(IUICRenderContext &inContext,
+        SSubPresentationHelper(IQt3DSRenderContext &inContext,
                                const SWindowDimensions &inPresDimensions)
             : m_RenderContext(inContext)
             , m_PreviousPresentationDimensions(inContext.GetCurrentPresentationDimensions())

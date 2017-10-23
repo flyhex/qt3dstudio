@@ -75,7 +75,7 @@ Q_SIGNALS:
 
 
 protected:
-    // UICDM callbacks
+    // DataModel callbacks
     virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                                const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
     virtual void OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
@@ -99,7 +99,7 @@ private:
     SlideModel *m_SlidesModel = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_Connections; /// connections to the UICDM
+        m_Connections; /// connections to the DataModel
     typedef std::unordered_map<int, int> TIntIntMap;
     // We need to remember which slide we were on when we entered the master slide.
     // Then, when the users leave the master slide we can go back to roughly the same

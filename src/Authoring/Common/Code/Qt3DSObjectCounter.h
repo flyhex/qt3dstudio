@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef __UICOBJECTCOUNTER_H__
-#define __UICOBJECTCOUNTER_H__
+#ifndef __QT3DS_OBJECTCOUNTER_H__
+#define __QT3DS_OBJECTCOUNTER_H__
 
 //==============================================================================
 //	Includes
@@ -42,12 +42,12 @@
 //==============================================================================
 //	Forwards
 //==============================================================================
-class UICObjectCounter;
+class Qt3DSObjectCounter;
 
 //==============================================================================
 //	Typedefs
 //==============================================================================
-typedef std::vector<UICObjectCounter *> TObjectCounterTracker;
+typedef std::vector<Qt3DSObjectCounter *> TObjectCounterTracker;
 
 //==============================================================================
 //	Constants
@@ -56,10 +56,10 @@ typedef std::vector<UICObjectCounter *> TObjectCounterTracker;
 // If defined, track the object counts
 #ifdef TRACK_OBJECT_COUNTS
 
-#define DEFINE_OBJECT_COUNTER(classname) static UICObjectCounter s_ObjectCounter##classname;
+#define DEFINE_OBJECT_COUNTER(classname) static Qt3DSObjectCounter s_ObjectCounter##classname;
 
 #define IMPLEMENT_OBJECT_COUNTER(classname)                                                        \
-    UICObjectCounter classname::s_ObjectCounter##classname(#classname, sizeof(classname));
+    Qt3DSObjectCounter classname::s_ObjectCounter##classname(#classname, sizeof(classname));
 
 #define ADDTO_OBJECT_COUNTER(classname) classname::s_ObjectCounter##classname.Add();
 
@@ -101,7 +101,7 @@ typedef std::vector<UICObjectCounter *> TObjectCounterTracker;
 
 //==============================================================================
 /**
- *	@class	UICObjectCounter
+ *	@class	Qt3DSObjectCounter
  *	@brief	This class is used to track that object have been released.
  *
  *	Use the macros to make the feature easy.
@@ -110,7 +110,7 @@ typedef std::vector<UICObjectCounter *> TObjectCounterTracker;
  *	is destructed. When the static variable is destroyed, object counts are
  *	dumped out to the debugger.
  */
-class UICObjectCounter
+class Qt3DSObjectCounter
 {
     //==============================================================================
     //	Enumerations
@@ -133,7 +133,7 @@ private:
     //==============================================================================
 
 public:
-    UICObjectCounter(const char *inName, long inClassSize)
+    Qt3DSObjectCounter(const char *inName, long inClassSize)
         : m_ObjectCount(0)
         , m_ObjectSize(inClassSize)
     {
@@ -143,7 +143,7 @@ public:
         s_ObjectVector.push_back(this);
     }
 
-    ~UICObjectCounter()
+    ~Qt3DSObjectCounter()
     {
         if (m_ObjectCount > 0) {
 #ifdef WIN32
@@ -175,4 +175,4 @@ public:
     void Remove() { m_ObjectCount--; };
 };
 
-#endif // #ifndef __UICOBJECTCOUNTER_H__
+#endif // #ifndef __QT3DS_OBJECTCOUNTER_H__

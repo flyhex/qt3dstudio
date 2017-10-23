@@ -57,13 +57,13 @@ bool IsNotUIPFile(const CFilePath &inFile)
     return false;
 }
 
-using namespace UICDM;
+using namespace qt3dsdm;
 typedef map<Q3DStudio::CFilePath, vector<QT3DSU32>> TMeshFileToIdMap;
 
-void ScanChildrenForSourcepath(UICDM::IDOMReader &inReader, TMeshFileToIdMap &inMap,
+void ScanChildrenForSourcepath(qt3dsdm::IDOMReader &inReader, TMeshFileToIdMap &inMap,
                                const CFilePath &inProjectDirectory)
 {
-    UICDM::IDOMReader::Scope elemScope(inReader);
+    qt3dsdm::IDOMReader::Scope elemScope(inReader);
     const wchar_t *sourcePathAtt = NULL;
     if (inReader.UnregisteredAtt(L"sourcepath", sourcePathAtt)) {
         if (sourcePathAtt && *sourcePathAtt) {
@@ -94,28 +94,28 @@ void FindMeshFiles(const CFilePath &inUIPPath, TMeshFileToIdMap &inMeshMap,
                    const CFilePath &inProjectDirectory)
 {
     qCInfo(qt3ds::TRACE_INFO) << "Scanning file " << inUIPPath.GetCharStar() << " for mesh files";
-    std::shared_ptr<UICDM::IStringTable> theTable(UICDM::IStringTable::CreateStringTable());
-    std::shared_ptr<UICDM::IDOMFactory> theFactory(
-        UICDM::IDOMFactory::CreateDOMFactory(theTable));
+    std::shared_ptr<qt3dsdm::IStringTable> theTable(qt3dsdm::IStringTable::CreateStringTable());
+    std::shared_ptr<qt3dsdm::IDOMFactory> theFactory(
+        qt3dsdm::IDOMFactory::CreateDOMFactory(theTable));
     CFileSeekableIOStream theStream(inUIPPath, FileOpenFlagValues::Open);
     if (!theStream.IsOpen()) {
         QT3DS_ASSERT(false);
         return;
     }
 
-    UICDM::SDOMElement *theElement = CDOMSerializer::Read(*theFactory, theStream);
+    qt3dsdm::SDOMElement *theElement = CDOMSerializer::Read(*theFactory, theStream);
     if (!theElement) {
         QT3DS_ASSERT(false);
         return;
     }
-    std::shared_ptr<UICDM::IDOMReader> theReader(
-        UICDM::IDOMReader::CreateDOMReader(*theElement, theTable, theFactory));
+    std::shared_ptr<qt3dsdm::IDOMReader> theReader(
+        qt3dsdm::IDOMReader::CreateDOMReader(*theElement, theTable, theFactory));
     if (!theReader->MoveToFirstChild(L"Project")) {
         QT3DS_ASSERT(false);
         return;
     }
     {
-        UICDM::IDOMReader::Scope projectScope(*theReader);
+        qt3dsdm::IDOMReader::Scope projectScope(*theReader);
         if (!theReader->MoveToFirstChild(L"Graph")) {
             QT3DS_ASSERT(false);
             return;
@@ -123,7 +123,7 @@ void FindMeshFiles(const CFilePath &inUIPPath, TMeshFileToIdMap &inMeshMap,
         ScanChildrenForSourcepath(*theReader, inMeshMap, inProjectDirectory);
     }
     {
-        UICDM::IDOMReader::Scope projectScope(*theReader);
+        qt3dsdm::IDOMReader::Scope projectScope(*theReader);
         if (theReader->MoveToFirstChild(L"Logic"))
             ScanChildrenForSourcepath(*theReader, inMeshMap, inProjectDirectory);
     }

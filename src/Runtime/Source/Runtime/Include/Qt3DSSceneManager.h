@@ -49,7 +49,7 @@ namespace foundation {
 
 namespace qt3ds {
 namespace render {
-    class IUICRenderContextCore;
+    class IQt3DSRenderContextCore;
     class ILoadedBuffer;
 }
 }

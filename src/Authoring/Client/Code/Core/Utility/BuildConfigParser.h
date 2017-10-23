@@ -207,7 +207,7 @@ public:
     virtual ~CBuildConfigParser();
 
 public:
-    bool LoadConfigurations(CUICFile &inDirectory);
+    bool LoadConfigurations(Qt3DSFile &inDirectory);
     CString GetErrorMessage() { return CString::fromQString(m_ErrorMessage); }
 
 protected:

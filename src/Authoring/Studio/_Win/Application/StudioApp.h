@@ -184,7 +184,7 @@ public:
     void PlaybackRewind();
     void OnRevert();
     bool CanRevert();
-    void OnFileOpenRecent(const CUICFile &inDocument);
+    void OnFileOpenRecent(const Qt3DSFile &inDocument);
     bool PerformSavePrompt();
     void PlaybackStop();
     void AdvanceTime();
@@ -197,8 +197,8 @@ public:
     bool OnSave();
     bool OnSaveAs();
     bool OnSaveCopy();
-    bool OnLoadDocument(const CUICFile &inDocument, bool inShowStartupDialogOnError = true);
-    void OnLoadDocumentCatcher(const CUICFile &inLocation);
+    bool OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError = true);
+    void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
     void OnFileNew();
     bool IsAuthorZoom();

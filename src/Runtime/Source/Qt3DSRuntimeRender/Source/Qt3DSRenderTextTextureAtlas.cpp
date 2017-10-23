@@ -42,7 +42,7 @@ namespace {
 struct STextTextureAtlas : public ITextTextureAtlas
 {
     static const QT3DSI32 TEXTURE_ATLAS_DIM =
-        256; // if you change this you need to adjust UICOnscreenTextRenderer size as well
+        256; // if you change this you need to adjust Qt3DSOnscreenTextRenderer size as well
 
     NVFoundationBase &m_Foundation;
     volatile QT3DSI32 mRefCount;
@@ -88,7 +88,7 @@ struct STextTextureAtlas : public ITextTextureAtlas
             if (m_textureAtlas && count) {
                 m_TextureAtlasInitialized = true;
                 m_textureAtlas->addRef();
-                // if you change the size you need to adjust UICOnscreenTextRenderer too
+                // if you change the size you need to adjust Qt3DSOnscreenTextRenderer too
                 if (m_RenderContext->GetRenderContextType() == NVRenderContextValues::GLES2) {
                     m_textureAtlas->SetTextureData(NVDataRef<QT3DSU8>(), 0, TEXTURE_ATLAS_DIM,
                                                TEXTURE_ATLAS_DIM, NVRenderTextureFormats::RGBA8);

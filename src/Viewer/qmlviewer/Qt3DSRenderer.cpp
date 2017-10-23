@@ -150,7 +150,7 @@ void Q3DSRenderer::draw()
 
 bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
 {
-    m_runtime = &Q3DSViewerApp::Create(nullptr, new CUICAudioPlayerImpl());
+    m_runtime = &Q3DSViewerApp::Create(nullptr, new Qt3DSAudioPlayerImpl());
     Q_ASSERT(m_runtime);
 
     int theWidth = inFbo->width();

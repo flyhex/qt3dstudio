@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTMESHH
-#define UICIMPORTMESHH
+#ifndef QT3DS_IMPORT_MESH_H
+#define QT3DS_IMPORT_MESH_H
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSDataRef.h"
 #include "render/Qt3DSRenderBaseTypes.h"

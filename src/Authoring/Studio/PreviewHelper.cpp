@@ -116,7 +116,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
                                       EExecMode inMode, RemoteDeploymentSender *project)
 {
     bool theUsingTempFile;
-    CUICFile theDocument = GetDocumentFile(theUsingTempFile);
+    Qt3DSFile theDocument = GetDocumentFile(theUsingTempFile);
     CCore *theCore = g_StudioApp.GetCore();
     try {
         if (theCore->GetDoc()->IsModified()) {
@@ -150,7 +150,7 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
     } else if (inMode == EXECMODE_PREVIEW
                && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
         // Quick Preview on PC without going via NANT
-        CFilePath theCurrentPath(CUICFile::GetApplicationDirectory().GetAbsolutePath());
+        CFilePath theCurrentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
         CFilePath theViewerDir = CFilePath::fromQString(QApplication::applicationDirPath());
         if (!theViewerDir.IsDirectory()) {
             // theMainDir = theCurrentPath.GetDirectory().GetDirectory();
@@ -281,10 +281,10 @@ bool CPreviewHelper::ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedC
  *	@param	outUsingTempFile	if temp file if used
  *	@return the document file to be previewed or conditioned
  */
-CUICFile CPreviewHelper::GetDocumentFile(bool &outUsingTempFile)
+Qt3DSFile CPreviewHelper::GetDocumentFile(bool &outUsingTempFile)
 {
-    CUICFile theDocument = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
-    CUICFile theResult("");
+    Qt3DSFile theDocument = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
+    Qt3DSFile theResult("");
     theResult = theDocument;
     outUsingTempFile = false;
     return theResult;

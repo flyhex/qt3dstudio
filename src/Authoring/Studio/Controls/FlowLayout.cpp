@@ -360,7 +360,7 @@ void CFlowLayout::SuspendRecalcLayout(bool inSuspendFlag)
  */
 void CFlowLayout::RecalcLayout()
 {
-    UICPROFILE(RecalcLayout);
+    QT3DS_PROFILE(RecalcLayout);
 
     // if you need to add lots of children items to this control, do this:
     // SuspendRecalcLayout( true ); AddLotsOFItems( ); SuspendRecalcLayout( false );

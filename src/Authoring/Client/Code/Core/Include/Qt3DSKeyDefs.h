@@ -30,10 +30,10 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef __UICKEYDEFS_H__
-#define __UICKEYDEFS_H__
+#ifndef __QT3DS_KEYDEFS_H__
+#define __QT3DS_KEYDEFS_H__
 
-enum EUICKeyDefines {
+enum QT3DSKeyDefines {
     // We start this at 0x30 so all alpha-numeric keyCodes will match Studio 1.5 Windows virtual key
     // codes
     QT3DS_KEY_0 = 0x30, // 0
@@ -162,4 +162,4 @@ enum EUICKeyDefines {
     QT3DS_KEY_SINGLEQUOTE_DOUBLEQUOTE, //
 };
 
-#endif // #ifndef __UICKEYDEFS_H__
+#endif // #ifndef __QT3DS_KEYDEFS_H__

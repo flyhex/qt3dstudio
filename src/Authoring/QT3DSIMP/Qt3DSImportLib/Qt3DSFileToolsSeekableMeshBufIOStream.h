@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICFILETOOLSSEEKABLEMESHBUFIOSTREAM
-#define UICFILETOOLSSEEKABLEMESHBUFIOSTREAM
+#ifndef QT3DS_FILETOOLSSEEKABLEMESHBUFIOSTREAM
+#define QT3DS_FILETOOLSSEEKABLEMESHBUFIOSTREAM
 #include "foundation/IOStreams.h"
 
 namespace Q3DStudio {
@@ -36,13 +36,13 @@ struct SFile;
 }
 
 namespace qt3dsimp {
-class CUICFileToolsSeekableMeshBufIOStream : public qt3ds::foundation::ISeekableIOStream
+class Qt3DSFileToolsSeekableMeshBufIOStream : public qt3ds::foundation::ISeekableIOStream
 {
 protected:
     std::shared_ptr<Q3DStudio::SFile> m_File;
 
 public:
-    CUICFileToolsSeekableMeshBufIOStream(std::shared_ptr<Q3DStudio::SFile> inFile)
+    Qt3DSFileToolsSeekableMeshBufIOStream(std::shared_ptr<Q3DStudio::SFile> inFile)
         : m_File(inFile)
     {
     }

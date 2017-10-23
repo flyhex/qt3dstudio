@@ -73,7 +73,7 @@ struct SRendererImpl : public IStudioRenderer,
 {
     typedef eastl::vector<Option<SEditCameraPersistentInformation>> TEditCameraInfoList;
     std::shared_ptr<CWGLRenderContext> m_RenderContext;
-    NVScopedRefCounted<IUICRenderContext> m_UICContext;
+    NVScopedRefCounted<IQt3DSRenderContext> m_Context;
     QRect m_Rect;
     CDispatch &m_Dispatch;
     CDoc &m_Doc;
@@ -135,46 +135,46 @@ struct SRendererImpl : public IStudioRenderer,
 
     ITextRenderer *GetTextRenderer() override
     {
-        if (m_UICContext.mPtr)
-            return m_UICContext->GetTextRenderer();
+        if (m_Context.mPtr)
+            return m_Context->GetTextRenderer();
         return NULL;
     }
     // The buffer manager may not be available
     IBufferManager *GetBufferManager() override
     {
-        if (m_UICContext.mPtr)
-            return &m_UICContext->GetBufferManager();
+        if (m_Context.mPtr)
+            return &m_Context->GetBufferManager();
         return NULL;
     }
 
     IPathManager *GetPathManager() override
     {
-        if (m_UICContext.mPtr)
-            return &m_UICContext->GetPathManager();
+        if (m_Context.mPtr)
+            return &m_Context->GetPathManager();
         return NULL;
     }
 
     qt3ds::foundation::IStringTable *GetRenderStringTable() override
     {
-        if (m_UICContext.mPtr)
-            return &m_UICContext->GetStringTable();
+        if (m_Context.mPtr)
+            return &m_Context->GetStringTable();
         return NULL;
     }
 
-    bool IsInitialized() override { return m_UICContext.mPtr != NULL; }
+    bool IsInitialized() override { return m_Context.mPtr != NULL; }
 
     void Initialize(QWidget *inWindow) override
     {
         if (m_Closed)
             return;
         QT3DS_ASSERT(!m_RenderContext);
-        QT3DS_ASSERT(m_UICContext.mPtr == NULL);
+        QT3DS_ASSERT(m_Context.mPtr == NULL);
         try {
             m_RenderContext = std::make_shared<CWGLRenderContext>(inWindow);
 
             Q3DStudio::CString theResourcePath = Q3DStudio::CString::fromQString(resourcePath());
-            NVScopedRefCounted<qt3ds::render::IUICRenderContextCore> theCore =
-                qt3ds::render::IUICRenderContextCore::Create(
+            NVScopedRefCounted<qt3ds::render::IQt3DSRenderContextCore> theCore =
+                qt3ds::render::IQt3DSRenderContextCore::Create(
                     m_RenderContext->GetRenderContext().GetFoundation(),
                     m_RenderContext->GetRenderContext().GetStringTable());
 
@@ -185,19 +185,19 @@ struct SRendererImpl : public IStudioRenderer,
                             m_RenderContext->GetRenderContext().GetStringTable()));
             theCore->SetTextRendererCore(theTextRenderer);
 
-            m_UICContext = theCore->CreateRenderContext(
+            m_Context = theCore->CreateRenderContext(
                 m_RenderContext->GetRenderContext(),
                 m_RenderContext->GetRenderContext().GetStringTable().RegisterStr(
                     theResourcePath.c_str()));
 
             // Allow the artist to interact with the top level objects alone.
-            m_UICContext->GetRenderer().PickRenderPlugins(false);
+            m_Context->GetRenderer().PickRenderPlugins(false);
 
             SetupTextRenderer();
 
-            m_UICContext->SetAuthoringMode(true);
+            m_Context->SetAuthoringMode(true);
 
-            InitializePointerTags(m_UICContext->GetStringTable());
+            InitializePointerTags(m_Context->GetStringTable());
             SetViewRect(m_Rect);
 #ifdef KDAB_TEMPORARILY_REMOVE
             // KDAB_TODO the below call asserts on windows
@@ -209,7 +209,7 @@ struct SRendererImpl : public IStudioRenderer,
             // Notify that renderer has been initialized
             m_Dispatch.FireOnRendererInitialized();
         } catch (...) {
-            m_UICContext = nullptr;
+            m_Context = nullptr;
             m_RenderContext = std::shared_ptr<CWGLRenderContext>();
             throw;
         }
@@ -374,7 +374,7 @@ struct SRendererImpl : public IStudioRenderer,
                 for (SNode *theChild = theEditLayer->m_FirstChild; theChild;
                      theChild = theChild->m_NextSibling) {
                     qt3ds::NVBounds3 childBounds = theChild->GetBounds(
-                        m_UICContext->GetBufferManager(), m_UICContext->GetPathManager());
+                        m_Context->GetBufferManager(), m_Context->GetPathManager());
                     if (childBounds.isEmpty() == false) {
                         childBounds.transform(theChild->m_GlobalTransform);
                         theBounds.include(childBounds);
@@ -383,7 +383,7 @@ struct SRendererImpl : public IStudioRenderer,
             }
         } else
             theBounds =
-                theNode.GetBounds(m_UICContext->GetBufferManager(), m_UICContext->GetPathManager());
+                theNode.GetBounds(m_Context->GetBufferManager(), m_Context->GetPathManager());
         QT3DSVec3 theCenter = theNode.m_GlobalTransform.transform(theBounds.getCenter());
         // Center the edit camera so that it points directly at the bounds center point
         m_Translation->m_EditCameraInfo.m_Position = theCenter;
@@ -405,7 +405,7 @@ struct SRendererImpl : public IStudioRenderer,
     {
         m_Closed = true;
         m_Translation = std::shared_ptr<STranslation>();
-        m_UICContext = nullptr;
+        m_Context = nullptr;
         m_RenderContext = std::shared_ptr<CWGLRenderContext>();
     }
 
@@ -488,9 +488,9 @@ struct SRendererImpl : public IStudioRenderer,
     void CreateTranslator()
     {
         if (!m_Translation) {
-            if (m_UICContext.mPtr) {
+            if (m_Context.mPtr) {
                 m_Translation = std::make_shared<STranslation>(std::ref(*this),
-                                                                 std::ref(*m_UICContext.mPtr));
+                                                                 std::ref(*m_Context.mPtr));
                 m_Translation->m_EditLightEnabled = CStudioPreferences::GetEditViewFillMode();
                 ApplyEditCameraIndex();
                 SetTranslationViewport();
@@ -500,17 +500,17 @@ struct SRendererImpl : public IStudioRenderer,
 
     void SetupTextRenderer()
     {
-        if (m_UICContext.mPtr && m_UICContext->GetTextRenderer()) {
-            m_UICContext->GetTextRenderer()->ClearProjectFontDirectories();
+        if (m_Context.mPtr && m_Context->GetTextRenderer()) {
+            m_Context->GetTextRenderer()->ClearProjectFontDirectories();
             Q3DStudio::CString theDocDir = m_Doc.GetDocumentDirectory();
             if (theDocDir.Length()) {
                 // Add the installed font folders from the res dir.
                 Q3DStudio::CString thePath(Q3DStudio::CString::fromQString(
                                                resourcePath() + QStringLiteral("/Font")));
-                m_UICContext->GetTextRenderer()->AddSystemFontDirectory(
-                    m_UICContext->GetStringTable().RegisterStr(thePath.c_str()));
-                m_UICContext->GetTextRenderer()->AddProjectFontDirectory(
-                    m_UICContext->GetStringTable().RegisterStr(theDocDir.c_str()));
+                m_Context->GetTextRenderer()->AddSystemFontDirectory(
+                    m_Context->GetStringTable().RegisterStr(thePath.c_str()));
+                m_Context->GetTextRenderer()->AddProjectFontDirectory(
+                    m_Context->GetStringTable().RegisterStr(theDocDir.c_str()));
             }
         }
     }
@@ -583,7 +583,7 @@ struct SRendererImpl : public IStudioRenderer,
                 qt3dsdm::Qt3DSDMInstanceHandle theHandle(m_PickResult.getData<Qt3DSDMInstanceHandle>());
 
                 if (theHandle != m_Doc.GetSelectedInstance())
-                    m_Doc.SelectUICDMObject(theHandle);
+                    m_Doc.SelectDataModelObject(theHandle);
             } else if (m_PickResult.getType() == StudioPickValueTypes::Guide)
                 m_Doc.NotifySelectionChanged(m_PickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>());
             else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
@@ -591,7 +591,7 @@ struct SRendererImpl : public IStudioRenderer,
                 qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle =
                     m_Translation->GetAnchorPoint(thePick);
                 if (theAnchorHandle.Valid() && theAnchorHandle != m_Doc.GetSelectedInstance()) {
-                    m_Doc.SelectUICDMObject(theAnchorHandle);
+                    m_Doc.SelectDataModelObject(theAnchorHandle);
                 }
             }
             RequestRender();
@@ -836,13 +836,13 @@ struct SRendererImpl : public IStudioRenderer,
             m_RenderContext->EndRender();
 
             if (theResult.getType() == StudioPickValueTypes::Instance)
-                m_Doc.SelectAndNavigateToUICDMObject(theResult.getData<Qt3DSDMInstanceHandle>());
+                m_Doc.SelectAndNavigateToDataModelObject(theResult.getData<Qt3DSDMInstanceHandle>());
             else if (theResult.getType() == StudioPickValueTypes::Path) {
                 SPathPick thePickValue = theResult.getData<SPathPick>();
                 qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle =
                     m_Translation->GetAnchorPoint(thePickValue);
                 if (theAnchorHandle.Valid() && theAnchorHandle != m_Doc.GetSelectedInstance()) {
-                    m_Doc.SelectUICDMObject(theAnchorHandle);
+                    m_Doc.SelectDataModelObject(theAnchorHandle);
                 }
             }
         }

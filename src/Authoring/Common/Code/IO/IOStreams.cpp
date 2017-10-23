@@ -116,9 +116,9 @@ void CInStream::GetURL(wchar_t *ioURLString, const long &inSize)
         // the job...
 
         // the stuff that dint work:
-        // theCharCount = _aswprintf( ioURLString, inSize, _UIC( "%s" ), theString );
+        // theCharCount = _aswprintf( ioURLString, inSize, _LSTR( "%s" ), theString );
         // ... that's even when you call the swprintf directly...
-        // theCharCount = swprintf(ioURLString, inSize, _UIC( "%s" ), (unsigned short *)theString );
+        // theCharCount = swprintf(ioURLString, inSize, _LSTR( "%s" ), (unsigned short *)theString );
 
         // the sloppy solution
         for (long theCharCount = 0; theCharCount < theEndCount; ++theCharCount) {
@@ -199,9 +199,9 @@ void COutStream::GetURL(wchar_t *ioURLString, const long &inSize)
 {
     if (inSize >= m_URLString.Length())
 #ifdef WIN32
-        _aswprintf(ioURLString, inSize, _UIC("%ls"), static_cast<const wchar_t *>(m_URLString));
+        _aswprintf(ioURLString, inSize, _LSTR("%ls"), static_cast<const wchar_t *>(m_URLString));
 #else
-        swprintf(ioURLString, inSize, _UIC("%ls"), static_cast<const wchar_t *>(m_URLString));
+        swprintf(ioURLString, inSize, _LSTR("%ls"), static_cast<const wchar_t *>(m_URLString));
 #endif
     else
         throw CIOException();

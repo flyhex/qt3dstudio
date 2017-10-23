@@ -78,7 +78,7 @@ protected:
     static bool ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedConfig,
                                 const Q3DStudio::CString &inDocumentFile,
                                 const Q3DStudio::CString &inVariable, Q3DStudio::CString &outValue);
-    static CUICFile GetDocumentFile(bool &outUsingTempFile);
+    static Qt3DSFile GetDocumentFile(bool &outUsingTempFile);
     static Q3DStudio::CString GetLaunchFile(const Q3DStudio::CString &inDocFile);
 };
 

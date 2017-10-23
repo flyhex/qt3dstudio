@@ -73,7 +73,7 @@ Q3DStudio::CString FormatTimeString(long inTimeMS)
     // Remainder is MS value
 
     // Format the string
-    theTimeString.Format(_UIC("%d:%0.2d.%0.2d"), theMM, theSS, theTimeMS / 10);
+    theTimeString.Format(_LSTR("%d:%0.2d.%0.2d"), theMM, theSS, theTimeMS / 10);
 
     // If the original time was negative, append the "-" to the front of the time string.
     if (theNegativeFlag) {

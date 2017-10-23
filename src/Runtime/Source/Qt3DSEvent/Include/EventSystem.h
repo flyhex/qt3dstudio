@@ -36,7 +36,7 @@
 namespace qt3ds {
 namespace evt {
 
-    typedef TUICEventSystemStr TEventStr;
+    typedef Qt3DSEventSystemStr TEventStr;
 
     // Factory from the provider's perspective.
     class IEventFactory
@@ -44,13 +44,13 @@ namespace evt {
     protected:
         virtual ~IEventFactory() {}
     public:
-        virtual SUICEventSystemEvent &CreateEvent(int numData) = 0;
-        // Guaranteed to be at least 4K - sizeof(SUICEventSystemEvent)
+        virtual Qt3DSEventSystemEvent &CreateEvent(int numData) = 0;
+        // Guaranteed to be at least 4K - sizeof(Qt3DSEventSystemEvent)
         virtual size_t GetMaxNumEventData() = 0;
         // Guaranteed to be at least 4K
         virtual size_t GetMaxStrLength() = 0;
 
-        virtual SUICEventSystemRegisteredStr RegisterStr(TEventStr inSrc) = 0;
+        virtual Qt3DSEventSystemRegisteredStr RegisterStr(TEventStr inSrc) = 0;
         // Null terminates if strlen(inSrc) > getMaxStrLength
         virtual TEventStr AllocateStr(TEventStr inSrc) = 0;
         // Returns null if inLength > getMaxStrLength
@@ -63,7 +63,7 @@ namespace evt {
         virtual ~IEventProvider() {}
     public:
         // Return the next N events, placed into the event buffer.
-        virtual size_t GetNextEvents(IEventFactory &inFactory, SUICEventSystemEvent **outBuffer,
+        virtual size_t GetNextEvents(IEventFactory &inFactory, Qt3DSEventSystemEvent **outBuffer,
                                      size_t bufLen) = 0;
         virtual void Release() = 0;
     };

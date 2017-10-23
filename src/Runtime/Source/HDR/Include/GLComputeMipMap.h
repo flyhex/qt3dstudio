@@ -39,7 +39,6 @@
 #include "Qt3DSTypes.h"
 
 using namespace qt3ds::render;
-using namespace uic::render;
 
 class qt3ds::render::NVRenderContext;
 class qt3ds::render::NVRenderShaderProgram;

@@ -43,44 +43,44 @@
 #extern "C" {
 #endif
 
-enum EUICRenderPluginPropertyTypes {
-    EUICRenderPluginPropertyTypeNone = 0,
-    EUICRenderPluginPropertyTypeLong = 1,
-    EUICRenderPluginPropertyTypeFloat = 2,
-    EUICRenderPluginPropertyTypeCharPtr = 3,
+enum QT3DSRenderPluginPropertyTypes {
+    QT3DSRenderPluginPropertyTypeNone = 0,
+    QT3DSRenderPluginPropertyTypeLong = 1,
+    QT3DSRenderPluginPropertyTypeFloat = 2,
+    QT3DSRenderPluginPropertyTypeCharPtr = 3,
 };
 
-enum EUICRenderPluginDepthTypes {
-    EUICRenderPluginDepthTypeNoDepthBuffer = 0,
-    EUICRenderPluginDepthTypeDepth16, // 16 bit depth buffer
-    EUICRenderPluginDepthTypeDepth24, // 24 bit depth buffer
-    EUICRenderPluginDepthTypeDepth32, // 32 bit depth buffer
+enum QT3DSRenderPluginDepthTypes {
+    QT3DSRenderPluginDepthTypeNoDepthBuffer = 0,
+    QT3DSRenderPluginDepthTypeDepth16, // 16 bit depth buffer
+    QT3DSRenderPluginDepthTypeDepth24, // 24 bit depth buffer
+    QT3DSRenderPluginDepthTypeDepth32, // 32 bit depth buffer
 };
 
-enum EUICRenderPluginTextureTypes {
-    EUICRenderPluginTextureTypeNoTexture = 0,
-    EUICRenderPluginTextureTypeRGBA8, // 32 bit format
-    EUICRenderPluginTextureTypeRGB8, // 24 bit format
-    EUICRenderPluginTextureTypeRGB565, // 16 bit format
-    EUICRenderPluginTextureTypeRGBA5551, // 16 bit format
+enum QT3DSRenderPluginTextureTypes {
+    QT3DSRenderPluginTextureTypeNoTexture = 0,
+    QT3DSRenderPluginTextureTypeRGBA8, // 32 bit format
+    QT3DSRenderPluginTextureTypeRGB8, // 24 bit format
+    QT3DSRenderPluginTextureTypeRGB565, // 16 bit format
+    QT3DSRenderPluginTextureTypeRGBA5551, // 16 bit format
 };
 
-enum EUICRenderPluginColorClearState {
-    EUICRenderPluginColorClearStateClearIsOptional = 0,
-    EUICRenderPluginColorClearStateDoNotClear,
-    EUICRenderPluginColorClearStateAlwaysClear,
+enum QT3DSRenderPluginColorClearState {
+    QT3DSRenderPluginColorClearStateClearIsOptional = 0,
+    QT3DSRenderPluginColorClearStateDoNotClear,
+    QT3DSRenderPluginColorClearStateAlwaysClear,
 };
 
-enum EUICRenderPluginMSAALevel {
-    EUICRenderPluginMSAALevelNoMSAA = 0, // no MSAA, one also works.
-    EUICRenderPluginMSAALevelTwo = 2, // 2 samples
-    EUICRenderPluginMSAALevelFour = 4, // 4 samples
-    EUICRenderPluginMSAALevelEight = 8, // 8 samples
+enum QT3DSRenderPluginMSAALevel {
+    QT3DSRenderPluginMSAALevelNoMSAA = 0, // no MSAA, one also works.
+    QT3DSRenderPluginMSAALevelTwo = 2, // 2 samples
+    QT3DSRenderPluginMSAALevelFour = 4, // 4 samples
+    QT3DSRenderPluginMSAALevelEight = 8, // 8 samples
 };
 
-typedef long TUICBOOL;
-#define UICTRUE 1
-#define UICFALSE 0
+typedef long TBool;
+#define TTRUE 1
+#define TFALSE 0
 
 #define QT3DS_CURRENT_RENDER_PLUGIN_API_VERSION 2
 
@@ -91,7 +91,7 @@ typedef void *TRenderPluginClassPtr;
 typedef struct _RenderPluginPropertyUpdate
 {
     const char *m_PropName;
-    enum EUICRenderPluginPropertyTypes m_PropertyType;
+    enum QT3DSRenderPluginPropertyTypes m_PropertyType;
 
     // Is either a float or a long or a const char* depending on the property type.
     // for specify types of properties, example code would be:
@@ -105,22 +105,22 @@ typedef struct _RenderPluginSurfaceDescription
 {
     long m_Width;
     long m_Height;
-    enum EUICRenderPluginDepthTypes m_DepthBuffer;
-    enum EUICRenderPluginTextureTypes m_ColorBuffer;
-    TUICBOOL m_HasStencilBuffer;
-    EUICRenderPluginMSAALevel m_MSAALevel;
+    enum QT3DSRenderPluginDepthTypes m_DepthBuffer;
+    enum QT3DSRenderPluginTextureTypes m_ColorBuffer;
+    TBool m_HasStencilBuffer;
+    QT3DSRenderPluginMSAALevel m_MSAALevel;
 } TRenderPluginSurfaceDescription;
 
-typedef struct _UICVec2
+typedef struct _TVec2
 {
     float x;
     float y;
-} TUICVec2;
+} TVec2;
 
 typedef struct _NeedsRenderResult
 {
-    TUICBOOL HasChangedSinceLastFrame;
-    TUICBOOL HasTransparency;
+    TBool HasChangedSinceLastFrame;
+    TBool HasTransparency;
 } TNeedsRenderResult;
 
 struct lua_State;
@@ -177,7 +177,7 @@ typedef void (*TUpdateInstanceFunction)(TRenderPluginClassPtr cls,
  */
 typedef TRenderPluginSurfaceDescription (*TSurfaceQueryFunction)(TRenderPluginClassPtr cls,
                                                                  TRenderPluginInstancePtr instance,
-                                                                 TUICVec2 presScaleFactor);
+                                                                 TVec2 presScaleFactor);
 
 /*
  *	Query used by the rendering system.  Should return true if the plugin will render something
@@ -197,7 +197,7 @@ typedef TRenderPluginSurfaceDescription (*TSurfaceQueryFunction)(TRenderPluginCl
 typedef TNeedsRenderResult (*TNeedsRenderFunction)(TRenderPluginClassPtr cls,
                                                    TRenderPluginInstancePtr instance,
                                                    TRenderPluginSurfaceDescription surface,
-                                                   TUICVec2 presScaleFactor);
+                                                   TVec2 presScaleFactor);
 
 /*
  *  Render plugin data.
@@ -222,8 +222,8 @@ typedef TNeedsRenderResult (*TNeedsRenderFunction)(TRenderPluginClassPtr cls,
  *	Required API function.
  */
 typedef void (*TRenderFunction)(TRenderPluginClassPtr cls, TRenderPluginInstancePtr instance,
-                                TRenderPluginSurfaceDescription surface, TUICVec2 presScaleFactor,
-                                EUICRenderPluginColorClearState inClearColorBuffer);
+                                TRenderPluginSurfaceDescription surface, TVec2 presScaleFactor,
+                                QT3DSRenderPluginColorClearState inClearColorBuffer);
 
 /*
  *	Pick - handle a mouse pick into the plugin.
@@ -231,8 +231,8 @@ typedef void (*TRenderFunction)(TRenderPluginClassPtr cls, TRenderPluginInstance
  *
  *	Option API function.
  */
-typedef TUICBOOL (*TPickFunction)(TRenderPluginClassPtr cls, TRenderPluginInstancePtr instance,
-                                  TUICVec2 inMouse, TUICVec2 inViewport);
+typedef TBool (*TPickFunction)(TRenderPluginClassPtr cls, TRenderPluginInstancePtr instance,
+                                  TVec2 inMouse, TVec2 inViewport);
 
 /*
  *	Release a given instance of the plugin.

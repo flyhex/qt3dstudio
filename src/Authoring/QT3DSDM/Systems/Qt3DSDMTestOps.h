@@ -27,10 +27,10 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICDMOPSH
-#define UICDMOPSH
+#ifndef QT3DSDM_OPS_H
+#define QT3DSDM_OPS_H
 
-namespace UICDM {
+namespace qt3dsdm {
 inline const TCharStr &GetPropertyName(const IDataCore &inModel, Qt3DSDMPropertyHandle inProperty)
 {
     return inModel.GetProperty(inProperty).m_Name;

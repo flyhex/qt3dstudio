@@ -124,19 +124,19 @@ namespace render {
         QT3DSMat44 m_LightView; ///< light view transform
     };
 
-    class UICShadowMap : public NVRefCounted
+    class Qt3DSShadowMap : public NVRefCounted
     {
         typedef nvvector<SShadowMapEntry> TShadowMapEntryList;
 
     public:
-        IUICRenderContext &m_UICContext;
+        IQt3DSRenderContext &m_Context;
         volatile QT3DSI32 mRefCount;
 
     public:
-        UICShadowMap(IUICRenderContext &inContext);
-        ~UICShadowMap();
+        Qt3DSShadowMap(IQt3DSRenderContext &inContext);
+        ~Qt3DSShadowMap();
 
-        QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_UICContext.GetAllocator())
+        QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Context.GetAllocator())
 
         /*
          * @brief Add a shadow map entry
@@ -172,7 +172,7 @@ namespace render {
          */
         QT3DSU32 GetShadowMapEntryCount() { return m_ShadowMapList.size(); }
 
-        static UICShadowMap *Create(IUICRenderContext &inContext);
+        static Qt3DSShadowMap *Create(IQt3DSRenderContext &inContext);
 
     private:
         TShadowMapEntryList m_ShadowMapList; ///< List of shadow map entries

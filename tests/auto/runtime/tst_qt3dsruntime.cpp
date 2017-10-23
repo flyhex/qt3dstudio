@@ -661,8 +661,8 @@ void tst_qt3dsruntime::runCustomShaderGeneratorTest(QSurfaceFormat format)
     Qt3DSRenderTestCustomMaterialGenerator *test =
         QT3DS_NEW(m_foundation->getAllocator(), Qt3DSRenderTestCustomMaterialGenerator);
 
-    test->initializeUICRenderer(format);
-    m_renderContext = &NVRenderContext::CreateGL(*m_foundation, test->uicRenderer()->GetContext()
+    test->initializeQt3DSRenderer(format);
+    m_renderContext = &NVRenderContext::CreateGL(*m_foundation, test->qt3dsRenderer()->GetContext()
                                                  .GetStringTable(), format);
 
     if (!test->isSupported(m_renderContext))
@@ -694,8 +694,8 @@ void tst_qt3dsruntime::testRenderEffectGenerator()
     Qt3DSRenderTestEffectGenerator *test =
         QT3DS_NEW(m_foundation->getAllocator(), Qt3DSRenderTestEffectGenerator);
 
-    test->initializeUICRenderer(format);
-    m_renderContext = &NVRenderContext::CreateGL(*m_foundation, test->uicRenderer()->GetContext()
+    test->initializeQt3DSRenderer(format);
+    m_renderContext = &NVRenderContext::CreateGL(*m_foundation, test->qt3dsRenderer()->GetContext()
                                                  .GetStringTable(), format);
 
     if (!test->isSupported(m_renderContext))

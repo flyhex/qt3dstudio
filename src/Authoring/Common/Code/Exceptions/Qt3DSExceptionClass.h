@@ -30,8 +30,8 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef __UICEXCEPTIONCLASS_H_
-#define __UICEXCEPTIONCLASS_H_
+#ifndef __QT3DS_EXCEPTION_CLASS_H_
+#define __QT3DS_EXCEPTION_CLASS_H_
 
 //==============================================================================
 //	Includes
@@ -67,7 +67,7 @@ const short MAX_STACKTRACE_LENGTH = 1024;
  *	@class	CExceptionClass
  *	@brief
  */
-class CUICExceptionClass : public CStudioException
+class Qt3DSExceptionClass : public CStudioException
 {
     //==============================================================================
     //	Fields
@@ -92,9 +92,9 @@ protected:
     // Construction
 
 protected:
-    CUICExceptionClass(const wchar_t *inFileName, const unsigned long inLineNumber,
+    Qt3DSExceptionClass(const wchar_t *inFileName, const unsigned long inLineNumber,
                        const long inErrorCode, const long inlong, va_list inParameters);
-    virtual ~CUICExceptionClass() {}
+    virtual ~Qt3DSExceptionClass() {}
 
     // Access
 
@@ -137,4 +137,4 @@ protected:
     static void Initialize();
 };
 
-#endif //__UICEXCEPTIONCLASS_H_
+#endif //__QT3DS_EXCEPTION_CLASS_H_

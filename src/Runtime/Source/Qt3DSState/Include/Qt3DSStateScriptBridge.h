@@ -91,7 +91,7 @@ namespace state {
         // EndPreloadScripts
         // This function is only used for binary loading, eg, .uiab
         // virtual void		BeginPreloadScripts( const eastl::vector<const char*>& inScripts,
-        // uic::render::IThreadPool& inThreadPool, const char* inProjectDir ) = 0;
+        // qt3ds::render::IThreadPool& inThreadPool, const char* inProjectDir ) = 0;
         // This function is blocking if m_LuaState == NULL, which only holds during binary loading
         // virtual void		EndPreloadScripts() = 0;
         // Fast loading support
@@ -116,7 +116,7 @@ namespace state {
         virtual void AddGlobalFunction(const Q3DStudio::CHAR *inFunctionName,
                                        lua_CFunction inFunction) = 0;
         // virtual void
-        // EnableDebugging(uic::state::debugger::IMultiProtocolSocket& socket ) = 0;
+        // EnableDebugging(qt3ds::state::debugger::IMultiProtocolSocket& socket ) = 0;
         // virtual void				EnableProfiling() = 0;
         virtual void StepGC() = 0;
     };

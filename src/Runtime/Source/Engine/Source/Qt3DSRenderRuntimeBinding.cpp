@@ -97,12 +97,12 @@ namespace render {
 }
 }
 namespace {
-struct SUICRenderScene;
+struct Qt3DSRenderScene;
 
-struct UICRenderSceneSubPresRenderer : public CSubPresentationRenderer
+struct Qt3DSRenderSceneSubPresRenderer : public CSubPresentationRenderer
 {
-    SUICRenderScene &m_Scene;
-    UICRenderSceneSubPresRenderer(SUICRenderScene &inScene, IUICRenderContext &inRenderContext,
+    Qt3DSRenderScene &m_Scene;
+    Qt3DSRenderSceneSubPresRenderer(Qt3DSRenderScene &inScene, IQt3DSRenderContext &inRenderContext,
                                   SPresentation &inPresentation)
         : CSubPresentationRenderer(inRenderContext, inPresentation)
         , m_Scene(inScene)
@@ -123,7 +123,7 @@ struct SSceneLoadData
     SPresentation *m_Presentation;
     NVDataRef<QT3DSU8> m_TranslatorData;
     NVDataRef<QT3DSU8> m_SceneGraphData;
-    eastl::vector<CUICTranslator *> m_Translators;
+    eastl::vector<Qt3DSTranslator *> m_Translators;
     SPoolingAllocator m_AutoAllocator;
     Q3DStudio::IPresentation *m_RuntimePresentation;
     QT3DSI32 mRefCount;
@@ -140,10 +140,10 @@ struct SSceneLoadData
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Allocator)
 };
 
-struct SUICRenderScene : public Q3DStudio::IScene
+struct Qt3DSRenderScene : public Q3DStudio::IScene
 {
     SBindingCore &m_BindingCore;
-    NVScopedRefCounted<IUICRenderContext> m_Context;
+    NVScopedRefCounted<IQt3DSRenderContext> m_Context;
     NVScopedRefCounted<SSceneLoadData> m_LoadData;
     // The scene graph gets allocated kind of on its own
     // So do the smaller translation objects that translate TElement properties
@@ -160,7 +160,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
     NVRenderRect m_LastRenderViewport;
     CRegisteredString m_PathSubPathType;
 
-    SUICRenderScene(SBindingCore &inBindingCore, IUICRenderContext &inContext,
+    Qt3DSRenderScene(SBindingCore &inBindingCore, IQt3DSRenderContext &inContext,
                     SSceneLoadData &inLoadData)
         : m_BindingCore(inBindingCore)
         , m_Context(inContext)
@@ -168,11 +168,11 @@ struct SUICRenderScene : public Q3DStudio::IScene
         , m_Presentation(inLoadData.m_Presentation)
         , m_RuntimePresentation(inLoadData.m_RuntimePresentation)
         , m_UserData(NULL)
-        , m_DirtySet(inContext.GetAllocator(), "SUICRenderScene::m_DirtySet")
+        , m_DirtySet(inContext.GetAllocator(), "Qt3DSRenderScene::m_DirtySet")
         , m_OffscreenRenderer(NULL)
         , m_SubPresentationType(
               inContext.GetStringTable().RegisterStr(CSubPresentationRenderer::GetRendererName()))
-        , m_GraphObjectList(inContext.GetAllocator(), "SUICDSRenderScene::m_GraphObjectList")
+        , m_GraphObjectList(inContext.GetAllocator(), "Qt3DSDSRenderScene::m_GraphObjectList")
         , m_LoggedPickLastFrame(false)
     {
         for (QT3DSU32 idx = 0, end = inLoadData.m_Translators.size(); idx < end; ++idx) {
@@ -181,7 +181,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
         m_PathSubPathType = inContext.GetStringTable().RegisterStr("PathAnchorPoint");
     }
 
-    virtual ~SUICRenderScene()
+    virtual ~Qt3DSRenderScene()
     {
         if (m_OffscreenRenderer)
             m_Context->GetOffscreenRenderManager().ReleaseOffscreenRenderer(m_OffscreenRendererId);
@@ -203,12 +203,12 @@ struct SUICRenderScene : public Q3DStudio::IScene
             m_RuntimePresentation->GetFrameData().GetDirtyList();
         for (QT3DSU32 idx = 0, end = theDirtyList.GetCount(); idx < end; ++idx) {
             Q3DStudio::TElement &theElement = *theDirtyList[idx];
-            CUICTranslator *theTranslator =
-                reinterpret_cast<CUICTranslator *>(theElement.GetAssociation());
+            Qt3DSTranslator *theTranslator =
+                reinterpret_cast<Qt3DSTranslator *>(theElement.GetAssociation());
             if (!theTranslator && theElement.GetType() == m_PathSubPathType) {
                 Q3DStudio::TElement *theParent = theElement.GetParent();
                 if (theParent) {
-                    theTranslator = reinterpret_cast<CUICTranslator *>(theParent->GetAssociation());
+                    theTranslator = reinterpret_cast<Qt3DSTranslator *>(theParent->GetAssociation());
                     // The path translator responds to anchor point changes as well as its own data
                     // changes.
                     if (theTranslator
@@ -272,7 +272,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
         // Thus we have to add it back.
         QT3DSVec2 mousePos(mouseX + m_LastRenderViewport.m_X, mouseY + m_LastRenderViewport.m_Y);
 
-        SUICRenderPickResult thePickResult = m_Context->GetRenderer().Pick(
+        Qt3DSRenderPickResult thePickResult = m_Context->GetRenderer().Pick(
             *m_Presentation->m_Scene->m_FirstChild, m_Context->GetMousePickViewport()
             // GetMousePickMouseCoords is called by the renderer to setup the pick frame.
             // This is so that the presentation's lastMouseX and lastMouseY variables are correctly
@@ -283,7 +283,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
         if (thePickResult.m_HitObject != NULL) {
             SModel *theHitModel =
                 static_cast<SModel *>(const_cast<SGraphObject *>(thePickResult.m_HitObject));
-            return &CUICTranslator::GetTranslatorFromGraphNode(*theHitModel)->Element();
+            return &Qt3DSTranslator::GetTranslatorFromGraphNode(*theHitModel)->Element();
         }
         return NULL;
     }
@@ -296,8 +296,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
             && inMapperElements.size() == 0) {
             return Empty();
         }
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement.GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement.GetAssociation());
         if (theTranslator == NULL)
             return Empty();
         bool isValidPickObject =
@@ -310,8 +310,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
         QT3DSVec2 mousePos(mouseX + m_LastRenderViewport.m_X, mouseY + m_LastRenderViewport.m_Y);
         eastl::vector<SGraphObject *> theMapperObjects(inMapperElements.size());
         for (QT3DSU32 idx = 0, end = inMapperElements.size(); idx < end; ++idx) {
-            CUICTranslator *theMapperTranslator =
-                reinterpret_cast<CUICTranslator *>(inMapperElements[idx]->GetAssociation());
+            Qt3DSTranslator *theMapperTranslator =
+                reinterpret_cast<Qt3DSTranslator *>(inMapperElements[idx]->GetAssociation());
             SGraphObject *theMapperObject = NULL;
             if (theMapperTranslator) {
                 theMapperObject = theMapperTranslator->m_RenderObject;
@@ -352,7 +352,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
             // If we have not already found a valid pick on a previous layer
             if (!ioPickFrame.m_ResultValid && m_Presentation && m_Presentation->m_Scene
                 && m_Presentation->m_Scene->m_FirstChild) {
-                SUICRenderPickResult thePickResult = m_Context->GetRenderer().Pick(
+                Qt3DSRenderPickResult thePickResult = m_Context->GetRenderer().Pick(
                     *m_Presentation->m_Scene->m_FirstChild, m_Context->GetMousePickViewport()
                     // GetMousePickMouseCoords is called by the renderer to setup the pick frame.
                     // This is so that the presentation's lastMouseX and lastMouseY variables are
@@ -365,7 +365,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
                     SModel *theHitModel = static_cast<SModel *>(
                         const_cast<SGraphObject *>(thePickResult.m_HitObject));
                     ioPickFrame.m_Model =
-                        &CUICTranslator::GetTranslatorFromGraphNode(*theHitModel)->Element();
+                        &Qt3DSTranslator::GetTranslatorFromGraphNode(*theHitModel)->Element();
                     // I don't think local hit is used any more, but not sure.  If they are used,
                     // then the code below is probably wrong.
                     ioPickFrame.m_LocalHit[0] = thePickResult.m_LocalUVCoords.x;
@@ -385,8 +385,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
                 } else {
                     // The scene is always picked if it is pickable; nothing else really makes
                     // sense.
-                    CUICTranslator *theTranslator =
-                        CUICTranslator::GetTranslatorFromGraphNode(*m_Presentation->m_Scene);
+                    Qt3DSTranslator *theTranslator =
+                        Qt3DSTranslator::GetTranslatorFromGraphNode(*m_Presentation->m_Scene);
 
                     if (theTranslator) {
                         ioPickFrame.m_Model = &theTranslator->Element();
@@ -417,8 +417,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
             QT3DS_ASSERT(false);
             return;
         }
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
         if (theTranslator && GraphObjectTypes::IsNodeType(theTranslator->GetUIPType())) {
             Update();
             TransferDirtyProperties();
@@ -442,8 +442,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
             return;
         }
 
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
         if (theTranslator && GraphObjectTypes::IsNodeType(theTranslator->GetUIPType())) {
             SNode *theNode = static_cast<SNode *>(&theTranslator->RenderObject());
             QT3DSMat44 transform;
@@ -474,8 +474,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
             QT3DS_ASSERT(false);
             return retval;
         }
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
         if (theTranslator && GraphObjectTypes::IsNodeType(theTranslator->GetUIPType())) {
             Update();
             TransferDirtyProperties();
@@ -509,8 +509,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
         retval.SetEmpty();
         NVBounds3 theLocalBox = GetNodeLocalBoundingBox(inElement, inSelfOnly);
         if (theLocalBox.isEmpty() == false) {
-            CUICTranslator *theTranslator =
-                reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+            Qt3DSTranslator *theTranslator =
+                reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
             if (theTranslator && GraphObjectTypes::IsNodeType(theTranslator->GetUIPType())) {
                 SNode *theNode = static_cast<SNode *>(&theTranslator->RenderObject());
                 theLocalBox.transform(theNode->m_GlobalTransform);
@@ -545,7 +545,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
 
     Q3DStudio::SCameraRect GetCameraBounds(Q3DStudio::TElement &inElem) override
     {
-        CUICTranslator *theTranslator = reinterpret_cast<CUICTranslator *>(inElem.GetAssociation());
+        Qt3DSTranslator *theTranslator = reinterpret_cast<Qt3DSTranslator *>(inElem.GetAssociation());
         if (theTranslator && theTranslator->m_RenderObject) {
             Option<qt3ds::render::SCuboidRect> theRectOpt =
                 m_Context->GetRenderer().GetCameraBounds(*theTranslator->m_RenderObject);
@@ -560,8 +560,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
 
     void PositionToScreen(Q3DStudio::TElement &inElement, QT3DSVec3 &inPos, QT3DSVec3 &outScreen) override
     {
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement.GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement.GetAssociation());
         if (theTranslator && theTranslator->m_RenderObject) {
             SNode *theNode = reinterpret_cast<SNode *>(theTranslator->m_RenderObject);
             QT3DSVec3 thePos = theNode->m_GlobalTransform.transform(inPos);
@@ -571,8 +571,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
 
     void ScreenToPosition(Q3DStudio::TElement &inElement, QT3DSVec3 &inScreen, QT3DSVec3 &outPos) override
     {
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement.GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement.GetAssociation());
         if (theTranslator && theTranslator->m_RenderObject) {
             SNode *theNode = reinterpret_cast<SNode *>(theTranslator->m_RenderObject);
             QT3DSVec3 objPos = theNode->GetGlobalPos();
@@ -602,13 +602,13 @@ struct SUICRenderScene : public Q3DStudio::IScene
                                     Q3DStudio::INT32 inBufferLength, Q3DStudio::INT32 inWidth,
                                     Q3DStudio::INT32 inHeight,
                                     qt3ds::render::NVRenderTextureFormats::Enum inFormat,
-                                    IUICRenderContext *theContext)
+                                    IQt3DSRenderContext *theContext)
     {
         NVRenderTextureFormats::Enum destFormat = qt3ds::render::NVRenderTextureFormats::RGBA16F;
 
-        UICRenderPrefilterTexture *theBSDFMipMap = theImage->m_TextureData.m_BSDFMipMap;
+        Qt3DSRenderPrefilterTexture *theBSDFMipMap = theImage->m_TextureData.m_BSDFMipMap;
         if (theBSDFMipMap == NULL) {
-            theBSDFMipMap = UICRenderPrefilterTexture::Create(
+            theBSDFMipMap = Qt3DSRenderPrefilterTexture::Create(
                 &theContext->GetRenderContext(), inWidth, inHeight,
                 *theImage->m_TextureData.m_Texture, destFormat, theContext->GetFoundation());
             theImage->m_TextureData.m_BSDFMipMap = theBSDFMipMap;
@@ -625,8 +625,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
                                 qt3ds::render::NVRenderTextureFormats::Enum inFormat,
                                 Q3DStudio::INT32 inHasTransparency) override
     {
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
         if (theTranslator && theTranslator->GetUIPType() == GraphObjectTypes::Image) {
             SImage *theImage = static_cast<SImage *>(&theTranslator->RenderObject());
             // Attempt to resolve the image's path
@@ -682,8 +682,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
 
     Q3DStudio::STextSizes MeasureText(Q3DStudio::TElement *inElement, const char *inTextStr) override
     {
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
         Q3DStudio::STextSizes retval;
         if (theTranslator && theTranslator->GetUIPType() == GraphObjectTypes::Text) {
             if (inElement->IsDirty()) {
@@ -724,8 +724,8 @@ struct SUICRenderScene : public Q3DStudio::IScene
     {
         ioWidth = 0;
         ioHeight = 0;
-        CUICTranslator *theTranslator =
-            reinterpret_cast<CUICTranslator *>(inElement->GetAssociation());
+        Qt3DSTranslator *theTranslator =
+            reinterpret_cast<Qt3DSTranslator *>(inElement->GetAssociation());
         if (theTranslator->GetUIPType() == GraphObjectTypes::Image) {
             SImage *theImage = static_cast<SImage *>(&theTranslator->RenderObject());
             if (theImage) {
@@ -770,7 +770,7 @@ struct SUICRenderScene : public Q3DStudio::IScene
 
     void RegisterOffscreenRenderer(const char *inKey) override
     {
-        m_OffscreenRenderer = QT3DS_NEW(m_Context->GetAllocator(), UICRenderSceneSubPresRenderer)(
+        m_OffscreenRenderer = QT3DS_NEW(m_Context->GetAllocator(), Qt3DSRenderSceneSubPresRenderer)(
             *this, *m_Context, *m_Presentation);
         m_OffscreenRendererId = m_Context->GetStringTable().RegisterStr(inKey);
         m_Context->GetOffscreenRenderManager().RegisterOffscreenRenderer(m_OffscreenRendererId,
@@ -781,14 +781,14 @@ struct SUICRenderScene : public Q3DStudio::IScene
 };
 
 SOffscreenRenderFlags
-UICRenderSceneSubPresRenderer::NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
+Qt3DSRenderSceneSubPresRenderer::NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
                                            QT3DSVec2 inPresScale)
 {
     m_Scene.TransferDirtyProperties();
     return CSubPresentationRenderer::NeedsRender(inEnvironment, inPresScale);
 }
 
-void UICRenderSceneSubPresRenderer::Render(const SOffscreenRendererEnvironment &inEnvironment,
+void Qt3DSRenderSceneSubPresRenderer::Render(const SOffscreenRendererEnvironment &inEnvironment,
                                            NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
                                            SScene::RenderClearCommand inClearBuffer)
 {
@@ -799,13 +799,13 @@ void UICRenderSceneSubPresRenderer::Render(const SOffscreenRendererEnvironment &
 // Scene Manager
 //////////////////////////////////////////////////////////////////
 
-struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
+struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                                 public Q3DStudio::ISceneBinaryLoader
 {
     typedef nvhash_map<CRegisteredString, bool> TStrBoolMap;
 
     NVScopedRefCounted<SBindingCore> m_Context;
-    nvvector<pair<Q3DStudio::IPresentation *, SUICRenderScene *>> m_Scenes;
+    nvvector<pair<Q3DStudio::IPresentation *, Qt3DSRenderScene *>> m_Scenes;
     nvvector<pair<qt3ds::foundation::CRegisteredString, long>> m_RenderPlugins;
     Q3DStudio::INT32 m_ViewWidth;
     Q3DStudio::INT32 m_ViewHeight;
@@ -815,7 +815,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
     nvvector<eastl::pair<CRegisteredString, bool>> m_SourcePaths;
     eastl::hash_set<CRegisteredString> m_SourcePathSet;
 
-    SUICRenderScene *m_LastRenderedScene;
+    Qt3DSRenderScene *m_LastRenderedScene;
     Q3DStudio::IWindowSystem &m_WindowSystem;
     Mutex m_LoadingScenesMutex;
     eastl::vector<NVScopedRefCounted<SSceneLoadData>> m_LoadingScenes;
@@ -824,13 +824,13 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
     bool m_ProjectInitialized;
     QT3DSI32 mRefCount;
 
-    SUICRenderSceneManager(SBindingCore &ctx, Q3DStudio::IWindowSystem &inWindowSystem)
+    Qt3DSRenderSceneManager(SBindingCore &ctx, Q3DStudio::IWindowSystem &inWindowSystem)
         : m_Context(ctx)
-        , m_Scenes(ctx.GetAllocator(), "SUICRenderSceneManager::m_Scenes")
-        , m_RenderPlugins(ctx.GetAllocator(), "SUICRenderSceneManager::m_RenderPlugins")
+        , m_Scenes(ctx.GetAllocator(), "Qt3DSRenderSceneManager::m_Scenes")
+        , m_RenderPlugins(ctx.GetAllocator(), "Qt3DSRenderSceneManager::m_RenderPlugins")
         , m_ViewWidth(0)
         , m_ViewHeight(0)
-        , m_SourcePaths(ctx.GetAllocator(), "SUICRenderSceneManager::m_SourcePaths")
+        , m_SourcePaths(ctx.GetAllocator(), "Qt3DSRenderSceneManager::m_SourcePaths")
         , m_LastRenderedScene(NULL)
         , m_WindowSystem(inWindowSystem)
         , m_LoadingScenesMutex(ctx.GetAllocator())
@@ -839,7 +839,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
     {
         memZero(&m_PickFrame, sizeof(m_PickFrame));
     }
-    virtual ~SUICRenderSceneManager()
+    virtual ~Qt3DSRenderSceneManager()
     {
         for (QT3DSU32 idx = 0, end = m_Scenes.size(); idx < end; ++idx)
             m_Scenes[idx].second->Release();
@@ -870,13 +870,13 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         return stricmp(ending, "mesh") == 0;
     }
 
-    void FinalizeScene(Q3DStudio::IPresentation &inPresentation, SUICRenderScene &inScene)
+    void FinalizeScene(Q3DStudio::IPresentation &inPresentation, Qt3DSRenderScene &inScene)
     {
         inPresentation.SetScene(&inScene);
         if (m_ProjectInitialized == false) {
             m_ProjectInitialized = true;
-            if (m_Context->m_UICContext->GetTextRenderer())
-                m_Context->m_UICContext->GetTextRenderer()->AddProjectFontDirectory(
+            if (m_Context->m_Context->GetTextRenderer())
+                m_Context->m_Context->GetTextRenderer()->AddProjectFontDirectory(
                     inScene.m_Presentation->m_PresentationDirectory);
             eastl::string theBinaryPath(inPresentation.GetFilePath().toLatin1().constData());
             qt3ds::foundation::CFileTools::AppendDirectoryInPathToFile(theBinaryPath, "binary");
@@ -887,7 +887,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         }
         inScene.m_RuntimePresentation = &inPresentation;
         m_Scenes.push_back(make_pair(&inPresentation, &inScene));
-        CUICTranslator::AssignUserData(inPresentation, *inScene.m_Presentation);
+        Qt3DSTranslator::AssignUserData(inPresentation, *inScene.m_Presentation);
     }
 
     static const char *GetBinaryExtension() { return "uibsg"; }
@@ -902,13 +902,13 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         void CreateTable(lua_State *inState) override { m_Instance.CreateLuaProxy(inState); }
     };
 
-    void InitializeTranslator(CUICTranslator &inTranslator, Q3DStudio::IScriptBridge &inBridge)
+    void InitializeTranslator(Qt3DSTranslator &inTranslator, Q3DStudio::IScriptBridge &inBridge)
     {
         if (inTranslator.m_RenderObject->m_Type == GraphObjectTypes::RenderPlugin) {
             SRenderPlugin &theRenderPlugin =
                 static_cast<SRenderPlugin &>(*inTranslator.m_RenderObject);
             IRenderPluginInstance *thePluginInstance =
-                m_Context->m_UICContext->GetRenderPluginManager().GetOrCreateRenderPluginInstance(
+                m_Context->m_Context->GetRenderPluginManager().GetOrCreateRenderPluginInstance(
                     theRenderPlugin.m_PluginPath, &theRenderPlugin);
             if (thePluginInstance) {
                 SPluginInstanceTableProvider theProvider(*thePluginInstance);
@@ -943,10 +943,10 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
     {
         // We have to initialize the tags late so that we can load flow data before adding anything
         // to the string table.
-        CUICTranslator::InitializePointerTags(m_Context->m_RenderContext->GetStringTable());
+        Qt3DSTranslator::InitializePointerTags(m_Context->m_RenderContext->GetStringTable());
         NVScopedRefCounted<SSceneLoadData> theScene =
             QT3DS_NEW(m_Context->GetAllocator(), SSceneLoadData)(m_Context->GetAllocator());
-        SUICRenderScene *theIScene = NULL;
+        Qt3DSRenderScene *theIScene = NULL;
         if (inParser) {
             QString thePath(inPresentation->GetFilePath());
             QFileInfo fileInfo(thePath);
@@ -960,20 +960,20 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
                 m_Context->m_CoreContext->GetStringTable(),
                 m_Context->m_RenderContext->GetFoundation(),
                 theScene->m_AutoAllocator, theObjMap,
-                m_Context->m_UICContext->GetBufferManager(),
-                m_Context->m_UICContext->GetEffectSystem(),
+                m_Context->m_Context->GetBufferManager(),
+                m_Context->m_Context->GetEffectSystem(),
                 fileInfo.path().toLatin1().constData(),
-                m_Context->m_UICContext->GetRenderPluginManager(),
-                m_Context->m_UICContext->GetCustomMaterialSystem(),
-                m_Context->m_UICContext->GetDynamicObjectSystem(),
-                m_Context->m_UICContext->GetPathManager(), &theResolver, false);
+                m_Context->m_Context->GetRenderPluginManager(),
+                m_Context->m_Context->GetCustomMaterialSystem(),
+                m_Context->m_Context->GetDynamicObjectSystem(),
+                m_Context->m_Context->GetPathManager(), &theResolver, false);
             if (!theScene->m_Presentation) {
                 QT3DS_ASSERT(false);
                 return NULL;
             }
 
             NVConstDataRef<eastl::string> theSourcePathData(inParser->GetSourcePaths());
-            IBufferManager &theManager(m_Context->m_UICContext->GetBufferManager());
+            IBufferManager &theManager(m_Context->m_Context->GetBufferManager());
             // List of image paths to be loaded in parallel at the end.
             eastl::vector<CRegisteredString> theSourcePathList;
             for (QT3DSU32 idx = 0, end = theSourcePathData.size(); idx < end; ++idx) {
@@ -997,14 +997,14 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
             }
 
             // Fire off parallel loading of the source paths
-            QT3DSU64 imageBatchId = m_Context->m_UICContext->GetImageBatchLoader().LoadImageBatch(
+            QT3DSU64 imageBatchId = m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
                 CRegisteredString(), NULL);
-            m_Context->m_UICContext->GetImageBatchLoader().BlockUntilLoaded(
+            m_Context->m_Context->GetImageBatchLoader().BlockUntilLoaded(
                 static_cast<TImageBatchId>(imageBatchId));
 
             theIScene = QT3DS_NEW(m_Context->GetAllocator(),
-                               SUICRenderScene)(*m_Context, *m_Context->m_UICContext, *theScene);
+                               Qt3DSRenderScene)(*m_Context, *m_Context->m_Context, *theScene);
             // Now we need to associate the presentation with everything else.
             NVAllocatorCallback &translatorAllocator = theScene->m_AutoAllocator;
             for (TIdObjectMap::iterator iter = theObjMap.begin(), end = theObjMap.end();
@@ -1014,7 +1014,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
                     inParser->GetElementForID(iter->first.c_str());
                 if (theElement.m_Element
                     && theElement.m_Type != Q3DStudio::UIPElementTypes::Unknown) {
-                    CUICTranslator *theTranslator = CUICTranslator::CreateTranslatorForElement(
+                    Qt3DSTranslator *theTranslator = Qt3DSTranslator::CreateTranslatorForElement(
                         *theElement.m_Element, *iter->second, translatorAllocator);
                     if (theTranslator) {
                         theIScene->m_DirtySet.insert(*theTranslator);
@@ -1128,7 +1128,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         theScene->m_Translators.resize(theNumTranslators);
         theScene->m_RuntimePresentation = &inPresentation;
         for (QT3DSU32 idx = 0, end = theNumTranslators; idx < end; ++idx) {
-            CUICTranslator *theTranslator = CUICTranslator::LoadTranslator(
+            Qt3DSTranslator *theTranslator = Qt3DSTranslator::LoadTranslator(
                 theReader, inElementMemoryOffset, theScene->m_SceneGraphData,
                 theScene->m_AutoAllocator);
             if (theTranslator) {
@@ -1140,10 +1140,10 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
     void OnGraphicsInitialized()
     {
-        QT3DS_ASSERT(m_Context->m_UICContext.mPtr);
+        QT3DS_ASSERT(m_Context->m_Context.mPtr);
         // this means graphics have been initialized
         eastl::string theSourcePathStr;
-        IBufferManager &theManager(m_Context->m_UICContext->GetBufferManager());
+        IBufferManager &theManager(m_Context->m_Context->GetBufferManager());
         nvvector<CRegisteredString> theSourcePathList(m_Context->GetAllocator(),
                                                       "TempSourcePathList");
         for (QT3DSU32 idx = 0, end = m_SourcePaths.size(); idx < end; ++idx) {
@@ -1166,7 +1166,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
             SStackPerfTimer __perfTimer(m_Context->m_CoreContext->GetPerfTimer(),
                                         "Initial Batch Image Load");
 
-            m_Context->m_UICContext->GetImageBatchLoader().LoadImageBatch(
+            m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
                 CRegisteredString(), NULL);
         }
@@ -1179,8 +1179,8 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
                 SSceneLoadData &theScene = *m_LoadingScenes[idx];
                 // m_Context->m_Foundation->error( QT3DS_WARN, "Finalizing scene %d", (int)idx+1 );
                 if (theScene.m_RuntimePresentation) {
-                    SUICRenderScene *theIScene = QT3DS_NEW(m_Context->GetAllocator(), SUICRenderScene)(
-                        *m_Context, *m_Context->m_UICContext, theScene);
+                    Qt3DSRenderScene *theIScene = QT3DS_NEW(m_Context->GetAllocator(), Qt3DSRenderScene)(
+                        *m_Context, *m_Context->m_Context, theScene);
                     FinalizeScene(*theScene.m_RuntimePresentation, *theIScene);
                 } else {
                     qCWarning(WARNING, "Failed to finalize scene %d", (int)idx + 1);
@@ -1197,11 +1197,11 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         if (theHandle >= 0) {
             qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
                 QT3DS_NEW(m_Context->GetAllocator(),
-                       qt3ds::render::COldNBustedPluginRenderer)(*m_Context->m_UICContext, theHandle);
+                       qt3ds::render::COldNBustedPluginRenderer)(*m_Context->m_Context, theHandle);
             qt3ds::foundation::CRegisteredString theAssetString =
                 m_Context->m_CoreContext->GetStringTable().RegisterStr(inAssetIDString);
 
-            m_Context->m_UICContext->GetOffscreenRenderManager().RegisterOffscreenRenderer(
+            m_Context->m_Context->GetOffscreenRenderManager().RegisterOffscreenRenderer(
                 theAssetString, *theOffscreenRenderer);
 
             PROC_Initialize theInitializeProc =
@@ -1232,11 +1232,11 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
     {
         qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
             QT3DS_NEW(m_Context->GetAllocator(),
-                   Q3DSQmlRender)(*m_Context->m_UICContext, inAssetIDString);
+                   Q3DSQmlRender)(*m_Context->m_Context, inAssetIDString);
         if (theOffscreenRenderer) {
             qt3ds::foundation::CRegisteredString theAssetString =
                 m_Context->m_CoreContext->GetStringTable().RegisterStr(inAssetIDString);
-            m_Context->m_UICContext->GetOffscreenRenderManager().RegisterOffscreenRenderer(
+            m_Context->m_Context->GetOffscreenRenderManager().RegisterOffscreenRenderer(
                 SOffscreenRendererKey(theAssetString), *theOffscreenRenderer);
 
             m_RenderPlugins.push_back(make_pair(theAssetString, 0));
@@ -1245,7 +1245,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
     void BinarySave(Q3DStudio::IScene &inScene) override
     {
-        SUICRenderScene &theScene = static_cast<SUICRenderScene &>(inScene);
+        Qt3DSRenderScene &theScene = static_cast<Qt3DSRenderScene &>(inScene);
         qt3ds::render::SWriteBuffer theWriteBuffer(m_Context->GetAllocator(), "BinarySaveBuffer");
         qt3ds::render::SPtrOffsetMap theSGOffsetMap(m_Context->GetAllocator(), "PointerOffsetMap");
         // Start with some versioning and sanity checks.
@@ -1260,8 +1260,8 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         // These offsets are after we have read in the data section
         SGraphObjectSerializer::Save(
             m_Context->m_RenderContext->GetFoundation(), *theScene.m_Presentation, theWriteBuffer,
-            m_Context->m_UICContext->GetDynamicObjectSystem(),
-            m_Context->m_UICContext->GetPathManager(), theSGOffsetMap,
+            m_Context->m_Context->GetDynamicObjectSystem(),
+            m_Context->m_Context->GetPathManager(), theSGOffsetMap,
             m_Context->m_CoreContext->GetStringTable(), theScene.m_GraphObjectList);
 
         theWriteBuffer.align(sizeof(void *));
@@ -1274,8 +1274,8 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         // from old element ptr->new element ptr.
         QT3DSU32 theTranslatorCount = 0;
         for (QT3DSU32 idx = 0, end = theScene.m_GraphObjectList.size(); idx < end; ++idx) {
-            CUICTranslator *theTranslator =
-                CUICTranslator::GetTranslatorFromGraphNode(*theScene.m_GraphObjectList[idx]);
+            Qt3DSTranslator *theTranslator =
+                Qt3DSTranslator::GetTranslatorFromGraphNode(*theScene.m_GraphObjectList[idx]);
             // Presentation nodes don't have translator
             if (theTranslator) {
                 qt3ds::render::SPtrOffsetMap::iterator theIter =
@@ -1340,15 +1340,15 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         theWriteBuffer.writeZeros(4); // String system offset
         // string system last.
         QT3DSU32 theOffsetStart = theWriteBuffer.size();
-        m_Context->m_UICContext->GetDynamicObjectSystem().Save(
+        m_Context->m_Context->GetDynamicObjectSystem().Save(
             theWriteBuffer, theStrTable.GetRemapMap(), theProjectDir.c_str());
         theWriteBuffer.align(sizeof(void *));
         QT3DSU32 theEffectSystemOffset = theWriteBuffer.size() - theOffsetStart;
-        m_Context->m_UICContext->GetEffectSystem().Save(theWriteBuffer, theStrTable.GetRemapMap(),
+        m_Context->m_Context->GetEffectSystem().Save(theWriteBuffer, theStrTable.GetRemapMap(),
                                                         theProjectDir.c_str());
         theWriteBuffer.align(sizeof(void *));
         QT3DSU32 theMaterialSystemOffset = theWriteBuffer.size() - theOffsetStart;
-        m_Context->m_UICContext->GetCustomMaterialSystem().Save(
+        m_Context->m_Context->GetCustomMaterialSystem().Save(
             theWriteBuffer, theStrTable.GetRemapMap(), theProjectDir.c_str());
         QT3DSU32 theBinaryPathOffset = theWriteBuffer.size() - theOffsetStart;
 
@@ -1365,7 +1365,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
         QT3DSU32 thePluginManagerOffset = theWriteBuffer.size() - theOffsetStart;
 
-        m_Context->m_UICContext->GetRenderPluginManager().Save(
+        m_Context->m_Context->GetRenderPluginManager().Save(
             theWriteBuffer, theStrTable.GetRemapMap(), theProjectDir.c_str());
 
         QT3DSU32 theStringTableOffset = theWriteBuffer.size() - theOffsetStart;
@@ -1500,7 +1500,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
         bool theResult = false;
         long theSceneCount = m_Scenes.size();
         for (long theSceneIndex = 0; theSceneIndex < theSceneCount; ++theSceneIndex) {
-            SUICRenderScene *theScene = m_Scenes[theSceneIndex].second;
+            Qt3DSRenderScene *theScene = m_Scenes[theSceneIndex].second;
             theResult |= theScene->Update();
         }
         return theResult;
@@ -1508,7 +1508,7 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
     Q3DStudio::BOOL RenderPresentation(Q3DStudio::IPresentation *inPresentation) override
     {
-        SUICRenderScene *theFirstScene = NULL;
+        Qt3DSRenderScene *theFirstScene = NULL;
         for (QT3DSU32 idx = 0, end = m_Scenes.size(); idx < end && theFirstScene == NULL; ++idx)
             if (m_Scenes[idx].second->m_RuntimePresentation == inPresentation)
                 theFirstScene = m_Scenes[idx].second;
@@ -1517,25 +1517,25 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
             m_LastRenderedScene = theFirstScene;
             if (theFirstScene->m_Presentation->m_Scene
                 && theFirstScene->m_Presentation->m_Scene->m_UseClearColor) {
-                m_Context->m_UICContext->SetSceneColor(
+                m_Context->m_Context->SetSceneColor(
                     QT3DSVec4(theFirstScene->m_Presentation->m_Scene->m_ClearColor, 1.0f));
             } else
-                m_Context->m_UICContext->SetSceneColor(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                m_Context->m_Context->SetSceneColor(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
             // Setup the render rotation *before* rendering so that the magic can happen on begin
             // render.
             if (m_Context->m_RenderRotationsEnabled)
-                m_Context->m_UICContext->SetRenderRotation(
+                m_Context->m_Context->SetRenderRotation(
                     theFirstScene->m_Presentation->m_PresentationRotation);
             else
-                m_Context->m_UICContext->SetRenderRotation(RenderRotationValues::NoRotation);
+                m_Context->m_Context->SetRenderRotation(RenderRotationValues::NoRotation);
 
-            m_Context->m_UICContext->SetPresentationDimensions(SWindowDimensions(
+            m_Context->m_Context->SetPresentationDimensions(SWindowDimensions(
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.x,
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
         }
 
-        m_Context->m_UICContext->BeginFrame();
+        m_Context->m_Context->BeginFrame();
         m_Context->m_RenderContext->ResetBlendState();
 
         // How exactly does this work, I have no idea.
@@ -1548,11 +1548,11 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
             m_Context->m_RenderContext->Clear(qt3ds::render::NVRenderClearFlags(
                 NVRenderClearValues::Color | NVRenderClearValues::Depth));
         }
-        m_Context->m_UICContext->RunRenderTasks();
+        m_Context->m_Context->RunRenderTasks();
         if (theFirstScene)
             theFirstScene->Render();
 
-        m_Context->m_UICContext->EndFrame();
+        m_Context->m_Context->EndFrame();
 
         return wasDirty;
     }
@@ -1570,16 +1570,16 @@ struct SUICRenderSceneManager : public Q3DStudio::ISceneManager,
 
     Q3DStudio::STextSizes GetDisplayDimensions(Q3DStudio::IPresentation *inPresentation) override
     {
-        SUICRenderScene *theFirstScene = NULL;
+        Qt3DSRenderScene *theFirstScene = NULL;
         for (QT3DSU32 idx = 0, end = m_Scenes.size(); idx < end && theFirstScene == NULL; ++idx)
             if (m_Scenes[idx].second->m_RuntimePresentation == inPresentation)
                 theFirstScene = m_Scenes[idx].second;
         if (theFirstScene) {
-            m_Context->m_UICContext->SetPresentationDimensions(SWindowDimensions(
+            m_Context->m_Context->SetPresentationDimensions(SWindowDimensions(
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.x,
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
             render::NVRenderRectF theDisplayViewport =
-                m_Context->m_UICContext->GetDisplayViewport();
+                m_Context->m_Context->GetDisplayViewport();
             return Q3DStudio::STextSizes(
                 static_cast<Q3DStudio::INT32>(theDisplayViewport.m_Width),
                 static_cast<Q3DStudio::INT32>(theDisplayViewport.m_Height));
@@ -1668,13 +1668,13 @@ public:
                         qt3ds::state::IScriptContext &inScriptContext) override;
 };
 
-struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
+struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFactory
 {
     NVScopedRefCounted<SBindingCore> m_Context;
 
     NVScopedRefCounted<Q3DStudio::CLuaEngine> m_ScriptBridge;
     NVScopedRefCounted<Q3DStudio::CQmlEngine> m_ScriptBridgeQml;
-    NVScopedRefCounted<SUICRenderSceneManager> m_SceneManager;
+    NVScopedRefCounted<Qt3DSRenderSceneManager> m_SceneManager;
     NVScopedRefCounted<qt3ds::state::IVisualStateContext> m_VisualStateContext;
     NVScopedRefCounted<qt3ds::evt::IEventSystem> m_EventSystem;
     qt3ds::runtime::IApplicationCore *m_ApplicationCore;
@@ -1714,7 +1714,7 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
         }
     }
 
-    qt3ds::render::IUICRenderContextCore &GetUICRenderContextCore() override
+    qt3ds::render::IQt3DSRenderContextCore &GetRenderContextCore() override
     {
         return *m_Context->m_CoreContext;
     }
@@ -1729,7 +1729,7 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
     {
         if (m_SceneManager == NULL)
             m_SceneManager = QT3DS_NEW(m_Context->GetAllocator(),
-                                    SUICRenderSceneManager)(*m_Context, m_Context->m_WindowSystem);
+                                    Qt3DSRenderSceneManager)(*m_Context, m_Context->m_WindowSystem);
         return *m_SceneManager;
     }
 
@@ -1741,7 +1741,7 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
     {
         if (m_SceneManager == NULL)
             m_SceneManager = QT3DS_NEW(m_Context->GetAllocator(),
-                                    SUICRenderSceneManager)(*m_Context, m_Context->m_WindowSystem);
+                                    Qt3DSRenderSceneManager)(*m_Context, m_Context->m_WindowSystem);
         return *m_SceneManager;
     }
     Q3DStudio::IScriptBridge &GetScriptEngine() override
@@ -1768,9 +1768,9 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
         return m_Context->m_CoreContext->GetInputStreamFactory();
     }
 
-    qt3ds::render::IUICRenderContext &GetUICRenderContext() override
+    qt3ds::render::IQt3DSRenderContext &GetQt3DSRenderContext() override
     {
-        return *m_Context->m_UICContext;
+        return *m_Context->m_Context;
     }
     qt3ds::state::IVisualStateContext &GetVisualStateContext() override
     {
@@ -1851,7 +1851,7 @@ struct SRenderFactory : public IUICRenderFactoryCore, public IUICRenderFactory
         }
     };
 
-    IUICRenderFactory &CreateRenderFactory(const QSurfaceFormat& format) override
+    IQt3DSRenderFactory &CreateRenderFactory(const QSurfaceFormat& format) override
     {
 
         SContextTypeRenderFactory theContextFactory(format);
@@ -1986,8 +1986,8 @@ void SVisualStateHandler::Handle(const qt3ds::state::SVisualStateCommand &inComm
 }
 }
 
-IUICRenderFactoryCore &
-IUICRenderFactoryCore::CreateRenderFactoryCore(const char8_t *inApplicationDirectory,
+IQt3DSRenderFactoryCore &
+IQt3DSRenderFactoryCore::CreateRenderFactoryCore(const char8_t *inApplicationDirectory,
                                                Q3DStudio::IWindowSystem &inWindowSystem,
                                                Q3DStudio::ITimeProvider &inTimeProvider)
 {

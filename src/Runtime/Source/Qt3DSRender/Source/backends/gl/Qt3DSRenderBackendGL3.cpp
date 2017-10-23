@@ -411,7 +411,7 @@ namespace render {
             GL_CALL_EXTRA_FUNCTION(glBindVertexArray(inputAssembler->m_VaoID));
             inputAssembler->m_cachedShaderHandle = programID;
 
-            UICBASE_FOREACH(idx, shaderAttribBuffer.size())
+            QT3DS_FOREACH(idx, shaderAttribBuffer.size())
             {
                 const NVRenderBackendShaderInputEntryGL &attrib(shaderAttribBuffer[idx]);
                 NVRenderBackendLayoutEntryGL *entry =
@@ -440,7 +440,7 @@ namespace render {
             }
 
             // setup all attribs
-            UICBASE_FOREACH(idx, shaderAttribBuffer.size())
+            QT3DS_FOREACH(idx, shaderAttribBuffer.size())
             {
                 NVRenderBackendLayoutEntryGL *entry =
                     attribLayout->getEntryByName(shaderAttribBuffer[idx].m_AttribName);
@@ -475,7 +475,7 @@ namespace render {
         }
 #ifdef _DEBUG
         if (inputAssembler->m_VaoID) {
-            UICBASE_FOREACH(idx, shaderAttribBuffer.size())
+            QT3DS_FOREACH(idx, shaderAttribBuffer.size())
             {
                 const NVRenderBackendShaderInputEntryGL &attrib(shaderAttribBuffer[idx]);
                 NVRenderBackendLayoutEntryGL *entry =
@@ -648,7 +648,7 @@ namespace render {
             if (type) {
                 GL_CALL_EXTRA_FUNCTION(glGetActiveUniformsiv(programID, count, indices, GL_UNIFORM_TYPE, type));
                 // convert to UIC types
-                UICBASE_FOREACH(idx, count)
+                QT3DS_FOREACH(idx, count)
                 {
                     type[idx] = m_Conversion.fromShaderGLToPropertyDataTypes(type[idx]);
                 }

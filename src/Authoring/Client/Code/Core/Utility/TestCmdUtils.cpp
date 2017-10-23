@@ -79,7 +79,7 @@ qt3dsdm::Qt3DSDMInstanceHandle TestCmdUtilsAddObject(CAsset *inParent, CAsset *i
  *		@return a string representing the property name and other measurable attributes
  */
 //==============================================================================
-// TODO: UICDM Fingerprint
+// TODO: DataModel Fingerprint
 
 //==============================================================================
 /**

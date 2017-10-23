@@ -106,7 +106,7 @@ Qt3DSDMTimelineItemBinding::~Qt3DSDMTimelineItemBinding()
 }
 
 // helpers
-bool Qt3DSDMTimelineItemBinding::UICDMGetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const
+bool Qt3DSDMTimelineItemBinding::GetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_StudioSystem->GetPropertySystem();
     SValue theValue;
@@ -114,7 +114,7 @@ bool Qt3DSDMTimelineItemBinding::UICDMGetBoolean(qt3dsdm::Qt3DSDMPropertyHandle 
     return qt3dsdm::get<bool>(theValue);
 }
 
-void Qt3DSDMTimelineItemBinding::UICDMSetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
+void Qt3DSDMTimelineItemBinding::SetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
                                                 bool inValue, const QString &inNiceText) const
 {
     CDoc *theDoc = dynamic_cast<CDoc *>(g_StudioApp.GetCore()->GetDoc());
@@ -166,16 +166,16 @@ bool Qt3DSDMTimelineItemBinding::IsMaster() const
 
 bool Qt3DSDMTimelineItemBinding::IsShy() const
 {
-    return UICDMGetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Shy);
+    return GetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Shy);
 }
 void Qt3DSDMTimelineItemBinding::SetShy(bool inShy)
 {
-    UICDMSetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Shy, inShy,
+    SetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Shy, inShy,
                     QObject::tr("Shy Toggle"));
 }
 bool Qt3DSDMTimelineItemBinding::IsLocked() const
 {
-    return UICDMGetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Locked);
+    return GetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Locked);
 }
 
 void ToggleChildrenLock(Q3DStudio::ScopedDocumentEditor &scopedDocEditor,
@@ -208,12 +208,12 @@ void Qt3DSDMTimelineItemBinding::SetLocked(bool inLocked)
 
 bool Qt3DSDMTimelineItemBinding::IsVisible() const
 {
-    return UICDMGetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball);
+    return GetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball);
 }
 
 void Qt3DSDMTimelineItemBinding::SetVisible(bool inVisible)
 {
-    UICDMSetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball,
+    SetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball,
                     inVisible, QObject::tr("Visibility Toggle"));
 }
 
@@ -339,7 +339,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
     if (inName.IsEmpty()) {
         Q3DStudio::CString theTitle(::LoadResourceString(IDS_ERROR_OBJECT_RENAME_TITLE));
         Q3DStudio::CString theString(::LoadResourceString(IDS_ERROR_OBJECT_RENAME_EMPTY_STRING));
-        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString, CUICMessageBox::ICON_ERROR,
+        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString, Qt3DSMessageBox::ICON_ERROR,
                                                     false);
 
         return;
@@ -351,7 +351,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
         Q3DStudio::CString theString(
             ::LoadResourceString(IDS_ERROR_OBJECT_RENAME_DUPLICATED_STRING));
         int theUserChoice = g_StudioApp.GetDialogs()->DisplayChoiceBox(
-            theTitle, theString, CUICMessageBox::ICON_WARNING);
+            theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
         if (theUserChoice == QMessageBox::Yes) {
             // Set with the unique name
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
@@ -381,9 +381,9 @@ CBaseStateRow *Qt3DSDMTimelineItemBinding::GetRow()
 void Qt3DSDMTimelineItemBinding::SetSelected(bool inMultiSelect)
 {
     if (!inMultiSelect)
-        g_StudioApp.GetCore()->GetDoc()->SelectUICDMObject(m_DataHandle);
+        g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(m_DataHandle);
     else
-        g_StudioApp.GetCore()->GetDoc()->ToggleUICDMObjectToSelection(m_DataHandle);
+        g_StudioApp.GetCore()->GetDoc()->ToggleDataModelObjectToSelection(m_DataHandle);
 }
 
 void Qt3DSDMTimelineItemBinding::OnCollapsed()
@@ -687,7 +687,7 @@ ITimelineKeyframesManager *Qt3DSDMTimelineItemBinding::GetKeyframesManager() con
 void Qt3DSDMTimelineItemBinding::RemoveProperty(ITimelineItemProperty *inProperty)
 {
     Q_UNUSED(inProperty);
-    // TODO: This function has no use in UICDM world. This is replaced by RemovePropertyRow(
+    // TODO: This function has no use in DataModel world. This is replaced by RemovePropertyRow(
     // Qt3DSDMPropertyHandle inPropertyHandle ).
     // Decide if this function should be removed from ITimelineItemBinding.
 }
@@ -951,7 +951,7 @@ void Qt3DSDMTimelineItemBinding::RefreshPropertyKeyframe(
 }
 
 // called when the keyframes are updated in the UI and data model hasn't committed the change, ie no
-// event callback from UICDM
+// event callback from DataModel
 void Qt3DSDMTimelineItemBinding::UIRefreshPropertyKeyframe(long inOffset)
 {
     if (!m_Row)
@@ -1252,7 +1252,7 @@ bool Qt3DSDMTimelineItemBinding::OpenSourcePathFile()
             m_DataHandle, theClientBridge->GetSourcePathProperty(), theValue)) {
         // Open the respective file
         Q3DStudio::CFilePath theSourcePath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData());
-        CUICFile theFile(m_TransMgr->GetDoc()->GetResolvedPathToDoc(theSourcePath));
+        Qt3DSFile theFile(m_TransMgr->GetDoc()->GetResolvedPathToDoc(theSourcePath));
         theFile.Execute();
         return true;
     }

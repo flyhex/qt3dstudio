@@ -33,7 +33,7 @@
 #include "Qt3DSStateEditorFoundation.h"
 #include "Qt3DSStateEditorProperties.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

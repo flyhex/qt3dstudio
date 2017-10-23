@@ -341,7 +341,7 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
 
     m_context->makeCurrent(m_surface);
 
-    m_viewerApp = &Q3DSViewerApp::Create(m_context, new CUICAudioPlayerImpl());
+    m_viewerApp = &Q3DSViewerApp::Create(m_context, new Qt3DSAudioPlayerImpl());
 
     Q_ASSERT(m_viewerApp);
 

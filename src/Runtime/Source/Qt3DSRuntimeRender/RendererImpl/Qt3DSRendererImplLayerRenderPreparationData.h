@@ -46,7 +46,7 @@
 namespace qt3ds {
 namespace render {
     struct SLayerRenderData;
-    class CUICRendererImpl;
+    class Qt3DSRendererImpl;
     struct SRenderableObject;
 
     struct LayerRenderPreparationResultFlagValues
@@ -246,7 +246,7 @@ namespace render {
         };
 
         SLayer &m_Layer;
-        CUICRendererImpl &m_Renderer;
+        Qt3DSRendererImpl &m_Renderer;
         NVAllocatorCallback &m_Allocator;
         // List of nodes we can render, not all may be active.  Found by doing a depth-first
         // search through m_FirstChild if length is zero.
@@ -295,9 +295,9 @@ namespace render {
         bool m_TooManyLightsError;
 
         // shadow mapps
-        NVScopedRefCounted<UICShadowMap> m_ShadowMapManager;
+        NVScopedRefCounted<Qt3DSShadowMap> m_ShadowMapManager;
 
-        SLayerRenderPreparationData(SLayer &inLayer, CUICRendererImpl &inRenderer);
+        SLayerRenderPreparationData(SLayer &inLayer, Qt3DSRendererImpl &inRenderer);
         virtual ~SLayerRenderPreparationData();
         bool GetOffscreenRenderer();
         bool GetShadowMapManager();

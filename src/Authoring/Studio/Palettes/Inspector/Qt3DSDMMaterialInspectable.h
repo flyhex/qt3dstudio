@@ -30,16 +30,16 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#ifndef INCLUDED_UICDM_MATERIAL_INSPECTABLE_H
-#define INCLUDED_UICDM_MATERIAL_INSPECTABLE_H 1
+#ifndef INCLUDED_QT3DSDM_MATERIAL_INSPECTABLE_H
+#define INCLUDED_QT3DSDM_MATERIAL_INSPECTABLE_H 1
 
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMInspectorGroup.h"
 
-class UICDMMaterialInspectorGroup : public Qt3DSDMInspectorGroup
+class Qt3DSDMMaterialInspectorGroup : public Qt3DSDMInspectorGroup
 {
 public:
-    UICDMMaterialInspectorGroup(CStudioApp &inApp, const Q3DStudio::CString &inName,
+    Qt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const Q3DStudio::CString &inName,
                                 Qt3DSDMInspectable &inInspectable, long inIndex);
 
     virtual bool isMaterialGroup() const = 0;

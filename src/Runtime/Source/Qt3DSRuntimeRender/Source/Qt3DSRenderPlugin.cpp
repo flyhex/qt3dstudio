@@ -63,20 +63,20 @@ typedef struct _RenderPluginSurfaceDescriptionV1
 {
     long m_Width;
     long m_Height;
-    enum EUICRenderPluginDepthTypes m_DepthBuffer;
-    enum EUICRenderPluginTextureTypes m_ColorBuffer;
-    TUICBOOL m_HasStencilBuffer;
+    enum QT3DSRenderPluginDepthTypes m_DepthBuffer;
+    enum QT3DSRenderPluginTextureTypes m_ColorBuffer;
+    TBool m_HasStencilBuffer;
 } TRenderPluginSurfaceDescriptionV1;
 
 typedef TNeedsRenderResult (*TNeedsRenderFunctionV1)(TRenderPluginClassPtr cls,
                                                      TRenderPluginInstancePtr instance,
                                                      TRenderPluginSurfaceDescriptionV1 surface,
-                                                     TUICVec2 presScaleFactor);
+                                                     TVec2 presScaleFactor);
 
 typedef void (*TRenderFunctionV1)(TRenderPluginClassPtr cls, TRenderPluginInstancePtr instance,
                                   TRenderPluginSurfaceDescriptionV1 surface,
-                                  TUICVec2 presScaleFactor,
-                                  EUICRenderPluginColorClearState inClearColorBuffer);
+                                  TVec2 presScaleFactor,
+                                  QT3DSRenderPluginColorClearState inClearColorBuffer);
 
 // End API version 1 definitions
 
@@ -85,22 +85,22 @@ TRenderPluginSurfaceDescription ToCInterface(const SOffscreenRendererEnvironment
     TRenderPluginSurfaceDescription retval;
     retval.m_Width = (long)env.m_Width;
     retval.m_Height = (long)env.m_Height;
-    retval.m_ColorBuffer = static_cast<EUICRenderPluginTextureTypes>(env.m_Format);
-    retval.m_DepthBuffer = static_cast<EUICRenderPluginDepthTypes>(env.m_Depth);
-    retval.m_HasStencilBuffer = env.m_Stencil ? UICTRUE : UICFALSE;
-    retval.m_MSAALevel = EUICRenderPluginMSAALevelNoMSAA;
+    retval.m_ColorBuffer = static_cast<QT3DSRenderPluginTextureTypes>(env.m_Format);
+    retval.m_DepthBuffer = static_cast<QT3DSRenderPluginDepthTypes>(env.m_Depth);
+    retval.m_HasStencilBuffer = env.m_Stencil ? TTRUE : TFALSE;
+    retval.m_MSAALevel = QT3DSRenderPluginMSAALevelNoMSAA;
     // note no supersampling AA support for plugins
     // we fall back to 4xMSAA
     switch (env.m_MSAAMode) {
     case AAModeValues::X2:
-        retval.m_MSAALevel = EUICRenderPluginMSAALevelTwo;
+        retval.m_MSAALevel = QT3DSRenderPluginMSAALevelTwo;
         break;
     case AAModeValues::SSAA:
     case AAModeValues::X4:
-        retval.m_MSAALevel = EUICRenderPluginMSAALevelFour;
+        retval.m_MSAALevel = QT3DSRenderPluginMSAALevelFour;
         break;
     case AAModeValues::X8:
-        retval.m_MSAALevel = EUICRenderPluginMSAALevelEight;
+        retval.m_MSAALevel = QT3DSRenderPluginMSAALevelEight;
         break;
     default:
         QT3DS_ASSERT(false);
@@ -116,29 +116,29 @@ TRenderPluginSurfaceDescriptionV1 ToCInterfaceV1(const SOffscreenRendererEnviron
     TRenderPluginSurfaceDescriptionV1 retval;
     retval.m_Width = (long)env.m_Width;
     retval.m_Height = (long)env.m_Height;
-    retval.m_ColorBuffer = static_cast<EUICRenderPluginTextureTypes>(env.m_Format);
-    retval.m_DepthBuffer = static_cast<EUICRenderPluginDepthTypes>(env.m_Depth);
-    retval.m_HasStencilBuffer = env.m_Stencil ? UICTRUE : UICFALSE;
+    retval.m_ColorBuffer = static_cast<QT3DSRenderPluginTextureTypes>(env.m_Format);
+    retval.m_DepthBuffer = static_cast<QT3DSRenderPluginDepthTypes>(env.m_Depth);
+    retval.m_HasStencilBuffer = env.m_Stencil ? TTRUE : TFALSE;
     return retval;
 }
 
-TUICVec2 ToCInterface(const QT3DSVec2 &item)
+TVec2 ToCInterface(const QT3DSVec2 &item)
 {
-    TUICVec2 retval = { item.x, item.y };
+    TVec2 retval = { item.x, item.y };
     return retval;
 }
 
-EUICRenderPluginColorClearState ToCInterface(SScene::RenderClearCommand inClearCommand)
+QT3DSRenderPluginColorClearState ToCInterface(SScene::RenderClearCommand inClearCommand)
 {
     switch (inClearCommand) {
     case SScene::DoNotClear:
-        return EUICRenderPluginColorClearStateDoNotClear;
+        return QT3DSRenderPluginColorClearStateDoNotClear;
     case SScene::AlwaysClear:
-        return EUICRenderPluginColorClearStateAlwaysClear;
+        return QT3DSRenderPluginColorClearStateAlwaysClear;
     default:
         QT3DS_ASSERT(false); // fallthrough intentional
     case SScene::ClearIsOptional:
-        return EUICRenderPluginColorClearStateClearIsOptional;
+        return QT3DSRenderPluginColorClearStateClearIsOptional;
     };
 }
 
@@ -183,22 +183,22 @@ public:
         retval.m_PropName = inPropName.c_str();
         switch (m_Value.getType()) {
         case RenderPluginPropertyValueTypes::Long: {
-            retval.m_PropertyType = EUICRenderPluginPropertyTypeLong;
+            retval.m_PropertyType = QT3DSRenderPluginPropertyTypeLong;
             long temp = (long)m_Value.getData<QT3DSI32>();
             retval.m_PropertyValue = *reinterpret_cast<void **>(&temp);
         } break;
         case RenderPluginPropertyValueTypes::Float: {
-            retval.m_PropertyType = EUICRenderPluginPropertyTypeFloat;
+            retval.m_PropertyType = QT3DSRenderPluginPropertyTypeFloat;
             float temp = m_Value.getData<QT3DSF32>();
             retval.m_PropertyValue = *reinterpret_cast<void **>(&temp);
         } break;
         case RenderPluginPropertyValueTypes::Boolean: {
-            retval.m_PropertyType = EUICRenderPluginPropertyTypeLong;
-            long temp = m_Value.getData<bool>() ? UICTRUE : UICFALSE;
+            retval.m_PropertyType = QT3DSRenderPluginPropertyTypeLong;
+            long temp = m_Value.getData<bool>() ? TTRUE : TFALSE;
             retval.m_PropertyValue = *reinterpret_cast<void **>(&temp);
         } break;
         case RenderPluginPropertyValueTypes::String: {
-            retval.m_PropertyType = EUICRenderPluginPropertyTypeCharPtr;
+            retval.m_PropertyType = QT3DSRenderPluginPropertyTypeCharPtr;
             const char *temp = m_Value.getData<CRegisteredString>().c_str();
             retval.m_PropertyValue = reinterpret_cast<void *>(const_cast<char *>(temp));
         } break;
@@ -220,46 +220,46 @@ struct IInternalPluginClass : public IRenderPluginClass
     virtual QT3DSI32 GetAPIVersion() = 0;
 };
 
-static NVRenderTextureFormats::Enum ToTextureFormat(EUICRenderPluginTextureTypes inTextureType)
+static NVRenderTextureFormats::Enum ToTextureFormat(QT3DSRenderPluginTextureTypes inTextureType)
 {
     switch (inTextureType) {
     default:
-    case EUICRenderPluginTextureTypeRGBA8:
+    case QT3DSRenderPluginTextureTypeRGBA8:
         return NVRenderTextureFormats::RGBA8;
-    case EUICRenderPluginTextureTypeRGB8:
+    case QT3DSRenderPluginTextureTypeRGB8:
         return NVRenderTextureFormats::RGB8;
-    case EUICRenderPluginTextureTypeRGB565:
+    case QT3DSRenderPluginTextureTypeRGB565:
         return NVRenderTextureFormats::RGB565;
-    case EUICRenderPluginTextureTypeRGBA5551:
+    case QT3DSRenderPluginTextureTypeRGBA5551:
         return NVRenderTextureFormats::RGBA5551;
     }
 }
 
-static OffscreenRendererDepthValues::Enum ToDepthValue(EUICRenderPluginDepthTypes inType)
+static OffscreenRendererDepthValues::Enum ToDepthValue(QT3DSRenderPluginDepthTypes inType)
 {
     switch (inType) {
     default:
-    case EUICRenderPluginDepthTypeDepth16:
+    case QT3DSRenderPluginDepthTypeDepth16:
         return OffscreenRendererDepthValues::Depth16;
-    case EUICRenderPluginDepthTypeDepth24:
+    case QT3DSRenderPluginDepthTypeDepth24:
         return OffscreenRendererDepthValues::Depth24;
-    case EUICRenderPluginDepthTypeDepth32:
+    case QT3DSRenderPluginDepthTypeDepth32:
         return OffscreenRendererDepthValues::Depth32;
     }
 }
 
-static AAModeValues::Enum ToAAMode(EUICRenderPluginMSAALevel inMode)
+static AAModeValues::Enum ToAAMode(QT3DSRenderPluginMSAALevel inMode)
 {
     switch (inMode) {
-    case EUICRenderPluginMSAALevelTwo:
+    case QT3DSRenderPluginMSAALevelTwo:
         return AAModeValues::X2;
-    case EUICRenderPluginMSAALevelFour:
+    case QT3DSRenderPluginMSAALevelFour:
         return AAModeValues::X4;
-    case EUICRenderPluginMSAALevelEight:
+    case QT3DSRenderPluginMSAALevelEight:
         return AAModeValues::X8;
     default:
         QT3DS_ASSERT(false); // fallthrough intentional
-    case EUICRenderPluginMSAALevelNoMSAA:
+    case QT3DSRenderPluginMSAALevelNoMSAA:
         return AAModeValues::NoAA;
     }
 }
@@ -310,7 +310,7 @@ struct InstanceImpl : public IRenderPluginInstance
     SOffscreenRendererEnvironment GetDesiredEnvironment(QT3DSVec2 inPresentationScaleFactor) override
     {
         if (m_Class.QueryInstanceRenderSurface) {
-            EUICRenderPluginMSAALevel theLevel = EUICRenderPluginMSAALevelNoMSAA;
+            QT3DSRenderPluginMSAALevel theLevel = QT3DSRenderPluginMSAALevelNoMSAA;
             TRenderPluginSurfaceDescription desc = m_Class.QueryInstanceRenderSurface(
                 m_Class.m_Class, m_Instance, ToCInterface(inPresentationScaleFactor));
             if (m_Owner->GetAPIVersion() > 1)

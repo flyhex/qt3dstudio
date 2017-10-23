@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 #pragma once
-#ifndef UICIMPORTSTRINGTABLEH
-#define UICIMPORTSTRINGTABLEH
+#ifndef QT3DS_IMPORT_STRINGTABLE_H
+#define QT3DS_IMPORT_STRINGTABLE_H
 
 #include <string>
 #include <EABase/eabase.h>

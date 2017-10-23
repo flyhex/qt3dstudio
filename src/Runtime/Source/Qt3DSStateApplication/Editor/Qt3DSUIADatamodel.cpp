@@ -42,10 +42,10 @@
 #include "foundation/StringConversionImpl.h"
 #include "Qt3DSDMStringTable.h"
 
-using namespace uic::app;
-using uic::render::IInputStreamFactory;
+using namespace qt3ds::app;
+using qt3ds::render::IInputStreamFactory;
 
-namespace uic {
+namespace qt3ds {
 namespace app {
 
     struct ElementSubTypes
@@ -1347,8 +1347,8 @@ struct DatamodelImpl : public IDatamodel,
         }
     };
 
-    static const char *GetUICNamespace() { return "http://qt.io/qt3dstudio/uia"; }
-    static const char *GetOldUICNamespace() { return "http://qt.io/qt3dstudio/uicomposer"; }
+    static const char *GetNamespace() { return "http://qt.io/qt3dstudio/uia"; }
+    static const char *GetOldNamespace() { return "http://qt.io/qt3dstudio/uicomposer"; }
 
     void LoadUIADatabase()
     {
@@ -1397,9 +1397,9 @@ struct DatamodelImpl : public IDatamodel,
             CDOMSerializer::Read(*theFactory, inStream, &theXmlErrorWriter);
         if (parseResult.second != NULL) {
             qt3ds::foundation::CRegisteredString theRegisteredOldNamespace =
-                m_StringTable->RegisterStr(GetOldUICNamespace());
+                m_StringTable->RegisterStr(GetOldNamespace());
             qt3ds::foundation::CRegisteredString theRegisteredNamespace =
-                m_StringTable->RegisterStr(GetUICNamespace());
+                m_StringTable->RegisterStr(GetNamespace());
 
             ReplaceDOMNamespace(*parseResult.second, theRegisteredOldNamespace,
                                 theRegisteredNamespace);
@@ -1416,12 +1416,12 @@ struct DatamodelImpl : public IDatamodel,
 
         if (m_UIADocument.first.mPtr == NULL) {
             m_UIADocument = IDOMWriter::CreateDOMWriter(m_Foundation->getAllocator(), "application",
-                                                        m_StringTable, GetUICNamespace());
+                                                        m_StringTable, GetNamespace());
             m_Dirty = true;
         }
         if (m_UIANamespaces.empty())
             m_UIANamespaces.push_back(
-                SNamespacePair(m_StringTable->RegisterStr(GetUICNamespace())));
+                SNamespacePair(m_StringTable->RegisterStr(GetNamespace())));
 
         {
             NVScopedReleasable<Q3DStudio::IRuntimeMetaData> theMetaData(
@@ -1597,7 +1597,7 @@ struct DatamodelImpl : public IDatamodel,
         // Get an ID for the editor
         IDOMReader::Scope __appScope(*m_UIADocument.second);
         if (!m_UIADocument.second->MoveToFirstChild("assets")) {
-            m_UIADocument.first->Begin("assets", GetUICNamespace());
+            m_UIADocument.first->Begin("assets", GetNamespace());
         }
 
         {
@@ -1619,8 +1619,8 @@ struct DatamodelImpl : public IDatamodel,
 
         eastl::string dirname, fname, extension;
         CFileTools::Split(normalizedPath.c_str(), dirname, fname, extension);
-        m_UIADocument.first->Begin("statemachine", GetUICNamespace());
-        m_UIADocument.first->Att("id", fname.c_str(), GetUICNamespace());
+        m_UIADocument.first->Begin("statemachine", GetNamespace());
+        m_UIADocument.first->Att("id", fname.c_str(), GetNamespace());
         eastl::string relativePath;
         CFileTools::GetRelativeFromBase(appDir, normalizedPath, relativePath);
         m_UIADocument.first->Att("src", relativePath.c_str());
@@ -2087,12 +2087,12 @@ struct DatamodelImpl : public IDatamodel,
             break;
         }
         if (!isTrivial(elemName))
-            inWriter.Begin(elemName, GetUICNamespace());
+            inWriter.Begin(elemName, GetNamespace());
 
         eastl::vector<SPropertyDeclaration> properties;
         for (size_t idx = 0, end = inEntry->m_Editors.size(); idx < end; ++idx) {
             TObjPtr editor(inEntry->m_Editors[idx]);
-            IDOMWriter::Scope __contentScope(inWriter, editor->TypeName(), GetUICNamespace());
+            IDOMWriter::Scope __contentScope(inWriter, editor->TypeName(), GetNamespace());
             editor->GetProperties(properties);
             bool theNoProperty = true;
             for (size_t idx = 0, end = properties.size(); idx < end; ++idx) {
@@ -2100,12 +2100,12 @@ struct DatamodelImpl : public IDatamodel,
                     editor->GetPropertyValue(properties[idx].m_Name)->getData<TEditorStr>();
                 if (theProp.empty() == false) {
                     inWriter.Att(properties[idx].m_Name.c_str(), theProp.c_str(),
-                                 GetUICNamespace());
+                                 GetNamespace());
                     theNoProperty = false;
                 }
             }
             if (theNoProperty && properties.size() > 0)
-                inWriter.Att(properties[0].m_Name.c_str(), "", GetUICNamespace());
+                inWriter.Att(properties[0].m_Name.c_str(), "", GetNamespace());
         }
 
         if (!isTrivial(elemName))
@@ -2119,7 +2119,7 @@ struct DatamodelImpl : public IDatamodel,
         if (AreEqual(typeName, "transition"))
             stateName = "transition";
         eastl::string tempAtt;
-        IDOMWriter::Scope __stateScope(writer, stateName, GetUICNamespace());
+        IDOMWriter::Scope __stateScope(writer, stateName, GetNamespace());
         tempAtt.assign("#");
         tempAtt.append(id);
         writer.Att("ref", tempAtt.c_str());
@@ -2135,7 +2135,7 @@ struct DatamodelImpl : public IDatamodel,
             IDOMFactory::CreateDOMFactory(m_Foundation->getAllocator(), m_StringTable));
         NVScopedRefCounted<IDOMWriter> outgoingDoc =
             IDOMWriter::CreateDOMWriter(m_Foundation->getAllocator(), "application", m_StringTable,
-                                        GetUICNamespace())
+                                        GetNamespace())
                 .first;
         {
             m_UIADocument.second->MoveToFirstChild("application");
@@ -2162,11 +2162,11 @@ struct DatamodelImpl : public IDatamodel,
                     QT3DS_ASSERT(false);
                     return false;
                 }
-                IDOMWriter::Scope __machineScope(*outgoingDoc, "statemachine", GetUICNamespace());
+                IDOMWriter::Scope __machineScope(*outgoingDoc, "statemachine", GetNamespace());
                 tempAtt.assign("#");
                 tempAtt.append(iter->first);
                 outgoingDoc->Att("ref", tempAtt.c_str());
-                IDOMWriter::Scope __vsScope(*outgoingDoc, "visual-states", GetUICNamespace());
+                IDOMWriter::Scope __vsScope(*outgoingDoc, "visual-states", GetNamespace());
                 const TIdEntryExitMap &itemMap = iter->second;
                 for (TIdEntryExitMap::const_iterator stateIter = itemMap.begin(),
                                                      stateEnd = itemMap.end();
@@ -2347,7 +2347,7 @@ struct DatamodelImpl : public IDatamodel,
     virtual void OnCopy(TEditorPtr inEditor, eastl::vector<SStateNode *> &ioCopiedRoots,
                         IDOMWriter &ioWriter, eastl::vector<SNamespacePair> &ioNamespaces)
     {
-        ioNamespaces.push_back(SNamespacePair(m_StringTable->RegisterStr(GetUICNamespace()),
+        ioNamespaces.push_back(SNamespacePair(m_StringTable->RegisterStr(GetNamespace()),
                                               m_StringTable->RegisterStr("uia")));
         eastl::vector<SEditorEntry>::iterator entry =
             eastl::find_if(m_Editors.begin(), m_Editors.end(), SEditorFinder(inEditor));
@@ -2356,7 +2356,7 @@ struct DatamodelImpl : public IDatamodel,
         TIdStateMapMap::iterator mapEntry = m_IdToStateMaps.find(entry->m_Id);
         if (mapEntry == m_IdToStateMaps.end())
             return;
-        IDOMWriter::Scope __modelScope(ioWriter, "datamodel_fragment", GetUICNamespace());
+        IDOMWriter::Scope __modelScope(ioWriter, "datamodel_fragment", GetNamespace());
         for (size_t idx = 0, end = ioCopiedRoots.size(); idx < end; ++idx) {
             CopyStateNode(*ioCopiedRoots[idx], mapEntry->second, ioWriter);
         }
@@ -2502,7 +2502,7 @@ struct DatamodelImpl : public IDatamodel,
 };
 }
 
-IDatamodel &IDatamodel::Create(uic::state::editor::TFoundationPtr inFoundation,
+IDatamodel &IDatamodel::Create(qt3ds::state::editor::TFoundationPtr inFoundation,
                                const TEditorStr &inPath, const TEditorStr &inAppDir,
                                IStateMachineEditorManager &inStateMachineEditorManager,
                                IInStream *inStream)
@@ -2512,7 +2512,7 @@ IDatamodel &IDatamodel::Create(uic::state::editor::TFoundationPtr inFoundation,
                               inStream);
 }
 
-IDatamodel &IDatamodel::Create(uic::state::editor::TFoundationPtr inFoundation,
+IDatamodel &IDatamodel::Create(qt3ds::state::editor::TFoundationPtr inFoundation,
                                const TEditorStr &inPath, const TEditorStr &inAppDir,
                                IStateMachineEditorManager &inStateMachineEditorManager,
                                IStringTable &inStringTable, IInStream *inStream)

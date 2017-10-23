@@ -139,7 +139,7 @@ extern CComModule _Module;
 //==============================================================================
 //	Global Variables
 //==============================================================================
-QT3DS_LOGEXTERN; // Enables access to the logger for all files.  See UICLog for more info.
+QT3DS_LOGEXTERN; // Enables access to the logger for all files.  See Qt3DSLog for more info.
 
 // I put these in to help with some of the data model compile times.
 #ifdef _WIN32

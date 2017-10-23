@@ -66,8 +66,8 @@ bool SortKeyframeByTime(const Qt3DSDMTimelineKeyframe *inLHS, const Qt3DSDMTimel
     return inLHS->GetTime() < inRHS->GetTime();
 }
 
-// UICDM stores it from 0..1, UI expects 0..255
-inline float UICDMToColor(float inValue)
+// DataModel stores it from 0..1, UI expects 0..255
+inline float DataModelToColor(float inValue)
 {
     return inValue * 255;
 }
@@ -210,7 +210,7 @@ float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
     float theRetVal = FLT_MIN;
     do_all(m_Keyframes, boost::bind(CompareAndSet, _1, boost::ref(theRetVal), true));
     if (m_Type.first == DataModelDataType::Float3 && m_Type.second == AdditionalMetaDataType::Color)
-        theRetVal = UICDMToColor(theRetVal);
+        theRetVal = DataModelToColor(theRetVal);
     return theRetVal;
 }
 
@@ -220,7 +220,7 @@ float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
     float theRetVal = FLT_MAX;
     do_all(m_Keyframes, boost::bind(CompareAndSet, _1, boost::ref(theRetVal), false));
     if (m_Type.first == DataModelDataType::Float3 && m_Type.second == AdditionalMetaDataType::Color)
-        theRetVal = UICDMToColor(theRetVal);
+        theRetVal = DataModelToColor(theRetVal);
     return theRetVal;
 }
 
@@ -320,7 +320,7 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
                 if (m_Type.second == AdditionalMetaDataType::Color) {
                     SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
                     if (inChannelIndex >= 0 && inChannelIndex < 3)
-                        return UICDMToColor(theFloat3[inChannelIndex]);
+                        return DataModelToColor(theFloat3[inChannelIndex]);
                 } else {
                     SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
                     if (inChannelIndex >= 0 && inChannelIndex < 3)
@@ -349,7 +349,7 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
             m_AnimationHandles[inChannelIndex], Qt3DSDMTimelineKeyframe::GetTimeInSecs(inTime));
         if (m_Type.first == DataModelDataType::Float3
             && m_Type.second == AdditionalMetaDataType::Color)
-            theValue = UICDMToColor(theValue);
+            theValue = DataModelToColor(theValue);
 
         return theValue;
     }

@@ -61,7 +61,7 @@ QT_END_NAMESPACE
  * Generic cross-platform class for showing message boxes with an Ok and Cancel
  * button
  */
-class CUICMessageBox
+class Qt3DSMessageBox
 {
 public:
     /// Return codes from the message box
@@ -77,8 +77,8 @@ public:
 
     typedef QWidget* TPlatformWindow;
 
-    CUICMessageBox();
-    virtual ~CUICMessageBox();
+    Qt3DSMessageBox();
+    virtual ~Qt3DSMessageBox();
     static EMessageBoxReturn Show(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
                                   EMessageBoxIcon inIcon, bool inShowCancel = false,
                                   TPlatformWindow inParentWindow = NULL);

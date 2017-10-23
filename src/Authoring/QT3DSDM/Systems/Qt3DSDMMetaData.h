@@ -98,8 +98,8 @@ struct SMetaDataLoadWarning
 };
 
 /**
- *	Meta data class to hold meta data descriptions of the objects used in UICDM.
- *	A user-visible type in UICDM (things in the timeline) has a specific set of metadata,
+ *	Meta data class to hold meta data descriptions of the objects used in DataModel.
+ *	A user-visible type in DataModel (things in the timeline) has a specific set of metadata,
  *	the type can have properties, events, handlers, and references.
  *
  *	Properties are exactly what they sound like.  Events are messages the object can send,

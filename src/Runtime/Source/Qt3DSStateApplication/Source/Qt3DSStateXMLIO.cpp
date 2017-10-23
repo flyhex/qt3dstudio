@@ -165,7 +165,7 @@ struct SParseContext
     TExternalTransitionList m_ExternalTransitions;
     CRegisteredString m_SCXMLNamespace;
     CRegisteredString m_StudioNamespace;
-    QT3DSI32 m_UICVersion;
+    QT3DSI32 m_Version;
 
     SParseContext(NVAllocatorCallback &inGraphAlloc, NVFoundationBase &inFnd, IDOMReader &inReader,
                   IStateContext &inCtx, IStringTable &inStrTable, IEditor *inEditor)
@@ -181,7 +181,7 @@ struct SParseContext
         , m_SendReferences(inFnd.getAllocator(), "m_StrReferences")
         , m_GenerateIdList(inFnd.getAllocator(), "m_GenerateIdList")
         , m_ExternalTransitions(inFnd.getAllocator(), "m_ExternalTransitions")
-        , m_UICVersion(SSCXML::GetCurrentUICVersion())
+        , m_Version(SSCXML::GetCurrentVersion())
     {
 #define HANDLE_XML_ELEMENT_NAME(nm) m_Names[SXMLName::e##nm] = inStrTable.RegisterStr(#nm);
         ITERATE_XML_ELEMENT_NAMES
@@ -743,7 +743,7 @@ struct SParseContext
 
         retval->m_Condition = ParseStrAtt("cond");
         // Position and such is only valid for transitions after UIC version 0.
-        if (m_UICVersion > 0) {
+        if (m_Version > 0) {
             QT3DSVec2 endPos;
             if (ParseVec2Att("end_position", endPos))
                 retval->SetEndPosition(endPos);
@@ -1033,11 +1033,11 @@ struct SParseContext
         ParseStrAtt("name", retval->m_Name);
         const char8_t *uicVersion;
         if (!m_Reader.UnregisteredAtt("version", uicVersion, GetStudioStateNamespace()))
-            retval->m_UICVersion = 0;
+            retval->m_Version = 0;
         else {
-            StringConversion<QT3DSI32>().StrTo(uicVersion, retval->m_UICVersion);
+            StringConversion<QT3DSI32>().StrTo(uicVersion, retval->m_Version);
         }
-        m_UICVersion = retval->m_UICVersion;
+        m_Version = retval->m_Version;
         const char8_t *desc;
         if (m_Editor && m_Reader.UnregisteredAtt("description", desc))
             m_Editor->GetOrCreate(*retval)->SetPropertyValue("description", desc);
@@ -1239,12 +1239,12 @@ struct SWriteContext
         m_Writer.Att(inName, (const char8_t *)m_Buffer.begin(), GetStudioStateNamespace());
     }
 
-    void WriteEditorAttributes(void *inType, bool inUICId, bool inAdjustPos = false)
+    void WriteEditorAttributes(void *inType, bool idId, bool inAdjustPos = false)
     {
         if (m_Editor) {
             TObjPtr editorObj = m_Editor->GetEditor(inType);
             if (editorObj != NULL) {
-                if (inUICId) {
+                if (idId) {
                     eastl::string name = editorObj->GetId();
                     if (name.empty() == false)
                         m_Writer.Att("id", name.c_str(), GetStudioStateNamespace());
@@ -1664,7 +1664,7 @@ struct SWriteContext
         if (item.m_Flags.IsLateBinding())
             Att("binding", "late");
         Att("version", "1");
-        m_Writer.Att("version", SSCXML::GetCurrentUICVersion(), GetStudioStateNamespace());
+        m_Writer.Att("version", SSCXML::GetCurrentVersion(), GetStudioStateNamespace());
 
         if (!isTrivial(item.m_InitialExpr)) {
             m_Writer.Att("initialexpr", item.m_InitialExpr, GetStudioStateNamespace());

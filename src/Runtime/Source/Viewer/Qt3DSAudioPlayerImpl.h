@@ -36,11 +36,11 @@
 
 namespace Q3DSViewer {
 
-class QT3DS_RUNTIME_API CUICAudioPlayerImpl : public Q3DStudio::IAudioPlayer
+class QT3DS_RUNTIME_API Qt3DSAudioPlayerImpl : public Q3DStudio::IAudioPlayer
 {
 public:
-    CUICAudioPlayerImpl();
-    virtual ~CUICAudioPlayerImpl();
+    Qt3DSAudioPlayerImpl();
+    virtual ~Qt3DSAudioPlayerImpl();
     bool PlaySoundFile(const char *inFilePath) override;
 };
 }

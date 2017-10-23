@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef __UICPOINTBASE_H__
-#define __UICPOINTBASE_H__
+#ifndef __QT3DS_POINTBASE_H__
+#define __QT3DS_POINTBASE_H__
 
 namespace Q3DStudio {
 
@@ -53,4 +53,4 @@ public:
 
 } // namespace Q3DStudio
 
-#endif // __UICPOINTBASE_H__
+#endif // __QT3DS_POINTBASE_H__

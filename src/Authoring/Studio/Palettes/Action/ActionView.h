@@ -179,7 +179,7 @@ private:
     ActionModel *m_actionsModel = nullptr;
     PropertyModel *m_propertyModel = nullptr;
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_connections; /// connections to the UICDM
+        m_connections; /// connections to the DataModel
     QPointer<ObjectListModel> m_objectsModel;
     QPointer<ObjectBrowserView> m_triggerObjectBrowser;
     QPointer<ObjectBrowserView> m_targetObjectBrowser;

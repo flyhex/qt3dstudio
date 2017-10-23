@@ -172,13 +172,13 @@ struct SMetaDataData
     : public qt3ds::foundation::
           DiscriminatedUnion<qt3ds::foundation::
                                  DiscriminatedUnionGenericBase<SMetaDataValueTraits,
-                                                               SUICDMDataTypeUnionTraits::
+                                                               Qt3DSDMDataTypeUnionTraits::
                                                                    TBufferSize>,
                              SMetaDataValueTraits::TBufferSize>
 {
     typedef qt3ds::foundation::
         DiscriminatedUnion<qt3ds::foundation::DiscriminatedUnionGenericBase<SMetaDataValueTraits,
-                                                                         SUICDMDataTypeUnionTraits::
+                                                                         Qt3DSDMDataTypeUnionTraits::
                                                                              TBufferSize>,
                            SMetaDataValueTraits::TBufferSize>
             TBase;
@@ -214,7 +214,7 @@ struct SMetaDataData
 };
 
 template <>
-struct SUICDMGetter<SMetaDataData>
+struct Qt3DSDMGetter<SMetaDataData>
 {
     template <typename TRetType>
     TRetType doGet(const SMetaDataData &inValue)
@@ -224,7 +224,7 @@ struct SUICDMGetter<SMetaDataData>
 };
 
 template <>
-struct SUICDMValueTyper<SMetaDataData>
+struct Qt3DSDMValueTyper<SMetaDataData>
 {
     AdditionalMetaDataType::Value Get(const SMetaDataData &inValue) { return inValue.getType(); }
 };
@@ -240,7 +240,7 @@ inline QStringList get<QStringList>(const qt3dsdm::SMetaDataData &inType)
         return result;
 
     auto list = qt3dsdm::get<qt3dsdm::TMetaDataStringList>(inType);
-    std::transform(list.begin(), list.end(), std::back_inserter(result), [](const SUICDMStr &s) {
+    std::transform(list.begin(), list.end(), std::back_inserter(result), [](const Qt3DSDMStr &s) {
         return QString::fromWCharArray(s.wide_str());
     });
     return result;

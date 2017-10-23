@@ -37,7 +37,7 @@ namespace qt3ds {
 namespace render {
 
     // forward declararion
-    class UICRenderPrefilterTexture;
+    class Qt3DSRenderPrefilterTexture;
 
     struct ImageTextureFlagValues
     {
@@ -82,7 +82,7 @@ namespace render {
     {
         NVRenderTexture2D *m_Texture;
         SImageTextureFlags m_TextureFlags;
-        UICRenderPrefilterTexture *m_BSDFMipMap;
+        Qt3DSRenderPrefilterTexture *m_BSDFMipMap;
 
         SImageTextureData()
             : m_Texture(NULL)

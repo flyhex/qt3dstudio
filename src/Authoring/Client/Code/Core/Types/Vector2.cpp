@@ -388,7 +388,7 @@ float CVector2::DotProduct(const CVector2 &inVector)
 Q3DStudio::CString CVector2::toString()
 {
     Q3DStudio::CString theStringBuffer;
-    theStringBuffer.Format(_UIC("%.6f %.6f"), x, y);
+    theStringBuffer.Format(_LSTR("%.6f %.6f"), x, y);
     return theStringBuffer;
 }
 

@@ -40,7 +40,7 @@
 #include "Qt3DSStateExecutionTypes.h"
 #include "Qt3DSStateContext.h"
 
-namespace uic {
+namespace qt3ds {
 namespace state {
     namespace editor {
 

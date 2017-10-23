@@ -62,7 +62,7 @@ namespace render {
         m_AttachmentBits = 0;
 
         // release attachments
-        UICBASE_FOREACH(idx, (QT3DSU32)NVRenderFrameBufferAttachments::LastAttachment)
+        QT3DS_FOREACH(idx, (QT3DSU32)NVRenderFrameBufferAttachments::LastAttachment)
         {
             if ((NVRenderFrameBufferAttachments::Enum)idx
                     != NVRenderFrameBufferAttachments::DepthStencil

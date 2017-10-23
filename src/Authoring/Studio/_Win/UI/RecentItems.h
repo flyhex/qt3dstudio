@@ -39,7 +39,7 @@
 
 #include <vector>
 
-class CUICFile;
+class Qt3DSFile;
 
 QT_BEGIN_NAMESPACE
 class QMenu;
@@ -49,7 +49,7 @@ class CRecentItems : public QObject
 {
     Q_OBJECT
 
-    typedef std::vector<CUICFile> TFileList;
+    typedef std::vector<Qt3DSFile> TFileList;
 
 public:
     static const Q3DStudio::CString RECENTITEM_KEY;
@@ -63,10 +63,10 @@ public:
                  Q3DStudio::CString inPreferenceKey = RECENTITEM_KEY);
     virtual ~CRecentItems();
 
-    void AddRecentItem(const CUICFile &inItem);
-    void RemoveRecentItem(const CUICFile &inItem);
+    void AddRecentItem(const Qt3DSFile &inItem);
+    void RemoveRecentItem(const Qt3DSFile &inItem);
 
-    CUICFile GetItem(long inIndex);
+    Qt3DSFile GetItem(long inIndex);
     long GetItemCount() const { return (long)m_RecentItems.size(); }
 
 protected:

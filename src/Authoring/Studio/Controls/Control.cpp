@@ -1315,7 +1315,7 @@ CPt CControl::GetGlobalPosition(CPt inChildPoint) const
 /**
  * Query the platform specific render device (window)
  */
-UICRenderDevice CControl::GetPlatformDevice()
+Qt3DSRenderDevice CControl::GetPlatformDevice()
 {
     if (GetParent())
         return GetParent()->GetPlatformDevice();
@@ -1327,7 +1327,7 @@ UICRenderDevice CControl::GetPlatformDevice()
  * Does self or child use this render device?
  * @see CWndControl::OnKillFocus
  */
-bool CControl::IsChildPlatformDevice(UICRenderDevice inDevice)
+bool CControl::IsChildPlatformDevice(Qt3DSRenderDevice inDevice)
 {
     if (GetPlatformDevice() == inDevice)
         return true;

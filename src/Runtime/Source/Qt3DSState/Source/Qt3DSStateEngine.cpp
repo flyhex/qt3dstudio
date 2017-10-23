@@ -1066,7 +1066,7 @@ void CNDDStateEngine::CancelEvent(const char *inCancelId, const char *inMachineI
 
 namespace {
 
-class SUICFNDTimer : public Q3DStudio::ITimeProvider
+class Qt3DSFNDTimer : public Q3DStudio::ITimeProvider
 {
     Q3DStudio::INT64 GetCurrentTimeMicroSeconds() override
     {
@@ -1081,7 +1081,7 @@ class CNDDStateEngineDefault : public qt3ds::state::INDDStateEngine
 public:
     qt3ds::foundation::CAllocator m_Allocator;
     qt3ds::foundation::NVScopedRefCounted<qt3ds::NVFoundation> m_Foundation;
-    SUICFNDTimer m_TimeProvider;
+    Qt3DSFNDTimer m_TimeProvider;
     CNDDStateEngine &m_RealEngine;
 
     CNDDStateEngineDefault()
