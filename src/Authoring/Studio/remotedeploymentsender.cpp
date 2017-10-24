@@ -93,15 +93,22 @@ QPair<QString, int> ConnectionDialog::getInfo(QWidget *parent)
 
 RemoteDeploymentSender::RemoteDeploymentSender(QWidget *parent)
     : QObject(parent)
-    , m_tcpSocket(0)
+    , m_tcpSocket(nullptr)
     , m_mainWindow(parent)
+    , m_connectionError(nullptr)
 {
 }
 
-void RemoteDeploymentSender::connect()
+RemoteDeploymentSender::~RemoteDeploymentSender()
+{
+    delete m_tcpSocket;
+    delete m_connectionError;
+}
+
+QPair<QString, int> RemoteDeploymentSender::initConnection()
 {
     if (isConnected())
-        return;
+        return QPair<QString, int>();
 
     delete m_tcpSocket;
     m_tcpSocket = new QTcpSocket(this);
@@ -115,8 +122,11 @@ void RemoteDeploymentSender::connect()
                      (&QAbstractSocket::error),
                      this, &RemoteDeploymentSender::connectionError);
 
-    QPair<QString, int> info = ConnectionDialog::getInfo(m_mainWindow);
+    return ConnectionDialog::getInfo(m_mainWindow);
+ }
 
+void RemoteDeploymentSender::connect(const QPair<QString, int> &info)
+{
     m_tcpSocket->connectToHost(info.first, info.second);
     if (!m_tcpSocket->waitForConnected(2000)) {
         m_tcpSocket->abort();
@@ -143,11 +153,17 @@ void RemoteDeploymentSender::checkConnection()
 
 void RemoteDeploymentSender::connectionError()
 {
-    if (m_tcpSocket) {
-        QMessageBox::warning(m_mainWindow, tr("Connect to Device"),
-                             tr("Device connection error: ") + m_tcpSocket->errorString());
-    }
     Q_EMIT connectionChanged(isConnected());
+    if (m_tcpSocket) {
+        delete m_connectionError;
+        m_connectionError = new QMessageBox(QMessageBox::Warning, tr("Connect to Device"),
+                                            tr("Device connection error: ")
+                                            + m_tcpSocket->errorString(),
+                                            QMessageBox::Ok, m_mainWindow, Qt::Dialog
+                                            | Qt::MSWindowsFixedSizeDialogHint
+                                            | Qt::WindowStaysOnTopHint);
+        m_connectionError->open();
+    }
 }
 
 void RemoteDeploymentSender::streamProject(const QString &projectFile)

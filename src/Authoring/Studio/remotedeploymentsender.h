@@ -34,13 +34,17 @@
 #include <QtWidgets/qwidget.h>
 #include <QtNetwork/qtcpsocket.h>
 
+class QMessageBox;
+
 class RemoteDeploymentSender : public QObject
 {
     Q_OBJECT
 public:
     explicit RemoteDeploymentSender(QWidget *parent);
+    ~RemoteDeploymentSender();
 
-    void connect();
+    QPair<QString, int> initConnection();
+    void connect(const QPair<QString, int> &info);
     void disconnect();
     bool isConnected() const;
 
@@ -56,6 +60,7 @@ Q_SIGNALS:
 private:
     QTcpSocket *m_tcpSocket;
     QWidget *m_mainWindow;
+    QMessageBox *m_connectionError;
 };
 
 #endif // REMOTEDEPLOYMENTSENDER_H

@@ -1793,10 +1793,13 @@ void CMainFrame::OnFileConnectToDevice()
                         QObject::tr("Disconnecting from remote device...")), "");
         m_remoteDeploymentSender->disconnect();
     } else {
-        g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                    Q3DStudio::CString::fromQString(QObject::tr("Connecting to remote device...")),
-                    "");
-        m_remoteDeploymentSender->connect();
+        QPair<QString, int> info = m_remoteDeploymentSender->initConnection();
+        if (!info.first.isEmpty()) {
+            g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
+                        Q3DStudio::CString::fromQString(
+                            QObject::tr("Connecting to remote device...")), "");
+            m_remoteDeploymentSender->connect(info);
+        }
     }
 }
 
