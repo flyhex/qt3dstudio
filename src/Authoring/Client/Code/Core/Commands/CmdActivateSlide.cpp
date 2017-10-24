@@ -63,6 +63,8 @@ CCmdActivateSlide::~CCmdActivateSlide()
 
 unsigned long CCmdActivateSlide::Do()
 {
+    if (m_Doc->IsPlaying())
+        m_Doc->SetPlayMode(PLAYMODE_STOP);
     m_Doc->NotifyActiveSlideChanged(m_SlideHandle, m_ForceRefresh);
     return 0;
 }
