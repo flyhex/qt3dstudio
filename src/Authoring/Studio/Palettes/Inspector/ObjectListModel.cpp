@@ -200,8 +200,11 @@ QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle
         auto idx = index(i, 0, startIndex);
         if (static_cast<qt3dsdm::Qt3DSDMInstanceHandle>(idx.internalId()) == handle)
             return idx;
-        if (rowCount(idx) > 0)
-            return indexForHandle(handle, idx);
+        if (rowCount(idx) > 0) {
+            QModelIndex foundIndex = indexForHandle(handle, idx);
+            if (foundIndex.isValid())
+                return foundIndex;
+        }
     }
     return {};
 }
@@ -332,5 +335,42 @@ void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
     m_sourceModel = sourceModel;
     m_sourceInfo = collectSourceIndexes({}, 0);
     endResetModel();
+}
+
+// startIndex and searchIndex are source indexes
+bool FlatObjectListModel::expandTo(const QModelIndex &startIndex, const QModelIndex &searchIndex)
+{
+    // Found the index we are looking for. We don't want to expand it, so just return true.
+    if (startIndex == searchIndex)
+        return true;
+
+    // Look for the search index in children
+    const int rowCount = m_sourceModel->rowCount(startIndex);
+    for (int i = 0; i < rowCount; i++) {
+        auto idx = m_sourceModel->index(i, 0, startIndex);
+        if (idx == searchIndex) {
+            // Expand startIndex as that is the parent
+            setData(index(rowForSourceIndex(startIndex)), QVariant(true), ExpandedRole);
+            return true;
+        }
+        if (m_sourceModel->rowCount(idx) > 0) {
+            bool found = expandTo(idx, searchIndex);
+            if (found) {
+                // Found by some descendant. Keep expanding parents
+                setData(index(rowForSourceIndex(startIndex)), QVariant(true), ExpandedRole);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex)
+{
+    for (int i = 0; i < m_sourceInfo.size(); i++) {
+        if (m_sourceInfo[i].index == sourceIndex)
+            return i;
+    }
+    return -1;
 }
 

@@ -61,6 +61,7 @@ Rectangle {
             model: _objectBrowserView.model
             boundsBehavior: Flickable.StopAtBounds
             clip: true
+            currentIndex: _objectBrowserView.selection
 
             delegate: Item {
                 id: delegateItem
@@ -136,6 +137,14 @@ Rectangle {
             }
 
             onCurrentIndexChanged: _objectBrowserView.selection = currentIndex
+
+            Connections {
+                target: _objectBrowserView
+                onSelectionChanged: {
+                    if (browserList.currentIndex !== _objectBrowserView.selection)
+                        browserList.currentIndex = _objectBrowserView.selection;
+                }
+            }
         }
 
         StyledMenuSeparator {}

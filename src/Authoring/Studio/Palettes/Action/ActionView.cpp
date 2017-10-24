@@ -306,14 +306,19 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
 
     m_triggerObjectBrowser->setModel(m_objectsModel);
 
+    const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
+    const auto instanceHandle = GetBridge()->GetInstance(actionInfo.m_Owner,
+                                                         actionInfo.m_TriggerObject);
+    m_triggerObjectBrowser->selectAndExpand(instanceHandle);
+
     showBrowser(m_triggerObjectBrowser, point);
 
     connect(m_triggerObjectBrowser, &ObjectBrowserView::selectionChanged,
             this, [this] {
         auto selectedItem = m_triggerObjectBrowser->selectedHandle();
-        setTriggerObject(m_objRefHelper->GetAssetRefValue(selectedItem,
-                                                         m_itemHandle,
-                                                         (CRelativePathTools::EPathType)(m_triggerObjectBrowser->pathType())));
+        setTriggerObject(m_objRefHelper->GetAssetRefValue(
+                             selectedItem, m_itemHandle,
+                             (CRelativePathTools::EPathType)(m_triggerObjectBrowser->pathType())));
     });
 
     return m_triggerObjectBrowser;
@@ -331,14 +336,19 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
 
     m_targetObjectBrowser->setModel(m_objectsModel);
 
+    const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
+    const auto instanceHandle = GetBridge()->GetInstance(actionInfo.m_Owner,
+                                                         actionInfo.m_TargetObject);
+    m_targetObjectBrowser->selectAndExpand(instanceHandle);
+
     showBrowser(m_targetObjectBrowser, point);
 
     connect(m_targetObjectBrowser, &ObjectBrowserView::selectionChanged,
             this, [this] {
         auto selectedItem = m_targetObjectBrowser->selectedHandle();
-        setTargetObject(m_objRefHelper->GetAssetRefValue(selectedItem,
-                                                         m_itemHandle,
-                                                         (CRelativePathTools::EPathType)(m_targetObjectBrowser->pathType())));
+        setTargetObject(m_objRefHelper->GetAssetRefValue(
+                            selectedItem, m_itemHandle,
+                            (CRelativePathTools::EPathType)(m_targetObjectBrowser->pathType())));
         resetFiredEvent();
     });
 

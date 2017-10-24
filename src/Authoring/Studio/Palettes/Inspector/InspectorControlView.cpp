@@ -388,6 +388,13 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
 
     disconnect(m_objectReferenceView);
 
+    IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
+    if (objRefHelper) {
+        qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
+        qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
+        m_objectReferenceView->selectAndExpand(refInstance);
+    }
+
     showBrowser(m_objectReferenceView, point);
 
     connect(m_objectReferenceView, &ObjectBrowserView::selectionChanged,

@@ -116,6 +116,7 @@ public:
     void refresh();
 
     QVariant getPropertyValue(long instance, int handle);
+    qt3dsdm::SValue currentPropertyValue(long instance, int handle);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setRenderableValue(long instance, int handle, const QVariant &value);
@@ -169,8 +170,6 @@ private:
     InspectorControlBase *createItem(Qt3DSDMInspectable *inspectable,
                                      const qt3dsdm::SMetaDataPropertyInfo &metaProperty,
                                      int groupIndex);
-
-    qt3dsdm::SValue currentPropertyValue(long instance, int handle);
 
     QVector<GroupInspectorControl> computeTree(CInspectableBase *inspectBase);
     bool isTreeRebuildRequired(CInspectableBase *inspectBase) const;

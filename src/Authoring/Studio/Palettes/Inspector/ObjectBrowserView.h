@@ -64,6 +64,8 @@ public:
     Q_INVOKABLE QString name(int index) const;
     Q_INVOKABLE QString path(int index) const;
 
+    void selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
+
     int selection() const { return m_selection; }
     void setSelection(int index);
 

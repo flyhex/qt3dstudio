@@ -63,6 +63,9 @@ public:
 
     qt3dsdm::Qt3DSDMInstanceHandle baseHandle() const {return m_baseHandle;}
 
+    QModelIndex indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle,
+                               const QModelIndex &startIndex = {}) const;
+
 private:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
@@ -70,8 +73,6 @@ private:
                                                     const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
     QString nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
-
-    QModelIndex indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle, const QModelIndex &startIndex = {}) const;
 
     CCore *m_core;
     qt3dsdm::Qt3DSDMSlideHandle m_slideHandle;
@@ -99,7 +100,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     void setSourceModel(ObjectListModel *sourceModel);
-    ObjectListModel *sourceModel() const {return m_sourceModel;}
+    ObjectListModel *sourceModel() const { return m_sourceModel; }
+    bool expandTo(const QModelIndex &rootIndex, const QModelIndex &searchIndex);
+    int rowForSourceIndex(const QModelIndex &sourceIndex);
 
 private:
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
