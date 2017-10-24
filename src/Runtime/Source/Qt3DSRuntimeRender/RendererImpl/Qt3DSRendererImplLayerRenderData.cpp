@@ -1459,7 +1459,8 @@ namespace render {
                 theFB->Attach(theAttachment, NVRenderTextureOrRenderBuffer());
             }
 
-            if (thePrepResult.m_Flags.RequiresSsaoPass() && m_ProgressiveAAPassIndex == 0) {
+            if (thePrepResult.m_Flags.RequiresSsaoPass() && m_ProgressiveAAPassIndex == 0
+                    && m_Camera != nullptr) {
                 StartProfiling("AO pass", false);
                 // Setup FBO with single color buffer target
                 theFB->Attach(NVRenderFrameBufferAttachments::Color0, *m_LayerSsaoTexture);
