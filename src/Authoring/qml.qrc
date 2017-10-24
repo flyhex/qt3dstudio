@@ -22,7 +22,6 @@
         <file>Studio/Palettes/Inspector/ImageChooser.qml</file>
         <file>Studio/Palettes/Inspector/MeshChooser.qml</file>
         <file>Studio/Palettes/Inspector/HandlerGenericChooser.qml</file>
-        <file>Studio/Palettes/Inspector/ObjectReference.qml</file>
         <file>Studio/Palettes/Inspector/ChooserDelegate.qml</file>
         <file>Studio/Palettes/Inspector/TextureChooser.qml</file>
         <file>Studio/Palettes/Project/ProjectView.qml</file>

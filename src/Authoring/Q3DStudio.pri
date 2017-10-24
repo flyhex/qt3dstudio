@@ -143,8 +143,6 @@ SOURCES += \
     Studio/Palettes/Inspector/InspectorControlModel.cpp \
     Studio/Palettes/Inspector/ObjectListModel.cpp \
     Studio/Palettes/Inspector/ObjectBrowserView.cpp \
-    Studio/Palettes/Inspector/ObjectReferenceModel.cpp \
-    Studio/Palettes/Inspector/ObjectReferenceView.cpp \
     Studio/Palettes/Inspector/TabOrderHandler.cpp \
     Studio/Palettes/Inspector/MouseHelper.cpp \
     #Studio/Palettes/Master/MasterControl.cpp \
@@ -273,8 +271,6 @@ HEADERS += \
     Studio/Palettes/Inspector/ImageChooserModel.h \
     Studio/Palettes/Inspector/MeshChooserModel.h \
     Studio/Palettes/Inspector/MeshChooserView.h \
-    Studio/Palettes/Inspector/ObjectReferenceModel.h \
-    Studio/Palettes/Inspector/ObjectReferenceView.h \
     Studio/Palettes/Inspector/FileChooserView.h \
     Studio/Palettes/Inspector/FileChooserModel.h \
     Studio/Palettes/Inspector/TextureChooserView.h \
