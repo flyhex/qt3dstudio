@@ -88,20 +88,22 @@ ColumnLayout {
         id: xyzPropertyComponent
 
         HandlerPropertyXYZ {
-            readonly property var propValue: propertyModel && propertyModel.value.x ?
-                                             propertyModel.value
-                                             : undefined
+            readonly property var propValue: propertyModel && propertyModel.value
+                                             && propertyModel.value.x
+                                             ? propertyModel.value : undefined
             label: parent ? parent.label : ""
-            valueX: propValue !== undefined ? Number(propValue.x).toFixed(numberOfDecimal) : 0
-            valueY: propValue !== undefined ? Number(propValue.y).toFixed(numberOfDecimal) : 0
-            valueZ: propValue !== undefined ? Number(propValue.z).toFixed(numberOfDecimal) : 0
+            valueX: propValue !== undefined ? Number(propValue.x).toFixed(numberOfDecimal) : "0.000"
+            valueY: propValue !== undefined ? Number(propValue.y).toFixed(numberOfDecimal) : "0.000"
+            valueZ: propValue !== undefined ? Number(propValue.z).toFixed(numberOfDecimal) : "0.000"
 
             onPropValueChanged: {
                 // FloatTextField can set its text internally, thus breaking the binding, so
                 // let's set the text value explicitly each time value changes
-                valueX = Number(propValue.x).toFixed(numberOfDecimal);
-                valueY = Number(propValue.y).toFixed(numberOfDecimal);
-                valueZ = Number(propValue.z).toFixed(numberOfDecimal);
+                if (propValue !== undefined) {
+                    valueX = Number(propValue.x).toFixed(numberOfDecimal);
+                    valueY = Number(propValue.y).toFixed(numberOfDecimal);
+                    valueZ = Number(propValue.z).toFixed(numberOfDecimal);
+                }
             }
 
             onEditingFinished: {
