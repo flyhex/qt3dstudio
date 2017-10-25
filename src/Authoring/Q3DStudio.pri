@@ -259,10 +259,8 @@ HEADERS += \
     Studio/Palettes/Timeline/Bindings/ITimelineItemProperty.h \
     Studio/Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Studio/Palettes/Timeline/Bindings/ITimelineTimebar.h \
-    Studio/Palettes/Slide/SlideView.h \
     Studio/Palettes/Slide/SlideContextMenu.h \
     Studio/Controls/ClickableLabel.h \
-    Studio/_Win/UI/SceneView.h \
     Studio/PreviewHelper.h \
     Studio/remotedeploymentsender.h \
     Studio/Application/StudioTutorialWidget.h \
