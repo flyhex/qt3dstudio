@@ -821,6 +821,7 @@ void ActionView::initialize()
     rootContext()->setContextProperty("_actionView"_L1, this);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
+    rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
     qmlRegisterUncreatableType<qt3dsdm::HandlerArgumentType>("Qt3DStudio", 1, 0, "HandlerArgumentType",
                                                           "HandlerArgumentType is an enum container"_L1);
     qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
