@@ -1,25 +1,25 @@
 <Material name="carpaint_yellow_standard" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property formalName="Gradient1D Map" hidden="True" name="randomGradient1D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient1D.png"/>
-		<Property formalName="Gradient2D Map" hidden="True" name="randomGradient2D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient2D.png"/>
-		<Property formalName="Gradient3D Map" hidden="True" name="randomGradient3D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient3D.png"/>
-		<Property formalName="Gradient4D Map" hidden="True" name="randomGradient4D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient4D.png"/>
-		<Property formalName="Unit conversion factor" name="unit_conversion" type="Float" default="1.000000" category="Other"/>
-		<Property formalName="Normal Base Color" name="normal_base_color" type="Color" default="0.659 0.4261 0.0494" category="Material"/>
-		<Property formalName="Grazing Base Color" name="grazing_base_color" type="Color" default="0.393 0.2654 0.0549" category="Material"/>
-		<Property formalName="Orange Peel Amount" name="peel_amount" type="Float" default="0.100000" category="Material"/>
-		<Property formalName="Orange Peel Size" name="peel_size" type="Float" default="0.100000" category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Gradient1D Map" description="Gradient texture of the material" hidden="True" name="randomGradient1D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient1D.png"/>
+        <Property formalName="Gradient2D Map" description="Gradient texture of the material" hidden="True" name="randomGradient2D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient2D.png"/>
+        <Property formalName="Gradient3D Map" description="Gradient texture of the material" hidden="True" name="randomGradient3D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient3D.png"/>
+        <Property formalName="Gradient4D Map" description="Gradient texture of the material" hidden="True" name="randomGradient4D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient4D.png"/>
+        <Property formalName="Unit Conversion Factor" name="unit_conversion" description="Unit conversion factor" type="Float" default="1.000000" category="Other"/>
+        <Property formalName="Normal Base Color" name="normal_base_color" description="Base color of the material" type="Color" default="0.659 0.4261 0.0494" category="Material"/>
+        <Property formalName="Grazing Base Color" name="grazing_base_color" description="Grazing base color of the material" type="Color" default="0.393 0.2654 0.0549" category="Material"/>
+        <Property formalName="Orange Peel Amount" name="peel_amount" description="Orange peel bumpiness of the material" type="Float" default="0.100000" category="Material"/>
+        <Property formalName="Orange Peel Size" name="peel_size" description="Orange peel bump size" type="Float" default="0.100000" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define texture_coordinate_uvw 0
@@ -193,10 +193,10 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-	 tmp2 = coordinateSource(texture_coordinate_object, 0 );
-	 ftmp0 = perlinNoiseBumpTexture( tmp2, ( peel_amount/10.000000 ), ( peel_size*unit_conversion ), false, false, 0.000000, 1, false, vec3( 0.000000, 0.000000, 0.000000 ), 1.000000, 0.000000, 1.000000, normal );
-	 ftmp1 = flakeNoiseTexture(tmp2, 0.000000, ( unit_conversion*0.002000 ), 0.350000 ).mono;
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     tmp2 = coordinateSource(texture_coordinate_object, 0 );
+     ftmp0 = perlinNoiseBumpTexture( tmp2, ( peel_amount/10.000000 ), ( peel_size*unit_conversion ), false, false, 0.000000, 1, false, vec3( 0.000000, 0.000000, 0.000000 ), 1.000000, 0.000000, 1.000000, normal );
+     ftmp1 = flakeNoiseTexture(tmp2, 0.000000, ( unit_conversion*0.002000 ), 0.350000 ).mono;
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -219,13 +219,13 @@ void initializeLayerVariables(void)
   layers[1].tanFrame = orthoNormalize( mat3( tangent, cross(normal, tangent), normal ) );
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="5"/>
-		<LayerKey count="2"/>
-	<Pass >
-	</Pass>
+        <ShaderKey value="5"/>
+        <LayerKey count="2"/>
+    <Pass >
+    </Pass>
 </Passes>
 </Material>

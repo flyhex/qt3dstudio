@@ -1,26 +1,26 @@
 <Material name="aluminum" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property formalName="Reflectivity Map" name="reflection_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="specular" default="./maps/materials/grunge_b.png" category="Material"/>
-		<Property formalName="Reflection Map Offset" name="reflection_map_offset" hidden="True" type="Float" default="0.500000" description="Reflection texture value offset." category="Material"/>
-		<Property formalName="Reflection Map Scale" name="reflection_map_scale" hidden="True" type="Float" default="0.300000" description="Reflection texture value scale." category="Material"/>
-		<Property formalName="Tiling" name="tiling" type="Vector" default="1 1 1" description="Texture Tiling size." category="Material"/>
-		<Property formalName="Roughness Map" name="roughness_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="roughness" default="./maps/materials/grunge_d.png" category="Material"/>
-		<Property formalName="Roughness Map Offset" name="roughness_map_offset" hidden="True" type="Float" default="0.160000" description="Roughness texture value offset." category="Material"/>
-		<Property formalName="Roughness Map Scale" name="roughness_map_scale" hidden="True" type="Float" default="0.400000" description="Roughness texture value scale." category="Material"/>
-		<Property formalName="Metal Color" name="metal_color" type="Color" default="0.95 0.95 0.95" description="Base color of the material." category="Material"/>
-		<Property formalName="Bump Map" name="bump_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/grunge_d.png" category="Material"/>
-		<Property formalName="Bump Amount" name="bump_amount" type="Float" min="0" max="2" default="0.500000" description="Scale value for bump amount." category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Reflectivity Map" name="reflection_texture" description="Reflection texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="specular" default="./maps/materials/grunge_b.png" category="Material"/>
+        <Property formalName="Reflection Map Offset" name="reflection_map_offset" hidden="True" type="Float" default="0.500000" description="Reflection texture value offset" category="Material"/>
+        <Property formalName="Reflection Map Scale" name="reflection_map_scale" hidden="True" type="Float" default="0.300000" description="Reflection texture value scale" category="Material"/>
+        <Property formalName="Tiling" name="tiling" type="Vector" default="1 1 1" description="Texture Tiling size" category="Material"/>
+        <Property formalName="Roughness Map" name="roughness_texture" description="Roughness texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="roughness" default="./maps/materials/grunge_d.png" category="Material"/>
+        <Property formalName="Roughness Map Offset" name="roughness_map_offset" hidden="True" type="Float" default="0.160000" description="Roughness texture value offset" category="Material"/>
+        <Property formalName="Roughness Map Scale" name="roughness_map_scale" hidden="True" type="Float" default="0.400000" description="Roughness texture value scale" category="Material"/>
+        <Property formalName="Metal Color" name="metal_color" type="Color" default="0.95 0.95 0.95" description="Base color of the material" category="Material"/>
+        <Property formalName="Bump Map" name="bump_texture" description="Bump texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/grunge_d.png" category="Material"/>
+        <Property formalName="Bump Amount" name="bump_amount" type="Float" min="0" max="2" default="0.500000" description="Scale value for bump amount" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define mono_alpha 0
@@ -189,10 +189,10 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-	 tmp1 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), tiling ), textureCoordinateInfo( texCoord0, tangent, binormal ) );
-	 tmp2 = fileTexture(roughness_texture, vec3( roughness_map_offset ), vec3( roughness_map_scale ), mono_luminance, tmp1, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
-	 ftmp0 = fileTexture(reflection_texture, vec3( reflection_map_offset ), vec3( reflection_map_scale ), mono_luminance, tmp1, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     tmp1 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), tiling ), textureCoordinateInfo( texCoord0, tangent, binormal ) );
+     tmp2 = fileTexture(roughness_texture, vec3( roughness_map_offset ), vec3( roughness_map_scale ), mono_luminance, tmp1, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
+     ftmp0 = fileTexture(reflection_texture, vec3( reflection_map_offset ), vec3( reflection_map_scale ), mono_luminance, tmp1, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -211,13 +211,13 @@ void initializeLayerVariables(void)
   layers[0].tanFrame = orthoNormalize( mat3( tangent, cross(normal, tangent), normal ) );
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="4"/>
-		<LayerKey count="1"/>
-	<Pass >
-	</Pass>
+        <ShaderKey value="4"/>
+        <LayerKey count="1"/>
+    <Pass >
+    </Pass>
 </Passes>
 </Material>

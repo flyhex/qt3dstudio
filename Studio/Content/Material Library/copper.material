@@ -1,18 +1,18 @@
 <Material name="copper" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material.  A value of 0 makes it completely specular, 1 is completely diffuse" category="Material"/>
-		<Property name="metal_color" type="Color" default="0.805 0.395 0.305" description="Color of the material" category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
+        <Property formalName="Metal Color" name="metal_color" type="Color" default="0.805 0.395 0.305" description="Color of the material" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define scatter_reflect 0
@@ -147,7 +147,7 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -166,13 +166,13 @@ void initializeLayerVariables(void)
   layers[0].tanFrame = orthoNormalize( mat3( tangent, cross(normal, tangent), normal ) );
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="4"/>
-		<LayerKey count="1"/>
-	<Pass >
-	</Pass>
+        <ShaderKey value="4"/>
+        <LayerKey count="1"/>
+    <Pass >
+    </Pass>
 </Passes>
 </Material>

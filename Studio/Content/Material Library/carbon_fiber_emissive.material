@@ -1,33 +1,33 @@
 <Material name="carbon_fiber" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property formalName="Coat ior" name="coat_ior" type="Float" default="1.250000" description="Index of refraction of the coating layer" category="Material"/>
-		<Property formalName="Coat Glossy weight" name="coat_weight" type="Float" min="0.000000" max="1.000000" default="1.000000" description="Strength of the coating's glossy reflection.  A value of 0 means no reflection, 1 is maximum reflectivity" category="Material"/>
-		<Property formalName="Coat Roughness" name="coat_roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material.  A value of 0 makes it completely specular, 1 is completely diffuse" category="Material"/>
-		<Property formalName="Base ior" name="base_ior" type="Float" default="1.650000" description="Index of refraction of the material" category="Material"/>
-		<Property formalName="Glossy Weight" name="base_weight" type="Float" min="0.000000" max="1.000000" default="0.500000" description="Strength of glossy reflection at incident angles.  A value of 0 means no reflection, 1 is maximum reflectivity" category="Material"/>
-		<Property formalName="Roughness" name="base_roughness" type="Float" min="0.000000" max="1.000000" default="0.100000" description="Roughness of the material.  A value of 0 makes it completely specular, 1 is completely diffuse" category="Material"/>
-		<Property formalName="Anisotropy" name="anisotropy" type="Float" min="0.000000" max="0.999000" default="0.800000" description="The anisotropy of the roughness" category="Material"/>
-		<Property formalName="Anisotropy Transformation Map" name="anisotropy_rotation_texture" type="Texture" filter="linear" minfilter="linear" clamp="repeat" usage="anisotropy" default="./maps/materials/carbon_fiber_aniso.png" category="Material"/>
-		<Property formalName="Tiling" name="texture_tiling" type="Float2" default="12 12" description="Scaling of the textures" category="Material"/>
-		<Property formalName="Reflectivity Map" name="reflect_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="specular" default="./maps/materials/carbon_fiber_spec.png" category="Material"/>
-		<Property formalName="Diffuse Map" name="diffuse_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="diffuse" default="./maps/materials/carbon_fiber.png" category="Material"/>
-		<Property formalName="Bump Map" name="bump_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/carbon_fiber_bump.png" category="Material"/>
-		<Property formalName="Bump Amount" name="bump_amount" type="Float" default="1.000000" description="Value determining the bumpiness" category="Material"/>
-		<Property name="intensity" type="Float" default="1.000000" category="Material"/>
-		<Property name="emission_color" type="Color" default="0 0 0" category="Material"/>
-		<Property name="emissive_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="emissive" default="./maps/materials/emissive.png" category="Material"/>
-		<Property formalName="Emissive Mask Map" name="emissive_mask_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="emissive_mask" category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Coat ior" name="coat_ior" type="Float" default="1.250000" description="Index of refraction of the coating layer" category="Material"/>
+        <Property formalName="Coat Glossy weight" name="coat_weight" type="Float" min="0.000000" max="1.000000" default="1.000000" description="Strength of the coating's glossy reflection.  A value of 0 means no reflection, 1 is maximum reflectivity" category="Material"/>
+        <Property formalName="Coat Roughness" name="coat_roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
+        <Property formalName="Base ior" name="base_ior" type="Float" default="1.650000" description="Index of refraction of the material" category="Material"/>
+        <Property formalName="Glossy Weight" name="base_weight" type="Float" min="0.000000" max="1.000000" default="0.500000" description="Strength of glossy reflection at incident angles.  A value of 0 means no reflection, 1 is maximum reflectivity" category="Material"/>
+        <Property formalName="Roughness" name="base_roughness" type="Float" min="0.000000" max="1.000000" default="0.100000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
+        <Property formalName="Anisotropy" name="anisotropy" type="Float" min="0.000000" max="0.999000" default="0.800000" description="The anisotropy of the roughness" category="Material"/>
+        <Property formalName="Anisotropy Transformation Map" description="Anisotropy transformation texture" name="anisotropy_rotation_texture" type="Texture" filter="linear" minfilter="linear" clamp="repeat" usage="anisotropy" default="./maps/materials/carbon_fiber_aniso.png" category="Material"/>
+        <Property formalName="Tiling" name="texture_tiling" type="Float2" default="12 12" description="Scaling of the textures" category="Material"/>
+        <Property formalName="Reflectivity Map" name="reflect_texture" description="Reflectivity texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="specular" default="./maps/materials/carbon_fiber_spec.png" category="Material"/>
+        <Property formalName="Diffuse Map" name="diffuse_texture" description="Diffuse texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="diffuse" default="./maps/materials/carbon_fiber.png" category="Material"/>
+        <Property formalName="Bump Map" name="bump_texture" description="Bump texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/carbon_fiber_bump.png" category="Material"/>
+        <Property formalName="Bump Amount" name="bump_amount" type="Float" default="1.000000" description="Value determining the bumpiness" category="Material"/>
+        <Property formalName="Intensity" name="intensity" description="Emission intensity" type="Float" default="1.000000" category="Material"/>
+        <Property formalName="Emission Color" name="emission_color" description="Color of the emission" type="Color" default="0 0 0" category="Material"/>
+        <Property formalName="Emissive Map" name="emissive_texture" description="Emissive texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="emissive" default="./maps/materials/emissive.png" category="Material"/>
+        <Property formalName="Emissive Mask Map" name="emissive_mask_texture" description="Emissive mask texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="emissive_mask" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define scatter_reflect 0
@@ -229,16 +229,16 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-	 tmp3 = textureCoordinateInfo( texCoord0, tangent, binormal );
-	 tmp4 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( texture_tiling[0], texture_tiling[1], 1.000000 ) ), tmp3 );
-	 tmp5 = anisotropyConversion( base_roughness, anisotropy, fileTexture(anisotropy_rotation_texture, vec3( 0, 0, 0 ), vec3( 3.14, 3.14, 3.14 ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear ).mono, tangent, false );
-	 tmp7 = fileBumpTexture(bump_texture, bump_amount, mono_average, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal );
-	 ftmp0 = tmp5.roughness_u;
-	 ftmp1 = tmp5.roughness_v;
-	 ftmp2 = fileTexture(reflect_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear ).tint;
-	 ftmp3 = tmp5.tangent_u;
-	 ftmp4 = fileTexture(diffuse_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_srgb ).tint;
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     tmp3 = textureCoordinateInfo( texCoord0, tangent, binormal );
+     tmp4 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( texture_tiling[0], texture_tiling[1], 1.000000 ) ), tmp3 );
+     tmp5 = anisotropyConversion( base_roughness, anisotropy, fileTexture(anisotropy_rotation_texture, vec3( 0, 0, 0 ), vec3( 3.14, 3.14, 3.14 ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear ).mono, tangent, false );
+     tmp7 = fileBumpTexture(bump_texture, bump_amount, mono_average, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal );
+     ftmp0 = tmp5.roughness_u;
+     ftmp1 = tmp5.roughness_v;
+     ftmp2 = fileTexture(reflect_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear ).tint;
+     ftmp3 = tmp5.tangent_u;
+     ftmp4 = fileTexture(diffuse_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_srgb ).tint;
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -265,13 +265,13 @@ void initializeLayerVariables(void)
   layers[2].tanFrame = orthoNormalize( mat3( tangent, cross(tmp7, tangent), tmp7 ) );
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="5"/>
-		<LayerKey count="3"/>
-	<Pass >
-	</Pass>
+        <ShaderKey value="5"/>
+        <LayerKey count="3"/>
+    <Pass >
+    </Pass>
 </Passes>
 </Material>

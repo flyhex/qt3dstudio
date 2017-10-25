@@ -1,31 +1,31 @@
 <Material name="aluminum_anisotropic" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property name="material_ior" type="Float" default="8.000000" category="Material"/>
-		<Property formalName="Diffuse Map" name="reflection_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="specular" default="./maps/materials/concentric_milled_steel.png" category="Material"/>
-		<Property formalName="Reflection Map Offset" name="reflection_map_offset" hidden="True" type="Float" default="1.000000" description="Reflection texture value offset." category="Material"/>
-		<Property formalName="Reflection Map Scale" name="reflection_map_scale" hidden="True" type="Float" default="1.000000" description="Reflection texture value scale." category="Material"/>
-		<Property formalName="Tiling" name="tiling" type="Float2" default="1 1" description="Texture Tiling size." category="Material"/>
-		<Property formalName="Roughness Map Offset" name="roughness_map_offset" hidden="True" type="Float" default="0.000000" description="Roughness texture value offset." category="Material"/>
-		<Property formalName="Roughness Map Scale" name="roughness_map_scale" hidden="True" type="Float" default="1.000000" description="Roughness texture value scale." category="Material"/>
-		<Property formalName="Anisotropy" name="anisotropy" type="Float" default="0.800000" description="Anisotropy." category="Material"/>
-		<Property formalName="Anisotropy Map" name="aniso_rot_texture" type="Texture" filter="linear" minfilter="linear" clamp="repeat" usage="anisotropy" default="./maps/materials/concentric_milled_steel_aniso.png" category="Material"/>
-		<Property formalName="Roughness Map Offset" name="aniso_tex_color_offset" hidden="True" type="Float" default="0.000000" description="Roughness texture value offset." category="Material"/>
-		<Property formalName="Roughness Map Scale" name="aniso_tex_color_scale" hidden="True" type="Float" default="1.000000" description="Roughness texture value scale." category="Material"/>
-		<Property name="aniso_tiling" type="Float2" default="1 1" category="Material"/>
-		<Property name="base_weight" hidden="True" type="Float" default="1.000000" category="Material"/>
-		<Property formalName="Bump Map" name="bump_texture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/concentric_milled_steel.png" category="Material"/>
-		<Property formalName="Bump Amount" name="bump_amount" type="Float" min="0" max="2" default="0.000000" description="Scale value for bump amount." category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Index of Refraction" name="material_ior" description="Refractive index of the material" type="Float" default="8.000000" category="Material"/>
+        <Property formalName="Diffuse Map" name="reflection_texture" description="Reflection texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="specular" default="./maps/materials/concentric_milled_steel.png" category="Material"/>
+        <Property formalName="Reflection Map Offset" name="reflection_map_offset" hidden="True" type="Float" default="1.000000" description="Reflection texture value offset" category="Material"/>
+        <Property formalName="Reflection Map Scale" name="reflection_map_scale" hidden="True" type="Float" default="1.000000" description="Reflection texture value scale" category="Material"/>
+        <Property formalName="Tiling" name="tiling" type="Float2" default="1 1" description="Texture Tiling size" category="Material"/>
+        <Property formalName="Roughness Map Offset" name="roughness_map_offset" hidden="True" type="Float" default="0.000000" description="Roughness texture value offset" category="Material"/>
+        <Property formalName="Roughness Map Scale" name="roughness_map_scale" hidden="True" type="Float" default="1.000000" description="Roughness texture value scale" category="Material"/>
+        <Property formalName="Anisotropy" name="anisotropy" type="Float" default="0.800000" description="Anisotropy" category="Material"/>
+        <Property formalName="Anisotropy Map" name="aniso_rot_texture" description="Anisotropy rot texture of the material" type="Texture" filter="linear" minfilter="linear" clamp="repeat" usage="anisotropy" default="./maps/materials/concentric_milled_steel_aniso.png" category="Material"/>
+        <Property formalName="Roughness Map Offset" name="aniso_tex_color_offset" hidden="True" type="Float" default="0.000000" description="Roughness texture value offset" category="Material"/>
+        <Property formalName="Roughness Map Scale" name="aniso_tex_color_scale" hidden="True" type="Float" default="1.000000" description="Roughness texture value scale" category="Material"/>
+        <Property formalName="Anisotropy Tiling" name="aniso_tiling" description="Anisotropy Tiling" type="Float2" default="1 1" category="Material"/>
+        <Property formalName="Base Weight" name="base_weight" description="Base weight" hidden="True" type="Float" default="1.000000" category="Material"/>
+        <Property formalName="Bump Map" name="bump_texture" description="Bump texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/concentric_milled_steel.png" category="Material"/>
+        <Property formalName="Bump Amount" name="bump_amount" type="Float" min="0" max="2" default="0.000000" description="Scale value for bump amount" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define mono_alpha 0
@@ -219,16 +219,16 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-	 tmp2 = textureCoordinateInfo( texCoord0, tangent, binormal );
-	 tmp4 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( tiling[0], tiling[1], 1.000000 ) ), tmp2 );
-	 tmp5 = fileTexture(reflection_texture, vec3( reflection_map_offset ), vec3( reflection_map_scale ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear );
-	 tmp7 = anisotropyConversion( fileTexture(reflection_texture, vec3( roughness_map_offset ), vec3( roughness_map_scale ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear ).mono, anisotropy, fileTexture(aniso_rot_texture, vec3( aniso_tex_color_offset ), vec3( aniso_tex_color_scale ), mono_luminance, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( aniso_tiling[0], aniso_tiling[1], 1.000000 ) ), tmp2 ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono, tangent, false );
-	 tmp8 = tmp5.tint;
-	 tmp10 = fileBumpTexture(bump_texture, bump_amount, mono_average, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal );
-	 ftmp0 = tmp7.roughness_u;
-	 ftmp1 = tmp7.roughness_v;
-	 ftmp2 = tmp7.tangent_u;
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     tmp2 = textureCoordinateInfo( texCoord0, tangent, binormal );
+     tmp4 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( tiling[0], tiling[1], 1.000000 ) ), tmp2 );
+     tmp5 = fileTexture(reflection_texture, vec3( reflection_map_offset ), vec3( reflection_map_scale ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear );
+     tmp7 = anisotropyConversion( fileTexture(reflection_texture, vec3( roughness_map_offset ), vec3( roughness_map_scale ), mono_luminance, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_linear ).mono, anisotropy, fileTexture(aniso_rot_texture, vec3( aniso_tex_color_offset ), vec3( aniso_tex_color_scale ), mono_luminance, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( aniso_tiling[0], aniso_tiling[1], 1.000000 ) ), tmp2 ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono, tangent, false );
+     tmp8 = tmp5.tint;
+     tmp10 = fileBumpTexture(bump_texture, bump_amount, mono_average, tmp4, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal );
+     ftmp0 = tmp7.roughness_u;
+     ftmp1 = tmp7.roughness_v;
+     ftmp2 = tmp7.tangent_u;
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -251,13 +251,13 @@ void initializeLayerVariables(void)
   layers[1].tanFrame = orthoNormalize( mat3( tangent, cross(normal, tangent), normal ) );
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="5"/>
-		<LayerKey count="2"/>
-	<Pass >
-	</Pass>
+        <ShaderKey value="5"/>
+        <LayerKey count="2"/>
+    <Pass >
+    </Pass>
 </Passes>
 </Material>

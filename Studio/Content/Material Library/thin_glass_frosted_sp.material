@@ -1,31 +1,31 @@
 <Material name="thin_glass_frosted_sp" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property formalName="Gradient1D Map" hidden="True" name="randomGradient1D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient1D.png"/>
-    <Property formalName="Gradient2D Map" hidden="True" name="randomGradient2D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient2D.png"/>
-    <Property formalName="Gradient3D Map" hidden="True" name="randomGradient3D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient3D.png"/>
-    <Property formalName="Gradient4D Map" hidden="True" name="randomGradient4D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient4D.png"/>
-    <Property name="noiseCoords" type="Vector" default="1 1 1" category="Material"/>
-    <Property name="noiseScale" type="Float" min="0.000000" max="40.000000" default="2.000000" category="Material"/>
-    <Property name="bumpCoords" type="Vector" default="1 1 1" category="Material"/>
-    <Property name="bumpScale" type="Float" min="0.000000" max="1.000000" default="0.500000" category="Material"/>
-    <Property name="bumpBands" type="Long" min="1.000000" max="10.000000"  default="1" category="Material"/>
-    <Property formalName="Fresnel Power" name="uFresnelPower" type="Float" default="1.0" category="Material"/>
-		<Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="surface reflection roughness" category="Material"/>
-		<Property formalName="Blur Width" name="blur_size" type="Float" default="8" min="0.000000" max="20.00000" category="Material"/>
-		<Property formalName="Reflectivity" name="reflectivity_amount" type="Float" min="0.000000" max="1.000000" default="1.000000" description="reflectivity factor" category="Material"/>
-		<Property formalName="Glass ior" name="glass_ior" type="Float" default="1.100000" description="Index of refraction of the material" category="Material"/>
-		<Property formalName="Glass Color" name="glass_color" type="Color" default="0.9 0.9 0.9" description="Color of the material" category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Gradient1D Map" description="Gradient texture of the material" hidden="True" name="randomGradient1D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient1D.png"/>
+        <Property formalName="Gradient2D Map" description="Gradient texture of the material" hidden="True" name="randomGradient2D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient2D.png"/>
+        <Property formalName="Gradient3D Map" description="Gradient texture of the material" hidden="True" name="randomGradient3D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient3D.png"/>
+        <Property formalName="Gradient4D Map" description="Gradient texture of the material" hidden="True" name="randomGradient4D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient4D.png"/>
+        <Property formalName="Noise Coordinates" name="noiseCoords" description="Coordinates of the noise" type="Vector" default="1 1 1" category="Material"/>
+        <Property formalName="Noise Scale" name="noiseScale" description="Scaling of the noise" type="Float" min="0.000000" max="40.000000" default="2.000000" category="Material"/>
+        <Property formalName="Bump Coordinates" name="bumpCoords" description="Bump coordinates of the refraction" type="Vector" default="1 1 1" category="Material"/>
+        <Property formalName="Bump Scale" name="bumpScale" description="Scale of the bumps" type="Float" min="0.000000" max="1.000000" default="0.500000" category="Material"/>
+        <Property formalName="Bump Bands" name="bumpBands" description="Bump bands of the material" type="Long" min="1.000000" max="10.000000"  default="1" category="Material"/>
+        <Property formalName="Fresnel Power" name="uFresnelPower" description="Fresnel power of the material" type="Float" default="1.0" category="Material"/>
+        <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
+        <Property formalName="Blur Width" name="blur_size" description="Width of the blur" type="Float" default="8" min="0.000000" max="20.00000" category="Material"/>
+        <Property formalName="Reflectivity" name="reflectivity_amount" type="Float" min="0.000000" max="1.000000" default="1.000000" description="Reflectivity factor" category="Material"/>
+        <Property formalName="Glass ior" name="glass_ior" type="Float" default="1.100000" description="Index of refraction of the material" category="Material"/>
+        <Property formalName="Glass Color" name="glass_color" type="Color" default="0.9 0.9 0.9" description="Color of the material" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define texture_coordinate_uvw 0
@@ -192,8 +192,8 @@ void computeTemporaries()
 {
    tmp0 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), noiseCoords ), coordinateSource(texture_coordinate_world, 0 ) );
    tmp1 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), bumpCoords ), coordinateSource(texture_coordinate_world, 0 ) );
-	 ftmp0 = vec3( reflectivity_amount );
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     ftmp0 = vec3( reflectivity_amount );
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -230,17 +230,17 @@ vec4 computeGlass(in vec3 normal, in float materialIOR, in float alpha, in vec4 
   return rgba;
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="20"/>
-		<LayerKey count="1"/>
-	<Buffer name="temp_buffer" format="source" filter="linear" wrap="clamp" size="1.0" lifetime="frame"/>
-	<Pass >
-		<BufferBlit dest="temp_buffer"/>
-		<BufferInput value="temp_buffer" param="refractiveTexture"/>
-		<Blending source="SrcAlpha" dest="OneMinusSrcAlpha"/>
-	</Pass>
+        <ShaderKey value="20"/>
+        <LayerKey count="1"/>
+    <Buffer name="temp_buffer" format="source" filter="linear" wrap="clamp" size="1.0" lifetime="frame"/>
+    <Pass >
+        <BufferBlit dest="temp_buffer"/>
+        <BufferInput value="temp_buffer" param="refractiveTexture"/>
+        <Blending source="SrcAlpha" dest="OneMinusSrcAlpha"/>
+    </Pass>
 </Passes>
 </Material>

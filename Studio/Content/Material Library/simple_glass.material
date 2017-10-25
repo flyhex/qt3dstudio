@@ -1,21 +1,21 @@
 <Material name="simple_glass" version="1.0">
-	<MetaData >
-		<Property formalName="Environment Map" name="uEnvironmentTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
-		<Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" type="Boolean" default="True" category="Material"/>
-		<Property formalName="Baked Shadow Map" name="uBakedShadowTexture" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-		<Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" type="Boolean" default="False" category="Material"/>
-		<Property formalName="Fresnel Power" name="uFresnelPower" type="Float" default="1.0" category="Material"/>
-		<Property formalName="Minimum Opacity" name="uMinOpacity" type="Float" default="0.5" category="Material"/>
-		<Property formalName="Reflectivity" name="reflectivity_amount" type="Float" min="0.000000" max="1.000000" default="1.000000" description="reflectivity factor" category="Material"/>
-		<Property formalName="Glass ior" name="glass_ior" hidden="True" type="Float" default="1.100000" description="Index of refraction of the material" category="Material"/>
-		<Property formalName="Glass Color" name="glass_color" type="Color" default="0.9 0.9 0.9" description="Color of the material" category="Material"/>
-	</MetaData>
-	<Shaders type="GLSL" version="330">
-	<Shader>
-	<Shared>	</Shared>		
+    <MetaData >
+        <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
+        <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
+        <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
+        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Fresnel Power" name="uFresnelPower" description="Fresnel power of the material" type="Float" default="1.0" category="Material"/>
+        <Property formalName="Minimum Opacity" name="uMinOpacity" description="Minimum opacity of the material" type="Float" default="0.5" category="Material"/>
+        <Property formalName="Reflectivity" name="reflectivity_amount" type="Float" min="0.000000" max="1.000000" default="1.000000" description="Reflectivity factor" category="Material"/>
+        <Property formalName="Glass ior" name="glass_ior" hidden="True" type="Float" default="1.100000" description="Index of refraction of the material" category="Material"/>
+        <Property formalName="Glass Color" name="glass_color" type="Color" default="0.9 0.9 0.9" description="Color of the material" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+    <Shared>    </Shared>
 <VertexShader>
-		</VertexShader>
-		<FragmentShader>
+        </VertexShader>
+        <FragmentShader>
 
 // add enum defines
 #define scatter_reflect 0
@@ -149,8 +149,8 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-	 ftmp0 = vec3( reflectivity_amount );
-	 tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+     ftmp0 = vec3( reflectivity_amount );
+     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
@@ -183,15 +183,15 @@ vec4 computeGlass(in vec3 normal, in float materialIOR, in float alpha, in vec4 
   return rgba;
 }
 
-		</FragmentShader>
-	</Shader>
-	</Shaders>
+        </FragmentShader>
+    </Shader>
+    </Shaders>
 <Passes >
-		<ShaderKey value="36"/>
-		<LayerKey count="1"/>
-	<Pass >
-		<Blending source="SrcAlpha" dest="OneMinusSrcAlpha"/>
-		<RenderState name="CullFace"/>
-	</Pass>
+        <ShaderKey value="36"/>
+        <LayerKey count="1"/>
+    <Pass >
+        <Blending source="SrcAlpha" dest="OneMinusSrcAlpha"/>
+        <RenderState name="CullFace"/>
+    </Pass>
 </Passes>
 </Material>
