@@ -30,22 +30,35 @@
 
 #include <QtCore/qobject.h>
 #include <QtCore/qpoint.h>
+#include <QtCore/qtimer.h>
 
 class MouseHelper : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MouseHelper(QObject *parent = nullptr) {};
+    explicit MouseHelper(QObject *parent = nullptr);
     ~MouseHelper() {};
 
     Q_INVOKABLE void startUnboundedDrag();
     Q_INVOKABLE void endUnboundedDrag();
     Q_INVOKABLE QPoint delta();
 
+private Q_SLOTS:
+    void resetCursor();
+
 private:
     QPoint m_startPos;
     QPoint m_referencePoint;
+    QPoint m_previousPoint;
+    QTimer m_cursorResetTimer;
+
+    enum DragState {
+        StateNotDragging,
+        StateDragging,
+        StateEndingDrag
+    };
+    DragState m_dragState;
 };
 
 #endif // MOUSEHELPER_H

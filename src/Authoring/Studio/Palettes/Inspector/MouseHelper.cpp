@@ -36,10 +36,23 @@
 #include <QtWidgets/qmainwindow.h>
 #include <QtCore/qtimer.h>
 
+MouseHelper::MouseHelper(QObject *parent)
+    : QObject(parent)
+    , m_dragState(StateNotDragging)
+{
+    // All cursor position modifications are done asynchronously, so we don't get position
+    // changes in middle of mouse event handling.
+    m_cursorResetTimer.setInterval(0);
+    m_cursorResetTimer.setSingleShot(true);
+    connect(&m_cursorResetTimer, &QTimer::timeout, this, &MouseHelper::resetCursor);
+}
+
 void MouseHelper::startUnboundedDrag()
 {
+    m_dragState = StateDragging;
     qApp->setOverrideCursor(QCursor(Qt::BlankCursor));
     m_startPos = QCursor::pos();
+
     QWindow *window = g_StudioApp.m_pMainWnd->windowHandle();
     if (window) {
         QSize screenSize = window->screen()->size() / window->screen()->devicePixelRatio();
@@ -48,40 +61,59 @@ void MouseHelper::startUnboundedDrag()
         // Just assume the screen of the app is at least 400x400 if we can't resolve window
         m_referencePoint = QPoint(200, 200);
     }
-    QCursor::setPos(m_referencePoint);
+    m_previousPoint = m_startPos;
+
+    m_cursorResetTimer.start();
 }
 
 void MouseHelper::endUnboundedDrag()
 {
-    QCursor::setPos(m_startPos);
-
-    // If the referencePoint is above a control that sets override cursor, the cursor
-    // of that control will flicker briefly when restoring the cursor. Work around that
-    // by restoring the cursor asynchronously.
-    QTimer::singleShot(0, [](){
-        // First change to default cursor to avoid any remaining flicker of cursor
-        qApp->changeOverrideCursor(Qt::ArrowCursor);
-        qApp->restoreOverrideCursor();
-    });
+    m_dragState = StateEndingDrag;
+    m_cursorResetTimer.start();
 }
 
 QPoint MouseHelper::delta()
 {
-    QPoint delta = QCursor::pos() - m_referencePoint;
+    QPoint delta(0, 0);
+    if (m_dragState == StateDragging) {
+        QPoint currentPoint = QCursor::pos();
+        delta = currentPoint - m_previousPoint;
+        m_previousPoint = currentPoint;
 
-    // Limit delta to m_referencePoint size, so maximum delta to all directions is the same
-    // even with multi-screen virtual desktops
-    if (delta.x() > m_referencePoint.x())
-        delta.setX(m_referencePoint.x());
-    else if (delta.x() < -m_referencePoint.x())
-        delta.setX(-m_referencePoint.x());
+        // Limit delta to m_referencePoint size, so maximum delta to all directions is the same
+        // even with multi-screen virtual desktops
+        if (delta.x() > m_referencePoint.x())
+            delta.setX(m_referencePoint.x());
+        else if (delta.x() < -m_referencePoint.x())
+            delta.setX(-m_referencePoint.x());
 
-    if (delta.y() > m_referencePoint.y())
-        delta.setY(m_referencePoint.y());
-    else if (delta.y() < -m_referencePoint.y())
-        delta.setY(-m_referencePoint.y());
+        if (delta.y() > m_referencePoint.y())
+            delta.setY(m_referencePoint.y());
+        else if (delta.y() < -m_referencePoint.y())
+            delta.setY(-m_referencePoint.y());
 
-    QCursor::setPos(m_referencePoint);
+        if (!m_cursorResetTimer.isActive())
+            m_cursorResetTimer.start();
+    }
     return delta;
+}
+
+void MouseHelper::resetCursor()
+{
+    switch (m_dragState) {
+    case StateDragging:
+        QCursor::setPos(m_referencePoint);
+        m_previousPoint = m_referencePoint;
+        break;
+    case StateEndingDrag:
+        QCursor::setPos(m_startPos);
+        // First change to default cursor to avoid any flicker of cursor
+        qApp->changeOverrideCursor(Qt::ArrowCursor);
+        qApp->restoreOverrideCursor();
+        break;
+    case StateNotDragging:
+    default:
+        break;
+    }
 }
 
