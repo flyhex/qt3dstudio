@@ -193,7 +193,7 @@ int SingleLookup(const char *inString)
  *    Main function.
  *    Open two files, read lines from source and write enum entry to destination.
  */
-int _tmain(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     // Application notice
     fprintf(

@@ -5,16 +5,16 @@ CONFIG += console
 
 SOURCES += Qt3DSCompilerMain.cpp
 
-linux {
+linux|mingw {
     BEGIN_ARCHIVE = -Wl,--whole-archive
     END_ARCHIVE = -Wl,--no-whole-archive
 }
 
 STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
+    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lLua$$qtPlatformTargetSuffix() \
-    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
     $$END_ARCHIVE
 
 # On non-windows systems link the whole static archives and do not put them

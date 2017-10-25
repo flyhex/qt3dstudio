@@ -30,9 +30,7 @@
 
 #pragma once
 
-#ifdef _INTEGRITYPLATFORM
 #include <QtCore/QDebug>
-#endif
 
 //==============================================================================
 //	Namespace

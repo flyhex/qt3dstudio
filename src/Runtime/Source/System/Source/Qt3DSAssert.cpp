@@ -66,7 +66,7 @@ void CAssert::Default(const CHAR *inAssert, const CHAR *inFile, INT32 inLine,
     qCCritical (qt3ds::INTERNAL_ERROR) << "Assertion failed: " << inFile << " " << inLine
                                        << " " << inAssert << " " << inFunction;
 
-#if defined(_DEBUG) && defined(_PCPLATFORM)
+#if defined(_DEBUG) && defined(_PCPLATFORM) && defined(QT3DS_VC)
     if (_CrtDbgReport(_CRT_ASSERT, inFile, inLine, inFunction, "Assertion Failed") == 1)
         ::DebugBreak();
 #endif // _DEBUG & _PCPLATFORM

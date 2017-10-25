@@ -102,7 +102,7 @@ STATICRUNTIME = \
 } else {
     DEFINES +=  WIN32_LEAN_AND_MEAN
     LIBS += $$STATICRUNTIME
-    QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
+    !mingw: QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
 }
 
 LIBS += \

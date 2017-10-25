@@ -168,6 +168,7 @@ namespace foundation {
         info.dwThreadID = mImpl->threadID;
         info.dwFlags = 0;
 
+#ifdef QT3DS_VC
         // C++ Exceptions are disabled for this project, but SEH is not (and cannot be)
         // http://stackoverflow.com/questions/943087/what-exactly-will-happen-if-i-disable-c-exceptions-in-a-project
         __try {
@@ -176,6 +177,10 @@ namespace foundation {
         } __except (EXCEPTION_EXECUTE_HANDLER) {
             // this runs if not attached to a debugger (thus not really naming the thread)
         }
+#else
+        RaiseException(QT3DS_MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR),
+                       (ULONG_PTR *)&info);
+#endif
     }
 
     void Thread::setPriority(ThreadPriority::Enum prio)

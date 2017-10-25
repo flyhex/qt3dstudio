@@ -145,7 +145,7 @@ namespace render {
 
         bool initializeQt3DSRenderer(QSurfaceFormat format);
         qt3ds::render::Qt3DSRendererImpl *qt3dsRenderer();
-        Q3DStudio::IRuntimeMetaData *NVRenderTestBase::metadata();
+        Q3DStudio::IRuntimeMetaData *metadata();
 
     private:
 

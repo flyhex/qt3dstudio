@@ -37,7 +37,11 @@
 #error "This file should only be included by Windows builds!!"
 #endif
 
+#ifdef QT3DS_GNUC
+#include <cmath>
+#else
 #include <math.h>
+#endif
 #include <float.h>
 #include <intrin.h>
 #include <string.h>
@@ -84,8 +88,10 @@ namespace intrinsics {
     //! \brief platform-specific finiteness check (not INF or NAN)
     QT3DS_CUDA_CALLABLE QT3DS_FORCE_INLINE bool isFinite(float a)
     {
-#ifdef __CUDACC__
-        return isfinite(a) ? true : false;
+#if defined(__CUDACC__)
+        return isfinite(a)? true : false;
+#elif defined(QT3DS_GNUC)
+        return (std::isfinite(a) && !std::isinf(a)) ? true : false;
 #else
     return (0 == ((_FPCLASS_SNAN | _FPCLASS_QNAN | _FPCLASS_NINF | _FPCLASS_PINF) & _fpclass(a)));
 #endif
@@ -94,8 +100,10 @@ namespace intrinsics {
     //! \brief platform-specific finiteness check (not INF or NAN)
     QT3DS_CUDA_CALLABLE QT3DS_FORCE_INLINE bool isFinite(double a)
     {
-#ifdef __CUDACC__
-        return isfinite(a) ? true : false;
+#if defined(__CUDACC__)
+        return isfinite(a)? true : false;
+#elif defined(QT3DS_GNUC)
+        return (std::isfinite(a) && !std::isinf(a)) ? true : false;
 #else
     return (0 == ((_FPCLASS_SNAN | _FPCLASS_QNAN | _FPCLASS_NINF | _FPCLASS_PINF) & _fpclass(a)));
 #endif
