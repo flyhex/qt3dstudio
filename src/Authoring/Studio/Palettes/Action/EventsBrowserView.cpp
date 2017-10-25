@@ -69,6 +69,12 @@ qt3dsdm::CDataModelHandle EventsBrowserView::selectedHandle() const
     return handleId;
 }
 
+void EventsBrowserView::selectAndExpand(const QString &event)
+{
+    // All categories are expanded by default, so let's just select
+    setSelection(m_model->rowForEventName(event));
+}
+
 void EventsBrowserView::setSelection(int index)
 {
     auto handleId = m_model->handleForRow(index);

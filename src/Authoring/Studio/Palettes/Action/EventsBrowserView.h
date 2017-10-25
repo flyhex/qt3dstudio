@@ -49,6 +49,8 @@ public:
     QSize sizeHint() const override;
     qt3dsdm::CDataModelHandle selectedHandle() const;
 
+    void selectAndExpand(const QString &event);
+
     int selection() const { return m_selection; }
     void setSelection(int index);
 

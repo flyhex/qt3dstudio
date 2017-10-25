@@ -64,6 +64,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     qt3dsdm::CDataModelHandle handleForRow(int row) const;
+    int rowForEventName(const QString &event) const;
 
 private:
     struct EventInfo {

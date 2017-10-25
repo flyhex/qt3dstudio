@@ -391,6 +391,7 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
 
     m_eventsBrowser->setModel(m_eventsModel);
 
+    m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
     showBrowser(m_eventsBrowser, point);
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
@@ -423,6 +424,7 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
 
     m_handlerBrowser->setModel(m_handlersModel);
 
+    m_handlerBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Handler));
     showBrowser(m_handlerBrowser, point);
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
@@ -455,11 +457,25 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
 
     m_fireEventsBrowser->setModel(m_fireEventsModel);
 
+    qt3dsdm::SValue oldValue;
+    GetDoc()->GetStudioSystem()->GetActionCore()->GetHandlerArgumentValue(handle, oldValue);
+
+    QString eventName;
+    for (Qt3DSDMEventHandle eventHandle : eventList) {
+        if (oldValue == eventHandle.GetHandleValue()) {
+            qt3dsdm::SEventInfo eventInfo = bridge->GetEventInfo(eventHandle);
+            eventName = QString::fromWCharArray(eventInfo.m_FormalName.wide_str());
+            if (eventName.isEmpty())
+                eventName = QString::fromWCharArray(eventInfo.m_Name.wide_str());
+        }
+    }
+    m_fireEventsBrowser->selectAndExpand(eventName);
     showBrowser(m_fireEventsBrowser, point);
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this, handle] {
-          setArgumentValue(handle, qt3dsdm::Qt3DSDMEventHandle(m_fireEventsBrowser->selectedHandle()).GetHandleValue());
+          setArgumentValue(handle, qt3dsdm::Qt3DSDMEventHandle(
+                               m_fireEventsBrowser->selectedHandle()).GetHandleValue());
     });
 
     return m_fireEventsBrowser;

@@ -214,6 +214,20 @@ qt3dsdm::CDataModelHandle EventsModel::handleForRow(int row) const
     return {};
 }
 
+int EventsModel::rowForEventName(const QString &event) const
+{
+    int i = 0;
+    for (const auto &category: m_categories) {
+        i++;
+        const auto events = m_events[category.name];
+        for (int j = 0; j < events.size(); j++, i++) {
+            if (events[j].name == event)
+                return i;
+        }
+    }
+    return i;
+}
+
 EventsModel::CategoryInfo EventsModel::categoryForRow(int row) const
 {
     int i = 0;

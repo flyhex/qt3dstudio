@@ -55,6 +55,7 @@ Rectangle {
 
             boundsBehavior: Flickable.StopAtBounds
             clip: true
+            currentIndex: _eventsBrowserView.selection
 
             model: _eventsBrowserView.model
 
@@ -124,12 +125,17 @@ Rectangle {
 
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: eventsList.currentIndex = model.index
+                            onClicked: {
+                                if (!delegateItem.isCategory)
+                                    eventsList.currentIndex = model.index;
+                            }
                             onEntered: itemDescription.text = model.description
                             onExited: itemDescription.text = ""
                             onDoubleClicked: {
-                                eventsList.currentIndex = model.index;
-                                _eventsBrowserView.close();
+                                if (!delegateItem.isCategory) {
+                                    eventsList.currentIndex = model.index;
+                                    _eventsBrowserView.close();
+                                }
                             }
                         }
                     }
@@ -137,6 +143,14 @@ Rectangle {
 
             }
             onCurrentIndexChanged: _eventsBrowserView.selection = currentIndex
+
+            Connections {
+                target: _eventsBrowserView
+                onSelectionChanged: {
+                    if (eventsList.currentIndex !== _eventsBrowserView.selection)
+                        eventsList.currentIndex = _eventsBrowserView.selection;
+                }
+            }
         }
 
         StyledMenuSeparator {
