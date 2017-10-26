@@ -3865,8 +3865,13 @@ public:
                             CFilePath theSrcFile = CFilePath::CombineBaseAndRelative(
                                 CFilePath(theImport.m_Value->GetDestDir()),
                                 CFilePath(theImport.m_Value->GetSrcFile()));
-                            if (theSrcFile.Compare(inOldFile.c_str(), CString::ENDOFSTRING, false))
+
+                            CFilePath normalizedOldFile(inOldFile);
+                            normalizedOldFile.Normalize();
+                            if (theSrcFile.Compare(normalizedOldFile.c_str(),
+                                                   CString::ENDOFSTRING, false)) {
                                 importFileList.push_back(theFullPath.GetPathWithoutIdentifier());
+                            }
 
                             theImport.m_Value->Release();
                         }

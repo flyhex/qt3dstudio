@@ -48,7 +48,7 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleCopyFullPath);
     addAction(action);
 
-    if (m_view->isGroup(m_index)) {
+    if (m_view->isRefreshable(m_index)) {
         addSeparator();
         action = new QAction(tr("Refresh Import..."));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleRefreshImport);

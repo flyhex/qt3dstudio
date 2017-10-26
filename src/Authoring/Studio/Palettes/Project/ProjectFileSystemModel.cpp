@@ -122,6 +122,14 @@ QString ProjectFileSystemModel::filePath(int row) const
     return item.index.data(QFileSystemModel::FilePathRole).toString();
 }
 
+bool ProjectFileSystemModel::isRefreshable(int row) const
+{
+    const QString path = filePath(row);
+    if (path.endsWith(QStringLiteral(".import")))
+        return m_references.contains(path);
+    return false;
+}
+
 void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
 {
     m_references.clear();

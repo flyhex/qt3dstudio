@@ -220,6 +220,11 @@ bool ProjectView::isGroup(int row) const
     return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_ObjectType == OBJTYPE_GROUP;
 }
 
+bool ProjectView::isRefreshable(int row) const
+{
+    return m_ProjectModel->isRefreshable(row);
+}
+
 void ProjectView::showContextMenu(int x, int y, int index)
 {
     ProjectContextMenu contextMenu(this, index);
@@ -237,11 +242,12 @@ void ProjectView::refreshImport(int row) const
         const auto destDir = QString::fromWCharArray(importPtr.m_Value->GetDestDir());
         const auto srcFile = QString::fromWCharArray(importPtr.m_Value->GetSrcFile());
         const QString fullSrcPath(QDir(destDir).filePath(srcFile));
+        const QFileInfo oldFile(fullSrcPath);
         const QFileInfo newFile(g_StudioApp.GetDialogs()->ConfirmRefreshModelFile(fullSrcPath));
         if (newFile.exists() && newFile.isFile()){
             const auto doc = g_StudioApp.GetCore()->GetDoc();
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Refresh Import..."))
-                    ->RefreshImport(fullSrcPath, CString::fromQString(newFile.filePath()));
+                    ->RefreshImport(oldFile.canonicalFilePath(), newFile.canonicalFilePath());
         }
     }
 }

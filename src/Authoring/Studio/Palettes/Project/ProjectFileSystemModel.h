@@ -60,6 +60,7 @@ public:
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
     QString filePath(int row) const;
+    bool isRefreshable(int row) const;
 
     void updateReferences(bool emitDataChanged);
 
