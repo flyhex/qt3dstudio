@@ -75,6 +75,12 @@ SValue::SValue(const QVariant &inData)
         break;
     }
 
+    case QVariant::Vector2D: {
+        const auto v = inData.value<QVector2D>();
+        *this = qt3dsdm::SFloat2(v.x(), v.y());
+        break;
+    }
+
     case QVariant::Vector3D: {
         const auto v = inData.value<QVector3D>();
         *this = qt3dsdm::SFloat3(v.x(), v.y(), v.z());

@@ -641,6 +641,16 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             element->m_values = QVariant::fromValue<QList<double> >(float3Values);
         }
         break;
+    case qt3dsdm::DataModelDataType::Float2:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
+            const QVector2D theFloat2 = qt3dsdm::get<QVector2D>(value);
+            const QList<double> float2Values{theFloat2.x(), theFloat2.y()};
+            element->m_values = QVariant::fromValue<QList<double> >(float2Values);
+        } else {
+            qWarning() << "TODO: InspectorControlModel::updatePropertyValue: need to implement:"
+                       << element->m_dataType << element->m_propertyType;
+        }
+        break;
     case qt3dsdm::DataModelDataType::Float:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
             element->m_value = qt3dsdm::get<float>(value);

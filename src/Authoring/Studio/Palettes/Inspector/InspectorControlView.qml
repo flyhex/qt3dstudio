@@ -283,6 +283,13 @@ Rectangle {
                                             console.warn("KDAB_TODO: implement handler for type\"float\" property:",
                                                          modelData.propertyType);
                                             return null;
+                                        case DataModelDataType.Float2:
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return xyPropertyComponent;
+                                            console.warn("TODO: implement handler for type:\"float2\" property:",
+                                                         modelData.propertyType, "text ",
+                                                         model.modelData.title);
+                                            return null;
                                         case DataModelDataType.Float3:
                                             if (modelData.propertyType === AdditionalMetaDataType.Color)
                                                 return colorBox;
@@ -478,6 +485,43 @@ Rectangle {
                 onPreviewValueChanged: {
                     _inspectorModel.setPropertyValue(parent.instance, parent.handle,
                                                      Qt.vector3d(valueX, valueY, valueZ), false);
+                }
+            }
+        }
+    }
+
+    Component {
+        id: xyPropertyComponent
+
+        RowLayout {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property variant values: parent.modelData.values
+            property alias tabItem1: xyHandler.tabItem1
+            property alias tabItem2: xyHandler.tabItem2
+            spacing: 0
+
+            onValuesChanged: {
+                // FloatTextField can set its text internally, thus breaking the binding, so
+                // let's set the text value explicitly each time value changes
+                xyHandler.valueX = Number(values[0]).toFixed(xyHandler.numberOfDecimal);
+                xyHandler.valueY = Number(values[1]).toFixed(xyHandler.numberOfDecimal);
+            }
+
+            Item {
+                width: _valueWidth - xyHandler.width
+            }
+            HandlerPropertyBaseXY {
+                id: xyHandler
+                valueX: Number(values[0]).toFixed(numberOfDecimal)
+                valueY: Number(values[1]).toFixed(numberOfDecimal)
+                onEditingFinished: {
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Qt.vector2d(valueX, valueY), true);
+                }
+                onPreviewValueChanged: {
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Qt.vector2d(valueX, valueY), false);
                 }
             }
         }

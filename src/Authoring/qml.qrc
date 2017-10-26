@@ -15,6 +15,7 @@
         <file>Studio/Palettes/Action/HandlerPropertySlider.qml</file>
         <file>Studio/Palettes/Action/HandlerPropertyCombo.qml</file>
         <file>Studio/Palettes/Action/HandlerProperty.qml</file>
+        <file>Studio/Palettes/Action/HandlerPropertyBaseXY.qml</file>
         <file>Studio/Palettes/Action/HandlerPropertyBaseXYZ.qml</file>
         <file>Studio/Palettes/Action/HandlerPropertyBaseSlider.qml</file>
         <file>Studio/Palettes/Action/HandlerGenericColor.qml</file>
