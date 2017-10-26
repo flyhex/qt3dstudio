@@ -85,13 +85,6 @@ bool RecurseCreateDirectory(const Q3DStudio::CFilePath &dirName)
 
 namespace Q3DStudio {
 
-const CString CFilePathTokenizer::s_DirectoryDelimiters = L"\\/";
-
-CFilePath::CFilePath(const CFilePath &str)
-    : CString(str)
-{
-}
-
 const CFilePath &CFilePath::operator=(const CFilePath &strSrc)
 {
     CString::operator=(strSrc);
@@ -109,23 +102,6 @@ void CFilePath::AddTrailingBackslash()
     const auto separator = QDir::separator().toLatin1();
     if (GetAt(Length()) != separator)
         Concat(separator);
-}
-
-CString CFilePath::GetDrive() const
-{
-#ifdef _WIN32
-    Q3DStudio::CString theReturnString;
-    wchar_t theDrive[_MAX_DRIVE];
-
-    // Remove the file name and extension
-    _wsplitpath(GetPathWithoutIdentifier().c_str(), theDrive, NULL, NULL, NULL);
-
-    theReturnString = theDrive;
-
-    return theReturnString;
-#else
-    return CString();
-#endif
 }
 
 CFilePath CFilePath::GetDirectory() const
@@ -176,11 +152,6 @@ CString CFilePath::GetExtension() const
     return DoGetExtension(GetPathWithoutIdentifier());
 }
 
-CString CFilePath::GetSuffix() const
-{
-    return DoGetExtension(*this);
-}
-
 // Get a file path you can give to systems that don't understand the identifier
 CFilePath CFilePath::GetPathWithoutIdentifier() const
 {
@@ -210,16 +181,6 @@ CString CFilePath::GetIdentifier() const
     return Q3DStudio::CString();
 }
 
-unsigned long CFilePath::GetULIdentifier() const
-{
-    CString id(GetIdentifier());
-    if (id.size() == 0)
-        return 0;
-    QT3DSU32 retval;
-    WStrOps<QT3DSU32>().StrTo(id.GetCharStar(), retval);
-    return retval;
-}
-
 void CFilePath::SetIdentifier(unsigned long inIdentifier)
 {
     QT3DSU32 id(inIdentifier);
@@ -228,60 +189,10 @@ void CFilePath::SetIdentifier(unsigned long inIdentifier)
     SetIdentifier(idBuf);
 }
 
-bool CFilePath::GetTempDirectory()
-{
-    CString path = QDir::tempPath().toLatin1().data();
-    StrAssign(path);
-
-    return TRUE;
-}
-
-bool CFilePath::GetTemporaryFileName(const CString &inPrefix, const CString &inDirectory)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    wchar_t szPath[_MAX_PATH] = L"\0";
-    wchar_t szFile[_MAX_PATH] = L"\0";
-
-    if (inDirectory == NULL)
-        ::GetTempPathW(sizeof(szPath), szPath);
-    else
-        wcscpy(szPath, inDirectory);
-
-    ::GetTempFileNameW(szPath, inPrefix, 0, szFile);
-
-    *this = CString(szFile);
-
-    return TRUE;
-#else
-    return FALSE;
-#endif
-}
-
-bool CFilePath::GetModuleFilePath(/*HMODULE inModuleHandle*/)
+bool CFilePath::GetModuleFilePath()
 {
     StrAssign(CString::fromQString(qApp->applicationFilePath()));
     return true;
-}
-
-//==============================================================================
-/**
-*	Obtiains the sourcepath of the module who's currently running.  For example
-*	the code currently exexuting might be within a DLL, but somebody may have
-*	loaded that DLL, like Internet Explorer.
-*/
-bool CFilePath::GetContainerModuleFilePath()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    TCHAR theModuleFileName[_MAX_PATH];
-
-    ::GetModuleFileName(NULL, theModuleFileName, sizeof(theModuleFileName));
-
-    *this = theModuleFileName;
-
-    return TRUE;
-#else
-    return FALSE;
-#endif
 }
 
 //==============================================================================
@@ -344,39 +255,6 @@ bool CFilePath::IsInSubDirectory(const CFilePath &inBasePath) const
             && theBaseDirectory.Compare(thePath.Extract(0, theBaseDirectory.Length()), false));
 }
 
-//==============================================================================
-/**
-*	Retrieves the current directory for the current process.
-*	@return TRUE always
-*/
-bool CFilePath::GetCurrentDir()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    wchar_t szPath[_MAX_PATH] = L"\0";
-    ::GetCurrentDirectoryW(sizeof(szPath) / sizeof(wchar_t), szPath);
-    StrAssign(szPath);
-#ifdef _WIN32
-    *this += L"\\";
-#else
-    *this += L"/";
-#endif //_WIN32
-    return TRUE;
-#else
-    return FALSE;
-#endif
-}
-
-//==============================================================================
-/**
-*	Resolves if this and inOtherPath are on the same drive.
-*	@return true if this and inOtherPath are on the same drive.
-*/
-bool CFilePath::IsOnSameDrive(const CFilePath &inOtherPath) const
-{
-    CFilePath theOtherPath(inOtherPath);
-    return GetDrive().Compare(theOtherPath.GetDrive(), false);
-}
-
 void CFilePath::Normalize()
 {
     CString &path(*this);
@@ -424,27 +302,6 @@ void CFilePath::Normalize()
         }
     }
     *this = retval;
-}
-
-bool CFilePath::IsNormalized() const
-{
-    const CFilePath &path(*this);
-#ifdef _WIN32
-    if (path.find('/') != CFilePath::npos)
-#else
-    if (path.find('\\') != CFilePath::npos)
-#endif
-        return false;
-
-    CFilePath::size_type findResult = path.find(updir);
-    if (findResult != 0 && findResult != CFilePath::npos)
-        return false;
-
-    findResult = path.find(UNCPathSepStr);
-    if (findResult != 0 && findResult != CFilePath::npos)
-        return false;
-
-    return true;
 }
 
 bool CFilePath::IsAbsolute() const
@@ -577,29 +434,6 @@ void CFilePath::ListFilesAndDirectories(std::vector<CFilePath> &files) const
     QDirIterator di(findPath.toQString(), QDir::NoDotAndDotDot | QDir::AllEntries);
     while (di.hasNext())
         files.push_back(CString::fromQString(di.next()));
-}
-
-bool CFilePath::FindLatestModifiedFileInDirectory(CFilePath &file) const
-{
-    if (!IsDirectory()) {
-        return false;
-    }
-
-    QDateTime theLatestFileTime;
-    bool foundFile = false;
-
-    CString findPath(GetPathWithoutIdentifier());
-    QDirIterator di(findPath.toQString(), QDir::NoDotAndDotDot | QDir::AllEntries);
-    while (di.hasNext()) {
-        auto ffd = di.fileInfo();
-        if (theLatestFileTime < ffd.lastModified()) {
-            theLatestFileTime = ffd.lastModified();
-            file = CString::fromQString(ffd.absoluteFilePath());
-            foundFile = true;
-        }
-    }
-
-    return foundFile;
 }
 
 void CFilePath::RecursivelyFindFilesOfType(const wchar_t **inExtensionList,
@@ -866,23 +700,6 @@ QT3DSU32 SFile::ReadData(const QSharedPointer<QFile> &fileHandle, void *data, QT
     return 0;
 }
 
-DWORD SeekPosToMoveMethod(SeekPosition::Enum inEnum)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    switch (inEnum) {
-    case SeekPosition::Begin:
-        return FILE_BEGIN;
-    case SeekPosition::Current:
-        return FILE_CURRENT;
-    case SeekPosition::End:
-        return FILE_END;
-    }
-    QT3DS_ASSERT(false);
-    return FILE_BEGIN;
-#endif
-    return {};
-}
-
 QT3DSI64 SFile::GetPosition(const QSharedPointer<QFile> &fileHandle)
 {
     QT3DS_ASSERT(fileHandle);
@@ -908,20 +725,6 @@ void SFile::SetPosition(const QSharedPointer<QFile> &fileHandle, QT3DSI64 inOffs
             break;
         }
     }
-}
-
-void SFile::SetFileTimeToCurrentTime(const QSharedPointer<QFile> &fileHandle)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    FILETIME ft;
-    SYSTEMTIME st;
-
-    GetSystemTime(&st); // Gets the current system time
-    SystemTimeToFileTime(&st, &ft); // Converts the current system time to file time format
-    SetFileTime((HANDLE)fileHandle, // Sets last-write time of the file
-                (LPFILETIME)NULL, // to the converted current system time
-                (LPFILETIME)NULL, &ft);
-#endif
 }
 
 // Close the file handle.
@@ -1156,12 +959,6 @@ bool SFileTools::FindAndCopyDestFile(const QDir &inDestDir,
     if (dest.isEmpty())
         return false;
     return QFile::copy(inSrcFile, dest);
-}
-
-QDebug operator<<(QDebug stream, const CFilePath &s)
-{
-    stream << "CFilePath(" << s.toQString() << ")";
-    return stream;
 }
 
 }

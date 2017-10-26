@@ -45,7 +45,7 @@ CPreferencesSerializer::~CPreferencesSerializer()
 
 void CPreferencesSerializer::SetPreferencesFile(const Q3DStudio::CString &theFile)
 {
-    Q3DStudio::CFilePath fPath = Q3DStudio::CFilePath::Normalize(theFile);
+    Q3DStudio::CFilePath fPath(theFile);
 
     if (m_PreferencesFile.Compare(fPath, false))
         return;

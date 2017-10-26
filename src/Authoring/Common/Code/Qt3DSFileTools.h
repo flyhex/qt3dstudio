@@ -54,66 +54,6 @@ using qt3ds::foundation::FileOpenFlags;
 using qt3ds::foundation::FileOpenFlagValues;
 using qt3dsdm::WStrOps;
 
-class CFilePathTokenizer
-{
-protected:
-    CString m_FilePath;
-    long m_CurrPos;
-    long m_NextPos;
-
-public:
-    static const CString s_DirectoryDelimiters;
-
-    CFilePathTokenizer(const CString &inString)
-        : m_FilePath(static_cast<const wchar_t *>(inString))
-        , m_CurrPos(0)
-        , m_NextPos(CString::npos)
-    {
-        while (m_FilePath.find_first_of(s_DirectoryDelimiters, 0) == 0) {
-            m_FilePath.erase(0, 1);
-        }
-    }
-
-    CString GetNext()
-    {
-        long theTokenEnd = m_FilePath.find_first_of(s_DirectoryDelimiters, m_CurrPos);
-
-        if (theTokenEnd == CString::npos)
-            theTokenEnd = m_FilePath.size();
-
-        m_NextPos = theTokenEnd + 1;
-
-        return m_FilePath.substr(m_CurrPos, theTokenEnd - m_CurrPos);
-    }
-
-    bool HasNext()
-    {
-        if (m_CurrPos >= m_FilePath.size()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    CString GetRest()
-    {
-        if (HasNext())
-            return m_FilePath.substr(m_CurrPos);
-        else
-            return L"";
-    }
-
-    void operator++()
-    {
-        if (m_NextPos == CString::npos) {
-            GetNext();
-        }
-
-        m_CurrPos = m_NextPos;
-        m_NextPos = CString::npos;
-    }
-};
-
 struct SFileModificationRecord;
 
 /**
@@ -140,18 +80,6 @@ public:
     {
         Normalize();
     }
-    CFilePath(const CString &szString, unsigned long inIdentifier)
-        : CString(szString)
-    {
-        Normalize();
-        SetIdentifier(inIdentifier);
-    }
-    CFilePath(const CString &szString, const CString &inIdentifier)
-        : CString(szString)
-    {
-        Normalize();
-        SetIdentifier(inIdentifier);
-    }
     CFilePath(const CString &szString)
         : CString(szString)
     {
@@ -160,61 +88,34 @@ public:
     CFilePath(const QString &string)
         : CString(string.toStdWString().c_str())
     {
-
+        Normalize();
     }
-
-    CFilePath(const CFilePath &szString);
+    CFilePath(const CFilePath &szString)
+        : CString(szString)
+    {
+        Normalize();
+    }
 
     const CFilePath &operator=(const CFilePath &strSrc);
 
     void AddTrailingBackslash();
     void RemoveTrailingBackslash();
 
-    CString GetDrive() const;
     CFilePath GetDirectory() const;
     CString GetFileName() const;
     CString GetFileStem() const; // no extension, test.png -> test
     CString GetExtension() const;
-    CString GetSuffix() const; // Return the extension +'#' + the identifier string, basically
-                               // everything after the last .
     // Get a file path you can give to systems that don't understand the identifier
     CFilePath GetPathWithoutIdentifier() const;
     // Set the identifer appended to the end of this file path.
     void SetIdentifier(const CString &inIdentifier);
     // Get the identifier appended to the end of this file path.
     CString GetIdentifier() const;
-    // Returns 0 if no identifier was found
-    unsigned long GetULIdentifier() const;
     void SetIdentifier(unsigned long inIdentifier);
-
-    bool GetTempDirectory();
 
     static void EnsureNonFileURL(CString &ioFileFilePath);
 
-    bool GetTemporaryFileName(const CString &inPrefix, const CString &inDirectory = CString());
-    // NULL stands for the executable.
-// KDAB_TEMPORARILY_REMOVED
-    bool GetModuleFilePath(/*HMODULE inModuleHandle = NULL*/);
-
-    bool GetContainerModuleFilePath();
-    bool GetCurrentDir();
-
-    bool IsOnSameDrive(const CFilePath &inOtherFilePath) const;
-
-    /*
-     1. All file:// or file:\ are stripped off
-     2. All / are replaced with \
-		//3. duplicate forward slashes are removed.
-     4. ..\ and .\ are resolved if possible.
-     This is done upon construction!!
-     */
-    void Normalize();
-
-    static CFilePath Normalize(const CString &inData) { return CFilePath(inData); }
-    static CFilePath Normalize(const CFilePath &inData) { return inData; }
-
-    // Ensure the above conditions are met.
-    bool IsNormalized() const;
+    bool GetModuleFilePath();
 
     void ConvertToRelative(const CFilePath &inBaseAbsolute);
     static CFilePath GetRelativePathFromBase(const CFilePath &inBase, const CFilePath &inPath)
@@ -281,7 +182,6 @@ public:
     // Returns absolute paths combined with this
     // this.combineBaseAndRelative( result );
     void ListFilesAndDirectories(std::vector<CFilePath> &files) const;
-    bool FindLatestModifiedFileInDirectory(CFilePath &file) const;
 
     // Returns absolute paths
     // This object has to be a directory
@@ -320,6 +220,9 @@ public:
 
     // Get the directory where applications can write data.
     static CFilePath GetUserApplicationDirectory();
+
+private:
+    void Normalize();
 };
 
 struct SFileModificationRecord
@@ -482,7 +385,5 @@ struct SFileTools
 };
 
 }
-
-QDebug operator<<(QDebug stream, const Q3DStudio::CFilePath &s);
 
 #endif // INCLUDED_QT3DS_FILETOOLS_H

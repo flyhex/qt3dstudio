@@ -3867,7 +3867,6 @@ public:
                                 CFilePath(theImport.m_Value->GetSrcFile()));
 
                             CFilePath normalizedOldFile(inOldFile);
-                            normalizedOldFile.Normalize();
                             if (theSrcFile.Compare(normalizedOldFile.c_str(),
                                                    CString::ENDOFSTRING, false)) {
                                 importFileList.push_back(theFullPath.GetPathWithoutIdentifier());
