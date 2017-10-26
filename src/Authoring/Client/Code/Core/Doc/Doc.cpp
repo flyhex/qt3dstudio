@@ -1363,19 +1363,6 @@ Qt3DSFile CDoc::GetDocumentPath() const
     return m_DocumentPath;
 }
 
-//=============================================================================
-/**
- * Given an absolute path, return true if it is in doc's subdirectory.
- */
-bool CDoc::IsInDocSubDirectory(const Q3DStudio::CString &inPath) const
-{
-    Q3DStudio::CFilePath thePath(inPath);
-    if (thePath.IsInSubDirectory(GetDocumentDirectory())) {
-        return true;
-    }
-    return false;
-}
-
 Q3DStudio::CString CDoc::GetDocumentDirectory() const
 {
     Q3DStudio::CFilePath thePath(m_DocumentPath.GetAbsolutePath());

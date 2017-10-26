@@ -91,19 +91,6 @@ const CFilePath &CFilePath::operator=(const CFilePath &strSrc)
     return *this;
 }
 
-void CFilePath::RemoveTrailingBackslash()
-{
-    if (GetAt(Length() - 1) == QDir::separator().toLatin1())
-        Assign(Extract(0, Length() - 1));
-}
-
-void CFilePath::AddTrailingBackslash()
-{
-    const auto separator = QDir::separator().toLatin1();
-    if (GetAt(Length()) != separator)
-        Concat(separator);
-}
-
 CFilePath CFilePath::GetDirectory() const
 {
     const CFilePath &path(*this);
@@ -232,27 +219,11 @@ bool CFilePath::IsInSubDirectory(const CFilePath &inBasePath) const
     if (IsEmpty() || inBasePath.IsEmpty()) // nothing to compare
         return false;
 
-    CFilePath thePath(GetPathWithoutIdentifier().c_str());
+    QT3DS_ASSERT(inBasePath.IsAbsolute());
 
-    // Get base directory if it is a file
-    CFilePath theBaseDirectory(inBasePath.c_str());
-    if (inBasePath.IsFile())
-        theBaseDirectory = inBasePath.GetDirectory();
-
-    // Remove any trailing backslash so that we are comparing on the same ground
-    // just in case if we are comparing between same folder.
-    thePath.RemoveTrailingBackslash();
-    theBaseDirectory.RemoveTrailingBackslash();
-    if (thePath == theBaseDirectory)
-        return true;
-
-    // Add trailing backslash because we want to compare different folder
-    theBaseDirectory.AddTrailingBackslash();
-
-    // Check if the path is in the base directory
-    // Use caseless comparison because it's windows
-    return ((thePath.Length() >= theBaseDirectory.Length())
-            && theBaseDirectory.Compare(thePath.Extract(0, theBaseDirectory.Length()), false));
+    QDir basePathDir(inBasePath.toQString());
+    return basePathDir.exists()
+        && basePathDir.exists(GetPathWithoutIdentifier().toQString());
 }
 
 void CFilePath::Normalize()

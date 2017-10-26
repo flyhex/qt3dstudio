@@ -98,9 +98,6 @@ public:
 
     const CFilePath &operator=(const CFilePath &strSrc);
 
-    void AddTrailingBackslash();
-    void RemoveTrailingBackslash();
-
     CFilePath GetDirectory() const;
     CString GetFileName() const;
     CString GetFileStem() const; // no extension, test.png -> test

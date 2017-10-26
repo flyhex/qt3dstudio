@@ -164,7 +164,6 @@ public:
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
     void SetDocumentPath(const Qt3DSFile &inFile);
     Qt3DSFile GetDocumentPath() const;
-    bool IsInDocSubDirectory(const Q3DStudio::CString &inPath) const;
     Q3DStudio::CString GetDocumentDirectory() const;
     Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
     Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);

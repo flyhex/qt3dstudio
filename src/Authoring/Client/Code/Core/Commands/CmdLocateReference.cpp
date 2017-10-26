@@ -287,9 +287,6 @@ CCmdLocateFolder::CCmdLocateFolder(CDoc *inDoc, const Q3DStudio::CFilePath &inOl
                                    const Q3DStudio::CFilePath &inNewPath)
     : CCmdLocateReference(inDoc, inOldPath, inNewPath)
 {
-    // Need to add last backslash to compare directories
-    m_OldPath.AddTrailingBackslash();
-    m_NewPath.AddTrailingBackslash();
 }
 
 //=============================================================================
