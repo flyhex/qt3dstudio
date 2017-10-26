@@ -1881,14 +1881,14 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                     shader.m_LightProbeProps.Set(
                         QT3DSVec4(0.0f, 0.0f, inProbeHorizon, inProbeBright * 0.01f));
                 }
+                NVRenderTexture2D *textureImage = theLightProbe->m_TextureData.m_Texture;
+                shader.m_LightProbe.Set(textureImage);
+                shader.m_LightProbeSize.Set(QT3DSVec2(textureImage->GetTextureDetails().m_Width,
+                                                      textureImage->GetTextureDetails().m_Height));
             } else {
                 shader.m_LightProbeProps.Set(QT3DSVec4(0.0f, 0.0f, -1.0f, 0.0f));
                 shader.m_LightProbe2Props.Set(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
             }
-            NVRenderTexture2D *textureImage = theLightProbe->m_TextureData.m_Texture;
-            shader.m_LightProbe.Set(textureImage);
-            shader.m_LightProbeSize.Set(QT3DSVec2(textureImage->GetTextureDetails().m_Width,
-                                                  textureImage->GetTextureDetails().m_Height));
         } else {
             shader.m_LightProbeProps.Set(QT3DSVec4(0.0f, 0.0f, -1.0f, 0.0f));
             shader.m_LightProbe2Props.Set(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
