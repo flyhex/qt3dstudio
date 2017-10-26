@@ -53,14 +53,13 @@ class CProgressView : public QDialog
 {
 public:
     CProgressView(QWidget *parent = nullptr);
+    virtual ~CProgressView();
 
     void SetActionText(const Q3DStudio::CString &inActionText);
     void SetAdditionalText(const Q3DStudio::CString &inAdditionalText);
 
 protected:
     Ui::ProgressDlg *m_ui;
-
-    virtual ~CProgressView();
 };
 
 #endif // INCLUDED_PROGRESS_VIEW_H

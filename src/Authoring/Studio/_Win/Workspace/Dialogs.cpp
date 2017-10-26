@@ -930,7 +930,7 @@ void CDialogs::DisplayProgressScreen(const Q3DStudio::CString &inActionText,
 void CDialogs::DestroyProgressScreen()
 {
     if (m_ShowGUI && m_ProgressPalette) {
-        m_ProgressPalette->deleteLater();
+        delete m_ProgressPalette;
         m_ProgressPalette = nullptr;
     }
 }
