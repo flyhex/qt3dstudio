@@ -31,7 +31,7 @@
 #ifndef INCLUDED_QUAT_H
 #define INCLUDED_QUAT_H
 
-#include <GLES2/gl2.h>
+#include <QtOpenGL/qgl.h>
 #include <math.h>
 #include <assert.h>
 

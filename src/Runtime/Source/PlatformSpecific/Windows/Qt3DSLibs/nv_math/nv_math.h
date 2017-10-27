@@ -31,7 +31,7 @@
 #ifndef _QT3DS_MATH_H
 #define _QT3DS_MATH_H
 
-#include <GLES2/gl2.h>
+#include <QtOpenGL/qgl.h>
 
 GLfloat NvRandf();
 

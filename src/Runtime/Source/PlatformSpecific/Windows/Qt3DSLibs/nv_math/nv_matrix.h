@@ -31,7 +31,7 @@
 #ifndef INCLUDED_MATRIX_H
 #define INCLUDED_MATRIX_H
 
-#include <GLES2/gl2.h>
+#include <QtOpenGL/qgl.h>
 #include <math.h>
 #include <assert.h>
 
