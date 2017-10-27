@@ -126,18 +126,21 @@ QToolBar::separator {
 }
 
 QToolButton:!checked {
+    border-top: 1px solid #262829;
     min-width: 22px;
     min-height: 22px;
     background-color: #404244;
 }
 
 QToolButton:checked, QToolButton:hover {
+    border-top: 1px solid #262829;
     min-width: 22px;
     min-height: 22px;
     background-color: #262829;
 }
 
 QToolButton:pressed {
+    border-top: 1px solid #262829;
     min-width: 22px;
     min-height: 22px;
     background-color: #46a2da;
@@ -192,12 +195,16 @@ QGroupBox::title {
     margin-left: 10px;
 }
 
-QPushButton {
+QPushButton:!pressed {
     background: #404244;
     border: 1px solid #262829;
     border-radius: 2;
     padding: 3px 10px 3px 10px;
     min-width: 75;
+}
+
+QPushButton:pressed {
+    background: #262829;
 }
 
 /* Tutorial Dialog */
