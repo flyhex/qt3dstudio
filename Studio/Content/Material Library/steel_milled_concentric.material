@@ -8,7 +8,7 @@
         <Property formalName="Diffuse Map" name="diffuse_texture" description="Diffuse texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="diffuse" default="./maps/materials/concentric_milled_steel.png" category="Material"/>
         <Property formalName="Tiling" name="texture_tiling" type="Float2" default="8 5" description="Scaling of the textures" category="Material"/>
         <Property formalName="Anisotropy" name="anisotropy" type="Float" min="0.010000" max="100.000000" default="0.800000" description="The anisotropy of the roughness" category="Material"/>
-        <Property formalName="Anisotropy Rot Map" name="anisotropy_rot_texture" d type="Texture" filter="linear" minfilter="linear" clamp="repeat" usage="anisotropy" default="./maps/materials/concentric_milled_steel_aniso.png" category="Material"/>
+        <Property formalName="Anisotropy Rot Map" name="anisotropy_rot_texture" description="Anisotropy rot texture of the material" type="Texture" filter="linear" minfilter="linear" clamp="repeat" usage="anisotropy" default="./maps/materials/concentric_milled_steel_aniso.png" category="Material"/>
     </MetaData>
     <Shaders type="GLSL" version="330">
     <Shader>
