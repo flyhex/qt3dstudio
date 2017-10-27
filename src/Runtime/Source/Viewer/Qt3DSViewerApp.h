@@ -351,6 +351,8 @@ public:
 
     void SetGlobalAnimationTime(qint64 inMilliSecs);
 
+    QString error();
+
 private:
     /*
      * @brief parse command line arguments this fills in our

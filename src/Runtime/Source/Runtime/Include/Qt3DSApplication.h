@@ -193,6 +193,8 @@ public:
     virtual void MarkApplicationDirty() = 0;
 
     virtual Q3DStudio::IAudioPlayer &GetAudioPlayer() = 0;
+
+    virtual bool createSuccessful() = 0;
 };
 }
 }

@@ -503,7 +503,6 @@ BOOL CUIPParserImpl::Load(IPresentation &inPresentation,
     m_CurrentPresentation = &inPresentation;
     if (!m_DOMReader) {
         qCCritical(qt3ds::INVALID_PARAMETER) << "CUIPParserImpl::Load, No DOM reader";
-        QT3DS_ASSERT(false);
         return FALSE;
     }
 

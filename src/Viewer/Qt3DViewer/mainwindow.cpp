@@ -43,6 +43,7 @@
 #include <QQmlComponent>
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 #include <QtGui/qguiapplication.h>
+#include <QtCore/qtimer.h>
 
 #include "Qt3DSView.h"
 #include "q3dspresentationitem.h"
@@ -318,6 +319,8 @@ void MainWindow::loadFile(const QString &filename)
         viewer()->reset();
         return;
     }
+    delete m_errorInfo;
+    m_errorInfo = nullptr;
 
     QQmlEngine *engine = ui->quickWidget->engine();
     QQuickItem *root = ui->quickWidget->rootObject();
@@ -338,6 +341,8 @@ void MainWindow::loadFile(const QString &filename)
     }
 
     m_studio3D = static_cast<Q3DSView *>(component.create());
+    connect(m_studio3D, &Q3DSView::errorChanged, this, &MainWindow::onErrorChanged,
+            Qt::QueuedConnection);
     viewer()->presentation()->setSource(sourceUrl);
 
     QQmlEngine::setObjectOwnership(m_studio3D, QQmlEngine::CppOwnership);
@@ -569,6 +574,46 @@ void MainWindow::remoteDisconnected()
 {
     m_connectionInfo->setProperty("text", "Remote Disconnected");
     updateUI();
+}
+
+void MainWindow::onErrorChanged(const QString &error)
+{
+    if (error.isEmpty()) {
+        delete m_errorInfo;
+        m_errorInfo = nullptr;
+    } else {
+        if (!m_errorInfo) {
+            QQmlEngine *engine = ui->quickWidget->engine();
+            QQuickItem *root = ui->quickWidget->rootObject();
+
+            QByteArray qml = "import QtQuick 2.7\n"
+                             "import QtQuick.Controls 2.2\n"
+                             "Label {\n"
+                             "    color: \"White\"\n"
+                             "    horizontalAlignment: Text.AlignHCenter\n"
+                             "    verticalAlignment: Text.AlignVCenter\n"
+                             "    anchors.fill: parent\n"
+                             "    font.pixelSize: width / 80\n"
+                             "}";
+
+            QQmlComponent component(engine);
+            component.setData(qml, QUrl());
+
+            if (component.isError()) {
+                qCritical() << "Error setting up error UI:" << component.errors();
+                return;
+            }
+
+            m_errorInfo = qobject_cast<QQuickItem *>(component.create());
+            m_errorInfo->setParentItem(root);
+            m_errorInfo->setParent(engine);
+            QQmlEngine::setObjectOwnership(m_errorInfo, QQmlEngine::CppOwnership);
+        }
+        m_errorInfo->setProperty("text", m_studio3D->error());
+
+        delete m_studio3D;
+        m_studio3D = nullptr;
+    }
 }
 
 void MainWindow::generatorProgress(int totalFrames, int frameCount)

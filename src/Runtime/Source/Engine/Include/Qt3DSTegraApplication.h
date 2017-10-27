@@ -162,7 +162,7 @@ public:
 public: // loading
     virtual bool BeginLoad(const QString &sourcePath) = 0;
     virtual bool HasOfflineLoadingCompleted() = 0;
-    virtual void InitializeGraphics(const QSurfaceFormat &format) = 0;
+    virtual bool InitializeGraphics(const QSurfaceFormat &format) = 0;
 
     virtual void Cleanup() = 0;
 
@@ -235,7 +235,7 @@ public:
     bool HasOfflineLoadingCompleted() { return m_NDDView->HasOfflineLoadingCompleted(); }
     // Invokes m_ApplicationCore->CreateApplication(), a blocking function ensures binary loading
     // completed
-    void InitializeGraphics(const QSurfaceFormat& format);
+    bool InitializeGraphics(const QSurfaceFormat& format);
 
     void Cleanup() { m_NDDView->Cleanup(); }
     bool CanRender() { return m_NDDView->CanRender(); }

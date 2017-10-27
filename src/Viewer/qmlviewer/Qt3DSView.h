@@ -48,6 +48,7 @@ class Q3DSView : public QQuickFramebufferObject
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
     Q_PROPERTY(Q3DSPresentationItem *presentation READ presentation CONSTANT)
     Q_PROPERTY(Q3DSViewerSettings *viewerSettings READ viewerSettings CONSTANT)
+    Q_PROPERTY(QString error READ error NOTIFY errorChanged)
 
 public:
     Q3DSView();
@@ -58,6 +59,8 @@ public:
     bool isRunning() const;
     Q3DSPresentationItem *presentation() const;
     Q3DSViewerSettings *viewerSettings() const;
+    QString error() const;
+    void setError(const QString &error);
 
     void getCommands(bool emitInitialize, CommandQueue &renderQueue);
 
@@ -75,6 +78,7 @@ public:
 Q_SIGNALS:
     void frameUpdate();
     void runningChanged(bool initialized);
+    void errorChanged(const QString &error);
 
 public Q_SLOTS:
     void reset();
@@ -98,6 +102,7 @@ protected:
 
     CommandQueue m_pendingCommands;
     qreal m_pixelRatio;
+    QString m_error;
 };
 
 QT_END_NAMESPACE

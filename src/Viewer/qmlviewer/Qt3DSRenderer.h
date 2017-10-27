@@ -78,10 +78,12 @@ protected:
     QQuickWindow *m_window; // Window associated with the plugin; needed to reset OpenGL state.
 
     bool m_initialized; // Has the runtime and OpenGL state been initialized?
+    bool m_initializationFailure; // Initialization failed, no point in trying to init again
     qt3ds::Qt3DSAssetVisitor *m_visitor;
 
     Q3DSViewerSettings *m_settings;
     Q3DSPresentation *m_presentation;
+    QString m_error;
 };
 
 QT_END_NAMESPACE

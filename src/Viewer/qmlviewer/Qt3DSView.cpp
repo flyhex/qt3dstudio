@@ -74,6 +74,19 @@ Q3DSViewerSettings *Q3DSView::viewerSettings() const
     return m_viewerSettings;
 }
 
+QString Q3DSView::error() const
+{
+    return m_error;
+}
+
+void Q3DSView::setError(const QString &error)
+{
+    if (error != m_error) {
+        m_error = error;
+        Q_EMIT errorChanged(m_error);
+    }
+}
+
 void Q3DSView::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
 {
     // TODO: It might be beneficial to have these as properties so they could be acceessed from QML

@@ -97,6 +97,7 @@ private Q_SLOTS:
     void remoteProjectChanging();
     void remoteConnected();
     void remoteDisconnected();
+    void onErrorChanged(const QString &error);
 
 private:
     Ui::MainWindow *ui;
@@ -108,6 +109,7 @@ private:
     RemoteDeploymentReceiver *m_remoteDeploymentReceiver = nullptr;
     bool m_generatorMode;
     QQuickItem *m_generatorInfo = nullptr;
+    QQuickItem *m_errorInfo = nullptr;
 };
 
 #endif // MAINWINDOW_H

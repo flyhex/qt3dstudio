@@ -173,7 +173,7 @@ public:
 
     bool BeginLoad(const QString &sourcePath) override;
     bool HasOfflineLoadingCompleted() override;
-    void InitializeGraphics(const QSurfaceFormat &format) override;
+    bool InitializeGraphics(const QSurfaceFormat &format) override;
 
     void Cleanup() override;
 
@@ -268,7 +268,7 @@ bool CNDDView::HasOfflineLoadingCompleted()
     return true;
 }
 
-void CNDDView::InitializeGraphics(const QSurfaceFormat &format)
+bool CNDDView::InitializeGraphics(const QSurfaceFormat &format)
 {
     m_ApplicationCore->EndLoad();
     // Next call will initialize the render portion of the scenes.  This *must* have a loaded
@@ -277,6 +277,9 @@ void CNDDView::InitializeGraphics(const QSurfaceFormat &format)
     m_Application
             = m_ApplicationCore->CreateApplication(*m_InputEngine, m_AudioPlayer,
                                                    *m_RuntimeFactory);
+    if (!m_Application->createSuccessful())
+        return false;
+
     m_Application->ResetTime();
     m_RenderEngine = &m_RuntimeFactory->CreateRenderEngine();
     m_Presentation = m_Application->GetPrimaryPresentation();
@@ -287,6 +290,7 @@ void CNDDView::InitializeGraphics(const QSurfaceFormat &format)
                      signalProxy(), &QINDDViewSignalProxy::SigSlideExited);
 
     m_TimeProvider.Reset();
+    return true;
 }
 
 void CNDDView::Cleanup()
@@ -302,7 +306,8 @@ void CNDDView::Cleanup()
 
     CDLLManager &theDLLManager = CDLLManager::GetDLLManager();
     theDLLManager.Cleanup();
-    QObject::disconnect(m_Presentation->signalProxy(), 0, signalProxy(), 0);
+    if (m_Presentation)
+        QObject::disconnect(m_Presentation->signalProxy(), 0, signalProxy(), 0);
 
     m_InputEngine = NULL;
     m_RenderEngine = NULL;
@@ -737,9 +742,9 @@ KDint CTegraApplication::BeginLoad(const QString &sourcePath)
     return theResult;
 }
 
-void CTegraApplication::InitializeGraphics(const QSurfaceFormat &format)
+bool CTegraApplication::InitializeGraphics(const QSurfaceFormat &format)
 {
-    m_NDDView->InitializeGraphics(format);
+    return m_NDDView->InitializeGraphics(format);
 }
 
 void CTegraApplication::Render()

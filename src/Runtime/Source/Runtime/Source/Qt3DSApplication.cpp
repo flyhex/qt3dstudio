@@ -225,7 +225,7 @@ class IAppLoadContext : public NVRefCounted
 {
 public:
     virtual void EndLoad() = 0;
-    virtual void OnGraphicsInitialized(IRuntimeFactory &inFactory) = 0;
+    virtual bool OnGraphicsInitialized(IRuntimeFactory &inFactory) = 0;
     virtual bool HasCompletedLoading() = 0;
     static IAppLoadContext &CreateXMLLoadContext(
             SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
@@ -484,6 +484,8 @@ struct SApp : public IApplication
 
     Qt3DSAssetVisitor *m_visitor;
 
+    bool m_createSuccessful;
+
     QT3DSI32 mRefCount;
     SApp(Q3DStudio::IRuntimeFactoryCore &inFactory, const char8_t *inAppDir)
         : m_CoreFactory(inFactory)
@@ -520,6 +522,7 @@ struct SApp : public IApplication
         , m_ThisFrameStartTime(0)
         , m_MillisecondsSinceLastFrame(0)
         , m_DirtyCountdown(5)
+        , m_createSuccessful(false)
         , mRefCount(0)
         , m_visitor(nullptr)
     {
@@ -1370,6 +1373,11 @@ struct SApp : public IApplication
         return true;
     }
 
+    bool createSuccessful() override
+    {
+        return m_createSuccessful;
+    }
+
     // will force loading to end if endLoad hasn't been called yet.  Will fire off loading
     // of resources that need to be uploaded to opengl.  Maintains reference to runtime factory
     IApplication &CreateApplication(Q3DStudio::CInputEngine &inInputEngine,
@@ -1396,9 +1404,11 @@ struct SApp : public IApplication
                 SStackPerfTimer __timer(m_CoreFactory->GetPerfTimer(),
                                         "Application: Load Context Graphics Initialized");
                 if (m_AppLoadContext)
-                    m_AppLoadContext->OnGraphicsInitialized(inFactory);
+                    m_createSuccessful = m_AppLoadContext->OnGraphicsInitialized(inFactory);
                 // Guarantees the end of the multithreaded access to the various components
                 m_AppLoadContext = NULL;
+                if (!m_createSuccessful)
+                    return *this;
             }
 
             {
@@ -1929,7 +1939,7 @@ struct SXMLLoader : public IAppLoadContext
 
     bool HasCompletedLoading() override { return true; }
 
-    void OnGraphicsInitialized(IRuntimeFactory &inFactory) override
+    bool OnGraphicsInitialized(IRuntimeFactory &inFactory) override
     {
         eastl::vector<SElementAttributeReference> theUIPReferences;
         eastl::string tempString;
@@ -1964,6 +1974,7 @@ struct SXMLLoader : public IAppLoadContext
                                                   (QT3DSU32)theUIPReferences.size()))) {
                     qCCritical(INVALID_OPERATION, "Unable to load presentation %s",
                                thePathStr.c_str());
+                    return false;
                 }
             } break;
             case AssetValueTypes::Behavior: {
@@ -2009,6 +2020,7 @@ struct SXMLLoader : public IAppLoadContext
                            initialScaleMode);
             }
         }
+        return true;
     }
 
     virtual void OnFirstRender() {}
@@ -2363,7 +2375,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
         return completed;
     }
 
-    void OnGraphicsInitialized(IRuntimeFactory &inRuntimeFactory) override
+    bool OnGraphicsInitialized(IRuntimeFactory &inRuntimeFactory) override
     {
         EndLoad();
 
@@ -2373,12 +2385,13 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
         for (QT3DSU32 idx = 0, end = m_LoadingPresentations.size(); idx < end; ++idx) {
             SLoadingPresentation &thePresentation(m_LoadingPresentations[idx]);
             if (thePresentation.m_Error) {
-                qFatal("Error detected loading presentation: %s",
+                qCritical("Error detected loading presentation: %s",
                        thePresentation.m_Asset->m_Src.c_str());
+                return false;
             }
             if (thePresentation.m_Finished == false) {
-                qFatal("Unfinished presentation: %s",
-                       thePresentation.m_Asset->m_Src.c_str());
+                qCritical("Unfinished presentation: %s", thePresentation.m_Asset->m_Src.c_str());
+                return false;
             }
         }
 
@@ -2397,6 +2410,7 @@ struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
                 }
             }
         }
+        return true;
     }
 
     virtual void OnFirstRender() {}

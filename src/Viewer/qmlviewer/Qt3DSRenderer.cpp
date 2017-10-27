@@ -52,6 +52,7 @@ Q3DSRenderer::Q3DSRenderer(bool visibleFlag, qt3ds::Qt3DSAssetVisitor *assetVisi
     , m_runtime(0)
     , m_window(nullptr)
     , m_initialized(false)
+    , m_initializationFailure(false)
     , m_visitor(assetVisitor)
     , m_settings(new Q3DSViewerSettings(this))
     , m_presentation(new Q3DSPresentation(this))
@@ -84,11 +85,17 @@ void Q3DSRenderer::synchronize(QQuickFramebufferObject *inView)
     // Passing m_InitElements here is a bit of a hack to easily set the flag on the plugin.
     static_cast<Q3DSView *>(inView)->getCommands(m_initElements, m_commands);
 
+    if (m_initializationFailure)
+        static_cast<Q3DSView *>(inView)->setError(m_error);
+
     if (m_commands.m_sourceChanged) {
         releaseRuntime();
         // Need to update source here rather than processCommands, as source is needed for init
         m_presentation->setSource(m_commands.m_source);
         m_initialized = false;
+        m_initializationFailure = false;
+        m_error.clear();
+        static_cast<Q3DSView *>(inView)->setError(QString());
     }
 
     m_initElements = false;
@@ -122,15 +129,19 @@ void Q3DSRenderer::render()
 {
     // We may start in a non visible state but we still need
     // to init the runtime otherwise the commands are never processed
-    if (!m_initialized)
+    if (!m_initialized && !m_initializationFailure) {
         m_initialized = initializeRuntime(this->framebufferObject());
+        m_initializationFailure = !m_initialized;
+    }
 
     // Don't render if the plugin is hidden; however, if hidden, but sure
     // to process pending commands so we can be shown again.
-    if (m_visibleFlag)
-        draw();
-    else
-        processCommands();
+    if (m_initialized) {
+        if (m_visibleFlag)
+            draw();
+        else
+            processCommands();
+    }
 }
 
 /** Cause Qt3DS runtime to render content.
@@ -160,6 +171,7 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
 
     if (!m_runtime->InitializeApp(theWidth, theHeight, QOpenGLContext::currentContext()->format(),
                                   inFbo->handle(), localSource, m_visitor)) {
+        m_error = m_runtime->error();
         releaseRuntime();
         return false;
     }

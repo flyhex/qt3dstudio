@@ -279,6 +279,8 @@ public:
     IAudioPlayer *m_AudioPlayer;
     QList<KDEvent *> m_pendingEvents;
 
+    QString m_error;
+
     void queueMouseEvent(int index, int select, int x, int y)
     {
         KDEvent *e = new KDEvent;
@@ -340,8 +342,9 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
 
     QFileInfo info(source);
     if (!info.exists()) {
-        qWarning("Failed to initialize UICViewer,"
-                 " presentation doesn't exist");
+        m_Impl.m_error
+                = QObject::tr("Failed to initialize viewer, presentation doesn't exist");
+        qCritical() << m_Impl.m_error;
         return false;
     }
 
@@ -386,11 +389,19 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         }*/
 
         if (m_Impl.m_appInitSuccessful == false) {
-            qCritical() << "Qt3DSViewer Launch failure!! Failed to load" << source;
+            m_Impl.m_error = QObject::tr("Viewer launch failure! Failed to load: '%1'").arg(source);
+            m_Impl.m_error.append("\n");
+            qCritical() << m_Impl.m_error;
             return false;
         }
 
-        m_Impl.m_tegraApp->InitializeGraphics(format);
+        bool success = m_Impl.m_tegraApp->InitializeGraphics(format);
+        if (!success) {
+            m_Impl.m_error = QObject::tr("Viewer launch failure! Failed to load: '%1'").arg(source);
+            m_Impl.m_error.append("\n");
+            qCritical() << m_Impl.m_error;
+            return false;
+        }
 
         SigPresentationReady();
 
@@ -526,6 +537,13 @@ void Q3DSViewerApp::DoSetWatermarkLocation()
         m_Impl.m_tegraApp->GetTegraRenderEngine()->SetWatermarkLocation(m_Impl.m_WatermarkX,
                                                                         m_Impl.m_WatermarkY);
     }
+}
+
+QString Q3DSViewerApp::error()
+{
+    QString error = m_Impl.m_error;
+    m_Impl.m_error.clear();
+    return error;
 }
 
 void Q3DSViewerApp::Resize(int width, int height)
