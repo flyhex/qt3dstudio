@@ -91,7 +91,7 @@ static bool compareContextVersion(QSurfaceFormat a, QSurfaceFormat b)
         return false;
     if (a.majorVersion() != b.majorVersion())
         return false;
-    if (a.minorVersion() != b.minorVersion())
+    if (a.minorVersion() > b.minorVersion())
         return false;
     return true;
 }
