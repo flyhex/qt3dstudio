@@ -116,11 +116,6 @@ win: PRECOMPILED_HEADER = Studio/_Win/Studio/stdafx.h
 
 include(Q3DStudio.pri)
 
-
-DISTFILES += \
-    Studio/Palettes/BasicObjects/BasicObjectsView.qml \
-    Studio/Palettes/BasicObjects/SlideView.qml
-
 FORMS += \
     Studio/MainFrm.ui \
     Studio/_Win/Application/AboutDlg.ui \
@@ -212,7 +207,6 @@ QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy1", $$PWD/../../Studio/Conte
 QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy2", "$$PWD/../../Studio/Build Configurations/*", "Build Configurations")
 
 CONFIG += exceptions
-DISTFILES +=
 
 RESOURCES += \
     Studio/qt3dstudio.qrc
