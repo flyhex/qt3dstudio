@@ -116,7 +116,8 @@ void CStartupDlg::OnInitDialog()
             toolTip.append(GetFileTimeReadable(m_RecentDocs[theIndex]));
             recent->setToolTip(toolTip);
         } else {
-            recent->hide();
+            recent->setEnabled(false);
+            recent->setText(QString());
         }
     }
 }
