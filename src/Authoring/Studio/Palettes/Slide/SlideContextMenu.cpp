@@ -41,7 +41,7 @@ SlideContextMenu::SlideContextMenu(SlideView *parent, int row, int rowCount, boo
     addAction(action);
 
     action = new QAction(tr("Delete Slide"));
-    action->setEnabled(!master && m_row != -1);
+    action->setEnabled(!master && m_row != -1 && m_rowCount > 1);
     connect(action, &QAction::triggered, this, &SlideContextMenu::handleRemoveSlide);
     addAction(action);
 

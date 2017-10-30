@@ -215,10 +215,14 @@ void SlideModel::addNewSlide(int row)
 
 void SlideModel::removeSlide(int row)
 {
-    const auto handle = m_slides[row];
+    // Don't allow deleting of the last slide
+    if (m_slides.size() > 1) {
+        const auto handle = m_slides[row];
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Delete Slide"))->DeleteSlide(handle);
-    removeRows(row, 1);
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Delete Slide"))->DeleteSlide(
+                    handle);
+        removeRows(row, 1);
+    }
 }
 
 bool SlideModel::hasSlideWithName(const QString &name) const
