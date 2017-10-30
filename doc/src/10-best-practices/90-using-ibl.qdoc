@@ -1,0 +1,159 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Using Image-based Lighting
+\page best-practices-image-based-lighting.html
+\ingroup qt3dstudio-best-practices
+
+\section1 Introduction
+
+Qt 3D Studio supports IBL (Image-based lighting) to illuminate layers and objects.
+
+IBL is a lighting technique that allows scenes to be illuminated with images.  This is
+especially useful when you want to create realistic lighting and reflections in indoor and outdoor
+scenes.
+
+You can use any image file for IBL but it is recommended to use 360º HDR (High Dynamic Range)
+images. HDR images have a much higher dynamic range than for example JPEG or PNG images.
+A higher dynamic range will provide more realistic lighting through a great range of luminance
+levels from very bright to very dark.
+
+Included in Studio is a set of sample 360º HDR images. You find these in the \e{Environments}
+folder of the \e{Maps library}. Add desired images to your project by dragging and dropping them
+from the file system to the \e{project palette}.
+
+\image OpenfootageNET_Grado-512.png "360º HDR image"
+
+It is of course also possible to create and use your own 360º HDR images. There are many
+different techniques that can be used to obtain such images.
+
+Below you can see the effect of lighting an object with the HDR image above versus lighting
+the same object with a single directional light.
+
+\table
+\header
+  \li Light
+  \li Reflective material
+  \li Matte material
+\row
+  \li \b{Single directional light}
+  \li \image ball-directional-light.png
+  \li \image ball-directional-light-matte.png
+\row
+  \li \b{Image-based light}
+  \li \image ball-environment-light.png
+  \li \image ball-environment-light-matte.png
+\endtable
+
+\section1 Layer Lighting
+
+To illuminate a layer using an image follow the steps below:
+
+\list 1
+  \li Select the desired layer in the \e{scene graph}.
+  \li Click \uicontrol{Light Probe} in the \e{inspector palette} and browse to the image you wish
+  to use.
+\endlist
+
+Once you have selected an image IBL is set up for your layer. All objects on the layer will by
+default be illuminated by the light probe.
+
+\note You can combine IBL with any other light source, or you can use it alone. It is also possible
+to use two different IBL light probes, which is described below.
+
+Now that you have IBL set up for your layer, let us have a look at the different settings. You find
+these in the \e{inspector palette} once you have selected the corresponding layer. In many cases the
+default settings will provide a satisfying result, but depending on the source image and desired
+end result you might want to tweak these.
+
+\list
+  \li \uicontrol{IBL Brightness} - The amount of light emitted by the light probe.
+  \li \uicontrol{IBL Horizon Cutoff} - Increasing the value will add darkness (black) to the
+  bottom half of the environment, forcing the lighting to come predominantly from the top
+  of the image (and removing specific reflections from the lower half).
+  \li \uicontrol{IBL FOV Angle} - The image source field of view.
+  \li \uicontrol{Secondary Light Probe} - The image to use as secondary IBL light source.
+  \li \uicontrol{Probe crossfade} - The blend amount between the primary and secondary
+  light probes.
+\endlist
+
+\table
+\header
+  \li Property
+  \li Reflective material
+  \li Matte material
+\row
+  \li \e{\b{Default settings}}
+  \li \image ball-environment-light.png
+  \li \image ball-environment-light-matte.png
+\row
+  \li \b{IBL Horizon Cutoff}
+  \li \image ball-environment-light-horiz.png
+  \li \image ball-environment-light-horiz-matte.png
+\row
+  \li \b{IBL FOV Angle}
+  \li \image ball-environment-light-fov.png
+  \li \image ball-environment-light-fov-matte.png
+\row
+  \li \b{Secondary Light Probe}
+  \li \image ball-environment-light-second.png
+  \li \image ball-environment-light-second-matte.png
+\endtable
+
+\section2 Edit Light Probe
+
+To edit the light probe source image, you can double-click the \uicontrol{Light Probe}
+in the \e{scene graph} to open it in your default image editing software. You might need to save
+and re-open your project for the changes to be visible.
+
+\image scene-graph-light-probe.png
+
+\note Editing the source image will only edit the image in this project, the original image file
+will remain untouched.
+
+\section1 Object Lighting
+
+To use image-based lighting only on one object instead of a layer, or if you want to use
+a separate light probe for an object on a layer already illuminated by image-based lighting, follow
+the steps below:
+
+\list 1
+  \li In the \e{scene graph} expand the desired object and select its material.
+  \image scene-graph-material.png
+  \li In the \e{inspector palette} click the \uicontrol{IBL Override} and select the desired image
+  to use as the light probe.
+\endlist
+
+Once you have followed the steps above you have a separate light probe set up for the material.
+This light probe will always override the layer light probe if there is one specified.
+
+\note You can easily reuse the same material on any other object using
+\l{studio-inspector-palette.html#referenced-materials}{Reference Material}.
+
+*/

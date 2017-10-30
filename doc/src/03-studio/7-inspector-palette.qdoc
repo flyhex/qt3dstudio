@@ -140,8 +140,7 @@ shown in the Inspector palette \e{specific to the active slide}:
 \endlist
 
 \target layer-properties
-\section1 Layer
-Properties
+\section1 Layer Properties
 
 Selecting a layer in the Timeline palette shows the following properties
 in the Inspector palette:
@@ -337,7 +336,7 @@ in the Inspector palette:
   range image (\c{.hdr})) to use to light the scene, either instead of or
   in addition to standard lights. If selected, note that this image will
   be used as the environment for any custom \c{.material}, instead
-  of the environment often associated with them.
+  of the environment often associated with them. For details see \l{Using Image-based Lighting}.
 \li
   \b{IBL Brightness} - The amount of light emitted by the light probe.
 \li
@@ -354,8 +353,7 @@ in the Inspector palette:
 \endlist
 
 \target transform-properties
-\section1 Transform
-Properties
+\section1 Transform Properties
 
 Selecting an element in the Timeline palette that has a 3D presence
 shows the following properties in the Inspector palette:
@@ -497,8 +495,7 @@ in the Inspector palette (in addition to the
   element and its descendants.
 \li
   \b{Light Type}\target light-properties\_light-type
- - Choose
-  whether the light is a directional or point light:
+ - Choose whether the light is a directional or point light:
 \list
 \li
   \c{Directional} - Lighting is applied uniformly in the direction
@@ -583,8 +580,7 @@ in the Inspector palette (in addition to the
 \endlist
 
 \target model-properties
-\section1 Model
-Properties
+\section1 Model Properties
 
 A model selected in the Timeline palette shows the following properties
 in the Inspector palette (in addition to the
@@ -610,8 +606,7 @@ in the Inspector palette (in addition to the
 \endlist
 
 \target material-properties
-\section1 Material
-Properties
+\section1 Material Properties
 
 A material selected in the Timeline palette shows the different
 properties in the Inspector palette depending on the type of the
@@ -633,9 +628,12 @@ material, chosen in the top-most property:
 \endlist
 
 \target standard-materials
-\section2 Standard
-Materials
+\section2 Standard Materials
 
+\list
+\li
+  \b{IBL override} - IBL probe to use in place of the layer probe.
+\endlist
 \list
 \li
   \b{Lighting} - Choose the type of lighting calculations used for
