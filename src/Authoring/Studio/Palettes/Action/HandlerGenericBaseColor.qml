@@ -59,8 +59,9 @@ RowLayout {
 
         Image {
             id: img
-            x: parent.width - sourceSize.width - 3
-            y: (parent.height - sourceSize.height) / 2
+            // Source image size is 16x16 pixels
+            x: parent.width - 18
+            y: parent.height / 2 - 8
             source: _resDir + "arrow_down.png"
         }
     }

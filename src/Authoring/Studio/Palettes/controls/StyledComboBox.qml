@@ -85,8 +85,6 @@ ComboBox {
         x: control.width - width - 2
         y: control.topPadding + (control.availableHeight - height) / 2
         source: _resDir + "arrow_down.png"
-        sourceSize.width: width
-        sourceSize.height: height
     }
 
     contentItem: StyledTextField {
