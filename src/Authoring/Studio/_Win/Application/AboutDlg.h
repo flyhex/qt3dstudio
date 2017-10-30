@@ -67,7 +67,6 @@ private:
     Q3DStudio::CString m_ProductVersionStr;
     Q3DStudio::CString m_CopyrightStr;
     Q3DStudio::CString m_Credit1Str;
-    Q3DStudio::CString m_Credit2Str;
 };
 
 #endif // INCLUDED_ABOUT_DLG_H

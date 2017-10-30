@@ -93,9 +93,8 @@ void CAboutDlg::OnInitDialog()
                           static_cast<const wchar_t *>(Q3DStudio::CString(STUDIO_COPYRIGHT_YEAR)));
 
     // Set the credit strings
-    m_Credit1Str.Format(::LoadResourceString(IDS_ABOUT_PAINTLIB_CREDIT));
 #ifdef QT_3DSTUDIO_FBX
-    m_Credit2Str.Format(::LoadResourceString(IDS_ABOUT_FBX_CREDIT));
+    m_Credit1Str.Format(::LoadResourceString(IDS_ABOUT_FBX_CREDIT));
 #endif
 
 #ifdef STUDIOSTORYNUM
@@ -137,5 +136,4 @@ void CAboutDlg::OnInitDialog()
     m_ui->m_ProductVersion->setText(m_ProductVersionStr.toQString());
     m_ui->m_Copyright->setText(m_CopyrightStr.toQString());
     m_ui->m_Credit1->setText(m_Credit1Str.toQString());
-    m_ui->m_Credit2->setText(m_Credit2Str.toQString());
 }
