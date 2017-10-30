@@ -28,7 +28,6 @@ SOURCES += \
     Source/Qt3DSFoundation/Source/foundation/StringTable.cpp \
     Source/Qt3DSFoundation/Source/foundation/XML.cpp \
     Source/Qt3DSRuntimeRender/Source/q3dsqmlrender.cpp \
-    Source/Engine/Source/Qt3DSOSSpecificFunctions.cpp \
     Source/Engine/Source/Qt3DSRenderRuntimeBinding.cpp \
     Source/Engine/Source/Qt3DSRenderRuntimeBindingImplRenderer.cpp \
     Source/Engine/Source/Qt3DSRenderRuntimeBindingImplTranslation.cpp \
@@ -151,8 +150,6 @@ SOURCES += \
     Source/System/Source/Qt3DSMemoryProbe.cpp \
     Source/System/Source/Qt3DSMemoryStatistics.cpp \
     Source/System/Source/Qt3DSMemoryTracker.cpp \
-    Source/System/Source/Qt3DSSyncPrimitive.cpp \
-    Source/System/Source/Qt3DSThreadManager.cpp \
     Source/System/Source/Qt3DSTimer.cpp \
     Source/System/Source/Qt3DSTypes.cpp \
     Source/System/Source/Qt3DSVector3.cpp \
@@ -427,18 +424,12 @@ HEADERS += \
     Source/System/Include/Qt3DSMemoryStatistics.h \
     Source/System/Include/Qt3DSMemoryTracker.h \
     Source/System/Include/Qt3DSPlatformSpecific.h \
-    Source/System/Include/Qt3DSSyncPrimitive.h \
-    Source/System/Include/Qt3DSThreadManager.h \
-    Source/System/Include/Qt3DSThreadSafeQueue.h \
-    Source/System/Include/Qt3DSThreadSafeScratchpad.h \
     Source/System/Include/Qt3DSTimer.h \
     Source/System/Include/Qt3DSTypes.h \
     Source/System/Include/Qt3DSVector3.h \
     Source/System/Include/Qt3DSArray.inl \
     Source/System/Include/Qt3DSCircularArray.inl \
     Source/System/Include/Qt3DSFixedArray.inl \
-    Source/System/Include/Qt3DSThreadSafeQueue.inl \
-    Source/System/Include/Qt3DSThreadSafeScratchpad.inl \
     Source/Qt3DSStateApplication/Application/Qt3DSStateApplication.h \
     Source/Qt3DSStateApplication/Debugger/Qt3DSLuaDebugger.h \
     Source/Qt3DSStateApplication/Debugger/Qt3DSLuaDebuggerImpl.h \
@@ -537,7 +528,6 @@ HEADERS += \
 
 # Libs
 SOURCES += \
-    ../3rdparty/RuntimePlatformSpecific/$$PlatformSpecificDir/Qt3DSLibs/KD/MinKD.c \
     Source/PlatformSpecific/$$PlatformSpecificDir/Qt3DSLibs/nv_math/nv_math.cpp \
     Source/PlatformSpecific/$$PlatformSpecificDir/Qt3DSLibs/nv_math/nv_matrix.cpp \
     Source/PlatformSpecific/$$PlatformSpecificDir/Qt3DSLibs/nv_math/nv_quat.cpp

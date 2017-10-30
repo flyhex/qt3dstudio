@@ -65,63 +65,56 @@ SInputFrame &CTegraInputEngine::GetInputFrame()
 /**
  * Handles the input message.
  */
-void CTegraInputEngine::HandleMessage(const KDEvent *inEvent,
+void CTegraInputEngine::HandleMessage(const QEvent *inEvent,
                                       ITegraApplicationRenderEngine &inRenderEngine,
                                       CPresentation *inPresentation)
 {
-    static KDboolean s_PointerWasDown = KD_FALSE;
+    static bool s_PointerWasDown = false;
 
     if (NULL == inPresentation)
         return;
 
-    switch (inEvent->type) {
-    // we still want to preserve the mouse events support, hence process this event as usual.
-    case KD_EVENT_INPUT_POINTER: {
-        const KDEventInputPointer *ptr = &(inEvent->data.inputpointer);
+    switch (inEvent->type()) {
 
-        KDfloat32 x = static_cast<KDfloat32>(ptr->x);
-        KDfloat32 y = static_cast<KDfloat32>(ptr->y);
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseButtonRelease:
+        {
+            const QMouseEvent *event = static_cast<const QMouseEvent *>(inEvent);
 
-        if (inRenderEngine.IsPickValid(x, y, *inPresentation)) {
-            // printf( "INPUT x %ld y %ld\n", (int)x, (int)y );
-            SetPickInput(x, y, (ptr->select || s_PointerWasDown) ? true : false);
+            QPointF pos = event->localPos();
+            FLOAT x = pos.x();
+            FLOAT y = pos.y();
 
-            if (ptr->select) {
-                if (s_PointerWasDown)
-                    SetPickFlags(LMOUSE_DOWN);
-                else
-                    SetPickFlags(LMOUSE_PRESSED);
+            const bool pressed = inEvent->type() == QEvent::MouseButtonPress;
 
-                s_PointerWasDown = KD_TRUE;
+            if (inRenderEngine.IsPickValid(x, y, *inPresentation)) {
+                // printf( "INPUT x %ld y %ld\n", (int)x, (int)y );
+                SetPickInput(x, y, (pressed || s_PointerWasDown) ? true : false);
+
+                if (pressed) {
+                    if (s_PointerWasDown)
+                        SetPickFlags(LMOUSE_DOWN);
+                    else
+                        SetPickFlags(LMOUSE_PRESSED);
+
+                    s_PointerWasDown = true;
+                } else {
+                    if (s_PointerWasDown)
+                        SetPickFlags(LMOUSE_RELEASED);
+                    else
+                        SetPickFlags(LMOUSE_UP);
+
+                    s_PointerWasDown = false;
+                }
             } else {
                 if (s_PointerWasDown)
                     SetPickFlags(LMOUSE_RELEASED);
                 else
                     SetPickFlags(LMOUSE_UP);
 
-                s_PointerWasDown = KD_FALSE;
+                s_PointerWasDown = false;
             }
-        } else {
-            if (s_PointerWasDown)
-                SetPickFlags(LMOUSE_RELEASED);
-            else
-                SetPickFlags(LMOUSE_UP);
-
-            s_PointerWasDown = KD_FALSE;
-        }
-    } break;
-#if !defined(Q_OS_MACOS)
-    case KD_EVENT_WINDOW_FOCUS:
-        /* On loss of focus, we simulate a pointer-up event */
-        if (!inEvent->data.windowfocus.focusstate) {
-            /*if ( s_PointerWasDown )
-                SetPickFlags( LMOUSE_RELEASED );
-            else
-                SetPickFlags( LMOUSE_UP );*/
-            s_PointerWasDown = KD_FALSE;
-        }
-        break;
-#endif
+        } break;
     }
 }
 

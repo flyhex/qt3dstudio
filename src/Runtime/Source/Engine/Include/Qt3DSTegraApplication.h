@@ -44,7 +44,7 @@
 #include "Qt3DSRenderRuntimeBinding.h"
 #include <QtCore/qobject.h>
 #include <QtGui/qsurfaceformat.h>
-#include <KD/kd.h>
+
 //==============================================================================
 //	Namespace
 //==============================================================================
@@ -123,7 +123,7 @@ public:
     virtual void CheckResize(bool inForce, IPresentation &inActivePresentation) = 0;
     virtual BOOL LoadShaderCache(const CHAR *inFilePath) = 0;
     virtual void AbandonLoadingImages(IScene &inScene) = 0;
-    virtual BOOL IsPickValid(KDfloat32 &outX, KDfloat32 &outY,
+    virtual BOOL IsPickValid(FLOAT &outX, FLOAT &outY,
                              const IPresentation &inPresentation) const = 0;
     virtual void SetScaleMode(TegraRenderScaleModes::Enum inScale) = 0;
     virtual void SetShadeMode(TegraRenderShadeModes::Enum inShade) = 0;
@@ -172,7 +172,7 @@ public: // loading
 
     virtual bool WasLastFrameDirty() = 0;
 
-    virtual KDint HandleMessage(const KDEvent *inEvent) = 0;
+    virtual bool HandleMessage(const QEvent *inEvent) = 0;
 
     virtual void Pause() = 0;
     virtual void UnPause() = 0;
@@ -229,7 +229,7 @@ public:
                       IAudioPlayer *inAudioPlayer = 0);
     virtual ~CTegraApplication();
     // loading
-    KDint BeginLoad(const QString &sourcePath);
+    bool BeginLoad(const QString &sourcePath);
     // asynchronous BeginLoad completed? That only valid for binary presentation, for text
     // presentation, always true
     bool HasOfflineLoadingCompleted() { return m_NDDView->HasOfflineLoadingCompleted(); }
@@ -242,7 +242,7 @@ public:
     void Render();
     bool WasLastFrameDirty() { return m_NDDView->WasLastFrameDirty(); }
 
-    KDint HandleMessage(const KDEvent *inEvent);
+    bool HandleMessage(const QEvent *inEvent);
     void Pause() { m_NDDView->Pause(); }
     void UnPause() { m_NDDView->UnPause(); }
     bool IsPaused() { return m_NDDView->IsPaused(); }

@@ -38,7 +38,6 @@
 #include "Qt3DSTegraApplication.h"
 #include "Qt3DSInputEventTypes.h"
 #include "Qt3DSPresentation.h"
-#include "KD/kd.h"
 
 //==============================================================================
 //	Namespace
@@ -73,7 +72,7 @@ public: // Construction
 public: // Access
     SInputFrame &GetInputFrame() override;
 
-    void HandleMessage(const KDEvent *inEvent, ITegraApplicationRenderEngine &inRenderEngine,
+    void HandleMessage(const QEvent *inEvent, ITegraApplicationRenderEngine &inRenderEngine,
                        CPresentation *inPresentation);
 };
 

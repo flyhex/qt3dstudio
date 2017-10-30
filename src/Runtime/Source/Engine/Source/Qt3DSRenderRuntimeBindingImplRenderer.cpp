@@ -98,13 +98,13 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 
     void AbandonLoadingImages(Q3DStudio::IScene & /*inScene*/) override {}
 
-    Q3DStudio::BOOL IsPickValid(KDfloat32 &outX, KDfloat32 &outY,
+    Q3DStudio::BOOL IsPickValid(FLOAT &outX, FLOAT &outY,
                                         const Q3DStudio::IPresentation & /*inPresentation*/) const override
     {
-        KDfloat32 theX = outX;
-        KDfloat32 theY = outY;
-        theX = theX / static_cast<KDfloat32>(m_BindingCore->m_WindowDimensions.m_Width);
-        theY = theY / static_cast<KDfloat32>(m_BindingCore->m_WindowDimensions.m_Height);
+        FLOAT theX = outX;
+        FLOAT theY = outY;
+        theX = theX / static_cast<FLOAT>(m_BindingCore->m_WindowDimensions.m_Width);
+        theY = theY / static_cast<FLOAT>(m_BindingCore->m_WindowDimensions.m_Height);
         Q3DStudio::BOOL theValid = false;
 
         if ((theX >= 0.0f) && (theY >= 0.0f) && (theX <= 1.0f) && (theY <= 1.0f))

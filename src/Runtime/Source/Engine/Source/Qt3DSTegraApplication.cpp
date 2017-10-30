@@ -35,7 +35,6 @@
 #include "Qt3DSTegraInputEngine.h"
 #include "Qt3DSDataLogger.h"
 #include "Qt3DSFileStream.h"
-#include "Qt3DSThreadManager.h"
 #include "Qt3DSArray.h"
 #include "Qt3DSApplication.h"
 #include "foundation/FileTools.h"
@@ -181,7 +180,7 @@ public:
     void Render() override;
     bool WasLastFrameDirty() override;
 
-    KDint HandleMessage(const KDEvent *inEvent) override;
+    bool HandleMessage(const QEvent *inEvent) override;
 
     void Pause() override;
     void UnPause() override;
@@ -378,43 +377,32 @@ bool CNDDView::WasLastFrameDirty()
  *	nv_main APP-SPECIFIC message call
  *	HandleMessage
  */
-KDint CNDDView::HandleMessage(const KDEvent *inEvent)
+bool CNDDView::HandleMessage(const QEvent *inEvent)
 {
     if (m_Application.mPtr == NULL || m_RenderEngine == NULL)
         return 0;
-    KDint theReturn = KD_FALSE;
-    switch (inEvent->type) {
-    case KD_EVENT_INPUT:
-        theReturn = KD_TRUE;
-        break;
-    case KD_EVENT_INPUT_POINTER:
-        m_InputEngine->SetPickInput(static_cast<FLOAT>(inEvent->data.inputpointer.x),
-                                    static_cast<FLOAT>(inEvent->data.inputpointer.y), true);
-        m_InputEngine->SetPickFlags(inEvent->data.inputpointer.select ? LMOUSE_DOWN : LMOUSE_UP);
-        theReturn = KD_TRUE;
-        break;
-#if !defined(Q_OS_MACOS)
-    case KD_EVENT_WINDOW_CLOSE:
-        theReturn = KD_FALSE;
-        break;
-    case KD_EVENT_WINDOW_REDRAW:
-    case KD_EVENT_WINDOW_FOCUS:
-        theReturn = KD_TRUE;
-        break;
-    case KD_EVENT_WINDOWPROPERTY_CHANGE:
-        if (inEvent->data.windowproperty.pname == KD_WINDOWPROPERTY_SIZE
-                && m_Application->GetPrimaryPresentation())
-            m_RenderEngine->CheckResize(KD_TRUE, *m_Application->GetPrimaryPresentation());
-        theReturn = KD_TRUE;
-        break;
-#endif
-    default:
-        kdDefaultEvent(inEvent);
-        theReturn = KD_TRUE;
-        break;
+    bool ret = false;
+    switch (inEvent->type()) {
+
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseButtonRelease:
+        {
+            const QMouseEvent *event = static_cast<const QMouseEvent *>(inEvent);
+            m_InputEngine->SetPickInput(static_cast<FLOAT>(event->x()),
+                                        static_cast<FLOAT>(event->y()), true);
+            m_InputEngine->SetPickFlags(inEvent->type() == QEvent::MouseButtonPress
+                                        ? LMOUSE_DOWN : LMOUSE_UP);
+            ret = true;
+        } break;
+    case QEvent::Resize:
+        {
+            if (m_Application->GetPrimaryPresentation())
+                m_RenderEngine->CheckResize(true, *m_Application->GetPrimaryPresentation());
+            ret = true;
+        } break;
     }
     m_InputEngine->HandleMessage(inEvent, *m_RenderEngine, m_Application->GetPrimaryPresentation());
-    return theReturn;
+    return ret ? 1 : 0;
 }
 
 void CNDDView::Pause()
@@ -706,7 +694,7 @@ CTegraApplication::~CTegraApplication()
 {
 }
 
-KDint CTegraApplication::BeginLoad(const QString &sourcePath)
+bool CTegraApplication::BeginLoad(const QString &sourcePath)
 {
 #ifndef QT3DS_NO_SEARCH_PATH
     // We need these later on in case we try to load any files
@@ -716,7 +704,7 @@ KDint CTegraApplication::BeginLoad(const QString &sourcePath)
     NvFSAppendSearchPath("/data");
 #endif
 
-    KDint theResult = KD_FALSE;
+    bool theResult = false;
 
     qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: Attempting presentation beginload";
 
@@ -726,16 +714,16 @@ KDint CTegraApplication::BeginLoad(const QString &sourcePath)
             qCInfo(TRACE_INFO)
                     << "CTegraApplication::BeginLoad: Successfully begin loading presentation: "
                     << sourcePath;
-            theResult = KD_TRUE;
+            theResult = true;
         } else {
             qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: Failed to load presentation: "
                                << sourcePath;
-            theResult = KD_FALSE;
+            theResult = false;
         }
     } else {
         // If there wasn't, then we are still in an OK state.
         qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: Presentation file not provided";
-        theResult = KD_TRUE;
+        theResult = true;
     }
 
     qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: End beginload";
@@ -752,7 +740,7 @@ void CTegraApplication::Render()
     m_NDDView->Render();
 }
 
-KDint CTegraApplication::HandleMessage(const KDEvent *inEvent)
+bool CTegraApplication::HandleMessage(const QEvent *inEvent)
 {
     return m_NDDView->HandleMessage(inEvent);
 }

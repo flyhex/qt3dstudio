@@ -34,7 +34,9 @@
 #include "SystemPrefix.h"
 #include "Qt3DSFile.h"
 #include "Qt3DSFileStream.h"
-#include "Qt3DSThreadManager.h"
+#include "foundation/Qt3DSLogging.h"
+
+#include <QtCore/qthread.h>
 
 //==============================================================================
 //	Namespace
@@ -77,7 +79,7 @@ void CFileStream::Open(const CHAR *inFilePath, const CHAR *inMode)
     Close();
     m_FileStream = CFile::Open()(inFilePath, inMode);
     while (m_KeepTrying && !m_FileStream) {
-        Q3DStudio_sleepmillisec(10);
+        QThread::msleep(10);
         m_FileStream = CFile::Open()(inFilePath, inMode);
     }
 

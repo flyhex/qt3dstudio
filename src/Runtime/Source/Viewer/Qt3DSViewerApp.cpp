@@ -34,9 +34,6 @@
 #include "Qt3DSTegraApplication.h"
 #include "Qt3DSViewerApp.h"
 #include "Qt3DSTegraInputEngine.h"
-#if !defined(Q_OS_MACOS)
-#include "TCPPerfLogClientStub.h"
-#endif
 #include "Qt3DSInputFrame.h" // keyboard mapping
 #include "foundation/Qt3DSTime.h"
 #include "Qt3DSFNDTimer.h"
@@ -198,30 +195,13 @@ void PerfLogSetStringData(const char *)
 {
 } // Dummy defination when TCP perf logging isnt used
 
-//-----------------------------------------------------------------------------
-// KD overwrite
-//-----------------------------------------------------------------------------
-void kdLogMessage(const KDchar *string)
-{
-    qCInfo(qt3ds::TRACE_INFO) << string;
-}
-
-void kdHandleAssertion(const KDchar *condition, const KDchar *filename, KDint linenumber)
-{
-    qCCritical(qt3ds::TRACE_INFO) << "assertion failed: " << condition
-                                  << " " << filename << " " << linenumber;
-}
-
 Q3DStudio::Qt3DSFNDTimer g_GlobalTimeProvider;
 
-KDust GetTimeUST()
+__int64 GetTimeUST()
 {
     // this needs to be nano seconds
-    //	KDust kdTime = static_cast<KDust>( g_gobalTimer.getNanoSeconds() );
     Q3DStudio::ITimeProvider &theTimer = g_GlobalTimeProvider;
-    KDust kdTime = static_cast<KDust>(theTimer.GetCurrentTimeMicroSeconds() * 1000);
-
-    return kdTime;
+    return theTimer.GetCurrentTimeMicroSeconds() * 1000;
 }
 
 void initResource() {
@@ -277,22 +257,16 @@ public:
     Q3DStudio::IWindowSystem *m_WindowSystem;
 
     IAudioPlayer *m_AudioPlayer;
-    QList<KDEvent *> m_pendingEvents;
+    QVector<QMouseEvent *> m_pendingEvents;
 
     QString m_error;
 
-    void queueMouseEvent(int index, int select, int x, int y)
+    void queueMouseEvent(int button, int pressed, int x, int y)
     {
-        KDEvent *e = new KDEvent;
-        e->timestamp = GetTimeUST();
-        e->type = KD_EVENT_INPUT_POINTER;
-        e->userptr = reinterpret_cast<void*>(KD_NULL);
-        KDEventInputPointer *dataPtr = reinterpret_cast<KDEventInputPointer *>(&(e->data));
-        dataPtr->index = index;
-        dataPtr->select = select;
-        dataPtr->x = x;
-        dataPtr->y = y;
-
+        QMouseEvent *e = new QMouseEvent(pressed ? QEvent::MouseButtonPress : QEvent::MouseButtonRelease,
+                                         QPointF(x, y), (Qt::MouseButton)button,
+                                         (Qt::MouseButtons)button, 0);
+        e->setTimestamp(static_cast<ulong>(GetTimeUST()));
         m_pendingEvents.append(e);
     }
 };
@@ -461,7 +435,7 @@ void Q3DSViewerApp::Render()
 {
     if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         if (m_Impl.m_appInitSuccessful) {
-            for (KDEvent *e : m_Impl.m_pendingEvents) {
+            for (QEvent *e : m_Impl.m_pendingEvents) {
                 m_Impl.m_tegraApp->HandleMessage(e);
                 delete e;
             }
@@ -549,16 +523,14 @@ QString Q3DSViewerApp::error()
 void Q3DSViewerApp::Resize(int width, int height)
 {
     WindowRect &theWindowRect = static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_Rect;
+    QSize oldSize = QSize(theWindowRect.width, theWindowRect.height);
     theWindowRect.width = width;
     theWindowRect.height = height;
 
 #if !defined(Q_OS_MACOS)
     if (m_Impl.m_appInitSuccessful && m_Impl.m_tegraApp
             && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
-        KDEvent event;
-        memset(&event, 0, sizeof(KDEvent));
-        event.type = KD_EVENT_WINDOWPROPERTY_CHANGE;
-        event.data.windowproperty.pname = KD_WINDOWPROPERTY_SIZE;
+        QResizeEvent event = QResizeEvent(QSize(width, height), oldSize);
         m_Impl.m_tegraApp->HandleMessage(&event);
     }
 #endif

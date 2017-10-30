@@ -99,7 +99,6 @@
 //==============================================================================
 #include "Qt3DSTimer.h"
 #include "Qt3DSIScene.h"
-#include "Qt3DSSyncPrimitive.h"
 #include "foundation/Qt3DSRefCounted.h" //scoped releasable auto ptr.
 #include "EASTL/hash_map.h"
 #include "EASTL/string.h"
