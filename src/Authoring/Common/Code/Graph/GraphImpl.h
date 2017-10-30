@@ -158,7 +158,7 @@ namespace Graph {
             }
             if (parent)
                 return parent->m_Children.end();
-            assert(0);
+            Q_ASSERT(0);
             return TNodeList::const_iterator();
         }
 
@@ -322,7 +322,7 @@ namespace Graph {
                 }
                 return;
             }
-            assert(0);
+            Q_ASSERT(0);
         }
 
         void MoveBefore(const TKeyType inNode, const TKeyType inOther)
