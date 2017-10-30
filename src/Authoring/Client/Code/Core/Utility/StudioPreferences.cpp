@@ -471,13 +471,6 @@ void CStudioPreferences::SetShowTooltips(bool inShowTooltips)
 ::CColor CStudioPreferences::GetTooltipBackgroundColor()
 {
     ::CColor theTooltipBGColor(255, 255, 225);
-
-#ifdef WIN32
-    // On windows, get the color from the system
-    ::CColor theWinColor(::GetSysColor(COLOR_INFOBK));
-    theTooltipBGColor = theWinColor;
-#endif
-
     return theTooltipBGColor;
 }
 

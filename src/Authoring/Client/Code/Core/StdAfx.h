@@ -58,21 +58,6 @@
 #include <winsock2.h> //must include before windows.h to avoid winsock.h defines.
 #define QT3DS_LITTLE_ENDIAN
 #include <windows.h>
-//==============================================================================
-//	ATL Includes
-//==============================================================================
-#include <atlbase.h>
-// You may derive a class from CComModule and use it if you want to override
-// something, but do not change the name of _Module
-extern CComModule _Module;
-
-#include <atlcom.h>
-#include <atlctl.h>
-#include <atlhost.h>
-
-#include <COMMCTRL.H>
-#include <LIMITS.H>
-#include <CONTROL.H>
 #endif
 
 #include <assert.h>
@@ -125,7 +110,6 @@ extern CComModule _Module;
 #include "CommonConstants.h"
 #include "Qt3DSExceptions.h"
 #include "Qt3DSExceptionConstants.h"
-#include "Qt3DSLog.h"
 #include "Mutex.h"
 #include "Guard.h"
 #include "Thread.h"
@@ -135,11 +119,6 @@ extern CComModule _Module;
 #include "Qt3DSRender.h"
 
 #include <QtGlobal>
-
-//==============================================================================
-//	Global Variables
-//==============================================================================
-QT3DS_LOGEXTERN; // Enables access to the logger for all files.  See Qt3DSLog for more info.
 
 // I put these in to help with some of the data model compile times.
 #ifdef _WIN32

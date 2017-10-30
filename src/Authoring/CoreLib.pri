@@ -47,7 +47,6 @@ SOURCES += \
     Client/Code/Core/Timer/Timer.cpp \
     Client/Code/Core/VirtualAssets/PlaybackClock.cpp \
     Client/Code/Core/VirtualAssets/VClockPolicy.cpp \
-    Client/Code/Shared/Log/LogHelper.cpp \
     QT3DSIMP/Qt3DSImportLib/Qt3DSImport.cpp \
     QT3DSIMP/Qt3DSImportLib/Qt3DSImportComposerTypes.cpp \
     QT3DSIMP/Qt3DSImportLib/Qt3DSImportLibPrecompile.cpp \

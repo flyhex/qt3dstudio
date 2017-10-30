@@ -114,7 +114,6 @@ int main(int argc, char *argv[])
 #include "MsgRouter.h"
 #include "SplashView.h"
 #include "Views.h"
-#include "Qt3DSLog.h"
 #ifdef KDAB_TEMPORARILY_REMOVED
 #include "CrashDlg.h"
 #endif
@@ -409,8 +408,6 @@ int CStudioApp::Run()
 #endif
 
     try {
-        QT3DS_LOGSTART;
-
 #ifdef KDAB_TEMPORARILY_REMOVED
         // Set the crash handler for all unhandled exceptions.
         CStackOps::SetCrashProc(&StudioUnhandledCrashHandler);
@@ -442,8 +439,6 @@ int CStudioApp::Run()
                 break;
         }
         PerformShutdown();
-
-        QT3DS_LOGSTOP;
     } catch (Qt3DSExceptionClass &inException) {
         g_ErrorCode = inException.GetErrorCode();
         throw;

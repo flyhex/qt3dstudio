@@ -38,6 +38,7 @@
 //==============================================================================
 #include <vector>
 #include <string.h>
+#include <QDebug>
 
 //==============================================================================
 //	Forwards
@@ -146,19 +147,13 @@ public:
     ~Qt3DSObjectCounter()
     {
         if (m_ObjectCount > 0) {
-#ifdef WIN32
-#ifdef ATLTRACE
-            ATLTRACE("\t. . . with %ld unreleased %s objects.\n", m_ObjectCount, m_ObjectName);
-#endif
-#endif
+            qDebug() << "\t. . . with " << m_ObjectCount << "unreleased " << m_ObjectName
+                     << " objects.";
         }
 
         else if (m_ObjectCount < 0) {
-#ifdef WIN32
-#ifdef ATLTRACE
-            ATLTRACE("\t. . . object counting error for %s (%ld).\n", m_ObjectName, m_ObjectCount);
-#endif
-#endif
+            qDebug() << "\t. . . object counting error for " << m_ObjectName << " ("
+                     << m_ObjectCount << ").";
         }
         if (s_ObjectVector.size()) {
             TObjectCounterTracker::iterator theBegin = s_ObjectVector.begin();
