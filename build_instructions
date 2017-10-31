@@ -14,13 +14,8 @@ for 3rd party components. For example:
 
 git clone --recursive https://codereview.qt-project.org/qt3dstudio/qt3dstudio
 
-Additionally Qt 3D Studio Editor requires Boost library and optionally, if FBX assets
-are used, also the FBX SDK.
-
-2.1 List of tested 3rd party libraries and versions
-
-    Boost                                   1.65.0
-    FBX SDK                                 2016.1.2
+Additionally Qt 3D Studio Editor requires FBX SDK when FBX assets are used.
+Tested Autodesk FBX SDK version is 2016.1.2.
 
 
 3. Environment setup
@@ -30,11 +25,7 @@ are used, also the FBX SDK.
 You need Windows build tools. Download tools from
 https://go.microsoft.com/fwlink/?LinkId=691126 .
 
-Do a custom installation and select ATL/MFC SDK. For debugging the Qt 3D Studio,
-you need to select also Windows SDK.
-
-Download precompiled boost binaries from www.boost.org and extract them to:
-<path to repo root>/src/3rdparty/boost/1.65.0
+For debugging the Qt 3D Studio do a custom installation and select Windows SDK.
 
 Download the Windows version installer of FBX SDK 2016.1.2 from link:
 http://download.autodesk.com/us/fbx_release_older/2016.1.2/fbx20161_2_fbxsdk_vs2015_win.exe
@@ -44,12 +35,6 @@ Or copy the folder to <path to repo root>/src/3rdparty/FBX
 
 3.2 macOS
 
-Boost can be installed on macOS with HomeBrew package manager.
-To install Homebrew run following command line in terminal:
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-And then use the following to install boost:
-brew install boost
-
 Download the macOS version of FBX SDK 2016.1.2 from link:
 http://download.autodesk.com/us/fbx_release_older/2016.1.2/fbx20161_2_fbxsdk_clang_mac.pkg.tgz
 Install the SDK. By default <installation directory> on macOS is /Applications. Set FBXSDK
@@ -58,7 +43,15 @@ Or copy the folder to <path to repo root>/src/3rdparty/FBX
 
 3.3 Linux
 
-TBDL
+Download the Linux version of FBX SDK 2016.1.2 from link:
+http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
+Install the SDK. By default <installation directory> on Linux is /usr.
+Use custom location with the installer and set FBXSDK to point to that directory.
+example:
+mkdir ~/FBX
+~/Downloads/fbx20161_2_fbxsdk_linux ~/FBX
+export FBXSDK=/home/<user>/FBX
+or set the FBXSDK environment variable in QtCreator.
 
 
 4. Setup project in Qt Creator
@@ -68,9 +61,9 @@ Open <path to repo root>\qt3dstudio.pro in Qt Creator.
 Go to "Projects" view. Select desired Build & Run configuration (either
 Release, or Debug). Tested configurations:
 
-    Windows 10: Qt 5.9.0 MSVC2015_64bit
-    macOS:  Qt 5.9.0 clang_64
-    Linux:  TBDL
+    Windows 10: Qt 5.9.2 MSVC2015_64bit
+    macOS:  Qt 5.9.2 clang_64
+    Linux:  Qt 5.9.2 gcc 64bit
 
 Under "Build steps" click "Add Build Step" and select "Make". To make
 arguments type "install". This will move the qmlviewer plugin to correct
@@ -81,6 +74,6 @@ place under Qt.
 
 Run subproject Q3DStudio under Authoring
 
-Quick Viewer example: Open <path to ndd
-repo>\examples\qmldynamickeyframes\qmldynamickeyframes.pro in Qt Creator and
-build it. Done!
+Quick Viewer example:
+Open <path to qt3dstudio repo>\examples\qmldynamickeyframes\qmldynamickeyframes.pro in Qt Creator
+and build it. Done!
