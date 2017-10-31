@@ -77,66 +77,73 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     // Position tabs to the right
     inMainFrame->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
 
-    QDockWidget *basicObjectsDock = new QDockWidget(QObject::tr("Basic Objects"), inMainFrame);
-    basicObjectsDock->setObjectName("basic_objects");
-    basicObjectsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+    m_basicObjectsDock = new QDockWidget(QObject::tr("Basic Objects"), inMainFrame);
+    m_basicObjectsDock->setObjectName("basic_objects");
+    m_basicObjectsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                       | Qt::BottomDockWidgetArea);
-    auto basicObjectsView = new BasicObjectsView(basicObjectsDock);
-    basicObjectsDock->setWidget(basicObjectsView);
-    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, basicObjectsDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, basicObjectsDock));
+    auto basicObjectsView = new BasicObjectsView(m_basicObjectsDock);
+    m_basicObjectsDock->setWidget(basicObjectsView);
+    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_basicObjectsDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
-    QDockWidget *projectDock = new QDockWidget(QObject::tr("Project"), inMainFrame);
-    projectDock->setObjectName("project");
-    projectDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+    m_projectDock = new QDockWidget(QObject::tr("Project"), inMainFrame);
+    m_projectDock->setObjectName("project");
+    m_projectDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                  | Qt::BottomDockWidgetArea);
-    auto projectView = new ProjectView(projectDock);
-    projectDock->setWidget(projectView);
-    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, projectDock);
-    inMainFrame->tabifyDockWidget(basicObjectsDock, projectDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, projectDock));
+    auto projectView = new ProjectView(m_projectDock);
+    m_projectDock->setWidget(projectView);
+    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
+    inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_projectDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
 
-    QDockWidget *slideDock = new QDockWidget(QObject::tr("Slide"), inMainFrame);
-    slideDock->setObjectName("slide");
-    slideDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    auto slideView = new SlideView(slideDock);
-    slideDock->setWidget(slideView);
-    inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, slideDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_SLIDE, slideDock));
+    m_slideDock = new QDockWidget(QObject::tr("Slide"), inMainFrame);
+    m_slideDock->setObjectName("slide");
+    m_slideDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    auto slideView = new SlideView(m_slideDock);
+    m_slideDock->setWidget(slideView);
+    inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_slideDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_SLIDE, m_slideDock));
 
-    QDockWidget *timelineDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
-    timelineDock->setObjectName("timeline");
-    timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    m_timelineDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
+    m_timelineDock->setObjectName("timeline");
+    m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
     auto c = new CTimelineControl();
-    auto w = new WidgetControl(c, timelineDock);
-    timelineDock->setWidget(w);
+    auto w = new WidgetControl(c, m_timelineDock);
+    m_timelineDock->setWidget(w);
     w->setMinimumWidth(500);
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, timelineDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, timelineDock));
+    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
 
     int actionViewMinWidth = CStudioPreferences::valueWidth()
             + CStudioPreferences::idWidth() + 40; // 40 added to accommodate tabs
 
-    QDockWidget *actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
-    actionDock->setObjectName("action");
-    actionDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+    m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
+    m_actionDock->setObjectName("action");
+    m_actionDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                 | Qt::BottomDockWidgetArea);
-    auto actionView = new ActionView(actionDock);
-    actionDock->setWidget(actionView);
+    auto actionView = new ActionView(m_actionDock);
+    m_actionDock->setWidget(actionView);
     actionView->setMinimumWidth(actionViewMinWidth);
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, actionDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, actionDock));
+    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_actionDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, m_actionDock));
 
-    QDockWidget *inspectorDock = new QDockWidget(QObject::tr("Inspector Control"), inMainFrame);
-    inspectorDock->setObjectName("inspector_control");
-    inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+    m_inspectorDock = new QDockWidget(QObject::tr("Inspector Control"), inMainFrame);
+    m_inspectorDock->setObjectName("inspector_control");
+    m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                    | Qt::BottomDockWidgetArea);
-    auto inspectorView = new InspectorControlView(inspectorDock);
-    inspectorDock->setWidget(inspectorView);
+    auto inspectorView = new InspectorControlView(m_inspectorDock);
+    m_inspectorDock->setWidget(inspectorView);
     inspectorView->setMinimumWidth(actionViewMinWidth); // Same min size as action view
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, inspectorDock);
-    inMainFrame->tabifyDockWidget(actionDock, inspectorDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, inspectorDock));
+    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_inspectorDock);
+    inMainFrame->tabifyDockWidget(m_actionDock, m_inspectorDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
+
+    m_basicObjectsDock->setEnabled(false);
+    m_projectDock->setEnabled(false);
+    m_slideDock->setEnabled(false);
+    m_timelineDock->setEnabled(false);
+    m_actionDock->setEnabled(false);
+    m_inspectorDock->setEnabled(false);
 
     w->RegiserForDnd(w);
     w->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
@@ -838,6 +845,16 @@ void CPaletteManager::OnMovePalette(CMasterControl *inMoveFromMaster,
         thePaletteBar->ShowPalette(false);
     }
 #endif
+}
+
+void CPaletteManager::EnablePalettes()
+{
+    m_basicObjectsDock->setEnabled(true);
+    m_projectDock->setEnabled(true);
+    m_slideDock->setEnabled(true);
+    m_timelineDock->setEnabled(true);
+    m_actionDock->setEnabled(true);
+    m_inspectorDock->setEnabled(true);
 }
 
 //==============================================================================

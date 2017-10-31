@@ -96,6 +96,13 @@ protected:
 
     static long s_PaletteIDBase; ///<
 
+    QDockWidget *m_basicObjectsDock;
+    QDockWidget *m_projectDock;
+    QDockWidget *m_slideDock;
+    QDockWidget *m_timelineDock;
+    QDockWidget *m_actionDock;
+    QDockWidget *m_inspectorDock;
+
 public:
     CPaletteManager(CMainFrame *inMainFrame);
     virtual ~CPaletteManager();
@@ -119,6 +126,7 @@ public:
     // Commands
     void OnNewPalette(CMasterControl *inMaster);
     void OnMovePalette(CMasterControl *inMoveFromMaster, CMasterControl *inMoveToMaster);
+    void EnablePalettes();
 
     // Serialization
     bool Load();

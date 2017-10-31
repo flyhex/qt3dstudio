@@ -302,6 +302,18 @@ int CMainFrame::OnCreate()
     // Kept in ui form in case it is going to be added back later on.
     delete m_ui->toolBar;
 
+    // Disable toolbars and menus until we have a presentation
+    m_ui->m_ClientToolsBar->setEnabled(false);
+    m_ui->m_EditCamerasBar->setEnabled(false);
+    m_ui->m_PlaybackToolbar->setEnabled(false);
+    m_ui->menu_Edit->setEnabled(false);
+    m_ui->menu_Timeline->setEnabled(false);
+    m_ui->menu_View->setEnabled(false);
+    m_ui->actionSave_As->setEnabled(false);
+    m_ui->actionSave_a_Copy->setEnabled(false);
+    m_ui->action_Connect_to_Device->setEnabled(false);
+    m_ui->action_Revert->setEnabled(false);
+
     setCentralWidget(m_SceneView);
     return 0;
 }
@@ -314,9 +326,20 @@ int CMainFrame::OnCreate()
  */
 void CMainFrame::OnNewPresentation()
 {
-    // TODO - CN needs to fix this
     // Associate the scene object with the scene view
     m_ui->m_EditCamerasBar->SetupCameras();
+    // Enable dockables, toolbars, and menus
+    m_PaletteManager->EnablePalettes();
+    m_ui->m_ClientToolsBar->setEnabled(true);
+    m_ui->m_EditCamerasBar->setEnabled(true);
+    m_ui->m_PlaybackToolbar->setEnabled(true);
+    m_ui->menu_Edit->setEnabled(true);
+    m_ui->menu_Timeline->setEnabled(true);
+    m_ui->menu_View->setEnabled(true);
+    m_ui->actionSave_As->setEnabled(true);
+    m_ui->actionSave_a_Copy->setEnabled(true);
+    m_ui->action_Connect_to_Device->setEnabled(true);
+    m_ui->action_Revert->setEnabled(true);
 }
 
 //==============================================================================
