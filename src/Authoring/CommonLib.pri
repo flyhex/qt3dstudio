@@ -25,7 +25,7 @@ SOURCES += \
     Common/Code/_Win32/Preferences.cpp \
     Common/Code/_Win32/stdafx.cpp \
     Common/Code/_Win32/SystemInfo.cpp \
-   # Common/Code/_Win32/Qt3DSFile.cpp \
+    Common/Code/_Win32/Qt3DSFile.cpp \
     Common/Code/_Win32/Qt3DSRegistry.cpp \
     Common/Code/Graph/Graph.cpp \
     Common/Code/InfoDump/CoutSink.cpp \
@@ -48,9 +48,5 @@ SOURCES += \
     Common/Code/Serialize/FormattedInputStream.cpp \
     Common/Code/Serialize/FormattedOutputStream.cpp \
     Common/Code/Serialize/PreferencesSerializer.cpp \
-
-
-SOURCES += \
-    Common/Code/_Qt/QtUICFile.cpp \
 
 HEADERS = Common/Code/Literals.h

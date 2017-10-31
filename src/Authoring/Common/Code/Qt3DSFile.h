@@ -50,9 +50,6 @@ class Qt3DSFile
 public:
     typedef void OSErr; // this may be better typedefed to HRESULT
 
-    static const Q3DStudio::CString CURRENT_DIR;
-    static const Q3DStudio::CString PARENT_DIR;
-
     Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix = false, bool inAddBase = true);
     Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CString &inName);
     Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname,

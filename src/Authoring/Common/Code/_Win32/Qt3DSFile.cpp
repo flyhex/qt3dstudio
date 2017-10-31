@@ -28,37 +28,25 @@
 ****************************************************************************/
 
 //==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
+// Includes
 //==============================================================================
 #include "Qt3DSFile.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include <shellapi.h> // ShellExecute, etc.
-#include <Urlmon.h> // CoInternetCombineURL, etc.
-#endif
-#include "IOLibraryException.h"
-#include <sys/stat.h> // _stat
+#include "Qt3DSFileTools.h"
 
-// Qt3DSFile originally uses ***W for file ops
-// but this only works for win2k and above (Bug2994)
-// if using plain version is giving too much problem, uncomment the line below
-//#define USE_WIDE_VERSION
+#include "IOLibraryException.h"
+
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qtemporaryfile.h>
+#include <QtGui/qdesktopservices.h>
+#include <QtCore/qurl.h>
 
 //==============================================================================
-//	Static variables
+// Static variables
 //==============================================================================
 TFilePathList Qt3DSFile::s_TempFilePathList;
-
-//==============================================================================
-//	Constants
-//==============================================================================
-#ifdef KDAB_TEMPORARILY_REMOVED
-const Q3DStudio::CString Qt3DSFile::CURRENT_DIR(".\\");
-const Q3DStudio::CString Qt3DSFile::PARENT_DIR("..\\");
 
 //=============================================================================
 /**
@@ -71,14 +59,18 @@ Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool 
     Q_UNUSED(inIsPosix);
     Q_UNUSED(inAddBase);
 
-    m_Path = inPathName;
+    QString path = inPathName.toQString();
+#ifndef Q_OS_WIN
+    path.replace('\\', '/');
+#endif
+    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(path));
 }
 
 //=============================================================================
 /**
  * Create a file by combining the two paths.
  */
-Qt3DSFile::Qt3DSFile(Q3DStudio::CString inPathName, Q3DStudio::CString inName)
+Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CString &inName)
 {
     Qt3DSFile theBasePath(inPathName);
     Qt3DSFile theFile = Combine(theBasePath, inName);
@@ -89,7 +81,8 @@ Qt3DSFile::Qt3DSFile(Q3DStudio::CString inPathName, Q3DStudio::CString inName)
 /**
  * Create a file by combining the base path with a relative path.
  */
-Qt3DSFile::Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname, bool inIsPosix)
+Qt3DSFile::Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname,
+                     bool inIsPosix)
 {
     Q_UNUSED(inIsPosix);
 
@@ -143,16 +136,16 @@ bool Qt3DSFile::CanRead() const
  */
 bool Qt3DSFile::CanWrite() const
 {
-    long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
-    return (theAttributes != INVALID_FILE_ATTRIBUTES) && !(theAttributes & FILE_ATTRIBUTE_READONLY);
+    QFileInfo info(m_Path.toQString());
+    return info.isWritable();
 }
 
 //=============================================================================
 /**
- *	Delete this file from the file system. This will also perform a recursive
- *	delete on the sub folders and files if it is a folder
+ * Delete this file from the file system. This will also perform a recursive
+ * delete on the sub folders and files if it is a folder
  *
- *	@return	true if the deletion of file/folder is successful, else false
+ * @return true if the deletion of file/folder is successful, else false
  */
 bool Qt3DSFile::DeleteFile() const
 {
@@ -161,16 +154,10 @@ bool Qt3DSFile::DeleteFile() const
     // check if AKFile to delete is a folder type, if it is, we want to recusively delete all its
     // subfolder
     if (!IsFile()) {
-        CFileIterator theIterator = GetSubItems();
-
-        for (; !theIterator.IsDone(); ++theIterator) {
-            Qt3DSFile theFile = theIterator.GetCurrent();
-            theFile.DeleteFile();
-        }
-        theFileDeleted = ::RemoveDirectory(m_Path);
+        theFileDeleted = QDir(m_Path.toQString()).removeRecursively();
     } else {
         // delete the requested file or the main folder
-        theFileDeleted = ::DeleteFile(m_Path);
+        theFileDeleted = QFile::remove(m_Path.toQString());
     }
 
     // erase it from this list
@@ -185,12 +172,8 @@ bool Qt3DSFile::DeleteFile() const
  */
 bool Qt3DSFile::Exists() const
 {
-#ifdef USE_WIDE_VERSION
-    long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
-#else
-    long theAttributes = ::GetFileAttributes(GetAbsolutePath());
-#endif
-    return theAttributes != INVALID_FILE_ATTRIBUTES;
+    QFileInfo info(m_Path.toQString());
+    return info.exists();
 }
 
 //=============================================================================
@@ -200,6 +183,9 @@ bool Qt3DSFile::Exists() const
  */
 Q3DStudio::CString Qt3DSFile::GetAbsolutePath() const
 {
+    const QFileInfo fi(m_Path.toQString());
+    if (fi.isDir())
+        return Q3DStudio::CString::fromQString(fi.absoluteFilePath() + QDir::separator());
     return m_Path;
 }
 
@@ -218,42 +204,8 @@ Q3DStudio::CString Qt3DSFile::GetAbsolutePosixPath() const
  */
 Q3DStudio::CString Qt3DSFile::GetName() const
 {
-    // back/forward slashes counts in a file path (a badly formed, but still acceptable in win32)
-    // apparently, m_Path.ReverseFind( "\\/" ); doesnt work as required
-    // since no file name would consist of '/', a hack here is better than changing ReverseFind
-    // the ideal code would be:
-    //
-    // std::wstring theWString = m_Path.GetWidthString( ); // no luck...
-    // long theIdx = static_cast<long>( theWString.find_last_of( L"\\/" ) );
-    // if ( theIdx == std::wstring::npos )
-    //	theIdx = -1;
-    // return m_Path.Extract( theIdx + 1 );
-
-    // so here's the little hack
-    long theIdx1 = m_Path.ReverseFind('\\');
-    long theIdx2 = m_Path.ReverseFind('/');
-    long theIdx = -1;
-    if (theIdx1 != Q3DStudio::CString::ENDOFSTRING) {
-        if (theIdx2 != Q3DStudio::CString::ENDOFSTRING) {
-            // both exist, so take the larger one
-            theIdx = (theIdx1 > theIdx2) ? theIdx1 : theIdx2;
-        } else {
-            theIdx = theIdx1;
-        }
-    } else {
-        if (theIdx2 != Q3DStudio::CString::ENDOFSTRING) {
-            theIdx = theIdx2;
-        } else {
-            theIdx = -1;
-        }
-    }
-    return m_Path.Extract(theIdx + 1);
-
-    // the original version
-    // long theIdx = m_Path.ReverseFind( '\\' );
-    // if ( theIdx != Q3DStudio::CString::ENDOFSTRING )
-    //	return m_Path.Extract( theIdx + 1 );
-    // return m_Path;
+    QFileInfo info(m_Path.toQString());
+    return Q3DStudio::CString::fromQString(info.fileName());
 }
 
 //=============================================================================
@@ -262,11 +214,8 @@ Q3DStudio::CString Qt3DSFile::GetName() const
  */
 Q3DStudio::CString Qt3DSFile::GetExtension() const
 {
-    long theIdx = m_Path.ReverseFind('.');
-    if (theIdx != Q3DStudio::CString::ENDOFSTRING)
-        return m_Path.Extract(theIdx + 1);
-
-    return "";
+    QFileInfo info(m_Path.toQString());
+    return Q3DStudio::CString::fromQString(info.suffix());
 }
 
 //=============================================================================
@@ -286,13 +235,8 @@ Q3DStudio::CString Qt3DSFile::GetPath() const
 bool Qt3DSFile::IsFile(bool inCheckForAlias /*true*/) const
 {
     Q_UNUSED(inCheckForAlias);
-#ifdef USE_WIDE_VERSION
-    long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
-#else
-    long theAttributes = ::GetFileAttributes(GetAbsolutePath());
-#endif
-    return (theAttributes != INVALID_FILE_ATTRIBUTES)
-        && !(theAttributes & FILE_ATTRIBUTE_DIRECTORY);
+    QFileInfo info(m_Path.toQString());
+    return info.isFile();
 }
 
 //=============================================================================
@@ -301,12 +245,8 @@ bool Qt3DSFile::IsFile(bool inCheckForAlias /*true*/) const
  */
 bool Qt3DSFile::IsHidden() const
 {
-#ifdef USE_WIDE_VERSION
-    long theAttributes = ::GetFileAttributesW(GetAbsolutePath());
-#else
-    long theAttributes = ::GetFileAttributes(GetAbsolutePath());
-#endif
-    return (theAttributes != INVALID_FILE_ATTRIBUTES) && (theAttributes & FILE_ATTRIBUTE_HIDDEN);
+    QFileInfo info(m_Path.toQString());
+    return info.isHidden();
 }
 
 //=============================================================================
@@ -315,11 +255,8 @@ bool Qt3DSFile::IsHidden() const
  */
 long Qt3DSFile::Length() const
 {
-    HANDLE theFile = OpenFileReadHandle();
-    long theFilesize = ::GetFileSize(theFile, NULL);
-    ::CloseHandle(theFile);
-
-    return theFilesize;
+    QFileInfo info(m_Path.toQString());
+    return info.size();
 }
 
 //=============================================================================
@@ -328,15 +265,8 @@ long Qt3DSFile::Length() const
  */
 void Qt3DSFile::RenameTo(const Qt3DSFile &inDestination)
 {
-#ifdef USE_WIDE_VERSION
-
-    ::MoveFileW(GetAbsolutePath(), inDestination.GetAbsolutePath());
-
-#else
-    // note that destination file must NOT exist
-    if (!::MoveFile(GetAbsolutePath(), inDestination.GetAbsolutePath()))
+    if (!QFile::rename(m_Path.toQString(), inDestination.GetAbsolutePath().toQString()))
         throw CIOException();
-#endif
 }
 
 //=============================================================================
@@ -345,11 +275,10 @@ void Qt3DSFile::RenameTo(const Qt3DSFile &inDestination)
  */
 void Qt3DSFile::CopyTo(const Qt3DSFile &inDestination)
 {
-#ifdef USE_WIDE_VERSION
-    if (!::CopyFileW(GetAbsolutePath(), inDestination.GetAbsolutePath(), FALSE))
-#else
-    if (!::CopyFile(GetAbsolutePath(), inDestination.GetAbsolutePath(), FALSE))
-#endif
+    const QString destination(inDestination.GetAbsolutePath().toQString());
+    if (QFile::exists(destination))
+        QFile::remove(destination);
+    if (!QFile::copy(m_Path.toQString(), destination))
         throw CIOException();
 }
 
@@ -359,25 +288,13 @@ void Qt3DSFile::CopyTo(const Qt3DSFile &inDestination)
  */
 void Qt3DSFile::SetReadOnly(bool inReadOnlyFlag)
 {
-#ifdef USE_WIDE_VERSION
-
-    DWORD theFileAttributes = ::GetFileAttributesW(GetAbsolutePath());
-    // If we are setting the file to be readonly
+    const QString qpath(m_Path.toQString());
+    QFile::Permissions perm = QFile::permissions(qpath);
     if (inReadOnlyFlag)
-        ::SetFileAttributesW(GetAbsolutePath(), theFileAttributes | FILE_ATTRIBUTE_READONLY);
+        perm &= ~QFile::WriteOwner;
     else
-        ::SetFileAttributesW(GetAbsolutePath(), theFileAttributes & !FILE_ATTRIBUTE_READONLY);
-
-#else
-
-    DWORD theFileAttributes = ::GetFileAttributes(GetAbsolutePath());
-    // If we are setting the file to be readonly
-    if (inReadOnlyFlag)
-        ::SetFileAttributes(GetAbsolutePath(), theFileAttributes | FILE_ATTRIBUTE_READONLY);
-    else
-        ::SetFileAttributes(GetAbsolutePath(), theFileAttributes & !FILE_ATTRIBUTE_READONLY);
-
-#endif
+        perm |= QFile::WriteOwner;
+    QFile::setPermissions(qpath, perm);
 }
 
 //=============================================================================
@@ -386,19 +303,16 @@ void Qt3DSFile::SetReadOnly(bool inReadOnlyFlag)
  */
 Qt3DSFile Qt3DSFile::GetApplicationDirectory()
 {
-    Q3DStudio::CString theModuleDir;
-    wchar_t theModulePath[MAX_PATH] = { '\0' };
-    DWORD theRetVal = 0;
-
-    theRetVal = ::GetModuleFileNameW(NULL, theModulePath, MAX_PATH - 1);
-    theModulePath[theRetVal] = 0;
-
-    theModuleDir = theModulePath;
-    int theDirSeparatorIdx = theModuleDir.ReverseFind('\\');
-    if (theDirSeparatorIdx != Q3DStudio::CString::ENDOFSTRING)
-        theModuleDir = theModuleDir.Extract(0, theDirSeparatorIdx + 1);
-
-    return theModuleDir;
+#ifdef Q_OS_MACOS
+    QDir appDir(qApp->applicationDirPath());
+    if (appDir.dirName() == "MacOS") {
+        appDir.cdUp();
+        appDir.cd("Resources");
+    }
+    return Qt3DSFile(Q3DStudio::CString::fromQString(appDir.absolutePath()));
+#else
+    return Qt3DSFile(Q3DStudio::CString::fromQString(qApp->applicationDirPath()));
+#endif
 }
 
 //=============================================================================
@@ -408,66 +322,27 @@ Qt3DSFile Qt3DSFile::GetApplicationDirectory()
  */
 Qt3DSFile Qt3DSFile::GetTemporaryFile(const Q3DStudio::CString &inExtension)
 {
-    wchar_t theTempPath[MAX_PATH] = { '\0' };
-    // char theTempFileName[MAX_PATH] = {'\0'};
-
-    // Get the temporary file directory name
-    ::GetTempPath(sizeof(theTempPath), theTempPath);
-
-    Q3DStudio::CString theTempFile(theTempPath);
-    theTempFile += L"Untitled." + inExtension;
-    /*
-            // Build a temporary filename
-            ::GetTempFileName( theTempPath, "~ui", 0, theTempFileName );
-
-            theTempFile = Q3DStudio::CString( theTempFileName );
-
-            theTempFile += ".";
-            theTempFile += inExtension;
-    */
-    // Ensure the file does not exist
-    ::DeleteFile(theTempFile);
-
-    s_TempFilePathList.insert(theTempFile);
-
-    return Qt3DSFile(theTempFile);
+    QTemporaryFile tempFile(QDir::tempPath() + "/~uiXXXXXX" + inExtension.toQString());
+    tempFile.setAutoRemove(false);
+    tempFile.open(); // force creation of the actual file name
+    return Qt3DSFile(Q3DStudio::CString::fromQString(tempFile.fileName()));
 }
 
 Qt3DSFile Qt3DSFile::GetTemporaryFile()
 {
-    wchar_t theTempPath[MAX_PATH] = { '\0' };
-    wchar_t theTempFileName[MAX_PATH] = { '\0' };
-
-    // Get the temporary file directory name
-    ::GetTempPath(MAX_PATH, theTempPath);
-
-    // Build a temporary filename
-    if (::GetTempFileName(theTempPath, L"~ui", 0, theTempFileName) != 0) {
-        Q3DStudio::CString theTempFile(theTempFileName);
-        s_TempFilePathList.insert(theTempFile);
-        return Qt3DSFile(theTempFile);
-    }
-    // return "" if the system fails us.
-    return Qt3DSFile("");
+    QTemporaryFile tempFile(QDir::tempPath() + "/~uiXXXXXX");
+    tempFile.setAutoRemove(false);
+    tempFile.open(); // force creation of the actual file name
+    return Qt3DSFile(Q3DStudio::CString::fromQString(tempFile.fileName()));
 }
 
 //=============================================================================
 /**
  * Get the URL representing this file.
  */
-CURL Qt3DSFile::GetURL() const
+QUrl Qt3DSFile::GetURL() const
 {
-    Q3DStudio::CString thePath(m_Path);
-
-    // Return a fully qualified path if m_Path is relative.
-    if ((thePath.Find(CURRENT_DIR) == 0) || (thePath.Find(PARENT_DIR) == 0)) {
-        if (thePath.Find(CURRENT_DIR) == 0)
-            thePath.Delete(0, CURRENT_DIR.Length());
-
-        thePath.Insert(0, Qt3DSFile::GetApplicationDirectory().GetAbsolutePosixPath());
-    }
-
-    return CURL(thePath);
+    return QUrl::fromLocalFile(m_Path.toQString());
 }
 
 //=============================================================================
@@ -478,15 +353,8 @@ CURL Qt3DSFile::GetURL() const
 void Qt3DSFile::Execute() const
 {
     Q3DStudio::CString sFile = GetAbsolutePath();
-
-    SHELLEXECUTEINFO sei;
-    ::ZeroMemory(&sei, sizeof(sei));
-    sei.cbSize = sizeof(sei);
-    sei.hwnd = ::GetActiveWindow();
-    sei.nShow = SW_SHOW;
-    sei.lpFile = sFile;
-    sei.fMask = SEE_MASK_INVOKEIDLIST;
-    ::ShellExecuteEx(&sei);
+    QUrl url = QUrl::fromLocalFile(sFile.toQString());
+    QDesktopServices::openUrl(url);
 }
 
 //=============================================================================
@@ -495,34 +363,9 @@ void Qt3DSFile::Execute() const
  */
 Qt3DSFile Qt3DSFile::Combine(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inRelativePath)
 {
-    Q3DStudio::CString theFullPath;
-
-    const int MAX_BUFFER_SIZE = 512;
-
-    DWORD theBufferSize;
-    WCHAR theResultBuffer[MAX_BUFFER_SIZE];
-
-    wchar_t *theWorkingDir =
-        const_cast<wchar_t *>(static_cast<const wchar_t *>(inBasePath.GetAbsolutePath()));
-    wchar_t *theRelPath = const_cast<wchar_t *>(static_cast<const wchar_t *>(inRelativePath));
-
-    // This method is a bit of black magic, but seems to work well for client.
-    HRESULT theResult = CoInternetCombineUrl(theWorkingDir, theRelPath, 0, theResultBuffer,
-                                             MAX_BUFFER_SIZE, &theBufferSize, 0);
-    if (SUCCEEDED(theResult)) {
-        // I can find no reference to the flags parameter for CoInternetCombineUrl, maybe
-        // it does something, maybe not, anyway, to get rid of the %20 for spaces (and other
-        // special characters) that this function creates, we need to call the following function
-
-        theResult = CoInternetParseUrl(theResultBuffer, PARSE_UNESCAPE, 0, theResultBuffer,
-                                       MAX_BUFFER_SIZE, &theBufferSize, 0);
-        theResult = CoInternetParseUrl(theResultBuffer, PARSE_PATH_FROM_URL, 0, theResultBuffer,
-                                       MAX_BUFFER_SIZE, &theBufferSize, 0);
-
-        theFullPath = theResultBuffer;
-    }
-
-    return theFullPath;
+    QDir basePath(inBasePath.GetAbsolutePath().toQString());
+    QString rel = basePath.absoluteFilePath(inRelativePath.toQString());
+    return Qt3DSFile(Q3DStudio::CString::fromQString(rel));
 }
 
 //=============================================================================
@@ -532,17 +375,8 @@ Qt3DSFile Qt3DSFile::Combine(const Qt3DSFile &inBasePath, const Q3DStudio::CStri
  */
 HANDLE Qt3DSFile::OpenFileReadHandle() const
 {
-#ifdef USE_WIDE_VERSION
-
-    return ::CreateFileW(GetAbsolutePath(), 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                         FILE_ATTRIBUTE_NORMAL, NULL);
-
-#else
-
-    return ::CreateFile(GetAbsolutePath(), 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                        FILE_ATTRIBUTE_NORMAL, NULL);
-
-#endif
+    qFatal("implement me");
+    return nullptr;
 }
 
 //=============================================================================
@@ -552,34 +386,22 @@ HANDLE Qt3DSFile::OpenFileReadHandle() const
  */
 HANDLE Qt3DSFile::OpenFileWriteHandle() const
 {
-#ifdef USE_WIDE_VERSION
-
-    return ::CreateFileW(GetAbsolutePath(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-#else
-
-    return ::CreateFile(GetAbsolutePath(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-#endif
+    qFatal("implement me");
+    return nullptr;
 }
 
 //=============================================================================
 /**
- *	Clear all temp files that have been created so far by calling the GetTemporaryFile methods.
- *	This would only clear the temp files that were created during the current program session,
- *	and not any previous files created by anything prior to this session.
+ * Clear all temp files that have been created so far by calling the GetTemporaryFile methods.
+ * This would only clear the temp files that were created during the current program session,
+ * and not any previous files created by anything prior to this session.
  */
 void Qt3DSFile::ClearCurrentTempCache()
 {
-    TFilePathListIterator theTempFileIterator;
-
     if (!s_TempFilePathList.empty()) {
         // Delete all temp files created so far
-        for (theTempFileIterator = s_TempFilePathList.begin();
-             theTempFileIterator != s_TempFilePathList.end(); ++theTempFileIterator)
-            ::DeleteFile((*theTempFileIterator));
+        for (auto file : s_TempFilePathList)
+            QFile::remove(file.toQString());
 
         s_TempFilePathList.clear();
     }
@@ -592,22 +414,15 @@ void Qt3DSFile::AddTempFile(const Q3DStudio::CString &inFile)
 
 //=============================================================================
 /**
- *	Checks if a path is relative or not.
- *	Filename-only strings have no path separators and are considered relative.
- *  @param inPath path to check
- *  @return bool true to indicate this is a relative path
+ * Checks if a path is relative or not.
+ * Filename-only strings have no path separators and are considered relative.
+ * @param inPath path to check
+ * @return bool true to indicate this is a relative path
  */
 bool Qt3DSFile::IsPathRelative(const Q3DStudio::CString &inPath)
 {
-    bool theIsRelative = false;
-
-    if (!inPath.IsEmpty()) {
-        // relative paths start with a '.' or is just a filename entry
-        theIsRelative =
-            (inPath.GetAt(0) == L'.') || (inPath.Find('\\') == Q3DStudio::CString::ENDOFSTRING);
-    }
-
-    return theIsRelative;
+    QFileInfo info(inPath.toQString());
+    return info.isRelative();
 }
 
 //=============================================================================
@@ -618,6 +433,9 @@ bool Qt3DSFile::IsPathRelative(const Q3DStudio::CString &inPath)
  */
 bool Qt3DSFile::GetFileStat(struct _stat *inStat) const
 {
+#ifdef KDAB_TEMPORARILY_REMOVED
     return ::_wstat(m_Path, inStat) == 0;
-}
+#else
+    return false;
 #endif
+}
