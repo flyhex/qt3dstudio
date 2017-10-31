@@ -43,7 +43,6 @@
 //#include "InterpolationDlg.h"
 #include "MainFrm.h"
 #include "StudioProjectSettings.h"
-#include "StudioInstance.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
 #include "StudioApp.h"

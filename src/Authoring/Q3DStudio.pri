@@ -69,7 +69,6 @@ SOURCES += \
     Studio/_Win/Utils/MouseCursor.cpp \
     Studio/_Win/Workspace/Dialogs.cpp \
     Studio/_Win/Workspace/Views.cpp \
-    Studio/Application/StudioInstance.cpp \
     Studio/Application/StudioTutorialWidget.cpp \
     Studio/Controls/BaseMeasure.cpp \
     Studio/Controls/BlankControl.cpp \

@@ -27,7 +27,6 @@ SOURCES += \
     Common/Code/_Win32/SystemInfo.cpp \
    # Common/Code/_Win32/Qt3DSFile.cpp \
     Common/Code/_Win32/Qt3DSRegistry.cpp \
-    Common/Code/_Win32/Win32Config.cpp \
     Common/Code/Graph/Graph.cpp \
     Common/Code/InfoDump/CoutSink.cpp \
     Common/Code/InfoDump/DumpFileSink.cpp \
@@ -44,11 +43,6 @@ SOURCES += \
     Common/Code/IO/MemInputStream.cpp \
     Common/Code/IO/MemOutputStream.cpp \
     Common/Code/IO/Seekable.cpp \
-    Common/Code/Report/CompConfig.cpp \
-    Common/Code/Report/CrashInfo.cpp \
-    Common/Code/Report/ProductInfo.cpp \
-    Common/Code/Report/ProductInstance.cpp \
-    Common/Code/Report/StackOps.cpp \
     Common/Code/EulerAngles/EulerAngles.cpp \
     Common/Code/Memory/MemoryObject.cpp \
     Common/Code/Serialize/FormattedInputStream.cpp \

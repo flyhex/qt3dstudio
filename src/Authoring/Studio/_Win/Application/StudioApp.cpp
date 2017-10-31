@@ -102,7 +102,6 @@ int main(int argc, char *argv[])
 #include "Strings.h"
 #include "MainFrm.h"
 #include "AboutDlg.h"
-#include "StackOps.h"
 #include "Views.h"
 #include "StringLoader.h"
 #include "Doc.h"
@@ -408,13 +407,6 @@ int CStudioApp::Run()
 #endif
 
     try {
-#ifdef KDAB_TEMPORARILY_REMOVED
-        // Set the crash handler for all unhandled exceptions.
-        CStackOps::SetCrashProc(&StudioUnhandledCrashHandler);
-        CStackOps::RegisterCrashHandler();
-        CStackOps::EnableCrashingOnCrashes();
-#endif
-
         CCmdLineParser::EExecutionMode theMode = m_CmdLineParser.PopExecutionMode();
         if (CCmdLineParser::END_OF_CMDS == theMode)
             theMode = CCmdLineParser::NORMAL;

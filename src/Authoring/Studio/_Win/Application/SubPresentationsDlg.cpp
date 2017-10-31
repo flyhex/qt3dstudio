@@ -39,7 +39,6 @@
 //==============================================================================
 #include "SubPresentationsDlg.h"
 #include "ui_SubPresentationsDlg.h"
-#include "ProductInfo.h"
 #include "HotKeys.h"
 #include "Preferences.h"
 #include "StudioPreferences.h"
