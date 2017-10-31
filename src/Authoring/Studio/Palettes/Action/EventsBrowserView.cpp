@@ -100,6 +100,6 @@ void EventsBrowserView::initialize()
     rootContext()->setContextProperty("_resDir"_L1,
                                       resourceImageUrl());
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Action/EventsBrowser.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Action/EventsBrowser.qml"_L1));
 }
 

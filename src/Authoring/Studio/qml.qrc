@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Palettes/Action/ActionView.qml</file>
+        <file>Palettes/BasicObjects/BasicObjectsView.qml</file>
+        <file>Palettes/Slide/SlideView.qml</file>
+        <file>Palettes/Inspector/InspectorControlView.qml</file>
+        <file>Palettes/Inspector/ObjectBrowser.qml</file>
+        <file>Palettes/Action/HandlerEmitSignal.qml</file>
+        <file>Palettes/Action/HandlerGenericText.qml</file>
+        <file>Palettes/Action/HandlerFireEvent.qml</file>
+        <file>Palettes/Action/HandlerGenericCheckbox.qml</file>
+        <file>Palettes/Action/HandlerGoToSlide.qml</file>
+        <file>Palettes/Action/EventsBrowser.qml</file>
+        <file>Palettes/Action/HandlerPropertyXYZ.qml</file>
+        <file>Palettes/Action/HandlerPropertySlider.qml</file>
+        <file>Palettes/Action/HandlerPropertyCombo.qml</file>
+        <file>Palettes/Action/HandlerProperty.qml</file>
+        <file>Palettes/Action/HandlerPropertyBaseXY.qml</file>
+        <file>Palettes/Action/HandlerPropertyBaseXYZ.qml</file>
+        <file>Palettes/Action/HandlerPropertyBaseSlider.qml</file>
+        <file>Palettes/Action/HandlerGenericColor.qml</file>
+        <file>Palettes/Inspector/HandlerFilesChooser.qml</file>
+        <file>Palettes/Inspector/ImageChooser.qml</file>
+        <file>Palettes/Inspector/MeshChooser.qml</file>
+        <file>Palettes/Inspector/HandlerGenericChooser.qml</file>
+        <file>Palettes/Inspector/ChooserDelegate.qml</file>
+        <file>Palettes/Inspector/TextureChooser.qml</file>
+        <file>Palettes/Project/ProjectView.qml</file>
+        <file>Palettes/Action/HandlerMultilineText.qml</file>
+        <file>Palettes/Action/HandlerGenericBaseColor.qml</file>
+        <file>Palettes/Inspector/FileChooser.qml</file>
+        <file>Palettes/controls/StyledLabel.qml</file>
+        <file>Palettes/controls/StyledTextField.qml</file>
+        <file>Palettes/controls/FloatTextField.qml</file>
+        <file>Palettes/controls/StyledComboBox.qml</file>
+        <file>Palettes/controls/BrowserCombo.qml</file>
+        <file>Palettes/controls/StyledMenuItem.qml</file>
+        <file>Palettes/controls/StyledTooltip.qml</file>
+        <file>Palettes/controls/StyledToolButton.qml</file>
+        <file>Palettes/controls/StyledMenuSeparator.qml</file>
+    </qresource>
+</RCC>

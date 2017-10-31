@@ -60,7 +60,7 @@ void TextureChooserView::initialize()
     rootContext()->setContextProperty("_textureChooserView"_L1, this);
     rootContext()->setContextProperty("_textureChooserModel"_L1, m_model);
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Inspector/TextureChooser.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Inspector/TextureChooser.qml"_L1));
 }
 
 QSize TextureChooserView::sizeHint() const

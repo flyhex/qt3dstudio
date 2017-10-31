@@ -1,16 +1,18 @@
 TEMPLATE = app
 TARGET = MorphLines
-include($$PWD/commoninclude.pri)
-include($$OUT_PWD/qtAuthoring-config.pri)
+include(../commoninclude.pri)
+include($$OUT_PWD/../qtAuthoring-config.pri)
+INCLUDEPATH += $$OUT_PWD/..
+
 CONFIG += console nostrictstrings
 QT -= gui
 DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC
 
 INCLUDEPATH += \
-    QT3DSIMP/Qt3DSImportLib \
-    $$PWD/../Runtime/Source/Qt3DSRender/Include \
-    $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
-    ../3rdparty/EASTL/UnknownVersion/include
+    ../QT3DSIMP/Qt3DSImportLib \
+    ../../Runtime/Source/Qt3DSRender/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../3rdparty/EASTL/UnknownVersion/include
 
 LIBS += \
     $$QMAKE_LIBS_FBX \
@@ -27,7 +29,7 @@ LIBS += \
     -lCoreLib$$qtPlatformTargetSuffix() \
     -lCommonLib$$qtPlatformTargetSuffix()
 
-include(MorphLines.pri)
+SOURCES += MorphLines.cpp
 
 load(qt_tool)
 

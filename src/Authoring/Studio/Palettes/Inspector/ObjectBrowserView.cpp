@@ -120,5 +120,5 @@ void ObjectBrowserView::initialize()
     qmlRegisterUncreatableType<ObjectBrowserView>("Qt3DStudio", 1, 0, "ObjectBrowserView"
                                                   , tr("Creation of ObjectBrowserView not allowed from QML"));
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Inspector/ObjectBrowser.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Inspector/ObjectBrowser.qml"_L1));
 }

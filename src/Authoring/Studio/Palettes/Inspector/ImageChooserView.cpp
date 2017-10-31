@@ -61,7 +61,7 @@ void ImageChooserView::initialize()
     rootContext()->setContextProperty("_imageChooserView"_L1, this);
     rootContext()->setContextProperty("_imageChooserModel"_L1, m_model);
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Inspector/ImageChooser.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Inspector/ImageChooser.qml"_L1));
 }
 
 QSize ImageChooserView::sizeHint() const

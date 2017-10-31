@@ -1,15 +1,17 @@
 TEMPLATE = app
 TARGET = FBXLineExporter
-include($$PWD/commoninclude.pri)
-include($$OUT_PWD/qtAuthoring-config.pri)
+include(../commoninclude.pri)
+include($$OUT_PWD/../qtAuthoring-config.pri)
+INCLUDEPATH += $$OUT_PWD/..
+
 CONFIG += console
 QT -= gui
 DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC
 
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include \
     $$QMAKE_INCDIR_FBX \
-    ../3rdparty/EASTL/UnknownVersion/include
+    ../../3rdparty/EASTL/UnknownVersion/include
 
 LIBS += \
     $$QMAKE_LIBS_FBX \
@@ -24,7 +26,7 @@ LIBS += \
     -lWinmm \
     -lqt3dsruntimestatic$$qtPlatformTargetSuffix()
 
-include(FBXLineExporter.pri)
+SOURCES += FBXLineExporter.cpp
 
 load(qt_tool)
 

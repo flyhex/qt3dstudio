@@ -4,27 +4,27 @@ TARGET = qt3dsruntime
 DEFINES += QT3DS_RUNTIME_EXPORTS
 
 CONFIG += installed
-include(commoninclude.pri)
+include(../commoninclude.pri)
 QT += qml
 
 boot2qt: {
-    RESOURCES += res.qrc
+    RESOURCES += ../res.qrc
     DEFINES += EMBEDDED_LINUX # TODO: Is there a compile-time flag for boot2qt?
 }
 
 integrity {
-RESOURCES += res.qrc
+    RESOURCES += ../res.qrc
 }
 
 SOURCES += \
-    Source/Viewer/Qt3DSAudioPlayerImpl.cpp \
-    Source/Viewer/Qt3DSViewerApp.cpp
+    ../Source/Viewer/Qt3DSAudioPlayerImpl.cpp \
+    ../Source/Viewer/Qt3DSViewerApp.cpp
 
 HEADERS += \
-    Source/Viewer/qt3dsruntimeglobal.h \
-    Source/Viewer/Qt3DSAudioPlayerImpl.h \
-    Source/Viewer/Qt3DSViewerApp.h \
-    Source/Viewer/Qt3DSViewerTimer.h
+    ../Source/Viewer/qt3dsruntimeglobal.h \
+    ../Source/Viewer/Qt3DSAudioPlayerImpl.h \
+    ../Source/Viewer/Qt3DSViewerApp.h \
+    ../Source/Viewer/Qt3DSViewerTimer.h
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -54,7 +54,7 @@ win32 {
     LIBS += \
         -lws2_32
 
-    RESOURCES += platformres.qrc
+    RESOURCES += ../platformres.qrc
 }
 
 linux {
@@ -70,5 +70,5 @@ macos {
 
 PREDEPS_LIBS = qt3dsruntimestatic
 
-include($$PWD/../utils.pri)
+include(../../utils.pri)
 PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)

@@ -1,10 +1,9 @@
 TEMPLATE = app
 TARGET = Qt3DCompiler
-include($$PWD/../Runtime/commoninclude.pri)
+include(../commoninclude.pri)
 CONFIG += console
 
-SOURCES += \
-    $$PWD/../Runtime/Source/Qt3DSCompiler/Source/Qt3DSCompilerMain.cpp
+SOURCES += Qt3DSCompilerMain.cpp
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -43,7 +42,7 @@ linux {
 
 PREDEPS_LIBS = qt3dsruntimestatic
 
-include($$PWD/../utils.pri)
+include(../../utils.pri)
 PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)
 
 load(qt_tool)

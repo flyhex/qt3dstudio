@@ -1,1 +1,0 @@
-SOURCES += FBXLineExporter/FBXLineExporter.cpp

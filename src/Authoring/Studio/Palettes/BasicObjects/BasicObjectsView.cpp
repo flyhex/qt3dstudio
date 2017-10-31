@@ -72,5 +72,5 @@ void BasicObjectsView::initialize()
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
 
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/BasicObjects/BasicObjectsView.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/BasicObjects/BasicObjectsView.qml"_L1));
 }

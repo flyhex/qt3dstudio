@@ -62,7 +62,7 @@ void MeshChooserView::initialize()
     rootContext()->setContextProperty("_meshChooserModel"_L1, m_model);
 
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Inspector/MeshChooser.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Inspector/MeshChooser.qml"_L1));
 }
 
 QSize MeshChooserView::sizeHint() const

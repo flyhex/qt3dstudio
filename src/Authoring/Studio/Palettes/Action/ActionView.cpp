@@ -849,7 +849,7 @@ void ActionView::initialize()
     qmlRegisterUncreatableType<qt3dsdm::CompleteMetaDataType>("Qt3DStudio", 1, 0, "CompleteMetaDataType",
                                                           "CompleteMetaDataType is an enum container"_L1);
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Action/ActionView.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Action/ActionView.qml"_L1));
 }
 
 QStringList ActionView::slideNames()

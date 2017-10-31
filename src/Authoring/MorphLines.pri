@@ -1,1 +1,0 @@
-SOURCES += MorphLinesExporter/MorphLines.cpp

@@ -7,8 +7,9 @@ LIBS += \
     -lws2_32
 }
 
-include(commoninclude.pri)
-include(AttributeHashes.pri)
+include(../commoninclude.pri)
+
+SOURCES += AttributeHashes.cpp
 
 load(qt_tool)
 

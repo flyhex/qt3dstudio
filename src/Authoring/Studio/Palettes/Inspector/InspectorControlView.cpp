@@ -184,7 +184,7 @@ void InspectorControlView::initialize()
                 "Qt3DStudio", 1, 0, "AdditionalMetaDataType",
                 "AdditionalMetaDataType is an enum container");
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Inspector/InspectorControlView.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Inspector/InspectorControlView.qml"_L1));
 }
 
 QAbstractItemModel *InspectorControlView::inspectorControlModel() const

@@ -103,7 +103,7 @@ void ProjectView::initialize()
     rootContext()->setContextProperty("_projectView"_L1, this);
 
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Project/ProjectView.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Project/ProjectView.qml"_L1));
 }
 
 void ProjectView::effectAction()

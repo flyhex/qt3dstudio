@@ -60,7 +60,7 @@ void FileChooserView::initialize()
     rootContext()->setContextProperty("_fileChooserView"_L1, this);
     rootContext()->setContextProperty("_fileChooserModel"_L1, m_model);
     engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Studio/Palettes/Inspector/FileChooser.qml"_L1));
+    setSource(QUrl("qrc:/Palettes/Inspector/FileChooser.qml"_L1));
 }
 
 QSize FileChooserView::sizeHint() const
