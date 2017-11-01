@@ -86,7 +86,7 @@ namespace render {
     {
         SSubPresentationHelper theHelper(
             m_RenderContext,
-            SWindowDimensions((QT3DSU32)inEnvironment.m_Width, (QT3DSU32)inEnvironment.m_Height));
+            QSize((QT3DSU32)inEnvironment.m_Width, (QT3DSU32)inEnvironment.m_Height));
         NVRenderRect theViewportSize(inRenderContext.GetViewport());
         m_Presentation.m_Scene->Render(
             QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),

@@ -138,7 +138,7 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
     }
 
     void RenderPick(const QT3DSMat44 &inProjPremult, NVRenderContext &inRenderContext,
-                            qt3ds::render::SWindowDimensions /*inWinDimensions*/) override
+                            QSize /*inWinDimensions*/) override
     {
         if (m_XAxis && m_PickShader) {
             inRenderContext.SetDepthWriteEnabled(true);

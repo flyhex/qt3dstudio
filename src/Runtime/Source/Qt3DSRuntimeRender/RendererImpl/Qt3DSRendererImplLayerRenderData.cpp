@@ -116,7 +116,7 @@ namespace render {
         if (m_AdvancedBlendDrawTexture)
             m_AdvancedBlendDrawTexture = NULL;
     }
-    void SLayerRenderData::PrepareForRender(const SWindowDimensions &inViewportDimensions)
+    void SLayerRenderData::PrepareForRender(const QSize &inViewportDimensions)
     {
         SLayerRenderPreparationData::PrepareForRender(inViewportDimensions);
         SLayerRenderPreparationResult &thePrepResult(*m_LayerPrepResult);
@@ -158,8 +158,8 @@ namespace render {
         m_Renderer.LayerNeedsFrameClear(*this);
 
         // Clean up the texture cache if layer dimensions changed
-        if (inViewportDimensions.m_Width != m_previousDimensions.width()
-                || inViewportDimensions.m_Height != m_previousDimensions.height()) {
+        if (inViewportDimensions.width() != m_previousDimensions.width()
+                || inViewportDimensions.height() != m_previousDimensions.height()) {
             m_LayerTexture.ReleaseTexture();
             m_LayerDepthTexture.ReleaseTexture();
             m_LayerSsaoTexture.ReleaseTexture();
@@ -170,8 +170,8 @@ namespace render {
             m_LayerMultisamplePrepassDepthTexture.ReleaseTexture();
             m_LayerMultisampleWidgetTexture.ReleaseTexture();
 
-            m_previousDimensions.setWidth(inViewportDimensions.m_Width);
-            m_previousDimensions.setHeight(inViewportDimensions.m_Height);
+            m_previousDimensions.setWidth(inViewportDimensions.width());
+            m_previousDimensions.setHeight(inViewportDimensions.height());
 
             theResourceManager.DestroyFreeSizedResources();
 
@@ -1202,8 +1202,8 @@ namespace render {
         QT3DS_ASSERT(m_LayerPrepResult->m_Flags.ShouldRenderToTexture());
         SLayerRenderPreparationResult &thePrepResult(*m_LayerPrepResult);
         NVRenderContext &theRenderContext(m_Renderer.GetContext());
-        SWindowDimensions theLayerTextureDimensions = thePrepResult.GetTextureDimensions();
-        SWindowDimensions theLayerOriginalTextureDimensions = theLayerTextureDimensions;
+        QSize theLayerTextureDimensions = thePrepResult.GetTextureDimensions();
+        QSize theLayerOriginalTextureDimensions = theLayerTextureDimensions;
         NVRenderTextureFormats::Enum DepthTextureFormat = NVRenderTextureFormats::Depth24Stencil8;
         NVRenderTextureFormats::Enum ColorTextureFormat = NVRenderTextureFormats::RGBA8;
         if (thePrepResult.m_LastEffect
@@ -1258,11 +1258,11 @@ namespace render {
         QT3DSU32 maxTemporalPassIndex = m_Layer.m_TemporalAAEnabled ? 2 : 0;
 
         // If all the dimensions match then we do not have to re-render the layer.
-        if (m_LayerTexture.TextureMatches(theLayerTextureDimensions.m_Width,
-                                          theLayerTextureDimensions.m_Height, ColorTextureFormat)
+        if (m_LayerTexture.TextureMatches(theLayerTextureDimensions.width(),
+                                          theLayerTextureDimensions.height(), ColorTextureFormat)
             && (!thePrepResult.m_Flags.RequiresDepthTexture()
-                || m_LayerDepthTexture.TextureMatches(theLayerTextureDimensions.m_Width,
-                                                      theLayerTextureDimensions.m_Height,
+                || m_LayerDepthTexture.TextureMatches(theLayerTextureDimensions.width(),
+                                                      theLayerTextureDimensions.height(),
                                                       DepthTextureFormat))
             && m_ProgressiveAAPassIndex >= thePrepResult.m_MaxAAPassIndex
             && m_NonDirtyTemporalAAPassIndex >= maxTemporalPassIndex && needsRender == false) {
@@ -1271,10 +1271,11 @@ namespace render {
 
         // adjust render size for SSAA
         if (m_Layer.m_MultisampleAAMode == AAModeValues::SSAA) {
-            CRendererUtil::GetSSAARenderSize(theLayerOriginalTextureDimensions.m_Width,
-                                             theLayerOriginalTextureDimensions.m_Height,
-                                             theLayerTextureDimensions.m_Width,
-                                             theLayerTextureDimensions.m_Height);
+            QT3DSU32 ow, oh;
+            CRendererUtil::GetSSAARenderSize(theLayerOriginalTextureDimensions.width(),
+                                             theLayerOriginalTextureDimensions.height(),
+                                             ow, oh);
+            theLayerTextureDimensions = QSize(ow, oh);
         }
 
         // If our pass index == thePreResult.m_MaxAAPassIndex then
@@ -1283,8 +1284,8 @@ namespace render {
         IResourceManager &theResourceManager = m_Renderer.GetQt3DSContext().GetResourceManager();
         bool hadLayerTexture = true;
 
-        if (renderColorTexture->EnsureTexture(theLayerTextureDimensions.m_Width,
-                                              theLayerTextureDimensions.m_Height,
+        if (renderColorTexture->EnsureTexture(theLayerTextureDimensions.width(),
+                                              theLayerTextureDimensions.height(),
                                               ColorTextureFormat, sampleCount)) {
             m_ProgressiveAAPassIndex = 0;
             m_NonDirtyTemporalAAPassIndex = 0;
@@ -1293,8 +1294,8 @@ namespace render {
 
         if (thePrepResult.m_Flags.RequiresDepthTexture()) {
             // The depth texture doesn't need to be multisample, the prepass depth does.
-            if (m_LayerDepthTexture.EnsureTexture(theLayerTextureDimensions.m_Width,
-                                                  theLayerTextureDimensions.m_Height,
+            if (m_LayerDepthTexture.EnsureTexture(theLayerTextureDimensions.width(),
+                                                  theLayerTextureDimensions.height(),
                                                   DepthTextureFormat)) {
                 // Depth textures are generally not bilinear filtered.
                 m_LayerDepthTexture->SetMinFilter(NVRenderTextureMinifyingOp::Nearest);
@@ -1305,8 +1306,8 @@ namespace render {
         }
 
         if (thePrepResult.m_Flags.RequiresSsaoPass()) {
-            if (m_LayerSsaoTexture.EnsureTexture(theLayerTextureDimensions.m_Width,
-                                                 theLayerTextureDimensions.m_Height,
+            if (m_LayerSsaoTexture.EnsureTexture(theLayerTextureDimensions.width(),
+                                                 theLayerTextureDimensions.height(),
                                                  ColorSSAOTextureFormat)) {
                 m_LayerSsaoTexture->SetMinFilter(NVRenderTextureMinifyingOp::Linear);
                 m_LayerSsaoTexture->SetMagFilter(NVRenderTextureMagnifyingOp::Linear);
@@ -1328,8 +1329,8 @@ namespace render {
         if (isProgressiveAABlendPass || isTemporalAABlendPass) {
             theBlendShader = m_Renderer.GetLayerProgAABlendShader();
             if (theBlendShader) {
-                m_LayerTexture.EnsureTexture(theLayerOriginalTextureDimensions.m_Width,
-                                             theLayerOriginalTextureDimensions.m_Height,
+                m_LayerTexture.EnsureTexture(theLayerOriginalTextureDimensions.width(),
+                                             theLayerOriginalTextureDimensions.height(),
                                              ColorTextureFormat);
                 QT3DSVec2 theVertexOffsets;
                 if (isProgressiveAABlendPass) {
@@ -1351,9 +1352,9 @@ namespace render {
                 }
                 if (theLastLayerTexture.GetTexture()) {
                     theVertexOffsets.x =
-                        theVertexOffsets.x / (theLayerOriginalTextureDimensions.m_Width / 2.0f);
+                        theVertexOffsets.x / (theLayerOriginalTextureDimensions.width() / 2.0f);
                     theVertexOffsets.y =
-                        theVertexOffsets.y / (theLayerOriginalTextureDimensions.m_Height / 2.0f);
+                        theVertexOffsets.y / (theLayerOriginalTextureDimensions.height() / 2.0f);
                     // Run through all models and update MVP.
                     // run through all texts and update MVP.
                     // run through all path and update MVP.
@@ -1392,8 +1393,8 @@ namespace render {
             isTemporalAABlendPass = false;
         }
         // Sometimes we will have stolen the render texture.
-        renderColorTexture->EnsureTexture(theLayerTextureDimensions.m_Width,
-                                          theLayerTextureDimensions.m_Height, ColorTextureFormat,
+        renderColorTexture->EnsureTexture(theLayerTextureDimensions.width(),
+                                          theLayerTextureDimensions.height(), ColorTextureFormat,
                                           sampleCount);
 
         if (!isTemporalAABlendPass)
@@ -1423,8 +1424,8 @@ namespace render {
         bool hasDepthObjects = m_OpaqueObjects.size() > 0;
         bool requiresDepthStencilBuffer =
             hasDepthObjects || thePrepResult.m_Flags.RequiresStencilBuffer();
-        NVRenderRect theNewViewport(0, 0, theLayerTextureDimensions.m_Width,
-                                    theLayerTextureDimensions.m_Height);
+        NVRenderRect theNewViewport(0, 0, theLayerTextureDimensions.width(),
+                                    theLayerTextureDimensions.height());
         {
             theRenderContext.SetRenderTarget(theFB);
             NVRenderContextScopedProperty<NVRenderRect> __viewport(
@@ -1438,8 +1439,8 @@ namespace render {
                 theRenderContext, &NVRenderContext::GetClearColor, &NVRenderContext::SetClearColor,
                 clearColor);
             if (requiresDepthStencilBuffer) {
-                if (renderPrepassDepthTexture->EnsureTexture(theLayerTextureDimensions.m_Width,
-                                                             theLayerTextureDimensions.m_Height,
+                if (renderPrepassDepthTexture->EnsureTexture(theLayerTextureDimensions.width(),
+                                                             theLayerTextureDimensions.height(),
                                                              theDepthFormat, sampleCount)) {
                     (*renderPrepassDepthTexture)->SetMinFilter(NVRenderTextureMinifyingOp::Nearest);
                     (*renderPrepassDepthTexture)
@@ -1523,7 +1524,7 @@ namespace render {
                     // Resolve the FBO to the layer texture
                     CRendererUtil::ResolveMutisampleFBOColorOnly(
                         theResourceManager, m_LayerTexture, theRenderContext,
-                        theLayerTextureDimensions.m_Width, theLayerTextureDimensions.m_Height,
+                        theLayerTextureDimensions.width(), theLayerTextureDimensions.height(),
                         ColorTextureFormat, *theFB);
 
                     theRenderContext.SetMultisampleEnabled(false);
@@ -1531,9 +1532,9 @@ namespace render {
                     // Resolve the FBO to the layer texture
                     CRendererUtil::ResolveSSAAFBOColorOnly(
                         theResourceManager, m_LayerTexture,
-                        theLayerOriginalTextureDimensions.m_Width,
-                        theLayerOriginalTextureDimensions.m_Height, theRenderContext,
-                        theLayerTextureDimensions.m_Width, theLayerTextureDimensions.m_Height,
+                        theLayerOriginalTextureDimensions.width(),
+                        theLayerOriginalTextureDimensions.height(), theRenderContext,
+                        theLayerTextureDimensions.width(), theLayerTextureDimensions.height(),
                         ColorTextureFormat, *theFB);
                 }
             }
@@ -1543,8 +1544,8 @@ namespace render {
             // manipulating.  When I tried to use parallel nsight on it the entire studio
             // application crashed on startup.
             if (NeedsWidgetTexture()) {
-                m_LayerWidgetTexture.EnsureTexture(theLayerTextureDimensions.m_Width,
-                                                   theLayerTextureDimensions.m_Height,
+                m_LayerWidgetTexture.EnsureTexture(theLayerTextureDimensions.width(),
+                                                   theLayerTextureDimensions.height(),
                                                    NVRenderTextureFormats::RGBA8);
                 theRenderContext.SetRenderTarget(theFB);
                 theFB->Attach(NVRenderFrameBufferAttachments::Color0, *m_LayerWidgetTexture);
@@ -1559,11 +1560,11 @@ namespace render {
             if (theLastLayerTexture.GetTexture() != NULL
                 && (isProgressiveAABlendPass || isTemporalAABlendPass)) {
                 theRenderContext.SetViewport(
-                    NVRenderRect(0, 0, theLayerOriginalTextureDimensions.m_Width,
-                                 theLayerOriginalTextureDimensions.m_Height));
+                    NVRenderRect(0, 0, theLayerOriginalTextureDimensions.width(),
+                                 theLayerOriginalTextureDimensions.height()));
                 CResourceTexture2D targetTexture(
-                    theResourceManager, theLayerOriginalTextureDimensions.m_Width,
-                    theLayerOriginalTextureDimensions.m_Height, ColorTextureFormat);
+                    theResourceManager, theLayerOriginalTextureDimensions.width(),
+                    theLayerOriginalTextureDimensions.height(), ColorTextureFormat);
                 theFB->Attach(theDepthAttachmentFormat,
                               NVRenderTextureOrRenderBuffer());
                 theFB->Attach(NVRenderFrameBufferAttachments::Color0, *targetTexture);
@@ -2046,7 +2047,7 @@ namespace render {
         qt3ds::render::NVRenderRect theCurrentViewport = theGraph.GetViewport();
         if (!m_LayerPrepResult.hasValue())
             PrepareForRender(
-                SWindowDimensions(theCurrentViewport.m_Width, theCurrentViewport.m_Height));
+                QSize(theCurrentViewport.m_Width, theCurrentViewport.m_Height));
     }
 
     void SLayerRenderData::PrepareForRender()
@@ -2055,7 +2056,7 @@ namespace render {
         // then we use the MVP of the layer somewhat.
         NVRenderRect theViewport = m_Renderer.GetQt3DSContext().GetRenderList().GetViewport();
         PrepareForRender(
-            SWindowDimensions((QT3DSU32)theViewport.m_Width, (QT3DSU32)theViewport.m_Height));
+            QSize((QT3DSU32)theViewport.m_Width, (QT3DSU32)theViewport.m_Height));
     }
 
     void SLayerRenderData::ResetForFrame()

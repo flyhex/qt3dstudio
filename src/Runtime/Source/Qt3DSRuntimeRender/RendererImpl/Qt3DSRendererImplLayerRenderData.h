@@ -103,7 +103,7 @@ struct AdvancedBlendModes
         void PrepareForRender();
 
         // Internal Call
-        void PrepareForRender(const SWindowDimensions &inViewportDimensions) override;
+        void PrepareForRender(const QSize &inViewportDimensions) override;
 
         NVRenderTextureFormats::Enum GetDepthBufferFormat();
         NVRenderFrameBufferAttachments::Enum

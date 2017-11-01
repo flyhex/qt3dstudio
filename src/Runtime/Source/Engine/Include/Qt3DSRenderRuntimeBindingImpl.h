@@ -93,7 +93,7 @@ namespace render {
         NVScopedRefCounted<IQt3DSRenderContextCore> m_CoreContext;
         NVScopedRefCounted<NVRenderContext> m_RenderContext;
         NVScopedRefCounted<IQt3DSRenderContext> m_Context;
-        SWindowDimensions m_WindowDimensions;
+        QSize m_WindowDimensions;
         eastl::string m_PrimitivePath;
         bool m_RenderRotationsEnabled;
         bool m_WriteOutShaderCache;

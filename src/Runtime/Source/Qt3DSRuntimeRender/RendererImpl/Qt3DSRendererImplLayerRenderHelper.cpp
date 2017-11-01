@@ -195,11 +195,11 @@ NVRenderRectF SLayerRenderHelper::GetLayerRenderViewport() const
         return m_Viewport;
 }
 
-SWindowDimensions SLayerRenderHelper::GetTextureDimensions() const
+QSize SLayerRenderHelper::GetTextureDimensions() const
 {
     QT3DSU32 width = (QT3DSU32)m_Viewport.m_Width;
     QT3DSU32 height = (QT3DSU32)m_Viewport.m_Height;
-    return SWindowDimensions(ITextRenderer::NextMultipleOf4(width),
+    return QSize(ITextRenderer::NextMultipleOf4(width),
                              ITextRenderer::NextMultipleOf4(height));
 }
 

@@ -822,8 +822,8 @@ namespace render {
             return QT3DSVec3(0, 0, 0);
         } // QT3DS_ASSERT( false ); return QT3DSVec3(0,0,0); }
 
-        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
-        QT3DSVec2 theDims((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height);
+        QSize theWindow = m_qt3dsContext.GetWindowDimensions();
+        QT3DSVec2 theDims((QT3DSF32)theWindow.width(), (QT3DSF32)theWindow.height());
 
         SLayerRenderPreparationResult &thePrepResult(*theData->m_LayerPrepResult);
         SRay theRay = thePrepResult.GetPickRay(inMouseVec, theDims, true);
@@ -846,9 +846,9 @@ namespace render {
         NVReal theDepth = inMouseVec.z;
 
         SLayerRenderPreparationResult &thePrepResult(*theData->m_LayerPrepResult);
-        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
+        QSize theWindow = m_qt3dsContext.GetWindowDimensions();
         SRay theRay = thePrepResult.GetPickRay(
-            theMouse, QT3DSVec2((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height), true);
+            theMouse, QT3DSVec2((QT3DSF32)theWindow.width(), (QT3DSF32)theWindow.height()), true);
         QT3DSVec3 theTargetPosition = theRay.m_Origin + theRay.m_Direction * theDepth;
         if (inNode.m_Parent != NULL && inNode.m_Parent->m_Type != GraphObjectTypes::Layer)
             theTargetPosition =
@@ -891,23 +891,23 @@ namespace render {
         mouseVec.y += theViewport.m_Y;
 
         // Flip the y into window coordinates so it matches the mouse.
-        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
-        mouseVec.y = theWindow.m_Height - mouseVec.y;
+        QSize theWindow = m_qt3dsContext.GetWindowDimensions();
+        mouseVec.y = theWindow.height() - mouseVec.y;
 
         return mouseVec;
     }
 
     Option<SLayerPickSetup> Qt3DSRendererImpl::GetLayerPickSetup(SLayer &inLayer,
                                                                 const QT3DSVec2 &inMouseCoords,
-                                                                const SWindowDimensions &inPickDims)
+                                                                const QSize &inPickDims)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
         if (theData == NULL || theData->m_Camera == NULL) {
             QT3DS_ASSERT(false);
             return Empty();
         }
-        SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
-        QT3DSVec2 theDims((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height);
+        QSize theWindow = m_qt3dsContext.GetWindowDimensions();
+        QT3DSVec2 theDims((QT3DSF32)theWindow.width(), (QT3DSF32)theWindow.height());
         // The mouse is relative to the layer
         Option<QT3DSVec2> theLocalMouse = GetLayerMouseCoords(*theData, inMouseCoords, theDims, false);
         if (theLocalMouse.hasValue() == false) {
@@ -929,7 +929,7 @@ namespace render {
         layerToPresentation.m_Y = 0;
         QT3DSVec2 theMouse(*theLocalMouse);
         // The viewport will need to center at this location
-        QT3DSVec2 viewportDims((QT3DSF32)inPickDims.m_Width, (QT3DSF32)inPickDims.m_Height);
+        QT3DSVec2 viewportDims((QT3DSF32)inPickDims.width(), (QT3DSF32)inPickDims.height());
         QT3DSVec2 bottomLeft =
             QT3DSVec2(theMouse.x - viewportDims.x / 2.0f, theMouse.y - viewportDims.y / 2.0f);
         // For some reason, and I haven't figured out why yet, the offsets need to be backwards for
@@ -1012,7 +1012,7 @@ namespace render {
             // The special number comes in from physically measuring how off we are on the screen.
             QT3DSF32 theScaleFactor = (1.0f / inCamera.m_Projection.column1[1]);
             SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inCamera);
-            QT3DSU32 theHeight = theData->m_LayerPrepResult->GetTextureDimensions().m_Height;
+            QT3DSU32 theHeight = theData->m_LayerPrepResult->GetTextureDimensions().height();
             QT3DSF32 theScaleMultiplier = 600.0f / ((QT3DSF32)theHeight / 2.0f);
             theScaleFactor *= theScaleMultiplier;
 
@@ -1810,14 +1810,14 @@ namespace render {
             if (PrepareTextureAtlasForRender()) {
                 TTextRenderAtlasDetailsAndTexture theRenderTextDetails;
                 ITextTextureAtlas *theTextureAtlas = m_qt3dsContext.GetTextureAtlas();
-                SWindowDimensions theWindow = m_qt3dsContext.GetWindowDimensions();
+                QSize theWindow = m_qt3dsContext.GetWindowDimensions();
 
                 const wchar_t *wText = m_StringTable->GetWideStr(text);
                 STextRenderInfo theInfo;
                 theInfo.m_Text = m_StringTable->RegisterStr(wText);
                 theInfo.m_FontSize = 20;
                 // text scale 2% of screen we don't scale Y though because it becomes unreadable
-                theInfo.m_ScaleX = (theWindow.m_Width / 100.0f) * 1.5f / (theInfo.m_FontSize);
+                theInfo.m_ScaleX = (theWindow.width() / 100.0f) * 1.5f / (theInfo.m_FontSize);
                 theInfo.m_ScaleY = 1.0f;
 
                 theRenderTextDetails = theTextureAtlas->RenderText(theInfo);
@@ -1832,9 +1832,9 @@ namespace render {
 
                         theCamera.MarkDirty(NodeTransformDirtyFlag::TransformIsDirty);
                         theCamera.m_Flags.SetOrthographic(true);
-                        QT3DSVec2 theWindowDim((QT3DSF32)theWindow.m_Width, (QT3DSF32)theWindow.m_Height);
+                        QT3DSVec2 theWindowDim((QT3DSF32)theWindow.width(), (QT3DSF32)theWindow.height());
                         theCamera.CalculateGlobalVariables(
-                            NVRenderRect(0, 0, theWindow.m_Width, theWindow.m_Height),
+                            NVRenderRect(0, 0, theWindow.width(), theWindow.height()),
                             theWindowDim);
                         // We want a 2D lower left projection
                         QT3DSF32 *writePtr(theCamera.m_Projection.front());

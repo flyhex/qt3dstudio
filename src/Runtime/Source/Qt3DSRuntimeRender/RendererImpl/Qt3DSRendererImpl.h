@@ -352,7 +352,7 @@ namespace render {
 
         Option<SLayerPickSetup> GetLayerPickSetup(SLayer &inLayer,
                                                           const QT3DSVec2 &inMouseCoords,
-                                                          const SWindowDimensions &inPickDims) override;
+                                                          const QSize &inPickDims) override;
 
         Option<NVRenderRectF> GetLayerRect(SLayer &inLayer) override;
 

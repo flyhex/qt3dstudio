@@ -30,17 +30,9 @@
 #ifndef QT3DS_WINDOW_SYSTEM_H
 #define QT3DS_WINDOW_SYSTEM_H
 
+#include <QtCore/qsize.h>
+
 namespace Q3DStudio {
-struct SSize
-{
-    int m_Width;
-    int m_Height;
-    SSize(int w = 0, int h = 0)
-        : m_Width(w)
-        , m_Height(h)
-    {
-    }
-};
 
 struct SEGLInfo;
 
@@ -49,8 +41,8 @@ class IWindowSystem
 protected:
     virtual ~IWindowSystem() {}
 public:
-    virtual SSize GetWindowDimensions() = 0;
-    virtual void SetWindowDimensions(const SSize &inSize) = 0;
+    virtual QSize GetWindowDimensions() = 0;
+    virtual void SetWindowDimensions(const QSize &inSize) = 0;
     // For platforms that support it, we get the egl info for render plugins
     // Feel free to return NULL.
     virtual SEGLInfo *GetEGLInfo() = 0;

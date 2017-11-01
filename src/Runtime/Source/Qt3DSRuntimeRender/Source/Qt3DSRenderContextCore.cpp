@@ -234,7 +234,7 @@ struct SRenderContext : public IQt3DSRenderContext
     volatile QT3DSI32 mRefCount;
     // Viewport that this render context should use
     Option<NVRenderRect> m_Viewport;
-    SWindowDimensions m_WindowDimensions;
+    QSize m_WindowDimensions;
     ScaleModes::Enum m_ScaleMode;
     bool m_WireframeMode;
     bool m_IsInSubPresentation;
@@ -246,9 +246,9 @@ struct SRenderContext : public IQt3DSRenderContext
     NVScopedRefCounted<NVRenderRenderBuffer> m_RotationDepthBuffer;
     NVRenderFrameBuffer *m_ContextRenderTarget;
     NVRenderRect m_PresentationViewport;
-    SWindowDimensions m_PresentationDimensions;
-    SWindowDimensions m_RenderPresentationDimensions;
-    SWindowDimensions m_PreRenderPresentationDimensions;
+    QSize m_PresentationDimensions;
+    QSize m_RenderPresentationDimensions;
+    QSize m_PreRenderPresentationDimensions;
     QT3DSVec2 m_PresentationScale;
     NVRenderRect m_VirtualViewport;
     NVScopedRefCounted<NVRenderTexture2D> m_Watermark;
@@ -414,12 +414,12 @@ struct SRenderContext : public IQt3DSRenderContext
     void SetSceneColor(Option<QT3DSVec4> inSceneColor) override { m_SceneColor = inSceneColor; }
     void SetMatteColor(Option<QT3DSVec4> inMatteColor) override { m_MatteColor = inMatteColor; }
 
-    void SetWindowDimensions(const SWindowDimensions &inWindowDimensions) override
+    void SetWindowDimensions(const QSize &inWindowDimensions) override
     {
         m_WindowDimensions = inWindowDimensions;
     }
 
-    SWindowDimensions GetWindowDimensions() override { return m_WindowDimensions; }
+    QSize GetWindowDimensions() override { return m_WindowDimensions; }
 
     void SetScaleMode(ScaleModes::Enum inMode) override { m_ScaleMode = inMode; }
 
@@ -445,7 +445,7 @@ struct SRenderContext : public IQt3DSRenderContext
 
     eastl::pair<NVRenderRect, NVRenderRect> GetPresentationViewportAndOuterViewport() const
     {
-        SWindowDimensions thePresentationDimensions(m_PresentationDimensions);
+        QSize thePresentationDimensions(m_PresentationDimensions);
         NVRenderRect theOuterViewport(GetContextViewport());
         if (m_Rotation == RenderRotationValues::Clockwise90
             || m_Rotation == RenderRotationValues::Clockwise270) {
@@ -463,11 +463,11 @@ struct SRenderContext : public IQt3DSRenderContext
         return GetPresentationViewportAndOuterViewport().first;
     }
 
-    void SetPresentationDimensions(const SWindowDimensions &inPresentationDimensions) override
+    void SetPresentationDimensions(const QSize &inPresentationDimensions) override
     {
         m_PresentationDimensions = inPresentationDimensions;
     }
-    SWindowDimensions GetCurrentPresentationDimensions() const override
+    QSize GetCurrentPresentationDimensions() const override
     {
         return m_PresentationDimensions;
     }
@@ -485,7 +485,7 @@ struct SRenderContext : public IQt3DSRenderContext
             return QT3DSVec2((QT3DSF32)m_PresentationViewport.m_Width,
                           (QT3DSF32)m_PresentationViewport.m_Height);
         else
-            return QT3DSVec2((QT3DSF32)m_WindowDimensions.m_Width, (QT3DSF32)m_WindowDimensions.m_Height);
+            return QT3DSVec2((QT3DSF32)m_WindowDimensions.width(), (QT3DSF32)m_WindowDimensions.height());
     }
     NVRenderRect GetContextViewport() const override
     {
@@ -493,7 +493,7 @@ struct SRenderContext : public IQt3DSRenderContext
         if (m_Viewport.hasValue())
             retval = *m_Viewport;
         else
-            retval = NVRenderRect(0, 0, m_WindowDimensions.m_Width, m_WindowDimensions.m_Height);
+            retval = NVRenderRect(0, 0, m_WindowDimensions.width(), m_WindowDimensions.height());
 
         return retval;
     }
@@ -502,14 +502,14 @@ struct SRenderContext : public IQt3DSRenderContext
     {
         bool renderOffscreen = m_Rotation != RenderRotationValues::NoRotation;
         if (renderOffscreen) {
-            SWindowDimensions thePresentationDimensions(m_RenderPresentationDimensions);
+            QSize thePresentationDimensions(m_RenderPresentationDimensions);
             NVRenderRect theViewport(GetContextViewport());
             // Calculate the presentation viewport perhaps with the presentation width and height
             // swapped.
             NVRenderRect thePresentationViewport =
                 GetPresentationViewport(theViewport, m_ScaleMode, thePresentationDimensions);
             // Translate pick into presentation space without rotations or anything else.
-            QT3DSF32 YHeightDiff = (QT3DSF32)((QT3DSF32)m_WindowDimensions.m_Height
+            QT3DSF32 YHeightDiff = (QT3DSF32)((QT3DSF32)m_WindowDimensions.height()
                                         - (QT3DSF32)thePresentationViewport.m_Height);
             QT3DSVec2 theLocalMouse((inMouseCoords.x - thePresentationViewport.m_X),
                                  (inMouseCoords.y - YHeightDiff + thePresentationViewport.m_Y));
@@ -538,27 +538,27 @@ struct SRenderContext : public IQt3DSRenderContext
 
     NVRenderRect GetPresentationViewport(const NVRenderRect &inViewerViewport,
                                          ScaleModes::Enum inScaleToFit,
-                                         const SWindowDimensions &inPresDimensions) const
+                                         const QSize &inPresDimensions) const
     {
         NVRenderRect retval;
         QT3DSI32 theWidth = inViewerViewport.m_Width;
         QT3DSI32 theHeight = inViewerViewport.m_Height;
-        if (inPresDimensions.m_Width == 0 || inPresDimensions.m_Height == 0)
+        if (inPresDimensions.width() == 0 || inPresDimensions.height() == 0)
             return NVRenderRect(0, 0, 0, 0);
         // Setup presentation viewport.  This may or may not match the physical viewport that we
         // want to setup.
         // Avoiding scaling keeps things as sharp as possible.
         if (inScaleToFit == ScaleModes::ExactSize) {
-            retval.m_Width = inPresDimensions.m_Width;
-            retval.m_Height = inPresDimensions.m_Height;
-            retval.m_X = (theWidth - (QT3DSI32)inPresDimensions.m_Width) / 2;
-            retval.m_Y = (theHeight - (QT3DSI32)inPresDimensions.m_Height) / 2;
+            retval.m_Width = inPresDimensions.width();
+            retval.m_Height = inPresDimensions.height();
+            retval.m_X = (theWidth - (QT3DSI32)inPresDimensions.width()) / 2;
+            retval.m_Y = (theHeight - (QT3DSI32)inPresDimensions.height()) / 2;
         } else if (inScaleToFit == ScaleModes::ScaleToFit
                    || inScaleToFit == ScaleModes::FitSelected) {
             // Scale down in such a way to preserve aspect ratio.
             float screenAspect = (float)theWidth / (float)theHeight;
             float thePresentationAspect =
-                (float)inPresDimensions.m_Width / (float)inPresDimensions.m_Height;
+                (float)inPresDimensions.width() / (float)inPresDimensions.height();
             if (screenAspect >= thePresentationAspect) {
                 // if the screen height is the limiting factor
                 retval.m_Y = 0;
@@ -599,14 +599,14 @@ struct SRenderContext : public IQt3DSRenderContext
     struct SBeginFrameResult
     {
         bool m_RenderOffscreen;
-        SWindowDimensions m_PresentationDimensions;
+        QSize m_PresentationDimensions;
         bool m_ScissorTestEnabled;
         NVRenderRect m_ScissorRect;
         NVRenderRect m_Viewport;
-        SWindowDimensions m_FBODimensions;
-        SBeginFrameResult(bool ro, SWindowDimensions presDims, bool scissorEnabled,
+        QSize m_FBODimensions;
+        SBeginFrameResult(bool ro, QSize presDims, bool scissorEnabled,
                           NVRenderRect scissorRect, NVRenderRect viewport,
-                          SWindowDimensions fboDims)
+                          QSize fboDims)
             : m_RenderOffscreen(ro)
             , m_PresentationDimensions(presDims)
             , m_ScissorTestEnabled(scissorEnabled)
@@ -625,7 +625,7 @@ struct SRenderContext : public IQt3DSRenderContext
     void BeginFrame() override
     {
         m_PreRenderPresentationDimensions = m_PresentationDimensions;
-        SWindowDimensions thePresentationDimensions(m_PreRenderPresentationDimensions);
+        QSize thePresentationDimensions(m_PreRenderPresentationDimensions);
         NVRenderRect theContextViewport(GetContextViewport());
         m_PerFrameAllocator.reset();
         IRenderList &theRenderList(*m_RenderList);
@@ -644,12 +644,12 @@ struct SRenderContext : public IQt3DSRenderContext
         NVRenderRect thePresentationViewport = thePresViewportAndOuterViewport.first;
         m_PresentationViewport = thePresentationViewport;
         m_PresentationScale = QT3DSVec2(
-            (QT3DSF32)thePresentationViewport.m_Width / (QT3DSF32)thePresentationDimensions.m_Width,
-            (QT3DSF32)thePresentationViewport.m_Height / (QT3DSF32)thePresentationDimensions.m_Height);
-        SWindowDimensions fboDimensions;
+            (QT3DSF32)thePresentationViewport.m_Width / (QT3DSF32)thePresentationDimensions.width(),
+            (QT3DSF32)thePresentationViewport.m_Height / (QT3DSF32)thePresentationDimensions.height());
+        QSize fboDimensions;
         if (thePresentationViewport.m_Width > 0 && thePresentationViewport.m_Height > 0) {
             if (renderOffscreen == false) {
-                m_PresentationDimensions = SWindowDimensions(thePresentationViewport.m_Width,
+                m_PresentationDimensions = QSize(thePresentationViewport.m_Width,
                                                              thePresentationViewport.m_Height);
                 m_RenderList->SetViewport(thePresentationViewport);
                 if (thePresentationViewport.m_X || thePresentationViewport.m_Y
@@ -662,8 +662,8 @@ struct SRenderContext : public IQt3DSRenderContext
                 QT3DSU32 imageWidth = ITextRenderer::NextMultipleOf4(thePresentationViewport.m_Width);
                 QT3DSU32 imageHeight =
                     ITextRenderer::NextMultipleOf4(thePresentationViewport.m_Height);
-                fboDimensions = SWindowDimensions(imageWidth, imageHeight);
-                m_PresentationDimensions = SWindowDimensions(thePresentationViewport.m_Width,
+                fboDimensions = QSize(imageWidth, imageHeight);
+                m_PresentationDimensions = QSize(thePresentationViewport.m_Width,
                                                              thePresentationViewport.m_Height);
                 NVRenderRect theSceneViewport = NVRenderRect(0, 0, imageWidth, imageHeight);
                 m_RenderList->SetScissorTestEnabled(false);
@@ -727,8 +727,8 @@ struct SRenderContext : public IQt3DSRenderContext
                     m_RenderContext->Clear(qt3ds::render::NVRenderClearValues::Color);
                 }
             } else {
-                QT3DSU32 imageWidth = m_BeginFrameResult.m_FBODimensions.m_Width;
-                QT3DSU32 imageHeight = m_BeginFrameResult.m_FBODimensions.m_Height;
+                QT3DSU32 imageWidth = m_BeginFrameResult.m_FBODimensions.width();
+                QT3DSU32 imageHeight = m_BeginFrameResult.m_FBODimensions.height();
                 NVRenderTextureFormats::Enum theColorBufferFormat = NVRenderTextureFormats::RGBA8;
                 NVRenderRenderBufferFormats::Enum theDepthBufferFormat =
                     NVRenderRenderBufferFormats::Depth16;
@@ -772,7 +772,7 @@ struct SRenderContext : public IQt3DSRenderContext
     {
         if (m_Watermark) {
             STextureDetails theWatermarkDims = m_Watermark->GetTextureDetails();
-            SWindowDimensions thePresentationDimensions(m_PresentationDimensions);
+            QSize thePresentationDimensions(m_PresentationDimensions);
             NVRenderRect theViewport(GetContextViewport());
             // Calculate the presentation viewport perhaps with the presentation width and height
             // swapped.
@@ -847,10 +847,11 @@ struct SRenderContext : public IQt3DSRenderContext
             ScaleModes::Enum theScaleToFit = m_ScaleMode;
             NVRenderRect theOuterViewport(GetContextViewport());
             m_RenderContext->SetRenderTarget(m_ContextRenderTarget);
-            SWindowDimensions thePresentationDimensions = GetCurrentPresentationDimensions();
+            QSize thePresentationDimensions = GetCurrentPresentationDimensions();
             if (m_Rotation == RenderRotationValues::Clockwise90
                 || m_Rotation == RenderRotationValues::Clockwise270) {
-                eastl::swap(thePresentationDimensions.m_Width, thePresentationDimensions.m_Height);
+                thePresentationDimensions = QSize(thePresentationDimensions.height(),
+                                                  thePresentationDimensions.width());
             }
             m_RenderPresentationDimensions = thePresentationDimensions;
             // Calculate the presentation viewport perhaps with the presentation width and height

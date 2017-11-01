@@ -1091,7 +1091,7 @@ namespace render {
 
     // m_Layer.m_Camera->CalculateViewProjectionMatrix(m_ViewProjection);
     void
-    SLayerRenderPreparationData::PrepareForRender(const SWindowDimensions &inViewportDimensions)
+    SLayerRenderPreparationData::PrepareForRender(const QSize &inViewportDimensions)
     {
         SStackPerfTimer __timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                 "SLayerRenderData::PrepareForRender");
@@ -1100,8 +1100,8 @@ namespace render {
 
         m_Features.clear();
         m_FeatureSetHash = 0;
-        QT3DSVec2 thePresentationDimensions((QT3DSF32)inViewportDimensions.m_Width,
-                                         (QT3DSF32)inViewportDimensions.m_Height);
+        QT3DSVec2 thePresentationDimensions((QT3DSF32)inViewportDimensions.width(),
+                                         (QT3DSF32)inViewportDimensions.height());
         IRenderList &theGraph(m_Renderer.GetQt3DSContext().GetRenderList());
         NVRenderRect theViewport(theGraph.GetViewport());
         NVRenderRect theScissor(theGraph.GetViewport());

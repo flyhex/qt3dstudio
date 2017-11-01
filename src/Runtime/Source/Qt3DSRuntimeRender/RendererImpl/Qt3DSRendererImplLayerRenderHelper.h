@@ -31,7 +31,6 @@
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSVec2.h"
 #include "render/Qt3DSRenderBaseTypes.h"
-#include "Qt3DSRenderWindowDimensions.h"
 #include "Qt3DSRenderCamera.h"
 #include "Qt3DSRenderContextCore.h"
 
@@ -92,7 +91,7 @@ namespace render {
         // presentation.
         NVRenderRectF GetLayerToPresentationScissorRect() const { return m_Scissor; }
 
-        SWindowDimensions GetTextureDimensions() const;
+        QSize GetTextureDimensions() const;
 
         SCameraGlobalCalculationResult SetupCameraForRender(SCamera &inCamera);
 

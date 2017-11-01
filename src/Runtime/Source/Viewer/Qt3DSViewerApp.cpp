@@ -213,15 +213,14 @@ namespace Q3DSViewer {
 
 struct SWindowSystemImpl : public Q3DStudio::IWindowSystem
 {
-    WindowRect m_Rect;
+    QSize m_size;
     int m_OffscreenID;
     int m_DepthBitCount;
 
-    SSize GetWindowDimensions() override { return SSize(m_Rect.width, m_Rect.height); }
-    void SetWindowDimensions(const SSize &inSize) override
+    QSize GetWindowDimensions() override { return m_size; }
+    void SetWindowDimensions(const QSize &inSize) override
     {
-        m_Rect.width = inSize.m_Width;
-        m_Rect.height = inSize.m_Height;
+        m_size = inSize;
     }
     // For platforms that support it, we get the egl info for render plugins
     // Feel free to return NULL.
@@ -322,15 +321,10 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         return false;
     }
 
-    m_Impl.m_WindowSystem->SetWindowDimensions(SSize(winWidth, winHeight));
+    m_Impl.m_WindowSystem->SetWindowDimensions(QSize(winWidth, winHeight));
 
     // create our internal application
     if (hasValidPresentationFile && !m_Impl.m_tegraApp) {
-        WindowRect &theWindowRect = static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_Rect;
-        theWindowRect.x = 0;
-        theWindowRect.y = 0;
-        theWindowRect.width = winWidth;
-        theWindowRect.height = winHeight;
         static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_OffscreenID = offscreenID;
         static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_DepthBitCount
                 = format.depthBufferSize();
@@ -400,12 +394,12 @@ bool Q3DSViewerApp::IsInitialised(void)
 
 int Q3DSViewerApp::GetWindowHeight()
 {
-    return m_Impl.m_WindowSystem->GetWindowDimensions().m_Height;
+    return m_Impl.m_WindowSystem->GetWindowDimensions().width();
 }
 
 int Q3DSViewerApp::GetWindowWidth()
 {
-    return m_Impl.m_WindowSystem->GetWindowDimensions().m_Width;
+    return m_Impl.m_WindowSystem->GetWindowDimensions().height();
 }
 
 void Q3DSViewerApp::setupSearchPath(std::vector<std::string> &cmdLineArgs)
@@ -522,15 +516,14 @@ QString Q3DSViewerApp::error()
 
 void Q3DSViewerApp::Resize(int width, int height)
 {
-    WindowRect &theWindowRect = static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_Rect;
-    QSize oldSize = QSize(theWindowRect.width, theWindowRect.height);
-    theWindowRect.width = width;
-    theWindowRect.height = height;
+    QSize oldSize = m_Impl.m_WindowSystem->GetWindowDimensions();
+    QSize newSize(width, height);
+    m_Impl.m_WindowSystem->SetWindowDimensions(newSize);
 
 #if !defined(Q_OS_MACOS)
     if (m_Impl.m_appInitSuccessful && m_Impl.m_tegraApp
             && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
-        QResizeEvent event = QResizeEvent(QSize(width, height), oldSize);
+        QResizeEvent event = QResizeEvent(newSize, oldSize);
         m_Impl.m_tegraApp->HandleMessage(&event);
     }
 #endif

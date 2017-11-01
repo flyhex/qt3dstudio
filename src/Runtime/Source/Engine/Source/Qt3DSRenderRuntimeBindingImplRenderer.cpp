@@ -33,8 +33,6 @@
 #include "Qt3DSWindowSystem.h"
 #include "Qt3DSRenderLoadedTexture.h"
 
-using qt3ds::render::SWindowDimensions;
-
 struct SRenderer;
 struct SRendererRSM : public Q3DStudio::ITegraRenderStateManager
 {
@@ -61,7 +59,7 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
     NVScopedRefCounted<IQt3DSRenderContext> m_Context;
     NVRenderRect m_Viewport;
     nvvector<NVRenderRect> m_StateStack;
-    SWindowDimensions m_PresentationDimensions;
+    QSize m_PresentationDimensions;
     SRendererRSM m_RSM;
     Q3DStudio::IWindowSystem &m_WindowSystem;
 
@@ -89,9 +87,8 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
 
     void CheckResize(bool, Q3DStudio::IPresentation & /*inPresentation*/) override
     {
-        Q3DStudio::SSize theWindowDims(m_WindowSystem.GetWindowDimensions());
-        m_BindingCore->m_WindowDimensions =
-            SWindowDimensions(theWindowDims.m_Width, theWindowDims.m_Height);
+        QSize theWindowDims(m_WindowSystem.GetWindowDimensions());
+        m_BindingCore->m_WindowDimensions = theWindowDims;
         m_BindingCore->m_Context->SetWindowDimensions(m_BindingCore->m_WindowDimensions);
     }
     Q3DStudio::BOOL LoadShaderCache(const char * /*inFilePath*/) override { return true; }
@@ -103,8 +100,8 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
     {
         Q3DStudio::FLOAT theX = outX;
         Q3DStudio::FLOAT theY = outY;
-        theX = theX / static_cast<Q3DStudio::FLOAT>(m_BindingCore->m_WindowDimensions.m_Width);
-        theY = theY / static_cast<Q3DStudio::FLOAT>(m_BindingCore->m_WindowDimensions.m_Height);
+        theX = theX / static_cast<Q3DStudio::FLOAT>(m_BindingCore->m_WindowDimensions.width());
+        theY = theY / static_cast<Q3DStudio::FLOAT>(m_BindingCore->m_WindowDimensions.height());
         Q3DStudio::BOOL theValid = false;
 
         if ((theX >= 0.0f) && (theY >= 0.0f) && (theX <= 1.0f) && (theY <= 1.0f))

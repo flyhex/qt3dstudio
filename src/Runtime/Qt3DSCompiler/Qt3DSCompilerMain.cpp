@@ -72,9 +72,9 @@ struct SNullTimeProvider : public Q3DStudio::ITimeProvider
 
 struct SNullWindowSystem : public Q3DStudio::IWindowSystem
 {
-    Q3DStudio::SSize GetWindowDimensions() override { return Q3DStudio::SSize(); }
+    QSize GetWindowDimensions() override { return QSize(); }
 
-    void SetWindowDimensions(const Q3DStudio::SSize &) override {}
+    void SetWindowDimensions(const QSize &) override {}
     // For platforms that support it, we get the egl info for render plugins
     // Feel free to return NULL.
     Q3DStudio::SEGLInfo *GetEGLInfo() override { return NULL; }

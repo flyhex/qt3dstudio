@@ -365,7 +365,6 @@ HEADERS += \
     Source/Qt3DSRuntimeRender/Include/Qt3DSRenderUIPLoader.h \
     Source/Qt3DSRuntimeRender/Include/Qt3DSRenderUIPSharedTranslation.h \
     Source/Qt3DSRuntimeRender/Include/Qt3DSRenderWidgets.h \
-    Source/Qt3DSRuntimeRender/Include/Qt3DSRenderWindowDimensions.h \
     Source/Qt3DSRuntimeRender/Include/Qt3DSTextRenderer.h \
     Source/Qt3DSRuntimeRender/RendererImpl/Qt3DSRenderableObjects.h \
     Source/Qt3DSRuntimeRender/RendererImpl/Qt3DSRendererImpl.h \

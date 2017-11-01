@@ -477,7 +477,7 @@ struct SPathWidget : public IPathWidget
     }
 
     void RenderPick(const QT3DSMat44 &inProjPreMult, NVRenderContext &inRenderContext,
-                            qt3ds::render::SWindowDimensions inWinDimensions) override
+                    QSize inWinDimensions) override
     {
         if (m_PointAssembler == nullptr || m_PointPickShader == nullptr)
             return;
@@ -486,7 +486,7 @@ struct SPathWidget : public IPathWidget
         // aspect).
         QT3DSMat44 theMVP = inProjPreMult * m_PointMVP;
         m_PointViewportDimensions =
-            QT3DSVec2((QT3DSF32)inWinDimensions.m_Width, (QT3DSF32)inWinDimensions.m_Height);
+            QT3DSVec2((QT3DSF32)inWinDimensions.width(), (QT3DSF32)inWinDimensions.height());
 
         RenderPointBuffer(*m_PointPickShader, theMVP, inRenderContext);
     }

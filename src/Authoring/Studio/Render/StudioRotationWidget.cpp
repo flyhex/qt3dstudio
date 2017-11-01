@@ -399,7 +399,7 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
     }
 
     void RenderPick(const QT3DSMat44 &inProjPremult, NVRenderContext &inRenderContext,
-                            qt3ds::render::SWindowDimensions /*inWinDimensions*/) override
+                            QSize /*inWinDimensions*/) override
     {
         if (m_XAxis && m_PickShader) {
             QT3DSMat44 theCameraMVP =

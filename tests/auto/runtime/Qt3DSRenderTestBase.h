@@ -72,9 +72,9 @@ namespace render {
 
     struct SNullWindowSystem : public Q3DStudio::IWindowSystem
     {
-        virtual Q3DStudio::SSize GetWindowDimensions() { return Q3DStudio::SSize(); }
+        virtual QSize GetWindowDimensions() { return QSize(); }
 
-        virtual void SetWindowDimensions(const Q3DStudio::SSize &) {}
+        virtual void SetWindowDimensions(const QSize &) {}
         // For platforms that support it, we get the egl info for render plugins
         // Feel free to return NULL.
         virtual Q3DStudio::SEGLInfo *GetEGLInfo() { return NULL; }

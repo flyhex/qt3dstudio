@@ -38,16 +38,16 @@ struct SEGLWindowSystemImpl : public IWindowSystem
 {
     SEGLInfo m_EGLInfo;
 
-    virtual SSize GetWindowDimensions()
+    virtual QSize GetWindowDimensions()
     {
         int w, h;
 
         eglQuerySurface(gEGLHandles[0].display, gEGLHandles[0].surface, EGL_WIDTH, &w);
         eglQuerySurface(gEGLHandles[0].display, gEGLHandles[0].surface, EGL_HEIGHT, &h);
 
-        return SSize(w, h);
+        return QSize(w, h);
     }
-    virtual void SetWindowDimensions(const SSize &) {}
+    virtual void SetWindowDimensions(const QSize &) {}
     // For platforms that support it, we get the egl info for render plugins
     // Feel free to return NULL.
     virtual SEGLInfo *GetEGLInfo()

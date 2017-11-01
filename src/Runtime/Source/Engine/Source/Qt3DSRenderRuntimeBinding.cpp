@@ -1529,7 +1529,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             else
                 m_Context->m_Context->SetRenderRotation(RenderRotationValues::NoRotation);
 
-            m_Context->m_Context->SetPresentationDimensions(SWindowDimensions(
+            m_Context->m_Context->SetPresentationDimensions(QSize(
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.x,
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
         }
@@ -1574,7 +1574,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             if (m_Scenes[idx].second->m_RuntimePresentation == inPresentation)
                 theFirstScene = m_Scenes[idx].second;
         if (theFirstScene) {
-            m_Context->m_Context->SetPresentationDimensions(SWindowDimensions(
+            m_Context->m_Context->SetPresentationDimensions(QSize(
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.x,
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
             render::NVRenderRectF theDisplayViewport =

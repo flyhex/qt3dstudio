@@ -29,7 +29,6 @@
 #ifndef QT3DS_STUDIO_RENDERER_WIDGET_H
 #define QT3DS_STUDIO_RENDERER_WIDGET_H
 #pragma once
-#include "Qt3DSRenderWindowDimensions.h"
 #include "Qt3DSRenderWidgets.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "StudioPickValues.h"
@@ -70,7 +69,7 @@ namespace widgets {
     public:
         virtual void SetNode(SNode &inNode) = 0;
         virtual void RenderPick(const QT3DSMat44 &inProjPreMult, NVRenderContext &inRenderContext,
-                                qt3ds::render::SWindowDimensions inWinDimensions) = 0;
+                                QSize inWinDimensions) = 0;
         virtual qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) = 0;
     };
 

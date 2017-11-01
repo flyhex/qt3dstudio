@@ -45,12 +45,12 @@ namespace render {
     struct SSubPresentationHelper
     {
         IQt3DSRenderContext &m_RenderContext;
-        SWindowDimensions m_PreviousPresentationDimensions;
+        QSize m_PreviousPresentationDimensions;
 
         bool m_WasInSubPresentation;
 
         SSubPresentationHelper(IQt3DSRenderContext &inContext,
-                               const SWindowDimensions &inPresDimensions)
+                               const QSize &inPresDimensions)
             : m_RenderContext(inContext)
             , m_PreviousPresentationDimensions(inContext.GetCurrentPresentationDimensions())
             , m_WasInSubPresentation(inContext.IsInSubPresentation())

@@ -340,9 +340,9 @@ void CNDDView::Render()
                 = GetTegraRenderEngine()->GetTegraRenderStateManager();
         manager.PushState();
 
-        SSize dim = m_WindowSystem.GetWindowDimensions();
+        QSize dim = m_WindowSystem.GetWindowDimensions();
         manager.SetScissorTestEnabled(false);
-        manager.SetViewport(0, 0, dim.m_Width, dim.m_Height);
+        manager.SetViewport(0, 0, dim.width(), dim.height());
 
         QPair<QT3DSF32, QT3DSF32> fps
                 = m_RuntimeFactory->GetQt3DSRenderContext().GetFPS();
@@ -356,10 +356,10 @@ void CNDDView::Render()
 
         // bottom left coordinates
         GetTegraRenderEngine()->RenderText2D(
-                    dim.m_Width / 4, dim.m_Height - 25, qt3ds::QT3DSVec3(0.0, 1.0, 0.0),
+                    dim.width() / 4, dim.height() - 25, qt3ds::QT3DSVec3(0.0, 1.0, 0.0),
                     text.toLatin1().constData());
         GetTegraRenderEngine()->RenderGpuProfilerStats(
-                    20.0, dim.m_Height - 80, qt3ds::QT3DSVec3(0.0, 1.0, 0.0));
+                    20.0, dim.height() - 80, qt3ds::QT3DSVec3(0.0, 1.0, 0.0));
 
         manager.PopState();
     }

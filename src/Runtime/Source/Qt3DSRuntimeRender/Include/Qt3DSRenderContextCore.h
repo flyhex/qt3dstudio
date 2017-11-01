@@ -35,9 +35,9 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/StringTable.h"
 #include "Qt3DSRenderPresentation.h"
-#include "Qt3DSRenderWindowDimensions.h"
 
-#include <QPair>
+#include <QtCore/qpair.h>
+#include <QtCore/qsize.h>
 
 namespace qt3ds {
 namespace render {
@@ -150,8 +150,8 @@ namespace render {
         // needs to be inverted
         // which requires the window height, and then the rest of the system really requires the
         // viewport.
-        virtual void SetWindowDimensions(const SWindowDimensions &inWindowDimensions) = 0;
-        virtual SWindowDimensions GetWindowDimensions() = 0;
+        virtual void SetWindowDimensions(const QSize &inWindowDimensions) = 0;
+        virtual QSize GetWindowDimensions() = 0;
 
         // In addition to the window dimensions which really have to be set, you can optionally
         // set the viewport which will force the entire viewer to render specifically to this
@@ -179,8 +179,8 @@ namespace render {
 
         // Layers require the current presentation dimensions in order to render.
         virtual void
-        SetPresentationDimensions(const SWindowDimensions &inPresentationDimensions) = 0;
-        virtual SWindowDimensions GetCurrentPresentationDimensions() const = 0;
+        SetPresentationDimensions(const QSize &inPresentationDimensions) = 0;
+        virtual QSize GetCurrentPresentationDimensions() const = 0;
 
         virtual void SetRenderRotation(RenderRotationValues::Enum inRotation) = 0;
         virtual RenderRotationValues::Enum GetRenderRotation() const = 0;

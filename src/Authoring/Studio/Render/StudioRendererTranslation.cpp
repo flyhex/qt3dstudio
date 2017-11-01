@@ -2048,9 +2048,9 @@ void STranslation::PreRender()
             QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
         QT3DSVec2 theViewportDims(GetViewportDimensions());
         m_Context.SetWindowDimensions(
-            qt3ds::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
+            QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
         m_Context.SetPresentationDimensions(
-            qt3ds::render::SWindowDimensions((QT3DSU32)m_Presentation.m_PresentationDimensions.x,
+            QSize((QT3DSU32)m_Presentation.m_PresentationDimensions.x,
                                            (QT3DSU32)m_Presentation.m_PresentationDimensions.y));
 
         // set if we draw geometry in wireframe mode
@@ -2059,7 +2059,7 @@ void STranslation::PreRender()
         if (m_EditCameraEnabled) {
             m_Presentation.m_PresentationDimensions = theViewportDims;
             m_Context.SetPresentationDimensions(
-                qt3ds::render::SWindowDimensions((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
+                QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
             ::CColor theEditCameraBackground = CStudioPreferences::GetEditViewBackgroundColor();
             m_Context.SetSceneColor(QT3DSVec4(theEditCameraBackground.GetRed() / 255.0f,
                                               theEditCameraBackground.GetGreen() / 255.0f,
@@ -2607,7 +2607,7 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
         qt3ds::render::IQt3DSRenderer &theRenderer(m_Context.GetRenderer());
         Option<qt3ds::render::SLayerPickSetup> thePickSetup(
             theRenderer.GetLayerPickSetup(*theLayer, QT3DSVec2((QT3DSF32)thePoint.x, (QT3DSF32)thePoint.y),
-                                          qt3ds::render::SWindowDimensions(16, 16)));
+                                          QSize(16, 16)));
         if (thePickSetup.hasValue()) {
             qt3ds::render::NVRenderContext &theRenderContext(m_Context.GetRenderContext());
             theRenderContext.SetViewport(qt3ds::render::NVRenderRect(0, 0, 100, 100));
@@ -2670,7 +2670,7 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
         Option<qt3ds::render::SLayerPickSetup> thePickSetup(
             m_Context.GetRenderer().GetLayerPickSetup(
                 *theLayer, QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y),
-                qt3ds::render::SWindowDimensions(4, 4)));
+                QSize(4, 4)));
         if (thePickSetup.hasValue()) {
             qt3ds::render::NVRenderContext &theContext(m_Context.GetRenderContext());
             qt3ds::render::NVRenderContextScopedProperty<qt3ds::render::NVRenderFrameBuffer *>
@@ -2702,7 +2702,7 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
             theContext.Clear(qt3ds::render::NVRenderClearFlags(
                 qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
             inWidget.RenderPick(thePickSetup->m_ProjectionPreMultiply, theContext,
-                                qt3ds::render::SWindowDimensions(4, 4));
+                                QSize(4, 4));
             // Now read the pixels back.
             m_PixelBuffer.resize(fboDims * fboDims * 3);
             theContext.ReadPixels(theViewport, qt3ds::render::NVRenderReadPixelFormats::RGB8,
@@ -3233,9 +3233,9 @@ STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum i
     retval.m_Node = &inNode;
     retval.m_Layer = GetLayerForNode(inNode);
     retval.m_Camera = theRenderer.GetCameraForNode(inNode);
-    qt3ds::render::SWindowDimensions theUnsignedDimensions(m_Context.GetWindowDimensions());
-    QT3DSVec2 theWindowDimensions((QT3DSF32)theUnsignedDimensions.m_Width,
-                               (QT3DSF32)theUnsignedDimensions.m_Height);
+    QSize theUnsignedDimensions(m_Context.GetWindowDimensions());
+    QT3DSVec2 theWindowDimensions((QT3DSF32)theUnsignedDimensions.width(),
+                               (QT3DSF32)theUnsignedDimensions.height());
     if (retval.m_Camera == nullptr || retval.m_Layer == nullptr)
         return Empty();
 
@@ -3837,7 +3837,7 @@ PickTargetAreas::Enum STranslation::GetPickArea(CPt inPoint)
 {
     qt3ds::render::NVRenderRectF displayViewport = m_Context.GetDisplayViewport();
     QT3DSVec2 thePickPoint((QT3DSF32)inPoint.x,
-                        m_Context.GetWindowDimensions().m_Height - (QT3DSF32)inPoint.y);
+                        m_Context.GetWindowDimensions().height() - (QT3DSF32)inPoint.y);
     QT3DSF32 left = displayViewport.m_X;
     QT3DSF32 right = displayViewport.m_X + displayViewport.m_Width;
     QT3DSF32 top = displayViewport.m_Y + displayViewport.m_Height;

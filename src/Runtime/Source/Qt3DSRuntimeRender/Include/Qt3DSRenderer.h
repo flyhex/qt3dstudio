@@ -37,7 +37,6 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSVec2.h"
 #include "Qt3DSRenderGraphObjectPickQuery.h"
-#include "Qt3DSRenderWindowDimensions.h"
 #include "Qt3DSRenderCamera.h"
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "Qt3DSRenderRay.h"
@@ -171,7 +170,7 @@ namespace render {
         // obviously this method is irrelevant.
         virtual Option<SLayerPickSetup> GetLayerPickSetup(SLayer &inLayer,
                                                           const QT3DSVec2 &inMouseCoords,
-                                                          const SWindowDimensions &inPickDims) = 0;
+                                                          const QSize &inPickDims) = 0;
 
         // Return the layer's viewport rect after the layer's member variables have been applied.
         // Uses the last rendered viewport rect.
