@@ -43,6 +43,7 @@
 
 #include <QtStudio3D/qstudio3dglobal.h>
 #include <QtCore/qthread.h>
+#include <QtCore/qurl.h>
 
 QT_BEGIN_NAMESPACE
 

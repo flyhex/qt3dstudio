@@ -38,6 +38,8 @@
 #include <QtGui/qopenglframebufferobject.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qdir.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qmath.h>
 
 bool Q3DSImageSequenceGeneratorThread::initialize(
         const QString &presentation, qreal start, qreal end, qreal fps, qreal frameInterval,
