@@ -45,7 +45,9 @@ bool Q3DSImageSequenceGeneratorThread::initialize(
 {
     QFileInfo fileInfo(presentation);
     if (!fileInfo.exists()) {
-        qWarning("Generating image sequence failed - File not found");
+        QString error = QObject::tr("File not found: '%1'").arg(presentation);
+        qWarning() << "Generating image sequence failed -" << error;
+        Q_EMIT generationFinished(false, error);
         return false;
     }
 
@@ -66,7 +68,9 @@ bool Q3DSImageSequenceGeneratorThread::initialize(
     m_context = new QOpenGLContext;
     m_context->setFormat(format);
     if (!m_context->create()) {
-        qWarning("Generating image sequence failed - Failed to create context");
+        QString error = QObject::tr("Failed to create context");
+        qWarning() << "Generating image sequence failed -" << error;
+        Q_EMIT generationFinished(false, error);
         return false;
     }
 
@@ -86,6 +90,18 @@ bool Q3DSImageSequenceGeneratorThread::initialize(
     m_height = height;
 
     return true;
+}
+
+Q3DSImageSequenceGeneratorThread::Q3DSImageSequenceGeneratorThread()
+    : m_start(0)
+    , m_end(10000)
+    , m_fps(60)
+    , m_frameInterval(16.666667)
+    , m_width(1920)
+    , m_height(1080)
+    , m_surface(nullptr)
+    , m_context(nullptr)
+{
 }
 
 Q3DSImageSequenceGeneratorThread::~Q3DSImageSequenceGeneratorThread() {

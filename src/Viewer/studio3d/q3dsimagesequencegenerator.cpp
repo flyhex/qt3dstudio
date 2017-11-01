@@ -35,12 +35,14 @@ bool Q3DSImageSequenceGenerator::generateImageSequence(
         int width, int height, const QString &outPath, const QString &outFile)
 {
     Q3DSImageSequenceGeneratorThread *thread = new Q3DSImageSequenceGeneratorThread;
+
+    connect(thread, &Q3DSImageSequenceGeneratorThread::generationFinished,
+            this, &Q3DSImageSequenceGenerator::finished);
+
     bool success = thread->initialize(presentation, start, end, fps, frameInterval, width, height,
                                       outPath, outFile);
 
     if (success) {
-        connect(thread, &Q3DSImageSequenceGeneratorThread::generationFinished,
-                this, &Q3DSImageSequenceGenerator::finished);
         connect(thread, &Q3DSImageSequenceGeneratorThread::progress,
                 this, &Q3DSImageSequenceGenerator::progress);
         thread->start();

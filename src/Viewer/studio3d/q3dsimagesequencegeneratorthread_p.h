@@ -53,7 +53,7 @@ class Q3DSImageSequenceGeneratorThread : public QThread
 {
     Q_OBJECT
 public:
-    Q3DSImageSequenceGeneratorThread() {}
+    Q3DSImageSequenceGeneratorThread();
     virtual ~Q3DSImageSequenceGeneratorThread();
 
     bool initialize(const QString &presentation, qreal start, qreal end,
