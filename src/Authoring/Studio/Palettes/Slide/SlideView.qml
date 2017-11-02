@@ -84,7 +84,8 @@ Rectangle {
                         color: "transparent"
                     }
                     contentItem: Image {
-                        source: _resDir + "Slide-Master-Active.png"
+                        source: _slideView.showMasterSlide ? _resDir + "Slide-Normal.png"
+                                                           : _resDir + "Slide-Master-Active.png"
                     }
                 }
 
