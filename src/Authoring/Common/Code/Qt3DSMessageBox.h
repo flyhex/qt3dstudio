@@ -40,9 +40,7 @@
 //==============================================================================
 #include "Qt3DSString.h"
 
-QT_BEGIN_NAMESPACE
-class QWidget;
-QT_END_NAMESPACE
+QT_FORWARD_DECLARE_CLASS(QWidget)
 
 #ifndef _WIN32
 #define IDOK 1

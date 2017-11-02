@@ -38,7 +38,7 @@
 class ObjectListModel;
 class FlatObjectListModel;
 
-class QAbstractItemModel;
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
 class ObjectBrowserView : public QQuickWidget
 {

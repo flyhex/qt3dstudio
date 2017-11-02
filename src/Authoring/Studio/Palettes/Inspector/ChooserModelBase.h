@@ -36,7 +36,7 @@
 #include <QList>
 #include <QVector>
 
-class QFileSystemModel;
+QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
 
 class ChooserModelBase : public QAbstractListModel, public CPresentationChangeListener
 {

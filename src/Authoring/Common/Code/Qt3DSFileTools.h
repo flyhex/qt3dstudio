@@ -45,7 +45,7 @@
 #include "Qt3DSFileToolTypes.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 
-class QDir;
+QT_FORWARD_DECLARE_CLASS(QDir)
 
 namespace Q3DStudio {
 using qt3ds::QT3DSI64;

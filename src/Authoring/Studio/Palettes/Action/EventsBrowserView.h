@@ -34,7 +34,7 @@
 
 class EventsModel;
 
-class QAbstractItemModel;
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
 class EventsBrowserView : public QQuickWidget
 {

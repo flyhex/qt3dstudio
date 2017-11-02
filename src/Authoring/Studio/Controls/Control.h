@@ -47,7 +47,7 @@ class IDragable;
 class CAsset;
 class CStudioApp;
 
-class QMenu;
+QT_FORWARD_DECLARE_CLASS(QMenu)
 
 namespace Q3DStudio {
 namespace Control {

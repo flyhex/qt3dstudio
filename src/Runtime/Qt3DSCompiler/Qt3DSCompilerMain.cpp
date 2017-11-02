@@ -97,7 +97,7 @@ int main(int c, char **v)
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
 
-    QOpenGLContext *context = new QT_PREPEND_NAMESPACE(QOpenGLContext);
+    QT_PREPEND_NAMESPACE(QOpenGLContext) *context = new QT_PREPEND_NAMESPACE(QOpenGLContext);
     context->setFormat(format);
     bool success = context->create();
     if (!success)

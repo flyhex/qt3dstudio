@@ -48,11 +48,11 @@ class CDropContainer;
 class CStudioApp;
 class CDropSource;
 
-class QDragEnterEvent;
-class QDragLeaveEvent;
-class QDragMoveEvent;
-class QDropEvent;
-class QMimeData;
+QT_FORWARD_DECLARE_CLASS(QDragEnterEvent)
+QT_FORWARD_DECLARE_CLASS(QDragLeaveEvent)
+QT_FORWARD_DECLARE_CLASS(QDragMoveEvent)
+QT_FORWARD_DECLARE_CLASS(QDropEvent)
+QT_FORWARD_DECLARE_CLASS(QMimeData)
 
 class CDropProxy : public QObject
 {

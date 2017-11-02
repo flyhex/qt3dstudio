@@ -37,17 +37,18 @@
 
 #include "StudioPreferencesPropSheet.h"
 
-class QComboBox;
-class QLabel;
+QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 
 class CStudioApp;
 /////////////////////////////////////////////////////////////////////////////
 // CStudioAppPrefsPage dialog
-
+QT_BEGIN_NAMESPACE
 namespace Ui
 {
     class StudioAppPrefsPage;
 }
+QT_END_NAMESPACE
 
 class CStudioAppPrefsPage : public CStudioPreferencesPropPage
 {
@@ -107,7 +108,7 @@ protected:
     void SavePreviewSettings();
     void RemovePreviewPropertyControls();
 #endif
-    QScopedPointer<Ui::StudioAppPrefsPage> m_ui;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioAppPrefsPage)> m_ui;
 
 private:
     void updateColorButton();

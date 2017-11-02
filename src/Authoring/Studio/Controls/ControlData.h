@@ -41,7 +41,7 @@ class CControlWindowListener;
 class CChildFocusListener;
 class CRenderer;
 
-class QMenu;
+QT_FORWARD_DECLARE_CLASS(QMenu)
 
 namespace Q3DStudio {
 namespace Control {

@@ -38,7 +38,7 @@
 #include "MouseHelper.h"
 
 class InspectorControlModel;
-class QAbstractItemModel;
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class CInspectableBase;
 class ImageChooserView;
 class ImageChooserModel;

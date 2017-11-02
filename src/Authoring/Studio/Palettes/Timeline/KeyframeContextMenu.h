@@ -44,7 +44,7 @@ class ITimeChangeCallback;
 class ITimelineItemKeyframesHolder;
 class ITimebarControl;
 
-class QAction;
+QT_FORWARD_DECLARE_CLASS(QAction)
 
 //=============================================================================
 /**

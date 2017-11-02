@@ -43,10 +43,12 @@
 
 #include "Qt3DSString.h"
 
+QT_BEGIN_NAMESPACE
 namespace Ui
 {
     class GLVersionDlg;
 }
+QT_END_NAMESPACE
 
 //==============================================================================
 /**
@@ -65,7 +67,7 @@ public:
     bool GetDontShowAgain();
 
 private:
-    QScopedPointer<Ui::GLVersionDlg> m_ui;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::GLVersionDlg)> m_ui;
 };
 
 #endif // INCLUDED_GL_VERSION_DLG

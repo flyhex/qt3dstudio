@@ -34,10 +34,12 @@
 
 #include <QDialog>
 
+QT_BEGIN_NAMESPACE
 namespace Ui
 {
     class ResetKeyframeValuesDlg;
 }
+QT_END_NAMESPACE
 
 class CResetKeyframeValuesDlg : public QDialog
 {
@@ -47,5 +49,5 @@ public:
     ~CResetKeyframeValuesDlg();
 
 private:
-    QScopedPointer<Ui::ResetKeyframeValuesDlg> m_ui;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::ResetKeyframeValuesDlg)> m_ui;
 };

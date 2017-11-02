@@ -55,7 +55,7 @@ class CCore;
 class CDoc;
 class IObjectReferenceHelper;
 
-class QAbstractItemModel;
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
 struct HandlerArgument {
     Q_PROPERTY(qt3dsdm::HandlerArgumentType::Value type MEMBER m_type FINAL)

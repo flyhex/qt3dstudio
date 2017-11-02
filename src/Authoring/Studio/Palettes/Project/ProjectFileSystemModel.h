@@ -35,7 +35,7 @@
 #include <QList>
 #include <QUrl>
 
-class QFileSystemModel;
+QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
 
 class ProjectFileSystemModel : public QAbstractListModel
 {

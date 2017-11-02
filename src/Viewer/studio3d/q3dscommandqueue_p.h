@@ -49,6 +49,8 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qvariant.h>
 
+QT_BEGIN_NAMESPACE
+
 enum CommandType {
     CommandType_Invalid = 0,
     CommandType_SetAttribute,
@@ -67,8 +69,6 @@ enum CommandType {
     CommandType_SetGlobalAnimationTime,
     CommandType_RequestSlideInfo
 };
-
-Q_DECLARE_METATYPE(CommandType)
 
 class Q_STUDIO3D_EXPORT ElementCommand
 {
@@ -137,5 +137,9 @@ private:
     CommandList m_elementCommands;
     int m_size;
 };
+
+QT_END_NAMESPACE
+
+Q_DECLARE_METATYPE(CommandType)
 
 #endif // Q3DS_COMMAND_QUEUE_H

@@ -35,7 +35,7 @@
 #include <QtWidgets/qwidget.h>
 #include <QtNetwork/qtcpsocket.h>
 
-class QMessageBox;
+QT_FORWARD_DECLARE_CLASS(QMessageBox)
 
 class RemoteDeploymentSender : public QObject
 {

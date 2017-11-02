@@ -36,7 +36,7 @@ class CFilePath;
 class CString;
 }
 
-class QAbstractItemModel;
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class MeshChooserModel;
 class MeshChooserView : public QQuickWidget
 {

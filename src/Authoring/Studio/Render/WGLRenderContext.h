@@ -37,10 +37,8 @@
 
 #include <QSurfaceFormat>
 
-QT_BEGIN_NAMESPACE
-class QOpenGLContext;
-class QOpenGLWidget;
-QT_END_NAMESPACE
+QT_FORWARD_DECLARE_CLASS(QOpenGLContext)
+QT_FORWARD_DECLARE_CLASS(QOpenGLWidget)
 
 namespace qt3ds {
 class NVFoundation;

@@ -41,9 +41,7 @@
 
 class Qt3DSFile;
 
-QT_BEGIN_NAMESPACE
-class QMenu;
-QT_END_NAMESPACE
+QT_FORWARD_DECLARE_CLASS(QMenu)
 
 class CRecentItems : public QObject
 {

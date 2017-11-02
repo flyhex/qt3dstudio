@@ -47,7 +47,7 @@ enum E_TEXTURE_FORMAT
 class Q3DS_QMLSTREAMERSHARED_EXPORT IQ3DSQmlStreamRenderer
 {
 public:
-    virtual bool initialize(QOpenGLContext *context, QSurface *surface) = 0;
+    virtual bool initialize(QT_PREPEND_NAMESPACE(QOpenGLContext) *context, QSurface *surface) = 0;
 
     virtual QSize getDesiredSize() = 0;
     virtual E_TEXTURE_FORMAT getDesiredFormat() = 0;

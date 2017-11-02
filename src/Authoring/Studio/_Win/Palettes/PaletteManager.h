@@ -47,7 +47,7 @@ class CStudioApp;
 class CMainFrame;
 class CStudioPaletteBar;
 
-class QDockWidget;
+QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
 //==============================================================================
 /**

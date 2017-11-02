@@ -51,9 +51,11 @@
 //==============================================================================
 class CStudioApp;
 
+QT_BEGIN_NAMESPACE
 namespace Ui {
     class StudioProjectSettingsPage;
 }
+QT_END_NAMESPACE
 
 //==============================================================================
 //	Base class for the settings for different modes
@@ -97,7 +99,7 @@ protected:
     void OnChangeSet3();
     void OnChangeSet5();
 
-    QScopedPointer<Ui::StudioProjectSettingsPage> m_ui;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioProjectSettingsPage)> m_ui;
 };
 
 #endif // !defined(AFX_STUDIOPROJECTSETTINGSPAGE_H__E3317E44_810D_4478_A7DD_CF8570B7C17C__INCLUDED_)

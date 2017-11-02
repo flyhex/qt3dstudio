@@ -38,9 +38,7 @@
 #include "foundation/IOStreams.h"
 #include <QtGlobal>
 
-QT_BEGIN_NAMESPACE
-class QIODevice;
-QT_END_NAMESPACE
+QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 namespace qt3ds {
 namespace foundation {

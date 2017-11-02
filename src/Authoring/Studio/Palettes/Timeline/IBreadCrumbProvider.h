@@ -36,7 +36,7 @@
 #include <QString>
 #include <QObject>
 
-class QPixmap;
+QT_FORWARD_DECLARE_CLASS(QPixmap)
 
 struct SBreadCrumb
 {

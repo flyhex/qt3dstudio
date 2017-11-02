@@ -241,7 +241,7 @@ protected:
     CPaletteManager *m_PaletteManager = nullptr;
     bool m_PlaybackFlag = false;
 
-    QScopedPointer<Ui::MainFrame> m_ui;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
     QTimer m_playbackTimer;
 };
 

@@ -38,9 +38,11 @@
 
 #include <QDialog>
 
+QT_BEGIN_NAMESPACE
 namespace Ui {
 class InterpolationDlg;
 }
+QT_END_NAMESPACE
 
 //==============================================================================
 /**
@@ -60,7 +62,7 @@ public:
     int easeOut() const;
 
 protected:
-    Ui::InterpolationDlg* m_ui = nullptr;
+    QT_PREPEND_NAMESPACE(Ui::InterpolationDlg) *m_ui = nullptr;
 };
 
 #endif // INCLUDED_INTERPOLATION_DLG

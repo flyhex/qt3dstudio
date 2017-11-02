@@ -42,10 +42,12 @@ class CStudioProjectSettingsPage;
 class CStudioPreferencesPropSheet;
 class CStudioApp;
 
+QT_BEGIN_NAMESPACE
 namespace Ui
 {
     class StudioPreferencesPropSheet;
 }
+QT_END_NAMESPACE
 
 class CStudioPreferencesPropPage : public QWidget
 {
@@ -94,7 +96,7 @@ protected:
     void reject() override;
 
 private:
-    QScopedPointer<Ui::StudioPreferencesPropSheet> m_ui;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioPreferencesPropSheet)> m_ui;
 };
 
 /////////////////////////////////////////////////////////////////////////////
