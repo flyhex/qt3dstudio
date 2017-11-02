@@ -57,7 +57,6 @@
 #include "Qt3DSPluginDLL.h"
 #include "Qt3DSRenderPlugin.h"
 #include "foundation/FileTools.h"
-#include "foundation/Qt3DSTime.h"
 #include "Qt3DSStateVisualBindingContext.h"
 #include "Qt3DSStateVisualBindingContextValues.h"
 #include "Qt3DSStateScriptContext.h"

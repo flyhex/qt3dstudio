@@ -197,7 +197,7 @@ void PerfLogSetStringData(const char *)
 
 Q3DStudio::Qt3DSFNDTimer g_GlobalTimeProvider;
 
-__int64 GetTimeUST()
+qint64 GetTimeUST()
 {
     // this needs to be nano seconds
     Q3DStudio::ITimeProvider &theTimer = g_GlobalTimeProvider;
