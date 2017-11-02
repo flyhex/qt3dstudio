@@ -541,9 +541,10 @@ CRct CTimelineControl::GetVisibleTreeLayoutArea()
     return m_TreeLayout->GetVisibleArea();
 }
 
-void CTimelineControl::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
+void CTimelineControl::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
+                                                       QWidget *actionParent)
 {
-    m_TimelineLayout->RegisterGlobalKeyboardShortcuts(inShortcutHandler);
+    m_TimelineLayout->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
 }
 
 //=============================================================================

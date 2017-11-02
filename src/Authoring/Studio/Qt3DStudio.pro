@@ -358,6 +358,7 @@ SOURCES += \
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
+    _Win/Application/StudioApp.h \
     Controls/TextEditContextMenu.h \
     Palettes/Action/ActionModel.h \
     Palettes/Action/ActionContextMenu.h \
@@ -379,6 +380,7 @@ HEADERS += \
     Palettes/Timeline/Bindings/ITimelineItemProperty.h \
     Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Palettes/Timeline/Bindings/ITimelineTimebar.h \
+    Palettes/Timeline/TimelineTimelineLayout.h \
     Palettes/Slide/SlideContextMenu.h \
     Controls/ClickableLabel.h \
     PreviewHelper.h \

@@ -54,6 +54,8 @@ class CFrameWnd;
 
 #include "Qt3DSString.h"
 
+QT_FORWARD_DECLARE_CLASS(QWidget)
+
 //==============================================================================
 //	Class
 //==============================================================================
@@ -69,7 +71,7 @@ public:
     void DestroyViews();
 
     // Keyboard
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
     // Main Frame
     CMainFrame *GetMainFrame(); // ONLY THE APP SHOULD USE THIS FUNCTION- ABSOLUTELY NO ONE ELSE!!!!

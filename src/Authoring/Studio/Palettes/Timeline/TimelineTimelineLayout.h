@@ -65,11 +65,14 @@ class CPlayhead;
 /**
  * Right-hand pane of the Timeline containing timebars, keyframes, etc.
  */
-class CTimelineTimelineLayout : public CControl,
+class CTimelineTimelineLayout : public QObject,
+                                public CControl,
                                 public CScalingListener,
                                 public CScrollListener,
                                 public ISnappingListProvider
 {
+    Q_OBJECT
+
     typedef std::vector<CTimelineRow *> TTimelineRowList;
     typedef std::map<qt3dsdm::Qt3DSDMSlideHandle, double> TSlideRatioMap;
 
@@ -112,7 +115,7 @@ public:
     void OnTimeMeasureMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags);
     long GetViewTimeOffset();
     void RecalcLayout();
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     void SetTimeRatio(double inTimeRatio);
     void OnTimelineLayoutChanged();
 

@@ -111,10 +111,10 @@ void CViews::DestroyViews()
  * view.
  * @param inHotKeys the handler to register on.
  */
-void CViews::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys)
+void CViews::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
     if (m_MainFrame)
-        m_MainFrame->RegisterGlobalKeyboardShortcuts(inHotKeys);
+        m_MainFrame->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
 //=============================================================================

@@ -90,6 +90,8 @@ class ISignalConnection;
 class CmdDataModel;
 }
 
+QT_FORWARD_DECLARE_CLASS(QWidget)
+
 struct SDocumentDataModelListener;
 
 namespace std {
@@ -143,9 +145,9 @@ struct SubPresentationRecord
 //	CDoc Class
 //==============================================================================
 
-class CDoc : public IDoc, public ICmdStackModifier
+class CDoc : public QObject, public IDoc, public ICmdStackModifier
 {
-
+    Q_OBJECT
 public:
     friend struct SDocumentDataModelListener;
     CDoc(CCore *inCore);
@@ -239,8 +241,7 @@ public:
 
     bool VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset);
 
-    void DeselectAllItems(bool inSendEvent);
-    void DeselectAllItems() { DeselectAllItems(true); }
+    void DeselectAllItems(bool inSendEvent = true);
 
     qt3dsdm::Qt3DSDMInstanceHandle GetActiveLayer();
     void SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance);
@@ -251,7 +252,7 @@ public:
     bool IsPlaying();
     long GetCurrentClientTime();
 
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
     qt3dsdm::Qt3DSDMInstanceHandle GetSceneInstance() { return m_SceneInstance; }
 
@@ -411,7 +412,7 @@ protected:
     //==========================================================================
 
     long m_PlayMode; ///< This tracks whether we're playing a client presentation or not.
-    Q3DStudio::SSelectedValue m_SelectedObject; ///< DIE USELESS COMMENTS DIE.
+    Q3DStudio::SSelectedValue m_SelectedObject;
     long m_CurrentViewTime; ///< The current time that is displayed by the playhead, not necessarily
                             ///the client time.
     qt3dsdm::Qt3DSDMInstanceHandle m_SceneInstance; ///< Pointer to the root level Scene object.
@@ -445,6 +446,7 @@ protected:
     std::shared_ptr<qt3dsdm::CmdDataModel> m_OpenTransaction;
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;
     Q3DStudio::SSelectedValue m_SelectedValue;
+    bool m_nudging;
 
     void GetOrUpdateFileList(std::vector<Q3DStudio::CString> &ioMyList,
                              std::vector<Q3DStudio::CString> &outResult,

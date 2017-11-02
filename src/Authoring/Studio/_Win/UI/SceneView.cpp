@@ -485,10 +485,6 @@ bool CSceneView::GetKeyStatus()
 //=============================================================================
 void CSceneView::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
 {
-    inShortcutHandler->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::OnToolGroupSelection), 0, Qt::Key_A);
-    inShortcutHandler->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::OnToolItemSelection), 0, Qt::Key_V);
     inShortcutHandler->RegisterKeyDownEvent(
                 new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
                 Qt::ControlModifier, Qt::Key_Control);

@@ -80,6 +80,9 @@
     \li Paste
     \li \c{Ctrl + V}
   \row
+    \li Paste to Master Slide
+    \li \c{Ctrl + Alt + V}
+  \row
     \li Duplicate Object
     \li \c{Ctrl + D}
   \row
@@ -289,10 +292,10 @@
     \li \c{,}
   \row
     \li Move Playhead to next medium tick mark
-    \li \c{Shift + >}
+    \li \c{Shift + .}
   \row
     \li Move Playhead to previous medium tick mark
-    \li \c{Shift + <}
+    \li \c{Shift + ,}
 \endtable
 
 \section1 Inspector Palette

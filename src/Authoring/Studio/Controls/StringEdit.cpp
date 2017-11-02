@@ -46,16 +46,6 @@
 CStringEdit::CStringEdit()
     : m_AutoSize(false)
 {
-    // StringEdit is going to have to handle its own RevertText.
-    // This can't be done in TextEdit because FloatEdit ( VectorEdit, etc ) are using the command
-    // stack for undo/redo
-    // StringEdit doesn't have command stack set until you hit enter or lose focus.
-    // We can't make CTextEdit::RegisterCommands a virtual function since its being called in the
-    // constructor,
-    // therefore this is a pretty lame way to register for a hotkey.
-    m_CommandHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStringEdit>(this, &CStringEdit::RevertText),
-        Qt::ControlModifier, Qt::Key_Z);
 }
 
 //==============================================================================
@@ -206,6 +196,11 @@ bool CStringEdit::HandleSpecialChar(unsigned int inChar, Qt::KeyboardModifiers i
 {
     bool theMessageWasHandled = false;
 
+    // StringEdit is going to have to handle its own RevertText.
+    // This can't be done in TextEdit because FloatEdit ( VectorEdit, etc ) are using the command
+    // stack for undo/redo.
+    // StringEdit doesn't have command stack set until you hit enter or lose focus.
+
     switch (inChar) {
     // Escape and Ctrl+Z both do basically the same thing for StringEdits,
     // They are special cased in TextEditInPlace though.
@@ -213,7 +208,12 @@ bool CStringEdit::HandleSpecialChar(unsigned int inChar, Qt::KeyboardModifiers i
         RevertText();
         theMessageWasHandled = true;
         break;
-
+    case Qt::Key_Z:
+        if (inFlags & Qt::ControlModifier) {
+            RevertText();
+            theMessageWasHandled = false;
+        }
+        break;
     default:
         theMessageWasHandled = CTextEdit::HandleSpecialChar(inChar, inFlags);
     }

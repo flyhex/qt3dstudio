@@ -85,7 +85,7 @@ CTextEdit::CTextEdit()
     , m_BackgroundColorFocus(CStudioPreferences::GetTextBoxBGColorWithFocus())
     , m_BoldText(false)
     , m_ScrollAmount(0, 0)
-    , m_CommandHandler(new CHotKeys())
+    , m_CommandHandler(g_StudioApp.GetCore()->GetHotKeys())
 {
     ADDTO_OBJECT_COUNTER(CTextEdit)
 
@@ -99,7 +99,6 @@ CTextEdit::CTextEdit()
 
     m_TextColor = CStudioPreferences::GetRulerTickColor();
 
-    RegisterCommands();
 }
 
 //==============================================================================
@@ -114,7 +113,6 @@ CTextEdit::~CTextEdit()
 
     // Added to help debug freeing memory allocated from inside a DLL
     m_DisplayString.Clear();
-    delete m_CommandHandler;
 }
 
 //==============================================================================
@@ -451,8 +449,8 @@ bool CTextEdit::OnKeyDown(unsigned int inChar, Qt::KeyboardModifiers inFlags)
 bool CTextEdit::HandleSpecialChar(unsigned int inChar, Qt::KeyboardModifiers inFlags)
 {
     bool theHandledFlag = true;
-    bool isShiftDown = inFlags & CHotKeys::MODIFIER_SHIFT ? true : false;
-    // bool isControlDown = inFlags & CHotKeys::MODIFIER_CONTROL ? true : false;
+    bool isShiftDown = inFlags & Qt::ShiftModifier ? true : false;
+    bool isControlDown = inFlags & Qt::ControlModifier ? true : false;
 
     switch (inChar) {
     case Qt::Key_Left:
@@ -497,7 +495,30 @@ bool CTextEdit::HandleSpecialChar(unsigned int inChar, Qt::KeyboardModifiers inF
     case Qt::Key_Return:
         EnterText(true);
         break;
-
+    case Qt::Key_C:
+        if (isControlDown)
+            CopyText();
+        else
+            theHandledFlag = false;
+        break;
+    case Qt::Key_V:
+        if (isControlDown)
+            PasteText();
+        else
+            theHandledFlag = false;
+        break;
+    case Qt::Key_X:
+        if (isControlDown)
+            CutText();
+        else
+            theHandledFlag = false;
+        break;
+    case Qt::Key_A:
+        if (isControlDown)
+            SelectAllText();
+        else
+            theHandledFlag = false;
+        break;
     default:
         theHandledFlag = false;
         break;
@@ -1268,25 +1289,6 @@ void CTextEdit::SetPrefix(const Q3DStudio::CString &inPrefix)
 void CTextEdit::SetPostfix(const Q3DStudio::CString &inPostfix)
 {
     m_Postfix = inPostfix;
-}
-
-//==============================================================================
-/**
- * Handles the hotkey commands
- */
-
-void CTextEdit::RegisterCommands()
-{
-    m_CommandHandler->RegisterKeyEvent(new CDynHotKeyConsumer<CTextEdit>(this, &CTextEdit::CopyText),
-                                       Qt::ControlModifier, Qt::Key_C);
-    m_CommandHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CTextEdit>(this, &CTextEdit::PasteText),  Qt::ControlModifier,
-        Qt::Key_V);
-    m_CommandHandler->RegisterKeyEvent(new CDynHotKeyConsumer<CTextEdit>(this, &CTextEdit::CutText),
-                                       Qt::ControlModifier, Qt::Key_X);
-    m_CommandHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CTextEdit>(this, &CTextEdit::SelectAllText),
-         Qt::ControlModifier, Qt::Key_A);
 }
 
 //==============================================================================

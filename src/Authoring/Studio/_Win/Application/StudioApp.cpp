@@ -43,6 +43,7 @@
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qurl.h>
 #include <QtGui/qopenglcontext.h>
+#include <QtWidgets/qaction.h>
 
 int main(int argc, char *argv[])
 {
@@ -258,7 +259,7 @@ void CStudioApp::PerformShutdown()
  * This creates the all the views, then returns if everything
  * was successful.
  */
-BOOL CStudioApp::InitInstance(int argc, char* argv[])
+bool CStudioApp::InitInstance(int argc, char* argv[])
 {
     QApplication::setOrganizationName("The Qt Company");
     QApplication::setOrganizationDomain("qt.io");
@@ -295,7 +296,7 @@ BOOL CStudioApp::InitInstance(int argc, char* argv[])
     if (m_CmdLineParser.IsRunUnitTests()) {
         {
             RunCmdLineTests(m_CmdLineParser.GetFilename());
-            return FALSE; // return false so we bail from loading the app
+            return false; // return false so we bail from loading the app
         }
     }
 
@@ -341,7 +342,7 @@ BOOL CStudioApp::InitInstance(int argc, char* argv[])
     m_Core->GetDispatch()->AddAppStatusListener(this);
     m_Core->GetDispatch()->AddCoreAsynchronousEventListener(this);
 
-    return TRUE;
+    return true;
 }
 
 //=============================================================================
@@ -726,7 +727,7 @@ void CStudioApp::InitCore()
         m_SplashPalette = nullptr;
     }
 
-    RegisterGlobalKeyboardShortcuts(m_Core->GetHotKeys());
+    RegisterGlobalKeyboardShortcuts(m_Core->GetHotKeys(), m_pMainWnd);
     m_Core->GetDispatch()->AddPresentationChangeListener(this);
 }
 
@@ -1364,47 +1365,36 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
     return theInspectableBase;
 }
 
-void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
+void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
+                                                 QWidget *actionParent)
 {
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::AdvanceTime), 0, Qt::Key_Period);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::ReduceTime), 0, Qt::Key_Comma);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::AdvanceUltraBigTime),
-        Qt::ShiftModifier, Qt::Key_Greater);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::ReduceUltraBigTime),
-        Qt::ShiftModifier, Qt::Key_Less);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::OnToggleAutosetKeyframes), 0, Qt::Key_K);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::OnSaveAs),
-        Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_S);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::OnSave), Qt::ControlModifier,
-        Qt::Key_S);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::OnSaveCopy),
-        Qt::ControlModifier | Qt::AltModifier, Qt::Key_S);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::OnFileNew),
-        Qt::ControlModifier, Qt::Key_N);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::OnFileOpen),
-        Qt::ControlModifier, Qt::Key_O);
+    m_Core->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
+
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Period),
+                        CStudioApp::AdvanceTime);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Comma),
+                        CStudioApp::ReduceTime);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ShiftModifier | Qt::Key_Period),
+                        CStudioApp::AdvanceUltraBigTime);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ShiftModifier | Qt::Key_Comma),
+                        CStudioApp::ReduceUltraBigTime);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Return),
+                        CStudioApp::PlaybackToggle);
+
     inShortcutHandler->RegisterKeyUpEvent(
         new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackStop), 0,
         Qt::Key_Space);
     inShortcutHandler->RegisterKeyDownEvent(
         new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackPlay), 0,
         Qt::Key_Space);
-    inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackToggle), 0,
-        Qt::Key_Return);
 
     if (m_Views)
-        m_Views->RegisterGlobalKeyboardShortcuts(inShortcutHandler);
+        m_Views->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
 }
 
 //=============================================================================

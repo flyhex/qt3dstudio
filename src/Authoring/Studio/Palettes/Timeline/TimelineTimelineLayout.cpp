@@ -47,6 +47,7 @@
 #include "ControlData.h"
 #include "HotKeys.h"
 #include "foundation/Qt3DSLogging.h"
+#include <QtWidgets/qaction.h>
 
 //=============================================================================
 // Defines
@@ -643,20 +644,17 @@ CTimeMeasure *CTimelineTimelineLayout::GetTimeMeasure()
  * scope.
  * @param inShortcutHandler the global shortcut handler.
  */
-void CTimelineTimelineLayout::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
+void CTimelineTimelineLayout::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
+                                                              QWidget *actionParent)
 {
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CTimelineTimelineLayout>(
-                                                this, &CTimelineTimelineLayout::OnScalingZoomIn),
-                                            0, Qt::Key_Plus);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CTimelineTimelineLayout>(
-                                                this, &CTimelineTimelineLayout::OnScalingZoomOut),
-                                            0, Qt::Key_Minus);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CTimelineTimelineLayout>(
-                                                this, &CTimelineTimelineLayout::OnScalingZoomIn),
-                                            Qt::KeypadModifier, Qt::Key_Plus);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CTimelineTimelineLayout>(
-                                                this, &CTimelineTimelineLayout::OnScalingZoomOut),
-                                            Qt::KeypadModifier, Qt::Key_Minus);
+    Q_UNUSED(inShortcutHandler)
+
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Plus),
+                        CTimelineTimelineLayout::OnScalingZoomIn);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Minus),
+                        CTimelineTimelineLayout::OnScalingZoomOut);
 }
 
 //=============================================================================

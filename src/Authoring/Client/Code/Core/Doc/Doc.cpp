@@ -84,6 +84,8 @@
 #include "foundation/Qt3DSLogging.h"
 
 #include <QtCore/qfileinfo.h>
+#include <QtWidgets/qaction.h>
+#include <QtWidgets/qwidget.h>
 
 using std::ref;
 using std::shared_ptr;
@@ -149,17 +151,18 @@ CDoc::CDoc(CCore *inCore)
     : m_PlayMode(PLAYMODE_STOP)
     , m_CurrentViewTime(0)
     , m_ActiveLayer(0)
-    , m_Core(NULL)
+    , m_Core(nullptr)
     , m_IsModified(false)
     , m_IsTemporary(true)
     , m_DocumentPath("")
-    , m_DataManager(NULL)
-    , m_KeyframesManager(NULL)
-    , m_DataModelObjectRefHelper(NULL)
+    , m_DataManager(nullptr)
+    , m_KeyframesManager(nullptr)
+    , m_DataModelObjectRefHelper(nullptr)
     , m_AssetGraph(TAssetGraphPtr())
     , m_TransactionDepth(0)
-    , m_RenderContext(NULL)
-    , m_WindowHandle(NULL)
+    , m_nudging(false)
+    , m_RenderContext(nullptr)
+    , m_WindowHandle(nullptr)
 {
     ADDTO_OBJECT_COUNTER(CDoc)
 
@@ -1940,33 +1943,15 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
  * scope.
  * @param inShortcutHandler the global shortcut handler.
  */
-void CDoc::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
+void CDoc::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Backspace) << QKeySequence(Qt::Key_Delete),
+                        CDoc::DeleteSelectedItems);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_V),
+                        CDoc::HandleMasterPaste);
 
-    inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CDoc>(this, &CDoc::DeleteSelectedItems), 0, Qt::Key_Delete);
-    inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CDoc>(this, &CDoc::DeleteSelectedItems), 0, Qt::Key_Backspace);
-
-    inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CDoc>(this, &CDoc::SetChangedKeyframes), 0, Qt::Key_F6);
-
-    inShortcutHandler->RegisterKeyEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::DeselectAllItems),
-                                        Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_A);
-    inShortcutHandler->RegisterKeyEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::HandlePaste),
-                                        Qt::ControlModifier, Qt::Key_V);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CDoc>(this, &CDoc::HandleMasterPaste),
-        Qt::ControlModifier | Qt::AltModifier, Qt::Key_V);
-    inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CDoc>(this, &CDoc::HandleDuplicateCommand),
-        Qt::ControlModifier, Qt::Key_D);
-    inShortcutHandler->RegisterKeyEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::HandleCopy),
-                                        Qt::ControlModifier, Qt::Key_C);
-    inShortcutHandler->RegisterKeyEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::HandleCut),
-                                        Qt::ControlModifier, Qt::Key_X);
-
-    // Move nudge
     inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
                                             0, Qt::Key_Up);
     inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
@@ -2423,6 +2408,9 @@ bool CDoc::OnNudgeKey(int inChar, int inRepeatCount, Qt::KeyboardModifiers inFla
 {
     Q_UNUSED(inRepeatCount);
 
+    if (!GetSelectedInstance().GetHandleValue())
+        return false;
+
     bool theHandledFlag = true;
     ENudgeDirection theDir = NUDGE_NEG_X;
     switch (inChar) {
@@ -2464,19 +2452,25 @@ bool CDoc::OnNudgeKey(int inChar, int inRepeatCount, Qt::KeyboardModifiers inFla
     // TODO: need to know the tool mode
     // Previously we query m_StudioApp->GetToolMode( ) but this is not possible anymore.
     // Temporarily we use the keyboard to decide
-    long theToolMode = STUDIO_TOOLMODE_MOVE;
-    if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-        theToolMode = STUDIO_TOOLMODE_ROTATE;
-    else if (CHotKeys::IsKeyDown(Qt::AltModifier))
-        theToolMode = STUDIO_TOOLMODE_SCALE;
-    m_Core->GetDispatch()->FireOnNudge(theDir, theToolMode, inFlags);
+    if (theHandledFlag) {
+        long theToolMode = STUDIO_TOOLMODE_MOVE;
+        if (CHotKeys::IsKeyDown(Qt::ControlModifier))
+            theToolMode = STUDIO_TOOLMODE_ROTATE;
+        else if (CHotKeys::IsKeyDown(Qt::AltModifier))
+            theToolMode = STUDIO_TOOLMODE_SCALE;
+        m_nudging = true;
+        m_Core->GetDispatch()->FireOnNudge(theDir, theToolMode, inFlags);
+    }
 
     return theHandledFlag;
 }
 
 void CDoc::OnNudgeDone()
 {
-    m_Core->GetDispatch()->FireOnNudgeDone();
+    if (m_nudging) {
+        m_nudging = false;
+        m_Core->GetDispatch()->FireOnNudgeDone();
+    }
 }
 
 void CDoc::DeselectAllKeyframes()

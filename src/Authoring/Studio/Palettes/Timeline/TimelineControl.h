@@ -121,7 +121,7 @@ public:
     CInsertionOverlay *GetInsertionOverlay();
     CRct GetVisibleTreeLayoutArea();
 
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
     CTimelineTranslationManager *GetTranslationManager() const { return m_TranslationManager; }
 

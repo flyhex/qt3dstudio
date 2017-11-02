@@ -43,7 +43,7 @@
 #include "DispatchListeners.h"
 #include "Qt3DSDMHandles.h"
 
-#include <QApplication>
+#include <QtWidgets/qapplication.h>
 
 namespace Q3DStudio {
 class IInternalDirectoryWatchingSystem;
@@ -79,18 +79,20 @@ class CMainFrame;
 enum EStudioObjectType;
 struct SubPresentationRecord;
 
-class CStudioApp : public CCoreAsynchronousEventListener,
+class CStudioApp : public QObject,
+        public CCoreAsynchronousEventListener,
         public CAppStatusListener,
         public CFailListener,
         public CPresentationChangeListener // to setup auto set keyframes
 {
+    Q_OBJECT
 public:
     CStudioApp();
     virtual ~CStudioApp();
 
     // Overrides
 public:
-    virtual BOOL InitInstance(int argc, char *argv[]);
+    virtual bool InitInstance(int argc, char *argv[]);
     virtual int ExitInstance();
     virtual int Run();
 
@@ -193,7 +195,7 @@ public:
     void ReduceUltraBigTime();
     void PlaybackToggle();
     CInspectableBase *GetInspectableFromSelectable(Q3DStudio::SSelectedValue inSelectable);
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     bool OnSave();
     bool OnSaveAs();
     bool OnSaveCopy();

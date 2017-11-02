@@ -128,5 +128,6 @@ SOURCES += \
 
 HEADERS += \
     ../Client/Code/Core/Utility/q3dsdirsystem.h \
-    ../Client/Code/Core/Utility/q3dsdirwatcher.h
-
+    ../Client/Code/Core/Utility/q3dsdirwatcher.h \
+    ../Client/Code/Core/Doc/Doc.h \
+    ../Client/Code/Core/Core/Core.h

@@ -43,11 +43,12 @@
 #include "Studio/Controls/TextEdit.h"
 #include "Studio/Controls/WidgetControl.h"
 
-#include <QGuiApplication>
-#include <QKeyEvent>
-#include <QtQuickWidgets/QQuickWidget>
-#include <QtQuick/QQuickWindow>
-#include <QtQuick/QQuickItem>
+#include <QtGui/qguiapplication.h>
+#include <QtGui/qevent.h>
+#include <QtQuickWidgets/qquickwidget.h>
+#include <QtQuick/qquickwindow.h>
+#include <QtQuick/qquickitem.h>
+#include <QtWidgets/qcombobox.h>
 
 class KeyEventFilter : public QObject
 {
@@ -60,8 +61,33 @@ public:
 
     bool eventFilter(QObject *watched, QEvent *event) override
     {
+        const QEvent::Type eventType = event->type();
+        if (eventType != QEvent::ShortcutOverride
+                && eventType != QEvent::KeyPress
+                && eventType != QEvent::KeyRelease) {
+            return false;
+        }
+
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+
+        static int counter = 0;
+        if (eventType == QEvent::ShortcutOverride) {
+            // If we are in text control, eat all plain and shift-adjusted hotkeys
+            // We want to also skip editing related global hotkeys: CTRL-A/X/C/V/Z
+            const bool normalChar = !(ke->modifiers() && ke->modifiers() != Qt::ShiftModifier);
+            const bool editShortcut = (ke->modifiers() == Qt::ControlModifier)
+                    && (ke->key() == Qt::Key_C || ke->key() == Qt::Key_V || ke->key() == Qt::Key_Z
+                        || ke->key() == Qt::Key_X || ke->key() == Qt::Key_A);
+            if ((normalChar || editShortcut) && m_hotkeys->isFocusOnTextEditControl()) {
+                ke->accept();
+                return true;
+            }
+        }
+
         if (qobject_cast<CSceneView *>(watched) == nullptr
-            && qobject_cast<CMainFrame *>(watched) == nullptr ) {
+                && qobject_cast<CMainFrame *>(watched) == nullptr
+                && qobject_cast<QComboBox *>(watched) == nullptr
+                && qobject_cast<CPlayerContainerWnd *>(watched) == nullptr) {
             return false;
         }
 
@@ -74,29 +100,22 @@ public:
                 if (superClass && QByteArray(superClass->className()) == "QQuickTextField")
                     return false;
             }
-
         }
 
         //ignore global shortcuts if we are in an "old" style textedit
         if (m_hotkeys->isFocusOnTextEditControl())
             return false;
 
-        switch (event->type()) {
+        switch (eventType) {
         case QEvent::ShortcutOverride:
         case QEvent::KeyPress: {
-            QKeyEvent *ke = static_cast<QKeyEvent *>(event);
-            // We are not in a text field, so we can
-            // ignore auto-repeated key presses as it breaks
-            // timeline animation on/off switching by hotkey
-            if (!ke->isAutoRepeat()) {
-                return m_hotkeys->OnKeyDown(ke->key(), ke->count(), ke->modifiers())
+                bool success = m_hotkeys->OnKeyDown(ke->key(), ke->count(), ke->modifiers())
                         || m_hotkeys->OnChar(ke->key(), ke->count(), ke->modifiers());
-            } else {
-                return true;
-            }
+                if (success)
+                    ke->accept();
+                return success;
         }
         case QEvent::KeyRelease: {
-            QKeyEvent *ke = static_cast<QKeyEvent *>(event);
             // We are not in a text field, so we can
             // ignore auto-repeated key releases as it breaks
             // timeline animation on/off switching by hotkey

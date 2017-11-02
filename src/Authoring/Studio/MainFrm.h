@@ -86,7 +86,7 @@ public:
     void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) override;
     void OnDocumentPathChanged(const Qt3DSFile &inNewPath) override;
 
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     void RecheckSizingMode();
 
     void SaveLayout();
@@ -180,7 +180,6 @@ public:
     void OnHelpVisitQt();
     void OnHelpOpenTutorial();
     void OnHelpBehaviorReference();
-    void OnOpenMostRecentlyUsedDocument();
 
     void OnViewAction();
     void OnUpdateViewAction();

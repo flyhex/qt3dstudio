@@ -43,6 +43,15 @@
 
 #include <QtGlobal>
 
+// New QAction based shortcuts can be added with this macro
+#define ADD_GLOBAL_SHORTCUT(actionParent, keyList, handlerFunc) \
+{ \
+    QAction *action = new QAction(QStringLiteral(#handlerFunc), actionParent); \
+    QObject::connect(action, &QAction::triggered, this, &handlerFunc); \
+    action->setShortcuts(QList<QKeySequence>() << keyList); \
+    actionParent->addAction(action); \
+}
+
 class KeyEventFilter;
 
 //=============================================================================

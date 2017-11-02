@@ -45,8 +45,11 @@ namespace Q3DStudio {
 class CFilePath;
 }
 
-class CCore : public CModificationListener, public CPresentationChangeListener
+QT_FORWARD_DECLARE_CLASS(QWidget)
+
+class CCore : public QObject, public CModificationListener, public CPresentationChangeListener
 {
+    Q_OBJECT
 protected: // Members
     CDoc *m_Doc;
     CDispatch *m_Dispatch;
@@ -71,7 +74,7 @@ public: // Methods
     Q3DStudio::CBuildConfigurations &GetBuildConfigurations();
 
     bool LoadBuildConfigurations();
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
     void OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory);
     void OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy = false);

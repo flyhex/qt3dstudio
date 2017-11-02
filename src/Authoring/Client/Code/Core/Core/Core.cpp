@@ -42,6 +42,8 @@
 #include "Cmd.h"
 #include "StudioPreferences.h"
 #include "Qt3DSStateApplication.h"
+#include <QtWidgets/qaction.h>
+#include <QtWidgets/qwidget.h>
 
 //==============================================================================
 // Construction
@@ -72,7 +74,6 @@ CCore::~CCore()
 void CCore::Initialize()
 {
     LoadBuildConfigurations();
-    RegisterGlobalKeyboardShortcuts(m_HotKeys);
 }
 
 CDoc *CCore::GetDoc() const
@@ -176,35 +177,25 @@ void CCore::InitAndValidateBuildConfiguration()
  * Call by the mainframe to register the keyboard settings.
  * @param inShortcutHandler the handler for the keyboard actions.
  */
-void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
+void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
-    m_Doc->RegisterGlobalKeyboardShortcuts(inShortcutHandler);
+    m_Doc->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
 
-    inShortcutHandler->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CCmdStack>(m_CmdStack, &CCmdStack::Undo), Qt::ControlModifier,
-                Qt::Key_Z);
-    inShortcutHandler->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CCmdStack>(m_CmdStack, &CCmdStack::Redo),
-                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_Z);
-    inShortcutHandler->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CCmdStack>(m_CmdStack, &CCmdStack::Redo), Qt::ControlModifier,
-                Qt::Key_Y);
-
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CCore>(this, &CCore::DumpCommandQueue), Qt::ControlModifier,
-                Qt::Key_F6);
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CCore>(this, &CCore::SetTimebarStartAffectsChildren), 0,
-                Qt::Key_BracketLeft);
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CCore>(this, &CCore::SetTimebarEndAffectsChildren), 0,
-                Qt::Key_BracketRight);
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CCore>(this, &CCore::SetTimebarStart), Qt::ControlModifier,
-                Qt::Key_BracketLeft);
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CCore>(this, &CCore::SetTimebarEnd), Qt::ControlModifier,
-                Qt::Key_BracketRight);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ControlModifier | Qt::Key_F6),
+                        CCore::DumpCommandQueue);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_BracketLeft),
+                        CCore::SetTimebarStartAffectsChildren);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_BracketRight),
+                        CCore::SetTimebarEndAffectsChildren);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ControlModifier | Qt::Key_BracketLeft),
+                        CCore::SetTimebarStart);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ControlModifier | Qt::Key_BracketRight),
+                        CCore::SetTimebarEnd);
 }
 
 void CCore::GetCreateDirectoryFileName(const Qt3DSFile &inDocument,

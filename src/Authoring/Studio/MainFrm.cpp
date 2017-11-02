@@ -1118,65 +1118,19 @@ void CMainFrame::OnUpdatePlaybackStop()
  *	Registers all the keys it will need for shortcuts, also telsl children to register theirs
  *  @param inHotKeys the hotkeys to with which to register
  */
-void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys)
+void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnToolMove),
-                                0, Qt::Key_W);
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnToolRotate),
-                                0, Qt::Key_R);
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnToolScale),
-                                0, Qt::Key_E);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewBoundingBoxes),
-                Qt::ControlModifier, Qt::Key_B);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewPivotPoint),
-                Qt::ControlModifier | Qt::AltModifier, Qt::Key_P);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnEditPresentationPreferences),
-                Qt::ControlModifier, Qt::Key_P);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnOpenMostRecentlyUsedDocument),
-                Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier, Qt::Key_P);
-
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowAction),
-                                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_A);
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowBasic),
-                                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_B);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowInspector),
-                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_I);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowProject),
-                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_P);
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowSlide),
-                                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_D);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnShowTimeline),
-                Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_T);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnViewGuidesRulers),
-                Qt::ControlModifier, Qt::Key_Semicolon);
-    inHotKeys->RegisterKeyEvent(new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnLockGuides),
-                                Qt::ControlModifier | Qt::AltModifier, Qt::Key_Semicolon);
-
 #ifdef INCLUDE_EDIT_CAMERA
-    inHotKeys->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::HandleEditViewFillModeKey), 0,
-                Qt::Key_F3);
-    inHotKeys->RegisterKeyEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::HandleEditCameraZoomExtent), 0, Qt::Key_F);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_F3),
+                        CMainFrame::HandleEditViewFillModeKey);
 #endif
-
-    inHotKeys->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CMainFrame>(this, &CMainFrame::OnPlaybackPreview), 0,
-                Qt::Key_F5);
 
     m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);
 
     CTimelineControl *theTimelineControl = GetTimelineControl();
     if (theTimelineControl)
-        theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys);
+        theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
 //==============================================================================
@@ -1877,17 +1831,6 @@ void CMainFrame::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
 
     if (inNewPath.Exists())
         m_RecentItems->AddRecentItem(inNewPath);
-}
-
-//==============================================================================
-/**
- *	Secret hot-key compatibility with Aftereffects muscle memory
- */
-void CMainFrame::OnOpenMostRecentlyUsedDocument()
-{
-    Qt3DSFile theDocument = m_RecentItems->GetItem(0);
-    if (theDocument.Exists())
-        g_StudioApp.OnLoadDocument(theDocument);
 }
 
 void CMainFrame::OnShowSlide()
