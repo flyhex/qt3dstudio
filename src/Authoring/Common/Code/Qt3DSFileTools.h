@@ -88,12 +88,10 @@ public:
     CFilePath(const QString &string)
         : CString(string.toStdWString().c_str())
     {
-        Normalize();
     }
     CFilePath(const CFilePath &szString)
         : CString(szString)
     {
-        Normalize();
     }
 
     const CFilePath &operator=(const CFilePath &strSrc);

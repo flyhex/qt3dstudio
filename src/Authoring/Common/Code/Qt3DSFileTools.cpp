@@ -583,7 +583,11 @@ SFileData CFilePath::GetFileData() const
 
 CFilePath CFilePath::GetUserApplicationDirectory()
 {
-    return CFilePath(CString::fromQString(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))));
+    CFilePath path = CFilePath(QDir::toNativeSeparators(
+                                   QStandardPaths::writableLocation(
+                                       QStandardPaths::AppLocalDataLocation)));
+    path.Normalize();
+    return path;
 }
 
 SFile::SFile(const QSharedPointer<QFile> &of, const CFilePath &path)
