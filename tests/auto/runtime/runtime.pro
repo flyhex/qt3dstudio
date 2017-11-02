@@ -6,7 +6,6 @@ TARGET = tst_qt3dsruntime
 QT += testlib gui
 RESOURCES += \
     runtime.qrc \
-    $$PWD/../../../src/Runtime/res.qrc \
     $$PWD/../../../src/Runtime/testres.qrc \
     $$PWD/../../../src/Runtime/platformres.qrc
 
