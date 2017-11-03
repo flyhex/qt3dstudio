@@ -61,7 +61,6 @@ public:
     virtual ~CBufferedInputStream();
 
     long Read(void *inBuffer, long inBufferLength) override;
-    virtual long Read(std::wstringstream &inStringStream);
     void Close() override;
     bool IsValid() override;
     virtual void InsertIntoBuffer(void *inData, long inDataLength);

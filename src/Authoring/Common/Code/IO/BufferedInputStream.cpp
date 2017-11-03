@@ -98,24 +98,6 @@ long CBufferedInputStream::Read(void *inBuffer, long inBufferLength)
     return theReadCount;
 }
 
-long CBufferedInputStream::Read(std::wstringstream &inStringStream)
-{
-    std::string theStreamData;
-    theStreamData.resize(m_BufferLength);
-    Read(&theStreamData[0], m_BufferLength);
-#ifdef KDAB_TEMPORARILY_REMOVED
-    long theDataLength = ::MultiByteToWideChar(CP_UTF8, 0, theStreamData.c_str(), -1, 0, 0);
-    wchar_t *theWideBuffer = new wchar_t[theDataLength];
-    ::MultiByteToWideChar(CP_UTF8, 0, theStreamData.c_str(), -1, theWideBuffer, theDataLength);
-
-    inStringStream.write(&theWideBuffer[0], theDataLength);
-    delete[] theWideBuffer;
-
-    return m_BufferLength;
-#endif
-    return 0;
-}
-
 void CBufferedInputStream::Close()
 {
     if (m_InputStream)
