@@ -33,11 +33,13 @@ import QtQuick.Window 2.2
 
 ComboBox {
     id: control
+
+    property bool ignoreHotkeys: true
+
     Layout.preferredHeight: _controlBaseHeight
     Layout.preferredWidth: _valueWidth
     topPadding: 0
     bottomPadding: 0
-
     delegate: ItemDelegate {
         id: itemDelegate
 

@@ -1124,6 +1124,11 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_F3),
                         CMainFrame::HandleEditViewFillModeKey);
+    // Default undo shortcut is Ctrl-Y, which is specified in main form. Let's add the common
+    // alternate shortcut for redo, CTRL-SHIFT-Z
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z),
+                        CMainFrame::OnEditRedo);
 #endif
 
     m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);

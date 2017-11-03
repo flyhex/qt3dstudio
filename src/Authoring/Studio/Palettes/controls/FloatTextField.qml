@@ -35,6 +35,7 @@ import QtQuick.Layouts 1.3
 TextField {
     id: floatTextFieldId
     property alias decimalValue: validator.decimals
+    property bool ignoreHotkeys: true
 
     signal previewValueChanged
 
@@ -160,6 +161,23 @@ TextField {
                     }
                 }
             }
+        }
+    }
+
+    Keys.onPressed: {
+        if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
+            event.accepted = true
+            var delta = 1.0;
+            if (event.modifiers === Qt.ControlModifier)
+                delta = 0.1;
+            else if (event.modifiers === Qt.ShiftModifier)
+                delta = 10.0;
+            if (event.key === Qt.Key_Down)
+                delta = -delta;
+            floatTextFieldId.text = Number(parseFloat(floatTextFieldId.text)
+                                           + delta).toFixed(validator.decimals);
+            if (!rateLimiter.running)
+                rateLimiter.start();
         }
     }
 }

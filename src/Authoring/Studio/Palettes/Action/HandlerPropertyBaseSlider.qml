@@ -52,8 +52,32 @@ Row {
     spacing: 5
     width: _valueWidth
 
+    Keys.onPressed: {
+        if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
+            event.accepted = true
+            var delta = 1.0;
+            if (intSlider) {
+                if (event.key === Qt.Key_Down)
+                    delta = -delta;
+                slider.value = Number(slider.value + delta).toFixed(0);
+            } else {
+                if (event.modifiers === Qt.ControlModifier)
+                    delta = 0.1;
+                else if (event.modifiers === Qt.ShiftModifier)
+                    delta = 10.0;
+                if (event.key === Qt.Key_Down)
+                    delta = -delta;
+                slider.value = Number(slider.value + delta).toFixed(doubleValidator.decimals);
+            }
+            if (!rateLimiter.running)
+                rateLimiter.start();
+        }
+    }
+
     Slider {
         id: slider
+
+        property bool ignoreHotkeys: true
 
         leftPadding: 0
 

@@ -344,6 +344,8 @@ Rectangle {
             TextArea {
                 id: textArea
 
+                property bool ignoreHotkeys: true
+
                 text: scrollView.value
                 horizontalAlignment: TextInput.AlignLeft
                 verticalAlignment: TextInput.AlignTop

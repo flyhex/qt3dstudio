@@ -187,7 +187,6 @@ protected:
 
     virtual void DeleteCurrentSelection(bool inFireEvent = true);
     virtual void DeleteCharacter(bool inIsOnRight = false);
-    void RegisterCommands();
     virtual void SetDirty(bool inDirty);
     float CalculateCharWidths(CRenderer *inRenderer);
     virtual bool HandleSpecialChar(unsigned int inChar, Qt::KeyboardModifiers inFlags);

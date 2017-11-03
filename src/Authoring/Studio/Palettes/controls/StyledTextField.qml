@@ -34,6 +34,7 @@ TextField {
     id: styledTextFieldId
 
     property alias backgroundColor: textBackground.color
+    property bool ignoreHotkeys: true
 
     Layout.preferredWidth: _valueWidth
     Layout.preferredHeight: _controlBaseHeight

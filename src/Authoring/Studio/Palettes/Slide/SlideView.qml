@@ -214,6 +214,8 @@ Rectangle {
                                 TextInput {
                                     id: slideName
 
+                                    property bool ignoreHotkeys: true
+
                                     readOnly: masterSlide
                                     selectByMouse: !readOnly
                                     color: _textColor

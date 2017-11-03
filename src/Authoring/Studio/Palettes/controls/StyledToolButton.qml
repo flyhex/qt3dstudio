@@ -35,6 +35,7 @@ ToolButton {
     property string enabledImage
     property string disabledImage
     property alias toolTipText: toolTip.text
+    property bool ignoreHotkeys: true
 
     hoverEnabled: true
 

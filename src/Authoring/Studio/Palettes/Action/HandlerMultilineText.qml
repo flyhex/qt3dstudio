@@ -54,6 +54,8 @@ RowLayout {
         TextArea.flickable: TextArea {
             id: textArea
 
+            property bool ignoreHotkeys: true
+
             horizontalAlignment: TextInput.AlignLeft
             verticalAlignment: TextInput.AlignVCenter
             implicitWidth: _valueWidth

@@ -657,7 +657,7 @@ void CDoc::CutSelectedObject()
 
 void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
 {
-    if (CHotKeys::isFocusOnTextEditControl())
+    if (CHotKeys::isFocusOnControlThatWantsKeys())
         return;
     if (inInstances.empty())
         return;
@@ -691,7 +691,7 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
 
 void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
 {
-    if (CHotKeys::isFocusOnTextEditControl())
+    if (CHotKeys::isFocusOnControlThatWantsKeys())
         return;
     if (inInstances.empty())
         return;

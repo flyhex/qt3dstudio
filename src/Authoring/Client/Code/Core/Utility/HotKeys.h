@@ -239,7 +239,7 @@ public:
 
     static bool IsKeyDown(Qt::KeyboardModifier inKeyCode);
     static Qt::KeyboardModifiers GetCurrentKeyModifiers();
-    static bool isFocusOnTextEditControl();
+    static bool isFocusOnControlThatWantsKeys();
 
 protected:
     struct SHotKeyInfo

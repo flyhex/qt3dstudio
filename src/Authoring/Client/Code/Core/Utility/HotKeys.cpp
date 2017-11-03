@@ -70,15 +70,16 @@ public:
 
         QKeyEvent *ke = static_cast<QKeyEvent *>(event);
 
-        static int counter = 0;
         if (eventType == QEvent::ShortcutOverride) {
-            // If we are in text control, eat all plain and shift-adjusted hotkeys
-            // We want to also skip editing related global hotkeys: CTRL-A/X/C/V/Z
+            // If we are in key consuming control, eat all plain and shift-adjusted hotkeys
+            // We want to also skip editing related global hotkeys (CTRL-A/X/C/V/Z)
+            // and value adjusting keys (CTRL-UP/DOWN).
             const bool normalChar = !(ke->modifiers() && ke->modifiers() != Qt::ShiftModifier);
             const bool editShortcut = (ke->modifiers() == Qt::ControlModifier)
                     && (ke->key() == Qt::Key_C || ke->key() == Qt::Key_V || ke->key() == Qt::Key_Z
-                        || ke->key() == Qt::Key_X || ke->key() == Qt::Key_A);
-            if ((normalChar || editShortcut) && m_hotkeys->isFocusOnTextEditControl()) {
+                        || ke->key() == Qt::Key_X || ke->key() == Qt::Key_A
+                        || ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down);
+            if ((normalChar || editShortcut) && m_hotkeys->isFocusOnControlThatWantsKeys()) {
                 ke->accept();
                 return true;
             }
@@ -91,19 +92,9 @@ public:
             return false;
         }
 
-        //ignore global shortcuts when we are in a text field
-        auto quickWidget = dynamic_cast<QQuickWidget *>(qApp->focusObject());
-        if (quickWidget) {
-            auto focusItem = quickWidget->quickWindow()->activeFocusItem();
-            if (focusItem) {
-                auto superClass = focusItem->metaObject()->superClass();
-                if (superClass && QByteArray(superClass->className()) == "QQuickTextField")
-                    return false;
-            }
-        }
-
-        //ignore global shortcuts if we are in an "old" style textedit
-        if (m_hotkeys->isFocusOnTextEditControl())
+        // Ignore global shortcuts if we are in an "old" style textedit or qml control that
+        // wants key events.
+        if (m_hotkeys->isFocusOnControlThatWantsKeys())
             return false;
 
         switch (eventType) {
@@ -592,7 +583,7 @@ Qt::KeyboardModifiers CHotKeys::GetCurrentKeyModifiers()
     return qApp->keyboardModifiers();
 }
 
-bool CHotKeys::isFocusOnTextEditControl()
+bool CHotKeys::isFocusOnControlThatWantsKeys()
 {
     auto widgetControl = dynamic_cast<WidgetControl *>(qApp->focusObject());
     if (widgetControl) {
@@ -600,6 +591,13 @@ bool CHotKeys::isFocusOnTextEditControl()
         if (control) {
             auto te = dynamic_cast<CTextEdit *>(control->FocusedChild());
             if (te && !te->IsReadOnly())
+                return true;
+        }
+    } else {
+        auto quickWidget = dynamic_cast<QQuickWidget *>(qApp->focusObject());
+        if (quickWidget) {
+            auto focusItem = quickWidget->quickWindow()->activeFocusItem();
+            if (focusItem && focusItem->property("ignoreHotkeys").toBool())
                 return true;
         }
     }
