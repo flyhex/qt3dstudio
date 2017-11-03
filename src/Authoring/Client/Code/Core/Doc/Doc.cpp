@@ -1242,9 +1242,7 @@ void CDoc::SetPlayMode(EPlayMode inPlayMode, long inRestoreTime /*= -1*/)
             // Set Client to STOP
             if (inRestoreTime >= 0)
                 NotifyTimeChanged(inRestoreTime); // update views as indicated by client
-            else {
-                m_PlaybackClock->StopPlayback();
-            }
+            m_PlaybackClock->StopPlayback();
             m_Core->GetDispatch()->FireOnPlayStop();
         }
     }
