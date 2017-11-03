@@ -71,38 +71,7 @@ public:
     bool IsValid() override;
 
     // CSeekOutputStream
-    long Seek(Q3DStudio::ISeekable::ESeekPosition inBegin, long inOffset) override;
     long GetCurrentPosition() override;
 };
-
-/* STL implementation
-class CFileOutputStream : public CSeekOutputStream
-{
-        // Construction
-        protected:
-                std::ofstream* m_FileStream;
-                char* m_Buffer;
-
-        public:
-                CFileOutputStream( const Q3DStudio::CString& inFilename, bool inAppend = false ,
-long inBuffersize = 10485760 );
-
-                virtual ~CFileOutputStream( );
-
-                virtual long Write( const void* inBuffer, long inBufferLength );
-
-                virtual void Flush( );
-
-                virtual void Close( );
-
-                virtual bool IsValid( );
-
-        //CSeekOutputStream
-                virtual long Seek( Q3DStudio::ISeekable::ESeekPosition inBegin, long inOffset );
-
-                virtual long GetCurrentPosition( );
-
-};
-*/
 
 #endif // INCLUDED_FILE_OUTPUT_STREAM_H

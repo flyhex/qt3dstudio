@@ -41,74 +41,6 @@
 #include <QByteArray>
 #include <QString>
 
-/* STL implementation
-CFileOutputStream::CFileOutputStream( const Q3DStudio::CString& inFilename, bool inAppend, long
-inBuffersize )
-{
-        m_Buffer = new char[inBuffersize];
-        m_FileStream = new std::ofstream( inFilename.GetMulti( ), inAppend ? ( std::ios_base::app |
-std::ios_base::binary ) : ( std::ios_base::out | std::ios_base::trunc | std::ios_base::binary ) );
-
-        m_FileStream->rdbuf( )->pubsetbuf( m_Buffer, inBuffersize );
-        m_FileStream->sync_with_stdio( false );
-
-        m_FileStream->unsetf( std::ios_base::unitbuf );
-        m_FileStream->tie( NULL );
-}
-
-CFileOutputStream::~CFileOutputStream( )
-{
-        Close( );
-        delete m_FileStream;
-        delete[] m_Buffer;
-}
-
-long CFileOutputStream::Write( const void* inBuffer, long inBufferLength )
-{
-        m_FileStream->write( static_cast<const char*>( inBuffer ), inBufferLength );
-        return inBufferLength;
-}
-
-void CFileOutputStream::Flush( )
-{
-        m_FileStream->flush( );
-}
-
-void CFileOutputStream::Close( )
-{
-        m_FileStream->close( );
-}
-
-bool CFileOutputStream::IsValid( )
-{
-        return m_FileStream->good( );
-}
-
-//CSeekOutputStream
-long CFileOutputStream::Seek( Q3DStudio::ISeekable::ESeekPosition inBegin, long inOffset )
-{
-        switch ( inBegin )
-        {
-                case Q3DStudio::ISeekable::EBEGIN:
-                        m_FileStream->seekp( inOffset, std::ios_base::beg );
-                break;
-                case Q3DStudio::ISeekable::EEND:
-                        m_FileStream->seekp( inOffset, std::ios_base::end );
-                break;
-                case Q3DStudio::ISeekable::ECURRENT:
-                        m_FileStream->seekp( inOffset, std::ios_base::cur );
-                break;
-        }
-
-        return 0;
-}
-
-long CFileOutputStream::GetCurrentPosition( )
-{
-        return m_FileStream->tellp( );
-}
-*/
-
 CFileOutputStream::CFileOutputStream(const Q3DStudio::CString &inFilename, bool inAppend /* = false */)
     : m_Position(0)
     , m_Length(0)
@@ -194,47 +126,6 @@ bool CFileOutputStream::IsValid()
 #else
     return (m_File != NULL);
 #endif
-}
-
-/**	Seek to inOffset from inBegin.  If the result is past either end of the
-  *	file then the next byte read from the stream will either not exist or come
-  *	from the beginning, ie the file position pointer will not be moved past
-  *	the end or in front of the beginning of the file.
-  *	@param inOffset The offset to seek to.
-  *	@param inBegin where to seek from, i.e. current position, begin or end.
-  *	@return success if this is a valid file handle.
-  */
-long CFileOutputStream::Seek(Q3DStudio::ISeekable::ESeekPosition inBegin, long inOffset)
-{
-    if (!IsValid())
-        throw CIOException();
-#ifdef KDAB_TEMPORARILY_REMOVED
-    long theSeek = INVALID_SET_FILE_POINTER;
-    switch (inBegin) {
-    case Q3DStudio::ISeekable::EBEGIN: {
-        theSeek = ::SetFilePointer(m_File, inOffset, NULL, FILE_BEGIN);
-        m_Position = inOffset;
-        break;
-    }
-    case Q3DStudio::ISeekable::ECURRENT: {
-        theSeek = ::SetFilePointer(m_File, inOffset, NULL, FILE_CURRENT);
-        m_Position += inOffset;
-        break;
-    }
-    case Q3DStudio::ISeekable::EEND: {
-        theSeek = ::SetFilePointer(m_File, inOffset, NULL, FILE_END);
-        m_Position = m_Length + inOffset;
-        break;
-    }
-    default: {
-        throw CIOException();
-        break;
-    }
-    }
-    if (theSeek == INVALID_SET_FILE_POINTER)
-        throw CIOException();
-#endif
-    return 0; // okay because we implement seeking
 }
 
 long CFileOutputStream::GetCurrentPosition()
