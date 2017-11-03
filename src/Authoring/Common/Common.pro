@@ -52,7 +52,6 @@ SOURCES += \
     Code/_Win32/stdafx.cpp \
     Code/_Win32/SystemInfo.cpp \
     Code/_Win32/Qt3DSFile.cpp \
-    Code/_Win32/Qt3DSRegistry.cpp \
     Code/Graph/Graph.cpp \
     Code/InfoDump/CoutSink.cpp \
     Code/InfoDump/DumpFileSink.cpp \
