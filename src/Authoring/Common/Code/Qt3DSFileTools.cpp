@@ -726,7 +726,7 @@ std::shared_ptr<SFile> SFile::Wrap(const QSharedPointer<QFile> &inFileHandle, co
 // fstem -> file stem to write to
 // inExt -> extension to use after stem + unique append apparatus.
 TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDirectory, const CString &inFStem,
-                                        const CString &inExt)
+                                        const CString &inExt, bool truncate)
 {
     if (!inDestDirectory.Exists())
         inDestDirectory.CreateDir(true);
@@ -748,7 +748,10 @@ TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDirectory, const 
     retval.append(inExt);
 
     // Force creation of new file or failure.
-    auto handle = SFile::OpenForWrite(retval, FileOpenFlagValues::Create);
+    FileOpenFlags flags = FileOpenFlagValues::Create;
+    if (truncate)
+        flags |= FileOpenFlagValues::Truncate;
+    auto handle = SFile::OpenForWrite(retval, flags);
     QT3DSU32 idx = 1;
     while (handle == NULL && idx < 1000) {
         wchar_t buffer[10];
@@ -767,7 +770,7 @@ TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDirectory, const 
         retval.append(buffer, numChars);
         retval.append(&period, 1);
         retval.append(inExt);
-        handle = SFile::OpenForWrite(retval, FileOpenFlagValues::Create);
+        handle = SFile::OpenForWrite(retval, flags);
     }
     if (handle == NULL) {
         retval.assign(inFStem);
@@ -778,7 +781,7 @@ TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDirectory, const 
 }
 
 QString SFileTools::FindUniqueDestFile(const QDir &inDestDirectory, const QString &inFStem,
-                                       const QString &inExt)
+                                       const QString &inExt, bool truncate)
 {
     if (!inDestDirectory.exists())
         return {};
@@ -790,10 +793,23 @@ QString SFileTools::FindUniqueDestFile(const QDir &inDestDirectory, const QStrin
         ++idx;
     }
     if (inDestDirectory.exists(retval)) {
-        return FindUniqueDestFile(inDestDirectory, inFStem + QLatin1String("_999"), inExt);
+        return FindUniqueDestFile(inDestDirectory, inFStem + QLatin1String("_999"), inExt,
+                                  truncate);
     }
 
     return inDestDirectory.filePath(retval);
+}
+
+TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDir, const CString &inFStem,
+                                        const CString &inExt)
+{
+    return FindUniqueDestFile(inDestDir, inFStem, inExt, false);
+}
+
+QString SFileTools::FindUniqueDestFile(const QDir &inDestDir, const QString &inFStem,
+                                       const QString &inExt)
+{
+    return FindUniqueDestFile(inDestDir, inFStem, inExt, false);
 }
 
 // Similar to above but takes care of finding the stem and extension from the full source CFilePath

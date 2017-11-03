@@ -336,6 +336,7 @@ struct SFileTools
     // the file name and then we have two objects thinking they own the file.
     // Function appends an index in betwee nthe file stem and the extension
     // in order to generate a possibly unique name.
+    // Note that the file is not truncated by default if it already exists.
     // params:
     // inDestDir -> points to destination directory (and is a directory)
     // fstem -> file stem to write to
@@ -350,6 +351,13 @@ struct SFileTools
                                        const CFilePath &inSrcFullFilePath);
     static QString FindUniqueDestFile(const QDir &inDestDir,
                                       const QString &inSrcFullFilePath);
+
+    // Similar to above, but allows specifying whether you want the file to be truncated
+    // before writing if it exists.
+    static TFilePtr FindUniqueDestFile(const CFilePath &inDestDir, const CString &inFStem,
+                                       const CString &inExt, bool truncate);
+    static QString FindUniqueDestFile(const QDir &inDestDir, const QString &inFStem,
+                                      const QString &inExt, bool truncate);
 
     // Find a unique destination directory.  This directory was guaranteed not to exist before this
     // call

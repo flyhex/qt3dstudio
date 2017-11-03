@@ -777,7 +777,7 @@ public:
         theTempFileDir.CreateDir(true);
         CFilePath theFinalPath;
         {
-            TFilePtr theFile = SFileTools::FindUniqueDestFile(theTempFileDir, inStem, L"uip");
+            TFilePtr theFile = SFileTools::FindUniqueDestFile(theTempFileDir, inStem, L"uip", true);
 
             theFinalPath = theFile->m_Path;
 
