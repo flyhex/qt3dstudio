@@ -36,16 +36,12 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include <bitset>
-#include "MasterControl.h"
 #include "TimelineControl.h"
 
 //==============================================================================
 //  Forwards
 //==============================================================================
-class CStudioApp;
 class CMainFrame;
-class CStudioPaletteBar;
 
 QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
@@ -53,7 +49,7 @@ QT_FORWARD_DECLARE_CLASS(QDockWidget)
 /**
  *	@class	CPaletteManager
  */
-class CPaletteManager : public IMasterControlProvider
+class CPaletteManager
 {
 public:
     // Do NOT change the order/values of this enum, these
@@ -72,29 +68,12 @@ public:
                                       ///an upgrade process )
     };
 
-public:
-    typedef std::bitset<CONTROLTYPE_MAXCONTROLS> TPaletteSet;
-
 protected:
-    typedef struct _TSMasterInfo
-    {
-        CStudioPaletteBar *m_PaletteBar; ///< pointer to the master palette bar
-        TPaletteSet m_Palettes; ///< the palettes contained by the master
-        CMasterControl *m_Master; ///< pointer to the master control
-
-    } TSMasterInfo;
-
     typedef std::map<long, QDockWidget *> TControlMap;
-    typedef std::vector<CStudioPaletteBar *> TPaletteList;
-    typedef std::vector<TSMasterInfo> TMasterList;
 
 protected:
-    CMainFrame *m_MainFrame; ///<
-    TControlMap m_ControlList; ///< map of EControlTypes and CControl
-    TPaletteList m_PaletteList; ///<
-    TMasterList m_MasterList; ///<
-
-    static long s_PaletteIDBase; ///<
+    CMainFrame *m_MainFrame;
+    TControlMap m_ControlList;
 
     QDockWidget *m_basicObjectsDock;
     QDockWidget *m_projectDock;
@@ -108,54 +87,17 @@ public:
     virtual ~CPaletteManager();
 
     // Access
-    void AddControlToMaster(CMasterControl *inControl, long inType);
-    void RemoveControlFromMaster(CMasterControl *inControl, long inType);
-    CMasterControl *FindMasterPalette(long inType);
-    long GetMasterCount();
-    CMasterControl *GetMaster(long inIndex);
     void HideControl(long inType);
     bool IsControlVisible(long inType) const;
     void ShowControl(long inType);
     void ToggleControl(long inType);
-
-    QDockWidget *GetControl(long inType) const; ///< return corresponding Palette according to EControlTypes enum value
+    QDockWidget *GetControl(long inType) const;
     QWidget *getFocusWidget() const;
     bool tabNavigateFocusedWidget(bool tabForward);
     CTimelineControl *GetTimelineControl() const;
 
     // Commands
-    void OnNewPalette(CMasterControl *inMaster);
-    void OnMovePalette(CMasterControl *inMoveFromMaster, CMasterControl *inMoveToMaster);
     void EnablePalettes();
-
-    // Serialization
-    bool Load();
-    void Save();
-
-    // Defaults
-    void RestoreDefaults(bool inForce = false);
-
-    // IMasterControlProvider
-    void OnControlRemoved(CMasterControl *inControl) override;
-    void OnContextMenu(CMasterControl *inControl, const CPt &inPosition,
-                               CContextMenu *inMyMenu) override;
-    void OnControlSelected(CMasterControl *inMaster, CControl *inNewControl, long inType) override;
-
-    // Static Methods
-    static Q3DStudio::CString GetControlName(long inType);
-
-protected:
-    CMasterControl *AddMasterPalette(long inType);
-
-    void Reset();
-    CStudioPaletteBar *CreatePalette();
-
-    CMasterControl *FindUnusedMaster();
-    CMasterControl *FindMasterByPaletteId(long inPaletteId);
-
-    CStudioPaletteBar *FindStudioPaletteBar(long inType);
-    CStudioPaletteBar *FindStudioPaletteBar(CMasterControl *inMaster);
-    void OnAsyncDestroyWindow(CStudioPaletteBar *inWnd);
 };
 
 #endif // INCLUDED_VIEW_MANAGER_H

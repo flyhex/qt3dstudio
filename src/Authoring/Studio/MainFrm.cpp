@@ -374,9 +374,6 @@ void CMainFrame::OnTimelineSetInterpolation()
  */
 void CMainFrame::SaveLayout()
 {
-    if (m_PaletteManager)
-        m_PaletteManager->Save();
-
 #ifdef KDAB_TEMPORARILY_REMOVED
     // Only save the window position if we're not minimized
     if (!IsIconic()) {
@@ -931,9 +928,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
 #endif
-
-        if (m_PaletteManager)
-            m_PaletteManager->RestoreDefaults();
 
         RecheckSizingMode();
 

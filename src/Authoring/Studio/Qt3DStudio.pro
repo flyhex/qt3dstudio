@@ -267,8 +267,6 @@ SOURCES += \
     Palettes/Inspector/ObjectBrowserView.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
     Palettes/Inspector/MouseHelper.cpp \
-    #Palettes/Master/MasterControl.cpp \
-    #Palettes/Master/MasterView.cpp \
     Palettes/Project/ProjectView.cpp \
     Palettes/Project/ProjectFileSystemModel.cpp \
     Palettes/Project/ProjectContextMenu.cpp \
