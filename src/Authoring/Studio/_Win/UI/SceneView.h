@@ -38,8 +38,8 @@
 //	Includes
 //==============================================================================
 
-#include <QWidget>
-#include <QCursor>
+#include <QtWidgets/qwidget.h>
+#include <QtGui/qcursor.h>
 
 #include "EditorPane.h"
 #include "PlayerWnd.h"
@@ -48,12 +48,6 @@
 
 class CStudioApp;
 class CHotKeys;
-class CMouseCursor;
-class CWndControl;
-
-//==============================================================================
-//	Forwards
-//==============================================================================
 
 //==============================================================================
 //	Class CSceneView
@@ -77,7 +71,6 @@ class CSceneView : public QWidget,
     //	Protected Properties
     //==========================================================================
 protected:
-    bool m_FitClientToWindow = false; ///< True if user selected fit to window in prefrences
     bool m_RegisteredKeyDown = false; ///< True if a key is down
     CPlayerContainerWnd *m_PlayerContainerWnd = nullptr; ///< first-level child
     CPlayerWnd *m_PlayerWnd = nullptr; ///< second-level child (grandchild)
@@ -95,11 +88,6 @@ protected:
     long m_PreviousToolMode; ///< The previous tool mode (used when toggling with hotkeys to switch
                              ///back to previous mode on release)
     long m_PreviousSelectMode; ///< The previous select mode
-
-    //==========================================================================
-    //	Protected Methods
-    //==========================================================================
-protected: // create from serialization only
 
     //==========================================================================
     //	Public Methods
@@ -164,11 +152,9 @@ protected:
 protected:
     void OnSetCursor();
     void showEvent(QShowEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     void onDropReceived();
 };
-
-/////////////////////////////////////////////////////////////////////////////
 
 #endif // INCLUDED_SCENE_VIEW_H

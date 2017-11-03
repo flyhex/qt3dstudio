@@ -28,21 +28,9 @@
 ****************************************************************************/
 
 //==============================================================================
-//	Prefix
-//==============================================================================
-
-#include "stdafx.h"
-#ifdef _WIN32
-#pragma warning(disable : 4100) // unreferenced formal parameter
-#endif
-//==============================================================================
 //	Includes
 //==============================================================================
-#include "Qt3DSOptions.h"
 #include "SceneView.h"
-//#include "InterpolationDlg.h"
-#include "MainFrm.h"
-#include "StudioProjectSettings.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
 #include "StudioApp.h"
@@ -50,17 +38,10 @@
 #include "Dispatch.h"
 #include "MouseCursor.h"
 #include "ResourceCache.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "WndControl.h"
-#endif
 #include "Core.h"
-#include "Qt3DSDMStudioSystem.h"
 #include "IStudioRenderer.h"
-#include "ClientDataModelBridge.h"
 
-#include <QKeyEvent>
-#include <QScrollBar>
-#include <QSettings>
+#include <QtGui/qevent.h>
 
 //==============================================================================
 /**
@@ -76,30 +57,12 @@ CSceneView::CSceneView(CStudioApp *inStudioApp, QWidget *parent)
     m_PreviousSelectMode = g_StudioApp.GetSelectMode();
 
     m_PlayerContainerWnd = new CPlayerContainerWnd(this);
-    connect(m_PlayerContainerWnd, &CPlayerContainerWnd::toolChanged, this, &CSceneView::toolChanged);
-#ifdef KDAB_TEMPORARILY_REMOVED
-        // Create the player container window
-        CPt theSize = CStudioPreferences::GetDefaultClientSize();
-
-        // Note that creating with WS_CLIPCHILDREN prevents flickering when SceneView is being
-        // resized.
-        m_PlayerContainerWnd->CreateEx(0, AfxRegisterWndClass(0, LoadCursor(NULL, IDC_ARROW),
-                                                              (HBRUSH)GetStockObject(BLACK_BRUSH)),
-                                       L"player_container_wnd",
-                                       WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-                                       CRect(0, 0, theSize.x, theSize.y), this, 1000);
-#endif
+    connect(m_PlayerContainerWnd, &CPlayerContainerWnd::toolChanged, this,
+            &CSceneView::toolChanged);
 
     m_PlayerWnd = new CPlayerWnd(m_PlayerContainerWnd);
     connect(m_PlayerWnd, &CPlayerWnd::dropReceived, this, &CSceneView::onDropReceived);
-#ifdef KDAB_TEMPORARILY_REMOVED
 
-        // Create the player frame child window
-        m_PlayerWnd.Create(AfxRegisterWndClass(0, LoadCursor(NULL, IDC_ARROW),
-                                               (HBRUSH)GetStockObject(WHITE_BRUSH)),
-                           L"player_wnd", WS_CHILD | WS_VISIBLE, CRect(0, 0, theSize.x, theSize.y),
-                           m_PlayerContainerWnd, 1001);
-#endif
     m_PlayerContainerWnd->SetPlayerWnd(m_PlayerWnd);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -137,7 +100,7 @@ QSize CSceneView::sizeHint() const
     return QSize(theSize.x, theSize.y);
 }
 
-//====================================================m==========================
+//==============================================================================
 /**
  * Called by the framework after the view is first attached
  * to the document, but before the view is initially displayed.
@@ -148,12 +111,6 @@ void CSceneView::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
-#ifdef KDAB_TEMPORARILY_REMOVED
-
-    // Modify the style for WS_CLIPCHILDREN
-    ModifyStyle(0, WS_CLIPCHILDREN);
-#endif
-
     m_PlayerContainerWnd->RecenterClient();
 
     // Set the scroll information.
@@ -163,17 +120,17 @@ void CSceneView::showEvent(QShowEvent *event)
     m_ArrowCursor = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ARROW);
     m_CursorGroupMove = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_MOVE);
     m_CursorGroupRotate =
-        CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_ROTATE);
+            CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_ROTATE);
     m_CursorGroupScale = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_SCALE);
     m_CursorItemMove = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_MOVE);
     m_CursorItemRotate = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_ROTATE);
     m_CursorItemScale = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_SCALE);
     m_CursorEditCameraPan =
-        CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_PAN);
+            CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_PAN);
     m_CursorEditCameraRotate =
-        CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ROTATE);
+            CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ROTATE);
     m_CursorEditCameraZoom =
-        CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM);
+            CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM);
 
 #ifdef INCLUDE_EDIT_CAMERA
     g_StudioApp.GetCore()->GetDispatch()->AddEditCameraChangeListener(this);
@@ -181,21 +138,6 @@ void CSceneView::showEvent(QShowEvent *event)
 
     // Set the default cursor
     OnSetCursor();
-}
-
-void CSceneView::keyPressEvent(QKeyEvent *event)
-{
-    /*switch (event->key())
-    {
-    case Qt::Key_Control:
-    case Qt::Key_Alt:
-    case Qt::Key_Shift:
-    case Qt::Key_Meta:
-        HandleModifierDown(event->key(), event->isAutoRepeat() ? 2 : 1, event->modifiers());
-        break;
-    default:
-        break;
-    }*/
 }
 
 //==============================================================================
@@ -224,7 +166,6 @@ void CSceneView::OnToolItemSelection()
     Q_EMIT toolChanged();
 }
 
-
 //==============================================================================
 /**
  *	SetViewCursor: Sets the cursor for the view according to the current Client Tool.
@@ -248,7 +189,7 @@ void CSceneView::SetViewCursor()
         case STUDIO_SELECTMODE_GROUP:
             m_PlayerWnd->setCursor(m_CursorGroupMove);
             break;
-        // Default - shouldn't happen
+            // Default - shouldn't happen
         default:
             m_PlayerWnd->setCursor(m_CursorItemMove);
             break;
@@ -263,7 +204,7 @@ void CSceneView::SetViewCursor()
         case STUDIO_SELECTMODE_GROUP:
             m_PlayerWnd->setCursor(m_CursorGroupRotate);
             break;
-        // Default - shouldn't happen
+            // Default - shouldn't happen
         default:
             m_PlayerWnd->setCursor(m_CursorItemRotate);
             break;
@@ -278,7 +219,7 @@ void CSceneView::SetViewCursor()
         case STUDIO_SELECTMODE_GROUP:
             m_PlayerWnd->setCursor(m_CursorGroupScale);
             break;
-        // Default - shouldn't happen
+            // Default - shouldn't happen
         default:
             m_PlayerWnd->setCursor(m_CursorItemScale);
             break;
@@ -298,7 +239,7 @@ void CSceneView::SetViewCursor()
         m_PlayerWnd->setCursor(m_CursorEditCameraRotate);
         break;
 #endif
-    // Default - shouldn't happen
+        // Default - shouldn't happen
     default:
         m_PlayerWnd->setCursor(m_CursorItemMove);
         break;
@@ -350,10 +291,10 @@ bool CSceneView::PtInClientRect(const QPoint& inPoint)
  *	Changes tool modes and saves the previous mode.
  *
  *	@param		inChar		Contains the character code value of the key.
- *	@param		inRepCnt	Contains the repeat count, the number of times the keystroke
- *is repeated when user holds down the key.
- *	@param		inFlags		Contains the scan code, key-transition code, previous
- *key state, and context code.
+ *  @param      inRepCnt    Contains the repeat count, the number of times the keystroke
+ *                          is repeated when user holds down the key.
+ *  @param      modifiers   Contains the scan code, key-transition code, previous
+ *                          key state, and context code.
  */
 //==============================================================================
 bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers)
@@ -397,7 +338,7 @@ bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifi
                 // press Alt-Scroll Wheel Click
                 // Do Camera Rotate if we are in 3D Camera
                 if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-                        g_StudioApp.GetRenderer().GetEditCamera())) {
+                            g_StudioApp.GetRenderer().GetEditCamera())) {
                     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
                     theHandledFlag = true;
                 }
@@ -423,9 +364,9 @@ bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifi
  *	Changes tool modes back to the original tool mode.
  *
  *	@param	inChar		Contains the character code value of the key.
- *	@param	inRepCnt	Contains the repeat count, the number of times the keystroke is
- *repeated when user holds down the key.
- *	@param	inFlags		Contains the scan code, key-transition code, previous key
+ *  @param  inRepCnt    Contains the repeat count, the number of times the keystroke is
+ *                      repeated when user holds down the key.
+ *  @param  modifiers   Contains the scan code, key-transition code, previous key
  *state, and context code.
  */
 //==============================================================================
@@ -448,11 +389,11 @@ bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifier
         // If the control key or alt key is released (and the opposite key is not down) revert back
         // to the original tool mode
         if (((inChar == Qt::Key_Control) && (!theAltKeyIsDown))
-            || ((inChar == Qt::Key_Alt) && (!theCtrlKeyIsDown))) {
+                || ((inChar == Qt::Key_Alt) && (!theCtrlKeyIsDown))) {
 #ifdef INCLUDE_EDIT_CAMERA
-            if (m_PlayerContainerWnd->IsMiddleMouseDown())
+            if (m_PlayerContainerWnd->IsMiddleMouseDown()) {
                 g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-            else
+            } else
 #endif
             {
                 RestorePreviousTool();
@@ -463,7 +404,6 @@ bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifier
 
             theHandledFlag = true;
         }
-        //	m_RegisteredKeyDown = false;
     }
 
     return theHandledFlag;
@@ -506,33 +446,10 @@ void CSceneView::SetPlayerWndPosition()
         long theLeft, theTop;
         // Retrieve the left and top edge of the presentation currently in view
         m_PlayerContainerWnd->SetPlayerWndPosition(theLeft, theTop);
-
         m_PlayerContainerWnd->update();
     }
 }
 
-//==============================================================================
-/**
- *	GetPlayerHwnd: Gets the window handle for the player object.
- *
- *	@return	<HWND>	Window handle for the player window
- */
-//==============================================================================
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-
-HWND CSceneView::GetPlayerHwnd()
-{
-    HWND thePlayerWnd;
-
-    thePlayerWnd = this->GetSafeHwnd();
-
-    if (IsWindow(m_PlayerWnd.GetSafeHwnd()))
-        thePlayerWnd = m_PlayerWnd.GetSafeHwnd();
-
-    return thePlayerWnd;
-}
-#endif
 //==============================================================================
 /**
  *	SetRegisteredKey: Sets the staus to true or false
@@ -569,21 +486,21 @@ bool CSceneView::GetKeyStatus()
 void CSceneView::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
 {
     inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::OnToolGroupSelection), 0, Qt::Key_A);
+                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::OnToolGroupSelection), 0, Qt::Key_A);
     inShortcutHandler->RegisterKeyEvent(
-        new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::OnToolItemSelection), 0, Qt::Key_V);
+                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::OnToolItemSelection), 0, Qt::Key_V);
     inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
-        Qt::ControlModifier, Qt::Key_Control);
+                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
+                Qt::ControlModifier, Qt::Key_Control);
     inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
-        Qt::AltModifier, Qt::Key_Alt);
+                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
+                Qt::AltModifier, Qt::Key_Alt);
     inShortcutHandler->RegisterKeyUpEvent(
-        new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierUp), 0,
-        Qt::Key_Control);
+                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierUp), 0,
+                Qt::Key_Control);
     inShortcutHandler->RegisterKeyUpEvent(
-        new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierUp), 0,
-        Qt::Key_Alt);
+                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierUp), 0,
+                Qt::Key_Alt);
 }
 
 //==============================================================================
@@ -593,7 +510,7 @@ void CSceneView::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
  * Changes the cursor depending on the current tool mode.
  *
  * @param inWnd     Specifies a pointer to the window that contains the cursor.
- * @param inHitTest Specifies the hit-test area code. The hit test determines the cursor�s
+ * @param inHitTest Specifies the hit-test area code. The hit test determines the cursor's
  *location.
  * @param inMessage Specifies the mouse message number.
  *
@@ -793,8 +710,7 @@ void CSceneView::SetToolOnAlt()
 bool CSceneView::IsDeploymentView()
 {
     // default mode is SCENE_VIEW so if playercontainerwnd does not exist ( should only happen on
-    // startup ),
-    // it is deployment view
+    // startup ), it is deployment view
     bool theStatus = true;
     if (m_PlayerContainerWnd)
         theStatus = m_PlayerContainerWnd->IsDeploymentView();
@@ -834,8 +750,6 @@ void CSceneView::OnEditCameraChanged()
     // update the view mode accordingly
     SetViewMode(g_StudioApp.GetRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
                                                                : CPlayerContainerWnd::VIEW_SCENE);
-    // redraw the scene so that markers can be calculated correctly
-    // g_StudioApp.GetCore()->GetDoc( )->UpdateClientScene( false );
     m_PlayerWnd->update();
 }
 
