@@ -29,6 +29,8 @@
 ****************************************************************************/
 #ifndef QT3DS_EGLINFO_H
 #define QT3DS_EGLINFO_H
+
+#ifdef _PLATFORM_USE_EGL
 #include <EGL/egl.h>
 
 namespace Q3DStudio {
@@ -41,5 +43,18 @@ struct SEGLInfo
     EGLNativeWindowType nativewin;
 };
 };
+
+#else
+namespace Q3DStudio {
+struct SEGLInfo
+{
+    void *display;
+    void *surface;
+    void *context;
+    void *config;
+    void *nativewin;
+};
+};
+#endif
 
 #endif
