@@ -424,18 +424,3 @@ bool Qt3DSFile::IsPathRelative(const Q3DStudio::CString &inPath)
     QFileInfo info(inPath.toQString());
     return info.isRelative();
 }
-
-//=============================================================================
-/**
- * Retrieves the file 'stat' struct that contains useful information.
- * @param inStat stat struct to fill
- * @return true if file stats are successfully obtained
- */
-bool Qt3DSFile::GetFileStat(struct _stat *inStat) const
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    return ::_wstat(m_Path, inStat) == 0;
-#else
-    return false;
-#endif
-}

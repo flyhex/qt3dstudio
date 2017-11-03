@@ -96,7 +96,6 @@ public:
     HANDLE OpenFileReadHandle() const;
     HANDLE OpenFileWriteHandle() const;
     void RenameTo(const Qt3DSFile &inDestination);
-    bool GetFileStat(struct _stat *inStat) const;
 
     static void ClearCurrentTempCache();
 
