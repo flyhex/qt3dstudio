@@ -237,14 +237,16 @@ static FIBITMAP *DoLoadHDR(FreeImageIO *io, fi_handle handle,
     return NULL;
 }
 
-SLoadedTexture *SLoadedTexture::LoadHDR(ISeekableIOStream &inStream, NVFoundationBase &inFnd)
+SLoadedTexture *SLoadedTexture::LoadHDR(ISeekableIOStream &inStream, NVFoundationBase &inFnd,
+                                        qt3ds::render::NVRenderContextType renderContextType)
 {
     FreeImageIO theIO(inFnd.getAllocator(), inFnd);
-#ifdef QT_OPENGL_ES_2
-    SLoadedTexture *retval = DoLoadHDR(&theIO, &inStream, NVRenderTextureFormats::RGBA8);
-#else
-    SLoadedTexture *retval = DoLoadHDR(&theIO, &inStream, NVRenderTextureFormats::RGBA16F);
-#endif
+    SLoadedTexture *retval = nullptr;
+    if (renderContextType == qt3ds::render::NVRenderContextValues::GLES2)
+        retval = DoLoadHDR(&theIO, &inStream, NVRenderTextureFormats::RGBA8);
+    else
+        retval = DoLoadHDR(&theIO, &inStream, NVRenderTextureFormats::RGBA16F);
+
 
     // Let's just assume we don't support this just yet.
     //	if ( retval )

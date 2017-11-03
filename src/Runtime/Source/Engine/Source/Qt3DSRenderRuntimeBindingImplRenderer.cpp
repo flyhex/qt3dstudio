@@ -197,7 +197,9 @@ struct SRenderer : public Q3DStudio::ITegraApplicationRenderEngine
             SMemoryInStream theInStream(inTextureData, inTextureData + inDataSize);
             NVFoundationBase &theFoundation(*m_BindingCore->m_Foundation);
             qt3ds::render::SLoadedTexture *theLoadedTexture =
-                qt3ds::render::SLoadedTexture::LoadDDS(theInStream, true, theFoundation);
+                qt3ds::render::SLoadedTexture::LoadDDS(theInStream, true, theFoundation,
+                                                       m_Context->GetRenderContext()
+                                                            .GetRenderContextType());
             if (theLoadedTexture && theLoadedTexture->dds) {
                 theLoadedTexture->EnsureMultiplerOfFour(theFoundation, "AutoworksWatermark.png");
                 qt3ds::render::NVRenderContext &theContext = *m_BindingCore->m_RenderContext;

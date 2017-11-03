@@ -834,7 +834,8 @@ static void DLL_CALLCONV Close(void *data)
 }
 
 SLoadedTexture *SLoadedTexture::LoadGIF(ISeekableIOStream &inStream, bool inFlipY,
-                                        NVFoundationBase &inFnd)
+                                        NVFoundationBase &inFnd,
+                                        qt3ds::render::NVRenderContextType renderContextType)
 {
     FreeImageIO theIO(inFnd.getAllocator(), inFnd);
     void *gifData = Open(&theIO, &inStream);

@@ -153,17 +153,24 @@ namespace render {
         void ReleaseDecompressedTexture(STextureData inImage);
 
         static SLoadedTexture *Load(const QString &inPath, NVFoundationBase &inAllocator,
-                                    IInputStreamFactory &inFactory, bool inFlipY = true);
+                                    IInputStreamFactory &inFactory, bool inFlipY = true,
+                                    NVRenderContextType renderContextType
+                                        = NVRenderContextValues::NullContext);
         static SLoadedTexture *LoadDDS(IInStream &inStream, QT3DSI32 flipVertical,
-                                       NVFoundationBase &fnd);
+                                       NVFoundationBase &fnd,
+                                       NVRenderContextType renderContextType);
         static SLoadedTexture *LoadBMP(ISeekableIOStream &inStream, bool inFlipY,
-                                       NVFoundationBase &inFnd);
+                                       NVFoundationBase &inFnd,
+                                       NVRenderContextType renderContextType);
         static SLoadedTexture *LoadGIF(ISeekableIOStream &inStream, bool inFlipY,
-                                       NVFoundationBase &inFnd);
-        static SLoadedTexture *LoadHDR(ISeekableIOStream &inStream, NVFoundationBase &inFnd);
+                                       NVFoundationBase &inFnd,
+                                       NVRenderContextType renderContextType);
+        static SLoadedTexture *LoadHDR(ISeekableIOStream &inStream, NVFoundationBase &inFnd,
+                                       NVRenderContextType renderContextType);
 
         static SLoadedTexture *LoadQImage(const QString &inPath, QT3DSI32 flipVertical,
-                                          NVFoundationBase &fnd);
+                                          NVFoundationBase &fnd,
+                                          NVRenderContextType renderContextType);
 
     private:
         // Implemented in the bmp loader.

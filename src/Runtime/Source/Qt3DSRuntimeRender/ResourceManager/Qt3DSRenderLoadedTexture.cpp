@@ -42,9 +42,11 @@
 using namespace qt3ds::render;
 
 SLoadedTexture *SLoadedTexture::LoadQImage(const QString &inPath, QT3DSI32 flipVertical,
-                                           NVFoundationBase &fnd)
+                                           NVFoundationBase &fnd,
+                                           NVRenderContextType renderContextType)
 {
     Q_UNUSED(flipVertical)
+    Q_UNUSED(renderContextType)
     SLoadedTexture *retval(NULL);
     NVAllocatorCallback &alloc(fnd.getAllocator());
     QImage image(inPath);
@@ -649,7 +651,8 @@ void SLoadedTexture::ReleaseDecompressedTexture(STextureData inImage)
 #endif
 
 SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &inFoundation,
-                                     IInputStreamFactory &inFactory, bool inFlipY)
+                                     IInputStreamFactory &inFactory, bool inFlipY,
+                                     NVRenderContextType renderContextType)
 {
     if (inPath.isEmpty())
         return NULL;
@@ -660,18 +663,18 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
     inFactory.GetPathForFile(inPath, fileName);
     if (theStream.mPtr && inPath.size() > 3) {
         if (inPath.endsWith("png", Qt::CaseInsensitive))
-            theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation);
+            theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation, renderContextType);
         else if (inPath.endsWith("jpg", Qt::CaseInsensitive)
                  || inPath.endsWith("peg", Qt::CaseInsensitive))
-            theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation);
+            theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation, renderContextType);
         else if (inPath.endsWith("dds", Qt::CaseInsensitive))
-            theLoadedImage = LoadDDS(*theStream, inFlipY, inFoundation);
+            theLoadedImage = LoadDDS(*theStream, inFlipY, inFoundation, renderContextType);
         else if (inPath.endsWith("gif", Qt::CaseInsensitive))
-            theLoadedImage = LoadGIF(*theStream, !inFlipY, inFoundation);
+            theLoadedImage = LoadGIF(*theStream, !inFlipY, inFoundation, renderContextType);
         else if (inPath.endsWith("bmp", Qt::CaseInsensitive))
-            theLoadedImage = LoadBMP(*theStream, !inFlipY, inFoundation);
+            theLoadedImage = LoadBMP(*theStream, !inFlipY, inFoundation, renderContextType);
         else if (inPath.endsWith("hdr", Qt::CaseInsensitive))
-            theLoadedImage = LoadHDR(*theStream, inFoundation);
+            theLoadedImage = LoadHDR(*theStream, inFoundation, renderContextType);
         else {
             qCCritical(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
         }

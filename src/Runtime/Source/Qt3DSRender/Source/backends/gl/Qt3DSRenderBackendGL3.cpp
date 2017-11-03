@@ -53,6 +53,10 @@
 namespace qt3ds {
 namespace render {
 
+#ifndef GL_PATCH_VERTICES
+#define GL_PATCH_VERTICES 0x8E72
+#endif
+
     /// constructor
     NVRenderBackendGL3Impl::NVRenderBackendGL3Impl(NVFoundationBase &fnd,
                                                    qt3ds::foundation::IStringTable &stringTable,
@@ -399,9 +403,7 @@ namespace render {
             && m_pCurrentMiscState->m_PatchVertexCount != inputAssembler->m_PatchVertexCount) {
             m_pCurrentMiscState->m_PatchVertexCount = inputAssembler->m_PatchVertexCount;
 #if defined(QT_OPENGL_ES)
-#if !defined (QT_OPENGL_ES_2)
             GL_CALL_TESSELATION_EXT(glPatchParameteriEXT(GL_PATCH_VERTICES, inputAssembler->m_PatchVertexCount));
-#endif
 #else
             GL_CALL_TESSELATION_EXT(glPatchParameteri(GL_PATCH_VERTICES, inputAssembler->m_PatchVertexCount));
 #endif

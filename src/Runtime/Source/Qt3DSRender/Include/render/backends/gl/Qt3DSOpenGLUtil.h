@@ -78,6 +78,44 @@ namespace render {
 #define GL_PATCHES 0x000E
 #endif
 
+#ifndef GL_READ_ONLY
+#define GL_READ_ONLY 0x88B8
+#define GL_WRITE_ONLY 0x88B9
+#define GL_READ_WRITE 0x88BA
+#endif
+
+#ifndef GL_SHADER_STORAGE_BUFFER
+#define GL_SHADER_STORAGE_BUFFER 0x90D2
+#endif
+
+#ifndef GL_ATOMIC_COUNTER_BUFFER
+#define GL_ATOMIC_COUNTER_BUFFER 0x92C0
+#endif
+
+#ifndef GL_DRAW_INDIRECT_BUFFER
+#define GL_DRAW_INDIRECT_BUFFER 0x8F3F
+#endif
+
+#ifndef GL_VERTEX_SHADER_BIT
+#define GL_VERTEX_SHADER_BIT 0x00000001
+#endif
+
+#ifndef GL_FRAGMENT_SHADER_BIT
+#define GL_FRAGMENT_SHADER_BIT 0x00000002
+#endif
+
+#ifndef GL_GEOMETRY_SHADER_BIT
+#define GL_GEOMETRY_SHADER_BIT 0x00000004
+#endif
+
+#ifndef GL_TESS_CONTROL_SHADER_BIT
+#define GL_TESS_CONTROL_SHADER_BIT 0x00000008
+#endif
+
+#ifndef GL_TESS_EVALUATION_SHADER_BIT
+#define GL_TESS_EVALUATION_SHADER_BIT 0x00000010
+#endif
+
 #define QT3DS_RENDER_ITERATE_QT3DS_GL_COLOR_FUNC                                                         \
     QT3DS_RENDER_HANDLE_GL_COLOR_FUNC(GL_ZERO, Zero)                                                  \
     QT3DS_RENDER_HANDLE_GL_COLOR_FUNC(GL_ONE, One)                                                    \
@@ -659,14 +697,12 @@ namespace render {
                 retval = GL_ELEMENT_ARRAY_BUFFER;
             else if (value & NVRenderBufferBindValues::Constant)
                 retval = GL_UNIFORM_BUFFER;
-#if defined(GL_ARB_shader_storage_buffer_object)
             else if (value & NVRenderBufferBindValues::Storage)
                 retval = GL_SHADER_STORAGE_BUFFER;
             else if (value & NVRenderBufferBindValues::Atomic_Counter)
                 retval = GL_ATOMIC_COUNTER_BUFFER;
             else if (value & NVRenderBufferBindValues::Draw_Indirect)
                 retval = GL_DRAW_INDIRECT_BUFFER;
-#endif
             else
                 QT3DS_ASSERT(false);
 
@@ -683,14 +719,12 @@ namespace render {
                 retval |= NVRenderBufferBindValues::Index;
             else if (value == GL_UNIFORM_BUFFER)
                 retval |= NVRenderBufferBindValues::Constant;
-#if defined(GL_ARB_shader_storage_buffer_object)
             else if (value == GL_SHADER_STORAGE_BUFFER)
                 retval |= NVRenderBufferBindValues::Storage;
             else if (value == GL_ATOMIC_COUNTER_BUFFER)
                 retval |= NVRenderBufferBindValues::Atomic_Counter;
             else if (value == GL_DRAW_INDIRECT_BUFFER)
                 retval |= NVRenderBufferBindValues::Draw_Indirect;
-#endif
             else
                 QT3DS_ASSERT(false);
 
@@ -1299,7 +1333,6 @@ namespace render {
 
         static GLenum fromImageAccessToGL(NVRenderImageAccessType::Enum value)
         {
-#if defined(GL_READ_ONLY)
             switch (value) {
             case NVRenderImageAccessType::Read:
                 return GL_READ_ONLY;
@@ -1310,7 +1343,6 @@ namespace render {
             default:
                 break;
             }
-#endif
             QT3DS_ASSERT(false);
             return GL_INVALID_ENUM;
         }
@@ -1373,7 +1405,6 @@ namespace render {
         {
             QT3DSU32 value = flags;
             GLbitfield retval = 0;
-#if !defined(QT_OPENGL_ES)
             if (value & NVRenderShaderTypeValue::Vertex)
                 retval |= GL_VERTEX_SHADER_BIT;
             if (value & NVRenderShaderTypeValue::Fragment)
@@ -1387,7 +1418,6 @@ namespace render {
                 retval |= GL_GEOMETRY_SHADER_BIT_EXT;
 #else
                 retval |= GL_GEOMETRY_SHADER_BIT;
-#endif
 #endif
             QT3DS_ASSERT(retval || !value);
             return retval;

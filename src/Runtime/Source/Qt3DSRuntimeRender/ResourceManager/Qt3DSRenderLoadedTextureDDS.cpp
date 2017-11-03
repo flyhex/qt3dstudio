@@ -682,7 +682,8 @@ namespace render {
     }
 
     SLoadedTexture *SLoadedTexture::LoadDDS(IInStream &inStream, QT3DSI32 flipVertical,
-                                            NVFoundationBase &inFnd)
+                                            NVFoundationBase &inFnd,
+                                            qt3ds::render::NVRenderContextType renderContextType)
     {
         FreeImageIO theIO(inFnd.getAllocator(), inFnd);
         SLoadedTexture *retval = DoLoadDDS(&theIO, inStream, flipVertical);

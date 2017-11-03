@@ -338,7 +338,8 @@ struct SBufferManager : public IBufferManager
             {
                 SStackPerfTimer __perfTimer(m_PerfTimer, "Image Decompression");
                 theLoadedImage = SLoadedTexture::Load(
-                    inImagePath.c_str(), m_Context->GetFoundation(), *m_InputStreamFactory);
+                    inImagePath.c_str(), m_Context->GetFoundation(), *m_InputStreamFactory,
+                            m_Context->GetRenderContextType());
             }
 
             if (theLoadedImage) {

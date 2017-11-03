@@ -977,9 +977,11 @@ namespace render {
         } else if (NVRenderTextureFormats::isDepthTextureFormat(format))
             m_Conversion.fromDepthTextureFormatToGL(GetRenderContextType(), format, glformat,
                                                     gltype, glInternalFormat);
-#ifdef QT_OPENGL_ES_2
-        glInternalFormat = glformat;
-#endif
+
+        // for es2 internal format must be same as format
+        if (GetRenderContextType() == NVRenderContextValues::GLES2)
+            glInternalFormat = glformat;
+
         GL_CALL_FUNCTION(glTexImage2D(glTarget, level, glInternalFormat, (GLsizei)width, (GLsizei)height,
                                 border, glformat, gltype, hostPtr));
 

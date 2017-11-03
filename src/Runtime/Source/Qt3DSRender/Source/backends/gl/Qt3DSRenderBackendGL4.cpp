@@ -521,7 +521,7 @@ namespace render {
                                                 eastl::string &errorMessage, bool binary)
     {
         GLuint shaderID = 0;
-#if defined(GL_VERSION_4_3) || defined (QT_OPENGL_ES_3_1)
+#if defined(GL_COMPUTE_SHADER)
         shaderID = m_glExtraFunctions->glCreateShader(GL_COMPUTE_SHADER);
 
         if (shaderID && !compileSource(shaderID, source, errorMessage, binary)) {
