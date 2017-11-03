@@ -47,7 +47,6 @@ SOURCES += \
     Code/Thread/Thread.cpp \
     Code/Exceptions/Qt3DSExceptionClass.cpp \
     Code/Exceptions/XMLException.cpp \
-    Code/_Win32/DLLVersion.cpp \
     Code/_Win32/FileIterator.cpp \
     Code/_Win32/Preferences.cpp \
     Code/_Win32/stdafx.cpp \
