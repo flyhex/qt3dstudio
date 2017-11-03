@@ -50,7 +50,6 @@ SOURCES += \
     Code/_Win32/FileIterator.cpp \
     Code/_Win32/Preferences.cpp \
     Code/_Win32/stdafx.cpp \
-    Code/_Win32/SystemInfo.cpp \
     Code/_Win32/Qt3DSFile.cpp \
     Code/Graph/Graph.cpp \
     Code/InfoDump/CoutSink.cpp \
