@@ -94,8 +94,6 @@ public:
     virtual void PushAbsoluteClippingRect(const QRect &inRect) = 0;
     virtual void PopClippingRect() = 0;
 
-    virtual QRect Scroll(const QPoint &inAmount, const QRect &inVisibleSize) = 0;
-
     virtual void FillHashed(const QRect &inRect, const QColor &inForeGroundColor) = 0;
 
     virtual QPixmap pixmap() const = 0;

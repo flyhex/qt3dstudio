@@ -97,7 +97,6 @@ public:
     void PopClippingRect() override;
     void PushAbsoluteClippingRect(const QRect &inRect) override {}
     void FillHashed(const QRect &inRect, const QColor &inForeGroundColor) override;
-    QRect Scroll(const QPoint &inAmount, const QRect &inVisibleSize) override;
     QPainter *GetPainter() override;
     QPen GetPen(const QColor &inColor, int inWidth, Qt::PenStyle inStyle);
 

@@ -467,41 +467,6 @@ void CWinRenderer::DrawGradientBitmap(const QRect &inRct, const QColor &inBeginC
 
 //=============================================================================
 /**
- * Scroll the selected area of the current view by the specified amount.
- * This will take the rectangle represented by inVisibleSize and 'scroll' it
- * by inAmount. The section that goes out of the visible size will be clipped
- * off and the area entering the visible area will be empty.
- * @param inAmount the amount to scroll by.
- * @param inVisibleSize the rectangle to be scrolled.
- * @return the smallest rect of area that needs to be redrawn.
- */
-QRect CWinRenderer::Scroll(const QPoint &inAmount, const QRect &inVisibleSize)
-{
-#if KDAB_TEMPORARILY_REMOVED
-    inAmount.Offset(m_Translation);
-    inVisibleSize.Offset(m_Translation);
-
-    QRect theVisibleRect(QPoint(inVisibleSize.position.x, inVisibleSize.position.y),
-                         QSize(inVisibleSize.size.x, inVisibleSize.size.y));
-
-    CRgn theDirtyRegion;
-    CRect theDirtyRect;
-    m_painter->ScrollDC(inAmount.x, inAmount.y, theVisibleRect, theVisibleRect, &theDirtyRegion,
-                   &theDirtyRect);
-
-    QRect theDirtyRct(theDirtyRect.left, theDirtyRect.top, theDirtyRect.right - theDirtyRect.left,
-                     theDirtyRect.bottom - theDirtyRect.top);
-
-    theDirtyRct.Offset(QPoint(-m_Translation.x, -m_Translation.y));
-
-    return theDirtyRct;
-#else
-    return {};
-#endif
-}
-
-//=============================================================================
-/**
  * Draw a gradient over inRect.
  * This will blend horizontally across the rect from inBeginColor into inEndColor.
  * This does linear interpolation.
