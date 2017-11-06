@@ -100,9 +100,6 @@ public:
 
 public:
     void PerformShutdown();
-#ifdef KDAB_TEMPORARILY_REMOVED
-    static void StudioUnhandledCrashHandler(EXCEPTION_POINTERS *pExPtrs);
-#endif
     Q3DStudio::IDirectoryWatchingSystem &GetDirectoryWatchingSystem();
     void SetupTimer(long inMessageId, QWidget *inWnd);
     Q3DStudio::ITickTock &GetTickTock();

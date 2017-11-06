@@ -114,9 +114,6 @@ int main(int argc, char *argv[])
 #include "MsgRouter.h"
 #include "SplashView.h"
 #include "Views.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "CrashDlg.h"
-#endif
 #include "Qt3DSFile.h"
 #include "Qt3DSFileTools.h"
 #include "ITickTock.h"
@@ -810,88 +807,6 @@ IDirectoryWatchingSystem &CStudioApp::GetDirectoryWatchingSystem()
     }
     return *m_DirectoryWatchingSystem;
 }
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-bool s_testVar = true;
-//==============================================================================
-/**
- * This gets called any time an unhandled exception is thrown anywhere in the
- * application.
- *
- * @param pExPtrs a description of the exception.
- * @return 0 if not handled, 1 if it was handled.
- */
-void CStudioApp::StudioUnhandledCrashHandler(EXCEPTION_POINTERS *pExPtrs)
-{
-    TCHAR theTraceBuffer[4096];
-    CCrashDlg theDlg;
-    Q3DStudio::CString errorMessage;
-
-    CStackOps::GetExceptionStackTrace(theTraceBuffer, sizeof(theTraceBuffer),
-                                      pExPtrs->ContextRecord);
-    if (g_ErrorCode != 0) {
-        // switch (g_ErrorCode)
-        //{
-        //	default:
-        Q3DStudio::CString description;
-        description.Format(_LSTR("Custom error 0x%X "), g_ErrorCode);
-        errorMessage = CStackOps::GetExceptionDescription(description, pExPtrs);
-        //		break;
-        //}
-    } else {
-        errorMessage = CStackOps::GetExceptionDescription(pExPtrs);
-    }
-    theDlg.SetStackTrace(theTraceBuffer);
-    qCCritical(qt3ds::INTERNAL_ERROR) << "Crash!" << theTraceBuffer;
-    // Attempt to save the current project (although this may crash).
-    CDoc &theDoc = *g_StudioApp.m_Core->GetDoc();
-    CFilePath theFullPath = theDoc.GetDocumentPath().GetAbsolutePath();
-    CFilePath theDir = theFullPath.GetDirectory();
-    CFilePath theStem = theFullPath.GetFileStem();
-    theStem.append(L"_Crash");
-    // Attempt to open a dump file ideally next to the log file.
-    CFilePath theSaveFile;
-    {
-        TFilePtr theSaveFilePtr =
-            SFileTools::FindUniqueDestFile(theDir, theStem, CFilePath(L"uip"));
-        theSaveFile = theSaveFilePtr->m_Path;
-    }
-    theSaveFile.DeleteThisFile();
-    theDoc.SaveDocument(Qt3DSFile(theSaveFile));
-    qCInfo(qt3ds::TRACE_INFO) << "Project successfully saved: " << theSaveFile.GetCharStar();
-
-    ::CString fileSaveLocationMessage;
-    fileSaveLocationMessage.Format(L"Project saved as %ls",
-                                   static_cast<const wchar_t *>(theSaveFile));
-
-    theDlg.SetErrorMessage(errorMessage);
-    theDlg.SetFilename(fileSaveLocationMessage);
-    theDlg.DoModal();
-}
-
-void CStudioApp::InitHelpSystem()
-{
-    Q3DStudio::CString theHelpFile = ::LoadResourceString(IDS_HELP_FILE_NAME);
-
-    ATL::CStringT<TCHAR, StrTraitMFC<TCHAR>> theOldHelpPath(m_pszHelpFilePath);
-    ATL::CStringT<TCHAR, StrTraitMFC<TCHAR>> theNewHelpPath;
-
-    long theIndex = theOldHelpPath.ReverseFind('\\');
-    theOldHelpPath.Delete(theIndex + 1, (theOldHelpPath.GetLength() - theIndex));
-    theNewHelpPath = theOldHelpPath;
-    ::CString theMFCHelpFile(theHelpFile.GetMulti());
-    theNewHelpPath += theMFCHelpFile;
-
-    // Save the m_pszHelpFilePath variable so that CWinApp::SetCurrentHandles()
-    // in appinit.cpp can deallocate the memory it allocated, which causes a
-    // mmgr.h assert when we free it in here
-    m_OldHelpFilePath = const_cast<LPTSTR>(m_pszHelpFilePath);
-
-    long theLength = theNewHelpPath.GetLength();
-    m_pszHelpFilePath = new TCHAR[theLength + 1];
-    ::lstrcpyn(const_cast<LPTSTR>(m_pszHelpFilePath), theNewHelpPath, theLength + 1);
-}
-#endif
 
 CCore *CStudioApp::GetCore()
 {

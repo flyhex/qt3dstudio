@@ -168,7 +168,6 @@ SOURCES += \
     _Win/Palettes/PaletteManager.cpp \
     _Win/Palettes/Progress/ProgressView.cpp \
     _Win/Palettes/Splash/SplashView.cpp \
-    #_Win/UI/CrashDlg.cpp \
     _Win/UI/EditCameraBar.cpp \
     _Win/UI/EditorPane.cpp \
     _Win/UI/GLVersionDlg.cpp \
