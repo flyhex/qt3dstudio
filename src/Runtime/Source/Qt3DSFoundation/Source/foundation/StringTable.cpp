@@ -349,7 +349,7 @@ public:
     void Save(SWriteBuffer &ioBuffer) const
     {
         // Buffer should be aligned before we get to it.
-        QT3DS_ASSERT(ioBuffer.size() % sizeof(void *) == 0);
+        QT3DS_ASSERT(ioBuffer.size() % 4 == 0);
 
         QT3DSU32 numStrs = Size();
         size_t bufferBegin = ioBuffer.size();

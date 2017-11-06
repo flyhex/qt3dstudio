@@ -576,7 +576,7 @@ void SGraphObjectSerializer::Save(NVFoundationBase &inFoundation,
     // everything else so we go
     // in two passes per layer.
     // We expect the incoming data buffer to be aligned already.
-    QT3DS_ASSERT(outSavedData.size() % sizeof(void *) == 0);
+    QT3DS_ASSERT(outSavedData.size() % 4 == 0);
     if (inPresentation.m_Scene) {
         QT3DSU32 theDataSectionStart = outSavedData.size();
         outSavedData.writeZeros(4);

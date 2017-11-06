@@ -1513,7 +1513,7 @@ Qt3DSTranslator::Qt3DSTranslator(Q3DStudio::TElement &inElement, SGraphObject &i
 void Qt3DSTranslator::Save(SWriteBuffer &inWriteBuffer, QT3DSU32 inGraphObjectOffset)
 {
     // We have to start on pointer aligned boundaries.
-    QT3DS_ASSERT(inWriteBuffer.size() % sizeof(void *) == 0);
+    QT3DS_ASSERT(inWriteBuffer.size() % 4 == 0);
     QT3DSU32 theOffset = inWriteBuffer.size();
     inWriteBuffer.write(*this);
     Qt3DSTranslator *theNewTranslator =
@@ -1750,7 +1750,7 @@ Qt3DSTranslator *Qt3DSTranslator::LoadTranslator(SDataReader &inReader, size_t i
     QT3DSU8 *theTranslatorStart = inReader.m_CurrentPtr;
     // Make sure things are aligned
     (void)theTranslatorStart;
-    QT3DS_ASSERT((size_t)theTranslatorStart % sizeof(void *) == 0);
+    QT3DS_ASSERT((size_t)theTranslatorStart % 4 == 0);
     Qt3DSTranslator *theTranslator = inReader.Load<Qt3DSTranslator>();
     if (theTranslator) {
         size_t *elemPtr = reinterpret_cast<size_t *>(&theTranslator->m_Element);

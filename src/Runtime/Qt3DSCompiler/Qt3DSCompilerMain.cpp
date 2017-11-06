@@ -89,6 +89,9 @@ struct SNullWindowSystem : public Q3DStudio::IWindowSystem
 
 int main(int c, char **v)
 {
+    // init runtime static resources
+    Q_INIT_RESOURCE(res);
+
     QGuiApplication app(c, v);
 
     QSurfaceFormat format;
