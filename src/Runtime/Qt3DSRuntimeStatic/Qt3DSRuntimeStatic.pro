@@ -365,7 +365,6 @@ HEADERS += \
     ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderUIPLoader.h \
     ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderUIPSharedTranslation.h \
     ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderWidgets.h \
-    ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderWindowDimensions.h \
     ../Source/Qt3DSRuntimeRender/Include/Qt3DSTextRenderer.h \
     ../Source/Qt3DSRuntimeRender/RendererImpl/Qt3DSRenderableObjects.h \
     ../Source/Qt3DSRuntimeRender/RendererImpl/Qt3DSRendererImpl.h \
@@ -641,12 +640,12 @@ SOURCES += \
     ../Source/DataModel/Source/Qt3DSMetadata.cpp \
     ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
     ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.cpp \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMMetaData.cpp \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMXML.cpp \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMStringTable.cpp \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMHandles.cpp \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMComposerTypeDefinitions.cpp \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMValue.cpp \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMMetaData.cpp \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMXML.cpp \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMStringTable.cpp \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMHandles.cpp \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMComposerTypeDefinitions.cpp \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMValue.cpp \
     ../../Authoring/QT3DSDM/Systems/Cores/SimpleDataCore.cpp
 
 HEADERS += \
@@ -654,12 +653,12 @@ HEADERS += \
     ../Source/DataModel/Include/DocumentResourceManagerScriptParser.h \
     ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.h \
     ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.h \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMMetaData.h \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMXML.h \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMStringTable.h \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMHandles.h \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMComposerTypeDefinitions.h \
-    ../../Authoring/QT3DSDM/Systems/QT3DSDMValue.h \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMMetaData.h \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMXML.h \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMStringTable.h \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMHandles.h \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMComposerTypeDefinitions.h \
+    ../../Authoring/QT3DSDM/Systems/Qt3DSDMValue.h \
     ../../Authoring/QT3DSDM/Systems/Cores/SimpleDataCore.h
 
 # Engine
