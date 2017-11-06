@@ -136,4 +136,7 @@ void CAboutDlg::OnInitDialog()
     m_ui->m_ProductVersion->setText(m_ProductVersionStr.toQString());
     m_ui->m_Copyright->setText(m_CopyrightStr.toQString());
     m_ui->m_Credit1->setText(m_Credit1Str.toQString());
+
+    // We don't currently have secondary credit, so clear that
+    m_ui->m_Credit2->setText(QString());
 }
