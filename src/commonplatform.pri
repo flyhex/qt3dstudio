@@ -19,7 +19,7 @@ DEFINES += \
 
 win32: PlatformSpecificDir = Windows
 macos: PlatformSpecificDir = Macos
-linux|integrity: PlatformSpecificDir = Linux
+linux|integrity|qnx: PlatformSpecificDir = Linux
 android: PlatformSpecificDir = Android/jni
 
 integrity: {
@@ -44,7 +44,7 @@ CONFIG(debug, debug|release) {
     DEFINES += NDEBUG
 }
 
-linux {
+linux|qnx {
     CONFIG += egl
     DEFINES+=_LINUX QT3DS_OS_LINUX _LINUXPLATFORM QT3DS_NO_X11 \
         QT3DS_VIEWER_EXPORTS WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T

@@ -55,7 +55,7 @@ INCLUDEPATH += \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/Qt3DSLibs
 }
 
-linux {
+linux|qnx {
 QMAKE_CXXFLAGS += -fpermissive
 QMAKE_CFLAGS += -fpermissive
 INCLUDEPATH += \

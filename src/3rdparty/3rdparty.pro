@@ -4,7 +4,7 @@ SUBDIRS += \
     Lua \
     EASTL
 
-!boot2qt:!android:!integrity {
+!boot2qt:!android:!integrity:!qnx {
     SUBDIRS += \
         pcre \
         ColladaDOM/TinyXML \

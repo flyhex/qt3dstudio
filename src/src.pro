@@ -6,6 +6,6 @@ SUBDIRS += \
     Runtime \
     Viewer
 
-!boot2qt:!android:!integrity {
+!boot2qt:!android:!integrity:!qnx {
     SUBDIRS += Authoring
 }

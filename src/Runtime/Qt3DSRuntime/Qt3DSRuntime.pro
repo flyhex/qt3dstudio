@@ -26,7 +26,7 @@ HEADERS += \
     ../Source/Viewer/Qt3DSViewerApp.h \
     ../Source/Viewer/Qt3DSViewerTimer.h
 
-linux {
+linux|qnx {
     BEGIN_ARCHIVE = -Wl,--whole-archive
     END_ARCHIVE = -Wl,--no-whole-archive
 }
