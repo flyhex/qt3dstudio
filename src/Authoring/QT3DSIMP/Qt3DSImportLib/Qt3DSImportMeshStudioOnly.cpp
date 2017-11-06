@@ -38,7 +38,7 @@ using namespace Q3DStudio;
 Mesh *Mesh::Load(const char *inFilePath)
 {
     Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath, FileReadFlags());
+    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
     if (stream.IsOpen() == false) {
         QT3DS_ASSERT(false);
         return NULL;
@@ -66,7 +66,7 @@ QT3DSU32 Mesh::SaveMulti(const char *inFilePath) const
     MallocAllocator allocator;
     Q3DStudio::CFilePath thePath(inFilePath);
     FileOpenFlags theFlags = thePath.Exists() ? FileAppendFlags() : FileWriteFlags();
-    CFileSeekableIOStream stream(thePath, theFlags);
+    CFileSeekableIOStream stream(thePath.toCString(), theFlags);
     return SaveMulti(allocator, stream);
 }
 
@@ -75,7 +75,7 @@ SMultiLoadResult Mesh::LoadMulti(const char *inFilePath, QT3DSU32 inId)
 {
     MallocAllocator allocator;
     Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath, FileReadFlags());
+    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
     return LoadMulti(allocator, stream, inId);
 }
 
@@ -84,7 +84,7 @@ MeshMultiHeader *Mesh::LoadMultiHeader(const char *inFilePath)
 {
     MallocAllocator allocator;
     Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath, FileReadFlags());
+    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
     return LoadMultiHeader(allocator, stream);
 }
 
@@ -92,7 +92,7 @@ QT3DSU32 Mesh::GetHighestMultiVersion(const char *inFilePath)
 {
     MallocAllocator allocator;
     Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath, FileReadFlags());
+    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
     return GetHighestMultiVersion(allocator, stream);
 }
 

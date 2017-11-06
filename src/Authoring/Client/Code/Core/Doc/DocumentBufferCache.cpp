@@ -127,14 +127,14 @@ struct SDocBufferCache : public IDocumentBufferCache
         CFilePath theFullPath = m_Doc.GetResolvedPathToDoc(inPath);
         if (GetBufferManager())
             GetBufferManager()->InvalidateBuffer(
-                GetBufferManager()->GetStringTable().RegisterStr(theFullPath.c_str()));
+                GetBufferManager()->GetStringTable().RegisterStr(theFullPath.toCString()));
 
         TBufferHashMap::iterator entry(
-            m_Buffers.find(m_StringTablePtr->RegisterStr(inPath.GetPathWithoutIdentifier())));
+            m_Buffers.find(m_StringTablePtr->RegisterStr(inPath.toCString())));
         if (entry != m_Buffers.end()) {
             const_cast<SModelBufferOrImage &>(entry->second).Release();
             m_Buffers.erase(entry);
-            m_Doc.GetCore()->GetDispatch()->FireDocumentBufferCacheInvalidated(inPath);
+            m_Doc.GetCore()->GetDispatch()->FireDocumentBufferCacheInvalidated(inPath.toCString());
         }
     }
 
@@ -163,10 +163,10 @@ struct SDocBufferCache : public IDocumentBufferCache
 
     void AddModelBuffer(const CFilePath inFile, SRenderMesh *inBuffer)
     {
-        const wchar_t *thePath(m_StringTablePtr->RegisterStr(inFile.GetPathWithoutIdentifier()));
+        const wchar_t *thePath(m_StringTablePtr->RegisterStr(inFile.toCString()));
         TBufferHashMap::iterator theBufPtr =
             m_Buffers.insert(make_pair(thePath, SModelBufferOrImage())).first;
-        const wchar_t *theFileWithId(m_StringTablePtr->RegisterStr(inFile));
+        const wchar_t *theFileWithId(m_StringTablePtr->RegisterStr(thePath));
         theBufPtr->second.AddModelBuffer(theFileWithId, inBuffer);
     }
 
@@ -196,26 +196,27 @@ struct SDocBufferCache : public IDocumentBufferCache
     {
         CheckAndCreatePrimitiveBuffers();
 
+        CString path = inPath.toCString();
         const TBufferHashMap::iterator entry(
-            m_Buffers.find(m_StringTablePtr->RegisterStr(inPath.GetPathWithoutIdentifier())));
+            m_Buffers.find(m_StringTablePtr->RegisterStr(path)));
         if (entry != m_Buffers.end()) {
             SModelBufferAndPath retval =
-                entry->second.FindModelBuffer(m_StringTablePtr->RegisterStr(inPath.c_str()));
+                entry->second.FindModelBuffer(m_StringTablePtr->RegisterStr(path));
             if (retval.m_ModelBuffer)
                 return retval;
         }
 
-        if (inPath.size() == 0 || inPath[0] == '#')
+        if (path.size() == 0 || path[0] == '#')
             return SModelBufferAndPath();
 
-        CFilePath theFullPath(m_Doc.GetResolvedPathToDoc(inPath));
+        CFilePath theFullPath(m_Doc.GetResolvedPathToDoc(path));
         SModelBufferAndPath retval;
         if (theFullPath.IsFile()) {
             if (GetBufferManager()) {
                 SRenderMesh *theMesh = GetBufferManager()->LoadMesh(
-                    GetBufferManager()->GetStringTable().RegisterStr(theFullPath.c_str()));
+                    GetBufferManager()->GetStringTable().RegisterStr(theFullPath.toCString()));
                 if (theMesh) {
-                    theFullPath.SetIdentifier(theMesh->m_MeshId);
+                    theFullPath.SetIdentifier(QString::number(theMesh->m_MeshId));
                     retval = SModelBufferAndPath(theMesh, theFullPath);
                 }
             }
@@ -227,18 +228,18 @@ struct SDocBufferCache : public IDocumentBufferCache
 
     SImageTextureData GetOrCreateImageBuffer(const CFilePath &inPath) override
     {
-        const TBufferHashMap::iterator entry(m_Buffers.find(m_StringTablePtr->RegisterStr(inPath)));
+        const TBufferHashMap::iterator entry(m_Buffers.find(m_StringTablePtr->RegisterStr(inPath.toCString())));
         if (entry != m_Buffers.end() && entry->second.m_ImageBuffer.hasValue())
             return entry->second.m_ImageBuffer;
         CFilePath thePath(m_Doc.GetResolvedPathToDoc(inPath));
         SImageTextureData retval;
         if (thePath.IsFile() && GetBufferManager()) {
             retval = GetBufferManager()->LoadRenderImage(
-                GetBufferManager()->GetStringTable().RegisterStr(thePath));
+                GetBufferManager()->GetStringTable().RegisterStr(thePath.toCString()));
         }
         if (retval.m_Texture)
             m_Buffers.insert(
-                make_pair(m_StringTablePtr->RegisterStr(inPath), SModelBufferOrImage(retval)));
+                make_pair(m_StringTablePtr->RegisterStr(inPath.toCString()), SModelBufferOrImage(retval)));
         return retval;
     }
 

@@ -226,9 +226,9 @@ struct MeshEntry
         , m_FilePath(L"")
         , m_ReferencePath(L"")
     {
-        m_FilePath = inStringTable.RegisterStr(inPath);
-        inPath.SetIdentifier(inRevision);
-        m_ReferencePath = inStringTable.RegisterStr(inPath);
+        m_FilePath = inStringTable.RegisterStr(inPath.toCString());
+        inPath.SetIdentifier(QString::number(inRevision));
+        m_ReferencePath = inStringTable.RegisterStr(inPath.toCString());
     }
 
     MeshEntry(TCharPtr inSourceId, TCharPtr inPath, qt3dsdm::IStringTable &inStringTable)
@@ -327,11 +327,11 @@ public:
     }
 
     TCharPtr RegisterStr(TCharPtr str) override { return m_StringTable.RegisterStr(str); }
-    TCharPtr GetSrcFile() const override { return m_SrcFile.c_str(); }
-    TCharPtr GetDestDir() const override { return m_DestDirectory.c_str(); }
-    TCharPtr GetImageDir() const override { return m_ImageDir.c_str(); }
-    TCharPtr GetMeshDir() const override { return m_MeshDir.c_str(); }
-    TCharPtr GetPathBufferDir() const override { return m_PathBufferDir.c_str(); }
+    QString GetSrcFile() const override { return m_SrcFile.toQString(); }
+    QString GetDestDir() const override { return m_DestDirectory.toQString(); }
+    QString GetImageDir() const override { return m_ImageDir.toQString(); }
+    QString GetMeshDir() const override { return m_MeshDir.toQString(); }
+    QString GetPathBufferDir() const override { return m_PathBufferDir.toQString(); }
     void Release() override { delete this; }
 
     Instance *GetInstance(TIMPHandle inst) const
@@ -749,7 +749,7 @@ public:
             m_ImageDir.CreateDir(true);
 
         if (!m_ImageDir.IsDirectory())
-            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir);
+            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir.toCString());
 
         Q3DStudio::CString imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
         Q3DStudio::CString srcImgPath =
@@ -778,7 +778,7 @@ public:
             if (!m_ImageDir.IsDirectory())
                 m_ImageDir.CreateDir(true);
             if (!m_ImageDir.IsDirectory())
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir);
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir.toCString());
             CFilePath fullDestPath =
                 CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(dstPath.getValue()));
             Q3DStudio::SFileErrorCodeAndNumBytes copyResult = Q3DStudio::SFileTools::Copy(
@@ -793,7 +793,7 @@ public:
                 CFilePath imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
                 CFilePath srcImgPath =
                     CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
-                m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(srcImgPath.c_str()),
+                m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(srcImgPath.toCString()),
                                                  m_StringTable.RegisterStr(dstPath.getValue())));
             }
 
@@ -859,7 +859,7 @@ public:
         if (!m_MeshDir.IsDirectory())
             m_MeshDir.CreateDir(true);
         if (!m_MeshDir.IsDirectory())
-            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir);
+            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir.toCString());
 
         Q3DStudio::TFilePtr handf =
             Q3DStudio::SFileTools::FindUniqueDestFile(m_MeshDir, name, L"mesh");
@@ -879,12 +879,12 @@ public:
             if (!m_MeshDir.IsDirectory())
                 m_MeshDir.CreateDir(true);
             if (!m_MeshDir.IsDirectory())
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir);
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir.toCString());
 
             CFilePath meshPath =
                 CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(srcMesh.getValue()));
 
-            meshPath = meshPath.GetPathWithoutIdentifier();
+            meshPath = meshPath.filePath();
             Qt3DSFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
                 SFile::OpenForWrite(
                     meshPath, FileOpenFlags(FileOpenFlagValues::Open | FileOpenFlagValues::Create)),
@@ -960,7 +960,7 @@ public:
         if (!m_PathBufferDir.IsDirectory())
             m_PathBufferDir.CreateDir(true);
         if (!m_PathBufferDir.IsDirectory())
-            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_PathBufferDir);
+            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_PathBufferDir.toCString());
 
         Q3DStudio::TFilePtr handf =
             Q3DStudio::SFileTools::FindUniqueDestFile(m_PathBufferDir, name, L"path");
@@ -968,7 +968,7 @@ public:
         MallocAllocator alloc;
         pathBuffer.Save(output);
         CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
-        const wchar_t *return_Value = m_StringTable.RegisterStr(_retval.c_str());
+        const wchar_t *return_Value = m_StringTable.RegisterStr(_retval.toCString());
         m_PathBuffers.insert(
             eastl::make_pair(m_StringTable.RegisterStr(name.c_str()), return_Value));
         return return_Value;
@@ -982,12 +982,12 @@ public:
             if (!m_PathBufferDir.IsDirectory())
                 m_PathBufferDir.CreateDir(true);
             if (!m_PathBufferDir.IsDirectory())
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_PathBufferDir);
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_PathBufferDir.toCString());
 
             CFilePath pathBufferPath = CFilePath::CombineBaseAndRelative(
                 m_DestDirectory, CString(srcPathBuffer.getValue()));
 
-            pathBufferPath = pathBufferPath.GetPathWithoutIdentifier();
+            pathBufferPath = pathBufferPath.filePath();
             Qt3DSFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
                 SFile::OpenForWrite(pathBufferPath, FileOpenFlags(FileOpenFlagValues::Open
                                                                   | FileOpenFlagValues::Create)),
@@ -1003,7 +1003,7 @@ public:
             CFilePath relativePath =
                 CFilePath::GetRelativePathFromBase(m_DestDirectory, pathBufferPath);
 
-            const wchar_t *relPath = m_StringTable.RegisterStr(relativePath.c_str());
+            const wchar_t *relPath = m_StringTable.RegisterStr(relativePath.toCString());
             m_PathBuffers.insert(eastl::make_pair(m_StringTable.RegisterStr(name), relPath));
             return relPath;
         }
@@ -1391,7 +1391,7 @@ public:
 
         {
             if (exists) {
-                CFileSeekableIOStream stream(fullPath, FileReadFlags());
+                CFileSeekableIOStream stream(fullPath.toCString(), FileReadFlags());
 
                 // OK, ensure we can open this file in append mode.
                 // This is kind of tricky because we need to write the data to the file
@@ -1449,7 +1449,8 @@ public:
                 if (theSrcFile.IsAbsolute())
                     theSrcFile = CFilePath::GetRelativePathFromBase(theDirectory, m_SrcFile);
 
-                writer.Att(L"SrcFile", theSrcFile.c_str());
+                CString src = theSrcFile.toCString();
+                writer.Att(L"SrcFile", src.c_str());
                 writer.Att(L"ImageDir", L"Images");
                 writer.Att(L"MeshDir", L"Meshes");
                 Serialize(writer, L"Image", const_cast<TStrToStrMap &>(m_Images));
@@ -1457,7 +1458,7 @@ public:
             }
         }
         {
-            CFileSeekableIOStream stream(fullPath, FileWriteFlags());
+            CFileSeekableIOStream stream(fullPath.toCString(), FileWriteFlags());
             stream.SetPosition(0, SeekPosition::Begin);
             CDOMSerializer::WriteXMLHeader(stream);
             CDOMSerializer::Write(*theTopElement, stream);
@@ -1558,8 +1559,8 @@ class RefreshImpl : public Import
 
 public:
     RefreshImpl(ImportImpl &src, const Q3DStudio::CString &srcDirectory)
-        : m_Import(src.m_StringTablePtr, srcDirectory, src.m_DestDirectory, src.m_ImageDir.c_str(),
-                   src.m_MeshDir.c_str())
+        : m_Import(src.m_StringTablePtr, srcDirectory, src.m_DestDirectory, src.m_ImageDir.toCString(),
+                   src.m_MeshDir.toCString())
         , m_Source(src)
     {
     }
@@ -1571,11 +1572,11 @@ public:
     // Implement the import interface...
 
     TCharPtr RegisterStr(TCharPtr str) override { return m_Import.RegisterStr(str); }
-    TCharPtr GetSrcFile() const override { return m_Import.GetSrcFile(); }
-    TCharPtr GetDestDir() const override { return m_Import.GetDestDir(); }
-    TCharPtr GetImageDir() const override { return m_Import.GetImageDir(); }
-    TCharPtr GetMeshDir() const override { return m_Import.GetMeshDir(); }
-    TCharPtr GetPathBufferDir() const override { return m_Import.GetPathBufferDir(); }
+    QString GetSrcFile() const override { return m_Import.GetSrcFile(); }
+    QString GetDestDir() const override { return m_Import.GetDestDir(); }
+    QString GetImageDir() const override { return m_Import.GetImageDir(); }
+    QString GetMeshDir() const override { return m_Import.GetMeshDir(); }
+    QString GetPathBufferDir() const override { return m_Import.GetPathBufferDir(); }
     QT3DSU32 Save(TCharPtr fname) const override { return m_Import.Save(fname); }
 
     // Add a mapping from an named id to a handle
@@ -1875,10 +1876,10 @@ ImportPtrOrError Import::Create(TCharPtr _srcPath, TCharPtr _destDir)
     CFilePath destDir(CFilePath::GetAbsolutePath(_destDir));
 
     if (!srcPath.IsFile())
-        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath);
+        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath.toCString());
 
     if (!destDir.CreateDir(true))
-        return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, destDir);
+        return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, destDir.toCString());
 
     TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
     return new ImportImpl(strTable, srcPath, destDir, L"maps", L"meshes");
@@ -1890,7 +1891,7 @@ ImportPtrOrError Import::Load(TCharPtr pathToFile, QT3DSU32 inImportVersion)
     CFilePath destDir(fullFilePath.GetDirectory());
 
     if (fullFilePath.IsFile() == false)
-        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath);
+        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath.toCString());
 
     TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
     ImportImpl *impl = new ImportImpl(strTable, Q3DStudio::CString(), destDir);
@@ -1898,7 +1899,7 @@ ImportPtrOrError Import::Load(TCharPtr pathToFile, QT3DSU32 inImportVersion)
     QT3DS_ASSERT(success);
     if (success == false) {
         impl->Release();
-        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath.c_str());
+        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath.toCString());
     }
     return impl;
 }
@@ -1909,7 +1910,7 @@ ImportPtrOrError Import::CreateForRefresh(Import &original, TCharPtr _srcPath)
 
     if (!srcPath.IsFile()) {
         original.Release();
-        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath);
+        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath.toCString());
     }
 
     RefreshImpl *refresh(new RefreshImpl(static_cast<ImportImpl &>(original), srcPath));
@@ -1920,7 +1921,7 @@ QT3DSU32 Import::GetHighestImportRevision(TCharPtr pathToFile)
 {
     using std::shared_ptr;
     CFilePath fullFilePath(CFilePath::GetAbsolutePath(pathToFile));
-    CFileSeekableIOStream stream(fullFilePath, FileReadFlags());
+    CFileSeekableIOStream stream(fullFilePath.toCString(), FileReadFlags());
     if (stream.IsOpen() == false) {
         QT3DS_ASSERT(false);
         return 0;

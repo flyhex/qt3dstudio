@@ -371,7 +371,7 @@ bool ChooserModelBase::isExpanded(const QModelIndex &modelIndex) const
 
 EStudioObjectType ChooserModelBase::getIconType(const QString &path) const
 {
-    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(Q3DStudio::CFilePath::fromQString(path)).m_IconType;
+    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(Q3DStudio::CFilePath(path)).m_IconType;
 }
 
 QString ChooserModelBase::getIconName(const QString &path) const

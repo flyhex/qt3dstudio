@@ -128,10 +128,10 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     {
         m_Editor.SetSpecificInstancePropertyValue(
             m_Slide, m_Root, L"sourcepath",
-            std::make_shared<CDataStr>((const wchar_t *)m_Relativeimportfile));
+            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
         m_Editor.SetSpecificInstancePropertyValue(
             m_Slide, m_Root, L"importfile",
-            std::make_shared<CDataStr>((const wchar_t *)m_Relativeimportfile));
+            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
     }
 
     Qt3DSDMInstanceHandle FindInstance(TImportId inImportHdl) override
@@ -199,7 +199,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
                                                   std::make_shared<CDataStr>(inImportId));
         m_Editor.SetSpecificInstancePropertyValue(
             m_Slide, retval, L"importfile",
-            std::make_shared<CDataStr>((const wchar_t *)m_Relativeimportfile));
+            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
         AddInstanceMap(retval, inImportId);
         return retval;
     }
@@ -435,7 +435,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             m_Editor.SetSpecificInstancePropertyValue(0, newInstance, L"importid",
                                                       std::make_shared<CDataStr>(inImportId));
             m_Editor.SetSpecificInstancePropertyValue(
-                0, newInstance, L"importfile", std::make_shared<CDataStr>(m_Relativeimportfile));
+                0, newInstance, L"importfile",
+                std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
             insert_unique(theInserter.first->second,
                           make_pair(theIterator.GetCurrentSlide(), newInstance));
         }

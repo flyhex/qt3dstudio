@@ -142,7 +142,7 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
                                         RemoteDeploymentSender *project)
 {
     using namespace Q3DStudio;
-    Q3DStudio::CString theCommandStr;
+    QString theCommandStr;
 
     if (inMode == EXECMODE_DEPLOY) {
         Q_ASSERT(project);
@@ -151,7 +151,7 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
                && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
         // Quick Preview on PC without going via NANT
         CFilePath theCurrentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
-        CFilePath theViewerDir = CFilePath::fromQString(QApplication::applicationDirPath());
+        CFilePath theViewerDir(QApplication::applicationDirPath());
         if (!theViewerDir.IsDirectory()) {
             // theMainDir = theCurrentPath.GetDirectory().GetDirectory();
             // theViewerDir = CFilePath::CombineBaseAndRelative( theMainDir, CFilePath(
@@ -161,25 +161,25 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
 
         Q3DStudio::CString theDocumentFile = CPreviewHelper::GetLaunchFile(inDocumentFile);
 #ifdef Q_OS_WIN
-        Q3DStudio::CString theViewerFile = "Qt3DViewer.exe";
-        theCommandStr = theViewerDir + "\\" + theViewerFile;
+        QString theViewerFile = "Qt3DViewer.exe";
+        theCommandStr = theViewerDir.filePath() + "\\" + theViewerFile;
 #else
 #ifdef Q_OS_MACOS
-        Q3DStudio::CString theViewerFile = "../../../Qt3DViewer.app/Contents/MacOS/Qt3DViewer";
+        QString theViewerFile = "../../../Qt3DViewer.app/Contents/MacOS/Qt3DViewer";
 #else
-        Q3DStudio::CString theViewerFile = "Qt3DViewer";
+        QString theViewerFile = "Qt3DViewer";
 #endif
-        theCommandStr = theViewerDir + "/" + theViewerFile;
+        theCommandStr = theViewerDir.filePath() + "/" + theViewerFile;
 #endif
 
         QProcess *p = new QProcess;
         auto finished = static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished);
         QObject::connect(p, finished, p, &QObject::deleteLater);
-        p->start(theCommandStr.toQString(), { theDocumentFile.toQString() });
+        p->start(theCommandStr, { theDocumentFile.toQString() });
 
         if (!p->waitForStarted()) {
             QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"), QObject::tr("%1 failed with error: %2")
-                                  .arg(theViewerFile.toQString()).arg(p->errorString()));
+                                  .arg(theViewerFile).arg(p->errorString()));
             delete p;
             return;
         }

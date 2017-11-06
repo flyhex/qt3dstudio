@@ -45,7 +45,8 @@
 #include "Qt3DSFileToolTypes.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 
-QT_FORWARD_DECLARE_CLASS(QDir)
+#include <QtCore/qdir.h>
+#include <QtCore/qfileinfo.h>
 
 namespace Q3DStudio {
 using qt3ds::QT3DSI64;
@@ -56,61 +57,43 @@ using qt3dsdm::WStrOps;
 
 struct SFileModificationRecord;
 
-/**
- *	SFile tools to abstract dealing with the filesystem.  You should not be calling fstat
- *	or stat, fopen, CreateFile, CreateDirectory, etc.  Those calls need to go through
- *	this object.  File paths can also have identifiers trailing them.
- *  Anything after a # is interprented as an identifier.  All file operations still work
- *	with the identifer included.
- */
-class CFilePath : public CString
+// FIXME: This class should ultimately be removed and replaced with direct
+// calls to QFileInfo and friends.
+class CFilePath : public QFileInfo
 {
 public:
-    //////Begin public API
+    CFilePath();
+    CFilePath(const wchar_t *path);
+    CFilePath(const char *path);
+    CFilePath(const CString &path);
+    CFilePath(const QString &path);
 
-    CFilePath()
-        : CString(){}
-    CFilePath(const wchar_t *inPath)
-        : CString(inPath)
-    {
-        Normalize();
-    }
-    CFilePath(const char *inPath)
-        : CString(inPath)
-    {
-        Normalize();
-    }
-    CFilePath(const CString &szString)
-        : CString(szString)
-    {
-        Normalize();
-    }
-    CFilePath(const QString &string)
-        : CString(string.toStdWString().c_str())
-    {
-    }
-    CFilePath(const CFilePath &szString)
-        : CString(szString)
-    {
-    }
+    // FIXME: remove when RecursivelyFindFilesOfType is refactored
+    bool operator<(const CFilePath &path) const
+    { return filePath() < path.filePath(); }
 
-    const CFilePath &operator=(const CFilePath &strSrc);
+    // FIXME: refactor call sites to just use 'filePath()'
+    QString toQString() const { return filePath(); }
+    CString toCString() const { return CString::fromQString(filePath()); }
+    const char *GetCharStar() const
+    { return filePath().toLatin1().constData(); }
+
+    // FIXME: refactor at call sites to no longer use implicit casts
+    operator const CString()
+    { return toCString(); }
 
     CFilePath GetDirectory() const;
     CString GetFileName() const;
     CString GetFileStem() const; // no extension, test.png -> test
     CString GetExtension() const;
-    // Get a file path you can give to systems that don't understand the identifier
-    CFilePath GetPathWithoutIdentifier() const;
-    // Set the identifer appended to the end of this file path.
-    void SetIdentifier(const CString &inIdentifier);
-    // Get the identifier appended to the end of this file path.
-    CString GetIdentifier() const;
-    void SetIdentifier(unsigned long inIdentifier);
 
-    static void EnsureNonFileURL(CString &ioFileFilePath);
+    CString GetPathWithIdentifier() const;
+    CString GetIdentifier() const { return CString::fromQString(m_identifier); }
+    void SetIdentifier(const QString &identifier) { m_identifier = identifier; }
+    void SetIdentifier(const CString &identifier)
+    { m_identifier = identifier.toQString(); }
 
-    bool GetModuleFilePath();
+    static CString GetModuleFilePath();
 
     void ConvertToRelative(const CFilePath &inBaseAbsolute);
     static CFilePath GetRelativePathFromBase(const CFilePath &inBase, const CFilePath &inPath)
@@ -141,9 +124,7 @@ public:
     }
 
     bool IsAbsolute() const;
-    // If we are absolute, we are done.
-    // If not, CombineBaseAndRelative using getcwd.
-    void ConvertToAbsolute();
+    bool ConvertToAbsolute();
     static CFilePath GetAbsolutePath(const CFilePath &inBaseFilePath)
     {
         CFilePath retval(inBaseFilePath);
@@ -217,7 +198,8 @@ public:
     static CFilePath GetUserApplicationDirectory();
 
 private:
-    void Normalize();
+    void normalizeAndSetPath(const QString& path);
+    QString m_identifier;
 };
 
 struct SFileModificationRecord
@@ -241,7 +223,7 @@ struct SFileModificationRecord
     {
     }
     // Order lexographically
-    bool operator<(const SFileModificationRecord &inOther) const { return m_File < inOther.m_File; }
+    bool operator<(const SFileModificationRecord &inOther) const { return m_File.filePath() < inOther.m_File.filePath(); }
 };
 
 typedef std::vector<SFileModificationRecord> TFileModificationList;

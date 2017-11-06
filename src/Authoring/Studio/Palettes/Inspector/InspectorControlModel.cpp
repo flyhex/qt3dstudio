@@ -232,7 +232,8 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
             = Q3DStudio::CFilePath::CombineBaseAndRelative(base, path);
 
         const QString name = g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
-                                  .GetCustomMaterialName(absolutePath).toQString();
+                                  .GetCustomMaterialName(
+                                        absolutePath.toCString()).toQString();
 
         m_materials.push_back({name, relativePath});
     }
@@ -573,7 +574,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Mesh) {
             QString meshValue = qt3dsdm::get<QString>(value);
             Q3DStudio::CFilePath theSelectionItem(Q3DStudio::CString::fromQString(meshValue));
-            Q3DStudio::CFilePath theSelectionWithoutId(theSelectionItem.GetPathWithoutIdentifier());
+            Q3DStudio::CFilePath theSelectionWithoutId(theSelectionItem.filePath());
             if (theSelectionWithoutId.size())
                 element->m_value = theSelectionWithoutId.GetFileName().toQString();
             else

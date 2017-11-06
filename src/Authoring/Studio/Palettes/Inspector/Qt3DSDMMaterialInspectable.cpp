@@ -109,7 +109,8 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
                     SMaterialEntry &theEntry =
                         *GetOrCreateMaterialEntry(Q3DStudio::CString(relativePath));
                     theEntry.m_Name =
-                        m_Doc.GetDocumentReader().GetCustomMaterialName(theRecord.m_File);
+                        m_Doc.GetDocumentReader().GetCustomMaterialName(
+                            theRecord.m_File.toCString());
                 } break;
                 case Q3DStudio::FileModificationType::Destroyed: {
                     vector<SMaterialEntry>::iterator theEntry = GetMaterialEntry(relativePath);

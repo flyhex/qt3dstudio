@@ -236,11 +236,12 @@ void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"scripts")).CreateDir(true);
     }
 
-    m_Doc->SetDocumentPath(theDocument);
+    Qt3DSFile fileDocument(theDocument.toCString());
+    m_Doc->SetDocumentPath(fileDocument);
     m_Doc->CreateNewDocument();
 
     // Serialize the new document.
-    m_Doc->SaveDocument(theDocument);
+    m_Doc->SaveDocument(fileDocument);
 
 #ifdef DRIVE_DESIGN_STUDIO
     // Update the uia file if possible.

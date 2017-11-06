@@ -193,10 +193,10 @@ void CCmdLocateReference::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
 
         // Split the source path and the identifier
         outIdentifier = theSourcePath.GetIdentifier();
-        outPath = theSourcePath.GetPathWithoutIdentifier();
+        outPath = theSourcePath.filePath();
     } else {
         outIdentifier.Clear();
-        outPath.Clear();
+        outPath = Q3DStudio::CFilePath();
     }
 }
 
@@ -215,7 +215,8 @@ void CCmdLocateReference::SetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
 {
     Q3DStudio::CFilePath theSourcePath(inPath);
     theSourcePath.SetIdentifier(inIdentifier);
-    qt3dsdm::SValue theValue(qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(theSourcePath)));
+    qt3dsdm::SValue theValue(qt3dsdm::TDataStrPtr(
+        new qt3dsdm::CDataStr(theSourcePath.toCString())));
 
     if (inSpecificSlide.Valid())
         m_SlideCore->ForceSetInstancePropertyValue(inSpecificSlide, inInstance,
@@ -253,7 +254,7 @@ CCmdLocateFile::~CCmdLocateFile()
 bool CCmdLocateFile::ComparePath(const Q3DStudio::CFilePath &inPath)
 {
     // Do a caseless comparison between inPath and the old path
-    return inPath.Compare(m_OldPath, false);
+    return inPath.toCString().Compare(m_OldPath.toCString(), false);
 }
 
 //=============================================================================
@@ -314,8 +315,9 @@ bool CCmdLocateFolder::ComparePath(const Q3DStudio::CFilePath &inPath)
 Q3DStudio::CFilePath CCmdLocateFolder::GetNewPath(const Q3DStudio::CFilePath &inPath)
 {
     // Change inPath from old folder to new folder
-    Q3DStudio::CFilePath theNewPath(m_NewPath + inPath.Extract(m_OldPath.Length()));
-    return theNewPath;
+    Q3DStudio::CString path = inPath.toCString();
+    Q3DStudio::CString oldPath = m_OldPath.toCString();
+    return m_NewPath.toCString() + path.Extract(oldPath.Length());
 }
 
 //=============================================================================

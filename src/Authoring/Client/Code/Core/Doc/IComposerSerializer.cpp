@@ -2545,7 +2545,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                     // Now the magic section
                                     NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>
                                             theStream = m_InputStreamFactory->GetStreamForFile(
-                                                QString::fromWCharArray(theFullPath));
+                                                theFullPath.toQString());
                                     if (theStream) {
                                         m_MetaData.LoadEffectInstance(
                                                     m_StringTable.GetNarrowStr(theSourcePath),
@@ -2576,7 +2576,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                     std::vector<SMetaDataLoadWarning> warnings;
                                     NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>
                                             theStream = m_InputStreamFactory->GetStreamForFile(
-                                                QString::fromWCharArray(theFullPath));
+                                                theFullPath.toQString());
                                     if (theStream) {
                                         // Now the magic section
                                         m_MetaData.LoadMaterialInstance(

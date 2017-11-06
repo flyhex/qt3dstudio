@@ -212,7 +212,7 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
                 }
             }
 
-            if (theFontFile == L"") {
+            if (theFontFile.filePath().isEmpty()) {
                 // If user doesn't have any font file, copy the default font file from Studio's res
                 // folder
 
@@ -228,7 +228,7 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
                     }
                 }
 
-                if (theResFontFile == L"") {
+                if (theResFontFile.filePath().isEmpty()) {
                     QT3DS_ASSERT(false);
                     std::shared_ptr<IImportFailedHandler> theHandler(
                         theDoc->GetImportFailedHandler());

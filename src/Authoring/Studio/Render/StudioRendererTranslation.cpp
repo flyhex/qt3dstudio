@@ -216,7 +216,7 @@ struct STranslatorDataModelParser
                 Q3DStudio::CFilePath theResolvedPath =
                     Q3DStudio::CFilePath::CombineBaseAndRelative(theDirectory, outValue.c_str());
                 outValue =
-                    m_Context.m_Context.GetStringTable().RegisterStr(theResolvedPath.c_str());
+                    m_Context.m_Context.GetStringTable().RegisterStr(theResolvedPath.toCString());
             }
             return true;
         }
@@ -1291,7 +1291,7 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
 
         Q3DStudio::CFilePath theFullPath = inContext.m_Doc.GetResolvedPathToDoc(theData->GetData());
         qt3ds::foundation::IStringTable &theStrTable = inContext.m_Context.GetStringTable();
-        theItem.m_PluginPath = theStrTable.RegisterStr(theFullPath);
+        theItem.m_PluginPath = theStrTable.RegisterStr(theFullPath.toCString());
         qt3ds::render::IRenderPluginInstance *theInstance =
             inContext.m_Context.GetRenderPluginManager().GetOrCreateRenderPluginInstance(
                 theItem.m_PluginPath, &theItem);

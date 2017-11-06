@@ -230,8 +230,7 @@ void CBuildConfigParser::ParseValueAttributes(const QXmlStreamAttributes &inAttr
             theFilePath.GetModuleFilePath();
             CFilePath theDir = theFilePath.GetDirectory().GetFileStem();
             // If this isn't a developer build.
-            if (theDir.Compare(L"release", CFilePath::ENDOFSTRING, false) == false
-                && theDir.Compare(L"debug", CFilePath::ENDOFSTRING, false) == false)
+            if (theDir.filePath() != "release" || theDir.filePath() != "debug")
                 return;
         }
     }

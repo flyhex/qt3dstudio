@@ -236,20 +236,6 @@ public:
         Assign(inChar);
         return *this;
     }
-#ifdef WIN32
-    template <class T>
-    CString &operator=(const T *inChars)
-    {
-        Assign(inChars);
-        return *this;
-    }
-    template <class T>
-    CString &operator=(const T inChar)
-    {
-        Assign(inChar);
-        return *this;
-    }
-#endif
 
     CString &operator+=(const CString &inString)
     {
@@ -261,20 +247,6 @@ public:
         Concat(inChar);
         return *this;
     }
-#ifdef WIN32
-    template <class T>
-    CString &operator+=(const T *inChars)
-    {
-        Concat(inChars);
-        return *this;
-    }
-    template <class T>
-    CString &operator+=(const T inChar)
-    {
-        Concat(inChar);
-        return *this;
-    }
-#endif
 
     CString operator+(const CString &inString) const
     {

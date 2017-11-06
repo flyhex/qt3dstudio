@@ -999,7 +999,7 @@ Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPa
         qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
             theRenderer->GetProjectFontList();
         qCInfo(qt3ds::TRACE_INFO) << "Attempting to find font: "
-                                  << inFullPathToFontFile.GetCharStar();
+                                  << inFullPathToFontFile.filePath();
         for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx) {
             // Using a CFilePath here instead of a CString means the file path object will normalize
             // the data coming from fontconfig.  For example, they always use forward slashes
@@ -1007,12 +1007,12 @@ Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPa
             // back slashes.
             Q3DStudio::CFilePath theFontFile(ConvertToWide(theProjectFonts[idx].m_FontFile));
             if (inFullPathToFontFile == theFontFile) {
-                qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.GetCharStar()
+                qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.filePath()
                                           << " SUCCEEDED";
                 theFont = ConvertToWide(theProjectFonts[idx].m_FontName);
                 break;
             } else {
-                qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.GetCharStar()
+                qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.filePath()
                                           << " FAILED";
             }
         }
@@ -1402,7 +1402,7 @@ Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath
 
         return Q3DStudio::CFilePath::CombineBaseAndRelative(GetDocumentDirectory(), inPath);
     }
-    return inPath;
+    return inPath.toCString();
 }
 
 //=============================================================================

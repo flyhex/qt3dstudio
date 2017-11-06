@@ -1086,8 +1086,7 @@ inline void AddSourcePathToList(std::set<Q3DStudio::CString> &ioSourcePathList,
                                 const SValue &inValue)
 {
     Q3DStudio::CFilePath theSourcePath = qt3dsdm::get<TDataStrPtr>(inValue)->GetData();
-    theSourcePath = theSourcePath.GetPathWithoutIdentifier();
-    if (theSourcePath != L"")
+    if (!theSourcePath.filePath().isEmpty())
         ioSourcePathList.insert(theSourcePath);
 }
 
@@ -1230,7 +1229,7 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
         // If the font is not found, it means that we are using missing font file.
         // Create some non-existing path to inform user that this font is missing.
         bool theFontFound = false;
-        Q3DStudio::CFilePath theFontFile;
+        Q3DStudio::CString theFontFile;
         for (size_t idx = 0, end = theFontNameFileList.size(); idx < end; ++idx) {
             if (theFontNameFileList[idx].first == *theFontNameIter) {
                 theFontFound = true;
@@ -1243,7 +1242,7 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
             theFontFile.append(*theFontNameIter);
             theFontFile.append(" ]");
         }
-        theFontFileList.insert(theFontFile);
+        theFontFileList.insert(Q3DStudio::CFilePath(theFontFile));
     }
     return theFontFileList;
 }

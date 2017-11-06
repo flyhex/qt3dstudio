@@ -114,8 +114,8 @@ void MeshChooserView::showEvent(QShowEvent *event)
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
     const QString meshValue = qt3dsdm::get<QString>(value);
-    const Q3DStudio::CFilePath selectionItem = Q3DStudio::CFilePath::fromQString(meshValue);
-    const Q3DStudio::CFilePath selectionWithoutId = selectionItem.GetPathWithoutIdentifier();
+    const Q3DStudio::CFilePath selectionItem = Q3DStudio::CFilePath(meshValue);
+    const Q3DStudio::CFilePath selectionWithoutId = selectionItem.filePath();
 
     QString currentFile;
 

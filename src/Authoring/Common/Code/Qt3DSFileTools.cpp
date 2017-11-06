@@ -34,163 +34,127 @@
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "foundation/Qt3DSMath.h"
 
-#include <QDateTime>
-#include <QDir>
-#include <QDirIterator>
-#include <QStandardPaths>
-#include <QCoreApplication>
+#include <QtCore/qdatetime.h>
+#include <QtCore/qdiriterator.h>
+#include <QtCore/qstandardpaths.h>
+#include <QtCore/qcoreapplication.h>
 
-// #ifndef __ATLMISC_H__
-using qt3ds::NVMax;
 using qt3ds::QT3DSU8;
 
 namespace {
-const Q3DStudio::CString updirSearch = L"\\..\\";
-const Q3DStudio::CString curdirSearch = L"\\.\\";
-#ifdef _WIN32
-const Q3DStudio::CString updir = L"..\\";
-const Q3DStudio::CString curdir = L".\\";
-const wchar_t pathSep = '\\';
-const Q3DStudio::CString pathSepStr = L"\\";
-#else
-const Q3DStudio::CString updir = L"../";
-const Q3DStudio::CString curdir = L"./";
-const wchar_t pathSep = '/';
-const Q3DStudio::CString pathSepStr = L"/";
-#endif
-const Q3DStudio::CString UNCPathSepStr = L"\\\\";
-#ifdef _WIN32
-const wchar_t alternateSep = '/';
-#else
-const wchar_t alternateSep = '\\';
-#endif
-const Q3DStudio::CString fileUnsafeChars = L"\\/.:";
-const wchar_t identifierSep = '#';
-const Q3DStudio::CString veryLongPathPrefix = "\\\\?\\";
+const QChar identifierSep = '#';
+Q3DStudio::CString veryLongPathPrefix = "\\\\?\\";
 
-long FindPreviousPathSep(const Q3DStudio::CString &path)
+/* From QDir::fromNativeSeparators */
+QString fromWindowsSeparators(const QString &pathName)
 {
-    long startOff = Q3DStudio::CString::npos;
-    // If the end of the path is a slash,
-    if (path.Length() && path[path.Length() - 1] == pathSep)
-        startOff = path.Length() - 2;
-    return path.rfind(pathSep, startOff);
+    int i = pathName.indexOf(QLatin1Char('\\'));
+    if (i != -1) {
+        QString n(pathName);
+
+        QChar * const data = n.data();
+        data[i++] = QLatin1Char('/');
+
+        for (; i < n.length(); ++i) {
+            if (data[i] == QLatin1Char('\\'))
+                data[i] = QLatin1Char('/');
+        }
+
+        return n;
+    }
+    return pathName;
 }
 
-bool RecurseCreateDirectory(const Q3DStudio::CFilePath &dirName)
+/*
+ *  This function cleans up the path references in older uip files created by
+ *  NDD when the tool was windows specific.
+ */
+QString normalizeAndCleanPath(const QString &path)
 {
-    return QDir().mkpath(dirName.toQString());
+    QString ret = path;
+    if (ret.startsWith("file://"))
+        ret = ret.remove(0, 7);
+    if (ret.startsWith("file:\\"))
+        ret = ret.remove(0, 6);
+
+    ret = fromWindowsSeparators(ret);
+    ret = QDir::cleanPath(ret);
+    return ret;
 }
 }
 
 namespace Q3DStudio {
 
-const CFilePath &CFilePath::operator=(const CFilePath &strSrc)
+CFilePath::CFilePath() : QFileInfo() {}
+
+CFilePath::CFilePath(const wchar_t *path)
+    : QFileInfo()
 {
-    CString::operator=(strSrc);
-    return *this;
+    normalizeAndSetPath(QString::fromWCharArray(path));
+}
+
+CFilePath::CFilePath(const char *path)
+    : QFileInfo()
+{
+    normalizeAndSetPath(path);
+}
+
+CFilePath::CFilePath(const CString &path)
+    : QFileInfo()
+{
+    normalizeAndSetPath(path.toQString());
+}
+
+CFilePath::CFilePath(const QString &path)
+    : QFileInfo()
+{
+    normalizeAndSetPath(path);
+}
+
+void CFilePath::normalizeAndSetPath(const QString &path)
+{
+    QString ret = normalizeAndCleanPath(path);
+
+    if (ret.contains(identifierSep)) {
+        int i = ret.indexOf(identifierSep);
+        m_identifier = ret.mid(i);
+        ret.truncate(i);
+    }
+
+    setFile(ret);
 }
 
 CFilePath CFilePath::GetDirectory() const
 {
-    const CFilePath &path(*this);
-    CFilePath::size_type pos = FindPreviousPathSep(path);
-    if (pos == CFilePath::npos)
-        return L"";
-    if (pos == 1 && path[0] == '.') {
-        if (path.size() > 2)
-            return L".\\";
-        return L"";
-    }
-    return path.substr(0, pos);
+    return CFilePath(dir().canonicalPath());
 }
 
 CString CFilePath::GetFileStem() const
 {
-    QFileInfo fi(QString::fromWCharArray(GetPathWithoutIdentifier().c_str()));
-    return fi.baseName().toLatin1().data();
+    return CString::fromQString(completeBaseName());
 }
 
 CString CFilePath::GetFileName() const
 {
-    CFilePath path(GetPathWithoutIdentifier());
-    CFilePath::size_type pos = FindPreviousPathSep(path);
-    if (pos == CFilePath::npos)
-        return path;
-    return path.substr(pos + 1);
-}
-
-CString DoGetExtension(const CFilePath &inPath)
-{
-    const CFilePath &fullName(inPath);
-    CFilePath::size_type lastSlash = fullName.rfind(pathSep);
-    CFilePath::size_type period = fullName.rfind('.');
-    if (period != CFilePath::npos) {
-        if (lastSlash == CFilePath::npos || period > lastSlash) {
-            if (period != CFilePath::npos)
-                return fullName.substr(period + 1);
-        }
-    }
-    return L"";
+    return CString::fromQString(fileName());
 }
 
 CString CFilePath::GetExtension() const
 {
-    return DoGetExtension(GetPathWithoutIdentifier());
+    return CString::fromQString(suffix());
 }
 
-// Get a file path you can give to systems that don't understand the identifier
-CFilePath CFilePath::GetPathWithoutIdentifier() const
+CString CFilePath::GetPathWithIdentifier() const
 {
-    long pos = rfind(identifierSep);
-    if (pos != npos)
-        return substr(0, pos);
-    return *this;
+    if (m_identifier.isEmpty())
+        return CString::fromQString(filePath());
+
+    return CString::fromQString(filePath() + identifierSep + m_identifier);
 }
 
-// Set the identifer appended to the end of this file path.
-void CFilePath::SetIdentifier(const CString &inIdentifier)
+CString CFilePath::GetModuleFilePath()
 {
-    CFilePath theCanonicalPath(GetPathWithoutIdentifier());
-    if (inIdentifier.size()) {
-        theCanonicalPath.append(identifierSep);
-        theCanonicalPath.append(inIdentifier);
-    }
-    *this = theCanonicalPath;
-}
-
-// Get the identifier appended to the end of this file path.
-CString CFilePath::GetIdentifier() const
-{
-    long pos = rfind(identifierSep);
-    if (pos != npos)
-        return substr(pos + 1);
-    return Q3DStudio::CString();
-}
-
-void CFilePath::SetIdentifier(unsigned long inIdentifier)
-{
-    QT3DSU32 id(inIdentifier);
-    wchar_t idBuf[16];
-    WStrOps<QT3DSU32>().ToStr(id, qt3ds::foundation::toDataRef(idBuf, 16));
-    SetIdentifier(idBuf);
-}
-
-bool CFilePath::GetModuleFilePath()
-{
-    StrAssign(CString::fromQString(qApp->applicationFilePath()));
-    return true;
-}
-
-//==============================================================================
-/**
-*	Helper function to strip of "file" protocol so that this is just a system file path
-*/
-void CFilePath::EnsureNonFileURL(Q3DStudio::CString &ioFilePath)
-{
-    if (ioFilePath.Find(L"file://") != Q3DStudio::CString::ENDOFSTRING) {
-        ioFilePath.Delete(0, 7); // length of file protocol
-    }
+    return CString::fromQString(qApp->applicationFilePath());
 }
 
 //==============================================================================
@@ -201,207 +165,105 @@ void CFilePath::EnsureNonFileURL(Q3DStudio::CString &ioFilePath)
 *	@param inBaseAbsolute absolute path to base off from
 *	@return bool to indicate successful conversion or not
 */
-void CFilePath::ConvertToRelative(const CFilePath &inBasePath)
+void CFilePath::ConvertToRelative(const CFilePath &basePath)
 {
-    if (inBasePath.IsEmpty()) // nothing to make relative to
-        return;
+    QT3DS_ASSERT(basePath.isAbsolute());
+    QT3DS_ASSERT(!isRelative());
 
-    QT3DS_ASSERT(inBasePath.IsAbsolute());
-    QT3DS_ASSERT(IsAbsolute());
-
-    QDir basePathDir(inBasePath.toQString());
-    QString relPath = basePathDir.relativeFilePath(toQString());
-    *this = fromQString(relPath);
+    QDir basePathDir = basePath.absoluteFilePath();
+    QString relPath = basePathDir.relativeFilePath(absoluteFilePath());
+    setFile(QDir::cleanPath(relPath));
 }
 
-bool CFilePath::IsInSubDirectory(const CFilePath &inBasePath) const
+bool CFilePath::IsInSubDirectory(const CFilePath &basePath) const
 {
-    if (IsEmpty() || inBasePath.IsEmpty()) // nothing to compare
-        return false;
+    QT3DS_ASSERT(basePath.isAbsolute());
 
-    QT3DS_ASSERT(inBasePath.IsAbsolute());
-
-    QDir basePathDir(inBasePath.toQString());
+    QDir basePathDir = basePath.canonicalFilePath();
     return basePathDir.exists()
-        && basePathDir.exists(GetPathWithoutIdentifier().toQString());
-}
-
-void CFilePath::Normalize()
-{
-    CString &path(*this);
-    EnsureNonFileURL(path);
-    CFilePath retval;
-    retval.reserve(path.size());
-    bool lastSlash = false;
-    bool normalSep = false;
-    size_t index = 0;
-    for (CString::const_iterator iter = path.begin(), end = path.end(); iter != end;
-         ++iter, ++index) {
-        wchar_t current = *iter;
-        if (current == pathSep || current == alternateSep) {
-            if (lastSlash == false || (normalSep && (index < 2)))
-                retval.Concat(pathSep);
-            lastSlash = true;
-            normalSep = current == pathSep;
-        } else {
-            normalSep = false;
-            lastSlash = false;
-            retval.Concat(current);
-        }
-    }
-    // Resolve and remove ./ indicators that don't start at the beginning of the string
-    for (long curdirPos = retval.find(curdirSearch); curdirPos != CString::npos;
-         curdirPos = retval.find(curdirSearch, curdirPos))
-        retval = retval.erase(curdirPos, 2);
-
-    // Resolve updir indicators until we can't any more
-    for (long updirPos = retval.find(updirSearch); updirPos != CString::npos;
-         updirPos = retval.find(updirSearch, updirPos)) {
-        long lastSlash = CString::npos;
-        // catch ./../
-        if (updirPos < 2) {
-            retval = retval.erase(0, updirPos + 1);
-            break;
-        }
-        // for all other ../ conditions
-        else {
-            lastSlash = retval.rfind(pathSep, updirPos - 1);
-            if (lastSlash == CString::npos)
-                break;
-            retval = retval.erase(lastSlash, updirPos - lastSlash + 3);
-            updirPos = lastSlash;
-        }
-    }
-    *this = retval;
+        && basePathDir.exists(filePath());
 }
 
 bool CFilePath::IsAbsolute() const
 {
-    const CString &path(*this);
-    if (path.Length() > 1) {
-#ifdef _WIN32
-        if (path[1] == ':')
-            return true;
-        if (path[0] == path[1] && path[1] == pathSep)
-            return true;
-#else
-        if (path[0] == pathSep)
-            return true;
-#endif
-    }
-    return false;
-}
-void CFilePath::CombineBaseAndRelative(const CFilePath &basePath)
-{
-    QT3DS_ASSERT(basePath.IsAbsolute());
-    CFilePath &relativePath(*this);
-    if (relativePath.IsAbsolute())
-        return;
-    Q3DStudio::CFilePath retval;
-    retval.reserve(basePath.Length() + relativePath.Length());
-    retval.assign(basePath);
-    if (retval.Length() && retval[retval.Length() - 1] != '\\')
-        retval.append(pathSepStr);
-    retval.append(relativePath);
-    retval.Normalize();
-    *this = retval;
-}
-// If we are absolute, we are done.
-// If not, ConvertToAbsolute using getcwd.
-void CFilePath::ConvertToAbsolute()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    if (IsAbsolute())
-        return;
-    wchar_t pathBuf[1024];
-    _wgetcwd(pathBuf, 1024);
-    CombineBaseAndRelative(CString(pathBuf));
-#endif
-}
-// Make a save file stem from this string.  Involves replacing characters
-// that are illegal (:,\\,//,etc).
-CString CFilePath::MakeSafeFileStem(const CString &name)
-{
-    CFilePath retval;
-    retval.reserve(name.Length());
-    for (Q3DStudio::CString::const_iterator iter = name.begin(), end = name.end(); iter != end;
-         ++iter) {
-        wchar_t strItem(*iter);
-        if (fileUnsafeChars.find_first_of(strItem) != Q3DStudio::CString::npos)
-            retval.append(L"_", 1);
-        else
-            retval.append(&strItem, 1);
-    }
-    return retval;
+    return isAbsolute();
 }
 
-// Create this directory, recursively creating parent directories
-// if necessary.
+void CFilePath::CombineBaseAndRelative(const CFilePath &basePath)
+{
+    QT3DS_ASSERT(basePath.isAbsolute());
+    QT3DS_ASSERT(isRelative());
+    QDir basePathDir = basePath.absoluteFilePath();
+    QString absPath = basePathDir.absoluteFilePath(filePath());
+    setFile(QDir::cleanPath(absPath));
+}
+
+bool CFilePath::ConvertToAbsolute()
+{
+    return makeAbsolute();
+}
+
+CString CFilePath::MakeSafeFileStem(const CString &name)
+{
+    return CString::fromQString(normalizeAndCleanPath(name.toQString()));
+}
+
 bool CFilePath::CreateDir(bool recurse) const
 {
-    QDir d(GetPathWithoutIdentifier().toQString());
+    QDir d(filePath());
     if (d.exists())
         return true;
 
     if (recurse)
-        return RecurseCreateDirectory(CString(GetPathWithoutIdentifier().c_str()));
+        return d.mkpath(filePath());
     d.cdUp();
-    return d.mkdir(QFileInfo(GetPathWithoutIdentifier().toQString()).fileName());
-}
-// Returns true if exists and is directory
-bool CFilePath::IsDirectory() const
-{
-    return GetFileFlags().IsDirectory();
-}
-// returns true if exists and is a file
-bool CFilePath::IsFile() const
-{
-    return GetFileFlags().IsFile();
-}
-// If the file doesn't exist, create it.
-// If it does exist, update its modification time.
-void CFilePath::Touch() const
-{
-    QFile f(GetPathWithoutIdentifier().toQString());
-    f.open(QIODevice::ReadWrite);
-}
-// Returns true if this exists on the filesystem and is a directory or file.
-bool CFilePath::Exists() const
-{
-    return GetFileFlags().Exists();
+    return d.mkdir(fileName());
 }
 
-// Delete this file from the filesystem
+bool CFilePath::IsDirectory() const
+{
+    return isDir();
+}
+
+bool CFilePath::IsFile() const
+{
+    return isFile();
+}
+
+void CFilePath::Touch() const
+{
+    QFile f(filePath());
+    f.open(QIODevice::ReadWrite);
+}
+
+bool CFilePath::Exists() const
+{
+    return exists();
+}
+
 bool CFilePath::DeleteThisFile()
 {
-    return QFile::remove(QString::fromWCharArray(GetPathWithoutIdentifier().c_str())) != 0;
+    return QFile::remove(filePath());
 }
-// Delete this directory
-bool CFilePath::DeleteThisDirectory(bool recursive)
+
+bool CFilePath::DeleteThisDirectory(bool recurse)
 {
-    bool retval = true;
-    if (recursive) {
-        std::vector<CFilePath> subFiles;
-        ListFilesAndDirectories(subFiles);
-        for (size_t idx = 0; idx < subFiles.size(); ++idx) {
-            if (subFiles[idx].IsFile())
-                retval = retval && subFiles[idx].DeleteThisFile();
-            else
-                retval = retval && subFiles[idx].DeleteThisDirectory(true);
-        }
-    }
-    QDir dir(QString::fromWCharArray(GetPathWithoutIdentifier().c_str()));
-    dir.cdUp();
-    retval = retval && dir.rmdir(QDir(QString::fromWCharArray(GetPathWithoutIdentifier().c_str())).dirName());
-    return retval;
+    QDir d(filePath());
+    if (!d.exists())
+        return true;
+
+    if (recurse)
+        return d.rmpath(filePath());
+    d.cdUp();
+    return d.mkdir(fileName());
 }
 
 void CFilePath::ListFilesAndDirectories(std::vector<CFilePath> &files) const
 {
-    if (!IsDirectory()) {
+    if (!IsDirectory())
         return;
-    }
-    CString findPath(GetPathWithoutIdentifier());
+
+    CString findPath = CString::fromQString(filePath());
     QDirIterator di(findPath.toQString(), QDir::NoDotAndDotDot | QDir::AllEntries);
     while (di.hasNext())
         files.push_back(CString::fromQString(di.next()));
@@ -459,135 +321,31 @@ void CFilePath::RecursivelyFindFilesOfType(const wchar_t **inExtensionList,
     }
 }
 
-void CFilePath::FindDirectoryDifferences(
-    const std::vector<SFileModificationRecord> &inOldDifferences,
-    std::vector<SFileModificationRecord> &outNewDifferences, volatile bool *inCancel) const
-{
-    std::vector<SFileModificationRecord> theOutput;
-    std::vector<CFilePath> theFiles;
-
-    // Assume we will have about as many results as last time.
-    theFiles.reserve(inOldDifferences.size());
-    if (IsDirectory())
-        RecursivelyFindFilesOfType(NULL, theFiles, false, true);
-
-    // Else we have no files and the new file list should be empty
-    // This will send out destroyed messages for every file in the list
-    // once.
-
-    theOutput.reserve(NVMax(inOldDifferences.size(), theFiles.size()));
-    // Given that we know theFiles are sorted and inOldDifferences is sorted,
-    // run through inOldDifferences and theFiles exactly one, putting new values into theOutput.
-    // Algorithm below is O(max(inOldDifferences.size(), theFiles.size()) )
-
-    size_t numOldDifferences = inOldDifferences.size();
-    size_t numFiles = theFiles.size();
-    size_t oldDiffIdx = 0;
-    size_t fileIdx = 0;
-    volatile bool theLocalCancel = false;
-    if (inCancel == NULL)
-        inCancel = &theLocalCancel;
-
-    while (oldDiffIdx < numOldDifferences && fileIdx < numFiles && !*inCancel) {
-        const SFileModificationRecord &oldRecord = inOldDifferences[oldDiffIdx];
-        const CFilePath &theFile = theFiles[fileIdx];
-        if (oldRecord.m_File < theFile) {
-            // Stop recording destroyed files if the message has been sent once
-            if (oldRecord.m_ModificationType != FileModificationType::Destroyed)
-                theOutput.push_back(SFileModificationRecord(oldRecord.m_File, oldRecord.m_FileInfo,
-                                                            oldRecord.m_FileData,
-                                                            FileModificationType::Destroyed));
-
-            ++oldDiffIdx;
-        } else {
-            SFileData newData;
-            if (theFile.IsFile())
-                newData = theFile.GetFileData();
-
-            SFileInfoFlags theInfo = theFile.GetFileFlags();
-            FileModificationType::Enum theFileModType = FileModificationType::NoChange;
-            if (theFile < oldRecord.m_File) {
-                theFileModType = FileModificationType::Created;
-                ++fileIdx;
-            } else // We have matching files
-            {
-                if (oldRecord.m_ModificationType == FileModificationType::Destroyed)
-                    theFileModType = FileModificationType::Created;
-                else if (newData.m_LastModTime != oldRecord.m_FileData.m_LastModTime)
-                    theFileModType = FileModificationType::Modified;
-                else if (theInfo != oldRecord.m_FileInfo)
-                    theFileModType = FileModificationType::InfoChanged;
-
-                ++fileIdx;
-                ++oldDiffIdx;
-            }
-            theOutput.push_back(SFileModificationRecord(theFile, theInfo, newData, theFileModType));
-        }
-    }
-    for (; oldDiffIdx < numOldDifferences && !*inCancel; ++oldDiffIdx) {
-        const SFileModificationRecord &oldRecord = inOldDifferences[oldDiffIdx];
-        if (oldRecord.m_ModificationType != FileModificationType::Destroyed)
-            theOutput.push_back(SFileModificationRecord(oldRecord.m_File, oldRecord.m_FileInfo,
-                                                        oldRecord.m_FileData,
-                                                        FileModificationType::Destroyed));
-    }
-    for (; fileIdx < numFiles && !*inCancel; ++fileIdx) {
-        const CFilePath &theFile = theFiles[fileIdx];
-        theOutput.push_back(SFileModificationRecord(
-            theFile, theFile.GetFileFlags(), theFile.GetFileData(), FileModificationType::Created));
-    }
-    std::swap(theOutput, outNewDifferences);
-}
-
 SFileInfoFlags CFilePath::GetFileFlags() const
 {
-    QFileInfo fi(GetPathWithoutIdentifier().toQString());
-    if (!fi.exists())
+    if (!exists())
         return 0; // doesn't exist
     int atts = FileInfoFlagValues::Exists;
-    if (fi.isDir())
+    if (isDir())
         atts += FileInfoFlagValues::IsDirectory;
     else {
         atts += FileInfoFlagValues::CanRead;
-        if (fi.isWritable())
+        if (isWritable())
             atts += FileInfoFlagValues::CanWrite;
     }
-    if (fi.isHidden())
+    if (isHidden())
         atts += FileInfoFlagValues::IsHidden;
     return atts;
 }
 
 SFileData CFilePath::GetFileData() const
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    HANDLE file = CreateFileW(GetPathWithoutIdentifier().c_str(), GENERIC_READ, FILE_SHARE_READ,
-                              NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-    if (file == INVALID_HANDLE_VALUE)
-        return SFileData();
-    StaticAssert<sizeof(FILETIME) == sizeof(QT3DSU64)>::valid_expression();
-    QT3DSU64 create;
-    QT3DSU64 lastWrite;
-    GetFileTime(file, reinterpret_cast<FILETIME *>(&create), NULL,
-                reinterpret_cast<FILETIME *>(&lastWrite));
-
-    // LE code alert
-    QT3DSU64 fileSize = 0;
-    DWORD *sizePtr(reinterpret_cast<DWORD *>(&fileSize));
-    sizePtr[0] = GetFileSize(file, sizePtr + 1);
-    CloseHandle(file);
-    return SFileData(fileSize, lastWrite, create);
-#else
     return {};
-#endif
 }
 
 CFilePath CFilePath::GetUserApplicationDirectory()
 {
-    CFilePath path = CFilePath(QDir::toNativeSeparators(
-                                   QStandardPaths::writableLocation(
-                                       QStandardPaths::AppLocalDataLocation)));
-    path.Normalize();
-    return path;
+    return CFilePath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
 }
 
 SFile::SFile(const QSharedPointer<QFile> &of, const CFilePath &path)
@@ -595,15 +353,18 @@ SFile::SFile(const QSharedPointer<QFile> &of, const CFilePath &path)
     , m_Path(path)
 {
 }
+
 SFile::~SFile()
 {
     if (m_OpenFile)
         Close(m_OpenFile);
 }
+
 QT3DSU32 SFile::Read(void *buffPtr, QT3DSU32 byteSize)
 {
     return ReadData(m_OpenFile, buffPtr, byteSize);
 }
+
 QT3DSU32 SFile::Write(const void *buffPtr, QT3DSU32 byteSize)
 {
     return WriteData(m_OpenFile, buffPtr, byteSize);
@@ -611,10 +372,9 @@ QT3DSU32 SFile::Write(const void *buffPtr, QT3DSU32 byteSize)
 
 QSharedPointer<QFile> SFile::OpenForRead(const CFilePath &inPath)
 {
-    QSharedPointer<QFile> f(new QFile(inPath.toQString()));
-    if (!f->open(QFile::ReadOnly)) {
+    QSharedPointer<QFile> f(new QFile(inPath.filePath()));
+    if (!f->open(QFile::ReadOnly))
         return nullptr;
-    }
     return f;
 }
 
@@ -627,8 +387,8 @@ QSharedPointer<QFile> SFile::OpenForWrite(const CFilePath &inFullPath, FileOpenF
     bool open = (QT3DSU32)((fileFlags & FileOpenFlagValues::Open)) != 0;
     bool create = (QT3DSU32)((fileFlags & FileOpenFlagValues::Create)) != 0;
 
-    QSharedPointer<QFile> file(new QFile(inFullPath.GetPathWithoutIdentifier().toQString()));
-    if (!create && !file->exists() || !file->open(mode)) {
+    QSharedPointer<QFile> file(new QFile(inFullPath.filePath()));
+    if (!create || !file->exists() || !file->open(mode)) {
         return nullptr;
     }
     // If we aren't truncating, then we seek to the end to append.
@@ -733,9 +493,12 @@ TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDirectory, const 
     if (!inDestDirectory.Exists())
         return TFilePtr();
     wchar_t period = '.';
+    const wchar_t pathSep = '/';
     Q3DStudio::CString stem;
-    stem.reserve(inDestDirectory.Length() + inFStem.Length() + 1);
-    stem.assign(inDestDirectory);
+    Q3DStudio::CString inDestDirectoryPath
+        = CString::fromQString(inDestDirectory.filePath());
+    stem.reserve(inDestDirectoryPath.Length() + inFStem.Length() + 1);
+    stem.assign(inDestDirectoryPath);
     if (stem.Length() && stem[stem.Length() - 1] != '\\')
         stem.append(&pathSep, 1);
     stem.append(inFStem);
@@ -762,10 +525,12 @@ TFilePtr SFileTools::FindUniqueDestFile(const CFilePath &inDestDirectory, const 
         // On windows we need to limit the path
         if (stem.size() > MAX_PATH) {
             retval.assign(veryLongPathPrefix);
-            retval.append(stem, MAX_PATH - (inDestDirectory.Length() + 10));
+            retval.append(stem, MAX_PATH - (inDestDirectoryPath.Length() + 10));
         } else
 #endif
+        {
             retval.assign(stem);
+        }
 
         retval.append(buffer, numChars);
         retval.append(&period, 1);
@@ -841,31 +606,10 @@ CFilePath SFileTools::FindUniqueDestDirectory(const CFilePath &inDestDirectory,
         return L"";
     }
 
-    Q3DStudio::CString retval;
-    retval.reserve(inDestDirectory.Length() + inDirName.Length() + 2);
-    retval = CFilePath::CombineBaseAndRelative(inDestDirectory, inDirName);
-#ifdef KDAB_TEMPORARILY_REMOVED
-    BOOL success = ::CreateDirectoryW(retval, NULL);
-    if (success)
-        return CFilePath::GetAbsolutePath(retval);
-    DWORD error = GetLastError();
-    if (error == ERROR_PATH_NOT_FOUND) {
-        QT3DS_ASSERT(false);
-        return L"";
-    }
-    QT3DSU32 idx = 0;
-    Q3DStudio::CString stem(retval);
-    // Eventually we will succeed
-    while (success == FALSE) {
-        ++idx;
-        retval = stem;
-        wchar_t buffer[10] = { 0 };
-        swprintf(buffer, 10, L"_%03d", idx);
-        retval.append(buffer);
-        success = ::CreateDirectoryW(retval, NULL);
-    }
-#endif
-    return CFilePath::GetAbsolutePath(retval);
+    Q3DStudio::CFilePath retval =
+        CFilePath::CombineBaseAndRelative(inDestDirectory, inDirName);
+    retval.ConvertToAbsolute();
+    return retval;
 }
 
 QDir SFileTools::FindUniqueDestDirectory(const QDir &inDestDirectory,
@@ -899,25 +643,22 @@ QDir SFileTools::FindUniqueDestDirectory(const QDir &inDestDirectory,
 SFileErrorCodeAndNumBytes SFileTools::Copy(const CFilePath &destFile, FileOpenFlags dstFileFlags,
                                            const CFilePath &srcFile)
 {
-    QFileInfo srcInfo(srcFile.toQString());
-    if (!srcInfo.exists())
+    if (!srcFile.exists())
         return FileErrorCodes::SourceNotExist;
 
-    if (!srcInfo.isReadable())
+    if (!srcFile.isReadable())
         return FileErrorCodes::SourceNotReadable;
 
-    QString destFileString = destFile.toQString();
+    QString destFileString = destFile.filePath();
     if (QFile::exists(destFileString)) {
         bool ok = QFile::remove(destFileString);
         if (!ok)
             return FileErrorCodes::DestNotWriteable;
     }
 
-    bool ok = QFile::copy(srcFile.toQString(), destFileString);
-    if (ok) {
-        QFileInfo destInfo(destFile.toQString());
-        return destInfo.size();
-    }
+    bool ok = QFile::copy(srcFile.filePath(), destFileString);
+    if (ok)
+        return destFile.size();
 
     return FileErrorCodes::DestNotWriteable;
 }
@@ -935,11 +676,12 @@ SFileErrorCodeFileNameAndNumBytes SFileTools::FindAndCopyDestFile(const CFilePat
     auto srcFile = SFile::OpenForRead(inSrcFile);
     if (srcFile == NULL)
         return SFileErrorCodeFileNameAndNumBytes(FileErrorCodes::SourceNotReadable, 0,
-                                                 dest->m_Path);
+            CString::fromQString(dest->m_Path.filePath()));
     else {
         QT3DSU64 nb = SFile::Copy(dest->m_OpenFile, srcFile);
         dest->m_OpenFile = NULL;
-        return SFileErrorCodeFileNameAndNumBytes(FileErrorCodes::NoError, nb, dest->m_Path);
+        return SFileErrorCodeFileNameAndNumBytes(FileErrorCodes::NoError, nb,
+            CString::fromQString(dest->m_Path.filePath()));
     }
 }
 

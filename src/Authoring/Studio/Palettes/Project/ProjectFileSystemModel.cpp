@@ -334,7 +334,7 @@ void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) con
         const QDir outputDir = SFileTools::FindUniqueDestDirectory(targetDir, fileStem);
         const QString fullOutputFile = outputDir.filePath(outputFileName);
         const SImportResult importResult =
-            CPerformImport::TranslateToImportFile(translator, CFilePath::fromQString(fullOutputFile));
+            CPerformImport::TranslateToImportFile(translator, CFilePath(fullOutputFile));
         bool forceError = QFileInfo(fullOutputFile).isFile() == false;
         IDocumentEditor::DisplayImportErrors(
                 sourceFile, importResult.m_Error, doc->GetImportFailedHandler(),
@@ -345,7 +345,7 @@ void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) con
         const QDir outputDir = SFileTools::FindUniqueDestDirectory(targetDir, fileStem);
         const QString fullOutputFile = outputDir.filePath(outputFileName);
         const SImportResult importResult =
-            CPerformImport::TranslateToImportFile(translator, CFilePath::fromQString(fullOutputFile));
+            CPerformImport::TranslateToImportFile(translator, CFilePath(fullOutputFile));
         bool forceError = QFileInfo(fullOutputFile).isFile() == false;
         IDocumentEditor::DisplayImportErrors(
                 sourceFile, importResult.m_Error, doc->GetImportFailedHandler(),
@@ -357,7 +357,7 @@ void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) con
         const QDir outputDir = SFileTools::FindUniqueDestDirectory(targetDir, fileStem);
         const QString fullOutputFile = outputDir.filePath(outputFileName);
         const SImportResult importResult =
-            CPerformImport::TranslateToImportFile(translator, CFilePath::fromQString(fullOutputFile));
+            CPerformImport::TranslateToImportFile(translator, CFilePath(fullOutputFile));
         bool forceError = QFileInfo(fullOutputFile).isFile() == false;
         IDocumentEditor::DisplayImportErrors(
                 sourceFile, importResult.m_Error,
@@ -375,7 +375,7 @@ void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) con
                 || CDialogs::IsMaterialFileExtension(extension.toLatin1().data())) {
             std::vector<Q3DStudio::CString> effectFileSourcePaths;
             doc->GetDocumentReader().ParseSourcePathsOutOfEffectFile(
-                        Q3DStudio::CFilePath::GetAbsolutePath(CFilePath::fromQString(sourceFile)),
+                        Q3DStudio::CFilePath::GetAbsolutePath(CFilePath(sourceFile)),
                         effectFileSourcePaths);
 
             const QDir fileDir = QFileInfo(sourceFile).dir();

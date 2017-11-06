@@ -77,7 +77,7 @@ SImportResult::SImportResult(const Q3DStudio::CFilePath &inFilePath, QT3DSU32 in
     : m_Error(ImportErrorCodes::NoError)
     , m_FilePath(inFilePath)
 {
-    m_FilePath.SetIdentifier(inFileVersion);
+    m_FilePath.SetIdentifier(QString::number(inFileVersion));
 }
 
 /**
@@ -193,7 +193,7 @@ SImportResult CPerformImport::RefreshToComposer(ITranslator &translator,
 SImportResult CPerformImport::RefreshToComposer(ITranslator &translator, IComposerEditor &composer,
                                                 const CFilePath &ioImportFile)
 {
-    ImportPtrOrError originalPtr = Import::Load(ioImportFile.c_str());
+    ImportPtrOrError originalPtr = Import::Load(ioImportFile.toCString());
     if (originalPtr.m_Value == NULL)
         return originalPtr.m_ErrorData.m_Error;
 
@@ -208,7 +208,7 @@ SImportResult CPerformImport::ImportToComposer(ITranslator &translator, ICompose
     if (importDestFile.IsFile() && importDestFile.GetFileFlags().CanWrite() == false)
         return ImportErrorCodes::ResourceNotWriteable;
     ImportPtrOrError importPtr =
-        Import::Create(translator.GetSourceFile().toStdWString().c_str(), importDestFile.GetDirectory());
+        Import::Create(translator.GetSourceFile().toStdWString().c_str(), importDestFile.GetDirectory().toCString());
     if (importPtr.m_Value == NULL)
         return importPtr.m_ErrorData.m_Error;
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
@@ -229,11 +229,11 @@ CPerformImport::ImportToComposerFromImportFile(IComposerEditor &composer,
     if (importDestFile.IsFile() == false)
         return ImportErrorCodes::SourceFileDoesNotExist;
 
-    QT3DSU32 fileId = Import::GetHighestImportRevision(inImportFile.c_str());
+    QT3DSU32 fileId = Import::GetHighestImportRevision(inImportFile.toCString());
     if (fileId == 0)
         return ImportErrorCodes::SourceFileNotReadable;
 
-    ImportPtrOrError importPtr = Import::Load(importDestFile.c_str(), fileId);
+    ImportPtrOrError importPtr = Import::Load(importDestFile.toCString(), fileId);
     if (importPtr.m_Value == NULL)
         return importPtr.m_ErrorData.m_Error;
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
@@ -250,7 +250,7 @@ SImportResult CPerformImport::TranslateToImportFile(ITranslator &translator,
         return ImportErrorCodes::ResourceNotWriteable;
 
     ImportPtrOrError importPtr =
-        Import::Create(translator.GetSourceFile().toStdWString().c_str(), importDestFile.GetDirectory());
+        Import::Create(translator.GetSourceFile().toStdWString().c_str(), importDestFile.GetDirectory().toCString());
     if (importPtr.m_Value == NULL)
         return importPtr.m_ErrorData.m_Error;
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);

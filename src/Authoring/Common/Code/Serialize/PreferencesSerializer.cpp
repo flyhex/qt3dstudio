@@ -47,7 +47,7 @@ void CPreferencesSerializer::SetPreferencesFile(const Q3DStudio::CString &theFil
 {
     Q3DStudio::CFilePath fPath(theFile);
 
-    if (m_PreferencesFile.Compare(fPath, false))
+    if (m_PreferencesFile.filePath() == fPath.filePath())
         return;
 
     Serialize();
@@ -56,8 +56,8 @@ void CPreferencesSerializer::SetPreferencesFile(const Q3DStudio::CString &theFil
 
     SDOMElement *topElement = NULL;
     if (m_PreferencesFile.IsFile()) {
-        qt3ds::foundation::CFileSeekableIOStream theInStream(m_PreferencesFile,
-                                                             qt3ds::foundation::FileReadFlags());
+        qt3ds::foundation::CFileSeekableIOStream theInStream(
+            m_PreferencesFile.filePath(), qt3ds::foundation::FileReadFlags());
         if (theInStream.IsOpen() == false) {
             QT3DS_ASSERT(false);
             m_FileSet = false;
@@ -238,15 +238,15 @@ bool CPreferencesSerializer::ExistElem(const Q3DStudio::CString &inElemName)
 void CPreferencesSerializer::Serialize()
 {
     if (m_FileSet) {
-        QString preferencesDir = m_PreferencesFile.GetDirectory().toQString();
+        QString preferencesDir = m_PreferencesFile.GetDirectory().filePath();
         QDir dir(preferencesDir);
         if (!dir.exists()) {
             dir.mkpath(preferencesDir);
         }
 
         // Serialize the preferences in to the XML file
-        qt3ds::foundation::CFileSeekableIOStream stream(m_PreferencesFile,
-                                                        qt3ds::foundation::FileWriteFlags());
+        qt3ds::foundation::CFileSeekableIOStream stream(
+            m_PreferencesFile.filePath(), qt3ds::foundation::FileWriteFlags());
         stream.SetPosition(0, qt3ds::foundation::SeekPosition::Begin);
         CDOMSerializer::WriteXMLHeader(stream);
         CDOMSerializer::Write(*m_PreferencesIO.first->GetTopElement(), stream);

@@ -239,8 +239,8 @@ void ProjectView::refreshImport(int row) const
     const auto path = m_ProjectModel->filePath(row);
     qt3dsimp::ImportPtrOrError importPtr = qt3dsimp::Import::Load(path.toStdWString().c_str());
     if (importPtr.m_Value) {
-        const auto destDir = QString::fromWCharArray(importPtr.m_Value->GetDestDir());
-        const auto srcFile = QString::fromWCharArray(importPtr.m_Value->GetSrcFile());
+        const auto destDir = importPtr.m_Value->GetDestDir();
+        const auto srcFile = importPtr.m_Value->GetSrcFile();
         const QString fullSrcPath(QDir(destDir).filePath(srcFile));
         const QFileInfo oldFile(fullSrcPath);
         const QFileInfo newFile(g_StudioApp.GetDialogs()->ConfirmRefreshModelFile(fullSrcPath));

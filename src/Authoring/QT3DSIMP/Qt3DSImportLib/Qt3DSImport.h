@@ -249,15 +249,15 @@ public:
     virtual TCharPtr RegisterStr(TCharPtr data) = 0;
     // Returns the source directory relative to the dest directory
     // or the full path if it is on a different drive
-    virtual TCharPtr GetSrcFile() const = 0;
+    virtual QString GetSrcFile() const = 0;
     // Returns the full path of the destination directory
-    virtual TCharPtr GetDestDir() const = 0;
+    virtual QString GetDestDir() const = 0;
     // Returns the full path of the image directory
-    virtual TCharPtr GetImageDir() const = 0;
+    virtual QString GetImageDir() const = 0;
     // Returns the full path of the mesh directory
-    virtual TCharPtr GetMeshDir() const = 0;
+    virtual QString GetMeshDir() const = 0;
     // Returns the full path to the path buffer directory
-    virtual TCharPtr GetPathBufferDir() const = 0;
+    virtual QString GetPathBufferDir() const = 0;
     virtual void Release() = 0;
     // returns false if fname couldn't be opened for write
     // Fname is appended to the directory this object was created with.

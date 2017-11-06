@@ -477,9 +477,9 @@ public:
                     thePaths[pathIdx]);
                 CFilePath thePath(theSlideStr.second);
                 if (inIncludeIdentifiers == false)
-                    thePath = thePath.GetPathWithoutIdentifier();
+                    thePath = thePath.filePath();
                 const wchar_t *theString = m_DataCore.GetStringTable().RegisterStr(
-                    thePath.GetPathWithoutIdentifier().c_str());
+                    thePath.toCString());
                 pair<TCharPtrToSlideInstanceMap::iterator, bool> theInsertResult(
                     outInstanceMap.insert(make_pair(theString, TSlideInstanceList())));
                 insert_unique(theInsertResult.first->second,
@@ -1143,7 +1143,7 @@ public:
                 Qt3DSDMInstanceHandle theParent(theParents[idx]);
                 if (m_DataCore.IsInstanceOrDerivedFrom(theParent, theObjectDefInstance)
                     && theParent != theObjectDefInstance
-                    && theSourcePath == GetSourcePath(theParent)) {
+                    && theSourcePath.toCString() == GetSourcePath(theParent)) {
                     theInstanceParent = theParent;
                     break;
                 }
@@ -2228,7 +2228,8 @@ public:
                                                       const CPt &inPosition) override
     {
         qt3ds::QT3DSI32 theVersion = 0;
-        std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(inFilePath, theVersion);
+        std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(
+            inFilePath.toCString(), theVersion);
         if (!theReader)
             return TInstanceHandleList();
         return DoPasteSceneGraphObject(theReader, inNewRoot, inGenerateUniqueName, inInsertType,
@@ -2241,7 +2242,8 @@ public:
                                 DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition) override
     {
         qt3ds::QT3DSI32 theVersion = 0;
-        std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(inFilePath, theVersion);
+        std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(
+            inFilePath.toCString(), theVersion);
         if (!theReader)
             return TInstanceHandleList();
 
@@ -2438,7 +2440,7 @@ public:
     Qt3DSDMActionHandle PasteAction(const CFilePath &inFilePath,
                                            Qt3DSDMInstanceHandle inNewRoot) override
     {
-        CFileSeekableIOStream theStream(inFilePath, FileReadFlags());
+        CFileSeekableIOStream theStream(inFilePath.toCString(), FileReadFlags());
         if (theStream.IsOpen() == false) {
             QT3DS_ASSERT(false);
             return 0;
@@ -2702,7 +2704,7 @@ public:
             if (!forceError) {
                 Qt3DSDMInstanceHandle theImportRoot = importToComposer->GetRoot();
                 CFilePath theRelPath(m_Doc.GetRelativePathToDoc(theDestFile));
-                SValue theSourcePathValue(std::make_shared<CDataStr>(theRelPath.c_str()));
+                SValue theSourcePathValue(std::make_shared<CDataStr>(theRelPath.toCString()));
                 Qt3DSDMPropertyHandle theProp(m_Bridge.GetObjectDefinitions().m_Asset.m_SourcePath);
                 if (inSlide.Valid())
                     m_SlideCore.ForceSetInstancePropertyValue(inSlide, theImportRoot, theProp,
@@ -2775,8 +2777,8 @@ public:
         if (retval.Valid()) {
             CFilePath theRelativeImport = m_Doc.GetRelativePathToDoc(outputFileName);
             m_ImportFileToDAEMap.insert(
-                make_pair(m_StringTable.RegisterStr(theRelativeImport.c_str()),
-                          m_StringTable.RegisterStr(theRelativeDAE.c_str())));
+                make_pair(m_StringTable.RegisterStr(theRelativeImport.toCString()),
+                          m_StringTable.RegisterStr(theRelativeDAE.toCString())));
         }
 
         return retval;
@@ -2937,7 +2939,7 @@ public:
         QString retval;
 
         QQmlEngine engine;
-        QString path = QString::fromWCharArray(inFile);
+        QString path = inFile.filePath();
         path.replace('\\', '/');
         QQmlComponent component(&engine, QUrl::fromLocalFile(path),
                                 QQmlComponent::CompilationMode::PreferSynchronous);
@@ -3118,7 +3120,7 @@ public:
             if (theParents.empty() || theParents[0] != inSpecificInstance.GetRootInstance())
                 continue;
             // Ensure this object is *directly* derived from behavior, not indirectly.
-            if (theRelativePath == GetSourcePath(existing[idx]))
+            if (theRelativePath.toCString() == GetSourcePath(existing[idx]))
                 theParentInstance = existing[idx];
         }
 
@@ -3131,7 +3133,7 @@ public:
                 m_DataCore.DeriveInstance(theParentInstance, inSpecificInstance.GetRootInstance());
                 m_DataCore.SetInstancePropertyValue(
                     theParentInstance, m_Bridge.GetObjectDefinitions().m_Asset.m_SourcePath,
-                    std::make_shared<CDataStr>((const wchar_t *)theRelativePath));
+                    std::make_shared<CDataStr>(theRelativePath.toCString()));
 
                 m_DataCore.SetInstancePropertyValue(
                     theParentInstance, m_Bridge.GetObjectDefinitions().m_Named.m_NameProp,
@@ -3345,8 +3347,10 @@ public:
         if (theShaderFile.GetExtension() == "nvmpe") {
             // If user drag-drop nvmpe file, we find the corresponding glsl file and use it to load
             // the effect.
-            theShaderFile = theShaderFile.substr(0, theShaderFile.Length() - 5);
-            theShaderFile.append("glsl");
+            CString shaderFile = theShaderFile.toCString();
+            CString newShaderFile = shaderFile.substr(0, shaderFile.Length() - 5);
+            newShaderFile.append("glsl");
+            theShaderFile = CFilePath(newShaderFile);
         }
 
         TInstanceHandleList existing;
@@ -3362,7 +3366,7 @@ public:
             if (theParents.empty() || theParents[0] != inDerivationParent)
                 continue;
             // Ensure this object is *directly* derived from Effect, not indirectly.
-            if (theRelativePath == GetSourcePath(existing[idx]))
+            if (theRelativePath.toCString() == GetSourcePath(existing[idx]))
                 theParentInstance = existing[idx];
         }
 
@@ -3372,17 +3376,17 @@ public:
                 m_DataCore.DeriveInstance(theParentInstance, inDerivationParent);
                 m_DataCore.SetInstancePropertyValue(
                     theParentInstance, m_Bridge.GetObjectDefinitions().m_Asset.m_SourcePath,
-                    std::make_shared<CDataStr>((const wchar_t *)theRelativePath));
+                    std::make_shared<CDataStr>(theRelativePath.toCString()));
 
                 m_DataCore.SetInstancePropertyValue(
                     theParentInstance, m_Bridge.GetObjectDefinitions().m_Named.m_NameProp,
                     std::make_shared<CDataStr>(theRelativePath.GetFileStem().c_str()));
 
                 std::vector<SMetaDataLoadWarning> theWarnings;
-                QString shaderFile = QString::fromWCharArray(theShaderFile);
+                QString shaderFile = theShaderFile.toQString();
                 NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(shaderFile));
-                (m_MetaData.*inLoader)(m_StringTable.GetNarrowStr(theRelativePath),
+                (m_MetaData.*inLoader)(m_StringTable.GetNarrowStr(theRelativePath.toCString()),
                                        theParentInstance,
                                        theRelativePath.GetFileStem().c_str(),
                                        theWarnings,
@@ -3858,20 +3862,16 @@ public:
                 CFilePath theFullPath = m_Doc.GetResolvedPathToDoc(theSource);
                 if (theFullPath.Exists() && theFullPath.IsFile()) {
                     if (std::find(importFileList.begin(), importFileList.end(),
-                                  theFullPath.GetPathWithoutIdentifier())
+                                  theFullPath.filePath())
                         == importFileList.end()) {
-                        ImportPtrOrError theImport = Import::Load(theFullPath);
+                        ImportPtrOrError theImport = Import::Load(theFullPath.toCString());
                         if (theImport.m_Value) {
                             CFilePath theSrcFile = CFilePath::CombineBaseAndRelative(
                                 CFilePath(theImport.m_Value->GetDestDir()),
                                 CFilePath(theImport.m_Value->GetSrcFile()));
-
-                            CFilePath normalizedOldFile(inOldFile);
-                            if (theSrcFile.Compare(normalizedOldFile.c_str(),
-                                                   CString::ENDOFSTRING, false)) {
-                                importFileList.push_back(theFullPath.GetPathWithoutIdentifier());
-                            }
-
+                            if (theSrcFile.toCString().Compare(
+                                inOldFile.toCString(), false))
+                                importFileList.push_back(theFullPath.filePath());
                             theImport.m_Value->Release();
                         }
                     }
@@ -3894,7 +3894,7 @@ public:
             CFilePath theImportFilePath = importFileList[importIdx];
             CFilePath theImportRelativePath = m_Doc.GetRelativePathToDoc(theImportFilePath);
             TCharPtrToSlideInstanceMap::iterator theIter =
-                m_SourcePathInstanceMap.find(m_StringTable.RegisterStr(theImportRelativePath));
+                m_SourcePathInstanceMap.find(m_StringTable.RegisterStr(theImportRelativePath.toCString()));
             if (theIter == m_SourcePathInstanceMap.end())
                 continue;
             // First pass just build the group id entries.  This avoids us copying hashtables which
@@ -3922,7 +3922,7 @@ public:
             // Unfortunately the first revision of the system didn't put import paths on objects so
             // we need both the above loop *and* to consider every object who's import path matches
             // out import document's relative path.
-            theIter = theImportPaths.find(m_StringTable.RegisterStr(theImportRelativePath));
+            theIter = theImportPaths.find(m_StringTable.RegisterStr(theImportRelativePath.toCString()));
             TSlideHandleList theAssociatedSlides;
             if (theIter != theImportPaths.end()) {
                 vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> &theInstances =
@@ -3953,7 +3953,7 @@ public:
             // OK, we have distinct maps sorted on a per-slide basis for all trees of children
             // of this asset.  We now need to attempt to run the refresh algorithm.
 
-            qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theImportFilePath);
+            qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theImportFilePath.toCString());
             if (theImportPtr.m_Value == NULL) {
                 QT3DS_ASSERT(false);
                 continue;
@@ -4010,8 +4010,9 @@ public:
     void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) override
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
-        theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(
-                                            QObject::tr("Refreshing Import ")), inOldFile);
+        theDispatch.FireOnProgressBegin(
+            Q3DStudio::CString::fromQString(QObject::tr("Refreshing Import ")),
+            inOldFile.toCString());
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();
@@ -4029,19 +4030,20 @@ public:
         thePathsDirectory.CreateDir(true);
         Q3DStudio::CString theName = GetName(path);
         CFilePath theTargetFileName(CFilePath::CombineBaseAndRelative(thePathsDirectory, theName));
-        theTargetFileName.append(".path");
+        theTargetFileName.setFile(theTargetFileName.filePath() + ".path");
         if (theTargetFileName.Exists()) {
-            CFilePath tempPath(theTargetFileName.substr(0, theTargetFileName.size() - 5));
+            CString targetFile = theTargetFileName.toCString();
+            CFilePath tempPath(targetFile.substr(0, targetFile.size() - 5));
             QT3DSU32 index = 1;
             do {
                 wchar_t buffer[64];
                 swprintf(buffer, 64, L"%d", index);
-                tempPath.append(L"_");
-                tempPath.append(buffer);
+                tempPath.setFile(
+                    tempPath.filePath() + "_" + QString::fromWCharArray(buffer));
                 ++index;
             } while (tempPath.Exists());
             theTargetFileName = tempPath;
-            theTargetFileName.append(".path");
+            theTargetFileName.setFile(theTargetFileName.filePath() + ".path");
         }
         NVScopedRefCounted<IPathBufferBuilder> theBuilder(
             IPathBufferBuilder::CreateBuilder(*this->m_Foundation.m_Foundation));
@@ -4096,7 +4098,7 @@ public:
             }
         }
         SPathBuffer theBuffer = theBuilder->GetPathBuffer();
-        CFileSeekableIOStream theWriter(theTargetFileName, FileWriteFlags());
+        CFileSeekableIOStream theWriter(theTargetFileName.toCString(), FileWriteFlags());
         theBuffer.Save(theWriter);
 
         for (QT3DSU32 idx = 0, end = theSubPathChildren.size(); idx < end; ++idx)
@@ -4105,7 +4107,7 @@ public:
         CFilePath relativeFileName(
             CFilePath::GetRelativePathFromBase(m_Doc.GetDocumentDirectory(), theTargetFileName));
         SetInstancePropertyValue(path, theDefinitions.m_Asset.m_SourcePath,
-                                 TDataStrPtr(new CDataStr(relativeFileName.c_str())));
+                                 TDataStrPtr(new CDataStr(relativeFileName.toCString())));
     }
     static SFloat2 NextDataItem(NVConstDataRef<QT3DSF32> inData, QT3DSU32 &inDataIdx)
     {
@@ -4131,7 +4133,7 @@ public:
             return;
         CFilePath thePathToPathFile = CFilePath::CombineBaseAndRelative(
             m_Doc.GetDocumentDirectory(), (*thePathOpt)->GetData());
-        CFileSeekableIOStream theReader(thePathToPathFile, FileReadFlags());
+        CFileSeekableIOStream theReader(thePathToPathFile.toCString(), FileReadFlags());
         if (theReader.IsOpen() == false)
             return;
         qt3dsimp::SPathBuffer *theLoadedBuffer =
@@ -4303,11 +4305,11 @@ public:
             if (theRecord.m_ModificationType == FileModificationType::InfoChanged
                 || theRecord.m_ModificationType == FileModificationType::Destroyed) {
                 if (isImport)
-                    m_ImportFileToDAEMap.erase(theRelativePath);
+                    m_ImportFileToDAEMap.erase(theRelativePath.toCString());
                 continue;
             }
             if (isImport) {
-                qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theRecord.m_File);
+                qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theRecord.m_File.toCString());
                 if (theImportPtr.m_Value) {
                     CFilePath theDestDir = theImportPtr.m_Value->GetDestDir();
                     CFilePath theSrcFile = theImportPtr.m_Value->GetSrcFile();
@@ -4317,7 +4319,7 @@ public:
                         m_StringTable.RegisterStr(m_Doc.GetRelativePathToDoc(theFullSrcPath));
                     pair<unordered_map<TCharPtr, TCharPtr>::iterator, bool> theInsertResult =
                         m_ImportFileToDAEMap.insert(
-                            make_pair(m_StringTable.RegisterStr(theRelativePath.c_str()),
+                            make_pair(m_StringTable.RegisterStr(theRelativePath.toCString()),
                                       theDAERelativePath));
                     theImportPtr.m_Value->Release();
                     if (theInsertResult.second == false)
@@ -4385,7 +4387,7 @@ public:
             bool isImport = theExtension.Compare(L"import", CString::ENDOFSTRING, false);
             CFilePath theRelativePath(m_Doc.GetRelativePathToDoc(theRecord.m_File));
             const wchar_t *theString(
-                m_DataCore.GetStringTable().RegisterStr(theRelativePath.c_str()));
+                m_DataCore.GetStringTable().RegisterStr(theRelativePath.toCString()));
 
             if ((theExtension.CompareNoCase(L"ttf")
                  || theExtension.CompareNoCase(L"otf")) // should use CDialogs::IsFontFileExtension
@@ -4399,7 +4401,7 @@ public:
             if (theRecord.m_ModificationType == FileModificationType::InfoChanged
                 || theRecord.m_ModificationType == FileModificationType::Destroyed) {
                 if (isImport)
-                    m_ImportFileToDAEMap.erase(theRelativePath);
+                    m_ImportFileToDAEMap.erase(theRelativePath.toCString());
                 continue;
             }
 
@@ -4487,7 +4489,7 @@ public:
                       << ModificationTypeToString(theRecord.m_ModificationType);
 
             if (isImport) {
-                qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theRecord.m_File);
+                qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theRecord.m_File.toCString());
                 if (theImportPtr.m_Value) {
                     ENSURE_PROGRESS;
                     CFilePath theDestDir = theImportPtr.m_Value->GetDestDir();
@@ -4498,7 +4500,7 @@ public:
                         m_StringTable.RegisterStr(m_Doc.GetRelativePathToDoc(theFullSrcPath));
                     pair<unordered_map<TCharPtr, TCharPtr>::iterator, bool> theInsertResult =
                         m_ImportFileToDAEMap.insert(
-                            make_pair(m_StringTable.RegisterStr(theRelativePath.c_str()),
+                            make_pair(m_StringTable.RegisterStr(theRelativePath.toCString()),
                                       theDAERelativePath));
                     theImportPtr.m_Value->Release();
                     if (theInsertResult.second == false)
@@ -4572,10 +4574,9 @@ public:
                 CString theNameStr = GetName(theInstances[0].second);
                 std::vector<SMetaDataLoadWarning> theWarnings;
                 NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
-                    m_InputStreamFactory->GetStreamForFile(
-                        QString::fromWCharArray(theRecord.m_File)));
+                    m_InputStreamFactory->GetStreamForFile(theRecord.m_File.toQString()));
                 if (theStream) {
-                    m_MetaData.LoadEffectInstance(m_StringTable.GetNarrowStr(theRelativePath),
+                    m_MetaData.LoadEffectInstance(m_StringTable.GetNarrowStr(theRelativePath.toCString()),
                                                   theInstances[0].second,
                                                   TCharStr(theNameStr),
                                                   theWarnings, *theStream);
@@ -4729,7 +4730,8 @@ IDocumentEditor::ParseLuaFile(const CFilePath &inFullPathToDocument,
     using namespace LuaParser;
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument);
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
+        inFullPathToDocument.toCString());
     std::shared_ptr<IDOMReader> theReaderPtr(
         SLuaParser::ParseLuaFile(theFactory, inStringTable, inFullPathToDocument.GetCharStar(),
                                  theXmlErrorHandler, inInputStreamFactory));
@@ -4753,7 +4755,8 @@ IDocumentEditor::ParseScriptFile(const CFilePath &inFullPathToDocument,
     using namespace ScriptParser;
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument);
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
+        inFullPathToDocument.toCString());
     std::shared_ptr<IDOMReader> theReaderPtr(
         SScriptParser::ParseScriptFile(theFactory, inStringTable,
                                        inFullPathToDocument.GetCharStar(),
@@ -4778,10 +4781,11 @@ IDocumentEditor::ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocumen
 {
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument);
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
+        inFullPathToDocument.toCString());
 
     std::shared_ptr<IDOMReader> theReaderPtr = CRenderPluginParser::ParseFile(
-        theFactory, theStringTable, theStringTable->GetNarrowStr(inFullPathToDocument),
+        theFactory, theStringTable, theStringTable->GetNarrowStr(inFullPathToDocument.toCString()),
         theXmlErrorHandler, inInputStreamFactory);
     if (!theReaderPtr) {
         QT3DS_ASSERT(false);
@@ -4802,10 +4806,11 @@ IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathT
 {
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument);
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
+        inFullPathToDocument.toCString());
 
     std::shared_ptr<IDOMReader> theReaderPtr = CRenderPluginParser::ParseFile(
-        theFactory, theStringTable, theStringTable->GetNarrowStr(inFullPathToDocument),
+        theFactory, theStringTable, theStringTable->GetNarrowStr(inFullPathToDocument.toCString()),
         theXmlErrorHandler, inInputStreamFactory);
     if (!theReaderPtr) {
         QT3DS_ASSERT(false);

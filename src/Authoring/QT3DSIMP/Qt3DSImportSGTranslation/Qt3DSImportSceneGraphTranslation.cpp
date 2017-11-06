@@ -435,7 +435,7 @@ public:
             name = ComposerObjectTypes::Convert(inType);
 
         Q3DStudio::CFilePath objectName = Q3DStudio::CFilePath(name);
-        Q3DStudio::CString normName = objectName.GetPathWithoutIdentifier();
+        Q3DStudio::CString normName = objectName.toCString();
         name = normName;
 
         TCharPtr nameStem = name;
