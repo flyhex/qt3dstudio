@@ -48,12 +48,6 @@ linux {
     CONFIG += egl
     DEFINES+=_LINUX QT3DS_OS_LINUX _LINUXPLATFORM QT3DS_NO_X11 \
         QT3DS_VIEWER_EXPORTS WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
-
-    contains(QT_ARCH, x86_64) {
-        BINDIR = $$PWD/../Bin/Linux64
-    } else {
-        BINDIR = $$PWD/../Bin/Linux32
-    }
     QMAKE_CXXFLAGS_WARN_ON = -Wall -Wno-unused-local-typedefs
 }
 
@@ -63,13 +57,6 @@ linux-clang {
 
 macos {
     DEFINES += _MACOSX _LINUXPLATFORM WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
-
-    contains(QT_ARCH, x86_64) {
-        BINDIR = $$PWD/../Bin/Macosx64
-    } else {
-        BINDIR = $$PWD/../Bin/Macosx32
-    }
-
     INCLUDEPATH += /usr/local/include
 
     QMAKE_CXXFLAGS += -Wno-unused-local-typedef
