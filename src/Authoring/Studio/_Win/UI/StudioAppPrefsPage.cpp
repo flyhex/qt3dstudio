@@ -54,8 +54,9 @@
 #include "Core.h"
 #include "IStudioRenderer.h"
 
-#include <QColorDialog>
-#include <QMessageBox>
+#include <QtWidgets/qcolordialog.h>
+#include <QtWidgets/qmessagebox.h>
+#include <QtGui/qstandarditemmodel.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CStudioAppPrefsPage property page
@@ -398,6 +399,12 @@ void CStudioAppPrefsPage::InitEditStartViewCombo()
 
     m_ui->m_EditViewStartupView->addItem("--------------------------");
     m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1, -1); // set to an invalid pointer
+    // make item non-selectable
+    QStandardItemModel *model =
+            qobject_cast<QStandardItemModel *>(m_ui->m_EditViewStartupView->model());
+    QStandardItem *item = model->item(theCameraNames.size());
+    item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+
     // add the deployment view as the last selection
     m_ui->m_EditViewStartupView->addItem(::LoadResourceString(IDS_SCENE_CAMERA_VIEW).toQString());
     m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1, 0);
