@@ -30,7 +30,6 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#include "stdafx.h"
 #include "MainFrm.h"
 #include "ui_MainFrm.h"
 
@@ -46,18 +45,10 @@
 #include "Strings.h"
 #include "StringLoader.h"
 #include "StudioApp.h"
-#include "TimelineControl.h"
-#include "Qt3DSOptions.h"
-#include "Qt3DSColor.h"
-
-#include "Doc.h"
 #include "IKeyframesManager.h"
-#include "Dispatch.h"
 #include "Dialogs.h"
 #include "StudioPreferencesPropSheet.h"
-#include "StudioProjectSettings.h"
 #include "StudioPreferences.h"
-#include "Views.h"
 #include "HotKeys.h"
 #include "RecentItems.h"
 #include "PaletteManager.h"
@@ -67,7 +58,6 @@
 #include "SubPresentationsDlg.h"
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
-
 #include "InspectorControlView.h"
 
 #include <QtGui/qevent.h>
@@ -359,106 +349,6 @@ void CMainFrame::OnClosingPresentation()
 void CMainFrame::OnTimelineSetInterpolation()
 {
     g_StudioApp.GetCore()->GetDoc()->SetKeyframeInterpolation();
-}
-
-//==============================================================================
-/**
- *	Store all the information regarding the layout of the main frame and its palettes.
- *	This is used to save the current position, so when the app is restarted the
- *	window will come back to it's previous location.
- *	On one hand, there is the main frame which continues to use the original
- *	CPaletteState scheme.  Now there is also the control bars/palettes that dock.
- *	These all now use the MFC path for serialization to the registry.
- *	This operation used to occur every time there was a change to any window, now
- *	the final state is only saved when the app is closed.
- */
-void CMainFrame::SaveLayout()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    // Only save the window position if we're not minimized
-    if (!IsIconic()) {
-        CPaletteState theState("MainWindow");
-
-        theState.SetMaximized(IsZoomed() == TRUE);
-        if (!IsZoomed()) {
-            /*
-            SDJ: 12/17/03 - From MSDN
-            The coordinates used in a WINDOWPLACEMENT structure should be used only by the
-            GetWindowPlacement and SetWindowPlacement functions. Passing coordinates
-            to functions which expect screen coordinates (such as SetWindowPos) will result
-            in the window appearing in the wrong location. For example, if the taskbar is at
-            the top of the screen, saving window coordinates using GetWindowPlacement and
-            restoring them using SetWindowPos causes the window to appear to "creep" up the screen.
-
-            We were using GetWindowPlacement with MoveWindow (in SetLayout) which was causing
-            "creep" when the taskbar was at the top of the screen. Replaced GetWindowPlacement
-            with the following GetWindowRect call.
-            */
-
-            CRect theRect;
-            GetWindowRect(&theRect);
-
-            theState.SetPosition(CPt(theRect.left, theRect.top));
-            theState.SetSize(CPt(theRect.right - theRect.left, theRect.bottom - theRect.top));
-        }
-        theState.SetVisible(IsWindowVisible() ? true : false);
-
-        theState.SaveState();
-
-        // Force a recalc of the layout to ensure that everything is correct with the docking
-        RecalcLayout(TRUE);
-    }
-#endif
-}
-
-//==============================================================================
-/**
- *	Restore all the information regarding the layout of the main frame and its palettes.
- *	This will make the window be located at the last stored location.
- *	On one hand, there is the main frame which continues to use the original
- *	CPaletteState scheme.  Now there is also the control bars/palettes that dock.
- *	These all now use the MFC path for serialization to the registry.  This happens
- *	on startup.
- */
-void CMainFrame::RestoreLayout()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    CPaletteState theState("MainWindow");
-    theState.LoadState();
-
-    SetLayout(theState);
-
-    if (!m_PaletteManager->Load())
-        m_PaletteManager->RestoreDefaults(true);
-
-    // Force a recalc for the layout for the docking palettes to work
-    RecalcLayout(TRUE);
-#endif
-}
-
-//==============================================================================
-/**
- * Set the state of this window to the specified state.
- */
-void CMainFrame::SetLayout(const CPaletteState &inState)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    CPt thePosition = inState.GetPosition();
-    CPt theSize = inState.GetSize();
-    bool isVisible = inState.IsVisible();
-
-    CRect theWindowRect(thePosition.x, thePosition.y, thePosition.x + theSize.x,
-                        thePosition.y + theSize.y);
-
-    // Relocate the window to the new location
-    MoveWindow(theWindowRect);
-
-    if (inState.IsMaximized())
-        ::AfxGetApp()->m_nCmdShow = SW_SHOWMAXIMIZED;
-    ShowWindow(::AfxGetApp()->m_nCmdShow);
-    ShowWindow((isVisible ? SW_SHOW : SW_HIDE));
-#endif
-    // UpdateWindow();
 }
 
 //==============================================================================
@@ -1534,7 +1424,6 @@ void CMainFrame::timerEvent(QTimerEvent *event)
 void CMainFrame::OnViewAction()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_ACTION);
-    SaveLayout();
 }
 
 void CMainFrame::OnUpdateViewAction()
@@ -1546,7 +1435,6 @@ void CMainFrame::OnUpdateViewAction()
 void CMainFrame::OnViewBasicObjects()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_BASICOBJECTS);
-    SaveLayout();
 }
 
 void CMainFrame::OnUpdateViewBasicObjects()
@@ -1557,7 +1445,6 @@ void CMainFrame::OnUpdateViewBasicObjects()
 void CMainFrame::OnViewInspector()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
-    SaveLayout();
 }
 
 void CMainFrame::OnUpdateViewInspector()
@@ -1569,7 +1456,6 @@ void CMainFrame::OnUpdateViewInspector()
 void CMainFrame::OnViewProject()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_PROJECT);
-    SaveLayout();
 }
 
 void CMainFrame::OnUpdateViewProject()
@@ -1581,7 +1467,6 @@ void CMainFrame::OnUpdateViewProject()
 void CMainFrame::OnViewSlide()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_SLIDE);
-    SaveLayout();
 }
 
 void CMainFrame::OnUpdateViewSlide()
@@ -1597,7 +1482,6 @@ void CMainFrame::OnUpdateViewSlide()
 void CMainFrame::OnViewTimeline()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_TIMELINE);
-    SaveLayout();
 }
 
 //==============================================================================
@@ -1748,7 +1632,6 @@ void CMainFrame::OnHelpBehaviorReference()
     if (theFile.Exists()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnNavigate(
                     Q3DStudio::CString::fromQString(theFile.GetURL().path()), true);
-        SaveLayout();
     }
 }
 

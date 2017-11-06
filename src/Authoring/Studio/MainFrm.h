@@ -41,15 +41,14 @@
 #include "PreviewHelper.h"
 #include "DispatchListeners.h"
 
-#include <QMainWindow>
-#include <QTimer>
+#include <QtWidgets/qmainwindow.h>
+#include <QtCore/qtimer.h>
 
 //==============================================================================
 //	Forwards
 //==============================================================================
 class CHotKeys;
 class CPaletteManager;
-class CPaletteState;
 class CRecentItems;
 class CSceneView;
 class CStudioApp;
@@ -88,10 +87,6 @@ public:
 
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     void RecheckSizingMode();
-
-    void SaveLayout();
-    void RestoreLayout();
-    void SetLayout(const CPaletteState &inState);
 
     // CClientPlayChangeListener
     void OnPlayStart() override;
