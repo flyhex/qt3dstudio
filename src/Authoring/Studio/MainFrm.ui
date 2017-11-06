@@ -162,7 +162,7 @@
    <addaction name="actionRotation_Tool"/>
    <addaction name="actionLocal_Global_Manipulators"/>
    <addaction name="separator"/>
-   <addaction name="actionAutoset_Keyframes"/>
+   <addaction name="actionToolbarAutoset_Keyframes"/>
   </widget>
   <widget class="CEditCameraBar" name="m_EditCamerasBar">
    <property name="windowTitle">
@@ -187,7 +187,7 @@
    <addaction name="actionOrbit_Tool"/>
    <addaction name="separator"/>
    <addaction name="actionShading_Mode"/>
-   <addaction name="actionWireframe"/>
+   <addaction name="actionToolbarWireframe"/>
   </widget>
   <widget class="QToolBar" name="m_PlaybackToolbar">
    <property name="windowTitle">
@@ -257,10 +257,6 @@
   <action name="actionAutoset_Keyframes">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/client_tools_hi_color-06.png</normaloff>:/images/client_tools_hi_color-06.png</iconset>
    </property>
    <property name="text">
     <string>Autoset Keyframes</string>
@@ -363,11 +359,6 @@
   <action name="actionWireframe">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/editcamera_tools_hi-05.png</normaloff>
-     <disabledoff>:/images/editcamera_tools_hi-05_disabled.png</disabledoff>:/images/editcamera_tools_hi-05.png</iconset>
    </property>
    <property name="text">
     <string>Wireframe</string>
@@ -806,6 +797,37 @@
   <action name="actionSubpresentations">
    <property name="text">
     <string>Sub-presentations...</string>
+   </property>
+  </action>
+  <action name="actionToolbarWireframe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/editcamera_tools_hi-05.png</normaloff>
+     <disabledoff>:/images/editcamera_tools_hi-05_disabled.png</disabledoff>:/images/editcamera_tools_hi-05.png</iconset>
+   </property>
+   <property name="text">
+    <string>Wireframe</string>
+   </property>
+   <property name="toolTip">
+    <string>Show or Hide Wireframe</string>
+   </property>
+  </action>
+  <action name="actionToolbarAutoset_Keyframes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/client_tools_hi_color-06.png</normaloff>:/images/client_tools_hi_color-06.png</iconset>
+   </property>
+   <property name="text">
+    <string>Autoset Keyframes</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle autoset keyframes</string>
    </property>
   </action>
  </widget>

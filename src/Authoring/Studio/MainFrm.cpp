@@ -162,6 +162,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionRotation_Tool, &QAction::triggered, this, &CMainFrame::OnToolRotate);
     connect(m_ui->actionScale_Tool, &QAction::triggered, this, &CMainFrame::OnToolScale);
     connect(m_ui->actionLocal_Global_Manipulators, &QAction::triggered, this, &CMainFrame::OnToolGlobalManipulators);
+    connect(m_ui->actionToolbarAutoset_Keyframes, &QAction::triggered, this, &CMainFrame::OnToolAutosetkeys);
 
     // Edit Camera toolbar
     connect(m_ui->actionFit_Selected, &QAction::triggered, this, &CMainFrame::OnEditCameraZoomExtent);
@@ -172,6 +173,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionRulers_Guides, &QAction::triggered, this, &CMainFrame::OnViewGuidesRulers);
     connect(m_ui->actionClear_Guides, &QAction::triggered, this, &CMainFrame::OnClearGuides);
     connect(m_ui->actionLock_Guides, &QAction::triggered, this, &CMainFrame::OnLockGuides);
+    connect(m_ui->actionToolbarWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
 
     // TODO: better solution?
     QTimer* updateUITimer = new QTimer;
@@ -856,6 +858,10 @@ void CMainFrame::OnToolAutosetkeys()
 {
     // Toggle autoset keyframes to the opposite of what it's currently set as
     g_StudioApp.SetAutosetKeyframes(!CStudioPreferences::IsAutosetKeyframesOn());
+
+    // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
+    m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
+    m_ui->actionToolbarAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
 //==============================================================================
@@ -869,6 +875,7 @@ void CMainFrame::OnUpdateToolAutosetkeys()
 {
     // If autoset keyframes is on
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
+    m_ui->actionToolbarAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
 //==========================================================================
@@ -1542,6 +1549,11 @@ void CMainFrame::OnUpdateViewPivotPoint()
 void CMainFrame::OnViewWireframe()
 {
     CStudioPreferences::SetWireframeModeOn(!CStudioPreferences::IsWireframeModeOn());
+
+    // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
+    m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
+    m_ui->actionToolbarWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
+
     g_StudioApp.GetRenderer().RequestRender();
 }
 
@@ -1553,6 +1565,7 @@ void CMainFrame::OnViewWireframe()
 void CMainFrame::OnUpdateViewWireframe()
 {
     m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
+    m_ui->actionToolbarWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
 }
 
 //==============================================================================
