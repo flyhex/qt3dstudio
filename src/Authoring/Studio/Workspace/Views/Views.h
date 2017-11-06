@@ -35,9 +35,7 @@
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
+#include <QtWidgets/qwidget.h>
 
 //==============================================================================
 //	Forwards
@@ -45,16 +43,6 @@
 class CMainFrame;
 class CStudioApp;
 class CHotKeys;
-class CStudioPaletteBar;
-class CStudioDialog;
-#ifdef WIN32
-class CRuntimeClass;
-class CFrameWnd;
-#endif
-
-#include "Qt3DSString.h"
-
-QT_FORWARD_DECLARE_CLASS(QWidget)
 
 //==============================================================================
 //	Class
@@ -78,16 +66,8 @@ public:
 
     void RecheckMainframeSizingMode();
 
-#ifdef WIN32
-    static void CreatePaletteAndView(CRuntimeClass *inClass, CStudioPaletteBar *inPalette,
-                                     CFrameWnd *inParent, Q3DStudio::CString inWindowTitle);
-    static void CreateDialogAndView(CRuntimeClass *inClass, CStudioDialog *inDialog,
-                                    CFrameWnd *inParent, Q3DStudio::CString inWindowTitle);
-#endif
-
 protected:
-    CMainFrame *m_MainFrame; ///<
-    Q3DStudio::CString m_HelpURL; ///<
+    CMainFrame *m_MainFrame;
 };
 
 #endif // INCLUDED_VIEWS_H

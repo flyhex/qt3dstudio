@@ -30,25 +30,12 @@
 //==============================================================================
 //	Prefix
 //==============================================================================
-#include "stdafx.h"
 #include "Views.h"
 
 //==============================================================================
 //	Includes
 //==============================================================================
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "Doc.h"
-#endif
 #include "MainFrm.h"
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "TimelineTimelineLayout.h"
-#include "ScalableScroller.h"
-#include "PaletteManager.h"
-#include "HotKeys.h"
-#include "Dispatch.h"
-#include "ActionControl.h"
-#include "StudioPaletteBar.h"
-#endif
 
 //==============================================================================
 //	Implementation
@@ -82,12 +69,6 @@ void CViews::CreateViews()
     // object and then sets it as the application's main window object
     m_MainFrame = new CMainFrame();
     m_MainFrame->show();
-#ifdef KDAB_TEMPORARILY_REMOVED
-    // create and load the frame with its resources
-    m_MainFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, nullptr, nullptr);
-
-    m_MainFrame->RestoreLayout();
-#endif
 }
 
 //=============================================================================
@@ -135,58 +116,3 @@ void CViews::RecheckMainframeSizingMode()
     if (m_MainFrame != nullptr)
         m_MainFrame->RecheckSizingMode();
 }
-
-//==============================================================================
-//	Static
-//==============================================================================
-
-//=============================================================================
-/**
- * Creates a palette and the associated view.
- * @param inClass Should be RUNTIME_CLASS( CCLASS ) where CCLASS is a class that
- * inherits from MFC::CView (must implement dynamic creation) and is the view
- * that you want associated with the palette.
- * @param inPalette Palette that you want the view attached to
- * @param inParent Parent window or nullptr for top level windows
- * @param inWindowTitle Title caption to appear on the title bar of the palette
- * @param inShowWindow true to show the window after creation, false to hide it
- */
-#ifdef KDAB_TEMPORARILY_REMOVED
-void CViews::CreatePaletteAndView(CRuntimeClass *inClass, CStudioPaletteBar *inPalette,
-                                  CFrameWnd *inParent, Q3DStudio::CString inWindowTitle)
-{
-    CCreateContext theCreateContext;
-    memset(&theCreateContext, 0, sizeof(CCreateContext));
-    theCreateContext.m_pNewViewClass = inClass;
-    theCreateContext.m_pCurrentFrame = inParent;
-    theCreateContext.m_pCurrentDoc = nullptr;
-
-    inPalette->Create(::CString(inWindowTitle.GetMulti()), &theCreateContext,
-                      CPaletteManager::GetUniquePaletteId(), inParent);
-}
-#endif
-
-//=============================================================================
-/**
- * Creates a dialog and the associated view.
- * @param inClass Should be RUNTIME_CLASS( CCLASS ) where CCLASS is a class that
- * inherits from MFC::CView (must implement dynamic creation) and is the view
- * that you want associated with the palette.
- * @param inPalette Palette that you want the view attached to
- * @param inParent Parent window or nullptr for top level windows
- * @param inWindowTitle Title caption to appear on the title bar of the palette
- * @param inShowWindow true to show the window after creation, false to hide it
- */
-#ifdef KDAB_TEMPORARILY_REMOVED
-void CViews::CreateDialogAndView(CRuntimeClass *inClass, CStudioDialog *inDialog,
-                                 CFrameWnd *inParent, Q3DStudio::CString inWindowTitle)
-{
-    CCreateContext theCreateContext;
-    memset(&theCreateContext, 0, sizeof(CCreateContext));
-    theCreateContext.m_pNewViewClass = inClass;
-    theCreateContext.m_pCurrentFrame = inParent;
-    theCreateContext.m_pCurrentDoc = nullptr;
-
-    inDialog->Create(::CString(inWindowTitle.GetMulti()), &theCreateContext, inParent);
-}
-#endif
