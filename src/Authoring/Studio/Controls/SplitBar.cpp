@@ -99,6 +99,17 @@ void CSplitBar::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
     m_MouseDown = false;
 
     Invalidate();
+
+    if (!IsMouseOver())
+        resetCursor();
+}
+
+void CSplitBar::OnMouseRUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+    CControl::OnMouseRUp(inPoint, inFlags);
+
+    if (!IsMouseOver())
+        resetCursor();
 }
 
 //=============================================================================

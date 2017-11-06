@@ -89,8 +89,10 @@ public:
 
     void Draw(CRenderer *inRenderer) override;
     void OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     bool OnMouseDown(CPt inLocation, Qt::KeyboardModifiers inFlags) override;
     void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseRUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     bool OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     bool OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;

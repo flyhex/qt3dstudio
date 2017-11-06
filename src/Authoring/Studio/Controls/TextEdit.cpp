@@ -544,6 +544,12 @@ void CTextEdit::OnMouseOver(CPt inLocation, Qt::KeyboardModifiers inFlags)
         setCursorIfNotSet(CMouseCursor::CURSOR_IBEAM);
 }
 
+void CTextEdit::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+    resetCursor();
+    CControl::OnMouseOut(inPoint, inFlags);
+}
+
 //==============================================================================
 /**
  * Handles mouse down events.  Places the caret in the appropriate place based
@@ -597,6 +603,17 @@ void CTextEdit::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
     m_MouseIsDown = false;
     m_StartDragPt = CPt(0, 0);
     CControl::OnMouseUp(inPoint, inFlags);
+
+    if (!IsMouseOver())
+        resetCursor();
+}
+
+void CTextEdit::OnMouseRUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+    CControl::OnMouseRUp(inPoint, inFlags);
+
+    if (!IsMouseOver())
+        resetCursor();
 }
 
 //==============================================================================

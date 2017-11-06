@@ -1784,15 +1784,19 @@ void CControl::setCursorIfNotSet(long cursor)
 {
     if (cursor != m_cursorSet) {
         if (m_cursorSet != -1)
-            qApp->restoreOverrideCursor();
+            qApp->changeOverrideCursor(CResourceCache::GetInstance()->GetCursor(cursor));
+        else
+            qApp->setOverrideCursor(CResourceCache::GetInstance()->GetCursor(cursor));
         m_cursorSet = cursor;
-        qApp->setOverrideCursor(CResourceCache::GetInstance()->GetCursor(cursor));
     }
 }
 
 void CControl::resetCursor()
 {
     if (m_cursorSet != -1) {
+        // Restoring back to no-override state seems to not change the cursor automatically
+        // to the default cursor, so let's do that manually before restoring the cursor
+        qApp->changeOverrideCursor(Qt::ArrowCursor);
         qApp->restoreOverrideCursor();
         m_cursorSet = -1;
     }

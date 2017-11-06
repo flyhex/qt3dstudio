@@ -78,6 +78,7 @@ public:
 
     bool OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseRUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
 
