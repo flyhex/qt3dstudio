@@ -53,10 +53,8 @@ SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
         return SObjectFileType(
             OBJTYPE_MODEL, OBJTYPE_IMAGE,
             DocumentEditorFileType::Image); // Drag-drop image to scene will auto-map to Rectangle.
-    else if (theExtension.Compare(CDialogs::GetLUAFileExtension(),
-                                  Q3DStudio::CString::ENDOFSTRING, false)
-             || theExtension.Compare(CDialogs::GetQmlFileExtension(),
-                                     Q3DStudio::CString::ENDOFSTRING, false))
+    else if (theExtension.Compare(CDialogs::GetQmlFileExtension(),
+                                  Q3DStudio::CString::ENDOFSTRING, false))
         return SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
     else if (CDialogs::IsFontFileExtension(theExtension))
         return SObjectFileType(OBJTYPE_TEXT, DocumentEditorFileType::Font);

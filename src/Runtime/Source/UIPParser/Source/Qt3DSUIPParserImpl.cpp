@@ -1120,9 +1120,7 @@ BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &i
             theNewElem.m_Path = m_ParseElementManager.m_StringTable.RegisterStr(thePath.c_str());
 
         if (isBehavior) {
-            if (theFileString.find(".lua") != eastl::string::npos) {
-                theScriptBridge->LoadScript(&inPresentation, &theNewElem, theFileString.c_str());
-            } else {
+            if (theFileString.find(".qml") != eastl::string::npos) {
                 theScriptBridgeQml->LoadScript(&inPresentation, &theNewElem,
                                                theFileString.c_str());
             }

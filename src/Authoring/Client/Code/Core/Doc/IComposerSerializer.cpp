@@ -2509,23 +2509,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                     make_pair(m_StringTable.RegisterStr(theSourcePath), theMaster));
 
                         if (theFullPath.Exists()) {
-                            if (theFullPath.GetExtension().Compare(L"lua", CString::ENDOFSTRING,
-                                                                   false)) {
-                                // If we can't parse the lua file, go on.
-                                std::shared_ptr<IDOMReader> theLuaPtr =
-                                        IDocumentEditor::ParseLuaFile(
-                                            theFullPath, m_DataCore.GetStringTablePtr(),
-                                            m_ImportFailedHandler, *m_InputStreamFactory);
-                                if (theLuaPtr) {
-                                    std::vector<SMetaDataLoadWarning> warnings;
-                                    // Now the magic section
-                                    m_MetaData.LoadInstance(*theLuaPtr, theMaster,
-                                                            theFullPath.GetFileStem().c_str(),
-                                                            warnings);
-                                }
-                            } else if (theFullPath.GetExtension().Compare(L"qml",
-                                                                          CString::ENDOFSTRING,
-                                                                          false)) {
+                            if (theFullPath.GetExtension().Compare(L"qml",
+                                                                   CString::ENDOFSTRING, false)) {
                                 std::shared_ptr<IDOMReader> theScriptPtr =
                                         IDocumentEditor::ParseScriptFile(
                                             theFullPath, m_DataCore.GetStringTablePtr(),

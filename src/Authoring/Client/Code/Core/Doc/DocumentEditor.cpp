@@ -3227,15 +3227,13 @@ public:
                                          DocumentEditorInsertType::Enum inDropType,
                                          long inStartTime) override
     {
-        if (inFullPathToDocument.Find(".lua") != Q3DStudio::CString::ENDOFSTRING) {
-            CLuaDynamicInstanceLoader loader(*this);
-            return LoadDynamicInstance(inFullPathToDocument, inParent, inSlide,
-                                       inDropType, inStartTime, loader, true);
-        } else {
+        TInstanceHandle ret;
+        if (inFullPathToDocument.Find(".qml") != Q3DStudio::CString::ENDOFSTRING) {
             CScriptDynamicInstanceLoader loader(*this);
-            return LoadDynamicInstance(inFullPathToDocument, inParent, inSlide,
+            ret = LoadDynamicInstance(inFullPathToDocument, inParent, inSlide,
                                        inDropType, inStartTime, loader, true);
         }
+        return ret;
     }
 
     struct CRenderPluginDynamicInstanceLoader : public ISpecificDynamicInstance
@@ -4506,11 +4504,9 @@ public:
                     if (theInsertResult.second == false)
                         theInsertResult.first->second = theDAERelativePath;
                 }
-            } else if ((theExtension.Compare(L"lua", CString::ENDOFSTRING, false) ||
-                       theExtension.Compare(L"qml", CString::ENDOFSTRING, false))
+            } else if (theExtension.Compare(L"qml", CString::ENDOFSTRING, false)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && theInstances.empty() == false) {
-                bool isLua = theExtension.Compare(L"lua", CString::ENDOFSTRING, false);
                 // First, refresh the parent behavior.
                 if (!hasDispatchNotificationScope) {
                     theDispatch.FireBeginDataModelNotifications();
@@ -4533,17 +4529,10 @@ public:
                         m_DataCore.RemoveCachedValues(theBehavior);
                     } else {
                         std::shared_ptr<IDOMReader> theReaderPtr;
-                        if (isLua) {
-                            theReaderPtr = ParseLuaFile(theRecord.m_File,
-                                                        m_DataCore.GetStringTablePtr(),
-                                                        m_Doc.GetImportFailedHandler(),
-                                                        *m_InputStreamFactory);
-                        } else {
-                            theReaderPtr = ParseScriptFile(theRecord.m_File,
-                                                           m_DataCore.GetStringTablePtr(),
-                                                           m_Doc.GetImportFailedHandler(),
-                                                           *m_InputStreamFactory);
-                        }
+                        theReaderPtr = ParseScriptFile(theRecord.m_File,
+                                                       m_DataCore.GetStringTablePtr(),
+                                                       m_Doc.GetImportFailedHandler(),
+                                                       *m_InputStreamFactory);
                         if (!theReaderPtr) {
                             // then effectively no change...
                             QT3DS_ASSERT(false);
@@ -4552,19 +4541,11 @@ public:
                             m_MetaData.LoadInstance(*theReaderPtr, theBehavior,
                                                     theRelativePath.GetFileStem().c_str(),
                                                     theWarnings);
-                            if (isLua) {
-                                CLuaDynamicInstanceLoader inSpecificInstance(*this);
-                                QString theLoadError =
-                                    inSpecificInstance.LoadInstanceData(theRecord.m_File);
-                                DisplayLoadWarnings(theRecord.m_File.toQString(),
-                                                    theWarnings, theLoadError);
-                            } else {
-                                CScriptDynamicInstanceLoader inSpecificInstance(*this);
-                                QString theLoadError =
-                                    inSpecificInstance.LoadInstanceData(theRecord.m_File);
-                                DisplayLoadWarnings(theRecord.m_File.toQString(),
-                                                    theWarnings, theLoadError);
-                            }
+                            CScriptDynamicInstanceLoader inSpecificInstance(*this);
+                            QString theLoadError =
+                                inSpecificInstance.LoadInstanceData(theRecord.m_File);
+                            DisplayLoadWarnings(theRecord.m_File.toQString(),
+                                                theWarnings, theLoadError);
                         }
                     }
                 }
