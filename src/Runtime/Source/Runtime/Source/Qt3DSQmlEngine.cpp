@@ -811,7 +811,7 @@ void CQmlEngineImpl::createComponent(QQmlComponent *component, TElement *element
     }
 
     auto script = new Q3DSQmlScript(*this, *obj, *element, *parent);
-    context->setContextProperty("Qt3ds", script);
+    context->setContextProperty("Qt3DSRuntime", script);
     component->completeCreate();
 
     script->setParent(component);
