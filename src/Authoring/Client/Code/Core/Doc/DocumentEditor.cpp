@@ -4759,7 +4759,7 @@ IDocumentEditor::ParseScriptFile(const CFilePath &inFullPathToDocument,
         inFullPathToDocument.toCString());
     std::shared_ptr<IDOMReader> theReaderPtr(
         SScriptParser::ParseScriptFile(theFactory, inStringTable,
-                                       inFullPathToDocument.GetCharStar(),
+                                       inFullPathToDocument.toQString(),
                                        theXmlErrorHandler, inInputStreamFactory));
 
     if (!theReaderPtr) {
