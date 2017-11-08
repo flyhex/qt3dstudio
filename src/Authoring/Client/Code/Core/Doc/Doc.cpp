@@ -367,7 +367,7 @@ void CDoc::GetOrUpdateFileList(std::vector<Q3DStudio::CString> &ioMyList,
         std::vector<Q3DStudio::CFilePath> files;
         dirPath.RecursivelyFindFilesOfType(inExtensionList, files, true);
         for (size_t idx = 0, end = files.size(); idx < end; ++idx)
-            ioMyList.push_back(files[idx]);
+            ioMyList.push_back(files[idx].toCString());
     }
     outResult = ioMyList;
 }

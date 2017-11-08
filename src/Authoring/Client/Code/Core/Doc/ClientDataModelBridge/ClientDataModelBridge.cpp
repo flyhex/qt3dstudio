@@ -1087,7 +1087,7 @@ inline void AddSourcePathToList(std::set<Q3DStudio::CString> &ioSourcePathList,
 {
     Q3DStudio::CFilePath theSourcePath = qt3dsdm::get<TDataStrPtr>(inValue)->GetData();
     if (!theSourcePath.filePath().isEmpty())
-        ioSourcePathList.insert(theSourcePath);
+        ioSourcePathList.insert(theSourcePath.toCString());
 }
 
 //=============================================================================
@@ -1242,7 +1242,7 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
             theFontFile.append(*theFontNameIter);
             theFontFile.append(" ]");
         }
-        theFontFileList.insert(Q3DStudio::CFilePath(theFontFile));
+        theFontFileList.insert(Q3DStudio::CFilePath(theFontFile).toCString());
     }
     return theFontFileList;
 }

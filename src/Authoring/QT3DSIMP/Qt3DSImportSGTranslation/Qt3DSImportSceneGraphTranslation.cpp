@@ -605,7 +605,8 @@ public:
         if (result.m_Value != NULL && *result.m_Value)
             imgPath = result.m_Value;
         else {
-            swprintf(pathBuf, 1024, L"%ls/missing.png", m_Import.GetImageDir());
+            swprintf(pathBuf, 1024, L"%hs/missing.png",
+                     m_Import.GetImageDir().toStdString().c_str());
             imgPath = pathBuf;
         }
         // We want to name the texture after the material id concatenated with the map type.
