@@ -217,9 +217,9 @@ bool Q3DSView::isRunning() const
 void Q3DSView::tick()
 {
     if (m_emitRunningChange) {
+        m_isRunning = true;
         Q_EMIT runningChanged(true);
         m_emitRunningChange = false;
-        m_isRunning = true;
     }
 
     // Don't call onFrameUpdate until after onInitialize has been called
