@@ -38,7 +38,6 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "Qt3DSOptions.h"
 #include "Doc.h"
 #include "StudioAppPrefsPage.h"
 #include "StudioConst.h"
@@ -117,14 +116,6 @@ void CStudioAppPrefsPage::OnInitDialog()
     for (auto w : findChildren<QGroupBox *>())
         w->setFont(m_BoldFont);
 
-#ifndef INCLUDE_EDIT_CAMERA
-    ASSERT(0);
-    // This won't work as all the controls have to move accordingly. Don't think INCLUDE_EDIT_CAMERA
-    // will be undefined
-    // Hide controls related to Edit Camera
-    m_ui->m_groupBoxEditingView->setVisible(false);
-#endif
-
     // Hidden until we have some other Preview configurations than just Viewer
     m_ui->groupBoxPreview->setVisible(false);
 
@@ -185,9 +176,7 @@ void CStudioAppPrefsPage::LoadSettings()
     long theResolution = (long)CStudioPreferences::GetTimelineSnappingGridResolution();
     m_ui->m_SnapRangeCombo->setCurrentIndex(theResolution);
 
-#ifdef INCLUDE_EDIT_CAMERA
     InitEditStartViewCombo();
-#endif
 
     EnableOptions();
 
@@ -228,7 +217,6 @@ void CStudioAppPrefsPage::SaveSettings()
     long theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
     CStudioPreferences::SetTimelineSnappingGridResolution((ESnapGridResolution)theCurrentSelection);
 
-#ifdef INCLUDE_EDIT_CAMERA
     // Edit View Background Color
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
 
@@ -237,7 +225,6 @@ void CStudioAppPrefsPage::SaveSettings()
     long theNumItems = m_ui->m_EditViewStartupView->count();
     CStudioPreferences::SetPreferredStartupView(
         (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
-#endif
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     SavePreviewSettings();
