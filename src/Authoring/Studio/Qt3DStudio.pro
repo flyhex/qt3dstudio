@@ -151,7 +151,8 @@ FORMS += \
     _Win/UI/InterpolationDlg.ui \
     _Win/UI/ResetKeyframeValuesDlg.ui \
     _Win/UI/GLVersionDlg.ui \
-    Application/StudioTutorialWidget.ui
+    Application/StudioTutorialWidget.ui \
+    _Win/UI/TimeLineToolbar.ui
 
 SOURCES += \
     MainFrm.cpp \
@@ -183,6 +184,7 @@ SOURCES += \
     _Win/UI/StudioPreferencesPropSheet.cpp \
     _Win/UI/StudioProjectSettingsPage.cpp \
     _Win/UI/TimeEditDlg.cpp \
+    _Win/UI/TimeLineToolbar.cpp \
     _Win/Utils/MouseCursor.cpp \
     _Win/Workspace/Dialogs.cpp \
     _Win/Workspace/Views.cpp \
@@ -312,7 +314,6 @@ SOURCES += \
     Palettes/Timeline/TimelineTimelineLayout.cpp \
     Palettes/Timeline/TimelineTreeLayout.cpp \
     Palettes/Timeline/TimeMeasure.cpp \
-    Palettes/Timeline/TimeToolbar.cpp \
     Palettes/Timeline/ToggleBlankControl.cpp \
     Palettes/Timeline/ToggleControl.cpp \
     Palettes/Timeline/ToggleToolbar.cpp \
@@ -357,6 +358,7 @@ SOURCES += \
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
+    _Win/UI/TimeLineToolbar.h \
     _Win/Application/StudioApp.h \
     Controls/TextEditContextMenu.h \
     Palettes/Action/ActionModel.h \

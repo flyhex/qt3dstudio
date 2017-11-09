@@ -49,6 +49,7 @@
 #include <QtQuick/qquickwindow.h>
 #include <QtQuick/qquickitem.h>
 #include <QtWidgets/qcombobox.h>
+#include <QtWidgets/qabstractbutton.h>
 
 class KeyEventFilter : public QObject
 {
@@ -88,7 +89,8 @@ public:
         if (qobject_cast<CSceneView *>(watched) == nullptr
                 && qobject_cast<CMainFrame *>(watched) == nullptr
                 && qobject_cast<QComboBox *>(watched) == nullptr
-                && qobject_cast<CPlayerContainerWnd *>(watched) == nullptr) {
+                && qobject_cast<CPlayerContainerWnd *>(watched) == nullptr
+                && qobject_cast<QAbstractButton *>(watched) == nullptr) {
             return false;
         }
 

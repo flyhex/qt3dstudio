@@ -154,5 +154,6 @@ protected:
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel
+    long m_time;
 };
 #endif // INCLUDED_TIMELINE_CONTROL_H

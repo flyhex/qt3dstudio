@@ -205,10 +205,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRewind"/>
-   <addaction name="actionStop"/>
-   <addaction name="actionPlay"/>
-   <addaction name="separator"/>
    <addaction name="actionPreview"/>
   </widget>
   <action name="action_Reference_Manual">
@@ -750,36 +746,6 @@
    </property>
    <property name="shortcut">
     <string>F3</string>
-   </property>
-  </action>
-  <action name="actionRewind">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_low-00.png</normaloff>:/images/playback_tools_low-00.png</iconset>
-   </property>
-   <property name="text">
-    <string>Rewind</string>
-   </property>
-  </action>
-  <action name="actionStop">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_low-01.png</normaloff>:/images/playback_tools_low-01.png</iconset>
-   </property>
-   <property name="text">
-    <string>Stop</string>
-   </property>
-  </action>
-  <action name="actionPlay">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
-   </property>
-   <property name="text">
-    <string>Play</string>
    </property>
   </action>
   <action name="actionPreview">

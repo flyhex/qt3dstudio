@@ -51,7 +51,6 @@ class CScroller;
 class CFilterToolbar;
 class CTimelineRow;
 class CToggleToolbar;
-class CTimeToolbar;
 class CTimelineControl;
 class IDoc;
 class CRenderer;
@@ -87,8 +86,6 @@ public:
 
     void ClearRows();
 
-    void SetTime(long inTime);
-    long GetTime();
     void ResetFilter();
     CRct GetVisibleArea();
     void RecalcLayout();
@@ -97,7 +94,6 @@ protected:
     CFilter m_Filter;
     CFilterToolbar
         *m_FilterToolbar; ///< Control at the top of the timeline containing filter buttons.
-    CTimeToolbar *m_TimeToolbar; ///< Control at the top containing the time display
     CToggleToolbar
         *m_ToggleToolbar; ///< Control at the top containing a header for the toggle column.
 

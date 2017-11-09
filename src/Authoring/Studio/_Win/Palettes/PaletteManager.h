@@ -42,6 +42,8 @@
 //  Forwards
 //==============================================================================
 class CMainFrame;
+class WidgetControl;
+class QTimeLineToolbar;
 
 QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
@@ -82,6 +84,9 @@ protected:
     QDockWidget *m_actionDock;
     QDockWidget *m_inspectorDock;
 
+    WidgetControl *m_timeLineWidgetControl;
+    QTimeLineToolbar *m_timeLineToolbar;
+
 public:
     CPaletteManager(CMainFrame *inMainFrame);
     virtual ~CPaletteManager();
@@ -95,6 +100,7 @@ public:
     QWidget *getFocusWidget() const;
     bool tabNavigateFocusedWidget(bool tabForward);
     CTimelineControl *GetTimelineControl() const;
+    void onTimeChanged(long time);
 
     // Commands
     void EnablePalettes();

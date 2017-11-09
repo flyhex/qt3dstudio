@@ -44,8 +44,10 @@
 #include "ProjectView.h"
 #include "TabOrderHandler.h"
 #include "StudioPreferences.h"
+#include "TimeLineToolbar.h"
 
 #include <QtWidgets/qdockwidget.h>
+#include <QtWidgets/qboxlayout.h>
 
 //==============================================================================
 /**
@@ -87,10 +89,28 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_timelineDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
     m_timelineDock->setObjectName("timeline");
     m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+    QWidget *timeLineParent = new QWidget(inMainFrame);
+    timeLineParent->setObjectName("TimeLineParent");
+    m_timeLineToolbar = new QTimeLineToolbar(inMainFrame, timeLineParent);
+    QVBoxLayout *layout = new QVBoxLayout(timeLineParent);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    // Use spacer widget instead of just layout spacing to get the color of the space correct
+    QWidget *spacer = new QWidget(timeLineParent);
+    spacer->setMaximumHeight(2);
+    spacer->setMinimumHeight(2);
+
     auto c = new CTimelineControl();
-    auto w = new WidgetControl(c, m_timelineDock);
-    m_timelineDock->setWidget(w);
-    w->setMinimumWidth(500);
+    m_timeLineWidgetControl = new WidgetControl(c, timeLineParent);
+
+    layout->addWidget(m_timeLineWidgetControl);
+    layout->addWidget(spacer);
+    layout->addWidget(m_timeLineToolbar);
+
+    m_timelineDock->setWidget(timeLineParent);
+    timeLineParent->setMinimumWidth(500);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
 
@@ -125,13 +145,13 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_actionDock->setEnabled(false);
     m_inspectorDock->setEnabled(false);
 
-    w->RegiserForDnd(w);
-    w->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
-    w->AddMainFlavor(QT3DS_FLAVOR_FILE);
-    w->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
-    w->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
-    w->AddMainFlavor(QT3DS_FLAVOR_ASSET_TL);
-    w->AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
+    m_timeLineWidgetControl->RegiserForDnd(m_timeLineWidgetControl);
+    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
+    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
+    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
+    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
+    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_TL);
+    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 }
 
 //==============================================================================
@@ -243,16 +263,15 @@ bool CPaletteManager::tabNavigateFocusedWidget(bool tabForward)
  */
 CTimelineControl *CPaletteManager::GetTimelineControl() const
 {
-    auto dock = GetControl(CPaletteManager::CONTROLTYPE_TIMELINE);
-
-    if (dock) {
-        auto widget = static_cast<WidgetControl *>(dock->widget());
-
-        if (widget)
-            return static_cast<CTimelineControl *>(widget->getControl());
-    }
+    if (m_timeLineWidgetControl)
+        return static_cast<CTimelineControl *>(m_timeLineWidgetControl->getControl());
 
     return nullptr;
+}
+
+void CPaletteManager::onTimeChanged(long time)
+{
+    m_timeLineToolbar->onTimeChanged(time);
 }
 
 void CPaletteManager::EnablePalettes()

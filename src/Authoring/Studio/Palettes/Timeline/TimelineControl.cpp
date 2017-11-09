@@ -66,6 +66,7 @@ IMPLEMENT_OBJECT_COUNTER(CTimelineControl)
 CTimelineControl::CTimelineControl()
     : m_SuspendRecalcLayout(false)
     , m_TranslationManager(nullptr)
+    , m_time(0)
 {
     ADDTO_OBJECT_COUNTER(CTimelineControl)
 
@@ -128,7 +129,7 @@ CTimelineControl::~CTimelineControl()
   */
 long CTimelineControl::GetTime()
 {
-    return m_TreeLayout->GetTime();
+    return m_time;
 }
 
 //=============================================================================
@@ -359,8 +360,8 @@ ISnappingListProvider *CTimelineControl::GetSnappingListProvider() const
  */
 void CTimelineControl::SetTime(long inNewTime)
 {
+    m_time = inNewTime;
     m_TimelineLayout->SetTime(inNewTime);
-    m_TreeLayout->SetTime(inNewTime);
 }
 
 void CTimelineControl::HideInsertionMarkers()

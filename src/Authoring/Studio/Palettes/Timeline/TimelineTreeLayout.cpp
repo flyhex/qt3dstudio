@@ -41,7 +41,6 @@
 #include "StateRow.h"
 #include "FilterToolbar.h"
 #include "ToggleToolbar.h"
-#include "TimeToolbar.h"
 #include "StudioPreferences.h"
 #include "TimelineControl.h"
 #include "Renderer.h"
@@ -86,12 +85,10 @@ CTimelineTreeLayout::CTimelineTreeLayout(CTimelineControl *inTimelineControl, ID
     m_TreeScroller->AddChild(m_TreeList);
 
     m_FilterToolbar = new CFilterToolbar(this);
-    m_TimeToolbar = new CTimeToolbar(inDoc);
     m_ToggleToolbar = new CToggleToolbar(this);
 
     AddChild(m_TreeScroller);
     AddChild(m_ToggleScroller);
-    AddChild(m_TimeToolbar);
     AddChild(m_ToggleToolbar);
     AddChild(m_ColorScroller);
 }
@@ -108,14 +105,12 @@ CTimelineTreeLayout::~CTimelineTreeLayout()
 
     RemoveChild(m_TreeScroller);
     RemoveChild(m_ToggleScroller);
-    RemoveChild(m_TimeToolbar);
     RemoveChild(m_FilterToolbar);
     RemoveChild(m_ToggleToolbar);
     RemoveChild(m_ColorScroller);
     // RemoveChild( m_BreadCrumbToolbar );
 
     delete m_FilterToolbar;
-    delete m_TimeToolbar;
     delete m_ToggleToolbar;
     delete m_ColorScroller;
     delete m_ColorList;
@@ -196,9 +191,6 @@ void CTimelineTreeLayout::RecalcLayout()
 
     m_ToggleToolbar->SetSize(CPt(61, theHeaderHeight));
     m_ToggleToolbar->SetPosition(mySize.x - m_ToggleToolbar->GetSize().x, 0);
-
-    m_TimeToolbar->SetSize(CPt(mySize.x - m_ToggleToolbar->GetSize().x, theHeaderHeight));
-    m_TimeToolbar->SetPosition(0, 0);
 
     m_ColorScroller->SetSize(CPt(CStudioPreferences::GetRowSize(), mySize.y - theHeaderHeight
                                      - m_TreeScroller->GetHorizontalBar()->GetMinimumSize().y
@@ -314,31 +306,12 @@ void CTimelineTreeLayout::SetScrollPositionY(CScroller *inSource, long inScrollP
 
 //=============================================================================
 /**
- * Sets the time on the Time header display time.
- * @param inTime the new time.
- */
-void CTimelineTreeLayout::SetTime(long inTime)
-{
-    m_TimeToolbar->SetTime(inTime);
-}
-
-//=============================================================================
-/**
  * This is overridden so the Gesture can Notify Drop Listeners that its time to Drop.
  * If the gesture is dragging something then wee will drop.
  */
 void CTimelineTreeLayout::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseUp(inPoint, inFlags);
-}
-
-//=============================================================================
-/**
-  * Returns the playhead time
-  */
-long CTimelineTreeLayout::GetTime()
-{
-    return m_TimeToolbar->GetTime();
 }
 
 //=============================================================================

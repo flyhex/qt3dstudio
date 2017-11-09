@@ -126,23 +126,23 @@ QToolBar::separator {
 }
 
 QToolButton:!checked {
-    border-top: 1px solid #262829;
     min-width: 22px;
     min-height: 22px;
+    max-height: 22px;
     background-color: #404244;
 }
 
 QToolButton:checked, QToolButton:hover {
-    border-top: 1px solid #262829;
     min-width: 22px;
     min-height: 22px;
+    max-height: 22px;
     background-color: #262829;
 }
 
 QToolButton:pressed {
-    border-top: 1px solid #262829;
     min-width: 22px;
     min-height: 22px;
+    max-height: 22px;
     background-color: #46a2da;
 }
 
@@ -243,14 +243,21 @@ QDialog#AboutDlg QWidget {
     border: 0px;
 }
 
-QDialog#AboutDlg QPushButton:!pressed,
 QDialog#AboutDlg QPushButton:!pressed {
     background: transparent;
     border: 1px solid #41cd52;
 }
 
-QDialog#AboutDlg QPushButton:pressed,
 QDialog#AboutDlg QPushButton:pressed {
     background: #41cd52;
     border: 1px solid #41cd52;
+}
+
+/* TimeLineToolbar */
+QWidget#TimeLineParent,
+QTimeLineToolbar QWidget#layoutWidget {
+    background: #404244;
+}
+QTimeLineToolbar QPushButton#timeButton {
+    border: 0px;
 }

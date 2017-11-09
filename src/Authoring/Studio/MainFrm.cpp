@@ -152,9 +152,6 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionGroup_Select_Tool, &QAction::triggered, m_SceneView, &CSceneView::OnToolGroupSelection);
 
     // Playback toolbar
-    connect(m_ui->actionPlay, &QAction::triggered, this, &CMainFrame::OnPlaybackPlay);
-    connect(m_ui->actionRewind, &QAction::triggered, this, &CMainFrame::OnPlaybackRewind);
-    connect(m_ui->actionStop, &QAction::triggered, this, &CMainFrame::OnPlaybackStop);
     connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreview);
 
     // Tool mode toolbar
@@ -886,7 +883,7 @@ void CMainFrame::OnUpdateToolAutosetkeys()
 void CMainFrame::OnPlayStart()
 {
     // Update the play button since this doesn't always happen automatically
-    m_ui->actionPlay->setChecked(true);
+    Q_EMIT playStateChanged(true);
 
     if (m_PlaybackFlag == false) {
         m_PlaybackFlag = true;
@@ -905,7 +902,7 @@ void CMainFrame::OnPlayStart()
 void CMainFrame::OnPlayStop()
 {
     // Update the play button since this doesn't always happen automatically
-    m_ui->actionPlay->setChecked(false);
+    Q_EMIT playStateChanged(false);
 
     if (m_PlaybackFlag == true) {
         m_PlaybackFlag = false;
@@ -921,8 +918,8 @@ void CMainFrame::OnPlayStop()
  */
 void CMainFrame::OnTimeChanged(long inTime)
 {
-    Q_UNUSED(inTime);
-    // Do nothing
+    if (m_PaletteManager)
+        m_PaletteManager->onTimeChanged(inTime);
 }
 
 //==============================================================================

@@ -226,6 +226,9 @@ public:
 
     QWidget *GetActiveView();
 
+Q_SIGNALS:
+    void playStateChanged(bool started);
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
