@@ -1011,7 +1011,6 @@ public:
         } else {
             theName = GetName(retval);
         }
-        SetName(retval, theName, true);
         SetTimeRangeToParent(retval);
 
         if (inType == ComposerObjectTypes::Layer) {
@@ -1026,9 +1025,10 @@ public:
                 retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance))
             m_Bridge.GetOrCreateGraphRoot(retval);
 
-        // EnsureUniqueName( retval );
-
-        return FinalizeAddOrDrop(retval, inParent, inInsertType, inPosition, false);
+        TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
+                                                   inPosition, false);
+        SetName(retval, theName, true);
+        return handle;
     }
 
     TCharPtr GetSourcePath(Qt3DSDMInstanceHandle inInstance)

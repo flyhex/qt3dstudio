@@ -36,10 +36,13 @@
 #include "Dispatch.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
+#include "StudioObjectTypes.h"
+#include "IDocumentEditor.h"
+#include "DocumentEditorEnumerations.h"
 
 #include <QtCore/qdatetime.h>
 
-QTimeLineToolbar::QTimeLineToolbar(CMainFrame *mainFrame, QWidget *pParent)
+TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, QWidget *pParent)
     : QWidget(pParent)
     , m_ui(new QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar))
 {
@@ -70,22 +73,22 @@ QTimeLineToolbar::QTimeLineToolbar(CMainFrame *mainFrame, QWidget *pParent)
 
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     m_Connections.push_back(theDispatch->ConnectSelectionChange(
-        std::bind(&QTimeLineToolbar::OnSelectionChange, this, std::placeholders::_1)));
+        std::bind(&TimeLineToolbar::OnSelectionChange, this, std::placeholders::_1)));
+
+    connect(m_ui->addLayerButton, &QPushButton::clicked,
+            this, &TimeLineToolbar::onAddLayerClicked);
 
     // TODO: Add datainput button handling
     m_ui->addDataInputButton->setVisible(false);
-
-    // TODO: add layer button handling
-    m_ui->addLayerButton->setVisible(false);
 }
 
-QTimeLineToolbar::~QTimeLineToolbar()
+TimeLineToolbar::~TimeLineToolbar()
 {
     delete m_ui;
     m_Connections.clear();
 }
 
-void QTimeLineToolbar::onTimeChanged(long time)
+void TimeLineToolbar::onTimeChanged(long time)
 {
     QString formattedTime;
     if (time < 1000 * 60 * 60) {
@@ -100,7 +103,7 @@ void QTimeLineToolbar::onTimeChanged(long time)
     m_ui->rewindButton->setEnabled(time != 0);
 }
 
-void QTimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
+void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
 {
     qt3dsdm::TInstanceHandleList selectedInstances = newSelectable.GetSelectedInstances();
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
@@ -113,4 +116,25 @@ void QTimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable
         }
     }
     m_ui->deleteObject->setEnabled(canDelete);
+}
+
+void TimeLineToolbar::onAddLayerClicked()
+{
+    using namespace Q3DStudio;
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
+    // If active instance is component, just bail as we can't add layers to components
+    qt3dsdm::Qt3DSDMInstanceHandle rootInstance = doc->GetActiveRootInstance();
+    if (bridge->GetObjectType(rootInstance) == OBJTYPE_COMPONENT)
+        return;
+
+    qt3dsdm::Qt3DSDMSlideHandle slide = doc->GetActiveSlide();
+    qt3dsdm::Qt3DSDMInstanceHandle layer = doc->GetActiveLayer();
+
+    SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Add Layer"))
+        ->CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Layer, layer, slide,
+                                   DocumentEditorInsertType::PreviousSibling,
+                                   CPt(), PRIMITIVETYPE_UNKNOWN, -1);
 }

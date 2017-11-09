@@ -92,7 +92,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
 
     QWidget *timeLineParent = new QWidget(inMainFrame);
     timeLineParent->setObjectName("TimeLineParent");
-    m_timeLineToolbar = new QTimeLineToolbar(inMainFrame, timeLineParent);
+    m_timeLineToolbar = new TimeLineToolbar(inMainFrame, timeLineParent);
     QVBoxLayout *layout = new QVBoxLayout(timeLineParent);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);

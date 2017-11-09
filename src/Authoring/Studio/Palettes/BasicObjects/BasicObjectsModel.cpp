@@ -51,7 +51,6 @@ void BasicObjectsModel::initialize()
         {tr("Component"), "Asset-Component-Normal.png"_L1, OBJTYPE_COMPONENT, PRIMITIVETYPE_UNKNOWN},
         {tr("Group"), "Asset-Group-Normal.png"_L1, OBJTYPE_GROUP, PRIMITIVETYPE_UNKNOWN},
         {tr("Text"), "Asset-Text-Normal.png"_L1, OBJTYPE_TEXT, PRIMITIVETYPE_UNKNOWN},
-        {tr("Layer"), "Asset-Layer-Normal.png"_L1, OBJTYPE_LAYER, PRIMITIVETYPE_UNKNOWN},
         {tr("Camera"), "Asset-Camera-Normal.png"_L1, OBJTYPE_CAMERA, PRIMITIVETYPE_UNKNOWN},
         {tr("Light"), "Asset-Light-Normal.png"_L1, OBJTYPE_LIGHT, PRIMITIVETYPE_UNKNOWN},
         {tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN}
