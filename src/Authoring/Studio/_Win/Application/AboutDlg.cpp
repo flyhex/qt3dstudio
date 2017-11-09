@@ -49,7 +49,7 @@
  * Constructor: Initializes the object.
  */
 CAboutDlg::CAboutDlg(QWidget* parent)
-    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint)
+    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::AboutDlg)
     , m_palette(nullptr)
 {

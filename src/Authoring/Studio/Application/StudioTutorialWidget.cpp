@@ -29,8 +29,9 @@
 #include "ui_StudioTutorialWidget.h"
 #include "StudioUtils.h"
 
-StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog, bool showProjectButtons) :
-    QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint),
+StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog,
+                                           bool showProjectButtons) :
+    QDialog(parent, Qt::MSWindowsFixedSizeDialogHint),
     m_ui(new Ui::StudioTutorialWidget),
     m_welcomeImages(0),
     m_imgIter(0),

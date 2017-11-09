@@ -52,7 +52,7 @@
 // CStartupDlg dialog
 
 CStartupDlg::CStartupDlg(QWidget *pParent)
-    : QDialog(pParent, Qt::MSWindowsFixedSizeDialogHint | Qt::FramelessWindowHint)
+    : QDialog(pParent, Qt::MSWindowsFixedSizeDialogHint)
     , m_Choice(EStartupChoice_Invalid)
     , m_RecentDocSelected("")
     , m_ui(new Ui::StartupDlg)
