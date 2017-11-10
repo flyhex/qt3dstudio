@@ -59,7 +59,7 @@ void NVAssert(const char *exp, const char *file, int line, bool *igonore)
 #ifndef EASTL_DEBUG_BREAK
 void EASTL_DEBUG_BREAK()
 {
-    qFatal() << "EASTL_DEBUG_BREAK: Assertion blown";
+    qFatal("EASTL_DEBUG_BREAK: Assertion blown");
 }
 
 #endif
