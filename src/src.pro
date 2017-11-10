@@ -6,6 +6,6 @@ SUBDIRS += \
     Runtime \
     Viewer
 
-!boot2qt:!android:!integrity:!qnx:!mingw {
+!cross_compile:!qnx:!mingw {
     SUBDIRS += Authoring
 }
