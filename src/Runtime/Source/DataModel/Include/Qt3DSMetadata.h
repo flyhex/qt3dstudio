@@ -144,7 +144,7 @@ struct SElementInfo
  *	@class	IRuntimeMetaData
  *	@brief	Declare interfaces for querying meta data values
  */
-class IRuntimeMetaData : public NVReleasable
+class QT3DS_AUTOTEST_EXPORT IRuntimeMetaData : public NVReleasable
 {
 
 public:

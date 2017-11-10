@@ -48,7 +48,11 @@
 
 namespace qt3ds {
 namespace foundation {
+#ifdef QT3DS_FOUNDATION_NO_EXPORTS
+    class QT3DS_AUTOTEST_EXPORT MutexImpl
+#else
     class QT3DS_FOUNDATION_API MutexImpl
+#endif
     {
     public:
         /**

@@ -12,6 +12,8 @@ linux {
     QMAKE_LFLAGS += -lrt
 }
 
+DEFINES += QT3DS_BUILDING_LIBRARY
+
 QT += qml
 
 # Foundation
@@ -28,6 +30,7 @@ SOURCES += \
     ../Source/Qt3DSFoundation/Source/foundation/Socket.cpp \
     ../Source/Qt3DSFoundation/Source/foundation/StringTable.cpp \
     ../Source/Qt3DSFoundation/Source/foundation/XML.cpp \
+    ../Source/Qt3DSFoundation/Source/foundation/TrackingAllocator.cpp \
     ../Source/Qt3DSRuntimeRender/Source/q3dsqmlrender.cpp \
     ../Source/Engine/Source/Qt3DSRenderRuntimeBinding.cpp \
     ../Source/Engine/Source/Qt3DSRenderRuntimeBindingImplRenderer.cpp \

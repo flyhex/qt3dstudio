@@ -108,7 +108,12 @@ protected:
 @see NVFoundation
 */
 
-QT3DS_C_EXPORT QT3DS_FOUNDATION_API qt3ds::NVFoundation *QT3DS_CALL_CONV NVCreateFoundation(
+#ifdef QT3DS_FOUNDATION_NO_EXPORTS
+QT3DS_AUTOTEST_EXPORT
+#else
+QT3DS_FOUNDATION_API
+#endif
+qt3ds::NVFoundation *QT3DS_CALL_CONV NVCreateFoundation(
         qt3ds::QT3DSU32 version, qt3ds::NVAllocatorCallback &allocator);
 
 /** @} */

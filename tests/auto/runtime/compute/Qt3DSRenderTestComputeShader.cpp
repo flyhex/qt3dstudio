@@ -297,7 +297,7 @@ bool NVRenderTestComputeShader::computeCompile(NVRenderContext *context, userCon
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 5 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestComputeShader: Failed to create vertex buffer";
         return false;
     }
 
@@ -310,7 +310,7 @@ bool NVRenderTestComputeShader::computeCompile(NVRenderContext *context, userCon
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create input assembler";
+        qWarning() << "NVRenderTestComputeShader: Failed to create input assembler";
         return false;
     }
 
@@ -406,7 +406,7 @@ bool NVRenderTestComputeShader::computeWorkgroup(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 5 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestComputeShader: Failed to create vertex buffer";
         return false;
     }
 
@@ -419,7 +419,7 @@ bool NVRenderTestComputeShader::computeWorkgroup(NVRenderContext *context,
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create input assembler";
+        qWarning() << "NVRenderTestComputeShader: Failed to create input assembler";
         return false;
     }
 
@@ -429,7 +429,7 @@ bool NVRenderTestComputeShader::computeWorkgroup(NVRenderContext *context,
         "Compute workgroup shader", toRef(computeWorkShader(computeProg, isGLESContext(context))));
 
     if (!computeResult.mShader) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create compute shader";
+        qWarning() << "NVRenderTestComputeShader: Failed to create compute shader";
         return false;
     }
 
@@ -493,7 +493,7 @@ bool NVRenderTestComputeShader::computeStorage(NVRenderContext *context, userCon
     mComputeVertexBuffer = context->CreateVertexBuffer(
         NVRenderBufferUsageType::Static, 1000 * sizeof(QT3DSF32) * 4, sizeof(QT3DSF32), storData);
     if (!mComputeVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create compute vertex buffer";
+        qWarning() << "NVRenderTestComputeShader: Failed to create compute vertex buffer";
         return false;
     }
     // create storage wrapper for vertex buffer
@@ -502,7 +502,7 @@ bool NVRenderTestComputeShader::computeStorage(NVRenderContext *context, userCon
         context->CreateStorageBuffer("Pos", NVRenderBufferUsageType::Static,
                                      1000 * sizeof(QT3DSF32) * 4, storData, mComputeVertexBuffer.mPtr);
     if (!mComputeStorageBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create compute storage buffer";
+        qWarning() << "NVRenderTestComputeShader: Failed to create compute storage buffer";
         return false;
     }
 
@@ -536,7 +536,7 @@ bool NVRenderTestComputeShader::computeStorage(NVRenderContext *context, userCon
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 5 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestComputeShader: Failed to create vertex buffer";
         return false;
     }
 
@@ -549,7 +549,7 @@ bool NVRenderTestComputeShader::computeStorage(NVRenderContext *context, userCon
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create input assembler";
+        qWarning() << "NVRenderTestComputeShader: Failed to create input assembler";
         return false;
     }
 
@@ -559,7 +559,7 @@ bool NVRenderTestComputeShader::computeStorage(NVRenderContext *context, userCon
         "Compute storage shader", toRef(computeStorageShader(computeProg, isGLESContext(context))));
 
     if (!computeResult.mShader) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestComputeShader: Failed to create compute shader";
+        qWarning() << "NVRenderTestComputeShader: Failed to create compute shader";
         return false;
     }
 

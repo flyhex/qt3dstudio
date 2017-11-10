@@ -48,7 +48,7 @@ namespace render {
         TRenderAtomiCounterBufferEntryMap;
 
     ///< Constant (uniform) buffer representation
-    class NVRenderAtomicCounterBuffer : public NVRenderDataBuffer
+    class QT3DS_AUTOTEST_EXPORT NVRenderAtomicCounterBuffer : public NVRenderDataBuffer
     {
     public:
         /**

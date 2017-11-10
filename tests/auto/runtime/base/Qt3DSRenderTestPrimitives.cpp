@@ -121,7 +121,7 @@ bool NVRenderTestPrimitives::renderPrimitive(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestPrimitives::Triangles: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestPrimitives::Triangles: Failed to create vertex buffer";
         return false;
     }
 
@@ -133,7 +133,7 @@ bool NVRenderTestPrimitives::renderPrimitive(NVRenderContext *context,
             NVRenderBufferUsageType::Static, NVRenderComponentTypes::QT3DSU16, bufSize,
             NVConstDataRef<QT3DSU8>(reinterpret_cast<const QT3DSU8 *>(pIndexData), bufSize));
         if (!mIndexBuffer) {
-            qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestPrimitives::Triangles: Failed to create index buffer";
+            qWarning() << "NVRenderTestPrimitives::Triangles: Failed to create index buffer";
             return false;
         }
     }
@@ -147,7 +147,7 @@ bool NVRenderTestPrimitives::renderPrimitive(NVRenderContext *context,
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestPrimitives::Triangles: Failed to create inout assembler";
+        qWarning() << "NVRenderTestPrimitives::Triangles: Failed to create inout assembler";
         return false;
     }
 

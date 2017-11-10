@@ -141,7 +141,7 @@ namespace foundation {
 
     // All allocations are 16 byte aligned.
     // Prints out unallocated memory at destruction.
-    class CAllocator : public NVAllocatorCallback
+    class QT3DS_AUTOTEST_EXPORT CAllocator : public NVAllocatorCallback
     {
     public:
         typedef Mutex TMutexType;
@@ -161,18 +161,8 @@ namespace foundation {
             , mMutex(mAlloc)
         {
         }
-        virtual ~CAllocator()
-        {
-            QT3DS_ASSERT(mAllocations.size() == 0);
-            MemInfo info;
-            for (PtrToInfoMap::iterator iter = mAllocations.begin(), end = mAllocations.end();
-                 iter != end; ++iter) {
-                info = iter->second;
-                qCCritical(INTERNAL_ERROR, "!!Outstanding allocation of %lu bytes from %s::%d, %s",
-                          info.size, info.file, info.line, info.name ? info.name : "");
-            }
-            QT3DS_UNUSED(info);
-        }
+        virtual ~CAllocator();
+
         void *allocate(size_t size, const char *tn, const char *fl, int ln, int flags) override
         {
             QT3DS_ASSERT(size);

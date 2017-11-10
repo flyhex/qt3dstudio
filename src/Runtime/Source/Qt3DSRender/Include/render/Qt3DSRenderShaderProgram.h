@@ -58,7 +58,7 @@ namespace render {
 
     ///< A shader program is an object composed of a multiple shaders (vertex, fragment,
     ///geometry,....)
-    class NVRenderShaderProgram : public NVRefCounted
+    class QT3DS_AUTOTEST_EXPORT NVRenderShaderProgram : public NVRefCounted
     {
     public:
         struct ProgramType

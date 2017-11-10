@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 NVIDIA Corporation.
+** Copyright (C) 2008-2012 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -28,50 +28,23 @@
 **
 ****************************************************************************/
 
-#pragma once
-#ifndef QT3DS_RENDER_LIGHTMAPS_H
-#define QT3DS_RENDER_LIGHTMAPS_H
-
-#include "Qt3DSRender.h"
-#include "Qt3DSRenderGraphObject.h"
-#include "foundation/StringTable.h"
-#include "Qt3DSRenderer.h"
-#include "Qt3DSRenderMaterialDirty.h"
+#include "foundation/TrackingAllocator.h"
 
 namespace qt3ds {
-namespace render {
+namespace foundation {
 
-    struct MaterialLightmapsUsage
-    {
-        enum Enum {
-            Dynamic = 0,
-            Baked,
-            DynamicAndBaked,
-        };
-    };
-
-    struct QT3DS_AUTOTEST_EXPORT SLightmaps : public SGraphObject
-    {
-        CMaterialDirty m_Dirty;
-
-        SImage *m_LightmapIndirect;
-        SImage *m_LightmapRadiosity;
-        SImage *m_LightmapShadow;
-
-        SLightmaps();
-
-        // Generic method used during serialization
-        // to remap string and object pointers
-        template <typename TRemapperType>
-        void Remap(TRemapperType &inRemapper)
-        {
-            SGraphObject::Remap(inRemapper);
-            inRemapper.Remap(m_LightmapIndirect);
-            inRemapper.Remap(m_LightmapRadiosity);
-            inRemapper.Remap(m_LightmapShadow);
-        }
-    };
-}
+CAllocator::~CAllocator()
+{
+    QT3DS_ASSERT(mAllocations.size() == 0);
+    MemInfo info;
+    for (PtrToInfoMap::iterator iter = mAllocations.begin(), end = mAllocations.end();
+         iter != end; ++iter) {
+        info = iter->second;
+        qCCritical(INTERNAL_ERROR, "!!Outstanding allocation of %lu bytes from %s::%d, %s",
+                  info.size, info.file, info.line, info.name ? info.name : "");
+    }
+    QT3DS_UNUSED(info);
 }
 
-#endif
+}
+}

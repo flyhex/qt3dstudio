@@ -28,6 +28,35 @@
 
 #include "Qt3DSRenderTestBase.h"
 
+#include "Qt3DSDMPrefix.h"
+#include "EASTL/allocator.h"
+
+namespace eastl
+{
+void AssertionFailure(const char* pExpression)
+{
+    Q_UNUSED(pExpression);
+}
+EmptyString gEmptyString;
+void* gpEmptyBucketArray[2] = { nullptr, (void*)uintptr_t(~0) };
+}
+
+namespace qt3ds {
+namespace render {
+SEndlType Endl;
+}
+}
+
+void *operator new[](size_t size, const char *, int, unsigned, const char *, int)
+{
+    return malloc(size);
+}
+
+void *operator new[](size_t size, size_t, size_t, const char *, int, unsigned, const char *, int)
+{
+    return malloc(size);
+}
+
 using namespace qt3ds::render;
 
 namespace qt3ds {

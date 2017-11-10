@@ -181,7 +181,7 @@ bool NVRenderTestProgramPipeline::vertFragSeparateTest(NVRenderContext *context,
     // setup program pipeline
     mProgramPipeline = context->CreateProgramPipeline();
     if (!mProgramPipeline) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestProgramPipeline: Failed to create program pipeline";
+        qWarning() << "NVRenderTestProgramPipeline: Failed to create program pipeline";
         return false;
     }
 
@@ -212,7 +212,7 @@ bool NVRenderTestProgramPipeline::vertFragSeparateTest(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create vertex buffer";
         return false;
     }
     // color buffer
@@ -220,7 +220,7 @@ bool NVRenderTestProgramPipeline::vertFragSeparateTest(NVRenderContext *context,
     mColorBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                3 * sizeof(QT3DSF32), colorData);
     if (!mColorBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create color buffer";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create color buffer";
         return false;
     }
 
@@ -241,7 +241,7 @@ bool NVRenderTestProgramPipeline::vertFragSeparateTest(NVRenderContext *context,
         mAttribLayout, NVConstDataRef<NVRenderVertexBuffer *>(attribBuffers, 2), NULL,
         toConstDataRef(strides, 2), toConstDataRef(offsets, 2), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create input assembler";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create input assembler";
         return false;
     }
 
@@ -299,7 +299,7 @@ bool NVRenderTestProgramPipeline::vertFragCombinedTest(NVRenderContext *context,
     // setup program pipeline
     mProgramPipeline = context->CreateProgramPipeline();
     if (!mProgramPipeline) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestProgramPipeline: Failed to create program pipeline";
+        qWarning() << "NVRenderTestProgramPipeline: Failed to create program pipeline";
         return false;
     }
 
@@ -329,7 +329,7 @@ bool NVRenderTestProgramPipeline::vertFragCombinedTest(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create vertex buffer";
         return false;
     }
     // color buffer
@@ -337,7 +337,7 @@ bool NVRenderTestProgramPipeline::vertFragCombinedTest(NVRenderContext *context,
     mColorBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                3 * sizeof(QT3DSF32), colorData);
     if (!mColorBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create color buffer";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create color buffer";
         return false;
     }
 
@@ -358,7 +358,7 @@ bool NVRenderTestProgramPipeline::vertFragCombinedTest(NVRenderContext *context,
         mAttribLayout, NVConstDataRef<NVRenderVertexBuffer *>(attribBuffers, 2), NULL,
         toConstDataRef(strides, 2), toConstDataRef(offsets, 2), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create input assembler";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create input assembler";
         return false;
     }
 

@@ -3,7 +3,9 @@ TARGET = Qt3DCompiler
 include(../commoninclude.pri)
 CONFIG += console
 
-SOURCES += Qt3DSCompilerMain.cpp
+SOURCES += Qt3DSCompilerMain.cpp \
+           ../Source/Runtime/Source/Qt3DSInputEngine.cpp \
+           ../Source/Qt3DSFoundation/Source/foundation/Qt3DSLogging.cpp
 
 linux|mingw {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -21,7 +23,7 @@ integrity:ios {
 
 STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
-    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
+    -lqt3dsruntime$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lLua$$qtPlatformTargetSuffix() \
     $$END_ARCHIVE
@@ -48,11 +50,6 @@ linux {
         -ldl \
         -lEGL
 }
-
-PREDEPS_LIBS = qt3dsruntimestatic
-
-include(../../utils.pri)
-PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)
 
 load(qt_tool)
 CONFIG -= relative_qt_rpath

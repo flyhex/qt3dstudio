@@ -64,11 +64,7 @@ linux {
 }
 
 LIBS += \
-    $$BEGIN_ARCHIVE \
-    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
-    -lEASTL$$qtPlatformTargetSuffix() \
-    -lLua$$qtPlatformTargetSuffix() \
-    $$END_ARCHIVE \
+    -lqt3dsruntime$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 ANDROID_EXTRA_LIBS = \
@@ -84,8 +80,3 @@ linux {
         -ldl \
         -lEGL
 }
-
-PREDEPS_LIBS = qt3dsruntimestatic
-
-include($$PWD/../../../src/utils.pri)
-PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)

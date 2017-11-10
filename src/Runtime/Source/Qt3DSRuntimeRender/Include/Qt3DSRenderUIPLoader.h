@@ -67,7 +67,7 @@ namespace render {
 
     struct SPresentation;
 
-    class IUIPLoader
+    class QT3DS_AUTOTEST_EXPORT IUIPLoader
     {
     public:
         // The reader needs to point to the top of the file, we will search

@@ -213,7 +213,7 @@ namespace foundation {
     // Also generates offsets that are consistent so clients can convert their strings
     // to offsets during save and convert from offset to string during load regardless
     // of if they load before or after this table.
-    class IStringTable : public NVRefCounted
+    class QT3DS_AUTOTEST_EXPORT IStringTable : public NVRefCounted
     {
     public:
         // default state is for multithreaded access to be disabled.

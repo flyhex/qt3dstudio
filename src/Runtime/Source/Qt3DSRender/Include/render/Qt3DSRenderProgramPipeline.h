@@ -46,7 +46,7 @@ namespace render {
     class NVRenderShaderProgram;
 
     ///< A program pipeline is a collection of a multiple programs (vertex, fragment, geometry,....)
-    class NVRenderProgramPipeline : public NVRefCounted
+    class QT3DS_AUTOTEST_EXPORT NVRenderProgramPipeline : public NVRefCounted
     {
     protected:
         NVRenderContextImpl &m_Context; ///< pointer to context

@@ -47,7 +47,7 @@ namespace render {
 
     struct SImage;
 
-    struct SLight : public SNode
+    struct QT3DS_AUTOTEST_EXPORT SLight : public SNode
     {
         RenderLightTypes::Enum m_LightType; // Directional
         SNode *m_Scope;

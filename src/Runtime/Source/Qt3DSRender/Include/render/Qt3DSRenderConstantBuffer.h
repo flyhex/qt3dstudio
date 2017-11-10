@@ -48,7 +48,7 @@ namespace render {
     typedef nvhash_map<CRegisteredString, ConstantBufferParamEntry *> TRenderConstantBufferEntryMap;
 
     ///< Constant (uniform) buffer representation
-    class NVRenderConstantBuffer : public NVRenderDataBuffer
+    class QT3DS_AUTOTEST_EXPORT NVRenderConstantBuffer : public NVRenderDataBuffer
     {
     public:
         /**

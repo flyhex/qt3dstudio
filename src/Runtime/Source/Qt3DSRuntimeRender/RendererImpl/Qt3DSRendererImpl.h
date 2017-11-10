@@ -150,7 +150,7 @@ namespace render {
         operator STextShader *() { return m_Shader; }
     };
 
-    class Qt3DSRendererImpl : public IQt3DSRenderer, public IRenderWidgetContext
+    class QT3DS_AUTOTEST_EXPORT Qt3DSRendererImpl : public IQt3DSRenderer, public IRenderWidgetContext
     {
         typedef nvhash_map<SShaderDefaultMaterialKey, SShaderGeneratorGeneratedShader *> TShaderMap;
         typedef nvhash_map<CRegisteredString, NVScopedRefCounted<NVRenderConstantBuffer>>

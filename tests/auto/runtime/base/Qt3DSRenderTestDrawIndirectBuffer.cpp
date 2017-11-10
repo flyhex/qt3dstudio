@@ -175,7 +175,7 @@ bool NVRenderTestDrawIndirectBuffer::drawArrayIndirect(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
         return false;
     }
 
@@ -188,7 +188,7 @@ bool NVRenderTestDrawIndirectBuffer::drawArrayIndirect(NVRenderContext *context,
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), NULL, toConstDataRef(&strides, 1),
         toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create input assembler";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create input assembler";
         return false;
     }
 
@@ -204,7 +204,7 @@ bool NVRenderTestDrawIndirectBuffer::drawArrayIndirect(NVRenderContext *context,
                                                             commandBufSize, commandData);
 
     if (!mDrawIndirectBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
         return false;
     }
 
@@ -274,7 +274,7 @@ bool NVRenderTestDrawIndirectBuffer::drawElementsIndirect(NVRenderContext *conte
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
         return false;
     }
 
@@ -285,7 +285,7 @@ bool NVRenderTestDrawIndirectBuffer::drawElementsIndirect(NVRenderContext *conte
         NVRenderBufferUsageType::Static, NVRenderComponentTypes::QT3DSU16, bufSize,
         NVConstDataRef<QT3DSU8>(reinterpret_cast<const QT3DSU8 *>(indices), bufSize));
     if (!mIndexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestPrimitives::Triangles: Failed to create index buffer";
+        qWarning() << "NVRenderTestPrimitives::Triangles: Failed to create index buffer";
         return false;
     }
 
@@ -298,7 +298,7 @@ bool NVRenderTestDrawIndirectBuffer::drawElementsIndirect(NVRenderContext *conte
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create input assembler";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create input assembler";
         return false;
     }
 
@@ -315,7 +315,7 @@ bool NVRenderTestDrawIndirectBuffer::drawElementsIndirect(NVRenderContext *conte
                                                             commandBufSize, commandData);
 
     if (!mDrawIndirectBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
         return false;
     }
 

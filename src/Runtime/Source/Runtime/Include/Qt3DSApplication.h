@@ -83,7 +83,7 @@ public:
     virtual void Run() = 0;
 };
 
-class IApplicationCore : public NVRefCounted
+class QT3DS_AUTOTEST_EXPORT IApplicationCore : public NVRefCounted
 {
 public:
     // threadsafe call.

@@ -152,7 +152,7 @@ bool NVRenderTestAtomicCounterBuffer::rasterizerTest(NVRenderContext *context,
     mAtomicCounterBuffer = context->CreateAtomicCounterBuffer(
         "ac_buffer", NVRenderBufferUsageType::Static, sizeof(QT3DSU32), acData);
     if (!mAtomicCounterBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create atomic counter buffer";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create atomic counter buffer";
         return false;
     }
     // add a parameter
@@ -190,7 +190,7 @@ bool NVRenderTestAtomicCounterBuffer::rasterizerTest(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create vertex buffer";
         return false;
     }
 
@@ -203,7 +203,7 @@ bool NVRenderTestAtomicCounterBuffer::rasterizerTest(NVRenderContext *context,
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAtomicCounterBuffer: Failed to create input assembler";
+        qWarning() << "NVRenderTestAtomicCounterBuffer: Failed to create input assembler";
         return false;
     }
 

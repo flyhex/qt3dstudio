@@ -59,7 +59,7 @@ namespace render {
 
     class IQt3DSRenderFactory;
 
-    class IQt3DSRenderFactoryCore : public Q3DStudio::IRuntimeFactoryCore
+    class QT3DS_AUTOTEST_EXPORT IQt3DSRenderFactoryCore : public Q3DStudio::IRuntimeFactoryCore
     {
     public:
         virtual IQt3DSRenderFactory &
