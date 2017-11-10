@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 
-!package: SUBDIRS += \
-    auto
+# disable autotests for now
+#!package: SUBDIRS += \
+#    auto
