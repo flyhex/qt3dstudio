@@ -9,6 +9,7 @@ include(../commoninclude.pri)
 
 linux {
     DEFINES += _POSIX_C_SOURCE=199309L
+    QMAKE_LFLAGS += -lrt
 }
 
 QT += qml
