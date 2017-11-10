@@ -78,7 +78,7 @@ QtObject {
 
     function start() {
         running = true;
-        Qt3ds.setAttribute(attribute, firstValue);
+        Qt3DSRuntime.setAttribute(attribute, firstValue);
     }
 
     function stop() {
@@ -87,11 +87,11 @@ QtObject {
 
     function toggle() {
         if (index == 0) {
-            Qt3ds.setAttribute(attribute, secondValue);
-            Qt3ds.fireEvent("onToggle");
+            Qt3DSRuntime.setAttribute(attribute, secondValue);
+            Qt3DSRuntime.fireEvent("onToggle");
         } else if (index == 1) {
-            Qt3ds.setAttribute(attribute, firstValue);
-            Qt3ds.fireEvent("onUntoggle");
+            Qt3DSRuntime.setAttribute(attribute, firstValue);
+            Qt3DSRuntime.fireEvent("onUntoggle");
         }
         index++;
         if (index > 1)
@@ -107,7 +107,7 @@ QtObject {
         if (!running)
             return;
 
-        timer += Qt3ds.getDeltaTime();
+        timer += Qt3DSRuntime.getDeltaTime();
         var interval = timerInterval / 1000;
         while (timer >= interval) {
             timer -= interval;

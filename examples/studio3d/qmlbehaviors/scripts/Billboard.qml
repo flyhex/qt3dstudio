@@ -104,12 +104,12 @@ QtObject {
     }
 
     function faceCamera() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = Qt3DSRuntime.calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
-        var myTransform = Qt3ds.calculateGlobalTransform();
+        var myTransform = Qt3DSRuntime.calculateGlobalTransform();
         var mySpot = myTransform.row(3).toVector3d();
 
-        var matrix = Qt3ds.calculateGlobalTransform(Qt3ds.getParent()).inverted();
+        var matrix = Qt3DSRuntime.calculateGlobalTransform(Qt3DSRuntime.getParent()).inverted();
         matrix.m41 = 0;
         matrix.m42 = 0;
         matrix.m43 = 0;
@@ -118,14 +118,14 @@ QtObject {
                         .minus(mySpot)
                         .times(matrix);
 
-        var rotation = Qt3ds.lookAt(rotateRay);
+        var rotation = Qt3DSRuntime.lookAt(rotateRay);
         setAttributeVector("rotation", rotation);
     }
 
     function faceCameraGlobalY() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = Qt3DSRuntime.calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
-        var myTransform = Qt3ds.calculateGlobalTransform();
+        var myTransform = Qt3DSRuntime.calculateGlobalTransform();
         var mySpot = myTransform.row(3).toVector3d();
 
         var rotateRay = cameraSpot.minus(mySpot);
@@ -136,10 +136,10 @@ QtObject {
     }
 
     function matchRotation() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = Qt3DSRuntime.calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
 
-        var matrix = Qt3ds.calculateGlobalTransform(Qt3ds.getParent()).inverted();
+        var matrix = Qt3DSRuntime.calculateGlobalTransform(Qt3DSRuntime.getParent()).inverted();
         matrix.m41 = 0;
         matrix.m42 = 0;
         matrix.m43 = 0;
@@ -149,12 +149,12 @@ QtObject {
                         .minus(cameraSpot)
                         .times(matrix);
 
-        var rotation = Qt3ds.lookAt(rotateRay);
+        var rotation = Qt3DSRuntime.lookAt(rotateRay);
         setAttributeVector("rotation", rotation);
     }
 
     function matchRotationGlobalY() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = Qt3DSRuntime.calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
 
         var rotateRay = Qt.vector3d(0, 0, 1)
@@ -162,21 +162,21 @@ QtObject {
                         .minus(cameraSpot)
 
         var rotation = getAttributeVector("rotation");
-        rotation.y = Qt3ds.lookAt(rotateRay).y;
+        rotation.y = Qt3DSRuntime.lookAt(rotateRay).y;
         setAttributeVector("rotation", rotation);
     }
 
     function getAttributeVector(name) {
         var vec = Qt.vector3d(0, 0, 0);
-        Qt3ds.getAttribute(name + ".x", vec.x);
-        Qt3ds.getAttribute(name + ".y", vec.y);
-        Qt3ds.getAttribute(name + ".z", vec.z);
+        Qt3DSRuntime.getAttribute(name + ".x", vec.x);
+        Qt3DSRuntime.getAttribute(name + ".y", vec.y);
+        Qt3DSRuntime.getAttribute(name + ".z", vec.z);
         return vec;
     }
 
     function setAttributeVector(name, vec) {
-        Qt3ds.setAttribute(name + ".x", vec.x);
-        Qt3ds.setAttribute(name + ".y", vec.y);
-        Qt3ds.setAttribute(name + ".z", vec.z);
+        Qt3DSRuntime.setAttribute(name + ".x", vec.x);
+        Qt3DSRuntime.setAttribute(name + ".y", vec.y);
+        Qt3DSRuntime.setAttribute(name + ".z", vec.z);
     }
 }

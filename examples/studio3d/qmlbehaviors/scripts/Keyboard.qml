@@ -185,15 +185,15 @@ QtObject {
                             "SCALE"]
 
     function onInitialize() {
-        Qt3ds.registerForEvent("onKeyDown", onKeyDown);
-        Qt3ds.registerForEvent("onKeyUp", onKeyUp);
+        Qt3DSRuntime.registerForEvent("onKeyDown", onKeyDown);
+        Qt3DSRuntime.registerForEvent("onKeyUp", onKeyUp);
     }
 
     function onKeyDown(keyCode) {
-        Qt3ds.fireEvent("on" + keyNames[keyCode] + "Down");
+        Qt3DSRuntime.fireEvent("on" + keyNames[keyCode] + "Down");
     }
 
     function onKeyUp(keyCode) {
-        Qt3ds.fireEvent("on" + keyNames[keyCode] + "Up");
+        Qt3DSRuntime.fireEvent("on" + keyNames[keyCode] + "Up");
     }
 }

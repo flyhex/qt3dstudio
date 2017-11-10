@@ -55,6 +55,6 @@ QtObject {
         var date = new Date();
         var timeString = date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear()
                  + " " + date.getHours() + ":" + date.getMinutes() + "." + date.getSeconds();
-        Qt3ds.setAttribute("textstring", timeString);
+        Qt3DSRuntime.setAttribute("textstring", timeString);
     }
 }

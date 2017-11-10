@@ -82,14 +82,14 @@ QtObject {
     function start() {
         if (!running) {
             running = true;
-            Qt3ds.fireEvent("onStarted");
+            Qt3DSRuntime.fireEvent("onStarted");
         }
     }
 
     function stop() {
         if (running) {
             running = false;
-            Qt3ds.fireEvent("onStopped");
+            Qt3DSRuntime.fireEvent("onStopped");
         }
     }
 
@@ -117,8 +117,8 @@ QtObject {
             amplitude *= (Math.PI / 180);
         }
 
-        elapsedTime += Qt3ds.getDeltaTime();
+        elapsedTime += Qt3DSRuntime.getDeltaTime();
         var value = ampOffset + amplitude * Math.cos(elapsedTime * Math.PI * 2 / period);
-        Qt3ds.setAttribute(attribute, value);
+        Qt3DSRuntime.setAttribute(attribute, value);
     }
 }

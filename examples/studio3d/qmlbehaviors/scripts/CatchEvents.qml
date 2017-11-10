@@ -52,8 +52,8 @@ import QtQml 2.2
 
 QtObject {
     function onInitialize() {
-        Qt3ds.registerForEvent("onPressureDown", onMouseDown);
-        Qt3ds.registerForEvent("onPressureUp", onMouseUp);
+        Qt3DSRuntime.registerForEvent("onPressureDown", onMouseDown);
+        Qt3DSRuntime.registerForEvent("onPressureUp", onMouseUp);
     }
 
     function onMouseDown() {
