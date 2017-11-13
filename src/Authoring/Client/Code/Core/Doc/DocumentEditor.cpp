@@ -2917,21 +2917,8 @@ public:
 
     QString LoadLuaFile(const CFilePath &inFile)
     {
-        QString retval;
-        lua_State *L = lua_newstate(l_alloc, NULL);
-        if (L) {
-            luaL_openlibs(L); /* Load Lua libraries */
-
-            /* Load the file containing the script we are going to run */
-            int status = luaL_loadfile(L, inFile.GetCharStar());
-            if (status) {
-                /* If something went wrong, error message is at the top of */
-                /* the stack */
-                retval.append(lua_tostring(L, -1));
-            }
-            lua_close(L);
-        }
-        return retval;
+        Q_UNUSED(inFile)
+        return QString();
     }
 
     QString LoadScriptFile(const CFilePath &inFile)
@@ -3464,27 +3451,6 @@ public:
 
     void EnsureLuaState()
     {
-        if (m_LuaState == NULL) {
-            Q3DStudio::CFilePath thePath;
-            thePath.GetModuleFilePath();
-            Q3DStudio::CFilePath theAppDir = thePath.GetDirectory();
-            Q3DStudio::CFilePath theAbsoluteLuaDirectory =
-                CFilePath::CombineBaseAndRelative(theAppDir, "res\\lua");
-            Q3DStudio::CFilePath theLuaDll =
-                CFilePath::CombineBaseAndRelative(theAbsoluteLuaDirectory, "lua5.1.dll");
-
-            m_LuaState =
-                IDynamicLua::CreateDynamicLua(*m_Foundation.m_Foundation, theLuaDll.GetCharStar());
-            if (m_LuaState) {
-                m_LuaState->AddLibraryPath(theAbsoluteLuaDirectory.GetCharStar(),
-                                           IDynamicLua::LuaModule);
-                m_LuaState->AddLibraryPath(theAbsoluteLuaDirectory.GetCharStar(),
-                                           IDynamicLua::CModule);
-                CFilePath theSVGLoader = CFilePath::CombineBaseAndRelative(theAbsoluteLuaDirectory,
-                                                                           "parse_to_cubic.lua");
-                m_LuaState->LoadLuaFile(theSVGLoader.GetCharStar(), "SVGPARSER");
-            }
-        }
     }
 
     void SetUniqueName(TInstanceHandle inItem, const char8_t *inNameBase,
@@ -4483,7 +4449,7 @@ public:
                 m_Doc.GetBufferCache().InvalidateBuffer(theRelativePath);
             }
 
-            qCInfo(qt3ds::TRACE_INFO) << "Change detected: " << theRelativePath.GetCharStar() << " "
+            qCInfo(qt3ds::TRACE_INFO) << "Change detected: " << theRelativePath.toQString() << " "
                       << ModificationTypeToString(theRecord.m_ModificationType);
 
             if (isImport) {
@@ -4708,23 +4674,11 @@ IDocumentEditor::ParseLuaFile(const CFilePath &inFullPathToDocument,
                               std::shared_ptr<IImportFailedHandler> inHandler,
                               qt3ds::render::IInputStreamFactory &inInputStreamFactory)
 {
-    using namespace LuaParser;
-    std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
-    std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
-        inFullPathToDocument.toCString());
-    std::shared_ptr<IDOMReader> theReaderPtr(
-        SLuaParser::ParseLuaFile(theFactory, inStringTable, inFullPathToDocument.GetCharStar(),
-                                 theXmlErrorHandler, inInputStreamFactory));
-
-    if (!theReaderPtr) {
-        QT3DS_ASSERT(false);
-        if (inHandler)
-            inHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
-                                           QObject::tr("Failed to parse Lua data"),
-                                           false);
-    }
-    return theReaderPtr;
+    Q_UNUSED(inFullPathToDocument)
+    Q_UNUSED(inStringTable)
+    Q_UNUSED(inHandler)
+    Q_UNUSED(inInputStreamFactory)
+    return nullptr;
 }
 
 std::shared_ptr<IDOMReader>
