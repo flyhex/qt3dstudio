@@ -94,13 +94,39 @@
     <item>
      <widget class="ClickableLabel" name="recent4">
       <property name="text">
-       <string>Recent3.uip</string>
+       <string>Recent4.uip</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
       <property name="docIndex" stdset="0">
-       <number>3</number>
+       <number>4</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="ClickableLabel" name="recent5">
+      <property name="text">
+       <string>Recent5.uip</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="docIndex" stdset="0">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="ClickableLabel" name="recent6">
+      <property name="text">
+       <string>Recent6.uip</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="docIndex" stdset="0">
+       <number>6</number>
       </property>
      </widget>
     </item>

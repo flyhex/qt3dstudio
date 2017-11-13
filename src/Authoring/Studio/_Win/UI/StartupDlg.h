@@ -76,7 +76,7 @@ public:
     virtual ~CStartupDlg();
 
 protected:
-    const static int RECENT_COUNT = 5;
+    const static int RECENT_COUNT = 7;
 
     void paintEvent(QPaintEvent *event) override;
     void showEvent(QShowEvent *) override;
