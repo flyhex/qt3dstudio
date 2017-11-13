@@ -259,19 +259,26 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     QMenu theContextMenu;
 
     auto doc = g_StudioApp.GetCore()->GetDoc();
-    bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
+
     bool canBeLinkedFlag = doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
-    if (isLinkedFlag) {
-        auto action = theContextMenu.addAction(QObject::tr("Unlink Property from Master Slide"));
-        action->setEnabled(canBeLinkedFlag);
-        connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+    if (canBeLinkedFlag) {
+        const bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
+
+        if (isLinkedFlag) {
+            auto action = theContextMenu.addAction(QObject::tr("Unlink Property from Master Slide"));
+            action->setEnabled(canBeLinkedFlag);
+            connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+        } else {
+            auto action = theContextMenu.addAction(QObject::tr("Link Property from Master Slide"));
+            action->setEnabled(canBeLinkedFlag);
+            connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+        }
+
     } else {
-        auto action = theContextMenu.addAction(QObject::tr("Link Property from Master Slide"));
-        action->setEnabled(canBeLinkedFlag);
-        connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+        auto action = theContextMenu.addAction(QObject::tr("Unable to link from Master Slide"));
+        action->setEnabled(false);
     }
     theContextMenu.exec(mapToGlobal({x, y}));
-
     m_instance = 0;
     m_handle = 0;
 }
