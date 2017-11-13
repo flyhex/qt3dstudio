@@ -44,6 +44,12 @@
 
 #include <QtGui/qpalette.h>
 
+#ifdef QT3DSTUDIO_REVISION
+#define STRINGIFY_INTERNAL(x) #x
+#define STRINGIFY(x) STRINGIFY_INTERNAL(x)
+const char *const QT3DSTUDIO_REVISION_STR = STRINGIFY(QT3DSTUDIO_REVISION);
+#endif
+
 //==============================================================================
 /**
  * Constructor: Initializes the object.
@@ -81,6 +87,28 @@ void CAboutDlg::paintEvent(QPaintEvent* event)
     setFixedSize(size());
 }
 
+static QString compilerString()
+{
+#if defined(Q_CC_CLANG) // must be before GNU, because clang claims to be GNU too
+    QString isAppleString;
+#if defined(__apple_build_version__) // Apple clang has other version numbers
+    isAppleString = QStringLiteral(" (Apple)");
+#endif
+    return QStringLiteral("Clang " ) + QString::number(__clang_major__) + QStringLiteral(".")
+            + QString::number(__clang_minor__) + isAppleString;
+#elif defined(Q_CC_GNU)
+    return QStringLiteral("GCC " ) + QStringLiteral(__VERSION__);
+#elif defined(Q_CC_MSVC)
+    if (_MSC_VER > 1999)
+        return QStringLiteral("MSVC <unknown>");
+    if (_MSC_VER >= 1910)
+        return QStringLiteral("MSVC 2017");
+    if (_MSC_VER >= 1900)
+        return QStringLiteral("MSVC 2015");
+#endif
+    return QStringLiteral("<unknown compiler>");
+}
+
 void CAboutDlg::OnInitDialog()
 {
     // Set the Studio version
@@ -95,17 +123,6 @@ void CAboutDlg::OnInitDialog()
     // Set the credit strings
 #ifdef QT_3DSTUDIO_FBX
     m_Credit1Str.Format(::LoadResourceString(IDS_ABOUT_FBX_CREDIT));
-#endif
-
-#ifdef STUDIOSTORYNUM
-    m_ProductVersionStr += " (Story #";
-    m_ProductVersionStr += STUDIOSTORYNUM;
-    m_ProductVersionStr += ")";
-#endif
-
-#ifdef BETA
-    // Add "beta" to the Studio version if necessary
-    m_ProductVersionStr += " BETA";
 #endif
 
     // Add link to Web site
@@ -137,6 +154,20 @@ void CAboutDlg::OnInitDialog()
     m_ui->m_Copyright->setText(m_CopyrightStr.toQString());
     m_ui->m_Credit1->setText(m_Credit1Str.toQString());
 
-    // We don't currently have secondary credit, so clear that
-    m_ui->m_Credit2->setText(QString());
+    // Information about build
+    m_ui->m_buildTimestamp->setText(
+                tr("Built on %1 %2").arg(QStringLiteral(__DATE__), QStringLiteral(__TIME__)));
+    m_ui->m_qtVersion->setText(
+                tr("Based on Qt %1 (%2, %3 bit)").arg(
+                    QString::fromLatin1(qVersion()),
+                    compilerString(),
+                    QString::number(QSysInfo::WordSize)));
+#ifdef QT3DSTUDIO_REVISION
+    m_ui->m_revisionSHA->setText(
+                tr("From revision %1").arg(
+                    QString::fromLatin1(QT3DSTUDIO_REVISION_STR).left(10)));
+#else
+    m_ui->m_revisionSHA->setText(QString());
+    m_ui->m_revisionSHA->setMaximumHeight(0);
+#endif
 }

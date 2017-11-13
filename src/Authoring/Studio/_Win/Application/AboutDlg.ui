@@ -63,6 +63,43 @@
        </widget>
       </item>
       <item>
+       <spacer name="verticalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>12</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="m_qtVersion">
+        <property name="text">
+         <string>&lt;Based on Qt version goes here&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="m_buildTimestamp">
+        <property name="text">
+         <string>&lt;Built on timestamp goes here&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="m_revisionSHA">
+        <property name="text">
+         <string>&lt;From revision SHA goes here&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -126,16 +163,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="m_Credit2">
-        <property name="text">
-         <string>&lt;Credit 2 goes here&gt;</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
       <item>
        <widget class="Line" name="m_Line2">
