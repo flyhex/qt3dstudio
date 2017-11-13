@@ -3,7 +3,7 @@ TARGET = qt3dsruntimestatic
 CONFIG += staticlib
 include(../commoninclude.pri)
 
-!boot2qt:!integrity {
+!boot2qt:!integrity:!ios {
     RESOURCES += ../res.qrc
 }
 

@@ -12,7 +12,7 @@ boot2qt: {
     DEFINES += EMBEDDED_LINUX # TODO: Is there a compile-time flag for boot2qt?
 }
 
-integrity {
+integrity:ios {
     RESOURCES += ../res.qrc
 }
 

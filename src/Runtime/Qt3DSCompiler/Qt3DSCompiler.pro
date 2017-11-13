@@ -10,6 +10,15 @@ linux|mingw {
     END_ARCHIVE = -Wl,--no-whole-archive
 }
 
+boot2qt: {
+    RESOURCES += ../res.qrc
+    DEFINES += EMBEDDED_LINUX # TODO: Is there a compile-time flag for boot2qt?
+}
+
+integrity:ios {
+    RESOURCES += ../res.qrc
+}
+
 STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
     -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
