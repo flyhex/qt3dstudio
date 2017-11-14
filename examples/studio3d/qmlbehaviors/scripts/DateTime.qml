@@ -48,13 +48,13 @@
 **
 ****************************************************************************/
 
-import QtQml 2.2
+import QtStudio3D.Behavior 1.0
 
-QtObject {
+Qt3DSBehavior {
     function onUpdate() {
         var date = new Date();
         var timeString = date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear()
                  + " " + date.getHours() + ":" + date.getMinutes() + "." + date.getSeconds();
-        Qt3DSRuntime.setAttribute("textstring", timeString);
+        setAttribute("textstring", timeString);
     }
 }

@@ -48,12 +48,12 @@
 **
 ****************************************************************************/
 
-import QtQml 2.2
+import QtStudio3D.Behavior 1.0
 
-QtObject {
-    function onInitialize() {
-        Qt3DSRuntime.registerForEvent("onPressureDown", onMouseDown);
-        Qt3DSRuntime.registerForEvent("onPressureUp", onMouseUp);
+Qt3DSBehavior {
+    onInitialize: {
+        registerForEvent("onPressureDown", onMouseDown);
+        registerForEvent("onPressureUp", onMouseUp);
     }
 
     function onMouseDown() {
