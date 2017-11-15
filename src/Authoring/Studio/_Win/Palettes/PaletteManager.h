@@ -43,7 +43,7 @@
 //==============================================================================
 class CMainFrame;
 class WidgetControl;
-class QTimeLineToolbar;
+class TimeLineToolbar;
 
 QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
@@ -85,7 +85,7 @@ protected:
     QDockWidget *m_inspectorDock;
 
     WidgetControl *m_timeLineWidgetControl;
-    QTimeLineToolbar *m_timeLineToolbar;
+    TimeLineToolbar *m_timeLineToolbar;
 
 public:
     CPaletteManager(CMainFrame *inMainFrame);

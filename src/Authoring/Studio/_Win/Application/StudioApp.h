@@ -113,7 +113,6 @@ protected:
     int RunSystemTests(const Q3DStudio::CString &inTestArgs);
     int OpenAndRunApplication(const Q3DStudio::CString &inFilename);
     void InitCore();
-    void InitHelpSystem();
     bool ShowStartupDialog();
     bool HandleWelcomeRes(int res, bool recursive);
 

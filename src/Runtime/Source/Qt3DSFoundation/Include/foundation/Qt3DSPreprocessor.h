@@ -136,6 +136,8 @@ Platform define
 #define QT3DS_LINUX
 #elif defined(__QNX__)
 #define QT3DS_QNX
+#elif defined(_WIN32)
+#define QT3DS_WINDOWS
 #else
 #error "Unkown OS"
 #endif
@@ -215,7 +217,9 @@ Inline macro
 */
 #if defined(QT3DS_WINDOWS) || defined(QT3DS_X360)
 #define QT3DS_INLINE inline
+#ifdef QT3DS_VC
 #pragma inline_depth(255)
+#endif
 #else
 #define QT3DS_INLINE inline
 #endif

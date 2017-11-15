@@ -102,7 +102,7 @@ STATICRUNTIME = \
 } else {
     DEFINES +=  WIN32_LEAN_AND_MEAN
     LIBS += $$STATICRUNTIME
-    QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
+    !mingw: QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
 }
 
 LIBS += \
@@ -499,3 +499,10 @@ target.path = $$[QT_INSTALL_BINS]
 INSTALLS += target
 
 RC_ICONS = images/3D-studio.ico
+
+# Extract SHA from .tag file if project has it
+exists($$ABS_PRJ_ROOT/.tag) {
+    STUDIO_TAG = $$cat($$ABS_PRJ_ROOT/.tag)
+    FIRST_CHAR = $$str_member($$STUDIO_TAG, 0, 0)
+    !equals(FIRST_CHAR, "$"): DEFINES += QT3DSTUDIO_REVISION=$$first(STUDIO_TAG)
+}

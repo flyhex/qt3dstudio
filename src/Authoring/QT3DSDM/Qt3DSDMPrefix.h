@@ -43,7 +43,7 @@
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
 // TODO: reference additional headers your program requires here
-#ifdef WIN32
+#if defined(WIN32) && defined(MSVC)
 #pragma warning(push)
 #pragma warning(disable : 4100)
 #pragma warning(disable : 4512)
@@ -80,7 +80,7 @@ using std::function;
 using std::shared_ptr;
 using std::make_shared;
 }
-#ifdef WIN32
+#if defined(WIN32) && defined(MSVC)
 #pragma warning(pop)
 #endif
 #endif

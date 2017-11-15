@@ -59,7 +59,7 @@ void NVAssert(const char *exp, const char *file, int line, bool *igonore)
 #ifndef EASTL_DEBUG_BREAK
 void EASTL_DEBUG_BREAK()
 {
-    qFatal() << "EASTL_DEBUG_BREAK: Assertion blown";
+    qFatal("EASTL_DEBUG_BREAK: Assertion blown");
 }
 
 #endif
@@ -112,11 +112,8 @@ int main(int c, char **v)
     context->makeCurrent(surface);
 
     if (c < 2) {
-        puts("Usage: UICCompiler project.uia\n"
-             "No other usage is appropriate and there are at this time no options\n"
-             "Binary files will be under projectdir/binary/\n"
-             "Similar to if you had run UICViewer project.uia -saveBinary\n"
-             "With the important difference that the shader cache is neither created nor updated");
+        puts("Usage: Qt3DCompiler project.uia\n"
+             "Binary files will be generated under projectdir/binary/\n");
         return -1;
     }
     using namespace qt3ds;

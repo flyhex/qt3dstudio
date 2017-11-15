@@ -460,6 +460,7 @@ CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
           ForwardingAllocator(fnd.getAllocator(), "CQmlEngineImpl::m_EmitSignalDataList"))
     , mRefCount(0)
 {
+    qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Qt3DSBehavior");
 }
 
 void CQmlEngineImpl::Shutdown(qt3ds::NVFoundationBase &inFoundation)
@@ -809,10 +810,16 @@ void CQmlEngineImpl::createComponent(QQmlComponent *component, TElement *element
         context->deleteLater();
         return;
     }
+    Q3DSQmlBehavior *behaviorObject = qobject_cast<Q3DSQmlBehavior *>(obj);
+    if (behaviorObject == nullptr) {
+        obj->deleteLater();
+        context->deleteLater();
+        return;
+    }
 
-    auto script = new Q3DSQmlScript(*this, *obj, *element, *parent);
-    context->setContextProperty("Qt3DSRuntime", script);
+    auto script = new Q3DSQmlScript(*this, *behaviorObject, *element, *parent);
     component->completeCreate();
+    behaviorObject->setScript(script);
 
     script->setParent(component);
     obj->setParent(script);

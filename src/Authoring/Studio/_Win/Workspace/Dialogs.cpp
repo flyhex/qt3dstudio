@@ -319,7 +319,7 @@ const char *importExts[] = {
     CDialogs::GetImportFileExtension(), nullptr,
 };
 const char *behaviorExts[] = {
-    CDialogs::GetLUAFileExtension(), nullptr,
+    CDialogs::GetQmlFileExtension(), nullptr,
 };
 const char *fontExts[] = {
     "ttf", "otf", nullptr,
@@ -533,10 +533,6 @@ const char *CDialogs::GetImportFileExtension()
 const char *CDialogs::GetMeshFileExtension()
 {
     return "mesh";
-}
-const char *CDialogs::GetLUAFileExtension()
-{
-    return "lua";
 }
 const char *CDialogs::GetQmlFileExtension()
 {

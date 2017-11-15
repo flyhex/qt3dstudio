@@ -64,9 +64,9 @@
     <Event name="onStopped" description="Fires when the Sine Wave is stopped." />
 ]]*/
 
-import QtQml 2.2
+import QtStudio3D.Behavior 1.0
 
-QtObject {
+Qt3DSBehavior {
     //External:
     property string attribute
     property real ampOffset
@@ -82,14 +82,14 @@ QtObject {
     function start() {
         if (!running) {
             running = true;
-            Qt3ds.fireEvent("onStarted");
+            fireEvent("onStarted");
         }
     }
 
     function stop() {
         if (running) {
             running = false;
-            Qt3ds.fireEvent("onStopped");
+            fireEvent("onStopped");
         }
     }
 
@@ -100,7 +100,7 @@ QtObject {
             start();
     }
 
-    function onInitialize() {
+    onInitialize: {
         if (attribute.indexOf("rotation") != -1)
             inDegrees = true;
 
@@ -108,7 +108,7 @@ QtObject {
             start();
     }
 
-    function onUpdate() {
+    onUpdate: {
         if (!running)
             return;
 
@@ -117,8 +117,8 @@ QtObject {
             amplitude *= (Math.PI / 180);
         }
 
-        elapsedTime += Qt3ds.getDeltaTime();
+        elapsedTime += getDeltaTime();
         var value = ampOffset + amplitude * Math.cos(elapsedTime * Math.PI * 2 / period);
-        Qt3ds.setAttribute(attribute, value);
+        setAttribute(attribute, value);
     }
 }

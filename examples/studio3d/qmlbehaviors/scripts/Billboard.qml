@@ -58,9 +58,9 @@
     <Handler name="stop" formalName="Stop" category="Billboard" description="Stop rotating the parent object." />
 ]]*/
 
-import QtQml 2.2
+import QtStudio3D.Behavior 1.0
 
-QtObject {
+Qt3DSBehavior {
     //External:
     property string renderCamera
     property string billboardType
@@ -78,7 +78,7 @@ QtObject {
         running = false;
     }
 
-    function onInitialize() {
+    onInitialize: {
         if (billboardType === "Face Camera") {
             if (!yOnly)
                 updateFunction = faceCamera;
@@ -96,7 +96,7 @@ QtObject {
             start();
     }
 
-    function onUpdate() {
+    onUpdate: {
         if (!running)
             return;
 
@@ -104,12 +104,12 @@ QtObject {
     }
 
     function faceCamera() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
-        var myTransform = Qt3ds.calculateGlobalTransform();
+        var myTransform = calculateGlobalTransform();
         var mySpot = myTransform.row(3).toVector3d();
 
-        var matrix = Qt3ds.calculateGlobalTransform(Qt3ds.getParent()).inverted();
+        var matrix = calculateGlobalTransform(getParent()).inverted();
         matrix.m41 = 0;
         matrix.m42 = 0;
         matrix.m43 = 0;
@@ -118,14 +118,14 @@ QtObject {
                         .minus(mySpot)
                         .times(matrix);
 
-        var rotation = Qt3ds.lookAt(rotateRay);
+        var rotation = lookAt(rotateRay);
         setAttributeVector("rotation", rotation);
     }
 
     function faceCameraGlobalY() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
-        var myTransform = Qt3ds.calculateGlobalTransform();
+        var myTransform = calculateGlobalTransform();
         var mySpot = myTransform.row(3).toVector3d();
 
         var rotateRay = cameraSpot.minus(mySpot);
@@ -136,10 +136,10 @@ QtObject {
     }
 
     function matchRotation() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
 
-        var matrix = Qt3ds.calculateGlobalTransform(Qt3ds.getParent()).inverted();
+        var matrix = calculateGlobalTransform(getParent()).inverted();
         matrix.m41 = 0;
         matrix.m42 = 0;
         matrix.m43 = 0;
@@ -149,12 +149,12 @@ QtObject {
                         .minus(cameraSpot)
                         .times(matrix);
 
-        var rotation = Qt3ds.lookAt(rotateRay);
+        var rotation = lookAt(rotateRay);
         setAttributeVector("rotation", rotation);
     }
 
     function matchRotationGlobalY() {
-        var cameraTransform = Qt3ds.calculateGlobalTransform(renderCamera);
+        var cameraTransform = calculateGlobalTransform(renderCamera);
         var cameraSpot = cameraTransform.row(3).toVector3d();
 
         var rotateRay = Qt.vector3d(0, 0, 1)
@@ -162,21 +162,21 @@ QtObject {
                         .minus(cameraSpot)
 
         var rotation = getAttributeVector("rotation");
-        rotation.y = Qt3ds.lookAt(rotateRay).y;
+        rotation.y = lookAt(rotateRay).y;
         setAttributeVector("rotation", rotation);
     }
 
     function getAttributeVector(name) {
         var vec = Qt.vector3d(0, 0, 0);
-        Qt3ds.getAttribute(name + ".x", vec.x);
-        Qt3ds.getAttribute(name + ".y", vec.y);
-        Qt3ds.getAttribute(name + ".z", vec.z);
+        getAttribute(name + ".x", vec.x);
+        getAttribute(name + ".y", vec.y);
+        getAttribute(name + ".z", vec.z);
         return vec;
     }
 
     function setAttributeVector(name, vec) {
-        Qt3ds.setAttribute(name + ".x", vec.x);
-        Qt3ds.setAttribute(name + ".y", vec.y);
-        Qt3ds.setAttribute(name + ".z", vec.z);
+        setAttribute(name + ".x", vec.x);
+        setAttribute(name + ".y", vec.y);
+        setAttribute(name + ".z", vec.z);
     }
 }

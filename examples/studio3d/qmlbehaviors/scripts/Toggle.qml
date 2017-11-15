@@ -62,9 +62,9 @@
     <Event name="onUntoggle" description="Fires when untoggled." />
 ]]*/
 
-import QtQml 2.2
+import QtStudio3D.Behavior 1.0
 
-QtObject {
+Qt3DSBehavior {
     //External:
     property string attribute
     property real firstValue
@@ -78,7 +78,7 @@ QtObject {
 
     function start() {
         running = true;
-        Qt3ds.setAttribute(attribute, firstValue);
+        setAttribute(attribute, firstValue);
     }
 
     function stop() {
@@ -87,27 +87,27 @@ QtObject {
 
     function toggle() {
         if (index == 0) {
-            Qt3ds.setAttribute(attribute, secondValue);
-            Qt3ds.fireEvent("onToggle");
+            setAttribute(attribute, secondValue);
+            fireEvent("onToggle");
         } else if (index == 1) {
-            Qt3ds.setAttribute(attribute, firstValue);
-            Qt3ds.fireEvent("onUntoggle");
+            setAttribute(attribute, firstValue);
+            fireEvent("onUntoggle");
         }
         index++;
         if (index > 1)
             index = 0;
     }
 
-    function onInitialize() {
+    onInitialize: {
         if (startImmediately)
             start();
     }
 
-    function onUpdate() {
+    onUpdate: {
         if (!running)
             return;
 
-        timer += Qt3ds.getDeltaTime();
+        timer += getDeltaTime();
         var interval = timerInterval / 1000;
         while (timer >= interval) {
             timer -= interval;

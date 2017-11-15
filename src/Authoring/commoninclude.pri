@@ -8,9 +8,13 @@ contains(TEMPLATE, lib) {
 }
 
 # TODO: Investigate whether these can be moved to commonplatform
-win32 {
+win32-msvc {
     QMAKE_CXXFLAGS += /EHsc /GA
     QMAKE_CFLAGS += /EHsc /GA
+}
+
+mingw:win32 {
+    DEFINES += WIN32
 }
 
 INCLUDEPATH += $$PWD/../Runtime/Source

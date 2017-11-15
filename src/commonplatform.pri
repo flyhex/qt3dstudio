@@ -15,7 +15,8 @@ DEFINES += \
     EA_COMPILER_HAS_INTTYPES \
     EASTL_ALLOCATOR_COPY_ENABLED \
     UNICODE \
-    _UNICODE
+    _UNICODE \
+    NO_BOOST
 
 win32: PlatformSpecificDir = Windows
 macos: PlatformSpecificDir = Macos

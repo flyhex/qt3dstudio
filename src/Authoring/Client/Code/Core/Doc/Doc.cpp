@@ -35,7 +35,6 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "Qt3DSOptions.h"
 #include "Doc.h"
 #include "Core.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -1535,11 +1534,6 @@ void CDoc::CreatePresentation()
     // Initialize Asset Graph
     m_AssetGraph = TAssetGraph::CreateGraph();
     m_AssetGraph->AddRoot(m_SceneInstance);
-
-#ifdef INCLUDE_EDIT_CAMERA
-    ::CColor theColor = CStudioPreferences::GetEditViewBackgroundColor();
-// SetEditViewBackgroundColor( theColor );
-#endif
 }
 
 void CDoc::ClosePresentation()

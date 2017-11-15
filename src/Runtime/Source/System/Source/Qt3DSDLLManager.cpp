@@ -189,7 +189,11 @@ void *CDLLManager::GetProc(const char *inProcName, long inHandle)
 void *CDLLManager::GetProc(const char *inProcName, const DLLHANDLE inHandle)
 {
 #ifdef _PCPLATFORM
+#ifdef QT3DS_VC
     return ::GetProcAddress(inHandle, inProcName);
+#else
+    return (void *)(::GetProcAddress(inHandle, inProcName));
+#endif
 #endif
 
 #ifdef _LINUXPLATFORM

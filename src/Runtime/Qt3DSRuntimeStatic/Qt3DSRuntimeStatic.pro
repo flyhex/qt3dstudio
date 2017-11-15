@@ -3,7 +3,7 @@ TARGET = qt3dsruntimestatic
 CONFIG += staticlib
 include(../commoninclude.pri)
 
-!boot2qt:!integrity {
+!boot2qt:!integrity:!ios {
     RESOURCES += ../res.qrc
 }
 
@@ -692,11 +692,13 @@ HEADERS += \
 # Runtime
 HEADERS += \
     ../Source/Runtime/Include/RuntimePrefix.h \
-    ../Source/Runtime/Include/q3dsqmlscript.h
+    ../Source/Runtime/Include/q3dsqmlscript.h \
+    ../Source/Runtime/Include/q3dsqmlbehavior.h
 
 SOURCES += \
     ../Source/Runtime/Source/RuntimePrefix.cpp \
-    ../Source/Runtime/Source/q3dsqmlscript.cpp
+    ../Source/Runtime/Source/q3dsqmlscript.cpp \
+    ../Source/Runtime/Source/q3dsqmlbehavior.cpp
 
 # System
 SOURCES += \

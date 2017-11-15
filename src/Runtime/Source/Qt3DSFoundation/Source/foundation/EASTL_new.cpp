@@ -32,12 +32,11 @@
 // this on linux to recognize malloc
 #include <stdio.h>
 #include <stdarg.h>
-#if defined(_LINUX) || (_MACOSX) || (__ANDROID__)
+
+#if !defined(_MSC_VER)
 #include <stdlib.h>
 #endif
 
-#ifdef _MSC_VER
-#endif
 #include "EASTL/allocator.h"
 
 void *operator new[](size_t size, const char *, int, unsigned, const char *, int)

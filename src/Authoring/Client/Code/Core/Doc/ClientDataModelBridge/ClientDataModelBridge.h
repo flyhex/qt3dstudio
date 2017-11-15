@@ -378,7 +378,8 @@ public:
 
 protected:
     qt3dsdm::Qt3DSDMInstanceHandle GetChildByName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
-                                               Q3DStudio::CString inChildName);
+                                                  Q3DStudio::CString inChildName,
+                                                  qt3dsdm::Qt3DSDMInstanceHandle skipInstance);
     std::vector<qt3dsdm::SValue>
     GetValueList(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
                                          qt3dsdm::Qt3DSDMPropertyHandle inProperty,

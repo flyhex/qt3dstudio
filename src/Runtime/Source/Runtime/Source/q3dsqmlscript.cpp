@@ -71,7 +71,7 @@ void eventCallback(void *contextData, SEventCommand &event)
     data->function.call({arg1, arg2});
 }
 
-Q3DSQmlScript::Q3DSQmlScript(CQmlEngine &api, QObject &object,
+Q3DSQmlScript::Q3DSQmlScript(CQmlEngine &api, Q3DSQmlBehavior &object,
                              TElement &behavior, TElement &owner)
     : QObject(nullptr)
     , m_api(api)
@@ -100,7 +100,7 @@ void Q3DSQmlScript::update()
 
     if (active && !m_initialized) {
         m_initialized = true;
-        call("onInitialize");
+        Q_EMIT m_object.initialize();
     }
 
     TTimeUnit time = static_cast<CPresentation *>(m_behavior.GetBelongedPresentation())->GetTime();
@@ -109,13 +109,13 @@ void Q3DSQmlScript::update()
 
     if (m_lastActivationState != active) {
         if (active)
-            call("onActivate");
+            Q_EMIT m_object.activate();
         else
-            call("onDeactivate");
+            Q_EMIT m_object.deactivate();
     }
     m_lastActivationState = active;
     if (active)
-        call("onUpdate");
+        Q_EMIT m_object.update();
 }
 
 void Q3DSQmlScript::call(const QString &function)
@@ -344,7 +344,7 @@ QMatrix4x4 Q3DSQmlScript::calculateGlobalTransform(const QString &handle)
     return QMatrix4x4(&transform.m_Data[0][0]);
 }
 
-QVector3D Q3DSQmlScript::lookAt(const QVector3D& target)
+QVector3D Q3DSQmlScript::lookAt(const QVector3D &target)
 {
     RuntimeVector3 rotation;
 
@@ -357,7 +357,7 @@ QVector3D Q3DSQmlScript::lookAt(const QVector3D& target)
     return QVector3D(rotation.m_X, rotation.m_Y, rotation.m_Z);
 }
 
-QString Q3DSQmlScript::getParent(const QString& handle)
+QString Q3DSQmlScript::getParent(const QString &handle)
 {
     TElement *element = &m_owner;
     if (!handle.isEmpty())

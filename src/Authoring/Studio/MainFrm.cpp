@@ -265,10 +265,8 @@ int CMainFrame::OnCreate()
     m_SceneView = new CSceneView(&g_StudioApp, this);
     connect(m_SceneView, &CSceneView::toolChanged, this, &CMainFrame::OnUpdateToolChange);
 
-#ifdef INCLUDE_EDIT_CAMERA
     // tell the edit camera bar about this scene view
     m_ui->m_EditCamerasBar->SetSceneView(m_SceneView);
-#endif
 
     // Newly launched, the file dialog for open and import should default to more recent
     // opened/imported
@@ -518,25 +516,9 @@ void CMainFrame::OnUpdateToolChange()
     m_ui->actionLocal_Global_Manipulators->setChecked(g_StudioApp.GetMinpulationMode()
                                                       == StudioManipulationModes::Global);
 
-#ifdef INCLUDE_EDIT_CAMERA
     m_ui->actionPan_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_PAN);
     m_ui->actionOrbit_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE);
     m_ui->actionZoom_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM);
-
-    /*CEditCameraContainer* theEditCameras = g_StudioApp.GetCore()->GetDoc()->GetEditCameraContainer( );
-CSEditCamera* theActiveEditCamera = theEditCameras->GetActiveEditCamera( );
-bool theIsEditView = !m_SceneView->IsDeploymentView( );
-m_EditCamerasBar.GetToolBarCtrl( ).EnableButton( ID_TOOL_EDITCAMERA_ROTATE, ( theActiveEditCamera &&
-theActiveEditCamera->Is3D( ) ) );
-m_EditCamerasBar.GetToolBarCtrl( ).EnableButton( ID_TOOL_EDITCAMERA_PAN, theIsEditView );
-m_EditCamerasBar.GetToolBarCtrl( ).EnableButton( ID_TOOL_EDITCAMERA_ZOOM, theIsEditView );
-m_EditCamerasBar.GetToolBarCtrl( ).EnableButton( ID_EDITCAMERA_ZOOMEXTENT, theIsEditView );
-
-m_EditCamerasBar.GetToolBarCtrl( ).EnableButton( ID_TOOL_EDITVIEW_FILLMODE, theIsEditView );
-m_EditCamerasBar.GetToolBarCtrl( ).CheckButton( ID_TOOL_EDITVIEW_FILLMODE, theIsEditView &&
-theEditCameras->GetEditViewFillMode( ) );
-*/
-#endif
 }
 
 //==============================================================================
@@ -809,14 +791,12 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetSnapRange(10);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
+
         // Edit Cameras
-#ifdef INCLUDE_EDIT_CAMERA
         CColor theDefaultBgColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetEditViewBackgroundColor(theDefaultBgColor);
-        // g_StudioApp.GetCore()->GetDoc()->SetEditViewBackgroundColor( theDefaultBgColor );
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
-#endif
 
         RecheckSizingMode();
 
@@ -1014,16 +994,15 @@ void CMainFrame::OnUpdatePlaybackStop()
  */
 void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
-#ifdef INCLUDE_EDIT_CAMERA
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_F3),
                         CMainFrame::HandleEditViewFillModeKey);
+
     // Default undo shortcut is Ctrl-Y, which is specified in main form. Let's add the common
     // alternate shortcut for redo, CTRL-SHIFT-Z
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z),
                         CMainFrame::OnEditRedo);
-#endif
 
     m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);
 

@@ -171,7 +171,7 @@ bool COptimizedArithmetic::Has3DNow()
     return has3DNow;
 }
 
-#if defined(WIN32) && !defined(_AMD64_)
+#if defined(WIN32) && !defined(_AMD64_) && !defined(__GNUC__)
 //==============================================================================
 /**
  * The following code is part of an SSE matrix multiplication algorithm developed

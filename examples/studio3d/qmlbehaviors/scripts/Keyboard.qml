@@ -59,9 +59,9 @@
 <Event name="onDOWNUp" category="Navigation" />
 ]]*/
 
-import QtQml 2.2
+import QtStudio3D.Behavior 1.0
 
-QtObject {
+Qt3DSBehavior {
     property var keyNames: ["NOKEY",
                             "ESCAPE",
                             "1",
@@ -184,16 +184,16 @@ QtObject {
                             "PAUSE",
                             "SCALE"]
 
-    function onInitialize() {
-        Qt3ds.registerForEvent("onKeyDown", onKeyDown);
-        Qt3ds.registerForEvent("onKeyUp", onKeyUp);
+    onInitialize: {
+        registerForEvent("onKeyDown", onKeyDown);
+        registerForEvent("onKeyUp", onKeyUp);
     }
 
     function onKeyDown(keyCode) {
-        Qt3ds.fireEvent("on" + keyNames[keyCode] + "Down");
+        fireEvent("on" + keyNames[keyCode] + "Down");
     }
 
     function onKeyUp(keyCode) {
-        Qt3ds.fireEvent("on" + keyNames[keyCode] + "Up");
+        fireEvent("on" + keyNames[keyCode] + "Up");
     }
 }

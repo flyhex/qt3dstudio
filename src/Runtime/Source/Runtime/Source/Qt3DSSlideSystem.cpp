@@ -393,7 +393,7 @@ struct SSlideSystem : public ISlideSystem
         }
         bool handleElementActive(SElement &inElement, bool inActive)
         {
-            if (m_InvertActive)
+            if (m_InvertActive && inElement.Flags().IsExplicitActive())
                 inActive = !inActive;
             inElement.Flags().SetExplicitActive(inActive);
 

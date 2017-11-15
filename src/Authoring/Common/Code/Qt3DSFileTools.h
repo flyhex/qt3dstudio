@@ -75,8 +75,6 @@ public:
     // FIXME: refactor call sites to just use 'filePath()'
     QString toQString() const { return filePath(); }
     CString toCString() const { return CString::fromQString(filePath()); }
-    const char *GetCharStar() const
-    { return filePath().toLatin1().constData(); }
 
     // FIXME: refactor at call sites to no longer use implicit casts
     operator const CString()

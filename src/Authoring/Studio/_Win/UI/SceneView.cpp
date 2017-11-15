@@ -89,9 +89,7 @@ CSceneView::~CSceneView()
     // Stop listening for selection change events
     theDispatch->RemoveSelectedNodePropChangeListener(this);
     theDispatch->RemoveClientPlayChangeListener(this);
-#ifdef INCLUDE_EDIT_CAMERA
     theDispatch->RemoveEditCameraChangeListener(this);
-#endif
 }
 
 QSize CSceneView::sizeHint() const
@@ -132,9 +130,7 @@ void CSceneView::showEvent(QShowEvent *event)
     m_CursorEditCameraZoom =
             CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM);
 
-#ifdef INCLUDE_EDIT_CAMERA
     g_StudioApp.GetCore()->GetDispatch()->AddEditCameraChangeListener(this);
-#endif
 
     // Set the default cursor
     OnSetCursor();
@@ -226,7 +222,6 @@ void CSceneView::SetViewCursor()
         }
         break;
 
-#ifdef INCLUDE_EDIT_CAMERA
     case STUDIO_TOOLMODE_CAMERA_PAN:
         m_PlayerWnd->setCursor(m_CursorEditCameraPan);
         break;
@@ -238,7 +233,7 @@ void CSceneView::SetViewCursor()
     case STUDIO_TOOLMODE_CAMERA_ROTATE:
         m_PlayerWnd->setCursor(m_CursorEditCameraRotate);
         break;
-#endif
+
         // Default - shouldn't happen
     default:
         m_PlayerWnd->setCursor(m_CursorItemMove);
@@ -318,12 +313,9 @@ bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifi
             // If this is the first press, toggle tool modes
             m_RegisteredKeyDown = true;
 
-#ifdef INCLUDE_EDIT_CAMERA
             if (m_PlayerContainerWnd->IsMiddleMouseDown() && !IsDeploymentView()) {
                 // Do nothing, do not let it switch to other tool when middle mouse is down
-            } else
-#endif
-            {
+            } else {
                 // See what tool mode we are in and change modes accordingly
                 SetToolOnCtrl();
                 theHandledFlag = true;
@@ -333,7 +325,6 @@ bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifi
         else if ((inChar == Qt::Key_Alt) && (!theCtrlKeyIsDown)) {
             m_RegisteredKeyDown = true;
 
-#ifdef INCLUDE_EDIT_CAMERA
             if (m_PlayerContainerWnd->IsMiddleMouseDown() && !IsDeploymentView()) {
                 // press Alt-Scroll Wheel Click
                 // Do Camera Rotate if we are in 3D Camera
@@ -342,9 +333,7 @@ bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifi
                     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
                     theHandledFlag = true;
                 }
-            } else
-#endif
-            {
+            } else {
                 // See what tool mode we are in and change modes accordingly
                 SetToolOnAlt();
                 theHandledFlag = true;
@@ -390,14 +379,10 @@ bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifier
         // to the original tool mode
         if (((inChar == Qt::Key_Control) && (!theAltKeyIsDown))
                 || ((inChar == Qt::Key_Alt) && (!theCtrlKeyIsDown))) {
-#ifdef INCLUDE_EDIT_CAMERA
-            if (m_PlayerContainerWnd->IsMiddleMouseDown()) {
+            if (m_PlayerContainerWnd->IsMiddleMouseDown())
                 g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-            } else
-#endif
-            {
+            else
                 RestorePreviousTool();
-            }
 
             OnSetCursor();
             Q_EMIT toolChanged();
@@ -598,7 +583,6 @@ void CSceneView::RestorePreviousTool()
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
         break;
 
-#ifdef INCLUDE_EDIT_CAMERA
     case STUDIO_TOOLMODE_CAMERA_PAN:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
         break;
@@ -610,7 +594,6 @@ void CSceneView::RestorePreviousTool()
     case STUDIO_TOOLMODE_CAMERA_ZOOM:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
         break;
-#endif
     }
 }
 
@@ -637,7 +620,6 @@ void CSceneView::SetToolOnCtrl()
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
         break;
 
-#ifdef INCLUDE_EDIT_CAMERA
     // If we are in camera pan mode, switch to camera orbit
     case STUDIO_TOOLMODE_CAMERA_PAN:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
@@ -652,7 +634,6 @@ void CSceneView::SetToolOnCtrl()
     case STUDIO_TOOLMODE_CAMERA_ZOOM:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
         break;
-#endif
     }
 }
 
@@ -679,7 +660,6 @@ void CSceneView::SetToolOnAlt()
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
         break;
 
-#ifdef INCLUDE_EDIT_CAMERA
     // If we are in camera pan mode, switch to camera zoom
     case STUDIO_TOOLMODE_CAMERA_PAN:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
@@ -694,7 +674,6 @@ void CSceneView::SetToolOnAlt()
     case STUDIO_TOOLMODE_CAMERA_ZOOM:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
         break;
-#endif
     }
 }
 

@@ -100,7 +100,9 @@ C++ Portable Types Library (PTypes)
 
 #ifdef WIN32
 typedef long pthread_id_t;
+#ifndef __GNUC__
 typedef HANDLE pthread_t;
+#endif
 #define __PFASTCALL __fastcall
 #elif defined(__MACH__)
 typedef pthread_t pthread_id_t;

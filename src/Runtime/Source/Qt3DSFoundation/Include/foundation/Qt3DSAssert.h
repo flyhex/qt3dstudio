@@ -36,9 +36,11 @@
 #include "EABase/config/eaplatform.h"
 #include "foundation/Qt3DSPreprocessor.h"
 
-#ifdef EA_PLATFORM_WINDOWS
+#ifdef QT3DS_WINDOWS
 
 #include <stdio.h>
+
+#ifdef QT3DS_VC
 #include <crtdbg.h>
 
 extern void __debugbreak();
@@ -92,6 +94,40 @@ QT3DS_INLINE void NVAssert(const char *exp, const char *file, int line, bool *ig
 #define QT3DS_ASSERT(exp) ((void)0)
 #define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
 #endif
+#endif
+#else
+
+#include <assert.h>
+
+namespace qt3ds {
+
+QT3DS_INLINE void NVAssert(const char *exp, const char *file, int line, bool *ignore)
+{
+    QT3DS_FORCE_PARAMETER_REFERENCE(exp);
+    QT3DS_FORCE_PARAMETER_REFERENCE(file);
+    QT3DS_FORCE_PARAMETER_REFERENCE(line);
+    QT3DS_FORCE_PARAMETER_REFERENCE(ignore);
+    assert(false);
+}
+
+} // qt3ds
+
+#ifndef NDEBUG
+#define QT3DS_ASSERT(exp)                                                                   \
+    {                                                                                       \
+        static bool ignore = false;                                                         \
+        (void)((!!(exp)) || (qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));   \
+    }
+#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp)                                                    \
+    {                                                                                       \
+        static bool ignore = false;                                                         \
+        (void)((qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));                \
+    }
+#else
+#define QT3DS_ASSERT(exp) ((void)0)
+#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
+#endif
+
 #endif
 
 #elif defined(QT3DS_PS3)

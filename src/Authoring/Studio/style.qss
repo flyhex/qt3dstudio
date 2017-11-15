@@ -255,9 +255,9 @@ QDialog#AboutDlg QPushButton:pressed {
 
 /* TimeLineToolbar */
 QWidget#TimeLineParent,
-QTimeLineToolbar QWidget#layoutWidget {
+TimeLineToolbar QWidget#layoutWidget {
     background: #404244;
 }
-QTimeLineToolbar QPushButton#timeButton {
+TimeLineToolbar QPushButton#timeButton {
     border: 0px;
 }
