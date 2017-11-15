@@ -486,7 +486,7 @@ void CTimelineTimelineLayout::RecalcTime(bool inUpdateClient, long inFlags)
 /**
  * Call from the timeline view that the time is changing.
  * @param inNewTime the new time.
- * @param inIsSecondary lame flag to prevent infinite recursion.
+ * @param inIsSecondary flag to prevent infinite recursion.
  */
 void CTimelineTimelineLayout::SetTime(long inNewTime, bool inIsSecondary)
 {

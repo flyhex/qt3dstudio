@@ -82,7 +82,7 @@ Q_SIGNALS:
     void SigToggle(CToggleButton*, CButtonControl::EButtonState);
 
 protected:
-    // protected to make fools use SetToggleState instead.
+    // protected to force use of SetToggleState instead.
     void SetButtonState(EButtonState inState) override { CButtonControl::SetButtonState(inState); }
 
     bool m_IsToggleDown;
