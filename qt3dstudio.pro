@@ -2,7 +2,7 @@ requires(!ios)
 requires(!winrt)
 requires(!tvos)
 requires(!watchos)
-requires(!msvc2013)
+requires(!win32-msvc2013)
 
 requires(qtHaveModule(widgets))
 requires(qtHaveModule(multimedia))
