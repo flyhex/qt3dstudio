@@ -159,10 +159,6 @@ int main(int argc, char *argv[])
 #include "Qt3DSFileTools.h"
 #include "foundation/Qt3DSLogging.h"
 
-#ifdef USE_LICENSE_HANDLER
-#include "licensehandler.h"
-#endif
-
 CStudioApp g_StudioApp;
 long g_ErrorCode = 0;
 
@@ -395,13 +391,6 @@ void CStudioApp::OnAppAbout()
 int CStudioApp::Run()
 {
     int theRetVal = -1;
-
-#ifdef USE_LICENSE_HANDLER
-    LicenseHandler lh;
-    if (!lh.handleLicense())
-        return theRetVal;
-#endif
-
     try {
         CCmdLineParser::EExecutionMode theMode = m_CmdLineParser.PopExecutionMode();
         if (CCmdLineParser::END_OF_CMDS == theMode)

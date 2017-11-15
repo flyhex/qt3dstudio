@@ -421,15 +421,6 @@ PREDEPS_LIBS += \
     CommonLib \
     CoreLib
 
-
-# Optional license handler
-isEmpty(TQTC_LICENSE_MANAGING): TQTC_LICENSE_MANAGING=$$(TQTC_LICENSE_MANAGING)
-!isEmpty(TQTC_LICENSE_MANAGING) {
-    DEFINES += USE_LICENSE_HANDLER LICENSE_HANDLER_AS_DLL
-    LIBS += -llicensehandler$$qtPlatformTargetSuffix()
-    INCLUDEPATH += $$TQTC_LICENSE_MANAGING/studio3d
-}
-
 include(../../utils.pri)
 PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)
 
