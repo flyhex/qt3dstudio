@@ -514,17 +514,18 @@ public:
     bool IsPropertyLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
     {
         if (IsInstance(inInstance)) {
-            AdditionalMetaDataType::Value thePropertyMetaData =
-                m_PropertySystem.GetAdditionalMetaDataType(inInstance, inProperty);
             Qt3DSDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
             if (theAssociatedSlide.Valid() && m_SlideSystem.IsMasterSlide(theAssociatedSlide)) {
-                SValue theValue;
-                if (thePropertyMetaData == AdditionalMetaDataType::Image) {
-                    qt3dsdm::Qt3DSDMInstanceHandle theInstance =
-                        GetImageInstanceForProperty(inInstance, inProperty);
-                    if (theInstance)
-                        return IsPropertyLinked(theInstance, m_Bridge.GetSourcePathProperty());
-                    return true; // No image means the property is linked.
+                if (inProperty.Valid()) {
+                    AdditionalMetaDataType::Value thePropertyMetaData =
+                        m_PropertySystem.GetAdditionalMetaDataType(inInstance, inProperty);
+                    if (thePropertyMetaData == AdditionalMetaDataType::Image) {
+                        qt3dsdm::Qt3DSDMInstanceHandle theInstance =
+                            GetImageInstanceForProperty(inInstance, inProperty);
+                        if (theInstance)
+                            return IsPropertyLinked(theInstance, m_Bridge.GetSourcePathProperty());
+                        return true; // No image means the property is linked.
+                    }
                 }
                 return m_SlideSystem.IsPropertyLinked(inInstance, inProperty);
             }

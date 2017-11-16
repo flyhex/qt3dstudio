@@ -54,6 +54,7 @@
 #include "IObjectReferenceHelper.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
+#include "ClientDataModelBridge.h"
 
 InspectorControlView::InspectorControlView(QWidget *parent)
     : QQuickWidget(parent),
@@ -204,16 +205,36 @@ QString InspectorControlView::titleText() const
     return tr("No Object Selected");
 }
 
+static EStudioObjectType instanceObjectType(int instance)
+{
+    auto doc = g_StudioApp.GetCore()->GetDoc();
+    auto studio = doc->GetStudioSystem();
+    return studio->GetClientDataModelBridge()->GetObjectType(instance);
+}
+
+bool InspectorControlView::canLinkProperty(int instance, int handle) const
+{
+    EStudioObjectType type = instanceObjectType(instance);
+    bool canBeLinkedFlag = g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                                .CanPropertyBeLinked(instance, handle);
+    if (qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid() == false
+            && (type == OBJTYPE_CUSTOMMATERIAL || type == OBJTYPE_MATERIAL
+                || type == OBJTYPE_REFERENCEDMATERIAL)) {
+        canBeLinkedFlag = false;
+    }
+    return canBeLinkedFlag;
+}
+
 QColor InspectorControlView::titleColor(int instance, int handle) const
 {
-    if (instance != 0 && handle != 0) {
-        if (g_StudioApp.GetCore()->GetDoc()->GetDocumentReader().IsPropertyLinked(instance, handle))
-            return CStudioPreferences::masterColor();
-        else
-            return CStudioPreferences::textColor();
-    } else {
-        return CStudioPreferences::textColor();
+    QColor ret = CStudioPreferences::textColor();
+    if (instance != 0) {
+        if (g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                .IsPropertyLinked(instance, handle)) {
+            ret = CStudioPreferences::masterColor();
+        }
     }
+    return ret;
 }
 
 QString InspectorControlView::titleIcon() const
@@ -260,7 +281,7 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
 
     auto doc = g_StudioApp.GetCore()->GetDoc();
 
-    bool canBeLinkedFlag = doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
+    bool canBeLinkedFlag = canLinkProperty(instance, handle);
     if (canBeLinkedFlag) {
         const bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
 
