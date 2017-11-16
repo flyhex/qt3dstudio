@@ -490,6 +490,7 @@ target.path = $$[QT_INSTALL_BINS]
 INSTALLS += target
 
 RC_ICONS = images/3D-studio.ico
+ICON = images/studio.icns
 
 # Extract SHA from .tag file if project has it
 exists($$ABS_PRJ_ROOT/.tag) {

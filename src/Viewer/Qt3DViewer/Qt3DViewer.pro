@@ -10,6 +10,8 @@ FORMS += mainwindow.ui
 RESOURCES += Viewer.qrc
 RC_FILE += Viewer.rc
 
+ICON = resources/images/viewer.icns
+
 SOURCES += \
     $$PWD/../qmlviewer/Qt3DSViewPlugin.cpp \
     $$PWD/../qmlviewer/Qt3DSView.cpp \
