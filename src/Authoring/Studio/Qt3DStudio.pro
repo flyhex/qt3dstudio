@@ -424,6 +424,13 @@ PREDEPS_LIBS += \
 include(../../utils.pri)
 PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)
 
+# Bundle FBX for macOS
+macos: {
+    fbxsdk.files = $$(FBXSDK)/lib/clang/release/libfbxsdk.dylib
+    fbxsdk.path = Contents/MacOS
+    QMAKE_BUNDLE_DATA += fbxsdk
+}
+
 # Copy necessary resources
 
 ABS_PRJ_ROOT = $$absolute_path($$PWD/../../..)
