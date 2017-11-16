@@ -499,9 +499,14 @@ INSTALLS += target
 RC_ICONS = images/3D-studio.ico
 ICON = images/studio.icns
 
-# Extract SHA from .tag file if project has it
-exists($$ABS_PRJ_ROOT/.tag) {
+# Extract SHA from git if building sources from git repository
+exists($$ABS_PRJ_ROOT/.git) {
+    GIT_SHA = $$system(git rev-list --abbrev-commit -n1 HEAD)
+}
+# Otherwise attempt to extract SHA from .tag file
+isEmpty(GIT_SHA):exists($$ABS_PRJ_ROOT/.tag) {
     STUDIO_TAG = $$cat($$ABS_PRJ_ROOT/.tag)
     FIRST_CHAR = $$str_member($$STUDIO_TAG, 0, 0)
-    !equals(FIRST_CHAR, "$"): DEFINES += QT3DSTUDIO_REVISION=$$first(STUDIO_TAG)
+    !equals(FIRST_CHAR, "$"): GIT_SHA = $$first(STUDIO_TAG)
 }
+!isEmpty(GIT_SHA): DEFINES += QT3DSTUDIO_REVISION=$$GIT_SHA
