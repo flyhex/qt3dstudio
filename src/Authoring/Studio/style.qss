@@ -6,11 +6,17 @@ QWidget {
     border: 0px;
 }
 
-/* DockWidget separators */
+/* DockWidget */
 QMainWindow::separator {
     background: #000000;
     width: 1px;  /* when vertical */
     height: 1px; /* when horizontal */
+}
+
+QDockWidget::title {
+    border: 1px solid #262829;
+    background: #2e2f30;
+    padding: 3px;
 }
 
 /* Tabs */
@@ -30,7 +36,6 @@ QTabWidget::pane {
 }
 
 /* Scrollbar */
-
 QScrollBar:horizontal {
     height: 6px;
 }
