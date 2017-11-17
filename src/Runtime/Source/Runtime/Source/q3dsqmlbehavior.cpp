@@ -105,6 +105,11 @@ QVector3D Q3DSQmlBehavior::lookAt(const QVector3D &target)
     return m_script->lookAt(target);
 }
 
+QVector3D Q3DSQmlBehavior::matrixToEuler(const QMatrix4x4 &matrix)
+{
+    return m_script->matrixToEuler(matrix);
+}
+
 QString Q3DSQmlBehavior::getParent(const QString &handle)
 {
     return m_script->getParent(handle);

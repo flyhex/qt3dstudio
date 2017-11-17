@@ -67,6 +67,7 @@ public:
     Q_INVOKABLE QVector2D getMousePosition();
     Q_INVOKABLE QMatrix4x4 calculateGlobalTransform(const QString &handle = QString());
     Q_INVOKABLE QVector3D lookAt(const QVector3D &target);
+    Q_INVOKABLE QVector3D matrixToEuler(const QMatrix4x4 &matrix);
     Q_INVOKABLE QString getParent(const QString &handle = QString());
 
 

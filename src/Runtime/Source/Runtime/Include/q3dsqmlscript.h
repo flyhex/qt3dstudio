@@ -71,6 +71,7 @@ public:
     QVector2D getMousePosition();
     QMatrix4x4 calculateGlobalTransform(const QString &handle);
     QVector3D lookAt(const QVector3D &target);
+    QVector3D matrixToEuler(const QMatrix4x4 &matrix);
     QString getParent(const QString &handle);
 
     struct EventData {

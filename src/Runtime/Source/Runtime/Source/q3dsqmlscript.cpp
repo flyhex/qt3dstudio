@@ -37,6 +37,7 @@
 #include "Qt3DSInputFrame.h"
 #include "Qt3DSQmlElementHelper.h"
 #include "Qt3DSHash.h"
+#include "Qt3DSEulerAngles.h"
 
 using namespace Q3DStudio;
 
@@ -355,6 +356,19 @@ QVector3D Q3DSQmlScript::lookAt(const QVector3D &target)
     rotation.Set(thePitch, theYaw, 0.0f);
 
     return QVector3D(rotation.m_X, rotation.m_Y, rotation.m_Z);
+}
+
+QVector3D Q3DSQmlScript::matrixToEuler(const QMatrix4x4 &matrix)
+{
+    CEulerAngleConverter converter;
+    const float *qMatrix = matrix.constData();
+    HMatrix hHatrix;
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j)
+            hHatrix[i][j] = qMatrix[j * 4 + i];
+    }
+    EulerAngles eulerAngles = converter.Eul_FromHMatrix(hHatrix, EulOrdYXZs);
+    return QVector3D(-eulerAngles.y, -eulerAngles.x, -eulerAngles.z);
 }
 
 QString Q3DSQmlScript::getParent(const QString &handle)
