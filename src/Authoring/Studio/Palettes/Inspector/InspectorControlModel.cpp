@@ -575,8 +575,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             QString meshValue = qt3dsdm::get<QString>(value);
             Q3DStudio::CFilePath theSelectionItem(Q3DStudio::CString::fromQString(meshValue));
             Q3DStudio::CFilePath theSelectionWithoutId(theSelectionItem.filePath());
-            if (theSelectionWithoutId.size())
-                element->m_value = theSelectionWithoutId.GetFileName().toQString();
+            QString theSelectionWithoutIdName = theSelectionWithoutId.GetFileName().toQString();
+            if (theSelectionWithoutIdName.size())
+                element->m_value = theSelectionWithoutIdName;
             else
                 element->m_value = theSelectionItem.GetIdentifier().toQString();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Texture) {

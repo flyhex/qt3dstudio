@@ -321,8 +321,13 @@ void InspectorControlView::setPropertyValueFromFilename(long instance, int handl
 {
     if (m_inspectorControlModel) {
         QString value;
-        if (name != tr("[None]"))
-            value = name;
+        if (name != tr("[None]")) {
+            // Relativize the path to the project
+            const auto doc = g_StudioApp.GetCore()->GetDoc();
+            const QDir documentDir(doc->GetDocumentDirectory().toQString());
+            QString relativeName = documentDir.relativeFilePath(name);
+            value = relativeName;
+        }
         m_inspectorControlModel->setPropertyValue(instance, handle, value);
     }
 }
@@ -371,8 +376,12 @@ QObject *InspectorControlView::showMeshChooser(int handle, int instance, const Q
         m_meshChooserView = new MeshChooserView(this);
         connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
                 [this] (int handle, int instance, const QString &name){
-            if (m_inspectorControlModel)
-                m_inspectorControlModel->setPropertyValue(instance, handle, name);
+            if (name.startsWith(QStringLiteral("#"))) {
+                if (m_inspectorControlModel)
+                    m_inspectorControlModel->setPropertyValue(instance, handle, name);
+            } else {
+                setPropertyValueFromFilename(instance, handle, name);
+            }
         });
     }
 
