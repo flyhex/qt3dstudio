@@ -442,7 +442,8 @@ macos:RES = "Resources"
 
 defineReplace(doReplaceResCopy_copy1) {
     filePath = $$absolute_path($$1)
-    filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
+    macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR/$$RES)
+    !macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
     PRE_TARGETDEPS += $$filePath
     export(PRE_TARGETDEPS)
     return($$system_path($$filePath))
