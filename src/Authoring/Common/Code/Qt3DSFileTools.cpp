@@ -126,7 +126,7 @@ void CFilePath::normalizeAndSetPath(const QString &path)
 
 CFilePath CFilePath::GetDirectory() const
 {
-    return CFilePath(dir().canonicalPath());
+    return CFilePath(path());
 }
 
 CString CFilePath::GetFileStem() const
