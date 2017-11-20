@@ -380,14 +380,6 @@ void CControl::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
             theChild->OnMouseOut(theChildPoint, inFlags);
         }
     }
-
-    // If there is a child with focus and the mouse is not over it then still notify it of the mouse
-    // move
-    // If the mouse is over it then it would have gotten the move from the above loop.
-    if (m_ControlData->m_MouseFocus && !m_ControlData->m_MouseFocus->IsMouseOver()) {
-        CPt theChildPoint = inPoint - m_ControlData->m_MouseFocus->GetPosition();
-        m_ControlData->m_MouseFocus->OnMouseMove(theChildPoint, inFlags);
-    }
 }
 
 //=============================================================================
