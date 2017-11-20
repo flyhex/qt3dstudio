@@ -212,6 +212,14 @@ QPushButton:pressed {
     background: #262829;
 }
 
+QHeaderView::section {
+    background: transparent;
+}
+
+QHeaderView::section:hover {
+    background: #46a2da;
+}
+
 /* Tutorial Dialog */
 QDialog#StudioTutorialWidget,
 QDialog#StudioTutorialWidget QWidget {
