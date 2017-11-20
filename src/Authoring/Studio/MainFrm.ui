@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>973</width>
-     <height>22</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -213,7 +213,7 @@
   </action>
   <action name="action_Visit_Qt_Web_Site">
    <property name="text">
-    <string>&amp;Visit Qt Web site...</string>
+    <string>&amp;Visit Qt 3D Studio Page...</string>
    </property>
   </action>
   <action name="action_About_Qt_3D_Studio">
