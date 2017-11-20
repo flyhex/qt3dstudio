@@ -237,6 +237,35 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
 
         m_materials.push_back({name, relativePath});
     }
+
+    // Find if there are any material items and update the values of those
+    for (int row = 0; row < m_groupElements.count(); ++row) {
+        const CInspectorGroup *inspectorGroup = m_inspectableBase->GetGroup(row);
+        const auto group = dynamic_cast<const Qt3DSDMInspectorGroup *>(inspectorGroup);
+        const auto materialGroup = dynamic_cast<const Qt3DSDMMaterialInspectorGroup *>(group);
+        if (materialGroup &&  materialGroup->isMaterialGroup()) {
+            if (m_groupElements[row].controlElements.size()) {
+                auto item = m_groupElements[row].controlElements[0]
+                        .value<InspectorControlBase *>();
+                item->m_values = materialValues();
+                Q_EMIT item->valuesChanged();
+                // Changing values resets the selected index, so pretend the value has also changed
+                Q_EMIT item->valueChanged();
+            }
+        }
+    }
+}
+
+QStringList InspectorControlModel::materialValues() const
+{
+    QStringList values;
+    values.push_back(tr("Standard Material"));
+    values.push_back(tr("Referenced Material"));
+
+    for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx)
+        values.push_back(m_materials[matIdx].m_name);
+
+    return values;
 }
 
 InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectable *inspectable,
@@ -256,14 +285,12 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
 
     item->m_animatable = false;
 
-    QStringList values;
-    values.push_back(tr("Standard Material"));
-    values.push_back(tr("Referenced Material"));
+    const QStringList values = materialValues();
+    item->m_values = values;
 
     const QString sourcePath = theBridge->GetSourcePath(item->m_instance).toQString();
 
     switch (theType) {
-
     case OBJTYPE_MATERIAL:
         item->m_value = tr("Standard Material");
         break;
@@ -274,12 +301,9 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
     }
 
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx) {
-        values.push_back(m_materials[matIdx].m_name);
         if (m_materials[matIdx].m_relativePath == sourcePath)
-            item->m_value = values.last();
+            item->m_value = values[matIdx + 2]; // +2 for standard and referenced materials
     }
-
-    item->m_values = values;
 
     return item;
 }
