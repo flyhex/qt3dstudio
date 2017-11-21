@@ -52,6 +52,7 @@ public:
     bool isConnected() const { return m_connection; }
     bool isProjectDeployed() const { return m_connection && m_projectDeployed; }
     QString fileName() const { return m_projectFile; }
+    bool canceled() const { return m_canceled; }
 
 Q_SIGNALS:
     void projectChanged();
@@ -75,6 +76,7 @@ private:
     QString m_projectFile;
     bool m_projectDeployed;
     int m_serverPort;
+    bool m_canceled;
 };
 
 #endif // REMOTEDEPLOYMENTRECEIVER_H
