@@ -29,9 +29,6 @@
                 <Handler name="Emit Signal" category="Asset" description="Emit a Signal.">
                         <Argument name="Signal Name" description="The signal to emit" type="String" argumentType="Signal" />
                 </Handler>
-                <Handler name="Play Sound" category="Asset" description="Play a sound file.">
-                        <Argument name="Sound File" description="The sound file to play" type="String" argumentType="Sound" />
-                </Handler>
         </Asset>
         <Behavior>
                 <Property name="name" formalName="Name" type="String" default="Behavior" hidden="True" />
