@@ -135,7 +135,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_inspectorDock->setWidget(inspectorView);
     inspectorView->setMinimumWidth(actionViewMinWidth); // Same min size as action view
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_inspectorDock);
-    inMainFrame->tabifyDockWidget(m_actionDock, m_inspectorDock);
+    inMainFrame->tabifyDockWidget(m_inspectorDock, m_actionDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
 
     m_basicObjectsDock->setEnabled(false);
