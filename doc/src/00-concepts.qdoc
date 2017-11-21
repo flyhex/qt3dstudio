@@ -46,9 +46,8 @@
     \li \l {Integrating with Qt 3D Studio}
     \endomit
     \li \l {Best Practices}
-    \omit
+    \li \l {Requirements}
     \li \l {Copyright Notices}
-    \endomit
 \endlist
 
 \section1 Applications
