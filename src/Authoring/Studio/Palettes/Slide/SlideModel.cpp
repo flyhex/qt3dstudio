@@ -32,7 +32,7 @@
 #include "Core.h"
 #include "Doc.h"
 #include "StudioApp.h"
-
+#include "SlideSystem.h"
 #include "IDocumentEditor.h"
 
 #include "ClientDataModelBridge.h"
@@ -42,7 +42,6 @@
 SlideModel::SlideModel(int slideCount, QObject *parent) : QAbstractListModel(parent)
   , m_slides(slideCount)
 {
-
 }
 
 QVariant SlideModel::data(const QModelIndex &index, int role) const
@@ -77,6 +76,9 @@ bool SlideModel::setData(const QModelIndex &index, const QVariant &value, int ro
     }
     case HandleRole: {
         slideHandle = value.value<qt3dsdm::Qt3DSDMSlideHandle>();
+        qt3dsdm::Qt3DSDMInstanceHandle instanceHandle
+                = GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(slideHandle);
+        m_slideLookupHash.insert(instanceHandle, slideHandle);
         Q_EMIT dataChanged(index, index, {HandleRole, NameRole});
         break;
     }
@@ -121,7 +123,7 @@ bool SlideModel::insertRows(int row, int count, const QModelIndex &parent)
         return false;
 
     beginInsertRows(parent, row, row + count - 1);
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < count; ++i)
         m_slides.insert(row, {});
     endInsertRows();
 
@@ -136,7 +138,7 @@ bool SlideModel::removeRows(int row, int count, const QModelIndex &parent)
 
     bool selectionRemoved = false;
     beginRemoveRows(parent, row, row + count - 1);
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; ++i) {
         if (m_selectedRow == row)
             selectionRemoved = true;
         m_slides.removeAt(row);
@@ -161,15 +163,14 @@ bool SlideModel::removeRows(int row, int count, const QModelIndex &parent)
 void SlideModel::duplicateRow(int row)
 {
     const auto handle = m_slides[row];
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Duplicate Slide"))
+            ->DuplicateSlide(handle);
+}
 
-    beginInsertRows({}, row, row);
-    m_slides.insert(row + 1, Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(),
-                                                               QObject::tr("Duplicate Slide"))
-                    ->DuplicateSlide(handle));
-    endInsertRows();
-    setData(index(row + 1), true, SelectedRole);
-
-    Q_EMIT dataChanged(index(row, 0), index(row + 1, 0), {});
+void SlideModel::startRearrange(int row)
+{
+    m_rearrangeStartRow = row;
+    m_rearrangeEndRow = -1;
 }
 
 void SlideModel::move(int fromRow, int toRow)
@@ -177,40 +178,44 @@ void SlideModel::move(int fromRow, int toRow)
     if (fromRow == toRow)
         return;
 
-    auto handle = m_slides[fromRow];
-    // toRow + 1 as DocumentEditor uses 1 based indexes for slides
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Rearrange Slide"))
-            ->RearrangeSlide(handle, toRow + 1);
+    onSlideRearranged({}, fromRow + 1, toRow + 1);
+}
 
-    if (fromRow > toRow)
-        beginMoveRows({}, fromRow, fromRow, {}, toRow);
-    else
-        beginMoveRows({}, fromRow, fromRow, {}, toRow + 1);
-    m_slides.move(fromRow, toRow);
-    endMoveRows();
+void SlideModel::finishRearrange(bool commit)
+{
+    if (m_rearrangeEndRow != m_rearrangeStartRow
+            && m_rearrangeEndRow >= 0 && m_rearrangeStartRow >= 0) {
+        // Restore state before committing the actual change
+        // +1 added as DocumentEditor uses 1 based indexes for slides
+        int endRow = m_rearrangeEndRow + 1;
+        onSlideRearranged({}, endRow, m_rearrangeStartRow + 1);
+
+        if (commit) {
+            auto handle = m_slides[m_rearrangeStartRow];
+            m_rearrangeStartRow = -1;
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Rearrange Slide"))
+                    ->RearrangeSlide(handle, endRow);
+        }
+    }
+    m_rearrangeEndRow = -1;
+    m_rearrangeStartRow = -1;
 }
 
 void SlideModel::clear()
 {
     beginResetModel();
     m_slides.clear();
+    m_slideLookupHash.clear();
     endResetModel();
 }
 
 void SlideModel::addNewSlide(int row)
 {
     const auto handle = (row < m_slides.size()) ? m_slides[row] : m_slides.last();
-
     const auto instanceHandle = GetBridge()->GetOwningComponentInstance(handle);
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlide = GetBridge()->GetComponentSlide(instanceHandle, 0);
-
-    beginInsertRows({}, row, row);
-    m_slides.insert(row, Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(),
-                                                           QObject::tr("Create Slide"))
-                    ->AddSlide(theMasterSlide, row + 1));
-    endInsertRows();
-
-    setData(index(row), true, SelectedRole);
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Create Slide"))
+            ->AddSlide(theMasterSlide, row + 1);
 }
 
 void SlideModel::removeSlide(int row)
@@ -218,11 +223,92 @@ void SlideModel::removeSlide(int row)
     // Don't allow deleting of the last slide
     if (m_slides.size() > 1) {
         const auto handle = m_slides[row];
-
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Delete Slide"))->DeleteSlide(
                     handle);
-        removeRows(row, 1);
     }
+}
+
+void SlideModel::onNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
+{
+    qt3dsdm::ISlideSystem &theSlideSystem(*GetDoc()->GetStudioSystem()->GetSlideSystem());
+
+    // Ignore new slides added to random different components
+    if (m_slides.size() && theSlideSystem.GetMasterSlide(inSlide)
+            != theSlideSystem.GetMasterSlide(m_slides[0])) {
+        return;
+    }
+
+    finishRearrange(false); // Cancel any uncommitted rearrange
+
+    // Find the slide index
+    int row = int(slideIndex(inSlide));
+
+    // Slide index zero indicates master slide. We can't add master slides
+    Q_ASSERT(row > 0);
+
+    --row;
+
+    beginInsertRows({}, row, row);
+    m_slides.insert(row, inSlide);
+    qt3dsdm::Qt3DSDMInstanceHandle instanceHandle
+            = GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(inSlide);
+    m_slideLookupHash.insert(instanceHandle, inSlide);
+    endInsertRows();
+
+    setData(index(row), true, SelectedRole);
+}
+
+void SlideModel::onDeleteSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
+{
+    for (int i = 0; i < m_slides.size(); ++i) {
+        if (m_slides[i] == inSlide) {
+            if (m_rearrangeStartRow >= 0) {
+                finishRearrange(false); // Cancel any uncommitted rearrange
+                // We need to re-resolve the index after rearrange cancel
+                for (int j = 0; j < m_slides.size(); ++j) {
+                    if (m_slides[j] == inSlide) {
+                        i = j;
+                        break;
+                    }
+                }
+            }
+            QList<qt3dsdm::Qt3DSDMInstanceHandle> keys = m_slideLookupHash.keys(inSlide);
+            for (auto key : keys)
+                m_slideLookupHash.remove(key);
+            removeRows(i, 1);
+            break;
+        }
+    }
+}
+
+void SlideModel::onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int fromRow,
+                                   int toRow)
+{
+    if (inMaster.Valid()) {
+        // If imMaster is valid, this was triggered by either a rearrange commit or
+        // undo/redo of a rearrange, so we need to cancel any uncommitted rearrange.
+        finishRearrange(false);
+        // Check we are working on correct slide set
+        qt3dsdm::ISlideSystem &theSlideSystem(*GetDoc()->GetStudioSystem()->GetSlideSystem());
+        if (fromRow - 1 >= m_slides.size()
+                || inMaster != theSlideSystem.GetMasterSlide(m_slides[fromRow - 1]))
+            return;
+    } else {
+        // Do not do uncommitted rearranges if we haven't started a rearrange (or more likely
+        // an uncommitted rearrange was canceled while in progress by undo/redo operation)
+        if (m_rearrangeStartRow < 0)
+            return;
+    }
+
+    // -1 because internal slide model has 1-based indexing for non-master slides
+    if (fromRow > toRow)
+        beginMoveRows({}, fromRow - 1, fromRow - 1, {}, toRow - 1);
+    else
+        beginMoveRows({}, fromRow - 1, fromRow - 1, {}, toRow);
+    m_slides.move(fromRow - 1, toRow - 1);
+    m_rearrangeEndRow = toRow - 1;
+
+    endMoveRows();
 }
 
 bool SlideModel::hasSlideWithName(const QString &name) const
@@ -266,6 +352,11 @@ CDoc *SlideModel::GetDoc() const
     return g_StudioApp.GetCore()->GetDoc();
 }
 
+long SlideModel::slideIndex(const qt3dsdm::Qt3DSDMSlideHandle &handle)
+{
+    return GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(handle);
+}
+
 CClientDataModelBridge *SlideModel::GetBridge() const
 {
     auto doc = GetDoc();
@@ -273,5 +364,22 @@ CClientDataModelBridge *SlideModel::GetBridge() const
         return nullptr;
     return doc->GetStudioSystem()->GetClientDataModelBridge();
 }
+
+void SlideModel::refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle,
+                                   qt3dsdm::Qt3DSDMPropertyHandle propertyHandle)
+{
+    if (m_slideLookupHash.contains(instanceHandle)
+            && propertyHandle == GetBridge()->GetNameProperty()) {
+        qt3dsdm::Qt3DSDMSlideHandle slideHandle = m_slideLookupHash.value(instanceHandle);
+        for (int i = 0; i < m_slides.size(); ++i) {
+            if (m_slides[i] == slideHandle) {
+                setData(index(i, 0), GetBridge()->GetName(instanceHandle).toQString(),
+                        SlideModel::NameRole);
+            }
+        }
+    }
+
+}
+
 
 
