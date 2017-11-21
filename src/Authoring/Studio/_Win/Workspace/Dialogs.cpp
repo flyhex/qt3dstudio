@@ -70,7 +70,7 @@
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
     : m_ProgressPalette(nullptr)
     , m_ShowGUI(inShowGUI)
-    , m_LastSaveFile(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath())
+    , m_LastSaveFile(Q3DStudio::CString("."))
 {
 }
 
@@ -774,7 +774,9 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &i
     QFileDialog theFileDlg;
     theFileDlg.setOption(QFileDialog::DontConfirmOverwrite);
     const QFileInfo fi(m_LastSaveFile.toQString());
-    theFileDlg.setDirectory((fi.path() == QLatin1Char('.')) ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) : fi.path());
+    theFileDlg.setDirectory((fi.path() == QStringLiteral("."))
+                            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                            : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt.toQString());
     if (inDialogTitle != "")
