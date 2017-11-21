@@ -108,6 +108,7 @@ Row {
             if (!rateLimiter.running) {
                 rateLimiter.start();
             }
+            textField.setTextFieldValue()
         }
 
         onPressedChanged: {
@@ -168,6 +169,12 @@ Row {
 
         validator: intSlider ? intValidator : doubleValidator
 
+        onTextEdited: {
+            if (!intSlider && text.search(",")) {
+                text = text.replace(",",".")
+            }
+        }
+
         onEditingFinished: {
             if (textField.text > sliderMax)
                 textField.text = sliderMax
@@ -175,6 +182,10 @@ Row {
                 textField.text = sliderMin
             slider.value = textField.text
             root.editingFinished()
+        }
+
+        function setTextFieldValue() {
+            text = intSlider ? slider.value.toFixed(0) : slider.value.toFixed(decimalSlider)
         }
     }
 }
