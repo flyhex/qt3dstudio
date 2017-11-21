@@ -94,7 +94,11 @@ void CSubPresentationsDlg::OnInitDialog()
     }
     m_ui->lineEditId->setEnabled(current != -1);
     m_ui->lineEditPreview->setReadOnly(true);
+    m_ui->lineEditPreview->setEnabled(current != -1);
     m_ui->buttonBox->setFocusPolicy(Qt::NoFocus);
+    m_ui->pushButtonBrowse->setEnabled(current != -1);
+    m_ui->deleteButton->setEnabled(current != -1);
+    m_ui->comboBox->setEnabled(current != -1);
 }
 
 void CSubPresentationsDlg::OnSelectPresentation(int selectionIndex)
@@ -104,10 +108,18 @@ void CSubPresentationsDlg::OnSelectPresentation(int selectionIndex)
         m_ui->lineEditId->setEnabled(true);
         m_ui->lineEditId->setText(m_records[current].m_id);
         m_ui->lineEditPreview->setText(m_records[current].m_argsOrSrc);
+        m_ui->lineEditPreview->setEnabled(true);
+        m_ui->pushButtonBrowse->setEnabled(true);
+        m_ui->deleteButton->setEnabled(true);
+        m_ui->comboBox->setEnabled(true);
     } else {
         m_ui->lineEditId->setEnabled(false);
         m_ui->lineEditId->setText(QString());
         m_ui->lineEditPreview->setText(QString());
+        m_ui->lineEditPreview->setEnabled(false);
+        m_ui->pushButtonBrowse->setEnabled(false);
+        m_ui->deleteButton->setEnabled(false);
+        m_ui->comboBox->setEnabled(false);
     }
 }
 
@@ -148,8 +160,7 @@ void CSubPresentationsDlg::OnBrowsePresentation()
     if (fileInfo.exists()) {
         if (fileInfo.suffix() == QStringLiteral("qml"))
             m_records[current].m_type = QStringLiteral("presentation-qml");
-        else
-        if (fileInfo.suffix() == QStringLiteral("uip"))
+        else if (fileInfo.suffix() == QStringLiteral("uip"))
             m_records[current].m_type = QStringLiteral("presentation");
 
         m_records[current].m_argsOrSrc = shortFile;

@@ -274,3 +274,9 @@ TimeLineToolbar QWidget#layoutWidget {
 TimeLineToolbar QPushButton#timeButton {
     border: 0px;
 }
+
+/* Sub-presentation Dialog */
+QDialog#SubPresentationsDlg QWidget::!enabled {
+    color: #727476;
+    background: transparent;
+}
