@@ -52,7 +52,7 @@ CPropertyTreeControl::CPropertyTreeControl(CPropertyRow *inPropRow)
 {
     m_PropRow = inPropRow;
 
-    CBaseStateRow *theParentRow = m_PropRow->GetParentRow();
+    CTimelineRow *theParentRow = m_PropRow->GetParentRow();
     if (theParentRow) // property row typically should never exists on its own, but to be safe.
         m_BackgroundColor = m_PropRow->GetTimebarBackgroundColor();
     else
@@ -110,7 +110,7 @@ long CPropertyTreeControl::GetIndent()
 
 void CPropertyTreeControl::SetHighlighted(bool inIsHighlighted)
 {
-    CBaseStateRow *theParentRow = m_PropRow->GetParentRow();
+    CTimelineRow *theParentRow = m_PropRow->GetParentRow();
     if (theParentRow) // property row typically should never exists on its own, but to be safe.
         m_BackgroundColor = (inIsHighlighted) ? m_PropRow->GetTimebarHighlightBackgroundColor()
                                               : m_PropRow->GetTimebarBackgroundColor();

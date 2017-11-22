@@ -88,6 +88,11 @@ public:
 
     CPropertyTimebarRow *GetTimebar() { return m_TimebarRow; }
 
+    void Expand(bool inExpandAll = false, bool inExpandUp = false) override {}
+    void Collapse(bool inCollapseAll = false) override {}
+    bool CalculateActiveStartTime() override { return true; }
+    bool CalculateActiveEndTime() override { return true; }
+
 protected:
     CPropertyTreeControl *m_TreeControl;
     CPropertyToggleControl *m_ToggleControl;

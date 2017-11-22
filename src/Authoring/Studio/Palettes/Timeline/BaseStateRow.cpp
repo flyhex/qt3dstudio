@@ -59,8 +59,6 @@ CBaseStateRow::CBaseStateRow()
     , m_Dirty(false)
     , m_Selected(false)
     , m_TimelineItemBinding(nullptr)
-    , m_ActiveStart(0)
-    , m_ActiveEnd(0)
 {
 }
 
@@ -1013,15 +1011,6 @@ long CBaseStateRow::GetEndTime()
     if (theTimebar)
         return theTimebar->GetEndTime();
     return 0;
-}
-
-long CBaseStateRow::GetActiveStart()
-{
-    return m_ActiveStart;
-}
-long CBaseStateRow::GetActiveEnd()
-{
-    return m_ActiveEnd;
 }
 
 //=============================================================================

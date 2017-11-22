@@ -159,7 +159,7 @@ void CTimelineTranslationManager::RemovePropertyRow(
         || (theRow = inTimelineItemPropertyBinding->GetRow()) == nullptr)
         return;
 
-    CBaseStateRow *theParentRow = theRow->GetParentRow();
+    CBaseStateRow *theParentRow = dynamic_cast<CBaseStateRow*>(theRow->GetParentRow());
     if (theParentRow) {
         inTimelineItemPropertyBinding->Release();
         theParentRow->RemovePropertyRow(theRow); // this implicitly delete the row

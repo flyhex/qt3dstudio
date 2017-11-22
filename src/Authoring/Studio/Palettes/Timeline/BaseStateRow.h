@@ -80,8 +80,8 @@ public:
 
     bool IsExpanded();
     bool IsLoaded();
-    virtual void Expand(bool inExpandAll = false, bool inExpandUp = false);
-    virtual void Collapse(bool inCollapseAll = false);
+    void Expand(bool inExpandAll = false, bool inExpandUp = false) override;
+    void Collapse(bool inCollapseAll = false) override;
     void ToggleExpansion(CToggleButton *, CButtonControl::EButtonState);
 
     void SetTimeRatio(double inTimePerPixel) override;
@@ -139,10 +139,6 @@ public:
 
     long GetStartTime();
     long GetEndTime();
-    long GetActiveStart();
-    long GetActiveEnd();
-    virtual bool CalculateActiveStartTime() = 0;
-    virtual bool CalculateActiveEndTime() = 0;
     void Dispose() override;
 
     virtual QPixmap GetIcon();
@@ -198,8 +194,5 @@ protected:
     bool m_Selected;
 
     ITimelineItemBinding *m_TimelineItemBinding;
-
-    long m_ActiveStart;
-    long m_ActiveEnd;
 };
 #endif // INCLUDED_BASE_STATE_ROW_H

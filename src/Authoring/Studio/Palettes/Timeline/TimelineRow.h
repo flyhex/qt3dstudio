@@ -40,7 +40,6 @@
 
 class CSnapper;
 class CControl;
-class CBaseStateRow;
 class ISnappingListProvider;
 class ITimelineControl;
 
@@ -62,8 +61,8 @@ public:
 
     virtual void Filter(const CFilter &inFilter, bool inFilterChildren = true) = 0;
 
-    void SetParent(CBaseStateRow *inParent);
-    CBaseStateRow *GetParentRow() const;
+    void SetParent(CTimelineRow *inParent);
+    CTimelineRow *GetParentRow() const;
     virtual void SetTimeRatio(double inTimeRatio);
     virtual void OnChildVisibilityChanged();
     virtual bool IsViewable() const;
@@ -79,9 +78,18 @@ public:
 
     virtual void Dispose();
 
+    virtual void Expand(bool inExpandAll = false, bool inExpandUp = false) = 0;
+    virtual void Collapse(bool inCollapseAll = false) = 0;
+    virtual bool CalculateActiveStartTime() = 0;
+    virtual bool CalculateActiveEndTime() = 0;
+    long GetActiveStart();
+    long GetActiveEnd();
+
 protected:
-    CBaseStateRow *m_ParentRow;
+    CTimelineRow *m_ParentRow;
     bool m_IsViewable;
     long m_Indent;
+    long m_ActiveStart;
+    long m_ActiveEnd;
 };
 #endif // INCLUDED_TIMELINE_ROW_H

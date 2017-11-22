@@ -171,7 +171,7 @@ inline ITimelineItemBinding *GetParentBinding(CPropertyRow *inRow)
 {
     ITimelineItemBinding *theParentBinding = nullptr;
     if (inRow) {
-        CBaseStateRow *theParentRow = inRow->GetParentRow();
+        CBaseStateRow *theParentRow = dynamic_cast<CBaseStateRow *>(inRow->GetParentRow());
         if (theParentRow) {
             theParentBinding = theParentRow->GetTimelineItemBinding();
             ASSERT(theParentBinding); // TimelineItemBinding should be set properly during

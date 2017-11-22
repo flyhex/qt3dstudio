@@ -122,7 +122,7 @@ void CToggleControl::OnShyClicked(CToggleButton *, CToggleButton::EButtonState i
                                                      == CToggleButton::EBUTTONSTATE_DOWN);
 
     m_StateRow->Filter(*m_StateRow->GetFilter());
-    CBaseStateRow *theParentRow = m_StateRow->GetParentRow();
+    CTimelineRow *theParentRow = m_StateRow->GetParentRow();
     if (theParentRow != nullptr)
         theParentRow->OnChildVisibilityChanged();
 }

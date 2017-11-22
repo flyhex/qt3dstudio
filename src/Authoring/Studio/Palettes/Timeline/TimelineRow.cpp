@@ -32,7 +32,6 @@
 #include "TimelineRow.h"
 #include "StudioPreferences.h"
 #include "StudioObjectTypes.h"
-#include "BaseStateRow.h"
 
 const long CTimelineRow::TREE_INDENT = CStudioPreferences::GetRowSize();
 
@@ -40,6 +39,8 @@ CTimelineRow::CTimelineRow()
     : m_ParentRow(nullptr)
     , m_IsViewable(false)
     , m_Indent(0)
+    , m_ActiveStart(0)
+    , m_ActiveEnd(0)
 {
 }
 
@@ -56,7 +57,7 @@ long CTimelineRow::GetIndent()
     return m_Indent;
 }
 
-void CTimelineRow::SetParent(CBaseStateRow *inParent)
+void CTimelineRow::SetParent(CTimelineRow *inParent)
 {
     m_ParentRow = inParent;
 }
@@ -65,7 +66,7 @@ void CTimelineRow::SetParent(CBaseStateRow *inParent)
 /**
  * Gets the Parent Row
  */
-CBaseStateRow *CTimelineRow::GetParentRow() const
+CTimelineRow *CTimelineRow::GetParentRow() const
 {
     return m_ParentRow;
 }
@@ -167,4 +168,14 @@ long CTimelineRow::GetLatestEndTime()
 void CTimelineRow::Dispose()
 {
     delete this;
+}
+
+long CTimelineRow::GetActiveStart()
+{
+    return m_ActiveStart;
+}
+
+long CTimelineRow::GetActiveEnd()
+{
+    return m_ActiveEnd;
 }
