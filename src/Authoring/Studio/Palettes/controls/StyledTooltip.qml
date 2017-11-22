@@ -27,7 +27,7 @@
 ****************************************************************************/
 
 import QtQuick 2.6
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.2
 
 ToolTip {
     id: control
