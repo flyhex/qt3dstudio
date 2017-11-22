@@ -468,6 +468,9 @@ void InspectorControlView::OnBeginDataModelNotifications()
 
 void InspectorControlView::OnEndDataModelNotifications()
 {
+    CInspectableBase *inspectable = m_inspectorControlModel->inspectable();
+    if (inspectable && !inspectable->IsValid())
+        OnSelectionSet(Q3DStudio::SSelectedValue());
     m_inspectorControlModel->refresh();
 }
 

@@ -111,6 +111,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void setInspectable(CInspectableBase *inInspectable);
+    CInspectableBase *inspectable() const;
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void refreshRenderables();
     void refresh();

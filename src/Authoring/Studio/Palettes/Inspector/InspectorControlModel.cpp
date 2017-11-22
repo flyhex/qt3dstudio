@@ -180,6 +180,11 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
     }
 }
 
+CInspectableBase *InspectorControlModel::inspectable() const
+{
+    return m_inspectableBase;
+}
+
 void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inHandle,
                                                         qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
