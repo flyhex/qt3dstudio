@@ -803,7 +803,9 @@ struct SApp : public IApplication
                     SPresentationAsset &theAsset(
                                 *m_OrderedAssets[idx].second->getDataPtr<SPresentationAsset>());
                     CPresentation *thePresentation = theAsset.m_Presentation;
-                    if (thePresentation && thePresentation->GetActive())
+                    // allow EndUpdate also for inactive presentations so that we can
+                    // activate it
+                    if (thePresentation)
                         thePresentation->EndUpdate();
                 }
             }
@@ -817,7 +819,9 @@ struct SApp : public IApplication
                     SPresentationAsset &theAsset(
                                 *m_OrderedAssets[idx].second->getDataPtr<SPresentationAsset>());
                     CPresentation *thePresentation = theAsset.m_Presentation;
-                    if (thePresentation && thePresentation->GetActive())
+                    // allow PostUpdate also for inactive presentations so that we can
+                    // activate it
+                    if (thePresentation)
                         thePresentation->PostUpdate(globalTime);
                 }
             }
