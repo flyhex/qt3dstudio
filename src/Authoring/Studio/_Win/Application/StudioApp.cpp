@@ -310,7 +310,8 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
     CPreferences::SetPreferencesFile(thePreferencesPath);
 
     // Initialize help file path
-    m_pszHelpFilePath = ::LoadResourceString(IDS_HELP_FILE_NAME);
+    m_pszHelpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+            Q3DStudio::CString("/../doc/qt3dstudio/index.html");
 
     CStudioPreferences::LoadPreferences();
 

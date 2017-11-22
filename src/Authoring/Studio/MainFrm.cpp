@@ -1573,8 +1573,8 @@ void CMainFrame::OnViewTooltips()
  */
 void CMainFrame::OnUpdateHelpIndex()
 {
-    Qt3DSFile theFile(g_StudioApp.m_pszHelpFilePath);
-    m_ui->action_Reference_Manual->setEnabled(theFile.Exists());
+    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    m_ui->action_Reference_Manual->setEnabled(theFile.exists());
 }
 
 //==============================================================================
@@ -1583,9 +1583,9 @@ void CMainFrame::OnUpdateHelpIndex()
  */
 void CMainFrame::OnHelpIndex()
 {
-    Qt3DSFile theFile(g_StudioApp.m_pszHelpFilePath);
-    if (theFile.Exists())
-        QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.GetAbsolutePath().toQString()));
+    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    if (theFile.exists())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.fileName()));
 }
 
 //==============================================================================
