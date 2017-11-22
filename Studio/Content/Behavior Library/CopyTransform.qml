@@ -88,7 +88,7 @@
 
 import QtStudio3D.Behavior 1.0
 
-Qt3DSBehavior {
+Behavior {
     //External:
     property string targetObject
     property bool offsetMode

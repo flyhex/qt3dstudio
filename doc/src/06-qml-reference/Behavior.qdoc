@@ -26,12 +26,13 @@
 ****************************************************************************/
 
 /*!
-    \qmltype Qt3DSBehavior
-    \brief Behavior Integration
+    \qmltype Behavior
+    \brief Technology Preview Behavior Integration
 
-    Qt 3D Studio supports writing custom behavior scripts using QML. It enables
-    interacting with the runtime using the Qt3DSBehavior QML class exposed to each
-    behavior script.
+    This is a technology preview (API may change in upcoming version) of how
+    Qt 3D Studio could support writing custom behavior scripts using QML and
+    JavaScript. It enables interacting with the runtime using the Behavior
+    QML class exposed to each behavior script.
 
     In QML behavior script, the integration to Qt 3D Studio is established by using
     the metadata tag system similar to the \l {file-formats-effects.html}{effect}
@@ -53,9 +54,9 @@
 import QtStudio3D.Behavior 1.0
     \endcode
 
-    Finally, the Qt3DSBehavior type needs to be implemented in the qml script.
+    Finally, the Behavior type needs to be implemented in the qml script.
     \badcode
-Qt3DSBehavior {
+Behavior {
     id: mybehavior
 
     function onInitialize() {
@@ -83,93 +84,93 @@ Qt3DSBehavior {
 */
 
 /*!
-    \qmlmethod float Qt3DSBehavior::getDeltaTime()
+    \qmlmethod float Behavior::getDeltaTime()
 
     Returns the delta time between this and previous frame in milliseconds.
 */
 
 /*!
-    \qmlmethod float Qt3DSBehavior::getAttribute(string attribute)
+    \qmlmethod float Behavior::getAttribute(string attribute)
 
     Returns the value of the given \a attribute.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::setAttribute(string attribute, var value)
+    \qmlmethod void Behavior::setAttribute(string attribute, var value)
 
     Sets the \a value of the given \a attribute.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::setAttribute(string handle, string attribute, var value)
+    \qmlmethod void Behavior::setAttribute(string handle, string attribute, var value)
 
     Sets the \a value of the given \a attribute for a given \a handle.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::fireEvent(string event)
+    \qmlmethod void Behavior::fireEvent(string event)
 
     Fires the given \a event.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::registerForEvent(string event, QJSValue function)
+    \qmlmethod void Behavior::registerForEvent(string event, QJSValue function)
 
     Registers the script for an \a event with the handler \a function.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::registerForEvent(string handle, string event, QJSValue function)
+    \qmlmethod void Behavior::registerForEvent(string handle, string event, QJSValue function)
 
     Registers the script for an \a event with the handler \a function for a given \a handle.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::unregisterForEvent(string event)
+    \qmlmethod void Behavior::unregisterForEvent(string event)
 
     Unregisters the script from an \a event.
 */
 
 /*!
-    \qmlmethod void Qt3DSBehavior::unregisterForEvent(string handle, string event)
+    \qmlmethod void Behavior::unregisterForEvent(string handle, string event)
 
     Unregisters the script from an \a event for a given \a handle.
 */
 
 /*!
-    \qmlmethod vector2d Qt3DSBehavior::getMousePosition()
+    \qmlmethod vector2d Behavior::getMousePosition()
 
     Returns the current position of the mouse in presentation coordinates.
 */
 
 /*!
-    \qmlmethod matrix4 Qt3DSBehavior::calculateGlobalTransform(string handle)
+    \qmlmethod matrix4 Behavior::calculateGlobalTransform(string handle)
 
     Returns the current global transformation of the element specified by the
     \a handle or parent element if the handle is empty string.
 */
 
 /*!
-    \qmlmethod vector3d Qt3DSBehavior::lookAt(vector3d target)
+    \qmlmethod vector3d Behavior::lookAt(vector3d target)
 
     Returns the rotation angles of the look at \a target.
 */
 
 /*!
-    \qmlmethod string Qt3DSBehavior::getParent(string handle)
+    \qmlmethod string Behavior::getParent(string handle)
 
     Returns the parent of the given \a handle or parent element if the handle is
     empty string.
 */
 
 /*!
-    \qmlmethod vector3d Qt3DSBehavior::matrixToEuler(matrix4 matrix)
+    \qmlmethod vector3d Behavior::matrixToEuler(matrix4 matrix)
 
     Returns the euler angles extracted from the \a matrix rotations.
 */
 
 /*!
-    \qmlsignal void Qt3DSBehavior::onInitialize()
+    \qmlsignal void Behavior::onInitialize()
 
     This signal is emitted when the script becomes active the first time.
     If multiple behaviors match this, the signal for parent elements will
@@ -179,7 +180,7 @@ Qt3DSBehavior {
  */
 
 /*!
-    \qmlsignal void Qt3DSBehavior::onActivate()
+    \qmlsignal void Behavior::onActivate()
 
     This signal is emitted when the script becomes active.
     Any behaviors which were not active last frame that are active
@@ -189,7 +190,7 @@ Qt3DSBehavior {
  */
 
 /*!
-    \qmlsignal void Qt3DSBehavior::onDeactivate()
+    \qmlsignal void Behavior::onDeactivate()
 
     This signal is emitted when the script becomes inactive.
     Any behaviors which were active last frame that are not active
@@ -199,7 +200,7 @@ Qt3DSBehavior {
  */
 
 /*!
-    \qmlsignal void Qt3DSBehavior::onUpdate()
+    \qmlsignal void Behavior::onUpdate()
 
     This signal is emitted on each frame when the script is active.
     Any behaviors that are active this frame will have their

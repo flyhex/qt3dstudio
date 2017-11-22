@@ -460,7 +460,7 @@ CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
           ForwardingAllocator(fnd.getAllocator(), "CQmlEngineImpl::m_EmitSignalDataList"))
     , mRefCount(0)
 {
-    qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Qt3DSBehavior");
+    qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
 }
 
 void CQmlEngineImpl::Shutdown(qt3ds::NVFoundationBase &inFoundation)

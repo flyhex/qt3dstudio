@@ -95,7 +95,7 @@ runtime, a piece of logic gets created representing this action. When
 the onSelect event is fired and later processed, the interested logic
 will be notified and the slide change will occur.
 
-\note Behavior event registrations (created with \l {Qt3DSBehavior}{QML Behavior}
+\note Behavior event registrations (created with \l {Behavior}{QML Behavior}
 registerForEvent) work similarly to the logic described above. If a
 behavior registers explicitly for a certain event and in the handler calls
 goToSlide, essentially the same things happen.
