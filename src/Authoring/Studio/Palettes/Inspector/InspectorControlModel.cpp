@@ -810,6 +810,22 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         return;
     }
 
+    // If the user enters 0.0 to any (x, y, z) values of camera scale,
+    // we reset the value back to original, because zero scale factor will crash
+    // camera-specific inverse matrix math. (Additionally, scale of zero for a camera
+    // is generally not useful anyway.) We could silently discard zero values also deeper in the
+    // value setter code, but then the inspector panel value would not be updated as opposed
+    // to both rejecting invalid and resetting the original value here.
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    EStudioObjectType theType = studio->GetClientDataModelBridge()->GetObjectType(instance);
+
+    if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
+            studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
+        const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
+        if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
+            v = oldValue;
+    }
+
     if (!commit && m_modifiedProperty.first == 0) {
         m_modifiedProperty.first = instance;
         m_modifiedProperty.second = handle;
