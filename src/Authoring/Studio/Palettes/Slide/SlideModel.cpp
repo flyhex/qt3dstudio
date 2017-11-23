@@ -139,7 +139,7 @@ bool SlideModel::removeRows(int row, int count, const QModelIndex &parent)
     bool selectionRemoved = false;
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
-        if (m_selectedRow == row)
+        if (m_selectedRow == row + i)
             selectionRemoved = true;
         m_slides.removeAt(row);
     }
@@ -150,9 +150,9 @@ bool SlideModel::removeRows(int row, int count, const QModelIndex &parent)
         if (row > 0)
             newSelectedRow = row - 1;
         else
-            newSelectedRow = row + count - 1;
-    } else if (m_selectedRow >= m_slides.count()) {
-        newSelectedRow = m_slides.count() - 1;
+            newSelectedRow = 0;
+    } else if (m_selectedRow > row) {
+        newSelectedRow = m_selectedRow - count;
     }
     if (newSelectedRow != -1)
         setData(index(newSelectedRow), true, SelectedRole);
