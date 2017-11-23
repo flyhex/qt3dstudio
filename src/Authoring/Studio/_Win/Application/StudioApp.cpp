@@ -543,7 +543,7 @@ bool CStudioApp::ShowStartupDialog()
     // show the usual startup dialog only if user rejected tutorial
     // ( = did not open samples or create new project)
     if (welcomeRes == QDialog::Rejected) {
-        CStartupDlg theStartupDlg;
+        CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
         Q3DStudio::CFilePath theMostRecentDirectory;
