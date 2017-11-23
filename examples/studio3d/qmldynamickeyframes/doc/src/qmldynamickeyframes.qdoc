@@ -1,0 +1,68 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \example qmldynamickeyframes
+    \title Qt 3D Studio: Dynamic Keyframes Example
+    \ingroup qtstudio3d-examples-qml
+    \brief Demonstrates using dynamic keyframes in QML
+
+    \image qml-dynamic-keyframes.jpg
+
+    \e {This example demonstrates using dynamic keyframes with QML in Studio}
+
+    \include examples-run.qdocinc
+
+    \section1 Description
+
+    The presentation displayed in this example consists of three simple slides with ping-pong
+    animations:
+
+    \list
+        \li Slide 1: Move ball to the right side of the screen
+        \li Slide 2: Move ball to center of the screen and scale it up
+        \li Slide 3: Move ball back to the initial position on the left side of the screen
+    \endlist
+
+    Because the animations in the presentation are defined dynamic, the current position
+    and scale of the ball are used as the initial keyframes for animations whenever
+    a slide is changed.
+
+    \section1 Usage
+
+    \section2 Change Slide
+
+    Changes the current slide to next slide in sequence
+
+    \section2 Reset Time
+
+    Resets the animation time to the beginning
+
+    \section2 Change Color
+
+    Changes the current color to the next one in an array of predefined colors
+*/

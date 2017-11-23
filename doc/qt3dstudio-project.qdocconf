@@ -52,3 +52,9 @@ navigation.homepage            = Qt 3D Studio
 navigation.cppclassespage      = Qt 3D Studio C++ Classes
 navigation.qmltypespage        = Qt 3D Studio QML Types
 buildversion                   = "Qt 3D Studio $QT_VER Manual"
+
+examplesinstallpath     = qtstudio3d
+exampledirs            += ../examples/studio3d
+
+manifestmeta.highlighted.names = \
+                "QtStudio3D/Qt 3D Studio: Dynamic Keyframes Example"
