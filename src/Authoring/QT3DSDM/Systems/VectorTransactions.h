@@ -204,10 +204,8 @@ struct HashMapSwapTransaction : public ITransaction, public IMergeableTransactio
         typename TMapType::iterator find(m_HashMap.find(m_Key));
         if (find != m_HashMap.end())
             find->second = inVal;
-        else {
-            Q_ASSERT(0);
+        else
             m_HashMap.insert(std::make_pair(m_Key, inVal));
-        }
     }
     void Do() override { SetValue(m_NewValue); }
     void Undo() override { SetValue(m_OldValue); }
