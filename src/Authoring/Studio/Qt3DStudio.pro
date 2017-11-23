@@ -136,7 +136,8 @@ HEADERS += \
     _Win/DragNDrop/DropProxy.h \
     Palettes/Inspector/ObjectListModel.h \
     Palettes/Inspector/ObjectBrowserView.h \
-    _Win/Application/SubPresentationsDlg.h \
+    _Win/Application/SubPresentationDlg.h \
+    _Win/Application/SubPresentationListDlg.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
@@ -354,7 +355,8 @@ SOURCES += \
     Utils/TickTock.cpp \
     Controls/ClickableLabel.cpp \
     Controls/WidgetControl.cpp \
-    _Win/Application/SubPresentationsDlg.cpp
+    _Win/Application/SubPresentationDlg.cpp \
+    _Win/Application/SubPresentationListDlg.cpp
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
@@ -406,7 +408,8 @@ FORMS += \
     MainFrm.ui \
     _Win/Application/AboutDlg.ui \
     _Win/UI/StartupDlg.ui \
-    _Win/Application/SubPresentationsDlg.ui \
+    _Win/Application/SubPresentationDlg.ui \
+    _Win/Application/SubPresentationListDlg.ui \
     _Win/Palettes/Progress/ProgressDlg.ui
 
 RESOURCES += \

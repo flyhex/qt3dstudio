@@ -55,7 +55,7 @@
 #include "Core.h"
 #include "ITickTock.h"
 #include "IStudioRenderer.h"
-#include "SubPresentationsDlg.h"
+#include "SubPresentationListDlg.h"
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
@@ -746,8 +746,7 @@ void CMainFrame::OnEditSubPresentations()
 {
     QString dir = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString();
 
-    CSubPresentationsDlg dlg(QDir::toNativeSeparators(dir),
-                             g_StudioApp.m_subpresentations);
+    CSubPresentationListDlg dlg(QDir::toNativeSeparators(dir), g_StudioApp.m_subpresentations);
     dlg.exec();
     if (dlg.result() == QDialog::Accepted) {
         g_StudioApp.m_subpresentations = dlg.subpresentations();

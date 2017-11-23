@@ -36,7 +36,6 @@
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #endif
 #include "StudioApp.h"
-#include "SubPresentationsDlg.h"
 #include "Qt3DSStateApplication.h"
 
 #include <QtGui/qsurfaceformat.h>

@@ -276,7 +276,25 @@ TimeLineToolbar QPushButton#timeButton {
 }
 
 /* Sub-presentation Dialog */
-QDialog#SubPresentationsDlg QWidget::!enabled {
-    color: #727476;
+QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
+QDialog#SubPresentationListDlg QHeaderView::section {
     background: transparent;
+}
+
+QDialog#SubPresentationListDlg QTableView {
+    selection-background-color: #46a2da;
+}
+
+QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton {
+    background-color: transparent;
+    border: 0px;
+    min-width: 16px;
+    max-width: 16px;
+    min-height: 16px;
+    max-height: 16px;
+    padding: 0px;
+}
+
+QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton:pressed {
+    background-color: #262829;
 }
