@@ -47,6 +47,9 @@
 
 int main(int argc, char *argv[])
 {
+    // Hack to work around qml cache bug (QT3DS-556)
+    qputenv("QML_DISABLE_DISK_CACHE", "true");
+
     // to enable QOpenGLWidget to work on macOS, we must set the default
     // QSurfaceFormat before QApplication is created. Otherwise context-sharing
     // fails and QOpenGLWidget breaks.
