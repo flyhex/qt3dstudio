@@ -71,6 +71,7 @@ Row {
             }
             if (!rateLimiter.running)
                 rateLimiter.start();
+            textField.setTextFieldValue()
         }
     }
 
@@ -136,6 +137,7 @@ Row {
                 if (!rateLimiter.running) {
                     rateLimiter.start();
                 }
+                textField.setTextFieldValue()
             }
         }
     }
@@ -177,19 +179,29 @@ Row {
             if (!intSlider && text.search(",")) {
                 text = text.replace(",",".")
             }
+            if (intSlider) {
+                // handle limiting integer values when entered value is less than
+                // minimum value since IntValidator doesn't handle this
+                if (text.length >= sliderMin.toString().length && text < sliderMin)
+                    text = text.substring(0, text.length - 1)
+            }
         }
 
         onEditingFinished: {
-            if (textField.text > sliderMax)
-                textField.text = sliderMax
-            else if (textField.text < sliderMin)
-                textField.text = sliderMin
-            slider.value = textField.text
+            if (text > sliderMax)
+                text = sliderMax
+            else if (text < sliderMin)
+                text = sliderMin
+            slider.value = text
             root.editingFinished()
         }
 
         function setTextFieldValue() {
             text = intSlider ? slider.value.toFixed(0) : slider.value.toFixed(decimalSlider)
+        }
+        onActiveFocusChanged: {
+            if (!activeFocus)
+                setTextFieldValue()
         }
     }
 }
