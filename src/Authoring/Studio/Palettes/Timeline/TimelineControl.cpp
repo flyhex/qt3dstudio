@@ -53,6 +53,8 @@
 #include "Doc.h"
 #include "Core.h"
 #include "MasterP.h"
+#include "TimelineUIFactory.h"
+#include "AbstractTimelineRowUI.h"
 
 // Data model specific
 #include "TimelineDropTarget.h"
@@ -169,8 +171,11 @@ void CTimelineControl::ViewSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 
     qt3dsdm::ISlideSystem *theSlideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
     qt3dsdm::Qt3DSDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
-    CSlideRow *theSlideRow = new CSlideRow(m_TranslationManager->GetOrCreate(theSlideInstance));
-    theSlideRow->SetTimelineControl(this);
+    CSlideRow *theSlideRow = TimelineUIFactory::instance()->createSlideRow(nullptr,
+                                m_TranslationManager->GetOrCreate(theSlideInstance));
+
+    auto uiRow = TimelineUIFactory::instance()->uiForRow(theSlideRow);
+    uiRow->SetTimelineControl(this);
 
     m_TreeLayout->AddRow(theSlideRow);
     m_TimelineLayout->AddRow(theSlideRow);
@@ -199,6 +204,9 @@ void CTimelineControl::ViewSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide)
  */
 void CTimelineControl::OnActiveSlide(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
+    if (m_ActiveSlide == inSlide)
+        return;
+
     ClearView();
     ViewSlide(inSlide);
 
@@ -438,8 +446,10 @@ void CTimelineControl::OnGainFocus()
     CControl::OnGainFocus();
 
     CBaseStateRow *theRow = m_TranslationManager->GetSelectedRow();
-    if (theRow)
-        theRow->SetFocus();
+    if (theRow) {
+        auto uiRow = TimelineUIFactory::instance()->uiForRow(theRow);
+        uiRow->SetFocus();
+    }
 }
 
 //=============================================================================

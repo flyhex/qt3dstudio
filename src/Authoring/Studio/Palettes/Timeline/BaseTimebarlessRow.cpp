@@ -33,6 +33,7 @@
 #include "Renderer.h"
 #include "StudioPreferences.h"
 #include "BaseStateRow.h"
+#include "BaseStateRowUI.h"
 
 CBaseTimebarlessRow::CBaseTimebarlessRow()
     : m_Selected(false)
@@ -141,7 +142,7 @@ void CBaseTimebarlessRow::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFlags
 {
     CControl::OnMouseOver(inPoint, inFlags);
 
-    GetBaseStateRow()->OnMouseOver();
+    GetBaseStateRowUI()->OnMouseOver();
 }
 
 //=============================================================================
@@ -154,7 +155,7 @@ void CBaseTimebarlessRow::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseOut(inPoint, inFlags);
 
-    GetBaseStateRow()->OnMouseOut();
+    GetBaseStateRowUI()->OnMouseOut();
 }
 
 //=============================================================================

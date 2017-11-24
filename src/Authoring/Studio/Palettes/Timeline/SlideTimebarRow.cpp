@@ -31,9 +31,10 @@
 
 #include "SlideTimebarRow.h"
 #include "SlideRow.h"
+#include "SlideRowUI.h"
 
-CSlideTimebarRow::CSlideTimebarRow(CSlideRow *inSlideRow)
-    : m_SlideRow(inSlideRow)
+CSlideTimebarRow::CSlideTimebarRow(CSlideRowUI *inSlideRow)
+    : m_SlideRowUi(inSlideRow)
 {
 }
 
@@ -66,9 +67,9 @@ void CSlideTimebarRow::PopulateSnappingList(CSnapper *inSnapper)
     Q_UNUSED(inSnapper);
 }
 
-CBaseStateRow *CSlideTimebarRow::GetBaseStateRow() const
+CBaseStateRowUI *CSlideTimebarRow::GetBaseStateRowUI() const
 {
-    return m_SlideRow;
+    return m_SlideRowUi;
 }
 
 // This is not applicable to a SlideTimebarRow!!

@@ -30,6 +30,7 @@
 //=============================================================================
 // Prefix
 //=============================================================================
+#include "AbstractTimelineRowUI.h"
 #include "stdafx.h"
 
 //=============================================================================
@@ -46,6 +47,8 @@
 #include "Bindings/TimelineTranslationManager.h"
 #include "ControlData.h"
 #include "HotKeys.h"
+#include "TimelineUIFactory.h"
+
 #include "foundation/Qt3DSLogging.h"
 #include <QtWidgets/qaction.h>
 
@@ -126,7 +129,8 @@ void CTimelineTimelineLayout::ClearRows()
     TTimelineRowList::iterator thePos = m_Rows.begin();
     for (; thePos != m_Rows.end(); ++thePos) {
         CTimelineRow *theRow = (*thePos);
-        m_TimebarList->RemoveChild(theRow->GetTimebarControl());
+        auto uiRow = TimelineUIFactory::instance()->uiForRow(theRow);
+        m_TimebarList->RemoveChild(uiRow->GetTimebarControl());
     }
 
     m_Rows.clear();
@@ -208,13 +212,14 @@ void CTimelineTimelineLayout::RecalcLayout()
  */
 void CTimelineTimelineLayout::AddRow(CTimelineRow *inRow)
 {
+    CAbstractTimelineRowUI *uiRow = TimelineUIFactory::instance()->uiForRow(inRow);
     m_Rows.push_back(inRow);
 
-    m_TimebarList->AddChild(inRow->GetTimebarControl());
+    m_TimebarList->AddChild(uiRow->GetTimebarControl());
 
     inRow->SetTimeRatio(m_TimeRatio);
     // For keyframe/timebar snapping.
-    inRow->SetSnappingListProvider(this);
+    uiRow->SetSnappingListProvider(this);
 }
 
 //=============================================================================
@@ -584,7 +589,8 @@ void CTimelineTimelineLayout::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inF
 
         for (; thePos != m_Rows.end(); ++thePos) {
             CStateRow *theRow = reinterpret_cast<CStateRow *>(*thePos);
-            theRow->SelectKeysInRect(theRect, theModifierKeyDown, m_CommitKeyframeSelection);
+            auto rowUi = TimelineUIFactory::instance()->uiForRow(theRow);
+            rowUi->SelectKeysInRect(theRect, theModifierKeyDown, m_CommitKeyframeSelection);
         }
         m_CommitKeyframeSelection = false;
     }
@@ -623,7 +629,8 @@ void CTimelineTimelineLayout::PopulateSnappingList(CSnapper *inSnappingList)
 
     TTimelineRowList::iterator theRowIter = m_Rows.begin();
     for (; theRowIter != m_Rows.end(); ++theRowIter) {
-        (*theRowIter)->PopulateSnappingList(inSnappingList);
+        auto uiRow = TimelineUIFactory::instance()->uiForRow(*theRowIter);
+        uiRow->PopulateSnappingList(inSnappingList);
     }
 }
 

@@ -42,7 +42,7 @@
 //==============================================================================
 //	Forwards
 //==============================================================================
-class CStateRow;
+class CStateRowUI;
 class CSnapper;
 class CAssetTimelineKeyframe;
 class ITimelineItemBinding;
@@ -52,7 +52,7 @@ class CStateTimebarlessRow : public CBaseTimebarlessRow
     typedef std::vector<CAssetTimelineKeyframe *> TTimelineAssetKeyframeList;
 
 public:
-    CStateTimebarlessRow(CStateRow *inStateRow);
+    CStateTimebarlessRow(CStateRowUI *inStateRow);
     virtual ~CStateTimebarlessRow();
 
     void OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation = false) override;
@@ -71,15 +71,15 @@ public:
     void SelectAllKeys() override;
     void SelectKeysByTime(long inTime, bool inSelected) override;
     bool HasSelectedKeys();
-    CStateRow *GetStateRow();
+    CStateRowUI *GetStateRowUI();
     void PopulateSnappingList(CSnapper *inSnapper) override;
 
 protected:
-    CBaseStateRow *GetBaseStateRow() const override;
+    CBaseStateRowUI *GetBaseStateRowUI() const override;
     bool PropertiesHaveKeyframe(long inTime);
 
 protected:
-    CStateRow *m_StateRow;
+    CStateRowUI *m_StateRowUI;
     bool m_Selected;
     TTimelineAssetKeyframeList m_Keyframes; ///<Master Keyframe list ( STL )
     bool m_Refreshing;

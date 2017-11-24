@@ -42,7 +42,7 @@
 //==============================================================================
 //	forwards
 //==============================================================================
-class CPropertyRow;
+class CPropertyRowUI;
 class CPropertyTimelineKeyframe;
 class ISnappingListProvider;
 
@@ -51,7 +51,7 @@ class CPropertyTimebarRow : public CControl
     typedef std::vector<CPropertyTimelineKeyframe *> TTimelineKeyframeList;
 
 public:
-    CPropertyTimebarRow(CPropertyRow *inPropertyRow);
+    CPropertyTimebarRow(CPropertyRowUI *inPropertyRowUI);
     virtual ~CPropertyTimebarRow();
 
     void Draw(CRenderer *inRenderer) override;
@@ -65,7 +65,7 @@ public:
 
     void SetSize(CPt inSize) override;
 
-    CPropertyRow *GetPropertyRow();
+    CPropertyRowUI *GetPropertyRowUI();
 
     void SetTimeRatio(double inTimeRatio);
 
@@ -91,7 +91,7 @@ protected:
 
 protected:
     TTimelineKeyframeList m_Keyframes; ///< Properties Keyframe List (STL)
-    CPropertyRow *m_PropertyRow;
+    CPropertyRowUI *m_PropertyRowUI;
     CPropertyTimebarGraph m_DetailedView;
     ::CColor m_BackgroundColor;
     double m_TimeRatio;

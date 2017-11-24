@@ -39,25 +39,19 @@ class ITimelineControl;
 
 class CSlideRow : public CBaseStateRow
 {
+    Q_OBJECT
 public:
-    CSlideRow(ITimelineItemBinding *inTimelineItem);
+    CSlideRow(CTimelineRow *parent);
     virtual ~CSlideRow();
-
-    void SetTimelineControl(ITimelineControl *inTimelineControl);
 
     // BaseStateRow
     void Expand(bool inExpandAll = false, bool inExpandUp = false) override;
     bool CalculateActiveStartTime() override;
     bool CalculateActiveEndTime() override;
-    ISnappingListProvider *GetSnappingListProvider() const override;
-    void SetSnappingListProvider(ISnappingListProvider *inProvider) override;
-    ITimelineControl *GetTopControl() const override;
 
 protected:
     // CBaseStateRow
-    CBaseTimebarlessRow *CreateTimebarRow() override;
     bool PerformFilter(const CFilter &inFilter) override;
 
-    ITimelineControl *m_TimelineControl;
 };
 #endif // INCLUDED_TIME_CONTEXT_ROW_H

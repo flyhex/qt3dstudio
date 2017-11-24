@@ -36,12 +36,12 @@
 #include "SIcon.h"
 #include "StringEdit.h"
 
-class CPropertyRow;
+class CPropertyRowUI;
 
 class CPropertyTreeControl : public CControl
 {
 public:
-    CPropertyTreeControl(CPropertyRow *inPropRow);
+    CPropertyTreeControl(CPropertyRowUI *inPropRowUI);
     virtual ~CPropertyTreeControl();
 
     void Draw(CRenderer *inRenderer) override;
@@ -60,7 +60,7 @@ public:
 
 protected:
     long m_Indent;
-    CPropertyRow *m_PropRow;
+    CPropertyRowUI *m_PropRowUI;
     CSIcon m_Icon;
     CStringEdit m_Text;
     ::CColor m_BackgroundColor;

@@ -48,18 +48,20 @@
 #include "AssetTimelineKeyframe.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "StudioUtils.h"
+#include "StateRowUI.h"
 
 //=============================================================================
 /**
  * Creates a new CStateTimebarRow for the StateRow.
  * @param inStateRow the State Row that this is on.
  */
-CStateTimebarlessRow::CStateTimebarlessRow(CStateRow *inStateRow)
-    : m_StateRow(inStateRow)
+CStateTimebarlessRow::CStateTimebarlessRow(CStateRowUI *inStateRow)
+    : m_StateRowUI(inStateRow)
     , m_Selected(false)
     , m_Refreshing(false)
 {
-    m_BackgroundColor = m_StateRow->GetTimebarBackgroundColor(m_StateRow->GetObjectType());
+    auto timelineRow = m_StateRowUI->GetTimelineRow();
+    m_BackgroundColor = timelineRow->GetTimebarBackgroundColor(timelineRow->GetObjectType());
 }
 
 CStateTimebarlessRow::~CStateTimebarlessRow()
@@ -102,7 +104,8 @@ void CStateTimebarlessRow::Draw(CRenderer *inRenderer)
  */
 bool CStateTimebarlessRow::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
-    m_StateRow->Select(SBaseStateRowSelectionKeyState()); // ensure this is selected, but doesn't
+    auto stateRow = static_cast<CStateRow *>(m_StateRowUI->GetTimelineRow());
+    stateRow->Select(SBaseStateRowSelectionKeyState()); // ensure this is selected, but doesn't
                                                           // affect any key selections, because this
                                                           // can be triggered from a key being
                                                           // selected
@@ -128,9 +131,9 @@ void CStateTimebarlessRow::SetTimeRatio(double inTimeRatio)
 /**
  * Get the state row that this belongs to.
  */
-CStateRow *CStateTimebarlessRow::GetStateRow()
+CStateRowUI *CStateTimebarlessRow::GetStateRowUI()
 {
-    return m_StateRow;
+    return m_StateRowUI;
 }
 
 //=============================================================================
@@ -142,7 +145,8 @@ CStateRow *CStateTimebarlessRow::GetStateRow()
 void CStateTimebarlessRow::OnKeySelected(long inTime, bool inSelected,
                                          bool inClearPreviouslySelectedKeys)
 {
-    ITimelineItemBinding *theTimelineItemBinding = m_StateRow->GetTimelineItemBinding();
+    ITimelineItemBinding *theTimelineItemBinding =
+            m_StateRowUI->GetTimelineRow()->GetTimelineItemBinding();
     if (inSelected)
         theTimelineItemBinding->SetSelected(false);
 
@@ -154,9 +158,9 @@ void CStateTimebarlessRow::OnKeySelected(long inTime, bool inSelected,
     Invalidate();
 }
 
-CBaseStateRow *CStateTimebarlessRow::GetBaseStateRow() const
+CBaseStateRowUI *CStateTimebarlessRow::GetBaseStateRowUI() const
 {
-    return m_StateRow;
+    return m_StateRowUI;
 }
 
 //=============================================================================
@@ -168,7 +172,8 @@ bool CStateTimebarlessRow::PropertiesHaveKeyframe(long inTime)
 {
     bool theResult = false;
 
-    ITimelineItemBinding *theTimelineItemBinding = m_StateRow->GetTimelineItemBinding();
+    ITimelineItemBinding *theTimelineItemBinding =
+            m_StateRowUI->GetTimelineRow()->GetTimelineItemBinding();
     long theNumProps = theTimelineItemBinding->GetPropertyCount();
     for (long theIndex = 0; theIndex < theNumProps; ++theIndex) {
         ITimelineItemProperty *theProp = theTimelineItemBinding->GetProperty(theIndex);
@@ -193,7 +198,8 @@ void CStateTimebarlessRow::RefreshKeyframes()
 
     m_Refreshing = true;
 
-    ITimelineItemBinding *theTimelineItemBinding = m_StateRow->GetTimelineItemBinding();
+    ITimelineItemBinding *theTimelineItemBinding =
+            m_StateRowUI->GetTimelineRow()->GetTimelineItemBinding();
     long theKeyframeCount = theTimelineItemBinding->GetKeyframeCount();
     TTimelineAssetKeyframeList::iterator thePos = m_Keyframes.begin();
 
@@ -287,8 +293,10 @@ void CStateTimebarlessRow::SelectKeysByTime(long inTime, bool inSelected)
  */
 void CStateTimebarlessRow::SelectKeysInRect(CRct inRect, bool inModifierKeyDown)
 {
+    ITimelineItemBinding *theTimelineItemBinding =
+            m_StateRowUI->GetTimelineRow()->GetTimelineItemBinding();
     CMultiSelectAspect<TTimelineAssetKeyframeList> theMultiSelectAspect(
-        m_Keyframes, m_StateRow->GetTimelineItemBinding());
+        m_Keyframes, theTimelineItemBinding);
     theMultiSelectAspect.MultiSelect(inRect, inModifierKeyDown);
 }
 
@@ -305,8 +313,10 @@ void CStateTimebarlessRow::SelectKeysInRect(CRct inRect, bool inModifierKeyDown)
 
 void CStateTimebarlessRow::CommitSelections()
 {
+    ITimelineItemBinding *theTimelineItemBinding =
+            m_StateRowUI->GetTimelineRow()->GetTimelineItemBinding();
     CMultiSelectAspect<TTimelineAssetKeyframeList> theMultiSelectAspect(
-        m_Keyframes, m_StateRow->GetTimelineItemBinding());
+        m_Keyframes, theTimelineItemBinding);
     theMultiSelectAspect.CommitSelections();
 }
 
@@ -332,7 +342,7 @@ bool CStateTimebarlessRow::HasSelectedKeys()
  */
 void CStateTimebarlessRow::SelectAllKeys()
 {
-    m_StateRow->GetTimelineItemBinding()->SelectKeyframes(true, -1);
+    m_StateRowUI->GetTimelineRow()->GetTimelineItemBinding()->SelectKeyframes(true, -1);
 
     TTimelineAssetKeyframeList::iterator thePos = m_Keyframes.begin();
     for (; thePos != m_Keyframes.end(); ++thePos)

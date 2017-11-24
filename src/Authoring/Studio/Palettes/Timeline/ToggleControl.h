@@ -35,14 +35,14 @@
 #include "BlankToggleControl.h"
 #include "ToggleButton.h"
 
-class CStateRow;
+class CStateRowUI;
 class CBlankControl;
 class ITimelineItemBinding;
 
 class CToggleControl : public CBlankToggleControl
 {
 public:
-    CToggleControl(CStateRow *inStateRow, ITimelineItemBinding *inTimelineItemBinding);
+    CToggleControl(CStateRowUI *inStateRow, ITimelineItemBinding *inTimelineItemBinding);
     virtual ~CToggleControl();
 
     void OnShyClicked(CToggleButton *inButton, CToggleButton::EButtonState inState);
@@ -52,8 +52,6 @@ public:
     void Refresh() override;
 
 protected:
-    CStateRow *m_StateRow;
-
     CToggleButton *m_Shy;
     CToggleButton *m_Visible;
     CToggleButton *m_Locked;

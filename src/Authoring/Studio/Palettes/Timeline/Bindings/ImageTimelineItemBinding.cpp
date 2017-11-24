@@ -39,6 +39,7 @@
 #include "TimelineTranslationManager.h"
 #include "Qt3DSDMHandles.h"
 #include "BaseStateRow.h"
+#include "BaseStateRowUI.h"
 #include "Doc.h"
 #include "IObjectReferenceHelper.h"
 #include "EmptyTimelineTimebar.h"
@@ -84,7 +85,7 @@ bool CImageTimelineItemBinding::ShowToggleControls() const
 void CImageTimelineItemBinding::Bind(CBaseStateRow *inRow)
 {
     Qt3DSDMTimelineItemBinding::Bind(inRow);
-    GetRow()->SetNameReadOnly(true);
+    inRow->requestSetNameReadOnly();
 }
 
 //=============================================================================

@@ -34,12 +34,12 @@
 
 #include "BaseTimebarlessRow.h"
 
-class CSlideRow;
+class CSlideRowUI;
 
 class CSlideTimebarRow : public CBaseTimebarlessRow
 {
 public:
-    CSlideTimebarRow(CSlideRow *inSlideRow);
+    CSlideTimebarRow(CSlideRowUI *inSlideRow);
     virtual ~CSlideTimebarRow();
 
     void CommitSelections() override;
@@ -52,9 +52,9 @@ public:
     ISnappingListProvider &GetSnappingListProvider() const override;
 
 protected:
-    CBaseStateRow *GetBaseStateRow() const override;
+    CBaseStateRowUI *GetBaseStateRowUI() const override;
 
 protected:
-    CSlideRow *m_SlideRow;
+    CSlideRowUI *m_SlideRowUi;
 };
 #endif // INCLUDED_TIME_CONTEXT_TIMEBAR_ROW_H

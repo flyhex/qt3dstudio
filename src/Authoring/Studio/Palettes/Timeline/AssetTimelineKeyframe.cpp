@@ -40,6 +40,7 @@
 #include "Renderer.h"
 #include "MasterP.h"
 #include "StateRow.h"
+#include "StateRowUI.h"
 #include "KeyframeContextMenu.h"
 #include "HotKeys.h"
 #include "ResourceCache.h"
@@ -47,6 +48,8 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "StudioUtils.h"
 #include "TimeEditDlg.h"
+#include "TimelineUIFactory.h"
+#include "AbstractTimelineRowUI.h"
 
 CAssetTimelineKeyframe::CAssetTimelineKeyframe(CStateTimebarlessRow *inParentRow,
                                                double inTimeRatio)
@@ -136,7 +139,7 @@ bool CAssetTimelineKeyframe::GetPreviousSelectState()
 void CAssetTimelineKeyframe::RefreshToolTip(CPt inPoint)
 {
     Q3DStudio::CString theCommentText;
-    CStateRow *theStateRow = m_ParentRow->GetStateRow();
+    CStateRowUI *theStateRow = m_ParentRow->GetStateRowUI();
     CRct theTimelineBounds(theStateRow->GetTopControl()->GetBounds());
 
     // format label
@@ -166,8 +169,9 @@ void CAssetTimelineKeyframe::Draw(CRenderer *inRenderer)
 QPixmap CAssetTimelineKeyframe::GetImage() const
 {
     QPixmap theImage = m_Icon;
-    long theStartTime = m_ParentRow->GetStateRow()->GetStartTime();
-    long theEndTime = m_ParentRow->GetStateRow()->GetEndTime();
+    auto baseStateRow = static_cast<CBaseStateRow *>(m_ParentRow->GetStateRowUI()->GetTimelineRow());
+    long theStartTime = baseStateRow->GetStartTime();
+    long theEndTime = baseStateRow->GetEndTime();
 
     if (theStartTime == m_Time) {
         theImage = m_LeftIcon;
@@ -216,8 +220,9 @@ bool CAssetTimelineKeyframe::HitTest(const CPt &inPoint) const
     // If not over the control then don't bother with specific checks
     if (CControl::HitTest(inPoint)) {
         // If the key is at the beginning or end of the timebar then calculate the test differently
-        long theStartTime = m_ParentRow->GetStateRow()->GetStartTime();
-        long theEndTime = m_ParentRow->GetStateRow()->GetEndTime();
+        auto baseStateRow = static_cast<CBaseStateRow *>(m_ParentRow->GetStateRowUI()->GetTimelineRow());
+        long theStartTime = baseStateRow->GetStartTime();
+        long theEndTime = baseStateRow->GetEndTime();
         CPt thePoint = inPoint - GetPosition();
         if (theStartTime == m_Time)
             theRetVal = (thePoint.x > 7);
@@ -264,7 +269,7 @@ bool CAssetTimelineKeyframe::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFl
         //	m_ParentRow->GetStateRow( )->GetState( )->FireAnimatedPropertiesChanged( );
 
         m_IsMouseDown = true;
-        CStateRow *theStateRow = m_ParentRow->GetStateRow();
+        auto theStateRow = static_cast<CBaseStateRow *>(m_ParentRow->GetStateRowUI()->GetTimelineRow());
         long theStartTime = theStateRow->GetStartTime();
         long theEndTime = theStateRow->GetEndTime();
         m_Snapper.SetStartEndTime(theStartTime, theEndTime);
@@ -272,7 +277,7 @@ bool CAssetTimelineKeyframe::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFl
         m_Snapper.SetKeyFrameClicked(true);
         m_Snapper.SetSnappingSelectedKeyframes(false);
 
-        theStateRow->GetTimebar()->GetSnappingListProvider().PopulateSnappingList(&m_Snapper);
+        m_ParentRow->GetStateRowUI()->GetTimebar()->GetSnappingListProvider().PopulateSnappingList(&m_Snapper);
         m_Snapper.BeginDrag(inPoint.x);
 
         // display the time range tooltip
@@ -436,5 +441,5 @@ void CAssetTimelineKeyframe::SetSize(CPt inSize)
  */
 ITimelineItemBinding *CAssetTimelineKeyframe::GetTimelineItemBinding() const
 {
-    return m_ParentRow->GetStateRow()->GetTimelineItemBinding();
+    return m_ParentRow->GetStateRowUI()->GetTimelineRow()->GetTimelineItemBinding();
 }

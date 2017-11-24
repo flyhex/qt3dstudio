@@ -36,11 +36,12 @@
 #include "CColor.h"
 
 class CBaseStateRow;
+class CBaseStateRowUI;
 
 class CBlankToggleControl : public CControl
 {
 public:
-    CBlankToggleControl(CBaseStateRow *inStateRow);
+    CBlankToggleControl(CBaseStateRowUI *inStateRow);
     virtual ~CBlankToggleControl();
 
     void Draw(CRenderer *inRenderer) override;
@@ -57,7 +58,10 @@ public:
     virtual void Refresh();
 
 protected:
+    CBaseStateRow *baseStateRow() const;
+
     CBaseStateRow *m_StateRow;
+    CBaseStateRowUI *m_StateRowUI;
     bool m_Selected;
 
     ::CColor m_BackgroundColor;

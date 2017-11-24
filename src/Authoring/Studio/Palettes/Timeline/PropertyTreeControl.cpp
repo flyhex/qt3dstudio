@@ -37,6 +37,7 @@
 //==============================================================================
 #include "PropertyTreeControl.h"
 #include "PropertyRow.h"
+#include "PropertyRowUI.h"
 #include "Renderer.h"
 #include "StudioPreferences.h"
 #include "StudioUtils.h"
@@ -46,21 +47,22 @@
 #include "Bindings/ITimelineItemProperty.h"
 #include "CoreUtils.h"
 
-CPropertyTreeControl::CPropertyTreeControl(CPropertyRow *inPropRow)
+CPropertyTreeControl::CPropertyTreeControl(CPropertyRowUI *inPropRowUI)
     : m_Icon(CResourceCache::GetInstance()->GetBitmap("Objects-Property-Normal.png"),
              CResourceCache::GetInstance()->GetBitmap("Objects-Property-Disabled.png"))
 {
-    m_PropRow = inPropRow;
+    m_PropRowUI = inPropRowUI;
 
-    CTimelineRow *theParentRow = m_PropRow->GetParentRow();
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropRowUI->GetTimelineRow());
+    CTimelineRow *theParentRow = propertyRow->GetParentRow();
     if (theParentRow) // property row typically should never exists on its own, but to be safe.
-        m_BackgroundColor = m_PropRow->GetTimebarBackgroundColor();
+        m_BackgroundColor = propertyRow->GetTimebarBackgroundColor();
     else
         m_BackgroundColor = CStudioPreferences::GetPropertyBackgroundColor();
 
     AddChild(&m_Icon);
 
-    m_Text.SetData(inPropRow->GetProperty()->GetName());
+    m_Text.SetData(propertyRow->GetProperty()->GetName());
     m_Text.SetAlignment(CTextEdit::LEFT);
     m_Text.SetReadOnly(true);
 
@@ -87,7 +89,8 @@ void CPropertyTreeControl::Draw(CRenderer *inRenderer)
     inRenderer->PopPen();
 
     ::CColor theTextColor = CStudioPreferences::GetNormalColor();
-    if (m_PropRow->GetProperty()->IsMaster())
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropRowUI->GetTimelineRow());
+    if (propertyRow->GetProperty()->IsMaster())
         theTextColor = CStudioPreferences::GetMasterColor();
     m_Text.SetTextColor(theTextColor);
 }
@@ -110,10 +113,11 @@ long CPropertyTreeControl::GetIndent()
 
 void CPropertyTreeControl::SetHighlighted(bool inIsHighlighted)
 {
-    CTimelineRow *theParentRow = m_PropRow->GetParentRow();
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropRowUI->GetTimelineRow());
+    CTimelineRow *theParentRow = propertyRow->GetParentRow();
     if (theParentRow) // property row typically should never exists on its own, but to be safe.
-        m_BackgroundColor = (inIsHighlighted) ? m_PropRow->GetTimebarHighlightBackgroundColor()
-                                              : m_PropRow->GetTimebarBackgroundColor();
+        m_BackgroundColor = (inIsHighlighted) ? propertyRow->GetTimebarHighlightBackgroundColor()
+                                              : propertyRow->GetTimebarBackgroundColor();
     else
         m_BackgroundColor = (inIsHighlighted) ? CStudioPreferences::GetPropertyMouseOverColor()
                                               : CStudioPreferences::GetPropertyBackgroundColor();
@@ -159,14 +163,14 @@ void CPropertyTreeControl::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFlag
 {
     CControl::OnMouseOver(inPoint, inFlags);
 
-    m_PropRow->OnMouseOver();
+    m_PropRowUI->OnMouseOver();
 }
 
 void CPropertyTreeControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseOut(inPoint, inFlags);
 
-    m_PropRow->OnMouseOut();
+    m_PropRowUI->OnMouseOut();
 }
 
 //==============================================================================
@@ -175,8 +179,10 @@ void CPropertyTreeControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags
  */
 bool CPropertyTreeControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
-    if (!CControl::OnMouseDown(inPoint, inFlags))
-        m_PropRow->Select((CHotKeys::MODIFIER_SHIFT & inFlags) == CHotKeys::MODIFIER_SHIFT);
+    if (!CControl::OnMouseDown(inPoint, inFlags)) {
+        auto propertyRow = static_cast<CPropertyRow *>(m_PropRowUI->GetTimelineRow());
+        propertyRow->Select((CHotKeys::MODIFIER_SHIFT & inFlags) == CHotKeys::MODIFIER_SHIFT);
+    }
 
     return true;
 }
@@ -184,7 +190,7 @@ bool CPropertyTreeControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlag
 bool CPropertyTreeControl::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     if (!CControl::OnMouseDoubleClick(inPoint, inFlags)) {
-        m_PropRow->OnMouseDoubleClick();
+        m_PropRowUI->OnMouseDoubleClick();
     }
     return true;
 }

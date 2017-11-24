@@ -36,7 +36,7 @@
 #include "CColor.h"
 
 class CSnapper;
-class CBaseStateRow;
+class CBaseStateRowUI;
 class ISnappingListProvider;
 
 class CBaseTimebarlessRow : public CControl
@@ -70,7 +70,7 @@ public:
     virtual ISnappingListProvider &GetSnappingListProvider() const = 0;
 
 protected:
-    virtual CBaseStateRow *GetBaseStateRow() const = 0;
+    virtual CBaseStateRowUI *GetBaseStateRowUI() const = 0;
 
     ::CColor m_BackgroundColor;
     bool m_Selected;

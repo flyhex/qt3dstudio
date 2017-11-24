@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -27,56 +26,56 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "AbstractTimelineRowUI.h"
+#include "TimelineRow.h"
+#include "ITimelineControl.h"
 
-#include "SlideRow.h"
-#include "BlankToggleControl.h"
-#include "ColorControl.h"
 #include "Bindings/ITimelineItemBinding.h"
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+CAbstractTimelineRowUI::CAbstractTimelineRowUI(CTimelineRow *timelineRow,
+                                               CAbstractTimelineRowUI *parentUiRow)
+    : QObject(parentUiRow)
+    , m_timelineRow(timelineRow)
+    , m_parentRowUI(parentUiRow)
+    , m_Indent(0)
 {
 }
 
-CSlideRow::~CSlideRow()
+CAbstractTimelineRowUI::~CAbstractTimelineRowUI()
 {
 }
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
+void CAbstractTimelineRowUI::SetParentRow(CAbstractTimelineRowUI *parentUiRow)
 {
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
-
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
+    m_parentRowUI = parentUiRow;
+    setParent(parentUiRow);
 }
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
+CTimelineRow *CAbstractTimelineRowUI::GetTimelineRow() const
 {
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
+    return m_timelineRow;
 }
 
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
+void CAbstractTimelineRowUI::SetTimelineControl(ITimelineControl *inTimelineControl)
 {
-    Q_UNUSED(inFilter);
-    return true;
+    m_TimelineControl = inTimelineControl;
+}
+
+ITimelineControl *CAbstractTimelineRowUI::GetTopControl() const
+{
+    auto *parentRow = m_timelineRow->GetParentRow();
+    ITimelineControl *theControl = parentRow ? m_parentRowUI->GetTopControl() : m_TimelineControl;
+    // GetTopControl() should be not used if SetTimeLineControl() was not called in this item
+    Q_ASSERT(theControl);
+    return theControl;
+}
+
+void CAbstractTimelineRowUI::SetIndent(long indent)
+{
+    m_Indent = indent;
+}
+
+long CAbstractTimelineRowUI::GetIndent() const
+{
+    return m_Indent;
 }

@@ -32,20 +32,16 @@
 
 #pragma once
 
+#include "stdafx.h"
+
 #include "TimelineRow.h"
-#include "ListLayout.h"
 #include "ToggleButton.h"
 #include "DispatchListeners.h"
 
 class CPropertyRow;
-class CBaseTimelineTreeControl;
-class CColorControl;
-class CBlankToggleControl;
-class CBaseTimebarlessRow;
 class CStateRow;
 class CCmdBatch;
 class ITimelineItem;
-class ITimelineItemBinding;
 
 struct SBaseStateRowSelectionKeyState
 {
@@ -67,16 +63,16 @@ struct SBaseStateRowSelectionKeyState
 
 class CBaseStateRow : public CTimelineRow
 {
+    Q_OBJECT
 public:
     typedef std::vector<CPropertyRow *> TPropertyRowList;
     typedef std::vector<CStateRow *> TStateRowList;
-    static const long DEFAULT_TOGGLE_LENGTH;
 
 public:
-    CBaseStateRow();
+    CBaseStateRow(CTimelineRow *parent);
     virtual ~CBaseStateRow();
 
-    virtual void Initialize(ITimelineItemBinding *inTimelineItemBinding);
+    void Initialize(ITimelineItemBinding *inTimelineItemBinding) override;
 
     bool IsExpanded();
     bool IsLoaded();
@@ -86,23 +82,10 @@ public:
 
     void SetTimeRatio(double inTimePerPixel) override;
 
-    CControl *GetColorControl() override;
-    CControl *GetTreeControl() override;
-    CControl *GetToggleControl() override;
-    CControl *GetTimebarControl() override;
-
     void Select(SBaseStateRowSelectionKeyState inKeyState, bool inCheckKeySelection = true);
-    void SelectKeysInRect(CRct inRect, bool inModifierKeyDown, bool inGlobalCommitSelectionFlag);
     void DeleteAllKeys();
 
-    virtual void OnMouseOver();
-    virtual void OnMouseOut();
-    virtual void OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags);
-    virtual void OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags);
-    virtual void OnDirty();
-    virtual void OnSelected(bool inSelected);
-
-    void LoadChildren();
+    void LoadChildren() override;
     void AddChildRow(ITimelineItemBinding *inTimeLineItem, ITimelineItemBinding *inNextItem);
     void RemoveChildRow(ITimelineItemBinding *inTimeLineItem);
 
@@ -120,18 +103,8 @@ public:
 
     void Filter(const CFilter &inFilter, bool inFilterChildren = true) override;
     CFilter *GetFilter() { return &m_Filter; }
-    void OnChildVisibilityChanged() override;
 
     virtual bool HasVisibleChildren();
-
-    void PopulateSnappingList(CSnapper *inSnappingList) override;
-
-    virtual void SetEnabled(bool inEnabled);
-
-    void DoStartDrag(CControlWindowListener *inWndListener);
-    void AcceptDropAfter(bool inAccept);
-    void AcceptDropBefore(bool inAccept);
-    void SetDropTarget(CDropTarget *inDropTarget);
 
     // CTimelineRow
     virtual long GetEarliestStartTime();
@@ -144,55 +117,48 @@ public:
     virtual QPixmap GetIcon();
     virtual QPixmap GetDisabledIcon();
 
-    EStudioObjectType GetObjectType() const;
-    ITimelineItemBinding *GetTimelineItemBinding() const;
-    ITimelineItem *GetTimelineItem() const;
+    TPropertyRowList GetPropertyRows() const;
+    TStateRowList GetStateRows() const;
 
-    void UpdateActionStatus();
-    void SetFocus();
+    virtual void OnSelected(bool inSelected);
+    void RequestRefreshRowMetaData();
+    void ForceEmitChildrenChanged();
+    void requestSetNameReadOnly();
+    void requestUpdateActionStatus();
 
-    CBaseTimebarlessRow *GetTimebar() const;
-
-    void SetNameReadOnly(bool inReadOnly);
-
-    void ClearDirty();
+Q_SIGNALS:
+    void expanded(bool isExpanded);
+    void timeRatioChanged(double timeRatio);
+    void visibleChanged(bool visible);
+    void hasChildrenChanged(bool hasChildren);
+    void rowAboutToBeRemoved(CTimelineRow *row);
+    void selectAllKeys();
+    void selectedChanged(bool selected);
+    void addRowToUILists(CTimelineRow *inRow, CTimelineRow *inNextRow, CFilter &inFilter);
+    void rowAdded(CBaseStateRow *row);
+    void refreshRowMetaData();
+    void setNameReadOnly();
+    void updateActionStatus();
 
 protected:
     void DeletePropertyRow(CPropertyRow *inPropertyRow);
-    virtual CBlankToggleControl *CreateToggleControl();
-    virtual CBaseTimebarlessRow *CreateTimebarRow() = 0;
     virtual bool PerformFilter(const CFilter &inFilter) = 0;
     CStateRow *GetRow(ITimelineItem *inTimelineItem);
     void DeleteRow(CStateRow *inRow);
-    void SetTimelineLatestTime(long inLength);
+    // KDAB_TODO unused?
+//    void SetTimelineLatestTime(long inLength);
 
     virtual void LoadProperties() {}
     void InitializePropertyRow(CPropertyRow *inRow, CTimelineRow *inNextRow = nullptr);
 
-    void AddRowToUILists(CTimelineRow *inRow, CTimelineRow *inNextRow, CFilter &inFilter);
     CStateRow *CreateChildRow(ITimelineItemBinding *inChildBinding, CStateRow *inNextRow);
 
-    double m_TimeRatio;
     CFilter m_Filter;
-    CListLayout m_ColorList;
-    CListLayout m_TreeList;
-    CListLayout m_ToggleList;
-    CListLayout m_TimebarList;
-
-    CBaseTimelineTreeControl *m_TreeControl;
-    CColorControl *m_ColorControl;
-    CBlankToggleControl *m_ToggleControl;
-    CBaseTimebarlessRow *m_TimebarControl;
 
     TStateRowList m_StateRows;
     TPropertyRowList m_PropertyRows;
 
     bool m_Loaded;
-    bool m_IsExpanded;
-    bool m_Highlighted;
-    bool m_Dirty;
     bool m_Selected;
-
-    ITimelineItemBinding *m_TimelineItemBinding;
 };
 #endif // INCLUDED_BASE_STATE_ROW_H

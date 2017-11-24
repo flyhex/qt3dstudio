@@ -511,7 +511,7 @@ void Qt3DSDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime
     }
     // Requires UI to be updated explicitly
     if (inParentTriggered && m_Row)
-        m_Row->GetTimebar()->SelectKeysByTime(inTime, inSelected);
+        m_Row->RequestSelectKeysByTime(inTime, inSelected);
 
     // Support existing feature, selection by mouse-drag a rect, when all property keyframes are
     // selected, the asset keyframe is automatically selected as well.

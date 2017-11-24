@@ -47,6 +47,8 @@
 #include "ToggleBlankControl.h"
 #include "ColorBlankControl.h"
 #include "TreeBlankControl.h"
+#include "AbstractTimelineRowUI.h"
+#include "TimelineUIFactory.h"
 
 //=============================================================================
 /**
@@ -140,9 +142,11 @@ void CTimelineTreeLayout::ClearRows()
     TTimelineRowList::iterator thePos = m_Rows.begin();
     for (; thePos != m_Rows.end(); ++thePos) {
         CTimelineRow *theRow = (*thePos);
-        m_ColorList->RemoveChild(theRow->GetColorControl());
-        m_TreeList->RemoveChild(theRow->GetTreeControl());
-        m_ToggleList->RemoveChild(theRow->GetToggleControl());
+        auto uiRow = TimelineUIFactory::instance()->uiForRow(theRow);
+
+        m_ColorList->RemoveChild(uiRow->GetColorControl());
+        m_TreeList->RemoveChild(uiRow->GetTreeControl());
+        m_ToggleList->RemoveChild(uiRow->GetToggleControl());
 
         theRow->Dispose();
     }
@@ -221,13 +225,14 @@ void CTimelineTreeLayout::RecalcLayout()
  */
 void CTimelineTreeLayout::AddRow(CTimelineRow *inRow)
 {
-    m_ColorList->AddChild(inRow->GetColorControl());
-    m_TreeList->AddChild(inRow->GetTreeControl());
-    m_ToggleList->AddChild(inRow->GetToggleControl());
+    CAbstractTimelineRowUI *uiRow = TimelineUIFactory::instance()->uiForRow(inRow);
+    m_ColorList->AddChild(uiRow->GetColorControl());
+    m_TreeList->AddChild(uiRow->GetTreeControl());
+    m_ToggleList->AddChild(uiRow->GetToggleControl());
 
     m_Rows.push_back(inRow);
 
-    inRow->SetIndent(20);
+    uiRow->SetIndent(20);
 
     inRow->Filter(m_Filter);
 }

@@ -32,6 +32,7 @@
 #include "TimebarControl.h"
 #include "StateTimebarRow.h"
 #include "StateRow.h"
+#include "StateRowUI.h"
 #include "Renderer.h"
 #include "ColorControl.h"
 #include "StudioPreferences.h"
@@ -119,7 +120,8 @@ CTimebarControl::~CTimebarControl()
  */
 void CTimebarControl::Draw(CRenderer *inRenderer)
 {
-    CStateRow *theRow = m_TimebarRow->GetStateRow();
+    CStateRowUI *theRowUI = m_TimebarRow->GetStateRowUI();
+    auto theRow = static_cast<CBaseStateRow *>(theRowUI->GetTimelineRow());
     CRct theRect(GetSize());
 
     ::CColor theNormalColor = GetTimebar()->GetTimebarColor();
@@ -254,7 +256,8 @@ void CTimebarControl::SetSize(CPt inSize)
 {
     CControl::SetSize(CPt(inSize.x, inSize.y));
 
-    CStateRow *theRow = m_TimebarRow->GetStateRow();
+    CStateRowUI *theRowUI = m_TimebarRow->GetStateRowUI();
+    auto theRow = static_cast<CBaseStateRow *>(theRowUI->GetTimelineRow());
     long theTipSize =
         CStudioPreferences::GetTimebarTipSize() + CStudioPreferences::GetTimebarInnerTipSize();
     long theCommentSize = CStudioPreferences::GetDefaultCommentSize();
@@ -350,7 +353,8 @@ ITimelineTimebar *CTimebarControl::GetTimebar()
 void CTimebarControl::RefreshToolTip(CPt inPoint)
 {
     Q3DStudio::CString theCommentText;
-    CStateRow *theRow = m_TimebarRow->GetStateRow();
+    CStateRowUI *theRowUI= m_TimebarRow->GetStateRowUI();
+    auto theRow = static_cast<CBaseStateRow *>(theRowUI->GetTimelineRow());
 
     CRct theTimelineBounds(GetTopControlBounds());
     // format label as: startTime - endTime (timeDifference)
@@ -403,7 +407,8 @@ bool CTimebarControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
         OnBeginDrag();
 
-        m_TimebarRow->GetStateRow()->Select(SBaseStateRowSelectionKeyState());
+        auto row = static_cast<CBaseStateRow *>(m_TimebarRow->GetStateRowUI()->GetTimelineRow());
+        row->Select(SBaseStateRowSelectionKeyState());
 
         m_Snapper.Clear();
         m_Snapper.SetSource(this);
@@ -680,11 +685,10 @@ ISnappingListProvider &CTimebarControl::GetSnappingListProvider() const
 {
     // sk - If you hit this, it means the setup order is incorrect. e.g. loading children is done
     // depth first, ie your child's children is loaded before parent, doesn't work that way.
-    ASSERT(m_SnappingListProvider);
     return *m_SnappingListProvider;
 }
 
 CRct CTimebarControl::GetTopControlBounds() const
 {
-    return m_TimebarRow->GetStateRow()->GetTopControl()->GetBounds();
+    return m_TimebarRow->GetStateRowUI()->GetTopControl()->GetBounds();
 }

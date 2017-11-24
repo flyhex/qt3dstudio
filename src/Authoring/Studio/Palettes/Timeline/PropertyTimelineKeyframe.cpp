@@ -40,6 +40,7 @@
 #include "PropertyTimebarRow.h"
 #include "Renderer.h"
 #include "PropertyRow.h"
+#include "PropertyRowUI.h"
 #include "KeyframeContextMenu.h"
 #include "HotKeys.h"
 #include "ResourceCache.h"
@@ -354,7 +355,7 @@ bool CPropertyTimelineKeyframe::IsSelected()
 */
 void CPropertyTimelineKeyframe::RefreshToolTip(CPt inPoint)
 {
-    CRct theTimelineBounds(m_ParentRow->GetPropertyRow()->GetTopControl()->GetBounds());
+    CRct theTimelineBounds(m_ParentRow->GetPropertyRowUI()->GetTopControl()->GetBounds());
 
     // format label
     Q3DStudio::CString theCommentText = " " + ::FormatTimeString(GetTime());
@@ -370,5 +371,6 @@ void CPropertyTimelineKeyframe::RefreshToolTip(CPt inPoint)
 */
 ITimelineItemProperty *CPropertyTimelineKeyframe::GetProperty() const
 {
-    return m_ParentRow->GetPropertyRow()->GetProperty();
+    auto propertyRow = static_cast<CPropertyRow *>(m_ParentRow->GetPropertyRowUI()->GetTimelineRow());
+    return propertyRow->GetProperty();
 }

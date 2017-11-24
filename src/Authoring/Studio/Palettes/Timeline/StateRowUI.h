@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -26,42 +25,34 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef STATEROWUI_H
+#define STATEROWUI_H
 
-#ifndef INCLUDED_STATE_TIMEBAR_ROW_H
-#define INCLUDED_STATE_TIMEBAR_ROW_H 1
-
-#pragma once
-
-#include "Control.h"
-#include "StateTimebarlessRow.h"
+#include "BaseStateRowUI.h"
 
 class CStateRow;
-class CTimebarControl;
-class CSnapper;
-class ITimelineItemBinding;
 
-class CStateTimebarRow : public CStateTimebarlessRow
+class CStateRowUI : public CBaseStateRowUI
 {
+    Q_OBJECT
 public:
-    CStateTimebarRow(CStateRowUI *inStateRow, bool inCreateTimebar = true);
-    virtual ~CStateTimebarRow();
+    CStateRowUI(CStateRow *stateRow, CAbstractTimelineRowUI *parentUiRow);
+
+    void SetSnappingListProvider(ISnappingListProvider *inProvider) override;
+    ISnappingListProvider *GetSnappingListProvider() const override;
+
+    void SetIndent(long inIndent) override;
 
     // CControl
-    bool OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
 
-    void SetTimeRatio(double inTimeRatio) override;
-
-    void OnSelect() override;
-    void OnDeselect() override;
-    void UpdateTime(long inStartTime, long inEndTime) override;
-
-    void PopulateSnappingList(CSnapper *inSnappingList) override;
-    void RefreshRowMetaData() override;
-
-    void SetSnappingListProvider(ISnappingListProvider *inProvider);
-    ISnappingListProvider &GetSnappingListProvider() const override;
+private Q_SLOTS:
+    void handleTimeChanged();
+    void handleRecalcLayoutRequested();
 
 protected:
-    CTimebarControl *m_Timebar;
+    CBlankToggleControl *CreateToggleControl() override;
+    CBaseTimebarlessRow *CreateTimebarRow() override;
 };
-#endif // INCLUDED_STATE_TIMEBAR_ROW_H
+
+#endif // STATEROWUI_H

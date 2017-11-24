@@ -32,15 +32,18 @@
 #include "ToggleControl.h"
 #include "Renderer.h"
 #include "StateRow.h"
+#include "StateRowUI.h"
 #include "BlankControl.h"
 #include "HotKeys.h"
+#include "TimelineUIFactory.h"
+#include "AbstractTimelineRowUI.h"
+
 #include "Bindings/ITimelineItemBinding.h"
 
-CToggleControl::CToggleControl(CStateRow *inStateRow, ITimelineItemBinding *inTimelineItemBinding)
-    : CBlankToggleControl(inStateRow)
+CToggleControl::CToggleControl(CStateRowUI *inStateRowUI, ITimelineItemBinding *inTimelineItemBinding)
+    : CBlankToggleControl(inStateRowUI)
     , m_TimelineItemBinding(inTimelineItemBinding)
 {
-    m_StateRow = inStateRow;
     long theLeftOffset = 4;
 
     m_Shy = new CToggleButton();
@@ -123,8 +126,10 @@ void CToggleControl::OnShyClicked(CToggleButton *, CToggleButton::EButtonState i
 
     m_StateRow->Filter(*m_StateRow->GetFilter());
     CTimelineRow *theParentRow = m_StateRow->GetParentRow();
-    if (theParentRow != nullptr)
-        theParentRow->OnChildVisibilityChanged();
+    if (theParentRow != nullptr) {
+        auto parentRowUI = TimelineUIFactory::instance()->uiForRow(theParentRow);
+        parentRowUI->OnChildVisibilityChanged();
+    }
 }
 
 //==============================================================================

@@ -53,6 +53,7 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMSlides.h"
 #include "Qt3DSDMSignals.h"
+#include "TimelineUIFactory.h"
 
 // Link to Data model
 #include "ClientDataModelBridge.h"
@@ -142,9 +143,8 @@ void CTimelineTranslationManager::CreateNewPropertyRow(
     if (!inParentRow || !inTimelineItemPropertyBinding)
         return;
 
-    CPropertyRow *theNewRow = new CPropertyRow(inTimelineItemPropertyBinding);
-    inParentRow->AddPropertyRow(theNewRow, inNextRow);
-    inTimelineItemPropertyBinding->Bind(theNewRow);
+    TimelineUIFactory::instance()->createPropertyRow(inParentRow, inNextRow,
+                                                     inTimelineItemPropertyBinding);
 }
 
 //==============================================================================

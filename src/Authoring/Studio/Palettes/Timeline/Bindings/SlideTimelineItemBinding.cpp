@@ -37,6 +37,7 @@
 //==============================================================================
 #include "SlideTimelineItemBinding.h"
 #include "BaseStateRow.h"
+#include "BaseStateRowUI.h"
 
 // Data model specific
 #include "Doc.h"
@@ -86,7 +87,7 @@ void CSlideTimelineItemBinding::SetName(const Q3DStudio::CString & /*inName*/)
 void CSlideTimelineItemBinding::Bind(CBaseStateRow *inRow)
 {
     Qt3DSDMTimelineItemBinding::Bind(inRow);
-    GetRow()->SetNameReadOnly(true);
+    inRow->requestSetNameReadOnly();
 }
 
 bool CSlideTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)

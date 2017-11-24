@@ -32,6 +32,7 @@
 #include "Renderer.h"
 #include "ToggleButton.h"
 #include "BaseStateRow.h"
+#include "BaseStateRowUI.h"
 #include "StudioPreferences.h"
 #include "TimelineDropTarget.h"
 #include "BaseTimelineTreeControl.h"
@@ -45,13 +46,14 @@
  * This control contains the toggle button and item name controls.
  * @param inStateRow the state row of which this belongs to.
  */
-CBaseTimelineTreeControl::CBaseTimelineTreeControl(CBaseStateRow *inStateRow, bool inMaster)
+CBaseTimelineTreeControl::CBaseTimelineTreeControl(CBaseStateRowUI *inStateRow, bool inMaster)
     : m_Selected(false)
     , m_MouseDown(false)
 {
-    m_StateRow = inStateRow;
+    m_StateRowUI = inStateRow;
 
-    m_BackgroundColor = m_StateRow->GetTimebarBackgroundColor(m_StateRow->GetObjectType());
+    auto timelineRow = m_StateRowUI->GetTimelineRow();
+    m_BackgroundColor = timelineRow->GetTimebarBackgroundColor(timelineRow->GetObjectType());
 
     // Create the expand/collapse button.
     m_ExpandButton = new CToggleButton();
@@ -61,11 +63,11 @@ CBaseTimelineTreeControl::CBaseTimelineTreeControl(CBaseStateRow *inStateRow, bo
     // Add the button and initialize all the listeners for the events on it.
     AddChild(m_ExpandButton);
     QObject::connect(m_ExpandButton,&CToggleButton::SigToggle,
-                     std::bind(&CBaseStateRow::ToggleExpansion, m_StateRow,
+                     std::bind(&CBaseStateRow::ToggleExpansion, baseStateRow(),
                                std::placeholders::_1, std::placeholders::_2));
     m_ExpandButton->SetVisible(false);
 
-    m_Icon = new CSIcon(m_StateRow->GetIcon(), m_StateRow->GetDisabledIcon());
+    m_Icon = new CSIcon(baseStateRow()->GetIcon(), baseStateRow()->GetDisabledIcon());
     AddChild(m_Icon);
 
     // Create and add the name label.
@@ -74,7 +76,7 @@ CBaseTimelineTreeControl::CBaseTimelineTreeControl(CBaseStateRow *inStateRow, bo
     // Initialize all the component's positions to 0.
     SetIndent(CStudioPreferences::GetRowSize());
 
-    SetMinimumSize(CPt(CBaseStateRow::DEFAULT_TOGGLE_LENGTH + m_Icon->GetPosition().x
+    SetMinimumSize(CPt(CBaseStateRowUI::DEFAULT_TOGGLE_LENGTH + m_Icon->GetPosition().x
                            + m_Icon->GetSize().x + 5,
                        CStudioPreferences::GetRowSize()));
 
@@ -109,7 +111,7 @@ CBaseTimelineTreeControl::~CBaseTimelineTreeControl()
 void CBaseTimelineTreeControl::CreateText()
 {
     if (!m_Text) {
-        ITimelineItem *theTimelineItem = m_StateRow->GetTimelineItem();
+        ITimelineItem *theTimelineItem = baseStateRow()->GetTimelineItem();
 
         m_Text = new CNameEdit(theTimelineItem);
 
@@ -123,7 +125,7 @@ void CBaseTimelineTreeControl::CreateText()
         m_Text->SetBoldText(false);
 
         // If the object is the scene, you can't edit it's name
-        m_Text->SetEditable(m_StateRow->GetObjectType() != OBJTYPE_SCENE);
+        m_Text->SetEditable(baseStateRow()->GetObjectType() != OBJTYPE_SCENE);
         AddChild(m_Text);
         m_Text->SetPosition(CPt(m_Icon->GetPosition().x + m_Icon->GetSize().x + 5, 1));
 
@@ -139,7 +141,7 @@ void CBaseTimelineTreeControl::CreateText()
         // ( i.e. to the end of the asset name )
         CPt theSize(GetSize());
         theSize.x =
-            CBaseStateRow::DEFAULT_TOGGLE_LENGTH + m_Text->GetPosition().x + m_Text->GetSize().x;
+            CBaseStateRowUI::DEFAULT_TOGGLE_LENGTH + m_Text->GetPosition().x + m_Text->GetSize().x;
         SetAbsoluteSize(theSize);
     }
 }
@@ -156,6 +158,11 @@ void CBaseTimelineTreeControl::UpdateTextSelection()
         // m_Text->SetFillBackground( m_Selected );
         // m_Text->SetBoldText( m_Selected );
     }
+}
+
+CBaseStateRow *CBaseTimelineTreeControl::baseStateRow() const
+{
+    return static_cast<CBaseStateRow* >(m_StateRowUI->GetTimelineRow());
 }
 
 //=============================================================================
@@ -222,7 +229,7 @@ void CBaseTimelineTreeControl::Refresh(ITimelineItem *inTimelineItem)
 
         m_Text->SetData(inTimelineItem->GetName());
     }
-    m_Icon->SetImage((theEnabled) ? m_StateRow->GetIcon() : m_StateRow->GetDisabledIcon());
+    m_Icon->SetImage((theEnabled) ? baseStateRow()->GetIcon() : baseStateRow()->GetDisabledIcon());
     SetEnabled(theEnabled);
 }
 
@@ -304,7 +311,7 @@ void CBaseTimelineTreeControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inF
 
     CControl::OnMouseOut(inPoint, inFlags);
 
-    m_StateRow->OnMouseOut();
+    m_StateRowUI->OnMouseOut();
 
     if (m_TimerHandler) {
 
@@ -327,7 +334,7 @@ void CBaseTimelineTreeControl::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers in
 {
     CControl::OnMouseOver(inPoint, inFlags);
 
-    m_StateRow->OnMouseOver();
+    m_StateRowUI->OnMouseOver();
 }
 
 //=============================================================================
@@ -341,7 +348,7 @@ void CBaseTimelineTreeControl::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers in
 bool CBaseTimelineTreeControl::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     if (!CControl::OnMouseDoubleClick(inPoint, inFlags)) {
-        m_StateRow->OnMouseDoubleClick(inPoint, inFlags);
+        m_StateRowUI->OnMouseDoubleClick(inPoint, inFlags);
         GrabFocus(nullptr);
     }
     return true;
@@ -363,7 +370,7 @@ bool CBaseTimelineTreeControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers in
             theKeyState.SetShiftDown();
         if ((CHotKeys::MODIFIER_CONTROL & inFlags) == CHotKeys::MODIFIER_CONTROL)
             theKeyState.SetControlDown();
-        m_StateRow->Select(theKeyState);
+        baseStateRow()->Select(theKeyState);
 
         // Always track where the mouse is.
         m_MouseDown = true;
@@ -377,7 +384,7 @@ bool CBaseTimelineTreeControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers in
 bool CBaseTimelineTreeControl::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     if (!CControl::OnMouseRDown(inPoint, inFlags))
-        m_StateRow->OnMouseRDown(inPoint, inFlags);
+        m_StateRowUI->OnMouseRDown(inPoint, inFlags);
 
     return true;
 }
@@ -429,7 +436,7 @@ void CBaseTimelineTreeControl::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers in
         if (::abs(theDeltaX) > 3 || ::abs(theDeltaY) > 3) {
             m_TrackingPoint = inPoint;
 
-            m_StateRow->DoStartDrag(GetWindowListener());
+            m_StateRowUI->DoStartDrag(GetWindowListener());
         }
     }
 }
@@ -516,7 +523,7 @@ void CBaseTimelineTreeControl::OnChildSizeChanged(CControl *inChild)
         // ( i.e. to the end of the asset name )
         CPt theSize(GetSize());
         theSize.x =
-            CBaseStateRow::DEFAULT_TOGGLE_LENGTH + m_Text->GetPosition().x + m_Text->GetSize().x;
+            CBaseStateRowUI::DEFAULT_TOGGLE_LENGTH + m_Text->GetPosition().x + m_Text->GetSize().x;
         SetAbsoluteSize(theSize);
     }
 }
@@ -598,7 +605,7 @@ CDropTarget *CBaseTimelineTreeControl::BuildDropTarget(CPt &inMousePoint, Qt::Ke
     theTarget->SetInsertionMarkerIndent(m_Icon->GetPosition().x);
 
     // connect the data portion of the drag&drop action
-    m_StateRow->SetDropTarget(theTarget);
+    m_StateRowUI->SetDropTarget(theTarget);
 
     return theTarget;
 }
@@ -616,7 +623,7 @@ CDropTarget *CBaseTimelineTreeControl::BuildDropTarget(CPt &inMousePoint, Qt::Ke
 CDropTarget *CBaseTimelineTreeControl::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags)
 {
     // Make sure the Mouse Highlighting happens.
-    m_StateRow->OnMouseOver();
+    m_StateRowUI->OnMouseOver();
 
     // This will do all of the work.
     CDropTarget *theReturnTarget = BuildDropTarget(inMousePoint, inFlags);
@@ -640,7 +647,7 @@ CDropTarget *CBaseTimelineTreeControl::FindDropCandidate(CPt &inMousePoint, Qt::
 void CBaseTimelineTreeControl::OnTimer()
 {
     // Expand the Row to show the children.
-    m_StateRow->Expand();
+    baseStateRow()->Expand();
 }
 
 //=============================================================================

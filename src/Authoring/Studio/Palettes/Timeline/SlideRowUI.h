@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -26,42 +25,23 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef SLIDEROWUI_H
+#define SLIDEROWUI_H
 
-#ifndef INCLUDED_STATE_TIMEBAR_ROW_H
-#define INCLUDED_STATE_TIMEBAR_ROW_H 1
+#include "BaseStateRowUI.h"
 
-#pragma once
-
-#include "Control.h"
-#include "StateTimebarlessRow.h"
-
-class CStateRow;
-class CTimebarControl;
-class CSnapper;
-class ITimelineItemBinding;
-
-class CStateTimebarRow : public CStateTimebarlessRow
+class CSlideRowUI : public CBaseStateRowUI
 {
+    Q_OBJECT
 public:
-    CStateTimebarRow(CStateRowUI *inStateRow, bool inCreateTimebar = true);
-    virtual ~CStateTimebarRow();
+    CSlideRowUI(CBaseStateRow *baseStateRow, CAbstractTimelineRowUI *parentUiRow);
 
-    // CControl
-    bool OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    CSlideRowUI(ITimelineItemBinding *inTimelineItem);
 
-    void SetTimeRatio(double inTimeRatio) override;
+    void SetSnappingListProvider(ISnappingListProvider *inProvider) override;
+    ISnappingListProvider *GetSnappingListProvider() const override;
 
-    void OnSelect() override;
-    void OnDeselect() override;
-    void UpdateTime(long inStartTime, long inEndTime) override;
-
-    void PopulateSnappingList(CSnapper *inSnappingList) override;
-    void RefreshRowMetaData() override;
-
-    void SetSnappingListProvider(ISnappingListProvider *inProvider);
-    ISnappingListProvider &GetSnappingListProvider() const override;
-
-protected:
-    CTimebarControl *m_Timebar;
+    CBaseTimebarlessRow *CreateTimebarRow() override;
 };
-#endif // INCLUDED_STATE_TIMEBAR_ROW_H
+
+#endif // SLIDEROWUI_H

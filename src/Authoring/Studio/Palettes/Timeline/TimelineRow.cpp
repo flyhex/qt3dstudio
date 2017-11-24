@@ -30,36 +30,35 @@
 #include "stdafx.h"
 
 #include "TimelineRow.h"
+#include "TimelineUIFactory.h"
 #include "StudioPreferences.h"
 #include "StudioObjectTypes.h"
 
+#include "Bindings/ITimelineItemBinding.h"
+
 const long CTimelineRow::TREE_INDENT = CStudioPreferences::GetRowSize();
 
-CTimelineRow::CTimelineRow()
-    : m_ParentRow(nullptr)
+CTimelineRow::CTimelineRow(CTimelineRow *parent)
+    : QObject(parent)
+    , m_ParentRow(nullptr)
     , m_IsViewable(false)
-    , m_Indent(0)
     , m_ActiveStart(0)
     , m_ActiveEnd(0)
+    , m_TimeRatio(0.0f)
 {
 }
 
 CTimelineRow::~CTimelineRow()
 {
-}
-void CTimelineRow::SetIndent(long inIndent)
-{
-    m_Indent = inIndent;
-}
-
-long CTimelineRow::GetIndent()
-{
-    return m_Indent;
+    TimelineUIFactory::instance()->deleteRowUI(this);
 }
 
 void CTimelineRow::SetParent(CTimelineRow *inParent)
 {
-    m_ParentRow = inParent;
+    if (m_ParentRow != inParent) {
+        m_ParentRow = inParent;
+        TimelineUIFactory::instance()->setParentForRowUI(this, m_ParentRow);
+    }
 }
 
 //=============================================================================
@@ -73,11 +72,12 @@ CTimelineRow *CTimelineRow::GetParentRow() const
 
 void CTimelineRow::SetTimeRatio(double inTimeRatio)
 {
-    Q_UNUSED(inTimeRatio);
+    m_TimeRatio = inTimeRatio;
 }
 
-void CTimelineRow::OnChildVisibilityChanged()
+double CTimelineRow::GetTimeRatio()
 {
+    return m_TimeRatio;
 }
 
 bool CTimelineRow::IsViewable() const
@@ -85,22 +85,6 @@ bool CTimelineRow::IsViewable() const
     return m_IsViewable;
 }
 
-void CTimelineRow::PopulateSnappingList(CSnapper *inSnapper)
-{
-    Q_UNUSED(inSnapper);
-}
-
-//=============================================================================
-/**
- * By default, this will recurse up its parent, for an answer.
- * If this proves to a performance hit, we can cache a ITimelineControl pointer at EVERY row.
- */
-ITimelineControl *CTimelineRow::GetTopControl() const
-{
-    ITimelineControl *theControl = (m_ParentRow) ? m_ParentRow->GetTopControl() : nullptr;
-    ASSERT(theControl);
-    return theControl;
-}
 
 //=============================================================================
 /**
@@ -170,6 +154,11 @@ void CTimelineRow::Dispose()
     delete this;
 }
 
+bool CTimelineRow::isExpanded() const
+{
+    return m_IsExpanded;
+}
+
 long CTimelineRow::GetActiveStart()
 {
     return m_ActiveStart;
@@ -178,4 +167,36 @@ long CTimelineRow::GetActiveStart()
 long CTimelineRow::GetActiveEnd()
 {
     return m_ActiveEnd;
+}
+
+void CTimelineRow::setDirty(bool dirty)
+{
+    if (m_Dirty == dirty)
+        return;
+    m_Dirty = dirty;
+    emit dirtyChanged(dirty);
+}
+
+ITimelineItemBinding *CTimelineRow::GetTimelineItemBinding() const
+{
+    return m_TimelineItemBinding;
+}
+
+//=============================================================================
+/**
+ * @return the studio type of the object represented by this row
+ */
+EStudioObjectType CTimelineRow::GetObjectType() const
+{
+    return GetTimelineItem()->GetObjectType();
+}
+
+ITimelineItem *CTimelineRow::GetTimelineItem() const
+{
+    return m_TimelineItemBinding->GetTimelineItem();
+}
+
+void CTimelineRow::RequestSelectKeysByTime(long inTime, bool inSelected)
+{
+    emit selectKeysByTime(inTime, inSelected);
 }

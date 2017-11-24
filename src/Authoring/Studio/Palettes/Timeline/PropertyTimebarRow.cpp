@@ -37,6 +37,7 @@
 #include "StudioPreferences.h"
 #include "StudioUtils.h"
 #include "PropertyRow.h"
+#include "PropertyRowUI.h"
 #include "MasterP.h"
 #include "KeyframeContextMenu.h"
 #include "PropertyTimelineKeyframe.h"
@@ -49,16 +50,17 @@
 //=============================================================================
 /**
  */
-CPropertyTimebarRow::CPropertyTimebarRow(CPropertyRow *inPropertyRow)
-    : m_PropertyRow(inPropertyRow)
-    , m_DetailedView(inPropertyRow->GetProperty())
+CPropertyTimebarRow::CPropertyTimebarRow(CPropertyRowUI *inPropertyRowUI)
+    : m_PropertyRowUI(inPropertyRowUI)
+    , m_DetailedView(static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow())->GetProperty())
     , m_DirtyFlag(false)
     , m_Refreshing(false)
     , m_SnappingListProvider(nullptr)
 {
     m_DetailedView.SetVisible(false);
 
-    m_BackgroundColor = m_PropertyRow->GetTimebarBackgroundColor();
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+    m_BackgroundColor = propertyRow->GetTimebarBackgroundColor();
 
     AddChild(&m_DetailedView);
     m_Refreshing = false;
@@ -88,7 +90,8 @@ void CPropertyTimebarRow::Draw(CRenderer *inRenderer)
     }
 
     CRct theRect(GetSize());
-    qt3dsdm::TDataTypePair theType = m_PropertyRow->GetProperty()->GetType();
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+    qt3dsdm::TDataTypePair theType = propertyRow->GetProperty()->GetType();
     if (theType.first == qt3dsdm::DataModelDataType::Float3
         && theType.second == qt3dsdm::AdditionalMetaDataType::Color) {
         inRenderer->FillSolidRect(CRct(0, 0, theRect.size.x, theRect.size.y - 1),
@@ -117,7 +120,8 @@ void CPropertyTimebarRow::DrawColor(CRenderer *inRenderer)
 {
     QT3DS_PROFILE(DrawColor);
 
-    ITimelineItemProperty *theProperty = m_PropertyRow->GetProperty();
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+    ITimelineItemProperty *theProperty = propertyRow->GetProperty();
     ASSERT(theProperty->GetChannelCount() == 3); // sanity check
 
     CColor thePreviousColor;
@@ -166,7 +170,7 @@ void CPropertyTimebarRow::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFlags
 {
     CControl::OnMouseOver(inPoint, inFlags);
 
-    m_PropertyRow->OnMouseOver();
+    m_PropertyRowUI->OnMouseOver();
 }
 
 //=============================================================================
@@ -179,7 +183,7 @@ void CPropertyTimebarRow::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseOut(inPoint, inFlags);
 
-    m_PropertyRow->OnMouseOut();
+    m_PropertyRowUI->OnMouseOut();
 }
 
 //=============================================================================
@@ -193,9 +197,10 @@ bool CPropertyTimebarRow::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlag
     // Only do it if a child has not handled the mouse down.
     bool theRetVal = CControl::OnMouseRDown(inPoint, inFlags);
     if (!theRetVal) {
-        m_PropertyRow->Select();
-        CKeyframeContextMenu theMenu(m_PropertyRow->GetProperty()->GetKeyframesManager(),
-                                     m_PropertyRow->GetProperty());
+        auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+        propertyRow->Select();
+        CKeyframeContextMenu theMenu(propertyRow->GetProperty()->GetKeyframesManager(),
+                                     propertyRow->GetProperty());
         DoPopup(&theMenu, inPoint);
         theRetVal = true;
     }
@@ -221,10 +226,11 @@ void CPropertyTimebarRow::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags
  */
 void CPropertyTimebarRow::SetHighlighted(bool inIsHighlighted)
 {
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
     if (inIsHighlighted)
-        m_BackgroundColor = m_PropertyRow->GetTimebarHighlightBackgroundColor();
+        m_BackgroundColor = propertyRow->GetTimebarHighlightBackgroundColor();
     else
-        m_BackgroundColor = m_PropertyRow->GetTimebarBackgroundColor();
+        m_BackgroundColor = propertyRow->GetTimebarBackgroundColor();
 
     Invalidate();
 }
@@ -233,9 +239,9 @@ void CPropertyTimebarRow::SetHighlighted(bool inIsHighlighted)
 /**
  * Get the state row that this belongs to.
  */
-CPropertyRow *CPropertyTimebarRow::GetPropertyRow()
+CPropertyRowUI *CPropertyTimebarRow::GetPropertyRowUI()
 {
-    return m_PropertyRow;
+    return m_PropertyRowUI;
 }
 
 //=============================================================================
@@ -285,6 +291,7 @@ void CPropertyTimebarRow::RefreshKeyframes()
 {
     m_Refreshing = true;
     QT3DS_PROFILE(RefreshKeyframes);
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
 
     // First Loop clears any keys that do not correlate to a supersetkey
     TTimelineKeyframeList::iterator thePos = m_Keyframes.begin();
@@ -292,7 +299,7 @@ void CPropertyTimebarRow::RefreshKeyframes()
         CPropertyTimelineKeyframe *theTimelineKey = (*thePos);
         CPt theSize = theTimelineKey->GetSize();
         IKeyframe *theTempKey = nullptr;
-        theTempKey = m_PropertyRow->GetProperty()->GetKeyframeByTime(theTimelineKey->GetTime());
+        theTempKey = propertyRow->GetProperty()->GetKeyframeByTime(theTimelineKey->GetTime());
 
         // If we find a key at this time, then the timeline key doesn't need to be deleted
         if (!theTempKey) {
@@ -310,10 +317,10 @@ void CPropertyTimebarRow::RefreshKeyframes()
     }
 
     // Second Loop adds teh remaining keys
-    long theKeyframeCount = m_PropertyRow->GetProperty()->GetKeyframeCount();
+    long theKeyframeCount = propertyRow->GetProperty()->GetKeyframeCount();
     for (long theKey = 0; theKey < theKeyframeCount; ++theKey) {
         bool theFoundFlag = false;
-        IKeyframe *theTempKey = m_PropertyRow->GetProperty()->GetKeyframeByIndex(theKey);
+        IKeyframe *theTempKey = propertyRow->GetProperty()->GetKeyframeByIndex(theKey);
         TTimelineKeyframeList::iterator thePos = m_Keyframes.begin();
 
         long theKeyframeTime = theTempKey->GetTime();
@@ -363,7 +370,8 @@ void CPropertyTimebarRow::Invalidate(bool inInvalidate)
 void CPropertyTimebarRow::OnKeySelected(long inTime, bool inSelected)
 {
     if (inTime >= 0) {
-        m_PropertyRow->GetProperty()->SelectKeyframes(inSelected, inTime);
+        auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+        propertyRow->GetProperty()->SelectKeyframes(inSelected, inTime);
         Invalidate();
     }
 }
@@ -374,7 +382,8 @@ void CPropertyTimebarRow::OnKeySelected(long inTime, bool inSelected)
  */
 void CPropertyTimebarRow::DeselectAllKeyframes()
 {
-    m_PropertyRow->GetProperty()->SelectKeyframes(false);
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+    propertyRow->GetProperty()->SelectKeyframes(false);
 }
 
 //=============================================================================
@@ -402,8 +411,9 @@ void CPropertyTimebarRow::SetDirty(bool inDirtyFlag)
  */
 void CPropertyTimebarRow::SelectKeysInRect(CRct inRect, bool inModifierKeyDown)
 {
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
     CMultiSelectAspect<TTimelineKeyframeList> theMultiSelectAspect(m_Keyframes,
-                                                                   m_PropertyRow->GetProperty());
+                                                                   propertyRow->GetProperty());
     theMultiSelectAspect.MultiSelect(inRect, inModifierKeyDown);
 }
 
@@ -421,8 +431,9 @@ void CPropertyTimebarRow::SelectKeysInRect(CRct inRect, bool inModifierKeyDown)
 
 void CPropertyTimebarRow::CommitSelections()
 {
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
     CMultiSelectAspect<TTimelineKeyframeList> theMultiSelectAspect(m_Keyframes,
-                                                                   m_PropertyRow->GetProperty());
+                                                                   propertyRow->GetProperty());
     theMultiSelectAspect.CommitSelections();
 }
 
@@ -448,9 +459,10 @@ bool CPropertyTimebarRow::HasSelectedKeys()
  */
 void CPropertyTimebarRow::SelectAllKeys()
 {
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
     TTimelineKeyframeList::iterator thePos = m_Keyframes.begin();
     for (; thePos != m_Keyframes.end(); ++thePos) {
-        m_PropertyRow->GetProperty()->SelectKeyframes(true, (*thePos)->GetTime());
+        propertyRow->GetProperty()->SelectKeyframes(true, (*thePos)->GetTime());
         (*thePos)->Select(true);
         Invalidate();
     }
@@ -473,7 +485,8 @@ void CPropertyTimebarRow::SetVisible(bool inIsVisible)
 
 bool CPropertyTimebarRow::HasKeyframe(long inTime) const
 {
-    return m_PropertyRow->GetProperty()->GetKeyframeByTime(inTime) != nullptr;
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+    return propertyRow->GetProperty()->GetKeyframeByTime(inTime) != nullptr;
 }
 
 //=============================================================================

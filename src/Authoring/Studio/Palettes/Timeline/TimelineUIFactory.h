@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -26,42 +25,42 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef TIMELINEUIFACTORY_H
+#define TIMELINEUIFACTORY_H
 
-#ifndef INCLUDED_STATE_TIMEBAR_ROW_H
-#define INCLUDED_STATE_TIMEBAR_ROW_H 1
+#include <QObject>
+#include <QHash>
 
-#pragma once
+#include "TimelineRow.h"
+#include "AbstractTimelineRowUI.h"
 
-#include "Control.h"
-#include "StateTimebarlessRow.h"
-
+class CBaseStateRow;
+class CPropertyRow;
+class CSlideRow;
 class CStateRow;
-class CTimebarControl;
-class CSnapper;
-class ITimelineItemBinding;
 
-class CStateTimebarRow : public CStateTimebarlessRow
+class TimelineUIFactory : public QObject
 {
+    Q_OBJECT
+
 public:
-    CStateTimebarRow(CStateRowUI *inStateRow, bool inCreateTimebar = true);
-    virtual ~CStateTimebarRow();
+    static TimelineUIFactory *instance();
+    virtual ~TimelineUIFactory();
 
-    // CControl
-    bool OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    CAbstractTimelineRowUI *uiForRow(CTimelineRow *row);
 
-    void SetTimeRatio(double inTimeRatio) override;
+    CPropertyRow *createPropertyRow(CBaseStateRow *parentRow, CPropertyRow *nextRow, ITimelineItemProperty *inTimelineItemPropertyBinding);
+    CStateRow *createStateRow(CBaseStateRow *parentRow, ITimelineItemBinding *inTimelineItem);
+    CSlideRow *createSlideRow(CBaseStateRow *parentRow, ITimelineItemBinding *inTimelineItem);
 
-    void OnSelect() override;
-    void OnDeselect() override;
-    void UpdateTime(long inStartTime, long inEndTime) override;
+    void deleteRowUI(CTimelineRow *row);
+    void setParentForRowUI(CTimelineRow *row, CTimelineRow *parentRow);
 
-    void PopulateSnappingList(CSnapper *inSnappingList) override;
-    void RefreshRowMetaData() override;
+private:
+    CAbstractTimelineRowUI *createRowUI(CTimelineRow *row, CTimelineRow *parentRow);
 
-    void SetSnappingListProvider(ISnappingListProvider *inProvider);
-    ISnappingListProvider &GetSnappingListProvider() const override;
-
-protected:
-    CTimebarControl *m_Timebar;
+    TimelineUIFactory(QObject *parent = nullptr);
+    QHash<CTimelineRow *, CAbstractTimelineRowUI *> m_uiRows;
 };
-#endif // INCLUDED_STATE_TIMEBAR_ROW_H
+
+#endif // TIMELINEUIFACTORY_H

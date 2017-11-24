@@ -32,6 +32,7 @@
 #include "StateTimebarRow.h"
 #include "Renderer.h"
 #include "StateRow.h"
+#include "StateRowUI.h"
 #include "StudioPreferences.h"
 #include "TimebarControl.h"
 #include "MasterP.h"
@@ -46,12 +47,12 @@
  * the derived class will take care of the construction.
  *
  */
-CStateTimebarRow::CStateTimebarRow(CStateRow *inStateRow, bool inCreateTimebar /*=true*/)
+CStateTimebarRow::CStateTimebarRow(CStateRowUI *inStateRow, bool inCreateTimebar /*=true*/)
     : CStateTimebarlessRow(inStateRow)
     , m_Timebar(nullptr)
 {
     if (inCreateTimebar) {
-        m_Timebar = new CTimebarControl(this, inStateRow->GetTimelineItemBinding());
+        m_Timebar = new CTimebarControl(this, inStateRow->GetTimelineRow()->GetTimelineItemBinding());
         m_Timebar->SetMinimumSize(CPt(0, CStudioPreferences::GetRowSize()));
 
         AddChild(m_Timebar);

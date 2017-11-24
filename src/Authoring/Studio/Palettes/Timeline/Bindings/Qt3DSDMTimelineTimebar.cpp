@@ -150,8 +150,7 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
             if (theBinding) {
                 CBaseStateRow *theRow = theBinding->GetRow();
                 if (theRow) {
-                    CBaseTimebarlessRow *theTimebar = theRow->GetTimebar();
-                    theTimebar->RefreshRowMetaData();
+                    theRow->RequestRefreshRowMetaData();
                 }
             }
         }

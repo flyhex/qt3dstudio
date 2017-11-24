@@ -141,7 +141,18 @@ HEADERS += \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
     Controls/BreadCrumbControl.h \
-    Controls/TreeItem.h
+    Controls/TreeItem.h \
+    Palettes/Timeline/AbstractTimelineRowUI.h \
+    Palettes/Timeline/BaseStateRow.h \
+    Palettes/Timeline/BaseStateRowUI.h \
+    Palettes/Timeline/SlideRow.h \
+    Palettes/Timeline/SlideRowUI.h \
+    Palettes/Timeline/StateRow.h \
+    Palettes/Timeline/StateRowUI.h \
+    Palettes/Timeline/PropertyRow.h \
+    Palettes/Timeline/PropertyRowUI.h \
+    Palettes/Timeline/TimelineRow.h \
+    Palettes/Timeline/TimelineUIFactory.h
 
 FORMS += \
     _Win/UI/timeeditdlg.ui \
@@ -355,7 +366,13 @@ SOURCES += \
     Controls/ClickableLabel.cpp \
     Controls/WidgetControl.cpp \
     _Win/Application/SubPresentationDlg.cpp \
-    _Win/Application/SubPresentationListDlg.cpp
+    _Win/Application/SubPresentationListDlg.cpp \
+    Palettes/Timeline/AbstractTimelineRowUI.cpp \
+    Palettes/Timeline/BaseStateRowUI.cpp \
+    Palettes/Timeline/SlideRowUI.cpp \
+    Palettes/Timeline/StateRowUI.cpp \
+    Palettes/Timeline/TimelineUIFactory.cpp \
+    Palettes/Timeline/PropertyRowUI.cpp
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \

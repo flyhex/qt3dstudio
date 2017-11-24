@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -26,42 +25,37 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#include "SlideRowUI.h"
 
-#ifndef INCLUDED_STATE_TIMEBAR_ROW_H
-#define INCLUDED_STATE_TIMEBAR_ROW_H 1
+#include "SlideRow.h"
 
-#pragma once
+#include "ITimelineControl.h"
+#include "SlideTimebarRow.h"
 
-#include "Control.h"
-#include "StateTimebarlessRow.h"
-
-class CStateRow;
-class CTimebarControl;
-class CSnapper;
-class ITimelineItemBinding;
-
-class CStateTimebarRow : public CStateTimebarlessRow
+CSlideRowUI::CSlideRowUI(CBaseStateRow *baseStateRow, CAbstractTimelineRowUI *parentUiRow)
+    : CBaseStateRowUI(baseStateRow, parentUiRow)
 {
-public:
-    CStateTimebarRow(CStateRowUI *inStateRow, bool inCreateTimebar = true);
-    virtual ~CStateTimebarRow();
+}
 
-    // CControl
-    bool OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+void CSlideRowUI::SetSnappingListProvider(ISnappingListProvider *inProvider)
+{
+    Q_UNUSED(inProvider);
+}
 
-    void SetTimeRatio(double inTimeRatio) override;
+ISnappingListProvider *CSlideRowUI::GetSnappingListProvider() const
+{
+    Q_ASSERT(m_TimelineControl);
+    return m_TimelineControl->GetSnappingListProvider();
+}
 
-    void OnSelect() override;
-    void OnDeselect() override;
-    void UpdateTime(long inStartTime, long inEndTime) override;
+//=============================================================================
+/**
+ * Create a new CStateTimebarRow.
+ * This is virtual and used for objects to return their type specific
+ * timebar rows if they want to.
+ * @return the created timebar row.
+ */CBaseTimebarlessRow *CSlideRowUI::CreateTimebarRow()
+{
+    return new CSlideTimebarRow(this);
 
-    void PopulateSnappingList(CSnapper *inSnappingList) override;
-    void RefreshRowMetaData() override;
-
-    void SetSnappingListProvider(ISnappingListProvider *inProvider);
-    ISnappingListProvider &GetSnappingListProvider() const override;
-
-protected:
-    CTimebarControl *m_Timebar;
-};
-#endif // INCLUDED_STATE_TIMEBAR_ROW_H
+}

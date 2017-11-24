@@ -39,6 +39,7 @@
 
 class CButtonControl;
 class CBaseStateRow;
+class CBaseStateRowUI;
 class CDropTarget;
 class CNameEdit;
 class CTickTockProc;
@@ -53,7 +54,7 @@ class CBaseTimelineTreeControl : public CControl
 public:
     enum ECONTROLREGION { ECONTROLREGION_ON, ECONTROLREGION_ABOVE, ECONTROLREGION_BELOW };
 
-    CBaseTimelineTreeControl(CBaseStateRow *inStateRow, bool inMaster);
+    CBaseTimelineTreeControl(CBaseStateRowUI *inStateRow, bool inMaster);
     virtual ~CBaseTimelineTreeControl();
 
     void Draw(CRenderer *inRenderer) override;
@@ -100,9 +101,11 @@ protected:
     void CreateText(); // delay text creation until row is exposed
     void UpdateTextSelection();
 
+    CBaseStateRow *baseStateRow() const;
+
     long m_Indent;
 
-    CBaseStateRow *m_StateRow;
+    CBaseStateRowUI *m_StateRowUI;
 
     CToggleButton *m_ExpandButton;
     CNameEdit *m_Text;

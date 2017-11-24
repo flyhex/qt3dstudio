@@ -32,14 +32,16 @@
 #include "PropertyToggleControl.h"
 #include "TimelineRow.h"
 #include "PropertyRow.h"
+#include "PropertyRowUI.h"
 #include "Renderer.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
 
-CPropertyToggleControl::CPropertyToggleControl(CPropertyRow *inPropertyRow)
-    : m_PropertyRow(inPropertyRow)
+CPropertyToggleControl::CPropertyToggleControl(CPropertyRowUI *inPropertyRow)
+    : m_PropertyRowUI(inPropertyRow)
 {
-    m_BackgroundColor = m_PropertyRow->GetTimebarBackgroundColor();
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+    m_BackgroundColor = propertyRow->GetTimebarBackgroundColor();
 }
 
 CPropertyToggleControl::~CPropertyToggleControl()
@@ -77,22 +79,23 @@ void CPropertyToggleControl::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFl
 {
     CControl::OnMouseOver(inPoint, inFlags);
 
-    m_PropertyRow->OnMouseOver();
+    m_PropertyRowUI->OnMouseOver();
 }
 
 void CPropertyToggleControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseOut(inPoint, inFlags);
 
-    m_PropertyRow->OnMouseOut();
+    m_PropertyRowUI->OnMouseOut();
 }
 
 void CPropertyToggleControl::SetHighlighted(bool inIsHighlighted)
 {
+    auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
     if (inIsHighlighted)
-        m_BackgroundColor = m_PropertyRow->GetTimebarHighlightBackgroundColor();
+        m_BackgroundColor = propertyRow->GetTimebarHighlightBackgroundColor();
     else
-        m_BackgroundColor = m_PropertyRow->GetTimebarBackgroundColor();
+        m_BackgroundColor = propertyRow->GetTimebarBackgroundColor();
 
     Invalidate();
 }
@@ -103,8 +106,10 @@ void CPropertyToggleControl::SetHighlighted(bool inIsHighlighted)
  */
 bool CPropertyToggleControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
-    if (!CControl::OnMouseDown(inPoint, inFlags))
-        m_PropertyRow->Select((CHotKeys::MODIFIER_SHIFT & inFlags) == CHotKeys::MODIFIER_SHIFT);
+    if (!CControl::OnMouseDown(inPoint, inFlags)) {
+        auto propertyRow = static_cast<CPropertyRow *>(m_PropertyRowUI->GetTimelineRow());
+        propertyRow->Select((CHotKeys::MODIFIER_SHIFT & inFlags) == CHotKeys::MODIFIER_SHIFT);
+    }
 
     return true;
 }

@@ -35,12 +35,12 @@
 #include "Control.h"
 #include "CColor.h"
 
-class CPropertyRow;
+class CPropertyRowUI;
 
 class CPropertyToggleControl : public CControl
 {
 public:
-    CPropertyToggleControl(CPropertyRow *inPropertyRow);
+    CPropertyToggleControl(CPropertyRowUI *inPropertyRow);
     virtual ~CPropertyToggleControl();
 
     void Draw(CRenderer *inRenderer) override;
@@ -52,7 +52,7 @@ public:
     void SetHighlighted(bool inIsHightlighted);
 
 protected:
-    CPropertyRow *m_PropertyRow;
+    CPropertyRowUI *m_PropertyRowUI;
     ::CColor m_BackgroundColor;
 };
 #endif // INCLUDED_PROPERTY_TOGGLE_CONTROL_H

@@ -31,44 +31,24 @@
 
 #include "BaseStateRow.h"
 #include "PropertyRow.h"
-#include "BaseTimelineTreeControl.h"
-#include "ToggleControl.h"
-#include "BaseTimebarlessRow.h"
-#include "ColorControl.h"
 #include "StateRowFactory.h"
 #include "TimelineTimelineLayout.h"
 #include "ComponentContextMenu.h"
-#include "ITimelineControl.h"
 #include "ResourceCache.h"
 #include "StudioUtils.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
 
-const long CBaseStateRow::DEFAULT_TOGGLE_LENGTH = 57;
 
-CBaseStateRow::CBaseStateRow()
-    : m_TimeRatio(0.0f)
-    , m_TreeList(true)// true to align the children in the timeline.
-    , m_TreeControl(nullptr)
-    , m_ColorControl(nullptr)
-    , m_ToggleControl(nullptr)
-    , m_TimebarControl(nullptr)
+CBaseStateRow::CBaseStateRow(CTimelineRow *parent)
+    : CTimelineRow(parent)
     , m_Loaded(false)
-    , m_IsExpanded(false)
-    , m_Highlighted(false)
-    , m_Dirty(false)
     , m_Selected(false)
-    , m_TimelineItemBinding(nullptr)
 {
 }
 
 CBaseStateRow::~CBaseStateRow()
 {
-    delete m_TreeControl;
-    delete m_ColorControl;
-    delete m_ToggleControl;
-    delete m_TimebarControl;
-
     // Go through all the state rows and delete them, this control owns all child controls.
     TStateRowList::iterator thePos = m_StateRows.begin();
     for (; thePos != m_StateRows.end(); ++thePos)
@@ -84,46 +64,12 @@ CBaseStateRow::~CBaseStateRow()
 
 void CBaseStateRow::Initialize(ITimelineItemBinding *inTimelineItemBinding)
 {
-    m_Dirty = true;
-    ASSERT(inTimelineItemBinding);
-    m_TimelineItemBinding = inTimelineItemBinding;
-
-    m_TreeControl = new CBaseTimelineTreeControl(this, GetTimelineItem()->IsMaster());
-    m_ColorControl = new CColorControl(this);
-    m_ToggleControl = CreateToggleControl();
-    m_TimebarControl = CreateTimebarRow();
-
-    long theTimebarHeight = CStudioPreferences::GetRowSize();
-    m_TreeControl->SetSize(CPt(500, theTimebarHeight));
-    m_ColorControl->SetAbsoluteSize(CPt(theTimebarHeight, theTimebarHeight));
-    m_ToggleControl->SetAbsoluteSize(CPt(DEFAULT_TOGGLE_LENGTH, theTimebarHeight));
-    m_TimebarControl->SetSize(CPt(800, theTimebarHeight));
-
-    ::CColor theColor = GetTimebarBackgroundColor(GetObjectType());
-    m_TreeControl->SetBackgroundColor(theColor);
-    m_ToggleControl->SetBackgroundColor(theColor);
-    m_TimebarControl->SetBackgroundColor(theColor);
-
-    m_ColorList.AddChild(m_ColorControl);
-    m_TreeList.AddChild(m_TreeControl);
-    m_ToggleList.AddChild(m_ToggleControl);
-    m_TimebarList.AddChild(m_TimebarControl);
-
-    // sk - I think setting controls' names is only useful for debugging.
-    /*Q3DStudio::CString theAssetName( m_Asset->GetName( ) );
-    m_TreeControl->SetName( theAssetName + "TreeControl" );
-    m_TreeList.SetName( theAssetName + "TreeList" );
-    m_ColorControl->SetName( theAssetName + "ColorControl" );
-    m_ColorList.SetName( theAssetName + "ColorList" );
-    m_ToggleControl->SetName( theAssetName + "ToggleControl" );
-    m_ToggleList.SetName( theAssetName + "ToggleList" );
-    m_TimebarControl->SetName( theAssetName + "TimebarControl" );
-    m_TimebarList.SetName( theAssetName + "TimebarList" );*/
-
     // Bind after all the UI is setup.
+    Q_ASSERT(inTimelineItemBinding);
+    m_TimelineItemBinding = inTimelineItemBinding;
     m_TimelineItemBinding->Bind(this); // see Dispose where it properly unbinds.
 
-    ClearDirty();
+    emit initialized();
 }
 
 //=============================================================================
@@ -151,9 +97,9 @@ void CBaseStateRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
             theRow->Filter(m_Filter, false);
         }
 
-        m_TreeControl->SetExpanded(true);
         m_IsExpanded = true;
-        m_ColorControl->UpdateIconStatus();
+
+        emit expanded(true);
     }
 
     if (inExpandAll) {
@@ -192,9 +138,9 @@ void CBaseStateRow::Collapse(bool inCollapseAll /* = false */)
 
         m_TimelineItemBinding->OnCollapsed();
 
-        m_TreeControl->SetExpanded(false);
         m_IsExpanded = false;
-        m_ColorControl->UpdateIconStatus();
+
+        emit expanded(false);
     }
 
     if (inCollapseAll) {
@@ -251,10 +197,7 @@ void CBaseStateRow::Filter(const CFilter &inFilter, bool inFilterChildren /*= tr
     theVisibleFlag &= inFilter.IsExpanded();
 
     // Show or hide the controls on this row before we iterate through the properties
-    m_ColorList.SetVisible(theVisibleFlag);
-    m_TreeList.SetVisible(theVisibleFlag);
-    m_ToggleList.SetVisible(theVisibleFlag);
-    m_TimebarList.SetVisible(theVisibleFlag);
+    emit visibleChanged(theVisibleFlag);
 
     if (inFilterChildren) {
         CFilter theChildFilter = inFilter;
@@ -270,48 +213,10 @@ void CBaseStateRow::Filter(const CFilter &inFilter, bool inFilterChildren /*= tr
         }
     }
 
-    m_TreeControl->SetToggleVisible(this->HasVisibleChildren());
+    emit hasChildrenChanged(HasVisibleChildren());
 }
 
-//=============================================================================
-/**
- * Get the color control for this row.
- * @return the color control for this row.
- */
-CControl *CBaseStateRow::GetColorControl()
-{
-    return &m_ColorList;
-}
 
-//=============================================================================
-/**
- * Get the tree control for this row.
- * @return the tree control for this row.
- */
-CControl *CBaseStateRow::GetTreeControl()
-{
-    return &m_TreeList;
-}
-
-//=============================================================================
-/**
- * Get the toggle control for this row.
- * @return the toggle control for this row.
- */
-CControl *CBaseStateRow::GetToggleControl()
-{
-    return &m_ToggleList;
-}
-
-//=============================================================================
-/**
- * Get the timebar control for this row.
- * @return the timebar control for this row.
- */
-CControl *CBaseStateRow::GetTimebarControl()
-{
-    return &m_TimebarList;
-}
 
 //=============================================================================
 /**
@@ -329,7 +234,7 @@ void CBaseStateRow::RemoveRow(CStateRow *inRow)
             break;
         }
     }
-    m_TreeControl->SetToggleVisible(this->HasVisibleChildren());
+    emit hasChildrenChanged(HasVisibleChildren());
 }
 
 //=============================================================================
@@ -341,20 +246,8 @@ void CBaseStateRow::DeletePropertyRow(CPropertyRow *inPropertyRow)
     if (!inPropertyRow)
         return;
 
-    m_ColorList.RemoveChild(inPropertyRow->GetColorControl());
-    m_TreeList.RemoveChild(inPropertyRow->GetTreeControl());
-    m_ToggleList.RemoveChild(inPropertyRow->GetToggleControl());
-    m_TimebarList.RemoveChild(inPropertyRow->GetTimebarControl());
+    emit rowAboutToBeRemoved(inPropertyRow);
     delete inPropertyRow;
-}
-
-//=============================================================================
-/**
- * By default, we don't show shy/eye/lock toggles
- */
-CBlankToggleControl *CBaseStateRow::CreateToggleControl()
-{
-    return new CBlankToggleControl(this);
 }
 
 //=============================================================================
@@ -381,82 +274,10 @@ CStateRow *CBaseStateRow::GetRow(ITimelineItem *inTimelineItem)
  */
 void CBaseStateRow::DeleteRow(CStateRow *inRow)
 {
-    m_ColorList.RemoveChild(inRow->GetColorControl());
-    m_TreeList.RemoveChild(inRow->GetTreeControl());
-    m_ToggleList.RemoveChild(inRow->GetToggleControl());
-    m_TimebarList.RemoveChild(inRow->GetTimebarControl());
-
+    emit rowAboutToBeRemoved(inRow);
     inRow->Dispose();
 }
 
-//=============================================================================
-/**
- * Call from the child controls that the mouse is over one of the children.
- * This is used to highlight the entire row on mouse over.
- */
-void CBaseStateRow::OnMouseOver()
-{
-    if (!m_Highlighted) {
-        try {
-            // TODO: Added the try/catch block to prevent crashing when the instance handle is not
-            // found
-            // this will happen sometimes when delete the object from the timeline
-            // need to really fix this at the root.
-            ::CColor theColor = GetTimebarHighlightBackgroundColor(GetObjectType());
-            m_TreeControl->SetBackgroundColor(theColor);
-            m_ToggleControl->SetBackgroundColor(theColor);
-            m_TimebarControl->SetBackgroundColor(theColor);
-
-            m_Highlighted = true;
-        } catch (...) {
-        }
-    }
-}
-
-//=============================================================================
-/**
- * Call from the child controls that the mouse is no longer over one of the children.
- * This is used to highlight the entire row on mouse over.
- */
-void CBaseStateRow::OnMouseOut()
-{
-    if (m_Highlighted) {
-        try {
-            // TODO: Added the try/catch block to prevent crashing when the instance handle is not
-            // found
-            // this will happen sometimes when delete the object from the timeline
-            // need to really fix this at the root.
-            ::CColor theColor = GetTimebarBackgroundColor(GetObjectType());
-            m_TreeControl->SetBackgroundColor(theColor);
-            m_ToggleControl->SetBackgroundColor(theColor);
-            m_TimebarControl->SetBackgroundColor(theColor);
-
-            m_Highlighted = false;
-        } catch (...) {
-        }
-    }
-}
-
-//=============================================================================
-/**
- * Tells this that the Asset data has changed and it needs to be updated.
- * Someone should call ClearDirty afterwards.
- */
-void CBaseStateRow::OnDirty()
-{
-    m_Dirty = true;
-}
-
-void CBaseStateRow::ClearDirty()
-{
-    if (m_Dirty) {
-        m_TreeControl->Refresh(m_TimelineItemBinding->GetTimelineItem());
-        m_ToggleControl->Refresh();
-        m_ColorControl->Invalidate();
-        m_TimebarControl->RefreshRowMetaData();
-        m_Dirty = false;
-    }
-}
 
 //=============================================================================
 /**
@@ -475,7 +296,7 @@ void CBaseStateRow::LoadChildren()
         for (; !theChildIter.IsDone(); ++theChildIter)
             CreateChildRow(*theChildIter, nullptr);
 
-        GetTopControl()->OnLayoutChanged();
+        emit childrenLoaded();
     }
 }
 
@@ -502,9 +323,7 @@ void CBaseStateRow::AddChildRow(ITimelineItemBinding *inTimeLineItem,
 
     CBaseStateRow *theRow = GetRow(inTimeLineItem->GetTimelineItem());
     if (theRow) {
-        CControl *theTreeControl = theRow->GetTreeControl();
-        if (theTreeControl)
-            theTreeControl->EnsureVisible();
+        emit rowAdded(theRow);
     }
 }
 
@@ -514,8 +333,9 @@ void CBaseStateRow::RemoveChildRow(ITimelineItemBinding *inTimelineItem)
     inTimelineItem->SetParent(nullptr);
     if (theChildRow) {
         RemoveRow(theChildRow);
+        // KDAB_TODO check if needed
         // preserving legacy behavior.
-        GetTopControl()->HideTimelineMoveableTooltip();
+//        GetTopControl()->HideTimelineMoveableTooltip();
     }
 }
 
@@ -560,7 +380,7 @@ void CBaseStateRow::Select(SBaseStateRowSelectionKeyState inState,
     m_TimelineItemBinding->SetSelected(inState.IsControlDown());
     if (inCheckKeySelection) {
         if (inState.IsShiftDown())
-            m_TimebarControl->SelectAllKeys();
+            emit selectAllKeys();
         else if (!alreadySelected)
             m_TimelineItemBinding->ClearKeySelection();
     }
@@ -579,19 +399,29 @@ void CBaseStateRow::OnSelected(bool inSelection)
     if (inSelection) {
         if (m_ParentRow)
             m_ParentRow->Expand(false, true);
-
-        m_TreeControl->EnsureVisible();
-
-        m_TreeControl->OnSelect();
-        m_ToggleControl->OnSelect();
-        m_ColorControl->OnSelect();
-        m_TimebarControl->OnSelect();
-    } else {
-        m_TreeControl->OnDeselect();
-        m_ToggleControl->OnDeselect();
-        m_ColorControl->OnDeselect();
-        m_TimebarControl->OnDeselect();
     }
+
+    emit selectedChanged(inSelection);
+}
+
+void CBaseStateRow::RequestRefreshRowMetaData()
+{
+    emit refreshRowMetaData();
+}
+
+void CBaseStateRow::ForceEmitChildrenChanged()
+{
+    emit hasChildrenChanged(HasVisibleChildren());
+}
+
+void CBaseStateRow::requestSetNameReadOnly()
+{
+    emit setNameReadOnly();
+}
+
+void CBaseStateRow::requestUpdateActionStatus()
+{
+    emit updateActionStatus();
 }
 
 //=============================================================================
@@ -603,10 +433,8 @@ void CBaseStateRow::AddPropertyRow(CPropertyRow *inRow, CTimelineRow *inNextRow 
 {
     m_PropertyRows.push_back(inRow);
     InitializePropertyRow(inRow, inNextRow);
-    // For snapping timebars/keyframes
-    inRow->SetSnappingListProvider(GetSnappingListProvider());
 
-    m_TimebarControl->SetDirty(true);
+    emit propertyRowAdded(inRow);
 }
 
 //=============================================================================
@@ -626,7 +454,7 @@ void CBaseStateRow::RemovePropertyRow(const CPropertyRow *inRow)
             m_PropertyRows.erase(thePropPos);
 
             // Update flippy
-            OnChildVisibilityChanged();
+            emit hasChildrenChanged(HasVisibleChildren());
             break;
         }
     }
@@ -650,53 +478,13 @@ void CBaseStateRow::InitializePropertyRow(CPropertyRow *inRow, CTimelineRow *inN
         if (!theIterator.IsDone())
             inNextRow = GetRow(theIterator.GetCurrent()->GetTimelineItem());
     }
-    AddRowToUILists(inRow, inNextRow, theFilter);
-}
-
-void CBaseStateRow::AddRowToUILists(CTimelineRow *inRow, CTimelineRow *inNextRow, CFilter &inFilter)
-{
-    // Default the insert locations to the end of the list.
-    CControl *theNextColorControl = nullptr;
-    CControl *theNextTreeControl = nullptr;
-    CControl *theNextToggleControl = nullptr;
-    CControl *theNextTimebarControl = nullptr;
-    if (inNextRow) {
-        theNextColorControl = inNextRow->GetColorControl();
-        theNextTreeControl = inNextRow->GetTreeControl();
-        theNextToggleControl = inNextRow->GetToggleControl();
-        theNextTimebarControl = inNextRow->GetTimebarControl();
-    }
-    inRow->SetIndent(m_Indent + CTimelineRow::TREE_INDENT);
-    inRow->SetParent(this);
-    inRow->Filter(inFilter);
-    inRow->SetTimeRatio(m_TimeRatio);
-
-    CControl *theColorControl = inRow->GetColorControl();
-    CControl *theTreeControl = inRow->GetTreeControl();
-    CControl *theToggleControl = inRow->GetToggleControl();
-    CControl *theTimebarControl = inRow->GetTimebarControl();
-
-    // If not expanded then hide the controls.
-    if (!m_IsExpanded) {
-        theColorControl->SetVisible(false);
-        theTreeControl->SetVisible(false);
-        theToggleControl->SetVisible(false);
-        theTimebarControl->SetVisible(false);
-    }
-
-    // Add the controls to the lists in the prioritized order
-    m_ColorList.AddChild(theColorControl, theNextColorControl);
-    m_TreeList.AddChild(theTreeControl, theNextTreeControl);
-    m_ToggleList.AddChild(theToggleControl, theNextToggleControl);
-    m_TimebarList.AddChild(theTimebarControl, theNextTimebarControl);
-
-    m_TreeControl->SetToggleVisible(this->HasVisibleChildren());
+    emit addRowToUILists(inRow, inNextRow, theFilter);
 }
 
 CStateRow *CBaseStateRow::CreateChildRow(ITimelineItemBinding *inChildBinding, CStateRow *inNextRow)
 {
     CStateRow *theRow =
-        CStateRowFactory::CreateStateRow(inChildBinding, this, GetSnappingListProvider());
+        CStateRowFactory::CreateStateRow(inChildBinding, this);
     if (theRow) { // add by appending to the list
         AddStateRow(theRow, inNextRow);
     }
@@ -745,7 +533,7 @@ void CBaseStateRow::AddStateRow(CStateRow *inRow, CStateRow *inNextRow)
         m_StateRows.push_back(inRow);
     }
 
-    AddRowToUILists(inRow, inNextRow, m_Filter);
+    emit addRowToUILists(inRow, inNextRow, m_Filter);
 }
 
 //=============================================================================
@@ -782,106 +570,24 @@ bool CBaseStateRow::HasVisibleChildren()
  */
 void CBaseStateRow::SetTimeRatio(double inTimeRatio)
 {
-    m_TimeRatio = inTimeRatio;
-    m_TimebarControl->SetTimeRatio(inTimeRatio);
+    if (m_TimeRatio != inTimeRatio) {
+        m_TimeRatio = inTimeRatio;
 
-    TStateRowList::iterator thePos = m_StateRows.begin();
-    for (; thePos != m_StateRows.end(); ++thePos) {
-        (*thePos)->SetTimeRatio(inTimeRatio);
-    }
-
-    TPropertyRowList::iterator thePropPos = m_PropertyRows.begin();
-    for (; thePropPos != m_PropertyRows.end(); ++thePropPos) {
-        CPropertyRow *thePropRow = (*thePropPos);
-        if (thePropRow)
-            thePropRow->SetTimeRatio(inTimeRatio);
-    }
-}
-
-//=============================================================================
-/**
- * Called when a child becomes visible/invisible.
- */
-void CBaseStateRow::OnChildVisibilityChanged()
-{
-    m_TreeControl->SetToggleVisible(this->HasVisibleChildren());
-}
-
-//=============================================================================
-/**
- * Called when the mouse is double clicked.
- * @param inPoint location of the mouse at time of event
- * @param inFlags modifier key states at time of event
- */
-void CBaseStateRow::OnMouseDoubleClick(CPt, Qt::KeyboardModifiers inFlags)
-{
-    // Do nothing by default. Let subclasses define what to do.
-    Q_UNUSED(inFlags);
-}
-
-//=============================================================================
-/**
- * Show context menu for this row
- */
-void CBaseStateRow::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
-    Q_UNUSED(inFlags);
-
-    Select(SBaseStateRowSelectionKeyState()); // ensure this is selected, but doesn't affect any key
-                                              // selections, because this can be triggered from a
-                                              // key being selected
-    CComponentContextMenu theMenu(m_TreeControl, m_TimelineItemBinding);
-    m_TreeControl->DoPopup(&theMenu, inPoint);
-}
-
-//=============================================================================
-/**
- * Selects keys in a given rect
- * @param inRect the rect to use for selection
- */
-void CBaseStateRow::SelectKeysInRect(CRct inRect, bool inModifierKeyDown,
-                                     bool inGlobalCommitSelectionFlag)
-{
-    CRct theOffsetRect = inRect;
-    theOffsetRect.Offset(-m_TimebarList.GetPosition());
-
-    // Commits the keyframe selection by setting the keyframes' previous state to its current state,
-    // when the user releases the mouse button.
-    // This will help the keyframes to retain their original states even though they are
-    // not in the mouse select region.
-    if (inGlobalCommitSelectionFlag) {
-        m_TimebarControl->CommitSelections();
-
-        // iterates through every property row and commits the selection states of properties
-        // keyframes
-        TPropertyRowList::iterator thePropPos = m_PropertyRows.begin();
-        for (; thePropPos != m_PropertyRows.end(); ++thePropPos) {
-            CPropertyRow *thePropRow = (*thePropPos);
-            if (thePropRow && thePropRow->IsViewable())
-                thePropRow->CommitSelections();
-        }
-    }
-
-    if (m_IsExpanded) {
-        // Iterates each property row and select the keys that are in the rectangle
-        TPropertyRowList::iterator thePropPos = m_PropertyRows.begin();
-        for (; thePropPos != m_PropertyRows.end(); ++thePropPos) {
-            CPropertyRow *thePropRow = (*thePropPos);
-            if (thePropRow && thePropRow->IsViewable())
-                thePropRow->SelectKeysInRect(theOffsetRect, inModifierKeyDown);
-        }
-
-        // Recurse the each state row (or master row) and selects the property keyframes in them
         TStateRowList::iterator thePos = m_StateRows.begin();
-        for (; thePos != m_StateRows.end(); ++thePos)
-            (*thePos)->SelectKeysInRect(theOffsetRect, inModifierKeyDown,
-                                        inGlobalCommitSelectionFlag);
+        for (; thePos != m_StateRows.end(); ++thePos) {
+            (*thePos)->SetTimeRatio(inTimeRatio);
+        }
 
-    } else {
-        // Selects all the master key frames  in the rect
-        m_TimebarControl->SelectKeysInRect(theOffsetRect, inModifierKeyDown);
+        TPropertyRowList::iterator thePropPos = m_PropertyRows.begin();
+        for (; thePropPos != m_PropertyRows.end(); ++thePropPos) {
+            CPropertyRow *thePropRow = (*thePropPos);
+            if (thePropRow)
+                thePropRow->SetTimeRatio(inTimeRatio);
+        }
+        emit timeRatioChanged(inTimeRatio);
     }
 }
+
 
 //=============================================================================
 /**
@@ -899,70 +605,8 @@ void CBaseStateRow::DeleteAllKeys()
     }
 }
 
-//=============================================================================
-/**
- * Add snapping points to inSnappingList.
- * This will add the snapping points for any visible objects to inSnappingList.
- * @param inSnappingList the list to add the snapping points to.
- */
-void CBaseStateRow::PopulateSnappingList(CSnapper *inSnappingList)
-{
-    inSnappingList->PushOffset(-m_TimebarList.GetPosition().y);
-    m_TimebarControl->PopulateSnappingList(inSnappingList);
-
-    if (IsExpanded()) {
-        TStateRowList::iterator thePos = m_StateRows.begin();
-        for (; thePos != m_StateRows.end(); ++thePos) {
-            (*thePos)->PopulateSnappingList(inSnappingList);
-        }
-    }
-}
-
-//=============================================================================
-/**
- * Sets all the child control enable states
- * @param inEnabled the state to set the controls to
- */
-void CBaseStateRow::SetEnabled(bool inEnabled)
-{
-    m_TreeControl->SetEnabled(inEnabled);
-    m_ToggleControl->SetEnabled(inEnabled);
-    m_ColorControl->SetEnabled(inEnabled);
-    m_TimebarControl->SetEnabled(inEnabled);
-}
-
-//=============================================================================
-/**
- * Begin dragging.
- * sk - potential spot for refactoring the Drag&Drop implementation.
- * Right now, each IDragable is implicitly assumed to be a asset implementation. See
- * *DropSource.cpp: each IDragable is dynamically cast to its implementation.
- */
-void CBaseStateRow::DoStartDrag(CControlWindowListener *inWndListener)
-{
-    m_TimelineItemBinding->DoStartDrag(inWndListener);
-}
-
-void CBaseStateRow::AcceptDropAfter(bool inAccept)
-{
-    m_TreeControl->AcceptDropAfter(inAccept);
-}
-
-void CBaseStateRow::AcceptDropBefore(bool inAccept)
-{
-    m_TreeControl->AcceptDropBefore(inAccept);
-}
-
-//=============================================================================
-/**
- *	Pass through to the binding to set up the target aset for a drag&drop action on this
- *control.
- */
-void CBaseStateRow::SetDropTarget(CDropTarget *inDropTarget)
-{
-    m_TimelineItemBinding->SetDropTarget(inDropTarget);
-}
-
+// KDAB_TODO unused?
+/*
 void CBaseStateRow::SetTimelineLatestTime(long inTime)
 {
     long theLength = ::TimeToPos(inTime, m_TimeRatio) + CTimelineTimelineLayout::END_BUFFER_SIZE;
@@ -972,6 +616,7 @@ void CBaseStateRow::SetTimelineLatestTime(long inTime)
     for (; thePos != m_StateRows.end(); ++thePos)
         (*thePos)->SetTimelineLatestTime(inTime);
 }
+*/
 
 //=============================================================================
 /**
@@ -1069,24 +714,7 @@ QPixmap CBaseStateRow::GetDisabledIcon()
         CStudioObjectTypes::GetDisabledIconName(GetObjectType()));
 }
 
-//=============================================================================
-/**
- * @return the studio type of the object represented by this row
- */
-EStudioObjectType CBaseStateRow::GetObjectType() const
-{
-    return GetTimelineItem()->GetObjectType();
-}
 
-ITimelineItemBinding *CBaseStateRow::GetTimelineItemBinding() const
-{
-    return m_TimelineItemBinding;
-}
-
-ITimelineItem *CBaseStateRow::GetTimelineItem() const
-{
-    return m_TimelineItemBinding->GetTimelineItem();
-}
 
 //=============================================================================
 /**
@@ -1101,28 +729,14 @@ void CBaseStateRow::Dispose()
     CTimelineRow::Dispose();
 }
 
-void CBaseStateRow::UpdateActionStatus()
+
+CBaseStateRow::TPropertyRowList CBaseStateRow::GetPropertyRows() const
 {
-    m_ColorControl->UpdateIconStatus();
+    return m_PropertyRows;
 }
 
-//=============================================================================
-/**
- * Restores the focus state of this row.
- */
-void CBaseStateRow::SetFocus()
+CBaseStateRow::TStateRowList CBaseStateRow::GetStateRows() const
 {
-    CControl *theParent = m_TreeControl->GetParent();
-    if (theParent)
-        theParent->GrabFocus(m_TreeControl);
+    return m_StateRows;
 }
 
-CBaseTimebarlessRow *CBaseStateRow::GetTimebar() const
-{
-    return m_TimebarControl;
-}
-
-void CBaseStateRow::SetNameReadOnly(bool inReadOnly)
-{
-    m_TreeControl->SetNameReadOnly(inReadOnly);
-}

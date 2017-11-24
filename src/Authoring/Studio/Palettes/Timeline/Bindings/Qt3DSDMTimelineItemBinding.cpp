@@ -822,7 +822,7 @@ void Qt3DSDMTimelineItemBinding::RefreshStateRow(bool inRefreshChildren)
     CStateRow *theRow = dynamic_cast<CStateRow *>(m_Row);
     if (theRow) {
         theRow->OnTimeChange();
-        theRow->ClearDirty();
+        theRow->setDirty(false);
         if (inRefreshChildren) {
             long theChildrenCount = GetChildrenCount();
             for (long theIndex = 0; theIndex < theChildrenCount; ++theIndex) {
@@ -930,8 +930,8 @@ void Qt3DSDMTimelineItemBinding::RemovePropertyRow(Qt3DSDMPropertyHandle inPrope
 
         // UI must update
         if (m_Row && theUpdateUI) {
-            m_Row->OnChildVisibilityChanged();
-            m_Row->GetTimebar()->SetDirty(true);
+            m_Row->ForceEmitChildrenChanged();
+            m_Row->setDirty(true);
         }
     }
 }
@@ -949,7 +949,7 @@ void Qt3DSDMTimelineItemBinding::RefreshPropertyKeyframe(
                 // Update asset keyframes
                 UpdateKeyframe(theProperty->GetKeyframeByHandle(inKeyframe), inTransaction);
                 if (m_Row) // UI update
-                    m_Row->GetTimebar()->SetDirty(true);
+                    m_Row->setDirty(true);
             }
         }
     }
@@ -982,11 +982,11 @@ void Qt3DSDMTimelineItemBinding::UIRefreshPropertyKeyframe(long inOffset)
             if (theKeyframe->IsSelected()) {
                 CPropertyRow *thePropertyRow = theIter->second->GetRow();
                 if (thePropertyRow)
-                    thePropertyRow->GetTimebar()->SetDirty(true);
+                    thePropertyRow->setDirty(true);
             }
         }
     }
-    m_Row->GetTimebar()->SetDirty(true);
+    m_Row->setDirty(true);
 }
 
 void Qt3DSDMTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPropertyHandle)
@@ -998,7 +998,7 @@ void Qt3DSDMTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPrope
                   || inPropertyHandle == theBridge->GetSceneAsset().m_Shy
                   || inPropertyHandle == theBridge->GetSceneAsset().m_StartTime
                   || inPropertyHandle == theBridge->GetSceneAsset().m_EndTime))
-        m_Row->OnDirty();
+        m_Row->setDirty(true);
 }
 
 void Qt3DSDMTimelineItemBinding::OnPropertyLinked(Qt3DSDMPropertyHandle inPropertyHandle)
@@ -1058,7 +1058,7 @@ void Qt3DSDMTimelineItemBinding::DoSelectKeyframes(bool inSelected, long inTime,
             theKeyframe->SetSelected(inSelected);
     }
     if (inUpdateUI && m_Row)
-        m_Row->GetTimebar()->SelectKeysByTime(-1, inSelected);
+        m_Row->RequestSelectKeysByTime(-1, inSelected);
 
     // legacy feature: all properties with keyframes at inTime or all if inTime is -1 are selected
     // as well.
@@ -1091,7 +1091,7 @@ void Qt3DSDMTimelineItemBinding::OnPropertySelection(long inTime)
                     ->SetSelected(theAllSelectedFlag);
             // Update UI
             if (m_Row)
-                m_Row->GetTimebar()->SelectKeysByTime(inTime, theAllSelectedFlag);
+                m_Row->RequestSelectKeysByTime(inTime, theAllSelectedFlag);
         }
     }
 }
@@ -1194,7 +1194,7 @@ void Qt3DSDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
     if (m_Row && (theDoAddFlag
                   || inTransaction == ETimelineKeyframeTransaction_DynamicChanged)) {
         // dynamic => only UI needs to refresh
-        m_Row->GetTimebar()->SetDirty(true);
+        m_Row->setDirty(true);
     }
 }
 
@@ -1240,8 +1240,9 @@ void Qt3DSDMTimelineItemBinding::OnDeleteChild(Qt3DSDMInstanceHandle inInstance)
 
 void Qt3DSDMTimelineItemBinding::UpdateActionStatus()
 {
-    if (m_Row)
-        m_Row->UpdateActionStatus();
+    if (m_Row) {
+        m_Row->requestUpdateActionStatus();
+    }
 }
 
 //=============================================================================

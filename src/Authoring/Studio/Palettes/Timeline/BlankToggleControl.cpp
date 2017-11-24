@@ -31,15 +31,17 @@
 
 #include "BlankToggleControl.h"
 #include "Renderer.h"
-#include "BaseStateRow.h"
+#include "BaseStateRowUI.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
+#include "BaseStateRow.h"
 
-CBlankToggleControl::CBlankToggleControl(CBaseStateRow *inBaseStateRow)
-    : m_StateRow(inBaseStateRow)
+CBlankToggleControl::CBlankToggleControl(CBaseStateRowUI *inBaseStateRow)
+    : m_StateRowUI(inBaseStateRow)
     , m_Selected(false)
 {
-    m_BackgroundColor = m_StateRow->GetTimebarBackgroundColor(inBaseStateRow->GetObjectType());
+    m_StateRow = static_cast<CBaseStateRow *>(m_StateRowUI->GetTimelineRow());
+    m_BackgroundColor = m_StateRow->GetTimebarBackgroundColor(m_StateRow->GetObjectType());
 }
 
 CBlankToggleControl::~CBlankToggleControl()
@@ -147,7 +149,7 @@ void CBlankToggleControl::OnMouseOver(CPt inPoint, Qt::KeyboardModifiers inFlags
 {
     CControl::OnMouseOver(inPoint, inFlags);
 
-    m_StateRow->OnMouseOver();
+    m_StateRowUI->OnMouseOver();
 }
 
 //==============================================================================
@@ -161,9 +163,14 @@ void CBlankToggleControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     CControl::OnMouseOut(inPoint, inFlags);
 
-    m_StateRow->OnMouseOut();
+    m_StateRowUI->OnMouseOut();
 }
 
 void CBlankToggleControl::Refresh()
 {
+}
+
+CBaseStateRow *CBlankToggleControl::baseStateRow() const
+{
+    return m_StateRow;
 }
