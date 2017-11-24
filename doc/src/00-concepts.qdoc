@@ -53,27 +53,34 @@
 \section1 Applications
 
 The Qt 3D Studio suite includes:
-
-\section2 Studio
-
-\image studio_128.png
-
-An authoring tool for creating interactive 3D presentations and applications. Studio is exclusively
-available for Windows PCs.
-
-\section2 Viewer
-
-\image viewer_128.png
-
-A runtime player to test and deploy interfaces created in Studio. The Viewer is currently available
-for PC, with more devices planned.
+\table
+  \header
+    \li \section2 Studio
+    \li \section2 Viewer
+  \row
+    \li \inlineimage studio_128.png
+    \li \inlineimage viewer_128.png
+  \row
+    \li An authoring tool for creating interactive 3D presentations and applications.
+    \li A runtime player to test and deploy interfaces created in Studio.
+  \row
+    \li
+      \list
+        \li \l {Getting started}
+        \li \l {Studio Index}
+      \endlist
+    \li
+      \list
+        \li \l {Viewer Index}
+      \endlist
+\endtable
 
 \section1 Concepts
 
 \section2 Project
 
 A \e{\"project\"} is simply a folder on your computer holding all the art and other assets needed
-for your application. You can create a \e project by creating folders on your favorite OS, or you
+for your application. You can create a \e project by creating folders in your file system, or you
 can also have a template project created for you (with suggested folders for organization) from
 \l Studio application.
 
