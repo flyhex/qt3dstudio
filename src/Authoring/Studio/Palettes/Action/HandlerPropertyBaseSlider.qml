@@ -101,8 +101,12 @@ Row {
 
         from: 0
         to: 100
-        stepSize: root.intSlider ? 1 : 2
+        stepSize: root.intSlider ? 1 : sliderStepFromRange(slider.to, slider.from, 100)
         snapMode: root.intSlider ? Slider.SnapAlways : Slider.NoSnap
+
+        function sliderStepFromRange(top, bottom, steps) {
+            return ((top - bottom) / steps);
+        }
 
         onMoved: {
             if (!rateLimiter.running) {
