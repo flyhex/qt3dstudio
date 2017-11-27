@@ -37,6 +37,7 @@
 #include "StudioObjectTypes.h"
 #include "StudioPreferences.h"
 #include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QCoreApplication>
 #include <QColor>
@@ -108,8 +109,13 @@ QVariant ObjectListModel::data(const QModelIndex &index, int role) const
         return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
     }
     case TextColorRole: {
-        auto info = m_objRefHelper->GetInfo(handleForIndex(index));
-        if (info.m_Master)
+        auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+        auto handle = handleForIndex(index);
+        auto objType = bridge->GetObjectType(handle);
+        auto info = m_objRefHelper->GetInfo(handle);
+        if (m_excludeTypes.contains(objType))
+            return QVariant::fromValue(CStudioPreferences::disabledColor());
+        else if (info.m_Master)
             return QVariant::fromValue(CStudioPreferences::masterColor());
         else
             return QVariant::fromValue(CStudioPreferences::textColor());
@@ -159,6 +165,18 @@ QModelIndex ObjectListModel::parent(const QModelIndex &index) const
 qt3dsdm::Qt3DSDMInstanceHandle ObjectListModel::handleForIndex(const QModelIndex &index) const
 {
     return static_cast<qt3dsdm::Qt3DSDMInstanceHandle>(index.internalId());
+}
+
+void ObjectListModel::excludeObjectTypes(const QVector<EStudioObjectType> &types)
+{
+    m_excludeTypes = types;
+}
+
+bool ObjectListModel::selectable(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
+{
+    auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    auto objType = bridge->GetObjectType(handle);
+    return !m_excludeTypes.contains(objType);
 }
 
 qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
@@ -373,4 +391,3 @@ int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex)
     }
     return -1;
 }
-

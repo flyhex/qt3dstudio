@@ -423,6 +423,17 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
         m_objectReferenceView = new ObjectBrowserView(this);
     m_objectReferenceView->setModel(m_objectReferenceModel);
 
+    if (doc->GetStudioSystem()->GetClientDataModelBridge()
+            ->GetObjectType(instance) == OBJTYPE_ALIAS) {
+        QVector<EStudioObjectType> exclude;
+        exclude << OBJTYPE_ALIAS << OBJTYPE_BEHAVIOR << OBJTYPE_CUSTOMMATERIAL
+                << OBJTYPE_EFFECT << OBJTYPE_GUIDE << OBJTYPE_IMAGE << OBJTYPE_LAYER
+                << OBJTYPE_MATERIAL << OBJTYPE_REFERENCEDMATERIAL << OBJTYPE_SCENE;
+        m_objectReferenceModel->excludeObjectTypes(exclude);
+    } else {
+        m_objectReferenceModel->excludeObjectTypes(QVector<EStudioObjectType>());
+    }
+
     disconnect(m_objectReferenceView);
 
     IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();

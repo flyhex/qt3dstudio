@@ -69,8 +69,6 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
     // Skip the break because these cases have the same parent.
     case OBJTYPE_GROUP:
     // Skip the break because these cases have the same parent.
-    case OBJTYPE_ALIAS:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_PATH:
     // Skip the break because these cases have the same parent.
     case OBJTYPE_COMPONENT:
@@ -79,6 +77,10 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
             || (inParent == OBJTYPE_GROUP) || (inParent == OBJTYPE_COMPONENT)
             || (inParent == OBJTYPE_PATH);
 
+        break;
+    case OBJTYPE_ALIAS:
+        theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_GROUP)
+            || (inParent == OBJTYPE_COMPONENT) || (inParent == OBJTYPE_PATH);
         break;
     case OBJTYPE_IMAGE:
         theAcceptible = false;
