@@ -44,6 +44,7 @@
 #include <QtCore/qurl.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtWidgets/qaction.h>
+#include <QtCore/qstandardpaths.h>
 
 int main(int argc, char *argv[])
 {
@@ -464,24 +465,33 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
 
     case StudioTutorialWidget::openSampleResult: {
         // Try three options:
-        // - open a specific example directory with .uip file in it
+        // - open a specific example .uip
         // - failing that, show the main example root dir
-        // - failing all previous, show Qt3DStudio dir
+        // - failing all previous, show default Documents dir
         Q3DStudio::CFilePath filePath;
+        Qt3DSFile theFile = Qt3DSFile(".");
 
-        filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
-                Q3DStudio::CString("../examples/qmldynamickeyframes/presentation");
+#ifndef Q_OS_MACOS
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                Q3DStudio::CString("/../examples/studio3d/SampleProject");
 
         if (!filePath.Exists()) {
-            filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
-                    Q3DStudio::CString("../examples");
-        }
-        if (!filePath.Exists()) {
-            filePath =  Qt3DSFile::GetApplicationDirectory().GetPath()+
-                    Q3DStudio::CString(".");
-        }
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                    Q3DStudio::CString("/../examples/studio3d");
+#else
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                Q3DStudio::CString("/../../../../examples/studio3d/SampleProject");
 
-        Qt3DSFile theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        if (!filePath.Exists()) {
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                    Q3DStudio::CString("/../../../../examples/studio3d");
+#endif
+            if (!filePath.Exists())
+                filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+            theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        } else {
+            theFile = Qt3DSFile(filePath, Q3DStudio::CString("SampleProject.uip"));
+        }
 
         if (theFile.GetPath() != "") {
             OnLoadDocument(theFile);
@@ -546,7 +556,7 @@ bool CStudioApp::ShowStartupDialog()
         CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
-        Q3DStudio::CFilePath theMostRecentDirectory;
+        Q3DStudio::CFilePath theMostRecentDirectory = Q3DStudio::CFilePath(".");
         if (m_Views) {
             CRecentItems *theRecentItems = m_Views->GetMainFrame()->GetRecentItems();
             for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex) {

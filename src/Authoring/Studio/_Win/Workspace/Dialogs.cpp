@@ -856,7 +856,11 @@ Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirecto
 
     theImportFilter += " (*" + theFileExt + ")";
 
-    QFileDialog theFileDlg(qApp->activeWindow(), QString(), inInitialDirectory.toQString(), theImportFilter.toQString());
+    QFileDialog theFileDlg(qApp->activeWindow(), QString(),
+                           (inInitialDirectory == Q3DStudio::CString("."))
+                           ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                           : inInitialDirectory.toQString(),
+                           theImportFilter.toQString());
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
