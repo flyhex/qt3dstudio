@@ -37,6 +37,7 @@
 #endif
 #include "StudioApp.h"
 #include "Qt3DSStateApplication.h"
+#include "PlayerWnd.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -228,8 +229,10 @@ void CStudioApp::PerformShutdown()
     }
 
     if (m_Renderer) {
+        m_Views->GetMainFrame()->GetPlayerWnd()->makeCurrent();
         m_Renderer->Close();
         m_Renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
+        m_Views->GetMainFrame()->GetPlayerWnd()->doneCurrent();
     }
 
     delete m_SplashPalette;

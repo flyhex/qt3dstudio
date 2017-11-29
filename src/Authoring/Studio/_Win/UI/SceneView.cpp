@@ -79,6 +79,11 @@ void CSceneView::onDropReceived()
     setFocus();
 }
 
+CPlayerWnd *CSceneView::GetPlayerWnd() const
+{
+    return m_PlayerWnd;
+}
+
 //==============================================================================
 /**
  * Destructor: Releases the object.

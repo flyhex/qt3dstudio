@@ -1770,6 +1770,11 @@ QWidget *CMainFrame::GetActiveView()
     return centralWidget();
 }
 
+CPlayerWnd *CMainFrame::GetPlayerWnd() const
+{
+    return m_SceneView->GetPlayerWnd();
+}
+
 bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
 {
     switch (event->type()) {
