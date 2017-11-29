@@ -41,7 +41,7 @@
 		</Graph>
 		<Logic >
 			<State name="Master Slide" component="#Scene" >
-				<Add ref="#Layer" multisampleaa="4x" probebright="500" />
+				<Add ref="#Layer" multisampleaa="SSAA" probebright="500" />
 				<Add ref="#Camera" fov="30" position="0 0 -400" />
 				<Add ref="#Light" brightness="200" lightdiffuse="1 1 1" lightspecular="0 0.666667 1" lighttype="Point" pivot="100 0 0" position="0 0 -50" >
 					<AnimationTrack property="rotation.x" type="EaseInOut" >0 0 100 100 5 0 100 100</AnimationTrack>
@@ -52,7 +52,7 @@
 					<Set ref="#Layer" endtime="5000" />
 					<Set ref="#Camera" endtime="5000" />
 					<Set ref="#Light" endtime="5000" />
-					<Add ref="#Layer2" name="Layer2" endtime="5000" multisampleaa="4x" />
+					<Add ref="#Layer2" name="Layer2" endtime="5000" multisampleaa="SSAA" />
 					<Add ref="#Camera_001" endtime="5000" fov="30" position="0 0 -600" />
 					<Add ref="#Light_001" endtime="5000" />
 					<Add ref="#NeedleSpeed_001" name="NeedleSpeed" endtime="5000" importfile="models/Speedometer/Speedometer.import" pivot="5 5 0" >
