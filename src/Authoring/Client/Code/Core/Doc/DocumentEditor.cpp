@@ -86,6 +86,7 @@
 #include <QtQml/qqmlcomponent.h>
 #include <QtCore/qdir.h>
 #include <unordered_set>
+#include "Runtime/Include/q3dsqmlbehavior.h"
 
 extern "C" {
 #include "lua.h"
@@ -231,6 +232,7 @@ public:
                 theSystem->AddDirectory(m_Doc.GetDocumentDirectory().toQString(),
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
+        qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
     }
     virtual ~CDocEditor()
     {
