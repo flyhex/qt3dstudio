@@ -298,3 +298,8 @@ QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton {
 QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton:pressed {
     background-color: #262829;
 }
+
+QDialog#SubPresentationDlg QPushButton:!enabled {
+    background: transparent;
+    color: #727476;
+}

@@ -32,6 +32,7 @@
 #include <QtWidgets/qabstractbutton.h>
 #include <QtWidgets/qfiledialog.h>
 #include <QtCore/qdir.h>
+#include <QtWidgets/qabstractbutton.h>
 
 CSubPresentationDlg::CSubPresentationDlg(const QString &directory,
                                          const SubPresentationRecord &subpresentation,
@@ -94,6 +95,10 @@ void CSubPresentationDlg::onTypeChanged(int index)
                                      : QStringLiteral("presentation-qml");
 
     updateUI();
+    // Disable "Ok" if type is presentation and no file has been selected
+    m_ui->buttonBox->buttons()[0]->setEnabled(
+                !(m_subPresentation.m_type == QStringLiteral("presentation")
+                && m_ui->comboBoxFileList->currentText() == tr("Browse...")));
 }
 
 void CSubPresentationDlg::onFileChanged(int index)
@@ -102,6 +107,10 @@ void CSubPresentationDlg::onFileChanged(int index)
         m_subPresentation.m_argsOrSrc = m_ui->comboBoxFileList->currentText();
     else
         browseFile();
+    // Disable "Ok" if type is presentation and no file has been selected
+    m_ui->buttonBox->buttons()[0]->setEnabled(
+                !(m_subPresentation.m_type == QStringLiteral("presentation")
+                && m_ui->comboBoxFileList->currentText() == tr("Browse...")));
 }
 
 void CSubPresentationDlg::onIdChanged(const QString &id)
