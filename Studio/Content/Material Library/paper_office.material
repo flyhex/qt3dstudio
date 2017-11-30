@@ -199,7 +199,7 @@ void computeBackLayerRnmColor( in vec3 normal, in vec3 rnmX, in vec3 rnmY, in ve
 
 float computeIOR()
 {
-  return( false ? 1.0f : luminance( vec3( 1, 1, 1 ) ) );
+  return( false ? 1.0 : luminance( vec3( 1, 1, 1 ) ) );
 }
 
 float evalCutout()

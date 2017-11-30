@@ -481,7 +481,8 @@ HEADERS += \
     ../Source/Engine/Include/Qt3DSEGLWindowSystem.h \
     ../Source/Engine/Include/Qt3DSPluginDLL.h \
     ../Source/Engine/Include/Qt3DSWindowSystem.h \
-    ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderContextCore.h
+    ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderContextCore.h \
+    ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderLightConstantProperties.h
 
 win32 {
 SOURCES += \

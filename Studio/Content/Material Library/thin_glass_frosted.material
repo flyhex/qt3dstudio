@@ -191,7 +191,7 @@ void computeBackLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFacto
 
 float computeIOR()
 {
-  return( false ? 1.0f : luminance( vec3( abbeNumberIOR(glass_ior, 0.000000 ) ) ) );
+  return( false ? 1.0 : luminance( vec3( abbeNumberIOR(glass_ior, 0.000000 ) ) ) );
 }
 
 float evalCutout()

@@ -28,8 +28,10 @@
 **
 ****************************************************************************/
 
-float average( in vec3 v )
+vec3 evalEnvironmentMap( in vec3 R, float roughness )
 {
-  return( ( v.x + v.y + v.z ) / 3.0 );
-}
+    // convert R to spherical texture coordinates
+    vec2 tc = vec2( ( atan( R.x, -R.z ) + PI ) / ( PI_TWO ), acos( -R.y ) / PI );
 
+    return( textureLod( uEnvironmentTexture, tc, 0.0 ).rgb );
+}

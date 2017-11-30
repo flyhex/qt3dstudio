@@ -41,6 +41,7 @@
 #include "Qt3DSRenderCustomMaterial.h"
 #include "Qt3DSRenderDynamicObjectSystem.h"
 #include "render/Qt3DSRenderShaderProgram.h"
+#include "Qt3DSRenderLightConstantProperties.h"
 
 using namespace qt3ds::render;
 using qt3ds::render::NVRenderCachedShaderProperty;
@@ -128,45 +129,6 @@ struct SShadowMapProperties
     }
 };
 
-struct SShaderGeneratorGeneratedShader;
-
-struct SLightConstantProperties
-{
-    struct LightConstants
-    {
-        NVRenderCachedShaderProperty<QT3DSVec4> m_position;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_direction;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_up;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_right;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_diffuse;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_ambient;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_specular;
-        NVRenderCachedShaderProperty<QT3DSF32> m_spotExponent;
-        NVRenderCachedShaderProperty<QT3DSF32> m_spotCutoff;
-        NVRenderCachedShaderProperty<QT3DSF32> m_constantAttenuation;
-        NVRenderCachedShaderProperty<QT3DSF32> m_linearAttenuation;
-        NVRenderCachedShaderProperty<QT3DSF32> m_quadraticAttenuation;
-        NVRenderCachedShaderProperty<QT3DSF32> m_range;
-        NVRenderCachedShaderProperty<QT3DSF32> m_width;
-        NVRenderCachedShaderProperty<QT3DSF32> m_height;
-        NVRenderCachedShaderProperty<QT3DSVec4> m_shadowControls;
-        NVRenderCachedShaderProperty<QT3DSMat44> m_shadowView;
-        NVRenderCachedShaderProperty<QT3DSI32> m_shadowIdx;
-        NVRenderCachedShaderProperty<QT3DSVec3> m_attenuation;
-
-        LightConstants(const QString &lightRef, NVRenderShaderProgram &shader);
-
-        void updateLights(int lIdx, SShaderGeneratorGeneratedShader &shader);
-    };
-
-    SLightConstantProperties(SShaderGeneratorGeneratedShader &shader, bool packed);
-    ~SLightConstantProperties();
-    void updateLights(SShaderGeneratorGeneratedShader &shader);
-
-    QVector<LightConstants *> m_constants;
-    NVRenderCachedShaderProperty<QT3DSI32> m_lightCount;
-};
-
 /**
  *	The results of generating a shader.  Caches all possible variable names into
  *	typesafe objects.
@@ -212,7 +174,7 @@ struct SShaderGeneratorGeneratedShader
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AoShadowParams;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_LightsBuffer;
 
-    SLightConstantProperties *m_lightConstantProperties;
+    SLightConstantProperties<SShaderGeneratorGeneratedShader> *m_lightConstantProperties;
 
     // Cache the image property name lookups
     nvvector<SShaderTextureProperties> m_Images;
@@ -281,108 +243,6 @@ struct SShaderGeneratorGeneratedShader
         }
     }
 };
-
-static const QStringList lconstantnames = {
-    QStringLiteral("position"),
-    QStringLiteral("direction"),
-    QStringLiteral("up"),
-    QStringLiteral("right"),
-    QStringLiteral("diffuse"),
-    QStringLiteral("ambient"),
-    QStringLiteral("specular"),
-    QStringLiteral("spotExponent"),
-    QStringLiteral("spotCutoff"),
-    QStringLiteral("constantAttenuation"),
-    QStringLiteral("linearAttenuation"),
-    QStringLiteral("quadraticAttenuation"),
-    QStringLiteral("range"),
-    QStringLiteral("width"),
-    QStringLiteral("height"),
-    QStringLiteral("shadowControls"),
-    QStringLiteral("shadowView"),
-    QStringLiteral("shadowIdx"),
-    QStringLiteral("attenuation")
-};
-
-SLightConstantProperties::LightConstants::LightConstants(const QString &lightRef,
-                                                         NVRenderShaderProgram &shader)
-    : m_position(QString("%1%2").arg(lightRef, lconstantnames[0]), shader)
-    , m_direction(QString("%1%2").arg(lightRef).arg(lconstantnames[1]), shader)
-    , m_up(QString("%1%2").arg(lightRef, lconstantnames[2]), shader)
-    , m_right(QString("%1%2").arg(lightRef, lconstantnames[3]), shader)
-    , m_diffuse(QString("%1%2").arg(lightRef, lconstantnames[4]), shader)
-    , m_ambient(QString("%1%2").arg(lightRef, lconstantnames[5]), shader)
-    , m_specular(QString("%1%2").arg(lightRef, lconstantnames[6]), shader)
-    , m_spotExponent(QString("%1%2").arg(lightRef, lconstantnames[7]), shader)
-    , m_spotCutoff(QString("%1%2").arg(lightRef, lconstantnames[8]), shader)
-    , m_constantAttenuation(QString("%1%2").arg(lightRef, lconstantnames[9]), shader)
-    , m_linearAttenuation(QString("%1%2").arg(lightRef, lconstantnames[10]), shader)
-    , m_quadraticAttenuation(QString("%1%2").arg(lightRef, lconstantnames[11]), shader)
-    , m_range(QString("%1%2").arg(lightRef, lconstantnames[12]), shader)
-    , m_width(QString("%1%2").arg(lightRef, lconstantnames[13]), shader)
-    , m_height(QString("%1%2").arg(lightRef, lconstantnames[14]), shader)
-    , m_shadowControls(QString("%1%2").arg(lightRef, lconstantnames[15]), shader)
-    , m_shadowView(QString("%1%2").arg(lightRef, lconstantnames[16]), shader)
-    , m_shadowIdx(QString("%1%2").arg(lightRef, lconstantnames[17]), shader)
-    , m_attenuation(QString("%1%2").arg(lightRef, lconstantnames[18]), shader)
-{
-
-}
-
-void SLightConstantProperties::LightConstants::updateLights(int lIdx,
-                                                            SShaderGeneratorGeneratedShader &shader)
-{
-    m_position.Set(shader.m_Lights[lIdx].m_LightData.m_position);
-    m_direction.Set(shader.m_Lights[lIdx].m_LightData.m_direction);
-    m_up.Set(shader.m_Lights[lIdx].m_LightData.m_up);
-    m_right.Set(shader.m_Lights[lIdx].m_LightData.m_right);
-    m_diffuse.Set(shader.m_Lights[lIdx].m_LightData.m_diffuse);
-    m_ambient.Set(shader.m_Lights[lIdx].m_LightData.m_ambient);
-    m_specular.Set(shader.m_Lights[lIdx].m_LightData.m_specular);
-    m_spotExponent.Set(shader.m_Lights[lIdx].m_LightData.m_spotExponent);
-    m_spotCutoff.Set(shader.m_Lights[lIdx].m_LightData.m_spotCutoff);
-    m_constantAttenuation.Set(shader.m_Lights[lIdx].m_LightData.m_constantAttenuation);
-    m_linearAttenuation.Set(shader.m_Lights[lIdx].m_LightData.m_linearAttenuation);
-    m_quadraticAttenuation.Set(shader.m_Lights[lIdx].m_LightData.m_quadraticAttenuation);
-    m_range.Set(shader.m_Lights[lIdx].m_LightData.m_range);
-    m_width.Set(shader.m_Lights[lIdx].m_LightData.m_width);
-    m_height.Set(shader.m_Lights[lIdx].m_LightData.m_height);
-    m_shadowControls.Set(shader.m_Lights[lIdx].m_LightData.m_shadowControls);
-    m_shadowView.Set(shader.m_Lights[lIdx].m_LightData.m_shadowView);
-    m_shadowIdx.Set(shader.m_Lights[lIdx].m_LightData.m_shadowIdx);
-    m_attenuation.Set(QT3DSVec3(shader.m_Lights[lIdx].m_LightData.m_constantAttenuation,
-                                shader.m_Lights[lIdx].m_LightData.m_linearAttenuation,
-                                shader.m_Lights[lIdx].m_LightData.m_quadraticAttenuation));
-}
-
-
-SLightConstantProperties::SLightConstantProperties(SShaderGeneratorGeneratedShader &shader,
-                                                   bool packed)
-    : m_lightCount("uNumLights", shader.m_Shader)
-{
-    m_constants.resize(shader.m_Lights.size());
-    for (unsigned int i = 0; i < shader.m_Lights.size(); ++i) {
-        QString lref;
-        if (packed)
-            lref = QStringLiteral("light_%1_");
-        else
-            lref = QStringLiteral("lights[%1].");
-        lref = lref.arg(i);
-        m_constants[i] = new LightConstants(lref, shader.m_Shader);
-    }
-    m_lightCount.Set(shader.m_Lights.size());
-}
-
-SLightConstantProperties::~SLightConstantProperties()
-{
-    qDeleteAll(m_constants);
-}
-
-void SLightConstantProperties::updateLights(SShaderGeneratorGeneratedShader &shader)
-{
-    for (int i = 0; i < m_constants.size(); ++i)
-        m_constants[i]->updateLights(i, shader);
-}
 
 
 #ifndef EA_PLATFORM_WINDOWS
@@ -1935,7 +1795,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                 shader.m_LightsBuffer.Set();
             }
         } else {
-            SLightConstantProperties *pLightConstants = GetLightConstantProperties(shader);
+            SLightConstantProperties<SShaderGeneratorGeneratedShader> *pLightConstants
+                    = GetLightConstantProperties(shader);
 
             // if we have lights we need a light buffer
             QT3DS_ASSERT(shader.m_Lights.size() == 0 || pLightConstants);
@@ -2045,14 +1906,15 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                               inRenderProperties.m_Probe2Fade, inRenderProperties.m_ProbeFOV);
     }
 
-    SLightConstantProperties *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader)
+    SLightConstantProperties<SShaderGeneratorGeneratedShader> *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader)
     {
         if (!shader.m_lightConstantProperties
                 || shader.m_Lights.size() > !shader.m_lightConstantProperties->m_constants.size()) {
             if (shader.m_lightConstantProperties)
                 delete shader.m_lightConstantProperties;
             shader.m_lightConstantProperties
-                    = new SLightConstantProperties(shader, m_LightsAsSeparateUniforms);
+                    = new SLightConstantProperties<SShaderGeneratorGeneratedShader>(
+                            shader, m_LightsAsSeparateUniforms);
         }
         return shader.m_lightConstantProperties;
     }

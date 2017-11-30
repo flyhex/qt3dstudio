@@ -136,7 +136,7 @@ void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, 
 #if QT3DS_ENABLE_CG_LIGHTING
   layers[0].layer += tmpShadowTerm * microfacetBSDF( layers[0].tanFrame, lightDir, viewDir, lightSpecular, materialIOR, ftmp0, ftmp1, scatter_reflect );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * diffuseReflectionBSDF( normal, lightDir, viewDir, lightDiffuse, 0.000000 );
 
 #endif
@@ -147,7 +147,7 @@ void computeFrontAreaColor( in int lightIdx, in vec4 lightDiffuse, in vec4 light
 #if QT3DS_ENABLE_CG_LIGHTING
   layers[0].layer += tmpShadowTerm * lightSpecular * sampleAreaGlossy( layers[0].tanFrame, varWorldPos, lightIdx, viewDir, ftmp0, ftmp1 );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * lightDiffuse * sampleAreaDiffuse( layers[1].tanFrame, varWorldPos, lightIdx );
 
 #endif
@@ -158,13 +158,13 @@ void computeFrontLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFact
 #if !QT3DS_ENABLE_LIGHT_PROBE
   layers[0].layer += tmpShadowTerm * microfacetSampledBSDF( layers[0].tanFrame, viewDir, ftmp0, ftmp1, scatter_reflect );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * diffuseReflectionBSDFEnvironment( normal, 0.000000 ) * aoFactor;
 
 #else
   layers[0].layer += tmpShadowTerm * sampleGlossyAniso( layers[0].tanFrame, viewDir, ftmp0, ftmp1 );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * sampleDiffuse( layers[1].tanFrame ) * aoFactor;
 
 #endif
@@ -204,7 +204,7 @@ void computeBackLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFacto
 
 float computeIOR()
 {
-  return( false ? 1.0f : luminance( vec3( 1, 1, 1 ) ) );
+  return( false ? 1.0 : luminance( vec3( 1, 1, 1 ) ) );
 }
 
 float evalCutout()

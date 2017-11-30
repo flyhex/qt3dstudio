@@ -31,13 +31,13 @@
 #ifndef QT3DS_RENDER_DEFAULT_MATERIAL_SHADER_GENERATOR_H
 #define QT3DS_RENDER_DEFAULT_MATERIAL_SHADER_GENERATOR_H
 #include "Qt3DSRenderMaterialShaderGenerator.h"
+#include "Qt3DSRenderLightConstantProperties.h"
 
 namespace qt3ds {
 namespace render {
 
     class Qt3DSShadowMap;
     struct SShaderGeneratorGeneratedShader;
-    struct SLightConstantProperties;
 
     class IDefaultMaterialVertexPipeline : public IShaderStageGenerator
     {
@@ -113,7 +113,8 @@ namespace render {
         static IDefaultMaterialShaderGenerator &
         CreateDefaultMaterialShaderGenerator(IQt3DSRenderContext &inRenderContext);
 
-        SLightConstantProperties *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader);
+        SLightConstantProperties<SShaderGeneratorGeneratedShader>
+            *GetLightConstantProperties(SShaderGeneratorGeneratedShader &shader);
     };
 }
 }
