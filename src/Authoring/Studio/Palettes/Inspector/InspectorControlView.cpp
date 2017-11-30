@@ -434,7 +434,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
         m_objectReferenceModel->excludeObjectTypes(QVector<EStudioObjectType>());
     }
 
-    disconnect(m_objectReferenceView);
+    disconnect(m_objectReferenceView, nullptr, nullptr, nullptr);
 
     IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
     if (objRefHelper) {
