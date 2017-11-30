@@ -27,13 +27,21 @@
 **
 ****************************************************************************/
 
-
 import QtQuick 2.7
 import QtQuick.Controls 2.2
-import QtStudio3D 1.0
 
-Rectangle {
-    id: window
-    visible: true
-    color: "black"
+MenuSeparator {
+    id: control
+    padding: 0
+    topPadding: 0
+    bottomPadding: 0
+    leftPadding: 0
+    rightPadding: 0
+    width: parent.width
+    height: 1
+    contentItem: Rectangle {
+        width: control.width - control.leftPadding - control.rightPadding
+        height: 1
+        color: _menuBorderColor
+    }
 }
