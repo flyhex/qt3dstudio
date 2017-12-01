@@ -94,6 +94,14 @@ void CSubPresentationDlg::onTypeChanged(int index)
     m_subPresentation.m_type = index ? QStringLiteral("presentation")
                                      : QStringLiteral("presentation-qml");
 
+    // Remove possible illegal file from argsOrSrc
+    if ((m_subPresentation.m_type == QStringLiteral("presentation")
+            && m_subPresentation.m_argsOrSrc.endsWith(QStringLiteral(".qml")))
+            || (m_subPresentation.m_type == QStringLiteral("presentation-qml")
+            && m_subPresentation.m_argsOrSrc.endsWith(QStringLiteral(".uip")))) {
+        m_subPresentation.m_argsOrSrc.clear();
+    }
+
     updateUI();
     // Disable "Ok" if type is presentation and no file has been selected
     m_ui->buttonBox->buttons()[0]->setEnabled(
