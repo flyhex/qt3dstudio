@@ -36,11 +36,57 @@
 #include <QtCore/qcommandlineparser.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
+#include <QtGui/qopenglcontext.h>
 #include <QtStudio3D/q3dssurfaceviewer.h>
 #include <QtStudio3D/private/q3dsimagesequencegenerator_p.h>
 #include <QtQml/qqmlapplicationengine.h>
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlcontext.h>
+
+static QSurfaceFormat findIdealGLVersion()
+{
+    QSurfaceFormat fmt;
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+
+    // Advanced: Try 4.3 core (so we get compute shaders for instance)
+    fmt.setVersion(4, 3);
+    QOpenGLContext ctx;
+    ctx.setFormat(fmt);
+    if (ctx.create() && ctx.format().version() >= qMakePair(4, 3))
+        return fmt;
+
+    // Basic: Stick with 3.3 for now to keep less fortunate,
+    // Mesa-based systems happy
+    fmt.setVersion(3, 3);
+    ctx.setFormat(fmt);
+    if (ctx.create())
+        return fmt;
+
+    // We tried...
+    return QSurfaceFormat::defaultFormat();
+}
+
+static QSurfaceFormat findIdealGLESVersion()
+{
+    QSurfaceFormat fmt;
+
+    // Advanced: Try 3.1 (so we get compute shaders for instance)
+    fmt.setVersion(3, 1);
+    QOpenGLContext ctx;
+    ctx.setFormat(fmt);
+    if (ctx.create())
+        return fmt;
+
+    // Basic: OpenGL ES 3.0 is a hard requirement at the moment since we can
+    // only generate 300 es shaders, uniform buffers are mandatory.
+    fmt.setVersion(3, 0);
+    ctx.setFormat(fmt);
+    if (ctx.create())
+        return fmt;
+
+    // We tried...
+    return QSurfaceFormat::defaultFormat();
+}
 
 int main(int argc, char *argv[])
 {
@@ -60,6 +106,17 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Qt 3D Viewer");
 
     QGuiApplication a(argc, argv);
+
+#if !defined(Q_OS_MACOS)
+    QSurfaceFormat fmt;
+    if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL)
+        fmt = findIdealGLVersion();
+    else
+        fmt = findIdealGLESVersion();
+    fmt.setDepthBufferSize(24);
+    fmt.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(fmt);
+#endif
 
     QCommandLineParser parser;
     parser.addHelpOption();
