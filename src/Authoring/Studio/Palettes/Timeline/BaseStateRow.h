@@ -38,28 +38,12 @@
 #include "ToggleButton.h"
 #include "DispatchListeners.h"
 
+#include <Qt>
+
 class CPropertyRow;
 class CStateRow;
 class CCmdBatch;
 class ITimelineItem;
-
-struct SBaseStateRowSelectionKeyState
-{
-    enum Enum {
-        NoKeyDown = 0,
-        ShiftKey = 1 << 0,
-        ControlKey = 1 << 1,
-    };
-    qt3ds::QT3DSU32 m_KeyState;
-    SBaseStateRowSelectionKeyState()
-        : m_KeyState(0)
-    {
-    }
-    void SetShiftDown() { m_KeyState = m_KeyState | ShiftKey; }
-    void SetControlDown() { m_KeyState = m_KeyState | ControlKey; }
-    bool IsShiftDown() const { return (m_KeyState & ShiftKey) != 0; }
-    bool IsControlDown() const { return (m_KeyState & ControlKey) != 0; }
-};
 
 class CBaseStateRow : public CTimelineRow
 {
@@ -82,7 +66,7 @@ public:
 
     void SetTimeRatio(double inTimePerPixel) override;
 
-    void Select(SBaseStateRowSelectionKeyState inKeyState, bool inCheckKeySelection = true);
+    void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true);
     void DeleteAllKeys();
 
     void LoadChildren() override;

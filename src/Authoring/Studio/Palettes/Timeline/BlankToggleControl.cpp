@@ -119,7 +119,7 @@ void CBlankToggleControl::OnDeselect()
 bool CBlankToggleControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     if (!CControl::OnMouseDown(inPoint, inFlags)) {
-        m_StateRow->Select(SBaseStateRowSelectionKeyState());
+        m_StateRow->Select(Qt::NoModifier);
     }
     return true;
 }

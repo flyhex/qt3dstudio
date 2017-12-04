@@ -373,13 +373,13 @@ void CBaseStateRow::RemoveAllProperties()
 /**
  * Set this row to selected
  */
-void CBaseStateRow::Select(SBaseStateRowSelectionKeyState inState,
+void CBaseStateRow::Select(Qt::KeyboardModifiers modifier,
                            bool inCheckKeySelection /*= true */)
 {
     bool alreadySelected = m_Selected;
-    m_TimelineItemBinding->SetSelected(inState.IsControlDown());
+    m_TimelineItemBinding->SetSelected(modifier.testFlag(Qt::ControlModifier));
     if (inCheckKeySelection) {
-        if (inState.IsShiftDown())
+        if (modifier.testFlag(Qt::ShiftModifier))
             emit selectAllKeys();
         else if (!alreadySelected)
             m_TimelineItemBinding->ClearKeySelection();

@@ -408,7 +408,7 @@ bool CTimebarControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
         OnBeginDrag();
 
         auto row = static_cast<CBaseStateRow *>(m_TimebarRow->GetStateRowUI()->GetTimelineRow());
-        row->Select(SBaseStateRowSelectionKeyState());
+        row->Select(Qt::NoModifier);
 
         m_Snapper.Clear();
         m_Snapper.SetSource(this);

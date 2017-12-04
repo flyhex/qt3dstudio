@@ -365,11 +365,11 @@ bool CBaseTimelineTreeControl::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModif
 bool CBaseTimelineTreeControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     if (!CControl::OnMouseDown(inPoint, inFlags)) {
-        SBaseStateRowSelectionKeyState theKeyState;
+        Qt::KeyboardModifiers theKeyState;
         if ((CHotKeys::MODIFIER_SHIFT & inFlags) == CHotKeys::MODIFIER_SHIFT)
-            theKeyState.SetShiftDown();
+            theKeyState.setFlag(Qt::ShiftModifier);
         if ((CHotKeys::MODIFIER_CONTROL & inFlags) == CHotKeys::MODIFIER_CONTROL)
-            theKeyState.SetControlDown();
+            theKeyState.setFlag(Qt::ControlModifier);
         baseStateRow()->Select(theKeyState);
 
         // Always track where the mouse is.

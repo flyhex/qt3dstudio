@@ -279,7 +279,7 @@ void CBaseStateRowUI::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
     Q_UNUSED(inFlags);
 
-    m_baseStateRow->Select(SBaseStateRowSelectionKeyState()); // ensure this is selected, but doesn't affect any key
+    m_baseStateRow->Select(Qt::NoModifier); // ensure this is selected, but doesn't affect any key
                                               // selections, because this can be triggered from a
                                               // key being selected
     CComponentContextMenu theMenu(m_TreeControl, m_baseStateRow->GetTimelineItemBinding());

@@ -105,7 +105,7 @@ void CStateTimebarlessRow::Draw(CRenderer *inRenderer)
 bool CStateTimebarlessRow::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     auto stateRow = static_cast<CStateRow *>(m_StateRowUI->GetTimelineRow());
-    stateRow->Select(SBaseStateRowSelectionKeyState()); // ensure this is selected, but doesn't
+    stateRow->Select(Qt::NoModifier); // ensure this is selected, but doesn't
                                                           // affect any key selections, because this
                                                           // can be triggered from a key being
                                                           // selected
