@@ -55,7 +55,6 @@
 
 #include "StringLoader.h"
 
-#include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
@@ -938,22 +937,6 @@ void CDialogs::DestroyProgressScreen()
         delete m_ProgressPalette;
         m_ProgressPalette = nullptr;
     }
-}
-
-//==============================================================================
-/**
- *	Prompt the user for the Object Timebar color.
- *	@param ioColor
- *	@return	true if we successfully obtained a color using the displayed dialog.
- */
-bool CDialogs::PromptObjectTimebarColor(CColor &ioColor)
-{
-    std::auto_ptr<QColorDialog> theColorDlg(new QColorDialog(ioColor));
-    if (theColorDlg->exec() == QDialog::Accepted) {
-        ioColor = theColorDlg->selectedColor();
-        return true;
-    }
-    return false;
 }
 
 //==============================================================================

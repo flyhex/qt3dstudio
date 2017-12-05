@@ -67,6 +67,7 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
+#include <QtWidgets/qcolordialog.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -531,12 +532,24 @@ void CMainFrame::OnUpdateToolChange()
 void CMainFrame::OnTimelineSetTimeBarColor()
 {
     ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
-    if (theTimelineTimebar != NULL) {
-        CColor theColor = theTimelineTimebar->GetTimebarColor();
-
-        if (g_StudioApp.GetDialogs()->PromptObjectTimebarColor(theColor))
-            theTimelineTimebar->SetTimebarColor(theColor);
+    if (theTimelineTimebar) {
+        QColor previousColor = theTimelineTimebar->GetTimebarColor();
+        QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
+        theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
+        connect(theColorDlg, &QColorDialog::currentColorChanged,
+                this, &CMainFrame::OnTimeBarColorChanged);
+        if (theColorDlg->exec() == QDialog::Accepted)
+            theTimelineTimebar->SetTimebarColor(theColorDlg->selectedColor());
+        else
+            theTimelineTimebar->SetTimebarColor(previousColor);
     }
+}
+
+void CMainFrame::OnTimeBarColorChanged(const QColor &color)
+{
+    ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
+    if (theTimelineTimebar)
+        theTimelineTimebar->SetTimebarColor(color);
 }
 
 //==============================================================================

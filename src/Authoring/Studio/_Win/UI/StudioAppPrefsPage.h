@@ -71,6 +71,7 @@ public:
 public:
     bool OnApply() override;
     void OnOK() override;
+    void onBackgroundColorChanged(const QColor &color);
 
     // Implementation
 protected:

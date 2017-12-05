@@ -218,6 +218,8 @@ public:
 
     void OnConnectionChanged(bool);
 
+    void OnTimeBarColorChanged(const QColor &color);
+
     CTimelineControl *GetTimelineControl();
     ITimelineTimebar *GetSelectedTimelineTimebar();
 
