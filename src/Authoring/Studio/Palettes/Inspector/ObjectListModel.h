@@ -71,7 +71,7 @@ public:
 
     void excludeObjectTypes(const QVector<EStudioObjectType> &types);
 
-private:
+protected:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
     qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
@@ -108,10 +108,12 @@ public:
     void setSourceModel(ObjectListModel *sourceModel);
     ObjectListModel *sourceModel() const { return m_sourceModel; }
     bool expandTo(const QModelIndex &rootIndex, const QModelIndex &searchIndex);
-    int rowForSourceIndex(const QModelIndex &sourceIndex);
+    int rowForSourceIndex(const QModelIndex &sourceIndex) const;
+    QModelIndex sourceIndexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
 
 private:
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
+    QModelIndex mapFromSource(const QModelIndex &sourceIndex) const;
 
     struct SourceInfo {
         bool expanded = false;

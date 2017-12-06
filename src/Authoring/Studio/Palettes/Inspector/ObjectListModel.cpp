@@ -230,11 +230,10 @@ QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle
 
 FlatObjectListModel::FlatObjectListModel(ObjectListModel *sourceModel, QObject *parent)
     : QAbstractListModel(parent)
-    , m_sourceModel(sourceModel)
 
 {
     Q_ASSERT(sourceModel);
-    m_sourceInfo = collectSourceIndexes({}, 0);
+    setSourceModel(sourceModel);
 }
 
 QVector<FlatObjectListModel::SourceInfo> FlatObjectListModel::collectSourceIndexes(
@@ -272,6 +271,11 @@ QModelIndex FlatObjectListModel::mapToSource(const QModelIndex &proxyIndex) cons
     if (row < 0 || row >= m_sourceInfo.count())
         return {};
     return m_sourceInfo[row].index;
+}
+
+QModelIndex FlatObjectListModel::mapFromSource(const QModelIndex &sourceIndex) const
+{
+    return index(rowForSourceIndex(sourceIndex));
 }
 
 QVariant FlatObjectListModel::data(const QModelIndex &index, int role) const
@@ -350,6 +354,12 @@ int FlatObjectListModel::rowCount(const QModelIndex &parent) const
 void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
 {
     beginResetModel();
+    sourceModel->disconnect(this);
+    connect(sourceModel, &QAbstractListModel::dataChanged, this,
+            [this](const QModelIndex &start, const QModelIndex &end, const QVector<int> &roles) {
+        emit dataChanged(mapFromSource(start), mapFromSource(end), roles);
+
+    });
     m_sourceModel = sourceModel;
     m_sourceInfo = collectSourceIndexes({}, 0);
     endResetModel();
@@ -383,11 +393,16 @@ bool FlatObjectListModel::expandTo(const QModelIndex &startIndex, const QModelIn
     return false;
 }
 
-int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex)
+int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex) const
 {
     for (int i = 0; i < m_sourceInfo.size(); i++) {
         if (m_sourceInfo[i].index == sourceIndex)
             return i;
     }
     return -1;
+}
+
+QModelIndex FlatObjectListModel::sourceIndexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
+{
+    return m_sourceModel->indexForHandle(handle);
 }
