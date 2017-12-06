@@ -48,7 +48,6 @@ class CButtonDownListener;
 class CColorControl;
 class CStateTreeControl;
 class CToggleControl;
-class CStateTimebarlessRow;
 class CPropertyRow;
 class CCmdBatch;
 class CSnapper;
@@ -58,7 +57,7 @@ class CStateRow : public CBaseStateRow
 {
     Q_OBJECT
 public:
-    CStateRow(CBaseStateRow *inParentRow);
+    CStateRow(CBaseStateRow *inParentRow, bool loaded = false);
     virtual ~CStateRow();
 
     using CBaseStateRow::Initialize;

@@ -46,6 +46,8 @@ class ISnappingListProvider;
 class ITimelineItemBinding;
 class CPropertyRow;
 
+const double DEFAULT_TIME_RATIO = .05;
+
 class CTimelineRow : public QObject
 {
     Q_OBJECT
@@ -57,6 +59,9 @@ public:
 
     virtual void Initialize(ITimelineItemBinding *inTimelineItemBinding) = 0;
     virtual void Filter(const CFilter &inFilter, bool inFilterChildren = true) = 0;
+
+    virtual void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true) = 0;
+    virtual bool IsSelected() const = 0;
 
     void SetParent(CTimelineRow *inParent);
     CTimelineRow *GetParentRow() const;
@@ -97,6 +102,8 @@ Q_SIGNALS:
     void propertyRowAdded(CPropertyRow *newRow);
     void childrenLoaded();
     void selectKeysByTime(long inTime, bool inSelected);
+    void selectedChanged(bool selected);
+    void timeRatioChanged(double timeRatio);
 
 protected:
     CTimelineRow *m_ParentRow;
@@ -109,6 +116,6 @@ protected:
     bool m_Dirty = false;
     bool m_IsExpanded = false;
 
-    double m_TimeRatio;
+    double m_TimeRatio = DEFAULT_TIME_RATIO;
 };
 #endif // INCLUDED_TIMELINE_ROW_H

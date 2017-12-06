@@ -45,7 +45,6 @@
  */
 CPropertyRow::CPropertyRow(ITimelineItemProperty *inProperty, CTimelineRow *parent)
     : CTimelineRow(parent)
-    , m_TimeRatio(0.0f)
     , m_Property(inProperty)
 {
     m_IsViewable = true;
@@ -97,6 +96,11 @@ void CPropertyRow::Select(bool inIsShiftKeyPressed /*= false */)
         emit selectAllKeys();
     else
         m_Property->ClearKeySelection();
+}
+
+bool CPropertyRow::IsSelected() const
+{
+    return false; // KDAB_TODO check!
 }
 
 //=============================================================================

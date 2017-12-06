@@ -62,7 +62,10 @@ public:
     void SetTimeRatio(double inTimePerPixel) override;
     void Filter(const CFilter &inFilter, bool inFilterChildren = true) override;
 
+    void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true) override {}
     void Select(bool inIsShiftKeyPressed = false);
+    bool IsSelected() const override;
+
     void DeleteAllKeys();
     bool IsViewable() const override;
 
@@ -93,7 +96,6 @@ Q_SIGNALS:
 
 
 protected:
-    double m_TimeRatio;
     CFilter m_Filter;
     ITimelineItemProperty *m_Property;
 };

@@ -91,6 +91,7 @@ class FlatObjectListModel : public QAbstractListModel
     Q_OBJECT
 
 public:
+    // TODO Make FlatObjectList take a shared pointer
     FlatObjectListModel(ObjectListModel *sourceModel, QObject *parent = nullptr);
 
     enum Roles {
@@ -124,7 +125,7 @@ private:
     QVector<SourceInfo> collectSourceIndexes(const QModelIndex &sourceIndex, int depth) const;
 
     QVector<SourceInfo> m_sourceInfo;
-    ObjectListModel *m_sourceModel;
+    ObjectListModel *m_sourceModel = nullptr;
 };
 
 

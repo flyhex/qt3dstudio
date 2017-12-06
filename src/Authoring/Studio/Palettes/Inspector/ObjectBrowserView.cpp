@@ -86,7 +86,7 @@ bool ObjectBrowserView::selectable(int index) const
 
 void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
 {
-    QModelIndex index = m_model->sourceModel()->indexForHandle(handle);
+    QModelIndex index = m_model->sourceIndexForHandle(handle);
     m_model->expandTo(QModelIndex(), index);
     setSelection(m_model->rowForSourceIndex(index));
 }

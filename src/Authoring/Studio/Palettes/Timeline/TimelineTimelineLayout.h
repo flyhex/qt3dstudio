@@ -48,11 +48,12 @@
 #include "Playhead.h"
 #include "Qt3DSDMHandles.h"
 
+#include "TimelineRow.h"
+
 //=============================================================================
 // Forwards
 //=============================================================================
 class CScalableScroller;
-class CTimelineRow;
 class CFlowLayout;
 class CTimelineControl;
 class CSnapper;
@@ -140,7 +141,7 @@ protected:
     CTimeMeasure *m_TimeMeasure;
     CScalableScroller *m_Scroller;
     CFlowLayout *m_TimebarList;
-    double m_TimeRatio;
+    double m_TimeRatio = DEFAULT_TIME_RATIO;
 
     TTimelineRowList m_Rows;
     CPlayhead m_Playhead;

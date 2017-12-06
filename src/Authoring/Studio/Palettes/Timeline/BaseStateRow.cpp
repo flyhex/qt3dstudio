@@ -40,9 +40,9 @@
 #include "Bindings/ITimelineTimebar.h"
 
 
-CBaseStateRow::CBaseStateRow(CTimelineRow *parent)
+CBaseStateRow::CBaseStateRow(CTimelineRow *parent, bool loaded)
     : CTimelineRow(parent)
-    , m_Loaded(false)
+    , m_Loaded(loaded)
     , m_Selected(false)
 {
 }

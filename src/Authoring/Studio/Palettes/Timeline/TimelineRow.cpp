@@ -44,7 +44,6 @@ CTimelineRow::CTimelineRow(CTimelineRow *parent)
     , m_IsViewable(false)
     , m_ActiveStart(0)
     , m_ActiveEnd(0)
-    , m_TimeRatio(0.0f)
 {
 }
 
@@ -72,7 +71,10 @@ CTimelineRow *CTimelineRow::GetParentRow() const
 
 void CTimelineRow::SetTimeRatio(double inTimeRatio)
 {
-    m_TimeRatio = inTimeRatio;
+    if (m_TimeRatio != inTimeRatio) {
+        m_TimeRatio = inTimeRatio;
+        emit timeRatioChanged(inTimeRatio);
+    }
 }
 
 double CTimelineRow::GetTimeRatio()

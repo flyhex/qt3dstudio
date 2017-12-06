@@ -53,7 +53,7 @@ public:
     typedef std::vector<CStateRow *> TStateRowList;
 
 public:
-    CBaseStateRow(CTimelineRow *parent);
+    CBaseStateRow(CTimelineRow *parent, bool loaded = false);
     virtual ~CBaseStateRow();
 
     void Initialize(ITimelineItemBinding *inTimelineItemBinding) override;
@@ -67,6 +67,7 @@ public:
     void SetTimeRatio(double inTimePerPixel) override;
 
     void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true);
+    bool IsSelected() const override { return m_Selected; }
     void DeleteAllKeys();
 
     void LoadChildren() override;
@@ -112,12 +113,10 @@ public:
 
 Q_SIGNALS:
     void expanded(bool isExpanded);
-    void timeRatioChanged(double timeRatio);
     void visibleChanged(bool visible);
     void hasChildrenChanged(bool hasChildren);
     void rowAboutToBeRemoved(CTimelineRow *row);
     void selectAllKeys();
-    void selectedChanged(bool selected);
     void addRowToUILists(CTimelineRow *inRow, CTimelineRow *inNextRow, CFilter &inFilter);
     void rowAdded(CBaseStateRow *row);
     void refreshRowMetaData();

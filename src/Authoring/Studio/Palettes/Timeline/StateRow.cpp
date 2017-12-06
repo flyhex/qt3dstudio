@@ -50,8 +50,8 @@
  * Creates a new CStateRow for the Asset.
  * @param inParentRow the parent of this row.
  */
-CStateRow::CStateRow(CBaseStateRow *inParentRow)
-    : CBaseStateRow(inParentRow)
+CStateRow::CStateRow(CBaseStateRow *inParentRow, bool loaded)
+    : CBaseStateRow(inParentRow, loaded)
 {
     m_ParentRow = inParentRow;
 }

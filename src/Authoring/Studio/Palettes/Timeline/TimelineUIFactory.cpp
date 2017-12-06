@@ -79,8 +79,10 @@ CStateRow *TimelineUIFactory::createStateRow(CBaseStateRow *parentRow,
     ISnappingListProvider *snappingListProvider = nullptr;
     do {
         parentUiRow = m_uiRows.value(parentRow, nullptr);
-        snappingListProvider = parentUiRow->GetSnappingListProvider();
-        parentRow = dynamic_cast<CBaseStateRow*>(parentRow->GetParentRow());
+        if (parentUiRow) {
+            snappingListProvider = parentUiRow->GetSnappingListProvider();
+            parentRow = dynamic_cast<CBaseStateRow*>(parentRow->GetParentRow());
+        }
     } while (parentUiRow && !snappingListProvider);
     if (parentUiRow) {
         Q_ASSERT(snappingListProvider);

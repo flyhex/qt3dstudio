@@ -61,7 +61,6 @@
 //=============================================================================
 // Class constants
 //=============================================================================
-const double DEFAULT_TIME_RATIO = .05;
 const double CTimelineTimelineLayout::SCALING_PERCENTAGE_INC = 1.1;
 const double CTimelineTimelineLayout::SCALING_PERCENTAGE_DEC = 0.9;
 const double CTimelineTimelineLayout::MAX_ZOOM_OUT = 7e-005;

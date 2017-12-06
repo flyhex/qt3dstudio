@@ -34,6 +34,7 @@
 #include "StudioApp.h"
 #include "MainFrm.h"
 #include "TimelineControl.h"
+#include "TimelineView.h"
 #include "BasicObjectsView.h"
 #include "SlideView.h"
 #include "WidgetControl.h"
@@ -108,8 +109,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
-    m_timelineDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
-    m_timelineDock->setObjectName("timeline");
+    m_timelineDock = new QDockWidget(QObject::tr("Timeline (old)"), inMainFrame);
+    m_timelineDock->setObjectName("timeline_old");
     m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
 
     QWidget *timeLineParent = new QWidget(inMainFrame);
@@ -143,6 +144,12 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_timelineDock->setWidget(timeLineParent);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
+
+    m_timelineQmlDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
+    m_timelineQmlDock->setObjectName("timeline");
+    m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    auto timelineView = new TimelineView(m_timelineQmlDock);
+    m_timelineQmlDock->setWidget(timelineView);
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
