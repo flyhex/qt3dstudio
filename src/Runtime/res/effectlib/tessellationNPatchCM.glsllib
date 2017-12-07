@@ -72,40 +72,40 @@ varying vec3 varWorldPosTC[];
 
 void main() {
 
-	ctNorm[0] = varNormal[0];
-	ctNorm[1] = varNormal[1];
-	ctNorm[2] = varNormal[2];
+    ctNorm[0] = varNormal[0];
+    ctNorm[1] = varNormal[1];
+    ctNorm[2] = varNormal[2];
 #if QT3DS_ENABLE_TEXTAN
-	ctTangent[0] = varObjTangent[0];
-	ctTangent[1] = varObjTangent[1];
-	ctTangent[2] = varObjTangent[2];
+    ctTangent[0] = varObjTangent[0];
+    ctTangent[1] = varObjTangent[1];
+    ctTangent[2] = varObjTangent[2];
 #endif
 #if QT3DS_ENABLE_WORLD_POSITION
-	ctWorldPos[0] = varWorldPos[0];
-	ctWorldPos[1] = varWorldPos[1];
-	ctWorldPos[2] = varWorldPos[2];
+    ctWorldPos[0] = varWorldPos[0];
+    ctWorldPos[1] = varWorldPos[1];
+    ctWorldPos[2] = varWorldPos[2];
 #endif
 
-	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-	tessShader( tessLevelOuter, tessLevelInner);
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    tessShader( tessLevelOuter, tessLevelInner);
 
-	varObjPosTC[gl_InvocationID] = varObjPos[gl_InvocationID];
-	varNormalTC[gl_InvocationID] = varNormal[gl_InvocationID];
+    varObjPosTC[gl_InvocationID] = varObjPos[gl_InvocationID];
+    varNormalTC[gl_InvocationID] = varNormal[gl_InvocationID];
 
 #if QT3DS_ENABLE_UV0
-	varTexCoord0TC[gl_InvocationID] = varTexCoord0[gl_InvocationID];
+    varTexCoord0TC[gl_InvocationID] = varTexCoord0[gl_InvocationID];
 #endif
 #if QT3DS_ENABLE_TEXTAN
-	varTangentTC[gl_InvocationID] = varTangent[gl_InvocationID];
-	varObjTangentTC[gl_InvocationID] = varObjTangent[gl_InvocationID];
+    varTangentTC[gl_InvocationID] = varTangent[gl_InvocationID];
+    varObjTangentTC[gl_InvocationID] = varObjTangent[gl_InvocationID];
 #endif
 #if QT3DS_ENABLE_BINORMAL
-	varBinormalTC[gl_InvocationID] = varBinormal[gl_InvocationID];
-	varObjBinormalTC[gl_InvocationID] = varObjBinormal[gl_InvocationID];
+    varBinormalTC[gl_InvocationID] = varBinormal[gl_InvocationID];
+    varObjBinormalTC[gl_InvocationID] = varObjBinormal[gl_InvocationID];
 #endif
 #if QT3DS_ENABLE_WORLD_POSITION
-	varWorldPosTC[gl_InvocationID] = varWorldPos[gl_InvocationID];
-#endif	
+    varWorldPosTC[gl_InvocationID] = varWorldPos[gl_InvocationID];
+#endif
 }
 
 #endif
@@ -154,37 +154,37 @@ varying vec3 VARYING_NAME(varWorldPos);
 
 void main() {
 
-	ctNorm[0] = varNormalTC[0];
-	ctNorm[1] = varNormalTC[1];
-	ctNorm[2] = varNormalTC[2];
+    ctNorm[0] = varNormalTC[0];
+    ctNorm[1] = varNormalTC[1];
+    ctNorm[2] = varNormalTC[2];
 #if QT3DS_ENABLE_TEXTAN
-	ctTangent[0] = varObjTangentTC[0];
-	ctTangent[1] = varObjTangentTC[1];
-	ctTangent[2] = varObjTangentTC[2];
+    ctTangent[0] = varObjTangentTC[0];
+    ctTangent[1] = varObjTangentTC[1];
+    ctTangent[2] = varObjTangentTC[2];
 #endif
 
-	vec4 pos = tessShader( );
+    vec4 pos = tessShader( );
 
-	gl_Position = model_view_projection_matrix * pos;
+    gl_Position = model_view_projection_matrix * pos;
 
-	VARYING_NAME(varObjPos) = gl_TessCoord.z * varObjPosTC[0] + gl_TessCoord.x * varObjPosTC[1] + gl_TessCoord.y * varObjPosTC[2];
+    VARYING_NAME(varObjPos) = gl_TessCoord.z * varObjPosTC[0] + gl_TessCoord.x * varObjPosTC[1] + gl_TessCoord.y * varObjPosTC[2];
 
 #if QT3DS_ENABLE_UV0
-	VARYING_NAME(varTexCoord0) = gl_TessCoord.z * varTexCoord0TC[0] + gl_TessCoord.x * varTexCoord0TC[1] + gl_TessCoord.y * varTexCoord0TC[2];
-#endif	
+    VARYING_NAME(varTexCoord0) = gl_TessCoord.z * varTexCoord0TC[0] + gl_TessCoord.x * varTexCoord0TC[1] + gl_TessCoord.y * varTexCoord0TC[2];
+#endif
 #if QT3DS_ENABLE_WORLD_POSITION
-	VARYING_NAME(varWorldPos) = gl_TessCoord.z * varWorldPosTC[0] + gl_TessCoord.x * varWorldPosTC[1] + gl_TessCoord.y * varWorldPosTC[2];
+    VARYING_NAME(varWorldPos) = gl_TessCoord.z * varWorldPosTC[0] + gl_TessCoord.x * varWorldPosTC[1] + gl_TessCoord.y * varWorldPosTC[2];
 #endif
 
-	VARYING_NAME(varNormal) = normalize(normal_matrix * teNorm);
+    VARYING_NAME(varNormal) = normalize(normal_matrix * teNorm);
 
 #if QT3DS_ENABLE_TEXTAN
-	VARYING_NAME(varTangent) = normalize(normal_matrix * teTangent);
-	VARYING_NAME(varObjTangent) = gl_TessCoord.z * varObjTangentTC[0] + gl_TessCoord.x * varObjTangentTC[1] + gl_TessCoord.y * varObjTangentTC[2];
+    VARYING_NAME(varTangent) = normalize(normal_matrix * teTangent);
+    VARYING_NAME(varObjTangent) = gl_TessCoord.z * varObjTangentTC[0] + gl_TessCoord.x * varObjTangentTC[1] + gl_TessCoord.y * varObjTangentTC[2];
 #endif
 #if QT3DS_ENABLE_BINORMAL
-	VARYING_NAME(varBinormal) = normalize(normal_matrix * teBinormal);
-	VARYING_NAME(varObjBinormal) = gl_TessCoord.z * varObjBinormalTC[0] + gl_TessCoord.x * varObjBinormalTC[1] + gl_TessCoord.y * varObjBinormalTC[2];
+    VARYING_NAME(varBinormal) = normalize(normal_matrix * teBinormal);
+    VARYING_NAME(varObjBinormal) = gl_TessCoord.z * varObjBinormalTC[0] + gl_TessCoord.x * varObjBinormalTC[1] + gl_TessCoord.y * varObjBinormalTC[2];
 #endif
 }
 

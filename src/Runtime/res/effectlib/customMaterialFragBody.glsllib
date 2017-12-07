@@ -52,25 +52,25 @@
   }
 
   vec4 rgba = vec4( materialEmissive, 0.0f );
-  
+
   vec3 lightAmbient, lightDiffuse, lightSpecular, L;
   for ( int i=0 ; i<uNumLights ; i++ )
   {
     sampleLight( lights[i], varWorldPos, L, lightAmbient, lightDiffuse, lightSpecular);
     //evalTemporariesPerLightSource( normal, L, lightDiffuse, lightSpecular, materialIOR );
-    if (gl_FrontFacing) 
+    if (gl_FrontFacing)
       computeFrontLayerColor( normal, L, viewDir, lightDiffuse, lightSpecular, materialIOR, 1.0 );
     else
-      computeBackLayerColor( normal, L, viewDir, lightDiffuse, lightSpecular, materialIOR, 1.0 ); 
+      computeBackLayerColor( normal, L, viewDir, lightDiffuse, lightSpecular, materialIOR, 1.0 );
   }
   for ( int i=0 ; i < uNumAreaLights; ++i )
   {
     if (gl_FrontFacing)
       computeFrontAreaColor( i, arealights[i].diffuse, arealights[i].specular );
     else
-      computeBackAreaColor( i, arealights[i].diffuse, arealights[i].specular );      
+      computeBackAreaColor( i, arealights[i].diffuse, arealights[i].specular );
   }
-  
+
   if ( 0.0f < alpha )
   {
     if (gl_FrontFacing)
