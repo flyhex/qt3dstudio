@@ -377,7 +377,8 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 
 
     return QFileDialog::getOpenFileName(qApp->activeWindow(), QObject::tr("Open"),
-                                                 inFile, theFileFilter);
+                                        inFile, theFileFilter, nullptr,
+                                        QFileDialog::DontUseNativeDialog);
 }
 
 //==============================================================================
@@ -779,6 +780,7 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &i
                             : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt.toQString());
+    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
     if (inDialogTitle != "")
         theFileDlg.setWindowTitle(inDialogTitle.toQString());
 
@@ -862,6 +864,7 @@ Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirecto
                            : inInitialDirectory.toQString(),
                            theImportFilter.toQString());
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
+    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
         QFileInfo fi(theFileDlg.selectedFiles().first());
