@@ -56,12 +56,13 @@
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
 
-InspectorControlView::InspectorControlView(QWidget *parent)
+InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
       TabNavigable(),
       m_inspectorControlModel(new InspectorControlModel(this)),
       m_instance(0),
-      m_handle(0)
+      m_handle(0),
+      m_preferredSize(preferredSize)
 {
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &InspectorControlView::initialize);
@@ -167,7 +168,7 @@ InspectorControlView::~InspectorControlView()
 
 QSize InspectorControlView::sizeHint() const
 {
-    return {120, 600};
+    return m_preferredSize;
 }
 
 void InspectorControlView::initialize()

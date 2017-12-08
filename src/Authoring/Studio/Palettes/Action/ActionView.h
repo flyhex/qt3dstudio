@@ -95,7 +95,7 @@ class ActionView : public QQuickWidget,
     Q_PROPERTY(QString firedEvent MEMBER m_firedEvent NOTIFY firedEventChanged FINAL)
 
 public:
-    ActionView(QWidget *parent = nullptr);
+    ActionView(const QSize &preferredSize, QWidget *parent = nullptr);
     ~ActionView();
 
     QSize sizeHint() const override;
@@ -198,6 +198,7 @@ private:
     QTimer m_actionChangedCompressionTimer;
     QString m_firedEvent;
     MouseHelper m_mouseHelper;
+    QSize m_preferredSize;
 };
 
 #endif // ACTIONVIEW_H

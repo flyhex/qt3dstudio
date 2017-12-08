@@ -266,6 +266,8 @@ int CMainFrame::OnCreate()
     m_SceneView = new CSceneView(&g_StudioApp, this);
     connect(m_SceneView, &CSceneView::toolChanged, this, &CMainFrame::OnUpdateToolChange);
 
+    m_SceneView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     // tell the edit camera bar about this scene view
     m_ui->m_EditCamerasBar->SetSceneView(m_SceneView);
 

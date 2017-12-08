@@ -46,17 +46,20 @@ class TimeLineToolbar : public QWidget
 {
   Q_OBJECT
 public:
-    TimeLineToolbar(CMainFrame *mainFrame, QWidget *pParent = nullptr);
+    TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSize, QWidget *pParent = nullptr);
     virtual ~TimeLineToolbar();
 
     void onTimeChanged(long time);
     void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
+
+    QSize sizeHint() const;
 
 private Q_SLOTS:
     void onAddLayerClicked();
 
 protected:
     QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar) *m_ui;
+    QSize m_preferredSize;
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
 };

@@ -54,10 +54,11 @@
 #include <QQmlEngine>
 #include <QTimer>
 
-ActionView::ActionView(QWidget *parent)
+ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent)
     , TabNavigable()
     , m_actionsModel(new ActionModel(this))
+    , m_preferredSize(preferredSize)
 {
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &ActionView::initialize);
@@ -97,7 +98,7 @@ ActionView::~ActionView()
 
 QSize ActionView::sizeHint() const
 {
-    return {500, 500};
+    return m_preferredSize;
 }
 
 void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)

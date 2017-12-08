@@ -89,7 +89,7 @@ CWinDropContainer::~CWinDropContainer()
  *	This is so the Window that is derived from CWinContainer can receive drags.
  *	@param inWindow the outer to drag.
  */
-void CWinDropContainer::RegiserForDnd(QWidget *inWindow)
+void CWinDropContainer::RegisterForDnd(QWidget *inWindow)
 {
     // This passes the inWindow down to the COLEDropSource.
     m_DropProxy.Register(inWindow);

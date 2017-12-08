@@ -113,7 +113,7 @@ void SlideView::setShowMasterSlide(bool show)
 
 QSize SlideView::sizeHint() const
 {
-    return {150, 200};
+    return {150, 500};
 }
 
 void SlideView::deselectAll()

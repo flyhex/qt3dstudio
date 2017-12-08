@@ -63,10 +63,11 @@
 
 IMPLEMENT_OBJECT_COUNTER(CTimelineControl)
 
-CTimelineControl::CTimelineControl()
+CTimelineControl::CTimelineControl(const QSize &preferredSize)
     : m_SuspendRecalcLayout(false)
     , m_TranslationManager(nullptr)
     , m_time(0)
+    , m_preferredSize(preferredSize)
 {
     ADDTO_OBJECT_COUNTER(CTimelineControl)
 
@@ -121,6 +122,11 @@ CTimelineControl::~CTimelineControl()
     delete m_BreadCrumbToolbar;
 
     REMOVEFROM_OBJECT_COUNTER(CTimelineControl)
+}
+
+CPt CTimelineControl::GetPreferredSize()
+{
+    return CPt(m_preferredSize.width(), m_preferredSize.height());
 }
 
 //=============================================================================
