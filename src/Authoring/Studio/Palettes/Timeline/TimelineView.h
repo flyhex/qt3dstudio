@@ -64,6 +64,7 @@ public:
 
     Q_INVOKABLE void select(int index, Qt::KeyboardModifiers modifiers);
 
+
 Q_SIGNALS:
     void objectModelChanged();
     void selectionChanged();
@@ -72,6 +73,10 @@ protected:
     // DataModel callbacks
     virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                                const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
+    void OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+                            qt3dsdm::Qt3DSDMPropertyHandle property);
+    void OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+                            qt3dsdm::Qt3DSDMPropertyHandle property);
 
 private:
     void initialize();

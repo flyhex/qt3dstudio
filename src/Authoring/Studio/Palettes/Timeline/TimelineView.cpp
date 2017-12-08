@@ -83,6 +83,13 @@ void TimelineView::OnNewPresentation()
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     m_Connections.push_back(theDispatch->ConnectSelectionChange(
         std::bind(&TimelineView::OnSelectionChange, this, std::placeholders::_1)));
+
+    m_Connections.push_back(theSignalProvider->ConnectAnimationCreated(
+        std::bind(&TimelineView::OnAnimationCreated, this,
+             std::placeholders::_2, std::placeholders::_3)));
+    m_Connections.push_back(theSignalProvider->ConnectAnimationDeleted(
+        std::bind(&TimelineView::OnAnimationDeleted, this,
+             std::placeholders::_2, std::placeholders::_3)));
 }
 
 void TimelineView::OnClosingPresentation()
@@ -110,6 +117,20 @@ void TimelineView::select(int index, Qt::KeyboardModifiers modifiers)
             .data(TimelineObjectModel::TimelineRowRole).value<CTimelineRow*>();
     timelineRow->Select(modifiers);
     setSelection(index);
+}
+
+void TimelineView::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+                                      qt3dsdm::Qt3DSDMPropertyHandle property)
+{
+    if (m_objectListModel)
+        m_objectListModel->addProperty(parentInstance, property);
+}
+
+void TimelineView::OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+                                      qt3dsdm::Qt3DSDMPropertyHandle property)
+{
+    if (m_objectListModel)
+        m_objectListModel->removeProperty(parentInstance, property);
 }
 
 void TimelineView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex, const qt3dsdm::Qt3DSDMSlideHandle &inSlide)

@@ -94,7 +94,7 @@ public:
 
 public:
     ITimelineItemBinding *GetOrCreate(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    void CreateNewPropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding,
+    CPropertyRow *CreateNewPropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding,
                               CBaseStateRow *inParentRow, CPropertyRow *inNextRow);
     void RemovePropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding);
 

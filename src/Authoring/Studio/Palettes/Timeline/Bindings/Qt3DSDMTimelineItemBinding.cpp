@@ -873,12 +873,12 @@ Qt3DSDMTimelineItemBinding::GetOrCreatePropertyBinding(Qt3DSDMPropertyHandle inP
  * @param inAppend true to skip the check to find where to insert. ( true if this is a
  * loading/initializing step, where the call is already done in order )
  */
-void Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inPropertyHandle,
-                                                bool inAppend /*= false */)
+CPropertyRow *Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inPropertyHandle,
+                                               bool inAppend /*= false */)
 {
     ITimelineItemProperty *theTimelineProperty = GetPropertyBinding(inPropertyHandle);
     if (theTimelineProperty && theTimelineProperty->GetRow()) // if created, bail
-        return;
+        return {};
 
     if (!theTimelineProperty)
         theTimelineProperty = GetOrCreatePropertyBinding(inPropertyHandle);
@@ -909,12 +909,22 @@ void Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inProperty
             }
         }
     }
+
+    CPropertyRow *propertyRow = nullptr;
     // Create a new property row
-    m_TransMgr->CreateNewPropertyRow(theTimelineProperty, m_Row,
-                                     theNextProperty ? theNextProperty->GetRow() : nullptr);
+    if (m_createUIRow) {
+        propertyRow = m_TransMgr->CreateNewPropertyRow(theTimelineProperty, m_Row,
+                                             theNextProperty ? theNextProperty->GetRow() : nullptr);
+    } else {
+        propertyRow = new CPropertyRow(theTimelineProperty, m_Row);
+        m_Row->AddPropertyRow(propertyRow, theNextProperty ? theNextProperty->GetRow() : nullptr);
+        theTimelineProperty->Bind(propertyRow);
+    }
 
     // Update keyframes
     AddKeyframes(theTimelineProperty);
+
+    return propertyRow;
 }
 
 void Qt3DSDMTimelineItemBinding::RemovePropertyRow(Qt3DSDMPropertyHandle inPropertyHandle)

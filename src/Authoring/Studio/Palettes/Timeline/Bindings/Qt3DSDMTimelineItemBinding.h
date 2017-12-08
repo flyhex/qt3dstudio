@@ -179,8 +179,8 @@ public:
                                             long inInstanceCount) override;
     void RefreshStateRow(bool inRefreshChildren = false);
 
-    virtual void AddPropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                                bool inAppend = false);
+    virtual CPropertyRow* AddPropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
+                                          bool inAppend = false);
     virtual void RemovePropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     virtual void RefreshPropertyKeyframe(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                          qt3dsdm::Qt3DSDMKeyframeHandle,
@@ -205,10 +205,11 @@ public:
     // Bridge between asset & DataModel. Ideally we should be fully DataModel
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstance() const;
 
+
+    ITimelineItemProperty *GetOrCreatePropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
+    ITimelineItemProperty *GetPropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
 protected:
     virtual ITimelineTimebar *CreateTimelineTimebar();
-    ITimelineItemProperty *GetPropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
-    ITimelineItemProperty *GetOrCreatePropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     void RemoveAllPropertyBindings();
     void AddKeyframes(ITimelineItemProperty *inPropertyBinding);
     bool

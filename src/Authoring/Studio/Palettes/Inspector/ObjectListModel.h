@@ -74,8 +74,8 @@ public:
 protected:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
-    qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
-                                                    const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
+    virtual qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
+                                                      const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
     QString nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 

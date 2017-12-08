@@ -136,15 +136,15 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
  * Create a new CPropertyRow that maps to this ITimelineItemProperty.
  * The caller is assumed to have ensured that this is only called once per property binding.
  */
-void CTimelineTranslationManager::CreateNewPropertyRow(
+CPropertyRow *CTimelineTranslationManager::CreateNewPropertyRow(
     ITimelineItemProperty *inTimelineItemPropertyBinding, CBaseStateRow *inParentRow,
     CPropertyRow *inNextRow)
 {
     if (!inParentRow || !inTimelineItemPropertyBinding)
-        return;
+        return {};
 
-    TimelineUIFactory::instance()->createPropertyRow(inParentRow, inNextRow,
-                                                     inTimelineItemPropertyBinding);
+    return TimelineUIFactory::instance()->createPropertyRow(inParentRow, inNextRow,
+                                                            inTimelineItemPropertyBinding);
 }
 
 //==============================================================================

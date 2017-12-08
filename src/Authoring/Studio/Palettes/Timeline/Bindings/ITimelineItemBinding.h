@@ -127,6 +127,11 @@ public:
     // Properties
     virtual void RemoveProperty(ITimelineItemProperty *inProperty) = 0;
     virtual void LoadProperties() = 0;
+
+    void setCreateUIRow(bool create) { m_createUIRow = create; }
+
+protected:
+    bool m_createUIRow = true; // control creation of UI row for old style timeline UI
 };
 
 //=============================================================================

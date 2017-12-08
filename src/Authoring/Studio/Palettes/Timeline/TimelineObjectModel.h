@@ -35,6 +35,8 @@
 #include <QSharedPointer>
 
 class CSlideRow;
+class CPropertyRow;
+class IKeyframe;
 class ITimelineItemBinding;
 
 struct TimebarTimeInfo {
@@ -86,16 +88,32 @@ public:
     };
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant dataForProperty(CPropertyRow *propertyRow, const QModelIndex &index,
+                             int role = Qt::DisplayRole) const;
+    QModelIndex parent(const QModelIndex &index) const override;
 
     void setTimelineItemBinding(ITimelineItemBinding *inTimelineItem);
 
     QSharedPointer<CTimelineRow> timelineRowForIndex(const QModelIndex &index);
 
+    void addProperty(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+                     qt3dsdm::Qt3DSDMPropertyHandle property);
+    void removeProperty(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+                        qt3dsdm::Qt3DSDMPropertyHandle property);
+
+protected:
+    qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
+                                              const qt3dsdm::Qt3DSDMInstanceHandle &handle) const override;
+
+
+
 private:
+   void appendKey(QVariantList &keyframes, IKeyframe *key, double timeRatio) const;
 
    QSharedPointer<CSlideRow> m_slideRow;
    ITimelineItemBinding *m_timelineItemBinding = nullptr;
    QHash<int, QSharedPointer<CTimelineRow> > m_rows;
+   mutable QHash<int, QVector<qt3dsdm::Qt3DSDMInstanceHandle> > m_properties;
 };
 
 Q_DECLARE_METATYPE(CTimelineRow *);

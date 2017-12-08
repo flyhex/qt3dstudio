@@ -28,6 +28,7 @@
 
 #include "ObjectListModel.h"
 
+#include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "Doc.h"
 #include "GraphUtils.h"
@@ -87,30 +88,41 @@ QVariant ObjectListModel::data(const QModelIndex &index, int role) const
     if (!hasIndex(index.row(), index.column(), index.parent()))
         return {};
 
+    auto handle = handleForIndex(index);
+
+    auto studioSystem = m_core->GetDoc()->GetStudioSystem();
+    auto propertySystem = studioSystem->GetPropertySystem();
+    qt3dsdm::SValue typeValue;
+    propertySystem->GetInstancePropertyValue(handle,
+                                             studioSystem->GetClientDataModelBridge()
+                                             ->GetTypeProperty(), typeValue);
+    qt3dsdm::DataModelDataType::Value valueType(qt3dsdm::GetValueType(typeValue));
+    if (valueType == qt3dsdm::DataModelDataType::None)
+        return {};
+
     switch (role) {
     case NameRole: {
-        return nameForHandle(handleForIndex(index));
+        return nameForHandle(handle);
     }
     case PathReferenceRole: {
         Q3DStudio::CString data(m_objRefHelper->GetObjectReferenceString(
-            m_baseHandle, CRelativePathTools::EPATHTYPE_RELATIVE, handleForIndex(index)));
+            m_baseHandle, CRelativePathTools::EPATHTYPE_RELATIVE, handle));
         return data.toQString();
     }
     case AbsolutePathRole: {
         Q3DStudio::CString data(m_objRefHelper->GetObjectReferenceString(
-            m_baseHandle, CRelativePathTools::EPATHTYPE_GUID, handleForIndex(index)));
+            m_baseHandle, CRelativePathTools::EPATHTYPE_GUID, handle));
         return data.toQString();
     }
     case HandleRole: {
         return (int)handleForIndex(index);
     }
     case IconRole: {
-        auto info = m_objRefHelper->GetInfo(handleForIndex(index));
+        auto info = m_objRefHelper->GetInfo(handle);
         return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
     }
     case TextColorRole: {
         auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-        auto handle = handleForIndex(index);
         auto objType = bridge->GetObjectType(handle);
         auto info = m_objRefHelper->GetInfo(handle);
         if (m_excludeTypes.contains(objType))
@@ -179,9 +191,12 @@ bool ObjectListModel::selectable(const qt3dsdm::Qt3DSDMInstanceHandle &handle) c
     return !m_excludeTypes.contains(objType);
 }
 
-qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
+
+qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
+                                                           const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
-    auto slideSystem = m_core->GetDoc()->GetStudioSystem()->GetSlideSystem();
+    auto studioSystem = m_core->GetDoc()->GetStudioSystem();
+    auto slideSystem = studioSystem->GetSlideSystem();
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);
 
     qt3dsdm::TInstanceHandleList children;
@@ -359,6 +374,34 @@ void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
             [this](const QModelIndex &start, const QModelIndex &end, const QVector<int> &roles) {
         emit dataChanged(mapFromSource(start), mapFromSource(end), roles);
 
+    });
+    connect(sourceModel, &QAbstractListModel::rowsAboutToBeInserted, this,
+            [this](const QModelIndex &parent, int start, int end) {
+        auto idx = mapFromSource(parent);
+        beginInsertRows(idx, idx.row() + start, idx.row() + end);
+        // TODO implement
+    });
+    connect(sourceModel, &QAbstractListModel::rowsInserted, this,
+            [this](const QModelIndex &parent, int start, int end) {
+        endInsertRows();
+
+    });
+    connect(sourceModel, &QAbstractListModel::rowsAboutToBeRemoved, this,
+            [this](const QModelIndex &parent, int start, int end) {
+        auto idx = mapFromSource(parent);
+        beginRemoveRows(idx, idx.row() + start, idx.row() + end);
+        // TODO implement
+    });
+    connect(sourceModel, &QAbstractListModel::rowsRemoved, this,
+            [this](const QModelIndex &parent, int start, int end) {
+        endRemoveRows();
+
+    });
+    connect(sourceModel, &QAbstractListModel::modelReset, this,
+            [this]() {
+        beginResetModel();
+        m_sourceInfo = collectSourceIndexes({}, 0);
+        endResetModel();
     });
     m_sourceModel = sourceModel;
     m_sourceInfo = collectSourceIndexes({}, 0);
