@@ -154,7 +154,8 @@ HEADERS += \
     Palettes/Timeline/TimelineRow.h \
     Palettes/Timeline/TimelineUIFactory.h \
     Palettes/Timeline/TimelineView.h \
-    Palettes/Timeline/TimelineObjectModel.h
+    Palettes/Timeline/TimelineObjectModel.h \
+    Palettes/Timeline/TimeMeasureItem.h
 
 FORMS += \
     _Win/UI/timeeditdlg.ui \
@@ -376,7 +377,8 @@ SOURCES += \
     Palettes/Timeline/TimelineUIFactory.cpp \
     Palettes/Timeline/PropertyRowUI.cpp \
     Palettes/Timeline/TimelineView.cpp \
-    Palettes/Timeline/TimelineObjectModel.cpp
+    Palettes/Timeline/TimelineObjectModel.cpp \
+    Palettes/Timeline/TimeMeasureItem.cpp
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
