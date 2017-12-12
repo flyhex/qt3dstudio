@@ -111,7 +111,6 @@ struct SDocTransactionCommand : public CCmd
         , m_DoneOnce(false)
         , m_Dispatch(dispatch)
     {
-        m_ShouldSetModified = false;
     }
 
     ECmdType GetType() override { return CCmd::GENERIC; }
