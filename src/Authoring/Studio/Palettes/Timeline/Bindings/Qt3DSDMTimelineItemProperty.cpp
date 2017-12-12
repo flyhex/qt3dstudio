@@ -387,6 +387,7 @@ long Qt3DSDMTimelineItemProperty::OffsetSelectedKeyframes(long inOffset)
 void Qt3DSDMTimelineItemProperty::CommitChangedKeyframes()
 {
     if (m_SetKeyframeValueCommand) { // if this is moving a keyframe value
+        m_SetKeyframeValueCommand->Finalize(m_SetKeyframeValueCommand->GetValue());
         g_StudioApp.GetCore()->ExecuteCommand(m_SetKeyframeValueCommand, false);
         m_SetKeyframeValueCommand = nullptr;
     } else // otherwise its changing keyframe times

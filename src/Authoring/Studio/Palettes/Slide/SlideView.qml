@@ -151,14 +151,22 @@ Rectangle {
                 drag.target: held ? delegateItem : null
                 drag.axis: Drag.YAxis
 
-
                 onPressed: {
                     dragIndex = model.index;
+                    _slideView.startSlideRearrange(model.index);
                     if (mouse.x > delegateItem.x && mouse.x < delegateItem.x + delegateItem.width)
                         held = true;
                 }
-                onReleased: held = false
 
+                onReleased: {
+                    held = false;
+                    _slideView.finishSlideRearrange(true);
+                }
+
+                onCanceled: {
+                    held = false;
+                    _slideView.finishSlideRearrange(false);
+                }
 
                 onClicked: {
                     _slideView.deselectAll();

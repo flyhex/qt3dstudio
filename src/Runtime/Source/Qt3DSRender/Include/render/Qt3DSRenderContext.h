@@ -414,6 +414,8 @@ namespace render {
 
         virtual QSurfaceFormat format() const = 0;
 
+        virtual void resetStates() = 0;
+
         static NVRenderContext &CreateGL(NVFoundationBase &foundation, IStringTable &inStringTable,
                                          const QSurfaceFormat &format);
 
@@ -1049,6 +1051,11 @@ namespace render {
         QSurfaceFormat format() const override
         {
             return m_backend->format();
+        }
+        virtual void resetStates()
+        {
+            PushPropertySet();
+            PopPropertySet(true);
         }
     };
 }

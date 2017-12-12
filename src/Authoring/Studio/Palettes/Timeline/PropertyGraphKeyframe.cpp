@@ -49,7 +49,7 @@ CPropertyGraphKeyframe::CPropertyGraphKeyframe(ITimelineItemProperty *inProperty
     , m_MaxY(inMaxY)
     , m_IsMouseDown(false)
 {
-    SetSize(CPt(4, 4));
+    SetSize(CPt(6, 8));
     PositionKeyframe();
 }
 

@@ -136,7 +136,8 @@ HEADERS += \
     _Win/DragNDrop/DropProxy.h \
     Palettes/Inspector/ObjectListModel.h \
     Palettes/Inspector/ObjectBrowserView.h \
-    _Win/Application/SubPresentationsDlg.h \
+    _Win/Application/SubPresentationDlg.h \
+    _Win/Application/SubPresentationListDlg.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
@@ -354,7 +355,8 @@ SOURCES += \
     Utils/TickTock.cpp \
     Controls/ClickableLabel.cpp \
     Controls/WidgetControl.cpp \
-    _Win/Application/SubPresentationsDlg.cpp
+    _Win/Application/SubPresentationDlg.cpp \
+    _Win/Application/SubPresentationListDlg.cpp
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
@@ -406,7 +408,8 @@ FORMS += \
     MainFrm.ui \
     _Win/Application/AboutDlg.ui \
     _Win/UI/StartupDlg.ui \
-    _Win/Application/SubPresentationsDlg.ui \
+    _Win/Application/SubPresentationDlg.ui \
+    _Win/Application/SubPresentationListDlg.ui \
     _Win/Palettes/Progress/ProgressDlg.ui
 
 RESOURCES += \
@@ -421,17 +424,16 @@ PREDEPS_LIBS += \
     CommonLib \
     CoreLib
 
-
-# Optional license handler
-isEmpty(TQTC_LICENSE_MANAGING): TQTC_LICENSE_MANAGING=$$(TQTC_LICENSE_MANAGING)
-!isEmpty(TQTC_LICENSE_MANAGING) {
-    DEFINES += USE_LICENSE_HANDLER LICENSE_HANDLER_AS_DLL
-    LIBS += -llicensehandler$$qtPlatformTargetSuffix()
-    INCLUDEPATH += $$TQTC_LICENSE_MANAGING/studio3d
-}
-
 include(../../utils.pri)
 PRE_TARGETDEPS += $$fixLibPredeps($$LIBDIR, PREDEPS_LIBS)
+
+# Bundle FBX for macOS
+macos:!isEmpty(QMAKE_LIBS_FBX) {
+    fbxlibpath = $$last(QMAKE_LIBS_FBX)
+    fbxsdk.files = $$str_member($$fbxlibpath, 2, -1)/libfbxsdk.dylib
+    fbxsdk.path = Contents/MacOS
+    QMAKE_BUNDLE_DATA += fbxsdk
+}
 
 # Copy necessary resources
 
@@ -443,7 +445,8 @@ macos:RES = "Resources"
 
 defineReplace(doReplaceResCopy_copy1) {
     filePath = $$absolute_path($$1)
-    filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
+    macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR/$$RES)
+    !macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
     PRE_TARGETDEPS += $$filePath
     export(PRE_TARGETDEPS)
     return($$system_path($$filePath))
@@ -499,10 +502,16 @@ target.path = $$[QT_INSTALL_BINS]
 INSTALLS += target
 
 RC_ICONS = images/3D-studio.ico
+ICON = images/studio.icns
 
-# Extract SHA from .tag file if project has it
-exists($$ABS_PRJ_ROOT/.tag) {
+# Extract SHA from git if building sources from git repository
+exists($$ABS_PRJ_ROOT/.git) {
+    GIT_SHA = $$system(git rev-list --abbrev-commit -n1 HEAD)
+}
+# Otherwise attempt to extract SHA from .tag file
+isEmpty(GIT_SHA):exists($$ABS_PRJ_ROOT/.tag) {
     STUDIO_TAG = $$cat($$ABS_PRJ_ROOT/.tag)
     FIRST_CHAR = $$str_member($$STUDIO_TAG, 0, 0)
-    !equals(FIRST_CHAR, "$"): DEFINES += QT3DSTUDIO_REVISION=$$first(STUDIO_TAG)
+    !equals(FIRST_CHAR, "$"): GIT_SHA = $$first(STUDIO_TAG)
 }
+!isEmpty(GIT_SHA): DEFINES += QT3DSTUDIO_REVISION=$$GIT_SHA

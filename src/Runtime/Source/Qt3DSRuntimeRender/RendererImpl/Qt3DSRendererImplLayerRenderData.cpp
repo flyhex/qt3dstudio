@@ -1687,6 +1687,8 @@ namespace render {
             return;
 
         NVRenderContext &theContext(m_Renderer.GetContext());
+        theContext.resetStates();
+
         NVRenderContextScopedProperty<NVRenderFrameBuffer *> __fbo(
             theContext, &NVRenderContext::GetRenderTarget, &NVRenderContext::SetRenderTarget);
         qt3ds::render::NVRenderRect theCurrentViewport = theContext.GetViewport();

@@ -234,6 +234,13 @@ void MainWindow::on_actionConnect_triggered()
     }
 
     m_remoteDeploymentReceiver = new RemoteDeploymentReceiver(this);
+    if (m_remoteDeploymentReceiver->canceled()) {
+        delete m_remoteDeploymentReceiver;
+        m_remoteDeploymentReceiver = 0;
+        ui->actionConnect->setChecked(false);
+        return;
+    }
+
     if (!m_remoteDeploymentReceiver->startServer()) {
         QString msg = "Unable to connect to remote project.\n";
         QMessageBox::warning(this, "Connection Error", msg, QMessageBox::Close);

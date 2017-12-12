@@ -1,0 +1,21 @@
+Qt 3D Studio 1.0 is the first release of the rapid 3D user interface creation tool.
+
+For more details, refer to the product page:
+
+https://www.qt.io/3d-studio
+
+Documentation is included in this distribution.
+The documentation is also available online:
+
+http://doc.qt.io/qt3dstudio/index.html
+
+For Qt 3D Studio known issues, submitting feature suggestions and
+live development tracking go to QT3DS project Bug Tracker:
+
+https://bugreports.qt.io/projects/QT3DS
+
+****************************************************************************
+*                          Qt 3D Studio 1.0 Changes                        *
+****************************************************************************
+
+ - This is the first public release of Qt 3D Studio

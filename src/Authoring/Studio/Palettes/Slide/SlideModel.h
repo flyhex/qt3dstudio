@@ -29,7 +29,8 @@
 #ifndef SLIDEMODEL_H
 #define SLIDEMODEL_H
 
-#include <QAbstractListModel>
+#include <QtCore/qabstractitemmodel.h>
+#include <QtCore/qhash.h>
 
 #include "Qt3DSDMHandles.h"
 
@@ -60,21 +61,34 @@ public:
     bool removeRows(int row, int count,
                     const QModelIndex &parent = QModelIndex()) override;
     void duplicateRow(int row);
+    void startRearrange(int row);
     void move(int fromRow, int toRow);
+    void finishRearrange(bool commit);
 
     void clear();
     void addNewSlide(int row);
     void removeSlide(int row);
+
+    void onNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
+    void onDeleteSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
+    void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
+                           int toRow);
+    void refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle,
+                           qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
 
 private:
     bool hasSlideWithName(const QString &name) const;
     QString slideName(const qt3dsdm::Qt3DSDMSlideHandle &handle) const;
     void setSlideName(const qt3dsdm::Qt3DSDMSlideHandle &handle, const QString &name);
     inline CDoc *GetDoc() const;
+    inline long slideIndex(const qt3dsdm::Qt3DSDMSlideHandle &handle);
     inline CClientDataModelBridge *GetBridge() const;
 
     QVector<qt3dsdm::Qt3DSDMSlideHandle> m_slides;
     int m_selectedRow = -1;
+    int m_rearrangeStartRow = -1;
+    int m_rearrangeEndRow = -1;
+    QHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMSlideHandle> m_slideLookupHash;
 };
 
 

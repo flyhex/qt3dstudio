@@ -62,7 +62,9 @@ public:
     Q_INVOKABLE void addNewSlide(int row);
     Q_INVOKABLE void removeSlide(int row);
     Q_INVOKABLE void duplicateSlide(int row);
+    Q_INVOKABLE void startSlideRearrange(int row);
     Q_INVOKABLE void moveSlide(int from, int to);
+    Q_INVOKABLE void finishSlideRearrange(bool commit);
     Q_INVOKABLE void showContextMenu(int x, int y, int row);
 
     // Presentation Change Listener

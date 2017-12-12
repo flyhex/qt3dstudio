@@ -48,13 +48,67 @@
 **
 ****************************************************************************/
 
+/*[[
+    <Property name="cameraTarget" formalName="Camera Target" type="ObjectRef" default="Scene.Layer.Camera" description="Object in scene the camera should look at" />
+    <Property name="startImmediately" formalName="Start Immediately?" type="Boolean" default="True" publishLevel="Advanced" description="Start immediately, or wait for the Enable action to be called?" />
+
+    <Handler name="start" formalName="Start" category="CameraLookAt" description="Begin looking the target" />
+    <Handler name="stop" formalName="Stop" category="CameraLookAt" description="Stop looking the target" />
+]]*/
+
 import QtStudio3D.Behavior 1.0
 
-Qt3DSBehavior {
-    function onUpdate() {
-        var date = new Date();
-        var timeString = date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear()
-                 + " " + date.getHours() + ":" + date.getMinutes() + "." + date.getSeconds();
-        setAttribute("textstring", timeString);
+Behavior {
+    //External:
+    property string cameraTarget
+    property bool startImmediately
+    //Internal:
+    property bool running: false
+    property var updateFunction
+
+    function start() {
+        running = true;
+    }
+    function stop() {
+        running = false;
+    }
+    onInitialize: {
+        if (startImmediately)
+            start();
+    }
+    onUpdate: {
+        if (!running)
+            return;
+        var targetTransform = calculateGlobalTransform(cameraTarget);
+        var targetSpot = targetTransform.row(3).toVector3d();
+        var cameraTransform = calculateGlobalTransform();
+        var cameraSpot = cameraTransform.row(3).toVector3d();
+
+        var matrix = calculateGlobalTransform(getParent()).inverted();
+        matrix.m41 = 0;
+        matrix.m42 = 0;
+        matrix.m43 = 0;
+
+        var rotateRay = targetSpot
+                        .minus(cameraSpot)
+                        .times(matrix);
+
+        var rotation = lookAt(rotateRay);
+        setAttributeVector("rotation", rotation);
+        setAttributeVector("position", cameraSpot);
+    }
+
+    function getAttributeVector(name) {
+        var vec = Qt.vector3d(0, 0, 0);
+        getAttribute(name + ".x", vec.x);
+        getAttribute(name + ".y", vec.y);
+        getAttribute(name + ".z", vec.z);
+        return vec;
+    }
+
+    function setAttributeVector(name, vec) {
+        setAttribute(name + ".x", vec.x);
+        setAttribute(name + ".y", vec.y);
+        setAttribute(name + ".z", vec.z);
     }
 }

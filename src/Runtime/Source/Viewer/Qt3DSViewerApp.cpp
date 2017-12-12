@@ -520,13 +520,11 @@ void Q3DSViewerApp::Resize(int width, int height)
     QSize newSize(width, height);
     m_Impl.m_WindowSystem->SetWindowDimensions(newSize);
 
-#if !defined(Q_OS_MACOS)
     if (m_Impl.m_appInitSuccessful && m_Impl.m_tegraApp
             && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
         QResizeEvent event = QResizeEvent(newSize, oldSize);
         m_Impl.m_tegraApp->HandleMessage(&event);
     }
-#endif
 }
 
 void Q3DSViewerApp::HandleKeyInput(Q3DStudio::EKeyCode inKeyCode, bool isPressed)

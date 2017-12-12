@@ -44,6 +44,10 @@ import QtStudio3D 1.0
 
 \generatelist {qmltypesbymodule QtStudio3D}
 
+\section1 QML Behavior Script
+
+\l Behavior
+
 \section1 Additional Information
 
 //! [toc]

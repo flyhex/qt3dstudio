@@ -86,6 +86,7 @@
 #include <QtQml/qqmlcomponent.h>
 #include <QtCore/qdir.h>
 #include <unordered_set>
+#include "Runtime/Include/q3dsqmlbehavior.h"
 
 extern "C" {
 #include "lua.h"
@@ -231,6 +232,7 @@ public:
                 theSystem->AddDirectory(m_Doc.GetDocumentDirectory().toQString(),
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
+        qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
     }
     virtual ~CDocEditor()
     {
@@ -514,17 +516,18 @@ public:
     bool IsPropertyLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
     {
         if (IsInstance(inInstance)) {
-            AdditionalMetaDataType::Value thePropertyMetaData =
-                m_PropertySystem.GetAdditionalMetaDataType(inInstance, inProperty);
             Qt3DSDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
             if (theAssociatedSlide.Valid() && m_SlideSystem.IsMasterSlide(theAssociatedSlide)) {
-                SValue theValue;
-                if (thePropertyMetaData == AdditionalMetaDataType::Image) {
-                    qt3dsdm::Qt3DSDMInstanceHandle theInstance =
-                        GetImageInstanceForProperty(inInstance, inProperty);
-                    if (theInstance)
-                        return IsPropertyLinked(theInstance, m_Bridge.GetSourcePathProperty());
-                    return true; // No image means the property is linked.
+                if (inProperty.Valid()) {
+                    AdditionalMetaDataType::Value thePropertyMetaData =
+                        m_PropertySystem.GetAdditionalMetaDataType(inInstance, inProperty);
+                    if (thePropertyMetaData == AdditionalMetaDataType::Image) {
+                        qt3dsdm::Qt3DSDMInstanceHandle theInstance =
+                            GetImageInstanceForProperty(inInstance, inProperty);
+                        if (theInstance)
+                            return IsPropertyLinked(theInstance, m_Bridge.GetSourcePathProperty());
+                        return true; // No image means the property is linked.
+                    }
                 }
                 return m_SlideSystem.IsPropertyLinked(inInstance, inProperty);
             }
@@ -1193,10 +1196,16 @@ public:
                 QT3DS_ASSERT(false);
                 return;
             }
-            if (m_AssetGraph.IsExist(theInstance))
+            if (m_AssetGraph.IsExist(theInstance)) {
                 RecursiveDeleteInstanceInSceneGraph(theInstance);
-            else
+            } else if (IsInstance(theInstance)) {
+                // When deleting multiple instances that have a parent-descendant
+                // relationship, it is possible that an instance not in asset graph
+                // has already been recursively deleted in this loop.
+                // We cannot do blind delete for out-of-graph items without checking
+                // if they exist.
                 DoDeleteInstance(theInstance);
+            }
         }
     }
 

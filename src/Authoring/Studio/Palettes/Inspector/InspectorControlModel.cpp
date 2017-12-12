@@ -180,6 +180,11 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
     }
 }
 
+CInspectableBase *InspectorControlModel::inspectable() const
+{
+    return m_inspectableBase;
+}
+
 void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inHandle,
                                                         qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
@@ -237,6 +242,35 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
 
         m_materials.push_back({name, relativePath});
     }
+
+    // Find if there are any material items and update the values of those
+    for (int row = 0; row < m_groupElements.count(); ++row) {
+        const CInspectorGroup *inspectorGroup = m_inspectableBase->GetGroup(row);
+        const auto group = dynamic_cast<const Qt3DSDMInspectorGroup *>(inspectorGroup);
+        const auto materialGroup = dynamic_cast<const Qt3DSDMMaterialInspectorGroup *>(group);
+        if (materialGroup &&  materialGroup->isMaterialGroup()) {
+            if (m_groupElements[row].controlElements.size()) {
+                auto item = m_groupElements[row].controlElements[0]
+                        .value<InspectorControlBase *>();
+                item->m_values = materialValues();
+                Q_EMIT item->valuesChanged();
+                // Changing values resets the selected index, so pretend the value has also changed
+                Q_EMIT item->valueChanged();
+            }
+        }
+    }
+}
+
+QStringList InspectorControlModel::materialValues() const
+{
+    QStringList values;
+    values.push_back(tr("Standard Material"));
+    values.push_back(tr("Referenced Material"));
+
+    for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx)
+        values.push_back(m_materials[matIdx].m_name);
+
+    return values;
 }
 
 InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectable *inspectable,
@@ -256,14 +290,12 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
 
     item->m_animatable = false;
 
-    QStringList values;
-    values.push_back(tr("Standard Material"));
-    values.push_back(tr("Referenced Material"));
+    const QStringList values = materialValues();
+    item->m_values = values;
 
     const QString sourcePath = theBridge->GetSourcePath(item->m_instance).toQString();
 
     switch (theType) {
-
     case OBJTYPE_MATERIAL:
         item->m_value = tr("Standard Material");
         break;
@@ -274,12 +306,9 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
     }
 
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx) {
-        values.push_back(m_materials[matIdx].m_name);
         if (m_materials[matIdx].m_relativePath == sourcePath)
-            item->m_value = values.last();
+            item->m_value = values[matIdx + 2]; // +2 for standard and referenced materials
     }
-
-    item->m_values = values;
 
     return item;
 }
@@ -575,8 +604,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             QString meshValue = qt3dsdm::get<QString>(value);
             Q3DStudio::CFilePath theSelectionItem(Q3DStudio::CString::fromQString(meshValue));
             Q3DStudio::CFilePath theSelectionWithoutId(theSelectionItem.filePath());
-            if (theSelectionWithoutId.size())
-                element->m_value = theSelectionWithoutId.GetFileName().toQString();
+            QString theSelectionWithoutIdName = theSelectionWithoutId.GetFileName().toQString();
+            if (theSelectionWithoutIdName.size())
+                element->m_value = theSelectionWithoutIdName;
             else
                 element->m_value = theSelectionItem.GetIdentifier().toQString();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Texture) {
@@ -778,6 +808,22 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     if (v == oldValue && !(commit && (m_modifiedProperty.first == instance
                                       && m_modifiedProperty.second == handle))) {
         return;
+    }
+
+    // If the user enters 0.0 to any (x, y, z) values of camera scale,
+    // we reset the value back to original, because zero scale factor will crash
+    // camera-specific inverse matrix math. (Additionally, scale of zero for a camera
+    // is generally not useful anyway.) We could silently discard zero values also deeper in the
+    // value setter code, but then the inspector panel value would not be updated as opposed
+    // to both rejecting invalid and resetting the original value here.
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    EStudioObjectType theType = studio->GetClientDataModelBridge()->GetObjectType(instance);
+
+    if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
+            studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
+        const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
+        if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
+            v = oldValue;
     }
 
     if (!commit && m_modifiedProperty.first == 0) {

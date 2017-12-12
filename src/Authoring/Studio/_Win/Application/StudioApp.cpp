@@ -36,17 +36,21 @@
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #endif
 #include "StudioApp.h"
-#include "SubPresentationsDlg.h"
 #include "Qt3DSStateApplication.h"
+#include "PlayerWnd.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qurl.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtWidgets/qaction.h>
+#include <QtCore/qstandardpaths.h>
 
 int main(int argc, char *argv[])
 {
+    // Hack to work around qml cache bug (QT3DS-556)
+    qputenv("QML_DISABLE_DISK_CACHE", "true");
+
     // to enable QOpenGLWidget to work on macOS, we must set the default
     // QSurfaceFormat before QApplication is created. Otherwise context-sharing
     // fails and QOpenGLWidget breaks.
@@ -159,10 +163,6 @@ int main(int argc, char *argv[])
 #include "Qt3DSFileTools.h"
 #include "foundation/Qt3DSLogging.h"
 
-#ifdef USE_LICENSE_HANDLER
-#include "licensehandler.h"
-#endif
-
 CStudioApp g_StudioApp;
 long g_ErrorCode = 0;
 
@@ -229,8 +229,10 @@ void CStudioApp::PerformShutdown()
     }
 
     if (m_Renderer) {
+        m_Views->GetMainFrame()->GetPlayerWnd()->makeCurrent();
         m_Renderer->Close();
         m_Renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
+        m_Views->GetMainFrame()->GetPlayerWnd()->doneCurrent();
     }
 
     delete m_SplashPalette;
@@ -314,7 +316,8 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
     CPreferences::SetPreferencesFile(thePreferencesPath);
 
     // Initialize help file path
-    m_pszHelpFilePath = ::LoadResourceString(IDS_HELP_FILE_NAME);
+    m_pszHelpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+            Q3DStudio::CString("/../doc/qt3dstudio/index.html");
 
     CStudioPreferences::LoadPreferences();
 
@@ -395,13 +398,6 @@ void CStudioApp::OnAppAbout()
 int CStudioApp::Run()
 {
     int theRetVal = -1;
-
-#ifdef USE_LICENSE_HANDLER
-    LicenseHandler lh;
-    if (!lh.handleLicense())
-        return theRetVal;
-#endif
-
     try {
         CCmdLineParser::EExecutionMode theMode = m_CmdLineParser.PopExecutionMode();
         if (CCmdLineParser::END_OF_CMDS == theMode)
@@ -471,24 +467,33 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
 
     case StudioTutorialWidget::openSampleResult: {
         // Try three options:
-        // - open a specific example directory with .uip file in it
+        // - open a specific example .uip
         // - failing that, show the main example root dir
-        // - failing all previous, show Qt3DStudio dir
+        // - failing all previous, show default Documents dir
         Q3DStudio::CFilePath filePath;
+        Qt3DSFile theFile = Qt3DSFile(".");
 
-        filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
-                Q3DStudio::CString("../examples/qmldynamickeyframes/presentation");
+#ifndef Q_OS_MACOS
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                Q3DStudio::CString("/../examples/studio3d/SampleProject");
 
         if (!filePath.Exists()) {
-            filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
-                    Q3DStudio::CString("../examples");
-        }
-        if (!filePath.Exists()) {
-            filePath =  Qt3DSFile::GetApplicationDirectory().GetPath()+
-                    Q3DStudio::CString(".");
-        }
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                    Q3DStudio::CString("/../examples/studio3d");
+#else
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                Q3DStudio::CString("/../../../../examples/studio3d/SampleProject");
 
-        Qt3DSFile theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        if (!filePath.Exists()) {
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                    Q3DStudio::CString("/../../../../examples/studio3d");
+#endif
+            if (!filePath.Exists())
+                filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+            theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        } else {
+            theFile = Qt3DSFile(filePath, Q3DStudio::CString("SampleProject.uip"));
+        }
 
         if (theFile.GetPath() != "") {
             OnLoadDocument(theFile);
@@ -550,10 +555,10 @@ bool CStudioApp::ShowStartupDialog()
     // show the usual startup dialog only if user rejected tutorial
     // ( = did not open samples or create new project)
     if (welcomeRes == QDialog::Rejected) {
-        CStartupDlg theStartupDlg;
+        CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
-        Q3DStudio::CFilePath theMostRecentDirectory;
+        Q3DStudio::CFilePath theMostRecentDirectory = Q3DStudio::CFilePath(".");
         if (m_Views) {
             CRecentItems *theRecentItems = m_Views->GetMainFrame()->GetRecentItems();
             for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex) {

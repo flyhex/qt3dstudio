@@ -48,6 +48,11 @@ TextField {
     bottomPadding: 0
     rightPadding: 6
 
+    onTextEdited: {
+        if (text.search(","))
+            text = text.replace(",",".")
+    }
+
     activeFocusOnPress: false
 
     horizontalAlignment: TextInput.AlignRight

@@ -53,7 +53,7 @@ ProjectView::ProjectView(QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
 {
     const QString theApplicationPath =
-            Qt3DSFile::GetApplicationDirectory().GetAbsolutePath().toQString();
+            Qt3DSFile::GetApplicationDirectory().GetPath().toQString();
 
     m_BehaviorDir = Qt3DSFile(
                 Q3DStudio::CString::fromQString(theApplicationPath

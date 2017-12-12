@@ -77,6 +77,13 @@ QString ObjectBrowserView::path(int index) const
     return m_model->index(index, 0).data(ObjectListModel::PathReferenceRole).toString();
 }
 
+bool ObjectBrowserView::selectable(int index) const
+{
+    auto handleId = m_model->index(index, 0).data(ObjectListModel::HandleRole).toInt();
+    auto handle = qt3dsdm::Qt3DSDMInstanceHandle(handleId);
+    return m_model->sourceModel()->selectable(handle);
+}
+
 void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
 {
     QModelIndex index = m_model->sourceModel()->indexForHandle(handle);

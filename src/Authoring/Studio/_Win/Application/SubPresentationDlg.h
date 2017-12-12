@@ -26,12 +26,11 @@
 **
 ****************************************************************************/
 
-#ifndef SUBPRESENTATIONSDLG_H
-#define SUBPRESENTATIONSDLG_H
+#ifndef SUBPRESENTATIONDLG_H
+#define SUBPRESENTATIONDLG_H
 
 #include <QtWidgets/qdialog.h>
 
-#include "Qt3DSString.h"
 #include "Doc.h"
 
 #ifdef QT_NAMESPACE
@@ -40,43 +39,36 @@ using namespace QT_NAMESPACE;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-    class SubPresentationsDlg;
+    class SubPresentationDlg;
 }
 QT_END_NAMESPACE
 
-class CSubPresentationsDlg : public QDialog
+class CSubPresentationDlg : public QDialog
 {
     Q_OBJECT
 public:
-    CSubPresentationsDlg(const QString &directory,
-                         const QVector<SubPresentationRecord> &subpresentations,
-                         QWidget* parent = nullptr);
-    ~CSubPresentationsDlg();
+    CSubPresentationDlg(const QString &directory,
+                        const SubPresentationRecord &subpresentation,
+                        QWidget* parent = nullptr);
+    ~CSubPresentationDlg();
+    SubPresentationRecord subpresentation();
 
-    // Implementation
 protected:
-
-    void OnInitDialog();
-
-public:
-
-    QVector<SubPresentationRecord> subpresentations() const;
-
-    void OnDeletePresentation();
-    void OnNewPresentation();
-    void OnBrowsePresentation();
-    void OnSelectPresentation(int selectionIndex);
-    void OnIdChanged(const QString &text);
+    void initDialog();
+    void updateUI();
+    void browseFile();
 
 private Q_SLOTS:
     void on_buttonBox_accepted();
     void on_buttonBox_rejected();
+    void onTypeChanged(int index);
+    void onFileChanged(int index);
+    void onIdChanged(const QString &id);
 
 private:
+    Ui::SubPresentationDlg *m_ui;
+    SubPresentationRecord m_subPresentation;
     QString m_directory;
-    QVector<SubPresentationRecord> m_records;
-    Ui::SubPresentationsDlg *m_ui;
-    int current;
 };
 
 #endif

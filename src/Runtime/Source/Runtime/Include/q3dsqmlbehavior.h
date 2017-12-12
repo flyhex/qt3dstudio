@@ -37,10 +37,6 @@
 #include <QtGui/qvector3d.h>
 #include <QtGui/qmatrix4x4.h>
 
-#include "Qt3DSTypes.h"
-#include "Qt3DSKernelTypes.h"
-#include "Qt3DSEvent.h"
-
 namespace Q3DStudio {
 
 class Q3DSQmlScript;
@@ -67,6 +63,7 @@ public:
     Q_INVOKABLE QVector2D getMousePosition();
     Q_INVOKABLE QMatrix4x4 calculateGlobalTransform(const QString &handle = QString());
     Q_INVOKABLE QVector3D lookAt(const QVector3D &target);
+    Q_INVOKABLE QVector3D matrixToEuler(const QMatrix4x4 &matrix);
     Q_INVOKABLE QString getParent(const QString &handle = QString());
 
 

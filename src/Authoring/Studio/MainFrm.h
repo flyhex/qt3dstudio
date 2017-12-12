@@ -67,6 +67,8 @@ namespace Ui
 }
 QT_END_NAMESPACE
 
+class CPlayerWnd;
+
 class CMainFrame : public QMainWindow,
                    public CPresentationChangeListener,
                    public CFileOpenListener,
@@ -225,6 +227,7 @@ public:
     void HandleEditCameraZoomExtent();
 
     QWidget *GetActiveView();
+    CPlayerWnd *GetPlayerWnd() const;
 
 Q_SIGNALS:
     void playStateChanged(bool started);

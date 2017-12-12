@@ -117,7 +117,7 @@ void CFilePath::normalizeAndSetPath(const QString &path)
 
     if (ret.contains(identifierSep)) {
         int i = ret.indexOf(identifierSep);
-        m_identifier = ret.mid(i);
+        m_identifier = ret.mid(i + 1);
         ret.truncate(i);
     }
 
@@ -126,7 +126,7 @@ void CFilePath::normalizeAndSetPath(const QString &path)
 
 CFilePath CFilePath::GetDirectory() const
 {
-    return CFilePath(dir().canonicalPath());
+    return CFilePath(path());
 }
 
 CString CFilePath::GetFileStem() const

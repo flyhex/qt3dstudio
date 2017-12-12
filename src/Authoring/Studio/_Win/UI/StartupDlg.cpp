@@ -48,6 +48,7 @@
 #include <QtGui/qpalette.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qdir.h>
+#include "StudioUtils.h"
 
 // CStartupDlg dialog
 
@@ -89,6 +90,18 @@ void CStartupDlg::reject()
 
 void CStartupDlg::OnInitDialog()
 {
+    QWidget *p = qobject_cast<QWidget *>(parent());
+    if (p) {
+        QRect pRect;
+        if (p->isMaximized())
+            pRect = QRect(QPoint(0, 0), GetAvailableDisplaySize(getWidgetScreen(p)));
+        else
+            pRect = p->frameGeometry();
+
+        move(pRect.x() + pRect.width() / 2 - width() / 2,
+             pRect.y() + pRect.height() / 2 - height() / 2);
+    }
+
     connect(m_ui->newDocument, &QPushButton::clicked, this, &CStartupDlg::OnNewDocClicked);
     connect(m_ui->openDocument, &QPushButton::clicked, this, &CStartupDlg::OnOpenDocClicked);
 

@@ -28,10 +28,7 @@ LIBS += \
     -lqt3dsruntime$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
-QMAKE_DOCS = $$absolute_path($$PWD/../../../doc/qt3dstudio.qdocconf)
-
 OTHER_FILES += \
-  qmldir \
-  $$PWD/../../../doc/src/06-qml-reference/*
+  qmldir
 
 load(qml_plugin)

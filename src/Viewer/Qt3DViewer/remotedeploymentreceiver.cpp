@@ -41,6 +41,7 @@ RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
     , m_temporaryDir(0)
     , m_serverPort(36000)
     , m_projectDeployed(false)
+    , m_canceled(false)
 {
     m_incoming.setVersion(QDataStream::Qt_5_8);
 
@@ -51,8 +52,10 @@ RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
     inputPort.setIntMaximum(65536);
     inputPort.setIntValue(m_serverPort);
     inputPort.setWindowFlags(Qt::Popup);
+    // We don't have to worry about cancel with this, as the dialog is always recreated when
+    // initializing the connection.
     connect(&inputPort, &QInputDialog::intValueSelected, this, &RemoteDeploymentReceiver::setPort);
-    inputPort.exec();
+    m_canceled = (inputPort.exec() != 1);
 }
 
 RemoteDeploymentReceiver::~RemoteDeploymentReceiver()

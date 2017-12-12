@@ -119,11 +119,11 @@ void MeshChooserView::showEvent(QShowEvent *event)
 
     QString currentFile;
 
-    if (selectionWithoutId.size()) {
-        currentFile = selectionWithoutId.toQString();
-    } else {
+    QString selectionWithoutIdName = selectionWithoutId.GetFileName().toQString();
+    if (selectionWithoutIdName.size())
+        currentFile = selectionWithoutIdName;
+    else
         currentFile = selectionItem.GetIdentifier().toQString();
-    }
 
     m_model->setCurrentFile(currentFile);
 

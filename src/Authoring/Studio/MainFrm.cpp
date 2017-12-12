@@ -55,7 +55,7 @@
 #include "Core.h"
 #include "ITickTock.h"
 #include "IStudioRenderer.h"
-#include "SubPresentationsDlg.h"
+#include "SubPresentationListDlg.h"
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
@@ -746,8 +746,7 @@ void CMainFrame::OnEditSubPresentations()
 {
     QString dir = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString();
 
-    CSubPresentationsDlg dlg(QDir::toNativeSeparators(dir),
-                             g_StudioApp.m_subpresentations);
+    CSubPresentationListDlg dlg(QDir::toNativeSeparators(dir), g_StudioApp.m_subpresentations);
     dlg.exec();
     if (dlg.result() == QDialog::Accepted) {
         g_StudioApp.m_subpresentations = dlg.subpresentations();
@@ -1573,8 +1572,8 @@ void CMainFrame::OnViewTooltips()
  */
 void CMainFrame::OnUpdateHelpIndex()
 {
-    Qt3DSFile theFile(g_StudioApp.m_pszHelpFilePath);
-    m_ui->action_Reference_Manual->setEnabled(theFile.Exists());
+    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    m_ui->action_Reference_Manual->setEnabled(theFile.exists());
 }
 
 //==============================================================================
@@ -1583,9 +1582,9 @@ void CMainFrame::OnUpdateHelpIndex()
  */
 void CMainFrame::OnHelpIndex()
 {
-    Qt3DSFile theFile(g_StudioApp.m_pszHelpFilePath);
-    if (theFile.Exists())
-        QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.GetAbsolutePath().toQString()));
+    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    if (theFile.exists())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.fileName()));
 }
 
 //==============================================================================
@@ -1769,6 +1768,11 @@ CRecentItems *CMainFrame::GetRecentItems()
 QWidget *CMainFrame::GetActiveView()
 {
     return centralWidget();
+}
+
+CPlayerWnd *CMainFrame::GetPlayerWnd() const
+{
+    return m_SceneView->GetPlayerWnd();
 }
 
 bool CMainFrame::eventFilter(QObject *obj, QEvent *event)

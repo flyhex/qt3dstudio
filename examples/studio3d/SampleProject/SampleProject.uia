@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application xmlns="http://qt.io/qt3dstudio/uia">
-	<assets initial="qmlbehaviors">
-		<presentation id="qmlbehaviors" src="qmlbehaviors.uip"/>
+	<assets initial="SampleProject">
+		<presentation id="SampleProject"	src="SampleProject.uip"/>
 	</assets>
 
 	<statemachine ref="#logic">

@@ -28,9 +28,9 @@
 /*!
     \qmltype SubPresentationSettings
     \inqmlmodule QtStudio3D 1.0
-    \brief Settings for subpresentations.
+    \brief Settings for sub-presentations.
 
-    This type enables specifying settings for the subpresentations
+    This type enables specifying settings for the sub-presentations
     from Qt Quick application.
 
     \note Currently only 'presentation-qml' settings can be set.
@@ -61,7 +61,7 @@
 /*!
     \qmlproperty list<QmlStream> SubPresentationSettings::qmlStreams
 
-    Holds the list of settings for 'presentation-qml' subpresentations.
+    Holds the list of settings for \c presentation-qml sub-presentations.
  */
 
 /*!
@@ -69,10 +69,10 @@
     \inqmlmodule QtStudio3D
     \brief QML stream.
 
-    This type allows attaching qml-subpresentation with a quick item. The item is rendered to a
+    This type allows attaching QML sub-presentation with a quick item. The item is rendered to a
     texture and used as a part of a Qt 3D Studio presentation.
 
-    The subpresentation element must be specified in the \e assets element of the presentation
+    The sub-presentation element must be specified in the \e assets element of the presentation
     .uia file:
 
      \badcode
@@ -81,22 +81,22 @@
      </assets>
      \endcode
 
-    The 'presentation-id' attribute must contain a unique ID of the subpresentation.
-    The 'args' attribute may contain an optional preview version of the item, which is only
+    The \c presentation-id attribute must contain a unique ID of the sub-presentation.
+    The \c args attribute may contain an optional preview version of the item, which is only
     used in the Viewer application.
  */
 
 /*!
     \qmlproperty string QmlStream::presentationId
 
-    Holds the string ID of the subpresentation the item is attached to. The id must be one of
-    the 'presentation-qml' IDs specified in the .uia file.
+    Holds the string ID of the sub-presentation the item is attached to. The id must be one of
+    the \c presentation-qml IDs specified in the .uia file.
  */
 
 /*!
     \qmlproperty Item QmlStream::item
 
-    Holds the item attached to the subpresentation. The item size is used as the the size of the
+    Holds the item attached to the sub-presentation. The item size is used as the the size of the
     texture the item is rendered to. Default values \c{(256, 256)} are used if the item doesn't
     specify a size.
  */

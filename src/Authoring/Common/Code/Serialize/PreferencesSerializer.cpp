@@ -238,7 +238,7 @@ bool CPreferencesSerializer::ExistElem(const Q3DStudio::CString &inElemName)
 void CPreferencesSerializer::Serialize()
 {
     if (m_FileSet) {
-        QString preferencesDir = m_PreferencesFile.GetDirectory().filePath();
+        QString preferencesDir = m_PreferencesFile.dir().path();
         QDir dir(preferencesDir);
         if (!dir.exists()) {
             dir.mkpath(preferencesDir);
