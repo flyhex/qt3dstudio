@@ -40,6 +40,7 @@ TODO: The whole qdoc for uia needs to be rewritten.
     \li \l {The .uia File Format}
 \endomit
     \li \l {The .material Format}
+    \li \l {Custom Material Reference}
 \endlist
 //! [toc]
 */
