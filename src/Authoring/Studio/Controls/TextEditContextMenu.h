@@ -37,7 +37,7 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include <QMenu>
+#include <QtWidgets/qmenu.h>
 
 //==============================================================================
 //	Forwards
@@ -51,7 +51,7 @@ class CTextEdit;
 
 class CTextEditContextMenu : public QMenu
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
     CTextEditContextMenu(CTextEdit *inEditControl, QWidget *parent = nullptr);
     ~CTextEditContextMenu();

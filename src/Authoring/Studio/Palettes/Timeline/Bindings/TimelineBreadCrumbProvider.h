@@ -67,8 +67,8 @@ protected:
 protected:
     std::vector<qt3dsdm::Qt3DSDMInstanceHandle> m_BreadCrumbList;
     CDoc *m_Doc;
-    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_Connections; /// connections to the DataModel
+    // connections to the DataModel
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
 };
 
 #endif // INCLUDED_BREADCRUMBPROVIDER_H

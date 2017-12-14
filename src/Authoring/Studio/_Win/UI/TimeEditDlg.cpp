@@ -35,8 +35,6 @@
 
 #include "stdafx.h"
 #include "StudioPreferences.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //==============================================================================
 //	 Includes
@@ -46,8 +44,8 @@
 #include "IDoc.h"
 #include "Bindings/ITimelineKeyframesManager.h"
 
-#include <QFont>
-#include <QPalette>
+#include <QtGui/qfont.h>
+#include <QtGui/qpalette.h>
 
 //=============================================================================
 /**
@@ -85,8 +83,10 @@ CTimeEditDlg::CTimeEditDlg(QWidget *pParent)
     m_ui->setupUi(this);
     setAutoFillBackground(true);
 
-    connect(m_ui->startTimeEdit, &QDateTimeEdit::timeChanged, this, &CTimeEditDlg::OnEnChangeTimeEdit1);
-    connect(m_ui->endTimeEdit, &QDateTimeEdit::timeChanged, this, &CTimeEditDlg::OnEnChangeTimeEdit2);
+    connect(m_ui->startTimeEdit, &QDateTimeEdit::timeChanged,
+            this, &CTimeEditDlg::OnEnChangeTimeEdit1);
+    connect(m_ui->endTimeEdit, &QDateTimeEdit::timeChanged,
+            this, &CTimeEditDlg::OnEnChangeTimeEdit2);
 }
 
 //=============================================================================
@@ -129,13 +129,13 @@ void CTimeEditDlg::ShowDialog(long inTime1, long inTime2, IDoc *inDoc, long inOb
     m_NumberOfDigitsDrop = 0;
     m_MinTimeDisplay = 0;
     // if it is a Timebar, this will be adjusted, else this should be initialized to some value at
-    // least,
-    // for OverflowHandling to work correctly
+    // least, for OverflowHandling to work correctly
     m_MaxTimeDisplay = LONG_MAX;
 
     // 9999:59:999 converted to milliseconds
     m_MaxTime =
-        TimeConversion(9999, CONVERT_MIN_TO_MSEC) + TimeConversion(59, CONVERT_SEC_TO_MSEC) + 999;
+            TimeConversion(9999, CONVERT_MIN_TO_MSEC) + TimeConversion(59,
+                                                                       CONVERT_SEC_TO_MSEC) + 999;
 
     m_TimeDisplay2 = FormatTime(m_InitialTime2);
     // In cases Keyframes, where its only one set of time, do m_InitialTime1 later so that
@@ -193,25 +193,21 @@ void CTimeEditDlg::OnInitDialog()
     if (m_ObjectAssociation != TIMEBAR)
         HideUnnecessaryFields();
     m_ui->startTimeEdit->setTime(QTime::fromString(m_TimeDisplay1, "hh:mm:ss:zzz"));
-    Q3DStudio::CString theTitle;
     // Display the window captions for the correct object type
     switch (m_ObjectAssociation) {
     case PLAYHEAD:
-        theTitle = ::LoadResourceString(IDS_TIME_EDIT_DLG_GO_TO_TIME);
-        setWindowTitle(theTitle.toQString());
+        setWindowTitle(QObject::tr("Go To Time"));
         break;
     case ASSETKEYFRAME:
-        theTitle = ::LoadResourceString(IDS_TIME_EDIT_DLG_SET_KEYFRAME_TIME);
-        setWindowTitle(theTitle.toQString());
+        setWindowTitle(QObject::tr("Set Keyframe Time"));
         break;
     case TIMEBAR:
-        theTitle = ::LoadResourceString(IDS_TIME_EDIT_DLG_SET_TIMEBAR_TIME);
         // m_TimeEditBoxNumber is a flag that switches the output between
         // the first and second text box.
         // When m_TimeEditBoxNumber = EDITBOX1, we are writing to the first text box
         // (the one that appears on top).
         // When it is EDITBOX2, the SetTimeEdit will write to the second text box.
-        setWindowTitle(theTitle.toQString());
+        setWindowTitle(QObject::tr("Set Timebar Start/End Time"));
         m_ui->endTimeEdit->setTime(QTime::fromString(m_TimeDisplay2, "hh:mm:ss:zzz"));
         break;
     }
@@ -286,8 +282,8 @@ bool CTimeEditDlg::TimeOverflowUnderflow(long *inMin, long *inSec, long *inMSec,
                    CONVERT_MSEC_TO_MIN_SEC_MSEC);
     // Handle time overflow/underflow
     if ((*inMin > theLimitMin && inOverflowOrUnderflow)
-        || (*inMin < theLimitMin && inOverflowOrUnderflow == false)) // Minutes exceeds limit
-    {
+            || (*inMin < theLimitMin && inOverflowOrUnderflow == false)) {
+        // Minutes exceeds limit
         // Set all time segments to the limit
         *inMin = theLimitMin;
         *inSec = theLimitSec;
@@ -295,17 +291,17 @@ bool CTimeEditDlg::TimeOverflowUnderflow(long *inMin, long *inSec, long *inMSec,
         theLimitExceeds = true;
     } else if (*inMin == theLimitMin) {
         if ((*inSec > theLimitSec && inOverflowOrUnderflow)
-            || (*inSec < theLimitSec && inOverflowOrUnderflow == false)) // Seconds exceeds limit
-        {
+                || (*inSec < theLimitSec && inOverflowOrUnderflow == false)) {
+            // Seconds exceeds limit
             // Set the Sec and Msec segments to the limit
             *inSec = theLimitSec;
             *inMSec = theLimitMsec;
             theLimitExceeds = true;
         } else if (*inSec == theLimitSec) {
             if ((*inMSec > theLimitMsec && inOverflowOrUnderflow)
-                || (*inMSec < theLimitMsec
-                    && inOverflowOrUnderflow == false)) // Milliseconds exceeds limit
-            {
+                    || (*inMSec < theLimitMsec
+                        && inOverflowOrUnderflow == false)) {
+                // Milliseconds exceeds limit
                 // Msec segments to the limit
                 *inMSec = theLimitMsec;
                 theLimitExceeds = true;
@@ -365,7 +361,7 @@ long CTimeEditDlg::TimeConversion(long inMin, long inSec, long inMsec, long inOp
     switch (inOperationCode) {
     case CONVERT_TIME_TO_MSEC:
         theResult = TimeConversion(inMin, CONVERT_MIN_TO_MSEC)
-            + TimeConversion(inSec, CONVERT_SEC_TO_MSEC) + inMsec;
+                + TimeConversion(inSec, CONVERT_SEC_TO_MSEC) + inMsec;
         break;
     }
     return theResult;
@@ -392,7 +388,7 @@ void CTimeEditDlg::TimeConversion(long inTotalTime, long *ioMin, long *ioSec, lo
         *ioSec = inTotalTime - TimeConversion(*ioMin, CONVERT_MIN_TO_MSEC);
         *ioSec = TimeConversion(*ioSec, CONVERT_MSEC_TO_SEC);
         *ioMsec = inTotalTime - TimeConversion(*ioMin, CONVERT_MIN_TO_MSEC)
-            - TimeConversion(*ioSec, CONVERT_SEC_TO_MSEC);
+                - TimeConversion(*ioSec, CONVERT_SEC_TO_MSEC);
         break;
     }
 }
@@ -450,9 +446,8 @@ void CTimeEditDlg::OnEnChangeTimeEdit1()
 {
     // Making sure that the start time is not greater than the end time, when
     // the user modifies the start time of the timebar
-    if (m_ObjectAssociation == TIMEBAR) {
+    if (m_ObjectAssociation == TIMEBAR)
         m_MaxTimeDisplay = m_InitialTime2; // the initial end time
-    }
     m_MinTimeDisplay = 0;
 
     const auto time = m_ui->startTimeEdit->time();
@@ -470,7 +465,7 @@ void CTimeEditDlg::OnEnChangeTimeEdit1()
     m_ui->startTimeMsec->setText(QString::number(msec));
 
     long theGoToTime = TimeConversion(min, CONVERT_MIN_TO_MSEC)
-        + TimeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
+            + TimeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
     // Go to the time specified in the time edit display
     UpdateObjectTime(theGoToTime, true /*start time*/);
 }
@@ -504,7 +499,7 @@ void CTimeEditDlg::OnEnChangeTimeEdit2()
     m_ui->endTimeMsec->setText(QString::number(msec));
 
     long theGoToTime = TimeConversion(min, CONVERT_MIN_TO_MSEC)
-        + TimeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
+            + TimeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
     // Go to the time specified in the time edit display
     UpdateObjectTime(theGoToTime, false /*end time*/);
 }

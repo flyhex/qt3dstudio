@@ -77,7 +77,7 @@ public:
     virtual CPt ScreenToClient(CPt inPoint) = 0;
     virtual TPlatformView GetPlatformView() = 0;
     virtual void SetIsDragging(bool inIsDragging) = 0;
-    virtual void ShowTooltips(CPt inLocation, const Q3DStudio::CString &inText) = 0;
+    virtual void ShowTooltips(CPt inLocation, const QString &inText) = 0;
     virtual void HideTooltips() = 0;
     virtual void DoStartDrag(IDragable *inDragable) = 0;
     virtual void DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileList) = 0;
@@ -197,8 +197,8 @@ public:
     virtual void OnChildSizeChanged(CControl *inChild);
     virtual void ResetMinMaxPref(){}
 
-    void SetName(const Q3DStudio::CString &inName);
-    Q3DStudio::CString GetName();
+    void SetName(const QString &inName);
+    QString GetName();
 
     virtual void BeginDrawChildren(CRenderer *inRenderer);
 
@@ -209,7 +209,8 @@ public:
     virtual CPt GetGlobalPosition(CPt inChildPoint) const;
     virtual Qt3DSRenderDevice GetPlatformDevice();
     bool IsChildPlatformDevice(Qt3DSRenderDevice inDevice);
-    virtual void ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText, CRct inBoundingRct);
+    virtual void ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText,
+                                    CRct inBoundingRct);
     virtual void HideMoveableWindow();
     CControl *GetFirstChild();
     bool HasFocus(CControl *inControl);
@@ -222,8 +223,8 @@ public:
     void RemoveFocusListener(CChildFocusListener *inListener);
     void FireFocusEvent(bool inStatus);
 
-    void SetTooltipText(const Q3DStudio::CString &inText);
-    Q3DStudio::CString GetTooltipText();
+    void SetTooltipText(const QString &inText);
+    QString GetTooltipText();
 
     virtual void EnsureVisible(CRct inRect);
     void EnsureVisible();

@@ -36,15 +36,10 @@
 #include "Rct.h"
 #include "Qt3DSFile.h"
 
-#include <QDrag>
-#include <QFocusEvent>
-#include <QKeyEvent>
-#include <QMenu>
-#include <QMouseEvent>
-#include <QPainter>
-#include <QPaintEvent>
-#include <QShowEvent>
-#include <QWheelEvent>
+#include <QtGui/qdrag.h>
+#include <QtGui/qevent.h>
+#include <QtGui/qpainter.h>
+#include <QtWidgets/qmenu.h>
 
 WidgetControl::WidgetControl(CControl *control, QWidget *parent)
     : QWidget(parent)
@@ -234,7 +229,7 @@ void WidgetControl::DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameL
             if (theDragFileName.Length() > 0) {
                 theDragFile = new Qt3DSFile(theDragFileName);
                 CDropSource *theDropSource = CDropSourceFactory::Create(
-                    QT3DS_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));
+                            QT3DS_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));
                 // Add the QT3DS_GESTURE_FLAVOR.  This will allow us to drag to StudioControls.
                 drag.setMimeData(theDropSource);
                 break;
@@ -300,7 +295,7 @@ void WidgetControl::OnReflectMouse(CPt &inPoint, Qt::KeyboardModifiers inFlags)
  */
 WidgetControlControlListener::WidgetControlControlListener(WidgetControl *inParent)
 {
-  m_Parent = inParent;
+    m_Parent = inParent;
 }
 
 WidgetControlControlListener::~WidgetControlControlListener()
@@ -384,7 +379,7 @@ void WidgetControlControlListener::SetIsDragging(bool inIsDragging)
  * @param inLocation mid-point of the tooltip in global coordinates
  * @param inText text to display as a tooltip
  */
-void WidgetControlControlListener::ShowTooltips(CPt inLocation, const Q3DStudio::CString &inText)
+void WidgetControlControlListener::ShowTooltips(CPt inLocation, const QString &inText)
 {
 #ifdef KDAB_TEMPORARILY_REMOVED
     m_Parent->ShowTooltips(inLocation, inText);
@@ -409,7 +404,7 @@ void WidgetControlControlListener::HideTooltips()
  * @param inText text to display as a tooltip
  */
 void WidgetControlControlListener::ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText,
-                                                    CRct inBoundingRct)
+                                                      CRct inBoundingRct)
 {
 #ifdef KDAB_TEMPORARILY_REMOVED
     m_Parent->ShowMoveableWindow(inLocation, inText, inBoundingRct);

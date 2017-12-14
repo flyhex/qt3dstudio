@@ -42,8 +42,6 @@
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
 #include "SceneView.h"
-#include "Strings.h"
-#include "StringLoader.h"
 #include "StudioApp.h"
 #include "IKeyframesManager.h"
 #include "Dialogs.h"
@@ -114,22 +112,31 @@ CMainFrame::CMainFrame()
     connect(m_ui->action_Redo, &QAction::triggered, this, &CMainFrame::OnEditRedo);
     connect(m_ui->action_Copy, &QAction::triggered, this, &CMainFrame::OnEditCopy);
     connect(m_ui->action_Cut, &QAction::triggered, this, &CMainFrame::OnEditCut);
-    connect(m_ui->actionAutoset_Keyframes, &QAction::triggered, this, &CMainFrame::OnToolAutosetkeys);
+    connect(m_ui->actionAutoset_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnToolAutosetkeys);
     connect(m_ui->action_Paste, &QAction::triggered, this, &CMainFrame::OnEditPaste);
-    connect(m_ui->actionStudio_Preferences, &QAction::triggered, this, &CMainFrame::OnEditApplicationPreferences);
-    connect(m_ui->actionPresentation_Settings, &QAction::triggered, this, &CMainFrame::OnEditPresentationPreferences);
+    connect(m_ui->actionStudio_Preferences, &QAction::triggered,
+            this, &CMainFrame::OnEditApplicationPreferences);
+    connect(m_ui->actionPresentation_Settings, &QAction::triggered,
+            this, &CMainFrame::OnEditPresentationPreferences);
     connect(m_ui->actionSubpresentations, &QAction::triggered, this,
             &CMainFrame::OnEditSubPresentations);
-    connect(m_ui->action_Duplicate_Object, &QAction::triggered, this, &CMainFrame::OnEditDuplicate);
+    connect(m_ui->action_Duplicate_Object, &QAction::triggered,
+            this, &CMainFrame::OnEditDuplicate);
 
     // Timeline Menu
-    connect(m_ui->actionDelete_Selected_Keyframe_s, &QAction::triggered, this, &CMainFrame::OnTimelineDeleteSelectedKeyframes);
-    connect(m_ui->actionSet_Interpolation, &QAction::triggered, this, &CMainFrame::OnTimelineSetInterpolation);
-    connect(m_ui->actionChange_Time_Bar_Color, &QAction::triggered, this, &CMainFrame::OnTimelineSetTimeBarColor);
-    connect(m_ui->actionSet_Changed_Keyframes, &QAction::triggered, this, &CMainFrame::OnTimelineSetChangedKeyframe);
+    connect(m_ui->actionDelete_Selected_Keyframe_s, &QAction::triggered,
+            this, &CMainFrame::OnTimelineDeleteSelectedKeyframes);
+    connect(m_ui->actionSet_Interpolation, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetInterpolation);
+    connect(m_ui->actionChange_Time_Bar_Color, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetTimeBarColor);
+    connect(m_ui->actionSet_Changed_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetChangedKeyframe);
 
     // View Menu
-    connect(m_ui->actionBounding_Boxes, &QAction::triggered, this, &CMainFrame::OnViewBoundingBoxes);
+    connect(m_ui->actionBounding_Boxes, &QAction::triggered,
+            this, &CMainFrame::OnViewBoundingBoxes);
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
     connect(m_ui->actionWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
     connect(m_ui->actionTooltips, &QAction::triggered, this, &CMainFrame::OnViewTooltips);
@@ -145,12 +152,15 @@ CMainFrame::CMainFrame()
     // Help Menu
     connect(m_ui->action_Reference_Manual, &QAction::triggered, this, &CMainFrame::OnHelpIndex);
     connect(m_ui->action_Visit_Qt_Web_Site, &QAction::triggered, this, &CMainFrame::OnHelpVisitQt);
-    connect(m_ui->action_About_Qt_3D_Studio, &QAction::triggered, []() { g_StudioApp.OnAppAbout(); });
+    connect(m_ui->action_About_Qt_3D_Studio, &QAction::triggered,
+            []() { g_StudioApp.OnAppAbout(); });
     connect(m_ui->action_Open_Tutorial, &QAction::triggered, this, &CMainFrame::OnHelpOpenTutorial);
 
 
-    connect(m_ui->actionItem_Select_Tool, &QAction::triggered, m_SceneView, &CSceneView::OnToolItemSelection);
-    connect(m_ui->actionGroup_Select_Tool, &QAction::triggered, m_SceneView, &CSceneView::OnToolGroupSelection);
+    connect(m_ui->actionItem_Select_Tool, &QAction::triggered,
+            m_SceneView, &CSceneView::OnToolItemSelection);
+    connect(m_ui->actionGroup_Select_Tool, &QAction::triggered,
+            m_SceneView, &CSceneView::OnToolGroupSelection);
 
     // Playback toolbar
     connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreview);
@@ -159,11 +169,14 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
     connect(m_ui->actionRotation_Tool, &QAction::triggered, this, &CMainFrame::OnToolRotate);
     connect(m_ui->actionScale_Tool, &QAction::triggered, this, &CMainFrame::OnToolScale);
-    connect(m_ui->actionLocal_Global_Manipulators, &QAction::triggered, this, &CMainFrame::OnToolGlobalManipulators);
-    connect(m_ui->actionToolbarAutoset_Keyframes, &QAction::triggered, this, &CMainFrame::OnToolAutosetkeys);
+    connect(m_ui->actionLocal_Global_Manipulators, &QAction::triggered,
+            this, &CMainFrame::OnToolGlobalManipulators);
+    connect(m_ui->actionToolbarAutoset_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnToolAutosetkeys);
 
     // Edit Camera toolbar
-    connect(m_ui->actionFit_Selected, &QAction::triggered, this, &CMainFrame::OnEditCameraZoomExtent);
+    connect(m_ui->actionFit_Selected, &QAction::triggered,
+            this, &CMainFrame::OnEditCameraZoomExtent);
     connect(m_ui->actionPan_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraPan);
     connect(m_ui->actionOrbit_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraRotate);
     connect(m_ui->actionZoom_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraZoom);
@@ -379,7 +392,8 @@ void CMainFrame::OnEditUndo()
  */
 void CMainFrame::OnUpdateEditUndo()
 {
-    const QString undoDescription = QObject::tr("Undo %1\tCtrl+Z").arg(g_StudioApp.GetCore()->GetCmdStack()->GetUndoDescription());
+    const QString undoDescription = QObject::tr("Undo %1\tCtrl+Z").arg(
+                g_StudioApp.GetCore()->GetCmdStack()->GetUndoDescription());
     m_ui->action_Undo->setEnabled(g_StudioApp.CanUndo());
     m_ui->action_Undo->setText(undoDescription);
 }
@@ -392,7 +406,8 @@ void CMainFrame::OnUpdateEditUndo()
  */
 void CMainFrame::OnUpdateEditRedo()
 {
-    const QString redoDescription = QObject::tr("Redo %1\tCtrl+Y").arg(g_StudioApp.GetCore()->GetCmdStack()->GetRedoDescription());
+    const QString redoDescription = QObject::tr("Redo %1\tCtrl+Y").arg(
+                g_StudioApp.GetCore()->GetCmdStack()->GetRedoDescription());
     m_ui->action_Redo->setEnabled(g_StudioApp.CanRedo());
     m_ui->action_Redo->setText(redoDescription);
 }
@@ -420,11 +435,9 @@ void CMainFrame::OnEditCopy()
 void CMainFrame::OnUpdateEditCopy()
 {
     if (g_StudioApp.CanCopy()) {
-        Q3DStudio::CString theDescription;
-        theDescription.Format(::LoadResourceString(IDS_MENU_WIN_COPY_FORMAT),
-                              static_cast<const wchar_t *>(g_StudioApp.GetCopyType()));
+        QString theDescription = tr("Copy %1\tCtrl+C").arg(g_StudioApp.GetCopyType());
 
-        m_ui->action_Copy->setText(theDescription.toQString());
+        m_ui->action_Copy->setText(theDescription);
         m_ui->action_Copy->setEnabled(true);
     } else {
         m_ui->action_Copy->setEnabled(false);
@@ -454,11 +467,9 @@ void CMainFrame::OnEditCut()
 void CMainFrame::OnUpdateEditCut()
 {
     if (g_StudioApp.CanCut()) {
-        Q3DStudio::CString theDescription;
-        theDescription.Format(::LoadResourceString(IDS_MENU_WIN_CUT_FORMAT),
-                              static_cast<const wchar_t *>(g_StudioApp.GetCopyType()));
+        QString theDescription = tr("Cut %1\tCtrl+X").arg(g_StudioApp.GetCopyType());
 
-        m_ui->action_Cut->setText(theDescription.toQString());
+        m_ui->action_Cut->setText(theDescription);
         m_ui->action_Cut->setEnabled(true);
     } else {
         m_ui->action_Cut->setEnabled(false);
@@ -489,11 +500,9 @@ void CMainFrame::OnEditPaste()
 void CMainFrame::OnUpdateEditPaste()
 {
     if (g_StudioApp.CanPaste()) {
-        Q3DStudio::CString theUndoDescription;
-        theUndoDescription.Format(::LoadResourceString(IDS_MENU_WIN_PASTE_FORMAT),
-                                  static_cast<const wchar_t *>(g_StudioApp.GetPasteType()));
+        QString theUndoDescription = tr("Paste %1\tCtrl+V").arg(g_StudioApp.GetPasteType());
 
-        m_ui->action_Paste->setText(theUndoDescription.toQString());
+        m_ui->action_Paste->setText(theUndoDescription);
 
         m_ui->action_Paste->setEnabled(true);
     } else {
@@ -620,7 +629,8 @@ void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineSetInterpolation()
 {
-    m_ui->actionSet_Interpolation->setEnabled(g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    m_ui->actionSet_Interpolation->setEnabled(
+                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
 //==============================================================================
@@ -723,9 +733,8 @@ void CMainFrame::closeEvent(QCloseEvent *event)
             // If the save was canceled or failed then do not exit.
             if (!g_StudioApp.OnSave())
                 return;
-        }
-        // On cancel ditch out of here and abort exit. Abort! Abort!
-        else if (theResult == CDialogs::CANCEL_OPERATION) {
+        } else if (theResult == CDialogs::CANCEL_OPERATION) {
+            // On cancel ditch out of here and abort exit. Abort! Abort!
             event->ignore();
             return;
         }
@@ -781,8 +790,7 @@ void CMainFrame::OnEditSubPresentations()
 void CMainFrame::EditPreferences(short inPageIndex)
 {
     // Set the active page based on the inPageIndex
-    CStudioPreferencesPropSheet thePropSheet(::LoadResourceString(IDS_STUDIOPREFSTITLE).toQString(),
-                                             this, inPageIndex);
+    CStudioPreferencesPropSheet thePropSheet(tr("Studio Preferences"), this, inPageIndex);
 
     // CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
 
@@ -815,22 +823,15 @@ void CMainFrame::EditPreferences(short inPageIndex)
         RecheckSizingMode();
 
         // Remove keys related to the ObjRef and PropRef Pickers
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("ObjectReferenceWidth");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("ObjectReferenceHeight");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("ObjectReferenceXPos");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("ObjectReferenceYPos");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("PropertyReferenceWidth");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("PropertyReferenceHeight");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("PropertyReferenceXPos");
-        CPreferences::GetUserPreferences(::LoadResourceString(IDS_PREFS_REFERENCECONTROLS))
-                .RemoveKey("PropertyReferenceYPos");
+        const Q3DStudio::CString reference = "ReferenceGadgets";
+        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceWidth");
+        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceHeight");
+        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceXPos");
+        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceYPos");
+        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceWidth");
+        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceHeight");
+        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceXPos");
+        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceYPos");
 
         // Also clear out the viewer's settings file
         Q3DStudio::CFilePath theFilePath(Q3DStudio::CFilePath::CombineBaseAndRelative(
@@ -1041,7 +1042,8 @@ void CMainFrame::OnUpdateToolMove()
 
     // If the current tool mode matches this button
     // If the button is currently enabled
-    m_ui->actionPosition_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_MOVE && m_ui->actionPosition_Tool->isEnabled());
+    m_ui->actionPosition_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_MOVE
+                                          && m_ui->actionPosition_Tool->isEnabled());
 }
 
 //==============================================================================
@@ -1059,7 +1061,8 @@ void CMainFrame::OnUpdateToolRotate()
 
     // If the current tool mode matches this button
     // If the button is currently enabled
-    m_ui->actionRotation_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_ROTATE && m_ui->actionRotation_Tool->isEnabled());
+    m_ui->actionRotation_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_ROTATE
+                                          && m_ui->actionRotation_Tool->isEnabled());
 }
 
 //==============================================================================
@@ -1077,7 +1080,8 @@ void CMainFrame::OnUpdateToolScale()
 
     // If the current tool mode matches this button
     // If the button is currently enabled
-    m_ui->actionScale_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_SCALE && m_ui->actionScale_Tool->isEnabled());
+    m_ui->actionScale_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_SCALE
+                                       && m_ui->actionScale_Tool->isEnabled());
 }
 
 //==============================================================================
@@ -1095,7 +1099,9 @@ void CMainFrame::OnUpdateToolGlobalManipulators()
 
     // If the current tool mode matches this button
     // If the button is currently enabled
-    m_ui->actionLocal_Global_Manipulators->setChecked(theMode == StudioManipulationModes::Global && m_ui->actionLocal_Global_Manipulators->isEnabled());
+    m_ui->actionLocal_Global_Manipulators->setChecked(
+                theMode == StudioManipulationModes::Global
+                && m_ui->actionLocal_Global_Manipulators->isEnabled());
 }
 
 //==============================================================================
@@ -1156,7 +1162,8 @@ void CMainFrame::OnUpdateToolGroupSelection()
 
     // If the current tool mode matches this button
     // If the button is currently enabled
-    m_ui->actionGroup_Select_Tool->setChecked(theCurrentSelectSettings == STUDIO_SELECTMODE_GROUP && m_ui->actionGroup_Select_Tool->isEnabled());
+    m_ui->actionGroup_Select_Tool->setChecked(theCurrentSelectSettings == STUDIO_SELECTMODE_GROUP
+                                              && m_ui->actionGroup_Select_Tool->isEnabled());
 }
 
 //==============================================================================
@@ -1174,7 +1181,8 @@ void CMainFrame::OnUpdateToolItemSelection()
 
     // If the current tool mode matches this button
     // If the button is currently enabled
-    m_ui->actionItem_Select_Tool->setChecked(theCurrentSelectSettings == STUDIO_SELECTMODE_ENTITY && m_ui->actionItem_Select_Tool->isEnabled());
+    m_ui->actionItem_Select_Tool->setChecked(theCurrentSelectSettings == STUDIO_SELECTMODE_ENTITY
+                                             && m_ui->actionItem_Select_Tool->isEnabled());
 }
 
 //==============================================================================
@@ -1246,11 +1254,10 @@ void CMainFrame::OnEditCameraZoom()
 //==============================================================================
 void CMainFrame::OnUpdateCameraZoomExtentAndAuthorZoom()
 {
-    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
+    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView())
         m_ui->actionFit_Selected->setChecked(false);
-    } else {
+    else
         m_ui->actionFit_Selected->setChecked(g_StudioApp.IsAuthorZoom());
-    }
 }
 
 //==============================================================================
@@ -1436,7 +1443,8 @@ void CMainFrame::OnViewBasicObjects()
 
 void CMainFrame::OnUpdateViewBasicObjects()
 {
-    m_ui->actionBasic_Objects->setChecked(m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_BASICOBJECTS));
+    m_ui->actionBasic_Objects->setChecked(m_PaletteManager->IsControlVisible(
+                                              CPaletteManager::CONTROLTYPE_BASICOBJECTS));
 }
 
 void CMainFrame::OnViewInspector()
@@ -1469,7 +1477,8 @@ void CMainFrame::OnViewSlide()
 void CMainFrame::OnUpdateViewSlide()
 {
     m_ui->actionSlide->setChecked(
-                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_SLIDE) ? TRUE : FALSE);
+                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_SLIDE)
+                ? TRUE : FALSE);
 }
 
 //==============================================================================
@@ -1608,8 +1617,7 @@ void CMainFrame::OnHelpIndex()
  */
 void CMainFrame::OnHelpVisitQt()
 {
-    Q3DStudio::CString theWebSite(::LoadResourceString(IDS_HELP_VISIT_QT));
-    QDesktopServices::openUrl(QUrl(theWebSite.toQString()));
+    QDesktopServices::openUrl(QUrl(QStringLiteral("https://www.qt.io/3d-studio")));
 }
 
 //==============================================================================
@@ -1620,22 +1628,6 @@ void CMainFrame::OnHelpOpenTutorial()
 {
     StudioTutorialWidget tutorial(this, false, false);
     tutorial.exec();
-}
-
-//==============================================================================
-/**
- *	OnHelpBehaviorReference: Handles the ID_HELP_BEHAVIORREFERENCE message.
- *	Called when the Behavior Reference menu item is chosen inside the Help menu.
- *	Opens the HTML file to display the Behavior help.
- */
-void CMainFrame::OnHelpBehaviorReference()
-{
-    Qt3DSFile theFile(Qt3DSFile::GetApplicationDirectory(),
-                     ::LoadResourceString(IDS_HELP_BEHAVIORREFERENCE));
-    if (theFile.Exists()) {
-        g_StudioApp.GetCore()->GetDispatch()->FireOnNavigate(
-                    Q3DStudio::CString::fromQString(theFile.GetURL().path()), true);
-    }
 }
 
 //==============================================================================

@@ -32,9 +32,7 @@
 
 #pragma once
 
-#include <QDialog>
-
-#include "Qt3DSString.h"
+#include <QtWidgets/qdialog.h>
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -64,9 +62,9 @@ private:
 
     QPalette *m_palette;
 
-    Q3DStudio::CString m_ProductVersionStr;
-    Q3DStudio::CString m_CopyrightStr;
-    Q3DStudio::CString m_Credit1Str;
+    QString m_ProductVersionStr;
+    QString m_CopyrightStr;
+    QString m_Credit1Str;
 };
 
 #endif // INCLUDED_ABOUT_DLG_H

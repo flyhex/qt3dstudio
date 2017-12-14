@@ -39,8 +39,8 @@
 class Qt3DSDMMaterialInspectorGroup : public Qt3DSDMInspectorGroup
 {
 public:
-    Qt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const Q3DStudio::CString &inName,
-                                Qt3DSDMInspectable &inInspectable, long inIndex);
+    Qt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const QString &inName,
+                                  Qt3DSDMInspectable &inInspectable, long inIndex);
 
     virtual bool isMaterialGroup() const = 0;
 };
@@ -49,7 +49,7 @@ class Qt3DSDMMaterialInspectable : public Qt3DSDMInspectable
 {
 public:
     Qt3DSDMMaterialInspectable(CStudioApp &inApp, CCore *inCore,
-                              qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+                               qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         : Qt3DSDMInspectable(inApp, inCore, inInstance)
     {
     }

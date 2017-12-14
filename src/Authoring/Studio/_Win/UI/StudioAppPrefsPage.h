@@ -56,7 +56,7 @@ class CStudioAppPrefsPage : public CStudioPreferencesPropPage
 protected:
     typedef std::pair<QLabel *, QComboBox *> TBuildLabelDropdownPair;
     typedef std::pair<Q3DStudio::CBuildConfiguration::SConfigProperty *, TBuildLabelDropdownPair>
-        TBuildNameControlPair;
+    TBuildNameControlPair;
 
     // Construction
 public:
@@ -100,8 +100,8 @@ protected: // helper functions
     void InitEditStartViewCombo();
 
 protected:
-    std::list<TBuildNameControlPair>
-        m_BuildProperties; ///< List of build properties, either ComboBox or Static
+    std::list<TBuildNameControlPair> m_BuildProperties; ///< List of build properties, either
+                                                        /// ComboBox or Static
 
 #if 0 // Removed until we have some other Preview configurations that just Viewer
     void LoadPreviewSelections();

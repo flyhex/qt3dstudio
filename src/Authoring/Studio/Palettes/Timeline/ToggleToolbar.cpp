@@ -32,15 +32,12 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //==============================================================================
 //	Includes
 //==============================================================================
 
 #include "ToggleToolbar.h"
-#include "SIcon.h"
 #include "Renderer.h"
 #include "StudioPreferences.h"
 #include "TimelineTreeLayout.h"
@@ -68,7 +65,7 @@ CToggleToolbar::CToggleToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrShyBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrShyBtn->SetCenterImage(true, true);
     m_FltrShyBtn->SetAbsoluteSize(CPt(20, 20));
-    m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY2));
+    m_FltrShyBtn->SetTooltipText(QObject::tr("Hide shy objects"));
     m_FltrShyBtn->SetFillStyleUp(CProceduralButton<CToggleButton>::EFILLSTYLE_NONE);
     m_FltrShyBtn->SetFillStyleDown(CProceduralButton<CToggleButton>::EFILLSTYLE_FLOOD);
     m_FltrShyBtn->SetFillStyleOver(CProceduralButton<CToggleButton>::EFILLSTYLE_NONE);
@@ -84,7 +81,7 @@ CToggleToolbar::CToggleToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrVisibleBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrVisibleBtn->SetCenterImage(true, true);
     m_FltrVisibleBtn->SetAbsoluteSize(CPt(20, 20));
-    m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE2));
+    m_FltrVisibleBtn->SetTooltipText(QObject::tr("Hide inactive objects"));
     m_FltrVisibleBtn->SetFillStyleUp(CProceduralButton<CToggleButton>::EFILLSTYLE_NONE);
     m_FltrVisibleBtn->SetFillStyleDown(CProceduralButton<CToggleButton>::EFILLSTYLE_FLOOD);
     m_FltrVisibleBtn->SetFillStyleOver(CProceduralButton<CToggleButton>::EFILLSTYLE_NONE);
@@ -100,7 +97,7 @@ CToggleToolbar::CToggleToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrLockBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrLockBtn->SetCenterImage(true, true);
     m_FltrLockBtn->SetAbsoluteSize(CPt(20, 20));
-    m_FltrLockBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_LOCK2));
+    m_FltrLockBtn->SetTooltipText(QObject::tr("Hide locked objects"));
     m_FltrLockBtn->SetFillStyleUp(CProceduralButton<CToggleButton>::EFILLSTYLE_NONE);
     m_FltrLockBtn->SetFillStyleDown(CProceduralButton<CToggleButton>::EFILLSTYLE_FLOOD);
     m_FltrLockBtn->SetFillStyleOver(CProceduralButton<CToggleButton>::EFILLSTYLE_NONE);
@@ -160,9 +157,9 @@ void CToggleToolbar::OnButtonToggled(CToggleButton *inButton, CButtonControl::EB
 void CToggleToolbar::FilterShy(bool inFilter)
 {
     if (inFilter)
-        m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY2));
+        m_FltrShyBtn->SetTooltipText(QObject::tr("Hide shy objects"));
     else
-        m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY1));
+        m_FltrShyBtn->SetTooltipText(QObject::tr("Show shy objects"));
 
     m_TreeLayout->GetFilter()->SetShy(inFilter);
     m_TreeLayout->Filter();
@@ -177,9 +174,9 @@ void CToggleToolbar::FilterShy(bool inFilter)
 void CToggleToolbar::FilterVisible(bool inFilter)
 {
     if (inFilter)
-        m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE2));
+        m_FltrVisibleBtn->SetTooltipText(QObject::tr("Hide inactive objects"));
     else
-        m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE1));
+        m_FltrVisibleBtn->SetTooltipText(QObject::tr("Show inactive objects"));
 
     m_TreeLayout->GetFilter()->SetVisible(inFilter);
     m_TreeLayout->Filter();
@@ -194,9 +191,9 @@ void CToggleToolbar::FilterVisible(bool inFilter)
 void CToggleToolbar::FilterLocked(bool inFilter)
 {
     if (inFilter)
-        m_FltrLockBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_LOCK2));
+        m_FltrLockBtn->SetTooltipText(QObject::tr("Hide locked objects"));
     else
-        m_FltrLockBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_LOCK1));
+        m_FltrLockBtn->SetTooltipText(QObject::tr("Show locked objects"));
 
     m_TreeLayout->GetFilter()->SetLocked(inFilter);
     m_TreeLayout->Filter();

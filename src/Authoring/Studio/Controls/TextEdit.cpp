@@ -50,15 +50,14 @@
 #include "StudioApp.h"
 #include "Core.h"
 
-#include <QApplication>
+#include <QtWidgets/qapplication.h>
 
 using namespace Q3DStudio;
 
 //==============================================================================
 //	Constants
 //==============================================================================
-const long BLINKSPEED =
-    700; ///< Speed of the blinking cursor while editing, measured in milliseconds
+const long BLINKSPEED = 700; // Speed of the blinking cursor while editing, measured in milliseconds
 
 IMPLEMENT_OBJECT_COUNTER(CTextEdit)
 
@@ -175,7 +174,7 @@ CRct CTextEdit::GetTextRect()
         break;
 
     case RIGHT:
-    // NO BREAK
+        // NO BREAK
     default: {
         theTextRect = CRct(CPt(GetSize().x - ::dtol(m_TotalCharWidth + m_BufferLength), 0),
                            CPt(::dtol(m_TotalCharWidth), GetSize().y));
@@ -206,7 +205,8 @@ void CTextEdit::DrawText(CRenderer *inRenderer)
     if (HasSelectedText()) {
         theFirstPart = theCompleteString.Extract(0, GetSelectionLeft());
         theHighlightedString =
-            theCompleteString.Extract(GetSelectionLeft(), GetSelectionRight() - GetSelectionLeft());
+                theCompleteString.Extract(GetSelectionLeft(),
+                                          GetSelectionRight() - GetSelectionLeft());
         theLastPart = theCompleteString.Extract(GetSelectionRight(),
                                                 theCompleteString.Length() - GetSelectionRight());
     }
@@ -268,8 +268,8 @@ void CTextEdit::DrawText(CRenderer *inRenderer)
             inRenderer->DrawText(theUpperLeftX, theUpperLeftY, theLastPart.toQString(), sizeRect,
                                  m_TextColor);
         } else {
-            inRenderer->DrawBoldText(theUpperLeftX, theUpperLeftY, theLastPart.toQString(), sizeRect,
-                                     m_TextColor);
+            inRenderer->DrawBoldText(theUpperLeftX, theUpperLeftY, theLastPart.toQString(),
+                                     sizeRect, m_TextColor);
         }
     }
 }
@@ -337,7 +337,7 @@ bool CTextEdit::InsertChar(unsigned int inChar)
     }
 
     if (CanAcceptChar(theTempString, inChar, thePosition)
-        && theTempString.Length() < GetMaxLength()) {
+            && theTempString.Length() < GetMaxLength()) {
         DeleteCurrentSelection(false);
 
         Q3DStudio::CString theChar = static_cast<wchar_t>(inChar);
@@ -581,8 +581,9 @@ bool CTextEdit::OnMouseDown(CPt inLocation, Qt::KeyboardModifiers inFlags)
         ResetBlinkingCursor();
 
         m_TimerConnection =
-            ITickTock::GetInstance().AddTimer(1000, true, std::bind(&CTextEdit::OnTimer, this),
-                                              "CTextEdit::OnMouseDown::" + GetDisplayString());
+                ITickTock::GetInstance().AddTimer(1000, true, std::bind(&CTextEdit::OnTimer, this),
+                                                  QStringLiteral("CTextEdit::OnMouseDown::")
+                                                  + GetDisplayString().toQString());
 
         theReturnValue = true;
     }
@@ -673,14 +674,12 @@ long CTextEdit::ConvertPositionToIndex(CPt inPosition)
                 break;
             theIndex++;
         }
-    }
-    // If the point is to the left of the text, default the index to the beginning of the text
-    else if (theTextRect.position.x > thePositionNoY.x) {
+    } else if (theTextRect.position.x > thePositionNoY.x) {
+        // If the point is to the left of the text, default the index to the beginning of the text
         theIndex = 0;
-    }
-    // Otherwise, the point must be to the right of the text, so move the index to the end of the
-    // text
-    else {
+    } else {
+        // Otherwise, the point must be to the right of the text, so move the index to the end of
+        // the text
         theIndex = (long)m_CharWidths.size();
     }
 
@@ -703,9 +702,8 @@ long CTextEdit::ConvertIndexToPosition(long inIndex)
          ++thePos) {
         theCurrentIndex++;
 
-        if (theCurrentIndex > inIndex) {
+        if (theCurrentIndex > inIndex)
             break;
-        }
 
         theXPixelOffset += ::dtol(*thePos);
     }
@@ -869,8 +867,9 @@ void CTextEdit::OnGainFocus()
         if (m_Caret.show) {
             ResetBlinkingCursor();
             m_TimerConnection = ITickTock::GetInstance().AddTimer(
-                1000, true, std::bind(&CTextEdit::OnTimer, this),
-                "CTextEdit::OnGainFocus::" + GetDisplayString());
+                        1000, true, std::bind(&CTextEdit::OnTimer, this),
+                        QStringLiteral("CTextEdit::OnGainFocus::")
+                        + GetDisplayString().toQString());
         }
     }
 
@@ -908,9 +907,8 @@ Q3DStudio::CString CTextEdit::GetDisplayString()
     // If the edit box is read only, then add the pre and postfix,
     // otherwise, just the display string is drawn while editing
     Q3DStudio::CString theCompleteString = m_DisplayString;
-    if (m_IsReadOnly) {
+    if (m_IsReadOnly)
         theCompleteString = m_Prefix + m_DisplayString + m_Postfix;
-    }
 
     return theCompleteString;
 }
@@ -1181,13 +1179,14 @@ void CTextEdit::MoveCaretTo(long inPosition, bool inSelect /*=false*/, bool inSc
     // Only perform the operation if the caret is actually going to move, or the selection is going
     // to change
     if ((static_cast<unsigned long>(inPosition) != m_Caret.position)
-        || (HasSelectedText() && !inSelect)) {
+            || (HasSelectedText() && !inSelect)) {
         if (inSelect) {
             if (!HasSelectedText())
                 m_SelectionStart = m_Caret.position;
             m_SelectionEnd = inPosition;
-        } else
+        } else {
             ClearSelection();
+        }
 
         m_Caret.position = inPosition;
 
@@ -1316,11 +1315,13 @@ void CTextEdit::SetPostfix(const Q3DStudio::CString &inPostfix)
 bool CTextEdit::CopyText()
 {
     if (!m_IsReadOnly) {
-        if (HasSelectedText())
-            CStudioClipboard::CopyTextToClipboard(m_DisplayString.Extract(
-                GetSelectionLeft(), GetSelectionRight() - GetSelectionLeft()).toQString());
-        else
+        if (HasSelectedText()) {
+            CStudioClipboard::CopyTextToClipboard(
+                        m_DisplayString.Extract(GetSelectionLeft(), GetSelectionRight()
+                                                - GetSelectionLeft()).toQString());
+        } else {
             CStudioClipboard::CopyTextToClipboard(m_DisplayString.toQString());
+        }
     }
     return !m_IsReadOnly;
 }
@@ -1339,8 +1340,8 @@ bool CTextEdit::PasteText()
     theHandledFlag &= theText.Length() <= GetMaxLength();
     if (HasSelectedText()) {
         theHandledFlag &=
-            m_DisplayString.Length() - (GetSelectionRight() - GetSelectionLeft()) + theText.Length()
-            <= GetMaxLength();
+                m_DisplayString.Length() - (GetSelectionRight() - GetSelectionLeft())
+                + theText.Length() <= GetMaxLength();
     } else {
         theHandledFlag &= m_DisplayString.Length() + theText.Length() <= GetMaxLength();
     }
@@ -1480,8 +1481,10 @@ void CTextEdit::ResetBlinkingCursor()
 
     // Add the timer so that the cursor will blink back off after BLINKSPEED amount of time
     m_TimerConnection =
-        ITickTock::GetInstance().AddTimer(BLINKSPEED, true, std::bind(&CTextEdit::OnTimer, this),
-                                          "CTextEdit::ResetBlinkingCursor::" + m_DisplayString);
+            ITickTock::GetInstance().AddTimer(BLINKSPEED, true, std::bind(&CTextEdit::OnTimer,
+                                                                          this),
+                                              QStringLiteral("CTextEdit::ResetBlinkingCursor::")
+                                              + m_DisplayString.toQString());
 }
 
 //==============================================================================

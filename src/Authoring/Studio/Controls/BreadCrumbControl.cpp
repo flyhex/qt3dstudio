@@ -31,7 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -40,7 +39,7 @@
 #include "StudioPreferences.h"
 #include "IBreadCrumbProvider.h"
 
-#include <QPixmap>
+#include <QtGui/qpixmap.h>
 
 IMPLEMENT_OBJECT_COUNTER(CBreadCrumbControl)
 
@@ -91,7 +90,7 @@ CBreadCrumbControl::~CBreadCrumbControl()
 static inline CBreadCrumbControl::TSeparatorButtonType *CreateSeparatorButton(const QPixmap &inImage)
 {
     CBreadCrumbControl::TSeparatorButtonType *theButton =
-        new CBreadCrumbControl::TSeparatorButtonType;
+            new CBreadCrumbControl::TSeparatorButtonType;
     theButton->SetAutoSize(true);
     theButton->SetUpImage(inImage);
     theButton->SetSize(CPt(12, 24));
@@ -135,7 +134,7 @@ static inline CBreadCrumbControl::TButtonType *CreateButton(const QPixmap &inIma
  */
 void CBreadCrumbControl::GenerateButtonText(const SBreadCrumb &inBreadCrumb, TButtonType *inButton)
 {
-    Q3DStudio::CString theDisplayName(Q3DStudio::CString::fromQString(inBreadCrumb.m_String));
+    QString theDisplayName(inBreadCrumb.m_String);
     inButton->SetTextColorUp(CStudioPreferences::GetNormalColor());
     inButton->SetTextColorDown(CStudioPreferences::GetNormalColor());
     inButton->SetText(theDisplayName);
@@ -199,14 +198,14 @@ void CBreadCrumbControl::RefreshTrail(IBreadCrumbProvider *inBreadCrumbProvider)
                 else // create new
                 {
                     theButton =
-                        CreateButton((theIndex == 0) ? m_BreadCrumbProvider->GetRootImage()
-                                                     : m_BreadCrumbProvider->GetBreadCrumbImage());
+                            CreateButton((theIndex == 0) ? m_BreadCrumbProvider->GetRootImage()
+                                                         : m_BreadCrumbProvider->GetBreadCrumbImage());
                     QObject::connect(theButton,&CToggleButton::SigToggle,
                                      std::bind(&CBreadCrumbControl::OnButtonToggled, this,
                                                std::placeholders::_1, std::placeholders::_2));
 
                     TSeparatorButtonType *theSeparator =
-                        CreateSeparatorButton(m_BreadCrumbProvider->GetSeparatorImage());
+                            CreateSeparatorButton(m_BreadCrumbProvider->GetSeparatorImage());
 
                     // the ":" is always added as a pair
                     m_BreadCrumbList.push_back(SBreadCrumbItem(theButton, theSeparator));
@@ -220,7 +219,7 @@ void CBreadCrumbControl::RefreshTrail(IBreadCrumbProvider *inBreadCrumbProvider)
                 QPixmap theImage;
                 bool theEnabled = true;
                 if (theIndex
-                    == theList.size()
+                        == theList.size()
                         - 1) { // The last button is displayed differently (grayed-out)
                     theButton->SetTextColorUp(CColor(94, 91, 85));
                     theButton->SetTextColorDown(CColor(94, 91, 85));
@@ -264,19 +263,19 @@ void CBreadCrumbControl::OnUpdateBreadCrumb()
     ASSERT(m_BreadCrumbList.size() == theList.size()
            || (m_BreadCrumbList.size() == 0
                && theList.size()
-                   == 1)); // By design, if this is only 1 item in the list, nothing is shown.
+               == 1)); // By design, if this is only 1 item in the list, nothing is shown.
 
     for (size_t theIndex = 0; theIndex < m_BreadCrumbList.size(); ++theIndex) {
         TButtonType *theButton = m_BreadCrumbList[theIndex].m_BreadCrumb;
-        if (theButton->GetText().toQString() != theList[theIndex].m_String
-            || theButton->GetTextColorUp().getQColor() != theList[theIndex].m_Color) {
+        if (theButton->GetText() != theList[theIndex].m_String
+                || theButton->GetTextColorUp().getQColor() != theList[theIndex].m_Color) {
             GenerateButtonText(theList[theIndex], theButton);
             theUpdated = true;
         }
     }
 
     if (theUpdated) // Make sure that this entire BreadCrumbControl has room for extraneous length
-                    // buttons
+        // buttons
         RecalcLayout();
 }
 

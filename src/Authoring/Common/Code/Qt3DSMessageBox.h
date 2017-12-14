@@ -77,7 +77,7 @@ public:
 
     Qt3DSMessageBox();
     virtual ~Qt3DSMessageBox();
-    static EMessageBoxReturn Show(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
+    static EMessageBoxReturn Show(const QString &inTitle, const QString &inText,
                                   EMessageBoxIcon inIcon, bool inShowCancel = false,
                                   TPlatformWindow inParentWindow = NULL);
 

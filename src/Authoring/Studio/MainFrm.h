@@ -70,9 +70,9 @@ QT_END_NAMESPACE
 class CPlayerWnd;
 
 class CMainFrame : public QMainWindow,
-                   public CPresentationChangeListener,
-                   public CFileOpenListener,
-                   public CClientPlayChangeListener
+        public CPresentationChangeListener,
+        public CFileOpenListener,
+        public CClientPlayChangeListener
 {
     Q_OBJECT
 public:
@@ -176,7 +176,6 @@ public:
     void OnHelpIndex();
     void OnHelpVisitQt();
     void OnHelpOpenTutorial();
-    void OnHelpBehaviorReference();
 
     void OnViewAction();
     void OnUpdateViewAction();

@@ -32,8 +32,6 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 #include "ui_StudioProjectSettingsPage.h"
 
@@ -83,11 +81,6 @@ CStudioProjectSettingsPage::~CStudioProjectSettingsPage()
 {
 }
 
-//==============================================================================
-//	Message Map is defined by subclasses, since there is any specific handlers must be
-//	defined within the BEGIN_MESSAGE_MAP macros.
-//==============================================================================
-
 /////////////////////////////////////////////////////////////////////////////
 // CStudioProjectSettingsPage message handlers
 
@@ -106,11 +99,12 @@ void CStudioProjectSettingsPage::OnInitDialog()
 {
     m_ui->setupUi(this);
 
-    m_ui->m_ClientSizeWidth->setToolTip(::LoadResourceString(IDS_PREFS_PRESENTATIONWIDTH).toQString());
-    m_ui->m_ClientSizeHeight->setToolTip(::LoadResourceString(IDS_PREFS_PRESENTATIONHEIGHT).toQString());
-    m_ui->m_checkConstrainProportions->setToolTip(::LoadResourceString(IDS_PREFS_PRESENTATIONASPECTRATIO).toQString());
-    m_ui->m_Author->setToolTip(::LoadResourceString(IDS_PREFS_AUTHORNAME).toQString());
-    m_ui->m_Company->setToolTip(::LoadResourceString(IDS_PREFS_COMPANYNAME).toQString());
+    m_ui->m_ClientSizeWidth->setToolTip(tr("Presentation Width"));
+    m_ui->m_ClientSizeHeight->setToolTip(tr("Presentation Height"));
+    m_ui->m_checkConstrainProportions->setToolTip(tr("Check to maintain the aspect ratio when "
+                                                     "changing presentation width or height"));
+    m_ui->m_Author->setToolTip(tr("Enter an author name for this presentation"));
+    m_ui->m_Company->setToolTip(tr("Enter a company name for this presentation"));
 
     // Set fonts for child windows.
     for (auto w : findChildren<QWidget *>())
@@ -128,11 +122,16 @@ void CStudioProjectSettingsPage::OnInitDialog()
     this->LoadSettings();
 
     auto valueChanged = static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged);
-    connect(m_ui->m_ClientSizeWidth, valueChanged, this, &CStudioProjectSettingsPage::OnChangeEditPresWidth);
-    connect(m_ui->m_ClientSizeHeight, valueChanged, this, &CStudioProjectSettingsPage::OnChangeEditPresHeight);
-    connect(m_ui->m_checkConstrainProportions, &QCheckBox::clicked, this, &CStudioProjectSettingsPage::OnCheckMaintainRatio);
-    connect(m_ui->m_Author, &QLineEdit::textEdited, this, &CStudioProjectSettingsPage::OnChangeAuthor);
-    connect(m_ui->m_Company, &QLineEdit::textEdited, this, &CStudioProjectSettingsPage::OnChangeCompany);
+    connect(m_ui->m_ClientSizeWidth, valueChanged,
+            this, &CStudioProjectSettingsPage::OnChangeEditPresWidth);
+    connect(m_ui->m_ClientSizeHeight, valueChanged,
+            this, &CStudioProjectSettingsPage::OnChangeEditPresHeight);
+    connect(m_ui->m_checkConstrainProportions, &QCheckBox::clicked,
+            this, &CStudioProjectSettingsPage::OnCheckMaintainRatio);
+    connect(m_ui->m_Author, &QLineEdit::textEdited,
+            this, &CStudioProjectSettingsPage::OnChangeAuthor);
+    connect(m_ui->m_Company, &QLineEdit::textEdited,
+            this, &CStudioProjectSettingsPage::OnChangeCompany);
 }
 
 //==============================================================================

@@ -31,7 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -90,19 +89,22 @@ void CComponentContextMenu::Initialize()
 
     if (CanInspectComponent()) {
         m_inspectAction = new QAction(tr("Edit Component"), this);
-        connect(m_inspectAction, &QAction::triggered, this, &CComponentContextMenu::InspectComponent);
+        connect(m_inspectAction, &QAction::triggered,
+                this, &CComponentContextMenu::InspectComponent);
         addAction(m_inspectAction);
     }
 
     if (m_TimelineItemBinding->IsExternalizeable()) {
         addSeparator();
         m_externalizeAction = new QAction(tr("Externalize Buffer"), this);
-        connect(m_externalizeAction, &QAction::triggered, this, &CComponentContextMenu::Externalize);
+        connect(m_externalizeAction, &QAction::triggered,
+                this, &CComponentContextMenu::Externalize);
         addAction(m_externalizeAction);
     } else if (m_TimelineItemBinding->IsInternalizeable()) {
         addSeparator();
         m_internalizeAction = new QAction(tr("Internalize Buffer"), this);
-        connect(m_internalizeAction, &QAction::triggered, this, &CComponentContextMenu::Internalize);
+        connect(m_internalizeAction, &QAction::triggered,
+                this, &CComponentContextMenu::Internalize);
         addAction(m_internalizeAction);
     }
 
@@ -131,8 +133,6 @@ void CComponentContextMenu::showEvent(QShowEvent *event)
 
 CComponentContextMenu::~CComponentContextMenu()
 {
-    // This will result in a double deletion.
-    // DeletePerformers( );
 }
 
 //=============================================================================
@@ -162,7 +162,7 @@ void CComponentContextMenu::RenameObject()
 bool CComponentContextMenu::CanDuplicateObject()
 {
     return m_TimelineItemBinding->IsValidTransaction(
-        ITimelineItemBinding::EUserTransaction_Duplicate);
+                ITimelineItemBinding::EUserTransaction_Duplicate);
 }
 
 //=============================================================================
@@ -201,7 +201,7 @@ void CComponentContextMenu::DeleteObject()
 bool CComponentContextMenu::CanInspectComponent()
 {
     return m_TimelineItemBinding->IsValidTransaction(
-        ITimelineItemBinding::EUserTransaction_EditComponent);
+                ITimelineItemBinding::EUserTransaction_EditComponent);
 }
 
 //=============================================================================
@@ -222,7 +222,7 @@ void CComponentContextMenu::InspectComponent()
 bool CComponentContextMenu::CanMakeComponent()
 {
     return m_TimelineItemBinding->IsValidTransaction(
-        ITimelineItemBinding::EUserTransaction_MakeComponent);
+                ITimelineItemBinding::EUserTransaction_MakeComponent);
 }
 
 //=============================================================================

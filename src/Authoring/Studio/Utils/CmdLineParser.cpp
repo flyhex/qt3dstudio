@@ -32,8 +32,6 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //=============================================================================
 //	Includes
@@ -42,7 +40,6 @@
 #include "CmdLineParser.h"
 #include "StudioObjectTypes.h"
 #include "Qt3DSFile.h"
-#include "Qt3DSString.h"
 
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
 // the template generator go blah
@@ -116,19 +113,18 @@ void CCmdLineParser::ParseArguments(int inArgc, wchar_t **inArgv)
         ParseParam(theArg, isFlag);
     }
 
-    // m_Params[1]is m_Filename
+    // m_Params[1] is m_Filename
     // m_Params[0] is the path to the executable
-    if (m_Params.size() > 1) {
+    if (m_Params.size() > 1)
         ConvertToLongFilename(m_Params[1], m_Filename);
-    }
 
     // Post-processing
     // If there were no switches modifying m_ExecutionMode, default execution mode
     // according to the file extension found on m_Filename.
     if (0 == m_ExecutionQueue.size()) {
         Qt3DSFile theFile(m_Filename);
-        Q3DStudio::CString theExtension = "." + theFile.GetExtension();
-        if (theExtension.CompareNoCase(::LoadResourceString(IDS_FILE_EXT_UIP)))
+        QString theExtension = "." + theFile.GetExtension().toQString();
+        if (!QString::compare(theExtension, QStringLiteral(".uip"), Qt::CaseInsensitive))
             m_ExecutionQueue.push_back(OPEN_FILE);
     }
 }

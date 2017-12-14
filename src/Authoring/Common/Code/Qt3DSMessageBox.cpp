@@ -40,7 +40,7 @@ using namespace Q3DStudio;
 //==============================================================================
 #include "Qt3DSMessageBox.h"
 
-#include <QMessageBox>
+#include <QtWidgets/qmessagebox.h>
 
 //==============================================================================
 /**
@@ -67,13 +67,13 @@ Qt3DSMessageBox::~Qt3DSMessageBox()
  * @param inParentWindow window to attach this dialog to.
  */
 Qt3DSMessageBox::EMessageBoxReturn
-Qt3DSMessageBox::Show(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText, EMessageBoxIcon inIcon,
-                     bool inShowCancel /*false*/,
-                     Qt3DSMessageBox::TPlatformWindow inParentWindow /*NULL*/)
+Qt3DSMessageBox::Show(const QString &inTitle, const QString &inText, EMessageBoxIcon inIcon,
+                      bool inShowCancel /*false*/,
+                      Qt3DSMessageBox::TPlatformWindow inParentWindow /*NULL*/)
 {
     QMessageBox box(inParentWindow);
-    box.setWindowTitle(inTitle.toQString());
-    box.setText(inText.toQString());
+    box.setWindowTitle(inTitle);
+    box.setText(inText);
 
     switch (inIcon) {
     case ICON_ERROR:

@@ -39,9 +39,9 @@
 //==============================================================================
 //	 Includes
 //==============================================================================
-#include <QDialog>
-
 #include "Qt3DSString.h"
+
+#include <QtWidgets/qdialog.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -62,8 +62,7 @@ public:
     CGLVersionDlg(QWidget *pParent = nullptr); // standard constructor
     ~CGLVersionDlg();
 
-    void Initialize(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inMessage,
-                    bool inErrorIcon);
+    void Initialize(const QString &inTitle, const QString &inMessage, bool inErrorIcon);
     bool GetDontShowAgain();
 
 private:

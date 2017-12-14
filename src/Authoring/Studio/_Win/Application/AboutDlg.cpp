@@ -31,8 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "StudioDefs.h"
-#include "Strings.h"
-#include "StringLoader.h"
 #include "qtAuthoring-config.h"
 
 //==============================================================================
@@ -112,47 +110,57 @@ static QString compilerString()
 void CAboutDlg::OnInitDialog()
 {
     // Set the Studio version
-    m_ProductVersionStr.Format(
-        ::LoadResourceString(IDS_UIC_STUDIO_VERSION),
-        static_cast<const wchar_t *>(CStudioPreferences::GetVersionString()));
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
+            + CStudioPreferences::GetVersionString().toQString();
 
     // Set the copyright string
-    m_CopyrightStr.Format(::LoadResourceString(IDS_ABOUT_COPYRIGHT),
-                          static_cast<const wchar_t *>(Q3DStudio::CString(STUDIO_COPYRIGHT_YEAR)));
+    m_CopyrightStr = QObject::tr("Copyright (C) %1 The Qt Company. All rights reserved.").arg(
+                QString(STUDIO_COPYRIGHT_YEAR));
 
     // Set the credit strings
 #ifdef QT_3DSTUDIO_FBX
-    m_Credit1Str.Format(::LoadResourceString(IDS_ABOUT_FBX_CREDIT));
+    m_Credit1Str = QObject::tr("This software contains Autodesk(R) FBX(R) code developed by "
+                               "Autodesk, Inc. Copyright 2014 Autodesk, Inc. All rights, reserved. "
+                               "Such code is provided 'as is' and Autodesk, Inc. disclaims any "
+                               "and all warranties, whether express or implied, including without "
+                               "limitation the implied warranties of merchantability, fitness for "
+                               "a particular purpose or non-infringement of third party rights. "
+                               "In no event shall Autodesk, Inc. be liable for any direct, "
+                               "indirect, incidental, special, exemplary, or consequential "
+                               "damages (including, but not limited to, procurement of "
+                               "substitute goods or services; loss of use, data, or profits; or "
+                               "business interruption) however caused and on any theory of "
+                               "liability, whether in contract, strict liability, or tort "
+                               "(including negligence or otherwise) arising in any way out of "
+                               "such code.");
 #endif
 
     // Add link to Web site
-    Q3DStudio::CString theURL(::LoadResourceString(IDS_HELP_VISIT_QT));
+    QString theURL(QStringLiteral("https://www.qt.io/3d-studio"));
 
     m_ui->m_WebSite->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
-                                 theURL.toQString(),
+                                 theURL,
                                  CStudioPreferences::GetMasterColor().GetString().toQString(),
-                                 theURL.toQString()));
-    m_ui->m_WebSite->setToolTip(::LoadResourceString(IDS_WEBSITELINK).toQString());
+                                 theURL));
+    m_ui->m_WebSite->setToolTip(tr("Click to visit Qt web site"));
     m_ui->m_WebSite->setOpenExternalLinks(true);
 
     // Add link to support address
-    Q3DStudio::CString theSupport;
-
-    theSupport = ::LoadResourceString(IDS_SUPPORTEMAIL);
+    const QString theSupport = QStringLiteral("https://account.qt.io/support");
 
     m_ui->m_Email->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
-                               theSupport.toQString(),
+                               theSupport,
                                CStudioPreferences::GetMasterColor().GetString().toQString(),
-                               theSupport.toQString()));
-    m_ui->m_Email->setToolTip(::LoadResourceString(IDS_SUPPORTEMAIL_TEXT).toQString());
+                               theSupport));
+    m_ui->m_Email->setToolTip(tr("Send a Studio support request to the Qt Company"));
     m_ui->m_Email->setOpenExternalLinks(true);
 
     // Make the font bold for version number
     m_ui->m_ProductVersion->setStyleSheet("font-weight: bold;");
 
-    m_ui->m_ProductVersion->setText(m_ProductVersionStr.toQString());
-    m_ui->m_Copyright->setText(m_CopyrightStr.toQString());
-    m_ui->m_Credit1->setText(m_Credit1Str.toQString());
+    m_ui->m_ProductVersion->setText(m_ProductVersionStr);
+    m_ui->m_Copyright->setText(m_CopyrightStr);
+    m_ui->m_Credit1->setText(m_Credit1Str);
 
     // Information about build
     m_ui->m_buildTimestamp->setText(

@@ -31,7 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -47,9 +46,9 @@
 #include "Core.h"
 #include "Qt3DSFileTools.h"
 
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QProcess>
+#include <QtWidgets/qinputdialog.h>
+#include <QtWidgets/qmessagebox.h>
+#include <QtCore/qprocess.h>
 
 #include "remotedeploymentsender.h"
 
@@ -173,12 +172,14 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
 #endif
 
         QProcess *p = new QProcess;
-        auto finished = static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished);
+        auto finished
+                = static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished);
         QObject::connect(p, finished, p, &QObject::deleteLater);
         p->start(theCommandStr, { theDocumentFile.toQString() });
 
         if (!p->waitForStarted()) {
-            QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"), QObject::tr("%1 failed with error: %2")
+            QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"),
+                                  QObject::tr("%1 failed with error: %2")
                                   .arg(theViewerFile).arg(p->errorString()));
             delete p;
             return;

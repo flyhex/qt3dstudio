@@ -50,14 +50,14 @@ class Qt3DSDMSceneInspectable : public Qt3DSDMInspectable
 {
 public:
     Qt3DSDMSceneInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                           qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance);
+                            qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance);
 
     bool IsValid() const override;
     // Qt3DSDMInspectable
     long GetGroupCount() override;
 
 protected:
-    inline Q3DStudio::CString GetGroupName(long inGroupIndex) override;
+    inline QString GetGroupName(long inGroupIndex) override;
     inline qt3dsdm::Qt3DSDMInstanceHandle GetGroupInstance(long inGroupIndex) override;
 
     qt3dsdm::Qt3DSDMInstanceHandle m_CurrentActiveSlideInstance;

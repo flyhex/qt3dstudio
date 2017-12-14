@@ -29,10 +29,10 @@
 #ifndef WIDGETCONTROL_H
 #define WIDGETCONTROL_H
 
-#include <QWidget>
-
 #include "Control.h"
 #include "DropContainer.h"
+
+#include <QtWidgets/qwidget.h>
 
 class CRenderer;
 class WidgetControl;
@@ -49,11 +49,12 @@ public:
     CPt ScreenToClient(CPt inPoint) override;
     TPlatformView GetPlatformView() override;
     void SetIsDragging(bool inIsDragging) override;
-    void ShowTooltips(CPt inLocation, const Q3DStudio::CString &inText) override;
+    void ShowTooltips(CPt inLocation, const QString &inText) override;
     void HideTooltips() override;
     void DoStartDrag(IDragable *inDragable) override;
     void DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameList) override;
-    void ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText, CRct inBoundingRct) override;
+    void ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText,
+                            CRct inBoundingRct) override;
     void HideMoveableWindow() override;
 
 protected:

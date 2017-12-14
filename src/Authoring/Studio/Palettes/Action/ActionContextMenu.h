@@ -36,7 +36,7 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include <QMenu>
+#include <QtWidgets/qmenu.h>
 
 //==============================================================================
 /**
@@ -44,7 +44,7 @@
  */
 class CActionContextMenu : public QMenu
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
     explicit CActionContextMenu(QWidget *parent = nullptr);
     virtual ~CActionContextMenu();

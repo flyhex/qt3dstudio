@@ -45,7 +45,6 @@ INCLUDEPATH += \
     Workspace/Views \
     . \
     .. \
-    English.lproj/Strings \
     ../QT3DSIMP/Qt3DSImportLib \
     ../QT3DSIMP/Qt3DSImportSGTranslation \
     ../QT3DSDM/Systems \
@@ -349,7 +348,6 @@ SOURCES += \
     Utils/CmdLineParser.cpp \
     Utils/ImportUtils.cpp \
     Utils/ResourceCache.cpp \
-    Utils/StringLoader.cpp \
     Utils/StudioUtils.cpp \
     Utils/SystemPreferences.cpp \
     Utils/TickTock.cpp \
@@ -415,8 +413,7 @@ FORMS += \
 RESOURCES += \
     MainFrm.qrc \
     qml.qrc \
-    images.qrc \
-    qt3dstudio.qrc
+    images.qrc
 
 PREDEPS_LIBS += \
     qt3dsruntimestatic \

@@ -41,9 +41,8 @@
 #include "StudioPreferences.h"
 #include "StudioPreferencesPropSheet.h"
 #include "StudioProjectSettingsPage.h"
-#include "StringLoader.h"
 
-#include <QPushButton>
+#include <QtWidgets/qpushbutton.h>
 
 CStudioPreferencesPropPage::CStudioPreferencesPropPage(QWidget *parent)
     : QWidget(parent)
@@ -86,17 +85,8 @@ void CStudioPreferencesPropPage::EndDialog(int returnCode)
 /////////////////////////////////////////////////////////////////////////////
 // CStudioPreferencesPropSheet
 
-CStudioPreferencesPropSheet::CStudioPreferencesPropSheet(int nIDCaption, QWidget *pParentWnd,
-                                                         int iSelectPage)
-    : QDialog(pParentWnd)
-    , m_ui(new Ui::StudioPreferencesPropSheet)
-{
-    setWindowTitle(::LoadResourceString(nIDCaption).toQString());
-    OnInitDialog();
-    m_ui->m_TabCtrl->setCurrentIndex(iSelectPage);
-}
-
-CStudioPreferencesPropSheet::CStudioPreferencesPropSheet(const QString &pszCaption, QWidget *pParentWnd,
+CStudioPreferencesPropSheet::CStudioPreferencesPropSheet(const QString &pszCaption,
+                                                         QWidget *pParentWnd,
                                                          int iSelectPage)
     : QDialog(pParentWnd)
     , m_ui(new Ui::StudioPreferencesPropSheet)

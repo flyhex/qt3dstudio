@@ -32,15 +32,13 @@
 //==============================================================================
 #include "stdafx.h"
 #include "StudioDefs.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //==============================================================================
 // Includes
 //==============================================================================
 
 #include "StartupDlg.h"
-
+#include "StudioUtils.h"
 #include "StudioPreferences.h"
 #include "ui_StartupDlg.h"
 
@@ -48,7 +46,6 @@
 #include <QtGui/qpalette.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qdir.h>
-#include "StudioUtils.h"
 
 // CStartupDlg dialog
 
@@ -106,10 +103,9 @@ void CStartupDlg::OnInitDialog()
     connect(m_ui->openDocument, &QPushButton::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
-    m_ProductVersionStr.Format(
-        ::LoadResourceString(IDS_UIC_STUDIO_VERSION),
-        static_cast<const wchar_t *>(CStudioPreferences::GetVersionString()));
-    m_ui->versionStr->setText(m_ProductVersionStr.toQString());
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
+            + CStudioPreferences::GetVersionString().toQString();
+    m_ui->versionStr->setText(m_ProductVersionStr);
 
     // Populate the recent document list
     for (uint theIndex = 0; theIndex < RECENT_COUNT; ++theIndex) {

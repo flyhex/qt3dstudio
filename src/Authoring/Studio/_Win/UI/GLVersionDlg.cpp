@@ -34,7 +34,7 @@
 #include "GLVersionDlg.h"
 #include "ui_GLVersionDlg.h"
 
-#include <QStyle>
+#include <QtWidgets/qstyle.h>
 
 CGLVersionDlg::CGLVersionDlg(QWidget *pParent)
     : QDialog(pParent)
@@ -48,18 +48,18 @@ CGLVersionDlg::~CGLVersionDlg()
 {
 }
 
-void CGLVersionDlg::Initialize(const Q3DStudio::CString &inTitle,
-                               const Q3DStudio::CString &inMessage, bool inErrorIcon)
+void CGLVersionDlg::Initialize(const QString &inTitle, const QString &inMessage, bool inErrorIcon)
 {
     // Set title and message
-    setWindowTitle(inTitle.toQString());
-    m_ui->m_Message->setText(inMessage.toQString());
+    setWindowTitle(inTitle);
+    m_ui->m_Message->setText(inMessage);
 
     // Set which icon to load
     const int size = style()->pixelMetric(QStyle::PM_LargeIconSize);
-    m_ui->m_WarningIcon->setPixmap(style()->standardIcon(inErrorIcon ?
-        QStyle::SP_MessageBoxCritical :
-        QStyle::SP_MessageBoxWarning).pixmap(size, size));
+    m_ui->m_WarningIcon->setPixmap(style()->standardIcon(inErrorIcon
+                                                         ? QStyle::SP_MessageBoxCritical
+                                                         : QStyle::SP_MessageBoxWarning).pixmap(
+                                       size, size));
 }
 
 bool CGLVersionDlg::GetDontShowAgain()

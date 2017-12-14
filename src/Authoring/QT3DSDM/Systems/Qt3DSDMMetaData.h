@@ -149,7 +149,7 @@ public:
     virtual QT3DSU32 GetGroupCountForInstance(Qt3DSDMInstanceHandle inInstance) = 0;
     // Get all group names
     virtual QT3DSU32 GetGroupNamesForInstance(Qt3DSDMInstanceHandle inInstance,
-                                           std::vector<TCharStr> &outNames) = 0;
+                                              std::vector<TCharStr> &outNames) = 0;
     // Get group count for instance
     virtual Option<TCharStr> GetGroupFilterNameForInstance(Qt3DSDMInstanceHandle inInstance,
                                                            long inIndex) = 0;
@@ -197,9 +197,9 @@ public:
     virtual void DestroyMetaDataProperty(Qt3DSDMMetaDataPropertyHandle inProperty) = 0;
 
     virtual Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
-                                                             TStrType inPropertyName) = 0;
+                                                              TStrType inPropertyName) = 0;
     virtual Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
-                                                             Qt3DSDMPropertyHandle inProperty) = 0;
+                                                              Qt3DSDMPropertyHandle inProperty) = 0;
     virtual Option<SMetaDataPropertyInfo>
     GetMetaDataPropertyInfo(Qt3DSDMMetaDataPropertyHandle inProperty) = 0;
     // Get all of the meta data properties defined on this object or its derivation parents
@@ -217,7 +217,7 @@ public:
     virtual TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
                                    Qt3DSDMPropertyHandle inProperty) = 0;
     virtual AdditionalMetaDataType::Value GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
-                                                              Qt3DSDMPropertyHandle inProperty) = 0;
+                                                                    Qt3DSDMPropertyHandle inProperty) = 0;
     virtual TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
                                                     Qt3DSDMPropertyHandle inProperty) = 0;
     virtual bool IsCustomProperty(Qt3DSDMInstanceHandle inInstance,
@@ -252,7 +252,7 @@ public:
     virtual void GetSpecificEvents(Qt3DSDMInstanceHandle inInstance,
                                    TEventHandleList &outEvents) = 0;
     virtual Qt3DSDMEventHandle GetOrCreateSpecificEvent(Qt3DSDMInstanceHandle inInstance,
-                                                       TStrType inName) = 0;
+                                                        TStrType inName) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Handlers
@@ -263,7 +263,7 @@ public:
     virtual void DestroyHandler(Qt3DSDMHandlerHandle inHandlerHandle) = 0;
 
     virtual Qt3DSDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance,
-                                                  TStrType inName) = 0;
+                                                   TStrType inName) = 0;
     virtual Option<SHandlerInfo> GetHandlerInfo(Qt3DSDMHandlerHandle inHandlerHandle) = 0;
     virtual void GetHandlers(Qt3DSDMInstanceHandle inInstance, THandlerHandleList &outHandlers) = 0;
     virtual bool IsCustomHandler(Qt3DSDMHandlerHandle inEventHandle) = 0;
@@ -271,7 +271,7 @@ public:
     virtual void GetSpecificHandlers(Qt3DSDMInstanceHandle inInstance,
                                      THandlerHandleList &outHandlers) = 0;
     virtual Qt3DSDMHandlerHandle GetOrCreateSpecificHandler(Qt3DSDMInstanceHandle inInstance,
-                                                           TStrType inName) = 0;
+                                                            TStrType inName) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Handler Arguments
@@ -382,13 +382,13 @@ public:
     virtual std::shared_ptr<ISignalConnection>
     ConnectInternalCategoryDestroyed(std::function<void(Qt3DSDMCategoryHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection> ConnectInternalPropertyDestroyed(
-        std::function<void(Qt3DSDMMetaDataPropertyHandle)> inCallback) = 0;
+            std::function<void(Qt3DSDMMetaDataPropertyHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection>
     ConnectInternalEventDestroyed(std::function<void(Qt3DSDMEventHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection>
     ConnectInternalHandlerDestroyed(std::function<void(Qt3DSDMHandlerHandle)> inCallback) = 0;
     virtual std::shared_ptr<ISignalConnection> ConnectInternalHandlerArgDestroyed(
-        std::function<void(Qt3DSDMHandlerHandle, QT3DSU32)> inCallback) = 0;
+            std::function<void(Qt3DSDMHandlerHandle, QT3DSU32)> inCallback) = 0;
 #endif
 
     ////////////////////////////////////////////////////////////////////////////////////

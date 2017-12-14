@@ -49,7 +49,8 @@
 #include "Qt3DSColor.h"
 #include "SelectedValueImpl.h"
 #include "Utility/CoreConst.h"
-#include <quuid.h>
+
+#include <QtCore/quuid.h>
 
 //==============================================================================
 //	Forwards
@@ -160,7 +161,7 @@ public:
     void SetImportFailedHandler(std::shared_ptr<Q3DStudio::IImportFailedHandler> inHandler);
     std::shared_ptr<Q3DStudio::IImportFailedHandler> GetImportFailedHandler();
     void SetDocMessageBoxHandler(
-        std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler> inHandler);
+            std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler> inHandler);
 
     // The system may be null in the case where we are running without a UI.
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
@@ -266,8 +267,8 @@ public:
     virtual void DoNotifyTimeChanged(long inNewTime);
     void NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide) override;
     void NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide,
-                                          bool inForceRefresh,
-                                          bool inIgnoreLastDisplayTime = false) override;
+                                  bool inForceRefresh,
+                                  bool inIgnoreLastDisplayTime = false) override;
     virtual void
     NotifySelectionChanged(Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue()) override;
     virtual Q3DStudio::SSelectedValue GetSelectedValue() const { return m_SelectedValue; }
@@ -279,14 +280,14 @@ public:
     qt3dsdm::IPropertySystem *GetPropertySystem() override;
     qt3dsdm::IAnimationCore *GetAnimationCore() override;
     void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                          const std::wstring &inPropertyName,
-                                          const qt3dsdm::SValue &inValue) override;
+                                  const std::wstring &inPropertyName,
+                                  const qt3dsdm::SValue &inValue) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
-                                                        const char *inFile, int inLine) override;
+                                                const char *inFile, int inLine) override;
     Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const Q3DStudio::CString &cmdName,
-                                                             const char *inFile, int inLine) override;
+                                                     const char *inFile, int inLine) override;
     bool IsTransactionOpened() const override;
     void RollbackTransaction() override;
     void CloseTransaction() override;
@@ -324,8 +325,6 @@ public:
     CLight*                     GetEditingLight( );
     long                        GetEditingFillMode( );
     bool                        IsInEditMode( );
-    void                        SetEditViewBackgroundColor( ::CColor& inColor
-    );
     Q3DStudio::CColor           GetEditViewBackgroundColor( );
     */
 
@@ -351,7 +350,7 @@ public:
     void IterateImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                std::vector<Q3DStudio::CId> *outImageIdList);
     qt3dsdm::Qt3DSDMInstanceHandle GetObjectbySelectMode(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                                      bool inGroupMode);
+                                                         bool inGroupMode);
 
     // ICmdStackModifier
     bool CanUndo() override;
@@ -364,11 +363,11 @@ public:
     Q3DStudio::IDocSceneGraph *GetSceneGraph() { return m_SceneGraph.get(); }
 
     void GetProjectFonts(
-        std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList);
+            std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList);
     void GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts);
     Q3DStudio::CString
     GetProjectFontName(const Q3DStudio::CFilePath
-                           &inFullPathToFontFile); // Given a font file, return the font name
+                       &inFullPathToFontFile); // Given a font file, return the font name
 
 protected:
     // Set the active slide, return true if delving
@@ -440,8 +439,7 @@ protected:
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
-    std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler>
-        m_DeletingReferencedObjectHandler;
+    std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler> m_DeletingReferencedObjectHandler;
     long m_TransactionDepth;
     std::shared_ptr<qt3dsdm::CmdDataModel> m_OpenTransaction;
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;

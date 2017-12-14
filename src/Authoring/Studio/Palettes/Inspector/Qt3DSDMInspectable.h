@@ -41,10 +41,6 @@
 #include "StudioApp.h"
 
 //==============================================================================
-//	Forwards
-//==============================================================================
-
-//==============================================================================
 /**
 *	For inspecting data model instances
 */
@@ -57,21 +53,20 @@ protected: // Fields
 
 public: // Constructor
     Qt3DSDMInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                      qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance = 0);
+                       qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance = 0);
 
 public: // CInspectableBase
     Q3DStudio::CString GetName() override;
     long GetGroupCount() override;
     CInspectorGroup *GetGroup(long) override;
     EStudioObjectType GetObjectType() override;
-    // virtual std::wstring			GetTypeString( ) const;
     bool IsValid() const override;
     bool IsMaster() override;
     virtual qt3dsdm::TMetaDataPropertyHandleList GetGroupProperties(long inGroupIndex);
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetGroupInstance(long inGroupIndex);
 
 protected:
-    virtual Q3DStudio::CString GetGroupName(long inGroupIndex);
+    virtual QString GetGroupName(long inGroupIndex);
 };
 
 #endif
