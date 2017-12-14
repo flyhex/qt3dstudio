@@ -31,6 +31,7 @@
 #include "Doc.h"
 #include "Dispatch.h"
 #include "Bindings/TimelineTranslationManager.h"
+#include "HotKeys.h"
 
 #include "Literals.h"
 #include "StudioApp.h"
@@ -46,6 +47,12 @@
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
 #include <QtCore/qtimer.h>
+#include <QtWidgets/qaction.h>
+
+namespace {
+const qreal SCALING_PERCENTAGE_INC = 1.1;
+const qreal SCALING_PERCENTAGE_DEC = 0.9;
+}
 
 TimelineView::TimelineView(QWidget *parent) : QQuickWidget(parent)
 {
@@ -67,6 +74,23 @@ void TimelineView::setSelection(int index)
     if (m_selection != index) {
         m_selection = index;
         Q_EMIT selectionChanged();
+    }
+}
+
+void TimelineView::setTimeRatio(qreal timeRatio)
+{
+    timeRatio = qMin(timeRatio, 1.0);
+
+    if (!qFuzzyCompare(m_timeRatio, timeRatio)) {
+        m_timeRatio = timeRatio;
+
+        for (int i = 0; i < m_model->rowCount(); ++i) {
+            auto timelineRow = m_model->index(i, 0)
+                .data(TimelineObjectModel::TimelineRowRole).value<CTimelineRow*>();
+            timelineRow->SetTimeRatio(timeRatio);
+        }
+
+        Q_EMIT timeRatioChanged(timeRatio);
     }
 }
 
@@ -250,4 +274,28 @@ void TimelineView::initialize()
 CDoc *TimelineView::GetDoc()
 {
     return g_StudioApp.GetCore()->GetDoc();
+}
+
+void TimelineView::OnScalingZoomIn()
+{
+    const qreal timeRatio = m_timeRatio * SCALING_PERCENTAGE_INC;
+    setTimeRatio(timeRatio);
+}
+
+void TimelineView::OnScalingZoomOut()
+{
+    const qreal timeRatio = m_timeRatio * SCALING_PERCENTAGE_DEC;
+    setTimeRatio(timeRatio);
+}
+
+void TimelineView::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
+{
+    Q_UNUSED(inShortcutHandler);
+
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Plus),
+                        TimelineView::OnScalingZoomIn);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Minus),
+                        TimelineView::OnScalingZoomOut);
 }

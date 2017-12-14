@@ -175,7 +175,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredWidth: parent.width
                     Layout.preferredHeight: itemHeight
-                    timeRatio: 0.05
+                    timeRatio: _timelineView.timeRatio
                 }
 
                 ListView {

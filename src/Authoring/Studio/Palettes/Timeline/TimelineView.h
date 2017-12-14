@@ -38,8 +38,11 @@
 #include "SelectedValueImpl.h"
 #include "TimelineObjectModel.h"
 
+#include "TimelineRow.h" // for DEFAULT_TIME_RATIO
+
 class CDoc;
 class CTimelineTranslationManager;
+class CHotKeys;
 
 QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
@@ -51,6 +54,7 @@ class TimelineView : public QQuickWidget, public CPresentationChangeListener
     Q_PROPERTY(bool hideShy READ hideShy WRITE setHideShy NOTIFY hideShyChanged)
     Q_PROPERTY(bool hideHidden READ hideHidden WRITE setHideHidden NOTIFY hideHiddenChanged)
     Q_PROPERTY(bool hideLocked READ hideLocked WRITE setHideLocked NOTIFY hideLockedChanged)
+    Q_PROPERTY(qreal timeRatio READ timeRatio WRITE setTimeRatio NOTIFY timeRatioChanged FINAL)
 public:
     explicit TimelineView(QWidget *parent = nullptr);
 
@@ -58,6 +62,11 @@ public:
 
     int selection() const { return m_selection; }
     void setSelection(int index);
+
+    qreal timeRatio() const { return m_timeRatio; }
+    void setTimeRatio(qreal timeRatio);
+
+    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
     // Presentation Change Listener
     void OnNewPresentation() override;
@@ -79,8 +88,12 @@ Q_SIGNALS:
     void hideShyChanged();
     void hideHiddenChanged();
     void hideLockedChanged();
+    void timeRatioChanged(qreal timeRatio);
 
 protected:
+    void OnScalingZoomIn();
+    void OnScalingZoomOut();
+
     // DataModel callbacks
     virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                                const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
@@ -106,6 +119,7 @@ private:
 
     int m_selection = -1;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
+    qreal m_timeRatio = DEFAULT_TIME_RATIO;
 };
 
 #endif // TIMELINEVIEW_H

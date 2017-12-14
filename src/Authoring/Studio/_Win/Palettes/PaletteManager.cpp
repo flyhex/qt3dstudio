@@ -148,8 +148,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_timelineQmlDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
     m_timelineQmlDock->setObjectName("timeline");
     m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
-    auto timelineView = new TimelineView(m_timelineQmlDock);
-    m_timelineQmlDock->setWidget(timelineView);
+    m_timelineView = new TimelineView(m_timelineQmlDock);
+    m_timelineQmlDock->setWidget(m_timelineView);
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
@@ -294,6 +294,11 @@ CTimelineControl *CPaletteManager::GetTimelineControl() const
         return static_cast<CTimelineControl *>(m_timeLineWidgetControl->getControl());
 
     return nullptr;
+}
+
+TimelineView *CPaletteManager::GetTimelineView() const
+{
+    return m_timelineView;
 }
 
 void CPaletteManager::onTimeChanged(long time)

@@ -57,6 +57,7 @@
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
+#include "TimelineView.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -1024,6 +1025,10 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
     CTimelineControl *theTimelineControl = GetTimelineControl();
     if (theTimelineControl)
         theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
+
+    TimelineView *theTimelineView = GetTimelineView();
+    if (theTimelineView)
+        theTimelineView->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
 //==============================================================================
@@ -1755,6 +1760,11 @@ void CMainFrame::OnConnectionChanged(bool connected)
 CTimelineControl *CMainFrame::GetTimelineControl()
 {
     return m_PaletteManager->GetTimelineControl();
+}
+
+TimelineView *CMainFrame::GetTimelineView()
+{
+    return m_PaletteManager->GetTimelineView();
 }
 
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()

@@ -55,6 +55,7 @@ class CStudioApp;
 class CTimelineControl;
 class ITimelineTimebar;
 class RemoteDeploymentSender;
+class TimelineView;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -221,6 +222,7 @@ public:
 
     CTimelineControl *GetTimelineControl();
     ITimelineTimebar *GetSelectedTimelineTimebar();
+    TimelineView *GetTimelineView();
 
     void EditPreferences(short inPageIndex);
 

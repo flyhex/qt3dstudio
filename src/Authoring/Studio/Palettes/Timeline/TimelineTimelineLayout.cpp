@@ -655,12 +655,14 @@ void CTimelineTimelineLayout::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortc
 {
     Q_UNUSED(inShortcutHandler)
 
+#ifdef KDAB_TEMPORARILY_REMOVED
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Plus),
                         CTimelineTimelineLayout::OnScalingZoomIn);
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Minus),
                         CTimelineTimelineLayout::OnScalingZoomOut);
+#endif
 }
 
 //=============================================================================
