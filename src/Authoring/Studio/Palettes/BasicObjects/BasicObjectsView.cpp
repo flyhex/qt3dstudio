@@ -50,7 +50,7 @@ BasicObjectsView::BasicObjectsView(QWidget *parent) : QQuickWidget(parent)
 
 QSize BasicObjectsView::sizeHint() const
 {
-    return {120, 600};
+    return {150, 500};
 }
 
 void BasicObjectsView::startDrag(QQuickItem *item, int row)

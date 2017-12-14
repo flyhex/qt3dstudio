@@ -42,9 +42,11 @@
 
 #include <QtCore/qdatetime.h>
 
-TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, QWidget *pParent)
+TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSize,
+                                 QWidget *pParent)
     : QWidget(pParent)
     , m_ui(new QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar))
+    , m_preferredSize(preferredSize)
 {
     m_ui->setupUi(this);
 
@@ -86,6 +88,11 @@ TimeLineToolbar::~TimeLineToolbar()
 {
     delete m_ui;
     m_Connections.clear();
+}
+
+QSize TimeLineToolbar::sizeHint() const
+{
+    return m_preferredSize;
 }
 
 void TimeLineToolbar::onTimeChanged(long time)

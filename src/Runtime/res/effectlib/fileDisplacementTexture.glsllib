@@ -50,21 +50,21 @@
 
 
 vec3 fileDisplacementTexture( in sampler2D sampler, in float factor, in int displaceSource
-							, in texture_coordinate_info uvw, in vec3 normal, in vec3 pos )
+                            , in texture_coordinate_info uvw, in vec3 normal, in vec3 pos )
 {
-	// compute displace factor
-	float df = monoChannel( texture( sampler, uvw.position.xy ), displaceSource );
+    // compute displace factor
+    float df = monoChannel( texture( sampler, uvw.position.xy ), displaceSource );
 
-	return( normal * df * factor + pos );
+    return( normal * df * factor + pos );
 }
 
 
 //default material path version
 vec3 defaultMaterialFileDisplacementTexture( in sampler2D sampler, in float factor, vec2 texCoord, in vec3 normal, vec3 pos )
 {
-	return fileDisplacementTexture( sampler, factor, mono_luminance
-				, textureCoordinateInfo( vec3( texCoord.x, texCoord.y, 0.0 ), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0) )
-				, normal, pos );
+    return fileDisplacementTexture( sampler, factor, mono_luminance
+                , textureCoordinateInfo( vec3( texCoord.x, texCoord.y, 0.0 ), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0) )
+                , normal, pos );
 }
 
 

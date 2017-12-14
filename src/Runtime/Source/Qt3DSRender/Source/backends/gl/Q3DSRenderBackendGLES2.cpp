@@ -71,7 +71,7 @@ NVRenderBackendGLES2Impl::NVRenderBackendGLES2Impl(NVFoundationBase &fnd,
     QString extsFPRenderTarget = QStringLiteral("GL_EXT_color_buffer_float");
     QString extsTimerQuery = QStringLiteral("GL_EXT_timer_query");
     QString extsGpuShader5 = QStringLiteral("EXT_gpu_shader5");
-    QString extDepthTexture = QStringLiteral("GL_ANGLE_depth_texture");
+    QString extDepthTexture = QStringLiteral("GL_OES_packed_depth_stencil");
     QString extvao = QStringLiteral("GL_OES_vertex_array_object");
     QString extStdDd = QStringLiteral("GL_OES_standard_derivatives");
     QString extTexLod = QStringLiteral("GL_EXT_shader_texture_lod");

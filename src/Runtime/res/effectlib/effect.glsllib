@@ -35,14 +35,14 @@
 
 vec4 GetTextureValue( sampler2D sampler, vec2 inUVCoords, float inTextureAlphaInfo )
 {
-	vec4 c = texture2D(sampler, inUVCoords);
-	c.rgb = mix( c.rgb*c.a, c.rgb, inTextureAlphaInfo );
-	return c;
+    vec4 c = texture2D(sampler, inUVCoords);
+    c.rgb = mix( c.rgb*c.a, c.rgb, inTextureAlphaInfo );
+    return c;
 }
 
 vec4 GetTextureValuePreMult( sampler2D sampler, vec2 inUVCoords )
 {
-	return texture2D(sampler, inUVCoords);
+    return texture2D(sampler, inUVCoords);
 }
 
 #define SNAPPER_TITLE( title )
@@ -53,14 +53,14 @@ vec4 GetTextureValuePreMult( sampler2D sampler, vec2 inUVCoords )
 #define SNAPPER_CHECKBOX(propName, propNiceName, defaultValue) uniform float propName;
 
 #define SNAPPER_ENUM_BEGIN(propName, propNiceName, defaultValueAsIndex) uniform int propName;
-#define SNAPPER_ENUM_VALUE(valueNiceName) 
+#define SNAPPER_ENUM_VALUE(valueNiceName)
 #define SNAPPER_ENUM_END()
 
 #define SNAPPER_POINT2(propName, propNiceName, defaultValue) uniform vec2 propName;
 #define SNAPPER_COLOR(propName, propNiceName, defaultValue) uniform vec3 propName;
 
 
-#define TEXTURE_LOOKUP_FUNC(name) 		\
+#define TEXTURE_LOOKUP_FUNC(name)         \
 
 
 //texType = one of: ubyte, ushort, float
@@ -70,7 +70,7 @@ vec4 GetTextureValuePreMult( sampler2D sampler, vec2 inUVCoords )
 #define SNAPPER_EXTERNAL_PARAMETER(propName, datatype, rangeMin, rangeMax, propNiceName, defaultValue)
 #define SNAPPER_EXTERNAL_ANGLE(propName, propNiceName, defaultValueAsFloat)
 
-// Provide the ability to render outside a effect boundary. 
+// Provide the ability to render outside a effect boundary.
 // Total size = The original effect size * Overrendering value
 // Overrendering value needs to be >= 1.0
 #define SNAPPER_OVERRENDERING(value) const float OverrenderingValue = value;
@@ -94,24 +94,24 @@ uniform vec2 FragColorAlphaSettings; //x > 0.0 premultiply result, y is an alpha
 
 vec4 Transform( mat4 ModelViewProjectionMatrix, vec2 inDestSize, vec4 inVertex )
 {
-	vec4 temp = ModelViewProjectionMatrix * vec4( inDestSize.x * .5 * inVertex.x, inDestSize.y * .5  * inVertex.y, inVertex.z, inVertex.w );
-	return temp;
+    vec4 temp = ModelViewProjectionMatrix * vec4( inDestSize.x * .5 * inVertex.x, inDestSize.y * .5  * inVertex.y, inVertex.z, inVertex.w );
+    return temp;
 }
 ////////////////////////////////////////////////////////////
 // provide the texture lookup functions for the default
 // texture (Texture0).
-vec4 texture2D_0(vec2 uv) 
-{ 
+vec4 texture2D_0(vec2 uv)
+{
     return GetTextureValue( Texture0, uv, Texture0Info.z );
 }
 
 #ifdef FRAGMENT_SHADER
 ////////////////////////////////////////////////////////////
 // the functions to set the final frag result.
-void colorOutput(vec4 c) 
+void colorOutput(vec4 c)
 {
-	c *= FragColorAlphaSettings.x;
-	gl_FragColor = clamp(c, 0.0, c.a );
+    c *= FragColorAlphaSettings.x;
+    gl_FragColor = clamp(c, 0.0, c.a );
 }
 
 #endif
@@ -126,9 +126,9 @@ void colorOutput(vec4 c)
 
 void vert();
 void main()
-{	
-	gl_Position = Transform( ModelViewProjectionMatrix, DestSize, vec4(attr_pos, 1.0) );
-	TexCoord = attr_uv;
+{
+    gl_Position = Transform( ModelViewProjectionMatrix, DestSize, vec4(attr_pos, 1.0) );
+    TexCoord = attr_uv;
     vert();
 }
 
@@ -138,9 +138,9 @@ void main()
 #ifdef FRAGMENT_SHADER
 #ifndef NO_FRAG_MAIN
 void frag();
-void main() 
-{ 
-	frag(); 
+void main()
+{
+    frag();
 }
 #endif // NO_FRAG_MAIN
 #endif // FRAGMENT_SHADER

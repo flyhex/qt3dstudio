@@ -452,14 +452,26 @@ void CStudioAppPrefsPage::OnChangePreviewConfiguration()
 
 void CStudioAppPrefsPage::OnBgColorButtonClicked() 
 {
-    QColorDialog dlg(this);
-    dlg.setCurrentColor(m_bgColor);
-    if (dlg.exec() == QDialog::Accepted) {
-        m_bgColor = dlg.selectedColor();
-        updateColorButton();
-    }
-
+    QColor previousColor = m_bgColor;
+    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
+    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
+    connect(theColorDlg, &QColorDialog::currentColorChanged,
+            this, &CStudioAppPrefsPage::onBackgroundColorChanged);
+    if (theColorDlg->exec() == QDialog::Accepted)
+        m_bgColor = theColorDlg->selectedColor();
+    else
+        m_bgColor = previousColor;
+    updateColorButton();
     this->SetModified(true);
+    OnApply();
+}
+
+void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
+{
+    m_bgColor = color;
+    updateColorButton();
+    this->SetModified(true);
+    OnApply();
 }
 
 //==============================================================================

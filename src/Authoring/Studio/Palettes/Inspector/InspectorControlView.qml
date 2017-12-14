@@ -743,7 +743,9 @@ Rectangle {
             property int handle: parent.modelData.handle
 
             color: parent.modelData.value
-            onColorSelected: _inspectorModel.setPropertyValue(instance, handle, selectedColor)
+            onColorSelected: _inspectorModel.setPropertyValue(instance, handle, selectedColor);
+            onPreviewColorSelected: _inspectorModel.setPropertyValue(instance, handle,
+                                                                     selectedColor, false);
         }
     }
 

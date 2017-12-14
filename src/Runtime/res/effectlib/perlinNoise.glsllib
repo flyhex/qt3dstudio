@@ -28,7 +28,7 @@
 **
 ****************************************************************************/
 
-// check out implementation from GPU Gems 1 and 2 
+// check out implementation from GPU Gems 1 and 2
 
 float fade( in float x )
 {
@@ -117,7 +117,7 @@ float perlinNoise( in vec3 pos )
   int bxay = bx ^ ay;
   int axby = ax ^ by;
   int bxby = bx ^ by;
-  
+
   return( mix( mix( mix( influence( axay^az, fracPos.x,        fracPos.y,        fracPos.z        )
                        , influence( bxay^az, fracPos.x - 1.0f, fracPos.y,        fracPos.z        ), fadedPos.x )
                   , mix( influence( axby^az, fracPos.x,        fracPos.y - 1.0f, fracPos.z        )

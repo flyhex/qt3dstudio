@@ -104,6 +104,7 @@ protected:
     void ChangeTimebarText();
     void ToggleTimebarHandles();
     void SetTimebarTime();
+    void onTimeBarColorChanged(const QColor &color);
 
 protected:
     ITimebarControl *m_TimebarControl;

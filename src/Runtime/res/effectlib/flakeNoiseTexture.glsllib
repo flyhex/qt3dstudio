@@ -41,7 +41,7 @@ texture_return flakeNoiseTexture( in texture_coordinate_info uvw, in float inten
   float s = pow( noise.w, 1.0f / density ) * intensity;
 
   texture_return tr;
-  tr.tint = vec3( noise.x, noise.y, noise.z ); 
+  tr.tint = vec3( noise.x, noise.y, noise.z );
   tr.mono = clamp(s, 0.0, 1.0);
   return( tr );
 }
@@ -60,7 +60,7 @@ texture_return flakeNoiseAndBumpTexture( in texture_coordinate_info uvw, in floa
   float s = pow( noise.w, 1.0f / density ) * intensity;
 
   texture_return tr;
-  tr.tint = normalize( normal/strength + ( uvw.tangent_u * grad.x + uvw.tangent_v * grad.y + normal * abs( grad.z ) ) ); 
+  tr.tint = normalize( normal/strength + ( uvw.tangent_u * grad.x + uvw.tangent_v * grad.y + normal * abs( grad.z ) ) );
   tr.mono = s;
   return( tr );
 }

@@ -70,7 +70,7 @@ public:
     CWinDropContainer();
     virtual ~CWinDropContainer();
 
-    void RegiserForDnd(QWidget *inWindow);
+    void RegisterForDnd(QWidget *inWindow);
     long ReflectMouse(long inX, long inY);
 
 protected:

@@ -132,6 +132,7 @@ void Q3DSRenderer::render()
     if (!m_initialized && !m_initializationFailure) {
         m_initialized = initializeRuntime(this->framebufferObject());
         m_initializationFailure = !m_initialized;
+        m_commands.clear();
     }
 
     // Don't render if the plugin is hidden; however, if hidden, but sure

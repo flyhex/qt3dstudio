@@ -28,34 +28,19 @@
 ****************************************************************************/
 
 #include "remotedeploymentreceiver.h"
-#include "mainwindow.h"
+#include "viewer.h"
 
 #include <QtNetwork>
-#include <QtWidgets/qinputdialog.h>
 
-RemoteDeploymentReceiver::RemoteDeploymentReceiver(QWidget *parent)
+RemoteDeploymentReceiver::RemoteDeploymentReceiver(int serverPort, QObject *parent)
     : QObject(parent)
-    , m_mainWindow(parent)
     , m_tcpServer(0)
     , m_connection(0)
     , m_temporaryDir(0)
-    , m_serverPort(36000)
+    , m_serverPort(serverPort)
     , m_projectDeployed(false)
-    , m_canceled(false)
 {
     m_incoming.setVersion(QDataStream::Qt_5_8);
-
-    QInputDialog inputPort;
-    inputPort.setLabelText(tr("Enter IP Port:"));
-    inputPort.setInputMode(QInputDialog::IntInput);
-    inputPort.setIntMinimum(0);
-    inputPort.setIntMaximum(65536);
-    inputPort.setIntValue(m_serverPort);
-    inputPort.setWindowFlags(Qt::Popup);
-    // We don't have to worry about cancel with this, as the dialog is always recreated when
-    // initializing the connection.
-    connect(&inputPort, &QInputDialog::intValueSelected, this, &RemoteDeploymentReceiver::setPort);
-    m_canceled = (inputPort.exec() != 1);
 }
 
 RemoteDeploymentReceiver::~RemoteDeploymentReceiver()
@@ -69,18 +54,18 @@ void RemoteDeploymentReceiver::setPort(int value)
     m_serverPort = value;
 }
 
-bool RemoteDeploymentReceiver::startServer()
+QString RemoteDeploymentReceiver::startServer()
 {
     if (m_tcpServer)
-        return true;
+        return QString();
 
     m_tcpServer = new QTcpServer(this);
     if (!m_tcpServer->listen(QHostAddress::Any, m_serverPort)) {
-        qWarning() << "Can't start the remote connection: "
-                   << m_tcpServer->errorString();
+        QString error = tr("Can't start the remote connection: '%1'")
+                .arg(m_tcpServer->errorString());
         delete m_tcpServer;
         m_tcpServer = 0;
-        return false;
+        return error;
     }
 
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
@@ -100,7 +85,7 @@ bool RemoteDeploymentReceiver::startServer()
     m_serverPort = m_tcpServer->serverPort();
     connect(m_tcpServer, SIGNAL(newConnection()),
             this, SLOT(acceptRemoteConnection()));
-    return true;
+    return QString();
 }
 
 void RemoteDeploymentReceiver::acceptRemoteConnection()
@@ -143,8 +128,11 @@ void RemoteDeploymentReceiver::readProject()
     int totalBytes = 0;
     m_incoming >> totalBytes;
 
-    qobject_cast<MainWindow *>(m_mainWindow)->updateProgress(
-                100 * ((double)m_connection->bytesAvailable() / (double)totalBytes));
+    Viewer *viewer = qobject_cast<Viewer *>(parent());
+    if (viewer && totalBytes != 0) {
+        viewer->updateProgress(
+                    100 * ((double)m_connection->bytesAvailable() / (double)totalBytes));
+    }
 
     if (m_connection->bytesAvailable() < totalBytes) {
         m_incoming.rollbackTransaction();

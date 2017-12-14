@@ -262,9 +262,20 @@ ITimelineItemKeyframesHolder *CTimebarKeyframeContextMenu::GetKeyframesHolder()
  */
 void CTimebarKeyframeContextMenu::ChangeTimebarColor()
 {
-    const auto color = QColorDialog::getColor(m_TimebarControl->GetTimebarColor());
-    if (color.isValid())
-        m_TimebarControl->SetTimebarColor(color);
+    QColor previousColor = m_TimebarControl->GetTimebarColor();
+    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
+    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
+    connect(theColorDlg, &QColorDialog::currentColorChanged,
+            this, &CTimebarKeyframeContextMenu::onTimeBarColorChanged);
+    if (theColorDlg->exec() == QDialog::Accepted)
+        m_TimebarControl->SetTimebarColor(theColorDlg->selectedColor());
+    else
+        m_TimebarControl->SetTimebarColor(previousColor);
+}
+
+void CTimebarKeyframeContextMenu::onTimeBarColorChanged(const QColor &color)
+{
+    m_TimebarControl->SetTimebarColor(color);
 }
 
 //=============================================================================

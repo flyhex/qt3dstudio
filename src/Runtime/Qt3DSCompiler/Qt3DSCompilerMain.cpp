@@ -45,10 +45,11 @@
 #include "Qt3DSRenderShaderCache.h"
 
 #include <QSurfaceFormat>
+#include <QMessageLogger>
 
 using namespace qt3ds::render;
 
-#if defined(_LINUX) || defined(_MACOSX) || defined(_LINUXPLATFORM) || defined(_INTEGRITYPLATFORM)
+#if defined(_LINUX) || defined(_MACOSX) || defined(_LINUXPLATFORM) || defined(_INTEGRITYPLATFORM) || defined(Q_OS_QNX)
 namespace qt3ds {
 void NVAssert(const char *exp, const char *file, int line, bool *igonore)
 {

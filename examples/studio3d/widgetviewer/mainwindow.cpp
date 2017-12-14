@@ -214,7 +214,7 @@ void MainWindow::on_actionOpen_triggered()
                 this, tr("Open File or Project"), m_openFileDir,
                 tr("All supported formats (*.uip *.uia *.uiab);;Studio UI Presentation "
                    "(*.uip);;Application file (*.uia);;Binary Application (*.uiab)"),
-                NULL);
+                nullptr, QFileDialog::DontUseNativeDialog);
 
     if (filename.size() == 0)
         return;

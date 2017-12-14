@@ -28,16 +28,18 @@
 
 import QtQuick 2.6
 import QtQuick.Controls 2.1
-import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
+import Qt.labs.platform 1.0
 
 RowLayout {
     id: root
 
     property alias color: rect.color
-    property alias selectedColor: colorDialog.color
+    property color selectedColor: "black"
+    property color previousColor: "black"
 
     signal colorSelected()
+    signal previewColorSelected()
 
     Rectangle {
         id: rect
@@ -54,7 +56,7 @@ RowLayout {
             id: mouseArea
 
             anchors.fill: parent
-            onClicked: colorDialog.open()
+            onClicked: colorDialog.open();
         }
 
         Image {
@@ -66,6 +68,10 @@ RowLayout {
         }
     }
 
+    Component.onCompleted: {
+        selectedColor = rect.color;
+        previousColor = rect.color;
+    }
 
     Item {
         Layout.fillWidth: true
@@ -73,9 +79,20 @@ RowLayout {
 
     ColorDialog {
         id: colorDialog
+        options: ColorDialog.DontUseNativeDialog
+        color: selectedColor
 
-        color: rect.color
-
-        onAccepted: root.colorSelected()
+        onCurrentColorChanged: {
+            selectedColor = currentColor;
+            root.previewColorSelected();
+        }
+        onAccepted: {
+            previousColor = selectedColor;
+            root.colorSelected();
+        }
+        onRejected: {
+            selectedColor = previousColor;
+            root.colorSelected();
+        }
     }
 }

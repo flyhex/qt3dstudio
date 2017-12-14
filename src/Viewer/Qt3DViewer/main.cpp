@@ -28,19 +28,22 @@
 **
 ****************************************************************************/
 
-#include "mainwindow.h"
+#include "viewer.h"
 
-#include <QtWidgets/qapplication.h>
+#include <QtGui/qguiapplication.h>
+#include <QtGui/qtouchdevice.h>
+#include <QtGui/qscreen.h>
 #include <QtCore/qcommandlineparser.h>
 #include <QtCore/qfile.h>
+#include <QtCore/qtimer.h>
 #include <QtStudio3D/q3dssurfaceviewer.h>
 #include <QtStudio3D/private/q3dsimagesequencegenerator_p.h>
+#include <QtQml/qqmlapplicationengine.h>
+#include <QtQml/qqmlengine.h>
+#include <QtQml/qqmlcontext.h>
 
 int main(int argc, char *argv[])
 {
-    // To enable QOpenGLWidget to work on macOS, we must set the default
-    // QSurfaceFormat before QApplication is created. Otherwise context-sharing
-    // fails and QOpenGLWidget breaks.
 #if defined(Q_OS_MACOS)
     QSurfaceFormat openGLFormat;
     openGLFormat.setRenderableType(QSurfaceFormat::OpenGL);
@@ -56,13 +59,14 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("qt.io");
     QCoreApplication::setApplicationName("Qt 3D Viewer");
 
-    QApplication a(argc, argv);
+    QGuiApplication a(argc, argv);
 
     QCommandLineParser parser;
     parser.addHelpOption();
-    parser.addPositionalArgument("file",
-                                 QCoreApplication::translate("main", "The presentation file to open."),
-                                 QCoreApplication::translate("main", "[file]"));
+    parser.addPositionalArgument(
+                "file",
+                QCoreApplication::translate("main", "The presentation file to open."),
+                QCoreApplication::translate("main", "[file]"));
 
     parser.addOption({"sequence",
                       QCoreApplication::translate("main",
@@ -87,8 +91,8 @@ int main(int argc, char *argv[])
                       QCoreApplication::translate("main", "fps"), QString::number(60)});
     parser.addOption({"seq-interval",
                       QCoreApplication::translate("main",
-                      "Time interval between frames in the sequence\n"
-                      "in milliseconds. The seq-fps argument is ignored\n"
+                      "Time interval between frames in\n"
+                      "the sequence in milliseconds. The seq-fps argument is ignored"
                       "if this argument is used."),
                       QCoreApplication::translate("main", "ms"), QString::number(0)});
     parser.addOption({"seq-width",
@@ -111,6 +115,24 @@ int main(int argc, char *argv[])
                       "Output filename base for the image sequence.\n"
                       "The default value is derived from the presentation filename."),
                       QCoreApplication::translate("main", "file"), QStringLiteral("")});
+    parser.addOption({"connect",
+                      QCoreApplication::translate("main",
+                      "If this parameter is specified, the viewer\n"
+                      "is started in connection mode.\n"
+                      "The default value is 36000."),
+                      QCoreApplication::translate("main", "port"), QString::number(36000)});
+    parser.addOption({"fullscreen",
+                      QCoreApplication::translate("main",
+                      "Starts the viewer in fullscreen mode.\n")});
+    parser.addOption({"maximized",
+                      QCoreApplication::translate("main",
+                      "Starts the viewer in maximized mode.")});
+    parser.addOption({"windowgeometry",
+                      QCoreApplication::translate("main",
+                      "Specifies the initial\n"
+                      "window geometry using the X11-syntax.\n"
+                      "For example: 1000x800+50+50"),
+                      QCoreApplication::translate("main", "geometry"), QStringLiteral("")});
     parser.process(a);
 
     const QStringList files = parser.positionalArguments();
@@ -127,7 +149,83 @@ int main(int argc, char *argv[])
 
     Q3DSImageSequenceGenerator *generator = nullptr;
 
-    MainWindow w(generateSequence);
+    Viewer viewer(generateSequence);
+
+    // Figure out control size multiplier for devices using touch screens to ensure all controls
+    // have minimum usable size.
+    qreal sizeMultiplier = 1.0;
+    const auto touchDevices = QTouchDevice::devices();
+    if (touchDevices.size() > 0) {
+        // Find out the actual screen logical pixel size. Typically touch devices we care about
+        // only have a single screen, so we just check primary screen.
+        const auto screens = QGuiApplication::screens();
+        if (screens.size() > 0) {
+            QScreen *screen = screens.at(0);
+            qreal dpi = screen->physicalDotsPerInch() / screen->devicePixelRatio();
+            sizeMultiplier = dpi / 40.0; // divider chosen empirically
+        }
+    }
+
+    QQmlApplicationEngine engine;
+    // Set import paths so that standalone installation works
+    QString extraImportPath1(QStringLiteral("%1/qml"));
+#ifdef Q_OS_MACOS
+    QString extraImportPath2(QStringLiteral("%1/../../../../qml"));
+#else
+    QString extraImportPath2(QStringLiteral("%1/../qml"));
+#endif
+    engine.addImportPath(extraImportPath1.arg(QGuiApplication::applicationDirPath()));
+    engine.addImportPath(extraImportPath2.arg(QGuiApplication::applicationDirPath()));
+
+    QQmlContext *ctx = engine.rootContext();
+    ctx->setContextProperty(QStringLiteral("_menuBackgroundColor"), QColor("#404244"));
+    ctx->setContextProperty(QStringLiteral("_menuSelectionColor"), QColor("#46a2da"));
+    ctx->setContextProperty(QStringLiteral("_menuBorderColor"), QColor("#727476"));
+    ctx->setContextProperty(QStringLiteral("_dialogBorderColor"), QColor("#404244"));
+    ctx->setContextProperty(QStringLiteral("_dialogBackgroundColor"), QColor("#2e2f30"));
+    ctx->setContextProperty(QStringLiteral("_dialogFieldColor"), QColor("#404244"));
+    ctx->setContextProperty(QStringLiteral("_dialogFieldBorderColor"), QColor("#262829"));
+    ctx->setContextProperty(QStringLiteral("_textColor"), QColor("#ffffff"));
+    ctx->setContextProperty(QStringLiteral("_disabledColor"), QColor("#727476"));
+    ctx->setContextProperty(QStringLiteral("_fontSize"), int(12 * sizeMultiplier));
+    ctx->setContextProperty(QStringLiteral("_controlBaseHeight"), int(24 * sizeMultiplier));
+    ctx->setContextProperty(QStringLiteral("_controlBaseWidth"), int(80 * sizeMultiplier));
+    ctx->setContextProperty(QStringLiteral("_controlPadding"), int(12 * sizeMultiplier));
+    ctx->setContextProperty(QStringLiteral("_viewerHelper"), &viewer);
+    qmlRegisterUncreatableType<Viewer>(
+                "Qt3DStudioViewer", 1, 0, "ViewerHelper",
+                QCoreApplication::translate("main",
+                                            "Creation of ViewerHelper not allowed from QML"));
+    engine.load(QUrl(QLatin1String("qrc:/qml/main.qml")));
+    Q_ASSERT(engine.rootObjects().size() > 0);
+    QWindow *appWindow = qobject_cast<QWindow *>(engine.rootObjects().at(0));
+    Q_ASSERT(appWindow);
+    viewer.setQmlRootObject(appWindow);
+
+    if (parser.isSet(QStringLiteral("windowgeometry"))) {
+        int width = 1280;
+        int height = 768;
+        int x = 50;
+        int y = 50;
+        QString geometryStr = parser.value(QStringLiteral("windowgeometry"));
+        const QStringList splitPlus = geometryStr.split(QLatin1Char('+'));
+        if (splitPlus.size() > 0) {
+            const QStringList splitX = splitPlus[0].split(QLatin1Char('x'));
+            if (splitX.size() >= 2) {
+                width = splitX[0].toInt();
+                height = splitX[1].toInt();
+            }
+            if (splitPlus.size() >= 3) {
+                x = splitPlus[1].toInt();
+                y = splitPlus[2].toInt();
+            }
+        }
+        appWindow->setGeometry(x, y, width, height);
+    }
+    if (parser.isSet(QStringLiteral("fullscreen")))
+        appWindow->setVisibility(QWindow::FullScreen);
+    else if (parser.isSet(QStringLiteral("maximized")))
+        appWindow->setVisibility(QWindow::Maximized);
 
     if (generateSequence) {
         if (files.count() != 1) {
@@ -136,10 +234,10 @@ int main(int argc, char *argv[])
         }
         generator = new Q3DSImageSequenceGenerator;
         QObject::connect(generator, &Q3DSImageSequenceGenerator::progress,
-                         &w, &MainWindow::generatorProgress);
+                         &viewer, &Viewer::generatorProgress);
         QObject::connect(generator, &Q3DSImageSequenceGenerator::finished,
-                         &w, &MainWindow::generatorFinished);
-        w.setGeneratorDetails(files.first());
+                         &viewer, &Viewer::generatorFinished);
+        viewer.setGeneratorDetails(files.first());
         generator->generateImageSequence(
                     files.first(),
                     parser.value("seq-start").toDouble(),
@@ -151,21 +249,22 @@ int main(int argc, char *argv[])
                     parser.value("seq-outpath"),
                     parser.value("seq-outfile"));
     } else if (!files.isEmpty()) {
-        w.loadFile(files.first());
+        // Load the presentation after window has been exposed to give QtQuick time to construct
+        // the application window properly
+        QTimer *exposeTimer = new QTimer(appWindow);
+        QObject::connect(exposeTimer, &QTimer::timeout, [&](){
+            if (appWindow->isExposed()) {
+                exposeTimer->stop();
+                exposeTimer->deleteLater();
+                viewer.loadFile(files.first());
+            }
+        });
+        exposeTimer->start(0);
+    } else if (parser.isSet(QStringLiteral("connect"))) {
+        viewer.setContentView(Viewer::ConnectView);
+        viewer.setConnectPort(parser.value(QStringLiteral("connect")).toInt());
+        viewer.connectRemote();
     }
-
-    w.show();
-#ifndef Q_OS_ANDROID
-    QFile styleFile(":/style.qss");
-#else
-    // We need a different stylesheet for Android, or the controls are too small, and some of
-    // them aren't displayed correctly (see QTBUG-41773)
-    QFile styleFile(":/style_android.qss");
-#endif
-    styleFile.open(QFile::ReadOnly);
-
-    QString style(styleFile.readAll());
-    a.setStyleSheet(style);
 
     return a.exec();
 }

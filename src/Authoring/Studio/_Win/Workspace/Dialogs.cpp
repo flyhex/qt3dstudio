@@ -55,7 +55,6 @@
 
 #include "StringLoader.h"
 
-#include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
@@ -377,7 +376,8 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 
 
     return QFileDialog::getOpenFileName(qApp->activeWindow(), QObject::tr("Open"),
-                                                 inFile, theFileFilter);
+                                        inFile, theFileFilter, nullptr,
+                                        QFileDialog::DontUseNativeDialog);
 }
 
 //==============================================================================
@@ -779,6 +779,7 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &i
                             : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt.toQString());
+    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
     if (inDialogTitle != "")
         theFileDlg.setWindowTitle(inDialogTitle.toQString());
 
@@ -862,6 +863,7 @@ Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirecto
                            : inInitialDirectory.toQString(),
                            theImportFilter.toQString());
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
+    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
         QFileInfo fi(theFileDlg.selectedFiles().first());
@@ -935,22 +937,6 @@ void CDialogs::DestroyProgressScreen()
         delete m_ProgressPalette;
         m_ProgressPalette = nullptr;
     }
-}
-
-//==============================================================================
-/**
- *	Prompt the user for the Object Timebar color.
- *	@param ioColor
- *	@return	true if we successfully obtained a color using the displayed dialog.
- */
-bool CDialogs::PromptObjectTimebarColor(CColor &ioColor)
-{
-    std::auto_ptr<QColorDialog> theColorDlg(new QColorDialog(ioColor));
-    if (theColorDlg->exec() == QDialog::Accepted) {
-        ioColor = theColorDlg->selectedColor();
-        return true;
-    }
-    return false;
 }
 
 //==============================================================================

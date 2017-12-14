@@ -74,7 +74,7 @@ class CTimelineControl : public CControl,
                          public ITimelineControl
 {
 public:
-    CTimelineControl();
+    CTimelineControl(const QSize &preferredSize);
     ~CTimelineControl();
 
     DEFINE_OBJECT_COUNTER(CTimelineControl)
@@ -86,6 +86,7 @@ public:
     CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    CPt GetPreferredSize() override;
 
     // Presentation Change Listener
     void OnNewPresentation() override;
@@ -155,5 +156,6 @@ protected:
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel
     long m_time;
+    QSize m_preferredSize;
 };
 #endif // INCLUDED_TIMELINE_CONTROL_H

@@ -147,13 +147,13 @@ QUrl Q3DSQmlStreamProxy::pathToUrl(const QString &path)
     QUrl retval;
     if (path.startsWith(QStringLiteral(":"))) {
         retval.setScheme(QStringLiteral("qrc"));
-        retval.setPath(QStringLiteral("//") + path.mid(1));
+        retval.setPath(path.mid(1));
     } else if (path.startsWith(QStringLiteral("qrc:"), Qt::CaseInsensitive)) {
         retval.setScheme(QStringLiteral("qrc"));
         retval.setPath(path.mid(4));
     } else {
         retval.setScheme(QStringLiteral("file"));
-        retval.setPath(QStringLiteral("//") + path);
+        retval.setPath(path);
     }
     return retval;
 }

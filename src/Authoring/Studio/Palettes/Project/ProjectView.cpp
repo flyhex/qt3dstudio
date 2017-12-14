@@ -49,8 +49,9 @@
 #include <QtQml/qqmlengine.h>
 #include <QtQuick/qquickitem.h>
 
-ProjectView::ProjectView(QWidget *parent) : QQuickWidget(parent)
+ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
+  , m_preferredSize(preferredSize)
 {
     const QString theApplicationPath =
             Qt3DSFile::GetApplicationDirectory().GetPath().toQString();
@@ -93,7 +94,7 @@ QAbstractItemModel *ProjectView::projectModel() const
 
 QSize ProjectView::sizeHint() const
 {
-    return {500,500};
+    return m_preferredSize;
 }
 
 void ProjectView::initialize()

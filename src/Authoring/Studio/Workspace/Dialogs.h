@@ -144,7 +144,6 @@ public:
                                const Q3DStudio::CString &inAdditionalText);
     void DestroyProgressScreen();
 
-    bool PromptObjectTimebarColor(CColor &ioColor);
     void DisplayProfilingStatistics();
     /*void DisplayMultilineTextEdit(Q3DStudio::CString &ioText,
                                   CMultilineEditDlg::INotification *inNotifiction = NULL);*/

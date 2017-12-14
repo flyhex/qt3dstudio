@@ -811,8 +811,8 @@ CPt CStudioPreferences::GetPropertyReferenceGadgetPosition(const CPt &inDefault)
 CPt CStudioPreferences::GetDefaultClientSize()
 {
     CPt theSize;
-    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth", 800);
-    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight", 480);
+    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth", 1920);
+    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight", 1080);
     return theSize;
 }
 

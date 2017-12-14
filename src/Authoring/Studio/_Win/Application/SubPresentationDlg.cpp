@@ -154,7 +154,8 @@ void CSubPresentationDlg::browseFile()
     if (m_subPresentation.m_type == QStringLiteral("presentation-qml"))
         filter = QStringLiteral("*.qml");
     const QString file = QDir::toNativeSeparators(
-                QFileDialog::getOpenFileName(nullptr, nullptr, m_directory, filter));
+                QFileDialog::getOpenFileName(nullptr, nullptr, m_directory, filter, nullptr,
+                                             QFileDialog::DontUseNativeDialog));
     QString shortFile = file;
     int subdir = file.indexOf(m_directory);
     if (subdir >= 0)

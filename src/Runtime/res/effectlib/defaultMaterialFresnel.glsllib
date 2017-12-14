@@ -38,7 +38,7 @@ float defaultMaterialSimpleFresnel( in vec3 N, in vec3 viewDir, in float ior, fl
     float dvn = abs( dFdx(VdotN) * dFdy(VdotN) );
     VdotN = clamp( VdotN, 0.0, 1.0 );
     float ratio = F + (1.0 - F) * pow(1.0 - VdotN, fresnelPower);
-   
+
     return clamp( ratio * pow( VdotN, dvn * fresnelPower ), 0.0, 1.0 );
 }
 

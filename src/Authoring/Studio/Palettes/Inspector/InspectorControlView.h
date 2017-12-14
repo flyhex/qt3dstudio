@@ -57,7 +57,7 @@ class InspectorControlView : public QQuickWidget,
     Q_PROPERTY(QString titleText READ titleText NOTIFY titleChanged FINAL)
     Q_PROPERTY(QString titleIcon READ titleIcon NOTIFY titleChanged FINAL)
 public:
-    explicit InspectorControlView(QWidget *parent = nullptr);
+    explicit InspectorControlView(const QSize &preferredSize, QWidget *parent = nullptr);
     ~InspectorControlView();
 
     void OnSelectionSet(Q3DStudio::SSelectedValue inValue);
@@ -125,6 +125,8 @@ private:
 
     int m_instance;
     int m_handle;
+
+    QSize m_preferredSize;
 };
 
 #endif // INSPECTORCONTROLVIEW_H

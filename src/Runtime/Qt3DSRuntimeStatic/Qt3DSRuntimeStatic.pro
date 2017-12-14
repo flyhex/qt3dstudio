@@ -506,7 +506,7 @@ macos: SOURCES += \
     ../Source/Qt3DSFoundation/Source/foundation/linux/Qt3DSLinuxThread.cpp \
     ../Source/Qt3DSFoundation/Source/foundation/macosx/Qt3DSUnixTime.cpp
 
-linux|integrity {
+linux|integrity|qnx {
 SOURCES += \
     ../Source/Qt3DSFoundation/Source/foundation/linux/Qt3DSLinuxAtomic.cpp \
     ../Source/Qt3DSFoundation/Source/foundation/linux/Qt3DSLinuxFPU.cpp \
