@@ -76,12 +76,14 @@ int main(int argc, char *argv[])
                       "implies setting this option.")});
     parser.addOption({"seq-start",
                       QCoreApplication::translate("main",
-                      "Start time of the sequence in milliseconds.\n"
+                      "Start time of the sequence in\n"
+                      "milliseconds.\n"
                       "The default value is 0."),
                       QCoreApplication::translate("main", "ms"), QString::number(0)});
     parser.addOption({"seq-end",
                       QCoreApplication::translate("main",
-                      "End time of the sequence in milliseconds.\n"
+                      "End time of the sequence in\n"
+                      "milliseconds.\n"
                       "The default value is 10000."),
                       QCoreApplication::translate("main", "ms"), QString::number(1000)});
     parser.addOption({"seq-fps",
@@ -112,7 +114,8 @@ int main(int argc, char *argv[])
                       QCoreApplication::translate("main", "path"), QStringLiteral(".")});
     parser.addOption({"seq-outfile",
                       QCoreApplication::translate("main",
-                      "Output filename base for the image sequence.\n"
+                      "Output filename base for the image\n"
+                      "sequence.\n"
                       "The default value is derived from the presentation filename."),
                       QCoreApplication::translate("main", "file"), QStringLiteral("")});
     parser.addOption({"connect",
@@ -133,6 +136,21 @@ int main(int argc, char *argv[])
                       "window geometry using the X11-syntax.\n"
                       "For example: 1000x800+50+50"),
                       QCoreApplication::translate("main", "geometry"), QStringLiteral("")});
+    parser.addOption({"mattecolor",
+                      QCoreApplication::translate("main",
+                      "Specifies custom matte color\n"
+                      "using #000000 syntax.\n"
+                      "For example, white matte: #ffffff"),
+                      QCoreApplication::translate("main", "color"), QStringLiteral("#333333")});
+    parser.addOption({"showstats",
+                      QCoreApplication::translate("main",
+                      "Show render statistics on screen.")});
+    parser.addOption({"scalemode",
+                      QCoreApplication::translate("main",
+                      "Specifies scaling mode.\n"
+                      "The default value is 'center'."),
+                      QCoreApplication::translate("main", "center|fit|fill"),
+                      QStringLiteral("center")});
     parser.process(a);
 
     const QStringList files = parser.positionalArguments();
@@ -226,6 +244,25 @@ int main(int argc, char *argv[])
         appWindow->setVisibility(QWindow::FullScreen);
     else if (parser.isSet(QStringLiteral("maximized")))
         appWindow->setVisibility(QWindow::Maximized);
+
+    if (parser.isSet(QStringLiteral("mattecolor"))) {
+        QColor matteColor(parser.value("mattecolor"));
+        if (matteColor != Qt::black) {
+            appWindow->setProperty("showMatteColor", QVariant::fromValue<QColor>(matteColor));
+            appWindow->setProperty("matteColor", QVariant::fromValue<QColor>(matteColor));
+        }
+    }
+    if (parser.isSet(QStringLiteral("showstats")))
+        appWindow->setProperty("showRenderStats", true);
+    if (parser.isSet(QStringLiteral("scalemode"))) {
+        QString scaleStr(parser.value("scalemode"));
+        if (scaleStr == QStringLiteral("fit"))
+            appWindow->setProperty("scaleMode", Q3DSViewerSettings::ScaleModeFit);
+        else if (scaleStr == QStringLiteral("fill"))
+            appWindow->setProperty("scaleMode", Q3DSViewerSettings::ScaleModeFill);
+        else
+            appWindow->setProperty("scaleMode", Q3DSViewerSettings::ScaleModeCenter);
+    }
 
     if (generateSequence) {
         if (files.count() != 1) {

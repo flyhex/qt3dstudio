@@ -78,8 +78,6 @@ public:
     int connectPort(); // not const since it potentially updates from settings
     QString connectText() const;
     bool isConnected() const;
-    QRect initialRect() const;
-    int initialState() const;
 
     void setQmlRootObject(QObject *obj);
 

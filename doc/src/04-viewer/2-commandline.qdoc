@@ -94,6 +94,16 @@ The following command line options are supported:
         \li --windowgeometry <geometry>
         \li Specifies the initial window geometry using the X11-syntax.
             For example: \c{1000x800+50+50}
+    \row
+        \li --mattecolor <color>
+        \li Specifies custom matte color using #000000 syntax.
+            For example, white matte: #ffffff
+    \row
+        \li --showstats
+        \li Show render statistics on screen.
+    \row
+        \li --scalemode <center|fit|fill>
+        \li Specifies scaling mode. The default value is 'center'.
 \endtable
 
 Example - Creating a one minute 4k image sequence of a presentation:

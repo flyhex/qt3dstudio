@@ -46,7 +46,9 @@ ApplicationWindow {
     property string error
     property int previousVisibility
 
-    property color matteColor: Qt.rgba(0, 0, 0, 1)
+    property color showMatteColor: Qt.rgba(0.2, 0.2, 0.2, 1)
+    property color hideMatteColor: Qt.rgba(0, 0, 0, 1)
+    property color matteColor: hideMatteColor
     property bool showRenderStats: false
     property int scaleMode: ViewerSettings.ScaleModeCenter
 
@@ -440,15 +442,13 @@ ApplicationWindow {
                         text: qsTr("Show Matte")
                         shortcut: "F6"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                        showCheckMark: window.matteColor !== window.hideMatteColor
                         onTriggered: {
                             if (enabled) {
-                                if (window.matteColor === Qt.rgba(0, 0, 0, 1)) {
-                                    window.matteColor = Qt.rgba(0.2, 0.2, 0.2, 1);
-                                    showCheckMark = true;
-                                } else {
-                                    window.matteColor = Qt.rgba(0, 0, 0, 1);
-                                    showCheckMark = false;
-                                }
+                                if (window.matteColor === window.hideMatteColor)
+                                    window.matteColor = window.showMatteColor;
+                                else
+                                    window.matteColor = window.hideMatteColor;
                             }
                         }
                     }
@@ -462,24 +462,16 @@ ApplicationWindow {
                             id: scaleMenu
                             x: parent.width
                             y: 0
-                            function clearChecks() {
-                                scaleCenter.showCheckMark = false;
-                                scaleFit.showCheckMark = false;
-                                scaleFill.showCheckMark = false;
-                            }
 
                             StyledMenuItem {
                                 id: scaleCenter
                                 text: qsTr("Center")
                                 shortcut: "F2"
-                                showCheckMark: true
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                                showCheckMark: window.scaleMode === ViewerSettings.ScaleModeCenter
                                 onTriggered: {
-                                    if (enabled) {
-                                        scaleMenu.clearChecks();
+                                    if (enabled)
                                         window.scaleMode = ViewerSettings.ScaleModeCenter;
-                                        showCheckMark = true;
-                                    }
                                 }
                             }
                             StyledMenuItem {
@@ -487,12 +479,10 @@ ApplicationWindow {
                                 text: qsTr("Scale to Fit")
                                 shortcut: "F3"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                                showCheckMark: window.scaleMode === ViewerSettings.ScaleModeFit
                                 onTriggered: {
-                                    if (enabled) {
-                                        scaleMenu.clearChecks();
+                                    if (enabled)
                                         window.scaleMode = ViewerSettings.ScaleModeFit;
-                                        showCheckMark = true;
-                                    }
                                 }
                             }
                             StyledMenuItem {
@@ -500,12 +490,10 @@ ApplicationWindow {
                                 text: qsTr("Scale to Fill")
                                 shortcut: "F4"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                                showCheckMark: window.scaleMode === ViewerSettings.ScaleModeFill
                                 onTriggered: {
-                                    if (enabled) {
-                                        scaleMenu.clearChecks();
+                                    if (enabled)
                                         window.scaleMode = ViewerSettings.ScaleModeFill;
-                                        showCheckMark = true;
-                                    }
                                 }
                             }
                         }
@@ -514,12 +502,10 @@ ApplicationWindow {
                         text: qsTr("Show Render Statistics")
                         shortcut: "F1"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                        showCheckMark: window.showRenderStats
                         onTriggered: {
-                            if (enabled) {
-                                window.showRenderStats =
-                                        !contentLoader.item.viewerSettings.showRenderStats;
-                                showCheckMark = window.showRenderStats;
-                            }
+                            if (enabled)
+                                window.showRenderStats = !window.showRenderStats;
                         }
                     }
                     StyledMenuSeparator {}
