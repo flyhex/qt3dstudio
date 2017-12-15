@@ -153,9 +153,7 @@ struct SMetaDataPropertyInfo : SMetaPropertyBase
 {
     Qt3DSDMInstanceHandle m_Instance;
     Qt3DSDMPropertyHandle m_Property;
-    // TODO set these properties
-    Qt3DSDMInstanceHandle m_DataInputSource;  // controller for this property
-    bool m_IsControlledByDataInput; // Is this property controlled externally from datainput
+    bool m_Controllable; // Can this property be controlled
     bool m_IsHidden; // Is this property visible in the UI
     bool m_Animatable; // Is this property visible in the UI
 
@@ -172,17 +170,15 @@ struct SMetaDataPropertyInfo : SMetaPropertyBase
         m_IsHidden = false;
         // We default to being animatable
         m_Animatable = true;
-        // Default to not being controlled with controlling datainput handle
-        // being zero
-        m_IsControlledByDataInput = false;
-        m_DataInputSource = 0;
+        // Default to not being controlled
+        m_Controllable = false;
     }
     bool operator==(const SMetaDataPropertyInfo &inOther) const
     {
         return m_Instance == inOther.m_Instance && m_Property == inOther.m_Property
             && m_IsHidden == inOther.m_IsHidden && m_Animatable == inOther.m_Animatable
             && m_GroupName == inOther.m_GroupName
-            && m_IsControlledByDataInput == inOther.m_IsControlledByDataInput
+            && m_Controllable == inOther.m_Controllable
             && SMetaPropertyBase::operator==(inOther);
     }
 

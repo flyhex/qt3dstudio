@@ -180,6 +180,43 @@ Rectangle {
                                     }
                                 }
 
+                                Item {
+                                    Layout.alignment: Qt.AlignTop
+                                    width: controlledPropertyButton.sourceSize.width
+                                    height: _controlBaseHeight
+                                    visible: model.modelData.controllable
+                                    Image {
+                                        id: controlledPropertyButton
+
+                                        property bool controlled: model.modelData.controlled
+
+                                        anchors.fill: parent
+                                        fillMode: Image.Pad
+
+                                        source: {
+                                            _resDir + (controlled
+                                                       ? "Objects-DataInput-Normal.png"
+                                                       : "Objects-DataInput-Disabled.png")
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                            onClicked:  {
+                                                if (mouse.button === Qt.LeftButton) {
+                                                    _inspectorModel.setPropertyControlled(
+                                                                model.modelData.instance,
+                                                                model.modelData.handle,
+                                                                !model.modelData.controlled)
+                                                } else {
+                                                    const coords = mapToItem(root, mouse.x, mouse.y);
+                                                    groupDelegateItem.showContextMenu(coords);
+                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+
 
                                 Item {
                                     // Spacer item

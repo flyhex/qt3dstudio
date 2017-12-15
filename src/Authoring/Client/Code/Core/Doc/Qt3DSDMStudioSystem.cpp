@@ -209,6 +209,10 @@ IStudioFullSystemSignalProvider *CStudioSystem::GetFullSystemSignalProvider()
 {
     return m_StudioSystem->GetSignalProvider();
 }
+IStudioFullSystemSignalSender *CStudioSystem::GetFullSystemSignalSender()
+{
+    return m_StudioSystem->GetSignalSender();
+}
 IAnimationCore *CStudioSystem::GetAnimationCore()
 {
     return m_StudioSystem->GetAnimationCore().get();

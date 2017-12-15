@@ -453,6 +453,7 @@ struct STranslatorDataModelParser
 #define Text_Leading m_Text.m_Leading
 #define Text_Tracking m_Text.m_Tracking
 #define Text_TextColor m_Text.m_TextColor
+#define Text_ControlledProperty m_Text.m_ControlledProperty
 #define Text_EnableAcceleratedFont m_Text.m_EnableAcceleratedFont
 #define Path_Width m_Path.m_Width
 #define Path_LinearError m_Path.m_LinearError
@@ -904,14 +905,52 @@ struct SDataInputTranslator : public SGraphObjectTranslator
         SGraphObjectTranslator::PushTranslation(inContext);
         qt3ds::render::SDataInput &theItem =
             static_cast<qt3ds::render::SDataInput &>(GetGraphObject());
+
         STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
+
         ITERATE_QT3DS_RENDER_DATAINPUT_PROPERTIES
+
+        // Handle incoming controlled element - property pairs
+        CRegisteredString incomingElemProp = CRegisteredString();
+        theParser.ParseProperty(
+            inContext.m_ObjectDefinitions.m_DataInput.m_ControlledElemProp,
+            incomingElemProp);
+        qt3ds::render::IStringTable &theStrTable(inContext.m_Context.GetStringTable());
+
+        QVector<QPair<CRegisteredString, CRegisteredString>> newVec
+            = ResolveControlledElemProps(incomingElemProp.c_str(), theStrTable);
+        theItem.SetControlledElementProperties(newVec);
     }
     void AppendChild(SGraphObject &inChild) override {}
 
     void ClearChildren() override { }
 
     void SetActive(bool /*inActive*/) override {}
+
+    QVector<QPair<CRegisteredString, CRegisteredString>> ResolveControlledElemProps(
+        std::string elemProp, qt3ds::render::IStringTable &strTable)
+    {
+        if (!elemProp.size())
+            return QVector<QPair<CRegisteredString, CRegisteredString>>();
+
+        QVector<QPair<CRegisteredString, CRegisteredString>> ret;
+        std::string theStr = elemProp;
+        std::string theCurrentElemStr;
+        std::string theCurrentPropStr;
+        std::string::size_type thePos = 0;
+        while (thePos < theStr.length()) {
+            theCurrentElemStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
+            thePos += theCurrentElemStr.length() + 1;
+
+            theCurrentPropStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
+            thePos += theCurrentPropStr.length() + 1;
+
+            ret.append(QPair<CRegisteredString, CRegisteredString>(
+                strTable.RegisterStr(theCurrentElemStr.c_str()),
+                strTable.RegisterStr(theCurrentPropStr.c_str())));
+        }
+        return ret;
+    }
 };
 
 struct SPathTranslator : public SNodeTranslator

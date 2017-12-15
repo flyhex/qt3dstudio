@@ -58,6 +58,7 @@
 #include "ClientDataModelBridge.h"
 #include "IDocumentReader.h"
 #include "IStudioRenderer.h"
+#include "foundation/Qt3DSLogging.h"
 
 static QStringList renderableItems()
 {
@@ -347,12 +348,15 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,
                                                                metaProperty.m_Property);
+
+    item->m_controllable = metaProperty.m_Controllable;
+
+    auto signalProvider = studio->GetFullSystemSignalProvider();
     if (item->m_animatable) {
         item->m_animated = studio->GetAnimationSystem()->IsPropertyAnimated(item->m_instance,
                                                                             metaProperty.m_Property);
 
         // Update the Animate Toggle on undo/redo
-        auto signalProvider = studio->GetFullSystemSignalProvider();
         item->m_connections.push_back(signalProvider->ConnectAnimationCreated(
                                           std::bind(&InspectorControlModel::updateAnimateToggleState,
                                                     this, item)));
@@ -360,6 +364,21 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
         item->m_connections.push_back(signalProvider->ConnectAnimationDeleted(
                                           std::bind(&InspectorControlModel::updateAnimateToggleState,
                                                     this, item)));
+    }
+
+    if (item->m_controllable) {
+        // get the current control status for this element
+        qt3dsdm::SValue currPropVal = currentPropertyValue(
+            item->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                item->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+        QString currPropValStr = qt3dsdm::get<QString>(currPropVal);
+        Q3DStudio::CString propertyNameStr = metaProperty.m_Name.c_str();
+        // is this property controlled in this element?
+        item->m_controlled = currPropValStr.contains(propertyNameStr.toQString());
+
+        m_controlledToggleConnection = signalProvider->ConnectControlledToggled(
+            std::bind(&InspectorControlModel::updateControlledToggleState,
+                      this, item));
     }
 
     // synchronize the value itself
@@ -376,6 +395,12 @@ qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int h
     propertySystem->GetInstancePropertyValue(instance, handle,  value);
 
     return  value;
+}
+
+void InspectorControlModel::updateControlledToggleState(InspectorControlBase* inItem)
+{
+    inItem->m_controlled = !inItem->m_controlled;
+    Q_EMIT inItem->controlledChanged();
 }
 
 void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inItem)
@@ -889,6 +914,37 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
             ->SetInstancePropertyValue(instance, handle, newSelectedData);
+}
+
+void InspectorControlModel::setPropertyControlled(long instance, int property, bool controlled)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    CClientDataModelBridge *theBridge = studio->GetClientDataModelBridge();
+    IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
+
+    Q3DStudio::CString instancepath = Q3DStudio::CString(
+        objRefHelper->GetObjectReferenceString(doc->GetSceneInstance(),
+                                               CRelativePathTools::EPATHTYPE_GUID, instance));
+    // TODO this is test code, hardwired for item named DataInput
+    // We need to have the datainput handle or name as input to this
+    // function, coming from dialog
+    Q3DStudio::CString controller = Q3DStudio::CString("this.DataInput");
+
+    bool theFullResolvedFlag;
+    CRelativePathTools::EPathType type;
+    qt3dsdm::Qt3DSDMInstanceHandle controllerhandle
+        = CRelativePathTools::FindAssetInstanceByObjectPath(
+            doc, doc->GetActiveRootInstance(), controller,
+            type, theFullResolvedFlag, objRefHelper);
+
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property Controlled"))
+        ->SetInstancePropertyControlled(instance, instancepath, property,
+                                        controllerhandle, controlled);
+
+    const auto signalSender
+        = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalSender();
+    signalSender->SendControlledToggled(instance, property);
 }
 
 void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool animated)

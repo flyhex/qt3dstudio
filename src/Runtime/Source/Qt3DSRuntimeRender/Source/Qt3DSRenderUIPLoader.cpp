@@ -810,6 +810,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Text_TextColor "textcolor"
 #define Text_BackColor "backcolor"
 #define Text_EnableAcceleratedFont "enableacceleratedfont"
+#define Text_ControlledProperty "controlledproperty"
 #define Layer_ProgressiveAAMode "progressiveaa"
 #define Layer_MultisampleAAMode "multisampleaa"
 #define Light_Scope "scope"

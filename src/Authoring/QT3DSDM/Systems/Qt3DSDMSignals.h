@@ -514,6 +514,8 @@ public:
         const std::function<void(Qt3DSDMHandlerParamHandle)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectCustomReferencesModified(
         const std::function<void(Qt3DSDMInstanceHandle, const TCharStr &)> &inCallback) = 0;
+    virtual TSignalConnectionPtr ConnectControlledToggled(
+        const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> &inCallback) = 0;
 };
 
 class IStudioFullSystemSignalSender : public ISignalItem
@@ -584,6 +586,8 @@ public:
     virtual void SendCustomHandlerParamModified(Qt3DSDMHandlerParamHandle inParameter) = 0;
     virtual void SendCustomReferencesModified(Qt3DSDMInstanceHandle inOwner,
                                               const TCharStr &inString) = 0;
+    virtual void SendControlledToggled(Qt3DSDMInstanceHandle inInstance,
+                                       Qt3DSDMPropertyHandle inProperty) = 0;
 };
 
 // Use this if you want to register for only a specific instance or specific property

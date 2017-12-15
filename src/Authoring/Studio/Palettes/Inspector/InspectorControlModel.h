@@ -67,6 +67,8 @@ class InspectorControlBase : public QObject
 
     Q_PROPERTY(bool animatable MEMBER m_animatable CONSTANT)
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
+    Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
+    Q_PROPERTY(bool controllable MEMBER m_controllable CONSTANT)
 
 public:
     virtual ~InspectorControlBase();
@@ -75,6 +77,7 @@ Q_SIGNALS:
     void valueChanged();
     void valuesChanged();
     void animatedChanged();
+    void controlledChanged();
 
 public:
     qt3dsdm::DataModelDataType::Value m_dataType;
@@ -89,6 +92,8 @@ public:
 
     bool m_animatable  = false;
     bool m_animated = false;
+    bool m_controlled = false;
+    bool m_controllable = false;
 
     std::vector<qt3dsdm::TSignalConnectionPtr> m_connections;
 };
@@ -125,6 +130,7 @@ public:
     Q_INVOKABLE void setSlideSelection(long instance, int handle, int index,
                                        const QStringList &list);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
+    Q_INVOKABLE void setPropertyControlled(long instance, int handle, bool controlled);
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -160,10 +166,12 @@ private:
     void rebuildTree();
     void refreshTree();
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void updateAnimateToggleState(InspectorControlBase* inItem);
+    void updateAnimateToggleState(InspectorControlBase *inItem);
+    void updateControlledToggleState(InspectorControlBase *inItem);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_controlledToggleConnection;
 
     QStringList materialValues() const;
     InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);

@@ -196,6 +196,11 @@ public:
     SetInstancePropertyValueAsRenderable(TInstanceHandle instance, TPropertyHandle propName,
                                          const Q3DStudio::CString &inSourcePath) = 0;
 
+    virtual void SetInstancePropertyControlled(TInstanceHandle instance, CString instancepath,
+                                               TPropertyHandle propName,
+                                               TInstanceHandle controller,
+                                               bool controlled) = 0;
+
     virtual void SetMaterialType(TInstanceHandle instance,
                                  const Q3DStudio::CString &inRelativePathToMaterialFile) = 0;
 

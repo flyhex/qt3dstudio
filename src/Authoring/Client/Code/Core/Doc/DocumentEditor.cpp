@@ -1373,6 +1373,55 @@ public:
         SetName(theMaterial, materialName);
     }
 
+    void SetInstancePropertyControlled(TInstanceHandle instance, CString instancepath,
+                                       TPropertyHandle propName, TInstanceHandle controller,
+                                       bool controlled) override
+    {
+        SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
+
+        // get the name of controlled property
+        auto metadataHandle = m_MetaData.GetMetaDataProperty(instance, propName);
+        auto metadata = m_MetaData.GetMetaDataPropertyInfo(metadataHandle);
+        const wchar_t *propname = metadata->m_Name.wide_str();
+        qt3dsdm::SValue controlledProperty = std::make_shared<CDataStr>(propname);
+
+        // get existing string of controlled elements and properties from controlling
+        // datainput
+        qt3dsdm::SValue controlledElemProp;
+        m_DataCore.GetInstancePropertyValue(
+            controller, theDefinitions.m_DataInput.m_ControlledElemProp, controlledElemProp);
+        QString controlledElemPropStr = controlledElemProp.toQVariant().toString();
+
+        // build the controlled element - controlled property string specific for this element
+        instancepath.append(" ");
+        instancepath.append(propname);
+        instancepath.append(" ");
+
+        // If property was set to controlled, append element - property string to the list
+        // held by the controlling datainput. Otherwise, remove this element-property -pair from it.
+        if (controlled)
+            controlledElemPropStr.append(instancepath.toQString());
+        else
+            controlledElemPropStr.remove(instancepath.toQString());
+
+        qCDebug(qt3ds::TRACE_INFO) << "SetInstance datainput controlledelemprop: instance "
+            << controller
+            << " property " << theDefinitions.m_DataInput.m_ControlledElemProp.m_Property
+            << " value " << controlledElemPropStr;
+
+        controlledElemProp = std::make_shared<CDataStr>(controlledElemPropStr.toStdWString().c_str());
+        // For DataInput and Alias, property values are set through datacore.
+        // Set the newly built controlledelemprop string for the controlling datainput
+        m_DataCore.SetInstancePropertyValue(controller,
+                                            theDefinitions.m_DataInput.m_ControlledElemProp,
+                                            controlledElemProp);
+        // Set the controlledproperty string in the controlled element
+        // TODO: For the moment this is Text element -specific only
+        m_DataCore.SetInstancePropertyValue(instance,
+                                            theDefinitions.m_Text.m_ControlledProperty,
+                                            controlledProperty);
+    }
+
     // Normal way in to the system.
     void SetInstancePropertyValue(TInstanceHandle instance, TPropertyHandle propName,
                                           const SValue &value, bool inAutoDelete = true) override

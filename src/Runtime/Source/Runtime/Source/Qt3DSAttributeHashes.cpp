@@ -265,6 +265,7 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_TIMEFROM: return "timefrom";
         case ATTRIBUTE_TIMETO: return "timeto";
         case ATTRIBUTE_CONTROLLEDELEMPROP: return "controlledelemprop";
+        case ATTRIBUTE_CONTROLLEDPROPERTY: return "controlledproperty";
         case ATTRIBUTE_QT_IO: return "qt.io";
         default: {
             static char s_UnknownHash[16];

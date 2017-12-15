@@ -51,6 +51,7 @@ SText::SText()
     : SNode(GraphObjectTypes::Text)
     , m_TextColor(1, 1, 1)
     , m_TextTexture(NULL)
+    , m_ControlledProperty(CRegisteredString())
 {
     m_Bounds.setEmpty();
 }

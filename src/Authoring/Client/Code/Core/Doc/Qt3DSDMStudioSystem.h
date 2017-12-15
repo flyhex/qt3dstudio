@@ -46,6 +46,7 @@ class IAnimationCore;
 class IActionCore;
 class CStudioFullSystem;
 class IStudioFullSystemSignalProvider;
+class IStudioFullSystemSignalSender;
 class IStudioAnimationSystem;
 class IActionSystem;
 class ISignalConnection;
@@ -69,6 +70,7 @@ public:
     ISlideCore *GetSlideCore();
     IPropertySystem *GetPropertySystem();
     IStudioFullSystemSignalProvider *GetFullSystemSignalProvider();
+    IStudioFullSystemSignalSender *GetFullSystemSignalSender();
     IAnimationCore *GetAnimationCore();
     IStudioAnimationSystem *GetAnimationSystem();
     IActionCore *GetActionCore();

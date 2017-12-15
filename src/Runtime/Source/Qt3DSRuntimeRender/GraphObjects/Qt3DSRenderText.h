@@ -45,7 +45,8 @@ namespace render {
 
         // These properties can change every frame with no additional cost.
         QT3DSVec3 m_TextColor;
-
+        // Used by Editor to keep track of controlled properties in this element
+        CRegisteredString m_ControlledProperty;
         // Setup and utilized by the rendering system
         NVRenderTexture2D *m_TextTexture;
         STextTextureDetails m_TextTextureDetails;
@@ -67,6 +68,7 @@ namespace render {
             SNode::Remap(inRemapper);
             inRemapper.Remap(m_Text);
             inRemapper.Remap(m_Font);
+            inRemapper.Remap(m_ControlledProperty);
             inRemapper.NullPtr(m_TextTexture);
             inRemapper.NullPtr(m_PathFontItem);
             inRemapper.NullPtr(m_PathFontDetails);

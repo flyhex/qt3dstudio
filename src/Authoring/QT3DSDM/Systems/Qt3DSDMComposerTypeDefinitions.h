@@ -262,7 +262,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(vertalign, m_VertAlign, TDataStrPtr, L"Middle")                       \
     HANDLE_COMPOSER_PROPERTY(leading, m_Leading, float, 0.f)                                       \
     HANDLE_COMPOSER_PROPERTY(tracking, m_Tracking, float, 0.f)                                     \
-    HANDLE_COMPOSER_PROPERTY(enableacceleratedfont, m_EnableAcceleratedFont, bool, false)
+    HANDLE_COMPOSER_PROPERTY(enableacceleratedfont, m_EnableAcceleratedFont, bool, false)          \
+    HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_SLIDE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(componentid, m_ComponentId, SLong4, 0)                                \

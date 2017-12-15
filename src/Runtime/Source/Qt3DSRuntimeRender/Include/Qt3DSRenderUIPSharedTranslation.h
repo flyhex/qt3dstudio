@@ -437,7 +437,8 @@ namespace render {
     HANDLE_QT3DS_RENDER_PROPERTY(Text, Tracking, TextDirty)                                          \
     HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(Text, TextColor, Dirty)                                  \
     HANDLE_QT3DS_RENDER_COLOR_PROPERTY(Text, TextColor, Dirty)                                       \
-    HANDLE_QT3DS_RENDER_PROPERTY(Text, EnableAcceleratedFont, Dirty)
+    HANDLE_QT3DS_RENDER_PROPERTY(Text, EnableAcceleratedFont, Dirty)                                 \
+    HANDLE_QT3DS_RENDER_PROPERTY(Text, ControlledProperty, Dirty)
 
 #define ITERATE_QT3DS_RENDER_PATH_PROPERTIES                                                         \
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Path, PathType, Dirty)                                         \
@@ -463,8 +464,8 @@ namespace render {
     HANDLE_QT3DS_RENDER_PROPERTY(DataInput, Value, Dirty)                                        \
     HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ValueStr, Dirty)                                        \
     HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeFrom, Dirty)                                     \
-    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ControlledElemProp, Dirty)                              \
-    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeTo, Dirty)
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeTo, Dirty)                                        \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ControlledElemProp, Dirty)
 }
 }
 #endif
