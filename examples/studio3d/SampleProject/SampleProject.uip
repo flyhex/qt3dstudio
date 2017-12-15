@@ -52,7 +52,7 @@
 					<Set ref="#Layer" endtime="5000" />
 					<Set ref="#Camera" endtime="5000" />
 					<Set ref="#Light" endtime="5000" />
-					<Add ref="#Layer2" name="Layer2" endtime="5000" multisampleaa="SSAA" />
+					<Add ref="#Layer2" name="Layer2" endtime="5000" multisampleaa="None" progressiveaa="8x" />
 					<Add ref="#Camera_001" endtime="5000" fov="30" position="0 0 -600" />
 					<Add ref="#Light_001" endtime="5000" />
 					<Add ref="#NeedleSpeed_001" name="NeedleSpeed" endtime="5000" importfile="models/Speedometer/Speedometer.import" pivot="5 5 0" >
