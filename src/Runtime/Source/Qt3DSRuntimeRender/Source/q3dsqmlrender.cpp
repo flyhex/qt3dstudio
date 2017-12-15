@@ -66,7 +66,7 @@ NVRenderTextureFormats::Enum convertTextureFormat(E_TEXTURE_FORMAT fmt)
 
 SOffscreenRendererEnvironment Q3DSQmlRender::GetDesiredEnvironment(QT3DSVec2 inPresScale)
 {
-    QSize size;
+    QSize size(0, 0);
     E_TEXTURE_FORMAT format;
 
     if (!m_qmlStreamRenderer)
