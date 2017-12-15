@@ -1343,7 +1343,7 @@ bool CClientDataModelBridge::IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inIn
 
     EStudioObjectType theObjectType = GetObjectType(inInstance);
     if (theObjectType == OBJTYPE_SCENE || theObjectType == OBJTYPE_MATERIAL
-        || theObjectType == OBJTYPE_IMAGE)
+        || theObjectType == OBJTYPE_IMAGE ||theObjectType == OBJTYPE_DATAINPUT)
         return false;
     // If we are delving inside component and selecting the component itself (the component is root
     // in timeline palette)

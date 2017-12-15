@@ -41,6 +41,7 @@ class InspectorControlModel;
 QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class CInspectableBase;
 class ImageChooserView;
+class DataInputChooserView;
 class ImageChooserModel;
 class MeshChooserView;
 class ObjectBrowserView;
@@ -74,6 +75,7 @@ public:
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE QObject *showDataInputChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE void showDataInputDialog();
 
     // IDataModelListener
@@ -120,6 +122,7 @@ private:
     QPointer<MeshChooserView> m_meshChooserView;
     QPointer<FileChooserView> m_fileChooserView;
     QPointer<TextureChooserView> m_textureChooserView;
+    QPointer<DataInputChooserView> m_dataInputChooserView;
     QPointer<ObjectBrowserView> m_objectReferenceView;
     QPointer<ObjectListModel> m_objectReferenceModel;
     std::vector<Q3DStudio::CFilePath> m_fileList;

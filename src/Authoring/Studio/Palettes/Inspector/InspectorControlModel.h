@@ -124,13 +124,16 @@ public:
     QVariant getPropertyValue(long instance, int handle);
     qt3dsdm::SValue currentPropertyValue(long instance, int handle);
 
+    void setPropertyControllerInstance(long instance, int handle,
+                                       long controllerInstance, bool controlled);
+
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setRenderableValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setPropertyValue(long instance, int handle, const QVariant &value, bool commit = true);
     Q_INVOKABLE void setSlideSelection(long instance, int handle, int index,
                                        const QStringList &list);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
-    Q_INVOKABLE void setPropertyControlled(long instance, int handle, bool controlled);
+    Q_INVOKABLE void setPropertyControlled(long instance, int property, bool controlled);
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,

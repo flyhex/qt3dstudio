@@ -32,6 +32,7 @@
 #include "Doc.h"
 #include "Qt3DSFileTools.h"
 #include "StudioFullSystem.h"
+#include "IObjectReferenceHelper.h"
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
 #include "StudioCoreSystem.h"
@@ -658,6 +659,40 @@ public:
         }
     }
 
+    // Resolve all instances that are controlled by datainput instance
+    void GetControlledInstancesAndProperties(TInstanceHandle dataInput,
+                                             TInstancePropertyPairList &ctrldInstsProps)
+    {
+        Q_ASSERT(m_Bridge.IsDataInputInstance(dataInput));
+        IObjectReferenceHelper *objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
+
+        Option<SValue> controlledElemProp
+            = GetInstancePropertyValue(
+                dataInput,
+                m_Bridge.GetObjectDefinitions().m_DataInput.m_ControlledElemProp);
+        CString controlledElemPropStr = get<TDataStrPtr>(*controlledElemProp)->GetData();
+
+        std::string::size_type thePos = 0;
+        bool fullResolved = false;
+        CRelativePathTools::EPathType type;
+        // Controlled instance and property names are stored in "controlledelemprop"
+        // property as a single string, each item separated by whitespace. Parse
+        // names and get corresponding handles.
+        while (thePos < controlledElemPropStr.size()) {
+            CString theCurrentElemStr = controlledElemPropStr.substr(
+                thePos, controlledElemPropStr.find(' ', thePos) - thePos);
+            thePos += theCurrentElemStr.size() + 1;
+            CString theCurrentPropStr = controlledElemPropStr.substr(
+                thePos, controlledElemPropStr.find(' ', thePos) - thePos);
+            thePos += theCurrentPropStr.size() + 1;
+            TInstanceHandle currElement = CRelativePathTools::FindAssetInstanceByObjectPath(
+                &m_Doc, m_Doc.GetActiveRootInstance(), theCurrentElemStr,
+                type, fullResolved, objReferenceHelper);
+            TPropertyHandle currProp = FindProperty(currElement, theCurrentPropStr);
+            ctrldInstsProps.push_back(TInstancePropertyPair(currElement, currProp));
+        }
+    }
+
     bool IsInSceneGraph(TInstanceHandle child) const override { return m_AssetGraph.IsExist(child); }
 
     // If the path has any sub-path children, then yes it is externalizeable.
@@ -729,7 +764,20 @@ public:
             return false;
         return m_AnimationCore.IsArtistEdited(animHandle);
     }
-
+    bool IsControlled(TInstanceHandle instance)
+    {
+        // TODO This is Text element specific code
+        if (!m_Bridge.IsTextInstance(instance))
+            return false;
+        Option<SValue> currentControlledProperty = GetInstancePropertyValue(
+            instance, m_Bridge.GetObjectDefinitions().m_Text.m_ControlledProperty);
+        if (!currentControlledProperty.hasValue())
+            return false;
+        CString propStr = (get<TDataStrPtr>(*currentControlledProperty))->GetData();
+        if (!propStr.IsEmpty())
+            return true;
+        return false;
+    }
     pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>
     DoCopySceneGraphObject(const TInstanceHandleList &inInstances)
     {
@@ -1049,6 +1097,7 @@ public:
 
     void DoDeleteInstance(Qt3DSDMInstanceHandle instance)
     {
+        IObjectReferenceHelper *objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
         // For delete, the metadata needs to participate in the undo/redo system.
         m_MetaData.SetConsumer(m_StudioSystem.GetFullSystem()->GetConsumer());
         TInstanceHandleList theDeleteDependentInstances;
@@ -1167,16 +1216,40 @@ public:
                               && theInstanceChildren[0] == instance));
                 theDeleteDependentInstances.push_back(theInstanceParent);
             }
+        } else if (m_Bridge.IsDataInputInstance(instance)) {
+            // When DataInput is deleted, we must set properties controlled by it
+            // in target instances to uncontrolled
+            TInstancePropertyPairList instPropPairList;
+            GetControlledInstancesAndProperties(instance, instPropPairList);
+            // Iterate through instance-property pairs and set to uncontrolled
+            for (size_t idx = 0, end = instPropPairList.size(); idx < end; ++idx) {
+                CString controlledElemStr = objReferenceHelper->GetObjectReferenceString(
+                    m_Doc.GetSceneInstance(), CRelativePathTools::EPATHTYPE_GUID,
+                    instPropPairList[idx].first);
+                SetInstancePropertyControlled(instPropPairList[idx].first,
+                                              controlledElemStr,
+                                              instPropPairList[idx].second,
+                                              0, false);
+            }
         }
 
         // Note that the instance and its parents are still valid.
         // we delete from the bottom of the asset graph upwards.
+        // If any instance properties are controlled by a datainput,
+        // remove control first
+        if (IsControlled(instance))
+            RemoveAllControlForInstance(instance);
+
         m_DataCore.DeleteInstance(instance);
+
         if (m_AssetGraph.IsExist(instance))
             m_AssetGraph.RemoveNode(instance);
 
         for (size_t idx = 0; idx < theDeleteDependentInstances.size(); ++idx) {
             QT3DS_ASSERT(!m_AssetGraph.IsExist(theDeleteDependentInstances[idx]));
+            if (IsControlled(theDeleteDependentInstances[idx]))
+                RemoveAllControlForInstance(theDeleteDependentInstances[idx]);
+
             m_DataCore.DeleteInstance(theDeleteDependentInstances[idx]);
         }
     }
@@ -1372,54 +1445,175 @@ public:
         }
         SetName(theMaterial, materialName);
     }
-
+    // Set a property in an instance to be controlled by datainput.
+    // We build two strings here. "Controlled element - controlled property" -string
+    // goes to controlling datainput and details all elements and their properties
+    // that a specified datainput should control. "Controlling datanode - controlled
+    // property" -string is specific for this (=controlled) instance and contains
+    // the path of controlling datanode and the controlled property(/-ies).
     void SetInstancePropertyControlled(TInstanceHandle instance, CString instancepath,
                                        TPropertyHandle propName, TInstanceHandle controller,
                                        bool controlled) override
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
+        IObjectReferenceHelper* objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
 
         // get the name of controlled property
         auto metadataHandle = m_MetaData.GetMetaDataProperty(instance, propName);
         auto metadata = m_MetaData.GetMetaDataPropertyInfo(metadataHandle);
         const wchar_t *propname = metadata->m_Name.wide_str();
-        qt3dsdm::SValue controlledProperty = std::make_shared<CDataStr>(propname);
 
-        // get existing string of controlled elements and properties from controlling
-        // datainput
-        qt3dsdm::SValue controlledElemProp;
-        m_DataCore.GetInstancePropertyValue(
-            controller, theDefinitions.m_DataInput.m_ControlledElemProp, controlledElemProp);
-        QString controlledElemPropStr = controlledElemProp.toQVariant().toString();
+        SValue controlledProperty;
+        Option<SValue> controlledElemProp;
+        CString controlledElemPropStr;
+        SValue controllerName;
 
-        // build the controlled element - controlled property string specific for this element
-        instancepath.append(" ");
-        instancepath.append(propname);
-        instancepath.append(" ");
+        // Get the name of controller instance and build controller - controlled property
+        // string.
+        // If we are setting control on, we have incoming controller handle from
+        // dialog.
+        // If control is simply being set off from UI toggle, we need to get the current
+        // controlling instance from a property string held by this instance, for the purposes
+        // of removing the control target from the controller datainput
+        if (controlled) {
+            // controller instance must be valid when setting control to true
+            Q_ASSERT(controller != 0);
+            // get existing string of controlled elements and properties from controlling
+            // datainput
+            controlledElemProp = GetInstancePropertyValue(
+                controller, theDefinitions.m_DataInput.m_ControlledElemProp);
+            controlledElemPropStr = get<TDataStrPtr>(*controlledElemProp)->GetData();
 
-        // If property was set to controlled, append element - property string to the list
-        // held by the controlling datainput. Otherwise, remove this element-property -pair from it.
-        if (controlled)
-            controlledElemPropStr.append(instancepath.toQString());
-        else
-            controlledElemPropStr.remove(instancepath.toQString());
+            // build the controlled element - controlled property string specific for this element
+            instancepath.append(" ");
+            instancepath.append(propname);
+            instancepath.append(" ");
 
-        qCDebug(qt3ds::TRACE_INFO) << "SetInstance datainput controlledelemprop: instance "
-            << controller
-            << " property " << theDefinitions.m_DataInput.m_ControlledElemProp.m_Property
-            << " value " << controlledElemPropStr;
+            // append this element - property pair to existing items that datainput already controls
+            controlledElemPropStr.append(instancepath);
 
-        controlledElemProp = std::make_shared<CDataStr>(controlledElemPropStr.toStdWString().c_str());
+            // build the controller datainput - controlled property string
+            CString controlledElemStr = objReferenceHelper->GetObjectReferenceString(
+                    m_Doc.GetSceneInstance(), CRelativePathTools::EPATHTYPE_GUID, controller);
+            controlledElemStr.append(" ");
+            controlledElemStr.append(metadata->m_Name.c_str());
+
+            controlledProperty = std::make_shared<CDataStr>(controlledElemStr);
+            // Text element -specific: show controlling datainput name in brackets
+            // as the textstring contents for clarity
+            controllerName = std::make_shared<CDataStr>("[" + m_Bridge.GetName(controller) + "]");
+        } else {
+            // TODO: this is Text element-specific at the moment
+            // Get controller - property -pair for this element
+            Option<SValue> currentControlledProperty = GetInstancePropertyValue(
+                instance, theDefinitions.m_Text.m_ControlledProperty);
+
+            TDataStrPtr theNamePtr(get<TDataStrPtr>(*currentControlledProperty));
+            CString controllerNameStr = theNamePtr->GetData();
+
+            // Check if this property has a controlling datainput before trying
+            // to delete it from the list of controlled properties
+            if (controllerNameStr.size()) {
+                // get the controlling datainput name only
+                controllerNameStr = controllerNameStr.substr(0, controllerNameStr.find(" "));
+
+                bool theFullResolvedFlag;
+                CRelativePathTools::EPathType type;
+                controller = CRelativePathTools::FindAssetInstanceByObjectPath(
+                    &m_Doc, m_Doc.GetActiveRootInstance(), controllerNameStr,
+                    type, theFullResolvedFlag, objReferenceHelper);
+
+                // get existing string of controlled elements and properties from controlling
+                // datainput
+                controlledElemProp = GetInstancePropertyValue(
+                    controller, theDefinitions.m_DataInput.m_ControlledElemProp);
+                controlledElemPropStr = get<TDataStrPtr>(*controlledElemProp)->GetData();
+                // build the string for this element-property -pair and remove it
+                // from items that datanode controls
+                instancepath.append(" ");
+                instancepath.append(metadata->m_Name.c_str());
+                instancepath.append(" ");
+                controlledElemPropStr.Replace(instancepath, "");
+
+                // Set controller - property -string empty for this element.
+                // We need to explicitly set controlledProperty with an empty string initializer,
+                // otherwise it will have type "None" instead of "String".
+                // TODO: for now only a single textstring property can be controlled. For
+                // control of several properties in a single element, we must only remove
+                // a specific controller - property pair from controlledProperty string, not all.
+                controlledProperty = std::make_shared<CDataStr>(CString());
+
+                // Set the textstring content to default when disabling datainput control
+                // TODO: restore the previous text content prior to setting it to controlled
+                controllerName = theDefinitions.m_Text.m_TextString.m_DefaultValue.getValue();
+            } else {
+                // We are trying to turn control off for property that had no existing control.
+                // This might happen when user toggles control on and off without setting
+                // the controller from the selection dialog.
+                // Nothing to do except to make sure that we set the textstring to default and
+                // controlledProperty to an empty string.
+                controlledProperty = std::make_shared<CDataStr>(CString());
+                controllerName = theDefinitions.m_Text.m_TextString.m_DefaultValue.getValue();
+
+                m_DataCore.SetInstancePropertyValue(instance,
+                                                    theDefinitions.m_Text.m_ControlledProperty,
+                                                    controlledProperty);
+                SetInstancePropertyValue(instance,
+                                         theDefinitions.m_Text.m_TextString,
+                                         controllerName);
+                // early return to avoid trying to set property in the non-existent
+                // controller instance
+                return;
+            }
+        }
+
+        // Set properties both in the controller and the controlled instance
+        SValue finalControlledElemProp = std::make_shared<CDataStr>(controlledElemPropStr);
+
         // For DataInput and Alias, property values are set through datacore.
         // Set the newly built controlledelemprop string for the controlling datainput
         m_DataCore.SetInstancePropertyValue(controller,
                                             theDefinitions.m_DataInput.m_ControlledElemProp,
-                                            controlledElemProp);
+                                            finalControlledElemProp);
         // Set the controlledproperty string in the controlled element
         // TODO: For the moment this is Text element -specific only
         m_DataCore.SetInstancePropertyValue(instance,
                                             theDefinitions.m_Text.m_ControlledProperty,
                                             controlledProperty);
+
+        // Show the controller name also in Inspector Text field as visual reminder.
+        // DataInput does not set any values to target in Editor; we need to show something
+        // to indicate where the values will be coming from during animation so we use
+        // controller name in brackets.
+        // Do not set this value directly via datacore so that the value updates in Studio UI.
+        if (m_Bridge.IsTextInstance(instance)) {
+            SetInstancePropertyValue(instance,
+                                     theDefinitions.m_Text.m_TextString,
+                                     controllerName);
+        }
+    }
+
+    // Remove datainput control of all properties of this instance,
+    // for example when deleting the entire instance
+    void RemoveAllControlForInstance(TInstanceHandle instance)
+    {
+        SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
+        IObjectReferenceHelper* objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
+
+        // TODO: text element-specific. Also, only removes a single controller-property
+        // pair as currently only textstring can be controlled. For generic
+        // implementation we need to iterate through all controller-property pairs
+        // and remove control for each of them separately (a single instance can have
+        // several different datainputs each controlling a single or multiple properties
+        // i.e. one-to-many mapping).
+        SetInstancePropertyControlled(instance,
+                                      objReferenceHelper->GetObjectReferenceString(
+                                          m_Doc.GetSceneInstance(),
+                                          CRelativePathTools::EPATHTYPE_GUID,
+                                          instance),
+                                      theDefinitions.m_Text.m_TextString,
+                                      0,
+                                      false);
     }
 
     // Normal way in to the system.
@@ -2385,8 +2579,17 @@ public:
         // messages.
         // The timeline, for instance, requires that before a create operation happens all remove
         // operations have happened.
-
+        QList<CString> instancePaths;
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
+        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
+            instancePaths.push_back(
+                m_Doc.GetDataModelObjectReferenceHelper()->GetObjectReferenceString(
+                    m_Doc.GetSceneInstance(),
+                    CRelativePathTools::EPATHTYPE_GUID,
+                    theInstance));
+        }
+
         for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
             m_AssetGraph.RemoveChild(sortableList[idx], false);
         }
@@ -2415,13 +2618,71 @@ public:
             else if (inInsertType == DocumentEditorInsertType::LastChild)
                 m_AssetGraph.MoveTo(theInstance, inDest, COpaquePosition::LAST);
         }
+
+        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
+            if (inInsertType == DocumentEditorInsertType::NextSibling)
+                theInstance = sortableList[end - idx - 1];
+            if (IsControlled(theInstance))
+                UpdateDataInputTarget(theInstance, instancePaths[idx]);
+        }
     }
 
+    // Called when controlled instance is moved inside scene graph and
+    // controlling datanode must update the instance path
+    void UpdateDataInputTarget(TInstanceHandle instance, CString oldPath)
+    {
+        SComposerObjectDefinitions &objDefinitions(m_Bridge.GetObjectDefinitions());
+        // TODO: Text-element specific code
+        Option<SValue> currentControlledProperty = GetInstancePropertyValue(
+            instance, objDefinitions.m_Text.m_ControlledProperty);
+        CString controllerNameStr
+            = (get<TDataStrPtr>(*currentControlledProperty))->GetData();
+
+        Q_ASSERT(controllerNameStr.size());
+
+        // get the controlling datainput name only
+        controllerNameStr = controllerNameStr.substr(0, controllerNameStr.find(" "));
+
+        bool theFullResolvedFlag;
+        CRelativePathTools::EPathType type;
+        TInstanceHandle controller = CRelativePathTools::FindAssetInstanceByObjectPath(
+            &m_Doc, m_Doc.GetActiveRootInstance(), controllerNameStr,
+            type, theFullResolvedFlag, m_Doc.GetDataModelObjectReferenceHelper());
+
+        // get existing string of controlled elements and properties from controlling
+        // datainput and replace old path with new
+        Option<SValue> controlledElemProp = GetInstancePropertyValue(
+            controller, objDefinitions.m_DataInput.m_ControlledElemProp);
+        CString controlledElemPropStr = get<TDataStrPtr>(*controlledElemProp)->GetData();
+
+        CString currentInstancePath = m_Doc.GetDataModelObjectReferenceHelper()
+            ->GetObjectReferenceString(m_Doc.GetSceneInstance(),
+                                       CRelativePathTools::EPATHTYPE_GUID,
+                                       instance);
+        controlledElemPropStr.Replace(oldPath, currentInstancePath);
+
+        // Set the new controlled properties string to controlling datainput
+        SValue finalControlledElemProp = std::make_shared<CDataStr>(controlledElemPropStr);
+
+        m_DataCore.SetInstancePropertyValue(controller,
+                                            objDefinitions.m_DataInput.m_ControlledElemProp,
+                                            finalControlledElemProp);
+    }
     Qt3DSDMInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) override
     {
         if (inInstances.empty())
             return Qt3DSDMInstanceHandle();
 
+        // TODO: For now, we need to break control relationship for instances that are
+        // included in the newly made component as the binding goes wrong during
+        // instance "copy to mem - delete - insert" sequence needed for component creation.
+        // This means that at the moment, datainput cannot control a property
+        // within a component instance.
+        for (size_t idx = 0; idx < inInstances.size(); idx++) {
+            if (IsControlled(inInstances[idx]))
+                RemoveAllControlForInstance(inInstances[idx]);
+        }
         qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         // Do this in reverse order.
         // first add new component.

@@ -375,6 +375,8 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
         Q3DStudio::CString propertyNameStr = metaProperty.m_Name.c_str();
         // is this property controlled in this element?
         item->m_controlled = currPropValStr.contains(propertyNameStr.toQString());
+        // This works for now because Text element textstring is only controllable property so far.
+        item->m_controlled = currPropValStr.contains(propertyNameStr.toQString());
 
         m_controlledToggleConnection = signalProvider->ConnectControlledToggled(
             std::bind(&InspectorControlModel::updateControlledToggleState,
@@ -916,7 +918,8 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
             ->SetInstancePropertyValue(instance, handle, newSelectedData);
 }
 
-void InspectorControlModel::setPropertyControlled(long instance, int property, bool controlled)
+void InspectorControlModel::setPropertyControllerInstance(long instance, int property,
+                                                  long controllerInstance, bool controlled)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
@@ -926,25 +929,34 @@ void InspectorControlModel::setPropertyControlled(long instance, int property, b
     Q3DStudio::CString instancepath = Q3DStudio::CString(
         objRefHelper->GetObjectReferenceString(doc->GetSceneInstance(),
                                                CRelativePathTools::EPATHTYPE_GUID, instance));
-    // TODO this is test code, hardwired for item named DataInput
-    // We need to have the datainput handle or name as input to this
-    // function, coming from dialog
-    Q3DStudio::CString controller = Q3DStudio::CString("this.DataInput");
-
-    bool theFullResolvedFlag;
-    CRelativePathTools::EPathType type;
-    qt3dsdm::Qt3DSDMInstanceHandle controllerhandle
-        = CRelativePathTools::FindAssetInstanceByObjectPath(
-            doc, doc->GetActiveRootInstance(), controller,
-            type, theFullResolvedFlag, objRefHelper);
+    Q_ASSERT(instancepath.size());
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property Controlled"))
         ->SetInstancePropertyControlled(instance, instancepath, property,
-                                        controllerhandle, controlled);
+                                        controllerInstance, controlled);
+}
 
+void InspectorControlModel::setPropertyControlled(long instance, int property, bool controlled)
+{
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto signalSender
         = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalSender();
     signalSender->SendControlledToggled(instance, property);
+    // If control is toggled on, we do not need to do anything here except toggle the UI icon,
+    // and set the controller to "None" as DataInput selector dialog will later call
+    // setPropertyControllerInstance() and set the correct controller handle and name.
+    // If we are setting control off, no need to find out the datainput that controls this pair.
+    // SetInstancePropertyControlled() will get the current controller from controlledProperty
+    // of this item and removes control.
+    if (controlled) {
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+            *g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
+            ->SetInstancePropertyValue(
+                instance, property, std::make_shared<qt3dsdm::CDataStr>(
+                    Q3DStudio::CString::fromQString(tr("[None]"))));
+    } else {
+        setPropertyControllerInstance(instance, property, 0, controlled);
+    }
 }
 
 void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool animated)

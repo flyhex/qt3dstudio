@@ -42,6 +42,7 @@
 #include "IDocumentEditor.h"
 #include "ImageChooserModel.h"
 #include "ImageChooserView.h"
+#include "DataInputChooserView.h"
 #include "MeshChooserView.h"
 #include "TextureChooserView.h"
 #include "InspectableBase.h"
@@ -458,6 +459,60 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     });
 
     return m_objectReferenceView;
+}
+
+QObject *InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (!m_objectReferenceModel) {
+        m_objectReferenceModel
+            = new ObjectListModel(g_StudioApp.GetCore(), doc->GetActiveRootInstance(), this);
+    }
+    if (!m_dataInputChooserView)
+        m_dataInputChooserView = new DataInputChooserView(this);
+    m_dataInputChooserView->setModel(m_objectReferenceModel);
+
+    // TODO: for now datainput chooser can only be evoked from text element.
+    // Remove this restriction when other element types can also be controlled
+    if (doc->GetStudioSystem()->GetClientDataModelBridge()
+        ->GetObjectType(instance) == OBJTYPE_TEXT) {
+        QVector<EStudioObjectType> exclude;
+        exclude << OBJTYPE_ALIAS << OBJTYPE_BEHAVIOR << OBJTYPE_MODEL
+            << OBJTYPE_EFFECT << OBJTYPE_GUIDE << OBJTYPE_IMAGE << OBJTYPE_LAYER
+            << OBJTYPE_MATERIAL << OBJTYPE_REFERENCEDMATERIAL << OBJTYPE_CAMERA
+            << OBJTYPE_LIGHT << OBJTYPE_GROUP << OBJTYPE_TEXT
+            << OBJTYPE_COMPONENT << OBJTYPE_SLIDE << OBJTYPE_RENDERPLUGIN
+            << OBJTYPE_CUSTOMMATERIAL << OBJTYPE_PATH << OBJTYPE_PATHANCHORPOINT
+            << OBJTYPE_SUBPATH << OBJTYPE_SOUND << OBJTYPE_LIGHTMAPS;
+        m_objectReferenceModel->excludeObjectTypes(exclude);
+    } else {
+        m_objectReferenceModel->excludeObjectTypes(QVector<EStudioObjectType>());
+    }
+
+    disconnect(m_dataInputChooserView, nullptr, nullptr, nullptr);
+
+    IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
+    if (objRefHelper) {
+        qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
+        qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
+        m_dataInputChooserView->selectAndExpand(refInstance);
+    }
+
+    showBrowser(m_dataInputChooserView, point);
+
+    connect(m_dataInputChooserView, &DataInputChooserView::selectionChanged,
+            this, [this, doc, handle, instance] {
+        auto selectedItem = m_dataInputChooserView->selectedHandle();
+        qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
+
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
+            ->SetInstancePropertyValue(instance, handle, value);
+
+        m_inspectorControlModel->setPropertyControllerInstance(instance, handle,
+                                                               selectedItem, true);
+    });
+
+    return m_dataInputChooserView;
 }
 
 void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)

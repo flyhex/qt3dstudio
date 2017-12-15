@@ -207,7 +207,7 @@ Rectangle {
                                                     _inspectorModel.setPropertyControlled(
                                                                 model.modelData.instance,
                                                                 model.modelData.handle,
-                                                                !model.modelData.controlled)
+                                                                !model.modelData.controlled);
                                                 } else {
                                                     const coords = mapToItem(root, mouse.x, mouse.y);
                                                     groupDelegateItem.showContextMenu(coords);
@@ -298,8 +298,12 @@ Rectangle {
                                                 return renderableDropDown;
                                             if (modelData.propertyType === AdditionalMetaDataType.Mesh)
                                                 return meshChooser;
+                                            // Show DataInput selector if this item is controlled
                                             if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
-                                                return multiLine;
+                                                if (modelData.controlled)
+                                                    return datainputChooser;
+                                                else
+                                                    return multiLine;
                                             if (modelData.propertyType === AdditionalMetaDataType.Font)
                                                 return comboDropDown;
                                             if (modelData.propertyType === AdditionalMetaDataType.Texture)
@@ -795,6 +799,21 @@ Rectangle {
             value: parent.modelData.value
             onShowBrowser: {
                 activeBrowser = _inspectorView.showObjectReference(handle, instance,
+                                                   mapToGlobal(width, 0))
+            }
+        }
+    }
+
+    Component {
+        id: datainputChooser
+
+        HandlerGenericChooser {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property variant values: parent.modelData.values
+            value: parent.modelData.value
+            onShowBrowser: {
+                activeBrowser = _inspectorView.showDataInputChooser(handle, instance,
                                                    mapToGlobal(width, 0))
             }
         }

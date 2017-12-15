@@ -277,6 +277,7 @@ SOURCES += \
     Palettes/Inspector/InspectorControlModel.cpp \
     Palettes/Inspector/ObjectListModel.cpp \
     Palettes/Inspector/ObjectBrowserView.cpp \
+    Palettes/Inspector/DataInputChooserView.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
     Palettes/Inspector/MouseHelper.cpp \
     Palettes/Project/ProjectView.cpp \
@@ -409,6 +410,7 @@ HEADERS += \
     Palettes/Inspector/FileChooserView.h \
     Palettes/Inspector/FileChooserModel.h \
     Palettes/Inspector/TextureChooserView.h \
+    Palettes/Inspector/DataInputChooserView.h \
     Palettes/Inspector/TabOrderHandler.h \
     Palettes/Inspector/MouseHelper.h \
     Palettes/Project/ProjectView.h \
