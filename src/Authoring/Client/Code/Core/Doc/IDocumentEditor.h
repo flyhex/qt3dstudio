@@ -282,7 +282,7 @@ public:
         theInstances.push_back(inInstance);
         RearrangeObjects(theInstances, inDest, inInsertType);
     }
-
+    virtual void UpdateDataInputTarget(TInstanceHandle instance, CString oldPath) = 0;
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
 

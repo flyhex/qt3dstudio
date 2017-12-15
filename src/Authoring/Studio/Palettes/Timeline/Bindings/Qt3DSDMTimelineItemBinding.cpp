@@ -346,6 +346,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
         return;
     }
 
+    Q3DStudio::CString oldPath = GetObjectPath();
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
         QString theTitle = QObject::tr("Rename Object Error");
@@ -355,8 +356,12 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
                     theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
         if (theUserChoice == QMessageBox::Yes) {
             // Set with the unique name
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
-                    ->SetName(m_DataHandle, inName, true);
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                *m_TransMgr->GetDoc(), QObject::tr("Set Name"))
+                ->SetName(m_DataHandle, inName, true);
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                *m_TransMgr->GetDoc(), QObject::tr("Update DataInput target path"))
+                ->UpdateDataInputTarget(m_DataHandle, oldPath);
             return;
         }
     }
@@ -364,9 +369,13 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
     Qt3DSDMPropertyHandle theNamePropHandle =
             m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
                                                                                     L"name");
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
             ->SetInstancePropertyValue(m_DataHandle, theNamePropHandle,
                                        std::make_shared<CDataStr>(inName));
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(),
+                                      QObject::tr("Update DataInput target path"))
+            ->UpdateDataInputTarget(m_DataHandle, oldPath);
 }
 
 ITimelineItem *Qt3DSDMTimelineItemBinding::GetTimelineItem()

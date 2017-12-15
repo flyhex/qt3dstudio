@@ -2628,10 +2628,12 @@ public:
         }
     }
 
-    // Called when controlled instance is moved inside scene graph and
+    // Called when controlled instance is renamed or moved inside scene graph and
     // controlling datanode must update the instance path
-    void UpdateDataInputTarget(TInstanceHandle instance, CString oldPath)
+    void UpdateDataInputTarget(TInstanceHandle instance, CString oldPath) override
     {
+        if (!IsControlled(instance))
+            return;
         SComposerObjectDefinitions &objDefinitions(m_Bridge.GetObjectDefinitions());
         // TODO: Text-element specific code
         Option<SValue> currentControlledProperty = GetInstancePropertyValue(
