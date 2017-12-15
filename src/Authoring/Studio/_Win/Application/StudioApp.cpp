@@ -139,10 +139,6 @@ int main(int argc, char *argv[])
 #include <QtWidgets/qapplication.h>
 #include <QtCore/qsettings.h>
 
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "..\Build\versionnumber.h"
-#endif
-
 #include "Qt3DSDESKey.h" // g_DESKey
 
 #include "Core.h"
