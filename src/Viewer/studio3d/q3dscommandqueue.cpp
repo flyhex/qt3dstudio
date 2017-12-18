@@ -138,31 +138,32 @@ ElementCommand &CommandQueue::queueRequest(const QString &elementPath, CommandTy
 
 void CommandQueue::copyCommands(const CommandQueue &fromQueue)
 {
-    m_visibleChanged = fromQueue.m_visibleChanged;
-    m_scaleModeChanged = fromQueue.m_scaleModeChanged;
-    m_shadeModeChanged = fromQueue.m_shadeModeChanged;
-    m_showRenderStatsChanged = fromQueue.m_showRenderStatsChanged;
-    m_matteColorChanged = fromQueue.m_matteColorChanged;
-    m_sourceChanged = fromQueue.m_sourceChanged;
-    m_globalAnimationTimeChanged = fromQueue.m_globalAnimationTimeChanged;
+    m_visibleChanged = m_visibleChanged || fromQueue.m_visibleChanged;
+    m_scaleModeChanged = m_scaleModeChanged || fromQueue.m_scaleModeChanged;
+    m_shadeModeChanged = m_shadeModeChanged || fromQueue.m_shadeModeChanged;
+    m_showRenderStatsChanged = m_showRenderStatsChanged || fromQueue.m_showRenderStatsChanged;
+    m_matteColorChanged = m_matteColorChanged || fromQueue.m_matteColorChanged;
+    m_sourceChanged = m_sourceChanged || fromQueue.m_sourceChanged;
+    m_globalAnimationTimeChanged
+            = m_globalAnimationTimeChanged || fromQueue.m_globalAnimationTimeChanged;
 
-    if (m_visibleChanged)
+    if (fromQueue.m_visibleChanged)
        m_visible = fromQueue.m_visible;
-    if (m_scaleModeChanged)
+    if (fromQueue.m_scaleModeChanged)
        m_scaleMode = fromQueue.m_scaleMode;
-    if (m_shadeModeChanged)
+    if (fromQueue.m_shadeModeChanged)
        m_shadeMode = fromQueue.m_shadeMode;
-    if (m_showRenderStatsChanged)
+    if (fromQueue.m_showRenderStatsChanged)
        m_showRenderStats = fromQueue.m_showRenderStats;
-    if (m_matteColorChanged)
+    if (fromQueue.m_matteColorChanged)
        m_matteColor = fromQueue.m_matteColor;
-    if (m_sourceChanged)
+    if (fromQueue.m_sourceChanged)
        m_source = fromQueue.m_source;
-    if (m_globalAnimationTimeChanged)
+    if (fromQueue.m_globalAnimationTimeChanged)
         m_globalAnimationTime = fromQueue.m_globalAnimationTime;
 
-    m_size = 0;
-
+    // Pending queue may be synchronized multiple times between queue processing, so let's append
+    // to the existing queue rather than clearing it.
     for (int i = 0; i < fromQueue.m_size; i++) {
         const ElementCommand &source = fromQueue.commandAt(i);
         switch (source.m_commandType) {

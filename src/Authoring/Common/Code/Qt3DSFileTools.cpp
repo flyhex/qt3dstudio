@@ -117,7 +117,7 @@ void CFilePath::normalizeAndSetPath(const QString &path)
 
     if (ret.contains(identifierSep)) {
         int i = ret.indexOf(identifierSep);
-        m_identifier = ret.mid(i);
+        m_identifier = ret.mid(i + 1);
         ret.truncate(i);
     }
 
@@ -126,7 +126,7 @@ void CFilePath::normalizeAndSetPath(const QString &path)
 
 CFilePath CFilePath::GetDirectory() const
 {
-    return CFilePath(dir().canonicalPath());
+    return CFilePath(path());
 }
 
 CString CFilePath::GetFileStem() const
@@ -388,13 +388,11 @@ QSharedPointer<QFile> SFile::OpenForWrite(const CFilePath &inFullPath, FileOpenF
     bool create = (QT3DSU32)((fileFlags & FileOpenFlagValues::Create)) != 0;
 
     QSharedPointer<QFile> file(new QFile(inFullPath.filePath()));
-    if (!create || !file->exists() || !file->open(mode)) {
+    if ((!create && !file->exists()) || !file->open(mode))
         return nullptr;
-    }
     // If we aren't truncating, then we seek to the end to append.
-    if (truncate == false && open == true) {
+    if (truncate == false && open == true)
         file->seek(file->size());
-    }
     return file;
 }
 

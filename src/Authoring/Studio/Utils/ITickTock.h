@@ -30,10 +30,6 @@
 #ifndef ITICKTOCKH
 #define ITICKTOCKH
 
-namespace Q3DStudio {
-class CString;
-}
-
 namespace qt3dsdm {
 class ISignalConnection;
 }
@@ -64,7 +60,7 @@ public:
     // The callback, however, (inTickTockProc) will be activated solely from the UI thread.
     virtual std::shared_ptr<qt3dsdm::ISignalConnection>
     AddTimer(unsigned long inTime, bool inIsPeriodic, TTickTockProc inTickTockProc,
-             const Q3DStudio::CString &inName) = 0;
+             const QString &inName) = 0;
 
     // Called from UI thread to process all of the messages
     // that have happened in the timer thread.

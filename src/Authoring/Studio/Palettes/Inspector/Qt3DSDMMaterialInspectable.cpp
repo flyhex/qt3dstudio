@@ -68,11 +68,11 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
         using Q3DStudio::CString;
         using Q3DStudio::CFilePath;
         m_CommitListener =
-            CREATE_LISTENER(CGenericEditCommitListener, SMaterialTypeDropDown, OnDataCommit);
+                CREATE_LISTENER(CGenericEditCommitListener, SMaterialTypeDropDown, OnDataCommit);
         AddCommitListener(m_CommitListener);
         m_FileListPtr = m_Doc.GetDirectoryWatchingSystem()->AddDirectory(
-            m_Doc.GetDocumentDirectory().toQString(),
-            std::bind(&SMaterialTypeDropDown::OnFilesChanged, this, std::placeholders::_1));
+                    m_Doc.GetDocumentDirectory().toQString(),
+                    std::bind(&SMaterialTypeDropDown::OnFilesChanged, this, std::placeholders::_1));
     }
 
     vector<SMaterialEntry>::iterator GetMaterialEntry(const Q3DStudio::CString &inRelativePath)
@@ -100,17 +100,17 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
         for (size_t idx = 0, end = inFileModificationList.size(); idx < end; ++idx) {
             const Q3DStudio::SFileModificationRecord &theRecord = inFileModificationList[idx];
             Q3DStudio::CFilePath relativePath(Q3DStudio::CFilePath::GetRelativePathFromBase(
-                m_Doc.GetDocumentDirectory(), theRecord.m_File));
+                                                  m_Doc.GetDocumentDirectory(), theRecord.m_File));
             Q3DStudio::CString extension = relativePath.GetExtension();
             if (extension.CompareNoCase("material")) {
                 switch (theRecord.m_ModificationType) {
                 case Q3DStudio::FileModificationType::Created:
                 case Q3DStudio::FileModificationType::Modified: {
                     SMaterialEntry &theEntry =
-                        *GetOrCreateMaterialEntry(Q3DStudio::CString(relativePath));
+                            *GetOrCreateMaterialEntry(Q3DStudio::CString(relativePath));
                     theEntry.m_Name =
-                        m_Doc.GetDocumentReader().GetCustomMaterialName(
-                            theRecord.m_File.toCString());
+                            m_Doc.GetDocumentReader().GetCustomMaterialName(
+                                theRecord.m_File.toCString());
                 } break;
                 case Q3DStudio::FileModificationType::Destroyed: {
                     vector<SMaterialEntry>::iterator theEntry = GetMaterialEntry(relativePath);
@@ -158,7 +158,8 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
                                    Qt3DSDMInstanceHandle instance)
     {
         using namespace Q3DStudio;
-        SCOPED_DOCUMENT_EDITOR(*inDoc, QObject::tr("Set Property"))->SetMaterialType(instance, inNewType);
+        SCOPED_DOCUMENT_EDITOR(*inDoc, QObject::tr("Set Property"))->SetMaterialType(instance,
+                                                                                     inNewType);
     }
 
     void OnDataCommit()
@@ -173,30 +174,29 @@ struct SMaterialTypeDropDown : public CGenericComboDropDown
                     selectedType = m_Materials[matIdx].m_RelativePath;
             }
             // Fire a command to do this later because we will get screwed if we don't as we will be
-            // deleted
-            // during this process.
+            // deleted during this process.
             g_StudioApp.GetCore()->GetDispatch()->FireOnAsynchronousCommand(
-                std::bind(&DoChangeObjectType, &m_Doc, selectedType, m_Instance));
+                        std::bind(&DoChangeObjectType, &m_Doc, selectedType, m_Instance));
         }
     }
 };
 
 Qt3DSDMMaterialInspectorGroup::Qt3DSDMMaterialInspectorGroup(
         CStudioApp &inApp,
-        const Q3DStudio::CString &inName,
+        const QString &inName,
         Qt3DSDMInspectable &inInspectable,
         long inIndex)
-    : Qt3DSDMInspectorGroup(inApp, inName.toQString(), inInspectable, inIndex)
+    : Qt3DSDMInspectorGroup(inApp, inName, inInspectable, inIndex)
 {
 }
 
 struct SQt3DSDMMaterialInspectorGroup : public Qt3DSDMMaterialInspectorGroup
 {
-    SQt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const Q3DStudio::CString &inName,
-                                 Qt3DSDMInspectable &inInspectable, long inIndex)
+    SQt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const QString &inName,
+                                   Qt3DSDMInspectable &inInspectable, long inIndex)
         : Qt3DSDMMaterialInspectorGroup(inApp, inName, inInspectable, inIndex)
     {
-        Q3DStudio::CString theMaterialGroupName = L"Material";
+        QString theMaterialGroupName = QStringLiteral("Material");
         m_isMaterialGroup = (inName == theMaterialGroupName);
     }
 
@@ -211,11 +211,10 @@ private:
 
 CInspectorGroup *Qt3DSDMMaterialInspectable::GetGroup(long inIndex)
 {
-    Q3DStudio::CString theGroupName = GetGroupName(inIndex);
-    Q3DStudio::CString theMaterialGroupName = L"Material";
+    QString theGroupName = GetGroupName(inIndex);
 
     Qt3DSDMInspectorGroup *theGroup =
-        new SQt3DSDMMaterialInspectorGroup(m_App, theGroupName, *this, inIndex);
+            new SQt3DSDMMaterialInspectorGroup(m_App, theGroupName, *this, inIndex);
 
     TMetaDataPropertyHandleList theProperties = GetGroupProperties(inIndex);
     size_t thePropertyCount = theProperties.size();

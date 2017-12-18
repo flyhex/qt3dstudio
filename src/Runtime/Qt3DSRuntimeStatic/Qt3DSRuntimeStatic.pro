@@ -3,12 +3,13 @@ TARGET = qt3dsruntimestatic
 CONFIG += staticlib
 include(../commoninclude.pri)
 
-!boot2qt:!integrity {
+!boot2qt:!integrity:!ios {
     RESOURCES += ../res.qrc
 }
 
 linux {
     DEFINES += _POSIX_C_SOURCE=199309L
+    QMAKE_LFLAGS += -lrt
 }
 
 QT += qml
@@ -65,6 +66,7 @@ SOURCES += \
     ../Source/Runtime/Source/Qt3DSSlideSystem.cpp \
     ../Source/Runtime/Source/Qt3DSTimePolicy.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.cpp \
+    ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDataInput.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDynamicObject.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderEffect.cpp \
@@ -291,6 +293,7 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSLuaIncludes.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCustomMaterial.h \
+    ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDataInput.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDynamicObject.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderEffect.h \
@@ -506,7 +509,7 @@ macos: SOURCES += \
     ../Source/Qt3DSFoundation/Source/foundation/linux/Qt3DSLinuxThread.cpp \
     ../Source/Qt3DSFoundation/Source/foundation/macosx/Qt3DSUnixTime.cpp
 
-linux|integrity {
+linux|integrity|qnx {
 SOURCES += \
     ../Source/Qt3DSFoundation/Source/foundation/linux/Qt3DSLinuxAtomic.cpp \
     ../Source/Qt3DSFoundation/Source/foundation/linux/Qt3DSLinuxFPU.cpp \
@@ -692,11 +695,13 @@ HEADERS += \
 # Runtime
 HEADERS += \
     ../Source/Runtime/Include/RuntimePrefix.h \
-    ../Source/Runtime/Include/q3dsqmlscript.h
+    ../Source/Runtime/Include/q3dsqmlscript.h \
+    ../Source/Runtime/Include/q3dsqmlbehavior.h
 
 SOURCES += \
     ../Source/Runtime/Source/RuntimePrefix.cpp \
-    ../Source/Runtime/Source/q3dsqmlscript.cpp
+    ../Source/Runtime/Source/q3dsqmlscript.cpp \
+    ../Source/Runtime/Source/q3dsqmlbehavior.cpp
 
 # System
 SOURCES += \

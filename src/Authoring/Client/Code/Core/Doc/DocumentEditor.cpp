@@ -86,6 +86,7 @@
 #include <QtQml/qqmlcomponent.h>
 #include <QtCore/qdir.h>
 #include <unordered_set>
+#include "Runtime/Include/q3dsqmlbehavior.h"
 
 extern "C" {
 #include "lua.h"
@@ -231,6 +232,7 @@ public:
                 theSystem->AddDirectory(m_Doc.GetDocumentDirectory().toQString(),
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
+        qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
     }
     virtual ~CDocEditor()
     {
@@ -514,17 +516,18 @@ public:
     bool IsPropertyLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
     {
         if (IsInstance(inInstance)) {
-            AdditionalMetaDataType::Value thePropertyMetaData =
-                m_PropertySystem.GetAdditionalMetaDataType(inInstance, inProperty);
             Qt3DSDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
             if (theAssociatedSlide.Valid() && m_SlideSystem.IsMasterSlide(theAssociatedSlide)) {
-                SValue theValue;
-                if (thePropertyMetaData == AdditionalMetaDataType::Image) {
-                    qt3dsdm::Qt3DSDMInstanceHandle theInstance =
-                        GetImageInstanceForProperty(inInstance, inProperty);
-                    if (theInstance)
-                        return IsPropertyLinked(theInstance, m_Bridge.GetSourcePathProperty());
-                    return true; // No image means the property is linked.
+                if (inProperty.Valid()) {
+                    AdditionalMetaDataType::Value thePropertyMetaData =
+                        m_PropertySystem.GetAdditionalMetaDataType(inInstance, inProperty);
+                    if (thePropertyMetaData == AdditionalMetaDataType::Image) {
+                        qt3dsdm::Qt3DSDMInstanceHandle theInstance =
+                            GetImageInstanceForProperty(inInstance, inProperty);
+                        if (theInstance)
+                            return IsPropertyLinked(theInstance, m_Bridge.GetSourcePathProperty());
+                        return true; // No image means the property is linked.
+                    }
                 }
                 return m_SlideSystem.IsPropertyLinked(inInstance, inProperty);
             }
@@ -1011,7 +1014,6 @@ public:
         } else {
             theName = GetName(retval);
         }
-        SetName(retval, theName, true);
         SetTimeRangeToParent(retval);
 
         if (inType == ComposerObjectTypes::Layer) {
@@ -1026,9 +1028,10 @@ public:
                 retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance))
             m_Bridge.GetOrCreateGraphRoot(retval);
 
-        // EnsureUniqueName( retval );
-
-        return FinalizeAddOrDrop(retval, inParent, inInsertType, inPosition, false);
+        TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
+                                                   inPosition, false);
+        SetName(retval, theName, true);
+        return handle;
     }
 
     TCharPtr GetSourcePath(Qt3DSDMInstanceHandle inInstance)
@@ -1193,10 +1196,16 @@ public:
                 QT3DS_ASSERT(false);
                 return;
             }
-            if (m_AssetGraph.IsExist(theInstance))
+            if (m_AssetGraph.IsExist(theInstance)) {
                 RecursiveDeleteInstanceInSceneGraph(theInstance);
-            else
+            } else if (IsInstance(theInstance)) {
+                // When deleting multiple instances that have a parent-descendant
+                // relationship, it is possible that an instance not in asset graph
+                // has already been recursively deleted in this loop.
+                // We cannot do blind delete for out-of-graph items without checking
+                // if they exist.
                 DoDeleteInstance(theInstance);
+            }
         }
     }
 
@@ -2917,21 +2926,8 @@ public:
 
     QString LoadLuaFile(const CFilePath &inFile)
     {
-        QString retval;
-        lua_State *L = lua_newstate(l_alloc, NULL);
-        if (L) {
-            luaL_openlibs(L); /* Load Lua libraries */
-
-            /* Load the file containing the script we are going to run */
-            int status = luaL_loadfile(L, inFile.GetCharStar());
-            if (status) {
-                /* If something went wrong, error message is at the top of */
-                /* the stack */
-                retval.append(lua_tostring(L, -1));
-            }
-            lua_close(L);
-        }
-        return retval;
+        Q_UNUSED(inFile)
+        return QString();
     }
 
     QString LoadScriptFile(const CFilePath &inFile)
@@ -3227,15 +3223,13 @@ public:
                                          DocumentEditorInsertType::Enum inDropType,
                                          long inStartTime) override
     {
-        if (inFullPathToDocument.Find(".lua") != Q3DStudio::CString::ENDOFSTRING) {
-            CLuaDynamicInstanceLoader loader(*this);
-            return LoadDynamicInstance(inFullPathToDocument, inParent, inSlide,
-                                       inDropType, inStartTime, loader, true);
-        } else {
+        TInstanceHandle ret;
+        if (inFullPathToDocument.Find(".qml") != Q3DStudio::CString::ENDOFSTRING) {
             CScriptDynamicInstanceLoader loader(*this);
-            return LoadDynamicInstance(inFullPathToDocument, inParent, inSlide,
+            ret = LoadDynamicInstance(inFullPathToDocument, inParent, inSlide,
                                        inDropType, inStartTime, loader, true);
         }
+        return ret;
     }
 
     struct CRenderPluginDynamicInstanceLoader : public ISpecificDynamicInstance
@@ -3466,27 +3460,6 @@ public:
 
     void EnsureLuaState()
     {
-        if (m_LuaState == NULL) {
-            Q3DStudio::CFilePath thePath;
-            thePath.GetModuleFilePath();
-            Q3DStudio::CFilePath theAppDir = thePath.GetDirectory();
-            Q3DStudio::CFilePath theAbsoluteLuaDirectory =
-                CFilePath::CombineBaseAndRelative(theAppDir, "res\\lua");
-            Q3DStudio::CFilePath theLuaDll =
-                CFilePath::CombineBaseAndRelative(theAbsoluteLuaDirectory, "lua5.1.dll");
-
-            m_LuaState =
-                IDynamicLua::CreateDynamicLua(*m_Foundation.m_Foundation, theLuaDll.GetCharStar());
-            if (m_LuaState) {
-                m_LuaState->AddLibraryPath(theAbsoluteLuaDirectory.GetCharStar(),
-                                           IDynamicLua::LuaModule);
-                m_LuaState->AddLibraryPath(theAbsoluteLuaDirectory.GetCharStar(),
-                                           IDynamicLua::CModule);
-                CFilePath theSVGLoader = CFilePath::CombineBaseAndRelative(theAbsoluteLuaDirectory,
-                                                                           "parse_to_cubic.lua");
-                m_LuaState->LoadLuaFile(theSVGLoader.GetCharStar(), "SVGPARSER");
-            }
-        }
     }
 
     void SetUniqueName(TInstanceHandle inItem, const char8_t *inNameBase,
@@ -4485,7 +4458,7 @@ public:
                 m_Doc.GetBufferCache().InvalidateBuffer(theRelativePath);
             }
 
-            qCInfo(qt3ds::TRACE_INFO) << "Change detected: " << theRelativePath.GetCharStar() << " "
+            qCInfo(qt3ds::TRACE_INFO) << "Change detected: " << theRelativePath.toQString() << " "
                       << ModificationTypeToString(theRecord.m_ModificationType);
 
             if (isImport) {
@@ -4506,11 +4479,9 @@ public:
                     if (theInsertResult.second == false)
                         theInsertResult.first->second = theDAERelativePath;
                 }
-            } else if ((theExtension.Compare(L"lua", CString::ENDOFSTRING, false) ||
-                       theExtension.Compare(L"qml", CString::ENDOFSTRING, false))
+            } else if (theExtension.Compare(L"qml", CString::ENDOFSTRING, false)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && theInstances.empty() == false) {
-                bool isLua = theExtension.Compare(L"lua", CString::ENDOFSTRING, false);
                 // First, refresh the parent behavior.
                 if (!hasDispatchNotificationScope) {
                     theDispatch.FireBeginDataModelNotifications();
@@ -4533,17 +4504,10 @@ public:
                         m_DataCore.RemoveCachedValues(theBehavior);
                     } else {
                         std::shared_ptr<IDOMReader> theReaderPtr;
-                        if (isLua) {
-                            theReaderPtr = ParseLuaFile(theRecord.m_File,
-                                                        m_DataCore.GetStringTablePtr(),
-                                                        m_Doc.GetImportFailedHandler(),
-                                                        *m_InputStreamFactory);
-                        } else {
-                            theReaderPtr = ParseScriptFile(theRecord.m_File,
-                                                           m_DataCore.GetStringTablePtr(),
-                                                           m_Doc.GetImportFailedHandler(),
-                                                           *m_InputStreamFactory);
-                        }
+                        theReaderPtr = ParseScriptFile(theRecord.m_File,
+                                                       m_DataCore.GetStringTablePtr(),
+                                                       m_Doc.GetImportFailedHandler(),
+                                                       *m_InputStreamFactory);
                         if (!theReaderPtr) {
                             // then effectively no change...
                             QT3DS_ASSERT(false);
@@ -4552,19 +4516,11 @@ public:
                             m_MetaData.LoadInstance(*theReaderPtr, theBehavior,
                                                     theRelativePath.GetFileStem().c_str(),
                                                     theWarnings);
-                            if (isLua) {
-                                CLuaDynamicInstanceLoader inSpecificInstance(*this);
-                                QString theLoadError =
-                                    inSpecificInstance.LoadInstanceData(theRecord.m_File);
-                                DisplayLoadWarnings(theRecord.m_File.toQString(),
-                                                    theWarnings, theLoadError);
-                            } else {
-                                CScriptDynamicInstanceLoader inSpecificInstance(*this);
-                                QString theLoadError =
-                                    inSpecificInstance.LoadInstanceData(theRecord.m_File);
-                                DisplayLoadWarnings(theRecord.m_File.toQString(),
-                                                    theWarnings, theLoadError);
-                            }
+                            CScriptDynamicInstanceLoader inSpecificInstance(*this);
+                            QString theLoadError =
+                                inSpecificInstance.LoadInstanceData(theRecord.m_File);
+                            DisplayLoadWarnings(theRecord.m_File.toQString(),
+                                                theWarnings, theLoadError);
                         }
                     }
                 }
@@ -4727,23 +4683,11 @@ IDocumentEditor::ParseLuaFile(const CFilePath &inFullPathToDocument,
                               std::shared_ptr<IImportFailedHandler> inHandler,
                               qt3ds::render::IInputStreamFactory &inInputStreamFactory)
 {
-    using namespace LuaParser;
-    std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
-    std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
-        inFullPathToDocument.toCString());
-    std::shared_ptr<IDOMReader> theReaderPtr(
-        SLuaParser::ParseLuaFile(theFactory, inStringTable, inFullPathToDocument.GetCharStar(),
-                                 theXmlErrorHandler, inInputStreamFactory));
-
-    if (!theReaderPtr) {
-        QT3DS_ASSERT(false);
-        if (inHandler)
-            inHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
-                                           QObject::tr("Failed to parse Lua data"),
-                                           false);
-    }
-    return theReaderPtr;
+    Q_UNUSED(inFullPathToDocument)
+    Q_UNUSED(inStringTable)
+    Q_UNUSED(inHandler)
+    Q_UNUSED(inInputStreamFactory)
+    return nullptr;
 }
 
 std::shared_ptr<IDOMReader>

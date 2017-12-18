@@ -31,8 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //==============================================================================
 //	Includes
@@ -88,7 +86,6 @@ CFilterToolbar::CFilterToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrMaterialsBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrShyBtn->SetBorderVisibilityAll(theBorderOptions);
     m_FltrVisibleBtn->SetBorderVisibilityAll(theBorderOptions);
-    CProceduralButton<CButtonControl>::SBorderOptions theBorderOptions2(false, true, true, true);
 
     // Set the max sizes for the buttons
     m_FltrBehaviorsBtn->SetAbsoluteSize(m_FltrBehaviorsBtn->GetSize());
@@ -98,11 +95,11 @@ CFilterToolbar::CFilterToolbar(CTimelineTreeLayout *inTreeLayout)
     m_FltrVisibleBtn->SetAbsoluteSize(m_FltrShyBtn->GetSize());
 
     // Tooltips
-    m_FltrBehaviorsBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_BEHAVIOR2));
-    m_FltrPropertiesBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_PROPERTIES2));
-    m_FltrMaterialsBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_MATERIALS2));
-    m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY2));
-    m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE2));
+    m_FltrBehaviorsBtn->SetTooltipText(QObject::tr("Hide behaviors"));
+    m_FltrPropertiesBtn->SetTooltipText(QObject::tr("Hide properties"));
+    m_FltrMaterialsBtn->SetTooltipText(QObject::tr("Hide materials"));
+    m_FltrShyBtn->SetTooltipText(QObject::tr("Hide shy objects"));
+    m_FltrVisibleBtn->SetTooltipText(QObject::tr("Hide inactive objects"));
 
     // Callback for one of the Filter buttons being clicked on
     QObject::connect(m_FltrBehaviorsBtn,&CToggleButton::SigToggle,
@@ -176,9 +173,9 @@ void CFilterToolbar::Draw(CRenderer *inRenderer)
 void CFilterToolbar::FilterBehaviors(bool inFilter)
 {
     if (inFilter)
-        m_FltrBehaviorsBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_BEHAVIOR1));
+        m_FltrBehaviorsBtn->SetTooltipText(QObject::tr("Show behaviors"));
     else
-        m_FltrBehaviorsBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_BEHAVIOR2));
+        m_FltrBehaviorsBtn->SetTooltipText(QObject::tr("Hide behaviors"));
 
     m_TreeLayout->GetFilter()->SetBehaviors(inFilter);
     m_TreeLayout->Filter();
@@ -193,9 +190,9 @@ void CFilterToolbar::FilterBehaviors(bool inFilter)
 void CFilterToolbar::FilterProperties(bool inFilter)
 {
     if (inFilter)
-        m_FltrPropertiesBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_PROPERTIES1));
+        m_FltrPropertiesBtn->SetTooltipText(QObject::tr("Show properties"));
     else
-        m_FltrPropertiesBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_PROPERTIES2));
+        m_FltrPropertiesBtn->SetTooltipText(QObject::tr("Hide properties"));
 
     m_TreeLayout->GetFilter()->SetProperties(inFilter);
     m_TreeLayout->Filter();
@@ -210,9 +207,9 @@ void CFilterToolbar::FilterProperties(bool inFilter)
 void CFilterToolbar::FilterMaterials(bool inFilter)
 {
     if (inFilter)
-        m_FltrMaterialsBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_MATERIALS1));
+        m_FltrMaterialsBtn->SetTooltipText(QObject::tr("Show materials"));
     else
-        m_FltrMaterialsBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_MATERIALS2));
+        m_FltrMaterialsBtn->SetTooltipText(QObject::tr("Hide materials"));
 
     m_TreeLayout->GetFilter()->SetMaterials(inFilter);
     m_TreeLayout->Filter();
@@ -227,9 +224,9 @@ void CFilterToolbar::FilterMaterials(bool inFilter)
 void CFilterToolbar::FilterShy(bool inFilter)
 {
     if (inFilter)
-        m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY1));
+        m_FltrShyBtn->SetTooltipText(QObject::tr("Show shy objects"));
     else
-        m_FltrShyBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_SHY2));
+        m_FltrShyBtn->SetTooltipText(QObject::tr("Hide shy objects"));
 
     m_TreeLayout->GetFilter()->SetShy(inFilter);
     m_TreeLayout->Filter();
@@ -244,9 +241,9 @@ void CFilterToolbar::FilterShy(bool inFilter)
 void CFilterToolbar::FilterVisible(bool inFilter)
 {
     if (inFilter)
-        m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE1));
+        m_FltrVisibleBtn->SetTooltipText(QObject::tr("Show inactive objects"));
     else
-        m_FltrVisibleBtn->SetTooltipText(::LoadResourceString(IDS_FLTR_TOOLTIP_VISIBLE2));
+        m_FltrVisibleBtn->SetTooltipText(QObject::tr("Hide inactive objects"));
 
     m_TreeLayout->GetFilter()->SetVisible(inFilter);
     m_TreeLayout->Filter();

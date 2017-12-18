@@ -35,9 +35,9 @@
 #include "StandardExtensions.h"
 #include <vector>
 
-#include <QCoreApplication>
-#include <QDateTime>
-#include <QWidget>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qdatetime.h>
+#include <QtWidgets/qwidget.h>
 
 using namespace Q3DStudio;
 using Q3DStudio::CString;
@@ -153,15 +153,17 @@ struct TickTockImpl : public ITickTock, public CRunnable
     }
 
     TSignalConnectionPtr AddTimer(unsigned long inTime, bool inIsPeriodic,
-                                          TTickTockProc inTickTockProc,
-                                          const Q3DStudio::CString &inName) override
+                                  TTickTockProc inTickTockProc,
+                                  const QString &inName) override
     {
         // Lock down so we don't conflict with the timer thread.
         CMutex::Scope __mutexScope(&m_Mutex);
 
         std::shared_ptr<TickTockItem> retval =
-            std::make_shared<TickTockItem>(inTickTockProc, inIsPeriodic, inTime,
-                                             QDateTime::currentMSecsSinceEpoch() + inTime, inName, std::ref(*this));
+                std::make_shared<TickTockItem>(inTickTockProc, inIsPeriodic, inTime,
+                                               QDateTime::currentMSecsSinceEpoch() + inTime,
+                                               Q3DStudio::CString::fromQString(inName),
+                                               std::ref(*this));
         if (inTime > 0) {
             UnsafeInsertTimer(*retval);
         } else {
@@ -194,7 +196,7 @@ struct TickTockImpl : public ITickTock, public CRunnable
         CMutex::Scope __mutexScope(&m_Mutex);
         // Go through all the timers looking for expired ones
         for (TTockList::iterator theTocks = m_SignalledTockers.begin(),
-                                 end = m_SignalledTockers.end();
+             end = m_SignalledTockers.end();
              theTocks != end; ++theTocks) {
             TickTockItem *theTock = (*theTocks);
             // If this item hasn't been released in another thread.
@@ -299,7 +301,7 @@ ITickTock *ITickTock::m_Instance(NULL);
 std::shared_ptr<ITickTock> ITickTock::CreateTickTock(long inMessageID, QWidget *inWnd)
 {
     std::shared_ptr<TickTockImpl> theTickTock(
-        std::make_shared<TickTockImpl>(inMessageID, std::ref(inWnd)));
+                std::make_shared<TickTockImpl>(inMessageID, std::ref(inWnd)));
     theTickTock->Initialize();
     if (m_Instance == NULL)
         m_Instance = theTickTock.get();

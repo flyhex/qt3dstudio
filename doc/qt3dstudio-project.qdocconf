@@ -3,7 +3,7 @@ description             = Qt 3D Studio Reference Manual
 version                 = $QT_VERSION
 
 sources.fileextensions  = "*.qdoc *.html"
-sourcedirs              = ./src \
+sourcedirs              = . \
                           ../src/Viewer
 
 headerdirs              = ../src/Viewer
@@ -42,7 +42,7 @@ qhp.Qt3DStudio.subprojects.classes.sortPages  = true
 
 
 # Add an .html file with sidebar content, used in the online style
-#HTML.stylesheets             += style/qt5-sidebar.html
+HTML.stylesheets             += style/qt5-sidebar.html
 
 # ensure all images are included
 #HTML.extraimages             += ./src/static/Runtime-AODistances.jpg
@@ -52,3 +52,9 @@ navigation.homepage            = Qt 3D Studio
 navigation.cppclassespage      = Qt 3D Studio C++ Classes
 navigation.qmltypespage        = Qt 3D Studio QML Types
 buildversion                   = "Qt 3D Studio $QT_VER Manual"
+
+examplesinstallpath     = studio3d
+exampledirs            += ../examples/studio3d
+
+manifestmeta.highlighted.names = \
+                "QtStudio3D/Qt 3D Studio: Dynamic Keyframes Example"

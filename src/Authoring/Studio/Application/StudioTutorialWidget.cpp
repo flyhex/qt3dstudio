@@ -28,6 +28,7 @@
 #include "StudioTutorialWidget.h"
 #include "ui_StudioTutorialWidget.h"
 #include "StudioUtils.h"
+#include <QtWidgets/qdesktopwidget.h>
 
 StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog,
                                            bool showProjectButtons) :
@@ -119,14 +120,11 @@ void StudioTutorialWidget::paintEvent(QPaintEvent *event)
     resize(pic.size());
     setFixedSize(size());
 
-    // If the dialog was originally larger than the screen, it will be placed into the
-    // top-left corner. Adjust its position after resizing.
-    if (m_displayScale < 1.0) {
-        QSize windowSize = GetAvailableDisplaySize(getWidgetScreen(this));
-        QSize welcomeSize = size();
-        move((windowSize.width() - welcomeSize.width()) / 2,
-             (windowSize.height() - welcomeSize.height()) / 2);
-    }
+    QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
+    QSize windowSize = screenRect.size();
+    QSize welcomeSize = size();
+    move(screenRect.x() + (windowSize.width() - welcomeSize.width()) / 2,
+         screenRect.y() + (windowSize.height() - welcomeSize.height()) / 2);
 }
 
 void StudioTutorialWidget::handleFwd()

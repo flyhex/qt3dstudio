@@ -386,13 +386,6 @@ void CUIPParserActionHelper::BuildAction(TElement &inElement, UINT32 inEventName
         if (!IsTrivial(theValue))
             WStrOps<bool>().StrTo(theValue, thePause);
         theAdder.AddAction(thePause ? COMMAND_PAUSE : COMMAND_PLAY);
-    } else if (theAction.m_Handler == "Play Sound") {
-        qt3ds::foundation::CStringHandle theStringHandle;
-        if (!theAction.m_HandlerArgs[0].m_Value.empty()) {
-            const char *theValue = theAction.m_HandlerArgs[0].m_Value.c_str();
-            theStringHandle = inPresentation.GetStringTable().GetHandle(theValue);
-        }
-        theAddActionIndex = theAdder.AddAction(COMMAND_PLAYSOUND, theStringHandle.handle());
     } else if (theAction.m_Handler == "Emit Signal") // Emit a signal
     {
         qt3ds::foundation::CStringHandle theStringHandle;

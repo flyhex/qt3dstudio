@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#if !defined(AFX_STUDIOPREFERENCESPROPSHEET_H__FADC69CE_5F0E_4F7E_A906_ED6052BBECF6__INCLUDED_)
-#define AFX_STUDIOPREFERENCESPROPSHEET_H__FADC69CE_5F0E_4F7E_A906_ED6052BBECF6__INCLUDED_
+#ifndef STUDIOPREFERENCESPROPSHEET_H
+#define STUDIOPREFERENCESPROPSHEET_H
 
 #pragma once
 
@@ -36,7 +36,7 @@
 //	Includes
 //==============================================================================
 
-#include <QDialog>
+#include <QtWidgets/qdialog.h>
 
 class CStudioProjectSettingsPage;
 class CStudioPreferencesPropSheet;
@@ -74,8 +74,6 @@ class CStudioPreferencesPropSheet : public QDialog
     Q_OBJECT
     // Construction
 public:
-    explicit CStudioPreferencesPropSheet(int nIDCaption, QWidget *pParentWnd = nullptr,
-                                         int iSelectPage = 0);
     explicit CStudioPreferencesPropSheet(const QString &pszCaption, QWidget *pParentWnd = nullptr,
                                          int iSelectPage = 0);
 
@@ -88,7 +86,6 @@ public:
 
     // Generated message map functions
 protected:
-    //{{AFX_MSG(CStudioPreferencesPropSheet)
     virtual void OnInitDialog();
 
     bool apply();
@@ -101,7 +98,4 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_STUDIOPREFERENCESPROPSHEET_H__FADC69CE_5F0E_4F7E_A906_ED6052BBECF6__INCLUDED_)
+#endif

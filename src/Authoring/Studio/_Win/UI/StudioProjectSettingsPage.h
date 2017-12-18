@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#if !defined(AFX_STUDIOPROJECTSETTINGSPAGE_H__E3317E44_810D_4478_A7DD_CF8570B7C17C__INCLUDED_)
-#define AFX_STUDIOPROJECTSETTINGSPAGE_H__E3317E44_810D_4478_A7DD_CF8570B7C17C__INCLUDED_
+#ifndef STUDIOPROJECTSETTINGSPAGE_H
+#define STUDIOPROJECTSETTINGSPAGE_H
 
 #if _MSC_VER > 1000
 #pragma once
@@ -37,8 +37,6 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-
-//#include "ParameterColor.h"
 
 #include "StudioPreferencesPropSheet.h"
 
@@ -102,4 +100,4 @@ protected:
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioProjectSettingsPage)> m_ui;
 };
 
-#endif // !defined(AFX_STUDIOPROJECTSETTINGSPAGE_H__E3317E44_810D_4478_A7DD_CF8570B7C17C__INCLUDED_)
+#endif

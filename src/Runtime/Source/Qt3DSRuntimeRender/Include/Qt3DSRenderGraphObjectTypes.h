@@ -54,7 +54,8 @@ namespace render {
     QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(CustomMaterial)                                             \
     QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(ReferencedMaterial)                                         \
     QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(Path)                                                       \
-    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(PathSubPath)
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(PathSubPath)                                                \
+    QT3DS_RENDER_HANDL_GRAPH_OBJECT_TYPE(DataInput)
 
     struct GraphObjectTypes
     {
@@ -76,6 +77,7 @@ namespace render {
             ReferencedMaterial,
             Path,
             PathSubPath,
+            DataInput,
             Lightmaps,
             LastKnownGraphObjectType,
         };

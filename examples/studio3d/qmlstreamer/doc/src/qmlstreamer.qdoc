@@ -1,0 +1,50 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \example qmlstreamer
+    \title Qt 3D Studio: QML Streamer Example
+    \ingroup qtstudio3d-examples-qml
+    \brief Demonstrates using QML as a texture in presentation
+
+    \image qml-streamer.jpg
+
+    \e {This example demonstrates QML as a texture in presentation}
+
+    \include examples-run.qdocinc
+
+    \section1 Description
+
+    The presentation consists of as simple rotating cube with QML item as texture
+
+    The \l {qmlstreamer/qml/qmlstreamer/main.qml}{qml main} loads a presentation, which contains
+    a sub-presentation. The content of the sub-presentation is specified using the
+    \l QmlStream element, which defines an id to the sub-presentation and the content of
+    the sub-presentation. The content is rendered to texture and used wherever the texture is used
+    in the presentation. In this example the content is QML item specified by the
+    \l {qmlstreamer/presentation/scripts/RedFill.qml}{RedFill} script.
+*/

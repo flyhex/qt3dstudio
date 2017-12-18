@@ -317,11 +317,16 @@ namespace render {
             QT3DSVec3 camZ(dataPtr[8], dataPtr[9], dataPtr[10]);
 
             float tanFOV = tanf(inCamera.m_FOV * 0.5f);
-            float asTanFOV = tanFOV * inViewPort.m_Height / inViewPort.m_Width;
-            camEdges[0] = -tanFOV * camX + asTanFOV * camY + camZ;
-            camEdges[1] = tanFOV * camX + asTanFOV * camY + camZ;
-            camEdges[2] = tanFOV * camX - asTanFOV * camY + camZ;
-            camEdges[3] = -tanFOV * camX - asTanFOV * camY + camZ;
+            float asTanFOV = tanFOV * inViewPort.m_Width / inViewPort.m_Height;
+            camEdges[0] = -asTanFOV * camX + tanFOV * camY + camZ;
+            camEdges[1] = asTanFOV * camX + tanFOV * camY + camZ;
+            camEdges[2] = asTanFOV * camX - tanFOV * camY + camZ;
+            camEdges[3] = -asTanFOV * camX - tanFOV * camY + camZ;
+
+            for (int i = 0; i < 4; ++i) {
+                camEdges[i].x = -camEdges[i].x;
+                camEdges[i].y = -camEdges[i].y;
+            }
 
             camVerts[0] = inCamera.m_Position + camEdges[0] * inCamera.m_ClipNear;
             camVerts[1] = inCamera.m_Position + camEdges[0] * inCamera.m_ClipFar;
@@ -339,10 +344,9 @@ namespace render {
             ctrBound *= 0.125f;
         }
 
-        void SetupCameraForShadowMap(const QT3DSVec2 &inCameraVec, NVRenderContext & /*inContext*/
-                                     ,
-                                     const SCamera &inCamera, const SLight *inLight,
-                                     SCamera &theCamera)
+        void SetupCameraForShadowMap(const QT3DSVec2 &inCameraVec, NVRenderContext & /*inContext*/,
+                                     const NVRenderRectF &inViewport, const SCamera &inCamera,
+                                     const SLight *inLight, SCamera &theCamera)
         {
             // setup light matrix
             QT3DSU32 mapRes = 1 << inLight->m_ShadowMapRes;
@@ -350,8 +354,6 @@ namespace render {
             theCamera.m_ClipNear = 1.0f;
             theCamera.m_ClipFar = inLight->m_ShadowMapFar;
             // Setup camera projection
-            // we adjust light pos z to camera for directional lights if pos is zero
-            QT3DSVec3 inCameraDir = inCamera.GetDirection();
             QT3DSVec3 inLightPos = inLight->GetGlobalPos();
             QT3DSVec3 inLightDir = inLight->GetDirection();
 
@@ -363,23 +365,47 @@ namespace render {
 
             if (inLight->m_LightType == RenderLightTypes::Directional) {
                 QT3DSVec3 frustBounds[8], boundCtr;
-                computeFrustumBounds(inCamera, theViewport, boundCtr, frustBounds);
+                computeFrustumBounds(inCamera, inViewport, boundCtr, frustBounds);
 
+                QT3DSVec3 forward = inLightDir;
+                forward.normalize();
+                QT3DSVec3 right = forward.cross(QT3DSVec3(0, 1, 0));
+                right.normalize();
+                QT3DSVec3 up = right.cross(forward);
+                up.normalize();
+
+                // Calculate bounding box of the scene camera frustum
+                float minDistanceZ = std::numeric_limits<float>::max();
+                float maxDistanceZ = -std::numeric_limits<float>::max();
+                float minDistanceY = std::numeric_limits<float>::max();
+                float maxDistanceY = -std::numeric_limits<float>::max();
+                float minDistanceX = std::numeric_limits<float>::max();
+                float maxDistanceX = -std::numeric_limits<float>::max();
+                for (int i = 0; i < 8; ++i) {
+                    float distanceZ = frustBounds[i].dot(forward);
+                    if (distanceZ < minDistanceZ)
+                        minDistanceZ = distanceZ;
+                    if (distanceZ > maxDistanceZ)
+                        maxDistanceZ = distanceZ;
+                    float distanceY = frustBounds[i].dot(up);
+                    if (distanceY < minDistanceY)
+                        minDistanceY = distanceY;
+                    if (distanceY > maxDistanceY)
+                        maxDistanceY = distanceY;
+                    float distanceX = frustBounds[i].dot(right);
+                    if (distanceX < minDistanceX)
+                        minDistanceX = distanceX;
+                    if (distanceX > maxDistanceX)
+                        maxDistanceX = distanceX;
+                }
+
+                // Apply bounding box parameters to shadow map camera projection matrix
+                // so that the whole scene is fit inside the shadow map
                 inLightPos = boundCtr;
-                // inLightPos += inLightDir * 0.5 * ( inCamera.m_ClipNear + inCamera.m_ClipFar );
-                float d = 0.5f * (inLight->m_ShadowMapFar + 1.0f);
-                inLightPos += inLightDir * d;
-
-                float o1 = d * 2.0f * tan(0.5f * theCamera.m_FOV);
-                float o2 = inLight->m_ShadowMapFar - 1.0f;
-                float o = fabs(inLightDir.dot(inCameraDir));
-                o = (1.0f - o) * o2 + o * o1;
-
-                theViewport.m_Height = NVHalfPi * o;
-                theViewport.m_Width = NVHalfPi * o;
-
-                inLightPos -= inLightDir * d;
-                theCamera.m_ClipFar += inCameraVec.x;
+                theViewport.m_Height = abs(maxDistanceY - minDistanceY);
+                theViewport.m_Width = abs(maxDistanceX - minDistanceX);
+                theCamera.m_ClipNear = -abs(maxDistanceZ - minDistanceZ);
+                theCamera.m_ClipFar = abs(maxDistanceZ - minDistanceZ);
             }
 
             theCamera.m_Flags.SetLeftHanded(false);
@@ -672,7 +698,8 @@ namespace render {
                 SCamera theCamera;
 
                 QT3DSVec2 theCameraProps = QT3DSVec2(m_Camera->m_ClipNear, m_Camera->m_ClipFar);
-                SetupCameraForShadowMap(theCameraProps, m_Renderer.GetContext(), *m_Camera,
+                SetupCameraForShadowMap(theCameraProps, m_Renderer.GetContext(),
+                                        __viewport.m_InitialValue, *m_Camera,
                                         m_Lights[i], theCamera);
                 // we need this matrix for the final rendering
                 theCamera.CalculateViewProjectionMatrix(pEntry->m_LightVP);
@@ -1687,6 +1714,8 @@ namespace render {
             return;
 
         NVRenderContext &theContext(m_Renderer.GetContext());
+        theContext.resetStates();
+
         NVRenderContextScopedProperty<NVRenderFrameBuffer *> __fbo(
             theContext, &NVRenderContext::GetRenderTarget, &NVRenderContext::SetRenderTarget);
         qt3ds::render::NVRenderRect theCurrentViewport = theContext.GetViewport();

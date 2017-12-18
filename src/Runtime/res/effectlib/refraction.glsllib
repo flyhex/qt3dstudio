@@ -42,11 +42,11 @@ vec3 refraction( in sampler2D sampler, in float materialIOR )
   vec2 newUV = vec2(gl_FragCoord.xy/texSize);
   if ( xdir > ydir)
   {
-  	newUV = ( viewDir.x > 0.0) ? newUV + displace.xy : newUV - displace.xy;
+    newUV = ( viewDir.x > 0.0) ? newUV + displace.xy : newUV - displace.xy;
   }
   else
   {
-  	newUV = ( viewDir.y > 0.0) ? newUV - displace.xy : newUV + displace.xy;
+    newUV = ( viewDir.y > 0.0) ? newUV - displace.xy : newUV + displace.xy;
   }
 
   vec3 refractColor = texture( sampler, newUV ).rgb;
@@ -72,15 +72,15 @@ vec3 refractBlur( in sampler2D sampler, in vec3 viewDir, in float materialIOR, i
 
   for (int y = -sz; y <= sz; ++y)
   {
-  	for (int x = -sz; x <= sz; ++x)
-  	{
-  	    float wt = float(x*x + y*y) / (blurWidth * 0.5);
-  	    wt = exp2(-wt);
-  	    //refractColor += wt * textureOffset( sampler, newUV, ivec2(x, y) ).rgb;
-  	    vec2 uvOfs = vec2(x, y) * texSize;
-  	    refractColor += wt * texture( sampler, newUV+uvOfs).rgb;
-  	    wtsum += wt;
-  	}
+    for (int x = -sz; x <= sz; ++x)
+    {
+        float wt = float(x*x + y*y) / (blurWidth * 0.5);
+        wt = exp2(-wt);
+        //refractColor += wt * textureOffset( sampler, newUV, ivec2(x, y) ).rgb;
+        vec2 uvOfs = vec2(x, y) * texSize;
+        refractColor += wt * texture( sampler, newUV+uvOfs).rgb;
+        wtsum += wt;
+    }
   }
 
   return refractColor / wtsum;

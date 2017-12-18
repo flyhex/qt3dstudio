@@ -31,7 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -45,7 +44,8 @@
  * Constructor
  */
 
-CTextEditContextMenu::CTextEditContextMenu(CTextEdit *inEditControl, QWidget *parent) : QMenu(parent)
+CTextEditContextMenu::CTextEditContextMenu(CTextEdit *inEditControl, QWidget *parent)
+    : QMenu(parent)
 {
     m_TextEditControl = inEditControl;
 

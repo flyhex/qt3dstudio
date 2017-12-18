@@ -36,8 +36,6 @@
 #include "StudioApp.h"
 #include "Cmd.h"
 #include "ResourceCache.h"
-#include "Strings.h"
-#include "StringLoader.h"
 #include "CColor.h"
 
 #include "ClientDataModelBridge.h"
@@ -75,7 +73,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
     ISlideSystem *theSlideSystem = inDoc->GetStudioSystem()->GetSlideSystem();
     Q3DStudio::CId theId = theBridge->GetGUID(inInstance);
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
-        theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
+            theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     ASSERT(theMasterSlide.Valid()); // it should be valid because inAsset should be OBJTYPE_SCENE or
                                     // non-library OBJTYPE_COMPONENT
 
@@ -85,16 +83,16 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
 
     // Determine the color
     outBreadCrumb.m_Color =
-        theIsMaster ? CColor(0, 0, 255) : CColor(0, 0, 0); // blue for master, black otherwise
+            theIsMaster ? CColor(0, 0, 255) : CColor(0, 0, 0); // blue for master, black otherwise
 
     // Determine the text string
     outBreadCrumb.m_String = theBridge->GetName(inInstance).toQString();
     outBreadCrumb.m_String += " (";
-    if (theIsMaster)
-        outBreadCrumb.m_String += ::LoadResourceString(IDS_OBJTYPE_MASTER).toQString();
-    else {
+    if (theIsMaster) {
+        outBreadCrumb.m_String += QObject::tr("Master");
+    } else {
         Qt3DSDMSlideHandle theActiveSlide =
-            theSlideSystem->GetSlideByIndex(theMasterSlide, theActiveIndex);
+                theSlideSystem->GetSlideByIndex(theMasterSlide, theActiveIndex);
         Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theActiveSlide);
         ASSERT(theInstanceHandle.Valid());
         outBreadCrumb.m_String += theBridge->GetName(theInstanceHandle).toQString();
@@ -211,29 +209,33 @@ void CTimelineBreadCrumbProvider::FillSlideList(qt3dsdm::Qt3DSDMInstanceHandle i
     m_BreadCrumbList.push_back(inInstance);
 
     Qt3DSDMPropertyHandle theNameProp =
-        m_Doc->GetStudioSystem()->GetClientDataModelBridge()->GetNameProperty();
+            m_Doc->GetStudioSystem()->GetClientDataModelBridge()->GetNameProperty();
     IStudioFullSystemSignalProvider *theEngine =
-        m_Doc->GetStudioSystem()->GetFullSystemSignalProvider();
+            m_Doc->GetStudioSystem()->GetFullSystemSignalProvider();
     std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> theSetter(
-        std::bind(&CTimelineBreadCrumbProvider::OnNameDirty, this));
+                std::bind(&CTimelineBreadCrumbProvider::OnNameDirty, this));
 
     // Listen to name changes on the Asset
-    m_Connections.push_back(theEngine->ConnectInstancePropertyValue(
-        std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
-                        Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
-                    std::placeholders::_1, std::placeholders::_2, inInstance, theNameProp, theSetter)));
+    m_Connections.push_back(
+                theEngine->ConnectInstancePropertyValue(
+                    std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
+                                  Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
+                              std::placeholders::_1, std::placeholders::_2, inInstance,
+                              theNameProp, theSetter)));
 
     // Listen to name changes on the non-master Slides
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
-        theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
+            theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
     long theSlideCount = (long)theSlideSystem->GetSlideCount(theMasterSlide);
 
     for (long theIndex = 1; theIndex < theSlideCount; ++theIndex) {
         Qt3DSDMSlideHandle theSlide = theSlideSystem->GetSlideByIndex(theMasterSlide, theIndex);
         Qt3DSDMInstanceHandle theSlideInstance = theSlideSystem->GetSlideInstance(theSlide);
-        m_Connections.push_back(theEngine->ConnectInstancePropertyValue(
-            std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
-                            Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
-                        std::placeholders::_1, std::placeholders::_2, theSlideInstance, theNameProp, theSetter)));
+        m_Connections.push_back(
+                    theEngine->ConnectInstancePropertyValue(
+                        std::bind(qt3dsdm::MaybackCallbackInstancePropertyValue<std::function<void(
+                                      Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)>>,
+                                  std::placeholders::_1, std::placeholders::_2, theSlideInstance,
+                                  theNameProp, theSetter)));
     }
 }

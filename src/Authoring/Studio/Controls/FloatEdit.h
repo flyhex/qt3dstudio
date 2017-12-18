@@ -40,7 +40,7 @@
 //==============================================================================
 #include "TextEdit.h"
 
-#include <QCursor>
+#include <QtGui/qcursor.h>
 
 GENERIC_FUNCTOR_1(CRevertListener, OnDiscardChanges, CControl *);
 
@@ -73,7 +73,7 @@ public:
     virtual void SetData(float inValue, bool inFireEvent = true);
     void SetData(const Q3DStudio::CString &inData, bool inFireEvent = true) override;
     bool CanAcceptChar(const Q3DStudio::CString &inCheckString, unsigned int inChar,
-                               unsigned int inPosition) override;
+                       unsigned int inPosition) override;
     bool CanPaste() override;
 
     void OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags) override;

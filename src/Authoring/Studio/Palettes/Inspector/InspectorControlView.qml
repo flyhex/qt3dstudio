@@ -660,6 +660,7 @@ Rectangle {
             property int handle: parent.modelData.handle
             property var values: parent.modelData.values
             property var value: parent.modelData.value
+            property bool blockIndexChange: false
 
             model: values
 
@@ -671,11 +672,20 @@ Rectangle {
             }
             onCurrentIndexChanged: {
                 var newValue = textAt(currentIndex)
-                if (value !== newValue && currentIndex !== -1)
+                if (!blockIndexChange && value !== newValue && currentIndex !== -1)
                     _inspectorModel.setMaterialTypeValue(instance, handle, newValue)
             }
             onValueChanged: {
-                currentIndex = find(value)
+                var newNewIndex = find(value);
+                if (!blockIndexChange || newNewIndex > 0)
+                    currentIndex = newNewIndex;
+                blockIndexChange = false;
+            }
+            onValuesChanged : {
+                // Changing the values list will reset the currentIndex to zero, so block setting
+                // the actual material. We'll get the proper index right after.
+                if (currentIndex > 0)
+                    blockIndexChange = true;
             }
         }
     }
@@ -733,7 +743,9 @@ Rectangle {
             property int handle: parent.modelData.handle
 
             color: parent.modelData.value
-            onColorSelected: _inspectorModel.setPropertyValue(instance, handle, selectedColor)
+            onColorSelected: _inspectorModel.setPropertyValue(instance, handle, selectedColor);
+            onPreviewColorSelected: _inspectorModel.setPropertyValue(instance, handle,
+                                                                     selectedColor, false);
         }
     }
 

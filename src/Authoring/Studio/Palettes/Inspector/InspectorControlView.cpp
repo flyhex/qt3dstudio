@@ -54,13 +54,15 @@
 #include "IObjectReferenceHelper.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
+#include "ClientDataModelBridge.h"
 
-InspectorControlView::InspectorControlView(QWidget *parent)
+InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
       TabNavigable(),
       m_inspectorControlModel(new InspectorControlModel(this)),
       m_instance(0),
-      m_handle(0)
+      m_handle(0),
+      m_preferredSize(preferredSize)
 {
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &InspectorControlView::initialize);
@@ -166,7 +168,7 @@ InspectorControlView::~InspectorControlView()
 
 QSize InspectorControlView::sizeHint() const
 {
-    return {120, 600};
+    return m_preferredSize;
 }
 
 void InspectorControlView::initialize()
@@ -204,16 +206,36 @@ QString InspectorControlView::titleText() const
     return tr("No Object Selected");
 }
 
+static EStudioObjectType instanceObjectType(int instance)
+{
+    auto doc = g_StudioApp.GetCore()->GetDoc();
+    auto studio = doc->GetStudioSystem();
+    return studio->GetClientDataModelBridge()->GetObjectType(instance);
+}
+
+bool InspectorControlView::canLinkProperty(int instance, int handle) const
+{
+    EStudioObjectType type = instanceObjectType(instance);
+    bool canBeLinkedFlag = g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                                .CanPropertyBeLinked(instance, handle);
+    if (qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid() == false
+            && (type == OBJTYPE_CUSTOMMATERIAL || type == OBJTYPE_MATERIAL
+                || type == OBJTYPE_REFERENCEDMATERIAL)) {
+        canBeLinkedFlag = false;
+    }
+    return canBeLinkedFlag;
+}
+
 QColor InspectorControlView::titleColor(int instance, int handle) const
 {
-    if (instance != 0 && handle != 0) {
-        if (g_StudioApp.GetCore()->GetDoc()->GetDocumentReader().IsPropertyLinked(instance, handle))
-            return CStudioPreferences::masterColor();
-        else
-            return CStudioPreferences::textColor();
-    } else {
-        return CStudioPreferences::textColor();
+    QColor ret = CStudioPreferences::textColor();
+    if (instance != 0) {
+        if (g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                .IsPropertyLinked(instance, handle)) {
+            ret = CStudioPreferences::masterColor();
+        }
     }
+    return ret;
 }
 
 QString InspectorControlView::titleIcon() const
@@ -259,19 +281,26 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     QMenu theContextMenu;
 
     auto doc = g_StudioApp.GetCore()->GetDoc();
-    bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
-    bool canBeLinkedFlag = doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
-    if (isLinkedFlag) {
-        auto action = theContextMenu.addAction(QObject::tr("Unlink Property from Master Slide"));
-        action->setEnabled(canBeLinkedFlag);
-        connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+
+    bool canBeLinkedFlag = canLinkProperty(instance, handle);
+    if (canBeLinkedFlag) {
+        const bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
+
+        if (isLinkedFlag) {
+            auto action = theContextMenu.addAction(QObject::tr("Unlink Property from Master Slide"));
+            action->setEnabled(canBeLinkedFlag);
+            connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+        } else {
+            auto action = theContextMenu.addAction(QObject::tr("Link Property from Master Slide"));
+            action->setEnabled(canBeLinkedFlag);
+            connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+        }
+
     } else {
-        auto action = theContextMenu.addAction(QObject::tr("Link Property from Master Slide"));
-        action->setEnabled(canBeLinkedFlag);
-        connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
+        auto action = theContextMenu.addAction(QObject::tr("Unable to link from Master Slide"));
+        action->setEnabled(false);
     }
     theContextMenu.exec(mapToGlobal({x, y}));
-
     m_instance = 0;
     m_handle = 0;
 }
@@ -293,8 +322,13 @@ void InspectorControlView::setPropertyValueFromFilename(long instance, int handl
 {
     if (m_inspectorControlModel) {
         QString value;
-        if (name != tr("[None]"))
-            value = name;
+        if (name != tr("[None]")) {
+            // Relativize the path to the project
+            const auto doc = g_StudioApp.GetCore()->GetDoc();
+            const QDir documentDir(doc->GetDocumentDirectory().toQString());
+            QString relativeName = documentDir.relativeFilePath(name);
+            value = relativeName;
+        }
         m_inspectorControlModel->setPropertyValue(instance, handle, value);
     }
 }
@@ -343,8 +377,12 @@ QObject *InspectorControlView::showMeshChooser(int handle, int instance, const Q
         m_meshChooserView = new MeshChooserView(this);
         connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
                 [this] (int handle, int instance, const QString &name){
-            if (m_inspectorControlModel)
-                m_inspectorControlModel->setPropertyValue(instance, handle, name);
+            if (name.startsWith(QStringLiteral("#"))) {
+                if (m_inspectorControlModel)
+                    m_inspectorControlModel->setPropertyValue(instance, handle, name);
+            } else {
+                setPropertyValueFromFilename(instance, handle, name);
+            }
         });
     }
 
@@ -386,7 +424,18 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
         m_objectReferenceView = new ObjectBrowserView(this);
     m_objectReferenceView->setModel(m_objectReferenceModel);
 
-    disconnect(m_objectReferenceView);
+    if (doc->GetStudioSystem()->GetClientDataModelBridge()
+            ->GetObjectType(instance) == OBJTYPE_ALIAS) {
+        QVector<EStudioObjectType> exclude;
+        exclude << OBJTYPE_ALIAS << OBJTYPE_BEHAVIOR << OBJTYPE_CUSTOMMATERIAL
+                << OBJTYPE_EFFECT << OBJTYPE_GUIDE << OBJTYPE_IMAGE << OBJTYPE_LAYER
+                << OBJTYPE_MATERIAL << OBJTYPE_REFERENCEDMATERIAL << OBJTYPE_SCENE;
+        m_objectReferenceModel->excludeObjectTypes(exclude);
+    } else {
+        m_objectReferenceModel->excludeObjectTypes(QVector<EStudioObjectType>());
+    }
+
+    disconnect(m_objectReferenceView, nullptr, nullptr, nullptr);
 
     IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
     if (objRefHelper) {
@@ -431,6 +480,9 @@ void InspectorControlView::OnBeginDataModelNotifications()
 
 void InspectorControlView::OnEndDataModelNotifications()
 {
+    CInspectableBase *inspectable = m_inspectorControlModel->inspectable();
+    if (inspectable && !inspectable->IsValid())
+        OnSelectionSet(Q3DStudio::SSelectedValue());
     m_inspectorControlModel->refresh();
 }
 

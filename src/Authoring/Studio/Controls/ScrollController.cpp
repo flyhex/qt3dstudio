@@ -114,28 +114,25 @@ void CScrollController::OnScrollForward(CControl *inButton)
     if (!m_ScrollingForward && inButton) {
         m_ScrollingForward = true;
 
-        Q3DStudio::CString theName = "CScrollController::OnScrollForward";
-        if (m_Control) {
-            theName += "::%s";
-            theName.Format(theName, static_cast<const wchar_t *>(m_Control->GetName()));
-        }
+        QString theName = QStringLiteral("CScrollController::OnScrollForward");
+        if (m_Control)
+            theName += QStringLiteral("::%1").arg(m_Control->GetName());
 
         m_TimerConnection = ITickTock::GetInstance().AddTimer(
-            100, true, std::bind(&CScrollController::OnTimer, this), theName);
+                    100, true, std::bind(&CScrollController::OnTimer, this), theName);
     }
 
     Q_UNUSED(inButton);
     CPt theScrollDistance(0, 0);
     long theScrollAmount = DetermineScrollAmount();
 
-    if (m_ScrollerBar->GetOrientation() == IScrollerBar::VERTICAL) {
+    if (m_ScrollerBar->GetOrientation() == IScrollerBar::VERTICAL)
         theScrollDistance.y = theScrollAmount;
-    } else {
+    else
         theScrollDistance.x = theScrollAmount;
-    }
 
     m_ScrollerBar->GetScroller()->SetVisiblePosition(
-        m_ScrollerBar->GetScroller()->GetVisiblePosition() + theScrollDistance);
+                m_ScrollerBar->GetScroller()->GetVisiblePosition() + theScrollDistance);
     m_ScrollerBar->RepositionThumb();
 }
 
@@ -149,28 +146,25 @@ void CScrollController::OnScrollBackward(CControl *inButton)
     if (!m_ScrollingBackward && inButton) {
         m_ScrollingBackward = true;
 
-        Q3DStudio::CString theName = "CScrollController::OnScrollBackward";
-        if (m_Control) {
-            theName += "::%s";
-            theName.Format(theName, static_cast<const wchar_t *>(m_Control->GetName()));
-        }
+        QString theName = QStringLiteral("CScrollController::OnScrollBackward");
+        if (m_Control)
+            theName += QStringLiteral("::%s").arg(m_Control->GetName());
 
         m_TimerConnection = ITickTock::GetInstance().AddTimer(
-            100, true, std::bind(&CScrollController::OnTimer, this), theName);
+                    100, true, std::bind(&CScrollController::OnTimer, this), theName);
     }
 
     Q_UNUSED(inButton);
     CPt theScrollDistance(0, 0);
     long theScrollAmount = DetermineScrollAmount();
 
-    if (m_ScrollerBar->GetOrientation() == IScrollerBar::VERTICAL) {
+    if (m_ScrollerBar->GetOrientation() == IScrollerBar::VERTICAL)
         theScrollDistance.y = theScrollAmount;
-    } else {
+    else
         theScrollDistance.x = theScrollAmount;
-    }
 
     m_ScrollerBar->GetScroller()->SetVisiblePosition(
-        m_ScrollerBar->GetScroller()->GetVisiblePosition() - theScrollDistance);
+                m_ScrollerBar->GetScroller()->GetVisiblePosition() - theScrollDistance);
     m_ScrollerBar->RepositionThumb();
 }
 
@@ -196,16 +190,14 @@ void CScrollController::OnTimer()
 {
     if (m_ScrollingForward) {
         // We want it to scroll only if the mouse is over the control
-        if (m_Control->IsMouseOver()) {
+        if (m_Control->IsMouseOver())
             OnScrollForward(nullptr);
-        }
     } else if (m_ScrollingBackward) {
         // We want it to scroll only if the mouse is over the control
-        if (m_Control->IsMouseOver()) {
+        if (m_Control->IsMouseOver())
             OnScrollBackward(nullptr);
-        }
-    } else // The timer should not be called if we are not scrolling forward nor backwards
-    {
+    } else {
+        // The timer should not be called if we are not scrolling forward nor backwards
         ASSERT(false);
     }
 }

@@ -31,8 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //==============================================================================
 //	Includes
@@ -43,8 +41,8 @@
 #include "Qt3DSDMStudioSystem.h"
 
 Qt3DSDMSceneInspectable::Qt3DSDMSceneInspectable(
-    CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-    qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance)
+        CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+        qt3dsdm::Qt3DSDMInstanceHandle inCurrentActiveSlideInstance)
     : Qt3DSDMInspectable(inApp, inCore, inInstance)
     , m_CurrentActiveSlideInstance(inCurrentActiveSlideInstance)
 {
@@ -53,7 +51,7 @@ Qt3DSDMSceneInspectable::Qt3DSDMSceneInspectable(
 bool Qt3DSDMSceneInspectable::IsValid() const
 {
     return Qt3DSDMInspectable::IsValid()
-        && m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_CurrentActiveSlideInstance);
+            && m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_CurrentActiveSlideInstance);
 }
 
 long Qt3DSDMSceneInspectable::GetGroupCount()
@@ -65,10 +63,10 @@ long Qt3DSDMSceneInspectable::GetGroupCount()
 /**
  *	Return the Resource String ID for the Group Name, given the group index
  */
-Q3DStudio::CString Qt3DSDMSceneInspectable::GetGroupName(long inGroupIndex)
+QString Qt3DSDMSceneInspectable::GetGroupName(long inGroupIndex)
 {
-    return (inGroupIndex == 0) ? ::LoadResourceString(IDS_PROPERTIES_BASIC)
-                               : ::LoadResourceString(IDS_PROPERTIES_SHARED);
+    return (inGroupIndex == 0) ? QObject::tr("Basic Properties")
+                               : QObject::tr("Shared Properties");
 }
 
 qt3dsdm::Qt3DSDMInstanceHandle Qt3DSDMSceneInspectable::GetGroupInstance(long inGroupIndex)

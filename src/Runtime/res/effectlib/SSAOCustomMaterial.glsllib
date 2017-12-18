@@ -36,13 +36,13 @@
 #if QT3DS_ENABLE_SSDO
 #include "screenSpaceDO.glsllib"
 
-layout (std140) uniform cbAoShadow { 
-	vec4 ao_properties;
-	vec4 ao_properties2;
-	vec4 shadow_properties;
-	vec4 aoScreenConst;
-	vec4 UvToEyeConst;
-	};
+layout (std140) uniform cbAoShadow {
+    vec4 ao_properties;
+    vec4 ao_properties2;
+    vec4 shadow_properties;
+    vec4 aoScreenConst;
+    vec4 UvToEyeConst;
+    };
 
 uniform sampler2D depth_sampler;
 #endif
@@ -55,12 +55,12 @@ uniform sampler2D ao_sampler;
 float customMaterialAO()
 {
 #if QT3DS_ENABLE_SSDO
-	vec2 smpUV = (gl_FragCoord.xy) * aoScreenConst.zw;
+    vec2 smpUV = (gl_FragCoord.xy) * aoScreenConst.zw;
 #else
-	ivec2 iSize = textureSize(ao_sampler, 0);
-	vec2 smpUV = (gl_FragCoord.xy) / vec2(iSize);
+    ivec2 iSize = textureSize(ao_sampler, 0);
+    vec2 smpUV = (gl_FragCoord.xy) / vec2(iSize);
 #endif
-	return texture(ao_sampler, smpUV).x;
+    return texture(ao_sampler, smpUV).x;
 }
 
 #else
@@ -76,7 +76,7 @@ float customMaterialAO()
 
 float customMaterialShadow( vec3 lightDir, vec3 varWorldPos )
 {
-	return shadowOcclusion( depth_sampler, lightDir, varWorldPos, view_matrix, view_projection_matrix, shadow_properties, camera_properties, aoScreenConst, UvToEyeConst );
+    return shadowOcclusion( depth_sampler, lightDir, varWorldPos, view_matrix, view_projection_matrix, shadow_properties, camera_properties, aoScreenConst, UvToEyeConst );
 }
 
 #else

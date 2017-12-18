@@ -57,7 +57,7 @@ class InspectorControlView : public QQuickWidget,
     Q_PROPERTY(QString titleText READ titleText NOTIFY titleChanged FINAL)
     Q_PROPERTY(QString titleIcon READ titleIcon NOTIFY titleChanged FINAL)
 public:
-    explicit InspectorControlView(QWidget *parent = nullptr);
+    explicit InspectorControlView(const QSize &preferredSize, QWidget *parent = nullptr);
     ~InspectorControlView();
 
     void OnSelectionSet(Q3DStudio::SSelectedValue inValue);
@@ -105,6 +105,7 @@ private:
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     void showBrowser(QQuickWidget *browser, const QPoint &point);
+    bool canLinkProperty(int instance, int handle) const;
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_timeChanged;
@@ -124,6 +125,8 @@ private:
 
     int m_instance;
     int m_handle;
+
+    QSize m_preferredSize;
 };
 
 #endif // INSPECTORCONTROLVIEW_H

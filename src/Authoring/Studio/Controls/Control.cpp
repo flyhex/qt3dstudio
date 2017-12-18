@@ -93,9 +93,8 @@ void CControl::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect,
         inDirtyRect.Or(theRect);
     }
 
-    if (isInvalidated || inIgnoreValidation) {
+    if (isInvalidated || inIgnoreValidation)
         Draw(inRenderer);
-    }
 
     // Notify the children in the reverse order that they are drawn.
     ControlGraph::SReverseIterator theRPos = ControlGraph::GetRChildren(*this);
@@ -109,18 +108,15 @@ void CControl::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect,
     ControlGraph::SIterator thePos = ControlGraph::GetChildren(*this);
     for (; !thePos.IsDone(); ++thePos) {
         std::shared_ptr<CControlData> theChild = (*thePos);
-        if (theChild->IsVisible()) //&& ( theChild->IsChildInvalidated( ) || inIgnoreValidation ||
-                                   //isInvalidated ) )
-        {
+        if (theChild->IsVisible()) {
             CPt thePosition = theChild->GetPosition();
             inRenderer->PushTranslation(thePosition);
 
             // Clipping of non-visible objects.
-            if (theChild->IsInRect(theBoundingBox)) {
+            if (theChild->IsInRect(theBoundingBox))
                 theChild->OnDraw(inRenderer, inDirtyRect, inIgnoreValidation || isInvalidated);
-            } else {
+            else
                 theChild->NotifyNotInClipRect();
-            }
             inRenderer->PopTranslation();
         }
     }
@@ -365,9 +361,8 @@ void CControl::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
             // Do not fire events to non-enabled children.
             if (theChild->IsEnabled()) {
                 // If this is the first time the mouse is over this then fire a mouse over
-                if (!theChild->IsMouseOver()) {
+                if (!theChild->IsMouseOver())
                     theChild->OnMouseOver(theChildPoint, inFlags);
-                }
                 // Fire a mouse move as well, this will also propagate the mouse over to
                 // grand-children etc.
                 theChild->OnMouseMove(theChildPoint, inFlags);
@@ -471,8 +466,9 @@ bool CControl::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
                     if (theChild->CanGainFocus()) {
                         m_ControlData->m_Focus = theChild;
                         m_ControlData->m_Focus->OnGainFocus();
-                    } else
+                    } else {
                         m_ControlData->m_Focus = std::shared_ptr<CControlData>();
+                    }
                 }
                 m_ControlData->m_MouseFocus = theChild;
             } else {
@@ -524,8 +520,9 @@ bool CControl::OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
                     if (theChild->CanGainFocus()) {
                         m_ControlData->m_Focus = theChild;
                         m_ControlData->m_Focus->OnGainFocus();
-                    } else
+                    } else {
                         m_ControlData->m_Focus = std::shared_ptr<CControlData>();
+                    }
                 }
                 m_ControlData->m_MouseFocus = theChild;
                 theRetVal = theChild->OnMouseRDown(theChildPoint, inFlags);
@@ -564,9 +561,8 @@ bool CControl::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags)
         if (theChild->HitTest(inPoint)) {
             CPt theChildPoint = inPoint - theChild->GetPosition();
             // Only send the event if the child is enabled.
-            if (theChild->IsEnabled()) {
+            if (theChild->IsEnabled())
                 theRetVal = theChild->OnMouseDoubleClick(theChildPoint, inFlags);
-            }
 
             // only want OnMouseDown to be called on the first child under the point.
             break;
@@ -593,7 +589,7 @@ bool CControl::OnMouseWheel(CPt inPoint, long inAmount, Qt::KeyboardModifiers in
         for (; thePos.HasNext(); ++thePos) {
             std::shared_ptr<CControlData> theChild = (*thePos);
             if (theChild->GetMouseWheelEventState() == ControlEventState::Listening
-                && theChild->IsEnabled() && theChild->HitTest(inPoint)) {
+                    && theChild->IsEnabled() && theChild->HitTest(inPoint)) {
                 CPt theChildPoint = inPoint - theChild->GetPosition();
                 theRetVal = theChild->OnMouseWheel(theChildPoint, inAmount, inFlags);
                 break;
@@ -627,9 +623,8 @@ bool CControl::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
         if (theChild->HitTest(inPoint)) {
             CPt theChildPoint = inPoint - theChild->GetPosition();
             // Only send the event if the child is enabled.
-            if (theChild->IsEnabled()) {
+            if (theChild->IsEnabled())
                 theRetVal = theChild->OnMouseHover(theChildPoint, inFlags);
-            }
 
             // only want OnMouseHover to be called on the first child under the point.
             break;
@@ -639,8 +634,8 @@ bool CControl::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
     // If the mouseover was not handled
     if (!theRetVal) {
         // If the tooltip text is not empty
-        Q3DStudio::CString theTooltipText = GetTooltipText();
-        if (!theTooltipText.IsEmpty()) {
+        QString theTooltipText = GetTooltipText();
+        if (!theTooltipText.isEmpty()) {
             // Show the tooltip, and return true so that parents don't cover this tooltip with their
             // own
             // Note that we are offsetting the point so that it appears below the mouse cursor
@@ -680,7 +675,7 @@ void CControl::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
             CPt theChildPoint = inPoint - theChild->GetPosition();
             // Only send the event if the child is enabled.
             if (theChild->IsEnabled() && theChild != m_ControlData->m_MouseFocus
-                && theChild != m_ControlData->m_Focus) {
+                    && theChild != m_ControlData->m_Focus) {
                 theChild->OnMouseUp(theChildPoint, inFlags);
             }
 
@@ -723,7 +718,7 @@ void CControl::OnMouseRUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
             CPt theChildPoint = inPoint - theChild->GetPosition();
             // Only send the event if the child is enabled.
             if (theChild->IsEnabled() && theChild != m_ControlData->m_MouseFocus
-                && theChild != m_ControlData->m_Focus) {
+                    && theChild != m_ControlData->m_Focus) {
                 theChild->OnMouseRUp(theChildPoint, inFlags);
             }
 
@@ -767,11 +762,10 @@ bool CControl::OnKeyDown(unsigned int inChar, Qt::KeyboardModifiers inModifiers)
 
     if (!theRetVal) {
         if (inChar == Qt::Key_Tab) {
-            if (inModifiers & Qt::ShiftModifier) {
+            if (inModifiers & Qt::ShiftModifier)
                 OnReverseTab();
-            } else {
+            else
                 OnTab();
-            }
             theRetVal = true;
         }
     }
@@ -848,12 +842,10 @@ void CControl::RemoveChild(CControl *inControl)
     if (inControl) {
         ControlGraph::RemoveChild(*this, *inControl);
 
-        if (m_ControlData->m_Focus == inControl->m_ControlData) {
+        if (m_ControlData->m_Focus == inControl->m_ControlData)
             m_ControlData->m_Focus = std::shared_ptr<CControlData>();
-        }
-        if (m_ControlData->m_MouseFocus == inControl->m_ControlData) {
+        if (m_ControlData->m_MouseFocus == inControl->m_ControlData)
             m_ControlData->m_MouseFocus = std::shared_ptr<CControlData>();
-        }
     }
 }
 
@@ -954,8 +946,9 @@ bool CControl::HitTest(const CPt &inPoint) const
     CPt theSize = GetSize();
     // Basic check to see if it's in the size.
     if (IsVisible() && thePoint.x >= 0 && thePoint.y >= 0 && thePoint.x < theSize.x
-        && thePoint.y < theSize.y)
+            && thePoint.y < theSize.y) {
         return true;
+    }
     return false;
 }
 
@@ -972,9 +965,8 @@ bool CControl::IsInRect(const CRct &inRect) const
     CRct myRect(GetPosition(), GetSize());
 
     if (myRect.position <= inRect.size + inRect.position) {
-        if (myRect.size + myRect.position >= inRect.position) {
+        if (myRect.size + myRect.position >= inRect.position)
             return true;
-        }
     }
     return false;
 }
@@ -987,12 +979,10 @@ bool CControl::IsInRect(const CRct &inRect) const
 void CControl::Invalidate(bool inInvalidate /*= true*/)
 {
     m_ControlData->m_IsInvalidated = inInvalidate;
-    if (inInvalidate && GetParent() != nullptr) {
+    if (inInvalidate && GetParent() != nullptr)
         GetParent()->OnChildInvalidated();
-    }
-    if (!inInvalidate) {
+    if (!inInvalidate)
         m_ControlData->m_IsChildInvalidated = false;
-    }
 }
 
 //=============================================================================
@@ -1207,14 +1197,14 @@ void CControl::OnChildSizeChanged(CControl *inControl)
     Q_UNUSED(inControl);
 }
 
-void CControl::SetName(const Q3DStudio::CString &inName)
+void CControl::SetName(const QString &inName)
 {
-    m_ControlData->SetName(inName);
+    m_ControlData->SetName(Q3DStudio::CString::fromQString(inName));
 }
 
-Q3DStudio::CString CControl::GetName()
+QString CControl::GetName()
 {
-    return m_ControlData->GetName();
+    return m_ControlData->GetName().toQString();
 }
 
 void CControl::BeginDrawChildren(CRenderer *inRenderer)
@@ -1226,11 +1216,10 @@ long CControl::DoPopup(QMenu *inMenu, CPt inLocation)
 {
     inLocation.Offset(GetPosition());
     CControl *theParent(GetParent());
-    if (theParent) {
+    if (theParent)
         return theParent->DoPopup(inMenu, inLocation);
-    } else {
+    else
         return m_ControlData->m_WindowListener->DoPopup(inMenu, inLocation);
-    }
 }
 
 //=============================================================================
@@ -1247,9 +1236,8 @@ void CControl::OnGainFocus()
  */
 void CControl::OnLoseFocus()
 {
-    if (m_ControlData->m_Focus) {
+    if (m_ControlData->m_Focus)
         m_ControlData->m_Focus->OnLoseFocus();
-    }
     FireFocusEvent(false);
     m_ControlData->m_Focus = std::shared_ptr<CControlData>();
 }
@@ -1274,11 +1262,10 @@ const CControl *CControl::GetParent() const
  */
 void CControl::RemoveUberControl(CControl *inControl)
 {
-    if (GetParent() != nullptr) {
+    if (GetParent() != nullptr)
         GetParent()->RemoveUberControl(inControl);
-    } else {
+    else
         RemoveChild(inControl);
-    }
     Invalidate();
 }
 
@@ -1349,16 +1336,16 @@ bool CControl::IsChildPlatformDevice(Qt3DSRenderDevice inDevice)
  * @param inLocation the postion of hte center point of the window
  * @param inText the text the window will display
  */
-void CControl::ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText, CRct inBoundingRct)
+void CControl::ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText,
+                                  CRct inBoundingRct)
 {
     CPt thePosition(GetPosition());
     CPt thePoint = CPt(inLocation.x + thePosition.x, inLocation.y + thePosition.y);
 
     if (GetParent())
         GetParent()->ShowMoveableWindow(thePoint, inText, inBoundingRct);
-    else if (m_ControlData->m_WindowListener) {
+    else if (m_ControlData->m_WindowListener)
         m_ControlData->m_WindowListener->ShowMoveableWindow(thePoint, inText, inBoundingRct);
-    }
 }
 
 //=============================================================================
@@ -1393,9 +1380,8 @@ CControl *CControl::GetFirstChild()
 {
     std::shared_ptr<CControlData> theChild = std::shared_ptr<CControlData>();
     ControlGraph::SIterator thePos = ControlGraph::GetChildren(*this);
-    if (!thePos.IsDone()) {
+    if (!thePos.IsDone())
         theChild = (*thePos);
-    }
     return ToControl(theChild);
 }
 
@@ -1414,12 +1400,13 @@ bool CControl::HasFocus(CControl *inControl)
  */
 bool CControl::CanGainFocus()
 {
-    if (IsVisible())
+    if (IsVisible()) {
         for (ControlGraph::SIterator thePos = ControlGraph::GetChildren(*this); !thePos.IsDone();
-             ++thePos)
+             ++thePos) {
             if ((*thePos)->CanGainFocus())
                 return true;
-
+        }
+    }
     return false;
 }
 
@@ -1474,9 +1461,8 @@ void CControl::OnTab()
             else
                 SetFocusToFirstAvailable();
         }
-    }
-    // If no focus, then go to first available control
-    else {
+    } else {
+        // If no focus, then go to first available control
         SetFocusToFirstAvailable();
     }
 }
@@ -1519,10 +1505,8 @@ void CControl::OnReverseTab()
             else
                 SetFocusToLastAvailable();
         }
-    }
-
-    // If no focus, then go to last available control
-    else {
+    } else {
+        // If no focus, then go to last available control
         SetFocusToLastAvailable();
     }
 }
@@ -1661,7 +1645,7 @@ void CControl::OnMouseClick(CPt, Qt::KeyboardModifiers)
  * tooltip will be shown.
  * @param inText text of the tooltip
  */
-void CControl::SetTooltipText(const Q3DStudio::CString &inText)
+void CControl::SetTooltipText(const QString &inText)
 {
     m_ControlData->SetTooltipText(inText);
 }
@@ -1670,7 +1654,7 @@ void CControl::SetTooltipText(const Q3DStudio::CString &inText)
 /**
  * @return the current tooltip text for this control
  */
-Q3DStudio::CString CControl::GetTooltipText()
+QString CControl::GetTooltipText()
 {
     return m_ControlData->GetTooltipText();
 }

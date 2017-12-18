@@ -868,8 +868,8 @@ public:
     bool LoadLuaFile(const char *inType, const char *inId, const char *inName,
                              const char *inSourcePath) override
     {
-        return LoadLuaFile(Convert0(inType), Convert1(inId), Convert2(inName),
-                           Convert3(inSourcePath));
+        // Disable loading lua scripts
+        return false;
     }
 
     bool LoadScriptFile(const char *inType, const char *inId, const char *inName,

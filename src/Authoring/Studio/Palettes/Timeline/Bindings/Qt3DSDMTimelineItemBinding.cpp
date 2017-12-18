@@ -50,8 +50,6 @@
 #include "Dialogs.h"
 #include "GraphUtils.h"
 #include "Qt3DSDMDataCore.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 // Data model specific
 #include "IDoc.h"
@@ -70,12 +68,12 @@
 #include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 
-#include <QMessageBox>
+#include <QtWidgets/qmessagebox.h>
 
 using namespace qt3dsdm;
 
 Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                                                     Qt3DSDMInstanceHandle inDataHandle)
+                                                       Qt3DSDMInstanceHandle inDataHandle)
     : m_Row(nullptr)
     , m_TransMgr(inMgr)
     , m_DataHandle(inDataHandle)
@@ -115,11 +113,11 @@ bool Qt3DSDMTimelineItemBinding::GetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inPro
 }
 
 void Qt3DSDMTimelineItemBinding::SetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty,
-                                                bool inValue, const QString &inNiceText) const
+                                            bool inValue, const QString &inNiceText) const
 {
     CDoc *theDoc = dynamic_cast<CDoc *>(g_StudioApp.GetCore()->GetDoc());
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, inNiceText)
-        ->SetInstancePropertyValue(m_DataHandle, inProperty, inValue);
+            ->SetInstancePropertyValue(m_DataHandle, inProperty, inValue);
 }
 
 void Qt3DSDMTimelineItemBinding::SetInstanceHandle(qt3dsdm::Qt3DSDMInstanceHandle inDataHandle)
@@ -159,8 +157,8 @@ bool Qt3DSDMTimelineItemBinding::IsMaster() const
 
     // logic: you can't unlink name, so if name is linked then, this is master.
     Qt3DSDMPropertyHandle theNamePropHandle =
-        m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(theQueryHandle,
-                                                                                L"name");
+            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(theQueryHandle,
+                                                                                    L"name");
     return theReader.IsPropertyLinked(theQueryHandle, theNamePropHandle);
 }
 
@@ -171,7 +169,7 @@ bool Qt3DSDMTimelineItemBinding::IsShy() const
 void Qt3DSDMTimelineItemBinding::SetShy(bool inShy)
 {
     SetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Shy, inShy,
-                    QObject::tr("Shy Toggle"));
+               QObject::tr("Shy Toggle"));
 }
 bool Qt3DSDMTimelineItemBinding::IsLocked() const
 {
@@ -189,7 +187,7 @@ void ToggleChildrenLock(Q3DStudio::ScopedDocumentEditor &scopedDocEditor,
         return;
     for (long i = 0; i < childrenCount; ++i) {
         Qt3DSDMTimelineItemBinding *child =
-            static_cast<Qt3DSDMTimelineItemBinding *>(inTimelineItemBinding->GetChild(i));
+                static_cast<Qt3DSDMTimelineItemBinding *>(inTimelineItemBinding->GetChild(i));
         ToggleChildrenLock(scopedDocEditor, child, inSceneAsset, inLocked);
     }
 }
@@ -214,7 +212,7 @@ bool Qt3DSDMTimelineItemBinding::IsVisible() const
 void Qt3DSDMTimelineItemBinding::SetVisible(bool inVisible)
 {
     SetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball,
-                    inVisible, QObject::tr("Visibility Toggle"));
+               inVisible, QObject::tr("Visibility Toggle"));
 }
 
 // remember the expanded state for the current presentation
@@ -236,9 +234,10 @@ bool Qt3DSDMTimelineItemBinding::HasAction(bool inMaster)
     Qt3DSDMSlideHandle theSlide = theDoc->GetActiveSlide();
     qt3dsdm::ISlideCore &theSlideCore(*m_StudioSystem->GetSlideCore());
     if (theSlideCore.IsSlide(theSlide)) {
-        if (inMaster)
+        if (inMaster) {
             theSlide =
-                m_StudioSystem->GetSlideSystem()->GetMasterSlide(theSlide); // use the master slide
+                    m_StudioSystem->GetSlideSystem()->GetMasterSlide(theSlide); // use the master slide
+        }
 
         m_StudioSystem->GetActionCore()->GetActions(theSlide, m_DataHandle, theActions);
     }
@@ -257,9 +256,10 @@ bool Qt3DSDMTimelineItemBinding::ChildrenHasAction(bool inMaster)
     Qt3DSDMSlideHandle theSlide = theDoc->GetActiveSlide();
     qt3dsdm::ISlideCore &theSlideCore(*m_StudioSystem->GetSlideCore());
     if (theSlideCore.IsSlide(theSlide)) {
-        if (inMaster)
+        if (inMaster) {
             theSlide =
-                m_StudioSystem->GetSlideSystem()->GetMasterSlide(theSlide); // use the master slide
+                    m_StudioSystem->GetSlideSystem()->GetMasterSlide(theSlide); // use the master slide
+        }
 
         TSlideInstancePairList theGraphInstances;
         m_StudioSystem->GetSlideSystem()->GetAssociatedInstances(theSlide, theGraphInstances);
@@ -270,11 +270,11 @@ bool Qt3DSDMTimelineItemBinding::ChildrenHasAction(bool inMaster)
                  theIter != theGraphInstances.end(); ++theIter) {
                 if (theIter->first == theSlide && theBridge->IsActionInstance(theIter->second)) {
                     Qt3DSDMActionHandle theAction =
-                        theActionCore->GetActionByInstance(theIter->second);
+                            theActionCore->GetActionByInstance(theIter->second);
                     SActionInfo theActionInfo = theActionCore->GetActionInfo(theAction);
                     Qt3DSDMInstanceHandle theAcionOwner = theActionInfo.m_Owner;
                     if (theAcionOwner.Valid()
-                        && IsAscendant(theAcionOwner, theObservedInstance, theDoc->GetAssetGraph()))
+                            && IsAscendant(theAcionOwner, theObservedInstance, theDoc->GetAssetGraph()))
                         return true;
                 }
             }
@@ -296,7 +296,7 @@ bool Qt3DSDMTimelineItemBinding::ComponentHasAction(bool inMaster)
 
     Q3DStudio::CId theAssetId = theBridge->GetGUID(m_DataHandle);
     Qt3DSDMSlideHandle theMasterSlide =
-        m_StudioSystem->GetSlideSystem()->GetMasterSlideByComponentGuid(GuidtoSLong4(theAssetId));
+            m_StudioSystem->GetSlideSystem()->GetMasterSlideByComponentGuid(GuidtoSLong4(theAssetId));
 
     TSlideInstancePairList theGraphInstances;
     m_StudioSystem->GetSlideSystem()->GetAssociatedInstances(theMasterSlide, theGraphInstances);
@@ -305,8 +305,9 @@ bool Qt3DSDMTimelineItemBinding::ComponentHasAction(bool inMaster)
          theIter != theGraphInstances.end(); ++theIter) {
         if (((inMaster && theIter->first == theMasterSlide)
              || (!inMaster && theIter->first != theMasterSlide))
-            && theBridge->IsActionInstance(theIter->second))
+                && theBridge->IsActionInstance(theIter->second)) {
             return true;
+        }
     }
     return false;
 }
@@ -323,8 +324,8 @@ Q3DStudio::CString Qt3DSDMTimelineItemBinding::GetName() const
     if (m_StudioSystem->IsInstance(m_DataHandle) == false)
         return L"";
     Qt3DSDMPropertyHandle theNamePropHandle =
-        m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
-                                                                                L"name");
+            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
+                                                                                    L"name");
     SValue theNameValue;
     m_StudioSystem->GetPropertySystem()->GetInstancePropertyValue(m_DataHandle, theNamePropHandle,
                                                                   theNameValue);
@@ -337,35 +338,35 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
 {
     // Display warning dialog if user tried to enter an empty string
     if (inName.IsEmpty()) {
-        Q3DStudio::CString theTitle(::LoadResourceString(IDS_ERROR_OBJECT_RENAME_TITLE));
-        Q3DStudio::CString theString(::LoadResourceString(IDS_ERROR_OBJECT_RENAME_EMPTY_STRING));
-        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString, Qt3DSMessageBox::ICON_ERROR,
-                                                    false);
+        QString theTitle = QObject::tr("Rename Object Error");
+        QString theString = QObject::tr("Object name cannot be an empty string.");
+        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString,
+                                                    Qt3DSMessageBox::ICON_ERROR, false);
 
         return;
     }
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
-        Q3DStudio::CString theTitle(::LoadResourceString(IDS_ERROR_OBJECT_RENAME_TITLE));
-        Q3DStudio::CString theString(
-            ::LoadResourceString(IDS_ERROR_OBJECT_RENAME_DUPLICATED_STRING));
+        QString theTitle = QObject::tr("Rename Object Error");
+        QString theString = QObject::tr("The object name is duplicated under its parent, do you "
+                                        "want to make it unique?");
         int theUserChoice = g_StudioApp.GetDialogs()->DisplayChoiceBox(
-            theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
+                    theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
         if (theUserChoice == QMessageBox::Yes) {
             // Set with the unique name
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
-                ->SetName(m_DataHandle, inName, true);
+                    ->SetName(m_DataHandle, inName, true);
             return;
         }
     }
     // Set the name no matter it's unique or not
     Qt3DSDMPropertyHandle theNamePropHandle =
-        m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
-                                                                                L"name");
+            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
+                                                                                    L"name");
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
-        ->SetInstancePropertyValue(m_DataHandle, theNamePropHandle,
-                                   std::make_shared<CDataStr>(inName));
+            ->SetInstancePropertyValue(m_DataHandle, theNamePropHandle,
+                                       std::make_shared<CDataStr>(inName));
 }
 
 ITimelineItem *Qt3DSDMTimelineItemBinding::GetTimelineItem()
@@ -396,7 +397,7 @@ void Qt3DSDMTimelineItemBinding::OnCollapsed()
         CDoc *theDoc = m_TransMgr->GetDoc();
         qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
         if (theSelectedInstance.Valid()
-            && IsAscendant(theSelectedInstance, theInstance, theDoc->GetAssetGraph()))
+                && IsAscendant(theSelectedInstance, theInstance, theDoc->GetAssetGraph()))
             SetSelected(false);
     }
 }
@@ -479,8 +480,9 @@ long Qt3DSDMTimelineItemBinding::GetPropertyCount()
         for (size_t thePropertyIndex = 0; thePropertyIndex < theProperties.size();
              ++thePropertyIndex) {
             if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
-                    m_DataHandle, theProperties[thePropertyIndex]))
+                        m_DataHandle, theProperties[thePropertyIndex])) {
                 ++theCount;
+            }
         }
     }
     return theCount;
@@ -495,7 +497,7 @@ ITimelineItemProperty *Qt3DSDMTimelineItemBinding::GetProperty(long inIndex)
     size_t thePropertyIndex = 0;
     for (; thePropertyIndex < theProperties.size(); ++thePropertyIndex) {
         if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
-                m_DataHandle, theProperties[thePropertyIndex])) {
+                    m_DataHandle, theProperties[thePropertyIndex])) {
             ++theIndex;
             if (theIndex == inIndex)
                 break;
@@ -509,15 +511,17 @@ bool Qt3DSDMTimelineItemBinding::ShowToggleControls() const
 {
     return true;
 }
+
 bool Qt3DSDMTimelineItemBinding::IsLockedEnabled() const
 {
     return IsLocked();
 }
+
 bool Qt3DSDMTimelineItemBinding::IsVisibleEnabled() const
 {
     // You can only toggle visible if you aren't on the master slide.
     return m_StudioSystem->GetSlideSystem()->GetSlideIndex(m_TransMgr->GetDoc()->GetActiveSlide())
-        != 0;
+            != 0;
 }
 
 void Qt3DSDMTimelineItemBinding::Bind(CBaseStateRow *inRow)
@@ -532,7 +536,7 @@ void Qt3DSDMTimelineItemBinding::Bind(CBaseStateRow *inRow)
                                                                         theProperties);
     for (size_t thePropertyIndex = 0; thePropertyIndex < theProperties.size(); ++thePropertyIndex) {
         if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
-                m_DataHandle, theProperties[thePropertyIndex]))
+                    m_DataHandle, theProperties[thePropertyIndex]))
             AddKeyframes(GetOrCreatePropertyBinding(theProperties[thePropertyIndex]));
     }
 
@@ -586,14 +590,14 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
                 // This may include behavior assets which may be directly attached to the Scene.
                 // This is because by principal, components cannot exist on the Scene directly.
                 qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
-                    theBridge->GetParentInstance(theInstance);
+                        theBridge->GetParentInstance(theInstance);
                 if (theObjectType != OBJTYPE_LAYER && theObjectType != OBJTYPE_SCENE
-                    && theObjectType != OBJTYPE_MATERIAL && theObjectType != OBJTYPE_IMAGE
-                    && theObjectType != OBJTYPE_EFFECT
-                    && (theParentInstance.Valid()
-                        && theBridge->GetObjectType(theParentInstance)
+                        && theObjectType != OBJTYPE_MATERIAL && theObjectType != OBJTYPE_IMAGE
+                        && theObjectType != OBJTYPE_EFFECT
+                        && (theParentInstance.Valid()
+                            && theBridge->GetObjectType(theParentInstance)
                             != OBJTYPE_SCENE)) // This checks if the object is
-                                               // AttachedToSceneDirectly
+                    // AttachedToSceneDirectly
                 {
                     theCanMakeFlag = true;
                 }
@@ -649,7 +653,7 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     } break;
     case EUserTransaction_Cut: {
         theDispatch.FireOnAsynchronousCommand(
-            std::bind(DoCut, std::ref(*theDoc), theInstances));
+                    std::bind(DoCut, std::ref(*theDoc), theInstances));
     } break;
     case EUserTransaction_Copy: {
         theDoc->DeselectAllKeyframes();
@@ -661,11 +665,11 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     } break;
     case EUserTransaction_Delete: {
         theDispatch.FireOnAsynchronousCommand(
-            std::bind(DoDelete, std::ref(*theDoc), theInstances));
+                    std::bind(DoDelete, std::ref(*theDoc), theInstances));
     } break;
     case EUserTransaction_MakeComponent: {
         theDispatch.FireOnAsynchronousCommand(
-            std::bind(DoMakeComponent, std::ref(*theDoc), theInstances));
+                    std::bind(DoMakeComponent, std::ref(*theDoc), theInstances));
     }
     default: // not handled
         break;
@@ -699,7 +703,7 @@ void Qt3DSDMTimelineItemBinding::LoadProperties()
                                                                         theProperties);
     for (size_t thePropertyIndex = 0; thePropertyIndex < theProperties.size(); ++thePropertyIndex) {
         if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
-                m_DataHandle, theProperties[thePropertyIndex]))
+                    m_DataHandle, theProperties[thePropertyIndex]))
             AddPropertyRow(theProperties[thePropertyIndex], true);
     }
 }
@@ -725,9 +729,10 @@ void Qt3DSDMTimelineItemBinding::DeleteAllChannelKeyframes()
     Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Delete Channel Keyframes", __FILE__,
                                            __LINE__);
     for (TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.begin(),
-                                       theEnd = m_PropertyBindingMap.end();
-         theIter != theEnd; ++theIter)
+         theEnd = m_PropertyBindingMap.end();
+         theIter != theEnd; ++theIter) {
         theIter->second->DeleteAllKeys();
+    }
 }
 
 long Qt3DSDMTimelineItemBinding::GetKeyframeCount() const
@@ -797,13 +802,13 @@ void Qt3DSDMTimelineItemBinding::OnEndDataModelNotifications()
     RefreshStateRow();
 }
 void Qt3DSDMTimelineItemBinding::OnImmediateRefreshInstanceSingle(
-    qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+        qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (inInstance == m_DataHandle)
         RefreshStateRow(true);
 }
 void Qt3DSDMTimelineItemBinding::OnImmediateRefreshInstanceMultiple(
-    qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+        qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
 {
     for (long idx = 0; idx < inInstanceCount; ++idx)
         if (inInstance[idx] == m_DataHandle) {
@@ -823,7 +828,7 @@ void Qt3DSDMTimelineItemBinding::RefreshStateRow(bool inRefreshChildren)
             for (long theIndex = 0; theIndex < theChildrenCount; ++theIndex) {
                 ITimelineItemBinding *theChild = GetChild(theIndex);
                 Qt3DSDMTimelineItemBinding *theBinding =
-                    dynamic_cast<Qt3DSDMTimelineItemBinding *>(theChild);
+                        dynamic_cast<Qt3DSDMTimelineItemBinding *>(theChild);
                 if (theBinding)
                     theBinding->RefreshStateRow(inRefreshChildren);
             }
@@ -856,7 +861,7 @@ Qt3DSDMTimelineItemBinding::GetOrCreatePropertyBinding(Qt3DSDMPropertyHandle inP
 
     // Create
     Qt3DSDMTimelineItemProperty *theTimelineProperty =
-        new Qt3DSDMTimelineItemProperty(m_TransMgr, inPropertyHandle, m_DataHandle);
+            new Qt3DSDMTimelineItemProperty(m_TransMgr, inPropertyHandle, m_DataHandle);
     m_PropertyBindingMap.insert(std::make_pair(inPropertyHandle, theTimelineProperty));
 
     return theTimelineProperty;
@@ -869,7 +874,7 @@ Qt3DSDMTimelineItemBinding::GetOrCreatePropertyBinding(Qt3DSDMPropertyHandle inP
  * loading/initializing step, where the call is already done in order )
  */
 void Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inPropertyHandle,
-                                               bool inAppend /*= false */)
+                                                bool inAppend /*= false */)
 {
     ITimelineItemProperty *theTimelineProperty = GetPropertyBinding(inPropertyHandle);
     if (theTimelineProperty && theTimelineProperty->GetRow()) // if created, bail
@@ -897,7 +902,7 @@ void Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inProperty
         // to a existing propertyrow
         for (; thePropertyIndex < thePropertyCount; ++thePropertyIndex) {
             TPropertyBindingMap::iterator theNextPropIter =
-                m_PropertyBindingMap.find(theProperties[thePropertyIndex]);
+                    m_PropertyBindingMap.find(theProperties[thePropertyIndex]);
             if (theNextPropIter != m_PropertyBindingMap.end()) {
                 theNextProperty = theNextPropIter->second;
                 break;
@@ -933,8 +938,8 @@ void Qt3DSDMTimelineItemBinding::RemovePropertyRow(Qt3DSDMPropertyHandle inPrope
 
 // called when a keyframe is inserted, deleted or updated in the data model
 void Qt3DSDMTimelineItemBinding::RefreshPropertyKeyframe(
-    qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
-    ETimelineKeyframeTransaction inTransaction)
+        qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
+        ETimelineKeyframeTransaction inTransaction)
 {
     TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.find(inPropertyHandle);
     if (theIter != m_PropertyBindingMap.end()) {
@@ -1048,7 +1053,7 @@ void Qt3DSDMTimelineItemBinding::DoSelectKeyframes(bool inSelected, long inTime,
             theKeyIter->SetSelected(inSelected);
     } else {
         Qt3DSDMAssetTimelineKeyframe *theKeyframe =
-            dynamic_cast<Qt3DSDMAssetTimelineKeyframe *>(GetKeyframeByTime(inTime));
+                dynamic_cast<Qt3DSDMAssetTimelineKeyframe *>(GetKeyframeByTime(inTime));
         if (theKeyframe)
             theKeyframe->SetSelected(inSelected);
     }
@@ -1075,15 +1080,15 @@ void Qt3DSDMTimelineItemBinding::OnPropertySelection(long inTime)
         TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.begin();
         for (; theIter != m_PropertyBindingMap.end(); ++theIter) {
             IKeyframe *theKeyframe = theIter->second->GetKeyframeByTime(inTime);
-            if (theKeyframe && !theKeyframe->IsSelected()) // done, i.e selection remain unchanged.
-            {
+            if (theKeyframe && !theKeyframe->IsSelected()) {
+                // done, i.e selection remain unchanged.
                 theAllSelectedFlag = false;
                 break;
             }
         }
         if (theAssetKeyframe->IsSelected() != theAllSelectedFlag) {
             dynamic_cast<Qt3DSDMAssetTimelineKeyframe *>(theAssetKeyframe)
-                ->SetSelected(theAllSelectedFlag);
+                    ->SetSelected(theAllSelectedFlag);
             // Update UI
             if (m_Row)
                 m_Row->GetTimebar()->SelectKeysByTime(inTime, theAllSelectedFlag);
@@ -1100,7 +1105,7 @@ Q3DStudio::CId Qt3DSDMTimelineItemBinding::GetGuid() const
                                                     theValue)) {
         SLong4 theLong4 = qt3dsdm::get<SLong4>(theValue);
         return Q3DStudio::CId(theLong4.m_Longs[0], theLong4.m_Longs[1], theLong4.m_Longs[2],
-                              theLong4.m_Longs[3]);
+                theLong4.m_Longs[3]);
     }
     return Q3DStudio::CId();
 }
@@ -1109,7 +1114,7 @@ Q3DStudio::CId Qt3DSDMTimelineItemBinding::GetGuid() const
 //@param inSkipPropertyBinding property that to skip, e.g. in cases where property is deleted
 //@return true if there are asset keyframes deleted.
 bool Qt3DSDMTimelineItemBinding::DeleteAssetKeyframesWhereApplicable(
-    ITimelineItemProperty *inSkipPropertyBinding /*= nullptr */)
+        ITimelineItemProperty *inSkipPropertyBinding /*= nullptr */)
 {
     // iterate through m_Keyframes because we cannot obtain time information from the Animation
     // keyframes anymore, since they are deleted.
@@ -1118,8 +1123,10 @@ bool Qt3DSDMTimelineItemBinding::DeleteAssetKeyframesWhereApplicable(
         TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.begin();
         for (; theIter != m_PropertyBindingMap.end(); ++theIter) {
             if ((!inSkipPropertyBinding || theIter->second != inSkipPropertyBinding)
-                && theIter->second->GetKeyframeByTime(m_Keyframes[theIndex].GetTime())) // done!
+                    && theIter->second->GetKeyframeByTime(m_Keyframes[theIndex].GetTime())) {
+                // done!
                 break;
+            }
         }
         if (theIter == m_PropertyBindingMap.end())
             theDeleteIndicesList.push_back((long)theIndex);
@@ -1150,7 +1157,7 @@ void Qt3DSDMTimelineItemBinding::AddKeyframes(ITimelineItemProperty *inPropertyB
 
 // Update the asset keyframes based on the properties' keyframes.
 void Qt3DSDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
-                                               ETimelineKeyframeTransaction inTransaction)
+                                                ETimelineKeyframeTransaction inTransaction)
 {
     bool theDoAddFlag = (inTransaction == ETimelineKeyframeTransaction_Add);
     bool theDoDeleteFlag = (inTransaction == ETimelineKeyframeTransaction_Delete);
@@ -1159,7 +1166,7 @@ void Qt3DSDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
     if (inTransaction == ETimelineKeyframeTransaction_Update) {
         theDoAddFlag = inKeyframe && !GetKeyframeByTime(inKeyframe->GetTime());
         theDoDeleteFlag = true; // plus, since we don't keep track of indiviual property keyframes
-                                // here, iterate and make sure list is correct.
+        // here, iterate and make sure list is correct.
     }
 
     if (theDoDeleteFlag)
@@ -1177,7 +1184,7 @@ void Qt3DSDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
                 if (theTime == theKeyframeTime) {
                     theAppend = false;
                     break; // already exists, we are done. Because we only need 1 to represent ALL
-                           // properties
+                    // properties
                 }
             }
             if (theAppend)
@@ -1185,10 +1192,10 @@ void Qt3DSDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
         }
     }
     if (m_Row && (theDoAddFlag
-                  || inTransaction == ETimelineKeyframeTransaction_DynamicChanged)) // dynamic =>
-                                                                                    // only UI needs
-                                                                                    // to refresh
+                  || inTransaction == ETimelineKeyframeTransaction_DynamicChanged)) {
+        // dynamic => only UI needs to refresh
         m_Row->GetTimebar()->SetDirty(true);
+    }
 }
 
 void Qt3DSDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
@@ -1199,7 +1206,7 @@ void Qt3DSDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
 
     qt3dsdm::Qt3DSDMSlideHandle theSlide = theSlideSystem->GetAssociatedSlide(inInstance);
     if (theBridge->IsInActiveComponent(inInstance)
-        && (theSlideSystem->IsMasterSlide(theSlide) || theSlide == theDoc->GetActiveSlide())) {
+            && (theSlideSystem->IsMasterSlide(theSlide) || theSlide == theDoc->GetActiveSlide())) {
         // Only add if the asset is in the current active component, and it's a master asset or in
         // the current slide
         ITimelineItemBinding *theNextItem = nullptr;
@@ -1249,7 +1256,7 @@ bool Qt3DSDMTimelineItemBinding::OpenSourcePathFile()
     qt3dsdm::IPropertySystem *thePropertySystem = m_StudioSystem->GetPropertySystem();
     SValue theValue;
     if (thePropertySystem->GetInstancePropertyValue(
-            m_DataHandle, theClientBridge->GetSourcePathProperty(), theValue)) {
+                m_DataHandle, theClientBridge->GetSourcePathProperty(), theValue)) {
         // Open the respective file
         Q3DStudio::CFilePath theSourcePath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData());
         Qt3DSFile theFile(m_TransMgr->GetDoc()->GetResolvedPathToDoc(theSourcePath));

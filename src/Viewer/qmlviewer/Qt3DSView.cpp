@@ -129,6 +129,9 @@ void Q3DSView::componentComplete()
     m_viewerSettings->d_ptr->setCommandQueue(&m_pendingCommands);
     m_presentation->d_ptr->setCommandQueue(&m_pendingCommands);
 
+    // Ensure qml stream proxy gets created on main thread
+    m_presentation->d_ptr->streamProxy();
+
     QQuickFramebufferObject::componentComplete();
 }
 

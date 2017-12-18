@@ -77,3 +77,27 @@ Run subproject Q3DStudio under Authoring
 Quick Viewer example:
 Open <path to qt3dstudio repo>\examples\qmldynamickeyframes\qmldynamickeyframes.pro in Qt Creator
 and build it. Done!
+
+6. Application deployment on Qt for Device Creation (Boot2Qt)
+
+The deployment of applications using Qt 3D Studio happens in the same way as any other
+application, depending on the used device. Follow the instructions on the
+Qt for Device Creation homepage: http://doc.qt.io/QtForDeviceCreation.
+
+7. Building and deploying on Android
+
+Building Qt3DStudio:
+- Go to "Projects" > "Build"
+    - Add Build step: mingw32-make install
+    - Disable "Make install" and "Build Android APK"
+- Build normally
+
+Building an application:
+- Go to "Projects" > "Build"
+    - Click "Build Android APK" > "Details" > "Create templates"
+    - Enable "Make install" and "Build Android APK"
+- Build normally
+
+Deploying an application:
+- Deploy normally (in "Edit" view, right click on project > "Deploy" or from menu "Build" >
+  "Deploy Project").

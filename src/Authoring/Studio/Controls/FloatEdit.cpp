@@ -32,10 +32,7 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "Strings.h"
 
-#include "StringTokenizer.h"
-#include "StringLoader.h"
 //==============================================================================
 //	Include
 //==============================================================================
@@ -46,7 +43,7 @@
 #include "ControlData.h"
 #include "Qt3DSMath.h"
 
-#include <QApplication>
+#include <QtWidgets/qapplication.h>
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
 // the template generator go blah
 
@@ -74,10 +71,10 @@ CFloatEdit::CFloatEdit()
     // to register any events. Registering minus here will prevent it from working for zooming
     // out in the timeline.
     // TODO: This whole class will most likely be removed when timeline is converted to Qt.
-//    m_CommandHandler.RegisterKeyEvent(
-//        new CDynHotKeyConsumer<CFloatEdit>(this, &CFloatEdit::AddCharNegative), 0, '-');
-//    m_CommandHandler.RegisterKeyEvent(
-//        new CDynHotKeyConsumer<CFloatEdit>(this, &CFloatEdit::AddCharPeriod), 0, '.');
+    //    m_CommandHandler.RegisterKeyEvent(
+    //        new CDynHotKeyConsumer<CFloatEdit>(this, &CFloatEdit::AddCharNegative), 0, '-');
+    //    m_CommandHandler.RegisterKeyEvent(
+    //        new CDynHotKeyConsumer<CFloatEdit>(this, &CFloatEdit::AddCharPeriod), 0, '.');
 }
 
 //==============================================================================
@@ -90,16 +87,14 @@ CFloatEdit::~CFloatEdit()
 
 void CFloatEdit::AddCharNegative()
 {
-    Q3DStudio::CString theMinusString = ::LoadResourceString(IDS_CONTROLS_FLOAT_MINUS);
-    unsigned int theMinus = theMinusString[0];
+    unsigned int theMinus = '-';
 
     InsertChar(theMinus);
 }
 
 void CFloatEdit::AddCharPeriod()
 {
-    Q3DStudio::CString thePeriodString = ::LoadResourceString(IDS_CONTROLS_FLOAT_PERIOD);
-    unsigned int thePeriod = thePeriodString[0];
+    unsigned int thePeriod = '.';
 
     InsertChar(thePeriod);
 }
@@ -180,27 +175,25 @@ bool CFloatEdit::CanAcceptChar(const Q3DStudio::CString &inCheckString, unsigned
                                unsigned int inPosition)
 {
     bool theRetVal = false;
-    Q3DStudio::CString thePeriodString = ::LoadResourceString(IDS_CONTROLS_FLOAT_PERIOD);
-    Q3DStudio::CString theMinusString = ::LoadResourceString(IDS_CONTROLS_FLOAT_MINUS);
 
-    unsigned int thePeriod = thePeriodString[0];
-    unsigned int theMinus = theMinusString[0];
+    unsigned int thePeriod = '.';
+    unsigned int theMinus = '-';
 
     if ((CTextEdit::CanAcceptChar(inCheckString, inChar, inPosition) && inCheckString.Length() < 10)
-        || inChar == thePeriod || inChar == theMinus) {
+            || inChar == thePeriod || inChar == theMinus) {
         if (inChar >= '0' && inChar <= '9')
             theRetVal = true;
         if (!theRetVal) {
             if (thePeriod == inChar) {
                 if (inCheckString.Find(char(thePeriod)) == Q3DStudio::CString::ENDOFSTRING)
                     theRetVal = true;
-                else {
+                else
                     theRetVal = false;
-                }
             } else if (theMinus == inChar) {
                 if ((inCheckString.Find(char(theMinus)) == Q3DStudio::CString::ENDOFSTRING)
-                    && (inPosition == 0))
+                        && (inPosition == 0)) {
                     theRetVal = true;
+                }
             }
         }
     }
@@ -316,7 +309,7 @@ void CFloatEdit::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
             // If moved outside of the safety zone start dragging the value.
             if (::labs(inPoint.y - m_MouseStartPos.y) > 2) {
                 m_Trapping = true;
-// In Mac there's no infinite mouse, so don't hide it.
+                // In Mac there's no infinite mouse, so don't hide it.
                 setCursorIfNotSet(CMouseCursor::CURSOR_BLANK);
             }
         }
@@ -336,8 +329,9 @@ void CFloatEdit::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
             m_StartDragVal = GetData();
         }
-    } else
+    } else {
         CTextEdit::OnMouseMove(inPoint, inFlags);
+    }
 }
 
 void CFloatEdit::SetFloatValue(float inValue)
@@ -506,8 +500,9 @@ bool CFloatEdit::Validate(const Q3DStudio::CString &inString)
         if (!CanAcceptChar(theCheckString, theTemp[0], theIter)) {
             theRetVal = false;
             break;
-        } else
+        } else {
             theCheckString += inString.Extract(theIter, 1);
+        }
     }
 
     return theRetVal;

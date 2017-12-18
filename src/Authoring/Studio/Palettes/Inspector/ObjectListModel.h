@@ -33,6 +33,7 @@
 #include <QAbstractListModel>
 
 #include "Qt3DSDMHandles.h"
+#include "StudioObjectTypes.h"
 
 class IObjectReferenceHelper;
 class CCore;
@@ -66,6 +67,10 @@ public:
     QModelIndex indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle,
                                const QModelIndex &startIndex = {}) const;
 
+    bool selectable(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
+
+    void excludeObjectTypes(const QVector<EStudioObjectType> &types);
+
 private:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
@@ -78,6 +83,7 @@ private:
     qt3dsdm::Qt3DSDMSlideHandle m_slideHandle;
     qt3dsdm::Qt3DSDMInstanceHandle m_baseHandle;
     IObjectReferenceHelper *m_objRefHelper;
+    QVector<EStudioObjectType> m_excludeTypes;
 };
 
 class FlatObjectListModel : public QAbstractListModel

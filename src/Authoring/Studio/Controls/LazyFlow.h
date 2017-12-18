@@ -65,12 +65,7 @@ namespace Control {
             long curSum = GetSummedVariable(inCurrentSum);
             long nextSum = GetSummedVariable(inOther);
             long resultSum = SafeSum(curSum, nextSum);
-#ifdef WIN32
-            // windows.h redefines max
-            long resultMax = max(GetMaxedVariable(inCurrentSum), GetMaxedVariable(inOther));
-#else
-            long resultMax = std::max(GetMaxedVariable(inCurrentSum), GetMaxedVariable(inOther));
-#endif
+            long resultMax = qMax(GetMaxedVariable(inCurrentSum), GetMaxedVariable(inOther));
             return ToPoint(resultSum, resultMax);
         }
         // Return the summed variable

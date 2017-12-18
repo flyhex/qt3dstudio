@@ -31,8 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "StudioDefs.h"
-#include "Strings.h"
-#include "StringLoader.h"
 #include "qtAuthoring-config.h"
 
 //==============================================================================
@@ -43,6 +41,12 @@
 #include "StudioPreferences.h"
 
 #include <QtGui/qpalette.h>
+
+#ifdef QT3DSTUDIO_REVISION
+#define STRINGIFY_INTERNAL(x) #x
+#define STRINGIFY(x) STRINGIFY_INTERNAL(x)
+const char *const QT3DSTUDIO_REVISION_STR = STRINGIFY(QT3DSTUDIO_REVISION);
+#endif
 
 //==============================================================================
 /**
@@ -81,62 +85,97 @@ void CAboutDlg::paintEvent(QPaintEvent* event)
     setFixedSize(size());
 }
 
+static QString compilerString()
+{
+#if defined(Q_CC_CLANG) // must be before GNU, because clang claims to be GNU too
+    QString isAppleString;
+#if defined(__apple_build_version__) // Apple clang has other version numbers
+    isAppleString = QStringLiteral(" (Apple)");
+#endif
+    return QStringLiteral("Clang " ) + QString::number(__clang_major__) + QStringLiteral(".")
+            + QString::number(__clang_minor__) + isAppleString;
+#elif defined(Q_CC_GNU)
+    return QStringLiteral("GCC " ) + QStringLiteral(__VERSION__);
+#elif defined(Q_CC_MSVC)
+    if (_MSC_VER > 1999)
+        return QStringLiteral("MSVC <unknown>");
+    if (_MSC_VER >= 1910)
+        return QStringLiteral("MSVC 2017");
+    if (_MSC_VER >= 1900)
+        return QStringLiteral("MSVC 2015");
+#endif
+    return QStringLiteral("<unknown compiler>");
+}
+
 void CAboutDlg::OnInitDialog()
 {
     // Set the Studio version
-    m_ProductVersionStr.Format(
-        ::LoadResourceString(IDS_UIC_STUDIO_VERSION),
-        static_cast<const wchar_t *>(CStudioPreferences::GetVersionString()));
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
+            + CStudioPreferences::GetVersionString().toQString();
 
     // Set the copyright string
-    m_CopyrightStr.Format(::LoadResourceString(IDS_ABOUT_COPYRIGHT),
-                          static_cast<const wchar_t *>(Q3DStudio::CString(STUDIO_COPYRIGHT_YEAR)));
+    m_CopyrightStr = QObject::tr("Copyright (C) %1 The Qt Company. All rights reserved.").arg(
+                QString(STUDIO_COPYRIGHT_YEAR));
 
     // Set the credit strings
 #ifdef QT_3DSTUDIO_FBX
-    m_Credit1Str.Format(::LoadResourceString(IDS_ABOUT_FBX_CREDIT));
-#endif
-
-#ifdef STUDIOSTORYNUM
-    m_ProductVersionStr += " (Story #";
-    m_ProductVersionStr += STUDIOSTORYNUM;
-    m_ProductVersionStr += ")";
-#endif
-
-#ifdef BETA
-    // Add "beta" to the Studio version if necessary
-    m_ProductVersionStr += " BETA";
+    m_Credit1Str = QObject::tr("This software contains Autodesk(R) FBX(R) code developed by "
+                               "Autodesk, Inc. Copyright 2014 Autodesk, Inc. All rights, reserved. "
+                               "Such code is provided 'as is' and Autodesk, Inc. disclaims any "
+                               "and all warranties, whether express or implied, including without "
+                               "limitation the implied warranties of merchantability, fitness for "
+                               "a particular purpose or non-infringement of third party rights. "
+                               "In no event shall Autodesk, Inc. be liable for any direct, "
+                               "indirect, incidental, special, exemplary, or consequential "
+                               "damages (including, but not limited to, procurement of "
+                               "substitute goods or services; loss of use, data, or profits; or "
+                               "business interruption) however caused and on any theory of "
+                               "liability, whether in contract, strict liability, or tort "
+                               "(including negligence or otherwise) arising in any way out of "
+                               "such code.");
 #endif
 
     // Add link to Web site
-    Q3DStudio::CString theURL(::LoadResourceString(IDS_HELP_VISIT_QT));
+    QString theURL(QStringLiteral("https://www.qt.io/3d-studio"));
 
     m_ui->m_WebSite->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
-                                 theURL.toQString(),
+                                 theURL,
                                  CStudioPreferences::GetMasterColor().GetString().toQString(),
-                                 theURL.toQString()));
-    m_ui->m_WebSite->setToolTip(::LoadResourceString(IDS_WEBSITELINK).toQString());
+                                 theURL));
+    m_ui->m_WebSite->setToolTip(tr("Click to visit Qt web site"));
     m_ui->m_WebSite->setOpenExternalLinks(true);
 
     // Add link to support address
-    Q3DStudio::CString theSupport;
-
-    theSupport = ::LoadResourceString(IDS_SUPPORTEMAIL);
+    const QString theSupport = QStringLiteral("https://account.qt.io/support");
 
     m_ui->m_Email->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
-                               theSupport.toQString(),
+                               theSupport,
                                CStudioPreferences::GetMasterColor().GetString().toQString(),
-                               theSupport.toQString()));
-    m_ui->m_Email->setToolTip(::LoadResourceString(IDS_SUPPORTEMAIL_TEXT).toQString());
+                               theSupport));
+    m_ui->m_Email->setToolTip(tr("Send a Studio support request to the Qt Company"));
     m_ui->m_Email->setOpenExternalLinks(true);
 
     // Make the font bold for version number
     m_ui->m_ProductVersion->setStyleSheet("font-weight: bold;");
 
-    m_ui->m_ProductVersion->setText(m_ProductVersionStr.toQString());
-    m_ui->m_Copyright->setText(m_CopyrightStr.toQString());
-    m_ui->m_Credit1->setText(m_Credit1Str.toQString());
+    m_ui->m_ProductVersion->setText(m_ProductVersionStr);
+    m_ui->m_Copyright->setText(m_CopyrightStr);
+    m_ui->m_Credit1->setText(m_Credit1Str);
 
-    // We don't currently have secondary credit, so clear that
-    m_ui->m_Credit2->setText(QString());
+    // Information about build
+    m_ui->m_buildTimestamp->setText(
+                tr("Built on %1 %2").arg(QStringLiteral(__DATE__), QStringLiteral(__TIME__)));
+    m_ui->m_qtVersion->setText(
+                tr("Based on Qt %1 (%2, %3 bit)").arg(
+                    QString::fromLatin1(qVersion()),
+                    compilerString(),
+                    QString::number(QSysInfo::WordSize)));
+#ifdef QT3DSTUDIO_REVISION
+    m_ui->m_revisionSHA->setText(
+                tr("From revision %1").arg(
+                    QString::fromLatin1(QT3DSTUDIO_REVISION_STR).left(10)));
+#else
+    m_ui->m_revisionSHA->setText(QString());
+    m_ui->m_revisionSHA->setMaximumHeight(0);
+#endif
 }

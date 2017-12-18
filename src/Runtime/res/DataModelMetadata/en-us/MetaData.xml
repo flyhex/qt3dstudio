@@ -29,9 +29,6 @@
                 <Handler name="Emit Signal" category="Asset" description="Emit a Signal.">
                         <Argument name="Signal Name" description="The signal to emit" type="String" argumentType="Signal" />
                 </Handler>
-                <Handler name="Play Sound" category="Asset" description="Play a sound file.">
-                        <Argument name="Sound File" description="The sound file to play" type="String" argumentType="Sound" />
-                </Handler>
         </Asset>
         <Behavior>
                 <Property name="name" formalName="Name" type="String" default="Behavior" hidden="True" />
@@ -219,7 +216,7 @@
                 <Property name="castshadow" formalName="Cast Shadows?" description="Enable shadow casting for this light" type="Boolean" default="False"/>
                 <Property name="shdwfactor" formalName="Shadow Darkness" description="Factor used to darken shadows" default="10.0" min="1.0" max="100.0" />
                 <Property name="shdwfilter" formalName="Shadow Softness" description="Width of the blur filter on the shadow map" min="1" max="100" default="35" />
-                <Property name="shdwmapres" formalName="Shadow Resolution" description="Resolution of shadow map (powers of two)" type="ShadowMapResolution" />
+                <Property name="shdwmapres" formalName="Shadow Resolution" description="Resolution of shadow map (powers of two)" type="ShadowMapResolution" default="9" animatable="False" />
                 <Property name="shdwbias" formalName="Shadow Depth Bias" description="Slight offset to avoid self-shadowing artifacts" default="0" min="-1.0" max="1.0" />
                 <Property name="shdwmapfar" formalName="Shadow Far Clip" description="Affects the maximum distance for the shadow depth map" default="5000" />
                 <Property name="shdwmapfov" formalName="Shadow Field of View" description="Affects the field of view of the shadow camera" default="90" min="1" max="179" />
@@ -447,4 +444,10 @@
                 <Property name="leading" formalName="Leading" description="Leading" />
                 <Property name="tracking" formalName="Tracking" description="Tracking" />
         </Text>
+        <DataInput>
+          <Property name="name" formalName="Name" type="String" default="DataInput" hidden="True" />
+          <Property name="timefrom" formalName="Time from" type="Long" description="Datainput incoming value corresponding to playhead time zero" animatable="False" />
+          <Property name="timeto" formalName="Time to" type="Long" description="Datainput incoming value corresponding to playhead end" animatable="False" />
+          <Property name="controlledelemprop" formalName="Controlled Element-Properties" type="String" description ="Element/properties connected to this data input" animatable="False" default="" />
+        </DataInput>
 </MetaData>

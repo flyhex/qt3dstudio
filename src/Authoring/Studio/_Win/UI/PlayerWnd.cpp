@@ -72,7 +72,7 @@ CPlayerWnd::CPlayerWnd(QWidget *parent)
     m_LastKnownMousePosition = QPoint(-1, -1);
 
     setAcceptDrops(true);
-    RegiserForDnd(this);
+    RegisterForDnd(this);
     AddMainFlavor(QT3DS_FLAVOR_FILE);
     AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
     AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);

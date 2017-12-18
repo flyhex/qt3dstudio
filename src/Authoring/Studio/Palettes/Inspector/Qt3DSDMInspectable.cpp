@@ -50,8 +50,6 @@
 #include "Qt3DSDMMetaData.h"
 #include "Qt3DSDMSlides.h"
 #include "IDocumentReader.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 using namespace qt3dsdm;
 
@@ -60,8 +58,8 @@ using namespace qt3dsdm;
  *	Constructor
  */
 Qt3DSDMInspectable::Qt3DSDMInspectable(CStudioApp &inApp, CCore *inCore,
-                                     qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                     qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance /*= 0*/)
+                                       qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                       qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance)
     : CInspectableBase(inCore)
     , m_Instance(inInstance)
     , m_DualPersonalityInstance((inDualPersonalityInstance != 0) ? inDualPersonalityInstance
@@ -78,7 +76,7 @@ Qt3DSDMInspectable::Qt3DSDMInspectable(CStudioApp &inApp, CCore *inCore,
 Q3DStudio::CString Qt3DSDMInspectable::GetName()
 {
     CClientDataModelBridge *theBridge =
-        m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+            m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 
     if (m_Instance == m_DualPersonalityInstance)
         return theBridge->GetName(m_Instance);
@@ -99,9 +97,9 @@ long Qt3DSDMInspectable::GetGroupCount()
 {
     // If you have a dual personality inspectable then you may overwrite
     QT3DS_ASSERT(
-        m_Instance == m_DualPersonalityInstance
-        || m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsComponentInstance(
-               m_Instance));
+                m_Instance == m_DualPersonalityInstance
+                || m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()
+                ->IsComponentInstance(m_Instance));
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
     long count = (long)theMetaData.GetGroupCountForInstance(m_Instance);
     return count;
@@ -114,7 +112,7 @@ long Qt3DSDMInspectable::GetGroupCount()
 CInspectorGroup *Qt3DSDMInspectable::GetGroup(long inIndex)
 {
     Qt3DSDMInspectorGroup *theGroup =
-        new Qt3DSDMInspectorGroup(m_App, GetGroupName(inIndex).toQString(), *this, inIndex);
+            new Qt3DSDMInspectorGroup(m_App, GetGroupName(inIndex), *this, inIndex);
 
     TMetaDataPropertyHandleList theProperties = GetGroupProperties(inIndex);
 
@@ -135,10 +133,10 @@ TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
     theMetaData.GetMetaDataProperties(GetGroupInstance(inIndex), retval);
     qt3dsdm::IPropertySystem &thePropertySystem(
-        *m_Core->GetDoc()->GetStudioSystem()->GetPropertySystem());
+                *m_Core->GetDoc()->GetStudioSystem()->GetPropertySystem());
     // get name of the current group fofr filtering
     Option<qt3dsdm::TCharStr> theGroupFilterName =
-        theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(inIndex), inIndex);
+            theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(inIndex), inIndex);
     long theGroupCount = GetGroupCount();
 
     // end is explicitly required
@@ -148,29 +146,31 @@ TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
             --idx;
         } else if (theGroupCount > 1 && theGroupFilterName.hasValue()
                    && theMetaData.GetMetaDataPropertyInfo(retval[idx])->m_GroupName
-                       != theGroupFilterName) {
+                   != theGroupFilterName) {
             retval.erase(retval.begin() + idx);
             --idx;
         } else {
             qt3ds::foundation::NVConstDataRef<SPropertyFilterInfo> theFilters(
-                theMetaData.GetMetaDataPropertyFilters(retval[idx]));
+                        theMetaData.GetMetaDataPropertyFilters(retval[idx]));
             if (theFilters.size()) {
                 Option<bool> keepProperty;
                 // The tests are done in an ambiguous way.  Really, show if equal should take
                 // multiple conditions
                 // as should hide if equal.  They do not, so we need to rigorously define exactly
                 // how those two interact.
-                for (QT3DSU32 propIdx = 0, propEnd = theFilters.size(); propIdx < propEnd; ++propIdx) {
+                for (QT3DSU32 propIdx = 0, propEnd = theFilters.size(); propIdx < propEnd;
+                     ++propIdx) {
                     const SPropertyFilterInfo &theFilter(theFilters[propIdx]);
 
                     QT3DS_ASSERT(theFilter.m_FilterType == PropertyFilterTypes::ShowIfEqual
-                              || theFilter.m_FilterType == PropertyFilterTypes::HideIfEqual);
+                                 || theFilter.m_FilterType == PropertyFilterTypes::HideIfEqual);
 
                     SValue theValue;
                     thePropertySystem.GetInstancePropertyValue(
-                        GetGroupInstance(inIndex), theFilter.m_FilterProperty, theValue);
+                                GetGroupInstance(inIndex), theFilter.m_FilterProperty, theValue);
                     bool resultIfTrue =
-                        theFilter.m_FilterType == PropertyFilterTypes::ShowIfEqual ? true : false;
+                            theFilter.m_FilterType == PropertyFilterTypes::ShowIfEqual
+                            ? true : false;
                     if (Equals(theValue.toOldSkool(), theFilter.m_Value.toOldSkool())) {
                         keepProperty = resultIfTrue;
                         break;
@@ -192,7 +192,7 @@ TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
 /**
  *	Return the Resource String ID for the Group Name, given the group index
  */
-Q3DStudio::CString Qt3DSDMInspectable::GetGroupName(long inGroupIndex)
+QString Qt3DSDMInspectable::GetGroupName(long inGroupIndex)
 {
     std::vector<TCharStr> theGroupNames;
     IMetaData &theMetaData = *m_Core->GetDoc()->GetStudioSystem()->GetActionMetaData();
@@ -202,9 +202,10 @@ Q3DStudio::CString Qt3DSDMInspectable::GetGroupName(long inGroupIndex)
 
     if (theGroupNames.size() > theIndex) {
         Q3DStudio::CString theName = theGroupNames[inGroupIndex].wide_str();
-        return theName;
-    } else
-        return ::LoadResourceString(IDS_PROPERTIES_BASIC);
+        return theName.toQString();
+    } else {
+        return QObject::tr("Basic Properties");
+    }
 }
 
 //==============================================================================
@@ -223,18 +224,18 @@ EStudioObjectType Qt3DSDMInspectable::GetObjectType()
     Option<qt3dsdm::TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(m_Instance);
     if (theObjTypeName.hasValue()) {
         ComposerObjectTypes::Enum theType =
-            ComposerObjectTypes::Convert(theObjTypeName->wide_str());
+                ComposerObjectTypes::Convert(theObjTypeName->wide_str());
         switch (theType) {
         case ComposerObjectTypes::Slide: {
             CDoc *theDoc = m_Core->GetDoc();
             CClientDataModelBridge *theBridge =
-                theDoc->GetStudioSystem()->GetClientDataModelBridge();
+                    theDoc->GetStudioSystem()->GetClientDataModelBridge();
             qt3dsdm::Qt3DSDMInstanceHandle theInstance =
-                theBridge->GetOwningComponentInstance(theDoc->GetActiveSlide());
+                    theBridge->GetOwningComponentInstance(theDoc->GetActiveSlide());
             Option<TCharStr> theObjTypeName = theMetaData.GetTypeForInstance(theInstance);
             if (theObjTypeName.hasValue()) {
                 ComposerObjectTypes::Enum theType =
-                    ComposerObjectTypes::Convert(theObjTypeName->wide_str());
+                        ComposerObjectTypes::Convert(theObjTypeName->wide_str());
                 if (theType == ComposerObjectTypes::Scene)
                     return OBJTYPE_SCENE;
                 else
@@ -278,6 +279,8 @@ EStudioObjectType Qt3DSDMInspectable::GetObjectType()
             return OBJTYPE_PATHANCHORPOINT;
         case ComposerObjectTypes::Lightmaps:
             return OBJTYPE_LIGHTMAPS;
+        case ComposerObjectTypes::DataInput:
+            return OBJTYPE_DATAINPUT;
         }
     }
     return OBJTYPE_UNKNOWN;
@@ -286,7 +289,7 @@ EStudioObjectType Qt3DSDMInspectable::GetObjectType()
 bool Qt3DSDMInspectable::IsValid() const
 {
     return m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_Instance)
-        && m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_DualPersonalityInstance);
+            && m_Core->GetDoc()->GetStudioSystem()->IsInstance(m_DualPersonalityInstance);
 }
 
 bool Qt3DSDMInspectable::IsMaster()
@@ -299,27 +302,3 @@ bool Qt3DSDMInspectable::IsMaster()
     // we select the Component root.
     return false;
 }
-
-// std::wstring Qt3DSDMInspectable::GetTypeString( ) const
-//{
-//	std::wstring theReturn(L"");
-//	try
-//	{
-//		IPropertySystem* thePropertySystem = m_Core->GetDoc( )->GetStudioSystem(
-//)->GetPropertySystem( );
-//		Qt3DSDMPropertyHandle theProperty =
-//thePropertySystem->GetAggregateInstancePropertyByName( m_Instance, L"type" );
-//		SValue theTypeValue;
-//		if ( theProperty && thePropertySystem->GetInstancePropertyValue( m_Instance,
-//theProperty, theTypeValue ) )
-//		{
-//			theReturn.assign( qt3dsdm::get<TDataStrPtr>( theTypeValue )->GetData() );
-//		}
-//	}
-//	catch( ... )
-//	{
-//		theReturn.assign(L"");
-//	}
-//
-//	return theReturn;
-//}

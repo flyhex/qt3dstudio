@@ -44,7 +44,7 @@
 #include "ButtonControl.h"
 #include "CColor.h"
 
-#include <QSize>
+#include <QtCore/qsize.h>
 
 const long MARGIN_X = 2;
 const long MARGIN_Y = 0;
@@ -74,9 +74,9 @@ public:
     virtual ~CTextButton();
     // Access
 public:
-    void SetText(const Q3DStudio::CString &inText);
-    void SetBoldText(const Q3DStudio::CString &inText);
-    Q3DStudio::CString GetText();
+    void SetText(const QString &inText);
+    void SetBoldText(const QString &inText);
+    QString GetText();
     void SetTextColorUp(const CColor &inColor);
     void SetTextColorDown(const CColor &inColor);
     CColor GetTextColorUp();
@@ -92,7 +92,7 @@ protected:
 
     // Field members
 protected:
-    Q3DStudio::CString m_Text; ///< Text
+    QString m_Text; ///< Text
     CColor m_TextColorUp; ///< Color of text
     CColor m_TextColorDown; ///< Color of text
     CPt m_TextPos; ///< Position of text
@@ -134,7 +134,7 @@ CTextButton<TButton>::~CTextButton()
  * @param inText new text to be displayed on this button
  */
 template <class TButton>
-void CTextButton<TButton>::SetText(const Q3DStudio::CString &inText)
+void CTextButton<TButton>::SetText(const QString &inText)
 {
     if (m_Text != inText) {
         m_Text = inText;
@@ -149,7 +149,7 @@ void CTextButton<TButton>::SetText(const Q3DStudio::CString &inText)
  * @param inText new text to be displayed on this button
  */
 template <class TButton>
-void CTextButton<TButton>::SetBoldText(const Q3DStudio::CString &inText)
+void CTextButton<TButton>::SetBoldText(const QString &inText)
 {
     m_Text = inText;
     m_BoldText = TRUE;
@@ -162,7 +162,7 @@ void CTextButton<TButton>::SetBoldText(const Q3DStudio::CString &inText)
  * @return the text currently displayed on this button
  */
 template <class TButton>
-Q3DStudio::CString CTextButton<TButton>::GetText()
+QString CTextButton<TButton>::GetText()
 {
     return m_Text;
 }
@@ -262,23 +262,23 @@ void CTextButton<TButton>::Render(CRenderer *inRenderer)
 
     switch (m_TextAlign) {
     case ALIGNMENT_CENTER: {
-        const auto textSize = inRenderer->GetTextSize(m_Text.toQString());
+        const auto textSize = inRenderer->GetTextSize(m_Text);
         theTextPosX = (TButton::GetSize().x - textSize.width() + theImageX) / 2;
         theTextPosY = static_cast<float>(m_TextPos.y);
     } break;
 
     case ALIGNMENT_RIGHT: {
-        const auto textSize = inRenderer->GetTextSize(m_Text.toQString());
+        const auto textSize = inRenderer->GetTextSize(m_Text);
         theTextPosX = TButton::GetSize().x - textSize.width();
         theTextPosY = static_cast<float>(m_TextPos.y);
     } break;
 
     case ALIGNMENT_VCENTER: {
-      const auto textSize = inRenderer->GetTextSize(m_Text.toQString());
+        const auto textSize = inRenderer->GetTextSize(m_Text);
         theTextPosY = (TButton::GetSize().y - textSize.height() + theImageY) / 2;
         theTextPosX = static_cast<float>(m_TextPos.x);
     }
-    // Default is LEFT justification
+        // Default is LEFT justification
     default:
     case ALIGNMENT_LEFT:
         theTextPosX += theImageX;
@@ -297,12 +297,10 @@ void CTextButton<TButton>::Render(CRenderer *inRenderer)
     // Draw the text
     const auto buttonSize = TButton::GetSize();
     const QRect rect(0, 0, buttonSize.x, buttonSize.y);
-    if (m_BoldText && !m_Text.IsEmpty()) {
-        inRenderer->DrawBoldText(theTextPosX, theTextPosY, m_Text.toQString(), rect, theTextColor);
-    } else {
-        if (!m_Text.IsEmpty())
-            inRenderer->DrawText(theTextPosX, theTextPosY, m_Text.toQString(), rect, theTextColor);
-    }
+    if (m_BoldText && !m_Text.isEmpty())
+        inRenderer->DrawBoldText(theTextPosX, theTextPosY, m_Text, rect, theTextColor);
+    else if (!m_Text.isEmpty())
+        inRenderer->DrawText(theTextPosX, theTextPosY, m_Text, rect, theTextColor);
 
     inRenderer->PopPen();
 }
@@ -332,7 +330,7 @@ void CTextButton<TButton>::SizeToFitTextLen()
         // Resize the control to fit the text, plus the buffer gap
         COffscreenRenderer theRenderer(CRct(0, 0, 1, 1));
         CPt theSize;
-        const auto textSize = theRenderer.GetTextSize(m_Text.toQString());
+        const auto textSize = theRenderer.GetTextSize(m_Text);
         int theX = textSize.width();
         int theY = textSize.height();
 

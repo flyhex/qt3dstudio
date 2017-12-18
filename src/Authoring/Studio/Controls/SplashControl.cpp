@@ -31,7 +31,6 @@
 // Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 // Includes
@@ -41,7 +40,6 @@
 #include "ResourceCache.h"
 #include "StudioPreferences.h"
 #include "OffscreenRenderer.h"
-#include "StringLoader.h"
 #include "StudioDefs.h"
 
 //=============================================================================
@@ -55,20 +53,19 @@ CSplashControl::CSplashControl()
     SetAbsoluteSize(m_Image.rect().bottomRight());
 
     // First line of the copyright statement
-    m_CopyrightLine1.Format(
-        ::LoadResourceString(IDS_SPLASH_COPYRIGHT1),
-        static_cast<const wchar_t *>(Q3DStudio::CString(STUDIO_COPYRIGHT_YEAR)));
+    m_CopyrightLine1 = QObject::tr("Copyright %1 The Qt Company. All rights reserved.").arg(
+                QString(STUDIO_COPYRIGHT_YEAR));
 
     // Second line of the copyright statement
-    m_CopyrightLine2 = ::LoadResourceString(IDS_SPLASH_COPYRIGHT2);
+    m_CopyrightLine2 = QObject::tr("Qt and Qt Logo are trademarks of The Qt Company");
 
     // Version text
-    m_VersionInfo.Format((::LoadResourceString(IDS_UIC_STUDIO_VERSION)),
-                         static_cast<const wchar_t *>(CStudioPreferences::GetVersionString()));
+    m_VersionInfo = QStringLiteral("Qt 3D Studio v")
+            + CStudioPreferences::GetVersionString().toQString();
 
     // Calculate the number of pixels between each line of text
     COffscreenRenderer theOffscreenRenderer(CRct(0, 0, 1, 1));
-    auto size = theOffscreenRenderer.GetTextSize(m_CopyrightLine1.toQString());
+    auto size = theOffscreenRenderer.GetTextSize(m_CopyrightLine1);
     m_SpaceBetweenLines = size.height();
 }
 
@@ -96,12 +93,12 @@ void CSplashControl::Draw(CRenderer *inRenderer)
 
     // Print the copyright text, starting at the last line and going up to the first line (just to
     // make sure that we didn't move where the text ends)
-    inRenderer->DrawText(14, static_cast<float>(theVertOffset), m_VersionInfo.toQString(), theBounds,
+    inRenderer->DrawText(14, static_cast<float>(theVertOffset), m_VersionInfo, theBounds,
                          theTextColor);
     theVertOffset -= m_SpaceBetweenLines;
-    inRenderer->DrawText(14, static_cast<float>(theVertOffset), m_CopyrightLine2.toQString(), theBounds,
+    inRenderer->DrawText(14, static_cast<float>(theVertOffset), m_CopyrightLine2, theBounds,
                          theTextColor);
     theVertOffset -= m_SpaceBetweenLines;
-    inRenderer->DrawText(14, static_cast<float>(theVertOffset), m_CopyrightLine1.toQString(), theBounds,
+    inRenderer->DrawText(14, static_cast<float>(theVertOffset), m_CopyrightLine1, theBounds,
                          theTextColor);
 }

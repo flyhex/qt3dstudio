@@ -50,7 +50,6 @@
 
 class CRenderer;
 class CTimelineTreeLayout;
-// class CSIcon;
 
 //=============================================================================
 /**
@@ -69,9 +68,6 @@ public:
     void OnButtonToggled(CToggleButton *inButton, CToggleButton::EButtonState inState);
 
 protected:
-    // CSIcon* m_ShyIcon;
-    // CSIcon* m_VisibilityIcon;
-    // CSIcon* m_LockIcon;
     CProceduralButton<CToggleButton> *m_FltrShyBtn;
     CProceduralButton<CToggleButton> *m_FltrVisibleBtn;
     CProceduralButton<CToggleButton> *m_FltrLockBtn;

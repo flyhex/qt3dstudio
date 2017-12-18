@@ -38,7 +38,7 @@ float sqr(float v)
 
 float Gterm( float cosTheta, float roughness )
 {
-   float k = roughness * 0.31830988618;		// roughness / pi
+   float k = roughness * 0.31830988618;        // roughness / pi
    return clamp( ( cosTheta / (cosTheta*(1.0-k) + k) + (1.0 - k*k) ) * 0.5, 0.0, 1.0 );
 }
 
@@ -62,18 +62,18 @@ vec4 kggxGlossyBSDF( in mat3 tanFrame, in vec3 L, in vec3 V, in vec3 lightSpecul
     // in the range of 0..1
     float ax = clamp(roughnessU, 0.0001, 2.0);
     float ay = clamp(roughnessV, 0.0001, 2.0);
-    
+
     float NdotL = dot(tanFrame[2], L);
     float HdotL = clamp(dot(H, L), 0.0, 1.0);
-    
- //   if (0.0f < NdotL) 
+
+ //   if (0.0f < NdotL)
  //   {
         vec3 Haf = L + V;
-        
+
         float HdotN = clamp( dot(H, tanFrame[2]), 0.0001, 1.0 );
         float HdotX = clamp( abs(dot(H, tanFrame[0])), 0.0001, 1.0 );
         float HdotY = clamp( abs(dot(H, tanFrame[1])), 0.0001, 1.0 );
-        
+
         float sigma = sqrt(ax * ay);
         float sigma2 = ax * ay * HdotN;
 
@@ -81,13 +81,13 @@ vec4 kggxGlossyBSDF( in mat3 tanFrame, in vec3 L, in vec3 V, in vec3 lightSpecul
         float maxThetaI = (thetaI + 1.57079632679) * 0.5;
         float minThetaI = (thetaI - 1.57079632679) * 0.5;
         float range = atan(maxThetaI / sigma) - atan(minThetaI / sigma);
-        range = max( range, ax*ay );        
-        
+        range = max( range, ax*ay );
+
         if ( ( mode == scatter_reflect ) || ( mode == scatter_reflect_transmit ) )
         {
-            float PDF = sigma2 / (sigma2 + sqr(HdotX / ax) + sqr(HdotY / ay));            
+            float PDF = sigma2 / (sigma2 + sqr(HdotX / ax) + sqr(HdotY / ay));
             PDF *= dot(Haf, Haf) / (4.71238898038 * sqr(dot(Haf, L)) * ax*ay * sigma * sqr(range));
-            
+
             rgba.rgb = Gterm(HdotL, sigma) * lightSpecular * PDF * max(NdotL, 0.0);
         }
         if ( ( mode == scatter_transmit ) || ( mode == scatter_reflect_transmit ) )
@@ -99,12 +99,12 @@ vec4 kggxGlossyBSDF( in mat3 tanFrame, in vec3 L, in vec3 V, in vec3 lightSpecul
 }
 
 vec4 kggxGlossyDefaultMtl( in vec3 normal, in vec3 tangent, in vec3 L, in vec3 V, in vec3 lightSpecular,
-			in vec3 materialSpecular, in float roughU, in float roughV )
+            in vec3 materialSpecular, in float roughU, in float roughV )
 {
    vec3 bitan = normalize(cross(normal, tangent));
    mat3 tanFrame = mat3( normalize(cross( bitan, normal) ), bitan, normal );
    return vec4(materialSpecular, 1.0) * kggxGlossyBSDF( tanFrame, L, V, lightSpecular, 1.5, roughU, roughV, scatter_reflect );
-}            
+}
 
 // To be exact, this is not the Ward lobe as Ward originally described (there are a few flaws in
 // the original paper, which had spawned half a dozen corrective measures as papers of their own).
@@ -119,25 +119,25 @@ vec4 wardGlossyBSDF( in mat3 tanFrame, in vec3 L, in vec3 V, in vec3 lightSpecul
     // specular
     float ax = clamp(roughnessU, 0.0001, 1.0);
     float ay = clamp(roughnessV, 0.0001, 1.0);
-    
+
     float NdotL = dot(tanFrame[2], L);
     float HdotL = clamp(dot(H, L), 0.0, 1.0);
-    
-//    if (0.0f < NdotL) 
+
+//    if (0.0f < NdotL)
 //    {
         vec3 Haf = L + V;
-            
+
         float HdotN = clamp( dot(H, tanFrame[2]), 0.0001, 1.0 );
         float HdotX = clamp( abs(dot(H, tanFrame[0])), 0.0001, 1.0 );
         float HdotY = clamp( abs(dot(H, tanFrame[1])), 0.0001, 1.0 );
-    
+
         if ( ( mode == scatter_reflect ) || ( mode == scatter_reflect_transmit ) )
         {
             float exponent = -(sqr(HdotX/ax) + sqr(HdotY/ay));
             exponent /= sqr(HdotN);
             float PDF = exp(exponent) / (4.0 * 3.1415926535 * ax * ay);
             PDF *= 4.0 * dot(Haf, Haf) / sqr(sqr(dot(Haf,tanFrame[2])));
-            
+
             rgba.rgb = Gterm(HdotL, sqrt(ax * ay)) * lightSpecular * PDF * max(NdotL, 0.0);
         }
         if ( ( mode == scatter_transmit ) || ( mode == scatter_reflect_transmit ) )
@@ -149,7 +149,7 @@ vec4 wardGlossyBSDF( in mat3 tanFrame, in vec3 L, in vec3 V, in vec3 lightSpecul
 }
 
 vec4 wardGlossyDefaultMtl( in vec3 normal, in vec3 tangent, in vec3 L, in vec3 V, in vec3 lightSpecular,
-			in vec3 materialSpecular, in float roughU, in float roughV )
+            in vec3 materialSpecular, in float roughU, in float roughV )
 {
    vec3 bitan = normalize(cross(normal, tangent));
    mat3 tanFrame = mat3( normalize(cross( bitan, normal) ), bitan, normal );

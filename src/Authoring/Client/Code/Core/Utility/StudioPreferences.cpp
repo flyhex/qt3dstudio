@@ -36,7 +36,6 @@
 #include "Preferences.h"
 #include "CColor.h"
 #include "MasterP.h"
-#include "versionnumber.h"
 #include "CommonConstants.h"
 
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
@@ -91,6 +90,9 @@ QSize s_browserPopupSize;
 
 bool CStudioPreferences::m_SudoMode = false;
 bool CStudioPreferences::m_DebugTimes = false;
+
+#define STRINGIFY(x) STRINGIFY2(x)
+#define STRINGIFY2(x) #x
 
 // Static Consts
 const ::CColor CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR = ::CColor("#262829");
@@ -811,8 +813,8 @@ CPt CStudioPreferences::GetPropertyReferenceGadgetPosition(const CPt &inDefault)
 CPt CStudioPreferences::GetDefaultClientSize()
 {
     CPt theSize;
-    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth", 800);
-    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight", 480);
+    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth", 1920);
+    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight", 1080);
     return theSize;
 }
 
@@ -1750,7 +1752,7 @@ QSize CStudioPreferences::browserPopupSize()
 
 Q3DStudio::CString CStudioPreferences::GetVersionString()
 {
-    Q3DStudio::CString theVersionNumber = STRPRODUCTVER;
+    Q3DStudio::CString theVersionNumber = STRINGIFY(STUDIO_VERSION);
     theVersionNumber.Replace(",", ".");
 
     return theVersionNumber;

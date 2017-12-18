@@ -65,22 +65,24 @@ void Q3DSPresentationItem::appendQmlChildren(QQmlListProperty<QObject> *list, QO
                 qWarning() << __FUNCTION__ << "A duplicate SceneElement defined for Presentation.";
             else
                 item->registerElement(scene);
-        }
-        auto studioElement = qobject_cast<Q3DSElement *>(element);
-        if (studioElement) {
-            if (item->registeredElement(studioElement->elementPath()))
-                qWarning() << __FUNCTION__ << "A duplicate Element defined for Presentation.";
-            else
-                item->registerElement(studioElement);
-        }
-        auto subPresSettings = qobject_cast<Q3DSSubPresentationSettings *>(element);
-        if (subPresSettings) {
-            if (item->m_subPresentationSettings) {
-                qWarning() << __FUNCTION__
-                           << "Duplicate SubPresentationSettings defined for Presentation.";
+        } else {
+            auto studioElement = qobject_cast<Q3DSElement *>(element);
+            if (studioElement) {
+                if (item->registeredElement(studioElement->elementPath()))
+                    qWarning() << __FUNCTION__ << "A duplicate Element defined for Presentation.";
+                else
+                    item->registerElement(studioElement);
             } else {
-                item->m_subPresentationSettings = subPresSettings;
-                item->d_ptr->streamProxy()->setSettings(subPresSettings);
+                auto subPresSettings = qobject_cast<Q3DSSubPresentationSettings *>(element);
+                if (subPresSettings) {
+                    if (item->m_subPresentationSettings) {
+                        qWarning() << __FUNCTION__
+                                   << "Duplicate SubPresentationSettings defined for Presentation.";
+                    } else {
+                        item->m_subPresentationSettings = subPresSettings;
+                        item->d_ptr->streamProxy()->setSettings(subPresSettings);
+                    }
+                }
             }
         }
     }

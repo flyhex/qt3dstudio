@@ -32,7 +32,6 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "Qt3DSOptions.h"
 #include "SceneView.h"
 #include "Doc.h"
 #include "StudioProjectSettings.h"
@@ -143,20 +142,16 @@ void CPlayerContainerWnd::SetScrollRanges()
     long theScrollWidth = 0;
     long theScrollHeight = 0;
 
-#ifdef INCLUDE_EDIT_CAMERA
     if (ShouldHideScrollBars()) {
         horizontalScrollBar()->setRange(0, 0);
         verticalScrollBar()->setRange(0, 0);
         horizontalScrollBar()->setValue(0);
         verticalScrollBar()->setValue(0);
-    } else
-#endif
-    {
+    } else {
         QSize theSize = GetEffectivePresentationSize();
 
         theScrollWidth = theSize.width();
         theScrollHeight = theSize.height();
-
 
         // Set scrollbar ranges
         horizontalScrollBar()->setRange(0, theScrollWidth - width());
@@ -203,11 +198,7 @@ void CPlayerContainerWnd::RecenterClient()
     QSize theClientSize;
     m_ClientRect = theViewClientRect;
 
-#ifdef INCLUDE_EDIT_CAMERA
-    if (ShouldHideScrollBars()) {
-    } else
-#endif
-    {
+    if (!ShouldHideScrollBars()) {
         theClientSize = GetEffectivePresentationSize();
 
         // Only center if we need to scroll
@@ -245,47 +236,42 @@ void CPlayerContainerWnd::mousePressEvent(QMouseEvent *event)
 {
     if ((event->button() == Qt::LeftButton) || (event->button() == Qt::RightButton)) {
         long theToolMode = g_StudioApp.GetToolMode();
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte, event->pos(),
-                                                                 theToolMode);
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(
+                    SceneDragSenderType::Matte, event->pos(), theToolMode);
         m_IsMouseDown = true;
     } else if (event->button() == Qt::MiddleButton) {
-#ifdef INCLUDE_EDIT_CAMERA
-    const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-    const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
+        const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
+        const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
-    bool theToolChanged = false;
-    if (rect().contains(event->pos()) && !IsDeploymentView()) {
-        // If both the control key and the Alt key is not down
-        if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
-            // press Scroll Wheel Click
-            // Do Camera Pan
-            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-            theToolChanged = true;
-        } else if ((theAltKeyIsDown) && (!theCtrlKeyIsDown)) {
-            // press Alt-Scroll Wheel Click
-            // Do Camera Rotate if we are in 3D Camera
-            if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-                    g_StudioApp.GetRenderer().GetEditCamera())) {
-                g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
+        bool theToolChanged = false;
+        if (rect().contains(event->pos()) && !IsDeploymentView()) {
+            // If both the control key and the Alt key is not down
+            if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
+                // press Scroll Wheel Click
+                // Do Camera Pan
+                g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
                 theToolChanged = true;
+            } else if ((theAltKeyIsDown) && (!theCtrlKeyIsDown)) {
+                // press Alt-Scroll Wheel Click
+                // Do Camera Rotate if we are in 3D Camera
+                if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
+                            g_StudioApp.GetRenderer().GetEditCamera())) {
+                    g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
+                    theToolChanged = true;
+                }
             }
         }
-    }
 
-    if (theToolChanged) {
-        Q_EMIT toolChanged();
-        m_SceneView->SetViewCursor();
+        if (theToolChanged) {
+            Q_EMIT toolChanged();
+            m_SceneView->SetViewCursor();
 
-        long theToolMode = g_StudioApp.GetToolMode();
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
-                                                                 event->pos(), theToolMode);
-        m_IsMouseDown = true;
-        m_IsMiddleMouseDown = true;
-    }
-#else
-    Q_UNUSED(inFlags);
-    Q_UNUSED(inPoint);
-#endif
+            long theToolMode = g_StudioApp.GetToolMode();
+            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
+                                                                     event->pos(), theToolMode);
+            m_IsMouseDown = true;
+            m_IsMiddleMouseDown = true;
+        }
     }
 }
 
@@ -308,29 +294,27 @@ void CPlayerContainerWnd::mouseReleaseEvent(QMouseEvent *event)
          g_StudioApp.GetCore()->CommitCurrentCommand();
          m_IsMouseDown = false;
      } else if (event->button() == Qt::MiddleButton) {
-    #ifdef INCLUDE_EDIT_CAMERA
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
-        g_StudioApp.GetCore()->CommitCurrentCommand();
-        if (m_IsMiddleMouseDown) {
-            m_IsMouseDown = false;
-            m_IsMiddleMouseDown = false;
+         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
+         g_StudioApp.GetCore()->CommitCurrentCommand();
+         if (m_IsMiddleMouseDown) {
+             m_IsMouseDown = false;
+             m_IsMiddleMouseDown = false;
 
-            const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-            const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
+             const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
+             const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
-            if (!IsDeploymentView()) {
-                if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
-                    // none of the modifier key is pressed... reset to previous tool
-                    m_SceneView->RestorePreviousTool();
-                } else if (theCtrlKeyIsDown && theAltKeyIsDown) {
-                    // since both modifier is down... let the ctrl has priority
-                    m_SceneView->SetToolOnCtrl();
-                }
-                m_SceneView->SetViewCursor();
-                Q_EMIT toolChanged();
-            }
-        }
-    #endif
+             if (!IsDeploymentView()) {
+                 if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
+                     // none of the modifier key is pressed... reset to previous tool
+                     m_SceneView->RestorePreviousTool();
+                 } else if (theCtrlKeyIsDown && theAltKeyIsDown) {
+                     // since both modifier is down... let the ctrl has priority
+                     m_SceneView->SetToolOnCtrl();
+                 }
+                 m_SceneView->SetViewCursor();
+                 Q_EMIT toolChanged();
+             }
+         }
      }
 }
 
@@ -375,7 +359,6 @@ void CPlayerContainerWnd::mouseMoveEvent(QMouseEvent* event)
 //==============================================================================
 void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
 {
-#ifdef INCLUDE_EDIT_CAMERA
     // Note : Mouse wheel is a special animal of the scene drag tool. We dont change the tool
     // so as not to affect the toolbar button and the view cursor. This will just do the zoom
     // and the cursor is not changed.
@@ -383,30 +366,10 @@ void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
     const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
     const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
-    // Keeping these codes here, till we finalized the behavior and confirm these not needed
-    // long theToolMode = g_StudioApp.GetToolMode( );
-    //// If both the control key and the Alt key is not down
-    // if ( !theCtrlKeyIsDown && !theAltKeyIsDown && !IsDeploymentView( ) )
-    //{
-    //	if ( theToolMode != STUDIO_TOOLMODE_CAMERA_ZOOM )
-    //	{
-    //		g_StudioApp.SetToolMode( STUDIO_TOOLMODE_CAMERA_ZOOM );
-    //		theToolMode = STUDIO_TOOLMODE_CAMERA_ZOOM;
-    //		m_MouseWheeling = true;
-
-    //      Q_EMIT toolChanged();
-    //		SetViewCursor( );
-    //	}
-    //}
-
-    // Mouse Wheel
-    // Do Camera Zoom
+    // Mouse Wheel zooms the camera
     if (!theCtrlKeyIsDown && !theAltKeyIsDown && !IsDeploymentView())
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseWheel(
             SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
-#else
-    Q_UNUSED(event);
-#endif
 }
 
 void CPlayerContainerWnd::scrollContentsBy(int, int)
@@ -504,7 +467,5 @@ void CPlayerContainerWnd::resizeEvent(QResizeEvent* event)
 {
     QAbstractScrollArea::resizeEvent(event);
 
-#ifdef INCLUDE_EDIT_CAMERA
     SetScrollRanges();
-#endif
 }

@@ -69,14 +69,18 @@ public:
     CFilePath(const QString &path);
 
     // FIXME: remove when RecursivelyFindFilesOfType is refactored
+    // Note: Also needed by binary_sort_insert_unique
     bool operator<(const CFilePath &path) const
     { return filePath() < path.filePath(); }
+
+    // Needed by binary_sort_insert_unique, QFileInfo's corresponding operator doesn't work
+    // correctly for paths that do not exist.
+    bool operator==(const CFilePath &path) const
+    { return filePath() == path.filePath(); }
 
     // FIXME: refactor call sites to just use 'filePath()'
     QString toQString() const { return filePath(); }
     CString toCString() const { return CString::fromQString(filePath()); }
-    const char *GetCharStar() const
-    { return filePath().toLatin1().constData(); }
 
     // FIXME: refactor at call sites to no longer use implicit casts
     operator const CString()

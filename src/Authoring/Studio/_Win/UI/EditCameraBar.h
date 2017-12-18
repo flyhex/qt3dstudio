@@ -43,7 +43,7 @@
 #include "DispatchListeners.h"
 #include <vector>
 
-#include <QToolBar>
+#include <QtWidgets/qtoolbar.h>
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
@@ -66,11 +66,6 @@ public:
     CEditCameraBar(QWidget* parent = nullptr); // standard constructor
     virtual ~CEditCameraBar();
 
-    // Overrides
-    // ClassWizard generated virtual function overrides
-    //{{AFX_VIRTUAL(CEditCameraBar)
-    //}}AFX_VIRTUAL
-
     // Implementation
     // Generated message map functions
     void OnCameraChanged();
@@ -84,7 +79,7 @@ public:
 
     // CEditCameraChangeListener
     void OnEditCameraChanged() override;
-    void OnEditCamerasTransformed() override {} // I am not interested in this
+    void OnEditCamerasTransformed() override {}
     void OnAuthorZoomChanged() override {}
 
 protected:

@@ -39,7 +39,7 @@
 qt3ds::foundation::FPUGuard::FPUGuard()
 {
 // default plus FTZ and DAZ
-#ifdef QT3DS_WINDOWS
+#if defined(QT3DS_WINDOWS) && defined(QT3DS_VC)
 #ifdef QT3DS_X64
     _controlfp_s(mControlWords, _CW_DEFAULT | _DN_FLUSH, _MCW_ALL);
 #else
@@ -50,7 +50,7 @@ qt3ds::foundation::FPUGuard::FPUGuard()
 
 qt3ds::foundation::FPUGuard::~FPUGuard()
 {
-#ifdef QT3DS_WINDOWS
+#if defined(QT3DS_WINDOWS) && defined(QT3DS_VC)
 #ifdef QT3DS_X64
     _controlfp_s(mControlWords, *mControlWords, _MCW_ALL);
 #else

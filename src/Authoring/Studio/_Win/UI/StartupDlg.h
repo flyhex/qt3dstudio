@@ -39,10 +39,10 @@
 //	 Includes
 //==============================================================================
 
-#include <QDialog>
-
 #include "Qt3DSString.h"
 #include "Qt3DSFile.h"
+
+#include <QtWidgets/qdialog.h>
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -76,7 +76,7 @@ public:
     virtual ~CStartupDlg();
 
 protected:
-    const static int RECENT_COUNT = 5;
+    const static int RECENT_COUNT = 7;
 
     void paintEvent(QPaintEvent *event) override;
     void showEvent(QShowEvent *) override;
@@ -93,7 +93,7 @@ private:
     QPalette *m_palette;
 
     // Product version string
-    Q3DStudio::CString m_ProductVersionStr;
+    QString m_ProductVersionStr;
 
     // Choice
     EStartupChoice m_Choice = EStartupChoice_Invalid;

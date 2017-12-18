@@ -31,6 +31,7 @@
 #include "Qt3DSRenderScene.h"
 #include "Qt3DSRenderLayer.h"
 #include "Qt3DSRenderContextCore.h"
+#include "Qt3DSRenderDataInput.h"
 #include "render/Qt3DSRenderContext.h"
 
 using namespace qt3ds::render;
@@ -39,6 +40,7 @@ SScene::SScene()
     : SGraphObject(GraphObjectTypes::Scene)
     , m_Presentation(NULL)
     , m_FirstChild(NULL)
+    , m_FirstDataInput(NULL)
     , m_ClearColor(0, 0, 0)
     , m_UseClearColor(true)
     , m_Dirty(true)
@@ -54,12 +56,32 @@ void SScene::AddChild(SLayer &inLayer)
     inLayer.m_Scene = this;
 }
 
+void SScene::AddDataInput(SDataInput &inDataInput)
+{
+    if (m_FirstDataInput == NULL)
+        m_FirstDataInput = &inDataInput;
+    else
+        GetLastDataInput()->m_NextSibling = &inDataInput;
+    inDataInput.m_Scene = this;
+}
+
 SLayer *SScene::GetLastChild()
 {
     // empty loop intentional
     SLayer *child;
     for (child = m_FirstChild; child && child->m_NextSibling;
          child = (SLayer *)child->m_NextSibling) {
+    }
+
+    return child;
+}
+
+SDataInput *SScene::GetLastDataInput()
+{
+    // empty loop intentional
+    SDataInput *child;
+    for (child = m_FirstDataInput; child && child->m_NextSibling;
+         child = (SDataInput *)child->m_NextSibling) {
     }
 
     return child;

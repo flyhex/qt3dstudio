@@ -41,10 +41,10 @@
 #include "Qt3DSFile.h"
 #include "StudioObjectTypes.h"
 #include "Qt3DSMessageBox.h"
-//#include "MultilineEditDlg.h"
 #include "Qt3DSFileTools.h"
 #include "CColor.h"
-#include <QMessageBox>
+
+#include <QtWidgets/qmessagebox.h>
 
 //=============================================================================
 // Forwards
@@ -112,10 +112,10 @@ public:
     static bool IsSoundFileExtension(const wchar_t *inExt);
 
     Qt3DSFile GetExportChoice(const Q3DStudio::CString &inExtension,
-                             const Q3DStudio::CString &inDefaultName);
+                              const Q3DStudio::CString &inDefaultName);
 
-    std::pair<Qt3DSFile, bool> GetSaveAsChoice(const Q3DStudio::CString &inDialogTitle = "",
-                                              bool inFilenameUntitled = false);
+    std::pair<Qt3DSFile, bool> GetSaveAsChoice(const QString &inDialogTitle = "",
+                                               bool inFilenameUntitled = false);
     // Returns pair of file along with a boolean indicating the state of the create
     // new directory checkbox.
     std::pair<Qt3DSFile, bool>
@@ -124,16 +124,16 @@ public:
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription,
                              bool inWarningsOnly);
-    void DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation, long inErrorIDS = -1);
+    void DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
+                                          const QString &inErrorText);
     void DisplaySavingPresentationFailed();
     void DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation);
-    Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const Q3DStudio::CString &inTitle,
-                                                        const Q3DStudio::CString &inText,
-                                                        Qt3DSMessageBox::EMessageBoxIcon inIcon,
-                                                        bool inShowCancel);
-    int DisplayChoiceBox(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
-                         int inIcon);
-    void DisplayKnownErrorDialog(const Q3DStudio::CString &inErrorText);
+    Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const QString &inTitle,
+                                                         const QString &inText,
+                                                         Qt3DSMessageBox::EMessageBoxIcon inIcon,
+                                                         bool inShowCancel);
+    int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
+    void DisplayKnownErrorDialog(const QString &inErrorText);
 
     ESavePromptResult PromptForSave();
     bool PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut);
@@ -143,11 +143,6 @@ public:
     void DisplayProgressScreen(const Q3DStudio::CString &inActionText,
                                const Q3DStudio::CString &inAdditionalText);
     void DestroyProgressScreen();
-
-    bool PromptObjectTimebarColor(CColor &ioColor);
-    void DisplayProfilingStatistics();
-    /*void DisplayMultilineTextEdit(Q3DStudio::CString &ioText,
-                                  CMultilineEditDlg::INotification *inNotifiction = NULL);*/
 
     void DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErrorMessage);
 

@@ -60,14 +60,25 @@
 
 int main(int argc, char *argv[])
 {
+    QSurfaceFormat openGLFormat;
+    openGLFormat.setStencilBufferSize(8);
+    openGLFormat.setDepthBufferSize(24);
+
+    // To enable QOpenGLWidget to work on macOS, we must set the default
+    // QSurfaceFormat before QApplication is created. Otherwise context-sharing
+    // fails and QOpenGLWidget breaks.
+#if defined(Q_OS_MACOS)
+    openGLFormat.setRenderableType(QSurfaceFormat::OpenGL);
+    openGLFormat.setProfile(QSurfaceFormat::CoreProfile);
+    openGLFormat.setMajorVersion(4);
+    openGLFormat.setMinorVersion(1);
+    QSurfaceFormat::setDefaultFormat(openGLFormat);
+#endif
+
     QGuiApplication app(argc, argv);
 
-    QSurfaceFormat format;
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-
     QOpenGLContext context;
-    context.setFormat(format);
+    context.setFormat(openGLFormat);
     if (!context.create())
         qFatal("Failed to create OpenGL context");
 

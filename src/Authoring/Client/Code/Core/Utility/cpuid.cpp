@@ -29,6 +29,7 @@
 
 #include "stdafx.h"
 #include "cpuid.h"
+#include <QtCore/qglobal.h>
 
 extern "C" {
 
@@ -42,7 +43,6 @@ extern "C" {
 // register set to 80000001h (only applicable to AMD)
 #define _3DNOW_FEATURE_BIT 0x80000000
 
-
 #ifndef _WIN32
 void __cpuid(int cpuInfo[4], int function_id)
 {
@@ -55,13 +55,14 @@ void __cpuid(int cpuInfo[4], int function_id)
 int IsCPUID()
 {
     int CPUInfo[4];
-    int nIds;
+    int nIds = 0;
 
     // __cpuid with an InfoType argument of 0 returns the number of
     // valid Ids in CPUInfo[0]
+#if defined(_AMD64_)
     __cpuid(CPUInfo, 0);
     nIds = CPUInfo[0];
-
+#endif
     return nIds;
 }
 
@@ -98,7 +99,7 @@ int _os_support(int feature)
     default:
         return 0;
     }
-#else
+#elif defined (QT3DS_VC)
     __try {
         switch (feature) {
         case _CPU_FEATURE_SSE:
@@ -131,6 +132,32 @@ int _os_support(int feature)
         return 0;
     }
     return 1;
+#else
+    int ret = 0;
+    switch (feature)
+    {
+    case _CPU_FEATURE_SSE:
+#if defined (QT_COMPILER_SUPPORTS_SSE) && (QT_COMPILER_SUPPORTS_SSE == 1)
+        ret = 1;
+#endif
+        break;
+    case _CPU_FEATURE_SSE2:
+#if defined (QT_COMPILER_SUPPORTS_SSE2) && (QT_COMPILER_SUPPORTS_SSE2 == 1)
+        ret = 1;
+#endif
+        break;
+    case _CPU_FEATURE_3DNOW:
+#if defined (QT_COMPILER_SUPPORTS_3DNOW) && (QT_COMPILER_SUPPORTS_3DNOW == 1)
+        ret = 1;
+#endif
+        break;
+    case _CPU_FEATURE_MMX:
+#if defined (QT_COMPILER_SUPPORTS_MMX) && (QT_COMPILER_SUPPORTS_MMX == 1)
+        ret = 1;
+#endif
+        break;
+    }
+    return 0;
 #endif
 }
 
@@ -304,14 +331,18 @@ int _cpuid(_p_info *pinfo)
     }
 
     // get the vendor string
+#if defined(_AMD64_)
     __cpuid(CPUInfo, 0);
+#endif
     memset(Ident.cBuf, 0, sizeof(Ident));
     (Ident.s.dw0) = CPUInfo[1];
     (Ident.s.dw1) = CPUInfo[3];
     (Ident.s.dw2) = CPUInfo[2];
 
     // get cpu features
+#if defined(_AMD64_)
     __cpuid(CPUFeatures, 1);
+#endif
     nSteppingID = CPUFeatures[0] & 0xf;
     nModel = (CPUFeatures[0] >> 4) & 0xf;
     nFamily = (CPUFeatures[0] >> 8) & 0xf;

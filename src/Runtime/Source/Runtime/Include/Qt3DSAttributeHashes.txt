@@ -224,4 +224,9 @@ maxparticles
 particlesize
 lifetime
 
+value
+valuestr
+timefrom
+timeto
+controlledelemprop
 

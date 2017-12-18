@@ -49,7 +49,7 @@ void initializeBaseFragmentVariables()
 {
   normal = normalize( varNormal );
   surfNormal = normalize( varNormal );
-  
+
   texCoord0 = vec3( varTexCoord0.xy, 1.0 );
   tangent = normalize( varTangent );
 

@@ -40,6 +40,7 @@
 #include "Qt3DSTypes.h"
 #include "Qt3DSKernelTypes.h"
 #include "Qt3DSEvent.h"
+#include "q3dsqmlbehavior.h"
 
 namespace Q3DStudio {
 class CQmlEngine;
@@ -48,7 +49,7 @@ class Q3DSQmlScript : public QObject
 {
     Q_OBJECT
 public:
-    Q3DSQmlScript(CQmlEngine &api, QObject &object, TElement &element, TElement &parent);
+    Q3DSQmlScript(CQmlEngine &api, Q3DSQmlBehavior &object, TElement &element, TElement &parent);
     ~Q3DSQmlScript();
 
     void update();
@@ -56,21 +57,22 @@ public:
     void updateProperties();
     bool hasBehavior(const TElement *behavior);
 
-    Q_INVOKABLE float getDeltaTime();
-    Q_INVOKABLE float getAttribute(const QString &attribute);
-    Q_INVOKABLE void setAttribute(const QString &attribute, const QVariant &value);
-    Q_INVOKABLE void setAttribute(const QString &handle, const QString &attribute,
-                                  const QVariant &value);
-    Q_INVOKABLE void fireEvent(const QString &event);
-    Q_INVOKABLE void registerForEvent(const QString &event, const QJSValue &function);
-    Q_INVOKABLE void registerForEvent(const QString &handle, const QString &event,
-                                      const QJSValue &function);
-    Q_INVOKABLE void unregisterForEvent(const QString &event);
-    Q_INVOKABLE void unregisterForEvent(const QString &handle, const QString &event);
-    Q_INVOKABLE QVector2D getMousePosition();
-    Q_INVOKABLE QMatrix4x4 calculateGlobalTransform(const QString &handle = "");
-    Q_INVOKABLE QVector3D lookAt(const QVector3D& target);
-    Q_INVOKABLE QString getParent(const QString& handle = "");
+    float getDeltaTime();
+    float getAttribute(const QString &attribute);
+    void setAttribute(const QString &attribute, const QVariant &value);
+    void setAttribute(const QString &handle, const QString &attribute,
+                      const QVariant &value);
+    void fireEvent(const QString &event);
+    void registerForEvent(const QString &event, const QJSValue &function);
+    void registerForEvent(const QString &handle, const QString &event,
+                          const QJSValue &function);
+    void unregisterForEvent(const QString &event);
+    void unregisterForEvent(const QString &handle, const QString &event);
+    QVector2D getMousePosition();
+    QMatrix4x4 calculateGlobalTransform(const QString &handle);
+    QVector3D lookAt(const QVector3D &target);
+    QVector3D matrixToEuler(const QMatrix4x4 &matrix);
+    QString getParent(const QString &handle);
 
     struct EventData {
         QJSValue function;
@@ -80,7 +82,7 @@ private:
     TElement *getElementByPath(const QString &path);
 
     CQmlEngine &m_api;
-    QObject &m_object;
+    Q3DSQmlBehavior &m_object;
     TElement &m_behavior;
     TElement &m_owner;
 

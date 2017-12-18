@@ -31,7 +31,6 @@
 //	Prefix
 //==============================================================================
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -39,13 +38,12 @@
 #include "EditCameraBar.h"
 #include "MainFrm.h"
 #include "SceneView.h"
-#include "StringLoader.h"
 #include "StudioPreferences.h"
 #include "StudioApp.h"
 #include "IStudioRenderer.h"
 
-#include <QComboBox>
-#include <QLabel>
+#include <QtWidgets/qcombobox.h>
+#include <QtWidgets/qlabel.h>
 
 //==============================================================================
 /**
@@ -89,13 +87,13 @@ void CEditCameraBar::SetupCameras()
 
     m_CameraSelector->addItem("--------------------------");
     m_CameraSelector->setItemData(m_CameraSelector->count() - 1, -1); // set to an invalid pointer
-    m_CameraSelector->addItem(::LoadResourceString(IDS_SCENE_CAMERA_VIEW).toQString());
+    m_CameraSelector->addItem(tr("Scene Camera View"));
     m_CameraSelector->setItemData(m_CameraSelector->count() - 1, 0);
 
     long thePreferredView = CStudioPreferences::GetPreferredStartupView();
     long theNumItems = m_CameraSelector->count();
-    if (thePreferredView == -1) // deployment view
-    {
+    if (thePreferredView == -1) {
+        // deployment view
         m_CameraSelector->setCurrentIndex(theNumItems - 1);
         HandleCameraChanged(theNumItems - 1); // set to the last one
     } else {
@@ -153,7 +151,7 @@ void CEditCameraBar::HandleCameraChanged(int inIndex)
     if (theMainFrame != nullptr) {
         long theToolMode = g_StudioApp.GetToolMode();
         if (theRenderer.DoesEditCameraSupportRotation(theRenderer.GetEditCamera()) == false
-            && theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE) {
+                && theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE) {
             g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
             m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
         }

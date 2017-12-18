@@ -47,7 +47,7 @@ class ProjectView : public QQuickWidget,
     Q_PROPERTY(QAbstractItemModel *projectModel READ projectModel NOTIFY projectChanged FINAL)
 
 public:
-    explicit ProjectView(QWidget *parent = nullptr);
+    explicit ProjectView(const QSize &preferredSize, QWidget *parent = nullptr);
     ~ProjectView();
 
     QSize sizeHint() const override;
@@ -99,6 +99,7 @@ private:
     Qt3DSFile m_ImageDir{""};
     Qt3DSFile m_MaterialDir{""};
     Qt3DSFile m_ModelDir{""};
+    QSize m_preferredSize;
 };
 
 #endif // PROJECTVIEW_H

@@ -62,6 +62,18 @@ int main(int argc, char *argv[])
 #ifdef USE_EMBEDDED_FONTS
     qputenv("QT_QPA_FONTDIR",".");
 #endif
+    // To enable QOpenGLWidget to work on macOS, we must set the default
+    // QSurfaceFormat before QApplication is created. Otherwise context-sharing
+    // fails and QOpenGLWidget breaks.
+#if defined(Q_OS_MACOS)
+    QSurfaceFormat openGLFormat;
+    openGLFormat.setRenderableType(QSurfaceFormat::OpenGL);
+    openGLFormat.setProfile(QSurfaceFormat::CoreProfile);
+    openGLFormat.setMajorVersion(4);
+    openGLFormat.setMinorVersion(1);
+    openGLFormat.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(openGLFormat);
+#endif
 
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);

@@ -32,22 +32,91 @@
 \page best-practices-dynamic-keyframes.html
 \ingroup qt3dstudio-best-practices
 
-Dynamic keyframes are a powerful feature
-that allow you to smoothly interpolate between different animated values
-on different slides. This can be used to simplify the creation of
-interactivity that would otherwise require scripting or heavy coding,
-such as user-interruptible animations.
+\section1 Overview
+Dynamic keyframes are a powerful feature that allow you to smoothly interpolate between different
+animated values on different slides. This can be used to simplify the creation of interactivity
+that would otherwise require scripting or heavy coding, such as user-interruptible animations.
 
-Dynamic keyframes smoothly animate an unlinked property between slides
-because no matter what the property value is for the object when it
-leaves one slide, a dynamic keyframe at the beginning of the next slide
-ensures that the object's animation will pick up exactly where it left
-off.
+Dynamic keyframes smoothly animate an unlinked property between slides because no matter what the
+property value is for the object when it leaves one slide, a dynamic keyframe at the beginning of
+the next slide ensures that the object's animation will pick up exactly where it left off.
 
-To make an animation dynamic in Studio right-click on the animation
-track you want to be dynamic and select \"Make Animations Dynamic\" from
-the context menu. The first keyframe for each dynamic track turns green.
-When the slide is entered at runtime the value of this keyframe is taken
-from the value of the property immediately prior to entering the slide.
+\section2 Using Dynamic Keyframes
+In this section, you will find a step by step example on how to use dynamic keyframes when
+animating a basic object.
+\list 1
+  \li Add the object to the master slide. We are using a sphere in this example.
+  \li Duplicate \e{Slide1}.
+  \image dyn-keyframes-slide.png
+  \li Turn animation on for the property you wish to animate and create the animation. You can do
+  this on either slide, changes will affect both slides since the property is linked to the
+  master slide.
+  \li Once you have created the desired animation, unlink the animated property from the master
+  slide by right-clicking it in the \e{inspector palette} and selecting
+  \uicontrol{Unlink Property from Master Slide}. In this example we are animating \e{Position}.
+  \image dyn-keyframes-position.png
+  \li Finally make the animation dynamic by right-clicking the time bar in the \e{timeline palette}
+  and select \uicontrol{Make Animations Dynamic}. You need to do this on both \e{Slide1} and
+  \e{Slide2}. The first keyframe of each track will turn green when this is done.
+  \image dyn-keyframes-make-dynamic.png
+\endlist
+
+Now you have dynamic keyframes set up for your animation.
+
+When switching between the two slides at runtime, the value of the green keyframe will be
+replaced by the value of the property immediately prior to entering the slide.
+
+We can try this out by creating simple actions to switch between slides.
+\list 1
+  \li On the master slide, create a text object.
+  \li Create a new action for the text element:
+  \image dyn-keyframes-action.png
+  \li Duplicate the text element, then move it to separate it from the original text element.
+  Place them side to side.
+  \li Edit the action of the duplicated element, set \e{Slide} to \e{Slide1}.
+  \li Change the text properties of both text elements if desired.
+  \li Now you should have something looking like the image shown below. Note that both slides should have the
+  same appearance.
+  \image dyn-keyframes-viewport.png
+\endlist
+
+To distinguish between the two slides and more easily see the effect of dynamic keyframes, it is
+recommended to set for example different diffuse color on the sphere on the two different slides.
+Remember to first unlink the diffuse color property from the master slide.
+
+When you run the presentation in the Viewer, the sphere will animate seamlessly when switching
+between the two slides.
+
+\section2 Looping and ping pong animations
+
+If you have used looping, ping pong or ping animation on any slide in the previous example, you
+might have noticed that animation will loop back only to the frame where you entered the slide.
+This might be the desired behavior in some cases, but many times you would like the animation to
+play the whole animation starting from the original first keyframe.
+
+In this example, we will set up a transition slide to get the full looping animation.
+
+\list 1
+  \li Duplicate \e{Slide2}.
+  \li Select \e{Slide2}, this is the slide we will use as transition slide.
+  \li Select the \e{Scene} in the \e{timeline palette}, set the animation to play through to
+  \e{Slide3}.
+  \image dyn-keyframes-playmode.png
+  \li On \e{Slide3}, you need to turn dynamic keyframes off. Right-click the timebar for the
+  sphere, then select \uicontrol{Make Animation Static}.
+  \li Ensure that \uicontrol{Play Mode} is set to \e{Looping} on \e{Slide3}.
+\endlist
+
+Now it works as desired. To complete this example, you will have to create a transition slide for
+transitioning from \e{Slide3} to \e{Slide1} the same way as well.
+
+As mentioned, the example above handled looping animation. It works the same way with ping pong
+animations but with one difference. For \e{Slide3}, you will have to reverse the animation so that
+the starting position of the object is the same as the position of the object when it has reached
+the end of \e{Slide2}. If you have an animation with only two keyframes, you will basically just
+have to interchange the location of the two keyframes.
+
+With a ping animation, you can follow the steps above without any change. It works exactly the
+same way as with looping animations.
 
 */

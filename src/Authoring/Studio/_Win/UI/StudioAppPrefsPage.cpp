@@ -31,14 +31,11 @@
 //	Prefix
 //==============================================================================
 
-#include "Strings.h"
-
 #include "ui_StudioAppPrefsPage.h"
 
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "Qt3DSOptions.h"
 #include "Doc.h"
 #include "StudioAppPrefsPage.h"
 #include "StudioConst.h"
@@ -46,7 +43,6 @@
 #include "StudioPreferences.h"
 #include "StudioApp.h"
 #include "StudioPreferences.h"
-#include "StringLoader.h"
 #include "CommonConstants.h"
 #include "Views.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -101,12 +97,11 @@ void CStudioAppPrefsPage::OnInitDialog()
     m_ui->m_editNudgeAmount->setValidator(new QDoubleValidator(this));
 
     // Add tool tips for controls
-    m_ui->m_editNudgeAmount->setToolTip(::LoadResourceString(IDS_PREFS_NUDGEAMOUNT).toQString());
-    m_ui->m_DefaultInterpolation->setToolTip(::LoadResourceString(IDS_PREFS_INTERPOLATIONDEFAULT).toQString());
-    m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(
-                ::LoadResourceString(IDS_PREFS_TIMELINEGRIDSNAPPING).toQString());
-    m_ui->m_SnapRangeCombo->setToolTip(::LoadResourceString(IDS_PREFS_TIMELINEGRIDRESOLUTION).toQString());
-    m_ui->m_buttonRestoreDefaults->setToolTip(::LoadResourceString(IDS_PREFS_RESTOREDEFAULTS).toQString());
+    m_ui->m_editNudgeAmount->setToolTip(tr("Set the object nudge amount"));
+    m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
+    m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
+    m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
+    m_ui->m_buttonRestoreDefaults->setToolTip(tr("Click to restore default Studio settings"));
     m_ui->m_EditViewBGColor->setAutoFillBackground(true);
 
     // Set fonts for child windows.
@@ -117,14 +112,6 @@ void CStudioAppPrefsPage::OnInitDialog()
     for (auto w : findChildren<QGroupBox *>())
         w->setFont(m_BoldFont);
 
-#ifndef INCLUDE_EDIT_CAMERA
-    ASSERT(0);
-    // This won't work as all the controls have to move accordingly. Don't think INCLUDE_EDIT_CAMERA
-    // will be undefined
-    // Hide controls related to Edit Camera
-    m_ui->m_groupBoxEditingView->setVisible(false);
-#endif
-
     // Hidden until we have some other Preview configurations than just Viewer
     m_ui->groupBoxPreview->setVisible(false);
 
@@ -132,15 +119,22 @@ void CStudioAppPrefsPage::OnInitDialog()
     LoadSettings();
 
     auto activated = static_cast<void(QComboBox::*)(int)>(&QComboBox::activated);
-    connect(m_ui->m_buttonRestoreDefaults, &QPushButton::clicked, this, &CStudioAppPrefsPage::OnButtonRestoreDefaults);
-    connect(m_ui->m_DefaultInterpolation, activated, this, &CStudioAppPrefsPage::OnSelChangeInterpolationDefault);
+    connect(m_ui->m_buttonRestoreDefaults, &QPushButton::clicked,
+            this, &CStudioAppPrefsPage::OnButtonRestoreDefaults);
+    connect(m_ui->m_DefaultInterpolation, activated,
+            this, &CStudioAppPrefsPage::OnSelChangeInterpolationDefault);
     connect(m_ui->m_SnapRangeCombo, activated, this, &CStudioAppPrefsPage::OnSelChangeSnapRange);
-    connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked, this, &CStudioAppPrefsPage::OnCheckTimelineAbsoluteSnapping);
-    connect(m_ui->m_EditViewBGColor, &QPushButton::clicked, this, &CStudioAppPrefsPage::OnBgColorButtonClicked);
-    connect(m_ui->m_editNudgeAmount, &QLineEdit::textEdited, this, &CStudioAppPrefsPage::OnChangeEditNudgeAmount);
-    connect(m_ui->m_EditViewStartupView, activated, this, &CStudioAppPrefsPage::OnSelChangeStartupView);
+    connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
+            this, &CStudioAppPrefsPage::OnCheckTimelineAbsoluteSnapping);
+    connect(m_ui->m_EditViewBGColor, &QPushButton::clicked,
+            this, &CStudioAppPrefsPage::OnBgColorButtonClicked);
+    connect(m_ui->m_editNudgeAmount, &QLineEdit::textEdited,
+            this, &CStudioAppPrefsPage::OnChangeEditNudgeAmount);
+    connect(m_ui->m_EditViewStartupView, activated,
+            this, &CStudioAppPrefsPage::OnSelChangeStartupView);
 #if 0 // Removed until we have some other Preview configurations than just Viewer
-    connect(m_ui->m_PreviewSelector, activated, this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
+    connect(m_ui->m_PreviewSelector, activated,
+            this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
 #endif
 }
 
@@ -156,11 +150,8 @@ void CStudioAppPrefsPage::LoadSettings()
     m_nudgeValue = CStudioPreferences::GetNudgeAmount();
 
     // Get the Interpolation Preference
-    Q3DStudio::CString theComboItem;
-    theComboItem = ::LoadResourceString(IDS_PREF_INTERPOLATION_1);
-    m_ui->m_DefaultInterpolation->addItem(theComboItem.toQString());
-    theComboItem = ::LoadResourceString(IDS_PREF_INTERPOLATION_2);
-    m_ui->m_DefaultInterpolation->addItem(theComboItem.toQString());
+    m_ui->m_DefaultInterpolation->addItem(tr("Smooth"));
+    m_ui->m_DefaultInterpolation->addItem(tr("Linear"));
 
     long theInterpolationPref = 0;
     if (CStudioPreferences::GetInterpolation())
@@ -171,23 +162,16 @@ void CStudioAppPrefsPage::LoadSettings()
 
     // Timeline snapping grid
     m_ui->m_checkTimelineAbsoluteSnapping->setChecked(
-                   CStudioPreferences::IsTimelineSnappingGridActive());
+                CStudioPreferences::IsTimelineSnappingGridActive());
 
-    // Load the combo boxes with values from the string table so that they are localizable.
     // The scale mode
-    (void)theComboItem;
-    theComboItem = ::LoadResourceString(IDS_PREF_SNAPRANGE_1);
-    m_ui->m_SnapRangeCombo->addItem(theComboItem.toQString());
-    theComboItem = ::LoadResourceString(IDS_PREF_SNAPRANGE_2);
-    m_ui->m_SnapRangeCombo->addItem(theComboItem.toQString());
-    theComboItem = ::LoadResourceString(IDS_PREF_SNAPRANGE_3);
-    m_ui->m_SnapRangeCombo->addItem(theComboItem.toQString());
+    m_ui->m_SnapRangeCombo->addItem(tr("Low Resolution"));
+    m_ui->m_SnapRangeCombo->addItem(tr("Medium Resolution"));
+    m_ui->m_SnapRangeCombo->addItem(tr("High Resolution"));
     long theResolution = (long)CStudioPreferences::GetTimelineSnappingGridResolution();
     m_ui->m_SnapRangeCombo->setCurrentIndex(theResolution);
 
-#ifdef INCLUDE_EDIT_CAMERA
     InitEditStartViewCombo();
-#endif
 
     EnableOptions();
 
@@ -220,7 +204,7 @@ void CStudioAppPrefsPage::SaveSettings()
 
     // Default interpolation
     g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(
-        m_ui->m_DefaultInterpolation->currentIndex() == 0);
+                m_ui->m_DefaultInterpolation->currentIndex() == 0);
 
     // Timeline snapping grid
     CStudioPreferences::SetTimelineSnappingGridActive(
@@ -228,7 +212,6 @@ void CStudioAppPrefsPage::SaveSettings()
     long theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
     CStudioPreferences::SetTimelineSnappingGridResolution((ESnapGridResolution)theCurrentSelection);
 
-#ifdef INCLUDE_EDIT_CAMERA
     // Edit View Background Color
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
 
@@ -236,8 +219,7 @@ void CStudioAppPrefsPage::SaveSettings()
     long theSel = m_ui->m_EditViewStartupView->currentIndex();
     long theNumItems = m_ui->m_EditViewStartupView->count();
     CStudioPreferences::SetPreferredStartupView(
-        (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
-#endif
+                (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     SavePreviewSettings();
@@ -285,16 +267,13 @@ void CStudioAppPrefsPage::OnOK()
 //==============================================================================
 void CStudioAppPrefsPage::OnButtonRestoreDefaults()
 {
-    Q3DStudio::CString theMessage;
-    Q3DStudio::CString theTitle;
     int theChoice = 0;
 
-    // Load the text strings for the message box
-    theTitle = ::LoadResourceString(IDS_PREF_RESTOREDEFAULT_TITLE);
-    theMessage = ::LoadResourceString(IDS_PREF_RESTOREDEFAULT_TEXT);
-
     // Ask the user if she really wants to do this
-    theChoice = QMessageBox::question(this, theTitle.toQString(), theMessage.toQString());
+    theChoice = QMessageBox::question(this,
+                                      tr("Restore Defaults"),
+                                      tr("Are you sure that you want to restore all program "
+                                         "\ndefaults? Your current settings will be lost."));
 
     // If the "yes" button was selected
     if (theChoice == QMessageBox::Yes) {
@@ -393,8 +372,9 @@ void CStudioAppPrefsPage::InitEditStartViewCombo()
     theRenderer.GetEditCameraList(theCameraNames);
     for (size_t idx = 0, end = theCameraNames.size(); idx < end; ++idx) {
         m_ui->m_EditViewStartupView->addItem(
-            theCameraNames.at(idx));
-        m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1, QVariant((int)idx + 1));
+                    theCameraNames.at(idx));
+        m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1,
+                                                 QVariant((int)idx + 1));
     }
 
     m_ui->m_EditViewStartupView->addItem("--------------------------");
@@ -406,7 +386,7 @@ void CStudioAppPrefsPage::InitEditStartViewCombo()
     item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
 
     // add the deployment view as the last selection
-    m_ui->m_EditViewStartupView->addItem(::LoadResourceString(IDS_SCENE_CAMERA_VIEW).toQString());
+    m_ui->m_EditViewStartupView->addItem(tr("Scene Camera View"));
     m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1, 0);
 
     long thePreferredView = CStudioPreferences::GetPreferredStartupView();
@@ -425,7 +405,7 @@ void CStudioAppPrefsPage::LoadPreviewSelections()
     // Load the configurations from all the .build files
     Q3DStudio::CBuildConfigurations &theConfig = g_StudioApp.GetCore()->GetBuildConfigurations();
     Q3DStudio::CBuildConfigurations::TBuildConfigurations theConfigurations =
-        theConfig.GetConfigurations();
+            theConfig.GetConfigurations();
     Q3DStudio::CBuildConfigurations::TBuildConfigurations::iterator theIter;
     for (theIter = theConfigurations.begin(); theIter != theConfigurations.end(); ++theIter) {
         const Q3DStudio::CString &theConfig = theIter->first;
@@ -434,7 +414,8 @@ void CStudioAppPrefsPage::LoadPreviewSelections()
                                              QVariant::fromValue(theIter->second));
     }
 
-    int thePreviewSelected = m_ui->m_PreviewSelector->findText(CStudioPreferences::GetPreviewConfig().toQString());
+    int thePreviewSelected = m_ui->m_PreviewSelector->findText(
+                CStudioPreferences::GetPreviewConfig().toQString());
     m_ui->m_PreviewSelector->setCurrentIndex(thePreviewSelected);
     if (thePreviewSelected == -1) {
         // select the first build configuration, or if no conriguration, the first application, i.e.
@@ -442,7 +423,8 @@ void CStudioAppPrefsPage::LoadPreviewSelections()
         m_ui->m_PreviewSelector->setCurrentIndex(0);
         long thePreviewCount = m_ui->m_PreviewSelector->count();
         for (long theIndex = 0; theIndex < thePreviewCount; ++theIndex) {
-            if (m_ui->m_PreviewSelector->itemData(theIndex).value<Q3DStudio::CBuildConfiguration *>() != nullptr) {
+            if (m_ui->m_PreviewSelector->itemData(
+                        theIndex).value<Q3DStudio::CBuildConfiguration *>() != nullptr) {
                 m_ui->m_PreviewSelector->setCurrentIndex(theIndex);
                 break;
             }
@@ -465,14 +447,26 @@ void CStudioAppPrefsPage::OnChangePreviewConfiguration()
 
 void CStudioAppPrefsPage::OnBgColorButtonClicked() 
 {
-    QColorDialog dlg(this);
-    dlg.setCurrentColor(m_bgColor);
-    if (dlg.exec() == QDialog::Accepted) {
-        m_bgColor = dlg.selectedColor();
-        updateColorButton();
-    }
-
+    QColor previousColor = m_bgColor;
+    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
+    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
+    connect(theColorDlg, &QColorDialog::currentColorChanged,
+            this, &CStudioAppPrefsPage::onBackgroundColorChanged);
+    if (theColorDlg->exec() == QDialog::Accepted)
+        m_bgColor = theColorDlg->selectedColor();
+    else
+        m_bgColor = previousColor;
+    updateColorButton();
     this->SetModified(true);
+    OnApply();
+}
+
+void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
+{
+    m_bgColor = color;
+    updateColorButton();
+    this->SetModified(true);
+    OnApply();
 }
 
 //==============================================================================
@@ -488,12 +482,14 @@ void CStudioAppPrefsPage::LoadBuildProperties()
 
     if (m_ui->m_PreviewSelector->count() > 0) {
         Q3DStudio::CBuildConfiguration *theConfig =
-            m_ui->m_PreviewSelector->itemData(m_ui->m_PreviewSelector->currentIndex()).value<Q3DStudio::CBuildConfiguration *>();
+                m_ui->m_PreviewSelector->itemData(
+                    m_ui->m_PreviewSelector->currentIndex())
+                .value<Q3DStudio::CBuildConfiguration *>();
         if (theConfig) {
             // Only configuration read from .build files will have the ItemDataPtr set.
 
             Q3DStudio::CBuildConfiguration::TConfigProperties &theProperties =
-                theConfig->GetBuildProperties();
+                    theConfig->GetBuildProperties();
 
             auto layout = qobject_cast<QFormLayout *>(m_ui->groupBoxPreview->layout());
             auto activated = static_cast<void(QComboBox::*)(int)>(&QComboBox::activated);
@@ -503,11 +499,11 @@ void CStudioAppPrefsPage::LoadBuildProperties()
 
                 for (theIter = theProperties.begin(); theIter != theProperties.end(); ++theIter) {
                     Q3DStudio::CBuildConfiguration::TConfigPropertyValues &theValues =
-                        theIter->GetAcceptableValues();
+                            theIter->GetAcceptableValues();
                     // Only create the combo if there is more than 1 choices
                     if (theValues.size() > 1) {
                         Q3DStudio::CBuildConfiguration::TConfigPropertyValues::iterator
-                            theValueIter;
+                                theValueIter;
                         long theMaxLength = 0;
                         for (theValueIter = theValues.begin(); theValueIter != theValues.end();
                              ++theValueIter) {
@@ -524,10 +520,10 @@ void CStudioAppPrefsPage::LoadBuildProperties()
                         layout->addRow(theStaticText, thePropertyDropdown);
 
                         m_BuildProperties.push_back(std::make_pair(
-                            &*theIter, std::make_pair(theStaticText, thePropertyDropdown)));
+                                                        &*theIter, std::make_pair(theStaticText, thePropertyDropdown)));
 
                         Q3DStudio::CString thePropertyValue =
-                            CStudioPreferences::GetPreviewProperty(theIter->GetName());
+                                CStudioPreferences::GetPreviewProperty(theIter->GetName());
                         for (theValueIter = theValues.begin(); theValueIter != theValues.end();
                              ++theValueIter) {
                             thePropertyDropdown->addItem(theValueIter->GetLabel().toQString());
@@ -556,7 +552,8 @@ void CStudioAppPrefsPage::SavePreviewSettings()
         QComboBox *theCombo = theIter->second.second;
         Q3DStudio::CString theName = theIter->first->GetName();
         Q3DStudio::CBuildConfiguration::SConfigPropertyValue *thePropertyValue =
-                theCombo->itemData(theCombo->currentIndex()).value<Q3DStudio::CBuildConfiguration::SConfigPropertyValue *>();
+                theCombo->itemData(theCombo->currentIndex())
+                .value<Q3DStudio::CBuildConfiguration::SConfigPropertyValue *>();
         CStudioPreferences::SetPreviewProperty(theName, thePropertyValue->GetName());
     }
 }

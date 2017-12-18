@@ -93,7 +93,6 @@ public:
     // Overrides
 public:
     virtual bool InitInstance(int argc, char *argv[]);
-    virtual int ExitInstance();
     virtual int Run();
 
     void OnAppAbout();
@@ -113,7 +112,6 @@ protected:
     int RunSystemTests(const Q3DStudio::CString &inTestArgs);
     int OpenAndRunApplication(const Q3DStudio::CString &inFilename);
     void InitCore();
-    void InitHelpSystem();
     bool ShowStartupDialog();
     bool HandleWelcomeRes(int res, bool recursive);
 
@@ -125,14 +123,14 @@ protected:
     bool m_IsSilent; ///< true indicates Studio running in silent mode (no GUI)
     CViews *m_Views;
     long m_ToolMode;
-    StudioManipulationModes::Enum
-    m_ManipulationMode; ///< Controls what space the tras,rot,and scale manipulations work in.
+    StudioManipulationModes::Enum m_ManipulationMode; ///< Controls what space the tras, rot, and
+                                                      /// scale manipulations work in.
     long m_SelectMode;
     CDialogs *m_Dialogs;
     long m_PlaybackTime; ///< Stores the playhead's starting position so that it can be restored
-    ///after playing the presentation for a little while
-    qt3dsdm::Qt3DSDMSlideHandle
-        m_PlaybackOriginalSlide; ///< Stores the current slide handle before playback started.
+                         ///after playing the presentation for a little while
+    qt3dsdm::Qt3DSDMSlideHandle m_PlaybackOriginalSlide; ///< Stores the current slide handle
+                                                         /// before playback started.
 
     std::shared_ptr<Q3DStudio::ITickTock> m_TickTock;
     std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
@@ -164,12 +162,12 @@ public:
     bool CanRedo();
     void OnCopy();
     bool CanCopy();
-    Q3DStudio::CString GetCopyType();
+    QString GetCopyType();
     void OnCut();
     bool CanCut();
     void OnPaste();
     bool CanPaste();
-    Q3DStudio::CString GetPasteType();
+    QString GetPasteType();
     void SetSelectedObjectTimebarColor();
     bool CanChangeTimebarColor();
     void HandleSetChangedKeys();

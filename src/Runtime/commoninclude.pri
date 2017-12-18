@@ -46,10 +46,13 @@ INCLUDEPATH += \
     $$PWD/Source/Qt3DSRuntimeRender/ResourceManager
 
 # TODO: Investigate whether these can be moved to commonplatform
+win32-msvc {
+    CONFIG += nostrictstrings
+    QMAKE_CXXFLAGS += /EHsc /GA
+    QMAKE_CFLAGS += /EHsc /GA
+}
+
 win32 {
-CONFIG += nostrictstrings
-QMAKE_CXXFLAGS += /EHsc /GA
-QMAKE_CFLAGS += /EHsc /GA
 INCLUDEPATH += \
     $$PWD/Source/PlatformSpecific/Windows/Qt3DSLibs
     $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/Qt3DSLibs

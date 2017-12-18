@@ -65,9 +65,9 @@ linux {
 
 LIBS += \
     $$BEGIN_ARCHIVE \
+    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lLua$$qtPlatformTargetSuffix() \
-    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
     $$END_ARCHIVE \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 

@@ -6,11 +6,17 @@ QWidget {
     border: 0px;
 }
 
-/* DockWidget separators */
+/* DockWidget */
 QMainWindow::separator {
     background: #000000;
     width: 1px;  /* when vertical */
     height: 1px; /* when horizontal */
+}
+
+QDockWidget::title {
+    border: 1px solid #262829;
+    background: #2e2f30;
+    padding: 3px;
 }
 
 /* Tabs */
@@ -30,7 +36,6 @@ QTabWidget::pane {
 }
 
 /* Scrollbar */
-
 QScrollBar:horizontal {
     height: 6px;
 }
@@ -207,6 +212,14 @@ QPushButton:pressed {
     background: #262829;
 }
 
+QHeaderView::section {
+    background: transparent;
+}
+
+QHeaderView::section:hover {
+    background: #46a2da;
+}
+
 /* Tutorial Dialog */
 QDialog#StudioTutorialWidget,
 QDialog#StudioTutorialWidget QWidget {
@@ -255,9 +268,38 @@ QDialog#AboutDlg QPushButton:pressed {
 
 /* TimeLineToolbar */
 QWidget#TimeLineParent,
-QTimeLineToolbar QWidget#layoutWidget {
+TimeLineToolbar QWidget#layoutWidget {
     background: #404244;
 }
-QTimeLineToolbar QPushButton#timeButton {
+TimeLineToolbar QPushButton#timeButton {
     border: 0px;
+}
+
+/* Sub-presentation Dialog */
+QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
+QDialog#SubPresentationListDlg QHeaderView::section {
+    background: transparent;
+}
+
+QDialog#SubPresentationListDlg QTableView {
+    selection-background-color: #46a2da;
+}
+
+QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton {
+    background-color: transparent;
+    border: 0px;
+    min-width: 16px;
+    max-width: 16px;
+    min-height: 16px;
+    max-height: 16px;
+    padding: 0px;
+}
+
+QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton:pressed {
+    background-color: #262829;
+}
+
+QDialog#SubPresentationDlg QPushButton:!enabled {
+    background: transparent;
+    color: #727476;
 }

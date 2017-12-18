@@ -985,6 +985,9 @@ EElementType GetElementType(const char *inType)
     else if (AreEqual(inType, "SubPath"))
         return ELEMENTTYPE_SUBPATH;
 
+    else if (AreEqual(inType, "DataInput"))
+        return ELEMENTTYPE_DATAINPUT;
+
     else
         return ELEMENTTYPE_UNKNOWN;
 }
@@ -1120,9 +1123,7 @@ BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &i
             theNewElem.m_Path = m_ParseElementManager.m_StringTable.RegisterStr(thePath.c_str());
 
         if (isBehavior) {
-            if (theFileString.find(".lua") != eastl::string::npos) {
-                theScriptBridge->LoadScript(&inPresentation, &theNewElem, theFileString.c_str());
-            } else {
+            if (theFileString.find(".qml") != eastl::string::npos) {
                 theScriptBridgeQml->LoadScript(&inPresentation, &theNewElem,
                                                theFileString.c_str());
             }
@@ -2541,6 +2542,9 @@ SElementAndType CUIPParserImpl::GetElementForID(const char *inElementName)
         break;
     case qt3dsdm::ComposerObjectTypes::SubPath:
         theUIPType = UIPElementTypes::PathSubPath;
+        break;
+    case qt3dsdm::ComposerObjectTypes::DataInput:
+        theUIPType = UIPElementTypes::DataInput;
         break;
     default:
         QT3DS_ASSERT(false);

@@ -138,6 +138,8 @@ public:
 
     void OnToolGroupSelection();
     void OnToolItemSelection();
+
+    CPlayerWnd *GetPlayerWnd() const;
 public:
 
     void resizeEvent(QResizeEvent *event) override;

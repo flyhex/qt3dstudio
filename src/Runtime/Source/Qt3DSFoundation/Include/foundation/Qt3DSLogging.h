@@ -31,14 +31,8 @@
 #ifndef QT3DS_FOUNDATION_QT3DS_ERRORS_H
 #define QT3DS_FOUNDATION_QT3DS_ERRORS_H
 
-#include <QDebug>
-
-// This is defined in: src/Authoring/Studio/English.lproj/Strings/Strings.h
-// which gets pulled into the precompiled header stdafx.h by the windows build
-// and conflicts with private member variables used in Qt.
-#undef placeholder
-
-#include <QLoggingCategory>
+#include <QtCore/qdebug.h>
+#include <QtCore/qloggingcategory.h>
 
 namespace qt3ds {
 

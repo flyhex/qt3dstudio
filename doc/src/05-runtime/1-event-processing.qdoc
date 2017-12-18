@@ -32,47 +32,6 @@
 \page runtime-event-processing.html
 \ingroup qt3dstudio-runtime
 
-\omit
-There are three different event systems in
-the Qt 3D Studio Runtime:
-
-\list
-\li
-  \e{External Events} arrive from outside the
-  system (e.g. from the CAN bus, a keyboard, a game controller) via
-  plugins that expose a queue of events each frame to your application.
-  These events must be explicitly received and handled by your
-  application.
-\li
-  \e{State Machine Events} occur within each
-  state machine running in your application, possibly causing the state
-  machine to possibly change states.
-\li
-  \l{presentation-events}{Presentation Events} occur within each
-  presentation (e.g. touch events, slide changes, Lua script), bubbling
-  up the scene graph of elements within the presentation.
-\endlist
-
-\target external-events
-\section1 External Events
-
-\list
-\li
-  \e{TODO: document the handling of events, with an example App.lua
-  with links to the Lua functions and also to the reference for writing
-  plugins.}
-\endlist
-
-\target state-machine-events
-\section1 State Machine Events
-
-\list
-\li
-  \e{TODO: document the firing of events on state machines, with
-  links to the Lua functions.}
-\endlist
-\endomit
-
 \target presentation-events
 \section1 Presentation Events
 
@@ -136,13 +95,10 @@ runtime, a piece of logic gets created representing this action. When
 the onSelect event is fired and later processed, the interested logic
 will be notified and the slide change will occur.
 
-\omit
-TODO: Needs to be rewritten?
-Note that behavior event registrations (created with Lua's
+\note Behavior event registrations (created with \l {Behavior}{QML Behavior}
 registerForEvent) work similarly to the logic described above. If a
-script registers explicitly for a certain event and in the handler calls
+behavior registers explicitly for a certain event and in the handler calls
 goToSlide, essentially the same things happen.
-\endomit
 
 \section3 Changing Properties
 
@@ -154,40 +110,34 @@ will result in changed properties if a master object inside of Studio
 has one or more of its properties unlinked from the master slide and
 that property is changed per-slide.
 
-\omit
-\section3 Executing Script
+\section3 Executing Behavior Callbacks
 
-Processing an event can result in arbitrary script code being executed.
-An event registration can be created by using the registerForEvent
+Processing an event can result in arbitrary QML Behavior callback code
+being executed. An event registration can be created by using the registerForEvent
 function to listen for a specific event on a specific element. The
 registration also has a callback function associated with it and when
-that specific event targeting that element is processed, the script
+that specific event targeting that element is processed, the behavior
 callback function will be executed.
 
-Of course, script can inspect and change properties on various elements,
-affect slide changes, fire more events, etc. Being able to respond to
-events being processed really empowers scripting.
-\endomit
+Of course, behavior can inspect and change properties on various elements,
+affect slide changes, fire more events, etc.
 
-\omit
-TODO: Needs to be rewritten.
 \section3 Firing More Events (Cascading)
 
 There are two ways a presentation may fire an event in response to
-another event. The first way is through script as described above, and
+another event. The first way is through behaviors as described above, and
 the second way is through the action palette.
 
 Behaviors in Studio can have arbitrary Custom Events associated with
 them by adding these custom events in the header section of the
-behavior's .lua file. When a behavior with one or more Custom Events is
+behavior's .qml file. When a behavior with one or more Custom Events is
 the target of an action in the action palette Studio will offer the Fire
 Event action. By using this action, arbitrary cascading events can be
-set up to fire by pointing and clicking. (as opposed to scripting).
+set up to fire by pointing and clicking.
 
-It's worth repeating that these cascading events will all be processed
+\note These cascading events will all be processed
 in the same frame. The event processor doesn't stop processing events
 until there are none left to process.
-\endomit
 
 \section2 How Your Application (C++) Interacts with Event Processing
 

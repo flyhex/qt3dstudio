@@ -35,16 +35,15 @@
 #include <QtCore/qdatastream.h>
 #include <QtCore/qtemporarydir.h>
 #include <QtNetwork/qtcpserver.h>
-#include <QtWidgets/qwidget.h>
 
 class RemoteDeploymentReceiver : public QObject
 {
     Q_OBJECT
 public:
-    explicit RemoteDeploymentReceiver(QWidget *parent);
+    explicit RemoteDeploymentReceiver(int serverPort, QObject *parent);
     ~RemoteDeploymentReceiver();
 
-    bool startServer();
+    QString startServer();
 
     QHostAddress hostAddress() const { return m_hostAddress; }
     int serverPort() const { return m_serverPort; }
@@ -66,7 +65,6 @@ private Q_SLOTS:
     void setPort(int value);
 
 private:
-    QWidget *m_mainWindow = nullptr;
     QTcpServer *m_tcpServer = nullptr;
     QTcpSocket *m_connection = nullptr;
     QHostAddress m_hostAddress;

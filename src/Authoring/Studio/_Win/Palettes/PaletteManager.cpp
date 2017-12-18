@@ -59,32 +59,54 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     // Position tabs to the right
     inMainFrame->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
 
-    m_basicObjectsDock = new QDockWidget(QObject::tr("Basic Objects"), inMainFrame);
-    m_basicObjectsDock->setObjectName("basic_objects");
-    m_basicObjectsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
-                                        | Qt::BottomDockWidgetArea);
-    auto basicObjectsView = new BasicObjectsView(m_basicObjectsDock);
-    m_basicObjectsDock->setWidget(basicObjectsView);
-    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_basicObjectsDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
-
     m_projectDock = new QDockWidget(QObject::tr("Project"), inMainFrame);
     m_projectDock->setObjectName("project");
     m_projectDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                    | Qt::BottomDockWidgetArea);
-    auto projectView = new ProjectView(m_projectDock);
+    // Give the preferred size as percentages of the mainframe size
+    auto projectView = new ProjectView(QSize(inMainFrame->width() * 0.2,
+                                             inMainFrame->height() * 0.8),
+                                       m_projectDock);
+    projectView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_projectDock->setWidget(projectView);
     inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
-    inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_projectDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
+
+    m_inspectorDock = new QDockWidget(QObject::tr("Inspector Control"), inMainFrame);
+    m_inspectorDock->setObjectName("inspector_control");
+    m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+                                     | Qt::BottomDockWidgetArea);
+    // Give the preferred size as percentages of the mainframe size
+    auto inspectorView = new InspectorControlView(QSize(inMainFrame->width() * 0.2,
+                                                        inMainFrame->height() * 0.8),
+                                                  m_inspectorDock);
+    inspectorView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_inspectorDock->setWidget(inspectorView);
+    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_inspectorDock);
+    inMainFrame->tabifyDockWidget(m_projectDock, m_inspectorDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
 
     m_slideDock = new QDockWidget(QObject::tr("Slide"), inMainFrame);
     m_slideDock->setObjectName("slide");
     m_slideDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    // Slide palette has a fixed size hint
     auto slideView = new SlideView(m_slideDock);
+    slideView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_slideDock->setWidget(slideView);
     inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_SLIDE, m_slideDock));
+
+    m_basicObjectsDock = new QDockWidget(QObject::tr("Basic Objects"), inMainFrame);
+    m_basicObjectsDock->setObjectName("basic_objects");
+    m_basicObjectsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+                                        | Qt::BottomDockWidgetArea);
+    // Basic objects palette has a fixed size hint
+    auto basicObjectsView = new BasicObjectsView(m_basicObjectsDock);
+    basicObjectsView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_basicObjectsDock->setWidget(basicObjectsView);
+    inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_basicObjectsDock);
+    inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
     m_timelineDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
     m_timelineDock->setObjectName("timeline");
@@ -92,7 +114,12 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
 
     QWidget *timeLineParent = new QWidget(inMainFrame);
     timeLineParent->setObjectName("TimeLineParent");
-    m_timeLineToolbar = new QTimeLineToolbar(inMainFrame, timeLineParent);
+    // Give the preferred size as percentages of the mainframe size
+    // -25 is applied to width to compensate the action palette having no tabs by default
+    m_timeLineToolbar = new TimeLineToolbar(inMainFrame,
+                                            QSize(inMainFrame->width() * 0.8 - 25, 26),
+                                            timeLineParent);
+    m_timeLineToolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     QVBoxLayout *layout = new QVBoxLayout(timeLineParent);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
@@ -102,7 +129,11 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     spacer->setMaximumHeight(2);
     spacer->setMinimumHeight(2);
 
-    auto c = new CTimelineControl();
+    // Give the preferred size as percentages of the mainframe size
+    // -25 is applied to width to compensate the action palette having no tabs by default
+    // -26 is applied to height, as that is the height of the timeline toolbar
+    auto c = new CTimelineControl(QSize(inMainFrame->width() * 0.8 - 25,
+                                        inMainFrame->height() * 0.2 - 26));
     m_timeLineWidgetControl = new WidgetControl(c, timeLineParent);
 
     layout->addWidget(m_timeLineWidgetControl);
@@ -110,33 +141,22 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     layout->addWidget(m_timeLineToolbar);
 
     m_timelineDock->setWidget(timeLineParent);
-    timeLineParent->setMinimumWidth(500);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
-
-    int actionViewMinWidth = CStudioPreferences::valueWidth()
-            + CStudioPreferences::idWidth() + 40; // 40 added to accommodate tabs
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
     m_actionDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                   | Qt::BottomDockWidgetArea);
-    auto actionView = new ActionView(m_actionDock);
+    // Give the preferred size as percentages of the mainframe size
+    // +25 is applied to width to compensate the action palette having no tabs by default
+    auto actionView = new ActionView(QSize(inMainFrame->width() * 0.2 + 25,
+                                           inMainFrame->height() * 0.2),
+                                     m_actionDock);
+    actionView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_actionDock->setWidget(actionView);
-    actionView->setMinimumWidth(actionViewMinWidth);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_actionDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, m_actionDock));
-
-    m_inspectorDock = new QDockWidget(QObject::tr("Inspector Control"), inMainFrame);
-    m_inspectorDock->setObjectName("inspector_control");
-    m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
-                                     | Qt::BottomDockWidgetArea);
-    auto inspectorView = new InspectorControlView(m_inspectorDock);
-    m_inspectorDock->setWidget(inspectorView);
-    inspectorView->setMinimumWidth(actionViewMinWidth); // Same min size as action view
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_inspectorDock);
-    inMainFrame->tabifyDockWidget(m_actionDock, m_inspectorDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
 
     m_basicObjectsDock->setEnabled(false);
     m_projectDock->setEnabled(false);
@@ -145,7 +165,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_actionDock->setEnabled(false);
     m_inspectorDock->setEnabled(false);
 
-    m_timeLineWidgetControl->RegiserForDnd(m_timeLineWidgetControl);
+    m_timeLineWidgetControl->RegisterForDnd(m_timeLineWidgetControl);
     m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
     m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
     m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);

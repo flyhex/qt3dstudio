@@ -290,7 +290,10 @@ template <>
 inline QColor get<QColor>(const SValue &inType)
 {
     auto f = get<qt3dsdm::SFloat3>(inType);
-    return QColor::fromRgbF(f.m_Floats[0], f.m_Floats[1], f.m_Floats[2]);
+    qreal r = qBound<qreal>(0.0, f.m_Floats[0], 1.0);
+    qreal g = qBound<qreal>(0.0, f.m_Floats[1], 1.0);
+    qreal b = qBound<qreal>(0.0, f.m_Floats[2], 1.0);
+    return QColor::fromRgbF(r, g, b);
 }
 
 template <>

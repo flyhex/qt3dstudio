@@ -113,7 +113,7 @@ void SlideView::setShowMasterSlide(bool show)
 
 QSize SlideView::sizeHint() const
 {
-    return {150, 200};
+    return {150, 500};
 }
 
 void SlideView::deselectAll()
@@ -136,9 +136,19 @@ void SlideView::duplicateSlide(int row)
     m_SlidesModel->duplicateRow(row);
 }
 
+void SlideView::startSlideRearrange(int row)
+{
+    m_SlidesModel->startRearrange(row);
+}
+
 void SlideView::moveSlide(int from, int to)
 {
     m_SlidesModel->move(from, to);
+}
+
+void SlideView::finishSlideRearrange(bool commit)
+{
+    m_SlidesModel->finishRearrange(commit);
 }
 
 void SlideView::showContextMenu(int x, int y, int row)
@@ -159,9 +169,7 @@ void SlideView::OnNewPresentation()
         std::bind(&SlideView::OnActiveSlide, this, std::placeholders::_1,
                   std::placeholders::_2, std::placeholders::_3)));
 
-    // KDAB_TODO We most probably don't need to listen to the below signals,
-    // as the functionality is done in the model already. Remove after it is confirmed
-    // it works as desired when the rendering works.
+    // Needed for undo/redo functionality to work properly
     m_Connections.push_back(theSignalProvider->ConnectSlideCreated(
         std::bind(&SlideView::OnNewSlide, this, std::placeholders::_1)));
     m_Connections.push_back(theSignalProvider->ConnectSlideDeleted(
@@ -169,6 +177,12 @@ void SlideView::OnNewPresentation()
     m_Connections.push_back(theSignalProvider->ConnectSlideRearranged(
         std::bind(&SlideView::OnSlideRearranged, this, std::placeholders::_1,
                   std::placeholders::_2, std::placeholders::_3)));
+
+    // Set up listener for the name changes to slide
+    m_Connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
+                std::bind(&SlideModel::refreshSlideLabel, m_SlidesModel,
+                          std::placeholders::_1, std::placeholders::_2)));
+
 }
 
 void SlideView::OnClosingPresentation()
@@ -180,26 +194,29 @@ void SlideView::OnClosingPresentation()
 void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                               const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
-    // When the active slide changes, we need to update our button and mode
-    if (inMaster.Valid()) {
-        // if inIndex is 0, it means that we are activating master slide
-        setShowMasterSlide(inIndex == 0);
-        setActiveSlide(inSlide);
-    }
+    // Don't use inIndex because inIndex might have been changed due to deletion
+    Q_UNUSED(inIndex);
+    Q_UNUSED(inMaster);
+
+    qt3dsdm::ISlideSystem &theSlideSystem(*GetDoc()->GetStudioSystem()->GetSlideSystem());
+    setShowMasterSlide(theSlideSystem.GetSlideIndex(inSlide) == 0);
+    setActiveSlide(inSlide);
 }
 
 void SlideView::OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
-
+    m_SlidesModel->onNewSlide(inSlide);
 }
 
 void SlideView::OnDeleteSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
-
+    m_SlidesModel->onDeleteSlide(inSlide);
 }
 
-void SlideView::OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex, int inNewIndex)
+void SlideView::OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
+                                  int inNewIndex)
 {
+    m_SlidesModel->onSlideRearranged(inMaster, inOldIndex, inNewIndex);
 }
 
 void SlideView::initialize()

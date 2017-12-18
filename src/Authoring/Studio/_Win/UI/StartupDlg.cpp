@@ -32,15 +32,13 @@
 //==============================================================================
 #include "stdafx.h"
 #include "StudioDefs.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 //==============================================================================
 // Includes
 //==============================================================================
 
 #include "StartupDlg.h"
-
+#include "StudioUtils.h"
 #include "StudioPreferences.h"
 #include "ui_StartupDlg.h"
 
@@ -89,14 +87,25 @@ void CStartupDlg::reject()
 
 void CStartupDlg::OnInitDialog()
 {
+    QWidget *p = qobject_cast<QWidget *>(parent());
+    if (p) {
+        QRect pRect;
+        if (p->isMaximized())
+            pRect = QRect(QPoint(0, 0), GetAvailableDisplaySize(getWidgetScreen(p)));
+        else
+            pRect = p->frameGeometry();
+
+        move(pRect.x() + pRect.width() / 2 - width() / 2,
+             pRect.y() + pRect.height() / 2 - height() / 2);
+    }
+
     connect(m_ui->newDocument, &QPushButton::clicked, this, &CStartupDlg::OnNewDocClicked);
     connect(m_ui->openDocument, &QPushButton::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
-    m_ProductVersionStr.Format(
-        ::LoadResourceString(IDS_UIC_STUDIO_VERSION),
-        static_cast<const wchar_t *>(CStudioPreferences::GetVersionString()));
-    m_ui->versionStr->setText(m_ProductVersionStr.toQString());
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
+            + CStudioPreferences::GetVersionString().toQString();
+    m_ui->versionStr->setText(m_ProductVersionStr);
 
     // Populate the recent document list
     for (uint theIndex = 0; theIndex < RECENT_COUNT; ++theIndex) {

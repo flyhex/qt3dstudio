@@ -64,9 +64,9 @@ class CStudioSystem;
  * Binding to generic DataModel object
  */
 class Qt3DSDMTimelineItemBinding : public ITimelineItemBinding,
-                                  public ITimelineItem,
-                                  public IDragable,
-                                  public IDataModelListener
+        public ITimelineItem,
+        public IDragable,
+        public IDataModelListener
 
 {
 protected: // Typedef
@@ -88,14 +88,14 @@ protected:
 
 public:
     Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
-                              qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
+                               qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
     Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr);
     virtual ~Qt3DSDMTimelineItemBinding();
 
 protected:
     bool GetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty) const;
     void SetBoolean(qt3dsdm::Qt3DSDMPropertyHandle inProperty, bool inValue,
-                         const QString &inNiceText) const;
+                    const QString &inNiceText) const;
     void SetInstanceHandle(qt3dsdm::Qt3DSDMInstanceHandle inDataHandle);
 
 public:
@@ -176,7 +176,7 @@ public:
     void OnEndDataModelNotifications() override;
     void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
-                                                    long inInstanceCount) override;
+                                            long inInstanceCount) override;
     void RefreshStateRow(bool inRefreshChildren = false);
 
     virtual void AddPropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,

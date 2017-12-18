@@ -36,17 +36,21 @@
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #endif
 #include "StudioApp.h"
-#include "SubPresentationsDlg.h"
 #include "Qt3DSStateApplication.h"
+#include "PlayerWnd.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qurl.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtWidgets/qaction.h>
+#include <QtCore/qstandardpaths.h>
 
 int main(int argc, char *argv[])
 {
+    // Hack to work around qml cache bug (QT3DS-556)
+    qputenv("QML_DISABLE_DISK_CACHE", "true");
+
     // to enable QOpenGLWidget to work on macOS, we must set the default
     // QSurfaceFormat before QApplication is created. Otherwise context-sharing
     // fails and QOpenGLWidget breaks.
@@ -100,11 +104,9 @@ int main(int argc, char *argv[])
 //==============================================================================
 #include "Exceptions.h"
 #include "IOLibraryException.h"
-#include "Strings.h"
 #include "MainFrm.h"
 #include "AboutDlg.h"
 #include "Views.h"
-#include "StringLoader.h"
 #include "Doc.h"
 #include "Dialogs.h"
 #include "Dispatch.h"
@@ -134,12 +136,8 @@ int main(int argc, char *argv[])
 #include <fcntl.h>
 #include <string.h>
 
-#include <QApplication>
-#include <QSettings>
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-#include "..\Build\versionnumber.h"
-#endif
+#include <QtWidgets/qapplication.h>
+#include <QtCore/qsettings.h>
 
 #include "Qt3DSDESKey.h" // g_DESKey
 
@@ -158,10 +156,6 @@ int main(int argc, char *argv[])
 #include "ITickTock.h"
 #include "Qt3DSFileTools.h"
 #include "foundation/Qt3DSLogging.h"
-
-#ifdef USE_LICENSE_HANDLER
-#include "licensehandler.h"
-#endif
 
 CStudioApp g_StudioApp;
 long g_ErrorCode = 0;
@@ -229,8 +223,10 @@ void CStudioApp::PerformShutdown()
     }
 
     if (m_Renderer) {
+        m_Views->GetMainFrame()->GetPlayerWnd()->makeCurrent();
         m_Renderer->Close();
         m_Renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
+        m_Views->GetMainFrame()->GetPlayerWnd()->doneCurrent();
     }
 
     delete m_SplashPalette;
@@ -241,8 +237,6 @@ void CStudioApp::PerformShutdown()
     m_Dialogs = nullptr;
     delete m_Core;
     m_Core = nullptr;
-
-    CStringLoader::UnloadStrings();
 
     // Get rid of the temp files
     Qt3DSFile::ClearCurrentTempCache();
@@ -265,12 +259,6 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
                 QString::fromWCharArray(CStudioPreferences::GetVersionString().c_str()));
 
     qCInfo(qt3ds::TRACE_INFO) << "Studio: " << QApplication::applicationFilePath();
-
-    // Load the strings used by the app gui
-    // This needs to occur prior to parsing command line arguments
-    // since access to the strings are required by some of the cases
-    Qt3DSFile theResDir(CString::fromQString(resourcePath() + QStringLiteral("/strings")));
-    CStringLoader::LoadStrings(theResDir);
     qCInfo(qt3ds::TRACE_INFO) << "Version: "
                               << CStudioPreferences::GetVersionString().GetCharStar();
 
@@ -291,32 +279,18 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
 
     // If we're just running unit tests, return before creating windows/MFC controls
     if (m_CmdLineParser.IsRunUnitTests()) {
-        {
-            RunCmdLineTests(m_CmdLineParser.GetFilename());
-            return false; // return false so we bail from loading the app
-        }
+        RunCmdLineTests(m_CmdLineParser.GetFilename());
+        return false; // return false so we bail from loading the app
     }
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-    // Standard initialization
-    // If you are not using these features and wish to reduce the size
-    // of your final executable, you should remove from the following
-    // the specific initialization routines you do not need
-    // Change the registry key under which our settings are stored
-    Q3DStudio::CString theRegistryKey =
-        ::LoadResourceString(IDS_UICOMPOSER_PALETTE_SETTINGS_REGISTRY_KEY);
-    SetRegistryKey(theRegistryKey);
-#endif
 
     CFilePath thePreferencesPath = CFilePath::GetUserApplicationDirectory();
     thePreferencesPath = CFilePath::CombineBaseAndRelative(
-        thePreferencesPath, CFilePath(L"Qt3DSComposer\\Preferences.setting"));
+                thePreferencesPath, CFilePath(L"Qt3DSComposer\\Preferences.setting"));
     CPreferences::SetPreferencesFile(thePreferencesPath);
 
-#ifdef KDAB_TEMPORARILY_REMOVED
-    // Set up the path to the help file
-    InitHelpSystem();
-#endif
+    // Initialize help file path
+    m_pszHelpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+            Q3DStudio::CString("/../doc/qt3dstudio/index.html");
 
     CStudioPreferences::LoadPreferences();
 
@@ -325,7 +299,7 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
     if (!m_IsSilent) {
         // Show the splash screen
         m_SplashPalette = new CSplashView();
-        m_SplashPalette->setWindowTitle(::LoadResourceString(IDS_PROJNAME).toQString());
+        m_SplashPalette->setWindowTitle(tr("Qt 3D Studio"));
         m_SplashPalette->show();
 
         m_Views = new CViews(this);
@@ -340,42 +314,6 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
     m_Core->GetDispatch()->AddCoreAsynchronousEventListener(this);
 
     return true;
-}
-
-//=============================================================================
-/**
- *	Exit location for the destruction of this application.
- *	@return 0 on success; -1 on failure
- */
-int CStudioApp::ExitInstance()
-{
-    int theResult = -1;
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-    // CWinApp::InitInstance returns 1(TRUE) on success; 0(FALSE) on failure
-    if (CWinApp::InitInstance() == TRUE)
-        theResult = 0;
-
-    if (m_CmdLineParser.IsRunUnitTests() && 0 == m_UnitTestResults)
-        theResult = m_UnitTestResults; // unit tests return 0 on success; 1 on failure
-
-#ifdef _DEBUG
-    // If appears that MFC takes over dumping memory leaks on exit
-    // this is the only way I've been able to turn it off.
-
-    // Turn off dumping CRT memory leaks
-    ::_CrtSetReportMode(_CRT_WARN, 0);
-    ::_CrtSetReportMode(_CRT_ERROR, 0);
-    ::_CrtSetReportMode(_CRT_ASSERT, 0);
-#endif
-
-    // Make sure any GDI resources have been cleaned up
-    CResourceCache::GetInstance()->Clear();
-    // Called in conjuction with Gdiplus::GdiplusStartup
-    Gdiplus::GdiplusShutdown(m_pGdiToken);
-#endif
-
-    return theResult;
 }
 
 //=============================================================================
@@ -397,13 +335,6 @@ void CStudioApp::OnAppAbout()
 int CStudioApp::Run()
 {
     int theRetVal = -1;
-
-#ifdef USE_LICENSE_HANDLER
-    LicenseHandler lh;
-    if (!lh.handleLicense())
-        return theRetVal;
-#endif
-
     try {
         CCmdLineParser::EExecutionMode theMode = m_CmdLineParser.PopExecutionMode();
         if (CCmdLineParser::END_OF_CMDS == theMode)
@@ -434,12 +365,6 @@ int CStudioApp::Run()
         throw;
     } catch (qt3dsdm::Qt3DSDMError &uicdmError) {
         Q_UNUSED(uicdmError);
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-        EXCEPTION_POINTERS *pExPtrs;
-        CStackOps::GetExceptionPointers(1, &pExPtrs);
-        StudioUnhandledCrashHandler(pExPtrs);
-#endif
         exit(1);
     } catch (...) {
         throw;
@@ -454,7 +379,7 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
         std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
-            GetNewDocumentChoice(Q3DStudio::CString("."));
+                GetNewDocumentChoice(Q3DStudio::CString("."));
         if (theFile.first.GetPath() != "") {
             m_Core->OnNewDocument(theFile.first, theFile.second);
             theReturn = true;
@@ -473,24 +398,33 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
 
     case StudioTutorialWidget::openSampleResult: {
         // Try three options:
-        // - open a specific example directory with .uip file in it
+        // - open a specific example .uip
         // - failing that, show the main example root dir
-        // - failing all previous, show Qt3DStudio dir
+        // - failing all previous, show default Documents dir
         Q3DStudio::CFilePath filePath;
+        Qt3DSFile theFile = Qt3DSFile(".");
 
-        filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
-                Q3DStudio::CString("../examples/qmldynamickeyframes/presentation");
+#ifndef Q_OS_MACOS
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                Q3DStudio::CString("/../examples/studio3d/SampleProject");
 
         if (!filePath.Exists()) {
-            filePath = Qt3DSFile::GetApplicationDirectory().GetPath()+
-                    Q3DStudio::CString("../examples");
-        }
-        if (!filePath.Exists()) {
-            filePath =  Qt3DSFile::GetApplicationDirectory().GetPath()+
-                    Q3DStudio::CString(".");
-        }
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                    Q3DStudio::CString("/../examples/studio3d");
+#else
+        filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                Q3DStudio::CString("/../../../../examples/studio3d/SampleProject");
 
-        Qt3DSFile theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        if (!filePath.Exists()) {
+            filePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
+                    Q3DStudio::CString("/../../../../examples/studio3d");
+#endif
+            if (!filePath.Exists())
+                filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+            theFile = m_Dialogs->GetFileOpenChoice(filePath);
+        } else {
+            theFile = Qt3DSFile(filePath, Q3DStudio::CString("SampleProject.uip"));
+        }
 
         if (theFile.GetPath() != "") {
             OnLoadDocument(theFile);
@@ -540,7 +474,7 @@ bool CStudioApp::ShowStartupDialog()
             // file dialog, do not care about settings but always show
             // welcome
             show = settings.value("showWelcomeScreen").toBool()
-                   || m_goStraightToWelcomeFileDialog;
+                    || m_goStraightToWelcomeFileDialog;
         }
 
         if (show) {
@@ -552,17 +486,17 @@ bool CStudioApp::ShowStartupDialog()
     // show the usual startup dialog only if user rejected tutorial
     // ( = did not open samples or create new project)
     if (welcomeRes == QDialog::Rejected) {
-        CStartupDlg theStartupDlg;
+        CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
-        Q3DStudio::CFilePath theMostRecentDirectory;
+        Q3DStudio::CFilePath theMostRecentDirectory = Q3DStudio::CFilePath(".");
         if (m_Views) {
             CRecentItems *theRecentItems = m_Views->GetMainFrame()->GetRecentItems();
             for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex) {
                 if (theIndex == 0) {
                     theMostRecentDirectory =
-                        Q3DStudio::CFilePath(theRecentItems->GetItem(0).GetAbsolutePath())
-                        .GetDirectory();
+                            Q3DStudio::CFilePath(theRecentItems->GetItem(0).GetAbsolutePath())
+                            .GetDirectory();
                 }
                 theStartupDlg.AddRecentItem(theRecentItems->GetItem(theIndex));
             }
@@ -578,7 +512,7 @@ bool CStudioApp::ShowStartupDialog()
 
         case CStartupDlg::EStartupChoice_NewDoc: {
             std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
-                GetNewDocumentChoice(theMostRecentDirectory);
+                    GetNewDocumentChoice(theMostRecentDirectory);
             if (theFile.first.GetPath() != "") {
                 m_Core->OnNewDocument(theFile.first, theFile.second);
                 theReturn = true;
@@ -679,8 +613,8 @@ int CStudioApp::OpenAndRunApplication(const Q3DStudio::CString &inFilename)
     int theSuccess = -1;
     InitCore();
     if (OnLoadDocument(
-            inFilename,
-            false)) // Load document. Upon failure, don't show startup dialog but exit immediately.
+                inFilename,
+                false)) // Load document. Upon failure, don't show startup dialog but exit immediately.
         theSuccess = RunApplication();
     return theSuccess;
 }
@@ -753,10 +687,10 @@ struct SIDeletingReferencedObjectHandler : public Q3DStudio::IDeletingReferenced
 
     void DisplayMessageBox(const Q3DStudio::CString &inDescription) override
     {
-        Q3DStudio::CString theTitle(::LoadResourceString(IDS_DELETE_OBJ_CONFIRM_TITLE));
-        Q3DStudio::CString theFormat(::LoadResourceString(IDS_DELETE_OBJ_CONFIRM_MSG));
-        Q3DStudio::CString theMessage;
-        theMessage.Format(theFormat, static_cast<const wchar_t *>(inDescription));
+        QString theTitle = QObject::tr("Warning");
+        QString theMessage = QObject::tr("The following objects have action(s) that reference this "
+                                         "object and/or its descendants:\n%1\nPlease fix the "
+                                         "action(s) accordingly.").arg(inDescription.toQString());
 
         m_Dialogs.DisplayMessageBox(theTitle, theMessage, Qt3DSMessageBox::ICON_WARNING, false);
     }
@@ -768,9 +702,9 @@ void CStudioApp::SetupTimer(long inMessageId, QWidget *inWnd)
     GetDirectoryWatchingSystem();
     m_Core->GetDoc()->SetDirectoryWatchingSystem(m_DirectoryWatchingSystem);
     m_Core->GetDoc()->SetImportFailedHandler(
-        std::make_shared<SIImportFailedHandler>(std::ref(*GetDialogs())));
+                std::make_shared<SIImportFailedHandler>(std::ref(*GetDialogs())));
     m_Core->GetDoc()->SetDocMessageBoxHandler(
-        std::make_shared<SIDeletingReferencedObjectHandler>(std::ref(*GetDialogs())));
+                std::make_shared<SIDeletingReferencedObjectHandler>(std::ref(*GetDialogs())));
 }
 
 ITickTock &CStudioApp::GetTickTock()
@@ -801,9 +735,10 @@ IDirectoryWatchingSystem &CStudioApp::GetDirectoryWatchingSystem()
 {
     if (m_DirectoryWatchingSystem == nullptr) {
         Q3DStudio::TCallbackCaller theCaller =
-            std::bind(SendAsyncCommand, std::ref(*m_Core->GetDispatch()), std::placeholders::_1);
+                std::bind(SendAsyncCommand, std::ref(*m_Core->GetDispatch()),
+                          std::placeholders::_1);
         m_DirectoryWatchingSystem =
-            IDirectoryWatchingSystem::CreateThreadedDirectoryWatchingSystem(theCaller);
+                IDirectoryWatchingSystem::CreateThreadedDirectoryWatchingSystem(theCaller);
     }
     return *m_DirectoryWatchingSystem;
 }
@@ -902,17 +837,17 @@ bool CStudioApp::CanCopy()
  * Get a string describing the type of the copy operation that can be done.
  * Precedence of copying is 1) Actions; 2) Keyframes; 3) Objects
  */
-Q3DStudio::CString CStudioApp::GetCopyType()
+QString CStudioApp::GetCopyType()
 {
-    Q3DStudio::CString theCopyType;
+    QString theCopyType;
 
     CDoc *theDoc = m_Core->GetDoc();
     if (theDoc->CanCopyAction())
-        theCopyType = ::LoadResourceString(IDS_MENU_COPYPASTE_TYPE_ACTION);
+        theCopyType = tr("Action");
     else if (theDoc->CanCopyKeyframe())
-        theCopyType = ::LoadResourceString(IDS_MENU_COPYPASTE_TYPE_KEYFRAMES);
+        theCopyType = tr("Keyframes");
     else
-        theCopyType = ::LoadResourceString(IDS_MENU_COPYPASTE_TYPE_OBJECT);
+        theCopyType = tr("Object");
 
     return theCopyType;
 }
@@ -950,17 +885,17 @@ bool CStudioApp::CanPaste()
  * Get a string describing the type of the paste operation that can be done.
  * Precedence of paste is 1) Actions; 2) Object ; 3) Keyframes
  */
-Q3DStudio::CString CStudioApp::GetPasteType()
+QString CStudioApp::GetPasteType()
 {
-    Q3DStudio::CString thePasteType;
+    QString thePasteType;
 
     CDoc *theDoc = m_Core->GetDoc();
     if (theDoc->CanPasteAction())
-        thePasteType = ::LoadResourceString(IDS_MENU_COPYPASTE_TYPE_ACTION);
+        thePasteType = tr("Action");
     else if (theDoc->CanPasteObject())
-        thePasteType = ::LoadResourceString(IDS_MENU_COPYPASTE_TYPE_OBJECT);
+        thePasteType = tr("Object");
     else
-        thePasteType = ::LoadResourceString(IDS_MENU_COPYPASTE_TYPE_KEYFRAMES);
+        thePasteType = tr("Keyframes");
 
     return thePasteType;
 }
@@ -970,9 +905,10 @@ bool CStudioApp::CanChangeTimebarColor()
     bool theRetVal = true;
     qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = m_Core->GetDoc()->GetSelectedInstance();
     if (!theSelectedInstance.Valid()
-        || m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsSceneInstance(
-               theSelectedInstance))
+            || m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsSceneInstance(
+                theSelectedInstance)) {
         theRetVal = false;
+    }
 
     return theRetVal;
 }
@@ -1017,7 +953,7 @@ bool CStudioApp::CanDuplicateObject()
 
     // Check if the object can be duplicated
     return m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsDuplicateable(
-        theSelectedInstance);
+                theSelectedInstance);
 }
 
 //==============================================================================
@@ -1130,8 +1066,9 @@ bool CStudioApp::PerformSavePrompt()
             bool onSaveResult = OnSave();
             if (onSaveResult)
                 return true;
-        } else if (theResult == CDialogs::CONTINUE_NO_SAVE)
+        } else if (theResult == CDialogs::CONTINUE_NO_SAVE) {
             return true;
+        }
 
         return false;
     }
@@ -1164,7 +1101,7 @@ void CStudioApp::AdvanceTime()
 {
     long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
     long theTime =
-        (m_Core->GetDoc()->GetCurrentViewTime() + theDeltaTime) / theDeltaTime * theDeltaTime;
+            (m_Core->GetDoc()->GetCurrentViewTime() + theDeltaTime) / theDeltaTime * theDeltaTime;
     m_Core->GetDoc()->NotifyTimeChanged(theTime);
 }
 
@@ -1187,7 +1124,7 @@ void CStudioApp::AdvanceUltraBigTime()
 {
     long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
     long theTime =
-        (m_Core->GetDoc()->GetCurrentViewTime() + theDeltaTime) / theDeltaTime * theDeltaTime;
+            (m_Core->GetDoc()->GetCurrentViewTime() + theDeltaTime) / theDeltaTime * theDeltaTime;
     m_Core->GetDoc()->NotifyTimeChanged(theTime);
 }
 
@@ -1225,7 +1162,8 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
         switch (inSelectable.getType()) {
         case Q3DStudio::SelectedValueTypes::Slide:
             theInspectableBase = new Qt3DSDMInspectable(
-                *this, m_Core, inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Instance);
+                        *this, m_Core,
+                        inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Instance);
             break;
         case Q3DStudio::SelectedValueTypes::MultipleInstances:
         case Q3DStudio::SelectedValueTypes::Instance: {
@@ -1236,42 +1174,45 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
             // for example when user selects the Root in Timeline Palette
             CDoc *theDoc = m_Core->GetDoc();
             qt3dsdm::TInstanceHandleList theSelectedInstances =
-                theDoc->GetSelectedValue().GetSelectedInstances();
+                    theDoc->GetSelectedValue().GetSelectedInstances();
             qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance;
             if (theSelectedInstances.size() == 1)
                 theSelectedInstance = theSelectedInstances[0];
 
             if (m_Core->GetDoc()->GetDocumentReader().IsInstance(theSelectedInstance)) {
                 CClientDataModelBridge *theBridge =
-                    theDoc->GetStudioSystem()->GetClientDataModelBridge();
+                        theDoc->GetStudioSystem()->GetClientDataModelBridge();
                 qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
 
                 // Slide, scene or component
                 if (theSelectedInstance
-                    == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
+                        == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
                     Qt3DSDMInstanceHandle theCurrentActiveSlideInstance =
-                        theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
-                            theCurrentActiveSlide);
+                            theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
+                                theCurrentActiveSlide);
 
                     if (theBridge->IsSceneInstance(theSelectedInstance))
                         theInspectableBase = new Qt3DSDMSceneInspectable(
-                            *this, m_Core, theSelectedInstance, theCurrentActiveSlideInstance);
+                                    *this, m_Core, theSelectedInstance,
+                                    theCurrentActiveSlideInstance);
                     else if (theBridge->IsComponentInstance(theSelectedInstance))
                         theInspectableBase = new Qt3DSDMInspectable(
-                            *this, m_Core, theSelectedInstance, theCurrentActiveSlideInstance);
+                                    *this, m_Core, theSelectedInstance,
+                                    theCurrentActiveSlideInstance);
                 }
                 if (theInspectableBase == nullptr) {
                     if (theBridge->IsMaterialBaseInstance(theSelectedInstance))
                         theInspectableBase =
-                            new Qt3DSDMMaterialInspectable(*this, m_Core, theSelectedInstance);
+                                new Qt3DSDMMaterialInspectable(*this, m_Core, theSelectedInstance);
                     else
                         theInspectableBase =
-                            new Qt3DSDMInspectable(*this, m_Core, theSelectedInstance);
+                                new Qt3DSDMInspectable(*this, m_Core, theSelectedInstance);
                 }
             }
         } break;
         case Q3DStudio::SelectedValueTypes::Guide: {
-            qt3dsdm::Qt3DSDMGuideHandle theGuide = inSelectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
+            qt3dsdm::Qt3DSDMGuideHandle theGuide
+                    = inSelectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
             theInspectableBase = CGuideInspectable::CreateInspectable(*m_Core, theGuide);
         } break;
         };
@@ -1302,11 +1243,11 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                         CStudioApp::PlaybackToggle);
 
     inShortcutHandler->RegisterKeyUpEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackStop), 0,
-        Qt::Key_Space);
+                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackStop), 0,
+                Qt::Key_Space);
     inShortcutHandler->RegisterKeyDownEvent(
-        new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackPlay), 0,
-        Qt::Key_Space);
+                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackPlay), 0,
+                Qt::Key_Space);
 
     if (m_Views)
         m_Views->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
@@ -1382,54 +1323,54 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
                                                inDocument.GetName());
 
     bool theLoadResult = false;
-    int theLoadErrorParameter = -1;
-    Q3DStudio::CString theErrorText;
+    QString theLoadErrorParameter;
+    QString theErrorText;
     try {
         OnLoadDocumentCatcher(inDocument);
         m_Core->GetDispatch()->FireOnOpenDocument(inDocument, true);
         // Loading was successful
         theLoadResult = true;
     } catch (CUnsupportedFileFormatException &) {
-        theErrorText = CString::fromQString(QObject::tr("The file could not be opened.  It is either invalid or was made with an "
-                                                        "old version of Studio."));
+        theErrorText = tr("The file could not be opened. It is either invalid or was made with an "
+                          "old version of Studio.");
         // We've encountered a file format that is older than the current, OR
         // corrupt files, unsupported file formats and illegal types.
     } catch (CInvalidFileFormatException &) {
-        theErrorText = CString::fromQString(QObject::tr("The file could not be opened.  It appears to have been made with a newer "
-                                                        "version of Studio."));
+        theErrorText = tr("The file could not be opened. It appears to have been made with a "
+                          "newer version of Studio.");
         // Cannot support opening newer file format, the UIP or (AP ie client portion)'s version is
         // mismatched.
     } catch (CLoadReferencedFileException &inError) {
         // referenced files (e.g. Data Files) failed to load
-        theErrorText.Format(L"%ls failed to load due to invalid referenced file: %ls.",
-                            static_cast<const wchar_t *>(inDocument.GetName()),
-                            inError.GetFilePath()); // TODO: Localize
+        theErrorText = tr("%1 failed to load due to invalid referenced file: %2.").arg(
+                    inDocument.GetName().toQString(),
+                    Q3DStudio::CString(inError.GetFilePath()).toQString());
         const wchar_t *theDesc = inError.GetDescription();
         if (theDesc && wcslen(theDesc) > 0) {
             // append any description is provided
-            theErrorText += L"\n";
-            theErrorText += inError.GetDescription();
+            theErrorText += QStringLiteral("\n")
+                    + Q3DStudio::CString(inError.GetDescription()).toQString();
         }
     } catch (CIOException &) { // provide specific error message if possible
         if (inDocument.Exists() == false)
-            theLoadErrorParameter = IDS_ERROR_LOADFILENOTEXIST;
+            theLoadErrorParameter = tr(" does not exist.");
         qCCritical(qt3ds::INTERNAL_ERROR)
                 << "Failed to load document, IO error (file may be unreadable or nonexistent)";
     } catch (...) {
-        qCCritical(qt3ds::INTERNAL_ERROR) << "Failed to load document, uknown error";
+        qCCritical(qt3ds::INTERNAL_ERROR) << "Failed to load document, unknown error";
         // We don't know exactly what went wrong during a load, but let studio 'fail gracefully'.
     }
 
-    if (theErrorText.Length()) {
+    if (!theErrorText.isEmpty()) {
         qCCritical(qt3ds::INTERNAL_ERROR) << "Failed to load document: "
-                                          << theErrorText.GetCharStar();
+                                          << theErrorText;
     }
 
     m_Core->GetDispatch()->FireOnProgressEnd();
 
     // load fail
     if (!theLoadResult) {
-        if (!theErrorText.IsEmpty())
+        if (!theErrorText.isEmpty())
             m_Dialogs->DisplayKnownErrorDialog(theErrorText);
         else
             m_Dialogs->DisplayLoadingPresentationFailed(inDocument, theLoadErrorParameter);
@@ -1437,9 +1378,10 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_Core->GetDispatch()->FireOnOpenDocument(inDocument, false);
 
         // Show startup dialog
-        if (inShowStartupDialogOnError)
+        if (inShowStartupDialogOnError) {
             if (!ShowStartupDialog())
                 qApp->quit();
+        }
     } else {
         m_Dialogs->ResetSettings(inDocument.GetPath());
 
@@ -1469,7 +1411,8 @@ void CStudioApp::SaveUIAFile()
         list.append(r.m_argsOrSrc);
     }
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
-    qt3ds::state::IApplication::EnsureApplicationFile(doc.GetCharStar(), list);
+    QByteArray docBA = doc.toQString().toLatin1();
+    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list);
 }
 
 //=============================================================================
@@ -1559,7 +1502,7 @@ void CStudioApp::OnPasteFail()
 
 void CStudioApp::OnBuildconfigurationFileParseFail(const Q3DStudio::CString &inMessage)
 {
-    m_Dialogs->DisplayMessageBox(::LoadResourceString(IDS_BUILDCONFIGS_ERROR_TITLE), inMessage,
+    m_Dialogs->DisplayMessageBox(tr("Build Configurations Error"), inMessage.toQString(),
                                  Qt3DSMessageBox::ICON_ERROR, false);
 }
 
@@ -1567,11 +1510,10 @@ void CStudioApp::OnSaveFail(bool inKnownError)
 {
     qCCritical(qt3ds::INTERNAL_ERROR) << "Failed to save project: "
                                       << (inKnownError ? "KnownError" : "UnknownError");
-    if (inKnownError) {
+    if (inKnownError)
         m_Dialogs->DisplaySavingPresentationFailed();
-    } else {
-        m_Dialogs->DisplayKnownErrorDialog(::LoadResourceString(IDS_SAVE_UNKNOWN_ERROR));
-    }
+    else
+        m_Dialogs->DisplayKnownErrorDialog(tr("Unknown error encountered while saving."));
 }
 
 void CStudioApp::OnProjectVariableFail(const Q3DStudio::CString &inMessage)
@@ -1582,7 +1524,7 @@ void CStudioApp::OnProjectVariableFail(const Q3DStudio::CString &inMessage)
 void CStudioApp::OnErrorFail(const Q3DStudio::CString &inText)
 {
     qCCritical(qt3ds::INTERNAL_ERROR) << inText.GetCharStar();
-    m_Dialogs->DisplayMessageBox(::LoadResourceString(IDS_PROJNAME), inText,
+    m_Dialogs->DisplayMessageBox(tr("Qt 3D Studio"), inText.toQString(),
                                  Qt3DSMessageBox::ICON_ERROR, false);
 }
 
@@ -1598,16 +1540,17 @@ void CStudioApp::OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
 void CStudioApp::OnNewPresentation()
 {
     m_Core->GetDoc()->GetStudioSystem()->GetAnimationSystem()->SetAutoKeyframe(
-        CStudioPreferences::IsAutosetKeyframesOn());
+                CStudioPreferences::IsAutosetKeyframesOn());
     qCInfo(qt3ds::TRACE_INFO) << "New Presentation: "
-              << m_Core->GetDoc()->GetDocumentPath().GetAbsolutePath().GetCharStar();
+                              << m_Core->GetDoc()->GetDocumentPath().GetAbsolutePath().GetCharStar();
 }
 
 void CStudioApp::OnPresentationModifiedExternally()
 {
     int theUserChoice = m_Dialogs->DisplayChoiceBox(
-        ::LoadResourceString(IDS_TITLE_WARNING),
-        ::LoadResourceString(IDS_PRESENTATION_MODIFIED_EXTERNALLY), Qt3DSMessageBox::ICON_WARNING);
+                tr("Warning!"),
+                tr("This project has changed on disk. Do you want to reload it?"),
+                Qt3DSMessageBox::ICON_WARNING);
     if (theUserChoice == IDYES) {
         Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);

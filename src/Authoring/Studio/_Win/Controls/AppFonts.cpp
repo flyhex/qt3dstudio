@@ -32,7 +32,6 @@
 //==============================================================================
 
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -40,7 +39,6 @@
 
 #include "AppFonts.h"
 #include "StudioPreferences.h"
-#include "StringLoader.h"
 
 //=============================================================================
 /**
@@ -51,10 +49,9 @@ CAppFonts::CAppFonts()
 {
     // Normal font
     const QString theFontFace = CStudioPreferences::GetFontFaceName();
-    Q3DStudio::CString theFontSize = ::LoadResourceString(IDS_STUDIOFONT_SIZE);
 
     m_NormalFont.setFamily(theFontFace);
-    m_NormalFont.setPointSize(13);  // atoi( theFontSize.GetCharStar( ) );
+    m_NormalFont.setPointSize(13);
 }
 
 //==============================================================================

@@ -28,7 +28,6 @@
 ****************************************************************************/
 
 #include "stdafx.h"
-#include "Strings.h"
 
 //==============================================================================
 //	Includes
@@ -45,7 +44,7 @@
 #include "Bindings/ITimelineItemProperty.h"
 #include "IKeyframe.h"
 
-#include <QColorDialog>
+#include <QtWidgets/qcolordialog.h>
 
 #define IDC_KEYFRAME_COLOR_BOX 1002
 
@@ -77,7 +76,8 @@ void CBaseKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyframes
     ITimelineItemKeyframesHolder *theKeyframesHolder = GetKeyframesHolder();
     if (theKeyframesHolder) {
         m_insertAction = new QAction(tr("Insert Keyframe"));
-        connect(m_insertAction, &QAction::triggered, this, &CBaseKeyframeContextMenu::InsertKeyframe);
+        connect(m_insertAction, &QAction::triggered,
+                this, &CBaseKeyframeContextMenu::InsertKeyframe);
         addAction(m_insertAction);
     }
 
@@ -101,14 +101,16 @@ void CBaseKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyframes
     addAction(m_pasteAction);
 
     m_deleteSelectedAction = new QAction(tr("Delete Selected Keyframes"));
-    connect(m_deleteSelectedAction, &QAction::triggered, this, &CBaseKeyframeContextMenu::DeleteSelectedKeys);
+    connect(m_deleteSelectedAction, &QAction::triggered,
+            this, &CBaseKeyframeContextMenu::DeleteSelectedKeys);
     m_deleteSelectedAction->setEnabled(theHasKeysSelected);
     addAction(m_deleteSelectedAction);
 
     //"Delete All Channel Keyframes"
     if (theKeyframesHolder) {
         m_deleteChannelKeysAction = new QAction(tr("Delete All Channel Keyframes"));
-        connect(m_deleteChannelKeysAction, &QAction::triggered, this, &CBaseKeyframeContextMenu::DeleteChannelKeys);
+        connect(m_deleteChannelKeysAction, &QAction::triggered,
+                this, &CBaseKeyframeContextMenu::DeleteChannelKeys);
         addAction(m_deleteChannelKeysAction);
     }
 }
@@ -185,8 +187,9 @@ void CBaseKeyframeContextMenu::MakeDynamic()
 //==============================================================================
 //	CTimebarKeyframeContextMenu
 //==============================================================================
-CTimebarKeyframeContextMenu::CTimebarKeyframeContextMenu(ITimebarControl *inTimebarControl, ITimelineKeyframesManager *inKeyframesManager,
-    bool inShowTimebarPropertiesOptions /*= true */, QWidget *parent)
+CTimebarKeyframeContextMenu::CTimebarKeyframeContextMenu(
+        ITimebarControl *inTimebarControl, ITimelineKeyframesManager *inKeyframesManager,
+        bool inShowTimebarPropertiesOptions /*= true */, QWidget *parent)
     : CBaseKeyframeContextMenu(parent)
     , m_TimebarControl(inTimebarControl)
     , m_ShowTimebarPropertiesOptions(inShowTimebarPropertiesOptions)
@@ -209,12 +212,12 @@ void CTimebarKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyfra
     if (m_TimebarControl->GetKeyframesHolder()->GetKeyframeCount() > 0) {
         m_HasDynamicSelectedKeyframes = m_KeyframesManager->HasDynamicKeyframes();
 
-        if (!m_HasDynamicSelectedKeyframes) {
+        if (!m_HasDynamicSelectedKeyframes)
             theMakeDynamicOption = tr("Make Animations Dynamic");
-        }
 
         m_makeDynamicAction = new QAction(theMakeDynamicOption);
-        connect(m_makeDynamicAction, &QAction::triggered, this, &CTimebarKeyframeContextMenu::MakeDynamic);
+        connect(m_makeDynamicAction, &QAction::triggered,
+                this, &CTimebarKeyframeContextMenu::MakeDynamic);
         addAction(m_makeDynamicAction);
     }
 
@@ -222,10 +225,12 @@ void CTimebarKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyfra
         // Timebar specific actions
         addSeparator();
         m_timeBarColorAction = new QAction(tr("Change Time Bar Color"));
-        connect(m_timeBarColorAction, &QAction::triggered, this, &CTimebarKeyframeContextMenu::ChangeTimebarColor);
+        connect(m_timeBarColorAction, &QAction::triggered,
+                this, &CTimebarKeyframeContextMenu::ChangeTimebarColor);
 
         m_timeBarTextAction = new QAction(tr("Change Time Bar Text"));
-        connect(m_timeBarTextAction, &QAction::triggered, this, &CTimebarKeyframeContextMenu::ChangeTimebarText);
+        connect(m_timeBarTextAction, &QAction::triggered,
+                this, &CTimebarKeyframeContextMenu::ChangeTimebarText);
 
         // Change the text for the timebar option depending on whether they are currently being
         // shown or not
@@ -234,10 +239,12 @@ void CTimebarKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyfra
             theTimebarHandleTextID = tr("Hide Time Bar Handles");
 
         m_timeBarHandlesAction = new QAction(theTimebarHandleTextID);
-        connect(m_timeBarHandlesAction, &QAction::triggered, this, &CTimebarKeyframeContextMenu::ToggleTimebarHandles);
+        connect(m_timeBarHandlesAction, &QAction::triggered,
+                this, &CTimebarKeyframeContextMenu::ToggleTimebarHandles);
 
         m_timeBarTimeAction = new QAction(tr("Set Timebar Time"));
-        connect(m_timeBarTimeAction, &QAction::triggered, this, &CTimebarKeyframeContextMenu::SetTimebarTime);
+        connect(m_timeBarTimeAction, &QAction::triggered,
+                this, &CTimebarKeyframeContextMenu::SetTimebarTime);
     }
 }
 
@@ -262,9 +269,20 @@ ITimelineItemKeyframesHolder *CTimebarKeyframeContextMenu::GetKeyframesHolder()
  */
 void CTimebarKeyframeContextMenu::ChangeTimebarColor()
 {
-    const auto color = QColorDialog::getColor(m_TimebarControl->GetTimebarColor());
-    if (color.isValid())
-        m_TimebarControl->SetTimebarColor(color);
+    QColor previousColor = m_TimebarControl->GetTimebarColor();
+    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
+    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
+    connect(theColorDlg, &QColorDialog::currentColorChanged,
+            this, &CTimebarKeyframeContextMenu::onTimeBarColorChanged);
+    if (theColorDlg->exec() == QDialog::Accepted)
+        m_TimebarControl->SetTimebarColor(theColorDlg->selectedColor());
+    else
+        m_TimebarControl->SetTimebarColor(previousColor);
+}
+
+void CTimebarKeyframeContextMenu::onTimeBarColorChanged(const QColor &color)
+{
+    m_TimebarControl->SetTimebarColor(color);
 }
 
 //=============================================================================
@@ -286,10 +304,10 @@ void CTimebarKeyframeContextMenu::ToggleTimebarHandles()
 {
     // Get the current timebar handle preference
     bool theHandlesAreShowing =
-        CPreferences::GetUserPreferences("Timeline").GetValue("ShowTimebarHandles", false);
+            CPreferences::GetUserPreferences("Timeline").GetValue("ShowTimebarHandles", false);
     // Switch the preference.
     CPreferences::GetUserPreferences("Timeline")
-        .SetValue("ShowTimebarHandles", !theHandlesAreShowing);
+            .SetValue("ShowTimebarHandles", !theHandlesAreShowing);
     if (m_TimebarControl)
         m_TimebarControl->OnToggleTimebarHandles();
 }
@@ -315,7 +333,8 @@ void CTimebarKeyframeContextMenu::SetTimebarTime()
 //	CKeyframeContextMenu
 //==============================================================================
 CKeyframeContextMenu::CKeyframeContextMenu(ITimelineKeyframesManager *inKeyframesManager,
-                                           ITimelineItemProperty *inTimelineItemProperty, QWidget *parent)
+                                           ITimelineItemProperty *inTimelineItemProperty,
+                                           QWidget *parent)
     : CBaseKeyframeContextMenu(parent)
     , m_TimelineItemProperty(inTimelineItemProperty)
 {
@@ -336,9 +355,8 @@ void CKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyframesMana
     m_HasDynamicSelectedKeyframes =
             m_TimelineItemProperty && m_TimelineItemProperty->IsDynamicAnimation();
 
-    if (!m_HasDynamicSelectedKeyframes) {
+    if (!m_HasDynamicSelectedKeyframes)
         theMakeDynamicOption = tr("Make Animations Dynamic");
-    }
 
     m_makeDynamicAction = new QAction(theMakeDynamicOption);
     connect(m_makeDynamicAction, &QAction::triggered, this, &CKeyframeContextMenu::MakeDynamic);
@@ -347,11 +365,13 @@ void CKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyframesMana
     addSeparator();
     bool theHasKeysSelected = m_KeyframesManager->HasSelectedKeyframes();
     m_setInterpolationAction = new QAction(tr("Set Interpolation"));
-    connect(m_setInterpolationAction, &QAction::triggered, this, &CKeyframeContextMenu::SetInterpolation);
+    connect(m_setInterpolationAction, &QAction::triggered,
+            this, &CKeyframeContextMenu::SetInterpolation);
     addAction(m_setInterpolationAction);
 
     m_setKeyframeTimeAction = new QAction(tr("Set Keyframe Time"));
-    connect(m_setKeyframeTimeAction, &QAction::triggered, this, &CKeyframeContextMenu::SetKeyframeTime);
+    connect(m_setKeyframeTimeAction, &QAction::triggered,
+            this, &CKeyframeContextMenu::SetKeyframeTime);
     m_setKeyframeTimeAction->setEnabled(theHasKeysSelected);
     addAction(m_setKeyframeTimeAction);
 }
@@ -360,7 +380,7 @@ void CKeyframeContextMenu::MakeDynamic()
 {
     if (m_TimelineItemProperty != nullptr && m_TimelineItemProperty->GetKeyframeCount() > 0) {
         m_TimelineItemProperty->SelectKeyframes(
-            true, m_TimelineItemProperty->GetKeyframeByIndex(0)->GetTime());
+                    true, m_TimelineItemProperty->GetKeyframeByIndex(0)->GetTime());
     }
 
     CBaseKeyframeContextMenu::MakeDynamic();

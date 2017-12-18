@@ -65,9 +65,17 @@ namespace render {
                                                                                    format);
         } else if (format.majorVersion() == 4
             || (isES && format.majorVersion() == 3 && format.minorVersion() >= 1)) {
+#ifdef Q_OS_MACOS
+            // TODO: macOS crashes with glTextStorage2DMultisample, so fall back to OpenGL3
+            // for now (QT3DS-590)
+            theBackend = QT3DS_NEW(foundation.getAllocator(), NVRenderBackendGL3Impl)(foundation,
+                                                                                   *theStringTable,
+                                                                                   format);
+#else
             theBackend = QT3DS_NEW(foundation.getAllocator(), NVRenderBackendGL4Impl)(foundation,
                                                                                    *theStringTable,
                                                                                    format);
+#endif
         } else {
             QT3DS_ASSERT(false);
             qCCritical(INTERNAL_ERROR) << "Can't find a suitable OpenGL version for" << format;

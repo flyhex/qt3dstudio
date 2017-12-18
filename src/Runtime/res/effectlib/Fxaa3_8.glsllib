@@ -34,34 +34,34 @@
 
                      NVIDIA FXAA III.8 by TIMOTHY LOTTES
 
-                     
+
 ------------------------------------------------------------------------------
                             INTEGRATION CHECKLIST
 ------------------------------------------------------------------------------
-(1.) 
+(1.)
 In the shader source,
-setup defines for the desired configuration. 
+setup defines for the desired configuration.
 Example,
 
   #define FXAA_PC 1
   #define FXAA_HLSL_3 1
   #define FXAA_LINEAR 1
 
-(2.) 
+(2.)
 Then include this file,
 
-  
 
-(3.) 
+
+(3.)
 Then call the FXAA pixel shader from within your desired shader,
 
   return FxaaPixelShader(pos, posPos, tex, rcpFrame, rcpFrameOpt);
 
-(4.) 
+(4.)
 Insure pass prior to FXAA outputs RGBL.
 See next section.
 
-(5.) 
+(5.)
 Setup engine to provide "rcpFrame" and "rcpFrameOpt" constants.
 Not using constants will result in a performance loss.
 
@@ -74,20 +74,20 @@ Not using constants will result in a performance loss.
   // {_y__} = 2.0/screenHeightInPixels
   // {__z_} = 0.5/screenWidthInPixels
   // {___w} = 0.5/screenHeightInPixels
-  float4 rcpFrameOpt 
-    
-(6.) 
+  float4 rcpFrameOpt
+
+(6.)
 Have FXAA vertex shader run as a full screen triangle,
 and output "pos" and "posPos" such that inputs in the pixel shader provide,
-  
+
   // {xy} = center of pixel
   float2 pos,
-    
+
   // {xy__} = upper left of pixel
   // {__zw} = lower right of pixel
   float4 posPos,
 
-(7.) 
+(7.)
 Insure the texture sampler used by FXAA is set to bilinear filtering.
 
 
@@ -96,16 +96,16 @@ Insure the texture sampler used by FXAA is set to bilinear filtering.
 ------------------------------------------------------------------------------
 FXAA3 requires RGBL as input.
 
-RGB should be LDR (low dynamic range). 
+RGB should be LDR (low dynamic range).
 Specifically do FXAA after tonemapping.
 
 RGB data as returned by a texture fetch can be linear or non-linear.
-Note an "sRGB format" texture counts as linear, 
+Note an "sRGB format" texture counts as linear,
 because the result of a texture fetch is linear data.
 Regular "RGBA8" textures in the sRGB colorspace are non-linear.
-If a texture fetch results linear data the following is required, 
+If a texture fetch results linear data the following is required,
 
-  #define FXAA_LINEAR 1 
+  #define FXAA_LINEAR 1
 
 Otherwise,
 
@@ -152,7 +152,7 @@ Q. What if the engine is blending into RGB before wanting to run FXAA?
 A. In the last opaque pass prior to FXAA,
    have the pass write out luma into alpha.
    Then blend into RGB only.
-   FXAA should be able to run ok 
+   FXAA should be able to run ok
    assuming the blending pass did not any add aliasing.
    This should be the common case for particles and common blending passes.
 
@@ -180,7 +180,7 @@ A. In the last opaque pass prior to FXAA,
 /*==========================================================================*/
 #ifndef FXAA_PC
     //
-    // FXAA Quality 
+    // FXAA Quality
     // The high quality PC algorithm.
     //
     #define FXAA_PC 0
@@ -188,7 +188,7 @@ A. In the last opaque pass prior to FXAA,
 /*--------------------------------------------------------------------------*/
 #ifndef FXAA_PC_CONSOLE
     //
-    // The console algorithm for PC is included 
+    // The console algorithm for PC is included
     // for developers targeting really low spec machines.
     //
     #define FXAA_PC_CONSOLE 0
@@ -208,36 +208,36 @@ A. In the last opaque pass prior to FXAA,
 /*--------------------------------------------------------------------------*/
 #ifndef FXAA_HLSL_4
     #define FXAA_HLSL_4 0
-#endif    
+#endif
 /*--------------------------------------------------------------------------*/
 #ifndef FXAA_HLSL_5
     #define FXAA_HLSL_5 0
-#endif    
+#endif
 /*==========================================================================*/
 #ifndef FXAA_EARLY_EXIT
-    // 
+    //
     // Controls algorithm's early exit path.
     // On PS3 turning this on adds 2 cycles to the shader.
     // On 360 turning this off adds 10ths of a millisecond to the shader.
     // Turning this off on console will result in a more blurry image.
     // So this defaults to on.
-    // 
+    //
     // 1 = On.
     // 0 = Off.
-    // 
+    //
     #define FXAA_EARLY_EXIT 1
 #endif
 /*--------------------------------------------------------------------------*/
 #ifndef FXAA_DISCARD
-    // 
+    //
     // Only valid for PC OpenGL currently.
-    // 
+    //
     // 1 = Use discard on pixels which don't need AA.
     //     For APIs which enable concurrent TEX+ROP from same surface.
     // 0 = Return unchanged color on pixels which don't need AA.
-    // 
+    //
     #define FXAA_DISCARD 0
-#endif    
+#endif
 /*--------------------------------------------------------------------------*/
 #ifndef FXAA_LINEAR
     //
@@ -245,8 +245,8 @@ A. In the last opaque pass prior to FXAA,
     //     Use this for standard 32-bit RGBA formats.
     //
     // 1 = Work in RGB=linear, A=non-linear luma.
-    //     Use this for sRGB and FP16 formats. 
-    //     Works with either FXAA_ALGORITHM = 1 or 0. 
+    //     Use this for sRGB and FP16 formats.
+    //     Works with either FXAA_ALGORITHM = 1 or 0.
     //
     #define FXAA_LINEAR 0
 #endif
@@ -257,7 +257,7 @@ A. In the last opaque pass prior to FXAA,
     //
     // 1 = GL API supports fast pixel offsets
     // 0 = do not use fast pixel offsets
-    // 
+    //
     #ifdef GL_EXT_gpu_shader4
         #define FXAA_FAST_PIXEL_OFFSET 1
     #endif
@@ -302,7 +302,7 @@ A. In the last opaque pass prior to FXAA,
     #ifndef FXAA_GATHER4_ALPHA
         #define FXAA_GATHER4_ALPHA 0
     #endif
-#endif    
+#endif
 #endif
 
 /*============================================================================
@@ -311,15 +311,15 @@ A. In the last opaque pass prior to FXAA,
 #ifndef FXAA_CONSOLE__EDGE_SHARPNESS
     //
     // Consoles the sharpness of edges.
-    // 
-    // Due to the PS3 being ALU bound, 
+    //
+    // Due to the PS3 being ALU bound,
     // there are only two safe values here: 4 and 8.
     // These options use the shaders ability to a free *|/ by 4|8.
     //
     // 8.0 is sharper
     // 4.0 is softer
     //
-    #if 1 
+    #if 1
         #define FXAA_CONSOLE__EDGE_SHARPNESS 8.0
     #else
         #define FXAA_CONSOLE__EDGE_SHARPNESS 4.0
@@ -333,7 +333,7 @@ A. In the last opaque pass prior to FXAA,
     //
     // This only applies when FXAA_EARLY_EXIT is 1.
     //
-    // Due to the PS3 being ALU bound, 
+    // Due to the PS3 being ALU bound,
     // there are only two safe values here: 0.25 and 0.125.
     // These options use the shaders ability to a free *|/ by 4|8.
     //
@@ -344,7 +344,7 @@ A. In the last opaque pass prior to FXAA,
         #define FXAA_CONSOLE__EDGE_THRESHOLD 0.125
     #else
         #define FXAA_CONSOLE__EDGE_THRESHOLD 0.25
-    #endif        
+    #endif
 #endif
 /*--------------------------------------------------------------------------*/
 #ifndef FXAA_CONSOLE__EDGE_THRESHOLD_MIN
@@ -356,7 +356,7 @@ A. In the last opaque pass prior to FXAA,
     //
     // This does not apply to PS3.
     // PS3 was simplified to avoid more shader instructions.
-    // 
+    //
     #define FXAA_CONSOLE__EDGE_THRESHOLD_MIN 0.05
 #endif
 
@@ -416,14 +416,14 @@ A. In the last opaque pass prior to FXAA,
 /*============================================================================
 
                                  API PORTING
-                                 
+
 ============================================================================*/
 #if FXAA_GLSL_120
     // Requires,
     //  #version 120
     // And at least,
     //  #extension GL_EXT_gpu_shader4 : enable
-    //  (or set FXAA_FAST_PIXEL_OFFSET 1 to work like DX9) 
+    //  (or set FXAA_FAST_PIXEL_OFFSET 1 to work like DX9)
     #define half float
     #define half2 vec2
     #define half3 vec3
@@ -451,7 +451,7 @@ A. In the last opaque pass prior to FXAA,
         // use #extension GL_ARB_gpu_shader5 : enable
         #define FxaaTexAlpha4(t, p, r) textureGather(t, p, 3)
         #define FxaaTexOffAlpha4(t, p, o, r) textureGatherOffset(t, p, o, 3)
-    #endif        
+    #endif
 #endif
 /*--------------------------------------------------------------------------*/
 #if FXAA_GLSL_130
@@ -479,7 +479,7 @@ A. In the last opaque pass prior to FXAA,
         // use #extension GL_ARB_gpu_shader5 : enable
         #define FxaaTexAlpha4(t, p, r) textureGather(t, p, 3)
         #define FxaaTexOffAlpha4(t, p, o, r) textureGatherOffset(t, p, o, 3)
-    #endif        
+    #endif
 #endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_3 == 1) || (FXAA_360 == 1)
@@ -507,7 +507,7 @@ A. In the last opaque pass prior to FXAA,
     #define FxaaSat(x) saturate(x)
     #define FxaaLerp(x,y,s) lerp(x,y,s)
     struct FxaaTex { SamplerState smpl; Texture2D tex; };
-    #define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0) 
+    #define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0)
     #define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, p, 0.0, o)
 #endif
 /*--------------------------------------------------------------------------*/
@@ -521,7 +521,7 @@ A. In the last opaque pass prior to FXAA,
     #define FxaaSat(x) saturate(x)
     #define FxaaLerp(x,y,s) lerp(x,y,s)
     struct FxaaTex { SamplerState smpl; Texture2D tex; };
-    #define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0) 
+    #define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0)
     #define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, p, 0.0, o)
     #define FxaaTexAlpha4(t, p, r) t.tex.GatherAlpha(t.smpl, p)
     #define FxaaTexOffAlpha4(t, p, o, r) t.tex.GatherAlpha(t.smpl, p, o)
@@ -556,8 +556,8 @@ half4 FxaaPixelShader(
     // {_y__} = 2.0/screenHeightInPixels
     // {__z_} = 0.5/screenWidthInPixels
     // {___w} = 0.5/screenHeightInPixels
-    float4 rcpFrameOpt 
-) { 
+    float4 rcpFrameOpt
+) {
 /*--------------------------------------------------------------------------*/
     half4 lumaNwNeSwSe;
     lumaNwNeSwSe.x = FxaaTexTop(tex, posPos.xy).w;
@@ -569,7 +569,7 @@ half4 FxaaPixelShader(
 /*--------------------------------------------------------------------------*/
     lumaNwNeSwSe.y += 1.0/384.0;
 /*--------------------------------------------------------------------------*/
-    half2 lumaMinTemp = min(lumaNwNeSwSe.xy, lumaNwNeSwSe.zw); 
+    half2 lumaMinTemp = min(lumaNwNeSwSe.xy, lumaNwNeSwSe.zw);
     half2 lumaMaxTemp = max(lumaNwNeSwSe.xy, lumaNwNeSwSe.zw);
 /*--------------------------------------------------------------------------*/
     half lumaMin = min(lumaMinTemp.x, lumaMinTemp.y);
@@ -588,7 +588,7 @@ half4 FxaaPixelShader(
     dir.x = dot(lumaNwNeSwSe, float4(-1.0, -1.0, 1.0, 1.0));
     dir.y = dot(lumaNwNeSwSe, float4( 1.0, -1.0, 1.0,-1.0));
 /*--------------------------------------------------------------------------*/
-    half2 dir1; 
+    half2 dir1;
     dir1 = normalize(dir.xy);
 /*--------------------------------------------------------------------------*/
     half dirAbsMinTimesC = min(abs(dir1.x), abs(dir1.y)) * FXAA_CONSOLE__EDGE_SHARPNESS;
@@ -600,7 +600,7 @@ half4 FxaaPixelShader(
     half4 rgbyN2 = FxaaTexTop(tex, pos.xy - dir2 * rcpFrameOpt.xy);
     half4 rgbyP2 = FxaaTexTop(tex, pos.xy + dir2 * rcpFrameOpt.xy);
 /*--------------------------------------------------------------------------*/
-    half4 rgbyA = rgbyN1 * 0.5 + rgbyP1 * 0.5;    
+    half4 rgbyA = rgbyN1 * 0.5 + rgbyP1 * 0.5;
     half4 rgbyB = rgbyN2 * 0.25 + rgbyP2 * 0.25 + rgbyA * 0.5;
 /*--------------------------------------------------------------------------*/
     bool twoTap = (rgbyB.w < lumaMin) || (rgbyB.w > lumaMax);
@@ -781,7 +781,7 @@ half4 FxaaPixelShader(
     // {__zw} = lower right of pixel
     float4 posPos,
     // {rgb_} = color in linear or perceptual color space
-    // {___a} = luma in perceptual color space (not linear) 
+    // {___a} = luma in perceptual color space (not linear)
     sampler2D tex,
     // This must be from a constant/uniform.
     // {xy} = rcpFrame not used on PS3
@@ -791,12 +791,12 @@ half4 FxaaPixelShader(
     // {_y__} = 2.0/screenHeightInPixels
     // {__z_} = 0.5/screenWidthInPixels
     // {___w} = 0.5/screenHeightInPixels
-    float4 rcpFrameOpt 
-) { 
+    float4 rcpFrameOpt
+) {
 /*--------------------------------------------------------------------------*/
 // (1)
     half4 dir;
-    half4 lumaNe = h4tex2Dlod(tex, half4(posPos.zy, 0, 0)); 
+    half4 lumaNe = h4tex2Dlod(tex, half4(posPos.zy, 0, 0));
     lumaNe.w += half(1.0/512.0);
     dir.x = -lumaNe.w;
     dir.z = -lumaNe.w;
@@ -830,24 +830,24 @@ half4 FxaaPixelShader(
     temp1N.xy = dir1_pos.zw - dir1_pos.xy * rcpFrameOpt.zw;
 /*--------------------------------------------------------------------------*/
 // (7)
-    temp1N = h4tex2Dlod(tex, half4(temp1N.xy, 0.0, 0.0)); 
+    temp1N = h4tex2Dlod(tex, half4(temp1N.xy, 0.0, 0.0));
     half4 rgby1;
     rgby1.xy = dir1_pos.zw + dir1_pos.xy * rcpFrameOpt.zw;
 /*--------------------------------------------------------------------------*/
 // (8)
-    rgby1 = h4tex2Dlod(tex, half4(rgby1.xy, 0.0, 0.0)); 
+    rgby1 = h4tex2Dlod(tex, half4(rgby1.xy, 0.0, 0.0));
     rgby1 = (temp1N + rgby1) * 0.5;
 /*--------------------------------------------------------------------------*/
 // (9)
     half4 temp2N;
     temp2N.xy = dir2_pos.zw - dir2_pos.xy * rcpFrameOpt.xy;
-    temp2N = h4tex2Dlod(tex, half4(temp2N.xy, 0.0, 0.0)); 
+    temp2N = h4tex2Dlod(tex, half4(temp2N.xy, 0.0, 0.0));
 /*--------------------------------------------------------------------------*/
 // (10)
     half4 rgby2;
     rgby2.xy = dir2_pos.zw + dir2_pos.xy * rcpFrameOpt.xy;
     rgby2 = h4tex2Dlod(tex, half4(rgby2.xy, 0.0, 0.0));
-    rgby2 = (temp2N + rgby2) * 0.5; 
+    rgby2 = (temp2N + rgby2) * 0.5;
 /*--------------------------------------------------------------------------*/
 // (11)
     // compilier moves these scalar ops up to other cycles
@@ -856,8 +856,8 @@ half4 FxaaPixelShader(
     rgby2 = (rgby2 + rgby1) * 0.5;
 /*--------------------------------------------------------------------------*/
 // (12)
-    bool twoTapLt = rgby2.w < lumaMin; 
-    bool twoTapGt = rgby2.w > lumaMax; 
+    bool twoTapLt = rgby2.w < lumaMin;
+    bool twoTapGt = rgby2.w > lumaMax;
 /*--------------------------------------------------------------------------*/
 // (13)
     if(twoTapLt || twoTapGt) rgby2 = rgby1;
@@ -1056,7 +1056,7 @@ half4 FxaaPixelShader(
     // {__zw} = lower right of pixel
     float4 posPos,
     // {rgb_} = color in linear or perceptual color space
-    // {___a} = luma in perceptual color space (not linear) 
+    // {___a} = luma in perceptual color space (not linear)
     sampler2D tex,
     // This must be from a constant/uniform.
     // {xy} = rcpFrame not used on PS3
@@ -1066,11 +1066,11 @@ half4 FxaaPixelShader(
     // {_y__} = 2.0/screenHeightInPixels
     // {__z_} = 0.5/screenWidthInPixels
     // {___w} = 0.5/screenHeightInPixels
-    float4 rcpFrameOpt 
-) { 
+    float4 rcpFrameOpt
+) {
 /*--------------------------------------------------------------------------*/
 // (1)
-    half4 rgbyNe = h4tex2Dlod(tex, half4(posPos.zy, 0, 0)); 
+    half4 rgbyNe = h4tex2Dlod(tex, half4(posPos.zy, 0, 0));
     half lumaNe = rgbyNe.w + half(1.0/512.0);
 /*--------------------------------------------------------------------------*/
 // (2)
@@ -1084,8 +1084,8 @@ half4 FxaaPixelShader(
 /*--------------------------------------------------------------------------*/
 // (4)
     half4 lumaSe = h4tex2Dlod(tex, half4(posPos.zw, 0, 0));
-    half dirZ =  lumaNw.w + lumaSwNegNe; 
-    half dirX = -lumaNw.w + lumaSwNegNe; 
+    half dirZ =  lumaNw.w + lumaSwNegNe;
+    half dirX = -lumaNw.w + lumaSwNegNe;
 /*--------------------------------------------------------------------------*/
 // (5)
     half3 dir;
@@ -1109,14 +1109,14 @@ half4 FxaaPixelShader(
 // (8)
     half4 temp1N;
     temp1N.xy = dir1_pos.zw - dir1_pos.xy * rcpFrameOpt.zw;
-    temp1N = h4tex2Dlod(tex, half4(temp1N.xy, 0.0, 0.0)); 
+    temp1N = h4tex2Dlod(tex, half4(temp1N.xy, 0.0, 0.0));
     half lumaMax = max(lumaMaxNwSw, lumaMaxNeSe);
     half lumaMin = min(lumaMinNwSw, lumaMinNeSe);
 /*--------------------------------------------------------------------------*/
 // (9)
     half4 rgby1;
     rgby1.xy = dir1_pos.zw + dir1_pos.xy * rcpFrameOpt.zw;
-    rgby1 = h4tex2Dlod(tex, half4(rgby1.xy, 0.0, 0.0)); 
+    rgby1 = h4tex2Dlod(tex, half4(rgby1.xy, 0.0, 0.0));
     rgby1 = (temp1N + rgby1) * 0.5;
 /*--------------------------------------------------------------------------*/
 // (10)
@@ -1134,7 +1134,7 @@ half4 FxaaPixelShader(
 /*--------------------------------------------------------------------------*/
 // (12)
     rgby2 = h4tex2Dlod(tex, half4(rgby2.xy, 0.0, 0.0));
-    rgby2 = (temp2N + rgby2) * 0.5; 
+    rgby2 = (temp2N + rgby2) * 0.5;
 /*--------------------------------------------------------------------------*/
 // (13)
     rgby2 = (rgby2 + rgby1) * 0.5;
@@ -1181,12 +1181,12 @@ half4 FxaaPixelShader(
     // {_y__} = 2.0/screenHeightInPixels
     // {__z_} = 0.5/screenWidthInPixels
     // {___w} = 0.5/screenHeightInPixels
-    float4 rcpFrameOpt 
+    float4 rcpFrameOpt
 ) {
 /*--------------------------------------------------------------------------*/
     half4 dir;
     dir.y = 0.0;
-    half4 lumaNe = FxaaTexTop(tex, posPos.zy); 
+    half4 lumaNe = FxaaTexTop(tex, posPos.zy);
     lumaNe.w += half(1.0/384.0);
     dir.x = -lumaNe.w;
     dir.z = -lumaNe.w;
@@ -1209,8 +1209,8 @@ half4 FxaaPixelShader(
         half lumaMin = min(min(lumaNw.w, lumaSw.w), min(lumaNe.w, lumaSe.w));
         half lumaMax = max(max(lumaNw.w, lumaSw.w), max(lumaNe.w, lumaSe.w));
 /*--------------------------------------------------------------------------*/
-        half lumaMinM = min(lumaMin, rgbyM.w); 
-        half lumaMaxM = max(lumaMax, rgbyM.w); 
+        half lumaMinM = min(lumaMin, rgbyM.w);
+        half lumaMaxM = max(lumaMax, rgbyM.w);
 /*--------------------------------------------------------------------------*/
         if((lumaMaxM - lumaMinM) < max(FXAA_CONSOLE__EDGE_THRESHOLD_MIN, lumaMax * FXAA_CONSOLE__EDGE_THRESHOLD))
             #if (FXAA_DISCARD == 1)
@@ -1231,21 +1231,21 @@ half4 FxaaPixelShader(
     half4 temp1N;
     temp1N.xy = dir1_pos.zw - dir1_pos.xy * rcpFrameOpt.zw;
 /*--------------------------------------------------------------------------*/
-    temp1N = FxaaTexTop(tex, temp1N.xy); 
+    temp1N = FxaaTexTop(tex, temp1N.xy);
     half4 rgby1;
     rgby1.xy = dir1_pos.zw + dir1_pos.xy * rcpFrameOpt.zw;
 /*--------------------------------------------------------------------------*/
-    rgby1 = FxaaTexTop(tex, rgby1.xy); 
+    rgby1 = FxaaTexTop(tex, rgby1.xy);
     rgby1 = (temp1N + rgby1) * 0.5;
 /*--------------------------------------------------------------------------*/
     half4 temp2N;
     temp2N.xy = dir2_pos.zw - dir2_pos.xy * rcpFrameOpt.xy;
-    temp2N = FxaaTexTop(tex, temp2N.xy); 
+    temp2N = FxaaTexTop(tex, temp2N.xy);
 /*--------------------------------------------------------------------------*/
     half4 rgby2;
     rgby2.xy = dir2_pos.zw + dir2_pos.xy * rcpFrameOpt.xy;
     rgby2 = FxaaTexTop(tex, rgby2.xy);
-    rgby2 = (temp2N + rgby2) * 0.5; 
+    rgby2 = (temp2N + rgby2) * 0.5;
 /*--------------------------------------------------------------------------*/
     #if (FXAA_EARLY_EXIT == 0)
         half lumaMin = min(min(lumaNw.w, lumaSw.w), min(lumaNe.w, lumaSe.w));
@@ -1253,8 +1253,8 @@ half4 FxaaPixelShader(
     #endif
     rgby2 = (rgby2 + rgby1) * 0.5;
 /*--------------------------------------------------------------------------*/
-    bool twoTapLt = rgby2.w < lumaMin; 
-    bool twoTapGt = rgby2.w > lumaMax; 
+    bool twoTapLt = rgby2.w < lumaMin;
+    bool twoTapGt = rgby2.w > lumaMax;
 /*--------------------------------------------------------------------------*/
     if(twoTapLt || twoTapGt) rgby2 = rgby1;
 /*--------------------------------------------------------------------------*/
@@ -1275,17 +1275,17 @@ float4 FxaaPixelShader(
     // {xy} = center of pixel
     float2 pos,
     // {xyzw} = not used on FXAA3 Quality
-    float4 posPos,       
+    float4 posPos,
     // {rgb_} = color in linear or perceptual color space
-    // {___a} = luma in perceptual color space (not linear) 
+    // {___a} = luma in perceptual color space (not linear)
     FxaaTex tex,
     // This must be from a constant/uniform.
     // {x_} = 1.0/screenWidthInPixels
     // {_y} = 1.0/screenHeightInPixels
     float2 rcpFrame,
     // {xyzw} = not used on FXAA3 Quality
-    float4 rcpFrameOpt 
-) {   
+    float4 rcpFrameOpt
+) {
 /*--------------------------------------------------------------------------*/
     #if (FXAA_GATHER4_ALPHA == 1)
         float4 luma4A = FxaaTexOffAlpha4(tex, pos.xy, FxaaInt2(-1, -1), rcpFrame.xy);
@@ -1322,7 +1322,7 @@ float4 FxaaPixelShader(
             return rgbyM;
         #endif
 /*--------------------------------------------------------------------------*/
-    #if (FXAA_GATHER4_ALPHA == 0) 
+    #if (FXAA_GATHER4_ALPHA == 0)
         float lumaNW = FxaaTexOff(tex, pos.xy, FxaaInt2(-1,-1), rcpFrame.xy).w;
         float lumaNE = FxaaTexOff(tex, pos.xy, FxaaInt2( 1,-1), rcpFrame.xy).w;
         float lumaSW = FxaaTexOff(tex, pos.xy, FxaaInt2(-1, 1), rcpFrame.xy).w;
@@ -1333,14 +1333,14 @@ float4 FxaaPixelShader(
 /*--------------------------------------------------------------------------*/
     float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25;
     float rangeL = abs(lumaL - lumaM);
-    float blendL = FxaaSat((rangeL / range) - FXAA_QUALITY__SUBPIX_TRIM) * FXAA_QUALITY__SUBPIX_TRIM_SCALE; 
+    float blendL = FxaaSat((rangeL / range) - FXAA_QUALITY__SUBPIX_TRIM) * FXAA_QUALITY__SUBPIX_TRIM_SCALE;
     blendL = min(FXAA_QUALITY__SUBPIX_CAP, blendL);
 /*--------------------------------------------------------------------------*/
-    float edgeVert = 
+    float edgeVert =
               abs(lumaNW + (-2.0 * lumaN) + lumaNE) +
         2.0 * abs(lumaW  + (-2.0 * lumaM) + lumaE ) +
               abs(lumaSW + (-2.0 * lumaS) + lumaSE);
-    float edgeHorz = 
+    float edgeHorz =
               abs(lumaNW + (-2.0 * lumaW) + lumaSW) +
         2.0 * abs(lumaN  + (-2.0 * lumaM) + lumaS ) +
               abs(lumaNE + (-2.0 * lumaE) + lumaSE);
@@ -1368,9 +1368,9 @@ float4 FxaaPixelShader(
     gradientN *= FXAA_SEARCH_THRESHOLD;
 /*--------------------------------------------------------------------------*/
     float2 posP = posN;
-    float2 offNP = horzSpan ? 
+    float2 offNP = horzSpan ?
         FxaaFloat2(rcpFrame.x, 0.0) :
-        FxaaFloat2(0.0f, rcpFrame.y); 
+        FxaaFloat2(0.0f, rcpFrame.y);
     float lumaEndN;
     float lumaEndP;
     bool doneN = false;
@@ -1396,7 +1396,7 @@ float4 FxaaPixelShader(
     bool directionN = dstN < dstP;
     lumaEndN = directionN ? lumaEndN : lumaEndP;
 /*--------------------------------------------------------------------------*/
-    if(((lumaM - lumaN) < 0.0) == ((lumaEndN - lumaN) < 0.0)) 
+    if(((lumaM - lumaN) < 0.0) == ((lumaEndN - lumaN) < 0.0))
         lengthSign = 0.0;
 /*--------------------------------------------------------------------------*/
     float spanLength = (dstP + dstN);

@@ -40,11 +40,7 @@
 //==============================================================================
 #include "Control.h"
 
-
-#include <QPixmap>
-//==============================================================================
-// Forwards
-//==============================================================================
+#include <QtGui/qpixmap.h>
 
 //=============================================================================
 /**
@@ -60,9 +56,9 @@ public:
 
 protected:
     QPixmap m_Image;
-    Q3DStudio::CString m_CopyrightLine1;
-    Q3DStudio::CString m_CopyrightLine2;
-    Q3DStudio::CString m_VersionInfo;
+    QString m_CopyrightLine1;
+    QString m_CopyrightLine2;
+    QString m_VersionInfo;
     long m_SpaceBetweenLines; ///< number of pixels between subsequent lines of the copyright
                               ///statement (calculated automatically)
 };

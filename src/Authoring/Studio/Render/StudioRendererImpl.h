@@ -56,6 +56,7 @@
 #include "Qt3DSRenderCamera.h"
 #include "Qt3DSRenderImage.h"
 #include "Qt3DSRenderPresentation.h"
+#include "Qt3DSRenderDataInput.h"
 #include "StudioProjectSettings.h"
 #include "Qt3DSRenderUIPSharedTranslation.h"
 #include "Qt3DSRenderBufferManager.h"

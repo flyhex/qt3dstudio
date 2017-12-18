@@ -67,10 +67,12 @@ namespace Ui
 }
 QT_END_NAMESPACE
 
+class CPlayerWnd;
+
 class CMainFrame : public QMainWindow,
-                   public CPresentationChangeListener,
-                   public CFileOpenListener,
-                   public CClientPlayChangeListener
+        public CPresentationChangeListener,
+        public CFileOpenListener,
+        public CClientPlayChangeListener
 {
     Q_OBJECT
 public:
@@ -174,7 +176,6 @@ public:
     void OnHelpIndex();
     void OnHelpVisitQt();
     void OnHelpOpenTutorial();
-    void OnHelpBehaviorReference();
 
     void OnViewAction();
     void OnUpdateViewAction();
@@ -216,6 +217,8 @@ public:
 
     void OnConnectionChanged(bool);
 
+    void OnTimeBarColorChanged(const QColor &color);
+
     CTimelineControl *GetTimelineControl();
     ITimelineTimebar *GetSelectedTimelineTimebar();
 
@@ -225,6 +228,7 @@ public:
     void HandleEditCameraZoomExtent();
 
     QWidget *GetActiveView();
+    CPlayerWnd *GetPlayerWnd() const;
 
 Q_SIGNALS:
     void playStateChanged(bool started);

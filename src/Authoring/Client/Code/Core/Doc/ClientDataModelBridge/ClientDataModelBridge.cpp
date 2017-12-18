@@ -94,6 +94,7 @@ CClientDataModelBridge::CClientDataModelBridge(
     , m_Alias(inDefinitions->m_Alias)
     , m_Path(inDefinitions->m_Path)
     , m_Lightmaps(inDefinitions->m_Lightmaps)
+    , m_DataInput(inDefinitions->m_DataInput)
     , m_CacheEnabled(false)
 {
 }
@@ -244,6 +245,9 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId
         break;
     case OBJTYPE_LIGHTMAPS:
         m_DataCore->DeriveInstance(theNewInstance, m_Lightmaps.m_Instance);
+        break;
+    case OBJTYPE_DATAINPUT:
+        m_DataCore->DeriveInstance(theNewInstance, m_DataInput.m_Instance);
         break;
     }
 
@@ -1020,7 +1024,7 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inPare
     qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
     // If there is a base name then use it
     if (theBaseName.Length() > 0)
-        theExistingChild = GetChildByName(inParent, inDesiredName);
+        theExistingChild = GetChildByName(inParent, inDesiredName, inInstance);
     else // there is no base name, just set it to a random setting so it'll fall into the while loop
         theExistingChild = inParent;
 
@@ -1037,7 +1041,7 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inPare
         while (theExistingChild != 0 && theExistingChild != inInstance) {
             theUniqueName.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(theBaseName), theIndex);
             ++theIndex;
-            theExistingChild = GetChildByName(inParent, theUniqueName);
+            theExistingChild = GetChildByName(inParent, theUniqueName, inInstance);
         }
     }
 
@@ -1048,8 +1052,10 @@ bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inIn
                                              Q3DStudio::CString inDesiredName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
-    if (inDesiredName.Length() > 0)
-        theExistingChild = GetChildByName(GetParentInstance(inInstance), inDesiredName);
+    if (inDesiredName.Length() > 0) {
+        theExistingChild = GetChildByName(GetParentInstance(inInstance), inDesiredName,
+                                          qt3dsdm::Qt3DSDMInstanceHandle());
+    }
 
     return ((int)theExistingChild == 0 || theExistingChild == inInstance);
 }
@@ -1386,6 +1392,7 @@ bool CClientDataModelBridge::CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance
     case OBJTYPE_PATHANCHORPOINT:
     case OBJTYPE_SUBPATH:
     case OBJTYPE_EFFECT:
+    case OBJTYPE_DATAINPUT:
         return !IsLockedAtAll(inInstance);
         break;
     case OBJTYPE_COMPONENT:
@@ -1469,14 +1476,15 @@ CClientDataModelBridge::GetResidingLayer(qt3dsdm::Qt3DSDMInstanceHandle inInstan
  */
 qt3dsdm::Qt3DSDMInstanceHandle
 CClientDataModelBridge::GetChildByName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
-                                       Q3DStudio::CString inName)
+                                       Q3DStudio::CString inName,
+                                       qt3dsdm::Qt3DSDMInstanceHandle skipInstance)
 {
     Q3DStudio::CGraphIterator theChildren;
     GetAssetChildren(m_Doc, inParent, theChildren);
 
     for (; !theChildren.IsDone(); ++theChildren) {
         qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
-        if (GetName(theChildInstance) == inName)
+        if (GetName(theChildInstance) == inName && skipInstance != theChildInstance)
             return theChildInstance;
     }
     return 0;
@@ -1552,6 +1560,8 @@ EStudioObjectType CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstance
         return OBJTYPE_PATHANCHORPOINT;
     else if (theType == L"SubPath")
         return OBJTYPE_SUBPATH;
+    else if (theType == L"DataInput")
+        return OBJTYPE_DATAINPUT;
     else if (theType == L"Lightmaps")
         return OBJTYPE_LIGHTMAPS;
     else {
@@ -1639,6 +1649,11 @@ bool CClientDataModelBridge::IsCustomMaterialInstance(qt3dsdm::Qt3DSDMInstanceHa
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_CustomMaterial.m_Instance);
 }
 
+bool CClientDataModelBridge::IsDataInputInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
+{
+    return m_DataCore->IsInstanceOrDerivedFrom(inInstance, m_DataInput.m_Instance);
+}
+
 bool CClientDataModelBridge::IsReferencedMaterialInstance(
     qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
@@ -1662,7 +1677,8 @@ bool CClientDataModelBridge::IsSceneGraphInstance(qt3dsdm::Qt3DSDMInstanceHandle
     return IsNodeType(inInstance) || IsSceneInstance(inInstance) || IsImageInstance(inInstance)
         || IsMaterialInstance(inInstance) || IsCustomMaterialInstance(inInstance)
         || IsReferencedMaterialInstance(inInstance) || IsRenderPluginInstance(inInstance)
-        || IsEffectInstance(inInstance) || IsBehaviorInstance(inInstance);
+        || IsEffectInstance(inInstance) || IsBehaviorInstance(inInstance)
+        || IsDataInputInstance(inInstance);
 }
 
 bool SActionInvalidProperty::operator()(qt3dsdm::Qt3DSDMPropertyHandle inProperty)

@@ -126,10 +126,15 @@ Rectangle {
                             id: delegateArea
 
                             anchors.fill: parent
-                            onClicked: browserList.currentIndex = model.index
+                            onClicked: {
+                                if (_objectBrowserView.selectable(model.index))
+                                    browserList.currentIndex = model.index;
+                            }
                             onDoubleClicked: {
-                                browserList.currentIndex = model.index;
-                                _objectBrowserView.close();
+                                if (_objectBrowserView.selectable(model.index)) {
+                                    browserList.currentIndex = model.index;
+                                    _objectBrowserView.close();
+                                }
                             }
                         }
                     }

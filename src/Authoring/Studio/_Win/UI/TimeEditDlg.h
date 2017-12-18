@@ -38,8 +38,8 @@
 //	 Includes
 //==============================================================================
 #include "Dialogs.h"
-#include <QDialog>
-#include <QDateTimeEdit>
+#include <QtWidgets/qdialog.h>
+#include <QtWidgets/qdatetimeedit.h>
 
 //==============================================================================
 //	Forwards
@@ -97,7 +97,7 @@ QT_END_NAMESPACE
 // See https://bugreports.qt.io/browse/QTBUG-34759
 class CDateTimeEdit : public QDateTimeEdit
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
     using QDateTimeEdit::QDateTimeEdit;
 
@@ -118,7 +118,7 @@ protected:
 //==============================================================================
 class CTimeEditDlg : public QDialog
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
     CTimeEditDlg(QWidget *pParent = nullptr); // standard constructor

@@ -42,18 +42,24 @@ QT_END_NAMESPACE
 
 class CMainFrame;
 
-class QTimeLineToolbar : public QWidget
+class TimeLineToolbar : public QWidget
 {
   Q_OBJECT
 public:
-    QTimeLineToolbar(CMainFrame *mainFrame, QWidget *pParent = nullptr);
-    virtual ~QTimeLineToolbar();
+    TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSize, QWidget *pParent = nullptr);
+    virtual ~TimeLineToolbar();
 
     void onTimeChanged(long time);
     void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
 
+    QSize sizeHint() const;
+
+private Q_SLOTS:
+    void onAddLayerClicked();
+
 protected:
     QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar) *m_ui;
+    QSize m_preferredSize;
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
 };

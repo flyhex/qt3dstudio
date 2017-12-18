@@ -28,8 +28,6 @@
 ****************************************************************************/
 #include "stdafx.h"
 #include "qtAuthoring-config.h"
-#include "Strings.h"
-#include "StringLoader.h"
 
 #include "Dialogs.h"
 #include "StudioApp.h"
@@ -53,12 +51,10 @@
 #include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 
-#include "StringLoader.h"
-
-#include <QColorDialog>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QStandardPaths>
+#include <QtWidgets/qcolordialog.h>
+#include <QtWidgets/qfiledialog.h>
+#include <QtWidgets/qmessagebox.h>
+#include <QtCore/qstandardpaths.h>
 
 #include <iostream>
 
@@ -70,7 +66,7 @@
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
     : m_ProgressPalette(nullptr)
     , m_ShowGUI(inShowGUI)
-    , m_LastSaveFile(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath())
+    , m_LastSaveFile(Q3DStudio::CString("."))
 {
 }
 
@@ -81,31 +77,6 @@ CDialogs::CDialogs(bool inShowGUI /*= true*/)
 CDialogs::~CDialogs()
 {
 }
-
-//=============================================================================
-/**
- *	Displays a multiline text edit.
- *	@param	ioText
- *	@param	inNotification
- */
-#if 0
-void CDialogs::DisplayMultilineTextEdit(Q3DStudio::CString &ioText,
-                                        CMultilineEditDlg::INotification *inNotifiction)
-{
-    CRct theLocation = CStudioPreferences::GetMultilineTextLocation();
-
-    CMultilineEditDlg theMultilineEditDlg(inNotifiction, theLocation);
-    theMultilineEditDlg.SetString(ioText);
-    if (theMultilineEditDlg.DoModal() == IDOK) {
-        // Set the string
-        ioText = theMultilineEditDlg.GetString();
-
-        // Save the window position
-        theLocation = theMultilineEditDlg.GetLocation();
-        CStudioPreferences::SetMultilineTextLocation(theLocation);
-    }
-}
-#endif
 
 //=============================================================================
 /**
@@ -125,7 +96,7 @@ bool CDialogs::PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut)
     theInterpolationDialog.setEaseIn(ioEaseIn);
     theInterpolationDialog.setEaseOut(ioEaseOut);
 
-        // If the user presses the OK button
+    // If the user presses the OK button
     if (theInterpolationDialog.exec() ==  QDialog::Accepted) {
         // Retrieve the new interpolation values
         ioEaseIn = theInterpolationDialog.easeIn();
@@ -142,15 +113,15 @@ bool CDialogs::PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut)
  */
 void CDialogs::DisplayAssetDeleteFailed()
 {
-    Q3DStudio::CString theMessage =
-        ::LoadResourceString(IDS_ERROR_CLIENTSAVE); // TODO: Should display the correct string
-    Q3DStudio::CString theTitle = ::LoadResourceString(IDS_ERROR_MSGTITLE);
+    QString theMessage = QObject::tr("Studio was unable to save your project data. Please close "
+                                     "down Studio and try again.");
+    QString theTitle = QObject::tr("General Error");
 
-    if (m_ShowGUI)
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theTitle.GetCharStar() << ": " << theMessage.GetCharStar() << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMessage;
     }
 }
 
@@ -171,20 +142,18 @@ Qt3DSFile CDialogs::GetExportChoice(const Q3DStudio::CString &, const Q3DStudio:
 void CDialogs::DisplayRefreshResourceFailed(const Q3DStudio::CString &inResourceName,
                                             const Q3DStudio::CString &inDescription)
 {
-    Q3DStudio::CString theTitle(::LoadResourceString(IDS_ERROR_REFRESHRESOURCETITLE));
-
-    Q3DStudio::CString theText;
-    theText.Format(::LoadResourceString(IDS_ERROR_REFRESHRESOURCETEXT),
-                   static_cast<const wchar_t *>(inResourceName));
+    QString theTitle = QObject::tr("Refresh File Error");
+    QString theText = QObject::tr("Studio was unable to refresh the resource '%1'.\n")
+            .arg(inResourceName.toQString());
 
     if (!inDescription.IsEmpty())
-        theText += inDescription;
+        theText += inDescription.toQString();
 
-    if (m_ShowGUI)
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theText, Qt3DSMessageBox::ICON_WARNING, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theTitle.GetCharStar() << ": " << theText.GetCharStar() << std::endl << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theText;
     }
 }
 
@@ -192,33 +161,24 @@ void CDialogs::DisplayRefreshResourceFailed(const Q3DStudio::CString &inResource
 /**
  *	Notify the user that the loading of the requested resource failed.
  *
- *	Possible failed import messages are:
- *	IDS_ERROR_IMPORTLUARESOURCETEXT				- Sorry - Studio was unable to
- *import the LUA script.\nPlease check the file and try again.\nNote that LUA files must be
- *syntactically correct to be importable.
- *	IDS_ERROR_IMPORTRESOURCETEXT				- Sorry - Studio was unable to
- *import the resource.\nPlease check the above file and try again.
- *	IDS_ERROR_IMPORTUNSUPPORTEDRESOURCETYPETEXT	- Sorry - Studio was unable to import
- *the resource file.\nThis resource file type is not currently supported by Studio.\n
- *
  *  @param inURL				the URL for the asset that was to have been imported
- *	@param inErrorDescription	description for the failure, if any
+ *	@param inDescription        description for the failure, if any
  *	@param inWarningsOnly		not a failure, just warnings
  */
 void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescription,
                                    bool inWarningsOnly)
 {
     // Notify the user we couldn't load the resource.
-    Q3DStudio::CString theTitle, theText, theMsgText;
+    QString theTitle;
+    QString theText;
+    QString theMsgText;
 
-    theTitle = ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETITLE);
-    // specify if its an error or warning
-    theTitle = (!inWarningsOnly) ? ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETITLE_ERROR)
-                                 : ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETITLE_WARNING);
+    theTitle = QObject::tr("Studio Import Resource ");
+    theTitle += !inWarningsOnly ? QObject::tr("Error") : QObject::tr("Warning");
 
     // Determine the asset type
     EStudioObjectType theAssetType =
-        Q3DStudio::ImportUtils::GetObjectFileTypeForFile(inURL.path(), false)
+            Q3DStudio::ImportUtils::GetObjectFileTypeForFile(inURL.path(), false)
             .m_ObjectType;
 
     bool theIsStudioObject = theAssetType != OBJTYPE_UNKNOWN;
@@ -226,14 +186,16 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
     // Is this a LUA file, but perhaps incorrectly formatted?
     if (theAssetType == OBJTYPE_BEHAVIOR) {
         // Load the message about the LUA format
-        if (inWarningsOnly)
-            theText = ::LoadResourceString(IDS_WARNING_IMPORTLUARESOURCETEXT);
-        else
-            theText = ::LoadResourceString(IDS_ERROR_IMPORTLUARESOURCETEXT);
-        if (!inDescription.isEmpty()) {
-            theText += L"\n";
-            theText += Q3DStudio::CString::fromQString(inDescription);
+        if (inWarningsOnly) {
+            theText = QObject::tr("Warnings were detected during import of the behavior script."
+                                  "\nPlease check the file.\n");
+        } else {
+            theText = QObject::tr("Studio was unable to import the behavior script.\nPlease check "
+                                  "the file and try again.\nNote that behavior files must be "
+                                  "syntactically correct to be importable.");
         }
+        if (!inDescription.isEmpty())
+            theText += QStringLiteral("\n") + inDescription;
     } else if (theAssetType != OBJTYPE_UNKNOWN || theIsStudioObject) {
         // Valid registered file type, but invalid file
 
@@ -241,40 +203,35 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
         // Load default text stating that the import resource failed.
         // descriptions if present are presented as "reasons" for failure.
         if (!inWarningsOnly || theNoDescription) {
-            theText.Format(::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT), theNoDescription
-                               ? L"."
-                               : ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT_REASON).c_str());
-            theText += "\n";
+            theText = QObject::tr("Studio was unable to import the resource%1")
+                    .arg(theNoDescription ? QStringLiteral(".\n")
+                                          : QObject::tr(" due to the following reason(s):\n"));
         }
         if (!theNoDescription)
-            theText += Q3DStudio::CString::fromQString(inDescription);
+            theText += inDescription;
         else
-            theText += ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT_CHECKFILE);
+            theText += QObject::tr("Please check the above file and try again.");
     } else {
         // Display the warning messsage if we have one
         // instead of a meaningless message. This provides more feed back
-        if (!inDescription.isEmpty())
-            theText += Q3DStudio::CString::fromQString(inDescription);
-        else
-            theText = ::LoadResourceString(
-                IDS_ERROR_IMPORTUNSUPPORTEDRESOURCETYPETEXT); // Load default text stating that the
-                                                              // import resource failed.
+        if (!inDescription.isEmpty()) {
+            theText += inDescription;
+        } else {
+            theText = QObject::tr("Studio was unable to import the resource file.\nThis "
+                                  "resource file type is not currently supported.\n");
+        }
     }
 
-    Q3DStudio::CString theFormatString(
-        !inWarningsOnly ? ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT_FAILED)
-                        : ::LoadResourceString(IDS_ERROR_IMPORTRESOURCETEXT_COMPLETEWITHWARNING));
-    theFormatString += _LSTR("\n%ls\n\n");
-    std::wstring wstr = inURL.path().toStdWString();
-    theMsgText.Format(theFormatString, static_cast<const wchar_t *>(wstr.c_str()));
-    theMsgText += theText;
+    theMsgText = !inWarningsOnly ? QObject::tr("Import resource failed:")
+                                 : QObject::tr("Import resource succeeded with warning(s):");
+    theMsgText += QStringLiteral("\n%s\n\n").arg(inURL.toDisplayString()) + theText;
 
     // Display the failed import resource message.
-    if (m_ShowGUI)
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMsgText, Qt3DSMessageBox::ICON_WARNING, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theTitle.GetCharStar() << ": " << theMsgText.GetCharStar() << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMsgText;
     }
 }
 
@@ -294,77 +251,90 @@ inline Q3DStudio::CString CreateExtensionsList(const char **extList)
 struct SAllowedTypesEntry
 {
     Q3DStudio::DocumentEditorFileType::Enum m_FileType;
-    long m_ResourceStringId; // Model Files, Image Files, etc
+    QString m_ResourceString; // Model Files, Image Files, etc
     const char **m_FileExtensions;
 };
+
 const char *imgExts[] = {
     "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", nullptr,
 };
+
 const wchar_t *wideImgExts[] = {
     L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", nullptr,
 };
+
 const char *modelExts[] = {
     CDialogs::GetDAEFileExtension(),
-#ifdef QT_3DSTUDIO_FBX
+    #ifdef QT_3DSTUDIO_FBX
     CDialogs::GetFbxFileExtension(),
-#endif
+    #endif
     // TODO CDialogs::GetImportFileExtension(),
     // TODO CDialogs::GetMeshFileExtension(),
     nullptr,
 };
+
 const char *meshExts[] = {
     CDialogs::GetMeshFileExtension(), nullptr,
 };
+
 const char *importExts[] = {
     CDialogs::GetImportFileExtension(), nullptr,
 };
+
 const char *behaviorExts[] = {
-    CDialogs::GetLUAFileExtension(), nullptr,
+    CDialogs::GetQmlFileExtension(), nullptr,
 };
+
 const char *fontExts[] = {
     "ttf", "otf", nullptr,
 };
 const wchar_t *wideFontExts[] = {
     L"ttf", L"otf", nullptr,
 };
+
 const char *effectExts[] = {
     "effect", nullptr,
 };
+
 const wchar_t *wideEffectExts[] = {
     L"effect", nullptr,
 };
+
 const char *materialExts[] = {
     "material", nullptr,
 };
+
 const wchar_t *wideMaterialExts[] = {
     L"material", nullptr,
 };
+
 const char *soundExts[] = {
     "wav", nullptr,
 };
+
 const wchar_t *wideSoundExts[] = {
     L"wav", nullptr,
 };
 
 // List of file types allowed during import
 SAllowedTypesEntry g_AllowedImportTypes[] = {
-    { Q3DStudio::DocumentEditorFileType::DAE, IDS_LIBRARYIMPORT_MODEL, modelExts },
-#ifdef QT_3DSTUDIO_FBX
-    { Q3DStudio::DocumentEditorFileType::FBX, IDS_LIBRARYIMPORT_MODEL, modelExts },
-#endif
+    { Q3DStudio::DocumentEditorFileType::DAE, QObject::tr("Model Files"), modelExts },
+    #ifdef QT_3DSTUDIO_FBX
+    { Q3DStudio::DocumentEditorFileType::FBX, QObject::tr("Model Files"), modelExts },
+    #endif
 };
 size_t g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
 
 // List of file types allowed for file references
 SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
-    { Q3DStudio::DocumentEditorFileType::Image, IDS_LIBRARYIMPORT_IMAGE, imgExts },
-    { Q3DStudio::DocumentEditorFileType::Behavior, IDS_LIBRARYIMPORT_BEHAVIOR, behaviorExts },
-    { Q3DStudio::DocumentEditorFileType::Mesh, IDS_LIBRARYIMPORT_MESH, meshExts },
-    { Q3DStudio::DocumentEditorFileType::Import, IDS_LIBRARYIMPORT_IMPORT, importExts },
-    { Q3DStudio::DocumentEditorFileType::Effect, IDS_LIBRARYIMPORT_EFFECT, effectExts },
+    { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
+    { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
+    { Q3DStudio::DocumentEditorFileType::Mesh, QObject::tr("Mesh Files"), meshExts },
+    { Q3DStudio::DocumentEditorFileType::Import, QObject::tr("Import Files"), importExts },
+    { Q3DStudio::DocumentEditorFileType::Effect, QObject::tr("Effect Files"), effectExts },
 };
 size_t g_NumAllowedFileReferencesTypes =
-    sizeof(g_AllowedFileReferencesTypes) / sizeof(*g_AllowedFileReferencesTypes);
+        sizeof(g_AllowedFileReferencesTypes) / sizeof(*g_AllowedFileReferencesTypes);
 }
 
 QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
@@ -373,11 +343,12 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
     // g_AllowedImportTypes
     // currently DAE and FBX
     QString theFileFilter =
-        CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::DAE, true);
+            CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::DAE, true);
 
 
     return QFileDialog::getOpenFileName(qApp->activeWindow(), QObject::tr("Open"),
-                                                 inFile, theFileFilter);
+                                        inFile, theFileFilter, nullptr,
+                                        QFileDialog::DontUseNativeDialog);
 }
 
 //==============================================================================
@@ -386,22 +357,22 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
  *	@param	inPresentation	The AKFile that we failed to load.
  */
 void CDialogs::DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
-                                                long inErrorIDS /*= -1 */)
+                                                const QString &inErrorText)
 {
-    Q_UNUSED(inPresentation);
+    QString theErrorMessage = inPresentation.GetName().toQString();
 
-    if (inErrorIDS == -1) // if unspecified, default to the 'generic' string
-        inErrorIDS = IDS_ERROR_LOADPRESENTATION;
-    Q3DStudio::CString theErrorMessage;
-    theErrorMessage.Format(::LoadResourceString(inErrorIDS),
-                           static_cast<const wchar_t *>(inPresentation.GetName()));
-    Q3DStudio::CString theErrorTitle(::LoadResourceString(IDS_ERROR_LOADPRESENTATION_TITLE));
+    if (inErrorText.isEmpty())
+        theErrorMessage +=  QObject::tr(" failed to load.");
+    else
+        theErrorMessage += inErrorText;
 
-    if (m_ShowGUI)
+    QString theErrorTitle = QObject::tr("Open File Error");
+
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theErrorTitle, theErrorMessage, Qt3DSMessageBox::ICON_WARNING, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theErrorTitle.GetCharStar() << ": " << theErrorMessage.GetCharStar() << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theErrorTitle << ": " << theErrorMessage;
     }
 }
 
@@ -413,14 +384,15 @@ void CDialogs::DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
  */
 void CDialogs::DisplaySavingPresentationFailed()
 {
-    Q3DStudio::CString theErrorMessage = ::LoadResourceString(IDS_ERROR_EXPORTPRESENTATION);
-    Q3DStudio::CString theErrorTitle = ::LoadResourceString(IDS_PROJNAME);
+    QString theErrorMessage = QObject::tr("Unable to save presentation. Please ensure that the "
+                                          "file is not set as read-only.");
+    QString theErrorTitle = QObject::tr("Qt 3D Studio");
 
-    if (m_ShowGUI)
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theErrorTitle, theErrorMessage, Qt3DSMessageBox::ICON_WARNING, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theErrorTitle.GetCharStar() << ": " << theErrorMessage.GetCharStar() << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theErrorTitle << ": " << theErrorMessage;
     }
 }
 
@@ -435,17 +407,16 @@ void CDialogs::DisplaySavingPresentationFailed()
  */
 void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
 {
-    Q3DStudio::CString theMsg = ::LoadResourceString(IDS_SAVE_READONLY_WARNING);
-    Q3DStudio::CString theTitle = ::LoadResourceString(IDS_PROJNAME);
+    QString theMsg = QObject::tr("Studio cannot save the file '%1'. The file is marked Read-Only."
+                                 "\nSave the file with another file name or to a different "
+                                 "location.").arg(inSavedLocation.GetName().toQString());
+    QString theTitle = QObject::tr("Qt 3D Studio");
 
-    Q3DStudio::CString theFormattedText;
-    theFormattedText.Format(theMsg, static_cast<const wchar_t *>(inSavedLocation.GetName()));
-
-    if (m_ShowGUI)
-        Qt3DSMessageBox::Show(theTitle, theFormattedText, Qt3DSMessageBox::ICON_WARNING, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theTitle.GetCharStar() << ": " << theFormattedText.GetCharStar() << std::endl;
+    if (m_ShowGUI) {
+        Qt3DSMessageBox::Show(theTitle, theMsg, Qt3DSMessageBox::ICON_WARNING, false,
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMsg;
     }
 }
 
@@ -462,29 +433,29 @@ void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
  *	@return Indication of which button was pressed to dismiss the dialog
  */
 Qt3DSMessageBox::EMessageBoxReturn
-CDialogs::DisplayMessageBox(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
+CDialogs::DisplayMessageBox(const QString &inTitle, const QString &inText,
                             Qt3DSMessageBox::EMessageBoxIcon inIcon, bool inShowCancel)
 {
     Qt3DSMessageBox::EMessageBoxReturn theUserChoice;
 
     if (m_ShowGUI) {
         theUserChoice =
-            Qt3DSMessageBox::Show(inTitle, inText, inIcon, inShowCancel, qApp->activeWindow());
+                Qt3DSMessageBox::Show(inTitle, inText, inIcon,
+                                      inShowCancel, qApp->activeWindow());
     } else {
-        std::cout << inTitle.GetCharStar() << ": " << inText.GetCharStar() << std::endl;
+        qCDebug(qt3ds::TRACE_INFO) << inTitle << ": " << inText;
         theUserChoice = Qt3DSMessageBox::MSGBX_OK;
     }
 
     return theUserChoice;
 }
 
-int CDialogs::DisplayChoiceBox(const Q3DStudio::CString &inTitle, const Q3DStudio::CString &inText,
-                               int inIcon)
+int CDialogs::DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon)
 {
     if (m_ShowGUI) {
         QMessageBox box;
-        box.setWindowTitle(inTitle.toQString());
-        box.setText(inText.toQString());
+        box.setWindowTitle(inTitle);
+        box.setText(inText);
         switch (inIcon) {
         case Qt3DSMessageBox::ICON_WARNING:
             box.setIcon(QMessageBox::Warning);
@@ -508,7 +479,7 @@ int CDialogs::DisplayChoiceBox(const Q3DStudio::CString &inTitle, const Q3DStudi
             Q_UNREACHABLE();
         }
     } else {
-        std::cout << inTitle.GetCharStar() << ": " << inText << std::endl;
+        qCDebug(qt3ds::TRACE_INFO) << inTitle << ": " << inText;
         return IDYES;
     }
 }
@@ -517,43 +488,48 @@ const char *CDialogs::GetDAEFileExtension()
 {
     return "dae";
 }
+
 const char *CDialogs::GetFbxFileExtension()
 {
     return "fbx";
 }
+
 // Null terminated list
 const char **CDialogs::GetImgFileExtensions()
 {
     return imgExts;
 }
+
 const char *CDialogs::GetImportFileExtension()
 {
     return "import";
 }
+
 const char *CDialogs::GetMeshFileExtension()
 {
     return "mesh";
 }
-const char *CDialogs::GetLUAFileExtension()
-{
-    return "lua";
-}
+
 const char *CDialogs::GetQmlFileExtension()
 {
     return "qml";
 }
+
 const char **CDialogs::GetFontFileExtensions()
 {
     return fontExts;
 }
+
 const char **CDialogs::GetEffectFileExtensions()
 {
     return effectExts;
 }
+
 const char **CDialogs::GetMaterialFileExtensions()
 {
     return materialExts;
 }
+
 const char **CDialogs::GetSoundFileExtensions()
 {
     return soundExts;
@@ -563,27 +539,33 @@ bool IsFileExtension(const char *inExt, const char **inExts)
 {
     if (inExt == nullptr)
         return false;
-    for (const char **ext = inExts; *ext != nullptr; ++ext)
+    for (const char **ext = inExts; *ext != nullptr; ++ext) {
         if (QString::compare(inExt, *ext, Qt::CaseInsensitive) == 0)
             return true;
+    }
     return false;
 }
+
 bool CDialogs::IsImageFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, imgExts);
 }
+
 bool CDialogs::IsFontFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, fontExts);
 }
+
 bool CDialogs::IsEffectFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, effectExts);
 }
+
 bool CDialogs::IsMaterialFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, materialExts);
 }
+
 bool CDialogs::IsSoundFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, soundExts);
@@ -593,34 +575,42 @@ const wchar_t **CDialogs::GetWideImgFileExtensions()
 {
     return wideImgExts;
 }
+
 const wchar_t *CDialogs::GetWideDAEFileExtension()
 {
     return L"dae";
 }
+
 const wchar_t *CDialogs::GetWideFbxFileExtension()
 {
     return L"fbx";
 }
+
 const wchar_t *CDialogs::GetWideImportFileExtension()
 {
     return L"import";
 }
+
 const wchar_t *CDialogs::GetWideMeshFileExtension()
 {
     return L"mesh";
 }
+
 const wchar_t *CDialogs::GetWideLUAFileExtension()
 {
     return L"lua";
 }
+
 const wchar_t **CDialogs::GetWideFontFileExtensions()
 {
     return wideFontExts;
 }
+
 const wchar_t **CDialogs::GetWideEffectFileExtensions()
 {
     return wideEffectExts;
 }
+
 const wchar_t **CDialogs::GetWideMaterialFileExtensions()
 {
     return wideMaterialExts;
@@ -638,14 +628,17 @@ bool IsFileExtension(const wchar_t *inExt, const wchar_t **inExts)
     }
     return false;
 }
+
 bool CDialogs::IsImageFileExtension(const wchar_t *inExt)
 {
     return IsFileExtension(inExt, wideImgExts);
 }
+
 bool CDialogs::IsFontFileExtension(const wchar_t *inExt)
 {
     return IsFileExtension(inExt, wideFontExts);
 }
+
 bool CDialogs::IsEffectFileExtension(const wchar_t *inExt)
 {
     return IsFileExtension(inExt, wideEffectExts);
@@ -683,10 +676,10 @@ QString CDialogs::CreateAllowedTypesString(long inFileTypeFilter, bool inForImpo
     size_t theCount = inForImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
     for (size_t idx = 0; idx < theCount; ++idx) {
         const SAllowedTypesEntry &entry =
-            inForImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
+                inForImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
         if (inFileTypeFilter == Q3DStudio::DocumentEditorFileType::Unknown
-            || inFileTypeFilter == entry.m_FileType) {
-            QString theTypeString(::LoadResourceString(entry.m_ResourceStringId).toQString());
+                || inFileTypeFilter == entry.m_FileType) {
+            QString theTypeString(entry.m_ResourceString);
             QString theExtensions(CreateExtensionsList(entry.m_FileExtensions).toQString());
             theReturnString += theTypeString + " (" + theExtensions + ");;";
         }
@@ -698,16 +691,17 @@ QString CDialogs::CreateAllowedTypesString(long inFileTypeFilter, bool inForImpo
 /**
  *	Display a error dialog box with the given text string that describes the error.
  */
-void CDialogs::DisplayKnownErrorDialog(const Q3DStudio::CString &inErrorText)
+void CDialogs::DisplayKnownErrorDialog(const QString &inErrorText)
 {
-    if (inErrorText.Length() > 0) // make sure this is valid
-    {
-        Q3DStudio::CString theTitle(::LoadResourceString(IDS_PROJNAME));
-        if (m_ShowGUI)
-            Qt3DSMessageBox::Show(theTitle, inErrorText, Qt3DSMessageBox::ICON_ERROR, false,
-                                 qApp->activeWindow());
-        else
-            std::cout << inErrorText.GetCharStar() << ": " << inErrorText.GetCharStar() << std::endl;
+    // make sure this is valid
+    if (!inErrorText.isEmpty()) {
+        QString theTitle = QObject::tr("Qt 3D Studio");
+        if (m_ShowGUI) {
+            Qt3DSMessageBox::Show(theTitle, inErrorText, Qt3DSMessageBox::ICON_ERROR,
+                                  false, qApp->activeWindow());
+        } else {
+            qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << inErrorText;
+        }
     }
 }
 
@@ -720,19 +714,19 @@ void CDialogs::DisplayKnownErrorDialog(const Q3DStudio::CString &inErrorText)
  */
 CDialogs::ESavePromptResult CDialogs::PromptForSave()
 {
-    Q3DStudio::CString theDocTitle;
+    QString theDocTitle;
 
     Qt3DSFile theCurrentDoc = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
     if (theCurrentDoc.IsFile())
-        theDocTitle = theCurrentDoc.GetName();
+        theDocTitle = theCurrentDoc.GetName().toQString();
     else // if the current doc has not been saved then use the default title.
-        theDocTitle = ::LoadResourceString(IDS_UNTITLED_DOCUMENT_TITLE);
+        theDocTitle = QObject::tr("Untitled");
 
-    Q3DStudio::CString thePrompt = ::LoadResourceString(IDS_PROMPT_FOR_SAVE);
-    thePrompt.Format(thePrompt, static_cast<const wchar_t *>(theDocTitle));
+    QString thePrompt = QObject::tr("Save changes to %1?").arg(theDocTitle);
 
-    int theChoice = QMessageBox::warning(nullptr, ::LoadResourceString(IDS_PROJNAME).toQString(),
-                         thePrompt.toQString(), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    int theChoice = QMessageBox::warning(nullptr, QObject::tr("Qt 3D Studio"),
+                                         thePrompt, QMessageBox::Yes | QMessageBox::No
+                                         | QMessageBox::Cancel);
 
     ESavePromptResult theResult = CANCEL_OPERATION;
 
@@ -758,31 +752,35 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  *	Prompt the user for a file to save to from the SaveAs menu option.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &inDialogTitle,
-                                                    bool inFilenameUntitled)
+std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitle,
+                                                     bool inFilenameUntitled)
 {
     Qt3DSFile theFile("");
-    Q3DStudio::CString theFileExt;
-    Q3DStudio::CString theImportFilter;
+    QString theFileExt;
+    QString theImportFilter;
 
-    Q3DStudio::CString theFilename = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath();
+    QString theFilename
+            = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
 
-    if (theFilename == "" || inFilenameUntitled)
-        theFilename = ::LoadResourceString(IDS_UNTITLED_DOCUMENT_TITLE);
+    if (theFilename.isEmpty() || inFilenameUntitled)
+        theFilename = QObject::tr("Untitled");
 
-    theFileExt = ::LoadResourceString(IDS_FILE_EXT_UIP);
-    theImportFilter = ::LoadResourceString(IDS_FILE_DESC_UIP);
+    theFileExt = QStringLiteral(".uip");
+    theImportFilter = QObject::tr("Studio UI Presentation");
 
     theImportFilter += " (*" + theFileExt + ")|*" + theFileExt + "|";
 
     QFileDialog theFileDlg;
     theFileDlg.setOption(QFileDialog::DontConfirmOverwrite);
     const QFileInfo fi(m_LastSaveFile.toQString());
-    theFileDlg.setDirectory((fi.path() == QLatin1Char('.')) ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) : fi.path());
+    theFileDlg.setDirectory((fi.path() == QStringLiteral("."))
+                            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                            : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
-    theFileDlg.setDefaultSuffix(theFileExt.toQString());
-    if (inDialogTitle != "")
-        theFileDlg.setWindowTitle(inDialogTitle.toQString());
+    theFileDlg.setDefaultSuffix(theFileExt);
+    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
+    if (!inDialogTitle.isEmpty())
+        theFileDlg.setWindowTitle(inDialogTitle);
 
     bool theCreateDir = false;
     bool theShowDialog = true;
@@ -812,8 +810,10 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const Q3DStudio::CString &i
             m_LastSaveFile = theFinalDoc;
             if (theFinalDoc.Exists()) {
                 const QString theTitle(QObject::tr("Confirm Save As"));
-                const QString filePath(theFinalDir.GetFileName().toQString() + QDir::separator() + theFinalDoc.GetFileName().toQString());
-                const QString theString = QObject::tr("%1 already exists.\nDo you want to replace it?").arg(filePath);
+                const QString filePath(theFinalDir.GetFileName().toQString() + QDir::separator()
+                                       + theFinalDoc.GetFileName().toQString());
+                const QString theString = QObject::tr("%1 already exists.\nDo you want to "
+                                                      "replace it?").arg(filePath);
 
                 auto result = QMessageBox::question(nullptr, theTitle, theString);
                 if (result != QMessageBox::Yes) {
@@ -839,7 +839,7 @@ CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory)
 {
     if (inInitialDirectory.size())
         m_LastSaveFile = inInitialDirectory;
-    return GetSaveAsChoice(::LoadResourceString(IDS_CREATE_NEW_DOCUMENT_TITLE), true);
+    return GetSaveAsChoice(QObject::tr("Create New Document"), true);
 }
 
 //==============================================================================
@@ -850,16 +850,21 @@ CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory)
 Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory)
 {
     Qt3DSFile theFile("");
-    Q3DStudio::CString theFileExt;
-    Q3DStudio::CString theImportFilter;
+    QString theFileExt;
+    QString theImportFilter;
 
-    theFileExt = ::LoadResourceString(IDS_FILE_EXT_UIP);
-    theImportFilter = ::LoadResourceString(IDS_FILE_DESC_UIP);
+    theFileExt = QStringLiteral(".uip");
+    theImportFilter = QObject::tr("Studio UI Presentation");
 
     theImportFilter += " (*" + theFileExt + ")";
 
-    QFileDialog theFileDlg(qApp->activeWindow(), QString(), inInitialDirectory.toQString(), theImportFilter.toQString());
+    QFileDialog theFileDlg(qApp->activeWindow(), QString(),
+                           (inInitialDirectory == Q3DStudio::CString("."))
+                           ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                           : inInitialDirectory.toQString(),
+                           theImportFilter);
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
+    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
         QFileInfo fi(theFileDlg.selectedFiles().first());
@@ -881,16 +886,17 @@ Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirecto
 bool CDialogs::ConfirmRevert()
 {
     bool theConfirmation = false;
-    Q3DStudio::CString thePrompt = ::LoadResourceString(IDS_PROMPT_FOR_REVERT);
-    Q3DStudio::CString theTitle = ::LoadResourceString(IDS_PROJNAME);
+    QString thePrompt = QObject::tr("All changes that have been made to your project since your "
+                                    "last save will be lost.\n\nDo you want to continue?");
+    QString theTitle = QObject::tr("Qt 3D Studio");
 
     Qt3DSMessageBox::EMessageBoxReturn theChoice;
 
-    if (m_ShowGUI)
+    if (m_ShowGUI) {
         theChoice = Qt3DSMessageBox::Show(theTitle, thePrompt, Qt3DSMessageBox::ICON_WARNING, true,
-                                         qApp->activeWindow());
-    else {
-        std::cout << theTitle.GetCharStar() << ": " << thePrompt.GetCharStar() << std::endl;
+                                          qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << thePrompt;
         theChoice = Qt3DSMessageBox::MSGBX_OK;
     }
 
@@ -937,63 +943,22 @@ void CDialogs::DestroyProgressScreen()
 
 //==============================================================================
 /**
- *	Prompt the user for the Object Timebar color.
- *	@param ioColor
- *	@return	true if we successfully obtained a color using the displayed dialog.
- */
-bool CDialogs::PromptObjectTimebarColor(CColor &ioColor)
-{
-    std::auto_ptr<QColorDialog> theColorDlg(new QColorDialog(ioColor));
-    if (theColorDlg->exec() == QDialog::Accepted) {
-        ioColor = theColorDlg->selectedColor();
-        return true;
-    }
-    return false;
-}
-
-//==============================================================================
-/**
- *	Display statistics from profiling.
- */
-void CDialogs::DisplayProfilingStatistics()
-{
-    Q3DStudio::CString theStatistics = "<Not Enabled>";
-#ifdef PERFORM_PROFILE
-    CMasterProf *theMasterP = CMasterProf::GetInstance();
-
-    for (long theIndex = 0; theIndex < theMasterP->GetProfilerCount(); ++theIndex) {
-        CMethProf *theProf = theMasterP->GetProfiler(theIndex);
-        if (theProf->GetCount() > 0) {
-            theStatistics += theProf->GetDescription();
-            theStatistics += "\n";
-        }
-    }
-#endif // #ifdef PERFORM_PROFILE
-    if (m_ShowGUI)
-        Qt3DSMessageBox::Show("Profiling Statistics", theStatistics, Qt3DSMessageBox::ICON_INFO);
-    else {
-        std::cout << "Profiling Statistics"
-                  << ": " << theStatistics.GetCharStar() << std::endl;
-    }
-}
-
-//==============================================================================
-/**
  *	Inform the user that the environment variables entered does not match the format
  *	expected, listing down all those settings that are wrong.
  *	@param	inErrorMessage the listing of all those errors.
  */
 void CDialogs::DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErrorMessage)
 {
-    Q3DStudio::CString theTitle = ::LoadResourceString(IDS_ERROR_PROJECT_VARIABLES_TITLE);
-    Q3DStudio::CString theMessage = ::LoadResourceString(IDS_ERROR_PROJECT_VARIABLES_MSG);
-    theMessage += inErrorMessage;
-    theMessage += ::LoadResourceString(IDS_PROJECT_VARIABLES_FORMAT);
-    if (m_ShowGUI)
+    QString theTitle = QObject::tr("Unable to accept all Environment Variables");
+    QString theMessage = QObject::tr("The following variables will not be saved:\n")
+            + inErrorMessage.toQString()
+            + QObject::tr("\nVariables must be listed in the following format:"
+                          "\n{Variable} = Value\n");
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
-                             qApp->activeWindow());
-    else {
-        std::cout << theTitle.GetCharStar() << ": " << theMessage.GetCharStar() << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMessage;
     }
 }
 
@@ -1008,9 +973,8 @@ void CDialogs::ResetSettings(const Q3DStudio::CString &inCurrentDocPath)
 {
     // Initialize the default dir/paths to the current document path if specified, otherwise leave
     // everything as it is.
-    if (!inCurrentDocPath.IsEmpty()) {
+    if (!inCurrentDocPath.IsEmpty())
         m_LastSaveFile = inCurrentDocPath;
-    }
 }
 
 bool CDialogs::DisplayResetKeyframeValuesDlg()
@@ -1029,14 +993,16 @@ bool CDialogs::DisplayResetKeyframeValuesDlg()
  */
 void CDialogs::DisplayPasteFailed()
 {
-    Q3DStudio::CString theTitle(::LoadResourceString(IDS_ERROR_PATHOLOGICAL_PASTE_TITLE));
-    Q3DStudio::CString theMessage(::LoadResourceString(IDS_ERROR_PATHOLOGICAL_PASTE_MESSAGE));
+    QString theTitle = QObject::tr("Paste Error");
+    QString theMessage = QObject::tr("Sorry, the attempted paste operation cannot be completed,"
+                                     " the destination is invalid.");
 
-    if (m_ShowGUI)
+    if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
-                             qApp->activeWindow());
-    else
-        std::cout << theTitle.GetCharStar() << ": " << theMessage.GetCharStar() << std::endl;
+                              qApp->activeWindow());
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMessage;
+    }
 }
 
 //==============================================================================
@@ -1067,25 +1033,24 @@ void CDialogs::DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
 void CDialogs::DisplayGLVersionDialog(const Q3DStudio::CString &inGLVersion,
                                       const Q3DStudio::CString &inRecommendedVersion, bool inError)
 {
-    long theTitleResourceID;
-    long theMessageResourceID;
+    QString theTitle;
+    QString theMessage;
 
     if (inError) {
-        theTitleResourceID = IDS_ERROR_MSGTITLE;
-        theMessageResourceID = IDS_GL_VERSION_ERROR;
+        theTitle = QObject::tr("Error");
+        theMessage = QObject::tr("OpenGL version %1 is unsupported.\nPlease use a video card and "
+                                 "driver that supports at least OpenGL %2 or higher.").arg(
+                    inGLVersion.toQString()).arg(inRecommendedVersion.toQString());
     } else {
-        theTitleResourceID = IDS_WARNING_MSGTITLE;
-        theMessageResourceID = IDS_GL_VERSION_WARNING;
+        theTitle = QObject::tr("Warning");
+        theMessage = QObject::tr("OpenGL version %1 detected.\nA video card with an updated driver "
+                                 "capable of OpenGL %2 is recommended or there may be rendering "
+                                 "errors.").arg(inGLVersion.toQString()).arg(
+                    inRecommendedVersion.toQString());
     }
 
-    Q3DStudio::CString theTitle(LoadResourceString(theTitleResourceID));
-    Q3DStudio::CString theMessage(LoadResourceString(theMessageResourceID));
-    Q3DStudio::CString theFormattedMessage;
-    theFormattedMessage.Format(theMessage, static_cast<const wchar_t *>(inGLVersion),
-                               static_cast<const wchar_t *>(inRecommendedVersion));
-
     CGLVersionDlg theGLVersionDlg;
-    theGLVersionDlg.Initialize(theTitle, theFormattedMessage, inError);
+    theGLVersionDlg.Initialize(theTitle, theMessage, inError);
     theGLVersionDlg.exec();
 
     if (theGLVersionDlg.GetDontShowAgain())

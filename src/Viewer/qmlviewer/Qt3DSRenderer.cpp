@@ -132,6 +132,8 @@ void Q3DSRenderer::render()
     if (!m_initialized && !m_initializationFailure) {
         m_initialized = initializeRuntime(this->framebufferObject());
         m_initializationFailure = !m_initialized;
+        if (m_initializationFailure)
+            m_commands.clear();
     }
 
     // Don't render if the plugin is hidden; however, if hidden, but sure
@@ -232,8 +234,10 @@ void Q3DSRenderer::onUpdateHandler(void *userData)
  */
 void Q3DSRenderer::processCommands()
 {
-    if (!m_runtime)
+    if (!m_runtime) {
+        m_commands.clear();
         return;
+    }
 
     if (m_commands.m_visibleChanged)
         m_visibleFlag = m_commands.m_visible;
@@ -325,6 +329,8 @@ void Q3DSRenderer::processCommands()
             qWarning() << __FUNCTION__ << "Unrecognized CommandType in command list!";
         }
     }
+
+    m_commands.clear();
 }
 
 QT_END_NAMESPACE

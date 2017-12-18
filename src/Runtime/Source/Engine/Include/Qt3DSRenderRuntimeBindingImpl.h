@@ -50,6 +50,7 @@
 #include "Qt3DSRenderModel.h"
 #include "Qt3DSRenderDefaultMaterial.h"
 #include "Qt3DSRenderImage.h"
+#include "Qt3DSRenderDataInput.h"
 #include "Qt3DSUIPParser.h"
 #include "Qt3DSRenderEffect.h"
 #include "Qt3DSRenderCustomMaterial.h"

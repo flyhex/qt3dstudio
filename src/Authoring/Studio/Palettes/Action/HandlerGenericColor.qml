@@ -39,6 +39,7 @@ RowLayout {
     property alias selectedColor: handlerGenericColor.selectedColor
 
     signal colorSelected()
+    signal previewColorSelected()
 
     StyledLabel {
         id: labelField
@@ -49,5 +50,6 @@ RowLayout {
         id: handlerGenericColor
 
         onColorSelected: root.colorSelected();
+        onPreviewColorSelected: root.previewColorSelected();
     }
 }
