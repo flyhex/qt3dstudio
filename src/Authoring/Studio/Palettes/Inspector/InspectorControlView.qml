@@ -50,10 +50,8 @@ Rectangle {
         spacing: 8
 
         RowLayout {
-            height: _controlBaseHeight + anchors.margins * 2
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: 4
+            height: _controlBaseHeight + 8
+            Layout.leftMargin: 4
 
             Image {
                 id: headerImage

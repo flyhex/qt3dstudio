@@ -63,7 +63,7 @@ Rectangle {
             spacing: 4
 
             RowLayout {
-                height: _controlBaseHeight + anchors.margins * 2
+                height: _controlBaseHeight + 8
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.margins: 4
