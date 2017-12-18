@@ -148,7 +148,9 @@ public:
     void OnUpdatePlaybackRewind();
     void OnPlaybackStop();
     void OnUpdatePlaybackStop();
-    void OnPlaybackPreview();
+    void OnPlaybackPreview(const QString &viewerExeName);
+    void OnPlaybackPreviewRuntime1();
+    void OnPlaybackPreviewRuntime2();
     void OnUpdatePlaybackPreview();
     void OnUpdateToolMove();
     void OnUpdateToolRotate();

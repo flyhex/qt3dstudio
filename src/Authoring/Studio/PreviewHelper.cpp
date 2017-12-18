@@ -78,14 +78,14 @@ Q3DStudio::CString CPreviewHelper::GetLaunchFile(const Q3DStudio::CString &inUip
 /**
  *	Callback for previewing a presentation.
  */
-void CPreviewHelper::OnPreview()
+void CPreviewHelper::OnPreview(const QString &viewerExeName)
 {
     Q3DStudio::CBuildConfigurations &theConfigurations =
             g_StudioApp.GetCore()->GetBuildConfigurations();
     Q3DStudio::CBuildConfiguration *theBuildConfiguration =
             theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
     if (theBuildConfiguration)
-        PreviewViaConfig(theBuildConfiguration, EXECMODE_PREVIEW);
+        PreviewViaConfig(theBuildConfiguration, EXECMODE_PREVIEW, viewerExeName);
 }
 
 //=============================================================================
@@ -100,7 +100,7 @@ void CPreviewHelper::OnDeploy(RemoteDeploymentSender &project)
             theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
     if (theBuildConfiguration) {
         // ItemDataPtr != nullptr ==> Build configurations specified NANT pipeline exporter
-        PreviewViaConfig(theBuildConfiguration, EXECMODE_DEPLOY, &project);
+        PreviewViaConfig(theBuildConfiguration, EXECMODE_DEPLOY, QString(), &project);
     }
 }
 
@@ -112,7 +112,8 @@ void CPreviewHelper::OnDeploy(RemoteDeploymentSender &project)
  *	2	Viewing the exported content following the command specified in the configuration.
  */
 void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                      EExecMode inMode, RemoteDeploymentSender *project)
+                                      EExecMode inMode, const QString &viewerExeName,
+                                      RemoteDeploymentSender *project)
 {
     bool theUsingTempFile;
     Qt3DSFile theDocument = GetDocumentFile(theUsingTempFile);
@@ -123,25 +124,40 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
         }
 
         DoPreviewViaConfig(inSelectedConfig, theDocument.GetAbsolutePath(),
-                           inMode, project);
+                           inMode, viewerExeName, project);
     } catch (...) {
         theCore->GetDispatch()->FireOnProgressEnd();
         g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(theDocument);
     }
 }
 
-//=============================================================================
-/**
- *	Launch a viewing app to preview a file.
- *	@param	inDocumentFile		File to be previewed
- */
+QString CPreviewHelper::getViewerFilePath(const QString &exeName)
+{
+    using namespace Q3DStudio;
+    CFilePath currentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
+    CFilePath viewerDir(QApplication::applicationDirPath());
+    if (!viewerDir.IsDirectory())
+        viewerDir = currentPath.GetDirectory(); // Developing directory
+
+    QString viewerFile;
+#ifdef Q_OS_WIN
+    viewerFile = QStringLiteral("%1.exe").arg(exeName);
+#else
+#ifdef Q_OS_MACOS
+    viewerFile = QStringLiteral("../../../%1.app/Contents/MacOS/%1").arg(exeName);
+#else
+    viewerFile = QStringLiteral("%1").arg(exeName);
+#endif
+#endif
+    return viewerDir.filePath() + QStringLiteral("/") + viewerFile;
+}
+
 void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSelectedConfig*/,
                                         const Q3DStudio::CString &inDocumentFile,
-                                        EExecMode inMode,
+                                        EExecMode inMode, const QString &viewerExeName,
                                         RemoteDeploymentSender *project)
 {
     using namespace Q3DStudio;
-    QString theCommandStr;
 
     if (inMode == EXECMODE_DEPLOY) {
         Q_ASSERT(project);
@@ -149,27 +165,8 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
     } else if (inMode == EXECMODE_PREVIEW
                && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
         // Quick Preview on PC without going via NANT
-        CFilePath theCurrentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
-        CFilePath theViewerDir(QApplication::applicationDirPath());
-        if (!theViewerDir.IsDirectory()) {
-            // theMainDir = theCurrentPath.GetDirectory().GetDirectory();
-            // theViewerDir = CFilePath::CombineBaseAndRelative( theMainDir, CFilePath(
-            // L"Runtime/Build/Bin/Win32" ) );
-            theViewerDir = theCurrentPath.GetDirectory(); // Developing directory
-        }
-
         Q3DStudio::CString theDocumentFile = CPreviewHelper::GetLaunchFile(inDocumentFile);
-#ifdef Q_OS_WIN
-        QString theViewerFile = "Qt3DViewer.exe";
-        theCommandStr = theViewerDir.filePath() + "\\" + theViewerFile;
-#else
-#ifdef Q_OS_MACOS
-        QString theViewerFile = "../../../Qt3DViewer.app/Contents/MacOS/Qt3DViewer";
-#else
-        QString theViewerFile = "Qt3DViewer";
-#endif
-        theCommandStr = theViewerDir.filePath() + "/" + theViewerFile;
-#endif
+        QString theCommandStr = getViewerFilePath(viewerExeName);
 
         QProcess *p = new QProcess;
         auto finished
@@ -179,12 +176,17 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
 
         if (!p->waitForStarted()) {
             QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"),
-                                  QObject::tr("%1 failed with error: %2")
-                                  .arg(theViewerFile).arg(p->errorString()));
+                                  QObject::tr("'%1' failed with error: '%2'")
+                                  .arg(theCommandStr).arg(p->errorString()));
             delete p;
             return;
         }
     }
+}
+
+bool CPreviewHelper::viewerExists(const QString &exeName)
+{
+    return QFileInfo(getViewerFilePath(exeName)).exists();
 }
 
 //=============================================================================

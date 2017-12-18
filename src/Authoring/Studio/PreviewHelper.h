@@ -62,14 +62,16 @@ public:
     };
 
 public:
-    static void OnPreview();
+    static void OnPreview(const QString &viewerExeName);
     static void OnDeploy(RemoteDeploymentSender &project);
     static void PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                 EExecMode inMode, RemoteDeploymentSender *project = 0);
+                                 EExecMode inMode, const QString &viewerExeName,
+                                 RemoteDeploymentSender *project = 0);
     static void DoPreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
                                    const Q3DStudio::CString &inDocumentFile,
-                                   EExecMode inMode,
+                                   EExecMode inMode, const QString &viewerExeName,
                                    RemoteDeploymentSender *project = 0);
+    static bool viewerExists(const QString &exeName);
 
 protected:
     static Q3DStudio::CString InterpretString(Q3DStudio::CBuildConfiguration *inSelectedConfig,
@@ -80,6 +82,7 @@ protected:
                                 const Q3DStudio::CString &inVariable, Q3DStudio::CString &outValue);
     static Qt3DSFile GetDocumentFile(bool &outUsingTempFile);
     static Q3DStudio::CString GetLaunchFile(const Q3DStudio::CString &inDocFile);
+    static QString getViewerFilePath(const QString &exeName);
 };
 
 #endif

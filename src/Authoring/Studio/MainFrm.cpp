@@ -163,7 +163,17 @@ CMainFrame::CMainFrame()
             m_SceneView, &CSceneView::OnToolGroupSelection);
 
     // Playback toolbar
-    connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreview);
+    connect(m_ui->actionPreview, &QAction::triggered,
+            this, &CMainFrame::OnPlaybackPreviewRuntime1);
+
+    // Only show runtime2 preview if we have appropriate viewer
+    if (CPreviewHelper::viewerExists(QStringLiteral("q3dsviewer"))) {
+        connect(m_ui->actionPreviewRuntime2, &QAction::triggered,
+                this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    } else {
+        m_ui->actionPreviewRuntime2->setVisible(false);
+    }
+
 
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
@@ -939,7 +949,7 @@ void CMainFrame::OnPlaybackStop()
 /**
  *	Handles pressing the preview button.
  */
-void CMainFrame::OnPlaybackPreview()
+void CMainFrame::OnPlaybackPreview(const QString &viewerExeName)
 {
     if (m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
@@ -948,8 +958,18 @@ void CMainFrame::OnPlaybackPreview()
         CPreviewHelper::OnDeploy(*m_remoteDeploymentSender);
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
     } else {
-        CPreviewHelper::OnPreview();
+        CPreviewHelper::OnPreview(viewerExeName);
     }
+}
+
+void CMainFrame::OnPlaybackPreviewRuntime1()
+{
+    OnPlaybackPreview(QStringLiteral("Qt3DViewer"));
+}
+
+void CMainFrame::OnPlaybackPreviewRuntime2()
+{
+    OnPlaybackPreview(QStringLiteral("q3dsviewer"));
 }
 
 //==============================================================================
