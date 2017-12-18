@@ -52,10 +52,13 @@ CPropertyRowUI::CPropertyRowUI(CPropertyRow *propertyRow, CAbstractTimelineRowUI
             this, &CPropertyRowUI::handleRefreshRequested);
     connect(propertyRow, &CPropertyRow::selectKeysByTime,
             this, &CPropertyRowUI::handleSelectKeysByTime);
+    connect(propertyRow, &CPropertyRow::timeRatioChanged,
+            this, &CPropertyRowUI::setTimeRatio);
 
     m_TreeControl = new CPropertyTreeControl(this);
     m_ToggleControl = new CPropertyToggleControl(this);
     m_TimebarRow = new CPropertyTimebarRow(this);
+    m_TimebarRow->SetTimeRatio(propertyRow->GetTimeRatio());
 
     m_PropertyColorControl = new CPropertyColorControl(m_propertyRow);
     long theTimebarHeight = CStudioPreferences::GetRowSize();

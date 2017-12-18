@@ -149,5 +149,7 @@ CBlankToggleControl *CStateRowUI::CreateToggleControl()
  */
 CBaseTimebarlessRow *CStateRowUI::CreateTimebarRow()
 {
-    return new CStateTimebarRow(this);
+    auto stateTimebarRow = new CStateTimebarRow(this);
+    stateTimebarRow->SetTimeRatio(m_baseStateRow->GetTimeRatio());
+    return stateTimebarRow;
 }
