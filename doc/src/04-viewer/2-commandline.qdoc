@@ -56,23 +56,23 @@ The following command line options are supported:
             Specifying any of the seq-* options implies setting this option.
     \row
         \li --seq-start <ms>
-        \li Start time of the sequence in milliseconds. The default value is 0.
+        \li Start time of the sequence in milliseconds. The default value is \c{0}.
     \row
         \li --seq-end <ms>
-        \li End time of the sequence in milliseconds. The default value is 10000.
+        \li End time of the sequence in milliseconds. The default value is \c{1000}.
     \row
         \li --seq-fps <fps>
-        \li Frames per second for the sequence. The default value is 60.
+        \li Frames per second for the sequence. The default value is \c{60}.
     \row
         \li --seq-interval <ms>
         \li Time interval between frames in the sequence in milliseconds.
             The \c{seq-fps} option is ignored if this option is used.
     \row
         \li --seq-width <pixels>
-        \li Width of the image sequence. The default value is 1920.
+        \li Width of the image sequence. The default value is \c{1920}.
     \row
         \li --seq-height <pixels>
-        \li Height of the image sequence. The default value is 1080.
+        \li Height of the image sequence. The default value is \c{1080}.
     \row
         \li --seq-outpath <path>
         \li Output path of the image sequence. The default value is the current directory.
@@ -83,7 +83,7 @@ The following command line options are supported:
     \row
         \li --connect <port>
         \li If this parameter is specified, the viewer is started in connection mode.
-            The default value is 36000.
+            The default value is \c{36000}.
     \row
         \li --fullscreen
         \li Starts the viewer in fullscreen mode.
@@ -96,14 +96,14 @@ The following command line options are supported:
             For example: \c{1000x800+50+50}
     \row
         \li --mattecolor <color>
-        \li Specifies custom matte color using #000000 syntax.
-            For example, white matte: #ffffff
+        \li Specifies custom matte color using \c{#000000} syntax.
+            For example, white matte: \c{#ffffff}
     \row
         \li --showstats
         \li Show render statistics on screen.
     \row
         \li --scalemode <center|fit|fill>
-        \li Specifies scaling mode. The default value is 'center'.
+        \li Specifies scaling mode. The default value is \c{center}.
 \endtable
 
 Example - Creating a one minute 4k image sequence of a presentation:

@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
                       QCoreApplication::translate("main",
                       "End time of the sequence in\n"
                       "milliseconds.\n"
-                      "The default value is 10000."),
+                      "The default value is 1000."),
                       QCoreApplication::translate("main", "ms"), QString::number(1000)});
     parser.addOption({"seq-fps",
                       QCoreApplication::translate("main",
