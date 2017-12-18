@@ -1,12 +1,15 @@
 [submodule "src/3rdparty/ColladaDOM"]
 	path = src/3rdparty/ColladaDOM
-	url = ../../qt3dstudio/qt3dstudio-collada-dom.git
+	url = ../qt3dstudio-collada-dom.git
 [submodule "src/3rdparty/EASTL"]
 	path = src/3rdparty/EASTL
-	url = ../../qt3dstudio/qt3dstudio-eastl.git
+	url = ../qt3dstudio-eastl.git
 [submodule "src/3rdparty/pcre"]
 	path = src/3rdparty/pcre
-	url = ../../qt3dstudio/qt3dstudio-pcre.git
+	url = ../qt3dstudio-pcre.git
 [submodule "src/3rdparty/Lua"]
 	path = src/3rdparty/Lua
-	url = ../../qt3dstudio/qt3dstudio-lua.git
+	url = ../qt3dstudio-lua.git
+[submodule "src/Runtime/qt3d-runtime"]
+	path = src/Runtime/qt3d-runtime
+	url = ../qt3d-runtime.git
