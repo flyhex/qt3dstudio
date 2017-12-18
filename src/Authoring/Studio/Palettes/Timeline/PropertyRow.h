@@ -91,7 +91,6 @@ Q_SIGNALS:
     void visibleChanged(bool visible);
     void deleteAllKeys();
     void selectAllKeys();
-    void timeRatioChanged(double timeRatio);
     void refreshRequested();
 
 

@@ -246,6 +246,10 @@ QSharedPointer<CTimelineRow> TimelineObjectModel::timelineRowForIndex(const QMod
 
                 auto propertyRow = binding->AddPropertyRow(handle);
 
+                connect(propertyRow, &CTimelineRow::timeRatioChanged, this, [this, index] {
+                    emit dataChanged(index, index, {TimeInfoRole, KeyframesRole});
+                });
+
                 m_rows[handle].reset(propertyRow);
             } else {
                 // TODO:
@@ -263,7 +267,7 @@ QSharedPointer<CTimelineRow> TimelineObjectModel::timelineRowForIndex(const QMod
                 });
 
                 connect(stateRow, &CTimelineRow::timeRatioChanged, this, [this, index] {
-                    emit dataChanged(index, index, {TimeInfoRole});
+                    emit dataChanged(index, index, {TimeInfoRole, KeyframesRole});
                 });
 
                 connect(stateRow, &CTimelineRow::dirtyChanged, this, [this, index] {
