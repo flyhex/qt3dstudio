@@ -48,6 +48,7 @@ class CHotKeys;
 namespace Q3DStudio {
 class CBuildConfiguration;
 }
+QT_FORWARD_DECLARE_CLASS(QProcess)
 
 //==============================================================================
 /**
@@ -83,6 +84,7 @@ protected:
     static Qt3DSFile GetDocumentFile(bool &outUsingTempFile);
     static Q3DStudio::CString GetLaunchFile(const Q3DStudio::CString &inDocFile);
     static QString getViewerFilePath(const QString &exeName);
+    static void cleanupProcess(QProcess *p, QString *pDocStr);
 };
 
 #endif

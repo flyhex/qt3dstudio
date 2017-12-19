@@ -52,26 +52,51 @@
 
 #include "remotedeploymentsender.h"
 
-//=============================================================================
-/**
- *	PKC : Yes, we're duplicating functionality found in UICStateApplication
- *  but we want to eliminate as many dependencies on UICState as possible in Studio.
- */
+static const Q3DStudio::CString previewSuffix("_@preview@");
+static const Q3DStudio::CString uipSuffix(".uip");
+static const Q3DStudio::CString uiaSuffix(".uia");
 
 Q3DStudio::CString CPreviewHelper::GetLaunchFile(const Q3DStudio::CString &inUipPath)
 {
+    const bool isPreview = inUipPath.Right(previewSuffix.Length() + uipSuffix.Length())
+            .Compare(previewSuffix + uipSuffix);
+
     Q3DStudio::CFilePath theUipPath(inUipPath);
 
     Q3DStudio::CString theDir = theUipPath.GetDirectory();
     Q3DStudio::CString theStem = theUipPath.GetFileStem();
+    if (isPreview)
+        theStem = theStem.Left(theStem.Length() - previewSuffix.Length());
 
     // Check if a corresponding .UIA file actually exists
     theDir.append('/');
-    Q3DStudio::CString idealPath = theDir + theStem + Q3DStudio::CString(".uia");
+    Q3DStudio::CString uiaPath = theDir + theStem + uiaSuffix;
 
-    Q3DStudio::CFilePath theUiaPath(idealPath);
-
-    return (theUiaPath.IsFile()) ? idealPath : inUipPath;
+    Q3DStudio::CFilePath theUiaPath(uiaPath);
+    if (theUiaPath.IsFile()) {
+        if (isPreview) {
+            // We need to make a preview .uia that points to the preview .uip
+            Q3DStudio::CString previewPath = theDir + theStem + previewSuffix + uiaSuffix;
+            QFile previewFile(previewPath.toQString());
+            QFile origFile(uiaPath.toQString());
+            if (previewFile.open(QIODevice::WriteOnly) && origFile.open(QIODevice::ReadOnly)) {
+                QByteArray content = origFile.readAll();
+                QString origUip = (theStem + uipSuffix).toQString();
+                QString previewUip = (theStem + previewSuffix + uipSuffix).toQString();
+                content.replace(origUip, previewUip.toUtf8());
+                previewFile.write(content);
+                previewFile.flush();
+                return previewPath;
+            } else {
+                qCWarning(qt3ds::WARNING) << "Failed to create preview .uia file:"
+                                          << previewPath.toQString();
+                return inUipPath;
+            }
+        }
+        return uiaPath;
+    } else {
+        return inUipPath;
+    }
 }
 
 //=============================================================================
@@ -119,9 +144,8 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
     Qt3DSFile theDocument = GetDocumentFile(theUsingTempFile);
     CCore *theCore = g_StudioApp.GetCore();
     try {
-        if (theCore->GetDoc()->IsModified()) {
-            theCore->OnSaveDocument(theDocument);
-        }
+        if (theUsingTempFile)
+            theCore->OnSaveDocument(theDocument, true);
 
         DoPreviewViaConfig(inSelectedConfig, theDocument.GetAbsolutePath(),
                            inMode, viewerExeName, project);
@@ -152,6 +176,27 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     return viewerDir.filePath() + QStringLiteral("/") + viewerFile;
 }
 
+void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
+{
+    p->disconnect();
+    QString preview = previewSuffix.toQString();
+    QString uia = preview + uiaSuffix.toQString();
+    QString uip = preview + uipSuffix.toQString();
+    if (pDocStr->endsWith(uia) || pDocStr->endsWith(uip)) {
+        QFile(*pDocStr).remove();
+        if (pDocStr->endsWith(uia)) {
+            pDocStr->replace(uia, uip);
+            QFile(*pDocStr).remove();
+        }
+    }
+    if (p->state() == QProcess::Running) {
+        p->terminate();
+        p->waitForFinished(5000); // To avoid warning about deleting a running process
+    }
+    p->deleteLater();
+    delete pDocStr;
+}
+
 void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSelectedConfig*/,
                                         const Q3DStudio::CString &inDocumentFile,
                                         EExecMode inMode, const QString &viewerExeName,
@@ -167,12 +212,24 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
         // Quick Preview on PC without going via NANT
         Q3DStudio::CString theDocumentFile = CPreviewHelper::GetLaunchFile(inDocumentFile);
         QString theCommandStr = getViewerFilePath(viewerExeName);
+        QString *pDocStr = new QString(theDocumentFile.toQString());
 
         QProcess *p = new QProcess;
+        QMetaObject::Connection *connection = new QMetaObject::Connection(
+                    QObject::connect(qApp, &QApplication::aboutToQuit, [p, pDocStr](){
+            // connection object is never destroyed, but it doesn't matter as application is
+            // quitting anyway.
+            cleanupProcess(p, pDocStr);
+        }));
         auto finished
                 = static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished);
-        QObject::connect(p, finished, p, &QObject::deleteLater);
-        p->start(theCommandStr, { theDocumentFile.toQString() });
+        QObject::connect(p, finished, [p, pDocStr, connection](){
+            // Disconnect the other connection to avoid duplicate cleanup
+            QObject::disconnect(*connection);
+            delete connection;
+            cleanupProcess(p, pDocStr);
+        });
+        p->start(theCommandStr, { *pDocStr });
 
         if (!p->waitForStarted()) {
             QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"),
@@ -275,20 +332,26 @@ bool CPreviewHelper::ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedC
     return theHasResolved;
 }
 
-//=============================================================================
 /**
- *	Gets a file to be previewed or conditioned based on the current document.
- *	If the document has not been saved yet (and thus does not have a name), a temp file is used.
- *	If the document has been saved but it's dirty, a temp file based on the current document is
- *used (same path but different extension).
- *	@param	outUsingTempFile	if temp file if used
- *	@return the document file to be previewed or conditioned
+ *  Gets a file to be previewed based on the current document.
+ *  If the document is dirty, a temp file based on the current document is used.
+ *  @param outUsingTempFile indicates if temp file is used
+ *  @return the document file to be previewed
  */
 Qt3DSFile CPreviewHelper::GetDocumentFile(bool &outUsingTempFile)
 {
-    Qt3DSFile theDocument = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
-    Qt3DSFile theResult("");
-    theResult = theDocument;
-    outUsingTempFile = false;
-    return theResult;
+    Qt3DSFile result("");
+    if (g_StudioApp.GetCore()->GetDoc()->IsModified()) {
+        Qt3DSFile document = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
+        Q3DStudio::CFilePath absPath = document.GetAbsolutePath();
+        Q3DStudio::CString dir = absPath.GetDirectory();
+        Q3DStudio::CString stem = absPath.GetFileStem();
+        dir.append('/');
+        result = dir + stem + previewSuffix + uipSuffix;
+        outUsingTempFile = true;
+    } else {
+        result = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
+        outUsingTempFile = false;
+    }
+    return result;
 }
