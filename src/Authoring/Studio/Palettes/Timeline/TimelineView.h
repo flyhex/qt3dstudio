@@ -30,7 +30,6 @@
 #define TIMELINEVIEW_H
 
 #include <QQuickWidget>
-#include <QScopedPointer>
 
 #include "DispatchListeners.h"
 #include "ObjectListModel.h"
@@ -84,8 +83,8 @@ private:
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel
-    QScopedPointer<FlatObjectListModel> m_model;
-    QScopedPointer<TimelineObjectModel> m_objectListModel;
+    FlatObjectListModel *m_model = nullptr;
+    TimelineObjectModel *m_objectListModel = nullptr;
     qt3dsdm::Qt3DSDMSlideHandle m_activeSlide;
 
     CTimelineTranslationManager *m_translationManager = nullptr;

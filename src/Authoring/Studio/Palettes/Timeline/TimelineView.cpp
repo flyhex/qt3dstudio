@@ -59,7 +59,7 @@ TimelineView::TimelineView(QWidget *parent) : QQuickWidget(parent)
 
 QAbstractItemModel *TimelineView::objectModel() const
 {
-    return m_model.data(); // should be safe as it is passed only to QML
+    return m_model; // should be safe as it is passed only to QML
 }
 
 void TimelineView::setSelection(int index)
@@ -146,13 +146,13 @@ void TimelineView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, in
     auto *theSlideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
     auto theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
 
-    m_objectListModel.reset(new TimelineObjectModel(g_StudioApp.GetCore(),
-                                                    GetDoc()->GetActiveRootInstance(), this));
+    m_objectListModel = new TimelineObjectModel(g_StudioApp.GetCore(),
+                                                GetDoc()->GetActiveRootInstance(), this);
     m_objectListModel->setTimelineItemBinding(m_translationManager->GetOrCreate(theSlideInstance));
-    if (m_model.isNull())
-        m_model.reset(new FlatObjectListModel(m_objectListModel.data(), this));
+    if (!m_model)
+        m_model = new FlatObjectListModel(m_objectListModel, this);
     else
-        m_model->setSourceModel(m_objectListModel.data());
+        m_model->setSourceModel(m_objectListModel);
 
     // expand by default the first level
     m_model->expandTo(QModelIndex(), m_objectListModel->index(0, 0, m_objectListModel->index(0,0)));
