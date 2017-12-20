@@ -237,6 +237,8 @@ palette.
   you have a black ambient lighting in your scene (the default) then
   objects viewed from behind may not be visible without turning on your
   headlamp.
+\li
+  The show or hide \b{Wireframe} toggles wireframe visibility (for tessellated meshes only).
 \endlist
 
 \section1 Playback Control
