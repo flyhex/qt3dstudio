@@ -116,6 +116,7 @@ public:
     QModelIndex sourceIndexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
 
 private:
+    int rowForSourceIndex(const QModelIndex &parentIndex, int row) const;
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
     QModelIndex mapFromSource(const QModelIndex &sourceIndex) const;
 

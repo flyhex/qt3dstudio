@@ -377,27 +377,29 @@ void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
         emit dataChanged(mapFromSource(start), mapFromSource(end), roles);
 
     });
-    connect(sourceModel, &QAbstractListModel::rowsAboutToBeInserted, this,
-            [this](const QModelIndex &parent, int start, int end) {
-        auto idx = mapFromSource(parent);
-        beginInsertRows(idx, idx.row() + start, idx.row() + end);
-        // TODO implement
-    });
     connect(sourceModel, &QAbstractListModel::rowsInserted, this,
             [this](const QModelIndex &parent, int start, int end) {
+        const int parentRow = rowForSourceIndex(parent);
+        const int depth = m_sourceInfo[parentRow].depth + 1;
+        const int startRow = rowForSourceIndex(parent, start);
+        Q_ASSERT(startRow != -1);
+        beginInsertRows({}, startRow, startRow + end - start);
+        for (int row = end; row >= start; --row) {
+            SourceInfo info;
+            info.depth = depth;
+            info.index = m_sourceModel->index(row, 0, parent);
+            m_sourceInfo.insert(startRow, info);
+        }
         endInsertRows();
-
-    });
-    connect(sourceModel, &QAbstractListModel::rowsAboutToBeRemoved, this,
-            [this](const QModelIndex &parent, int start, int end) {
-        auto idx = mapFromSource(parent);
-        beginRemoveRows(idx, idx.row() + start, idx.row() + end);
-        // TODO implement
     });
     connect(sourceModel, &QAbstractListModel::rowsRemoved, this,
             [this](const QModelIndex &parent, int start, int end) {
+        const int startRow = rowForSourceIndex(parent, start);
+        const int endRow = rowForSourceIndex(parent, end);
+        Q_ASSERT(startRow != -1 && endRow != -1);
+        beginRemoveRows({}, startRow, endRow);
+        m_sourceInfo.remove(startRow, endRow - startRow + 1);
         endRemoveRows();
-
     });
     connect(sourceModel, &QAbstractListModel::modelReset, this,
             [this]() {
@@ -450,6 +452,27 @@ int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex) const
             return i;
     }
     return -1;
+}
+
+int FlatObjectListModel::rowForSourceIndex(const QModelIndex& parentIndex, int row) const
+{
+    const int parentRow = rowForSourceIndex(parentIndex);
+    if (parentRow == -1)
+        return -1;
+    const int childDepth = m_sourceInfo[parentRow].depth + 1;
+    int i = parentRow + 1;
+    while (i < m_sourceInfo.size()) {
+        const auto& info = m_sourceInfo[i];
+        if (info.depth < childDepth)
+            break;
+        if (info.depth == childDepth) {
+            if (row == 0)
+                break;
+            --row;
+        }
+        ++i;
+    }
+    return i;
 }
 
 QModelIndex FlatObjectListModel::sourceIndexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle)

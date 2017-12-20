@@ -316,7 +316,17 @@ CTimelineRow* TimelineObjectModel::timelineRowForIndex(const QModelIndex &index)
                 dynamic_cast<Qt3DSDMTimelineItemBinding *>(parentBinding)) {
                 auto binding = static_cast<Qt3DSDMTimelineItemBinding *>(parentBinding);
 
-                auto propertyRow = binding->AddPropertyRow(handle);
+                CPropertyRow *propertyRow = nullptr;
+
+                // check if the property row was already created
+                // KDAB_TODO can we remove this once we get rid of the legacy timeline view?
+                if (auto propertyBinding = binding->GetPropertyBinding(handle))
+                    propertyRow = propertyBinding->GetRow();
+
+                if (propertyRow == nullptr)
+                    propertyRow = binding->AddPropertyRow(handle);
+
+                Q_ASSERT(propertyRow);
 
                 connect(propertyRow, &CTimelineRow::timeRatioChanged, this, [this, index] {
                     emit dataChanged(index, index, {TimeInfoRole, KeyframesRole});
@@ -363,13 +373,19 @@ void TimelineObjectModel::addProperty(qt3dsdm::Qt3DSDMInstanceHandle parentInsta
                                       qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     auto parentIndex = indexForHandle(parentInstance);
-    auto properties = m_properties.value(parentInstance.GetHandleValue(), {});
-    if (properties.contains(property))
+
+    // addProperty and removeProperty are called multiple times for properties with multiple
+    // components, e.g. Position, so check if the property was already inserted in m_properties
+    if (m_properties.value(parentInstance.GetHandleValue(), {}).contains(property))
         return;
-    auto propertyCount = properties.count();
+
+    auto children = childrenList(m_slideHandle, parentInstance);
+    auto it = std::find(children.begin(), children.end(), property);
+    Q_ASSERT(it != children.end());
+    int propertyIndex = std::distance(children.begin(), it);
 
     // Now we rely on rowCount calling childrenList, thus getting the new rows automatically
-    beginInsertRows(parentIndex, propertyCount, propertyCount);
+    beginInsertRows(parentIndex, propertyIndex, propertyIndex);
     endInsertRows();
 }
 
@@ -377,8 +393,18 @@ void TimelineObjectModel::removeProperty(qt3dsdm::Qt3DSDMInstanceHandle parentIn
                                          qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     auto parentIndex = indexForHandle(parentInstance);
-    auto properties = m_properties.value(parentInstance.GetHandleValue(), {});
+
+    auto parentHandle = parentInstance.GetHandleValue();
+    if (!m_properties.contains(parentHandle))
+            return;
+
+    auto& properties = m_properties[parentHandle];
+
     auto propertyIndex = properties.indexOf(property);
+    if (propertyIndex == -1)
+        return;
+
+    properties.remove(propertyIndex);
 
     // Now we rely on rowCount calling childrenList, thus getting the new rows automatically
     beginRemoveRows(parentIndex, propertyIndex, propertyIndex);
@@ -414,33 +440,40 @@ qt3dsdm::TInstanceHandleList TimelineObjectModel::childrenList(const qt3dsdm::Qt
      if (valueType == qt3dsdm::DataModelDataType::None)
          return {};
 
-    auto children = ObjectListModel::childrenList(slideHandle, handle);
-
     qt3dsdm::TPropertyHandleList properties;
     propertySystem->GetAggregateInstanceProperties(handle, properties);
-    auto it = children.begin();
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> animatedProperties;
     for (const auto &propertyHandle: properties) {
         if (studioSystem->GetAnimationSystem()->IsPropertyAnimated(
                     handle, propertyHandle)) {
             animatedProperties.append(propertyHandle);
-            it = children.insert(it, propertyHandle);
         }
     }
     m_properties[handle] = animatedProperties;
+
+    qt3dsdm::TInstanceHandleList children(animatedProperties.begin(), animatedProperties.end());
+    auto objectChildren = ObjectListModel::childrenList(slideHandle, handle);
+    children.insert(children.end(), objectChildren.begin(), objectChildren.end());
 
     return children;
 }
 
 void TimelineObjectModel::appendKey(QVariantList &keyframes, IKeyframe *key, double timeRatio) const
 {
-    KeyframeInfo keyInfo;
-    keyInfo.m_time = key->GetTime();
-    keyInfo.m_selected = key->IsSelected();
-    keyInfo.m_dynamic = key->IsDynamic();
-    keyInfo.m_position = ::TimeToPos(keyInfo.m_time, timeRatio);
+    try {
+        KeyframeInfo keyInfo;
+        keyInfo.m_time = key->GetTime();
+        keyInfo.m_selected = key->IsSelected();
+        keyInfo.m_dynamic = key->IsDynamic();
+        keyInfo.m_position = ::TimeToPos(keyInfo.m_time, timeRatio);
 
-    keyframes.append(QVariant::fromValue(keyInfo));
+        keyframes.append(QVariant::fromValue(keyInfo));
+    } catch (qt3dsdm::AnimationKeyframeNotFound) {
+        // happens when the keyframe was removed and added again. This is because
+        // CStudioAnimationSystem::Deanimate does not erase the keyframes, just
+        // marks as being deleted for later reuse. If the UI requests an update
+        // while a keyframe has no associated animation, this exception is triggered
+    }
 }
 
 bool TimelineObjectModel::isVisible(const QModelIndex &index) const
