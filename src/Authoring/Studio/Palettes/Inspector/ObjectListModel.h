@@ -71,6 +71,9 @@ public:
 
     void excludeObjectTypes(const QVector<EStudioObjectType> &types);
 
+Q_SIGNALS:
+    void roleUpdated(int role);
+
 protected:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 

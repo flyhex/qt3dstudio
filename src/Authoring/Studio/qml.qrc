@@ -41,5 +41,7 @@
         <file>Palettes/Timeline/Timeline.qml</file>
         <file>Palettes/Timeline/TimelineItem.qml</file>
         <file>Palettes/Timeline/Keyframes.qml</file>
+        <file>Palettes/controls/StyledToggleButton.qml</file>
+        <file>Palettes/Timeline/TimelineTreeDelegate.qml</file>
     </qresource>
 </RCC>

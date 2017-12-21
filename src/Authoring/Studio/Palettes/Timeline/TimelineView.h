@@ -48,6 +48,9 @@ class TimelineView : public QQuickWidget, public CPresentationChangeListener
     Q_OBJECT
     Q_PROPERTY(QAbstractItemModel *objectModel READ objectModel NOTIFY objectModelChanged FINAL)
     Q_PROPERTY(int selection READ selection WRITE setSelection NOTIFY selectionChanged FINAL)
+    Q_PROPERTY(bool hideShy READ hideShy WRITE setHideShy NOTIFY hideShyChanged)
+    Q_PROPERTY(bool hideHidden READ hideHidden WRITE setHideHidden NOTIFY hideHiddenChanged)
+    Q_PROPERTY(bool hideLocked READ hideLocked WRITE setHideLocked NOTIFY hideLockedChanged)
 public:
     explicit TimelineView(QWidget *parent = nullptr);
 
@@ -63,10 +66,19 @@ public:
 
     Q_INVOKABLE void select(int index, Qt::KeyboardModifiers modifiers);
 
+    void setHideShy(bool enabled);
+    bool hideShy() const;
+    void setHideHidden(bool enabled);
+    bool hideHidden() const;
+    void setHideLocked(bool enabled);
+    bool hideLocked() const;
 
 Q_SIGNALS:
     void objectModelChanged();
     void selectionChanged();
+    void hideShyChanged();
+    void hideHiddenChanged();
+    void hideLockedChanged();
 
 protected:
     // DataModel callbacks

@@ -405,6 +405,11 @@ void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
         m_sourceInfo = collectSourceIndexes({}, 0);
         endResetModel();
     });
+
+    connect(sourceModel, &ObjectListModel::roleUpdated, this, [this](int role) {
+        emit dataChanged(index(0,0), index(rowCount() - 1, 0), {role});
+    });
+
     m_sourceModel = sourceModel;
     m_sourceInfo = collectSourceIndexes({}, 0);
     endResetModel();

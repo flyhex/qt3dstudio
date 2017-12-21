@@ -57,11 +57,53 @@ Rectangle {
             Layout.maximumWidth: root.splitterPos
             Layout.preferredWidth: root.width
 
-            Rectangle {
+            Item {
                 Layout.fillWidth: true
                 Layout.preferredWidth: parent.width
                 Layout.preferredHeight: itemHeight
-                color: "transparent"
+
+                Row {
+                    anchors.right: parent.right
+                    StyledToggleButton {
+                        width: 20
+                        height: 20
+
+                        enabledImage: "Toggle-Shy.png"
+                        checkedImage: "Toggle-Shy.png"
+                        toolTipText: checked ? qsTr("Show shy objects")
+                                             : qsTr("Hide shy objects")
+
+                        checked: _timelineView.hideShy
+                        onClicked: _timelineView.hideShy = checked
+                    }
+
+                    StyledToggleButton {
+                        width: 20
+                        height: 20
+
+                        enabledImage: "filter-toggle-eye-up.png"
+                        checkedImage: "filter-toggle-eye-down.png"
+                        toolTipText: checked ? qsTr("Show inactive objects")
+                                             : qsTr("Hide inactive objects")
+
+                        checked: _timelineView.hideHidden
+                        onClicked: _timelineView.hideHidden = checked
+                    }
+
+                    StyledToggleButton {
+                        width: 20
+                        height: 20
+
+                        checkedImage: "Toggle-Lock.png"
+                        enabledImage: "Toggle-Lock.png"
+                        toolTipText: checked ? qsTr("Show locked objects")
+                                             : qsTr("Hide locked objects")
+
+                        checked: _timelineView.hideLocked
+                        onClicked: _timelineView.hideLocked = checked
+                    }
+                }
+
             }
 
             ListView {
@@ -80,14 +122,12 @@ Rectangle {
                 clip: true
                 currentIndex: _timelineView.selection
 
-                delegate: Rectangle {
+                delegate: TimelineTreeDelegate {
                     id: delegateItem
 
+                    splitterPos: root.splitterPos
                     width: parent.width
-                    height: model.parentExpanded ? itemHeight : 0
-
-                    color: model.selected ? _selectionColor : _studioColor2
-                    border.color: _backgroundColor
+                    height: model.parentExpanded && model.visible ? itemHeight : 0
 
                     visible: height > 0
 
@@ -95,59 +135,6 @@ Rectangle {
                         NumberAnimation {
                             duration: 100
                             easing.type: Easing.OutQuad
-                        }
-                    }
-
-
-                    MouseArea {
-                        id: delegateArea
-
-                        anchors.fill: parent
-                        onClicked: _timelineView.select(model.index, mouse.modifiers)
-                    }
-
-                    Row {
-                        id: row
-
-                        x: model.depth * 20
-                        anchors.verticalCenter: parent.verticalCenter
-                        height: itemHeight
-                        width: splitterPos - x
-                        spacing: 5
-
-                        Image {
-                            source: {
-                                if (!model.hasChildren)
-                                return "";
-                                model.expanded ? _resDir + "arrow_down.png"
-                                : _resDir + "arrow.png";
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: model.expanded = !model.expanded
-                            }
-                        }
-
-                        Item {
-                            height: itemHeight
-                            width: typeIcon.width + name.width + 10
-
-                            Row {
-                                spacing: 10
-                                Image {
-                                    id: typeIcon
-
-                                    source: model.icon
-                                }
-
-                                StyledLabel {
-                                    id: name
-                                    anchors.verticalCenter: typeIcon.verticalCenter
-                                    color: model.textColor
-                                    text: model.name
-                                }
-                            }
                         }
                     }
                 }
@@ -210,7 +197,7 @@ Rectangle {
                         id: timelineItemsDelegateItem
 
                         width: parent.width
-                        height: model.parentExpanded ? itemHeight : 0
+                        height: model.parentExpanded && model.visible ? itemHeight : 0
 
                         color: model.selected ? _selectionColor : "#404244"
                         border.color: _backgroundColor

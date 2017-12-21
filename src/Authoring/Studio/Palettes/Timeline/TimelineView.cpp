@@ -121,6 +121,54 @@ void TimelineView::select(int index, Qt::KeyboardModifiers modifiers)
     setSelection(index);
 }
 
+void TimelineView::setHideShy(bool enabled)
+{
+    if (m_objectListModel && m_objectListModel->hideShy() != enabled) {
+        m_objectListModel->setHideShy(enabled);
+        emit hideShyChanged();
+    }
+}
+
+bool TimelineView::hideShy() const
+{
+    if (m_objectListModel)
+        return m_objectListModel->hideShy();
+
+    return false;
+}
+
+void TimelineView::setHideHidden(bool enabled)
+{
+    if (m_objectListModel && m_objectListModel->hideHidden() != enabled) {
+        m_objectListModel->setHideHidden(enabled);
+        emit hideHiddenChanged();
+    }
+}
+
+bool TimelineView::hideHidden() const
+{
+    if (m_objectListModel)
+        return m_objectListModel->hideHidden();
+
+    return false;
+}
+
+void TimelineView::setHideLocked(bool enabled)
+{
+    if (m_objectListModel && m_objectListModel->hideLocked() != enabled) {
+        m_objectListModel->setHideLocked(enabled);
+        emit hideLockedChanged();
+    }
+}
+
+bool TimelineView::hideLocked() const
+{
+    if (m_objectListModel)
+        return m_objectListModel->hideLocked();
+
+    return false;
+}
+
 void TimelineView::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                                       qt3dsdm::Qt3DSDMPropertyHandle property)
 {

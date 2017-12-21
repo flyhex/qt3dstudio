@@ -63,7 +63,11 @@ QHash<int, QByteArray> TimelineObjectModel::roleNames() const
     names.insert(ItemColorRole, "itemColor");
     names.insert(TimeInfoRole, "timeInfo");
     names.insert(KeyframesRole, "keyframes");
-
+    names.insert(ShyRowRole, "shy");
+    names.insert(VisibleRowRole, "rowVisible");
+    names.insert(LockedRowRole, "locked");
+    names.insert(IsPropertyRole, "isProperty");
+    names.insert(VisibleRole, "visible");
     return names;
 }
 
@@ -84,6 +88,8 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
     }
 
     auto timelineItemBinding = timelineRow->GetTimelineItemBinding();
+    auto timelineItem = timelineItemBinding->GetTimelineItem();
+
     switch (role) {
     case TimelineRowRole: {
         return QVariant::fromValue(timelineRow);
@@ -92,19 +98,19 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
         return timelineRow->IsSelected();
     }
     case ItemColorRole: {
-        auto timebar = timelineItemBinding->GetTimelineItem()->GetTimebar();
+        auto timebar = timelineItem->GetTimebar();
 
         auto color = timebar->GetTimebarColor().getQColor();
         return color.name();
     }
     case SelectedColorRole: {
-        auto timebar = timelineItemBinding->GetTimelineItem()->GetTimebar();
+        auto timebar = timelineItem->GetTimebar();
 
         auto color = CColorControl::CalculateSelectedColor(timebar->GetTimebarColor()).getQColor();
         return color.name();
     }
     case TimeInfoRole: {
-        auto timebar = timelineItemBinding->GetTimelineItem()->GetTimebar();
+        auto timebar = timelineItem->GetTimebar();
 
         const auto startTime = timebar->GetStartTime();
         const auto endTime = timebar->GetEndTime();
@@ -132,10 +138,67 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
         return keyframes;
     }
 
+    case ShyRowRole: {
+        return timelineItem->IsShy();
+    }
+
+    case VisibleRowRole: {
+        return timelineItem->IsVisible();
+    }
+
+    case LockedRowRole: {
+        return timelineItem->IsLocked();
+    }
+
+    case VisibleRole: {
+        return isVisible(index);
+    }
+
+    case IsPropertyRole: {
+        return false;
+    }
+
     default: ;
     }
 
     return ObjectListModel::data(index, role);
+}
+
+bool TimelineObjectModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!hasIndex(index.row(), index.column(), index.parent()))
+        return false;
+
+    auto timelineRow = const_cast<TimelineObjectModel*>(this)->timelineRowForIndex(index);
+
+    if (!timelineRow)
+        return false;
+
+    auto propertyRow = dynamic_cast<CPropertyRow *>(timelineRow);
+    if (propertyRow)
+        return false;
+
+    auto timelineItemBinding = timelineRow->GetTimelineItemBinding();
+    auto timelineItem = timelineItemBinding->GetTimelineItem();
+
+    QVariant result;
+    switch (role) {
+    case ShyRowRole:
+        timelineItem->SetShy(value.toBool());
+        break;
+    case VisibleRowRole:
+        timelineItem->SetVisible(value.toBool());
+        break;
+    case LockedRowRole:
+        timelineItem->SetLocked(value.toBool());
+        break;
+    }
+    if (!result.isValid())
+        return ObjectListModel::setData(index, value, role);
+
+    emit dataChanged(index, index, {role});
+
+    return true;
 }
 
 QVariant TimelineObjectModel::dataForProperty(CPropertyRow *propertyRow, const QModelIndex &index, int role) const
@@ -193,6 +256,15 @@ QVariant TimelineObjectModel::dataForProperty(CPropertyRow *propertyRow, const Q
     case PathReferenceRole:
     case AbsolutePathRole:
         return {};
+
+
+    case IsPropertyRole: {
+        return true;
+    }
+
+    case VisibleRole: {
+        return isVisible(index);
+    }
 
     default: ;
     }
@@ -291,7 +363,10 @@ void TimelineObjectModel::addProperty(qt3dsdm::Qt3DSDMInstanceHandle parentInsta
                                       qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     auto parentIndex = indexForHandle(parentInstance);
-    auto propertyCount = m_properties.value(parentInstance.GetHandleValue(), {}).count();
+    auto properties = m_properties.value(parentInstance.GetHandleValue(), {});
+    if (properties.contains(property))
+        return;
+    auto propertyCount = properties.count();
 
     // Now we rely on rowCount calling childrenList, thus getting the new rows automatically
     beginInsertRows(parentIndex, propertyCount, propertyCount);
@@ -308,6 +383,24 @@ void TimelineObjectModel::removeProperty(qt3dsdm::Qt3DSDMInstanceHandle parentIn
     // Now we rely on rowCount calling childrenList, thus getting the new rows automatically
     beginRemoveRows(parentIndex, propertyIndex, propertyIndex);
     endRemoveRows();
+}
+
+void TimelineObjectModel::setHideShy(bool enabled)
+{
+    m_hideShy = enabled;
+    Q_EMIT roleUpdated(VisibleRole);
+}
+
+void TimelineObjectModel::setHideHidden(bool enabled)
+{
+    m_hideHidden = enabled;
+    Q_EMIT roleUpdated(VisibleRole);
+}
+
+void TimelineObjectModel::setHideLocked(bool enabled)
+{
+    m_hideLocked = enabled;
+    Q_EMIT roleUpdated(VisibleRole);
 }
 
 qt3dsdm::TInstanceHandleList TimelineObjectModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
@@ -348,4 +441,30 @@ void TimelineObjectModel::appendKey(QVariantList &keyframes, IKeyframe *key, dou
     keyInfo.m_position = ::TimeToPos(keyInfo.m_time, timeRatio);
 
     keyframes.append(QVariant::fromValue(keyInfo));
+}
+
+bool TimelineObjectModel::isVisible(const QModelIndex &index) const
+{
+    auto idx = index;
+    while (idx.isValid()) {
+        auto row = const_cast<TimelineObjectModel*>(this)->timelineRowForIndex(idx);
+
+        if (!row)
+            return false;
+
+        auto binding = row->GetTimelineItemBinding();
+        if (binding) {
+            auto item = binding->GetTimelineItem();
+
+            auto hidden = (m_hideShy && item->IsShy()) ||
+                    (m_hideHidden && !item->IsVisible()) ||
+                    (m_hideLocked && item->IsLocked());
+
+            if (hidden)
+                return false;
+        }
+        idx = idx.parent();
+    }
+
+    return true;
 }

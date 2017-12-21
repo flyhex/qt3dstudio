@@ -84,10 +84,17 @@ public:
         SelectedColorRole,
         SelectedRole,
         TimeInfoRole,
-        KeyframesRole
+        KeyframesRole,
+        ShyRowRole,
+        VisibleRowRole,
+        LockedRowRole,
+        IsPropertyRole,
+        VisibleRole
+
     };
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant dataForProperty(CPropertyRow *propertyRow, const QModelIndex &index,
                              int role = Qt::DisplayRole) const;
     QModelIndex parent(const QModelIndex &index) const override;
@@ -101,6 +108,14 @@ public:
     void removeProperty(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                         qt3dsdm::Qt3DSDMPropertyHandle property);
 
+    void setHideShy(bool enabled);
+    bool hideShy() const { return m_hideShy; }
+    void setHideHidden(bool enabled);
+    bool hideHidden() const { return m_hideHidden; }
+    void setHideLocked(bool enabled);
+    bool hideLocked() const { return m_hideLocked; }
+
+
 protected:
     qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
                                               const qt3dsdm::Qt3DSDMInstanceHandle &handle) const override;
@@ -109,11 +124,16 @@ protected:
 
 private:
    void appendKey(QVariantList &keyframes, IKeyframe *key, double timeRatio) const;
+   bool isVisible(const QModelIndex &index) const;
 
    QSharedPointer<CSlideRow> m_slideRow;
    ITimelineItemBinding *m_timelineItemBinding = nullptr;
    QHash<int, CTimelineRow* > m_rows;
    mutable QHash<int, QVector<qt3dsdm::Qt3DSDMInstanceHandle> > m_properties;
+
+   bool m_hideShy = false;
+   bool m_hideHidden = false;
+   bool m_hideLocked = true;
 };
 
 Q_DECLARE_METATYPE(CTimelineRow *);
