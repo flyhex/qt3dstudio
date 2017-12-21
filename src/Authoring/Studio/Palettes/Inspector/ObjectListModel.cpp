@@ -165,11 +165,13 @@ QModelIndex ObjectListModel::parent(const QModelIndex &index) const
 
     int row = 0;
     qt3dsdm::Qt3DSDMInstanceHandle grandParentHandle = m_core->GetDoc()->GetAssetGraph()
-            ->GetParent(handle);
-    const auto children = childrenList(m_slideHandle, grandParentHandle);
-    const auto it = std::find(children.begin(), children.end(), parentHandle);
-    if (it != children.end())
+            ->GetParent(parentHandle);
+    if (grandParentHandle.Valid()) {
+        const auto children = childrenList(m_slideHandle, grandParentHandle);
+        const auto it = std::find(children.begin(), children.end(), parentHandle);
+        Q_ASSERT(it != children.end());
         row = it - children.begin();
+    }
 
     return createIndex(row, 0, (quintptr)(parentHandle));
 }
