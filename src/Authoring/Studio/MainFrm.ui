@@ -43,6 +43,7 @@
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_a_Copy"/>
     <addaction name="action_Revert"/>
+    <addaction name="actionImportAssets"/>
     <addaction name="action_Connect_to_Device"/>
     <addaction name="separator"/>
     <addaction name="menuRecent_Projects"/>
@@ -809,6 +810,17 @@
    </property>
    <property name="toolTip">
     <string>Preview with Runtime 2</string>
+   </property>
+  </action>
+  <action name="actionImportAssets">
+   <property name="text">
+    <string>Import Assets...</string>
+   </property>
+   <property name="iconText">
+    <string>Import Assets</string>
+   </property>
+   <property name="toolTip">
+    <string>Import Assets</string>
    </property>
   </action>
  </widget>

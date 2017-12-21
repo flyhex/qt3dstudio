@@ -45,6 +45,7 @@ private Q_SLOTS:
     void handleCopyPath();
     void handleCopyFullPath();
     void handleRefreshImport();
+    void handleImportAssets();
 
 private:
     ProjectView *m_view;

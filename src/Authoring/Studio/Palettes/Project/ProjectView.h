@@ -54,12 +54,14 @@ public:
 
     QAbstractItemModel *projectModel() const;
 
-    Q_INVOKABLE void effectAction();
-    Q_INVOKABLE void fontAction();
-    Q_INVOKABLE void imageAction();
-    Q_INVOKABLE void materialAction();
-    Q_INVOKABLE void modelAction();
-    Q_INVOKABLE void behaviorAction();
+    Q_INVOKABLE void effectAction(int row);
+    Q_INVOKABLE void fontAction(int row);
+    Q_INVOKABLE void imageAction(int row);
+    Q_INVOKABLE void materialAction(int row);
+    Q_INVOKABLE void modelAction(int row);
+    Q_INVOKABLE void behaviorAction(int row);
+    Q_INVOKABLE void assetImportAction(int row);
+    void assetImportInContext(int row);
 
     Q_INVOKABLE void startDrag(QQuickItem *item, int row);
 
@@ -93,12 +95,19 @@ private:
 
     ProjectFileSystemModel *m_ProjectModel = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
-    Qt3DSFile m_BehaviorDir{""};
-    Qt3DSFile m_EffectDir{""};
-    Qt3DSFile m_FontDir{""};
-    Qt3DSFile m_ImageDir{""};
-    Qt3DSFile m_MaterialDir{""};
-    Qt3DSFile m_ModelDir{""};
+    QString m_defaultBehaviorDir;
+    QString m_defaultEffectDir;
+    QString m_defaultFontDir;
+    QString m_defaultImageDir;
+    QString m_defaultMaterialDir;
+    QString m_defaultModelDir;
+    QString m_BehaviorDir;
+    QString m_EffectDir;
+    QString m_FontDir;
+    QString m_ImageDir;
+    QString m_MaterialDir;
+    QString m_ModelDir;
+    QString m_assetImportDir;
     QSize m_preferredSize;
 };
 

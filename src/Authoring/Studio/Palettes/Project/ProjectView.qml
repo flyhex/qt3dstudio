@@ -56,10 +56,17 @@ Rectangle {
                 id: projectTree
 
                 anchors.fill: parent
+                clip: true
 
                 ScrollBar.vertical: ScrollBar {}
 
                 model: _projectView.projectModel
+
+                onCurrentIndexChanged: {
+                    // Try to keep something selected always
+                    if ((currentIndex < 0 || currentIndex >= count) && count > 0)
+                        currentIndex = 0;
+                }
 
                 delegate: Rectangle {
                     id: delegateItem
@@ -122,22 +129,18 @@ Rectangle {
                     }
 
                     DropArea {
-                        id: dropArea
-
                         anchors.fill: parent
 
                         onEntered: {
-                            if (drag.hasUrls && projectTree.model.hasValidUrlsForDropping(drag.urls)) {
+                            if (drag.hasUrls && projectTree.model.hasValidUrlsForDropping(drag.urls))
                                 drag.accept(Qt.CopyAction)
-                            } else {
+                            else
                                 drag.accepted = false;
-                            }
                         }
 
                         onDropped: {
-                            if (drop.hasUrls) {
-                                projectTree.model.dropUrls(drop.urls, index)
-                            }
+                            if (drop.hasUrls)
+                                projectTree.model.importUrls(drop.urls, index, false)
                         }
                     }
 
@@ -177,6 +180,23 @@ Rectangle {
                         }
                     }
                 }
+                DropArea {
+                    // Leftover listview area. Dropping here is equivalent to dropping to root
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: parent.height - parent.contentHeight
+                    onEntered: {
+                        if (drag.hasUrls && projectTree.model.hasValidUrlsForDropping(drag.urls))
+                            drag.accept(Qt.CopyAction)
+                        else
+                            drag.accepted = false;
+                    }
+                    onDropped: {
+                        if (drop.hasUrls)
+                            projectTree.model.importUrls(drop.urls, 0, false)
+                    }
+                }
             }
         }
 
@@ -187,44 +207,50 @@ Rectangle {
             Layout.margins: 4
             Layout.rightMargin: 12
 
+            StyledToolButton {
+                enabledImage: "Asset-import-Normal.png";
+                onClicked: _projectView.assetImportAction(projectTree.currentIndex);
+                toolTipText: qsTr("Import Assets");
+            }
+
             Item {
                 Layout.fillWidth: true
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Effect-Normal.png";
-                onClicked: _projectView.effectAction()
-                toolTipText: qsTr("Open Effect Library directory")
+                onClicked: _projectView.effectAction(projectTree.currentIndex)
+                toolTipText: qsTr("Open Effect Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Text-Normal.png";
-                onClicked: _projectView.fontAction()
-                toolTipText: qsTr("Open Font Library directory")
+                onClicked: _projectView.fontAction(projectTree.currentIndex)
+                toolTipText: qsTr("Open Font Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Image-Normal.png";
-                onClicked: _projectView.imageAction()
-                toolTipText: qsTr("Open Maps Library directory")
+                onClicked: _projectView.imageAction(projectTree.currentIndex)
+                toolTipText: qsTr("Open Map Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Material-Normal.png";
-                onClicked: _projectView.materialAction()
-                toolTipText: qsTr("Open Material Library directory")
+                onClicked: _projectView.materialAction(projectTree.currentIndex)
+                toolTipText: qsTr("Open Material Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Model-Normal.png";
-                onClicked: _projectView.modelAction()
-                toolTipText: qsTr("Open Models Library directory")
+                onClicked: _projectView.modelAction(projectTree.currentIndex)
+                toolTipText: qsTr("Open Model Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Behavior-Normal.png";
-                onClicked: _projectView.behaviorAction()
-                toolTipText: qsTr("Open Behavior Library directory")
+                onClicked: _projectView.behaviorAction(projectTree.currentIndex)
+                toolTipText: qsTr("Open Behavior Library")
             }
         }
     }

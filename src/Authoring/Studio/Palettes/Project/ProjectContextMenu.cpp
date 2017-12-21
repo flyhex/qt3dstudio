@@ -48,6 +48,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleCopyFullPath);
     addAction(action);
 
+    addSeparator();
+
+    action = new QAction(tr("Import Assets..."));
+    connect(action, &QAction::triggered, this, &ProjectContextMenu::handleImportAssets);
+    addAction(action);
+
     if (m_view->isRefreshable(m_index)) {
         addSeparator();
         action = new QAction(tr("Refresh Import..."));
@@ -78,4 +84,9 @@ void ProjectContextMenu::handleCopyFullPath()
 void ProjectContextMenu::handleRefreshImport()
 {
     m_view->refreshImport(m_index);
+}
+
+void ProjectContextMenu::handleImportAssets()
+{
+    m_view->assetImportInContext(m_index);
 }

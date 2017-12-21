@@ -108,6 +108,7 @@ public:
     void OnFileSaveCopy();
     void OnFileNew();
     void OnFileRevert();
+    void OnFileImportAssets();
     void OnFileConnectToDevice();
     void OnFileOpenRecent(int nID);
 

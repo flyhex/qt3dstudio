@@ -64,11 +64,11 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_projectDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                    | Qt::BottomDockWidgetArea);
     // Give the preferred size as percentages of the mainframe size
-    auto projectView = new ProjectView(QSize(inMainFrame->width() * 0.2,
-                                             inMainFrame->height() * 0.8),
-                                       m_projectDock);
-    projectView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_projectDock->setWidget(projectView);
+    m_projectView = new ProjectView(QSize(inMainFrame->width() * 0.2,
+                                          inMainFrame->height() * 0.8),
+                                    m_projectDock);
+    m_projectView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_projectDock->setWidget(m_projectView);
     inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
 
@@ -292,6 +292,11 @@ CTimelineControl *CPaletteManager::GetTimelineControl() const
 void CPaletteManager::onTimeChanged(long time)
 {
     m_timeLineToolbar->onTimeChanged(time);
+}
+
+ProjectView *CPaletteManager::projectView() const
+{
+    return m_projectView;
 }
 
 void CPaletteManager::EnablePalettes()

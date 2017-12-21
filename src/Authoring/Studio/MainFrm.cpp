@@ -57,6 +57,7 @@
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
+#include "ProjectView.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -95,6 +96,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionSave_As, &QAction::triggered, this, &CMainFrame::OnFileSaveAs);
     connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
+    connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
     connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
@@ -326,6 +328,7 @@ int CMainFrame::OnCreate()
     m_ui->actionSave_a_Copy->setEnabled(false);
     m_ui->action_Connect_to_Device->setEnabled(false);
     m_ui->action_Revert->setEnabled(false);
+    m_ui->actionImportAssets->setEnabled(false);
 
     setCentralWidget(m_SceneView);
     return 0;
@@ -353,6 +356,7 @@ void CMainFrame::OnNewPresentation()
     m_ui->actionSave_a_Copy->setEnabled(true);
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
+    m_ui->actionImportAssets->setEnabled(true);
 }
 
 //==============================================================================
@@ -1658,6 +1662,11 @@ void CMainFrame::OnHelpOpenTutorial()
 void CMainFrame::OnFileRevert()
 {
     g_StudioApp.OnRevert();
+}
+
+void CMainFrame::OnFileImportAssets()
+{
+    m_PaletteManager->projectView()->assetImportAction(0);
 }
 
 void CMainFrame::OnFileConnectToDevice()
