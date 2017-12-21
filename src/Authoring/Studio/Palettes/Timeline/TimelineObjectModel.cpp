@@ -78,7 +78,7 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
         return {};
     }
 
-    auto propertyRow = dynamic_cast<CPropertyRow *>(timelineRow.data());
+    auto propertyRow = dynamic_cast<CPropertyRow *>(timelineRow);
     if (propertyRow) {
         return dataForProperty(propertyRow, index, role);
     }
@@ -86,7 +86,7 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
     auto timelineItemBinding = timelineRow->GetTimelineItemBinding();
     switch (role) {
     case TimelineRowRole: {
-        return QVariant::fromValue(timelineRow.data());
+        return QVariant::fromValue(timelineRow);
     }
     case SelectedRole: {
         return timelineRow->IsSelected();
@@ -220,23 +220,23 @@ void TimelineObjectModel::setTimelineItemBinding(ITimelineItemBinding *inTimelin
     m_timelineItemBinding = inTimelineItem;
 }
 
-QSharedPointer<CTimelineRow> TimelineObjectModel::timelineRowForIndex(const QModelIndex &index)
+CTimelineRow* TimelineObjectModel::timelineRowForIndex(const QModelIndex &index)
 {
     if (!index.parent().isValid()) {
         if (!m_slideRow) {
             m_slideRow.reset(new CSlideRow(nullptr));
             Q_ASSERT(m_timelineItemBinding);
             m_slideRow->Initialize(m_timelineItemBinding);
-            m_rows[m_baseHandle.GetHandleValue()] = m_slideRow;
+            m_rows[m_baseHandle.GetHandleValue()] = m_slideRow.data();
         }
-        return m_slideRow;
+        return m_slideRow.data();
     } else {
         const auto handle = handleForIndex(index).GetHandleValue();
 
         if (!m_rows.contains(handle)) {
             int propertyCount = m_properties.value(handleForIndex(index.parent()), {}).count();
 
-            auto parentRow = dynamic_cast<CBaseStateRow*>(timelineRowForIndex(index.parent()).data());
+            auto parentRow = dynamic_cast<CBaseStateRow*>(timelineRowForIndex(index.parent()));
             Q_ASSERT(parentRow);
             auto parentBinding = parentRow->GetTimelineItemBinding();
 
@@ -250,7 +250,9 @@ QSharedPointer<CTimelineRow> TimelineObjectModel::timelineRowForIndex(const QMod
                     emit dataChanged(index, index, {TimeInfoRole, KeyframesRole});
                 });
 
-                m_rows[handle].reset(propertyRow);
+                m_rows[handle] = propertyRow;
+
+                return propertyRow;
             } else {
                 // TODO:
                 // the second "true" argument assumes it is loaded, avoids calling LoadChildren
@@ -260,7 +262,7 @@ QSharedPointer<CTimelineRow> TimelineObjectModel::timelineRowForIndex(const QMod
                 itemBinding->setCreateUIRow(false);
                 stateRow->Initialize(itemBinding);
                 itemBinding->SetParent(parentBinding); // KDAB_TODO do we really need it?
-                m_rows[handle].reset(stateRow);
+                m_rows[handle] = stateRow;
 
                 connect(stateRow, &CTimelineRow::selectedChanged, this, [this, index] {
                     emit dataChanged(index, index, {SelectedRole});
@@ -273,6 +275,8 @@ QSharedPointer<CTimelineRow> TimelineObjectModel::timelineRowForIndex(const QMod
                 connect(stateRow, &CTimelineRow::dirtyChanged, this, [this, index] {
                     emit dataChanged(index, index, {});
                 });
+
+                return stateRow;
             }
         }
 

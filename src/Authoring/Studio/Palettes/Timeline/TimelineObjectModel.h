@@ -94,7 +94,7 @@ public:
 
     void setTimelineItemBinding(ITimelineItemBinding *inTimelineItem);
 
-    QSharedPointer<CTimelineRow> timelineRowForIndex(const QModelIndex &index);
+    CTimelineRow* timelineRowForIndex(const QModelIndex &index);
 
     void addProperty(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                      qt3dsdm::Qt3DSDMPropertyHandle property);
@@ -112,7 +112,7 @@ private:
 
    QSharedPointer<CSlideRow> m_slideRow;
    ITimelineItemBinding *m_timelineItemBinding = nullptr;
-   QHash<int, QSharedPointer<CTimelineRow> > m_rows;
+   QHash<int, CTimelineRow* > m_rows;
    mutable QHash<int, QVector<qt3dsdm::Qt3DSDMInstanceHandle> > m_properties;
 };
 
