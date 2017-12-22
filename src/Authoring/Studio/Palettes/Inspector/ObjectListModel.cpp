@@ -412,6 +412,12 @@ void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
         emit dataChanged(index(0,0), index(rowCount() - 1, 0), {role});
     });
 
+    connect(sourceModel, &ObjectListModel::rolesUpdated, this,
+            [this](const QVector<int> &roles = QVector<int> ()) {
+                emit dataChanged(index(0,0), index(rowCount() - 1, 0), roles);
+            });
+
+
     m_sourceModel = sourceModel;
     m_sourceInfo = collectSourceIndexes({}, 0);
     endResetModel();

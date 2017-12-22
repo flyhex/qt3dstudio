@@ -89,9 +89,15 @@ public:
         VisibleRowRole,
         LockedRowRole,
         IsPropertyRole,
-        VisibleRole
-
+        VisibleRole,
+        HasActionRole,
+        HasMasterActionRole,
+        HasChildActionRole,
+        HasMasterChildActionRole,
+        HasComponentActionRole,
+        HasMasterComponentActionRole
     };
+
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
@@ -115,6 +121,7 @@ public:
     void setHideLocked(bool enabled);
     bool hideLocked() const { return m_hideLocked; }
 
+    void updateActions();
 
 protected:
     qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,

@@ -68,6 +68,13 @@ QHash<int, QByteArray> TimelineObjectModel::roleNames() const
     names.insert(LockedRowRole, "locked");
     names.insert(IsPropertyRole, "isProperty");
     names.insert(VisibleRole, "visible");
+    names.insert(HasActionRole, "hasAction");
+    names.insert(HasMasterActionRole, "hasMasterAction");
+    names.insert(HasChildActionRole, "hasChildAction");
+    names.insert(HasMasterChildActionRole, "hasMasterChildAction");
+    names.insert(HasComponentActionRole, "hasComponentAction");
+    names.insert(HasMasterComponentActionRole, "hasMasterComponentAction");
+
     return names;
 }
 
@@ -156,6 +163,29 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
 
     case IsPropertyRole: {
         return false;
+    }
+    case HasActionRole: {
+        return timelineItem->HasAction(false);
+    }
+
+    case HasMasterActionRole:{
+        return timelineItem->HasAction(true);
+    }
+
+    case HasChildActionRole: {
+        return timelineItem->ChildrenHasAction(false);
+    }
+
+    case HasMasterChildActionRole: {
+        return timelineItem->ChildrenHasAction(true);
+    }
+
+    case HasComponentActionRole:  {
+        return timelineItem->ComponentHasAction(false);
+    }
+
+    case HasMasterComponentActionRole:  {
+        return timelineItem->ComponentHasAction(true);
     }
 
     default: ;
@@ -265,6 +295,14 @@ QVariant TimelineObjectModel::dataForProperty(CPropertyRow *propertyRow, const Q
     case VisibleRole: {
         return isVisible(index);
     }
+
+    case HasActionRole:
+    case HasMasterActionRole:
+    case HasChildActionRole:
+    case HasMasterChildActionRole:
+    case HasComponentActionRole:
+    case HasMasterComponentActionRole:
+        return false;
 
     default: ;
     }
@@ -427,6 +465,13 @@ void TimelineObjectModel::setHideLocked(bool enabled)
 {
     m_hideLocked = enabled;
     Q_EMIT roleUpdated(VisibleRole);
+}
+
+void TimelineObjectModel::updateActions()
+{
+    Q_EMIT rolesUpdated({HasActionRole, HasChildActionRole, HasComponentActionRole,
+                         HasMasterActionRole, HasMasterChildActionRole,
+                         HasMasterComponentActionRole});
 }
 
 qt3dsdm::TInstanceHandleList TimelineObjectModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const

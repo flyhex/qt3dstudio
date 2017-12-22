@@ -92,6 +92,13 @@ void TimelineView::OnNewPresentation()
     m_Connections.push_back(theSignalProvider->ConnectAnimationDeleted(
         std::bind(&TimelineView::OnAnimationDeleted, this,
              std::placeholders::_2, std::placeholders::_3)));
+
+    m_Connections.push_back(theSignalProvider->ConnectActionCreated(
+        std::bind(&TimelineView::OnActionEvent, this,
+                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
+    m_Connections.push_back(theSignalProvider->ConnectActionDeleted(
+        std::bind(&TimelineView::OnActionEvent, this,
+                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 }
 
 void TimelineView::OnClosingPresentation()
@@ -176,6 +183,18 @@ void TimelineView::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInsta
         m_objectListModel->addProperty(parentInstance, property);
 }
 
+void TimelineView::OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
+                                 qt3dsdm::Qt3DSDMSlideHandle inSlide,
+                                 qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+{
+    Q_UNUSED(inAction);
+    Q_UNUSED(inSlide);
+    Q_UNUSED(inOwner);
+    if (m_objectListModel) {
+        m_objectListModel->updateActions();
+    }
+}
+
 void TimelineView::OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                                       qt3dsdm::Qt3DSDMPropertyHandle property)
 {
@@ -183,8 +202,12 @@ void TimelineView::OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInsta
         m_objectListModel->removeProperty(parentInstance, property);
 }
 
-void TimelineView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex, const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
+void TimelineView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
+                                 const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
+    Q_UNUSED(inMaster);
+    Q_UNUSED(inIndex);
+
     if (m_activeSlide == inSlide)
         return;
 

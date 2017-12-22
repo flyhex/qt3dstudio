@@ -73,6 +73,7 @@ public:
 
 Q_SIGNALS:
     void roleUpdated(int role);
+    void rolesUpdated(const QVector<int> &roles = QVector<int> ());
 
 protected:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;

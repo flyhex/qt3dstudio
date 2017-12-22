@@ -88,6 +88,9 @@ protected:
                             qt3dsdm::Qt3DSDMPropertyHandle property);
     void OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle property);
+    void OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
+                       qt3dsdm::Qt3DSDMInstanceHandle inOwner);
+
 
 private:
     void initialize();

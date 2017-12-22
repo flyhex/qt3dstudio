@@ -44,9 +44,58 @@ Item {
         spacing: 2
 
         Rectangle {
+            id: actionStatusRect
+
+            width: 20
+            height: 20
+            color: model.selected ? _selectionColor :
+                                    model.isProperty ? _backgroundColor : _studioColor2
+            border.color: _backgroundColor
+
+            Image {
+                anchors.fill: parent
+                fillMode: Image.Pad
+                source: {
+                    if (model.hasAction)
+                        return _resDir + "Action-Action.png";
+                    else if (model.hasMasterAction)
+                        return _resDir + "Action-MasterAction.png";
+                    return "";
+                }
+            }
+
+            Image {
+                anchors.fill: parent
+                fillMode: Image.Pad
+                source: {
+                    if (model.expanded)
+                        return "";
+                    if (model.hasChildAction)
+                        return _resDir + "Action-ChildAction.png";
+                    else if (model.hasMasterChildAction)
+                        return _resDir + "Action-ChildMasterAction.png";
+                    return "";
+                }
+            }
+
+            Image {
+                anchors.fill: parent
+                fillMode: Image.Pad
+                source: {
+                    if (model.hasComponentAction)
+                        return _resDir + "Action-ComponentAction.png";
+                    else if (model.hasMasterComponentAction)
+                        return _resDir + "Action-ComponentMasterAction.png";
+                    return "";
+                }
+            }
+
+        }
+
+        Rectangle {
             id: itemDescription
 
-            width: root.width - buttons.width - delegateRow.spacing
+            width: root.width - buttons.width - actionStatusRect.width - 2 * delegateRow.spacing
             height: root.height
 
             color: model.selected ? _selectionColor :
