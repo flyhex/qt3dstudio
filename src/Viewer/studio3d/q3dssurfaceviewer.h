@@ -88,6 +88,7 @@ Q_SIGNALS:
     void autoSizeChanged(bool autoSize);
     void updateIntervalChanged(bool autoUpdate);
     void runningChanged(bool initialized);
+    void frameUpdated();
 
 private:
     Q_DISABLE_COPY(Q3DSSurfaceViewer)
