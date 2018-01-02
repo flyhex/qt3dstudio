@@ -203,7 +203,7 @@ Rectangle {
                                         anchors.fill: parent
                                         acceptedButtons: Qt.RightButton
                                         hoverEnabled: true
-                                        onClicked:  {
+                                        onClicked: {
                                             const coords = mapToItem(root, mouse.x, mouse.y);
                                             groupDelegateItem.showContextMenu(coords);
                                         }

@@ -55,6 +55,7 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
+#include "DataInputListDlg.h"
 
 InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
@@ -471,6 +472,18 @@ void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &poin
         browser->activateWindow();
         browser->setFocus();
     });
+}
+
+// TODO: Add the following call into InspectorControlView.qml, where appropriate
+//_inspectorView.showDataInputDialog();
+void InspectorControlView::showDataInputDialog()
+{
+    // TODO: Create the dialog item list from the actual data inputs (in another task)
+
+    CDataInputListDlg dataInputDlg(&m_dataInputDialogItems);
+    dataInputDlg.exec();
+
+    // TODO: Create the actual data inputs from the dialog item list (in another task)
 }
 
 void InspectorControlView::OnBeginDataModelNotifications()

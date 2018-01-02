@@ -47,6 +47,7 @@ class ObjectBrowserView;
 class ObjectListModel;
 class FileChooserView;
 class TextureChooserView;
+class SDataInputDialogItem;
 
 class InspectorControlView : public QQuickWidget,
                              public CPresentationChangeListener,
@@ -73,6 +74,7 @@ public:
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE void showDataInputDialog();
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -127,6 +129,8 @@ private:
     int m_handle;
 
     QSize m_preferredSize;
+
+    QVector<SDataInputDialogItem *> m_dataInputDialogItems;
 };
 
 #endif // INSPECTORCONTROLVIEW_H

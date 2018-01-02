@@ -137,6 +137,8 @@ HEADERS += \
     Palettes/Inspector/ObjectBrowserView.h \
     _Win/Application/SubPresentationDlg.h \
     _Win/Application/SubPresentationListDlg.h \
+    Application/DataInputDlg.h \
+    Application/DataInputListDlg.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
@@ -152,7 +154,15 @@ FORMS += \
     _Win/UI/ResetKeyframeValuesDlg.ui \
     _Win/UI/GLVersionDlg.ui \
     Application/StudioTutorialWidget.ui \
-    _Win/UI/TimeLineToolbar.ui
+    _Win/UI/TimeLineToolbar.ui \
+    MainFrm.ui \
+    _Win/Application/AboutDlg.ui \
+    _Win/UI/StartupDlg.ui \
+    _Win/Application/SubPresentationDlg.ui \
+    _Win/Application/SubPresentationListDlg.ui \
+    Application/DataInputDlg.ui \
+    Application/DataInputListDlg.ui \
+    _Win/Palettes/Progress/ProgressDlg.ui
 
 SOURCES += \
     MainFrm.cpp \
@@ -180,7 +190,6 @@ SOURCES += \
     _Win/UI/SceneView.cpp \
     _Win/UI/StartupDlg.cpp \
     _Win/UI/StudioAppPrefsPage.cpp \
-    #_Win/UI/StudioPaletteBar.cpp \
     _Win/UI/StudioPreferencesPropSheet.cpp \
     _Win/UI/StudioProjectSettingsPage.cpp \
     _Win/UI/TimeEditDlg.cpp \
@@ -345,7 +354,6 @@ SOURCES += \
     Render/StudioTranslationWidget.cpp \
     Render/StudioWidget.cpp \
     Render/WGLRenderContext.cpp \
-    #UI/PaletteState.cpp \
     Utils/CmdLineParser.cpp \
     Utils/ImportUtils.cpp \
     Utils/ResourceCache.cpp \
@@ -355,7 +363,9 @@ SOURCES += \
     Controls/ClickableLabel.cpp \
     Controls/WidgetControl.cpp \
     _Win/Application/SubPresentationDlg.cpp \
-    _Win/Application/SubPresentationListDlg.cpp
+    _Win/Application/SubPresentationListDlg.cpp \
+    Application/DataInputDlg.cpp \
+    Application/DataInputListDlg.cpp
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
@@ -402,14 +412,6 @@ HEADERS += \
     Palettes/Project/ProjectFileSystemModel.h \
     Palettes/Project/ProjectContextMenu.h \
     ../Common/Code/Graph/GraphPosition.h
-
-FORMS += \
-    MainFrm.ui \
-    _Win/Application/AboutDlg.ui \
-    _Win/UI/StartupDlg.ui \
-    _Win/Application/SubPresentationDlg.ui \
-    _Win/Application/SubPresentationListDlg.ui \
-    _Win/Palettes/Progress/ProgressDlg.ui
 
 RESOURCES += \
     MainFrm.qrc \
