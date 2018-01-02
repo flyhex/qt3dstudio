@@ -87,6 +87,7 @@ Rectangle {
                 width: parent.width
                 height: items.height
                 color: "transparent";
+                ListView.delayRemove: true
 
                 readonly property var values: model.values
 
