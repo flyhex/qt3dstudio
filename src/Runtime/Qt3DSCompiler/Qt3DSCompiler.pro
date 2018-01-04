@@ -23,7 +23,6 @@ integrity:ios {
 
 STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
-    -lqt3dsruntime$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lLua$$qtPlatformTargetSuffix() \
     $$END_ARCHIVE
@@ -33,10 +32,13 @@ STATICRUNTIME = \
 # upon this shared library
 !win32 {
     QMAKE_LFLAGS += $$STATICRUNTIME
-    LIBS += -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
+    LIBS += -lqt3dsruntime$$qtPlatformTargetSuffix() \
+            -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
+
 } else {
     LIBS += \
         $$STATICRUNTIME \
+        -lqt3dsruntime$$qtPlatformTargetSuffix() \
         -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 }
 

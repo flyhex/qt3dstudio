@@ -2,8 +2,11 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS += \
     Qt3DSRuntimeStatic \
-    Qt3DSRuntime \
-    Qt3DSCompiler
+    Qt3DSRuntime
+
+!cross_compile {
+SUBDIRS += Qt3DSCompiler
+}
 
 win32 {
 SUBDIRS += \
