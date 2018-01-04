@@ -71,6 +71,8 @@ public:
     void OnDragLeave() override;
     void OnReflectMouse(CPt &inPoint, Qt::KeyboardModifiers inFlags) override {}
 
+    qreal fixedDevicePixelRatio() const;
+
 protected:
 
     CPlayerContainerWnd *m_ContainerWnd;

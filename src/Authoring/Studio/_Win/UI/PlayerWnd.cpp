@@ -57,6 +57,8 @@
 
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QtGui/qwindow.h>
+#include <QtGui/qscreen.h>
 
 //==============================================================================
 //	Class CPlayerWnd
@@ -250,10 +252,21 @@ void CPlayerWnd::paintGL()
     theRenderer.RenderNow();
 }
 
+qreal CPlayerWnd::fixedDevicePixelRatio() const
+{
+    // Fix a problem on X11: https://bugreports.qt.io/browse/QTBUG-65570
+    qreal ratio = devicePixelRatio();
+    if (QWindow *w = window()->windowHandle()) {
+        if (QScreen *s = w->screen())
+            ratio = s->devicePixelRatio();
+    }
+    return ratio;
+}
+
 void CPlayerWnd::resizeGL(int width, int height)
 {
     // this also passes the new FBO to the CWGLContext
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
-    theRenderer.SetViewRect(QRect(0, 0, width * devicePixelRatio(),
-                                  height * devicePixelRatio()));
+    theRenderer.SetViewRect(QRect(0, 0, width * fixedDevicePixelRatio(),
+                                  height * fixedDevicePixelRatio()));
 }
