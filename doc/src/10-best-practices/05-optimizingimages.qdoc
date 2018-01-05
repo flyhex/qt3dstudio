@@ -195,8 +195,8 @@ original size, including portions in perspective.}}
 Enabling MIP maps creates many smaller copies of the image at an
 additional 1/3 memory usage. Each mipmap is half the dimensions of the
 one preceding it, downsized in Photoshop with good image resampling. The
-result speeds up renderin - t the appropriate times the graphics card
-will use the smaller image for texture lookup - nd also reduces
+result speeds up rendering - the appropriate times the graphics card
+will use the smaller image for texture lookup - and also reduces
 aliasing artifacts such as moiré effects or
 \l{best-practices-antialiasing.html#texture-aliasing}{texture subsampling}.
 
