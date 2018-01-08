@@ -44,6 +44,8 @@
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qlabel.h>
+#include <QtWidgets/qabstractitemview.h>
+#include <QtWidgets/qlistview.h>
 
 //==============================================================================
 /**
@@ -85,10 +87,12 @@ void CEditCameraBar::SetupCameras()
         idx++;
     }
 
-    m_CameraSelector->addItem("--------------------------");
-    m_CameraSelector->setItemData(m_CameraSelector->count() - 1, -1); // set to an invalid pointer
     m_CameraSelector->addItem(tr("Scene Camera View"));
     m_CameraSelector->setItemData(m_CameraSelector->count() - 1, 0);
+
+    m_CameraSelector->insertSeparator(m_CameraSelector->count() - 1);
+    // adding a 1px spacing, else the separator will disappear sometimes (QComboBox bug)
+    qobject_cast<QListView*>(m_CameraSelector->view())->setSpacing(1);
 
     long thePreferredView = CStudioPreferences::GetPreferredStartupView();
     long theNumItems = m_CameraSelector->count();
