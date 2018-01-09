@@ -46,7 +46,10 @@ class CHotKeys;
 
 QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
-class TimelineView : public QQuickWidget, public CPresentationChangeListener
+class TimelineView : public QQuickWidget,
+                     public CPresentationChangeListener,
+                     public CClientPlayChangeListener
+
 {
     Q_OBJECT
     Q_PROPERTY(QAbstractItemModel *objectModel READ objectModel NOTIFY objectModelChanged FINAL)
@@ -55,6 +58,8 @@ class TimelineView : public QQuickWidget, public CPresentationChangeListener
     Q_PROPERTY(bool hideHidden READ hideHidden WRITE setHideHidden NOTIFY hideHiddenChanged)
     Q_PROPERTY(bool hideLocked READ hideLocked WRITE setHideLocked NOTIFY hideLockedChanged)
     Q_PROPERTY(qreal timeRatio READ timeRatio WRITE setTimeRatio NOTIFY timeRatioChanged FINAL)
+    Q_PROPERTY(long currentTime READ currentTime WRITE setCurrentTime NOTIFY currentTimeChanged FINAL)
+    Q_PROPERTY(double currentTimePos READ currentTimePos NOTIFY currentTimeChanged FINAL)
 public:
     explicit TimelineView(QWidget *parent = nullptr);
 
@@ -73,7 +78,11 @@ public:
     void OnClosingPresentation() override;
     void OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
 
+    //CClientPlayChangeListener
+    void OnTimeChanged(long inTime) override;
+
     Q_INVOKABLE void select(int index, Qt::KeyboardModifiers modifiers);
+    Q_INVOKABLE void setNewTimePosition(double position);
 
     void setHideShy(bool enabled);
     bool hideShy() const;
@@ -82,6 +91,10 @@ public:
     void setHideLocked(bool enabled);
     bool hideLocked() const;
 
+    void setCurrentTime(long newTime);
+    long currentTime() const;
+    double currentTimePos() const;
+
 Q_SIGNALS:
     void objectModelChanged();
     void selectionChanged();
@@ -89,6 +102,7 @@ Q_SIGNALS:
     void hideHiddenChanged();
     void hideLockedChanged();
     void timeRatioChanged(qreal timeRatio);
+    void currentTimeChanged();
 
 protected:
     void OnScalingZoomIn();
@@ -120,6 +134,7 @@ private:
     int m_selection = -1;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     qreal m_timeRatio = DEFAULT_TIME_RATIO;
+    long m_currentTime = 0;
 };
 
 #endif // TIMELINEVIEW_H

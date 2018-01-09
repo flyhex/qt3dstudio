@@ -152,6 +152,10 @@ Rectangle {
         }
 
         Flickable {
+            id: timelineFlickable
+
+            property bool movingPlayHead: false
+
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: 80
@@ -161,72 +165,106 @@ Rectangle {
             contentHeight: height
             contentWidth: 2000
             clip: true
+            interactive: !movingPlayHead
 
             ScrollBar.horizontal: ScrollBar {
                 policy: ScrollBar.AlwaysOn
             }
 
-            ColumnLayout {
+            Connections {
+                target: _timelineView
+                onCurrentTimePosChanged: {
+                    // -10 compensates the width of the playhead
+                    var pos = _timelineView.currentTimePos - 10;
+                    if (pos < timelineFlickable.contentX ||
+                        pos > timelineFlickable.contentX + timelineFlickable.width)
+                        timelineFlickable.contentX = pos;
+                }
+            }
+
+            Item {
                 anchors.fill: parent
 
-                spacing: 0
+                ColumnLayout {
+                    anchors.fill: parent
 
-                TimeMeasureItem {
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: parent.width
-                    Layout.preferredHeight: itemHeight
-                    timeRatio: _timelineView.timeRatio
-                }
+                    spacing: 0
 
-                ListView {
-                    id: timelineItemsList
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: count * itemHeight
-                    Layout.preferredWidth: root.width
-
-                    ScrollBar.vertical: scrollBar
-
-                    model: browserList.model
-                    boundsBehavior: Flickable.StopAtBounds
-                    clip: true
-                    currentIndex: browserList.currentIndex
-
-                    delegate: Rectangle {
-                        id: timelineItemsDelegateItem
-
-                        width: parent.width
-                        height: model.parentExpanded && model.visible ? itemHeight : 0
-
-                        color: model.selected ? _selectionColor : "#404244"
-                        border.color: _backgroundColor
-
-                        visible: height > 0
+                    TimeMeasureItem {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: parent.width
+                        Layout.preferredHeight: itemHeight
+                        timeRatio: _timelineView.timeRatio
 
                         MouseArea {
-                            id: timelineItemsDelegateArea
+                            id: timeMeasureItemMouseArea
 
                             anchors.fill: parent
-                            onClicked: _timelineView.select(model.index, mouse.modifiers)
-                        }
 
-                        TimelineItem {
-                            height: parent.height
-                            visible: timeInfo.endPosition > timeInfo.startPosition
-
-                            timeInfo: model.timeInfo
-                            color: model.itemColor
-                            borderColor: root.color
-                            selected: model.selected
-                            selectionColor: model.selectedColor
-                        }
-
-                        Keyframes {
-                            anchors.verticalCenter: parent.verticalCenter
-                            keyframes: model.keyframes
+                            onPressed: {
+                                timelineFlickable.movingPlayHead = true;
+                                _timelineView.setNewTimePosition(mouse.x)
+                            }
+                            onPositionChanged: _timelineView.setNewTimePosition(mouse.x)
+                            onReleased: timelineFlickable.movingPlayHead = false;
                         }
                     }
+
+                    ListView {
+                        id: timelineItemsList
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredHeight: count * itemHeight
+                        Layout.preferredWidth: root.width
+
+                        ScrollBar.vertical: scrollBar
+
+                        model: browserList.model
+                        boundsBehavior: Flickable.StopAtBounds
+                        clip: true
+                        currentIndex: browserList.currentIndex
+
+                        delegate: Rectangle {
+                            id: timelineItemsDelegateItem
+
+                            width: parent.width
+                            height: model.parentExpanded && model.visible ? itemHeight : 0
+
+                            color: model.selected ? _selectionColor : "#404244"
+                            border.color: _backgroundColor
+
+                            visible: height > 0
+
+                            MouseArea {
+                                id: timelineItemsDelegateArea
+
+                                anchors.fill: parent
+                                onClicked: _timelineView.select(model.index, mouse.modifiers)
+                            }
+
+                            TimelineItem {
+                                height: parent.height
+                                visible: timeInfo.endPosition > timeInfo.startPosition
+
+                                timeInfo: model.timeInfo
+                                color: model.itemColor
+                                borderColor: root.color
+                                selected: model.selected
+                                selectionColor: model.selectedColor
+                            }
+
+                            Keyframes {
+                                anchors.verticalCenter: parent.verticalCenter
+                                keyframes: model.keyframes
+                            }
+                        }
+                    }
+                }
+
+                PlayHead {
+                    x: _timelineView.currentTimePos - width / 2
+                    height: parent.height - scrollBar.height
                 }
             }
         }

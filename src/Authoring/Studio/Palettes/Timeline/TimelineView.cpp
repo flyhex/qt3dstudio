@@ -57,6 +57,7 @@ const qreal SCALING_PERCENTAGE_DEC = 0.9;
 TimelineView::TimelineView(QWidget *parent) : QQuickWidget(parent)
 {
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
+    g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
 
     m_translationManager = new CTimelineTranslationManager();
@@ -144,12 +145,23 @@ void TimelineView::OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
     m_translationManager->OnSelectionChange(inNewSelectable);
 }
 
+void TimelineView::OnTimeChanged(long inTime)
+{
+    setCurrentTime(inTime);
+}
+
 void TimelineView::select(int index, Qt::KeyboardModifiers modifiers)
 {
     auto timelineRow = m_model->index(index, 0)
             .data(TimelineObjectModel::TimelineRowRole).value<CTimelineRow*>();
     timelineRow->Select(modifiers);
     setSelection(index);
+}
+
+void TimelineView::setNewTimePosition(double position)
+{
+    auto time = ::PosToTime(position, m_timeRatio);
+    GetDoc()->NotifyTimeChanged(time);
 }
 
 void TimelineView::setHideShy(bool enabled)
@@ -198,6 +210,25 @@ bool TimelineView::hideLocked() const
         return m_objectListModel->hideLocked();
 
     return false;
+}
+
+void TimelineView::setCurrentTime(long newTime)
+{
+    if (m_currentTime != newTime) {
+        m_currentTime = newTime;
+
+        Q_EMIT currentTimeChanged();
+    }
+}
+
+long TimelineView::currentTime() const
+{
+    return m_currentTime;
+}
+
+double TimelineView::currentTimePos() const
+{
+    return ::TimeToPos(m_currentTime, m_timeRatio);
 }
 
 void TimelineView::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
