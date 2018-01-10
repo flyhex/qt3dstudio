@@ -172,20 +172,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QToolButton" name="stopButton">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>:/images/playback_tools_low-01.png</normaloff>:/images/playback_tools_low-01.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QToolButton" name="playButton">
       <property name="text">
        <string/>

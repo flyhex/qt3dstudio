@@ -56,10 +56,12 @@ public:
 
 private Q_SLOTS:
     void onAddLayerClicked();
+    void onPlayButtonClicked();
 
 protected:
     QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar) *m_ui;
     QSize m_preferredSize;
+    CMainFrame *m_mainFrame;
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
 };

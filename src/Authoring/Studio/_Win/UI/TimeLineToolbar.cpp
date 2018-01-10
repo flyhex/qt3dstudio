@@ -47,20 +47,20 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     : QWidget(pParent)
     , m_ui(new QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar))
     , m_preferredSize(preferredSize)
+    , m_mainFrame(mainFrame)
 {
     m_ui->setupUi(this);
 
     connect(m_ui->playButton, &QToolButton::clicked,
-            mainFrame, &CMainFrame::OnPlaybackPlay);
+            this, &TimeLineToolbar::onPlayButtonClicked);
     connect(m_ui->rewindButton, &QToolButton::clicked,
             mainFrame, &CMainFrame::OnPlaybackRewind);
-    connect(m_ui->stopButton, &QToolButton::clicked,
-            mainFrame, &CMainFrame::OnPlaybackStop);
     connect(mainFrame, &CMainFrame::playStateChanged,
-            [this](bool state){
-        m_ui->playButton->setEnabled(!state);
-        m_ui->playButton->setChecked(state);
-        m_ui->stopButton->setEnabled(state);
+            [this](bool started) {
+        if (started)
+            m_ui->playButton->setIcon(QIcon(":/images/playback_tools_low-01.png"));
+        else
+            m_ui->playButton->setIcon(QIcon(":/images/playback_tools_low-02.png"));
     });
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
@@ -144,4 +144,13 @@ void TimeLineToolbar::onAddLayerClicked()
         ->CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Layer, layer, slide,
                                    DocumentEditorInsertType::PreviousSibling,
                                    CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+}
+
+void TimeLineToolbar::onPlayButtonClicked()
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (doc->IsPlaying())
+        m_mainFrame->OnPlaybackStop();
+    else
+        m_mainFrame->OnPlaybackPlay();
 }
