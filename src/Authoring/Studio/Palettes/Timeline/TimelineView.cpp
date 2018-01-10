@@ -295,7 +295,7 @@ void TimelineView::initialize()
                                              , tr("Creation of TimelineView not allowed from QML"));
     qmlRegisterUncreatableType<TimebarTimeInfo>("Qt3DStudio", 1, 0, "TimebarTimeInfo"
                                              , tr("Creation of TimebarTimeInfo not allowed from QML"));
-    qmlRegisterUncreatableType<TimebarTimeInfo>("Qt3DStudio", 1, 0, "KeyframeInfo"
+    qmlRegisterUncreatableType<KeyframeInfo>("Qt3DStudio", 1, 0, "KeyframeInfo"
                                              , tr("Creation of KeyframeInfo not allowed from QML"));
     qmlRegisterType<TimeMeasureItem>("Qt3DStudio", 1, 0, "TimeMeasureItem");
     engine()->addImportPath(qmlImportPath());
