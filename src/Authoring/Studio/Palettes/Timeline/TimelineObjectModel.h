@@ -89,6 +89,7 @@ public:
         VisibleRowRole,
         LockedRowRole,
         IsPropertyRole,
+        PropertyExpandedRole,
         VisibleRole,
         HasActionRole,
         HasMasterActionRole,

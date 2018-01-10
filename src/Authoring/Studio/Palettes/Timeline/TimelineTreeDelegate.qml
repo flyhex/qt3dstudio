@@ -37,6 +37,8 @@ Item {
 
     property real splitterPos: 0
 
+    signal doubleClicked(var mouse)
+
     Row {
         id: delegateRow
 
@@ -107,6 +109,7 @@ Item {
 
                 anchors.fill: parent
                 onClicked: _timelineView.select(model.index, mouse.modifiers)
+                onDoubleClicked: root.doubleClicked(mouse)
             }
 
             Row {

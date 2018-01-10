@@ -39,6 +39,7 @@
 #include "StudioUtils.h"
 
 #include "TimeMeasureItem.h"
+#include "TimePropertyItem.h"
 
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMSlides.h"
@@ -297,7 +298,10 @@ void TimelineView::initialize()
                                              , tr("Creation of TimebarTimeInfo not allowed from QML"));
     qmlRegisterUncreatableType<KeyframeInfo>("Qt3DStudio", 1, 0, "KeyframeInfo"
                                              , tr("Creation of KeyframeInfo not allowed from QML"));
+    qmlRegisterUncreatableType<CTimelineRow>("Qt3DStudio", 1, 0, "TimelineRow"
+                                             , tr("Creation of TimelineRow not allowed from QML"));
     qmlRegisterType<TimeMeasureItem>("Qt3DStudio", 1, 0, "TimeMeasureItem");
+    qmlRegisterType<TimePropertyItem>("Qt3DStudio", 1, 0, "TimePropertyItem");
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Timeline/Timeline.qml"_L1));
 }

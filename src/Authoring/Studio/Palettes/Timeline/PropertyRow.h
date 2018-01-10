@@ -77,6 +77,9 @@ public:
     void Refresh();
     ITimelineItemProperty *GetProperty() const { return m_Property; }
 
+    void setExpanded(bool expanded) { m_Expanded = expanded; }
+    bool expanded() const { return m_Expanded; }
+
     void Expand(bool inExpandAll = false, bool inExpandUp = false) override {}
     void Collapse(bool inCollapseAll = false) override {}
     bool CalculateActiveStartTime() override { return true; }
@@ -97,5 +100,6 @@ Q_SIGNALS:
 protected:
     CFilter m_Filter;
     ITimelineItemProperty *m_Property;
+    bool m_Expanded = false;
 };
 #endif // INCLUDED_PROPERTY_CONTROL_H

@@ -58,6 +58,7 @@ TimelineObjectModel::~TimelineObjectModel()
 QHash<int, QByteArray> TimelineObjectModel::roleNames() const
 {
     auto names = ObjectListModel::roleNames();
+    names.insert(TimelineRowRole, "timelineRow");
     names.insert(SelectedRole, "selected");
     names.insert(SelectedColorRole, "selectedColor");
     names.insert(ItemColorRole, "itemColor");
@@ -67,6 +68,7 @@ QHash<int, QByteArray> TimelineObjectModel::roleNames() const
     names.insert(VisibleRowRole, "rowVisible");
     names.insert(LockedRowRole, "locked");
     names.insert(IsPropertyRole, "isProperty");
+    names.insert(PropertyExpandedRole, "propertyExpanded");
     names.insert(VisibleRole, "visible");
     names.insert(HasActionRole, "hasAction");
     names.insert(HasMasterActionRole, "hasMasterAction");
@@ -164,6 +166,9 @@ QVariant TimelineObjectModel::data(const QModelIndex &index, int role) const
     case IsPropertyRole: {
         return false;
     }
+    case PropertyExpandedRole: {
+        return false;
+    }
     case HasActionRole: {
         return timelineItem->HasAction(false);
     }
@@ -205,8 +210,15 @@ bool TimelineObjectModel::setData(const QModelIndex &index, const QVariant &valu
         return false;
 
     auto propertyRow = dynamic_cast<CPropertyRow *>(timelineRow);
-    if (propertyRow)
+    if (propertyRow) {
+        switch (role) {
+        case PropertyExpandedRole:
+            propertyRow->setExpanded(value.toBool());
+            emit dataChanged(index, index, {role});
+            return true;
+        }
         return false;
+    }
 
     auto timelineItemBinding = timelineRow->GetTimelineItemBinding();
     auto timelineItem = timelineItemBinding->GetTimelineItem();
@@ -238,6 +250,9 @@ QVariant TimelineObjectModel::dataForProperty(CPropertyRow *propertyRow, const Q
         return {};
 
     switch (role) {
+    case PropertyExpandedRole: {
+        return propertyRow->expanded();
+    }
     case TimelineRowRole: {
         return QVariant::fromValue(propertyRow);
     }
@@ -370,6 +385,10 @@ CTimelineRow* TimelineObjectModel::timelineRowForIndex(const QModelIndex &index)
                     emit dataChanged(index, index, {TimeInfoRole, KeyframesRole});
                 });
 
+                connect(propertyRow, &CTimelineRow::dirtyChanged, this, [this, index] {
+                    emit dataChanged(index, index, {});
+                });
+
                 m_rows[handle] = propertyRow;
 
                 return propertyRow;
@@ -393,7 +412,11 @@ CTimelineRow* TimelineObjectModel::timelineRowForIndex(const QModelIndex &index)
                 });
 
                 connect(stateRow, &CTimelineRow::dirtyChanged, this, [this, index] {
-                    emit dataChanged(index, index, {});
+                    // update item and its children
+                    auto nextIndex = this->index(index.row() + 1, 0, index.parent());
+                    if (!nextIndex.isValid())
+                        nextIndex = index;
+                    emit dataChanged(index, nextIndex, {});
                 });
 
                 return stateRow;

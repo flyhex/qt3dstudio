@@ -378,7 +378,8 @@ SOURCES += \
     Palettes/Timeline/PropertyRowUI.cpp \
     Palettes/Timeline/TimelineView.cpp \
     Palettes/Timeline/TimelineObjectModel.cpp \
-    Palettes/Timeline/TimeMeasureItem.cpp
+    Palettes/Timeline/TimeMeasureItem.cpp \
+    Palettes/Timeline/TimePropertyItem.cpp
 
 HEADERS += \
     _Win/UI/TimeEditDlg.h \
@@ -406,6 +407,8 @@ HEADERS += \
     Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Palettes/Timeline/Bindings/ITimelineTimebar.h \
     Palettes/Timeline/TimelineTimelineLayout.h \
+    Palettes/Timeline/TimeMeasureItem.h\
+    Palettes/Timeline/TimePropertyItem.h\
     Palettes/Slide/SlideContextMenu.h \
     Controls/ClickableLabel.h \
     PreviewHelper.h \

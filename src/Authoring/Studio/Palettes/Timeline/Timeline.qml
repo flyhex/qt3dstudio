@@ -37,6 +37,7 @@ Rectangle {
 
     property real splitterPos: 300
     property int itemHeight: 20
+    property int itemExtraHeight: 80
 
     color: _backgroundColor
 
@@ -125,9 +126,11 @@ Rectangle {
                 delegate: TimelineTreeDelegate {
                     id: delegateItem
 
+                    property int extraHeight: model.propertyExpanded ? itemExtraHeight : 0
+
                     splitterPos: root.splitterPos
                     width: parent.width
-                    height: model.parentExpanded && model.visible ? itemHeight : 0
+                    height: model.parentExpanded && model.visible ? itemHeight + extraHeight : 0
 
                     visible: height > 0
 
@@ -136,6 +139,11 @@ Rectangle {
                             duration: 100
                             easing.type: Easing.OutQuad
                         }
+                    }
+
+                    onDoubleClicked: {
+                        if (model.isProperty)
+                            model.propertyExpanded = !model.propertyExpanded;
                     }
                 }
 
@@ -228,8 +236,11 @@ Rectangle {
                         delegate: Rectangle {
                             id: timelineItemsDelegateItem
 
+                            property int extraHeight: model.propertyExpanded ? itemExtraHeight : 0
+
                             width: parent.width
-                            height: model.parentExpanded && model.visible ? itemHeight : 0
+                            height: model.parentExpanded && model.visible ? itemHeight  + extraHeight
+                                                                          : 0
 
                             color: model.selected ? _selectionColor : "#404244"
                             border.color: _backgroundColor
@@ -243,19 +254,43 @@ Rectangle {
                                 onClicked: _timelineView.select(model.index, mouse.modifiers)
                             }
 
-                            TimelineItem {
-                                height: parent.height
-                                visible: timeInfo.endPosition > timeInfo.startPosition
+                            Component {
+                                id: standardTimelineItem
 
-                                timeInfo: model.timeInfo
-                                color: model.itemColor
-                                borderColor: root.color
-                                selected: model.selected
-                                selectionColor: model.selectedColor
+                                TimelineItem {
+                                    height: parent ? parent.height : 0
+                                    visible: timeInfo.endPosition > timeInfo.startPosition
+
+                                    timeInfo: model.timeInfo
+                                    color: model.itemColor
+                                    borderColor: root.color
+                                    selected: model.selected
+                                    selectionColor: model.selectedColor
+                                }
+                            }
+
+                            Component {
+                                id: propertyTimelineItem
+
+                                TimePropertyItem {
+                                    height: parent ? parent.height : 0
+                                    width: parent ? parent.width : 0
+                                    timeRatio: _timelineView.timeRatio
+                                    timelineRow: model.timelineRow
+                                }
+                            }
+
+                            Loader {
+                                anchors.fill: parent
+                                sourceComponent: model.propertyExpanded ? propertyTimelineItem
+                                                                        : standardTimelineItem
                             }
 
                             Keyframes {
-                                anchors.verticalCenter: parent.verticalCenter
+                                anchors {
+                                    top: parent.top
+                                    topMargin: 10
+                                }
                                 keyframes: model.keyframes
                             }
                         }
