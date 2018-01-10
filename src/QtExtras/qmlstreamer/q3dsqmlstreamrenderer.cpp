@@ -153,6 +153,7 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
 
     m_renderControl = new RenderControl(nullptr);
     m_quickWindow = new QQuickWindow(m_renderControl);
+    m_quickWindow->setClearBeforeRendering(false);
 
     m_renderObject = new Q3DSQmlStreamEventHandler(this);
     renderThread->setObjectName(QStringLiteral("Qt3DSQmlStreamRenderer::renderThread"));
@@ -201,6 +202,7 @@ void Q3DSQmlStreamRenderer::cleanup()
 
 bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surface)
 {
+    Q_UNUSED(surface);
     if (m_initialized) {
         Q_ASSERT(QOpenGLContext::areSharing(context, m_context));
         return true;
