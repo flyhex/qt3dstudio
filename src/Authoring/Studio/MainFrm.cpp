@@ -624,7 +624,8 @@ void CMainFrame::OnTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
 {
-    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(g_StudioApp.CanCopy());
+    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(
+                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
 //==============================================================================
