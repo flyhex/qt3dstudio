@@ -42,34 +42,43 @@
     \li Open
     \li \c{Ctrl + O}
   \row
+    \li Connect
+    \li \c{F9}
+  \row
     \li Reload
     \li \c{F5}
   \row
     \li Quit
-    \li \c{Alt + F4}
+    \li \c{Ctrl + Q}
 \endtable
 
 \section1 View Menu
 
 \table
   \header
-    \li Function
+    \li {2, 1} Function
     \li Shortcut
   \row
-    \li Full Screen
-    \li \c{F11}
-  \row
-    \li Show Matte
-    \li \c{Ctrl + D}
+    \li {2, 1} Show Matte
+    \li \c{F6}
   \row
     \li Scale Modes
-    \li \c{Ctrl + Shift + S}
+    \li Center
+    \li \c{F2}
   \row
-    \li Shade Mode
-    \li \c{Ctrl + Shift + W}
+    \li
+    \li Scale to Fit
+    \li \c{F3}
   \row
-    \li Render Statistics
+    \li
+    \li Scale to Fill
+    \li \c{F4}
+  \row
+    \li {2, 1} Show Render Statistics
     \li \c{F1}
+  \row
+    \li {2, 1} Full Screen
+    \li \c{F11}
 \endtable
 
 */
