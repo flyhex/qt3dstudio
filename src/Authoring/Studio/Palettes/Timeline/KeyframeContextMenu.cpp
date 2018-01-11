@@ -43,6 +43,8 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/ITimelineItemProperty.h"
 #include "IKeyframe.h"
+#include "MainFrm.h"
+#include "StudioApp.h"
 
 #include <QtWidgets/qcolordialog.h>
 
@@ -225,12 +227,17 @@ void CTimebarKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyfra
         // Timebar specific actions
         addSeparator();
         m_timeBarColorAction = new QAction(tr("Change Time Bar Color"));
+        CMainFrame *theMainFrame = g_StudioApp.m_pMainWnd;
         connect(m_timeBarColorAction, &QAction::triggered,
-                this, &CTimebarKeyframeContextMenu::ChangeTimebarColor);
+                theMainFrame, &CMainFrame::OnTimelineSetTimeBarColor);
+        addAction(m_timeBarColorAction);
 
+        // TODO: If these will become into main menu, combine with CMainFrame
+        // like m_timeBarColorAction to not duplicate code
         m_timeBarTextAction = new QAction(tr("Change Time Bar Text"));
         connect(m_timeBarTextAction, &QAction::triggered,
                 this, &CTimebarKeyframeContextMenu::ChangeTimebarText);
+        addAction(m_timeBarTextAction);
 
         // Change the text for the timebar option depending on whether they are currently being
         // shown or not
@@ -241,10 +248,12 @@ void CTimebarKeyframeContextMenu::Initialize(ITimelineKeyframesManager *inKeyfra
         m_timeBarHandlesAction = new QAction(theTimebarHandleTextID);
         connect(m_timeBarHandlesAction, &QAction::triggered,
                 this, &CTimebarKeyframeContextMenu::ToggleTimebarHandles);
+        addAction(m_timeBarHandlesAction);
 
         m_timeBarTimeAction = new QAction(tr("Set Timebar Time"));
         connect(m_timeBarTimeAction, &QAction::triggered,
                 this, &CTimebarKeyframeContextMenu::SetTimebarTime);
+        addAction(m_timeBarTimeAction);
     }
 }
 
@@ -261,28 +270,6 @@ void CTimebarKeyframeContextMenu::MakeDynamic()
 ITimelineItemKeyframesHolder *CTimebarKeyframeContextMenu::GetKeyframesHolder()
 {
     return m_TimebarControl->GetKeyframesHolder();
-}
-
-//=============================================================================
-/**
- * Called when the copy selected keys option is chosen by the user.
- */
-void CTimebarKeyframeContextMenu::ChangeTimebarColor()
-{
-    QColor previousColor = m_TimebarControl->GetTimebarColor();
-    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
-    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
-    connect(theColorDlg, &QColorDialog::currentColorChanged,
-            this, &CTimebarKeyframeContextMenu::onTimeBarColorChanged);
-    if (theColorDlg->exec() == QDialog::Accepted)
-        m_TimebarControl->SetTimebarColor(theColorDlg->selectedColor());
-    else
-        m_TimebarControl->SetTimebarColor(previousColor);
-}
-
-void CTimebarKeyframeContextMenu::onTimeBarColorChanged(const QColor &color)
-{
-    m_TimebarControl->SetTimebarColor(color);
 }
 
 //=============================================================================

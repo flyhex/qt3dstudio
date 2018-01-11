@@ -562,7 +562,7 @@ void CMainFrame::OnTimelineSetTimeBarColor()
         if (theColorDlg->exec() == QDialog::Accepted)
             theTimelineTimebar->SetTimebarColor(theColorDlg->selectedColor());
         else
-            theTimelineTimebar->SetTimebarColor(previousColor);
+            theTimelineTimebar->PreviewTimebarColor(previousColor);
     }
 }
 
@@ -570,7 +570,7 @@ void CMainFrame::OnTimeBarColorChanged(const QColor &color)
 {
     ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
     if (theTimelineTimebar)
-        theTimelineTimebar->SetTimebarColor(color);
+        theTimelineTimebar->PreviewTimebarColor(color);
 }
 
 //==============================================================================
