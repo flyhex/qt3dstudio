@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of Qt 3D Studio.
+** This file is part of the Qt 3D Studio.
 **
 ** $QT_BEGIN_LICENSE:FDL$
 ** Commercial License Usage
@@ -26,25 +26,28 @@
 ****************************************************************************/
 
 /*!
-\title Examples
-\ingroup qml-examples
-\page qtstudio3d-qml-examples.html
-\noautolist
+    \example qmldatainput
+    \title Qt 3D Studio: QML DataInput Example
+    \ingroup qtstudio3d-examples-qml
+    \brief Demonstrates using DataInput elements in QML
+    \since QtStudio3D 1.1
 
-Included in Qt 3D Studio you will find a set of examples. These are located in the \c {examples}
-folder in the installation folder.
+    \image qml-datainput.jpg
 
-\section1 QML Examples
+    \e {This example demonstrates using DataInput elements with QML in Studio}
 
-\list
-     \li \l {Qt 3D Studio: Dynamic Keyframes Example}
-     \li \l {Qt 3D Studio: QML Streamer Example}
-     \li \l {Qt 3D Studio: QML DataInput Example}
-\endlist
+    \include examples-run.qdocinc
 
-\section1 More Examples
+    \section1 Description
 
-You can find more examples from \l {https://git.qt.io/public-demos/qt3dstudio}
-, these examples are more visually appealing and suitable to use as for example demos.
+    The presentation consists of a static text element serving as a label, a rotating text element
+    for showing the input data, and a DataInput element linked to the textstring property of the
+    rotating text element.
 
+    The \l {qmldatainput/qml/qmldatainput/main.qml}{qml main} loads the presentation and animates
+    a number property. The value of the animated property is bound to the
+    \l{DataInput::value}{value} property of the DataInput element, making the value show up in the
+    linked text element in the presentation:
+
+    \snippet qmldatainput/qml/qmldatainput/main.qml 1
 */

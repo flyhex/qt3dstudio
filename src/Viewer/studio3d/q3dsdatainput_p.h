@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,8 +27,8 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DSPRESENTATION_P_H
-#define Q3DSPRESENTATION_P_H
+#ifndef Q3DSDATAINPUT_P_P_H
+#define Q3DSDATAINPUT_P_P_H
 
 //
 //  W A R N I N G
@@ -41,59 +41,34 @@
 // We mean it.
 //
 
-#include "q3dspresentation.h"
+#include "q3dsdatainput.h"
+#include "q3dscommandqueue_p.h"
 #include "Qt3DSViewerApp.h"
-#include <QtCore/QHash>
-#include <QtCore/QUrl>
 
 QT_BEGIN_NAMESPACE
 
-class CommandQueue;
-class ViewerQmlStreamProxy;
-class QKeyEvent;
+class Q3DSPresentationPrivate;
 
-class Q_STUDIO3D_EXPORT Q3DSPresentationPrivate : public QObject
+class Q_STUDIO3D_EXPORT Q3DSDataInputPrivate
 {
-    Q_OBJECT
-    Q_DECLARE_PUBLIC(Q3DSPresentation)
-
+    Q_DECLARE_PUBLIC(Q3DSDataInput)
 public:
-    typedef QHash<QString, Q3DSElement *> ElementMap;
-    typedef QHash<QString, Q3DSDataInput *> DataInputMap;
+    explicit Q3DSDataInputPrivate(Q3DSDataInput *parent);
+    virtual ~Q3DSDataInputPrivate();
 
-    explicit Q3DSPresentationPrivate(Q3DSPresentation *parent);
-    ~Q3DSPresentationPrivate();
-
-    void setSource(const QUrl &source);
-    void setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp = true);
+    void setViewerApp(Q3DSViewer::Q3DSViewerApp *app);
     void setCommandQueue(CommandQueue *queue);
+    void setPresentation(Q3DSPresentationPrivate *presentation);
 
-    void registerElement(Q3DSElement *element);
-    void unregisterElement(Q3DSElement *element);
-    void unregisterAllElements();
-
-    void registerDataInput(Q3DSDataInput *dataInput);
-    void unregisterDataInput(Q3DSDataInput *dataInput);
-    void unregisterAllDataInputs();
-
-    ViewerQmlStreamProxy *streamProxy();
-    Q3DStudio::EKeyCode getScanCode(QKeyEvent *e);
-
-public Q_SLOTS:
-    void handleSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
-
-public:
-    Q3DSPresentation *q_ptr;
-
-private:
-    Q3DSViewer::Q3DSViewerApp *m_viewerApp; // Not owned
-    CommandQueue *m_commandQueue; // Not owned
-    ElementMap m_elements;
-    DataInputMap m_dataInputs;
-    QUrl m_source;
-    ViewerQmlStreamProxy *m_streamProxy;
+protected:
+    Q3DSDataInput *q_ptr;
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp = nullptr; // Not owned
+    CommandQueue *m_commandQueue = nullptr; // Not owned
+    Q3DSPresentationPrivate *m_presentation = nullptr; // Not owned
+    QString m_name;
+    QVariant m_value;
 };
 
 QT_END_NAMESPACE
 
-#endif // Q3DSPRESENTATION_P_H
+#endif // Q3DSDATAINPUT_P_P_H

@@ -8,5 +8,6 @@
         <file alias="settings.uip">presentation/settings.uip</file>
         <file alias="multislide.uip">presentation/multislide.uip</file>
         <file alias="mouse.uip">presentation/mouse.uip</file>
+        <file alias="datainput.uip">presentation/datainput.uip</file>
     </qresource>
 </RCC>

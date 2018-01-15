@@ -1,0 +1,81 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \class Q3DSDataInput
+    \inheaderfile q3dsdatainput.h
+    \inmodule QtStudio3D
+    \since QtStudio3D 1.1
+    \brief Control class for data inputs in a Qt 3D Studio presentation.
+
+    This class is a convenience class for controlling a data input in a presentation.
+
+    \sa Q3DSPresentation
+*/
+
+/*!
+    \fn Q3DSDataInput::Q3DSDataInput(const QString &name, QObject *parent = nullptr)
+
+    Constructs a Q3DSDataInput instance and initializes the \a name.
+    An optional \a parent object can be specified.
+*/
+
+/*!
+    \fn Q3DSDataInput::Q3DSDataInput(Q3DSPresentation *presentation, const QString &name,
+                                     QObject *parent = nullptr)
+
+    Constructs a Q3DSDataInput instance and initializes the \a name.
+    The constructed instance is automatically \l{Q3DSPresentation::registerDataInput}{registered}
+    for the \a presentation.
+    An optional \a parent object can be specified.
+*/
+
+/*!
+    \fn Q3DSDataInput::Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presentation,
+                                     const QString &name, QObject *parent = nullptr)
+    \internal
+*/
+
+/*!
+    \property Q3DSDataInput::name
+
+    Specifies the name of the controlled data input element in the presentation.
+    This property must be set before the data input is registered to a presentation.
+
+    \sa Q3DSPresentation::registerDataInput()
+*/
+
+/*!
+    \property Q3DSDataInput::value
+
+    Specifies the value of the controlled data input element in the presentation.
+
+    The value of this property only accounts for changes done via the same Q3DSDataInput instance.
+    If the value of the same data input in the presentation is changed elsewhere,
+    for example via presentation scripting, those changes are not reflected in
+    the value of this property.
+*/

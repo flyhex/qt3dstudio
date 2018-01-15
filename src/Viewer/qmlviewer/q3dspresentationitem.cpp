@@ -29,6 +29,8 @@
 
 #include "q3dspresentationitem.h"
 
+#include <QtStudio3D/q3dssceneelement.h>
+#include <QtStudio3D/q3dsdatainput.h>
 #include <QtStudio3D/private/q3dspresentation_p.h>
 #include <QtStudio3D/private/viewerqmlstreamproxy_p.h>
 #include <QtCore/qdebug.h>
@@ -55,25 +57,25 @@ QQmlListProperty<QObject> Q3DSPresentationItem::qmlChildren()
     return QQmlListProperty<QObject>(this, nullptr, &appendQmlChildren, nullptr, nullptr, nullptr);
 }
 
-void Q3DSPresentationItem::appendQmlChildren(QQmlListProperty<QObject> *list, QObject *element)
+void Q3DSPresentationItem::appendQmlChildren(QQmlListProperty<QObject> *list, QObject *obj)
 {
     auto item = qobject_cast<Q3DSPresentationItem *>(list->object);
     if (item) {
-        auto scene = qobject_cast<Q3DSSceneElement *>(element);
+        auto scene = qobject_cast<Q3DSSceneElement *>(obj);
         if (scene) {
             if (item->registeredElement(scene->elementPath()))
                 qWarning() << __FUNCTION__ << "A duplicate SceneElement defined for Presentation.";
             else
                 item->registerElement(scene);
         } else {
-            auto studioElement = qobject_cast<Q3DSElement *>(element);
+            auto studioElement = qobject_cast<Q3DSElement *>(obj);
             if (studioElement) {
                 if (item->registeredElement(studioElement->elementPath()))
                     qWarning() << __FUNCTION__ << "A duplicate Element defined for Presentation.";
                 else
                     item->registerElement(studioElement);
             } else {
-                auto subPresSettings = qobject_cast<Q3DSSubPresentationSettings *>(element);
+                auto subPresSettings = qobject_cast<Q3DSSubPresentationSettings *>(obj);
                 if (subPresSettings) {
                     if (item->m_subPresentationSettings) {
                         qWarning() << __FUNCTION__
@@ -81,6 +83,14 @@ void Q3DSPresentationItem::appendQmlChildren(QQmlListProperty<QObject> *list, QO
                     } else {
                         item->m_subPresentationSettings = subPresSettings;
                         item->d_ptr->streamProxy()->setSettings(subPresSettings);
+                    }
+                } else {
+                    auto dataInput = qobject_cast<Q3DSDataInput *>(obj);
+                    if (item->registeredDataInput(dataInput->name())) {
+                        qWarning() << __FUNCTION__
+                                   << "Duplicate DataInput defined for Presentation.";
+                    } else {
+                        item->registerDataInput(dataInput);
                     }
                 }
             }

@@ -167,6 +167,7 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
     for (int i = 0; i < fromQueue.m_size; i++) {
         const ElementCommand &source = fromQueue.commandAt(i);
         switch (source.m_commandType) {
+        case CommandType_SetDataInputValue:
         case CommandType_SetAttribute:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue,
                          source.m_variantValue);

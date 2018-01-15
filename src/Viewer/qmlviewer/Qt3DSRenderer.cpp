@@ -312,6 +312,9 @@ void Q3DSRenderer::processCommands()
         case CommandType_KeyRelease:
             m_runtime->HandleKeyInput(Q3DStudio::EKeyCode(cmd.m_intValues[0]), false);
             break;
+        case CommandType_SetDataInputValue:
+            m_runtime->SetDataInputValue(cmd.m_stringValue, cmd.m_variantValue);
+            break;
         case CommandType_RequestSlideInfo: {
             int current = 0;
             int previous = 0;

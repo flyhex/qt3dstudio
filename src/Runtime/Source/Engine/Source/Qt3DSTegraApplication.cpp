@@ -202,6 +202,7 @@ public:
     void SetPresentationAttribute(const char *presId, const char *, const char *value) override;
     void GoToTime(const char *elementPath, const float time) override;
     void SetGlobalAnimationTime(qint64 inMilliSecs) override;
+    void SetDataInputValue(const QString &name, const QVariant &value);
     void SetAttribute(const char *elementPath, const char *attributeName, const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
     void FireEvent(const char *element, const char *evtName) override;
@@ -536,6 +537,24 @@ void CNDDView::SetGlobalAnimationTime(qint64 inMilliSecs)
 {
     if (m_Application)
         m_Application->SetTimeMilliSecs(inMilliSecs);
+}
+
+void CNDDView::SetDataInputValue(const QString &name, const QVariant &value)
+{
+    if (m_Application) {
+        if (name.isEmpty() || !value.isValid())
+            return;
+        QByteArray valueStr = value.toString().toUtf8();
+        float valueFloat = value.toFloat();
+        QByteArray elementPath = QByteArrayLiteral("Scene.") + name.toUtf8();
+
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+
+        theBridgeEngine.SetAttribute(elementPath.constData(), "valuestr", valueStr.constData());
+        theBridgeEngine.SetAttribute(elementPath.constData(), "value",
+                                     reinterpret_cast<char *>(&valueFloat));
+    }
 }
 
 void CNDDView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)

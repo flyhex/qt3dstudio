@@ -347,6 +347,8 @@ public:
 
     void SetGlobalAnimationTime(qint64 inMilliSecs);
 
+    void SetDataInputValue(const QString &name, const QVariant &value);
+
     QString error();
 
 private:

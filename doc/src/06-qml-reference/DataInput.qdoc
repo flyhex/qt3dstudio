@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,25 +26,32 @@
 ****************************************************************************/
 
 /*!
-\title Examples
-\ingroup qml-examples
-\page qtstudio3d-qml-examples.html
-\noautolist
+    \qmltype DataInput
+    \inqmlmodule QtStudio3D
+    \brief Control type for data inputs in a Qt 3D Studio presentation.
+    \since QtStudio3D 1.1
 
-Included in Qt 3D Studio you will find a set of examples. These are located in the \c {examples}
-folder in the installation folder.
+    This type is a convenience type for controlling a data input in a presentation.
 
-\section1 QML Examples
+    \sa Studio3D, Presentation
+*/
 
-\list
-     \li \l {Qt 3D Studio: Dynamic Keyframes Example}
-     \li \l {Qt 3D Studio: QML Streamer Example}
-     \li \l {Qt 3D Studio: QML DataInput Example}
-\endlist
+/*!
+    \qmlproperty string DataInput::name
 
-\section1 More Examples
+    Specifies the name of the controlled data input element in the presentation.
+    This property must be set as part of DataInput declaration.
+*/
 
-You can find more examples from \l {https://git.qt.io/public-demos/qt3dstudio}
-, these examples are more visually appealing and suitable to use as for example demos.
+/*!
+    \qmlproperty variant DataInput::value
 
+    Specifies the value of the controlled data input element in the presentation.
+    The changes to the value property are queued and handled asynchronously before the
+    next frame is displayed.
+
+    The value of this property only accounts for changes done via the same DataInput instance.
+    If the value of the same data input in the presentation is changed elsewhere,
+    for example via presentation scripting, those changes are not reflected in
+    the value of this property.
 */

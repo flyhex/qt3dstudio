@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,38 +27,56 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DSPRESENTATIONITEM_H
-#define Q3DSPRESENTATIONITEM_H
+#ifndef Q3DSDATAINPUT_P_H
+#define Q3DSDATAINPUT_P_H
 
-#include "q3dsqmlsubpresentationsettings.h"
-
-#include <QtStudio3D/q3dspresentation.h>
-#include <QtQml/qqmllist.h>
+#include <QtStudio3D/qstudio3dglobal.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qvariant.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q3DSPresentationItem : public Q3DSPresentation
+class Q3DSDataInputPrivate;
+class Q3DSPresentation;
+
+class Q_STUDIO3D_EXPORT Q3DSDataInput : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QQmlListProperty<QObject> qmlChildren READ qmlChildren DESIGNABLE false)
-    Q_PROPERTY(Q3DSSubPresentationSettings *subPresentationSettings READ subPresentationSettings CONSTANT)
-    Q_CLASSINFO("DefaultProperty", "qmlChildren")
+    Q_DECLARE_PRIVATE(Q3DSDataInput)
+
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+    Q_PROPERTY(QVariant value READ value WRITE setValue NOTIFY valueChanged)
 
 public:
-    explicit Q3DSPresentationItem(QObject *parent = nullptr);
-    ~Q3DSPresentationItem();
+    explicit Q3DSDataInput(QObject *parent = nullptr);
+    explicit Q3DSDataInput(const QString &name, QObject *parent = nullptr);
+    explicit Q3DSDataInput(Q3DSPresentation *presentation, const QString &name,
+                           QObject *parent = nullptr);
 
-    Q3DSSubPresentationSettings *subPresentationSettings() const;
+    virtual ~Q3DSDataInput();
 
-    QQmlListProperty<QObject> qmlChildren();
+    QString name() const;
+    QVariant value() const;
 
 public Q_SLOTS:
-    static void appendQmlChildren(QQmlListProperty<QObject> *list, QObject *obj);
+    void setName(const QString &name);
+    void setValue(const QVariant &value);
+
+Q_SIGNALS:
+    void nameChanged();
+    void valueChanged();
+
+protected:
+    explicit Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presentation,
+                           const QString &name, QObject *parent = nullptr);
+    Q3DSDataInputPrivate *d_ptr;
 
 private:
-    Q3DSSubPresentationSettings *m_subPresentationSettings;
+    Q_DISABLE_COPY(Q3DSDataInput)
+
+    friend class Q3DSPresentationPrivate;
 };
 
 QT_END_NAMESPACE
 
-#endif // Q3DSPRESENTATIONITEM_H
+#endif // Q3DSDATAINPUT_P_H

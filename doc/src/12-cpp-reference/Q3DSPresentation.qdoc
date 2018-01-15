@@ -79,6 +79,29 @@
 */
 
 /*!
+    \fn void Q3DSPresentation::registerDataInput(Q3DSDataInput *dataInput)
+
+    \since QtStudio3D 1.1
+    Registers a \a dataInput for the presentation. The registered \a dataInput can be used to manage
+    the corresponding data input in the presentation.
+*/
+
+/*!
+    \fn void Q3DSPresentation::unregisterDataInput(Q3DSDataInput *dataInput)
+    \since QtStudio3D 1.1
+
+    Unregisters a \a dataInput from the presentation.
+*/
+
+/*!
+    \fn Q3DSElement *Q3DSPresentation::registeredDataInput(const QString &name) const
+    \since QtStudio3D 1.1
+
+    Returns a pointer to a registered data input with \a name. If no data input with given name
+    is registered, a null pointer is returned.
+*/
+
+/*!
     \fn void Q3DSPresentation::goToSlide(const QString &elementPath, unsigned int index)
 
     Requests a time context (a Scene or a Component element) to change to a specific slide by
@@ -190,6 +213,13 @@
     Sets the global animation time to \a milliseconds. Setting the global animation time to a
     non-zero value will disable the automatic animation timer. Setting the value to zero
     resumes automatic animation timer.
+*/
+
+/*!
+    \fn void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &value)
+    \since QtStudio3D 1.1
+
+    Sets the \a value of a data input element \a name in the presentation.
 */
 
 /*!

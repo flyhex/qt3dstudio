@@ -6,7 +6,8 @@ TEMPLATE = subdirs
         qmlstreamer \
         widgetviewer \
         surfaceviewer \
-        surfaceviewer_offscreen
+        surfaceviewer_offscreen \
+        qmldatainput
 
     # Sample project only has the presentation.
     # We do not want to pollute the sample folder with .pro file, so do the install here.

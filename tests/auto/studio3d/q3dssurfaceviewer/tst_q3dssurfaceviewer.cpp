@@ -82,6 +82,8 @@ private slots:
     void testElement();
     void testMouseInput_data();
     void testMouseInput();
+    void testDataInput_data();
+    void testDataInput();
 
 private:
     QWindow *createWindow(const QSize &size);
@@ -1470,6 +1472,25 @@ void tst_Q3DSSurfaceViewer::testMouseInput()
     checkPixel(m_viewer, Qt::red, point2);
 
     // Note: No way yet to hook mouse move into anything in the presentation
+}
+
+void tst_Q3DSSurfaceViewer::testDataInput_data()
+{
+    testBasics_data();
+}
+
+void tst_Q3DSSurfaceViewer::testDataInput()
+{
+//    QFETCH(bool, isWindow);
+
+//    if (isWindow)
+//        createWindowAndViewer(m_viewer, DATAINPUT);
+//    else
+//        createOffscreenAndViewer(m_viewer, DATAINPUT);
+
+    // TODO: This is a placeholder for data input test. To be finished when proper support
+    // for changing animation time via data inputs is supported and the display bugs fixed.
+    // See: https://bugreports.qt.io/browse/QT3DS-854
 }
 
 

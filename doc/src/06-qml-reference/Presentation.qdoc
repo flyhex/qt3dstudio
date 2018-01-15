@@ -167,6 +167,13 @@
 */
 
 /*!
+    \qmlmethod void Presentation::setDataInputValue(string name, variant value)
+    \since QtStudio3D 1.1
+
+    Sets the \a value of a data input element \a name in the presentation.
+*/
+
+/*!
     \qmlsignal Presentation::slideEntered(string elementPath, int index, string name)
 
     This signal is emitted when a slide is entered in the presentation.

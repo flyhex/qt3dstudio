@@ -105,8 +105,8 @@
 */
 
 /*!
-    \qmlsignal bool Studio3D::presentationReady
-    \since 1.1
+    \qmlsignal Studio3D::presentationReady()
+    \since QtStudio3D 1.1
 
     This signal is emitted when the viewer has been initialized and the presentation is ready to
     be shown. The difference to \c running property is that the viewer has to be visible for
