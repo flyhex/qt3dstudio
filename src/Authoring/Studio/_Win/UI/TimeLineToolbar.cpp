@@ -67,7 +67,7 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     connect(m_ui->timeButton, &QPushButton::clicked,
             [this, doc](){
         CTimeEditDlg timeEditDlg;
-        timeEditDlg.ShowDialog(doc->GetCurrentViewTime(), 0, doc, PLAYHEAD);
+        timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
     });
 
     connect(m_ui->deleteObject, &QPushButton::clicked,

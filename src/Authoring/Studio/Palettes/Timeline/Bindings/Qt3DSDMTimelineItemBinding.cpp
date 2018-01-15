@@ -773,8 +773,8 @@ void Qt3DSDMTimelineItemBinding::CommitChangedKeyframes()
 void Qt3DSDMTimelineItemBinding::OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation)
 {
     CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.SetKeyframesManager(m_TransMgr->GetKeyframesManager());
-    theTimeEditDlg.ShowDialog(inCurrentTime, 0, g_StudioApp.GetCore()->GetDoc(),
+    theTimeEditDlg.setKeyframesManager(m_TransMgr->GetKeyframesManager());
+    theTimeEditDlg.showDialog(inCurrentTime, g_StudioApp.GetCore()->GetDoc(),
                               inObjectAssociation);
 }
 

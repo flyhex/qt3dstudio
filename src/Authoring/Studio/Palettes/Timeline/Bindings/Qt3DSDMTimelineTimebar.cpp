@@ -44,7 +44,7 @@
 #include "Doc.h"
 #include "Dispatch.h"
 #include "Core.h"
-#include "TimeEditDlg.h"
+#include "DurationEditDlg.h"
 #include "IDocumentEditor.h"
 #include "BaseStateRow.h"
 #include "BaseTimebarlessRow.h"
@@ -257,7 +257,7 @@ void Qt3DSDMTimelineTimebar::SetTimebarTime(ITimeChangeCallback *inCallback /*= 
 {
     long theStartTime = GetStartTime();
     long theEndTime = GetEndTime();
-    CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.ShowDialog(theStartTime, theEndTime, m_TimelineTranslationManager->GetDoc(),
-                              TIMEBAR, inCallback);
+    CDurationEditDlg theDurationEditDlg;
+    theDurationEditDlg.showDialog(theStartTime, theEndTime, m_TimelineTranslationManager->GetDoc(),
+                                  inCallback);
 }

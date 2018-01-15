@@ -146,7 +146,8 @@ HEADERS += \
     Controls/TreeItem.h
 
 FORMS += \
-    _Win/UI/timeeditdlg.ui \
+    Application/TimeEditDlg.ui \
+    Application/DurationEditDlg.ui \
     _Win/UI/StudioAppPrefsPage.ui \
     _Win/UI/StudioPreferencesPropSheet.ui \
     _Win/UI/StudioProjectSettingsPage.ui \
@@ -192,7 +193,8 @@ SOURCES += \
     _Win/UI/StudioAppPrefsPage.cpp \
     _Win/UI/StudioPreferencesPropSheet.cpp \
     _Win/UI/StudioProjectSettingsPage.cpp \
-    _Win/UI/TimeEditDlg.cpp \
+    Application/TimeEditDlg.cpp \
+    Application/DurationEditDlg.cpp \
     _Win/UI/TimeLineToolbar.cpp \
     _Win/Utils/MouseCursor.cpp \
     _Win/Workspace/Dialogs.cpp \
@@ -368,7 +370,8 @@ SOURCES += \
     Application/DataInputListDlg.cpp
 
 HEADERS += \
-    _Win/UI/TimeEditDlg.h \
+    Application/TimeEditDlg.h \
+    Application/DurationEditDlg.h \
     _Win/UI/TimeLineToolbar.h \
     _Win/Application/StudioApp.h \
     Controls/TextEditContextMenu.h \

@@ -135,7 +135,7 @@ bool CPlayhead::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags)
     Q_UNUSED(inFlags);
 
     CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.ShowDialog(GetCurrentTime(), 0, m_Doc, PLAYHEAD);
+    theTimeEditDlg.showDialog(GetCurrentTime(), m_Doc, PLAYHEAD);
     return true;
 }
 
