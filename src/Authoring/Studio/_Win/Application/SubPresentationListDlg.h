@@ -59,7 +59,7 @@ protected:
     void initDialog();
     void updateButtons();
     void updateContents();
-    QString getUniqueId(const QString &id);
+    QString getUniqueId(const QString &id, bool editing = false);
 
 private Q_SLOTS:
     void on_buttonBox_accepted();

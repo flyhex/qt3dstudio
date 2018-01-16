@@ -101,6 +101,10 @@ void CSubPresentationListDlg::initDialog()
 
     // When clicking an item, select the whole row
     connect(m_ui->tableView, &QTableView::clicked, this, &CSubPresentationListDlg::onSelected);
+
+    // Double-click opens the item in edit mode
+    connect(m_ui->tableView, &QTableView::doubleClicked,
+            this, &CSubPresentationListDlg::onEditSubPresentation);
 }
 
 void CSubPresentationListDlg::updateButtons()
@@ -191,14 +195,17 @@ void CSubPresentationListDlg::onEditSubPresentation()
 
     if (subpresdialog.exec() == QDialog::Accepted) {
         m_records[m_currentIndex] = subpresdialog.subpresentation();
+        // We need to update the table to be able to accurately find out if the id is unique
+        updateContents();
         // Make sure that id is still unique
-        m_records[m_currentIndex].m_id = getUniqueId(m_records[m_currentIndex].m_id);
+        m_records[m_currentIndex].m_id = getUniqueId(m_records[m_currentIndex].m_id, true);
+        // Update again, as the id might have been updated
+        updateContents();
     }
 
     m_currentIndex = -1;
 
     updateButtons();
-    updateContents();
 }
 
 void CSubPresentationListDlg::onSelected(const QModelIndex &index)
@@ -209,11 +216,14 @@ void CSubPresentationListDlg::onSelected(const QModelIndex &index)
     updateButtons();
 }
 
-QString CSubPresentationListDlg::getUniqueId(const QString &id)
+QString CSubPresentationListDlg::getUniqueId(const QString &id, bool editing)
 {
     QString retval = QStringLiteral("%1").arg(id);
     int idx = 1;
-    while (m_tableContents->findItems(retval, Qt::MatchExactly, 0).size() && idx < 1000) {
+    int limit = (editing == true) ? 1 : 0;
+    // When editing, ignore our own id (i.e. there is supposed to be one entry already)
+    while (m_tableContents->findItems(retval, Qt::MatchExactly, 0).size() > limit
+           && idx < 1000) {
         retval = QStringLiteral("%1_%2").arg(id).arg(idx, 3, 10, QLatin1Char('0'));
         ++idx;
     }
