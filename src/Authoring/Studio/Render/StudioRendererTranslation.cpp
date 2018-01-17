@@ -476,7 +476,6 @@ struct STranslatorDataModelParser
 #define DataInput_ControlledElemProp m_DataInput.m_ControlledElemProp
 #define DataInput_TimeFrom m_DataInput.m_TimeFrom
 #define DataInput_TimeTo m_DataInput.m_TimeTo
-
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);

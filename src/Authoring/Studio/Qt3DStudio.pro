@@ -143,7 +143,8 @@ HEADERS += \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
     Controls/BreadCrumbControl.h \
-    Controls/TreeItem.h
+    Controls/TreeItem.h \
+    Application/DataInputSelectDlg.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -277,7 +278,6 @@ SOURCES += \
     Palettes/Inspector/InspectorControlModel.cpp \
     Palettes/Inspector/ObjectListModel.cpp \
     Palettes/Inspector/ObjectBrowserView.cpp \
-    Palettes/Inspector/DataInputChooserView.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
     Palettes/Inspector/MouseHelper.cpp \
     Palettes/Project/ProjectView.cpp \
@@ -368,7 +368,8 @@ SOURCES += \
     _Win/Application/SubPresentationDlg.cpp \
     _Win/Application/SubPresentationListDlg.cpp \
     Application/DataInputDlg.cpp \
-    Application/DataInputListDlg.cpp
+    Application/DataInputListDlg.cpp \
+    Application/DataInputSelectDlg.cpp
 
 HEADERS += \
     Application/TimeEditDlg.h \
@@ -410,7 +411,6 @@ HEADERS += \
     Palettes/Inspector/FileChooserView.h \
     Palettes/Inspector/FileChooserModel.h \
     Palettes/Inspector/TextureChooserView.h \
-    Palettes/Inspector/DataInputChooserView.h \
     Palettes/Inspector/TabOrderHandler.h \
     Palettes/Inspector/MouseHelper.h \
     Palettes/Project/ProjectView.h \

@@ -38,7 +38,6 @@
 #include "IDocumentEditor.h"
 #include "ImageChooserModel.h"
 #include "ImageChooserView.h"
-#include "DataInputChooserView.h"
 #include "MeshChooserView.h"
 #include "TextureChooserView.h"
 #include "InspectableBase.h"
@@ -52,6 +51,7 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
+#include "DataInputSelectDlg.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -462,58 +462,30 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     return m_objectReferenceView;
 }
 
-QObject *InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
+void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
 {
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    if (!m_objectReferenceModel) {
-        m_objectReferenceModel
-            = new ObjectListModel(g_StudioApp.GetCore(), doc->GetActiveRootInstance(), this);
-    }
-    if (!m_dataInputChooserView)
-        m_dataInputChooserView = new DataInputChooserView(this);
-    m_dataInputChooserView->setModel(m_objectReferenceModel);
+    if (!m_dataInputChooserView) {
+        m_dataInputChooserView = new DataInputSelectDlg(this);
+        connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
+                [this, handle, instance](const QString &controllerName) {
 
-    // TODO: for now datainput chooser can only be evoked from text element.
-    // Remove this restriction when other element types can also be controlled
-    if (doc->GetStudioSystem()->GetClientDataModelBridge()
-        ->GetObjectType(instance) == OBJTYPE_TEXT) {
-        QVector<EStudioObjectType> exclude;
-        exclude << OBJTYPE_ALIAS << OBJTYPE_BEHAVIOR << OBJTYPE_MODEL
-            << OBJTYPE_EFFECT << OBJTYPE_GUIDE << OBJTYPE_IMAGE << OBJTYPE_LAYER
-            << OBJTYPE_MATERIAL << OBJTYPE_REFERENCEDMATERIAL << OBJTYPE_CAMERA
-            << OBJTYPE_LIGHT << OBJTYPE_GROUP << OBJTYPE_TEXT
-            << OBJTYPE_COMPONENT << OBJTYPE_SLIDE << OBJTYPE_RENDERPLUGIN
-            << OBJTYPE_CUSTOMMATERIAL << OBJTYPE_PATH << OBJTYPE_PATHANCHORPOINT
-            << OBJTYPE_SUBPATH << OBJTYPE_SOUND << OBJTYPE_LIGHTMAPS;
-        m_objectReferenceModel->excludeObjectTypes(exclude);
-    } else {
-        m_objectReferenceModel->excludeObjectTypes(QVector<EStudioObjectType>());
+            bool controlled = controllerName == tr("[No control]") ? false : true;
+            m_inspectorControlModel
+                ->setPropertyControllerInstance(
+                    instance, handle,
+                    Q3DStudio::CString::fromQString(controllerName), controlled);
+            m_inspectorControlModel->setPropertyControlled(instance, handle);
+        });
     }
 
-    disconnect(m_dataInputChooserView, nullptr, nullptr, nullptr);
+    QStringList dataInputList;
+    dataInputList.append(tr("[No control]"));
+    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
+        dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
 
-    IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
-    if (objRefHelper) {
-        qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
-        qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
-        m_dataInputChooserView->selectAndExpand(refInstance);
-    }
-
-    showBrowser(m_dataInputChooserView, point);
-
-    connect(m_dataInputChooserView, &DataInputChooserView::selectionChanged,
-            this, [this, doc, handle, instance] {
-        auto selectedItem = m_dataInputChooserView->selectedHandle();
-        qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
-
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
-            ->SetInstancePropertyValue(instance, handle, value);
-
-        m_inspectorControlModel->setPropertyControllerInstance(instance, handle,
-                                                               selectedItem, true);
-    });
-
-    return m_dataInputChooserView;
+    m_dataInputChooserView->setData(dataInputList);
+    m_dataInputChooserView->setWindowModality(Qt::WindowModality::ApplicationModal);
+    m_dataInputChooserView->showDialog();
 }
 
 void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)

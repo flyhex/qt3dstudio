@@ -61,7 +61,7 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(QVariant value MEMBER m_value NOTIFY valueChanged)
     Q_PROPERTY(QVariant values MEMBER m_values NOTIFY valuesChanged)
     Q_PROPERTY(QString title MEMBER m_title CONSTANT)
-    Q_PROPERTY(QString toolTip MEMBER m_tooltip CONSTANT)
+    Q_PROPERTY(QString toolTip MEMBER m_tooltip NOTIFY tooltipChanged)
     Q_PROPERTY(int instance MEMBER m_instance CONSTANT)
     Q_PROPERTY(int handle MEMBER m_property CONSTANT)
 
@@ -78,10 +78,12 @@ Q_SIGNALS:
     void valuesChanged();
     void animatedChanged();
     void controlledChanged();
+    void tooltipChanged();
 
 public:
     qt3dsdm::DataModelDataType::Value m_dataType;
     qt3dsdm::AdditionalMetaDataType::Value m_propertyType;
+    qt3dsdm::SMetaDataPropertyInfo m_metaProperty;
     QVariant m_value;
     QVariant m_values;
     QString m_title;
@@ -122,10 +124,11 @@ public:
     void refresh();
 
     QVariant getPropertyValue(long instance, int handle);
-    qt3dsdm::SValue currentPropertyValue(long instance, int handle);
+    qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
 
-    void setPropertyControllerInstance(long instance, int handle,
-                                       long controllerInstance, bool controlled);
+    void setPropertyControllerInstance(long instance,int handle,
+                                       Q3DStudio::CString controllerInstance,
+                                       bool controlled);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setRenderableValue(long instance, int handle, const QVariant &value);
@@ -133,7 +136,7 @@ public:
     Q_INVOKABLE void setSlideSelection(long instance, int handle, int index,
                                        const QStringList &list);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
-    Q_INVOKABLE void setPropertyControlled(long instance, int property, bool controlled);
+    Q_INVOKABLE void setPropertyControlled(long instance, int property);
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -170,7 +173,7 @@ private:
     void refreshTree();
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
-    void updateControlledToggleState(InspectorControlBase *inItem);
+    void updateControlledToggleState(InspectorControlBase *inItem) const;
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;

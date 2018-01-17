@@ -276,6 +276,7 @@ public:
     static QColor textColor();
     static QColor masterColor();
     static QColor disabledColor();
+    static QColor dataInputColor();
     static int fontSize();
     static int controlBaseHeight();
     static int idWidth();

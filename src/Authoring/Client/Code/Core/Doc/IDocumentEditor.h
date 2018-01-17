@@ -202,7 +202,7 @@ public:
     // locate element when controlling the property value
     virtual void SetInstancePropertyControlled(TInstanceHandle instance, CString instancepath,
                                                TPropertyHandle propName,
-                                               TInstanceHandle controller,
+                                               CString controller,
                                                bool controlled) = 0;
 
     virtual void SetMaterialType(TInstanceHandle instance,
@@ -282,7 +282,7 @@ public:
         theInstances.push_back(inInstance);
         RearrangeObjects(theInstances, inDest, inInsertType);
     }
-    virtual void UpdateDataInputTarget(TInstanceHandle instance, CString oldPath) = 0;
+
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
 

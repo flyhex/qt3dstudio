@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -25,50 +25,24 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef DATAINPUTSELECTDLG_H
+#define DATAINPUTSELECTDLG_H
 
-#ifndef INCLUDED_TIMELINETOOLBAR_H
-#define INCLUDED_TIMELINETOOLBAR_H 1
+#include <QtWidgets/qlistwidget.h>
 
-#include "Qt3DSDMSignals.h"
-#include "SelectedValueImpl.h"
-#include "DataInputSelectDlg.h"
-#include <QtWidgets/qwidget.h>
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-    class TimeLineToolbar;
-}
-QT_END_NAMESPACE
-
-class CMainFrame;
-
-class TimeLineToolbar : public QWidget
+class DataInputSelectDlg : public QListWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-    TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSize, QWidget *pParent = nullptr);
-    virtual ~TimeLineToolbar();
-
-    void onTimeChanged(long time);
-    void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
-
-    void showDataInputChooser();
-    void onDataInputChange(const QString &dataInputName);
-
-    QSize sizeHint() const;
-
-private Q_SLOTS:
-    void onAddLayerClicked();
-    void onPlayButtonClicked();
-    void onAddDataInputClicked();
+    explicit DataInputSelectDlg(QWidget *parent = nullptr);
+    void showDialog();
+    void setData(const QStringList &dataInputList);
+Q_SIGNALS:
+    void dataInputChanged(const QString &selected);
 
 protected:
-    QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar) *m_ui;
-    QSize m_preferredSize;
-    CMainFrame *m_mainFrame;
-    qt3dsdm::Qt3DSDMInstanceHandle m_currTimeCtxRoot = 0;
-
-    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
-    DataInputSelectDlg *m_DataInputSelector;
+    void onSelectionChanged();
+    void onItemClicked(QListWidgetItem *item);
 };
-#endif // INCLUDED_TIMELINETOOLBAR_H
+
+#endif // DATAINPUTSELECTDLG_H

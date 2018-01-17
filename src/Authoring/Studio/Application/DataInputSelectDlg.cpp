@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -25,50 +25,38 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-#ifndef INCLUDED_TIMELINETOOLBAR_H
-#define INCLUDED_TIMELINETOOLBAR_H 1
-
-#include "Qt3DSDMSignals.h"
-#include "SelectedValueImpl.h"
 #include "DataInputSelectDlg.h"
-#include <QtWidgets/qwidget.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-    class TimeLineToolbar;
-}
-QT_END_NAMESPACE
-
-class CMainFrame;
-
-class TimeLineToolbar : public QWidget
+DataInputSelectDlg::DataInputSelectDlg(QWidget *parent)
+    : QListWidget(parent)
 {
-  Q_OBJECT
-public:
-    TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSize, QWidget *pParent = nullptr);
-    virtual ~TimeLineToolbar();
+    connect(this, &DataInputSelectDlg::itemSelectionChanged,
+            this, &DataInputSelectDlg::onSelectionChanged);
+    connect(this, &DataInputSelectDlg::itemClicked,
+            this, &DataInputSelectDlg::onItemClicked);
+}
 
-    void onTimeChanged(long time);
-    void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
+void DataInputSelectDlg::setData(const QStringList &dataInputList)
+{
+    clear();
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionBehavior(QAbstractItemView::SelectItems);
+    addItems(dataInputList);
+}
 
-    void showDataInputChooser();
-    void onDataInputChange(const QString &dataInputName);
+void DataInputSelectDlg::showDialog()
+{
+    show();
+}
 
-    QSize sizeHint() const;
+void DataInputSelectDlg::onItemClicked(QListWidgetItem *item)
+{
+    if (item == currentItem())
+        hide();
+}
 
-private Q_SLOTS:
-    void onAddLayerClicked();
-    void onPlayButtonClicked();
-    void onAddDataInputClicked();
-
-protected:
-    QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar) *m_ui;
-    QSize m_preferredSize;
-    CMainFrame *m_mainFrame;
-    qt3dsdm::Qt3DSDMInstanceHandle m_currTimeCtxRoot = 0;
-
-    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
-    DataInputSelectDlg *m_DataInputSelector;
-};
-#endif // INCLUDED_TIMELINETOOLBAR_H
+void DataInputSelectDlg::onSelectionChanged()
+{
+    Q_EMIT dataInputChanged(currentItem()->text());
+    hide();
+}

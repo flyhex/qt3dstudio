@@ -36,6 +36,7 @@
 #include "Qt3DSFileTools.h"
 #include "TabOrderHandler.h"
 #include "MouseHelper.h"
+#include "DataInputSelectDlg.h"
 
 class InspectorControlModel;
 QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
@@ -74,7 +75,7 @@ public:
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
-    Q_INVOKABLE QObject *showDataInputChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -120,9 +121,9 @@ private:
     QPointer<MeshChooserView> m_meshChooserView;
     QPointer<FileChooserView> m_fileChooserView;
     QPointer<TextureChooserView> m_textureChooserView;
-    QPointer<DataInputChooserView> m_dataInputChooserView;
     QPointer<ObjectBrowserView> m_objectReferenceView;
     QPointer<ObjectListModel> m_objectReferenceModel;
+    QPointer<DataInputSelectDlg> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
 

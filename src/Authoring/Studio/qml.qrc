@@ -38,6 +38,5 @@
         <file>Palettes/controls/StyledTooltip.qml</file>
         <file>Palettes/controls/StyledToolButton.qml</file>
         <file>Palettes/controls/StyledMenuSeparator.qml</file>
-        <file>Palettes/Inspector/DataInputBrowser.qml</file>
     </qresource>
 </RCC>

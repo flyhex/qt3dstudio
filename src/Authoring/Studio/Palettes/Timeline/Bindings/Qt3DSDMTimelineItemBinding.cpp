@@ -359,9 +359,6 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(
                 *m_TransMgr->GetDoc(), QObject::tr("Set Name"))
                 ->SetName(m_DataHandle, inName, true);
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                *m_TransMgr->GetDoc(), QObject::tr("Update DataInput target path"))
-                ->UpdateDataInputTarget(m_DataHandle, oldPath);
             return;
         }
     }
@@ -373,9 +370,6 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
             ->SetInstancePropertyValue(m_DataHandle, theNamePropHandle,
                                        std::make_shared<CDataStr>(inName));
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(),
-                                      QObject::tr("Update DataInput target path"))
-            ->UpdateDataInputTarget(m_DataHandle, oldPath);
 }
 
 ITimelineItem *Qt3DSDMTimelineItemBinding::GetTimelineItem()
