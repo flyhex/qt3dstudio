@@ -90,7 +90,6 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     m_DataInputSelector->setWindowFlags(Qt::Tool | Qt::Dialog);
     m_DataInputSelector->setWindowTitle(tr("Select timeline controller"));
 
-    m_ui->addDataInputButton->setVisible(false);
 
     connect(m_ui->addDataInputButton, &QPushButton::clicked,
             this, &TimeLineToolbar::onAddDataInputClicked);

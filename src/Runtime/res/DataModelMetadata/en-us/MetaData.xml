@@ -432,9 +432,7 @@
         </SlideOwner>
         <Text>
                 <Property name="name" formalName="Name" type="String" default="Text" hidden="True" />
-                <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" />
-                <!-- Set controllable to true when enabling
-                <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" /> -->
+                <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" />
                 <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" />
                 <Property name="font" formalName="Font" description="Font" type="Font" default="TitilliumWeb-Regular" />
                 <!-- HW accelerated fonts not supported
