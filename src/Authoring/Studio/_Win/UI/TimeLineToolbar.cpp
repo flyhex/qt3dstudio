@@ -87,15 +87,12 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     // Set as parent to mainframe to allow positioning in the main window
     m_DataInputSelector = new DataInputSelectDlg(mainFrame);
     m_DataInputSelector->hide();
-    // TODO: Add datainput button handling
     m_ui->addDataInputButton->setVisible(false);
 
-    // TODO: setting/unsetting datainput timeline control does
-    // not obey undo functionality, add connection for
-    // onDataInputChange to m_Connections
     connect(m_ui->addDataInputButton, &QPushButton::clicked,
             this, &TimeLineToolbar::onAddDataInputClicked);
 
+    theDispatch->AddDataModelListener(this);
     connect(m_DataInputSelector, &DataInputSelectDlg::dataInputChanged,
             this, &TimeLineToolbar::onDataInputChange);
 }
@@ -140,15 +137,26 @@ void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
     }
     m_ui->deleteObject->setEnabled(canDelete);
 
-    // Update datainput button state according to this timecontext
-    // control state
+    updateDataInputStatus(false);
+}
+
+void TimeLineToolbar::onAddDataInputClicked()
+{
+    showDataInputChooser();
+}
+
+// Update datainput button state according to this timecontext
+// control state. If triggered via datamodel change i.e. dispatch message,
+// force update from actual property values
+void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
     qt3dsdm::Qt3DSDMInstanceHandle timeCtxRoot = doc->GetActiveRootInstance();
-
-    // Only check for updates if we have entered new time context;
-    // actual control changes in this time context are handled in
-    // onAddDataInputClicked
-    if (m_currTimeCtxRoot != timeCtxRoot) {
+    CClientDataModelBridge *theClientBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    // Only check for updates if we have entered new time context or receive dispatch (undo/redo).
+    // Actual control changes in this time context are handled in onDataInputChange
+    if (m_currTimeCtxRoot != timeCtxRoot || isViaDispatch) {
         if (theClientBridge->GetObjectType(timeCtxRoot) == EStudioObjectType::OBJTYPE_SCENE) {
             ctrldProp = theClientBridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
         } else if (theClientBridge->GetObjectType(timeCtxRoot) ==
@@ -181,11 +189,6 @@ void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
 
         m_currTimeCtxRoot = timeCtxRoot;
     }
-}
-
-void TimeLineToolbar::onAddDataInputClicked()
-{
-    showDataInputChooser();
 }
 
 void TimeLineToolbar::showDataInputChooser()
@@ -273,4 +276,24 @@ void TimeLineToolbar::onPlayButtonClicked()
         m_mainFrame->OnPlaybackStop();
     else
         m_mainFrame->OnPlaybackPlay();
+}
+
+void TimeLineToolbar::OnBeginDataModelNotifications()
+{
+}
+
+void TimeLineToolbar::OnEndDataModelNotifications()
+{
+    updateDataInputStatus(true);
+}
+
+void TimeLineToolbar::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    updateDataInputStatus(true);
+}
+
+void TimeLineToolbar::OnImmediateRefreshInstanceMultiple(
+    qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+{
+    updateDataInputStatus(true);
 }

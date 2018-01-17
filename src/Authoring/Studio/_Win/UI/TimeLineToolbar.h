@@ -32,6 +32,8 @@
 #include "Qt3DSDMSignals.h"
 #include "SelectedValueImpl.h"
 #include "DataInputSelectDlg.h"
+#include "DispatchListeners.h"
+#include "Dispatch.h"
 #include <QtWidgets/qwidget.h>
 
 QT_BEGIN_NAMESPACE
@@ -42,7 +44,8 @@ QT_END_NAMESPACE
 
 class CMainFrame;
 
-class TimeLineToolbar : public QWidget
+class TimeLineToolbar : public QWidget,
+                        public IDataModelListener
 {
   Q_OBJECT
 public:
@@ -57,6 +60,12 @@ public:
 
     QSize sizeHint() const;
 
+    // IDataModelListener
+    void OnBeginDataModelNotifications() override;
+    void OnEndDataModelNotifications() override;
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
+                                            long inInstanceCount) override;
 private Q_SLOTS:
     void onAddLayerClicked();
     void onPlayButtonClicked();
@@ -71,5 +80,6 @@ protected:
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     DataInputSelectDlg *m_DataInputSelector;
+    void updateDataInputStatus(bool isViaDispatch);
 };
 #endif // INCLUDED_TIMELINETOOLBAR_H
