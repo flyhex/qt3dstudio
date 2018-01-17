@@ -152,6 +152,7 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
 
 InspectorControlModel::InspectorControlModel(QObject *parent)
     : QAbstractListModel(parent)
+    , m_currController(QString())
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
     m_modifiedProperty.first = 0;
@@ -368,6 +369,25 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     }
 
     if (item->m_controllable) {
+        // Get the name of current controller
+        qt3dsdm::SValue currPropVal = currentPropertyValue(
+            item->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                item->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+        // If this property is controlled, set the model controller variable
+        // as it is needed in UI dialogs.
+        if (!currPropVal.empty()) {
+            Q3DStudio::CString propName
+                = studio->GetPropertySystem()->GetName(item->m_property).c_str();
+            Q3DStudio::CString currPropValStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+            long propNamePos = currPropValStr.find(propName);
+            if (propNamePos != currPropValStr.ENDOFSTRING && propNamePos != 0)
+                m_currController = currPropValStr.Left(currPropValStr.find(" ")).toQString();
+            else
+                m_currController = QString(tr("[No control]"));
+        }
+
+        // Update UI icon state and tooltip
         updateControlledToggleState(item);
         m_controlledToggleConnection = signalProvider->ConnectControlledToggled(
             std::bind(&InspectorControlModel::updateControlledToggleState,
@@ -430,10 +450,12 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            // property, but when we enable control of several properties
            // in a single element, we need to parse controlledproperty
            // through and find the controller name for this specific property
-           inItem->m_tooltip = tr("Controlling Datainput: %1").arg(
-               (currPropValStr.Left(currPropValStr.find(" "))).toQString());
+           const QString ctrlName = (currPropValStr.Left(
+               currPropValStr.find(" "))).toQString();
+           inItem->m_tooltip = tr("Controlling Datainput: %1").arg(ctrlName);
        }
     }
+
     Q_EMIT inItem->tooltipChanged();
      if (wasControlled != inItem->m_controlled)
         Q_EMIT inItem->controlledChanged();

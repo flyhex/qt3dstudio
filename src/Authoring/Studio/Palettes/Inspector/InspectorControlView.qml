@@ -171,6 +171,7 @@ Rectangle {
                                     width: animatedPropertyButton.sourceSize.width
                                     height: _controlBaseHeight
                                     visible: model.modelData.animatable
+
                                     Image {
                                         id: animatedPropertyButton
 
@@ -208,6 +209,30 @@ Rectangle {
                                     width: controlledPropertyButton.sourceSize.width
                                     height: _controlBaseHeight
                                     visible: model.modelData.controllable
+
+                                    MouseArea {
+                                        id: mousearea
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            const coords = mapToItem(root, mouse.x, mouse.y);
+                                            if (mouse.button === Qt.LeftButton) {
+                                                _inspectorView.showDataInputChooser(
+                                                            model.modelData.handle,
+                                                            model.modelData.instance,
+                                                            coords);
+                                            } else {
+                                                groupDelegateItem.showContextMenu(coords);
+                                            }
+                                        }
+                                    }
+                                    StyledTooltip {
+                                        id: ctrlToolTip
+                                        text: modelData.toolTip
+                                        visible: mousearea.containsMouse
+                                    }
+
                                     Image {
                                         id: controlledPropertyButton
 
@@ -222,29 +247,19 @@ Rectangle {
                                                        : "Objects-DataInput-Disabled.png")
                                         }
 
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                            onClicked:  {
-                                                const coords = mapToItem(root, mouse.x, mouse.y);
-                                                if (mouse.button === Qt.LeftButton) {
-                                                    _inspectorView.showDataInputChooser(
-                                                                model.modelData.handle,
-                                                                model.modelData.instance,
-                                                                coords);
-                                                } else {
 
-                                                    groupDelegateItem.showContextMenu(coords);
-                                                 }
-                                            }
-                                        }
                                     }
                                 }
 
                                 Item {
-                                    width: (model.modelData.animatable ||
-                                            model.modelData.controllable)
-                                           ? 4 : animatedPropertyButton.width + 4
+                                    width: (controlledPropertyButton.visible
+                                           ? 4 : controlledPropertyButton.width + 4)
+                                    height: loadedItem.height + 4 // Add little space between items
+                                }
+
+                                Item {
+                                    width: (animatedPropertyButton.visible
+                                           ? 4 : animatedPropertyButton.width + 4)
                                     height: loadedItem.height + 4 // Add little space between items
                                 }
 
@@ -273,6 +288,7 @@ Rectangle {
                                     }
 
                                     StyledTooltip {
+                                        id: valueToolTip
                                         text: modelData.toolTip
                                         visible: mouse.containsMouse
                                     }

@@ -36,12 +36,17 @@ DataInputSelectDlg::DataInputSelectDlg(QWidget *parent)
             this, &DataInputSelectDlg::onItemClicked);
 }
 
-void DataInputSelectDlg::setData(const QStringList &dataInputList)
+void DataInputSelectDlg::setData(const QStringList &dataInputList,
+                                 const QString &currentController)
 {
     clear();
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectItems);
     addItems(dataInputList);
+    QList<QListWidgetItem *> itemList = findItems(currentController, Qt::MatchFlag::MatchExactly);
+
+    if (!itemList.isEmpty())
+        setItemSelected(itemList.first(), true);
 }
 
 void DataInputSelectDlg::showDialog()
@@ -57,6 +62,8 @@ void DataInputSelectDlg::onItemClicked(QListWidgetItem *item)
 
 void DataInputSelectDlg::onSelectionChanged()
 {
-    Q_EMIT dataInputChanged(currentItem()->text());
-    hide();
+    if (currentItem()) {
+        Q_EMIT dataInputChanged(currentItem()->text());
+        hide();
+    }
 }

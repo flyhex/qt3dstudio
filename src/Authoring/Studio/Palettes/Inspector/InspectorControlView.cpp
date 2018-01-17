@@ -475,6 +475,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
                     instance, handle,
                     Q3DStudio::CString::fromQString(controllerName), controlled);
             m_inspectorControlModel->setPropertyControlled(instance, handle);
+            m_inspectorControlModel->setCurrentController(controllerName);
         });
     }
 
@@ -483,7 +484,8 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
         dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
 
-    m_dataInputChooserView->setData(dataInputList);
+    m_dataInputChooserView->setData(dataInputList,
+                                    m_inspectorControlModel->getCurrentController());
     m_dataInputChooserView->setWindowModality(Qt::WindowModality::ApplicationModal);
     m_dataInputChooserView->showDialog();
 }

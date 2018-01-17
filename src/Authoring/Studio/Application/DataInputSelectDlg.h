@@ -36,7 +36,8 @@ class DataInputSelectDlg : public QListWidget
 public:
     explicit DataInputSelectDlg(QWidget *parent = nullptr);
     void showDialog();
-    void setData(const QStringList &dataInputList);
+    void setData(const QStringList &dataInputList,
+                 const QString &currentController);
 Q_SIGNALS:
     void dataInputChanged(const QString &selected);
 

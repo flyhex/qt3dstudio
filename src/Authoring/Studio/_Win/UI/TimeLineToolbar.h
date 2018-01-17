@@ -67,6 +67,7 @@ protected:
     QSize m_preferredSize;
     CMainFrame *m_mainFrame;
     qt3dsdm::Qt3DSDMInstanceHandle m_currTimeCtxRoot = 0;
+    QString m_currController;
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     DataInputSelectDlg *m_DataInputSelector;

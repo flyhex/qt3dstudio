@@ -51,6 +51,7 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     , m_ui(new QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar))
     , m_preferredSize(preferredSize)
     , m_mainFrame(mainFrame)
+    , m_currController(QString(tr("[No control]")))
     , m_DataInputSelector(nullptr)
 {
     m_ui->setupUi(this);
@@ -170,10 +171,12 @@ void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
             m_ui->addDataInputButton->setToolTip(
                 tr("Timeline controller: %1").arg(dataInputName.left(dataInputName.indexOf(" "))));
             m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
+            m_currController = dataInputName.left(dataInputName.indexOf(" "));
         } else {
             m_ui->addDataInputButton->setToolTip(QString());
             // TODO actually delete the entire property instead of setting it as empty string
             m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Disabled.png"));
+            m_currController = QString(tr("[No control]"));
         }
 
         m_currTimeCtxRoot = timeCtxRoot;
@@ -194,7 +197,7 @@ void TimeLineToolbar::showDataInputChooser()
             dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
     }
 
-    m_DataInputSelector->setData(dataInputList);
+    m_DataInputSelector->setData(dataInputList, m_currController);
     m_DataInputSelector->setWindowModality(Qt::WindowModality::ApplicationModal);
 
     m_DataInputSelector->showDialog();
@@ -235,6 +238,7 @@ void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
         Q_ASSERT(false);
 
     m_currTimeCtxRoot = timeCtxRoot;
+    m_currController = dataInputName;
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Timeline control"))
         ->SetInstancePropertyValue(timeCtxRoot, ctrldPropertyHandle, fullTimeCtrlVal);
