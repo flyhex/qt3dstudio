@@ -37,6 +37,9 @@
 #include "StudioApp.h"
 #include "StudioUtils.h"
 #include "SlideContextMenu.h"
+#include "DataInputSelectDlg.h"
+#include "DataInputDlg.h"
+#include "IDocumentEditor.h"
 
 #include "ClientDataModelBridge.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -111,6 +114,22 @@ void SlideView::setShowMasterSlide(bool show)
     Q_EMIT currentModelChanged();
 }
 
+void SlideView::showControllerDialog()
+{
+    QStringList dataInputList;
+    dataInputList.append(tr("[No control]"));
+    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
+        if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeString)
+            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+    }
+    QString currCtr = m_currentController.size() ?
+        m_currentController : tr("[No control]");
+    m_dataInputSelector->setData(dataInputList, currCtr);
+    m_dataInputSelector->showDialog();
+
+    return;
+}
+
 QSize SlideView::sizeHint() const
 {
     return {150, 500};
@@ -182,7 +201,11 @@ void SlideView::OnNewPresentation()
     m_Connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
                 std::bind(&SlideModel::refreshSlideLabel, m_SlidesModel,
                           std::placeholders::_1, std::placeholders::_2)));
-
+    // Set up listener for undo/redo changes in order to update
+    // slide datainput control
+    CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
+    theDispatch->AddDataModelListener(this);
+    updateDataInputStatus(false);
 }
 
 void SlideView::OnClosingPresentation()
@@ -219,6 +242,102 @@ void SlideView::OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, i
     m_SlidesModel->onSlideRearranged(inMaster, inOldIndex, inNewIndex);
 }
 
+void SlideView::onDataInputChange(const QString &dataInputName)
+{
+    if (dataInputName == m_currentController ||
+        (dataInputName == tr("[No Control]") && !m_currentController.size())) {
+        return;
+    }
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetSceneInstance();
+    QString fullSlideControlStr;
+
+    if (dataInputName != tr("[No control]")) {
+        fullSlideControlStr = dataInputName + " @slide";
+        m_controlled = true;
+        m_currentController = dataInputName;
+        m_toolTip = tr("Slide Controller: ") + m_currentController;
+    } else {
+        m_controlled = false;
+        m_currentController.clear();
+        m_toolTip = tr("No controller");
+    }
+
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp
+            = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
+        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+            *doc,
+            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(slideRoot,
+                                                                            ctrldProp);
+
+    // To indicate that slide transitions are controlled by data input,
+    // we set "controlled property" of this scene to contain the name of
+    // controller followed by special indicator "@slide".
+    // If we have existing slide control in this root element, replace it.
+    // Otherwise just append slide control string to controlledproperty
+    // (it might already contain timeline control information)
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    if (existingCtrl.contains("@slide")) {
+        int slideStrPos = existingCtrl.indexOf("@slide");
+        // find the controlling datainput name and build the string to replace
+        int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
+        QString prevCtrler = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 1);
+        existingCtrl.replace(prevCtrler + "@slide", fullSlideControlStr);
+    } else {
+        (!existingCtrl.isEmpty() && m_controlled) ? existingCtrl.append(" ") : 0;
+        existingCtrl.append(fullSlideControlStr);
+    }
+
+    if (existingCtrl.endsWith(" "))
+        existingCtrl.chop(1);
+
+    if (existingCtrl.startsWith(" "))
+        existingCtrl.remove(0, 1);
+
+    qt3dsdm::SValue fullCtrlPropVal
+            = std::make_shared<qt3dsdm::CDataStr>(
+                Q3DStudio::CString::fromQString(existingCtrl));
+
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Slide control"))
+        ->SetInstancePropertyValue(slideRoot, ctrldProp, fullCtrlPropVal);
+
+    Q_EMIT controlledChanged();
+}
+
+// Set the state of slide control based on scene
+// controlledproperty
+void SlideView::updateDataInputStatus(bool isViaDispatch)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetSceneInstance();
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp
+        = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
+        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+            *doc,
+            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(slideRoot,
+                                                                            ctrldProp);
+
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    if (existingCtrl.contains("@slide")) {
+        int slideStrPos = existingCtrl.indexOf("@slide");
+        int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
+        m_currentController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
+        m_toolTip = tr("Slide Controller: ") + m_currentController;
+        m_controlled = true;
+    } else {
+        m_currentController.clear();
+        m_toolTip = tr("No controller");
+        m_controlled = false;
+    }
+
+    // update UI
+    Q_EMIT controlledChanged();
+}
 void SlideView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
@@ -227,6 +346,14 @@ void SlideView::initialize()
 
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
+
+    m_dataInputSelector = new DataInputSelectDlg(parentWidget());
+    connect(m_dataInputSelector, &DataInputSelectDlg::dataInputChanged,
+            this, &SlideView::onDataInputChange);
+    m_dataInputSelector->hide();
+    m_dataInputSelector->setWindowModality(Qt::WindowModality::WindowModal);
+    m_dataInputSelector->setWindowFlags(Qt::Tool | Qt::Dialog);
+    m_dataInputSelector->setWindowTitle(tr("Select slide controller"));
 }
 
 void SlideView::clearSlideList()
@@ -327,6 +454,26 @@ long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 {
     return (0 == GetSlideIndex(inSlideHandle));
+}
+
+void SlideView::OnBeginDataModelNotifications()
+{
+}
+
+void SlideView::OnEndDataModelNotifications()
+{
+    updateDataInputStatus(true);
+}
+
+void SlideView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    updateDataInputStatus(true);
+}
+
+void SlideView::OnImmediateRefreshInstanceMultiple(
+    qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+{
+    updateDataInputStatus(true);
 }
 
 
