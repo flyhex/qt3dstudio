@@ -39,6 +39,7 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         spacing: 4
+        width: parent.width
 
         Item {
             Layout.fillWidth: true
@@ -228,12 +229,16 @@ Rectangle {
             }
         }
 
-        StyledMenuSeparator {}
+        StyledMenuSeparator {
+            leftPadding: 12
+            rightPadding: 12
+        }
 
         RowLayout {
             width: parent.width
             Layout.margins: 4
             Layout.rightMargin: 12
+            Layout.leftMargin: 12
 
             StyledToolButton {
                 enabledImage: "Asset-import-Normal.png";

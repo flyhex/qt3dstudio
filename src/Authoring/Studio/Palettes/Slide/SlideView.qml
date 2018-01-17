@@ -113,10 +113,12 @@ Rectangle {
             ScrollBar.vertical: ScrollBar {}
 
             width: root.width
-            height: root.height - masterButtonColumn.height
-                    - separator.height - separator2.height
-                    - parent.spacing * 2 - 14 - slideControlButton.height
-                    - slideControlButton.spacing * 2
+            property int listItemHeight: root.height - masterButtonColumn.height
+                                         - separator.height - separator2.height
+                                         - parent.spacing * 2 - 14 - slideControlButton.height
+                                         - slideControlButton.spacing * 2
+            height: listItemHeight > 0 ? listItemHeight : 0
+
             anchors.horizontalCenter: parent.horizontalCenter
             boundsBehavior: Flickable.StopAtBounds
             clip: true
