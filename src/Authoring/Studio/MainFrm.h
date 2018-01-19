@@ -143,6 +143,7 @@ public:
     void OnEditApplicationPreferences();
     void OnEditPresentationPreferences();
     void OnEditSubPresentations();
+    void OnEditDataInputs();
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();

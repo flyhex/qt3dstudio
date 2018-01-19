@@ -78,6 +78,7 @@ class CViews;
 class CMainFrame;
 enum EStudioObjectType;
 struct SubPresentationRecord;
+class SDataInputDialogItem;
 
 class CStudioApp : public QObject,
         public CCoreAsynchronousEventListener,
@@ -227,6 +228,8 @@ public:
     Q3DStudio::CString m_pszHelpFilePath;
 
     QVector<SubPresentationRecord> m_subpresentations;
+    QVector<SDataInputDialogItem *> m_dataInputDialogItems;
+
     void SaveUIAFile();
 };
 

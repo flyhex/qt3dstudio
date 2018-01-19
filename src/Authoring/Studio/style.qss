@@ -232,6 +232,7 @@ QPushButton:pressed {
 
 QHeaderView::section {
     background: transparent;
+    min-height: 26px;
 }
 
 QHeaderView::section:hover {

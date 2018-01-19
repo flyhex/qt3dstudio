@@ -46,13 +46,23 @@ QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 class SDataInputDialogItem
 {
 public:
-    float m_Value;
-    QString m_ValueStr;
-    QString m_ControlledElemProp;
-    int m_TimeFrom;
-    int m_TimeTo;
+    QString valueString;
+    int minValue;
+    int maxValue;
     QString name;
     int type;
+};
+
+enum EDataType {
+    DataTypeNumber = 0,
+    DataTypeString,
+#if 0 // TODO: To be added in version 2.x
+    DataTypeEvaluator,
+    DataTypeBoolean,
+    DataTypeVector3,
+    DataTypeVector2,
+    DataTypeVariant
+#endif
 };
 
 class CDataInputDlg : public QDialog
@@ -66,6 +76,7 @@ public:
 protected:
     void initDialog();
     QString getUniqueId(const QString &id);
+    void updateVisibility(int type);
 
 private Q_SLOTS:
     void on_buttonBox_accepted();
@@ -74,6 +85,9 @@ private Q_SLOTS:
     void onMinChanged(float min);
     void onMaxChanged(float max);
     void onNameChanged(const QString &name);
+#if 0 // TODO: To be added in version 2.x
+    void onTextChanged(const QString &text);
+#endif
 
 private:
     Ui::DataInputDlg *m_ui;
@@ -83,6 +97,9 @@ private:
     float m_max;
     float m_min;
     int m_type;
+#if 0 // TODO: To be added in version 2.x
+    QString m_text;
+#endif
 };
 
 #endif

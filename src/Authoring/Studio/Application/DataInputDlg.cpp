@@ -45,11 +45,14 @@ CDataInputDlg::CDataInputDlg(SDataInputDialogItem **datainput, QStandardItemMode
 {
     m_ui->setupUi(this);
 
-    m_ui->comboBoxTypeList->addItem(tr("Number"));
-#if 0 // TODO: To be added in future version
-    m_ui->comboBoxTypeList->addItem(tr("Text"));
-    m_ui->comboBoxTypeList->addItem(tr("Color"));
+    m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
+    m_ui->comboBoxTypeList->addItem(tr("String"));
+#if 0 // TODO: To be added in version 2.x
+    m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
     m_ui->comboBoxTypeList->addItem(tr("Boolean"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector3"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
+    m_ui->comboBoxTypeList->addItem(tr("Variant"));
 #endif
 
     initDialog();
@@ -64,6 +67,9 @@ CDataInputDlg::CDataInputDlg(SDataInputDialogItem **datainput, QStandardItemMode
             static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &CDataInputDlg::onMaxChanged);
     connect(m_ui->lineEditInputName, &QLineEdit::textChanged, this, &CDataInputDlg::onNameChanged);
+#if 0 // TODO: To be added in version 2.x
+    connect(m_ui->lineEditEvaluation, &QLineEdit::textChanged, this, &CDataInputDlg::onTextChanged);
+#endif
 }
 
 CDataInputDlg::~CDataInputDlg()
@@ -73,11 +79,21 @@ CDataInputDlg::~CDataInputDlg()
 
 void CDataInputDlg::initDialog()
 {
+    m_ui->lineEditEvaluation->setVisible(false);
+    m_ui->labelEvaluation->setVisible(false);
     if (!m_dataInput->name.isEmpty()) {
         m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
+        updateVisibility(m_dataInput->type);
         m_ui->lineEditInputName->setText(m_dataInput->name);
-        m_ui->doubleSpinBoxMin->setValue(m_dataInput->m_TimeFrom / 1000.);
-        m_ui->doubleSpinBoxMax->setValue(m_dataInput->m_TimeTo / 1000.);
+        if (m_type == DataTypeNumber) {
+            m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue / 1000.);
+            m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue / 1000.);
+        }
+#if 0 // TODO: To be added in version 2.x
+        else if (m_type == DataTypeEvaluator) {
+            m_ui->lineEditEvaluation->setText(m_dataInput->valueString);
+        }
+#endif
     } else {
         m_name = getUniqueId(tr("newDataInput"));
         m_ui->lineEditInputName->setText(m_name);
@@ -88,10 +104,15 @@ void CDataInputDlg::on_buttonBox_accepted()
 {
     m_dataInput->name = m_name;
     m_dataInput->type = m_type;
-    if (m_type == 0) {
-        m_dataInput->m_TimeFrom = m_min * 1000.;
-        m_dataInput->m_TimeTo = m_max * 1000.;
+    if (m_type == DataTypeNumber) {
+        m_dataInput->minValue = m_min * 1000.;
+        m_dataInput->maxValue = m_max * 1000.;
     }
+#if 0 // TODO: To be added in version 2.x
+    else if (m_type == DataTypeEvaluator) {
+        m_dataInput->valueString = m_text;
+    }
+#endif
     QDialog::accept();
 }
 
@@ -102,17 +123,7 @@ void CDataInputDlg::on_buttonBox_rejected()
 
 void CDataInputDlg::onTypeChanged(int type)
 {
-    if (type == 0) {
-        m_ui->labelMin->setVisible(true);
-        m_ui->labelMax->setVisible(true);
-        m_ui->doubleSpinBoxMin->setVisible(true);
-        m_ui->doubleSpinBoxMax->setVisible(true);
-    } else {
-        m_ui->labelMin->setVisible(false);
-        m_ui->labelMax->setVisible(false);
-        m_ui->doubleSpinBoxMin->setVisible(false);
-        m_ui->doubleSpinBoxMax->setVisible(false);
-    }
+    updateVisibility(type);
     m_type = type;
 }
 
@@ -136,6 +147,13 @@ void CDataInputDlg::onNameChanged(const QString &name)
     m_ui->lineEditInputName->setText(m_name);
 }
 
+#if 0 // TODO: To be added in version 2.x
+void CDataInputDlg::onTextChanged(const QString &text)
+{
+    m_text = text;
+}
+#endif
+
 QString CDataInputDlg::getUniqueId(const QString &id)
 {
     QString retval = QStringLiteral("%1").arg(id);
@@ -145,4 +163,30 @@ QString CDataInputDlg::getUniqueId(const QString &id)
         ++idx;
     }
     return retval;
+}
+
+void CDataInputDlg::updateVisibility(int type)
+{
+    if (type == DataTypeNumber) {
+        m_ui->labelMin->setVisible(true);
+        m_ui->labelMax->setVisible(true);
+        m_ui->doubleSpinBoxMin->setVisible(true);
+        m_ui->doubleSpinBoxMax->setVisible(true);
+    } else {
+        m_ui->labelMin->setVisible(false);
+        m_ui->labelMax->setVisible(false);
+        m_ui->doubleSpinBoxMin->setVisible(false);
+        m_ui->doubleSpinBoxMax->setVisible(false);
+    }
+
+#if 0 // TODO: To be added in version 2.x
+    if (type == DataTypeEvaluator) {
+        m_ui->lineEditEvaluation->setVisible(true);
+        m_ui->labelEvaluation->setVisible(true);
+
+    } else {
+        m_ui->lineEditEvaluation->setVisible(false);
+        m_ui->labelEvaluation->setVisible(false);
+    }
+#endif
 }

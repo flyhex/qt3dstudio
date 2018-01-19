@@ -255,6 +255,8 @@
         <file>images/Objects-DataInput-Disabled@2x.png</file>
         <file>images/Asset-import-Normal.png</file>
         <file>images/Asset-import-Normal@2x.png</file>
+        <file>images/arrow_up.png</file>
+        <file>images/arrow_up@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

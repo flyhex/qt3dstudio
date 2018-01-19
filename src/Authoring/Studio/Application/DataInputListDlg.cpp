@@ -38,7 +38,7 @@ CDataInputListDlg::CDataInputListDlg(QVector<SDataInputDialogItem *> *datainputs
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
     , m_currentDataInputIndex(-1)
-    , m_tableContents(new QStandardItemModel(0, 4, this))
+    , m_tableContents(new QStandardItemModel(0, 3, this))
 {
     m_ui->setupUi(this);
 
@@ -89,10 +89,13 @@ void CDataInputListDlg::initDialog()
     // Disable selecting the whole table
     m_ui->tableView->setCornerButtonEnabled(false);
 
+    // Make the expression column wider than name and type
+    m_ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    m_ui->tableView->horizontalHeader()->setMinimumSectionSize(125);
+
     // Align columns left and prevent selecting the whole column
     m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     m_ui->tableView->horizontalHeader()->setSectionsClickable(false);
-    m_ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // Hide the vertical header with line numbers
     m_ui->tableView->verticalHeader()->setHidden(true);
@@ -128,7 +131,7 @@ void CDataInputListDlg::updateContents()
     m_tableContents->clear();
 
     QStringList labels;
-    labels << tr("Name") << tr("Input Type") << tr("Min Range") << tr("Max Range");
+    labels << tr("Name") << tr("Input Type") << tr("Expression");
     m_tableContents->setHorizontalHeaderLabels(labels);
 
     QList<QStandardItem *> dataInput;
@@ -136,20 +139,29 @@ void CDataInputListDlg::updateContents()
         dataInput.clear();
         dataInput.append(new QStandardItem(m_dataInputs.at(i)->name));
         int dataInputType = m_dataInputs.at(i)->type;
-        if (dataInputType == 0) {
-            dataInput.append(new QStandardItem(tr("Number")));
-            dataInput.append(new QStandardItem(QString::number(
-                                                   m_dataInputs.at(i)->m_TimeFrom / 1000.)));
-            dataInput.append(new QStandardItem(QString::number(
-                                                   m_dataInputs.at(i)->m_TimeTo / 1000.)));
+        if (dataInputType == DataTypeNumber) {
+            dataInput.append(new QStandardItem(tr("Ranged Number")));
+            QString expression = QStringLiteral("[ ")
+                    + QString::number(m_dataInputs.at(i)->minValue / 1000.)
+                    + QStringLiteral(" ... ")
+                    + QString::number(m_dataInputs.at(i)->maxValue / 1000.)
+                    + QStringLiteral(" ]");
+            dataInput.append(new QStandardItem(expression));
+        } else if (dataInputType == DataTypeString) {
+            dataInput.append(new QStandardItem(tr("String")));
         }
 #if 0 // TODO: To be added in future version
-        else if (dataInputType == 1) {
-            dataInput.append(new QStandardItem(tr("Text")));
-        } else if (dataInputType == 2) {
-            dataInput.append(new QStandardItem(tr("Color")));
-        } else if (dataInputType == 3) {
+        else if (dataInputType == DataTypeEvaluator) {
+            dataInput.append(new QStandardItem(tr("Evaluator")));
+            dataInput.append(new QStandardItem(m_dataInputs.at(i)->valueString));
+        }  else if (dataInputType == DataTypeBoolean) {
             dataInput.append(new QStandardItem(tr("Boolean")));
+        } else if (dataInputType == DataTypeVector3) {
+            dataInput.append(new QStandardItem(tr("Vector3")));
+        } else if (dataInputType == DataTypeVector2) {
+            dataInput.append(new QStandardItem(tr("Vector2")));
+        } else if (dataInputType == DataTypeVariant) {
+            dataInput.append(new QStandardItem(tr("Variant")));
         }
 #endif
         m_tableContents->appendRow(dataInput);
@@ -178,9 +190,8 @@ void CDataInputListDlg::onAddDataInput()
     // Create a new data input dialog item and give it to dialog
     SDataInputDialogItem *dataInput = new SDataInputDialogItem();
     CDataInputDlg datainputdialog(&dataInput, m_tableContents, this);
-    datainputdialog.exec();
-
-    m_dataInputs.append(dataInput);
+    if (datainputdialog.exec() == QDialog::Accepted)
+        m_dataInputs.append(dataInput);
 
     updateButtons();
     updateContents();

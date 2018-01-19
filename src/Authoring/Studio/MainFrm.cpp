@@ -54,6 +54,7 @@
 #include "ITickTock.h"
 #include "IStudioRenderer.h"
 #include "SubPresentationListDlg.h"
+#include "DataInputListDlg.h"
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
@@ -123,6 +124,8 @@ CMainFrame::CMainFrame()
             this, &CMainFrame::OnEditPresentationPreferences);
     connect(m_ui->actionSubpresentations, &QAction::triggered, this,
             &CMainFrame::OnEditSubPresentations);
+    connect(m_ui->actionData_Inputs, &QAction::triggered, this,
+            &CMainFrame::OnEditDataInputs);
     connect(m_ui->action_Duplicate_Object, &QAction::triggered,
             this, &CMainFrame::OnEditDuplicate);
 
@@ -779,7 +782,7 @@ void CMainFrame::OnEditPresentationPreferences()
 
 //==============================================================================
 /**
- *  Displays the preferences dialog and can change subpresentation settings.
+ *  Displays the sub-presentation dialog.
  */
 void CMainFrame::OnEditSubPresentations()
 {
@@ -791,6 +794,20 @@ void CMainFrame::OnEditSubPresentations()
         g_StudioApp.m_subpresentations = dlg.subpresentations();
         g_StudioApp.SaveUIAFile();
     }
+}
+
+//==============================================================================
+/**
+ *  Displays the data input dialog.
+ */
+void CMainFrame::OnEditDataInputs()
+{
+    CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems));
+    dataInputDlg.exec();
+
+    // TODO: Implement writing (and reading) the data from UIA file (QT3DS-834)
+//    if (dataInputDlg.result() == QDialog::Accepted)
+//        g_StudioApp.SaveUIAFile();
 }
 
 //==============================================================================
