@@ -56,29 +56,20 @@
 
 \table
   \header
-    \li {2, 1} Function
+    \li Function
     \li Shortcut
   \row
-    \li {2, 1} Show Matte
-    \li \c{F6}
+    \li Show Matte
+    \li \c{Ctrl + D}
   \row
     \li Scale Modes
-    \li Center
-    \li \c{F2}
+    \li \c{Ctrl + Shift + S} (cycle through scale modes)
   \row
-    \li
-    \li Scale to Fit
-    \li \c{F3}
+    \li Show Render Statistics
+    \li \c{F7}
   \row
-    \li
-    \li Scale to Fill
-    \li \c{F4}
-  \row
-    \li {2, 1} Show Render Statistics
-    \li \c{F1}
-  \row
-    \li {2, 1} Full Screen
-    \li \c{F11}
+    \li Full Screen
+    \li \c{F11} (To exit full screen, ESC or swipe down gesture can also be used)
 \endtable
 
 */

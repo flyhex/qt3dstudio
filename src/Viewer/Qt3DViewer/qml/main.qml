@@ -440,7 +440,7 @@ ApplicationWindow {
                     id: viewMenu
                     StyledMenuItem {
                         text: qsTr("Show Matte")
-                        shortcut: "F6"
+                        shortcut: "Ctrl+D"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                         showCheckMark: window.matteColor !== window.hideMatteColor
                         onTriggered: {
@@ -457,7 +457,20 @@ ApplicationWindow {
                         text: qsTr("Scale Mode")
                         showArrow: true
                         arrowMenu: scaleMenu
+                        shortcut: "Ctrl+Shift+S"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                        onTriggered: {
+                            if (enabled) {
+                                scaleMenu.close();
+                                if (window.scaleMode === ViewerSettings.ScaleModeCenter)
+                                    window.scaleMode = ViewerSettings.ScaleModeFit;
+                                else if (window.scaleMode === ViewerSettings.ScaleModeFit)
+                                    window.scaleMode = ViewerSettings.ScaleModeFill;
+                                else if (window.scaleMode === ViewerSettings.ScaleModeFill)
+                                    window.scaleMode = ViewerSettings.ScaleModeCenter;
+                            }
+                        }
+
                         StyledMenu {
                             id: scaleMenu
                             x: parent.width
@@ -466,7 +479,6 @@ ApplicationWindow {
                             StyledMenuItem {
                                 id: scaleCenter
                                 text: qsTr("Center")
-                                shortcut: "F2"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                                 showCheckMark: window.scaleMode === ViewerSettings.ScaleModeCenter
                                 onTriggered: {
@@ -477,7 +489,6 @@ ApplicationWindow {
                             StyledMenuItem {
                                 id: scaleFit
                                 text: qsTr("Scale to Fit")
-                                shortcut: "F3"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                                 showCheckMark: window.scaleMode === ViewerSettings.ScaleModeFit
                                 onTriggered: {
@@ -488,7 +499,6 @@ ApplicationWindow {
                             StyledMenuItem {
                                 id: scaleFill
                                 text: qsTr("Scale to Fill")
-                                shortcut: "F4"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                                 showCheckMark: window.scaleMode === ViewerSettings.ScaleModeFill
                                 onTriggered: {
@@ -500,7 +510,7 @@ ApplicationWindow {
                     }
                     StyledMenuItem {
                         text: qsTr("Show Render Statistics")
-                        shortcut: "F1"
+                        shortcut: "F7"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                         showCheckMark: window.showRenderStats
                         onTriggered: {
@@ -512,6 +522,15 @@ ApplicationWindow {
                     StyledMenuItem {
                         text: qsTr("Full Screen")
                         shortcut: "F11"
+                        Shortcut {
+                            sequence: "ESC"
+                            context: Qt.ApplicationShortcut
+                            enabled: window.visibility === Window.FullScreen
+                            onActivated: {
+                                window.visibility = window.previousVisibility;
+                            }
+                        }
+
                         onTriggered: {
                             if (window.visibility !== Window.FullScreen) {
                                 window.previousVisibility = window.visibility
