@@ -41,7 +41,8 @@ namespace state {
         // Upon creation of this application file, ensure the creation of
         // Returns false if it was unable to write or update the uia file.
         static bool EnsureApplicationFile(const char *inFullUIPPath,
-                                          const QStringList &presentations);
+                                          const QStringList &presentations,
+                                          bool subpresentations);
         static eastl::string GetLaunchFile(const char *inFullUIPPath);
     };
 }

@@ -2761,11 +2761,12 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-QString CDoc::GetDocumentUIAFile()
+QString CDoc::GetDocumentUIAFile(bool master)
 {
     Q3DStudio::CString docDir = GetDocumentDirectory();
     Q3DStudio::CString docName
             = Q3DStudio::CFilePath(GetDocumentPath().GetName()).GetFileStem();
+
     QString file;
     std::vector<Q3DStudio::CFilePath> dirFiles;
     Q3DStudio::CFilePath thePath(docDir);
@@ -2773,7 +2774,7 @@ QString CDoc::GetDocumentUIAFile()
     for (size_t idx = 0, end = dirFiles.size(); idx < end; ++idx) {
         if (dirFiles[idx].IsFile()) {
             Q3DStudio::CString ext = dirFiles[idx].GetExtension();
-            if (ext.CompareNoCase("uia") && dirFiles[idx].GetFileStem() == docName) {
+            if (ext.CompareNoCase("uia") && (master || dirFiles[idx].GetFileStem() == docName)) {
                 file = dirFiles[idx].toQString();
                 break;
             }
@@ -2833,3 +2834,52 @@ void CDoc::LoadUIASubpresentations(const QString &uiaFile,
         }
     }
 }
+
+void CDoc::LoadUIADataInputs(const QString &uiaFile,
+                             QVector<CDataInputDialogItem *> &datainputs)
+{
+    if (QFileInfo::exists(uiaFile)) {
+        qt3dsdm::TStringTablePtr theStringTable = qt3dsdm::IStringTable::CreateStringTable();
+        std::shared_ptr<qt3dsdm::IDOMFactory> theDomFact =
+                qt3dsdm::IDOMFactory::CreateDOMFactory(theStringTable);
+
+        qt3ds::foundation::CFileSeekableIOStream theStream(uiaFile,
+                                                           qt3ds::foundation::FileReadFlags());
+
+        qt3dsdm::SDOMElement *theElem = qt3dsdm::CDOMSerializer::Read(*theDomFact, theStream);
+        if (theElem) {
+            std::shared_ptr<qt3dsdm::IDOMReader> theReader =
+                    qt3dsdm::IDOMReader::CreateDOMReader(*theElem, theStringTable, theDomFact);
+            if (theReader->MoveToFirstChild("assets")) {
+                 for (bool success = theReader->MoveToFirstChild(); success;
+                     success = theReader->MoveToNextSibling()) {
+                    if (qt3dsdm::AreEqual(theReader->GetElementName(), L"dataInput")) {
+                        qt3dsdm::TXMLStr name = nullptr;
+                        qt3dsdm::TXMLStr type = nullptr;
+                        qt3dsdm::TXMLStr min = nullptr;
+                        qt3dsdm::TXMLStr max = nullptr;
+                        CDataInputDialogItem *item = new CDataInputDialogItem();
+
+                        theReader->Att("name", name);
+                        item->name = QString(name.c_str());
+                        // TODO: Dump int/enum type and use string instead?
+                        if (theReader->Att("type", type)) {
+                            if (!QString(type.c_str()).compare(QStringLiteral("Ranged Number"))) {
+                                item->type = 0;
+                                if (theReader->Att("min", min))
+                                    item->minValue = QString(min.c_str()).toFloat();
+                                if (theReader->Att("max", max))
+                                    item->maxValue = QString(max.c_str()).toFloat();
+                            } else {
+                                item->type = 1;
+                            }
+                        }
+
+                        datainputs.push_back(item);
+                    }
+                }
+            }
+        }
+    }
+}
+

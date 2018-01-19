@@ -32,7 +32,7 @@
 #include <QtWidgets/qabstractbutton.h>
 #include <QtGui/qstandarditemmodel.h>
 
-CDataInputDlg::CDataInputDlg(SDataInputDialogItem **datainput, QStandardItemModel *data,
+CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                              QWidget *parent)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputDlg)
@@ -85,9 +85,9 @@ void CDataInputDlg::initDialog()
         m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
         updateVisibility(m_dataInput->type);
         m_ui->lineEditInputName->setText(m_dataInput->name);
-        if (m_type == DataTypeNumber) {
-            m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue / 1000.);
-            m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue / 1000.);
+        if (m_type == DataTypeRangedNumber) {
+            m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue);
+            m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
         }
 #if 0 // TODO: To be added in version 2.x
         else if (m_type == DataTypeEvaluator) {
@@ -104,9 +104,9 @@ void CDataInputDlg::on_buttonBox_accepted()
 {
     m_dataInput->name = m_name;
     m_dataInput->type = m_type;
-    if (m_type == DataTypeNumber) {
-        m_dataInput->minValue = m_min * 1000.;
-        m_dataInput->maxValue = m_max * 1000.;
+    if (m_type == DataTypeRangedNumber) {
+        m_dataInput->minValue = m_min;
+        m_dataInput->maxValue = m_max;
     }
 #if 0 // TODO: To be added in version 2.x
     else if (m_type == DataTypeEvaluator) {
@@ -167,7 +167,7 @@ QString CDataInputDlg::getUniqueId(const QString &id)
 
 void CDataInputDlg::updateVisibility(int type)
 {
-    if (type == DataTypeNumber) {
+    if (type == DataTypeRangedNumber) {
         m_ui->labelMin->setVisible(true);
         m_ui->labelMax->setVisible(true);
         m_ui->doubleSpinBoxMin->setVisible(true);

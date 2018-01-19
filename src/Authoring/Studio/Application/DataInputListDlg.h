@@ -41,7 +41,7 @@ namespace Ui {
 }
 QT_END_NAMESPACE
 
-class SDataInputDialogItem;
+class CDataInputDialogItem;
 
 QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 
@@ -49,14 +49,14 @@ class CDataInputListDlg : public QDialog
 {
     Q_OBJECT
 public:
-    CDataInputListDlg(QVector<SDataInputDialogItem *> *datainputs, QWidget* parent = nullptr);
+    CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs, QWidget* parent = nullptr);
     ~CDataInputListDlg();
 
 protected:
     void initDialog();
     void updateButtons();
     void updateContents();
-    QVector<SDataInputDialogItem *> dataInputs() const;
+    QVector<CDataInputDialogItem *> dataInputs() const;
 
 private Q_SLOTS:
     void on_buttonBox_accepted();
@@ -68,8 +68,8 @@ private Q_SLOTS:
 
 private:
     Ui::DataInputListDlg *m_ui;
-    QVector<SDataInputDialogItem *> m_dataInputs;
-    QVector<SDataInputDialogItem *> *m_actualDataInputs;
+    QVector<CDataInputDialogItem *> m_dataInputs;
+    QVector<CDataInputDialogItem *> *m_actualDataInputs;
     int m_currentDataInputIndex;
     QStandardItemModel *m_tableContents;
 };

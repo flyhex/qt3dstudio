@@ -805,9 +805,8 @@ void CMainFrame::OnEditDataInputs()
     CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems));
     dataInputDlg.exec();
 
-    // TODO: Implement writing (and reading) the data from UIA file (QT3DS-834)
-//    if (dataInputDlg.result() == QDialog::Accepted)
-//        g_StudioApp.SaveUIAFile();
+    if (dataInputDlg.result() == QDialog::Accepted)
+        g_StudioApp.SaveUIAFile(false);
 }
 
 //==============================================================================

@@ -246,7 +246,7 @@ void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
 #ifdef DRIVE_DESIGN_STUDIO
     // Update the uia file if possible.
     QByteArray docBA = theDocument.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList());
+    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(), true);
 #endif
 }
 

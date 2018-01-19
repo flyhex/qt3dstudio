@@ -152,7 +152,7 @@ void InspectorControlView::onFilesChanged(
         if (record.m_FileInfo.IsFile()
                 && record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {
             if (record.m_File.toQString() == g_StudioApp.GetCore()->GetDoc()
-                    ->GetDocumentUIAFile()) {
+                    ->GetDocumentUIAFile(false)) {
                 m_inspectorControlModel->refreshRenderables();
             }
         }

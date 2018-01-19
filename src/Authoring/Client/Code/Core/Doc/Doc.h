@@ -142,6 +142,16 @@ struct SubPresentationRecord
     }
 };
 
+class CDataInputDialogItem
+{
+public:
+    QString valueString;
+    float minValue;
+    float maxValue;
+    QString name;
+    int type;
+};
+
 //==============================================================================
 //	CDoc Class
 //==============================================================================
@@ -177,9 +187,11 @@ public:
     void LoadDocument(const Qt3DSFile &inDocument);
     void SaveDocument(const Qt3DSFile &inDocument);
     void CreateNewDocument();
-    QString GetDocumentUIAFile();
+    QString GetDocumentUIAFile(bool master = false);
     void LoadUIASubpresentations(const QString &uiaFile,
                                  QVector<SubPresentationRecord> &subpresentations);
+    void LoadUIADataInputs(const QString &uiaFile,
+                           QVector<CDataInputDialogItem *> &datainputs);
 
     bool IsModified();
     bool IsValid() const;

@@ -33,7 +33,7 @@
 #include <QtWidgets/qpushbutton.h>
 #include <QtGui/qstandarditemmodel.h>
 
-CDataInputListDlg::CDataInputListDlg(QVector<SDataInputDialogItem *> *datainputs, QWidget *parent)
+CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs, QWidget *parent)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
@@ -139,12 +139,12 @@ void CDataInputListDlg::updateContents()
         dataInput.clear();
         dataInput.append(new QStandardItem(m_dataInputs.at(i)->name));
         int dataInputType = m_dataInputs.at(i)->type;
-        if (dataInputType == DataTypeNumber) {
+        if (dataInputType == DataTypeRangedNumber) {
             dataInput.append(new QStandardItem(tr("Ranged Number")));
             QString expression = QStringLiteral("[ ")
-                    + QString::number(m_dataInputs.at(i)->minValue / 1000.)
+                    + QString::number(m_dataInputs.at(i)->minValue)
                     + QStringLiteral(" ... ")
-                    + QString::number(m_dataInputs.at(i)->maxValue / 1000.)
+                    + QString::number(m_dataInputs.at(i)->maxValue)
                     + QStringLiteral(" ]");
             dataInput.append(new QStandardItem(expression));
         } else if (dataInputType == DataTypeString) {
@@ -188,7 +188,7 @@ void CDataInputListDlg::on_buttonBox_rejected()
 void CDataInputListDlg::onAddDataInput()
 {
     // Create a new data input dialog item and give it to dialog
-    SDataInputDialogItem *dataInput = new SDataInputDialogItem();
+    CDataInputDialogItem *dataInput = new CDataInputDialogItem();
     CDataInputDlg datainputdialog(&dataInput, m_tableContents, this);
     if (datainputdialog.exec() == QDialog::Accepted)
         m_dataInputs.append(dataInput);

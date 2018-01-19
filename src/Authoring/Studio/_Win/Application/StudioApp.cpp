@@ -38,6 +38,7 @@
 #include "StudioApp.h"
 #include "Qt3DSStateApplication.h"
 #include "PlayerWnd.h"
+#include "DataInputDlg.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -1388,6 +1389,10 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_subpresentations.clear();
         m_Core->GetDoc()->LoadUIASubpresentations(m_Core->GetDoc()->GetDocumentUIAFile(),
                                                   m_subpresentations);
+
+        m_dataInputDialogItems.clear();
+        m_Core->GetDoc()->LoadUIADataInputs(m_Core->GetDoc()->GetDocumentUIAFile(true),
+                                            m_dataInputDialogItems);
     }
 
     m_AuthorZoom = false;
@@ -1402,17 +1407,31 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
 /**
  *
  */
-void CStudioApp::SaveUIAFile()
+void CStudioApp::SaveUIAFile(bool subpresentations)
 {
     QStringList list;
-    for (SubPresentationRecord r : m_subpresentations) {
-        list.append(r.m_type);
-        list.append(r.m_id);
-        list.append(r.m_argsOrSrc);
+    if (subpresentations) {
+        for (SubPresentationRecord r : m_subpresentations) {
+            list.append(r.m_type);
+            list.append(r.m_id);
+            list.append(r.m_argsOrSrc);
+        }
+    } else {
+        for (CDataInputDialogItem *item : m_dataInputDialogItems) {
+            list.append(item->name);
+            if (item->type == EDataType::DataTypeRangedNumber)
+                list.append(QStringLiteral("Ranged Number"));
+            else
+                list.append(QStringLiteral("String"));
+            // Write min and max regardless of type, as we will get a mess if number of parameters
+            // varies between different types
+            list.append(QString::number(item->minValue));
+            list.append(QString::number(item->maxValue));
+        }
     }
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
     QByteArray docBA = doc.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list);
+    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list, subpresentations);
 }
 
 //=============================================================================

@@ -31,6 +31,8 @@
 
 #include <QtWidgets/qdialog.h>
 
+#include "Doc.h"
+
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
 #endif
@@ -43,18 +45,8 @@ QT_END_NAMESPACE
 
 QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 
-class SDataInputDialogItem
-{
-public:
-    QString valueString;
-    int minValue;
-    int maxValue;
-    QString name;
-    int type;
-};
-
 enum EDataType {
-    DataTypeNumber = 0,
+    DataTypeRangedNumber = 0,
     DataTypeString,
 #if 0 // TODO: To be added in version 2.x
     DataTypeEvaluator,
@@ -69,7 +61,7 @@ class CDataInputDlg : public QDialog
 {
     Q_OBJECT
 public:
-    CDataInputDlg(SDataInputDialogItem **datainput, QStandardItemModel *data,
+    CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                   QWidget* parent = nullptr);
     ~CDataInputDlg();
 
@@ -91,7 +83,7 @@ private Q_SLOTS:
 
 private:
     Ui::DataInputDlg *m_ui;
-    SDataInputDialogItem *m_dataInput;
+    CDataInputDialogItem *m_dataInput;
     QStandardItemModel *m_data;
     QString m_name;
     float m_max;
