@@ -144,7 +144,7 @@ QToolButton:checked, QToolButton:hover {
     background-color: #262829;
 }
 
-QToolButton:pressed {
+QToolButton:pressed:!checked {
     min-width: 22px;
     min-height: 22px;
     max-height: 22px;
