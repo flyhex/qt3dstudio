@@ -72,6 +72,7 @@ ApplicationWindow {
 
         anchors.fill: parent
         z: 10
+        enabled: !ipEntry.visible
 
         onPressed: {
             if (window.visibility === Window.FullScreen)
@@ -337,6 +338,7 @@ ApplicationWindow {
                 text: qsTr("Connect")
                 onClicked: {
                     _viewerHelper.contentView = ViewerHelper.ConnectView;
+                    _viewerHelper.connectPort = Number(connectText.text);
                     _viewerHelper.connectRemote();
                     ipEntry.visible = false;
                 }

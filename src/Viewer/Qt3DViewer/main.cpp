@@ -354,9 +354,10 @@ int main(int argc, char *argv[])
             }
         });
         exposeTimer->start(0);
-    } else if (parser.isSet(QStringLiteral("connect"))) {
+    } else {
         viewer.setContentView(Viewer::ConnectView);
-        viewer.setConnectPort(parser.value(QStringLiteral("connect")).toInt());
+        if (parser.isSet(QStringLiteral("connect")))
+            viewer.setConnectPort(parser.value(QStringLiteral("connect")).toInt());
         viewer.connectRemote();
     }
 

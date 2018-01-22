@@ -70,7 +70,9 @@ void Viewer::connectRemote()
 
     m_connectText.clear();
     QTextStream stream(&m_connectText);
-    stream << tr("Connection Info\nAddress: %1\nPort: %2")
+    stream << tr("Use IP: %1 and Port: %2\n"
+                 "in Qt 3D Studio Editor to connect to this viewer.\n\n"
+                 "Use File/Open... to open a local presentation.")
               .arg(m_remoteDeploymentReceiver->hostAddress().toString())
               .arg(QString::number(m_connectPort));
     Q_EMIT connectTextChanged();
