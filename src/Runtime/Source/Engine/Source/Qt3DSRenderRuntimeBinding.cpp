@@ -1816,6 +1816,7 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
             // QML engine
             GetScriptEngineQml();
             m_ScriptBridgeQml->SetApplication(*app);
+            m_ScriptBridgeQml->Initialize();
         }
     }
     void SetDllDir(const char *dllDir) override

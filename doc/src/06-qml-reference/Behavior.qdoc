@@ -51,7 +51,7 @@
 
     Secondly, the QML behavior script needs access to the QML module.
     \badcode
-import QtStudio3D.Behavior 1.0
+import QtStudio3D.Behavior 1.1
     \endcode
 
     Finally, the Behavior type needs to be implemented in the qml script.
@@ -168,6 +168,12 @@ Behavior {
 
     Returns the euler angles extracted from the \a matrix rotations.
 */
+
+/*!
+    \qmlmethod void Behavior::setDataInputValue(string name, variant value)
+
+    Sets the \a value of the data input identified with the \a name.
+ */
 
 /*!
     \qmlsignal void Behavior::onInitialize()

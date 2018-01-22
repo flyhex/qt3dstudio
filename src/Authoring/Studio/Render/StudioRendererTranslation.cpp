@@ -453,7 +453,6 @@ struct STranslatorDataModelParser
 #define Text_Leading m_Text.m_Leading
 #define Text_Tracking m_Text.m_Tracking
 #define Text_TextColor m_Text.m_TextColor
-#define Text_ControlledProperty m_Text.m_ControlledProperty
 #define Text_EnableAcceleratedFont m_Text.m_EnableAcceleratedFont
 #define Path_Width m_Path.m_Width
 #define Path_LinearError m_Path.m_LinearError

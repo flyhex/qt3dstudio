@@ -541,20 +541,9 @@ void CNDDView::SetGlobalAnimationTime(qint64 inMilliSecs)
 
 void CNDDView::SetDataInputValue(const QString &name, const QVariant &value)
 {
-    if (m_Application) {
-        if (name.isEmpty() || !value.isValid())
-            return;
-        QByteArray valueStr = value.toString().toUtf8();
-        float valueFloat = value.toFloat();
-        QByteArray elementPath = QByteArrayLiteral("Scene.") + name.toUtf8();
-
-        Q3DStudio::CQmlEngine &theBridgeEngine
-                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-
-        theBridgeEngine.SetAttribute(elementPath.constData(), "valuestr", valueStr.constData());
-        theBridgeEngine.SetAttribute(elementPath.constData(), "value",
-                                     reinterpret_cast<char *>(&valueFloat));
-    }
+    Q3DStudio::CQmlEngine &theBridgeEngine
+            = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+    theBridgeEngine.SetDataInputValue(name, value);
 }
 
 void CNDDView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)

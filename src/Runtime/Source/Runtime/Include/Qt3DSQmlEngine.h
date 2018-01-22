@@ -206,6 +206,8 @@ public: // Public functions but not functions on the script bridge
 
     virtual qt3ds::runtime::IApplication *GetApplication() = 0;
 
+    virtual void Initialize() = 0;
+
 public:
     /**
     * @brief Create QML engine

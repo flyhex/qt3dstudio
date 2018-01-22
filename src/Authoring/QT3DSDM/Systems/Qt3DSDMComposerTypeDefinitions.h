@@ -70,7 +70,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_OBJECT_TYPE(Model, ITERATE_COMPOSER_MODEL_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Light, ITERATE_COMPOSER_LIGHT_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Camera, ITERATE_COMPOSER_CAMERA_PROPERTIES)                        \
-    HANDLE_COMPOSER_OBJECT_TYPE(Component, ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES)              \
+    HANDLE_COMPOSER_OBJECT_TYPE(Component, ITERATE_COMPOSER_COMPONENT_PROPERTIES)              \
     HANDLE_COMPOSER_OBJECT_TYPE(Text, ITERATE_COMPOSER_TEXT_PROPERTIES)                            \
     HANDLE_COMPOSER_OBJECT_TYPE(RenderPlugin, ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES)           \
     HANDLE_COMPOSER_OBJECT_TYPE(Alias, ITERATE_COMPOSER_ALIAS_PROPERTIES)                          \
@@ -104,7 +104,11 @@ class IPropertySystem;
 
 #define ITERATE_COMPOSER_SCENE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(bgcolorenable, m_BgColorEnable, bool, true)                           \
-    HANDLE_COMPOSER_PROPERTY(backgroundcolor, m_BackgroundColor, SFloat3, SFloat3(0, 0, 0))
+    HANDLE_COMPOSER_PROPERTY(backgroundcolor, m_BackgroundColor, SFloat3, SFloat3(0, 0, 0))        \
+    HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
+
+#define ITERATE_COMPOSER_COMPONENT_PROPERTIES                                                      \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_NODE_PROPERTIES                                                           \
     HANDLE_COMPOSER_PROPERTY(position, m_Position, SFloat3, SFloat3(0, 0, 0))                      \
@@ -263,7 +267,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(leading, m_Leading, float, 0.f)                                       \
     HANDLE_COMPOSER_PROPERTY(tracking, m_Tracking, float, 0.f)                                     \
     HANDLE_COMPOSER_PROPERTY(enableacceleratedfont, m_EnableAcceleratedFont, bool, false)          \
-    HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_SLIDE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(componentid, m_ComponentId, SLong4, 0)                                \

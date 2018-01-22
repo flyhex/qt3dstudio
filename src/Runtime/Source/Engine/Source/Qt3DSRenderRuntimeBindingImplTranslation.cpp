@@ -628,7 +628,6 @@ struct SRuntimePropertyParser
 #define Text_BackColor_B ATTRIBUTE_BACKCOLOR_B
 #define Text_UseBackColor ATTRIBUTE_USEBACKCOLOR
 #define Text_EnableAcceleratedFont ATTRIBUTE_ENABLEACCELERATEDFONT
-#define Text_ControlledProperty ATTRIBUTE_CONTROLLEDPROPERTY
 #define Path_PathType ATTRIBUTE_PATHTYPE
 #define Path_Width ATTRIBUTE_WIDTH
 #define Path_LinearError ATTRIBUTE_LINEARERROR

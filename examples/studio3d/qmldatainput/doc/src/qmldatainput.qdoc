@@ -40,14 +40,17 @@
 
     \section1 Description
 
-    The presentation consists of a static text element serving as a label, a rotating text element
-    for showing the input data, and a DataInput element linked to the textstring property of the
-    rotating text element.
+    The presentation consists of a static text element serving as a label and a rotating text
+    element for showing the input data as text. There is also a data input of type \e{Ranged Number}
+    in the presentation. This data input is used to control both the rotation animation time and
+    the text shown on the second text element.
+    The range is specified as [0 .. 360] in the presentation, where zero maps
+    to the beginning of the animation and 360 maps to the end of the animation.
 
     The \l {qmldatainput/qml/qmldatainput/main.qml}{qml main} loads the presentation and animates
     a number property. The value of the animated property is bound to the
     \l{DataInput::value}{value} property of the DataInput element, making the value show up in the
-    linked text element in the presentation:
+    linked text element in the presentation. The same value is used to control the animation time:
 
     \snippet qmldatainput/qml/qmldatainput/main.qml 1
 */

@@ -763,9 +763,9 @@ void CPresentation::SetLoadedBuffer(qt3ds::render::ILoadedBuffer &inBuffer)
  *	Retrieve the name of the presentation. This is actually the file path.
  *	@return the name of this presentation
  */
-const CHAR *CPresentation::GetName() const
+const QByteArray CPresentation::GetName() const
 {
-    return m_Name.toLatin1().constData();
+    return m_Name.toLatin1();
 }
 
 //==============================================================================

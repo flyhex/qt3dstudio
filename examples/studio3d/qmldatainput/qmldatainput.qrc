@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file alias="main.qml">qml/qmldatainput/main.qml</file>
         <file>presentation/datainput.uip</file>
+        <file>presentation/datainput.uia</file>
     </qresource>
 </RCC>

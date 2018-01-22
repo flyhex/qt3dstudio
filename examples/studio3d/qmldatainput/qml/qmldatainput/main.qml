@@ -72,9 +72,9 @@ Item {
         NumberAnimation {
             target: studio3D
             property: "inputNumber"
-            duration: 30000
+            duration: 20000
             from: 0
-            to: 1000
+            to: 360
             loops: Animation.Infinite
             running: true
         }
@@ -88,10 +88,10 @@ Item {
         // Presentation item is used to control the presentation.
         //![1]
         Presentation {
-            source: "qrc:/presentation/datainput.uip"
+            source: "qrc:/presentation/datainput.uia"
             DataInput {
-                // Name must match the DataInput element name in the presentation
-                name: "MyDataInput"
+                // Name must match the data input name specified in the presentation
+                name: "rangeInput"
                 value: studio3D.inputNumber
             }
         }

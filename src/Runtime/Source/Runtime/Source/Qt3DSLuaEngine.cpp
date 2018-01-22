@@ -789,6 +789,7 @@ struct SLuaEngineImpl : public CLuaEngine
     void SetTableForElement(TElement &inElement, ILuaScriptTableProvider &inProvider) override;
     void SetAttribute(const char *element, const char *attName, const char *value) override;
     void FireEvent(const char *element, const char *evtName) override;
+    void SetDataInputValue(const QString &name, const QVariant &value) override;
 
     void GotoSlide(const char *component, const char *slideName,
                            const SScriptEngineGotoSlideArgs &inArgs) override;
@@ -1756,6 +1757,14 @@ void SLuaEngineImpl::FireEvent(const char *element, const char *evtName)
                 << "LuaEngine::FireEvent: failed to find element: "
                 << element << "(" << evtName << ")";
     }
+}
+
+void SLuaEngineImpl::SetDataInputValue(const QString &name, const QVariant &value)
+{
+    Q_UNUSED(name)
+    Q_UNUSED(value)
+    // Data inputs are not supported from lua
+    Q_ASSERT(false);
 }
 
 void SLuaEngineImpl::GotoSlide(const char *component, const char *slideName,
