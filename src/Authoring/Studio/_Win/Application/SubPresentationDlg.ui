@@ -120,16 +120,27 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QLineEdit" name="lineEditId">
+        <property name="toolTip">
+         <string>Id of the sub-presentation</string>
+        </property>
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxTypeList"/>
+       <widget class="QComboBox" name="comboBoxTypeList">
+        <property name="toolTip">
+         <string>Sub-presentation type</string>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxFileList"/>
+       <widget class="QComboBox" name="comboBoxFileList">
+        <property name="toolTip">
+         <string>The *.uip file containing the sub-presentation</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

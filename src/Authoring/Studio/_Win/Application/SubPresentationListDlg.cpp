@@ -67,6 +67,10 @@ CSubPresentationListDlg::CSubPresentationListDlg(
     connect(buttons.at(2), &QAbstractButton::clicked,
             this, &CSubPresentationListDlg::onRemoveSubPresentation);
 
+    buttons[0]->setToolTip(tr("Add New Sub-presentation..."));
+    buttons[1]->setToolTip(tr("Edit Sub-presentation..."));
+    buttons[2]->setToolTip(tr("Remove Sub-presentation"));
+
     initDialog();
 }
 

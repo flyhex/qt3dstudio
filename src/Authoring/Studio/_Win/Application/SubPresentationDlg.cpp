@@ -132,8 +132,12 @@ void CSubPresentationDlg::updateUI() {
     // Populate file combobox with current uip/qml + folder's uips/qmls + "Browse..."
     // and select the current uip/qml (or browse if none)
     QString filter = QStringLiteral("*.uip");
-    if (m_subPresentation.m_type == QStringLiteral("presentation-qml"))
+    if (m_subPresentation.m_type == QStringLiteral("presentation-qml")) {
         filter = QStringLiteral("*.qml");
+        m_ui->comboBoxFileList->setToolTip(tr("The *.qml file containing the QML stream"));
+    } else {
+        m_ui->comboBoxFileList->setToolTip(tr("The *.uip file containing the sub-presentation"));
+    }
 
     QDir dir(m_directory, filter, QDir::Name, QDir::Files);
     m_ui->comboBoxFileList->addItems(dir.entryList());
