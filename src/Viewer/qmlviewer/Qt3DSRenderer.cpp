@@ -143,6 +143,7 @@ void Q3DSRenderer::render()
             draw();
         else
             processCommands();
+        update(); // mark as dirty to ensure update again
     }
 }
 
