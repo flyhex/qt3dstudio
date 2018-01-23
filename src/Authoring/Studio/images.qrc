@@ -259,6 +259,7 @@
         <file>images/arrow_up@2x.png</file>
         <file>images/separator-vertical.png</file>
         <file>images/separator-vertical@2x.png</file>
+        <file>images/toolbutton-arrow.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

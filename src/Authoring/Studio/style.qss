@@ -114,16 +114,8 @@ QMenu::separator {
 }
 
 /* Toolbar */
-QToolBar:horizontal {
+QToolBar {
     background: #404244;
-    min-height: 24px;
-    max-height: 24px;
-}
-
-QToolBar:vertical {
-    background: #404244;
-    min-width: 24px;
-    max-width: 24px;
 }
 
 QToolBar::handle:horizontal {
@@ -168,6 +160,10 @@ QToolButton:pressed:!checked {
     min-height: 22px;
     max-height: 22px;
     background-color: #46a2da;
+}
+
+QToolButton#qt_toolbar_ext_button {
+    image: url(:/images/toolbutton-arrow.png);
 }
 
 QComboBox#cameraSelector {
