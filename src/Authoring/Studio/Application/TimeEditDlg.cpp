@@ -32,6 +32,8 @@
 #include "IDoc.h"
 #include "Bindings/ITimelineKeyframesManager.h"
 
+#include <QtGui/qvalidator.h>
+
 CTimeEditDlg::CTimeEditDlg(QWidget *pParent)
     : QDialog(pParent)
     , m_ui(new Ui::TimeEditDlg)
