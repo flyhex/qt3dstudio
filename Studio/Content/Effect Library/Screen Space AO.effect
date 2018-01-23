@@ -42,7 +42,7 @@ void frag( void )
 	kernel[15] = vec3(0.0975089, -0.329594, 0.609803);
 	
 	ivec2 iCoords = ivec2( gl_FragCoord.xy + vec2(0.5, 0.5) );
-	float depth = getDepthValue(texelFetch(DepthSampler, iCoords, 0));
+	float depth = getDepthValue(texelFetch(DepthSampler, iCoords, 0), CameraClipRange);
 	depth = depthValueToLinearDistance( depth, CameraClipRange );
 	
 	for( int i = 15; i >= 0; --i )
@@ -52,7 +52,7 @@ void frag( void )
 		// 3D distance between points.
 		vec3 ray = kernel[i] * FilterSize;
 		ivec2 newSamp = ivec2( iCoords + ray.xy );
-		float sampleDepth = getDepthValue( texelFetch(DepthSampler, newSamp, 0) );
+		float sampleDepth = getDepthValue( texelFetch(DepthSampler, newSamp, 0), CameraClipRange );
 		sampleDepth = depthValueToLinearDistance( sampleDepth, CameraClipRange );
 		
 		// Occlusion is applied based on a Cauchy distribution filter
