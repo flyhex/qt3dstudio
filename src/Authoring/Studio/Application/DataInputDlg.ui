@@ -178,13 +178,20 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QLineEdit" name="lineEditInputName">
+        <property name="toolTip">
+         <string>The name of the data input</string>
+        </property>
         <property name="text">
          <string>newDataInput</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxTypeList"/>
+       <widget class="QComboBox" name="comboBoxTypeList">
+        <property name="toolTip">
+         <string>The type of the data input</string>
+        </property>
+       </widget>
       </item>
       <item>
        <spacer name="verticalSpacer">
@@ -200,10 +207,17 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEditEvaluation"/>
+       <widget class="QLineEdit" name="lineEditEvaluation">
+        <property name="toolTip">
+         <string/>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="doubleSpinBoxMin">
+        <property name="toolTip">
+         <string>The minimum value for the number</string>
+        </property>
         <property name="maximum">
          <double>999999999.000000000000000</double>
         </property>
@@ -211,6 +225,9 @@
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="doubleSpinBoxMax">
+        <property name="toolTip">
+         <string>The maximum value for the number</string>
+        </property>
         <property name="maximum">
          <double>999999999.000000000000000</double>
         </property>

@@ -65,6 +65,10 @@ CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs
     connect(buttons.at(1), &QAbstractButton::clicked, this, &CDataInputListDlg::onEditDataInput);
     connect(buttons.at(2), &QAbstractButton::clicked, this, &CDataInputListDlg::onRemoveDataInput);
 
+    buttons[0]->setToolTip(tr("Add New Data Input..."));
+    buttons[1]->setToolTip(tr("Edit Data Input..."));
+    buttons[2]->setToolTip(tr("Remove Data Input"));
+
     initDialog();
 }
 
