@@ -77,6 +77,7 @@ QScrollBar::sub-line:vertical {
 QMenuBar {
     background: #404244;
     border-top: 1px solid #262829;
+    border-bottom: 1px solid #262829;
 }
 
 QMenuBar::item {
@@ -113,25 +114,41 @@ QMenu::separator {
 }
 
 /* Toolbar */
-QToolBar {
+QToolBar:horizontal {
     background: #404244;
-    border-top: 1px solid #262829;
     min-height: 24px;
     max-height: 24px;
 }
 
-QToolBar::handle {
+QToolBar:vertical {
+    background: #404244;
+    min-width: 24px;
+    max-width: 24px;
+}
+
+QToolBar::handle:horizontal {
     image: url(:/images/separator.png);
 }
 
-QToolBar::separator {
+QToolBar::handle:vertical {
+    image: url(:/images/separator-vertical.png);
+}
+
+QToolBar::separator:horizontal {
     background: #727476;
     width: 1px;
     margin: 3px;
 }
 
+QToolBar::separator:vertical {
+    background: #727476;
+    height: 1px;
+    margin: 3px;
+}
+
 QToolButton:!checked {
     min-width: 22px;
+    max-width: 22px;
     min-height: 22px;
     max-height: 22px;
     background-color: #404244;
@@ -139,6 +156,7 @@ QToolButton:!checked {
 
 QToolButton:checked, QToolButton:hover {
     min-width: 22px;
+    max-width: 22px;
     min-height: 22px;
     max-height: 22px;
     background-color: #262829;
@@ -146,6 +164,7 @@ QToolButton:checked, QToolButton:hover {
 
 QToolButton:pressed:!checked {
     min-width: 22px;
+    max-width: 22px;
     min-height: 22px;
     max-height: 22px;
     background-color: #46a2da;
