@@ -84,7 +84,7 @@ void CDataInputListDlg::initDialog()
     for (int i = 0; i < m_actualDataInputs->count(); ++i)
         m_dataInputs.append(m_actualDataInputs->at(i));
 
-    // Check available list. If there are none, hide "Remove" and "Edit" buttons
+    // Check available list. If there are none, disable "Remove" and "Edit" buttons
     updateButtons();
 
     // Update table contents
@@ -105,6 +105,8 @@ void CDataInputListDlg::initDialog()
     m_ui->tableView->verticalHeader()->setHidden(true);
 
     // When clicking an item, select the whole row
+    // Connect both pressed and clicked to prevent selecting individual cells
+    connect(m_ui->tableView, &QTableView::pressed, this, &CDataInputListDlg::onSelected);
     connect(m_ui->tableView, &QTableView::clicked, this, &CDataInputListDlg::onSelected);
 
     // Double-click opens the item in edit mode

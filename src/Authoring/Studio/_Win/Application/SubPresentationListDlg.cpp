@@ -86,7 +86,7 @@ QVector<SubPresentationRecord> CSubPresentationListDlg::subpresentations() const
 
 void CSubPresentationListDlg::initDialog()
 {
-    // Check available list. If there are none, hide "Remove" and "Edit" buttons
+    // Check available list. If there are none, disable "Remove" and "Edit" buttons
     updateButtons();
 
     // Update table contents
@@ -104,6 +104,8 @@ void CSubPresentationListDlg::initDialog()
     m_ui->tableView->verticalHeader()->setHidden(true);
 
     // When clicking an item, select the whole row
+    // Connect both pressed and clicked to prevent selecting individual cells
+    connect(m_ui->tableView, &QTableView::pressed, this, &CSubPresentationListDlg::onSelected);
     connect(m_ui->tableView, &QTableView::clicked, this, &CSubPresentationListDlg::onSelected);
 
     // Double-click opens the item in edit mode
@@ -203,11 +205,11 @@ void CSubPresentationListDlg::onEditSubPresentation()
         updateContents();
         // Make sure that id is still unique
         m_records[m_currentIndex].m_id = getUniqueId(m_records[m_currentIndex].m_id, true);
-        // Update again, as the id might have been updated
-        updateContents();
     }
 
+    // Update again, as the id might have been updated
     m_currentIndex = -1;
+    updateContents();
 
     updateButtons();
 }
