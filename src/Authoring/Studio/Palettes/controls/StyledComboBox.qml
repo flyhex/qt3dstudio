@@ -87,6 +87,7 @@ ComboBox {
         x: control.width - width - 2
         y: control.topPadding + (control.availableHeight - height) / 2
         source: _resDir + "arrow_down.png"
+        rotation: control.popup.visible ? 180 : 0
     }
 
     contentItem: StyledTextField {
