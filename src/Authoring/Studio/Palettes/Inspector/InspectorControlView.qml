@@ -849,23 +849,42 @@ Rectangle {
             property int handle: parent.modelData.handle
             property real value: parent.modelData.value
 
+            editable: true
+            property bool ready: false
+
+            validator: IntValidator {
+                bottom: 1
+            }
+
             model: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72", "96", "120"]
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight
 
             Component.onCompleted: {
-                currentIndex = find(value)
-            }
-
-            onCurrentIndexChanged: {
-                var newvalue = parseInt(textAt(currentIndex))
-                _inspectorModel.setPropertyValue(instance, handle, newvalue)
+                editText = value;
+                ready = true;
             }
 
             onValueChanged: {
-                currentIndex = find(value)
+                if (ready)
+                    editText = value;
             }
+
+            onEditTextChanged: {
+                if (ready) {
+                    var newvalue = parseInt(editText);
+                    _inspectorModel.setPropertyValue(instance, handle, newvalue, false);
+                }
+            }
+
+            onActiveFocusChanged: {
+                if (!activeFocus) {
+                    var newvalue = parseInt(editText);
+                    _inspectorModel.setPropertyValue(instance, handle, newvalue);
+                }
+            }
+
         }
     }
 
