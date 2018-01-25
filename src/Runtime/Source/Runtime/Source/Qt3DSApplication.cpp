@@ -541,11 +541,6 @@ struct SApp : public IApplication
         m_CoreFactory->GetScriptEngine().SetApplicationCore(*this);
         m_CoreFactory->GetScriptEngineQml().SetApplicationCore(*this);
 
-        // To make examples & tests load nicely, add qt bin dir into search path.
-        // TODO: Remove this once resources are baked into the library as qrc.
-        QString qtBin = QLibraryInfo::location(QLibraryInfo::BinariesPath);
-        m_CoreFactory->AddSearchPath(qtBin.toLatin1().constData());
-
         m_CoreFactory->AddSearchPath(tempStr.c_str());
     }
 
