@@ -168,11 +168,6 @@ namespace render {
         virtual void SetWireframeMode(bool inEnable) = 0;
         virtual bool GetWireframeMode() = 0;
 
-        // Once set, the texture is displayed as long as the context is in place.
-        virtual void SetWatermark(NVRenderTexture2D &inTexture) = 0;
-        // default is 1,1
-        virtual void SetWatermarkLocation(QT3DSVec2 inCoordinates) = 0;
-
         // Return the viewport the system is using to render data to.  This gives the the dimensions
         // of the rendered system.  It is dependent on but not equal to the viewport.
         virtual NVRenderRectF GetDisplayViewport() const = 0;

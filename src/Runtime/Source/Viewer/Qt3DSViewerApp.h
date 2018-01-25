@@ -340,10 +340,6 @@ public:
     bool RegisterScriptCallback(ViewerCallbackType::Enum callbackType,
                                 const qml_Function inCallback, void *inUserData);
 
-    void EnableWatermarkDDS(const unsigned char *inData, size_t inDataSize);
-
-    void SetWatermarkLocation(float x, float y);
-
     bool WasLastFrameDirty();
 
     int GetWindowHeight();
@@ -373,10 +369,6 @@ private:
      * @return no return
      */
     void setupSearchPath(std::vector<std::string> &cmdLineArgs);
-
-    void DoEnableWatermark();
-
-    void DoSetWatermarkLocation();
 
 private:
     Q3DSViewerAppImpl &m_Impl;

@@ -470,7 +470,6 @@ struct SApp : public IApplication
     bool m_DisableState;
     bool m_ProfileLogging;
     bool m_LastRenderWasDirty;
-    QT3DSVec2 m_WatermarkCoordinates;
     QT3DSU64 m_LastFrameStartTime;
     QT3DSU64 m_ThisFrameStartTime;
     double m_MillisecondsSinceLastFrame;
@@ -517,7 +516,6 @@ struct SApp : public IApplication
         , m_DisableState(false)
         , m_ProfileLogging(false)
         , m_LastRenderWasDirty(true)
-        , m_WatermarkCoordinates(1.0f, 1.0f)
         , m_LastFrameStartTime(0)
         , m_ThisFrameStartTime(0)
         , m_MillisecondsSinceLastFrame(0)
@@ -1109,14 +1107,6 @@ struct SApp : public IApplication
             theStateReferences = m_CoreFactory->GetVisualStateContext().PreParseDocument(inReader);
         }
         {
-            QT3DSVec2 watermarkCoords(0, 0);
-            if (inReader.Att("watermark-location", watermarkCoords)) {
-                m_WatermarkCoordinates = QT3DSVec2(Clamp(watermarkCoords.x),
-                                                   Clamp(watermarkCoords.y));
-            }
-            m_UIAFileSettings.Parse(inReader);
-        }
-        {
             IDOMReader::Scope __assetsScope(inReader);
             if (!inReader.MoveToFirstChild("assets")) {
                 qCCritical(INVALID_OPERATION,
@@ -1470,7 +1460,6 @@ struct SApp : public IApplication
         }
 
         m_CoreFactory->GetPerfTimer().OutputTimerData();
-        m_RuntimeFactory->GetQt3DSRenderContext().SetWatermarkLocation(m_WatermarkCoordinates);
 
         m_AudioPlayer.SetPlayer(inAudioPlayer);
 
@@ -1603,7 +1592,6 @@ struct SApp : public IApplication
             QT3DSU32 theScaleMode
                     = static_cast<QT3DSU32>(m_RuntimeFactory->GetQt3DSRenderContext().GetScaleMode());
             theOutStream.Write(theScaleMode);
-            theOutStream.Write(m_WatermarkCoordinates);
             m_UIAFileSettings.Save(theOutStream);
 
             MemoryBuffer<> theSaveBuffer(
@@ -1703,7 +1691,6 @@ struct SApp : public IApplication
             theInStream.Read(&theScaleMode, 1);
             qt3ds::render::ScaleModes::Enum theProperScaleMode
                     = static_cast<qt3ds::render::ScaleModes::Enum>(theScaleMode);
-            theInStream.Read(m_WatermarkCoordinates);
             m_UIAFileSettings.Load(theInStream);
 
             // Connect the debugger after we load the string table information because connecting

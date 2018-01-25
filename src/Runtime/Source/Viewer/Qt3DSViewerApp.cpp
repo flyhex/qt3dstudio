@@ -238,8 +238,6 @@ public:
     Q3DSViewerAppImpl(Q3DStudio::IAudioPlayer *inAudioPlayer)
         : m_tegraApp(0)
         , m_appInitSuccessful(false)
-        , m_WatermarkX(-1.0f)
-        , m_WatermarkY(-1.0f)
         , m_AudioPlayer(inAudioPlayer)
     {
 #ifndef EMBEDDED_LINUX
@@ -248,9 +246,6 @@ public:
     }
     Q3DStudio::CTegraApplication *m_tegraApp; ///< pointer to internal "tegra appliction"
     bool m_appInitSuccessful; ///< true if m_tegraApp is initialized successful
-    std::vector<unsigned char> m_WatermarkData; ///< Watermark data discarded after upload
-    float m_WatermarkX;
-    float m_WatermarkY;
 
     std::vector<int> m_mouseButtons;
     Q3DStudio::IWindowSystem *m_WindowSystem;
@@ -377,9 +372,6 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
                 &QINDDViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
 
-        DoEnableWatermark();
-        DoSetWatermarkLocation();
-
         Resize(winWidth, winHeight);
 
         Q_EMIT SigPresentationReady();
@@ -469,42 +461,11 @@ void Q3DSViewerApp::RestoreState()
     }
 }
 
-void Q3DSViewerApp::EnableWatermarkDDS(const unsigned char *inData, size_t inDataSize)
-{
-    m_Impl.m_WatermarkData.assign(inData, inData + inDataSize);
-    DoEnableWatermark();
-}
-
-void Q3DSViewerApp::SetWatermarkLocation(float x, float y)
-{
-    m_Impl.m_WatermarkX = x;
-    m_Impl.m_WatermarkY = y;
-    DoSetWatermarkLocation();
-}
-
 bool Q3DSViewerApp::WasLastFrameDirty()
 {
     if (m_Impl.m_tegraApp)
         return m_Impl.m_tegraApp->WasLastFrameDirty();
     return false;
-}
-
-void Q3DSViewerApp::DoEnableWatermark()
-{
-    if (m_Impl.m_WatermarkData.size() && m_Impl.m_tegraApp
-            && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
-        m_Impl.m_tegraApp->GetTegraRenderEngine()->SetWatermarkTextureDataDDS(
-                    m_Impl.m_WatermarkData.data(), m_Impl.m_WatermarkData.size());
-    }
-}
-
-void Q3DSViewerApp::DoSetWatermarkLocation()
-{
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()
-            && m_Impl.m_WatermarkX >= 0.0f) {
-        m_Impl.m_tegraApp->GetTegraRenderEngine()->SetWatermarkLocation(m_Impl.m_WatermarkX,
-                                                                        m_Impl.m_WatermarkY);
-    }
 }
 
 QString Q3DSViewerApp::error()

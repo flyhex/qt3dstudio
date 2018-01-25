@@ -147,11 +147,6 @@ public:
                               const char *text) = 0;
     virtual void RenderGpuProfilerStats(FLOAT x, FLOAT y,
                                         qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor) = 0;
-
-    // Set the watermark texture as a compressed PNG file.
-    virtual bool SetWatermarkTextureDataDDS(const unsigned char *inTextureData,
-                                            size_t inDataSize) = 0;
-    virtual void SetWatermarkLocation(float x, float y) = 0;
 };
 
 class INDDView : public qt3ds::foundation::NVRefCounted
