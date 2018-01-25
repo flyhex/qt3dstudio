@@ -316,6 +316,9 @@ void Q3DSPresentationPrivate::setSource(const QUrl &source)
 
 void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp)
 {
+    Q3DSViewer::Q3DSViewerApp *oldApp = m_viewerApp;
+    m_viewerApp = app;
+
     const auto elements = m_elements.values();
     const auto dataInputs = m_dataInputs.values();
     for (Q3DSElement *element : elements)
@@ -330,27 +333,25 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                     q_ptr, &Q3DSPresentation::slideExited);
         }
-        if (m_viewerApp) {
-            disconnect(m_viewerApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
+        if (oldApp) {
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
                        this, &Q3DSPresentationPrivate::handleSlideEntered);
-            disconnect(m_viewerApp, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                        q_ptr, &Q3DSPresentation::slideExited);
         }
     }
-
-    m_viewerApp = app;
 }
 
 void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
 {
+    m_commandQueue = queue;
+
     const auto elements = m_elements.values();
     const auto dataInputs = m_dataInputs.values();
     for (Q3DSElement *element : elements)
         element->d_ptr->setCommandQueue(queue);
     for (Q3DSDataInput *di : dataInputs)
         di->d_ptr->setCommandQueue(queue);
-
-    m_commandQueue = queue;
 
     if (m_commandQueue)
         setSource(m_source);

@@ -95,9 +95,7 @@ QVariant Q3DSDataInput::value() const
 void Q3DSDataInput::setValue(const QVariant &value)
 {
     if (value != d_ptr->m_value) {
-        d_ptr->m_value = value;
-        if (d_ptr->m_presentation)
-            d_ptr->m_presentation->q_ptr->setDataInputValue(d_ptr->m_name, d_ptr->m_value);
+        d_ptr->setValue(value);
         Q_EMIT valueChanged();
     }
 }
@@ -113,12 +111,19 @@ Q3DSDataInputPrivate::~Q3DSDataInputPrivate()
         m_presentation->unregisterDataInput(q_ptr);
 }
 
+void Q3DSDataInputPrivate::setValue(const QVariant &value)
+{
+    m_value = value;
+    if (m_presentation)
+        m_presentation->q_ptr->setDataInputValue(m_name, m_value);
+}
+
 void Q3DSDataInputPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
 {
     m_viewerApp = app;
 
     if (m_viewerApp && m_value.isValid())
-        q_ptr->setValue(m_value);
+        setValue(m_value);
 }
 
 void Q3DSDataInputPrivate::setCommandQueue(CommandQueue *queue)
@@ -126,7 +131,7 @@ void Q3DSDataInputPrivate::setCommandQueue(CommandQueue *queue)
     m_commandQueue = queue;
 
     if (m_commandQueue && m_value.isValid())
-        q_ptr->setValue(m_value);
+        setValue(m_value);
 }
 
 void Q3DSDataInputPrivate::setPresentation(Q3DSPresentationPrivate *presentation)
