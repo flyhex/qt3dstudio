@@ -619,6 +619,15 @@ void CQmlEngineImpl::SetDataInputValue(const QString &name, const QVariant &valu
                 }
                 break;
             }
+            case ATTRIBUTETYPE_DATAINPUT_SLIDE: {
+                // Quietly ignore other than string type when adjusting slide
+                if (diDef.type == qt3ds::runtime::DataInputTypeString) {
+                    const QByteArray valueStr = value.toString().toUtf8();
+                    GotoSlide(ctrlElem.elementPath.constData(), valueStr.constData(),
+                              SScriptEngineGotoSlideArgs());
+                }
+                break;
+            }
             case ATTRIBUTETYPE_STRING: {
                 const QByteArray valueStr = value.toString().toUtf8();
                 SetAttribute(ctrlElem.elementPath.constData(), ctrlElem.attributeName.constData(),
@@ -935,6 +944,10 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                         ctrlElem.attributeName = splitValues[i].toUtf8();
                         if (ctrlElem.attributeName == QByteArrayLiteral("@timeline")) {
                             ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_TIMELINE;
+                            TElement *component = &element->GetComponentParent();
+                            ctrlElem.elementPath.append(component->m_Path);
+                        } else if (ctrlElem.attributeName == QByteArrayLiteral("@slide")) {
+                            ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_SLIDE;
                             TElement *component = &element->GetComponentParent();
                             ctrlElem.elementPath.append(component->m_Path);
                         } else {
