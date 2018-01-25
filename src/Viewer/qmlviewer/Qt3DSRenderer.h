@@ -60,6 +60,7 @@ Q_SIGNALS:
     void enterSlide(const QString &elementPath, unsigned int slide, const QString &slideName);
     void exitSlide(const QString &elementPath, unsigned int slide, const QString &slideName);
     void requestResponse(const QString &elementPath, CommandType commandType, void *requestData);
+    void presentationReady();
 
 protected:
     static void onInitHandler(void *userData);

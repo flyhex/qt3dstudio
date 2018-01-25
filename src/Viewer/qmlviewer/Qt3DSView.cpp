@@ -196,6 +196,8 @@ QQuickFramebufferObject::Renderer *Q3DSView::createRenderer() const
             m_presentation, &Q3DSPresentation::slideExited);
     connect(renderer, &Q3DSRenderer::requestResponse,
             this, &Q3DSView::requestResponseHandler);
+    connect(renderer, &Q3DSRenderer::presentationReady,
+            this, &Q3DSView::presentationReady);
     return renderer;
 }
 

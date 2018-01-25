@@ -166,6 +166,10 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
     m_runtime = &Q3DSViewerApp::Create(nullptr, new Qt3DSAudioPlayerImpl());
     Q_ASSERT(m_runtime);
 
+    // Connect presentation ready signal before initializing the app
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigPresentationReady,
+            this, &Q3DSRenderer::presentationReady);
+
     int theWidth = inFbo->width();
     int theHeight = inFbo->height();
 

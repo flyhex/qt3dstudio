@@ -371,8 +371,6 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
             return false;
         }
 
-        SigPresentationReady();
-
         // Connect signals
         connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
                 &QINDDViewSignalProxy::SigSlideEntered, this, &Q3DSViewerApp::SigSlideEntered);
@@ -383,6 +381,8 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         DoSetWatermarkLocation();
 
         Resize(winWidth, winHeight);
+
+        Q_EMIT SigPresentationReady();
     }
     return true;
 }
