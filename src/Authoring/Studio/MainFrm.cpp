@@ -285,6 +285,15 @@ void CMainFrame::showEvent(QShowEvent *event)
     restoreState(settings.value("mainWindowState").toByteArray());
 }
 
+void CMainFrame::hideEvent(QHideEvent *event)
+{
+    QMainWindow::hideEvent(event);
+
+    QSettings settings;
+    settings.setValue("mainWindowGeometry", saveGeometry());
+    settings.setValue("mainWindowState", saveState());
+}
+
 /**
  * Called when the main frame is actually created.  Sets up tool bars and default
  * views.
