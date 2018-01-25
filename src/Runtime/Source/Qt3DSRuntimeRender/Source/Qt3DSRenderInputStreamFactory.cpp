@@ -174,10 +174,7 @@ struct SFactory : public IInputStreamFactory
         if (fileInfo.exists())
             inputStream = SInputStream::OpenFile(fileInfo.absoluteFilePath(), m_Foundation);
 
-        if (inputStream) {
-            qCInfo(TRACE_INFO, "file %s resolved to: %s", inFilename.toLatin1().data(),
-                fileInfo.absoluteFilePath().toLatin1().constData());
-        } else if (!inQuiet) {
+        if (!inputStream && !inQuiet) {
             // Print extensive debugging information.
             qCCritical(INTERNAL_ERROR, "Failed to find file: %s", inFilename.toLatin1().data());
             qCCritical(INTERNAL_ERROR, "Searched path: %s",
