@@ -1503,7 +1503,10 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         // This is time consuming but I feel like it doesn't happen all that often and is very
         // useful to users
         // looking at the log file.
+
+        m_GeneratedShaderString.clear();
         m_GeneratedShaderString.assign(nonNull(inShaderPrefix));
+
         SShaderDefaultMaterialKey theKey(Key());
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
 

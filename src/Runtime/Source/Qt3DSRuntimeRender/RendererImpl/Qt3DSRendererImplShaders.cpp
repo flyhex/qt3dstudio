@@ -554,7 +554,11 @@ namespace render {
         // This is time consuming but I feel like it doesn't happen all that often and is very
         // useful to users
         // looking at the log file.
+        QLatin1String logPrefix("mesh subset pipeline-- ");
+
         m_GeneratedShaderString.clear();
+        m_GeneratedShaderString.assign(logPrefix.data());
+
         SShaderDefaultMaterialKey theKey(inRenderable.m_ShaderDescription);
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
         IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
@@ -570,7 +574,8 @@ namespace render {
         return m_qt3dsContext.GetDefaultMaterialShaderGenerator().GenerateShader(
             inRenderable.m_Material, inRenderable.m_ShaderDescription, pipeline, inFeatureSet,
             m_CurrentLayer->m_Lights, inRenderable.m_FirstImage,
-            inRenderable.m_RenderableFlags.HasTransparency(), "mesh subset pipeline-- ");
+            inRenderable.m_RenderableFlags.HasTransparency(),
+            logPrefix.data());
     }
 
     // --------------  Special cases for shadows  -------------------

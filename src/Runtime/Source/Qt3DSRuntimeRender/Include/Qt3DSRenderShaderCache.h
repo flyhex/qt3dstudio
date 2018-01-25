@@ -129,7 +129,8 @@ namespace render {
         ForceCompileProgram(CRegisteredString inKey, const char8_t *inVert, const char8_t *inFrag,
                             const char8_t *inTessCtrl, const char8_t *inTessEval,
                             const char8_t *inGeom, const SShaderCacheProgramFlags &inFlags,
-                            TShaderFeatureSet inFeatures, bool separableProgram) = 0;
+                            TShaderFeatureSet inFeatures, bool separableProgram,
+                            bool fromDisk = false) = 0;
 
         // It is up to the caller to ensure that inFeatures contains unique keys.
         // It is also up the the caller to ensure the keys are ordered in some way.

@@ -456,7 +456,7 @@ struct ShaderCache : public IShaderCache
                         const char8_t *inTessCtrl, const char8_t *inTessEval, const char8_t *inGeom,
                         const SShaderCacheProgramFlags &inFlags,
                         NVConstDataRef<SShaderPreprocessorFeature> inFeatures,
-                        bool separableProgram) override
+                        bool separableProgram, bool fromDisk = false) override
     {
         if (m_ShaderCompilationEnabled == false)
             return NULL;
@@ -465,6 +465,14 @@ struct ShaderCache : public IShaderCache
         tempKey.GenerateHashCode();
 
         eastl::pair<TShaderMap::iterator, bool> theInserter = m_Shaders.insert(tempKey);
+        if (fromDisk) {
+            qCInfo(TRACE_INFO) << "Loading from persistent shader cache: '<"
+                << tempKey.m_Key << ">'";
+        } else {
+            qCInfo(TRACE_INFO) << "Compiling into shader cache: '"
+                << tempKey.m_Key << ">'";
+        }
+
         if (!inVert)
             inVert = "";
         if (!inTessCtrl)
@@ -496,8 +504,6 @@ struct ShaderCache : public IShaderCache
         }
         if (inFlags.IsGeometryShaderEnabled())
             AddShaderPreprocessor(m_GeometryCode, inKey, ShaderType::Geometry, inFeatures);
-
-        qCInfo(TRACE_INFO, "Shader compiler - compiling shader %s", inKey.c_str());
 
         theInserter.first->second =
             m_RenderContext
@@ -706,7 +712,7 @@ struct ShaderCache : public IShaderCache
                                         loadGeometryData.c_str(), theFlags,
                                         qt3ds::foundation::toDataRef(theFeatures.data(),
                                                                   (QT3DSU32)theFeatures.size()),
-                                        false);
+                                        false, true /*fromDisk*/);
                                     // If something doesn't save or load correctly, get the runtime
                                     // to re-generate.
                                     if (!theShader)
