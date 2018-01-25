@@ -33,6 +33,7 @@
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 #include <QtStudio3D/private/q3dspresentation_p.h>
 #include <QtGui/qguiapplication.h>
+#include <QtGui/qscreen.h>
 #include <QtQuick/qquickwindow.h>
 
 #include "viewer.h"
@@ -134,7 +135,14 @@ void Viewer::restoreWindowState(QWindow *window)
     int visibility = settings.value(QStringLiteral("WindowVisibility"),
                                     QWindow::Windowed).toInt();
 
-    if (!geo.isNull()) {
+    // Do not restore geometry if resulting geometry means the center of the window
+    // would be offscreen on the virtual desktop
+    QRect vgeo = window->screen()->availableVirtualGeometry();
+    QPoint center(geo.x() + geo.width() / 2, geo.y() + geo.height() / 2);
+    bool offscreen = center.x() > vgeo.width() || center.x() < 0
+            || center.y() > vgeo.height() || center.y() < 0;
+
+    if (!offscreen && !geo.isNull()) {
         // The first geometry set at startup may adjust the geometry according to pixel
         // ratio if mouse cursor is on different screen than where window goes and the
         // two screens have different pixel ratios. Setting geometry twice seems to
