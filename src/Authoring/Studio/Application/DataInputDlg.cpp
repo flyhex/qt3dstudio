@@ -143,8 +143,10 @@ void CDataInputDlg::onMaxChanged(float max)
 
 void CDataInputDlg::onNameChanged(const QString &name)
 {
+    int cursorPos = m_ui->lineEditInputName->cursorPosition();
     m_name = getUniqueId(name);
     m_ui->lineEditInputName->setText(m_name);
+    m_ui->lineEditInputName->setCursorPosition(cursorPos);
 }
 
 #if 0 // TODO: To be added in version 2.x
