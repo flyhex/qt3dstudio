@@ -33,10 +33,6 @@
 #include "StudioUtils.h"
 #include "InspectorControlModel.h"
 #include "StudioPreferences.h"
-#include <QtCore/qtimer.h>
-#include <QtQml/qqmlcontext.h>
-#include <QtQml/qqmlengine.h>
-#include <QtWidgets/qmenu.h>
 #include "Core.h"
 #include "Doc.h"
 #include "IDocumentEditor.h"
@@ -56,6 +52,12 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
+
+#include <QtCore/qtimer.h>
+#include <QtQml/qqmlcontext.h>
+#include <QtQml/qqmlengine.h>
+#include <QtWidgets/qmenu.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
@@ -518,7 +520,18 @@ void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &poin
 {
     QSize popupSize = CStudioPreferences::browserPopupSize();
     browser->resize(popupSize);
-    browser->move(point - QPoint(popupSize.width(), popupSize.height()));
+
+    // Make sure the popup doesn't go outside the screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    browser->move(newPos);
 
     // Show asynchronously to avoid flashing blank window on first show
     QTimer::singleShot(0, this, [browser] {

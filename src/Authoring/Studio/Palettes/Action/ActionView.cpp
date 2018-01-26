@@ -49,10 +49,11 @@
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMSlides.h"
 
-#include <QCoreApplication>
-#include <QQmlContext>
-#include <QQmlEngine>
-#include <QTimer>
+#include <QtCore/qcoreapplication.h>
+#include <QtQml/qqmlcontext.h>
+#include <QtQml/qqmlengine.h>
+#include <QtCore/qtimer.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent)
@@ -487,7 +488,18 @@ void ActionView::showBrowser(QQuickWidget *browser, const QPoint &point)
     QSize popupSize = CStudioPreferences::browserPopupSize();
     browser->disconnect();
     browser->resize(popupSize);
-    browser->move(point - QPoint(popupSize.width(), popupSize.height()));
+
+    // Make sure the popup doesn't go outside the screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    browser->move(newPos);
 
     // Show asynchronously to avoid flashing blank window on first show
     QTimer::singleShot(0, this, [browser] {
