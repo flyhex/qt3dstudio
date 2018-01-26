@@ -31,12 +31,11 @@
 \page viewer-commandline.html
 \ingroup qt3dstudio-viewer
 
-\section1 Command Line Usage
-
 The Qt 3D Studio Viewer supports launching a specific presentation and generating image
 sequences using command line arguments.
 
-Usage:
+\section1 Usage
+
 \badcode
     Qt3DViewer [options] [presentation file]
 \endcode
@@ -106,7 +105,10 @@ The following command line options are supported:
         \li Specifies scaling mode. The default value is \c{center}.
 \endtable
 
-Example - Creating a one minute 4k image sequence of a presentation:
+\section1 Example
+
+Creating a one minute 4k image sequence of a presentation:
+
 \badcode
     Qt3DViewer --seq-end 60000 --seq-width 3840 --seq-height 2160 MyPresentation.uip
 \endcode

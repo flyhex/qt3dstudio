@@ -1,0 +1,100 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Viewer: Remote Deployment
+\page viewer-remote-deployment.html
+\ingroup qt3dstudio-viewer
+
+Qt 3D Studio supports remote deployment to Qt 3D Studio Viewer. This enables seeing design changes
+live in the target device, for example an Android tablet.
+
+\note For supported devices and operating systems see the \l{Requirements} page.
+
+\section1 Setting Up the Target Device
+
+To set up the target device for remote deployment, follow the steps below.
+
+\section2 Android Devices
+
+\list 1
+  \li Download Qt 3D Viewer from
+  \l{https://play.google.com/store/apps/details?id=org.qtproject.qt3dviewer}{Google Play}
+  and install it on the target device.
+  \li Run Qt 3D Viewer.
+  \li Connection information, IP address and port, will display in the Viewer.
+\endlist
+
+\section2 Embedded Systems
+
+For embedded systems you will have to compile the application on the target device.
+
+\section3 Command Line
+
+You can run the Viewer from the command line. The default mode is connection mode. To start the
+Viewer, use the following command:
+\badcode
+Qt3DViewer
+\endcode
+
+When you run the Viewer in connection mode it will display connection details, IP address and port,
+right away.
+
+For full usage, see the \l{Viewer: Command Line Usage}{Command line usage documentation}.
+
+\section1 Connecting to the Target Device
+
+To connect to the target device Viewer from Qt 3D Studio, follow the steps below.
+
+\list 1
+  \li From the file menu, select \uicontrol {File > Connect to Device}.
+  \li Enter the connection information displaying in the Viewer on the target device, then press
+  \uicontrol{OK}.
+  \note Previous used IP and port is automatically inserted when you click
+  \uicontrol {Connect to Device}.
+  \li You are now connected. The Viewer on the target device should display \e{Remote Connected}.
+\endlist
+
+\section1 Preview Presentation
+
+To preview the presentation on the target device, press the \uicontrol{Preview} button
+\inlineimage preview-button.png
+in the Studio toolbar or press \uicontrol F5.
+
+After making changes to your presentation, press the \uicontrol{Preview} button to see the changes
+on the target device.
+
+\section1 Disconnecting from the Target Device
+
+You can disconnect from the target device either by selecting \uicontrol{File > Connect to Device}
+from the Studio file menu, or by selecting \uicontrol{File > Disconnect} from the Viewer file menu.
+
+After disconnecting, the presentation will be shown in the local Viewer when pressing the
+\uicontrol{Preview} button.
+
+*/
