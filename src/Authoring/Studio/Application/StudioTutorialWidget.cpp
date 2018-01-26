@@ -65,6 +65,12 @@ StudioTutorialWidget::~StudioTutorialWidget()
 
 void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
 {
+    QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
+    QSize windowSize = screenRect.size();
+    QSize welcomeSize = size();
+    move(screenRect.x() + (windowSize.width() - welcomeSize.width()) / 2,
+         screenRect.y() + (windowSize.height() - welcomeSize.height()) / 2);
+
     m_welcomeImages = new QList<QString>();
 
     // populate welcome screen images
@@ -108,23 +114,16 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
 void StudioTutorialWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
-    if (m_palette)
-        return;
-
-    m_palette = new QPalette;
     QPixmap pic = getScaledPic(m_imgIter);
-    m_palette->setBrush(QPalette::Window, pic);
-    setPalette(*m_palette);
 
-    // assume all welcome screen images are sized the same
+    if (!m_palette) {
+        m_palette = new QPalette;
+        m_palette->setBrush(QPalette::Window, pic);
+        setPalette(*m_palette);
+    }
+
     resize(pic.size());
     setFixedSize(size());
-
-    QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
-    QSize windowSize = screenRect.size();
-    QSize welcomeSize = size();
-    move(screenRect.x() + (windowSize.width() - welcomeSize.width()) / 2,
-         screenRect.y() + (windowSize.height() - welcomeSize.height()) / 2);
 }
 
 void StudioTutorialWidget::handleFwd()
