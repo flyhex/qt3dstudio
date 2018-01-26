@@ -98,6 +98,27 @@ Rectangle {
 
                         Image {
                             source: fileIcon
+
+                            Item {
+                                id: dragItemIcon
+
+                                visible: _isDraggable
+                                anchors.fill: parent
+
+                                Drag.active: dragAreaIcon.drag.active
+                                Drag.hotSpot.x: width / 2
+                                Drag.hotSpot.y: height / 2
+                                Drag.dragType: Drag.Automatic
+                                Drag.supportedActions: Qt.CopyAction
+
+                                MouseArea {
+                                    id: dragAreaIcon
+                                    anchors.fill: parent
+                                    drag.target: dragItemIcon
+                                }
+
+                                Drag.onDragStarted: _projectView.startDrag(dragAreaIcon, index)
+                            }
                         }
 
                         StyledLabel {
