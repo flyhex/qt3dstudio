@@ -52,7 +52,7 @@
 #include <QtStudio3D/Q3DSViewerSettings>
 #include <QtStudio3D/Q3DSPresentation>
 #include <QtStudio3D/Q3DSSceneElement>
-#include <QtStudio3D/Q3DSElement>
+#include <QtStudio3D/Q3DSDataInput>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLContext>
@@ -90,13 +90,13 @@ int main(int argc, char *argv[])
     context.create();
 
     Q3DSSurfaceViewer viewer;
-    viewer.presentation()->setSource(QUrl(QStringLiteral("qrc:/presentation/circling_cube.uip")));
+    viewer.presentation()->setSource(QUrl(QStringLiteral("qrc:/presentation/circling_cube.uia")));
     viewer.setUpdateInterval(0);
     viewer.settings()->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
     viewer.settings()->setShowRenderStats(true);
 
     Q3DSSceneElement sceneElement(viewer.presentation(), QStringLiteral("Scene"));
-    Q3DSElement counterElement(viewer.presentation(), QStringLiteral("Scene.Layer.Loopcounter"));
+    Q3DSDataInput counterInput(viewer.presentation(), QStringLiteral("counterInput"));
 
     viewer.initialize(&window, &context);
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     QObject::connect(&sceneElement, &Q3DSSceneElement::currentSlideIndexChanged, [&]() {
         if (sceneElement.currentSlideIndex() == 1)
             n++;
-        counterElement.setAttribute(QStringLiteral("textstring"), loopCounter.arg(n));
+        counterInput.setValue(loopCounter.arg(n));
     });
 
     return app.exec();

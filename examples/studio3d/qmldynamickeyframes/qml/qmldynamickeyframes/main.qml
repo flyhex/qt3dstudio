@@ -49,7 +49,7 @@
 ****************************************************************************/
 
 import QtQuick 2.7
-import QtStudio3D 1.0
+import QtStudio3D 1.1
 
 Item {
     id: mainview
@@ -81,30 +81,19 @@ Item {
 
         // Presentation item is used to control the presentation.
         Presentation {
-            source: "qrc:/presentation/dyn_key.uip"
+            id: presentation
+            source: "qrc:/presentation/dyn_key.uia"
 
-            // SceneElement item is used to listen for slide changes of a scene in the presentation.
-            // You can also change the slides via its properties.
-            SceneElement {
-                id: scene
-                elementPath: "Scene"
-                onCurrentSlideIndexChanged: {
-                    console.log("Current slide : " + currentSlideIndex + " ("
-                                + currentSlideName + ")");
-                }
-                onPreviousSlideIndexChanged: {
-                    console.log("Previous slide: " + previousSlideIndex + " ("
-                                + previousSlideName + ")");
-                }
-            }
+            //![2]
+            property int slideIndex: 0
+            property var slideArray: [
+                "Ball_PingPong",
+                "Ball_ToCenter+Scale",
+                "Ball_ToStart+Scale"
+            ]
+            //![2]
 
-            // Element item is used to change element attributes
-            Element {
-                id: materialElement
-                elementPath: "Scene.Layer.Sphere.Material"
-            }
-
-            property int desiredSlideIndex: 1
+            //![6]
             property int colorIndex: 0
             property var colorArray: [
                 [1.0, 1.0, 1.0],
@@ -115,21 +104,50 @@ Item {
                 [1.0, 0.0, 1.0],
                 [1.0, 1.0, 0.0]
             ]
+            //![6]
+
+            //![0]
+            // This DataInput item is used to control current slide. The presentation has
+            // a corresponding data input of "String" type linked to main Scene slides.
+            DataInput {
+                id: slideInput
+                name: "slideInput"
+                value: presentation.slideArray[presentation.slideIndex]
+            }
+            //![0]
+
+            //![1]
+            // This DataInput item is used to control animation time. The presentation has
+            // a corresponding data input of "Ranged Number" type linked to main Scene timeline.
+            DataInput {
+                id: animationInput
+                name: "animationInput"
+                value: 0
+            }
+            //![1]
+
+            //![4]
+            // Element item is used to change element attributes.
+            // Note that the preferred API for changing element attribute values would be
+            // the DataInput API, but changing colors is not yet supported via DataInput in 1.1.
+            Element {
+                id: materialElement
+                elementPath: "Scene.Layer.Sphere.Material"
+            }
+            //![4]
 
             function nextSlide() {
-                // Separate desiredSlideIndex variable is used to keep track of the desired slide,
-                // because SceneElement's currentSlideIndex property works asynchronously.
-                // This way the button click always changes the slide even if you click
-                // it twice during the same frame.
-                desiredSlideIndex = desiredSlideIndex != 3 ? desiredSlideIndex + 1 : 1;
-                scene.currentSlideIndex = desiredSlideIndex
-                slideButtonText.text = "Change Slide (" + desiredSlideIndex + ")"
+                slideIndex = slideIndex != 2 ? slideIndex + 1 : 0;
+                slideButtonText.text = "Change Slide (" + (slideIndex + 1) + ")";
             }
 
+            //![3]
             function resetTime() {
-                scene.goToTime(0);
+                animationInput.value = 0;
             }
+            //![3]
 
+            //![5]
             function changeColor() {
                 colorIndex = colorIndex >= colorArray.length - 1 ? colorIndex = 0 : colorIndex + 1;
                 materialElement.setAttribute("diffuse.r", colorArray[colorIndex][0]);
@@ -139,8 +157,10 @@ Item {
                                                   colorArray[colorIndex][1],
                                                   colorArray[colorIndex][2], 1.0);
             }
+            //![5]
         }
         onRunningChanged: console.log("Presentation running")
+        onPresentationReady: console.log("Presentation ready")
     }
 
     // Some buttons to control the scene

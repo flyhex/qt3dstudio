@@ -15,7 +15,7 @@
 					<Model id="Cube_001" >
 						<Material id="Material_001" />
 					</Model>
-					<Text id="Loopcounter" />
+                    <Text id="Loopcounter" controlledproperty="counterInput textstring" />
 				</Layer>
 			</Scene>
 		</Graph>

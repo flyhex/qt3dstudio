@@ -56,13 +56,36 @@
 
     \section2 Change Slide
 
-    Changes the current slide to next slide in sequence
+    Changes the current slide to next slide in sequence using a DataInput item:
+
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 2
+    \codeline
+    \dots 0
+    \codeline
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 0
 
     \section2 Reset Time
 
-    Resets the animation time to the beginning
+    Resets the animation time to the beginning using another DataInput item:
+
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 1
+    \codeline
+    \dots 0
+    \codeline
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 3
 
     \section2 Change Color
 
-    Changes the current color to the next one in an array of predefined colors
+    Changes the current color to the next one in an array of predefined colors using
+    an \l{Element} item:
+
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 6
+    \codeline
+    \dots 0
+    \codeline
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 4
+    \codeline
+    \dots 0
+    \codeline
+    \snippet qmldynamickeyframes/qml/qmldynamickeyframes/main.qml 5
 */

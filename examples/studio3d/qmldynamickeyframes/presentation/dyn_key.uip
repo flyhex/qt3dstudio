@@ -3,7 +3,7 @@
 	<Project >
 		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False" />
 		<Graph >
-			<Scene id="Scene" >
+            <Scene id="Scene" controlledproperty="animationInput @timeline slideInput @slide" >
 				<Layer id="Layer" >
 					<Camera id="Camera" />
 					<Light id="Light" />
