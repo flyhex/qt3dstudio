@@ -70,10 +70,11 @@ Rectangle {
 
                 delegate: Rectangle {
                     id: delegateItem
-
+                    property bool dragging: false
                     width: parent.width
                     height: 20
-                    color: index == projectTree.currentIndex ? _selectionColor : "transparent"
+                    color: (index == projectTree.currentIndex || dragging) ? _selectionColor
+                                                                           : "transparent"
 
                     Row {
                         x: _depth*28
@@ -153,15 +154,21 @@ Rectangle {
                         anchors.fill: parent
 
                         onEntered: {
+                            dragging = true;
                             if (drag.hasUrls && projectTree.model.hasValidUrlsForDropping(drag.urls))
                                 drag.accept(Qt.CopyAction)
                             else
                                 drag.accepted = false;
                         }
 
+                        onExited: {
+                            dragging = false;
+                        }
+
                         onDropped: {
                             if (drop.hasUrls)
-                                projectTree.model.importUrls(drop.urls, index, false)
+                                projectTree.model.importUrls(drop.urls, index, false);
+                            dragging = false;
                         }
                     }
 
