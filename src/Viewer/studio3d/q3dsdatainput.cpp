@@ -94,10 +94,13 @@ QVariant Q3DSDataInput::value() const
 
 void Q3DSDataInput::setValue(const QVariant &value)
 {
-    if (value != d_ptr->m_value) {
-        d_ptr->setValue(value);
-        Q_EMIT valueChanged();
-    }
+    // Since properties controlled by data inputs can change without the currect value being
+    // reflected on the value of the DataInput element, we allow setting the value to the
+    // same one it was previously and still consider it a change.
+    // For example, when controlling timeline, the value set to DataInput will only be
+    // the current value for one frame if presentation has a running animation.
+    d_ptr->setValue(value);
+    Q_EMIT valueChanged();
 }
 
 Q3DSDataInputPrivate::Q3DSDataInputPrivate(Q3DSDataInput *parent)

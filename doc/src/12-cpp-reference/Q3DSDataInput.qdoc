@@ -77,5 +77,6 @@
     The value of this property only accounts for changes done via the same Q3DSDataInput instance.
     If the value of the same data input in the presentation is changed elsewhere,
     for example via presentation scripting, those changes are not reflected in
-    the value of this property.
+    the value of this property. Due to this uncertainty, this property treats all value sets as
+    changes even if the newly set value is the same value as the previous value.
 */
