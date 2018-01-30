@@ -180,6 +180,7 @@ public:
     void PlaybackPlay();
     void PlaybackStopNoRestore();
     void PlaybackRewind();
+    bool IsPlaying();
     void OnRevert();
     bool CanRevert();
     void OnFileOpenRecent(const Qt3DSFile &inDocument);

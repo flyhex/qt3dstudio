@@ -1020,6 +1020,11 @@ void CStudioApp::PlaybackRewind()
     }
 }
 
+bool CStudioApp::IsPlaying()
+{
+    return m_Core->GetDoc()->IsPlaying();
+}
+
 //=============================================================================
 /**
  * Performs a file revert.

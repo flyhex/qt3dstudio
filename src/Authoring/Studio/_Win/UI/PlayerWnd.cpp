@@ -152,6 +152,14 @@ void CPlayerWnd::mousePressEvent(QMouseEvent *event)
 {
     const Qt::MouseButton btn = event->button();
     if ((btn == Qt::LeftButton) || (btn == Qt::RightButton)) {
+        // Pause playback for the duration of the mouse click
+        if (g_StudioApp.IsPlaying()) {
+            g_StudioApp.PlaybackStopNoRestore();
+            m_resumePlayOnMouseRelease = true;
+        } else {
+            m_resumePlayOnMouseRelease = false;
+        }
+
         long theToolMode = g_StudioApp.GetToolMode();
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::SceneWindow,
                                                                  event->pos(), theToolMode);
@@ -179,6 +187,10 @@ void CPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::SceneWindow);
         g_StudioApp.GetCore()->CommitCurrentCommand();
         m_IsMouseDown = false;
+        if (m_resumePlayOnMouseRelease) {
+            m_resumePlayOnMouseRelease = false;
+            g_StudioApp.PlaybackPlay();
+        }
     } else if (btn == Qt::MiddleButton) {
         event->ignore();
     }
