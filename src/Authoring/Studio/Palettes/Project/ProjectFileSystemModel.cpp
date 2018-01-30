@@ -601,7 +601,8 @@ void ProjectFileSystemModel::modelRowsRemoved(const QModelIndex &parent, int sta
                 for (auto parent = item.parent; parent != nullptr; parent = parent->parent)
                     parent->childCount -= 1 + item.childCount;
 
-                m_items.erase(std::begin(m_items) + row, std::begin(m_items) + row + item.childCount + 1);
+                m_items.erase(std::begin(m_items) + row,
+                              std::begin(m_items) + row + item.childCount + 1);
 
                 endRemoveRows();
             }
@@ -609,10 +610,12 @@ void ProjectFileSystemModel::modelRowsRemoved(const QModelIndex &parent, int sta
     }
 
     if (!hasVisibleChildren(parent)) {
-        // hide expand arrow
+        // collapse the now empty folder
         const int row = modelIndexRow(parent);
-        m_items[row].expanded = false;
-        Q_EMIT dataChanged(index(row), index(row));
+        if (m_items[row].expanded)
+            collapse(row);
+        else
+            Q_EMIT dataChanged(index(row), index(row));
     }
 }
 
