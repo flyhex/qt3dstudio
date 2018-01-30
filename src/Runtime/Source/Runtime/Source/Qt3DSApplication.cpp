@@ -1104,6 +1104,9 @@ struct SApp : public IApplication
             theStateReferences = m_CoreFactory->GetVisualStateContext().PreParseDocument(inReader);
         }
         {
+            m_UIAFileSettings.Parse(inReader);
+        }
+        {
             IDOMReader::Scope __assetsScope(inReader);
             if (!inReader.MoveToFirstChild("assets")) {
                 qCCritical(INVALID_OPERATION,
