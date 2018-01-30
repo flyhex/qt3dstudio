@@ -1,0 +1,158 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Using Data Inputs
+\page using-data-inputs.html
+\ingroup using-data-inputs
+
+This is a technology preview of how Qt 3D Studio could support data-driven animations. This makes
+it possible to control timeline animations and slides with data input. Additionally you can control
+the text property of a text object with data input.
+
+The data input value can be set using
+\l{Behavior::setDataInputValue(string name, variant value)}{behavior scripts}
+or the DataInput QML Type.
+
+\section1 Manage Data Inputs
+
+\target add data input
+\section2 Add a Data Input
+To add a new data input, follow the steps below.
+
+\list 1
+  \li Select \uicontrol{Edit > Data Inputs} from the file menu in Studio.
+  \li Click the \inlineimage add-data-input-icon.png
+  icon.
+  \li Enter \uicontrol{Name} for the data input.
+  \li Enter \uicontrol{Input Type} for the data input. If \e{Ranged Number} is selected,
+  it is required to specify \e{Minimum Range} and \e{Maximum Range}.
+  \li Click \uicontrol{OK}.
+\endlist
+
+\image new-data-input.png
+
+\section2 Edit a Data Input
+
+To edit a data input, follow the steps below.
+
+\list 1
+  \li Select \uicontrol{Edit > Data Inputs} from the file menu in Studio.
+  \li Select the data input you want to edit by clicking on it.
+    \raw HTML
+    <p>Or</p>
+    \endraw
+    Double-click the data input you want to edit (then skip to step 4).
+  \li Click the \inlineimage edit-data-input-icon.png
+  icon.
+  \li Make desired changes.
+  \li Click \uicontrol{OK}.
+\endlist
+
+\image data-inputs.png
+
+\section2 Delete a Data Input
+
+To delete a data input, follow the steps below.
+
+\list 1
+  \li Select \uicontrol{Edit > Data Inputs} from the file menu in Studio.
+  \li Select the data input you want to delete by clicking on it.
+  \li Click the \inlineimage delete-data-input-icon.png
+  icon.
+\endlist
+
+\section1 Control the Timeline with Data Input
+
+\image timeline-datainput.png
+
+\note Only data input of \e {Ranged Number} type can be used to control the timeline.
+
+To add a data input to control the timeline animation, follow the instructions below.
+
+\list 1
+  \li Add the data input according to
+  \l {add data input}{instructions above}.
+  \li Click the \inlineimage datainput-to-timeline-icon-inactive.png
+  icon located in the bottom of the scene graph.
+  \li Select the desired data input from the list by clicking it.
+  \li Press \uicontrol{OK}.
+\endlist
+
+The \e{minimum range} value of the data input will correspond to the start of the timeline while
+the \e{maximum range} value will correspond to the end of the timeline.
+
+When you have selected a data input for the timeline the data input will turn orange
+\inlineimage datainput-to-timeline-icon-active.png
+to indicate that the timeline is connected to a data input.
+
+To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 3.
+
+\section1 Control Slides with Data Input
+
+\image slide-palette-data-input-inactive.png
+
+\note Only data input of \e {String} type can be used to control slides.
+
+\list 1
+  \li Add the data input according to
+  \l {add data input}{instructions above}.
+  \li In the slide palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
+  icon located below the slides.
+  \li Select the desired data input from the list by clicking it.
+  \li Press \uicontrol{OK}.
+\endlist
+
+When you have selected a data input for the slides data input icon in the inspector palette will
+turn orange \inlineimage datainput-to-timeline-icon-active.png
+to indicate that the slides are connected to a data input.
+
+To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 3.
+
+\section1 Control an Object Property with Data Input
+
+\image datainput-text-property.png
+
+\list 1
+  \li Add the data input according to
+  \l {add data input}{instructions above}.
+  \li Select the desired text object in the scene graph.
+  \li In the inspector palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
+  icon next to the \e{text string} property.
+  \li Select the desired data input from the list by clicking it.
+  \li Press \uicontrol{OK}.
+\endlist
+
+When you have selected a data input for the text object the \e{text string} property and the
+data input icon in the inspector palette will turn orange
+\inlineimage datainput-text-property-active-icon.png
+to indicate that the property is connected to a data input.
+
+To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 4.
+
+*/

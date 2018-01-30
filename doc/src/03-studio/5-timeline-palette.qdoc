@@ -227,6 +227,17 @@ To remove a layer, select it in the scene graph, then click the delete layer ico
 \inlineimage Studio-Timeline-DeleteLayer.png
 .
 
+\section2 Data Input
+
+You can \l {Using Data Inputs}{use a data input} to control the timeline animation. You can set up
+a data input to control the timeline by clicking the
+\inlineimage datainput-to-timeline-icon-inactive.png
+icon.
+
+An orange colored icon \inlineimage datainput-to-timeline-icon-active.png
+indicates that a data input is currently connected to the timeline. Click the icon to remove the
+data input.
+
 \section1 Animation Portion
 
 \image Studio-Timeline-Animation.png
