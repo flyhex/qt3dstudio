@@ -354,7 +354,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
                                         "want to make it unique?");
         int theUserChoice = g_StudioApp.GetDialogs()->DisplayChoiceBox(
                     theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
-        if (theUserChoice == QMessageBox::Yes) {
+        if (theUserChoice == IDYES) {
             // Set with the unique name
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(
                 *m_TransMgr->GetDoc(), QObject::tr("Set Name"))
