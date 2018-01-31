@@ -1708,6 +1708,8 @@ void CMainFrame::OnFileConnectToDevice()
                         Q3DStudio::CString::fromQString(
                             QObject::tr("Connecting to remote device...")), "");
             m_remoteDeploymentSender->connect(info);
+        } else {
+            m_ui->action_Connect_to_Device->setChecked(false);
         }
     }
 }

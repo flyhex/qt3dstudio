@@ -546,7 +546,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;Connect to Device</string>
+    <string>&amp;Connect to Device...</string>
    </property>
   </action>
   <action name="action_Exit">
