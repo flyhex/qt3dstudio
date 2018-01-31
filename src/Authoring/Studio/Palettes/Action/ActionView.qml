@@ -37,11 +37,25 @@ Rectangle {
 
     color: _backgroundColor
 
+    Item {
+        id: focusEater
+        // Used to eat keyboard focus when user clicks outside any property control
+    }
+
     Flickable {
         id: actionFlickable
         ScrollBar.vertical: ScrollBar {
             id: scrollBar
             visible: size < 1.0
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            z: -10
+            onPressed: {
+                mouse.accepted = false
+                focusEater.forceActiveFocus();
+            }
         }
 
         anchors.fill: parent
@@ -141,6 +155,10 @@ Rectangle {
                         anchors.fill: parent
 
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                        onPressed: {
+                            actionsList.forceActiveFocus();
+                        }
 
                         onClicked: {
                             actionFlickable.scrollToBottom = false;

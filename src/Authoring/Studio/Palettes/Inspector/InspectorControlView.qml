@@ -49,6 +49,20 @@ Rectangle {
         anchors.topMargin: 4
         spacing: 8
 
+        MouseArea {
+            anchors.fill: parent
+            z: -10
+            onPressed: {
+                mouse.accepted = false
+                focusEater.forceActiveFocus();
+            }
+        }
+
+        Item {
+            id: focusEater
+            // Used to eat keyboard focus when user clicks outside any property control
+        }
+
         RowLayout {
             height: _controlBaseHeight + 8
             Layout.leftMargin: 4
@@ -76,6 +90,15 @@ Rectangle {
 
             ScrollBar.vertical: ScrollBar {
                 visible: size < 1.0
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                z: -10
+                onPressed: {
+                    mouse.accepted = false
+                    focusEater.forceActiveFocus();
+                }
             }
 
             model: _inspectorModel
