@@ -246,7 +246,7 @@ paths for compilation.
 \endcode
 
 \list
-\li \e QT3DS_ENABLE_CG_LIGHTING flag is enabled when CG lighting is enabled(on by default).
+\li \e QT3DS_ENABLE_CG_LIGHTING flag is enabled when lighting is enabled.
 \li \e QT3DS_ENABLE_LIGHT_PROBE flag is enabled when light probe is enabled.
 \li \e QT3DS_ENABLE_SSAO flag is enabled when screen space ambient occlusion is enabled.
 \li \e QT3DS_ENABLE_SSDO flag is enabled when screen space direct occlusion is enabled.
