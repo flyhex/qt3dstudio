@@ -38,7 +38,7 @@
 #define RENDER_LOG_ERROR_PARAMS(x) checkGLError()
 #endif
 
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
 #define GL_CALL_TIMER_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
 #define GL_CALL_TESSELATION_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
 #define GL_CALL_MULTISAMPLE_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
@@ -150,7 +150,7 @@ NVRenderBackendGLES2Impl::NVRenderBackendGLES2Impl(NVFoundationBase &fnd,
     setAndInspectHardwareCaps();
 
     // Initialize extensions
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
     m_qt3dsExtensions = new Qt3DSOpenGLES2Extensions;
     m_qt3dsExtensions->initializeOpenGLFunctions();
 #endif
@@ -160,7 +160,7 @@ NVRenderBackendGLES2Impl::~NVRenderBackendGLES2Impl()
 {
     if (m_pCurrentMiscState)
         NVDelete(m_Foundation.getAllocator(), m_pCurrentMiscState);
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
     if (m_qt3dsExtensions)
         delete m_qt3dsExtensions;
 #endif

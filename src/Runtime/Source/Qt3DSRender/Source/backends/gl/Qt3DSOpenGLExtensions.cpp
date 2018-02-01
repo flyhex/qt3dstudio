@@ -61,7 +61,7 @@ bool Qt3DSOpenGLExtensions::initializeOpenGLFunctions()
     return true;
 }
 
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
 Qt3DSOpenGLES2Extensions::Qt3DSOpenGLES2Extensions()
 {
 }
@@ -80,7 +80,7 @@ bool Qt3DSOpenGLES2Extensions::initializeOpenGLFunctions()
 
     Q_D(Qt3DSOpenGLExtensions);
 
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
     d->PatchParameteriEXT = reinterpret_cast<void (QOPENGLF_APIENTRYP)(
         GLenum, GLint)>(
             context->getProcAddress("glPatchParameteriEXT"));

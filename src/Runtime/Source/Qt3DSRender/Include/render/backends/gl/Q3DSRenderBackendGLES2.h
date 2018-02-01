@@ -183,7 +183,7 @@ namespace render {
 
     protected:
         NVRenderBackendMiscStateGL *m_pCurrentMiscState; ///< this holds the current misc state
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
         Qt3DSOpenGLES2Extensions *m_qt3dsExtensions;
 #endif
     };

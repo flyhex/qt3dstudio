@@ -44,7 +44,7 @@ public:
     GLenum (QOPENGLF_APIENTRYP PathGlyphIndexRangeNV)(
         GLenum, const void*, GLbitfield, GLuint, GLfloat, GLuint[2]);
 
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
     void (QOPENGLF_APIENTRYP PatchParameteriEXT)(GLenum, GLint);
     void (QOPENGLF_APIENTRYP QueryCounterEXT)(GLuint, GLenum);
     void (QOPENGLF_APIENTRYP GetQueryObjectui64vEXT)(GLuint, GLenum,
@@ -128,7 +128,7 @@ inline GLenum Qt3DSOpenGLExtensions::glPathGlyphIndexRangeNV(GLenum fontTarget,
         pathParameterTemplate, emScale, baseAndCount);
 }
 
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
 class Qt3DSOpenGLES2Extensions : public Qt3DSOpenGLExtensions
 {
 public:
