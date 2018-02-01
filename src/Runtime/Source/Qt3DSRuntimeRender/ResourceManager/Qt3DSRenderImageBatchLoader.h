@@ -33,6 +33,7 @@
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSDataRef.h"
+#include "render/Qt3DSRenderBaseTypes.h"
 
 namespace qt3ds {
 namespace render {
@@ -70,7 +71,8 @@ namespace render {
         // An optional listener can be passed in to get callbacks about the batch.
         virtual TImageBatchId LoadImageBatch(NVConstDataRef<CRegisteredString> inSourcePaths,
                                              CRegisteredString inImageTillLoaded,
-                                             IImageLoadListener *inListener) = 0;
+                                             IImageLoadListener *inListener,
+                                             NVRenderContextType type) = 0;
         // Blocks if any of the images in the batch are in flight
         virtual void CancelImageBatchLoading(TImageBatchId inBatchId) = 0;
         // Blocks if the image is currently in-flight
