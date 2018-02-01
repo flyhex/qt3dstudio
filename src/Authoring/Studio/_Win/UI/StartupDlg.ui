@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>250</y>
+     <y>210</y>
      <width>411</width>
      <height>29</height>
     </rect>
@@ -33,9 +33,9 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>290</y>
+     <y>250</y>
      <width>401</width>
-     <height>341</height>
+     <height>381</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="recentList">
@@ -130,43 +130,80 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="ClickableLabel" name="recent7">
+      <property name="text">
+       <string>Recent7.uip</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="docIndex" stdset="0">
+       <number>7</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="ClickableLabel" name="recent8">
+      <property name="text">
+       <string>Recent8.uip</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="docIndex" stdset="0">
+       <number>8</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="ClickableLabel" name="recent9">
+      <property name="text">
+       <string>Recent9.uip</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="docIndex" stdset="0">
+       <number>9</number>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="verticalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>30</x>
      <y>130</y>
-     <width>161</width>
-     <height>101</height>
+     <width>401</width>
+     <height>61</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="buttons">
     <item>
-     <widget class="QPushButton" name="newDocument">
+     <widget class="ClickableLabel" name="newDocument">
       <property name="text">
        <string>Create Project...</string>
       </property>
-      <property name="icon">
-       <iconset resource="../../images.qrc">
-        <normaloff>:/images/Toolbar-00.png</normaloff>:/images/Toolbar-00.png</iconset>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
-      <property name="flat">
-       <bool>true</bool>
+      <property name="docIndex" stdset="0">
+       <number>0</number>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="openDocument">
+     <widget class="ClickableLabel" name="openDocument">
       <property name="text">
        <string>Open Project...</string>
       </property>
-      <property name="icon">
-       <iconset resource="../../images.qrc">
-        <normaloff>:/images/Toolbar-01.png</normaloff>:/images/Toolbar-01.png</iconset>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
-      <property name="flat">
-       <bool>true</bool>
+      <property name="docIndex" stdset="0">
+       <number>0</number>
       </property>
      </widget>
     </item>
@@ -193,8 +230,6 @@
    <header>ClickableLabel.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../../images.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

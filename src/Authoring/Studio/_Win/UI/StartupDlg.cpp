@@ -99,8 +99,8 @@ void CStartupDlg::OnInitDialog()
              pRect.y() + pRect.height() / 2 - height() / 2);
     }
 
-    connect(m_ui->newDocument, &QPushButton::clicked, this, &CStartupDlg::OnNewDocClicked);
-    connect(m_ui->openDocument, &QPushButton::clicked, this, &CStartupDlg::OnOpenDocClicked);
+    connect(m_ui->newDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnNewDocClicked);
+    connect(m_ui->openDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
     m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
