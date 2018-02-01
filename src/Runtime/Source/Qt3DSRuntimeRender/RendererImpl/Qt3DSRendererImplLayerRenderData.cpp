@@ -1914,32 +1914,60 @@ namespace render {
                     theContext.SetBlendingEnabled(blendingEnabled);
                     theContext.SetDepthTestEnabled(false);
 #ifdef ADVANCED_BLEND_SW_FALLBACK
-                    NVScopedRefCounted<NVRenderTexture2D> layerBlendTexture =
+                    NVScopedRefCounted<NVRenderTexture2D> screenTexture =
                             m_Renderer.GetLayerBlendTexture();
                     NVScopedRefCounted<NVRenderFrameBuffer> blendFB = m_Renderer.GetBlendFB();
 
                     // Layer blending for advanced blending modes if SW fallback is needed
                     // rendering to FBO and blending with separate shader
-                    if (layerBlendTexture) {
+                    if (screenTexture) {
                         // Blending is enabled only if layer background has been chosen transparent
                         // Layers with advanced blending modes
                         if (blendingEnabled && (m_Layer.m_BlendType == LayerBlendTypes::Overlay ||
                                                 m_Layer.m_BlendType == LayerBlendTypes::ColorBurn ||
                                                 m_Layer.m_BlendType == LayerBlendTypes::ColorDodge)) {
-                            // Set up for rendering to texture
                             theContext.SetScissorTestEnabled(false);
                             theContext.SetBlendingEnabled(false);
-                            theContext.SetViewport(NVRenderRect(0, 0, theCurrentViewport.m_Width,
-                                                                theCurrentViewport.m_Height));
+
+                            // Get part matching to layer from screen texture and
+                            // use that for blending
+                            qt3ds::render::NVRenderTexture2D *blendBlitTexture;
+                            blendBlitTexture = theContext.CreateTexture2D();
+                            blendBlitTexture->SetTextureData(NVDataRef<QT3DSU8>(), 0,
+                                                             theLayerViewport.m_Width,
+                                                             theLayerViewport.m_Height,
+                                                             NVRenderTextureFormats::RGBA8);
+                            qt3ds::render::NVRenderFrameBuffer *blitFB;
+                            blitFB = theContext.CreateFrameBuffer();
+                            blitFB->Attach(NVRenderFrameBufferAttachments::Color0,
+                                           NVRenderTextureOrRenderBuffer(*blendBlitTexture));
+                            blendFB->Attach(NVRenderFrameBufferAttachments::Color0,
+                                            NVRenderTextureOrRenderBuffer(*screenTexture));
+                            theContext.SetRenderTarget(blitFB);
+                            theContext.SetReadTarget(blendFB);
+                            theContext.SetReadBuffer(NVReadFaces::Color0);
+                            theContext.BlitFramebuffer(theLayerViewport.m_X, theLayerViewport.m_Y,
+                                                       theLayerViewport.m_Width +
+                                                       theLayerViewport.m_X,
+                                                       theLayerViewport.m_Height +
+                                                       theLayerViewport.m_Y,
+                                                       0, 0,
+                                                       theLayerViewport.m_Width,
+                                                       theLayerViewport.m_Height,
+                                                       NVRenderClearValues::Color,
+                                                       NVRenderTextureMagnifyingOp::Nearest);
+
                             qt3ds::render::NVRenderTexture2D *blendResultTexture;
                             blendResultTexture = theContext.CreateTexture2D();
                             blendResultTexture->SetTextureData(NVDataRef<QT3DSU8>(), 0,
-                                                               theCurrentViewport.m_Width,
-                                                               theCurrentViewport.m_Height,
+                                                               theLayerViewport.m_Width,
+                                                               theLayerViewport.m_Height,
                                                                NVRenderTextureFormats::RGBA8);
-                            blendFB->Attach(NVRenderFrameBufferAttachments::Color0,
-                                            NVRenderTextureOrRenderBuffer(*blendResultTexture));
-                            theContext.SetRenderTarget(blendFB);
+                            qt3ds::render::NVRenderFrameBuffer *resultFB;
+                            resultFB = theContext.CreateFrameBuffer();
+                            resultFB->Attach(NVRenderFrameBufferAttachments::Color0,
+                                             NVRenderTextureOrRenderBuffer(*blendResultTexture));
+                            theContext.SetRenderTarget(resultFB);
 
                             AdvancedBlendModes::Enum advancedMode;
                             switch (m_Layer.m_BlendType) {
@@ -1956,49 +1984,40 @@ namespace render {
                                 advancedMode = AdvancedBlendModes::None;
                                 break;
                             }
-                            BlendAdvancedEquationSwFallback(theLayerColorTexture, layerBlendTexture,
+
+                            theContext.SetViewport(NVRenderRect(0, 0, theLayerViewport.m_Width,
+                                                                theLayerViewport.m_Height));
+                            BlendAdvancedEquationSwFallback(theLayerColorTexture, blendBlitTexture,
                                                             advancedMode);
-                            // save blending result for use with other layers
-                            qt3ds::render::NVRenderFrameBuffer *drawFB;
-                            drawFB = theContext.CreateFrameBuffer();
-                            drawFB->Attach(NVRenderFrameBufferAttachments::Color0,
-                                           NVRenderTextureOrRenderBuffer(*layerBlendTexture));
-                            theContext.SetRenderTarget(drawFB);
-                            theContext.SetReadTarget(blendFB);
-                            theContext.SetReadBuffer(NVReadFaces::Color0);
-                            theContext.BlitFramebuffer(0, 0, theCurrentViewport.m_Width,
-                                                       theCurrentViewport.m_Height, 0, 0,
-                                                       theCurrentViewport.m_Width,
-                                                       theCurrentViewport.m_Height,
-                                                       NVRenderClearValues::Color,
-                                                       NVRenderTextureMagnifyingOp::Nearest);
+                            blitFB->release();
+                            // save blending result to screen texture for use with other layers
+                            theContext.SetViewport(theLayerViewport);
+                            theContext.SetRenderTarget(blendFB);
+                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theLayerViewport.m_Width,
+                                                            (QT3DSF32)theLayerViewport.m_Height),
+                                                  theFinalMVP, *blendResultTexture);
                             // render the blended result
                             theContext.SetRenderTarget(theFB);
                             theContext.SetScissorTestEnabled(true);
-                            theContext.SetViewport(theCurrentViewport);
-                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theCurrentViewport.m_Width,
-                                                            (QT3DSF32)theCurrentViewport.m_Height),
-                                                  theFinalMVP, *layerBlendTexture);
-                            blendFB->Attach(NVRenderFrameBufferAttachments::Color0,
-                                            NVRenderTextureOrRenderBuffer(*layerBlendTexture));
-                            drawFB->release();
+                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theLayerViewport.m_Width,
+                                                            (QT3DSF32)theLayerViewport.m_Height),
+                                                  theFinalMVP, *blendResultTexture);
+                            resultFB->release();
                         } else {
                             // Layers with normal blending modes
                             // save result for future use
-                            theContext.SetViewport(NVRenderRect(0, 0, theCurrentViewport.m_Width,
-                                                                theCurrentViewport.m_Height));
+                            theContext.SetViewport(theLayerViewport);
                             theContext.SetScissorTestEnabled(false);
-                            blendFB->Attach(NVRenderFrameBufferAttachments::Color0,
-                                            NVRenderTextureOrRenderBuffer(*layerBlendTexture));
+                            theContext.SetBlendingEnabled(true);
                             theContext.SetRenderTarget(blendFB);
-                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theCurrentViewport.m_Width,
-                                                            (QT3DSF32)theCurrentViewport.m_Height),
+                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theLayerViewport.m_Width,
+                                                            (QT3DSF32)theLayerViewport.m_Height),
                                                   theFinalMVP, *theLayerColorTexture);
                             theContext.SetRenderTarget(theFB);
                             theContext.SetScissorTestEnabled(true);
                             theContext.SetViewport(theCurrentViewport);
-                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theCurrentViewport.m_Width,
-                                                            (QT3DSF32)theCurrentViewport.m_Height),
+                            m_Renderer.RenderQuad(QT3DSVec2((QT3DSF32)theLayerViewport.m_Width,
+                                                            (QT3DSF32)theLayerViewport.m_Height),
                                                   theFinalMVP, *theLayerColorTexture);
                         }
                     } else {

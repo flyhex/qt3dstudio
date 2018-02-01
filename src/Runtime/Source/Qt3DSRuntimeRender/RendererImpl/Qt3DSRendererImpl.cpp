@@ -238,8 +238,9 @@ namespace render {
                  !theRenderContext.IsAdvancedBlendHwSupported() &&
                  !theRenderContext.IsAdvancedBlendHwSupportedKHR()) {
                 // Create and set up FBO and texture for advanced blending SW fallback
-                m_LayerBlendTexture.EnsureTexture(prepRes.GetLayerToPresentationViewport().m_Width,
-                                                  prepRes.GetLayerToPresentationViewport().m_Height,
+                NVRenderRect viewport = theRenderContext.GetViewport();
+                m_LayerBlendTexture.EnsureTexture(viewport.m_Width + viewport.m_X,
+                                                  viewport.m_Height + viewport.m_Y,
                                                   NVRenderTextureFormats::RGBA8);
                 if (m_BlendFB == NULL)
                     m_BlendFB = theRenderContext.CreateFrameBuffer();
