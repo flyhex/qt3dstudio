@@ -125,12 +125,12 @@ in shader.
 <Property name="Image2DParam" type="Image2D" format="rgba32f" binding="1"/>
 \endcode
 
-Image2D type is used to declare image property. Its value can not be set outside the
+\c Image2D type is used to declare image property. Its value can not be set outside the
 effect, but instead using the \c <ImageInput> element. \c {format}-attribute specifies
 the format of the image.
 See \l {https://www.khronos.org/opengl/wiki/Layout_Qualifier_(GLSL)#Image_formats}
 {GLSL Specification} for accepted values. \c {binding}-attribute specifies the binding
- point of the image.
+point of the image.
 
 \section2 Buffer
 
@@ -138,7 +138,7 @@ See \l {https://www.khronos.org/opengl/wiki/Layout_Qualifier_(GLSL)#Image_format
 <Property name="BufferParam" type="Buffer" format="uvec4" usage="storage" binding="1" align="std140"/>
 \endcode
 
-Buffer type is used to declare buffer property and allows using shader storage buffer objects in
+\c Buffer type is used to declare buffer property and allows using shader storage buffer objects in
 shader. Its value can not be set outside the effect, but instead using the \c <DataBufferInput>
 element. \c {format}-attribute specifies the format of the buffer. See GLSL Specification for
 accepted values. \c {usage}-attribute specifies the usage of the buffer. For now, only \c storage
@@ -146,6 +146,10 @@ is supported. \c {binding}-attribute specifies the binding point of the image.
 \c {align}-attribute specifies the buffer alignment. See GLSL Specification for accepted values.
 The shader generator appends \c _data[] to the name, which must be taken into account when
 using it in shader.
+
+\note \c Buffer type properties are only used with SSBO's together with \c <DataBuffer> element
+specifying the data buffer. Use \c Texture type properties together with \c <Buffer> element to
+specify texture buffers used with samplers.
 
 \section1 Elements
 
