@@ -441,66 +441,14 @@ macos:!isEmpty(QMAKE_LIBS_FBX) {
 }
 
 # Copy necessary resources
-
 ABS_PRJ_ROOT = $$absolute_path($$PWD/../../..)
-macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)/$${TARGET}.app/Contents
+macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)/$${TARGET}.app/Contents/Resources
 !macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)
-macos:RES = "Resources"
-!macos:RES = "res"
 
-defineReplace(doReplaceResCopy_copy1) {
-    filePath = $$absolute_path($$1)
-    macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR/$$RES)
-    !macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
-    PRE_TARGETDEPS += $$filePath
-    export(PRE_TARGETDEPS)
-    return($$system_path($$filePath))
-}
-defineReplace(doReplaceResCopy_copy2) {
-    filePath = $$absolute_path($$1)
-    macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR/$$RES)
-    !macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
-    PRE_TARGETDEPS += $$filePath
-    export(PRE_TARGETDEPS)
-    return($$system_path($$filePath))
-}
+copy_content.files = "$$PWD/../../../Studio/Content" "$$PWD/../../../Studio/Build Configurations"
+copy_content.path = $$ABS_DEST_DIR
 
-defineReplace(addFilesToResources) {
-    # Remove directories from results
-    input_files = $$files($$2, true)
-    for(input_file, input_files) {
-        last_part = $$split(input_file, /)
-        last_part = $$last(last_part)
-        last_split = $$split(last_part, .)
-        split_size = $$size(last_split)
-        equals(split_size, 2): $${1}.input_files += $$input_file
-    }
-    $${1}.input = $${1}.input_files
-    $${1}.commands = $(COPY_FILE) "${QMAKE_FILE_IN}" "${QMAKE_FILE_OUT}"
-    $${1}.CONFIG = no_link
-    $${1}.name = $$1
-    $${1}.output_function = doReplaceResCopy_$${1}
-
-    export($${1}.input_files)
-    export($${1}.input)
-    export($${1}.output_function)
-    export($${1}.commands)
-    export($${1}.CONFIG)
-    export($${1}.name)
-
-    $${1}_install.files = $$2
-    $${1}_install.path = $$[QT_INSTALL_BINS]/$$3
-    INSTALLS += $${1}_install
-    export($${1}_install.files)
-    export($${1}_install.path)
-    export(INSTALLS)
-
-    return($$1)
-}
-
-# TODO: Hack to get commits merged, must be figured out
-#QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy1", $$PWD/../../../Studio/Content/*, Content)
-#QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy2", "$$PWD/../../../Studio/Build Configurations/*", "Build Configurations")
+COPIES += copy_content
 
 CONFIG += exceptions
 
