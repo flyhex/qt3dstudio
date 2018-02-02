@@ -61,10 +61,13 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
             mainFrame, &CMainFrame::OnPlaybackRewind);
     connect(mainFrame, &CMainFrame::playStateChanged,
             [this](bool started) {
-        if (started)
+        if (started) {
             m_ui->playButton->setIcon(QIcon(":/images/playback_tools_low-01.png"));
-        else
+            m_ui->playButton->setToolTip(tr("Stop animation"));
+        } else {
             m_ui->playButton->setIcon(QIcon(":/images/playback_tools_low-02.png"));
+            m_ui->playButton->setToolTip(tr("Play animation"));
+        }
     });
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();

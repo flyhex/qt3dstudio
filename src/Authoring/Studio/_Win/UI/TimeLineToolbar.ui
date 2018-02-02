@@ -79,6 +79,9 @@
     </item>
     <item>
      <widget class="QToolButton" name="addLayerButton">
+      <property name="toolTip">
+       <string>Add new Layer</string>
+      </property>
       <property name="text">
        <string/>
       </property>
@@ -108,6 +111,9 @@
      <widget class="QToolButton" name="deleteObject">
       <property name="enabled">
        <bool>false</bool>
+      </property>
+      <property name="toolTip">
+       <string>Delete selected item</string>
       </property>
       <property name="text">
        <string/>
@@ -142,6 +148,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="toolTip">
+       <string>Playhead time</string>
+      </property>
       <property name="text">
        <string>0:00.000</string>
       </property>
@@ -165,6 +174,9 @@
     </item>
     <item>
      <widget class="QToolButton" name="rewindButton">
+      <property name="toolTip">
+       <string>Rewind</string>
+      </property>
       <property name="text">
        <string/>
       </property>
@@ -176,6 +188,9 @@
     </item>
     <item>
      <widget class="QToolButton" name="playButton">
+      <property name="toolTip">
+       <string>Play</string>
+      </property>
       <property name="text">
        <string/>
       </property>
