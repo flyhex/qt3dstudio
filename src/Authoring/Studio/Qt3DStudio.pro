@@ -498,8 +498,9 @@ defineReplace(addFilesToResources) {
     return($$1)
 }
 
-QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy1", $$PWD/../../../Studio/Content/*, Content)
-QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy2", "$$PWD/../../../Studio/Build Configurations/*", "Build Configurations")
+# TODO: Hack to get commits merged, must be figured out
+#QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy1", $$PWD/../../../Studio/Content/*, Content)
+#QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy2", "$$PWD/../../../Studio/Build Configurations/*", "Build Configurations")
 
 CONFIG += exceptions
 
