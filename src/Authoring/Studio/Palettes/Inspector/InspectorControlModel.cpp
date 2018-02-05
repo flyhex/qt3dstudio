@@ -452,7 +452,7 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            // through and find the controller name for this specific property
            const QString ctrlName = (currPropValStr.Left(
                currPropValStr.find(" "))).toQString();
-           inItem->m_tooltip = tr("Controlling Datainput: %1").arg(ctrlName);
+           inItem->m_tooltip = tr("Controlling Datainput:\n%1").arg(ctrlName);
        }
     }
 

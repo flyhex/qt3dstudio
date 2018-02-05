@@ -189,7 +189,7 @@ void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
         // differs from the control state of current time context
         if (m_currController.size()) {
             m_ui->addDataInputButton->setToolTip(
-                tr("Timeline controller: %1").arg(m_currController));
+                tr("Timeline Controller:\n%1").arg(m_currController));
             m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
         } else {
             // TODO actually delete the entire property instead of setting it as empty string
@@ -229,7 +229,7 @@ void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
     QString fullTimeControlStr;
 
     if (dataInputName != tr("[No control]")) {
-        m_ui->addDataInputButton->setToolTip(tr("Timeline controller: %1").arg(dataInputName));
+        m_ui->addDataInputButton->setToolTip(tr("Timeline Controller:\n%1").arg(dataInputName));
         fullTimeControlStr = dataInputName + " @timeline";
         m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
         m_currController = dataInputName;

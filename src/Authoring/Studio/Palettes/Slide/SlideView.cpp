@@ -258,7 +258,7 @@ void SlideView::onDataInputChange(const QString &dataInputName)
         fullSlideControlStr = dataInputName + " @slide";
         m_controlled = true;
         m_currentController = dataInputName;
-        m_toolTip = tr("Slide Controller: ") + m_currentController;
+        m_toolTip = tr("Slide Controller:\n") + m_currentController;
     } else {
         m_controlled = false;
         m_currentController.clear();
@@ -327,7 +327,7 @@ void SlideView::updateDataInputStatus(bool isViaDispatch)
         int slideStrPos = existingCtrl.indexOf("@slide");
         int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
         m_currentController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
-        m_toolTip = tr("Slide Controller: ") + m_currentController;
+        m_toolTip = tr("Slide Controller:\n") + m_currentController;
         m_controlled = true;
     } else {
         m_currentController.clear();
