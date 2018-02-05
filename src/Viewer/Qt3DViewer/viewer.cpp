@@ -45,6 +45,10 @@ Viewer::Viewer(bool generatorMode, QObject *parent)
 {
     if (m_generatorMode)
         setContentView(SequenceView);
+
+    m_connectTextResetTimer.setInterval(5000);
+    m_connectTextResetTimer.setSingleShot(true);
+    connect(&m_connectTextResetTimer, &QTimer::timeout, this, &Viewer::resetConnectionInfoText);
 }
 
 Viewer::~Viewer()
@@ -69,14 +73,7 @@ void Viewer::connectRemote()
         return;
     }
 
-    m_connectText.clear();
-    QTextStream stream(&m_connectText);
-    stream << tr("Use IP: %1 and Port: %2\n"
-                 "in Qt 3D Studio Editor to connect to this viewer.\n\n"
-                 "Use File/Open... to open a local presentation.")
-              .arg(m_remoteDeploymentReceiver->hostAddress().toString())
-              .arg(QString::number(m_connectPort));
-    Q_EMIT connectTextChanged();
+    resetConnectionInfoText();
 
     connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::remoteConnected,
             this, &Viewer::remoteConnected);
@@ -91,6 +88,11 @@ void Viewer::connectRemote()
             this, &Viewer::loadRemoteDeploymentReceiver);
 
     Q_EMIT connectedChanged();
+}
+
+void Viewer::disconnectRemote()
+{
+    m_remoteDeploymentReceiver->disconnectRemote();
 }
 
 // Used to load files via command line
@@ -300,6 +302,8 @@ void Viewer::remoteConnected()
     m_connectText = tr("Remote Connected");
     Q_EMIT connectTextChanged();
     Q_EMIT connectedChanged();
+    if (m_contentView != ConnectView)
+        Q_EMIT showInfoOverlay(m_connectText);
 }
 
 void Viewer::remoteDisconnected()
@@ -307,6 +311,24 @@ void Viewer::remoteDisconnected()
     m_connectText = tr("Remote Disconnected");
     Q_EMIT connectTextChanged();
     Q_EMIT connectedChanged();
+    if (m_contentView != ConnectView) {
+        Q_EMIT showInfoOverlay(m_connectText);
+    } else {
+        // Start timer to reset connection info text
+        m_connectTextResetTimer.start();
+    }
+}
+
+void Viewer::resetConnectionInfoText()
+{
+    m_connectText.clear();
+    QTextStream stream(&m_connectText);
+    stream << tr("Use IP: %1 and Port: %2\n"
+                 "in Qt 3D Studio Editor to connect to this viewer.\n\n"
+                 "Use File/Open... to open a local presentation.")
+              .arg(m_remoteDeploymentReceiver->hostAddress().toString())
+              .arg(QString::number(m_connectPort));
+    Q_EMIT connectTextChanged();
 }
 
 Q3DSView *Viewer::qmlStudio()

@@ -67,6 +67,46 @@ ApplicationWindow {
         _viewerHelper.storeWindowState(window);
     }
 
+    Timer {
+        id: infoTimer
+        repeat: false
+        interval: 5000
+
+        onTriggered: {
+            infoOverlay.visible = false;
+        }
+    }
+
+    Rectangle {
+        id: infoOverlay
+        visible: false
+        color: "black"
+        border.color: _dialogBorderColor
+        x: parent.width * 0.2
+        y: parent.height * 0.4
+        width: parent.width * 0.6
+        height: parent.height * 0.2
+        z: 20
+        Label {
+            id: infoLabel
+            anchors.fill: parent
+            color: _textColor
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: window.width / 40
+        }
+    }
+
+    Connections {
+        target: _viewerHelper
+        onShowInfoOverlay: {
+            // Show a brief info overlay
+            infoLabel.text = infoStr;
+            infoOverlay.visible = true;
+            infoTimer.restart();
+        }
+    }
+
     MouseArea {
         property int swipeStart: 0
 
@@ -274,6 +314,7 @@ ApplicationWindow {
         border.color: _dialogBorderColor
         y: (parent.height - height) / 2
         x: (parent.width - width) / 2
+        z: 100
         width: connectionEntry.width + (2 * _controlPadding)
         height: connectionEntry.height + (2 * _controlPadding)
 
@@ -321,6 +362,7 @@ ApplicationWindow {
                         _viewerHelper.connectPort = Number(text);
                         _viewerHelper.connectRemote();
                         ipEntry.visible = false;
+                        infoOverlay.visible = false;
                     }
                 }
 
@@ -341,6 +383,7 @@ ApplicationWindow {
                     _viewerHelper.connectPort = Number(connectText.text);
                     _viewerHelper.connectRemote();
                     ipEntry.visible = false;
+                    infoOverlay.visible = false;
                 }
             }
             StyledButton {
@@ -402,13 +445,16 @@ ApplicationWindow {
                         }
                     }
                     StyledMenuItem {
-                        text: qsTr("Connect")
+                        text: _viewerHelper.connected ? qsTr("Disconnect") : qsTr("Connect...")
                         shortcut: "F9"
                         enabled: _viewerHelper.contentView !== ViewerHelper.SequenceView
-                        showCheckMark: _viewerHelper.connected
                         onTriggered: {
-                            if (enabled)
-                                ipEntry.visible = !ipEntry.visible;
+                            if (enabled) {
+                                if (_viewerHelper.connected)
+                                    _viewerHelper.disconnectRemote();
+                                else
+                                    ipEntry.visible = !ipEntry.visible;
+                            }
                         }
                     }
                     StyledMenuItem {

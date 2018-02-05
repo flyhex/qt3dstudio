@@ -44,6 +44,7 @@ public:
     ~RemoteDeploymentReceiver();
 
     QString startServer();
+    void disconnectRemote();
 
     QHostAddress hostAddress() const { return m_hostAddress; }
     int serverPort() const { return m_serverPort; }
