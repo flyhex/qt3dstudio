@@ -273,7 +273,7 @@ animations and slide transitions without leaving Studio.
 
 \image Studio-Toolbar-Preview.png
 
-Invoking the \b{Preview} command (keyboard shortcut: \c{F12})
+Invoking the \b{Preview} command (keyboard shortcut: \c{F5})
 will launch the Qt 3D Studio Viewer application and preview the
 application for the presentation. If there is no \c{.uia} file in
 the folder for this presentation, then the presentation will be
