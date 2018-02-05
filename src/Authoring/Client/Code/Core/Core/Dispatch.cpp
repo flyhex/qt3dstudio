@@ -224,25 +224,6 @@ void CDispatch::FireSceneMouseWheel(SceneDragSenderType::Enum inSender, short in
                                    inToolMode);
 }
 
-//==============================================================================
-/**
- * Used for nudging selected objects in the scene.
- */
-void CDispatch::FireOnNudge(ENudgeDirection inNudgeDirection, int inToolMode, Qt::KeyboardModifiers inFlags)
-{
-    m_SceneDragListeners.FireEvent(&CSceneDragListener::OnNudge, inNudgeDirection, inToolMode,
-                                   inFlags);
-}
-
-//==============================================================================
-/**
- * Finished nudging, clears the acceleration.
- */
-void CDispatch::FireOnNudgeDone()
-{
-    m_SceneDragListeners.FireEvent(&CSceneDragListener::OnNudgeDone);
-}
-
 qt3dsdm::TSignalConnectionPtr
 CDispatch::ConnectSelectionChange(std::function<void(Q3DStudio::SSelectedValue)> inCallback)
 {

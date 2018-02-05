@@ -69,15 +69,6 @@ const long RESETDATA = 0x20000000; // Reset the data in the view by clearing the
 const long PLAYMODECHANGE = 0x40000000; // The Studio play mode has changed
 }
 
-enum ENudgeDirection {
-    NUDGE_NEG_X = -1,
-    NUDGE_NEG_Y = -2,
-    NUDGE_NEG_Z = -3,
-    NUDGE_POS_X = 1,
-    NUDGE_POS_Y = 2,
-    NUDGE_POS_Z = 3
-};
-
 // Used for play mode notifications inside the Document.
 enum EPlayMode {
     PLAYMODE_STOP = 1,

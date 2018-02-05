@@ -849,7 +849,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetBoundingBoxesOn(true);
         CStudioPreferences::SetTimebarDisplayTime(true);
         g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
-        CStudioPreferences::SetNudgeAmount(10.0f);
         CStudioPreferences::SetSnapRange(10);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);

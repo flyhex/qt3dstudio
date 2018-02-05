@@ -110,9 +110,6 @@ public:
     static bool GetTimebarDisplayTime();
     static void SetTimebarDisplayTime(bool inDisplayTime);
 
-    static double GetNudgeAmount();
-    static void SetNudgeAmount(double inNudgeAbount);
-
     static bool ShowVersionDialog();
     static void SetShowVersionDialog(bool inShowVersionDialog);
 

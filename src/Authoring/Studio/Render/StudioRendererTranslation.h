@@ -614,12 +614,6 @@ namespace studio {
                              CPt inPreviousMouseCoords, CPt inMouseCoords,
                              CUpdateableDocumentEditor &inEditor);
 
-        // Pulled directly from old studio's Node.cpp.
-        void OnNudge(ENudgeDirection inDirection, int inToolmode, int inFlags,
-                     CUpdateableDocumentEditor &inEditor);
-
-        void OnNudgeFinished() { m_KeyRepeat = 0; }
-
         void RequestRender()
         {
             if (m_ComponentSecondsDepth == 0)

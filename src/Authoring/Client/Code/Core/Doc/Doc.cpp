@@ -1932,100 +1932,14 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
  */
 void CDoc::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
+    Q_UNUSED(inShortcutHandler)
+
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Backspace) << QKeySequence(Qt::Key_Delete),
                         CDoc::DeleteSelectedItems);
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_V),
                         CDoc::HandleMasterPaste);
-
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier, Qt::Key_Down);
-
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Down);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Left);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Right);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier, Qt::Key_Down);
-
-    // Rotation nudge
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::ControlModifier,
-                                            Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::ControlModifier,
-                                            Qt::Key_Down);
-
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::ControlModifier,
-                                          Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::ControlModifier,
-                                          Qt::Key_Down);
-
-    // Scale nudge
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::AltModifier,
-                                            Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::AltModifier,
-                                            Qt::Key_Down);
-
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::AltModifier,
-                                          Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::AltModifier,
-                                          Qt::Key_Down);
 }
 
 //==============================================================================
@@ -2390,75 +2304,6 @@ void CDoc::SetKeyframeInterpolation()
 {
     if (m_KeyframesManager)
         m_KeyframesManager->SetKeyframeInterpolation();
-}
-
-bool CDoc::OnNudgeKey(int inChar, int inRepeatCount, Qt::KeyboardModifiers inFlags)
-{
-    Q_UNUSED(inRepeatCount);
-
-    if (!GetSelectedInstance().GetHandleValue())
-        return false;
-
-    bool theHandledFlag = true;
-    ENudgeDirection theDir = NUDGE_NEG_X;
-    switch (inChar) {
-    case Qt::Key_Up:
-        if (CHotKeys::IsKeyDown(Qt::ShiftModifier))
-            theDir = NUDGE_POS_Z;
-        else {
-            if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-                theDir = NUDGE_NEG_Y;
-            else
-                theDir = NUDGE_POS_Y;
-        }
-        break;
-
-    case Qt::Key_Down:
-        if (CHotKeys::IsKeyDown(Qt::ShiftModifier))
-            theDir = NUDGE_NEG_Z;
-        else {
-            if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-                theDir = NUDGE_POS_Y;
-            else
-                theDir = NUDGE_NEG_Y;
-        }
-        break;
-
-    case Qt::Key_Left:
-        theDir = NUDGE_NEG_X;
-        break;
-
-    case Qt::Key_Right:
-        theDir = NUDGE_POS_X;
-        break;
-
-    default:
-        theHandledFlag = false;
-        break;
-    }
-
-    // TODO: need to know the tool mode
-    // Previously we query m_StudioApp->GetToolMode( ) but this is not possible anymore.
-    // Temporarily we use the keyboard to decide
-    if (theHandledFlag) {
-        long theToolMode = STUDIO_TOOLMODE_MOVE;
-        if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-            theToolMode = STUDIO_TOOLMODE_ROTATE;
-        else if (CHotKeys::IsKeyDown(Qt::AltModifier))
-            theToolMode = STUDIO_TOOLMODE_SCALE;
-        m_nudging = true;
-        m_Core->GetDispatch()->FireOnNudge(theDir, theToolMode, inFlags);
-    }
-
-    return theHandledFlag;
-}
-
-void CDoc::OnNudgeDone()
-{
-    if (m_nudging) {
-        m_nudging = false;
-        m_Core->GetDispatch()->FireOnNudgeDone();
-    }
 }
 
 void CDoc::DeselectAllKeyframes()

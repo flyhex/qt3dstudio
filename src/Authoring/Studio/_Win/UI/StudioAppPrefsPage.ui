@@ -21,16 +21,6 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Nudge Increment</string>
-        </property>
-        <property name="buddy">
-         <cstring>m_editNudgeAmount</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>Default Interpolation</string>
@@ -40,21 +30,18 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="0" column="1">
        <widget class="QComboBox" name="m_DefaultInterpolation"/>
       </item>
-      <item row="2" column="0">
+      <item row="1" column="1">
+       <widget class="QComboBox" name="m_SnapRangeCombo"/>
+      </item>
+      <item row="1" column="0">
        <widget class="QCheckBox" name="m_checkTimelineAbsoluteSnapping">
         <property name="text">
          <string>Timeline Snapping Grid</string>
         </property>
        </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="m_SnapRangeCombo"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="m_editNudgeAmount"/>
       </item>
      </layout>
     </widget>

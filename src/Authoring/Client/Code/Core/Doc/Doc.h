@@ -407,9 +407,6 @@ protected:
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                qt3dsdm::TActionHandleList &ioActionList);
 
-    bool OnNudgeKey(int inChar, int inRepeatCount, Qt::KeyboardModifiers modifiers);
-    void OnNudgeDone();
-
     qt3dsdm::Qt3DSDMInstanceHandle GetFirstSelectableLayer();
     qt3dsdm::Qt3DSDMInstanceHandle GetTopmostGroup(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 

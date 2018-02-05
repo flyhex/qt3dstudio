@@ -655,32 +655,6 @@ void CStudioPreferences::SetTimebarDisplayTime(bool inDisplayTime)
 
 //==============================================================================
 /**
- *	Gets the amount to nudge the selection by.
- *	When an object is selected, it can be nudged by using the arrow keys.  This
- *	function gets the nudge amount from the registry, or returns a default value
- *	if the registry entry does not exist.  The nudge amount can be set with the
- *	Preferences dialog.
- *	@return The amount to nudge by
- */
-double CStudioPreferences::GetNudgeAmount()
-{
-    return CPreferences::GetUserPreferences().GetValue("NudgeAmount", 10.0);
-}
-
-//==============================================================================
-/**
- *	Sets the amount to nudge the object by.
- *	When an object is selected, it can be nudged by using the arrow keys.  This
- *	function stores the nudge amount in the registry.
- *	@param inAmount Amount to nudge by
- */
-void CStudioPreferences::SetNudgeAmount(double inNudgeAmount)
-{
-    CPreferences::GetUserPreferences().SetValue("NudgeAmount", inNudgeAmount);
-}
-
-//==============================================================================
-/**
  *	Gets the advance property expanded flag
  *	When an object is selected, this universal flag is used for either toggle
  *  the advance properties on or off but will not be visually available in
