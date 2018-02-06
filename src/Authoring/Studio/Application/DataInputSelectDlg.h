@@ -35,9 +35,10 @@ class DataInputSelectDlg : public QListWidget
     Q_OBJECT
 public:
     explicit DataInputSelectDlg(QWidget *parent = nullptr);
-    void showDialog();
+    void showDialog(const QPoint &point);
     void setData(const QStringList &dataInputList,
                  const QString &currentController);
+
 Q_SIGNALS:
     void dataInputChanged(const QString &selected);
 

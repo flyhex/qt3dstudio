@@ -52,6 +52,7 @@
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
 #include "DataInputSelectDlg.h"
+#include "MainFrm.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -167,6 +168,7 @@ void InspectorControlView::onFilesChanged(
 InspectorControlView::~InspectorControlView()
 {
     g_StudioApp.GetCore()->GetDispatch()->RemovePresentationChangeListener(this);
+    delete m_dataInputChooserView;
 }
 
 QSize InspectorControlView::sizeHint() const
@@ -465,7 +467,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
 void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
 {
     if (!m_dataInputChooserView) {
-        m_dataInputChooserView = new DataInputSelectDlg(this);
+        m_dataInputChooserView = new DataInputSelectDlg(g_StudioApp.m_pMainWnd);
         connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
                 [this, handle, instance](const QString &controllerName) {
 
@@ -487,7 +489,8 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     m_dataInputChooserView->setData(dataInputList,
                                     m_inspectorControlModel->getCurrentController());
     m_dataInputChooserView->setWindowModality(Qt::WindowModality::ApplicationModal);
-    m_dataInputChooserView->showDialog();
+    m_dataInputChooserView->setWindowFlags(Qt::Popup);
+    m_dataInputChooserView->showDialog(point);
 }
 
 void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)

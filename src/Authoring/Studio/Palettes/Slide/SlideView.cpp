@@ -65,6 +65,7 @@ SlideView::~SlideView()
 {
     clearSlideList();
     g_StudioApp.GetCore()->GetDispatch()->RemovePresentationChangeListener(this);
+    delete m_dataInputSelector;
 }
 
 bool SlideView::showMasterSlide() const
@@ -114,7 +115,7 @@ void SlideView::setShowMasterSlide(bool show)
     Q_EMIT currentModelChanged();
 }
 
-void SlideView::showControllerDialog()
+void SlideView::showControllerDialog(const QPoint &point)
 {
     QStringList dataInputList;
     dataInputList.append(tr("[No control]"));
@@ -125,7 +126,7 @@ void SlideView::showControllerDialog()
     QString currCtr = m_currentController.size() ?
         m_currentController : tr("[No control]");
     m_dataInputSelector->setData(dataInputList, currCtr);
-    m_dataInputSelector->showDialog();
+    m_dataInputSelector->showDialog(point);
 
     return;
 }
@@ -351,8 +352,8 @@ void SlideView::initialize()
     connect(m_dataInputSelector, &DataInputSelectDlg::dataInputChanged,
             this, &SlideView::onDataInputChange);
     m_dataInputSelector->hide();
-    m_dataInputSelector->setWindowModality(Qt::WindowModality::WindowModal);
-    m_dataInputSelector->setWindowFlags(Qt::Tool | Qt::Dialog);
+    m_dataInputSelector->setWindowModality(Qt::WindowModality::ApplicationModal);
+    m_dataInputSelector->setWindowFlags(Qt::Popup);
     m_dataInputSelector->setWindowTitle(tr("Select slide controller"));
 }
 

@@ -27,6 +27,9 @@
 ****************************************************************************/
 #include "DataInputSelectDlg.h"
 
+#include <QtWidgets/qapplication.h>
+#include <QtWidgets/qdesktopwidget.h>
+
 DataInputSelectDlg::DataInputSelectDlg(QWidget *parent)
     : QListWidget(parent)
 {
@@ -40,6 +43,7 @@ void DataInputSelectDlg::setData(const QStringList &dataInputList,
                                  const QString &currentController)
 {
     clear();
+    setObjectName("DataInputSelectDlg");
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectItems);
     addItems(dataInputList);
@@ -49,9 +53,26 @@ void DataInputSelectDlg::setData(const QStringList &dataInputList,
         setItemSelected(itemList.first(), true);
 }
 
-void DataInputSelectDlg::showDialog()
+void DataInputSelectDlg::showDialog(const QPoint &point)
 {
+    setVisible(false);
+
+    // Must show before we can get the real size
     show();
+
+    // Make sure the dialog stays on screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(width(), height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + width() > screenSize.width())
+        newPos.setX(screenSize.width() - width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    move(newPos);
+
+    setVisible(true);
 }
 
 void DataInputSelectDlg::onItemClicked(QListWidgetItem *item)

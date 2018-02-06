@@ -216,14 +216,14 @@ Rectangle {
                                         acceptedButtons: Qt.RightButton | Qt.LeftButton
                                         hoverEnabled: true
                                         onClicked: {
-                                            const coords = mapToItem(root, mouse.x, mouse.y);
                                             if (mouse.button === Qt.LeftButton) {
                                                 _inspectorView.showDataInputChooser(
                                                             model.modelData.handle,
                                                             model.modelData.instance,
-                                                            coords);
+                                                            mapToGlobal(mouse.x, mouse.y));
                                             } else {
-                                                groupDelegateItem.showContextMenu(coords);
+                                                groupDelegateItem.showContextMenu(
+                                                            mapToItem(root, mouse.x, mouse.y));
                                             }
                                         }
                                     }

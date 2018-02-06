@@ -311,7 +311,7 @@ Rectangle {
                     hoverEnabled: true
                     acceptedButtons: Qt.LeftButton
                     onClicked:  {
-                        _slideView.showControllerDialog();
+                        _slideView.showControllerDialog(mapToGlobal(mouse.x, mouse.y));
                     }
                 }
                 Image {

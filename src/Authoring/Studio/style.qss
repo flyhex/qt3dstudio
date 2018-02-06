@@ -344,3 +344,8 @@ QDialog#DataInputDlg  QPushButton:!enabled {
     background: transparent;
     color: #727476;
 }
+
+/* Data input chooser */
+DataInputSelectDlg {
+    border: 1px solid #404244;
+}

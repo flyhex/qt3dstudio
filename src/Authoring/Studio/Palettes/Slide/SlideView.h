@@ -74,7 +74,7 @@ public:
     Q_INVOKABLE void moveSlide(int from, int to);
     Q_INVOKABLE void finishSlideRearrange(bool commit);
     Q_INVOKABLE void showContextMenu(int x, int y, int row);
-    Q_INVOKABLE void showControllerDialog();
+    Q_INVOKABLE void showControllerDialog(const QPoint &point);
 
     // Presentation Change Listener
     void OnNewPresentation() override;
