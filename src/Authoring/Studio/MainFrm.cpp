@@ -279,19 +279,13 @@ void CMainFrame::onPlaybackTimeout()
 void CMainFrame::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
-
-    QSettings settings;
-    restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-    restoreState(settings.value("mainWindowState").toByteArray());
+    handleGeometryAndState(false);
 }
 
 void CMainFrame::hideEvent(QHideEvent *event)
 {
     QMainWindow::hideEvent(event);
-
-    QSettings settings;
-    settings.setValue("mainWindowGeometry", saveGeometry());
-    settings.setValue("mainWindowState", saveState());
+    handleGeometryAndState(true);
 }
 
 /**
@@ -749,9 +743,7 @@ void CMainFrame::OnFileNew()
  */
 void CMainFrame::closeEvent(QCloseEvent *event)
 {
-    QSettings settings;
-    settings.setValue("mainWindowGeometry", saveGeometry());
-    settings.setValue("mainWindowState", saveState());
+    handleGeometryAndState(true);
     QMainWindow::closeEvent(event);
 
     if (g_StudioApp.GetCore()->GetDoc()->IsModified()) {
@@ -1856,4 +1848,18 @@ bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
         break;
     }
     return QMainWindow::eventFilter(obj, event);
+}
+
+void CMainFrame::handleGeometryAndState(bool save)
+{
+    QSettings settings;
+    QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
+    QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+    if (save) {
+        settings.setValue(geoKey, saveGeometry());
+        settings.setValue(stateKey, saveState(STUDIO_VERSION_NUM));
+    } else {
+        restoreGeometry(settings.value(geoKey).toByteArray());
+        restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
+    }
 }

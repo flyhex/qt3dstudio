@@ -469,3 +469,10 @@ isEmpty(GIT_SHA):exists($$ABS_PRJ_ROOT/.tag) {
     !equals(FIRST_CHAR, "$"): GIT_SHA = $$first(STUDIO_TAG)
 }
 !isEmpty(GIT_SHA): DEFINES += QT3DSTUDIO_REVISION=$$GIT_SHA
+
+# Get a unique version identifying integer
+STUDIO_MAJOR_VERSION = $$section(MODULE_VERSION, '.', 0, 0)
+STUDIO_MINOR_VERSION = $$section(MODULE_VERSION, '.', 1, 1)
+STUDIO_PATCH_VERSION = $$section(MODULE_VERSION, '.', 2, 2)
+DEFINES += \
+    STUDIO_VERSION_NUM=$${STUDIO_MAJOR_VERSION}0$${STUDIO_MINOR_VERSION}0$${STUDIO_PATCH_VERSION}

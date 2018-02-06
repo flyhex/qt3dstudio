@@ -240,6 +240,7 @@ Q_SIGNALS:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void handleGeometryAndState(bool save);
 
     RemoteDeploymentSender *m_remoteDeploymentSender = nullptr;
     CSceneView *m_SceneView = nullptr;
