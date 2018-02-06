@@ -43,7 +43,7 @@
 
 #include <QtStudio3D/qstudio3dglobal.h>
 #include <QtCore/qobject.h>
-
+#ifndef Q_OS_ANDROID
 QT_BEGIN_NAMESPACE
 
 class Q_STUDIO3D_EXPORT Q3DSImageSequenceGenerator : public QObject
@@ -64,3 +64,4 @@ Q_SIGNALS:
 QT_END_NAMESPACE
 
 #endif // Q3DSIMAGE_SEQUENCE_GENERATOR_H
+#endif
