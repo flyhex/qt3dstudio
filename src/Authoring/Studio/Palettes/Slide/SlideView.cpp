@@ -252,7 +252,7 @@ void SlideView::onDataInputChange(const QString &dataInputName)
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetSceneInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetActiveRootInstance();
     QString fullSlideControlStr;
 
     if (dataInputName != tr("[No control]")) {
@@ -265,9 +265,16 @@ void SlideView::onDataInputChange(const QString &dataInputName)
         m_currentController.clear();
         m_toolTip = tr("No controller");
     }
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
+    if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE) {
+        ctrldProp = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    } else if (bridge->GetObjectType(slideRoot) ==
+               EStudioObjectType::OBJTYPE_COMPONENT) {
+        ctrldProp = bridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
+    } else {
+        Q_ASSERT(false);
+    }
 
-    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp
-            = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
     qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
         = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
             *doc,
@@ -308,15 +315,24 @@ void SlideView::onDataInputChange(const QString &dataInputName)
     Q_EMIT controlledChanged();
 }
 
-// Set the state of slide control based on scene
+// Set the state of slide control based on scene or component
 // controlledproperty
 void SlideView::updateDataInputStatus(bool isViaDispatch)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetSceneInstance();
-    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp
-        = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetActiveRootInstance();
+
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
+    if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE) {
+        ctrldProp = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    } else if (bridge->GetObjectType(slideRoot) ==
+               EStudioObjectType::OBJTYPE_COMPONENT) {
+        ctrldProp = bridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
+    } else {
+        Q_ASSERT(false);
+    }
+
     qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
         = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
             *doc,
@@ -428,6 +444,7 @@ void SlideView::rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlid
             row++;
         }
     }
+    updateDataInputStatus(true);
 }
 
 CDoc *SlideView::GetDoc()
