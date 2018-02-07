@@ -105,7 +105,7 @@ Rectangle {
 
                 StyledToolButton {
                     enabledImage: "add.png"
-                    disabledImage: "add.png" // TODO: Needs proper disabled image
+                    disabledImage: "add-disabled.png"
                     toolTipText: qsTr("Add new action")
                     enabled: _actionView.hasItem
 
