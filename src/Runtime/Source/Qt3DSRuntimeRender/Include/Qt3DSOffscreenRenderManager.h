@@ -152,6 +152,10 @@ namespace render {
         virtual void Render(const SOffscreenRendererEnvironment &inEnvironment,
                             NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                             SScene::RenderClearCommand inColorBufferNeedsClear) = 0;
+        virtual void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
+                            NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
+                            SScene::RenderClearCommand inColorBufferNeedsClear,
+                            QT3DSVec3 inclearColor) = 0;
 
         // Implementors should implement one of the two interfaces below.
 

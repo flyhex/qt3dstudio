@@ -77,6 +77,8 @@ namespace render {
         bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext);
         void Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
                     RenderClearCommand command = ClearIsOptional);
+        void RenderWithClear(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
+                             RenderClearCommand inClearColorBuffer, QT3DSVec3 inclearColor);
     };
 }
 }

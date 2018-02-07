@@ -69,6 +69,10 @@ namespace render {
                             NVRenderContext & /*inRenderContext*/
                             ,
                             QT3DSVec2 inPresScale, SScene::RenderClearCommand inClearBuffer) override;
+        void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
+                             NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
+                             SScene::RenderClearCommand inColorBufferNeedsClear,
+                             QT3DSVec3 inclearColor) override {}
         IGraphObjectPickQuery *GetGraphObjectPickQuery() override { return NULL; }
         bool Pick(const QT3DSVec2 & /*inMouseCoords*/, const QT3DSVec2 & /*inViewportDimensions*/) override
         {

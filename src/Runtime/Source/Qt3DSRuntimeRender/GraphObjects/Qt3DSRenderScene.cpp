@@ -104,7 +104,8 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
 {
     if ((inClearColorBuffer == SScene::ClearIsOptional && m_UseClearColor)
         || inClearColorBuffer == SScene::AlwaysClear) {
-        QT3DSF32 clearColorAlpha = inContext.IsInSubPresentation() ? 0.0f : 1.0f;
+        QT3DSF32 clearColorAlpha
+                = inContext.IsInSubPresentation() && !m_UseClearColor ? 0.0f : 1.0f;
         QT3DSVec4 clearColor(0.0f, 0.0f, 0.0f, clearColorAlpha);
         if (m_UseClearColor) {
             clearColor.x = m_ClearColor.x;
@@ -120,4 +121,17 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
     if (m_FirstChild)
         inContext.GetRenderer().RenderLayer(*m_FirstChild, inViewportDimensions, m_UseClearColor,
                                             m_ClearColor, true);
+}
+void SScene::RenderWithClear(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
+                             RenderClearCommand inClearColorBuffer, QT3DSVec3 inClearColor)
+{
+    // If this scene is not using clear color, we set the color
+    // to background color from parent layer. This allows
+    // fully transparent subpresentations (both scene and layer(s) transparent)
+    // to inherit color from the layer that contains them.
+    if (!m_UseClearColor) {
+        m_ClearColor = inClearColor;
+        m_UseClearColor = true;
+    }
+    Render(inViewportDimensions, inContext, inClearColorBuffer);
 }

@@ -1172,10 +1172,17 @@ namespace render {
     {
         if (m_LayerPrepResult->IsLayerVisible()) {
             if (GetOffscreenRenderer()) {
-                m_LastFrameOffscreenRenderer->Render(
-                    CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
-                    m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
-                    SScene::ClearIsOptional);
+                if (m_Layer.m_Background == LayerBackground::Color) {
+                    m_LastFrameOffscreenRenderer->RenderWithClear(
+                        CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
+                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
+                        SScene::AlwaysClear, m_Layer.m_ClearColor);
+                } else {
+                    m_LastFrameOffscreenRenderer->Render(
+                        CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
+                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
+                        SScene::ClearIsOptional);
+                }
             } else {
                 RenderDepthPass(false);
                 Render();

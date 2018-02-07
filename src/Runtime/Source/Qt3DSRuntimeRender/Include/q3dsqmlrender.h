@@ -59,6 +59,10 @@ public:
     void Render(const SOffscreenRendererEnvironment &inEnvironment,
                         NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                         SScene::RenderClearCommand inColorBufferNeedsClear) override;
+    void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
+                        NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
+                        SScene::RenderClearCommand inColorBufferNeedsClear,
+                        QT3DSVec3 inclearColor) override {}
 
     IGraphObjectPickQuery *GetGraphObjectPickQuery() override
     {

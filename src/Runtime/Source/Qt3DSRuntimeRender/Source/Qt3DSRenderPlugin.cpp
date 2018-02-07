@@ -384,6 +384,13 @@ struct InstanceImpl : public IRenderPluginInstance
         }
     }
 
+    void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
+                         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
+                         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor)
+    {
+        Q_ASSERT(false);
+    }
+
     // Implementors should implement one of the two interfaces below.
 
     // If this renderer supports picking that can return graph objects

@@ -113,6 +113,9 @@ struct Qt3DSRenderSceneSubPresRenderer : public CSubPresentationRenderer
     void Render(const SOffscreenRendererEnvironment &inEnvironment,
                         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
                         SScene::RenderClearCommand inClearBuffer) override;
+    void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
+                         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
+                         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor);
 };
 
 struct SSceneLoadData
@@ -793,6 +796,16 @@ void Qt3DSRenderSceneSubPresRenderer::Render(const SOffscreenRendererEnvironment
                                            SScene::RenderClearCommand inClearBuffer)
 {
     CSubPresentationRenderer::Render(inEnvironment, inRenderContext, inPresScale, inClearBuffer);
+}
+
+void Qt3DSRenderSceneSubPresRenderer::RenderWithClear(
+        const SOffscreenRendererEnvironment &inEnvironment,
+        NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
+        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor)
+{
+    CSubPresentationRenderer::RenderWithClear(inEnvironment, inRenderContext,
+                                              inPresScale, inClearBuffer,
+                                              inClearColor);
 }
 
 //////////////////////////////////////////////////////////////////

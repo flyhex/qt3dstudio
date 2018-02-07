@@ -94,6 +94,17 @@ namespace render {
         m_LastRenderedEnvironment = inEnvironment;
     }
 
+    void CSubPresentationRenderer::RenderWithClear(
+        const SOffscreenRendererEnvironment &inEnvironment,
+        NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
+        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor)
+    {
+        NVRenderRect theViewportSize(inRenderContext.GetViewport());
+        m_Presentation.m_Scene->RenderWithClear(
+            QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),
+            m_RenderContext, inClearBuffer, inClearColor);
+    }
+
     // You know the viewport dimensions because
     Qt3DSRenderPickResult CSubPresentationRenderer::DoGraphQueryPick(
         const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions, bool inPickEverything)
