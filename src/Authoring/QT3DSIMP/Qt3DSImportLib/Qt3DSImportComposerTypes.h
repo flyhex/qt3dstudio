@@ -139,14 +139,6 @@ struct SImportPathAnchorPoint : public SImportAsset
     }
 };
 
-struct SImportDataInput : public SImportAsset
-{
-    ITERATE_COMPOSER_DATAINPUT_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
-    ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::DataInput; }
-};
-
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
@@ -171,7 +163,6 @@ inline void ImportVisitPropertyType(ComposerPropertyNames::Enum inName, TOperato
         ITERATE_COMPOSER_PATH_PROPERTIES
         ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES
         ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES
-        ITERATE_COMPOSER_DATAINPUT_PROPERTIES
 
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
@@ -191,7 +182,6 @@ struct SImportComposerTypes
     SImportPath m_Path;
     SImportSubPath m_SubPath;
     SImportPathAnchorPoint m_PathAnchorPoint;
-    SImportDataInput m_DataInput;
 
     SImportAsset &GetImportAssetForType(ComposerObjectTypes::Enum inTypeName);
 };

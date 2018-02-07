@@ -1366,8 +1366,8 @@ public:
                                  CompleteMetaDataType::Enum inDataType,
                                  const SValue &inDefaultValue,
                                  const TMetaDataData &inMetaData, TStrType inGroupName,
-                                         bool inIsHidden, bool inIsAnimatable,
-                                         bool inIsControllable) override
+                                 bool inIsHidden, bool inIsAnimatable,
+                                 bool inIsControllable) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inPropertyHandle);
         if (infoPtr == NULL) {

@@ -69,7 +69,6 @@ SOURCES += \
     ../Source/Runtime/Source/Qt3DSSlideSystem.cpp \
     ../Source/Runtime/Source/Qt3DSTimePolicy.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.cpp \
-    ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDataInput.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDynamicObject.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderEffect.cpp \
@@ -296,7 +295,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSLuaIncludes.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCustomMaterial.h \
-    ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDataInput.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDynamicObject.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderEffect.h \

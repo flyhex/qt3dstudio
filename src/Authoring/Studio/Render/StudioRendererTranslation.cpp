@@ -471,11 +471,7 @@ struct STranslatorDataModelParser
 #define Path_PaintStyle m_Path.m_PaintStyle
 #define Path_PathBuffer m_Asset.m_SourcePath
 #define SubPath_Closed m_SubPath.m_Closed
-#define DataInput_Value m_DataInput.m_Value
-#define DataInput_ValueStr m_DataInput.m_ValueStr
-#define DataInput_ControlledElemProp m_DataInput.m_ControlledElemProp
-#define DataInput_TimeFrom m_DataInput.m_TimeFrom
-#define DataInput_TimeTo m_DataInput.m_TimeTo
+
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
@@ -534,9 +530,7 @@ struct SSceneTranslator : public SGraphObjectTranslator
         STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_SCENE_PROPERTIES
         SLayer *theCurrentLayer = nullptr;
-        qt3ds::render::SDataInput *theCurrentDataInput = nullptr;
         theItem.m_FirstChild = nullptr;
-        theItem.m_FirstDataInput = nullptr;
         for (long idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
              idx < end; ++idx) {
             SGraphObjectTranslator::PushTranslation(inContext);
@@ -552,16 +546,6 @@ struct SSceneTranslator : public SGraphObjectTranslator
                 else
                     theCurrentLayer->m_NextSibling = theLayerObj;
                 theCurrentLayer = theLayerObj;
-            } else if (theTranslator && theTranslator->GetGraphObject().m_Type ==
-                qt3ds::render::GraphObjectTypes::DataInput ) {
-                qt3ds::render::SDataInput *theDataInputObj =
-                        static_cast<qt3ds::render::SDataInput *>(&theTranslator->GetGraphObject());
-                theDataInputObj->m_NextSibling = nullptr;
-                if (theItem.m_FirstDataInput == nullptr)
-                    theItem.m_FirstDataInput = theDataInputObj;
-                else
-                    theCurrentDataInput->m_NextSibling = theDataInputObj;
-                theCurrentDataInput = theDataInputObj;
             }
         }
     }
@@ -569,7 +553,6 @@ struct SSceneTranslator : public SGraphObjectTranslator
     {
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
         SLayer *theLastChild = nullptr;
-        qt3ds::render::SDataInput *theLastDataInput = nullptr;
 
         for (SLayer *theChild = theItem.m_FirstChild; theChild;
              theChild = static_cast<SLayer *>(theChild->m_NextSibling)) {
@@ -579,32 +562,16 @@ struct SSceneTranslator : public SGraphObjectTranslator
             theLastChild = theChild;
         }
         theItem.m_FirstChild = nullptr;
-
-        for (qt3ds::render::SDataInput *theChild = theItem.m_FirstDataInput; theChild;
-            theChild = static_cast<qt3ds::render::SDataInput *>(theChild->m_NextSibling)) {
-            if (theLastDataInput)
-                theLastDataInput->m_NextSibling = nullptr;
-            theChild->m_Scene = nullptr;
-            theLastDataInput = theChild;
-        }
-        theItem.m_FirstDataInput = nullptr;
     }
     void AppendChild(SGraphObject &inChild) override
     {
-        if (inChild.m_Type != GraphObjectTypes::Layer &&
-            inChild.m_Type != GraphObjectTypes::DataInput ) {
+        if (inChild.m_Type != GraphObjectTypes::Layer) {
             QT3DS_ASSERT(false);
             return;
         }
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
-        if ( inChild.m_Type == GraphObjectTypes::Layer ) {
-            SLayer &theLayer = static_cast<SLayer &>(inChild);
-            theItem.AddChild(theLayer);
-        } else if (inChild.m_Type == GraphObjectTypes::DataInput) {
-            qt3ds::render::SDataInput &theDataInput =
-                static_cast<qt3ds::render::SDataInput &>(inChild);
-            theItem.AddDataInput(theDataInput);
-        }
+        SLayer &theLayer = static_cast<SLayer &>(inChild);
+        theItem.AddChild(theLayer);
     }
     void SetActive(bool /*inActive*/) override
     {
@@ -888,67 +855,6 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
     void ClearChildren() override {}
 
     void SetActive(bool /*inActive*/) override {}
-};
-
-struct SDataInputTranslator : public SGraphObjectTranslator
-{
-    SDataInputTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-        qt3ds::NVAllocatorCallback &inAlloc)
-        : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, qt3ds::render::SDataInput)())
-    {
-    }
-
-    void PushTranslation(STranslation &inContext) override
-    {
-        SGraphObjectTranslator::PushTranslation(inContext);
-        qt3ds::render::SDataInput &theItem =
-            static_cast<qt3ds::render::SDataInput &>(GetGraphObject());
-
-        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
-
-        ITERATE_QT3DS_RENDER_DATAINPUT_PROPERTIES
-
-        // Handle incoming controlled element - property pairs
-        CRegisteredString incomingElemProp = CRegisteredString();
-        theParser.ParseProperty(
-            inContext.m_ObjectDefinitions.m_DataInput.m_ControlledElemProp,
-            incomingElemProp);
-        qt3ds::render::IStringTable &theStrTable(inContext.m_Context.GetStringTable());
-
-        QVector<QPair<CRegisteredString, CRegisteredString>> newVec
-            = ResolveControlledElemProps(incomingElemProp.c_str(), theStrTable);
-        theItem.SetControlledElementProperties(newVec);
-    }
-    void AppendChild(SGraphObject &inChild) override {}
-
-    void ClearChildren() override { }
-
-    void SetActive(bool /*inActive*/) override {}
-
-    QVector<QPair<CRegisteredString, CRegisteredString>> ResolveControlledElemProps(
-        std::string elemProp, qt3ds::render::IStringTable &strTable)
-    {
-        if (!elemProp.size())
-            return QVector<QPair<CRegisteredString, CRegisteredString>>();
-
-        QVector<QPair<CRegisteredString, CRegisteredString>> ret;
-        std::string theStr = elemProp;
-        std::string theCurrentElemStr;
-        std::string theCurrentPropStr;
-        std::string::size_type thePos = 0;
-        while (thePos < theStr.length()) {
-            theCurrentElemStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
-            thePos += theCurrentElemStr.length() + 1;
-
-            theCurrentPropStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
-            thePos += theCurrentPropStr.length() + 1;
-
-            ret.append(QPair<CRegisteredString, CRegisteredString>(
-                strTable.RegisterStr(theCurrentElemStr.c_str()),
-                strTable.RegisterStr(theCurrentPropStr.c_str())));
-        }
-        return ret;
-    }
 };
 
 struct SPathTranslator : public SNodeTranslator
@@ -1709,9 +1615,6 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
         break;
     case qt3dsdm::ComposerObjectTypes::SubPath:
         theNewTranslator = QT3DS_NEW(m_Allocator, SPathSubPathTranslator)(inInstance, m_Allocator);
-        break;
-    case qt3dsdm::ComposerObjectTypes::DataInput:
-        theNewTranslator = QT3DS_NEW(m_Allocator, SDataInputTranslator)(inInstance, m_Allocator);
         break;
     case qt3dsdm::ComposerObjectTypes::Effect: {
         IEffectSystem &theSystem = m_Context.GetEffectSystem();

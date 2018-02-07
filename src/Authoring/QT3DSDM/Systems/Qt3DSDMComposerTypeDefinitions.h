@@ -76,8 +76,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_OBJECT_TYPE(Alias, ITERATE_COMPOSER_ALIAS_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Path, ITERATE_COMPOSER_PATH_PROPERTIES)                            \
     HANDLE_COMPOSER_OBJECT_TYPE(PathAnchorPoint, ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES)    \
-    HANDLE_COMPOSER_OBJECT_TYPE(SubPath, ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES)                 \
-    HANDLE_COMPOSER_OBJECT_TYPE(DataInput, ITERATE_COMPOSER_DATAINPUT_PROPERTIES)
+    HANDLE_COMPOSER_OBJECT_TYPE(SubPath, ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES)
 
 #define ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES
 
@@ -305,14 +304,6 @@ class IPropertySystem;
 
 #define ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES                                                   \
     HANDLE_COMPOSER_PROPERTY(closed, m_Closed, bool, true)
-
-#define ITERATE_COMPOSER_DATAINPUT_PROPERTIES                                                       \
-    HANDLE_COMPOSER_PROPERTY(value, m_Value, float, 0.0f)                                          \
-    HANDLE_COMPOSER_PROPERTY(valuestr, m_ValueStr, TDataStrPtr, L"")                               \
-    HANDLE_COMPOSER_PROPERTY(timefrom, m_TimeFrom, float, 0.0f)                             \
-    HANDLE_COMPOSER_PROPERTY(timeto, m_TimeTo, float, 10000.0f)                             \
-    HANDLE_COMPOSER_PROPERTY(controlledelemprop, m_ControlledElemProp, TDataStrPtr, L"")
-
 
 struct ComposerObjectTypes
 {
@@ -902,23 +893,6 @@ struct SComposerObjectDefinition<ComposerObjectTypes::SubPath>
         SetType(inCore, inTyped);
     }
 };
-
-template <>
-struct SComposerObjectDefinition<ComposerObjectTypes::DataInput>
-        : public SComposerBaseObjectDefinition<ComposerObjectTypes::DataInput>
-{
-        SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              Qt3DSDMInstanceHandle inInstance,
-                              SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
-        : SComposerBaseObjectDefinition<ComposerObjectTypes::DataInput>(inCore, inMetaData,
-                                                                       inInstance)
-    {
-        Derive(inCore, inAsset);
-        SetType(inCore, inTyped);
-    }
-};
-
 
 // Container object for all of the object definitions
 class SComposerObjectDefinitions

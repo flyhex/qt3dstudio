@@ -40,7 +40,6 @@
 #include "Qt3DSRenderImage.h"
 #include "Qt3DSRenderBufferManager.h"
 #include "Qt3DSRenderUIPSharedTranslation.h"
-#include "Qt3DSRenderDataInput.h"
 #include <vector>
 #include <map>
 #include <set>
@@ -112,7 +111,6 @@ using qt3ds::render::SEffect;
 using qt3ds::render::SCustomMaterial;
 using qt3ds::render::GraphObjectTypes;
 using qt3ds::render::NodeFlags;
-using qt3ds::render::SDataInput;
 using qt3ds::foundation::CRegisteredString;
 using qt3ds::render::CRenderString;
 using qt3ds::foundation::CFileTools;
@@ -529,27 +527,6 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         return NULL;
     }
 
-    QVector<QPair<CRegisteredString, CRegisteredString>>
-        ResolveDataInputControlledElemProp(const char *instr)
-    {
-        QVector<QPair<CRegisteredString, CRegisteredString>> ret;
-        CRenderString theStr = CRenderString(instr);
-        CRenderString theCurrentElemStr;
-        CRenderString theCurrentPropStr;
-        CRenderString::size_type thePos = 0;
-        while (thePos < theStr.length()) {
-            theCurrentElemStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
-            thePos += theCurrentElemStr.length() + 1;
-
-            theCurrentPropStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
-            thePos += theCurrentPropStr.length() + 1;
-
-            ret.append(QPair<CRegisteredString, CRegisteredString>(
-                m_StrTable.RegisterStr(theCurrentElemStr.c_str()),
-                m_StrTable.RegisterStr(theCurrentPropStr.c_str())));
-        }
-        return ret;
-    }
     static bool IsNode(GraphObjectTypes::Enum inType)
     {
         return GraphObjectTypes::IsNodeType(inType);
@@ -834,11 +811,6 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Path_EndCapWidth "endcapwidth"
 #define Path_PathBuffer "sourcepath"
 #define SubPath_Closed "closed"
-#define DataInput_Value "value"
-#define DataInput_ValueStr "valuestr"
-#define DataInput_TimeFrom "timefrom"
-#define DataInput_TimeTo "timeto"
-#define DataInput_ControlledElemProp "controlledelemprop"
 
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
@@ -1047,16 +1019,6 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         ITERATE_QT3DS_RENDER_PATH_SUBPATH_PROPERTIES
     }
 
-    void ParseProperties(SDataInput &inItem, IPropertyParser &inParser)
-    {
-        ITERATE_QT3DS_RENDER_DATAINPUT_PROPERTIES
-            if (inItem.m_ControlledElemProp != CRegisteredString())
-            {
-               inItem.SetControlledElementProperties(
-                   ResolveDataInputControlledElemProp(inItem.m_ControlledElemProp));
-            }
-    }
-
     void AddPluginPropertyUpdate(eastl::vector<qt3ds::render::SRenderPropertyValueUpdate> &ioUpdates,
                                  qt3ds::render::IRenderPluginClass &,
                                  const qt3ds::render::SRenderPluginPropertyDeclaration &inDeclaration,
@@ -1257,10 +1219,6 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
             }
             m_PathManager.ResizePathSubPathBuffer(*thePath, anchorCount);
         } break;
-        case qt3dsdm::ComposerObjectTypes::DataInput: {
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SDataInput)();
-            static_cast<SDataInput *>(theNewObject)->m_Scene = static_cast<SScene *>(inParent);
-        } break;
         case qt3dsdm::ComposerObjectTypes::Effect: {
             const char8_t *effectClassId;
             m_Reader.Att("class", effectClassId);
@@ -1314,12 +1272,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     if (theNewObject->m_Type == GraphObjectTypes::Layer) {
                         static_cast<SScene *>(inParent)->AddChild(
                             *static_cast<SLayer *>(theNewObject));
-                    } else if (theNewObject->m_Type == GraphObjectTypes::DataInput ) {
-                        // DataInputs should always be at scene root level
-                        static_cast<SScene *>(inParent)->AddDataInput(
-                                    *static_cast<SDataInput *>(theNewObject));
                     } else {
-                        // Something added to a scene that was not a layer or datainput.
+                        // Something added to a scene that was not a layer.
                         QT3DS_ASSERT(false);
                     }
                     break;
@@ -1501,9 +1455,6 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
             case GraphObjectTypes::PathSubPath:
                 ParsePass2Properties(*static_cast<SPathSubPath *>(theObject->second), theClass);
                 break;
-            case GraphObjectTypes::DataInput:
-                ParsePass2Properties(*static_cast<SDataInput *>(theObject->second), theClass);
-                break;
             default:
                 QT3DS_ASSERT(false);
                 break;
@@ -1596,10 +1547,6 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     case GraphObjectTypes::PathSubPath:
                         ParseProperties(
                             *static_cast<qt3ds::render::SPathSubPath *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::DataInput:
-                        ParseProperties(
-                            *static_cast<qt3ds::render::SDataInput *>(theObject->second), parser);
                         break;
                     default:
                         QT3DS_ASSERT(false);

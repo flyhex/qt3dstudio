@@ -346,7 +346,6 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
         return;
     }
 
-    Q3DStudio::CString oldPath = GetObjectPath();
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
         QString theTitle = QObject::tr("Rename Object Error");
@@ -560,11 +559,7 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     switch (inTransaction) {
     case EUserTransaction_Rename:
-        // DataInput renaming is forbidden by convention. DataInput name is
-        // permanently assigned when it is added to the scene from a fixed list of
-        // available datainputs
-        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE
-                && GetObjectType() != OBJTYPE_DATAINPUT);
+        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE);
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())
@@ -596,14 +591,11 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
                 // component.
                 // This may include behavior assets which may be directly attached to the Scene.
                 // This is because by principal, components cannot exist on the Scene directly.
-                // DataInputs cannot reside inside component as they must be direct children
-                // of scene
                 qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
                         theBridge->GetParentInstance(theInstance);
                 if (theObjectType != OBJTYPE_LAYER && theObjectType != OBJTYPE_SCENE
                         && theObjectType != OBJTYPE_MATERIAL && theObjectType != OBJTYPE_IMAGE
-                        && theObjectType != OBJTYPE_EFFECT && theObjectType != OBJTYPE_DATAINPUT
-                        && theObjectType != OBJTYPE_COMPONENT
+                        && theObjectType != OBJTYPE_EFFECT && theObjectType != OBJTYPE_COMPONENT
                         && (theParentInstance.Valid()
                             && theBridge->GetObjectType(theParentInstance)
                             != OBJTYPE_SCENE)) // This checks if the object is

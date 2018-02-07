@@ -286,8 +286,6 @@ inline EStudioObjectType GetStudioObjectType(qt3dsdm::ComposerObjectTypes::Enum 
         return OBJTYPE_EFFECT;
     case ComposerObjectTypes::Path:
         return OBJTYPE_PATH;
-    case ComposerObjectTypes::DataInput:
-        return OBJTYPE_DATAINPUT;
     default: ;
     }
     return OBJTYPE_UNKNOWN;

@@ -38,14 +38,12 @@ namespace qt3ds {
 namespace render {
     struct SLayer;
     struct SPresentation;
-    struct SDataInput;
     typedef void *SRenderInstanceId;
 
     struct SScene : public SGraphObject
     {
         SPresentation *m_Presentation;
         SLayer *m_FirstChild;
-        SDataInput *m_FirstDataInput;
         QT3DSVec3 m_ClearColor;
         bool m_UseClearColor;
         bool m_Dirty;
@@ -59,10 +57,7 @@ namespace render {
         SScene();
 
         void AddChild(SLayer &inLayer);
-        void AddDataInput(SDataInput &inDataInput);
-
         SLayer *GetLastChild();
-        SDataInput *GetLastDataInput();
 
         // Generic method used during serialization
         // to remap string and object pointers
@@ -72,7 +67,6 @@ namespace render {
             SGraphObject::Remap(inRemapper);
             inRemapper.Remap(m_Presentation);
             inRemapper.Remap(m_FirstChild);
-            inRemapper.Remap(m_FirstDataInput);
         }
         // returns true if any of the layers were dirty or if this object was dirty
         bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,

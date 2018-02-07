@@ -717,8 +717,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             element->m_value = fileInfo.fileName();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::PathBuffer) {
             element->m_value = qt3dsdm::get<QString>(value);
-        } else if (bridge->GetObjectType(element->m_instance) ==  OBJTYPE_DATAINPUT) {
-            element->m_value = qt3dsdm::get<QString>(value);
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
                        << element->m_dataType << " element->m_propertyType : "

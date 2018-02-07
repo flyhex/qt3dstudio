@@ -32,7 +32,6 @@
 #include "Doc.h"
 #include "Qt3DSFileTools.h"
 #include "StudioFullSystem.h"
-#include "IObjectReferenceHelper.h"
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
 #include "StudioCoreSystem.h"
@@ -508,8 +507,7 @@ public:
 
     bool CanPropertyBeLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
     {
-        if (inProperty == m_Bridge.GetAlias().m_ReferencedNode.m_Property ||
-            inProperty == m_Bridge.GetDataInput().m_ControlledElemProp.m_Property)
+        if (inProperty == m_Bridge.GetAlias().m_ReferencedNode.m_Property)
             return false;
         return m_SlideSystem.CanPropertyBeLinked(inInstance, inProperty);
     }
@@ -660,40 +658,6 @@ public:
         }
     }
 
-    // Resolve all instances that are controlled by datainput instance
-    void GetControlledInstancesAndProperties(TInstanceHandle dataInput,
-                                             TInstancePropertyPairList &ctrldInstsProps)
-    {
-        Q_ASSERT(m_Bridge.IsDataInputInstance(dataInput));
-        IObjectReferenceHelper *objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
-
-        Option<SValue> controlledElemProp
-            = GetInstancePropertyValue(
-                dataInput,
-                m_Bridge.GetObjectDefinitions().m_DataInput.m_ControlledElemProp);
-        CString controlledElemPropStr = get<TDataStrPtr>(*controlledElemProp)->GetData();
-
-        std::string::size_type thePos = 0;
-        bool fullResolved = false;
-        CRelativePathTools::EPathType type;
-        // Controlled instance and property names are stored in "controlledelemprop"
-        // property as a single string, each item separated by whitespace. Parse
-        // names and get corresponding handles.
-        while (thePos < controlledElemPropStr.size()) {
-            CString theCurrentElemStr = controlledElemPropStr.substr(
-                thePos, controlledElemPropStr.find(' ', thePos) - thePos);
-            thePos += theCurrentElemStr.size() + 1;
-            CString theCurrentPropStr = controlledElemPropStr.substr(
-                thePos, controlledElemPropStr.find(' ', thePos) - thePos);
-            thePos += theCurrentPropStr.size() + 1;
-            TInstanceHandle currElement = CRelativePathTools::FindAssetInstanceByObjectPath(
-                &m_Doc, m_Doc.GetActiveRootInstance(), theCurrentElemStr,
-                type, fullResolved, objReferenceHelper);
-            TPropertyHandle currProp = FindProperty(currElement, theCurrentPropStr);
-            ctrldInstsProps.push_back(TInstancePropertyPair(currElement, currProp));
-        }
-    }
-
     bool IsInSceneGraph(TInstanceHandle child) const override { return m_AssetGraph.IsExist(child); }
 
     // If the path has any sub-path children, then yes it is externalizeable.
@@ -765,20 +729,7 @@ public:
             return false;
         return m_AnimationCore.IsArtistEdited(animHandle);
     }
-    bool IsControlled(TInstanceHandle instance)
-    {
-        // TODO This is Text element specific code
-        if (!m_Bridge.IsTextInstance(instance))
-            return false;
-        Option<SValue> currentControlledProperty = GetInstancePropertyValue(
-            instance, m_Bridge.GetObjectDefinitions().m_Text.m_ControlledProperty);
-        if (!currentControlledProperty.hasValue())
-            return false;
-        CString propStr = (get<TDataStrPtr>(*currentControlledProperty))->GetData();
-        if (!propStr.IsEmpty())
-            return true;
-        return false;
-    }
+
     pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>
     DoCopySceneGraphObject(const TInstanceHandleList &inInstances)
     {
@@ -1098,7 +1049,6 @@ public:
 
     void DoDeleteInstance(Qt3DSDMInstanceHandle instance)
     {
-        IObjectReferenceHelper *objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
         // For delete, the metadata needs to participate in the undo/redo system.
         m_MetaData.SetConsumer(m_StudioSystem.GetFullSystem()->GetConsumer());
         TInstanceHandleList theDeleteDependentInstances;
@@ -1564,11 +1514,10 @@ public:
             // Now set the property for reals
             thePropertySystem.SetInstancePropertyValue(instance, propName, value);
         } else {
-            if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property &&
-                propName != m_Bridge.GetDataInput().m_ControlledElemProp.m_Property)
+            if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property) {
                 thePropertySystem.SetInstancePropertyValue(instance, propName, value);
-            else {
-                // Alias and datainput properties are set in the scene graph, not in the slides.
+            } else {
+                // Alias properties are set in the scene graph, not in the slides.
                 // This makes the runtime expansion easier and stops problems such as
                 // someone unlinking the alias
                 // node reference and setting it to different values on different slides.

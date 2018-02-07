@@ -44,20 +44,13 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
         theAcceptible = false;
         break;
     case OBJTYPE_LAYER:
-    case OBJTYPE_DATAINPUT:
-        theAcceptible = (inParent == OBJTYPE_SCENE);
-        break;
-
     case OBJTYPE_BEHAVIOR:
-        // TODO: datainput can now have behavior child, to allow child QML script feed
-        // dummy data to DataInput for testing. To be removed.
         theAcceptible = (inParent == OBJTYPE_SCENE) || (inParent == OBJTYPE_LAYER)
             || (inParent == OBJTYPE_BEHAVIOR) || (inParent == OBJTYPE_CAMERA)
             || (inParent == OBJTYPE_LIGHT) || (inParent == OBJTYPE_MODEL)
             || (inParent == OBJTYPE_GROUP) || (inParent == OBJTYPE_COMPONENT)
             || (inParent == OBJTYPE_IMAGE) || (inParent == OBJTYPE_TEXT)
-            || (inParent == OBJTYPE_PATH) || (inParent == OBJTYPE_DATAINPUT);
-
+            || (inParent == OBJTYPE_PATH);
         break;
     case OBJTYPE_MATERIAL:
         theAcceptible = false;
@@ -183,10 +176,6 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         static QString theString = "Objects-Sound-Normal.png";
         return theString;
     }
-    case OBJTYPE_DATAINPUT: {
-        static QString theString = "Objects-DataInput-Normal.png";
-        return theString;
-    }
     default: {
         static QString theString = "Objects-Model-Normal.png";
         return theString;
@@ -272,10 +261,6 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
         static QString theString = "Objects-Sound-Disabled.png";
         return theString;
     }
-    case OBJTYPE_DATAINPUT: {
-        static QString theString = "Objects-DataInput-Disabled.png";
-        return theString;
-    }
     default: {
         static QString theString = "Objects-Model-Disabled.png";
         return theString;
@@ -359,10 +344,6 @@ const QString &CStudioObjectTypes::GetHighlightIconName(EStudioObjectType inType
     }
     case OBJTYPE_SOUND: {
         static QString theString = "Objects-Sound-Normal.png";
-        return theString;
-    }
-    case OBJTYPE_DATAINPUT: {
-        static QString theString = "Objects-DataInput-Normal.png";
         return theString;
     }
     default: {
