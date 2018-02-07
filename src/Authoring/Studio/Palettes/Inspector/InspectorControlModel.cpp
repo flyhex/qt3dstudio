@@ -417,7 +417,6 @@ qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int h
 void InspectorControlModel::updateControlledToggleState(InspectorControlBase* inItem) const
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
-    bool wasControlled = inItem->m_controlled;
 
     // toggle if controlledproperty contains the name of this property
     qt3dsdm::SValue currPropVal = currentPropertyValue(
@@ -431,6 +430,7 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
         inItem->m_controlled = false;
         inItem->m_tooltip = Q3DStudio::CString(
             inItem->m_metaProperty.m_Description.c_str()).toQString();
+        inItem->m_controller = "";
     } else {
        Q3DStudio::CString propName
            = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
@@ -447,6 +447,7 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            inItem->m_controlled = false;
            inItem->m_tooltip = Q3DStudio::CString(
                inItem->m_metaProperty.m_Description.c_str()).toQString();
+           inItem->m_controller = "";
        } else {
            inItem->m_controlled = true;
            // TODO just get the first whitespace-delimited string from
@@ -458,12 +459,14 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            const QString ctrlName = (currPropValStr.Left(
                currPropValStr.find(" "))).toQString();
            inItem->m_tooltip = tr("Controlling Datainput:\n%1").arg(ctrlName);
+           inItem->m_controller = ctrlName;
        }
     }
 
     Q_EMIT inItem->tooltipChanged();
-     if (wasControlled != inItem->m_controlled)
-        Q_EMIT inItem->controlledChanged();
+    // Emit signal always to trigger updating of controller name in UI
+    // also when user switches from one controller to another
+    Q_EMIT inItem->controlledChanged();
 }
 
 void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inItem)
