@@ -103,6 +103,7 @@ protected:
                                    int inNewIndex);
 
     void updateDataInputStatus(bool isViaDispatch);
+    void UpdateSlideViewTitleColor();
 
 private:
     void initialize();

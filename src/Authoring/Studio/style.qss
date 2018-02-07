@@ -314,6 +314,11 @@ TimeLineToolbar QPushButton#timeButton {
     border: 0px;
 }
 
+TimeLineToolbar QLabel#dataInputName {
+    background: transparent;
+    color: #ff5102;
+}
+
 /* Sub-presentation Dialogs and Data Input Dialogs */
 QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
 QDialog#SubPresentationListDlg QHeaderView::section,

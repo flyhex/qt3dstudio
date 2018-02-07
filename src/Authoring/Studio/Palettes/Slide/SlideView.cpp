@@ -313,6 +313,7 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Slide control"))
         ->SetInstancePropertyValue(slideRoot, ctrldProp, fullCtrlPropVal);
 
+    UpdateSlideViewTitleColor();
     Q_EMIT controlledChanged();
 }
 
@@ -352,6 +353,7 @@ void SlideView::updateDataInputStatus(bool isViaDispatch)
     }
 
     // update UI
+    UpdateSlideViewTitleColor();
     Q_EMIT controlledChanged();
 }
 void SlideView::initialize()
@@ -491,4 +493,17 @@ void SlideView::OnImmediateRefreshInstanceMultiple(
     updateDataInputStatus(true);
 }
 
+// Notify the user about control state change also with slide view
+// title color change.
+void SlideView::UpdateSlideViewTitleColor() {
+    QString styleString;
+    if (m_controlled) {
+        styleString = "QDockWidget { color: "
+                + QString(CStudioPreferences::dataInputColor().name()) + "; }";
+    } else {
+        styleString = "QDockWidget { color: "
+                + QString(CStudioPreferences::textColor().name()) + "; }";
+    }
 
+    parentWidget()->setStyleSheet(styleString);
+}

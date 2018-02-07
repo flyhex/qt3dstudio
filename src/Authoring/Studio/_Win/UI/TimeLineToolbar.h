@@ -80,6 +80,7 @@ protected:
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     DataInputSelectDlg *m_DataInputSelector;
-    void updateDataInputStatus(bool isViaDispatch);
+    void UpdateDataInputStatus(bool isViaDispatch);
+    void UpdateTimelineTitleColor(bool controlled);
 };
 #endif // INCLUDED_TIMELINETOOLBAR_H
