@@ -26,6 +26,7 @@
 **
 ****************************************************************************/
 #include <QFileInfo>
+#include <QtCore/qurl.h>
 
 #include <functional>
 
@@ -915,6 +916,17 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
+    }
+    if (theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL &&
+            studio->GetPropertySystem()->GetDataType(handle)
+                == qt3dsdm::DataModelDataType::String) {
+        // force . at the beginning of the url
+        QString x = value.toString();
+        QUrl url(x);
+        if (url.isRelative() && !x.startsWith("./")) {
+            QString s = QString("./%1").arg(url.path());
+            v = QVariant::fromValue(s);
+        }
     }
 
     if (!commit && m_modifiedProperty.first == 0) {
