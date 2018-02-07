@@ -393,9 +393,9 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
 
         // Update UI icon state and tooltip
         updateControlledToggleState(item);
-        m_controlledToggleConnection = signalProvider->ConnectControlledToggled(
+        item->m_connections.push_back(signalProvider->ConnectControlledToggled(
             std::bind(&InspectorControlModel::updateControlledToggleState,
-                      this, item));
+                      this, item)));
     }
 
     // synchronize the value itself
@@ -423,16 +423,17 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
     qt3dsdm::SValue currPropVal = currentPropertyValue(
         inItem->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
             inItem->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+    Q3DStudio::CString currPropValStr;
+    if (!currPropVal.empty())
+        currPropValStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
     // Restore original tool tip from metadata when turning control off
-    if (currPropVal.empty()) {
+    if (!currPropValStr.size()) {
         inItem->m_controlled = false;
         inItem->m_tooltip = Q3DStudio::CString(
             inItem->m_metaProperty.m_Description.c_str()).toQString();
     } else {
        Q3DStudio::CString propName
            = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
-       Q3DStudio::CString currPropValStr
-           = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
        // TODO this only works when controlling a single property,
        // see below
        // Item is not controlled if property name is not found altogether,
@@ -805,7 +806,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     // Controlled state must be manually set after undo operations,
     // as only the "controlledproperty" is restored in undo,
     // not the controlled flag nor the tooltip
-    if (element->m_controlled)
+    if (element->m_controllable)
           updateControlledToggleState(element);
 }
 
@@ -1009,14 +1010,12 @@ void InspectorControlModel::setPropertyControllerInstance(
                                                CRelativePathTools::EPATHTYPE_GUID, instance));
     Q_ASSERT(instancepath.size());
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property Controlled"))
-        ->SetInstancePropertyControlled(instance, instancepath, property,
-                                        controllerInstance, controlled);
+    doc->SetInstancePropertyControlled(instance, instancepath, property,
+                                       controllerInstance, controlled);
 }
 
 void InspectorControlModel::setPropertyControlled(long instance, int property)
 {
-
     const auto signalSender
         = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalSender();
 

@@ -193,7 +193,6 @@ private:
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_controlledToggleConnection;
 
     QStringList materialValues() const;
     InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);
