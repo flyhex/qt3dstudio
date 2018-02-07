@@ -32,13 +32,17 @@
 
 #include <QtWidgets/qpushbutton.h>
 #include <QtGui/qstandarditemmodel.h>
+#include <QtGui/qevent.h>
+#include <algorithm>
+
+const int columnCount = 3;
 
 CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs, QWidget *parent)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
     , m_currentDataInputIndex(-1)
-    , m_tableContents(new QStandardItemModel(0, 3, this))
+    , m_tableContents(new QStandardItemModel(0, columnCount, this))
 {
     m_ui->setupUi(this);
 
@@ -104,31 +108,31 @@ void CDataInputListDlg::initDialog()
     // Hide the vertical header with line numbers
     m_ui->tableView->verticalHeader()->setHidden(true);
 
-    // When clicking an item, select the whole row
-    // Connect both pressed and clicked to prevent selecting individual cells
-    connect(m_ui->tableView, &QTableView::pressed, this, &CDataInputListDlg::onSelected);
-    connect(m_ui->tableView, &QTableView::clicked, this, &CDataInputListDlg::onSelected);
-
-    // Double-click opens the item in edit mode
-    connect(m_ui->tableView, &QTableView::doubleClicked, this, &CDataInputListDlg::onEditDataInput);
+    connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &CDataInputListDlg::onSelectionChanged);
+    connect(m_ui->tableView, &QTableView::activated, this, &CDataInputListDlg::onActivated);
 }
 
 void CDataInputListDlg::updateButtons()
 {
-    if (m_dataInputs.isEmpty() || m_currentDataInputIndex == -1) {
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(false);
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(false);
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
-                    QIcon(":/images/Objects-edit-disabled.png"));
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
-                    QIcon(":/images/Action-Trash-Disabled.png"));
-    } else {
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(true);
+    if (m_ui->tableView->selectionModel()
+            && m_ui->tableView->selectionModel()->selectedIndexes().size() > 0) {
         m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(true);
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
-                    QIcon(":/images/Objects-edit-normal.png"));
         m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
                     QIcon(":/images/Action-Trash-Normal.png"));
+    } else {
+        m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(false);
+        m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
+                    QIcon(":/images/Action-Trash-Disabled.png"));
+    }
+    if (m_dataInputs.isEmpty() || m_currentDataInputIndex == -1) {
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(false);
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
+                    QIcon(":/images/Objects-edit-disabled.png"));
+    } else {
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(true);
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
+                    QIcon(":/images/Objects-edit-normal.png"));
     }
 }
 
@@ -176,6 +180,22 @@ void CDataInputListDlg::updateContents()
     m_ui->tableView->setModel(m_tableContents);
 }
 
+void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Delete)) {
+        onRemoveDataInput();
+    } else if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)) {
+        // Eat enter if we have selections
+        const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+        if (indexes.size() > 0)
+            event->accept();
+        else
+            QDialog::keyPressEvent(event);
+    } else {
+        QDialog::keyPressEvent(event);
+    }
+}
+
 void CDataInputListDlg::on_buttonBox_accepted()
 {
     m_actualDataInputs->clear();
@@ -205,28 +225,52 @@ void CDataInputListDlg::onAddDataInput()
 
 void CDataInputListDlg::onRemoveDataInput()
 {
-    m_dataInputs.removeAt(m_ui->tableView->currentIndex().row());
-    m_ui->tableView->clearSelection();
-    m_currentDataInputIndex = -1;
+    QVector<int> removedRows;
+    if (m_ui->tableView->selectionModel()) {
+        const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+        for (const auto index : indexes) {
+            if (!removedRows.contains(index.row()))
+                removedRows.append(index.row());
+        }
 
-    updateButtons();
-    updateContents();
+        if (removedRows.size() > 0) {
+            std::sort(removedRows.begin(), removedRows.end());
+            for (int i = removedRows.size() - 1; i >= 0; --i)
+                m_dataInputs.removeAt(removedRows[i]);
+
+            m_ui->tableView->clearSelection();
+            m_currentDataInputIndex = -1;
+
+            updateButtons();
+            updateContents();
+        }
+    }
 }
 
 void CDataInputListDlg::onEditDataInput()
 {
-    CDataInputDlg datainputdialog(&m_dataInputs[m_currentDataInputIndex], m_tableContents, this);
-    datainputdialog.exec();
-    m_currentDataInputIndex = -1;
+    if (m_currentDataInputIndex >= 0) {
+        CDataInputDlg datainputdialog(&m_dataInputs[m_currentDataInputIndex],
+                                      m_tableContents, this);
+        datainputdialog.exec();
 
-    updateButtons();
-    updateContents();
+        updateButtons();
+        updateContents();
+
+        m_ui->tableView->selectRow(m_currentDataInputIndex);
+    }
 }
 
-void CDataInputListDlg::onSelected(const QModelIndex &index)
+void CDataInputListDlg::onActivated(const QModelIndex &index)
 {
-    m_currentDataInputIndex = index.row();
-    m_ui->tableView->selectRow(m_currentDataInputIndex);
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+    m_currentDataInputIndex = indexes.size() == columnCount ? index.row() : -1;
+    onEditDataInput();
+}
 
+void CDataInputListDlg::onSelectionChanged()
+{
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+    m_currentDataInputIndex = indexes.size() == columnCount ? indexes.at(0).row() : -1;
     updateButtons();
 }

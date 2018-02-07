@@ -44,6 +44,7 @@ QT_END_NAMESPACE
 class CDataInputDialogItem;
 
 QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
+QT_FORWARD_DECLARE_CLASS(QKeyEvent)
 
 class CDataInputListDlg : public QDialog
 {
@@ -57,6 +58,7 @@ protected:
     void updateButtons();
     void updateContents();
     QVector<CDataInputDialogItem *> dataInputs() const;
+    void keyPressEvent(QKeyEvent *event);
 
 private Q_SLOTS:
     void on_buttonBox_accepted();
@@ -64,7 +66,8 @@ private Q_SLOTS:
     void onAddDataInput();
     void onRemoveDataInput();
     void onEditDataInput();
-    void onSelected(const QModelIndex &index);
+    void onActivated(const QModelIndex &index);
+    void onSelectionChanged();
 
 private:
     Ui::DataInputListDlg *m_ui;

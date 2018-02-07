@@ -44,6 +44,7 @@ namespace Ui {
 QT_END_NAMESPACE
 
 QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
+QT_FORWARD_DECLARE_CLASS(QKeyEvent)
 
 class CSubPresentationListDlg : public QDialog
 {
@@ -60,6 +61,7 @@ protected:
     void updateButtons();
     void updateContents();
     QString getUniqueId(const QString &id, bool editing = false);
+    void keyPressEvent(QKeyEvent *event);
 
 private Q_SLOTS:
     void on_buttonBox_accepted();
@@ -67,7 +69,8 @@ private Q_SLOTS:
     void onAddSubPresentation();
     void onRemoveSubPresentation();
     void onEditSubPresentation();
-    void onSelected(const QModelIndex &index);
+    void onActivated(const QModelIndex &index);
+    void onSelectionChanged();
 
 private:
     Ui::SubPresentationListDlg *m_ui;
