@@ -104,7 +104,8 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
 {
     if ((inClearColorBuffer == SScene::ClearIsOptional && m_UseClearColor)
         || inClearColorBuffer == SScene::AlwaysClear) {
-        QT3DSF32 clearColorAlpha = inContext.IsInSubPresentation() ? 0.0f : 1.0f;
+        QT3DSF32 clearColorAlpha
+            = inContext.IsInSubPresentation() && !m_UseClearColor ? 0.0f : 1.0f;
         QT3DSVec4 clearColor(0.0f, 0.0f, 0.0f, clearColorAlpha);
         if (m_UseClearColor) {
             clearColor.x = m_ClearColor.x;
