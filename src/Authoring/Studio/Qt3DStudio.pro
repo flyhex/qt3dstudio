@@ -445,10 +445,13 @@ ABS_PRJ_ROOT = $$absolute_path($$PWD/../../..)
 macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)/$${TARGET}.app/Contents/Resources
 !macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)
 
-copy_content.files = "$$PWD/../../../Studio/Content" "$$PWD/../../../Studio/Build Configurations"
+copy_content.files = $$PWD/../../../Studio/*
 copy_content.path = $$ABS_DEST_DIR
-
 COPIES += copy_content
+
+install_content.files = $$PWD/../../../Studio/*
+install_content.path = $$[QT_INSTALL_BINS]
+INSTALLS += install_content
 
 CONFIG += exceptions
 
