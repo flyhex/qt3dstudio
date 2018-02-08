@@ -207,6 +207,10 @@ QDateTimeEdit::down-arrow {
     image: url(:/images/arrow_down.png);
 }
 
+QComboBox::down-arrow:on {
+    image: url(:/images/arrow_up.png);
+}
+
 QSpinBox::up-arrow,
 QDoubleSpinBox::up-arrow,
 QDateTimeEdit::up-arrow {
