@@ -861,7 +861,13 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
 
     while (theShowDialog && theFileDlg.exec()) {
         theShowDialog = false;
-        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(theFileDlg.selectedFiles().front()));
+        QString selectedName = theFileDlg.selectedFiles().front();
+
+        // Make sure file name has correct extension
+        if (!selectedName.endsWith(theFileExt))
+            selectedName.append(theFileExt);
+
+        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(selectedName));
 
         m_LastSaveFile = theFile.GetAbsolutePath();
         // customising a dialog box will force us to use non-native.
