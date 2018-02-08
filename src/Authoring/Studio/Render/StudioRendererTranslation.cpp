@@ -2022,11 +2022,16 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
         if (m_EditCameraEnabled) {
             if (theTranslator->GetGraphObject().m_Type == GraphObjectTypes::Layer) {
                 if (theChild == m_Doc.GetActiveLayer()) {
-                    if (m_EditCameraLayerTranslator != nullptr)
+                    if (m_EditCameraLayerTranslator != nullptr
+                            && m_EditCameraLayerTranslator->GetInstanceHandle() != theChild) {
                         QT3DS_FREE(m_Allocator, m_EditCameraLayerTranslator);
-                    m_EditCameraLayerTranslator =
+                        m_EditCameraLayerTranslator = nullptr;
+                    }
+                    if (!m_EditCameraLayerTranslator) {
+                        m_EditCameraLayerTranslator =
                             QT3DS_NEW(m_Allocator, SEditCameraLayerTranslator)(theChild,
                                                                                m_Allocator);
+                    }
                     theTranslator = m_EditCameraLayerTranslator;
                     theParentTranslator.AppendChild(theTranslator->GetGraphObject());
                     BuildRenderGraph(*m_EditCameraLayerTranslator);
