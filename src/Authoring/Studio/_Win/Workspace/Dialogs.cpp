@@ -405,7 +405,7 @@ QString CDialogs::defaultDirForUrl(const QUrl &url)
     const QFileInfo fi(url.toLocalFile());
     const QString suffix = fi.suffix();
 
-    defaultDir = m_defaultDirForSuffixMap.value(suffix);
+    defaultDir = m_defaultDirForSuffixMap.value(suffix.toLower());
 
     return defaultDir;
 }
