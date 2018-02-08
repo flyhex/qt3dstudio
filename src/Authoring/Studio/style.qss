@@ -353,3 +353,11 @@ QDialog#DataInputDlg  QPushButton:!enabled {
 DataInputSelectDlg {
     border: 1px solid #404244;
 }
+
+DataInputSelectDlg::item:selected {
+    background: #46a2da;
+}
+
+DataInputSelectDlg::item:hover {
+    background: #23516d;
+}

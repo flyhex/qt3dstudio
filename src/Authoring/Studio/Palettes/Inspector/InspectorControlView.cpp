@@ -488,8 +488,6 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
 
     m_dataInputChooserView->setData(dataInputList,
                                     m_inspectorControlModel->getCurrentController());
-    m_dataInputChooserView->setWindowModality(Qt::WindowModality::ApplicationModal);
-    m_dataInputChooserView->setWindowFlags(Qt::Popup);
     m_dataInputChooserView->showDialog(point);
 }
 

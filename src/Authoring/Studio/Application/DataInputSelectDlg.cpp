@@ -46,6 +46,8 @@ void DataInputSelectDlg::setData(const QStringList &dataInputList,
     setObjectName("DataInputSelectDlg");
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectItems);
+    setWindowModality(Qt::WindowModality::ApplicationModal);
+    setWindowFlags(Qt::Popup);
     addItems(dataInputList);
     QList<QListWidgetItem *> itemList = findItems(currentController, Qt::MatchFlag::MatchExactly);
 

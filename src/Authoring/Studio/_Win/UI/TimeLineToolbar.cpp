@@ -89,8 +89,6 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     // Set as parent to mainframe to allow positioning in the main window
     m_DataInputSelector = new DataInputSelectDlg(mainFrame);
     m_DataInputSelector->hide();
-    m_DataInputSelector->setWindowModality(Qt::WindowModality::ApplicationModal);
-    m_DataInputSelector->setWindowFlags(Qt::Popup);
     m_DataInputSelector->setWindowTitle(tr("Select timeline controller"));
 
 

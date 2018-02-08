@@ -352,8 +352,6 @@ void SlideView::initialize()
     connect(m_dataInputSelector, &DataInputSelectDlg::dataInputChanged,
             this, &SlideView::onDataInputChange);
     m_dataInputSelector->hide();
-    m_dataInputSelector->setWindowModality(Qt::WindowModality::ApplicationModal);
-    m_dataInputSelector->setWindowFlags(Qt::Popup);
     m_dataInputSelector->setWindowTitle(tr("Select slide controller"));
 }
 
