@@ -708,6 +708,10 @@ struct SRenderContext : public IQt3DSRenderContext
                     m_RotationTexture = NULL;
                     m_RotationDepthBuffer = NULL;
                 }
+                if (m_SceneColor.hasValue() && !clearedScene) {
+                    m_RenderContext->SetClearColor(m_SceneColor);
+                    m_RenderContext->Clear(qt3ds::render::NVRenderClearValues::Color);
+                }
             } else {
                 QT3DSU32 imageWidth = m_BeginFrameResult.m_FBODimensions.width();
                 QT3DSU32 imageHeight = m_BeginFrameResult.m_FBODimensions.height();

@@ -251,9 +251,8 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         if (m_Presentation && m_Presentation->m_Scene) {
             NVRenderRect theViewportSize(m_LastRenderViewport);
             m_Presentation->m_Scene->Render(
-                QT3DSVec2((QT3DSF32)theViewportSize.m_Width,
-                (QT3DSF32)theViewportSize.m_Height), *m_Context,
-                SScene::AlwaysClear);
+                QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height), *m_Context,
+                SScene::DoNotClear);
         }
     }
 

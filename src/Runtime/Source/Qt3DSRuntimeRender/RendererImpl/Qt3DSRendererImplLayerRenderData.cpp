@@ -1739,7 +1739,7 @@ namespace render {
             if (m_Layer.m_Background == LayerBackground::Color) {
                 NVRenderContextScopedProperty<QT3DSVec4> __clearColor(
                     theContext, &NVRenderContext::GetClearColor, &NVRenderContext::SetClearColor,
-                    QT3DSVec4(m_Layer.m_ClearColor, 1.0f));
+                    QT3DSVec4(m_Layer.m_ClearColor, 0.0f));
                 theContext.Clear(NVRenderClearValues::Color);
             }
             RenderToViewport();
