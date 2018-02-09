@@ -917,7 +917,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
     }
-    if (theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL &&
+    if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
+         || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
             studio->GetPropertySystem()->GetDataType(handle)
                 == qt3dsdm::DataModelDataType::String) {
         // force . at the beginning of the url
