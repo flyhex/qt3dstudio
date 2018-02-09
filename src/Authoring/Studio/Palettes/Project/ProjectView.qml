@@ -155,11 +155,13 @@ Rectangle {
                         anchors.fill: parent
 
                         onEntered: {
-                            dragging = true;
-                            if (drag.hasUrls && projectTree.model.hasValidUrlsForDropping(drag.urls))
+                            if (drag.hasUrls
+                                    && projectTree.model.hasValidUrlsForDropping(drag.urls)) {
+                                dragging = true;
                                 drag.accept(Qt.CopyAction)
-                            else
+                            } else {
                                 drag.accepted = false;
+                            }
                         }
 
                         onExited: {
