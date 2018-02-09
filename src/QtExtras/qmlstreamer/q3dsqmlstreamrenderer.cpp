@@ -327,7 +327,25 @@ void Q3DSQmlStreamRenderer::uninitialize()
 
 void Q3DSQmlStreamRenderer::setItem(QQuickItem *item)
 {
-    m_rootItem = item;
+    if (item && m_rootItem && m_initialized) {
+        QMutexLocker lock(&m_renderMutex);
+        m_rootItem->setParentItem(nullptr);
+        m_rootItem = item;
+        m_rootItem->setParentItem(m_quickWindow->contentItem());
+        updateSizes();
+    } else {
+        if (item && m_rootItem != item) {
+            m_rootItem = item;
+
+            m_rootItem->setParentItem(m_quickWindow->contentItem());
+            updateSizes();
+
+            connect(m_renderControl, &QQuickRenderControl::renderRequested,
+                    this, &Q3DSQmlStreamRenderer::requestUpdate);
+            connect(m_renderControl, &QQuickRenderControl::sceneChanged,
+                    this, &Q3DSQmlStreamRenderer::requestUpdate);
+        }
+    }
 }
 
 bool Q3DSQmlStreamRenderer::event(QEvent *event)
