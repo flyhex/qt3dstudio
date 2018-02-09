@@ -399,10 +399,8 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
     void updateFontInfo(FontInfo &fi, const STextRenderInfo &inText,
                         QT3DSF32 inTextScaleFactor = 1.0f)
     {
-        static qreal dpi =
-            QGuiApplication::primaryScreen()->logicalDotsPerInch();
-        qreal point = inText.m_FontSize * 72 / dpi;
-        fi.font.setPointSizeF(point * inTextScaleFactor);
+        qreal pixelSize = inText.m_FontSize;
+        fi.font.setPixelSize(pixelSize * inTextScaleFactor);
         fi.font.setLetterSpacing(QFont::AbsoluteSpacing, qreal(inText.m_Tracking));
     }
 
