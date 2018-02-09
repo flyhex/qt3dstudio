@@ -1,7 +1,7 @@
 <Material name="paper_office" version="1.0">
     <MetaData >
         <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
         <Property formalName="Translucency Falloff" name="uTranslucentFalloff" description="Falloff of the translucency of the material" type="Float" default="0.0" category="Material"/>
         <Property formalName="Diffuse Light Bend" name="uDiffuseLightWrap" description="Diffuse light bend of the material" type="Float" min="0.0" max="1.0" default="0.0" category="Material"/>
         <Property formalName="Transparency" name="uOpacity" description="Transparency of the material" type="Float" min="0.0" max="100.0" default="100.0" category="Material"/>
