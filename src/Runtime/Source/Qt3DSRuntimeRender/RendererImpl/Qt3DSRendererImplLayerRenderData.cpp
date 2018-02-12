@@ -2078,6 +2078,11 @@ namespace render {
             theContext.SetScissorTestEnabled(false);
             m_Renderer.DrawScreenRect(theWidgetScreenRect, *m_BoundingRectColor);
         }
+        theContext.SetBlendFunction(qt3ds::render::NVRenderBlendFunctionArgument(
+                                        NVRenderSrcBlendFunc::One, NVRenderDstBlendFunc::OneMinusSrcAlpha,
+                                        NVRenderSrcBlendFunc::One, NVRenderDstBlendFunc::OneMinusSrcAlpha));
+        theContext.SetBlendEquation(qt3ds::render::NVRenderBlendEquationArgument(
+                                        NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
     }
 
 #define RENDER_FRAME_NEW(type) QT3DS_NEW(m_Renderer.GetPerFrameAllocator(), type)

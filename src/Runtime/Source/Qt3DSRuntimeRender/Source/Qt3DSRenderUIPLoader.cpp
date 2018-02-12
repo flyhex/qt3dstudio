@@ -619,7 +619,11 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     {
         qt3ds::render::SEnumNameMap *theMap = qt3ds::render::SEnumParseMap<TEnumType>::GetMap();
         for (qt3ds::render::SEnumNameMap *item = theMap; item->m_Name; ++item) {
-            if (qt3dsdm::AreEqual(inStr, item->m_Name)) {
+            // hack to match advanced overlay types, whose name start with a '*'
+            const char8_t *p = inStr;
+            if (*p == '*')
+                ++p;
+            if (qt3dsdm::AreEqual(p, item->m_Name)) {
                 ioEnum = static_cast<TEnumType>(item->m_Enum);
                 return true;
             }

@@ -371,7 +371,11 @@ struct SRuntimePropertyParser
         if (theString.IsValid()) {
             SEnumNameMap *theMap = SEnumParseMap<TEnumType>::GetMap();
             for (SEnumNameMap *theItem = theMap; theItem->m_Name && *theItem->m_Name; ++theItem) {
-                if (strcmp(theString, theItem->m_Name) == 0) {
+                // hack to match advanced overlay types, whose name start with a '*'
+                const char8_t *p = theString.c_str();
+                if (*p == '*')
+                    ++p;
+                if (strcmp(p, theItem->m_Name) == 0) {
                     TEnumType theNewValue = static_cast<TEnumType>(theItem->m_Enum);
                     if (outValue != theNewValue) {
                         outValue = theNewValue;
