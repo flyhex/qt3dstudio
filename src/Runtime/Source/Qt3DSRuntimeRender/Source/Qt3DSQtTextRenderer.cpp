@@ -224,8 +224,10 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
                         // Detect font style and weight using a dummy QRawFont
                         QRawFont rawFont(rawData, 1.0);
                         if (rawFont.isValid()) {
-                            fi.font.setStyle(rawFont.style());
-                            fi.font.setWeight(rawFont.weight());
+                            if (rawFont.style() != QFont::StyleOblique) {
+                                fi.font.setStyle(rawFont.style());
+                                fi.font.setWeight(rawFont.weight());
+                            }
                         } else {
                             qCWarning(WARNING, "Failed to determine font style: %s",
                                 entry.toStdString().c_str());
