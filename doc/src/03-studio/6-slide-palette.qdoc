@@ -34,7 +34,7 @@
 
  \section1 Using Slides
 
-\image SlidePalette.png
+\image slidePalette.png
 
  Each scene and
 component in a presentation has a set of "slides" associated with it.

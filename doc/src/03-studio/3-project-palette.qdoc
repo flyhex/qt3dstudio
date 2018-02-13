@@ -43,7 +43,7 @@ The original file will always remain untouched.
 
 \section2 Adding Assets from a Library
 
-\image SampleAssets.png
+\image sampleAssets.png
 
 Qt 3D Studio ships with a variety of sample assets to help you
 experiment and to speed common development needs. These files are hidden
