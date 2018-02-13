@@ -107,6 +107,8 @@ namespace render {
             m_backend->GetRenderState(NVRenderState::ScissorTest);
         m_backend->GetScissorRect(&m_HardwarePropertyContext.m_ScissorRect);
         m_backend->GetViewportRect(&m_HardwarePropertyContext.m_Viewport);
+
+        DoSetClearColor(m_HardwarePropertyContext.m_ClearColor);
     }
 
     NVRenderContextImpl::~NVRenderContextImpl()
