@@ -128,7 +128,6 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
     , m_vao(nullptr)
     , m_vertices(nullptr)
     , m_context(nullptr)
-    , m_shareContext(nullptr)
     , m_offscreenSurface(nullptr)
     , m_renderObject(nullptr)
     , m_renderThread(nullptr)
@@ -204,10 +203,16 @@ void Q3DSQmlStreamRenderer::cleanup()
 bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surface)
 {
     Q_UNUSED(surface);
+    if (!m_context) {
+        m_context = new QOpenGLContext();
+        m_context->setShareContext(context);
+        m_context->setFormat(context->format());
+        m_context->create();
+
+        m_context->moveToThread(m_renderThread);
+    }
 
     if (!m_rootItem) {
-        if (!m_shareContext)
-            m_shareContext = context;
         return true;
     }
 
@@ -215,12 +220,6 @@ bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surfac
         Q_ASSERT(QOpenGLContext::areSharing(context, m_context));
         return true;
     }
-    m_context = new QOpenGLContext();
-    m_context->setShareContext(context);
-    m_context->setFormat(context->format());
-    m_context->create();
-
-    m_context->moveToThread(m_renderThread);
 
     m_rootItem->setParentItem(m_quickWindow->contentItem());
     updateSizes();
@@ -343,8 +342,8 @@ void Q3DSQmlStreamRenderer::setItem(QQuickItem *item)
         if (item && m_rootItem != item) {
             m_rootItem = item;
 
-            if (m_shareContext)
-                initialize(m_shareContext, nullptr);
+            if (m_context)
+                initialize(m_context, nullptr);
         }
     }
 }
@@ -463,7 +462,6 @@ void Q3DSQmlStreamRenderer::render()
         func->glDrawArrays(GL_TRIANGLES, 0, 6);
         func->glEnable(GL_DEPTH_TEST);
 
-        m_update = false;
         m_program->release();
         m_vao->release();
     }

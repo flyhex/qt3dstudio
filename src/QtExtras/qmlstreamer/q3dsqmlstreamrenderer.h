@@ -106,7 +106,7 @@ private:
     QOpenGLShaderProgram *m_program;
     QOpenGLVertexArrayObject *m_vao;
     QOpenGLBuffer *m_vertices;
-    QOpenGLContext *m_context, *m_shareContext;
+    QOpenGLContext *m_context;
     QOffscreenSurface *m_offscreenSurface;
 
     Q3DSQmlStreamEventHandler *m_renderObject;
