@@ -131,10 +131,9 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
     , m_offscreenSurface(nullptr)
     , m_renderObject(nullptr)
     , m_renderThread(nullptr)
-    , m_requestRender(false)
+    , m_requestUpdate(false)
     , m_initialized(false)
     , m_prepared(false)
-    , m_renderControlInitialized(false)
     , m_update(false)
 {
     renderThreadClientCount->fetchAndAddAcquire(1);
@@ -203,12 +202,12 @@ void Q3DSQmlStreamRenderer::cleanup()
 bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surface)
 {
     Q_UNUSED(surface);
+    QMutexLocker lock(&m_renderMutex);
     if (!m_context) {
         m_context = new QOpenGLContext();
         m_context->setShareContext(context);
         m_context->setFormat(context->format());
         m_context->create();
-
         m_context->moveToThread(m_renderThread);
     }
 
@@ -222,6 +221,7 @@ bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surfac
     }
 
     m_rootItem->setParentItem(m_quickWindow->contentItem());
+
     updateSizes();
 
     connect(m_renderControl, &QQuickRenderControl::renderRequested,
@@ -303,6 +303,7 @@ void Q3DSQmlStreamRenderer::initializeFboCopy()
 
 void Q3DSQmlStreamRenderer::initializeRender()
 {
+    QMutexLocker lock(&m_renderMutex);
     m_context->makeCurrent(m_offscreenSurface);
     m_renderControl->initialize(m_context);
     m_context->doneCurrent();
@@ -366,7 +367,6 @@ bool Q3DSQmlStreamRenderer::event(QEvent *event)
 
         m_renderControl->polishItems();
         QMutexLocker lock(&m_mutex);
-        m_requestRender = true;
         QCoreApplication::postEvent(m_renderObject, new RequestUpdate());
         m_waitCondition.wait(&m_mutex);
         return true;
@@ -393,8 +393,10 @@ void Q3DSQmlStreamRenderer::updateSizes()
 
 void Q3DSQmlStreamRenderer::requestUpdate()
 {
-    if (!m_requestRender && m_initialized)
+    if (!m_requestUpdate && m_initialized) {
+        m_requestUpdate = true;
         QCoreApplication::postEvent(this, new RequestUpdate());
+    }
 }
 
 void Q3DSQmlStreamRenderer::renderTexture()
@@ -413,10 +415,10 @@ void Q3DSQmlStreamRenderer::renderTexture()
 
     {
         QMutexLocker lock(&m_mutex);
-        if (m_requestRender) {
+        if (m_requestUpdate) {
             m_renderControl->sync();
             m_renderControl->render();
-            m_requestRender = false;
+            m_requestUpdate = false;
             m_waitCondition.wakeOne();
         }
     }
