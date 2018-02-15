@@ -82,12 +82,16 @@ void CDataInputDlg::initDialog()
     m_ui->lineEditEvaluation->setVisible(false);
     m_ui->labelEvaluation->setVisible(false);
     if (!m_dataInput->name.isEmpty()) {
+        m_name = m_dataInput->name;
+        m_type = m_dataInput->type;
         m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
         updateVisibility(m_dataInput->type);
         m_ui->lineEditInputName->setText(m_dataInput->name);
         if (m_type == DataTypeRangedNumber) {
             m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue);
             m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
+            m_min = m_dataInput->minValue;
+            m_max = m_dataInput->maxValue;
         }
 #if 0 // TODO: To be added in version 2.x
         else if (m_type == DataTypeEvaluator) {
