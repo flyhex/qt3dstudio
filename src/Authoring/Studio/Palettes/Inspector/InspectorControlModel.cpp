@@ -598,6 +598,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     auto bridge = studioSystem->GetClientDataModelBridge();
     qt3dsdm::SValue value;
     const auto instance = element->m_instance;
+    if (!propertySystem->HandleValid(instance))
+        return;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
 
     const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
