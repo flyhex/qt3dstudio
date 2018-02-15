@@ -603,6 +603,7 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
                 if (theObjectType != OBJTYPE_LAYER && theObjectType != OBJTYPE_SCENE
                         && theObjectType != OBJTYPE_MATERIAL && theObjectType != OBJTYPE_IMAGE
                         && theObjectType != OBJTYPE_EFFECT && theObjectType != OBJTYPE_DATAINPUT
+                        && theObjectType != OBJTYPE_COMPONENT
                         && (theParentInstance.Valid()
                             && theBridge->GetObjectType(theParentInstance)
                             != OBJTYPE_SCENE)) // This checks if the object is
