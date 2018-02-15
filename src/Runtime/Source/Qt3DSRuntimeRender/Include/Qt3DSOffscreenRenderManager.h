@@ -126,6 +126,8 @@ namespace render {
         }
     };
 
+    typedef void *SRenderInstanceId;
+
     class IOffscreenRenderer : public NVRefCounted
     {
     protected:
@@ -140,7 +142,8 @@ namespace render {
         // Returns true of this object needs to be rendered, false if this object is not dirty
         virtual SOffscreenRenderFlags
         NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
-                    QT3DSVec2 inPresentationScaleFactor) = 0;
+                    QT3DSVec2 inPresentationScaleFactor,
+                    const SRenderInstanceId instanceId) = 0;
         // Returns true if the rendered result image has transparency, or false
         // if it should be treated as a completely opaque image.
         // It is the IOffscreenRenderer's job to clear any buffers (color, depth, stencil) that it
@@ -151,17 +154,19 @@ namespace render {
         // scaled.
         virtual void Render(const SOffscreenRendererEnvironment &inEnvironment,
                             NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
-                            SScene::RenderClearCommand inColorBufferNeedsClear) = 0;
+                            SScene::RenderClearCommand inColorBufferNeedsClear,
+                            const SRenderInstanceId instanceId) = 0;
         virtual void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
                             NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                             SScene::RenderClearCommand inColorBufferNeedsClear,
-                            QT3DSVec3 inclearColor) = 0;
+                            QT3DSVec3 inclearColor,
+                            const SRenderInstanceId instanceId) = 0;
 
         // Implementors should implement one of the two interfaces below.
 
         // If this renderer supports picking that can return graph objects
         // then return an interface here.
-        virtual IGraphObjectPickQuery *GetGraphObjectPickQuery() = 0;
+        virtual IGraphObjectPickQuery *GetGraphObjectPickQuery(const SRenderInstanceId instanceId) = 0;
 
         // If you *don't* support the GraphObjectPickIterator interface, then you should implement
         // this interface
@@ -169,7 +174,8 @@ namespace render {
         // If you return true, then we will assume that you swallowed the pick and will continue no
         // further.
         // else we will assume you did not and will continue the picking algorithm.
-        virtual bool Pick(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions) = 0;
+        virtual bool Pick(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions,
+                          const SRenderInstanceId instanceId) = 0;
     };
 
     struct SOffscreenRenderResult

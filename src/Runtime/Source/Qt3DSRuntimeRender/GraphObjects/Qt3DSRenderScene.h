@@ -39,6 +39,7 @@ namespace render {
     struct SLayer;
     struct SPresentation;
     struct SDataInput;
+    typedef void *SRenderInstanceId;
 
     struct SScene : public SGraphObject
     {
@@ -74,11 +75,14 @@ namespace render {
             inRemapper.Remap(m_FirstDataInput);
         }
         // returns true if any of the layers were dirty or if this object was dirty
-        bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext);
+        bool PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
+                              const SRenderInstanceId id = nullptr);
         void Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
-                    RenderClearCommand command = ClearIsOptional);
+                    RenderClearCommand command = ClearIsOptional,
+                    const SRenderInstanceId id = nullptr);
         void RenderWithClear(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
-                             RenderClearCommand inClearColorBuffer, QT3DSVec3 inclearColor);
+                             RenderClearCommand inClearColorBuffer,
+                             QT3DSVec3 inclearColor, const SRenderInstanceId id = nullptr);
     };
 }
 }

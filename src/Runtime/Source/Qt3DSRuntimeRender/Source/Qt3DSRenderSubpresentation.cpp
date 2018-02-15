@@ -68,13 +68,14 @@ namespace render {
 
     SOffscreenRenderFlags
     CSubPresentationRenderer::NeedsRender(const SOffscreenRendererEnvironment & /*inEnvironment*/,
-                                          QT3DSVec2 /*inPresScale*/)
+                                          QT3DSVec2 /*inPresScale*/,
+                                          const SRenderInstanceId instanceId)
     {
         bool hasTransparency = m_Presentation.m_Scene->m_UseClearColor ? false : true;
         NVRenderRect theViewportSize(m_RenderContext.GetRenderList().GetViewport());
         bool wasDirty = m_Presentation.m_Scene->PrepareForRender(
             QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),
-            m_RenderContext);
+            m_RenderContext, instanceId);
         return SOffscreenRenderFlags(hasTransparency, wasDirty);
     }
 
@@ -82,7 +83,8 @@ namespace render {
     // if it should be treated as a completely opaque image.
     void CSubPresentationRenderer::Render(const SOffscreenRendererEnvironment &inEnvironment,
                                           NVRenderContext &inRenderContext, QT3DSVec2,
-                                          SScene::RenderClearCommand inClearColorBuffer)
+                                          SScene::RenderClearCommand inClearColorBuffer,
+                                          const SRenderInstanceId instanceId)
     {
         SSubPresentationHelper theHelper(
             m_RenderContext,
@@ -90,19 +92,20 @@ namespace render {
         NVRenderRect theViewportSize(inRenderContext.GetViewport());
         m_Presentation.m_Scene->Render(
             QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),
-            m_RenderContext, inClearColorBuffer);
+            m_RenderContext, inClearColorBuffer, instanceId);
         m_LastRenderedEnvironment = inEnvironment;
     }
 
     void CSubPresentationRenderer::RenderWithClear(
         const SOffscreenRendererEnvironment &inEnvironment,
         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor)
+        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+        const SRenderInstanceId id)
     {
         NVRenderRect theViewportSize(inRenderContext.GetViewport());
         m_Presentation.m_Scene->RenderWithClear(
             QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),
-            m_RenderContext, inClearBuffer, inClearColor);
+            m_RenderContext, inClearBuffer, inClearColor, id);
     }
 
     // You know the viewport dimensions because

@@ -109,13 +109,16 @@ struct Qt3DSRenderSceneSubPresRenderer : public CSubPresentationRenderer
     }
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_RenderContext.GetAllocator())
     SOffscreenRenderFlags NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
-                                              QT3DSVec2 inPresScale) override;
+                                      QT3DSVec2 inPresScale,
+                                      const SRenderInstanceId instanceId) override;
     void Render(const SOffscreenRendererEnvironment &inEnvironment,
-                        NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-                        SScene::RenderClearCommand inClearBuffer) override;
+                NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
+                SScene::RenderClearCommand inClearBuffer,
+                const SRenderInstanceId instanceId) override;
     void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
                          NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-                         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor);
+                         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+                         const SRenderInstanceId instanceId) override;
 };
 
 struct SSceneLoadData
@@ -191,7 +194,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         if (m_Presentation && m_Presentation->m_Scene) {
             for (SLayer *theLayer = m_Presentation->m_Scene->m_FirstChild; theLayer;
                  theLayer = static_cast<SLayer *>(theLayer->m_NextSibling)) {
-                m_Context->GetRenderer().ReleaseLayerRenderResources(*theLayer);
+                m_Context->GetRenderer().ReleaseLayerRenderResources(*theLayer, nullptr);
             }
         }
     }
@@ -785,27 +788,32 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
 
 SOffscreenRenderFlags
 Qt3DSRenderSceneSubPresRenderer::NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
-                                           QT3DSVec2 inPresScale)
+                                             QT3DSVec2 inPresScale,
+                                             const SRenderInstanceId instanceId)
 {
     m_Scene.TransferDirtyProperties();
-    return CSubPresentationRenderer::NeedsRender(inEnvironment, inPresScale);
+    return CSubPresentationRenderer::NeedsRender(inEnvironment, inPresScale, instanceId);
 }
 
 void Qt3DSRenderSceneSubPresRenderer::Render(const SOffscreenRendererEnvironment &inEnvironment,
-                                           NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-                                           SScene::RenderClearCommand inClearBuffer)
+                                             NVRenderContext &inRenderContext,
+                                             QT3DSVec2 inPresScale,
+                                             SScene::RenderClearCommand inClearBuffer,
+                                             const SRenderInstanceId instanceId)
 {
-    CSubPresentationRenderer::Render(inEnvironment, inRenderContext, inPresScale, inClearBuffer);
+    CSubPresentationRenderer::Render(inEnvironment, inRenderContext, inPresScale, inClearBuffer,
+                                     instanceId);
 }
 
 void Qt3DSRenderSceneSubPresRenderer::RenderWithClear(
         const SOffscreenRendererEnvironment &inEnvironment,
         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor)
+        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+        const SRenderInstanceId id)
 {
     CSubPresentationRenderer::RenderWithClear(inEnvironment, inRenderContext,
                                               inPresScale, inClearBuffer,
-                                              inClearColor);
+                                              inClearColor, id);
 }
 
 //////////////////////////////////////////////////////////////////

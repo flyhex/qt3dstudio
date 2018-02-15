@@ -87,20 +87,22 @@ SDataInput *SScene::GetLastDataInput()
     return child;
 }
 
-bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext)
+bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
+                              const SRenderInstanceId id)
 {
     // We need to iterate through the layers in reverse order and ask them to render.
     bool wasDirty = m_Dirty;
     m_Dirty = false;
-    if (m_FirstChild)
-        wasDirty =
-            inContext.GetRenderer().PrepareLayerForRender(*m_FirstChild, inViewportDimensions, true)
-            || wasDirty;
+    if (m_FirstChild) {
+        wasDirty |=
+            inContext.GetRenderer().PrepareLayerForRender(*m_FirstChild, inViewportDimensions,
+                                                          true, id);
+    }
     return wasDirty;
 }
 
 void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
-                    RenderClearCommand inClearColorBuffer)
+                    RenderClearCommand inClearColorBuffer, const SRenderInstanceId id)
 {
     if ((inClearColorBuffer == SScene::ClearIsOptional && m_UseClearColor)
         || inClearColorBuffer == SScene::AlwaysClear) {
@@ -118,12 +120,16 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
             &NVRenderContext::SetClearColor, clearColor);
         inContext.GetRenderContext().Clear(qt3ds::render::NVRenderClearValues::Color);
     }
-    if (m_FirstChild)
+    if (m_FirstChild) {
         inContext.GetRenderer().RenderLayer(*m_FirstChild, inViewportDimensions, m_UseClearColor,
-                                            m_ClearColor, true);
+                                            m_ClearColor, true, id);
+    }
 }
-void SScene::RenderWithClear(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
-                             RenderClearCommand inClearColorBuffer, QT3DSVec3 inClearColor)
+void SScene::RenderWithClear(const QT3DSVec2 &inViewportDimensions,
+                             IQt3DSRenderContext &inContext,
+                             RenderClearCommand inClearColorBuffer,
+                             QT3DSVec3 inClearColor,
+                             const SRenderInstanceId id)
 {
     // If this scene is not using clear color, we set the color
     // to background color from parent layer. This allows
@@ -133,5 +139,5 @@ void SScene::RenderWithClear(const QT3DSVec2 &inViewportDimensions, IQt3DSRender
         m_ClearColor = inClearColor;
         m_UseClearColor = true;
     }
-    Render(inViewportDimensions, inContext, inClearColorBuffer);
+    Render(inViewportDimensions, inContext, inClearColorBuffer, id);
 }

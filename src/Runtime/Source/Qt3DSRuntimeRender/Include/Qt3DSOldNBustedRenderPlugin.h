@@ -64,17 +64,22 @@ namespace render {
 
         SOffscreenRendererEnvironment GetDesiredEnvironment(QT3DSVec2 inPresScale) override;
         virtual SOffscreenRenderFlags
-        NeedsRender(const SOffscreenRendererEnvironment &inEnvironment, QT3DSVec2 inPresScale) override;
+        NeedsRender(const SOffscreenRendererEnvironment &inEnvironment, QT3DSVec2 inPresScale,
+                    const SRenderInstanceId instanceId) override;
         void Render(const SOffscreenRendererEnvironment &inEnvironment,
-                            NVRenderContext & /*inRenderContext*/
-                            ,
-                            QT3DSVec2 inPresScale, SScene::RenderClearCommand inClearBuffer) override;
+                    NVRenderContext & /*inRenderContext*/,
+                    QT3DSVec2 inPresScale, SScene::RenderClearCommand inClearBuffer,
+                    const SRenderInstanceId instanceId) override;
         void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
                              NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                              SScene::RenderClearCommand inColorBufferNeedsClear,
-                             QT3DSVec3 inclearColor) override {}
-        IGraphObjectPickQuery *GetGraphObjectPickQuery() override { return NULL; }
-        bool Pick(const QT3DSVec2 & /*inMouseCoords*/, const QT3DSVec2 & /*inViewportDimensions*/) override
+                             QT3DSVec3 inclearColor, const SRenderInstanceId instanceId) override {}
+        IGraphObjectPickQuery *GetGraphObjectPickQuery(const SRenderInstanceId instanceId) override
+        {
+            return NULL;
+        }
+        bool Pick(const QT3DSVec2 & /*inMouseCoords*/, const QT3DSVec2 & /*inViewportDimensions*/,
+                  const SRenderInstanceId instanceId) override
         {
             return false;
         }

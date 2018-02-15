@@ -1176,12 +1176,12 @@ namespace render {
                     m_LastFrameOffscreenRenderer->RenderWithClear(
                         CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
                         m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
-                        SScene::AlwaysClear, m_Layer.m_ClearColor);
+                        SScene::AlwaysClear, m_Layer.m_ClearColor, &m_Layer);
                 } else {
                     m_LastFrameOffscreenRenderer->Render(
                         CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
                         m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
-                        SScene::ClearIsOptional);
+                        SScene::ClearIsOptional, &m_Layer);
                 }
             } else {
                 RenderDepthPass(false);
@@ -1268,7 +1268,8 @@ namespace render {
         // progressive AA algorithm.
         if (thePrepResult.m_Flags.WasLayerDataDirty()
             || thePrepResult.m_Flags.WasDirty()
-            || m_Renderer.IsLayerCachingEnabled() == false) {
+            || m_Renderer.IsLayerCachingEnabled() == false
+            || thePrepResult.m_Flags.ShouldRenderToTexture()) {
             m_ProgressiveAAPassIndex = 0;
             m_NonDirtyTemporalAAPassIndex = 0;
             needsRender = true;

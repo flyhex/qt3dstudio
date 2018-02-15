@@ -51,6 +51,7 @@ namespace render {
     struct SLight;
     struct SLayer;
     class IBufferManager;
+    typedef void *SRenderInstanceId;
 
     using qt3ds::foundation::NVConstDataRef;
 
@@ -127,9 +128,11 @@ namespace render {
 
         // Returns true if this layer or a sibling was dirty.
         virtual bool PrepareLayerForRender(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                                           bool inRenderSiblings = true) = 0;
+                                           bool inRenderSiblings = true,
+                                           const SRenderInstanceId id = nullptr) = 0;
         virtual void RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions, bool clear,
-                                 QT3DSVec3 clearColor, bool inRenderSiblings = true) = 0;
+                                 QT3DSVec3 clearColor, bool inRenderSiblings = true,
+                                 const SRenderInstanceId id = nullptr) = 0;
 
         // Studio option to disable picking against sub renderers.  This allows better interaction
         // in studio.
@@ -139,8 +142,9 @@ namespace render {
         // in some cases and just pick everything in other things.
         virtual void PickRenderPlugins(bool inPick) = 0;
         virtual Qt3DSRenderPickResult Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                                          const QT3DSVec2 &inMouseCoords, bool inPickSiblings = true,
-                                          bool inPickEverything = false) = 0;
+                                           const QT3DSVec2 &inMouseCoords, bool inPickSiblings = true,
+                                           bool inPickEverything = false,
+                                           const SRenderInstanceId id = nullptr) = 0;
 
         // Return the relative hit position, in UV space, of a mouse pick against this object.
         // We need the node in order to figure out which layer rendered this object.
@@ -216,7 +220,7 @@ namespace render {
                                                              const QT3DSVec3 &inWorldPoint) = 0;
         // Called before a layer goes completely out of scope to release any rendering resources
         // related to the layer.
-        virtual void ReleaseLayerRenderResources(SLayer &inLayer) = 0;
+        virtual void ReleaseLayerRenderResources(SLayer &inLayer, const SRenderInstanceId id) = 0;
 
         // render a screen aligned 2D text
         virtual void RenderText2D(QT3DSF32 x, QT3DSF32 y, qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor,
