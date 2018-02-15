@@ -275,11 +275,9 @@ void SlideView::onDataInputChange(const QString &dataInputName)
         Q_ASSERT(false);
     }
 
-    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
-        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-            *doc,
-            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(slideRoot,
-                                                                            ctrldProp);
+    qt3dsdm::SValue controlledPropertyVal;
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                slideRoot, ctrldProp, controlledPropertyVal);
 
     // To indicate that slide transitions are controlled by data input,
     // we set "controlled property" of this scene to contain the name of
@@ -287,7 +285,7 @@ void SlideView::onDataInputChange(const QString &dataInputName)
     // If we have existing slide control in this root element, replace it.
     // Otherwise just append slide control string to controlledproperty
     // (it might already contain timeline control information)
-    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
     if (existingCtrl.contains("@slide")) {
         int slideStrPos = existingCtrl.indexOf("@slide");
         // find the controlling datainput name and build the string to replace
@@ -333,13 +331,11 @@ void SlideView::updateDataInputStatus(bool isViaDispatch)
         Q_ASSERT(false);
     }
 
-    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
-        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-            *doc,
-            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(slideRoot,
-                                                                            ctrldProp);
+    qt3dsdm::SValue controlledPropertyVal;
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                slideRoot, ctrldProp, controlledPropertyVal);
 
-    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
     if (existingCtrl.contains("@slide")) {
         int slideStrPos = existingCtrl.indexOf("@slide");
         int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);

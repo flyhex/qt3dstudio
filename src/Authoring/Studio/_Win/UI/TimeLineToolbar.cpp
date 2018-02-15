@@ -170,12 +170,10 @@ void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
             Q_ASSERT(false);
         }
 
-        qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
-            = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                *doc,
-                QObject::tr("Get Timeline control"))->GetInstancePropertyValue(timeCtxRoot,
-                                                                               ctrldProp);
-        auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+        qt3dsdm::SValue controlledPropertyVal;
+        doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                    timeCtxRoot, ctrldProp, controlledPropertyVal);
+        auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
 
         if (existingCtrl.contains("@timeline")) {
             int slideStrPos = existingCtrl.indexOf("@timeline");
@@ -254,13 +252,11 @@ void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
     else
         Q_ASSERT(false);
 
-    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
-        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-            *doc,
-            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(timeCtxRoot,
-                                                                            ctrldPropertyHandle);
+    qt3dsdm::SValue controlledPropertyVal;
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                timeCtxRoot, ctrldPropertyHandle, controlledPropertyVal);
 
-    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
     if (existingCtrl.contains("@timeline")) {
         int slideStrPos = existingCtrl.indexOf("@timeline");
         // find the controlling datainput name and build the string to replace
