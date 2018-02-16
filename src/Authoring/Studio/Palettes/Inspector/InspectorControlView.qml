@@ -439,6 +439,7 @@ Rectangle {
                 rightPadding: 6
 
                 background: Rectangle {
+                    height: textArea.height
                     color: textArea.enabled ? _studioColor2 : "transparent"
                     border.width: textArea.activeFocus ? 1 : 0
                     border.color: textArea.activeFocus ? _selectionColor : _disabledColor
