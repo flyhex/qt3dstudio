@@ -243,8 +243,11 @@ void SlideView::OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, i
     m_SlidesModel->onSlideRearranged(inMaster, inOldIndex, inNewIndex);
 }
 
-void SlideView::onDataInputChange(const QString &dataInputName)
+void SlideView::onDataInputChange(int handle, int instance, const QString &dataInputName)
 {
+    Q_UNUSED(handle)
+    Q_UNUSED(instance)
+
     if (dataInputName == m_currentController ||
         (dataInputName == tr("[No Control]") && !m_currentController.size())) {
         return;

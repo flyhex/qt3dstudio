@@ -482,8 +482,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     if (!m_dataInputChooserView) {
         m_dataInputChooserView = new DataInputSelectDlg(g_StudioApp.m_pMainWnd);
         connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
-                [this, handle, instance](const QString &controllerName) {
-
+                [this](int handle, int instance, const QString &controllerName) {
             bool controlled = controllerName == tr("[No control]") ? false : true;
             m_inspectorControlModel
                 ->setPropertyControllerInstance(
@@ -499,8 +498,8 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
         dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
 
-    m_dataInputChooserView->setData(dataInputList,
-                                    m_inspectorControlModel->getCurrentController());
+    m_dataInputChooserView->setData(dataInputList, m_inspectorControlModel->getCurrentController(),
+                                    handle, instance);
     m_dataInputChooserView->showDialog(point);
 }
 

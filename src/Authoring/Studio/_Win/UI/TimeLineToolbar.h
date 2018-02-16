@@ -56,7 +56,7 @@ public:
     void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
 
     void showDataInputChooser();
-    void onDataInputChange(const QString &dataInputName);
+    void onDataInputChange(int handle, int instance, const QString &dataInputName);
 
     QSize sizeHint() const;
 

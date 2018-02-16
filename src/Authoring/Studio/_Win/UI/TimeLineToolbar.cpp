@@ -214,8 +214,11 @@ void TimeLineToolbar::showDataInputChooser()
     return;
 }
 
-void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
+void TimeLineToolbar::onDataInputChange(int handle, int instance, const QString &dataInputName)
 {
+    Q_UNUSED(handle)
+    Q_UNUSED(instance)
+
     if (dataInputName == m_currController ||
         (dataInputName == tr("[No Control]") && !m_currController.size())) {
         return;
