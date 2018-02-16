@@ -238,8 +238,10 @@ void InspectorControlView::onInstancePropertyValueChanged(
     // titleChanged implies icon change too, but that will only occur if inspectable type changes,
     // which will invalidate the inspectable anyway, so in reality we are only interested in name
     // property here
-    if (propertyHandle == bridge->GetNameProperty() && m_inspectableBase->IsValid())
+    if (propertyHandle == bridge->GetNameProperty()
+            && m_inspectableBase && m_inspectableBase->IsValid()) {
         Q_EMIT titleChanged();
+    }
 }
 
 QColor InspectorControlView::titleColor(int instance, int handle) const
