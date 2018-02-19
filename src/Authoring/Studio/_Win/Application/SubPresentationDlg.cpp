@@ -28,6 +28,9 @@
 
 #include "SubPresentationDlg.h"
 #include "ui_SubPresentationDlg.h"
+#include "Core.h"
+#include "Doc.h"
+#include "StudioApp.h"
 
 #include <QtWidgets/qabstractbutton.h>
 #include <QtWidgets/qfiledialog.h>
@@ -140,7 +143,11 @@ void CSubPresentationDlg::updateUI() {
     }
 
     QDir dir(m_directory, filter, QDir::Name, QDir::Files);
-    m_ui->comboBoxFileList->addItems(dir.entryList());
+    QStringList entryList = dir.entryList();
+    // Remove the current presentation from the list of offered entries
+    QString currentPres = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetName().toQString();
+    entryList.removeAll(currentPres);
+    m_ui->comboBoxFileList->addItems(entryList);
 
     if (!m_subPresentation.m_argsOrSrc.isEmpty()) {
         // Do not add the current file to the combobox if it is already there
