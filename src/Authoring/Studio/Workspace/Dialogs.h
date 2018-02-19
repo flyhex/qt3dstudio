@@ -126,7 +126,7 @@ public:
                               const Q3DStudio::CString &inDefaultName);
 
     std::pair<Qt3DSFile, bool> GetSaveAsChoice(const QString &inDialogTitle = "",
-                                               bool inFilenameUntitled = false);
+                                               bool inNewDoc = false);
     // Returns pair of file along with a boolean indicating the state of the create
     // new directory checkbox.
     std::pair<Qt3DSFile, bool>

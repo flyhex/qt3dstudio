@@ -822,7 +822,7 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  *	@return	an invalid file if the user cancels the save dialog.
  */
 std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitle,
-                                                     bool inFilenameUntitled)
+                                                     bool inNewDoc)
 {
     Qt3DSFile theFile("");
     QString theFileExt;
@@ -831,7 +831,7 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
     QString theFilename
             = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
 
-    if (theFilename.isEmpty() || inFilenameUntitled)
+    if (theFilename.isEmpty() || inNewDoc)
         theFilename = QObject::tr("Untitled");
 
     theFileExt = QStringLiteral(".uip");
@@ -868,7 +868,9 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
         // customising a dialog box will force us to use non-native.
         // defaulting this for now, until we can agree a better workflow for
         // creating new projects
-        theCreateDir = true;
+        // New directory is only created when creating a new project. When doing a "save as"
+        // or "save copy", a new directory is not created.
+        theCreateDir = inNewDoc;
 
         if (theCreateDir) {
             // If user checks "Create directory for project"
