@@ -81,7 +81,7 @@
     <Property name="sclZ" formalName="Z" type="Boolean" default="True"  description="Z scale of target">
         <ShowIfEqual property="sclMode" value="True" />
     </Property>
-    <Property name="startImmediately" formalName="Start Immediately?" type="Boolean" default="True" publishLevel="Advanced" description="Start immediately, or wait for the Enable action to be called?" />
+    <Property name="startImmediately" formalName="Start Immediately?" type="Boolean" default="True" publishLevel="Advanced" description="Start immediately, or wait for\nthe Enable action to be called?" />
     <Handler name="start" formalName="Start" category="CopyTransform" description="Begin copying the transform" />
     <Handler name="stop" formalName="Stop" category="CopyTransform" description="Stop copying the transform" />
 ]]*/

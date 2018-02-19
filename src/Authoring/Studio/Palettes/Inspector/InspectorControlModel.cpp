@@ -347,6 +347,9 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_propertyType = static_cast<qt3dsdm::AdditionalMetaDataType::Value>
             (propertySystem->GetAdditionalMetaDataType(item->m_instance, metaProperty.m_Property));
     item->m_tooltip = Q3DStudio::CString(metaProperty.m_Description.c_str()).toQString();
+    // \n is parsed as \\n from the material and effect files. Replace them to fix multi-line
+    // tooltips
+    item->m_tooltip.replace(QStringLiteral("\\n"), QStringLiteral("\n"));
 
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,

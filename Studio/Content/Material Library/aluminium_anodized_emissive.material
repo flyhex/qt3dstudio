@@ -4,7 +4,7 @@
         <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
         <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
         <Property formalName="Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
-        <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.300000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
+        <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.300000" description="Roughness of the material.\n0 = fully specular\n1 = fully diffuse" category="Material"/>
         <Property formalName="Base color" name="base_color" type="Color" default="0.7 0.7 0.7" description="Color of the material" category="Material"/>
         <Property formalName="Intensity" name="intensity" description="Emission intensity" type="Float" default="1.000000" category="Material"/>
         <Property formalName="Emission Color" name="emission_color" description="Color of the emission" type="Color" default="0 0 0" category="Material"/>

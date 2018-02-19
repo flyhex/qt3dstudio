@@ -2,7 +2,7 @@
 <Effect>
 	<MetaData>
 		<!--Quickly blurs by an adjustable amount. Gaussian refers to the bell-shaped curve that is generated when the shader applies a weighted average to the pixels. The Gaussian Blur filter adds low-frequency detail and can produce a hazy effect.-->
-		<Property name="BlurBias" formalName="Blurriness" min="0" max="10" default="2" description="0=no blur, 10=maximum blur" />
+                <Property name="BlurBias" formalName="Blurriness" min="0" max="10" default="2" description="0 = no blur\n10 = maximum blur" />
 	</MetaData>
 	<Shaders>
 		<Shared>

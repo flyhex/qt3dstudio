@@ -4,10 +4,10 @@
 		<Property name="GammaValue" formalName="Gamma" default="2.2" min="0.1" max="4"/>
 		<Property name="Exposure"   min="-9" max="9"   default="0"/>
 
-		<Property name="BloomThreshold" formalName="Bloom Threshold" description="Objects brighter than this will generate a bloom" default="1.0" />
-		<Property name="BlurFalloff"    formalName="Bloom Falloff"   description="Size of the bloom (smaller is larger)" default="0" min="0" max="10"/>
+                <Property name="BloomThreshold" formalName="Bloom Threshold" description="Objects brighter than this will\ngenerate a bloom" default="1.0" />
+                <Property name="BlurFalloff"    formalName="Bloom Falloff"   description="Size of the bloom. Smaller\nnumber means larger bloom." default="0" min="0" max="10"/>
 
-		<Property name="TonemappingLerp" formalName="Effect Amount"  description="Adjust between no change and full effect." default="1" min="0" max="1" hidden="True"/>
+                <Property name="TonemappingLerp" formalName="Effect Amount"  description="Adjust between no change and\nfull effect." default="1" min="0" max="1" hidden="True"/>
 
 		<!--
 		<Property name="Key" formalName="Luminance Key" min="0" max="1" default="0.04"/>

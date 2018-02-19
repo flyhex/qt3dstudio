@@ -6,7 +6,7 @@
 	<MetaData>
 		<!--Properties are automatically translated into the effect format when we generate the effect's GLSL file -->
 		<!--Colorizes the image to a faded brown color, simulating old film coloration.-->
-		<Property name="amount" formalName="Amount" min="0" max="1" default="1" description="0=no change to image, 1=full sepia effect." />
+                <Property name="amount" formalName="Amount" min="0" max="1" default="1" description="0 = no change to image\n1 = full sepia effect" />
 	</MetaData>
 	<!-- default shader doesn't need to be named-->
 	<Shaders>
