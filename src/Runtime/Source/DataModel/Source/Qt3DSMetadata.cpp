@@ -61,10 +61,10 @@ namespace {
 
 struct SImportXmlErrorHandler : public CXmlErrorHandler
 {
-    void OnXmlError(TWideXMLCharPtr errorName, int line, int) override
+    void OnXmlError(const QString &errorName, int line, int) override
     {
         qCCritical(INTERNAL_ERROR) << "XML error:"
-            << QString::fromWCharArray(errorName) << "on line" << line;
+            << errorName << "on line" << line;
     }
 };
 
@@ -933,7 +933,7 @@ public:
 
     struct PluginErrorHandler : public qt3dsdm::CXmlErrorHandler
     {
-        void OnXmlError(TWideXMLCharPtr, int, int) override {}
+        void OnXmlError(const QString &, int, int) override {}
     };
 
     bool LoadPluginXMLFile(const char *inType, const char *inId, const char *inName,

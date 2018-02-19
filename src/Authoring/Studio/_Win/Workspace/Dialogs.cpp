@@ -305,9 +305,9 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
 
     bool theIsStudioObject = theAssetType != OBJTYPE_UNKNOWN;
 
-    // Is this a LUA file, but perhaps incorrectly formatted?
+    // Is this a behavior file, but perhaps incorrectly formatted?
     if (theAssetType == OBJTYPE_BEHAVIOR) {
-        // Load the message about the LUA format
+        // Load the message about the behavior format
         if (inWarningsOnly) {
             theText = QObject::tr("Warnings were detected during import of the behavior script."
                                   "\nPlease check the file.\n");
@@ -346,7 +346,7 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
 
     theMsgText = !inWarningsOnly ? QObject::tr("Import resource failed:")
                                  : QObject::tr("Import resource succeeded with warning(s):");
-    theMsgText += QStringLiteral("\n%s\n\n").arg(inURL.toDisplayString()) + theText;
+    theMsgText += QStringLiteral("\n%1\n\n").arg(inURL.toDisplayString()) + theText;
 
     // Display the failed import resource message.
     if (m_ShowGUI) {
@@ -653,11 +653,6 @@ const wchar_t *CDialogs::GetWideImportFileExtension()
 const wchar_t *CDialogs::GetWideMeshFileExtension()
 {
     return L"mesh";
-}
-
-const wchar_t *CDialogs::GetWideLUAFileExtension()
-{
-    return L"lua";
 }
 
 const wchar_t **CDialogs::GetWideFontFileExtensions()

@@ -163,11 +163,11 @@ struct SImportXmlErrorHandler : public CXmlErrorHandler
         , m_fullPathToDocument(inFullPathToDocument.toQString())
     {
     }
-    void OnXmlError(TWideXMLCharPtr errorName, int line, int) override
+    void OnXmlError(const QString &errorName, int line, int) override
     {
         if (m_handler) {
-            const QString str = QObject::tr("Failed to parse Lua data\n%1 on line %2\n")
-                    .arg(Q3DStudio::CString(errorName).toQString()).arg(line);
+            const QString str = QObject::tr("Failed to parse XML data.\nLine %1: %2\n")
+                    .arg(line).arg(errorName);
             m_handler->DisplayImportFailed(m_fullPathToDocument, str, false);
         }
     }
@@ -4885,7 +4885,7 @@ IDocumentEditor::ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocumen
         QT3DS_ASSERT(false);
         if (inHandler)
             inHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
-                                           QObject::tr("Failed to parse Lua data"),
+                                           QObject::tr("Failed to parse plugin file"),
                                            false);
     }
     CRenderPluginParser::NavigateToMetadata(theReaderPtr);
@@ -4910,7 +4910,7 @@ IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathT
         QT3DS_ASSERT(false);
         if (inHandler)
             inHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
-                                           QObject::tr("Failed to parse Lua data"),
+                                           QObject::tr("Failed to parse material file"),
                                            false);
     }
     CCustomMaterialParser::NavigateToMetadata(theReaderPtr);
