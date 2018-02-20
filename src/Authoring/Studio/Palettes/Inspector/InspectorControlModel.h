@@ -160,8 +160,6 @@ private:
         QVariantList controlElements;
 
         ~GroupInspectorControl() {
-            //for (auto element : controlElements)
-            //    element.value<QObject *>()->deleteLater();
         }
     };
 

@@ -585,8 +585,18 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
 void InspectorControlModel::rebuildTree()
 {
     beginResetModel();
+    QVector<QObject *> deleteVector;
+    for (int i = 0; i < m_groupElements.count(); ++i) {
+        auto group = m_groupElements[i];
+        for (int p = 0; p < group.controlElements.count(); ++p)
+            deleteVector.append(group.controlElements[p].value<QObject *>());
+    }
     m_groupElements = computeTree(m_inspectableBase);
     endResetModel();
+
+    // Clean the old objects after reset is done so that qml will not freak out about null pointers
+    for (int i = 0; i < deleteVector.count(); ++i)
+        deleteVector[i]->deleteLater();
 }
 
 int InspectorControlModel::rowCount(const QModelIndex &parent) const
@@ -833,13 +843,20 @@ void InspectorControlModel::refreshTree()
         rebuildTree();
     } else {
         // group structure is intact, let's walk to see which rows changed
+        QVector<QObject *> deleteVector;
         long theCount = m_inspectableBase->GetGroupCount();
         for (long theIndex = 0; theIndex < theCount; ++theIndex) {
             if (isGroupRebuildRequired(m_inspectableBase, theIndex)) {
+                auto group = m_groupElements[theIndex];
+                for (int p = 0; p < group.controlElements.count(); ++p)
+                    deleteVector.append(group.controlElements[p].value<QObject *>());
                 m_groupElements[theIndex] = computeGroup(m_inspectableBase, theIndex);
                 Q_EMIT dataChanged(index(theIndex), index(theIndex));
             }
         }
+        // Clean the old objects after refresh is done so that qml will not freak out
+        for (int i = 0; i < deleteVector.count(); ++i)
+            deleteVector[i]->deleteLater();
     }
 }
 
