@@ -363,6 +363,10 @@ void CMainFrame::OnNewPresentation()
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);
+
+    // Clear data input list and sub-presentation list
+    g_StudioApp.m_subpresentations.clear();
+    g_StudioApp.m_dataInputDialogItems.clear();
 }
 
 //==============================================================================
