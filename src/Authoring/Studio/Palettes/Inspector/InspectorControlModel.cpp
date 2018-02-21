@@ -936,6 +936,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     // to both rejecting invalid and resetting the original value here.
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     EStudioObjectType theType = studio->GetClientDataModelBridge()->GetObjectType(instance);
+    qt3dsdm::AdditionalMetaDataType::Value additionalType
+            = studio->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
 
     if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
             studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
@@ -946,7 +948,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
          || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
             studio->GetPropertySystem()->GetDataType(handle)
-                == qt3dsdm::DataModelDataType::String) {
+                == qt3dsdm::DataModelDataType::String
+            && additionalType == qt3dsdm::AdditionalMetaDataType::Texture) {
         // force . at the beginning of the url
         QString x = value.toString();
         QUrl url(x);
