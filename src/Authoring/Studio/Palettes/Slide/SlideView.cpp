@@ -223,8 +223,17 @@ void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int i
     Q_UNUSED(inMaster);
 
     qt3dsdm::ISlideSystem &theSlideSystem(*GetDoc()->GetStudioSystem()->GetSlideSystem());
-    setShowMasterSlide(theSlideSystem.GetSlideIndex(inSlide) == 0);
+    int currentSlideIndex = theSlideSystem.GetSlideIndex(inSlide);
+    setShowMasterSlide(currentSlideIndex == 0);
     setActiveSlide(inSlide);
+
+    // During playback update slide highlight
+    if (GetDoc()->IsPlaying()) {
+        // -1 because first slide is masterslide
+        auto index = m_SlidesModel->index(currentSlideIndex - 1, 0);
+        m_SlidesModel->setSelectedSlideIndex(index);
+    }
+
 }
 
 void SlideView::OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
