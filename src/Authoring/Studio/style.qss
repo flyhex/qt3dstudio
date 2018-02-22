@@ -19,6 +19,12 @@ QDockWidget::title {
     padding: 3px;
 }
 
+QDockWidget::close-button,
+QDockWidget::float-button {
+    border: 1px solid transparent;
+    background: transparent;
+}
+
 /* Tabs */
 QTabBar::tab:selected {
     background: #2e2f30;
@@ -330,6 +336,7 @@ QDialog#DataInputListDlg QHeaderView::section {
 QDialog#SubPresentationListDlg QTableView,
 QDialog#DataInputListDlg QTableView {
     selection-background-color: #46a2da;
+    gridline-color: #2e2f30;
 }
 
 QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton,
