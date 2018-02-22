@@ -37,12 +37,7 @@
 //	Includes
 //==============================================================================
 #include "StateRow.h"
-#include "TimelineControl.h"
-#include "TimelineTimelineLayout.h"
 #include "PropertyRow.h"
-#include "StateTimebarRow.h"
-#include "BaseTimebarlessRow.h"
-#include "BaseTimelineTreeControl.h"
 #include "Bindings/ITimelineItemBinding.h"
 
 //=============================================================================

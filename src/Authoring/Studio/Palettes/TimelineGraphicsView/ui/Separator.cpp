@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,42 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Separator.h"
+#include "TimelineConstants.h"
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include <QtGui/qpainter.h>
+#include <QtGui/qcursor.h>
+#include <QtWidgets/qapplication.h>
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+Separator::Separator(TimelineItem *parent) : TimelineItem(parent)
 {
+    setMinimumWidth(TimelineConstants::SEPARATOR_W);
+    setMaximumWidth(TimelineConstants::SEPARATOR_W);
+    setMaximumHeight(10000);
+    // TODO: remove
+//    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    setAcceptHoverEvents(true);
 }
 
-CSlideRow::~CSlideRow()
+void Separator::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    // TODO: remove
+//    painter->fillRect(0, 0, size().width(), size().height(), QColor("#666666"));
 }
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
+void Separator::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
-
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
+    qApp->setOverrideCursor(Qt::SplitHCursor);
 }
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
+void Separator::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
+    qApp->changeOverrideCursor(Qt::ArrowCursor);
+    qApp->restoreOverrideCursor();
 }
 
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
+int Separator::type() const
 {
-    Q_UNUSED(inFilter);
-    return true;
+    // Enable the use of qgraphicsitem_cast with this item.
+    return TypeSeparator;
 }

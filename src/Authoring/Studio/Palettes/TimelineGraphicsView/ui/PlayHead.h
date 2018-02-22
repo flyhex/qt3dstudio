@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,33 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#ifndef PLAYHEAD_H
+#define PLAYHEAD_H
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include "TimelineItem.h"
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+#include <QtWidgets/qgraphicsitem.h>
+
+class Ruler;
+
+class PlayHead : public QGraphicsRectItem
 {
-}
 
-CSlideRow::~CSlideRow()
-{
-}
+public:
+    explicit PlayHead(Ruler *m_ruler);
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
-{
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+    void setHeight(int height);
+    void setPosition(double posX); // set x poisiotn
+    void updatePosition(); // sync x poisiotn based on time value
+    void setTime(double time); // set time (sets x based on time input)
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget = nullptr) override;
+    double time() const;
+    int type() const;
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
+private:
+    double m_time = 0;
+    Ruler *m_ruler;
+};
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
-
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
-}
+#endif // PLAYHEAD_H

@@ -37,7 +37,6 @@
 //==============================================================================
 #include "SlideTimelineItemBinding.h"
 #include "BaseStateRow.h"
-#include "BaseStateRowUI.h"
 
 // Data model specific
 #include "Doc.h"

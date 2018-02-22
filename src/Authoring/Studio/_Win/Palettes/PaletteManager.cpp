@@ -33,8 +33,8 @@
 #include "PaletteManager.h"
 #include "StudioApp.h"
 #include "MainFrm.h"
-#include "TimelineControl.h"
 #include "TimelineView.h"
+#include "TimelineWidget.h"
 #include "BasicObjectsView.h"
 #include "SlideView.h"
 #include "WidgetControl.h"
@@ -45,7 +45,6 @@
 #include "ProjectView.h"
 #include "TabOrderHandler.h"
 #include "StudioPreferences.h"
-#include "TimeLineToolbar.h"
 
 #include <QtWidgets/qdockwidget.h>
 #include <QtWidgets/qboxlayout.h>
@@ -109,47 +108,18 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
-    m_timelineDock = new QDockWidget(QObject::tr("Timeline (old)"), inMainFrame);
-    m_timelineDock->setObjectName("timeline_old");
-    m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    // TODO: remove after the new timeline is complete (leaving it as reference for now)
+//    m_timelineQmlDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
+//    m_timelineQmlDock->setObjectName("timeline");
+//    m_timelineQmlDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+//    m_timelineView = new TimelineView(m_timelineQmlDock);
+//    m_timelineQmlDock->setWidget(m_timelineView);
 
-    QWidget *timeLineParent = new QWidget(inMainFrame);
-    timeLineParent->setObjectName("TimeLineParent");
-    // Give the preferred size as percentages of the mainframe size
-    // -25 is applied to width to compensate the action palette having no tabs by default
-    m_timeLineToolbar = new TimeLineToolbar(inMainFrame,
-                                            QSize(inMainFrame->width() * 0.8 - 25, 26),
-                                            timeLineParent);
-    m_timeLineToolbar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QVBoxLayout *layout = new QVBoxLayout(timeLineParent);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    // Use spacer widget instead of just layout spacing to get the color of the space correct
-    QWidget *spacer = new QWidget(timeLineParent);
-    spacer->setMaximumHeight(2);
-    spacer->setMinimumHeight(2);
-
-    // Give the preferred size as percentages of the mainframe size
-    // -25 is applied to width to compensate the action palette having no tabs by default
-    // -26 is applied to height, as that is the height of the timeline toolbar
-    auto c = new CTimelineControl(QSize(inMainFrame->width() * 0.8 - 25,
-                                        inMainFrame->height() * 0.2 - 26));
-    m_timeLineWidgetControl = new WidgetControl(c, timeLineParent);
-
-    layout->addWidget(m_timeLineWidgetControl);
-    layout->addWidget(spacer);
-    layout->addWidget(m_timeLineToolbar);
-
-    m_timelineDock->setWidget(timeLineParent);
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
-
-    m_timelineQmlDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
-    m_timelineQmlDock->setObjectName("timeline");
-    m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
-    m_timelineView = new TimelineView(m_timelineQmlDock);
-    m_timelineQmlDock->setWidget(m_timelineView);
+    m_timelineGVDock = new QDockWidget(QObject::tr("Timeline GV"), inMainFrame);
+    m_timelineGVDock->setObjectName("timeline GV.");
+    m_timelineGVDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    m_timelineWidget = new TimelineWidget(m_timelineGVDock);
+    m_timelineGVDock->setWidget(m_timelineWidget);
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
@@ -168,17 +138,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_basicObjectsDock->setEnabled(false);
     m_projectDock->setEnabled(false);
     m_slideDock->setEnabled(false);
-    m_timelineDock->setEnabled(false);
     m_actionDock->setEnabled(false);
     m_inspectorDock->setEnabled(false);
-
-    m_timeLineWidgetControl->RegisterForDnd(m_timeLineWidgetControl);
-    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
-    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
-    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
-    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
-    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_TL);
-    m_timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 }
 
 //==============================================================================
@@ -288,13 +249,6 @@ bool CPaletteManager::tabNavigateFocusedWidget(bool tabForward)
  *  A helper for CMainFrame::GetTimelineControl() to access the CTimelineControl
  *  inside the QDockWidget
  */
-CTimelineControl *CPaletteManager::GetTimelineControl() const
-{
-    if (m_timeLineWidgetControl)
-        return static_cast<CTimelineControl *>(m_timeLineWidgetControl->getControl());
-
-    return nullptr;
-}
 
 TimelineView *CPaletteManager::GetTimelineView() const
 {
@@ -303,7 +257,7 @@ TimelineView *CPaletteManager::GetTimelineView() const
 
 void CPaletteManager::onTimeChanged(long time)
 {
-    m_timeLineToolbar->onTimeChanged(time);
+    //m_timeLineToolbar->onTimeChanged(time);
 }
 
 ProjectView *CPaletteManager::projectView() const
@@ -316,7 +270,8 @@ void CPaletteManager::EnablePalettes()
     m_basicObjectsDock->setEnabled(true);
     m_projectDock->setEnabled(true);
     m_slideDock->setEnabled(true);
-    m_timelineDock->setEnabled(true);
+//    m_timelineQmlDock->setEnabled(true);
+    m_timelineGVDock->setEnabled(true);
     m_actionDock->setEnabled(true);
     m_inspectorDock->setEnabled(true);
 }

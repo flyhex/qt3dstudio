@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,40 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#ifndef TIMELINETOOLBAR_H
+#define TIMELINETOOLBAR_H
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include <QtWidgets/qtoolbar.h>
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+QT_FORWARD_DECLARE_CLASS(QAction)
+QT_FORWARD_DECLARE_CLASS(QSlider)
+
+class TimelineToolbar : public QToolBar
 {
-}
+    Q_OBJECT
 
-CSlideRow::~CSlideRow()
-{
-}
+signals:
+    void newLayerTriggered();
+    void deleteLayerTriggered();
+    void gotoTimeTriggered();
+    void firstFrameTriggered();
+    void stopTriggered();
+    void playTriggered();
+    void lastFrameTriggered();
+    void timelineScaleChanged(int scale);
+    void setDurationTriggered();
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
-{
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+public:
+    TimelineToolbar();
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
+    void setTime(double millis);
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
+private:
+    void addSpacing(int width);
 
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
-}
+    QAction *m_actionTime;
+    QAction *m_actionDuration;
+    QSlider *m_scaleSlider;
+};
+
+#endif // TIMELINETOOLBAR_H

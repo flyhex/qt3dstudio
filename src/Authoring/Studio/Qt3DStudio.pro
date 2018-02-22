@@ -38,6 +38,8 @@ INCLUDEPATH += \
     Palettes/Project \
     Palettes/Slide \
     Palettes/Timeline \
+    Palettes/TimelineGraphicsView \
+    Palettes/TimelineGraphicsView/ui \
     Render \
     UI \
     Utils \
@@ -146,19 +148,35 @@ HEADERS += \
     Controls/TreeItem.h \
     Palettes/Timeline/AbstractTimelineRowUI.h \
     Palettes/Timeline/BaseStateRow.h \
-    Palettes/Timeline/BaseStateRowUI.h \
     Palettes/Timeline/SlideRow.h \
-    Palettes/Timeline/SlideRowUI.h \
     Palettes/Timeline/StateRow.h \
     Palettes/Timeline/StateRowUI.h \
     Palettes/Timeline/PropertyRow.h \
-    Palettes/Timeline/PropertyRowUI.h \
     Palettes/Timeline/TimelineRow.h \
     Palettes/Timeline/TimelineUIFactory.h \
     Palettes/Timeline/TimelineView.h \
     Palettes/Timeline/TimelineObjectModel.h \
     Palettes/Timeline/TimeMeasureItem.h \
-    Application/DataInputSelectDlg.h
+    Application/DataInputSelectDlg.h \
+    Palettes/TimelineGraphicsView/TimelineWidget.h \
+    Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
+    Palettes/TimelineGraphicsView/ui/TimelineItem.h \
+    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.h \
+    Palettes/TimelineGraphicsView/ui/Separator.h \
+    Palettes/TimelineGraphicsView/ui/Ruler.h \
+    Palettes/TimelineGraphicsView/ui/PlayHead.h \
+    Palettes/TimelineGraphicsView/TimelineConstants.h \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
+    Palettes/TimelineGraphicsView/SelectionRect.h \
+    Palettes/TimelineGraphicsView/RowMover.h \
+    Palettes/TimelineGraphicsView/Keyframe.h \
+    Palettes/TimelineGraphicsView/rowtypes.h \
+    Palettes/TimelineGraphicsView/KeyframeManager.h \
+    Palettes/TimelineGraphicsView/RowManager.h \
+    Palettes/TimelineGraphicsView/TimelineUtils.h \
+    Palettes/TimelineGraphicsView/ui/RowTree.h \
+    Palettes/TimelineGraphicsView/ui/RowTimeline.h \
+    Palettes/TimelineGraphicsView/ui/TreeHeader.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -169,8 +187,6 @@ FORMS += \
     _Win/UI/InterpolationDlg.ui \
     _Win/UI/ResetKeyframeValuesDlg.ui \
     _Win/UI/GLVersionDlg.ui \
-    Application/StudioTutorialWidget.ui \
-    _Win/UI/TimeLineToolbar.ui \
     MainFrm.ui \
     _Win/Application/AboutDlg.ui \
     _Win/UI/StartupDlg.ui \
@@ -178,7 +194,8 @@ FORMS += \
     _Win/Application/SubPresentationListDlg.ui \
     Application/DataInputDlg.ui \
     Application/DataInputListDlg.ui \
-    _Win/Palettes/Progress/ProgressDlg.ui
+    _Win/Palettes/Progress/ProgressDlg.ui \
+    Application/StudioTutorialWidget.ui
 
 SOURCES += \
     MainFrm.cpp \
@@ -210,7 +227,6 @@ SOURCES += \
     _Win/UI/StudioProjectSettingsPage.cpp \
     Application/TimeEditDlg.cpp \
     Application/DurationEditDlg.cpp \
-    _Win/UI/TimeLineToolbar.cpp \
     _Win/Utils/MouseCursor.cpp \
     _Win/Workspace/Dialogs.cpp \
     _Win/Workspace/Views.cpp \
@@ -300,50 +316,23 @@ SOURCES += \
     Palettes/Slide/SlideModel.cpp \
     Palettes/Slide/SlideView.cpp \
     Palettes/Slide/SlideContextMenu.cpp \
-    Palettes/Timeline/AreaBoundingRect.cpp \
-    Palettes/Timeline/AssetTimelineKeyframe.cpp \
     Palettes/Timeline/BaseStateRow.cpp \
-    Palettes/Timeline/BaseTimebarlessRow.cpp \
-    Palettes/Timeline/BaseTimelineTreeControl.cpp \
-    Palettes/Timeline/BlankToggleControl.cpp \
     Palettes/Timeline/ColorBlankControl.cpp \
     Palettes/Timeline/ColorControl.cpp \
     Palettes/Timeline/CommentEdit.cpp \
-    Palettes/Timeline/ComponentContextMenu.cpp \
-    Palettes/Timeline/FilterToolbar.cpp \
-    Palettes/Timeline/KeyframeContextMenu.cpp \
-    Palettes/Timeline/Playhead.cpp \
     Palettes/Timeline/PropertyColorControl.cpp \
     Palettes/Timeline/PropertyGraphKeyframe.cpp \
     Palettes/Timeline/PropertyRow.cpp \
     Palettes/Timeline/PropertyTimebarGraph.cpp \
-    Palettes/Timeline/PropertyTimebarRow.cpp \
-    Palettes/Timeline/PropertyTimelineKeyframe.cpp \
-    Palettes/Timeline/PropertyToggleControl.cpp \
-    Palettes/Timeline/PropertyTreeControl.cpp \
     Palettes/Timeline/ScalableScroller.cpp \
     Palettes/Timeline/ScalableScrollerBar.cpp \
     Palettes/Timeline/SlideRow.cpp \
-    Palettes/Timeline/SlideTimebarRow.cpp \
     Palettes/Timeline/Snapper.cpp \
     Palettes/Timeline/StateRow.cpp \
     Palettes/Timeline/StateRowFactory.cpp \
-    Palettes/Timeline/StateTimebarlessRow.cpp \
-    Palettes/Timeline/StateTimebarRow.cpp \
-    Palettes/Timeline/TimebarControl.cpp \
-    Palettes/Timeline/TimebarTip.cpp \
-    Palettes/Timeline/TimelineControl.cpp \
     Palettes/Timeline/TimelineFilter.cpp \
     Palettes/Timeline/TimelineKeyframe.cpp \
     Palettes/Timeline/TimelineRow.cpp \
-    Palettes/Timeline/TimelineSplitter.cpp \
-    Palettes/Timeline/TimelineTimelineLayout.cpp \
-    Palettes/Timeline/TimelineTreeLayout.cpp \
-    Palettes/Timeline/TimeMeasure.cpp \
-    Palettes/Timeline/ToggleBlankControl.cpp \
-    Palettes/Timeline/ToggleControl.cpp \
-    Palettes/Timeline/ToggleToolbar.cpp \
-    Palettes/Timeline/TreeBlankControl.cpp \
     Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/DataInputTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
@@ -382,23 +371,34 @@ SOURCES += \
     _Win/Application/SubPresentationDlg.cpp \
     _Win/Application/SubPresentationListDlg.cpp \
     Palettes/Timeline/AbstractTimelineRowUI.cpp \
-    Palettes/Timeline/BaseStateRowUI.cpp \
-    Palettes/Timeline/SlideRowUI.cpp \
-    Palettes/Timeline/StateRowUI.cpp \
     Palettes/Timeline/TimelineUIFactory.cpp \
-    Palettes/Timeline/PropertyRowUI.cpp \
     Palettes/Timeline/TimelineView.cpp \
     Palettes/Timeline/TimelineObjectModel.cpp \
     Palettes/Timeline/TimeMeasureItem.cpp \
     Palettes/Timeline/TimePropertyItem.cpp \
     Application/DataInputDlg.cpp \
     Application/DataInputListDlg.cpp \
-    Application/DataInputSelectDlg.cpp
+    Application/DataInputSelectDlg.cpp \
+    Palettes/TimelineGraphicsView/TimelineWidget.cpp \
+    Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
+    Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
+    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.cpp \
+    Palettes/TimelineGraphicsView/ui/Separator.cpp \
+    Palettes/TimelineGraphicsView/ui/PlayHead.cpp \
+    Palettes/TimelineGraphicsView/ui/Ruler.cpp \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \
+    Palettes/TimelineGraphicsView/SelectionRect.cpp \
+    Palettes/TimelineGraphicsView/RowMover.cpp \
+    Palettes/TimelineGraphicsView/KeyframeManager.cpp \
+    Palettes/TimelineGraphicsView/RowManager.cpp \
+    Palettes/TimelineGraphicsView/TimelineUtils.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTree.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimeline.cpp \
+    Palettes/TimelineGraphicsView/ui/TreeHeader.cpp
 
 HEADERS += \
     Application/TimeEditDlg.h \
     Application/DurationEditDlg.h \
-    _Win/UI/TimeLineToolbar.h \
     _Win/Application/StudioApp.h \
     Controls/TextEditContextMenu.h \
     Palettes/Action/ActionModel.h \
@@ -413,8 +413,6 @@ HEADERS += \
     Palettes/Inspector/InspectorControlModel.h \
     Palettes/Slide/SlideModel.h \
     Palettes/Slide/SlideView.h \
-    Palettes/Timeline/ComponentContextMenu.h \
-    Palettes/Timeline/KeyframeContextMenu.h \
     Palettes/Timeline/Bindings/IKeyframeSelector.h \
     Palettes/Timeline/Bindings/ITimelineItemBinding.h \
     Palettes/Timeline/Bindings/ITimelineItem.h \

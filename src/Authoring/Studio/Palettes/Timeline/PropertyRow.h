@@ -48,8 +48,6 @@
 class CPropertyColorControl;
 class CBlankControl;
 class CPropertyTreeControl;
-class CPropertyToggleControl;
-class CPropertyTimebarRow;
 class ITimelineItemProperty;
 
 class CPropertyRow : public CTimelineRow

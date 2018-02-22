@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,25 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#ifndef SEPARATOR_H
+#define SEPARATOR_H
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include "TimelineItem.h"
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+class Separator : public TimelineItem
 {
-}
+    Q_OBJECT
 
-CSlideRow::~CSlideRow()
-{
-}
+public:
+    explicit Separator(TimelineItem *parent = nullptr);
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
-{
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                          QWidget *widget = nullptr) override;
+    int type() const;
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
+ protected:
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+};
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
-
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
-}
+#endif // SEPARATOR_H

@@ -41,8 +41,6 @@
 #include "EmptyTimelineTimebar.h"
 #include "Qt3DSDMTimelineTimebar.h"
 #include "BaseStateRow.h"
-#include "BaseTimebarlessRow.h"
-#include "PropertyTimebarRow.h"
 #include "PropertyRow.h"
 #include "KeyframesManager.h"
 #include "StudioApp.h"

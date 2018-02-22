@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,42 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#ifndef ROWMOVER_H
+#define ROWMOVER_H
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include "TimelineConstants.h"
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+#include <QtWidgets/qgraphicsitem.h>
+
+class RowTree;
+
+class RowMover : public QGraphicsRectItem
 {
-}
+public:
+    RowMover();
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget = nullptr) override;
 
-CSlideRow::~CSlideRow()
-{
-}
+    void start(RowTree *row, int index);
+    void end();
+    void resetInsertionParent(RowTree *newTarget = nullptr);
+    void updateState(int index, int depth, int rawIndex);
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
-{
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+    RowTree *insertionParent() const;
+    RowTree *sourceRow() const;
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
+    int targetIndex() const;
+    int sourceIndex() const;
+    bool isActive();
+    bool isValidMove(int index, RowTree *rowAtIndex);
+    bool movingDown() const;
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
+private:
+    RowTree *m_insertionParent = nullptr; // insertion parent
+    RowTree *m_sourceRow = nullptr;       // dragged row
+    int m_targetIndex = -1;               // insertion index
+    int m_sourceIndex = -1;
+    bool m_active = false;
+};
 
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
-}
+#endif // ROWMOVER_H

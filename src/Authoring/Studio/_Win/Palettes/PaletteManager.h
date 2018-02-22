@@ -36,7 +36,7 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "TimelineControl.h"
+#include <QtWidgets/qdockwidget.h>
 
 //==============================================================================
 //  Forwards
@@ -46,6 +46,7 @@ class WidgetControl;
 class TimeLineToolbar;
 class TimelineView;
 class ProjectView;
+class TimelineWidget;
 
 QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
@@ -82,15 +83,14 @@ protected:
     QDockWidget *m_basicObjectsDock;
     QDockWidget *m_projectDock;
     QDockWidget *m_slideDock;
-    QDockWidget *m_timelineDock;
     QDockWidget *m_timelineQmlDock;
+    QDockWidget *m_timelineGVDock;
     QDockWidget *m_actionDock;
     QDockWidget *m_inspectorDock;
 
-    WidgetControl *m_timeLineWidgetControl;
-    TimeLineToolbar *m_timeLineToolbar;
     TimelineView *m_timelineView;
     ProjectView *m_projectView = nullptr;
+    TimelineWidget *m_timelineWidget;
 
 public:
     CPaletteManager(CMainFrame *inMainFrame);
@@ -104,7 +104,6 @@ public:
     QDockWidget *GetControl(long inType) const;
     QWidget *getFocusWidget() const;
     bool tabNavigateFocusedWidget(bool tabForward);
-    CTimelineControl *GetTimelineControl() const;
     TimelineView *GetTimelineView() const;
     void onTimeChanged(long time);
     ProjectView *projectView() const;

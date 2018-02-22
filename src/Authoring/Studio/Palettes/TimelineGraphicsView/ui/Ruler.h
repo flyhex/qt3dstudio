@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,37 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#ifndef RULER_H
+#define RULER_H
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include "TimelineItem.h"
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+class Ruler : public TimelineItem
 {
-}
+    Q_OBJECT
 
-CSlideRow::~CSlideRow()
-{
-}
+signals:
+    void rulerClicked(const double &pos);
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
-{
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+public:
+    explicit Ruler(TimelineItem *parent = nullptr);
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
+    void setTimelineScale(double scl);
+    double distanceToTime(double distance) const;
+    double timeToDistance(double time) const;
+    double durationStartX() const;
+    double durationEndX() const;
+    double timelineScale() const;
+    double duration() const;
+    int type() const;
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
+protected:
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget = nullptr) override;
 
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
-}
+private:
+    double m_timeScale = 2;
+    double m_duration = 20; // in seconds
+};
+
+#endif // RULER_H

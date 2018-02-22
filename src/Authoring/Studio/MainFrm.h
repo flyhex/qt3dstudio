@@ -52,7 +52,6 @@ class CPaletteManager;
 class CRecentItems;
 class CSceneView;
 class CStudioApp;
-class CTimelineControl;
 class ITimelineTimebar;
 class RemoteDeploymentSender;
 class TimelineView;
@@ -225,7 +224,6 @@ public:
 
     void OnTimeBarColorChanged(const QColor &color);
 
-    CTimelineControl *GetTimelineControl();
     ITimelineTimebar *GetSelectedTimelineTimebar();
     TimelineView *GetTimelineView();
 

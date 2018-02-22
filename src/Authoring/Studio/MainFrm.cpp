@@ -635,8 +635,9 @@ void CMainFrame::OnTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
 {
-    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(
-                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    // TODO: reimplement in the new timeline
+//    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(
+//                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
 //==============================================================================
@@ -651,8 +652,9 @@ void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineSetInterpolation()
 {
-    m_ui->actionSet_Interpolation->setEnabled(
-                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    // TODO: reimplement at a later stage of the new timeline, leaving it here for reference
+//    m_ui->actionSet_Interpolation->setEnabled(
+//                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
 //==============================================================================
@@ -1063,13 +1065,10 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
 
     m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);
 
-    CTimelineControl *theTimelineControl = GetTimelineControl();
-    if (theTimelineControl)
-        theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
-
-    TimelineView *theTimelineView = GetTimelineView();
-    if (theTimelineView)
-        theTimelineView->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
+    // TODO: reimplement in the new timeline
+//    TimelineView *theTimelineView = GetTimelineView();
+//    if (theTimelineView)
+//        theTimelineView->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
 //==============================================================================
@@ -1805,11 +1804,6 @@ void CMainFrame::OnConnectionChanged(bool connected)
     g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
 }
 
-CTimelineControl *CMainFrame::GetTimelineControl()
-{
-    return m_PaletteManager->GetTimelineControl();
-}
-
 TimelineView *CMainFrame::GetTimelineView()
 {
     return m_PaletteManager->GetTimelineView();
@@ -1817,12 +1811,13 @@ TimelineView *CMainFrame::GetTimelineView()
 
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
 {
-    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
-            GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
-    if (theTimelineItemBinding == NULL)
+    // TODO: reimplement after finishing the new timeline
+//    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
+//            GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
+//    if (theTimelineItemBinding == NULL)
         return NULL;
 
-    return theTimelineItemBinding->GetTimelineItem()->GetTimebar();
+//    return theTimelineItemBinding->GetTimelineItem()->GetTimebar();
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

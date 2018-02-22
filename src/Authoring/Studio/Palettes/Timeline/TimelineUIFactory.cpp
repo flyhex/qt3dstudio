@@ -31,9 +31,6 @@
 #include "StateRow.h"
 #include "SlideRow.h"
 #include "PropertyRow.h"
-#include "SlideRowUI.h"
-#include "StateRowUI.h"
-#include "PropertyRowUI.h"
 
 #include "Bindings/ITimelineItemProperty.h"
 
@@ -60,9 +57,7 @@ CPropertyRow *TimelineUIFactory::createPropertyRow(CBaseStateRow *parentRow,
                                                    ITimelineItemProperty *inTimelineItemPropertyBinding)
 {
     auto propertyRow = new CPropertyRow(inTimelineItemPropertyBinding, parentRow);
-    createRowUI(propertyRow, parentRow);
 
-    parentRow->AddPropertyRow(propertyRow, nextRow);
     inTimelineItemPropertyBinding->Bind(propertyRow);
 
     return propertyRow;
@@ -72,22 +67,8 @@ CStateRow *TimelineUIFactory::createStateRow(CBaseStateRow *parentRow,
                                              ITimelineItemBinding *inTimelineItem)
 {
     auto stateRow = new CStateRow(parentRow);
-    auto stateRowUI = createRowUI(stateRow, parentRow);
-    Q_ASSERT(stateRowUI);
+
     stateRow->Initialize(inTimelineItem);
-    CAbstractTimelineRowUI *parentUiRow =nullptr;
-    ISnappingListProvider *snappingListProvider = nullptr;
-    do {
-        parentUiRow = m_uiRows.value(parentRow, nullptr);
-        if (parentUiRow) {
-            snappingListProvider = parentUiRow->GetSnappingListProvider();
-            parentRow = dynamic_cast<CBaseStateRow*>(parentRow->GetParentRow());
-        }
-    } while (parentUiRow && !snappingListProvider);
-    if (parentUiRow) {
-        Q_ASSERT(snappingListProvider);
-        stateRowUI->SetSnappingListProvider(snappingListProvider);
-    }
 
     return stateRow;
 }
@@ -96,33 +77,10 @@ CSlideRow *TimelineUIFactory::createSlideRow(CBaseStateRow *parentRow,
                                              ITimelineItemBinding *inTimelineItem)
 {
     auto slideRow = new CSlideRow(parentRow);
-    auto slideRowUI = createRowUI(slideRow, parentRow);
-    Q_ASSERT(slideRowUI);
+
     slideRow->Initialize(inTimelineItem);
-    CAbstractTimelineRowUI *parentUiRow = m_uiRows.value(parentRow, nullptr);
-    if (parentUiRow)
-        slideRowUI->SetSnappingListProvider(parentUiRow->GetSnappingListProvider());
 
     return slideRow;
-}
-
-CAbstractTimelineRowUI *TimelineUIFactory::createRowUI(CTimelineRow *row, CTimelineRow *parentRow)
-{
-    CAbstractTimelineRowUI *parentUiRow = m_uiRows.value(parentRow, nullptr);
-    CAbstractTimelineRowUI *uiRow = nullptr;
-    if (auto castedRow = qobject_cast<CSlideRow *>(row)) {
-        uiRow = new CSlideRowUI(castedRow, parentUiRow);
-    } else if (auto castedRow = qobject_cast<CStateRow *>(row)) {
-        uiRow = new CStateRowUI(castedRow, parentUiRow);
-    } else if (auto castedRow = qobject_cast<CPropertyRow *>(row)) {
-        uiRow = new CPropertyRowUI(castedRow, parentUiRow);
-    }
-
-    if (uiRow) {
-        m_uiRows[row] = uiRow;
-    }
-
-    return uiRow;
 }
 
 void TimelineUIFactory::deleteRowUI(CTimelineRow *row)

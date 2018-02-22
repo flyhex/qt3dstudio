@@ -39,7 +39,6 @@
 #include "TimelineTranslationManager.h"
 #include "Qt3DSDMHandles.h"
 #include "BaseStateRow.h"
-#include "BaseStateRowUI.h"
 #include "Doc.h"
 #include "IObjectReferenceHelper.h"
 #include "EmptyTimelineTimebar.h"

@@ -39,7 +39,6 @@
 #include "PropertyRow.h"
 #include "TimelineTranslationManager.h"
 #include "ITimelineItemBinding.h"
-#include "PropertyTimebarRow.h"
 #include "Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSDMTimelineKeyframe.h"
 #include "KeyframesManager.h"

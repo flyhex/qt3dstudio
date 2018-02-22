@@ -169,6 +169,7 @@ Rectangle {
             Layout.minimumHeight: 80
             Layout.preferredHeight: (timelineItemsList.count + 1) * itemHeight
             Layout.preferredWidth: root.width
+            boundsBehavior: Flickable.StopAtBounds
 
             contentHeight: height
             contentWidth: 2000

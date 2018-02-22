@@ -32,8 +32,6 @@
 #include "BaseStateRow.h"
 #include "PropertyRow.h"
 #include "StateRowFactory.h"
-#include "TimelineTimelineLayout.h"
-#include "ComponentContextMenu.h"
 #include "ResourceCache.h"
 #include "StudioUtils.h"
 #include "Bindings/ITimelineItemBinding.h"

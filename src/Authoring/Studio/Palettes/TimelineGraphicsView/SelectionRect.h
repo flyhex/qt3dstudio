@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,30 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#ifndef SELECTIONRECT_H
+#define SELECTIONRECT_H
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+class Ruler;
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+#include <QtWidgets/qgraphicsitem.h>
+
+class SelectionRect : public QGraphicsRectItem
 {
-}
+public:
+    explicit SelectionRect(Ruler *ruler);
 
-CSlideRow::~CSlideRow()
-{
-}
+    void start(const QPointF &origin);
+    void updateSize(const QPointF &pos);
+    void end();
+    bool isActive();
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
-{
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget = nullptr) override;
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
+private:
+    Ruler *m_ruler = nullptr;
+    bool m_active = false;
+    QRectF m_rect;
+};
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
-
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
-}
+#endif // SELECTIONRECT_H

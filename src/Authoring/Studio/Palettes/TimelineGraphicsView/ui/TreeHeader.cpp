@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,32 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "TreeHeader.h"
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include <QtGui/qpainter.h>
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+
+TreeHeader::TreeHeader(TimelineItem *parent) : TimelineItem(parent)
 {
+
 }
 
-CSlideRow::~CSlideRow()
+void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                       QWidget *widget)
 {
+    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
+    static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
+    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
+
+    double y = (size().height() - pixHide.height()) * .5;
+
+    painter->drawPixmap(size().width() - pixHide.width() * 1.1 * 3, y, pixShy);
+    painter->drawPixmap(size().width() - pixHide.width() * 1.1 * 2, y, pixHide);
+    painter->drawPixmap(size().width() - pixHide.width() * 1.1    , y, pixLock);
 }
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
+int TreeHeader::type() const
 {
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
-
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
-}
-
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
-{
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
-}
-
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
-{
-    Q_UNUSED(inFilter);
-    return true;
+    // Enable the use of qgraphicsitem_cast with this item.
+    return TypeTreeHeader;
 }

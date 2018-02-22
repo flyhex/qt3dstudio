@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,55 +26,52 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "SelectionRect.h"
+#include "TimelineConstants.h"
+#include "Ruler.h"
 
-#include "SlideRow.h"
-#include "ColorControl.h"
-#include "Bindings/ITimelineItemBinding.h"
+#include <QtGui/qpainter.h>
 
-CSlideRow::CSlideRow(CTimelineRow *parent)
-    : CBaseStateRow(parent)
+SelectionRect::SelectionRect(Ruler *ruler) : m_ruler(ruler)
 {
+    setZValue(100);
+    setActive(false);
 }
 
-CSlideRow::~CSlideRow()
+void SelectionRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                          QWidget *widget)
 {
+    if (m_active)
+        painter->drawRect(m_rect);
 }
 
-//=============================================================================
-/**
- * Expand this node of the tree control.
- * This will display all children the fit the filter.
- */
-void CSlideRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
+void SelectionRect::start(const QPointF &origin)
 {
-    if (!m_Loaded) {
-        m_Loaded = true;
-        LoadChildren();
-    }
+    m_rect.setTopLeft(origin);
 
-    CBaseStateRow::Expand(inExpandAll, inExpandUp);
+    m_active = true;
 }
 
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active start time
- */
-bool CSlideRow::CalculateActiveStartTime()
+void SelectionRect::updateSize(const QPointF &pos)
 {
-    return false;
-}
-//=============================================================================
-/**
- * This do not 'contribute' to its child's active end time
- */
-bool CSlideRow::CalculateActiveEndTime()
-{
-    return false;
+    QPointF newPos = pos;
+    if (newPos.x() < m_ruler->x())
+        newPos.setX(m_ruler->x());
+
+    if (newPos.y() < TimelineConstants::ROW_H)
+        newPos.setY(TimelineConstants::ROW_H);
+
+    m_rect.setBottomRight(newPos);
+    setRect(m_rect.normalized());
 }
 
-bool CSlideRow::PerformFilter(const CFilter &inFilter)
+void SelectionRect::end()
 {
-    Q_UNUSED(inFilter);
-    return true;
+    setRect(QRectF());
+    m_active = false;
+}
+
+bool SelectionRect::isActive()
+{
+    return m_active;
 }
