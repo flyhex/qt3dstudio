@@ -50,6 +50,7 @@
 #include "IDocumentEditor.h"
 #include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
+#include "MainFrm.h"
 
 #include <QtWidgets/qcolordialog.h>
 #include <QtWidgets/qfiledialog.h>
@@ -241,7 +242,7 @@ void CDialogs::DisplayAssetDeleteFailed()
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMessage;
     }
@@ -273,7 +274,7 @@ void CDialogs::DisplayRefreshResourceFailed(const Q3DStudio::CString &inResource
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theText, Qt3DSMessageBox::ICON_WARNING, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theText;
     }
@@ -351,7 +352,7 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
     // Display the failed import resource message.
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMsgText, Qt3DSMessageBox::ICON_WARNING, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMsgText;
     }
@@ -368,7 +369,7 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
                                      true, true);
 
 
-    return QFileDialog::getOpenFileName(qApp->activeWindow(), QObject::tr("Open"),
+    return QFileDialog::getOpenFileName(g_StudioApp.m_pMainWnd, QObject::tr("Open"),
                                         inFile, theFileFilter, nullptr,
                                         QFileDialog::DontUseNativeDialog);
 }
@@ -377,7 +378,7 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 QList<QUrl> CDialogs::SelectAssets(QString &outPath,
                                    Q3DStudio::DocumentEditorFileType::Enum assetType)
 {
-    QFileDialog fd(qApp->activeWindow());
+    QFileDialog fd(g_StudioApp.m_pMainWnd);
     fd.setDirectory(outPath);
     fd.setFileMode(QFileDialog::ExistingFiles);
     fd.setOption(QFileDialog::DontUseNativeDialog, true);
@@ -429,7 +430,7 @@ void CDialogs::DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theErrorTitle, theErrorMessage, Qt3DSMessageBox::ICON_WARNING, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theErrorTitle << ": " << theErrorMessage;
     }
@@ -449,7 +450,7 @@ void CDialogs::DisplaySavingPresentationFailed()
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theErrorTitle, theErrorMessage, Qt3DSMessageBox::ICON_WARNING, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theErrorTitle << ": " << theErrorMessage;
     }
@@ -473,7 +474,7 @@ void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMsg, Qt3DSMessageBox::ICON_WARNING, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMsg;
     }
@@ -500,7 +501,7 @@ CDialogs::DisplayMessageBox(const QString &inTitle, const QString &inText,
     if (m_ShowGUI) {
         theUserChoice =
                 Qt3DSMessageBox::Show(inTitle, inText, inIcon,
-                                      inShowCancel, qApp->activeWindow());
+                                      inShowCancel, g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << inTitle << ": " << inText;
         theUserChoice = Qt3DSMessageBox::MSGBX_OK;
@@ -767,7 +768,7 @@ void CDialogs::DisplayKnownErrorDialog(const QString &inErrorText)
         QString theTitle = QObject::tr("Qt 3D Studio");
         if (m_ShowGUI) {
             Qt3DSMessageBox::Show(theTitle, inErrorText, Qt3DSMessageBox::ICON_ERROR,
-                                  false, qApp->activeWindow());
+                                  false, g_StudioApp.m_pMainWnd);
         } else {
             qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << inErrorText;
         }
@@ -935,7 +936,7 @@ Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirecto
 
     theImportFilter += " (*" + theFileExt + ")";
 
-    QFileDialog theFileDlg(qApp->activeWindow(), QString(),
+    QFileDialog theFileDlg(g_StudioApp.m_pMainWnd, QString(),
                            (inInitialDirectory == Q3DStudio::CString("."))
                            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
                            : inInitialDirectory.toQString(),
@@ -971,7 +972,7 @@ bool CDialogs::ConfirmRevert()
 
     if (m_ShowGUI) {
         theChoice = Qt3DSMessageBox::Show(theTitle, thePrompt, Qt3DSMessageBox::ICON_WARNING, true,
-                                          qApp->activeWindow());
+                                          g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << thePrompt;
         theChoice = Qt3DSMessageBox::MSGBX_OK;
@@ -996,7 +997,7 @@ void CDialogs::DisplayProgressScreen(const Q3DStudio::CString &inActionText,
                                      const Q3DStudio::CString &inAdditionalText)
 {
     if (m_ShowGUI && !m_ProgressPalette) {
-        m_ProgressPalette = new CProgressView(qApp->activeWindow());
+        m_ProgressPalette = new CProgressView(g_StudioApp.m_pMainWnd);
         m_ProgressPalette->SetActionText(inActionText);
         m_ProgressPalette->SetAdditionalText(inAdditionalText);
         m_ProgressPalette->show();
@@ -1033,7 +1034,7 @@ void CDialogs::DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErro
                           "\n{Variable} = Value\n");
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMessage;
     }
@@ -1076,7 +1077,7 @@ void CDialogs::DisplayPasteFailed()
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theMessage, Qt3DSMessageBox::ICON_ERROR, false,
-                              qApp->activeWindow());
+                              g_StudioApp.m_pMainWnd);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMessage;
     }

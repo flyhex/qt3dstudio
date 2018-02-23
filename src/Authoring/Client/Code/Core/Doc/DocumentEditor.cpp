@@ -4510,7 +4510,7 @@ public:
             if (theFind == m_SourcePathInstanceMap.end())
                 continue;
 
-            const TSlideInstanceList &theInstances(theFind->second);
+            const TSlideInstanceList theInstances(theFind->second);
             if (theRecord.m_ModificationType != FileModificationType::Created) {
                 requestRender = true;
                 m_Doc.GetBufferCache().InvalidateBuffer(theRelativePath);
