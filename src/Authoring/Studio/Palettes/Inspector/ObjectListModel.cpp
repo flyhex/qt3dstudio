@@ -84,6 +84,13 @@ int ObjectListModel::columnCount(const QModelIndex &parent) const
 
 QVariant ObjectListModel::data(const QModelIndex &index, int role) const
 {
+    return data(index, QModelIndex(), role);
+}
+
+QVariant ObjectListModel::data(const QModelIndex &index,
+                               const QModelIndex &startingIndex,
+                               int role) const
+{
     if (!hasIndex(index.row(), index.column(), index.parent()))
         return {};
 
@@ -92,8 +99,18 @@ QVariant ObjectListModel::data(const QModelIndex &index, int role) const
         return nameForHandle(handleForIndex(index));
     }
     case PathReferenceRole: {
-        Q3DStudio::CString data(m_objRefHelper->GetObjectReferenceString(
-            m_baseHandle, CRelativePathTools::EPATHTYPE_RELATIVE, handleForIndex(index)));
+        Q3DStudio::CString data;
+        if (startingIndex.isValid()) {
+            data = m_objRefHelper->GetObjectReferenceString(
+                        handleForIndex(startingIndex),
+                        CRelativePathTools::EPATHTYPE_RELATIVE,
+                        handleForIndex(index));
+        } else {
+            data = m_objRefHelper->GetObjectReferenceString(
+                        m_baseHandle,
+                        CRelativePathTools::EPATHTYPE_RELATIVE,
+                        handleForIndex(index));
+        }
         return data.toQString();
     }
     case AbsolutePathRole: {
@@ -276,6 +293,13 @@ QModelIndex FlatObjectListModel::mapToSource(const QModelIndex &proxyIndex) cons
 
 QVariant FlatObjectListModel::data(const QModelIndex &index, int role) const
 {
+    return data(index, QModelIndex(), role);
+}
+
+QVariant FlatObjectListModel::data(const QModelIndex &index,
+                                   const QModelIndex &startingIndex,
+                                   int role) const
+{
     const auto row = index.row();
     if (row < 0 || row >= m_sourceInfo.count())
         return {};
@@ -317,7 +341,11 @@ QVariant FlatObjectListModel::data(const QModelIndex &index, int role) const
     }
 
     QModelIndex sourceIndex = mapToSource(index);
-    return m_sourceModel->data(sourceIndex, role);
+    if (startingIndex.isValid())
+        return m_sourceModel->data(sourceIndex, startingIndex, role);
+    else
+        return m_sourceModel->data(sourceIndex, QModelIndex(), role);
+
 }
 
 bool FlatObjectListModel::setData(const QModelIndex &index, const QVariant &data, int role)

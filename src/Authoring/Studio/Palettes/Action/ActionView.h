@@ -145,6 +145,8 @@ public:
     void OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void OnTargetSelectionChanged();
+    void OnTriggerSelectionChanged();
 
 Q_SIGNALS:
     void itemChanged();
