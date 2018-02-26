@@ -83,7 +83,10 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
 
         switch (role) {
         case Qt::DecorationRole:
-            return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(item.iconType);
+            if (!item.iconSource.isEmpty())
+                return resourceImageUrl() + item.iconSource;
+            else
+                return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(item.iconType);
 
         case IsExpandableRole:
             return false;

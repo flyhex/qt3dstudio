@@ -42,7 +42,12 @@ BasicObjectsModel::BasicObjectsModel(QObject *parent) : QAbstractListModel(paren
 
 void BasicObjectsModel::initialize()
 {
-    m_ObjectItems = {
+    m_ObjectItems = InitializeObjectModel();
+}
+
+const QVector<BasicObjectItem> BasicObjectsModel::InitializeObjectModel()
+{
+    return {
         {tr("Rectangle"), "Asset-Rectangle-Normal.png"_L1, OBJTYPE_MODEL, PRIMITIVETYPE_RECT},
         {tr("Sphere"), "Asset-Sphere-Normal.png"_L1, OBJTYPE_MODEL, PRIMITIVETYPE_SPHERE},
         {tr("Cube"), "Asset-Cube-Normal.png"_L1, OBJTYPE_MODEL, PRIMITIVETYPE_BOX},
@@ -55,6 +60,12 @@ void BasicObjectsModel::initialize()
         {tr("Light"), "Asset-Light-Normal.png"_L1, OBJTYPE_LIGHT, PRIMITIVETYPE_UNKNOWN},
         {tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN},
     };
+}
+
+// Returns meshes part of basic objects
+const QVector<BasicObjectItem> BasicObjectsModel::BasicMeshesModel()
+{
+    return InitializeObjectModel().mid(0, 5);
 }
 
 QVariant BasicObjectsModel::data(const QModelIndex &index, int role) const

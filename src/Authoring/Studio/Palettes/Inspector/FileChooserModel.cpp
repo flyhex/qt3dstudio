@@ -45,6 +45,6 @@ bool FileChooserModel::isVisible(const QString &path) const
 
 const QVector<ChooserModelBase::FixedItem> FileChooserModel::getFixedItems() const
 {
-    static const QVector<FixedItem> items = { { OBJTYPE_GROUP, tr("[None]") } };
+    static const QVector<FixedItem> items = { { OBJTYPE_GROUP, "", tr("[None]") } };
     return items;
 }
