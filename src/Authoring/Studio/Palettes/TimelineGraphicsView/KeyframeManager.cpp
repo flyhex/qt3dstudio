@@ -36,10 +36,28 @@
 #include "PlayHead.h"
 #include "RowManager.h"
 #include "TimelineGraphicsScene.h"
+#include "StudioObjectTypes.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "CmdDataModelRemoveKeyframe.h"
+#include "CmdDataModelInsertKeyframe.h"
+#include "Bindings/ITimelineItemBinding.h"
+#include "Bindings/KeyframesManager.h"
+#include "Bindings/Qt3DSDMTimelineKeyframe.h"
 
 #include <qglobal.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qdebug.h>
+
+// Mahmmoud_TODO: This function is copied from old timeline code. It should be removed after the
+// new timeline is done (during cleanup of old timeline)
+// legacy stuff that we have to support for animation tracks in the old data model to work
+inline void PostExecuteCommand(IDoc *inDoc)
+{
+    CDoc *theDoc = dynamic_cast<CDoc *>(inDoc);
+    theDoc->GetCore()->CommitCurrentCommand();
+}
 
 KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene) : m_scene(scene)
 {
@@ -50,10 +68,10 @@ QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time,
 {
     QList<Keyframe *> addedKeyframes;
     QList<RowTimeline *> propRows;
-    if (row->rowTree()->rowType() != RowType::Property) {
+    if (!row->rowTree()->isProperty()) {
         const auto childRows = row->rowTree()->childRows();
         for (const auto r : childRows) {
-            if (r->rowType() == RowType::Property)
+            if (r->isProperty())
                 propRows.append(r->rowTimeline());
         }
     } else {
@@ -89,6 +107,8 @@ void KeyframeManager::selectKeyframe(Keyframe *keyframe)
 
         keyframe->rowMaster->putSelectedKeyframesOnTop();
         keyframe->rowMaster->updateKeyframes();
+
+        keyframe->binding->SetSelected(true);
     }
 }
 
@@ -103,13 +123,22 @@ void KeyframeManager::selectKeyframes(const QList<Keyframe *> &keyframes)
         }
     }
 
-    for (auto keyframe : qAsConst(m_selectedKeyframes))
+    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
         keyframe->selected = true;
+        keyframe->binding->SetSelected(true);
+    }
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows)) {
         row->putSelectedKeyframesOnTop();
         row->updateKeyframes();
     }
+}
+
+// update bindings after selected keyframes are moved
+void KeyframeManager::commitMoveSelectedKeyframes()
+{
+    for (auto keyframe : qAsConst(m_selectedKeyframes))
+        keyframe->binding->SetTime(keyframe->time * 1000);
 }
 
 void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
@@ -121,9 +150,6 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
 
     m_scene->rowManager()->clampIndex(idx1);
     m_scene->rowManager()->clampIndex(idx2);
-
-    // TODO: remove
-    qDebug() << "idx1=" << idx1  << ", idx2=" << idx2;
 
     RowTimeline *rowTimeline;
     for (int i = idx1; i <= idx2; ++i) {
@@ -142,8 +168,10 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
         }
     }
 
-    for (auto keyframe : qAsConst(m_selectedKeyframes))
+    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
         keyframe->selected = true;
+        keyframe->binding->SetSelected(true);
+    }
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows)) {
         row->putSelectedKeyframesOnTop();
@@ -158,13 +186,17 @@ void KeyframeManager::deselectKeyframe(Keyframe *keyframe)
         m_selectedKeyframes.removeAll(keyframe);
         keyframe->rowMaster->updateKeyframes();
         m_selectedKeyframesMasterRows.removeAll(keyframe->rowMaster);
+
+        keyframe->binding->SetSelected(false);
     }
 }
 
 void KeyframeManager::deselectAllKeyframes()
 {
-    for (auto keyframe : qAsConst(m_selectedKeyframes))
+    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
         keyframe->selected = false;
+        keyframe->binding->SetSelected(false);
+    }
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows))
         row->updateKeyframes();
@@ -176,7 +208,11 @@ void KeyframeManager::deselectAllKeyframes()
 void KeyframeManager::deleteSelectedKeyframes()
 {
     if (!m_selectedKeyframes.empty()) {
+        CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+        CCmdDataModelRemoveKeyframe *cmd = new CCmdDataModelRemoveKeyframe(theDoc);
         for (auto keyframe : qAsConst(m_selectedKeyframes)) {
+            cmd->addKeyframeHandles(keyframe->binding);
+
             keyframe->rowMaster->removeKeyframe(keyframe);
             keyframe->rowProperty->removeKeyframe(keyframe);
 
@@ -188,6 +224,9 @@ void KeyframeManager::deleteSelectedKeyframes()
 
         m_selectedKeyframes.clear();
         m_selectedKeyframesMasterRows.clear();
+
+        g_StudioApp.GetCore()->ExecuteCommand(cmd);
+        PostExecuteCommand(theDoc);
     }
 }
 
@@ -236,7 +275,7 @@ void KeyframeManager::pasteKeyframes(RowTimeline *row)
     if (row == nullptr)
         return;
 
-    if (row->rowTree()->rowType() == RowType::Property)
+    if (row->rowTree()->isProperty())
         row = row->parentRow();
 
     if (!m_copiedKeyframes.empty()) {
@@ -262,8 +301,8 @@ void KeyframeManager::pasteKeyframes(RowTimeline *row)
         RowTree *propRow;
         QList<Keyframe *> addedKeyframes;
         for (auto keyframe : filteredKeyframes) {
-            propRow = m_scene->rowManager()->getOrCreatePropertyRow(keyframe->propertyType,
-                                                                    row->rowTree());
+            propRow = m_scene->rowManager()->getOrCreatePropertyRow(row->rowTree(),
+                                                                    keyframe->propertyType);
             addedKeyframes.append(insertKeyframe(propRow->rowTimeline(), keyframe->time + dt,
                                                  keyframe->value, false));
         }
@@ -335,83 +374,83 @@ bool KeyframeManager::hasCopiedKeyframes() const
     return !m_copiedKeyframes.empty();
 }
 
-const QHash<RowType, QList<PropertyType>> KeyframeManager::SUPPORTED_ROW_PROPS {
-    { RowType::Layer, {
-          PropertyType::Left,
-          PropertyType::Width,
-          PropertyType::Top,
-          PropertyType::Height,
-          PropertyType::AO,
-          PropertyType::AODistance,
-          PropertyType::AOSoftness,
-          PropertyType::AOThreshold,
-          PropertyType::AOSamplingRate,
-          PropertyType::IBLBrightness,
-          PropertyType::IBLHorizonCutoff,
-          PropertyType::IBLFOVAngle }
+const QHash<int, QList<QString>> KeyframeManager::SUPPORTED_ROW_PROPS = {
+    { OBJTYPE_LAYER, {
+        "Left",
+        "Width",
+        "Top",
+        "Height",
+        "Ambient Occulusion",
+        "AO Distance",
+        "AO Softness",
+        "AO Threshold",
+        "AO Sampling Rate",
+        "IBL Brightness",
+        "IBL Horizon Cutoff",
+        "IBL FOV Angle" }
     },
-    { RowType::Camera, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::FieldOfView,
-          PropertyType::ClippingStart,
-          PropertyType::ClippingEnd }
+    { OBJTYPE_CAMERA, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "FieldOfView",
+        "ClippingStart",
+        "ClippingEnd" }
     },
-    { RowType::Light, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::LightColor,
-          PropertyType::SpecularColor,
-          PropertyType::AmbientColor,
-          PropertyType::Brightness,
-          PropertyType::ShadowDarkness,
-          PropertyType::ShadowSoftness,
-          PropertyType::ShadowDepthBias,
-          PropertyType::ShadowFarClip,
-          PropertyType::ShadowFOV }
+    { OBJTYPE_LIGHT, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "LightColor",
+        "SpecularColor",
+        "AmbientColor",
+        "Brightness",
+        "ShadowDarkness",
+        "ShadowSoftness",
+        "ShadowDepthBias",
+        "ShadowFarClip",
+        "ShadowFOV" }
     },
-    { RowType::Object, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::Opacity,
-          PropertyType::EdgeTessellation,
-          PropertyType::InnerTessellation }
+    { OBJTYPE_MODEL, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "Opacity",
+        "EdgeTessellation",
+        "InnerTessellation" }
     },
-    { RowType::Text, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::Opacity,
-          PropertyType::TextColor,
-          PropertyType::Leading,
-          PropertyType::Tracking }
+    { OBJTYPE_TEXT, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "Opacity",
+        "TextColor",
+        "Leading",
+        "Tracking" }
     },
-    { RowType::Alias, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::Opacity }
+    { OBJTYPE_ALIAS, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "Opacity" }
     },
-    { RowType::Group, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::Opacity }
+    { OBJTYPE_GROUP, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "Opacity" }
     },
-    { RowType::Component, {
-          PropertyType::Position,
-          PropertyType::Rotation,
-          PropertyType::Scale,
-          PropertyType::Pivot,
-          PropertyType::Opacity }
+    { OBJTYPE_COMPONENT, {
+        "Position",
+        "Rotation",
+        "Scale",
+        "Pivot",
+        "Opacity" }
     }
 };

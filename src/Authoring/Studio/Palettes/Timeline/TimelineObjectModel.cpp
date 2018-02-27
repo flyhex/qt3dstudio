@@ -376,8 +376,9 @@ CTimelineRow* TimelineObjectModel::timelineRowForIndex(const QModelIndex &index)
                 if (auto propertyBinding = binding->GetPropertyBinding(handle))
                     propertyRow = propertyBinding->GetRow();
 
-                if (propertyRow == nullptr)
-                    propertyRow = binding->AddPropertyRow(handle);
+                // Mahmoud_TODO: this whole class will be removed
+//              if (propertyRow == nullptr)
+//                  propertyRow = binding->AddPropertyRow(handle);
 
                 Q_ASSERT(propertyRow);
 

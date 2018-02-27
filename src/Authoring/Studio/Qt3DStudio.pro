@@ -160,9 +160,9 @@ HEADERS += \
     Application/DataInputSelectDlg.h \
     Palettes/TimelineGraphicsView/TimelineWidget.h \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
+    Palettes/TimelineGraphicsView/TimelineSplitter.h \
     Palettes/TimelineGraphicsView/ui/TimelineItem.h \
     Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.h \
-    Palettes/TimelineGraphicsView/ui/Separator.h \
     Palettes/TimelineGraphicsView/ui/Ruler.h \
     Palettes/TimelineGraphicsView/ui/PlayHead.h \
     Palettes/TimelineGraphicsView/TimelineConstants.h \
@@ -381,9 +381,9 @@ SOURCES += \
     Application/DataInputSelectDlg.cpp \
     Palettes/TimelineGraphicsView/TimelineWidget.cpp \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
+    Palettes/TimelineGraphicsView/TimelineSplitter.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
     Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.cpp \
-    Palettes/TimelineGraphicsView/ui/Separator.cpp \
     Palettes/TimelineGraphicsView/ui/PlayHead.cpp \
     Palettes/TimelineGraphicsView/ui/Ruler.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \

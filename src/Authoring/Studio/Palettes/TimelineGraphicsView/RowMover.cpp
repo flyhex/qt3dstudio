@@ -37,14 +37,20 @@
 RowMover::RowMover() : QGraphicsRectItem()
 {
     setZValue(99);
-    setRect(0, -2, 20, 2);
+    setRect(0, -5, TimelineConstants::TREE_MAX_W, 10);
 }
 
 void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    painter->save();
+
+    painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
+    painter->drawLine(0, -1, TimelineConstants::TREE_BOUND_W, -1);
+
     painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 4));
-    painter->drawLine(0, -.5, 10, -.5);
-    painter->fillRect(0, -2.5, rect().width() - x(), 2, QColor(TimelineConstants::ROW_MOVER_COLOR));
+    painter->drawLine(0, -2, 5, -2);
+
+    painter->restore();
 }
 
 RowTree *RowMover::insertionParent() const
@@ -123,7 +129,7 @@ void RowMover::updateState(int index, int depth, int rawIndex)
 {
     m_targetIndex = index;
 
-    setPos(20 + depth * 15, (rawIndex + 1) * TimelineConstants::ROW_H);
+    setPos(25 + depth * 15, (rawIndex + 1) * TimelineConstants::ROW_H);
     setVisible(true);
 }
 
@@ -135,10 +141,9 @@ bool RowMover::isValidMove(int index, RowTree *rowAtIndex)
         //index != m_currentIndex &&
 
         // not moving an ancestor into a decendent
-        !rowAtIndex->isDecendentOf(m_sourceRow) &&
+        !rowAtIndex->isDecendentOf(m_sourceRow)
 
         // not at the top of an expanded object with property children
-        (rowAtIndex->childRows().empty()
-         || rowAtIndex->childRows().first()->rowType() != RowType::Property
-            || !rowAtIndex->expanded());
+         && (rowAtIndex->childRows().empty() || !rowAtIndex->childRows().first()->isProperty()
+             || !rowAtIndex->expanded());
 }

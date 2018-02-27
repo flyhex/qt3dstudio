@@ -30,18 +30,25 @@
 #define ROWTREE_H
 
 #include "InteractiveTimelineItem.h"
+#include "TimelineGraphicsScene.h"
+#include "TimelineConstants.h"
 #include "RowTypes.h"
+#include "StudioObjectTypes.h"
 
 class RowTimeline;
 class Ruler;
+class ITimelineItemBinding;
 
 class RowTree : public InteractiveTimelineItem
 {
     Q_OBJECT
 
 public:
-    explicit RowTree(Ruler *ruler, RowType rowType = RowType::Layer, const QString &label = {});
-    explicit RowTree(Ruler *ruler, PropertyType propType); // property row constructor
+    explicit RowTree(TimelineGraphicsScene *timelineScene,
+                     EStudioObjectType rowType = OBJTYPE_UNKNOWN, const QString &label = {});
+    // property row constructor
+    explicit RowTree(TimelineGraphicsScene *timelineScene, const QString &propType);
+    ~RowTree();
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
@@ -53,8 +60,10 @@ public:
     void removeChild(RowTree *child);
     void setMoveSourceRecursive(bool value);
     void setMoveTarget(bool value);
-
-    bool handleButtonsClick(QGraphicsSceneMouseEvent *event);
+    void setTreeWidth(double w);
+    void setBinding(ITimelineItemBinding *binding);
+    void setPropBinding(ITimelineItemProperty *binding); // for property rows
+    TreeControlType getClickedControl(const QPointF &scenePos);
     bool hasPropertyChildren();
     bool shy() const;
     bool visible() const;
@@ -62,36 +71,43 @@ public:
     bool expanded() const;
     bool isDecendentOf(RowTree *row) const;
     bool isContainer() const;
+    bool isProperty() const;
     bool empty() const;
-
+    bool selected() const;
     int depth() const;
     int type() const;
-    RowType rowType() const;
-    PropertyType propertyType() const;
-
+    EStudioObjectType rowType() const;
+    QString propertyType() const;
     RowTree *parentRow() const;
     QList<RowTree *> childRows() const;
     RowTimeline *rowTimeline() const;
     QString label() const;
 
+    ITimelineItemBinding *getBinding() const;
+
 private:
     void updateExpandStatus(bool expand, bool childrenOnly = false);
     void updateDepthRecursive();
-    void updatePropertyLabel();
+    void updateLockRecursive(bool state);
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
     int m_depth = 1;
+    int m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
     bool m_shy = false;
     bool m_visible = true;
     bool m_locked = false;
     bool m_expanded = true;
     bool m_moveSource = false;
     bool m_moveTarget = false;
-    RowType m_rowType = RowType::Layer;
-    PropertyType m_propertyType = PropertyType::None; // for property rows
-    QString m_label = 0;
+    bool m_isProperty = false;
+    TimelineGraphicsScene *m_scene;
+    EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;
+    QString m_propertyType; // for property rows
+    QString m_label;
     QList<RowTree *> m_childRows;
+    ITimelineItemBinding *m_binding;
+    ITimelineItemProperty *m_PropBinding; // for property rows
 
     QRect m_rectArrow;
     QRect m_rectShy;

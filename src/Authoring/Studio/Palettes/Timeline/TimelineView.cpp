@@ -143,7 +143,6 @@ void TimelineView::OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
             m_model->expandTo(QModelIndex(), index);
         }
     }
-    m_translationManager->OnSelectionChange(inNewSelectable);
 }
 
 void TimelineView::OnTimeChanged(long inTime)
@@ -269,7 +268,7 @@ void TimelineView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, in
 
     m_translationManager->Clear();
     m_activeSlide = inSlide;
-    qDebug() << "OnActiveSlide";
+
     auto *theSlideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
     auto theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
 

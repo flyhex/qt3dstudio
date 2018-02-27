@@ -30,11 +30,10 @@
 #define KEYFRAMEMANAGER_H
 
 #include <QtCore/qlist.h>
+#include <StudioObjectTypes.h>
 
 class RowTimeline;
 class TimelineGraphicsScene;
-enum class RowType;
-enum class PropertyType;
 struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsSceneContextMenuEvent)
@@ -57,6 +56,7 @@ public:
     void copySelectedKeyframes();
     void pasteKeyframes(RowTimeline *row);
     void moveSelectedKeyframes(double dx);
+    void commitMoveSelectedKeyframes();
     bool oneMasterRowSelected() const;
     bool hasSelectedKeyframes() const;
     bool hasCopiedKeyframes() const;
@@ -67,9 +67,8 @@ public:
     QList<Keyframe *> m_copiedKeyframes; // for copy, cut, paste
     QList<RowTimeline *> m_selectedKeyframesMasterRows;
 
-
 private:
-    static const QHash<RowType, QList<PropertyType>> SUPPORTED_ROW_PROPS;
+    static const QHash<int, QList<QString>> SUPPORTED_ROW_PROPS;
 
     QList<Keyframe *> filterKeyframesForRow(RowTimeline *row, const QList<Keyframe *> &keyframes);
 };

@@ -28,32 +28,56 @@
 
 #include "RowTree.h"
 #include "RowTimeline.h"
+#include "RowManager.h"
 #include "TimelineConstants.h"
+#include "StudioObjectTypes.h"
+#include "Bindings/ITimelineItemBinding.h"
 
 #include <QtGui/qpainter.h>
+#include <QtWidgets/qgraphicslinearlayout.h>
 #include <QtWidgets/qgraphicssceneevent.h>
 
-RowTree::RowTree(Ruler *ruler, RowType rowType, const QString &label)
+// object row constructor
+RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType,
+                 const QString &label)
     : InteractiveTimelineItem()
-    , m_rowTimeline(new RowTimeline(ruler))
+    , m_rowTimeline(new RowTimeline())
 {
+    m_scene = timelineScene;
     m_rowType = rowType;
     m_label = label;
 
     setTimelineRow(m_rowTimeline);
     m_rowTimeline->setRowTree(this);
+
+    if (m_rowType == OBJTYPE_MATERIAL)
+        m_isProperty = true;
 }
 
-RowTree::RowTree(Ruler *ruler, PropertyType propType)
-    : InteractiveTimelineItem()
-    , m_rowTimeline(new RowTimeline(ruler))
+RowTree::~RowTree()
 {
-    m_rowType = RowType::Property;
+    delete m_rowTimeline; // this will also delete the keyframes
+}
+
+ITimelineItemBinding *RowTree::getBinding() const
+{
+    return m_binding;
+}
+
+// property row constructor
+RowTree::RowTree(TimelineGraphicsScene *timelineScene, const QString &propType)
+    : InteractiveTimelineItem()
+    , m_rowTimeline(new RowTimeline())
+{
+    m_scene = timelineScene;
+    m_label = propType;
     m_propertyType = propType;
-    updatePropertyLabel();
 
     setTimelineRow(m_rowTimeline);
     m_rowTimeline->setRowTree(this);
+
+    m_isProperty = true;
+    m_rowTimeline->m_isProperty = true;
 }
 
 void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -62,20 +86,20 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     // update button bounds rects
     m_rectArrow  .setRect(offset, size().height() * .5 - 8, 16, 16);
-    m_rectShy    .setRect(size().width() - 16 * 3.3, size().height() * .5 - 8, 16, 16);
-    m_rectVisible.setRect(size().width() - 16 * 2.2, size().height() * .5 - 8, 16, 16);
-    m_rectLocked .setRect(size().width() - 16 * 1.1, size().height() * .5 - 8, 16, 16);
+    m_rectShy    .setRect(m_treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
+    m_rectVisible.setRect(m_treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
+    m_rectLocked .setRect(m_treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
 
     // Background
     QColor bgColor;
     if (m_moveSource)
         bgColor = TimelineConstants::ROW_COLOR_MOVE_SRC;
+    else if (m_isProperty)
+        bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
     else if (m_state == Selected)
         bgColor = TimelineConstants::ROW_COLOR_SELECTED;
-    else if (m_state == Hovered)
+    else if (m_state == Hovered && !m_locked)
         bgColor = TimelineConstants::ROW_COLOR_OVER;
-    else if (m_rowType == RowType::Property)
-        bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
     else
         bgColor = TimelineConstants::ROW_COLOR_NORMAL;
 
@@ -93,84 +117,101 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         painter->drawPixmap(m_rectArrow, m_expanded ? pixArrowDown : pixArrow);
 
     // Row type icon
-    static const QPixmap pixScene = QPixmap(":/images/Objects-Scene-Normal.png");
-    static const QPixmap pixLayer = QPixmap(":/images/Asset-Layer-Normal.png");
-    static const QPixmap pixObject = QPixmap(":/images/Asset-Cube-Normal.png");
-    static const QPixmap pixLight = QPixmap(":/images/Asset-Light-Normal.png");
-    static const QPixmap pixCamera = QPixmap(":/images/Asset-Camera-Normal.png");
-    static const QPixmap pixText = QPixmap(":/images/Asset-Text-Normal.png");
-    static const QPixmap pixAlias = QPixmap(":/images/Asset-Alias-Normal.png");
-    static const QPixmap pixGroup = QPixmap(":/images/Asset-Group-Normal.png");
-    static const QPixmap pixComponent = QPixmap(":/images/Asset-Component-Normal.png");
-    static const QPixmap pixProperty = QPixmap(":/images/Objects-Property-Normal.png");
+    static const QPixmap pixSceneNormal     = QPixmap(":/images/Objects-Scene-Normal.png");
+    static const QPixmap pixLayerNormal     = QPixmap(":/images/Objects-Layer-Normal.png");
+    static const QPixmap pixObjectNormal    = QPixmap(":/images/Objects-Model-Normal.png");
+    static const QPixmap pixLightNormal     = QPixmap(":/images/Objects-Light-Normal.png");
+    static const QPixmap pixCameraNormal    = QPixmap(":/images/Objects-Camera-Normal.png");
+    static const QPixmap pixTextNormal      = QPixmap(":/images/Objects-Text-Normal.png");
+    static const QPixmap pixAliasNormal     = QPixmap(":/images/Objects-Alias-Normal.png");
+    static const QPixmap pixGroupNormal     = QPixmap(":/images/Objects-Group-Normal.png");
+    static const QPixmap pixComponentNormal = QPixmap(":/images/Objects-Component-Normal.png");
+    static const QPixmap pixMaterialNormal  = QPixmap(":/images/Objects-Material-Normal.png");
+    static const QPixmap pixPropertyNormal  = QPixmap(":/images/Objects-Property-Normal.png");
+
+    static const QPixmap pixSceneDisabled     = QPixmap(":/images/Objects-Scene-Disabled.png");
+    static const QPixmap pixLayerDisabled     = QPixmap(":/images/Objects-Layer-Disabled.png");
+    static const QPixmap pixObjectDisabled    = QPixmap(":/images/Objects-Model-Disabled.png");
+    static const QPixmap pixLightDisabled     = QPixmap(":/images/Objects-Light-Disabled.png");
+    static const QPixmap pixCameraDisabled    = QPixmap(":/images/Objects-Camera-Disabled.png");
+    static const QPixmap pixTextDisabled      = QPixmap(":/images/Objects-Text-Disabled.png");
+    static const QPixmap pixAliasDisabled     = QPixmap(":/images/Objects-Alias-Disabled.png");
+    static const QPixmap pixGroupDisabled     = QPixmap(":/images/Objects-Group-Disabled.png");
+    static const QPixmap pixComponentDisabled = QPixmap(":/images/Objects-Component-Disabled.png");
+    static const QPixmap pixMaterialDisabled  = QPixmap(":/images/Objects-Material-Disabled.png");
+    static const QPixmap pixPropertyDisabled  = QPixmap(":/images/Objects-Property-Disabled.png");
 
     QPixmap pixRowType;
     QString rowLabel;
     switch (m_rowType) {
-    case RowType::Scene:
-        pixRowType = pixScene;
+    case OBJTYPE_SCENE:
+        pixRowType = m_locked ? pixSceneDisabled : pixSceneNormal;
         rowLabel = tr("Scene");
         break;
-    case RowType::Layer:
-        pixRowType = pixLayer;
+    case OBJTYPE_LAYER:
+        pixRowType = m_locked ? pixLayerDisabled : pixLayerNormal;
         rowLabel = tr("Layer");
         break;
-    case RowType::Object:
-        pixRowType = pixObject;
+    case OBJTYPE_MODEL:
+        pixRowType = m_locked ? pixObjectDisabled : pixObjectNormal;
         rowLabel = tr("Object");
         break;
-    case RowType::Light:
-        pixRowType = pixLight;
+    case OBJTYPE_LIGHT:
+        pixRowType = m_locked ? pixLightDisabled : pixLightNormal;
         rowLabel = tr("Light");
         break;
-    case RowType::Camera:
-        pixRowType = pixCamera;
+    case OBJTYPE_CAMERA:
+        pixRowType = m_locked ? pixCameraDisabled : pixCameraNormal;
         rowLabel = tr("Camera");
         break;
-    case RowType::Text:
-        pixRowType = pixText;
+    case OBJTYPE_TEXT:
+        pixRowType = m_locked ? pixTextDisabled : pixTextNormal;
         rowLabel = tr("Text");
         break;
-    case RowType::Alias:
-        pixRowType = pixAlias;
+    case OBJTYPE_ALIAS:
+        pixRowType = m_locked ? pixAliasDisabled : pixAliasNormal;
         rowLabel = tr("Alias");
         break;
-    case RowType::Group:
-        pixRowType = pixGroup;
+    case OBJTYPE_GROUP:
+        pixRowType = m_locked ? pixGroupDisabled : pixGroupNormal;
         rowLabel = tr("Group");
         break;
-    case RowType::Component:
-        pixRowType = pixComponent;
+    case OBJTYPE_COMPONENT:
+        pixRowType = m_locked ? pixComponentDisabled : pixComponentNormal;
         rowLabel = tr("Component");
         break;
-    case RowType::Property:
-        pixRowType = pixProperty;
-        rowLabel = tr("Property");
+    case OBJTYPE_MATERIAL:
+        pixRowType = m_locked ? pixMaterialDisabled : pixMaterialNormal;
+        rowLabel = tr("Default");
         break;
     default:
-        pixRowType = pixLayer;
-        rowLabel = tr("Layer");
+        break;
     }
 
-    if (m_label == 0)
+    if (m_isProperty && m_rowType != OBJTYPE_MATERIAL)
+        pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
+
+    if (m_label.isEmpty())
         m_label = rowLabel;
 
     y = (size().height() - 16) * .5;
+
     painter->drawPixmap(offset + 15, y, 16, 16, pixRowType);
 
     // Label
-    painter->setPen(QColor(TimelineConstants::ROW_TEXT_COLOR));
+    painter->setPen(QColor(m_locked ? TimelineConstants::ROW_TEXT_COLOR_DISABLED
+                                    : TimelineConstants::ROW_TEXT_COLOR));
     painter->drawText(offset + 35, size().height() * .5 + 4, tr("%1").arg(m_label));
 
     // Shy, eye, lock BG (to hide the label when overlapping)
-    painter->fillRect(QRect(size().width() - 53, 0, 53, size().height() - 1), bgColor);
+    painter->fillRect(QRect(m_treeWidth - 53, 0, 53, size().height() - 1), bgColor);
 
     // Shy, eye, lock
     static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
     static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
     static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
     static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
-    if (m_rowType != RowType::Property) {
+    if (!m_isProperty && m_rowType != OBJTYPE_SCENE) {
         painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
         painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
         painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
@@ -179,115 +220,29 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // Candidate parent of a dragged row
     if (m_moveTarget) {
         painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
-        painter->drawRect(QRect(1, 1, size().width()-2, size().height() - 3));
+        painter->drawRect(QRect(1, 1, m_treeWidth - 2, size().height() - 3));
     }
 }
 
-void RowTree::updatePropertyLabel()
+void RowTree::setTreeWidth(double w)
 {
-    switch (m_propertyType) {
-    case PropertyType::Position:
-        m_label = tr("Position");
-        break;
-    case PropertyType::Rotation:
-        m_label = tr("Rotation");
-        break;
-    case PropertyType::Scale:
-        m_label = tr("Scale");
-        break;
-    case PropertyType::Pivot:
-        m_label = tr("Pivot");
-        break;
-    case PropertyType::Opacity:
-        m_label = tr("Opacity");
-        break;
-    case PropertyType::EdgeTessellation:
-        m_label = tr("Edge Tessellation");
-        break;
-    case PropertyType::InnerTessellation:
-        m_label = tr("Inner Tessellation");
-        break;
-    case PropertyType::TextColor:
-        m_label = tr("Text Color");
-        break;
-    case PropertyType::Leading:
-        m_label = tr("Leading");
-        break;
-    case PropertyType::Tracking:
-        m_label = tr("Tracking");
-        break;
-    case PropertyType::LightColor:
-        m_label = tr("Light Color");
-        break;
-    case PropertyType::SpecularColor:
-        m_label = tr("Specular Color");
-        break;
-    case PropertyType::AmbientColor:
-        m_label = tr("Ambient Color");
-        break;
-    case PropertyType::Brightness:
-        m_label = tr("Brightness");
-        break;
-    case PropertyType::ShadowDarkness:
-        m_label = tr("Shadow Darkness");
-        break;
-    case PropertyType::ShadowSoftness:
-        m_label = tr("Shadow Softness");
-        break;
-    case PropertyType::ShadowDepthBias:
-        m_label = tr("Shadow Depth Bias");
-        break;
-    case PropertyType::FieldOfView:
-        m_label = tr("Field Of View");
-        break;
-    case PropertyType::ClippingStart:
-        m_label = tr("Clipping Start");
-        break;
-    case PropertyType::ClippingEnd:
-        m_label = tr("Clipping End");
-        break;
-    case PropertyType::Left:
-        m_label = tr("Left");
-        break;
-    case PropertyType::Top:
-        m_label = tr("Top");
-        break;
-    case PropertyType::Width:
-        m_label = tr("Width");
-        break;
-    case PropertyType::Height:
-        m_label = tr("Height");
-        break;
-    case PropertyType::AO:
-        m_label = tr("Ambient Occlusion");
-        break;
-    case PropertyType::AODistance:
-        m_label = tr("AO Distance");
-        break;
-    case PropertyType::AOSoftness:
-        m_label = tr("AO Softness");
-        break;
-    case PropertyType::AOThreshold:
-        m_label = tr("AO Threshold");
-        break;
-    case PropertyType::AOSamplingRate:
-        m_label = tr("AO Sampling Rate");
-        break;
-    case PropertyType::IBLBrightness:
-        m_label = tr("IBL Brightness");
-        break;
-    case PropertyType::IBLHorizonCutoff:
-        m_label = tr("IBL Horizon Cutoff");
-        break;
-    case PropertyType::IBLFOVAngle:
-        m_label = tr("IBL FOV Angle");
-        break;
-    case PropertyType::ProbeCrossfade:
-        m_label = tr("Probe Crossfade");
-        break;
-    default:
-        m_label = tr("Unnamed Property");
-    }
+    m_treeWidth = w;
+    update();
+}
+
+void RowTree::setBinding(ITimelineItemBinding *binding)
+{
+    m_binding = binding;
+
+    // update view (shy, visible, locked)
+    m_shy = m_binding->GetTimelineItem()->IsShy();
+    m_visible = m_binding->GetTimelineItem()->IsVisible();
+    m_locked = m_binding->GetTimelineItem()->IsLocked();
+}
+
+void RowTree::setPropBinding(ITimelineItemProperty *binding)
+{
+    m_PropBinding = binding;
 }
 
 void RowTree::setState(State state)
@@ -314,12 +269,12 @@ int RowTree::depth() const
     return m_depth;
 }
 
-RowType RowTree::rowType() const
+EStudioObjectType RowTree::rowType() const
 {
    return m_rowType;
 }
 
-PropertyType RowTree::propertyType() const
+QString RowTree::propertyType() const
 {
     return m_propertyType;
 }
@@ -378,36 +333,48 @@ void RowTree::removeChild(RowTree *child)
 
 bool RowTree::hasPropertyChildren()
 {
-    return !m_childRows.empty() && m_childRows.first()->rowType() == RowType::Property;
+    return m_scene->rowManager()->hasProperties(this);
 }
 
-bool RowTree::handleButtonsClick(QGraphicsSceneMouseEvent *event)
+// handle clicked control and return its type
+TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
-    if (rowType() == RowType::Property)
-        return false;
+    if (m_isProperty || m_rowType == OBJTYPE_SCENE)
+        return TreeControlType::None;
 
-    QPointF p = mapFromScene(event->scenePos().x(), event->scenePos().y());
-
-    if (m_rectArrow.contains(p.x(), p.y())) {
+    QPointF p = mapFromScene(scenePos.x(), scenePos.y());
+    if (m_rectArrow.contains(p.x(), p.y())  && !m_locked) {
         m_expanded = !m_expanded;
         updateExpandStatus(m_expanded, true);
         update();
-        return true;
+        return TreeControlType::Arrow;
     } else if (m_rectShy.contains(p.x(), p.y())) {
         m_shy = !m_shy;
         update();
-        return true;
+
+        m_binding->GetTimelineItem()->SetShy(m_shy);
+
+        return TreeControlType::Shy;
     } else if (m_rectVisible.contains(p.x(), p.y())) {
         m_visible = !m_visible;
         update();
-        return true;
+
+        m_binding->GetTimelineItem()->SetVisible(m_visible);
+
+
+        return TreeControlType::Hide;
     } else if (m_rectLocked.contains(p.x(), p.y())) {
-        m_locked = !m_locked;
-        update();
-        return true;
+        updateLockRecursive(!m_locked);
+
+        m_binding->GetTimelineItem()->SetLocked(m_locked);
+
+        if (m_locked && selected())
+            m_scene->rowManager()->clearSelection();
+
+        return TreeControlType::Lock;
     }
 
-    return false;
+    return TreeControlType::None;
 }
 
 void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
@@ -420,6 +387,17 @@ void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
     if (!m_childRows.empty()) {
         for (auto child : qAsConst(m_childRows))
             child->updateExpandStatus(expand && child->parentRow()->m_expanded);
+    }
+}
+
+void RowTree::updateLockRecursive(bool state)
+{
+    m_locked = state;
+    update();
+
+    if (!m_childRows.empty()) {
+        for (auto child : qAsConst(m_childRows))
+            child->updateLockRecursive(m_locked);
     }
 }
 
@@ -454,28 +432,59 @@ void RowTree::setMoveSourceRecursive(bool value)
 
 bool RowTree::isContainer() const
 {
-    return  m_rowType == RowType::Scene
-         || m_rowType == RowType::Layer
-         || m_rowType == RowType::Group
-         || m_rowType == RowType::Component;
+    return  m_rowType == OBJTYPE_SCENE
+         || m_rowType == OBJTYPE_LAYER
+         || m_rowType == OBJTYPE_GROUP
+         || m_rowType == OBJTYPE_COMPONENT;
 }
 
-bool RowTree::empty() const {
+bool RowTree::isProperty() const
+{
+    return m_isProperty;
+}
+
+bool RowTree::empty() const
+{
     return m_childRows.empty();
 }
 
-void RowTree::setMoveTarget(bool value) {
-    m_moveTarget = value;
+bool RowTree::selected() const
+{
+    return m_state == Selected;
 }
 
-QList<RowTree *> RowTree::childRows() const {
+void RowTree::setMoveTarget(bool value)
+{
+    m_moveTarget = value;
+    update();
+}
+
+QList<RowTree *> RowTree::childRows() const
+{
     return m_childRows;
 }
 
-RowTimeline *RowTree::rowTimeline() const {
+RowTimeline *RowTree::rowTimeline() const
+{
     return m_rowTimeline;
 }
 
-QString RowTree::label() const {
+QString RowTree::label() const
+{
     return m_label;
+}
+
+bool RowTree::shy() const
+{
+    return m_shy;
+}
+
+bool RowTree::visible() const
+{
+    return m_visible;
+}
+
+bool RowTree::locked() const
+{
+    return m_locked;
 }

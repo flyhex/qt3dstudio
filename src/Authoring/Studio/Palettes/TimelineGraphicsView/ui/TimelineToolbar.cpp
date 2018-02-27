@@ -46,7 +46,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     // create actions
     QAction *actionNewLayer    = new QAction(iconLayer, tr("Add New Layer"));
     QAction *actionDeleteLayer = new QAction(iconDelete, tr("Delete Layer"));
-             m_actionTime      = new QAction("0:00.000");
+             m_actionTime      = new QAction(tr("0:00.000"));
     QAction *actionFirst       = new QAction(iconFirst, tr("Go to Timeline Start"));
     QAction *actionStop        = new QAction(iconStop, tr("Stop Playing"));
     QAction *actionPlay        = new QAction(iconPlay, tr("Start Playing"));
@@ -54,15 +54,13 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
 
     m_scaleSlider = new QSlider();
     m_scaleSlider->setOrientation(Qt::Horizontal);
-    m_scaleSlider->setMaximumWidth(200);
-    m_scaleSlider->setMinimumWidth(100);
+    m_scaleSlider->setFixedWidth(100);
     m_scaleSlider->setMinimum(1);
     m_scaleSlider->setMaximum(8);
     m_scaleSlider->setPageStep(.1);
     m_scaleSlider->setValue(2);
-    m_scaleSlider->setStyleSheet("background-color:0,0,0,0;");
 
-    m_actionDuration = new QAction("0:20");
+    m_actionDuration = new QAction(tr("0:20"));
 
     // connections
     connect(actionNewLayer   , &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);

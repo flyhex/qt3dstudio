@@ -72,13 +72,9 @@ void PlayHead::setTime(double time)
 
 void PlayHead::setPosition(double posX)
 {
-    if (posX < TimelineConstants::RULER_EDGE_OFFSET) {
-        posX = TimelineConstants::RULER_EDGE_OFFSET;
-    } else if (posX > m_ruler->duration() * TimelineConstants::RULER_SEC_W
-               * m_ruler->timelineScale() + TimelineConstants::RULER_EDGE_OFFSET) {
-        posX = m_ruler->duration() * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale()
-                + TimelineConstants::RULER_EDGE_OFFSET;
-    }
+    posX = qBound(TimelineConstants::RULER_EDGE_OFFSET, posX, m_ruler->duration()
+                  * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale()
+                  + TimelineConstants::RULER_EDGE_OFFSET);
 
     setX(m_ruler->x() + posX);
     m_time = (posX - TimelineConstants::RULER_EDGE_OFFSET)

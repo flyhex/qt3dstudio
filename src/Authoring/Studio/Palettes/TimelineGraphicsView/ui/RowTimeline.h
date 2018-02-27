@@ -30,9 +30,9 @@
 #define ROWTIMELINE_H
 
 #include "InteractiveTimelineItem.h"
+#include "RowTypes.h"
 
 class RowTree;
-class Ruler;
 struct Keyframe;
 
 class RowTimeline : public InteractiveTimelineItem
@@ -40,15 +40,8 @@ class RowTimeline : public InteractiveTimelineItem
     Q_OBJECT
 
 public:
-    enum ControlType {
-        TypeNone,
-        TypeKeyFrame,
-        TypeDuration,
-        TypeStartHandle,
-        TypeEndHandle
-    };
-
-    explicit RowTimeline(Ruler *ruler);
+    explicit RowTimeline();
+    ~RowTimeline();
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
@@ -64,7 +57,7 @@ public:
     void updateKeyframes();
     void insertKeyframe(Keyframe *keyframe);
     void removeKeyframe(Keyframe *keyframe);
-    int getClickedControl(const QPointF &scenePos);
+    TimelineControlType getClickedControl(const QPointF &scenePos) const;
     double getStartTime() const;
     double getEndTime() const;
     int type() const;
@@ -81,13 +74,13 @@ private:
     double xToTime(double xPos);
 
     RowTree *m_rowTree;
-    Ruler *m_ruler;
-    double m_startTime;
-    double m_endTime;
-    double m_startX;
-    double m_endX;
-    double m_minStartX;
-    double m_maxEndX;
+    double m_startTime = 0;
+    double m_endTime = 0;
+    double m_startX = 0;
+    double m_endX = 0;
+    double m_minStartX = 0;
+    double m_maxEndX = 0;
+    bool m_isProperty = false; // used in the destructor
     QList<Keyframe *> m_keyframes;
 
     friend class RowTree;

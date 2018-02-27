@@ -31,6 +31,8 @@
 
 #pragma once
 
+struct Keyframe;
+
 //==============================================================================
 /**
  *	Abstraction of a animation keyframe.
@@ -51,6 +53,7 @@ public:
     */
     virtual void SetTime(const long inNewTime) = 0;
     virtual void SetDynamic(bool inIsDynamic) = 0;
+    virtual void setUI(Keyframe *kfUI) = 0;
     virtual bool IsDynamic() const = 0;
 };
 

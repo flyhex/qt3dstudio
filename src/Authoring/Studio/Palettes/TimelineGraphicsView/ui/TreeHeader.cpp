@@ -39,15 +39,69 @@ TreeHeader::TreeHeader(TimelineItem *parent) : TimelineItem(parent)
 void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                        QWidget *widget)
 {
-    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
-    static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
-    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
+    m_rectShy    .setRect(m_treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
+    m_rectVisible.setRect(m_treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
+    m_rectLock   .setRect(m_treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
 
-    double y = (size().height() - pixHide.height()) * .5;
+    static const QPixmap pixShy     = QPixmap(":/images/Toggle-Shy.png");
+    static const QPixmap pixVisible = QPixmap(":/images/Toggle-HideShow.png");
+    static const QPixmap pixLock    = QPixmap(":/images/Toggle-Lock.png");
 
-    painter->drawPixmap(size().width() - pixHide.width() * 1.1 * 3, y, pixShy);
-    painter->drawPixmap(size().width() - pixHide.width() * 1.1 * 2, y, pixHide);
-    painter->drawPixmap(size().width() - pixHide.width() * 1.1    , y, pixLock);
+    QColor selectedColor = QColor(TimelineConstants::FILTER_BUTTON_SELECTED_COLOR);
+    if (m_shy)
+        painter->fillRect(m_rectShy, selectedColor);
+
+    if (m_visible)
+        painter->fillRect(m_rectVisible, selectedColor);
+
+    if (m_lock)
+        painter->fillRect(m_rectLock, selectedColor);
+
+    painter->drawPixmap(m_rectShy    , pixShy);
+    painter->drawPixmap(m_rectVisible, pixVisible);
+    painter->drawPixmap(m_rectLock   , pixLock);
+}
+
+void TreeHeader::setWidth(double w)
+{
+    m_treeWidth = w;
+    update();
+}
+
+TreeControlType TreeHeader::handleButtonsClick(const QPointF &scenePos)
+{
+    QPointF p = mapFromScene(scenePos.x(), scenePos.y());
+
+    if (m_rectShy.contains(p.x(), p.y())) {
+        m_shy = !m_shy;
+        update();
+        return TreeControlType::Shy;
+    } else if (m_rectVisible.contains(p.x(), p.y())) {
+        m_visible = !m_visible;
+        update();
+        return TreeControlType::Hide;
+    } else if (m_rectLock.contains(p.x(), p.y())) {
+        m_lock = !m_lock;
+        update();
+        return TreeControlType::Lock;
+    }
+
+    return TreeControlType::None;
+}
+
+bool TreeHeader::filterShy() const
+{
+    return m_shy;
+}
+
+bool TreeHeader::filterHidden() const
+{
+    return m_visible;
+}
+
+bool TreeHeader::filterLocked() const
+{
+    return m_lock;
 }
 
 int TreeHeader::type() const

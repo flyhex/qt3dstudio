@@ -35,28 +35,38 @@
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qgraphicssceneevent.h>
 
-RowTimeline::RowTimeline(Ruler *ruler)
+RowTimeline::RowTimeline()
     : InteractiveTimelineItem()
-    , m_ruler(ruler)
 {
+}
+
+RowTimeline::~RowTimeline()
+{
+    // remove keyframes
+    if (!m_keyframes.empty()) {
+        if (m_isProperty) // non-property rows use the same keyframes from property rows.
+            qDeleteAll(m_keyframes);
+
+        m_keyframes.clear();
+    }
 }
 
 void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     // Background
     QColor bgColor;
-    if (m_state == Selected)
-        bgColor = TimelineConstants::ROW_COLOR_SELECTED;
-    else if (m_state == Hovered)
-        bgColor = TimelineConstants::ROW_COLOR_OVER;
-    else if (m_rowTree->rowType() == RowType::Property)
+    if (m_rowTree->isProperty())
         bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
+    else if (m_state == Selected)
+        bgColor = TimelineConstants::ROW_COLOR_SELECTED;
+    else if (m_state == Hovered && !m_rowTree->m_locked)
+        bgColor = TimelineConstants::ROW_COLOR_OVER;
     else
         bgColor = TimelineConstants::ROW_COLOR_NORMAL;
-    painter->fillRect(QRect(0, 0, size().width(), size().height() - 1), bgColor);
+    painter->fillRect(QRect(0, 0, 10000, size().height() - 1), bgColor);
 
     // Duration
-    if (m_rowTree->rowType() != RowType::Property) {
+    if (!m_rowTree->isProperty() && m_rowTree->rowType() != OBJTYPE_SCENE) {
         painter->save();
 
         // fully outside ancestors' limits, draw fully hashed
@@ -121,7 +131,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->drawPixmap(timeToX(keyframe->time) - 8.5, 2, keyframe->selected
                                 ? pixKeyframeMasterSelected : pixKeyframeMasterNormal);
         }
-    } else if (m_rowTree->rowType() == RowType::Property) {
+    } else if (m_rowTree->isProperty()) {
         static const QPixmap pixKeyframePropertyNormal
                 = QPixmap(":/images/Keyframe-Property-Normal.png");
         static const QPixmap pixKeyframePropertySelected
@@ -171,7 +181,7 @@ QList<Keyframe *> RowTimeline::getKeyframesInRange(const double left, const doub
     if (m_rowTree->hasPropertyChildren()) {
         const auto childRows = m_rowTree->childRows();
         for (auto child : childRows) {
-            if (child->rowType() == RowType::Property)
+            if (child->isProperty())
                 keyframes.append(child->rowTimeline()->m_keyframes);
         }
     } else {
@@ -228,23 +238,23 @@ void RowTimeline::updateKeyframes()
     }
 }
 
-int RowTimeline::getClickedControl(const QPointF &scenePos)
+TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) const
 {
-    if (m_rowTree->rowType() == RowType::Property)
-        return TypeNone;
+    if (m_rowTree->isProperty())
+        return TimelineControlType::None;
 
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
     if (p.x() > m_startX - TimelineConstants::DURATION_HANDLE_W * .5
             && p.x() < m_startX + TimelineConstants::DURATION_HANDLE_W * .5) {
-        return TypeStartHandle;
+        return TimelineControlType::StartHandle;
     } else if (p.x() > m_endX - TimelineConstants::DURATION_HANDLE_W * .5
                && p.x() < m_endX + TimelineConstants::DURATION_HANDLE_W * .5) {
-        return TypeEndHandle;
-    } else if (p.x() > m_startX && p.x() < m_endX) {
-        return TypeDuration;
+        return TimelineControlType::EndHandle;
+    } else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked()) {
+        return TimelineControlType::Duration;
     }
 
-    return TypeNone;
+    return TimelineControlType::None;
 }
 
 // move the duration area (start/end x)
@@ -258,8 +268,8 @@ void RowTimeline::moveDurationBy(double dx)
     if (m_startX < TimelineConstants::RULER_EDGE_OFFSET) {
         m_startX = TimelineConstants::RULER_EDGE_OFFSET;
         m_endX = m_startX + dur;
-    } else if (m_endX > timeToX(m_ruler->duration())) {
-        m_endX = timeToX(m_ruler->duration());
+    } else if (m_endX > timeToX(rowTree()->m_scene->ruler()->duration())) {
+        m_endX = timeToX(rowTree()->m_scene->ruler()->duration());
         m_startX = m_endX - dur;
     }
 
@@ -280,15 +290,15 @@ void RowTimeline::moveDurationBy(double dx)
 // convert time values to x
 double RowTimeline::timeToX(double time)
 {
-    return TimelineConstants::RULER_EDGE_OFFSET
-            + time * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale();
+    return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_SEC_W
+           * rowTree()->m_scene->ruler()->timelineScale();
 }
 
 // convert x values to time
 double RowTimeline::xToTime(double xPos)
 {
     return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
-            / (TimelineConstants::RULER_SEC_W * m_ruler->timelineScale());
+           / (TimelineConstants::RULER_SEC_W * rowTree()->m_scene->ruler()->timelineScale());
 }
 
 // called after timeline scale is changed to update duration star/end positions
@@ -309,7 +319,7 @@ void RowTimeline::setStartX(double startX)
     m_startX = startX;
     m_startTime = xToTime(startX);
 
-    if (m_rowTree->parentRow() == nullptr)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_minStartX = m_startX;
 
     updateChildrenMinStartXRecursive(m_rowTree);
@@ -321,13 +331,13 @@ void RowTimeline::setEndX(double endX)
 {
     if (endX < m_startX + 1)
         endX = m_startX + 1;
-    else if (endX > timeToX(m_ruler->duration()))
-        endX = timeToX(m_ruler->duration());
+    else if (endX > timeToX(rowTree()->m_scene->ruler()->duration()))
+        endX = timeToX(rowTree()->m_scene->ruler()->duration());
 
     m_endX = endX;
     m_endTime = xToTime(endX);
 
-    if (m_rowTree->parentRow() == nullptr)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_maxEndX = m_endX;
 
     updateChildrenMaxEndXRecursive(m_rowTree);
@@ -367,7 +377,7 @@ void RowTimeline::setStartTime(double startTime)
     m_startTime = startTime;
     m_startX = timeToX(startTime);
 
-    if (m_rowTree->parentRow() == nullptr)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_minStartX = m_startX;
 
     updateChildrenMinStartXRecursive(m_rowTree);
@@ -379,7 +389,7 @@ void RowTimeline::setEndTime(double endTime)
     m_endTime = endTime;
     m_endX = timeToX(endTime);
 
-    if (m_rowTree->parentRow() == nullptr)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_maxEndX = m_endX;
 
     updateChildrenMaxEndXRecursive(m_rowTree);

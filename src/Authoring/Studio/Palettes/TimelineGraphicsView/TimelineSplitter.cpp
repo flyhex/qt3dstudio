@@ -26,21 +26,27 @@
 **
 ****************************************************************************/
 
-#ifndef TIMELINEVIEWGV_H
-#define TIMELINEVIEWGV_H
+#include "TimelineSplitter.h"
+#include "TimelineConstants.h"
 
-#include "TimelineWidget.h"
+#include <QtGui/qevent.h>
+#include <QtWidgets/qapplication.h>
 
-class TimelineViewGV : public QObject
+TimelineSplitter::TimelineSplitter(QWidget *parent) : QWidget(parent)
 {
-    Q_OBJECT
+    setFixedWidth(TimelineConstants::SPLITTER_W);
+    setAttribute(Qt::WA_Hover, true);
+}
 
-public:
-    explicit TimelineViewGV(QWidget *parent = nullptr);
-    ~TimelineViewGV();
+void TimelineSplitter::enterEvent(QEvent *event)
+{
+    qApp->setOverrideCursor(Qt::SplitHCursor);
+    QWidget::enterEvent(event);
+}
 
-private:
-    TimelineWidget *m_timelineWidget = nullptr;
-};
-
-#endif // TIMELINEVIEWGV_H
+void TimelineSplitter::leaveEvent(QEvent *event)
+{
+    qApp->changeOverrideCursor(Qt::ArrowCursor);
+    qApp->restoreOverrideCursor();
+    QWidget::leaveEvent(event);
+}

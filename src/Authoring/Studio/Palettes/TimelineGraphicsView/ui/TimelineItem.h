@@ -45,8 +45,7 @@ public:
         TypeRowTree,
         TypeRowTimeline,
         TypePlayHead,
-        TypeRuler,
-        TypeSeparator
+        TypeRuler
     };
 
    int type() const;

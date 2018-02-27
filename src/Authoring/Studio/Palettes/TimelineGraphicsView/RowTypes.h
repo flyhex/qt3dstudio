@@ -31,23 +31,9 @@
 
 #include <qglobal.h>
 
-//namespace timeline {
-
-enum class RowType {
-    Scene = 90,
-    Layer,
-    Camera,
-    Light,
-    Object,
-    Text,
-    Alias,
-    Group,
-    Component,
-    Property
-};
-
+// Mahmoud_TODO: to be removed
 enum class PropertyType {
-    None = 540,
+    None = 200,
     Position,
     Rotation,
     Scale,
@@ -85,8 +71,20 @@ enum class PropertyType {
     ProbeCrossfade,     // Layer
 };
 
-inline uint qHash(RowType key) {
-    return static_cast<uint>(key);
-}
+enum class TimelineControlType {
+    None = 300,
+    KeyFrame,
+    Duration,
+    StartHandle,
+    EndHandle
+};
+
+enum class TreeControlType {
+    None = 400,
+    Arrow,
+    Shy,
+    Hide,
+    Lock
+};
 
 #endif // ROWTYPES_H

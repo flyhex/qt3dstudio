@@ -110,7 +110,6 @@ public:
 
     void ClearKeyframeSelection();
     void OnNewPresentation();
-    void OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
 
     qt3dsdm::CStudioSystem *GetStudioSystem() const;
 

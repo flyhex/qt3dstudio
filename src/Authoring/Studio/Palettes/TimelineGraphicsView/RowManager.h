@@ -31,10 +31,13 @@
 
 #include "RowTypes.h"
 #include <QtCore/qstring.h>
+#include <StudioObjectTypes.h>
 
 class TimelineGraphicsScene;
 class RowTree;
 class RowTimeline;
+class ITimelineItemBinding;
+class Qt3DSDMTimelineItemBinding;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
 
@@ -44,27 +47,38 @@ public:
     RowManager(TimelineGraphicsScene *scene, QGraphicsLinearLayout *layoutLabels,
                QGraphicsLinearLayout *layoutTimeline);
 
+    void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
     void clampIndex(int &idx);
     void correctIndex(int &idx);
     void selectRow(RowTree *row);
     void deleteRow(RowTree *row);
-    RowTree *getOrCreatePropertyRow(PropertyType propType, RowTree *masterRow);
-    RowTree *createRow(RowType rowType, RowTree *parentRow = nullptr, const QString &label = {},
-                       PropertyType propType = PropertyType::None);
+    void clearSelection();
+    void updateFiltering(RowTree *rowTree = nullptr);
+    void reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding);
+    bool hasProperties(RowTree *row);
+    RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
+    RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType);
+    RowTree *createRow(EStudioObjectType rowType, RowTree *parentRow = nullptr,
+                       const QString &label = QString(), const QString &propType = QString());
     RowTree *rowAt(int idx);
     RowTree *getRowAbove(RowTree *row);
-    RowTimeline *rowTimelineAt(int idx);
-
     RowTree *selectedRow() const;
+    RowTimeline *rowTimelineAt(int idx);
 
 private:
     int getRowIndex(RowTree *row);
+    int getLastChildIndex(RowTree *row);
     bool validIndex(int idx) const;
     void deleteRowRecursive(RowTree *row);
+    void updateRowFilter(RowTree *row);
+    void updateRowFilterRecursive(RowTree *row);
+    void createRowsFromBindingRecursive(ITimelineItemBinding *binding,
+                                        RowTree *parentRow = nullptr);
+    void removeAllRows();
 
     RowTree *m_selectedRow = nullptr;
     TimelineGraphicsScene *m_scene;
-    QGraphicsLinearLayout *m_layoutLabels;
+    QGraphicsLinearLayout *m_layoutTree;
     QGraphicsLinearLayout *m_layoutTimeline;
 };
 

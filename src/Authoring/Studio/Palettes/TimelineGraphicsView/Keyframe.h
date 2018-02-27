@@ -29,8 +29,9 @@
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
+#include "Bindings/Qt3DSDMTimelineKeyframe.h"
+
 class RowTimeline;
-enum class PropertyType;
 
 struct Keyframe
 {
@@ -45,9 +46,10 @@ struct Keyframe
     double time;
     double value;
     bool selected = false;
-    PropertyType propertyType;
+    QString propertyType;
     RowTimeline *rowProperty;
     RowTimeline *rowMaster;
+    Qt3DSDMTimelineKeyframe *binding;
 };
 
 #endif // KEYFRAME_H

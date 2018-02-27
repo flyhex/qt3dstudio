@@ -131,6 +131,11 @@ void Qt3DSDMTimelineKeyframe::SetDynamic(bool inIsDynamic)
     }
 }
 
+void Qt3DSDMTimelineKeyframe::setUI(Keyframe *kfUI)
+{
+    m_ui = kfUI;
+}
+
 // Only the first key of a track can be dynamic.
 bool Qt3DSDMTimelineKeyframe::IsDynamic() const
 {

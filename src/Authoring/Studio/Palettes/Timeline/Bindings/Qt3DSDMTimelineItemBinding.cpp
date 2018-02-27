@@ -375,9 +375,20 @@ ITimelineItem *Qt3DSDMTimelineItemBinding::GetTimelineItem()
     return this;
 }
 
+// Mahmoud_TODO: remove after finishing the new timeline
 CBaseStateRow *Qt3DSDMTimelineItemBinding::GetRow()
 {
     return m_Row;
+}
+
+RowTree *Qt3DSDMTimelineItemBinding::getRowTree() const
+{
+    return m_rowTree;
+}
+
+void Qt3DSDMTimelineItemBinding::setRowTree(RowTree *row)
+{
+    m_rowTree = row;
 }
 
 void Qt3DSDMTimelineItemBinding::SetSelected(bool inMultiSelect)
@@ -880,12 +891,12 @@ Qt3DSDMTimelineItemBinding::GetOrCreatePropertyBinding(Qt3DSDMPropertyHandle inP
  * @param inAppend true to skip the check to find where to insert. ( true if this is a
  * loading/initializing step, where the call is already done in order )
  */
-CPropertyRow *Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inPropertyHandle,
+void Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inPropertyHandle,
                                                bool inAppend /*= false */)
 {
     ITimelineItemProperty *theTimelineProperty = GetPropertyBinding(inPropertyHandle);
     if (theTimelineProperty && theTimelineProperty->GetRow()) // if created, bail
-        return {};
+        return;
 
     if (!theTimelineProperty)
         theTimelineProperty = GetOrCreatePropertyBinding(inPropertyHandle);
@@ -917,21 +928,8 @@ CPropertyRow *Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle i
         }
     }
 
-    CPropertyRow *propertyRow = nullptr;
-    // Create a new property row
-    if (m_createUIRow) {
-        propertyRow = m_TransMgr->CreateNewPropertyRow(theTimelineProperty, m_Row,
-                                             theNextProperty ? theNextProperty->GetRow() : nullptr);
-    } else {
-        propertyRow = new CPropertyRow(theTimelineProperty, m_Row);
-        m_Row->AddPropertyRow(propertyRow, theNextProperty ? theNextProperty->GetRow() : nullptr);
-        theTimelineProperty->Bind(propertyRow);
-    }
-
     // Update keyframes
     AddKeyframes(theTimelineProperty);
-
-    return propertyRow;
 }
 
 void Qt3DSDMTimelineItemBinding::RemovePropertyRow(Qt3DSDMPropertyHandle inPropertyHandle)
@@ -940,16 +938,8 @@ void Qt3DSDMTimelineItemBinding::RemovePropertyRow(Qt3DSDMPropertyHandle inPrope
     if (theIter != m_PropertyBindingMap.end()) {
         ITimelineItemProperty *thePropertyBinding = theIter->second;
 
-        bool theUpdateUI = DeleteAssetKeyframesWhereApplicable(thePropertyBinding);
-
-        m_TransMgr->RemovePropertyRow(thePropertyBinding);
+        DeleteAssetKeyframesWhereApplicable(thePropertyBinding);
         m_PropertyBindingMap.erase(theIter);
-
-        // UI must update
-        if (m_Row && theUpdateUI) {
-            m_Row->ForceEmitChildrenChanged();
-            m_Row->setDirty(true);
-        }
     }
 }
 
@@ -1243,7 +1233,8 @@ void Qt3DSDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
         if (theNextChild != 0)
             theNextItem = m_TransMgr->GetOrCreate(theNextChild);
 
-        m_Row->AddChildRow(m_TransMgr->GetOrCreate(inInstance), theNextItem);
+        // Mahmoud_TODO: remove
+//        m_Row->AddChildRow(m_TransMgr->GetOrCreate(inInstance), theNextItem);
     }
 }
 

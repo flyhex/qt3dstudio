@@ -30,18 +30,20 @@
 #include "TimelineItem.h"
 #include "TreeHeader.h"
 #include "Ruler.h"
-#include "Separator.h"
 #include "PlayHead.h"
 #include "RowTree.h"
 #include "RowMover.h"
 #include "RowTimeline.h"
-#include "Separator.h"
 #include "TimelineConstants.h"
 #include "TimelineToolbar.h"
 #include "SelectionRect.h"
 #include "RowManager.h"
 #include "KeyframeManager.h"
 #include "Keyframe.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "Bindings/Qt3DSDMTimelineItemBinding.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -50,106 +52,62 @@
 #include <QtWidgets/qgraphicsview.h>
 #include <QtWidgets/qscrollbar.h>
 #include <QtWidgets/qmenu.h>
+#include <QtWidgets/qaction.h>
 #include <QtGui/qevent.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/qglobal.h>
 #include <QtCore/qdebug.h>
 #include <QtWidgets/qaction.h>
 
-TimelineGraphicsScene::TimelineGraphicsScene(QGraphicsView *viewTimelineContent,
-                                             TimelineWidget *parent)
-    : QGraphicsScene (parent)
+TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
+    : QGraphicsScene(timelineWidget)
     , m_layoutRoot(new QGraphicsLinearLayout)
-    , m_layoutLabels(new QGraphicsLinearLayout(Qt::Vertical))
+    , m_layoutTree(new QGraphicsLinearLayout(Qt::Vertical))
     , m_layoutTimeline(new QGraphicsLinearLayout(Qt::Vertical))
-    , m_separator(new Separator)
     , m_ruler(new Ruler)
     , m_playHead(new PlayHead(m_ruler))
     , m_selectionRect(new SelectionRect(m_ruler))
     , m_rowMover(new RowMover)
-    , m_widget(parent)
-    , m_viewTimelineContent(viewTimelineContent)
+    , m_widgetTimeline(timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
-    , m_rowManager(new RowManager(this, m_layoutLabels, m_layoutTimeline))
+    , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
 {
     addItem(m_playHead);
     addItem(m_selectionRect);
     addItem(m_rowMover);
+    addItem(m_widgetRoot);
 
     m_rowMover->setVisible(false);
-    m_rowMover->setRect(0, 0, TimelineConstants::LABELS_MIN_W, TimelineConstants::ROW_H-1);
-
-    // TODO: remove
-//    m_widgetRoot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    addItem(m_widgetRoot);
 
     m_layoutRoot->setSpacing(0);
     m_layoutRoot->setContentsMargins(0, 0, 0, 0);
     m_layoutRoot->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     m_widgetRoot->setLayout(m_layoutRoot);
 
-    m_layoutLabels->setSpacing(0);
-    m_layoutLabels->setContentsMargins(0, 0, 0, 0);
-    m_layoutLabels->setMinimumWidth(TimelineConstants::LABELS_DEFAULT_W);
-    m_layoutLabels->setMaximumWidth(TimelineConstants::LABELS_DEFAULT_W);
-    m_layoutLabels->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    m_layoutTree->setSpacing(0);
+    m_layoutTree->setContentsMargins(0, 0, 0, 0);
+    m_layoutTree->setMinimumWidth(TimelineConstants::TREE_BOUND_W);
+    m_layoutTree->setMaximumWidth(TimelineConstants::TREE_BOUND_W);
+    m_layoutTree->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     setTimelineScale(m_ruler->timelineScale()); // refresh timeline width
     m_layoutTimeline->setSpacing(0);
     m_layoutTimeline->setContentsMargins(0, 0, 0, 0);
     m_layoutTimeline->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
-    m_layoutRoot->addItem(m_layoutLabels);
-    m_layoutRoot->addItem(m_separator);
+    m_layoutRoot->addItem(m_layoutTree);
     m_layoutRoot->addItem(m_layoutTimeline);
 
-    m_layoutLabels->addItem(new TreeHeader);
+    m_treeHeader = new TreeHeader;
+
+    m_layoutTree->addItem(m_treeHeader);
     m_layoutTimeline->addItem(m_ruler);
 
     QTimer::singleShot(0, this, [this]() {
         m_playHead->setPosition(0);
+        m_widgetTimeline->viewTreeContent()->horizontalScrollBar()->setValue(0);
     });
-
-    connect(m_ruler, &Ruler::rulerClicked, [this](const double &posX) {
-        m_playHead->setPosition(posX);
-        m_widget->toolbar()->setTime(m_playHead->time());
-    });
-
-    m_sceneRow = m_rowManager->createRow(RowType::Scene);
-
-//    add some test rows
-    // TODO: remove after connecting the view to the app data model
-    RowTree *layer1 = m_rowManager->createRow(RowType::Layer, m_sceneRow, tr("layer 1"));
-    RowTree *layer2 = m_rowManager->createRow(RowType::Layer, m_sceneRow, tr("layer 2"));
-
-    RowTree *obj1  = m_rowManager->createRow(RowType::Object, layer1, tr("Cone"));
-    RowTree *group1= m_rowManager->createRow(RowType::Group, layer1, tr("group 1"));
-    RowTree *cam   = m_rowManager->createRow(RowType::Camera, layer1, tr("cam 1"));
-    RowTree *light = m_rowManager->createRow(RowType::Light, layer2);
-    RowTree *obj2  = m_rowManager->createRow(RowType::Object, layer1, tr("Cube"));
-
-    RowTree *alias = m_rowManager->createRow(RowType::Alias, layer2);
-    RowTree *comp  = m_rowManager->createRow(RowType::Component, layer2);
-    RowTree *group2= m_rowManager->createRow(RowType::Group, comp, tr("group 2"));
-    RowTree *obj3  = m_rowManager->createRow(RowType::Object, comp, tr("Sphere"));
-    RowTree *cam2  = m_rowManager->createRow(RowType::Camera, group2, tr("cam 2"));
-    RowTree *obj4  = m_rowManager->createRow(RowType::Object, group2, tr("Cylinder"));
-    RowTree *text  = m_rowManager->createRow(RowType::Text, group2);
-
-    // properties
-    RowTree *prop1 = m_rowManager->getOrCreatePropertyRow(PropertyType::Scale, cam);
-    RowTree *prop2 = m_rowManager->getOrCreatePropertyRow(PropertyType::Opacity, obj2);
-    RowTree *prop3 = m_rowManager->getOrCreatePropertyRow(PropertyType::Position, obj3);
-    RowTree *prop4 = m_rowManager->getOrCreatePropertyRow(PropertyType::Rotation, obj3);
-    RowTree *prop5 = m_rowManager->getOrCreatePropertyRow(PropertyType::Rotation, obj3);
-
-    // keyframes
-    m_keyframeManager->insertKeyframe(prop1->rowTimeline(), 5, 7);
-    m_keyframeManager->insertKeyframe(prop1->rowTimeline(), 3, 52);
-    m_keyframeManager->insertKeyframe(prop2->rowTimeline(), 12, 34);
-    m_keyframeManager->insertKeyframe(prop3->rowTimeline(), 4.5, 6);
-    m_keyframeManager->deselectAllKeyframes();
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)
@@ -157,10 +115,10 @@ void TimelineGraphicsScene::setTimelineScale(int scl)
     m_ruler->setTimelineScale(scl);
     m_playHead->updatePosition();
 
-    m_layoutTimeline->setMinimumWidth(TimelineConstants::RULER_EDGE_OFFSET * 2
-                                      + m_ruler->duration() * TimelineConstants::RULER_SEC_W * scl);
-    m_layoutTimeline->setMaximumWidth(TimelineConstants::RULER_EDGE_OFFSET * 2
-                                      + m_ruler->duration() * TimelineConstants::RULER_SEC_W * scl);
+    double timelineWidth = TimelineConstants::RULER_EDGE_OFFSET * 2
+                           + m_ruler->duration() * TimelineConstants::RULER_SEC_W * scl;
+    m_layoutTimeline->setMinimumWidth(timelineWidth);
+    m_layoutTimeline->setMaximumWidth(timelineWidth);
 
     for (int i = 1; i < m_layoutTimeline->count(); i++)
         static_cast<RowTimeline *>(m_layoutTimeline->itemAt(i)->graphicsItem())->updatePosition();
@@ -168,12 +126,12 @@ void TimelineGraphicsScene::setTimelineScale(int scl)
 
 void TimelineGraphicsScene::addNewLayer()
 {
-    RowTree *newLayer = m_rowManager->createRow(RowType::Layer, m_sceneRow);
-
-    m_rowManager->selectRow(newLayer);
+    // TODO: get the update from the data model
+//    RowTree *newLayer = m_rowManager->createRow(OBJTYPE_LAYER, m_sceneRow);
+//    m_rowManager->selectRow(newLayer);
 
     // scroll to top
-    m_viewTimelineContent->verticalScrollBar()->setValue(0);
+    m_widgetTimeline->viewTimelineContent()->verticalScrollBar()->setValue(0);
 }
 
 // TODO: test function, to be removed
@@ -188,18 +146,7 @@ void debugPrintRows(RowTree *row)
 }
 
 void TimelineGraphicsScene::deleteSelectedRow() {
-    // TODO: test code, to be removed
-//    MainRowLabel *row_i = nullptr;
-//    for (int i = 1; i < m_layoutLabels->count(); ++i)
-//    {
-//        row_i = static_cast<MainRowLabel *>(m_layoutLabels->itemAt(i)->graphicsItem());
-//        qDebug().noquote().nospace() << "|" << QString("-").repeated(row_i->depth()) << row_i->label();
-//    }
-//    qDebug() << "------------------------------";
-
-    debugPrintRows(m_sceneRow);
-
-//    m_rowManager->deleteRow(m_rowManager->selectedRow());
+    m_rowManager->deleteRow(m_rowManager->selectedRow());
 }
 
 void TimelineGraphicsScene::commitMoveRows()
@@ -214,14 +161,15 @@ void TimelineGraphicsScene::commitMoveRows()
         return;
     }
 
-        // TODO: remove
-//    qDebug() << "sourceIndex=" << sourceIndex << ", targetIndex=" << targetIndex << ", rowSrcDepth=" << rowSrcDepth;
+    // TODO: remove
+//  qDebug() << "sourceIndex=" << sourceIndex << ", targetIndex=" << targetIndex
+//           << ", rowSrcDepth=" << rowSrcDepth;
 
     // gather the rows to be moved
     RowTree *row_i = nullptr;
     QList<RowTree *> itemsToMove { m_rowMover->sourceRow() };
-    for (int i = sourceIndex + 1; i < m_layoutLabels->count();) {
-        row_i = static_cast<RowTree *>(m_layoutLabels->itemAt(i)->graphicsItem());
+    for (int i = sourceIndex + 1; i < m_layoutTree->count();) {
+        row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
 
         // TODO: remove
 //      qDebug() << "i=" << i << ", row_i->depth()=" << row_i->depth();
@@ -229,7 +177,7 @@ void TimelineGraphicsScene::commitMoveRows()
         if (row_i->depth() <= rowSrcDepth)
             break;
 
-        m_layoutLabels->removeAt(i);
+        m_layoutTree->removeAt(i);
         m_layoutTimeline->removeAt(i);
         itemsToMove.append(row_i);
     }
@@ -245,7 +193,7 @@ void TimelineGraphicsScene::commitMoveRows()
 
     for (auto child : qAsConst(itemsToMove)) {
         ++targetIndex;
-        m_layoutLabels->insertItem(targetIndex, child);
+        m_layoutTree->insertItem(targetIndex, child);
         m_layoutTimeline->insertItem(targetIndex, child->rowTimeline());
     }
 }
@@ -256,8 +204,8 @@ void TimelineGraphicsScene::getLastChildRow(RowTree *row, int index, RowTree *ou
     if (row != nullptr) {
         RowTree *row_i = nullptr;
         RowTree *row_i_prev = nullptr;
-        for (int i = index + 1; i < m_layoutLabels->count() - 1; ++i) {
-            row_i = static_cast<RowTree *>(m_layoutLabels->itemAt(i)->graphicsItem());
+        for (int i = index + 1; i < m_layoutTree->count() - 1; ++i) {
+            row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
 
             if (row_i->depth() <= row->depth()) {
                 outLastChild = row_i_prev;
@@ -285,29 +233,42 @@ bool TimelineGraphicsScene::lastRowInAParent(RowTree *rowAtIndex, int index)
 
 // not used except in lastRowInAParent()
 int TimelineGraphicsScene::nextRowDepth(int index) {
-    if (index < m_layoutLabels->count() - 1)
+    if (index < m_layoutTree->count() - 1)
         index ++;
 
-    return static_cast<RowTree *>(m_layoutLabels->itemAt(index)->graphicsItem())->depth();
+    return static_cast<RowTree *>(m_layoutTree->itemAt(index)->graphicsItem())->depth();
 }
 
 bool TimelineGraphicsScene::validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex)
 {
     // we don't care about non-layers in this method
-    if (m_rowMover->sourceRow()->rowType() != RowType::Layer)
+    if (m_rowMover->sourceRow()->rowType() != OBJTYPE_LAYER)
         return true;
 
-    if (rowAtIndex->rowType() == RowType::Scene)
+    if (rowAtIndex->rowType() == OBJTYPE_SCENE)
         return true;
 
-    if (rowAtIndex->rowType() == RowType::Layer)
+    if (rowAtIndex->rowType() == OBJTYPE_LAYER)
        return rowAtIndex->empty() || !rowAtIndex->expanded();
 
     if (nextRowAtIndex == nullptr || (nextRowAtIndex->depth() <= rowAtIndex->depth()
-                                     && nextRowAtIndex->depth() == 2))
+                                      && nextRowAtIndex->depth() == 2))
         return true;
 
     return false;
+}
+
+void TimelineGraphicsScene::updateTreeWidth(double treeWidth)
+{
+    m_treeWidth = treeWidth;
+
+    m_treeHeader->setWidth(treeWidth);
+
+    RowTree *row_i;
+    for (int i = 1; i < m_layoutTree->count(); ++i) {
+        row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+        row_i->setTreeWidth(treeWidth);
+    }
 }
 
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -321,23 +282,26 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             if (item->type() == TimelineItem::TypePlayHead)
                 item = items(m_pressPos).at(1);
 
-            if (item->type() == TimelineItem::TypeSeparator) {
-                m_separatorPressed = true;
-            } else if (item->type() == TimelineItem::TypeRuler) {
+            if (item->type() == TimelineItem::TypeRuler) {
                 m_rulerPressed = true;
+                double time = m_ruler->distanceToTime(event->scenePos().x()
+                                                      - m_ruler->durationStartX()) * 1000;
+                g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
+            } else if (item->type() == TimelineItem::TypeTreeHeader) {
+                if (m_treeHeader->handleButtonsClick(m_pressPos) != TreeControlType::None)
+                    m_rowManager->updateFiltering();
             } else if (item->type() == TimelineItem::TypeRowTree) {
-                RowTree *rowLabel = static_cast<RowTree *>(item);
-
-                if (rowLabel->rowType() != RowType::Property) {
-                    if (!rowLabel->handleButtonsClick(event)) {
-                        // dragging layers to reorder
+                RowTree *rowTree = static_cast<RowTree *>(item);
+                if (!rowTree->isProperty()) {
+                    m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
+                    if (m_clickedTreeControlType != TreeControlType::None) {
+                        m_rowManager->updateFiltering(rowTree);
+                    } else if (!rowTree->locked()) { // dragging layers to reorder
                         int index = event->scenePos().y() / TimelineConstants::ROW_H;
                         m_rowManager->correctIndex(index);
 
-                        if (rowLabel->rowType() != RowType::Scene
-                                && rowLabel->rowType() != RowType::Property) {
-                            m_rowMover->start(rowLabel, index);
-                        }
+                        if (rowTree->rowType() != OBJTYPE_SCENE && !rowTree->isProperty())
+                            m_rowMover->start(rowTree, index);
                     }
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
@@ -361,12 +325,14 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             m_editedTimelineRow->getClickedControl(m_pressPos);
 
                     // clicked an empty spot on a timeline row, start selection rect.
-                    if (m_editedTimelineRow->getClickedControl(m_pressPos) == RowTimeline::TypeNone)
+                    if (m_clickedTimelineControlType == TimelineControlType::None)
                         m_selectionRect->start(m_pressPos);
                 }
             }
         } else {
-            if (m_pressPos.x() > m_separator->x() && m_pressPos.y() > TimelineConstants::ROW_H)
+            m_keyframeManager->deselectAllKeyframes();
+
+            if (m_pressPos.x() > m_ruler->x() && m_pressPos.y() > TimelineConstants::ROW_H)
                 m_selectionRect->start(m_pressPos);
         }
     }
@@ -381,24 +347,17 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         m_dragging = true;
 
     if (m_rulerPressed) {
-        m_playHead->setPosition(event->scenePos().x() - m_ruler->pos().x());
-        m_widget->toolbar()->setTime(m_playHead->time());
+        double time = m_ruler->distanceToTime(event->scenePos().x() - m_ruler->durationStartX())
+                      * 1000;
+        g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
     } else if (m_dragging) {
-        if (m_separatorPressed) { // resizing labels part
-            double x = event->scenePos().x() - m_separator->size().width() * .5;
-            x = qBound(TimelineConstants::LABELS_MIN_W, x, TimelineConstants::LABELS_MAX_W);
-            m_layoutLabels->setMinimumWidth(x);
-            m_layoutLabels->setMaximumWidth(x);
-            m_rowMover->setRect(0, -5, x, 10);
-
-            m_playHead->updatePosition();
-        } else if (m_clickedTimelineControlType == RowTimeline::TypeStartHandle) {
+        if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
             // resizing layer timline duration from left
             m_editedTimelineRow->setStartX(event->scenePos().x() - m_ruler->pos().x());
-        } else if (m_clickedTimelineControlType == RowTimeline::TypeEndHandle) {
+        } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
             // resizing layer timline duration from right
             m_editedTimelineRow->setEndX(event->scenePos().x() - m_ruler->pos().x());
-        } else if (m_clickedTimelineControlType == RowTimeline::TypeDuration) {
+        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
             // moving layer timline duration
             m_editedTimelineRow->moveDurationBy(event->scenePos().x() - m_pressPos.x());
             m_pressPos = event->scenePos();
@@ -418,9 +377,9 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             RowTree *lastChildAtIndex; // so far not used
 
             if (valid) { // valid row index
-                rowAtIndex = static_cast<RowTree *>(m_layoutLabels->itemAt(index)->graphicsItem());
-                nextRowAtIndex = index > m_layoutLabels->count() - 2 ? nullptr :
-                             static_cast<RowTree *>(m_layoutLabels->itemAt(index + 1)->graphicsItem());
+                rowAtIndex = static_cast<RowTree *>(m_layoutTree->itemAt(index)->graphicsItem());
+                nextRowAtIndex = index > m_layoutTree->count() - 2 ? nullptr :
+                             static_cast<RowTree *>(m_layoutTree->itemAt(index + 1)->graphicsItem());
 
                 if (!rowAtIndex->expanded())
                     getLastChildRow(rowAtIndex, index, lastChildAtIndex, nextRowAtIndex, index);
@@ -429,15 +388,14 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 valid = !rowAtIndex->isDecendentOf(m_rowMover->sourceRow())
 
                         // not inserting next to property rows
-                         && !(nextRowAtIndex != nullptr
-                                && nextRowAtIndex->rowType() == RowType::Property)
+                         && !(nextRowAtIndex != nullptr && nextRowAtIndex->isProperty())
 
                         // not  inserting as a first child of self
                         && !(rowAtIndex == m_rowMover->sourceRow() && !rowAtIndex->empty())
 
                         // not  inserting non-layer under the scene
-                        && !(m_rowMover->sourceRow()->rowType() != RowType::Layer
-                                && rowAtIndex->rowType() == RowType::Scene)
+                        && !(m_rowMover->sourceRow()->rowType() != OBJTYPE_LAYER
+                             && rowAtIndex->rowType() == OBJTYPE_SCENE)
 
                         // Layer cases
                         && validLayerMove(rowAtIndex, nextRowAtIndex);
@@ -452,14 +410,14 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 if (rowAtIndex->isContainer() && rowAtIndex->expanded()
                         && rowAtIndex != m_rowMover->sourceRow()) {
                     depth++; // Container: allow insertion as a child
-                } else if (rowAtIndex->rowType() == RowType::Property) {
+                } else if (rowAtIndex->isProperty()) {
                     depth--;  // Property: prevent insertion as a sibling
                 }
 
                 depthBasedOnX = qMax(depthBasedOnX, depthNextRow);
                 depth = qBound(3, depth, depthBasedOnX);
 
-                if (m_rowMover->sourceRow()->rowType() == RowType::Layer)
+                if (m_rowMover->sourceRow()->rowType() == OBJTYPE_LAYER)
                     depth = 2;
 
                 // calc insertion parent
@@ -497,25 +455,33 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         QGraphicsItem *item = itemAt(event->scenePos(), QTransform());
 
-        if (item != nullptr && !m_dragging && (item->type() == TimelineItem::TypeRowTree
-                                            || item->type() == TimelineItem::TypeRowTimeline)) {
-            // select row
+        if (item != nullptr && !m_dragging) {
+            // select pressed row
+            RowTree *rowTree = nullptr;
             if (item->type() == TimelineItem::TypeRowTree)
-                m_rowManager->selectRow( static_cast<RowTree *>(item) );
+                rowTree = static_cast<RowTree *>(item);
             else if (item->type() == TimelineItem::TypeRowTimeline)
-                m_rowManager->selectRow( static_cast<RowTimeline *>(item)->rowTree() );
+                rowTree = static_cast<RowTimeline *>(item)->rowTree();
+
+            if (rowTree != nullptr && m_clickedTreeControlType == TreeControlType::None
+                    && !rowTree->locked()) {
+                m_rowManager->selectRow(rowTree);
+            }
+
         } else if (m_rowMover->isActive()) { // moving rows (reorder/reparent)
             if (m_rowMover->insertionParent() != nullptr) // valid row move, commit it
                 commitMoveRows();
+        } else if (m_keyframePressed) {
+            // update keyframe movement (time) to binding
+            m_keyframeManager->commitMoveSelectedKeyframes();
         }
 
         // reset mouse drag params
         m_selectionRect->end();
         m_rowMover->end();
-        m_separatorPressed = false;
         m_rulerPressed = false;
         m_dragging = false;
-        m_clickedTimelineControlType = RowTimeline::TypeNone;
+        m_clickedTimelineControlType = TimelineControlType::None;
         m_keyframePressed = false;
         m_editedTimelineRow = nullptr;
     }
@@ -559,13 +525,15 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     QMenu contextMenu;
 
     int index = event->scenePos().y() / TimelineConstants::ROW_H;
+    RowTree *row = m_rowManager->rowAt(index);
 
-    RowTimeline *row = rowManager()->rowTimelineAt(index);
+    if (row == nullptr)
+        return;
 
-    if (row != nullptr) { // timeline context menu
-        Keyframe *keyframe = row->getClickedKeyframe(event->scenePos());
-        bool propRow = row->rowTree()->rowType() == RowType::Property;
-        bool hasPropRows = row->rowTree()->hasPropertyChildren();
+    if (event->scenePos().x() > TimelineConstants::TREE_BOUND_W) { // timeline context menu
+        Keyframe *keyframe = row->rowTimeline()->getClickedKeyframe(event->scenePos());
+        bool propRow = row->isProperty();
+        bool hasPropRows = row->hasPropertyChildren();
         bool ctrlPressed = event->modifiers() & Qt::ControlModifier;
 
         //TODO: remove
@@ -601,11 +569,12 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         actionCopySelectedKeyframes  ->setEnabled(m_keyframeManager->oneMasterRowSelected());
         actionPasteKeyframes         ->setEnabled(m_keyframeManager->hasCopiedKeyframes());
         actionDeleteSelectedKeyframes->setEnabled(m_keyframeManager->hasSelectedKeyframes());
-        actionDeleteRowKeyframes     ->setEnabled(!row->keyframes().empty());
+        actionDeleteRowKeyframes     ->setEnabled(!row->rowTimeline()->keyframes().empty());
 
         // connections
         connect(actionInsertKeyframe, &QAction::triggered, this, [=]() {
-            m_keyframeManager->insertKeyframe(row, m_playHead->time(), 0);
+            row->getBinding()->InsertKeyframe();
+            m_keyframeManager->insertKeyframe(row->rowTimeline(), m_playHead->time(), 0, false);
         });
 
         connect(actionCutSelectedKeyframes, &QAction::triggered, this, [=]() {
@@ -618,7 +587,7 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         });
 
         connect(actionPasteKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->pasteKeyframes(row);
+            m_keyframeManager->pasteKeyframes(row->rowTimeline());
         });
 
         connect(actionDeleteSelectedKeyframes, &QAction::triggered, this, [=]() {
@@ -626,9 +595,12 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         });
 
         connect(actionDeleteRowKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->deleteKeyframes(row);
+            m_keyframeManager->deleteKeyframes(row->rowTimeline());
         });
+    } else { // tree context menu
+        // Mahmoud_TODO: implement tree section context menu
     }
+
 
     contextMenu.exec(event->screenPos());
 }
@@ -649,9 +621,11 @@ bool TimelineGraphicsScene::event(QEvent *event)
     }
 }
 
-Ruler           *TimelineGraphicsScene::ruler()           const { return m_ruler;           }
-PlayHead        *TimelineGraphicsScene::playHead()        const { return m_playHead;        }
-Separator       *TimelineGraphicsScene::separator()       const { return m_separator;       }
-RowManager      *TimelineGraphicsScene::rowManager()      const { return m_rowManager;      }
-QGraphicsWidget *TimelineGraphicsScene::widgetRoot()      const { return m_widgetRoot;      }
-KeyframeManager *TimelineGraphicsScene::keyframeManager() const { return m_keyframeManager; }
+// Getters
+Ruler                 *TimelineGraphicsScene::ruler()           const { return m_ruler;           }
+PlayHead              *TimelineGraphicsScene::playHead()        const { return m_playHead;        }
+TreeHeader            *TimelineGraphicsScene::treeHeader()      const { return m_treeHeader;      }
+RowManager            *TimelineGraphicsScene::rowManager()      const { return m_rowManager;      }
+QGraphicsWidget       *TimelineGraphicsScene::widgetRoot()      const { return m_widgetRoot;      }
+KeyframeManager       *TimelineGraphicsScene::keyframeManager() const { return m_keyframeManager; }
+QGraphicsLinearLayout *TimelineGraphicsScene::layoutTree()      const { return m_layoutTree;      }

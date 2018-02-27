@@ -143,6 +143,11 @@ void Qt3DSDMTimelineItemProperty::ReleaseKeyframes()
     m_AnimationHandles.clear();
 }
 
+qt3dsdm::Qt3DSDMPropertyHandle Qt3DSDMTimelineItemProperty::getPropertyHandle() const
+{
+    return m_PropertyHandle;
+}
+
 // Type doesn't change and due to the logic required to figure this out, cache it.
 void Qt3DSDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
@@ -228,6 +233,11 @@ void Qt3DSDMTimelineItemProperty::Bind(CPropertyRow *inRow)
     ASSERT(!m_Row);
 
     m_Row = inRow;
+}
+
+RowTree *Qt3DSDMTimelineItemProperty::getRowTree() const
+{
+    return m_rowTree;
 }
 
 void Qt3DSDMTimelineItemProperty::Release()
@@ -406,6 +416,11 @@ void Qt3DSDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /
     Qt3DSDMTimelineItemBinding *theParent =
         dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row));
     DoSelectKeyframes(inSelected, inTime, false, theParent);
+}
+
+void Qt3DSDMTimelineItemProperty::setRowTree(RowTree *rowTree)
+{
+    m_rowTree = rowTree;
 }
 
 CPropertyRow *Qt3DSDMTimelineItemProperty::GetRow()

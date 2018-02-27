@@ -30,6 +30,8 @@
 #define TREEHEADER_H
 
 #include "TimelineItem.h"
+#include "TimelineConstants.h"
+#include "RowTypes.h"
 
 class RowTimeline;
 
@@ -42,8 +44,22 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                              QWidget *widget = nullptr) override;
-
+    void setWidth(double w);
+    TreeControlType handleButtonsClick(const QPointF &scenePos);
+    bool filterShy() const;
+    bool filterHidden() const;
+    bool filterLocked() const;
     int type() const;
+
+    int m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
+
+private:
+    bool m_shy = false;
+    bool m_visible = false;
+    bool m_lock = false;
+    QRect m_rectShy;
+    QRect m_rectVisible;
+    QRect m_rectLock;
 };
 
 #endif // TREEHEADER_H

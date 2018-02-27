@@ -26,14 +26,23 @@
 **
 ****************************************************************************/
 
-#include "TimelineViewGV.h"
+#ifndef TIMELINESPLITTER_H
+#define TIMELINESPLITTER_H
 
-TimelineViewGV::TimelineViewGV(QWidget *parent)
+#include <QtWidgets/qwidget.h>
+
+QT_FORWARD_DECLARE_CLASS(QEvent)
+
+class TimelineSplitter : public QWidget
 {
-    // TODO: to be deleted, not really useful
-}
+    Q_OBJECT
 
-TimelineViewGV::~TimelineViewGV()
-{
+public:
+    explicit TimelineSplitter(QWidget *parent = nullptr);
 
-}
+ protected:
+    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+};
+
+#endif // TIMELINESPLITTER_H

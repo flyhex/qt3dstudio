@@ -34,36 +34,39 @@ namespace TimelineConstants
     // Dimensions
     const int ROW_H             = 20;
     const int ROW_SPACING       = 2;
-    const int RULER_SEC_W       = 30;       // width of 1 second section (at scale 1)
-    const int RULER_SEC_DIV     = 10;       // second divisions
-    const int RULER_DIV_H1      = 5;        // height of main divisions
-    const int RULER_DIV_H2      = 2;        // height of secondary divisions
-    const int RULER_BASE_Y      = 18;       // baseline Y
-    const int RULER_EDGE_OFFSET = 15;
-    const double LABELS_MIN_W   = 160;
-    const double LABELS_MAX_W   = 600;
-    const int LABELS_DEFAULT_W  = 250;
-    const int SEPARATOR_W       = 8;
+    const int RULER_SEC_W       = 30;    // width of 1 second section (at scale 1)
+    const int RULER_SEC_DIV     = 10;    // second divisions
+    const int RULER_DIV_H1      = 5;     // height of main divisions
+    const int RULER_DIV_H2      = 2;     // height of secondary divisions
+    const int RULER_BASE_Y      = 18;    // baseline Y
+    const double RULER_EDGE_OFFSET = 15;
+    const double TREE_MIN_W     = 160;
+    const double TREE_MAX_W     = 600;
+    const double TREE_DEFAULT_W = 250;
+    const double TREE_BOUND_W   = 10000; // real width of the row (> max possible visible tree area)
+    const int SPLITTER_W        = 8;
     const int PLAYHEAD_W        = 14;
-    const int DURATION_HANDLE_W = 14;       // width of duration end handles in a timeline row
+    const int DURATION_HANDLE_W = 14;    // width of duration end handles in a timeline row
 
     // Colors
-    const char ROW_COLOR_NORMAL[]            = "#404040";
-    const char ROW_COLOR_NORMAL_PROP[]       = "#373737";
-    const char ROW_COLOR_OVER[]              = "#4d4d4d";
-    const char ROW_COLOR_SELECTED[]          = "#336699";
-    const char ROW_COLOR_DURATION[]          = "#66CCFF";
-    const char ROW_COLOR_DURATION_OFF1[]     = "#3388B3";
-    const char ROW_COLOR_DURATION_OFF2[]     = "#222222";
-    const char ROW_COLOR_DURATION_EDGE[]     = "#000000";
-    const char ROW_COLOR_DURATION_SELECTED[] = "#4D99CC";
-    const char ROW_COLOR_MOVE_SRC[]          = "#464600";
-    const char ROW_TEXT_COLOR[]              = "#bbbbbb";
-    const char PLAYHEAD_COLOR[]              = "#ff0066";
-    const char RULER_COLOR[]                 = "#666666";
-    const char ROW_MOVER_COLOR[]             = "#ffff00";
-    const char WIDGET_BG_COLOR[]             = "#222222";
-    const char PLAYHEAD_LINE_COLOR[]         = "#b20808";
+    const char ROW_COLOR_NORMAL[]             = "#404040";
+    const char ROW_COLOR_NORMAL_PROP[]        = "#373737";
+    const char ROW_COLOR_OVER[]               = "#4d4d4d";
+    const char ROW_COLOR_SELECTED[]           = "#336699";
+    const char ROW_COLOR_DURATION[]           = "#66CCFF";
+    const char ROW_COLOR_DURATION_OFF1[]      = "#3388B3"; // duration off ancestors' bounds color1
+    const char ROW_COLOR_DURATION_OFF2[]      = "#222222"; // duration off ancestors' bounds color2
+    const char ROW_COLOR_DURATION_EDGE[]      = "#000000"; // duration left and right edge lines
+    const char ROW_COLOR_DURATION_SELECTED[]  = "#4D99CC";
+    const char ROW_COLOR_MOVE_SRC[]           = "#464600";
+    const char ROW_TEXT_COLOR[]               = "#bbbbbb";
+    const char ROW_TEXT_COLOR_DISABLED[]      = "#888888";
+    const char PLAYHEAD_COLOR[]               = "#ff0066";
+    const char RULER_COLOR[]                  = "#666666";
+    const char ROW_MOVER_COLOR[]              = "#ffff00";
+    const char WIDGET_BG_COLOR[]              = "#222222";
+    const char PLAYHEAD_LINE_COLOR[]          = "#b20808";
+    const char FILTER_BUTTON_SELECTED_COLOR[] = "#000000";
 
     // TODO: move the colors (and maybe dimensions) to StudioPreferences.
 }

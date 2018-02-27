@@ -54,6 +54,7 @@ class CTimelineTranslationManager;
 class CBaseStateRow;
 class Qt3DSDMTimelineItemProperty;
 class CCmdDataModelSetKeyframeTime;
+class RowTree;
 
 namespace qt3dsdm {
 class CStudioSystem;
@@ -74,7 +75,8 @@ protected: // Typedef
     typedef std::vector<Qt3DSDMAssetTimelineKeyframe> TAssetKeyframeList;
 
 protected:
-    CBaseStateRow *m_Row;
+    CBaseStateRow *m_Row; // TODO: remove after finishing the new timeline
+    RowTree *m_rowTree = nullptr;
     CTimelineTranslationManager *m_TransMgr;
     qt3dsdm::Qt3DSDMInstanceHandle m_DataHandle;
     ITimelineItemBinding *m_Parent;
@@ -121,7 +123,9 @@ public:
 
     // ITimelineItemBinding
     ITimelineItem *GetTimelineItem() override;
-    CBaseStateRow *GetRow() override;
+    CBaseStateRow *GetRow() override; // Mahmoud_TODO: remove after finishing the new timeline
+    RowTree *getRowTree() const override;
+    void setRowTree(RowTree *row) override;
     void SetSelected(bool inMultiSelect) override;
     void OnCollapsed() override;
     void ClearKeySelection() override;
@@ -179,8 +183,8 @@ public:
                                             long inInstanceCount) override;
     void RefreshStateRow(bool inRefreshChildren = false);
 
-    virtual CPropertyRow* AddPropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                                          bool inAppend = false);
+    virtual void AddPropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
+                                bool inAppend = false);
     virtual void RemovePropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     virtual void RefreshPropertyKeyframe(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                          qt3dsdm::Qt3DSDMKeyframeHandle,

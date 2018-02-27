@@ -32,13 +32,13 @@
 #include "TimelineWidget.h"
 #include "RowTimeline.h"
 #include "RowTypes.h"
+#include "TimelineConstants.h"
 
 #include <QtWidgets/qgraphicsscene.h>
 
-class Separator;
 class Ruler;
 class PlayHead;
-class TimelineItem;
+class TreeHeader;
 class RowTree;
 class SelectionRect;
 class RowMover;
@@ -54,17 +54,19 @@ class TimelineGraphicsScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    explicit TimelineGraphicsScene(QGraphicsView *viewTimelineContent, TimelineWidget *parent);
+    explicit TimelineGraphicsScene(TimelineWidget *timelineWidget);
 
     void setTimelineScale(int scale);
     void addNewLayer();
     void deleteSelectedRow();
     Ruler *ruler() const;
     PlayHead *playHead() const;
-    Separator *separator() const;
     RowManager *rowManager() const;
     QGraphicsWidget *widgetRoot() const;
     KeyframeManager *keyframeManager() const;
+    QGraphicsLinearLayout *layoutTree() const;
+    TreeHeader *treeHeader() const;
+    void updateTreeWidth(double x);
 
 protected:
     bool event(QEvent *event) override;
@@ -87,29 +89,27 @@ private:
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
 
     QGraphicsLinearLayout *m_layoutRoot;
-    QGraphicsLinearLayout *m_layoutLabels;
+    QGraphicsLinearLayout *m_layoutTree;
     QGraphicsLinearLayout *m_layoutTimeline;
 
-    Separator *m_separator;
+    TreeHeader *m_treeHeader;
     Ruler *m_ruler;
     PlayHead *m_playHead;
-    TimelineWidget *m_widget;
+    TimelineWidget *m_widgetTimeline;
     QGraphicsWidget *m_widgetRoot;
-    QGraphicsView *m_viewTimelineContent;
     RowMover *m_rowMover = nullptr;
-    RowTree *m_sceneRow = nullptr;
     RowTimeline *m_editedTimelineRow = nullptr;
     SelectionRect *m_selectionRect;
     RowManager *m_rowManager = nullptr;
     KeyframeManager *m_keyframeManager = nullptr;
     QPointF m_pressPos;
 
-    bool m_separatorPressed = false;
     bool m_rulerPressed = false;
     bool m_keyframePressed = false;
     bool m_dragging = false;
-    int m_clickedTimelineControlType = RowTimeline::TypeNone;
-
+    TimelineControlType m_clickedTimelineControlType = TimelineControlType::None;
+    TreeControlType m_clickedTreeControlType = TreeControlType::None;
+    double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H

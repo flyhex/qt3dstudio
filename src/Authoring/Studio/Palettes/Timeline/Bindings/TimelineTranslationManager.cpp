@@ -320,25 +320,6 @@ void CTimelineTranslationManager::OnNewPresentation()
 }
 
 //==============================================================================
-/**
- * Selection events on the old data model was triggered via signals on the actual objects.
- * For the new data model, it would be via this OnSelectionChange event.
- */
-void CTimelineTranslationManager::OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
-{
-    // Deselect all items
-    TInstanceHandleBindingMap::const_iterator theIter = m_InstanceHandleBindingMap.begin();
-    for (; theIter != m_InstanceHandleBindingMap.end(); ++theIter) {
-        ITimelineItemBinding *theBinding = theIter->second;
-        CBaseStateRow *theRow = theBinding->GetRow();
-        if (theRow)
-            theRow->OnSelected(false);
-    }
-
-    // Select new
-    if (inNewSelectable)
-        SetSelected(inNewSelectable, true);
-}
 
 CDoc *CTimelineTranslationManager::GetDoc() const
 {
@@ -523,25 +504,6 @@ void CTimelineTranslationManager::ClearBindingsKeyframeSelection()
 }
 
 //==============================================================================
-/**
- * Helper function to find the binding that corresponds to inSelectable and set its selection state
- */
-void CTimelineTranslationManager::SetSelected(Q3DStudio::SSelectedValue inSelectable,
-                                              bool inSelected)
-{
-    qt3dsdm::TInstanceHandleList theInstances = inSelectable.GetSelectedInstances();
-    for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
-        Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
-        if (GetStudioSystem()->IsInstance(theInstance)) {
-            ITimelineItemBinding *theBinding = EnsureLoaded(theInstance);
-            if (theBinding) {
-                CBaseStateRow *theRow = theBinding->GetRow();
-                if (theRow)
-                    theRow->OnSelected(inSelected);
-            }
-        }
-    }
-}
 
 ITimelineItemBinding *CTimelineTranslationManager::EnsureLoaded(Qt3DSDMInstanceHandle inHandle)
 {
