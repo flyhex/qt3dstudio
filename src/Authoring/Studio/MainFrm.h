@@ -109,6 +109,7 @@ public:
     void OnFileSaveCopy();
     void OnFileNew();
     void OnFileRevert();
+    void OnFileImportAssets();
     void OnFileConnectToDevice();
     void OnFileOpenRecent(int nID);
 
@@ -127,6 +128,7 @@ public:
 
     void timerEvent(QTimerEvent *event) override;
     void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
     void OnUpdateTimelineSetTimeBarColor();
     void OnTimelineSetTimeBarColor();
@@ -143,13 +145,16 @@ public:
     void OnEditApplicationPreferences();
     void OnEditPresentationPreferences();
     void OnEditSubPresentations();
+    void OnEditDataInputs();
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();
     void OnUpdatePlaybackRewind();
     void OnPlaybackStop();
     void OnUpdatePlaybackStop();
-    void OnPlaybackPreview();
+    void OnPlaybackPreview(const QString &viewerExeName);
+    void OnPlaybackPreviewRuntime1();
+    void OnPlaybackPreviewRuntime2();
     void OnUpdatePlaybackPreview();
     void OnUpdateToolMove();
     void OnUpdateToolRotate();
@@ -237,6 +242,7 @@ Q_SIGNALS:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void handleGeometryAndState(bool save);
 
     RemoteDeploymentSender *m_remoteDeploymentSender = nullptr;
     CSceneView *m_SceneView = nullptr;

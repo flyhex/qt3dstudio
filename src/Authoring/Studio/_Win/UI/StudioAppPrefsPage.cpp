@@ -64,7 +64,6 @@
 //==============================================================================
 CStudioAppPrefsPage::CStudioAppPrefsPage(QWidget *parent)
     : CStudioPreferencesPropPage(parent)
-    , m_nudgeValue(0.0)
     , m_TimebarShowTime(FALSE)
     , m_InterpolationIsSmooth(FALSE)
     , m_ui(new Ui::StudioAppPrefsPage)
@@ -94,10 +93,8 @@ CStudioAppPrefsPage::~CStudioAppPrefsPage()
 void CStudioAppPrefsPage::OnInitDialog()
 {
     m_ui->setupUi(this);
-    m_ui->m_editNudgeAmount->setValidator(new QDoubleValidator(this));
 
     // Add tool tips for controls
-    m_ui->m_editNudgeAmount->setToolTip(tr("Set the object nudge amount"));
     m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
     m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
     m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
@@ -128,8 +125,6 @@ void CStudioAppPrefsPage::OnInitDialog()
             this, &CStudioAppPrefsPage::OnCheckTimelineAbsoluteSnapping);
     connect(m_ui->m_EditViewBGColor, &QPushButton::clicked,
             this, &CStudioAppPrefsPage::OnBgColorButtonClicked);
-    connect(m_ui->m_editNudgeAmount, &QLineEdit::textEdited,
-            this, &CStudioAppPrefsPage::OnChangeEditNudgeAmount);
     connect(m_ui->m_EditViewStartupView, activated,
             this, &CStudioAppPrefsPage::OnSelChangeStartupView);
 #if 0 // Removed until we have some other Preview configurations than just Viewer
@@ -147,8 +142,6 @@ void CStudioAppPrefsPage::OnInitDialog()
 //==============================================================================
 void CStudioAppPrefsPage::LoadSettings()
 {
-    m_nudgeValue = CStudioPreferences::GetNudgeAmount();
-
     // Get the Interpolation Preference
     m_ui->m_DefaultInterpolation->addItem(tr("Smooth"));
     m_ui->m_DefaultInterpolation->addItem(tr("Linear"));
@@ -179,7 +172,6 @@ void CStudioAppPrefsPage::LoadSettings()
     LoadPreviewSelections();
 #endif
 
-    m_ui->m_editNudgeAmount->setText(QString::number(m_nudgeValue));
     m_bgColor = CStudioPreferences::GetEditViewBackgroundColor();
     updateColorButton();
 }
@@ -199,9 +191,6 @@ void CStudioAppPrefsPage::updateColorButton()
 //==============================================================================
 void CStudioAppPrefsPage::SaveSettings()
 {
-    // Nudge amount
-    CStudioPreferences::SetNudgeAmount(m_nudgeValue);
-
     // Default interpolation
     g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(
                 m_ui->m_DefaultInterpolation->currentIndex() == 0);
@@ -295,20 +284,6 @@ void CStudioAppPrefsPage::OnButtonRestoreDefaults()
 void CStudioAppPrefsPage::OnSelChangeInterpolationDefault()
 {
     this->SetModified(TRUE);
-}
-
-//==============================================================================
-/**
- *	OnChangeEditNudgeAmount: EN_UPDATE handler for the IDC_EDIT_NUDGE
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioAppPrefsPage::OnChangeEditNudgeAmount()
-{
-    QString editStr = m_ui->m_editNudgeAmount->text();
-    m_nudgeValue = editStr.toDouble();
-    this->SetModified(true);
 }
 
 //==============================================================================

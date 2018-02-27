@@ -180,7 +180,7 @@ namespace render {
         }
     };
 
-    struct SNode : public SGraphObject
+    struct QT3DS_AUTOTEST_EXPORT SNode : public SGraphObject
     {
         // changing any one of these means you have to
         // set this object dirty

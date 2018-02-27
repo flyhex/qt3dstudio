@@ -26,6 +26,18 @@ HEADERS += \
     viewer.h \
     remotedeploymentreceiver.h
 
+android: {
+SOURCES += \
+    $$PWD/../studio3d/q3dsviewersettings.cpp \
+    $$PWD/../studio3d/q3dspresentation.cpp \
+    $$PWD/../studio3d/q3dsdatainput.cpp
+
+HEADERS += \
+    $$PWD/../studio3d/q3dsviewersettings.h \
+    $$PWD/../studio3d/q3dspresentation.h \
+    $$PWD/../studio3d/q3dsdatainput.h
+}
+
 LIBS += \
     -lqt3dsruntime$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()

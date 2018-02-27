@@ -77,6 +77,7 @@ QScrollBar::sub-line:vertical {
 QMenuBar {
     background: #404244;
     border-top: 1px solid #262829;
+    border-bottom: 1px solid #262829;
 }
 
 QMenuBar::item {
@@ -115,23 +116,31 @@ QMenu::separator {
 /* Toolbar */
 QToolBar {
     background: #404244;
-    border-top: 1px solid #262829;
-    min-height: 24px;
-    max-height: 24px;
 }
 
-QToolBar::handle {
+QToolBar::handle:horizontal {
     image: url(:/images/separator.png);
 }
 
-QToolBar::separator {
+QToolBar::handle:vertical {
+    image: url(:/images/separator-vertical.png);
+}
+
+QToolBar::separator:horizontal {
     background: #727476;
     width: 1px;
     margin: 3px;
 }
 
+QToolBar::separator:vertical {
+    background: #727476;
+    height: 1px;
+    margin: 3px;
+}
+
 QToolButton:!checked {
     min-width: 22px;
+    max-width: 22px;
     min-height: 22px;
     max-height: 22px;
     background-color: #404244;
@@ -139,16 +148,22 @@ QToolButton:!checked {
 
 QToolButton:checked, QToolButton:hover {
     min-width: 22px;
+    max-width: 22px;
     min-height: 22px;
     max-height: 22px;
     background-color: #262829;
 }
 
-QToolButton:pressed {
+QToolButton:pressed:!checked {
     min-width: 22px;
+    max-width: 22px;
     min-height: 22px;
     max-height: 22px;
     background-color: #46a2da;
+}
+
+QToolButton#qt_toolbar_ext_button {
+    image: url(:/images/toolbutton-arrow.png);
 }
 
 QComboBox#cameraSelector {
@@ -174,7 +189,7 @@ QComboBox,
 QLineEdit,
 QSpinBox,
 QDoubleSpinBox,
-QTimeEdit {
+QDateTimeEdit {
     background: #404244;
     border: 1px solid #262829;
     border-radius: 2;
@@ -185,8 +200,30 @@ QComboBox::drop-down {
     background: #404244;
 }
 
-QComboBox::down-arrow {
+QComboBox::down-arrow,
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow,
+QDateTimeEdit::down-arrow {
     image: url(:/images/arrow_down.png);
+}
+
+QComboBox::down-arrow:on {
+    image: url(:/images/arrow_up.png);
+}
+
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow,
+QDateTimeEdit::up-arrow {
+    image: url(:/images/arrow_up.png);
+}
+
+QSpinBox::up-button,
+QSpinBox::down-button,
+QDoubleSpinBox::up-button,
+QDoubleSpinBox::down-button,
+QDateTimeEdit::up-button,
+QDateTimeEdit::down-button {
+    border: 0px;
 }
 
 QGroupBox {
@@ -214,6 +251,7 @@ QPushButton:pressed {
 
 QHeaderView::section {
     background: transparent;
+    min-height: 26px;
 }
 
 QHeaderView::section:hover {
@@ -271,21 +309,26 @@ QWidget#TimeLineParent,
 TimeLineToolbar QWidget#layoutWidget {
     background: #404244;
 }
+
 TimeLineToolbar QPushButton#timeButton {
     border: 0px;
 }
 
-/* Sub-presentation Dialog */
+/* Sub-presentation Dialogs and Data Input Dialogs */
 QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
-QDialog#SubPresentationListDlg QHeaderView::section {
+QDialog#SubPresentationListDlg QHeaderView::section,
+QDialog#DataInputListDlg QTableView QTableCornerButton::section,
+QDialog#DataInputListDlg QHeaderView::section {
     background: transparent;
 }
 
-QDialog#SubPresentationListDlg QTableView {
+QDialog#SubPresentationListDlg QTableView,
+QDialog#DataInputListDlg QTableView {
     selection-background-color: #46a2da;
 }
 
-QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton {
+QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton,
+QDialog#DataInputListDlg QPushButton#DataInputListButton {
     background-color: transparent;
     border: 0px;
     min-width: 16px;
@@ -295,11 +338,26 @@ QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton {
     padding: 0px;
 }
 
-QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton:pressed {
+QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton:pressed,
+QDialog#DataInputListDlg QPushButton#DataInputListButton:pressed {
     background-color: #262829;
 }
 
-QDialog#SubPresentationDlg QPushButton:!enabled {
+QDialog#SubPresentationDlg QPushButton:!enabled,
+QDialog#DataInputDlg  QPushButton:!enabled {
     background: transparent;
     color: #727476;
+}
+
+/* Data input chooser */
+DataInputSelectDlg {
+    border: 1px solid #404244;
+}
+
+DataInputSelectDlg::item:selected {
+    background: #46a2da;
+}
+
+DataInputSelectDlg::item:hover {
+    background: #23516d;
 }

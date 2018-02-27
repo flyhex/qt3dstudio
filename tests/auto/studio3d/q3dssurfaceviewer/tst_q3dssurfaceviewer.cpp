@@ -32,6 +32,7 @@
 #include <QtStudio3D/q3dspresentation.h>
 #include <QtStudio3D/q3dssceneelement.h>
 #include <QtStudio3D/q3dselement.h>
+#include <QtStudio3D/q3dsdatainput.h>
 #include <QtGui/qwindow.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtGui/qoffscreensurface.h>
@@ -82,6 +83,8 @@ private slots:
     void testElement();
     void testMouseInput_data();
     void testMouseInput();
+    void testDataInput_data();
+    void testDataInput();
 
 private:
     QWindow *createWindow(const QSize &size);
@@ -1470,6 +1473,60 @@ void tst_Q3DSSurfaceViewer::testMouseInput()
     checkPixel(m_viewer, Qt::red, point2);
 
     // Note: No way yet to hook mouse move into anything in the presentation
+}
+
+void tst_Q3DSSurfaceViewer::testDataInput_data()
+{
+    testBasics_data();
+}
+
+void tst_Q3DSSurfaceViewer::testDataInput()
+{
+    QFETCH(bool, isWindow);
+
+    if (isWindow)
+        createWindowAndViewer(m_viewer, DATAINPUT);
+    else
+        createOffscreenAndViewer(m_viewer, DATAINPUT);
+
+    m_viewer->settings()->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
+
+    QPoint point1(m_viewer->size().width() / 4, m_viewer->size().height() / 4);
+
+    const QString animationName = QStringLiteral("animationInput");
+    const QString slideName = QStringLiteral("slideInput");
+
+    checkPixel(m_viewer, Qt::red, point1);
+    m_viewer->presentation()->setDataInputValue(animationName, 90);
+    checkPixel(m_viewer, Qt::blue, point1);
+    m_viewer->presentation()->setDataInputValue(animationName, 10);
+    checkPixel(m_viewer, Qt::red, point1);
+
+    Q3DSDataInput *animationInput = new Q3DSDataInput();
+    animationInput->setName(animationName);
+
+    m_viewer->presentation()->registerDataInput(animationInput);
+    QVERIFY(m_viewer->presentation()->registeredDataInput(animationInput->name()));
+
+    Q3DSDataInput *slideInput = new Q3DSDataInput(m_viewer->presentation(), slideName);
+    QVERIFY(m_viewer->presentation()->registeredDataInput(slideInput->name()));
+
+    animationInput->setValue(90);
+    checkPixel(m_viewer, Qt::blue, point1);
+    animationInput->setValue(10);
+    checkPixel(m_viewer, Qt::red, point1);
+
+    slideInput->setValue(QStringLiteral("Slide2"));
+    checkPixel(m_viewer, Qt::green, point1);
+    slideInput->setValue(QStringLiteral("Slide1"));
+    checkPixel(m_viewer, Qt::red, point1);
+
+    m_viewer->presentation()->unregisterDataInput(animationInput);
+    m_viewer->presentation()->unregisterDataInput(slideInput);
+    QVERIFY(!m_viewer->presentation()->registeredDataInput(animationInput->name()));
+    QVERIFY(!m_viewer->presentation()->registeredDataInput(slideInput->name()));
+    delete animationInput;
+    delete slideInput;
 }
 
 

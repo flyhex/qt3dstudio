@@ -46,7 +46,7 @@ struct AdvancedBlendModes
         ColorDodge
     };
 };
-    struct SLayerRenderData : public SLayerRenderPreparationData
+    struct QT3DS_AUTOTEST_EXPORT SLayerRenderData : public SLayerRenderPreparationData
     {
 
         // Layers can be rendered offscreen for many reasons; effects, progressive aa,

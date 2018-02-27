@@ -178,7 +178,7 @@ bool NVRenderTestOcclusionQuery::renderQuad(NVRenderContext *context, userContex
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestOcclusionQuery: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestOcclusionQuery: Failed to create vertex buffer";
         return false;
     }
 
@@ -191,7 +191,7 @@ bool NVRenderTestOcclusionQuery::renderQuad(NVRenderContext *context, userContex
         context->CreateInputAssembler(mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), NULL,
                                       toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestOcclusionQuery: Failed to create input assembler";
+        qWarning() << "NVRenderTestOcclusionQuery: Failed to create input assembler";
         return false;
     }
 
@@ -260,7 +260,7 @@ void NVRenderTestOcclusionQuery::renderPrim(NVRenderContext *context, userContex
     mVB = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize, 3 * sizeof(QT3DSF32),
                                       vertDataSmall);
     if (!mVB)
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestOcclusionQuery: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestOcclusionQuery: Failed to create vertex buffer";
 
     // create our attribute layout
     mAttribLayout = context->CreateAttributeLayout(toConstDataRef(entries, 1));
@@ -270,7 +270,7 @@ void NVRenderTestOcclusionQuery::renderPrim(NVRenderContext *context, userContex
     mIA = context->CreateInputAssembler(mAttribLayout, toConstDataRef(&mVB.mPtr, 1), NULL,
                                         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mVB) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestOcclusionQuery: Failed to create input assembler";
+        qWarning() << "NVRenderTestOcclusionQuery: Failed to create input assembler";
         return;
     }
 

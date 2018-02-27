@@ -153,6 +153,7 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
 
     m_renderControl = new RenderControl(nullptr);
     m_quickWindow = new QQuickWindow(m_renderControl);
+    m_quickWindow->setClearBeforeRendering(false);
 
     m_renderObject = new Q3DSQmlStreamEventHandler(this);
     renderThread->setObjectName(QStringLiteral("Qt3DSQmlStreamRenderer::renderThread"));
@@ -201,6 +202,7 @@ void Q3DSQmlStreamRenderer::cleanup()
 
 bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surface)
 {
+    Q_UNUSED(surface);
     if (m_initialized) {
         Q_ASSERT(QOpenGLContext::areSharing(context, m_context));
         return true;
@@ -325,7 +327,25 @@ void Q3DSQmlStreamRenderer::uninitialize()
 
 void Q3DSQmlStreamRenderer::setItem(QQuickItem *item)
 {
-    m_rootItem = item;
+    if (item && m_rootItem && m_initialized) {
+        QMutexLocker lock(&m_renderMutex);
+        m_rootItem->setParentItem(nullptr);
+        m_rootItem = item;
+        m_rootItem->setParentItem(m_quickWindow->contentItem());
+        updateSizes();
+    } else {
+        if (item && m_rootItem != item) {
+            m_rootItem = item;
+
+            m_rootItem->setParentItem(m_quickWindow->contentItem());
+            updateSizes();
+
+            connect(m_renderControl, &QQuickRenderControl::renderRequested,
+                    this, &Q3DSQmlStreamRenderer::requestUpdate);
+            connect(m_renderControl, &QQuickRenderControl::sceneChanged,
+                    this, &Q3DSQmlStreamRenderer::requestUpdate);
+        }
+    }
 }
 
 bool Q3DSQmlStreamRenderer::event(QEvent *event)

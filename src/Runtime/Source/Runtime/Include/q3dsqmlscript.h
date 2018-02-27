@@ -73,6 +73,7 @@ public:
     QVector3D lookAt(const QVector3D &target);
     QVector3D matrixToEuler(const QMatrix4x4 &matrix);
     QString getParent(const QString &handle);
+    void setDataInputValue(const QString &name, const QVariant &value);
 
     struct EventData {
         QJSValue function;

@@ -143,6 +143,7 @@ void Q3DSRenderer::render()
             draw();
         else
             processCommands();
+        update(); // mark as dirty to ensure update again
     }
 }
 
@@ -165,6 +166,10 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
 {
     m_runtime = &Q3DSViewerApp::Create(nullptr, new Qt3DSAudioPlayerImpl());
     Q_ASSERT(m_runtime);
+
+    // Connect presentation ready signal before initializing the app
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigPresentationReady,
+            this, &Q3DSRenderer::presentationReady);
 
     int theWidth = inFbo->width();
     int theHeight = inFbo->height();
@@ -307,6 +312,9 @@ void Q3DSRenderer::processCommands()
             break;
         case CommandType_KeyRelease:
             m_runtime->HandleKeyInput(Q3DStudio::EKeyCode(cmd.m_intValues[0]), false);
+            break;
+        case CommandType_SetDataInputValue:
+            m_runtime->SetDataInputValue(cmd.m_stringValue, cmd.m_variantValue);
             break;
         case CommandType_RequestSlideInfo: {
             int current = 0;

@@ -1,0 +1,660 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+\title Effect Reference
+\page effect-reference.html
+\ingroup qt3dstudio-file-formats
+
+This page explains how to write effects.
+
+\section1 Overview
+
+The effects specification allows writing custom effects, which are applied to
+layers. The effects can have multiple passes to calculate the final result.
+Each shader in a pass must implement the \c {void frag()} and \c {void vert()}
+functions for fragment and vertex shader respectively. The passes are executed
+in the order they are specified in the effect file. The studio shader library
+can also be accessed with \c #include directive to add functionality.
+
+\section1 Effect Structure
+
+\badcode
+<Effect>
+    <MetaData>
+        <Property name="FloatParam" type="Float" formalName="Float Param" description="" default="1.0"/>
+        <Property name="DepthTextureParam" type="Texture" filter="nearest" clamp="clamp"/>
+        <Property name="TextureParam" type="Texture" filter="linear" clamp="clamp"/>
+        <Property name="Image2DParam" type="Image2D" format="rgba32f" binding="1"/>
+        <Property name="BufferParam" type="Buffer" format="uvec4" usage="storage" binding="1" align="std140"/>
+    </MetaData>
+    <Shaders>
+        <Shared></Shared>
+        <VertexShaderShared></VertexShaderShared>
+        <FragmentShaderShared></FragmentShaderShared>
+        <Shader name="INPUTS">
+            <VertexShader></VertexShader>
+            <FragmentShader></FragmentShader>
+        </Shader>
+        <Shader name="INDIRECT">
+            <VertexShader></VertexShader>
+            <FragmentShader></FragmentShader>
+        </Shader>
+        <Shader name="MAIN">
+
+            <VertexShader>
+void vert()
+{
+}
+            </VertexShader>
+            <FragmentShader>
+void frag()
+{
+}
+            </FragmentShader>
+        </Shader>
+    </Shaders>
+    <Passes>
+        <Buffer name="buffer" type="fp16" format="rg" filter="nearest" wrap="clamp" size="1.0" lifetime="frame"/>
+        <Buffer name="buffer2" type="fp16" format="rg" filter="nearest" wrap="clamp" size="1.0" lifetime="frame"/>
+        <Image name="image" type="fp16" format="rgba" filter="nearest" wrap="clamp" size="1.0" lifetime="scene" access="readwrite"/>
+        <DataBuffer name="drawIndirect" type="indirect" wrapName="BufferParam" wrapType="storage" format="uint" size="4" lifetime="frame"/>
+        <Buffer name="stencilBuffer" format='depth24stencil8' lifetime="frame" />
+
+        <Pass shader="INPUTS" input="[source]" output="buffer">
+            <DepthInput param="DepthTextureParam"/>
+            <ImageInput value="image" param="Image2DParam" usage="image"/>
+            <DataBufferInput param="BufferParam" usage="storage"/>
+            <DepthStencil buffer='stencilBuffer' flags='clear-stencil' stencil-fail='replace' depth-fail='replace' depth-pass='replace' stencil-function='always' reference='1'/>
+        </Pass>
+
+        <Pass shader="INDIRECT" input="buffer" output="buffer2">
+            <BufferInput param="buffer" param="TextureParam" />
+            <DataBufferInput param="drawIndirect" usage="indirect"/>
+        </Pass>
+        <Pass shader="MAIN" input="[source]" output="[dest]">
+            <Blending source="SrcAlpha" dest="One"/>
+            <SetParam name="FloatParam" value="0.0"/>
+        </Pass>
+    </Passes>
+</Effect>
+
+\endcode
+
+The effect file structure follows the same pattern as custom materials, first is
+the metadata with parameters in \c <Metadata> element, then effect shaders in
+\c <Shaders> element and render passes in \c <Passes> element.
+
+\section1 Parameters
+
+Effect metadata parameters are the same as for custom materials, but also have a couple
+of effect-specific parameters. Parameters with \c Image2D type and \c <Image> element
+in allow using image-variables in shader and parameters with \c Buffer type
+and \c <DataBuffer> element allow using shader storage buffer objects in shader.
+They also enable indirect drawing in render pass using the \c <DataBufferInput> element.
+Parameters with \c Texture type and \c <Buffer> element allow using sampler-variables
+in shader.
+
+\section2 Image2D
+
+\badcode
+<Property name="Image2DParam" type="Image2D" format="rgba32f" binding="1"/>
+\endcode
+
+\c Image2D type is used to declare image property. Its value can not be set outside the
+effect, but instead using the \c <ImageInput> element. \c {format}-attribute specifies
+the format of the image.
+See \l {https://www.khronos.org/opengl/wiki/Layout_Qualifier_(GLSL)#Image_formats}
+{GLSL Specification} for accepted values. \c {binding}-attribute specifies the binding
+point of the image.
+
+\section2 Buffer
+
+\badcode
+<Property name="BufferParam" type="Buffer" format="uvec4" usage="storage" binding="1" align="std140"/>
+\endcode
+
+\c Buffer type is used to declare buffer property and allows using shader storage buffer objects in
+shader. Its value can not be set outside the effect, but instead using the \c <DataBufferInput>
+element. \c {format}-attribute specifies the format of the buffer. See GLSL Specification for
+accepted values. \c {usage}-attribute specifies the usage of the buffer. For now, only \c storage
+is supported. \c {binding}-attribute specifies the binding point of the image.
+\c {align}-attribute specifies the buffer alignment. See GLSL Specification for accepted values.
+The shader generator appends \c _data[] to the name, which must be taken into account when
+using it in shader.
+
+\note \c Buffer type properties are only used with SSBO's together with \c <DataBuffer> element
+specifying the data buffer. Use \c Texture type properties together with \c <Buffer> element to
+specify texture buffers used with samplers.
+
+\section1 Elements
+
+\section2 <Shared>
+
+This element can be used to insert block of shader code that is shared among all shaders.
+It gets inserted to all shaders in the effect.
+
+\section2 <VertexShaderShared> and <FragmentShaderShared>
+
+These elements can be used to insert block of shader code that is shared among all vertex
+and fragments shaders. The code inside \c <VertexShaderShared> element gets inserted to
+all vertex shaders and similarly code inside \c <FragmentShaderShared> element gets inserted
+to all fragment shaders.
+
+\section2 <Shader>, <VertexShader> and <FragmentShader>
+
+The \c <Shader> element specifies a shader with shader name specified with name attribute.
+The name is used inside \c <Pass> element to specify which shader to execute.
+\c <VertexShader> and \c <FragmentShader> elements are used to specify vertex shader code
+and fragment shader code respectively. The vertex shader must implement the \c {void vert()}
+function and fragment shader must implement the \c {void frag()} function, unless left empty.
+
+The shader can use the \c varying, \c in and \c out specifiers to define custom variables
+to pass parameters between shader stages.
+
+\section2 <Passes>
+
+The \c <Passes> element is used to specify render passes for the effect. Each render pass
+must be specified inside \c <Pass> element. The \c <Passes> element can also contain
+\c <Buffer>, \c <Image> and \c <Databuffer> elements to specify different kinds of data
+storages for the effect.
+
+\section2 <Buffer>
+
+This element can be used to create a buffer to be used inside the effect. Different passes
+can read and write to these buffers while implementing different stages of the effect.
+The \c <BufferInput> element can be used to bind the buffer to shader variable so that it
+can be read in shader.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li name
+    \li \c string
+    \li Used to specify unique name for the buffer.
+\row
+    \li type
+    \li \list
+        \li \c ubyte - 8-bit unsigned integer
+        \li \c ushort - 16-bit unsigned integer
+        \li \c fp16 - 16-bit floating point number
+        \li \c fp32 - 32-bit floating point number
+        \endlist
+    \li Used to specify the type of the buffer.
+\row
+    \li format
+    \li \list
+        \li \c source - take format from the source
+        \li \c depth24stencil8 - combined depth24 stencil 8
+        \li \c alpha - alpha
+        \li \c lum - luminance
+        \li \c lum_alpha - luminance alpha
+        \li \c rg - 2-component RG
+        \li \c rgb - 3-component RGB
+        \li \c rgba - 4-component RGBA
+        \endlist
+    \li Used to specify the format of the buffer.
+\row
+    \li filter
+    \li \list
+        \li \c nearest - nearest neighbor
+        \li \c linear - linear interpolation
+        \endlist
+    \li Used to specify the input filtering mode.
+\row
+    \li wrap
+    \li \list
+        \li \c clamp - clamp to edges
+        \li \c repeat - repeat values
+        \endlist
+    \li Used to specify the wrapping mode of the texture coordinates.
+\row
+    \li size
+    \li \c float
+    \li Used to specify the size of the buffer relative to the frame buffer.
+        1.0 corresponds to same size. 0.5 corresponds to the buffer width and height
+        being half the size.
+\row
+    \li lifetime
+    \li \list
+        \li \c scene - The buffer is allocated at the beginning of the scene
+        \li \c frame - The buffer is allocated at the beginning of the frame
+        \endlist
+    \li Used to specify how the buffer is allocated and deleted. Buffers with
+        \c frame lifetime can be reused by other effects.
+\endtable
+
+\section2 <Image>
+
+This element can be used to create a image to be used inside the effect.
+The \c <ImageInput> element can be used to bind the image to shader variable so that it
+can be accessed in shader.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li name
+    \li \c string
+    \li Used to specify unique name for the image.
+\row
+    \li type
+    \li \list
+        \li \c ubyte - 8-bit unsigned integer
+        \li \c ushort - 16-bit unsigned integer
+        \li \c fp16 - 16-bit floating point number
+        \li \c fp32 - 32-bit floating point number
+        \endlist
+    \li Used to specify the type of the image.
+\row
+    \li format
+    \li \list
+        \li \c source - take format from the source
+        \li \c depth24stencil8 - combined depth24 stencil 8
+        \li \c alpha - alpha
+        \li \c lum - luminance
+        \li \c lum_alpha - luminance alpha
+        \li \c rg - 2-component RG
+        \li \c rgb - 3-component RGB
+        \li \c rgba - 4-component RGBA
+        \endlist
+    \li Used to specify the format of the image.
+\row
+    \li filter
+    \li \list
+        \li \c nearest - nearest neighbor
+        \li \c linear - linear interpolation
+        \endlist
+    \li Used to specify the input filtering mode.
+\row
+    \li wrap
+    \li \list
+        \li \c clamp - clamp to edges
+        \li \c repeat - repeat values
+        \endlist
+    \li Used to specify the wrapping mode of the texture coordinates.
+\row
+    \li size
+    \li \c float
+    \li Used to specify the size of the image relative to the frame buffer.
+        1.0 corresponds to same size. 0.5 corresponds to the image width and height
+        being half the size.
+\row
+    \li lifetime
+    \li \list
+        \li \c scene - The image is allocated at the beginning of the scene
+        \li \c frame - The image is allocated at the beginning of the frame
+        \endlist
+    \li Used to specify how the image is allocated and deleted. Images with
+        \c frame lifetime can be reused by other effects.
+\row
+    \li access
+    \li \list
+        \li \c read - The image can be read in the shader
+        \li \c write - The image can be written in the shader
+        \li \c readwrite - The image can be both read and written in the shader
+        \endlist
+    \li Used to specify how the image is accessed in the shader.
+\endtable
+
+\section2 <DataBuffer>
+
+This element can be used to create a data buffer.
+The \c <DataBufferInput> element can be used to bind the data buffer to shader variable so that it
+can be accessed in shader.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li name
+    \li \c string
+    \li Used to specify unique name for the data buffer.
+\row
+    \li type
+    \li \list
+        \li \c storage - storage buffer
+        \li \c indirect - indirect draw buffer
+        \endlist
+    \li Used to specify the type of the data buffer.
+\row
+    \li format
+    \li \list
+        \li \c uint - 32-bit unsigned integer
+        \li \c int - 32-bit signed integer
+        \li \c uvec4 - 4-component 32-bit unsigned integer vector
+        \endlist
+    \li Used to specify the format of the data buffer.
+\row
+    \li size
+    \li \c unsigned integer
+    \li Used to specify the size of the data buffer. Specifies the number
+        of format sized elements are in the data buffer.
+\row
+    \li lifetime
+    \li \list
+        \li \c scene - The data buffer is allocated at the beginning of the scene
+        \li \c frame - The data buffer is allocated at the beginning of the frame
+        \endlist
+    \li Used to specify how the data buffer is allocated and deleted.
+\row
+    \li wrapName
+    \li string
+    \li The name of the property wrapping this data buffer. The name must match to
+        one property with type \c Buffer in the meta data.
+\row
+    \li wrapType
+    \li \list
+        \li \c storage - storage type
+        \li \c indirect - indirect draw type
+        \endlist
+    \li The type of the wrapping.
+\endtable
+
+\section2 <Pass>
+
+This element specifies one render pass in effect. The passes
+are executed in the order they are specified in the effect file.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li shader
+    \li string
+    \li The name of the shader executed in this pass. Must match to a shader name
+        in the \c <Shaders> element.
+\row
+    \li input
+    \li string
+    \li The name of one of the \c <Buffer> elements or [source].
+\row
+    \li output
+    \li string
+    \li The name of one of the \c <Buffer> elements or [dest].
+\row
+    \li format
+    \li \list
+        \li \c alpha - alpha
+        \li \c lum - luminance
+        \li \c lum_alpha - luminance alpha
+        \li \c rg - 2-component RG
+        \li \c rgb - 3-component RGB
+        \li \c rgba - 4-component RGBA
+        \endlist
+    \li If output is [dest], specifies the output format.
+\endtable
+
+\section2 <BufferInput>
+
+This element binds buffer to one of the shader sampler variables.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li value
+    \li string
+    \li The name of one of the \c <Buffer> elements or [source].
+\row
+    \li param
+    \li string
+    \li The name of the shader variable.
+\endtable
+
+\section2 <ImageInput>
+
+This element binds an image to one of the shader image variables.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li value
+    \li string
+    \li The name of one of the \c <Image> elements or [source].
+\row
+    \li param
+    \li string
+    \li The name of the shader variable.
+\row
+    \li usage
+    \li \list
+        \li \c texture - use as a texture
+        \li \c image - use as an image
+        \endlist
+    \li Specifies how the image is used in shader.
+\row
+    \li sync
+    \li boolean
+    \li Specifies if the effect execution should synchronize accesses to
+        the image.
+\endtable
+
+\section2 <DepthInput>
+
+This element binds frame buffer depth as a texture to shader sampler variable.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li param
+    \li string
+    \li The name of the shader variable.
+\endtable
+
+\section2 <DataBufferInput>
+
+This element either binds data buffer property to shader storage buffer object
+or performs indirect draw on the shader pass. The shader generator appends
+\c _data[] to the name, which must be taken into account when using it in shader.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li param
+    \li string
+    \li The name of the data buffer.
+\row
+    \li usage
+    \li \list
+        \li \c storage - bind data buffer as a shader variable
+        \li \c indirect - perform indirect draw
+        \endlist
+    \li Specifies the usage type of the element.
+\endtable
+
+\section2 <SetParam>
+
+This element can be used to set render pass specific shader parameters.
+The parameter must match to a parameter specified in the \c <Metadata> element.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li name
+    \li string
+    \li The name of the property.
+\row
+    \li value
+    \li float or integer
+    \li Specifies the value of the property.
+\endtable
+
+\section2 <Blending>
+
+This element can be used to change the blending of the a render pass.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li dest
+    \li \list
+        \li \c SrcAlpha
+        \li \c OneMinusSrcAlpha
+        \li \c One
+        \endlist
+    \li Specifies the destination blending mode.
+\row
+    \li source
+    \li \list
+        \li \c SrcAlpha
+        \li \c OneMinusSrcAlpha
+        \li \c One
+        \endlist
+    \li Specifies the source blending mode.
+\endtable
+
+\section2 <RenderState>
+
+This element can be used to enable/disable a render state for a pass.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li name
+    \li \list
+        \li \c Stencil
+        \endlist
+    \li Name of the render state
+\row
+    \li value
+    \li boolean
+    \li Specifies whether to enable or disable the render state.
+\endtable
+
+\section2 <DepthStencil>
+
+This element can be used to specify depth-stencil buffer and change the
+depth-stencil test for a render pass.
+
+The element attributes are:
+\table
+\header
+    \li attribute
+    \li values
+    \li description
+\row
+    \li buffer
+    \li string
+    \li Name of the buffer used as a depth-stencil buffer.
+\row
+    \li flags
+    \li \list
+        \li \c clear-stencil - Clear stencil buffer
+        \li \c clear-depth - Clear depth buffer
+        \endlist
+    \li Specifies flags for the element. These can be combined with logical or('|').
+\row
+    \li stencil-fail
+    \li One of the stencil operation values
+    \li Specifies stencil fail operation.
+\row
+    \li depth-fail
+    \li One of the stencil operation values
+    \li Specifies depth fail operation.
+\row
+    \li depth-pass
+    \li One of the stencil operation values
+    \li Specifies depth pass operation.
+\row
+    \li stencil-function
+    \li One of the boolean operator values
+    \li Specifies stencil function.
+\row
+    \li reference
+    \li integer
+    \li Specifies stencil reference value.
+\row
+    \li mask
+    \li integer
+    \li Specifies stencil mask value.
+\endtable
+
+The stencil operation values are:
+\list
+\li \c keep
+\li \c zero
+\li \c replace
+\li \c increment
+\li \c increment-wrap
+\li \c decrement
+\li \c decrement-wrap
+\li \c invert
+\endlist
+
+The boolean operator values are:
+\list
+\li \c never
+\li \c less
+\li \c less-than-or-equal
+\li \c equal
+\li \c not-equal
+\li \c greater
+\li \c greater-than-or-equal
+\li \c always
+\endlist
+*/

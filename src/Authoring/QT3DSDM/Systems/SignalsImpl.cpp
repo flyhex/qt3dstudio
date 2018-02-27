@@ -1059,6 +1059,7 @@ Q_SIGNALS:
     void instanceDeleted(Qt3DSDMInstanceHandle);
     void animationCreated(Qt3DSDMAnimationHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle);
     void animationDeleted(Qt3DSDMAnimationHandle, Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle);
+    void controlledToggled(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle);
     void keyframeInserted(Qt3DSDMAnimationHandle, Qt3DSDMKeyframeHandle);
     void keyframeErased(Qt3DSDMAnimationHandle, Qt3DSDMKeyframeHandle);
     void keyframeUpdated(Qt3DSDMKeyframeHandle);
@@ -1165,7 +1166,6 @@ public:
     {
         return CONNECT_SIGNAL_QT(&CStudioFullSystemSignaller::instanceDeleted);
     }
-
     virtual TSignalConnectionPtr
     ConnectAnimationCreated(const std::function<void(Qt3DSDMAnimationHandle, Qt3DSDMInstanceHandle,
                                                        Qt3DSDMPropertyHandle)> &inCallback) override
@@ -1306,6 +1306,12 @@ public:
         const std::function<void(Qt3DSDMInstanceHandle, const TCharStr &)> &inCallback) override
     {
         return CONNECT_SIGNAL_QT(&CStudioFullSystemSignaller::customReferencesModified);
+    }
+    TSignalConnectionPtr ConnectControlledToggled(
+        const std::function<void(
+            Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> &inCallback) override
+    {
+        return CONNECT_SIGNAL_QT(&CStudioFullSystemSignaller::controlledToggled);
     }
 
     virtual void SendChangeSetBegin()
@@ -1538,6 +1544,13 @@ public:
     {
         CHECK_SIGNALS_ENABLED();
         Q_EMIT customReferencesModified(inOwner, inString);
+    }
+
+    void SendControlledToggled(Qt3DSDMInstanceHandle inInstance,
+                               Qt3DSDMPropertyHandle inProperty) override
+    {
+        CHECK_SIGNALS_ENABLED();
+        Q_EMIT controlledToggled(inInstance, inProperty);
     }
 };
 

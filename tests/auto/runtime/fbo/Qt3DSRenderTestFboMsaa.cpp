@@ -153,7 +153,7 @@ bool NVRenderTestFboMsaa::renderTriangle(NVRenderContext *context, QT3DSVec3 col
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestFboMsaa: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestFboMsaa: Failed to create vertex buffer";
         return false;
     }
 
@@ -166,7 +166,7 @@ bool NVRenderTestFboMsaa::renderTriangle(NVRenderContext *context, QT3DSVec3 col
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestFboMsaa: Failed to create input assembler";
+        qWarning() << "NVRenderTestFboMsaa: Failed to create input assembler";
         return false;
     }
 

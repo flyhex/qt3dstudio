@@ -45,6 +45,7 @@ class CMainFrame;
 class WidgetControl;
 class TimeLineToolbar;
 class TimelineView;
+class ProjectView;
 
 QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
@@ -89,6 +90,7 @@ protected:
     WidgetControl *m_timeLineWidgetControl;
     TimeLineToolbar *m_timeLineToolbar;
     TimelineView *m_timelineView;
+    ProjectView *m_projectView = nullptr;
 
 public:
     CPaletteManager(CMainFrame *inMainFrame);
@@ -105,6 +107,7 @@ public:
     CTimelineControl *GetTimelineControl() const;
     TimelineView *GetTimelineView() const;
     void onTimeChanged(long time);
+    ProjectView *projectView() const;
 
     // Commands
     void EnablePalettes();

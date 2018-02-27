@@ -97,6 +97,8 @@
         <file>res/effectlib/gles2/shadowMapping.glsllib</file>
         <file>res/effectlib/gles2/tangentSpaceNormalTexture.glsllib</file>
         <file>res/effectlib/gles2/defaultMaterialBumpNoLod.glsllib</file>
+        <file>res/effectlib/gles2/evalEnvironmentMap.glsllib</file>
+        <file>res/effectlib/gles2/microfacetBSDF.glsllib</file>
         <file>res/primitives/Cone.mesh</file>
         <file>res/primitives/Cube.mesh</file>
         <file>res/primitives/Cylinder.mesh</file>

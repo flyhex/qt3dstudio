@@ -36,8 +36,8 @@ SDataInput::SDataInput()
       m_ValueStr(CRegisteredString()),
       m_ControlledElemProp(CRegisteredString()),
       m_NextSibling(nullptr),
-      m_TimeFrom(0),
-      m_TimeTo(10000),
+      m_TimeFrom(0.0f),
+      m_TimeTo(10000.0f),
       m_ControlledElementsProperties(QVector<QPair<CRegisteredString, CRegisteredString>>()),
       m_Scene(nullptr)
 {

@@ -36,26 +36,26 @@
 namespace qt3ds {
 namespace foundation {
     /* set *dest equal to val. Return the old value of *dest */
-    QT3DS_FOUNDATION_API QT3DSI32 atomicExchange(volatile QT3DSI32 *dest, QT3DSI32 val);
+    QT3DS_AUTOTEST_EXPORT QT3DSI32 atomicExchange(volatile QT3DSI32 *dest, QT3DSI32 val);
 
     /* if *dest == comp, replace with exch. Return original value of *dest */
-    QT3DS_FOUNDATION_API QT3DSI32 atomicCompareExchange(volatile QT3DSI32 *dest, QT3DSI32 exch, QT3DSI32 comp);
+    QT3DS_AUTOTEST_EXPORT QT3DSI32 atomicCompareExchange(volatile QT3DSI32 *dest, QT3DSI32 exch, QT3DSI32 comp);
 
     /* if *dest == comp, replace with exch. Return original value of *dest */
-    QT3DS_FOUNDATION_API void *atomicCompareExchangePointer(volatile void **dest, void *exch,
+    QT3DS_AUTOTEST_EXPORT void *atomicCompareExchangePointer(volatile void **dest, void *exch,
                                                          void *comp);
 
     /* increment the specified location. Return the incremented value */
-    QT3DS_FOUNDATION_API QT3DSI32 atomicIncrement(volatile QT3DSI32 *val);
+    QT3DS_AUTOTEST_EXPORT QT3DSI32 atomicIncrement(volatile QT3DSI32 *val);
 
     /* decrement the specified location. Return the decremented value */
-    QT3DS_FOUNDATION_API QT3DSI32 atomicDecrement(volatile QT3DSI32 *val);
+    QT3DS_AUTOTEST_EXPORT QT3DSI32 atomicDecrement(volatile QT3DSI32 *val);
 
     /* add delta to *val. Return the new value */
-    QT3DS_FOUNDATION_API QT3DSI32 atomicAdd(volatile QT3DSI32 *val, QT3DSI32 delta);
+    QT3DS_AUTOTEST_EXPORT QT3DSI32 atomicAdd(volatile QT3DSI32 *val, QT3DSI32 delta);
 
     /* compute the maximum of dest and val. Return the new value */
-    QT3DS_FOUNDATION_API QT3DSI32 atomicMax(volatile QT3DSI32 *val, QT3DSI32 val2);
+    QT3DS_AUTOTEST_EXPORT QT3DSI32 atomicMax(volatile QT3DSI32 *val, QT3DSI32 val2);
 
 } // namespace foundation
 } // namespace qt3ds

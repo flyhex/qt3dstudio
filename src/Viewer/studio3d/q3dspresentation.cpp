@@ -31,6 +31,7 @@
 #include "q3dssceneelement_p.h"
 #include "q3dscommandqueue_p.h"
 #include "viewerqmlstreamproxy_p.h"
+#include "q3dsdatainput_p.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
@@ -69,6 +70,21 @@ void Q3DSPresentation::unregisterElement(Q3DSElement *element)
 Q3DSElement *Q3DSPresentation::registeredElement(const QString &elementPath) const
 {
     return d_ptr->m_elements.value(elementPath, nullptr);
+}
+
+void Q3DSPresentation::registerDataInput(Q3DSDataInput *dataInput)
+{
+    d_ptr->registerDataInput(dataInput);
+}
+
+void Q3DSPresentation::unregisterDataInput(Q3DSDataInput *dataInput)
+{
+    d_ptr->unregisterDataInput(dataInput);
+}
+
+Q3DSDataInput *Q3DSPresentation::registeredDataInput(const QString &name) const
+{
+    return d_ptr->m_dataInputs.value(name, nullptr);
 }
 
 void Q3DSPresentation::setSource(const QUrl &source)
@@ -184,6 +200,16 @@ void Q3DSPresentation::setGlobalAnimationTime(qint64 milliseconds)
     }
 }
 
+void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &value)
+{
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->SetDataInputValue(name, value);
+    } else if (d_ptr->m_commandQueue) {
+        d_ptr->m_commandQueue->queueCommand(QString(), CommandType_SetDataInputValue,
+                                            name, value);
+    }
+}
+
 void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -275,6 +301,7 @@ Q3DSPresentationPrivate::Q3DSPresentationPrivate(Q3DSPresentation *q)
 Q3DSPresentationPrivate::~Q3DSPresentationPrivate()
 {
     unregisterAllElements();
+    unregisterAllDataInputs();
     delete m_streamProxy;
 }
 
@@ -289,9 +316,15 @@ void Q3DSPresentationPrivate::setSource(const QUrl &source)
 
 void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp)
 {
+    Q3DSViewer::Q3DSViewerApp *oldApp = m_viewerApp;
+    m_viewerApp = app;
 
-    for (Q3DSElement *element : m_elements.values())
+    const auto elements = m_elements.values();
+    const auto dataInputs = m_dataInputs.values();
+    for (Q3DSElement *element : elements)
         element->d_ptr->setViewerApp(app);
+    for (Q3DSDataInput *di : dataInputs)
+        di->d_ptr->setViewerApp(app);
 
     if (connectApp) {
         if (app) {
@@ -300,23 +333,25 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                     q_ptr, &Q3DSPresentation::slideExited);
         }
-        if (m_viewerApp) {
-            disconnect(m_viewerApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
+        if (oldApp) {
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
                        this, &Q3DSPresentationPrivate::handleSlideEntered);
-            disconnect(m_viewerApp, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                        q_ptr, &Q3DSPresentation::slideExited);
         }
     }
-
-    m_viewerApp = app;
 }
 
 void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
 {
-    for (Q3DSElement *element : m_elements.values())
-        element->d_ptr->setCommandQueue(queue);
-
     m_commandQueue = queue;
+
+    const auto elements = m_elements.values();
+    const auto dataInputs = m_dataInputs.values();
+    for (Q3DSElement *element : elements)
+        element->d_ptr->setCommandQueue(queue);
+    for (Q3DSDataInput *di : dataInputs)
+        di->d_ptr->setCommandQueue(queue);
 
     if (m_commandQueue)
         setSource(m_source);
@@ -372,6 +407,56 @@ void Q3DSPresentationPrivate::unregisterAllElements()
         element->d_ptr->setPresentation(nullptr);
     }
     m_elements.clear();
+}
+
+void Q3DSPresentationPrivate::registerDataInput(Q3DSDataInput *dataInput)
+{
+    Q_ASSERT(!dataInput->name().isEmpty());
+
+    // Allow only single registration for each DataInput
+    QMutableHashIterator<QString, Q3DSDataInput *> i(m_dataInputs);
+    while (i.hasNext()) {
+        i.next();
+        if (i.value() == dataInput) {
+            // If the same DataInput object is already registered with different name,
+            // remove it from the map to avoid duplication.
+            if (i.key() != dataInput->name())
+                i.remove();
+        } else if (i.key() == dataInput->name()) {
+            // If the same name is registered by another DataInput object, the old
+            // DataInput object is unregistered.
+            i.value()->d_ptr->setViewerApp(nullptr);
+            i.value()->d_ptr->setPresentation(nullptr);
+            i.remove();
+        }
+    }
+
+    dataInput->d_ptr->setPresentation(this);
+    dataInput->d_ptr->setViewerApp(m_viewerApp);
+    dataInput->d_ptr->setCommandQueue(m_commandQueue);
+
+    m_dataInputs.insert(dataInput->name(), dataInput);
+}
+
+void Q3DSPresentationPrivate::unregisterDataInput(Q3DSDataInput *dataInput)
+{
+    Q3DSDataInput *oldDi = m_dataInputs.value(dataInput->name());
+    if (oldDi == dataInput) {
+        dataInput->d_ptr->setCommandQueue(nullptr);
+        dataInput->d_ptr->setViewerApp(nullptr);
+        dataInput->d_ptr->setPresentation(nullptr);
+        m_dataInputs.remove(dataInput->name());
+    }
+}
+
+void Q3DSPresentationPrivate::unregisterAllDataInputs()
+{
+    for (Q3DSDataInput *di : m_dataInputs.values()) {
+        di->d_ptr->setViewerApp(nullptr);
+        di->d_ptr->setCommandQueue(nullptr);
+        di->d_ptr->setPresentation(nullptr);
+    }
+    m_dataInputs.clear();
 }
 
 Q3DStudio::EKeyCode Q3DSPresentationPrivate::getScanCode(QKeyEvent *e)

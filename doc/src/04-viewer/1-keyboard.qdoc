@@ -42,11 +42,14 @@
     \li Open
     \li \c{Ctrl + O}
   \row
+    \li Connect
+    \li \c{F9}
+  \row
     \li Reload
     \li \c{F5}
   \row
     \li Quit
-    \li \c{Alt + F4}
+    \li \c{Ctrl + Q}
 \endtable
 
 \section1 View Menu
@@ -56,20 +59,17 @@
     \li Function
     \li Shortcut
   \row
-    \li Full Screen
-    \li \c{F11}
-  \row
     \li Show Matte
     \li \c{Ctrl + D}
   \row
     \li Scale Modes
-    \li \c{Ctrl + Shift + S}
+    \li \c{Ctrl + Shift + S} (cycle through scale modes)
   \row
-    \li Shade Mode
-    \li \c{Ctrl + Shift + W}
+    \li Show Render Statistics
+    \li \c{F7}
   \row
-    \li Render Statistics
-    \li \c{F1}
+    \li Full Screen
+    \li \c{F11} (To exit full screen, ESC or swipe down gesture can also be used)
 \endtable
 
 */

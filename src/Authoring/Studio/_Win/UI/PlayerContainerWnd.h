@@ -78,6 +78,8 @@ public:
 
     QSize GetEffectivePresentationSize() const;
 
+    qreal fixedDevicePixelRatio() const;
+
 Q_SIGNALS:
     void toolChanged();
 

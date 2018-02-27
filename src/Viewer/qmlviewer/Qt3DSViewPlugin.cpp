@@ -39,6 +39,7 @@
 #include "q3dsqmlstream.h"
 #include "q3dsqmlsubpresentationsettings.h"
 #include "q3dssceneelement.h"
+#include "q3dsdatainput.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -62,6 +63,7 @@ void Q3DSViewPlugin::registerTypes(const char *uri)
 #endif
 */
     // @uri Studio3D
+    // Version 1.0
     qmlRegisterType<Q3DSView>(uri, 1, 0, "Studio3D");
     qmlRegisterType<Q3DSViewerSettings>(uri, 1, 0, "ViewerSettings");
     qmlRegisterType<Q3DSPresentationItem>(uri, 1, 0, "Presentation");
@@ -69,6 +71,11 @@ void Q3DSViewPlugin::registerTypes(const char *uri)
     qmlRegisterType<Q3DSElement>(uri, 1, 0, "Element");
     qmlRegisterType<Q3DSQmlStream>(uri, 1, 0, "QmlStream");
     qmlRegisterType<Q3DSSubPresentationSettings>(uri, 1, 0, "SubPresentationSettings");
+
+    // Version 1.1
+    qmlRegisterType<Q3DSView, 1>(uri, 1, 1, "Studio3D");
+    qmlRegisterType<Q3DSDataInput>(uri, 1, 1, "DataInput");
+    qmlRegisterType<Q3DSPresentationItem, 1>(uri, 1, 1, "Presentation");
 }
 
 QT_END_NAMESPACE

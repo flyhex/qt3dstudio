@@ -78,6 +78,7 @@ class CViews;
 class CMainFrame;
 enum EStudioObjectType;
 struct SubPresentationRecord;
+class CDataInputDialogItem;
 
 class CStudioApp : public QObject,
         public CCoreAsynchronousEventListener,
@@ -179,6 +180,7 @@ public:
     void PlaybackPlay();
     void PlaybackStopNoRestore();
     void PlaybackRewind();
+    bool IsPlaying();
     void OnRevert();
     bool CanRevert();
     void OnFileOpenRecent(const Qt3DSFile &inDocument);
@@ -227,7 +229,9 @@ public:
     Q3DStudio::CString m_pszHelpFilePath;
 
     QVector<SubPresentationRecord> m_subpresentations;
-    void SaveUIAFile();
+    QVector<CDataInputDialogItem *> m_dataInputDialogItems;
+
+    void SaveUIAFile(bool subpresentations = true);
 };
 
 extern CStudioApp g_StudioApp;

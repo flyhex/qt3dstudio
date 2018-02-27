@@ -71,10 +71,13 @@ public:
     void OnDragLeave() override;
     void OnReflectMouse(CPt &inPoint, Qt::KeyboardModifiers inFlags) override {}
 
+    qreal fixedDevicePixelRatio() const;
+
 protected:
 
     CPlayerContainerWnd *m_ContainerWnd;
     bool m_IsMouseDown;
+    bool m_resumePlayOnMouseRelease = false;
     long m_PreviousToolMode; ///< The previous tool mode (used when toggling with hotkeys to switch
                              ///back to previous mode on release)
     bool m_FitClientToWindow; ///< True if we are in Fit to Window Mode

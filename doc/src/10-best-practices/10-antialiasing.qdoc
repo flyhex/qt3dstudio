@@ -79,8 +79,8 @@ edges of selected geometry.
 
 \section2 Texture Aliasing
 
-When a texture is sub-sample - hen fewer pixels are displayed than are
-present in the origina - ou may see undesirable artifacts based on
+When a texture is sub-sample - fewer pixels than in the original are
+displayed - you may see undesirable artifacts based on
 which pixels are chosen. This effect is worsened when the model is
 moving, as very different pixels may be chosen at different times. In
 the image below, notice how the line between E3 and F3 is missing,

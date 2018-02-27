@@ -398,8 +398,8 @@ void Qt3DSDMTimelineItemProperty::OnEditKeyframeTime(long inCurrentTime, long in
 {
     (void)inObjectAssociation;
     CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.SetKeyframesManager(m_TransMgr->GetKeyframesManager());
-    theTimeEditDlg.ShowDialog(inCurrentTime, 0, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
+    theTimeEditDlg.setKeyframesManager(m_TransMgr->GetKeyframesManager());
+    theTimeEditDlg.showDialog(inCurrentTime, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
 }
 
 void Qt3DSDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /*= -1 */)

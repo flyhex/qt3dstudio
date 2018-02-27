@@ -216,7 +216,7 @@ bool NVRenderTestTexture2D::renderTexArrayQuad(NVRenderContext *context, userCon
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 6 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTexture2D: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestTexture2D: Failed to create vertex buffer";
         return false;
     }
 
@@ -229,7 +229,7 @@ bool NVRenderTestTexture2D::renderTexArrayQuad(NVRenderContext *context, userCon
         context->CreateInputAssembler(mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), NULL,
                                       toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTexture2D: Failed to create input assembler";
+        qWarning() << "NVRenderTestTexture2D: Failed to create input assembler";
         return false;
     }
 

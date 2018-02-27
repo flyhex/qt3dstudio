@@ -100,11 +100,9 @@ protected:
     ITimelineItemKeyframesHolder *GetKeyframesHolder() override;
     void MakeDynamic() override;
 
-    void ChangeTimebarColor();
     void ChangeTimebarText();
     void ToggleTimebarHandles();
     void SetTimebarTime();
-    void onTimeBarColorChanged(const QColor &color);
 
 protected:
     ITimebarControl *m_TimebarControl;

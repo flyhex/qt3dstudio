@@ -71,7 +71,7 @@ namespace render {
 
     struct SImage;
 
-    struct SDefaultMaterial : SGraphObject
+    struct QT3DS_AUTOTEST_EXPORT SDefaultMaterial : SGraphObject
     {
         CMaterialDirty m_Dirty;
         // lightmap section

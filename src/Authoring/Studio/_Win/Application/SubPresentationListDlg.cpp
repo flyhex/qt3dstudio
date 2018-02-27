@@ -32,6 +32,10 @@
 
 #include <QtWidgets/qpushbutton.h>
 #include <QtGui/qstandarditemmodel.h>
+#include <QtGui/qevent.h>
+#include <algorithm>
+
+const int columnCount = 3;
 
 CSubPresentationListDlg::CSubPresentationListDlg(
         const QString &directory, const QVector<SubPresentationRecord> &subpresentations,
@@ -41,7 +45,7 @@ CSubPresentationListDlg::CSubPresentationListDlg(
     , m_directory(directory)
     , m_records(subpresentations)
     , m_currentIndex(-1)
-    , m_tableContents(new QStandardItemModel(0, 3, this))
+    , m_tableContents(new QStandardItemModel(0, columnCount, this))
 {
     m_ui->setupUi(this);
 
@@ -67,6 +71,10 @@ CSubPresentationListDlg::CSubPresentationListDlg(
     connect(buttons.at(2), &QAbstractButton::clicked,
             this, &CSubPresentationListDlg::onRemoveSubPresentation);
 
+    buttons[0]->setToolTip(tr("Add New Sub-presentation..."));
+    buttons[1]->setToolTip(tr("Edit Sub-presentation..."));
+    buttons[2]->setToolTip(tr("Remove Sub-presentation"));
+
     initDialog();
 }
 
@@ -82,7 +90,7 @@ QVector<SubPresentationRecord> CSubPresentationListDlg::subpresentations() const
 
 void CSubPresentationListDlg::initDialog()
 {
-    // Check available list. If there are none, hide "Remove" and "Edit" buttons
+    // Check available list. If there are none, disable "Remove" and "Edit" buttons
     updateButtons();
 
     // Update table contents
@@ -99,26 +107,31 @@ void CSubPresentationListDlg::initDialog()
     // Hide the vertical header with line numbers
     m_ui->tableView->verticalHeader()->setHidden(true);
 
-    // When clicking an item, select the whole row
-    connect(m_ui->tableView, &QTableView::clicked, this, &CSubPresentationListDlg::onSelected);
+    connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &CSubPresentationListDlg::onSelectionChanged);
+    connect(m_ui->tableView, &QTableView::activated, this, &CSubPresentationListDlg::onActivated);
 }
 
 void CSubPresentationListDlg::updateButtons()
 {
-    if (m_records.isEmpty() || m_currentIndex == -1) {
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(false);
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(false);
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
-                    QIcon(":/images/Objects-edit-disabled.png"));
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
-                    QIcon(":/images/Action-Trash-Disabled.png"));
-    } else {
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(true);
+    if (m_ui->tableView->selectionModel()
+            && m_ui->tableView->selectionModel()->selectedIndexes().size() > 0) {
         m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(true);
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
-                    QIcon(":/images/Objects-edit-normal.png"));
         m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
                     QIcon(":/images/Action-Trash-Normal.png"));
+    } else {
+        m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(false);
+        m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
+                    QIcon(":/images/Action-Trash-Disabled.png"));
+    }
+    if (m_records.isEmpty() || m_currentIndex == -1) {
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(false);
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
+                    QIcon(":/images/Objects-edit-disabled.png"));
+    } else {
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(true);
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
+                    QIcon(":/images/Objects-edit-normal.png"));
     }
 }
 
@@ -144,6 +157,22 @@ void CSubPresentationListDlg::updateContents()
     }
 
     m_ui->tableView->setModel(m_tableContents);
+}
+
+void CSubPresentationListDlg::keyPressEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Delete)) {
+        onRemoveSubPresentation();
+    } else if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)) {
+        // Eat enter if we have selections
+        const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+        if (indexes.size() > 0)
+            event->accept();
+        else
+            QDialog::keyPressEvent(event);
+    } else {
+        QDialog::keyPressEvent(event);
+    }
 }
 
 void CSubPresentationListDlg::on_buttonBox_accepted()
@@ -177,43 +206,69 @@ void CSubPresentationListDlg::onAddSubPresentation()
 
 void CSubPresentationListDlg::onRemoveSubPresentation()
 {
-    m_records.removeAt(m_ui->tableView->currentIndex().row());
-    m_ui->tableView->clearSelection();
-    m_currentIndex = -1;
+    QVector<int> removedRows;
+    if (m_ui->tableView->selectionModel()) {
+        const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+        for (const auto index : indexes) {
+            if (!removedRows.contains(index.row()))
+                removedRows.append(index.row());
+        }
 
-    updateButtons();
-    updateContents();
+        if (removedRows.size() > 0) {
+            std::sort(removedRows.begin(), removedRows.end());
+            for (int i = removedRows.size() - 1; i >= 0; --i)
+                m_records.removeAt(removedRows[i]);
+
+            m_ui->tableView->clearSelection();
+            m_currentIndex = -1;
+
+            updateButtons();
+            updateContents();
+        }
+    }
 }
 
 void CSubPresentationListDlg::onEditSubPresentation()
 {
-    CSubPresentationDlg subpresdialog(m_directory, m_records.at(m_currentIndex), this);
+    if (m_currentIndex >= 0) {
+        CSubPresentationDlg subpresdialog(m_directory, m_records.at(m_currentIndex), this);
+        if (subpresdialog.exec() == QDialog::Accepted) {
+            m_records[m_currentIndex] = subpresdialog.subpresentation();
+            // We need to update the table to be able to accurately find out if the id is unique
+            updateContents();
+            // Make sure that id is still unique
+            m_records[m_currentIndex].m_id = getUniqueId(m_records[m_currentIndex].m_id, true);
+        }
+        // Update again, as the id might have been updated
+        updateContents();
+        updateButtons();
 
-    if (subpresdialog.exec() == QDialog::Accepted) {
-        m_records[m_currentIndex] = subpresdialog.subpresentation();
-        // Make sure that id is still unique
-        m_records[m_currentIndex].m_id = getUniqueId(m_records[m_currentIndex].m_id);
+        m_ui->tableView->selectRow(m_currentIndex);
     }
-
-    m_currentIndex = -1;
-
-    updateButtons();
-    updateContents();
 }
 
-void CSubPresentationListDlg::onSelected(const QModelIndex &index)
+void CSubPresentationListDlg::onActivated(const QModelIndex &index)
 {
-    m_currentIndex = index.row();
-    m_ui->tableView->selectRow(m_currentIndex);
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+    m_currentIndex = indexes.size() == columnCount ? index.row() : -1;
+    onEditSubPresentation();
+}
 
+void CSubPresentationListDlg::onSelectionChanged()
+{
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+    m_currentIndex = indexes.size() == columnCount ? indexes.at(0).row() : -1;
     updateButtons();
 }
 
-QString CSubPresentationListDlg::getUniqueId(const QString &id)
+QString CSubPresentationListDlg::getUniqueId(const QString &id, bool editing)
 {
     QString retval = QStringLiteral("%1").arg(id);
     int idx = 1;
-    while (m_tableContents->findItems(retval, Qt::MatchExactly, 0).size() && idx < 1000) {
+    int limit = (editing == true) ? 1 : 0;
+    // When editing, ignore our own id (i.e. there is supposed to be one entry already)
+    while (m_tableContents->findItems(retval, Qt::MatchExactly, 0).size() > limit
+           && idx < 1000) {
         retval = QStringLiteral("%1_%2").arg(id).arg(idx, 3, 10, QLatin1Char('0'));
         ++idx;
     }

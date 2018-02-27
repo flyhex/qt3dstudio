@@ -56,24 +56,21 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     const QString theApplicationPath =
             Qt3DSFile::GetApplicationDirectory().GetPath().toQString();
 
-    m_BehaviorDir = Qt3DSFile(
-                Q3DStudio::CString::fromQString(theApplicationPath
-                                                + QLatin1String("/Content/Behavior Library")));
-    m_EffectDir = Qt3DSFile(
-                Q3DStudio::CString::fromQString(theApplicationPath
-                                                + QLatin1String("/Content/Effect Library")));
-    m_FontDir = Qt3DSFile(
-                Q3DStudio::CString::fromQString(theApplicationPath
-                                                + QLatin1String("/Content/Font Library")));
-    m_ImageDir = Qt3DSFile(
-                Q3DStudio::CString::fromQString(theApplicationPath
-                                                + QLatin1String("/Content/Maps Library")));
-    m_MaterialDir = Qt3DSFile(
-                Q3DStudio::CString::fromQString(theApplicationPath
-                                                + QLatin1String("/Content/Material Library")));
-    m_ModelDir = Qt3DSFile(
-                Q3DStudio::CString::fromQString(theApplicationPath
-                                                + QLatin1String("/Content/Models Library")));
+    m_defaultBehaviorDir = theApplicationPath + QStringLiteral("/Content/Behavior Library");
+    m_defaultEffectDir = theApplicationPath + QStringLiteral("/Content/Effect Library");
+    m_defaultFontDir = theApplicationPath + QStringLiteral("/Content/Font Library");
+    m_defaultImageDir = theApplicationPath + QStringLiteral("/Content/Maps Library");
+    m_defaultMaterialDir = theApplicationPath + QStringLiteral("/Content/Material Library");
+    m_defaultModelDir = theApplicationPath + QStringLiteral("/Content/Models Library");
+
+    m_BehaviorDir = m_defaultBehaviorDir;
+    m_EffectDir = m_defaultEffectDir;
+    m_FontDir = m_defaultFontDir;
+    m_ImageDir = m_defaultImageDir;
+    m_MaterialDir = m_defaultMaterialDir;
+    m_ModelDir = m_defaultModelDir;
+
+    m_assetImportDir = theApplicationPath + QStringLiteral("/Content");
 
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &ProjectView::initialize);
@@ -107,34 +104,92 @@ void ProjectView::initialize()
     setSource(QUrl("qrc:/Palettes/Project/ProjectView.qml"_L1));
 }
 
-void ProjectView::effectAction()
+void ProjectView::effectAction(int row)
 {
-    m_EffectDir.Execute();
+    m_EffectDir = m_defaultEffectDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_EffectDir, Q3DStudio::DocumentEditorFileType::Effect);
+    m_ProjectModel->importUrls(urls, row);
 }
 
-void ProjectView::fontAction()
+void ProjectView::fontAction(int row)
 {
-    m_FontDir.Execute();
+    m_FontDir = m_defaultFontDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_FontDir, Q3DStudio::DocumentEditorFileType::Font);
+    m_ProjectModel->importUrls(urls, row);
 }
 
-void ProjectView::imageAction()
+void ProjectView::imageAction(int row)
 {
-    m_ImageDir.Execute();
+    m_ImageDir = m_defaultImageDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_ImageDir, Q3DStudio::DocumentEditorFileType::Image);
+    m_ProjectModel->importUrls(urls, row);
 }
 
-void ProjectView::materialAction()
+void ProjectView::materialAction(int row)
 {
-    m_MaterialDir.Execute();
+    m_MaterialDir = m_defaultMaterialDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_MaterialDir, Q3DStudio::DocumentEditorFileType::Material);
+    m_ProjectModel->importUrls(urls, row);
 }
 
-void ProjectView::modelAction()
+void ProjectView::modelAction(int row)
 {
-    m_ModelDir.Execute();
+    m_ModelDir = m_defaultModelDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_ModelDir, Q3DStudio::DocumentEditorFileType::DAE);
+    m_ProjectModel->importUrls(urls, row);
 }
 
-void ProjectView::behaviorAction()
+void ProjectView::behaviorAction(int row)
 {
-    m_BehaviorDir.Execute();
+    m_BehaviorDir = m_defaultBehaviorDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_BehaviorDir, Q3DStudio::DocumentEditorFileType::Behavior);
+    m_ProjectModel->importUrls(urls, row);
+}
+
+void ProjectView::assetImportAction(int row)
+{
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_assetImportDir, Q3DStudio::DocumentEditorFileType::Unknown);
+    m_ProjectModel->importUrls(urls, row);
+}
+
+void ProjectView::assetImportInContext(int row)
+{
+    // If the context is a default directory, select the correct directory
+    Q3DStudio::DocumentEditorFileType::Enum assetType = m_ProjectModel->assetTypeForRow(row);
+    QString *assetDir = &m_assetImportDir;
+    switch (assetType) {
+    case Q3DStudio::DocumentEditorFileType::Effect:
+        assetDir = &m_EffectDir;
+        break;
+    case Q3DStudio::DocumentEditorFileType::Font:
+        assetDir = &m_FontDir;
+        break;
+    case Q3DStudio::DocumentEditorFileType::Image:
+        assetDir = &m_ImageDir;
+        break;
+    case Q3DStudio::DocumentEditorFileType::Material:
+        assetDir = &m_MaterialDir;
+        break;
+    case Q3DStudio::DocumentEditorFileType::DAE:
+        assetDir = &m_ModelDir;
+        break;
+    case Q3DStudio::DocumentEditorFileType::Behavior:
+        assetDir = &m_BehaviorDir;
+        break;
+    default:
+        break;
+    }
+
+    QList<QUrl> urls;
+    urls = g_StudioApp.GetDialogs()->SelectAssets(*assetDir, assetType);
+    m_ProjectModel->importUrls(urls, row, false);
 }
 
 void ProjectView::OnNewPresentation()

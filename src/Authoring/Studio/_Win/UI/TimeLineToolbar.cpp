@@ -31,6 +31,8 @@
 #include "StudioApp.h"
 #include "MainFrm.h"
 #include "TimeEditDlg.h"
+#include "DataInputSelectDlg.h"
+#include "DataInputDlg.h"
 #include "Doc.h"
 #include "Core.h"
 #include "Dispatch.h"
@@ -39,6 +41,7 @@
 #include "StudioObjectTypes.h"
 #include "IDocumentEditor.h"
 #include "DocumentEditorEnumerations.h"
+#include "StudioPreferences.h"
 
 #include <QtCore/qdatetime.h>
 
@@ -47,27 +50,31 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     : QWidget(pParent)
     , m_ui(new QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar))
     , m_preferredSize(preferredSize)
+    , m_mainFrame(mainFrame)
+    , m_DataInputSelector(nullptr)
 {
     m_ui->setupUi(this);
 
     connect(m_ui->playButton, &QToolButton::clicked,
-            mainFrame, &CMainFrame::OnPlaybackPlay);
+            this, &TimeLineToolbar::onPlayButtonClicked);
     connect(m_ui->rewindButton, &QToolButton::clicked,
             mainFrame, &CMainFrame::OnPlaybackRewind);
-    connect(m_ui->stopButton, &QToolButton::clicked,
-            mainFrame, &CMainFrame::OnPlaybackStop);
     connect(mainFrame, &CMainFrame::playStateChanged,
-            [this](bool state){
-        m_ui->playButton->setEnabled(!state);
-        m_ui->playButton->setChecked(state);
-        m_ui->stopButton->setEnabled(state);
+            [this](bool started) {
+        if (started) {
+            m_ui->playButton->setIcon(QIcon(":/images/playback_tools_low-01.png"));
+            m_ui->playButton->setToolTip(tr("Stop animation"));
+        } else {
+            m_ui->playButton->setIcon(QIcon(":/images/playback_tools_low-02.png"));
+            m_ui->playButton->setToolTip(tr("Play animation"));
+        }
     });
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     connect(m_ui->timeButton, &QPushButton::clicked,
             [this, doc](){
         CTimeEditDlg timeEditDlg;
-        timeEditDlg.ShowDialog(doc->GetCurrentViewTime(), 0, doc, PLAYHEAD);
+        timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
     });
 
     connect(m_ui->deleteObject, &QPushButton::clicked,
@@ -79,14 +86,24 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
 
     connect(m_ui->addLayerButton, &QPushButton::clicked,
             this, &TimeLineToolbar::onAddLayerClicked);
+    // Set as parent to mainframe to allow positioning in the main window
+    m_DataInputSelector = new DataInputSelectDlg(mainFrame);
+    m_DataInputSelector->hide();
+    m_DataInputSelector->setWindowTitle(tr("Select timeline controller"));
 
-    // TODO: Add datainput button handling
-    m_ui->addDataInputButton->setVisible(false);
+
+    connect(m_ui->addDataInputButton, &QPushButton::clicked,
+            this, &TimeLineToolbar::onAddDataInputClicked);
+
+    theDispatch->AddDataModelListener(this);
+    connect(m_DataInputSelector, &DataInputSelectDlg::dataInputChanged,
+            this, &TimeLineToolbar::onDataInputChange);
 }
 
 TimeLineToolbar::~TimeLineToolbar()
 {
     delete m_ui;
+    delete m_DataInputSelector;
     m_Connections.clear();
 }
 
@@ -123,6 +140,153 @@ void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
         }
     }
     m_ui->deleteObject->setEnabled(canDelete);
+
+    updateDataInputStatus(false);
+}
+
+void TimeLineToolbar::onAddDataInputClicked()
+{
+    showDataInputChooser();
+}
+
+// Update datainput button state according to this timecontext
+// control state. If triggered via datamodel change i.e. dispatch message,
+// force update from actual property values
+void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
+    qt3dsdm::Qt3DSDMInstanceHandle timeCtxRoot = doc->GetActiveRootInstance();
+    CClientDataModelBridge *theClientBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    // Only check for updates if we have entered new time context or receive dispatch (undo/redo).
+    // Actual control changes in this time context are handled in onDataInputChange
+    if (m_currTimeCtxRoot != timeCtxRoot || isViaDispatch) {
+        if (theClientBridge->GetObjectType(timeCtxRoot) == EStudioObjectType::OBJTYPE_SCENE) {
+            ctrldProp = theClientBridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+        } else if (theClientBridge->GetObjectType(timeCtxRoot) ==
+                   EStudioObjectType::OBJTYPE_COMPONENT) {
+            ctrldProp = theClientBridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
+        } else {
+            Q_ASSERT(false);
+        }
+
+        qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
+            = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                *doc,
+                QObject::tr("Get Timeline control"))->GetInstancePropertyValue(timeCtxRoot,
+                                                                               ctrldProp);
+        auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+
+        if (existingCtrl.contains("@timeline")) {
+            int slideStrPos = existingCtrl.indexOf("@timeline");
+            int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
+            m_currController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
+        } else {
+            m_currController.clear();
+        }
+        // Toggle if we changed to a controlled time context, or if icon current state
+        // differs from the control state of current time context
+        if (m_currController.size()) {
+            m_ui->addDataInputButton->setToolTip(
+                tr("Timeline Controller:\n%1").arg(m_currController));
+            m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
+        } else {
+            // TODO actually delete the entire property instead of setting it as empty string
+            m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Disabled.png"));
+            m_ui->addDataInputButton->setToolTip(tr("No control"));
+        }
+
+        m_currTimeCtxRoot = timeCtxRoot;
+    }
+}
+
+void TimeLineToolbar::showDataInputChooser()
+{
+    QStringList dataInputList;
+    dataInputList.append(tr("[No control]"));
+    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
+        if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeRangedNumber)
+            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+    }
+    QString currCtr = m_currController.size() ?
+        m_currController : tr("[No control]");
+    m_DataInputSelector->setData(dataInputList, currCtr);
+    m_DataInputSelector->showDialog(QCursor::pos());
+
+    return;
+}
+
+void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
+{
+    if (dataInputName == m_currController ||
+        (dataInputName == tr("[No Control]") && !m_currController.size())) {
+        return;
+    }
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    QString fullTimeControlStr;
+
+    if (dataInputName != tr("[No control]")) {
+        m_ui->addDataInputButton->setToolTip(tr("Timeline Controller:\n%1").arg(dataInputName));
+        fullTimeControlStr = dataInputName + " @timeline";
+        m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
+        m_currController = dataInputName;
+    } else {
+        m_ui->addDataInputButton->setToolTip(tr("No control"));
+        // TODO actually delete the entire property instead of setting it as empty string
+        m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Disabled.png"));
+        m_currController.clear();
+    }
+
+    // To indicate that this presentation timeline is controlled by data input,
+    // we set "controlled property" of this time context root (scene or component)
+    // to contain the name of controller followed by special indicator "@timeline".
+    // Either replace existing timeline control indicator string or append new one
+    // but do not touch @slide indicator string as scene can have both
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldPropertyHandle;
+    qt3dsdm::Qt3DSDMInstanceHandle timeCtxRoot = doc->GetActiveRootInstance();
+    // Time context root is either scene or component
+    if (bridge->GetObjectType(timeCtxRoot) == EStudioObjectType::OBJTYPE_SCENE)
+        ctrldPropertyHandle = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    else if (bridge->GetObjectType(timeCtxRoot) == EStudioObjectType::OBJTYPE_COMPONENT)
+        ctrldPropertyHandle = bridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
+    else
+        Q_ASSERT(false);
+
+    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
+        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+            *doc,
+            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(timeCtxRoot,
+                                                                            ctrldPropertyHandle);
+
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    if (existingCtrl.contains("@timeline")) {
+        int slideStrPos = existingCtrl.indexOf("@timeline");
+        // find the controlling datainput name and build the string to replace
+        int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
+        QString prevCtrler = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 1);
+        existingCtrl.replace(prevCtrler + "@timeline", fullTimeControlStr);
+    } else {
+        if (!existingCtrl.isEmpty() && m_currController.size())
+            existingCtrl.append(" ");
+        existingCtrl.append(fullTimeControlStr);
+    }
+
+    if (existingCtrl.endsWith(" "))
+        existingCtrl.chop(1);
+
+    if (existingCtrl.startsWith(" "))
+        existingCtrl.remove(0, 1);
+
+    m_currTimeCtxRoot = timeCtxRoot;
+
+    qt3dsdm::SValue fullCtrlPropVal
+        = std::make_shared<qt3dsdm::CDataStr>(
+            Q3DStudio::CString::fromQString(existingCtrl));
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Timeline control"))
+        ->SetInstancePropertyValue(timeCtxRoot, ctrldPropertyHandle, fullCtrlPropVal);
+    return;
 }
 
 void TimeLineToolbar::onAddLayerClicked()
@@ -144,4 +308,33 @@ void TimeLineToolbar::onAddLayerClicked()
         ->CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Layer, layer, slide,
                                    DocumentEditorInsertType::PreviousSibling,
                                    CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+}
+
+void TimeLineToolbar::onPlayButtonClicked()
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (doc->IsPlaying())
+        m_mainFrame->OnPlaybackStop();
+    else
+        m_mainFrame->OnPlaybackPlay();
+}
+
+void TimeLineToolbar::OnBeginDataModelNotifications()
+{
+}
+
+void TimeLineToolbar::OnEndDataModelNotifications()
+{
+    updateDataInputStatus(true);
+}
+
+void TimeLineToolbar::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    updateDataInputStatus(true);
+}
+
+void TimeLineToolbar::OnImmediateRefreshInstanceMultiple(
+    qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+{
+    updateDataInputStatus(true);
 }

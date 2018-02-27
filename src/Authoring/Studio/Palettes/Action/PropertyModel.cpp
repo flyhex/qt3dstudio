@@ -64,52 +64,60 @@ void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
         qt3dsdm::IMetaData &metaData(*studioSystem->GetActionMetaData());
         qt3dsdm::TMetaDataPropertyHandleList metaProperties;
         const auto instance = bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
-        metaData.GetMetaDataProperties(instance, metaProperties);
+        if (instance.Valid()) {
+            metaData.GetMetaDataProperties(instance, metaProperties);
 
-        for (const auto &metaProperty: metaProperties) {
-            auto propertyMetaInfo = metaData.GetMetaDataPropertyInfo(metaProperty);
-            if (propertyMetaInfo->m_IsHidden == false) {
-                PropertyInfo property;
-                property.m_handle = propertyMetaInfo->m_Property;
-                property.m_name = QString::fromWCharArray(propertySystem->GetFormalName(instance, property.m_handle).wide_str());
-                property.m_nameId = QString::fromWCharArray(propertySystem->GetName(property.m_handle).wide_str());
-                property.m_type = propertyMetaInfo->GetDataType();
-                property.m_additionalType = propertyMetaInfo->GetAdditionalType();
+            for (const auto &metaProperty: metaProperties) {
+                auto propertyMetaInfo = metaData.GetMetaDataPropertyInfo(metaProperty);
+                if (propertyMetaInfo->m_IsHidden == false) {
+                    PropertyInfo property;
+                    property.m_handle = propertyMetaInfo->m_Property;
+                    property.m_name = QString::fromWCharArray(
+                                propertySystem->GetFormalName(instance,
+                                                              property.m_handle).wide_str());
+                    property.m_nameId = QString::fromWCharArray(
+                                propertySystem->GetName(property.m_handle).wide_str());
+                    property.m_type = propertyMetaInfo->GetDataType();
+                    property.m_additionalType = propertyMetaInfo->GetAdditionalType();
 
-                const auto additionalMetaDataType = propertySystem->GetAdditionalMetaDataType(instance, property.m_handle);
-                switch (additionalMetaDataType) {
-                case qt3dsdm::AdditionalMetaDataType::Range: {
-                    const qt3dsdm::TMetaDataData &metaDataData =
-                            propertySystem->GetAdditionalMetaDataData(instance, property.m_handle);
-                    qt3dsdm::SMetaDataRange minMax = qt3dsdm::get<qt3dsdm::SMetaDataRange>(metaDataData);
-                    property.m_min = minMax.m_Min;
-                    property.m_max = minMax.m_Max;
-                    break;
-                }
-                case qt3dsdm::AdditionalMetaDataType::StringList: {
-                    const qt3dsdm::TMetaDataData &metaDataData =
-                            propertySystem->GetAdditionalMetaDataData(instance, property.m_handle);
-                    auto values = qt3dsdm::get<qt3dsdm::TMetaDataStringList>(metaDataData);
-                    QStringList possibleValues;
-                    for (const auto &value: values) {
-                        possibleValues.append(QString::fromWCharArray(value.wide_str()));
+                    const auto additionalMetaDataType =
+                            propertySystem->GetAdditionalMetaDataType(instance, property.m_handle);
+                    switch (additionalMetaDataType) {
+                    case qt3dsdm::AdditionalMetaDataType::Range: {
+                        const qt3dsdm::TMetaDataData &metaDataData =
+                                propertySystem->GetAdditionalMetaDataData(instance,
+                                                                          property.m_handle);
+                        qt3dsdm::SMetaDataRange minMax =
+                                qt3dsdm::get<qt3dsdm::SMetaDataRange>(metaDataData);
+                        property.m_min = minMax.m_Min;
+                        property.m_max = minMax.m_Max;
+                        break;
                     }
-                    property.m_possibleValues = possibleValues;
-                    break;
-                }
-                case qt3dsdm::AdditionalMetaDataType::Font: {
-                    std::vector<Q3DStudio::CString> fontNames;
-                    doc->GetProjectFonts(fontNames);
-                    QStringList possibleValues;
-                    for (const auto &fontName: fontNames) {
-                        possibleValues.append(fontName.toQString());
+                    case qt3dsdm::AdditionalMetaDataType::StringList: {
+                        const qt3dsdm::TMetaDataData &metaDataData =
+                                propertySystem->GetAdditionalMetaDataData(instance,
+                                                                          property.m_handle);
+                        auto values = qt3dsdm::get<qt3dsdm::TMetaDataStringList>(metaDataData);
+                        QStringList possibleValues;
+                        for (const auto &value: values)
+                            possibleValues.append(QString::fromWCharArray(value.wide_str()));
+                        property.m_possibleValues = possibleValues;
+                        break;
                     }
-                    property.m_possibleValues = possibleValues;
-                    break;
+                    case qt3dsdm::AdditionalMetaDataType::Font: {
+                        std::vector<Q3DStudio::CString> fontNames;
+                        doc->GetProjectFonts(fontNames);
+                        QStringList possibleValues;
+                        for (const auto &fontName: fontNames)
+                            possibleValues.append(fontName.toQString());
+                        property.m_possibleValues = possibleValues;
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                    m_properties.append(property);
                 }
-                default:;
-                }
-                m_properties.append(property);
             }
         }
     }

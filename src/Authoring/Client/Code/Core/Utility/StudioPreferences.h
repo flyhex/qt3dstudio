@@ -110,9 +110,6 @@ public:
     static bool GetTimebarDisplayTime();
     static void SetTimebarDisplayTime(bool inDisplayTime);
 
-    static double GetNudgeAmount();
-    static void SetNudgeAmount(double inNudgeAbount);
-
     static bool ShowVersionDialog();
     static void SetShowVersionDialog(bool inShowVersionDialog);
 
@@ -276,6 +273,7 @@ public:
     static QColor textColor();
     static QColor masterColor();
     static QColor disabledColor();
+    static QColor dataInputColor();
     static int fontSize();
     static int controlBaseHeight();
     static int idWidth();

@@ -94,15 +94,6 @@ public:
         Q_UNUSED(inDelta);
         Q_UNUSED(inToolMode);
     }
-
-    virtual void OnNudge(ENudgeDirection inNudgeDirection, int inToolMode, int inFlags)
-    {
-        Q_UNUSED(inNudgeDirection);
-        Q_UNUSED(inToolMode);
-        Q_UNUSED(inFlags);
-    }
-
-    virtual void OnNudgeDone() {}
 };
 
 //=============================================================================

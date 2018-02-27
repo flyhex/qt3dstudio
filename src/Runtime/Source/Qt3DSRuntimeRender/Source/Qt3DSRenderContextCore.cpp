@@ -251,8 +251,6 @@ struct SRenderContext : public IQt3DSRenderContext
     QSize m_PreRenderPresentationDimensions;
     QT3DSVec2 m_PresentationScale;
     NVRenderRect m_VirtualViewport;
-    NVScopedRefCounted<NVRenderTexture2D> m_Watermark;
-    QT3DSVec2 m_WatermarkLocation;
     QPair<QT3DSF32, int> m_FPS;
     bool m_AuthoringMode;
 
@@ -279,7 +277,6 @@ struct SRenderContext : public IQt3DSRenderContext
         , m_Rotation(RenderRotationValues::NoRotation)
         , m_ContextRenderTarget(NULL)
         , m_PresentationScale(0, 0)
-        , m_WatermarkLocation(1, 1)
         , m_FPS(qMakePair(0.0, 0))
         , m_AuthoringMode(false)
     {
@@ -428,17 +425,6 @@ struct SRenderContext : public IQt3DSRenderContext
     void SetWireframeMode(bool inEnable) override { m_WireframeMode = inEnable; }
 
     bool GetWireframeMode() override { return m_WireframeMode; }
-
-    void SetWatermark(NVRenderTexture2D &inTexture) override
-    {
-        qCInfo(TRACE_INFO, "Qt3DSContext -- Setting watermark texture");
-        m_Watermark = inTexture;
-    }
-
-    void SetWatermarkLocation(QT3DSVec2 inLocation) override
-    {
-        m_WatermarkLocation = QT3DSVec2(Clamp(inLocation.x), Clamp(inLocation.y));
-    }
 
     void SetViewport(Option<NVRenderRect> inViewport) override { m_Viewport = inViewport; }
     Option<NVRenderRect> GetViewport() const override { return m_Viewport; }
@@ -770,79 +756,6 @@ struct SRenderContext : public IQt3DSRenderContext
     // Note this runs before EndFrame
     virtual void TeardownRenderTarget()
     {
-        if (m_Watermark) {
-            STextureDetails theWatermarkDims = m_Watermark->GetTextureDetails();
-            QSize thePresentationDimensions(m_PresentationDimensions);
-            NVRenderRect theViewport(GetContextViewport());
-            // Calculate the presentation viewport perhaps with the presentation width and height
-            // swapped.
-            NVRenderRect thePresentationViewport =
-                GetPresentationViewport(theViewport, m_ScaleMode, thePresentationDimensions);
-            if (m_RotationFBO) {
-                QT3DSU32 imageWidth = ITextRenderer::NextMultipleOf4(thePresentationViewport.m_Width);
-                QT3DSU32 imageHeight =
-                    ITextRenderer::NextMultipleOf4(thePresentationViewport.m_Height);
-                m_RenderContext->SetRenderTarget(m_RotationFBO);
-                NVRenderRect theSceneViewport = NVRenderRect(0, 0, imageWidth, imageHeight);
-                m_RenderContext->SetViewport(theSceneViewport);
-            } else {
-                m_RenderContext->SetRenderTarget(m_ContextRenderTarget);
-                m_RenderContext->SetViewport(thePresentationViewport);
-            }
-            NVRenderRect theRenderViewport = m_RenderContext->GetViewport();
-            if (theRenderViewport.m_Width && theRenderViewport.m_Height) {
-                double theDesiredTextureArea =
-                    theRenderViewport.m_Width * theRenderViewport.m_Height * 1.0 / 100;
-                double theMultiplier = sqrt(
-                    theDesiredTextureArea / (theWatermarkDims.m_Width * theWatermarkDims.m_Height));
-                double theTargetWidth = theWatermarkDims.m_Width * theMultiplier;
-                double theTargetHeight = theWatermarkDims.m_Height * theMultiplier;
-                double theInset = theTargetHeight / 4.0f;
-                double theInsetRectWidth = theRenderViewport.m_Width - 2 * theInset;
-                double theInsetRectHeight = theRenderViewport.m_Height - 2 * theInset;
-                double rangeWidth = theInsetRectWidth - theTargetWidth;
-                double rangeHeight = theInsetRectHeight - theTargetHeight;
-                double leftOffset = rangeWidth * m_WatermarkLocation.x;
-                double bottomOffset = theInsetRectHeight - (rangeHeight * m_WatermarkLocation.y);
-                theRenderViewport.m_X += (QT3DSI32)leftOffset;
-                theRenderViewport.m_Y += (QT3DSI32)bottomOffset;
-                theRenderViewport.m_Width = (QT3DSI32)theTargetWidth;
-                theRenderViewport.m_Height = (QT3DSI32)theTargetHeight;
-                m_RenderContext->SetViewport(theRenderViewport);
-                m_RenderContext->SetDepthTestEnabled(false);
-                m_RenderContext->SetBlendingEnabled(true);
-                m_RenderContext->SetBlendFunction(qt3ds::render::NVRenderBlendFunctionArgument(
-                    qt3ds::render::NVRenderSrcBlendFunc::SrcAlpha,
-                    qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha,
-                    qt3ds::render::NVRenderSrcBlendFunc::One,
-                    qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha));
-                m_RenderContext->SetBlendEquation(qt3ds::render::NVRenderBlendEquationArgument(
-                    NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
-                m_RenderContext->SetScissorTestEnabled(false);
-                SCamera theCamera;
-                theCamera.MarkDirty(NodeTransformDirtyFlag::TransformIsDirty);
-                theCamera.m_Flags.SetOrthographic(true);
-                QT3DSVec2 theCameraDimensions((QT3DSF32)theRenderViewport.m_Width,
-                                           (QT3DSF32)theRenderViewport.m_Height);
-                theCamera.CalculateGlobalVariables(NVRenderRect(0, 0,
-                                                                (QT3DSU32)theRenderViewport.m_Width,
-                                                                (QT3DSU32)theRenderViewport.m_Height),
-                                                   theCameraDimensions);
-
-                QT3DSMat44 theVP;
-                theCamera.CalculateViewProjectionMatrix(theVP);
-                SNode theTempNode;
-                theTempNode.CalculateGlobalVariables();
-                QT3DSMat44 theMVP;
-                QT3DSMat33 theNormalMat;
-                theTempNode.CalculateMVPAndNormalMatrix(theVP, theMVP, theNormalMat);
-                // Render fullscreen quad with the screen being defined as where the texture should
-                // go.
-                m_Renderer->RenderQuad(
-                    QT3DSVec2((QT3DSF32)theRenderViewport.m_Width, (QT3DSF32)theRenderViewport.m_Height),
-                    theMVP, *m_Watermark);
-            }
-        }
         if (m_RotationFBO) {
             ScaleModes::Enum theScaleToFit = m_ScaleMode;
             NVRenderRect theOuterViewport(GetContextViewport());

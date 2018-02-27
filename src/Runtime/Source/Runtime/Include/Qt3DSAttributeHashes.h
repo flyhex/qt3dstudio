@@ -256,6 +256,7 @@ enum EAttribute {
     ATTRIBUTE_TIMEFROM =             0x01028DC9, // timefrom
     ATTRIBUTE_TIMETO =               0x000AE5D8, // timeto
     ATTRIBUTE_CONTROLLEDELEMPROP =   0x021D0620, // controlledelemprop
+    ATTRIBUTE_CONTROLLEDPROPERTY =   0x022C0A1D, // controlledproperty
     ATTRIBUTE_QT_IO =                0x010EF2CF, // qt.io
 }; // enum EAttribute
 

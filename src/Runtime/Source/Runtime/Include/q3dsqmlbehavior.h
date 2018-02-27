@@ -65,6 +65,7 @@ public:
     Q_INVOKABLE QVector3D lookAt(const QVector3D &target);
     Q_INVOKABLE QVector3D matrixToEuler(const QMatrix4x4 &matrix);
     Q_INVOKABLE QString getParent(const QString &handle = QString());
+    Q_REVISION(1) Q_INVOKABLE void setDataInputValue(const QString &name, const QVariant &value);
 
 
 Q_SIGNALS:

@@ -205,6 +205,39 @@ path with the \c{id} of the
 \c{<presentation>} asset in order to
 differentiate it from other possible presentations.)}
 
+\section2 Layers
+
+A layer represents a 3D scene that gets rendered into a 2D image and
+placed somewhere on the screen. Just as a Photoshop file may have
+multiple 2D layers drawn on top of one another, a Studio presentation
+may have multiple layers composited together.
+
+Layers also provide a target where
+\l{best-practices-effects.html}{post-processing effects} may be applied.
+
+There must be at least one layer on each slide in the presentation. Studio will not let
+you delete the last layer unless you first add a new layer on the slide to replace it.
+
+You can create a new layer by clicking the layer icon
+\inlineimage Studio-Timeline-NewLayer.png
+in the bottom part of the scene graph. Creating a new layer in your scene will add both a
+camera and a light to that new layer.
+
+To remove a layer, select it in the scene graph, then click the delete layer icon
+\inlineimage Studio-Timeline-DeleteLayer.png
+.
+
+\section2 Data Input
+
+You can \l {Using Data Inputs}{use a data input} to control the timeline animation. You can set up
+a data input to control the timeline by clicking the
+\inlineimage datainput-to-timeline-icon-inactive.png
+icon.
+
+An orange colored icon \inlineimage datainput-to-timeline-icon-active.png
+indicates that a data input is currently connected to the timeline. Click the icon to remove the
+data input.
+
 \section1 Animation Portion
 
 \image Studio-Timeline-Animation.png

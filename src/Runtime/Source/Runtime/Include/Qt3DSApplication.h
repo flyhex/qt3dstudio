@@ -83,7 +83,7 @@ public:
     virtual void Run() = 0;
 };
 
-class IApplicationCore : public NVRefCounted
+class QT3DS_AUTOTEST_EXPORT IApplicationCore : public NVRefCounted
 {
 public:
     // threadsafe call.
@@ -156,6 +156,29 @@ public:
     static bool isPickingEvent(Q3DStudio::TEventCommandHash event);
 };
 
+struct DataInputControlledAttribute
+{
+    QByteArray elementPath;
+    QByteArray attributeName;
+    Q3DStudio::EAttributeType propertyType = Q3DStudio::ATTRIBUTETYPE_NONE;
+};
+
+enum DataInputType {
+    DataInputTypeInvalid = 0,
+    DataInputTypeRangedNumber,
+    DataInputTypeString
+};
+
+struct DataInputDef
+{
+    QVector<DataInputControlledAttribute> controlledAttributes;
+    DataInputType type = DataInputTypeInvalid;
+    float min = 0.0f;
+    float max = 0.0f;
+};
+
+typedef QMap<QString, DataInputDef> DataInputMap;
+
 class IApplication : public IApplicationCore
 {
 public:
@@ -185,6 +208,8 @@ public:
 
     virtual Q3DStudio::CPresentation *GetPresentationById(const char8_t *inId) = 0;
 
+    virtual QList<Q3DStudio::CPresentation *> GetPresentationList() = 0;
+
     // Update all the presentations and render them.  Called exactly once per frame.
     virtual void UpdateAndRender() = 0;
 
@@ -195,6 +220,8 @@ public:
     virtual Q3DStudio::IAudioPlayer &GetAudioPlayer() = 0;
 
     virtual bool createSuccessful() = 0;
+
+    virtual DataInputMap &dataInputMap() = 0;
 };
 }
 }

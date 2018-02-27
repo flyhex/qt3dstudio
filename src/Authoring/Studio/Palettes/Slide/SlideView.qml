@@ -28,6 +28,7 @@
 
 import QtQuick 2.8
 import QtQuick.Controls 2.2
+import QtQuick.Layouts 1.3
 import "../controls"
 
 Rectangle {
@@ -59,6 +60,7 @@ Rectangle {
         }
 
         spacing: 5
+        width: parent.width
 
         MouseArea {
             id: masterMouseArea
@@ -111,8 +113,12 @@ Rectangle {
             ScrollBar.vertical: ScrollBar {}
 
             width: root.width
-            height: root.height - masterButtonColumn.height
-                    - separator.height - parent.spacing * 2 - 10
+            property int listItemHeight: root.height - masterButtonColumn.height
+                                         - separator.height - separator2.height
+                                         - parent.spacing * 2 - 14 - slideControlButton.height
+                                         - slideControlButton.spacing * 2
+            height: listItemHeight > 0 ? listItemHeight : 0
+
             anchors.horizontalCenter: parent.horizontalCenter
             boundsBehavior: Flickable.StopAtBounds
             clip: true
@@ -276,6 +282,55 @@ Rectangle {
                 }
             }
         }
-    }
 
+        StyledMenuSeparator {
+            id: separator2
+            leftPadding: 12
+            rightPadding: 12
+        }
+        // RowLayout for possible addition and positioning of label
+        // showing the controller name
+        RowLayout {
+            Layout.rightMargin: 12
+            Layout.leftMargin: 12
+            anchors.left: parent.left
+            Button {
+                id: slideControlButton
+                width: dataInputImage.sourceSize.width
+                height: dataInputImage.sourceSize.height
+                Layout.leftMargin: 12
+                property bool controlled: _slideView.controlled
+                property string currentController: _slideView.currController
+                property string toolTip: _slideView.toolTip
+                background: Rectangle {
+                    color: "transparent"
+                }
+                MouseArea {
+                    id: controlButtonArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton
+                    onClicked:  {
+                        _slideView.showControllerDialog(mapToGlobal(mouse.x, mouse.y));
+                    }
+                }
+                Image {
+                    id: dataInputImage
+                    anchors.fill: parent
+                    fillMode: Image.Pad
+                    property bool controlled: parent.controlled
+                    source: {
+                        _resDir + (controlled
+                                   ? "Objects-DataInput-Normal.png"
+                                   : "Objects-DataInput-Disabled.png")
+                    }
+                }
+                StyledTooltip {
+                    id: tooltip
+                    visible: controlButtonArea.containsMouse
+                    text: parent.toolTip
+                }
+            }
+        }
+    }
 }

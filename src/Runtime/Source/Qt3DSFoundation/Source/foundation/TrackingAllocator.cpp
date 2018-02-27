@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 - 2016 NVIDIA Corporation.
+** Copyright (C) 2008-2012 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -28,37 +28,23 @@
 **
 ****************************************************************************/
 
-#ifndef QT3DS_EMBEDDED_WATERMARK_H
-#define QT3DS_EMBEDDED_WATERMARK_H
-#pragma once
-
-#include <stddef.h>
+#include "foundation/TrackingAllocator.h"
 
 namespace qt3ds {
-namespace viewer {
-    struct Qt3DSEmbeddedFile
-    {
-        const char *name;
-        const unsigned char *data;
-        size_t size;
-        Qt3DSEmbeddedFile()
-            : name(NULL)
-            , data(NULL)
-            , size(0)
-        {
-        }
-        Qt3DSEmbeddedFile(const char *n, const unsigned char *d, size_t s)
-            : name(n)
-            , data(d)
-            , size(s)
-        {
-        }
-    };
+namespace foundation {
 
-    inline const char *GetWatermarkFileName() { return "AutoworksWatermark.dds"; }
-
-    Qt3DSEmbeddedFile FindEmbeddedFile(const char *inName = GetWatermarkFileName());
-}
+CAllocator::~CAllocator()
+{
+    QT3DS_ASSERT(mAllocations.size() == 0);
+    MemInfo info;
+    for (PtrToInfoMap::iterator iter = mAllocations.begin(), end = mAllocations.end();
+         iter != end; ++iter) {
+        info = iter->second;
+        qCCritical(INTERNAL_ERROR, "!!Outstanding allocation of %lu bytes from %s::%d, %s",
+                  info.size, info.file, info.line, info.name ? info.name : "");
+    }
+    QT3DS_UNUSED(info);
 }
 
-#endif
+}
+}

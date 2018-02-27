@@ -39,7 +39,7 @@ namespace render {
 
     // Types should be setup on construction.  Change the type
     // at your own risk as the type is used for RTTI purposes.
-    struct SGraphObject
+    struct QT3DS_AUTOTEST_EXPORT SGraphObject
     {
         // Id's help debugging the object and are optionally set
         CRegisteredString m_Id;

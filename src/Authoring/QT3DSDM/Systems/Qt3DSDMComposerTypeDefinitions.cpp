@@ -308,6 +308,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_timefrom L"timefrom"
 #define QT3DS_WCHAR_T_timeto L"timeto"
 #define QT3DS_WCHAR_T_controlledelemprop L"controlledelemprop"
+#define QT3DS_WCHAR_T_controlledproperty L"controlledproperty"
 
 const wchar_t *ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
 {

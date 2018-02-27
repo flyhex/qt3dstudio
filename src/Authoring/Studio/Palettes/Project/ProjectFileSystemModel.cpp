@@ -161,6 +161,36 @@ void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
         Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole});
 }
 
+Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
+{
+    if (row <= 0 || row >= m_items.size())
+        return Q3DStudio::DocumentEditorFileType::Unknown;
+
+    const QString rootPath = m_items[0].index.data(QFileSystemModel::FilePathRole).toString();
+    QString path = m_items[row].index.data(QFileSystemModel::FilePathRole).toString();
+    QFileInfo fi(path);
+    if (!fi.isDir())
+        path = fi.absolutePath();
+    path = path.mid(rootPath.length() + 1);
+    const int slash = path.indexOf(QStringLiteral("/"));
+    if (slash >= 0)
+        path = path.left(slash);
+    if (path == QStringLiteral("effects"))
+        return Q3DStudio::DocumentEditorFileType::Effect;
+    else if (path == QStringLiteral("fonts"))
+        return Q3DStudio::DocumentEditorFileType::Font;
+    else if (path == QStringLiteral("maps"))
+        return Q3DStudio::DocumentEditorFileType::Image;
+    else if (path == QStringLiteral("materials"))
+        return Q3DStudio::DocumentEditorFileType::Material;
+    else if (path == QStringLiteral("models"))
+        return Q3DStudio::DocumentEditorFileType::DAE;
+    else if (path == QStringLiteral("scripts"))
+        return Q3DStudio::DocumentEditorFileType::Behavior;
+
+    return Q3DStudio::DocumentEditorFileType::Unknown;
+}
+
 void ProjectFileSystemModel::setRootPath(const QString &path)
 {
     setRootIndex(m_model->setRootPath(path));
@@ -186,6 +216,7 @@ void ProjectFileSystemModel::setRootIndex(const QModelIndex &rootIndex)
 void ProjectFileSystemModel::clearModelData()
 {
     beginResetModel();
+    m_defaultDirToAbsPathMap.clear();
     m_items.clear();
     endResetModel();
 }
@@ -286,24 +317,53 @@ bool ProjectFileSystemModel::hasValidUrlsForDropping(const QList<QUrl> &urls) co
     return false;
 }
 
-void ProjectFileSystemModel::dropUrls(const QList<QUrl> &urls, int row)
+void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool autoSort)
 {
-    Q_ASSERT(row >= 0 && row < m_items.size());
+    if (row < 0 || row >= m_items.size())
+        row = 0; // Import to root folder row not specified
 
-    const auto &item = m_items.at(row);
-    const QString targetPath = item.index.data(QFileSystemModel::FilePathRole).toString();
+    // If importing via buttons or doing in-context import to project root,
+    // sort imported items to default folders according to their type
+    const bool sortToDefaults = autoSort || row == 0;
+    if (sortToDefaults)
+        updateDefaultDirMap();
+
+    const TreeItem &item = m_items.at(row);
+    QString targetPath = item.index.data(QFileSystemModel::FilePathRole).toString();
+    QFileInfo fi(targetPath);
+    if (!fi.isDir())
+        targetPath = fi.absolutePath();
     const QDir targetDir(targetPath);
 
-    if (targetDir.exists()) {
-        for (const auto& url : urls)
-            dropUrl(targetPath, url);
+    QStringList expandPaths;
 
-        if (!item.expanded)
-            expand(row);
+    for (const auto &url : urls) {
+        QString sortedPath = targetPath;
+        QDir sortedDir = targetDir;
+
+        if (sortToDefaults) {
+            const QString defaultDir = m_defaultDirToAbsPathMap.value(
+                        g_StudioApp.GetDialogs()->defaultDirForUrl(url));
+            if (!defaultDir.isEmpty()) {
+                sortedPath = defaultDir;
+                sortedDir.setPath(sortedPath);
+            }
+        }
+
+        if (sortedDir.exists()) {
+            expandPaths << sortedPath;
+            importUrl(sortedPath, url);
+        }
+    }
+
+    for (const QString &expandPath : qAsConst(expandPaths)) {
+        int expandRow = rowForPath(expandPath);
+        if (expandRow >= 0 && !m_items[expandRow].expanded)
+            expand(expandRow);
     }
 }
 
-void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) const
+void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) const
 {
     using namespace Q3DStudio;
     using namespace qt3dsimp;
@@ -393,6 +453,16 @@ void ProjectFileSystemModel::dropUrl(const QDir &targetDir, const QUrl &url) con
             }
         }
     }
+}
+
+int ProjectFileSystemModel::rowForPath(const QString &path) const
+{
+    for (int i = m_items.size() - 1; i >= 0 ; --i) {
+        const QString itemPath = m_items[i].index.data(QFileSystemModel::FilePathRole).toString();
+        if (path == itemPath)
+            return i;
+    }
+    return -1;
 }
 
 void ProjectFileSystemModel::collapse(int row)
@@ -531,7 +601,8 @@ void ProjectFileSystemModel::modelRowsRemoved(const QModelIndex &parent, int sta
                 for (auto parent = item.parent; parent != nullptr; parent = parent->parent)
                     parent->childCount -= 1 + item.childCount;
 
-                m_items.erase(std::begin(m_items) + row, std::begin(m_items) + row + item.childCount + 1);
+                m_items.erase(std::begin(m_items) + row,
+                              std::begin(m_items) + row + item.childCount + 1);
 
                 endRemoveRows();
             }
@@ -539,10 +610,12 @@ void ProjectFileSystemModel::modelRowsRemoved(const QModelIndex &parent, int sta
     }
 
     if (!hasVisibleChildren(parent)) {
-        // hide expand arrow
+        // collapse the now empty folder
         const int row = modelIndexRow(parent);
-        m_items[row].expanded = false;
-        Q_EMIT dataChanged(index(row), index(row));
+        if (m_items[row].expanded)
+            collapse(row);
+        else
+            Q_EMIT dataChanged(index(row), index(row));
     }
 }
 
@@ -592,4 +665,32 @@ void ProjectFileSystemModel::modelLayoutChanged()
     Q_ASSERT(m_items.count() == itemCount);
 
     Q_EMIT dataChanged(index(0), index(itemCount - 1));
+}
+
+void ProjectFileSystemModel::updateDefaultDirMap()
+{
+    if (m_defaultDirToAbsPathMap.isEmpty()) {
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("effects"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("fonts"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("maps"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("materials"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("models"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("scripts"), QString());
+    }
+
+    const QString rootPath = m_items[0].index.data(QFileSystemModel::FilePathRole).toString();
+    const QStringList keys = m_defaultDirToAbsPathMap.keys();
+    for (const QString &key : keys) {
+        QString currentValue = m_defaultDirToAbsPathMap[key];
+        if (currentValue.isEmpty()) {
+            const QString defaultPath = rootPath + QStringLiteral("/") + key;
+            const QFileInfo fi(defaultPath);
+            if (fi.exists() && fi.isDir())
+                m_defaultDirToAbsPathMap.insert(key, defaultPath);
+        } else {
+            const QFileInfo fi(currentValue);
+            if (!fi.exists())
+                m_defaultDirToAbsPathMap.insert(key, QString());
+        }
+    }
 }

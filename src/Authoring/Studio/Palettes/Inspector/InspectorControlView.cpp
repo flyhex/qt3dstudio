@@ -33,10 +33,6 @@
 #include "StudioUtils.h"
 #include "InspectorControlModel.h"
 #include "StudioPreferences.h"
-#include <QtCore/qtimer.h>
-#include <QtQml/qqmlcontext.h>
-#include <QtQml/qqmlengine.h>
-#include <QtWidgets/qmenu.h>
 #include "Core.h"
 #include "Doc.h"
 #include "IDocumentEditor.h"
@@ -55,6 +51,14 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
+#include "DataInputSelectDlg.h"
+#include "MainFrm.h"
+
+#include <QtCore/qtimer.h>
+#include <QtQml/qqmlcontext.h>
+#include <QtQml/qqmlengine.h>
+#include <QtWidgets/qmenu.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
@@ -151,7 +155,7 @@ void InspectorControlView::onFilesChanged(
         if (record.m_FileInfo.IsFile()
                 && record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {
             if (record.m_File.toQString() == g_StudioApp.GetCore()->GetDoc()
-                    ->GetDocumentUIAFile()) {
+                    ->GetDocumentUIAFile(false)) {
                 m_inspectorControlModel->refreshRenderables();
             }
         }
@@ -164,6 +168,7 @@ void InspectorControlView::onFilesChanged(
 InspectorControlView::~InspectorControlView()
 {
     g_StudioApp.GetCore()->GetDispatch()->RemovePresentationChangeListener(this);
+    delete m_dataInputChooserView;
 }
 
 QSize InspectorControlView::sizeHint() const
@@ -459,11 +464,49 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     return m_objectReferenceView;
 }
 
+void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
+{
+    if (!m_dataInputChooserView) {
+        m_dataInputChooserView = new DataInputSelectDlg(g_StudioApp.m_pMainWnd);
+        connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
+                [this, handle, instance](const QString &controllerName) {
+
+            bool controlled = controllerName == tr("[No control]") ? false : true;
+            m_inspectorControlModel
+                ->setPropertyControllerInstance(
+                    instance, handle,
+                    Q3DStudio::CString::fromQString(controllerName), controlled);
+            m_inspectorControlModel->setPropertyControlled(instance, handle);
+            m_inspectorControlModel->setCurrentController(controllerName);
+        });
+    }
+
+    QStringList dataInputList;
+    dataInputList.append(tr("[No control]"));
+    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
+        dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+
+    m_dataInputChooserView->setData(dataInputList,
+                                    m_inspectorControlModel->getCurrentController());
+    m_dataInputChooserView->showDialog(point);
+}
+
 void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)
 {
     QSize popupSize = CStudioPreferences::browserPopupSize();
     browser->resize(popupSize);
-    browser->move(point - QPoint(popupSize.width(), popupSize.height()));
+
+    // Make sure the popup doesn't go outside the screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    browser->move(newPos);
 
     // Show asynchronously to avoid flashing blank window on first show
     QTimer::singleShot(0, this, [browser] {

@@ -41,6 +41,7 @@
 #include "Qt3DSRenderShadowMap.h"
 #include "Qt3DSRenderCustomMaterial.h"
 #include "Qt3DSRenderCustomMaterialSystem.h"
+#include "Qt3DSRenderLightConstantProperties.h"
 
 using namespace qt3ds::render;
 using qt3ds::render::NVRenderCachedShaderProperty;
@@ -176,6 +177,9 @@ struct SShaderGeneratorGeneratedShader
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_LightsBuffer;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AreaLightsBuffer;
 
+    SLightConstantProperties<SShaderGeneratorGeneratedShader> *m_lightsProperties;
+    SLightConstantProperties<SShaderGeneratorGeneratedShader> *m_areaLightsProperties;
+
     // Cache the image property name lookups
     TCustomMaterialImagMap m_Images; // Images external to custom material usage
     volatile QT3DSI32 m_RefCount;
@@ -207,13 +211,20 @@ struct SShaderGeneratorGeneratedShader
         , m_AoShadowParams("cbAoShadow", inShader)
         , m_LightsBuffer("cbBufferLights", inShader)
         , m_AreaLightsBuffer("cbBufferAreaLights", inShader)
+        , m_lightsProperties(nullptr)
+        , m_areaLightsProperties(nullptr)
         , m_Images(inContext.GetAllocator(), "SShaderGeneratorGeneratedShader::m_Images")
         , m_RefCount(0)
     {
         m_Shader.addRef();
     }
 
-    ~SShaderGeneratorGeneratedShader() { m_Shader.release(); }
+    ~SShaderGeneratorGeneratedShader()
+    {
+        m_Shader.release();
+        delete m_lightsProperties;
+        delete m_areaLightsProperties;
+    }
 
     void addRef() { ++m_RefCount; }
     void release()
@@ -223,6 +234,27 @@ struct SShaderGeneratorGeneratedShader
             NVAllocatorCallback &alloc(m_Allocator);
             NVDelete(alloc, this);
         }
+    }
+
+    SLightConstantProperties<SShaderGeneratorGeneratedShader> *GetLightProperties(int count)
+    {
+        if (!m_lightsProperties || m_areaLightsProperties->m_lightCountInt < count) {
+            if (m_lightsProperties)
+                delete m_lightsProperties;
+            m_lightsProperties = new SLightConstantProperties<SShaderGeneratorGeneratedShader>
+                                            ("lights", "uNumLights", *this, false, count);
+        }
+        return m_lightsProperties;
+    }
+    SLightConstantProperties<SShaderGeneratorGeneratedShader> *GetAreaLightProperties(int count)
+    {
+        if (!m_areaLightsProperties || m_areaLightsProperties->m_lightCountInt < count) {
+            if (m_areaLightsProperties)
+                delete m_areaLightsProperties;
+            m_areaLightsProperties = new SLightConstantProperties<SShaderGeneratorGeneratedShader>
+                                                ("areaLights", "uNumAreaLights", *this, false, count);
+        }
+        return m_areaLightsProperties;
     }
 };
 
@@ -574,68 +606,106 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             theShader.m_ProjMatrix.Set(vProjMat);
         }
 
-        // this call setsup the constant buffer for ambient occlusion and shadow
-        theShader.m_AoShadowParams.Set();
-
-        //
-        NVRenderConstantBuffer *pLightCb =
-            GetLightConstantBuffer("cbBufferLights", inLights.size());
-        NVRenderConstantBuffer *pAreaLightCb =
-            GetLightConstantBuffer("cbBufferAreaLights", inLights.size());
-
         // set lights separate for area lights
         QT3DSI32 cgLights = 0, areaLights = 0;
         QT3DSI32 numShadowMaps = 0, numShadowCubes = 0;
 
-        // Split the count between CG lights and area lights
-        for (QT3DSU32 lightIdx = 0; lightIdx < inLights.size() && pLightCb; ++lightIdx) {
-            SShadowMapEntry *theShadow = NULL;
-            if (inShadowMaps) {
-                theShadow = inShadowMaps->GetShadowMapEntry(lightIdx);
-            }
+        // this call setup the constant buffer for ambient occlusion and shadow
+        theShader.m_AoShadowParams.Set();
 
-            QT3DSI32 shdwIdx = (inLights[lightIdx]->m_LightType != RenderLightTypes::Directional)
-                ? numShadowCubes
-                : numShadowMaps;
-            SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes);
+        if (m_RenderContext.GetRenderContext().GetConstantBufferSupport()) {
+            NVRenderConstantBuffer *pLightCb =
+                GetLightConstantBuffer("cbBufferLights", inLights.size());
+            NVRenderConstantBuffer *pAreaLightCb =
+                GetLightConstantBuffer("cbBufferAreaLights", inLights.size());
 
-            if (inLights[lightIdx]->m_LightType == RenderLightTypes::Area) {
-                SShaderLightProperties *theAreaLightEntry =
-                    SetLight(inProgram, lightIdx, areaLights, inLights[lightIdx], theShadow,
-                             shdwIdx, inCamera.m_ClipFar);
+            // Split the count between CG lights and area lights
+            for (QT3DSU32 lightIdx = 0; lightIdx < inLights.size() && pLightCb; ++lightIdx) {
+                SShadowMapEntry *theShadow = NULL;
+                if (inShadowMaps)
+                    theShadow = inShadowMaps->GetShadowMapEntry(lightIdx);
 
-                if (theAreaLightEntry && pAreaLightCb)
-                    pAreaLightCb->UpdateRaw(areaLights * sizeof(SLightSourceShader)
-                                                + (4 * sizeof(QT3DSI32)),
-                                            NVDataRef<QT3DSU8>((QT3DSU8 *)&theAreaLightEntry->m_LightData,
+                QT3DSI32 shdwIdx = (inLights[lightIdx]->m_LightType
+                                                != RenderLightTypes::Directional)
+                    ? numShadowCubes
+                    : numShadowMaps;
+                SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes);
+
+                if (inLights[lightIdx]->m_LightType == RenderLightTypes::Area) {
+                    SShaderLightProperties *theAreaLightEntry =
+                        SetLight(inProgram, lightIdx, areaLights, inLights[lightIdx], theShadow,
+                                 shdwIdx, inCamera.m_ClipFar);
+
+                    if (theAreaLightEntry && pAreaLightCb) {
+                        pAreaLightCb->UpdateRaw(
+                            areaLights * sizeof(SLightSourceShader) + (4 * sizeof(QT3DSI32)),
+                            NVDataRef<QT3DSU8>((QT3DSU8 *)&theAreaLightEntry->m_LightData,
                                                             sizeof(SLightSourceShader)));
+                    }
 
-                areaLights++;
-            } else {
-                SShaderLightProperties *theLightEntry =
-                    SetLight(inProgram, lightIdx, cgLights, inLights[lightIdx], theShadow, shdwIdx,
-                             inCamera.m_ClipFar);
+                    areaLights++;
+                } else {
+                    SShaderLightProperties *theLightEntry =
+                        SetLight(inProgram, lightIdx, cgLights, inLights[lightIdx], theShadow,
+                                 shdwIdx, inCamera.m_ClipFar);
 
-                if (theLightEntry && pLightCb)
-                    pLightCb->UpdateRaw(cgLights * sizeof(SLightSourceShader) + (4 * sizeof(QT3DSI32)),
-                                        NVDataRef<QT3DSU8>((QT3DSU8 *)&theLightEntry->m_LightData,
-                                                        sizeof(SLightSourceShader)));
+                    if (theLightEntry && pLightCb) {
+                        pLightCb->UpdateRaw(
+                            cgLights * sizeof(SLightSourceShader) + (4 * sizeof(QT3DSI32)),
+                            NVDataRef<QT3DSU8>((QT3DSU8 *)&theLightEntry->m_LightData,
+                                                            sizeof(SLightSourceShader)));
+                    }
 
-                cgLights++;
+                    cgLights++;
+                }
             }
-        }
 
-        if (pLightCb) {
-            pLightCb->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&cgLights, sizeof(QT3DSI32)));
-            theShader.m_LightsBuffer.Set();
-        }
-        if (pAreaLightCb) {
-            pAreaLightCb->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&areaLights, sizeof(QT3DSI32)));
-            theShader.m_AreaLightsBuffer.Set();
-        }
+            if (pLightCb) {
+                pLightCb->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&cgLights, sizeof(QT3DSI32)));
+                theShader.m_LightsBuffer.Set();
+            }
+            if (pAreaLightCb) {
+                pAreaLightCb->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&areaLights,
+                                                              sizeof(QT3DSI32)));
+                theShader.m_AreaLightsBuffer.Set();
+            }
 
-        theShader.m_LightCount.Set(cgLights);
-        theShader.m_AreaLightCount.Set(areaLights);
+            theShader.m_LightCount.Set(cgLights);
+            theShader.m_AreaLightCount.Set(areaLights);
+        } else {
+            QVector<SShaderLightProperties *> lprop;
+            QVector<SShaderLightProperties *> alprop;
+            for (int lightIdx = 0; lightIdx < inLights.size(); ++lightIdx) {
+
+                SShadowMapEntry *theShadow = NULL;
+                if (inShadowMaps)
+                    theShadow = inShadowMaps->GetShadowMapEntry(lightIdx);
+
+                QT3DSI32 shdwIdx = (inLights[lightIdx]->m_LightType
+                                    != RenderLightTypes::Directional)
+                    ? numShadowCubes
+                    : numShadowMaps;
+                SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes);
+
+                SShaderLightProperties *p = SetLight(inProgram, lightIdx, areaLights,
+                                                     inLights[lightIdx], theShadow,
+                                                     shdwIdx, inCamera.m_ClipFar);
+                if (inLights[lightIdx]->m_LightType == RenderLightTypes::Area)
+                    alprop.push_back(p);
+                else
+                    lprop.push_back(p);
+            }
+            SLightConstantProperties<SShaderGeneratorGeneratedShader> *lightProperties
+                    = theShader.GetLightProperties(lprop.size());
+            SLightConstantProperties<SShaderGeneratorGeneratedShader> *areaLightProperties
+                    = theShader.GetAreaLightProperties(alprop.size());
+
+            lightProperties->updateLights(lprop);
+            areaLightProperties->updateLights(alprop);
+
+            theShader.m_LightCount.Set(lprop.size());
+            theShader.m_AreaLightCount.Set(alprop.size());
+        }
         theShader.m_ShadowMapCount.Set(numShadowMaps);
         theShader.m_ShadowCubeCount.Set(numShadowCubes);
     }
@@ -950,6 +1020,15 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         eastl::string srcString(fragSource);
 
+        if (m_RenderContext.GetRenderContext().GetRenderContextType()
+                == NVRenderContextValues::GLES2) {
+            eastl::string::size_type pos = 0;
+            while ((pos = srcString.find("out vec4 fragColor", pos)) != eastl::string::npos) {
+                srcString.insert(pos, "//");
+                pos += strlen("//out vec4 fragColor");
+            }
+        }
+
         fragmentShader << "#define FRAGMENT_SHADER\n\n";
 
         if (srcString.find("void main()") == eastl::string::npos)
@@ -963,7 +1042,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         fragmentShader << "#define QT3DS_ENABLE_RNM 0\n\n";
 
-        fragmentShader << fragSource << Endl;
+        fragmentShader << srcString.data() << Endl;
 
         if (srcString.find("void main()") != eastl::string::npos) // If a "main()" is already
                                                                   // written, we'll assume that the
@@ -1046,8 +1125,11 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
             fragmentShader.Append("\trgba = mix( vec4(0.0, 1.0, 0.0, 1.0), rgba, mixVal);");
         }
-
-        fragmentShader << "  fragColor = rgba;" << Endl;
+        if (m_RenderContext.GetRenderContext().GetRenderContextType()
+                == NVRenderContextValues::GLES2)
+            fragmentShader << "  gl_FragColor = rgba;" << Endl;
+        else
+            fragmentShader << "  fragColor = rgba;" << Endl;
     }
 
     NVRenderShaderProgram *GenerateCustomMaterialShader(const char8_t *inShaderPrefix,

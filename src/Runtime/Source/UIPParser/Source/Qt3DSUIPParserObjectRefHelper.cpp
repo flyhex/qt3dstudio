@@ -130,6 +130,87 @@ void CUIPParserObjectRefHelper::CacheGraph(qt3dsdm::IDOMReader &inReader, qt3dsd
         logicScopeItem = inReader.GetScope();
         CacheStateGraph(inReader);
     }
+    if (!m_SceneGraphDataInputList.empty()) {
+        IDOMReader::Scope __aliasScope(inReader);
+        // Parse objectreferences for datainput controlled objects and
+        // build full element paths for references
+        std::shared_ptr<qt3dsdm::IStringTable> theStrTable = inReader.GetStringTable();
+        {
+            IDOMReader::Scope __loopScope(inReader);
+            for (QT3DSU32 idx = 0, end = m_SceneGraphDataInputList.size(); idx < end; ++idx) {
+                inReader.SetScope(m_SceneGraphDataInputList[idx]);
+                const char8_t *reference;
+                qt3ds::render::CRenderString refStr;
+                SGraphNode *controlledNode = NULL;
+                const char8_t *theIdStr;
+                // CRenderString to avoid adding eastl dependencies
+                qt3ds::render::CRenderString outputStr;
+
+                // make sure that the controlling node can be parsed
+                inReader.Att("id", theIdStr);
+                SGraphNode *dataInputNode = NULL;
+                TGraphNodeMap::iterator iter = m_GraphNodeMap.find(m_MetaData.Register(theIdStr));
+                if (iter != m_GraphNodeMap.end())
+                    dataInputNode = iter->second;
+
+                if (dataInputNode == NULL) {
+                    QT3DS_ASSERT(false);
+                    continue;
+                }
+                // find the controlled node(s) and properties
+                if (inReader.UnregisteredAtt("controlledelemprop", reference)) {
+                    refStr = reference;
+                    while (refStr.find(' ') !=  qt3ds::render::CRenderString::npos) {
+                        // find the element name and corresponding node
+                        size_t pos = refStr.find(' ');
+                        qt3ds::render::CRenderString element = qt3ds::render::CRenderString(
+                            refStr.substr(0, pos).c_str());
+                        TStrType theSourceElemId = ParseObjectRefId(element.c_str(), theIdStr);
+                        iter = m_GraphNodeMap.find(theSourceElemId);
+                        if (iter != m_GraphNodeMap.end())
+                            controlledNode = iter->second;
+
+                        if (controlledNode == NULL) {
+                            QT3DS_ASSERT(false);
+                            continue;
+                        }
+
+                        refStr = refStr.substr(pos + 1, refStr.length());
+
+                        // find the property name
+                        pos = refStr.find(' ');
+                        // are we at the end of the tag?
+                        if (pos == qt3ds::render::CRenderString::npos)
+                            pos = refStr.length();
+                        qt3ds::render::CRenderString property =
+                            qt3ds::render::CRenderString(refStr.substr(0, pos).c_str());
+                        refStr = refStr.substr(pos, refStr.length());
+
+                        // If the path to controlled node is given as reference, build the full path
+                        if (reference[0] == '#') {
+                            qt3ds::render::CRenderString thePath;
+                            for (SGraphNode *theNode = controlledNode;
+                                 theNode; theNode = theNode->m_Parent) {
+                                if (thePath.length())
+                                    thePath.insert(0, ".");
+                                thePath.insert(0, theNode->m_Name);
+                            }
+                            element = thePath;
+                        }
+
+                        outputStr.append(element + " ");
+                        outputStr.append(property + " ");
+
+                        // if there are still contents left, drop the space delimiter
+                        // for the next round
+                        if (refStr.length() >= 1)
+                            refStr = refStr.substr(1, refStr.length());
+                    }
+                    inWriter.Att("controlledelemprop", outputStr.c_str());
+                }
+            }
+        } // End of loop scope.
+    }
     if (m_SceneGraphAliasList.empty() == false) {
         IDOMReader::Scope __aliasScope(inReader);
         // Now we expand aliases
@@ -245,88 +326,7 @@ FileWriteFlags() );
 #endif
         */
     }
-    if (!m_SceneGraphDataInputList.empty()) {
-        IDOMReader::Scope __aliasScope(inReader);
-        // Parse objectreferences for datainput controlled objects and
-        // build full element paths for references
-        std::shared_ptr<qt3dsdm::IStringTable> theStrTable = inReader.GetStringTable();
-        {
-            IDOMReader::Scope __loopScope(inReader);
-            for (QT3DSU32 idx = 0, end = m_SceneGraphDataInputList.size(); idx < end; ++idx) {
-                inReader.SetScope(m_SceneGraphDataInputList[idx]);
-                const char8_t *reference;
-                qt3ds::render::CRenderString refStr;
-                SGraphNode *controlledNode = NULL;
-                const char8_t *theIdStr;
-                // CRenderString to avoid adding eastl dependencies
-                qt3ds::render::CRenderString outputStr;
 
-                // make sure that the controlling node can be parsed
-                inReader.Att("id", theIdStr);
-                SGraphNode *dataInputNode = NULL;
-                TGraphNodeMap::iterator iter = m_GraphNodeMap.find(m_MetaData.Register(theIdStr));
-                if (iter != m_GraphNodeMap.end())
-                    dataInputNode = iter->second;
-
-                if (dataInputNode == NULL) {
-                    QT3DS_ASSERT(false);
-                    continue;
-                }
-
-                // find the controlled node(s) and properties
-                if (inReader.UnregisteredAtt("controlledelemprop", reference)) {
-                    refStr = reference;
-                    while (refStr.find(' ') !=  qt3ds::render::CRenderString::npos) {
-                        // find the element name and corresponding node
-                        size_t pos = refStr.find(' ');
-                        qt3ds::render::CRenderString element = qt3ds::render::CRenderString(
-                            refStr.substr(0, pos).c_str());
-                        TStrType theSourceElemId = ParseObjectRefId(element.c_str(), theIdStr);
-                        iter = m_GraphNodeMap.find(theSourceElemId);
-                        if (iter != m_GraphNodeMap.end())
-                            controlledNode = iter->second;
-
-                        if (controlledNode == NULL) {
-                            QT3DS_ASSERT(false);
-                            continue;
-                        }
-
-                        refStr = refStr.substr(pos+1, refStr.length());
-
-                        // find the property name
-                        pos = refStr.find(' ');
-                        // are we at the end of the tag?
-                        if (pos == qt3ds::render::CRenderString::npos)
-                            pos = refStr.length();
-                        qt3ds::render::CRenderString property =
-                            qt3ds::render::CRenderString(refStr.substr(0, pos).c_str());
-                        refStr = refStr.substr(pos, refStr.length());
-
-                        // If the path to controlled node is given as reference, build the full path
-                        if (reference[0] == '#') {
-                            qt3ds::render::CRenderString thePath;
-                            for (SGraphNode *theNode = controlledNode;
-                                theNode; theNode = theNode->m_Parent) {
-                                if (thePath.length())
-                                    thePath.insert(0, ".");
-                                thePath.insert(0, theNode->m_Name);
-                            }
-                            element = thePath;
-                        }
-
-                        outputStr.append(element + " ");
-                        outputStr.append(property + " ");
-
-                        // if there are still contents left, drop the space delimiter
-                        // for the next round
-                        if (refStr.length() >= 1)
-                            refStr = refStr.substr(1, refStr.length());
-                    }
-                    inWriter.Att("controlledelemprop", outputStr.c_str());
-                }
-            }
-        } // End of loop scope.
-    }
 }
 
 void CUIPParserObjectRefHelper::CacheSceneGraph(IDOMReader &inReader, SGraphNode *inParent)
@@ -435,6 +435,11 @@ void CUIPParserObjectRefHelper::CacheStateGraph(IDOMReader &inReader)
                                     theImageNode->m_Name = *theProp;
                             }
                         }
+                    }
+                    if (AreEqual(theNode->m_Type.c_str(), "DataInput")) {
+                        const char *theName;
+                        if (inReader.UnregisteredAtt("controlledelemprop", theName))
+                            m_MetaData.Register(theName);
                     }
                 }
             }

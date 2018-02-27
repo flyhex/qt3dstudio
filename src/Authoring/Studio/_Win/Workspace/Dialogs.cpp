@@ -58,7 +58,110 @@
 
 #include <iostream>
 
-//=============================================================================
+namespace {
+
+inline Q3DStudio::CString CreateExtensionsList(const char **extList)
+{
+    Q3DStudio::CString retval;
+    for (const char **ext = extList; *ext != nullptr; ++ext) {
+        if (retval.Length())
+            retval += " ";
+        retval += Q3DStudio::CString("*.") + *ext;
+    }
+    return retval;
+}
+
+struct SAllowedTypesEntry
+{
+    Q3DStudio::DocumentEditorFileType::Enum m_FileType;
+    QString m_ResourceString; // Model Files, Image Files, etc
+    const char **m_FileExtensions;
+};
+
+const char *imgExts[] = {
+    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", nullptr,
+};
+
+const wchar_t *wideImgExts[] = {
+    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", nullptr,
+};
+
+const char *modelExts[] = {
+    CDialogs::GetDAEFileExtension(),
+    #ifdef QT_3DSTUDIO_FBX
+    CDialogs::GetFbxFileExtension(),
+    #endif
+    nullptr,
+};
+
+const char *meshExts[] = {
+    CDialogs::GetMeshFileExtension(), nullptr,
+};
+
+const char *importExts[] = {
+    CDialogs::GetImportFileExtension(), nullptr,
+};
+
+const char *behaviorExts[] = {
+    CDialogs::GetQmlFileExtension(), nullptr,
+};
+
+const char *fontExts[] = {
+    "ttf", "otf", nullptr,
+};
+const wchar_t *wideFontExts[] = {
+    L"ttf", L"otf", nullptr,
+};
+
+const char *effectExts[] = {
+    "effect", nullptr,
+};
+
+const wchar_t *wideEffectExts[] = {
+    L"effect", nullptr,
+};
+
+const char *materialExts[] = {
+    "material", nullptr,
+};
+
+const wchar_t *wideMaterialExts[] = {
+    L"material", nullptr,
+};
+
+const char *soundExts[] = {
+    "wav", nullptr,
+};
+
+const wchar_t *wideSoundExts[] = {
+    L"wav", nullptr,
+};
+
+// List of file types allowed during import
+// Note: Despite its name, Q3DStudio::DocumentEditorFileType::DAE type includes
+// all supported model types
+SAllowedTypesEntry g_AllowedImportTypes[] = {
+    { Q3DStudio::DocumentEditorFileType::DAE, QObject::tr("Model Files"), modelExts },
+    { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
+    { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
+    { Q3DStudio::DocumentEditorFileType::Effect, QObject::tr("Effect Files"), effectExts },
+    { Q3DStudio::DocumentEditorFileType::Font, QObject::tr("Font Files"), fontExts },
+    { Q3DStudio::DocumentEditorFileType::Material, QObject::tr("Material Files"), materialExts },
+};
+size_t g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
+
+// List of file types allowed for file references
+SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
+    { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
+    { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
+    { Q3DStudio::DocumentEditorFileType::Mesh, QObject::tr("Mesh Files"), meshExts },
+    { Q3DStudio::DocumentEditorFileType::Import, QObject::tr("Import Files"), importExts },
+    { Q3DStudio::DocumentEditorFileType::Effect, QObject::tr("Effect Files"), effectExts },
+};
+size_t g_NumAllowedFileReferencesTypes =
+        sizeof(g_AllowedFileReferencesTypes) / sizeof(*g_AllowedFileReferencesTypes);
+}
+
 /**
  *	Constructor
  *	@param	inShowGUI	true if dialogs should be displayed or piped to std:cout instead
@@ -68,6 +171,25 @@ CDialogs::CDialogs(bool inShowGUI /*= true*/)
     , m_ShowGUI(inShowGUI)
     , m_LastSaveFile(Q3DStudio::CString("."))
 {
+    const auto effectExt = effectExtensions();
+    const auto fontExt = fontExtensions();
+    const auto mapExt = mapExtensions();
+    const auto materialExt = materialExtensions();
+    const auto modelExt = modelExtensions();
+    const auto behaviorExt = behaviorExtensions();
+
+    for (const auto ext : effectExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("effects"));
+    for (const auto ext : fontExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("fonts"));
+    for (const auto ext : mapExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("maps"));
+    for (const auto ext : materialExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("materials"));
+    for (const auto ext : modelExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("models"));
+    for (const auto ext : behaviorExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("scripts"));
 }
 
 //=============================================================================
@@ -235,120 +357,57 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
     }
 }
 
-namespace {
-
-inline Q3DStudio::CString CreateExtensionsList(const char **extList)
-{
-    Q3DStudio::CString retval;
-    for (const char **ext = extList; *ext != nullptr; ++ext) {
-        if (retval.Length())
-            retval += " ";
-        retval += Q3DStudio::CString("*.") + *ext;
-    }
-    return retval;
-}
-
-struct SAllowedTypesEntry
-{
-    Q3DStudio::DocumentEditorFileType::Enum m_FileType;
-    QString m_ResourceString; // Model Files, Image Files, etc
-    const char **m_FileExtensions;
-};
-
-const char *imgExts[] = {
-    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", nullptr,
-};
-
-const wchar_t *wideImgExts[] = {
-    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", nullptr,
-};
-
-const char *modelExts[] = {
-    CDialogs::GetDAEFileExtension(),
-    #ifdef QT_3DSTUDIO_FBX
-    CDialogs::GetFbxFileExtension(),
-    #endif
-    // TODO CDialogs::GetImportFileExtension(),
-    // TODO CDialogs::GetMeshFileExtension(),
-    nullptr,
-};
-
-const char *meshExts[] = {
-    CDialogs::GetMeshFileExtension(), nullptr,
-};
-
-const char *importExts[] = {
-    CDialogs::GetImportFileExtension(), nullptr,
-};
-
-const char *behaviorExts[] = {
-    CDialogs::GetQmlFileExtension(), nullptr,
-};
-
-const char *fontExts[] = {
-    "ttf", "otf", nullptr,
-};
-const wchar_t *wideFontExts[] = {
-    L"ttf", L"otf", nullptr,
-};
-
-const char *effectExts[] = {
-    "effect", nullptr,
-};
-
-const wchar_t *wideEffectExts[] = {
-    L"effect", nullptr,
-};
-
-const char *materialExts[] = {
-    "material", nullptr,
-};
-
-const wchar_t *wideMaterialExts[] = {
-    L"material", nullptr,
-};
-
-const char *soundExts[] = {
-    "wav", nullptr,
-};
-
-const wchar_t *wideSoundExts[] = {
-    L"wav", nullptr,
-};
-
-// List of file types allowed during import
-SAllowedTypesEntry g_AllowedImportTypes[] = {
-    { Q3DStudio::DocumentEditorFileType::DAE, QObject::tr("Model Files"), modelExts },
-    #ifdef QT_3DSTUDIO_FBX
-    { Q3DStudio::DocumentEditorFileType::FBX, QObject::tr("Model Files"), modelExts },
-    #endif
-};
-size_t g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
-
-// List of file types allowed for file references
-SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
-    { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
-    { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
-    { Q3DStudio::DocumentEditorFileType::Mesh, QObject::tr("Mesh Files"), meshExts },
-    { Q3DStudio::DocumentEditorFileType::Import, QObject::tr("Import Files"), importExts },
-    { Q3DStudio::DocumentEditorFileType::Effect, QObject::tr("Effect Files"), effectExts },
-};
-size_t g_NumAllowedFileReferencesTypes =
-        sizeof(g_AllowedFileReferencesTypes) / sizeof(*g_AllowedFileReferencesTypes);
-}
-
 QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 {
     // this produces an extension string which contains all allowed formats specified in
     // g_AllowedImportTypes
     // currently DAE and FBX
+    QString initialFilter;
     QString theFileFilter =
-            CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::DAE, true);
+            CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::DAE, initialFilter,
+                                     true, true);
 
 
     return QFileDialog::getOpenFileName(qApp->activeWindow(), QObject::tr("Open"),
                                         inFile, theFileFilter, nullptr,
                                         QFileDialog::DontUseNativeDialog);
+}
+
+// outPath parameter is changed to last selected path if dialog was accepted
+QList<QUrl> CDialogs::SelectAssets(QString &outPath,
+                                   Q3DStudio::DocumentEditorFileType::Enum assetType)
+{
+    QFileDialog fd(qApp->activeWindow());
+    fd.setDirectory(outPath);
+    fd.setFileMode(QFileDialog::ExistingFiles);
+    fd.setOption(QFileDialog::DontUseNativeDialog, true);
+    QString initialFilter;
+    fd.setNameFilter(CreateAllowedTypesString(assetType, initialFilter, true, false));
+    fd.selectNameFilter(initialFilter);
+    fd.setWindowTitle(QObject::tr("Import Assets"));
+
+    QList<QUrl> files;
+    if (fd.exec()) {
+        files = fd.selectedUrls();
+        // Return the new path
+        outPath = fd.directory().absolutePath();
+    }
+
+    return files;
+}
+
+QString CDialogs::defaultDirForUrl(const QUrl &url)
+{
+    QString defaultDir;
+    if (!url.isLocalFile())
+        return defaultDir;
+
+    const QFileInfo fi(url.toLocalFile());
+    const QString suffix = fi.suffix();
+
+    defaultDir = m_defaultDirForSuffixMap.value(suffix.toLower());
+
+    return defaultDir;
 }
 
 //==============================================================================
@@ -666,24 +725,39 @@ bool CDialogs::IsSoundFileExtension(const wchar_t *inExt)
 
 //==============================================================================
 /**
- *	CreateAllowedTypesString: Creates the string used to determine allowable types for import or
- *for filereferences
- *	@return the string that dynamicly created with the extensions supported.
+ *  CreateAllowedTypesString: Creates the string used to determine allowable types
+ *  for import or for filereferences
+ *  @return the string that dynamically created with the extensions supported.
  */
-QString CDialogs::CreateAllowedTypesString(long inFileTypeFilter, bool inForImport)
+QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::Enum fileTypeFilter,
+                                           QString &outInitialFilter, bool forImport,
+                                           bool exclusive)
 {
     QString theReturnString;
-    size_t theCount = inForImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
+    QString combinedFilter;
+    size_t theCount = forImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
     for (size_t idx = 0; idx < theCount; ++idx) {
         const SAllowedTypesEntry &entry =
-                inForImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
-        if (inFileTypeFilter == Q3DStudio::DocumentEditorFileType::Unknown
-                || inFileTypeFilter == entry.m_FileType) {
+                forImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
+        if (!exclusive || fileTypeFilter == entry.m_FileType) {
             QString theTypeString(entry.m_ResourceString);
             QString theExtensions(CreateExtensionsList(entry.m_FileExtensions).toQString());
-            theReturnString += theTypeString + " (" + theExtensions + ");;";
+            const QString filterString = theTypeString + " (" + theExtensions + ");;";
+            theReturnString += filterString;
+            if (exclusive)
+                outInitialFilter = filterString;
+            else
+                combinedFilter += theExtensions + " ";
         }
     }
+    if (!combinedFilter.isEmpty()) {
+        combinedFilter.chop(1); // Remove last separator
+        theReturnString.prepend(QObject::tr("All Supported Asset types")
+                                + " (" + combinedFilter + ");;");
+        outInitialFilter = combinedFilter;
+    }
+    theReturnString.chop(2);
+    outInitialFilter.chop(2);
     return theReturnString;
 }
 
@@ -787,7 +861,13 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
 
     while (theShowDialog && theFileDlg.exec()) {
         theShowDialog = false;
-        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(theFileDlg.selectedFiles().front()));
+        QString selectedName = theFileDlg.selectedFiles().front();
+
+        // Make sure file name has correct extension
+        if (!selectedName.endsWith(theFileExt))
+            selectedName.append(theFileExt);
+
+        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(selectedName));
 
         m_LastSaveFile = theFile.GetAbsolutePath();
         // customising a dialog box will force us to use non-native.
@@ -1055,4 +1135,76 @@ void CDialogs::DisplayGLVersionDialog(const Q3DStudio::CString &inGLVersion,
 
     if (theGLVersionDlg.GetDontShowAgain())
         CStudioPreferences::SetDontShowGLVersionDialog(true);
+}
+
+QStringList CDialogs::effectExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : effectExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::fontExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : fontExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::mapExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : imgExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::materialExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : materialExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::modelExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : modelExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::behaviorExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : behaviorExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
 }

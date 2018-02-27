@@ -36,7 +36,7 @@
 #include "Snapper.h"
 #include "CommentEdit.h"
 #include "TimebarTip.h"
-#include "TimeEditDlg.h"
+#include "DurationEditDlg.h"
 #include "KeyframeContextMenu.h"
 
 class CStateTimebarRow;

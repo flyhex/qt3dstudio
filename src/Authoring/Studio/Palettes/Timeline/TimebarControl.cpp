@@ -374,9 +374,9 @@ bool CTimebarControl::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFl
 {
     if (!CControl::OnMouseDoubleClick(inPoint, inFlags)
         && !m_TimelineItemBinding->IsLockedEnabled()) {
-        CTimeEditDlg theTimeEditDlg;
-        theTimeEditDlg.ShowDialog(m_StartTime, m_EndTime, g_StudioApp.GetCore()->GetDoc(), TIMEBAR,
-                                  this);
+        CDurationEditDlg theDurationEditDlg;
+        theDurationEditDlg.showDialog(m_StartTime, m_EndTime, g_StudioApp.GetCore()->GetDoc(),
+                                      this);
     }
 
     return true;

@@ -229,4 +229,4 @@ valuestr
 timefrom
 timeto
 controlledelemprop
-
+controlledproperty

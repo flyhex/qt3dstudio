@@ -463,8 +463,8 @@ namespace render {
     HANDLE_QT3DS_RENDER_PROPERTY(DataInput, Value, Dirty)                                        \
     HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ValueStr, Dirty)                                        \
     HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeFrom, Dirty)                                     \
-    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ControlledElemProp, Dirty)                              \
-    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeTo, Dirty)
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, TimeTo, Dirty)                                        \
+    HANDLE_QT3DS_RENDER_PROPERTY(DataInput, ControlledElemProp, Dirty)
 }
 }
 #endif

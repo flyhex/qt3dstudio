@@ -82,6 +82,7 @@ QColor s_selectionColor;
 QColor s_textColor;
 QColor s_masterColor;
 QColor s_disabledColor;
+QColor s_dataInputColor;
 int s_fontSize;
 int s_controlBaseHeight;
 int s_idWidth;
@@ -200,6 +201,7 @@ void CStudioPreferences::LoadPreferences()
     s_textColor = QColor("#ffffff");
     s_masterColor = QColor("#5caa15");
     s_disabledColor = QColor("#727476");
+    s_dataInputColor = QColor("#ff5102");
     s_fontSize = 12;
     s_controlBaseHeight = 22;
     s_idWidth = 130;
@@ -649,32 +651,6 @@ bool CStudioPreferences::GetTimebarDisplayTime()
 void CStudioPreferences::SetTimebarDisplayTime(bool inDisplayTime)
 {
     CPreferences::GetUserPreferences().SetValue("TimebarSetting", inDisplayTime);
-}
-
-//==============================================================================
-/**
- *	Gets the amount to nudge the selection by.
- *	When an object is selected, it can be nudged by using the arrow keys.  This
- *	function gets the nudge amount from the registry, or returns a default value
- *	if the registry entry does not exist.  The nudge amount can be set with the
- *	Preferences dialog.
- *	@return The amount to nudge by
- */
-double CStudioPreferences::GetNudgeAmount()
-{
-    return CPreferences::GetUserPreferences().GetValue("NudgeAmount", 10.0);
-}
-
-//==============================================================================
-/**
- *	Sets the amount to nudge the object by.
- *	When an object is selected, it can be nudged by using the arrow keys.  This
- *	function stores the nudge amount in the registry.
- *	@param inAmount Amount to nudge by
- */
-void CStudioPreferences::SetNudgeAmount(double inNudgeAmount)
-{
-    CPreferences::GetUserPreferences().SetValue("NudgeAmount", inNudgeAmount);
 }
 
 //==============================================================================
@@ -1675,6 +1651,7 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_textColor"), s_textColor);
     qml->setContextProperty(QStringLiteral("_masterColor"), s_masterColor);
     qml->setContextProperty(QStringLiteral("_disabledColor"), s_disabledColor);
+    qml->setContextProperty(QStringLiteral("_dataInputColor"), s_dataInputColor);
     qml->setContextProperty(QStringLiteral("_fontSize"), s_fontSize);
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);
@@ -1724,6 +1701,11 @@ QColor CStudioPreferences::masterColor()
 QColor CStudioPreferences::disabledColor()
 {
     return s_disabledColor;
+}
+
+QColor CStudioPreferences::dataInputColor()
+{
+    return s_dataInputColor;
 }
 
 int CStudioPreferences::fontSize()

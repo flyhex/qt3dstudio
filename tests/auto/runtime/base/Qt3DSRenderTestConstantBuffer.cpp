@@ -359,7 +359,7 @@ bool NVRenderTestConstantBuffer::scalarTest(NVRenderContext *context, userContex
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::scalarTest: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestConstantBuffer::scalarTest: Failed to create vertex buffer";
         return false;
     }
 
@@ -372,7 +372,7 @@ bool NVRenderTestConstantBuffer::scalarTest(NVRenderContext *context, userContex
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::scalarTest: Failed to create input assembler";
+        qWarning() << "NVRenderTestConstantBuffer::scalarTest: Failed to create input assembler";
         return false;
     }
 
@@ -464,7 +464,7 @@ bool NVRenderTestConstantBuffer::vectorTest(NVRenderContext *context, userContex
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::vectorTest: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestConstantBuffer::vectorTest: Failed to create vertex buffer";
         return false;
     }
 
@@ -477,7 +477,7 @@ bool NVRenderTestConstantBuffer::vectorTest(NVRenderContext *context, userContex
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::vectorTest: Failed to create input assembler";
+        qWarning() << "NVRenderTestConstantBuffer::vectorTest: Failed to create input assembler";
         return false;
     }
 
@@ -571,7 +571,7 @@ bool NVRenderTestConstantBuffer::structTest(NVRenderContext *context, userContex
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::structTest: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestConstantBuffer::structTest: Failed to create vertex buffer";
         return false;
     }
 
@@ -584,7 +584,7 @@ bool NVRenderTestConstantBuffer::structTest(NVRenderContext *context, userContex
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::structTest: Failed to create input assembler";
+        qWarning() << "NVRenderTestConstantBuffer::structTest: Failed to create input assembler";
         return false;
     }
 
@@ -674,7 +674,7 @@ bool NVRenderTestConstantBuffer::rawTest(NVRenderContext *context, userContextDa
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::rawTest: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestConstantBuffer::rawTest: Failed to create vertex buffer";
         return false;
     }
 
@@ -687,7 +687,7 @@ bool NVRenderTestConstantBuffer::rawTest(NVRenderContext *context, userContextDa
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::rawTest: Failed to create input assembler";
+        qWarning() << "NVRenderTestConstantBuffer::rawTest: Failed to create input assembler";
         return false;
     }
 
@@ -785,7 +785,7 @@ bool NVRenderTestConstantBuffer::multiCBTest(NVRenderContext *context, userConte
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::scalarTest: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestConstantBuffer::scalarTest: Failed to create vertex buffer";
         return false;
     }
 
@@ -798,7 +798,7 @@ bool NVRenderTestConstantBuffer::multiCBTest(NVRenderContext *context, userConte
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestConstantBuffer::scalarTest: Failed to create input assembler";
+        qWarning() << "NVRenderTestConstantBuffer::scalarTest: Failed to create input assembler";
         return false;
     }
 

@@ -125,19 +125,13 @@ project, Studio is forced to add a font file ("TitilliumWeb") to your
 project to support the display of text.
 
 \target layers-cameras-lights
-\section1 Layers, Cameras and Lights
+\section1 Cameras and Lights
 
 \table
   \row
-    \li \image Studio-Basic-Layer.png
     \li \image Studio-Basic-Camera.png
     \li \image Studio-Basic-Light.png
 \endtable
-
-A layer represents a 3D scene that gets rendered into a 2D image and
-placed somewhere on the screen. Just as a Photoshop file may have
-multiple 2D layers drawn on top of one another, a Studio presentation
-may have multiple layers composited together.
 
 Each layer has exactly one active camera that is used to render the
 elements inside the layer. If you place multiple cameras inside a layer,
@@ -149,23 +143,11 @@ though it is usually easier to just
 {unlink the properties} of a single camera on the
 \l{studio-slide-palette.html#the-master-slide}{master slide}.
 
-Layers also provide a target where
-\l{best-practices-effects.html}{post-processing effects} may be applied.
-
-In order to keep the runtime from freaking out, you must have at least
-one master layer at all times. Studio will not let you delete the last
-master layer unless you first add a new layer on the master slide to
-replace it.
-
 Each layer may have zero, one, or two lights on it. Lights are used to
 illuminate the models in your scene so that they can be seen. If you
 have zero lights you will need to set the
 \l{studio-inspector-palette.html#material-properties}{Lighting property
 for your materials} to \c{None} in order to see your models.
-
-To make your life simpler, dragging a layer from the Basic objects
-palette into your scene will also add both a camera and a light to that
-new layer.
 
 \section1 Alias
 

@@ -16,7 +16,9 @@ HEADERS += \
     studioutils_p.h \
     q3dscommandqueue_p.h \
     q3dsimagesequencegenerator_p.h \
-    q3dsimagesequencegeneratorthread_p.h
+    q3dsimagesequencegeneratorthread_p.h \
+    q3dsdatainput.h \
+    q3dsdatainput_p.h
 
 SOURCES += q3dswidget.cpp \
            q3dssurfaceviewer.cpp \
@@ -28,7 +30,8 @@ SOURCES += q3dswidget.cpp \
            studioutils.cpp \
            q3dscommandqueue.cpp \
            q3dsimagesequencegenerator.cpp \
-           q3dsimagesequencegeneratorthread.cpp
+           q3dsimagesequencegeneratorthread.cpp \
+           q3dsdatainput.cpp
 
 macos {
 INCLUDEPATH += $$PWD/../../Runtime/SDKsAndTools/nvap_sdk/libs/inc

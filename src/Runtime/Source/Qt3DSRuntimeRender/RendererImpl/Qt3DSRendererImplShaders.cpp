@@ -554,7 +554,11 @@ namespace render {
         // This is time consuming but I feel like it doesn't happen all that often and is very
         // useful to users
         // looking at the log file.
+        QLatin1String logPrefix("mesh subset pipeline-- ");
+
         m_GeneratedShaderString.clear();
+        m_GeneratedShaderString.assign(logPrefix.data());
+
         SShaderDefaultMaterialKey theKey(inRenderable.m_ShaderDescription);
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
         IShaderCache &theCache = m_qt3dsContext.GetShaderCache();
@@ -570,7 +574,8 @@ namespace render {
         return m_qt3dsContext.GetDefaultMaterialShaderGenerator().GenerateShader(
             inRenderable.m_Material, inRenderable.m_ShaderDescription, pipeline, inFeatureSet,
             m_CurrentLayer->m_Lights, inRenderable.m_FirstImage,
-            inRenderable.m_RenderableFlags.HasTransparency(), "mesh subset pipeline-- ");
+            inRenderable.m_RenderableFlags.HasTransparency(),
+            logPrefix.data());
     }
 
     // --------------  Special cases for shadows  -------------------
@@ -2821,36 +2826,33 @@ namespace render {
         fragmentGenerator.AddUniform("blend_layer", "sampler2D");
 
         fragmentGenerator.Append("void main() {");
-        fragmentGenerator.Append("\tvec4 base = texture2D( base_layer, uv_coords );");
-        fragmentGenerator.Append("\tvec4 blend_orig = texture2D( blend_layer, uv_coords );");
-        fragmentGenerator.Append("\tvec4 blend = blend_orig * vec4(blend_orig.a);");
+        fragmentGenerator.Append("\tvec4 base = texture2D(base_layer, uv_coords);");
+        fragmentGenerator.Append("\tif (base.a != 0.0) base.rgb /= base.a;");
+        fragmentGenerator.Append("\telse base = vec4(0.0);");
+        fragmentGenerator.Append("\tvec4 blend = texture2D(blend_layer, uv_coords);");
+        fragmentGenerator.Append("\tif (blend.a != 0.0) blend.rgb /= blend.a;");
+        fragmentGenerator.Append("\telse blend = vec4(0.0);");
 
-        fragmentGenerator.Append("\tvec3 res = vec3(0.0, 0.0, 0.0);");
+        fragmentGenerator.Append("\tvec4 res = vec4(0.0);");
+        fragmentGenerator.Append("\tfloat p0 = base.a * blend.a;");
+        fragmentGenerator.Append("\tfloat p1 = base.a * (1.0 - blend.a);");
+        fragmentGenerator.Append("\tfloat p2 = blend.a * (1.0 - base.a);");
+        fragmentGenerator.Append("\tres.a = p0 + p1 + p2;");
 
-        // As we are doing per-object pass we need to directly copy the base layer
-        // fragment whenever there is no object in the blend layer (alpha = 0), in order to
-        // preserve already-rendered objects and background-colored pixels.
-        // Fragments with base alpha = 0 indicate fully transparent background
-        // in which case we use blend layer fragments directly.
         NVRenderShaderProgram *theShader;
-        fragmentGenerator.Append("if (blend_orig.a != 0.0 && base.a != 0.0) {");
         fragmentGenerator.Append(
-                    "\tres.r = (base.r < 0.5? (2.0 * base.r * blend.r) : "
+                    "\tfloat f_rs_rd = (base.r < 0.5? (2.0 * base.r * blend.r) : "
                     "(1.0 - 2.0 * (1.0 - base.r) * (1.0 - blend.r)));");
         fragmentGenerator.Append(
-                    "\tres.g = (base.g < 0.5? (2.0 * base.g * blend.g) : "
+                    "\tfloat f_gs_gd = (base.g < 0.5? (2.0 * base.g * blend.g) : "
                     "(1.0 - 2.0 * (1.0 - base.g) * (1.0 - blend.g)));");
         fragmentGenerator.Append(
-                    "\tres.b = (base.b < 0.5? (2.0 * base.b * blend.b) : "
+                    "\tfloat f_bs_bd = (base.b < 0.5? (2.0 * base.b * blend.b) : "
                     "(1.0 - 2.0 * (1.0 - base.b) * (1.0 - blend.b)));");
-        fragmentGenerator.Append("\tgl_FragColor = vec4(res.rgb, blend_orig.a);");
-        fragmentGenerator.Append("} else if (base.a == 0.0 && blend_orig.a == 0.0) {");
-        fragmentGenerator.Append("\tgl_FragColor = vec4(blend.rgb , 0.0);");
-        fragmentGenerator.Append("} else if (base.a == 0.0) {");
-        fragmentGenerator.Append("\tgl_FragColor = vec4(blend.rgb , 1.0);");
-        fragmentGenerator.Append("} else {");
-        fragmentGenerator.Append("\tgl_FragColor = vec4(base.rgb, 1.0);");
-        fragmentGenerator.Append("}");
+        fragmentGenerator.Append("\tres.r = f_rs_rd * p0 + base.r * p1 + blend.r * p2;");
+        fragmentGenerator.Append("\tres.g = f_gs_gd * p0 + base.g * p1 + blend.g * p2;");
+        fragmentGenerator.Append("\tres.b = f_bs_bd * p0 + base.b * p1 + blend.b * p2;");
+        fragmentGenerator.Append("\tgl_FragColor = vec4(res.rgb * res.a, res.a);");
         fragmentGenerator.Append("}");
         theShader = GetProgramGenerator().CompileGeneratedShader(
                     "advanced overlay shader", SShaderCacheProgramFlags(), TShaderFeatureSet());
@@ -2885,34 +2887,33 @@ namespace render {
         fragmentGenerator.AddUniform("blend_layer", "sampler2D");
 
         fragmentGenerator.Append("void main() {");
-        fragmentGenerator.Append("\tvec4 base = texture2D( base_layer, uv_coords );");
-        fragmentGenerator.Append("\tvec4 blend_orig = texture2D( blend_layer, uv_coords );");
-        fragmentGenerator.Append("\tvec4 blend = blend_orig * vec4(blend_orig.a);");
+        fragmentGenerator.Append("\tvec4 base = texture2D(base_layer, uv_coords);");
+        fragmentGenerator.Append("\tif (base.a != 0.0) base.rgb /= base.a;");
+        fragmentGenerator.Append("\telse base = vec4(0.0);");
+        fragmentGenerator.Append("\tvec4 blend = texture2D(blend_layer, uv_coords);");
+        fragmentGenerator.Append("\tif (blend.a != 0.0) blend.rgb /= blend.a;");
+        fragmentGenerator.Append("\telse blend = vec4(0.0);");
 
-        fragmentGenerator.Append("\tvec3 res = vec3(0.0, 0.0, 0.0);");
+        fragmentGenerator.Append("\tvec4 res = vec4(0.0);");
+        fragmentGenerator.Append("\tfloat p0 = base.a * blend.a;");
+        fragmentGenerator.Append("\tfloat p1 = base.a * (1.0 - blend.a);");
+        fragmentGenerator.Append("\tfloat p2 = blend.a * (1.0 - base.a);");
+        fragmentGenerator.Append("\tres.a = p0 + p1 + p2;");
 
-        // As we are doing per-object pass we need to directly copy the base layer
-        // fragment whenever there is no object in the blend layer (alpha = 0), in order to
-        // preserve already-rendered objects and background-colored pixels.
-        // Fragments with base alpha = 0 indicate fully transparent background
-        // in which case we use blend layer fragments directly.
         NVRenderShaderProgram *theShader;
-        fragmentGenerator.Append("if (blend_orig.a != 0.0 && base.a != 0.0) {");
         fragmentGenerator.Append(
-                    "\tres.r = ((base.r == 1.0) ? 1.0 : "
+                    "\tfloat f_rs_rd = ((base.r == 1.0) ? 1.0 : "
                     "(blend.r == 0.0) ? 0.0 : 1.0 - min(1.0, ((1.0 - base.r) / blend.r)));");
         fragmentGenerator.Append(
-                    "\tres.g = ((base.g == 1.0) ? 1.0 : "
+                    "\tfloat f_gs_gd = ((base.g == 1.0) ? 1.0 : "
                     "(blend.g == 0.0) ? 0.0 : 1.0 - min(1.0, ((1.0 - base.g) / blend.g)));");
         fragmentGenerator.Append(
-                    "\tres.b = ((base.b == 1.0) ? 1.0 : "
+                    "\tfloat f_bs_bd = ((base.b == 1.0) ? 1.0 : "
                     "(blend.b == 0.0) ? 0.0 : 1.0 - min(1.0, ((1.0 - base.b) / blend.b)));");
-        fragmentGenerator.Append("\tgl_FragColor =  vec4(res.rgb, blend_orig.a);");
-        fragmentGenerator.Append("} else if (base.a == 0.0) {");
-        fragmentGenerator.Append("\tgl_FragColor = blend;");
-        fragmentGenerator.Append("} else {");
-        fragmentGenerator.Append("\tgl_FragColor = base;");
-        fragmentGenerator.Append("}");
+        fragmentGenerator.Append("\tres.r = f_rs_rd * p0 + base.r * p1 + blend.r * p2;");
+        fragmentGenerator.Append("\tres.g = f_gs_gd * p0 + base.g * p1 + blend.g * p2;");
+        fragmentGenerator.Append("\tres.b = f_bs_bd * p0 + base.b * p1 + blend.b * p2;");
+        fragmentGenerator.Append("\tgl_FragColor =  vec4(res.rgb * res.a, res.a);");
         fragmentGenerator.Append("}");
 
         theShader = GetProgramGenerator().CompileGeneratedShader(
@@ -2948,34 +2949,34 @@ namespace render {
         fragmentGenerator.AddUniform("blend_layer", "sampler2D");
 
         fragmentGenerator.Append("void main() {");
-        fragmentGenerator.Append("\tvec4 base = texture2D( base_layer, uv_coords );");
-        fragmentGenerator.Append("\tvec4 blend_orig = texture2D( blend_layer, uv_coords );");
-        fragmentGenerator.Append("\tvec4 blend = blend_orig * vec4(blend_orig.a);");
+        fragmentGenerator.Append("\tvec4 base = texture2D(base_layer, uv_coords);");
+        fragmentGenerator.Append("\tif (base.a != 0.0) base.rgb /= base.a;");
+        fragmentGenerator.Append("\telse base = vec4(0.0);");
+        fragmentGenerator.Append("\tvec4 blend = texture2D(blend_layer, uv_coords);");
+        fragmentGenerator.Append("\tif (blend.a != 0.0) blend.rgb /= blend.a;");
+        fragmentGenerator.Append("\telse blend = vec4(0.0);");
 
-        fragmentGenerator.Append("\tvec3 res = vec3(0.0, 0.0, 0.0);");
+        fragmentGenerator.Append("\tvec4 res = vec4(0.0);");
+        fragmentGenerator.Append("\tfloat p0 = base.a * blend.a;");
+        fragmentGenerator.Append("\tfloat p1 = base.a * (1.0 - blend.a);");
+        fragmentGenerator.Append("\tfloat p2 = blend.a * (1.0 - base.a);");
+        fragmentGenerator.Append("\tres.a = p0 + p1 + p2;");
 
-        // As we are doing per-object pass we need to directly copy the base layer
-        // fragment whenever there is no object in the blend layer (alpha = 0), in order to
-        // preserve already-rendered objects and background-colored pixels.
-        // Fragments with base alpha = 0 indicate fully transparent background
-        // in which case we use blend layer fragments directly.
         NVRenderShaderProgram *theShader;
-        fragmentGenerator.Append("if (blend_orig.a != 0.0 && base.a != 0.0) {");
         fragmentGenerator.Append(
-                    "\tres.r = ((base.r == 0.0) ? 0.0 : "
+                    "\tfloat f_rs_rd = ((base.r == 0.0) ? 0.0 : "
                     "(blend.r == 1.0) ? 1.0 : min(base.r / (1.0 - blend.r), 1.0));");
         fragmentGenerator.Append(
-                    "\tres.g = ((base.g == 0.0) ? 0.0 : "
+                    "\tfloat f_gs_gd = ((base.g == 0.0) ? 0.0 : "
                     "(blend.g == 1.0) ? 1.0 : min(base.g / (1.0 - blend.g), 1.0));");
         fragmentGenerator.Append(
-                    "\tres.b = ((base.b == 0.0) ? 0.0 : "
+                    "\tfloat f_bs_bd = ((base.b == 0.0) ? 0.0 : "
                     "(blend.b == 1.0) ? 1.0 : min(base.b / (1.0 - blend.b), 1.0));");
-        fragmentGenerator.Append("\tgl_FragColor =  vec4(res.rgb, blend_orig.a);");
-        fragmentGenerator.Append("} else if (base.a == 0.0) {");
-        fragmentGenerator.Append("\tgl_FragColor = blend;");
-        fragmentGenerator.Append("} else {");
-        fragmentGenerator.Append("\tgl_FragColor = base;");
-        fragmentGenerator.Append("}");
+        fragmentGenerator.Append("\tres.r = f_rs_rd * p0 + base.r * p1 + blend.r * p2;");
+        fragmentGenerator.Append("\tres.g = f_gs_gd * p0 + base.g * p1 + blend.g * p2;");
+        fragmentGenerator.Append("\tres.b = f_bs_bd * p0 + base.b * p1 + blend.b * p2;");
+
+        fragmentGenerator.Append("\tgl_FragColor =  vec4(res.rgb * res.a, res.a);");
         fragmentGenerator.Append("}");
         theShader = GetProgramGenerator().CompileGeneratedShader(
                     "advanced colorDodge shader", SShaderCacheProgramFlags(), TShaderFeatureSet());

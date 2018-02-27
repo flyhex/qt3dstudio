@@ -129,7 +129,7 @@ namespace render {
         virtual void EndFrame() = 0;
     };
 
-    struct SCustomMaterialVertexPipeline : public SVertexPipelineImpl
+    struct QT3DS_AUTOTEST_EXPORT SCustomMaterialVertexPipeline : public SVertexPipelineImpl
     {
         IQt3DSRenderContext *m_Context;
         TessModeValues::Enum m_TessMode;

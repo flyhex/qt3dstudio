@@ -43,6 +43,7 @@
 #include "Qt3DSMessageBox.h"
 #include "Qt3DSFileTools.h"
 #include "CColor.h"
+#include "DocumentEditorEnumerations.h"
 
 #include <QtWidgets/qmessagebox.h>
 
@@ -72,6 +73,16 @@ public:
     void DisplayRefreshResourceFailed(const Q3DStudio::CString &inResourceName,
                                       const Q3DStudio::CString &inDescription);
     QString ConfirmRefreshModelFile(const QString &inOriginalPath);
+    QList<QUrl> SelectAssets(QString &outPath, Q3DStudio::DocumentEditorFileType::Enum assetType);
+
+    QString defaultDirForUrl(const QUrl &url);
+
+    static QStringList effectExtensions();
+    static QStringList fontExtensions();
+    static QStringList mapExtensions();
+    static QStringList materialExtensions();
+    static QStringList modelExtensions();
+    static QStringList behaviorExtensions();
 
     // This is not an appropriate place for these, but better
     // in an inappropriate place than duplicated
@@ -157,7 +168,8 @@ public:
                                         const Q3DStudio::CString &inRecommendedVersion);
 
 protected:
-    QString CreateAllowedTypesString(long inFileTypeFilter, bool inForImport);
+    QString CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::Enum fileTypeFilter,
+                                     QString &outInitialFilter, bool forImport, bool exclusive);
     static void DisplayGLVersionDialog(const Q3DStudio::CString &inGLVersion,
                                        const Q3DStudio::CString &inRecommendedVersion,
                                        bool inError);
@@ -166,5 +178,7 @@ protected:
     bool m_ShowGUI;
 
     Q3DStudio::CString m_LastSaveFile; ///< Path to the file was previously saved
+
+    QHash<QString, QString> m_defaultDirForSuffixMap;
 };
 #endif // INCLUDED_DIALOGS_H

@@ -119,7 +119,7 @@ namespace render {
     typedef nvhash_map<CRegisteredString, NVRenderPathFontSpecification *>
         TContextPathFontSpecificationMap;
 
-    class NVRenderContext : public NVRefCounted, public NVRenderDrawable
+    class QT3DS_AUTOTEST_EXPORT NVRenderContext : public NVRefCounted, public NVRenderDrawable
     {
     public:
         virtual NVRenderContextType GetRenderContextType() const = 0;

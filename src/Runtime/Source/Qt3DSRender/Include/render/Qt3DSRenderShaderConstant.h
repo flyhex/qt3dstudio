@@ -48,7 +48,7 @@ namespace render {
     class NVRenderConstantBuffer;
 
     ///< A shader constant belongs to a program
-    class NVRenderShaderConstantBase
+    class QT3DS_AUTOTEST_EXPORT NVRenderShaderConstantBase
     {
     public:
         NVRenderBackend *m_Backend; ///< pointer to backend

@@ -66,8 +66,6 @@ public:
     // Dialog Data
     QColor m_bgColor;
 
-    double m_nudgeValue;
-
 public:
     bool OnApply() override;
     void OnOK() override;
@@ -89,7 +87,6 @@ protected:
     void OnSelChangeInterpolationDefault();
     void OnSelChangeSnapRange();
     void OnCheckTimelineAbsoluteSnapping();
-    void OnChangeEditNudgeAmount();
     void OnSelChangeStartupView();
 #if 0 // Removed until we have some other Preview configurations that just Viewer
     void OnChangePreviewConfiguration();

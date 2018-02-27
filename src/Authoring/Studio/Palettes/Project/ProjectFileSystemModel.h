@@ -29,11 +29,12 @@
 #define TREEVIEWADAPTOR_H
 
 #include "StudioObjectTypes.h"
+#include "DocumentEditorEnumerations.h"
 
-#include <QFileSystemModel>
-#include <QAbstractListModel>
-#include <QList>
-#include <QUrl>
+#include <QtWidgets/qfilesystemmodel.h>
+#include <QtCore/qabstractitemmodel.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qurl.h>
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
 
@@ -63,11 +64,12 @@ public:
     bool isRefreshable(int row) const;
 
     void updateReferences(bool emitDataChanged);
+    Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
 
     Q_INVOKABLE void expand(int row);
     Q_INVOKABLE void collapse(int row);
 
-    Q_INVOKABLE void dropUrls(const QList<QUrl> &urls, int row);
+    Q_INVOKABLE void importUrls(const QList<QUrl> &urls, int row, bool autoSort = true);
     Q_INVOKABLE bool hasValidUrlsForDropping(const QList<QUrl> &urls) const;
 
 Q_SIGNALS:
@@ -84,12 +86,15 @@ private:
     EStudioObjectType getIconType(const QString &path) const;
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
-    void dropUrl(const QDir &targetDir, const QUrl &url) const;
+    void importUrl(const QDir &targetDir, const QUrl &url) const;
+    int rowForPath(const QString &path) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);
     void modelRowsMoved(const QModelIndex &parent, int start, int end);
     void modelLayoutChanged();
+
+    void updateDefaultDirMap();
 
     struct TreeItem {
         QPersistentModelIndex index;
@@ -103,6 +108,7 @@ private:
     QPersistentModelIndex m_rootIndex;
     QList<TreeItem> m_items;
     QStringList m_references;
+    QHash<QString, QString> m_defaultDirToAbsPathMap;
 };
 
 #endif // TREEVIEWADAPTOR_H

@@ -69,18 +69,24 @@
        <string/>
       </property>
       <property name="icon">
-       <iconset>
-        <normaloff>:/images/Objects-Scene-Normal.png</normaloff>:/images/Objects-Scene-Normal.png</iconset>
+       <iconset resource="../../images.qrc">
+        <normaloff>:/images/Objects-DataInput-Disabled.png</normaloff>:/images/Objects-DataInput-Disabled.png</iconset>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QToolButton" name="addLayerButton">
+      <property name="toolTip">
+       <string>Add new Layer</string>
+      </property>
       <property name="text">
        <string/>
       </property>
       <property name="icon">
-       <iconset>
+       <iconset resource="../../images.qrc">
         <normaloff>:/images/Asset-Layer-Normal.png</normaloff>:/images/Asset-Layer-Normal.png</iconset>
       </property>
      </widget>
@@ -106,11 +112,14 @@
       <property name="enabled">
        <bool>false</bool>
       </property>
+      <property name="toolTip">
+       <string>Delete selected item</string>
+      </property>
       <property name="text">
        <string/>
       </property>
       <property name="icon">
-       <iconset>
+       <iconset resource="../../images.qrc">
         <normaloff>:/images/Action-Trash-Normal.png</normaloff>:/images/Action-Trash-Normal.png</iconset>
       </property>
      </widget>
@@ -139,6 +148,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="toolTip">
+       <string>Playhead time</string>
+      </property>
       <property name="text">
        <string>0:00.000</string>
       </property>
@@ -162,36 +174,28 @@
     </item>
     <item>
      <widget class="QToolButton" name="rewindButton">
+      <property name="toolTip">
+       <string>Rewind</string>
+      </property>
       <property name="text">
        <string/>
       </property>
       <property name="icon">
-       <iconset>
+       <iconset resource="../../images.qrc">
         <normaloff>:/images/playback_tools_low-00.png</normaloff>:/images/playback_tools_low-00.png</iconset>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QToolButton" name="stopButton">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>:/images/playback_tools_low-01.png</normaloff>:/images/playback_tools_low-01.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QToolButton" name="playButton">
+      <property name="toolTip">
+       <string>Play</string>
+      </property>
       <property name="text">
        <string/>
       </property>
       <property name="icon">
-       <iconset>
+       <iconset resource="../../images.qrc">
         <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
       </property>
       <property name="checkable">
@@ -215,6 +219,8 @@
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../images.qrc"/>
+ </resources>
  <connections/>
 </ui>

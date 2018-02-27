@@ -26,6 +26,7 @@
 **
 ****************************************************************************/
 #include <QFileInfo>
+#include <QtCore/qurl.h>
 
 #include <functional>
 
@@ -58,6 +59,7 @@
 #include "ClientDataModelBridge.h"
 #include "IDocumentReader.h"
 #include "IStudioRenderer.h"
+#include "foundation/Qt3DSLogging.h"
 
 static QStringList renderableItems()
 {
@@ -151,6 +153,7 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
 
 InspectorControlModel::InspectorControlModel(QObject *parent)
     : QAbstractListModel(parent)
+    , m_currController(QString())
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
     m_modifiedProperty.first = 0;
@@ -331,6 +334,7 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     InspectorControlBase *item = new InspectorControlBase;
     item->m_property = metaProperty.m_Property;
     item->m_instance = inspectable->GetGroupInstance(groupIndex);
+    item->m_metaProperty = metaProperty;
 
     Q3DStudio::CString title;
     title.Assign(metaProperty.m_FormalName.c_str());
@@ -347,12 +351,15 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,
                                                                metaProperty.m_Property);
+
+    item->m_controllable = metaProperty.m_Controllable;
+
+    auto signalProvider = studio->GetFullSystemSignalProvider();
     if (item->m_animatable) {
         item->m_animated = studio->GetAnimationSystem()->IsPropertyAnimated(item->m_instance,
                                                                             metaProperty.m_Property);
 
         // Update the Animate Toggle on undo/redo
-        auto signalProvider = studio->GetFullSystemSignalProvider();
         item->m_connections.push_back(signalProvider->ConnectAnimationCreated(
                                           std::bind(&InspectorControlModel::updateAnimateToggleState,
                                                     this, item)));
@@ -362,12 +369,38 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
                                                     this, item)));
     }
 
+    if (item->m_controllable) {
+        // Get the name of current controller
+        qt3dsdm::SValue currPropVal = currentPropertyValue(
+            item->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                item->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+        // If this property is controlled, set the model controller variable
+        // as it is needed in UI dialogs.
+        if (!currPropVal.empty()) {
+            Q3DStudio::CString propName
+                = studio->GetPropertySystem()->GetName(item->m_property).c_str();
+            Q3DStudio::CString currPropValStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+            long propNamePos = currPropValStr.find(propName);
+            if (propNamePos != currPropValStr.ENDOFSTRING && propNamePos != 0)
+                m_currController = currPropValStr.Left(currPropValStr.find(" ")).toQString();
+            else
+                m_currController = QString(tr("[No control]"));
+        }
+
+        // Update UI icon state and tooltip
+        updateControlledToggleState(item);
+        m_controlledToggleConnection = signalProvider->ConnectControlledToggled(
+            std::bind(&InspectorControlModel::updateControlledToggleState,
+                      this, item));
+    }
+
     // synchronize the value itself
     updatePropertyValue(item);
     return item;
 }
 
-qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int handle)
+qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int handle) const
 {
     qt3dsdm::SValue value;
     const auto doc = g_StudioApp.GetCore()->GetDoc();
@@ -376,6 +409,57 @@ qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int h
     propertySystem->GetInstancePropertyValue(instance, handle,  value);
 
     return  value;
+}
+
+void InspectorControlModel::updateControlledToggleState(InspectorControlBase* inItem) const
+{
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    bool wasControlled = inItem->m_controlled;
+
+    // toggle if controlledproperty contains the name of this property
+    qt3dsdm::SValue currPropVal = currentPropertyValue(
+        inItem->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
+            inItem->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+    // Restore original tool tip from metadata when turning control off
+    if (currPropVal.empty()) {
+        inItem->m_controlled = false;
+        inItem->m_tooltip = Q3DStudio::CString(
+            inItem->m_metaProperty.m_Description.c_str()).toQString();
+    } else {
+       Q3DStudio::CString propName
+           = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
+       Q3DStudio::CString currPropValStr
+           = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+       // TODO this only works when controlling a single property,
+       // see below
+       // Item is not controlled if property name is not found altogether,
+       // or it is found at the beginning of the string where it should
+       // be considered to be the name of controlling datainput
+       // (this handles the case of datainput name being one of
+       // property names)
+       long propNamePos = currPropValStr.find(propName);
+       if (propNamePos == currPropValStr.ENDOFSTRING &&
+           propNamePos != 0) {
+           inItem->m_controlled = false;
+           inItem->m_tooltip = Q3DStudio::CString(
+               inItem->m_metaProperty.m_Description.c_str()).toQString();
+       } else {
+           inItem->m_controlled = true;
+           // TODO just get the first whitespace-delimited string from
+           // controlledproperty to show as controller name.
+           // This works as long as we only have control for textstring
+           // property, but when we enable control of several properties
+           // in a single element, we need to parse controlledproperty
+           // through and find the controller name for this specific property
+           const QString ctrlName = (currPropValStr.Left(
+               currPropValStr.find(" "))).toQString();
+           inItem->m_tooltip = tr("Controlling Datainput:\n%1").arg(ctrlName);
+       }
+    }
+
+    Q_EMIT inItem->tooltipChanged();
+     if (wasControlled != inItem->m_controlled)
+        Q_EMIT inItem->controlledChanged();
 }
 
 void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inItem)
@@ -511,6 +595,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     auto studioSystem = doc->GetStudioSystem();
     const auto propertySystem = studioSystem->GetPropertySystem();
+    auto bridge = studioSystem->GetClientDataModelBridge();
     qt3dsdm::SValue value;
     const auto instance = element->m_instance;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
@@ -561,7 +646,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
 
                 selectedIndex = stringlist.indexOf(listOpt);
                 // Add the slide names (exclude the master slide)
-                auto bridge = studioSystem->GetClientDataModelBridge();
                 auto slideHandle = slideSystem->GetSlideByInstance(instance);
                 auto masterSlide = slideSystem->GetMasterSlide(slideHandle);
                 long slideCount = (long)slideSystem->GetSlideCount(masterSlide);
@@ -613,6 +697,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             QFileInfo fileInfo(qt3dsdm::get<QString>(value));
             element->m_value = fileInfo.fileName();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::PathBuffer) {
+            element->m_value = qt3dsdm::get<QString>(value);
+        } else if (bridge->GetObjectType(element->m_instance) ==  OBJTYPE_DATAINPUT) {
             element->m_value = qt3dsdm::get<QString>(value);
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
@@ -710,6 +796,12 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     }
     Q_EMIT element->valueChanged();
     Q_EMIT element->valuesChanged();
+
+    // Controlled state must be manually set after undo operations,
+    // as only the "controlledproperty" is restored in undo,
+    // not the controlled flag nor the tooltip
+    if (element->m_controlled)
+          updateControlledToggleState(element);
 }
 
 void InspectorControlModel::refreshRenderables()
@@ -825,6 +917,18 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
     }
+    if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
+         || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
+            studio->GetPropertySystem()->GetDataType(handle)
+                == qt3dsdm::DataModelDataType::String) {
+        // force . at the beginning of the url
+        QString x = value.toString();
+        QUrl url(x);
+        if (url.isRelative() && !x.startsWith("./")) {
+            QString s = QString("./%1").arg(url.path());
+            v = QVariant::fromValue(s);
+        }
+    }
 
     if (!commit && m_modifiedProperty.first == 0) {
         m_modifiedProperty.first = instance;
@@ -887,6 +991,31 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
             ->SetInstancePropertyValue(instance, handle, newSelectedData);
+}
+
+void InspectorControlModel::setPropertyControllerInstance(
+    long instance,int property, Q3DStudio::CString controllerInstance, bool controlled)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
+
+    Q3DStudio::CString instancepath = Q3DStudio::CString(
+        objRefHelper->GetObjectReferenceString(doc->GetSceneInstance(),
+                                               CRelativePathTools::EPATHTYPE_GUID, instance));
+    Q_ASSERT(instancepath.size());
+
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property Controlled"))
+        ->SetInstancePropertyControlled(instance, instancepath, property,
+                                        controllerInstance, controlled);
+}
+
+void InspectorControlModel::setPropertyControlled(long instance, int property)
+{
+
+    const auto signalSender
+        = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalSender();
+
+    signalSender->SendControlledToggled(instance, property);
 }
 
 void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool animated)

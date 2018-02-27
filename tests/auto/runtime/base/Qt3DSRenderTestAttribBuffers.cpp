@@ -179,7 +179,7 @@ bool NVRenderTestAttribBuffers::multiAttribBufferTest(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create vertex buffer";
         return false;
     }
     // color buffer
@@ -187,7 +187,7 @@ bool NVRenderTestAttribBuffers::multiAttribBufferTest(NVRenderContext *context,
     mColorBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                3 * sizeof(QT3DSF32), colorData);
     if (!mColorBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create color buffer";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create color buffer";
         return false;
     }
 
@@ -208,7 +208,7 @@ bool NVRenderTestAttribBuffers::multiAttribBufferTest(NVRenderContext *context,
         mAttribLayout, NVConstDataRef<NVRenderVertexBuffer *>(attribBuffers, 2), NULL,
         toConstDataRef(strides, 2), toConstDataRef(offsets, 2), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestAttribBuffers: Failed to create input assembler";
+        qWarning() << "NVRenderTestAttribBuffers: Failed to create input assembler";
         return false;
     }
 

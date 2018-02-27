@@ -60,6 +60,7 @@ public:
     void RollbackTimeChange() override;
     ::CColor GetTimebarColor() override;
     void SetTimebarColor(const ::CColor &inColor) override;
+    void PreviewTimebarColor(const ::CColor &inColor) override;
     Q3DStudio::CString GetTimebarComment() override;
     void SetTimebarComment(const Q3DStudio::CString &inComment) override;
     void SetTimebarTime(ITimeChangeCallback *inCallback = nullptr) override;

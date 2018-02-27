@@ -41,7 +41,7 @@ namespace render {
     struct SDefaultMaterial;
     class IBufferManager;
 
-    struct SModel : public SNode
+    struct QT3DS_AUTOTEST_EXPORT SModel : public SNode
     {
         // Complete path to the file;
         //*not* relative to the presentation directory

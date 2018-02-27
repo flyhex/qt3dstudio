@@ -43,7 +43,7 @@ namespace render {
     class NVRenderContextImpl;
     class NVRenderTextureSampler;
 
-    class NVRenderTexture2DArray : public NVRenderTextureBase
+    class QT3DS_AUTOTEST_EXPORT NVRenderTexture2DArray : public NVRenderTextureBase
     {
     private:
         QT3DSU32 m_Width; ///< texture width

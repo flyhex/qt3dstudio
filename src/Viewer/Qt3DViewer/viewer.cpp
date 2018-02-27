@@ -33,6 +33,7 @@
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 #include <QtStudio3D/private/q3dspresentation_p.h>
 #include <QtGui/qguiapplication.h>
+#include <QtGui/qscreen.h>
 #include <QtQuick/qquickwindow.h>
 
 #include "viewer.h"
@@ -44,6 +45,10 @@ Viewer::Viewer(bool generatorMode, QObject *parent)
 {
     if (m_generatorMode)
         setContentView(SequenceView);
+
+    m_connectTextResetTimer.setInterval(5000);
+    m_connectTextResetTimer.setSingleShot(true);
+    connect(&m_connectTextResetTimer, &QTimer::timeout, this, &Viewer::resetConnectionInfoText);
 }
 
 Viewer::~Viewer()
@@ -68,12 +73,7 @@ void Viewer::connectRemote()
         return;
     }
 
-    m_connectText.clear();
-    QTextStream stream(&m_connectText);
-    stream << tr("Connection Info\nAddress: %1\nPort: %2")
-              .arg(m_remoteDeploymentReceiver->hostAddress().toString())
-              .arg(QString::number(m_connectPort));
-    Q_EMIT connectTextChanged();
+    resetConnectionInfoText();
 
     connect(m_remoteDeploymentReceiver, &RemoteDeploymentReceiver::remoteConnected,
             this, &Viewer::remoteConnected);
@@ -88,6 +88,11 @@ void Viewer::connectRemote()
             this, &Viewer::loadRemoteDeploymentReceiver);
 
     Q_EMIT connectedChanged();
+}
+
+void Viewer::disconnectRemote()
+{
+    m_remoteDeploymentReceiver->disconnectRemote();
 }
 
 // Used to load files via command line
@@ -132,7 +137,14 @@ void Viewer::restoreWindowState(QWindow *window)
     int visibility = settings.value(QStringLiteral("WindowVisibility"),
                                     QWindow::Windowed).toInt();
 
-    if (!geo.isNull()) {
+    // Do not restore geometry if resulting geometry means the center of the window
+    // would be offscreen on the virtual desktop
+    QRect vgeo = window->screen()->availableVirtualGeometry();
+    QPoint center(geo.x() + geo.width() / 2, geo.y() + geo.height() / 2);
+    bool offscreen = center.x() > vgeo.width() || center.x() < 0
+            || center.y() > vgeo.height() || center.y() < 0;
+
+    if (!offscreen && !geo.isNull()) {
         // The first geometry set at startup may adjust the geometry according to pixel
         // ratio if mouse cursor is on different screen than where window goes and the
         // two screens have different pixel ratios. Setting geometry twice seems to
@@ -290,6 +302,8 @@ void Viewer::remoteConnected()
     m_connectText = tr("Remote Connected");
     Q_EMIT connectTextChanged();
     Q_EMIT connectedChanged();
+    if (m_contentView != ConnectView)
+        Q_EMIT showInfoOverlay(m_connectText);
 }
 
 void Viewer::remoteDisconnected()
@@ -297,6 +311,24 @@ void Viewer::remoteDisconnected()
     m_connectText = tr("Remote Disconnected");
     Q_EMIT connectTextChanged();
     Q_EMIT connectedChanged();
+    if (m_contentView != ConnectView) {
+        Q_EMIT showInfoOverlay(m_connectText);
+    } else {
+        // Start timer to reset connection info text
+        m_connectTextResetTimer.start();
+    }
+}
+
+void Viewer::resetConnectionInfoText()
+{
+    m_connectText.clear();
+    QTextStream stream(&m_connectText);
+    stream << tr("Use IP: %1 and Port: %2\n"
+                 "in Qt 3D Studio Editor to connect to this viewer.\n\n"
+                 "Use File/Open... to open a local presentation.")
+              .arg(m_remoteDeploymentReceiver->hostAddress().toString())
+              .arg(QString::number(m_connectPort));
+    Q_EMIT connectTextChanged();
 }
 
 Q3DSView *Viewer::qmlStudio()

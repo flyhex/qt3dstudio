@@ -33,7 +33,6 @@
 #include "q3dsqmlsubpresentationsettings.h"
 
 #include <QtStudio3D/q3dspresentation.h>
-#include <QtStudio3D/q3dssceneelement.h>
 #include <QtQml/qqmllist.h>
 
 QT_BEGIN_NAMESPACE
@@ -54,7 +53,7 @@ public:
     QQmlListProperty<QObject> qmlChildren();
 
 public Q_SLOTS:
-    static void appendQmlChildren(QQmlListProperty<QObject> *list, QObject *element);
+    static void appendQmlChildren(QQmlListProperty<QObject> *list, QObject *obj);
 
 private:
     Q3DSSubPresentationSettings *m_subPresentationSettings;

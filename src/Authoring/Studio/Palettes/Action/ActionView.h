@@ -86,6 +86,7 @@ class ActionView : public QQuickWidget,
     Q_PROPERTY(QString itemIcon READ itemIcon NOTIFY itemChanged FINAL)
     Q_PROPERTY(QString itemText READ itemText NOTIFY itemChanged FINAL)
     Q_PROPERTY(QColor itemColor READ itemColor NOTIFY itemChanged FINAL)
+    Q_PROPERTY(bool hasItem MEMBER m_hasItem NOTIFY hasItemChanged FINAL)
     Q_PROPERTY(QString triggerObjectName READ triggerObjectName NOTIFY actionChanged FINAL)
     Q_PROPERTY(QString targetObjectName READ targetObjectName NOTIFY actionChanged FINAL)
     Q_PROPERTY(QString eventName READ eventName NOTIFY actionChanged FINAL)
@@ -143,6 +144,7 @@ public:
     void OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument);
     void OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
 Q_SIGNALS:
     void itemChanged();
@@ -150,6 +152,7 @@ Q_SIGNALS:
     void propertyModelChanged();
     void propertyChanged();
     void firedEventChanged();
+    void hasItemChanged();
 
 private Q_SLOTS:
     void copyAction();
@@ -199,6 +202,7 @@ private:
     QString m_firedEvent;
     MouseHelper m_mouseHelper;
     QSize m_preferredSize;
+    bool m_hasItem = false;
 };
 
 #endif // ACTIONVIEW_H

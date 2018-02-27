@@ -147,11 +147,6 @@ public:
                               const char *text) = 0;
     virtual void RenderGpuProfilerStats(FLOAT x, FLOAT y,
                                         qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor) = 0;
-
-    // Set the watermark texture as a compressed PNG file.
-    virtual bool SetWatermarkTextureDataDDS(const unsigned char *inTextureData,
-                                            size_t inDataSize) = 0;
-    virtual void SetWatermarkLocation(float x, float y) = 0;
 };
 
 class INDDView : public qt3ds::foundation::NVRefCounted
@@ -194,6 +189,7 @@ public:
     virtual void SetPresentationAttribute(const char *presId, const char *, const char *value) = 0;
     virtual void GoToTime(const char *elementPath, const float time) = 0;
     virtual void SetGlobalAnimationTime(qint64 inMilliSecs) = 0;
+    virtual void SetDataInputValue(const QString &name, const QVariant &value) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;
@@ -286,6 +282,10 @@ public:
     void SetGlobalAnimationTime(qint64 inMilliSecs)
     {
         m_NDDView->SetGlobalAnimationTime(inMilliSecs);
+    }
+    void SetDataInputValue(const QString &name, const QVariant &value)
+    {
+        m_NDDView->SetDataInputValue(name, value);
     }
     void SetAttribute(const char *elementPath, const char *attributeName, const char *value)
     {

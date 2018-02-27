@@ -48,8 +48,10 @@ void ActionModel::setInstanceHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle
     m_handle = handle;
     auto doc = g_StudioApp.GetCore()->GetDoc();
     m_actions.clear();
-    doc->GetStudioSystem()->GetActionSystem()->GetActions(doc->GetActiveSlide(),
-                                                     handle, m_actions);
+    if (handle.Valid()) {
+        doc->GetStudioSystem()->GetActionSystem()->GetActions(doc->GetActiveSlide(),
+                                                              handle, m_actions);
+    }
 
     endResetModel();
 }

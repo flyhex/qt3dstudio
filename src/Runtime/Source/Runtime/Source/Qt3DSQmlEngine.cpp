@@ -389,6 +389,7 @@ public:
     void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) override;
     void SetApplication(qt3ds::runtime::IApplication &inApplication) override;
     qt3ds::runtime::IApplication *GetApplication() override;
+    void Initialize() override;
 
     void BeginPreloadScripts(const eastl::vector<const char *> &,
                                      qt3ds::render::IThreadPool &, const char *) override {}
@@ -420,6 +421,7 @@ public:
     void SetAttribute(const char *element, const char *attName, const char *value) override;
     bool GetAttribute(const char *element, const char *attName, char *value) override;
     void FireEvent(const char *element, const char *evtName) override;
+    void SetDataInputValue(const QString &name, const QVariant &value) override;
 
     void GotoSlide(const char *component, const char *slideName,
                            const SScriptEngineGotoSlideArgs &inArgs) override;
@@ -448,6 +450,8 @@ public:
 private:
     void createComponent(QQmlComponent *component, TElement *element);
     TElement *getTarget(const char *component);
+    void listAllElements(TElement *root, QList<TElement *> &elements);
+    void initializeDataInputsInPresentation(CPresentation &presentation, bool isPrimary);
 };
 
 CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
@@ -461,6 +465,7 @@ CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
     , mRefCount(0)
 {
     qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
+    qmlRegisterType<Q3DSQmlBehavior, 1>("QtStudio3D.Behavior", 1, 1, "Behavior");
 }
 
 void CQmlEngineImpl::Shutdown(qt3ds::NVFoundationBase &inFoundation)
@@ -493,6 +498,15 @@ qt3ds::runtime::IApplication *CQmlEngineImpl::GetApplication()
 {
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
     return m_Application;
+}
+
+void CQmlEngineImpl::Initialize()
+{
+    // Gather data input controlled properties
+    QList<CPresentation *> presentations = m_Application->GetPresentationList();
+
+    for (int i = 0; i < presentations.size(); ++i)
+        initializeDataInputsInPresentation(*presentations[i], i == 0);
 }
 
 void CQmlEngineImpl::SetAttribute(const char *element, const char *attName, const char *value)
@@ -578,6 +592,53 @@ void CQmlEngineImpl::FireEvent(const char *element, const char *evtName)
                 << "CQmlEngineImpl::FireEvent: "
                 << "failed to find element: "
                 << element << " " << evtName;
+    }
+}
+
+void CQmlEngineImpl::SetDataInputValue(const QString &name, const QVariant &value)
+{
+    qt3ds::runtime::DataInputMap &diMap = m_Application->dataInputMap();
+    if (diMap.contains(name)) {
+        const qt3ds::runtime::DataInputDef &diDef = diMap[name];
+        const QVector<qt3ds::runtime::DataInputControlledAttribute> &ctrlAtt
+                = diDef.controlledAttributes;
+        for (const qt3ds::runtime::DataInputControlledAttribute &ctrlElem : ctrlAtt) {
+            switch (ctrlElem.propertyType) {
+            case ATTRIBUTETYPE_DATAINPUT_TIMELINE: {
+                // Quietly ignore other than number type data inputs when adjusting timeline
+                if (diDef.type == qt3ds::runtime::DataInputTypeRangedNumber) {
+                    TTimeUnit endTime = 0;
+                    TElement *element = getTarget(ctrlElem.elementPath.constData());
+                    TComponent *component = static_cast<TComponent *>(element);
+                    endTime = component->GetTimePolicy().GetLoopingDuration();
+
+                    // Normalize the value to dataInput range
+                    qreal newTime = qreal(endTime) * (qreal(value.toFloat() - diDef.min)
+                                                      / qreal(diDef.max - diDef.min));
+                    GotoTime(ctrlElem.elementPath.constData(), float(newTime / 1000.0));
+                }
+                break;
+            }
+            case ATTRIBUTETYPE_DATAINPUT_SLIDE: {
+                // Quietly ignore other than string type when adjusting slide
+                if (diDef.type == qt3ds::runtime::DataInputTypeString) {
+                    const QByteArray valueStr = value.toString().toUtf8();
+                    GotoSlide(ctrlElem.elementPath.constData(), valueStr.constData(),
+                              SScriptEngineGotoSlideArgs());
+                }
+                break;
+            }
+            case ATTRIBUTETYPE_STRING: {
+                const QByteArray valueStr = value.toString().toUtf8();
+                SetAttribute(ctrlElem.elementPath.constData(), ctrlElem.attributeName.constData(),
+                             valueStr.constData());
+                break;
+            }
+            default:
+                qWarning() << __FUNCTION__ << "Unsupported property type";
+                break;
+            }
+        }
     }
 }
 
@@ -841,6 +902,69 @@ TElement *CQmlEngineImpl::getTarget(const char *component) {
                     split.at(0).toStdString().c_str(), NULL);
     }
     return target;
+}
+
+void CQmlEngineImpl::listAllElements(TElement *root, QList<TElement *> &elements)
+{
+    elements.append(root);
+    TElement *nextChild = root->GetChild();
+    while (nextChild) {
+        listAllElements(nextChild, elements);
+        nextChild = nextChild->GetSibling();
+    }
+}
+
+void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentation,
+                                                        bool isPrimary)
+{
+    TElement *parent = presentation.GetRoot();
+    QList<TElement *> elements;
+    listAllElements(parent, elements);
+    qt3ds::runtime::DataInputMap &diMap = m_Application->dataInputMap();
+    qt3ds::foundation::IStringTable &strTable(presentation.GetStringTable());
+
+    for (TElement *element : qAsConst(elements)) {
+        Option<QT3DSU32> ctrlIndex = element->FindPropertyIndex(ATTRIBUTE_CONTROLLEDPROPERTY);
+        if (ctrlIndex.hasValue()) {
+            Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> propertyInfo =
+                    element->GetPropertyByIndex(*ctrlIndex);
+            UVariant *valuePtr = propertyInfo->second;
+            QString valueStr =
+                    QString::fromUtf8(strTable.HandleToStr(valuePtr->m_StringHandle));
+            if (!valueStr.isEmpty()) {
+                QStringList splitValues = valueStr.split(QChar(' '));
+                for (int i = 1; i < splitValues.size(); i += 2) {
+                    if (diMap.contains(splitValues[i - 1])) {
+                        qt3ds::runtime::DataInputControlledAttribute ctrlElem;
+                        if (!isPrimary) {
+                            // Prepend presentation id to element path
+                            ctrlElem.elementPath = presentation.GetName();
+                            ctrlElem.elementPath.append(QByteArrayLiteral(":"));
+                        }
+                        ctrlElem.attributeName = splitValues[i].toUtf8();
+                        if (ctrlElem.attributeName == QByteArrayLiteral("@timeline")) {
+                            ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_TIMELINE;
+                            TElement *component = &element->GetComponentParent();
+                            ctrlElem.elementPath.append(component->m_Path);
+                        } else if (ctrlElem.attributeName == QByteArrayLiteral("@slide")) {
+                            ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_SLIDE;
+                            TElement *component = &element->GetComponentParent();
+                            ctrlElem.elementPath.append(component->m_Path);
+                        } else {
+                            ctrlElem.elementPath.append(element->m_Path);
+                            TStringHash attHash = CHash::HashAttribute(
+                                        ctrlElem.attributeName.constData());
+                            Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> attInfo =
+                                    element->FindProperty(attHash);
+                            ctrlElem.propertyType = attInfo->first.m_Type;
+                        }
+                        qt3ds::runtime::DataInputDef &diDef = diMap[splitValues[i - 1]];
+                        diDef.controlledAttributes.append(ctrlElem);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**

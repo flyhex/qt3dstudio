@@ -1198,27 +1198,25 @@ struct SDataInputTranslator : public Qt3DSTranslator
                         Element().GetBelongedPresentation()->GetApplication(),
                         Element().GetBelongedPresentation(), elemAndProperty.first,
                         Element().GetParent());
+
+            if (!controlledElem) {
+                qCWarning(qt3ds::WARNING()) << "DataInput controlled element not found!";
+                QT3DS_ASSERT(false);
+                return;
+            }
+
             SPresentation presentation = inParser.m_Presentation;
             Qt3DSTranslator *controlledTranslator =
                     reinterpret_cast<Qt3DSTranslator *>(controlledElem->GetAssociation());
             SRuntimePropertyParser ControlledElementParser(presentation,
                                                            inParser.m_RenderContext,
                                                            *controlledElem);
+            ControlledElementParser.Setup(
+                Q3DStudio::CHash::HashAttribute(elemAndProperty.second),
+                inParser.m_Value, inParser.m_Type);
 
             switch (inParser.m_PropertyName) {
-
-            case Q3DStudio::ATTRIBUTE_VALUESTR:
             case Q3DStudio::ATTRIBUTE_VALUE:
-                // TODO remove
-                qCDebug(qt3ds::TRACE_INFO) << "SDataInputTranslator OnSpecificPropertyChange  "
-                                           << Q3DStudio::GetAttributeString(
-                                                  (Q3DStudio::EAttribute)inParser.m_PropertyName)
-                                           << " " << inParser.m_Value.m_FLOAT;
-
-                ControlledElementParser.Setup(
-                            Q3DStudio::CHash::HashAttribute(elemAndProperty.second),
-                            inParser.m_Value, inParser.m_Type);
-
                 // Instead of generic macro, iterate through object types that are relevant for
                 // DataInput control and which have propertychange handler
                 switch (controlledTranslator->GetUIPType()) {
@@ -1286,6 +1284,16 @@ struct SDataInputTranslator : public Qt3DSTranslator
                     QT3DS_ASSERT(false);
                     break;
                 }
+                break;
+            case Q3DStudio::ATTRIBUTE_VALUESTR:
+                if (controlledTranslator->GetUIPType() == GraphObjectTypes::Text) {
+                    (reinterpret_cast<STextTranslator *>(controlledTranslator))
+                        ->OnSpecificPropertyChange(ControlledElementParser);
+                    (reinterpret_cast<STextTranslator *>(controlledTranslator))
+                        ->PostPropertyChanged(ControlledElementParser,
+                                              *m_Element->GetBelongedPresentation());
+                }
+                break;
                 // TODO handle remaining properties
                 // (timefrom/to)
             default:

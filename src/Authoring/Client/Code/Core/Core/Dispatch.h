@@ -121,8 +121,6 @@ public:
     void FireSceneMouseMove(SceneDragSenderType::Enum inSender, const QPoint &inPoint);
     void FireSceneMouseDblClick(SceneDragSenderType::Enum inSender, const QPoint &inPoint);
     void FireSceneMouseWheel(SceneDragSenderType::Enum inSender, short inDelta, int inToolMode);
-    void FireOnNudge(ENudgeDirection inNudgeDirection, int inToolMode, Qt::KeyboardModifiers inFlags);
-    void FireOnNudgeDone();
     void FireSceneMouseUp(SceneDragSenderType::Enum inSender);
 
     // Selection Change new skool.

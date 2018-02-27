@@ -196,6 +196,15 @@ public:
     SetInstancePropertyValueAsRenderable(TInstanceHandle instance, TPropertyHandle propName,
                                          const Q3DStudio::CString &inSourcePath) = 0;
 
+    // Sets/unsets "instance" property "propName" to be controlled by datainput "controller"
+    // and adds element - property pair to controlling datainput control list. "Instancepath"
+    // must correspond to controlled instance path as it is the data used by controller to
+    // locate element when controlling the property value
+    virtual void SetInstancePropertyControlled(TInstanceHandle instance, CString instancepath,
+                                               TPropertyHandle propName,
+                                               CString controller,
+                                               bool controlled) = 0;
+
     virtual void SetMaterialType(TInstanceHandle instance,
                                  const Q3DStudio::CString &inRelativePathToMaterialFile) = 0;
 

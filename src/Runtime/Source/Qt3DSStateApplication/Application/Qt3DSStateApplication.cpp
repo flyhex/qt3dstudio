@@ -42,7 +42,8 @@ using namespace qt3ds::state;
 using namespace eastl;
 
 bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
-                                         const QStringList &presentations)
+                                         const QStringList &parameters,
+                                         bool subpresentations)
 {
     eastl::string directory;
     eastl::string filestem;
@@ -85,29 +86,50 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
             if (!domReader->MoveToFirstChild("assets"))
                 writerData.first->Begin("assets");
             else {
-                int pre = domReader->CountChildren("presentation");
-                int preq = domReader->CountChildren("presentation-qml");
-                if (pre + preq > 0) {
-                    while (domReader->MoveToFirstChild("presentation"))
-                        writerData.first->RemoveCurrent();
-                    while (domReader->MoveToFirstChild("presentation-qml"))
-                        writerData.first->RemoveCurrent();
+                if (subpresentations) {
+                    int pre = domReader->CountChildren("presentation");
+                    int preq = domReader->CountChildren("presentation-qml");
+                    if (pre + preq > 0) {
+                        while (domReader->MoveToFirstChild("presentation"))
+                            writerData.first->RemoveCurrent();
+                        while (domReader->MoveToFirstChild("presentation-qml"))
+                            writerData.first->RemoveCurrent();
+                    }
+
+                    writerData.first->Begin("presentation");
+                    writerData.first->Att("id", filestem.c_str());
+                    writerData.first->Att("src", filename.c_str());
+                    writerData.first->End();
+                } else {
+                    int dai = domReader->CountChildren("dataInput");
+                    if (dai > 0) {
+                        while (domReader->MoveToFirstChild("dataInput"))
+                            writerData.first->RemoveCurrent();
+                    }
                 }
             }
 
-            writerData.first->Begin("presentation");
-            writerData.first->Att("id", filestem.c_str());
-            writerData.first->Att("src", filename.c_str());
-            writerData.first->End();
-
-            for (int i = 0; i < presentations.size() / 3; i++) {
-                writerData.first->Begin(qPrintable(presentations[3 * i]));
-                writerData.first->Att("id", qPrintable(presentations[3 * i + 1]));
-                if (presentations[3 * i] == QStringLiteral("presentation"))
-                    writerData.first->Att("src", qPrintable(presentations[3 * i + 2]));
-                else
-                    writerData.first->Att("args", qPrintable(presentations[3 * i + 2]));
-                writerData.first->End();
+            if (subpresentations) {
+                for (int i = 0; i < parameters.size() / 3; i++) {
+                    writerData.first->Begin(qPrintable(parameters[3 * i]));
+                    writerData.first->Att("id", qPrintable(parameters[3 * i + 1]));
+                    if (parameters[3 * i] == QStringLiteral("presentation"))
+                        writerData.first->Att("src", qPrintable(parameters[3 * i + 2]));
+                    else
+                        writerData.first->Att("args", qPrintable(parameters[3 * i + 2]));
+                    writerData.first->End();
+                }
+            } else {
+                for (int i = 0; i < parameters.size() / 4; i++) {
+                    writerData.first->Begin("dataInput");
+                    writerData.first->Att("name", qPrintable(parameters[4 * i]));
+                    writerData.first->Att("type", qPrintable(parameters[4 * i + 1]));
+                    if (QStringLiteral("Ranged Number") == parameters[4 * i + 1]) {
+                        writerData.first->Att("min", qPrintable(parameters[4 * i + 2]));
+                        writerData.first->Att("max", qPrintable(parameters[4 * i + 3]));
+                    }
+                    writerData.first->End();
+                }
             }
 
             CFileSeekableIOStream theOutStream(uiaPath.c_str(), FileWriteFlags());
@@ -137,17 +159,34 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
         uiaFileData.append(filename);
         uiaFileData.append("\"/>\n");
 
-        for (int i = 0; i < presentations.size() / 3; i++) {
-            uiaFileData.append("\t\t<");
-            uiaFileData.append(qPrintable(presentations[3 * i]));
-            uiaFileData.append("id=\"");
-            uiaFileData.append(qPrintable(presentations[3 * i + 1]));
-            if (presentations[3 * i] == QStringLiteral("presentation"))
-                uiaFileData.append("\" src=\"");
-            else
-                uiaFileData.append("\" args=\"");
-            uiaFileData.append(qPrintable(presentations[3 * i + 2]));
-            uiaFileData.append("\"/>\n");
+        if (subpresentations) {
+            for (int i = 0; i < parameters.size() / 3; i++) {
+                uiaFileData.append("\t\t<");
+                uiaFileData.append(qPrintable(parameters[3 * i]));
+                uiaFileData.append("id=\"");
+                uiaFileData.append(qPrintable(parameters[3 * i + 1]));
+                if (parameters[3 * i] == QStringLiteral("presentation"))
+                    uiaFileData.append("\" src=\"");
+                else
+                    uiaFileData.append("\" args=\"");
+                uiaFileData.append(qPrintable(parameters[3 * i + 2]));
+                uiaFileData.append("\"/>\n");
+            }
+        } else {
+            for (int i = 0; i < parameters.size() / 4; i++) {
+                uiaFileData.append("\t\t\t<dataInput ");
+                uiaFileData.append("name=\"");
+                uiaFileData.append(qPrintable(parameters[4 * i]));
+                uiaFileData.append("type=\"");
+                uiaFileData.append(qPrintable(parameters[4 * i + 1]));
+                if (QStringLiteral("Ranged Number") == parameters[4 * i + 1]) {
+                    uiaFileData.append("min=\"");
+                    uiaFileData.append(qPrintable(parameters[4 * i + 2]));
+                    uiaFileData.append("max=\"");
+                    uiaFileData.append(qPrintable(parameters[4 * i + 3]));
+                }
+                uiaFileData.append("\"/>\n");
+            }
         }
 
         uiaFileData.append("\t</assets>\n");

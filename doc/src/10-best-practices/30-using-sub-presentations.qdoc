@@ -61,8 +61,12 @@ or on an image element on an existing layer.
 \li
   From the file menu, select \uicontrol{Edit} > \uicontrol{Sub-presentations}.
 \li
+  Click the \uicontrol{+} icon.
+\li
+  Set \uicontrol{Type} to \c{Presentation}.
+\li
   Click \uicontrol{Browse}, browse to the project folder of your desired project and select the
-  \c{.uia} file.
+  \c{.uip} file.
   \image subpresentation-dialog.png
 \li
   Enter desired name for the sub-presentation in the \uicontrol{Name} field. In case you have

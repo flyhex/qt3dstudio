@@ -99,6 +99,11 @@ void CEmptyTimelineTimebar::SetTimebarColor(const ::CColor &inColor)
     Q_UNUSED(inColor);
 }
 
+void CEmptyTimelineTimebar::PreviewTimebarColor(const ::CColor &inColor)
+{
+    Q_UNUSED(inColor);
+}
+
 Q3DStudio::CString CEmptyTimelineTimebar::GetTimebarComment()
 {
     return "";

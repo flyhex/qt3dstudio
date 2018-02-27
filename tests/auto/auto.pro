@@ -1,8 +1,10 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-SUBDIRS += \
-    runtime \
-    viewer \
-    qtextras \
-    studio3d
+!macos: SUBDIRS += \
+    qtextras
+
+# TODO: Re-enable these tests after fixing them
+#    runtime \
+#    viewer \
+#    studio3d

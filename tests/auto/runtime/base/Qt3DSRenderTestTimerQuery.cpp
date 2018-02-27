@@ -170,7 +170,7 @@ bool NVRenderTestTimerQuery::renderQuad(NVRenderContext *context, userContextDat
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTimerQuery: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestTimerQuery: Failed to create vertex buffer";
         return false;
     }
 
@@ -183,7 +183,7 @@ bool NVRenderTestTimerQuery::renderQuad(NVRenderContext *context, userContextDat
         context->CreateInputAssembler(mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), NULL,
                                       toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTimerQuery: Failed to create input assembler";
+        qWarning() << "NVRenderTestTimerQuery: Failed to create input assembler";
         return false;
     }
 
@@ -247,7 +247,7 @@ bool NVRenderTestTimerQuery::timerTest(NVRenderContext *context, userContextData
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTimerQuery: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestTimerQuery: Failed to create vertex buffer";
         return false;
     }
 
@@ -260,7 +260,7 @@ bool NVRenderTestTimerQuery::timerTest(NVRenderContext *context, userContextData
         context->CreateInputAssembler(mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), NULL,
                                       toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTimerQuery: Failed to create input assembler";
+        qWarning() << "NVRenderTestTimerQuery: Failed to create input assembler";
         return false;
     }
 
@@ -350,7 +350,7 @@ bool NVRenderTestTimerQuery::absoluteTimerTest(NVRenderContext *context, userCon
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTimerQuery: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestTimerQuery: Failed to create vertex buffer";
         return false;
     }
 
@@ -363,7 +363,7 @@ bool NVRenderTestTimerQuery::absoluteTimerTest(NVRenderContext *context, userCon
         context->CreateInputAssembler(mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), NULL,
                                       toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestTimerQuery: Failed to create input assembler";
+        qWarning() << "NVRenderTestTimerQuery: Failed to create input assembler";
         return false;
     }
 

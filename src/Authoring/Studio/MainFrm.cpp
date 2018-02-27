@@ -54,10 +54,12 @@
 #include "ITickTock.h"
 #include "IStudioRenderer.h"
 #include "SubPresentationListDlg.h"
+#include "DataInputListDlg.h"
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
 #include "TimelineView.h"
+#include "ProjectView.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -96,6 +98,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionSave_As, &QAction::triggered, this, &CMainFrame::OnFileSaveAs);
     connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
+    connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
     connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
@@ -122,6 +125,8 @@ CMainFrame::CMainFrame()
             this, &CMainFrame::OnEditPresentationPreferences);
     connect(m_ui->actionSubpresentations, &QAction::triggered, this,
             &CMainFrame::OnEditSubPresentations);
+    connect(m_ui->actionData_Inputs, &QAction::triggered, this,
+            &CMainFrame::OnEditDataInputs);
     connect(m_ui->action_Duplicate_Object, &QAction::triggered,
             this, &CMainFrame::OnEditDuplicate);
 
@@ -164,7 +169,17 @@ CMainFrame::CMainFrame()
             m_SceneView, &CSceneView::OnToolGroupSelection);
 
     // Playback toolbar
-    connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreview);
+    connect(m_ui->actionPreview, &QAction::triggered,
+            this, &CMainFrame::OnPlaybackPreviewRuntime1);
+
+    // Only show runtime2 preview if we have appropriate viewer
+    if (CPreviewHelper::viewerExists(QStringLiteral("q3dsviewer"))) {
+        connect(m_ui->actionPreviewRuntime2, &QAction::triggered,
+                this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    } else {
+        m_ui->actionPreviewRuntime2->setVisible(false);
+    }
+
 
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
@@ -265,10 +280,13 @@ void CMainFrame::onPlaybackTimeout()
 void CMainFrame::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
+    handleGeometryAndState(false);
+}
 
-    QSettings settings;
-    restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-    restoreState(settings.value("mainWindowState").toByteArray());
+void CMainFrame::hideEvent(QHideEvent *event)
+{
+    QMainWindow::hideEvent(event);
+    handleGeometryAndState(true);
 }
 
 /**
@@ -317,6 +335,7 @@ int CMainFrame::OnCreate()
     m_ui->actionSave_a_Copy->setEnabled(false);
     m_ui->action_Connect_to_Device->setEnabled(false);
     m_ui->action_Revert->setEnabled(false);
+    m_ui->actionImportAssets->setEnabled(false);
 
     setCentralWidget(m_SceneView);
     return 0;
@@ -344,6 +363,7 @@ void CMainFrame::OnNewPresentation()
     m_ui->actionSave_a_Copy->setEnabled(true);
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
+    m_ui->actionImportAssets->setEnabled(true);
 }
 
 //==============================================================================
@@ -553,7 +573,7 @@ void CMainFrame::OnTimelineSetTimeBarColor()
         if (theColorDlg->exec() == QDialog::Accepted)
             theTimelineTimebar->SetTimebarColor(theColorDlg->selectedColor());
         else
-            theTimelineTimebar->SetTimebarColor(previousColor);
+            theTimelineTimebar->PreviewTimebarColor(previousColor);
     }
 }
 
@@ -561,7 +581,7 @@ void CMainFrame::OnTimeBarColorChanged(const QColor &color)
 {
     ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
     if (theTimelineTimebar)
-        theTimelineTimebar->SetTimebarColor(color);
+        theTimelineTimebar->PreviewTimebarColor(color);
 }
 
 //==============================================================================
@@ -615,7 +635,8 @@ void CMainFrame::OnTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
 {
-    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(g_StudioApp.CanCopy());
+    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(
+                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
 //==============================================================================
@@ -723,9 +744,7 @@ void CMainFrame::OnFileNew()
  */
 void CMainFrame::closeEvent(QCloseEvent *event)
 {
-    QSettings settings;
-    settings.setValue("mainWindowGeometry", saveGeometry());
-    settings.setValue("mainWindowState", saveState());
+    handleGeometryAndState(true);
     QMainWindow::closeEvent(event);
 
     if (g_StudioApp.GetCore()->GetDoc()->IsModified()) {
@@ -765,7 +784,7 @@ void CMainFrame::OnEditPresentationPreferences()
 
 //==============================================================================
 /**
- *  Displays the preferences dialog and can change subpresentation settings.
+ *  Displays the sub-presentation dialog.
  */
 void CMainFrame::OnEditSubPresentations()
 {
@@ -777,6 +796,19 @@ void CMainFrame::OnEditSubPresentations()
         g_StudioApp.m_subpresentations = dlg.subpresentations();
         g_StudioApp.SaveUIAFile();
     }
+}
+
+//==============================================================================
+/**
+ *  Displays the data input dialog.
+ */
+void CMainFrame::OnEditDataInputs()
+{
+    CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems));
+    dataInputDlg.exec();
+
+    if (dataInputDlg.result() == QDialog::Accepted)
+        g_StudioApp.SaveUIAFile(false);
 }
 
 //==============================================================================
@@ -810,7 +842,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetBoundingBoxesOn(true);
         CStudioPreferences::SetTimebarDisplayTime(true);
         g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
-        CStudioPreferences::SetNudgeAmount(10.0f);
         CStudioPreferences::SetSnapRange(10);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
@@ -940,7 +971,7 @@ void CMainFrame::OnPlaybackStop()
 /**
  *	Handles pressing the preview button.
  */
-void CMainFrame::OnPlaybackPreview()
+void CMainFrame::OnPlaybackPreview(const QString &viewerExeName)
 {
     if (m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
@@ -949,8 +980,18 @@ void CMainFrame::OnPlaybackPreview()
         CPreviewHelper::OnDeploy(*m_remoteDeploymentSender);
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
     } else {
-        CPreviewHelper::OnPreview();
+        CPreviewHelper::OnPreview(viewerExeName);
     }
+}
+
+void CMainFrame::OnPlaybackPreviewRuntime1()
+{
+    OnPlaybackPreview(QStringLiteral("Qt3DViewer"));
+}
+
+void CMainFrame::OnPlaybackPreviewRuntime2()
+{
+    OnPlaybackPreview(QStringLiteral("q3dsviewer"));
 }
 
 //==============================================================================
@@ -1644,6 +1685,11 @@ void CMainFrame::OnFileRevert()
     g_StudioApp.OnRevert();
 }
 
+void CMainFrame::OnFileImportAssets()
+{
+    m_PaletteManager->projectView()->assetImportAction(0);
+}
+
 void CMainFrame::OnFileConnectToDevice()
 {
     if (m_remoteDeploymentSender->isConnected()) {
@@ -1658,6 +1704,8 @@ void CMainFrame::OnFileConnectToDevice()
                         Q3DStudio::CString::fromQString(
                             QObject::tr("Connecting to remote device...")), "");
             m_remoteDeploymentSender->connect(info);
+        } else {
+            m_ui->action_Connect_to_Device->setChecked(false);
         }
     }
 }
@@ -1810,4 +1858,18 @@ bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
         break;
     }
     return QMainWindow::eventFilter(obj, event);
+}
+
+void CMainFrame::handleGeometryAndState(bool save)
+{
+    QSettings settings;
+    QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
+    QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+    if (save) {
+        settings.setValue(geoKey, saveGeometry());
+        settings.setValue(stateKey, saveState(STUDIO_VERSION_NUM));
+    } else {
+        restoreGeometry(settings.value(geoKey).toByteArray());
+        restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
+    }
 }

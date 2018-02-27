@@ -41,6 +41,7 @@ class Q3DSElement;
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
+class Q3DSDataInput;
 
 class Q_STUDIO3D_EXPORT Q3DSPresentation : public QObject
 {
@@ -57,6 +58,10 @@ public:
     void registerElement(Q3DSElement *scene);
     void unregisterElement(Q3DSElement *scene);
     Q3DSElement *registeredElement(const QString &elementPath) const;
+
+    void registerDataInput(Q3DSDataInput *dataInput);
+    void unregisterDataInput(Q3DSDataInput *dataInput);
+    Q3DSDataInput *registeredDataInput(const QString &name) const;
 
     // Input event handlers
     void mousePressEvent(QMouseEvent *e);
@@ -77,6 +82,7 @@ public Q_SLOTS:
     void setPresentationActive(const QString &id, bool active);
     void fireEvent(const QString &elementPath, const QString &eventName);
     void setGlobalAnimationTime(qint64 milliseconds);
+    Q_REVISION(1) void setDataInputValue(const QString &name, const QVariant &value);
 
 Q_SIGNALS:
     void sourceChanged(const QUrl &source);

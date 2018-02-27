@@ -49,10 +49,11 @@
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMSlides.h"
 
-#include <QCoreApplication>
-#include <QQmlContext>
-#include <QQmlEngine>
-#include <QTimer>
+#include <QtCore/qcoreapplication.h>
+#include <QtQml/qqmlcontext.h>
+#include <QtQml/qqmlengine.h>
+#include <QtCore/qtimer.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent)
@@ -66,6 +67,9 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
 
     connect(this, &ActionView::actionChanged, this, [this] {
+        if (!m_itemHandle.Valid())
+            return;
+
         if (!m_propertyModel)
             m_propertyModel = new PropertyModel(this);
 
@@ -82,7 +86,7 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
 
         });
 
-    m_actionChangedCompressionTimer.setInterval(500);
+    m_actionChangedCompressionTimer.setInterval(100);
     m_actionChangedCompressionTimer.setSingleShot(true);
     connect(&m_actionChangedCompressionTimer, &QTimer::timeout, this, [this] {
         updateHandlerArguments();
@@ -106,6 +110,10 @@ void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
     m_objRefHelper = GetDoc()->GetDataModelObjectReferenceHelper();
     m_itemHandle = handle;
     m_actionsModel->setInstanceHandle(handle);
+    if (m_itemHandle.Valid() != m_hasItem) {
+        m_hasItem = m_itemHandle.Valid();
+        Q_EMIT hasItemChanged();
+    }
     emitActionChanged();
     Q_EMIT itemChanged();
 }
@@ -152,7 +160,7 @@ QAbstractItemModel *ActionView::propertyModel() const
 
 QString ActionView::targetObjectName() const
 {
-    if (!GetDoc()->IsValid())
+    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
         return {};
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -169,7 +177,7 @@ QString ActionView::targetObjectName() const
 
 QString ActionView::triggerObjectName() const
 {
-    if (!GetDoc()->IsValid())
+    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
         return {};
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -186,7 +194,7 @@ QString ActionView::triggerObjectName() const
 
 QString ActionView::eventName() const
 {
-    if (!GetDoc()->IsValid())
+    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
         return {};
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -200,7 +208,7 @@ QString ActionView::eventName() const
 
 QString ActionView::handlerName() const
 {
-    if (!GetDoc()->IsValid())
+    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
         return {};
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -289,6 +297,9 @@ void ActionView::addAction()
 
 void ActionView::deleteAction(int index)
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     const auto action = m_actionsModel->actionAt(index);
     if (action.Valid()) {
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Delete Action"))->DeleteAction(action);
@@ -297,6 +308,9 @@ void ActionView::deleteAction(int index)
 
 QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
 {
+    if (!m_itemHandle.Valid())
+        return nullptr;
+
     if (!m_objectsModel) {
         m_objectsModel = new ObjectListModel(g_StudioApp.GetCore(),
                                              GetDoc()->GetActiveRootInstance(), this);
@@ -327,6 +341,9 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
 
 QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
 {
+    if (!m_itemHandle.Valid())
+        return nullptr;
+
     if (!m_objectsModel) {
         m_objectsModel = new ObjectListModel(g_StudioApp.GetCore(),
                                              GetDoc()->GetActiveRootInstance(), this);
@@ -358,6 +375,9 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
 
 void ActionView::showContextMenu(int x, int y)
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     CActionContextMenu contextMenu(this);
 
     connect(&contextMenu, &CActionContextMenu::copyAction, this, &ActionView::copyAction);
@@ -372,6 +392,9 @@ void ActionView::showContextMenu(int x, int y)
 
 QObject *ActionView::showEventBrowser(const QPoint &point)
 {
+    if (!m_itemHandle.Valid())
+        return nullptr;
+
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto bridge = GetBridge();
     const auto instanceHandle = bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TriggerObject);
@@ -405,6 +428,9 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
 
 QObject *ActionView::showHandlerBrowser(const QPoint &point)
 {
+    if (!m_itemHandle.Valid())
+        return nullptr;
+
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto bridge = GetBridge();
     const auto instanceHandle = bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
@@ -438,6 +464,9 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
 
 QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point)
 {
+    if (!m_itemHandle.Valid())
+        return nullptr;
+
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto bridge = GetBridge();
     const auto instanceHandle = bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
@@ -487,7 +516,18 @@ void ActionView::showBrowser(QQuickWidget *browser, const QPoint &point)
     QSize popupSize = CStudioPreferences::browserPopupSize();
     browser->disconnect();
     browser->resize(popupSize);
-    browser->move(point - QPoint(popupSize.width(), popupSize.height()));
+
+    // Make sure the popup doesn't go outside the screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    browser->move(newPos);
 
     // Show asynchronously to avoid flashing blank window on first show
     QTimer::singleShot(0, this, [browser] {
@@ -499,6 +539,9 @@ void ActionView::showBrowser(QQuickWidget *browser, const QPoint &point)
 
 void ActionView::updateFiredEvent()
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     if (actionInfo.m_Handler != L"Fire Event") {
         m_firedEvent = tr("[Unknown event]");
@@ -566,6 +609,8 @@ void ActionView::OnNewPresentation()
     m_connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
         std::bind(&ActionView::OnInstancePropertyValueChanged, this, std::placeholders::_1,
                   std::placeholders::_2)));
+    m_connections.push_back(theSignalProvider->ConnectInstanceDeleted(
+        std::bind(&ActionView::OnInstanceDeleted, this, std::placeholders::_1)));
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     m_connections.push_back(theDispatch->ConnectSelectionChange(
                                 std::bind(&ActionView::OnSelectionSet, this,
@@ -628,11 +673,15 @@ void ActionView::OnActionDeleted(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm:
 {
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
+
     m_actionsModel->removeAction(inAction);
 }
 
 void ActionView::OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction)
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     if (GetDoc()->GetStudioSystem()->GetActionCore()->HandleValid(inAction)) {
            m_actionsModel->updateAction(inAction);
            emitActionChanged();
@@ -641,16 +690,34 @@ void ActionView::OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction)
 
 void ActionView::OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument)
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     emitActionChanged();
 }
 
 void ActionView::OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     emitActionChanged();
+}
+
+void ActionView::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    // Clear the model on instance deletion
+    if (inInstance == m_itemHandle) {
+        qt3dsdm::Qt3DSDMInstanceHandle noInstance;
+        setItem(noInstance);
+    }
 }
 
 void ActionView::copyAction()
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     auto theTempAPFile =
         GetDoc()->GetDocumentReader().CopyAction(m_actionsModel->actionAt(m_currentActionIndex),
                                                  GetDoc()->GetActiveSlide());
@@ -660,6 +727,9 @@ void ActionView::copyAction()
 
 void ActionView::cutAction()
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     copyAction();
     auto action = m_actionsModel->actionAt(m_currentActionIndex);
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Cut Action"))->DeleteAction(action);
@@ -667,6 +737,9 @@ void ActionView::cutAction()
 
 void ActionView::pasteAction()
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     Qt3DSFile theTempAPFile = CStudioClipboard::GetActionFromClipboard();
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Paste Action"))
         ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
@@ -767,7 +840,7 @@ void ActionView::updateHandlerArguments()
     m_currentPropertyNameHandle = 0;
     m_handlerArguments.clear();
     const auto doc = GetDoc();
-    if (!doc->IsValid())
+    if (!doc->IsValid() || !m_itemHandle.Valid())
         return;
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -802,6 +875,9 @@ void ActionView::emitActionChanged()
 
 void ActionView::setArgumentValue(int handle, const QVariant &value)
 {
+    if (!m_itemHandle.Valid())
+        return;
+
     if (handle == 0)
         return;
 
@@ -855,6 +931,9 @@ void ActionView::initialize()
 
 QStringList ActionView::slideNames()
 {
+    if (!m_itemHandle.Valid())
+        return {};
+
     std::list<Q3DStudio::CString> outSlideNames;
     QStringList slideNames;
     CClientDataModelBridge *theBridge = GetBridge();

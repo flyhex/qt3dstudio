@@ -103,3 +103,13 @@
          }
     \endqml
 */
+
+/*!
+    \qmlsignal Studio3D::presentationReady()
+    \since QtStudio3D 1.1
+
+    This signal is emitted when the viewer has been initialized and the presentation is ready to
+    be shown. The difference to \c running property is that the viewer has to be visible for
+    \c running to get \c{true}. This signal is useful for displaying splash screen while viewer
+    is getting initialized.
+*/

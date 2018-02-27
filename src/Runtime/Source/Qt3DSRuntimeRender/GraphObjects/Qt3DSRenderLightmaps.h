@@ -50,7 +50,7 @@ namespace render {
         };
     };
 
-    struct SLightmaps : public SGraphObject
+    struct QT3DS_AUTOTEST_EXPORT SLightmaps : public SGraphObject
     {
         CMaterialDirty m_Dirty;
 

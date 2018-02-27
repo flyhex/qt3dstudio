@@ -860,19 +860,6 @@ struct SRendererImpl : public IStudioRenderer,
         }
     }
 
-    void OnNudge(ENudgeDirection inNudgeDirection, int inToolMode, int inFlags) override
-    {
-        if (m_Translation)
-            m_Translation->OnNudge(inNudgeDirection, inToolMode, inFlags, m_UpdatableEditor);
-    }
-
-    void OnNudgeDone() override
-    {
-        if (m_Translation)
-            m_Translation->OnNudgeFinished();
-        m_UpdatableEditor.CommitEditor();
-    }
-
     void OnToolbarChange()  override { RequestRender(); }
 };
 }

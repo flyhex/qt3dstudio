@@ -38,7 +38,7 @@
 #define RENDER_LOG_ERROR_PARAMS(x) checkGLError()
 #endif
 
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
 #define GL_CALL_TIMER_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
 #define GL_CALL_TESSELATION_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
 #define GL_CALL_MULTISAMPLE_EXT(x) m_qt3dsExtensions->x; RENDER_LOG_ERROR_PARAMS(x);
@@ -66,6 +66,7 @@ NVRenderBackendGLES2Impl::NVRenderBackendGLES2Impl(NVFoundationBase &fnd,
     : NVRenderBackendGLBase(fnd, stringTable, format)
 {
     QString exts3tc = QStringLiteral("GL_EXT_texture_compression_s3tc");
+    QString extsdxt = QStringLiteral("GL_EXT_texture_compression_dxt1");
     QString extsAniso = QStringLiteral("GL_EXT_texture_filter_anisotropic");
     QString extsTexSwizzle = QStringLiteral("GL_ARB_texture_swizzle");
     QString extsFPRenderTarget = QStringLiteral("GL_EXT_color_buffer_float");
@@ -103,7 +104,7 @@ NVRenderBackendGLES2Impl::NVRenderBackendGLES2Impl(NVFoundationBase &fnd,
 
         // search for extension
         if (!m_backendSupport.caps.bits.bDXTImagesSupported
-                && exts3tc.compare(extensionString) == 0) {
+            && (exts3tc.compare(extensionString) == 0 || extsdxt.compare(extensionString) == 0)) {
             m_backendSupport.caps.bits.bDXTImagesSupported = true;
         } else if (!m_backendSupport.caps.bits.bAnistropySupported
                    && extsAniso.compare(extensionString) == 0) {
@@ -150,7 +151,7 @@ NVRenderBackendGLES2Impl::NVRenderBackendGLES2Impl(NVFoundationBase &fnd,
     setAndInspectHardwareCaps();
 
     // Initialize extensions
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
     m_qt3dsExtensions = new Qt3DSOpenGLES2Extensions;
     m_qt3dsExtensions->initializeOpenGLFunctions();
 #endif
@@ -160,7 +161,7 @@ NVRenderBackendGLES2Impl::~NVRenderBackendGLES2Impl()
 {
     if (m_pCurrentMiscState)
         NVDelete(m_Foundation.getAllocator(), m_pCurrentMiscState);
-#if defined(QT_OPENGL_ES)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2_ANGLE)
     if (m_qt3dsExtensions)
         delete m_qt3dsExtensions;
 #endif

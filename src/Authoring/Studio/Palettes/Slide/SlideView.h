@@ -33,9 +33,11 @@
 
 #include "DispatchListeners.h"
 #include "SlideModel.h"
-
+#include "DataInputSelectDlg.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSignals.h"
+#include "DispatchListeners.h"
+#include "Dispatch.h"
 #include <unordered_map>
 class CClientDataModelBridge;
 class CDoc;
@@ -44,11 +46,16 @@ namespace qt3dsdm {
 class ISlideSystem;
 }
 
-class SlideView : public QQuickWidget, public CPresentationChangeListener
+class SlideView : public QQuickWidget,
+                  public CPresentationChangeListener,
+                  public IDataModelListener
 {
     Q_OBJECT
     Q_PROPERTY(QAbstractItemModel *currentModel READ currentModel NOTIFY currentModelChanged FINAL)
     Q_PROPERTY(bool showMasterSlide READ showMasterSlide WRITE setShowMasterSlide NOTIFY showMasterSlideChanged FINAL)
+    Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
+    Q_PROPERTY(QString currController MEMBER m_currentController NOTIFY controlledChanged)
+    Q_PROPERTY(QString toolTip MEMBER m_toolTip NOTIFY controlledChanged)
 public:
     SlideView(QWidget *parent = nullptr);
     ~SlideView();
@@ -57,6 +64,7 @@ public:
     void setShowMasterSlide(bool show);
     QAbstractItemModel *currentModel() { return m_CurrentModel; }
     QSize sizeHint() const override;
+    void onDataInputChange(const QString &dataInputName);
 
     Q_INVOKABLE void deselectAll();
     Q_INVOKABLE void addNewSlide(int row);
@@ -66,14 +74,23 @@ public:
     Q_INVOKABLE void moveSlide(int from, int to);
     Q_INVOKABLE void finishSlideRearrange(bool commit);
     Q_INVOKABLE void showContextMenu(int x, int y, int row);
+    Q_INVOKABLE void showControllerDialog(const QPoint &point);
 
     // Presentation Change Listener
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
 
+    // IDataModelListener
+    void OnBeginDataModelNotifications() override;
+    void OnEndDataModelNotifications() override;
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
+                                            long inInstanceCount) override;
+
 Q_SIGNALS:
     void currentModelChanged();
     void showMasterSlideChanged();
+    void controlledChanged();
 
 
 protected:
@@ -84,6 +101,8 @@ protected:
     virtual void OnDeleteSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
     virtual void OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
                                    int inNewIndex);
+
+    void updateDataInputStatus(bool isViaDispatch);
 
 private:
     void initialize();
@@ -99,6 +118,7 @@ private:
     SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
     SlideModel *m_SlidesModel = nullptr;
+    DataInputSelectDlg *m_dataInputSelector = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel
@@ -110,6 +130,9 @@ private:
 
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
     qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
+    bool m_controlled; // Are slides in this slide set controlled by datainput?
+    QString m_currentController;
+    QString m_toolTip;
 };
 
 #endif // SLIDEVIEW_H

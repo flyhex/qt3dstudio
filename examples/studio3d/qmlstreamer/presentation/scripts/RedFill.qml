@@ -50,9 +50,11 @@
 
 import QtQuick 2.7
 
-Item {
+Rectangle {
     width: 1024
     height: 512
+    color: "white"
+
     Rectangle {
         id: rectangle
         x: 0

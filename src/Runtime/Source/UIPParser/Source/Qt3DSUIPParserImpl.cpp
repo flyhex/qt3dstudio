@@ -1169,6 +1169,10 @@ void CUIPParserImpl::CacheGraphRequiredAttributes(qt3dsdm::IDOMReader &inReader)
             theProp->m_ElementFlag = true;
         }
 
+        // Probably not the most optimal thing to expose this attribute for all elements that
+        // support it, since it is not really needed except during initialization
+        m_ParseElementManager.MarkAttributeAsReferenced(theData, "controlledproperty");
+
         if (AreEqual(theType, "Text")) {
             m_ParseElementManager.MarkAttributeAsReferenced(theData, "textstring");
         }

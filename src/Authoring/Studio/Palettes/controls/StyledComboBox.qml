@@ -40,6 +40,9 @@ ComboBox {
     Layout.preferredWidth: _valueWidth
     topPadding: 0
     bottomPadding: 0
+    // hack to fix the color after Qt.Quick.Controls2 "optimization"
+    property alias color: backgroundBox.color
+
     delegate: ItemDelegate {
         id: itemDelegate
 
@@ -87,6 +90,7 @@ ComboBox {
         x: control.width - width - 2
         y: control.topPadding + (control.availableHeight - height) / 2
         source: _resDir + "arrow_down.png"
+        rotation: control.popup.visible ? 180 : 0
     }
 
     contentItem: StyledTextField {
@@ -107,6 +111,7 @@ ComboBox {
     }
 
     background: Rectangle {
+        id: backgroundBox
         color: control.enabled ? _studioColor2 : "transparent"
         border.width: 0
     }

@@ -476,7 +476,6 @@ struct STranslatorDataModelParser
 #define DataInput_ControlledElemProp m_DataInput.m_ControlledElemProp
 #define DataInput_TimeFrom m_DataInput.m_TimeFrom
 #define DataInput_TimeTo m_DataInput.m_TimeTo
-
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
@@ -904,14 +903,52 @@ struct SDataInputTranslator : public SGraphObjectTranslator
         SGraphObjectTranslator::PushTranslation(inContext);
         qt3ds::render::SDataInput &theItem =
             static_cast<qt3ds::render::SDataInput &>(GetGraphObject());
+
         STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
+
         ITERATE_QT3DS_RENDER_DATAINPUT_PROPERTIES
+
+        // Handle incoming controlled element - property pairs
+        CRegisteredString incomingElemProp = CRegisteredString();
+        theParser.ParseProperty(
+            inContext.m_ObjectDefinitions.m_DataInput.m_ControlledElemProp,
+            incomingElemProp);
+        qt3ds::render::IStringTable &theStrTable(inContext.m_Context.GetStringTable());
+
+        QVector<QPair<CRegisteredString, CRegisteredString>> newVec
+            = ResolveControlledElemProps(incomingElemProp.c_str(), theStrTable);
+        theItem.SetControlledElementProperties(newVec);
     }
     void AppendChild(SGraphObject &inChild) override {}
 
     void ClearChildren() override { }
 
     void SetActive(bool /*inActive*/) override {}
+
+    QVector<QPair<CRegisteredString, CRegisteredString>> ResolveControlledElemProps(
+        std::string elemProp, qt3ds::render::IStringTable &strTable)
+    {
+        if (!elemProp.size())
+            return QVector<QPair<CRegisteredString, CRegisteredString>>();
+
+        QVector<QPair<CRegisteredString, CRegisteredString>> ret;
+        std::string theStr = elemProp;
+        std::string theCurrentElemStr;
+        std::string theCurrentPropStr;
+        std::string::size_type thePos = 0;
+        while (thePos < theStr.length()) {
+            theCurrentElemStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
+            thePos += theCurrentElemStr.length() + 1;
+
+            theCurrentPropStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
+            thePos += theCurrentPropStr.length() + 1;
+
+            ret.append(QPair<CRegisteredString, CRegisteredString>(
+                strTable.RegisterStr(theCurrentElemStr.c_str()),
+                strTable.RegisterStr(theCurrentPropStr.c_str())));
+        }
+        return ret;
+    }
 };
 
 struct SPathTranslator : public SNodeTranslator
@@ -1985,11 +2022,16 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
         if (m_EditCameraEnabled) {
             if (theTranslator->GetGraphObject().m_Type == GraphObjectTypes::Layer) {
                 if (theChild == m_Doc.GetActiveLayer()) {
-                    if (m_EditCameraLayerTranslator == nullptr)
+                    if (m_EditCameraLayerTranslator != nullptr
+                            && m_EditCameraLayerTranslator->GetInstanceHandle() != theChild) {
+                        QT3DS_FREE(m_Allocator, m_EditCameraLayerTranslator);
+                        m_EditCameraLayerTranslator = nullptr;
+                    }
+                    if (!m_EditCameraLayerTranslator) {
                         m_EditCameraLayerTranslator =
-                            QT3DS_NEW(m_Allocator, SEditCameraLayerTranslator)(theChild, m_Allocator);
-                    else
-                        m_EditCameraLayerTranslator->GetInstanceHandle() = theChild;
+                            QT3DS_NEW(m_Allocator, SEditCameraLayerTranslator)(theChild,
+                                                                               m_Allocator);
+                    }
                     theTranslator = m_EditCameraLayerTranslator;
                     theParentTranslator.AppendChild(theTranslator->GetGraphObject());
                     BuildRenderGraph(*m_EditCameraLayerTranslator);
@@ -3768,123 +3810,6 @@ void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inO
             inEditor.FireImmediateRefresh(m_AssetGraph.GetParent(theAnchorHandle));
         }
     }
-}
-
-// Pulled directly from old studio's Node.cpp.
-void STranslation::OnNudge(ENudgeDirection inDirection, int inToolmode, int inFlags,
-                           CUpdateableDocumentEditor &inEditor)
-{
-    Q_UNUSED(inFlags);
-    SNode *theSelectedNode = GetSelectedNode();
-    if (theSelectedNode == nullptr)
-        return;
-    ;
-
-    // Increment the key press count
-    m_KeyRepeat++;
-
-    // Increment the acceleration for every 5 key presses
-    float theAcceleration = static_cast<float>(qt3ds::foundation::floor(m_KeyRepeat / 5.0)) + 1.0f;
-
-    Qt3DSDMPropertyHandle thePropertyHandle;
-    SFloat3 theValue;
-    const wchar_t *theCommandName = L"";
-    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle = m_Doc.GetSelectedInstance();
-    CDispatchDataModelImmediateScope __dispatchScope(*m_Doc.GetCore()->GetDispatch(),
-                                                     theInstanceHandle);
-    // See what tool mode we are in
-    switch (inToolmode) {
-    // We want to nudge the position vector
-    case STUDIO_TOOLMODE_MOVE:
-        thePropertyHandle = m_ObjectDefinitions.m_Node.m_Position;
-        theValue =
-            m_Reader.GetTypedInstancePropertyValue<SFloat3>(theInstanceHandle, thePropertyHandle);
-        theCommandName = L"Set Position";
-        break;
-
-    // We want to nudge the rotation vector
-    case STUDIO_TOOLMODE_ROTATE:
-        thePropertyHandle = m_ObjectDefinitions.m_Node.m_Rotation;
-        theValue = m_Reader.GetTypedInstancePropertyValue<qt3dsdm::SFloat3>(theInstanceHandle,
-                                                                          thePropertyHandle);
-        theCommandName = L"Set Rotation";
-        break;
-
-    // We want to nudge the scale vector
-    case STUDIO_TOOLMODE_SCALE:
-        thePropertyHandle = m_ObjectDefinitions.m_Node.m_Scale;
-        theValue = m_Reader.GetTypedInstancePropertyValue<qt3dsdm::SFloat3>(theInstanceHandle,
-                                                                          thePropertyHandle);
-        theCommandName = L"Set Scale";
-        break;
-
-    // We should always have a tool mode, but just in case, default to position
-    default:
-        thePropertyHandle = m_ObjectDefinitions.m_Node.m_Position;
-        theValue = m_Reader.GetTypedInstancePropertyValue<qt3dsdm::SFloat3>(theInstanceHandle,
-                                                                          thePropertyHandle);
-        theCommandName = L"Set Position";
-        break;
-    }
-
-    // If we are in rotate mode, we need to switch the x and y values because we want to rotate
-    // *around* the specified axis
-    if ((inToolmode) == STUDIO_TOOLMODE_ROTATE) {
-        // Switch from positive x to negative y
-        if (inDirection == NUDGE_POS_X) {
-            inDirection = NUDGE_NEG_Y;
-        }
-        // Switch from positive y to negative x
-        else if (inDirection == NUDGE_POS_Y) {
-            inDirection = NUDGE_NEG_X;
-        }
-        // Switch from negative x to positive y
-        else if (inDirection == NUDGE_NEG_X) {
-            inDirection = NUDGE_POS_Y;
-        }
-        // Switch from negative y to positive x
-        else if (inDirection == NUDGE_NEG_Y) {
-            inDirection = NUDGE_POS_X;
-        }
-    }
-
-    float theNudgeAmount = static_cast<float>(CStudioPreferences::GetNudgeAmount());
-
-    // Now check which value to change (x, y, or z) and whether to increment or decrement
-    switch (inDirection) {
-    // Nudge along the positive x-axis
-    case NUDGE_POS_X:
-        theValue.m_Floats[0] += (theNudgeAmount * theAcceleration);
-        break;
-
-    // Nudge along the positive y-axis
-    case NUDGE_POS_Y:
-        theValue.m_Floats[1] += (theNudgeAmount * theAcceleration);
-        break;
-
-    // Nudge along the positive z-axis
-    case NUDGE_POS_Z:
-        theValue.m_Floats[2] += (theNudgeAmount * theAcceleration);
-        break;
-
-    // Nudge along the negative x-axis
-    case NUDGE_NEG_X:
-        theValue.m_Floats[0] -= (theNudgeAmount * theAcceleration);
-        break;
-
-    // Nudge along the negative y-axis
-    case NUDGE_NEG_Y:
-        theValue.m_Floats[1] -= (theNudgeAmount * theAcceleration);
-        break;
-
-    // Nudge along the negative z-axis
-    case NUDGE_NEG_Z:
-        theValue.m_Floats[2] -= (theNudgeAmount * theAcceleration);
-        break;
-    }
-
-    inEditor.EnsureEditor(theCommandName, __FILE__, __LINE__)
-        .SetInstancePropertyValue(theInstanceHandle, thePropertyHandle, theValue);
 }
 
 SNode *STranslation::GetEditCameraLayer()

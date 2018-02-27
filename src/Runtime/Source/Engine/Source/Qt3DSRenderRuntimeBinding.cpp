@@ -764,7 +764,8 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
                                             qt3ds::render::IImageLoadListener *inLoadCallback) override
     {
         return static_cast<Q3DStudio::INT32>(m_Context->GetImageBatchLoader().LoadImageBatch(
-            toConstDataRef(inFullPaths, (QT3DSU32)inNumPaths), inDefaultImage, inLoadCallback));
+            toConstDataRef(inFullPaths, (QT3DSU32)inNumPaths), inDefaultImage, inLoadCallback,
+            m_Context->GetRenderContext().GetRenderContextType()));
     }
 
     void RegisterOffscreenRenderer(const char *inKey) override
@@ -998,7 +999,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             // Fire off parallel loading of the source paths
             QT3DSU64 imageBatchId = m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
-                CRegisteredString(), NULL);
+                CRegisteredString(), NULL, m_Context->m_Context->GetRenderContext()
+                                                .GetRenderContextType());
             m_Context->m_Context->GetImageBatchLoader().BlockUntilLoaded(
                 static_cast<TImageBatchId>(imageBatchId));
 
@@ -1167,7 +1169,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
 
             m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
-                CRegisteredString(), NULL);
+                CRegisteredString(), NULL, m_Context->m_Context->GetRenderContext()
+                        .GetRenderContextType());
         }
 
         {
@@ -1816,6 +1819,7 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
             // QML engine
             GetScriptEngineQml();
             m_ScriptBridgeQml->SetApplication(*app);
+            m_ScriptBridgeQml->Initialize();
         }
     }
     void SetDllDir(const char *dllDir) override

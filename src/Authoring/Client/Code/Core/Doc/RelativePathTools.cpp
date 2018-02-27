@@ -190,6 +190,10 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath
             outIsResolved = true;
             theFoundInstance = inRootInstance;
             outPathType = EPATHTYPE_RELATIVE;
+        } else if (theCurrentToken.Compare(CPathConstructionHelper::GetSceneString(), false)) {
+            outIsResolved = true;
+            theFoundInstance = inRootInstance;
+            outPathType = EPATHTYPE_RELATIVE;
         } else if (theCurrentToken.Compare(CPathConstructionHelper::GetParentString(), false)) {
             outIsResolved = true;
             theFoundInstance = theBridge->GetParentInstance(inRootInstance);

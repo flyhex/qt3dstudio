@@ -107,17 +107,19 @@ struct SImageLoaderBatch
     QT3DSU32 m_LoadedOrCanceledImageCount;
     QT3DSU32 m_FinalizedImageCount;
     QT3DSU32 m_NumImages;
+    NVRenderContextType m_contextType;
 
     // Called from main thread
     static SImageLoaderBatch *CreateLoaderBatch(SBatchLoader &inLoader, TImageBatchId inBatchId,
                                                 NVConstDataRef<CRegisteredString> inSourcePaths,
                                                 CRegisteredString inImageTillLoaded,
-                                                IImageLoadListener *inListener);
+                                                IImageLoadListener *inListener,
+                                                NVRenderContextType contextType);
 
     // Called from main thread
     SImageLoaderBatch(SBatchLoader &inLoader, IImageLoadListener *inLoadListener,
                       const TLoadingImageList &inImageList, TImageBatchId inBatchId,
-                      QT3DSU32 inImageCount);
+                      QT3DSU32 inImageCount, NVRenderContextType contextType);
 
     // Called from main thread
     ~SImageLoaderBatch();
@@ -254,8 +256,9 @@ struct SBatchLoader : public IImageBatchLoader
     // until said path is loaded.
     // An optional listener can be passed in to get callbacks about the batch.
     TImageBatchId LoadImageBatch(NVConstDataRef<CRegisteredString> inSourcePaths,
-                                         CRegisteredString inImageTillLoaded,
-                                         IImageLoadListener *inListener) override
+                                 CRegisteredString inImageTillLoaded,
+                                 IImageLoadListener *inListener,
+                                 NVRenderContextType contextType) override
     {
         if (inSourcePaths.size() == 0)
             return 0;
@@ -270,7 +273,7 @@ struct SBatchLoader : public IImageBatchLoader
         }
 
         SImageLoaderBatch *theBatch(SImageLoaderBatch::CreateLoaderBatch(
-            *this, theBatchId, inSourcePaths, inImageTillLoaded, inListener));
+            *this, theBatchId, inSourcePaths, inImageTillLoaded, inListener, contextType));
         if (theBatch) {
             m_Batches.insert(eastl::make_pair(theBatchId, theBatch));
             return theBatchId;
@@ -372,7 +375,8 @@ void SLoadingImage::LoadImage(void *inImg)
     if (theThis->m_Batch->m_Loader.m_BufferManager.IsImageLoaded(theThis->m_SourcePath) == false) {
         SLoadedTexture *theTexture = SLoadedTexture::Load(
             theThis->m_SourcePath.c_str(), theThis->m_Batch->m_Loader.m_Foundation,
-            theThis->m_Batch->m_Loader.m_InputStreamFactory);
+            theThis->m_Batch->m_Loader.m_InputStreamFactory, true,
+            theThis->m_Batch->m_contextType);
         // if ( theTexture )
         //	theTexture->EnsureMultiplerOfFour( theThis->m_Batch->m_Loader.m_Foundation,
         //theThis->m_SourcePath.c_str() );
@@ -419,7 +423,8 @@ SImageLoaderBatch *
 SImageLoaderBatch::CreateLoaderBatch(SBatchLoader &inLoader, TImageBatchId inBatchId,
                                      NVConstDataRef<CRegisteredString> inSourcePaths,
                                      CRegisteredString inImageTillLoaded,
-                                     IImageLoadListener *inListener)
+                                     IImageLoadListener *inListener,
+                                     NVRenderContextType contextType)
 {
     TLoadingImageList theImages;
     QT3DSU32 theLoadingImageCount = 0;
@@ -456,7 +461,8 @@ SImageLoaderBatch::CreateLoaderBatch(SBatchLoader &inLoader, TImageBatchId inBat
         SImageLoaderBatch *theBatch =
             (SImageLoaderBatch *)inLoader.m_BatchPool.allocate(__FILE__, __LINE__);
         new (theBatch)
-            SImageLoaderBatch(inLoader, inListener, theImages, inBatchId, theLoadingImageCount);
+            SImageLoaderBatch(inLoader, inListener, theImages, inBatchId, theLoadingImageCount,
+                              contextType);
         return theBatch;
     }
     return NULL;
@@ -464,7 +470,7 @@ SImageLoaderBatch::CreateLoaderBatch(SBatchLoader &inLoader, TImageBatchId inBat
 
 SImageLoaderBatch::SImageLoaderBatch(SBatchLoader &inLoader, IImageLoadListener *inLoadListener,
                                      const TLoadingImageList &inImageList, TImageBatchId inBatchId,
-                                     QT3DSU32 inImageCount)
+                                     QT3DSU32 inImageCount, NVRenderContextType contextType)
     : m_Loader(inLoader)
     , m_LoadListener(inLoadListener)
     , m_LoadEvent(inLoader.m_Foundation.getAllocator())
@@ -474,6 +480,7 @@ SImageLoaderBatch::SImageLoaderBatch(SBatchLoader &inLoader, IImageLoadListener 
     , m_LoadedOrCanceledImageCount(0)
     , m_FinalizedImageCount(0)
     , m_NumImages(inImageCount)
+    , m_contextType(contextType)
 {
     for (TLoadingImageList::iterator iter = m_Images.begin(), end = m_Images.end(); iter != end;
          ++iter) {

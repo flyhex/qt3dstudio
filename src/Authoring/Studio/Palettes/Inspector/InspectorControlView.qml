@@ -49,11 +49,23 @@ Rectangle {
         anchors.topMargin: 4
         spacing: 8
 
+        MouseArea {
+            anchors.fill: parent
+            z: -10
+            onPressed: {
+                mouse.accepted = false
+                focusEater.forceActiveFocus();
+            }
+        }
+
+        Item {
+            id: focusEater
+            // Used to eat keyboard focus when user clicks outside any property control
+        }
+
         RowLayout {
-            height: _controlBaseHeight + anchors.margins * 2
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: 4
+            height: _controlBaseHeight + 8
+            Layout.leftMargin: 4
 
             Image {
                 id: headerImage
@@ -80,6 +92,15 @@ Rectangle {
                 visible: size < 1.0
             }
 
+            MouseArea {
+                anchors.fill: parent
+                z: -10
+                onPressed: {
+                    mouse.accepted = false
+                    focusEater.forceActiveFocus();
+                }
+            }
+
             model: _inspectorModel
             delegate: Rectangle {
                 id: delegateItem
@@ -89,6 +110,7 @@ Rectangle {
                 width: parent.width
                 height: items.height
                 color: "transparent";
+                ListView.delayRemove: true
 
                 readonly property var values: model.values
 
@@ -149,6 +171,7 @@ Rectangle {
                                     width: animatedPropertyButton.sourceSize.width
                                     height: _controlBaseHeight
                                     visible: model.modelData.animatable
+
                                     Image {
                                         id: animatedPropertyButton
 
@@ -181,11 +204,62 @@ Rectangle {
                                     }
                                 }
 
+                                Item {
+                                    Layout.alignment: Qt.AlignTop
+                                    width: controlledPropertyButton.sourceSize.width
+                                    height: _controlBaseHeight
+                                    visible: model.modelData.controllable
+
+                                    MouseArea {
+                                        id: mousearea
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            if (mouse.button === Qt.LeftButton) {
+                                                _inspectorView.showDataInputChooser(
+                                                            model.modelData.handle,
+                                                            model.modelData.instance,
+                                                            mapToGlobal(mouse.x, mouse.y));
+                                            } else {
+                                                groupDelegateItem.showContextMenu(
+                                                            mapToItem(root, mouse.x, mouse.y));
+                                            }
+                                        }
+                                    }
+                                    StyledTooltip {
+                                        id: ctrlToolTip
+                                        text: modelData.toolTip
+                                        visible: mousearea.containsMouse
+                                    }
+
+                                    Image {
+                                        id: controlledPropertyButton
+
+                                        property bool controlled: model.modelData.controlled
+
+                                        anchors.fill: parent
+                                        fillMode: Image.Pad
+
+                                        source: {
+                                            _resDir + (controlled
+                                                       ? "Objects-DataInput-Normal.png"
+                                                       : "Objects-DataInput-Disabled.png")
+                                        }
+
+
+                                    }
+                                }
 
                                 Item {
-                                    // Spacer item
-                                    width: model.modelData.animatable
-                                           ? 4 : animatedPropertyButton.width + 4
+                                    width: (controlledPropertyButton.visible
+                                           ? 4 : controlledPropertyButton.width + 4)
+                                    height: loadedItem.height + 4 // Add little space between items
+                                }
+
+                                Item {
+                                    width: (animatedPropertyButton.visible
+                                           ? 4 : animatedPropertyButton.width + 4)
                                     height: loadedItem.height + 4 // Add little space between items
                                 }
 
@@ -194,7 +268,10 @@ Rectangle {
 
                                     readonly property var modelData: model.modelData
                                     text: model.modelData.title
-                                    color: _inspectorView.titleColor(modelData.instance,
+                                    // Color picked from DataInput icon
+                                    color: model.modelData.controlled?
+                                        _dataInputColor
+                                        : _inspectorView.titleColor(modelData.instance,
                                                                      modelData.handle)
 
                                     Layout.alignment: Qt.AlignTop
@@ -204,13 +281,14 @@ Rectangle {
                                         anchors.fill: parent
                                         acceptedButtons: Qt.RightButton
                                         hoverEnabled: true
-                                        onClicked:  {
+                                        onClicked: {
                                             const coords = mapToItem(root, mouse.x, mouse.y);
                                             groupDelegateItem.showContextMenu(coords);
                                         }
                                     }
 
                                     StyledTooltip {
+                                        id: valueToolTip
                                         text: modelData.toolTip
                                         visible: mouse.containsMouse
                                     }
@@ -262,8 +340,9 @@ Rectangle {
                                                 return renderableDropDown;
                                             if (modelData.propertyType === AdditionalMetaDataType.Mesh)
                                                 return meshChooser;
+                                            // Show DataInput selector if this item is controlled
                                             if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
-                                                return multiLine;
+                                                    return multiLine;
                                             if (modelData.propertyType === AdditionalMetaDataType.Font)
                                                 return comboDropDown;
                                             if (modelData.propertyType === AdditionalMetaDataType.Texture)
@@ -794,23 +873,42 @@ Rectangle {
             property int handle: parent.modelData.handle
             property real value: parent.modelData.value
 
+            editable: true
+            property bool ready: false
+
+            validator: IntValidator {
+                bottom: 1
+            }
+
             model: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72", "96", "120"]
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight
 
             Component.onCompleted: {
-                currentIndex = find(value)
-            }
-
-            onCurrentIndexChanged: {
-                var newvalue = parseInt(textAt(currentIndex))
-                _inspectorModel.setPropertyValue(instance, handle, newvalue)
+                editText = value;
+                ready = true;
             }
 
             onValueChanged: {
-                currentIndex = find(value)
+                if (ready)
+                    editText = value;
             }
+
+            onEditTextChanged: {
+                if (ready) {
+                    var newvalue = parseInt(editText);
+                    _inspectorModel.setPropertyValue(instance, handle, newvalue, false);
+                }
+            }
+
+            onActiveFocusChanged: {
+                if (!activeFocus) {
+                    var newvalue = parseInt(editText);
+                    _inspectorModel.setPropertyValue(instance, handle, newvalue);
+                }
+            }
+
         }
     }
 

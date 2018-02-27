@@ -53,7 +53,7 @@ namespace render {
         };
     };
 
-    struct SImage : public SGraphObject
+    struct QT3DS_AUTOTEST_EXPORT SImage : public SGraphObject
     {
         // Complete path to the file;
         //*not* relative to the presentation directory

@@ -385,6 +385,11 @@ QString Q3DSQmlScript::getParent(const QString &handle)
     return parent->m_Path.c_str();
 }
 
+void Q3DSQmlScript::setDataInputValue(const QString &name, const QVariant &value)
+{
+    m_api.SetDataInputValue(name, value);
+}
+
 TElement *Q3DSQmlScript::getElementByPath(const QString &path)
 {
     if (!m_api.GetApplication())

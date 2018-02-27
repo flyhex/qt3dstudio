@@ -88,6 +88,12 @@ QString RemoteDeploymentReceiver::startServer()
     return QString();
 }
 
+void RemoteDeploymentReceiver::disconnectRemote()
+{
+    if (m_connection)
+        m_connection->disconnectFromHost();
+}
+
 void RemoteDeploymentReceiver::acceptRemoteConnection()
 {
     Q_ASSERT(m_tcpServer);

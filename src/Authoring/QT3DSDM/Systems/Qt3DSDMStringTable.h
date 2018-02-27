@@ -32,6 +32,7 @@
 
 #include <string>
 #include <EABase/eabase.h>
+#include "foundation/Qt3DSPreprocessor.h"
 
 namespace qt3ds {
 namespace foundation {
@@ -41,7 +42,7 @@ namespace foundation {
 
 namespace qt3dsdm {
 
-class IStringTable
+class QT3DS_AUTOTEST_EXPORT IStringTable
 {
 public:
     virtual ~IStringTable() {}

@@ -1932,100 +1932,14 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
  */
 void CDoc::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
+    Q_UNUSED(inShortcutHandler)
+
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Backspace) << QKeySequence(Qt::Key_Delete),
                         CDoc::DeleteSelectedItems);
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_V),
                         CDoc::HandleMasterPaste);
-
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            0, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier, Qt::Key_Down);
-
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Down);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Left);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone), 0,
-                                          Qt::Key_Right);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier, Qt::Key_Down);
-
-    // Rotation nudge
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ControlModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::ControlModifier,
-                                            Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::ControlModifier,
-                                            Qt::Key_Down);
-
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ControlModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::ControlModifier,
-                                          Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::ControlModifier,
-                                          Qt::Key_Down);
-
-    // Scale nudge
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::AltModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::AltModifier,
-                                            Qt::Key_Up);
-    inShortcutHandler->RegisterKeyDownEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeKey),
-                                            Qt::ShiftModifier | Qt::AltModifier,
-                                            Qt::Key_Down);
-
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Down);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Left);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::AltModifier, Qt::Key_Right);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::AltModifier,
-                                          Qt::Key_Up);
-    inShortcutHandler->RegisterKeyUpEvent(new CDynHotKeyConsumer<CDoc>(this, &CDoc::OnNudgeDone),
-                                          Qt::ShiftModifier | Qt::AltModifier,
-                                          Qt::Key_Down);
 }
 
 //==============================================================================
@@ -2392,75 +2306,6 @@ void CDoc::SetKeyframeInterpolation()
         m_KeyframesManager->SetKeyframeInterpolation();
 }
 
-bool CDoc::OnNudgeKey(int inChar, int inRepeatCount, Qt::KeyboardModifiers inFlags)
-{
-    Q_UNUSED(inRepeatCount);
-
-    if (!GetSelectedInstance().GetHandleValue())
-        return false;
-
-    bool theHandledFlag = true;
-    ENudgeDirection theDir = NUDGE_NEG_X;
-    switch (inChar) {
-    case Qt::Key_Up:
-        if (CHotKeys::IsKeyDown(Qt::ShiftModifier))
-            theDir = NUDGE_POS_Z;
-        else {
-            if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-                theDir = NUDGE_NEG_Y;
-            else
-                theDir = NUDGE_POS_Y;
-        }
-        break;
-
-    case Qt::Key_Down:
-        if (CHotKeys::IsKeyDown(Qt::ShiftModifier))
-            theDir = NUDGE_NEG_Z;
-        else {
-            if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-                theDir = NUDGE_POS_Y;
-            else
-                theDir = NUDGE_NEG_Y;
-        }
-        break;
-
-    case Qt::Key_Left:
-        theDir = NUDGE_NEG_X;
-        break;
-
-    case Qt::Key_Right:
-        theDir = NUDGE_POS_X;
-        break;
-
-    default:
-        theHandledFlag = false;
-        break;
-    }
-
-    // TODO: need to know the tool mode
-    // Previously we query m_StudioApp->GetToolMode( ) but this is not possible anymore.
-    // Temporarily we use the keyboard to decide
-    if (theHandledFlag) {
-        long theToolMode = STUDIO_TOOLMODE_MOVE;
-        if (CHotKeys::IsKeyDown(Qt::ControlModifier))
-            theToolMode = STUDIO_TOOLMODE_ROTATE;
-        else if (CHotKeys::IsKeyDown(Qt::AltModifier))
-            theToolMode = STUDIO_TOOLMODE_SCALE;
-        m_nudging = true;
-        m_Core->GetDispatch()->FireOnNudge(theDir, theToolMode, inFlags);
-    }
-
-    return theHandledFlag;
-}
-
-void CDoc::OnNudgeDone()
-{
-    if (m_nudging) {
-        m_nudging = false;
-        m_Core->GetDispatch()->FireOnNudgeDone();
-    }
-}
-
 void CDoc::DeselectAllKeyframes()
 {
     if (m_KeyframesManager)
@@ -2761,11 +2606,12 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-QString CDoc::GetDocumentUIAFile()
+QString CDoc::GetDocumentUIAFile(bool master)
 {
     Q3DStudio::CString docDir = GetDocumentDirectory();
     Q3DStudio::CString docName
             = Q3DStudio::CFilePath(GetDocumentPath().GetName()).GetFileStem();
+
     QString file;
     std::vector<Q3DStudio::CFilePath> dirFiles;
     Q3DStudio::CFilePath thePath(docDir);
@@ -2773,7 +2619,7 @@ QString CDoc::GetDocumentUIAFile()
     for (size_t idx = 0, end = dirFiles.size(); idx < end; ++idx) {
         if (dirFiles[idx].IsFile()) {
             Q3DStudio::CString ext = dirFiles[idx].GetExtension();
-            if (ext.CompareNoCase("uia") && dirFiles[idx].GetFileStem() == docName) {
+            if (ext.CompareNoCase("uia") && (master || dirFiles[idx].GetFileStem() == docName)) {
                 file = dirFiles[idx].toQString();
                 break;
             }
@@ -2833,3 +2679,52 @@ void CDoc::LoadUIASubpresentations(const QString &uiaFile,
         }
     }
 }
+
+void CDoc::LoadUIADataInputs(const QString &uiaFile,
+                             QVector<CDataInputDialogItem *> &datainputs)
+{
+    if (QFileInfo::exists(uiaFile)) {
+        qt3dsdm::TStringTablePtr theStringTable = qt3dsdm::IStringTable::CreateStringTable();
+        std::shared_ptr<qt3dsdm::IDOMFactory> theDomFact =
+                qt3dsdm::IDOMFactory::CreateDOMFactory(theStringTable);
+
+        qt3ds::foundation::CFileSeekableIOStream theStream(uiaFile,
+                                                           qt3ds::foundation::FileReadFlags());
+
+        qt3dsdm::SDOMElement *theElem = qt3dsdm::CDOMSerializer::Read(*theDomFact, theStream);
+        if (theElem) {
+            std::shared_ptr<qt3dsdm::IDOMReader> theReader =
+                    qt3dsdm::IDOMReader::CreateDOMReader(*theElem, theStringTable, theDomFact);
+            if (theReader->MoveToFirstChild("assets")) {
+                 for (bool success = theReader->MoveToFirstChild(); success;
+                     success = theReader->MoveToNextSibling()) {
+                    if (qt3dsdm::AreEqual(theReader->GetElementName(), L"dataInput")) {
+                        qt3dsdm::TXMLStr name = nullptr;
+                        qt3dsdm::TXMLStr type = nullptr;
+                        qt3dsdm::TXMLStr min = nullptr;
+                        qt3dsdm::TXMLStr max = nullptr;
+                        CDataInputDialogItem *item = new CDataInputDialogItem();
+
+                        theReader->Att("name", name);
+                        item->name = QString(name.c_str());
+                        // TODO: Dump int/enum type and use string instead?
+                        if (theReader->Att("type", type)) {
+                            if (!QString(type.c_str()).compare(QStringLiteral("Ranged Number"))) {
+                                item->type = 0;
+                                if (theReader->Att("min", min))
+                                    item->minValue = QString(min.c_str()).toFloat();
+                                if (theReader->Att("max", max))
+                                    item->maxValue = QString(max.c_str()).toFloat();
+                            } else {
+                                item->type = 1;
+                            }
+                        }
+
+                        datainputs.push_back(item);
+                    }
+                }
+            }
+        }
+    }
+}
+

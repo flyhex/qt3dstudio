@@ -36,11 +36,57 @@
 #include <QtCore/qcommandlineparser.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qtimer.h>
+#include <QtGui/qopenglcontext.h>
 #include <QtStudio3D/q3dssurfaceviewer.h>
 #include <QtStudio3D/private/q3dsimagesequencegenerator_p.h>
 #include <QtQml/qqmlapplicationengine.h>
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlcontext.h>
+
+static QSurfaceFormat findIdealGLVersion()
+{
+    QSurfaceFormat fmt;
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+
+    // Advanced: Try 4.3 core (so we get compute shaders for instance)
+    fmt.setVersion(4, 3);
+    QOpenGLContext ctx;
+    ctx.setFormat(fmt);
+    if (ctx.create() && ctx.format().version() >= qMakePair(4, 3))
+        return fmt;
+
+    // Basic: Stick with 3.3 for now to keep less fortunate,
+    // Mesa-based systems happy
+    fmt.setVersion(3, 3);
+    ctx.setFormat(fmt);
+    if (ctx.create())
+        return fmt;
+
+    // We tried...
+    return QSurfaceFormat::defaultFormat();
+}
+
+static QSurfaceFormat findIdealGLESVersion()
+{
+    QSurfaceFormat fmt;
+
+    // Advanced: Try 3.1 (so we get compute shaders for instance)
+    fmt.setVersion(3, 1);
+    QOpenGLContext ctx;
+    ctx.setFormat(fmt);
+    if (ctx.create())
+        return fmt;
+
+    // Basic: OpenGL ES 3.0 is a hard requirement at the moment since we can
+    // only generate 300 es shaders, uniform buffers are mandatory.
+    fmt.setVersion(3, 0);
+    ctx.setFormat(fmt);
+    if (ctx.create())
+        return fmt;
+
+    // We tried...
+    return QSurfaceFormat::defaultFormat();
+}
 
 int main(int argc, char *argv[])
 {
@@ -60,6 +106,17 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Qt 3D Viewer");
 
     QGuiApplication a(argc, argv);
+
+#if !defined(Q_OS_MACOS)
+    QSurfaceFormat fmt;
+    if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL)
+        fmt = findIdealGLVersion();
+    else
+        fmt = findIdealGLESVersion();
+    fmt.setDepthBufferSize(24);
+    fmt.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(fmt);
+#endif
 
     QCommandLineParser parser;
     parser.addHelpOption();
@@ -84,7 +141,7 @@ int main(int argc, char *argv[])
                       QCoreApplication::translate("main",
                       "End time of the sequence in\n"
                       "milliseconds.\n"
-                      "The default value is 10000."),
+                      "The default value is 1000."),
                       QCoreApplication::translate("main", "ms"), QString::number(1000)});
     parser.addOption({"seq-fps",
                       QCoreApplication::translate("main",
@@ -165,8 +222,9 @@ int main(int argc, char *argv[])
             || parser.isSet("seq-height") || parser.isSet("seq-outpath")
             || parser.isSet("seq-outfile");
 
+#ifndef Q_OS_ANDROID
     Q3DSImageSequenceGenerator *generator = nullptr;
-
+#endif
     Viewer viewer(generateSequence);
 
     // Figure out control size multiplier for devices using touch screens to ensure all controls
@@ -264,6 +322,7 @@ int main(int argc, char *argv[])
             appWindow->setProperty("scaleMode", Q3DSViewerSettings::ScaleModeCenter);
     }
 
+#ifndef Q_OS_ANDROID
     if (generateSequence) {
         if (files.count() != 1) {
             qWarning() << "Presentation file is required for generating an image sequence.";
@@ -285,7 +344,9 @@ int main(int argc, char *argv[])
                     parser.value("seq-height").toInt(),
                     parser.value("seq-outpath"),
                     parser.value("seq-outfile"));
-    } else if (!files.isEmpty()) {
+    } else
+#endif
+    if (!files.isEmpty()) {
         // Load the presentation after window has been exposed to give QtQuick time to construct
         // the application window properly
         QTimer *exposeTimer = new QTimer(appWindow);
@@ -297,9 +358,10 @@ int main(int argc, char *argv[])
             }
         });
         exposeTimer->start(0);
-    } else if (parser.isSet(QStringLiteral("connect"))) {
+    } else {
         viewer.setContentView(Viewer::ConnectView);
-        viewer.setConnectPort(parser.value(QStringLiteral("connect")).toInt());
+        if (parser.isSet(QStringLiteral("connect")))
+            viewer.setConnectPort(parser.value(QStringLiteral("connect")).toInt());
         viewer.connectRemote();
     }
 

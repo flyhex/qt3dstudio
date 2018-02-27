@@ -34,6 +34,7 @@
 
 #include <QtCore/qobject.h>
 #include <QtCore/qurl.h>
+#include <QtCore/qtimer.h>
 #include <QtGui/qwindow.h>
 #include "Qt3DSView.h"
 
@@ -61,6 +62,7 @@ public:
     ~Viewer();
 
     Q_INVOKABLE void connectRemote();
+    Q_INVOKABLE void disconnectRemote();
     Q_INVOKABLE void loadFile(const QString &filename);
     Q_INVOKABLE QString convertUrlListToFilename(const QList<QUrl> &list);
     Q_INVOKABLE void restoreWindowState(QWindow *window);
@@ -94,6 +96,7 @@ private Q_SLOTS:
     void remoteProjectChanging();
     void remoteConnected();
     void remoteDisconnected();
+    void resetConnectionInfoText();
 
 Q_SIGNALS:
     void contentViewChanged();
@@ -101,6 +104,7 @@ Q_SIGNALS:
     void connectPortChanged();
     void connectTextChanged();
     void connectedChanged();
+    void showInfoOverlay(const QString &infoStr);
 
 private:
     Q3DSView *qmlStudio();
@@ -113,6 +117,7 @@ private:
     int m_connectPort = -1;
     QString m_connectText;
     Q3DSView *m_qmlStudio = nullptr;
+    QTimer m_connectTextResetTimer;
 };
 
 #endif // VIEWER_H

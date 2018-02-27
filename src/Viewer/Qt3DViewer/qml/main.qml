@@ -67,11 +67,52 @@ ApplicationWindow {
         _viewerHelper.storeWindowState(window);
     }
 
+    Timer {
+        id: infoTimer
+        repeat: false
+        interval: 5000
+
+        onTriggered: {
+            infoOverlay.visible = false;
+        }
+    }
+
+    Rectangle {
+        id: infoOverlay
+        visible: false
+        color: "black"
+        border.color: _dialogBorderColor
+        x: parent.width * 0.2
+        y: parent.height * 0.4
+        width: parent.width * 0.6
+        height: parent.height * 0.2
+        z: 20
+        Label {
+            id: infoLabel
+            anchors.fill: parent
+            color: _textColor
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: window.width / 40
+        }
+    }
+
+    Connections {
+        target: _viewerHelper
+        onShowInfoOverlay: {
+            // Show a brief info overlay
+            infoLabel.text = infoStr;
+            infoOverlay.visible = true;
+            infoTimer.restart();
+        }
+    }
+
     MouseArea {
         property int swipeStart: 0
 
         anchors.fill: parent
         z: 10
+        enabled: !ipEntry.visible
 
         onPressed: {
             if (window.visibility === Window.FullScreen)
@@ -273,6 +314,7 @@ ApplicationWindow {
         border.color: _dialogBorderColor
         y: (parent.height - height) / 2
         x: (parent.width - width) / 2
+        z: 100
         width: connectionEntry.width + (2 * _controlPadding)
         height: connectionEntry.height + (2 * _controlPadding)
 
@@ -320,6 +362,7 @@ ApplicationWindow {
                         _viewerHelper.connectPort = Number(text);
                         _viewerHelper.connectRemote();
                         ipEntry.visible = false;
+                        infoOverlay.visible = false;
                     }
                 }
 
@@ -337,8 +380,10 @@ ApplicationWindow {
                 text: qsTr("Connect")
                 onClicked: {
                     _viewerHelper.contentView = ViewerHelper.ConnectView;
+                    _viewerHelper.connectPort = Number(connectText.text);
                     _viewerHelper.connectRemote();
                     ipEntry.visible = false;
+                    infoOverlay.visible = false;
                 }
             }
             StyledButton {
@@ -400,13 +445,16 @@ ApplicationWindow {
                         }
                     }
                     StyledMenuItem {
-                        text: qsTr("Connect")
+                        text: _viewerHelper.connected ? qsTr("Disconnect") : qsTr("Connect...")
                         shortcut: "F9"
                         enabled: _viewerHelper.contentView !== ViewerHelper.SequenceView
-                        showCheckMark: _viewerHelper.connected
                         onTriggered: {
-                            if (enabled)
-                                ipEntry.visible = !ipEntry.visible;
+                            if (enabled) {
+                                if (_viewerHelper.connected)
+                                    _viewerHelper.disconnectRemote();
+                                else
+                                    ipEntry.visible = !ipEntry.visible;
+                            }
                         }
                     }
                     StyledMenuItem {
@@ -440,7 +488,7 @@ ApplicationWindow {
                     id: viewMenu
                     StyledMenuItem {
                         text: qsTr("Show Matte")
-                        shortcut: "F6"
+                        shortcut: "Ctrl+D"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                         showCheckMark: window.matteColor !== window.hideMatteColor
                         onTriggered: {
@@ -457,7 +505,20 @@ ApplicationWindow {
                         text: qsTr("Scale Mode")
                         showArrow: true
                         arrowMenu: scaleMenu
+                        shortcut: "Ctrl+Shift+S"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
+                        onTriggered: {
+                            if (enabled) {
+                                scaleMenu.close();
+                                if (window.scaleMode === ViewerSettings.ScaleModeCenter)
+                                    window.scaleMode = ViewerSettings.ScaleModeFit;
+                                else if (window.scaleMode === ViewerSettings.ScaleModeFit)
+                                    window.scaleMode = ViewerSettings.ScaleModeFill;
+                                else if (window.scaleMode === ViewerSettings.ScaleModeFill)
+                                    window.scaleMode = ViewerSettings.ScaleModeCenter;
+                            }
+                        }
+
                         StyledMenu {
                             id: scaleMenu
                             x: parent.width
@@ -466,7 +527,6 @@ ApplicationWindow {
                             StyledMenuItem {
                                 id: scaleCenter
                                 text: qsTr("Center")
-                                shortcut: "F2"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                                 showCheckMark: window.scaleMode === ViewerSettings.ScaleModeCenter
                                 onTriggered: {
@@ -477,7 +537,6 @@ ApplicationWindow {
                             StyledMenuItem {
                                 id: scaleFit
                                 text: qsTr("Scale to Fit")
-                                shortcut: "F3"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                                 showCheckMark: window.scaleMode === ViewerSettings.ScaleModeFit
                                 onTriggered: {
@@ -488,7 +547,6 @@ ApplicationWindow {
                             StyledMenuItem {
                                 id: scaleFill
                                 text: qsTr("Scale to Fill")
-                                shortcut: "F4"
                                 enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                                 showCheckMark: window.scaleMode === ViewerSettings.ScaleModeFill
                                 onTriggered: {
@@ -500,7 +558,7 @@ ApplicationWindow {
                     }
                     StyledMenuItem {
                         text: qsTr("Show Render Statistics")
-                        shortcut: "F1"
+                        shortcut: "F7"
                         enabled: _viewerHelper.contentView === ViewerHelper.StudioView
                         showCheckMark: window.showRenderStats
                         onTriggered: {
@@ -512,6 +570,15 @@ ApplicationWindow {
                     StyledMenuItem {
                         text: qsTr("Full Screen")
                         shortcut: "F11"
+                        Shortcut {
+                            sequence: "ESC"
+                            context: Qt.ApplicationShortcut
+                            enabled: window.visibility === Window.FullScreen
+                            onActivated: {
+                                window.visibility = window.previousVisibility;
+                            }
+                        }
+
                         onTriggered: {
                             if (window.visibility !== Window.FullScreen) {
                                 window.previousVisibility = window.visibility

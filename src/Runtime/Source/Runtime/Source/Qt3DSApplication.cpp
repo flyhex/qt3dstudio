@@ -470,7 +470,6 @@ struct SApp : public IApplication
     bool m_DisableState;
     bool m_ProfileLogging;
     bool m_LastRenderWasDirty;
-    QT3DSVec2 m_WatermarkCoordinates;
     QT3DSU64 m_LastFrameStartTime;
     QT3DSU64 m_ThisFrameStartTime;
     double m_MillisecondsSinceLastFrame;
@@ -485,6 +484,8 @@ struct SApp : public IApplication
     Qt3DSAssetVisitor *m_visitor;
 
     bool m_createSuccessful;
+
+    DataInputMap m_dataInputs;
 
     QT3DSI32 mRefCount;
     SApp(Q3DStudio::IRuntimeFactoryCore &inFactory, const char8_t *inAppDir)
@@ -517,7 +518,6 @@ struct SApp : public IApplication
         , m_DisableState(false)
         , m_ProfileLogging(false)
         , m_LastRenderWasDirty(true)
-        , m_WatermarkCoordinates(1.0f, 1.0f)
         , m_LastFrameStartTime(0)
         , m_ThisFrameStartTime(0)
         , m_MillisecondsSinceLastFrame(0)
@@ -540,11 +540,6 @@ struct SApp : public IApplication
         m_CoreFactory->SetApplicationCore(this);
         m_CoreFactory->GetScriptEngine().SetApplicationCore(*this);
         m_CoreFactory->GetScriptEngineQml().SetApplicationCore(*this);
-
-        // To make examples & tests load nicely, add qt bin dir into search path.
-        // TODO: Remove this once resources are baked into the library as qrc.
-        QString qtBin = QLibraryInfo::location(QLibraryInfo::BinariesPath);
-        m_CoreFactory->AddSearchPath(qtBin.toLatin1().constData());
 
         m_CoreFactory->AddSearchPath(tempStr.c_str());
     }
@@ -1109,11 +1104,6 @@ struct SApp : public IApplication
             theStateReferences = m_CoreFactory->GetVisualStateContext().PreParseDocument(inReader);
         }
         {
-            QT3DSVec2 watermarkCoords(0, 0);
-            if (inReader.Att("watermark-location", watermarkCoords)) {
-                m_WatermarkCoordinates = QT3DSVec2(Clamp(watermarkCoords.x),
-                                                   Clamp(watermarkCoords.y));
-            }
             m_UIAFileSettings.Parse(inReader);
         }
         {
@@ -1156,6 +1146,19 @@ struct SApp : public IApplication
                     if (inReader.Att("active", activeFlag))
                         theAsset.m_Active = activeFlag;
                     RegisterAsset(theAsset);
+                } else if (AreEqual(assetName, "dataInput")) {
+                    DataInputDef diDef;
+                    const char8_t *name = "";
+                    const char8_t *type = "";
+                    inReader.UnregisteredAtt("name", name);
+                    inReader.UnregisteredAtt("type", type);
+                    inReader.Att("min", diDef.min);
+                    inReader.Att("max", diDef.max);
+                    if (AreEqual(type, "Ranged Number"))
+                        diDef.type = DataInputTypeRangedNumber;
+                    else if (AreEqual(type, "String"))
+                        diDef.type = DataInputTypeString;
+                    m_dataInputs.insert(QString::fromUtf8(name), diDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";
                     inReader.UnregisteredAtt("args", pluginArgs);
@@ -1193,6 +1196,11 @@ struct SApp : public IApplication
                 = IAppLoadContext::CreateXMLLoadContext(*this, theStateReferences,
                                                         initialScaleMode);
         return true;
+    }
+
+    DataInputMap &dataInputMap() override
+    {
+        return m_dataInputs;
     }
 
     struct SAppXMLErrorHandler : public qt3ds::foundation::CXmlErrorHandler
@@ -1470,7 +1478,6 @@ struct SApp : public IApplication
         }
 
         m_CoreFactory->GetPerfTimer().OutputTimerData();
-        m_RuntimeFactory->GetQt3DSRenderContext().SetWatermarkLocation(m_WatermarkCoordinates);
 
         m_AudioPlayer.SetPlayer(inAudioPlayer);
 
@@ -1603,7 +1610,6 @@ struct SApp : public IApplication
             QT3DSU32 theScaleMode
                     = static_cast<QT3DSU32>(m_RuntimeFactory->GetQt3DSRenderContext().GetScaleMode());
             theOutStream.Write(theScaleMode);
-            theOutStream.Write(m_WatermarkCoordinates);
             m_UIAFileSettings.Save(theOutStream);
 
             MemoryBuffer<> theSaveBuffer(
@@ -1703,7 +1709,6 @@ struct SApp : public IApplication
             theInStream.Read(&theScaleMode, 1);
             qt3ds::render::ScaleModes::Enum theProperScaleMode
                     = static_cast<qt3ds::render::ScaleModes::Enum>(theScaleMode);
-            theInStream.Read(m_WatermarkCoordinates);
             m_UIAFileSettings.Load(theInStream);
 
             // Connect the debugger after we load the string table information because connecting
@@ -1816,6 +1821,24 @@ struct SApp : public IApplication
             }
         }
         return NULL;
+    }
+
+    // Returns a list of all presentations in the application
+    // The primary presentation is returned at index 0
+    QList<Q3DStudio::CPresentation *> GetPresentationList() override
+    {
+        QList<Q3DStudio::CPresentation *> list;
+        for (TIdAssetMap::iterator iter = m_AssetMap.begin(); iter != m_AssetMap.end(); ++iter) {
+            if (iter->second->getType() == AssetValueTypes::Presentation) {
+                Q3DStudio::CPresentation *presentation
+                        = iter->second->getData<SPresentationAsset>().m_Presentation;
+                if (iter->first == m_InitialPresentationId)
+                    list.prepend(presentation);
+                else
+                    list.append(presentation);
+            }
+        }
+        return list;
     }
 
     template <typename TAssetType>

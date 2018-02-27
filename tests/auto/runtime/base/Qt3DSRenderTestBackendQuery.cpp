@@ -148,7 +148,7 @@ bool NVRenderTestBackendQuery::renderQuad(NVRenderContext *context, userContextD
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 3 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestBackendQuery::depthBitsTest: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestBackendQuery::depthBitsTest: Failed to create vertex buffer";
         return false;
     }
 
@@ -161,7 +161,7 @@ bool NVRenderTestBackendQuery::renderQuad(NVRenderContext *context, userContextD
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1));
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestBackendQuery::depthBitsTest: Failed to create input assembler";
+        qWarning() << "NVRenderTestBackendQuery::depthBitsTest: Failed to create input assembler";
         return false;
     }
 
@@ -235,7 +235,7 @@ bool NVRenderTestBackendQuery::depthBitsFBOTest(NVRenderContext *context,
                   NVRenderTextureOrRenderBuffer(*m_Depth16Texture));
 
     if (!m_FBO->IsComplete()) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
+        qWarning() << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
         return false;
     }
 
@@ -256,7 +256,7 @@ bool NVRenderTestBackendQuery::depthBitsFBOTest(NVRenderContext *context,
     m_FBO->Attach(NVRenderFrameBufferAttachments::Depth,
                   NVRenderTextureOrRenderBuffer(*m_Depth24Texture));
     if (!m_FBO->IsComplete()) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
+        qWarning() << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
         return false;
     }
     // check depth bit count
@@ -273,7 +273,7 @@ bool NVRenderTestBackendQuery::depthBitsFBOTest(NVRenderContext *context,
     m_FBO->Attach(NVRenderFrameBufferAttachments::Depth,
                   NVRenderTextureOrRenderBuffer(*m_Depth32Texture));
     if (!m_FBO->IsComplete()) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
+        qWarning() << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
         return false;
     }
     // check depth bit count
@@ -292,7 +292,7 @@ bool NVRenderTestBackendQuery::depthBitsFBOTest(NVRenderContext *context,
         m_FBO->Attach(NVRenderFrameBufferAttachments::DepthStencil,
                       NVRenderTextureOrRenderBuffer(*m_Depth24Stencil8Texture));
         if (!m_FBO->IsComplete()) {
-            qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
+            qWarning() << "NVRenderTestBackendQuery::depthBitsFBOTest: Failed to create FBO";
             return false;
         }
         // check depth bit count

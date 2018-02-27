@@ -103,10 +103,6 @@
   \b{General}
   \list
   \li
-    \b{Nudge Increment} - Controls the amount that an object's
-    position values change when using the arrow keys to adjust the
-    position of an object.
-  \li
     \b{Default Interpolation} - Controls whether new animation
     keyframes are created with
     \l{studio-timeline-palette.html#interpolation}{linear or smooth interpolation}.

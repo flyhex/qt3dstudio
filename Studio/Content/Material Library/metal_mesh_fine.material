@@ -3,7 +3,7 @@
         <Property formalName="Environment Map" name="uEnvironmentTexture" description="Environment texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="environment" default="./maps/materials/spherical_checker.png" category="Material"/>
         <Property formalName="Enable Environment" name="uEnvironmentMappingEnabled" description="Enable environment mapping" type="Boolean" default="True" category="Material"/>
         <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
-        <Property formalName="Enable Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
+        <Property formalName="Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
         <Property formalName="Index of Refraction" name="material_ior" type="Float" default="15.000000" description="Index of refraction of the material" category="Material"/>
         <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
         <Property formalName="Diffuse Map" name="diffuse_texture" description="Diffuse texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="diffuse" default="./maps/materials/metal_mesh.png" category="Material"/>
@@ -113,7 +113,7 @@ void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, 
 #if QT3DS_ENABLE_CG_LIGHTING
   layers[0].layer += tmpShadowTerm * microfacetBSDF( layers[0].tanFrame, lightDir, viewDir, lightSpecular, materialIOR, roughness, roughness, scatter_reflect );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * diffuseReflectionBSDF( tmp6, lightDir, viewDir, lightDiffuse, 0.000000 );
 
 #endif
@@ -124,7 +124,7 @@ void computeFrontAreaColor( in int lightIdx, in vec4 lightDiffuse, in vec4 light
 #if QT3DS_ENABLE_CG_LIGHTING
   layers[0].layer += tmpShadowTerm * lightSpecular * sampleAreaGlossy( layers[0].tanFrame, varWorldPos, lightIdx, viewDir, roughness, roughness );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * lightDiffuse * sampleAreaDiffuse( layers[1].tanFrame, varWorldPos, lightIdx );
 
 #endif
@@ -135,13 +135,13 @@ void computeFrontLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFact
 #if !QT3DS_ENABLE_LIGHT_PROBE
   layers[0].layer += tmpShadowTerm * microfacetSampledBSDF( layers[0].tanFrame, viewDir, roughness, roughness, scatter_reflect );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * diffuseReflectionBSDFEnvironment( tmp6, 0.000000 ) * aoFactor;
 
 #else
   layers[0].layer += tmpShadowTerm * sampleGlossyAniso( layers[0].tanFrame, viewDir, roughness, roughness );
 
-  layers[1].base += tmpShadowTerm * vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+  layers[1].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
   layers[1].layer += tmpShadowTerm * sampleDiffuse( layers[1].tanFrame ) * aoFactor;
 
 #endif
@@ -181,7 +181,7 @@ void computeBackLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFacto
 
 float computeIOR()
 {
-  return( false ? 1.0f : luminance( vec3( 1, 1, 1 ) ) );
+  return( false ? 1.0 : luminance( vec3( 1, 1, 1 ) ) );
 }
 
 float evalCutout()

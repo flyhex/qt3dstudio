@@ -231,7 +231,7 @@ bool NVRenderTestGeometryShader::geometryCompile(NVRenderContext *context,
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 5 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestGeometryShader: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestGeometryShader: Failed to create vertex buffer";
         return false;
     }
 
@@ -244,7 +244,7 @@ bool NVRenderTestGeometryShader::geometryCompile(NVRenderContext *context,
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestGeometryShader: Failed to create input assembler";
+        qWarning() << "NVRenderTestGeometryShader: Failed to create input assembler";
         return false;
     }
 
@@ -333,7 +333,7 @@ bool NVRenderTestGeometryShader::wireframe(NVRenderContext *context, userContext
     mVertexBuffer = context->CreateVertexBuffer(NVRenderBufferUsageType::Static, bufSize,
                                                 5 * sizeof(QT3DSF32), vertData);
     if (!mVertexBuffer) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestGeometryShader: Failed to create vertex buffer";
+        qWarning() << "NVRenderTestGeometryShader: Failed to create vertex buffer";
         return false;
     }
 
@@ -346,7 +346,7 @@ bool NVRenderTestGeometryShader::wireframe(NVRenderContext *context, userContext
         mAttribLayout, toConstDataRef(&mVertexBuffer.mPtr, 1), mIndexBuffer.mPtr,
         toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1), NVRenderDrawMode::Triangles);
     if (!mInputAssembler) {
-        qCInfo(qt3ds::TRACE_INFO) << "NVRenderTestGeometryShader: Failed to create input assembler";
+        qWarning() << "NVRenderTestGeometryShader: Failed to create input assembler";
         return false;
     }
 

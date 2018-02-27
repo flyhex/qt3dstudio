@@ -46,6 +46,7 @@
 
 #include <QSurfaceFormat>
 #include <QMessageLogger>
+#include <QCommandLineParser>
 
 using namespace qt3ds::render;
 
@@ -65,6 +66,16 @@ void EASTL_DEBUG_BREAK()
 
 #endif
 #endif
+
+void *operator new[](size_t size, const char *, int, unsigned, const char *, int)
+{
+    return malloc(size);
+}
+
+void *operator new[](size_t size, size_t, size_t, const char *, int, unsigned, const char *, int)
+{
+    return malloc(size);
+}
 
 struct SNullTimeProvider : public Q3DStudio::ITimeProvider
 {
@@ -88,12 +99,49 @@ struct SNullWindowSystem : public Q3DStudio::IWindowSystem
     int GetDepthBitCount() override { return 16; }
 };
 
+void messageOutput(QtMsgType type, const QMessageLogContext &context,
+    const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    switch (type) {
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(),
+            context.file, context.line, context.function);
+        abort();
+    default:
+        break;
+    }
+}
+
 int main(int c, char **v)
 {
-    // init runtime static resources
-    Q_INIT_RESOURCE(res);
+    QCoreApplication::setOrganizationName("The Qt Company");
+    QCoreApplication::setOrganizationDomain("qt.io");
+    QCoreApplication::setApplicationName("Qt 3D Compiler");
 
     QGuiApplication app(c, v);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QCoreApplication::translate("main",
+        "Binary files will be generated under projectdir/binary/"));
+    parser.addHelpOption();
+    parser.addPositionalArgument(
+                "file",
+                QCoreApplication::translate("main", "Example: project.uia"),
+                QCoreApplication::translate("main", "[file]"));
+
+    parser.addOption({{"v", "verbose"},
+                      QCoreApplication::translate("main",
+                      "Verbose mode. Prints out more information.")});
+
+    parser.process(app);
+
+    const QStringList files = parser.positionalArguments();
+    if (files.isEmpty() || files.count() > 1)
+        parser.showHelp(-1);
+
+    if (!parser.isSet("verbose"))
+        qInstallMessageHandler(messageOutput);
 
     QSurfaceFormat format;
     format.setDepthBufferSize(32);
@@ -112,15 +160,10 @@ int main(int c, char **v)
     surface->create();
     context->makeCurrent(surface);
 
-    if (c < 2) {
-        puts("Usage: Qt3DCompiler project.uia\n"
-             "Binary files will be generated under projectdir/binary/\n");
-        return -1;
-    }
     using namespace qt3ds;
     using namespace qt3ds::foundation;
 
-    eastl::string uiaFile(v[1]);
+    eastl::string uiaFile(files.first().toLatin1().constData());
 
     eastl::string theApplicationDirectory
         = QCoreApplication::applicationDirPath().toLatin1().constData();

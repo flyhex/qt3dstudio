@@ -327,6 +327,10 @@ CustomTestParams *generateTest(qt3ds::render::Qt3DSRendererImpl *renderImpl,
         NVDataRef<QT3DSU8> buffer = toU8DataRef<unsigned int>(data);
         params->texture->SetTextureData(buffer, 0, 1, 1, format);
         params->iblLightProbe.m_TextureData.m_Texture = params->texture;
+    } else {
+        CRegisteredString str(renderImpl->GetQt3DSContext().GetStringTable()
+                              .RegisterStr("QT3DS_ENABLE_LIGHT_PROBE"));
+        params->features.push_back(SShaderPreprocessorFeature(str, false));
     }
 
     // these requires calculateGlass function in material

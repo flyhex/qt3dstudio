@@ -99,8 +99,8 @@ void CStartupDlg::OnInitDialog()
              pRect.y() + pRect.height() / 2 - height() / 2);
     }
 
-    connect(m_ui->newDocument, &QPushButton::clicked, this, &CStartupDlg::OnNewDocClicked);
-    connect(m_ui->openDocument, &QPushButton::clicked, this, &CStartupDlg::OnOpenDocClicked);
+    connect(m_ui->newDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnNewDocClicked);
+    connect(m_ui->openDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
     m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
@@ -176,14 +176,15 @@ void CStartupDlg::OpenRecent(size_t inIndex)
 void CStartupDlg::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
-    if (m_palette)
-        return;
-
-    m_palette = new QPalette;
     QPixmap pic = QPixmap(":/startup/open_dialog.png");
     pic.setDevicePixelRatio(devicePixelRatio());
-    m_palette->setBrush(QPalette::Window, pic);
-    setPalette(*m_palette);
+
+    if (!m_palette) {
+        m_palette = new QPalette;
+        m_palette->setBrush(QPalette::Window, pic);
+        setPalette(*m_palette);
+    }
+
     resize(pic.size());
     setFixedSize(size());
 }

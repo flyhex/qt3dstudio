@@ -158,9 +158,13 @@ TextField {
                 if (draggingActive) {
                     var delta = _mouseHelper.delta().x;
                     if (delta !== 0) {
-                        floatTextFieldId.text =
-                                Number(parseFloat(floatTextFieldId.text)
-                                       + delta).toFixed(validator.decimals);
+                        if (floatTextFieldId.text !== "") {
+                            floatTextFieldId.text = Number(parseFloat(floatTextFieldId.text)
+                                                           + delta).toFixed(validator.decimals);
+                        } else {
+                            floatTextFieldId.text = Number(delta).toFixed(validator.decimals);
+                        }
+
                         if (!rateLimiter.running)
                             rateLimiter.start();
                     }
@@ -179,8 +183,13 @@ TextField {
                 delta = 10.0;
             if (event.key === Qt.Key_Down)
                 delta = -delta;
-            floatTextFieldId.text = Number(parseFloat(floatTextFieldId.text)
-                                           + delta).toFixed(validator.decimals);
+            if (floatTextFieldId.text !== "") {
+                floatTextFieldId.text = Number(parseFloat(floatTextFieldId.text)
+                                               + delta).toFixed(validator.decimals);
+            } else {
+                floatTextFieldId.text = Number(delta).toFixed(validator.decimals);
+            }
+
             if (!rateLimiter.running)
                 rateLimiter.start();
         }

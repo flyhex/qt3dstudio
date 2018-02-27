@@ -64,6 +64,7 @@ namespace render {
         : NVRenderBackendGLBase(fnd, stringTable, format)
     {
         eastl::string exts3tc("GL_EXT_texture_compression_s3tc");
+        eastl::string extsdxt("GL_EXT_texture_compression_dxt1");
         eastl::string extsAniso("GL_EXT_texture_filter_anisotropic");
         eastl::string extsTexSwizzle("GL_ARB_texture_swizzle");
         eastl::string extsAstcHDR("GL_KHR_texture_compression_astc_hdr");
@@ -104,7 +105,7 @@ namespace render {
 
             // search for extension
             if (!m_backendSupport.caps.bits.bDXTImagesSupported
-                && exts3tc.compare(extensionString) == 0) {
+                && (exts3tc.compare(extensionString) == 0 || extsdxt.compare(extensionString) == 0)) {
                 m_backendSupport.caps.bits.bDXTImagesSupported = true;
             } else if (!m_backendSupport.caps.bits.bAnistropySupported
                        && extsAniso.compare(extensionString) == 0) {

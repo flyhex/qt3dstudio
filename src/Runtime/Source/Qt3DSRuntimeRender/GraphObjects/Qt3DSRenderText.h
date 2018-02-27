@@ -45,7 +45,6 @@ namespace render {
 
         // These properties can change every frame with no additional cost.
         QT3DSVec3 m_TextColor;
-
         // Setup and utilized by the rendering system
         NVRenderTexture2D *m_TextTexture;
         STextTextureDetails m_TextTextureDetails;

@@ -106,7 +106,7 @@ namespace render {
     // to children as the identity.  It also can optionally have a width or height
     // different than the overlying context.  You can think of layers as the transformation
     // between a 3d scene graph and a 2D texture.
-    struct SLayer : public SNode
+    struct QT3DS_AUTOTEST_EXPORT SLayer : public SNode
     {
         SScene *m_Scene;
 

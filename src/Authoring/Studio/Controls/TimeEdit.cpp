@@ -71,7 +71,7 @@ bool CTimeEdit::OnMouseDown(CPt inPoint, Qt::KeyboardModifiers inFlags)
     Q_UNUSED(inFlags);
 
     CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.ShowDialog(m_Time, 0, m_Doc, PLAYHEAD);
+    theTimeEditDlg.showDialog(m_Time, m_Doc, PLAYHEAD);
     return true;
 }
 

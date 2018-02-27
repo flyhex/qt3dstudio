@@ -299,8 +299,8 @@ void CKeyframesManager::SetChangedKeyframes()
 void CKeyframesManager::SetKeyframeTime(long inTime)
 {
     CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.SetKeyframesManager(this);
-    theTimeEditDlg.ShowDialog(inTime, 0, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
+    theTimeEditDlg.setKeyframesManager(this);
+    theTimeEditDlg.showDialog(inTime, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
 }
 
 void CKeyframesManager::SetKeyframeDynamic(Qt3DSDMTimelineKeyframe *inKeyframe, bool inDynamic)

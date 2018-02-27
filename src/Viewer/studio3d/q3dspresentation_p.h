@@ -59,6 +59,7 @@ class Q_STUDIO3D_EXPORT Q3DSPresentationPrivate : public QObject
 
 public:
     typedef QHash<QString, Q3DSElement *> ElementMap;
+    typedef QHash<QString, Q3DSDataInput *> DataInputMap;
 
     explicit Q3DSPresentationPrivate(Q3DSPresentation *parent);
     ~Q3DSPresentationPrivate();
@@ -70,6 +71,10 @@ public:
     void registerElement(Q3DSElement *element);
     void unregisterElement(Q3DSElement *element);
     void unregisterAllElements();
+
+    void registerDataInput(Q3DSDataInput *dataInput);
+    void unregisterDataInput(Q3DSDataInput *dataInput);
+    void unregisterAllDataInputs();
 
     ViewerQmlStreamProxy *streamProxy();
     Q3DStudio::EKeyCode getScanCode(QKeyEvent *e);
@@ -84,6 +89,7 @@ private:
     Q3DSViewer::Q3DSViewerApp *m_viewerApp; // Not owned
     CommandQueue *m_commandQueue; // Not owned
     ElementMap m_elements;
+    DataInputMap m_dataInputs;
     QUrl m_source;
     ViewerQmlStreamProxy *m_streamProxy;
 };

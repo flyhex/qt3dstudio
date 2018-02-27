@@ -54,6 +54,8 @@
 
 #include <QtWidgets/qscrollbar.h>
 #include <QtGui/qevent.h>
+#include <QtGui/qwindow.h>
+#include <QtGui/qscreen.h>
 
 //==============================================================================
 //	Class CPlayerContainerWnd
@@ -187,6 +189,17 @@ void CPlayerContainerWnd::OnRulerGuideToggled()
     m_PlayerWnd->update();
 }
 
+qreal CPlayerContainerWnd::fixedDevicePixelRatio() const
+{
+    // Fix a problem on X11: https://bugreports.qt.io/browse/QTBUG-65570
+    qreal ratio = devicePixelRatio();
+    if (QWindow *w = window()->windowHandle()) {
+        if (QScreen *s = w->screen())
+            ratio = s->devicePixelRatio();
+    }
+    return ratio;
+}
+
 //==============================================================================
 /**
  *	RecenterClient: Recenters the Client rect in the View's client area.
@@ -217,8 +230,8 @@ void CPlayerContainerWnd::RecenterClient()
     }
 
     QRect glRect = m_ClientRect;
-    glRect.setWidth(int(devicePixelRatio() * m_ClientRect.width()));
-    glRect.setHeight(int(devicePixelRatio() * m_ClientRect.height()));
+    glRect.setWidth(int(fixedDevicePixelRatio() * m_ClientRect.width()));
+    glRect.setHeight(int(fixedDevicePixelRatio() * m_ClientRect.height()));
     g_StudioApp.GetRenderer().SetViewRect(glRect);
 }
 
@@ -436,7 +449,7 @@ QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
         theSize += QSize(32, 32);
     }
 
-    return theSize / devicePixelRatio();
+    return theSize / fixedDevicePixelRatio();
 }
 
 //==============================================================================

@@ -61,12 +61,14 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(QVariant value MEMBER m_value NOTIFY valueChanged)
     Q_PROPERTY(QVariant values MEMBER m_values NOTIFY valuesChanged)
     Q_PROPERTY(QString title MEMBER m_title CONSTANT)
-    Q_PROPERTY(QString toolTip MEMBER m_tooltip CONSTANT)
+    Q_PROPERTY(QString toolTip MEMBER m_tooltip NOTIFY tooltipChanged)
     Q_PROPERTY(int instance MEMBER m_instance CONSTANT)
     Q_PROPERTY(int handle MEMBER m_property CONSTANT)
 
     Q_PROPERTY(bool animatable MEMBER m_animatable CONSTANT)
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
+    Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
+    Q_PROPERTY(bool controllable MEMBER m_controllable CONSTANT)
 
 public:
     virtual ~InspectorControlBase();
@@ -75,10 +77,13 @@ Q_SIGNALS:
     void valueChanged();
     void valuesChanged();
     void animatedChanged();
+    void controlledChanged();
+    void tooltipChanged();
 
 public:
     qt3dsdm::DataModelDataType::Value m_dataType;
     qt3dsdm::AdditionalMetaDataType::Value m_propertyType;
+    qt3dsdm::SMetaDataPropertyInfo m_metaProperty;
     QVariant m_value;
     QVariant m_values;
     QString m_title;
@@ -89,6 +94,8 @@ public:
 
     bool m_animatable  = false;
     bool m_animated = false;
+    bool m_controlled = false;
+    bool m_controllable = false;
 
     std::vector<qt3dsdm::TSignalConnectionPtr> m_connections;
 };
@@ -117,7 +124,22 @@ public:
     void refresh();
 
     QVariant getPropertyValue(long instance, int handle);
-    qt3dsdm::SValue currentPropertyValue(long instance, int handle);
+
+    QString getCurrentController()
+    {
+        return m_currController;
+    };
+
+    void setCurrentController(const QString &currCntroller)
+    {
+        m_currController = currCntroller;
+    };
+
+    qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
+
+    void setPropertyControllerInstance(long instance,int handle,
+                                       Q3DStudio::CString controllerInstance,
+                                       bool controlled);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setRenderableValue(long instance, int handle, const QVariant &value);
@@ -125,6 +147,7 @@ public:
     Q_INVOKABLE void setSlideSelection(long instance, int handle, int index,
                                        const QStringList &list);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
+    Q_INVOKABLE void setPropertyControlled(long instance, int property);
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -152,6 +175,11 @@ private:
 
     std::vector<MaterialEntry> m_materials;
 
+    // TODO: move this elsewhere where it is specific
+    // for a particular element - property, not member of
+    // the entire model
+    QString m_currController;
+
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
     QPair<long, int> m_modifiedProperty;
@@ -160,10 +188,12 @@ private:
     void rebuildTree();
     void refreshTree();
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void updateAnimateToggleState(InspectorControlBase* inItem);
+    void updateAnimateToggleState(InspectorControlBase *inItem);
+    void updateControlledToggleState(InspectorControlBase *inItem) const;
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_controlledToggleConnection;
 
     QStringList materialValues() const;
     InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);

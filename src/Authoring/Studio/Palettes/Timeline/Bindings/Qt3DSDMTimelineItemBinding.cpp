@@ -346,6 +346,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
         return;
     }
 
+    Q3DStudio::CString oldPath = GetObjectPath();
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
         QString theTitle = QObject::tr("Rename Object Error");
@@ -353,10 +354,11 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
                                         "want to make it unique?");
         int theUserChoice = g_StudioApp.GetDialogs()->DisplayChoiceBox(
                     theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
-        if (theUserChoice == QMessageBox::Yes) {
+        if (theUserChoice == IDYES) {
             // Set with the unique name
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
-                    ->SetName(m_DataHandle, inName, true);
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                *m_TransMgr->GetDoc(), QObject::tr("Set Name"))
+                ->SetName(m_DataHandle, inName, true);
             return;
         }
     }
@@ -364,6 +366,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
     Qt3DSDMPropertyHandle theNamePropHandle =
             m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
                                                                                     L"name");
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
             ->SetInstancePropertyValue(m_DataHandle, theNamePropHandle,
                                        std::make_shared<CDataStr>(inName));
@@ -557,7 +560,11 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     switch (inTransaction) {
     case EUserTransaction_Rename:
-        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE);
+        // DataInput renaming is forbidden by convention. DataInput name is
+        // permanently assigned when it is added to the scene from a fixed list of
+        // available datainputs
+        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE
+                && GetObjectType() != OBJTYPE_DATAINPUT);
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())
@@ -589,11 +596,13 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
                 // component.
                 // This may include behavior assets which may be directly attached to the Scene.
                 // This is because by principal, components cannot exist on the Scene directly.
+                // DataInputs cannot reside inside component as they must be direct children
+                // of scene
                 qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
                         theBridge->GetParentInstance(theInstance);
                 if (theObjectType != OBJTYPE_LAYER && theObjectType != OBJTYPE_SCENE
                         && theObjectType != OBJTYPE_MATERIAL && theObjectType != OBJTYPE_IMAGE
-                        && theObjectType != OBJTYPE_EFFECT
+                        && theObjectType != OBJTYPE_EFFECT && theObjectType != OBJTYPE_DATAINPUT
                         && (theParentInstance.Valid()
                             && theBridge->GetObjectType(theParentInstance)
                             != OBJTYPE_SCENE)) // This checks if the object is
@@ -773,8 +782,8 @@ void Qt3DSDMTimelineItemBinding::CommitChangedKeyframes()
 void Qt3DSDMTimelineItemBinding::OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation)
 {
     CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.SetKeyframesManager(m_TransMgr->GetKeyframesManager());
-    theTimeEditDlg.ShowDialog(inCurrentTime, 0, g_StudioApp.GetCore()->GetDoc(),
+    theTimeEditDlg.setKeyframesManager(m_TransMgr->GetKeyframesManager());
+    theTimeEditDlg.showDialog(inCurrentTime, g_StudioApp.GetCore()->GetDoc(),
                               inObjectAssociation);
 }
 

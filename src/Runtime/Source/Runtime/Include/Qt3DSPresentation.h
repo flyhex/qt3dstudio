@@ -205,8 +205,7 @@ public: // Hooks and callbacks
 public: // Configuration access
     SPresentationSize GetSize() const override;
     BOOL GetPause() const;
-    const CHAR *GetName() const;
-    const CHAR *GetScenePath() const;
+    const QByteArray GetName() const;
 
     void SetSize(const SPresentationSize &inSize) override;
     void SetPause(const BOOL inPause);

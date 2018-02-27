@@ -1366,9 +1366,8 @@ public:
                                  CompleteMetaDataType::Enum inDataType,
                                  const SValue &inDefaultValue,
                                  const TMetaDataData &inMetaData, TStrType inGroupName,
-                                         Qt3DSDMInstanceHandle inDataInputSource,
                                          bool inIsHidden, bool inIsAnimatable,
-                                         bool inIsControlled) override
+                                         bool inIsControllable) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inPropertyHandle);
         if (infoPtr == NULL) {
@@ -1382,9 +1381,8 @@ public:
                             inDefaultValue, inMetaData);
         newInfo.m_IsHidden = inIsHidden;
         newInfo.m_Animatable = inIsAnimatable;
-        newInfo.m_IsControlledByDataInput = inIsControlled;
+        newInfo.m_Controllable = inIsControllable;
         newInfo.m_GroupName = inGroupName;
-        newInfo.m_DataInputSource = inDataInputSource;
         EnsureDataCoreProperty(newInfo);
 
         SetItemInfo(__FILE__, __LINE__, inPropertyHandle, oldInfo, newInfo, m_Properties,
@@ -2288,6 +2286,8 @@ public:
             inArchive.Att(L"hidden", inItem.m_IsHidden);
         if (inItem.m_Animatable == false)
             inArchive.Att(L"animatable", inItem.m_Animatable);
+        if (inItem.m_Controllable == true)
+            inArchive.Att(L"controllable", inItem.m_Controllable);
         NVConstDataRef<SPropertyFilterInfo> theInfos = GetMetaDataPropertyFilters(inHandle);
         for (QT3DSU32 idx = 0, end = theInfos.size(); idx < end; ++idx) {
             const SPropertyFilterInfo &theInfo(theInfos[idx]);
@@ -2314,6 +2314,7 @@ public:
         SerializePropertyBase(inArchive, inItem);
         inArchive.Att(L"hidden", inItem.m_IsHidden);
         inArchive.Att(L"animatable", inItem.m_Animatable);
+        inArchive.Att(L"controllable", inItem.m_Controllable);
         inArchive.Att(L"category", inItem.m_GroupName);
     }
 
@@ -2725,9 +2726,8 @@ public:
                                             theInfo.m_Description, theInfo.m_Usage,
                                             theInfo.m_CompleteType, theInfo.m_DefaultValue,
                                             theInfo.m_MetaDataData, theInfo.m_GroupName,
-                                            theInfo.m_DataInputSource,
                                             theInfo.m_IsHidden, theInfo.m_Animatable,
-                                            theInfo.m_IsControlledByDataInput);
+                                            theInfo.m_Controllable);
                     CreateInstanceGroupInfo(theInfo);
                     theProperties.push_back(theProperty);
                     ReadChildren(inReader, theInfo, theProperty);
@@ -3072,11 +3072,11 @@ public:
             SetMetaDataPropertyInfo(theProp, theInfo.m_Name, theInfo.m_FormalName,
                                     theInfo.m_Description, theInfo.m_Usage, theInfo.m_CompleteType,
                                     theInfo.m_DefaultValue, theInfo.m_MetaDataData,
-                                    theInfo.m_GroupName, theInfo.m_DataInputSource,
-                                    true, theInfo.m_Animatable,
-                                    theInfo.m_IsControlledByDataInput);
+                                    theInfo.m_GroupName, true, theInfo.m_Animatable,
+                                    theInfo.m_Controllable);
         }
     }
+
     static inline void GetShaderName(const TCharStr &inObjectName,
                                      const char8_t *inShaderSpecificName,
                                      eastl::string &outShaderName)

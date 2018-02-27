@@ -30,6 +30,7 @@
 #include "q3dsimagesequencegenerator_p.h"
 #include "q3dsimagesequencegeneratorthread_p.h"
 
+#ifndef Q_OS_ANDROID
 bool Q3DSImageSequenceGenerator::generateImageSequence(
         const QString &presentation, qreal start, qreal end, qreal fps, qreal frameInterval,
         int width, int height, const QString &outPath, const QString &outFile)
@@ -52,3 +53,4 @@ bool Q3DSImageSequenceGenerator::generateImageSequence(
 
     return success;
 }
+#endif

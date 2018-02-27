@@ -67,6 +67,7 @@ enum CommandType {
     CommandType_KeyPress,
     CommandType_KeyRelease,
     CommandType_SetGlobalAnimationTime,
+    CommandType_SetDataInputValue,
     CommandType_RequestSlideInfo
 };
 

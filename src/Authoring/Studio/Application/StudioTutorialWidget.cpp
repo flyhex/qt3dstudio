@@ -78,6 +78,12 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
     m_displayScale = getDisplayScalingForImage(m_imgIter);
     m_ui->verticalWidget->setMaximumSize(m_displayScale * size());
 
+    QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
+    QSize windowSize = screenRect.size();
+    QSize welcomeSize = size() * m_displayScale;
+    move(screenRect.x() + (windowSize.width() - welcomeSize.width()) / 2,
+         screenRect.y() + (windowSize.height() - welcomeSize.height()) / 2);
+
     if (!m_welcomeImages->isEmpty()) {
         for (int i = 0; i < page && m_imgIter != m_welcomeImages->end(); ++i)
             m_imgIter++;
@@ -108,23 +114,16 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
 void StudioTutorialWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
-    if (m_palette)
-        return;
-
-    m_palette = new QPalette;
     QPixmap pic = getScaledPic(m_imgIter);
-    m_palette->setBrush(QPalette::Window, pic);
-    setPalette(*m_palette);
 
-    // assume all welcome screen images are sized the same
+    if (!m_palette) {
+        m_palette = new QPalette;
+        m_palette->setBrush(QPalette::Window, pic);
+        setPalette(*m_palette);
+    }
+
     resize(pic.size());
     setFixedSize(size());
-
-    QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
-    QSize windowSize = screenRect.size();
-    QSize welcomeSize = size();
-    move(screenRect.x() + (windowSize.width() - welcomeSize.width()) / 2,
-         screenRect.y() + (windowSize.height() - welcomeSize.height()) / 2);
 }
 
 void StudioTutorialWidget::handleFwd()
@@ -216,8 +215,9 @@ QPixmap StudioTutorialWidget::getPrevScaledPic()
 QPixmap StudioTutorialWidget::getScaledPic(QList<QString>::iterator iter)
 {
     QPixmap picOrig = QPixmap(*iter);
-    QPixmap pic = picOrig.scaledToHeight(m_displayScale * picOrig.height(),
-                                         Qt::SmoothTransformation);
+    QPixmap pic = picOrig;
+    if (m_displayScale < 1.0)
+        pic = picOrig.scaledToHeight(m_displayScale * picOrig.height(), Qt::SmoothTransformation);
 
     pic.setDevicePixelRatio(devicePixelRatio());
     return pic;
@@ -227,21 +227,20 @@ qreal StudioTutorialWidget::getDisplayScalingForImage(QList<QString>::iterator i
 {
     QPixmap picOrig = QPixmap(*iter);
 
-    // Set the splash screen to 80% of display size.
     // Note that high DPI scaling has an effect on the display
     // resolution returned by GetAvailableDisplaySize().
     // DPI scaling factor is integer and taken from the primary screen.
     // When running studio on secondary monitor with different DPI,
     // or running it on primary with non-integer scaling, we might
     // get different dialog size than intended.
-    QSize displaySize = GetAvailableDisplaySize(getWidgetScreen(this)) * 0.8;
+    QSize displaySize = GetAvailableDisplaySize(getWidgetScreen(this));
 
-    // scale down if images do not fit on screen, otherwise use
-    // 1:1 PNGs to avoid scaling artifacts
+    // Scale down if images do not fit on screen, otherwise use
+    // 1:1 PNGs to avoid scaling artifacts. Scale to 90% of the display size if scaling is needed.
     if (picOrig.height() > displaySize.height() ||
             picOrig.width() > displaySize.width()) {
         QSize picScaledSize = picOrig.size();
-        picScaledSize.scale(displaySize, Qt::KeepAspectRatio);
+        picScaledSize.scale(displaySize * 0.9, Qt::KeepAspectRatio);
         m_displayScale = qMin((qreal)picScaledSize.height() / (qreal)picOrig.height(),
                               (qreal)picScaledSize.width() / (qreal)picOrig.width());
         return m_displayScale;

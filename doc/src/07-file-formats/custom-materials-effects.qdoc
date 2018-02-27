@@ -1,0 +1,308 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Custom Materials and Effects
+\page custom-materials-effects.html
+\ingroup qt3dstudio-file-formats
+
+Qt 3D Studio supports custom \e{materials} and \e{layer effects}. These are arbitrary
+GLSL shaders, wrapped in a file format providing an artist-friendly interface
+for adjusting properties in Studio.
+
+You can write your own materials and effects to use in Qt 3D Studio, this requires knowledge in
+OpenGL Shading Language (GLSL).
+
+This document explains the structure of the \c{.effect} and \c{.material} files but does not go
+through how to write shaders in GLSL. For information about shaders see links in the end of this
+document.
+
+\sa {Custom Material Reference}, {Effect Reference}
+
+\section1 Overview
+
+The general structure of an \c{.effect} and a \c{.material} is almost the same.
+The only different is the \c{<Effect>} and the \c{<Material>} elements.
+
+\note Some of the attributes and elements shown here are optional (and this example does not
+include all possible attributes).
+
+The structure of an \c{.effect} file. As mentioned above the same structure applies to
+\c{.material} files as well with the only difference that you will need to use \c{<Material>} and
+\c{</Material>} instead of \c{<Effect>} and \c{</Effect>}.
+
+\badcode
+<Effect>
+    <MetaData>
+        <Property name="..."/>
+        <Property name="..."/>
+    </MetaData>
+    <Shaders>
+        <Shared>
+        </Shared>
+        <Shader>
+            <FragmentShader>
+            </FragmentShader>
+        </Shader>
+        <Shader>
+            <VertexShader>
+            </VertexShader>
+        </Shader>
+    </Shaders>
+    <Passes>
+        <Buffer name="..."/>
+        <Pass>
+            <DepthInput/>
+        </Pass>
+        <Pass>
+            <BufferInput/>
+        </Pass>
+    </Passes>
+</Effect>
+\endcode
+
+\section1 Elements
+
+\section2 \c{<Effect>}
+The \c{<Effect>} element is the root element of the document. Everything in the document needs
+to be wrapped in the \c{<Effect>} element.
+
+\section2 \c{<MetaData>}
+The \c{<MetaData>} element can contain zero or more \c{<Property>} elements. The \c{<MetaData>}
+element is optional.
+
+\section2 \c{<Property>}
+The \c{<Property>} element must be wrapped in the \c{<MetaData>} element. This element describes a
+property of the \e{effect} or \e{material}. Most properties are by default visible and adjustable
+in Studio. Below you can see an example on how properties might look in Studio.
+
+\image effect-properties.png
+
+A \c{property} element can have the following attributes:
+
+\table
+\header
+    \li Attribute
+    \li Value
+    \li Default value
+    \li Description
+\row
+    \li name
+    \li Text
+    \li -
+    \li The internal name of the property (must be a unique identifier).
+\row
+    \li formalName
+    \li Text
+    \li The \e{name} property.
+    \li The name to display in the \e{inspector palette}.
+\row
+    \li description
+    \li Text
+    \li -
+    \li Tooltip to display in the \e{inspector palette}.
+\row
+    \li type
+    \li \l{PropertyType}
+    \li Float
+    \li The type of the property.
+\row
+    \li min
+    \li Float
+    \li -
+    \li Min value for numeric types.
+\row
+    \li max
+    \li Float
+    \li -
+    \li Max value for numeric types.
+\row
+    \li default
+    \li Text
+    \li 0 or "".
+    \li Default value.
+\row
+    \li animatable
+    \li Boolean
+    \li True
+    \li Sets possibility to animate the property. Note that all types are not animatable.
+\row
+    \li hidden
+    \li Boolean
+    \li False
+    \li Sets visibility in the \e{inspector palette}.
+\row
+    \li clamp
+    \li Text
+    \li Clamp
+    \li For \c{Texture} type only, sets texture to \e{clamp} or \e{repeat}.
+\row
+    \li filter
+    \li Text
+    \li
+    \li For \c{Texture} type only, sets texture filter to \e{nearest} or \e{linear}.
+\row
+    \li \l{list}
+    \li Text
+    \li -
+    \li Creates UI dropdown list.
+\endtable
+
+The only required attribute in the \c{<property>} element is \c{name}.
+
+If a numeric \c{property} has both a \c{max} and a \c{min} attribute specified it will appear as
+a slide bar in Studio. Otherwise it will appear as a text box.
+
+\target PropertyType
+\section3 \c{PropertyType}
+
+The \c{PropertyType} sets the property type for the element. The following property
+types are valid:
+
+\table
+\header
+    \li PropertyType
+    \li Value
+    \li Description
+    \li Example
+\row
+    \li Boolean
+    \li True or false.
+    \li Boolean value, will show as a check box in Studio.
+    \li \c{<Property type="Boolean" default="True"...}
+\row
+    \li Color
+    \li RGB normalized decimal value.
+    \li RGB color, will show as a color picker tool in Studio.
+    \li \c{<Property type="Color" default="0.5 0.5 0.5"...}
+\row
+    \li Float
+    \li Float
+    \li Numeric value, will show as a text field in Studio.
+    \li \c{<Property type="Float" default="0.5"...}
+\row
+    \li Float2
+    \li Two float values.
+    \li Two numeric values, will show as two text fields in Studio.
+    \li \c{<Property type="Float2" default="0.5 0.75"...}
+\row
+    \li Font
+    \li Font
+    \li Will show as font selector in Studio.
+    \li \c{<Property type="Font" default="Arial"...}
+\row
+    \li FontSize
+    \li Long
+    \li Size of font, will show as drop down in Studio.
+    \li \c{<Property type="FontSize" default="36"...}
+\row
+    \li Image2D
+    \li Image path
+    \li Image file, will show as file selector in Studio.
+    \li \c{<Property type="Image2D" default=".\maps\bump-map.png"...}
+\row
+    \li Texture
+    \li Image path
+    \li Image file to use as texture, will show as file selector in Studio.
+    \li \c{<Property type="Texture" default=".\maps\bump-map.png"...}
+\endtable
+
+\section3 \c{<showifequal>} and \c{<hideifequal>}
+
+It is possible to toggle the UI visibility of properties based on the value of other
+properties using the \c{<showifequal>} and \c{<hideifequal>} elements.
+
+Two attributes are required for these elements:
+
+\table
+\header
+    \li Attribute
+    \li Description
+\row
+    \li property
+    \li The \c{name} of the property which value should effect the visibility.
+\row
+    \li value
+    \li The \c{value} of the property at which the visibility should change.
+\endtable
+
+In the example code below the color picker tool for \c{backgroundColor} property will be visible
+only when the \c{opacity} property value is equal to 0.
+
+\badcode
+<property name="opacity" formalName="Opacity" type="Float" min="0" max="1" />
+<property name="backgroundColor" formalName="Background color" type="color">
+    <showifequal property="opacity" value="0" />
+</property>
+\endcode
+
+It is possible to use multiple \c{<showifequal>} and \c{<hideifequal>} elements within the same
+\c{<property>} element. In these cases the visibility will toggle once either of the conditions
+are met. In the example code below the color picker tool for \c{backgroundColor} property will
+be visible either when \c{opacity} property value is equal to 0 or when \c{showAll} property
+value is equal to \c{True}.
+
+\badcode
+<property name="showAll" formalName="Show all" type="Boolean" />
+<property name="opacity" formalName="Opacity" type="Float" min="0" max="1" />
+<property name="backgroundColor" formalName="Background color" type="color">
+    <showifequal property="opacity" value="0" />
+    <showifequal property="showAll" value="True" />
+</property>
+\endcode
+
+\target list
+\section3 The \c{list} attribute
+It is possible to create a property that is displayed as a drop down menu in Studio. In order to
+do that you will need to specify the \c{name} and \c{list} attributes for the \c{<property>}
+element. The value for the \c{list} attribute needs to be a comma (,) or colon(:) separated text string.
+
+In Studio this will display as a drop down menu with the four options \e{Right}, \e{Left}, \e{Up}
+and \e{Down}. You can specify the default value with the \c{default} attribute, if not specified
+it will be empty.
+
+\badcode
+<property name="alignment" list="Right:Left:Up:Down" Default="Up"/>
+\endcode
+
+Note that you will not need to specify \c{type} for the property.
+
+\section2 \c{<Shaders>}
+The \c{<Shaders>} element must contain at least one \c{<Shader>} element.
+
+\section2 \c{<Shader>}
+The \c{<Shader>} element must contain either one \c{<FragmentShader>} element or one
+\c{<VertexShader>}.
+The \c{<Shader>} element has one attribute, \c{name}. It is optional and should contain an
+identifier-like name.
+
+\badcode
+<Shader name="tonemap">
+\endcode
+
+*/

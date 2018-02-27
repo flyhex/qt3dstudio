@@ -115,4 +115,9 @@ QString Q3DSQmlBehavior::getParent(const QString &handle)
     return m_script->getParent(handle);
 }
 
+void Q3DSQmlBehavior::setDataInputValue(const QString &name, const QVariant &value)
+{
+    return m_script->setDataInputValue(name, value);
+}
+
 }

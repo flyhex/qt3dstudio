@@ -137,6 +137,8 @@ HEADERS += \
     Palettes/Inspector/ObjectBrowserView.h \
     _Win/Application/SubPresentationDlg.h \
     _Win/Application/SubPresentationListDlg.h \
+    Application/DataInputDlg.h \
+    Application/DataInputListDlg.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
@@ -155,10 +157,12 @@ HEADERS += \
     Palettes/Timeline/TimelineUIFactory.h \
     Palettes/Timeline/TimelineView.h \
     Palettes/Timeline/TimelineObjectModel.h \
-    Palettes/Timeline/TimeMeasureItem.h
+    Palettes/Timeline/TimeMeasureItem.h \
+    Application/DataInputSelectDlg.h
 
 FORMS += \
-    _Win/UI/timeeditdlg.ui \
+    Application/TimeEditDlg.ui \
+    Application/DurationEditDlg.ui \
     _Win/UI/StudioAppPrefsPage.ui \
     _Win/UI/StudioPreferencesPropSheet.ui \
     _Win/UI/StudioProjectSettingsPage.ui \
@@ -166,7 +170,15 @@ FORMS += \
     _Win/UI/ResetKeyframeValuesDlg.ui \
     _Win/UI/GLVersionDlg.ui \
     Application/StudioTutorialWidget.ui \
-    _Win/UI/TimeLineToolbar.ui
+    _Win/UI/TimeLineToolbar.ui \
+    MainFrm.ui \
+    _Win/Application/AboutDlg.ui \
+    _Win/UI/StartupDlg.ui \
+    _Win/Application/SubPresentationDlg.ui \
+    _Win/Application/SubPresentationListDlg.ui \
+    Application/DataInputDlg.ui \
+    Application/DataInputListDlg.ui \
+    _Win/Palettes/Progress/ProgressDlg.ui
 
 SOURCES += \
     MainFrm.cpp \
@@ -194,10 +206,10 @@ SOURCES += \
     _Win/UI/SceneView.cpp \
     _Win/UI/StartupDlg.cpp \
     _Win/UI/StudioAppPrefsPage.cpp \
-    #_Win/UI/StudioPaletteBar.cpp \
     _Win/UI/StudioPreferencesPropSheet.cpp \
     _Win/UI/StudioProjectSettingsPage.cpp \
-    _Win/UI/TimeEditDlg.cpp \
+    Application/TimeEditDlg.cpp \
+    Application/DurationEditDlg.cpp \
     _Win/UI/TimeLineToolbar.cpp \
     _Win/Utils/MouseCursor.cpp \
     _Win/Workspace/Dialogs.cpp \
@@ -359,7 +371,6 @@ SOURCES += \
     Render/StudioTranslationWidget.cpp \
     Render/StudioWidget.cpp \
     Render/WGLRenderContext.cpp \
-    #UI/PaletteState.cpp \
     Utils/CmdLineParser.cpp \
     Utils/ImportUtils.cpp \
     Utils/ResourceCache.cpp \
@@ -379,10 +390,14 @@ SOURCES += \
     Palettes/Timeline/TimelineView.cpp \
     Palettes/Timeline/TimelineObjectModel.cpp \
     Palettes/Timeline/TimeMeasureItem.cpp \
-    Palettes/Timeline/TimePropertyItem.cpp
+    Palettes/Timeline/TimePropertyItem.cpp \
+    Application/DataInputDlg.cpp \
+    Application/DataInputListDlg.cpp \
+    Application/DataInputSelectDlg.cpp
 
 HEADERS += \
-    _Win/UI/TimeEditDlg.h \
+    Application/TimeEditDlg.h \
+    Application/DurationEditDlg.h \
     _Win/UI/TimeLineToolbar.h \
     _Win/Application/StudioApp.h \
     Controls/TextEditContextMenu.h \
@@ -429,14 +444,6 @@ HEADERS += \
     Palettes/Project/ProjectContextMenu.h \
     ../Common/Code/Graph/GraphPosition.h
 
-FORMS += \
-    MainFrm.ui \
-    _Win/Application/AboutDlg.ui \
-    _Win/UI/StartupDlg.ui \
-    _Win/Application/SubPresentationDlg.ui \
-    _Win/Application/SubPresentationListDlg.ui \
-    _Win/Palettes/Progress/ProgressDlg.ui
-
 RESOURCES += \
     MainFrm.qrc \
     qml.qrc \
@@ -460,65 +467,17 @@ macos:!isEmpty(QMAKE_LIBS_FBX) {
 }
 
 # Copy necessary resources
-
 ABS_PRJ_ROOT = $$absolute_path($$PWD/../../..)
-macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)/$${TARGET}.app/Contents
+macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)/$${TARGET}.app/Contents/Resources
 !macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)
-macos:RES = "Resources"
-!macos:RES = "res"
 
-defineReplace(doReplaceResCopy_copy1) {
-    filePath = $$absolute_path($$1)
-    macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR/$$RES)
-    !macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
-    PRE_TARGETDEPS += $$filePath
-    export(PRE_TARGETDEPS)
-    return($$system_path($$filePath))
-}
-defineReplace(doReplaceResCopy_copy2) {
-    filePath = $$absolute_path($$1)
-    macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR/$$RES)
-    !macos:filePath = $$replace(filePath, $$ABS_PRJ_ROOT/Studio, $$ABS_DEST_DIR)
-    PRE_TARGETDEPS += $$filePath
-    export(PRE_TARGETDEPS)
-    return($$system_path($$filePath))
-}
+copy_content.files = $$PWD/../../../Studio/*
+copy_content.path = $$ABS_DEST_DIR
+COPIES += copy_content
 
-defineReplace(addFilesToResources) {
-    # Remove directories from results
-    input_files = $$files($$2, true)
-    for(input_file, input_files) {
-        last_part = $$split(input_file, /)
-        last_part = $$last(last_part)
-        last_split = $$split(last_part, .)
-        split_size = $$size(last_split)
-        equals(split_size, 2): $${1}.input_files += $$input_file
-    }
-    $${1}.input = $${1}.input_files
-    $${1}.commands = $(COPY_FILE) "${QMAKE_FILE_IN}" "${QMAKE_FILE_OUT}"
-    $${1}.CONFIG = no_link
-    $${1}.name = $$1
-    $${1}.output_function = doReplaceResCopy_$${1}
-
-    export($${1}.input_files)
-    export($${1}.input)
-    export($${1}.output_function)
-    export($${1}.commands)
-    export($${1}.CONFIG)
-    export($${1}.name)
-
-    $${1}_install.files = $$2
-    $${1}_install.path = $$[QT_INSTALL_BINS]/$$3
-    INSTALLS += $${1}_install
-    export($${1}_install.files)
-    export($${1}_install.path)
-    export(INSTALLS)
-
-    return($$1)
-}
-
-QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy1", $$PWD/../../../Studio/Content/*, Content)
-QMAKE_EXTRA_COMPILERS += $$addFilesToResources("copy2", "$$PWD/../../../Studio/Build Configurations/*", "Build Configurations")
+install_content.files = $$PWD/../../../Studio/*
+install_content.path = $$[QT_INSTALL_BINS]
+INSTALLS += install_content
 
 CONFIG += exceptions
 
@@ -539,3 +498,10 @@ isEmpty(GIT_SHA):exists($$ABS_PRJ_ROOT/.tag) {
     !equals(FIRST_CHAR, "$"): GIT_SHA = $$first(STUDIO_TAG)
 }
 !isEmpty(GIT_SHA): DEFINES += QT3DSTUDIO_REVISION=$$GIT_SHA
+
+# Get a unique version identifying integer
+STUDIO_MAJOR_VERSION = $$section(MODULE_VERSION, '.', 0, 0)
+STUDIO_MINOR_VERSION = $$section(MODULE_VERSION, '.', 1, 1)
+STUDIO_PATCH_VERSION = $$section(MODULE_VERSION, '.', 2, 2)
+DEFINES += \
+    STUDIO_VERSION_NUM=$${STUDIO_MAJOR_VERSION}0$${STUDIO_MINOR_VERSION}0$${STUDIO_PATCH_VERSION}
