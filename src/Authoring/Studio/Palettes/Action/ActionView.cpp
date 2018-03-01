@@ -388,17 +388,19 @@ void ActionView::OnTriggerSelectionChanged()
 
 void ActionView::showContextMenu(int x, int y)
 {
-    if (!m_itemHandle.Valid())
-        return;
+    bool hasCurrAction = m_currentActionIndex != -1;
+    CActionContextMenu contextMenu(this, hasCurrAction);
 
-    CActionContextMenu contextMenu(this);
-
-    connect(&contextMenu, &CActionContextMenu::copyAction, this, &ActionView::copyAction);
+    // allow paste action even if item is not valid (list of actions is empty)
+    if (m_itemHandle.Valid() && hasCurrAction)
+    {
+        connect(&contextMenu, &CActionContextMenu::copyAction, this, &ActionView::copyAction);
+        connect(&contextMenu, &CActionContextMenu::cutAction, this, &ActionView::cutAction);
+        connect(&contextMenu, &CActionContextMenu::deleteAction, this, [this] {
+            deleteAction(m_currentActionIndex);
+        });
+    }
     connect(&contextMenu, &CActionContextMenu::pasteAction, this, &ActionView::pasteAction);
-    connect(&contextMenu, &CActionContextMenu::cutAction, this, &ActionView::cutAction);
-    connect(&contextMenu, &CActionContextMenu::deleteAction, this, [this] {
-        deleteAction(m_currentActionIndex);
-    });
 
     contextMenu.exec(mapToGlobal({x, y}));
 }

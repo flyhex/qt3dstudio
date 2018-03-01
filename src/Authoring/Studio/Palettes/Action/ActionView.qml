@@ -115,9 +115,23 @@ Rectangle {
             ListView {
                 id: actionsList
                 width: parent.width
-                height: count * _controlBaseHeight
+                height: count == 0 ? _controlBaseHeight : count * _controlBaseHeight
                 clip: true
 
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: parent.count == 0
+
+                    acceptedButtons: Qt.RightButton
+
+                     onClicked: {
+                        if (mouse.button == Qt.RightButton) {
+                            var updateMousePosition = mapToItem(actionsList, mouse.x, mouse.y)
+                            _actionView.showContextMenu(
+                                        updateMousePosition.x, updateMousePosition.y);
+                        }
+                    }
+                }
                 boundsBehavior: Flickable.StopAtBounds
                 model: _actionView.actionsModel
 
