@@ -31,7 +31,7 @@
 
 #include "Qt3DSDMSignals.h"
 #include "SelectedValueImpl.h"
-#include "DataInputSelectDlg.h"
+#include "DataInputSelectView.h"
 #include "DispatchListeners.h"
 #include "Dispatch.h"
 #include <QtWidgets/qwidget.h>
@@ -55,7 +55,7 @@ public:
     void onTimeChanged(long time);
     void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
 
-    void showDataInputChooser();
+    void showDataInputChooser(const QPoint &point);
     void onDataInputChange(int handle, int instance, const QString &dataInputName);
 
     QSize sizeHint() const;
@@ -70,6 +70,7 @@ private Q_SLOTS:
     void onAddLayerClicked();
     void onPlayButtonClicked();
     void onAddDataInputClicked();
+    void showBrowser(QQuickWidget *browser, const QPoint &point);
 
 protected:
     QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar) *m_ui;
@@ -79,7 +80,7 @@ protected:
     QString m_currController;
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
-    DataInputSelectDlg *m_DataInputSelector;
+    DataInputSelectView *m_dataInputSelector;
     void UpdateDataInputStatus(bool isViaDispatch);
     void UpdateTimelineTitleColor(bool controlled);
 };

@@ -28,28 +28,42 @@
 #ifndef DATAINPUTSELECTDLG_H
 #define DATAINPUTSELECTDLG_H
 
-#include <QtWidgets/qlistwidget.h>
+#include <QtQuickWidgets/qquickwidget.h>
+#include <QtCore/qstringlistmodel.h>
+#include "DataInputSelectModel.h"
 
-class DataInputSelectDlg : public QListWidget
+class DataInputSelectModel;
+
+class DataInputSelectView : public QQuickWidget
 {
     Q_OBJECT
+
 public:
-    explicit DataInputSelectDlg(QWidget *parent = nullptr);
-    void showDialog(const QPoint &point);
+    explicit DataInputSelectView(QWidget *parent = nullptr);
     void setData(const QStringList &dataInputList,
                  const QString &currentController,
                  int handle = 0, int instance = 0);
+    QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
+    QString getNoneString() { return tr("[None]"); }
 
+    Q_INVOKABLE void setSelection(int index);
+    Q_INVOKABLE int selection() const { return m_selection; }
 Q_SIGNALS:
     void dataInputChanged(int handle, int instance, const QString &selected);
 
+
 protected:
-    void onSelectionChanged();
-    void onItemClicked(QListWidgetItem *item);
+    void focusOutEvent(QFocusEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 private:
+    void initialize();
+    void updateData(const QStringList &dataInputList);
     int m_handle = 0;
     int m_instance = 0;
+    DataInputSelectModel *m_model = nullptr;
+    int m_selection = -1;
+    QString m_currController;
 };
 
 #endif // DATAINPUTSELECTDLG_H

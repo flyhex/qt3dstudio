@@ -51,7 +51,6 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
-#include "DataInputSelectDlg.h"
 #include "MainFrm.h"
 
 #include <QtCore/qtimer.h>
@@ -479,30 +478,32 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     return m_objectReferenceView;
 }
 
-void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
+QObject *InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
 {
     if (!m_dataInputChooserView) {
-        m_dataInputChooserView = new DataInputSelectDlg(g_StudioApp.m_pMainWnd);
-        connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
+        m_dataInputChooserView = new DataInputSelectView(this);
+        connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
                 [this](int handle, int instance, const QString &controllerName) {
-            bool controlled = controllerName == tr("[No control]") ? false : true;
+            bool controlled =
+                    controllerName == m_dataInputChooserView->getNoneString() ? false : true;
             m_inspectorControlModel
                 ->setPropertyControllerInstance(
                     instance, handle,
                     Q3DStudio::CString::fromQString(controllerName), controlled);
             m_inspectorControlModel->setPropertyControlled(instance, handle);
-            m_inspectorControlModel->setCurrentController(controllerName);
         });
     }
-
     QStringList dataInputList;
-    dataInputList.append(tr("[No control]"));
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
         dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
 
-    m_dataInputChooserView->setData(dataInputList, m_inspectorControlModel->getCurrentController(),
-                                    handle, instance);
-    m_dataInputChooserView->showDialog(point);
+    m_dataInputChooserView->
+            setData(dataInputList,
+                    m_inspectorControlModel->currentControllerValue(instance, handle),
+                    handle, instance);
+    showBrowser(m_dataInputChooserView, point);
+
+    return m_dataInputChooserView;
 }
 
 void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)

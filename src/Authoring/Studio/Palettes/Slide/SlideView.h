@@ -33,7 +33,7 @@
 
 #include "DispatchListeners.h"
 #include "SlideModel.h"
-#include "DataInputSelectDlg.h"
+#include "DataInputSelectView.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"
@@ -115,11 +115,12 @@ private:
     long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
+    void showBrowser(QQuickWidget *browser, const QPoint &point);
 
     SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
     SlideModel *m_SlidesModel = nullptr;
-    DataInputSelectDlg *m_dataInputSelector = nullptr;
+    DataInputSelectView *m_dataInputSelector = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel

@@ -126,18 +126,8 @@ public:
 
     QVariant getPropertyValue(long instance, int handle);
 
-    QString getCurrentController()
-    {
-        return m_currController;
-    };
-
-    void setCurrentController(const QString &currCntroller)
-    {
-        m_currController = currCntroller;
-    };
-
     qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
-
+    QString currentControllerValue(long instance, int handle) const;
     void setPropertyControllerInstance(long instance,int handle,
                                        Q3DStudio::CString controllerInstance,
                                        bool controlled);
@@ -173,11 +163,6 @@ private:
     };
 
     std::vector<MaterialEntry> m_materials;
-
-    // TODO: move this elsewhere where it is specific
-    // for a particular element - property, not member of
-    // the entire model
-    QString m_currController;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 

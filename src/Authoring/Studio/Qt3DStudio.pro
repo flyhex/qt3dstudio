@@ -144,7 +144,8 @@ HEADERS += \
     Palettes/Timeline/IBreadCrumbProvider.h \
     Controls/BreadCrumbControl.h \
     Controls/TreeItem.h \
-    Application/DataInputSelectDlg.h
+    Application/DataInputSelectModel.h \
+    Application/DataInputSelectView.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -368,7 +369,8 @@ SOURCES += \
     _Win/Application/SubPresentationListDlg.cpp \
     Application/DataInputDlg.cpp \
     Application/DataInputListDlg.cpp \
-    Application/DataInputSelectDlg.cpp
+    Application/DataInputSelectModel.cpp \
+    Application/DataInputSelectView.cpp
 
 HEADERS += \
     Application/TimeEditDlg.h \

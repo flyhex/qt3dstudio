@@ -176,6 +176,10 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         static QString theString = "Objects-Sound-Normal.png";
         return theString;
     }
+    case OBJTYPE_DATAINPUT: {
+        static QString theString = "Objects-DataInput-Normal.png";
+        return theString;
+    }
     default: {
         static QString theString = "Objects-Model-Normal.png";
         return theString;
@@ -259,6 +263,10 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
     }
     case OBJTYPE_SOUND: {
         static QString theString = "Objects-Sound-Disabled.png";
+        return theString;
+    }
+    case OBJTYPE_DATAINPUT: {
+        static QString theString = "Objects-DataInput-Disabled.png";
         return theString;
     }
     default: {

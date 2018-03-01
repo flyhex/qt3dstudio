@@ -37,7 +37,7 @@
 #include "StudioApp.h"
 #include "StudioUtils.h"
 #include "SlideContextMenu.h"
-#include "DataInputSelectDlg.h"
+#include "DataInputSelectView.h"
 #include "DataInputDlg.h"
 #include "IDocumentEditor.h"
 
@@ -49,6 +49,7 @@
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
   , m_MasterSlideModel(new SlideModel(1, this))
@@ -117,18 +118,42 @@ void SlideView::setShowMasterSlide(bool show)
 
 void SlideView::showControllerDialog(const QPoint &point)
 {
+    QString currCtr = m_currentController.size() ?
+        m_currentController : m_dataInputSelector->getNoneString();
     QStringList dataInputList;
-    dataInputList.append(tr("[No control]"));
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
         if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeString)
             dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
     }
-    QString currCtr = m_currentController.size() ?
-        m_currentController : tr("[No control]");
     m_dataInputSelector->setData(dataInputList, currCtr);
-    m_dataInputSelector->showDialog(point);
+    showBrowser(m_dataInputSelector, point);
 
     return;
+}
+
+void SlideView::showBrowser(QQuickWidget *browser, const QPoint &point)
+{
+    QSize popupSize = CStudioPreferences::browserPopupSize();
+    browser->resize(popupSize);
+
+    // Make sure the popup doesn't go outside the screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    browser->move(newPos);
+
+    // Show asynchronously to avoid flashing blank window on first show
+    QTimer::singleShot(0, this, [browser] {
+        browser->show();
+        browser->activateWindow();
+        browser->setFocus();
+    });
 }
 
 QSize SlideView::sizeHint() const
@@ -255,17 +280,15 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
     Q_UNUSED(handle)
     Q_UNUSED(instance)
 
-    if (dataInputName == m_currentController ||
-        (dataInputName == tr("[No Control]") && !m_currentController.size())) {
+    if (dataInputName == m_currentController)
         return;
-    }
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetActiveRootInstance();
     QString fullSlideControlStr;
 
-    if (dataInputName != tr("[No control]")) {
+    if (dataInputName != m_dataInputSelector->getNoneString()) {
         fullSlideControlStr = dataInputName + " @slide";
         m_controlled = true;
         m_currentController = dataInputName;
@@ -372,11 +395,9 @@ void SlideView::initialize()
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
 
-    m_dataInputSelector = new DataInputSelectDlg(parentWidget());
-    connect(m_dataInputSelector, &DataInputSelectDlg::dataInputChanged,
+    m_dataInputSelector = new DataInputSelectView(this);
+    connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &SlideView::onDataInputChange);
-    m_dataInputSelector->hide();
-    m_dataInputSelector->setWindowTitle(tr("Select slide controller"));
 }
 
 void SlideView::clearSlideList()

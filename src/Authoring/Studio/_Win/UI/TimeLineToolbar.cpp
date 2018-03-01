@@ -31,7 +31,7 @@
 #include "StudioApp.h"
 #include "MainFrm.h"
 #include "TimeEditDlg.h"
-#include "DataInputSelectDlg.h"
+#include "DataInputSelectView.h"
 #include "DataInputDlg.h"
 #include "Doc.h"
 #include "Core.h"
@@ -44,6 +44,7 @@
 #include "StudioPreferences.h"
 
 #include <QtCore/qdatetime.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSize,
                                  QWidget *pParent)
@@ -51,7 +52,7 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
     , m_ui(new QT_PREPEND_NAMESPACE(Ui::TimeLineToolbar))
     , m_preferredSize(preferredSize)
     , m_mainFrame(mainFrame)
-    , m_DataInputSelector(nullptr)
+    , m_dataInputSelector(nullptr)
 {
     m_ui->setupUi(this);
 
@@ -86,24 +87,21 @@ TimeLineToolbar::TimeLineToolbar(CMainFrame *mainFrame, const QSize &preferredSi
 
     connect(m_ui->addLayerButton, &QPushButton::clicked,
             this, &TimeLineToolbar::onAddLayerClicked);
-    // Set as parent to mainframe to allow positioning in the main window
-    m_DataInputSelector = new DataInputSelectDlg(mainFrame);
-    m_DataInputSelector->hide();
-    m_DataInputSelector->setWindowTitle(tr("Select timeline controller"));
 
+    m_dataInputSelector = new DataInputSelectView(this);
 
     connect(m_ui->addDataInputButton, &QPushButton::clicked,
             this, &TimeLineToolbar::onAddDataInputClicked);
 
     theDispatch->AddDataModelListener(this);
-    connect(m_DataInputSelector, &DataInputSelectDlg::dataInputChanged,
+    connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &TimeLineToolbar::onDataInputChange);
 }
 
 TimeLineToolbar::~TimeLineToolbar()
 {
     delete m_ui;
-    delete m_DataInputSelector;
+    delete m_dataInputSelector;
     m_Connections.clear();
 }
 
@@ -146,7 +144,7 @@ void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
 
 void TimeLineToolbar::onAddDataInputClicked()
 {
-    showDataInputChooser();
+    showDataInputChooser(mapToGlobal(m_ui->addDataInputButton->pos()));
 }
 
 // Update datainput button state according to this timecontext
@@ -201,20 +199,44 @@ void TimeLineToolbar::UpdateDataInputStatus(bool isViaDispatch)
     }
 }
 
-void TimeLineToolbar::showDataInputChooser()
+void TimeLineToolbar::showDataInputChooser(const QPoint &point)
 {
+    QString currCtr = m_currController.size() ?
+        m_currController : m_dataInputSelector->getNoneString();
     QStringList dataInputList;
-    dataInputList.append(tr("[No control]"));
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
         if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeRangedNumber)
             dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
     }
-    QString currCtr = m_currController.size() ?
-        m_currController : tr("[No control]");
-    m_DataInputSelector->setData(dataInputList, currCtr);
-    m_DataInputSelector->showDialog(QCursor::pos());
+    m_dataInputSelector->setData(dataInputList, currCtr);
+    showBrowser(m_dataInputSelector, point);
 
     return;
+}
+
+void TimeLineToolbar::showBrowser(QQuickWidget *browser, const QPoint &point)
+{
+    QSize popupSize = CStudioPreferences::browserPopupSize();
+    browser->resize(popupSize);
+
+    // Make sure the popup doesn't go outside the screen
+    QSize screenSize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
+    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+    browser->move(newPos);
+
+    // Show asynchronously to avoid flashing blank window on first show
+    QTimer::singleShot(0, this, [browser] {
+        browser->show();
+        browser->activateWindow();
+        browser->setFocus();
+    });
 }
 
 void TimeLineToolbar::onDataInputChange(int handle, int instance, const QString &dataInputName)
@@ -222,16 +244,14 @@ void TimeLineToolbar::onDataInputChange(int handle, int instance, const QString 
     Q_UNUSED(handle)
     Q_UNUSED(instance)
 
-    if (dataInputName == m_currController ||
-        (dataInputName == tr("[No Control]") && !m_currController.size())) {
+    if (dataInputName == m_currController)
         return;
-    }
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     QString fullTimeControlStr;
 
-    if (dataInputName != tr("[No control]")) {
+    if (dataInputName != m_dataInputSelector->getNoneString()) {
         m_ui->addDataInputButton->setToolTip(tr("Timeline Controller:\n%1").arg(dataInputName));
         fullTimeControlStr = dataInputName + " @timeline";
         m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
