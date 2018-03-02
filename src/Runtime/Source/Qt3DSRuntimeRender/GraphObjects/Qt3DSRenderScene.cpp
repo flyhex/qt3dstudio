@@ -31,7 +31,6 @@
 #include "Qt3DSRenderScene.h"
 #include "Qt3DSRenderLayer.h"
 #include "Qt3DSRenderContextCore.h"
-#include "Qt3DSRenderDataInput.h"
 #include "render/Qt3DSRenderContext.h"
 
 using namespace qt3ds::render;
@@ -40,7 +39,6 @@ SScene::SScene()
     : SGraphObject(GraphObjectTypes::Scene)
     , m_Presentation(NULL)
     , m_FirstChild(NULL)
-    , m_FirstDataInput(NULL)
     , m_ClearColor(0, 0, 0)
     , m_UseClearColor(true)
     , m_Dirty(true)
@@ -56,15 +54,6 @@ void SScene::AddChild(SLayer &inLayer)
     inLayer.m_Scene = this;
 }
 
-void SScene::AddDataInput(SDataInput &inDataInput)
-{
-    if (m_FirstDataInput == NULL)
-        m_FirstDataInput = &inDataInput;
-    else
-        GetLastDataInput()->m_NextSibling = &inDataInput;
-    inDataInput.m_Scene = this;
-}
-
 SLayer *SScene::GetLastChild()
 {
     // empty loop intentional
@@ -76,35 +65,27 @@ SLayer *SScene::GetLastChild()
     return child;
 }
 
-SDataInput *SScene::GetLastDataInput()
-{
-    // empty loop intentional
-    SDataInput *child;
-    for (child = m_FirstDataInput; child && child->m_NextSibling;
-         child = (SDataInput *)child->m_NextSibling) {
-    }
-
-    return child;
-}
-
-bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext)
+bool SScene::PrepareForRender(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
+                              const SRenderInstanceId id)
 {
     // We need to iterate through the layers in reverse order and ask them to render.
     bool wasDirty = m_Dirty;
     m_Dirty = false;
-    if (m_FirstChild)
-        wasDirty =
-            inContext.GetRenderer().PrepareLayerForRender(*m_FirstChild, inViewportDimensions, true)
-            || wasDirty;
+    if (m_FirstChild) {
+        wasDirty |=
+            inContext.GetRenderer().PrepareLayerForRender(*m_FirstChild, inViewportDimensions,
+                                                          true, id);
+    }
     return wasDirty;
 }
 
 void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
-                    RenderClearCommand inClearColorBuffer)
+                    RenderClearCommand inClearColorBuffer, const SRenderInstanceId id)
 {
     if ((inClearColorBuffer == SScene::ClearIsOptional && m_UseClearColor)
         || inClearColorBuffer == SScene::AlwaysClear) {
-        QT3DSF32 clearColorAlpha = inContext.IsInSubPresentation() ? 0.0f : 1.0f;
+        QT3DSF32 clearColorAlpha
+                = inContext.IsInSubPresentation() && !m_UseClearColor ? 0.0f : 1.0f;
         QT3DSVec4 clearColor(0.0f, 0.0f, 0.0f, clearColorAlpha);
         if (m_UseClearColor) {
             clearColor.x = m_ClearColor.x;
@@ -117,7 +98,24 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
             &NVRenderContext::SetClearColor, clearColor);
         inContext.GetRenderContext().Clear(qt3ds::render::NVRenderClearValues::Color);
     }
-    if (m_FirstChild)
+    if (m_FirstChild) {
         inContext.GetRenderer().RenderLayer(*m_FirstChild, inViewportDimensions, m_UseClearColor,
-                                            m_ClearColor, true);
+                                            m_ClearColor, true, id);
+    }
+}
+void SScene::RenderWithClear(const QT3DSVec2 &inViewportDimensions,
+                             IQt3DSRenderContext &inContext,
+                             RenderClearCommand inClearColorBuffer,
+                             QT3DSVec3 inClearColor,
+                             const SRenderInstanceId id)
+{
+    // If this scene is not using clear color, we set the color
+    // to background color from parent layer. This allows
+    // fully transparent subpresentations (both scene and layer(s) transparent)
+    // to inherit color from the layer that contains them.
+    if (!m_UseClearColor) {
+        m_ClearColor = inClearColor;
+        m_UseClearColor = true;
+    }
+    Render(inViewportDimensions, inContext, inClearColorBuffer, id);
 }

@@ -2,7 +2,7 @@
 <Effect>
 	<MetaData>
 		<!--Smooth, unchanging areas of the image are turned black, while areas of the image with sharp color changes are brightened to highlight the 'edges' in the image.-->
-		<Property name="amount" formalName="Amount" min="0" max="1" default="1" description="0=no effect, 1=maximum effect"/>
+                <Property name="amount" formalName="Amount" min="0" max="1" default="1" description="0 = no effect\n1 = maximum effect"/>
 	</MetaData>
 	<Shaders>
 		<Shared>

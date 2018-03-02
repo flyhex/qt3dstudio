@@ -121,7 +121,6 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_ReferencedMaterial L"ReferencedMaterial"
 #define QT3DS_WCHAR_T_Alias L"Alias"
 #define QT3DS_WCHAR_T_Lightmaps L"Lightmaps"
-#define QT3DS_WCHAR_T_DataInput L"DataInput"
 
 #define QT3DS_WCHAR_T_type L"type"
 #define QT3DS_WCHAR_T_id L"id"
@@ -303,11 +302,6 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_lightmapindirect L"lightmapindirect"
 #define QT3DS_WCHAR_T_lightmapradiosity L"lightmapradiosity"
 #define QT3DS_WCHAR_T_lightmapshadow L"lightmapshadow"
-#define QT3DS_WCHAR_T_value L"value"
-#define QT3DS_WCHAR_T_valuestr L"valuestr"
-#define QT3DS_WCHAR_T_timefrom L"timefrom"
-#define QT3DS_WCHAR_T_timeto L"timeto"
-#define QT3DS_WCHAR_T_controlledelemprop L"controlledelemprop"
 #define QT3DS_WCHAR_T_controlledproperty L"controlledproperty"
 
 const wchar_t *ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
@@ -511,7 +505,6 @@ SComposerObjectDefinitions::SComposerObjectDefinitions(
     , m_Path(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_PathAnchorPoint(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
     , m_SubPath(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
-    , m_DataInput(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
 {
 }
 

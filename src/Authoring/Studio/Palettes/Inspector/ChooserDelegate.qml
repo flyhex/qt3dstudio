@@ -63,6 +63,8 @@ Rectangle {
 
         Image {
             source: fileIcon
+            width: 16
+            height: 16
         }
 
         StyledLabel {

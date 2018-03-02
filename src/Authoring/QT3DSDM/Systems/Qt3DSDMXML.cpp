@@ -1072,11 +1072,8 @@ struct DOMParser
             }
             if (sreader.hasError()) {
                 if (handler) {
-                    wchar_t *error = new wchar_t[sreader.errorString().length() + 1];
-                    sreader.errorString().toWCharArray(error);
-                    handler->OnXmlError((TWideXMLCharPtr)error,
-                                        sreader.lineNumber(), sreader.columnNumber());
-                    delete [] error;
+                    handler->OnXmlError(sreader.errorString(), sreader.lineNumber(),
+                                        sreader.columnNumber());
                 } else  {
                     qWarning() << "XML parse error:" << sreader.errorString()
                                << "line:" << sreader.lineNumber()

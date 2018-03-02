@@ -28,6 +28,9 @@
 
 #include "SubPresentationDlg.h"
 #include "ui_SubPresentationDlg.h"
+#include "Core.h"
+#include "Doc.h"
+#include "StudioApp.h"
 
 #include <QtWidgets/qabstractbutton.h>
 #include <QtWidgets/qfiledialog.h>
@@ -140,7 +143,11 @@ void CSubPresentationDlg::updateUI() {
     }
 
     QDir dir(m_directory, filter, QDir::Name, QDir::Files);
-    m_ui->comboBoxFileList->addItems(dir.entryList());
+    QStringList entryList = dir.entryList();
+    // Remove the current presentation from the list of offered entries
+    QString currentPres = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetName().toQString();
+    entryList.removeAll(currentPres);
+    m_ui->comboBoxFileList->addItems(entryList);
 
     if (!m_subPresentation.m_argsOrSrc.isEmpty()) {
         // Do not add the current file to the combobox if it is already there
@@ -157,13 +164,28 @@ void CSubPresentationDlg::browseFile()
     QString filter = QStringLiteral("*.uip");
     if (m_subPresentation.m_type == QStringLiteral("presentation-qml"))
         filter = QStringLiteral("*.qml");
-    const QString file = QDir::toNativeSeparators(
+    const QString file = QDir::fromNativeSeparators(
                 QFileDialog::getOpenFileName(nullptr, nullptr, m_directory, filter, nullptr,
                                              QFileDialog::DontUseNativeDialog));
+    QString directory = QDir::fromNativeSeparators(m_directory);
+
     QString shortFile = file;
-    int subdir = file.indexOf(m_directory);
-    if (subdir >= 0)
-        shortFile.remove(subdir, m_directory.size() + 1);
+    int subdir = file.indexOf(directory);
+    if (subdir == 0) {
+        shortFile.remove(subdir, directory.size() + 1);
+    } else {
+        // parse relative path
+        int levels = 0;
+        do {
+            int index = directory.lastIndexOf("/");
+            directory.remove(index, directory.size());
+            subdir = shortFile.indexOf(directory);
+            ++levels;
+        } while (subdir);
+        shortFile.remove(0, directory.size() + 1);
+        for (int i = 0; i < levels; ++i)
+            shortFile.prepend("../");
+    }
 
     QFileInfo fileInfo(file);
     if (fileInfo.exists()) {

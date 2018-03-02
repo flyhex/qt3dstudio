@@ -52,7 +52,7 @@ public:
 
 
     enum PathType {
-        Name = CRelativePathTools::EPATHTYPE_GUID,
+        Absolute = CRelativePathTools::EPATHTYPE_GUID,
         Relative = CRelativePathTools::EPATHTYPE_RELATIVE,
     };
     Q_ENUM(PathType)
@@ -61,11 +61,12 @@ public:
     void setModel(ObjectListModel *model);
     QSize sizeHint() const override;
 
-    Q_INVOKABLE QString name(int index) const;
-    Q_INVOKABLE QString path(int index) const;
+    Q_INVOKABLE QString absPath(int index) const;
+    Q_INVOKABLE QString relPath(int index) const;
     Q_INVOKABLE bool selectable(int index) const;
 
-    void selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
+    void selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle,
+                         const qt3dsdm::Qt3DSDMInstanceHandle &owner);
 
     int selection() const { return m_selection; }
     void setSelection(int index);
@@ -91,7 +92,8 @@ private:
     QColor m_baseColor = QColor::fromRgb(75, 75, 75);
     QColor m_selectColor;
     int m_selection = -1;
-    PathType m_pathType = Name;
+    PathType m_pathType = Absolute;
+    qt3dsdm::Qt3DSDMInstanceHandle m_ownerInstance = 0;
 };
 
 #endif // OBJECTBROWSERVIEW_H

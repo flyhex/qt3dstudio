@@ -32,7 +32,6 @@
 #include "Doc.h"
 #include "Qt3DSFileTools.h"
 #include "StudioFullSystem.h"
-#include "IObjectReferenceHelper.h"
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSAssert.h"
 #include "StudioCoreSystem.h"
@@ -163,11 +162,11 @@ struct SImportXmlErrorHandler : public CXmlErrorHandler
         , m_fullPathToDocument(inFullPathToDocument.toQString())
     {
     }
-    void OnXmlError(TWideXMLCharPtr errorName, int line, int) override
+    void OnXmlError(const QString &errorName, int line, int) override
     {
         if (m_handler) {
-            const QString str = QObject::tr("Failed to parse Lua data\n%1 on line %2\n")
-                    .arg(Q3DStudio::CString(errorName).toQString()).arg(line);
+            const QString str = QObject::tr("Failed to parse XML data.\nLine %1: %2\n")
+                    .arg(line).arg(errorName);
             m_handler->DisplayImportFailed(m_fullPathToDocument, str, false);
         }
     }
@@ -234,6 +233,7 @@ public:
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
         qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
+        qmlRegisterType<Q3DSQmlBehavior, 1>("QtStudio3D.Behavior", 1, 1, "Behavior");
     }
     virtual ~CDocEditor()
     {
@@ -507,8 +507,7 @@ public:
 
     bool CanPropertyBeLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
     {
-        if (inProperty == m_Bridge.GetAlias().m_ReferencedNode.m_Property ||
-            inProperty == m_Bridge.GetDataInput().m_ControlledElemProp.m_Property)
+        if (inProperty == m_Bridge.GetAlias().m_ReferencedNode.m_Property)
             return false;
         return m_SlideSystem.CanPropertyBeLinked(inInstance, inProperty);
     }
@@ -659,40 +658,6 @@ public:
         }
     }
 
-    // Resolve all instances that are controlled by datainput instance
-    void GetControlledInstancesAndProperties(TInstanceHandle dataInput,
-                                             TInstancePropertyPairList &ctrldInstsProps)
-    {
-        Q_ASSERT(m_Bridge.IsDataInputInstance(dataInput));
-        IObjectReferenceHelper *objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
-
-        Option<SValue> controlledElemProp
-            = GetInstancePropertyValue(
-                dataInput,
-                m_Bridge.GetObjectDefinitions().m_DataInput.m_ControlledElemProp);
-        CString controlledElemPropStr = get<TDataStrPtr>(*controlledElemProp)->GetData();
-
-        std::string::size_type thePos = 0;
-        bool fullResolved = false;
-        CRelativePathTools::EPathType type;
-        // Controlled instance and property names are stored in "controlledelemprop"
-        // property as a single string, each item separated by whitespace. Parse
-        // names and get corresponding handles.
-        while (thePos < controlledElemPropStr.size()) {
-            CString theCurrentElemStr = controlledElemPropStr.substr(
-                thePos, controlledElemPropStr.find(' ', thePos) - thePos);
-            thePos += theCurrentElemStr.size() + 1;
-            CString theCurrentPropStr = controlledElemPropStr.substr(
-                thePos, controlledElemPropStr.find(' ', thePos) - thePos);
-            thePos += theCurrentPropStr.size() + 1;
-            TInstanceHandle currElement = CRelativePathTools::FindAssetInstanceByObjectPath(
-                &m_Doc, m_Doc.GetActiveRootInstance(), theCurrentElemStr,
-                type, fullResolved, objReferenceHelper);
-            TPropertyHandle currProp = FindProperty(currElement, theCurrentPropStr);
-            ctrldInstsProps.push_back(TInstancePropertyPair(currElement, currProp));
-        }
-    }
-
     bool IsInSceneGraph(TInstanceHandle child) const override { return m_AssetGraph.IsExist(child); }
 
     // If the path has any sub-path children, then yes it is externalizeable.
@@ -764,20 +729,7 @@ public:
             return false;
         return m_AnimationCore.IsArtistEdited(animHandle);
     }
-    bool IsControlled(TInstanceHandle instance)
-    {
-        // TODO This is Text element specific code
-        if (!m_Bridge.IsTextInstance(instance))
-            return false;
-        Option<SValue> currentControlledProperty = GetInstancePropertyValue(
-            instance, m_Bridge.GetObjectDefinitions().m_Text.m_ControlledProperty);
-        if (!currentControlledProperty.hasValue())
-            return false;
-        CString propStr = (get<TDataStrPtr>(*currentControlledProperty))->GetData();
-        if (!propStr.IsEmpty())
-            return true;
-        return false;
-    }
+
     pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>
     DoCopySceneGraphObject(const TInstanceHandleList &inInstances)
     {
@@ -1097,7 +1049,6 @@ public:
 
     void DoDeleteInstance(Qt3DSDMInstanceHandle instance)
     {
-        IObjectReferenceHelper *objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
         // For delete, the metadata needs to participate in the undo/redo system.
         m_MetaData.SetConsumer(m_StudioSystem.GetFullSystem()->GetConsumer());
         TInstanceHandleList theDeleteDependentInstances;
@@ -1423,90 +1374,6 @@ public:
         SetName(theMaterial, materialName);
     }
 
-    // Set a property in an instance to be controlled by datainput.
-    void SetInstancePropertyControlled(TInstanceHandle instance, CString instancepath,
-                                       TPropertyHandle propName, CString controller,
-                                       bool controlled) override
-    {
-        SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
-        IObjectReferenceHelper* objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
-
-        // get the name of controlled property
-        auto metadataHandle = m_MetaData.GetMetaDataProperty(instance, propName);
-        auto metadata = m_MetaData.GetMetaDataPropertyInfo(metadataHandle);
-        const wchar_t *propname = metadata->m_Name.wide_str();
-
-        SValue controlledProperty;
-        SValue controllerName;
-
-        // Build controller - controlled property string.
-        if (controlled) {
-            CString controlledElemStr = controller;
-            controlledElemStr.append(" ");
-            controlledElemStr.append(metadata->m_Name.c_str());
-
-            controlledProperty = std::make_shared<CDataStr>(controlledElemStr);
-        } else {
-            // TODO: this is Text element-specific at the moment
-            // Get controller - property -pair for this element
-            Option<SValue> currentControlledProperty = GetInstancePropertyValue(
-                instance, theDefinitions.m_Text.m_ControlledProperty);
-
-            TDataStrPtr theNamePtr(get<TDataStrPtr>(*currentControlledProperty));
-            CString controllerNameStr = theNamePtr->GetData();
-
-            // Check if this property has a controlling datainput before trying
-            // to delete it from the list of controlled properties
-            if (controllerNameStr.size()) {
-                // Set controller - property -string empty for this element.
-                // We need to explicitly set controlledProperty with an empty string initializer,
-                // otherwise it will have type "None" instead of "String".
-                // TODO: for now only a single textstring property can be controlled. For
-                // control of several properties in a single element, we must only remove
-                // a specific controller - property pair from controlledProperty string, not all.
-                controlledProperty = std::make_shared<CDataStr>(CString());
-
-                // Set the textstring content to default when disabling datainput control
-                // TODO: restore the previous text content prior to setting it to controlled
-                controllerName = theDefinitions.m_Text.m_TextString.m_DefaultValue.getValue();
-            } else {
-                // We are trying to turn control off for property that had no existing control.
-                // Nothing to do except to make sure that we set the
-                // controlledProperty to an empty string.
-                controlledProperty = std::make_shared<CDataStr>(CString());
-            }
-        }
-
-        // Set the controlledproperty string in the controlled element
-        // TODO: For the moment this is Text element -specific only
-        m_DataCore.SetInstancePropertyValue(instance,
-                                 theDefinitions.m_Text.m_ControlledProperty,
-                                 controlledProperty);
-    }
-
-    // Remove datainput control of all properties of this instance,
-    // for example when deleting the entire instance
-    void RemoveAllControlForInstance(TInstanceHandle instance)
-    {
-        SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
-        IObjectReferenceHelper* objReferenceHelper = m_Doc.GetDataModelObjectReferenceHelper();
-
-        // TODO: text element-specific. Also, only removes a single controller-property
-        // pair as currently only textstring can be controlled. For generic
-        // implementation we need to iterate through all controller-property pairs
-        // and remove control for each of them separately (a single instance can have
-        // several different datainputs each controlling a single or multiple properties
-        // i.e. one-to-many mapping).
-        SetInstancePropertyControlled(instance,
-                                      objReferenceHelper->GetObjectReferenceString(
-                                          m_Doc.GetSceneInstance(),
-                                          CRelativePathTools::EPATHTYPE_GUID,
-                                          instance),
-                                      theDefinitions.m_Text.m_TextString,
-                                      CString(),
-                                      false);
-    }
-
     // Normal way in to the system.
     void SetInstancePropertyValue(TInstanceHandle instance, TPropertyHandle propName,
                                           const SValue &value, bool inAutoDelete = true) override
@@ -1647,11 +1514,10 @@ public:
             // Now set the property for reals
             thePropertySystem.SetInstancePropertyValue(instance, propName, value);
         } else {
-            if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property &&
-                propName != m_Bridge.GetDataInput().m_ControlledElemProp.m_Property)
+            if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property) {
                 thePropertySystem.SetInstancePropertyValue(instance, propName, value);
-            else {
-                // Alias and datainput properties are set in the scene graph, not in the slides.
+            } else {
+                // Alias properties are set in the scene graph, not in the slides.
                 // This makes the runtime expansion easier and stops problems such as
                 // someone unlinking the alias
                 // node reference and setting it to different values on different slides.
@@ -2512,15 +2378,6 @@ public:
         if (inInstances.empty())
             return Qt3DSDMInstanceHandle();
 
-        // TODO: For now, we need to break control relationship for instances that are
-        // included in the newly made component as the binding goes wrong during
-        // instance "copy to mem - delete - insert" sequence needed for component creation.
-        // This means that at the moment, datainput cannot control a property
-        // within a component instance.
-        for (size_t idx = 0; idx < inInstances.size(); idx++) {
-            if (IsControlled(inInstances[idx]))
-                RemoveAllControlForInstance(inInstances[idx]);
-        }
         qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         // Do this in reverse order.
         // first add new component.
@@ -4602,7 +4459,7 @@ public:
             if (theFind == m_SourcePathInstanceMap.end())
                 continue;
 
-            const TSlideInstanceList &theInstances(theFind->second);
+            const TSlideInstanceList theInstances(theFind->second);
             if (theRecord.m_ModificationType != FileModificationType::Created) {
                 requestRender = true;
                 m_Doc.GetBufferCache().InvalidateBuffer(theRelativePath);
@@ -4885,7 +4742,7 @@ IDocumentEditor::ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocumen
         QT3DS_ASSERT(false);
         if (inHandler)
             inHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
-                                           QObject::tr("Failed to parse Lua data"),
+                                           QObject::tr("Failed to parse plugin file"),
                                            false);
     }
     CRenderPluginParser::NavigateToMetadata(theReaderPtr);
@@ -4910,7 +4767,7 @@ IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathT
         QT3DS_ASSERT(false);
         if (inHandler)
             inHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
-                                           QObject::tr("Failed to parse Lua data"),
+                                           QObject::tr("Failed to parse material file"),
                                            false);
     }
     CCustomMaterialParser::NavigateToMetadata(theReaderPtr);

@@ -2,9 +2,9 @@
 <Effect>
 	<MetaData>
 		<Property name="Dispersion" formalName="Aberration Amount" description="Amount of Chromatic Aberration" default="0"/>	
-		<Property name="FocusDepth" formalName="Focus Depth" description="Dispersion will scale in relation to distance from this depth" default="0"/>
-		<Property name="MaskSampler" formalName="Effect Mask" description="Grayscale texture to control where and how strong on screen the aberration effect occurs" type="Texture" filter="linear" clamp="clamp" default="./maps/effects/white.png" />
-		<Property name="DepthDebug" formalName="Debug Dispersion Amount" type="Boolean" description="Allows you to see effect of controls.  Black objects will disperse less and white will disperse more" default="False"/>
+                <Property name="FocusDepth" formalName="Focus Depth" description="Dispersion will scale in relation\nto distance from this depth" default="0"/>
+                <Property name="MaskSampler" formalName="Effect Mask" description="Grayscale texture to control where and how\nstrong on screen the aberration effect occurs" type="Texture" filter="linear" clamp="clamp" default="./maps/effects/white.png" />
+                <Property name="DepthDebug" formalName="Debug Dispersion Amount" type="Boolean" description="Allows you to see effect of controls.\nBlack objects will disperse less and\nwhite will disperse more" default="False"/>
 		<Property name="DepthSampler" type="Texture" filter="nearest" clamp="clamp"/>
 		<Property name="SourceSampler" type="Texture" filter="linear" clamp="clamp"/>
 	</MetaData>

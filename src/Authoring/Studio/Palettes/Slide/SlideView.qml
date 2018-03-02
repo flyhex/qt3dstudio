@@ -331,6 +331,12 @@ Rectangle {
                     text: parent.toolTip
                 }
             }
+            StyledLabel {
+                id: dataInputName
+                text: _slideView.currController
+                leftPadding: 10
+                color: _slideView.controlled ? _dataInputColor : "transparent"
+            }
         }
     }
 }

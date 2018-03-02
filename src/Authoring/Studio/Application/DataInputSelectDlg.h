@@ -37,14 +37,19 @@ public:
     explicit DataInputSelectDlg(QWidget *parent = nullptr);
     void showDialog(const QPoint &point);
     void setData(const QStringList &dataInputList,
-                 const QString &currentController);
+                 const QString &currentController,
+                 int handle = 0, int instance = 0);
 
 Q_SIGNALS:
-    void dataInputChanged(const QString &selected);
+    void dataInputChanged(int handle, int instance, const QString &selected);
 
 protected:
     void onSelectionChanged();
     void onItemClicked(QListWidgetItem *item);
+
+private:
+    int m_handle = 0;
+    int m_instance = 0;
 };
 
 #endif // DATAINPUTSELECTDLG_H

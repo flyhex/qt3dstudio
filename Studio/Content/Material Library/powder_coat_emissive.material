@@ -5,8 +5,8 @@
         <Property formalName="Baked Shadow Map" name="uBakedShadowTexture" description="Baked shadow texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="shadow" default="./maps/materials/shadow.png" category="Material"/>
         <Property formalName="Shadow Mapping" name="uShadowMappingEnabled" description="Enable shadow mapping" type="Boolean" default="False" category="Material"/>
         <Property formalName="Index of Refraction" name="material_ior" description="Refractive index of the material" type="Float" default="5.000000" category="Material"/>
-        <Property formalName="Glossiness" name="glossy_weight" description="Reflectivity of the material at the incident lighting angles. 1.0 means totally reflective, 0.0 means no reflection" type="Float" default="0.500000" category="Material"/>
-        <Property formalName="Roughness" name="roughness" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" type="Float" default="0.100000" category="Material"/>
+        <Property formalName="Glossiness" name="glossy_weight" description="Reflectivity of the material at the\nincident lighting angles.\n0.0 = no reflection\n1.0 = totally reflective" type="Float" default="0.500000" category="Material"/>
+        <Property formalName="Roughness" name="roughness" description="Roughness of the material.\n0 = fully specular\n1 = fully diffuse" type="Float" default="0.100000" category="Material"/>
         <Property formalName="Reflectivity" name="reflectivity" description="Reflectivity of the material" type="Float" default="0.100000" category="Material"/>
         <Property formalName="Diffuse Weight" name="diffuse_weight" description="Diffuse weight of the material" type="Float" default="1.000000" category="Material"/>
         <Property formalName="Powdercoat Color" name="powdercoat_diffuse_color" description="Color of the powdercoat" type="Color" default="0.046 0.046 0.054" category="Material"/>

@@ -45,10 +45,12 @@
  *	@param	inActionControl	Owner Action Control (commonly known as the Action Palette)
  *that will handle all cut/copy/paste/delete of Actions.
  */
-CActionContextMenu::CActionContextMenu(QWidget *parent)
+CActionContextMenu::CActionContextMenu(QWidget *parent, bool hasActiveAction)
     : QMenu(parent)
 {
+
     QAction *action = new QAction(tr("Copy Action"));
+    action->setEnabled(hasActiveAction);
     connect(action, &QAction::triggered, this, &CActionContextMenu::copyAction);
     addAction(action);
 
@@ -58,10 +60,12 @@ CActionContextMenu::CActionContextMenu(QWidget *parent)
     addAction(action);
 
     action = new QAction(tr("Cut Action"));
+    action->setEnabled(hasActiveAction);
     connect(action, &QAction::triggered, this, &CActionContextMenu::cutAction);
     addAction(action);
 
     action = new QAction(tr("Delete Action"));
+    action->setEnabled(hasActiveAction);
     connect(action, &QAction::triggered, this, &CActionContextMenu::deleteAction);
     addAction(action);
 }

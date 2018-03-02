@@ -681,15 +681,12 @@ struct SRenderContext : public IQt3DSRenderContext
         } else {
             m_RenderContext->SetScissorTestEnabled(false);
         }
-        bool clearedScene = false;
         {
             QT3DSVec4 theClearColor;
             if (m_MatteColor.hasValue())
                 theClearColor = m_MatteColor;
-            else {
+            else
                 theClearColor = m_SceneColor;
-                clearedScene = true;
-            }
             m_RenderContext->SetClearColor(theClearColor);
             m_RenderContext->Clear(qt3ds::render::NVRenderClearValues::Color);
         }
@@ -708,7 +705,8 @@ struct SRenderContext : public IQt3DSRenderContext
                     m_RotationTexture = NULL;
                     m_RotationDepthBuffer = NULL;
                 }
-                if (m_SceneColor.hasValue() && !clearedScene) {
+                bool clear = m_SceneColor.getValue().w == 0.0f ? false : true;
+                if (m_SceneColor.hasValue() && clear) {
                     m_RenderContext->SetClearColor(m_SceneColor);
                     m_RenderContext->Clear(qt3ds::render::NVRenderClearValues::Color);
                 }

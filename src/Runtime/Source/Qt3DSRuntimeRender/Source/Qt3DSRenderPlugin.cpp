@@ -328,7 +328,8 @@ struct InstanceImpl : public IRenderPluginInstance
 
     // Returns true of this object needs to be rendered, false if this object is not dirty
     SOffscreenRenderFlags NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
-                                              QT3DSVec2 inPresentationScaleFactor) override
+                                      QT3DSVec2 inPresentationScaleFactor,
+                                      const SRenderInstanceId instanceId) override
     {
         if (m_Dirty) {
             m_Dirty = false;
@@ -362,8 +363,9 @@ struct InstanceImpl : public IRenderPluginInstance
     // If we do so, the scale factor tells the subpresentation renderer how much the system has
     // scaled.
     void Render(const SOffscreenRendererEnvironment &inEnvironment,
-                        NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
-                        SScene::RenderClearCommand inColorBufferNeedsClear) override
+                NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
+                SScene::RenderClearCommand inColorBufferNeedsClear,
+                const SRenderInstanceId instanceId) override
     {
         m_RenderContext = &inRenderContext;
         if (m_Class.RenderInstance) {
@@ -384,11 +386,19 @@ struct InstanceImpl : public IRenderPluginInstance
         }
     }
 
+    void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
+                         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
+                         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+                         const SRenderInstanceId id)
+    {
+        Q_ASSERT(false);
+    }
+
     // Implementors should implement one of the two interfaces below.
 
     // If this renderer supports picking that can return graph objects
     // then return an interface here.
-    IGraphObjectPickQuery *GetGraphObjectPickQuery() override { return NULL; }
+    IGraphObjectPickQuery *GetGraphObjectPickQuery(const SRenderInstanceId) override { return NULL; }
 
     // If you *don't* support the GraphObjectPickIterator interface, then you should implement this
     // interface
@@ -396,7 +406,8 @@ struct InstanceImpl : public IRenderPluginInstance
     // If you return true, then we will assume that you swallowed the pick and will continue no
     // further.
     // else we will assume you did not and will continue the picking algorithm.
-    bool Pick(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions) override
+    bool Pick(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions,
+              const SRenderInstanceId instanceId) override
     {
         if (m_Class.Pick) {
             if (m_RenderContext) {

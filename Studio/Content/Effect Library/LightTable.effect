@@ -2,21 +2,21 @@
 <Effect>
 	<MetaData>
 	<Property name="SurfDist" formalName="Distance to Surface" description="Distance from camera to the paper surface" default="100"/>
-	<Property name="BlurDist" formalName="Distance to Full Blur" description="Distance from the paper surface that corresponds to fully blurred" default="100"/>
+        <Property name="BlurDist" formalName="Distance to Full Blur" description="Distance from the paper surface that\ncorresponds to fully blurred" default="100"/>
 	<Property name="MaxBlur" formalName="Max Blur Radius" description="Blur radius defined as 'full blur'" min="1" max="100" default="50"/>
 	<Property name="OverlayDif" formalName="Diffuse Texture" description="Texture overlay color for the paper surface" type="Texture" clamp="repeat" />
-	<Property name="OverlayTrn" formalName="Translucent Texture" description="Texture overlay translucency for the paper surface" type="Texture" clamp="repeat" />
-	<Property name="OverlayNrm" formalName="Normal Texture" description="Texture overlay normal for the paper surface" type="Texture" clamp="repeat" />
+        <Property name="OverlayTrn" formalName="Translucent Texture" description="Texture overlay translucency for the\npaper surface" type="Texture" clamp="repeat" />
+        <Property name="OverlayNrm" formalName="Normal Texture" description="Texture overlay normal for the paper\nsurface" type="Texture" clamp="repeat" />
 	<Property name="OverlayScale" formalName="Texture Scale" description="Texture overlay scaling factor" type="Float2" default="1 1"/>
 	<Property name="OverlayRot" formalName="Texture Rotation" description="Texture overlay rotation angle" default="0" min="0" max="360"/>
 	<Property name="OverlayTrans" formalName="Translucency blocking" description="How much translucency through the overlay" default="2.0"/>
 	<Property name="LightCol" formalName="Light Color" description="Color of the backlight" type="Color" default="1 1 1"/>
 	<Property name="LightBrt" formalName="Light Brightness" description="Brightness of the backlight" default="1.0"/>
-	<Property name="LightExp" formalName="Light Exposure" descriptoin="Pre-emptive exposure operation to prevent blowout" default="1.0"/>
+        <Property name="LightExp" formalName="Light Exposure" descriptoin="Pre-emptive exposure operation to prevent\nblowout" default="1.0"/>
 	
-	<Property name="DimplePos" formalName="Dimple Position" description="On-screen position of a depth 'pressure dimple'" type="Float2" default="0 0"/>
+        <Property name="DimplePos" formalName="Dimple Position" description="On-screen position of a depth\n'pressure dimple'" type="Float2" default="0 0"/>
 	<Property name="DimpleDepth" formalName="Dimple Pressure" description="How deep the 'pressure dimple' goes" default="0"/>
-	<Property name="DimpleSize" formalName="Dimple Size" description="How big the pressure dimple is in onscreen pixels" default="1" min="1" max="1000"/>
+        <Property name="DimpleSize" formalName="Dimple Size" description="How big the pressure dimple is in\nonscreen pixels" default="1" min="1" max="1000"/>
 	
 	<!-- Internal buffers plus a few extra options -->
 	<Property name="DepthSampler" type="Texture" filter="nearest" clamp="clamp"/>

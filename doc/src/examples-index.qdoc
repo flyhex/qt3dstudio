@@ -34,6 +34,40 @@
 Included in Qt 3D Studio you will find a set of examples. These are located in the \c {examples}
 folder in the installation folder.
 
+\section1 Instructions
+
+To compile the examples or other Qml or C++ applications you also need to install Qt in addition
+to Qt 3D Studio. Binaries provided by Qt 3D Studio installer are compiled with Qt 5.10.1
+and MSVC2015_64bit (win), clang_64 (macOS) and gcc 64bit (linux). For other combinations you need
+to compile Qt 3D Studio yourself from sources. In that case, refer to the \e{build_instructions}
+document available in the source code repository.
+
+Extra setup steps after installing Qt 3D Studio and Qt 5.10.1:
+
+\list 1
+  \li Copy \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\qml\QtStudio3D} under
+   \c{<Qt installation directory>\5.10.1\<compiler>\qml} (e.g. \c{C:\Qt\5.10.1\msvc2015_64\qml}).
+  \li Open the application's \c{.pro} file in Qt Creator.
+  \li Add \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\bin} to the end of the PATH
+  variable in the \e{Run Environment} for the build.
+   See \l{http://doc.qt.io/qtcreator/creator-build-settings.html#using-environment-variables}
+   for details on how to set environment variables.
+\endlist
+
+The last three steps are only needed for C++ applications:
+\list 4
+  \li Copy \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\include\QtStudio3D} under
+  \c{<Qt installation directory>\5.10.1\<compiler>\include}
+  (e.g. \c{C:\Qt\5.10.1\msvc2015_64\include}).
+  \li Copy \c{qt_lib_studio3d.pri} and \c{qt_lib_studio3d_private.pri} from
+  \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\mkspecs\modules} to
+  \c{<Qt installation directory>\5.10.1\<compiler>\mkspecs\modules}
+  (e.g. \c{C:\Qt\5.10.1\msvc2015_64\mkspecs\modules}).
+  \li Open the application's \c{.pro} file in Qt Creator and add
+  \c{LIBS += -L<Qt 3D Studio installation directory>/Tools/Qt3DStudio/lib Qt5Studio3D$$qtPlatformTargetSuffix()}
+  to your application’s \c{.pro} file.
+\endlist
+
 \section1 QML Examples
 
 \list

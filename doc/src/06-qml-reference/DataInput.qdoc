@@ -33,7 +33,7 @@
 
     This type is a convenience type for controlling a data input in a presentation.
 
-    \sa Studio3D, Presentation
+    \sa Studio3D, {Qml Presentation}
 */
 
 /*!

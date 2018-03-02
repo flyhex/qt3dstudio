@@ -9,7 +9,7 @@
         <Property formalName="Gradient3D Map" description="Gradient texture of the material" hidden="True" name="randomGradient3D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient3D.png"/>
         <Property formalName="Gradient4D Map" description="Gradient texture of the material" hidden="True" name="randomGradient4D" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="gradient" default="./maps/materials/randomGradient4D.png"/>
         <Property formalName="Index of Refraction" name="material_ior" description="Refractive index of the material" type="Float" default="1.800000" category="Material"/>
-        <Property formalName="Roughness" name="roughness" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" type="Float" default="0.250000" category="Material"/>
+        <Property formalName="Roughness" name="roughness" description="Roughness of the material.\n0 = fully specular\n1 = fully diffuse" type="Float" default="0.250000" category="Material"/>
         <Property formalName="Color" name="diffuse_color" description="Color of the material" type="Color" default="0.451 0.04 0.035" category="Material"/>
         <Property formalName="Intensity" name="intensity" description="Emission intensity" type="Float" default="1.000000" category="Material"/>
         <Property formalName="Emission Color" name="emission_color" description="Color of the emission" type="Color" default="0 0 0" category="Material"/>

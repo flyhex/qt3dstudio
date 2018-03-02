@@ -44,7 +44,6 @@
 #include "PathAnchorPointTimelineItemBinding.h"
 #include "PathTimelineItemBinding.h"
 #include "LayerTimelineItemBinding.h"
-#include "DataInputTimelineItemBinding.h"
 #include "KeyframesManager.h"
 #include "TimelineBreadCrumbProvider.h"
 #include "BaseStateRow.h"
@@ -114,8 +113,6 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
                  || theWideTypeString == L"Light" || theWideTypeString == L"RenderPlugin"
                  || theWideTypeString == L"Alias" || theWideTypeString == L"SubPath")
             theReturn = new Qt3DSDMTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"DataInput")
-            theReturn = new CDataInputTimelineItemBinding(this, inInstance);
         else {
             // Add support for additional DataModel types here.
             ASSERT(0);

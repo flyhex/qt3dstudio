@@ -260,11 +260,6 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_MAXPARTICLES: return "maxparticles";
         case ATTRIBUTE_PARTICLESIZE: return "particlesize";
         case ATTRIBUTE_LIFETIME: return "lifetime";
-        case ATTRIBUTE_VALUE: return "value";
-        case ATTRIBUTE_VALUESTR: return "valuestr";
-        case ATTRIBUTE_TIMEFROM: return "timefrom";
-        case ATTRIBUTE_TIMETO: return "timeto";
-        case ATTRIBUTE_CONTROLLEDELEMPROP: return "controlledelemprop";
         case ATTRIBUTE_CONTROLLEDPROPERTY: return "controlledproperty";
         case ATTRIBUTE_QT_IO: return "qt.io";
         default: {

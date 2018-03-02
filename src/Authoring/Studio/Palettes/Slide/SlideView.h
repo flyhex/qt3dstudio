@@ -64,7 +64,7 @@ public:
     void setShowMasterSlide(bool show);
     QAbstractItemModel *currentModel() { return m_CurrentModel; }
     QSize sizeHint() const override;
-    void onDataInputChange(const QString &dataInputName);
+    void onDataInputChange(int handle, int instance, const QString &dataInputName);
 
     Q_INVOKABLE void deselectAll();
     Q_INVOKABLE void addNewSlide(int row);
@@ -103,6 +103,7 @@ protected:
                                    int inNewIndex);
 
     void updateDataInputStatus(bool isViaDispatch);
+    void UpdateSlideViewTitleColor();
 
 private:
     void initialize();

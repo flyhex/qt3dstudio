@@ -294,6 +294,11 @@ public:
     void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                   const std::wstring &inPropertyName,
                                   const qt3dsdm::SValue &inValue) override;
+    void SetInstancePropertyControlled(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                       Q3DStudio::CString instancepath,
+                                       qt3dsdm::Qt3DSDMPropertyHandle propName,
+                                       Q3DStudio::CString controller,
+                                       bool controlled) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,

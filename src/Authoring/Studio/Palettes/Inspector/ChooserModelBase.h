@@ -77,6 +77,7 @@ protected:
     struct FixedItem
     {
         EStudioObjectType iconType;
+        QString iconSource;
         QString name;
     };
 

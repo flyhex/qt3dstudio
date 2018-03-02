@@ -95,14 +95,26 @@ void Viewer::disconnectRemote()
     m_remoteDeploymentReceiver->disconnectRemote();
 }
 
-// Used to load files via command line
+// Used to load files via command line and when using remote deployment
 void Viewer::loadFile(const QString &filename)
 {
-    QFileInfo fileInfo(filename);
+    QString targetFilename = filename;
+    // Try to find the application (*.uia) file for loading instead of the presentation (*.uip)
+    // in case we are connected to remote sender.
+    if (isConnected() && targetFilename.endsWith(QStringLiteral(".uip"))) {
+        targetFilename.chop(4);
+        targetFilename.append(QStringLiteral(".uia"));
+        QFileInfo targetfileInfo(targetFilename);
+        // uia not found, revert to given uip
+        if (!targetfileInfo.exists())
+            targetFilename = filename;
+    }
+
+    QFileInfo fileInfo(targetFilename);
     if (!fileInfo.exists()) {
         setContentView(DefaultView);
         m_qmlRootObject->setProperty(
-                    "error", QVariant(tr("Tried to load nonexistent file %1").arg(filename)));
+                    "error", QVariant(tr("Tried to load nonexistent file %1").arg(targetFilename)));
         return;
     }
 

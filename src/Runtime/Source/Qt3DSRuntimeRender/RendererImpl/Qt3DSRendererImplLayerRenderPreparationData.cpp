@@ -1395,7 +1395,7 @@ namespace render {
                         theViewport);
                     SOffscreenRenderFlags theResult = m_LastFrameOffscreenRenderer->NeedsRender(
                         CreateOffscreenRenderEnvironment(),
-                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor());
+                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(), &m_Layer);
                     wasDataDirty = wasDataDirty || theResult.m_HasChangedSinceLastFrame;
                 }
             }

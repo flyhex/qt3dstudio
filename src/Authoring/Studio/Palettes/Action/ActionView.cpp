@@ -324,17 +324,15 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto instanceHandle = GetBridge()->GetInstance(actionInfo.m_Owner,
                                                          actionInfo.m_TriggerObject);
-    m_triggerObjectBrowser->selectAndExpand(instanceHandle);
+    m_triggerObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
 
     showBrowser(m_triggerObjectBrowser, point);
 
     connect(m_triggerObjectBrowser, &ObjectBrowserView::selectionChanged,
-            this, [this] {
-        auto selectedItem = m_triggerObjectBrowser->selectedHandle();
-        setTriggerObject(m_objRefHelper->GetAssetRefValue(
-                             selectedItem, m_itemHandle,
-                             (CRelativePathTools::EPathType)(m_triggerObjectBrowser->pathType())));
-    });
+            this, &ActionView::OnTriggerSelectionChanged);
+    // update also pathtype in the trigger object when changed from UI
+    connect(m_triggerObjectBrowser, &ObjectBrowserView::pathTypeChanged,
+            this, &ActionView::OnTriggerSelectionChanged);
 
     return m_triggerObjectBrowser;
 }
@@ -357,35 +355,52 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto instanceHandle = GetBridge()->GetInstance(actionInfo.m_Owner,
                                                          actionInfo.m_TargetObject);
-    m_targetObjectBrowser->selectAndExpand(instanceHandle);
+    m_targetObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
 
     showBrowser(m_targetObjectBrowser, point);
 
     connect(m_targetObjectBrowser, &ObjectBrowserView::selectionChanged,
-            this, [this] {
-        auto selectedItem = m_targetObjectBrowser->selectedHandle();
-        setTargetObject(m_objRefHelper->GetAssetRefValue(
-                            selectedItem, m_itemHandle,
-                            (CRelativePathTools::EPathType)(m_targetObjectBrowser->pathType())));
-        resetFiredEvent();
-    });
+            this, &ActionView::OnTargetSelectionChanged);
+    // update also pathtype in the target object when changed from UI
+    connect(m_targetObjectBrowser, &ObjectBrowserView::pathTypeChanged,
+            this, &ActionView::OnTargetSelectionChanged);
 
     return m_targetObjectBrowser;
 }
 
+void ActionView::OnTargetSelectionChanged()
+{
+    auto selectedItem = m_targetObjectBrowser->selectedHandle();
+    setTargetObject(m_objRefHelper->GetAssetRefValue(
+        selectedItem, m_itemHandle,
+        (CRelativePathTools::EPathType)(m_targetObjectBrowser->pathType())));
+    resetFiredEvent();
+}
+
+void ActionView::OnTriggerSelectionChanged()
+{
+    auto selectedItem = m_triggerObjectBrowser->selectedHandle();
+    setTriggerObject(m_objRefHelper->GetAssetRefValue(
+        selectedItem, m_itemHandle,
+        (CRelativePathTools::EPathType)(m_triggerObjectBrowser->pathType())));
+    resetFiredEvent();
+}
+
 void ActionView::showContextMenu(int x, int y)
 {
-    if (!m_itemHandle.Valid())
-        return;
+    bool hasCurrAction = m_currentActionIndex != -1;
+    CActionContextMenu contextMenu(this, hasCurrAction);
 
-    CActionContextMenu contextMenu(this);
-
-    connect(&contextMenu, &CActionContextMenu::copyAction, this, &ActionView::copyAction);
+    // allow paste action even if item is not valid (list of actions is empty)
+    if (m_itemHandle.Valid() && hasCurrAction)
+    {
+        connect(&contextMenu, &CActionContextMenu::copyAction, this, &ActionView::copyAction);
+        connect(&contextMenu, &CActionContextMenu::cutAction, this, &ActionView::cutAction);
+        connect(&contextMenu, &CActionContextMenu::deleteAction, this, [this] {
+            deleteAction(m_currentActionIndex);
+        });
+    }
     connect(&contextMenu, &CActionContextMenu::pasteAction, this, &ActionView::pasteAction);
-    connect(&contextMenu, &CActionContextMenu::cutAction, this, &ActionView::cutAction);
-    connect(&contextMenu, &CActionContextMenu::deleteAction, this, [this] {
-        deleteAction(m_currentActionIndex);
-    });
 
     contextMenu.exec(mapToGlobal({x, y}));
 }

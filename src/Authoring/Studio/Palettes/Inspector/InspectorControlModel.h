@@ -69,6 +69,7 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
     Q_PROPERTY(bool controllable MEMBER m_controllable CONSTANT)
+    Q_PROPERTY(QString controller MEMBER m_controller NOTIFY controlledChanged)
 
 public:
     virtual ~InspectorControlBase();
@@ -96,7 +97,7 @@ public:
     bool m_animated = false;
     bool m_controlled = false;
     bool m_controllable = false;
-
+    QString m_controller;
     std::vector<qt3dsdm::TSignalConnectionPtr> m_connections;
 };
 
@@ -159,8 +160,6 @@ private:
         QVariantList controlElements;
 
         ~GroupInspectorControl() {
-            //for (auto element : controlElements)
-            //    element.value<QObject *>()->deleteLater();
         }
     };
 
@@ -193,7 +192,6 @@ private:
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_controlledToggleConnection;
 
     QStringList materialValues() const;
     InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);

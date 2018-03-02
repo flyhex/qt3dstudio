@@ -56,7 +56,7 @@ public:
     void OnSelectionChange(Q3DStudio::SSelectedValue newSelectable);
 
     void showDataInputChooser();
-    void onDataInputChange(const QString &dataInputName);
+    void onDataInputChange(int handle, int instance, const QString &dataInputName);
 
     QSize sizeHint() const;
 
@@ -80,6 +80,7 @@ protected:
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     DataInputSelectDlg *m_DataInputSelector;
-    void updateDataInputStatus(bool isViaDispatch);
+    void UpdateDataInputStatus(bool isViaDispatch);
+    void UpdateTimelineTitleColor(bool controlled);
 };
 #endif // INCLUDED_TIMELINETOOLBAR_H

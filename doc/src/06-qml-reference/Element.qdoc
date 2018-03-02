@@ -35,7 +35,7 @@
     All methods provided by this type are queued and handled asynchronously before the next
     frame is displayed.
 
-    \sa Studio3D, Presentation, SceneElement
+    \sa Studio3D, {Qml Presentation}, SceneElement
 */
 
 /*!

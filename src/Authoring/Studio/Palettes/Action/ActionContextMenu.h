@@ -46,7 +46,7 @@ class CActionContextMenu : public QMenu
 {
     Q_OBJECT
 public:
-    explicit CActionContextMenu(QWidget *parent = nullptr);
+    explicit CActionContextMenu(QWidget *parent = nullptr, bool hasActiveAction = true);
     virtual ~CActionContextMenu();
 
 Q_SIGNALS:

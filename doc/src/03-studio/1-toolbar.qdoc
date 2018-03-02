@@ -241,34 +241,6 @@ palette.
   The show or hide \b{Wireframe} toggles wireframe visibility (for tessellated meshes only).
 \endlist
 
-\section1 Playback Control
-
-\image Studio-Toolbar-Playback.png
-
-These commands control the playhead, making it easier to preview
-animations and slide transitions without leaving Studio.
-
-\list
-\li
-  The \b{Rewind} command sets the playhead to time 0.
-\li
-  The \b{Stop} command stops any playback.
-\li
-  The \b{Play} command starts advancing the playhead in realtime,
-  previewing animations on elements. The \b{Play Mode} for the
-  current slide is honored, possibly looping or ping-ponging playback,
-  or causing Studio to switch to an new slide when the end time for the
-  current slide is reached.
-\li
-  Holding down the space bar temporarily enables playback while held
-  down. Releasing the spacebar returns the playhead to its previous
-  time, allowing you to repeatedly hold down space to preview an
-  animation.
-\li
-  Pressing the Enter key will start playback. Press Enter again to stop
-  playback.
-\endlist
-
 \section1 Preview
 
 \image Studio-Toolbar-Preview.png

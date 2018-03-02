@@ -44,6 +44,6 @@ bool ImageChooserModel::isVisible(const QString &path) const
 
 const QVector<ChooserModelBase::FixedItem> ImageChooserModel::getFixedItems() const
 {
-    static const QVector<FixedItem> items = { { OBJTYPE_IMAGE, tr("[None]") } };
+    static const QVector<FixedItem> items = { { OBJTYPE_IMAGE, "", tr("[None]") } };
     return items;
 }

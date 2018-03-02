@@ -224,8 +224,10 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
                         // Detect font style and weight using a dummy QRawFont
                         QRawFont rawFont(rawData, 1.0);
                         if (rawFont.isValid()) {
-                            fi.font.setStyle(rawFont.style());
-                            fi.font.setWeight(rawFont.weight());
+                            if (rawFont.style() != QFont::StyleOblique) {
+                                fi.font.setStyle(rawFont.style());
+                                fi.font.setWeight(rawFont.weight());
+                            }
                         } else {
                             qCWarning(WARNING, "Failed to determine font style: %s",
                                 entry.toStdString().c_str());
@@ -397,10 +399,8 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
     void updateFontInfo(FontInfo &fi, const STextRenderInfo &inText,
                         QT3DSF32 inTextScaleFactor = 1.0f)
     {
-        static qreal dpi =
-            QGuiApplication::primaryScreen()->logicalDotsPerInch();
-        qreal point = inText.m_FontSize * 72 / dpi;
-        fi.font.setPointSizeF(point * inTextScaleFactor);
+        qreal pixelSize = inText.m_FontSize;
+        fi.font.setPixelSize(pixelSize * inTextScaleFactor);
         fi.font.setLetterSpacing(QFont::AbsoluteSpacing, qreal(inText.m_Tracking));
     }
 

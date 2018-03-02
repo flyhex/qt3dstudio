@@ -174,15 +174,15 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
             }
         } else {
             for (int i = 0; i < parameters.size() / 4; i++) {
-                uiaFileData.append("\t\t\t<dataInput ");
+                uiaFileData.append("\t\t<dataInput ");
                 uiaFileData.append("name=\"");
                 uiaFileData.append(qPrintable(parameters[4 * i]));
-                uiaFileData.append("type=\"");
+                uiaFileData.append("\" type=\"");
                 uiaFileData.append(qPrintable(parameters[4 * i + 1]));
                 if (QStringLiteral("Ranged Number") == parameters[4 * i + 1]) {
-                    uiaFileData.append("min=\"");
+                    uiaFileData.append("\" min=\"");
                     uiaFileData.append(qPrintable(parameters[4 * i + 2]));
-                    uiaFileData.append("max=\"");
+                    uiaFileData.append("\" max=\"");
                     uiaFileData.append(qPrintable(parameters[4 * i + 3]));
                 }
                 uiaFileData.append("\"/>\n");

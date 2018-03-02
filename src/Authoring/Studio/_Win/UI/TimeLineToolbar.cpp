@@ -141,7 +141,7 @@ void TimeLineToolbar::OnSelectionChange(Q3DStudio::SSelectedValue newSelectable)
     }
     m_ui->deleteObject->setEnabled(canDelete);
 
-    updateDataInputStatus(false);
+    UpdateDataInputStatus(false);
 }
 
 void TimeLineToolbar::onAddDataInputClicked()
@@ -152,7 +152,7 @@ void TimeLineToolbar::onAddDataInputClicked()
 // Update datainput button state according to this timecontext
 // control state. If triggered via datamodel change i.e. dispatch message,
 // force update from actual property values
-void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
+void TimeLineToolbar::UpdateDataInputStatus(bool isViaDispatch)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
@@ -170,12 +170,10 @@ void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
             Q_ASSERT(false);
         }
 
-        qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
-            = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                *doc,
-                QObject::tr("Get Timeline control"))->GetInstancePropertyValue(timeCtxRoot,
-                                                                               ctrldProp);
-        auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+        qt3dsdm::SValue controlledPropertyVal;
+        doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                    timeCtxRoot, ctrldProp, controlledPropertyVal);
+        auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
 
         if (existingCtrl.contains("@timeline")) {
             int slideStrPos = existingCtrl.indexOf("@timeline");
@@ -190,13 +188,16 @@ void TimeLineToolbar::updateDataInputStatus(bool isViaDispatch)
             m_ui->addDataInputButton->setToolTip(
                 tr("Timeline Controller:\n%1").arg(m_currController));
             m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
+            UpdateTimelineTitleColor(true);
         } else {
             // TODO actually delete the entire property instead of setting it as empty string
             m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Disabled.png"));
             m_ui->addDataInputButton->setToolTip(tr("No control"));
+            UpdateTimelineTitleColor(false);
         }
 
         m_currTimeCtxRoot = timeCtxRoot;
+        m_ui->dataInputName->setText(m_currController);
     }
 }
 
@@ -216,8 +217,11 @@ void TimeLineToolbar::showDataInputChooser()
     return;
 }
 
-void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
+void TimeLineToolbar::onDataInputChange(int handle, int instance, const QString &dataInputName)
 {
+    Q_UNUSED(handle)
+    Q_UNUSED(instance)
+
     if (dataInputName == m_currController ||
         (dataInputName == tr("[No Control]") && !m_currController.size())) {
         return;
@@ -232,11 +236,13 @@ void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
         fullTimeControlStr = dataInputName + " @timeline";
         m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
         m_currController = dataInputName;
+        UpdateTimelineTitleColor(false);
     } else {
         m_ui->addDataInputButton->setToolTip(tr("No control"));
         // TODO actually delete the entire property instead of setting it as empty string
         m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Disabled.png"));
         m_currController.clear();
+        UpdateTimelineTitleColor(true);
     }
 
     // To indicate that this presentation timeline is controlled by data input,
@@ -254,13 +260,11 @@ void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
     else
         Q_ASSERT(false);
 
-    qt3dsdm::Option<qt3dsdm::SValue> controlledPropertyVal
-        = Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-            *doc,
-            QObject::tr("Get DataInput control"))->GetInstancePropertyValue(timeCtxRoot,
-                                                                            ctrldPropertyHandle);
+    qt3dsdm::SValue controlledPropertyVal;
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                timeCtxRoot, ctrldPropertyHandle, controlledPropertyVal);
 
-    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal.getValue());
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
     if (existingCtrl.contains("@timeline")) {
         int slideStrPos = existingCtrl.indexOf("@timeline");
         // find the controlling datainput name and build the string to replace
@@ -280,7 +284,7 @@ void TimeLineToolbar::onDataInputChange(const QString &dataInputName)
         existingCtrl.remove(0, 1);
 
     m_currTimeCtxRoot = timeCtxRoot;
-
+    m_ui->dataInputName->setText(m_currController);
     qt3dsdm::SValue fullCtrlPropVal
         = std::make_shared<qt3dsdm::CDataStr>(
             Q3DStudio::CString::fromQString(existingCtrl));
@@ -325,16 +329,32 @@ void TimeLineToolbar::OnBeginDataModelNotifications()
 
 void TimeLineToolbar::OnEndDataModelNotifications()
 {
-    updateDataInputStatus(true);
+    UpdateDataInputStatus(true);
 }
 
 void TimeLineToolbar::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    updateDataInputStatus(true);
+    UpdateDataInputStatus(true);
 }
 
 void TimeLineToolbar::OnImmediateRefreshInstanceMultiple(
     qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
 {
-    updateDataInputStatus(true);
+    UpdateDataInputStatus(true);
+}
+
+// Notify the user about control state change also with timeline dock
+// title color change.
+void TimeLineToolbar::UpdateTimelineTitleColor(bool controlled)
+{
+    QString styleString;
+    if (controlled) {
+        styleString= "QDockWidget { color: "
+                + QString(CStudioPreferences::dataInputColor().name()) + "; }";
+    } else {
+        styleString = "QDockWidget { color: "
+                + QString(CStudioPreferences::textColor().name()) + "; }";
+    }
+    QWidget *timelineDock = parentWidget()->parentWidget();
+    timelineDock->setStyleSheet(styleString);
 }

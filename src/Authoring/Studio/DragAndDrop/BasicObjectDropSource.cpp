@@ -185,9 +185,6 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
     case OBJTYPE_PATH:
         theComposerType = ComposerObjectTypes::Path;
         break;
-    case OBJTYPE_DATAINPUT:
-        theComposerType = ComposerObjectTypes::DataInput;
-        break;
     default:
         QT3DS_ASSERT(false);
         theComposerType = ComposerObjectTypes::Unknown;

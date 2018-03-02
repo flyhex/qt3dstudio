@@ -294,106 +294,122 @@ Rectangle {
                                     }
                                 }
 
-                                Loader {
-                                    id: loader
-                                    readonly property var modelData: propertyRow.modelData
-                                    sourceComponent: {
-                                        const dataType = modelData.dataType;
-                                        switch (dataType) {
-                                        case DataModelDataType.Long:
-                                            if (modelData.propertyType ===
-                                                    AdditionalMetaDataType.ShadowMapResolution) {
-                                                return shadowResolutionComponent;
-                                            }
-                                            if (modelData.propertyType === AdditionalMetaDataType.Range) {
-                                                return intSliderComponent;
-                                            }
-                                            console.warn("KDAB_TODO: implement handler for type \"Long\", property:",
-                                                         modelData.propertyType);
-                                            return null;
-                                        case DataModelDataType.Long4:
-                                            if (modelData.propertyType === AdditionalMetaDataType.Image) {
-                                                return imageChooser;
-                                            }
-                                            console.warn("KDAB_TODO: implement handler for type \"long4\" property:",
-                                                         modelData.propertyType);
-                                            return null;
-                                        case DataModelDataType.ObjectRef:
-                                            if (modelData.propertyType === AdditionalMetaDataType.ObjectRef)
-                                                return objectReference;
-                                            console.warn("KDAB_TODO: implement handler for type: \"objectref\" property:",
-                                                         modelData.propertyType);
-                                            return null;
-                                        case DataModelDataType.StringOrInt:
-                                            //TODO: Maybe do some further check if the right combo is used
-                                            if (modelData.propertyType === AdditionalMetaDataType.StringList)
-                                                return slideSelectionDropDown;
-                                            console.warn("KDAB_TODO: (String) implement handler for type \"stringOrInt\" property:",
-                                                         modelData.propertyType);
-                                            return null;
-                                        case DataModelDataType.String:
-                                            if (modelData.propertyType === AdditionalMetaDataType.Import)
-                                                return fileChooser;
-                                            if (modelData.propertyType === AdditionalMetaDataType.StringList)
-                                                return comboDropDown;
-                                            if (modelData.propertyType === AdditionalMetaDataType.Renderable)
-                                                return renderableDropDown;
-                                            if (modelData.propertyType === AdditionalMetaDataType.Mesh)
-                                                return meshChooser;
-                                            // Show DataInput selector if this item is controlled
-                                            if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
-                                                    return multiLine;
-                                            if (modelData.propertyType === AdditionalMetaDataType.Font)
-                                                return comboDropDown;
-                                            if (modelData.propertyType === AdditionalMetaDataType.Texture)
-                                                return textureChooser;
-                                            console.warn("KDAB_TODO: (String) implement handler for type \"string\" property:",
-                                                         modelData.propertyType);
-                                            return null;
-                                        case DataModelDataType.Bool:
-                                            return checkBox;
-                                        case DataModelDataType.Float:
-                                            if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                return valueComponent;
-                                            if (modelData.propertyType === AdditionalMetaDataType.Range)
-                                                return sliderComponent;
-                                            if (modelData.propertyType === AdditionalMetaDataType.FontSize)
-                                                return fontSizeComponent;
-                                            console.warn("KDAB_TODO: implement handler for type\"float\" property:",
-                                                         modelData.propertyType);
-                                            return null;
-                                        case DataModelDataType.Float2:
-                                            if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                return xyPropertyComponent;
-                                            console.warn("TODO: implement handler for type:\"float2\" property:",
-                                                         modelData.propertyType, "text ",
-                                                         model.modelData.title);
-                                            return null;
-                                        case DataModelDataType.Float3:
-                                            if (modelData.propertyType === AdditionalMetaDataType.Color)
-                                                return colorBox;
-                                            if (modelData.propertyType === AdditionalMetaDataType.Rotation)
-                                                return xyzPropertyComponent;
-                                            if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                return xyzPropertyComponent;
-                                            console.warn("KDAB_TODO: implement handler for type:\"float3\" property:",
-                                                         modelData.propertyType, "text ",
-                                                         model.modelData.title);
-                                            return null;
-                                        case DataModelDataType.StringRef:
-                                            if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                return materialDropDown;
-                                            console.warn("KDAB_TODO: implement handler for type:\"StringRef\" text ",
-                                                         model.modelData.title);
-                                            return null;
-                                        default:
-                                            console.warn("KDAB_TODO: implement handler for type",
-                                                         dataType, "property",
-                                                         modelData.propertyType, "text ",
-                                                         model.modelData.title);
-                                        }
-                                        return null;
+                                ColumnLayout {
+                                    StyledLabel {
+                                        id: dataInputName
+                                        Layout.preferredWidth: _valueWidth
+                                        // use visible: modelData.controlled instead
+                                        // if label needs to be shown
+                                        // only when item is actually controlled
+                                        // (causes re-layouting of inspector panel)
+                                        visible: modelData.controllable
+                                        text: modelData.controlled ?
+                                                  modelData.controller : "[No datainput control]";
+                                        color: modelData.controlled ?
+                                                  _dataInputColor : _disabledColor;
                                     }
+
+                                    Loader {
+                                        id: loader
+                                        readonly property var modelData: propertyRow.modelData
+                                        sourceComponent: {
+                                            const dataType = modelData.dataType;
+                                            switch (dataType) {
+                                            case DataModelDataType.Long:
+                                                if (modelData.propertyType ===
+                                                        AdditionalMetaDataType.ShadowMapResolution) {
+                                                    return shadowResolutionComponent;
+                                                }
+                                                if (modelData.propertyType === AdditionalMetaDataType.Range) {
+                                                    return intSliderComponent;
+                                                }
+                                                console.warn("KDAB_TODO: implement handler for type \"Long\", property:",
+                                                             modelData.propertyType);
+                                                return null;
+                                            case DataModelDataType.Long4:
+                                                if (modelData.propertyType === AdditionalMetaDataType.Image) {
+                                                    return imageChooser;
+                                                }
+                                                console.warn("KDAB_TODO: implement handler for type \"long4\" property:",
+                                                             modelData.propertyType);
+                                                return null;
+                                            case DataModelDataType.ObjectRef:
+                                                if (modelData.propertyType === AdditionalMetaDataType.ObjectRef)
+                                                    return objectReference;
+                                                console.warn("KDAB_TODO: implement handler for type: \"objectref\" property:",
+                                                             modelData.propertyType);
+                                                return null;
+                                            case DataModelDataType.StringOrInt:
+                                                //TODO: Maybe do some further check if the right combo is used
+                                                if (modelData.propertyType === AdditionalMetaDataType.StringList)
+                                                    return slideSelectionDropDown;
+                                                console.warn("KDAB_TODO: (String) implement handler for type \"stringOrInt\" property:",
+                                                             modelData.propertyType);
+                                                return null;
+                                            case DataModelDataType.String:
+                                                if (modelData.propertyType === AdditionalMetaDataType.Import)
+                                                    return fileChooser;
+                                                if (modelData.propertyType === AdditionalMetaDataType.StringList)
+                                                    return comboDropDown;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Renderable)
+                                                    return renderableDropDown;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Mesh)
+                                                    return meshChooser;
+                                                if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
+                                                    return multiLine;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Font)
+                                                    return comboDropDown;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Texture)
+                                                    return textureChooser;
+                                                console.warn("KDAB_TODO: (String) implement handler for type \"string\" property:",
+                                                             modelData.propertyType);
+                                                return null;
+                                            case DataModelDataType.Bool:
+                                                return checkBox;
+                                            case DataModelDataType.Float:
+                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                    return valueComponent;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Range)
+                                                    return sliderComponent;
+                                                if (modelData.propertyType === AdditionalMetaDataType.FontSize)
+                                                    return fontSizeComponent;
+                                                console.warn("KDAB_TODO: implement handler for type\"float\" property:",
+                                                             modelData.propertyType);
+                                                return null;
+                                            case DataModelDataType.Float2:
+                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                    return xyPropertyComponent;
+                                                console.warn("TODO: implement handler for type:\"float2\" property:",
+                                                             modelData.propertyType, "text ",
+                                                             model.modelData.title);
+                                                return null;
+                                            case DataModelDataType.Float3:
+                                                if (modelData.propertyType === AdditionalMetaDataType.Color)
+                                                    return colorBox;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Rotation)
+                                                    return xyzPropertyComponent;
+                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                    return xyzPropertyComponent;
+                                                console.warn("KDAB_TODO: implement handler for type:\"float3\" property:",
+                                                             modelData.propertyType, "text ",
+                                                             model.modelData.title);
+                                                return null;
+                                            case DataModelDataType.StringRef:
+                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                    return materialDropDown;
+                                                console.warn("KDAB_TODO: implement handler for type:\"StringRef\" text ",
+                                                             model.modelData.title);
+                                                return null;
+                                            default:
+                                                console.warn("KDAB_TODO: implement handler for type",
+                                                             dataType, "property",
+                                                             modelData.propertyType, "text ",
+                                                             model.modelData.title);
+                                            }
+                                            return null;
+                                        }
+                                    }
+
                                 }
                             }
                         }
@@ -439,6 +455,7 @@ Rectangle {
                 rightPadding: 6
 
                 background: Rectangle {
+                    height: textArea.height
                     color: textArea.enabled ? _studioColor2 : "transparent"
                     border.width: textArea.activeFocus ? 1 : 0
                     border.color: textArea.activeFocus ? _selectionColor : _disabledColor

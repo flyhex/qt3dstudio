@@ -238,6 +238,69 @@ void CDoc::SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         thePropertySystem->SetInstancePropertyValue(inInstance, theProperty, inValue);
 }
 
+// Set a property in an instance to be controlled by datainput.
+void CDoc::SetInstancePropertyControlled(
+    qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DStudio::CString instancepath,
+    qt3dsdm::Qt3DSDMPropertyHandle propName, Q3DStudio::CString controller,
+    bool controlled)
+{
+    qt3dsdm::SComposerObjectDefinitions &theDefinitions(
+        GetStudioSystem()->GetClientDataModelBridge()->GetObjectDefinitions());
+    qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
+    // get the name of controlled property
+    auto metadataHandle
+        = GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(instance, propName);
+    auto metadata
+        = GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(metadataHandle);
+
+    qt3dsdm::SValue controlledProperty;
+    qt3dsdm::SValue controllerName;
+
+    // Build controller - controlled property string.
+    if (controlled) {
+        Q3DStudio::CString controlledElemStr = controller;
+        controlledElemStr.append(" ");
+        controlledElemStr.append(metadata->m_Name.c_str());
+        controlledProperty = std::make_shared<qt3dsdm::CDataStr>(controlledElemStr);
+    } else {
+        // TODO: this is Text element-specific at the moment
+        // Get controller - property -pair for this element
+        qt3dsdm::SValue currentControlledProperty;
+        thePropertySystem->GetInstancePropertyValue(
+            instance, theDefinitions.m_Text.m_ControlledProperty, currentControlledProperty);
+
+        Q3DStudio::CString controllerNameStr
+            = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentControlledProperty)->GetData();
+
+        // Check if this property has a controlling datainput before trying
+        // to delete it from the list of controlled properties
+        if (controllerNameStr.size()) {
+            // Set controller - property -string empty for this element.
+            // We need to explicitly set controlledProperty with an empty string initializer,
+            // otherwise it will have type "None" instead of "String".
+            // TODO: for now only a single textstring property can be controlled. For
+            // control of several properties in a single element, we must only remove
+            // a specific controller - property pair from controlledProperty string, not all.
+            controlledProperty = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString());
+
+            // Set the textstring content to default when disabling datainput control
+            // TODO: restore the previous text content prior to setting it to controlled
+            controllerName = theDefinitions.m_Text.m_TextString.m_DefaultValue.getValue();
+        } else {
+            // We are trying to turn control off for property that had no existing control.
+            // Nothing to do except to make sure that we set the
+            // controlledProperty to an empty string.
+            controlledProperty = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString());
+        }
+    }
+
+    // Set the controlledproperty string in the controlled element
+    Q3DStudio::ScopedDocumentEditor(*this, L"Set controlled", __FILE__, __LINE__)
+        ->SetInstancePropertyValue(instance,
+                                   theDefinitions.m_Text.m_ControlledProperty,
+                                   controlledProperty);
+}
+
 Q3DStudio::IDocumentBufferCache &CDoc::GetBufferCache()
 {
     if (!m_DocumentBufferCache)

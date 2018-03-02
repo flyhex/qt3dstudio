@@ -42,7 +42,12 @@ BasicObjectsModel::BasicObjectsModel(QObject *parent) : QAbstractListModel(paren
 
 void BasicObjectsModel::initialize()
 {
-    m_ObjectItems = {
+    m_ObjectItems = InitializeObjectModel();
+}
+
+const QVector<BasicObjectItem> BasicObjectsModel::InitializeObjectModel()
+{
+    return {
         {tr("Rectangle"), "Asset-Rectangle-Normal.png"_L1, OBJTYPE_MODEL, PRIMITIVETYPE_RECT},
         {tr("Sphere"), "Asset-Sphere-Normal.png"_L1, OBJTYPE_MODEL, PRIMITIVETYPE_SPHERE},
         {tr("Cube"), "Asset-Cube-Normal.png"_L1, OBJTYPE_MODEL, PRIMITIVETYPE_BOX},
@@ -54,13 +59,13 @@ void BasicObjectsModel::initialize()
         {tr("Camera"), "Asset-Camera-Normal.png"_L1, OBJTYPE_CAMERA, PRIMITIVETYPE_UNKNOWN},
         {tr("Light"), "Asset-Light-Normal.png"_L1, OBJTYPE_LIGHT, PRIMITIVETYPE_UNKNOWN},
         {tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN},
-        // For now, adding Datainput (and Layer) is done by drag-drop. TODO: remove after a separate
-        // panel for adding these metaobjects exists
-
-        // Master control for adding datainput functionality to studio, uncomment to enable adding
-        // datainput
-        // {tr("Datainput"), "Objects-DataInput-Normal.png"_L1, OBJTYPE_DATAINPUT, PRIMITIVETYPE_UNKNOWN}
     };
+}
+
+// Returns meshes part of basic objects
+const QVector<BasicObjectItem> BasicObjectsModel::BasicMeshesModel()
+{
+    return InitializeObjectModel().mid(0, 5);
 }
 
 QVariant BasicObjectsModel::data(const QModelIndex &index, int role) const

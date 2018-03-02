@@ -112,10 +112,9 @@ private:
     Q3DSQmlStreamEventHandler *m_renderObject;
     QThread *m_renderThread;
 
-    bool m_requestRender;
+    bool m_requestUpdate;
     bool m_initialized;
     bool m_prepared;
-    bool m_renderControlInitialized;
     bool m_update;
 
     friend class Q3DSQmlStreamEventHandler;

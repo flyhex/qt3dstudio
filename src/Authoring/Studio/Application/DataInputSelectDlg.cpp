@@ -40,8 +40,11 @@ DataInputSelectDlg::DataInputSelectDlg(QWidget *parent)
 }
 
 void DataInputSelectDlg::setData(const QStringList &dataInputList,
-                                 const QString &currentController)
+                                 const QString &currentController,
+                                 int handle, int instance)
 {
+    m_handle = handle;
+    m_instance = instance;
     clear();
     setObjectName("DataInputSelectDlg");
     setSelectionMode(QAbstractItemView::SingleSelection);
@@ -85,8 +88,9 @@ void DataInputSelectDlg::onItemClicked(QListWidgetItem *item)
 
 void DataInputSelectDlg::onSelectionChanged()
 {
-    if (currentItem()) {
-        Q_EMIT dataInputChanged(currentItem()->text());
+    // Ignore selection changes that happen during setData
+    if (currentItem() && isVisible()) {
+        Q_EMIT dataInputChanged(m_handle, m_instance, currentItem()->text());
         hide();
     }
 }

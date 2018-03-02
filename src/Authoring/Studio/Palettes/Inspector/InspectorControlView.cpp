@@ -231,6 +231,19 @@ bool InspectorControlView::canLinkProperty(int instance, int handle) const
     return canBeLinkedFlag;
 }
 
+void InspectorControlView::onInstancePropertyValueChanged(
+        qt3dsdm::Qt3DSDMPropertyHandle propertyHandle)
+{
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    // titleChanged implies icon change too, but that will only occur if inspectable type changes,
+    // which will invalidate the inspectable anyway, so in reality we are only interested in name
+    // property here
+    if (propertyHandle == bridge->GetNameProperty()
+            && m_inspectableBase && m_inspectableBase->IsValid()) {
+        Q_EMIT titleChanged();
+    }
+}
+
 QColor InspectorControlView::titleColor(int instance, int handle) const
 {
     QColor ret = CStudioPreferences::textColor();
@@ -269,10 +282,12 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
     if (m_inspectableBase != inInspectable) {
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
+
         Q_EMIT titleChanged();
         auto sp = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
         m_PropertyChangeConnection = sp->ConnectInstancePropertyValue(
-                    std::bind(&InspectorControlView::titleChanged, this));
+                    std::bind(&InspectorControlView::onInstancePropertyValueChanged, this,
+                              std::placeholders::_2));
         m_timeChanged = sp->ConnectComponentSeconds(
                     std::bind(&InspectorControlView::OnTimeChanged, this));
     }
@@ -446,7 +461,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     if (objRefHelper) {
         qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
         qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
-        m_objectReferenceView->selectAndExpand(refInstance);
+        m_objectReferenceView->selectAndExpand(refInstance, instance);
     }
 
     showBrowser(m_objectReferenceView, point);
@@ -469,8 +484,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     if (!m_dataInputChooserView) {
         m_dataInputChooserView = new DataInputSelectDlg(g_StudioApp.m_pMainWnd);
         connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
-                [this, handle, instance](const QString &controllerName) {
-
+                [this](int handle, int instance, const QString &controllerName) {
             bool controlled = controllerName == tr("[No control]") ? false : true;
             m_inspectorControlModel
                 ->setPropertyControllerInstance(
@@ -486,8 +500,8 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
         dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
 
-    m_dataInputChooserView->setData(dataInputList,
-                                    m_inspectorControlModel->getCurrentController());
+    m_dataInputChooserView->setData(dataInputList, m_inspectorControlModel->getCurrentController(),
+                                    handle, instance);
     m_dataInputChooserView->showDialog(point);
 }
 

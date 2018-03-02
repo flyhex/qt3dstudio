@@ -109,6 +109,7 @@ private:
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     void showBrowser(QQuickWidget *browser, const QPoint &point);
     bool canLinkProperty(int instance, int handle) const;
+    void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_timeChanged;

@@ -93,7 +93,6 @@ struct UIPElementTypes
         Path,
         PathAnchorPoint,
         PathSubPath,
-        DataInput,
     };
 };
 
