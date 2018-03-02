@@ -384,7 +384,8 @@ void SlideModel::refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle
 // Set selected slide highlight on UI
 void SlideModel::setSelectedSlideIndex(const QModelIndex &index)
 {
-    if (!hasIndex(index.row(), index.column(), index.parent()))
+    if (m_selectedRow == index.row() ||
+            !hasIndex(index.row(), index.column(), index.parent()))
         return;
 
     m_selectedRow = index.row();

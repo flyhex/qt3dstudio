@@ -227,12 +227,10 @@ void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int i
     setShowMasterSlide(currentSlideIndex == 0);
     setActiveSlide(inSlide);
 
-    // During playback update slide highlight
-    if (GetDoc()->IsPlaying()) {
-        // -1 because first slide is masterslide
-        auto index = m_SlidesModel->index(currentSlideIndex - 1, 0);
-        m_SlidesModel->setSelectedSlideIndex(index);
-    }
+    // Update slide highlight to match active slide
+    // -1 because first slide is masterslide
+    auto index = m_SlidesModel->index(currentSlideIndex - 1, 0);
+    m_SlidesModel->setSelectedSlideIndex(index);
 
 }
 
