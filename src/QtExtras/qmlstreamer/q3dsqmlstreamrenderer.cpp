@@ -220,14 +220,14 @@ bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surfac
         return true;
     }
 
-    m_rootItem->setParentItem(m_quickWindow->contentItem());
-
-    updateSizes();
-
     connect(m_renderControl, &QQuickRenderControl::renderRequested,
             this, &Q3DSQmlStreamRenderer::requestUpdate);
     connect(m_renderControl, &QQuickRenderControl::sceneChanged,
             this, &Q3DSQmlStreamRenderer::requestUpdate);
+
+    m_rootItem->setParentItem(m_quickWindow->contentItem());
+
+    updateSizes();
 
     m_initialized = true;
     // Initialize render thread
@@ -358,7 +358,8 @@ bool Q3DSQmlStreamRenderer::event(QEvent *event)
         m_renderControl->prepareThread(m_renderThread);
         m_prepared = true;
 
-        requestUpdate();
+        if (m_requestUpdate)
+            requestUpdate();
 
         return true;
     }
@@ -376,7 +377,7 @@ bool Q3DSQmlStreamRenderer::event(QEvent *event)
         break;
     }
 
-    return false;
+    return QObject::event(event);
 }
 
 void Q3DSQmlStreamRenderer::updateSizes()
@@ -393,9 +394,10 @@ void Q3DSQmlStreamRenderer::updateSizes()
 
 void Q3DSQmlStreamRenderer::requestUpdate()
 {
-    if (!m_requestUpdate && m_initialized) {
+    if (!m_requestUpdate) {
         m_requestUpdate = true;
-        QCoreApplication::postEvent(this, new RequestUpdate());
+        if (m_initialized)
+            QCoreApplication::postEvent(this, new RequestUpdate());
     }
 }
 
@@ -416,9 +418,9 @@ void Q3DSQmlStreamRenderer::renderTexture()
     {
         QMutexLocker lock(&m_mutex);
         if (m_requestUpdate) {
+            m_requestUpdate = false;
             m_renderControl->sync();
             m_renderControl->render();
-            m_requestUpdate = false;
             m_waitCondition.wakeOne();
         }
     }
