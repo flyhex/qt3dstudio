@@ -61,11 +61,12 @@ public:
                 NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                 SScene::RenderClearCommand inColorBufferNeedsClear,
                 const SRenderInstanceId instanceId) override;
-    void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
-                         NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
-                         SScene::RenderClearCommand inColorBufferNeedsClear,
-                         QT3DSVec3 inclearColor,
-                         const SRenderInstanceId instanceId) override {}
+    void RenderWithClear(const SOffscreenRendererEnvironment &/*inEnvironment*/,
+                         NVRenderContext &/*inRenderContext*/,
+                         QT3DSVec2 /*inPresentationScaleFactor*/,
+                         SScene::RenderClearCommand /*inColorBufferNeedsClear*/,
+                         QT3DSVec3 /*inclearColor*/,
+                         const SRenderInstanceId /*instanceId*/) override {}
 
     IGraphObjectPickQuery *GetGraphObjectPickQuery(const SRenderInstanceId instanceId) override
     {

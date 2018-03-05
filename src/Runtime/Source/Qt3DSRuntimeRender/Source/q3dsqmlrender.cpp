@@ -88,6 +88,7 @@ SOffscreenRenderFlags Q3DSQmlRender::NeedsRender(const SOffscreenRendererEnviron
 {
     Q_UNUSED(inEnvironment);
     Q_UNUSED(inPresentationScaleFactor);
+    Q_UNUSED(instanceId);
     bool render = false;
     if (!m_qmlStreamRenderer)
         initializeRenderer();

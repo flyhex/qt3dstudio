@@ -102,6 +102,8 @@ namespace render {
         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
         const SRenderInstanceId id)
     {
+        Q_UNUSED(inEnvironment);
+        Q_UNUSED(inPresScale);
         NVRenderRect theViewportSize(inRenderContext.GetViewport());
         m_Presentation.m_Scene->RenderWithClear(
             QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),
