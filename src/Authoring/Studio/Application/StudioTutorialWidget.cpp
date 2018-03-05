@@ -76,13 +76,13 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
     // based on first PNG, get the scale that we need to fit welcome
     // screen and buttons comfortably on display
     m_displayScale = getDisplayScalingForImage(m_imgIter);
-    m_ui->verticalWidget->setMaximumSize(m_displayScale * size());
-
+    QSize picSize = getPicSize(m_imgIter);
     QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
     QSize windowSize = screenRect.size();
-    QSize welcomeSize = size() * m_displayScale;
-    move(screenRect.x() + (windowSize.width() - welcomeSize.width()) / 2,
-         screenRect.y() + (windowSize.height() - welcomeSize.height()) / 2);
+    m_ui->verticalWidget->setFixedSize(picSize);
+
+    move(screenRect.x() + (windowSize.width() - picSize.width()) / 2,
+         screenRect.y() + (windowSize.height() - picSize.height()) / 2);
 
     if (!m_welcomeImages->isEmpty()) {
         for (int i = 0; i < page && m_imgIter != m_welcomeImages->end(); ++i)
@@ -187,8 +187,13 @@ void StudioTutorialWidget::handleCreateNew()
 
 void StudioTutorialWidget::getImageList()
 {
-    QDirIterator *it = new QDirIterator(":/images/Tutorial/screens/",
-                                        QDirIterator::NoIteratorFlags);
+    QString imagePath = QStringLiteral(":/images/Tutorial/screens/1x");
+
+    // Use @2x images for hiDPI displays
+    if (devicePixelRatio() > 1.0)
+        imagePath = QStringLiteral(":/images/Tutorial/screens/2x");
+
+    QDirIterator *it = new QDirIterator(imagePath, QDirIterator::NoIteratorFlags);
 
     while (it->hasNext())
         m_welcomeImages->append(it->next());
@@ -212,18 +217,26 @@ QPixmap StudioTutorialWidget::getPrevScaledPic()
     return getScaledPic(--m_imgIter);
 }
 
-QPixmap StudioTutorialWidget::getScaledPic(QList<QString>::iterator iter)
+QPixmap StudioTutorialWidget::getScaledPic(const QList<QString>::iterator &iter)
 {
     QPixmap picOrig = QPixmap(*iter);
     QPixmap pic = picOrig;
-    if (m_displayScale < 1.0)
-        pic = picOrig.scaledToHeight(m_displayScale * picOrig.height(), Qt::SmoothTransformation);
+    if (m_displayScale < 1.0) {
+        // Limit to the maximum size of @2x images
+        pic = picOrig.scaledToHeight(qMin(1800.0, m_displayScale * picOrig.height()),
+                                     Qt::SmoothTransformation);
+    }
 
     pic.setDevicePixelRatio(devicePixelRatio());
     return pic;
 }
 
-qreal StudioTutorialWidget::getDisplayScalingForImage(QList<QString>::iterator iter)
+QSize StudioTutorialWidget::getPicSize(const QList<QString>::iterator &iter)
+{
+    return getScaledPic(iter).size();
+}
+
+qreal StudioTutorialWidget::getDisplayScalingForImage(const QList<QString>::iterator &iter)
 {
     QPixmap picOrig = QPixmap(*iter);
 
@@ -237,8 +250,7 @@ qreal StudioTutorialWidget::getDisplayScalingForImage(QList<QString>::iterator i
 
     // Scale down if images do not fit on screen, otherwise use
     // 1:1 PNGs to avoid scaling artifacts. Scale to 90% of the display size if scaling is needed.
-    if (picOrig.height() > displaySize.height() ||
-            picOrig.width() > displaySize.width()) {
+    if (picOrig.height() > displaySize.height() || picOrig.width() > displaySize.width()) {
         QSize picScaledSize = picOrig.size();
         picScaledSize.scale(displaySize * 0.9, Qt::KeepAspectRatio);
         m_displayScale = qMin((qreal)picScaledSize.height() / (qreal)picOrig.height(),

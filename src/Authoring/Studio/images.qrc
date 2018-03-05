@@ -236,13 +236,6 @@
         <file>images/playback_tools_low-03@2x.png</file>
         <file>images/Tutorial/button_back.png</file>
         <file>images/Tutorial/button_next.png</file>
-        <file>images/Tutorial/screens/1.png</file>
-        <file>images/Tutorial/screens/2.png</file>
-        <file>images/Tutorial/screens/3.png</file>
-        <file>images/Tutorial/screens/4.png</file>
-        <file>images/Tutorial/screens/5.png</file>
-        <file>images/Tutorial/screens/6.png</file>
-        <file>images/Tutorial/screens/7.png</file>
         <file>images/Tutorial/button_back@2x.png</file>
         <file>images/Tutorial/button_next@2x.png</file>
         <file>images/Objects-edit-disabled.png</file>
@@ -262,6 +255,20 @@
         <file>images/toolbutton-arrow.png</file>
         <file>images/add-disabled.png</file>
         <file>images/add-disabled@2x.png</file>
+        <file>images/Tutorial/screens/1x/1.png</file>
+        <file>images/Tutorial/screens/1x/2.png</file>
+        <file>images/Tutorial/screens/1x/3.png</file>
+        <file>images/Tutorial/screens/1x/4.png</file>
+        <file>images/Tutorial/screens/1x/5.png</file>
+        <file>images/Tutorial/screens/1x/6.png</file>
+        <file>images/Tutorial/screens/1x/7.png</file>
+        <file>images/Tutorial/screens/2x/1.png</file>
+        <file>images/Tutorial/screens/2x/2.png</file>
+        <file>images/Tutorial/screens/2x/3.png</file>
+        <file>images/Tutorial/screens/2x/4.png</file>
+        <file>images/Tutorial/screens/2x/5.png</file>
+        <file>images/Tutorial/screens/2x/6.png</file>
+        <file>images/Tutorial/screens/2x/7.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>
