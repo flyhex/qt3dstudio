@@ -60,10 +60,6 @@ namespace runtime {
         virtual void SetActive(QT3DSI32 inTrackId, bool inActive) = 0;
         virtual void UpdateDynamicKey(QT3DSI32 inTrackId) = 0;
 
-        virtual void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream,
-                                    IElementAllocator &inElementAllocator) = 0;
-        virtual void LoadBinaryData(NVDataRef<QT3DSU8> inLoadData, size_t inElementOffset) = 0;
-
         static IAnimationSystem &CreateAnimationSystem(NVFoundationBase &inFoundation);
     };
 }

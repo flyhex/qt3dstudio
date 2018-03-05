@@ -588,23 +588,6 @@ namespace runtime {
                               CRegisteredString inName) = 0;
 
         virtual element::SElement *FindElementByHandle(QT3DSU32 inElementHandle) = 0;
-        // Saving out the type descriptors and elements.  Note that we save all roots in dfs order
-        // so that on load
-        // the graph is dfs although I do not think it matters.  We save all elements at once so
-        // that we can
-        // have cross-presentation element references work out correctly.  This is a rather large
-        // change
-        // from the older system which saved elements in presentation-specific groups.
-        // Unfortunately with this design
-        // a given address needs a presentation to distinguish it because on load each presentation
-        // will have a separate
-        // load address.  So in the new system we save all elements into one section thus
-        // cross-presentation element references
-        // work correctly.
-        virtual void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream,
-                                    NVDataRef<element::SElement *> inRoots) = 0;
-        virtual Option<eastl::pair<NVDataRef<element::SElement *>, size_t>>
-        LoadBinaryData(NVDataRef<QT3DSU8> inLoadData, NVDataRef<QT3DSU8> inStringTableData) = 0;
         // Returns an element pointer that when added to the return value of load will be a valid
         // element.
         virtual element::SElement *

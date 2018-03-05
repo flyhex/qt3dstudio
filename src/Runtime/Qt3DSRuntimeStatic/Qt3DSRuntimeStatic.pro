@@ -41,7 +41,6 @@ SOURCES += \
     ../Source/Runtime/Source/Qt3DSAnimationSystem.cpp \
     ../Source/Runtime/Source/Qt3DSApplication.cpp \
     ../Source/Runtime/Source/Qt3DSAttributeHashes.cpp \
-    ../Source/Runtime/Source/Qt3DSBinarySerializerImpl.cpp \
     ../Source/Runtime/Source/Qt3DSComponentManager.cpp \
     ../Source/Runtime/Source/Qt3DSElementSystem.cpp \
     ../Source/Runtime/Source/Qt3DSEventCallbacks.cpp \
@@ -255,7 +254,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSAnimationSystem.h \
     ../Source/Runtime/Include/Qt3DSApplication.h \
     ../Source/Runtime/Include/Qt3DSAttributeHashes.h \
-    ../Source/Runtime/Include/Qt3DSBinarySerializerImpl.h \
     ../Source/Runtime/Include/Qt3DSComponentManager.h \
     ../Source/Runtime/Include/Qt3DSElementSystem.h \
     ../Source/Runtime/Include/Qt3DSEventCallbacks.h \
@@ -283,8 +281,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSSlideSystem.h \
     ../Source/Runtime/Include/Qt3DSTimePolicy.h \
     ../Source/Runtime/Include/Qt3DSApplicationValues.h \
-    ../Source/Runtime/Include/Qt3DSBinarySerializationHelper.h \
-    ../Source/Runtime/Include/Qt3DSBinarySerializer.h \
     ../Source/Runtime/Include/Qt3DSIComponentManager.h \
     ../Source/Runtime/Include/Qt3DSIInputSystem.h \
     ../Source/Runtime/Include/Qt3DSInputDefs.h \

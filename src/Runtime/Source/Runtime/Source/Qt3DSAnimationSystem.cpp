@@ -44,7 +44,6 @@
 #include "EASTL/sort.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "foundation/Qt3DSIndexableLinkedList.h"
-#include "Qt3DSBinarySerializationHelper.h"
 
 using namespace qt3ds::runtime;
 using namespace qt3ds::runtime::element;
@@ -422,50 +421,6 @@ struct SAnimSystem : public IAnimationSystem
                 // Update start value
                 theFirstKey->m_Value = thePropData->m_FLOAT;
             }
-        }
-    }
-
-    void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream,
-                                IElementAllocator &inElementAllocator) override
-    {
-        qt3ds::foundation::SWriteBuffer theWriter(m_Foundation.getAllocator(), "WriteBuffer");
-        theWriter.write((QT3DSU32)m_Tracks.size());
-        theWriter.write(m_NextTrackId);
-        nvvector<SAnimationTrack *> tempTrackList(m_Foundation.getAllocator(), "TempTrackList");
-        tempTrackList.reserve(m_Tracks.size());
-        for (TAnimationTrackHash::iterator iter = m_Tracks.begin(), end = m_Tracks.end();
-             iter != end; ++iter)
-            tempTrackList.push_back(iter->second);
-        eastl::sort(tempTrackList.begin(), tempTrackList.end(), SAnimationTrackComparator());
-        for (QT3DSU32 idx = 0, end = tempTrackList.size(); idx < end; ++idx) {
-            SAnimationTrack &theTrack = *tempTrackList[idx];
-            size_t trackOffset = theWriter.size();
-            theWriter.write(theTrack);
-            SaveIndexableList<TAnimationKeyNodeList>(theTrack.m_Keys, theWriter);
-            SAnimationTrack *theWrittenTrack =
-                reinterpret_cast<SAnimationTrack *>(theWriter.begin() + trackOffset);
-            theWrittenTrack->m_Element =
-                inElementAllocator.GetRemappedElementAddress(theWrittenTrack->m_Element);
-            theWrittenTrack->m_ActiveSetIndex = QT3DS_MAX_U32;
-        }
-        ioStream.Write(theWriter.begin(), theWriter.size());
-    }
-
-    void LoadBinaryData(NVDataRef<QT3DSU8> inLoadData, size_t inElementOffset) override
-    {
-        m_LoadData = inLoadData;
-
-        SDataReader theReader(inLoadData.begin(), inLoadData.end());
-        QT3DSU32 numTracks = *theReader.Load<QT3DSU32>();
-        m_NextTrackId = *theReader.Load<QT3DSU32>();
-        for (QT3DSU32 idx = 0, end = numTracks; idx < end; ++idx) {
-            SAnimationTrack *theTrack = theReader.Load<SAnimationTrack>();
-            theTrack->m_Element = reinterpret_cast<SElement *>(
-                reinterpret_cast<size_t>(theTrack->m_Element) + inElementOffset);
-            m_Tracks.insert(eastl::make_pair(theTrack->m_Id, theTrack));
-
-            LoadIndexableList<TAnimationKeyNodeList>(theTrack->m_Keys, theTrack->m_KeyCount,
-                                                     theReader);
         }
     }
 };

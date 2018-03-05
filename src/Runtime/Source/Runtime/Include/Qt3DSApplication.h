@@ -200,10 +200,6 @@ public:
 
     virtual Q3DStudio::CInputEngine &GetInputEngine() = 0;
 
-    // Saves to presentationdir/binary/stem.uiab
-    // Saves all presentations and all scene data.
-    virtual void SaveBinary() = 0;
-
     virtual Q3DStudio::CPresentation *GetPrimaryPresentation() = 0;
 
     virtual Q3DStudio::CPresentation *GetPresentationById(const char8_t *inId) = 0;

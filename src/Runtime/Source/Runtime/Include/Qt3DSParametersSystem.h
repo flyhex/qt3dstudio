@@ -58,9 +58,6 @@ namespace runtime {
         virtual QT3DSU32 GetNumParameters(QT3DSI32 inGroupId) const = 0;
         virtual TIdValuePair GetParameter(QT3DSI32 inGroupId, QT3DSU32 inIndex) const = 0;
 
-        virtual void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream) = 0;
-        virtual void LoadBinaryData(NVDataRef<QT3DSU8> inLoadData) = 0;
-
         static IParametersSystem &CreateParametersSystem(NVFoundationBase &inFoundation);
     };
 }

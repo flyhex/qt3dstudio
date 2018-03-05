@@ -41,7 +41,6 @@
 #include "Qt3DSHash.h"
 #include "Qt3DSTimePolicy.h"
 #include "foundation/Qt3DSIndexableLinkedList.h"
-#include "Qt3DSBinarySerializationHelper.h"
 
 using namespace qt3ds::runtime;
 using namespace qt3ds::runtime::element;
@@ -531,92 +530,6 @@ struct SSlideSystem : public ISlideSystem
             return theSlide->m_PlayThroughTo;
         QT3DS_ASSERT(false);
         return 0xFF;
-    }
-
-    void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream) override
-    {
-        qt3ds::foundation::SWriteBuffer theWriter(m_Foundation.getAllocator(), "WriteBuffer");
-        theWriter.write((QT3DSU32)m_Slides.size());
-        for (TComponentSlideHash::iterator iter = m_Slides.begin(), end = m_Slides.end();
-             iter != end; ++iter) {
-            QT3DSU32 handle = iter->first->GetHandle();
-            SSlide *firstSlide = iter->second;
-            theWriter.write(handle);
-            size_t slideCountOffset = (QT3DSU32)theWriter.size();
-            theWriter.write(0);
-            QT3DSU32 slideCount = 0;
-            for (SSlide *theSlide = firstSlide; theSlide;
-                 theSlide = theSlide->m_NextSlide, ++slideCount) {
-                size_t theSlideOffset = (QT3DSU32)theWriter.size();
-                theWriter.write(*theSlide);
-                size_t theElementCountOffset = (QT3DSU32)theWriter.size();
-                theWriter.write((QT3DSU32)0);
-                QT3DSU32 theElementCount = 0;
-                for (SSlideElement *theElement = theSlide->m_FirstElement; theElement;
-                     theElement = theElement->m_NextElement, ++theElementCount) {
-                    theWriter.write(*theElement);
-                    SaveIndexableList<TSlideAttributeNodeList>(theElement->m_AttributeNodes,
-                                                               theWriter);
-                }
-
-                SaveIndexableList<TSlideAnimActionNodeList>(theSlide->m_FirstAnimActionNode,
-                                                            theWriter);
-
-                SSlide *theWrittenSlide =
-                    reinterpret_cast<SSlide *>(theWriter.begin() + theSlideOffset);
-                theWrittenSlide->m_Name.Remap(m_StringTable);
-                theWrittenSlide->m_FirstAnimActionNode = NULL;
-                theWrittenSlide->m_FirstElement = NULL;
-                QT3DSU32 *theElementCountPtr =
-                    reinterpret_cast<QT3DSU32 *>(theWriter.begin() + theElementCountOffset);
-                theElementCountPtr[0] = theElementCount;
-            }
-            QT3DSU32 *theSlideCountPtr =
-                reinterpret_cast<QT3DSU32 *>(theWriter.begin() + slideCountOffset);
-            theSlideCountPtr[0] = slideCount;
-        }
-        ioStream.Write(theWriter.begin(), theWriter.size());
-    }
-
-    void LoadBinaryData(NVDataRef<QT3DSU8> inLoadData, NVDataRef<QT3DSU8> inStringTableData,
-                                size_t /*inElementOffset*/) override
-    {
-        m_LoadData = inLoadData;
-
-        SDataReader theReader(inLoadData.begin(), inLoadData.end());
-        QT3DSU32 numComponents = *theReader.Load<QT3DSU32>();
-        for (QT3DSU32 compIdx = 0; compIdx < numComponents; ++compIdx) {
-            QT3DSU32 compHandle = *theReader.Load<QT3DSU32>();
-            SElement *theElement = m_ElementSystem.FindElementByHandle(compHandle);
-            QT3DSU32 numComponentSlides = *theReader.Load<QT3DSU32>();
-            SSlide *lastSlide = NULL;
-            for (QT3DSU32 slideIdx = 0; slideIdx < numComponentSlides; ++slideIdx) {
-                SSlide *theSlide = theReader.Load<SSlide>();
-                if (slideIdx == 0)
-                    m_Slides.insert(eastl::make_pair(theElement, theSlide));
-                else
-                    lastSlide->m_NextSlide = theSlide;
-
-                lastSlide = theSlide;
-                theSlide->m_Name.Remap(inStringTableData);
-                theSlide->m_NextSlide = NULL;
-                QT3DSU32 elementCount = *theReader.Load<QT3DSU32>();
-                SSlideElement *lastElement = NULL;
-                for (QT3DSU32 elemIdx = 0; elemIdx < elementCount; ++elemIdx) {
-                    SSlideElement *theElement = theReader.Load<SSlideElement>();
-                    if (elemIdx == 0)
-                        theSlide->m_FirstElement = theElement;
-                    else
-                        lastElement->m_NextElement = theElement;
-                    lastElement = theElement;
-                    LoadIndexableList<TSlideAttributeNodeList>(
-                        theElement->m_AttributeNodes, theElement->m_AttributeCount, theReader);
-                }
-
-                LoadIndexableList<TSlideAnimActionNodeList>(theSlide->m_FirstAnimActionNode,
-                                                            theSlide->m_AnimActionCount, theReader);
-            }
-        }
     }
 };
 }

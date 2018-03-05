@@ -130,11 +130,9 @@ QString Viewer::convertUrlListToFilename(const QList<QUrl> &list)
 {
     for (const QUrl &url : list) {
         QString str = url.toLocalFile();
-        if (str.isEmpty() == false) {
-            if ((QFileInfo(str).suffix() == "uip")
-                    || (QFileInfo(str).suffix() == "uia")
-                    || (QFileInfo(str).suffix() == "uiab"))
-            {
+        if (!str.isEmpty()) {
+            if (QFileInfo(str).suffix() == QStringLiteral("uip")
+                    || QFileInfo(str).suffix() == QStringLiteral("uia")) {
                 return str;
             }
         }

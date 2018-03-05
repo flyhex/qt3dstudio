@@ -35,7 +35,6 @@
 #include "foundation/Qt3DSIndexableLinkedList.h"
 #include "foundation/Qt3DSContainers.h"
 #include "foundation/SerializationTypes.h"
-#include "Qt3DSBinarySerializationHelper.h"
 #include "foundation/IOStreams.h"
 
 using namespace qt3ds::runtime;
@@ -162,36 +161,6 @@ struct SParamSystem : public IParametersSystem
 
         QT3DS_ASSERT(false);
         return retval;
-    }
-
-    void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream) override
-    {
-        SWriteBuffer theWriter(m_Foundation.getAllocator(), "SaveData");
-        theWriter.write(m_NextId);
-        theWriter.write((QT3DSU32)m_Groups.size());
-
-        for (TIdGroupHash::iterator iter = m_Groups.begin(), end = m_Groups.end(); iter != end;
-             ++iter) {
-            theWriter.write(iter->first);
-            theWriter.write(iter->second);
-            SaveIndexableList<TParametersList>(iter->second.m_FirstGroup, theWriter);
-        }
-        ioStream.Write(theWriter.begin(), theWriter.size());
-    }
-
-    void LoadBinaryData(NVDataRef<QT3DSU8> inLoadData) override
-    {
-        m_LoadData = inLoadData;
-        SDataReader theReader(inLoadData.begin(), inLoadData.end());
-        m_NextId = theReader.LoadRef<QT3DSI32>();
-        QT3DSU32 numGroups = theReader.LoadRef<QT3DSU32>();
-        for (QT3DSU32 idx = 0, end = numGroups; idx < end; ++idx) {
-            QT3DSI32 groupId = theReader.LoadRef<QT3DSI32>();
-            SParameterGroupEntry *theGroup = theReader.Load<SParameterGroupEntry>();
-            LoadIndexableList<TParametersList>(theGroup->m_FirstGroup, theGroup->m_ParameterCount,
-                                               theReader);
-            m_Groups.insert(eastl::make_pair(groupId, *theGroup));
-        }
     }
 };
 }

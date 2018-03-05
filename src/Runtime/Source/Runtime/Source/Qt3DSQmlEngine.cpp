@@ -391,15 +391,6 @@ public:
     qt3ds::runtime::IApplication *GetApplication() override;
     void Initialize() override;
 
-    void BeginPreloadScripts(const eastl::vector<const char *> &,
-                                     qt3ds::render::IThreadPool &, const char *) override {}
-    void EndPreloadScripts() override {}
-    eastl::vector<eastl::string> GetLoadedScripts() override
-    {
-        eastl::vector<eastl::string> retval;
-        return retval;
-    }
-
     void LoadScript(IPresentation *presentation, TElement *element, const CHAR *path) override;
     Q3DStudio::INT32 InitializeApplicationBehavior(const char *) override
     {

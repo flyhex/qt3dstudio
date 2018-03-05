@@ -765,12 +765,6 @@ struct SLuaEngineImpl : public CLuaEngine
     void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) override;
     void SetApplication(qt3ds::runtime::IApplication &inApplication) override;
 
-    void BeginPreloadScripts(const eastl::vector<const char *> &inScripts,
-                                     qt3ds::render::IThreadPool &inThreadPool,
-                                     const char *inProjectDir) override;
-    void EndPreloadScripts() override;
-    eastl::vector<eastl::string> GetLoadedScripts() override;
-
     void LoadScript(IPresentation *inPresentation, TElement *inOwner, const CHAR *inName) override;
     Q3DStudio::INT32 InitializeApplicationBehavior(const char *inProjectRelativePath) override;
 
@@ -1163,84 +1157,6 @@ void SLuaEngineImpl::SetApplication(qt3ds::runtime::IApplication &inApplication)
     m_Application = &inApplication;
     lua_pushlightuserdata(m_LuaState, m_Application);
     lua_setglobal(m_LuaState, "Qt3DSApplication");
-}
-
-// Starts preloading scripts offline.  This sets m_LuaState to NULL until after EndPreloadScripts to
-// avoid multithreaded lua state access.  Some calls may be queued till EndPreloadScripts
-void SLuaEngineImpl::BeginPreloadScripts(const eastl::vector<const char *> &inScripts,
-                                         qt3ds::render::IThreadPool &inThreadPool,
-                                         const char *inProjDir)
-{
-    m_PreloadScripts.assign(inScripts.begin(), inScripts.end());
-    m_PreloadState = m_LuaState;
-    m_LuaState = NULL;
-    m_PreloadProjectDir.assign(inProjDir);
-    m_PreloadSync.reset();
-    inThreadPool.AddTask(this, PreloadFunctionCall, NULL);
-}
-
-// Ends preload, restores m_LuaState.
-void SLuaEngineImpl::EndPreloadScripts()
-{
-    qt3ds::foundation::Mutex::ScopedLock __locker(m_PreloadMutex);
-    if (m_LuaState == NULL) {
-        m_PreloadSync.wait();
-        m_LuaState = m_PreloadState;
-        m_PreloadState = NULL;
-    }
-}
-
-// Fast loading support; on save get the set of loaded scripts
-eastl::vector<eastl::string> SLuaEngineImpl::GetLoadedScripts()
-{
-    LUA_ENGINE_MULTITHREAD_PROTECT_METHOD;
-    eastl::vector<eastl::string> retval;
-    SLuaStackScope theScope(m_LuaState);
-    GetLoadedBuffersTable(m_LuaState);
-    QT3DS_ASSERT(lua_type(m_LuaState, -1) == LUA_TTABLE);
-    lua_pushnil(m_LuaState);
-    eastl::vector<eastl::pair<eastl::string, QT3DSU32>> theDirectory;
-    qt3ds::foundation::MemoryBuffer<> theBuffer(ForwardingAllocator(
-        m_ApplicationCore->GetRuntimeFactoryCore().GetFoundation().getAllocator(),
-        "LuaBinaryData"));
-    while (lua_next(m_LuaState, -2)) {
-        // dup the key
-        lua_pushvalue(m_LuaState, -2);
-        const char *relativeFileName = lua_tostring(m_LuaState, -1);
-        retval.push_back(relativeFileName);
-        // pop the key
-        lua_pop(m_LuaState, 1);
-        // Dump the function
-        theDirectory.push_back(eastl::make_pair(retval.back(), (QT3DSU32)theBuffer.size()));
-        lua_dump(m_LuaState, WriteLuaData, &theBuffer);
-        // pop the value
-        lua_pop(m_LuaState, 1);
-    }
-    eastl::string tempStr;
-    CFileTools::CombineBaseAndRelative(m_ApplicationCore->GetProjectDirectory().c_str(), "binary",
-                                       tempStr);
-    CFileTools::CreateDir(tempStr.c_str());
-    tempStr.append("/compiledlua.bin");
-    qt3ds::foundation::CFileSeekableIOStream theStream(tempStr.c_str(), FileWriteFlags());
-    if (theStream.IsOpen() == false) {
-        qCritical(qt3ds::INTERNAL_ERROR, "Unable to open lua binary file");
-        QT3DS_ASSERT(false);
-    }
-    qt3ds::foundation::IOutStream &theOutStream(theStream);
-    theOutStream.Write((QT3DSU32)theDirectory.size());
-    for (QT3DSU32 idx = 0, end = theDirectory.size(); idx < end; ++idx) {
-        eastl::pair<eastl::string, QT3DSU32> &theEntry(theDirectory[idx]);
-        QT3DSU32 theStrLen = (QT3DSU32)theEntry.first.size();
-        if (theStrLen)
-            ++theStrLen;
-        theOutStream.Write(theStrLen);
-        if (theStrLen)
-            theOutStream.Write(theEntry.first.c_str(), theStrLen);
-        theOutStream.Write(theEntry.second);
-    }
-    theOutStream.Write((QT3DSU32)theBuffer.size());
-    theOutStream.Write(theBuffer.begin(), (QT3DSU32)theBuffer.size());
-    return retval;
 }
 
 //==============================================================================
@@ -2057,7 +1973,7 @@ void SLuaEngineImpl::Initialize()
 void SLuaEngineImpl::Shutdown(qt3ds::NVFoundationBase &inFoundation)
 {
     qCInfo(TRACE_INFO, "Lua engine Begin Exit");
-    EndPreloadScripts();
+
     for (int idx = 0, end = m_ImageLoadingCallbacks.size(); idx < end; ++idx) {
         m_ImageLoadingCallbacks[idx]->m_Engine = NULL;
     }
