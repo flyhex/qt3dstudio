@@ -151,6 +151,12 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
     m_offscreenSurface->create();
 
     m_renderControl = new RenderControl(nullptr);
+
+    connect(m_renderControl, &QQuickRenderControl::renderRequested,
+            this, &Q3DSQmlStreamRenderer::requestUpdate);
+    connect(m_renderControl, &QQuickRenderControl::sceneChanged,
+            this, &Q3DSQmlStreamRenderer::requestUpdate);
+
     m_quickWindow = new QQuickWindow(m_renderControl);
     m_quickWindow->setClearBeforeRendering(false);
 
@@ -219,11 +225,6 @@ bool Q3DSQmlStreamRenderer::initialize(QOpenGLContext *context, QSurface *surfac
         Q_ASSERT(QOpenGLContext::areSharing(context, m_context));
         return true;
     }
-
-    connect(m_renderControl, &QQuickRenderControl::renderRequested,
-            this, &Q3DSQmlStreamRenderer::requestUpdate);
-    connect(m_renderControl, &QQuickRenderControl::sceneChanged,
-            this, &Q3DSQmlStreamRenderer::requestUpdate);
 
     m_rootItem->setParentItem(m_quickWindow->contentItem());
 
@@ -359,7 +360,7 @@ bool Q3DSQmlStreamRenderer::event(QEvent *event)
         m_prepared = true;
 
         if (m_requestUpdate)
-            requestUpdate();
+            QCoreApplication::postEvent(this, new RequestUpdate());
 
         return true;
     }
