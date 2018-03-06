@@ -44,19 +44,19 @@ Rectangle {
        }
     }
 
+    MouseArea {
+        anchors.fill: controlArea
+        onPressed: {
+            mouse.accepted = false
+            focusEater.forceActiveFocus();
+        }
+    }
+
     ColumnLayout {
+        id: controlArea
         anchors.fill: parent
         anchors.topMargin: 4
         spacing: 8
-
-        MouseArea {
-            anchors.fill: parent
-            z: -10
-            onPressed: {
-                mouse.accepted = false
-                focusEater.forceActiveFocus();
-            }
-        }
 
         Item {
             id: focusEater
