@@ -37,19 +37,24 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Open
     \li \c{Ctrl + O}
+    \li \c{Cmd + O}
   \row
     \li Connect
+    \li \c{F9}
     \li \c{F9}
   \row
     \li Reload
     \li \c{F5}
+    \li \c{F5}
   \row
     \li Quit
     \li \c{Ctrl + Q}
+    \li \c{Cmd + Q}
 \endtable
 
 \section1 View Menu
@@ -57,19 +62,27 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Show Matte
     \li \c{Ctrl + D}
+    \li \c{Cmd + D}
   \row
-    \li Scale Modes
-    \li \c{Ctrl + Shift + S} (cycle through scale modes)
+    \li Scale Modes (cycle through)
+    \li \c{Ctrl + Shift + S}
+    \li \c{Cmd + Shift + S}
   \row
     \li Show Render Statistics
     \li \c{F7}
+    \li \c{F7}
   \row
     \li Full Screen
-    \li \c{F11} (To exit full screen, ESC or swipe down gesture can also be used)
+    \li \c{F11}
+    \li \c{F11}
+  \row
+    \li
+    \li {2, 1} To exit full screen, \c {F11}, \c {ESC} or swipe down gesture can be used.
 \endtable
 
 */
