@@ -70,6 +70,7 @@ Rectangle {
         StyledLabel {
             text: fileName
             color: _textColor
+            leftPadding: 5
 
             MouseArea {
                 anchors.fill: parent

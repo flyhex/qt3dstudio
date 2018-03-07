@@ -84,6 +84,7 @@ Rectangle {
                                       : _dataInputSelectModel.getInactiveIconPath();
                 }
                 StyledLabel {
+                    leftPadding: 5
                     text: display
                     color: (index >= _dataInputSelectModel.fixedItemCount)
                            && (index === _dataInputSelectView.selection())
