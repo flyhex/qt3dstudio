@@ -612,16 +612,17 @@ bool CHotKeys::isFocusOnControlThatWantsKeys()
  *
  * @param inString a string containing a key combo to parse
  */
-void CHotKeys::GetModAndKeyFromString(const Q3DStudio::CString &inString, Qt::KeyboardModifiers &inMod,
+void CHotKeys::GetModAndKeyFromString(const Q3DStudio::CString &inString,
+                                      Qt::KeyboardModifiers &inMod,
                                       int &inKey)
 {
     inMod = 0;
     inKey = 0;
-    CStringTokenizer theTokenizer(inString, L"/:"); // TODO: Localize
+    CStringTokenizer theTokenizer(inString, L"/:");
     Q3DStudio::CString theMods = theTokenizer.GetCurrentPartition();
     ++theTokenizer;
     Q3DStudio::CString theKey = theTokenizer.GetCurrentPartition();
-    CStringTokenizer theModTokenizer(theMods, L"/,"); // TODO: Localize
+    CStringTokenizer theModTokenizer(theMods, L"/,");
     while (theModTokenizer.HasNextPartition()) {
         Q3DStudio::CString theCurrentMod = theModTokenizer.GetCurrentPartition();
         inMod |= GetModifierFromString(theCurrentMod);
@@ -640,11 +641,11 @@ Qt::KeyboardModifier CHotKeys::GetModifierFromString(const Q3DStudio::CString &i
 {
     Qt::KeyboardModifier theRetVal = Qt::NoModifier;
 
-    if (inString == L"ctrl") // TODO: Localize
+    if (inString == L"ctrl")
         theRetVal = Qt::ControlModifier;
-    else if (inString == L"shift") // TODO: Localize
+    else if (inString == L"shift")
         theRetVal = Qt::ShiftModifier;
-    else if (inString == L"alt") // TODO: Localize
+    else if (inString == L"alt")
         theRetVal = Qt::AltModifier;
     return theRetVal;
 }

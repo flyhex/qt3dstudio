@@ -45,16 +45,16 @@ typedef std::function<void()> TCancelFunc;
 
 struct SInspectableDataInfo
 {
-    Q3DStudio::CString m_Name;
-    Q3DStudio::CString m_FormalName;
-    Q3DStudio::CString m_Description;
+    QString m_Name;
+    QString m_FormalName;
+    QString m_Description;
     TGetterFunc m_Getter;
     TSetterFunc m_Setter;
     TCommitFunc m_Commit;
     TCancelFunc m_Cancel;
 
-    SInspectableDataInfo(const Q3DStudio::CString &name, const Q3DStudio::CString &formalName,
-                         const Q3DStudio::CString &description, TGetterFunc getter, TSetterFunc setter,
+    SInspectableDataInfo(const QString &name, const QString &formalName,
+                         const QString &description, TGetterFunc getter, TSetterFunc setter,
                          TCommitFunc commit, TCancelFunc inCancel)
         : m_Name(name)
         , m_FormalName(formalName)
@@ -80,12 +80,12 @@ struct SComboAttItem : public IInspectableAttributeItem
     {
         return qt3dsdm::HandlerArgumentType::Property;
     }
-    Q3DStudio::CString GetInspectableName() const override { return m_BaseInspectableInfo.m_Name; }
-    Q3DStudio::CString GetInspectableFormalName() const override
+    QString GetInspectableName() const override { return m_BaseInspectableInfo.m_Name; }
+    QString GetInspectableFormalName() const override
     {
         return m_BaseInspectableInfo.m_FormalName;
     }
-    Q3DStudio::CString GetInspectableDescription() const override
+    QString GetInspectableDescription() const override
     {
         return m_BaseInspectableInfo.m_Description;
     }
@@ -128,12 +128,12 @@ struct SFloatIntItem : public IInspectableAttributeItem
     {
         return qt3dsdm::HandlerArgumentType::Property;
     }
-    Q3DStudio::CString GetInspectableName() const override { return m_BaseInspectableInfo.m_Name; }
-    Q3DStudio::CString GetInspectableFormalName() const override
+    QString GetInspectableName() const override { return m_BaseInspectableInfo.m_Name; }
+    QString GetInspectableFormalName() const override
     {
         return m_BaseInspectableInfo.m_FormalName;
     }
-    Q3DStudio::CString GetInspectableDescription() const override
+    QString GetInspectableDescription() const override
     {
         return m_BaseInspectableInfo.m_Description;
     }
@@ -200,34 +200,40 @@ long SGuideInspectableImpl::GetGroupCount()
 
 CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
 {
-    CDoc *theDoc = m_Core->GetDoc();
     TCommitFunc theCommiter = std::bind(&SGuideInspectableImpl::Commit, this);
     TCancelFunc theCanceler = std::bind(&SGuideInspectableImpl::Rollback, this);
-    m_Properties.push_back(std::make_shared<SFloatIntItem>(
-                               SInspectableDataInfo("Position", "Position", "Position of the guide",
-                                                    std::bind(&SGuideInspectableImpl::GetPosition, this),
-                                                    std::bind(&SGuideInspectableImpl::SetPosition, this,
-                                                              std::placeholders::_1),
-                                                    theCommiter, theCanceler),
-                               qt3dsdm::DataModelDataType::Float));
+    m_Properties.push_back(
+                std::make_shared<SFloatIntItem>(
+                    SInspectableDataInfo(QStringLiteral("Position"), QObject::tr("Position"),
+                                         QObject::tr("Position of the guide"),
+                                         std::bind(&SGuideInspectableImpl::GetPosition, this),
+                                         std::bind(&SGuideInspectableImpl::SetPosition, this,
+                                                   std::placeholders::_1),
+                                         theCommiter, theCanceler),
+                    qt3dsdm::DataModelDataType::Float));
     qt3dsdm::TMetaDataStringList theComboItems;
     theComboItems.push_back(L"Horizontal");
     theComboItems.push_back(L"Vertical");
 
-    m_Properties.push_back(std::make_shared<SComboAttItem>(
-                               SInspectableDataInfo("Direction", "Direction", "Direction of the guide",
-                                                    std::bind(&SGuideInspectableImpl::GetDirection, this),
-                                                    std::bind(&SGuideInspectableImpl::SetDirection, this,
-                                                              std::placeholders::_1),
-                                                    theCommiter, theCanceler),
-                               theComboItems));
+    m_Properties.push_back(
+                std::make_shared<SComboAttItem>(
+                    SInspectableDataInfo(QStringLiteral("Direction"), QObject::tr("Direction"),
+                                         QObject::tr("Direction of the guide"),
+                                         std::bind(&SGuideInspectableImpl::GetDirection, this),
+                                         std::bind(&SGuideInspectableImpl::SetDirection, this,
+                                                   std::placeholders::_1),
+                                         theCommiter, theCanceler),
+                    theComboItems));
 
-    m_Properties.push_back(std::make_shared<SFloatIntItem>(
-                               SInspectableDataInfo("Width", "Width", "Width of the guide",
-                                                    std::bind(&SGuideInspectableImpl::GetWidth, this),
-                                                    std::bind(&SGuideInspectableImpl::SetWidth, this, std::placeholders::_1),
-                                                    theCommiter, theCanceler),
-                               qt3dsdm::DataModelDataType::Long, 1.0f, 50.0f));
+    m_Properties.push_back(
+                std::make_shared<SFloatIntItem>(
+                    SInspectableDataInfo(QStringLiteral("Width"), QObject::tr("Width"),
+                                         QObject::tr("Width of the guide"),
+                                         std::bind(&SGuideInspectableImpl::GetWidth, this),
+                                         std::bind(&SGuideInspectableImpl::SetWidth, this,
+                                                   std::placeholders::_1),
+                                         theCommiter, theCanceler),
+                    qt3dsdm::DataModelDataType::Long, 1.0f, 50.0f));
 
     CEasyInspectorGroup *theNewGroup = new CEasyInspectorGroup(QObject::tr("Basic"));
     return theNewGroup;

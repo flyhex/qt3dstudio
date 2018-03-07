@@ -117,14 +117,15 @@ bool CCore::LoadBuildConfigurations()
     CFilePath theCurrentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
     CFilePath theMainDir = theCurrentPath.GetDirectory()
             .GetDirectory()
-            .GetDirectory(); //.GetDirectory();	// Developing directory
+            .GetDirectory();
     CFilePath theStudioDir =
-            CFilePath::CombineBaseAndRelative(theMainDir, CFilePath(L"Studio/Build Configurations"));
+            CFilePath::CombineBaseAndRelative(theMainDir,
+                                              CFilePath(L"Studio/Build Configurations"));
     Qt3DSFile theConfigurationDirectory(theStudioDir);
     if (!theStudioDir.IsDirectory())
         theConfigurationDirectory = Qt3DSFile(
                     Qt3DSFile::GetApplicationDirectory().GetAbsolutePath(),
-                    Q3DStudio::CString(L"Build Configurations")); // Installed directory // TODO: Localize
+                    Q3DStudio::CString(L"Build Configurations")); // Installed directory
 
     Q3DStudio::CBuildConfigParser theParser(m_BuildConfigurations);
     bool theSuccess = theParser.LoadConfigurations(theConfigurationDirectory);

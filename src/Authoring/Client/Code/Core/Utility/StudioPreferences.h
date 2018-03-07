@@ -113,34 +113,10 @@ public:
     static bool ShowVersionDialog();
     static void SetShowVersionDialog(bool inShowVersionDialog);
 
-    static Q3DStudio::CString GetDefaultApplication();
-    static void SetDefaultApplication(const Q3DStudio::CString &inApplication);
-
     static Q3DStudio::CString GetVersionString();
 
     static bool GetDontShowGLVersionDialog();
     static void SetDontShowGLVersionDialog(bool inValue);
-
-    static CPt GetObjectReferenceGadgetSize();
-    static void SetObjectReferenceGadgetSize(const CPt &inSize);
-
-    static CPt GetObjectReferenceGadgetPosition(const CPt &inDefault);
-    static void SetObjectReferenceGadgetPosition(const CPt &inPosition);
-
-    static CPt GetPropertyReferenceGadgetSize();
-    static void SetPropertyReferenceGadgetSize(const CPt &inSize);
-
-    static CPt GetPropertyReferenceGadgetPosition(const CPt &inDefault);
-    static void SetPropertyReferenceGadgetPosition(const CPt &inSize);
-
-    static CPt GetHandlerReferenceGadgetSize();
-    static void SetHandlerReferenceGadgetSize(const CPt &inSize);
-
-    static CPt GetEventReferenceGadgetSize();
-    static void SetEventReferenceGadgetSize(const CPt &inSize);
-
-    static CRct GetMultilineTextLocation();
-    static void SetMultilineTextLocation(const CRct &inSize);
 
     static long GetTimeAdvanceAmount();
     static void SetTimeAdvanceAmount(const long &inTime);
