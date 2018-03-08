@@ -133,12 +133,12 @@ void PropertyModel::setNameHandle(const qt3dsdm::Qt3DSDMHandlerArgHandle &handle
 
 void PropertyModel::setValueHandle(const qt3dsdm::Qt3DSDMHandlerArgHandle &handle)
 {
-    m_valueHandle = handle;
-
-    updateDefaultPropertyIndex();
-    updateValue();
-    if (m_valueHandle != handle)
+    if (m_valueHandle != handle) {
+        m_valueHandle = handle;
+        updateDefaultPropertyIndex();
+        updateValue();
         Q_EMIT valueHandleChanged();
+    }
 }
 
 int PropertyModel::rowCount(const QModelIndex &parent) const

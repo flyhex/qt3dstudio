@@ -246,9 +246,9 @@ void ActionView::setCurrentActionIndex(int index)
 
 void ActionView::setCurrentPropertyIndex(int handle, int index)
 {
-    if (index == m_currentPropertyIndex)
-        return;
 
+    // Make sure propertymodel name & value handles are always up-to-date,
+    // even when index is same as before
     m_currentPropertyValueHandle = 0;
     m_currentPropertyNameHandle = handle;
     for (int i = 0; i < m_handlerArguments.size(); ++i) {
@@ -261,6 +261,9 @@ void ActionView::setCurrentPropertyIndex(int handle, int index)
             }
         }
     }
+
+    if (index == m_currentPropertyIndex)
+        return;
 
     m_currentPropertyIndex = index;
 
