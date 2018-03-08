@@ -227,6 +227,9 @@ public:
 
     static QString GetFontFaceName();
 
+    static float getSelectorLineWidth();
+    static float getSelectorLineLength();
+
     static long GetRowSize();
     static long GetTimebarTipSize();
     static long GetTimebarInnerTipSize();

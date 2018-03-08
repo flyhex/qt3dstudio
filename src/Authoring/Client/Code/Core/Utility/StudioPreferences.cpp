@@ -1353,6 +1353,17 @@ QString CStudioPreferences::GetFontFaceName()
     return QStringLiteral("Segoe UI");
 }
 
+float CStudioPreferences::getSelectorLineWidth()
+{
+    return 3.0f;
+}
+
+float CStudioPreferences::getSelectorLineLength()
+{
+    return 50.0f;
+}
+
+
 //==============================================================================
 /**
  * Return the standard timeline row height

@@ -145,7 +145,7 @@ namespace studio {
     };
 
     const QT3DSF32 g_EditCameraFOV = 45.0f;
-    const QT3DSF32 g_RotationScaleFactor = 2 * M_PI / 180.0f;
+    const QT3DSF32 g_RotationScaleFactor = 2.0f * M_PI / 180.0f;
 
     struct SEditCameraPersistentInformation
     {

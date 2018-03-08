@@ -2620,7 +2620,7 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
             theRenderContext.SetScissorRect(qt3ds::render::NVRenderRect(0, 0, 100, 100));
             theRenderContext.SetDepthWriteEnabled(true);
             theRenderContext.SetScissorTestEnabled(true);
-            theRenderContext.SetClearColor(QT3DSVec4(.2, .2, .2, 0));
+            theRenderContext.SetClearColor(QT3DSVec4(.2f, .2f, .2f, 0.0f));
             theRenderContext.Clear(qt3ds::render::NVRenderClearFlags(
                 qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
             theRenderer.RunLayerRender(*theLayer, thePickSetup->m_ViewProjection);
