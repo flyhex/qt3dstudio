@@ -43,7 +43,6 @@
 #include "Qt3DSRect.h"
 #include "IDoc.h"
 #include "GUIDUtilities.h"
-#include "StudioErrorIDs.h"
 #include "GraphUtils.h"
 #include "CmdStackModifier.h"
 #include "Qt3DSColor.h"

@@ -35,9 +35,6 @@
 //	Includes
 //==============================================================================
 #include "VClockPolicy.h"
-#include "ClientErrorIDs.h"
-
-QT3DS_DEFINE_THISFILE;
 
 CVClockPolicy::CVClockPolicy()
 {

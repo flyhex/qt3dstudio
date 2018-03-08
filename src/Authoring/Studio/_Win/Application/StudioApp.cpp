@@ -159,7 +159,6 @@ int main(int argc, char *argv[])
 #include "foundation/Qt3DSLogging.h"
 
 CStudioApp g_StudioApp;
-long g_ErrorCode = 0;
 
 using namespace Q3DStudio;
 
@@ -361,9 +360,6 @@ int CStudioApp::Run()
                 break;
         }
         PerformShutdown();
-    } catch (Qt3DSExceptionClass &inException) {
-        g_ErrorCode = inException.GetErrorCode();
-        throw;
     } catch (qt3dsdm::Qt3DSDMError &uicdmError) {
         Q_UNUSED(uicdmError);
         exit(1);

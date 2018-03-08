@@ -25,6 +25,7 @@ INCLUDEPATH += \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
     ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \
     ..
@@ -51,7 +52,6 @@ SOURCES += \
     Code/Qt3DSTime.cpp \
     Code/Thread/Mutex.cpp \
     Code/Thread/Thread.cpp \
-    Code/Exceptions/Qt3DSExceptionClass.cpp \
     Code/Exceptions/XMLException.cpp \
     Code/_Win32/FileIterator.cpp \
     Code/_Win32/Preferences.cpp \

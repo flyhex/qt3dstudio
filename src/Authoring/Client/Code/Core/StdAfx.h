@@ -108,8 +108,6 @@
 #include "PlatformStrings.h"
 #include "PlatformConversion.h"
 #include "CommonConstants.h"
-#include "Qt3DSExceptions.h"
-#include "Qt3DSExceptionConstants.h"
 #include "Mutex.h"
 #include "Guard.h"
 #include "Thread.h"

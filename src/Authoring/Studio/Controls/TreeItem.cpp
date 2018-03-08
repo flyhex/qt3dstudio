@@ -876,9 +876,9 @@ void CTreeItem::AddChild(CControl *inControl, CControl *inInsertBefore /*= nullp
  */
 CTreeItem *CTreeItem::FindPrevSortSibling(CTreeItem *)
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    QT3DS_THROW(E_FAIL);
-#endif
+    // Not implemented
+    QT3DS_ASSERT(false);
+
     return NULL;
 }
 

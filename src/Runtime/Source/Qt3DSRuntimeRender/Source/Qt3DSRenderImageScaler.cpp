@@ -78,7 +78,7 @@ void CImageScaler::Scale(EScaleMethod inScaleMethod, unsigned char *inOldBuffer,
         break;
 
     default:
-        // QT3DS_THROW( RENDER_E_ILLEGALPARAMETER )
+        QT3DS_ASSERT(false);
         break;
     }
 }
@@ -116,7 +116,7 @@ void CImageScaler::FastScale(EScaleMethod inScaleMethod, unsigned char *inOldBuf
         break;
 
     default:
-        // QT3DS_THROW( RENDER_E_ILLEGALPARAMETER )
+        QT3DS_ASSERT(false);
         break;
     }
 }
@@ -137,13 +137,15 @@ void CImageScaler::FastScale(EScaleMethod inScaleMethod, unsigned char *inOldBuf
  *  also equivalent to the return value of the CTextureType::PixelSize method.
 */
 void CImageScaler::Crop(unsigned char *inOldBuffer, unsigned long inOldWidth,
-                        unsigned long /*inOldHeight*/, unsigned char *&outNewBuffer,
+                        unsigned long inOldHeight, unsigned char *&outNewBuffer,
                         unsigned long inNewWidth, unsigned long inNewHeight, unsigned long inPlanes)
 {
-    long theMinWidth = NVMin(inOldWidth, inNewWidth);
+    Q_UNUSED(inOldHeight);
 
-    // QT3DS_THROWFALSE( inNewWidth <= inOldWidth, RENDER_E_SCALERNOEXPAND )
-    // QT3DS_THROWFALSE( inNewHeight <= inOldHeight, RENDER_E_SCALERNOEXPAND )
+    QT3DS_ASSERT(inNewWidth <= inOldWidth);
+    QT3DS_ASSERT(inNewHeight <= inOldHeight);
+
+    long theMinWidth = NVMin(inOldWidth, inNewWidth);
 
     outNewBuffer = new unsigned char[inNewWidth * inNewHeight * inPlanes];
     ::memset(outNewBuffer, 0, inNewWidth * inNewHeight * inPlanes);
@@ -175,7 +177,7 @@ void CImageScaler::Bilinear(unsigned char *inOldBuffer, unsigned long inOldWidth
                             unsigned long inNewWidth, unsigned long inNewHeight,
                             unsigned long inPlanes)
 {
-    // QT3DS_THROWFALSE( inPlanes > 0, RENDER_E_SCALERBADTYPE )
+    QT3DS_ASSERT(inPlanes > 0);
 
     outNewBuffer = new unsigned char[inNewWidth * inNewHeight * inPlanes];
     CImageScaler::Resize(inOldBuffer, inOldWidth, inOldHeight, outNewBuffer, inNewWidth,
@@ -328,7 +330,7 @@ void CImageScaler::FastPointSample(unsigned char *inOldBuffer, unsigned long inO
     } break;
 
     default:
-        // QT3DS_THROW( RENDER_E_ILLEGALPARAMETER )
+        QT3DS_ASSERT(false);
         break;
     }
 }
@@ -371,7 +373,7 @@ void CImageScaler::Resize(unsigned char *inOldBuffer, unsigned long inOldWidth,
                           unsigned long inNewWidth, unsigned long inNewHeight,
                           unsigned long inPlanes)
 {
-    // QT3DS_THROWFALSE( inPlanes == 4, RENDER_E_ILLEGALPARAMETER );
+    QT3DS_ASSERT(inPlanes == 4);
 
     // only do the temporary allocation if necessary
     if (inOldWidth < inNewWidth || inOldHeight < inNewHeight) {
@@ -380,7 +382,6 @@ void CImageScaler::Resize(unsigned char *inOldBuffer, unsigned long inOldWidth,
         return;
     } else {
         // The downsampling algorithms *do* assume four planes.
-        // QT3DS_THROWFALSE( inPlanes == 4, RENDER_E_ILLEGALPARAMETER );
         if (inOldWidth > inNewWidth && inOldHeight > inNewHeight) {
             MemoryBuffer<> theBuffer(ForwardingAllocator(m_Allocator, "ImageScaler::TempBuffer"));
             theBuffer.reserve(inNewWidth * inOldHeight * 4);

@@ -40,7 +40,6 @@
 #include "HotKeys.h"
 #include "MasterP.h"
 #include "StudioPreferences.h"
-#include "StudioErrorIDs.h"
 
 //=============================================================================
 /**
@@ -92,9 +91,9 @@ void CTreeControl::Draw(CRenderer *inRenderer)
  */
 CTreeItem *CTreeControl::FindPrevSortSibling(CTreeItem *, CTreeItem *)
 {
-#ifdef KDAB_TEMPORARILY_REMOVED
-    QT3DS_THROW(E_FAIL); // this is ass
-#endif
+    // Not implemented
+    QT3DS_ASSERT(false);
+
     return NULL;
 }
 
@@ -479,7 +478,7 @@ void CTreeControl::ExpandFrom(CTreeItem *inItem)
 void CTreeControl::CollapseAll()
 {
     // Not implemented
-    QT3DS_THROW(STUDIO_E_FAIL);
+    QT3DS_ASSERT(false);
 }
 
 //=============================================================================

@@ -47,8 +47,6 @@
 //	Static Member Initialization
 //==============================================================================
 
-QT3DS_DEFINE_THISFILE;
-
 using namespace qt3dsdm;
 using namespace std;
 

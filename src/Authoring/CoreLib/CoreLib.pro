@@ -54,6 +54,7 @@ INCLUDEPATH += \
     ../../Runtime/Source/DataModel/Include \
     ../../Runtime/Source/Qt3DSRender/Include \
     ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../Runtime/Source/Qt3DSRuntimeRender/Include \
     ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
     ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
