@@ -340,7 +340,11 @@ SFileInfoFlags CFilePath::GetFileFlags() const
 
 SFileData CFilePath::GetFileData() const
 {
-    return {};
+    SFileData data;
+    data.m_CreateTime = birthTime().toSecsSinceEpoch();
+    data.m_LastModTime = lastModified().toSecsSinceEpoch();
+    data.m_Length = size();
+    return data;
 }
 
 CFilePath CFilePath::GetUserApplicationDirectory()
@@ -604,10 +608,9 @@ CFilePath SFileTools::FindUniqueDestDirectory(const CFilePath &inDestDirectory,
         return L"";
     }
 
-    Q3DStudio::CFilePath retval =
-        CFilePath::CombineBaseAndRelative(inDestDirectory, inDirName);
-    retval.ConvertToAbsolute();
-    return retval;
+    QDir uniqueDir = FindUniqueDestDirectory(QDir(inDestDirectory.filePath()),
+                                             inDirName.toQString());
+    return CFilePath(uniqueDir.absolutePath());
 }
 
 QDir SFileTools::FindUniqueDestDirectory(const QDir &inDestDirectory,
