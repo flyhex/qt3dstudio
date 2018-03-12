@@ -64,8 +64,9 @@
 //==============================================================================
 CStudioAppPrefsPage::CStudioAppPrefsPage(QWidget *parent)
     : CStudioPreferencesPropPage(parent)
-    , m_TimebarShowTime(FALSE)
-    , m_InterpolationIsSmooth(FALSE)
+    , m_TimebarShowTime(false)
+    , m_InterpolationIsSmooth(false)
+    , m_restartNeeded(false)
     , m_ui(new Ui::StudioAppPrefsPage)
 {
     m_Font = QFont(CStudioPreferences::GetFontFaceName());
@@ -118,15 +119,19 @@ void CStudioAppPrefsPage::OnInitDialog()
     auto activated = static_cast<void(QComboBox::*)(int)>(&QComboBox::activated);
     connect(m_ui->m_buttonRestoreDefaults, &QPushButton::clicked,
             this, &CStudioAppPrefsPage::OnButtonRestoreDefaults);
-    connect(m_ui->m_DefaultInterpolation, activated,
-            this, &CStudioAppPrefsPage::OnSelChangeInterpolationDefault);
-    connect(m_ui->m_SnapRangeCombo, activated, this, &CStudioAppPrefsPage::OnSelChangeSnapRange);
+    connect(m_ui->m_DefaultInterpolation, activated, this, [=](){ SetModified(true); });
+    connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ SetModified(true); });
     connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
-            this, &CStudioAppPrefsPage::OnCheckTimelineAbsoluteSnapping);
+            this, [=](){ SetModified(true); EnableOptions(); });
     connect(m_ui->m_EditViewBGColor, &QPushButton::clicked,
             this, &CStudioAppPrefsPage::OnBgColorButtonClicked);
-    connect(m_ui->m_EditViewStartupView, activated,
-            this, &CStudioAppPrefsPage::OnSelChangeStartupView);
+    connect(m_ui->m_EditViewStartupView, activated, this, [=](){ SetModified(true); });
+    connect(m_ui->selectorWidth,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, [=](){ SetModified(true); m_restartNeeded = true; });
+    connect(m_ui->selectorLength,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, [=](){ SetModified(true); m_restartNeeded = true; });
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     connect(m_ui->m_PreviewSelector, activated,
             this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
@@ -156,6 +161,10 @@ void CStudioAppPrefsPage::LoadSettings()
     // Timeline snapping grid
     m_ui->m_checkTimelineAbsoluteSnapping->setChecked(
                 CStudioPreferences::IsTimelineSnappingGridActive());
+
+    // Tool handles
+    m_ui->selectorWidth->setValue(CStudioPreferences::getSelectorLineWidth());
+    m_ui->selectorLength->setValue(CStudioPreferences::getSelectorLineLength());
 
     // The scale mode
     m_ui->m_SnapRangeCombo->addItem(tr("Low Resolution"));
@@ -210,9 +219,22 @@ void CStudioAppPrefsPage::SaveSettings()
     CStudioPreferences::SetPreferredStartupView(
                 (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
 
+    // Tool handles
+    CStudioPreferences::setSelectorLineWidth(m_ui->selectorWidth->value());
+    CStudioPreferences::setSelectorLineLength(m_ui->selectorLength->value());
+
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     SavePreviewSettings();
 #endif
+
+    if (m_restartNeeded) {
+        // If handles changed, a restart of Studio is needed
+        QMessageBox::information(this, tr("Restart Needed"),
+                                 tr("Some settings were changed that require a"
+                                    " restart of the Qt 3D Studio to take effect."));
+        // Just show the dialog once (unless the values are changed again)
+        m_restartNeeded = false;
+    }
 }
 
 //==============================================================================
@@ -227,7 +249,7 @@ bool CStudioAppPrefsPage::OnApply()
     // Apply was clicked - save settings and disabled the Apply button
     this->SaveSettings();
 
-    this->SetModified(FALSE);
+    this->SetModified(false);
 
     // Request that the renderer refreshes as settings may have changed
     g_StudioApp.GetRenderer().RequestRender();
@@ -274,46 +296,6 @@ void CStudioAppPrefsPage::OnButtonRestoreDefaults()
 
 //==============================================================================
 /**
- *	OnSelChangeInterpolationDefault: CBN_SELCHANGE handler for the
- *									 IDC_INTERPOLATION_DEFAULT combo
- *box.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioAppPrefsPage::OnSelChangeInterpolationDefault()
-{
-    this->SetModified(TRUE);
-}
-
-//==============================================================================
-/**
- *	OnSelChangeSnapRange: CBN_SELCHANGE handler for the IDC_SNAPRANGE combo box.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioAppPrefsPage::OnSelChangeSnapRange()
-{
-    this->SetModified(true);
-}
-
-//==============================================================================
-/**
- *	OnCheckTimelineAbsoluteSnapping: Handler for the IDC_CHECK_TIMELINEABSOLUTESNAPPING
- *checkbox.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioAppPrefsPage::OnCheckTimelineAbsoluteSnapping()
-{
-    this->SetModified(true);
-    this->EnableOptions();
-}
-
-//==============================================================================
-/**
  *	EnableOptions: Enable/disable options.
  *
  *	@param	None
@@ -322,16 +304,6 @@ void CStudioAppPrefsPage::OnCheckTimelineAbsoluteSnapping()
 void CStudioAppPrefsPage::EnableOptions()
 {
     m_ui->m_SnapRangeCombo->setEnabled(m_ui->m_checkTimelineAbsoluteSnapping->isChecked());
-}
-
-//==============================================================================
-/**
- *	OnSelChangeStartupView: CBN_SELCHANGE handler for the IDC_COMBO_EDIT_STARTUP_VIEW
- *	Combo box
- */
-void CStudioAppPrefsPage::OnSelChangeStartupView()
-{
-    this->SetModified(true);
 }
 
 //==============================================================================
@@ -345,7 +317,7 @@ void CStudioAppPrefsPage::InitEditStartViewCombo()
     Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
-    for (size_t idx = 0, end = theCameraNames.size(); idx < end; ++idx) {
+    for (int idx = 0, end = theCameraNames.size(); idx < end; ++idx) {
         m_ui->m_EditViewStartupView->addItem(
                     theCameraNames.at(idx));
         m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1,

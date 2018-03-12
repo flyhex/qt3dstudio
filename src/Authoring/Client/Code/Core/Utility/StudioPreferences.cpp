@@ -1355,14 +1355,23 @@ QString CStudioPreferences::GetFontFaceName()
 
 float CStudioPreferences::getSelectorLineWidth()
 {
-    return 3.0f;
+    return CPreferences::GetUserPreferences().GetLongValue("SelectorLineWidth", 30) / 10.0f;
+}
+
+void CStudioPreferences::setSelectorLineWidth(float width)
+{
+    CPreferences::GetUserPreferences().SetLongValue("SelectorLineWidth", int(width * 10.0f));
 }
 
 float CStudioPreferences::getSelectorLineLength()
 {
-    return 50.0f;
+    return float(CPreferences::GetUserPreferences().GetLongValue("SelectorLineLength", 50));
 }
 
+void CStudioPreferences::setSelectorLineLength(float length)
+{
+    CPreferences::GetUserPreferences().SetLongValue("SelectorLineLength", int(length));
+}
 
 //==============================================================================
 /**
