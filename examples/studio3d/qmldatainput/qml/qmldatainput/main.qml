@@ -67,6 +67,12 @@ Item {
         anchors.fill: parent
 
         property int inputNumber: 0
+        property vector3d inputVec3: Qt.vector3d(0, 0, 0)
+        property vector3d inputVec3_2: Qt.vector3d(0, 0, 0)
+        property vector3d inputVec3_3: Qt.vector3d(0, 0, 0)
+        property string inputString: ""
+        property int inputFloat: 0.0
+        property variant inputVariant: 0
 
         // A changing property to demonstrate DataInput
         NumberAnimation {
@@ -75,6 +81,60 @@ Item {
             duration: 20000
             from: 0
             to: 360
+            loops: Animation.Infinite
+            running: true
+        }
+        NumberAnimation {
+            target: studio3D
+            property: "inputFloat"
+            duration: 9000
+            from: 50
+            to: 100
+            loops: Animation.Infinite
+            running: true
+        }
+        Vector3dAnimation {
+            target: studio3D
+            property: "inputVec3"
+            duration: 12000
+            from: Qt.vector3d(0.3, 0.5, 0.5)
+            to: Qt.vector3d(1.0, 1.0, 1.0)
+            loops: Animation.Infinite
+            running: true
+        }
+        Vector3dAnimation {
+            target: studio3D
+            property: "inputVec3_2"
+            duration: 2000
+            from: Qt.vector3d(0.1, 0.1, 0.3)
+            to: Qt.vector3d(1.0, 0.5, 1.0)
+            loops: Animation.Infinite
+            running: true
+        }
+        Vector3dAnimation {
+            target: studio3D
+            property: "inputVec3_3"
+            duration: 20000
+            from: Qt.vector3d(-0.1, -0.1, 0.0)
+            to: Qt.vector3d(0.1, 0.1, 0.0)
+            loops: Animation.Infinite
+            running: true
+        }
+        NumberAnimation {
+            target: studio3D
+            property: "inputString"
+            duration: 20000
+            from: 0
+            to: 1
+            loops: Animation.Infinite
+            running: true
+        }
+        NumberAnimation {
+            target: studio3D
+            property: "inputVariant"
+            duration: 8000
+            from: 20
+            to: 100
             loops: Animation.Infinite
             running: true
         }
@@ -93,6 +153,30 @@ Item {
                 // Name must match the data input name specified in the presentation
                 name: "rangeInput"
                 value: studio3D.inputNumber
+            }
+            DataInput {
+                name: "vec3Input"
+                value: studio3D.inputVec3
+            }
+            DataInput {
+                name: "vec3Input2"
+                value: studio3D.inputVec3_2
+            }
+            DataInput {
+                name: "vec3Input3"
+                value: studio3D.inputVec3_3
+            }
+            DataInput {
+                name: "stringInput"
+                value: studio3D.inputString
+            }
+            DataInput {
+                name: "floatInput"
+                value: studio3D.inputFloat
+            }
+            DataInput {
+                name: "variantInput"
+                value: studio3D.inputVariant
             }
         }
         //![1]
