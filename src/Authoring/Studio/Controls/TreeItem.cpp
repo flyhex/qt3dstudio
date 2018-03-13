@@ -872,19 +872,33 @@ void CTreeItem::AddChild(CControl *inControl, CControl *inInsertBefore /*= nullp
 
 //=============================================================================
 /**
- * Find the item that this item should be added after to maintian sort order.
+ * Find the item that this item should be added after to maintain sort order.
  */
-CTreeItem *CTreeItem::FindPrevSortSibling(CTreeItem *)
+CTreeItem *CTreeItem::FindPrevSortSibling(CTreeItem *inChild)
 {
-    // Not implemented
-    QT3DS_ASSERT(false);
+    CTreeItem *theSortItem = nullptr;
 
-    return NULL;
+    // No items in the list - return nullptr (because we don't care)
+    if (m_ItemList.size()) {
+        CTreeItem::TItemList::iterator thePos = m_ItemList.end();
+        for (; thePos != m_ItemList.begin(); --thePos) {
+            // Item in the list
+            theSortItem = *thePos;
+            if (m_TreeControl->IsItemLess(inChild, theSortItem))
+                break;
+        }
+
+        // Last item in the list
+        if (thePos == m_ItemList.begin())
+            theSortItem = nullptr;
+    }
+
+    return theSortItem;
 }
 
 //=============================================================================
 /**
- * Find the item that this item should be added before to maintian sort order.
+ * Find the item that this item should be added before to maintain sort order.
  */
 CTreeItem *CTreeItem::FindNextSortSibling(CTreeItem *inChild)
 {

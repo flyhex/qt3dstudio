@@ -87,19 +87,37 @@ void CTreeControl::Draw(CRenderer *inRenderer)
 
 //=============================================================================
 /**
- * Find the item that this item should be added after to maintian sort order.
+ * Find the item that this item should be added after to maintain sort order.
  */
-CTreeItem *CTreeControl::FindPrevSortSibling(CTreeItem *, CTreeItem *)
+CTreeItem *CTreeControl::FindPrevSortSibling(CTreeItem *inParent, CTreeItem *inChild)
 {
-    // Not implemented
-    QT3DS_ASSERT(false);
+    CTreeItem *theSortItem = nullptr;
 
-    return NULL;
+    if (inParent) {
+        theSortItem = inParent->FindPrevSortSibling(inChild);
+    } else {
+        // No items in the list - return nullptr (because we don't care)
+        if (m_ItemList.size()) {
+            CTreeItem::TItemList::iterator thePos = m_ItemList.end();
+            for (; thePos != m_ItemList.begin(); --thePos) {
+                // Item in the list
+                theSortItem = *thePos;
+                if (IsItemLess(inChild, theSortItem))
+                    break;
+            }
+
+            // Last item in the list
+            if (thePos == m_ItemList.begin())
+                theSortItem = nullptr;
+        }
+    }
+
+    return theSortItem;
 }
 
 //=============================================================================
 /**
- * Find the item that this item should be before after to maintian sort order.
+ * Find the item that this item should be before after to maintain sort order.
  */
 CTreeItem *CTreeControl::FindNextSortSibling(CTreeItem *inParent, CTreeItem *inChild)
 {
