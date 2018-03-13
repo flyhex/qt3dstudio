@@ -67,7 +67,7 @@
  */
 //==============================================================================
 CPlayerContainerWnd::CPlayerContainerWnd(CSceneView *inSceneView)
-    : QAbstractScrollArea(inSceneView)
+    : QScrollArea(inSceneView)
     , m_SceneView(inSceneView)
     , m_PlayerWnd(NULL)
     , m_IsMouseDown(false)
@@ -116,7 +116,7 @@ void CPlayerContainerWnd::SetPlayerWndPosition(long &outLeftPresentationEdge,
     // Horizontal scrollbar does not exist
     if (m_ClientRect.width() < theClientRect.width()) {
         theHScrollPosition =
-            theClientRect.left() + (theClientRect.width() / 2) - (m_ClientRect.width() / 2);
+                theClientRect.left() + (theClientRect.width() / 2) - (m_ClientRect.width() / 2);
         outLeftPresentationEdge = theHScrollPosition;
     } else // This stays a negated value
         outLeftPresentationEdge = theHScrollPosition;
@@ -124,13 +124,14 @@ void CPlayerContainerWnd::SetPlayerWndPosition(long &outLeftPresentationEdge,
     // Vertical scrollbar does not exist
     if (m_ClientRect.height() < theClientRect.height()) {
         theVScrollPosition =
-            theClientRect.top() + (theClientRect.height() / 2) - (m_ClientRect.height() / 2);
+                theClientRect.top() + (theClientRect.height() / 2) - (m_ClientRect.height() / 2);
         outTopPresentionEdge = theVScrollPosition;
     } else // This stays a negated value
         outTopPresentionEdge = theVScrollPosition;
 
     // Move the child player window
-    m_PlayerWnd->setGeometry(QRect(QPoint(theHScrollPosition, theVScrollPosition), m_ClientRect.size()));
+    m_PlayerWnd->setGeometry(QRect(QPoint(theHScrollPosition, theVScrollPosition),
+                                   m_ClientRect.size()));
 }
 
 //==============================================================================
@@ -218,13 +219,15 @@ void CPlayerContainerWnd::RecenterClient()
         if (theClientSize.width() > theViewClientRect.width()) {
             // compute the size of the client rectangle to display
             m_ClientRect.setLeft(
-                (theViewClientRect.width() / 2) - (theClientSize.width() / 2) - (theClientSize.width() % 2));
+                        (theViewClientRect.width() / 2) - (theClientSize.width() / 2)
+                        - (theClientSize.width() % 2));
             m_ClientRect.setRight((theViewClientRect.width() / 2) + (theClientSize.width() / 2));
         }
 
         if (theClientSize.height() > theViewClientRect.height()) {
             m_ClientRect.setTop(
-                (theViewClientRect.height() / 2) - (theClientSize.height() / 2) - (theClientSize.height() % 2));
+                        (theViewClientRect.height() / 2) - (theClientSize.height() / 2)
+                        - (theClientSize.height() % 2));
             m_ClientRect.setBottom((theViewClientRect.height() / 2) + (theClientSize.height() / 2));
         }
     }
@@ -301,34 +304,34 @@ void CPlayerContainerWnd::mousePressEvent(QMouseEvent *event)
 //==============================================================================
 void CPlayerContainerWnd::mouseReleaseEvent(QMouseEvent *event)
 {
-     if ((event->button() == Qt::LeftButton) || (event->button() == Qt::RightButton)) {
-         // Need to commit the current command when we have a mouse up. :)
-         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
-         g_StudioApp.GetCore()->CommitCurrentCommand();
-         m_IsMouseDown = false;
-     } else if (event->button() == Qt::MiddleButton) {
-         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
-         g_StudioApp.GetCore()->CommitCurrentCommand();
-         if (m_IsMiddleMouseDown) {
-             m_IsMouseDown = false;
-             m_IsMiddleMouseDown = false;
+    if ((event->button() == Qt::LeftButton) || (event->button() == Qt::RightButton)) {
+        // Need to commit the current command when we have a mouse up. :)
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
+        g_StudioApp.GetCore()->CommitCurrentCommand();
+        m_IsMouseDown = false;
+    } else if (event->button() == Qt::MiddleButton) {
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
+        g_StudioApp.GetCore()->CommitCurrentCommand();
+        if (m_IsMiddleMouseDown) {
+            m_IsMouseDown = false;
+            m_IsMiddleMouseDown = false;
 
-             const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-             const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
+            const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
+            const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
-             if (!IsDeploymentView()) {
-                 if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
-                     // none of the modifier key is pressed... reset to previous tool
-                     m_SceneView->RestorePreviousTool();
-                 } else if (theCtrlKeyIsDown && theAltKeyIsDown) {
-                     // since both modifier is down... let the ctrl has priority
-                     m_SceneView->SetToolOnCtrl();
-                 }
-                 m_SceneView->SetViewCursor();
-                 Q_EMIT toolChanged();
-             }
-         }
-     }
+            if (!IsDeploymentView()) {
+                if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
+                    // none of the modifier key is pressed... reset to previous tool
+                    m_SceneView->RestorePreviousTool();
+                } else if (theCtrlKeyIsDown && theAltKeyIsDown) {
+                    // since both modifier is down... let the ctrl has priority
+                    m_SceneView->SetToolOnCtrl();
+                }
+                m_SceneView->SetViewCursor();
+                Q_EMIT toolChanged();
+            }
+        }
+    }
 }
 
 //==============================================================================
@@ -356,7 +359,7 @@ void CPlayerContainerWnd::mouseMoveEvent(QMouseEvent* event)
 
         long theToolMode = g_StudioApp.GetToolMode();
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDrag(
-            SceneDragSenderType::Matte, event->pos(), theToolMode, theModifierKeys);
+                    SceneDragSenderType::Matte, event->pos(), theToolMode, theModifierKeys);
     }
 }
 
@@ -380,9 +383,12 @@ void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
     const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
     // Mouse Wheel zooms the camera
-    if (!theCtrlKeyIsDown && !theAltKeyIsDown && !IsDeploymentView())
+    if (!theCtrlKeyIsDown && !theAltKeyIsDown && !IsDeploymentView()) {
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseWheel(
-            SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
+                    SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
+    } else {
+        QScrollArea::wheelEvent(event);
+    }
 }
 
 void CPlayerContainerWnd::scrollContentsBy(int, int)
@@ -445,9 +451,8 @@ QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
     // presentation
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
-    if (g_StudioApp.GetRenderer().AreGuidesEnabled()) {
+    if (g_StudioApp.GetRenderer().AreGuidesEnabled())
         theSize += QSize(32, 32);
-    }
 
     return theSize / fixedDevicePixelRatio();
 }

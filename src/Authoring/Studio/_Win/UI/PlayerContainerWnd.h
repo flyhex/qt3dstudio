@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include <QScrollArea>
+#include <QtWidgets/qscrollarea.h>
 
 class CSceneView;
 class CStudioApp;
@@ -46,7 +46,7 @@ class CWGLRenderContext;
 //	Class CPlayerContainerWnd
 //==============================================================================
 
-class CPlayerContainerWnd : public QAbstractScrollArea
+class CPlayerContainerWnd : public QScrollArea
 {
     Q_OBJECT
     //==============================================================================
