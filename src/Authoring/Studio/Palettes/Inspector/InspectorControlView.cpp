@@ -52,6 +52,7 @@
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
 #include "MainFrm.h"
+#include "DataInputDlg.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -499,9 +500,17 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
         });
     }
     QStringList dataInputList;
-    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
-        dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
-
+    const auto propertySystem =
+        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetPropertySystem();
+    const qt3dsdm::DataModelDataType::Value dataType
+        = propertySystem->GetDataType(handle);
+    // only add datainputs with matching type for this property
+    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
+        if (CDataInputDlg::isEquivalentDataType(
+            g_StudioApp.m_dataInputDialogItems[i]->type, dataType)) {
+            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+        }
+    }
     m_dataInputChooserView->
             setData(dataInputList,
                     m_inspectorControlModel->currentControllerValue(instance, handle),

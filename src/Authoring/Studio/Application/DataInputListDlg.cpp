@@ -159,21 +159,21 @@ void CDataInputListDlg::updateContents()
             dataInput.append(new QStandardItem(expression));
         } else if (dataInputType == DataTypeString) {
             dataInput.append(new QStandardItem(tr("String")));
-        }
-#if 0 // TODO: To be added in future version
-        else if (dataInputType == DataTypeEvaluator) {
+        } else if (dataInputType == DataTypeFloat) {
+            dataInput.append(new QStandardItem(tr("Float")));
+#if 0
+        } else if (dataInputType == DataTypeEvaluator) {
             dataInput.append(new QStandardItem(tr("Evaluator")));
             dataInput.append(new QStandardItem(m_dataInputs.at(i)->valueString));
-        }  else if (dataInputType == DataTypeBoolean) {
+#endif
+        } else if (dataInputType == DataTypeBoolean) {
             dataInput.append(new QStandardItem(tr("Boolean")));
         } else if (dataInputType == DataTypeVector3) {
             dataInput.append(new QStandardItem(tr("Vector3")));
-        } else if (dataInputType == DataTypeVector2) {
-            dataInput.append(new QStandardItem(tr("Vector2")));
         } else if (dataInputType == DataTypeVariant) {
             dataInput.append(new QStandardItem(tr("Variant")));
         }
-#endif
+
         m_tableContents->appendRow(dataInput);
     }
 

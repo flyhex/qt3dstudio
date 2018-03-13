@@ -413,8 +413,18 @@ QString InspectorControlModel::currentControllerValue(long instance, int handle)
                 = studio->GetPropertySystem()->GetName(handle).c_str();
 
         long propNamePos = currPropValStr.find(propName);
-        if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0))
-            return currPropValStr.Left(currPropValStr.find(" ")).toQString();
+        if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0)) {
+            long posCtrlr = currPropValStr.substr(0, propNamePos - 1).ReverseFind(" ");
+
+            // adjust pos if this is the first controller - property pair
+            // in controlledproperty
+            if (posCtrlr < 0)
+                posCtrlr = 0;
+            else
+                posCtrlr++; // remove whitespace delimiter
+
+            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr - 1).toQString();
+        }
         else
             return {};
     } else {
@@ -457,14 +467,17 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            inItem->m_controller = "";
        } else {
            inItem->m_controlled = true;
-           // TODO just get the first whitespace-delimited string from
-           // controlledproperty to show as controller name.
-           // This works as long as we only have control for textstring
-           // property, but when we enable control of several properties
-           // in a single element, we need to parse controlledproperty
-           // through and find the controller name for this specific property
-           const QString ctrlName = (currPropValStr.Left(
-               currPropValStr.find(" "))).toQString();
+           long posCtrlr = currPropValStr.substr(0, propNamePos - 1).ReverseFind(" ");
+
+           // this is the first controller - property pair in controlledproperty
+           if (posCtrlr < 0)
+               posCtrlr = 0;
+           else
+               posCtrlr++;
+
+           const QString ctrlName = currPropValStr.substr(
+               posCtrlr, propNamePos - posCtrlr - 1).toQString();
+
            inItem->m_tooltip = tr("Controlling Data Input:\n%1").arg(ctrlName);
            inItem->m_controller = ctrlName;
        }

@@ -32,6 +32,7 @@
 #include <QtWidgets/qdialog.h>
 
 #include "Doc.h"
+#include "Qt3DSDMDataTypes.h"
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -48,13 +49,12 @@ QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 enum EDataType {
     DataTypeRangedNumber = 0,
     DataTypeString,
-#if 0 // TODO: To be added in version 2.x
-    DataTypeEvaluator,
+    DataTypeFloat,
+    // TODO Evaluator
+    // DataTypeEvaluator,
     DataTypeBoolean,
     DataTypeVector3,
-    DataTypeVector2,
     DataTypeVariant
-#endif
 };
 
 class CDataInputDlg : public QDialog
@@ -65,6 +65,8 @@ public:
                   QWidget* parent = nullptr);
     ~CDataInputDlg();
 
+    // Maps between DataModel datatypes and datainput dialog types
+    static const bool isEquivalentDataType(int dlgType, qt3dsdm::DataModelDataType::Value dmType);
 protected:
     void initDialog();
     QString getUniqueId(const QString &id);

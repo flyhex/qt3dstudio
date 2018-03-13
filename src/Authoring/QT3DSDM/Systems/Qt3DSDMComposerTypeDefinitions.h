@@ -118,13 +118,15 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(rotationorder, m_RotationOrder, TDataStrPtr, L"YXZ")                  \
     HANDLE_COMPOSER_PROPERTY(orientation, m_Orientation, TDataStrPtr, L"Left Handed")              \
     HANDLE_COMPOSER_PROPERTY(boneid, m_BoneId, qt3ds::QT3DSI32, 0)                                            \
-    HANDLE_COMPOSER_PROPERTY(ignoresparent, m_IgnoresParent, bool, false)
+    HANDLE_COMPOSER_PROPERTY(ignoresparent, m_IgnoresParent, bool, false)                          \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_MODEL_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(poseroot, m_PoseRoot, qt3ds::QT3DSI32, -1)                                       \
     HANDLE_COMPOSER_PROPERTY(tessellation, m_Tessellation, TDataStrPtr, L"None")                   \
     HANDLE_COMPOSER_PROPERTY(edgetess, m_EdgeTess, float, 1.0)                                     \
-    HANDLE_COMPOSER_PROPERTY(innertess, m_InnerTess, float, 1.0)
+    HANDLE_COMPOSER_PROPERTY(innertess, m_InnerTess, float, 1.0)                                   \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_IMAGE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(scaleu, m_RepeatU, float, 1.0f)                                       \

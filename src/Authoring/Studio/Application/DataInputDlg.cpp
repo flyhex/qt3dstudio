@@ -47,13 +47,13 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
 
     m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
     m_ui->comboBoxTypeList->addItem(tr("String"));
-#if 0 // TODO: To be added in version 2.x
+    m_ui->comboBoxTypeList->addItem(tr("Float"));
+#if 0 // TODO Evaluator
     m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
+#endif
     m_ui->comboBoxTypeList->addItem(tr("Boolean"));
     m_ui->comboBoxTypeList->addItem(tr("Vector3"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
     m_ui->comboBoxTypeList->addItem(tr("Variant"));
-#endif
 
     initDialog();
 
@@ -195,4 +195,25 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->labelEvaluation->setVisible(false);
     }
 #endif
+}
+
+const bool CDataInputDlg::isEquivalentDataType(int dlgType,
+                                               qt3dsdm::DataModelDataType::Value dmType)
+{
+    // TODO Evaluator
+    if ((dlgType == EDataType::DataTypeString
+         && dmType == qt3dsdm::DataModelDataType::String)
+        || (dlgType == EDataType::DataTypeRangedNumber
+            && dmType == qt3dsdm::DataModelDataType::Float)
+        || (dlgType == EDataType::DataTypeFloat
+            && dmType == qt3dsdm::DataModelDataType::Float)
+        || (dlgType == EDataType::DataTypeBoolean
+            && dmType == qt3dsdm::DataModelDataType::Bool)
+        || (dlgType == EDataType::DataTypeVector3
+            && dmType == qt3dsdm::DataModelDataType::Float3)
+        || dlgType == EDataType::DataTypeVariant) {
+        return true;
+    }
+
+    return false;
 }

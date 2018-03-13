@@ -1460,8 +1460,21 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
             list.append(item->name);
             if (item->type == EDataType::DataTypeRangedNumber)
                 list.append(QStringLiteral("Ranged Number"));
-            else
+            else if (item->type == EDataType::DataTypeString)
                 list.append(QStringLiteral("String"));
+            else if (item->type == EDataType::DataTypeFloat)
+                list.append(QStringLiteral("Float"));
+            else if (item->type == EDataType::DataTypeBoolean)
+                list.append(QStringLiteral("Boolean"));
+            else if (item->type == EDataType::DataTypeVector3)
+                list.append(QStringLiteral("Vector3"));
+#if 0
+            else if (item->type == EDataType::DataTypeEvaluator)
+                list.append(QStringLiteral("Evaluator"));
+#endif
+            else if (item->type == EDataType::DataTypeVariant)
+                list.append(QStringLiteral("Variant"));
+
             // Write min and max regardless of type, as we will get a mess if number of parameters
             // varies between different types
             list.append(QString::number(item->minValue));
