@@ -317,7 +317,7 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
 
     if (!m_objectsModel) {
         m_objectsModel = new ObjectListModel(g_StudioApp.GetCore(),
-                                             GetDoc()->GetActiveRootInstance(), this);
+                                             GetDoc()->GetSceneInstance(), this);
     }
 
     if (!m_triggerObjectBrowser)
@@ -348,7 +348,7 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
 
     if (!m_objectsModel) {
         m_objectsModel = new ObjectListModel(g_StudioApp.GetCore(),
-                                             GetDoc()->GetActiveRootInstance(), this);
+                                             GetDoc()->GetSceneInstance(), this);
     }
 
     if (!m_targetObjectBrowser)

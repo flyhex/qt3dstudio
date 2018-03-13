@@ -57,6 +57,8 @@ void ObjectBrowserView::setModel(ObjectListModel *model)
         m_model = new FlatObjectListModel(model, this);
     }
     m_model->setSourceModel(model);
+    m_ownerInstance = 0;
+    m_selection = -1;
 
     Q_EMIT modelChanged();
 }

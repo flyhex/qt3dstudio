@@ -350,11 +350,7 @@ void CUIPParserObjectRefHelper::CacheStateGraph(IDOMReader &inReader)
                             }
                         }
                     }
-                    if (AreEqual(theNode->m_Type.c_str(), "DataInput")) {
-                        const char *theName;
-                        if (inReader.UnregisteredAtt("controlledelemprop", theName))
-                            m_MetaData.Register(theName);
-                    }
+
                 }
             }
         }

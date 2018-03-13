@@ -435,9 +435,14 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
 QObject *InspectorControlView::showObjectReference(int handle, int instance, const QPoint &point)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    if (!m_objectReferenceModel) {
-        m_objectReferenceModel
-            = new ObjectListModel(g_StudioApp.GetCore(), doc->GetActiveRootInstance(), this);
+    // different base handle than current active root instance means that we have entered/exited
+    // component after the reference model had been created, and we need to recreate it
+    if (!m_objectReferenceModel
+        || (m_objectReferenceModel->baseHandle() != doc->GetActiveRootInstance())) {
+        if (m_objectReferenceModel)
+            delete m_objectReferenceModel;
+        m_objectReferenceModel = new ObjectListModel(g_StudioApp.GetCore(),
+                                                     doc->GetActiveRootInstance(), this, true);
     }
     if (!m_objectReferenceView)
         m_objectReferenceView = new ObjectBrowserView(this);
@@ -469,7 +474,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
             this, [this, doc, handle, instance] {
         auto selectedItem = m_objectReferenceView->selectedHandle();
         qt3dsdm::SObjectRefType objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                    selectedItem, handle,
+                    selectedItem, instance,
                     (CRelativePathTools::EPathType)(m_objectReferenceView->pathType()));
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
                 ->SetInstancePropertyValue(instance, handle, objRef);

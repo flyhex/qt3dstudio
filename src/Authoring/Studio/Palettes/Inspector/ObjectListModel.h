@@ -42,7 +42,9 @@ class ObjectListModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    ObjectListModel(CCore *core, const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent = nullptr);
+    ObjectListModel(CCore *core, const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle,
+                    QObject *parent = nullptr,
+                    bool isAliasSelectList = false);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -87,6 +89,7 @@ private:
     qt3dsdm::Qt3DSDMInstanceHandle m_baseHandle;
     IObjectReferenceHelper *m_objRefHelper;
     QVector<EStudioObjectType> m_excludeTypes;
+    bool m_AliasSelectList;
 };
 
 class FlatObjectListModel : public QAbstractListModel

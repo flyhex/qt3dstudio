@@ -43,14 +43,19 @@
 #include <QColor>
 
 ObjectListModel::ObjectListModel(CCore *core,
-                                 const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent)
+                                 const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent,
+                                 bool isAliasSelectList)
     : QAbstractItemModel(parent)
     , m_core(core)
     , m_baseHandle(baseHandle)
+    , m_AliasSelectList(isAliasSelectList)
 {
     auto doc = m_core->GetDoc();
     m_objRefHelper = doc->GetDataModelObjectReferenceHelper();
-    m_slideHandle = m_objRefHelper->GetSlideList(m_baseHandle)[0];
+    if (!m_AliasSelectList)
+        m_slideHandle = m_objRefHelper->GetSlideList(m_baseHandle)[0];
+    else
+        m_slideHandle = m_objRefHelper->GetSlideList(m_baseHandle).back();
 }
 
 QHash<int, QByteArray> ObjectListModel::roleNames() const
@@ -193,29 +198,37 @@ bool ObjectListModel::selectable(const qt3dsdm::Qt3DSDMInstanceHandle &handle) c
 {
     auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
     auto objType = bridge->GetObjectType(handle);
-    return !m_excludeTypes.contains(objType);
+    // disallow aliasing the current active root
+    bool tryingToAliasParent = (m_core->GetDoc()->GetActiveRootInstance() == handle)
+                               && m_AliasSelectList;
+    return (!m_excludeTypes.contains(objType) && !tryingToAliasParent);
 }
 
-qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle, const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
+qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(
+        const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
+        const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
     auto slideSystem = m_core->GetDoc()->GetStudioSystem()->GetSlideSystem();
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);
 
     qt3dsdm::TInstanceHandleList children;
     m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle);
-    children.erase(
-    std::remove_if(children.begin(), children.end(),
-                   [&slideHandle, slideSystem, &currentMaster](const qt3dsdm::Qt3DSDMInstanceHandle &h) {
-                        const auto childSlide = slideSystem->GetAssociatedSlide(h);
-                        if (!childSlide.Valid())
-                            return true;
-                        const auto childMaster = slideSystem->GetMasterSlide(childSlide);
-                        if (childMaster == currentMaster) {
-                            return childSlide != childMaster && childSlide != slideHandle;
-                        } else {
-                            return childSlide != childMaster;
-                        }
-                    }), children.end());
+    // allow action trigger/target from all objects
+    if (m_AliasSelectList) {
+        children.erase(
+            std::remove_if(children.begin(), children.end(),
+                           [&slideHandle, slideSystem, &currentMaster](const qt3dsdm::Qt3DSDMInstanceHandle &h) {
+            const auto childSlide = slideSystem->GetAssociatedSlide(h);
+            if (!childSlide.Valid())
+                return true;
+            const auto childMaster = slideSystem->GetMasterSlide(childSlide);
+            if (childMaster == currentMaster) {
+                return childSlide != childMaster && childSlide != slideHandle;
+            } else {
+                return childSlide != childMaster;
+            }
+        }), children.end());
+    }
     return children;
 }
 
