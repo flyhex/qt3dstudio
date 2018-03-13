@@ -1153,6 +1153,14 @@ struct SApp : public IApplication
                         diDef.type = DataInputTypeRangedNumber;
                     else if (AreEqual(type, "String"))
                         diDef.type = DataInputTypeString;
+                    else if (AreEqual(type, "Float"))
+                        diDef.type = DataInputTypeFloat;
+                    else if (AreEqual(type, "Vector3"))
+                        diDef.type = DataInputTypeVector3;
+                    else if (AreEqual(type, "Boolean"))
+                        diDef.type = DataInputTypeBoolean;
+                    else if (AreEqual(type, "Variant"))
+                        diDef.type = DataInputTypeVariant;
                     m_dataInputs.insert(QString::fromUtf8(name), diDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";

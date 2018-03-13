@@ -295,11 +295,16 @@ void CDoc::SetInstancePropertyControlled(
     qt3dsdm::Qt3DSDMPropertyHandle ctrldElemPropHandle
         = thePropertySystem->GetAggregateInstancePropertyByName(instance,
                                                                 L"controlledproperty");
-    thePropertySystem->GetInstancePropertyValue(
-        instance, ctrldElemPropHandle, currentCtrldProps);
 
-    Q3DStudio::CString currCtrldPropsStr
-        = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
+    Q3DStudio::CString currCtrldPropsStr = Q3DStudio::CString();
+
+    if (ctrldElemPropHandle.Valid()) {
+        thePropertySystem->GetInstancePropertyValue(
+            instance, ctrldElemPropHandle, currentCtrldProps);
+
+        Q3DStudio::CString currCtrldPropsStr
+            = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
+    }
 
     // We are going to set or change the controller for this property. Remove the
     // old controller - property pair first if it exists.

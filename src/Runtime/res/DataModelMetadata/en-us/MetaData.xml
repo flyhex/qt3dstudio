@@ -37,10 +37,10 @@
                 <Property name="name" formalName="Name" type="String" default="Camera" hidden="True" />
                 <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" />
                 <Property name="orthographic" formalName="Orthographic" description="Remove all perspective from the camera?" type="Boolean" animatable="False" />
-                <Property name="position" formalName="Position" description="Location in local space" type="Vector" default="0 0 -600" />
-                <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" />
-                <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" />
-                <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the local center" type="Vector" />
+                <Property name="position" formalName="Position" description="Location in local space" type="Vector" default="0 0 -600" controllable="True" />
+                <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" controllable="True" />
+                <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" controllable="True" />
+                <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the local center" type="Vector" controllable="True" />
                 <Property name="fov" formalName="Field of View" description="Viewing angle of the camera\n(how much it can see)" min="1" max="180" default="60">
                         <ShowIfEqual property="orthographic" value="False"/>
                 </Property>
@@ -193,11 +193,11 @@
                 <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" />
                 <Property name='scope' formalName="Scope" description="Portion of the scene graph lit by this\nlight; no value results in entire layer\nbeing affected." type='ObjectRef' />
                 <Property name="lighttype" formalName="Light Type" description="Type of illumination to use" list="Directional:Point:Area" default="Directional" />
-                <Property name="position" formalName="Position" description="Location in local space" type="Vector"/>
-                <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" />
-                <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" />
-                <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the local center" type="Vector" />
-                <Property name="lightdiffuse" formalName="Light Color" description="Color of diffuse lighting effect" type="Color" default="1 1 1"/>
+                <Property name="position" formalName="Position" description="Location in local space" type="Vector" controllable="True"/>
+                <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" controllable="True" />
+                <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" controllable="True" />
+                <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the local center" type="Vector" controllable="True" />
+                <Property name="lightdiffuse" formalName="Light Color" description="Color of diffuse lighting effect" type="Color" default="1 1 1" controllable="True" />
                 <Property name="lightspecular" formalName="Specular Color" description="Color of specular lighting highlights" type="Color" default="1 1 1"/>
                 <Property name="lightambient" formalName="Ambient Color" description="Color of unlit areas (black for none)" type="Color"/>
                 <Property name="brightness" formalName="Brightness" description="Strength of the light" default="100"/>
@@ -297,11 +297,11 @@
                 <Event name="onTwoPointSwipeDown" category="Gesture" />
                 -->
 
-                <Property name="position" formalName="Position" description="Location in local space" type="Vector"/>
-                <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" />
-                <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" />
-                <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the\nlocal center" type="Vector" />
-                <Property name="opacity" formalName="Opacity" description="How much the element (and its children)\nocclude items behind them" min="0" max="100" default="100" />
+                <Property name="position" formalName="Position" description="Location in local space" type="Vector" controllable="True" />
+                <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" controllable="True" />
+                <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" controllable="True" />
+                <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the\nlocal center" type="Vector" controllable="True" />
+                <Property name="opacity" formalName="Opacity" description="How much the element (and its children)\nocclude items behind them" min="0" max="100" default="100" controllable="True" />
                 <Property name="rotationorder" formalName="Rotation Order" description="Rotation Order" list="XYZ:YZX:ZXY:XZY:YXZ:ZYX:XYZr:YZXr:ZXYr:XZYr:YXZr:ZYXr" default="YXZ" hidden="True"/>
                 <Property name="orientation" formalName="Orientation" description="Orientation" list="Left Handed:Right Handed" default="Left Handed" hidden="True"/>
                 <Property name="boneid" type="Long" hidden="True" default="-1" />
@@ -433,12 +433,12 @@
         <Text>
                 <Property name="name" formalName="Name" type="String" default="Text" hidden="True" />
                 <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" />
-                <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" />
+                <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" controllable="True" />
                 <Property name="font" formalName="Font" description="Font" type="Font" default="TitilliumWeb-Regular" />
                 <!-- HW accelerated fonts not supported
                     <Property name="enableacceleratedfont" formalName="Hardware accelerated font" description="Enabled hardware acclerated font" type="Boolean" default="false" />
                 -->
-                <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="24" animatable="False" />
+                <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="24" animatable="False" controllable="True" />
                 <Property name="horzalign" formalName="Horizontal Alignment" description="Horizontal Alignment" list="Left:Center:Right" default="Center" />
                 <Property name="vertalign" formalName="Vertical Alignment" description="Vertical Alignment" list="Top:Middle:Bottom" default="Middle" />
                 <Property name="leading" formalName="Leading" description="Leading" />

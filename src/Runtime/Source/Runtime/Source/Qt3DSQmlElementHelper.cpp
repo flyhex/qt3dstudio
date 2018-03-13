@@ -278,12 +278,12 @@ bool CQmlElementHelper::GetAttribute(TElement *inElement, const char *inAttribut
             break;
 
         case ATTRIBUTETYPE_POINTER:
-            qCCritical(INVALID_OPERATION, "setAttribute: pointer attributes not handled.");
+            qCCritical(INVALID_OPERATION, "getAttribute: pointer attributes not handled.");
             return false;
             break;
 
         case ATTRIBUTETYPE_ELEMENTREF:
-            qCCritical(INVALID_OPERATION, "setAttribute: ElementRef attributes are read only.");
+            qCCritical(INVALID_OPERATION, "getAttribute: ElementRef attributes are read only.");
             return false;
             break;
 
@@ -299,7 +299,7 @@ bool CQmlElementHelper::GetAttribute(TElement *inElement, const char *inAttribut
         case ATTRIBUTETYPE_DATADRIVEN_CHILD:
         case ATTRIBUTETYPECOUNT:
         default:
-            qCCritical(INVALID_OPERATION, "setAttribute: Attribute has no type!");
+            qCCritical(INVALID_OPERATION, "getAttribute: Attribute has no type!");
             return false;
             break;
         }

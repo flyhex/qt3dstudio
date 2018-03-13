@@ -204,9 +204,11 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
     if ((dlgType == EDataType::DataTypeString
          && dmType == qt3dsdm::DataModelDataType::String)
         || (dlgType == EDataType::DataTypeRangedNumber
-            && dmType == qt3dsdm::DataModelDataType::Float)
+            && (dmType == qt3dsdm::DataModelDataType::Float
+                || dmType == qt3dsdm::DataModelDataType::String))
         || (dlgType == EDataType::DataTypeFloat
-            && dmType == qt3dsdm::DataModelDataType::Float)
+            && (dmType == qt3dsdm::DataModelDataType::Float
+                || dmType == qt3dsdm::DataModelDataType::String))
         || (dlgType == EDataType::DataTypeBoolean
             && dmType == qt3dsdm::DataModelDataType::Bool)
         || (dlgType == EDataType::DataTypeVector3
