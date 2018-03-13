@@ -78,6 +78,8 @@ protected:
     QFont m_Font; ///< Font for text
     QFont m_BoldFont; ///< Bold font for drawing the group boxes
     bool m_restartNeeded;
+    bool m_autosaveChanged;
+
     void EnableOptions();
     void LoadSettings();
     void SaveSettings();
@@ -89,6 +91,9 @@ protected:
     void OnChangePreviewConfiguration();
 #endif
     void OnBgColorButtonClicked();
+
+    void enableAutosave(bool enabled);
+    void setAutosaveInterval(int interval);
 
 protected: // helper functions
     void InitEditStartViewCombo();

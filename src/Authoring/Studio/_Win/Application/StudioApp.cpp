@@ -191,7 +191,9 @@ CStudioApp::CStudioApp()
     , m_welcomeShownThisSession(false)
     , m_goStraightToWelcomeFileDialog(false)
     , m_tutorialPage(0)
+    , m_autosaveTimer(new QTimer(this))
 {
+    connect(m_autosaveTimer, &QTimer::timeout, this, [=](){ OnSave(true); });
 }
 
 //=============================================================================
@@ -312,6 +314,11 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
     // Dispatch registration
     m_Core->GetDispatch()->AddAppStatusListener(this);
     m_Core->GetDispatch()->AddCoreAsynchronousEventListener(this);
+
+    // Initialize autosave
+    m_autosaveTimer->setInterval(CStudioPreferences::GetAutoSaveDelay() * 1000);
+    if (CStudioPreferences::GetAutoSavePreference())
+        m_autosaveTimer->start();
 
     return true;
 }
@@ -1260,18 +1267,35 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
  * Handles the Save command
  * This will save the file, if the file has not been saved before this will
  * do a save as operation.
+ * @param autosave set true if triggering an autosave.
  * @return true if the file was successfully saved.
  */
-bool CStudioApp::OnSave()
+bool CStudioApp::OnSave(bool autosave)
 {
     Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
     if (!theCurrentDoc.IsFile()) {
-        return OnSaveAs();
+        if (autosave)
+            return false;
+        else
+            return OnSaveAs();
     } else if (!theCurrentDoc.CanWrite()) {
         m_Dialogs->DisplaySavingPresentationFailed();
         return false;
     } else {
-        m_Core->OnSaveDocument(theCurrentDoc);
+        // Compose autosave filename (insert _autosave before extension)
+        QString autosaveFile = theCurrentDoc.GetPath().toQString();
+        int insertionPoint = autosaveFile.lastIndexOf(QStringLiteral(".uip"));
+        autosaveFile.insert(insertionPoint, QStringLiteral("_autosave"));
+
+        if (autosave) {
+            // Set the copy flag to avoid changing actual document name & history
+            m_Core->OnSaveDocument(Qt3DSFile(CString::fromQString(autosaveFile)), true);
+        } else {
+            m_Core->OnSaveDocument(theCurrentDoc);
+            // Delete previous autosave file
+            QFile::remove(autosaveFile);
+        }
+
         return true;
     }
 }
@@ -1304,11 +1328,24 @@ bool CStudioApp::OnSaveCopy()
 {
     Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
     if (theFile.GetPath() != "") {
-        // Send in a "true" to teh save function to indicate this is a copy
+        // Send in a "true" to the save function to indicate this is a copy
         m_Core->OnSaveDocument(theFile, true);
         return true;
     }
     return false;
+}
+
+void CStudioApp::SetAutosaveEnabled(bool enabled)
+{
+    if (enabled)
+        m_autosaveTimer->start();
+    else
+        m_autosaveTimer->stop();
+}
+
+void CStudioApp::SetAutosaveInterval(int interval)
+{
+    m_autosaveTimer->setInterval(interval * 1000);
 }
 
 //=============================================================================

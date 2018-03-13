@@ -67,6 +67,7 @@ CStudioAppPrefsPage::CStudioAppPrefsPage(QWidget *parent)
     , m_TimebarShowTime(false)
     , m_InterpolationIsSmooth(false)
     , m_restartNeeded(false)
+    , m_autosaveChanged(false)
     , m_ui(new Ui::StudioAppPrefsPage)
 {
     m_Font = QFont(CStudioPreferences::GetFontFaceName());
@@ -132,6 +133,10 @@ void CStudioAppPrefsPage::OnInitDialog()
     connect(m_ui->selectorLength,
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, [=](){ SetModified(true); m_restartNeeded = true; });
+    connect(m_ui->autosaveEnabled, &QCheckBox::clicked, this,
+            [=](){ m_autosaveChanged = true; });
+    connect(m_ui->autosaveInterval, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, [=](){ m_autosaveChanged = true; });
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     connect(m_ui->m_PreviewSelector, activated,
             this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
@@ -172,6 +177,10 @@ void CStudioAppPrefsPage::LoadSettings()
     m_ui->m_SnapRangeCombo->addItem(tr("High Resolution"));
     long theResolution = (long)CStudioPreferences::GetTimelineSnappingGridResolution();
     m_ui->m_SnapRangeCombo->setCurrentIndex(theResolution);
+
+    // Autosave options
+    m_ui->autosaveEnabled->setChecked(CStudioPreferences::GetAutoSavePreference());
+    m_ui->autosaveInterval->setValue(CStudioPreferences::GetAutoSaveDelay());
 
     InitEditStartViewCombo();
 
@@ -222,6 +231,13 @@ void CStudioAppPrefsPage::SaveSettings()
     // Tool handles
     CStudioPreferences::setSelectorLineWidth(m_ui->selectorWidth->value());
     CStudioPreferences::setSelectorLineLength(m_ui->selectorLength->value());
+
+    // Autosave options
+    CStudioPreferences::SetAutoSavePreference(m_ui->autosaveEnabled->isChecked());
+    CStudioPreferences::SetAutoSaveDelay(m_ui->autosaveInterval->value());
+    enableAutosave(m_ui->autosaveEnabled->isChecked());
+    setAutosaveInterval(m_ui->autosaveInterval->value());
+    m_autosaveChanged = false;
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     SavePreviewSettings();
@@ -414,6 +430,18 @@ void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
     updateColorButton();
     this->SetModified(true);
     OnApply();
+}
+
+void CStudioAppPrefsPage::enableAutosave(bool enabled)
+{
+    if (m_autosaveChanged)
+        g_StudioApp.SetAutosaveEnabled(enabled);
+}
+
+void CStudioAppPrefsPage::setAutosaveInterval(int interval)
+{
+    if (m_autosaveChanged)
+        g_StudioApp.SetAutosaveInterval(interval);
 }
 
 //==============================================================================

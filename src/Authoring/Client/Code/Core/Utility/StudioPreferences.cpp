@@ -545,8 +545,8 @@ void CStudioPreferences::SetSnapRange(long inSnapRange)
  */
 long CStudioPreferences::GetAutoSaveDelay()
 {
-    // default delay is 10 minutes
-    return CPreferences::GetUserPreferences("AutoSave").GetLongValue("Delay", (long)10);
+    // default delay is 10 minutes (600 seconds)
+    return CPreferences::GetUserPreferences("AutoSave").GetLongValue("Delay", (long)600);
 }
 
 //==============================================================================
@@ -562,13 +562,13 @@ void CStudioPreferences::SetAutoSaveDelay(long inAutoSaveDelay)
 //==============================================================================
 /**
  *	Returns true if Auto Saving is turned on.
- *  AutoSaving is turned OFF by default.
+ *  AutoSaving is turned ON by default.
  *
  *	@return	true if autosaving is on.
  */
 bool CStudioPreferences::GetAutoSavePreference()
 {
-    return CPreferences::GetUserPreferences("AutoSave").GetValue("Preference", false);
+    return CPreferences::GetUserPreferences("AutoSave").GetValue("Preference", true);
 }
 
 //==============================================================================
