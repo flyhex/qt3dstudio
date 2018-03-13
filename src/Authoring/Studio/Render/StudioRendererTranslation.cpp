@@ -2298,9 +2298,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         // Don't show the bounding box or pivot for the component we are *in* the component
         SGraphObjectTranslator *theTranslator = nullptr;
         long theToolMode = g_StudioApp.GetToolMode();
-        bool isEditCamera = m_EditCameraEnabled;
-        int theCameraToolMode = isEditCamera ? (theToolMode & (STUDIO_CAMERATOOL_MASK)) : 0;
-        long theModifiers = CHotKeys::GetCurrentKeyModifiers();
+        int theCameraToolMode = m_EditCameraEnabled ? (theToolMode & STUDIO_CAMERATOOL_MASK) : 0;
         bool shouldDisplayWidget = false;
         if (theCameraToolMode == 0) {
             switch (theToolMode) {
@@ -2314,7 +2312,6 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             };
         }
 
-        SDisableUseClearColor color(*this, isEditCamera);
         bool selectedPath = false;
 
         for (size_t selectedIdx = 0, selectedEnd = theHandles.size(); selectedIdx < selectedEnd;
@@ -2437,7 +2434,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
 
         m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
 
-        if (inDrawGuides && m_EditCameraEnabled == false && g_StudioApp.IsAuthorZoom() == false) {
+        if (inDrawGuides && !m_EditCameraEnabled && !g_StudioApp.IsAuthorZoom()) {
             m_GuideContainer.clear();
             // Figure out the matte area.
             NVRenderRect theContextViewport = m_Context.GetContextViewport();
@@ -2775,12 +2772,7 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         }
     }
     // Pick against the widget first if possible.
-    // If we are in Edit camera mode, m_LastRenderedWidget might be outdated
-    // (and invisible = non-pickable) if the scene was not re-rendered when
-    // switching to edit camera. In this case do not pick against it, nor
-    // when it is inactive.
-    if (m_LastRenderedWidget && !m_EditCameraEnabled
-        && m_LastRenderedWidget->GetNode().m_Flags.IsActive()) {
+    if (m_LastRenderedWidget && m_LastRenderedWidget->GetNode().m_Flags.IsActive()) {
         Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
         if (picked.hasValue()) {
             RequestRender();
