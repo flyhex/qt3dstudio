@@ -151,9 +151,10 @@ public:
     void OnUpdatePlaybackRewind();
     void OnPlaybackStop();
     void OnUpdatePlaybackStop();
-    void OnPlaybackPreview(const QString &viewerExeName);
+    void OnPlaybackPreview(const QString &viewerExeName, bool remote = false);
     void OnPlaybackPreviewRuntime1();
     void OnPlaybackPreviewRuntime2();
+    void OnPlaybackPreviewRemote();
     void OnUpdatePlaybackPreview();
     void OnUpdateToolMove();
     void OnUpdateToolRotate();

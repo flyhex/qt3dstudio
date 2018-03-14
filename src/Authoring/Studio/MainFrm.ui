@@ -207,6 +207,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPreview"/>
+   <addaction name="actionRemote_Preview"/>
    <addaction name="actionPreviewRuntime2"/>
   </widget>
   <action name="action_Reference_Manual">
@@ -795,6 +796,19 @@
   <action name="actionData_Inputs">
    <property name="text">
     <string>Data Inputs...</string>
+   </property>
+  </action>
+  <action name="actionRemote_Preview">
+   <property name="icon">
+    <iconset>
+     <normalon>:/images/remote.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Remote Preview</string>
+   </property>
+   <property name="toolTip">
+    <string>Preview on Remote Device</string>
    </property>
   </action>
  </widget>

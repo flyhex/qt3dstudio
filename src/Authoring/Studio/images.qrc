@@ -269,6 +269,10 @@
         <file>images/Tutorial/screens/2x/5.png</file>
         <file>images/Tutorial/screens/2x/6.png</file>
         <file>images/Tutorial/screens/2x/7.png</file>
+        <file>images/remote.png</file>
+        <file>images/remote@2x.png</file>
+        <file>images/remote-disabled.png</file>
+        <file>images/remote-disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

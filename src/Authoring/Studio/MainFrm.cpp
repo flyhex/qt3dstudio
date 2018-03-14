@@ -101,8 +101,6 @@ CMainFrame::CMainFrame()
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
     connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
-            m_ui->action_Connect_to_Device, &QAction::setChecked);
-    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
             this, &CMainFrame::OnConnectionChanged);
     connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
@@ -170,6 +168,8 @@ CMainFrame::CMainFrame()
     // Playback toolbar
     connect(m_ui->actionPreview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRuntime1);
+    connect(m_ui->actionRemote_Preview, &QAction::triggered,
+            this, &CMainFrame::OnPlaybackPreviewRemote);
 
     // Only show runtime2 preview if we have appropriate viewer
     if (CPreviewHelper::viewerExists(QStringLiteral("q3dsviewer"))) {
@@ -334,6 +334,7 @@ void CMainFrame::OnCreate()
     m_ui->action_Connect_to_Device->setEnabled(false);
     m_ui->action_Revert->setEnabled(false);
     m_ui->actionImportAssets->setEnabled(false);
+    m_ui->actionRemote_Preview->setEnabled(false);
 
     setCentralWidget(m_SceneView);
 }
@@ -972,9 +973,9 @@ void CMainFrame::OnPlaybackStop()
 /**
  *	Handles pressing the preview button.
  */
-void CMainFrame::OnPlaybackPreview(const QString &viewerExeName)
+void CMainFrame::OnPlaybackPreview(const QString &viewerExeName, bool remote)
 {
-    if (m_remoteDeploymentSender->isConnected()) {
+    if (remote && m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
                     Q3DStudio::CString::fromQString(QObject::tr("Deploying to remote device...")),
                     "");
@@ -993,6 +994,11 @@ void CMainFrame::OnPlaybackPreviewRuntime1()
 void CMainFrame::OnPlaybackPreviewRuntime2()
 {
     OnPlaybackPreview(QStringLiteral("q3dsviewer"));
+}
+
+void CMainFrame::OnPlaybackPreviewRemote()
+{
+    OnPlaybackPreview(QStringLiteral("Qt3DViewer"), true);
 }
 
 //==============================================================================
@@ -1798,8 +1804,9 @@ void CMainFrame::OnShowInspector()
 
 void CMainFrame::OnConnectionChanged(bool connected)
 {
-    Q_UNUSED(connected)
     g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
+    m_ui->action_Connect_to_Device->setChecked(connected);
+    m_ui->actionRemote_Preview->setEnabled(connected);
 }
 
 CTimelineControl *CMainFrame::GetTimelineControl()
