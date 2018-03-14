@@ -306,6 +306,7 @@ void ActionView::deleteAction(int index)
     const auto action = m_actionsModel->actionAt(index);
     if (action.Valid()) {
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Delete Action"))->DeleteAction(action);
+        emitActionChanged();
     }
 }
 
