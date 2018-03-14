@@ -179,7 +179,6 @@ CMainFrame::CMainFrame()
         m_ui->actionPreviewRuntime2->setVisible(false);
     }
 
-
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
     connect(m_ui->actionRotation_Tool, &QAction::triggered, this, &CMainFrame::OnToolRotate);
@@ -292,7 +291,7 @@ void CMainFrame::hideEvent(QHideEvent *event)
  * Called when the main frame is actually created.  Sets up tool bars and default
  * views.
  */
-int CMainFrame::OnCreate()
+void CMainFrame::OnCreate()
 {
     m_SceneView = new CSceneView(&g_StudioApp, this);
     connect(m_SceneView, &CSceneView::toolChanged, this, &CMainFrame::OnUpdateToolChange);
@@ -337,7 +336,6 @@ int CMainFrame::OnCreate()
     m_ui->actionImportAssets->setEnabled(false);
 
     setCentralWidget(m_SceneView);
-    return 0;
 }
 
 //==============================================================================
@@ -1866,4 +1864,17 @@ void CMainFrame::handleGeometryAndState(bool save)
         restoreGeometry(settings.value(geoKey).toByteArray());
         restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
     }
+}
+
+void CMainFrame::initializeGeometryAndState()
+{
+    QSettings settings;
+    QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+    if (!settings.contains(stateKey)) {
+        // On first run, save and restore geometry and state. For some reason they are both needed
+        // to avoid a bug with palettes resizing to their original size when window is resized or
+        // something in a palette is edited.
+        handleGeometryAndState(true);
+    }
+    handleGeometryAndState(false);
 }

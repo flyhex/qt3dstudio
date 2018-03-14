@@ -97,7 +97,7 @@ public:
 
     CRecentItems *GetRecentItems();
 
-    int OnCreate();
+    void OnCreate();
 
     void onPlaybackTimeout();
 
@@ -234,6 +234,8 @@ public:
 
     QWidget *GetActiveView();
     CPlayerWnd *GetPlayerWnd() const;
+
+    void initializeGeometryAndState();
 
 Q_SIGNALS:
     void playStateChanged(bool started);

@@ -616,9 +616,8 @@ int CStudioApp::OpenAndRunApplication(const Q3DStudio::CString &inFilename)
 {
     int theSuccess = -1;
     InitCore();
-    if (OnLoadDocument(
-                inFilename,
-                false)) // Load document. Upon failure, don't show startup dialog but exit immediately.
+    // Load document. Upon failure, don't show startup dialog but exit immediately.
+    if (OnLoadDocument(inFilename, false))
         theSuccess = RunApplication();
     return theSuccess;
 }
@@ -630,6 +629,7 @@ int CStudioApp::OpenAndRunApplication(const Q3DStudio::CString &inFilename)
  */
 int CStudioApp::RunApplication()
 {
+    m_pMainWnd->initializeGeometryAndState();
     return qApp->exec();
 }
 
