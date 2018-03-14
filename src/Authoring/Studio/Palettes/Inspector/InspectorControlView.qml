@@ -446,7 +446,7 @@ Rectangle {
                 verticalAlignment: TextInput.AlignTop
                 font.pixelSize: _fontSize
                 color: _textColor
-                wrapMode: TextEdit.WordWrap
+                wrapMode: TextEdit.WrapAnywhere
                 selectionColor: _selectionColor
                 selectedTextColor: _textColor
 

@@ -66,7 +66,7 @@ ColumnLayout {
 
             label: parent ? parent.label : ""
             value: propertyModel && actionProperty && actionProperty.type ===  DataModelDataType.String
-                   ? propertyModel.value : ""
+                   && propertyModel.value !== undefined ? propertyModel.value : ""
             onEditingFinished: _actionView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
