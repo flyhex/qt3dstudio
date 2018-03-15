@@ -33,6 +33,7 @@
 #include "RowTimeline.h"
 #include "RowTypes.h"
 #include "TimelineConstants.h"
+#include "MouseCursor.h"
 
 #include <QtWidgets/qgraphicsscene.h>
 
@@ -67,6 +68,8 @@ public:
     QGraphicsLinearLayout *layoutTree() const;
     TreeHeader *treeHeader() const;
     void updateTreeWidth(double x);
+    void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
+    void resetMouseCursor();
 
 protected:
     bool event(QEvent *event) override;
@@ -87,6 +90,7 @@ private:
     int nextRowDepth(int index);
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
+    void updateHoverStatus(const QPointF &scenePos);
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;
@@ -103,6 +107,7 @@ private:
     RowManager *m_rowManager = nullptr;
     KeyframeManager *m_keyframeManager = nullptr;
     QPointF m_pressPos;
+    CMouseCursor::Qt3DSMouseCursor m_currentCursor;
 
     bool m_rulerPressed = false;
     bool m_keyframePressed = false;

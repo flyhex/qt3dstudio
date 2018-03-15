@@ -67,6 +67,9 @@ public:
     QList<Keyframe *> getKeyframesInRange(const double left, const double right);
     QList<Keyframe *> keyframes() const;
 
+protected:
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+
 private:
     void updateChildrenMinStartXRecursive(RowTree *rowTree);
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);

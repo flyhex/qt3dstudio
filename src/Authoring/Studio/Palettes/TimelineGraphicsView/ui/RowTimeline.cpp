@@ -438,6 +438,13 @@ RowTimeline *RowTimeline::parentRow() const
     return m_rowTree->m_parentRow->rowTimeline();
 }
 
+void RowTimeline::hoverLeaveEvent(QGraphicsSceneHoverEvent  *event)
+{
+    InteractiveTimelineItem::hoverLeaveEvent(event);
+    // Make sure mouse cursor is reseted when moving away from timeline row
+    m_rowTree->m_scene->resetMouseCursor();
+}
+
 int RowTimeline::type() const
 {
     // Enable the use of qgraphicsitem_cast with this item.

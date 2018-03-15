@@ -44,6 +44,7 @@
 #include "Core.h"
 #include "Doc.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
+#include "ResourceCache.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -72,6 +73,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
     , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
+    , m_currentCursor(-1)
 {
     addItem(m_playHead);
     addItem(m_selectionRect);
@@ -271,6 +273,28 @@ void TimelineGraphicsScene::updateTreeWidth(double treeWidth)
     }
 }
 
+void TimelineGraphicsScene::setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor)
+{
+    if (m_currentCursor != cursor) {
+        if (m_currentCursor != -1)
+            qApp->changeOverrideCursor(CResourceCache::GetInstance()->GetCursor(cursor));
+        else
+            qApp->setOverrideCursor(CResourceCache::GetInstance()->GetCursor(cursor));
+        m_currentCursor = cursor;
+    }
+}
+
+void TimelineGraphicsScene::resetMouseCursor()
+{
+    if (m_currentCursor != -1) {
+        // Restoring back to no-override state seems to not change the cursor automatically
+        // to the default cursor, so let's do that manually before restoring the cursor
+        qApp->changeOverrideCursor(Qt::ArrowCursor);
+        qApp->restoreOverrideCursor();
+        m_currentCursor = -1;
+    }
+}
+
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
@@ -342,6 +366,8 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    updateHoverStatus(event->scenePos());
+
     if (qAbs(event->scenePos().x() - m_pressPos.x()) > 10
             || qAbs(event->scenePos().y() - m_pressPos.y()) > 10)
         m_dragging = true;
@@ -618,6 +644,30 @@ bool TimelineGraphicsScene::event(QEvent *event)
 
     default:
         return QGraphicsScene::event(event);
+    }
+}
+
+void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
+{
+    QGraphicsItem *item = itemAt(scenePos, QTransform());
+    if (item != nullptr) {
+        if (item->type() == TimelineItem::TypePlayHead) {
+            // select next item below playhead
+            const QList<QGraphicsItem *> hoverItems = items(scenePos);
+            if (hoverItems.size() > 1)
+                item = hoverItems.at(1);
+        }
+        if (item->type() == TimelineItem::TypeRowTimeline) {
+            RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
+            TimelineControlType controlType =
+                    timelineItem->getClickedControl(scenePos);
+            if (controlType == TimelineControlType::StartHandle
+                    || controlType == TimelineControlType::EndHandle) {
+                setMouseCursor(CMouseCursor::CURSOR_RESIZE_LEFTRIGHT);
+            } else {
+                resetMouseCursor();
+            }
+        }
     }
 }
 
