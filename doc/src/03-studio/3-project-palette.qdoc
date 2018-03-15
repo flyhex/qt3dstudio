@@ -65,7 +65,7 @@ via the file system. Double-clicking on the folder in the Project
 palette will open the folder in the file system.
 
 Alternatively, you may right-click on a project asset and choose
-\c{Show in Explorer}. This will open the folder containing the item
+\c{Show Containing Folder}. This will open the folder containing the item
 and also select it in the file system.
 
 \section1 Using Assets

@@ -227,7 +227,7 @@ void ProjectView::startDrag(QQuickItem *item, int row)
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
-void ProjectView::showInExplorer(int row) const
+void ProjectView::showContainingFolder(int row) const
 {
     if (row == -1)
         return;

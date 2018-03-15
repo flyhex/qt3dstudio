@@ -65,7 +65,7 @@ public:
 
     Q_INVOKABLE void startDrag(QQuickItem *item, int row);
 
-    Q_INVOKABLE void showInExplorer(int row) const;
+    Q_INVOKABLE void showContainingFolder(int row) const;
     Q_INVOKABLE void copyPath(int row) const;
     Q_INVOKABLE void copyFullPath(int row) const;
     Q_INVOKABLE void refreshImport(int row) const;
