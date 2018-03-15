@@ -30,8 +30,8 @@
 #define ROWMANAGER_H
 
 #include "RowTypes.h"
+#include "StudioObjectTypes.h"
 #include <QtCore/qstring.h>
-#include <StudioObjectTypes.h>
 
 class TimelineGraphicsScene;
 class RowTree;
@@ -47,14 +47,15 @@ public:
     RowManager(TimelineGraphicsScene *scene, QGraphicsLinearLayout *layoutLabels,
                QGraphicsLinearLayout *layoutTimeline);
 
-    void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
     void clampIndex(int &idx);
     void correctIndex(int &idx);
     void selectRow(RowTree *row);
     void deleteRow(RowTree *row);
     void clearSelection();
     void updateFiltering(RowTree *rowTree = nullptr);
+    void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
     void reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding);
+    void syncRowPositionWithBinding(RowTree *row, Qt3DSDMTimelineItemBinding *parentBinding);
     bool hasProperties(RowTree *row);
     RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
     RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType);
@@ -67,7 +68,7 @@ public:
 
 private:
     int getRowIndex(RowTree *row);
-    int getLastChildIndex(RowTree *row);
+    int getLastChildIndex(RowTree *row, int index = -1);
     bool validIndex(int idx) const;
     void deleteRowRecursive(RowTree *row);
     void updateRowFilter(RowTree *row);

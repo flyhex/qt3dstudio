@@ -346,7 +346,7 @@ void RowTimeline::setEndX(double endX)
 
 void RowTimeline::updateChildrenMinStartXRecursive(RowTree *rowTree)
 {
-    if (!rowTree->empty()) {
+    if (m_rowTree->rowType() != OBJTYPE_SCENE && !rowTree->empty()) {
         const auto childRows = rowTree->childRows();
         for (auto child : childRows) {
             child->rowTimeline()->m_minStartX = std::max(rowTree->rowTimeline()->m_startX,
@@ -360,7 +360,7 @@ void RowTimeline::updateChildrenMinStartXRecursive(RowTree *rowTree)
 
 void RowTimeline::updateChildrenMaxEndXRecursive(RowTree *rowTree)
 {
-    if (!rowTree->empty()) {
+    if (m_rowTree->rowType() != OBJTYPE_SCENE && !rowTree->empty()) {
         const auto childRows = rowTree->childRows();
         for (auto child : childRows) {
             child->rowTimeline()->m_maxEndX = std::min(rowTree->rowTimeline()->m_endX,

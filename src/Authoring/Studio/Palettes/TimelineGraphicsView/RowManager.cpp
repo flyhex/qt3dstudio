@@ -170,6 +170,33 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
     return nullptr;
 }
 
+// Mahmoud_TODO: optimize this method or use another approach
+void RowManager::syncRowPositionWithBinding(RowTree *row,
+                                            Qt3DSDMTimelineItemBinding *parentBinding)
+{
+    int count = parentBinding->GetChildrenCount();
+    int bindingIndex = -1;
+    for (int i = 0; i < count; i++) {
+        if (parentBinding->GetChild(i) == row->getBinding()) {
+            bindingIndex = i;
+            break;
+        }
+    }
+
+    if (bindingIndex != -1) {
+        int parentIndex = getRowIndex(parentBinding->getRowTree());
+        int rowIndex = parentIndex + 1;
+
+        for (int i = 0; i < bindingIndex; i++) {
+            RowTree *childRow = static_cast<RowTree *>(m_layoutTree->itemAt(rowIndex));
+            rowIndex = getLastChildIndex(childRow, rowIndex) + 1;
+        }
+
+        m_layoutTree->insertItem(rowIndex, row);
+        m_layoutTimeline->insertItem(rowIndex, row->rowTimeline());
+    }
+}
+
 void RowManager::reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding)
 {
      int index = getRowIndex(binding->getRowTree()) + 1;
@@ -339,9 +366,11 @@ bool RowManager::hasProperties(RowTree *row)
     return false;
 }
 
-int RowManager::getLastChildIndex(RowTree *row)
+int RowManager::getLastChildIndex(RowTree *row, int index)
 {
-    int index = getRowIndex(row);
+    if (index == -1)
+        index = getRowIndex(row);
+
     if (index != -1) {
         for (int i = index + 1; i < m_layoutTree->count(); ++i) {
             if (static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem())->depth()

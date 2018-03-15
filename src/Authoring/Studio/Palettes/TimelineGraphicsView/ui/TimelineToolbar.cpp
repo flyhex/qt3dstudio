@@ -27,6 +27,12 @@
 ****************************************************************************/
 
 #include "TimelineToolbar.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "Dispatch.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QtWidgets/qslider.h>
 
@@ -45,7 +51,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
 
     // create actions
     QAction *actionNewLayer    = new QAction(iconLayer, tr("Add New Layer"));
-    QAction *actionDeleteLayer = new QAction(iconDelete, tr("Delete Layer"));
+             m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"));
              m_actionTime      = new QAction(tr("0:00.000"));
     QAction *actionFirst       = new QAction(iconFirst, tr("Go to Timeline Start"));
     QAction *actionStop        = new QAction(iconStop, tr("Stop Playing"));
@@ -64,7 +70,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
 
     // connections
     connect(actionNewLayer   , &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
-    connect(actionDeleteLayer, &QAction::triggered, this, &TimelineToolbar::deleteLayerTriggered);
+    connect(m_actionDeleteRow, &QAction::triggered, this, &TimelineToolbar::deleteLayerTriggered);
     connect(m_actionTime     , &QAction::triggered, this, &TimelineToolbar::gotoTimeTriggered);
     connect(actionFirst      , &QAction::triggered, this, &TimelineToolbar::firstFrameTriggered);
     connect(actionStop       , &QAction::triggered, this, &TimelineToolbar::stopTriggered);
@@ -75,7 +81,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
 
     // add actions
     addAction(actionNewLayer);
-    addAction(actionDeleteLayer);
+    addAction(m_actionDeleteRow);
     addSpacing(100);
     addAction(m_actionTime);
     addSpacing(10);
@@ -87,6 +93,25 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     addWidget(m_scaleSlider);
     addSeparator();
     addAction(m_actionDuration);
+
+    m_connectSelectionChange = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
+                std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));
+}
+
+void TimelineToolbar::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
+{
+    qt3dsdm::TInstanceHandleList selectedInstances = inNewSelectable.GetSelectedInstances();
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    CClientDataModelBridge *theClientBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    bool canDelete = false;
+    for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
+        if (theClientBridge->CanDelete(selectedInstances[idx])) {
+            canDelete = true;
+            break;
+        }
+    }
+
+    m_actionDeleteRow->setEnabled(canDelete);
 }
 
 // add a spacer widget

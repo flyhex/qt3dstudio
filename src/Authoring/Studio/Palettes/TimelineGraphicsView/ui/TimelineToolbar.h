@@ -29,6 +29,8 @@
 #ifndef TIMELINETOOLBAR_H
 #define TIMELINETOOLBAR_H
 
+#include "SelectedValueImpl.h"
+#include "Qt3DSDMSignals.h"
 #include <QtWidgets/qtoolbar.h>
 
 QT_FORWARD_DECLARE_CLASS(QAction)
@@ -56,9 +58,12 @@ public:
 
 private:
     void addSpacing(int width);
+    void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
 
     QAction *m_actionTime;
+    QAction *m_actionDeleteRow;
     QAction *m_actionDuration;
+    qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
     QSlider *m_scaleSlider;
 };
 

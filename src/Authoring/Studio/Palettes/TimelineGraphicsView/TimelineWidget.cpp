@@ -60,29 +60,28 @@
 void printBinding(ITimelineItemBinding *binding, QString padding = " ")
 {
     qDebug().noquote().nospace()
-             << "\x1b[42m \x1b[1m" << __FUNCTION__
-             << padding
-             << binding->GetTimelineItem()->GetName().toQString()
-             << " (" << static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance() << ")"
-             << "\x1b[m";
-
+            << "\x1b[42m \x1b[1m" << __FUNCTION__
+            << padding
+            << binding->GetTimelineItem()->GetName().toQString()
+            << " (" << static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance() << ")"
+            << "\x1b[m";
 
     for (int i = 0; i < binding->GetPropertyCount(); i++) {
         ITimelineItemProperty *property = binding->GetProperty(i);
         qDebug().noquote().nospace()
-                 << "\x1b[42m \x1b[1m" << __FUNCTION__
-                 << padding
-                 << "[" << property->GetName().toQString() << "]"
-                 << " (" << static_cast<Qt3DSDMTimelineItemProperty*>(property)->getPropertyHandle() << ")"
-                 << "\x1b[m";
+            << "\x1b[42m \x1b[1m" << __FUNCTION__
+            << padding
+            << "[" << property->GetName().toQString() << "]"
+            << " (" << static_cast<Qt3DSDMTimelineItemProperty*>(property)->getPropertyHandle() << ")"
+            << "\x1b[m";
 
         for (int j = 0; j < property->GetKeyframeCount(); j++) {
             IKeyframe *kf = property->GetKeyframeByIndex(j);
             qDebug().noquote().nospace()
-                     << "\x1b[42m \x1b[1m" << __FUNCTION__
-                     << padding
-                     << "  {KF: " << kf->GetTime() << ", selected: " << kf->IsSelected() << "}"
-                     << "\x1b[m";
+                << "\x1b[42m \x1b[1m" << __FUNCTION__
+                << padding
+                << "  {KF: " << kf->GetTime() << ", selected: " << kf->IsSelected() << "}"
+                << "\x1b[m";
         }
     }
     padding = padding.append("-");
@@ -234,15 +233,28 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
     connect(m_toolbar, &TimelineToolbar::newLayerTriggered, this, [this]() {
         // Mahmoud_TODO: debug code, remove
-        printHandlesMap(m_handlesMap);
-//      m_graphicsScene->addNewLayer();
+//        printHandlesMap(m_handlesMap);
+        using namespace Q3DStudio;
+
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
+        // If active instance is component, just bail as we can't add layers to components
+        qt3dsdm::Qt3DSDMInstanceHandle rootInstance = doc->GetActiveRootInstance();
+        if (bridge->GetObjectType(rootInstance) == OBJTYPE_COMPONENT)
+            return;
+
+        qt3dsdm::Qt3DSDMSlideHandle slide = doc->GetActiveSlide();
+        qt3dsdm::Qt3DSDMInstanceHandle layer = doc->GetActiveLayer();
+
+        SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Add Layer"))
+            ->CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Layer, layer, slide,
+                                       DocumentEditorInsertType::PreviousSibling,
+                                       CPt(), PRIMITIVETYPE_UNKNOWN, -1);
     });
 
-    connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered, this, [this]() {
-        // Mahmoud_TODO: debug code, remove
-        printBinding(m_binding);
-//      m_graphicsScene->deleteSelectedRow();
-    });
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered, doc, &CDoc::DeleteSelectedObject);
 
     connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [this]() {
         // Mahmoud_TODO: implement
@@ -394,6 +406,9 @@ void TimelineWidget::OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         RowTree *newRow = m_graphicsScene->rowManager()
                           ->createRowFromBinding(binding, bindingParent->getRowTree());
 
+        if (binding->GetObjectType() == OBJTYPE_LAYER)
+            m_graphicsScene->rowManager()->syncRowPositionWithBinding(newRow, bindingParent);
+
         m_handlesMap.insert(std::make_pair(inInstance, newRow));
     }
 }
@@ -444,13 +459,14 @@ void TimelineWidget::OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
-    ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
+    if (binding != nullptr) {
+        ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
 
-    if (propBinding != nullptr) {
-        m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
+        if (propBinding != nullptr) {
+            m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
 
-        if (binding)
-            binding->RemovePropertyRow(property);
+                binding->RemovePropertyRow(property);
+        }
     }
 }
 
