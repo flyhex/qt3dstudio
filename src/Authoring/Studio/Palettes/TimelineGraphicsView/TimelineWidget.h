@@ -36,6 +36,7 @@
 #include "Qt3DSDMSignals.h"
 #include "SelectedValueImpl.h"
 #include "TimelineObjectModel.h"
+#include "TreeHeaderView.h"
 
 class RowTree;
 class TimelineToolbar;
@@ -91,7 +92,7 @@ private:
     Qt3DSDMTimelineItemBinding *getBindingForHandle(int handle,
                                                     Qt3DSDMTimelineItemBinding *binding) const;
     void insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding);
-    QGraphicsView *m_viewTreeHeader = nullptr;
+    TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;
     QGraphicsView *m_viewTimelineHeader = nullptr;
     QGraphicsView *m_viewTimelineContent = nullptr;

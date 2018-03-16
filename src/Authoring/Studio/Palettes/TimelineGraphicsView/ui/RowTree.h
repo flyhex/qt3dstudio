@@ -34,6 +34,8 @@
 #include "TimelineConstants.h"
 #include "RowTypes.h"
 #include "StudioObjectTypes.h"
+#include "RowTreeLabelItem.h"
+
 #include <QtCore/qpropertyanimation.h>
 #include <QtCore/qparallelanimationgroup.h>
 
@@ -88,11 +90,13 @@ public:
     ITimelineItemBinding *getBinding() const;
 
 private:
+    void initialize();
     void initializeAnimations();
     void animateExpand(bool expand);
     void updateExpandStatus(bool expand, bool childrenOnly = false);
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
+    void updateLabelPosition();
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
@@ -106,6 +110,7 @@ private:
     bool m_moveTarget = false;
     bool m_isProperty = false;
     TimelineGraphicsScene *m_scene;
+    RowTreeLabelItem m_labelItem;
     EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;
     QString m_propertyType; // for property rows
     QString m_label;

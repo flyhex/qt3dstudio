@@ -32,6 +32,7 @@
 #include "TimelineConstants.h"
 #include "StudioObjectTypes.h"
 #include "Bindings/ITimelineItemBinding.h"
+#include "Qt3DSString.h"
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -46,14 +47,12 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
     m_scene = timelineScene;
     m_rowType = rowType;
     m_label = label;
-
-    setTimelineRow(m_rowTimeline);
-    m_rowTimeline->setRowTree(this);
+    m_labelItem.setRowTypeLabel(m_rowType);
 
     if (m_rowType == OBJTYPE_MATERIAL)
         m_isProperty = true;
 
-    initializeAnimations();
+    initialize();
 }
 
 RowTree::~RowTree()
@@ -75,13 +74,31 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, const QString &propType)
     m_label = propType;
     m_propertyType = propType;
 
-    setTimelineRow(m_rowTimeline);
-    m_rowTimeline->setRowTree(this);
-
     m_isProperty = true;
     m_rowTimeline->m_isProperty = true;
 
+    initialize();
+}
+
+void RowTree::initialize()
+{
+    setTimelineRow(m_rowTimeline);
+    m_rowTimeline->setRowTree(this);
+
     initializeAnimations();
+
+    m_labelItem.setParentItem(this);
+    m_labelItem.setLabel(m_label);
+    updateLabelPosition();
+
+    connect(&m_labelItem, &RowTreeLabelItem::labelChanged, this,
+            [this](const QString &label) {
+        // Update label on timeline and on model
+        m_label = label;
+        // TODO: Get rid of CString APIs
+        auto clabel = Q3DStudio::CString::fromQString(m_label);
+        m_binding->GetTimelineItem()->SetName(clabel);
+    });
 }
 
 void RowTree::initializeAnimations()
@@ -224,47 +241,36 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixPropertyDisabled  = QPixmap(":/images/Objects-Property-Disabled.png");
 
     QPixmap pixRowType;
-    QString rowLabel;
     switch (m_rowType) {
     case OBJTYPE_SCENE:
         pixRowType = m_locked ? pixSceneDisabled : pixSceneNormal;
-        rowLabel = tr("Scene");
         break;
     case OBJTYPE_LAYER:
         pixRowType = m_locked ? pixLayerDisabled : pixLayerNormal;
-        rowLabel = tr("Layer");
         break;
     case OBJTYPE_MODEL:
         pixRowType = m_locked ? pixObjectDisabled : pixObjectNormal;
-        rowLabel = tr("Object");
         break;
     case OBJTYPE_LIGHT:
         pixRowType = m_locked ? pixLightDisabled : pixLightNormal;
-        rowLabel = tr("Light");
         break;
     case OBJTYPE_CAMERA:
         pixRowType = m_locked ? pixCameraDisabled : pixCameraNormal;
-        rowLabel = tr("Camera");
         break;
     case OBJTYPE_TEXT:
         pixRowType = m_locked ? pixTextDisabled : pixTextNormal;
-        rowLabel = tr("Text");
         break;
     case OBJTYPE_ALIAS:
         pixRowType = m_locked ? pixAliasDisabled : pixAliasNormal;
-        rowLabel = tr("Alias");
         break;
     case OBJTYPE_GROUP:
         pixRowType = m_locked ? pixGroupDisabled : pixGroupNormal;
-        rowLabel = tr("Group");
         break;
     case OBJTYPE_COMPONENT:
         pixRowType = m_locked ? pixComponentDisabled : pixComponentNormal;
-        rowLabel = tr("Component");
         break;
     case OBJTYPE_MATERIAL:
         pixRowType = m_locked ? pixMaterialDisabled : pixMaterialNormal;
-        rowLabel = tr("Default");
         break;
     default:
         break;
@@ -273,17 +279,9 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     if (m_isProperty && m_rowType != OBJTYPE_MATERIAL)
         pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
 
-    if (m_label.isEmpty())
-        m_label = rowLabel;
-
     y = (size().height() - 16) * .5;
 
     painter->drawPixmap(offset + 15, y, 16, 16, pixRowType);
-
-    // Label
-    painter->setPen(QColor(m_locked ? TimelineConstants::ROW_TEXT_COLOR_DISABLED
-                                    : TimelineConstants::ROW_TEXT_COLOR));
-    painter->drawText(offset + 35, size().height() * .5 + 4, tr("%1").arg(m_label));
 
     // Shy, eye, lock BG (to hide the label when overlapping)
     painter->fillRect(QRect(m_treeWidth - 53, 0, 53, size().height() - 1), bgColor);
@@ -320,6 +318,7 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
     m_shy = m_binding->GetTimelineItem()->IsShy();
     m_visible = m_binding->GetTimelineItem()->IsVisible();
     m_locked = m_binding->GetTimelineItem()->IsLocked();
+    m_labelItem.setLocked(m_locked);
 }
 
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
@@ -393,6 +392,7 @@ void RowTree::updateDepthRecursive()
         for (auto child : qAsConst(m_childRows))
             child->updateDepthRecursive();
     }
+    updateLabelPosition();
 }
 
 // TODO: so far not used, delete if end up not used
@@ -410,6 +410,7 @@ void RowTree::removeChild(RowTree *child)
 
         if (m_childRows.empty())
             m_expanded = true;
+        child->updateLabelPosition();
     }
 }
 
@@ -461,9 +462,8 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 
 void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
 {
-    if (!childrenOnly) {
+    if (!childrenOnly)
         animateExpand(expand);
-    }
 
     if (!m_childRows.empty()) {
         for (auto child : qAsConst(m_childRows))
@@ -474,12 +474,19 @@ void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
 void RowTree::updateLockRecursive(bool state)
 {
     m_locked = state;
+    m_labelItem.setLocked(m_locked);
     update();
 
     if (!m_childRows.empty()) {
         for (auto child : qAsConst(m_childRows))
             child->updateLockRecursive(m_locked);
     }
+}
+
+void RowTree::updateLabelPosition()
+{
+    int offset = 5 + m_depth * 15 + 30;
+    m_labelItem.setPos(offset, -3);
 }
 
 bool RowTree::expanded() const

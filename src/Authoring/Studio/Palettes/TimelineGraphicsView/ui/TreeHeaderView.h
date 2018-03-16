@@ -26,30 +26,20 @@
 **
 ****************************************************************************/
 
-#ifndef TIMELINEITEM_H
-#define TIMELINEITEM_H
+#ifndef TREEHEADERVIEW_H
+#define TREEHEADERVIEW_H
 
-#include <QtWidgets/qgraphicswidget.h>
+#include <QtWidgets/qgraphicsview.h>
 
-class TimelineItem : public QGraphicsWidget
+class TreeHeaderView : public QGraphicsView
 {
     Q_OBJECT
-
 public:
-    explicit TimelineItem(TimelineItem *parent = nullptr);
+    TreeHeaderView(QWidget *parent = nullptr);
 
-    enum ItemType {
-        TypeTimelineItem = UserType + 1,
-        TypeInteractiveTimelineItem,
-        TypeTreeHeader,
-        TypeRowTree,
-        TypeRowTreeLabelItem,
-        TypeRowTimeline,
-        TypePlayHead,
-        TypeRuler
-    };
+protected:
+    void  scrollContentsBy(int dx, int dy) override;
 
-   int type() const;
 };
 
-#endif // TIMELINEITEM_H
+#endif // TREEHEADERVIEW_H

@@ -121,7 +121,7 @@ public:
 TimelineWidget::TimelineWidget(QWidget *parent)
     : QWidget()
     , m_toolbar(new TimelineToolbar())
-    , m_viewTreeHeader(new QGraphicsView(this))
+    , m_viewTreeHeader(new TreeHeaderView(this))
     , m_viewTreeContent(new QGraphicsView(this))
     , m_viewTimelineHeader(new QGraphicsView(this))
     , m_viewTimelineContent(new QGraphicsView(this))

@@ -91,6 +91,9 @@ private:
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
     void updateHoverStatus(const QPointF &scenePos);
+    QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
+                                    QGraphicsItem *item,
+                                    const QPointF &scenePos);
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;

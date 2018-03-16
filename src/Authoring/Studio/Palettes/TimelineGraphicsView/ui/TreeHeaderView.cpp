@@ -26,30 +26,21 @@
 **
 ****************************************************************************/
 
-#ifndef TIMELINEITEM_H
-#define TIMELINEITEM_H
+#include "TreeHeaderView.h"
 
-#include <QtWidgets/qgraphicswidget.h>
-
-class TimelineItem : public QGraphicsWidget
+TreeHeaderView::TreeHeaderView(QWidget *parent)
+    : QGraphicsView(parent)
 {
-    Q_OBJECT
+}
 
-public:
-    explicit TimelineItem(TimelineItem *parent = nullptr);
-
-    enum ItemType {
-        TypeTimelineItem = UserType + 1,
-        TypeInteractiveTimelineItem,
-        TypeTreeHeader,
-        TypeRowTree,
-        TypeRowTreeLabelItem,
-        TypeRowTimeline,
-        TypePlayHead,
-        TypeRuler
-    };
-
-   int type() const;
-};
-
-#endif // TIMELINEITEM_H
+void  TreeHeaderView::scrollContentsBy(int dx, int dy)
+{
+    // Overridden to ignore scrolling
+    //
+    // Longer explanation: When RowTreeLabelItem (QGraphicsTextItem) gets focus
+    // for text editing, it forces views to scroll themselves so that editable
+    // text item is always visible. But we don't want tree header view to move.
+    // See QGraphicsTextItemPrivate::textControl() and _q_ensureVisible()
+    Q_UNUSED(dx);
+    Q_UNUSED(dy);
+}
