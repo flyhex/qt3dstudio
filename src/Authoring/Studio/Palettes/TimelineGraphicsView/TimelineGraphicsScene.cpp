@@ -159,7 +159,7 @@ void TimelineGraphicsScene::commitMoveRows()
 
     // same place, abort
     if ((sourceIndex == targetIndex || sourceIndex == targetIndex + 1)
-            && m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()) {
+        && m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()) {
         return;
     }
 
@@ -168,10 +168,9 @@ void TimelineGraphicsScene::commitMoveRows()
 //           << ", rowSrcDepth=" << rowSrcDepth;
 
     // gather the rows to be moved
-    RowTree *row_i = nullptr;
-    QList<RowTree *> itemsToMove { m_rowMover->sourceRow() };
+    QList<RowTree *> rowsToMove { m_rowMover->sourceRow() };
     for (int i = sourceIndex + 1; i < m_layoutTree->count();) {
-        row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+        RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
 
         // TODO: remove
 //      qDebug() << "i=" << i << ", row_i->depth()=" << row_i->depth();
@@ -181,7 +180,7 @@ void TimelineGraphicsScene::commitMoveRows()
 
         m_layoutTree->removeAt(i);
         m_layoutTimeline->removeAt(i);
-        itemsToMove.append(row_i);
+        rowsToMove.append(row_i);
     }
 
     m_rowMover->insertionParent()->addChild(m_rowMover->sourceRow());
@@ -191,13 +190,15 @@ void TimelineGraphicsScene::commitMoveRows()
 
     // commit the move
     if (m_rowMover->movingDown())
-        targetIndex -= itemsToMove.count();
+        targetIndex -= rowsToMove.count();
 
-    for (auto child : qAsConst(itemsToMove)) {
+    for (RowTree *child : qAsConst(rowsToMove)) {
         ++targetIndex;
         m_layoutTree->insertItem(targetIndex, child);
         m_layoutTimeline->insertItem(targetIndex, child->rowTimeline());
     }
+
+    // Mahmoud_TODO: update binding
 }
 
 void TimelineGraphicsScene::getLastChildRow(RowTree *row, int index, RowTree *outLastChild,
@@ -500,15 +501,18 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
             m_keyframeManager->commitMoveSelectedKeyframes();
+        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+            // update duration values to the binding
+            m_editedTimelineRow->commitDurationMove();
         }
 
-        // reset mouse drag params
+        // reset mouse press params
         m_selectionRect->end();
         m_rowMover->end();
-        m_rulerPressed = false;
         m_dragging = false;
-        m_clickedTimelineControlType = TimelineControlType::None;
+        m_rulerPressed = false;
         m_keyframePressed = false;
+        m_clickedTimelineControlType = TimelineControlType::None;
         m_editedTimelineRow = nullptr;
     }
 

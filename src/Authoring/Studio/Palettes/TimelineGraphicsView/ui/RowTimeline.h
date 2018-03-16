@@ -49,6 +49,7 @@ public:
     void setRowTree(RowTree *rowTree);
     void updatePosition();
     void moveDurationBy(double dx);
+    void commitDurationMove();
     void setStartTime(double startTime);
     void setEndTime(double endTime);
     void setStartX(double startX);

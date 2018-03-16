@@ -31,6 +31,8 @@
 #include "Ruler.h"
 #include "TimelineConstants.h"
 #include "Keyframe.h"
+#include "Bindings/ITimelineItemBinding.h"
+#include "Bindings/ITimelineTimebar.h"
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -285,6 +287,24 @@ void RowTimeline::moveDurationBy(double dx)
     updateChildrenMaxEndXRecursive(m_rowTree);
 
     update();
+
+    if (!m_rowTree->empty()) {
+        for (RowTree *child : qAsConst(m_rowTree->m_childRows))
+            child->m_rowTimeline->moveDurationBy(dx);
+    }
+}
+
+void RowTimeline::commitDurationMove()
+{
+    m_rowTree->m_binding->GetTimelineItem()->GetTimebar()->ChangeTime(m_startTime * 1000, true);
+    m_rowTree->m_binding->GetTimelineItem()->GetTimebar()->ChangeTime(m_endTime * 1000, false);
+    m_rowTree->m_binding->GetTimelineItem()->GetTimebar()->CommitTimeChange();
+    if (!m_rowTree->empty()) {
+        for (RowTree *child : qAsConst(m_rowTree->m_childRows)) {
+            if (!child->isProperty())
+                child->m_rowTimeline->commitDurationMove();
+        }
+    }
 }
 
 // convert time values to x
@@ -320,7 +340,7 @@ void RowTimeline::setStartX(double startX)
     m_startTime = xToTime(startX);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
-        m_minStartX = m_startX;
+        m_minStartX = 0;
 
     updateChildrenMinStartXRecursive(m_rowTree);
     update();
@@ -338,7 +358,7 @@ void RowTimeline::setEndX(double endX)
     m_endTime = xToTime(endX);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
-        m_maxEndX = m_endX;
+        m_maxEndX = 999999;
 
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
@@ -378,7 +398,7 @@ void RowTimeline::setStartTime(double startTime)
     m_startX = timeToX(startTime);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
-        m_minStartX = m_startX;
+        m_minStartX = 0;
 
     updateChildrenMinStartXRecursive(m_rowTree);
     update();
@@ -390,7 +410,7 @@ void RowTimeline::setEndTime(double endTime)
     m_endX = timeToX(endTime);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
-        m_maxEndX = m_endX;
+        m_maxEndX = 999999;
 
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
