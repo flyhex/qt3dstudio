@@ -150,7 +150,7 @@ struct SScaleWidget : public SStudioWidgetImpl<StudioWidgetTypes::Scale>
         inRenderContext.SetDepthTestEnabled(true);
         inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
         float pixelRatio = float(devicePixelRatio());
-        QT3DSF32 axisWidth = CStudioPreferences::getSelectorLineWidth() * pixelRatio;
+        QT3DSF32 axisWidth = pixelRatio;
         QT3DSF32 triWidth = 3 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
         QT3DSF32 axisStart = CStudioPreferences::getSelectorLineLength() / 3.0f * pixelRatio;
         QT3DSF32 axisLength = CStudioPreferences::getSelectorLineLength() * pixelRatio;

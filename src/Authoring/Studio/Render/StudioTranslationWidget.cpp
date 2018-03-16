@@ -77,8 +77,8 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
         if (m_XAxis == nullptr) {
             TBase::SetupRender(inWidgetContext, inRenderContext);
             float pixelRatio = float(devicePixelRatio());
-            QT3DSF32 axisWidth = CStudioPreferences::getSelectorLineWidth() * pixelRatio;
-            QT3DSF32 triWidth = 3 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
+            QT3DSF32 axisWidth = pixelRatio;
+            QT3DSF32 triWidth = 4 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
             QT3DSF32 axisStart = CStudioPreferences::getSelectorLineLength() / 3.0f * pixelRatio;
             QT3DSF32 axisLength = CStudioPreferences::getSelectorLineLength() * pixelRatio;
             QT3DSF32 triLength = axisStart;
