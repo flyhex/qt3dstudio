@@ -114,10 +114,16 @@ void CSubPresentationDlg::onTypeChanged(int index)
 
 void CSubPresentationDlg::onFileChanged(int index)
 {
-    if (index != m_ui->comboBoxFileList->count() - 1)
+    int specialItems = (m_subPresentation.m_type == QStringLiteral("presentation")) ? 2 : 1;
+
+    if (index < m_ui->comboBoxFileList->count() - specialItems) {
         m_subPresentation.m_argsOrSrc = m_ui->comboBoxFileList->currentText();
-    else
-        browseFile();
+    } else {
+        if (specialItems == 2 && index == m_ui->comboBoxFileList->count() - 1)
+            createSubPresentation();
+        else
+            browseFile();
+    }
     // Disable "Ok" if type is presentation and no file has been selected
     m_ui->buttonBox->buttons()[0]->setEnabled(
                 !(m_subPresentation.m_type == QStringLiteral("presentation")
@@ -132,7 +138,7 @@ void CSubPresentationDlg::onIdChanged(const QString &id)
 void CSubPresentationDlg::updateUI() {
     m_ui->comboBoxFileList->clear();
 
-    // Populate file combobox with current uip/qml + folder's uips/qmls + "Browse..."
+    // Populate file combobox with current uip/qml + folder's uips/qmls + "Browse..." + "Create..."
     // and select the current uip/qml (or browse if none)
     QString filter = QStringLiteral("*.uip");
     if (m_subPresentation.m_type == QStringLiteral("presentation-qml")) {
@@ -157,6 +163,10 @@ void CSubPresentationDlg::updateUI() {
     }
 
     m_ui->comboBoxFileList->addItem(tr("Browse..."));
+
+    // Add "Create..." for sub-presentations only
+    if (m_subPresentation.m_type == QStringLiteral("presentation"))
+        m_ui->comboBoxFileList->addItem(tr("Create..."));
 }
 
 void CSubPresentationDlg::browseFile()
@@ -193,4 +203,12 @@ void CSubPresentationDlg::browseFile()
         m_ui->comboBoxFileList->insertItem(-1, shortFile);
         m_ui->comboBoxFileList->setCurrentText(shortFile);
     }
+}
+
+void CSubPresentationDlg::createSubPresentation()
+{
+    m_subPresentation.m_argsOrSrc = g_StudioApp.OnFileNew(false);
+    updateUI();
+    // Select the newly created file
+    m_ui->comboBoxFileList->setCurrentText(m_subPresentation.m_argsOrSrc);
 }

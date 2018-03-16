@@ -822,8 +822,7 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  *	Prompt the user for a file to save to from the SaveAs menu option.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitle,
-                                                     bool inNewDoc)
+Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool createFolder)
 {
     Qt3DSFile theFile("");
     QString theFileExt;
@@ -832,7 +831,7 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
     QString theFilename
             = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
 
-    if (theFilename.isEmpty() || inNewDoc)
+    if (theFilename.isEmpty() || createFolder)
         theFilename = QObject::tr("Untitled");
 
     theFileExt = QStringLiteral(".uip");
@@ -852,7 +851,6 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
     if (!inDialogTitle.isEmpty())
         theFileDlg.setWindowTitle(inDialogTitle);
 
-    bool theCreateDir = false;
     bool theShowDialog = true;
 
     while (theShowDialog && theFileDlg.exec()) {
@@ -866,20 +864,9 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
         theFile = Qt3DSFile(Q3DStudio::CString::fromQString(selectedName));
 
         m_LastSaveFile = theFile.GetAbsolutePath();
-        // customising a dialog box will force us to use non-native.
-        // defaulting this for now, until we can agree a better workflow for
-        // creating new projects
         // New directory is only created when creating a new project. When doing a "save as"
         // or "save copy", a new directory is not created.
-        theCreateDir = inNewDoc;
-
-        if (theCreateDir) {
-            // If user checks "Create directory for project"
-            // we need to check manually if the file in the directory already exists (because the
-            // default file dialog can't do that for you)
-            // If the file exists, show warning message if user wants to overwrite the file
-            // This is to fix bug #6315: Create new project in folder with same name will overwrite
-            // existing file without warning
+        if (createFolder) {
             Q3DStudio::CFilePath theFinalDir;
             Q3DStudio::CFilePath theFinalDoc;
             g_StudioApp.GetCore()->GetCreateDirectoryFileName(theFile, theFinalDir, theFinalDoc);
@@ -904,7 +891,7 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
         }
     }
 
-    return std::make_pair(theFile, theCreateDir);
+    return theFile;
 }
 
 //==============================================================================
@@ -912,12 +899,12 @@ std::pair<Qt3DSFile, bool> CDialogs::GetSaveAsChoice(const QString &inDialogTitl
  *	Prompt the user for a file to create.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-std::pair<Qt3DSFile, bool>
-CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory)
+Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory,
+                                         bool createFolder)
 {
     if (inInitialDirectory.size())
         m_LastSaveFile = inInitialDirectory;
-    return GetSaveAsChoice(QObject::tr("Create New Document"), true);
+    return GetSaveAsChoice(QObject::tr("Create New Document"), createFolder);
 }
 
 //==============================================================================

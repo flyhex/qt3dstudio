@@ -238,17 +238,12 @@ void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
     }
 
     Qt3DSFile fileDocument(theDocument.toCString());
+
     m_Doc->SetDocumentPath(fileDocument);
     m_Doc->CreateNewDocument();
 
     // Serialize the new document.
     m_Doc->SaveDocument(fileDocument);
-
-#ifdef DRIVE_DESIGN_STUDIO
-    // Update the uia file if possible.
-    QByteArray docBA = theDocument.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(), true);
-#endif
 }
 
 //=============================================================================

@@ -382,10 +382,9 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
     int theReturn = true;
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
-        std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
-                GetNewDocumentChoice(Q3DStudio::CString("."));
-        if (theFile.first.GetPath() != "") {
-            m_Core->OnNewDocument(theFile.first, theFile.second);
+        Qt3DSFile theFile = m_Dialogs->GetNewDocumentChoice(Q3DStudio::CString("."));
+        if (theFile.GetPath() != "") {
+            m_Core->OnNewDocument(theFile, true);
             theReturn = true;
             m_welcomeShownThisSession = true;
         } else {
@@ -515,10 +514,9 @@ bool CStudioApp::ShowStartupDialog()
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {
-            std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
-                    GetNewDocumentChoice(theMostRecentDirectory);
-            if (theFile.first.GetPath() != "") {
-                m_Core->OnNewDocument(theFile.first, theFile.second);
+            Qt3DSFile theFile = m_Dialogs->GetNewDocumentChoice(theMostRecentDirectory);
+            if (theFile.GetPath() != "") {
+                m_Core->OnNewDocument(theFile, true);
                 theReturn = true;
             } else {
                 // User Cancels the dialog. Show startup dialog again.
@@ -1309,7 +1307,7 @@ bool CStudioApp::OnSave(bool autosave)
  */
 bool CStudioApp::OnSaveAs()
 {
-    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
+    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice();
     if (theFile.GetPath() != "") {
         m_Core->OnSaveDocument(theFile);
         return true;
@@ -1326,7 +1324,7 @@ bool CStudioApp::OnSaveAs()
  */
 bool CStudioApp::OnSaveCopy()
 {
-    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
+    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice();
     if (theFile.GetPath() != "") {
         // Send in a "true" to the save function to indicate this is a copy
         m_Core->OnSaveDocument(theFile, true);
@@ -1499,15 +1497,16 @@ void CStudioApp::OnFileOpen()
             OnLoadDocument(theFile);
     }
 }
-using namespace std;
 
-void CStudioApp::OnFileNew()
+QString CStudioApp::OnFileNew(bool createFolder)
 {
     if (PerformSavePrompt()) {
-        pair<Qt3DSFile, bool> theFile = m_Dialogs->GetNewDocumentChoice();
-        if (theFile.first.GetPath() != "")
-            m_Core->OnNewDocument(theFile.first, theFile.second);
+        Qt3DSFile theFile = m_Dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), createFolder);
+        if (theFile.GetPath() != "")
+            m_Core->OnNewDocument(theFile, createFolder);
+        return theFile.GetName().toQString();
     }
+    return QString();
 }
 
 bool CStudioApp::IsAuthorZoom()

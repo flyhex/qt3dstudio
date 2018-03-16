@@ -201,7 +201,7 @@ public:
     bool OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError = true);
     void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
-    void OnFileNew();
+    QString OnFileNew(bool createFolder = true);
     bool IsAuthorZoom();
     void SetAuthorZoom(bool inZoom);
     void SetAutosaveEnabled(bool enabled);
