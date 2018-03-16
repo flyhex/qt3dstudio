@@ -407,7 +407,7 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
 
             inRenderContext.SetDepthWriteEnabled(true);
             inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
-            inRenderContext.SetDepthTestEnabled(true);
+            inRenderContext.SetDepthTestEnabled(false);
             inRenderContext.SetDepthWriteEnabled(true);
             inRenderContext.SetBlendingEnabled(true);
             inRenderContext.SetCullingEnabled(false);
