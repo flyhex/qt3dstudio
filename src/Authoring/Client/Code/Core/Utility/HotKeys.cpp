@@ -100,7 +100,6 @@ public:
             return false;
 
         switch (eventType) {
-        case QEvent::ShortcutOverride:
         case QEvent::KeyPress: {
                 bool success = m_hotkeys->OnKeyDown(ke->key(), ke->count(), ke->modifiers())
                         || m_hotkeys->OnChar(ke->key(), ke->count(), ke->modifiers());

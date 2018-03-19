@@ -206,6 +206,7 @@ public:
     void SetAuthorZoom(bool inZoom);
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);
+    void toggleEyeball();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;

@@ -1248,6 +1248,9 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Return),
                         CStudioApp::PlaybackToggle);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_H),
+                        CStudioApp::toggleEyeball);
 
     inShortcutHandler->RegisterKeyUpEvent(
                 new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackStop), 0,
@@ -1611,4 +1614,18 @@ void CStudioApp::OnPresentationModifiedExternally()
         Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);
     }
+}
+
+void CStudioApp::toggleEyeball()
+{
+    CDoc *theDoc = m_Core->GetDoc();
+    qt3dsdm::Qt3DSDMInstanceHandle handle = theDoc->GetSelectedInstance();
+    qt3dsdm::Qt3DSDMPropertyHandle property = theDoc->GetStudioSystem()->GetClientDataModelBridge()
+            ->GetSceneAsset().m_Eyeball;
+    SValue value;
+    theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
+                                                                             value);
+    bool boolValue = !qt3dsdm::get<bool>(value);
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
+            ->SetInstancePropertyValue(handle, property, boolValue);
 }
