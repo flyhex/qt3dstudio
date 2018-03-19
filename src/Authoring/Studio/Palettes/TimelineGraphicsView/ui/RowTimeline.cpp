@@ -123,6 +123,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 
     // Keyframes
+    int keyFrameY = 2 - (TimelineConstants::ROW_H - size().height())/2;
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
                 = QPixmap(":/images/Keyframe-Master-Normal.png");
@@ -130,7 +131,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-Master-Selected.png");
 
         for (auto keyframe : m_keyframes) {
-            painter->drawPixmap(timeToX(keyframe->time) - 8.5, 2, keyframe->selected
+            painter->drawPixmap(timeToX(keyframe->time) - 8.5, keyFrameY, keyframe->selected
                                 ? pixKeyframeMasterSelected : pixKeyframeMasterNormal);
         }
     } else if (m_rowTree->isProperty()) {
@@ -140,7 +141,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-Property-Selected.png");
 
         for (auto keyframe : m_keyframes) {
-            painter->drawPixmap(timeToX(keyframe->time) - (keyframe->selected ? 7.5 : 5.5), 2,
+            painter->drawPixmap(timeToX(keyframe->time) - (keyframe->selected ? 7.5 : 5.5), keyFrameY,
                                 keyframe->selected ? pixKeyframePropertySelected
                                                    : pixKeyframePropertyNormal);
         }

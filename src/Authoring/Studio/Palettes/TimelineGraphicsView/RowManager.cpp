@@ -294,8 +294,7 @@ void RowManager::updateRowFilterRecursive(RowTree *row)
 
 void RowManager::updateRowFilter(RowTree *row)
 {
-    bool parentOk = row->parentRow() == nullptr || (row->parentRow()->expanded()
-                                                        && row->parentRow()->isVisible());
+    bool parentOk = row->parentRow() == nullptr || row->parentRow()->isVisible();
     bool shyOk     = !row->shy()    || !m_scene->treeHeader()->filterShy();
     bool visibleOk = row->visible() || !m_scene->treeHeader()->filterHidden();
     bool lockOk    = !row->locked() || !m_scene->treeHeader()->filterLocked();

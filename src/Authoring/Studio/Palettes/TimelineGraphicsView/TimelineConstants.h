@@ -68,6 +68,9 @@ namespace TimelineConstants
     const char PLAYHEAD_LINE_COLOR[]          = "#b20808";
     const char FILTER_BUTTON_SELECTED_COLOR[] = "#000000";
 
+    // Other
+    const int EXPAND_ANIMATION_DURATION       = 200;
+
     // TODO: move the colors (and maybe dimensions) to StudioPreferences.
 }
 

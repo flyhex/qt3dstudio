@@ -34,6 +34,8 @@
 #include "TimelineConstants.h"
 #include "RowTypes.h"
 #include "StudioObjectTypes.h"
+#include <QtCore/qpropertyanimation.h>
+#include <QtCore/qparallelanimationgroup.h>
 
 class RowTimeline;
 class Ruler;
@@ -86,6 +88,8 @@ public:
     ITimelineItemBinding *getBinding() const;
 
 private:
+    void initializeAnimations();
+    void animateExpand(bool expand);
     void updateExpandStatus(bool expand, bool childrenOnly = false);
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
@@ -113,6 +117,13 @@ private:
     QRect m_rectShy;
     QRect m_rectVisible;
     QRect m_rectLocked;
+
+    QParallelAnimationGroup m_expandAnimation;
+    QPropertyAnimation *m_expandHeightAnimation;
+    QPropertyAnimation *m_expandTimelineHeightAnimation;
+    QParallelAnimationGroup m_collapseAnimation;
+    QPropertyAnimation *m_collapseHeightAnimation;
+    QPropertyAnimation *m_collapseTimelineHeightAnimation;
 
     friend class RowTimeline;
 };
