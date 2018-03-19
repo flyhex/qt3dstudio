@@ -1976,7 +1976,6 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
 void STranslation::DeactivateScan(SGraphObjectTranslator &inParent,
                                   Qt3DSDMInstanceHandle inAliasHandle)
 {
-    SGraphObjectTranslator &theParentTranslator(inParent);
     // Alias handles propagate down the scene graph.
     if (inParent.GetInstanceHandle() != inParent.GetSceneGraphInstanceHandle())
         inAliasHandle = inParent.GetInstanceHandle();
@@ -3090,8 +3089,7 @@ void STranslation::RotateSelectedInstanceAboutCameraDirectionVector(
 }
 
 // This method never feels right to me.  It is difficult to apply it to a single axis (of course for
-// that
-// you can use the inspector palette).
+// that you can use the inspector palette).
 void STranslation::RotateSelectedInstance(CPt inOriginalCoords, CPt inPreviousCoords,
                                           CPt inMouseCoords, CUpdateableDocumentEditor &inEditor,
                                           bool inLockToAxis)
@@ -3103,8 +3101,7 @@ void STranslation::RotateSelectedInstance(CPt inOriginalCoords, CPt inPreviousCo
     if (theCamera == nullptr)
         return;
     // We want to do a similar translation to what we did below but we need to calculate the
-    // parent's
-    // global rotation without scale included.
+    // parent's global rotation without scale included.
 
     QT3DSF32 theXDistance = (QT3DSF32)inMouseCoords.x - (QT3DSF32)inPreviousCoords.x;
     QT3DSF32 theYDistance = (QT3DSF32)inMouseCoords.y - (QT3DSF32)inPreviousCoords.y;
@@ -3384,7 +3381,6 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
 
     Option<QT3DSVec3> theOriginalPlaneCoords(thePrepResult->m_OriginalPlaneCoords);
     Option<QT3DSVec3> theCurrentPlaneCoords(thePrepResult->m_CurrentPlaneCoords);
-    Option<QT3DSVec3> thePreviousPlaneCoords(thePrepResult->m_PreviousPlaneCoords);
     QT3DSVec3 globalPos(thePrepResult->m_GlobalPos);
     bool isPlane(thePrepResult->m_IsPlane);
     QT3DSVec3 theAxis(thePrepResult->m_Axis);
@@ -3477,10 +3473,8 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             ApplyRotationToSelectedInstance(theRotation, *theNode, inEditor, false);
         }
         // In this case we are viewing the plane of rotation pretty much dead on, so we need to
-        // assume
-        // the camera and the object are both in the plane of rotation.  In this case we *sort* of
-        // need to
-        // do trackball rotation but force it to one plane of rotation.
+        // assume the camera and the object are both in the plane of rotation. In this case we
+        // *sort* of need to do trackball rotation but force it to one plane of rotation.
         else {
             // Setup a plane 600 units away from the camera and have the gadget run from there.
 
