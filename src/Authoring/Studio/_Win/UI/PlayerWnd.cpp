@@ -27,16 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-
 #include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
-
 #include "PlayerWnd.h"
 #include "MainFrm.h"
 #include "SceneView.h"
@@ -55,24 +46,16 @@
 #include "WGLRenderContext.h"
 #include "IStudioRenderer.h"
 
-#include <QMessageBox>
-#include <QMouseEvent>
+#include <QtWidgets/qmessagebox.h>
+#include <QtGui/qevent.h>
 #include <QtGui/qwindow.h>
 #include <QtGui/qscreen.h>
 
-//==============================================================================
-//	Class CPlayerWnd
-//==============================================================================
-
 CPlayerWnd::CPlayerWnd(QWidget *parent)
     : QOpenGLWidget(parent)
-    , m_ContainerWnd(nullptr)
-    , m_IsMouseDown(false)
-    , m_PreviousToolMode(0)
-    , m_FitClientToWindow(false)
+    , m_containerWnd(nullptr)
+    , m_mouseDown(false)
 {
-    m_LastKnownMousePosition = QPoint(-1, -1);
-
     setAcceptDrops(true);
     RegisterForDnd(this);
     AddMainFlavor(QT3DS_FLAVOR_FILE);
@@ -84,157 +67,149 @@ CPlayerWnd::CPlayerWnd(QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
-//==============================================================================
-/**
- *	Destructor: Releases the object.
- */
-//==============================================================================
 CPlayerWnd::~CPlayerWnd()
 {
 }
 
-//==============================================================================
-/**
- *	OnMouseMove: Handle the WM_MOUSEMOVE message
- *
- *	@param inFlags	flags passed in with th mouse move message
- *	@param inPoint	where the mouse is
- */
-//==============================================================================
-void CPlayerWnd::mouseMoveEvent(QMouseEvent *event)
-{
-    if (event->buttons() & Qt::MiddleButton) {
-        // Middle button events are handled by the parent CPlayerContainerWnd
-        event->ignore();
-    } else {
-        if (m_IsMouseDown) {
-            long theModifierKeys = 0;
-            if (event->buttons() & Qt::LeftButton)
-                theModifierKeys = CHotKeys::MOUSE_LBUTTON | CHotKeys::GetCurrentKeyModifiers();
-            else if (event->buttons() & Qt::RightButton)
-                theModifierKeys = CHotKeys::MOUSE_RBUTTON | CHotKeys::GetCurrentKeyModifiers();
-
-            long theToolMode = g_StudioApp.GetToolMode();
-            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDrag(
-                SceneDragSenderType::SceneWindow, event->pos(), theToolMode, theModifierKeys);
-        } else {
-            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseMove(
-                        SceneDragSenderType::SceneWindow, event->pos());
-        }
-    }
-}
-
-//==============================================================================
-/**
- *	OnSize: Handle the WM_SIZE message
- *
- *	@param nType Passed to the base class
- *	@param cx change in x window size
- *	@param cy change in y window size
- */
-//==============================================================================
 void CPlayerWnd::resizeEvent(QResizeEvent *event)
 {
     QOpenGLWidget::resizeEvent(event);
-
     update();
 }
 
-//==============================================================================
-/**
- *	OnLButtonDown: Handle the WM_LBUTTONDOWN message
- *
- *	@param inFlags Flags passed in from the message
- *	@param inPoint The point wher the button was clicked
- */
-//==============================================================================
-void CPlayerWnd::mousePressEvent(QMouseEvent *event)
+void CPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 {
-    const Qt::MouseButton btn = event->button();
-    if ((btn == Qt::LeftButton) || (btn == Qt::RightButton)) {
-        // Pause playback for the duration of the mouse click
-        if (g_StudioApp.IsPlaying()) {
-            g_StudioApp.PlaybackStopNoRestore();
-            m_resumePlayOnMouseRelease = true;
-        } else {
-            m_resumePlayOnMouseRelease = false;
+    if (m_mouseDown) {
+        long theModifierKeys = 0;
+        if (event->buttons() & Qt::LeftButton
+                || (!g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid())
+                && !m_containerWnd->IsDeploymentView()) {
+            // When in edit camera view and nothing is selected, all buttons are mapped
+            // as left button. That is how camera control tools work, they are all
+            // assuming left button.
+            theModifierKeys = CHotKeys::MOUSE_LBUTTON | CHotKeys::GetCurrentKeyModifiers();
+        } else if (event->buttons() & Qt::RightButton) {
+            theModifierKeys = CHotKeys::MOUSE_RBUTTON | CHotKeys::GetCurrentKeyModifiers();
+        } else if (event->buttons() & Qt::MiddleButton) {
+            theModifierKeys = CHotKeys::MOUSE_MBUTTON | CHotKeys::GetCurrentKeyModifiers();
         }
-
-        long theToolMode = g_StudioApp.GetToolMode();
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::SceneWindow,
-                                                                 event->pos(), theToolMode);
-        m_IsMouseDown = true;
-    } else if (btn == Qt::MiddleButton) {
-        event->ignore();
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDrag(
+                    SceneDragSenderType::Matte, event->pos(), g_StudioApp.GetToolMode(),
+                    theModifierKeys);
+    } else {
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseMove(
+                    SceneDragSenderType::SceneWindow, event->pos());
     }
 }
 
-//==============================================================================
-/**
- *	OnLButtonUp: Called whenever the user releases the left mouse button.
- *
- *	This processes the WM_LBUTTONUP message. This message is generated whenever
- *	the left mouse button. We release the mouse capture to stop dragging.
- *
- *	@param inFlags the flags passed in from the message call
- *	@param the point where the lbutton up takes place
- */
-//==============================================================================
+void CPlayerWnd::mousePressEvent(QMouseEvent *event)
+{
+    long toolMode = g_StudioApp.GetToolMode();
+    const Qt::MouseButton btn = event->button();
+
+    if (!g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid()
+            && !m_containerWnd->IsDeploymentView() && (event->modifiers() & Qt::AltModifier)
+            && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
+                g_StudioApp.GetRenderer().GetEditCamera())) {
+        // We are in edit camera view and nothing is selected, so we are in Alt-click camera tool
+        // controlling mode
+        m_mouseDown = true;
+        if (btn == Qt::MiddleButton) {
+            // Alt + Wheel Click
+            toolMode = STUDIO_TOOLMODE_CAMERA_PAN;
+        } else if (btn == Qt::LeftButton) {
+            // Alt + Left Click
+            toolMode = STUDIO_TOOLMODE_CAMERA_ROTATE;
+        } else if (btn == Qt::RightButton) {
+            // Alt + Right Click
+            toolMode = STUDIO_TOOLMODE_CAMERA_ZOOM;
+        }
+        g_StudioApp.SetToolMode(toolMode);
+        Q_EMIT m_containerWnd->toolChanged();
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
+                                                                 event->pos(), toolMode);
+    } else {
+        if (btn == Qt::LeftButton || btn == Qt::RightButton) {
+            // Pause playback for the duration of the mouse click
+            if (g_StudioApp.IsPlaying()) {
+                g_StudioApp.PlaybackStopNoRestore();
+                m_resumePlayOnMouseRelease = true;
+            } else {
+                m_resumePlayOnMouseRelease = false;
+            }
+
+            toolMode = g_StudioApp.GetToolMode();
+            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(
+                        SceneDragSenderType::SceneWindow, event->pos(), toolMode);
+            m_mouseDown = true;
+        } else if (btn == Qt::MiddleButton) {
+            event->ignore();
+        }
+    }
+}
+
 void CPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
 {
     const Qt::MouseButton btn = event->button();
-    if ((btn == Qt::LeftButton) || (btn == Qt::RightButton)) {
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::SceneWindow);
+    if (!m_containerWnd->IsDeploymentView()
+            && !g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid()) {
+        // We are in edit camera view and nothing is selected
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
         g_StudioApp.GetCore()->CommitCurrentCommand();
-        m_IsMouseDown = false;
-        if (m_resumePlayOnMouseRelease) {
-            m_resumePlayOnMouseRelease = false;
-            g_StudioApp.PlaybackPlay();
+        m_mouseDown = false;
+        // Restore normal tool mode
+        if (event->modifiers() & Qt::AltModifier)
+            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
+        else if (event->modifiers() & Qt::ControlModifier)
+            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
+        else
+            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
+        Q_EMIT m_containerWnd->toolChanged();
+    } else {
+        if (btn == Qt::LeftButton || btn == Qt::RightButton) {
+            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(
+                        SceneDragSenderType::SceneWindow);
+            g_StudioApp.GetCore()->CommitCurrentCommand();
+            m_mouseDown = false;
+            if (m_resumePlayOnMouseRelease) {
+                m_resumePlayOnMouseRelease = false;
+                g_StudioApp.PlaybackPlay();
+            }
+        } else if (btn == Qt::MiddleButton) {
+            event->ignore();
         }
-    } else if (btn == Qt::MiddleButton) {
-        event->ignore();
     }
 }
 
 void CPlayerWnd::mouseDoubleClickEvent(QMouseEvent *event)
 {
     g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDblClick(
-        SceneDragSenderType::SceneWindow, event->pos());
+                SceneDragSenderType::SceneWindow, event->pos());
 }
-
 
 bool CPlayerWnd::OnDragWithin(CDropSource &inSource)
 {
     CSceneViewDropTarget theTarget;
     return theTarget.Accept(inSource);
 }
+
 bool CPlayerWnd::OnDragReceive(CDropSource &inSource)
 {
     CSceneViewDropTarget theTarget;
     Q_EMIT dropReceived();
     return theTarget.Drop(inSource);
 }
-void CPlayerWnd::OnDragLeave()
-{
-}
 
-//==============================================================================
-/**
- *	SetContainerWnd: keep track of a pointer to the containing window
- *
- *	@param inContainerWnd pointer to what the containing window will be set to
- */
-//==============================================================================
-void CPlayerWnd::SetContainerWnd(CPlayerContainerWnd *inContainerWnd)
+void CPlayerWnd::setContainerWnd(CPlayerContainerWnd *inContainerWnd)
 {
-    m_ContainerWnd = inContainerWnd;
+    m_containerWnd = inContainerWnd;
     updateGeometry();
 }
 
 QSize CPlayerWnd::sizeHint() const
 {
-    if (m_ContainerWnd)
-        return m_ContainerWnd->GetEffectivePresentationSize();
+    if (m_containerWnd)
+        return m_containerWnd->GetEffectivePresentationSize();
     else
         return QOpenGLWidget::sizeHint();
 }
@@ -246,11 +221,11 @@ void CPlayerWnd::initializeGL()
         try {
             theRenderer.Initialize(this);
         } catch (...) {
-
             QMessageBox::critical(this, tr("Fatal Error"),
-                tr("Unable to initialize OpenGL.\nThis may be because your graphic device is "
-                   "not sufficient, or simply because your driver is too old.\n\nPlease try "
-                   "upgrading your graphics driver and try again."));
+                                  tr("Unable to initialize OpenGL.\nThis may be because your "
+                                     "graphic device is not sufficient, or simply because your "
+                                     "driver is too old.\n\nPlease try upgrading your graphics "
+                                     "driver and try again."));
             exit(1);
         }
     }
@@ -259,8 +234,7 @@ void CPlayerWnd::initializeGL()
 void CPlayerWnd::paintGL()
 {
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
-    // don't use request render here, this has to be
-    // synchronous inside paintGL
+    // Don't use request render here, this has to be synchronous inside paintGL
     theRenderer.RenderNow();
 }
 
@@ -277,7 +251,7 @@ qreal CPlayerWnd::fixedDevicePixelRatio() const
 
 void CPlayerWnd::resizeGL(int width, int height)
 {
-    // this also passes the new FBO to the CWGLContext
+    // This also passes the new FBO to the OpenGLContext
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
     theRenderer.SetViewRect(QRect(0, 0, width * fixedDevicePixelRatio(),
                                   height * fixedDevicePixelRatio()));

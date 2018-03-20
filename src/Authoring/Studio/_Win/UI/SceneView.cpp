@@ -27,9 +27,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "SceneView.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
@@ -43,12 +40,6 @@
 
 #include <QtGui/qevent.h>
 
-//==============================================================================
-/**
- *	Constructor: Initializes the object.
- */
-//==============================================================================
-
 CSceneView::CSceneView(CStudioApp *inStudioApp, QWidget *parent)
     : QWidget(parent)
 {
@@ -57,8 +48,8 @@ CSceneView::CSceneView(CStudioApp *inStudioApp, QWidget *parent)
     m_PreviousSelectMode = g_StudioApp.GetSelectMode();
 
     m_PlayerContainerWnd = new CPlayerContainerWnd(this);
-    connect(m_PlayerContainerWnd, &CPlayerContainerWnd::toolChanged, this,
-            &CSceneView::toolChanged);
+    connect(m_PlayerContainerWnd, &CPlayerContainerWnd::toolChanged,
+            this, [=](){ SetViewCursor(); Q_EMIT toolChanged(); });
 
     m_PlayerWnd = new CPlayerWnd(m_PlayerContainerWnd);
     connect(m_PlayerWnd, &CPlayerWnd::dropReceived, this, &CSceneView::onDropReceived);
@@ -84,16 +75,10 @@ CPlayerWnd *CSceneView::GetPlayerWnd() const
     return m_PlayerWnd;
 }
 
-//==============================================================================
-/**
- * Destructor: Releases the object.
- */
 CSceneView::~CSceneView()
 {
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     // Stop listening for selection change events
-    theDispatch->RemoveSelectedNodePropChangeListener(this);
-    theDispatch->RemoveClientPlayChangeListener(this);
     theDispatch->RemoveEditCameraChangeListener(this);
 }
 
@@ -138,7 +123,7 @@ void CSceneView::showEvent(QShowEvent *event)
     g_StudioApp.GetCore()->GetDispatch()->AddEditCameraChangeListener(this);
 
     // Set the default cursor
-    OnSetCursor();
+    SetViewCursor();
 }
 
 //==============================================================================
@@ -150,7 +135,7 @@ void CSceneView::OnToolGroupSelection()
 {
     m_PreviousSelectMode = g_StudioApp.GetSelectMode();
     g_StudioApp.SetSelectMode(STUDIO_SELECTMODE_GROUP);
-    OnSetCursor();
+    SetViewCursor();
     Q_EMIT toolChanged();
 }
 
@@ -163,7 +148,7 @@ void CSceneView::OnToolItemSelection()
 {
     m_PreviousSelectMode = g_StudioApp.GetSelectMode();
     g_StudioApp.SetSelectMode(STUDIO_SELECTMODE_ENTITY);
-    OnSetCursor();
+    SetViewCursor();
     Q_EMIT toolChanged();
 }
 
@@ -274,18 +259,6 @@ void CSceneView::RecalcMatte()
 
 //==============================================================================
 /**
- *	PtInClientRect: Returns true if the point lies in the client rect, false otherwise.
- *
- *	@param		inPoint	The point to check.
- */
-//==============================================================================
-bool CSceneView::PtInClientRect(const QPoint& inPoint)
-{
-    return m_PlayerContainerWnd && m_PlayerContainerWnd->geometry().contains(inPoint);
-}
-
-//==============================================================================
-/**
  *	HandleModifierDown: Called when a modifier key (ctrl or alt) is pressed and held.
  *
  *	Changes tool modes and saves the previous mode.
@@ -299,52 +272,32 @@ bool CSceneView::PtInClientRect(const QPoint& inPoint)
 //==============================================================================
 bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers)
 {
-    bool theHandledFlag = false;
+    Q_UNUSED(inRepCnt)
 
-    UNREFERENCED_PARAMETER(inRepCnt);
+    bool theHandledFlag = false;
 
     // Get the position of the mouse and the rectangle containing the scene view
     QPoint theCursorPosition = mapFromGlobal(QCursor::pos());
     QRect theWindowRect = rect();
 
-    // If we are currently dragging an object or the cursor is over the scene
-    if (((theWindowRect.contains(theCursorPosition))
-         || (m_PlayerContainerWnd && m_PlayerContainerWnd->IsMouseDown()))) {
+    // If we are currently over the scene
+    if (theWindowRect.contains(theCursorPosition)) {
         bool theCtrlKeyIsDown = modifiers & Qt::ControlModifier;
         bool theAltKeyIsDown = modifiers & Qt::AltModifier;
 
         // If the control key is being pressed and the Alt key is not down
-        if ((inChar == Qt::Key_Control) && (!theAltKeyIsDown)) {
-            // If this is the first press, toggle tool modes
-            m_RegisteredKeyDown = true;
-
-            if (m_PlayerContainerWnd->IsMiddleMouseDown() && !IsDeploymentView()) {
-                // Do nothing, do not let it switch to other tool when middle mouse is down
-            } else {
-                // See what tool mode we are in and change modes accordingly
-                SetToolOnCtrl();
-                theHandledFlag = true;
-            }
+        if (inChar == Qt::Key_Control && !theAltKeyIsDown) {
+            // See what tool mode we are in and change modes accordingly
+            SetToolOnCtrl();
+            theHandledFlag = true;
+        } else if (inChar == Qt::Key_Alt && !theCtrlKeyIsDown) {
+            // If the alt key is being pressed and the control key is not down
+            // See what tool mode we are in and change modes accordingly
+            SetToolOnAlt();
+            theHandledFlag = true;
         }
-        // If the alt key is being pressed and the control key is not down
-        else if ((inChar == Qt::Key_Alt) && (!theCtrlKeyIsDown)) {
-            m_RegisteredKeyDown = true;
 
-            if (m_PlayerContainerWnd->IsMiddleMouseDown() && !IsDeploymentView()) {
-                // press Alt-Scroll Wheel Click
-                // Do Camera Rotate if we are in 3D Camera
-                if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-                            g_StudioApp.GetRenderer().GetEditCamera())) {
-                    g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-                    theHandledFlag = true;
-                }
-            } else {
-                // See what tool mode we are in and change modes accordingly
-                SetToolOnAlt();
-                theHandledFlag = true;
-            }
-        }
-        OnSetCursor();
+        SetViewCursor();
         Q_EMIT toolChanged();
     }
 
@@ -366,7 +319,7 @@ bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifi
 //==============================================================================
 bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers)
 {
-    UNREFERENCED_PARAMETER(inRepCnt);
+    Q_UNUSED(inRepCnt)
 
     bool theHandledFlag = false;
 
@@ -374,24 +327,18 @@ bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifier
     QPoint theCursorPosition = mapFromGlobal(QCursor::pos());
     QRect theWindowRect = rect();
 
-    // If we are currently dragging an object or the cursor is over the scene
-    if (((theWindowRect.contains(theCursorPosition))
-         || (m_PlayerContainerWnd && m_PlayerContainerWnd->IsMouseDown()))) {
+    // If we are currently over the scene
+    if (theWindowRect.contains(theCursorPosition)) {
         bool theCtrlKeyIsDown = modifiers & Qt::ControlModifier;
         bool theAltKeyIsDown = modifiers & Qt::AltModifier;
 
         // If the control key or alt key is released (and the opposite key is not down) revert back
         // to the original tool mode
-        if (((inChar == Qt::Key_Control) && (!theAltKeyIsDown))
-                || ((inChar == Qt::Key_Alt) && (!theCtrlKeyIsDown))) {
-            if (m_PlayerContainerWnd->IsMiddleMouseDown())
-                g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-            else
-                RestorePreviousTool();
-
-            OnSetCursor();
+        if ((inChar == Qt::Key_Control && !theAltKeyIsDown)
+                || (inChar == Qt::Key_Alt && !theCtrlKeyIsDown)) {
+            RestorePreviousTool();
+            SetViewCursor();
             Q_EMIT toolChanged();
-
             theHandledFlag = true;
         }
     }
@@ -399,18 +346,6 @@ bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifier
     return theHandledFlag;
 }
 
-//==============================================================================
-/**
- * resizeEvent: Handles the WM_SIZE message
- *
- * Recenters the Client and recaluclates the matte when a resize message is
- * generated.
- *
- * @param  nType    Specifies the type of resizing requested.
- * @param  cx       Specifies the new width of the client area.
- * @param  cy       Specifies the new height of the client area.
- */
-//==============================================================================
 void CSceneView::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
@@ -440,30 +375,6 @@ void CSceneView::SetPlayerWndPosition()
     }
 }
 
-//==============================================================================
-/**
- *	SetRegisteredKey: Sets the staus to true or false
- *
- *	If we've already processesed an alt or tab, then set the flag
- */
-//==============================================================================
-void CSceneView::SetRegisteredKey(bool inStatus)
-{
-    m_RegisteredKeyDown = inStatus;
-}
-
-//==============================================================================
-/**
- *	GetKeyStatus: get the staus
- *
- *	check to see if the flag is true or false
- */
-//==============================================================================
-bool CSceneView::GetKeyStatus()
-{
-    return m_RegisteredKeyDown;
-}
-
 //=============================================================================
 /**
  * Register all the events for hotkeys that are active for the entire application.
@@ -491,24 +402,6 @@ void CSceneView::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
 
 //==============================================================================
 /**
- * OnSetCursor: Handles the WM_SETCURSOR Windows message.
- *
- * Changes the cursor depending on the current tool mode.
- *
- * @param inWnd     Specifies a pointer to the window that contains the cursor.
- * @param inHitTest Specifies the hit-test area code. The hit test determines the cursor's
- *location.
- * @param inMessage Specifies the mouse message number.
- *
- * @return true if the cursor was set
- */
-void CSceneView::OnSetCursor()
-{
-    SetViewCursor();
-}
-
-//==============================================================================
-/**
  *	Called when the tool mode changes, scene view maintains its own mode so it can
  *	return to that mode when modifiers are pressed
  *  @param inMode the mode to which to change
@@ -527,44 +420,8 @@ void CSceneView::SetToolMode(long inMode)
  */
 void CSceneView::RecheckSizingMode()
 {
-    if (m_PlayerContainerWnd) {
+    if (m_PlayerContainerWnd)
         m_PlayerContainerWnd->SetScrollRanges();
-    }
-}
-
-//=============================================================================
-/**
- *	Called a selected node property has changed.
- *	@param inPropertyName	name of the property changed
- */
-void CSceneView::OnPropValueChanged(const Q3DStudio::CString &inPropertyName)
-{
-}
-
-//=============================================================================
-/**
- *	Called a selected node property has its property changed via a mouse drag
- *	@param inConstrainXAxis  true if dragging is constrained along the X-Axis
- *	@param inConstrainYAxis  true if dragging is constrained along the Y-Axis
- */
-void CSceneView::OnMouseDragged(bool inConstrainXAxis, bool inConstrainYAxis)
-{
-    // If not constraining to Y-Axis, snap horizontally
-    // If not constraining to X-Axis, snap vertically
-    // true to update tranform, as this is called from a mouse drag and the global transform may be
-    // outdated.
-    // false to not update the scene, since this is a result of a mouse drag which is already doing
-    // the updating
-}
-
-//==========================================================================
-/**
- *	Called when the presentation time changes.
- *	When animating an object, the markers must be updated with the selected object
- */
-void CSceneView::OnTimeChanged(long inTime)
-{
-    UNREFERENCED_PARAMETER(inTime);
 }
 
 //==============================================================================
@@ -588,16 +445,8 @@ void CSceneView::RestorePreviousTool()
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
         break;
 
-    case STUDIO_TOOLMODE_CAMERA_PAN:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-        break;
-
-    case STUDIO_TOOLMODE_CAMERA_ROTATE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-        break;
-
-    case STUDIO_TOOLMODE_CAMERA_ZOOM:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
+    default:
+        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
         break;
     }
 }
@@ -615,29 +464,18 @@ void CSceneView::SetToolOnCtrl()
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
         break;
 
-    // If we are in rotate mode, switch to move
+        // If we are in rotate mode, switch to move
     case STUDIO_TOOLMODE_ROTATE:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
         break;
 
-    // If we are in scale mode, switch to move
+        // If we are in scale mode, switch to move
     case STUDIO_TOOLMODE_SCALE:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
         break;
 
-    // If we are in camera pan mode, switch to camera orbit
-    case STUDIO_TOOLMODE_CAMERA_PAN:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-        break;
-
-    // If we are in camera orbit mode, switch to camera pan
-    case STUDIO_TOOLMODE_CAMERA_ROTATE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-        break;
-
-    // If we are in camera zoom mode, switch to camera pan
-    case STUDIO_TOOLMODE_CAMERA_ZOOM:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
+    default:
+        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
         break;
     }
 }
@@ -655,29 +493,18 @@ void CSceneView::SetToolOnAlt()
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
         break;
 
-    // If we are in rotate mode, switch to move
+        // If we are in rotate mode, switch to move
     case STUDIO_TOOLMODE_ROTATE:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
         break;
 
-    // If we are in scale mode, switch to move
+        // If we are in scale mode, switch to move
     case STUDIO_TOOLMODE_SCALE:
         g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
         break;
 
-    // If we are in camera pan mode, switch to camera zoom
-    case STUDIO_TOOLMODE_CAMERA_PAN:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
-        break;
-
-    // If we are in camera orbit mode, switch to camera zoom
-    case STUDIO_TOOLMODE_CAMERA_ROTATE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
-        break;
-
-    // If we are in camera zoom mode, switch to camera orbit
-    case STUDIO_TOOLMODE_CAMERA_ZOOM:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
+    default:
+        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
         break;
     }
 }
@@ -689,8 +516,8 @@ void CSceneView::SetToolOnAlt()
  */
 bool CSceneView::IsDeploymentView()
 {
-    // default mode is SCENE_VIEW so if playercontainerwnd does not exist ( should only happen on
-    // startup ), it is deployment view
+    // Default mode is SCENE_VIEW so if playercontainerwnd does not exist (should only happen on
+    // startup), it is deployment view
     bool theStatus = true;
     if (m_PlayerContainerWnd)
         theStatus = m_PlayerContainerWnd->IsDeploymentView();
@@ -707,9 +534,8 @@ bool CSceneView::IsDeploymentView()
  */
 void CSceneView::SetViewMode(CPlayerContainerWnd::EViewMode inViewMode)
 {
-    if (m_PlayerContainerWnd) {
+    if (m_PlayerContainerWnd)
         m_PlayerContainerWnd->SetViewMode(inViewMode);
-    }
 }
 
 //==============================================================================
@@ -720,27 +546,17 @@ void CSceneView::SetViewMode(CPlayerContainerWnd::EViewMode inViewMode)
  */
 void CSceneView::OnEditCameraChanged()
 {
-    // reset any scrolling and recalculate the window position.
+    // Reset any scrolling and recalculate the window position.
     if (m_PlayerContainerWnd) {
         m_PlayerContainerWnd->SetScrollRanges();
         RecalcMatte();
         SetPlayerWndPosition();
     }
 
-    // update the view mode accordingly
+    // Update the view mode accordingly
     SetViewMode(g_StudioApp.GetRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
                                                                : CPlayerContainerWnd::VIEW_SCENE);
     m_PlayerWnd->update();
-}
-
-//==============================================================================
-/**
- *	When the active camera is changed, the display string needs to be changed. Hence
- *	find which entry is the one which is modified and update with the new string
- *	@param inCamera	the camera that has been modified
- */
-void CSceneView::OnEditCamerasTransformed()
-{
 }
 
 void CSceneView::OnAuthorZoomChanged()

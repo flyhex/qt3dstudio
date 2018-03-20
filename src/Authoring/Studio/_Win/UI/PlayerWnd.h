@@ -27,33 +27,20 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_PLAYERWND_H
 #define INCLUDED_PLAYERWND_H 1
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "DropContainer.h"
 #include "PlayerContainerWnd.h"
 
-#include <QOpenGLWidget>
+#include <QtWidgets/qopenglwidget.h>
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CPlayerContainerWnd;
 class CStudioApp;
 class CMouseCursor;
 class CHotkeys;
-
-//==============================================================================
-//	Class CPlayerWnd
-//==============================================================================
 
 class CPlayerWnd : public QOpenGLWidget, public CWinDropContainer
 {
@@ -62,27 +49,22 @@ public:
     explicit CPlayerWnd(QWidget *parent = nullptr);
     ~CPlayerWnd();
 
-    void SetContainerWnd(CPlayerContainerWnd *inSceneView);
+    void setContainerWnd(CPlayerContainerWnd *inSceneView);
 
     QSize sizeHint() const override;
 
     bool OnDragWithin(CDropSource &inSource) override;
     bool OnDragReceive(CDropSource &inSource) override;
-    void OnDragLeave() override;
-    void OnReflectMouse(CPt &inPoint, Qt::KeyboardModifiers inFlags) override {}
+    void OnDragLeave() override {}
+    void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
 
     qreal fixedDevicePixelRatio() const;
 
 protected:
 
-    CPlayerContainerWnd *m_ContainerWnd;
-    bool m_IsMouseDown;
+    CPlayerContainerWnd *m_containerWnd;
+    bool m_mouseDown;
     bool m_resumePlayOnMouseRelease = false;
-    long m_PreviousToolMode; ///< The previous tool mode (used when toggling with hotkeys to switch
-                             ///back to previous mode on release)
-    bool m_FitClientToWindow; ///< True if we are in Fit to Window Mode
-
-    QPoint m_LastKnownMousePosition;
 
 Q_SIGNALS:
     void dropReceived();

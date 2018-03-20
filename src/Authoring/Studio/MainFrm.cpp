@@ -191,9 +191,11 @@ CMainFrame::CMainFrame()
     // Edit Camera toolbar
     connect(m_ui->actionFit_Selected, &QAction::triggered,
             this, &CMainFrame::OnEditCameraZoomExtent);
+#if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     connect(m_ui->actionPan_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraPan);
     connect(m_ui->actionOrbit_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraRotate);
     connect(m_ui->actionZoom_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraZoom);
+#endif
     connect(m_ui->actionShading_Mode, &QAction::triggered, this, &CMainFrame::OnEditViewFillMode);
     connect(m_ui->actionRulers_Guides, &QAction::triggered, this, &CMainFrame::OnViewGuidesRulers);
     connect(m_ui->actionClear_Guides, &QAction::triggered, this, &CMainFrame::OnClearGuides);
@@ -335,6 +337,12 @@ void CMainFrame::OnCreate()
     m_ui->action_Revert->setEnabled(false);
     m_ui->actionImportAssets->setEnabled(false);
     m_ui->actionRemote_Preview->setEnabled(false);
+
+#if 1 // TODO: Hidden until UX decision is made if these buttons are needed at all or not
+    m_ui->actionPan_Tool->setVisible(false);
+    m_ui->actionOrbit_Tool->setVisible(false);
+    m_ui->actionZoom_Tool->setVisible(false);
+#endif
 
     setCentralWidget(m_SceneView);
 }
@@ -551,9 +559,11 @@ void CMainFrame::OnUpdateToolChange()
     m_ui->actionLocal_Global_Manipulators->setChecked(g_StudioApp.GetMinpulationMode()
                                                       == StudioManipulationModes::Global);
 
+#if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     m_ui->actionPan_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_PAN);
     m_ui->actionOrbit_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE);
     m_ui->actionZoom_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM);
+#endif
 }
 
 //==============================================================================
@@ -1344,6 +1354,7 @@ void CMainFrame::OnUpdateEditCameraPan()
 //==============================================================================
 void CMainFrame::OnUpdateEditCameraRotate()
 {
+#if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()
             && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
                 g_StudioApp.GetRenderer().GetEditCamera())) {
@@ -1355,6 +1366,7 @@ void CMainFrame::OnUpdateEditCameraRotate()
         m_ui->actionOrbit_Tool->setEnabled(false);
         m_ui->actionOrbit_Tool->setChecked(false);
     }
+#endif
 }
 
 //==============================================================================

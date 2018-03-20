@@ -27,9 +27,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_PLAYER_CONTAINER_WND_H
 #define INCLUDED_PLAYER_CONTAINER_WND_H 1
 
@@ -42,16 +39,9 @@ class CStudioApp;
 class CPlayerWnd;
 class CWGLRenderContext;
 
-//==============================================================================
-//	Class CPlayerContainerWnd
-//==============================================================================
-
 class CPlayerContainerWnd : public QScrollArea
 {
     Q_OBJECT
-    //==============================================================================
-    //	Typedefs
-    //==============================================================================
 public:
     typedef enum {
         VIEW_EDIT = 0, ///< Edit View
@@ -73,8 +63,6 @@ public:
     bool IsDeploymentView();
 
     QRect GetDisplayedClientRect() const { return m_ClientRect; }
-    bool IsMouseDown() const { return m_IsMouseDown; }
-    bool IsMiddleMouseDown() const { return m_IsMiddleMouseDown; }
 
     QSize GetEffectivePresentationSize() const;
 
@@ -85,11 +73,7 @@ Q_SIGNALS:
 
 protected:
     void resizeEvent(QResizeEvent *) override;
-    void mousePressEvent(QMouseEvent *) override;
-    void mouseReleaseEvent(QMouseEvent *) override;
-    void mouseMoveEvent(QMouseEvent *) override;
     void wheelEvent(QWheelEvent *) override;
-
     void scrollContentsBy(int, int) override;
 
 private:
@@ -100,8 +84,6 @@ protected:
     CSceneView *m_SceneView; ///< Pointer to the SceneView for rulers manipulation
     CPlayerWnd *m_PlayerWnd; ///< Pointer to the window control that contains client
     QRect m_ClientRect; ///< The rect where the client is drawn
-    bool m_IsMouseDown; ///< true if the mouse (any button) is down
-    bool m_IsMiddleMouseDown; ///< true if the middle mouse ( or scroll wheel ) is down
     EViewMode m_ViewMode;
 };
 
