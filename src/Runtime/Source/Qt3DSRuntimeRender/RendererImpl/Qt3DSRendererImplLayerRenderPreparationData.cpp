@@ -1263,7 +1263,7 @@ namespace render {
                                         : ShadowMapModes::VSM;
                                     m_ShadowMapManager->AddShadowMapEntry(
                                         m_Lights.size() - 1, mapSize, mapSize,
-                                        NVRenderTextureFormats::R16, 1, mapMode,
+                                        NVRenderTextureFormats::R16F, 1, mapMode,
                                         ShadowFilterValues::NONE);
                                     thePrepResult.m_Flags.SetRequiresShadowMapPass(true);
                                     SetShaderFeature("QT3DS_ENABLE_SSM", true);
