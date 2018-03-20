@@ -49,9 +49,6 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
     m_label = label;
     m_labelItem.setRowTypeLabel(m_rowType);
 
-    if (m_rowType == OBJTYPE_MATERIAL)
-        m_isProperty = true;
-
     initialize();
 }
 
@@ -276,7 +273,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         break;
     }
 
-    if (m_isProperty && m_rowType != OBJTYPE_MATERIAL)
+    if (m_isProperty)
         pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
 
     y = (size().height() - 16) * .5;
