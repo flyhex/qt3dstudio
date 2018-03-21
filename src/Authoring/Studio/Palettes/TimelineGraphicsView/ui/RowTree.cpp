@@ -288,7 +288,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
     static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
     static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
-    if (!m_isProperty && m_rowType != OBJTYPE_SCENE) {
+    if (hasActionButtons()) {
         painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
         painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
         painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
@@ -419,39 +419,40 @@ bool RowTree::hasPropertyChildren()
 // handle clicked control and return its type
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
-    if (m_isProperty || m_rowType == OBJTYPE_SCENE)
-        return TreeControlType::None;
-
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (m_rectArrow.contains(p.x(), p.y())  && !m_locked) {
+    if (!m_childRows.empty() && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
         m_expanded = !m_expanded;
         updateExpandStatus(m_expanded, true);
         update();
         return TreeControlType::Arrow;
-    } else if (m_rectShy.contains(p.x(), p.y())) {
-        m_shy = !m_shy;
-        update();
+    }
 
-        m_binding->GetTimelineItem()->SetShy(m_shy);
+    if (hasActionButtons()) {
+        if (m_rectShy.contains(p.x(), p.y())) {
+            m_shy = !m_shy;
+            update();
 
-        return TreeControlType::Shy;
-    } else if (m_rectVisible.contains(p.x(), p.y())) {
-        m_visible = !m_visible;
-        update();
+            m_binding->GetTimelineItem()->SetShy(m_shy);
 
-        m_binding->GetTimelineItem()->SetVisible(m_visible);
+            return TreeControlType::Shy;
+        } else if (m_rectVisible.contains(p.x(), p.y())) {
+            m_visible = !m_visible;
+            update();
+
+            m_binding->GetTimelineItem()->SetVisible(m_visible);
 
 
-        return TreeControlType::Hide;
-    } else if (m_rectLocked.contains(p.x(), p.y())) {
-        updateLockRecursive(!m_locked);
+            return TreeControlType::Hide;
+        } else if (m_rectLocked.contains(p.x(), p.y())) {
+            updateLockRecursive(!m_locked);
 
-        m_binding->GetTimelineItem()->SetLocked(m_locked);
+            m_binding->GetTimelineItem()->SetLocked(m_locked);
 
-        if (m_locked && selected())
-            m_scene->rowManager()->clearSelection();
+            if (m_locked && selected())
+                m_scene->rowManager()->clearSelection();
 
-        return TreeControlType::Lock;
+            return TreeControlType::Lock;
+        }
     }
 
     return TreeControlType::None;
@@ -572,4 +573,13 @@ bool RowTree::visible() const
 bool RowTree::locked() const
 {
     return m_locked;
+}
+
+// Returns true for items with shy/visible/lock buttons
+bool RowTree::hasActionButtons() const
+{
+    return (!m_isProperty
+            && m_rowType != OBJTYPE_SCENE
+            && m_rowType != OBJTYPE_MATERIAL
+            && m_rowType != OBJTYPE_IMAGE);
 }

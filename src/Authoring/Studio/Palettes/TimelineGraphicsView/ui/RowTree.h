@@ -97,6 +97,7 @@ private:
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
     void updateLabelPosition();
+    bool hasActionButtons() const;
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
