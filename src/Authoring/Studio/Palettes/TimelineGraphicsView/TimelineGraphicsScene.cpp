@@ -367,7 +367,8 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    updateHoverStatus(event->scenePos());
+    if (!m_editedTimelineRow)
+        updateHoverStatus(event->scenePos());
 
     if (qAbs(event->scenePos().x() - m_pressPos.x()) > 10
             || qAbs(event->scenePos().y() - m_pressPos.y()) > 10)

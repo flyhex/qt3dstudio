@@ -98,6 +98,7 @@ private:
     void updateLockRecursive(bool state);
     void updateLabelPosition();
     bool hasActionButtons() const;
+    bool hasDurationBar() const;
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;

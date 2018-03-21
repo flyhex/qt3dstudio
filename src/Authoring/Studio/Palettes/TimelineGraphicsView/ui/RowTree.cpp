@@ -584,3 +584,9 @@ bool RowTree::hasActionButtons() const
             && m_rowType != OBJTYPE_MATERIAL
             && m_rowType != OBJTYPE_IMAGE);
 }
+
+// Returns true for items with duration bar
+bool RowTree::hasDurationBar() const
+{
+    return hasActionButtons(); // Same at least now
+}

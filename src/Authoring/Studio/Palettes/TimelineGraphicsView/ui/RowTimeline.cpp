@@ -68,7 +68,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     painter->fillRect(QRect(0, 0, 10000, size().height() - 1), bgColor);
 
     // Duration
-    if (!m_rowTree->isProperty() && m_rowTree->rowType() != OBJTYPE_SCENE) {
+    if (m_rowTree->hasDurationBar()) {
         painter->save();
 
         // fully outside ancestors' limits, draw fully hashed
@@ -243,7 +243,7 @@ void RowTimeline::updateKeyframes()
 
 TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) const
 {
-    if (m_rowTree->isProperty())
+    if (!m_rowTree->hasDurationBar())
         return TimelineControlType::None;
 
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
