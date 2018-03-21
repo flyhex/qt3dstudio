@@ -249,7 +249,13 @@ RowTimeline *RowManager::rowTimelineAt(int idx)
 
 void RowManager::selectRow(RowTree *row)
 {
-    if (row != nullptr && row != m_selectedRow && !row->isProperty()) {
+    if (row == nullptr)
+        return;
+
+    if (row->isProperty())
+        row = row->parentRow();
+
+    if (row != m_selectedRow) {
         clearSelection();
         row->setState(InteractiveTimelineItem::Selected);
         m_selectedRow = row;

@@ -484,6 +484,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
         if (item != nullptr && !m_dragging) {
             item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
+            item = getItemBelowType(TimelineItem::TypePlayHead, item, m_pressPos);
             // select pressed row
             RowTree *rowTree = nullptr;
             if (item->type() == TimelineItem::TypeRowTree)
