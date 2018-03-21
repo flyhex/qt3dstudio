@@ -234,6 +234,9 @@
    <property name="text">
     <string>Set Changed Keyframes</string>
    </property>
+   <property name="toolTip">
+    <string>Set Changed Keyframes (F6)</string>
+   </property>
    <property name="shortcut">
     <string>F6</string>
    </property>
@@ -261,7 +264,7 @@
     <string>Autoset Keyframes</string>
    </property>
    <property name="toolTip">
-    <string>Toggle autoset keyframes</string>
+    <string>Toggle autoset keyframes (K)</string>
    </property>
    <property name="shortcut">
     <string>K</string>
@@ -540,7 +543,7 @@
     <string>Group Select Tool</string>
    </property>
    <property name="toolTip">
-    <string>Group Select</string>
+    <string>Select Group (A)</string>
    </property>
    <property name="shortcut">
     <string>A</string>
@@ -558,10 +561,10 @@
     <string>Item Select Tool</string>
    </property>
    <property name="toolTip">
-    <string>Select Item</string>
+    <string>Select Item (Q)</string>
    </property>
    <property name="shortcut">
-    <string>V</string>
+    <string>Q</string>
    </property>
   </action>
   <action name="actionRotation_Tool">
@@ -576,10 +579,10 @@
     <string>Rotation Tool</string>
    </property>
    <property name="toolTip">
-    <string>Rotate current selection</string>
+    <string>Rotate current selection (E)</string>
    </property>
    <property name="shortcut">
-    <string>R</string>
+    <string>E</string>
    </property>
   </action>
   <action name="actionPosition_Tool">
@@ -594,7 +597,7 @@
     <string>Position Tool</string>
    </property>
    <property name="toolTip">
-    <string>Move current selection</string>
+    <string>Move current selection (W)</string>
    </property>
    <property name="shortcut">
     <string>W</string>
@@ -612,10 +615,10 @@
     <string>Scale Tool</string>
    </property>
    <property name="toolTip">
-    <string>Scale current selection</string>
+    <string>Scale current selection (R)</string>
    </property>
    <property name="shortcut">
-    <string>E</string>
+    <string>R</string>
    </property>
   </action>
   <action name="actionLocal_Global_Manipulators">
@@ -630,7 +633,10 @@
     <string>Local/Global Manipulators</string>
    </property>
    <property name="toolTip">
-    <string>Toggle Manipulators to work in global/local space</string>
+    <string>Toggle Manipulators to work in global/local space (Y)</string>
+   </property>
+   <property name="shortcut">
+    <string>Y</string>
    </property>
   </action>
   <action name="actionFit_Selected">
@@ -646,7 +652,7 @@
     <string>Fit Selected (F)</string>
    </property>
    <property name="toolTip">
-    <string>Fit Selected</string>
+    <string>Fit Selected (F)</string>
    </property>
    <property name="shortcut">
     <string>F</string>
@@ -710,10 +716,10 @@
      <disabledoff>:/images/editcamera_tools_hi-04_disabled.png</disabledoff>:/images/editcamera_tools_hi-04.png</iconset>
    </property>
    <property name="text">
-    <string>Shading Mode (F3)</string>
+    <string>Shading Mode</string>
    </property>
    <property name="toolTip">
-    <string>Toggle Shading Mode</string>
+    <string>Toggle Shading Mode (F3)</string>
    </property>
    <property name="shortcut">
     <string>F3</string>
@@ -726,6 +732,9 @@
    </property>
    <property name="text">
     <string>Preview</string>
+   </property>
+   <property name="toolTip">
+    <string>Preview (F5)</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
