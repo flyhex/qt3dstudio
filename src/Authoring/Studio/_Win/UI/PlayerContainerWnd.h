@@ -61,6 +61,7 @@ public:
     void SetViewMode(EViewMode inViewMode);
     EViewMode GetViewMode();
     bool IsDeploymentView();
+    void setToolMode(long inMode);
 
     QRect GetDisplayedClientRect() const { return m_ClientRect; }
 

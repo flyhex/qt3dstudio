@@ -60,8 +60,6 @@ protected:
     QCursor m_CursorEditCameraRotate; ///< The edit camera rotate cursor
     QCursor m_CursorEditCameraZoom; ///< The edit camera zoom cursor
 
-    long m_PreviousToolMode; ///< The previous tool mode (used when toggling with hotkeys to switch
-                             ///back to previous mode on release)
     long m_PreviousSelectMode; ///< The previous select mode
 
 public:
@@ -69,24 +67,15 @@ public:
     CSceneView(); // used for serialization only!
     virtual ~CSceneView();
 
-    bool HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers);
-    bool HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers);
     void SetViewCursor();
-    void SetToolMode(long inMode);
     void RecheckSizingMode();
-
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler);
 
     void SetPlayerWndPosition();
 
     // redirect to/from PlayerContainerWnd
     bool IsDeploymentView();
     void SetViewMode(CPlayerContainerWnd::EViewMode inViewMode);
-
-    // Tool helper methods
-    void RestorePreviousTool();
-    void SetToolOnCtrl();
-    void SetToolOnAlt();
+    void SetToolMode(long inMode);
 
     void OnRulerGuideToggled();
 

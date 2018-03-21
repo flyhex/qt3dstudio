@@ -44,7 +44,6 @@ CSceneView::CSceneView(CStudioApp *inStudioApp, QWidget *parent)
     : QWidget(parent)
 {
     Q_UNUSED(inStudioApp)
-    m_PreviousToolMode = g_StudioApp.GetToolMode();
     m_PreviousSelectMode = g_StudioApp.GetSelectMode();
 
     m_PlayerContainerWnd = new CPlayerContainerWnd(this);
@@ -61,7 +60,6 @@ CSceneView::CSceneView(CStudioApp *inStudioApp, QWidget *parent)
 
 CSceneView::CSceneView()
 {
-    m_PreviousToolMode = g_StudioApp.GetToolMode();
     m_PreviousSelectMode = g_StudioApp.GetSelectMode();
 }
 
@@ -257,95 +255,6 @@ void CSceneView::RecalcMatte()
     }
 }
 
-//==============================================================================
-/**
- *	HandleModifierDown: Called when a modifier key (ctrl or alt) is pressed and held.
- *
- *	Changes tool modes and saves the previous mode.
- *
- *	@param		inChar		Contains the character code value of the key.
- *  @param      inRepCnt    Contains the repeat count, the number of times the keystroke
- *                          is repeated when user holds down the key.
- *  @param      modifiers   Contains the scan code, key-transition code, previous
- *                          key state, and context code.
- */
-//==============================================================================
-bool CSceneView::HandleModifierDown(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers)
-{
-    Q_UNUSED(inRepCnt)
-
-    bool theHandledFlag = false;
-
-    // Get the position of the mouse and the rectangle containing the scene view
-    QPoint theCursorPosition = mapFromGlobal(QCursor::pos());
-    QRect theWindowRect = rect();
-
-    // If we are currently over the scene
-    if (theWindowRect.contains(theCursorPosition)) {
-        bool theCtrlKeyIsDown = modifiers & Qt::ControlModifier;
-        bool theAltKeyIsDown = modifiers & Qt::AltModifier;
-
-        // If the control key is being pressed and the Alt key is not down
-        if (inChar == Qt::Key_Control && !theAltKeyIsDown) {
-            // See what tool mode we are in and change modes accordingly
-            SetToolOnCtrl();
-            theHandledFlag = true;
-        } else if (inChar == Qt::Key_Alt && !theCtrlKeyIsDown) {
-            // If the alt key is being pressed and the control key is not down
-            // See what tool mode we are in and change modes accordingly
-            SetToolOnAlt();
-            theHandledFlag = true;
-        }
-
-        SetViewCursor();
-        Q_EMIT toolChanged();
-    }
-
-    return theHandledFlag;
-}
-
-//==============================================================================
-/**
- *	HandleModifierUp: Handles the release of a modifier key (ctrl or alt).
- *
- *	Changes tool modes back to the original tool mode.
- *
- *	@param	inChar		Contains the character code value of the key.
- *  @param  inRepCnt    Contains the repeat count, the number of times the keystroke is
- *                      repeated when user holds down the key.
- *  @param  modifiers   Contains the scan code, key-transition code, previous key
- *state, and context code.
- */
-//==============================================================================
-bool CSceneView::HandleModifierUp(int inChar, int inRepCnt, Qt::KeyboardModifiers modifiers)
-{
-    Q_UNUSED(inRepCnt)
-
-    bool theHandledFlag = false;
-
-    // Get the position of the mouse and the rectangle containing the scene view
-    QPoint theCursorPosition = mapFromGlobal(QCursor::pos());
-    QRect theWindowRect = rect();
-
-    // If we are currently over the scene
-    if (theWindowRect.contains(theCursorPosition)) {
-        bool theCtrlKeyIsDown = modifiers & Qt::ControlModifier;
-        bool theAltKeyIsDown = modifiers & Qt::AltModifier;
-
-        // If the control key or alt key is released (and the opposite key is not down) revert back
-        // to the original tool mode
-        if ((inChar == Qt::Key_Control && !theAltKeyIsDown)
-                || (inChar == Qt::Key_Alt && !theCtrlKeyIsDown)) {
-            RestorePreviousTool();
-            SetViewCursor();
-            Q_EMIT toolChanged();
-            theHandledFlag = true;
-        }
-    }
-
-    return theHandledFlag;
-}
-
 void CSceneView::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
@@ -375,43 +284,6 @@ void CSceneView::SetPlayerWndPosition()
     }
 }
 
-//=============================================================================
-/**
- * Register all the events for hotkeys that are active for the entire application.
- * Hotkeys for the entire application are ones that are not view specific in
- * scope.
- *
- * @param inShortcutHandler the global shortcut handler.
- */
-//=============================================================================
-void CSceneView::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler)
-{
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
-                Qt::ControlModifier, Qt::Key_Control);
-    inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierDown),
-                Qt::AltModifier, Qt::Key_Alt);
-    inShortcutHandler->RegisterKeyUpEvent(
-                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierUp), 0,
-                Qt::Key_Control);
-    inShortcutHandler->RegisterKeyUpEvent(
-                new CDynHotKeyConsumer<CSceneView>(this, &CSceneView::HandleModifierUp), 0,
-                Qt::Key_Alt);
-}
-
-//==============================================================================
-/**
- *	Called when the tool mode changes, scene view maintains its own mode so it can
- *	return to that mode when modifiers are pressed
- *  @param inMode the mode to which to change
- */
-void CSceneView::SetToolMode(long inMode)
-{
-    m_PreviousToolMode = inMode;
-    SetViewCursor();
-}
-
 //==============================================================================
 /**
  *	Resets its scroll ranges and recenters client in the window. This is called when
@@ -422,91 +294,6 @@ void CSceneView::RecheckSizingMode()
 {
     if (m_PlayerContainerWnd)
         m_PlayerContainerWnd->SetScrollRanges();
-}
-
-//==============================================================================
-/**
- *	Restore to the previous tool mode. This is called when the modifier is released
- */
-//==============================================================================
-void CSceneView::RestorePreviousTool()
-{
-    // What was the original tool mode?
-    switch (m_PreviousToolMode) {
-    case STUDIO_TOOLMODE_MOVE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-        break;
-
-    case STUDIO_TOOLMODE_ROTATE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
-        break;
-
-    case STUDIO_TOOLMODE_SCALE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
-        break;
-
-    default:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-        break;
-    }
-}
-
-//==============================================================================
-/**
- *	Change the tool when the Ctrl Key is pressed
- */
-//==============================================================================
-void CSceneView::SetToolOnCtrl()
-{
-    switch (m_PreviousToolMode) {
-    // If we are in move mode, switch to rotate
-    case STUDIO_TOOLMODE_MOVE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
-        break;
-
-        // If we are in rotate mode, switch to move
-    case STUDIO_TOOLMODE_ROTATE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-        break;
-
-        // If we are in scale mode, switch to move
-    case STUDIO_TOOLMODE_SCALE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-        break;
-
-    default:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-        break;
-    }
-}
-
-//==============================================================================
-/**
- *	Change the tool when the Alt Key is pressed
- */
-//==============================================================================
-void CSceneView::SetToolOnAlt()
-{
-    switch (m_PreviousToolMode) {
-    // If we are in move mode, switch to rotate
-    case STUDIO_TOOLMODE_MOVE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
-        break;
-
-        // If we are in rotate mode, switch to move
-    case STUDIO_TOOLMODE_ROTATE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
-        break;
-
-        // If we are in scale mode, switch to move
-    case STUDIO_TOOLMODE_SCALE:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
-        break;
-
-    default:
-        g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-        break;
-    }
 }
 
 //==============================================================================
@@ -536,6 +323,13 @@ void CSceneView::SetViewMode(CPlayerContainerWnd::EViewMode inViewMode)
 {
     if (m_PlayerContainerWnd)
         m_PlayerContainerWnd->SetViewMode(inViewMode);
+}
+
+void CSceneView::SetToolMode(long inMode)
+{
+    if (m_PlayerContainerWnd)
+        m_PlayerContainerWnd->setToolMode(inMode);
+    SetViewCursor();
 }
 
 //==============================================================================

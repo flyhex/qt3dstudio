@@ -65,6 +65,8 @@ CPlayerWnd::CPlayerWnd(QWidget *parent)
 
     setFormat(CWGLRenderContext::selectSurfaceFormat(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    m_previousToolMode = g_StudioApp.GetToolMode();
 }
 
 CPlayerWnd::~CPlayerWnd()
@@ -107,11 +109,10 @@ void CPlayerWnd::mousePressEvent(QMouseEvent *event)
     long toolMode = g_StudioApp.GetToolMode();
     const Qt::MouseButton btn = event->button();
 
-    if (!g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid()
-            && !m_containerWnd->IsDeploymentView() && (event->modifiers() & Qt::AltModifier)
+    if (!m_containerWnd->IsDeploymentView() && (event->modifiers() & Qt::AltModifier)
             && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
                 g_StudioApp.GetRenderer().GetEditCamera())) {
-        // We are in edit camera view and nothing is selected, so we are in Alt-click camera tool
+        // We are in edit camera view, so we are in Alt-click camera tool
         // controlling mode
         m_mouseDown = true;
         if (btn == Qt::MiddleButton) {
@@ -151,19 +152,14 @@ void CPlayerWnd::mousePressEvent(QMouseEvent *event)
 void CPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
 {
     const Qt::MouseButton btn = event->button();
-    if (!m_containerWnd->IsDeploymentView()
-            && !g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid()) {
-        // We are in edit camera view and nothing is selected
+
+    if (!m_containerWnd->IsDeploymentView()) {
+        // We are in edit camera view
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
         g_StudioApp.GetCore()->CommitCurrentCommand();
         m_mouseDown = false;
         // Restore normal tool mode
-        if (event->modifiers() & Qt::AltModifier)
-            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
-        else if (event->modifiers() & Qt::ControlModifier)
-            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
-        else
-            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
+        g_StudioApp.SetToolMode(m_previousToolMode);
         Q_EMIT m_containerWnd->toolChanged();
     } else {
         if (btn == Qt::LeftButton || btn == Qt::RightButton) {

@@ -246,16 +246,6 @@ void CPlayerContainerWnd::SetViewMode(EViewMode inViewMode)
 {
     m_ViewMode = inViewMode;
     m_SceneView->RecheckSizingMode();
-    if (m_ViewMode == VIEW_SCENE) {
-        // switching from edit mode to deployment mode, release the edit camera tool and set it to
-        // object move
-        long theCurrentToolSettings = g_StudioApp.GetToolMode();
-        bool theIsCameraTool = (theCurrentToolSettings & STUDIO_CAMERATOOL_MASK ? true : false);
-        if (theIsCameraTool) {
-            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-            m_SceneView->SetToolMode(STUDIO_TOOLMODE_MOVE);
-        }
-    }
 }
 
 //==============================================================================
@@ -278,6 +268,12 @@ CPlayerContainerWnd::EViewMode CPlayerContainerWnd::GetViewMode()
 bool CPlayerContainerWnd::IsDeploymentView()
 {
     return m_ViewMode == VIEW_SCENE ? true : false;
+}
+
+void CPlayerContainerWnd::setToolMode(long inMode)
+{
+    if (m_PlayerWnd)
+        m_PlayerWnd->setToolMode(inMode);
 }
 
 QSize CPlayerContainerWnd::GetEffectivePresentationSize() const

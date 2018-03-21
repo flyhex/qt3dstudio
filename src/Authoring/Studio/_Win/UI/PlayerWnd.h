@@ -59,12 +59,14 @@ public:
     void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
 
     qreal fixedDevicePixelRatio() const;
+    void setToolMode(long toolMode) { m_previousToolMode = toolMode; }
 
 protected:
 
     CPlayerContainerWnd *m_containerWnd;
     bool m_mouseDown;
     bool m_resumePlayOnMouseRelease = false;
+    long m_previousToolMode;
 
 Q_SIGNALS:
     void dropReceived();

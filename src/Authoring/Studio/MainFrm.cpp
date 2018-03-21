@@ -1078,8 +1078,6 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
                         QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z),
                         CMainFrame::OnEditRedo);
 
-    m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);
-
     CTimelineControl *theTimelineControl = GetTimelineControl();
     if (theTimelineControl)
         theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
@@ -1276,7 +1274,7 @@ void CMainFrame::HandleEditCameraZoomExtent()
 void CMainFrame::OnEditCameraPan()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
+    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1287,7 +1285,7 @@ void CMainFrame::OnEditCameraPan()
 void CMainFrame::OnEditCameraRotate()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
+    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1298,7 +1296,7 @@ void CMainFrame::OnEditCameraRotate()
 void CMainFrame::OnEditCameraZoom()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
+    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
