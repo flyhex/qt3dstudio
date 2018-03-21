@@ -69,6 +69,16 @@ void RowTreeLabelItem::setLocked(bool isLocked) {
     }
 }
 
+RowTree *RowTreeLabelItem::parentRow() const
+{
+    return m_rowTree;
+}
+
+void RowTreeLabelItem::setParentRow(RowTree *row)
+{
+    m_rowTree = row;
+}
+
 int RowTreeLabelItem::type() const
 {
     // Enable the use of qgraphicsitem_cast with this item.
@@ -106,7 +116,7 @@ void RowTreeLabelItem::focusOutEvent(QFocusEvent *event)
 void RowTreeLabelItem::keyPressEvent(QKeyEvent *event)
 {
     int key = event->key();
-    if (key == Qt::Key_Return) {
+    if (key == Qt::Key_Return || key == Qt::Key_Enter) {
         m_acceptOnFocusOut = true;
         clearFocus();
         event->accept();

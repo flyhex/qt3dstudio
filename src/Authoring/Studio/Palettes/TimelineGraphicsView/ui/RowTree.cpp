@@ -85,6 +85,7 @@ void RowTree::initialize()
     initializeAnimations();
 
     m_labelItem.setParentItem(this);
+    m_labelItem.setParentRow(this);
     m_labelItem.setLabel(m_label);
     updateLabelPosition();
 

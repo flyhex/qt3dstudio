@@ -529,9 +529,11 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
         item = getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
         if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
             RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
-            // Tree labels text can be edited with double-click
-            treeLabelItem->setEnabled(true);
-            treeLabelItem->setFocus();
+            if (!treeLabelItem->parentRow()->isProperty()) {
+                // Tree labels text can be edited with double-click
+                treeLabelItem->setEnabled(true);
+                treeLabelItem->setFocus();
+            }
         }
     }
 

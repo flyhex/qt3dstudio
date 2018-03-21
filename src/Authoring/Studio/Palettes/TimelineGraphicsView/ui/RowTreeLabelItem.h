@@ -35,6 +35,8 @@
 #include <QtWidgets/qgraphicssceneevent.h>
 #include <QtGui/qevent.h>
 
+class RowTree;
+
 class RowTreeLabelItem : public QGraphicsTextItem
 {
     Q_OBJECT
@@ -45,6 +47,8 @@ public:
     void setLabel(const QString &label);
     void setLocked(bool isLocked);
     void setRowTypeLabel(EStudioObjectType rowType);
+    RowTree *parentRow() const;
+    void setParentRow(RowTree *row);
     int type() const;
 
 protected:
@@ -59,6 +63,7 @@ signals:
 private:
     void validateLabel();
 
+    RowTree *m_rowTree = nullptr;
     QString m_label;
     QString m_rowTypeLabel;
     bool m_locked;
