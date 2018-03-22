@@ -120,6 +120,12 @@ void CEditCameraBar::OnCameraChanged()
     HandleCameraChanged(m_CameraSelector->currentIndex());
 }
 
+void CEditCameraBar::setCameraIndex(int inIndex)
+{
+    m_CameraSelector->setCurrentIndex(inIndex);
+    OnCameraChanged();
+}
+
 //==============================================================================
 /**
  *	Handle the switching of the current edit camera

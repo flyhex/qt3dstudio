@@ -75,6 +75,7 @@ public:
     void SetupCameras();
     void SetSceneView(CSceneView *inSceneView);
     void Enable(bool inFlag);
+    void setCameraIndex(int inIndex);
     void HandleCameraChanged(int inIndex);
 
     // CEditCameraChangeListener

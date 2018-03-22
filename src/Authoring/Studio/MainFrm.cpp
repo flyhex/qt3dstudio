@@ -749,6 +749,29 @@ void CMainFrame::OnFileNew()
     g_StudioApp.OnFileNew();
 }
 
+void CMainFrame::onCtrlNPressed()
+{
+    static QMap<int, int> key2index {
+        {1, 9},         // Scene Camera View
+        {2, 0}, {3, 1}, // Perspective & Orthographic
+        {4, 2}, {5, 3}, // Top & Bottom
+        {6, 4}, {7, 5}, // Left & Right
+        {8, 6}, {9, 7}, // Front & Back
+    };
+
+    QAction *action = qobject_cast<QAction *>(sender());
+    Q_ASSERT(action);
+    QKeySequence shortcut = action->shortcut();
+    QMapIterator<int, int> i(key2index);
+    while (i.hasNext()) {
+        i.next();
+        QKeySequence keySequence(Qt::CTRL | static_cast<Qt::Key>(Qt::Key_0 + i.key()));
+        if (shortcut.matches(keySequence) == QKeySequence::ExactMatch) {
+            m_ui->m_EditCamerasBar->setCameraIndex(i.value());
+            break;
+        }
+    }
+}
 
 //==============================================================================
 /**
@@ -1081,6 +1104,12 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Q),
                         CMainFrame::toggleSelectMode);
+
+    for (int keyN = Qt::Key_1; keyN <= Qt::Key_9; keyN++) {
+        ADD_GLOBAL_SHORTCUT(actionParent,
+                            QKeySequence(Qt::CTRL | static_cast<Qt::Key>(keyN)),
+                            CMainFrame::onCtrlNPressed);
+    }
 
     CTimelineControl *theTimelineControl = GetTimelineControl();
     if (theTimelineControl)

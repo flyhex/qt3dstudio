@@ -225,6 +225,8 @@ public:
 
     void OnTimeBarColorChanged(const QColor &color);
 
+    void onCtrlNPressed();
+
     CTimelineControl *GetTimelineControl();
     ITimelineTimebar *GetSelectedTimelineTimebar();
 
