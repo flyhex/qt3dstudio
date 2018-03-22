@@ -41,7 +41,7 @@ ToolButton {
 
     StyledTooltip {
         id: toolTip
-        visible: control.hovered
+        enabled: control.hovered
     }
 
     background: Rectangle {

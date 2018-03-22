@@ -69,12 +69,12 @@ Rectangle {
 
             Image {
                 id: headerImage
-                source: _inspectorView.titleIcon !== "" ? _resDir + _inspectorView.titleIcon : ""
+                source: _parentView.titleIcon !== "" ? _resDir + _parentView.titleIcon : ""
             }
 
             StyledLabel {
-                text: _inspectorView.titleText
-                color: _inspectorView.titleColor()
+                text: _parentView.titleText
+                color: _parentView.titleColor()
             }
         }
 
@@ -157,12 +157,12 @@ Rectangle {
                                 property alias loadedItem: loader.item
 
                                 function showContextMenu(coords) {
-                                    _inspectorView.showContextMenu(
+                                    _parentView.showContextMenu(
                                                 coords.x, coords.y,
                                                 model.modelData.handle,
                                                 model.modelData.instance);
                                     // Refresh text; title color is wrong after this
-                                    propertyRow.color = _inspectorView.titleColor(
+                                    propertyRow.color = _parentView.titleColor(
                                                 modelData.instance, modelData.handle);
                                 }
 
@@ -217,7 +217,7 @@ Rectangle {
                                         hoverEnabled: true
                                         onClicked: {
                                             if (mouse.button === Qt.LeftButton) {
-                                                _inspectorView.showDataInputChooser(
+                                                _parentView.showDataInputChooser(
                                                             model.modelData.handle,
                                                             model.modelData.instance,
                                                             mapToGlobal(mouse.x, mouse.y));
@@ -230,7 +230,7 @@ Rectangle {
                                     StyledTooltip {
                                         id: ctrlToolTip
                                         text: modelData.toolTip
-                                        visible: mousearea.containsMouse
+                                        enabled: mousearea.containsMouse
                                     }
 
                                     Image {
@@ -270,9 +270,9 @@ Rectangle {
                                     text: model.modelData.title
                                     // Color picked from DataInput icon
                                     color: model.modelData.controlled?
-                                        _dataInputColor
-                                        : _inspectorView.titleColor(modelData.instance,
-                                                                     modelData.handle)
+                                               _dataInputColor
+                                             : _parentView.titleColor(modelData.instance,
+                                                                      modelData.handle)
 
                                     Layout.alignment: Qt.AlignTop
 
@@ -290,7 +290,7 @@ Rectangle {
                                     StyledTooltip {
                                         id: valueToolTip
                                         text: modelData.toolTip
-                                        visible: mouse.containsMouse
+                                        enabled: mouse.containsMouse
                                     }
                                 }
 
@@ -500,8 +500,8 @@ Rectangle {
             property variant values: parent.modelData.values
             value: parent.modelData.value
             onShowBrowser: {
-                activeBrowser = _inspectorView.showMeshChooser(handle, instance,
-                                                               mapToGlobal(width, 0))
+                activeBrowser = _parentView.showMeshChooser(handle, instance,
+                                                            mapToGlobal(width, 0))
             }
         }
     }
@@ -514,8 +514,8 @@ Rectangle {
             property variant values: parent.modelData.values
             value: parent.modelData.value
             onShowBrowser: {
-                activeBrowser = _inspectorView.showImageChooser(handle, instance,
-                                                                mapToGlobal(width, 0))
+                activeBrowser = _parentView.showImageChooser(handle, instance,
+                                                             mapToGlobal(width, 0))
             }
         }
     }
@@ -528,8 +528,8 @@ Rectangle {
             property variant values: parent.modelData.values
             value: parent.modelData.value === "" ? qsTr("[None]") : parent.modelData.value
             onShowBrowser: {
-                activeBrowser = _inspectorView.showFilesChooser(handle, instance,
-                                                                mapToGlobal(width, 0))
+                activeBrowser = _parentView.showFilesChooser(handle, instance,
+                                                             mapToGlobal(width, 0))
             }
         }
     }
@@ -542,8 +542,8 @@ Rectangle {
             property variant values: parent.modelData.values
             value: parent.modelData.value
             onShowBrowser: {
-                activeBrowser = _inspectorView.showTextureChooser(handle, instance,
-                                                                  mapToGlobal(width, 0))
+                activeBrowser = _parentView.showTextureChooser(handle, instance,
+                                                               mapToGlobal(width, 0))
             }
         }
     }
@@ -854,8 +854,8 @@ Rectangle {
             property variant values: parent.modelData.values
             value: parent.modelData.value
             onShowBrowser: {
-                activeBrowser = _inspectorView.showObjectReference(handle, instance,
-                                                   mapToGlobal(width, 0))
+                activeBrowser = _parentView.showObjectReference(handle, instance,
+                                                                mapToGlobal(width, 0))
             }
         }
     }

@@ -76,6 +76,7 @@ public:
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showDataInputChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE bool toolTipsEnabled();
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;

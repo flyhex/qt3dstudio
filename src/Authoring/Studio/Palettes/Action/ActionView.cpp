@@ -930,7 +930,7 @@ CClientDataModelBridge *ActionView::GetBridge()
 void ActionView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_actionView"_L1, this);
+    rootContext()->setContextProperty("_parentView"_L1, this);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
     rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
@@ -971,4 +971,9 @@ int ActionView::slideNameToIndex(const QString &name)
 {
     const auto slides = slideNames(); // KDAB_TODO cache it
     return slides.indexOf(name);
+}
+
+bool ActionView::toolTipsEnabled()
+{
+    return CStudioPreferences::ShouldShowTooltips();
 }

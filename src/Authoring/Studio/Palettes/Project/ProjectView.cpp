@@ -98,7 +98,7 @@ void ProjectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_projectView"_L1, this);
+    rootContext()->setContextProperty("_parentView"_L1, this);
 
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Project/ProjectView.qml"_L1));
@@ -285,6 +285,11 @@ void ProjectView::showContextMenu(int x, int y, int index)
 {
     ProjectContextMenu contextMenu(this, index);
     contextMenu.exec(mapToGlobal({x, y}));
+}
+
+bool ProjectView::toolTipsEnabled()
+{
+    return CStudioPreferences::ShouldShowTooltips();
 }
 
 void ProjectView::refreshImport(int row) const

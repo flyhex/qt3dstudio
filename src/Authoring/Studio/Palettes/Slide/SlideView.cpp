@@ -131,6 +131,11 @@ void SlideView::showControllerDialog(const QPoint &point)
     return;
 }
 
+bool SlideView::toolTipsEnabled()
+{
+    return CStudioPreferences::ShouldShowTooltips();
+}
+
 void SlideView::showBrowser(QQuickWidget *browser, const QPoint &point)
 {
     QSize popupSize = CStudioPreferences::browserPopupSize();
@@ -389,7 +394,7 @@ void SlideView::updateDataInputStatus(bool isViaDispatch)
 void SlideView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_slideView"_L1, this);
+    rootContext()->setContextProperty("_parentView"_L1, this);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
 
     engine()->addImportPath(qmlImportPath());

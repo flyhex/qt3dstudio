@@ -1852,6 +1852,13 @@ CPlayerWnd *CMainFrame::GetPlayerWnd() const
 bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
 {
     switch (event->type()) {
+    case QEvent::ToolTip: {
+        if (CStudioPreferences::ShouldShowTooltips())
+            event->ignore();
+        else
+            return true;
+        break;
+    }
     case QEvent::KeyPress: {
         QKeyEvent *ke = static_cast<QKeyEvent *>(event);
         if (ke->key() == Qt::Key_Tab) {

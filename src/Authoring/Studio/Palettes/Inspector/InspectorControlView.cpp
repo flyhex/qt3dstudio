@@ -178,7 +178,7 @@ QSize InspectorControlView::sizeHint() const
 void InspectorControlView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_inspectorView"_L1, this);
+    rootContext()->setContextProperty("_parentView"_L1, this);
     rootContext()->setContextProperty("_inspectorModel"_L1, m_inspectorControlModel);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
@@ -534,6 +534,11 @@ void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &poin
         browser->activateWindow();
         browser->setFocus();
     });
+}
+
+bool InspectorControlView::toolTipsEnabled()
+{
+    return CStudioPreferences::ShouldShowTooltips();
 }
 
 void InspectorControlView::OnBeginDataModelNotifications()

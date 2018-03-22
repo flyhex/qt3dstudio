@@ -61,7 +61,7 @@ Rectangle {
 
                 ScrollBar.vertical: ScrollBar {}
 
-                model: _projectView.projectModel
+                model: _parentView.projectModel
 
                 onCurrentIndexChanged: {
                     // Try to keep something selected always
