@@ -244,6 +244,12 @@ void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
 
     // Serialize the new document.
     m_Doc->SaveDocument(fileDocument);
+
+    // Update the uia file if possible. Edit the sub-presentation list only when creating a new
+    // main presentation.
+    QByteArray docBA = theDocument.toQString().toLatin1();
+    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(),
+                                                      inCreateDirectory);
 }
 
 //=============================================================================

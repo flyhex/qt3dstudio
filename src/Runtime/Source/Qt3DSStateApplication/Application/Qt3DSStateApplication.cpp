@@ -70,7 +70,7 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
         MallocAllocator allocator;
         NVScopedRefCounted<IStringTable> strTable(IStringTable::CreateStringTable(allocator));
         NVScopedRefCounted<IDOMFactory> domFactory(
-            IDOMFactory::CreateDOMFactory(allocator, strTable));
+                    IDOMFactory::CreateDOMFactory(allocator, strTable));
         eastl::pair<SNamespacePairNode *, SDOMElement *> readResult;
         {
             CFileSeekableIOStream theInStream(uiaPath.c_str(), FileReadFlags());
@@ -81,11 +81,11 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
             uiaPath.clear();
         } else {
             eastl::pair<NVScopedRefCounted<IDOMWriter>, NVScopedRefCounted<IDOMReader>> writerData
-                = IDOMWriter::CreateDOMWriter(domFactory, *readResult.second, strTable);
+                    = IDOMWriter::CreateDOMWriter(domFactory, *readResult.second, strTable);
             NVScopedRefCounted<IDOMReader> domReader(writerData.second);
-            if (!domReader->MoveToFirstChild("assets"))
+            if (!domReader->MoveToFirstChild("assets")) {
                 writerData.first->Begin("assets");
-            else {
+            } else {
                 if (subpresentations) {
                     int pre = domReader->CountChildren("presentation");
                     int preq = domReader->CountChildren("presentation-qml");
@@ -95,6 +95,16 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
                         while (domReader->MoveToFirstChild("presentation-qml"))
                             writerData.first->RemoveCurrent();
                     }
+
+                    // Retain the main presentation as the initial one regardless of the
+                    // sub-presentation we are editing now
+                    eastl::string dir;
+                    eastl::string ext;
+                    // Parse the main presentation name
+                    CFileTools::Split(uiaPath.c_str(), dir, filestem, ext);
+                    filename = filestem;
+                    filename.append(1, '.');
+                    filename.append(extension);
 
                     writerData.first->Begin("presentation");
                     writerData.first->Att("id", filestem.c_str());
@@ -140,8 +150,9 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
                 CDOMSerializer::WriteXMLHeader(theOutStream);
                 CDOMSerializer::Write(allocator, *readResult.second, theOutStream, *strTable,
                                       namespacePairs, false);
-            } else
+            } else {
                 return false;
+            }
         }
     }
     // No uia, just create a new one named after the uip file
@@ -210,8 +221,8 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
             return false;
         }
         theStream.Write(
-            toConstDataRef((const qt3ds::QT3DSU8 *)uiaFileData.c_str(),
-                           (qt3ds::QT3DSU32)uiaFileData.length()));
+                    toConstDataRef((const qt3ds::QT3DSU8 *)uiaFileData.c_str(),
+                                   (qt3ds::QT3DSU32)uiaFileData.length()));
     }
     return true;
 }
