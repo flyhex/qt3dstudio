@@ -150,9 +150,17 @@ void CSubPresentationDlg::updateUI() {
 
     QDir dir(m_directory, filter, QDir::Name, QDir::Files);
     QStringList entryList = dir.entryList();
-    // Remove the current presentation from the list of offered entries
-    QString currentPres = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetName().toQString();
-    entryList.removeAll(currentPres);
+    if (m_subPresentation.m_type == QStringLiteral("presentation")) {
+        // Remove the current presentation from the list of offered entries
+        QString currentPres = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetName()
+                .toQString();
+        entryList.removeAll(currentPres);
+        // Remove autosave files
+        foreach (const QString &entry, entryList) {
+            if (entry.endsWith(QStringLiteral("_autosave.uip")))
+                entryList.removeAll(entry);
+        }
+    }
     m_ui->comboBoxFileList->addItems(entryList);
 
     if (!m_subPresentation.m_argsOrSrc.isEmpty()) {
