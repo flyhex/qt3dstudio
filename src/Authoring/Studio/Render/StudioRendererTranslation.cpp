@@ -2771,7 +2771,11 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         }
     }
     // Pick against the widget first if possible.
-    if (m_LastRenderedWidget && m_LastRenderedWidget->GetNode().m_Flags.IsActive()) {
+    if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
+                                 || m_LastRenderedWidget->GetNode().m_Type
+                                 == GraphObjectTypes::Light
+                                 || m_LastRenderedWidget->GetNode().m_Type
+                                 == GraphObjectTypes::Camera)) {
         Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
         if (picked.hasValue()) {
             RequestRender();
