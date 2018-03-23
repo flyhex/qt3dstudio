@@ -794,11 +794,11 @@ void CStudioApp::SetSelectMode(long inSelectMode)
     }
 }
 
-StudioManipulationModes::Enum CStudioApp::GetMinpulationMode() const
+StudioManipulationModes::Enum CStudioApp::GetManipulationMode() const
 {
     return m_ManipulationMode;
 }
-void CStudioApp::SetMinpulationMode(StudioManipulationModes::Enum inManipulationMode)
+void CStudioApp::SetManipulationMode(StudioManipulationModes::Enum inManipulationMode)
 {
     if (m_ManipulationMode != inManipulationMode) {
         m_ManipulationMode = inManipulationMode;

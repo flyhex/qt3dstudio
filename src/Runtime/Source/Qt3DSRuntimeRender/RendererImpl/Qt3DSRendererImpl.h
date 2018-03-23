@@ -329,6 +329,11 @@ namespace render {
         SLayerRenderData *GetOrCreateLayerRenderDataForNode(const SNode &inNode,
                                                             const SRenderInstanceId id = nullptr);
 
+        IRenderWidgetContext &GetRenderWidgetContext()
+        {
+            return *this;
+        }
+
         void BeginFrame() override;
         void EndFrame() override;
 

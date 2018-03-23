@@ -40,6 +40,7 @@
 #include "Qt3DSDMGuides.h"
 #include "PathWidget.h"
 #include "StudioPreferences.h"
+#include "StudioGradientWidget.h"
 
 namespace qt3ds {
 namespace studio {
@@ -370,6 +371,7 @@ namespace studio {
         NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_RotationWidget;
         NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_ScaleWidget;
         NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_LastRenderedWidget;
+        NVScopedRefCounted<qt3ds::widgets::SGradientWidget> m_GradientWidget;
         NVScopedRefCounted<qt3ds::widgets::IPathWidget> m_PathWidget;
         NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_PickBuffer;
         Option<SPathAnchorDragInitialValue> m_LastPathDragValue;

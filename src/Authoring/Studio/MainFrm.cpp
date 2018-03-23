@@ -570,7 +570,7 @@ void CMainFrame::OnUpdateToolChange()
     m_ui->actionPosition_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_MOVE);
     m_ui->actionRotation_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_ROTATE);
     m_ui->actionScale_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_SCALE);
-    m_ui->actionLocal_Global_Manipulators->setChecked(g_StudioApp.GetMinpulationMode()
+    m_ui->actionLocal_Global_Manipulators->setChecked(g_StudioApp.GetManipulationMode()
                                                       == StudioManipulationModes::Global);
 
 #if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
@@ -1174,7 +1174,7 @@ void CMainFrame::OnUpdateToolScale()
  */
 void CMainFrame::OnUpdateToolGlobalManipulators()
 {
-    StudioManipulationModes::Enum theMode = g_StudioApp.GetMinpulationMode();
+    StudioManipulationModes::Enum theMode = g_StudioApp.GetManipulationMode();
 
     // If the current tool mode matches this button
     // If the button is currently enabled
@@ -1219,9 +1219,9 @@ void CMainFrame::OnToolScale()
 void CMainFrame::OnToolGlobalManipulators()
 {
     if (m_ui->actionLocal_Global_Manipulators->isChecked())
-        g_StudioApp.SetMinpulationMode(StudioManipulationModes::Global);
+        g_StudioApp.SetManipulationMode(StudioManipulationModes::Global);
     else
-        g_StudioApp.SetMinpulationMode(StudioManipulationModes::Local);
+        g_StudioApp.SetManipulationMode(StudioManipulationModes::Local);
 
     g_StudioApp.GetRenderer().RequestRender();
 }

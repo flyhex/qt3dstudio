@@ -158,8 +158,8 @@ public:
     long GetSelectMode();
     void SetSelectMode(long inSelectMode);
 
-    StudioManipulationModes::Enum GetMinpulationMode() const;
-    void SetMinpulationMode(StudioManipulationModes::Enum inManipulationMode);
+    StudioManipulationModes::Enum GetManipulationMode() const;
+    void SetManipulationMode(StudioManipulationModes::Enum inManipulationMode);
 
     bool CanUndo();
     bool CanRedo();

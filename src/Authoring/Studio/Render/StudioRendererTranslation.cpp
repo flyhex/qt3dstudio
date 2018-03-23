@@ -2414,7 +2414,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         m_LastRenderedWidget = theNextWidget;
         if (m_LastRenderedWidget) {
             m_LastRenderedWidget->SetSubComponentId(inWidgetId);
-            switch (g_StudioApp.GetMinpulationMode()) {
+            switch (g_StudioApp.GetManipulationMode()) {
             case StudioManipulationModes::Local:
                 m_LastRenderedWidget->SetRenderWidgetMode(qt3ds::render::RenderWidgetModes::Local);
                 break;
@@ -2430,6 +2430,23 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         m_Scene->PrepareForRender(GetViewportDimensions(), m_Context);
 
         m_Context.RunRenderTasks();
+
+        if (m_EditCameraEnabled) {
+            if (m_GradientWidget == nullptr)
+                m_GradientWidget = qt3ds::widgets::SGradientWidget
+                                    ::CreateGradientWidget(m_Context.GetAllocator());
+            // render gradient background
+            if (m_EditCameraEnabled) {
+                SNode *node = GetEditCameraLayer();
+                m_GradientWidget->SetNode(*node);
+                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
+                                         m_Context.GetRenderContext(),
+                                         m_EditCameraInfo.IsOrthographic());
+            } else {
+                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
+                                         m_Context.GetRenderContext(), true);
+            }
+        }
 
         m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
 

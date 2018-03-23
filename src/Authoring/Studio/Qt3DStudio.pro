@@ -146,7 +146,8 @@ HEADERS += \
     Controls/BreadCrumbControl.h \
     Controls/TreeItem.h \
     Application/DataInputSelectModel.h \
-    Application/DataInputSelectView.h
+    Application/DataInputSelectView.h \
+    Render/StudioGradientWidget.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -371,7 +372,8 @@ SOURCES += \
     Application/DataInputDlg.cpp \
     Application/DataInputListDlg.cpp \
     Application/DataInputSelectModel.cpp \
-    Application/DataInputSelectView.cpp
+    Application/DataInputSelectView.cpp \
+    Render/StudioGradientWidget.cpp
 
 HEADERS += \
     Application/TimeEditDlg.h \

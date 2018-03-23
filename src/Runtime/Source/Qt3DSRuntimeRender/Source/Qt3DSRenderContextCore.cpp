@@ -429,6 +429,11 @@ struct SRenderContext : public IQt3DSRenderContext
     void SetViewport(Option<NVRenderRect> inViewport) override { m_Viewport = inViewport; }
     Option<NVRenderRect> GetViewport() const override { return m_Viewport; }
 
+    IRenderWidgetContext &GetRenderWidgetContext() override
+    {
+        return m_Renderer->GetRenderWidgetContext();
+    }
+
     eastl::pair<NVRenderRect, NVRenderRect> GetPresentationViewportAndOuterViewport() const
     {
         QSize thePresentationDimensions(m_PresentationDimensions);
