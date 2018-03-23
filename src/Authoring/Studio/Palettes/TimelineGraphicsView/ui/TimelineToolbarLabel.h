@@ -26,60 +26,28 @@
 **
 ****************************************************************************/
 
-#ifndef TIMELINETOOLBAR_H
-#define TIMELINETOOLBAR_H
+#ifndef TIMELINETOOLBARLABEL_H
+#define TIMELINETOOLBARLABEL_H
 
-#include "SelectedValueImpl.h"
-#include "TimelineToolbarLabel.h"
-#include "Qt3DSDMSignals.h"
-#include <QtWidgets/qtoolbar.h>
+#include <QtWidgets/qlabel.h>
+#include <QtGui/qevent.h>
 
-QT_FORWARD_DECLARE_CLASS(QAction)
-QT_FORWARD_DECLARE_CLASS(QSlider)
-
-class TimelineToolbar : public QToolBar
+class TimelineToolbarLabel : public QLabel
 {
     Q_OBJECT
+public:
+    explicit TimelineToolbarLabel(QWidget *parent = nullptr);
+
+protected:
+    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 signals:
-    void newLayerTriggered();
-    void deleteLayerTriggered();
-    void gotoTimeTriggered();
-    void firstFrameTriggered();
-    void stopTriggered();
-    void playTriggered();
-    void lastFrameTriggered();
-    void timelineScaleChanged(int scale);
-    void setDurationTriggered();
-
-public:
-    TimelineToolbar();
-
-    void setTime(long totalMillis);
-
-public Q_SLOTS:
-    void updatePlayButtonState(bool started);
-
-private Q_SLOTS:
-    void onPlayButtonClicked();
-    void onZoomLevelChanged(int scale);
-    void onZoomInButtonClicked();
-    void onZoomOutButtonClicked();
+    void clicked(QMouseEvent *event);
 
 private:
-    void addSpacing(int width);
-    void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
-
-    TimelineToolbarLabel *m_timeLabel;
-    QAction *m_actionDeleteRow;
-    QAction *m_actionPlayStop;
-    QAction *m_actionZoomIn;
-    QAction *m_actionZoomOut;
-    qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
-    QSlider *m_scaleSlider;
-    QIcon m_iconStop;
-    QIcon m_iconPlay;
-
+    void setHighlight(bool highlight);
 };
 
-#endif // TIMELINETOOLBAR_H
+#endif // TIMELINETOOLBARLABEL_H

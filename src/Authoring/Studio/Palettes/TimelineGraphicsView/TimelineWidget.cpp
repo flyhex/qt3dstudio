@@ -40,6 +40,7 @@
 #include "Core.h"
 #include "Doc.h"
 #include "Dispatch.h"
+#include "MainFrm.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMSlides.h"
 #include "ClientDataModelBridge.h"
@@ -47,6 +48,7 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
+#include "TimeEditDlg.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -257,7 +259,9 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered, doc, &CDoc::DeleteSelectedObject);
 
     connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [this]() {
-        // Mahmoud_TODO: implement
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        CTimeEditDlg timeEditDlg;
+        timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
     });
 
     connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, [this]() {
@@ -265,7 +269,7 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     });
 
     connect(m_toolbar, &TimelineToolbar::stopTriggered, this, [this]() {
-        g_StudioApp.PlaybackStop();
+        g_StudioApp.PlaybackStopNoRestore();
     });
 
     connect(m_toolbar, &TimelineToolbar::playTriggered, this, [this]() {
@@ -322,6 +326,11 @@ void TimelineWidget::OnNewPresentation()
     m_connections.push_back(theSignalProvider->ConnectActionDeleted(
         std::bind(&TimelineWidget::OnActionEvent, this,
                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
+
+    // Connect toolbar play/stop now when m_pMainWnd exists
+    connect(g_StudioApp.m_pMainWnd, &CMainFrame::playStateChanged,
+            m_toolbar, &TimelineToolbar::updatePlayButtonState);
+
 }
 
 void TimelineWidget::OnClosingPresentation()

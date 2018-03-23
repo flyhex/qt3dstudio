@@ -263,6 +263,10 @@
         <file>images/toolbutton-arrow.png</file>
         <file>images/add-disabled.png</file>
         <file>images/add-disabled@2x.png</file>
+        <file>images/zoom_out.png</file>
+        <file>images/zoom_out@2x.png</file>
+        <file>images/zoom_in.png</file>
+        <file>images/zoom_in@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

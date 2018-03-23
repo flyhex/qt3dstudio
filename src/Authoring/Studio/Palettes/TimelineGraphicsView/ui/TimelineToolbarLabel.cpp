@@ -26,60 +26,42 @@
 **
 ****************************************************************************/
 
-#ifndef TIMELINETOOLBAR_H
-#define TIMELINETOOLBAR_H
-
-#include "SelectedValueImpl.h"
 #include "TimelineToolbarLabel.h"
-#include "Qt3DSDMSignals.h"
-#include <QtWidgets/qtoolbar.h>
+#include "StudioPreferences.h"
 
-QT_FORWARD_DECLARE_CLASS(QAction)
-QT_FORWARD_DECLARE_CLASS(QSlider)
-
-class TimelineToolbar : public QToolBar
+TimelineToolbarLabel::TimelineToolbarLabel(QWidget *parent)
+    : QLabel(parent)
 {
-    Q_OBJECT
+    setHighlight(false);
+    setAlignment(Qt::AlignCenter);
+}
 
-signals:
-    void newLayerTriggered();
-    void deleteLayerTriggered();
-    void gotoTimeTriggered();
-    void firstFrameTriggered();
-    void stopTriggered();
-    void playTriggered();
-    void lastFrameTriggered();
-    void timelineScaleChanged(int scale);
-    void setDurationTriggered();
+void TimelineToolbarLabel::enterEvent(QEvent *event)
+{
+    Q_UNUSED(event);
+    if (isEnabled())
+        setHighlight(true);
+}
 
-public:
-    TimelineToolbar();
+void TimelineToolbarLabel::leaveEvent(QEvent *event)
+{
+    Q_UNUSED(event);
+    if (isEnabled())
+        setHighlight(false);
+}
 
-    void setTime(long totalMillis);
+void TimelineToolbarLabel::mousePressEvent(QMouseEvent *event)
+{
+    emit clicked(event);
+}
 
-public Q_SLOTS:
-    void updatePlayButtonState(bool started);
-
-private Q_SLOTS:
-    void onPlayButtonClicked();
-    void onZoomLevelChanged(int scale);
-    void onZoomInButtonClicked();
-    void onZoomOutButtonClicked();
-
-private:
-    void addSpacing(int width);
-    void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
-
-    TimelineToolbarLabel *m_timeLabel;
-    QAction *m_actionDeleteRow;
-    QAction *m_actionPlayStop;
-    QAction *m_actionZoomIn;
-    QAction *m_actionZoomOut;
-    qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
-    QSlider *m_scaleSlider;
-    QIcon m_iconStop;
-    QIcon m_iconPlay;
-
-};
-
-#endif // TIMELINETOOLBAR_H
+void TimelineToolbarLabel::setHighlight(bool highlight)
+{
+    if (highlight) {
+        QColor bgColor = CStudioPreferences::GetMouseOverHighlightColor();
+        QString bgColorStyle = QStringLiteral("background-color: ") + bgColor.name();
+        setStyleSheet(bgColorStyle);
+    } else {
+        setStyleSheet("background-color: transparent;");
+    }
+}

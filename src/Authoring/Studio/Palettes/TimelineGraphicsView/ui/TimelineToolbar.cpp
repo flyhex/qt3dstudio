@@ -45,18 +45,21 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     static const QIcon iconLayer = QIcon(":/images/Asset-Layer-Normal.png");
     static const QIcon iconDelete = QIcon(":/images/Action-Trash-Normal.png");
     static const QIcon iconFirst = QIcon(":/images/playback_tools_low-00.png");
-    static const QIcon iconStop = QIcon(":/images/playback_tools_low-01.png");
-    static const QIcon iconPlay = QIcon(":/images/playback_tools_low-02.png");
     static const QIcon iconLast = QIcon(":/images/playback_tools_low-04.png");
+    static const QIcon iconZoomIn = QIcon(":/images/zoom_in.png");
+    static const QIcon iconZoomOut = QIcon(":/images/zoom_out.png");
+    m_iconStop = QIcon(":/images/playback_tools_low-01.png");
+    m_iconPlay = QIcon(":/images/playback_tools_low-02.png");
 
     // create actions
-    QAction *actionNewLayer    = new QAction(iconLayer, tr("Add New Layer"));
-             m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"));
-             m_actionTime      = new QAction(tr("0:00.000"));
-    QAction *actionFirst       = new QAction(iconFirst, tr("Go to Timeline Start"));
-    QAction *actionStop        = new QAction(iconStop, tr("Stop Playing"));
-    QAction *actionPlay        = new QAction(iconPlay, tr("Start Playing"));
-    QAction *actionLast        = new QAction(iconLast, tr("Go to Timeline End"));
+    QAction *actionNewLayer = new QAction(iconLayer, tr("Add New Layer"));
+    QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"));
+    QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"));
+    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"));
+    m_actionPlayStop = new QAction();
+    m_timeLabel = new TimelineToolbarLabel();
+    m_actionZoomIn = new QAction(iconZoomIn, tr("Zoom In"));
+    m_actionZoomOut = new QAction(iconZoomOut, tr("Zoom Out"));
 
     m_scaleSlider = new QSlider();
     m_scaleSlider->setOrientation(Qt::Horizontal);
@@ -66,33 +69,40 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_scaleSlider->setPageStep(.1);
     m_scaleSlider->setValue(2);
 
-    m_actionDuration = new QAction(tr("0:20"));
+    m_timeLabel->setText(tr("0:00.000"));
+    m_timeLabel->setMinimumWidth(80);
+
+    updatePlayButtonState(false);
 
     // connections
-    connect(actionNewLayer   , &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
+    connect(actionNewLayer, &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
     connect(m_actionDeleteRow, &QAction::triggered, this, &TimelineToolbar::deleteLayerTriggered);
-    connect(m_actionTime     , &QAction::triggered, this, &TimelineToolbar::gotoTimeTriggered);
-    connect(actionFirst      , &QAction::triggered, this, &TimelineToolbar::firstFrameTriggered);
-    connect(actionStop       , &QAction::triggered, this, &TimelineToolbar::stopTriggered);
-    connect(actionPlay       , &QAction::triggered, this, &TimelineToolbar::playTriggered);
-    connect(actionLast       , &QAction::triggered, this, &TimelineToolbar::lastFrameTriggered);
-    connect(m_scaleSlider    , &QSlider::valueChanged, this, &TimelineToolbar::timelineScaleChanged);
-    connect(m_actionDuration , &QAction::triggered, this, &TimelineToolbar::setDurationTriggered);
+    connect(m_timeLabel, &TimelineToolbarLabel::clicked, this,
+            &TimelineToolbar::gotoTimeTriggered);
+    connect(actionFirst, &QAction::triggered, this, &TimelineToolbar::firstFrameTriggered);
+    connect(m_actionPlayStop, &QAction::triggered, this, &TimelineToolbar::onPlayButtonClicked);
+    connect(actionLast, &QAction::triggered, this, &TimelineToolbar::lastFrameTriggered);
+    connect(m_scaleSlider, &QSlider::valueChanged, this, &TimelineToolbar::onZoomLevelChanged);
+    connect(m_actionZoomIn, &QAction::triggered, this, &TimelineToolbar::onZoomInButtonClicked);
+    connect(m_actionZoomOut, &QAction::triggered, this, &TimelineToolbar::onZoomOutButtonClicked);
 
     // add actions
     addAction(actionNewLayer);
     addAction(m_actionDeleteRow);
-    addSpacing(100);
-    addAction(m_actionTime);
-    addSpacing(10);
-    addAction(actionFirst);
-    addAction(actionStop);
-    addAction(actionPlay);
-    addAction(actionLast);
     addSpacing(20);
+    addWidget(m_timeLabel);
+    addSpacing(20);
+    addAction(actionFirst);
+    addAction(m_actionPlayStop);
+    addAction(actionLast);
+    addSpacing(30);
+    addAction(m_actionZoomOut);
     addWidget(m_scaleSlider);
-    addSeparator();
-    addAction(m_actionDuration);
+    addAction(m_actionZoomIn);
+
+    // add keyboard shortcuts
+    m_actionZoomOut->setShortcut(Qt::Key_Minus);
+    m_actionZoomIn->setShortcut(Qt::Key_Plus);
 
     m_connectSelectionChange = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));
@@ -123,12 +133,49 @@ void TimelineToolbar::addSpacing(int width)
     addWidget(widget);
 }
 
-void TimelineToolbar::setTime(double secsAndmillis)
+void TimelineToolbar::setTime(long totalMillis)
 {
-    long totalMillis = secsAndmillis * 1000;
     long mins = totalMillis % 3600000 / 60000;
     long secs = totalMillis % 60000 / 1000;
     long millis = totalMillis % 1000;
 
-    m_actionTime->setText(QString::asprintf("%01d:%02d.%03d", mins, secs, millis));
+    m_timeLabel->setText(QString::asprintf("%01d:%02d.%03d", mins, secs, millis));
+}
+
+void TimelineToolbar::updatePlayButtonState(bool started)
+{
+    if (started) {
+        m_actionPlayStop->setIcon(m_iconStop);
+        m_actionPlayStop->setText(tr("Stop Playing"));
+    } else {
+        m_actionPlayStop->setIcon(m_iconPlay);
+        m_actionPlayStop->setText(tr("Start Playing"));
+    }
+}
+
+void TimelineToolbar::onPlayButtonClicked()
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (doc->IsPlaying())
+        emit stopTriggered();
+    else
+        emit playTriggered();
+}
+
+void TimelineToolbar::onZoomLevelChanged(int scale)
+{
+    m_actionZoomIn->setEnabled(scale < m_scaleSlider->maximum());
+    m_actionZoomOut->setEnabled(scale > m_scaleSlider->minimum());
+
+    emit timelineScaleChanged(scale);
+}
+
+void TimelineToolbar::onZoomInButtonClicked()
+{
+    m_scaleSlider->setValue(m_scaleSlider->value() + 1);
+}
+
+void TimelineToolbar::onZoomOutButtonClicked()
+{
+    m_scaleSlider->setValue(m_scaleSlider->value() - 1);
 }
