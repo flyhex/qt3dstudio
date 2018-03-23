@@ -1426,7 +1426,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_Dialogs->ResetSettings(inDocument.GetPath());
 
         m_subpresentations.clear();
-        m_Core->GetDoc()->LoadUIASubpresentations(m_Core->GetDoc()->GetDocumentUIAFile(),
+        m_Core->GetDoc()->LoadUIASubpresentations(m_Core->GetDoc()->GetDocumentUIAFile(true),
                                                   m_subpresentations);
 
         m_dataInputDialogItems.clear();
