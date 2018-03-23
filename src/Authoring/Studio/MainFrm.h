@@ -238,6 +238,8 @@ public:
 
     void initializeGeometryAndState();
 
+    void toggleSelectMode();
+
 Q_SIGNALS:
     void playStateChanged(bool started);
 

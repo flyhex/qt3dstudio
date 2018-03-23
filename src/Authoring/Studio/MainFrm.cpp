@@ -1078,6 +1078,10 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
                         QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z),
                         CMainFrame::OnEditRedo);
 
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Q),
+                        CMainFrame::toggleSelectMode);
+
     CTimelineControl *theTimelineControl = GetTimelineControl();
     if (theTimelineControl)
         theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
@@ -1901,4 +1905,12 @@ void CMainFrame::initializeGeometryAndState()
         handleGeometryAndState(true);
     }
     handleGeometryAndState(false);
+}
+
+void CMainFrame::toggleSelectMode()
+{
+    if (m_ui->actionItem_Select_Tool->isChecked())
+        m_SceneView->OnToolGroupSelection();
+    else
+        m_SceneView->OnToolItemSelection();
 }

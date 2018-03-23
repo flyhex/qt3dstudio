@@ -546,10 +546,7 @@
     <string>Group Select Tool</string>
    </property>
    <property name="toolTip">
-    <string>Select Group (A)</string>
-   </property>
-   <property name="shortcut">
-    <string>A</string>
+    <string>Select Group (Q toggle)</string>
    </property>
   </action>
   <action name="actionItem_Select_Tool">
@@ -564,10 +561,7 @@
     <string>Item Select Tool</string>
    </property>
    <property name="toolTip">
-    <string>Select Item (Q)</string>
-   </property>
-   <property name="shortcut">
-    <string>Q</string>
+    <string>Select Item (Q toggle)</string>
    </property>
   </action>
   <action name="actionRotation_Tool">
@@ -652,7 +646,7 @@
      <disabledoff>:/images/editcamera_tools_hi-00_disabled.png</disabledoff>:/images/editcamera_tools_hi-00.png</iconset>
    </property>
    <property name="text">
-    <string>Fit Selected (F)</string>
+    <string>Fit Selected</string>
    </property>
    <property name="toolTip">
     <string>Fit Selected (F)</string>
@@ -722,10 +716,10 @@
     <string>Shading Mode</string>
    </property>
    <property name="toolTip">
-    <string>Toggle Shading Mode (F3)</string>
+    <string>Toggle Shading Mode (L)</string>
    </property>
    <property name="shortcut">
-    <string>F3</string>
+    <string>L</string>
    </property>
   </action>
   <action name="actionPreview">
@@ -761,7 +755,10 @@
     <string>Wireframe</string>
    </property>
    <property name="toolTip">
-    <string>Show or Hide Wireframe</string>
+    <string>Toggle Wireframe (M)</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
    </property>
   </action>
   <action name="actionToolbarAutoset_Keyframes">
@@ -820,7 +817,10 @@
     <string>Remote Preview</string>
    </property>
    <property name="toolTip">
-    <string>Preview on Remote Device</string>
+    <string>Preview on Remote Device (F6)</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
    </property>
   </action>
  </widget>
