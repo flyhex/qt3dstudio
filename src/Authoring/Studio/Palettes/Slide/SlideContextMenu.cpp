@@ -40,12 +40,16 @@ SlideContextMenu::SlideContextMenu(SlideView *parent, int row, int rowCount, boo
     connect(action, &QAction::triggered, this, &SlideContextMenu::handleAddNewSlide);
     addAction(action);
 
-    action = new QAction(tr("Delete Slide"));
+    action = new QAction(tr("Delete Slide\t(Del)"));
     action->setEnabled(!master && m_row != -1 && m_rowCount > 1);
     connect(action, &QAction::triggered, this, &SlideContextMenu::handleRemoveSlide);
     addAction(action);
 
-    action = new QAction(tr("Duplicate Slide"));
+    QString ctrlKey(QStringLiteral("Ctrl+"));
+#ifdef Q_OS_MACOS
+    ctrlKey = "⌘";
+#endif
+    action = new QAction(tr("Duplicate Slide\t(%1D)").arg(ctrlKey));
     action->setEnabled(!master && m_row != -1);
     connect(action, &QAction::triggered, this, &SlideContextMenu::handleDuplicateSlide);
     addAction(action);
