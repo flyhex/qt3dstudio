@@ -264,8 +264,6 @@ public:
     bool IsPlaying();
     long GetCurrentClientTime();
 
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
-
     qt3dsdm::Qt3DSDMInstanceHandle GetSceneInstance() { return m_SceneInstance; }
 
     // IDoc

@@ -2026,25 +2026,6 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
                                                                         theChildSlide);
 }
 
-//=============================================================================
-/**
- * Register all the events for hotkeys that are active for the entire application.
- * Hotkeys for the entire application are ones that are not view specific in
- * scope.
- * @param inShortcutHandler the global shortcut handler.
- */
-void CDoc::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
-{
-    Q_UNUSED(inShortcutHandler)
-
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_Backspace) << QKeySequence(Qt::Key_Delete),
-                        CDoc::DeleteSelectedItems);
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_V),
-                        CDoc::HandleMasterPaste);
-}
-
 //==============================================================================
 /**
  * Loads the Studio object data from an archive

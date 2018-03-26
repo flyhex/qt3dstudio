@@ -175,6 +175,7 @@ public:
     bool CanChangeTimebarColor();
     void HandleSetChangedKeys();
     void DeleteSelectedKeys();
+    void DeleteSelectedObject();
     void HandleDuplicateCommand();
     bool CanDuplicateObject();
     void OnToggleAutosetKeyframes();

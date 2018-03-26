@@ -935,6 +935,15 @@ void CStudioApp::DeleteSelectedKeys()
 
 //=============================================================================
 /**
+ * Deletes all selected object
+ */
+void CStudioApp::DeleteSelectedObject()
+{
+    m_Core->GetDoc()->DeleteSelectedObject();
+}
+
+//=============================================================================
+/**
  * Handles the duplicate object command
  */
 void CStudioApp::HandleDuplicateCommand()
@@ -1248,9 +1257,6 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Return),
                         CStudioApp::PlaybackToggle);
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_H),
-                        CStudioApp::toggleEyeball);
 
     inShortcutHandler->RegisterKeyUpEvent(
                 new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackStop), 0,

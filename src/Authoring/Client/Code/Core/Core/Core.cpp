@@ -180,8 +180,6 @@ void CCore::InitAndValidateBuildConfiguration()
  */
 void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
-    m_Doc->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
-
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ControlModifier | Qt::Key_F6),
                         CCore::DumpCommandQueue);

@@ -121,6 +121,7 @@ public:
     void OnEditCut();
     void OnUpdateEditCut();
     void OnEditPaste();
+    void onEditPasteToMaster();
     void OnUpdateEditPaste();
     void OnEditDuplicate();
     void OnUpdateEditDuplicate();
@@ -132,7 +133,6 @@ public:
     void OnUpdateTimelineSetTimeBarColor();
     void OnTimelineSetTimeBarColor();
     void OnTimelineSetChangedKeyframe();
-    void OnTimelineDeleteSelectedKeyframes();
     void OnUpdateTimelineDeleteSelectedKeyframes();
     void OnTimelineSetTimeBarText();
     void OnUpdateTimelineSetTimeBarText();
@@ -143,8 +143,8 @@ public:
     void OnUpdateToolAutosetkeys();
     void OnEditApplicationPreferences();
     void OnEditPresentationPreferences();
-    void OnEditSubPresentations();
-    void OnEditDataInputs();
+    void OnFileSubPresentations();
+    void OnFileDataInputs();
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();

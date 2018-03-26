@@ -91,66 +91,74 @@ CMainFrame::CMainFrame()
     m_remoteDeploymentSender = new RemoteDeploymentSender(this);
 
     // File Menu
+    connect(m_ui->action_New, &QAction::triggered, this, &CMainFrame::OnFileNew);
     connect(m_ui->action_Open, &QAction::triggered, this, &CMainFrame::OnFileOpen);
     connect(m_ui->action_Save, &QAction::triggered, this, &CMainFrame::OnFileSave);
-    connect(m_ui->action_New, &QAction::triggered, this, &CMainFrame::OnFileNew);
     connect(m_ui->actionSave_As, &QAction::triggered, this, &CMainFrame::OnFileSaveAs);
     connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
     connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
+    connect(m_ui->actionSubpresentations, &QAction::triggered, this,
+            &CMainFrame::OnFileSubPresentations);
+    connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
-    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
-            this, &CMainFrame::OnConnectionChanged);
-    connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
-
     m_RecentItems = new CRecentItems(m_ui->menuRecent_Projects, 0);
     connect(m_RecentItems, &CRecentItems::openRecent, this, &CMainFrame::OnFileOpenRecent);
-    //ON_COMMAND_RANGE(WM_STUDIO_OPEN_RECENT_MIN, WM_STUDIO_OPEN_RECENT_MAX, OnFileOpenRecent)
+    connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
     // Edit Menu
     connect(m_ui->action_Undo, &QAction::triggered, this, &CMainFrame::OnEditUndo);
     connect(m_ui->action_Redo, &QAction::triggered, this, &CMainFrame::OnEditRedo);
-    connect(m_ui->action_Copy, &QAction::triggered, this, &CMainFrame::OnEditCopy);
+//    connect(m_ui->actionRepeat, &QAction::triggered, this, &CMainFrame::onEditRepeat); // TODO: Implement
     connect(m_ui->action_Cut, &QAction::triggered, this, &CMainFrame::OnEditCut);
-    connect(m_ui->actionAutoset_Keyframes, &QAction::triggered,
-            this, &CMainFrame::OnToolAutosetkeys);
+    connect(m_ui->action_Copy, &QAction::triggered, this, &CMainFrame::OnEditCopy);
     connect(m_ui->action_Paste, &QAction::triggered, this, &CMainFrame::OnEditPaste);
+    connect(m_ui->actionPaste_to_Master_Slide, &QAction::triggered,
+            this, &CMainFrame::onEditPasteToMaster);
+    connect(m_ui->action_Duplicate_Object, &QAction::triggered, this, &CMainFrame::OnEditDuplicate);
+    connect(m_ui->actionDelete, &QAction::triggered, [](){ g_StudioApp.DeleteSelectedObject(); });
+//    connect(m_ui->actionGroup, &QAction::triggered, this, &CMainFrame::onEditGroup); // TODO: Implement
+//    connect(m_ui->actionParent, &QAction::triggered, this, &CMainFrame::onEditParent); // TODO: Implement
+//    connect(m_ui->actionUnparent, &QAction::triggered, this, &CMainFrame::onEditUnparent); // TODO: Implement
     connect(m_ui->actionStudio_Preferences, &QAction::triggered,
             this, &CMainFrame::OnEditApplicationPreferences);
     connect(m_ui->actionPresentation_Settings, &QAction::triggered,
             this, &CMainFrame::OnEditPresentationPreferences);
-    connect(m_ui->actionSubpresentations, &QAction::triggered, this,
-            &CMainFrame::OnEditSubPresentations);
-    connect(m_ui->actionData_Inputs, &QAction::triggered, this,
-            &CMainFrame::OnEditDataInputs);
-    connect(m_ui->action_Duplicate_Object, &QAction::triggered,
-            this, &CMainFrame::OnEditDuplicate);
-
-    // Timeline Menu
-    connect(m_ui->actionDelete_Selected_Keyframe_s, &QAction::triggered,
-            this, &CMainFrame::OnTimelineDeleteSelectedKeyframes);
-    connect(m_ui->actionSet_Interpolation, &QAction::triggered,
-            this, &CMainFrame::OnTimelineSetInterpolation);
-    connect(m_ui->actionChange_Time_Bar_Color, &QAction::triggered,
-            this, &CMainFrame::OnTimelineSetTimeBarColor);
-    connect(m_ui->actionSet_Changed_Keyframes, &QAction::triggered,
-            this, &CMainFrame::OnTimelineSetChangedKeyframe);
 
     // View Menu
+//    connect(m_ui->actionReset_layout, &QAction::triggered, this, &CMainFrame::onViewResetLayout); // TODO: Implement
+    connect(m_ui->actionFit_Selected, &QAction::triggered,
+            this, &CMainFrame::OnEditCameraZoomExtent);
+//    connect(m_ui->actionFit_all, &QAction::triggered, this, &CMainFrame::onViewFitAll); // TODO: Implement
+    connect(m_ui->actionToggle_hide_unhide_selected, &QAction::triggered,
+            []() { g_StudioApp.toggleEyeball(); });
+//    connect(m_ui->actionToggle_hide_unhide_unselected, &QAction::triggered,
+//            []() {  }); // TODO: Implement?
+    connect(m_ui->actionAction, &QAction::triggered, this, &CMainFrame::OnViewAction);
+    connect(m_ui->actionBasic_Objects, &QAction::triggered, this, &CMainFrame::OnViewBasicObjects);
+    connect(m_ui->actionInspector, &QAction::triggered, this, &CMainFrame::OnViewInspector);
+    connect(m_ui->actionProject, &QAction::triggered, this, &CMainFrame::OnViewProject);
+    connect(m_ui->actionSlide, &QAction::triggered, this, &CMainFrame::OnViewSlide);
+    connect(m_ui->actionTimeline, &QAction::triggered, this, &CMainFrame::OnViewTimeline);
     connect(m_ui->actionBounding_Boxes, &QAction::triggered,
             this, &CMainFrame::OnViewBoundingBoxes);
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
     connect(m_ui->actionWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
     connect(m_ui->actionTooltips, &QAction::triggered, this, &CMainFrame::OnViewTooltips);
+//    connect(m_ui->actionFind, &QAction::triggered, this, &CMainFrame::onViewFind); // TODO: Implement
 
-    // Tools Menu
-    connect(m_ui->actionTimeline, &QAction::triggered, this, &CMainFrame::OnViewTimeline);
-    connect(m_ui->actionAction, &QAction::triggered, this, &CMainFrame::OnViewAction);
-    connect(m_ui->actionBasic_Objects, &QAction::triggered, this, &CMainFrame::OnViewBasicObjects);
-    connect(m_ui->actionProject, &QAction::triggered, this, &CMainFrame::OnViewProject);
-    connect(m_ui->actionSlide, &QAction::triggered, this, &CMainFrame::OnViewSlide);
-    connect(m_ui->actionInspector, &QAction::triggered, this, &CMainFrame::OnViewInspector);
+    // Timeline Menu
+    connect(m_ui->actionSet_Changed_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetChangedKeyframe);
+    connect(m_ui->actionDelete_Selected_Keyframe_s, &QAction::triggered,
+            [](){ g_StudioApp.DeleteSelectedKeys(); });
+    connect(m_ui->actionSet_Interpolation, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetInterpolation);
+    connect(m_ui->actionChange_Time_Bar_Color, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetTimeBarColor);
+    connect(m_ui->actionAutoset_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnToolAutosetkeys);
 
     // Help Menu
     connect(m_ui->action_Reference_Manual, &QAction::triggered, this, &CMainFrame::OnHelpIndex);
@@ -185,12 +193,8 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionScale_Tool, &QAction::triggered, this, &CMainFrame::OnToolScale);
     connect(m_ui->actionLocal_Global_Manipulators, &QAction::triggered,
             this, &CMainFrame::OnToolGlobalManipulators);
-    connect(m_ui->actionToolbarAutoset_Keyframes, &QAction::triggered,
-            this, &CMainFrame::OnToolAutosetkeys);
 
     // Edit Camera toolbar
-    connect(m_ui->actionFit_Selected, &QAction::triggered,
-            this, &CMainFrame::OnEditCameraZoomExtent);
 #if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     connect(m_ui->actionPan_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraPan);
     connect(m_ui->actionOrbit_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraRotate);
@@ -200,7 +204,10 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionRulers_Guides, &QAction::triggered, this, &CMainFrame::OnViewGuidesRulers);
     connect(m_ui->actionClear_Guides, &QAction::triggered, this, &CMainFrame::OnClearGuides);
     connect(m_ui->actionLock_Guides, &QAction::triggered, this, &CMainFrame::OnLockGuides);
-    connect(m_ui->actionToolbarWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
+
+    // Others
+    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
+            this, &CMainFrame::OnConnectionChanged);
 
     // TODO: better solution?
     QTimer* updateUITimer = new QTimer;
@@ -519,6 +526,11 @@ void CMainFrame::OnEditPaste()
     g_StudioApp.OnPaste();
 }
 
+void CMainFrame::onEditPasteToMaster()
+{
+    g_StudioApp.GetCore()->GetDoc()->HandleMasterPaste();
+}
+
 //==============================================================================
 /**
  *	OnUpdateEditPaste: Handle the update UI command for the paste button and menu item
@@ -621,18 +633,6 @@ void CMainFrame::OnUpdateTimelineSetTimeBarColor()
 void CMainFrame::OnTimelineSetChangedKeyframe()
 {
     g_StudioApp.HandleSetChangedKeys();
-}
-
-//==============================================================================
-/**
- *	OnTimelineDeleteSelectedKeyframes: Handles the ID_TIMELINE_DELETESELECTEDKEYFRAMES
- *	message.
- *
- *	Deletes all currently selected keyframes.
- */
-void CMainFrame::OnTimelineDeleteSelectedKeyframes()
-{
-    g_StudioApp.DeleteSelectedKeys();
 }
 
 //==============================================================================
@@ -821,7 +821,7 @@ void CMainFrame::OnEditPresentationPreferences()
 /**
  *  Displays the sub-presentation dialog.
  */
-void CMainFrame::OnEditSubPresentations()
+void CMainFrame::OnFileSubPresentations()
 {
     QString dir = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString();
 
@@ -837,7 +837,7 @@ void CMainFrame::OnEditSubPresentations()
 /**
  *  Displays the data input dialog.
  */
-void CMainFrame::OnEditDataInputs()
+void CMainFrame::OnFileDataInputs()
 {
     CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems));
     dataInputDlg.exec();
@@ -920,7 +920,6 @@ void CMainFrame::OnToolAutosetkeys()
 
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
-    m_ui->actionToolbarAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
 //==============================================================================
@@ -934,7 +933,6 @@ void CMainFrame::OnUpdateToolAutosetkeys()
 {
     // If autoset keyframes is on
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
-    m_ui->actionToolbarAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
 //==========================================================================
@@ -1091,10 +1089,6 @@ void CMainFrame::OnUpdatePlaybackStop()
  */
 void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_F3),
-                        CMainFrame::HandleEditViewFillModeKey);
-
     // Default undo shortcut is Ctrl-Y, which is specified in main form. Let's add the common
     // alternate shortcut for redo, CTRL-SHIFT-Z
     ADD_GLOBAL_SHORTCUT(actionParent,
@@ -1643,7 +1637,6 @@ void CMainFrame::OnViewWireframe()
 
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
     m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
-    m_ui->actionToolbarWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
 
     g_StudioApp.GetRenderer().RequestRender();
 }
@@ -1656,7 +1649,6 @@ void CMainFrame::OnViewWireframe()
 void CMainFrame::OnUpdateViewWireframe()
 {
     m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
-    m_ui->actionToolbarWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
 }
 
 //==============================================================================
