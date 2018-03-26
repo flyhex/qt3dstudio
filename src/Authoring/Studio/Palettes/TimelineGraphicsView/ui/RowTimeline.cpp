@@ -337,12 +337,14 @@ void RowTimeline::setStartX(double startX)
     else if (startX > m_endX - 1)
         startX = m_endX - 1;
 
+    double oldStartX = m_startX;
     m_startX = startX;
     m_startTime = xToTime(startX);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_minStartX = 0;
 
+    updateChildrenStartRecursive(m_rowTree, oldStartX);
     updateChildrenMinStartXRecursive(m_rowTree);
     update();
 }
@@ -355,14 +357,52 @@ void RowTimeline::setEndX(double endX)
     else if (endX > timeToX(rowTree()->m_scene->ruler()->duration()))
         endX = timeToX(rowTree()->m_scene->ruler()->duration());
 
+    double oldEndX = m_endX;
     m_endX = endX;
     m_endTime = xToTime(endX);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_maxEndX = 999999;
 
+    updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
+}
+
+void RowTimeline::updateChildrenStartRecursive(RowTree *rowTree, double oldStartX)
+{
+    // Update all bound childred
+    // Rows are considered to be bound when their times match
+    if (!rowTree->empty()) {
+        const auto childRows = rowTree->childRows();
+        for (auto child : childRows) {
+            RowTimeline *rowTimeline = child->rowTimeline();
+            if (rowTimeline->m_startX == oldStartX) {
+                rowTimeline->m_startX = m_startX;
+                rowTimeline->m_startTime = m_startTime;
+                rowTimeline->updateChildrenStartRecursive(child, oldStartX);
+                rowTimeline->update();
+            }
+        }
+    }
+}
+
+void RowTimeline::updateChildrenEndRecursive(RowTree *rowTree, double oldEndX)
+{
+    // Update all bound childred
+    // Rows are considered to be bound when their times match
+    if (!rowTree->empty()) {
+        const auto childRows = rowTree->childRows();
+        for (auto child : childRows) {
+            RowTimeline *rowTimeline = child->rowTimeline();
+            if (rowTimeline->m_endX == oldEndX) {
+                rowTimeline->m_endX = m_endX;
+                rowTimeline->m_endTime = m_endTime;
+                rowTimeline->updateChildrenEndRecursive(child, oldEndX);
+                rowTimeline->update();
+            }
+        }
+    }
 }
 
 void RowTimeline::updateChildrenMinStartXRecursive(RowTree *rowTree)
@@ -395,24 +435,28 @@ void RowTimeline::updateChildrenMaxEndXRecursive(RowTree *rowTree)
 
 void RowTimeline::setStartTime(double startTime)
 {
+    double oldStartX = m_startX;
     m_startTime = startTime;
     m_startX = timeToX(startTime);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_minStartX = 0;
 
+    updateChildrenStartRecursive(m_rowTree, oldStartX);
     updateChildrenMinStartXRecursive(m_rowTree);
     update();
 }
 
 void RowTimeline::setEndTime(double endTime)
 {
+    double oldEndX = m_endX;
     m_endTime = endTime;
     m_endX = timeToX(endTime);
 
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_maxEndX = 999999;
 
+    updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
 }

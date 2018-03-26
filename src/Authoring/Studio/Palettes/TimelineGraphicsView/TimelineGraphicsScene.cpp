@@ -45,6 +45,8 @@
 #include "Doc.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "ResourceCache.h"
+#include "DurationEditDlg.h"
+#include "TimelineControl.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -73,6 +75,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
     , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
+    , m_timelineControl(new TimelineControl)
     , m_currentCursor(-1)
 {
     addItem(m_playHead);
@@ -535,6 +538,14 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 treeLabelItem->setEnabled(true);
                 treeLabelItem->setFocus();
             }
+        } else if (item->type() == TimelineItem::TypeRowTimeline) {
+            RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
+            long theStartTime = timelineItem->getStartTime() * 1000;
+            long theEndTime = timelineItem->getEndTime() * 1000;
+            m_timelineControl->setRowTimeline(timelineItem);
+            CDurationEditDlg theDurationEditDlg;
+            theDurationEditDlg.showDialog(theStartTime, theEndTime,
+                                          g_StudioApp.GetCore()->GetDoc(), m_timelineControl);
         }
     }
 

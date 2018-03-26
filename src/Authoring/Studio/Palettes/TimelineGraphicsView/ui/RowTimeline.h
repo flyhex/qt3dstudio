@@ -72,6 +72,8 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
+    void updateChildrenStartRecursive(RowTree *rowTree, double oldStartX);
+    void updateChildrenEndRecursive(RowTree *rowTree, double oldEndX);
     void updateChildrenMinStartXRecursive(RowTree *rowTree);
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
     double timeToX(double time);

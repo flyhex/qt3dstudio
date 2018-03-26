@@ -45,6 +45,7 @@ class SelectionRect;
 class RowMover;
 class RowManager;
 class KeyframeManager;
+class TimelineControl;
 struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
@@ -111,6 +112,7 @@ private:
     KeyframeManager *m_keyframeManager = nullptr;
     QPointF m_pressPos;
     CMouseCursor::Qt3DSMouseCursor m_currentCursor;
+    TimelineControl *m_timelineControl = nullptr;
 
     bool m_rulerPressed = false;
     bool m_keyframePressed = false;
