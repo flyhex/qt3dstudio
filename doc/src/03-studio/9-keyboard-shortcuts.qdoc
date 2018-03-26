@@ -213,16 +213,16 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li \c{F}
   \row
     \li Pan
-    \li Middle Mouse Drag
-    \li Middle Mouse Drag
-  \row
-    \li Zoom
-    \li Mouse Wheel
-    \li Mouse Wheel
-  \row
-    \li Orbit
     \li \c{Alt} + Middle Mouse Drag
     \li \c{Option} + Middle Mouse Drag
+  \row
+    \li Zoom
+    \li \c{Alt} + Right Mouse Drag
+    \li \c{Option} + Right Mouse Drag
+  \row
+    \li Orbit
+    \li \c{Alt} + Left Mouse Drag
+    \li \c{Option} + Left Mouse Drag
   \row
     \li Toggle Headlight
     \li \c{F3}

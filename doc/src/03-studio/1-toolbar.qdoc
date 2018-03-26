@@ -176,7 +176,41 @@ the 3D space of your scene without adjusting the final rendered view.
 Studio calls this concept \e {Edit Cameras}, and it is controlled by the
 section of the toolbar displayed above.
 
-Note that when Edit Camera is in use it only makes sense to show the
+You can navigate in \e{Edit Camera Mode} by zooming, panning and orbiting:
+\table
+\header
+  \li Action
+  \li Shortcut keyboard
+  \li Desctiption
+\header
+\row
+  \li
+  \b{Zoom}
+  \li
+  \c{Alt}+Right mouse button
+  \li
+  Clicking and dragging anywhere in the rendered view for the edit
+  camera will zoom the view in/out as you drag up/down.
+\row
+  \li
+  \b{Pan}
+  \li
+  \c{Alt}+Middle mouse button
+  \li
+  Clicking and dragging anywhere in the rendered view for the edit
+  camera will slide the view around.
+\row
+  \li
+  \b{Orbit}
+  \li
+  \c{Alt}+Left mouse button
+  \li
+  Clicking and dragging anywhere in the rendered view for the edit
+  camera will rotate the view. (This is not available for the
+  predefined, axis-aligned orthographic views.)
+\endtable
+
+Note that when \e{Edit Camera} is in use it only makes sense to show the
 contents of one layer at a time. To control which layer's items you are
 viewing, select any item inside the desired layer in the Timeline
 palette.
@@ -184,14 +218,16 @@ palette.
 \list
 \li
   The \b{Edit Camera Mode} drop-down menu controls the view.
-\li
-  The \b{Perspective View} and \b{Orthographic} view are
-  free-form cameras that you can use to rotate around the scene.
-\li
-  The
-  \b{Top}/\b{Bottom}/\b{Left}/\b{Right}/\b{Front}/\b{Back}
-  axis-aligned presets are orthographic cameras that may be panned and
-  zoomed, but not orbited.
+  \list
+    \li
+    The \b{Perspective View} and \b{Orthographic} view are
+    free-form cameras that you can use to rotate around the scene.
+  \li
+    The
+    \b{Top}/\b{Bottom}/\b{Left}/\b{Right}/\b{Front}/\b{Back}
+    axis-aligned presets are orthographic cameras that may be panned and
+    zoomed, but not orbited.
+  \endlist
 \li
   The \b{Scene Camera View} entry at the bottom of the menu
   switches out of edit camera mode and returns to displaying the final
@@ -216,19 +252,6 @@ palette.
     downscale the appearance of the presentation to fit within the
     available space in Studio.
   \endlist
-\li
-  With the \b{Pan} mode active (shortcut: middle-button mouse drag)
-  clicking and dragging anywhere in the rendered view for the edit
-  camera will slide the view around.
-\li
-  With the \b{Zoom} mode active (shortcut: roll the mouse wheel)
-  clicking and dragging anywhere in the rendered view for the edit
-  camera will zoom the view in/out as you drag up/down.
-\li
-  With the \b{Orbit} mode active (shortcut: alt+middle-button mouse
-  drag) clicking and dragging anywhere in the rendered view for the edit
-  camera will rotate the view. (This is not available for the
-  predefined, axis-aligned orthographic views.)
 \li
   The \b{Shading Mode} toggle (shortcut: \c{F3}) toggles a
   `headlamp' attached to your edit camera. When enabled (the default)
