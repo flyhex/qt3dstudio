@@ -155,6 +155,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
                                      m_actionDock);
     actionView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_actionDock->setWidget(actionView);
+    QObject::connect(actionView, &ActionView::actionFocused,
+                     m_MainFrame, &CMainFrame::actionActive);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_actionDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, m_actionDock));
 

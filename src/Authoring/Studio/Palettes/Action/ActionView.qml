@@ -98,7 +98,7 @@ Rectangle {
                     enabled: actionsList.currentIndex !== -1
                     enabledImage: "Action-Trash-Normal.png"
                     disabledImage: "Action-Trash-Disabled.png"
-                    toolTipText: qsTr("Delete selected action")
+                    toolTipText: qsTr("Delete (Del)")
 
                     onClicked: _parentView.deleteAction(actionsList.currentIndex)
                 }
@@ -106,7 +106,7 @@ Rectangle {
                 StyledToolButton {
                     enabledImage: "add.png"
                     disabledImage: "add-disabled.png"
-                    toolTipText: qsTr("Add new action")
+                    toolTipText: qsTr("New Action (") + _shiftKey + "A)"
                     enabled: _parentView.hasItem
 
                     onClicked: _parentView.addAction()

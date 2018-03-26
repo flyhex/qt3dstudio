@@ -148,6 +148,10 @@ public:
     void OnTargetSelectionChanged();
     void OnTriggerSelectionChanged();
 
+protected:
+    void focusInEvent(QFocusEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
+
 Q_SIGNALS:
     void itemChanged();
     void actionChanged();
@@ -155,6 +159,7 @@ Q_SIGNALS:
     void propertyChanged();
     void firedEventChanged();
     void hasItemChanged();
+    void actionFocused(bool);
 
 private Q_SLOTS:
     void copyAction();
@@ -173,6 +178,7 @@ private:
     void resetFiredEvent();
     void updateFiredEventFromHandle(int handle);
     void showBrowser(QQuickWidget *browser, const QPoint &point);
+    void updateActionStates();
 
     static CDoc *GetDoc();
     static CClientDataModelBridge *GetBridge();
@@ -205,6 +211,10 @@ private:
     MouseHelper m_mouseHelper;
     QSize m_preferredSize;
     bool m_hasItem = false;
+    QAction *m_actionDel;
+    QAction *m_actionCopy;
+    QAction *m_actionCut;
+    QAction *m_actionPaste;
 };
 
 #endif // ACTIONVIEW_H

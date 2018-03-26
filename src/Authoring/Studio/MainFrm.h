@@ -241,6 +241,7 @@ public:
     void initializeGeometryAndState();
 
     void toggleSelectMode();
+    void actionActive(bool active);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -254,6 +255,7 @@ protected:
     CRecentItems *m_RecentItems = nullptr;
     CPaletteManager *m_PaletteManager = nullptr;
     bool m_PlaybackFlag = false;
+    bool m_actionActive = false;
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
     QTimer m_playbackTimer;

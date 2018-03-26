@@ -73,12 +73,11 @@ public:
 
         if (eventType == QEvent::ShortcutOverride) {
             // If we are in key consuming control, eat all plain and shift-adjusted hotkeys
-            // We want to also skip editing related global hotkeys (CTRL-A/X/C/V/Z)
+            // We want to also skip some editing related global hotkeys (CTRL-A/Z)
             // and value adjusting keys (CTRL-UP/DOWN).
             const bool normalChar = !(ke->modifiers() && ke->modifiers() != Qt::ShiftModifier);
             const bool editShortcut = (ke->modifiers() == Qt::ControlModifier)
-                    && (ke->key() == Qt::Key_C || ke->key() == Qt::Key_V || ke->key() == Qt::Key_Z
-                        || ke->key() == Qt::Key_X || ke->key() == Qt::Key_A
+                    && (ke->key() == Qt::Key_Z || ke->key() == Qt::Key_A
                         || ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down);
             if ((normalChar || editShortcut) && m_hotkeys->isFocusOnControlThatWantsKeys()) {
                 ke->accept();

@@ -472,7 +472,7 @@ void CMainFrame::OnEditCopy()
  */
 void CMainFrame::OnUpdateEditCopy()
 {
-    if (g_StudioApp.CanCopy()) {
+    if (g_StudioApp.CanCopy() && !m_actionActive) {
         QString theDescription = tr("Copy %1\tCtrl+C").arg(g_StudioApp.GetCopyType());
 
         m_ui->action_Copy->setText(theDescription);
@@ -504,7 +504,7 @@ void CMainFrame::OnEditCut()
  */
 void CMainFrame::OnUpdateEditCut()
 {
-    if (g_StudioApp.CanCut()) {
+    if (g_StudioApp.CanCut() && !m_actionActive) {
         QString theDescription = tr("Cut %1\tCtrl+X").arg(g_StudioApp.GetCopyType());
 
         m_ui->action_Cut->setText(theDescription);
@@ -542,7 +542,7 @@ void CMainFrame::onEditPasteToMaster()
  */
 void CMainFrame::OnUpdateEditPaste()
 {
-    if (g_StudioApp.CanPaste()) {
+    if (g_StudioApp.CanPaste() && !m_actionActive) {
         QString theUndoDescription = tr("Paste %1\tCtrl+V").arg(g_StudioApp.GetPasteType());
 
         m_ui->action_Paste->setText(theUndoDescription);
@@ -1934,4 +1934,13 @@ void CMainFrame::toggleSelectMode()
         m_SceneView->OnToolGroupSelection();
     else
         m_SceneView->OnToolItemSelection();
+}
+
+void CMainFrame::actionActive(bool active)
+{
+    m_actionActive = active;
+    m_ui->actionDelete->setEnabled(!active);
+    m_ui->action_Copy->setEnabled(!active);
+    m_ui->action_Cut->setEnabled(!active);
+    m_ui->action_Paste->setEnabled(!active);
 }

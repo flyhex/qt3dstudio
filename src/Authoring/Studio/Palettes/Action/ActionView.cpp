@@ -83,8 +83,7 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
 
             Q_EMIT propertyModelChanged();
         }
-
-        });
+    });
 
     m_actionChangedCompressionTimer.setInterval(100);
     m_actionChangedCompressionTimer.setSingleShot(true);
@@ -93,6 +92,44 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
         updateFiredEvent();
         Q_EMIT actionChanged();
     });
+
+    QString ctrlKey(QStringLiteral("Ctrl+"));
+    QString shiftKey(QStringLiteral("Shift+"));
+#ifdef Q_OS_MACOS
+    ctrlKey = "⌘";
+    shiftKey = "⇧";
+#endif
+
+    // These actions will be passed to the context menu. Some of them need to me members, as we
+    // have to change their enabled state based on selection and previous actions.
+    QAction *action = new QAction(tr("New Action\t(%1A)").arg(shiftKey));
+    action->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_A));
+    connect(action, &QAction::triggered, this, &ActionView::addAction);
+    QQuickWidget::addAction(action);
+
+    m_actionCopy = new QAction(tr("Copy Action\t(%1C)").arg(ctrlKey));
+    m_actionCopy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    m_actionCopy->setShortcutContext(Qt::WidgetShortcut);
+    connect(m_actionCopy, &QAction::triggered, this, &ActionView::copyAction);
+    QQuickWidget::addAction(m_actionCopy);
+
+    m_actionPaste = new QAction(tr("Paste Action\t(%1V)").arg(ctrlKey));
+    m_actionPaste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+    m_actionPaste->setShortcutContext(Qt::WidgetShortcut);
+    connect(m_actionPaste, &QAction::triggered, this, &ActionView::pasteAction);
+    QQuickWidget::addAction(m_actionPaste);
+
+    m_actionCut = new QAction(tr("Cut Action\t(%1X)").arg(ctrlKey));
+    m_actionCut->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
+    m_actionCut->setShortcutContext(Qt::WidgetShortcut);
+    connect(m_actionCut, &QAction::triggered, this, &ActionView::cutAction);
+    QQuickWidget::addAction(m_actionCut);
+
+    m_actionDel = new QAction(tr("Delete Action\t(Del)"));
+    m_actionDel->setShortcut(QKeySequence(Qt::Key_Delete));
+    m_actionDel->setShortcutContext(Qt::WidgetShortcut);
+    connect(m_actionDel, &QAction::triggered, [=](){ deleteAction(m_currentActionIndex); });
+    QQuickWidget::addAction(m_actionDel);
 }
 
 ActionView::~ActionView()
@@ -103,6 +140,19 @@ ActionView::~ActionView()
 QSize ActionView::sizeHint() const
 {
     return m_preferredSize;
+}
+
+void ActionView::focusInEvent(QFocusEvent *event)
+{
+    Q_UNUSED(event)
+    updateActionStates();
+    Q_EMIT actionFocused(true);
+}
+
+void ActionView::focusOutEvent(QFocusEvent *event)
+{
+    Q_UNUSED(event)
+    Q_EMIT actionFocused(false);
 }
 
 void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
@@ -121,7 +171,7 @@ void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
 QString ActionView::itemIcon() const
 {
     if (!m_itemHandle.Valid())
-        return {};
+        return QString();
 
     auto info = m_objRefHelper->GetInfo(m_itemHandle);
     return CStudioObjectTypes::GetNormalIconName(info.m_Type);
@@ -161,16 +211,16 @@ QAbstractItemModel *ActionView::propertyModel() const
 QString ActionView::targetObjectName() const
 {
     if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
-        return {};
+        return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
 
     const auto targetInstance =
-        GetBridge()->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
+            GetBridge()->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
 
     QString targetName = targetInstance.Valid()
-        ? GetBridge()->GetName(targetInstance).toQString()
-        : tr("[Unknown Target]");
+            ? GetBridge()->GetName(targetInstance).toQString()
+            : tr("[Unknown Target]");
 
     return targetName;
 }
@@ -178,16 +228,16 @@ QString ActionView::targetObjectName() const
 QString ActionView::triggerObjectName() const
 {
     if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
-        return {};
+        return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
 
     const auto sourceInstance =
-        GetBridge()->GetInstance(actionInfo.m_Owner, actionInfo.m_TriggerObject);
+            GetBridge()->GetInstance(actionInfo.m_Owner, actionInfo.m_TriggerObject);
 
     QString sourceName = sourceInstance.Valid()
-        ? GetBridge()->GetName(sourceInstance).toQString()
-        : tr("[Unknown Source]");
+            ? GetBridge()->GetName(sourceInstance).toQString()
+            : tr("[Unknown Source]");
 
     return sourceName;
 }
@@ -195,7 +245,7 @@ QString ActionView::triggerObjectName() const
 QString ActionView::eventName() const
 {
     if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
-        return {};
+        return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto bridge = GetBridge();
@@ -209,7 +259,7 @@ QString ActionView::eventName() const
 QString ActionView::handlerName() const
 {
     if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
-        return {};
+        return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto bridge = GetBridge();
@@ -242,11 +292,12 @@ void ActionView::setCurrentActionIndex(int index)
 
     m_currentActionIndex = index;
     emitActionChanged();
+
+    updateActionStates();
 }
 
 void ActionView::setCurrentPropertyIndex(int handle, int index)
 {
-
     // Make sure propertymodel name & value handles are always up-to-date,
     // even when index is same as before
     m_currentPropertyValueHandle = 0;
@@ -254,7 +305,8 @@ void ActionView::setCurrentPropertyIndex(int handle, int index)
     for (int i = 0; i < m_handlerArguments.size(); ++i) {
         auto handlerArg = m_handlerArguments[i].value<HandlerArgument>();
         if (handlerArg.m_handle.GetHandleValue() == handle && i < m_handlerArguments.size() - 1) {
-            m_currentPropertyValueHandle = m_handlerArguments[i + 1].value<HandlerArgument>().m_handle;
+            m_currentPropertyValueHandle
+                    = m_handlerArguments[i + 1].value<HandlerArgument>().m_handle;
             if (m_propertyModel) {
                 m_propertyModel->setNameHandle(m_currentPropertyNameHandle);
                 m_propertyModel->setValueHandle(m_currentPropertyValueHandle);
@@ -293,9 +345,10 @@ void ActionView::addAction()
         std::wstring theHandlerName = theBridge->GetDefaultHandler(m_itemHandle);
 
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Add Action"))
-            ->AddAction(GetDoc()->GetActiveSlide(), m_itemHandle, theEventName,
-                        theHandlerName);
+                ->AddAction(GetDoc()->GetActiveSlide(), m_itemHandle, theEventName,
+                            theHandlerName);
     }
+    updateActionStates();
 }
 
 void ActionView::deleteAction(int index)
@@ -305,9 +358,11 @@ void ActionView::deleteAction(int index)
 
     const auto action = m_actionsModel->actionAt(index);
     if (action.Valid()) {
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Delete Action"))->DeleteAction(action);
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(),
+                                          QObject::tr("Delete Action"))->DeleteAction(action);
         emitActionChanged();
     }
+    updateActionStates();
 }
 
 QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
@@ -376,8 +431,8 @@ void ActionView::OnTargetSelectionChanged()
 {
     auto selectedItem = m_targetObjectBrowser->selectedHandle();
     setTargetObject(m_objRefHelper->GetAssetRefValue(
-        selectedItem, m_itemHandle,
-        (CRelativePathTools::EPathType)(m_targetObjectBrowser->pathType())));
+                        selectedItem, m_itemHandle,
+                        (CRelativePathTools::EPathType)(m_targetObjectBrowser->pathType())));
     resetFiredEvent();
 }
 
@@ -385,27 +440,15 @@ void ActionView::OnTriggerSelectionChanged()
 {
     auto selectedItem = m_triggerObjectBrowser->selectedHandle();
     setTriggerObject(m_objRefHelper->GetAssetRefValue(
-        selectedItem, m_itemHandle,
-        (CRelativePathTools::EPathType)(m_triggerObjectBrowser->pathType())));
+                         selectedItem, m_itemHandle,
+                         (CRelativePathTools::EPathType)(m_triggerObjectBrowser->pathType())));
     resetFiredEvent();
 }
 
 void ActionView::showContextMenu(int x, int y)
 {
-    bool hasCurrAction = m_currentActionIndex != -1;
-    CActionContextMenu contextMenu(this, hasCurrAction);
-
-    // allow paste action even if item is not valid (list of actions is empty)
-    if (m_itemHandle.Valid() && hasCurrAction)
-    {
-        connect(&contextMenu, &CActionContextMenu::copyAction, this, &ActionView::copyAction);
-        connect(&contextMenu, &CActionContextMenu::cutAction, this, &ActionView::cutAction);
-        connect(&contextMenu, &CActionContextMenu::deleteAction, this, [this] {
-            deleteAction(m_currentActionIndex);
-        });
-    }
-    connect(&contextMenu, &CActionContextMenu::pasteAction, this, &ActionView::pasteAction);
-
+    updateActionStates();
+    CActionContextMenu contextMenu(QQuickWidget::actions(), this);
     contextMenu.exec(mapToGlobal({x, y}));
 }
 
@@ -421,9 +464,8 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
     if (!instanceHandle.Valid())
         return nullptr;
 
-    if (!m_eventsModel) {
+    if (!m_eventsModel)
         m_eventsModel = new EventsModel(this);
-    }
 
     qt3dsdm::TEventHandleList eventList;
     bridge->GetEvents(instanceHandle, eventList);
@@ -457,9 +499,8 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
     if (!instanceHandle.Valid())
         return nullptr;
 
-    if (!m_handlersModel) {
+    if (!m_handlersModel)
         m_handlersModel = new EventsModel(this);
-    }
 
     qt3dsdm::THandlerHandleList handlerList;
     bridge->GetHandlers(instanceHandle, handlerList);
@@ -493,9 +534,8 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
     if (!instanceHandle.Valid())
         return nullptr;
 
-    if (!m_fireEventsModel) {
+    if (!m_fireEventsModel)
         m_fireEventsModel = new EventsModel(this);
-    }
 
     qt3dsdm::TEventHandleList eventList;
     bridge->GetEvents(instanceHandle, eventList);
@@ -523,8 +563,8 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this, handle] {
-          setArgumentValue(handle, qt3dsdm::Qt3DSDMEventHandle(
-                               m_fireEventsBrowser->selectedHandle()).GetHandleValue());
+        setArgumentValue(handle, qt3dsdm::Qt3DSDMEventHandle(
+                             m_fireEventsBrowser->selectedHandle()).GetHandleValue());
     });
 
     return m_fireEventsBrowser;
@@ -594,7 +634,8 @@ void ActionView::updateFiredEvent()
 
 void ActionView::updateFiredEventFromHandle(int handle)
 {
-    m_firedEvent = QString::fromWCharArray(GetBridge()->GetEventInfo(handle).m_FormalName.wide_str());
+    m_firedEvent = QString::fromWCharArray(
+                GetBridge()->GetEventInfo(handle).m_FormalName.wide_str());
     Q_EMIT firedEventChanged();
 }
 
@@ -608,28 +649,37 @@ void ActionView::OnNewPresentation()
 {
     // Register callback
     qt3dsdm::IStudioFullSystemSignalProvider *theSignalProvider =
-        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
+            g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
     m_connections.push_back(theSignalProvider->ConnectActionCreated(
-        std::bind(&ActionView::OnActionAdded, this, std::placeholders::_1,
-                  std::placeholders::_2, std::placeholders::_3)));
+                                std::bind(&ActionView::OnActionAdded, this,
+                                          std::placeholders::_1,
+                                          std::placeholders::_2, std::placeholders::_3)));
     m_connections.push_back(theSignalProvider->ConnectActionDeleted(
-        std::bind(&ActionView::OnActionDeleted, this, std::placeholders::_1,
-                  std::placeholders::_2, std::placeholders::_3)));
+                                std::bind(&ActionView::OnActionDeleted, this,
+                                          std::placeholders::_1,
+                                          std::placeholders::_2, std::placeholders::_3)));
     m_connections.push_back(theSignalProvider->ConnectTriggerObjectSet(
-        std::bind(&ActionView::OnActionModified, this, std::placeholders::_1)));
+                                std::bind(&ActionView::OnActionModified, this,
+                                          std::placeholders::_1)));
     m_connections.push_back(theSignalProvider->ConnectTargetObjectSet(
-        std::bind(&ActionView::OnActionModified, this, std::placeholders::_1)));
+                                std::bind(&ActionView::OnActionModified, this,
+                                          std::placeholders::_1)));
     m_connections.push_back(theSignalProvider->ConnectEventSet(
-        std::bind(&ActionView::OnActionModified, this, std::placeholders::_1)));
+                                std::bind(&ActionView::OnActionModified, this,
+                                          std::placeholders::_1)));
     m_connections.push_back(theSignalProvider->ConnectHandlerSet(
-        std::bind(&ActionView::OnActionModified, this, std::placeholders::_1)));
+                                std::bind(&ActionView::OnActionModified, this,
+                                          std::placeholders::_1)));
     m_connections.push_back(theSignalProvider->ConnectHandlerArgumentValueSet(
-        std::bind(&ActionView::OnHandlerArgumentModified, this, std::placeholders::_1)));
+                                std::bind(&ActionView::OnHandlerArgumentModified, this,
+                                          std::placeholders::_1)));
     m_connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
-        std::bind(&ActionView::OnInstancePropertyValueChanged, this, std::placeholders::_1,
-                  std::placeholders::_2)));
+                                std::bind(&ActionView::OnInstancePropertyValueChanged, this,
+                                          std::placeholders::_1,
+                                          std::placeholders::_2)));
     m_connections.push_back(theSignalProvider->ConnectInstanceDeleted(
-        std::bind(&ActionView::OnInstanceDeleted, this, std::placeholders::_1)));
+                                std::bind(&ActionView::OnInstanceDeleted, this,
+                                          std::placeholders::_1)));
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     m_connections.push_back(theDispatch->ConnectSelectionChange(
                                 std::bind(&ActionView::OnSelectionSet, this,
@@ -653,7 +703,7 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
         break;
     case Q3DStudio::SelectedValueTypes::Slide: {
         qt3dsdm::Qt3DSDMSlideHandle theSlideHandle =
-            inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Slide;
+                inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Slide;
         // Get the owning component instance
         CClientDataModelBridge *theBridge = GetBridge();
         qt3dsdm::SLong4 theComponentGuid = theBridge->GetComponentGuid(theSlideHandle);
@@ -666,29 +716,31 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
     setItem(theInstance);
 }
 
-void ActionView::OnActionAdded(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+void ActionView::OnActionAdded(qt3dsdm::Qt3DSDMActionHandle inAction,
+                               qt3dsdm::Qt3DSDMSlideHandle inSlide,
+                               qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     CDoc *theDoc = GetDoc();
     qt3dsdm::CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
 
     qt3dsdm::Qt3DSDMSlideHandle theCurrentSlide = theDoc->GetActiveSlide();
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlideOfAction =
-        theStudioSystem->GetSlideSystem()->GetMasterSlide(inSlide);
+            theStudioSystem->GetSlideSystem()->GetMasterSlide(inSlide);
     qt3dsdm::Qt3DSDMSlideHandle theMasterOfCurrentSlide =
-        theStudioSystem->GetSlideSystem()->GetMasterSlide(theCurrentSlide);
+            theStudioSystem->GetSlideSystem()->GetMasterSlide(theCurrentSlide);
 
-    if (inOwner == m_itemHandle && // the action is added to current viewed instance
-        (theCurrentSlide == inSlide || // and is added to the current viewed slide
-         (theMasterSlideOfAction == inSlide
-          && theMasterOfCurrentSlide == theMasterSlideOfAction))) // or it is added to the master of
-                                                                  // the current viewed slide
-    {
+    if (inOwner == m_itemHandle  // the action is added to current viewed instance
+            && (theCurrentSlide == inSlide // and is added to the current viewed slide
+                || (theMasterSlideOfAction == inSlide
+                    && theMasterOfCurrentSlide == theMasterSlideOfAction))) {
+        // or it is added to the master of the current viewed slide
         m_actionsModel->addAction(inAction);
-// KDAB_TODO       SortActions();
     }
 }
 
-void ActionView::OnActionDeleted(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide, qt3dsdm::Qt3DSDMInstanceHandle inOwner)
+void ActionView::OnActionDeleted(qt3dsdm::Qt3DSDMActionHandle inAction,
+                                 qt3dsdm::Qt3DSDMSlideHandle inSlide,
+                                 qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
@@ -702,8 +754,8 @@ void ActionView::OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction)
         return;
 
     if (GetDoc()->GetStudioSystem()->GetActionCore()->HandleValid(inAction)) {
-           m_actionsModel->updateAction(inAction);
-           emitActionChanged();
+        m_actionsModel->updateAction(inAction);
+        emitActionChanged();
     }
 }
 
@@ -715,8 +767,11 @@ void ActionView::OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHa
     emitActionChanged();
 }
 
-void ActionView::OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+void ActionView::OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
+    Q_UNUSED(inProperty)
+    Q_UNUSED(inInstance)
     if (!m_itemHandle.Valid())
         return;
 
@@ -738,10 +793,11 @@ void ActionView::copyAction()
         return;
 
     auto theTempAPFile =
-        GetDoc()->GetDocumentReader().CopyAction(m_actionsModel->actionAt(m_currentActionIndex),
-                                                 GetDoc()->GetActiveSlide());
+            GetDoc()->GetDocumentReader().CopyAction(m_actionsModel->actionAt(m_currentActionIndex),
+                                                     GetDoc()->GetActiveSlide());
     Qt3DSFile theFile(theTempAPFile);
     CStudioClipboard::CopyActionToClipboard(theFile);
+    updateActionStates();
 }
 
 void ActionView::cutAction()
@@ -752,6 +808,7 @@ void ActionView::cutAction()
     copyAction();
     auto action = m_actionsModel->actionAt(m_currentActionIndex);
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Cut Action"))->DeleteAction(action);
+    updateActionStates();
 }
 
 void ActionView::pasteAction()
@@ -761,7 +818,8 @@ void ActionView::pasteAction()
 
     Qt3DSFile theTempAPFile = CStudioClipboard::GetActionFromClipboard();
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Paste Action"))
-        ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
+            ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
+    updateActionStates();
 }
 
 void ActionView::setTriggerObject(const qt3dsdm::SObjectRefType &object)
@@ -774,16 +832,19 @@ void ActionView::setTriggerObject(const qt3dsdm::SObjectRefType &object)
     auto theBridge = GetBridge();
 
     auto theCmd = new CCmdDataModelActionSetTriggerObject(GetDoc(), action, object);
-    const SActionInfo &theActionInfo = GetDoc()->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
+    const SActionInfo &theActionInfo
+            = GetDoc()->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
 
     Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
     Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
-    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance, theActionInfo.m_TargetObject);
+    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance,
+                                                                  theActionInfo.m_TargetObject);
     // old instance and object instance could be the same, for example if user changes the type
     // from Absolute to Path. In this case we don't need to reset handler or event.
-    if (theOldInstance != theObjectInstance)
+    if (theOldInstance != theObjectInstance) {
         theCmd->ResetEvent(
-            theBridge->GetDefaultEvent(theObjectInstance, theActionInfo.m_Event));
+                    theBridge->GetDefaultEvent(theObjectInstance, theActionInfo.m_Event));
+    }
 
     core->ExecuteCommand(theCmd);
     emitActionChanged();
@@ -800,16 +861,19 @@ void ActionView::setTargetObject(const qt3dsdm::SObjectRefType &object)
     auto theBridge = GetBridge();
 
     auto theCmd = new CCmdDataModelActionSetTargetObject(doc, action, object);
-    const SActionInfo &theActionInfo = doc->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
+    const SActionInfo &theActionInfo = doc->GetStudioSystem()->GetActionCore()->GetActionInfo(
+                action);
 
     Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
     Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
-    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance, theActionInfo.m_TargetObject);
+    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance,
+                                                                  theActionInfo.m_TargetObject);
     // old instance and object instance could be the same, for example if user changes the type
     // from Absolute to Path. In this case we don't need to reset handler or event.
-    if (theOldInstance != theObjectInstance)
+    if (theOldInstance != theObjectInstance) {
         theCmd->ResetHandler(
-            theBridge->GetDefaultHandler(theObjectInstance, theActionInfo.m_Handler));
+                    theBridge->GetDefaultHandler(theObjectInstance, theActionInfo.m_Handler));
+    }
 
     core->ExecuteCommand(theCmd);
     emitActionChanged();
@@ -824,9 +888,9 @@ void ActionView::setEvent(const Qt3DSDMEventHandle &event)
     const auto action = m_actionsModel->actionAt(m_currentActionIndex);
     CCmd *theCmd = new CCmdDataModelActionSetEvent(doc, action,
                                                    doc->GetStudioSystem()
-                                                      ->GetActionMetaData()
-                                                      ->GetEventInfo(event)
-                                                      ->m_Name.wide_str());
+                                                   ->GetActionMetaData()
+                                                   ->GetEventInfo(event)
+                                                   ->m_Name.wide_str());
     g_StudioApp.GetCore()->ExecuteCommand(theCmd);
 }
 
@@ -838,9 +902,9 @@ void ActionView::setHandler(const Qt3DSDMHandlerHandle &handler)
     auto doc = GetDoc();
     const auto action = m_actionsModel->actionAt(m_currentActionIndex);
     wstring handlerName(doc->GetStudioSystem()->GetActionMetaData()->GetHandlerInfo(handler)
-                                ->m_Name.wide_str());
+                        ->m_Name.wide_str());
     CCmdDataModelActionSetHandler *theCmd =
-        new CCmdDataModelActionSetHandler(doc, action, handlerName);
+            new CCmdDataModelActionSetHandler(doc, action, handlerName);
     theCmd->ResetHandler(handlerName); // reset the handler args
 
     g_StudioApp.GetCore()->ExecuteCommand(theCmd);
@@ -873,8 +937,7 @@ void ActionView::updateHandlerArguments()
         for (const auto &argHandle: actionInfo.m_HandlerArgs) {
             const auto &argumentInfo = actionCore->GetHandlerArgumentInfo(argHandle);
             Option<SMetaDataHandlerArgumentInfo> argMetaData(
-                newMetaData->FindHandlerArgumentByName(handlerHandle, argumentInfo.m_Name));
-
+                        newMetaData->FindHandlerArgumentByName(handlerHandle, argumentInfo.m_Name));
 
             HandlerArgument argument;
             argument.m_handle = argHandle;
@@ -906,15 +969,15 @@ void ActionView::setArgumentValue(int handle, const QVariant &value)
 
     if (!Equals(oldValue, sValue)) {
         CCmd *theCmd =
-            new CCmdDataModelActionSetArgumentValue(GetDoc(), handle, sValue);
+                new CCmdDataModelActionSetArgumentValue(GetDoc(), handle, sValue);
         g_StudioApp.GetCore()->ExecuteCommand(theCmd);
     }
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
-       if (actionInfo.m_Handler == L"Fire Event") {
-           if (value.toInt())
-               updateFiredEventFromHandle(value.toInt());
-       }
+    if (actionInfo.m_Handler == L"Fire Event") {
+        if (value.toInt())
+            updateFiredEventFromHandle(value.toInt());
+    }
 }
 
 CDoc *ActionView::GetDoc()
@@ -934,16 +997,26 @@ void ActionView::initialize()
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
     rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
-    qmlRegisterUncreatableType<qt3dsdm::HandlerArgumentType>("Qt3DStudio", 1, 0, "HandlerArgumentType",
-                                                          "HandlerArgumentType is an enum container"_L1);
-    qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
-                                                          "DataModelDataType is an enum container"_L1);
-    qmlRegisterUncreatableType<qt3dsdm::AdditionalMetaDataType>("Qt3DStudio", 1, 0, "AdditionalMetaDataType",
-                                                          "AdditionalMetaDataType is an enum container"_L1);
-    qmlRegisterUncreatableType<PropertyInfo>("Qt3DStudio", 1, 0, "PropertyInfo",
-                                             "PropertyInfo is anot creatable in QML"_L1);
-    qmlRegisterUncreatableType<qt3dsdm::CompleteMetaDataType>("Qt3DStudio", 1, 0, "CompleteMetaDataType",
-                                                          "CompleteMetaDataType is an enum container"_L1);
+    QString shiftKey(QStringLiteral("Shift+"));
+#ifdef Q_OS_MACOS
+    shiftKey = "⇧";
+#endif
+    rootContext()->setContextProperty("_shiftKey"_L1, shiftKey);
+    qmlRegisterUncreatableType<qt3dsdm::HandlerArgumentType>(
+                "Qt3DStudio", 1, 0, "HandlerArgumentType",
+                "HandlerArgumentType is an enum container"_L1);
+    qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>(
+                "Qt3DStudio", 1, 0, "DataModelDataType",
+                "DataModelDataType is an enum container"_L1);
+    qmlRegisterUncreatableType<qt3dsdm::AdditionalMetaDataType>(
+                "Qt3DStudio", 1, 0, "AdditionalMetaDataType",
+                "AdditionalMetaDataType is an enum container"_L1);
+    qmlRegisterUncreatableType<PropertyInfo>(
+                "Qt3DStudio", 1, 0, "PropertyInfo",
+                "PropertyInfo is anot creatable in QML"_L1);
+    qmlRegisterUncreatableType<qt3dsdm::CompleteMetaDataType>(
+                "Qt3DStudio", 1, 0, "CompleteMetaDataType",
+                "CompleteMetaDataType is an enum container"_L1);
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Action/ActionView.qml"_L1));
 }
@@ -960,9 +1033,8 @@ QStringList ActionView::slideNames()
 
     theBridge->GetSlideNamesOfAction(action, outSlideNames);
 
-    for (auto slideName : outSlideNames) {
+    for (auto slideName : outSlideNames)
         slideNames.append(slideName.toQString());
-    }
 
     return slideNames;
 }
@@ -976,4 +1048,14 @@ int ActionView::slideNameToIndex(const QString &name)
 bool ActionView::toolTipsEnabled()
 {
     return CStudioPreferences::ShouldShowTooltips();
+}
+
+void ActionView::updateActionStates()
+{
+    bool hasValidAction = (m_currentActionIndex != -1) && m_itemHandle.Valid();
+    m_actionCopy->setEnabled(hasValidAction);
+    m_actionCut->setEnabled(hasValidAction);
+    m_actionDel->setEnabled(hasValidAction);
+    // Allow paste action even if item is not valid (list of actions is empty)
+    m_actionPaste->setEnabled(CStudioClipboard::CanPasteAction());
 }
