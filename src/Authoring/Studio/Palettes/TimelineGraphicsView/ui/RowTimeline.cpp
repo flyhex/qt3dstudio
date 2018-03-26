@@ -28,6 +28,7 @@
 
 #include "RowTimeline.h"
 #include "RowTree.h"
+#include "RowManager.h"
 #include "Ruler.h"
 #include "TimelineConstants.h"
 #include "Keyframe.h"
@@ -65,7 +66,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         bgColor = TimelineConstants::ROW_COLOR_OVER;
     else
         bgColor = TimelineConstants::ROW_COLOR_NORMAL;
-    painter->fillRect(QRect(0, 0, 10000, size().height() - 1), bgColor);
+    painter->fillRect(0, 0, widget->width() + size().width(), size().height() - 1, bgColor);
 
     // Duration
     if (m_rowTree->hasDurationBar()) {
@@ -271,9 +272,6 @@ void RowTimeline::moveDurationBy(double dx)
     if (m_startX < TimelineConstants::RULER_EDGE_OFFSET) {
         m_startX = TimelineConstants::RULER_EDGE_OFFSET;
         m_endX = m_startX + dur;
-    } else if (m_endX > timeToX(rowTree()->m_scene->ruler()->duration())) {
-        m_endX = timeToX(rowTree()->m_scene->ruler()->duration());
-        m_startX = m_endX - dur;
     }
 
     if (m_rowTree->parentRow() == nullptr) {
@@ -354,8 +352,8 @@ void RowTimeline::setEndX(double endX)
 {
     if (endX < m_startX + 1)
         endX = m_startX + 1;
-    else if (endX > timeToX(rowTree()->m_scene->ruler()->duration()))
-        endX = timeToX(rowTree()->m_scene->ruler()->duration());
+    else if (endX > m_endX)
+        rowTree()->m_scene->rowManager()->updateRulerDuration();
 
     double oldEndX = m_endX;
     m_endX = endX;
@@ -456,6 +454,7 @@ void RowTimeline::setEndTime(double endTime)
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_maxEndX = 999999;
 
+    rowTree()->m_scene->rowManager()->updateRulerDuration();
     updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();

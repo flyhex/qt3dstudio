@@ -112,6 +112,8 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
         }
     }
 
+    updateRulerDuration();
+
     return newRow;
 }
 
@@ -272,6 +274,20 @@ void RowManager::clearSelection()
         m_selectedRow->setState(InteractiveTimelineItem::Normal);
         m_selectedRow = nullptr;
     }
+}
+
+void RowManager::updateRulerDuration()
+{
+    double duration = 0;
+    for (int i = 1; i < m_layoutTree->count(); ++i) {
+        RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+        if (row_i->parentRow()
+                && row_i->rowType() == OBJTYPE_LAYER
+                && row_i->parentRow()->rowType() == OBJTYPE_SCENE) {
+            duration = std::max(duration, row_i->rowTimeline()->getEndTime());
+        }
+    }
+    m_scene->ruler()->setDuration(duration);
 }
 
 void RowManager::updateFiltering(RowTree *row)

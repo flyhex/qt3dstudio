@@ -65,7 +65,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_scaleSlider->setOrientation(Qt::Horizontal);
     m_scaleSlider->setFixedWidth(100);
     m_scaleSlider->setMinimum(1);
-    m_scaleSlider->setMaximum(8);
+    m_scaleSlider->setMaximum(22);
     m_scaleSlider->setPageStep(.1);
     m_scaleSlider->setValue(2);
 

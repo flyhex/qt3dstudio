@@ -30,6 +30,8 @@
 #include "TimelineConstants.h"
 
 #include <QtGui/qpainter.h>
+#include <QtWidgets/qwidget.h>
+#include <QtCore/qdebug.h>
 
 Ruler::Ruler(TimelineItem *parent) : TimelineItem(parent)
 {
@@ -38,34 +40,73 @@ Ruler::Ruler(TimelineItem *parent) : TimelineItem(parent)
 
 void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    Q_UNUSED(option);
     double xStep = TimelineConstants::RULER_SEC_W / TimelineConstants::RULER_SEC_DIV * m_timeScale;
-    double totalSegments = m_duration * TimelineConstants::RULER_SEC_DIV;
+    double totalSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
+            + m_duration * xStep * TimelineConstants::RULER_SEC_DIV;
+
+    // Ruler painted width to be at least widget width
+    double minRulerWidth = widget->width();
+    double rowXMax = std::max(minRulerWidth, totalSegmentsWidth);
 
     painter->save();
+    painter->setPen(QColor(TimelineConstants::RULER_COLOR_DISABLED));
+    painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
+                      TimelineConstants::RULER_BASE_Y,
+                      rowXMax + TimelineConstants::RULER_EDGE_OFFSET,
+                      TimelineConstants::RULER_BASE_Y);
     painter->setPen(QColor(TimelineConstants::RULER_COLOR));
-
-    painter->drawLine(QPointF(0, TimelineConstants::RULER_BASE_Y),
-                      QPointF(10000, TimelineConstants::RULER_BASE_Y));
+    painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
+                      TimelineConstants::RULER_BASE_Y,
+                      totalSegmentsWidth,
+                      TimelineConstants::RULER_BASE_Y);
 
     QFont font = painter->font();
     font.setPointSize(8);
     painter->setFont(font);
 
-    for (int i = 0; i <= totalSegments; i++) {
-        int h = (i % TimelineConstants::RULER_SEC_DIV == 0
-              || i % TimelineConstants::RULER_SEC_DIV == TimelineConstants::RULER_SEC_DIV * .5)
-                ? TimelineConstants::RULER_DIV_H1 : TimelineConstants::RULER_DIV_H2;
+    const int margin = 50;
+    const int secDiv = TimelineConstants::RULER_SEC_DIV;
+    double rowX = 0;
+    bool useDisabledColor = false;
+    for (int i = 0; rowX < rowXMax; i++) {
+        rowX = TimelineConstants::RULER_EDGE_OFFSET + xStep * i;
 
-        painter->drawLine(QPointF(TimelineConstants::RULER_EDGE_OFFSET + xStep * i,
-                                  TimelineConstants::RULER_BASE_Y - h),
-                          QPointF(TimelineConstants::RULER_EDGE_OFFSET + xStep * i,
-                                  TimelineConstants::RULER_BASE_Y));
+        // Optimization to skip painting outside the visible area
+        if (rowX < (m_viewportX - margin) || rowX > (m_viewportX + minRulerWidth + margin))
+            continue;
 
-        if (i % TimelineConstants::RULER_SEC_DIV == 0) {
-            painter->drawText(QRectF(TimelineConstants::RULER_EDGE_OFFSET
-                                     + xStep * i - 10, 2, 20, 10), Qt::AlignCenter,
-                              tr("%1s").arg(i / TimelineConstants::RULER_SEC_DIV));
+        const int h = i % secDiv == 0 ? TimelineConstants::RULER_DIV_H1 :
+                i % secDiv == secDiv * 0.5 ? TimelineConstants::RULER_DIV_H2 :
+                TimelineConstants::RULER_DIV_H3;
+
+        if (!useDisabledColor && rowX > totalSegmentsWidth) {
+            painter->setPen(QColor(TimelineConstants::RULER_COLOR_DISABLED));
+            useDisabledColor = true;
         }
+        painter->drawLine(QPointF(rowX, TimelineConstants::RULER_BASE_Y - h),
+                          QPointF(rowX, TimelineConstants::RULER_BASE_Y - 1));
+
+        // See if label should be shown at this tick at this zoom level
+        bool drawTimestamp = false;
+        if ((i % (secDiv * 4) == 0)
+                || (i % (secDiv * 2) == 0 && m_timeScale >= TimelineConstants::RULER_TICK_SCALE1)
+                || (i % secDiv == 0 && m_timeScale >= TimelineConstants::RULER_TICK_SCALE2)
+                || (i % secDiv == secDiv * 0.5
+                    && m_timeScale >= TimelineConstants::RULER_TICK_SCALE3)
+                || (m_timeScale >= TimelineConstants::RULER_TICK_SCALE4)) {
+            drawTimestamp = true;
+        }
+
+        if (drawTimestamp) {
+            QRectF timestampPos = QRectF(TimelineConstants::RULER_EDGE_OFFSET
+                                         + xStep * i - TimelineConstants::RULER_LABEL_W / 2,
+                                         1, TimelineConstants::RULER_LABEL_W,
+                                         TimelineConstants::RULER_LABEL_H);
+            painter->drawText(timestampPos, Qt::AlignCenter,
+                              timestampString(i * 1000 / TimelineConstants::RULER_SEC_DIV));
+        }
+
     }
 
     painter->restore();
@@ -109,6 +150,39 @@ double Ruler::timelineScale() const
 double Ruler::duration() const
 {
     return m_duration;
+}
+
+void Ruler::setDuration(double duration)
+{
+    if (m_duration != duration) {
+        m_duration = duration;
+        emit durationChanged(duration);
+        update();
+    }
+}
+
+void Ruler::setViewportX(int viewportX)
+{
+    if (m_viewportX != viewportX) {
+        m_viewportX = viewportX;
+        update();
+    }
+}
+
+// Returns timestamp in mm:ss.ttt or ss.ttt format
+const QString Ruler::timestampString(int timeMs)
+{
+    int ms = timeMs % 1000;
+    int s = timeMs % 60000 / 1000;
+    int m = timeMs % 3600000 / 60000;
+    QString msString = QString::number(ms).rightJustified(3, '0');
+    QString sString = QString::number(s).rightJustified(2, '0');
+    if (timeMs == 0)
+        return tr("0");
+    else if (m == 0)
+        return tr("%1.%2").arg(sString).arg(msString);
+    else
+        return tr("%1:%2.%3").arg(m).arg(sString).arg(msString);
 }
 
 int Ruler::type() const

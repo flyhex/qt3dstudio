@@ -56,6 +56,7 @@ public:
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
     void reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding);
     void syncRowPositionWithBinding(RowTree *row, Qt3DSDMTimelineItemBinding *parentBinding);
+    void updateRulerDuration();
     bool hasProperties(RowTree *row);
     RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
     RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType);

@@ -96,7 +96,6 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     m_layoutTree->setMaximumWidth(TimelineConstants::TREE_BOUND_W);
     m_layoutTree->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    setTimelineScale(m_ruler->timelineScale()); // refresh timeline width
     m_layoutTimeline->setSpacing(0);
     m_layoutTimeline->setContentsMargins(0, 0, 0, 0);
     m_layoutTimeline->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -389,8 +388,11 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             // resizing layer timline duration from right
             m_editedTimelineRow->setEndX(event->scenePos().x() - m_ruler->pos().x());
         } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
-            // moving layer timline duration
-            m_editedTimelineRow->moveDurationBy(event->scenePos().x() - m_pressPos.x());
+            // moving layer timeline duration
+            double dx = event->scenePos().x() - m_pressPos.x();
+            m_editedTimelineRow->moveDurationBy(dx);
+            if (dx > 0)
+                rowManager()->updateRulerDuration();
             m_pressPos = event->scenePos();
         } else if (m_selectionRect->isActive()) {
             // resizing keyframe selection rect
@@ -510,6 +512,12 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
             // update duration values to the binding
             m_editedTimelineRow->commitDurationMove();
+        }
+
+        if (m_clickedTimelineControlType == TimelineControlType::Duration
+                || m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+            // Update ruler duration if needed
+            rowManager()->updateRulerDuration();
         }
 
         // reset mouse press params

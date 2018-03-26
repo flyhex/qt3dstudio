@@ -158,10 +158,11 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     m_viewTimelineHeader->verticalScrollBar()->hide();
     m_viewTimelineHeader->viewport()->installEventFilter(new Eventfilter(this));
     m_viewTimelineHeader->viewport()->setFocusPolicy(Qt::NoFocus);
+    m_viewTimelineHeader->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     m_viewTimelineContent->setScene(m_graphicsScene);
     m_viewTimelineContent->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    m_viewTimelineContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    m_viewTimelineContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_viewTimelineContent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     m_viewTimelineContent->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
@@ -207,12 +208,21 @@ TimelineWidget::TimelineWidget(QWidget *parent)
                                                    rect.height()));
 
         m_graphicsScene->playHead()->setHeight(m_graphicsScene->widgetRoot()->geometry().height());
+
+        // While zooming in/out, keep playhead at center
+        int scrollValue = m_graphicsScene->ruler()->x() + TimelineConstants::RULER_EDGE_OFFSET
+                + m_graphicsScene->playHead()->time() * TimelineConstants::RULER_SEC_W
+                * m_graphicsScene->ruler()->timelineScale();
+        m_viewTimelineContent->centerOn(scrollValue, 0);
     });
 
     // connect timeline and ruler horizontalScrollBars
     connect(m_viewTimelineContent->horizontalScrollBar(), &QAbstractSlider::valueChanged, this,
             [this](int value) {
         m_viewTimelineHeader->horizontalScrollBar()->setValue(value);
+        // Note: Slider value starts from TREE_BOUND_W, make start from 0
+        int viewportX = std::max(0, value - (int)TimelineConstants::TREE_BOUND_W);
+        m_graphicsScene->ruler()->setViewportX(viewportX);
     });
 
     // connect timeline and tree verticalScrollBars
@@ -283,6 +293,10 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
     connect(m_toolbar, &TimelineToolbar::timelineScaleChanged, this, [this](int scale) {
         m_graphicsScene->setTimelineScale(scale);
+    });
+
+    connect(m_graphicsScene->ruler(), &Ruler::durationChanged, this, [this]() {
+        m_graphicsScene->setTimelineScale(m_graphicsScene->ruler()->timelineScale());
     });
 
     // data model listeners

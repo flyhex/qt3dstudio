@@ -48,15 +48,22 @@ public:
     double durationEndX() const;
     double timelineScale() const;
     double duration() const;
+    void setDuration(double duration);
+    void setViewportX(int viewportX);
     int type() const;
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
 
+signals:
+    void durationChanged(double duration);
+
 private:
+    const QString timestampString(int timeMs);
     double m_timeScale = 2;
-    double m_duration = 20; // in seconds
+    double m_duration = 0; // in seconds
+    int m_viewportX = 0;
 };
 
 #endif // RULER_H

@@ -37,8 +37,16 @@ namespace TimelineConstants
     const int RULER_SEC_W       = 30;    // width of 1 second section (at scale 1)
     const int RULER_SEC_DIV     = 10;    // second divisions
     const int RULER_DIV_H1      = 5;     // height of main divisions
-    const int RULER_DIV_H2      = 2;     // height of secondary divisions
+    const int RULER_DIV_H2      = 3;     // height of secondary divisions
+    const int RULER_DIV_H3      = 1;     // height of minor divisions
     const int RULER_BASE_Y      = 18;    // baseline Y
+    const int RULER_LABEL_W     = 60;
+    const int RULER_LABEL_H     = 10;
+    const int RULER_TICK_SCALE1 = 2;
+    const int RULER_TICK_SCALE2 = 3;
+    const int RULER_TICK_SCALE3 = 6;
+    const int RULER_TICK_SCALE4 = 21;
+
     const double RULER_EDGE_OFFSET = 15;
     const double TREE_MIN_W     = 160;
     const double TREE_MAX_W     = 600;
@@ -62,7 +70,8 @@ namespace TimelineConstants
     const char ROW_TEXT_COLOR[]               = "#bbbbbb";
     const char ROW_TEXT_COLOR_DISABLED[]      = "#888888";
     const char PLAYHEAD_COLOR[]               = "#ff0066";
-    const char RULER_COLOR[]                  = "#666666";
+    const char RULER_COLOR[]                  = "#888888";
+    const char RULER_COLOR_DISABLED[]         = "#444444";
     const char ROW_MOVER_COLOR[]              = "#ffff00";
     const char WIDGET_BG_COLOR[]              = "#222222";
     const char PLAYHEAD_LINE_COLOR[]          = "#b20808";
