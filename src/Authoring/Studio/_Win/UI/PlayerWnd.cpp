@@ -108,27 +108,35 @@ void CPlayerWnd::mousePressEvent(QMouseEvent *event)
 {
     long toolMode = g_StudioApp.GetToolMode();
     const Qt::MouseButton btn = event->button();
+    bool toolChanged = false;
 
-    if (!m_containerWnd->IsDeploymentView() && (event->modifiers() & Qt::AltModifier)
-            && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-                g_StudioApp.GetRenderer().GetEditCamera())) {
+    if (!m_containerWnd->IsDeploymentView() && (event->modifiers() & Qt::AltModifier)) {
         // We are in edit camera view, so we are in Alt-click camera tool
         // controlling mode
         m_mouseDown = true;
         if (btn == Qt::MiddleButton) {
             // Alt + Wheel Click
             toolMode = STUDIO_TOOLMODE_CAMERA_PAN;
+            toolChanged = true;
         } else if (btn == Qt::LeftButton) {
             // Alt + Left Click
-            toolMode = STUDIO_TOOLMODE_CAMERA_ROTATE;
+            if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
+                        g_StudioApp.GetRenderer().GetEditCamera())) {
+                toolMode = STUDIO_TOOLMODE_CAMERA_ROTATE;
+                toolChanged = true;
+            }
         } else if (btn == Qt::RightButton) {
             // Alt + Right Click
             toolMode = STUDIO_TOOLMODE_CAMERA_ZOOM;
+            toolChanged = true;
         }
-        g_StudioApp.SetToolMode(toolMode);
-        Q_EMIT m_containerWnd->toolChanged();
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
-                                                                 event->pos(), toolMode);
+
+        if (toolChanged) {
+            g_StudioApp.SetToolMode(toolMode);
+            Q_EMIT m_containerWnd->toolChanged();
+            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
+                                                                     event->pos(), toolMode);
+        }
     } else {
         if (btn == Qt::LeftButton || btn == Qt::RightButton) {
             // Pause playback for the duration of the mouse click
