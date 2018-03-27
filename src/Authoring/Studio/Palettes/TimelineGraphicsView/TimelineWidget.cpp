@@ -244,8 +244,6 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     });
 
     connect(m_toolbar, &TimelineToolbar::newLayerTriggered, this, [this]() {
-        // Mahmoud_TODO: debug code, remove
-//        printHandlesMap(m_handlesMap);
         using namespace Q3DStudio;
 
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();

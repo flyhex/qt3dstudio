@@ -373,6 +373,34 @@ int RowManager::getRowIndex(RowTree *row)
     return -1;
 }
 
+// Return the index of a direct child (not grand children) of a parent
+int RowManager::getChildIndex(RowTree *parentRow, RowTree *childRow)
+{
+    int index = getRowIndex(parentRow);
+
+    if (index != -1 && index < m_layoutTimeline->count() - 1) {
+        // make sure it is a direct child, not a grand child.
+        while (childRow->depth() > parentRow->depth() + 1)
+            childRow = childRow->parentRow();
+
+        int childIndex = -1;
+        for (int i = index + 1; i < m_layoutTree->count(); ++i) {
+            RowTree *childRow_i =
+                    static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+
+            if (childRow_i->depth() == parentRow->depth() + 1)
+                childIndex++;
+            else if (childRow_i->depth() <= parentRow->depth())
+                break;
+
+            if (childRow_i == childRow)
+                return childIndex;
+        }
+    }
+
+    return -1;
+}
+
 bool RowManager::hasProperties(RowTree *row)
 {
     if (row != nullptr && !row->empty()) {
@@ -382,6 +410,21 @@ bool RowManager::hasProperties(RowTree *row)
                                                       ->graphicsItem());
             return nextRow->isProperty();
         }
+    }
+
+    return false;
+}
+
+bool RowManager::isFirstChild(RowTree *parentRow, RowTree *childRow)
+{
+    int index = getRowIndex(parentRow);
+
+    if (index != -1 && index < m_layoutTimeline->count() - 1) {
+        RowTree *firstChild =
+                static_cast<RowTree *>(m_layoutTree->itemAt(index + 1)->graphicsItem());
+
+        if (firstChild == childRow && childRow->depth() == parentRow->depth() + 1)
+            return true;
     }
 
     return false;

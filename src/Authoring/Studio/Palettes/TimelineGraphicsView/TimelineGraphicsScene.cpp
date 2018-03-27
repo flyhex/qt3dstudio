@@ -153,6 +153,23 @@ void TimelineGraphicsScene::deleteSelectedRow() {
     m_rowManager->deleteRow(m_rowManager->selectedRow());
 }
 
+// Mahmoud_TODO: debug func, remove
+void printAsset(Q3DStudio::TIdentifier asset, QString padding = " ")
+{
+    TAssetGraphPtr assetGraph = g_StudioApp.GetCore()->GetDoc()->GetAssetGraph();
+    padding = padding.append("-");
+
+    for (int i = 0; i < assetGraph.get()->GetChildCount(asset); i++) {
+        qDebug().noquote().nospace()
+                << "\x1b[42m \x1b[1m" << __FUNCTION__
+                << padding
+                << assetGraph.get()->GetChild(asset, i)
+                << "\x1b[m";
+
+        printAsset(assetGraph.get()->GetChild(asset, i), padding);
+    }
+}
+
 void TimelineGraphicsScene::commitMoveRows()
 {
     int sourceIndex = m_rowMover->sourceIndex();
@@ -165,17 +182,13 @@ void TimelineGraphicsScene::commitMoveRows()
         return;
     }
 
-    // TODO: remove
-//  qDebug() << "sourceIndex=" << sourceIndex << ", targetIndex=" << targetIndex
-//           << ", rowSrcDepth=" << rowSrcDepth;
+    RowTree *rowInsertion =
+            static_cast<RowTree *>(m_layoutTree->itemAt(targetIndex)->graphicsItem());
 
     // gather the rows to be moved
     QList<RowTree *> rowsToMove { m_rowMover->sourceRow() };
     for (int i = sourceIndex + 1; i < m_layoutTree->count();) {
         RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-
-        // TODO: remove
-//      qDebug() << "i=" << i << ", row_i->depth()=" << row_i->depth();
 
         if (row_i->depth() <= rowSrcDepth)
             break;
@@ -185,32 +198,52 @@ void TimelineGraphicsScene::commitMoveRows()
         rowsToMove.append(row_i);
     }
 
-    m_rowMover->insertionParent()->addChild(m_rowMover->sourceRow());
+    TAssetGraphPtr assetGraph = g_StudioApp.GetCore()->GetDoc()->GetAssetGraph();
 
-    // TODO: remove
-//  qDebug() << "itemsToMove.count()=" << itemsToMove.count();
-
-    // commit the move
     if (m_rowMover->movingDown())
         targetIndex -= rowsToMove.count();
+
+    if (rowInsertion->isProperty() || rowInsertion->rowType() == OBJTYPE_MATERIAL)
+        rowInsertion = rowInsertion->parentRow();
+
+    // handle for the row we will insertion after
+    qt3dsdm::Qt3DSDMInstanceHandle handleInsertion = static_cast<Qt3DSDMTimelineItemBinding *>
+            (rowInsertion->getBinding())->GetInstance();
+
+    // handle for the moving row
+    qt3dsdm::Qt3DSDMInstanceHandle handleSource = static_cast<Qt3DSDMTimelineItemBinding *>
+            (m_rowMover->sourceRow()->getBinding())->GetInstance();
+
+    // handle for the parent of the insertion row
+    qt3dsdm::Qt3DSDMInstanceHandle handleParent = static_cast<Qt3DSDMTimelineItemBinding *>
+            (m_rowMover->insertionParent()->getBinding())->GetInstance();
+
+    // commit the row move to the binding
+    if (m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()
+        && rowInsertion == m_rowMover->insertionParent()) { // first child under same parent
+        assetGraph.get()->ReParent(handleSource, handleParent);
+    } else {
+        int index = m_rowManager->getChildIndex(m_rowMover->insertionParent(), rowInsertion) + 1;
+        assetGraph.get()->MoveTo(handleSource, handleParent, index);
+    }
+
+    // commit the row move to the UI
+    m_rowMover->insertionParent()->addChild(m_rowMover->sourceRow());
 
     for (RowTree *child : qAsConst(rowsToMove)) {
         ++targetIndex;
         m_layoutTree->insertItem(targetIndex, child);
         m_layoutTimeline->insertItem(targetIndex, child->rowTimeline());
     }
-
-    // Mahmoud_TODO: update binding
 }
 
 void TimelineGraphicsScene::getLastChildRow(RowTree *row, int index, RowTree *outLastChild,
                                             RowTree *outNextSibling, int &outLastChildIndex) const
 {
-    if (row != nullptr) {
-        RowTree *row_i = nullptr;
+    if (row != nullptr && m_layoutTree->count() > 1) {
         RowTree *row_i_prev = nullptr;
-        for (int i = index + 1; i < m_layoutTree->count() - 1; ++i) {
-            row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+        for (int i = index + 1; i < m_layoutTree->count(); ++i) {
+            RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
 
             if (row_i->depth() <= row->depth()) {
                 outLastChild = row_i_prev;
@@ -221,6 +254,13 @@ void TimelineGraphicsScene::getLastChildRow(RowTree *row, int index, RowTree *ou
 
             row_i_prev = row_i;
         }
+
+        // row (and all its descendants) are at the bottom of the list
+        outLastChild = static_cast<RowTree *>
+                (m_layoutTree->itemAt(m_layoutTree->count() - 1)->graphicsItem());
+        outNextSibling = nullptr;
+        outLastChildIndex = m_layoutTree->count() - 1;
+        return;
     }
 
     outLastChild = nullptr;
@@ -423,10 +463,10 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                         // not inserting next to property rows
                          && !(nextRowAtIndex != nullptr && nextRowAtIndex->isProperty())
 
-                        // not  inserting as a first child of self
+                        // not inserting as a first child of self
                         && !(rowAtIndex == m_rowMover->sourceRow() && !rowAtIndex->empty())
 
-                        // not  inserting non-layer under the scene
+                        // not inserting non-layer under the scene
                         && !(m_rowMover->sourceRow()->rowType() != OBJTYPE_LAYER
                              && rowAtIndex->rowType() == OBJTYPE_SCENE)
 
