@@ -217,9 +217,8 @@ void CPlayerContainerWnd::RecenterClient()
 void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
 {
     const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-    const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
-    if (!theCtrlKeyIsDown && !theAltKeyIsDown && !IsDeploymentView()) {
+    if (!theCtrlKeyIsDown && !IsDeploymentView()) {
         // Zoom when in edit camera view
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseWheel(
                     SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
