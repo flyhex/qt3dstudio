@@ -183,6 +183,7 @@ public:
     void OnHelpVisitQt();
     void OnHelpOpenTutorial();
 
+    void onViewResetLayout();
     void OnViewAction();
     void OnUpdateViewAction();
     void OnViewBasicObjects();
@@ -256,6 +257,7 @@ protected:
     CPaletteManager *m_PaletteManager = nullptr;
     bool m_PlaybackFlag = false;
     bool m_actionActive = false;
+    bool m_resettingLayout = false;
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
     QTimer m_playbackTimer;

@@ -127,7 +127,7 @@ CMainFrame::CMainFrame()
             this, &CMainFrame::OnEditPresentationPreferences);
 
     // View Menu
-//    connect(m_ui->actionReset_layout, &QAction::triggered, this, &CMainFrame::onViewResetLayout); // TODO: Implement
+    connect(m_ui->actionReset_layout, &QAction::triggered, this, &CMainFrame::onViewResetLayout);
     connect(m_ui->actionFit_Selected, &QAction::triggered,
             this, &CMainFrame::OnEditCameraZoomExtent);
 //    connect(m_ui->actionFit_all, &QAction::triggered, this, &CMainFrame::onViewFitAll); // TODO: Implement
@@ -1511,6 +1511,28 @@ void CMainFrame::timerEvent(QTimerEvent *event)
     QMainWindow::timerEvent(event);
 }
 
+void CMainFrame::onViewResetLayout()
+{
+    // Ask for a restart
+    int theChoice = QMessageBox::question(this,
+                                          tr("Restart Needed"),
+                                          tr("Are you sure that you want to restore Qt 3D Studio "
+                                             "layout? \nYour current layout will be lost, and"
+                                             "Studio will exit."));
+
+    // If "Yes" is clicked, delete window geometry and window state keys from QSettings
+    if (theChoice == QMessageBox::Yes) {
+        QSettings settings;
+        QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
+        QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+        settings.remove(geoKey);
+        settings.remove(stateKey);
+        // Prevent saving geometry and state, and exit
+        m_resettingLayout = true;
+        close();
+    }
+}
+
 void CMainFrame::OnViewAction()
 {
     m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_ACTION);
@@ -1903,6 +1925,9 @@ bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
 
 void CMainFrame::handleGeometryAndState(bool save)
 {
+    if (m_resettingLayout)
+        return;
+
     QSettings settings;
     QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
     QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
