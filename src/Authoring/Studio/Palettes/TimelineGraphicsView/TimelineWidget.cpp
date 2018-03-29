@@ -33,6 +33,7 @@
 #include "RowManager.h"
 #include "KeyframeManager.h"
 #include "RowTree.h"
+#include "Keyframe.h"
 #include "PlayHead.h"
 #include "Ruler.h"
 #include "TimelineSplitter.h"
@@ -309,34 +310,47 @@ void TimelineWidget::OnNewPresentation()
         g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
 
     m_connections.push_back(theSignalProvider->ConnectActiveSlide(
-        std::bind(&TimelineWidget::OnActiveSlide, this, std::placeholders::_1,
+        std::bind(&TimelineWidget::onActiveSlide, this, std::placeholders::_1,
                   std::placeholders::_2, std::placeholders::_3)));
 
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
 
     m_connections.push_back(theDispatch->ConnectSelectionChange(
-        std::bind(&TimelineWidget::OnSelectionChange, this, std::placeholders::_1)));
+        std::bind(&TimelineWidget::onSelectionChange, this, std::placeholders::_1)));
 
     // object created/deleted
     m_connections.push_back(theSignalProvider->ConnectInstanceCreated(
-        std::bind(&TimelineWidget::OnAssetCreated, this, std::placeholders::_1)));
+        std::bind(&TimelineWidget::onAssetCreated, this, std::placeholders::_1)));
     m_connections.push_back(theSignalProvider->ConnectInstanceDeleted(
-        std::bind(&TimelineWidget::OnAssetDeleted, this, std::placeholders::_1)));
+        std::bind(&TimelineWidget::onAssetDeleted, this, std::placeholders::_1)));
 
     // animation created/deleted
     m_connections.push_back(theSignalProvider->ConnectAnimationCreated(
-        std::bind(&TimelineWidget::OnAnimationCreated, this,
+        std::bind(&TimelineWidget::onAnimationCreated, this,
              std::placeholders::_2, std::placeholders::_3)));
     m_connections.push_back(theSignalProvider->ConnectAnimationDeleted(
-        std::bind(&TimelineWidget::OnAnimationDeleted, this,
+        std::bind(&TimelineWidget::onAnimationDeleted, this,
              std::placeholders::_2, std::placeholders::_3)));
+
+    // keyframe added/deleted
+    m_connections.push_back(theSignalProvider->ConnectKeyframeInserted(
+        std::bind(&TimelineWidget::onKeyframeInserted, this,
+             std::placeholders::_1, std::placeholders::_2)));
+    m_connections.push_back(theSignalProvider->ConnectKeyframeErased(
+        std::bind(&TimelineWidget::onKeyframeDeleted, this,
+             std::placeholders::_1, std::placeholders::_2)));
+    m_connections.push_back(theSignalProvider->ConnectKeyframeUpdated(
+        std::bind(&TimelineWidget::onKeyframeUpdated, this, std::placeholders::_1)));
+    m_connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
+        std::bind(&TimelineWidget::onPropertyChanged, this,
+             std::placeholders::_1, std::placeholders::_2)));
 
     // action created/deleted
     m_connections.push_back(theSignalProvider->ConnectActionCreated(
-        std::bind(&TimelineWidget::OnActionEvent, this,
+        std::bind(&TimelineWidget::onActionEvent, this,
                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
     m_connections.push_back(theSignalProvider->ConnectActionDeleted(
-        std::bind(&TimelineWidget::OnActionEvent, this,
+        std::bind(&TimelineWidget::onActionEvent, this,
                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 
     // Connect toolbar play/stop now when m_pMainWnd exists
@@ -356,7 +370,7 @@ void TimelineWidget::OnTimeChanged(long inTime)
     m_toolbar->setTime(inTime);
 }
 
-void TimelineWidget::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
+void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                                    const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
     Q_UNUSED(inMaster);
@@ -391,7 +405,7 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
     }
 }
 
-void TimelineWidget::OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
+void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
 {
     qt3dsdm::TInstanceHandleList theInstances = inNewSelectable.GetSelectedInstances();
     for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
@@ -410,7 +424,7 @@ void TimelineWidget::OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable
     // Mahmoud_TODO: Expand the tree so the selection is visible
 }
 
-void TimelineWidget::OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     CClientDataModelBridge *theDataModelBridge = g_StudioApp.GetCore()->GetDoc()
                                                  ->GetStudioSystem()->GetClientDataModelBridge();
@@ -434,7 +448,7 @@ void TimelineWidget::OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-void TimelineWidget::OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     THandleMap::const_iterator it = m_handlesMap.find(inInstance);
 
@@ -444,7 +458,7 @@ void TimelineWidget::OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-void TimelineWidget::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
@@ -465,8 +479,12 @@ void TimelineWidget::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
         // add keyframes
         for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
             IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
-            m_graphicsScene->keyframeManager()->insertKeyframe(propRow->rowTimeline(),
-                                        static_cast<double>(kf->GetTime()) * .001, 0, false);
+            Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
+                        propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, 0,
+                        false).at(0);
+
+            kf->setUI(kfUI);
+            kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
         }
 
         propRow->update();
@@ -476,7 +494,7 @@ void TimelineWidget::OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
     m_graphicsScene->rowManager()->reorderPropertiesFromBinding(binding);
 }
 
-void TimelineWidget::OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
@@ -491,7 +509,56 @@ void TimelineWidget::OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
     }
 }
 
-void TimelineWidget::OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
+void TimelineWidget::onKeyframeInserted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                                        qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
+{
+    refreshKeyframe(inAnimation, inKeyframe, ETimelineKeyframeTransaction_Add);
+}
+
+void TimelineWidget::onKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                                       qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
+{
+    refreshKeyframe(inAnimation, inKeyframe, ETimelineKeyframeTransaction_Delete);
+}
+
+void TimelineWidget::onKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
+{
+    qt3dsdm::IAnimationCore *theAnimationCore =
+            g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetAnimationCore();
+    if (theAnimationCore->KeyframeValid(inKeyframe)) {
+        qt3dsdm::Qt3DSDMAnimationHandle theAnimationHandle =
+            theAnimationCore->GetAnimationForKeyframe(inKeyframe);
+        refreshKeyframe(theAnimationHandle, inKeyframe, ETimelineKeyframeTransaction_Update);
+    }
+}
+
+void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                                     qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
+                                     ETimelineKeyframeTransaction inTransaction)
+{
+    qt3dsdm::CStudioSystem *studioSystem = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    if (studioSystem->GetAnimationCore()->AnimationValid(inAnimation)) {
+        qt3dsdm::SAnimationInfo theAnimationInfo =
+            studioSystem->GetAnimationCore()->GetAnimationInfo(inAnimation);
+        Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(theAnimationInfo.m_Instance,
+                                                                  m_binding);
+        if (binding != nullptr) {
+            binding->RefreshPropertyKeyframe(theAnimationInfo.m_Property, inKeyframe,
+                                             inTransaction);
+        }
+    }
+}
+
+void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                       qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+{
+    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
+
+    if (binding != nullptr)
+        binding->OnPropertyChanged(inProperty);
+}
+
+void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
                                    qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                    qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {

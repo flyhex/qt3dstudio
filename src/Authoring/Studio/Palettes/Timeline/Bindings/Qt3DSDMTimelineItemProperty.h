@@ -108,7 +108,7 @@ protected:
 protected:
     typedef std::vector<Qt3DSDMTimelineKeyframe *> TKeyframeList;
 
-    CPropertyRow *m_Row;
+    CPropertyRow *m_Row; // Mahmoud_TODO: remove
     qt3dsdm::Qt3DSDMInstanceHandle m_InstanceHandle;
     qt3dsdm::Qt3DSDMPropertyHandle m_PropertyHandle;
     CTimelineTranslationManager *m_TransMgr;

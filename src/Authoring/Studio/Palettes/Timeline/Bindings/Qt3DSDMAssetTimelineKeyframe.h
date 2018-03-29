@@ -60,6 +60,7 @@ public:
     long GetTime() const override;
     void SetTime(const long inNewTime) override;
     void SetDynamic(bool inIsDynamic) override;
+    Keyframe *getUI() override;
     void setUI(Keyframe *kfUI) override;
     bool IsDynamic() const override;
 

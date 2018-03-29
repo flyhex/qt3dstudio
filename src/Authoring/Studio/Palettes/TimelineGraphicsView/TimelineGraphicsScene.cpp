@@ -680,7 +680,24 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         // connections
         connect(actionInsertKeyframe, &QAction::triggered, this, [=]() {
             row->getBinding()->InsertKeyframe();
-            m_keyframeManager->insertKeyframe(row->rowTimeline(), m_playHead->time(), 0, false);
+
+            // update and wire the UI from binding
+            for (long i = 0; i < row->getBinding()->GetPropertyCount(); ++i) {
+                ITimelineItemProperty *prop_i = row->getBinding()->GetProperty(i);
+                for (long j = 0; j < prop_i->GetKeyframeCount(); ++j) {
+                    Qt3DSDMTimelineKeyframe *kf =
+                            static_cast<Qt3DSDMTimelineKeyframe *>(prop_i->GetKeyframeByIndex(j));
+
+                    if (kf->getUI() == nullptr) { // newly added keyframe
+                        Keyframe *kfUI = m_keyframeManager->insertKeyframe(prop_i->getRowTree()
+                                         ->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
+                                                         0, false).at(0);
+                        // wire the keyframe UI and binding
+                        kf->setUI(kfUI);
+                        kfUI->binding = kf;
+                    }
+                }
+            }
         });
 
         connect(actionCutSelectedKeyframes, &QAction::triggered, this, [=]() {

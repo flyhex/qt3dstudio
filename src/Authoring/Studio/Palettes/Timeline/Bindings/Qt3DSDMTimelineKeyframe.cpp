@@ -131,6 +131,11 @@ void Qt3DSDMTimelineKeyframe::SetDynamic(bool inIsDynamic)
     }
 }
 
+Keyframe *Qt3DSDMTimelineKeyframe::getUI()
+{
+    return m_ui;
+}
+
 void Qt3DSDMTimelineKeyframe::setUI(Keyframe *kfUI)
 {
     m_ui = kfUI;

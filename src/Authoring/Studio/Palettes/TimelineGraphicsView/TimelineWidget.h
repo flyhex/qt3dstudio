@@ -37,6 +37,7 @@
 #include "SelectedValueImpl.h"
 #include "TimelineObjectModel.h"
 #include "TreeHeaderView.h"
+#include "Bindings/Qt3DSDMTimeline.h"
 
 class RowTree;
 class TimelineToolbar;
@@ -64,23 +65,30 @@ public:
     // Presentation Change Listener
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
-    void OnSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
+    void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
 
     //CClientPlayChangeListener
     void OnTimeChanged(long inTime) override;
 
 protected:
     // DataModel callbacks
-    virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
+    virtual void onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                                const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
-    void OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    void OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    void OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+    void onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle property);
-    void OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
+    void onKeyframeInserted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                            qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
+    void onKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                           qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
+    void onKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
+    void onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle property);
-    void OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
+    void onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -109,6 +117,9 @@ private:
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
     qt3dsdm::Qt3DSDMSlideHandle m_activeSlide;
     THandleMap m_handlesMap;
+    void refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
+                         ETimelineKeyframeTransaction inTransaction);
 };
 
 #endif // TIMELINEWIDGET_H
