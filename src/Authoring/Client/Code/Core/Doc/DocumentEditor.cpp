@@ -2658,6 +2658,7 @@ public:
         qt3dsdm::TGuideHandleList theGuides(GetGuides());
         for (size_t idx = 0, end = theGuides.size(); idx < end; ++idx)
             DeleteGuide(theGuides[idx]);
+        m_Doc.GetSceneGraph()->RequestRender();
     }
 
     qt3dsdm::TGuideHandleList GetGuides() const override { return m_GuideSystem.GetAllGuides(); }
