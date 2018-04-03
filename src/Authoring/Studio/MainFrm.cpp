@@ -862,51 +862,44 @@ void CMainFrame::EditPreferences(short inPageIndex)
     // Set the active page based on the inPageIndex
     CStudioPreferencesPropSheet thePropSheet(tr("Studio Preferences"), this, inPageIndex);
 
-    // CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
-
-    // Q3DStudio::CString theAuthorName theAuthorName = theProjectSettings->GetAuthor();
-    // Q3DStudio::CString theCompanyName theCompanyName = theProjectSettings->GetCompany();
-
     // Display the CStudioPreferencesPropSheet
     int thePrefsReturn = thePropSheet.exec();
 
-    // Ugly hack to fix some bug
     m_SceneView->OnEditCameraChanged();
 
     if (thePrefsReturn == PREFS_RESET_DEFAULTS) {
         // Restore default values
-        g_StudioApp.SetAutosetKeyframes(true);
+        g_StudioApp.SetAutosetKeyframes(true); // Sets the preference as well
         CStudioPreferences::SetBoundingBoxesOn(true);
-        CStudioPreferences::SetTimebarDisplayTime(true);
+        CStudioPreferences::SetDisplayPivotPoint(true);
+        CStudioPreferences::SetWireframeModeOn(true);
+        CStudioPreferences::SetShowTooltips(true);
+        CStudioPreferences::SetTimebarDisplayTime(false);
         g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
-        CStudioPreferences::SetSnapRange(10);
+        CStudioPreferences::SetSnapRange(CStudioPreferences::DEFAULT_SNAPRANGE);
+        CStudioPreferences::SetDefaultObjectLifetime(CStudioPreferences::DEFAULT_LIFETIME);
+        CStudioPreferences::SetAdvancePropertyExpandedFlag(false);
+        CStudioPreferences::SetPreviewConfig("");
+        CStudioPreferences::SetPreviewProperty("", "");
+        CStudioPreferences::SetDontShowGLVersionDialog(false);
+        CStudioPreferences::SetDefaultClientSize(CStudioPreferences::DEFAULT_CLIENT_WIDTH,
+                                                 CStudioPreferences::DEFAULT_CLIENT_HEIGHT);
+        CStudioPreferences::SetTimeAdvanceAmount(CStudioPreferences::DEFAULT_TIME_ADVANCE);
+        CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
-
-        // Edit Cameras
-        CColor theDefaultBgColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
-        CStudioPreferences::SetEditViewBackgroundColor(theDefaultBgColor);
+        CStudioPreferences::SetEditViewFillMode(true);
+        CStudioPreferences::SetEditViewBackgroundColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
+        CStudioPreferences::SetAutoSaveDelay(CStudioPreferences::DEFAULT_AUTOSAVE_DELAY);
+        CStudioPreferences::SetAutoSavePreference(true);
+        CStudioPreferences::setSelectorLineWidth(
+                    (float)CStudioPreferences::DEFAULT_SELECTOR_WIDTH / 10.0f);
+        CStudioPreferences::setSelectorLineLength(
+                    (float)CStudioPreferences::DEFAULT_SELECTOR_LENGTH);
 
         RecheckSizingMode();
-
-        // Remove keys related to the ObjRef and PropRef Pickers
-        const Q3DStudio::CString reference = "ReferenceGadgets";
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceWidth");
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceHeight");
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceXPos");
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceYPos");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceWidth");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceHeight");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceXPos");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceYPos");
-
-        // Also clear out the viewer's settings file
-        Q3DStudio::CFilePath theFilePath(Q3DStudio::CFilePath::CombineBaseAndRelative(
-                                             Q3DStudio::CFilePath::GetUserApplicationDirectory(),
-                                             "Qt3DSComposer\\Qt3DSViewerSettings.txt"));
-        theFilePath.DeleteThisFile();
     }
 }
 

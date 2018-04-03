@@ -90,7 +90,6 @@ int s_valueWidth;
 QSize s_browserPopupSize;
 
 bool CStudioPreferences::m_SudoMode = false;
-bool CStudioPreferences::m_DebugTimes = false;
 
 #define STRINGIFY(x) STRINGIFY2(x)
 #define STRINGIFY2(x) #x
@@ -135,7 +134,6 @@ void CStudioPreferences::LoadPreferences()
                                          // 8 ) );
 
     m_SudoMode = CPreferences::GetUserPreferences().GetValue("sudo", false);
-    m_DebugTimes = CPreferences::GetUserPreferences().GetValue("DebugTimes", false);
 
     s_TopRowColor = s_BaseColor;
     s_TopRowColor.SetLuminance(s_TopRowColor.GetLuminance() - 0.10f);
@@ -254,30 +252,6 @@ void CStudioPreferences::SetTimelineSnappingGridResolution(ESnapGridResolution i
 
 //==============================================================================
 /**
- *	Returns true if help should be shown on Studio launch.
- *	Checks the registry to determine if the Help Palette should be displayed
- *	on launch of Studio.
- *	@return TRUE if the Help Palette should be shown, otherwise FALSE.
- */
-bool CStudioPreferences::ShowHelpOnLaunch()
-{
-    return CPreferences::GetUserPreferences().GetValue("ShowHelp", true);
-}
-
-//==============================================================================
-/**
- *	Sets the preference for showing the Help Palette on Studio launch.
- *	Changes a value in the registry (if the key could be opened) which determines
- *	whether or not to show the Help Palette on launch of Studio.
- *	@param inValue false to show the Help Palette on launch, otherwise false
- */
-void CStudioPreferences::SetShowHelpOnLaunch(bool inShowHelp)
-{
-    CPreferences::GetUserPreferences().SetValue("ShowHelp", inShowHelp);
-}
-
-//==============================================================================
-/**
  *	Get the background color of the editing view
  *	@return the color of the editing view
  */
@@ -324,7 +298,8 @@ void CStudioPreferences::SetEditViewFillMode(bool inRenderAsSolid)
  */
 long CStudioPreferences::GetPreferredStartupView()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("PreferredStartupView", -1);
+    return CPreferences::GetUserPreferences().GetLongValue("PreferredStartupView",
+                                                           PREFERREDSTARTUP_DEFAULTINDEX);
 }
 
 //==============================================================================
@@ -479,25 +454,6 @@ void CStudioPreferences::SetTimelineSplitterLocation(long inLocation)
 
 //==============================================================================
 /**
- *	Returns the preferred location of the Inspector Palette's splitter bar.
- */
-long CStudioPreferences::GetInspectorSplitterLocation()
-{
-    return CPreferences::GetUserPreferences("Inspector").GetLongValue("InspectorSplitterLoc", 100);
-}
-
-//==============================================================================
-/**
- *	Stores the location of the splitter bar in the Inspector Palette.
- *	@param inLocation location of the splitter
- */
-void CStudioPreferences::SetInspectorSplitterLocation(long inLocation)
-{
-    CPreferences::GetUserPreferences("Inspector").SetLongValue("InspectorSplitterLoc", inLocation);
-}
-
-//==============================================================================
-/**
  *	Gets the preferred method of interpolation.
  *	Indicates whether the user prefers smooth or linear interpolation by default.
  *	@return true indicates that smooth interpolation is preferred, false indicates linear
@@ -525,7 +481,7 @@ void CStudioPreferences::SetInterpolation(bool inSmooth)
  */
 long CStudioPreferences::GetSnapRange()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("SnapRange", (long)10);
+    return CPreferences::GetUserPreferences().GetLongValue("SnapRange", DEFAULT_SNAPRANGE);
 }
 
 //==============================================================================
@@ -546,7 +502,8 @@ void CStudioPreferences::SetSnapRange(long inSnapRange)
 long CStudioPreferences::GetAutoSaveDelay()
 {
     // default delay is 10 minutes (600 seconds)
-    return CPreferences::GetUserPreferences("AutoSave").GetLongValue("Delay", (long)600);
+    return CPreferences::GetUserPreferences("AutoSave").GetLongValue("Delay",
+                                                                     DEFAULT_AUTOSAVE_DELAY);
 }
 
 //==============================================================================
@@ -591,7 +548,8 @@ void CStudioPreferences::SetAutoSavePreference(bool inActive)
  */
 long CStudioPreferences::GetDefaultObjectLifetime()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("DefaultObjectLifetime", (long)10000);
+    return CPreferences::GetUserPreferences().GetLongValue("DefaultObjectLifetime",
+                                                           DEFAULT_LIFETIME);
 }
 
 //==============================================================================
@@ -701,22 +659,20 @@ void CStudioPreferences::SetDontShowGLVersionDialog(bool inValue)
     CPreferences::GetUserPreferences().SetValue("DontShowGLVersionDialog", inValue);
 }
 
-//==============================================================================
-/**
- *	Gets the size that the object reference dialog should be displayed.
- *	@return	the size as a point.
- */
 CPt CStudioPreferences::GetDefaultClientSize()
 {
     CPt theSize;
-    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth", 1920);
-    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight", 1080);
+    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth",
+                                                                DEFAULT_CLIENT_WIDTH);
+    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight",
+                                                                DEFAULT_CLIENT_HEIGHT);
     return theSize;
 }
 
-bool CStudioPreferences::GetCanImportComponent()
+void CStudioPreferences::SetDefaultClientSize(int width, int height)
 {
-    return CPreferences::GetUserPreferences().GetValue("CanImportComponent", false);
+    CPreferences::GetUserPreferences().SetLongValue("DefaultClientWidth", (long)width);
+    CPreferences::GetUserPreferences().SetLongValue("DefaultClientHeight", (long)height);
 }
 
 //==============================================================================
@@ -726,7 +682,7 @@ bool CStudioPreferences::GetCanImportComponent()
  */
 long CStudioPreferences::GetTimeAdvanceAmount()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("TimeAdvance", 100);
+    return CPreferences::GetUserPreferences().GetLongValue("TimeAdvance", DEFAULT_TIME_ADVANCE);
 }
 
 //==============================================================================
@@ -734,7 +690,7 @@ long CStudioPreferences::GetTimeAdvanceAmount()
  * Sets the amount of time that the playhead should be advanced/reduced when the
  * '.' and ',' keys are used.
  */
-void CStudioPreferences::SetTimeAdvanceAmount(const long &inTime)
+void CStudioPreferences::SetTimeAdvanceAmount(long inTime)
 {
     CPreferences::GetUserPreferences().SetLongValue("TimeAdvance", inTime);
 }
@@ -746,7 +702,8 @@ void CStudioPreferences::SetTimeAdvanceAmount(const long &inTime)
  */
 long CStudioPreferences::GetBigTimeAdvanceAmount()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("BigTimeAdvance", 200);
+    return CPreferences::GetUserPreferences().GetLongValue("BigTimeAdvance",
+                                                           DEFAULT_BIG_TIME_ADVANCE);
 }
 
 //==============================================================================
@@ -754,103 +711,9 @@ long CStudioPreferences::GetBigTimeAdvanceAmount()
  * Set the amount of time that the playhead should be advanced/reduced when the
  * '<' and '>' keys are used.
  */
-void CStudioPreferences::SetBigTimeAdvanceAmount(const long &inTime)
+void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 {
     CPreferences::GetUserPreferences().SetLongValue("BigTimeAdvance", inTime);
-}
-
-long CStudioPreferences::GetActionSplitterSize()
-{
-    return CPreferences::GetUserPreferences().GetLongValue("ActionSplitterSize", 200);
-}
-
-void CStudioPreferences::SetActionSplitterSize(long inSize)
-{
-    CPreferences::GetUserPreferences().SetLongValue("ActionSplitterSize", inSize);
-}
-
-long CStudioPreferences::GetCustomPropertySplitterSize()
-{
-    return CPreferences::GetUserPreferences().GetLongValue("CustomPropertySplitterSize", 200);
-}
-
-void CStudioPreferences::SetCustomPropertySplitterSize(long inSize)
-{
-    CPreferences::GetUserPreferences().SetLongValue("CustomPropertySplitterSize", inSize);
-}
-
-long CStudioPreferences::GetAssetSplitterSize()
-{
-    return CPreferences::GetUserPreferences().GetLongValue("AssetSplitterSize", 200);
-}
-
-void CStudioPreferences::SetAssetSplitterSize(long inSize)
-{
-    CPreferences::GetUserPreferences().SetLongValue("AssetSplitterSize", inSize);
-}
-
-//==============================================================================
-/**
- * Gets whether or not to show the version dialog.
- * Used in some of the serialization to display the file version, problably for
- * debugging.
- * @return true if the file version dialog should be displayed.
- */
-bool CStudioPreferences::ShowVersionDialog()
-{
-    return CPreferences::GetUserPreferences().GetValue("ShowVersionDlg", false);
-}
-
-//==============================================================================
-/**
- * Sets whether or not to show the version dialog.
- * Used in some of the serialization to display the file version, problably for
- * debugging.
- * @param true if the file version dialog should be displayed.
- */
-void CStudioPreferences::SetShowVersionDialog(bool inShowVersionDlg)
-{
-    CPreferences::GetUserPreferences().SetValue("ShowVersionDlg", inShowVersionDlg);
-}
-
-//==============================================================================
-/**
- * Gets whether the client map file should be written out when exporting.
- * The map file shows where all the file size is made up from and is good when
- * really trying to get the file size down.
- * @return true if the map file should be written.
- */
-bool CStudioPreferences::ShouldWriteMapFile()
-{
-    return CPreferences::GetUserPreferences().GetValue("Map", false);
-}
-
-//==============================================================================
-/**
- * Default color of the scene from a new presentation.
- */
-::CColor CStudioPreferences::GetDefaultSceneColor()
-{
-    return CPreferences::GetUserPreferences().GetColorValue("SceneColor", ::CColor(0, 0, 0));
-}
-
-//==============================================================================
-/**
- * Default color of new primitives.
- */
-::CColor CStudioPreferences::GetDefaultPrimitiveColor()
-{
-    return CPreferences::GetUserPreferences().GetColorValue("PrimitiveColor",
-                                                            ::CColor(255, 255, 255));
-}
-
-//==============================================================================
-/**
- * True if debugging timebar lengths.
- */
-bool CStudioPreferences::IsDebugTimes()
-{
-    return m_DebugTimes;
 }
 
 //==============================================================================
@@ -1355,7 +1218,8 @@ QString CStudioPreferences::GetFontFaceName()
 
 float CStudioPreferences::getSelectorLineWidth()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("SelectorLineWidth", 30) / 10.0f;
+    return CPreferences::GetUserPreferences().GetLongValue("SelectorLineWidth",
+                                                           DEFAULT_SELECTOR_WIDTH) / 10.0f;
 }
 
 void CStudioPreferences::setSelectorLineWidth(float width)
@@ -1365,7 +1229,8 @@ void CStudioPreferences::setSelectorLineWidth(float width)
 
 float CStudioPreferences::getSelectorLineLength()
 {
-    return float(CPreferences::GetUserPreferences().GetLongValue("SelectorLineLength", 50));
+    return float(CPreferences::GetUserPreferences().GetLongValue("SelectorLineLength",
+                                                                 DEFAULT_SELECTOR_LENGTH));
 }
 
 void CStudioPreferences::setSelectorLineLength(float length)
@@ -1555,24 +1420,4 @@ Q3DStudio::CString CStudioPreferences::GetVersionString()
     theVersionNumber.Replace(",", ".");
 
     return theVersionNumber;
-}
-
-//==============================================================================
-/**
- *	Returns the state of the timeline snapping grid
- *	@return true if the snapping grid is active
- */
-bool CStudioPreferences::IsSlideIconVisible()
-{
-    return CPreferences::GetUserPreferences().GetValue("SlideIconVisible", true);
-}
-
-//==============================================================================
-/**
- *	Sets the state of the timeline snapping grid
- *	@param inActiveFlag true if the snapping grid is active
- */
-void CStudioPreferences::SetSlideIconVisible(bool inVisible)
-{
-    CPreferences::GetUserPreferences().SetValue("SlideIconVisible", inVisible);
 }

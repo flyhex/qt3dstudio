@@ -33,18 +33,15 @@
 
 #include "Qt3DSId.h"
 
-/// Update masks. Each view will check their mask against the HINT passed in via UpdateAllViews (in
-/// their OnUpdate). If
-/// their bit is set, they will requery the document for the entire presentation's data. Otherwise,
-/// they'll ignore the
-/// update.
+// Update masks. Each view will check their mask against the HINT passed in via UpdateAllViews (in
+// their OnUpdate). If their bit is set, they will requery the document for the entire
+// presentation's data. Otherwise, they'll ignore the update.
 // These are the new operation update masks
 namespace UPDATEMASK {
 const long NONE = 0x00000000;
 const long UPDATECLIENT = 0x00000010; // Update the Client Scene
 const long NEWRESOURCE = 0x00000100; // We've added a new item to the Library
-const long NEWRESOURCE_LOADING =
-    0x00000200; // This is when we're loading items from the Library - not everything exists yet
+const long NEWRESOURCE_LOADING = 0x00000200; // This is when we're loading items from the Library
 const long PROPERTYCHANGE = 0x00000400; // Property on the selected object changed
 const long ASSOCIATIONCHANGE = 0x00000800; // An association changed (added or removed)
 const long SELECTIONCHANGE = 0x00001000; // The selected object changed
@@ -60,10 +57,8 @@ const long KEYFRAMEDELETE = 0x00400000; // A keyframe was removed
 const long KEYFRAMESELECT = 0x00800000; // A keyframe was selected
 const long KEYFRAMEDESELECT = 0x01000000; // A keyframe was deselected
 const long KEYFRAMEMOVE = 0x02000000; // A keyframe was moved (time was changed)
-const long TIMEBARCHANGE =
-    0x04000000; // Position of a timebar has changed (primarily due to undo/redo)
-const long INITSTORAGEPALETTE =
-    0x08000000; // Clear storage palette tabs and create the default tabs
+const long TIMEBARCHANGE = 0x04000000; // Position of a timebar has changed (undo/redo etc.)
+const long INITSTORAGEPALETTE = 0x08000000; // Clear storage palette and create the default tabs
 const long SHOWHELPPALETTE = 0x10000000; // Show the Help Palette if it is not already showing
 const long RESETDATA = 0x20000000; // Reset the data in the view by clearing the view's contents
 const long PLAYMODECHANGE = 0x40000000; // The Studio play mode has changed
@@ -74,22 +69,6 @@ enum EPlayMode {
     PLAYMODE_STOP = 1,
     PLAYMODE_PLAY = 2,
 };
-
-/// Define used to reference a GUID used internally in Client.
-static const GUID GUID_SCENE = {
-    0xFFFFFFFF, 0xFFFF, 0xFFFF, { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
-};
-
-// Used to determine if a keyframe needs to be set on F6.
-// This is determined by FLOAT_NUM_DECIMAL_PLACES and should not be larger than
-// .1^FLOAT_NUM_DECIMAL_PLACES.
-const float FLOAT_DIFF_TOLERANCES = .001f;
-
-// Length of the animation tracks. This needs to be at least 1 ms longer
-// than the limit of the timeline.
-// This is currently 10 min, 18 sec. The limit is therefore 10 min, 20 sec, 1 ms.
-// set to long max.
-const long ANIMATION_TRACK_LIMIT = LONG_MAX - 1;
 
 // Snapping grid settings
 enum ESnapGridResolution {
@@ -107,9 +86,6 @@ const long STUDIO_TOOLMODE_CAMERA_ZOOM = 0x20;
 const long STUDIO_TOOLMODE_CAMERA_ROTATE = 0x40;
 
 const long STUDIO_CAMERATOOL_MASK = 0xF0;
-
-/// Defines the base duration of the presentation on creation (on File | New).
-const long DEFAULT_DURATION = 10000;
 
 // Client Select Mode Constants
 const long STUDIO_SELECTMODE_ENTITY = 0x01;

@@ -134,9 +134,9 @@ void CStudioAppPrefsPage::OnInitDialog()
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, [=](){ SetModified(true); m_restartNeeded = true; });
     connect(m_ui->autosaveEnabled, &QCheckBox::clicked, this,
-            [=](){ m_autosaveChanged = true; });
+            [=](){ SetModified(true); m_autosaveChanged = true; });
     connect(m_ui->autosaveInterval, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, [=](){ m_autosaveChanged = true; });
+            this, [=](){ SetModified(true); m_autosaveChanged = true; });
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     connect(m_ui->m_PreviewSelector, activated,
             this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
@@ -198,6 +198,7 @@ void CStudioAppPrefsPage::updateColorButton()
 {
     QString bgColorStyle = QStringLiteral("background-color: ") + m_bgColor.name();
     m_ui->m_EditViewBGColor->setStyleSheet(bgColorStyle);
+    SetModified(true);
 }
 
 //==============================================================================
@@ -262,10 +263,10 @@ void CStudioAppPrefsPage::SaveSettings()
 //==============================================================================
 bool CStudioAppPrefsPage::OnApply()
 {
-    // Apply was clicked - save settings and disabled the Apply button
-    this->SaveSettings();
+    // Apply was clicked - save settings and disable the Apply button
+    SaveSettings();
 
-    this->SetModified(false);
+    SetModified(false);
 
     // Request that the renderer refreshes as settings may have changed
     g_StudioApp.GetRenderer().RequestRender();
@@ -420,16 +421,16 @@ void CStudioAppPrefsPage::OnBgColorButtonClicked()
     else
         m_bgColor = previousColor;
     updateColorButton();
-    this->SetModified(true);
-    OnApply();
+    CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
+    g_StudioApp.GetRenderer().RequestRender();
 }
 
 void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
 {
     m_bgColor = color;
     updateColorButton();
-    this->SetModified(true);
-    OnApply();
+    CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
+    g_StudioApp.GetRenderer().RequestRender();
 }
 
 void CStudioAppPrefsPage::enableAutosave(bool enabled)
