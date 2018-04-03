@@ -51,6 +51,7 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
     m_ui->comboBoxTypeList->addItem(tr("Boolean"));
     m_ui->comboBoxTypeList->addItem(tr("Vector3"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
     m_ui->comboBoxTypeList->addItem(tr("Variant"));
 
     initDialog();
@@ -205,10 +206,12 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
             && dmType == qt3dsdm::DataModelDataType::Bool)
         || (dlgType == EDataType::DataTypeVector3
             && dmType == qt3dsdm::DataModelDataType::Float3)
+        || (dlgType == EDataType::DataTypeVector2
+            && dmType == qt3dsdm::DataModelDataType::Float2)
         // Variant can be bound to any property type.
         // Allow also Evaluator binding to any property as we only know the evaluation
         // result type at runtime.
-        || dlgType == EDataType::DataTypeVariant || EDataType::DataTypeEvaluator) {
+        || dlgType == EDataType::DataTypeVariant || dlgType == EDataType::DataTypeEvaluator) {
         return true;
     }
 

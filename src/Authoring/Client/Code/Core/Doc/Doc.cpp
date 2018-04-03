@@ -2814,6 +2814,8 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
                                 item->type = EDataType::DataTypeBoolean;
                             } else if (!QString(type.c_str()).compare(QStringLiteral("Vector3"))) {
                                 item->type = EDataType::DataTypeVector3;
+                            } else if (!QString(type.c_str()).compare(QStringLiteral("Vector2"))) {
+                                item->type = EDataType::DataTypeVector2;
                             } else if (!QString(type.c_str()).compare(QStringLiteral("Variant"))) {
                                 item->type = EDataType::DataTypeVariant;
                             } else if (!QString(type.c_str())

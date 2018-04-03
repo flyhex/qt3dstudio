@@ -172,6 +172,7 @@ enum DataInputType {
     DataInputTypeEvaluator,
     DataInputTypeBoolean,
     DataInputTypeVector3,
+    DataInputTypeVector2,
     DataInputTypeVariant
 };
 

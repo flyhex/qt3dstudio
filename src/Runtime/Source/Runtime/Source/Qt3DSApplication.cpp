@@ -1160,6 +1160,8 @@ struct SApp : public IApplication
                         diDef.type = DataInputTypeFloat;
                     else if (AreEqual(type, "Vector3"))
                         diDef.type = DataInputTypeVector3;
+                    else if (AreEqual(type, "Vector2"))
+                        diDef.type = DataInputTypeVector2;
                     else if (AreEqual(type, "Boolean"))
                         diDef.type = DataInputTypeBoolean;
                     else if (AreEqual(type, "Variant"))

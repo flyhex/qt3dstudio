@@ -53,6 +53,7 @@ enum EDataType {
     DataTypeEvaluator,
     DataTypeBoolean,
     DataTypeVector3,
+    DataTypeVector2,
     DataTypeVariant
 };
 

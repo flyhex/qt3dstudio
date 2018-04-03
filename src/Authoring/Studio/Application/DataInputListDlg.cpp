@@ -168,6 +168,8 @@ void CDataInputListDlg::updateContents()
             dataInput.append(new QStandardItem(tr("Boolean")));
         } else if (dataInputType == DataTypeVector3) {
             dataInput.append(new QStandardItem(tr("Vector3")));
+        } else if (dataInputType == DataTypeVector2) {
+            dataInput.append(new QStandardItem(tr("Vector2")));
         } else if (dataInputType == DataTypeVariant) {
             dataInput.append(new QStandardItem(tr("Variant")));
         }
