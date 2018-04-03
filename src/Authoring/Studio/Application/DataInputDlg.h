@@ -50,8 +50,7 @@ enum EDataType {
     DataTypeRangedNumber = 0,
     DataTypeString,
     DataTypeFloat,
-    // TODO Evaluator
-    // DataTypeEvaluator,
+    DataTypeEvaluator,
     DataTypeBoolean,
     DataTypeVector3,
     DataTypeVariant
@@ -79,9 +78,7 @@ private Q_SLOTS:
     void onMinChanged(float min);
     void onMaxChanged(float max);
     void onNameChanged(const QString &name);
-#if 0 // TODO: To be added in version 2.x
     void onTextChanged(const QString &text);
-#endif
 
 private:
     Ui::DataInputDlg *m_ui;
@@ -91,9 +88,7 @@ private:
     float m_max;
     float m_min;
     int m_type;
-#if 0 // TODO: To be added in version 2.x
     QString m_text;
-#endif
 };
 
 #endif

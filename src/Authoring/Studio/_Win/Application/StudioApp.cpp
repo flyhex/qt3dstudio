@@ -1474,10 +1474,8 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
                 list.append(QStringLiteral("Boolean"));
             else if (item->type == EDataType::DataTypeVector3)
                 list.append(QStringLiteral("Vector3"));
-#if 0
             else if (item->type == EDataType::DataTypeEvaluator)
                 list.append(QStringLiteral("Evaluator"));
-#endif
             else if (item->type == EDataType::DataTypeVariant)
                 list.append(QStringLiteral("Variant"));
 
@@ -1485,6 +1483,8 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
             // varies between different types
             list.append(QString::number(item->minValue));
             list.append(QString::number(item->maxValue));
+            // Write evaluator expression
+            list.append(QString(item->valueString));
         }
     }
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());

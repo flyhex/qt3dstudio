@@ -36,6 +36,7 @@
 #include "foundation/Utils.h"
 #include "Qt3DSKernelTypes.h"
 #include "Qt3DSMetadata.h"
+#include "QtQml/qjsengine.h"
 
 namespace Q3DStudio {
 class IRuntimeFactory;
@@ -168,8 +169,7 @@ enum DataInputType {
     DataInputTypeRangedNumber,
     DataInputTypeString,
     DataInputTypeFloat,
-    // TODO Evaluator
-    // DataTypeEvaluator,
+    DataInputTypeEvaluator,
     DataInputTypeBoolean,
     DataInputTypeVector3,
     DataInputTypeVariant
@@ -181,6 +181,9 @@ struct DataInputDef
     DataInputType type = DataInputTypeInvalid;
     float min = 0.0f;
     float max = 0.0f;
+    QString evaluator;
+    QJSValue evalFunc;  // keep both evaluator string and JS function
+                        // to avoid having to evaluate string several times
 };
 
 typedef QMap<QString, DataInputDef> DataInputMap;

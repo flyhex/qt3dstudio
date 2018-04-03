@@ -1145,10 +1145,12 @@ struct SApp : public IApplication
                     DataInputDef diDef;
                     const char8_t *name = "";
                     const char8_t *type = "";
+                    const char8_t *evaluator = "";
                     inReader.UnregisteredAtt("name", name);
                     inReader.UnregisteredAtt("type", type);
                     inReader.Att("min", diDef.min);
                     inReader.Att("max", diDef.max);
+                    inReader.UnregisteredAtt("evaluator", evaluator);
                     if (AreEqual(type, "Ranged Number"))
                         diDef.type = DataInputTypeRangedNumber;
                     else if (AreEqual(type, "String"))
@@ -1161,6 +1163,12 @@ struct SApp : public IApplication
                         diDef.type = DataInputTypeBoolean;
                     else if (AreEqual(type, "Variant"))
                         diDef.type = DataInputTypeVariant;
+
+                    if (AreEqual(type, "Evaluator")) {
+                        diDef.type = DataInputTypeEvaluator;
+                        diDef.evaluator = QString::fromUtf8(evaluator);
+                    }
+
                     m_dataInputs.insert(QString::fromUtf8(name), diDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";

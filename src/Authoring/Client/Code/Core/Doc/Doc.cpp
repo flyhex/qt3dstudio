@@ -2793,12 +2793,12 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
                         qt3dsdm::TXMLStr type = nullptr;
                         qt3dsdm::TXMLStr min = nullptr;
                         qt3dsdm::TXMLStr max = nullptr;
+                        qt3dsdm::TXMLStr evaluator = nullptr;
                         CDataInputDialogItem *item = new CDataInputDialogItem();
 
                         theReader->Att("name", name);
                         item->name = QString(name.c_str());
 
-                        // TODO: Implement evaluator
                         if (theReader->Att("type", type)) {
                             if (!QString(type.c_str()).compare(QStringLiteral("Ranged Number"))) {
                                 item->type = EDataType::DataTypeRangedNumber;
@@ -2816,6 +2816,11 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
                                 item->type = EDataType::DataTypeVector3;
                             } else if (!QString(type.c_str()).compare(QStringLiteral("Variant"))) {
                                 item->type = EDataType::DataTypeVariant;
+                            } else if (!QString(type.c_str())
+                                       .compare(QStringLiteral("Evaluator"))) {
+                                item->type = EDataType::DataTypeEvaluator;
+                                if (theReader->Att("evaluator", evaluator))
+                                    item->valueString = evaluator.c_str();
                             }
                         }
 
