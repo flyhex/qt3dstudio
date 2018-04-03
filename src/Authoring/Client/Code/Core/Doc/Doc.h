@@ -199,6 +199,7 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance();
 
     void CutSelectedObject();
+    void DeleteSelectedItems();
     void DeleteSelectedObject();
     bool DeleteSelectedKeys();
     void SetChangedKeyframes();
@@ -403,7 +404,6 @@ protected:
     void CreatePresentation();
     void ClosePresentation();
 
-    void DeleteSelectedItems();
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                Q3DStudio::CString &ioActionDependencies);
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,

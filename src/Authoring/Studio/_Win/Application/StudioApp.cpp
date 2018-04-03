@@ -935,11 +935,11 @@ void CStudioApp::DeleteSelectedKeys()
 
 //=============================================================================
 /**
- * Deletes all selected object
+ * Deletes selected object or keyframes
  */
 void CStudioApp::DeleteSelectedObject()
 {
-    m_Core->GetDoc()->DeleteSelectedObject();
+    m_Core->GetDoc()->DeleteSelectedItems();
 }
 
 //=============================================================================
