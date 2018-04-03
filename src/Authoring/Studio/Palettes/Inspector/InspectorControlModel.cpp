@@ -412,18 +412,21 @@ QString InspectorControlModel::currentControllerValue(long instance, int handle)
         Q3DStudio::CString propName
                 = studio->GetPropertySystem()->GetName(handle).c_str();
 
-        long propNamePos = currPropValStr.find(propName);
+        // Datainput controller name is always prepended with "$". Differentiate
+        // between datainput and property that has the same name by searching specifically
+        // for whitespace followed by property name.
+        long propNamePos = currPropValStr.find(" " + propName);
         if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0)) {
-            long posCtrlr = currPropValStr.substr(0, propNamePos - 1).ReverseFind(" ");
+            long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
 
             // adjust pos if this is the first controller - property pair
             // in controlledproperty
             if (posCtrlr < 0)
                 posCtrlr = 0;
-            else
-                posCtrlr++; // remove whitespace delimiter
 
-            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr - 1).toQString();
+            // remove $
+            posCtrlr++;
+            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr).toQString();
         }
         else
             return {};
@@ -451,14 +454,10 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
     } else {
        Q3DStudio::CString propName
            = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
-       // TODO this only works when controlling a single property,
-       // see below
-       // Item is not controlled if property name is not found altogether,
-       // or it is found at the beginning of the string where it should
-       // be considered to be the name of controlling datainput
-       // (this handles the case of datainput name being one of
-       // property names)
-       long propNamePos = currPropValStr.find(propName);
+       // Search specifically for whitespace followed with registered property name.
+       // This avoids finding datainput with same name as the property, as datainput
+       // name is always prepended with "$"
+       long propNamePos = currPropValStr.find(" " + propName);
        if ((propNamePos == currPropValStr.ENDOFSTRING)
            && (propNamePos != 0)) {
            inItem->m_controlled = false;
@@ -467,16 +466,18 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            inItem->m_controller = "";
        } else {
            inItem->m_controlled = true;
-           long posCtrlr = currPropValStr.substr(0, propNamePos - 1).ReverseFind(" ");
+           // controller name is prepended with "$" to differentiate from property
+           // with same name. Reverse find specifically for $.
+           long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
 
            // this is the first controller - property pair in controlledproperty
            if (posCtrlr < 0)
                posCtrlr = 0;
-           else
-               posCtrlr++;
 
+           // remove $ from controller name for showing it in UI
+           posCtrlr++;
            const QString ctrlName = currPropValStr.substr(
-               posCtrlr, propNamePos - posCtrlr - 1).toQString();
+               posCtrlr, propNamePos - posCtrlr).toQString();
 
            inItem->m_tooltip = tr("Controlling Data Input:\n%1").arg(ctrlName);
            inItem->m_controller = ctrlName;

@@ -319,7 +319,7 @@ void CDoc::SetInstancePropertyControlled(
         // Insert delimiter to if we already have an existing string.
         if (currCtrldPropsStr.size())
             controlledElemStr.append(" ");
-        controlledElemStr.append(controller);
+        controlledElemStr.append("$" + controller);
         controlledElemStr.append(" ");
         controlledElemStr.append(metadata->m_Name.c_str());
 

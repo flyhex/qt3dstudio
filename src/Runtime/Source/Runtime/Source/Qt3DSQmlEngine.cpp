@@ -997,7 +997,10 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
             if (!valueStr.isEmpty()) {
                 QStringList splitValues = valueStr.split(QChar(' '));
                 for (int i = 1; i < splitValues.size(); i += 2) {
-                    if (diMap.contains(splitValues[i - 1])) {
+                    QString controllerName = splitValues[i - 1];
+                    // remove datainput name prefix "$"
+                    controllerName.remove(0, 1);
+                    if (diMap.contains(controllerName)) {
                         qt3ds::runtime::DataInputControlledAttribute ctrlElem;
                         if (!isPrimary) {
                             // Prepend presentation id to element path
@@ -1013,7 +1016,7 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                             ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_SLIDE;
                             TElement *component = &element->GetComponentParent();
                             ctrlElem.elementPath.append(component->m_Path);
-                        } else if (diMap[splitValues[0]].type
+                        } else if (diMap[controllerName].type
                                    == qt3ds::runtime::DataInputTypeVector3) {
                             // special handling for vector datatype to handle
                             // expansion from <propertyname> to <propertyname>.x .y .z
@@ -1046,7 +1049,7 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                                            << ctrlElem.attributeName.first() << " not existing!";
                             }
                         }
-                        qt3ds::runtime::DataInputDef &diDef = diMap[splitValues[i - 1]];
+                        qt3ds::runtime::DataInputDef &diDef = diMap[controllerName];
                         diDef.controlledAttributes.append(ctrlElem);
                     }
                 }

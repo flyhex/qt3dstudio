@@ -81,6 +81,11 @@ void CDataInputDlg::initDialog()
 {
     m_ui->lineEditEvaluation->setVisible(false);
     m_ui->labelEvaluation->setVisible(false);
+
+    // Disallow special characters and whitespaces
+    QRegExpValidator *rxp = new QRegExpValidator(QRegExp("[A-Za-z0-9_]+"), this);
+    m_ui->lineEditInputName->setValidator(rxp);
+
     if (!m_dataInput->name.isEmpty()) {
         m_name = m_dataInput->name;
         m_type = m_dataInput->type;

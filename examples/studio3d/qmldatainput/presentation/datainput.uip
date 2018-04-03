@@ -5,7 +5,7 @@
 			<CustomColors count="16" >#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff</CustomColors>
 		</ProjectSettings>
 		<Graph >
-			<Scene id="Scene" controlledproperty="rangeInput @timeline" >
+			<Scene id="Scene" controlledproperty="$rangeInput @timeline" >
 				<Layer id="Layer" >
 					<Camera id="Camera" />
 					<Light id="Light" />
@@ -34,26 +34,26 @@
 		<Logic >
 			<State name="Master Slide" component="#Scene" >
 				<Add ref="#Layer" />
-				<Add ref="#Camera" controlledproperty="vec3Input3 rotation" pivot="0 0 0" rotation="0 0 0" />
-				<Add ref="#Light" castshadow="True" controlledproperty="vec3Input lightdiffuse" lightdiffuse="1 0 0" position="-350.984 -229.258 -30" />
+				<Add ref="#Camera" controlledproperty="$vec3Input3 rotation" pivot="0 0 0" rotation="0 0 0" />
+				<Add ref="#Light" castshadow="True" controlledproperty="$vec3Input lightdiffuse" lightdiffuse="1 0 0" position="-350.984 -229.258 -30" />
 				<State id="Scene-Slide1" name="Slide1" initialplaystate="Pause" >
-					<Add ref="#Text" name="Text" controlledproperty="stringInput textstring" font="TitilliumWeb-Regular" position="15.2141 -9.98814 -113.498" scale="1 1 1" size="48" textstring="0" >
+					<Add ref="#Text" name="Text" controlledproperty="$rangeInput opacity $stringInput textstring" font="TitilliumWeb-Regular" position="15.2141 -9.98814 -113.498" scale="1 1 1" size="48" textstring="0" >
 						<AnimationTrack property="rotation.x" type="EaseInOut" >0 0 0 0 10 0 0 0</AnimationTrack>
 						<AnimationTrack property="rotation.y" type="EaseInOut" >0 0 0 0 10 0 0 0</AnimationTrack>
 						<AnimationTrack property="rotation.z" type="EaseInOut" >0 0 0 0 10 -360 0 0</AnimationTrack>
 					</Add>
 					<Add ref="#Text2" name="Text2" controlledproperty="" font="TitilliumWeb-Regular" position="28.8676 90.9325 0" scale="1 1 1" size="26" textstring="Text control&#10;Rotation animation control via datainput timeline control" />
-					<Add ref="#Cone" name="Cone" controlledproperty="vec3Input scale" position="-417.135 -225.166 0" sourcepath="#Cone" />
+					<Add ref="#Cone" name="Cone" controlledproperty="$vec3Input scale" position="-417.135 -225.166 0" sourcepath="#Cone" />
 					<Add ref="#Default" />
-					<Add ref="#Cube" name="Cube" controlledproperty="floatInput opacity" opacity="60" position="-135.677 -173.205 0" sourcepath="#Cube" />
+					<Add ref="#Cube" name="Cube" controlledproperty="$vec3Input3 pivot" opacity="60" position="-135.677 -173.205 0" sourcepath="#Cube" />
 					<Add ref="#Default_001" />
-					<Add ref="#Cylinder" name="Cylinder" controlledproperty="variantInput opacity" position="131.347 -180.422 0" sourcepath="#Cylinder" />
+					<Add ref="#Cylinder" name="Cylinder" controlledproperty="$variantInput opacity" position="131.347 -180.422 0" sourcepath="#Cylinder" />
 					<Add ref="#Default_002" />
 					<Add ref="#Text5" name="Text5" font="TitilliumWeb-Regular" position="-152.998 -290.118 0" textstring="Opacity control" />
 					<Add ref="#Text6" name="Text6" font="TitilliumWeb-Regular" position="135.678 -300.019 -8.28656" textstring="Opacity control&#10;(Variant type)" />
 					<Add ref="#Text8" name="Text8" font="TitilliumWeb-Regular" position="-428.683 -290.118 0" textstring="Scale control" />
-					<Add ref="#Cube2" name="Cube2" controlledproperty="vec3Input rotation" position="409.919 -177.535 0" sourcepath="#Cube" />
-					<Add ref="#Default_003" controlledproperty="vec3Input2 diffuse" />
+					<Add ref="#Cube2" name="Cube2" controlledproperty="$vec3Input rotation" position="409.919 -177.535 0" sourcepath="#Cube" />
+					<Add ref="#Default_003" controlledproperty="$vec3Input2 diffuse" />
 					<Add ref="#Text3" name="Text3" font="TitilliumWeb-Regular" position="434.456 -304.552 0" textstring="Rotation control&#10;Diffuse color control" />
 					<Add ref="#Text4" name="Text4" font="TitilliumWeb-Regular" position="-381.051 290.118 0" textstring="Directional light color and Camera xy &#10;rotation controlled via Datainput" />
 				</State>

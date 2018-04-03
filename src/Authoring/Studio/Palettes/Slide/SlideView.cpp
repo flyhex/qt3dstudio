@@ -294,7 +294,7 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
     QString fullSlideControlStr;
 
     if (dataInputName != m_dataInputSelector->getNoneString()) {
-        fullSlideControlStr = dataInputName + " @slide";
+        fullSlideControlStr = "$" + dataInputName + " @slide";
         m_controlled = true;
         m_currentController = dataInputName;
         m_toolTip = tr("Slide Controller:\n") + m_currentController;
@@ -327,9 +327,9 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
     if (existingCtrl.contains("@slide")) {
         int slideStrPos = existingCtrl.indexOf("@slide");
         // find the controlling datainput name and build the string to replace
-        int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
-        QString prevCtrler = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 1);
-        existingCtrl.replace(prevCtrler + "@slide", fullSlideControlStr);
+        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
+        QString prevCtrler = existingCtrl.mid(ctrStrPos, slideStrPos - ctrStrPos - 1);
+        existingCtrl.replace(prevCtrler + " @slide", fullSlideControlStr);
     } else {
         (!existingCtrl.isEmpty() && m_controlled) ? existingCtrl.append(" ") : 0;
         existingCtrl.append(fullSlideControlStr);
@@ -377,7 +377,7 @@ void SlideView::updateDataInputStatus(bool isViaDispatch)
     auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
     if (existingCtrl.contains("@slide")) {
         int slideStrPos = existingCtrl.indexOf("@slide");
-        int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
+        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
         m_currentController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
         m_toolTip = tr("Slide Controller:\n") + m_currentController;
         m_controlled = true;

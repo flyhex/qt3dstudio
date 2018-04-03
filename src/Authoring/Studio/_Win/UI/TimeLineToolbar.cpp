@@ -175,7 +175,7 @@ void TimeLineToolbar::UpdateDataInputStatus(bool isViaDispatch)
 
         if (existingCtrl.contains("@timeline")) {
             int slideStrPos = existingCtrl.indexOf("@timeline");
-            int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
+            int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
             m_currController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
         } else {
             m_currController.clear();
@@ -253,7 +253,7 @@ void TimeLineToolbar::onDataInputChange(int handle, int instance, const QString 
 
     if (dataInputName != m_dataInputSelector->getNoneString()) {
         m_ui->addDataInputButton->setToolTip(tr("Timeline Controller:\n%1").arg(dataInputName));
-        fullTimeControlStr = dataInputName + " @timeline";
+        fullTimeControlStr = "$" + dataInputName + " @timeline";
         m_ui->addDataInputButton->setIcon(QIcon(":/images/Objects-DataInput-Normal.png"));
         m_currController = dataInputName;
         UpdateTimelineTitleColor(false);
@@ -288,8 +288,8 @@ void TimeLineToolbar::onDataInputChange(int handle, int instance, const QString 
     if (existingCtrl.contains("@timeline")) {
         int slideStrPos = existingCtrl.indexOf("@timeline");
         // find the controlling datainput name and build the string to replace
-        int ctrStrPos = existingCtrl.lastIndexOf(" ", slideStrPos - 2);
-        QString prevCtrler = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 1);
+        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
+        QString prevCtrler = existingCtrl.mid(ctrStrPos, slideStrPos - ctrStrPos);
         existingCtrl.replace(prevCtrler + "@timeline", fullTimeControlStr);
     } else {
         if (!existingCtrl.isEmpty() && m_currController.size())
