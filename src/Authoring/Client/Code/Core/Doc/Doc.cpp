@@ -302,7 +302,7 @@ void CDoc::SetInstancePropertyControlled(
         thePropertySystem->GetInstancePropertyValue(
             instance, ctrldElemPropHandle, currentCtrldProps);
 
-        Q3DStudio::CString currCtrldPropsStr
+        currCtrldPropsStr
             = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
     }
 
