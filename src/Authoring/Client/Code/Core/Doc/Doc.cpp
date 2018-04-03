@@ -1750,8 +1750,9 @@ void CDoc::HandleMasterPaste()
                 if (theMasterSlideHandle.Valid())
                     theTargetSlide = theMasterSlideHandle;
                 PasteObjectMaster(theSelectedInstance);
-            } else
+            } else {
                 PasteObject(theSelectedInstance);
+            }
         } else {
             qt3dsdm::Qt3DSDMSlideHandle theMasterSlideHandle =
                     theSlideSystem->GetMasterSlide(theTargetSlide);

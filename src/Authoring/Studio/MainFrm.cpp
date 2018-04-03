@@ -548,8 +548,10 @@ void CMainFrame::OnUpdateEditPaste()
         m_ui->action_Paste->setText(theUndoDescription);
 
         m_ui->action_Paste->setEnabled(true);
+        m_ui->actionPaste_to_Master_Slide->setEnabled(true);
     } else {
         m_ui->action_Paste->setEnabled(false);
+        m_ui->actionPaste_to_Master_Slide->setEnabled(false);
     }
 }
 
