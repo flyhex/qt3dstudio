@@ -53,7 +53,7 @@
 					<Add ref="#Default_001" />
 					<Add ref="#Cylinder" name="Cylinder" controlledproperty="$variantInput opacity" position="131.347 -180.422 0" sourcepath="#Cylinder" />
 					<Add ref="#Default_002" />
-					<Add ref="#Text5" name="Text5" font="TitilliumWeb-Regular" position="-152.998 -290.118 0" textstring="Opacity control" />
+					<Add ref="#Text5" name="Text5" font="TitilliumWeb-Regular" position="-158.772 -301.665 0" textstring="Opacity control&#10;(Evaluator type)" />
 					<Add ref="#Text6" name="Text6" font="TitilliumWeb-Regular" position="135.678 -300.019 -8.28656" textstring="Opacity control&#10;(Variant type)" />
 					<Add ref="#Text8" name="Text8" font="TitilliumWeb-Regular" position="-428.683 -290.118 0" textstring="Scale control" />
 					<Add ref="#Cube2" name="Cube2" controlledproperty="$vec3Input rotation" position="409.919 -177.535 0" sourcepath="#Cube" />

@@ -1146,6 +1146,7 @@ struct SApp : public IApplication
                     const char8_t *name = "";
                     const char8_t *type = "";
                     const char8_t *evaluator = "";
+                    diDef.value = QVariant::Invalid;
                     inReader.UnregisteredAtt("name", name);
                     inReader.UnregisteredAtt("type", type);
                     inReader.Att("min", diDef.min);
