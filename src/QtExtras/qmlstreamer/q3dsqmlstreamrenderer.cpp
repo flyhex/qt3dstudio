@@ -359,9 +359,6 @@ bool Q3DSQmlStreamRenderer::event(QEvent *event)
         m_renderControl->prepareThread(m_renderThread);
         m_prepared = true;
 
-        if (m_requestUpdate)
-            QCoreApplication::postEvent(this, new RequestUpdate());
-
         return true;
     }
 
