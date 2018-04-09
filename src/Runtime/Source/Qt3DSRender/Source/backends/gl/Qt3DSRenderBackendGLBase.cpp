@@ -1929,8 +1929,15 @@ namespace render {
             GL_CALL_FUNCTION(glUniform4fv(id, count, (GLfloat *)value));
             break;
         case GL_INT:
-        case GL_BOOL:
             GL_CALL_FUNCTION(glUniform1iv(id, count, (GLint *)value));
+            break;
+        case GL_BOOL:
+            {
+                // Cast int value to be 0 or 1, matching to bool
+                GLint *boolValue = (GLint *)value;
+                *boolValue = *(GLboolean *)value;
+                GL_CALL_FUNCTION(glUniform1iv(id, count, boolValue));
+            }
             break;
         case GL_INT_VEC2:
         case GL_BOOL_VEC2:

@@ -62,12 +62,13 @@ ColumnLayout {
         id: multiLineComponent
 
         HandlerMultilineText {
-            readonly property var actionProperty: parent ? _actionView.property : null
+            readonly property var actionProperty: parent ? _parentView.property : null
 
             label: parent ? parent.label : ""
-            value: propertyModel && actionProperty && actionProperty.type ===  DataModelDataType.String
-                   ? propertyModel.value : ""
-            onEditingFinished: _actionView.setArgumentValue(propertyModel.valueHandle, value)
+            value: propertyModel && actionProperty
+                   && actionProperty.type === DataModelDataType.String
+                   && propertyModel.value !== undefined ? propertyModel.value : ""
+            onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
 
@@ -75,12 +76,13 @@ ColumnLayout {
         id: fontSizeComponent
 
         HandlerPropertyCombo {
-            readonly property var actionProperty: parent ? _actionView.property : null
+            readonly property var actionProperty: parent ? _parentView.property : null
 
             label: parent ? parent.label : ""
-            comboModel: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72", "96", "120"];
+            comboModel: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26",
+                "28", "36", "48", "72", "96", "120"];
 
-            onValueChanged: _actionView.setArgumentValue(propertyModel.valueHandle, value)
+            onValueChanged: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
 
@@ -107,11 +109,11 @@ ColumnLayout {
             }
 
             onEditingFinished: {
-                _actionView.setArgumentValue(propertyModel.valueHandle,
+                _parentView.setArgumentValue(propertyModel.valueHandle,
                                              Qt.vector3d(valueX, valueY, valueZ), true);
             }
             onPreviewValueChanged: {
-                _actionView.setArgumentValue(propertyModel.valueHandle,
+                _parentView.setArgumentValue(propertyModel.valueHandle,
                                              Qt.vector3d(valueX, valueY, valueZ), false);
             }
         }
@@ -121,7 +123,7 @@ ColumnLayout {
         id: sliderPropertyComponent
 
         HandlerPropertySlider {
-            readonly property var actionProperty: parent ? _actionView.property : null
+            readonly property var actionProperty: parent ? _parentView.property : null
 
             sliderMin: actionProperty ? actionProperty.min : 0
             sliderMax: actionProperty ? actionProperty.max : 100
@@ -130,7 +132,7 @@ ColumnLayout {
 
             label: parent ? parent.label : ""
 
-            onValueChanged: _actionView.setArgumentValue(propertyModel.valueHandle, value)
+            onValueChanged: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
 
@@ -138,12 +140,12 @@ ColumnLayout {
         id: comboPropertyComponent
 
         HandlerPropertyCombo {
-            readonly property var actionProperty: parent ? _actionView.property : null
+            readonly property var actionProperty: parent ? _parentView.property : null
 
             label: parent ? parent.label : ""
             comboModel: actionProperty ? actionProperty.possibleValues : null
 
-            onValueChanged: _actionView.setArgumentValue(propertyModel.valueHandle, value)
+            onValueChanged: _parentView.setArgumentValue(propertyModel.valueHandle, value)
 
         }
     }
@@ -156,7 +158,7 @@ ColumnLayout {
             checked: propertyModel ? propertyModel.value : false
 
             onClicked: {
-                _actionView.setArgumentValue(propertyModel.valueHandle, !checked)
+                _parentView.setArgumentValue(propertyModel.valueHandle, !checked)
             }
         }
     }
@@ -170,7 +172,7 @@ ColumnLayout {
             label: parent ? parent.label : ""
             color: propValue ? Qt.rgba(propValue.x, propValue.y, propValue.z, 1) : "black"
             onColorSelected: {
-                _actionView.setArgumentValue(propertyModel.valueHandle, selectedColor)
+                _parentView.setArgumentValue(propertyModel.valueHandle, selectedColor)
             }
         }
     }
@@ -181,7 +183,7 @@ ColumnLayout {
         HandlerGenericText {
             label: parent ? parent.label : ""
             value: propertyModel ? propertyModel.value : ""
-            onEditingFinished: _actionView.setArgumentValue(propertyModel.valueHandle, value)
+            onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
 
@@ -196,13 +198,13 @@ ColumnLayout {
                 notation: DoubleValidator.StandardNotation
             }
 
-            onEditingFinished: _actionView.setArgumentValue(propertyModel.valueHandle, value)
+            onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
 
     Loader {
         readonly property string label: qsTr("New Value")
-        readonly property var actionProperty: _actionView.property
+        readonly property var actionProperty: _parentView.property
 
         Layout.fillWidth: true
 
@@ -234,14 +236,15 @@ ColumnLayout {
                 return sliderPropertyComponent;
             case DataModelDataType.Float3:
                 switch (actionProperty.additionalType) {
-                    case AdditionalMetaDataType.None:
-                    case AdditionalMetaDataType.Rotation:
-                        return xyzPropertyComponent;
-                    case AdditionalMetaDataType.Color:
-                        return colorBox;
-                    default:
-                        console.warn("KDAB_TODO implement property handler for additional typeDataModelDataType.Float3: ", actionProperty.additionalType);
-                        return xyzPropertyComponent;
+                case AdditionalMetaDataType.None:
+                case AdditionalMetaDataType.Rotation:
+                    return xyzPropertyComponent;
+                case AdditionalMetaDataType.Color:
+                    return colorBox;
+                default:
+                    console.warn("KDAB_TODO implement property handler for additional " +
+                                 "typeDataModelDataType.Float3: ", actionProperty.additionalType);
+                    return xyzPropertyComponent;
                 }
             case DataModelDataType.String:
                 switch (actionProperty.additionalType) {
@@ -255,14 +258,16 @@ ColumnLayout {
                 case AdditionalMetaDataType.Renderable:
                     return genericTextComponent;
                 default:
-                    console.warn("KDAB_TODO implement property handler for additional type: ", actionProperty.additionalType)
+                    console.warn("KDAB_TODO implement property handler for additional type: ",
+                                 actionProperty.additionalType)
                     return null;
-            }
+                }
             case DataModelDataType.Bool:
                 return booleanComponent;
             case DataModelDataType.None:
                 return null;
-            default: console.warn("KDAB_TODO implement property handler for type: ", actionProperty.type)
+            default: console.warn("KDAB_TODO implement property handler for type: ",
+                                  actionProperty.type)
 
             }
             return null;

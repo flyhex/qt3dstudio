@@ -75,6 +75,7 @@ public:
                            int toRow);
     void refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle,
                            qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
+    void setSelectedSlideIndex(const QModelIndex &index);
 
 private:
     bool hasSlideWithName(const QString &name) const;

@@ -82,19 +82,16 @@ To connect to the target device Viewer from Qt 3D Studio, follow the steps below
 
 \section1 Preview Presentation
 
-To preview the presentation on the target device, press the \uicontrol{Preview} button
-\inlineimage preview-button.png
-in the Studio toolbar or press \uicontrol F5.
+To preview the presentation on the target device, press the \uicontrol{Remote Preview} button
+\inlineimage remote-preview-button.png
+in the Studio toolbar.
 
-After making changes to your presentation, press the \uicontrol{Preview} button to see the changes
-on the target device.
+After making changes to your presentation, press the \uicontrol{Remote Preview} button to see the
+changes on the target device.
 
 \section1 Disconnecting from the Target Device
 
 You can disconnect from the target device either by selecting \uicontrol{File > Connect to Device}
 from the Studio file menu, or by selecting \uicontrol{File > Disconnect} from the Viewer file menu.
-
-After disconnecting, the presentation will be shown in the local Viewer when pressing the
-\uicontrol{Preview} button.
 
 */

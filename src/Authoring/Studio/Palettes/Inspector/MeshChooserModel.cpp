@@ -31,6 +31,7 @@
 #include "Doc.h"
 #include "IDocumentBufferCache.h"
 #include "StudioApp.h"
+#include "BasicObjectsModel.h"
 
 MeshChooserModel::MeshChooserModel(QObject *parent)
     : ChooserModelBase(parent)
@@ -52,11 +53,13 @@ const QVector<ChooserModelBase::FixedItem> MeshChooserModel::getFixedItems() con
     static QVector<FixedItem> items;
 
     if (items.isEmpty()) {
-        auto primitiveNames = g_StudioApp.GetCore()->GetDoc()->GetBufferCache().GetPrimitiveNames();
-        for (auto item = primitiveNames; *item; ++item) {
-            auto itemName = *item;
+        auto primitives = BasicObjectsModel::BasicMeshesModel();
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        for (int i = 0; i < primitives.size(); i++) {
+            auto item = primitives.at(i);
+            const wchar_t *itemName = doc->GetBufferCache().GetPrimitiveName(item.primitiveType());
             if (itemName[0] == L'#')
-                items.append({ OBJTYPE_MODEL, QString::fromWCharArray(itemName + 1) });
+                items.append({ OBJTYPE_MODEL, item.icon(), QString::fromWCharArray(itemName + 1) });
         }
     }
 

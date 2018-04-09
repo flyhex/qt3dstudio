@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Effect>
 	<MetaData>
-		<Property name="Threshold" formalName="Threshold of the luminocity pass" description="Objects brighter than this will be part of the filter" min=".1" max=".98" default=".8" />
+                <Property name="Threshold" formalName="Threshold of the luminocity pass" description="Objects brighter than this will\nbe part of the filter" min=".1" max=".98" default=".8" />
 		<Property name="PoissonRotation" hidden="True" default="0"/>
 		<Property name="PoissonDistance" hidden="True" default="4"/>
 		<Property name="Downsample2" 	filter="linear" clamp="clamp" type="Texture" />

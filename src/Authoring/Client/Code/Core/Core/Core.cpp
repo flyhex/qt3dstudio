@@ -117,14 +117,15 @@ bool CCore::LoadBuildConfigurations()
     CFilePath theCurrentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
     CFilePath theMainDir = theCurrentPath.GetDirectory()
             .GetDirectory()
-            .GetDirectory(); //.GetDirectory();	// Developing directory
+            .GetDirectory();
     CFilePath theStudioDir =
-            CFilePath::CombineBaseAndRelative(theMainDir, CFilePath(L"Studio/Build Configurations"));
+            CFilePath::CombineBaseAndRelative(theMainDir,
+                                              CFilePath(L"Studio/Build Configurations"));
     Qt3DSFile theConfigurationDirectory(theStudioDir);
     if (!theStudioDir.IsDirectory())
         theConfigurationDirectory = Qt3DSFile(
                     Qt3DSFile::GetApplicationDirectory().GetAbsolutePath(),
-                    Q3DStudio::CString(L"Build Configurations")); // Installed directory // TODO: Localize
+                    Q3DStudio::CString(L"Build Configurations")); // Installed directory
 
     Q3DStudio::CBuildConfigParser theParser(m_BuildConfigurations);
     bool theSuccess = theParser.LoadConfigurations(theConfigurationDirectory);
@@ -179,8 +180,6 @@ void CCore::InitAndValidateBuildConfiguration()
  */
 void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
-    m_Doc->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
-
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ControlModifier | Qt::Key_F6),
                         CCore::DumpCommandQueue);
@@ -237,17 +236,18 @@ void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
     }
 
     Qt3DSFile fileDocument(theDocument.toCString());
+
     m_Doc->SetDocumentPath(fileDocument);
     m_Doc->CreateNewDocument();
 
     // Serialize the new document.
     m_Doc->SaveDocument(fileDocument);
 
-#ifdef DRIVE_DESIGN_STUDIO
-    // Update the uia file if possible.
+    // Update the uia file if possible. Edit the sub-presentation list only when creating a new
+    // main presentation.
     QByteArray docBA = theDocument.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(), true);
-#endif
+    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(),
+                                                      inCreateDirectory);
 }
 
 //=============================================================================

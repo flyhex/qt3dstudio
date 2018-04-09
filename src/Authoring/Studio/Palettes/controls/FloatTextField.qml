@@ -61,6 +61,7 @@ TextField {
         id: validator
         decimals: 3
         locale: "C"
+        notation: DoubleValidator.StandardNotation
     }
 
     selectionColor: _selectionColor

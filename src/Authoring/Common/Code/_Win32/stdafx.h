@@ -76,7 +76,6 @@
 #include "PlatformTypes.h"
 #include "PlatformStrings.h"
 #include "Qt3DSMath.h"
-#include "Qt3DSExceptions.h"
 #include "Qt3DSObjectCounter.h"
 #include "Qt3DSString.h"
 #include "STLHelpers.h"

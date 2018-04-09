@@ -29,8 +29,8 @@
 #ifndef AMXSMARTPTRH
 #define AMXSMARTPTRH
 #include <memory>
-#include "Qt3DSExceptions.h"
 #include "PlatformMacros.h"
+#include "Qt3DSAssert.h"
 #ifdef WIN32
 #pragma warning(disable : 4284)
 #endif
@@ -123,16 +123,16 @@ public:
       */
     T &operator*() const
     {
-        QT3DS_THROWNULL(m_T, -1);
+        QT3DS_ASSERT(m_T != nullptr);
         return *m_T;
     }
     //=======================================================================
     /**
-      *	Returns pointer-to-T, throws if T is null.
+      * Returns pointer-to-T, asserts if T is null.
       */
     T *operator->() const
     {
-        QT3DS_THROWNULL(m_T, -1);
+        QT3DS_ASSERT(m_T != nullptr);
         return m_T;
     }
     //=======================================================================

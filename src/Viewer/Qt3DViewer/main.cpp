@@ -245,13 +245,11 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     // Set import paths so that standalone installation works
     QString extraImportPath1(QStringLiteral("%1/qml"));
+    engine.addImportPath(extraImportPath1.arg(QGuiApplication::applicationDirPath()));
 #ifdef Q_OS_MACOS
     QString extraImportPath2(QStringLiteral("%1/../../../../qml"));
-#else
-    QString extraImportPath2(QStringLiteral("%1/../qml"));
-#endif
-    engine.addImportPath(extraImportPath1.arg(QGuiApplication::applicationDirPath()));
     engine.addImportPath(extraImportPath2.arg(QGuiApplication::applicationDirPath()));
+#endif
 
     QQmlContext *ctx = engine.rootContext();
     ctx->setContextProperty(QStringLiteral("_menuBackgroundColor"), QColor("#404244"));

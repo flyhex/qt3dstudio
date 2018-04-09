@@ -574,35 +574,36 @@ struct SRendererImpl : public IStudioRenderer,
             break;
         }
         if (inSenderType == SceneDragSenderType::SceneWindow
-            && m_Translation->GetPickArea(inPoint) == PickTargetAreas::Presentation) {
+                && m_Translation->GetPickArea(inPoint) == PickTargetAreas::Presentation) {
             m_RenderContext->BeginRender();
             m_PickResult = m_Translation->Pick(inPoint, theSelectMode);
             m_RenderContext->EndRender();
             // If we definitely did not pick a widget.
             if (m_PickResult.getType() == StudioPickValueTypes::Instance) {
-                qt3dsdm::Qt3DSDMInstanceHandle theHandle(m_PickResult.getData<Qt3DSDMInstanceHandle>());
-
+                qt3dsdm::Qt3DSDMInstanceHandle theHandle(
+                            m_PickResult.getData<Qt3DSDMInstanceHandle>());
                 if (theHandle != m_Doc.GetSelectedInstance())
                     m_Doc.SelectDataModelObject(theHandle);
-            } else if (m_PickResult.getType() == StudioPickValueTypes::Guide)
+            } else if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
                 m_Doc.NotifySelectionChanged(m_PickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>());
-            else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
+            } else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
                 SPathPick thePick = m_PickResult.getData<SPathPick>();
                 qt3dsdm::Qt3DSDMInstanceHandle theAnchorHandle =
-                    m_Translation->GetAnchorPoint(thePick);
-                if (theAnchorHandle.Valid() && theAnchorHandle != m_Doc.GetSelectedInstance()) {
+                        m_Translation->GetAnchorPoint(thePick);
+                if (theAnchorHandle.Valid() && theAnchorHandle != m_Doc.GetSelectedInstance())
                     m_Doc.SelectDataModelObject(theAnchorHandle);
-                }
+            } else if (m_PickResult.getType() == StudioPickValueTypes::UnknownValueType) {
+                m_Doc.DeselectAllItems(true);
             }
             RequestRender();
         } else {
             qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickResult =
-                m_Translation->PickRulers(inPoint);
-            if (pickResult.hasValue() == false)
+                    m_Translation->PickRulers(inPoint);
+            if (!pickResult.hasValue()) {
                 m_Translation->PrepareForDrag();
-            else {
+            } else {
                 Q3DStudio::IDocumentEditor &docEditor(
-                    m_UpdatableEditor.EnsureEditor(L"Create Guide", __FILE__, __LINE__));
+                            m_UpdatableEditor.EnsureEditor(L"Create Guide", __FILE__, __LINE__));
                 Qt3DSDMGuideHandle newGuide = docEditor.CreateGuide(*pickResult);
                 m_PickResult = SStudioPickValue(newGuide);
                 m_Doc.NotifySelectionChanged(newGuide);

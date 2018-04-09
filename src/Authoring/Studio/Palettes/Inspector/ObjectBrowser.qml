@@ -168,7 +168,7 @@ Rectangle {
 
                 onActivated: {
                     if (index === 0)
-                        _objectBrowserView.pathType = ObjectBrowserView.Name;
+                        _objectBrowserView.pathType = ObjectBrowserView.Absolute;
                     else if (index === 1)
                         _objectBrowserView.pathType = ObjectBrowserView.Relative;
                 }
@@ -181,8 +181,8 @@ Rectangle {
             StyledLabel {
                 id: selectionText
                 Layout.preferredWidth: _valueWidth
-                text: pathCombo.currentIndex === 0 ? _objectBrowserView.name(browserList.currentIndex)
-                                                   : _objectBrowserView.path(browserList.currentIndex)
+                text: pathCombo.currentIndex === 0 ? _objectBrowserView.absPath(browserList.currentIndex)
+                                                   : _objectBrowserView.relPath(browserList.currentIndex)
             }
         }
     }

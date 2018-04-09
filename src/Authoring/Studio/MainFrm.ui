@@ -43,7 +43,10 @@
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_a_Copy"/>
     <addaction name="action_Revert"/>
+    <addaction name="separator"/>
     <addaction name="actionImportAssets"/>
+    <addaction name="actionSubpresentations"/>
+    <addaction name="actionData_Inputs"/>
     <addaction name="action_Connect_to_Device"/>
     <addaction name="separator"/>
     <addaction name="menuRecent_Projects"/>
@@ -56,21 +59,31 @@
     </property>
     <addaction name="action_Undo"/>
     <addaction name="action_Redo"/>
+    <addaction name="actionRepeat"/>
     <addaction name="separator"/>
     <addaction name="action_Cut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
+    <addaction name="actionPaste_to_Master_Slide"/>
     <addaction name="action_Duplicate_Object"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionGroup"/>
+    <addaction name="actionParent"/>
+    <addaction name="actionUnparent"/>
     <addaction name="separator"/>
     <addaction name="actionStudio_Preferences"/>
     <addaction name="actionPresentation_Settings"/>
-    <addaction name="actionSubpresentations"/>
-    <addaction name="actionData_Inputs"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <addaction name="actionReset_layout"/>
+    <addaction name="actionFit_Selected"/>
+    <addaction name="actionFit_all"/>
+    <addaction name="actionToggle_hide_unhide_selected"/>
+    <addaction name="actionToggle_hide_unhide_unselected"/>
+    <addaction name="separator"/>
     <addaction name="actionAction"/>
     <addaction name="actionBasic_Objects"/>
     <addaction name="actionInspector"/>
@@ -82,6 +95,7 @@
     <addaction name="actionPivot_Point"/>
     <addaction name="actionWireframe"/>
     <addaction name="actionTooltips"/>
+    <addaction name="actionFind"/>
     <addaction name="actionRulers_Guides"/>
     <addaction name="actionLock_Guides"/>
     <addaction name="actionClear_Guides"/>
@@ -163,7 +177,7 @@
    <addaction name="actionRotation_Tool"/>
    <addaction name="actionLocal_Global_Manipulators"/>
    <addaction name="separator"/>
-   <addaction name="actionToolbarAutoset_Keyframes"/>
+   <addaction name="actionAutoset_Keyframes"/>
   </widget>
   <widget class="CEditCameraBar" name="m_EditCamerasBar">
    <property name="windowTitle">
@@ -188,7 +202,7 @@
    <addaction name="actionOrbit_Tool"/>
    <addaction name="separator"/>
    <addaction name="actionShading_Mode"/>
-   <addaction name="actionToolbarWireframe"/>
+   <addaction name="actionWireframe"/>
   </widget>
   <widget class="QToolBar" name="m_PlaybackToolbar">
    <property name="windowTitle">
@@ -207,11 +221,18 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPreview"/>
+   <addaction name="actionRemote_Preview"/>
    <addaction name="actionPreviewRuntime2"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
     <string>&amp;Reference Manual...</string>
+   </property>
+   <property name="toolTip">
+    <string>Reference Manual</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
   <action name="action_Visit_Qt_Web_Site">
@@ -233,8 +254,11 @@
    <property name="text">
     <string>Set Changed Keyframes</string>
    </property>
+   <property name="toolTip">
+    <string>Set Changed Keyframes</string>
+   </property>
    <property name="shortcut">
-    <string>F6</string>
+    <string>Ctrl+Shift+K</string>
    </property>
   </action>
   <action name="actionDelete_Selected_Keyframe_s">
@@ -246,24 +270,13 @@
    <property name="text">
     <string>Set Interpolation...</string>
    </property>
+   <property name="shortcut">
+    <string>I</string>
+   </property>
   </action>
   <action name="actionChange_Time_Bar_Color">
    <property name="text">
     <string>Change Time Bar Color...</string>
-   </property>
-  </action>
-  <action name="actionAutoset_Keyframes">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Autoset Keyframes</string>
-   </property>
-   <property name="toolTip">
-    <string>Toggle autoset keyframes</string>
-   </property>
-   <property name="shortcut">
-    <string>K</string>
    </property>
   </action>
   <action name="actionAction">
@@ -271,7 +284,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Action</string>
+    <string>Show Action Palette</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
@@ -282,7 +295,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Basic Objects</string>
+    <string>Show Basic Objects Palette</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Basic Objects Palette</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+B</string>
@@ -293,7 +309,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Inspector</string>
+    <string>Show Inspector Palette</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
@@ -304,7 +320,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Project</string>
+    <string>Show Project Palette</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -315,7 +331,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Slide</string>
+    <string>Show Slide Palette</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+D</string>
@@ -326,7 +342,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Timeline</string>
+    <string>Show Timeline Palette</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
@@ -337,7 +353,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Bounding Boxes</string>
+    <string>Show/Hide Bounding Boxes</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+B</string>
@@ -348,21 +364,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Pivot Point</string>
+    <string>Show/Hide Pivot Point</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+P</string>
-   </property>
-  </action>
-  <action name="actionWireframe">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Wireframe</string>
-   </property>
-   <property name="toolTip">
-    <string>Show or Hide Wireframe</string>
    </property>
   </action>
   <action name="actionTooltips">
@@ -404,6 +409,9 @@
    <property name="text">
     <string>&amp;Undo</string>
    </property>
+   <property name="toolTip">
+    <string>Undo</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
    </property>
@@ -442,7 +450,7 @@
   </action>
   <action name="action_Duplicate_Object">
    <property name="text">
-    <string>&amp;Duplicate Object</string>
+    <string>&amp;Duplicate</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -451,6 +459,9 @@
   <action name="actionStudio_Preferences">
    <property name="text">
     <string>Studio &amp;Preferences...</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+U</string>
    </property>
    <property name="menuRole">
     <enum>QAction::PreferencesRole</enum>
@@ -461,12 +472,12 @@
     <string>Presentation &amp;Settings...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Ctrl+Shift+U</string>
    </property>
   </action>
   <action name="action_New">
    <property name="text">
-    <string>&amp;New</string>
+    <string>&amp;New...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -474,7 +485,7 @@
   </action>
   <action name="action_Open">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Open...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -506,7 +517,7 @@
   </action>
   <action name="action_Revert">
    <property name="text">
-    <string>&amp;Revert...</string>
+    <string>&amp;Revert</string>
    </property>
   </action>
   <action name="action_Connect_to_Device">
@@ -520,6 +531,9 @@
   <action name="action_Exit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionSomething">
@@ -539,10 +553,7 @@
     <string>Group Select Tool</string>
    </property>
    <property name="toolTip">
-    <string>Group Select</string>
-   </property>
-   <property name="shortcut">
-    <string>A</string>
+    <string>Select Group (Q toggle)</string>
    </property>
   </action>
   <action name="actionItem_Select_Tool">
@@ -557,10 +568,7 @@
     <string>Item Select Tool</string>
    </property>
    <property name="toolTip">
-    <string>Select Item</string>
-   </property>
-   <property name="shortcut">
-    <string>V</string>
+    <string>Select Item (Q toggle)</string>
    </property>
   </action>
   <action name="actionRotation_Tool">
@@ -575,10 +583,10 @@
     <string>Rotation Tool</string>
    </property>
    <property name="toolTip">
-    <string>Rotate current selection</string>
+    <string>Rotate current selection (E)</string>
    </property>
    <property name="shortcut">
-    <string>R</string>
+    <string>E</string>
    </property>
   </action>
   <action name="actionPosition_Tool">
@@ -593,7 +601,7 @@
     <string>Position Tool</string>
    </property>
    <property name="toolTip">
-    <string>Move current selection</string>
+    <string>Move current selection (W)</string>
    </property>
    <property name="shortcut">
     <string>W</string>
@@ -611,10 +619,10 @@
     <string>Scale Tool</string>
    </property>
    <property name="toolTip">
-    <string>Scale current selection</string>
+    <string>Scale current selection (R)</string>
    </property>
    <property name="shortcut">
-    <string>E</string>
+    <string>R</string>
    </property>
   </action>
   <action name="actionLocal_Global_Manipulators">
@@ -629,7 +637,10 @@
     <string>Local/Global Manipulators</string>
    </property>
    <property name="toolTip">
-    <string>Toggle Manipulators to work in global/local space</string>
+    <string>Toggle Manipulators to work in global/local space (Y)</string>
+   </property>
+   <property name="shortcut">
+    <string>Y</string>
    </property>
   </action>
   <action name="actionFit_Selected">
@@ -642,13 +653,16 @@
      <disabledoff>:/images/editcamera_tools_hi-00_disabled.png</disabledoff>:/images/editcamera_tools_hi-00.png</iconset>
    </property>
    <property name="text">
-    <string>Fit Selected (F)</string>
+    <string>Fit selected</string>
    </property>
    <property name="toolTip">
-    <string>Fit Selected</string>
+    <string>Fit Selected (F)</string>
    </property>
    <property name="shortcut">
     <string>F</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionPan_Tool">
@@ -709,13 +723,13 @@
      <disabledoff>:/images/editcamera_tools_hi-04_disabled.png</disabledoff>:/images/editcamera_tools_hi-04.png</iconset>
    </property>
    <property name="text">
-    <string>Shading Mode (F3)</string>
+    <string>Shading Mode</string>
    </property>
    <property name="toolTip">
-    <string>Toggle Shading Mode</string>
+    <string>Toggle Shading Mode (L)</string>
    </property>
    <property name="shortcut">
-    <string>F3</string>
+    <string>L</string>
    </property>
   </action>
   <action name="actionPreview">
@@ -726,6 +740,9 @@
    <property name="text">
     <string>Preview</string>
    </property>
+   <property name="toolTip">
+    <string>Preview (F5)</string>
+   </property>
    <property name="shortcut">
     <string>F5</string>
    </property>
@@ -735,7 +752,7 @@
     <string>Sub-presentations...</string>
    </property>
   </action>
-  <action name="actionToolbarWireframe">
+  <action name="actionWireframe">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -748,10 +765,16 @@
     <string>Wireframe</string>
    </property>
    <property name="toolTip">
-    <string>Show or Hide Wireframe</string>
+    <string>Toggle Wireframe (M)</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
-  <action name="actionToolbarAutoset_Keyframes">
+  <action name="actionAutoset_Keyframes">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -760,10 +783,16 @@
      <normaloff>:/images/client_tools_hi_color-06.png</normaloff>:/images/client_tools_hi_color-06.png</iconset>
    </property>
    <property name="text">
-    <string>Autoset Keyframes</string>
+    <string>Toggle Autoset Keyframes</string>
    </property>
    <property name="toolTip">
-    <string>Toggle autoset keyframes</string>
+    <string>Toggle Autoset Keyframes (K)</string>
+   </property>
+   <property name="shortcut">
+    <string>K</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionPreviewRuntime2">
@@ -795,6 +824,149 @@
   <action name="actionData_Inputs">
    <property name="text">
     <string>Data Inputs...</string>
+   </property>
+  </action>
+  <action name="actionRemote_Preview">
+   <property name="icon">
+    <iconset>
+     <normalon>:/images/remote.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Remote Preview</string>
+   </property>
+   <property name="toolTip">
+    <string>Preview on Remote Device (F6)</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionGroup">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Group</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionRepeat">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Repeat</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="actionParent">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Parent</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+  </action>
+  <action name="actionUnparent">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Unparent</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+P</string>
+   </property>
+  </action>
+  <action name="actionPaste_to_Master_Slide">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Paste to Master Slide</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+V</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionReset_layout">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Reset layout</string>
+   </property>
+  </action>
+  <action name="actionFit_all">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Fit all</string>
+   </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
+  </action>
+  <action name="actionToggle_hide_unhide_selected">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Toggle hide/unhide selected</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionToggle_hide_unhide_unselected">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Toggle hide/unhide unselected</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+H</string>
    </property>
   </action>
  </widget>

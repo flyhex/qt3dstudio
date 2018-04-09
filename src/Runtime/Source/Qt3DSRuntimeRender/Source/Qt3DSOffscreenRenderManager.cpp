@@ -361,7 +361,7 @@ struct SOffscreenRenderManager : public IOffscreenRenderManager
         theContext.SetScissorTestEnabled(false);
 
         theData.m_Renderer->Render(theDesiredEnvironment, theContext, thePresScaleFactor,
-                                   SScene::AlwaysClear);
+                                   SScene::AlwaysClear, this);
 
         if (theSampleCount > 1) {
             CResourceTexture2D theResult(*m_ResourceManager, theData.m_Texture);
@@ -443,7 +443,7 @@ struct SOffscreenRenderManager : public IOffscreenRenderManager
                         SOffscreenRunnable)(*this, theData, theDesiredEnvironment));
 
             SOffscreenRenderFlags theFlags =
-                theData.m_Renderer->NeedsRender(theDesiredEnvironment, thePresScaleFactor);
+                theData.m_Renderer->NeedsRender(theDesiredEnvironment, thePresScaleFactor, this);
             theData.m_HasTransparency = theFlags.m_HasTransparency;
             theData.m_HasChangedSinceLastFrame = theFlags.m_HasChangedSinceLastFrame;
             if (theData.m_Texture) {

@@ -4,10 +4,6 @@ SUBDIRS += \
     Qt3DSRuntimeStatic \
     Qt3DSRuntime
 
-!cross_compile {
-SUBDIRS += Qt3DSCompiler
-}
-
 win32 {
 SUBDIRS += \
     AttributeHashes

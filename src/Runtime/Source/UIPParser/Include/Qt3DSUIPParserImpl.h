@@ -223,7 +223,7 @@ struct SParseElementManager
     // Attribute marking stage; mark which attributes will be kept on elements at all.
     void MarkAttributeAsReferenced(SElementData &inElement, const char8_t *inPropertyName);
     void MarkAttributeAsReferenced(const char8_t *inElement, const char8_t *inPropertyName);
-    void MarkAllAttributesAsReferenced(SElementData &inElement);
+    void MarkAllAttributesAsReferenced(SElementData &inElement, bool searchParent = false);
 };
 
 struct SParseSlideActionEntry

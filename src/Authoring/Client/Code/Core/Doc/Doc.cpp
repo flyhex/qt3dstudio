@@ -79,6 +79,7 @@
 #include "Qt3DSTextRenderer.h"
 #include "SelectedValueImpl.h"
 #include "Qt3DSRenderPathManager.h"
+#include "Studio/Application/DataInputDlg.h"
 #include "EASTL/sort.h"
 #include "foundation/Qt3DSLogging.h"
 
@@ -236,6 +237,113 @@ void CDoc::SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             thePropertySystem->GetAggregateInstancePropertyByName(inInstance, inPropertyName.c_str());
     if (theProperty.Valid())
         thePropertySystem->SetInstancePropertyValue(inInstance, theProperty, inValue);
+}
+
+// Finds the propName from the controlledPropStr and removes it plus
+// the preceding datainput controller name from controlledPropStr.
+bool RemoveControlStrForProperty(Q3DStudio::CString &controlledPropStr,
+                                 const Q3DStudio::CString &propName)
+{
+    Q3DStudio::CString cpStr = controlledPropStr;
+    // get the length of to-be-deleted controller - property string and
+    // delete it from the overall controlledproperty
+    long posProp = cpStr.find(propName);
+
+    if (posProp == Q3DStudio::CString::ENDOFSTRING)
+        return false;
+
+    long posCtrlr = cpStr.substr(0, posProp - 1).ReverseFind(" ");
+
+    // this is the first controller - property pair in controlledproperty
+    if (posCtrlr < 0)
+        posCtrlr = 0;
+
+    long deletableStrLen = (posProp + propName.Length()) - posCtrlr;
+
+    cpStr.Delete(posCtrlr, deletableStrLen);
+
+    // clean up the string as we might have extra whitespaces
+    cpStr.Replace("  ", " ");
+
+    cpStr.TrimLeft();
+    cpStr.TrimRight();
+
+    controlledPropStr = cpStr;
+    return true;
+}
+
+// Set a property in an instance to be controlled by datainput.
+void CDoc::SetInstancePropertyControlled(
+    qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DStudio::CString instancepath,
+    qt3dsdm::Qt3DSDMPropertyHandle propName, Q3DStudio::CString controller,
+    bool controlled)
+{
+    qt3dsdm::SComposerObjectDefinitions &theDefinitions(
+        GetStudioSystem()->GetClientDataModelBridge()->GetObjectDefinitions());
+    qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
+    // get the name of controlled property
+    auto metadataHandle
+        = GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(instance, propName);
+    auto metadata
+        = GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(metadataHandle);
+
+    qt3dsdm::SValue controlledProperty;
+    qt3dsdm::SValue controllerName;
+
+    // Get current controller - property string for this element
+    qt3dsdm::SValue currentCtrldProps;
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldElemPropHandle
+        = thePropertySystem->GetAggregateInstancePropertyByName(instance,
+                                                                L"controlledproperty");
+
+    Q3DStudio::CString currCtrldPropsStr = Q3DStudio::CString();
+
+    if (ctrldElemPropHandle.Valid()) {
+        thePropertySystem->GetInstancePropertyValue(
+            instance, ctrldElemPropHandle, currentCtrldProps);
+
+        currCtrldPropsStr
+            = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
+    }
+
+    // We are going to set or change the controller for this property. Remove the
+    // old controller - property pair first if it exists.
+    if (currCtrldPropsStr.find(metadata->m_Name.c_str())
+        != Q3DStudio::CString::ENDOFSTRING) {
+        RemoveControlStrForProperty(currCtrldPropsStr, metadata->m_Name.c_str());
+    }
+
+    if (controlled) {
+        // Build new controller - controlled property string.
+        Q3DStudio::CString controlledElemStr;
+        // Insert delimiter to if we already have an existing string.
+        if (currCtrldPropsStr.size())
+            controlledElemStr.append(" ");
+        controlledElemStr.append("$" + controller);
+        controlledElemStr.append(" ");
+        controlledElemStr.append(metadata->m_Name.c_str());
+
+        // append the existing controlledproperties with new string
+        controlledProperty = std::make_shared<qt3dsdm::CDataStr>(
+            currCtrldPropsStr + controlledElemStr);
+    } else {
+        if (currCtrldPropsStr.size()) {
+            // Current controller - property string was already removed, just store
+            // what is left.
+            controlledProperty = std::make_shared<qt3dsdm::CDataStr>(currCtrldPropsStr);
+        } else {
+            // All control is off. We cannot remove the entire property because undoing
+            // datainput control changes after removal would cause a crash in the
+            // undo/redo system.
+            // Consequently we cannot remove controlledproperty completely from the UIP file
+            // either so store empty string instead.
+            controlledProperty = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString());
+        }
+    }
+
+    // Set the controlledproperty string in the controlled element
+    Q3DStudio::ScopedDocumentEditor(*this, L"Set controlled", __FILE__, __LINE__)
+        ->SetInstancePropertyValue(instance, ctrldElemPropHandle, controlledProperty);
 }
 
 Q3DStudio::IDocumentBufferCache &CDoc::GetBufferCache()
@@ -1647,8 +1755,9 @@ void CDoc::HandleMasterPaste()
                 if (theMasterSlideHandle.Valid())
                     theTargetSlide = theMasterSlideHandle;
                 PasteObjectMaster(theSelectedInstance);
-            } else
+            } else {
                 PasteObject(theSelectedInstance);
+            }
         } else {
             qt3dsdm::Qt3DSDMSlideHandle theMasterSlideHandle =
                     theSlideSystem->GetMasterSlide(theTargetSlide);
@@ -1921,25 +2030,6 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
             m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 1);
     m_StudioSystem->GetFullSystem()->GetSignalSender()->SendActiveSlide(theMasterSlide, 1,
                                                                         theChildSlide);
-}
-
-//=============================================================================
-/**
- * Register all the events for hotkeys that are active for the entire application.
- * Hotkeys for the entire application are ones that are not view specific in
- * scope.
- * @param inShortcutHandler the global shortcut handler.
- */
-void CDoc::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
-{
-    Q_UNUSED(inShortcutHandler)
-
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_Backspace) << QKeySequence(Qt::Key_Delete),
-                        CDoc::DeleteSelectedItems);
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_V),
-                        CDoc::HandleMasterPaste);
 }
 
 //==============================================================================
@@ -2707,16 +2797,25 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
 
                         theReader->Att("name", name);
                         item->name = QString(name.c_str());
-                        // TODO: Dump int/enum type and use string instead?
+
+                        // TODO: Implement evaluator
                         if (theReader->Att("type", type)) {
                             if (!QString(type.c_str()).compare(QStringLiteral("Ranged Number"))) {
-                                item->type = 0;
+                                item->type = EDataType::DataTypeRangedNumber;
                                 if (theReader->Att("min", min))
                                     item->minValue = QString(min.c_str()).toFloat();
                                 if (theReader->Att("max", max))
                                     item->maxValue = QString(max.c_str()).toFloat();
-                            } else {
-                                item->type = 1;
+                            } else if (!QString(type.c_str()).compare(QStringLiteral("String"))) {
+                                item->type = EDataType::DataTypeString;
+                            } else if (!QString(type.c_str()).compare(QStringLiteral("Float"))) {
+                                item->type = EDataType::DataTypeFloat;
+                            } else if (!QString(type.c_str()).compare(QStringLiteral("Boolean"))) {
+                                item->type = EDataType::DataTypeBoolean;
+                            } else if (!QString(type.c_str()).compare(QStringLiteral("Vector3"))) {
+                                item->type = EDataType::DataTypeVector3;
+                            } else if (!QString(type.c_str()).compare(QStringLiteral("Variant"))) {
+                                item->type = EDataType::DataTypeVariant;
                             }
                         }
 
@@ -2727,4 +2826,3 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
         }
     }
 }
-

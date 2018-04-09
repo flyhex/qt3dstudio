@@ -37,25 +37,32 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Preview
+    \li \c{F5}
     \li \c{F5}
   \row
     \li New
     \li \c{Ctrl + N}
+    \li \c{Cmd + N}
   \row
     \li Open
     \li \c{Ctrl + O}
+    \li \c{Cmd + O}
   \row
     \li Save
     \li \c{Ctrl + S}
+    \li \c{Cmd + S}
   \row
     \li Save As...
     \li \c{Ctrl + Shift + S}
+    \li \c{Cmd + Shift + S}
   \row
     \li Save a Copy
     \li \c{Ctrl + Alt + S}
+    \li \c{Cmd + Option + S}
 \endtable
 
 \section1 Edit Menu
@@ -63,31 +70,40 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Undo
     \li \c{Ctrl + Z}
+    \li \c{Cmd + Z}
   \row
     \li Redo
     \li \c{Ctrl + Y} or \c{Ctrl + Shift + Z}
+    \li \c{Cmd + Y} or \c{Cmd + Shift + Z}
   \row
     \li Cut
     \li \c{Ctrl + X}
+    \li \c{Cmd + X}
   \row
     \li Copy
     \li \c{Ctrl + C}
+    \li \c{Cmd + C}
   \row
     \li Paste
     \li \c{Ctrl + V}
+    \li \c{Cmd + V}
   \row
     \li Paste to Master Slide
     \li \c{Ctrl + Alt + V}
+    \li \c{Cmd + Option + V}
   \row
     \li Duplicate Object
     \li \c{Ctrl + D}
+    \li \c{Cmd + D}
   \row
     \li Presentation Settings
     \li \c{Ctrl + P}
+    \li \c{Cmd + P}
 \endtable
 
 \section1 View Menu
@@ -95,31 +111,40 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Show Action Palette
     \li \c{Ctrl + Shift + A}
+    \li \c{Cmd + Shift + A}
   \row
     \li Show Basic Objects Palette
     \li \c{Ctrl + Shift + B}
+    \li \c{Cmd+ Shift + B}
   \row
     \li Show Inspector Palette
     \li \c{Ctrl + Shift + I}
+    \li \c{Cmd + Shift + I}
   \row
     \li Show Project Palette
     \li \c{Ctrl + Shift + P}
+    \li \c{Cmd + Shift + P}
   \row
     \li Show Slide Palette
     \li \c{Ctrl + Shift + D}
+    \li \c{Cmd + Shift + D}
   \row
     \li Show Timeline Palette
     \li \c{Ctrl + Shift + T}
+    \li \c{Cmd + Shift + T}
   \row
     \li Show/Hide Bounding Boxes
     \li \c{Ctrl + B}
+    \li \c{Cmd + B}
   \row
     \li Show/Hide Pivot Point
     \li \c{Ctrl + Alt + P}
+    \li \c{Cmd + Option + P}
 \endtable
 
 \section1 Animation Control
@@ -127,12 +152,15 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Set Changed Keyframes
     \li \c{F6}
+    \li \c{F6}
   \row
     \li Toggle Autoset Keyframes
+    \li \c{K}
     \li \c{K}
 \endtable
 
@@ -141,47 +169,63 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Group Select Mode
+    \li \c{A}
     \li \c{A}
   \row
     \li Item Select Mode
     \li \c{V}
+    \li \c{V}
   \row
     \li Position Mode
+    \li \c{W}
     \li \c{W}
   \row
     \li Scale Mode
     \li \c{E}
+    \li \c{E}
   \row
     \li Rotate Mode
+    \li \c{R}
     \li \c{R}
   \row
     \li Constrain drag to axis
     \li \c{Shift} + Mouse Drag
+    \li \c{Shift} + Mouse Drag
 \endtable
 
-\section2 Edit Cameras
+\section2 Scene View Navigation
+
+\note \e Pan and \e Zoom works in all views except the \e{Scene View} while \e Orbit works
+only in \e{Perspective View} and \e{Orthographic View}.
 
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Fit Selected
     \li \c{F}
+    \li \c{F}
   \row
     \li Pan
-    \li Middle Mouse Drag
+    \li \c{Alt} + Middle Mouse Drag
+    \li \c{Option} + Middle Mouse Drag
   \row
     \li Zoom
-    \li Mouse Wheel
+    \li \c{Alt} + Right Mouse Drag
+    \li \c{Option} + Right Mouse Drag
   \row
     \li Orbit
-    \li \c{Alt} + Middle Mouse Drag
+    \li \c{Alt} + Left Mouse Drag
+    \li \c{Option} + Left Mouse Drag
   \row
     \li Toggle Headlight
+    \li \c{F3}
     \li \c{F3}
 \endtable
 
@@ -190,33 +234,43 @@
 \table
   \header
     \li Function
-    \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Quick Play
+    \li Hold down \c{spacebar}
     \li Hold down \c{spacebar}
   \row
     \li Toggle Play/Pause
     \li \c{Enter}
+    \li \c{Enter}
   \row
     \li Set Time Bar Start Time
+    \li \c{[}
     \li \c{[}
   \row
     \li Set Time Bar End Time
     \li \c{]}
+    \li \c{]}
   \row
     \li Snap while Dragging
     \li \c{Shift} + Mouse Drag
+    \li \c{Shift} + Mouse Drag
   \row
     \li Move Playhead to next minor tick mark
-     \li \c{.}
+    \li \c{.}
+    \li \c{.}
   \row
     \li Move Playhead to previous minor tick mark
+    \li \c{,}
     \li \c{,}
   \row
     \li Move Playhead to next medium tick mark
     \li \c{Shift + .}
+    \li \c{Shift + .}
   \row
     \li Move Playhead to previous medium tick mark
+    \li \c{Shift + ,}
     \li \c{Shift + ,}
 \endtable
 
@@ -225,15 +279,19 @@
 \table
   \header
     \li Function
-     \li Shortcut
+    \li Windows/Linux
+    \li macOS
   \row
     \li Increment value by .1
     \li \c{Ctrl + Up/Down Arrow}
+    \li \c{Cmd + Up/Down Arrow}
   \row
     \li Increment value by 1
     \li \c{Up/Down Arrow}
+    \li \c{Up/Down Arrow}
   \row
     \li Increment value by 10
+    \li \c{Shift + Up/Down Arrow}
     \li \c{Shift + Up/Down Arrow}
 \endtable
 

@@ -41,7 +41,6 @@ SOURCES += \
     ../Source/Runtime/Source/Qt3DSAnimationSystem.cpp \
     ../Source/Runtime/Source/Qt3DSApplication.cpp \
     ../Source/Runtime/Source/Qt3DSAttributeHashes.cpp \
-    ../Source/Runtime/Source/Qt3DSBinarySerializerImpl.cpp \
     ../Source/Runtime/Source/Qt3DSComponentManager.cpp \
     ../Source/Runtime/Source/Qt3DSElementSystem.cpp \
     ../Source/Runtime/Source/Qt3DSEventCallbacks.cpp \
@@ -69,7 +68,6 @@ SOURCES += \
     ../Source/Runtime/Source/Qt3DSSlideSystem.cpp \
     ../Source/Runtime/Source/Qt3DSTimePolicy.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.cpp \
-    ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDataInput.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDynamicObject.cpp \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderEffect.cpp \
@@ -256,7 +254,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSAnimationSystem.h \
     ../Source/Runtime/Include/Qt3DSApplication.h \
     ../Source/Runtime/Include/Qt3DSAttributeHashes.h \
-    ../Source/Runtime/Include/Qt3DSBinarySerializerImpl.h \
     ../Source/Runtime/Include/Qt3DSComponentManager.h \
     ../Source/Runtime/Include/Qt3DSElementSystem.h \
     ../Source/Runtime/Include/Qt3DSEventCallbacks.h \
@@ -284,8 +281,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSSlideSystem.h \
     ../Source/Runtime/Include/Qt3DSTimePolicy.h \
     ../Source/Runtime/Include/Qt3DSApplicationValues.h \
-    ../Source/Runtime/Include/Qt3DSBinarySerializationHelper.h \
-    ../Source/Runtime/Include/Qt3DSBinarySerializer.h \
     ../Source/Runtime/Include/Qt3DSIComponentManager.h \
     ../Source/Runtime/Include/Qt3DSIInputSystem.h \
     ../Source/Runtime/Include/Qt3DSInputDefs.h \
@@ -296,7 +291,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSLuaIncludes.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCustomMaterial.h \
-    ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDataInput.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDynamicObject.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderEffect.h \

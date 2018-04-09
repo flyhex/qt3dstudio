@@ -27,49 +27,17 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #include "stdafx.h"
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "ActionContextMenu.h"
 #include "StudioClipboard.h"
 
-//==============================================================================
-/**
- *	Constructor
- *
- *	@param	inActionControl	Owner Action Control (commonly known as the Action Palette)
- *that will handle all cut/copy/paste/delete of Actions.
- */
-CActionContextMenu::CActionContextMenu(QWidget *parent)
+CActionContextMenu::CActionContextMenu(QList<QAction *> actions, QWidget *parent)
     : QMenu(parent)
 {
-    QAction *action = new QAction(tr("Copy Action"));
-    connect(action, &QAction::triggered, this, &CActionContextMenu::copyAction);
-    addAction(action);
-
-    action = new QAction(tr("Paste Action"));
-    action->setEnabled(CStudioClipboard::CanPasteAction());
-    connect(action, &QAction::triggered, this, &CActionContextMenu::pasteAction);
-    addAction(action);
-
-    action = new QAction(tr("Cut Action"));
-    connect(action, &QAction::triggered, this, &CActionContextMenu::cutAction);
-    addAction(action);
-
-    action = new QAction(tr("Delete Action"));
-    connect(action, &QAction::triggered, this, &CActionContextMenu::deleteAction);
-    addAction(action);
+    addActions(actions);
 }
 
-//==============================================================================
-/**
- * Destructor
- */
 CActionContextMenu::~CActionContextMenu()
 {
 }

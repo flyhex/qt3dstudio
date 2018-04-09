@@ -144,11 +144,6 @@ namespace runtime {
         virtual const char8_t *GetSlideName(SSlideKey inKey) const = 0;
         virtual QT3DSU8 GetPlaythroughToSlideIndex(SSlideKey inKey) const = 0;
 
-        // Serialization
-        virtual void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream) = 0;
-        virtual void LoadBinaryData(NVDataRef<QT3DSU8> inLoadData, NVDataRef<QT3DSU8> inStringTableData,
-                                    size_t inElementOffset) = 0;
-
         static ISlideSystem &CreateSlideSystem(NVFoundationBase &inFnd, IStringTable &inStrTable,
                                                IElementAllocator &inElemAllocator);
     };

@@ -128,9 +128,9 @@ public:
 
     virtual qt3dsdm::HandlerArgumentType::Value
     GetInspectableSubType() const = 0; // TODO : Make this method name correct
-    virtual Q3DStudio::CString GetInspectableName() const = 0;
-    virtual Q3DStudio::CString GetInspectableFormalName() const = 0;
-    virtual Q3DStudio::CString GetInspectableDescription() const = 0;
+    virtual QString GetInspectableName() const = 0;
+    virtual QString GetInspectableFormalName() const = 0;
+    virtual QString GetInspectableDescription() const = 0;
 
     virtual qt3dsdm::SValue GetInspectableData() const = 0;
     virtual void SetInspectableData(const qt3dsdm::SValue &) = 0;

@@ -28,6 +28,9 @@
 /*!
     \qmltype Presentation
     \inqmlmodule QtStudio3D
+
+    \keyword Qml Presentation
+
     \brief Control type for Qt 3D Studio presentations.
 
     This type provides properties and methods for controlling a presentation.

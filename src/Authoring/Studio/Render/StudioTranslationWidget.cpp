@@ -34,6 +34,7 @@
 #include "Qt3DSRenderNode.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
+#include "StudioPreferences.h"
 
 using namespace qt3ds::widgets;
 
@@ -76,11 +77,11 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
         if (m_XAxis == nullptr) {
             TBase::SetupRender(inWidgetContext, inRenderContext);
             float pixelRatio = float(devicePixelRatio());
-            QT3DSF32 axisStart = 20.0f * pixelRatio;
-            QT3DSF32 axisLength = 60.0f * pixelRatio;
-            QT3DSF32 triLength = 20.0f * pixelRatio;
-            QT3DSF32 axisWidth = 2.0f * pixelRatio;
-            QT3DSF32 triWidth = 7.0f * pixelRatio;
+            QT3DSF32 axisWidth = pixelRatio;
+            QT3DSF32 triWidth = 4 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
+            QT3DSF32 axisStart = CStudioPreferences::getSelectorLineLength() / 3.0f * pixelRatio;
+            QT3DSF32 axisLength = CStudioPreferences::getSelectorLineLength() * pixelRatio;
+            QT3DSF32 triLength = axisStart;
             m_XAxis = CreateAxis(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(1, 0, 0),
                                  axisStart, axisLength, triLength, axisWidth, triWidth,
                                  "TranslationWidgetXAxis");
@@ -96,16 +97,16 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
             QT3DSF32 axisRingRadius = GetDiscRingRadius() * pixelRatio;
             m_XPlane =
                 CreateRingedDisc(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(1, 0, 0),
-                                 QT3DSVec3(0, axisPos, -axisPos), axisDiscRadius, axisRingRadius, 0.0f,
-                                 1.0f, "TranslationWidgetXPlane");
+                                 QT3DSVec3(0, axisPos, -axisPos), axisDiscRadius, axisRingRadius,
+                                 0.0f, 1.0f, "TranslationWidgetXPlane");
             m_YPlane =
                 CreateRingedDisc(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(0, 1, 0),
-                                 QT3DSVec3(axisPos, 0, -axisPos), axisDiscRadius, axisRingRadius, 0.0f,
-                                 1.0f, "TranslationWidgetYPlane");
+                                 QT3DSVec3(axisPos, 0, -axisPos), axisDiscRadius, axisRingRadius,
+                                 0.0f, 1.0f, "TranslationWidgetYPlane");
             m_ZPlane =
                 CreateRingedDisc(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1),
-                                 QT3DSVec3(axisPos, axisPos, 0), axisDiscRadius, axisRingRadius, 0.0f,
-                                 1.0f, "TranslationWidgetZPlane");
+                                 QT3DSVec3(axisPos, axisPos, 0), axisDiscRadius, axisRingRadius,
+                                 0.0f, 1.0f, "TranslationWidgetZPlane");
         }
         QT3DSMat44 theMVP = TBase::SetupMVP(inWidgetContext);
         inRenderContext.SetBlendingEnabled(false);
@@ -120,7 +121,7 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
         QT3DSVec3 theXColor(GetXAxisColor());
         QT3DSVec3 theYColor(GetYAxisColor());
         QT3DSVec3 theZColor(GetZAxisColor());
-        QT3DSVec3 theRingColor(QT3DSVec3(.8, .8, .8));
+        QT3DSVec3 theRingColor(QT3DSVec3(.8f, .8f, .8f));
 
         RenderSingleToneGeometry(StudioWidgetComponentIds::XAxis, theXColor, inRenderContext,
                                  m_XAxis);

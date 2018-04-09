@@ -56,7 +56,6 @@
 #include "Qt3DSStateVisualBindingContext.h"
 #include "Qt3DSMetadata.h"
 #include "Qt3DSUIPParser.h"
-#include "Qt3DSBinarySerializer.h"
 #include "foundation/Socket.h"
 #include "Qt3DSStateDebugStreams.h"
 #include "Qt3DSSceneGraphDebugger.h"
@@ -230,9 +229,6 @@ public:
     static IAppLoadContext &CreateXMLLoadContext(
             SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
             const char8_t *inScaleMode);
-    static IAppLoadContext &CreateBinaryLoadContext(SApp &inApp,
-                                                    qt3ds::render::ScaleModes::Enum inScaleMode,
-                                                    NVDataRef<QT3DSU8> inStrTableData);
 };
 
 inline float Clamp(float val, float inMin = 0.0f, float inMax = 1.0f)
@@ -553,7 +549,6 @@ struct SApp : public IApplication
         }
         // Ensure we stop the timer.
         HasCompletedLoading();
-        m_CoreFactory->GetScriptEngine().EndPreloadScripts();
         m_AppLoadContext = NULL;
 
         for (QT3DSU32 idx = 0, end = m_OrderedAssets.size(); idx < end; ++idx) {
@@ -1158,6 +1153,14 @@ struct SApp : public IApplication
                         diDef.type = DataInputTypeRangedNumber;
                     else if (AreEqual(type, "String"))
                         diDef.type = DataInputTypeString;
+                    else if (AreEqual(type, "Float"))
+                        diDef.type = DataInputTypeFloat;
+                    else if (AreEqual(type, "Vector3"))
+                        diDef.type = DataInputTypeVector3;
+                    else if (AreEqual(type, "Boolean"))
+                        diDef.type = DataInputTypeBoolean;
+                    else if (AreEqual(type, "Variant"))
+                        diDef.type = DataInputTypeVariant;
                     m_dataInputs.insert(QString::fromUtf8(name), diDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";
@@ -1282,9 +1285,6 @@ struct SApp : public IApplication
         eastl::string extension;
         CFileTools::Split(inFilePath, directory, filename, extension);
         eastl::string projectDirectory(directory);
-        size_t binaryPos = projectDirectory.rfind("binary");
-        if (binaryPos != eastl::string::npos && binaryPos >= projectDirectory.size() - 7)
-            CFileTools::GetDirectory(projectDirectory);
 
         m_ProjectDir.assign(projectDirectory.c_str());
         m_CoreFactory->AddSearchPath(projectDirectory.c_str());
@@ -1350,8 +1350,6 @@ struct SApp : public IApplication
             } else {
                 qCCritical(INVALID_PARAMETER, "Unable to open input file %s", inFilePath);
             }
-        } else if (extension.comparei("uiab") == 0) {
-            retval = LoadBinary(inFilePath);
         } else {
             QT3DS_ASSERT(false);
         }
@@ -1403,11 +1401,6 @@ struct SApp : public IApplication
             {
                 SStackPerfTimer __timer(m_CoreFactory->GetPerfTimer(), "Application: EndLoad");
                 EndLoad();
-            }
-            {
-                SStackPerfTimer __timer(m_CoreFactory->GetPerfTimer(),
-                                        "Application: EndPreloadScripts");
-                m_CoreFactory->GetScriptEngine().EndPreloadScripts();
             }
             m_InputEnginePtr = &inInputEngine;
             m_RuntimeFactory = inFactory;
@@ -1468,301 +1461,12 @@ struct SApp : public IApplication
             inFactory.GetQt3DSRenderContext().GetRenderer().EnableLayerGpuProfiling(
                         *finalSettings.m_LayerGpuProfilingEnabled);
         }
-        if (finalSettings.m_ShaderCachePersistenceEnabled.hasValue()
-                && finalSettings.m_ShaderCachePersistenceEnabled.getValue()) {
-            eastl::string binaryDir;
-            CFileTools::CombineBaseAndRelative(this->GetProjectDirectory(), "binary", binaryDir);
-            CFileTools::CreateDir(binaryDir.c_str());
-            inFactory.GetQt3DSRenderContext().GetShaderCache().SetShaderCachePersistenceEnabled(
-                        binaryDir.c_str());
-        }
 
         m_CoreFactory->GetPerfTimer().OutputTimerData();
 
         m_AudioPlayer.SetPlayer(inAudioPlayer);
 
         return *this;
-    }
-
-    // Binary Save/Load
-
-    struct SAssetSaveRemapper
-    {
-        const SStrRemapMap &m_Remapper;
-        SAssetSaveRemapper(const SStrRemapMap &rm)
-            : m_Remapper(rm)
-        {
-        }
-        template <typename TDatatype>
-        SAssetValue operator()(const TDatatype &dt)
-        {
-            TDatatype temp(dt);
-            temp.Remap(*this);
-            return temp;
-        }
-        void Remap(CRegisteredString &str) { str.Remap(m_Remapper); }
-
-        SAssetValue operator()() { return SAssetValue(); }
-    };
-
-    void AddElementToHandleBuffer(TElement &inElement, eastl::vector<THandleElementPair> &inBuffer)
-    {
-        inBuffer.push_back(eastl::make_pair(inElement.m_Handle, &inElement));
-        if (inElement.m_Child)
-            AddElementToHandleBuffer(*inElement.m_Child, inBuffer);
-        if (inElement.m_Sibling)
-            AddElementToHandleBuffer(*inElement.m_Sibling, inBuffer);
-    }
-
-    void SaveBinary() override
-    {
-        eastl::string fname;
-        CFileTools::CombineBaseAndRelative(m_ProjectDir.c_str(), "binary", fname);
-        CFileTools::CreateDir(fname, true);
-        // Save out element data into temp buffer to generate correct element offsets used
-        // throughout the next steps.
-        NVDataRef<CPresentation *> thePresentations = GetPresentations();
-        qt3ds::foundation::CMemorySeekableIOStream theElementData(
-                    this->m_CoreFactory->GetFoundation().getAllocator(), "ElementSaveData");
-        {
-            eastl::vector<Q3DStudio::TElement *> thePresentationElements;
-
-            // We save must have exactly one element or null ptr per presentation asset.  Else the
-            // loading logic gets complicated.
-            for (QT3DSU32 assetIdx = 0, assetEnd = m_OrderedAssets.size(); assetIdx < assetEnd;
-                 ++assetIdx) {
-                if (m_OrderedAssets[assetIdx].second
-                        && m_OrderedAssets[assetIdx].second->getType()
-                        == AssetValueTypes::Presentation) {
-                    SPresentationAsset *theAsset =
-                            m_OrderedAssets[assetIdx].second->getDataPtr<SPresentationAsset>();
-                    if (theAsset->m_Presentation)
-                        thePresentationElements.push_back(theAsset->m_Presentation->GetRoot());
-                    else
-                        thePresentationElements.push_back(NULL);
-                }
-            }
-
-            m_ElementAllocator->SaveBinaryData(
-                        theElementData,
-                        NVDataRef<Q3DStudio::TElement *>(thePresentationElements.data(),
-                                                         (QT3DSU32)thePresentationElements.size()));
-        }
-
-        // First we have to save all the presentations out because this step can generate new
-        // strings.
-        {
-            Q3DStudio::IBinarySerializer &thePresentationSerializer(
-                        Q3DStudio::IBinarySerializer::Create());
-            for (QT3DSU32 presIdx = 0, presEnd = thePresentations.size(); presIdx < presEnd;
-                 ++presIdx) {
-                CPresentation &thePresentation = *thePresentations[presIdx];
-                thePresentationSerializer.BinarySave(&thePresentation);
-                IScene *theScene = thePresentation.GetScene();
-                if (theScene)
-                    m_RuntimeFactory->GetSceneManager().BinarySave(*theScene);
-            }
-        }
-        // Now no more strings may be generated else they can't be remapped on load.
-        eastl::string binaryDir(fname);
-        fname.append("/");
-        fname.append(m_Filename);
-        fname.append(".uiab");
-        {
-            CFileSeekableIOStream theStream(fname.c_str(), FileWriteFlags());
-            if (!theStream.IsOpen()) {
-                qCCritical(INVALID_OPERATION, "File %s is not writable", fname.c_str());
-                QT3DS_ASSERT(false);
-                return;
-            }
-
-            // Save out the loaded scripts first.
-            eastl::vector<eastl::string> loadedScripts =
-                    m_CoreFactory->GetScriptEngine().GetLoadedScripts();
-            IOutStream &theOutStream(theStream);
-            {
-                MemoryBuffer<> theBuffer(ForwardingAllocator(
-                                             m_CoreFactory->GetFoundation().getAllocator(),
-                                             "scriptsbuffer"));
-                theBuffer.write((QT3DSU32)loadedScripts.size());
-                for (QT3DSU32 idx = 0, end = loadedScripts.size(); idx < end; ++idx) {
-                    QT3DSU32 len = (QT3DSU32)loadedScripts[idx].size();
-                    if (len) {
-                        ++len;
-                        theBuffer.write(len);
-                        theBuffer.write(loadedScripts[idx].c_str(), len);
-                    } else {
-                        theBuffer.write(len);
-                    }
-                }
-                theOutStream.Write((QT3DSU32)theBuffer.size());
-                theOutStream.Write(theBuffer.begin(), (QT3DSU32)theBuffer.size());
-            }
-
-            m_RuntimeFactory->GetSceneManager().BinarySaveManagerData(theStream, binaryDir.c_str());
-
-            QT3DSU32 primaryIdSize = (QT3DSU32)m_InitialPresentationId.size();
-            if (primaryIdSize)
-                ++primaryIdSize; // include null
-            theOutStream.Write(primaryIdSize);
-            if (primaryIdSize)
-                theOutStream.Write(m_InitialPresentationId.c_str(), primaryIdSize);
-            QT3DSU32 theScaleMode
-                    = static_cast<QT3DSU32>(m_RuntimeFactory->GetQt3DSRenderContext().GetScaleMode());
-            theOutStream.Write(theScaleMode);
-            m_UIAFileSettings.Save(theOutStream);
-
-            MemoryBuffer<> theSaveBuffer(
-                        ForwardingAllocator(m_CoreFactory->GetFoundation().getAllocator(),
-                                            "SaveBuffer"));
-            // Now save our assets.
-            QT3DSU32 assetCount = (QT3DSU32)m_OrderedAssets.size();
-            theSaveBuffer.write(assetCount);
-            const SStrRemapMap &remapMap = m_CoreFactory->GetStringTable().GetRemapMap();
-            // Save the assets in the order they were loaded.
-            for (QT3DSU32 assetIdx = 0, assetEnd = m_OrderedAssets.size(); assetIdx < assetEnd;
-                 ++assetIdx) {
-                CRegisteredString temp(m_OrderedAssets[assetIdx].first);
-                temp.Remap(remapMap);
-                theSaveBuffer.write(temp);
-                SAssetValue theValue = m_OrderedAssets[assetIdx].second->visit<SAssetValue>(
-                            SAssetSaveRemapper(remapMap));
-                theSaveBuffer.write(theValue);
-            }
-            theOutStream.Write((QT3DSU32)theSaveBuffer.size());
-            theOutStream.Write(theSaveBuffer.begin(), (QT3DSU32)theSaveBuffer.size());
-            m_CoreFactory->GetVisualStateContext().BinarySave(theStream);
-            QT3DSU32 theElemDataSize = (QT3DSU32)theElementData.GetLength();
-            theOutStream.Write(theElemDataSize);
-            theOutStream.Write(theElementData.begin(), theElemDataSize);
-            GetSceneGraphDebugger().BinarySave(theStream);
-        }
-    }
-
-    struct SAssetLoadRemapper
-    {
-        NVDataRef<QT3DSU8> m_Remapper;
-        SAssetLoadRemapper(NVDataRef<QT3DSU8> rm)
-            : m_Remapper(rm)
-        {
-        }
-        template <typename TDatatype>
-        void operator()(TDatatype &dt)
-        {
-            dt.Remap(*this);
-        }
-        void Remap(CRegisteredString &str) { str.Remap(m_Remapper); }
-        void operator()() {}
-    };
-
-    bool LoadBinary(const char *inFilename)
-    {
-        CFileSeekableIOStream theStream(inFilename, FileReadFlags());
-        if (!theStream.IsOpen()) {
-            qCCritical(INVALID_OPERATION, "File %s is not readable", inFilename);
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        {
-            SStackPerfTimer __loadTimer(m_CoreFactory->GetPerfTimer(), "Load UIA");
-
-            eastl::string binaryDir(inFilename);
-            CFileTools::GetDirectory(binaryDir);
-
-            IInStream &theInStream(theStream);
-            QT3DSU32 scriptsDataLen = 0;
-            theInStream.Read(scriptsDataLen);
-            eastl::vector<char8_t> scriptsData;
-            scriptsData.resize(scriptsDataLen);
-            theInStream.Read(scriptsData.data(), scriptsDataLen);
-            eastl::vector<const char *> scripts;
-            {
-                qt3ds::foundation::SDataReader theReader((QT3DSU8 *)scriptsData.data(),
-                                                         (QT3DSU8 *)scriptsData.data()
-                                                         + scriptsDataLen);
-                QT3DSU32 numScripts = theReader.LoadRef<QT3DSU32>();
-                for (QT3DSU32 idx = 0, end = numScripts; idx < end; ++idx) {
-                    QT3DSU32 len = theReader.LoadRef<QT3DSU32>();
-                    scripts.push_back((const char *)theReader.m_CurrentPtr);
-                    theReader.m_CurrentPtr += len;
-                }
-            }
-            // We heavily thread the binary loading process so until we have killed the threading
-            // portion of the loader, we have to
-            // ensure the script engine is multithread-capable.
-            m_CoreFactory->GetScriptEngine().EnableMultithreadedAccess();
-            m_CoreFactory->GetStringTable().EnableMultithreadedAccess();
-            m_CoreFactory->GetScriptEngine().BeginPreloadScripts(
-                        scripts, m_CoreFactory->GetRenderContextCore().GetThreadPool(),
-                        m_ProjectDir.c_str());
-            NVDataRef<QT3DSU8> stringTableData
-                    = m_CoreFactory->GetSceneLoader().BinaryLoadManagerData(theInStream,
-                                                                            binaryDir.c_str());
-            QT3DSU32 primaryIdSize = 0;
-            theInStream.Read(primaryIdSize);
-            if (primaryIdSize) {
-                m_InitialPresentationId.resize(primaryIdSize);
-                theInStream.Read(&m_InitialPresentationId.at(0), primaryIdSize);
-                m_InitialPresentationId.resize(primaryIdSize - 1);
-            }
-            QT3DSU32 theScaleMode = 0;
-            theInStream.Read(&theScaleMode, 1);
-            qt3ds::render::ScaleModes::Enum theProperScaleMode
-                    = static_cast<qt3ds::render::ScaleModes::Enum>(theScaleMode);
-            m_UIAFileSettings.Load(theInStream);
-
-            // Connect the debugger after we load the string table information because connecting
-            // generates new string table strings and the string table itself needs to be in an
-            // empty
-            // state on load else the old strings are invalid.
-#if !defined(_LINUXPLATFORM) && !defined(_INTEGRITYPLATFORM)
-            ConnectDebugger();
-#endif
-            m_AssetMap.clear();
-            m_OrderedAssets.clear();
-            QT3DS_ASSERT(m_Behaviors.empty());
-            QT3DSU32 assetSectionSize = 0;
-            theInStream.Read(assetSectionSize);
-            m_LoadBuffer.resize(assetSectionSize);
-
-            theInStream.Read(m_LoadBuffer.data(), assetSectionSize);
-
-            {
-                qt3ds::foundation::SDataReader theReader(
-                            (QT3DSU8 *)m_LoadBuffer.data(), (QT3DSU8 *)m_LoadBuffer.data()
-                            + assetSectionSize);
-                QT3DSU32 assetCount = theReader.LoadRef<QT3DSU32>();
-
-                for (QT3DSU32 assetIdx = 0, assetEnd = assetCount; assetIdx < assetEnd;
-                     ++assetIdx) {
-                    CRegisteredString id = theReader.LoadRef<CRegisteredString>();
-                    id.Remap(stringTableData);
-                    SAssetValue theAsset = theReader.LoadRef<SAssetValue>();
-                    theAsset.visit<void>(SAssetLoadRemapper(stringTableData));
-                    NVScopedRefCounted<SRefCountedAssetValue> theRefAsset(
-                                QT3DS_NEW(m_CoreFactory->GetFoundation().getAllocator(),
-                                          SRefCountedAssetValue)(m_CoreFactory->GetFoundation(),
-                                                                 theAsset));
-                    TIdAssetMap::iterator iter =
-                            m_AssetMap.insert(eastl::make_pair(id, theRefAsset)).first;
-                    m_OrderedAssets.push_back(eastl::make_pair(iter->first, theRefAsset));
-                }
-            }
-            m_CoreFactory->GetVisualStateContext().BinaryLoad(theInStream, stringTableData);
-            QT3DSU32 theElementSectionSize = 0;
-            theInStream.Read(theElementSectionSize);
-            m_LoadBuffer.resize(theElementSectionSize);
-            theInStream.Read(m_LoadBuffer.data(), theElementSectionSize);
-            // Note that the elements are now all coming from the load buffer; that memory cannot be
-            // reused or released.
-            m_ElementLoadResult = m_ElementAllocator->LoadBinaryData(
-                        toDataRef((QT3DSU8 *)m_LoadBuffer.data(), theElementSectionSize),
-                        stringTableData);
-            GetSceneGraphDebugger().BinaryLoad(theInStream, stringTableData);
-            m_AppLoadContext = IAppLoadContext::CreateBinaryLoadContext(*this, theProperScaleMode,
-                                                                        stringTableData);
-        }
-        return true;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2053,443 +1757,12 @@ struct SXMLLoader : public IAppLoadContext
     virtual void OnFirstRender() {}
 };
 
-struct SLoadingPresentation
-{
-    QT3DSU32 m_SGHandle;
-    QT3DSU64 m_UIBJobId;
-    QT3DSU64 m_UIBSGJobId;
-    SPresentationAsset *m_Asset;
-    CRegisteredString m_UIBPath;
-    CRegisteredString m_UIBSGPath;
-    size_t m_ElementOffset;
-    Q3DStudio::TElement *m_RootElement;
-    NVDataRef<QT3DSU8> m_StringTableData;
-    volatile bool m_Finished;
-    volatile bool m_Error;
-    SLoadingPresentation(SPresentationAsset *inAsset = NULL,
-                         CRegisteredString uib = CRegisteredString(),
-                         CRegisteredString uibsg = CRegisteredString(), size_t inElementOffset = 0,
-                         Q3DStudio::TElement *inRoot = 0,
-                         NVDataRef<QT3DSU8> inStringTableData = NVDataRef<QT3DSU8>())
-        : m_SGHandle(0)
-        , m_UIBJobId(0)
-        , m_UIBSGJobId(0)
-        , m_Asset(inAsset)
-        , m_UIBPath(uib)
-        , m_UIBSGPath(uibsg)
-        , m_ElementOffset(inElementOffset)
-        , m_RootElement(inRoot)
-        , m_StringTableData(inStringTableData)
-        , m_Finished(false)
-        , m_Error(false)
-    {
-    }
-    // must be done with mutex held.
-    void CheckForFinished(SApp &inApp)
-    {
-        if (m_Finished == false && m_Error == false) {
-            if (m_Asset->m_Presentation != NULL && m_SGHandle != 0) {
-                m_Finished = true;
-                inApp.m_CoreFactory->GetSceneLoader().LoadSceneStage2(
-                            m_SGHandle, *m_Asset->m_Presentation, m_ElementOffset,
-                            inApp.m_CoreFactory->GetScriptEngine());
-                // inApp.m_CoreFactory->GetFoundation().error( QT3DS_WARN, "%s is finished",
-                // m_Asset->m_Src.c_str() );
-            }
-        }
-    }
-};
-
-typedef NVDataRef<SLoadingPresentation> TLoadingPresentationBuffer;
-
-struct SUIBLoadedCallback : public qt3ds::render::IBufferLoaderCallback
-{
-    SApp &m_App;
-    TLoadingPresentationBuffer m_LoadingPresentations;
-    Mutex &m_PresentationInitMutex;
-    Q3DStudio::IBinarySerializer &m_BinarySerializer;
-    QT3DSI32 mRefCount;
-
-    SUIBLoadedCallback(SApp &inApp, TLoadingPresentationBuffer inBuffer, Mutex &inPresInitMutex,
-                       Q3DStudio::IBinarySerializer &s)
-        : m_App(inApp)
-        , m_LoadingPresentations(inBuffer)
-        , m_PresentationInitMutex(inPresInitMutex)
-        , m_BinarySerializer(s)
-        , mRefCount(0)
-    {
-    }
-
-    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_App.m_CoreFactory->GetFoundation().getAllocator())
-
-    eastl::pair<SLoadingPresentation *, QT3DSU32> FindBuffer(CRegisteredString inPath)
-    {
-        SLoadingPresentation *theLoadingPresentation = NULL;
-        QT3DSU32 theLoadBufferIdx;
-        QT3DSU32 end = m_LoadingPresentations.size();
-        for (theLoadBufferIdx = 0; theLoadBufferIdx < end && theLoadingPresentation == NULL;
-             ++theLoadBufferIdx) {
-            if (m_LoadingPresentations[theLoadBufferIdx].m_UIBPath == inPath)
-                theLoadingPresentation = &m_LoadingPresentations[theLoadBufferIdx];
-        }
-        return eastl::make_pair(theLoadingPresentation, theLoadBufferIdx - 1);
-    }
-
-    static void SetPresentation(TElement &inElement, CPresentation &inPresentation)
-    {
-        inElement.SetBelongedPresentation(inPresentation);
-        for (TElement *theChild = inElement.m_Child; theChild; theChild = theChild->m_Sibling)
-            SetPresentation(*theChild, inPresentation);
-    }
-
-    void OnBufferLoaded(qt3ds::render::ILoadedBuffer &inBuffer) override
-    {
-        eastl::pair<SLoadingPresentation *, QT3DSU32> theBufferData = FindBuffer(inBuffer.Path());
-        SLoadingPresentation *theLoadingPresentation = theBufferData.first;
-        if (theLoadingPresentation) {
-            if (theLoadingPresentation->m_Error == false) {
-                m_App.m_CoreFactory->GetScriptEngine().EndPreloadScripts();
-                bool success = false;
-                SPresentationAsset &theAsset(*theLoadingPresentation->m_Asset);
-                {
-                    Mutex::ScopedLock __presLock(m_PresentationInitMutex);
-                    theAsset.m_Presentation
-                            = Q3DStudio_new(CPresentation) CPresentation(theAsset.m_Id.c_str(),
-                                                                         &m_App);
-                    theAsset.m_Presentation->SetFilePath(inBuffer.Path().c_str());
-                    theAsset.m_Presentation->SetRoot(*theLoadingPresentation->m_RootElement);
-                    SetPresentation(*theLoadingPresentation->m_RootElement,
-                                    *theAsset.m_Presentation);
-                    Q3DStudio::IBinarySerializer &thePresentationSerializer(m_BinarySerializer);
-                    {
-                        SStackPerfTimer __perfTimer(m_App.m_CoreFactory->GetPerfTimer(),
-                                                    "Load UIB");
-                        success = thePresentationSerializer.BinaryLoad(
-                                    theAsset.m_Presentation,
-                                    theLoadingPresentation->m_ElementOffset,
-                                    inBuffer.Data(),
-                                    theLoadingPresentation->m_StringTableData,
-                                    m_App.m_CoreFactory->GetPerfTimer());
-
-                        // Keep reference to buffer for the things that are loaded in place.
-                        theAsset.m_Presentation->SetLoadedBuffer(inBuffer);
-                    }
-                }
-                {
-                    SStackPerfTimer __perfTimer(m_App.m_CoreFactory->GetPerfTimer(),
-                                                "Load Presentation Debug Data");
-                    m_App.GetSceneGraphDebugger().BinaryLoadPresentation(
-                                theAsset.m_Presentation, theAsset.m_Id.c_str(),
-                                theLoadingPresentation->m_ElementOffset);
-                }
-
-                {
-                    Mutex::ScopedLock __presLock(m_PresentationInitMutex);
-                    theLoadingPresentation->CheckForFinished(m_App);
-                }
-            }
-        } else {
-            QT3DS_ASSERT(false);
-        }
-    }
-    void SetFailCondition(CRegisteredString inPath)
-    {
-        eastl::pair<SLoadingPresentation *, QT3DSU32> theBufferData = FindBuffer(inPath);
-        if (theBufferData.first)
-            theBufferData.first->m_Error = true;
-    }
-    void OnBufferLoadFailed(CRegisteredString inPath) override { SetFailCondition(inPath); }
-    void OnBufferLoadCancelled(CRegisteredString inPath) override { SetFailCondition(inPath); }
-};
-
-struct SUIBSGLoadedCallback : public qt3ds::render::IBufferLoaderCallback
-{
-    SApp &m_App;
-    TLoadingPresentationBuffer m_LoadingPresentations;
-    Mutex &m_PresentationMutex;
-    QT3DSI32 mRefCount;
-
-    SUIBSGLoadedCallback(SApp &inApp, TLoadingPresentationBuffer inBuffer,
-                         Mutex &inPresentationMutex)
-        : m_App(inApp)
-        , m_LoadingPresentations(inBuffer)
-        , m_PresentationMutex(inPresentationMutex)
-        , mRefCount(0)
-    {
-    }
-
-    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_App.m_CoreFactory->GetFoundation().getAllocator())
-
-    eastl::pair<SLoadingPresentation *, QT3DSU32> FindBuffer(CRegisteredString inPath)
-    {
-        SLoadingPresentation *theLoadingPresentation = NULL;
-        QT3DSU32 theLoadBufferIdx;
-        QT3DSU32 end = m_LoadingPresentations.size();
-        for (theLoadBufferIdx = 0; theLoadBufferIdx < end && theLoadingPresentation == NULL;
-             ++theLoadBufferIdx) {
-            if (m_LoadingPresentations[theLoadBufferIdx].m_UIBSGPath == inPath)
-                theLoadingPresentation = &m_LoadingPresentations[theLoadBufferIdx];
-        }
-        return eastl::make_pair(theLoadingPresentation, theLoadBufferIdx - 1);
-    }
-
-    void OnBufferLoaded(qt3ds::render::ILoadedBuffer &inBuffer) override
-    {
-        SLoadingPresentation *theLoadingPresentation = FindBuffer(inBuffer.Path()).first;
-
-        if (theLoadingPresentation && theLoadingPresentation->m_Error == false) {
-            QT3DSU32 sgHandle = m_App.m_CoreFactory->GetSceneLoader().LoadSceneStage1(
-                        m_App.GetProjectDirectory(), inBuffer);
-
-            {
-                Mutex::ScopedLock __presLock(m_PresentationMutex);
-                theLoadingPresentation->m_SGHandle = sgHandle;
-                m_App.m_CoreFactory->GetScriptEngine().EndPreloadScripts();
-                theLoadingPresentation->CheckForFinished(m_App);
-            }
-        }
-    }
-    void SetFailCondition(CRegisteredString inPath)
-    {
-        eastl::pair<SLoadingPresentation *, QT3DSU32> theBufferData = FindBuffer(inPath);
-        if (theBufferData.first)
-            theBufferData.first->m_Error = true;
-    }
-    void OnBufferLoadFailed(CRegisteredString inPath) override { SetFailCondition(inPath); }
-    void OnBufferLoadCancelled(CRegisteredString inPath) override { SetFailCondition(inPath); }
-};
-
-struct SBinaryLoader : public IAppLoadContext, public IAppRunnable
-{
-    SApp &m_App;
-    qt3ds::render::ScaleModes::Enum m_ScaleMode;
-    Mutex m_PresentationInitMutex;
-    NVScopedRefCounted<SUIBLoadedCallback> m_UIBCallback;
-    NVScopedRefCounted<SUIBSGLoadedCallback> m_UIBSGCallback;
-    Q3DStudio::IBinarySerializer &m_BinarySerializer;
-    eastl::vector<SLoadingPresentation> m_LoadingPresentations;
-    SStackPerfTimer *m_OfflineLoadTimer;
-    QT3DSI32 mRefCount;
-
-    SBinaryLoader(SApp &app, qt3ds::render::ScaleModes::Enum sc, NVDataRef<QT3DSU8> inStringTableData)
-        : m_App(app)
-        , m_ScaleMode(sc)
-        , m_PresentationInitMutex(app.m_CoreFactory->GetFoundation().getAllocator())
-        , m_BinarySerializer(IBinarySerializer::Create())
-        , m_OfflineLoadTimer(
-              new SStackPerfTimer(app.m_CoreFactory->GetPerfTimer(), "Binary Offline Load"))
-        , mRefCount(0)
-    {
-        using qt3ds::render::IBufferLoader;
-        IBufferLoader &theLoader(m_App.m_CoreFactory->GetRenderContextCore().GetBufferLoader());
-        eastl::string fullpath, directory, filename, extension, sceneGraphPath, presentationPath;
-        IStringTable &theStringTable(m_App.m_CoreFactory->GetStringTable());
-        for (QT3DSU32 idx = 0, end = app.m_OrderedAssets.size(); idx < end; ++idx) {
-            SAssetValue &theValue = *app.m_OrderedAssets[idx].second;
-            if (theValue.getType() == AssetValueTypes::Presentation) {
-                size_t presentationIndex = m_LoadingPresentations.size();
-                if (presentationIndex < m_App.m_ElementLoadResult.first.size()
-                        && m_App.m_ElementLoadResult.first[(QT3DSU32)presentationIndex]) {
-                    SPresentationAsset &theAsset = *theValue.getDataPtr<SPresentationAsset>();
-                    CFileTools::CombineBaseAndRelative(m_App.GetProjectDirectory().c_str(),
-                                                       theAsset.m_Src, fullpath);
-                    m_App.m_CoreFactory->GetSceneLoader().GetBinaryLoadFileName(fullpath,
-                                                                                sceneGraphPath);
-                    CFileTools::Split(fullpath.c_str(), directory, filename, extension);
-                    presentationPath.assign(directory);
-                    presentationPath.append("/binary/");
-                    presentationPath.append(filename);
-                    presentationPath.append(".uib");
-                    m_LoadingPresentations.push_back(
-                                SLoadingPresentation(
-                                    &theAsset,
-                                    theStringTable.RegisterStr(presentationPath.c_str()),
-                                    theStringTable.RegisterStr(sceneGraphPath.c_str()),
-                                    m_App.m_ElementLoadResult.second,
-                                    m_App.m_ElementLoadResult.first[(QT3DSU32)presentationIndex],
-                                inStringTableData));
-                }
-            }
-        }
-        if (m_LoadingPresentations.size()) {
-            SLoadingPresentation *beginPtr = m_LoadingPresentations.data();
-            TLoadingPresentationBuffer theBuffer(beginPtr, (QT3DSU32)m_LoadingPresentations.size());
-            m_UIBCallback
-                    = QT3DS_NEW(m_App.m_CoreFactory->GetFoundation().getAllocator(),
-                              SUIBLoadedCallback)(m_App, theBuffer, m_PresentationInitMutex,
-                                                  m_BinarySerializer);
-
-            m_UIBSGCallback
-                    = QT3DS_NEW(m_App.m_CoreFactory->GetFoundation().getAllocator(),
-                              SUIBSGLoadedCallback)(m_App, theBuffer, m_PresentationInitMutex);
-            for (QT3DSU32 idx = 0, end = m_LoadingPresentations.size(); idx < end; ++idx) {
-                SLoadingPresentation &thePresentation(m_LoadingPresentations[idx]);
-                thePresentation.m_UIBJobId
-                        = theLoader.QueueForLoading(thePresentation.m_UIBPath, m_UIBCallback.mPtr);
-                thePresentation.m_UIBSGJobId
-                        = theLoader.QueueForLoading(thePresentation.m_UIBSGPath,
-                                                    m_UIBSGCallback.mPtr);
-            }
-        }
-        m_App.QueueForMainThread(*this);
-    }
-
-    ~SBinaryLoader()
-    {
-        using qt3ds::render::IBufferLoader;
-        NVFoundationBase &theBase = m_App.m_CoreFactory->GetRenderContextCore().GetFoundation();
-        IBufferLoader &theLoader(m_App.m_CoreFactory->GetRenderContextCore().GetBufferLoader());
-        (void)theBase;
-        // theBase.error( QT3DS_WARN, "Binary Loader -cancel load" );
-        {
-            Mutex::ScopedLock __locker(m_PresentationInitMutex);
-            for (QT3DSU32 idx = 0, end = m_LoadingPresentations.size(); idx < end; ++idx) {
-                SLoadingPresentation &thePresentation(m_LoadingPresentations[idx]);
-
-                if (thePresentation.m_Error == false) {
-                    thePresentation.m_Error = true;
-                    theLoader.CancelBufferLoad(thePresentation.m_UIBJobId);
-                    theLoader.CancelBufferLoad(thePresentation.m_UIBSGJobId);
-                }
-            }
-        }
-
-        // theBase.error( QT3DS_WARN, "Binary Loader -clearing load queue" );
-        // Clear out any remaining buffers before we get destroyed else they will callback to us in
-        // their
-        // destructors causing chaos.
-        while (theLoader.WillLoadedBuffersBeAvailable())
-            theLoader.NextLoadedBuffer();
-
-        // theBase.error( QT3DS_WARN, "Binary Loader load queue cleared" );
-
-        if (m_OfflineLoadTimer)
-            delete m_OfflineLoadTimer;
-        m_OfflineLoadTimer = NULL;
-
-        m_BinarySerializer.release();
-    }
-
-    void addRef() override { atomicIncrement(&mRefCount); }
-    void release() override
-    {
-        atomicDecrement(&mRefCount);
-        if (mRefCount <= 0)
-            NVDelete(m_App.m_CoreFactory->GetFoundation().getAllocator(), this);
-    }
-
-    void EndLoad() override
-    {
-        using qt3ds::render::IBufferLoader;
-        IBufferLoader &theLoader(m_App.m_CoreFactory->GetRenderContextCore().GetBufferLoader());
-        while (theLoader.WillLoadedBuffersBeAvailable())
-            theLoader.NextLoadedBuffer();
-    }
-
-    bool HasCompletedLoading() override
-    {
-        bool completed = true;
-        for (QT3DSU32 idx = 0, end = m_LoadingPresentations.size(); idx < end && completed; ++idx) {
-            SLoadingPresentation &thePresentation(m_LoadingPresentations[idx]);
-            completed = thePresentation.m_Error || thePresentation.m_Finished;
-        }
-        if (completed) {
-            if (m_OfflineLoadTimer) {
-                delete m_OfflineLoadTimer;
-                m_OfflineLoadTimer = NULL;
-            }
-        }
-        return completed;
-    }
-
-    bool OnGraphicsInitialized(IRuntimeFactory &inRuntimeFactory) override
-    {
-        EndLoad();
-
-        // Ensure we stop the timer.
-        HasCompletedLoading();
-
-        for (QT3DSU32 idx = 0, end = m_LoadingPresentations.size(); idx < end; ++idx) {
-            SLoadingPresentation &thePresentation(m_LoadingPresentations[idx]);
-            if (thePresentation.m_Error) {
-                qCritical("Error detected loading presentation: %s",
-                       thePresentation.m_Asset->m_Src.c_str());
-                return false;
-            }
-            if (thePresentation.m_Finished == false) {
-                qCritical("Unfinished presentation: %s", thePresentation.m_Asset->m_Src.c_str());
-                return false;
-            }
-        }
-
-        inRuntimeFactory.GetQt3DSRenderContext().SetScaleMode(m_ScaleMode);
-
-        for (QT3DSU32 idx = 0, end = m_App.m_OrderedAssets.size(); idx < end; ++idx) {
-            if (m_App.m_OrderedAssets[idx].second->getType() == AssetValueTypes::Presentation) {
-                // Register the scenes.
-                SPresentationAsset &thePresentationAsset
-                        = *m_App.m_OrderedAssets[idx].second->getDataPtr<SPresentationAsset>();
-                if (thePresentationAsset.m_Presentation
-                        && thePresentationAsset.m_Presentation->GetScene()
-                        && thePresentationAsset.m_Id.c_str()) {
-                    thePresentationAsset.m_Presentation->GetScene()->RegisterOffscreenRenderer(
-                                thePresentationAsset.m_Id.c_str());
-                }
-            }
-        }
-        return true;
-    }
-
-    virtual void OnFirstRender() {}
-
-    // IAppRunnable
-    void Run() override
-    {
-        SBinaryLoader &theLoader = *this;
-        theLoader.m_App.m_CoreFactory->GetScriptEngine().EndPreloadScripts();
-        {
-            SStackPerfTimer __perfTimer(theLoader.m_App.m_CoreFactory->GetPerfTimer(),
-                                        "Application: Initialize application behaviors");
-
-            for (QT3DSU32 idx = 0, end = theLoader.m_App.m_OrderedAssets.size(); idx < end; ++idx) {
-                if (theLoader.m_App.m_OrderedAssets[idx].second->getType()
-                        == AssetValueTypes::Behavior) {
-                    SBehaviorAsset &theBehaviorAsset =
-                            *theLoader.m_App.m_OrderedAssets[idx]
-                            .second->getDataPtr<SBehaviorAsset>();
-                    SStackPerfTimer __perfTimer(theLoader.m_App.m_CoreFactory->GetPerfTimer(),
-                                                theBehaviorAsset.m_Src.c_str());
-                    Q3DStudio::INT32 scriptId =
-                            theLoader.m_App.m_CoreFactory->GetScriptEngine()
-                            .InitializeApplicationBehavior(theBehaviorAsset.m_Src);
-                    if (scriptId == 0) {
-                        qCCritical(INVALID_OPERATION, "Unable to load application behavior %s",
-                                   theBehaviorAsset.m_Src.c_str());
-                    } else {
-                        theBehaviorAsset.m_Handle = scriptId;
-                        theLoader.m_App.m_Behaviors.push_back(eastl::make_pair(theBehaviorAsset,
-                                                                               false));
-                    }
-                }
-            }
-        }
-    }
-};
-
 IAppLoadContext &IAppLoadContext::CreateXMLLoadContext(
         SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
         const char8_t *inScaleMode)
 {
     return *QT3DS_NEW(inApp.m_CoreFactory->GetFoundation().getAllocator(),
                       SXMLLoader)(inApp, inScaleMode, inStateReferences);
-}
-
-IAppLoadContext &IAppLoadContext::CreateBinaryLoadContext(SApp &inApp,
-                                                          qt3ds::render::ScaleModes::Enum inScaleMode,
-                                                          NVDataRef<QT3DSU8> inStrTableData)
-{
-    return *QT3DS_NEW(inApp.m_CoreFactory->GetFoundation().getAllocator(),
-                      SBinaryLoader)(inApp, inScaleMode, inStrTableData);
 }
 }
 

@@ -58,11 +58,7 @@ inline void GetAllowableParentSlides(CClientDataModelBridge *inBridge,
     qt3dsdm::Qt3DSDMSlideHandle theSlide = 0;
     qt3dsdm::Qt3DSDMInstanceHandle theTimeParent = inBridge->GetOwningComponentInstance(inInstance);
     if (theTimeParent.Valid()) {
-        if (inBridge->IsMaster(inInstance)) {
-            // we use master time context if parent is a master object
-            theSlide = inBridge->GetComponentSlide(theTimeParent, 0);
-        } else // else, we use the current time context of the parent
-            theSlide = inBridge->GetComponentActiveSlide(theTimeParent);
+        theSlide = inBridge->GetComponentActiveSlide(theTimeParent);
 
         // depth first, so that we have Scene at the beginning of the list.
         GetAllowableParentSlides(inBridge, theTimeParent, inList);

@@ -88,8 +88,11 @@ public:
     QStringList mimeTypes() const override;
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
+    static const QVector<BasicObjectItem> BasicMeshesModel();
+
 private:
     void initialize();
+    static const QVector<BasicObjectItem> InitializeObjectModel();
 
     QVector<BasicObjectItem> m_ObjectItems;
 

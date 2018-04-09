@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Effect>
 	<MetaData>
-		<Property name="FocusPos" formalName="Focus Position" description="Height of the focus bar in normalized coordinates" min="0" max="1" default=".5"/>
-		<Property name="FocusWidth" formalName="Focus Width" description="Objects within this range of Focus Distance will be in focus" min="0" max="1" default=".2"/>
-		<Property name="BlurDebug" formalName="Debug Rendering" type="Boolean" description="Allows you to see exactly how the Focus variables work.  Black objects are in focus, white are blurred" default="False"/>
-		<Property name="BlurAmount" formalName="Blur Amount" description="Increase the amount of blur.  Amounts above 4 may cause artifacts" min="0" max="10" default="4" />
+                <Property name="FocusPos" formalName="Focus Position" description="Height of the focus bar in\nnormalized coordinates" min="0" max="1" default=".5"/>
+                <Property name="FocusWidth" formalName="Focus Width" description="Objects within this range of Focus Distance\nwill be in focus" min="0" max="1" default=".2"/>
+                <Property name="BlurDebug" formalName="Debug Rendering" type="Boolean" description="Allows you to see exactly how the Focus\nvariables work. Black objects are in\nfocus, white are blurred" default="False"/>
+                <Property name="BlurAmount" formalName="Blur Amount" description="Increase the amount of blur. Amounts\nabove 4 may cause artifacts" min="0" max="10" default="4" />
 		<Property name="SourceSampler" type="Texture" filter="linear" clamp="clamp"/>
-		<Property name="VerticalEffect" formalName="Vertical" type='Boolean' description="Makes the effect work vertically instead of horizontally" default="False"/>
-		<Property name="InvertBlur" formalName="Invert Blur" type="Boolean" description="Inverts the blur area so the center is blurred vs. the outer" default="False"/>
+                <Property name="VerticalEffect" formalName="Vertical" type='Boolean' description="Makes the effect work vertically\ninstead of horizontally" default="False"/>
+                <Property name="InvertBlur" formalName="Invert Blur" type="Boolean" description="Inverts the blur area so the center\nis blurred vs. the outer" default="False"/>
 	</MetaData>
 	<Shaders>
 		<Shared>

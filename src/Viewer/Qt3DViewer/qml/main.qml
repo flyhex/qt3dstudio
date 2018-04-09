@@ -403,10 +403,9 @@ ApplicationWindow {
             id: fileDialog
             title: qsTr("Choose Presentation or Project")
             folder: _viewerHelper.openFolder
-            nameFilters: [qsTr("All supported formats (*.uip *.uia *.uiab)"),
+            nameFilters: [qsTr("All supported formats (*.uip *.uia)"),
                 qsTr("Studio UI Presentation (*.uip)"),
-                qsTr("Application file (*.uia)"),
-                qsTr("Binary Application (*.uiab)")]
+                qsTr("Application file (*.uia)")]
             onAccepted: {
                 _viewerHelper.contentView = ViewerHelper.StudioView;
                 contentLoader.item.presentation.setSource(fileUrls[0]);

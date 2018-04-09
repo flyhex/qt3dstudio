@@ -25,7 +25,6 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
 import QtQuick 2.6
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
@@ -45,42 +44,57 @@ RowLayout {
         text: qsTr("Argument")
     }
 
-    Flickable {
+    ScrollView {
+        id: scrollView
         Layout.preferredWidth: _valueWidth
-        Layout.preferredHeight: textArea.height
+        Layout.preferredHeight: _controlBaseHeight * 3
+        clip: true
 
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-        TextArea.flickable: TextArea {
+        TextArea {
             id: textArea
-
             property bool ignoreHotkeys: true
 
             horizontalAlignment: TextInput.AlignLeft
-            verticalAlignment: TextInput.AlignVCenter
-            implicitWidth: _valueWidth
+            verticalAlignment: TextInput.AlignTop
             font.pixelSize: _fontSize
             color: _textColor
+            selectionColor: _selectionColor
+            selectedTextColor: _textColor
 
             topPadding: 6
             bottomPadding: 6
             rightPadding: 6
 
-            wrapMode: TextArea.Wrap
+            wrapMode: TextEdit.WrapAnywhere
             background: Rectangle {
+                height: textArea.height
                 color: textArea.enabled ? _studioColor2 : "transparent"
                 border.width: textArea.activeFocus ? 1 : 0
                 border.color: textArea.activeFocus ? _selectionColor : _disabledColor
             }
 
+            MouseArea {
+                id: mouseArea
+                property int clickedPos
+
+                anchors.fill: parent
+                preventStealing: true
+                onPressed: {
+                    textArea.forceActiveFocus()
+                    clickedPos = textArea.positionAt(mouse.x, mouse.y)
+                    textArea.cursorPosition = clickedPos
+                }
+                onDoubleClicked: textArea.selectAll()
+                onPositionChanged: {
+                    textArea.cursorPosition = textArea.positionAt(mouse.x,
+                                                                  mouse.y)
+                    textArea.select(clickedPos, textArea.cursorPosition)
+                }
+            }
             onEditingFinished: root.editingFinished()
-        }
-
-        MouseArea {
-            id: mouseArea
-
-            anchors.fill: parent
-            onPressed: parent.forceActiveFocus()
         }
     }
 }

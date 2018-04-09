@@ -35,17 +35,17 @@ Rectangle {
 
     id: root
 
-    readonly property bool masterSlide: _slideView.showMasterSlide
+    readonly property bool masterSlide: _parentView.showMasterSlide
 
     function handleMouseClicks(mouse) {
         if (mouse.button === Qt.RightButton) {
             const coords = slideList.mapToItem(root, mouse.x, mouse.y);
-            _slideView.showContextMenu(coords.x, coords.y, -1);
+            _parentView.showContextMenu(coords.x, coords.y, -1);
         } else {
             root.focus = true;
             //Unselect All element when we click outside slider item in listView.
             //It worked as it in old version.
-            _slideView.deselectAll();
+            _parentView.deselectAll();
             mouse.accepted = false
         }
     }
@@ -80,20 +80,20 @@ Rectangle {
                     id: masterEditButton
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    onClicked: _slideView.showMasterSlide = !_slideView.showMasterSlide
+                    onClicked: _parentView.showMasterSlide = !_parentView.showMasterSlide
 
                     background: Rectangle {
                         color: "transparent"
                     }
                     contentItem: Image {
-                        source: _slideView.showMasterSlide ? _resDir + "Slide-Normal.png"
-                                                           : _resDir + "Slide-Master-Active.png"
+                        source: _parentView.showMasterSlide ? _resDir + "Slide-Normal.png"
+                                                            : _resDir + "Slide-Master-Active.png"
                     }
                 }
 
                 StyledLabel {
                     id: masterEditLabel
-                    text: _slideView.showMasterSlide ? qsTr("Leave Master") : qsTr("Edit Master")
+                    text: _parentView.showMasterSlide ? qsTr("Leave Master") : qsTr("Edit Master")
                     font.pixelSize: _fontSize
                     color: _masterColor
                     verticalAlignment: Text.AlignVCenter
@@ -123,7 +123,7 @@ Rectangle {
             boundsBehavior: Flickable.StopAtBounds
             clip: true
 
-            model: _slideView.currentModel
+            model: _parentView.currentModel
             spacing: 10
 
             MouseArea {
@@ -159,30 +159,30 @@ Rectangle {
 
                 onPressed: {
                     dragIndex = model.index;
-                    _slideView.startSlideRearrange(model.index);
+                    _parentView.startSlideRearrange(model.index);
                     if (mouse.x > delegateItem.x && mouse.x < delegateItem.x + delegateItem.width)
                         held = true;
                 }
 
                 onReleased: {
                     held = false;
-                    _slideView.finishSlideRearrange(true);
+                    _parentView.finishSlideRearrange(true);
                 }
 
                 onCanceled: {
                     held = false;
-                    _slideView.finishSlideRearrange(false);
+                    _parentView.finishSlideRearrange(false);
                 }
 
                 onClicked: {
-                    _slideView.deselectAll();
+                    _parentView.deselectAll();
                     if (mouse.button === Qt.LeftButton) {
                         root.focus = true;
                         model.selected = true;
                     }
                     if (mouse.button === Qt.RightButton) {
                         const coords = mapToItem(root, mouse.x, mouse.y);
-                        _slideView.showContextMenu(coords.x, coords.y, model.index);
+                        _parentView.showContextMenu(coords.x, coords.y, model.index);
                     }
                 }
 
@@ -262,7 +262,7 @@ Rectangle {
                     onEntered: {
                         var oldIndex = drag.source.dragIndex
                         var newIndex = model.index
-                        _slideView.moveSlide(oldIndex, newIndex)
+                        _parentView.moveSlide(oldIndex, newIndex)
                         drag.source.dragIndex = newIndex
                     }
                 }
@@ -299,9 +299,9 @@ Rectangle {
                 width: dataInputImage.sourceSize.width
                 height: dataInputImage.sourceSize.height
                 Layout.leftMargin: 12
-                property bool controlled: _slideView.controlled
-                property string currentController: _slideView.currController
-                property string toolTip: _slideView.toolTip
+                property bool controlled: _parentView.controlled
+                property string currentController: _parentView.currController
+                property string toolTip: _parentView.toolTip
                 background: Rectangle {
                     color: "transparent"
                 }
@@ -311,7 +311,7 @@ Rectangle {
                     hoverEnabled: true
                     acceptedButtons: Qt.LeftButton
                     onClicked:  {
-                        _slideView.showControllerDialog(mapToGlobal(mouse.x, mouse.y));
+                        _parentView.showControllerDialog(mapToGlobal(mouse.x, mouse.y));
                     }
                 }
                 Image {
@@ -327,9 +327,15 @@ Rectangle {
                 }
                 StyledTooltip {
                     id: tooltip
-                    visible: controlButtonArea.containsMouse
+                    enabled: controlButtonArea.containsMouse
                     text: parent.toolTip
                 }
+            }
+            StyledLabel {
+                id: dataInputName
+                text: _parentView.currController
+                leftPadding: 10
+                color: _parentView.controlled ? _dataInputColor : "transparent"
             }
         }
     }

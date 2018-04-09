@@ -54,20 +54,31 @@ public:
 
     // Returns true of this object needs to be rendered, false if this object is not dirty
     SOffscreenRenderFlags NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
-                                              QT3DSVec2 inPresentationScaleFactor) override;
+                                      QT3DSVec2 inPresentationScaleFactor,
+                                      const SRenderInstanceId instanceId) override;
 
     void Render(const SOffscreenRendererEnvironment &inEnvironment,
-                        NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
-                        SScene::RenderClearCommand inColorBufferNeedsClear) override;
+                NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
+                SScene::RenderClearCommand inColorBufferNeedsClear,
+                const SRenderInstanceId instanceId) override;
+    void RenderWithClear(const SOffscreenRendererEnvironment &/*inEnvironment*/,
+                         NVRenderContext &/*inRenderContext*/,
+                         QT3DSVec2 /*inPresentationScaleFactor*/,
+                         SScene::RenderClearCommand /*inColorBufferNeedsClear*/,
+                         QT3DSVec3 /*inclearColor*/,
+                         const SRenderInstanceId /*instanceId*/) override {}
 
-    IGraphObjectPickQuery *GetGraphObjectPickQuery() override
+    IGraphObjectPickQuery *GetGraphObjectPickQuery(const SRenderInstanceId instanceId) override
     {
+        Q_UNUSED(instanceId)
         return nullptr;
     }
-    bool Pick(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions) override
+    bool Pick(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inViewportDimensions,
+              const SRenderInstanceId instanceId) override
     {
         Q_UNUSED(inMouseCoords)
         Q_UNUSED(inViewportDimensions)
+        Q_UNUSED(instanceId)
         return false;
     }
     static const char *GetRendererName() { return "qml-render"; }

@@ -1,0 +1,72 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Using Behavior Scripts
+\page using-behavior-scripts.html
+\ingroup using-behavior-scripts
+
+Qt 3D Studio supports using behavior scripts. Included in Studio is a
+set of behavior scripts. These can be found in the scripts asset library.
+
+It is possible to write new behavior scripts and use them in Studio. See
+\l{Behavior} for more information about that.
+
+Behavior scripts can be applied to objects to give the specific object a certain behavior. Behavior
+properties can be edited in the \e{inspector palette}.
+
+\section1 Add a Behavior
+
+This is an example on how to add a behavior and use it in your project. In this example we
+are using the CopyTransform behavior.
+
+\list 1
+  \li From the \e{project palette}, open the behavior library. Then select the
+  \c{CopyTransform.qml} file from the file dialog to import it to your project.
+  \image behavior-library.png
+  \li Add two cubes to the scene by dragging and dropping from the \e{basic objects palette}.
+  \li Move the cubes away from each other.
+  \image copy-transform-cubes.png
+  \li Animate the position of one of the cubes.
+  \li Drag the \c{CopyTransform} script from the \e{project palette} to the cube
+  (in the \e{scene graph}) that has no animation. The \c{CopyTransform} script appears as
+  a child object to the Cube.
+  \image copy-transform-scene-graph.png
+  \li Select the \c{CopyTransform} script in the \e{scene graph} and set the properties in the
+  \e{inspector palette}:
+  \list
+    \li Copy Target: The cube with the animation
+    \li Additive mode: True
+    \li Position: True
+    \li Start Immediately: True
+    \image copy-transform-settings.png
+  \endlist
+  \li Preview the presentation in the Viewer to see the result.
+\endlist
+
+*/

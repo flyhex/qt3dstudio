@@ -27,32 +27,16 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_ACTION_CONTEXT_MENU_H
 #define INCLUDED_ACTION_CONTEXT_MENU_H 1
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include <QtWidgets/qmenu.h>
 
-//==============================================================================
-/**
- *	Context menu that springs up on right mouseclick in the Action Palette.
- */
 class CActionContextMenu : public QMenu
 {
     Q_OBJECT
 public:
-    explicit CActionContextMenu(QWidget *parent = nullptr);
+    explicit CActionContextMenu(QList<QAction *> actions, QWidget *parent = nullptr);
     virtual ~CActionContextMenu();
-
-Q_SIGNALS:
-    void cutAction();
-    void copyAction();
-    void pasteAction();
-    void deleteAction();
 };
 #endif // INCLUDED_ACTION_CONTEXT_MENU_H

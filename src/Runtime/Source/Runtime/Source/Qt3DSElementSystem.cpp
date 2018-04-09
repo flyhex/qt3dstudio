@@ -43,7 +43,6 @@
 #include "foundation/SerializationTypes.h"
 #include "foundation/IOStreams.h"
 #include "foundation/Qt3DSIndexableLinkedList.h"
-#include "Qt3DSBinarySerializationHelper.h"
 
 using namespace qt3ds::runtime::element;
 using namespace qt3ds;
@@ -488,78 +487,6 @@ struct SElementAllocator : public qt3ds::runtime::IElementAllocator
         return NULL;
     }
 
-    void SaveDFS(SWriteBuffer &inBuffer, SElement &inElement, nvvector<QT3DSU32> &ioElementOffsets)
-    {
-        ioElementOffsets.push_back(inBuffer.size());
-        m_ElementOffsets.insert(eastl::make_pair(&inElement, inBuffer.size()));
-        if (inElement.IsComponent()) {
-            SComponent &theComponent = static_cast<SComponent &>(inElement);
-            inBuffer.write(theComponent);
-        } else
-            inBuffer.write(inElement);
-        qt3ds::runtime::SaveIndexableList<TElementPropertyList>(
-            inElement.UnsafeGetFirstPropertyGroup(), inBuffer);
-        if (inElement.m_Child)
-            SaveDFS(inBuffer, *inElement.m_Child, ioElementOffsets);
-        if (inElement.m_Sibling)
-            SaveDFS(inBuffer, *inElement.m_Sibling, ioElementOffsets);
-    }
-
-    void SaveBinaryData(qt3ds::foundation::IOutStream &ioStream, NVDataRef<SElement *> inRoots) override
-    {
-        qt3ds::foundation::SWriteBuffer theWriter(m_Foundation.getAllocator(), "WriteBuffer");
-        theWriter.write(m_NextElementHandle);
-        theWriter.write((QT3DSU32)m_TypeDescriptors.size());
-        theWriter.write((QT3DSU32)inRoots.size());
-        // Write out the number of elements in each tree.
-        size_t countOffset = theWriter.size();
-        for (QT3DSU32 idx = 0, end = inRoots.size(); idx < end; ++idx)
-            theWriter.write((QT3DSU32)0);
-        for (TTypeDescSet::const_iterator iter = m_TypeDescriptors.begin(),
-                                          end = m_TypeDescriptors.end();
-             iter != end; ++iter) {
-            const STypeDesc *theDesc = &(*iter);
-            m_TypeDescOffsets.insert(eastl::make_pair(theDesc, (QT3DSU32)theWriter.size()));
-            STypeDesc theDescriptor = *iter;
-            theDescriptor.m_TypeName.Remap(m_StringTable);
-            theDescriptor.m_SubtypeName.Remap(m_StringTable);
-            theWriter.write(theDescriptor);
-            for (QT3DSU32 propIdx = 0, propEnd = theDescriptor.m_Properties.size(); propIdx < propEnd;
-                 ++propIdx) {
-                SPropertyDesc theProp = theDescriptor.m_Properties[propIdx];
-                theProp.m_Name.Remap(m_StringTable);
-                theWriter.write(theProp);
-            }
-        }
-        nvvector<QT3DSU32> theElementOffsets(m_Foundation.getAllocator(), "SaveData");
-        for (QT3DSU32 idx = 0, end = inRoots.size(); idx < end; ++idx) {
-            theElementOffsets.clear();
-            QT3DSU32 numElements = 0;
-            if (inRoots[idx]) {
-                SaveDFS(theWriter, *inRoots[idx], theElementOffsets);
-
-                numElements = (QT3DSU32)theElementOffsets.size();
-
-                for (QT3DSU32 idx = 0, end = (QT3DSU32)theElementOffsets.size(); idx < end; ++idx) {
-                    QT3DSU8 *theElemAddr = theWriter.begin() + theElementOffsets[idx];
-                    SElement *theElementPtr = reinterpret_cast<SElement *>(theElemAddr);
-                    theElementPtr->m_Name.Remap(m_StringTable);
-                    theElementPtr->m_Path.Remap(m_StringTable);
-                    theElementPtr->SetTypeDescription(
-                        GetRemappedTypeDescAddress(&theElementPtr->GetTypeDescription()));
-                    theElementPtr->m_Child = GetRemappedElementAddress(theElementPtr->m_Child);
-                    theElementPtr->m_Sibling = GetRemappedElementAddress(theElementPtr->m_Sibling);
-                    theElementPtr->m_Parent = GetRemappedElementAddress(theElementPtr->m_Parent);
-                    theElementPtr->Flags().SetDirty(false);
-                    theElementPtr->m_Association = NULL;
-                }
-            }
-            QT3DSU32 *theCountPtr = reinterpret_cast<QT3DSU32 *>(theWriter.begin() + countOffset);
-            theCountPtr[idx] = numElements;
-        }
-        ioStream.Write(theWriter.begin(), theWriter.size());
-    }
-
     // Returns an element pointer that when added to the return value of load will be a valid
     // element.
     SElement *GetRemappedElementAddress(SElement *inElement) const override
@@ -594,75 +521,6 @@ struct SElementAllocator : public qt3ds::runtime::IElementAllocator
         if (inElem)
             return reinterpret_cast<SElement *>(reinterpret_cast<size_t>(inElem) + memoryOffset);
         return NULL;
-    }
-
-    virtual Option<eastl::pair<NVDataRef<SElement *>, size_t>>
-    LoadBinaryData(NVDataRef<QT3DSU8> inLoadData, NVDataRef<QT3DSU8> inStringTableData) override
-    {
-        // m_LoadBuffer.assign( inLoadData.begin(), inLoadData.end() );
-        // inLoadData = m_LoadBuffer;
-        size_t retval = reinterpret_cast<size_t>(inLoadData.begin());
-        m_AllocatedBuffers.push_back(inLoadData);
-        SDataReader theReader(inLoadData.begin(), inLoadData.end());
-        m_NextElementHandle = *theReader.Load<QT3DSU32>();
-        QT3DSU32 numDescriptors = *theReader.Load<QT3DSU32>();
-        QT3DSU32 numRoots = *theReader.Load<QT3DSU32>();
-        QT3DSU32 *theElemCounts = reinterpret_cast<QT3DSU32 *>(theReader.m_CurrentPtr);
-        theReader.m_CurrentPtr += sizeof(QT3DSU32) * numRoots;
-        for (QT3DSU32 idx = 0, end = numDescriptors; idx < end; ++idx) {
-            QT3DSU32 theOffset = (QT3DSU32)(theReader.m_CurrentPtr - inLoadData.begin());
-            STypeDesc theDesc(*theReader.Load<STypeDesc>());
-            theDesc.m_SubtypeName.Remap(inStringTableData);
-            theDesc.m_TypeName.Remap(inStringTableData);
-            QT3DSU32 numProps = theDesc.m_Properties.mSize;
-            theDesc.m_Properties.mData = reinterpret_cast<SPropertyDesc *>(theReader.m_CurrentPtr);
-            theReader.m_CurrentPtr += numProps * sizeof(SPropertyDesc);
-            for (QT3DSU32 propIdx = 0, propEnd = theDesc.m_Properties.size(); propIdx < propEnd;
-                 ++propIdx) {
-                SPropertyDesc &thePropDesc =
-                    const_cast<SPropertyDesc &>(theDesc.m_Properties[propIdx]);
-                thePropDesc.m_Name.Remap(inStringTableData);
-            }
-            theDesc.SetHashValue();
-            const STypeDesc *theNewDesc = &(*m_TypeDescriptors.insert(theDesc).first);
-            m_OffsetsToTypeDescs.insert(eastl::make_pair(theOffset, theNewDesc));
-        }
-        for (QT3DSU32 idx = 0, end = numRoots; idx < end; ++idx) {
-            QT3DSU32 theElemCount = theElemCounts[idx];
-            if (theElemCount) {
-                for (QT3DSU32 elemIdx = 0, elemEnd = theElemCount;
-                     elemIdx < elemEnd && theReader.m_CurrentPtr < theReader.m_EndPtr; ++elemIdx) {
-                    SElement *theElement = reinterpret_cast<SElement *>(theReader.m_CurrentPtr);
-                    if (theElement->IsComponent())
-                        theReader.m_CurrentPtr += sizeof(SComponent);
-                    else
-                        theReader.m_CurrentPtr += sizeof(SElement);
-
-                    if (!elemIdx)
-                        m_LoadElements.push_back(theElement);
-
-                    if (theReader.m_CurrentPtr <= theReader.m_EndPtr) {
-                        theElement->SetTypeDescription(
-                            RemapTypeDesc(&theElement->GetTypeDescription()));
-                        theElement->m_Name.Remap(inStringTableData);
-                        theElement->m_Path.Remap(inStringTableData);
-                        theElement->m_Parent = RemapElement(theElement->m_Parent, retval);
-                        theElement->m_Child = RemapElement(theElement->m_Child, retval);
-                        theElement->m_Sibling = RemapElement(theElement->m_Sibling, retval);
-                        const STypeDesc &theTypeDescription = theElement->GetTypeDescription();
-                        qt3ds::runtime::LoadIndexableList<TElementPropertyList>(
-                            theElement->UnsafeGetFirstPropertyGroup(),
-                            theTypeDescription.m_Properties.size(), theReader);
-                    }
-                    // This may be the slowest part of loading and may need to be refactored into a
-                    // binary search
-                    // instead of a hashtable.
-                    m_HandleToElements.insert(eastl::make_pair(theElement->m_Handle, theElement));
-                }
-            } else
-                m_LoadElements.push_back(NULL);
-        }
-        return eastl::make_pair(NVDataRef<SElement *>(m_LoadElements), retval);
     }
 };
 }

@@ -57,9 +57,6 @@ public:
 
     static CPreferences GetTrialSettings(const Q3DStudio::CString &inKeyName);
 
-    static bool ShowHelpOnLaunch();
-    static void SetShowHelpOnLaunch(bool inShowHelpOnLaunch);
-
     static ::CColor GetEditViewBackgroundColor();
     static void SetEditViewBackgroundColor(::CColor inColor);
 
@@ -89,9 +86,6 @@ public:
     static long GetTimelineSplitterLocation();
     static void SetTimelineSplitterLocation(long inLocation);
 
-    static long GetInspectorSplitterLocation();
-    static void SetInspectorSplitterLocation(long inLocation);
-
     static bool GetInterpolation();
     static void SetInterpolation(bool inSmooth);
 
@@ -110,54 +104,18 @@ public:
     static bool GetTimebarDisplayTime();
     static void SetTimebarDisplayTime(bool inDisplayTime);
 
-    static bool ShowVersionDialog();
-    static void SetShowVersionDialog(bool inShowVersionDialog);
-
-    static Q3DStudio::CString GetDefaultApplication();
-    static void SetDefaultApplication(const Q3DStudio::CString &inApplication);
-
     static Q3DStudio::CString GetVersionString();
 
     static bool GetDontShowGLVersionDialog();
     static void SetDontShowGLVersionDialog(bool inValue);
 
-    static CPt GetObjectReferenceGadgetSize();
-    static void SetObjectReferenceGadgetSize(const CPt &inSize);
-
-    static CPt GetObjectReferenceGadgetPosition(const CPt &inDefault);
-    static void SetObjectReferenceGadgetPosition(const CPt &inPosition);
-
-    static CPt GetPropertyReferenceGadgetSize();
-    static void SetPropertyReferenceGadgetSize(const CPt &inSize);
-
-    static CPt GetPropertyReferenceGadgetPosition(const CPt &inDefault);
-    static void SetPropertyReferenceGadgetPosition(const CPt &inSize);
-
-    static CPt GetHandlerReferenceGadgetSize();
-    static void SetHandlerReferenceGadgetSize(const CPt &inSize);
-
-    static CPt GetEventReferenceGadgetSize();
-    static void SetEventReferenceGadgetSize(const CPt &inSize);
-
-    static CRct GetMultilineTextLocation();
-    static void SetMultilineTextLocation(const CRct &inSize);
-
     static long GetTimeAdvanceAmount();
-    static void SetTimeAdvanceAmount(const long &inTime);
+    static void SetTimeAdvanceAmount(long inTime);
     static long GetBigTimeAdvanceAmount();
-    static void SetBigTimeAdvanceAmount(const long &inTime);
-
-    static long GetActionSplitterSize();
-    static void SetActionSplitterSize(long inSize);
-
-    static long GetCustomPropertySplitterSize();
-    static void SetCustomPropertySplitterSize(long inSize);
-
-    static long GetAssetSplitterSize();
-    static void SetAssetSplitterSize(long inSize);
+    static void SetBigTimeAdvanceAmount(long inTime);
 
     static CPt GetDefaultClientSize();
-    static bool GetCanImportComponent();
+    static void SetDefaultClientSize(int width, int height);
 
     static bool GetAdvancePropertyExpandedFlag();
     static void SetAdvancePropertyExpandedFlag(bool inAdvancePropertyFlag);
@@ -167,16 +125,6 @@ public:
     static Q3DStudio::CString GetPreviewProperty(const Q3DStudio::CString &inName);
     static void SetPreviewProperty(const Q3DStudio::CString &inName,
                                    const Q3DStudio::CString &inValue);
-
-    static bool IsSlideIconVisible();
-    static void SetSlideIconVisible(bool inVisible);
-
-    static bool ShouldWriteMapFile();
-
-    static ::CColor GetDefaultSceneColor();
-    static ::CColor GetDefaultPrimitiveColor();
-
-    static bool IsDebugTimes();
 
     static ::CColor GetBaseColor();
     static ::CColor GetDarkBaseColor();
@@ -251,6 +199,11 @@ public:
 
     static QString GetFontFaceName();
 
+    static float getSelectorLineWidth();
+    static void setSelectorLineWidth(float width);
+    static float getSelectorLineLength();
+    static void setSelectorLineLength(float length);
+
     static long GetRowSize();
     static long GetTimebarTipSize();
     static long GetTimebarInnerTipSize();
@@ -284,9 +237,17 @@ public:
     static const long GUTTER_SIZE = 10;
     static const ::CColor EDITVIEW_DEFAULTBGCOLOR;
     static const long PREFERREDSTARTUP_DEFAULTINDEX = -1;
+    static const long DEFAULT_SNAPRANGE = 10;
+    static const long DEFAULT_LIFETIME = 10000;
+    static const long DEFAULT_CLIENT_WIDTH = 1920;
+    static const long DEFAULT_CLIENT_HEIGHT = 1080;
+    static const long DEFAULT_TIME_ADVANCE = 100;
+    static const long DEFAULT_BIG_TIME_ADVANCE = 200;
+    static const long DEFAULT_SELECTOR_WIDTH = 30;
+    static const long DEFAULT_SELECTOR_LENGTH = 50;
+    static const long DEFAULT_AUTOSAVE_DELAY = 600;
 
 protected:
     static bool m_SudoMode;
-    static bool m_DebugTimes;
 };
 #endif // INCLUDED_STUDIO_PREFERENCES_H

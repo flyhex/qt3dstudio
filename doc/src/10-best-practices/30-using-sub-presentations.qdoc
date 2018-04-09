@@ -63,14 +63,25 @@ or on an image element on an existing layer.
 \li
   Click the \uicontrol{+} icon.
 \li
-  Set \uicontrol{Type} to \c{Presentation}.
-\li
-  Click \uicontrol{Browse}, browse to the project folder of your desired project and select the
-  \c{.uip} file.
-  \image subpresentation-dialog.png
-\li
   Enter desired name for the sub-presentation in the \uicontrol{Name} field. In case you have
   several sub-presentations in your project the names need to be unique.
+\li
+  Set \uicontrol{Type} to \c{Presentation}.
+\li
+  Click \uicontrol{Browse}, the combobox will display the following options:
+  \list a
+    \li
+    \e{Browse} - Browse to the folder of an existing project and select the \c{.uip} file
+    to add that project as a sub-presentation.
+    \li
+    \e{Create} - Creates a new empty presentation, which is added as a sub-presentation to the
+    project. You may start editing it at once, or return to the main presentation by opening it
+    from the file menu.
+    \li
+    A list of all \c{.uip} files in your project folder. Select one to add it as a
+    sub-presentation.
+  \endlist
+  \image subpresentation-dialog.png
 \li
   Select the layer you want to use for the sub-presentation in the \e{timeline palette}.
   Then, in the inspector palette, select the desired sub-presentation in the
@@ -82,10 +93,10 @@ or on an image element on an existing layer.
 \section2 Sub-presentation on an Image Element
 \list 1
 \li
-  Follow step 1 to 3 in the \l {sub-presentation layer}{Sub-presentation on a layer}
+  Follow step 1 to 5 in the \l {sub-presentation layer}{Sub-presentation on a layer}
   section above.
 \li
-  Add a basic object to your layer, preferably a rectangle.
+  Add a basic object to your layer.
 \li
   Add any image as a diffuse map for the material of the object by first selecting the material
   of the object in the \e{timeline palette} and then selecting \uicontrol{Diffuse Map} in the

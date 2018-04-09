@@ -47,13 +47,13 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
 
     m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
     m_ui->comboBoxTypeList->addItem(tr("String"));
-#if 0 // TODO: To be added in version 2.x
+    m_ui->comboBoxTypeList->addItem(tr("Float"));
+#if 0 // TODO Evaluator
     m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
+#endif
     m_ui->comboBoxTypeList->addItem(tr("Boolean"));
     m_ui->comboBoxTypeList->addItem(tr("Vector3"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
     m_ui->comboBoxTypeList->addItem(tr("Variant"));
-#endif
 
     initDialog();
 
@@ -81,13 +81,22 @@ void CDataInputDlg::initDialog()
 {
     m_ui->lineEditEvaluation->setVisible(false);
     m_ui->labelEvaluation->setVisible(false);
+
+    // Disallow special characters and whitespaces
+    QRegExpValidator *rxp = new QRegExpValidator(QRegExp("[A-Za-z0-9_]+"), this);
+    m_ui->lineEditInputName->setValidator(rxp);
+
     if (!m_dataInput->name.isEmpty()) {
+        m_name = m_dataInput->name;
+        m_type = m_dataInput->type;
         m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
         updateVisibility(m_dataInput->type);
         m_ui->lineEditInputName->setText(m_dataInput->name);
         if (m_type == DataTypeRangedNumber) {
             m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue);
             m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
+            m_min = m_dataInput->minValue;
+            m_max = m_dataInput->maxValue;
         }
 #if 0 // TODO: To be added in version 2.x
         else if (m_type == DataTypeEvaluator) {
@@ -191,4 +200,27 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->labelEvaluation->setVisible(false);
     }
 #endif
+}
+
+const bool CDataInputDlg::isEquivalentDataType(int dlgType,
+                                               qt3dsdm::DataModelDataType::Value dmType)
+{
+    // TODO Evaluator
+    if ((dlgType == EDataType::DataTypeString
+         && dmType == qt3dsdm::DataModelDataType::String)
+        || (dlgType == EDataType::DataTypeRangedNumber
+            && (dmType == qt3dsdm::DataModelDataType::Float
+                || dmType == qt3dsdm::DataModelDataType::String))
+        || (dlgType == EDataType::DataTypeFloat
+            && (dmType == qt3dsdm::DataModelDataType::Float
+                || dmType == qt3dsdm::DataModelDataType::String))
+        || (dlgType == EDataType::DataTypeBoolean
+            && dmType == qt3dsdm::DataModelDataType::Bool)
+        || (dlgType == EDataType::DataTypeVector3
+            && dmType == qt3dsdm::DataModelDataType::Float3)
+        || dlgType == EDataType::DataTypeVariant) {
+        return true;
+    }
+
+    return false;
 }

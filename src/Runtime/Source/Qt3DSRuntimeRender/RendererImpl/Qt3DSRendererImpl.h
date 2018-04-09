@@ -155,7 +155,8 @@ namespace render {
         typedef nvhash_map<SShaderDefaultMaterialKey, SShaderGeneratorGeneratedShader *> TShaderMap;
         typedef nvhash_map<CRegisteredString, NVScopedRefCounted<NVRenderConstantBuffer>>
             TStrConstanBufMap;
-        typedef nvhash_map<const SLayer *, NVScopedRefCounted<SLayerRenderData>> TLayerRenderMap;
+        typedef nvhash_map<SRenderInstanceId, NVScopedRefCounted<SLayerRenderData>,
+                           eastl::hash<SRenderInstanceId>> TInstanceRenderMap;
         typedef nvvector<SLayerRenderData *> TLayerRenderList;
         typedef nvvector<Qt3DSRenderPickResult> TPickResultArray;
 
@@ -267,7 +268,7 @@ namespace render {
         NVScopedRefCounted<NVRenderFrameBuffer> m_BlendFB;
 #endif
         // Allocator for temporary data that is cleared after every layer.
-        TLayerRenderMap m_LayerToRenderMap;
+        TInstanceRenderMap m_InstanceRenderMap;
         TLayerRenderList m_LastFrameLayers;
         volatile QT3DSI32 mRefCount;
 
@@ -315,24 +316,27 @@ namespace render {
         // Calls prepare layer for render
         // and then do render layer.
         bool PrepareLayerForRender(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                                           bool inRenderSiblings) override;
+                                   bool inRenderSiblings, const SRenderInstanceId id) override;
         void RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                         bool clear, QT3DSVec3 clearColor, bool inRenderSiblings) override;
+                         bool clear, QT3DSVec3 clearColor, bool inRenderSiblings,
+                         const SRenderInstanceId id) override;
         void ChildrenUpdated(SNode &inParent) override;
         QT3DSF32 GetTextScale(const SText &inText) override;
 
         SCamera *GetCameraForNode(const SNode &inNode) const override;
         Option<SCuboidRect> GetCameraBounds(const SGraphObject &inObject) override;
         virtual SLayer *GetLayerForNode(const SNode &inNode) const;
-        SLayerRenderData *GetOrCreateLayerRenderDataForNode(const SNode &inNode);
+        SLayerRenderData *GetOrCreateLayerRenderDataForNode(const SNode &inNode,
+                                                            const SRenderInstanceId id = nullptr);
 
         void BeginFrame() override;
         void EndFrame() override;
 
         void PickRenderPlugins(bool inPick) override { m_PickRenderPlugins = inPick; }
         Qt3DSRenderPickResult Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                                          const QT3DSVec2 &inMouseCoords, bool inPickSiblings,
-                                          bool inPickEverything) override;
+                                   const QT3DSVec2 &inMouseCoords, bool inPickSiblings,
+                                   bool inPickEverything,
+                                   const SRenderInstanceId id) override;
 
         virtual Option<QT3DSVec2>
         FacePosition(SNode &inNode, NVBounds3 inBounds, const QT3DSMat44 &inGlobalTransform,
@@ -372,7 +376,7 @@ namespace render {
                                                      const QT3DSVec3 &inWorldPoint,
                                                      SLayerRenderData &inRenderData);
 
-        void ReleaseLayerRenderResources(SLayer &inLayer) override;
+        void ReleaseLayerRenderResources(SLayer &inLayer, const SRenderInstanceId id) override;
 
         void RenderQuad(const QT3DSVec2 inDimensions, const QT3DSMat44 &inMVP,
                                 NVRenderTexture2D &inQuadTexture) override;

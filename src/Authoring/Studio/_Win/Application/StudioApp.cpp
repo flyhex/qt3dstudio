@@ -159,7 +159,6 @@ int main(int argc, char *argv[])
 #include "foundation/Qt3DSLogging.h"
 
 CStudioApp g_StudioApp;
-long g_ErrorCode = 0;
 
 using namespace Q3DStudio;
 
@@ -192,7 +191,9 @@ CStudioApp::CStudioApp()
     , m_welcomeShownThisSession(false)
     , m_goStraightToWelcomeFileDialog(false)
     , m_tutorialPage(0)
+    , m_autosaveTimer(new QTimer(this))
 {
+    connect(m_autosaveTimer, &QTimer::timeout, this, [=](){ OnSave(true); });
 }
 
 //=============================================================================
@@ -314,6 +315,11 @@ bool CStudioApp::InitInstance(int argc, char* argv[])
     m_Core->GetDispatch()->AddAppStatusListener(this);
     m_Core->GetDispatch()->AddCoreAsynchronousEventListener(this);
 
+    // Initialize autosave
+    m_autosaveTimer->setInterval(CStudioPreferences::GetAutoSaveDelay() * 1000);
+    if (CStudioPreferences::GetAutoSavePreference())
+        m_autosaveTimer->start();
+
     return true;
 }
 
@@ -361,9 +367,6 @@ int CStudioApp::Run()
                 break;
         }
         PerformShutdown();
-    } catch (Qt3DSExceptionClass &inException) {
-        g_ErrorCode = inException.GetErrorCode();
-        throw;
     } catch (qt3dsdm::Qt3DSDMError &uicdmError) {
         Q_UNUSED(uicdmError);
         exit(1);
@@ -379,10 +382,9 @@ bool CStudioApp::HandleWelcomeRes(int res, bool recursive)
     int theReturn = true;
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
-        std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
-                GetNewDocumentChoice(Q3DStudio::CString("."));
-        if (theFile.first.GetPath() != "") {
-            m_Core->OnNewDocument(theFile.first, theFile.second);
+        Qt3DSFile theFile = m_Dialogs->GetNewDocumentChoice(Q3DStudio::CString("."));
+        if (theFile.GetPath() != "") {
+            m_Core->OnNewDocument(theFile, true);
             theReturn = true;
             m_welcomeShownThisSession = true;
         } else {
@@ -512,10 +514,9 @@ bool CStudioApp::ShowStartupDialog()
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {
-            std::pair<Qt3DSFile, bool> theFile = m_Dialogs->
-                    GetNewDocumentChoice(theMostRecentDirectory);
-            if (theFile.first.GetPath() != "") {
-                m_Core->OnNewDocument(theFile.first, theFile.second);
+            Qt3DSFile theFile = m_Dialogs->GetNewDocumentChoice(theMostRecentDirectory);
+            if (theFile.GetPath() != "") {
+                m_Core->OnNewDocument(theFile, true);
                 theReturn = true;
             } else {
                 // User Cancels the dialog. Show startup dialog again.
@@ -613,9 +614,8 @@ int CStudioApp::OpenAndRunApplication(const Q3DStudio::CString &inFilename)
 {
     int theSuccess = -1;
     InitCore();
-    if (OnLoadDocument(
-                inFilename,
-                false)) // Load document. Upon failure, don't show startup dialog but exit immediately.
+    // Load document. Upon failure, don't show startup dialog but exit immediately.
+    if (OnLoadDocument(inFilename, false))
         theSuccess = RunApplication();
     return theSuccess;
 }
@@ -627,6 +627,7 @@ int CStudioApp::OpenAndRunApplication(const Q3DStudio::CString &inFilename)
  */
 int CStudioApp::RunApplication()
 {
+    m_pMainWnd->initializeGeometryAndState();
     return qApp->exec();
 }
 
@@ -930,6 +931,15 @@ void CStudioApp::HandleSetChangedKeys()
 void CStudioApp::DeleteSelectedKeys()
 {
     m_Core->GetDoc()->DeleteSelectedKeys();
+}
+
+//=============================================================================
+/**
+ * Deletes selected object or keyframes
+ */
+void CStudioApp::DeleteSelectedObject()
+{
+    m_Core->GetDoc()->DeleteSelectedItems();
 }
 
 //=============================================================================
@@ -1264,18 +1274,35 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
  * Handles the Save command
  * This will save the file, if the file has not been saved before this will
  * do a save as operation.
+ * @param autosave set true if triggering an autosave.
  * @return true if the file was successfully saved.
  */
-bool CStudioApp::OnSave()
+bool CStudioApp::OnSave(bool autosave)
 {
     Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
     if (!theCurrentDoc.IsFile()) {
-        return OnSaveAs();
+        if (autosave)
+            return false;
+        else
+            return OnSaveAs();
     } else if (!theCurrentDoc.CanWrite()) {
         m_Dialogs->DisplaySavingPresentationFailed();
         return false;
     } else {
-        m_Core->OnSaveDocument(theCurrentDoc);
+        // Compose autosave filename (insert _autosave before extension)
+        QString autosaveFile = theCurrentDoc.GetPath().toQString();
+        int insertionPoint = autosaveFile.lastIndexOf(QStringLiteral(".uip"));
+        autosaveFile.insert(insertionPoint, QStringLiteral("_autosave"));
+
+        if (autosave) {
+            // Set the copy flag to avoid changing actual document name & history
+            m_Core->OnSaveDocument(Qt3DSFile(CString::fromQString(autosaveFile)), true);
+        } else {
+            m_Core->OnSaveDocument(theCurrentDoc);
+            // Delete previous autosave file
+            QFile::remove(autosaveFile);
+        }
+
         return true;
     }
 }
@@ -1289,7 +1316,7 @@ bool CStudioApp::OnSave()
  */
 bool CStudioApp::OnSaveAs()
 {
-    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
+    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice();
     if (theFile.GetPath() != "") {
         m_Core->OnSaveDocument(theFile);
         return true;
@@ -1306,13 +1333,26 @@ bool CStudioApp::OnSaveAs()
  */
 bool CStudioApp::OnSaveCopy()
 {
-    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice().first;
+    Qt3DSFile theFile = m_Dialogs->GetSaveAsChoice();
     if (theFile.GetPath() != "") {
-        // Send in a "true" to teh save function to indicate this is a copy
+        // Send in a "true" to the save function to indicate this is a copy
         m_Core->OnSaveDocument(theFile, true);
         return true;
     }
     return false;
+}
+
+void CStudioApp::SetAutosaveEnabled(bool enabled)
+{
+    if (enabled)
+        m_autosaveTimer->start();
+    else
+        m_autosaveTimer->stop();
+}
+
+void CStudioApp::SetAutosaveInterval(int interval)
+{
+    m_autosaveTimer->setInterval(interval * 1000);
 }
 
 //=============================================================================
@@ -1392,7 +1432,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_Dialogs->ResetSettings(inDocument.GetPath());
 
         m_subpresentations.clear();
-        m_Core->GetDoc()->LoadUIASubpresentations(m_Core->GetDoc()->GetDocumentUIAFile(),
+        m_Core->GetDoc()->LoadUIASubpresentations(m_Core->GetDoc()->GetDocumentUIAFile(true),
                                                   m_subpresentations);
 
         m_dataInputDialogItems.clear();
@@ -1426,8 +1466,21 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
             list.append(item->name);
             if (item->type == EDataType::DataTypeRangedNumber)
                 list.append(QStringLiteral("Ranged Number"));
-            else
+            else if (item->type == EDataType::DataTypeString)
                 list.append(QStringLiteral("String"));
+            else if (item->type == EDataType::DataTypeFloat)
+                list.append(QStringLiteral("Float"));
+            else if (item->type == EDataType::DataTypeBoolean)
+                list.append(QStringLiteral("Boolean"));
+            else if (item->type == EDataType::DataTypeVector3)
+                list.append(QStringLiteral("Vector3"));
+#if 0
+            else if (item->type == EDataType::DataTypeEvaluator)
+                list.append(QStringLiteral("Evaluator"));
+#endif
+            else if (item->type == EDataType::DataTypeVariant)
+                list.append(QStringLiteral("Variant"));
+
             // Write min and max regardless of type, as we will get a mess if number of parameters
             // varies between different types
             list.append(QString::number(item->minValue));
@@ -1466,15 +1519,16 @@ void CStudioApp::OnFileOpen()
             OnLoadDocument(theFile);
     }
 }
-using namespace std;
 
-void CStudioApp::OnFileNew()
+QString CStudioApp::OnFileNew(bool createFolder)
 {
     if (PerformSavePrompt()) {
-        pair<Qt3DSFile, bool> theFile = m_Dialogs->GetNewDocumentChoice();
-        if (theFile.first.GetPath() != "")
-            m_Core->OnNewDocument(theFile.first, theFile.second);
+        Qt3DSFile theFile = m_Dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), createFolder);
+        if (theFile.GetPath() != "")
+            m_Core->OnNewDocument(theFile, createFolder);
+        return theFile.GetName().toQString();
     }
+    return QString();
 }
 
 bool CStudioApp::IsAuthorZoom()
@@ -1579,4 +1633,18 @@ void CStudioApp::OnPresentationModifiedExternally()
         Qt3DSFile theCurrentDoc = m_Core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);
     }
+}
+
+void CStudioApp::toggleEyeball()
+{
+    CDoc *theDoc = m_Core->GetDoc();
+    qt3dsdm::Qt3DSDMInstanceHandle handle = theDoc->GetSelectedInstance();
+    qt3dsdm::Qt3DSDMPropertyHandle property = theDoc->GetStudioSystem()->GetClientDataModelBridge()
+            ->GetSceneAsset().m_Eyeball;
+    SValue value;
+    theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
+                                                                             value);
+    bool boolValue = !qt3dsdm::get<bool>(value);
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
+            ->SetInstancePropertyValue(handle, property, boolValue);
 }

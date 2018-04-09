@@ -36,169 +36,184 @@
 
 \list
 \li
-  \b{New} - Opens a dialog to create a new presentation. If you
-  enable the \"Create directory for project\" checkbox at the bottom of
-  the dialog a new directory with suggested folder organization is
-  created for you. If a \c{.uia} file exists in the same directory
-  as the \c{.uip} it will be modified to reference the new
-  \c{.uip} as an asset. If no \c{.uia} file exists in the same
-  directory one will be created for you.
+  \uicontrol{New} - Opens a dialog to create a new presentation. A new directory with default
+  folder structure will be created.
 \li
-  \b{Open...} - Opens a \c{.uip} presentation file from
-  disk.
+  \uicontrol{Open} - Opens a \c{.uip} presentation file.
 \li
-  \b{Recent Presentations} - Provides quick access to the last 10
-  presentations opened by Studio.
+  \uicontrol{Save} - Saves changes to the open presentation.
 \li
-  \b{Save} - Saves changes to the open presentation to disk.
-\li
-  \b{Save As...} - Saves the presentation to a new location.
+  \uicontrol{Save As} - Saves the presentation to a new location.
   No \c{.uia} file will be created or modified in the new location.
 \li
-  \b{Save a Copy...} - Saves a copy of the presentation to a
+  \uicontrol{Save a Copy} - Saves a copy of the presentation to a
   new location (but keep working on the current presentation). No
   \c{.uia} file will be created or modified in the new location.
 \li
-  \b{Revert...} - With confirmation, abandons all in-memory
-  changes to the presentation and re-opens it from disk. Note that this
-  resets the state of Studio (resetting all components to the first
+  \uicontrol{Revert} - With confirmation, abandons all in-memory
+  changes to the presentation and re-opens it from disk.
+  \note this resets the state of Studio (resetting all components to the first
   slide, playheads to time 0, etc.). This command is also a convenient
   way to re-open a presentation that may have changed on disk, for
   example via hand editing or source control updating.
 \li
-  \b{Exit} - Quit the Studio application (prompting to save
-  changes).
+  \uicontrol{Import Assets} - Opens the assets library folder to import assets to your project.
+\li
+  \uicontrol{Connect to Device} - Opens a dialog to connect to a remote device.
+\li
+  \uicontrol{Recent Projects} - Provides quick access to the last 10
+  projects opened in Studio.
+\li
+  \uicontrol{Exit} - Quits Studio (prompting to save changes).
 \endlist
 
 \section1 Edit
 
 \list
 \li
-  \b{Undo}/\b{Redo} - As expected.
+  \uicontrol{Undo}/\uicontrol{Redo} - As expected.
 \li
-  \b{Cut}/\b{Copy}/\b{Paste} - As expected.
+  \uicontrol{Cut}/\uicontrol{Copy}/\uicontrol{Paste} - As expected.
+  \list
+  \li
+    Cut/copy/pasting \e{actions} can only be done by right-clicking on them in
+    the \l{studio-action-palette.html}{action palette}.
+  \li
+    Duplicating slides can only be done by right-clicking on them in the
+    \l{studio-slide-palette.html}{slide palette}.
+  \li
+    Tip: Holding down the \c{Alt} key while pasting an element on the
+    Timeline will paste it to the master slide if possible.
+  \endlist
 \li
-  Cut/copy/pasting actions can only be done by right-clicking on them in
-  the \l{studio-action-palette.html}{Action palette}.
-\li
-  Duplicating slides can only be done by right-clicking on them in the
-  \l{studio-slide-palette.html}{Slide palette}.
-\li
-  \e{Tip: Holding down the Alt key while pasting an element on the
-  Timelin - trl-Alt- - ill paste it to the master slide, if
-  possible.}
-\li
-  \b{Duplicate Object} - Creates a copy of the currently-selected
-  object in the timeline on the current slide. (If the selected object
+  \uicontrol{Duplicate Object} - Creates a copy of the currently-selected
+  object in the timeline on the current slide. If the selected object
   is on the master slide, but you are on a slide other than the master
-  slide, the copy will be non-master.) Unfortunately, duplicating a
+  slide, the copy will be non-master. Duplicating a
   master object on the master slide does \e{not} preserve any
-  master-unlinked properties. There is no way within Studio to duplicate
-  a master object while preserving per-slide variations for that object.
+  master-unlinked properties.
 \li
-  \b{Application Preferences...} - Opens the Studio Preferences dialog:
+  \uicontrol{Studio Preferences} - Opens the Studio Preferences dialog.
   \image ApplicationPreferences.png
-
-\li
-  \b{General}
   \list
   \li
-    \b{Default Interpolation} - Controls whether new animation
-    keyframes are created with
-    \l{studio-timeline-palette.html#interpolation}{linear or smooth interpolation}.
+    \uicontrol{General}
+    \list
+    \li
+      \uicontrol{Default Interpolation} - Controls whether new animation
+      keyframes are created with
+      \l{studio-timeline-palette.html#interpolation}{linear or smooth interpolation}.
+    \li
+      \uicontrol{Timeline Snapping Grid} - When using snapping in the
+      timeline, controls whether to snap to the largest ticks only (Low
+      Resolution), largest and halfway ticks (Medium Resolution), or every
+      tick mark (High Resolution).
+    \endlist
   \li
-    \b{Timeline Snapping Grid} - When using snapping in the
-    timeline, controls whether to snap to the largest ticks only (Low
-    Resolution), largest and halfway ticks (Medium Resolution), or every
-    tick mark (High Resolution).
+    \uicontrol{Editing View}
+    \list
+    \li
+      \uicontrol{Background Color} - Sets the color of the background when
+      using an \l{studio-toolbar.html#edit-cameras}{Edit Camera view}.
+      \note This does not effect Scene Camera View background color.
+    \li
+      \uicontrol{Preferred Startup View} - Sets default camera view
+      when starting Studio.
+    \endlist
+  \li
+    \uicontrol{Manipulator Tool Handles} - Sets the size of the manipulator tool handles.
+  \li
+    \uicontrol{Autosave} - Enables auto saving.
+  \li
+    \b{Restore Defaults} - Restores all preferences for Studio to
+    their default state. This includes palette layout and placement.
+  \li
+    \target project-settings
+    \b{Presentation Settings}
+    \list
+    \li
+      \b{Presentation Width/Height} - Sets the render size for the
+      presentation.
+      \note Setting a higher resolution for a sub-presentation than the final
+      display size will result in anti-aliasing for the sub-presentation
+      (albeit at a performance cost).
+    \li
+      \b{Constrain Proportions} - When checked, editing a width or
+      height value will also update the other. (This setting has no effect
+      at runtime.)
+    \li
+      \b{Portrait Format} - When editing a portrait style
+      presentation (width is smaller than height) designed to be displayed
+      on a rotated hardware device (for example a tablet), check this setting to
+      have the presentation rotated correctly. This setting has no effect
+      when previewing on your computer.
+    \li
+      \b{Author/Company} - Informational meta data stored in the \c{.uip} file.
+      These settings have no effect at runtime.
+    \endlist
   \endlist
 \li
-  \b{Editing View}
-  \list
-  \li
-    \b{Background Color} - Sets the color of the background when
-    using an \l{studio-toolbar.html#edit-cameras}{Edit Camera view}. Please note that this does not effect Scene Camera View background color.
-  \li
-    \b{Preferred Startup View} - Sets whether to default to the
-    scene camera(s) or an \l{studio-toolbar.html#edit-cameras}{Edit Camera view}
-    when starting Studio.
-  \endlist
+  \uicontrol{Sub-Presentations} - Manage \l{Using Sub-Presentations}{sub-presentations}.
 \li
-  \b{Restore Defaults} - Restores all preferences for Studio to
-  their default state. This includes palette layout and placement.
-\li
-  \target project-settings
-   \b{Project Settings}
-  \list
-  \li
-    \b{Presentation Width/Height} - Sets the render size for the
-    presentation. Note that setting a higher resolution for a
-    sub-presentation than the final display size will result in
-    anti-aliasing for the sub-presentation (albeit at a performance
-    cost).
-  \li
-    \b{Constrain Proportions} - When checked, editing a width or
-    height value will also update the other. (This setting has no effect
-    at runtime.)
-  \li
-    \b{Portrait Format} - When editing a `portrait' style
-    presentation (width is smaller than height) designed to be displayed
-    on a rotated hardware device (e.g.~a tablet), check this setting to
-    have the presentation rotated correctly. This setting has no effect
-    when previewing on Windows.
-  \li
-    \b{Author/Company} - These are informational metadata that are
-    stored in the \c{.uip} file. These settings have no effect at
-    runtime.
-  \endlist
+  \uicontrol{Data Inputs} - Manage \l{Using Data Inputs}{data inputs}.
 \endlist
 
 \section1 View
 
 \list
 \li
-  (Palettes) - Selecting a palette ensures that this palette is visible.
+  \uicontrol{\e{Palettes}} - Toggles the display of palettes.
 \li
-  \b{Bounding Boxes} - Toggles the display of bounding boxes in the
-  scene for the selected item.
+  \uicontrol{Bounding Boxes} - Toggles the display of bounding boxes
+  for the selected item.
 \li
-  \b{Pivot Point} - Toggles the display of the pivot point for the
+  \uicontrol{Pivot Point} - Toggles the display of the pivot point for the
   selected item.
 \li
-  \b{Tooltips} - Toggles the display of tooltips when hovering over
+  \uicontrol{Wireframe} - Toggles the display of wireframes for the selected item.
+  \note Works only for tessellated meshes.
+\li
+  \uicontrol{Tooltips} - Toggles the display of tool tips when hovering over
   rows in the \l{studio-inspector-palette.html}{Inspector palette}.
+\li
+  \uicontrol{Rulers & Guides} - Toggles the display of rulers and guides in the scene view.
+\li
+  \uicontrol{Lock Guides} - Locks all guides in the scene view.
+\li
+  \uicontrol{Clear Guides} - Deletes all guides in the scene view.
 \endlist
 
 \section1 Timeline
 
 \list
 \li
-  \b{Set Changed Keyframes} - When \"Autoset Keyframes\" is turned
+  \uicontrol{Set Changed Keyframes} - When \e{Autoset Keyframes} is turned
   off, invoking this command will create keyframes at the current time
-  for any properties of the object that (a) have their
-  \l{studio-inspector-palette.html#animating-properties}{animation toggle}
-  enabled, and that (b) have values different from the animated
-  value at the current time.
+  for any properties of the object that:
+  \list a
+    \li Have their
+    \l{studio-inspector-palette.html#animating-properties}{animation toggle}
+    enabled.
+    \li Have values different from the animated value at the current time.
+  \endlist
 \li
-  \b{Delete Selected Keyframe(s)} - Behaves as the name implies.
+  \uicontrol{Delete Selected Keyframe(s)} - Deletes the selected keyframes.
   This command is also available from the context menu when
-  right-clicking in the animation portion of the Timeline palette; it's
-  usually easier to invoke it from there. Easier still, you can simply
-  press the Delete key after selecting the keyframes.
+  right-clicking in the animation portion of the \e{timeline palette}. Additionally you can
+  press the \c{Delete} key after selecting the keyframes to delete them.
 \li
-  \b{Set Interpolation...} - Changes the in and out
-  \l{studio-timeline-palette.html#interpolation}{interpolation setting}
-  setting for one or more selected keyframes. This command is
+  \uicontrol{Set Interpolation} - Changes the in and out
+  \l{studio-timeline-palette.html#interpolation}{interpolation}
+  setting for the selected keyframes. This command is
   also available from the context menu when right-clicking in the
-  animation portion of the Timeline palette; it's usually easier to
-  invoke it from there.
+  animation portion of the \e{timeline palette}.
 \li
-  \b{Change Time Bar Color...} - Sets the display color of the
-  time bar in the animation portion of the Timeline palette. This does
-  not affect the rendering of the presentation; it is only there to help
+  \uicontrol{Change Time Bar Color} - Sets the display color of the
+  time bar in the animation portion of the \e{timeline palette}. This does
+  not affect the rendering of the presentation, it is only there to help
   you organize and keep track of your work.
 \li
-  \b{Autoset Keyframes} - Toggles the `autoset' animation
+  \uicontrol{Autoset Keyframes} - Toggles the autoset keyframes
   functionality. When enabled, any change to a property whose
   \l{studio-inspector-palette.html#animating-properties}{animation toggle}
   is enabled will result in a keyframe being created or updated
@@ -209,11 +224,14 @@
 
 \list
 \li
-  \b{Reference Manual} - Open this help document from within Studio.
+  \uicontrol{Reference Manual} - Opens the Qt 3D Studio user manual.
 \li
-  \b{Visit Qt Web site...} - Opens Qt homepage in your browser.
+  \uicontrol{Visit Qt 3D Studio Page} - Opens the Qt 3D Studio web site in your
+  default web browser.
 \li
-  \b{About Qt 3D Studio...} - Opens the about dialog.
+  \uicontrol{About Qt 3D Studio} - Opens the about dialog.
+\li
+  \uicontrol{Open Tutorial} - Opens the getting started tutorial.
 \endlist
 
 */

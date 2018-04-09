@@ -76,8 +76,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_OBJECT_TYPE(Alias, ITERATE_COMPOSER_ALIAS_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Path, ITERATE_COMPOSER_PATH_PROPERTIES)                            \
     HANDLE_COMPOSER_OBJECT_TYPE(PathAnchorPoint, ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES)    \
-    HANDLE_COMPOSER_OBJECT_TYPE(SubPath, ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES)                 \
-    HANDLE_COMPOSER_OBJECT_TYPE(DataInput, ITERATE_COMPOSER_DATAINPUT_PROPERTIES)
+    HANDLE_COMPOSER_OBJECT_TYPE(SubPath, ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES)
 
 #define ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES
 
@@ -119,13 +118,15 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(rotationorder, m_RotationOrder, TDataStrPtr, L"YXZ")                  \
     HANDLE_COMPOSER_PROPERTY(orientation, m_Orientation, TDataStrPtr, L"Left Handed")              \
     HANDLE_COMPOSER_PROPERTY(boneid, m_BoneId, qt3ds::QT3DSI32, 0)                                            \
-    HANDLE_COMPOSER_PROPERTY(ignoresparent, m_IgnoresParent, bool, false)
+    HANDLE_COMPOSER_PROPERTY(ignoresparent, m_IgnoresParent, bool, false)                          \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_MODEL_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(poseroot, m_PoseRoot, qt3ds::QT3DSI32, -1)                                       \
     HANDLE_COMPOSER_PROPERTY(tessellation, m_Tessellation, TDataStrPtr, L"None")                   \
     HANDLE_COMPOSER_PROPERTY(edgetess, m_EdgeTess, float, 1.0)                                     \
-    HANDLE_COMPOSER_PROPERTY(innertess, m_InnerTess, float, 1.0)
+    HANDLE_COMPOSER_PROPERTY(innertess, m_InnerTess, float, 1.0)                                   \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_IMAGE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(scaleu, m_RepeatU, float, 1.0f)                                       \
@@ -179,7 +180,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(specularmodel, m_SpecularModel, TDataStrPtr, L"Default")              \
     HANDLE_COMPOSER_PROPERTY(speculartint, m_SpecularTint, SFloat3, SFloat3(1, 1, 1))              \
     HANDLE_COMPOSER_PROPERTY(ior, m_IOR, float, 0)                                                 \
-    HANDLE_COMPOSER_PROPERTY(fresnelPower, m_FresnelPower, float, 0)
+    HANDLE_COMPOSER_PROPERTY(fresnelPower, m_FresnelPower, float, 0)                               \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_REFERENCED_MATERIAL_PROPERTIES                                            \
     HANDLE_COMPOSER_PROPERTY(referencedmaterial, m_ReferencedMaterial, SObjectRefType, L"")
@@ -305,14 +307,6 @@ class IPropertySystem;
 
 #define ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES                                                   \
     HANDLE_COMPOSER_PROPERTY(closed, m_Closed, bool, true)
-
-#define ITERATE_COMPOSER_DATAINPUT_PROPERTIES                                                       \
-    HANDLE_COMPOSER_PROPERTY(value, m_Value, float, 0.0f)                                          \
-    HANDLE_COMPOSER_PROPERTY(valuestr, m_ValueStr, TDataStrPtr, L"")                               \
-    HANDLE_COMPOSER_PROPERTY(timefrom, m_TimeFrom, float, 0.0f)                             \
-    HANDLE_COMPOSER_PROPERTY(timeto, m_TimeTo, float, 10000.0f)                             \
-    HANDLE_COMPOSER_PROPERTY(controlledelemprop, m_ControlledElemProp, TDataStrPtr, L"")
-
 
 struct ComposerObjectTypes
 {
@@ -902,23 +896,6 @@ struct SComposerObjectDefinition<ComposerObjectTypes::SubPath>
         SetType(inCore, inTyped);
     }
 };
-
-template <>
-struct SComposerObjectDefinition<ComposerObjectTypes::DataInput>
-        : public SComposerBaseObjectDefinition<ComposerObjectTypes::DataInput>
-{
-        SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              Qt3DSDMInstanceHandle inInstance,
-                              SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
-        : SComposerBaseObjectDefinition<ComposerObjectTypes::DataInput>(inCore, inMetaData,
-                                                                       inInstance)
-    {
-        Derive(inCore, inAsset);
-        SetType(inCore, inTyped);
-    }
-};
-
 
 // Container object for all of the object definitions
 class SComposerObjectDefinitions

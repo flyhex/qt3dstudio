@@ -2,9 +2,9 @@
 <Effect>
 	<MetaData>
 		<Property name="FilterSize" formalName="Filter Size" description="Range to shoot samples for conversion" default="4"/>
-		<Property name="DistScale" formalName="Distance Scale" description="Divisor for distances during filtering -- larger equals more subtle" default="8"/>
+                <Property name="DistScale" formalName="Distance Scale" description="Divisor for distances during filtering;\nlarger equals more subtle" default="8"/>
 		<Property name="DistBias" formalName="Distance Bias" description="Depth bias to prevent self-shadowing artifacts" default="1"/>
-		<Property name="DebugView" formalName="Debug SSAO effect" type="Boolean" description="Allows you to see the effect of the filter directly to help setup parameters" default="False"/>
+                <Property name="DebugView" formalName="Debug SSAO effect" type="Boolean" description="Allows you to see the effect of\nthe filter directly to help setup\nparameters" default="False"/>
 		<Property name="DepthSampler" type="Texture" filter="nearest" clamp="clamp"/>
 		<Property name="SourceSampler" type="Texture" filter="linear" clamp="clamp"/>
 	</MetaData>

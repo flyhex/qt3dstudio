@@ -27,10 +27,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-
 #include "stdafx.h"
 #include "SceneView.h"
 #include "Doc.h"
@@ -40,11 +36,6 @@
 #include "MasterP.h"
 #include "StudioApp.h"
 #include "IStudioRenderer.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
-
 #include "PlatformStrings.h"
 #include "PlayerContainerWnd.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -57,31 +48,15 @@
 #include <QtGui/qwindow.h>
 #include <QtGui/qscreen.h>
 
-//==============================================================================
-//	Class CPlayerContainerWnd
-//==============================================================================
-
-//==============================================================================
-/**
- *	Constructor: Initializes the object.
- */
-//==============================================================================
 CPlayerContainerWnd::CPlayerContainerWnd(CSceneView *inSceneView)
-    : QAbstractScrollArea(inSceneView)
+    : QScrollArea(inSceneView)
     , m_SceneView(inSceneView)
     , m_PlayerWnd(NULL)
-    , m_IsMouseDown(false)
-    , m_IsMiddleMouseDown(false)
     , m_ViewMode(VIEW_SCENE)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
-//==============================================================================
-/**
- *	Destructor: Releases the object.
- */
-//==============================================================================
 CPlayerContainerWnd::~CPlayerContainerWnd()
 {
 }
@@ -93,13 +68,13 @@ bool CPlayerContainerWnd::ShouldHideScrollBars()
 
 //==============================================================================
 /**
- *	SetPlayerWndPosition: Sets the position of the child player window
+ * SetPlayerWndPosition: Sets the position of the child player window
  *
- *  Called when the view is scrolled to position the child player window
- *	@param outLeftPresentationEdge  the left edge of the presentation, with the scroll position
- *taken into consideration
- *	@param outTopPresentionEdge		the top edge of the presentation, with the scroll
- *position taken into consideration
+ * Called when the view is scrolled to position the child player window
+ * @param outLeftPresentationEdge   the left edge of the presentation, with the scroll position
+ *                                  taken into consideration
+ * @param outTopPresentionEdge      the top edge of the presentation, with the scroll
+ *                                  position taken into consideration
  *
  */
 //==============================================================================
@@ -116,21 +91,26 @@ void CPlayerContainerWnd::SetPlayerWndPosition(long &outLeftPresentationEdge,
     // Horizontal scrollbar does not exist
     if (m_ClientRect.width() < theClientRect.width()) {
         theHScrollPosition =
-            theClientRect.left() + (theClientRect.width() / 2) - (m_ClientRect.width() / 2);
+                theClientRect.left() + (theClientRect.width() / 2) - (m_ClientRect.width() / 2);
         outLeftPresentationEdge = theHScrollPosition;
-    } else // This stays a negated value
+    } else {
+        // This stays a negated value
         outLeftPresentationEdge = theHScrollPosition;
+    }
 
     // Vertical scrollbar does not exist
     if (m_ClientRect.height() < theClientRect.height()) {
         theVScrollPosition =
-            theClientRect.top() + (theClientRect.height() / 2) - (m_ClientRect.height() / 2);
+                theClientRect.top() + (theClientRect.height() / 2) - (m_ClientRect.height() / 2);
         outTopPresentionEdge = theVScrollPosition;
-    } else // This stays a negated value
+    } else {
+        // This stays a negated value
         outTopPresentionEdge = theVScrollPosition;
+    }
 
     // Move the child player window
-    m_PlayerWnd->setGeometry(QRect(QPoint(theHScrollPosition, theVScrollPosition), m_ClientRect.size()));
+    m_PlayerWnd->setGeometry(QRect(QPoint(theHScrollPosition, theVScrollPosition),
+                                   m_ClientRect.size()));
 }
 
 //==============================================================================
@@ -169,7 +149,6 @@ void CPlayerContainerWnd::SetScrollRanges()
 /**
  *	OnRulerGuideToggled:
  *	Handle scrollbar position when ruler, guide has been toggled
- *
  */
 //==============================================================================
 void CPlayerContainerWnd::OnRulerGuideToggled()
@@ -178,12 +157,10 @@ void CPlayerContainerWnd::OnRulerGuideToggled()
     bool hasHorz = horizontalScrollBar()->isVisible();
     bool hasVert = verticalScrollBar()->isVisible();
     int hscrollPos = 0, vscrollPos = 0;
-    if (hasHorz) {
+    if (hasHorz)
         hscrollPos = qMax(horizontalScrollBar()->value() + scrollAmount, 0);
-    }
-    if (hasVert) {
+    if (hasVert)
         vscrollPos = qMax(verticalScrollBar()->value() + scrollAmount, 0);
-    }
     horizontalScrollBar()->setValue(hscrollPos);
     verticalScrollBar()->setValue(vscrollPos);
     m_PlayerWnd->update();
@@ -218,13 +195,15 @@ void CPlayerContainerWnd::RecenterClient()
         if (theClientSize.width() > theViewClientRect.width()) {
             // compute the size of the client rectangle to display
             m_ClientRect.setLeft(
-                (theViewClientRect.width() / 2) - (theClientSize.width() / 2) - (theClientSize.width() % 2));
+                        (theViewClientRect.width() / 2) - (theClientSize.width() / 2)
+                        - (theClientSize.width() % 2));
             m_ClientRect.setRight((theViewClientRect.width() / 2) + (theClientSize.width() / 2));
         }
 
         if (theClientSize.height() > theViewClientRect.height()) {
             m_ClientRect.setTop(
-                (theViewClientRect.height() / 2) - (theClientSize.height() / 2) - (theClientSize.height() % 2));
+                        (theViewClientRect.height() / 2) - (theClientSize.height() / 2)
+                        - (theClientSize.height() % 2));
             m_ClientRect.setBottom((theViewClientRect.height() / 2) + (theClientSize.height() / 2));
         }
     }
@@ -235,154 +214,18 @@ void CPlayerContainerWnd::RecenterClient()
     g_StudioApp.GetRenderer().SetViewRect(glRect);
 }
 
-//==============================================================================
-/**
- *	OnLButtonDown: Called whenever the user left clicks in the view.
- *	This processes the WM_LBUTTONDOWN message. This message is generated whenever
- *	the user left clicks in the view. Since this could involve selection of an item
- *	in the scene, it may (if the click is in the Client rect) call ProcessMouseClick()
- *	on the Document to perform the selection.
- *	@param inFlags the flags passed in from the message call
- *	@param inPoint the point where the event takes place
- */
-void CPlayerContainerWnd::mousePressEvent(QMouseEvent *event)
-{
-    if ((event->button() == Qt::LeftButton) || (event->button() == Qt::RightButton)) {
-        long theToolMode = g_StudioApp.GetToolMode();
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(
-                    SceneDragSenderType::Matte, event->pos(), theToolMode);
-        m_IsMouseDown = true;
-    } else if (event->button() == Qt::MiddleButton) {
-        const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-        const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
-
-        bool theToolChanged = false;
-        if (rect().contains(event->pos()) && !IsDeploymentView()) {
-            // If both the control key and the Alt key is not down
-            if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
-                // press Scroll Wheel Click
-                // Do Camera Pan
-                g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-                theToolChanged = true;
-            } else if ((theAltKeyIsDown) && (!theCtrlKeyIsDown)) {
-                // press Alt-Scroll Wheel Click
-                // Do Camera Rotate if we are in 3D Camera
-                if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-                            g_StudioApp.GetRenderer().GetEditCamera())) {
-                    g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-                    theToolChanged = true;
-                }
-            }
-        }
-
-        if (theToolChanged) {
-            Q_EMIT toolChanged();
-            m_SceneView->SetViewCursor();
-
-            long theToolMode = g_StudioApp.GetToolMode();
-            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
-                                                                     event->pos(), theToolMode);
-            m_IsMouseDown = true;
-            m_IsMiddleMouseDown = true;
-        }
-    }
-}
-
-//==============================================================================
-/**
- * OnLButtonUp: Called whenever the user releases the left mouse button.
- *
- * This processes the WM_LBUTTONUP message. This message is generated whenever
- * the left mouse button. We release the mouse capture to stop dragging.
- *
- * @param inFlags The flags passed in from the message call
- * @param inPoint The point where the event takes place
- */
-//==============================================================================
-void CPlayerContainerWnd::mouseReleaseEvent(QMouseEvent *event)
-{
-     if ((event->button() == Qt::LeftButton) || (event->button() == Qt::RightButton)) {
-         // Need to commit the current command when we have a mouse up. :)
-         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
-         g_StudioApp.GetCore()->CommitCurrentCommand();
-         m_IsMouseDown = false;
-     } else if (event->button() == Qt::MiddleButton) {
-         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
-         g_StudioApp.GetCore()->CommitCurrentCommand();
-         if (m_IsMiddleMouseDown) {
-             m_IsMouseDown = false;
-             m_IsMiddleMouseDown = false;
-
-             const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-             const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
-
-             if (!IsDeploymentView()) {
-                 if (!theCtrlKeyIsDown && !theAltKeyIsDown) {
-                     // none of the modifier key is pressed... reset to previous tool
-                     m_SceneView->RestorePreviousTool();
-                 } else if (theCtrlKeyIsDown && theAltKeyIsDown) {
-                     // since both modifier is down... let the ctrl has priority
-                     m_SceneView->SetToolOnCtrl();
-                 }
-                 m_SceneView->SetViewCursor();
-                 Q_EMIT toolChanged();
-             }
-         }
-     }
-}
-
-//==============================================================================
-/**
- * OnMouseMove: Called whenever the user moves the mouse in the window.
- *
- * This processes the WM_MOUSEMOVE message. This message is generated whenever
- * the user moves the mouse in the view. This tells lets the document process it
- * as well since the user could be dragging an object.
- *
- * @param inFlags The flags passed in from the message call
- * @param inPoint The point where the event takes place
- */
-//==============================================================================
-void CPlayerContainerWnd::mouseMoveEvent(QMouseEvent* event)
-{
-    if (m_IsMouseDown) {
-        QT3DS_PROFILE(OnMouseMove);
-
-        long theModifierKeys = 0;
-        if (event->buttons() & Qt::LeftButton)
-            theModifierKeys = CHotKeys::MOUSE_LBUTTON | CHotKeys::GetCurrentKeyModifiers();
-        else if (event->buttons() & Qt::RightButton)
-            theModifierKeys = CHotKeys::MOUSE_RBUTTON | CHotKeys::GetCurrentKeyModifiers();
-
-        long theToolMode = g_StudioApp.GetToolMode();
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDrag(
-            SceneDragSenderType::Matte, event->pos(), theToolMode, theModifierKeys);
-    }
-}
-
-//==============================================================================
-/**
- * OnMouseWheel: Called whenever the mouse wheel.
- *
- * This processes the WM_MOUSEWHEEL message.
- *
- * @param inFlags the flags passed in from the message call
- * @param inPoint the point where the event takes place
- */
-//==============================================================================
 void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
 {
-    // Note : Mouse wheel is a special animal of the scene drag tool. We dont change the tool
-    // so as not to affect the toolbar button and the view cursor. This will just do the zoom
-    // and the cursor is not changed.
-
     const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
-    const bool theAltKeyIsDown = event->modifiers() & Qt::AltModifier;
 
-    // Mouse Wheel zooms the camera
-    if (!theCtrlKeyIsDown && !theAltKeyIsDown && !IsDeploymentView())
+    if (!theCtrlKeyIsDown && !IsDeploymentView()) {
+        // Zoom when in edit camera view
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseWheel(
-            SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
+                    SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
+    } else {
+        // Otherwise, scroll the view
+        QScrollArea::wheelEvent(event);
+    }
 }
 
 void CPlayerContainerWnd::scrollContentsBy(int, int)
@@ -402,16 +245,6 @@ void CPlayerContainerWnd::SetViewMode(EViewMode inViewMode)
 {
     m_ViewMode = inViewMode;
     m_SceneView->RecheckSizingMode();
-    if (m_ViewMode == VIEW_SCENE) {
-        // switching from edit mode to deployment mode, release the edit camera tool and set it to
-        // object move
-        long theCurrentToolSettings = g_StudioApp.GetToolMode();
-        bool theIsCameraTool = (theCurrentToolSettings & STUDIO_CAMERATOOL_MASK ? true : false);
-        if (theIsCameraTool) {
-            g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-            m_SceneView->SetToolMode(STUDIO_TOOLMODE_MOVE);
-        }
-    }
 }
 
 //==============================================================================
@@ -436,6 +269,12 @@ bool CPlayerContainerWnd::IsDeploymentView()
     return m_ViewMode == VIEW_SCENE ? true : false;
 }
 
+void CPlayerContainerWnd::setToolMode(long inMode)
+{
+    if (m_PlayerWnd)
+        m_PlayerWnd->setToolMode(inMode);
+}
+
 QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
 {
     CPt cSize = g_StudioApp.GetCore()->GetStudioProjectSettings()->GetPresentationSize();
@@ -445,9 +284,8 @@ QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
     // presentation
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
-    if (g_StudioApp.GetRenderer().AreGuidesEnabled()) {
+    if (g_StudioApp.GetRenderer().AreGuidesEnabled())
         theSize += QSize(32, 32);
-    }
 
     return theSize / fixedDevicePixelRatio();
 }
@@ -458,24 +296,12 @@ void CPlayerContainerWnd::SetPlayerWnd(CPlayerWnd *inPlayerWnd)
 {
     m_PlayerWnd = inPlayerWnd;
     viewport()->setBackgroundRole(QPalette::Dark);
-    m_PlayerWnd->SetContainerWnd(this);
+    m_PlayerWnd->setContainerWnd(this);
     m_PlayerWnd->setParent(viewport());
     m_PlayerWnd->setVisible(true);
     m_PlayerWnd->resize(m_PlayerWnd->sizeHint());
 }
 
-//==============================================================================
-/**
- *	OnSize: Handles the WM_SIZE message
- *
- *	Recenters the Client and recaluclates the matte when a resize message is
- *	generated.
- *
- *	@param  nType	Specifies the type of resizing requested.
- *	@param	cx		Specifies the new width of the client area.
- *	@param	cy		Specifies the new height of the client area.
- */
-//==============================================================================
 void CPlayerContainerWnd::resizeEvent(QResizeEvent* event)
 {
     QAbstractScrollArea::resizeEvent(event);

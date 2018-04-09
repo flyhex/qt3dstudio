@@ -491,7 +491,7 @@ class CXmlErrorHandler
 protected:
     virtual ~CXmlErrorHandler() {}
 public:
-    virtual void OnXmlError(TWideXMLCharPtr errorName, int line, int column) = 0;
+    virtual void OnXmlError(const QString &errorName, int line, int column) = 0;
 };
 
 class CDOMSerializer

@@ -153,7 +153,6 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
 
 InspectorControlModel::InspectorControlModel(QObject *parent)
     : QAbstractListModel(parent)
-    , m_currController(QString())
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
     m_modifiedProperty.first = 0;
@@ -347,6 +346,9 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_propertyType = static_cast<qt3dsdm::AdditionalMetaDataType::Value>
             (propertySystem->GetAdditionalMetaDataType(item->m_instance, metaProperty.m_Property));
     item->m_tooltip = Q3DStudio::CString(metaProperty.m_Description.c_str()).toQString();
+    // \n is parsed as \\n from the material and effect files. Replace them to fix multi-line
+    // tooltips
+    item->m_tooltip.replace(QStringLiteral("\\n"), QStringLiteral("\n"));
 
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,
@@ -370,29 +372,13 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     }
 
     if (item->m_controllable) {
-        // Get the name of current controller
-        qt3dsdm::SValue currPropVal = currentPropertyValue(
-            item->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                item->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
-        // If this property is controlled, set the model controller variable
-        // as it is needed in UI dialogs.
-        if (!currPropVal.empty()) {
-            Q3DStudio::CString propName
-                = studio->GetPropertySystem()->GetName(item->m_property).c_str();
-            Q3DStudio::CString currPropValStr
-                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
-            long propNamePos = currPropValStr.find(propName);
-            if (propNamePos != currPropValStr.ENDOFSTRING && propNamePos != 0)
-                m_currController = currPropValStr.Left(currPropValStr.find(" ")).toQString();
-            else
-                m_currController = QString(tr("[No control]"));
-        }
-
+        // Set the name of current controller
+        item->m_controller = currentControllerValue(item->m_instance, item->m_property);
         // Update UI icon state and tooltip
         updateControlledToggleState(item);
-        m_controlledToggleConnection = signalProvider->ConnectControlledToggled(
+        item->m_connections.push_back(signalProvider->ConnectControlledToggled(
             std::bind(&InspectorControlModel::updateControlledToggleState,
-                      this, item));
+                      this, item)));
     }
 
     // synchronize the value itself
@@ -411,55 +397,97 @@ qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int h
     return  value;
 }
 
+QString InspectorControlModel::currentControllerValue(long instance, int handle) const
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    auto studio = doc->GetStudioSystem();
+
+    qt3dsdm::SValue currPropVal = currentPropertyValue(
+                instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                    instance, qt3dsdm::TCharStr(L"controlledproperty")));
+    if (!currPropVal.empty()) {
+        Q3DStudio::CString currPropValStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+
+        Q3DStudio::CString propName
+                = studio->GetPropertySystem()->GetName(handle).c_str();
+
+        // Datainput controller name is always prepended with "$". Differentiate
+        // between datainput and property that has the same name by searching specifically
+        // for whitespace followed by property name.
+        long propNamePos = currPropValStr.find(" " + propName);
+        if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0)) {
+            long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
+
+            // adjust pos if this is the first controller - property pair
+            // in controlledproperty
+            if (posCtrlr < 0)
+                posCtrlr = 0;
+
+            // remove $
+            posCtrlr++;
+            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr).toQString();
+        }
+        else
+            return {};
+    } else {
+        return {};
+    }
+}
+
 void InspectorControlModel::updateControlledToggleState(InspectorControlBase* inItem) const
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
-    bool wasControlled = inItem->m_controlled;
-
     // toggle if controlledproperty contains the name of this property
     qt3dsdm::SValue currPropVal = currentPropertyValue(
         inItem->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
             inItem->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+    Q3DStudio::CString currPropValStr;
+    if (!currPropVal.empty())
+        currPropValStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
     // Restore original tool tip from metadata when turning control off
-    if (currPropVal.empty()) {
+    if (!currPropValStr.size()) {
         inItem->m_controlled = false;
         inItem->m_tooltip = Q3DStudio::CString(
             inItem->m_metaProperty.m_Description.c_str()).toQString();
+        inItem->m_controller = "";
     } else {
        Q3DStudio::CString propName
            = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
-       Q3DStudio::CString currPropValStr
-           = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
-       // TODO this only works when controlling a single property,
-       // see below
-       // Item is not controlled if property name is not found altogether,
-       // or it is found at the beginning of the string where it should
-       // be considered to be the name of controlling datainput
-       // (this handles the case of datainput name being one of
-       // property names)
-       long propNamePos = currPropValStr.find(propName);
-       if (propNamePos == currPropValStr.ENDOFSTRING &&
-           propNamePos != 0) {
+       // Search specifically for whitespace followed with registered property name.
+       // This avoids finding datainput with same name as the property, as datainput
+       // name is always prepended with "$"
+       long propNamePos = currPropValStr.find(" " + propName);
+       if ((propNamePos == currPropValStr.ENDOFSTRING)
+           && (propNamePos != 0)) {
            inItem->m_controlled = false;
            inItem->m_tooltip = Q3DStudio::CString(
                inItem->m_metaProperty.m_Description.c_str()).toQString();
+           inItem->m_controller = "";
        } else {
            inItem->m_controlled = true;
-           // TODO just get the first whitespace-delimited string from
-           // controlledproperty to show as controller name.
-           // This works as long as we only have control for textstring
-           // property, but when we enable control of several properties
-           // in a single element, we need to parse controlledproperty
-           // through and find the controller name for this specific property
-           const QString ctrlName = (currPropValStr.Left(
-               currPropValStr.find(" "))).toQString();
-           inItem->m_tooltip = tr("Controlling Datainput:\n%1").arg(ctrlName);
+           // controller name is prepended with "$" to differentiate from property
+           // with same name. Reverse find specifically for $.
+           long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
+
+           // this is the first controller - property pair in controlledproperty
+           if (posCtrlr < 0)
+               posCtrlr = 0;
+
+           // remove $ from controller name for showing it in UI
+           posCtrlr++;
+           const QString ctrlName = currPropValStr.substr(
+               posCtrlr, propNamePos - posCtrlr).toQString();
+
+           inItem->m_tooltip = tr("Controlling Data Input:\n%1").arg(ctrlName);
+           inItem->m_controller = ctrlName;
        }
     }
 
     Q_EMIT inItem->tooltipChanged();
-     if (wasControlled != inItem->m_controlled)
-        Q_EMIT inItem->controlledChanged();
+    // Emit signal always to trigger updating of controller name in UI
+    // also when user switches from one controller to another
+    Q_EMIT inItem->controlledChanged();
 }
 
 void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inItem)
@@ -578,8 +606,18 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
 void InspectorControlModel::rebuildTree()
 {
     beginResetModel();
+    QVector<QObject *> deleteVector;
+    for (int i = 0; i < m_groupElements.count(); ++i) {
+        auto group = m_groupElements[i];
+        for (int p = 0; p < group.controlElements.count(); ++p)
+            deleteVector.append(group.controlElements[p].value<QObject *>());
+    }
     m_groupElements = computeTree(m_inspectableBase);
     endResetModel();
+
+    // Clean the old objects after reset is done so that qml will not freak out about null pointers
+    for (int i = 0; i < deleteVector.count(); ++i)
+        deleteVector[i]->deleteLater();
 }
 
 int InspectorControlModel::rowCount(const QModelIndex &parent) const
@@ -598,6 +636,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     auto bridge = studioSystem->GetClientDataModelBridge();
     qt3dsdm::SValue value;
     const auto instance = element->m_instance;
+    if (!propertySystem->HandleValid(instance))
+        return;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
 
     const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
@@ -697,8 +737,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             QFileInfo fileInfo(qt3dsdm::get<QString>(value));
             element->m_value = fileInfo.fileName();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::PathBuffer) {
-            element->m_value = qt3dsdm::get<QString>(value);
-        } else if (bridge->GetObjectType(element->m_instance) ==  OBJTYPE_DATAINPUT) {
             element->m_value = qt3dsdm::get<QString>(value);
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
@@ -800,7 +838,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     // Controlled state must be manually set after undo operations,
     // as only the "controlledproperty" is restored in undo,
     // not the controlled flag nor the tooltip
-    if (element->m_controlled)
+    if (element->m_controllable)
           updateControlledToggleState(element);
 }
 
@@ -824,13 +862,20 @@ void InspectorControlModel::refreshTree()
         rebuildTree();
     } else {
         // group structure is intact, let's walk to see which rows changed
+        QVector<QObject *> deleteVector;
         long theCount = m_inspectableBase->GetGroupCount();
         for (long theIndex = 0; theIndex < theCount; ++theIndex) {
             if (isGroupRebuildRequired(m_inspectableBase, theIndex)) {
+                auto group = m_groupElements[theIndex];
+                for (int p = 0; p < group.controlElements.count(); ++p)
+                    deleteVector.append(group.controlElements[p].value<QObject *>());
                 m_groupElements[theIndex] = computeGroup(m_inspectableBase, theIndex);
                 Q_EMIT dataChanged(index(theIndex), index(theIndex));
             }
         }
+        // Clean the old objects after refresh is done so that qml will not freak out
+        for (int i = 0; i < deleteVector.count(); ++i)
+            deleteVector[i]->deleteLater();
     }
 }
 
@@ -910,6 +955,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     // to both rejecting invalid and resetting the original value here.
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     EStudioObjectType theType = studio->GetClientDataModelBridge()->GetObjectType(instance);
+    qt3dsdm::AdditionalMetaDataType::Value additionalType
+            = studio->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
 
     if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
             studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
@@ -920,7 +967,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
          || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
             studio->GetPropertySystem()->GetDataType(handle)
-                == qt3dsdm::DataModelDataType::String) {
+                == qt3dsdm::DataModelDataType::String
+            && additionalType == qt3dsdm::AdditionalMetaDataType::Texture) {
         // force . at the beginning of the url
         QString x = value.toString();
         QUrl url(x);
@@ -1004,14 +1052,12 @@ void InspectorControlModel::setPropertyControllerInstance(
                                                CRelativePathTools::EPATHTYPE_GUID, instance));
     Q_ASSERT(instancepath.size());
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property Controlled"))
-        ->SetInstancePropertyControlled(instance, instancepath, property,
-                                        controllerInstance, controlled);
+    doc->SetInstancePropertyControlled(instance, instancepath, property,
+                                       controllerInstance, controlled);
 }
 
 void InspectorControlModel::setPropertyControlled(long instance, int property)
 {
-
     const auto signalSender
         = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalSender();
 

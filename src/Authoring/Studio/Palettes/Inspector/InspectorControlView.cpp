@@ -51,8 +51,8 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "StudioFullSystem.h"
 #include "ClientDataModelBridge.h"
-#include "DataInputSelectDlg.h"
 #include "MainFrm.h"
+#include "DataInputDlg.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -179,7 +179,7 @@ QSize InspectorControlView::sizeHint() const
 void InspectorControlView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_inspectorView"_L1, this);
+    rootContext()->setContextProperty("_parentView"_L1, this);
     rootContext()->setContextProperty("_inspectorModel"_L1, m_inspectorControlModel);
     rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
     rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
@@ -231,6 +231,19 @@ bool InspectorControlView::canLinkProperty(int instance, int handle) const
     return canBeLinkedFlag;
 }
 
+void InspectorControlView::onInstancePropertyValueChanged(
+        qt3dsdm::Qt3DSDMPropertyHandle propertyHandle)
+{
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    // titleChanged implies icon change too, but that will only occur if inspectable type changes,
+    // which will invalidate the inspectable anyway, so in reality we are only interested in name
+    // property here
+    if (propertyHandle == bridge->GetNameProperty()
+            && m_inspectableBase && m_inspectableBase->IsValid()) {
+        Q_EMIT titleChanged();
+    }
+}
+
 QColor InspectorControlView::titleColor(int instance, int handle) const
 {
     QColor ret = CStudioPreferences::textColor();
@@ -269,10 +282,12 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
     if (m_inspectableBase != inInspectable) {
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
+
         Q_EMIT titleChanged();
         auto sp = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
         m_PropertyChangeConnection = sp->ConnectInstancePropertyValue(
-                    std::bind(&InspectorControlView::titleChanged, this));
+                    std::bind(&InspectorControlView::onInstancePropertyValueChanged, this,
+                              std::placeholders::_2));
         m_timeChanged = sp->ConnectComponentSeconds(
                     std::bind(&InspectorControlView::OnTimeChanged, this));
     }
@@ -421,9 +436,14 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
 QObject *InspectorControlView::showObjectReference(int handle, int instance, const QPoint &point)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    if (!m_objectReferenceModel) {
-        m_objectReferenceModel
-            = new ObjectListModel(g_StudioApp.GetCore(), doc->GetActiveRootInstance(), this);
+    // different base handle than current active root instance means that we have entered/exited
+    // component after the reference model had been created, and we need to recreate it
+    if (!m_objectReferenceModel
+        || (m_objectReferenceModel->baseHandle() != doc->GetActiveRootInstance())) {
+        if (m_objectReferenceModel)
+            delete m_objectReferenceModel;
+        m_objectReferenceModel = new ObjectListModel(g_StudioApp.GetCore(),
+                                                     doc->GetActiveRootInstance(), this, true);
     }
     if (!m_objectReferenceView)
         m_objectReferenceView = new ObjectBrowserView(this);
@@ -446,7 +466,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     if (objRefHelper) {
         qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
         qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
-        m_objectReferenceView->selectAndExpand(refInstance);
+        m_objectReferenceView->selectAndExpand(refInstance, instance);
     }
 
     showBrowser(m_objectReferenceView, point);
@@ -455,7 +475,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
             this, [this, doc, handle, instance] {
         auto selectedItem = m_objectReferenceView->selectedHandle();
         qt3dsdm::SObjectRefType objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                    selectedItem, handle,
+                    selectedItem, instance,
                     (CRelativePathTools::EPathType)(m_objectReferenceView->pathType()));
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
                 ->SetInstancePropertyValue(instance, handle, objRef);
@@ -464,31 +484,40 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     return m_objectReferenceView;
 }
 
-void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
+QObject *InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
 {
     if (!m_dataInputChooserView) {
-        m_dataInputChooserView = new DataInputSelectDlg(g_StudioApp.m_pMainWnd);
-        connect(m_dataInputChooserView, &DataInputSelectDlg::dataInputChanged, this,
-                [this, handle, instance](const QString &controllerName) {
-
-            bool controlled = controllerName == tr("[No control]") ? false : true;
+        m_dataInputChooserView = new DataInputSelectView(this);
+        connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
+                [this](int handle, int instance, const QString &controllerName) {
+            bool controlled =
+                    controllerName == m_dataInputChooserView->getNoneString() ? false : true;
             m_inspectorControlModel
                 ->setPropertyControllerInstance(
                     instance, handle,
                     Q3DStudio::CString::fromQString(controllerName), controlled);
             m_inspectorControlModel->setPropertyControlled(instance, handle);
-            m_inspectorControlModel->setCurrentController(controllerName);
         });
     }
-
     QStringList dataInputList;
-    dataInputList.append(tr("[No control]"));
-    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++)
-        dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+    const auto propertySystem =
+        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetPropertySystem();
+    const qt3dsdm::DataModelDataType::Value dataType
+        = propertySystem->GetDataType(handle);
+    // only add datainputs with matching type for this property
+    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
+        if (CDataInputDlg::isEquivalentDataType(
+            g_StudioApp.m_dataInputDialogItems[i]->type, dataType)) {
+            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+        }
+    }
+    m_dataInputChooserView->
+            setData(dataInputList,
+                    m_inspectorControlModel->currentControllerValue(instance, handle),
+                    handle, instance);
+    showBrowser(m_dataInputChooserView, point);
 
-    m_dataInputChooserView->setData(dataInputList,
-                                    m_inspectorControlModel->getCurrentController());
-    m_dataInputChooserView->showDialog(point);
+    return m_dataInputChooserView;
 }
 
 void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)
@@ -514,6 +543,11 @@ void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &poin
         browser->activateWindow();
         browser->setFocus();
     });
+}
+
+bool InspectorControlView::toolTipsEnabled()
+{
+    return CStudioPreferences::ShouldShowTooltips();
 }
 
 void InspectorControlView::OnBeginDataModelNotifications()

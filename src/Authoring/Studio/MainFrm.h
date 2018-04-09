@@ -97,7 +97,7 @@ public:
 
     CRecentItems *GetRecentItems();
 
-    int OnCreate();
+    void OnCreate();
 
     void onPlaybackTimeout();
 
@@ -121,6 +121,7 @@ public:
     void OnEditCut();
     void OnUpdateEditCut();
     void OnEditPaste();
+    void onEditPasteToMaster();
     void OnUpdateEditPaste();
     void OnEditDuplicate();
     void OnUpdateEditDuplicate();
@@ -132,7 +133,6 @@ public:
     void OnUpdateTimelineSetTimeBarColor();
     void OnTimelineSetTimeBarColor();
     void OnTimelineSetChangedKeyframe();
-    void OnTimelineDeleteSelectedKeyframes();
     void OnUpdateTimelineDeleteSelectedKeyframes();
     void OnTimelineSetTimeBarText();
     void OnUpdateTimelineSetTimeBarText();
@@ -143,17 +143,18 @@ public:
     void OnUpdateToolAutosetkeys();
     void OnEditApplicationPreferences();
     void OnEditPresentationPreferences();
-    void OnEditSubPresentations();
-    void OnEditDataInputs();
+    void OnFileSubPresentations();
+    void OnFileDataInputs();
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();
     void OnUpdatePlaybackRewind();
     void OnPlaybackStop();
     void OnUpdatePlaybackStop();
-    void OnPlaybackPreview(const QString &viewerExeName);
+    void OnPlaybackPreview(const QString &viewerExeName, bool remote = false);
     void OnPlaybackPreviewRuntime1();
     void OnPlaybackPreviewRuntime2();
+    void OnPlaybackPreviewRemote();
     void OnUpdatePlaybackPreview();
     void OnUpdateToolMove();
     void OnUpdateToolRotate();
@@ -182,6 +183,7 @@ public:
     void OnHelpVisitQt();
     void OnHelpOpenTutorial();
 
+    void onViewResetLayout();
     void OnViewAction();
     void OnUpdateViewAction();
     void OnViewBasicObjects();
@@ -224,6 +226,8 @@ public:
 
     void OnTimeBarColorChanged(const QColor &color);
 
+    void onCtrlNPressed();
+
     ITimelineTimebar *GetSelectedTimelineTimebar();
     TimelineView *GetTimelineView();
 
@@ -234,6 +238,11 @@ public:
 
     QWidget *GetActiveView();
     CPlayerWnd *GetPlayerWnd() const;
+
+    void initializeGeometryAndState();
+
+    void toggleSelectMode();
+    void actionActive(bool active);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -247,6 +256,8 @@ protected:
     CRecentItems *m_RecentItems = nullptr;
     CPaletteManager *m_PaletteManager = nullptr;
     bool m_PlaybackFlag = false;
+    bool m_actionActive = false;
+    bool m_resettingLayout = false;
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
     QTimer m_playbackTimer;

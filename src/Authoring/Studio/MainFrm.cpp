@@ -92,68 +92,74 @@ CMainFrame::CMainFrame()
     m_remoteDeploymentSender = new RemoteDeploymentSender(this);
 
     // File Menu
+    connect(m_ui->action_New, &QAction::triggered, this, &CMainFrame::OnFileNew);
     connect(m_ui->action_Open, &QAction::triggered, this, &CMainFrame::OnFileOpen);
     connect(m_ui->action_Save, &QAction::triggered, this, &CMainFrame::OnFileSave);
-    connect(m_ui->action_New, &QAction::triggered, this, &CMainFrame::OnFileNew);
     connect(m_ui->actionSave_As, &QAction::triggered, this, &CMainFrame::OnFileSaveAs);
     connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
     connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
+    connect(m_ui->actionSubpresentations, &QAction::triggered, this,
+            &CMainFrame::OnFileSubPresentations);
+    connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
-    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
-            m_ui->action_Connect_to_Device, &QAction::setChecked);
-    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
-            this, &CMainFrame::OnConnectionChanged);
-    connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
-
     m_RecentItems = new CRecentItems(m_ui->menuRecent_Projects, 0);
     connect(m_RecentItems, &CRecentItems::openRecent, this, &CMainFrame::OnFileOpenRecent);
-    //ON_COMMAND_RANGE(WM_STUDIO_OPEN_RECENT_MIN, WM_STUDIO_OPEN_RECENT_MAX, OnFileOpenRecent)
+    connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
     // Edit Menu
     connect(m_ui->action_Undo, &QAction::triggered, this, &CMainFrame::OnEditUndo);
     connect(m_ui->action_Redo, &QAction::triggered, this, &CMainFrame::OnEditRedo);
-    connect(m_ui->action_Copy, &QAction::triggered, this, &CMainFrame::OnEditCopy);
+//    connect(m_ui->actionRepeat, &QAction::triggered, this, &CMainFrame::onEditRepeat); // TODO: Implement
     connect(m_ui->action_Cut, &QAction::triggered, this, &CMainFrame::OnEditCut);
-    connect(m_ui->actionAutoset_Keyframes, &QAction::triggered,
-            this, &CMainFrame::OnToolAutosetkeys);
+    connect(m_ui->action_Copy, &QAction::triggered, this, &CMainFrame::OnEditCopy);
     connect(m_ui->action_Paste, &QAction::triggered, this, &CMainFrame::OnEditPaste);
+    connect(m_ui->actionPaste_to_Master_Slide, &QAction::triggered,
+            this, &CMainFrame::onEditPasteToMaster);
+    connect(m_ui->action_Duplicate_Object, &QAction::triggered, this, &CMainFrame::OnEditDuplicate);
+    connect(m_ui->actionDelete, &QAction::triggered, [](){ g_StudioApp.DeleteSelectedObject(); });
+//    connect(m_ui->actionGroup, &QAction::triggered, this, &CMainFrame::onEditGroup); // TODO: Implement
+//    connect(m_ui->actionParent, &QAction::triggered, this, &CMainFrame::onEditParent); // TODO: Implement
+//    connect(m_ui->actionUnparent, &QAction::triggered, this, &CMainFrame::onEditUnparent); // TODO: Implement
     connect(m_ui->actionStudio_Preferences, &QAction::triggered,
             this, &CMainFrame::OnEditApplicationPreferences);
     connect(m_ui->actionPresentation_Settings, &QAction::triggered,
             this, &CMainFrame::OnEditPresentationPreferences);
-    connect(m_ui->actionSubpresentations, &QAction::triggered, this,
-            &CMainFrame::OnEditSubPresentations);
-    connect(m_ui->actionData_Inputs, &QAction::triggered, this,
-            &CMainFrame::OnEditDataInputs);
-    connect(m_ui->action_Duplicate_Object, &QAction::triggered,
-            this, &CMainFrame::OnEditDuplicate);
-
-    // Timeline Menu
-    connect(m_ui->actionDelete_Selected_Keyframe_s, &QAction::triggered,
-            this, &CMainFrame::OnTimelineDeleteSelectedKeyframes);
-    connect(m_ui->actionSet_Interpolation, &QAction::triggered,
-            this, &CMainFrame::OnTimelineSetInterpolation);
-    connect(m_ui->actionChange_Time_Bar_Color, &QAction::triggered,
-            this, &CMainFrame::OnTimelineSetTimeBarColor);
-    connect(m_ui->actionSet_Changed_Keyframes, &QAction::triggered,
-            this, &CMainFrame::OnTimelineSetChangedKeyframe);
 
     // View Menu
+    connect(m_ui->actionReset_layout, &QAction::triggered, this, &CMainFrame::onViewResetLayout);
+    connect(m_ui->actionFit_Selected, &QAction::triggered,
+            this, &CMainFrame::OnEditCameraZoomExtent);
+//    connect(m_ui->actionFit_all, &QAction::triggered, this, &CMainFrame::onViewFitAll); // TODO: Implement
+    connect(m_ui->actionToggle_hide_unhide_selected, &QAction::triggered,
+            []() { g_StudioApp.toggleEyeball(); });
+//    connect(m_ui->actionToggle_hide_unhide_unselected, &QAction::triggered,
+//            []() {  }); // TODO: Implement?
+    connect(m_ui->actionAction, &QAction::triggered, this, &CMainFrame::OnViewAction);
+    connect(m_ui->actionBasic_Objects, &QAction::triggered, this, &CMainFrame::OnViewBasicObjects);
+    connect(m_ui->actionInspector, &QAction::triggered, this, &CMainFrame::OnViewInspector);
+    connect(m_ui->actionProject, &QAction::triggered, this, &CMainFrame::OnViewProject);
+    connect(m_ui->actionSlide, &QAction::triggered, this, &CMainFrame::OnViewSlide);
+    connect(m_ui->actionTimeline, &QAction::triggered, this, &CMainFrame::OnViewTimeline);
     connect(m_ui->actionBounding_Boxes, &QAction::triggered,
             this, &CMainFrame::OnViewBoundingBoxes);
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
     connect(m_ui->actionWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
     connect(m_ui->actionTooltips, &QAction::triggered, this, &CMainFrame::OnViewTooltips);
+//    connect(m_ui->actionFind, &QAction::triggered, this, &CMainFrame::onViewFind); // TODO: Implement
 
-    // Tools Menu
-    connect(m_ui->actionTimeline, &QAction::triggered, this, &CMainFrame::OnViewTimeline);
-    connect(m_ui->actionAction, &QAction::triggered, this, &CMainFrame::OnViewAction);
-    connect(m_ui->actionBasic_Objects, &QAction::triggered, this, &CMainFrame::OnViewBasicObjects);
-    connect(m_ui->actionProject, &QAction::triggered, this, &CMainFrame::OnViewProject);
-    connect(m_ui->actionSlide, &QAction::triggered, this, &CMainFrame::OnViewSlide);
-    connect(m_ui->actionInspector, &QAction::triggered, this, &CMainFrame::OnViewInspector);
+    // Timeline Menu
+    connect(m_ui->actionSet_Changed_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetChangedKeyframe);
+    connect(m_ui->actionDelete_Selected_Keyframe_s, &QAction::triggered,
+            [](){ g_StudioApp.DeleteSelectedKeys(); });
+    connect(m_ui->actionSet_Interpolation, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetInterpolation);
+    connect(m_ui->actionChange_Time_Bar_Color, &QAction::triggered,
+            this, &CMainFrame::OnTimelineSetTimeBarColor);
+    connect(m_ui->actionAutoset_Keyframes, &QAction::triggered,
+            this, &CMainFrame::OnToolAutosetkeys);
 
     // Help Menu
     connect(m_ui->action_Reference_Manual, &QAction::triggered, this, &CMainFrame::OnHelpIndex);
@@ -171,6 +177,8 @@ CMainFrame::CMainFrame()
     // Playback toolbar
     connect(m_ui->actionPreview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRuntime1);
+    connect(m_ui->actionRemote_Preview, &QAction::triggered,
+            this, &CMainFrame::OnPlaybackPreviewRemote);
 
     // Only show runtime2 preview if we have appropriate viewer
     if (CPreviewHelper::viewerExists(QStringLiteral("q3dsviewer"))) {
@@ -180,27 +188,27 @@ CMainFrame::CMainFrame()
         m_ui->actionPreviewRuntime2->setVisible(false);
     }
 
-
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
     connect(m_ui->actionRotation_Tool, &QAction::triggered, this, &CMainFrame::OnToolRotate);
     connect(m_ui->actionScale_Tool, &QAction::triggered, this, &CMainFrame::OnToolScale);
     connect(m_ui->actionLocal_Global_Manipulators, &QAction::triggered,
             this, &CMainFrame::OnToolGlobalManipulators);
-    connect(m_ui->actionToolbarAutoset_Keyframes, &QAction::triggered,
-            this, &CMainFrame::OnToolAutosetkeys);
 
     // Edit Camera toolbar
-    connect(m_ui->actionFit_Selected, &QAction::triggered,
-            this, &CMainFrame::OnEditCameraZoomExtent);
+#if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     connect(m_ui->actionPan_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraPan);
     connect(m_ui->actionOrbit_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraRotate);
     connect(m_ui->actionZoom_Tool, &QAction::triggered, this, &CMainFrame::OnEditCameraZoom);
+#endif
     connect(m_ui->actionShading_Mode, &QAction::triggered, this, &CMainFrame::OnEditViewFillMode);
     connect(m_ui->actionRulers_Guides, &QAction::triggered, this, &CMainFrame::OnViewGuidesRulers);
     connect(m_ui->actionClear_Guides, &QAction::triggered, this, &CMainFrame::OnClearGuides);
     connect(m_ui->actionLock_Guides, &QAction::triggered, this, &CMainFrame::OnLockGuides);
-    connect(m_ui->actionToolbarWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
+
+    // Others
+    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
+            this, &CMainFrame::OnConnectionChanged);
 
     // TODO: better solution?
     QTimer* updateUITimer = new QTimer;
@@ -293,7 +301,7 @@ void CMainFrame::hideEvent(QHideEvent *event)
  * Called when the main frame is actually created.  Sets up tool bars and default
  * views.
  */
-int CMainFrame::OnCreate()
+void CMainFrame::OnCreate()
 {
     m_SceneView = new CSceneView(&g_StudioApp, this);
     connect(m_SceneView, &CSceneView::toolChanged, this, &CMainFrame::OnUpdateToolChange);
@@ -336,9 +344,15 @@ int CMainFrame::OnCreate()
     m_ui->action_Connect_to_Device->setEnabled(false);
     m_ui->action_Revert->setEnabled(false);
     m_ui->actionImportAssets->setEnabled(false);
+    m_ui->actionRemote_Preview->setEnabled(false);
+
+#if 1 // TODO: Hidden until UX decision is made if these buttons are needed at all or not
+    m_ui->actionPan_Tool->setVisible(false);
+    m_ui->actionOrbit_Tool->setVisible(false);
+    m_ui->actionZoom_Tool->setVisible(false);
+#endif
 
     setCentralWidget(m_SceneView);
-    return 0;
 }
 
 //==============================================================================
@@ -364,6 +378,10 @@ void CMainFrame::OnNewPresentation()
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);
+
+    // Clear data input list and sub-presentation list
+    g_StudioApp.m_subpresentations.clear();
+    g_StudioApp.m_dataInputDialogItems.clear();
 }
 
 //==============================================================================
@@ -455,7 +473,7 @@ void CMainFrame::OnEditCopy()
  */
 void CMainFrame::OnUpdateEditCopy()
 {
-    if (g_StudioApp.CanCopy()) {
+    if (g_StudioApp.CanCopy() && !m_actionActive) {
         QString theDescription = tr("Copy %1\tCtrl+C").arg(g_StudioApp.GetCopyType());
 
         m_ui->action_Copy->setText(theDescription);
@@ -487,7 +505,7 @@ void CMainFrame::OnEditCut()
  */
 void CMainFrame::OnUpdateEditCut()
 {
-    if (g_StudioApp.CanCut()) {
+    if (g_StudioApp.CanCut() && !m_actionActive) {
         QString theDescription = tr("Cut %1\tCtrl+X").arg(g_StudioApp.GetCopyType());
 
         m_ui->action_Cut->setText(theDescription);
@@ -509,6 +527,11 @@ void CMainFrame::OnEditPaste()
     g_StudioApp.OnPaste();
 }
 
+void CMainFrame::onEditPasteToMaster()
+{
+    g_StudioApp.GetCore()->GetDoc()->HandleMasterPaste();
+}
+
 //==============================================================================
 /**
  *	OnUpdateEditPaste: Handle the update UI command for the paste button and menu item
@@ -520,14 +543,16 @@ void CMainFrame::OnEditPaste()
  */
 void CMainFrame::OnUpdateEditPaste()
 {
-    if (g_StudioApp.CanPaste()) {
+    if (g_StudioApp.CanPaste() && !m_actionActive) {
         QString theUndoDescription = tr("Paste %1\tCtrl+V").arg(g_StudioApp.GetPasteType());
 
         m_ui->action_Paste->setText(theUndoDescription);
 
         m_ui->action_Paste->setEnabled(true);
+        m_ui->actionPaste_to_Master_Slide->setEnabled(true);
     } else {
         m_ui->action_Paste->setEnabled(false);
+        m_ui->actionPaste_to_Master_Slide->setEnabled(false);
     }
 }
 
@@ -549,9 +574,11 @@ void CMainFrame::OnUpdateToolChange()
     m_ui->actionLocal_Global_Manipulators->setChecked(g_StudioApp.GetMinpulationMode()
                                                       == StudioManipulationModes::Global);
 
+#if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     m_ui->actionPan_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_PAN);
     m_ui->actionOrbit_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE);
     m_ui->actionZoom_Tool->setChecked(theToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM);
+#endif
 }
 
 //==============================================================================
@@ -609,18 +636,6 @@ void CMainFrame::OnUpdateTimelineSetTimeBarColor()
 void CMainFrame::OnTimelineSetChangedKeyframe()
 {
     g_StudioApp.HandleSetChangedKeys();
-}
-
-//==============================================================================
-/**
- *	OnTimelineDeleteSelectedKeyframes: Handles the ID_TIMELINE_DELETESELECTEDKEYFRAMES
- *	message.
- *
- *	Deletes all currently selected keyframes.
- */
-void CMainFrame::OnTimelineDeleteSelectedKeyframes()
-{
-    g_StudioApp.DeleteSelectedKeys();
 }
 
 //==============================================================================
@@ -739,6 +754,29 @@ void CMainFrame::OnFileNew()
     g_StudioApp.OnFileNew();
 }
 
+void CMainFrame::onCtrlNPressed()
+{
+    static QMap<int, int> key2index {
+        {1, 9},         // Scene Camera View
+        {2, 0}, {3, 1}, // Perspective & Orthographic
+        {4, 2}, {5, 3}, // Top & Bottom
+        {6, 4}, {7, 5}, // Left & Right
+        {8, 6}, {9, 7}, // Front & Back
+    };
+
+    QAction *action = qobject_cast<QAction *>(sender());
+    Q_ASSERT(action);
+    QKeySequence shortcut = action->shortcut();
+    QMapIterator<int, int> i(key2index);
+    while (i.hasNext()) {
+        i.next();
+        QKeySequence keySequence(Qt::CTRL | static_cast<Qt::Key>(Qt::Key_0 + i.key()));
+        if (shortcut.matches(keySequence) == QKeySequence::ExactMatch) {
+            m_ui->m_EditCamerasBar->setCameraIndex(i.value());
+            break;
+        }
+    }
+}
 
 //==============================================================================
 /**
@@ -788,7 +826,7 @@ void CMainFrame::OnEditPresentationPreferences()
 /**
  *  Displays the sub-presentation dialog.
  */
-void CMainFrame::OnEditSubPresentations()
+void CMainFrame::OnFileSubPresentations()
 {
     QString dir = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString();
 
@@ -804,7 +842,7 @@ void CMainFrame::OnEditSubPresentations()
 /**
  *  Displays the data input dialog.
  */
-void CMainFrame::OnEditDataInputs()
+void CMainFrame::OnFileDataInputs()
 {
     CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems));
     dataInputDlg.exec();
@@ -827,51 +865,44 @@ void CMainFrame::EditPreferences(short inPageIndex)
     // Set the active page based on the inPageIndex
     CStudioPreferencesPropSheet thePropSheet(tr("Studio Preferences"), this, inPageIndex);
 
-    // CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
-
-    // Q3DStudio::CString theAuthorName theAuthorName = theProjectSettings->GetAuthor();
-    // Q3DStudio::CString theCompanyName theCompanyName = theProjectSettings->GetCompany();
-
     // Display the CStudioPreferencesPropSheet
     int thePrefsReturn = thePropSheet.exec();
 
-    // Ugly hack to fix some bug
     m_SceneView->OnEditCameraChanged();
 
     if (thePrefsReturn == PREFS_RESET_DEFAULTS) {
         // Restore default values
-        g_StudioApp.SetAutosetKeyframes(true);
+        g_StudioApp.SetAutosetKeyframes(true); // Sets the preference as well
         CStudioPreferences::SetBoundingBoxesOn(true);
-        CStudioPreferences::SetTimebarDisplayTime(true);
+        CStudioPreferences::SetDisplayPivotPoint(true);
+        CStudioPreferences::SetWireframeModeOn(true);
+        CStudioPreferences::SetShowTooltips(true);
+        CStudioPreferences::SetTimebarDisplayTime(false);
         g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
-        CStudioPreferences::SetSnapRange(10);
+        CStudioPreferences::SetSnapRange(CStudioPreferences::DEFAULT_SNAPRANGE);
+        CStudioPreferences::SetDefaultObjectLifetime(CStudioPreferences::DEFAULT_LIFETIME);
+        CStudioPreferences::SetAdvancePropertyExpandedFlag(false);
+        CStudioPreferences::SetPreviewConfig("");
+        CStudioPreferences::SetPreviewProperty("", "");
+        CStudioPreferences::SetDontShowGLVersionDialog(false);
+        CStudioPreferences::SetDefaultClientSize(CStudioPreferences::DEFAULT_CLIENT_WIDTH,
+                                                 CStudioPreferences::DEFAULT_CLIENT_HEIGHT);
+        CStudioPreferences::SetTimeAdvanceAmount(CStudioPreferences::DEFAULT_TIME_ADVANCE);
+        CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
-
-        // Edit Cameras
-        CColor theDefaultBgColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
-        CStudioPreferences::SetEditViewBackgroundColor(theDefaultBgColor);
+        CStudioPreferences::SetEditViewFillMode(true);
+        CStudioPreferences::SetEditViewBackgroundColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
+        CStudioPreferences::SetAutoSaveDelay(CStudioPreferences::DEFAULT_AUTOSAVE_DELAY);
+        CStudioPreferences::SetAutoSavePreference(true);
+        CStudioPreferences::setSelectorLineWidth(
+                    (float)CStudioPreferences::DEFAULT_SELECTOR_WIDTH / 10.0f);
+        CStudioPreferences::setSelectorLineLength(
+                    (float)CStudioPreferences::DEFAULT_SELECTOR_LENGTH);
 
         RecheckSizingMode();
-
-        // Remove keys related to the ObjRef and PropRef Pickers
-        const Q3DStudio::CString reference = "ReferenceGadgets";
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceWidth");
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceHeight");
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceXPos");
-        CPreferences::GetUserPreferences(reference).RemoveKey("ObjectReferenceYPos");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceWidth");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceHeight");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceXPos");
-        CPreferences::GetUserPreferences(reference).RemoveKey("PropertyReferenceYPos");
-
-        // Also clear out the viewer's settings file
-        Q3DStudio::CFilePath theFilePath(Q3DStudio::CFilePath::CombineBaseAndRelative(
-                                             Q3DStudio::CFilePath::GetUserApplicationDirectory(),
-                                             "Qt3DSComposer\\Qt3DSViewerSettings.txt"));
-        theFilePath.DeleteThisFile();
     }
 }
 
@@ -887,7 +918,6 @@ void CMainFrame::OnToolAutosetkeys()
 
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
-    m_ui->actionToolbarAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
 //==============================================================================
@@ -901,7 +931,6 @@ void CMainFrame::OnUpdateToolAutosetkeys()
 {
     // If autoset keyframes is on
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
-    m_ui->actionToolbarAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
 //==========================================================================
@@ -973,9 +1002,9 @@ void CMainFrame::OnPlaybackStop()
 /**
  *	Handles pressing the preview button.
  */
-void CMainFrame::OnPlaybackPreview(const QString &viewerExeName)
+void CMainFrame::OnPlaybackPreview(const QString &viewerExeName, bool remote)
 {
-    if (m_remoteDeploymentSender->isConnected()) {
+    if (remote && m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
                     Q3DStudio::CString::fromQString(QObject::tr("Deploying to remote device...")),
                     "");
@@ -994,6 +1023,11 @@ void CMainFrame::OnPlaybackPreviewRuntime1()
 void CMainFrame::OnPlaybackPreviewRuntime2()
 {
     OnPlaybackPreview(QStringLiteral("q3dsviewer"));
+}
+
+void CMainFrame::OnPlaybackPreviewRemote()
+{
+    OnPlaybackPreview(QStringLiteral("Qt3DViewer"), true);
 }
 
 //==============================================================================
@@ -1053,17 +1087,21 @@ void CMainFrame::OnUpdatePlaybackStop()
  */
 void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_F3),
-                        CMainFrame::HandleEditViewFillModeKey);
-
     // Default undo shortcut is Ctrl-Y, which is specified in main form. Let's add the common
     // alternate shortcut for redo, CTRL-SHIFT-Z
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_Z),
                         CMainFrame::OnEditRedo);
 
-    m_SceneView->RegisterGlobalKeyboardShortcuts(inHotKeys);
+    ADD_GLOBAL_SHORTCUT(actionParent,
+                        QKeySequence(Qt::Key_Q),
+                        CMainFrame::toggleSelectMode);
+
+    for (int keyN = Qt::Key_1; keyN <= Qt::Key_9; keyN++) {
+        ADD_GLOBAL_SHORTCUT(actionParent,
+                            QKeySequence(Qt::CTRL | static_cast<Qt::Key>(keyN)),
+                            CMainFrame::onCtrlNPressed);
+    }
 
     // TODO: reimplement in the new timeline
 //    TimelineView *theTimelineView = GetTimelineView();
@@ -1262,7 +1300,7 @@ void CMainFrame::HandleEditCameraZoomExtent()
 void CMainFrame::OnEditCameraPan()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
+    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1273,7 +1311,7 @@ void CMainFrame::OnEditCameraPan()
 void CMainFrame::OnEditCameraRotate()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
+    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1284,7 +1322,7 @@ void CMainFrame::OnEditCameraRotate()
 void CMainFrame::OnEditCameraZoom()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
+    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1340,6 +1378,7 @@ void CMainFrame::OnUpdateEditCameraPan()
 //==============================================================================
 void CMainFrame::OnUpdateEditCameraRotate()
 {
+#if 0 // TODO: Disabled until UX decision is made if these buttons are needed at all or not
     if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()
             && g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
                 g_StudioApp.GetRenderer().GetEditCamera())) {
@@ -1351,6 +1390,7 @@ void CMainFrame::OnUpdateEditCameraRotate()
         m_ui->actionOrbit_Tool->setEnabled(false);
         m_ui->actionOrbit_Tool->setChecked(false);
     }
+#endif
 }
 
 //==============================================================================
@@ -1468,6 +1508,28 @@ void CMainFrame::timerEvent(QTimerEvent *event)
     if (event->timerId() == WM_STUDIO_TIMER)
         g_StudioApp.GetTickTock().ProcessMessages();
     QMainWindow::timerEvent(event);
+}
+
+void CMainFrame::onViewResetLayout()
+{
+    // Ask for a restart
+    int theChoice = QMessageBox::question(this,
+                                          tr("Restart Needed"),
+                                          tr("Are you sure that you want to restore Qt 3D Studio "
+                                             "layout? \nYour current layout will be lost, and"
+                                             "Studio will exit."));
+
+    // If "Yes" is clicked, delete window geometry and window state keys from QSettings
+    if (theChoice == QMessageBox::Yes) {
+        QSettings settings;
+        QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
+        QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+        settings.remove(geoKey);
+        settings.remove(stateKey);
+        // Prevent saving geometry and state, and exit
+        m_resettingLayout = true;
+        close();
+    }
 }
 
 void CMainFrame::OnViewAction()
@@ -1596,7 +1658,6 @@ void CMainFrame::OnViewWireframe()
 
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
     m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
-    m_ui->actionToolbarWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
 
     g_StudioApp.GetRenderer().RequestRender();
 }
@@ -1609,7 +1670,6 @@ void CMainFrame::OnViewWireframe()
 void CMainFrame::OnUpdateViewWireframe()
 {
     m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
-    m_ui->actionToolbarWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
 }
 
 //==============================================================================
@@ -1800,8 +1860,9 @@ void CMainFrame::OnShowInspector()
 
 void CMainFrame::OnConnectionChanged(bool connected)
 {
-    Q_UNUSED(connected)
     g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
+    m_ui->action_Connect_to_Device->setChecked(connected);
+    m_ui->actionRemote_Preview->setEnabled(connected);
 }
 
 TimelineView *CMainFrame::GetTimelineView()
@@ -1838,6 +1899,13 @@ CPlayerWnd *CMainFrame::GetPlayerWnd() const
 bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
 {
     switch (event->type()) {
+    case QEvent::ToolTip: {
+        if (CStudioPreferences::ShouldShowTooltips())
+            event->ignore();
+        else
+            return true;
+        break;
+    }
     case QEvent::KeyPress: {
         QKeyEvent *ke = static_cast<QKeyEvent *>(event);
         if (ke->key() == Qt::Key_Tab) {
@@ -1857,6 +1925,9 @@ bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
 
 void CMainFrame::handleGeometryAndState(bool save)
 {
+    if (m_resettingLayout)
+        return;
+
     QSettings settings;
     QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
     QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
@@ -1867,4 +1938,34 @@ void CMainFrame::handleGeometryAndState(bool save)
         restoreGeometry(settings.value(geoKey).toByteArray());
         restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
     }
+}
+
+void CMainFrame::initializeGeometryAndState()
+{
+    QSettings settings;
+    QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+    if (!settings.contains(stateKey)) {
+        // On first run, save and restore geometry and state. For some reason they are both needed
+        // to avoid a bug with palettes resizing to their original size when window is resized or
+        // something in a palette is edited.
+        handleGeometryAndState(true);
+    }
+    handleGeometryAndState(false);
+}
+
+void CMainFrame::toggleSelectMode()
+{
+    if (m_ui->actionItem_Select_Tool->isChecked())
+        m_SceneView->OnToolGroupSelection();
+    else
+        m_SceneView->OnToolItemSelection();
+}
+
+void CMainFrame::actionActive(bool active)
+{
+    m_actionActive = active;
+    m_ui->actionDelete->setEnabled(!active);
+    m_ui->action_Copy->setEnabled(!active);
+    m_ui->action_Cut->setEnabled(!active);
+    m_ui->action_Paste->setEnabled(!active);
 }

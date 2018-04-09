@@ -478,8 +478,15 @@ namespace render {
             GL_CALL_EXTRA_FUNCTION(glProgramUniform4fv(programID, id, count, (GLfloat *)value));
             break;
         case GL_INT:
-        case GL_BOOL:
             GL_CALL_EXTRA_FUNCTION(glProgramUniform1iv(programID, id, count, (GLint *)value));
+            break;
+        case GL_BOOL:
+            {
+                // Cast int value to be 0 or 1, matching to bool
+                GLint *boolValue = (GLint *)value;
+                *boolValue = *(GLboolean *)value;
+                GL_CALL_EXTRA_FUNCTION(glProgramUniform1iv(programID, id, count, boolValue));
+            }
             break;
         case GL_INT_VEC2:
         case GL_BOOL_VEC2:

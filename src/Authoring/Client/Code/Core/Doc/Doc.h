@@ -43,7 +43,6 @@
 #include "Qt3DSRect.h"
 #include "IDoc.h"
 #include "GUIDUtilities.h"
-#include "StudioErrorIDs.h"
 #include "GraphUtils.h"
 #include "CmdStackModifier.h"
 #include "Qt3DSColor.h"
@@ -200,6 +199,7 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance();
 
     void CutSelectedObject();
+    void DeleteSelectedItems();
     void DeleteSelectedObject();
     bool DeleteSelectedKeys();
     void SetChangedKeyframes();
@@ -265,8 +265,6 @@ public:
     bool IsPlaying();
     long GetCurrentClientTime();
 
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
-
     qt3dsdm::Qt3DSDMInstanceHandle GetSceneInstance() { return m_SceneInstance; }
 
     // IDoc
@@ -294,6 +292,11 @@ public:
     void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                   const std::wstring &inPropertyName,
                                   const qt3dsdm::SValue &inValue) override;
+    void SetInstancePropertyControlled(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                       Q3DStudio::CString instancepath,
+                                       qt3dsdm::Qt3DSDMPropertyHandle propName,
+                                       Q3DStudio::CString controller,
+                                       bool controlled) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
@@ -401,7 +404,6 @@ protected:
     void CreatePresentation();
     void ClosePresentation();
 
-    void DeleteSelectedItems();
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                Q3DStudio::CString &ioActionDependencies);
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,

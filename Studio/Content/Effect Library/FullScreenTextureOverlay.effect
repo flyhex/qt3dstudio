@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Effect>
     <MetaData>
-        <Property name="Overlay" formalName="Overlay Texture" description="overlay texture" type="Texture" clamp="repeat" />
+        <Property name="Overlay" formalName="Overlay Texture" description="Overlay texture" type="Texture" clamp="repeat" />
         <Property name="overlay_repeat" formalName="Repeat" min="0" max="50" default="1" description="Times to repeat the image over screen."/>
     </MetaData>
     <Shaders>

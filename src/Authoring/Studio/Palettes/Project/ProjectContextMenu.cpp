@@ -34,8 +34,8 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     , m_view(parent)
     , m_index(index)
 {
-    QAction *action = new QAction(tr("Show in Explorer"));
-    connect(action, &QAction::triggered, this, &ProjectContextMenu::handleShowInExplorer);
+    QAction *action = new QAction(tr("Show Containing Folder"));
+    connect(action, &QAction::triggered, this, &ProjectContextMenu::handleShowContainingFolder);
     addAction(action);
 
     addSeparator();
@@ -66,9 +66,9 @@ ProjectContextMenu::~ProjectContextMenu()
 {
 }
 
-void ProjectContextMenu::handleShowInExplorer()
+void ProjectContextMenu::handleShowContainingFolder()
 {
-    m_view->showInExplorer(m_index);
+    m_view->showContainingFolder(m_index);
 }
 
 void ProjectContextMenu::handleCopyPath()

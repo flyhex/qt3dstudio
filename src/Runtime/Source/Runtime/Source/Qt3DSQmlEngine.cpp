@@ -391,15 +391,6 @@ public:
     qt3ds::runtime::IApplication *GetApplication() override;
     void Initialize() override;
 
-    void BeginPreloadScripts(const eastl::vector<const char *> &,
-                                     qt3ds::render::IThreadPool &, const char *) override {}
-    void EndPreloadScripts() override {}
-    eastl::vector<eastl::string> GetLoadedScripts() override
-    {
-        eastl::vector<eastl::string> retval;
-        return retval;
-    }
-
     void LoadScript(IPresentation *presentation, TElement *element, const CHAR *path) override;
     Q3DStudio::INT32 InitializeApplicationBehavior(const char *) override
     {
@@ -452,6 +443,10 @@ private:
     TElement *getTarget(const char *component);
     void listAllElements(TElement *root, QList<TElement *> &elements);
     void initializeDataInputsInPresentation(CPresentation &presentation, bool isPrimary);
+    // Splits down vector attributes to components as Runtime does not really
+    // handle vectors at this level anymore
+    bool getAttributeVector3(QVector<QByteArray> &outAttVec, const QByteArray attName,
+                             TElement *elem);
 };
 
 CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
@@ -628,10 +623,78 @@ void CQmlEngineImpl::SetDataInputValue(const QString &name, const QVariant &valu
                 }
                 break;
             }
+            // Silently ignore invalid incoming type if it does not match with the datainput type
+            // except with type Variant, for which the incoming value is cast to target
+            // property type without checking. Caveat emptor.
+
+            // Handle ranged number similarly to generic float if it is bound to properties other
+            // than timeline animation i.e. disregard range min and max
+            case ATTRIBUTETYPE_FLOAT: {
+                if (diDef.type == qt3ds::runtime::DataInputTypeFloat
+                    || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
+                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    const float valueFloat = value.toFloat();
+                    SetAttribute(ctrlElem.elementPath.constData(),
+                                 ctrlElem.attributeName.first().constData(),
+                                 reinterpret_cast<const char *>(&valueFloat));
+                } else {
+                    qWarning() << __FUNCTION__ << "Property type "
+                               << ctrlElem.propertyType
+                               << " not matching with Datainput data type "
+                               << diDef.type;
+                }
+                break;
+            }
+            case ATTRIBUTETYPE_FLOAT3: {
+                if (diDef.type == qt3ds::runtime::DataInputTypeVector3
+                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    // Get the values of vector attribute components and set them separately
+                    const QVector3D valueVec = value.value<QVector3D>();
+                    for (int i = 0; i < 3; i++) {
+                        const float val = valueVec[i];
+                        SetAttribute(ctrlElem.elementPath.constData(),
+                                     ctrlElem.attributeName[i].constData(),
+                                     reinterpret_cast<const char *>(&val));
+                    }
+                } else {
+                    qWarning() << __FUNCTION__ << "Property type "
+                               << ctrlElem.propertyType
+                               << " not matching with Datainput data type "
+                               << diDef.type;
+                }
+                break;
+            }
+            case ATTRIBUTETYPE_BOOL: {
+                if (diDef.type == qt3ds::runtime::DataInputTypeBoolean
+                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    const bool valueBool = value.toBool();
+                    SetAttribute(ctrlElem.elementPath.constData(),
+                                 ctrlElem.attributeName.first().constData(),
+                                 reinterpret_cast<const char *>(valueBool));
+                } else {
+                    qWarning() << __FUNCTION__ << "Property type "
+                               << ctrlElem.propertyType
+                               << " not matching with Datainput data type "
+                               << diDef.type;
+                }
+                break;
+            }
             case ATTRIBUTETYPE_STRING: {
-                const QByteArray valueStr = value.toString().toUtf8();
-                SetAttribute(ctrlElem.elementPath.constData(), ctrlElem.attributeName.constData(),
-                             valueStr.constData());
+                // Allow scalar number types also as inputs to string attribute
+                if (diDef.type == qt3ds::runtime::DataInputTypeString
+                    || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
+                    || diDef.type == qt3ds::runtime::DataInputTypeFloat
+                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    const QByteArray valueStr = value.toString().toUtf8();
+                    SetAttribute(ctrlElem.elementPath.constData(),
+                                 ctrlElem.attributeName.first().constData(),
+                                 valueStr.constData());
+                } else {
+                    qWarning() << __FUNCTION__ << "Property type "
+                               << ctrlElem.propertyType
+                               << " not matching with Datainput data type "
+                               << diDef.type;
+                }
                 break;
             }
             default:
@@ -934,37 +997,93 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
             if (!valueStr.isEmpty()) {
                 QStringList splitValues = valueStr.split(QChar(' '));
                 for (int i = 1; i < splitValues.size(); i += 2) {
-                    if (diMap.contains(splitValues[i - 1])) {
+                    QString controllerName = splitValues[i - 1];
+                    // remove datainput name prefix "$"
+                    controllerName.remove(0, 1);
+                    if (diMap.contains(controllerName)) {
                         qt3ds::runtime::DataInputControlledAttribute ctrlElem;
                         if (!isPrimary) {
                             // Prepend presentation id to element path
                             ctrlElem.elementPath = presentation.GetName();
                             ctrlElem.elementPath.append(QByteArrayLiteral(":"));
                         }
-                        ctrlElem.attributeName = splitValues[i].toUtf8();
-                        if (ctrlElem.attributeName == QByteArrayLiteral("@timeline")) {
+                        ctrlElem.attributeName.append(splitValues[i].toUtf8());
+                        if (ctrlElem.attributeName.first() == QByteArrayLiteral("@timeline")) {
                             ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_TIMELINE;
                             TElement *component = &element->GetComponentParent();
                             ctrlElem.elementPath.append(component->m_Path);
-                        } else if (ctrlElem.attributeName == QByteArrayLiteral("@slide")) {
+                        } else if (ctrlElem.attributeName.first() == QByteArrayLiteral("@slide")) {
                             ctrlElem.propertyType = ATTRIBUTETYPE_DATAINPUT_SLIDE;
                             TElement *component = &element->GetComponentParent();
                             ctrlElem.elementPath.append(component->m_Path);
+                        } else if (diMap[controllerName].type
+                                   == qt3ds::runtime::DataInputTypeVector3) {
+                            // special handling for vector datatype to handle
+                            // expansion from <propertyname> to <propertyname>.x .y .z
+                            QVector<QByteArray> attVec;
+                            bool success = getAttributeVector3(
+                                attVec, ctrlElem.attributeName.first().constData(),
+                                element);
+                            if (!attVec.empty() && success) {
+                                ctrlElem.attributeName = attVec;
+                                ctrlElem.elementPath.append(element->m_Path);
+                                ctrlElem.propertyType = ATTRIBUTETYPE_FLOAT3;
+                            } else {
+                                qWarning() << __FUNCTION__ << "Property "
+                                           << ctrlElem.attributeName.first()
+                                           << " was not expanded to vector";
+                                ctrlElem.propertyType = ATTRIBUTETYPE_NONE;
+                            }
                         } else {
+                            // all other scalar datatypes
                             ctrlElem.elementPath.append(element->m_Path);
-                            TStringHash attHash = CHash::HashAttribute(
-                                        ctrlElem.attributeName.constData());
+                            TStringHash attHash
+                                = CHash::HashAttribute(ctrlElem.attributeName.first().constData());
                             Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> attInfo =
-                                    element->FindProperty(attHash);
-                            ctrlElem.propertyType = attInfo->first.m_Type;
+                                element->FindProperty(attHash);
+                            if (attInfo.hasValue()) {
+                                ctrlElem.propertyType = attInfo->first.m_Type;
+                            } else {
+                                ctrlElem.propertyType = ATTRIBUTETYPE_NONE;
+                                qWarning() << __FUNCTION__ << "Property "
+                                           << ctrlElem.attributeName.first() << " not existing!";
+                            }
                         }
-                        qt3ds::runtime::DataInputDef &diDef = diMap[splitValues[i - 1]];
+                        qt3ds::runtime::DataInputDef &diDef = diMap[controllerName];
                         diDef.controlledAttributes.append(ctrlElem);
                     }
                 }
             }
         }
     }
+}
+
+// Bit clumsy way of getting from "position" to "position .x .y .z" and enabling datainput
+// support for vectorized types. UIP parser has already thrown away all vector
+// type attributes and at this point we are operating with scalar components only.
+// We check if this element has a property attName.x or attName.r to find out it
+// we should expand property attName to XYZ or RGB vector
+bool CQmlEngineImpl::getAttributeVector3(QVector<QByteArray> &outAttVec,
+                                         const QByteArray attName,
+                                         TElement *elem)
+{
+    auto hashName = Q3DStudio::CHash::HashAttribute(attName + ".x");
+
+    if (!elem->FindProperty(hashName).isEmpty()) {
+        outAttVec.append(attName + ".x");
+        outAttVec.append(attName + ".y");
+        outAttVec.append(attName + ".z");
+        return true;
+    }
+    hashName = Q3DStudio::CHash::HashAttribute(attName + ".r");
+    if (!elem->FindProperty(hashName).isEmpty()) {
+        outAttVec.append(attName + ".r");
+        outAttVec.append(attName + ".g");
+        outAttVec.append(attName + ".b");
+        return true;
+    }
+    return false;
+
 }
 
 /**

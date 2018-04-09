@@ -37,6 +37,7 @@
 #include "Qt3DSRenderCamera.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
+#include "StudioPreferences.h"
 
 using namespace qt3ds::widgets;
 
@@ -239,32 +240,34 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
         // but they should self-occlude.
         inRenderContext.SetDepthWriteEnabled(true);
         inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
-        inRenderContext.SetBlendFunction(qt3ds::render::NVRenderBlendFunctionArgument(
-                                             qt3ds::render::NVRenderSrcBlendFunc::SrcAlpha,
-                                             qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha,
-                                             qt3ds::render::NVRenderSrcBlendFunc::One,
-                                             qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha));
-        inRenderContext.SetBlendEquation(qt3ds::render::NVRenderBlendEquationArgument(
-                                             NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
+        inRenderContext.SetBlendFunction(
+                    qt3ds::render::NVRenderBlendFunctionArgument(
+                        qt3ds::render::NVRenderSrcBlendFunc::SrcAlpha,
+                        qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha,
+                        qt3ds::render::NVRenderSrcBlendFunc::One,
+                        qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha));
+        inRenderContext.SetBlendEquation(
+                    qt3ds::render::NVRenderBlendEquationArgument(
+                        NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
 
         float pixelRatio = float(devicePixelRatio());
-        QT3DSF32 theRingRadius = 100.0f * pixelRatio;
-        QT3DSF32 theRingWidth = 2.0f * pixelRatio;
+        QT3DSF32 theRingRadius = 2 * CStudioPreferences::getSelectorLineLength() * pixelRatio;
+        QT3DSF32 theRingWidth = CStudioPreferences::getSelectorLineWidth() * pixelRatio;
         QT3DSF32 theRingInner = theRingRadius;
         QT3DSF32 theRingOuter = theRingRadius + theRingWidth;
         if (m_XAxis == nullptr) {
             TBase::SetupRender(inWidgetContext, inRenderContext);
             m_PickShader = IStudioWidget::CreateWidgetPickShader(inWidgetContext, inRenderContext);
-            ;
-            m_XAxis = CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(-1, 0, 0), theRingInner,
-                                 theRingOuter, 0.0f, "RotationWidgetXAxis");
-            m_YAxis = CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(0, -1, 0), theRingInner,
-                                 theRingOuter, 0.0f, "RotationWidgetYAxis");
-            m_ZAxis = CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1), theRingInner,
-                                 theRingOuter, 0.0f, "RotationWidgetZAxis");
+            m_XAxis = CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(-1, 0, 0),
+                                 theRingInner, theRingOuter, 0.0f, "RotationWidgetXAxis");
+            m_YAxis = CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(0, -1, 0),
+                                 theRingInner, theRingOuter, 0.0f, "RotationWidgetYAxis");
+            m_ZAxis = CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1),
+                                 theRingInner, theRingOuter, 0.0f, "RotationWidgetZAxis");
             m_CameraAxis =
-                    CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1), theRingInner + 5,
-                               theRingOuter + 5, 0.0f, "RotationWidgetCameraAxis");
+                    CreateRing(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1),
+                               theRingInner + 5, theRingOuter + 5, 0.0f,
+                               "RotationWidgetCameraAxis");
             m_CameraRect = CreateRect(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1), 200.0f,
                                       "RotationWidgetZClear");
             m_ZClearShader =
@@ -273,7 +276,7 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
         QT3DSVec3 theXColor(GetXAxisColor());
         QT3DSVec3 theYColor(GetYAxisColor());
         QT3DSVec3 theZColor(GetZAxisColor());
-        QT3DSVec3 theRingColor(QT3DSVec3(.8, .8, .8));
+        QT3DSVec3 theRingColor(QT3DSVec3(.8f, .8f, .8f));
 
         QT3DSMat44 theMVP = TBase::SetupMVP(inWidgetContext);
         inRenderContext.SetCullingEnabled(false);
@@ -318,29 +321,27 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
             QT3DSVec3 theStartDirection = theMVPRotation.transform(m_RotationWedge->m_StartDirection);
             theRotationAxis.normalize();
             theStartDirection.normalize();
-            QT3DSQuat theRotation(m_RotationWedge->m_Angle, theRotationAxis);
-            QT3DSVec3 theEndDirection = theRotation.rotate(theStartDirection);
             inRenderContext.SetDepthWriteEnabled(true);
             inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
             inRenderContext.SetDepthWriteEnabled(false);
             inRenderContext.SetDepthTestEnabled(false);
             inRenderContext.SetBlendingEnabled(true);
-            QT3DSVec4 lineColor(1, 1, 1, .7);
-            QT3DSVec4 fillColor(1, 1, 1, .2);
+            QT3DSVec4 lineColor(1.0f, 1.0f, 1.0f, .7f);
+            QT3DSVec4 fillColor(1.0f, 1.0f, 1.0f, .2f);
             switch (m_Highlight) {
             default:
                 break;
             case StudioWidgetComponentIds::XAxis:
-                lineColor = QT3DSVec4(theXColor, .7);
-                fillColor = QT3DSVec4(theXColor, .2);
+                lineColor = QT3DSVec4(theXColor, .7f);
+                fillColor = QT3DSVec4(theXColor, .2f);
                 break;
             case StudioWidgetComponentIds::YAxis:
-                lineColor = QT3DSVec4(theYColor, .7);
-                fillColor = QT3DSVec4(theYColor, .2);
+                lineColor = QT3DSVec4(theYColor, .7f);
+                fillColor = QT3DSVec4(theYColor, .2f);
                 break;
             case StudioWidgetComponentIds::ZAxis:
-                lineColor = QT3DSVec4(theZColor, .7);
-                fillColor = QT3DSVec4(theZColor, .2);
+                lineColor = QT3DSVec4(theZColor, .7f);
+                fillColor = QT3DSVec4(theZColor, .2f);
                 break;
             }
             QT3DSVec3 theStartPos(m_WidgetInfo.m_Position);
@@ -354,10 +355,7 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
             QT3DSVec3 theGlobalEnd = theGlobalStart + theGlobalDir * m_RotationWedge->m_EndLineLen;
             // Transform both start, end into camera space and get the length of the resulting
             // vector
-            QT3DSVec3 theCameraStart = m_WidgetInfo.m_CameraGlobalInverse.transform(theGlobalStart);
             QT3DSVec3 theCameraEnd = m_WidgetInfo.m_CameraGlobalInverse.transform(theGlobalEnd);
-            QT3DSF32 theCameraEndLineLen = QT3DSVec3(theCameraEnd - theCameraStart).magnitude();
-            QT3DSF32 theEndLineLen = theCameraEndLineLen;
             // Draw lines in world space
             SCamera &theCamera(*m_WidgetInfo.m_Camera);
             QT3DSVec3 lineStart(ToFixedCameraPos(theStartPos, theCamera));
@@ -393,7 +391,8 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
             theTransMatrix.column1[1] = m_WidgetInfo.m_Scale * .8f;
             theTransMatrix.column2[2] = m_WidgetInfo.m_Scale * .8f;
             QT3DSMat44 theTextMVP = theProjection * theTransMatrix;
-            inWidgetContext.RenderText(theInfo, QT3DSVec3(1, 1, 1), QT3DSVec3(.2, .2, .2), theTextMVP);
+            inWidgetContext.RenderText(theInfo, QT3DSVec3(1.0f, 1.0f, 1.0f),
+                                       QT3DSVec3(.2f, .2f, .2f), theTextMVP);
         }
         m_Highlight = StudioWidgetComponentIds::NoId;
     }
@@ -408,7 +407,7 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
 
             inRenderContext.SetDepthWriteEnabled(true);
             inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
-            inRenderContext.SetDepthTestEnabled(true);
+            inRenderContext.SetDepthTestEnabled(false);
             inRenderContext.SetDepthWriteEnabled(true);
             inRenderContext.SetBlendingEnabled(true);
             inRenderContext.SetCullingEnabled(false);

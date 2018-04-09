@@ -57,6 +57,7 @@ protected:
     void initDialog();
     void updateUI();
     void browseFile();
+    void createSubPresentation();
 
 private Q_SLOTS:
     void on_buttonBox_accepted();

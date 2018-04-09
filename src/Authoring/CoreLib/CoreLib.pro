@@ -5,8 +5,7 @@ include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
 INCLUDEPATH += $$OUT_PWD/..
 
-DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL \
-    PCRE_STATIC DRIVE_DESIGN_STUDIO \
+DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC _LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR \
     DISABLE_MESH_OPTIMIZATION DOM_INCLUDE_TINYXML NO_ZAE COLLADA_DOM_SUPPORT141 NO_BOOST
 
 DEFINES += STUDIO_VERSION=$$MODULE_VERSION
@@ -54,6 +53,7 @@ INCLUDEPATH += \
     ../../Runtime/Source/DataModel/Include \
     ../../Runtime/Source/Qt3DSRender/Include \
     ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../Runtime/Source/Qt3DSRuntimeRender/Include \
     ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
     ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \

@@ -6,7 +6,7 @@ include(../commoninclude.pri)
 QT += widgets
 
 DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC _WINSOCK_DEPRECATED_NO_WARNINGS \
-            NO_ZAE COLLADA_DOM_SUPPORT141 DOM_INCLUDE_TINYXML DRIVE_DESIGN_STUDIO \
+            NO_ZAE COLLADA_DOM_SUPPORT141 DOM_INCLUDE_TINYXML \
             DISABLE_MESH_OPTIMIZATION
 
 contains(QMAKE_TARGET.arch, x86_64) {
@@ -25,6 +25,7 @@ INCLUDEPATH += \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
     ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \
     ..
@@ -51,7 +52,6 @@ SOURCES += \
     Code/Qt3DSTime.cpp \
     Code/Thread/Mutex.cpp \
     Code/Thread/Thread.cpp \
-    Code/Exceptions/Qt3DSExceptionClass.cpp \
     Code/Exceptions/XMLException.cpp \
     Code/_Win32/FileIterator.cpp \
     Code/_Win32/Preferences.cpp \

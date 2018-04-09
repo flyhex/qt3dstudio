@@ -176,7 +176,41 @@ the 3D space of your scene without adjusting the final rendered view.
 Studio calls this concept \e {Edit Cameras}, and it is controlled by the
 section of the toolbar displayed above.
 
-Note that when Edit Camera is in use it only makes sense to show the
+You can navigate in \e{Edit Camera Mode} by zooming, panning and orbiting:
+\table
+\header
+  \li Action
+  \li Shortcut keyboard
+  \li Desctiption
+\header
+\row
+  \li
+  \b{Zoom}
+  \li
+  \c{Alt}+Right mouse button
+  \li
+  Clicking and dragging anywhere in the rendered view for the edit
+  camera will zoom the view in/out as you drag up/down.
+\row
+  \li
+  \b{Pan}
+  \li
+  \c{Alt}+Middle mouse button
+  \li
+  Clicking and dragging anywhere in the rendered view for the edit
+  camera will slide the view around.
+\row
+  \li
+  \b{Orbit}
+  \li
+  \c{Alt}+Left mouse button
+  \li
+  Clicking and dragging anywhere in the rendered view for the edit
+  camera will rotate the view. (This is not available for the
+  predefined, axis-aligned orthographic views.)
+\endtable
+
+Note that when \e{Edit Camera} is in use it only makes sense to show the
 contents of one layer at a time. To control which layer's items you are
 viewing, select any item inside the desired layer in the Timeline
 palette.
@@ -184,14 +218,16 @@ palette.
 \list
 \li
   The \b{Edit Camera Mode} drop-down menu controls the view.
-\li
-  The \b{Perspective View} and \b{Orthographic} view are
-  free-form cameras that you can use to rotate around the scene.
-\li
-  The
-  \b{Top}/\b{Bottom}/\b{Left}/\b{Right}/\b{Front}/\b{Back}
-  axis-aligned presets are orthographic cameras that may be panned and
-  zoomed, but not orbited.
+  \list
+    \li
+    The \b{Perspective View} and \b{Orthographic} view are
+    free-form cameras that you can use to rotate around the scene.
+  \li
+    The
+    \b{Top}/\b{Bottom}/\b{Left}/\b{Right}/\b{Front}/\b{Back}
+    axis-aligned presets are orthographic cameras that may be panned and
+    zoomed, but not orbited.
+  \endlist
 \li
   The \b{Scene Camera View} entry at the bottom of the menu
   switches out of edit camera mode and returns to displaying the final
@@ -217,19 +253,6 @@ palette.
     available space in Studio.
   \endlist
 \li
-  With the \b{Pan} mode active (shortcut: middle-button mouse drag)
-  clicking and dragging anywhere in the rendered view for the edit
-  camera will slide the view around.
-\li
-  With the \b{Zoom} mode active (shortcut: roll the mouse wheel)
-  clicking and dragging anywhere in the rendered view for the edit
-  camera will zoom the view in/out as you drag up/down.
-\li
-  With the \b{Orbit} mode active (shortcut: alt+middle-button mouse
-  drag) clicking and dragging anywhere in the rendered view for the edit
-  camera will rotate the view. (This is not available for the
-  predefined, axis-aligned orthographic views.)
-\li
   The \b{Shading Mode} toggle (shortcut: \c{F3}) toggles a
   `headlamp' attached to your edit camera. When enabled (the default)
   items are lit by the edit camera such that they are always easy to
@@ -241,42 +264,22 @@ palette.
   The show or hide \b{Wireframe} toggles wireframe visibility (for tessellated meshes only).
 \endlist
 
-\section1 Playback Control
-
-\image Studio-Toolbar-Playback.png
-
-These commands control the playhead, making it easier to preview
-animations and slide transitions without leaving Studio.
-
-\list
-\li
-  The \b{Rewind} command sets the playhead to time 0.
-\li
-  The \b{Stop} command stops any playback.
-\li
-  The \b{Play} command starts advancing the playhead in realtime,
-  previewing animations on elements. The \b{Play Mode} for the
-  current slide is honored, possibly looping or ping-ponging playback,
-  or causing Studio to switch to an new slide when the end time for the
-  current slide is reached.
-\li
-  Holding down the space bar temporarily enables playback while held
-  down. Releasing the spacebar returns the playhead to its previous
-  time, allowing you to repeatedly hold down space to preview an
-  animation.
-\li
-  Pressing the Enter key will start playback. Press Enter again to stop
-  playback.
-\endlist
-
 \section1 Preview
 
 \image Studio-Toolbar-Preview.png
+The preview toolbar buttons are used to preview your presentation.
+\list
+  \li
+  The \b{Preview} button (keyboard shortcut: \c{F5})
+  will launch the Qt 3D Studio Viewer application and preview the
+  application for the presentation.
+  \li
+  The \b{Remote Preview} button will launch the presentation on the connected remote device
+  Qt 3D Studio Viewer application. This button is only enabled if you are connected to a
+  remote device.
+\endlist
 
-Invoking the \b{Preview} command (keyboard shortcut: \c{F5})
-will launch the Qt 3D Studio Viewer application and preview the
-application for the presentation. If there is no \c{.uia} file in
-the folder for this presentation, then the presentation will be
-previewed by itself (no sub-presentations).
+\note If there is no \c{.uia} file in the folder for the presentation, then the
+presentation will be previewed by itself (no sub-presentations).
 
 */

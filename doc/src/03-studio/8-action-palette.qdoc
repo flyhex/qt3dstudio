@@ -34,66 +34,86 @@
 
 \image Studio-Action.png
 
-\e Actions provide a way for an artist to create interactivity in a
+\e Actions provide a way to create interactivity in a
 presentation without scripting. Actions listen for an event to occur on
 an element (or, due to event bubbling, on any descendant of the
 element), and when it occurs they cause an effect in the presentation.
-This effect may be a direct modification of the presentation (tell a
-component to switch slides, change the color of an element).
+This effect may be a direct modification of the presentation (for example tell a
+component to switch slides or change the color of an element).
 
 \section1 Creating Actions
 
 An action is defined by five attributes:
 
-\list
-\li
-  The element that the action is attached to (the \"home element\").
-\li
-  The element that the action is listening to (the \"Trigger Object\").
-\li
-  The event that the action is listening for (the \"Trigger Event\").
-\li
-  The element that the action will control (the \"Target Object\").
-\li
-  The handler to invoke on the target element (with possible additional
+\table
+\header
+  \li Attribute
+  \li Description
+\row
+  \li The home element
+  \li The element that the action is attached to.
+\row
+  \li Trigger Object
+  \li The element that the action is listening to.
+\row
+  \li Trigger Event
+  \li The event that the action is listening for.
+\row
+  \li Target Object
+  \li The element that the action will control.
+\row
+  \li Handler
+  \li The handler to invoke on the \e{Target Object} (with possible additional
   parameters).
+\endtable
+
+To create an action follow the steps below:
+\list 1
+  \li Choose the slide and home element that the
+  action will be attached to. We recommend attaching the action
+  to either the Trigger or Target object.
+
+  \note All actions created on any other slide than the master slide will always appear
+  only on that slide, even if they are created on a master slide object. To create a master
+  slide action, you need to first select \uicontrol{Edit Master} in the slide palette and then
+  add the action to an object on the master slide.
+
+  \li Click the + icon at the top of the action palette. An action
+  will be created and selected, with its properties set to default values.
+  Modify these properties in the action palette as appropriate.
+
+  \note When selecting a Trigger Object or a Target Object it is possible to select the
+  object path in the \uicontrol{Type} field.
 \endlist
 
-To create an action, first choose the slide and home element that the
-action is attached to. Actions may be non-master, taking effect only on
-a particular slide. For your sanity, we recommend attaching the action
-to either the Trigger or Target object.
-
-Second, click the \b {New Action} button in the Action palette. An action
-will be created and selected, with its properties set to default values.
-Modify these properties in the bottom half of the Action palette as
-appropriate.
+\image action-type.png
 
 \section1 Managing Actions
 
-Actions may be deleted by clicking on the action summary at the top of
-the Actions palette and pressing the \c{Delete} key, by choosing
-\c{Delete Action} after right-clicking on an action sumary, or by
-selecting the action summary and clicking the trash can icon at the
-bottom of the Actions palette.
+\section2 Editing Actions
+To edit an action, select the action summary in the action palette. This will display
+all the properties for the selected action, change the desired property. All changes to
+action properties are immediate.
 
-Tip: it is possible to have an action visually selected at the same time
-as Studio thinks that a different palette (for example, the Timeline palette) is
-actually accepting keyboard input. If you press the \c{Delete} key,
-you might want to double-check and ensure that only the action was
-deleted, and not the element that was selected in the Timeline palette.
+\section2 Deleting Actions
+
+There are three ways to delete an action:
+\list
+  \li Select the action summary in the action palette, then press the \c{Delete} key.
+  \li Right-click the action summary in the action palette, then select \uicontrol{Delete Action}
+  from the context menu.
+  \li Select the action summary in the action palette, then click the trash can icon at the
+  top of the action palette.
+\endlist
 
 \section2 Copying Actions
 
-To save time, you may copy and paste an action to a different element
-instead of creating a new action on that element. You must do this using
-the \c{Copy Action} and \c{Paste Action} context menu entries
-for the action summary. (If you use \c{ctrl-c} and \c{ctrl-v}
-you will end up copying and pasting the entire element that the action
-is on.)
+To copy and paste an action to a different element use,
+the \uicontrol{Copy Action} and \uicontrol{Paste Action} context menu entries
+for the action summary (shortcut keys \c{ctrl} + C and \c{ctrl} + V).
 
 The values of the Trigger Object and Target Object properties for the
-pasted action depends on the \b{Type} chosen when picking the
+pasted action depends on the \uicontrol{Type} chosen when selecting the
 objects:
 
 \list
@@ -113,7 +133,7 @@ element \c{A} as the Trigger Object. However, if the Trigger Object
 was specified with a Path Reference then the new action will use element
 \c{B} as the Trigger Object.
 
-This seemingly-complex system allows the sophisticated artist to quickly
+This allows you to quickly
 copy and paste actions to multiple elements with a minimum of editing on
 each new action.
 

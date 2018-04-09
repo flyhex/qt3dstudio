@@ -36,6 +36,7 @@
 #include "Qt3DSRenderShaderCodeGenerator.h"
 #include "render/Qt3DSRenderShaderProgram.h"
 #include "StudioUtils.h"
+#include "StudioPreferences.h"
 
 using namespace qt3ds::widgets;
 
@@ -149,36 +150,39 @@ struct SScaleWidget : public SStudioWidgetImpl<StudioWidgetTypes::Scale>
         inRenderContext.SetDepthTestEnabled(true);
         inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
         float pixelRatio = float(devicePixelRatio());
-        QT3DSF32 axisStart = 20.0f * pixelRatio;
-        QT3DSF32 axisLength = 60.0f * pixelRatio;
-        QT3DSF32 axisTotalLength = axisStart + axisLength;
+        QT3DSF32 axisWidth = pixelRatio;
+        QT3DSF32 triWidth = 3 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
+        QT3DSF32 axisStart = CStudioPreferences::getSelectorLineLength() / 3.0f * pixelRatio;
+        QT3DSF32 axisLength = CStudioPreferences::getSelectorLineLength() * pixelRatio;
+        QT3DSF32 axisTotalLength = triWidth + axisLength;
         if (m_XAxis == nullptr) {
             TBase::SetupRender(inWidgetContext, inRenderContext);
 
-            QT3DSF32 axisWidth = 2.0f * pixelRatio;
-            QT3DSF32 triWidth = 7.0f * pixelRatio;
-            m_XAxis = CreateScaleAxis(inWidgetContext, inRenderContext, QT3DSVec3(1, 0, 0), axisStart,
-                                      axisLength, axisWidth, triWidth, "ScaleWidgetXAxis");
-            m_YAxis = CreateScaleAxis(inWidgetContext, inRenderContext, QT3DSVec3(0, 1, 0), axisStart,
-                                      axisLength, axisWidth, triWidth, "ScaleWidgetYAxis");
-            m_ZAxis = CreateScaleAxis(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1), axisStart,
-                                      axisLength, axisWidth, triWidth, "ScaleWidgetZAxis");
+            m_XAxis = CreateScaleAxis(inWidgetContext, inRenderContext, QT3DSVec3(1, 0, 0),
+                                      axisStart, axisLength, axisWidth, triWidth,
+                                      "ScaleWidgetXAxis");
+            m_YAxis = CreateScaleAxis(inWidgetContext, inRenderContext, QT3DSVec3(0, 1, 0),
+                                      axisStart, axisLength, axisWidth, triWidth,
+                                      "ScaleWidgetYAxis");
+            m_ZAxis = CreateScaleAxis(inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1),
+                                      axisStart, axisLength, axisWidth, triWidth,
+                                      "ScaleWidgetZAxis");
 
             QT3DSF32 axisPos = GetDiscPos() * pixelRatio;
             QT3DSF32 axisDiscRadius = GetDiscRadius() * pixelRatio;
             QT3DSF32 axisRingRadius = GetDiscRingRadius() * pixelRatio;
             m_XPlane =
                 CreateRingedDisc(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(1, 0, 0),
-                                 QT3DSVec3(0, axisPos, -axisPos), axisDiscRadius, axisRingRadius, 0.0f,
-                                 1.0f, "ScaleWidgetXPlane");
+                                 QT3DSVec3(0, axisPos, -axisPos), axisDiscRadius, axisRingRadius,
+                                 0.0f, 1.0f, "ScaleWidgetXPlane");
             m_YPlane =
                 CreateRingedDisc(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(0, 1, 0),
-                                 QT3DSVec3(axisPos, 0, -axisPos), axisDiscRadius, axisRingRadius, 0.0f,
-                                 1.0f, "ScaleWidgetYPlane");
+                                 QT3DSVec3(axisPos, 0, -axisPos), axisDiscRadius, axisRingRadius,
+                                 0.0f, 1.0f, "ScaleWidgetYPlane");
             m_ZPlane =
                 CreateRingedDisc(m_Allocator, inWidgetContext, inRenderContext, QT3DSVec3(0, 0, -1),
-                                 QT3DSVec3(axisPos, axisPos, 0), axisDiscRadius, axisRingRadius, 0.0f,
-                                 1.0f, "ScaleWidgetZPlane");
+                                 QT3DSVec3(axisPos, axisPos, 0), axisDiscRadius, axisRingRadius,
+                                 0.0f, 1.0f, "ScaleWidgetZPlane");
 
             inRenderContext.SetActiveShader(m_Shader);
             m_Shader->SetPropertyValue("attr_pos_add_start", axisStart + 1);
@@ -197,10 +201,11 @@ struct SScaleWidget : public SStudioWidgetImpl<StudioWidgetTypes::Scale>
         QT3DSVec3 theXColor(GetXAxisColor());
         QT3DSVec3 theYColor(GetYAxisColor());
         QT3DSVec3 theZColor(GetZAxisColor());
-        QT3DSVec3 theRingColor(QT3DSVec3(.8, .8, .8));
+        QT3DSVec3 theRingColor(QT3DSVec3(.8f, .8f, .8f));
         QT3DSVec3 theEndOffset = QT3DSVec3(axisTotalLength);
-        QT3DSVec3 theScaledEnd = QT3DSVec3(theEndOffset.x * m_AxisScale.x, theEndOffset.y * m_AxisScale.y,
-                                     theEndOffset.z * m_AxisScale.z);
+        QT3DSVec3 theScaledEnd = QT3DSVec3(theEndOffset.x * m_AxisScale.x,
+                                           theEndOffset.y * m_AxisScale.y,
+                                           theEndOffset.z * m_AxisScale.z);
         QT3DSVec3 theEndAddition = theScaledEnd - theEndOffset;
 
         m_Shader->SetPropertyValue("attr_pos_add_amount", QT3DSVec3(theEndAddition.x, 0, 0));

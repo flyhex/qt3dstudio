@@ -88,6 +88,13 @@ namespace render {
 
     SEndlType Endl;
 
+    static SRenderInstanceId combineLayerAndId(const SLayer *layer, const SRenderInstanceId id)
+    {
+        uint64_t x = (uint64_t)layer;
+        x += 31u * (uint64_t)id;
+        return (SRenderInstanceId)x;
+    }
+
     Qt3DSRendererImpl::Qt3DSRendererImpl(IQt3DSRenderContext &ctx)
         : m_qt3dsContext(ctx)
         , m_Context(ctx.GetRenderContext())
@@ -105,7 +112,7 @@ namespace render {
         , m_LayerBlendTexture(ctx.GetResourceManager())
         , m_BlendFB(NULL)
 #endif
-        , m_LayerToRenderMap(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LayerToRenderMap")
+        , m_InstanceRenderMap(ctx.GetAllocator(), "Qt3DSRendererImpl::m_InstanceRenderMap")
         , m_LastFrameLayers(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LastFrameLayers")
         , mRefCount(0)
         , m_LastPickResults(ctx.GetAllocator(), "Qt3DSRendererImpl::m_LastPickResults")
@@ -128,7 +135,7 @@ namespace render {
             NVDelete(m_Context->GetAllocator(), iter->second);
 
         m_Shaders.clear();
-        m_LayerToRenderMap.clear();
+        m_InstanceRenderMap.clear();
         m_ConstantBuffers.clear();
     }
 
@@ -139,9 +146,9 @@ namespace render {
     void Qt3DSRendererImpl::ChildrenUpdated(SNode &inParent)
     {
         if (inParent.m_Type == GraphObjectTypes::Layer) {
-            TLayerRenderMap::iterator theIter =
-                m_LayerToRenderMap.find(static_cast<SLayer *>(&inParent));
-            if (theIter != m_LayerToRenderMap.end()) {
+            TInstanceRenderMap::iterator theIter =
+                m_InstanceRenderMap.find(static_cast<SRenderInstanceId>(&inParent));
+            if (theIter != m_InstanceRenderMap.end()) {
                 theIter->second->m_CamerasAndLights.clear();
                 theIter->second->m_RenderableNodes.clear();
             }
@@ -182,8 +189,9 @@ namespace render {
     }
 
     bool Qt3DSRendererImpl::PrepareLayerForRender(SLayer &inLayer,
-                                                 const QT3DSVec2 &inViewportDimensions,
-                                                 bool inRenderSiblings)
+                                                  const QT3DSVec2 &inViewportDimensions,
+                                                  bool inRenderSiblings,
+                                                  const SRenderInstanceId id)
     {
         (void)inViewportDimensions;
         nvvector<SLayer *> renderableLayers(m_qt3dsContext.GetPerFrameAllocator(), "LayerVector");
@@ -199,7 +207,7 @@ namespace render {
              iter != end; ++iter) {
             // Store the previous state of if we were rendering a layer.
             SLayer *theLayer = *iter;
-            SLayerRenderData *theRenderData = GetOrCreateLayerRenderDataForNode(*theLayer);
+            SLayerRenderData *theRenderData = GetOrCreateLayerRenderDataForNode(*theLayer, id);
 
             if (theRenderData) {
                 theRenderData->PrepareForRender();
@@ -213,7 +221,8 @@ namespace render {
     }
 
     void Qt3DSRendererImpl::RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                                       bool clear, QT3DSVec3 clearColor, bool inRenderSiblings)
+                                        bool clear, QT3DSVec3 clearColor, bool inRenderSiblings,
+                                        const SRenderInstanceId id)
     {
         (void)inViewportDimensions;
         nvvector<SLayer *> renderableLayers(m_qt3dsContext.GetPerFrameAllocator(), "LayerVector");
@@ -228,7 +237,7 @@ namespace render {
              end = renderableLayers.rend();
              iter != end; ++iter) {
             SLayer *theLayer = *iter;
-            SLayerRenderData *theRenderData = GetOrCreateLayerRenderDataForNode(*theLayer);
+            SLayerRenderData *theRenderData = GetOrCreateLayerRenderDataForNode(*theLayer, id);
             SLayerRenderPreparationResult &prepRes(*theRenderData->m_LayerPrepResult);
             LayerBlendTypes::Enum layerBlend = prepRes.GetLayer()->GetLayerBlend();
 #ifdef ADVANCED_BLEND_SW_FALLBACK
@@ -270,7 +279,7 @@ namespace render {
              iter != end; ++iter) {
             // Store the previous state of if we were rendering a layer.
             SLayer *theLayer = *iter;
-            SLayerRenderData *theRenderData = GetOrCreateLayerRenderDataForNode(*theLayer);
+            SLayerRenderData *theRenderData = GetOrCreateLayerRenderDataForNode(*theLayer, id);
 
             if (theRenderData) {
                 if (theRenderData->m_LayerPrepResult->IsLayerVisible())
@@ -291,17 +300,19 @@ namespace render {
         return NULL;
     }
 
-    SLayerRenderData *Qt3DSRendererImpl::GetOrCreateLayerRenderDataForNode(const SNode &inNode)
+    SLayerRenderData *Qt3DSRendererImpl::GetOrCreateLayerRenderDataForNode(const SNode &inNode,
+                                                                           const SRenderInstanceId id)
     {
         const SLayer *theLayer = GetLayerForNode(inNode);
         if (theLayer) {
-            TLayerRenderMap::const_iterator theIter = m_LayerToRenderMap.find(theLayer);
-            if (theIter != m_LayerToRenderMap.end())
+            TInstanceRenderMap::const_iterator theIter
+                    = m_InstanceRenderMap.find(combineLayerAndId(theLayer, id));
+            if (theIter != m_InstanceRenderMap.end())
                 return const_cast<SLayerRenderData *>(theIter->second.mPtr);
 
             SLayerRenderData *theRenderData = QT3DS_NEW(m_Context->GetAllocator(), SLayerRenderData)(
                 const_cast<SLayer &>(*theLayer), *this);
-            m_LayerToRenderMap.insert(make_pair(theLayer, theRenderData));
+            m_InstanceRenderMap.insert(make_pair(combineLayerAndId(theLayer, id), theRenderData));
 
             // create a profiler if enabled
             if (IsLayerGpuProfilingEnabled() && theRenderData)
@@ -607,7 +618,7 @@ namespace render {
                                                            *thePickResult.m_FirstSubObject);
                 QT3DSVec2 theMouseCoords = mouseAndViewport.first;
                 QT3DSVec2 theViewportDimensions = mouseAndViewport.second;
-                IGraphObjectPickQuery *theQuery = theSubRenderer->GetGraphObjectPickQuery();
+                IGraphObjectPickQuery *theQuery = theSubRenderer->GetGraphObjectPickQuery(this);
                 if (theQuery) {
                     Qt3DSRenderPickResult theInnerPickResult =
                         theQuery->Pick(theMouseCoords, theViewportDimensions, inPickEverything);
@@ -629,7 +640,7 @@ namespace render {
                     // itself.  So no matter what, if we get to here the pick was consumed.
                     thePickResult.m_WasPickConsumed = true;
                     bool wasPickConsumed =
-                        theSubRenderer->Pick(theMouseCoords, theViewportDimensions);
+                        theSubRenderer->Pick(theMouseCoords, theViewportDimensions, this);
                     if (wasPickConsumed) {
                         thePickResult.m_HitObject = NULL;
                         foundValidResult = true;
@@ -645,7 +656,7 @@ namespace render {
 
     Qt3DSRenderPickResult Qt3DSRendererImpl::Pick(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
                                                 const QT3DSVec2 &inMouseCoords, bool inPickSiblings,
-                                                bool inPickEverything)
+                                                bool inPickEverything, const SRenderInstanceId id)
     {
         m_LastPickResults.clear();
 
@@ -655,8 +666,9 @@ namespace render {
         // vector itself.
         do {
             if (theLayer->m_Flags.IsActive()) {
-                TLayerRenderMap::iterator theIter = m_LayerToRenderMap.find(theLayer);
-                if (theIter != m_LayerToRenderMap.end()) {
+                TInstanceRenderMap::iterator theIter
+                        = m_InstanceRenderMap.find(combineLayerAndId(theLayer, id));
+                if (theIter != m_InstanceRenderMap.end()) {
                     m_LastPickResults.clear();
                     GetLayerHitObjectList(*theIter->second, inViewportDimensions, inMouseCoords,
                                           inPickEverything, m_LastPickResults,
@@ -790,26 +802,12 @@ namespace render {
     }
 
     Qt3DSRenderPickResult
-    Qt3DSRendererImpl::PickOffscreenLayer(SLayer &inLayer, const QT3DSVec2 & /*inViewportDimensions*/
+    Qt3DSRendererImpl::PickOffscreenLayer(SLayer &/*inLayer*/, const QT3DSVec2 & /*inViewportDimensions*/
                                          ,
                                          const QT3DSVec2 & /*inMouseCoords*/
                                          ,
                                          bool /*inPickEverything*/)
     {
-        if (inLayer.m_Flags.IsActive()) {
-            TLayerRenderMap::iterator theIter = m_LayerToRenderMap.find(&inLayer);
-            if (theIter != m_LayerToRenderMap.end()) {
-                /*
-                m_LastPickResults.clear();
-                GetLayerHitObjectList( *theIter->second, inViewportDimensions, inMouseCoords,
-                m_LastPickResults, m_FrameTemporaryAllocator );
-                SPickResultProcessResult retval( ProcessPickResultList() );
-                if ( retval.m_WasPickConsumed )
-                        return retval;*/
-            } else {
-                // QT3DS_ASSERT( false );
-            }
-        }
         return Qt3DSRenderPickResult();
     }
 
@@ -1032,17 +1030,18 @@ namespace render {
         return GetWorldToPixelScaleFactor(*theData->m_Camera, inWorldPoint, *theData);
     }
 
-    void Qt3DSRendererImpl::ReleaseLayerRenderResources(SLayer &inLayer)
+    void Qt3DSRendererImpl::ReleaseLayerRenderResources(SLayer &inLayer, const SRenderInstanceId id)
     {
-        TLayerRenderMap::iterator theIter = m_LayerToRenderMap.find(&inLayer);
-        if (theIter != m_LayerToRenderMap.end()) {
+        TInstanceRenderMap::iterator theIter
+                = m_InstanceRenderMap.find(combineLayerAndId(&inLayer, id));
+        if (theIter != m_InstanceRenderMap.end()) {
             TLayerRenderList::iterator theLastFrm = eastl::find(
                 m_LastFrameLayers.begin(), m_LastFrameLayers.end(), theIter->second.mPtr);
             if (theLastFrm != m_LastFrameLayers.end()) {
                 theIter->second->ResetForFrame();
                 m_LastFrameLayers.erase(theLastFrm);
             }
-            m_LayerToRenderMap.erase(theIter);
+            m_InstanceRenderMap.erase(theIter);
         }
     }
 
@@ -1318,7 +1317,7 @@ namespace render {
                 }
             } else {
                 IGraphObjectPickQuery *theQuery =
-                    inLayerRenderData.m_LastFrameOffscreenRenderer->GetGraphObjectPickQuery();
+                    inLayerRenderData.m_LastFrameOffscreenRenderer->GetGraphObjectPickQuery(this);
                 if (theQuery) {
                     Qt3DSRenderPickResult theResult =
                         theQuery->Pick(inPresCoords, inViewportDimensions, inPickEverything);
@@ -1329,7 +1328,8 @@ namespace render {
                     }
                 } else
                     inLayerRenderData.m_LastFrameOffscreenRenderer->Pick(inPresCoords,
-                                                                         inViewportDimensions);
+                                                                         inViewportDimensions,
+                                                                         this);
             }
         }
     }
@@ -1867,14 +1867,14 @@ namespace render {
             return;
 
         char messageLine[1024];
-        TLayerRenderMap::const_iterator theIter;
+        TInstanceRenderMap::const_iterator theIter;
 
         QT3DSF32 startY = y;
 
-        for (theIter = m_LayerToRenderMap.begin(); theIter != m_LayerToRenderMap.end(); theIter++) {
+        for (theIter = m_InstanceRenderMap.begin(); theIter != m_InstanceRenderMap.end(); theIter++) {
             QT3DSF32 startX = x;
             const SLayerRenderData *theLayerRenderData = theIter->second;
-            const SLayer *theLayer = theIter->first;
+            const SLayer *theLayer = &theLayerRenderData->m_Layer;
 
             if (theLayer->m_Flags.IsActive() && theLayerRenderData->m_LayerProfilerGpu.mPtr) {
                 const IRenderProfiler::TStrIDVec &idList =

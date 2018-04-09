@@ -33,7 +33,7 @@
 
 #include "DispatchListeners.h"
 #include "SlideModel.h"
-#include "DataInputSelectDlg.h"
+#include "DataInputSelectView.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"
@@ -64,7 +64,7 @@ public:
     void setShowMasterSlide(bool show);
     QAbstractItemModel *currentModel() { return m_CurrentModel; }
     QSize sizeHint() const override;
-    void onDataInputChange(const QString &dataInputName);
+    void onDataInputChange(int handle, int instance, const QString &dataInputName);
 
     Q_INVOKABLE void deselectAll();
     Q_INVOKABLE void addNewSlide(int row);
@@ -75,6 +75,7 @@ public:
     Q_INVOKABLE void finishSlideRearrange(bool commit);
     Q_INVOKABLE void showContextMenu(int x, int y, int row);
     Q_INVOKABLE void showControllerDialog(const QPoint &point);
+    Q_INVOKABLE bool toolTipsEnabled();
 
     // Presentation Change Listener
     void OnNewPresentation() override;
@@ -103,6 +104,7 @@ protected:
                                    int inNewIndex);
 
     void updateDataInputStatus(bool isViaDispatch);
+    void UpdateSlideViewTitleColor();
 
 private:
     void initialize();
@@ -114,11 +116,12 @@ private:
     long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
+    void showBrowser(QQuickWidget *browser, const QPoint &point);
 
     SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
     SlideModel *m_SlidesModel = nullptr;
-    DataInputSelectDlg *m_dataInputSelector = nullptr;
+    DataInputSelectView *m_dataInputSelector = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel

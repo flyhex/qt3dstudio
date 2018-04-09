@@ -28,6 +28,9 @@
 
 #include "SubPresentationDlg.h"
 #include "ui_SubPresentationDlg.h"
+#include "Core.h"
+#include "Doc.h"
+#include "StudioApp.h"
 
 #include <QtWidgets/qabstractbutton.h>
 #include <QtWidgets/qfiledialog.h>
@@ -111,10 +114,16 @@ void CSubPresentationDlg::onTypeChanged(int index)
 
 void CSubPresentationDlg::onFileChanged(int index)
 {
-    if (index != m_ui->comboBoxFileList->count() - 1)
+    int specialItems = (m_subPresentation.m_type == QStringLiteral("presentation")) ? 2 : 1;
+
+    if (index < m_ui->comboBoxFileList->count() - specialItems) {
         m_subPresentation.m_argsOrSrc = m_ui->comboBoxFileList->currentText();
-    else
-        browseFile();
+    } else {
+        if (specialItems == 2 && index == m_ui->comboBoxFileList->count() - 1)
+            createSubPresentation();
+        else
+            browseFile();
+    }
     // Disable "Ok" if type is presentation and no file has been selected
     m_ui->buttonBox->buttons()[0]->setEnabled(
                 !(m_subPresentation.m_type == QStringLiteral("presentation")
@@ -129,7 +138,7 @@ void CSubPresentationDlg::onIdChanged(const QString &id)
 void CSubPresentationDlg::updateUI() {
     m_ui->comboBoxFileList->clear();
 
-    // Populate file combobox with current uip/qml + folder's uips/qmls + "Browse..."
+    // Populate file combobox with current uip/qml + folder's uips/qmls + "Browse..." + "Create..."
     // and select the current uip/qml (or browse if none)
     QString filter = QStringLiteral("*.uip");
     if (m_subPresentation.m_type == QStringLiteral("presentation-qml")) {
@@ -140,7 +149,19 @@ void CSubPresentationDlg::updateUI() {
     }
 
     QDir dir(m_directory, filter, QDir::Name, QDir::Files);
-    m_ui->comboBoxFileList->addItems(dir.entryList());
+    QStringList entryList = dir.entryList();
+    if (m_subPresentation.m_type == QStringLiteral("presentation")) {
+        // Remove the current presentation from the list of offered entries
+        QString currentPres = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetName()
+                .toQString();
+        entryList.removeAll(currentPres);
+        // Remove autosave files
+        foreach (const QString &entry, entryList) {
+            if (entry.endsWith(QStringLiteral("_autosave.uip")))
+                entryList.removeAll(entry);
+        }
+    }
+    m_ui->comboBoxFileList->addItems(entryList);
 
     if (!m_subPresentation.m_argsOrSrc.isEmpty()) {
         // Do not add the current file to the combobox if it is already there
@@ -150,6 +171,10 @@ void CSubPresentationDlg::updateUI() {
     }
 
     m_ui->comboBoxFileList->addItem(tr("Browse..."));
+
+    // Add "Create..." for sub-presentations only
+    if (m_subPresentation.m_type == QStringLiteral("presentation"))
+        m_ui->comboBoxFileList->addItem(tr("Create..."));
 }
 
 void CSubPresentationDlg::browseFile()
@@ -157,13 +182,28 @@ void CSubPresentationDlg::browseFile()
     QString filter = QStringLiteral("*.uip");
     if (m_subPresentation.m_type == QStringLiteral("presentation-qml"))
         filter = QStringLiteral("*.qml");
-    const QString file = QDir::toNativeSeparators(
+    const QString file = QDir::fromNativeSeparators(
                 QFileDialog::getOpenFileName(nullptr, nullptr, m_directory, filter, nullptr,
                                              QFileDialog::DontUseNativeDialog));
+    QString directory = QDir::fromNativeSeparators(m_directory);
+
     QString shortFile = file;
-    int subdir = file.indexOf(m_directory);
-    if (subdir >= 0)
-        shortFile.remove(subdir, m_directory.size() + 1);
+    int subdir = file.indexOf(directory);
+    if (subdir == 0) {
+        shortFile.remove(subdir, directory.size() + 1);
+    } else {
+        // parse relative path
+        int levels = 0;
+        do {
+            int index = directory.lastIndexOf("/");
+            directory.remove(index, directory.size());
+            subdir = shortFile.indexOf(directory);
+            ++levels;
+        } while (subdir);
+        shortFile.remove(0, directory.size() + 1);
+        for (int i = 0; i < levels; ++i)
+            shortFile.prepend("../");
+    }
 
     QFileInfo fileInfo(file);
     if (fileInfo.exists()) {
@@ -171,4 +211,12 @@ void CSubPresentationDlg::browseFile()
         m_ui->comboBoxFileList->insertItem(-1, shortFile);
         m_ui->comboBoxFileList->setCurrentText(shortFile);
     }
+}
+
+void CSubPresentationDlg::createSubPresentation()
+{
+    m_subPresentation.m_argsOrSrc = g_StudioApp.OnFileNew(false);
+    updateUI();
+    // Select the newly created file
+    m_ui->comboBoxFileList->setCurrentText(m_subPresentation.m_argsOrSrc);
 }

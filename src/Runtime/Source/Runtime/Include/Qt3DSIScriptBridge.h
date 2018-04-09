@@ -132,21 +132,6 @@ public: // Settings
     virtual void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) = 0;
     virtual void SetApplication(qt3ds::runtime::IApplication &inApplication) = 0;
 
-public: // Binary preloading
-    // Starts preloading scripts offline.  This sets m_LuaState to NULL until after
-    // EndPreloadScripts
-    // This function is only used for binary loading, eg, .uiab
-    virtual void BeginPreloadScripts(const eastl::vector<const char *> &inScripts,
-                                     qt3ds::render::IThreadPool &inThreadPool,
-                                     const char *inProjectDir) = 0;
-    // This function is blocking if m_LuaState == NULL, which only holds during binary loading
-    virtual void EndPreloadScripts() = 0;
-    // Fast loading support
-    // get the set of loaded scripts relative file names
-    // This has the side effect of writing out the loaded scripts to
-    // projectDir/binary/compiledlua.bin, only used for binary save
-    virtual eastl::vector<eastl::string> GetLoadedScripts() = 0;
-
 public: // Scripts
     // Both loads lua script, create an self table -> scriptIndex in a behaviors table
     // LoadScript goes further by registering scriptIndex->inPresentation, and inOwner->m_ScriptID=

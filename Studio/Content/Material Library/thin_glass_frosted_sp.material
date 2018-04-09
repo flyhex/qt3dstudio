@@ -14,7 +14,7 @@
         <Property formalName="Bump Scale" name="bumpScale" description="Scale of the bumps" type="Float" min="0.000000" max="1.000000" default="0.500000" category="Material"/>
         <Property formalName="Bump Bands" name="bumpBands" description="Bump bands of the material" type="Long" min="1.000000" max="10.000000"  default="1" category="Material"/>
         <Property formalName="Fresnel Power" name="uFresnelPower" description="Fresnel power of the material" type="Float" default="1.0" category="Material"/>
-        <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material. 0 is fully specular, 1 is fully diffuse" category="Material"/>
+        <Property formalName="Roughness" name="roughness" type="Float" min="0.000000" max="1.000000" default="0.000000" description="Roughness of the material.\n0 = fully specular\n1 = fully diffuse" category="Material"/>
         <Property formalName="Blur Width" name="blur_size" description="Width of the blur" type="Float" default="8" min="0.000000" max="20.00000" category="Material"/>
         <Property formalName="Reflectivity" name="reflectivity_amount" type="Float" min="0.000000" max="1.000000" default="1.000000" description="Reflectivity factor" category="Material"/>
         <Property formalName="Glass ior" name="glass_ior" type="Float" default="1.100000" description="Index of refraction of the material" category="Material"/>

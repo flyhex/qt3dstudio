@@ -105,6 +105,11 @@ public:
     virtual void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                           const std::wstring &inPropertyName,
                                           const qt3dsdm::SValue &inValue) = 0;
+    virtual void SetInstancePropertyControlled(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                               Q3DStudio::CString instancepath,
+                                               qt3dsdm::Qt3DSDMPropertyHandle propName,
+                                               Q3DStudio::CString controller,
+                                               bool controlled) = 0;
     // Return an editor to editing the scene graph of the document.
     // This editor takes care of putting objects into the property slide
     // as well as updating the world

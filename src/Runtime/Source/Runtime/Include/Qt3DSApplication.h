@@ -159,14 +159,20 @@ public:
 struct DataInputControlledAttribute
 {
     QByteArray elementPath;
-    QByteArray attributeName;
+    QVector<QByteArray> attributeName;
     Q3DStudio::EAttributeType propertyType = Q3DStudio::ATTRIBUTETYPE_NONE;
 };
 
 enum DataInputType {
     DataInputTypeInvalid = 0,
     DataInputTypeRangedNumber,
-    DataInputTypeString
+    DataInputTypeString,
+    DataInputTypeFloat,
+    // TODO Evaluator
+    // DataTypeEvaluator,
+    DataInputTypeBoolean,
+    DataInputTypeVector3,
+    DataInputTypeVariant
 };
 
 struct DataInputDef
@@ -199,10 +205,6 @@ public:
     virtual double GetMillisecondsSinceLastFrame() = 0;
 
     virtual Q3DStudio::CInputEngine &GetInputEngine() = 0;
-
-    // Saves to presentationdir/binary/stem.uiab
-    // Saves all presentations and all scene data.
-    virtual void SaveBinary() = 0;
 
     virtual Q3DStudio::CPresentation *GetPrimaryPresentation() = 0;
 

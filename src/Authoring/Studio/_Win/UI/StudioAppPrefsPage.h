@@ -77,6 +77,9 @@ protected:
     BOOL m_InterpolationIsSmooth; ///< TRUE if default interpolation is smooth
     QFont m_Font; ///< Font for text
     QFont m_BoldFont; ///< Bold font for drawing the group boxes
+    bool m_restartNeeded;
+    bool m_autosaveChanged;
+
     void EnableOptions();
     void LoadSettings();
     void SaveSettings();
@@ -84,14 +87,13 @@ protected:
     // Generated message map functions
     virtual void OnInitDialog();
     void OnButtonRestoreDefaults();
-    void OnSelChangeInterpolationDefault();
-    void OnSelChangeSnapRange();
-    void OnCheckTimelineAbsoluteSnapping();
-    void OnSelChangeStartupView();
 #if 0 // Removed until we have some other Preview configurations that just Viewer
     void OnChangePreviewConfiguration();
 #endif
     void OnBgColorButtonClicked();
+
+    void enableAutosave(bool enabled);
+    void setAutosaveInterval(int interval);
 
 protected: // helper functions
     void InitEditStartViewCombo();

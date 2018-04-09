@@ -63,11 +63,14 @@ Rectangle {
 
         Image {
             source: fileIcon
+            width: 16
+            height: 16
         }
 
         StyledLabel {
             text: fileName
             color: _textColor
+            leftPadding: 5
 
             MouseArea {
                 anchors.fill: parent

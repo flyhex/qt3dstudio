@@ -44,14 +44,19 @@
 #include <QColor>
 
 ObjectListModel::ObjectListModel(CCore *core,
-                                 const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent)
+                                 const qt3dsdm::Qt3DSDMInstanceHandle &baseHandle, QObject *parent,
+                                 bool isAliasSelectList)
     : QAbstractItemModel(parent)
     , m_core(core)
     , m_baseHandle(baseHandle)
+    , m_AliasSelectList(isAliasSelectList)
 {
     auto doc = m_core->GetDoc();
     m_objRefHelper = doc->GetDataModelObjectReferenceHelper();
-    m_slideHandle = m_objRefHelper->GetSlideList(m_baseHandle)[0];
+    if (!m_AliasSelectList)
+        m_slideHandle = m_objRefHelper->GetSlideList(m_baseHandle)[0];
+    else
+        m_slideHandle = m_objRefHelper->GetSlideList(m_baseHandle).back();
 }
 
 QHash<int, QByteArray> ObjectListModel::roleNames() const
@@ -85,6 +90,13 @@ int ObjectListModel::columnCount(const QModelIndex &parent) const
 
 QVariant ObjectListModel::data(const QModelIndex &index, int role) const
 {
+    return data(index, QModelIndex(), role);
+}
+
+QVariant ObjectListModel::data(const QModelIndex &index,
+                               const QModelIndex &startingIndex,
+                               int role) const
+{
     if (!hasIndex(index.row(), index.column(), index.parent()))
         return {};
 
@@ -105,8 +117,18 @@ QVariant ObjectListModel::data(const QModelIndex &index, int role) const
         return nameForHandle(handle);
     }
     case PathReferenceRole: {
-        Q3DStudio::CString data(m_objRefHelper->GetObjectReferenceString(
-            m_baseHandle, CRelativePathTools::EPATHTYPE_RELATIVE, handle));
+        Q3DStudio::CString data;
+        if (startingIndex.isValid()) {
+            data = m_objRefHelper->GetObjectReferenceString(
+                        handleForIndex(startingIndex),
+                        CRelativePathTools::EPATHTYPE_RELATIVE,
+                        handle);
+        } else {
+            data = m_objRefHelper->GetObjectReferenceString(
+                        m_baseHandle,
+                        CRelativePathTools::EPATHTYPE_RELATIVE,
+                        handle);
+        }
         return data.toQString();
     }
     case AbsolutePathRole: {
@@ -190,12 +212,15 @@ bool ObjectListModel::selectable(const qt3dsdm::Qt3DSDMInstanceHandle &handle) c
 {
     auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
     auto objType = bridge->GetObjectType(handle);
-    return !m_excludeTypes.contains(objType);
+    // disallow aliasing the current active root
+    bool tryingToAliasParent = (m_core->GetDoc()->GetActiveRootInstance() == handle)
+                               && m_AliasSelectList;
+    return (!m_excludeTypes.contains(objType) && !tryingToAliasParent);
 }
 
-
-qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
-                                                           const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
+qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(
+        const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
+        const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
     auto studioSystem = m_core->GetDoc()->GetStudioSystem();
     auto slideSystem = studioSystem->GetSlideSystem();
@@ -203,19 +228,22 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(const qt3dsdm::Qt3DSD
 
     qt3dsdm::TInstanceHandleList children;
     m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle);
-    children.erase(
-    std::remove_if(children.begin(), children.end(),
-                   [&slideHandle, slideSystem, &currentMaster](const qt3dsdm::Qt3DSDMInstanceHandle &h) {
-                        const auto childSlide = slideSystem->GetAssociatedSlide(h);
-                        if (!childSlide.Valid())
-                            return true;
-                        const auto childMaster = slideSystem->GetMasterSlide(childSlide);
-                        if (childMaster == currentMaster) {
-                            return childSlide != childMaster && childSlide != slideHandle;
-                        } else {
-                            return childSlide != childMaster;
-                        }
-                    }), children.end());
+    // allow action trigger/target from all objects
+    if (m_AliasSelectList) {
+        children.erase(
+            std::remove_if(children.begin(), children.end(),
+                           [&slideHandle, slideSystem, &currentMaster](const qt3dsdm::Qt3DSDMInstanceHandle &h) {
+            const auto childSlide = slideSystem->GetAssociatedSlide(h);
+            if (!childSlide.Valid())
+                return true;
+            const auto childMaster = slideSystem->GetMasterSlide(childSlide);
+            if (childMaster == currentMaster) {
+                return childSlide != childMaster && childSlide != slideHandle;
+            } else {
+                return childSlide != childMaster;
+            }
+        }), children.end());
+    }
     return children;
 }
 
@@ -297,6 +325,13 @@ QModelIndex FlatObjectListModel::mapFromSource(const QModelIndex &sourceIndex) c
 
 QVariant FlatObjectListModel::data(const QModelIndex &index, int role) const
 {
+    return data(index, QModelIndex(), role);
+}
+
+QVariant FlatObjectListModel::data(const QModelIndex &index,
+                                   const QModelIndex &startingIndex,
+                                   int role) const
+{
     const auto row = index.row();
     if (row < 0 || row >= m_sourceInfo.count())
         return {};
@@ -338,7 +373,11 @@ QVariant FlatObjectListModel::data(const QModelIndex &index, int role) const
     }
 
     QModelIndex sourceIndex = mapToSource(index);
-    return m_sourceModel->data(sourceIndex, role);
+    if (startingIndex.isValid())
+        return m_sourceModel->data(sourceIndex, startingIndex, role);
+    else
+        return m_sourceModel->data(sourceIndex, QModelIndex(), role);
+
 }
 
 bool FlatObjectListModel::setData(const QModelIndex &index, const QVariant &data, int role)

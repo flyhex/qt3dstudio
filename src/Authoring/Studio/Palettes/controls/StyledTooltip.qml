@@ -36,6 +36,17 @@ ToolTip {
         text: control.text
     }
 
+    // Handle tooltip visibility based on the trigger event given to the 'enabled' property and
+    // the 'Tooltips' view menu setting. Has to be done this way, as even though the eventFilter
+    // set for MainFrm catches the tooltip events for QML, it doesn't prevent showing them because
+    // we were/are controlling the visibility in code.
+    onEnabledChanged: {
+        if (enabled && _parentView.toolTipsEnabled())
+            visible = true;
+        else
+            visible = false;
+    }
+
     background: Rectangle {
         border.color: _studioColor3
         color: _studioColor2

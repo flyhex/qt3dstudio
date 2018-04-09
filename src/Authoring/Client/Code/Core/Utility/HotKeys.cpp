@@ -73,12 +73,11 @@ public:
 
         if (eventType == QEvent::ShortcutOverride) {
             // If we are in key consuming control, eat all plain and shift-adjusted hotkeys
-            // We want to also skip editing related global hotkeys (CTRL-A/X/C/V/Z)
+            // We want to also skip some editing related global hotkeys (CTRL-A/Z)
             // and value adjusting keys (CTRL-UP/DOWN).
             const bool normalChar = !(ke->modifiers() && ke->modifiers() != Qt::ShiftModifier);
             const bool editShortcut = (ke->modifiers() == Qt::ControlModifier)
-                    && (ke->key() == Qt::Key_C || ke->key() == Qt::Key_V || ke->key() == Qt::Key_Z
-                        || ke->key() == Qt::Key_X || ke->key() == Qt::Key_A
+                    && (ke->key() == Qt::Key_Z || ke->key() == Qt::Key_A
                         || ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down);
             if ((normalChar || editShortcut) && m_hotkeys->isFocusOnControlThatWantsKeys()) {
                 ke->accept();
@@ -100,7 +99,6 @@ public:
             return false;
 
         switch (eventType) {
-        case QEvent::ShortcutOverride:
         case QEvent::KeyPress: {
                 bool success = m_hotkeys->OnKeyDown(ke->key(), ke->count(), ke->modifiers())
                         || m_hotkeys->OnChar(ke->key(), ke->count(), ke->modifiers());
@@ -612,16 +610,17 @@ bool CHotKeys::isFocusOnControlThatWantsKeys()
  *
  * @param inString a string containing a key combo to parse
  */
-void CHotKeys::GetModAndKeyFromString(const Q3DStudio::CString &inString, Qt::KeyboardModifiers &inMod,
+void CHotKeys::GetModAndKeyFromString(const Q3DStudio::CString &inString,
+                                      Qt::KeyboardModifiers &inMod,
                                       int &inKey)
 {
     inMod = 0;
     inKey = 0;
-    CStringTokenizer theTokenizer(inString, L"/:"); // TODO: Localize
+    CStringTokenizer theTokenizer(inString, L"/:");
     Q3DStudio::CString theMods = theTokenizer.GetCurrentPartition();
     ++theTokenizer;
     Q3DStudio::CString theKey = theTokenizer.GetCurrentPartition();
-    CStringTokenizer theModTokenizer(theMods, L"/,"); // TODO: Localize
+    CStringTokenizer theModTokenizer(theMods, L"/,");
     while (theModTokenizer.HasNextPartition()) {
         Q3DStudio::CString theCurrentMod = theModTokenizer.GetCurrentPartition();
         inMod |= GetModifierFromString(theCurrentMod);
@@ -640,11 +639,11 @@ Qt::KeyboardModifier CHotKeys::GetModifierFromString(const Q3DStudio::CString &i
 {
     Qt::KeyboardModifier theRetVal = Qt::NoModifier;
 
-    if (inString == L"ctrl") // TODO: Localize
+    if (inString == L"ctrl")
         theRetVal = Qt::ControlModifier;
-    else if (inString == L"shift") // TODO: Localize
+    else if (inString == L"shift")
         theRetVal = Qt::ShiftModifier;
-    else if (inString == L"alt") // TODO: Localize
+    else if (inString == L"alt")
         theRetVal = Qt::AltModifier;
     return theRetVal;
 }

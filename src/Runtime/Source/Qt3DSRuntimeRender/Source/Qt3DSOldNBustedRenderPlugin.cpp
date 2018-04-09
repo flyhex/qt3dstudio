@@ -95,7 +95,8 @@ namespace render {
 
     SOffscreenRenderFlags
     COldNBustedPluginRenderer::NeedsRender(const SOffscreenRendererEnvironment & /*inEnvironment*/,
-                                           QT3DSVec2 /*inPresScale*/)
+                                           QT3DSVec2 /*inPresScale*/,
+                                           const SRenderInstanceId)
     {
         return SOffscreenRenderFlags(true, true);
     }
@@ -104,7 +105,8 @@ namespace render {
     // if it should be treated as a completely opaque image.
     void COldNBustedPluginRenderer::Render(const SOffscreenRendererEnvironment &inEnvironment,
                                            NVRenderContext &inRenderContext, QT3DSVec2 /*inPresScale*/,
-                                           SScene::RenderClearCommand /*inClearColorBuffer*/)
+                                           SScene::RenderClearCommand /*inClearColorBuffer*/,
+                                           const SRenderInstanceId)
     {
         inRenderContext.PushPropertySet();
 

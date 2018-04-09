@@ -212,8 +212,8 @@ void MainWindow::on_actionOpen_triggered()
 
     QString filename = QFileDialog::getOpenFileName(
                 this, tr("Open File or Project"), m_openFileDir,
-                tr("All supported formats (*.uip *.uia *.uiab);;Studio UI Presentation "
-                   "(*.uip);;Application file (*.uia);;Binary Application (*.uiab)"),
+                tr("All supported formats (*.uip *.uia);;Studio UI Presentation "
+                   "(*.uip);;Application file (*.uia)"),
                 nullptr, QFileDialog::DontUseNativeDialog);
 
     if (filename.size() == 0)
@@ -262,10 +262,10 @@ QString MainWindow::convertMimeDataToFilename(const QMimeData *mimeData)
     if (mimeData->hasUrls()) {
         for (const QUrl &url : mimeData->urls()) {
             QString str = url.toLocalFile();
-            if (str.isEmpty() == false) {
-                if ((QFileInfo(str).suffix() == "uip") || (QFileInfo(str).suffix() == "uia")
-                        || (QFileInfo(str).suffix() == "uiab")) {
-                    // Allow uip, uia and uia binary
+            if (!str.isEmpty()) {
+                if (QFileInfo(str).suffix() == QStringLiteral("uip")
+                        || QFileInfo(str).suffix() == QStringLiteral("uia")) {
+                    // Allow uip and uia
                     return str;
                 }
             }

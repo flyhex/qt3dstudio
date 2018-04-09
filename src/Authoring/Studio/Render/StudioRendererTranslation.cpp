@@ -471,11 +471,7 @@ struct STranslatorDataModelParser
 #define Path_PaintStyle m_Path.m_PaintStyle
 #define Path_PathBuffer m_Asset.m_SourcePath
 #define SubPath_Closed m_SubPath.m_Closed
-#define DataInput_Value m_DataInput.m_Value
-#define DataInput_ValueStr m_DataInput.m_ValueStr
-#define DataInput_ControlledElemProp m_DataInput.m_ControlledElemProp
-#define DataInput_TimeFrom m_DataInput.m_TimeFrom
-#define DataInput_TimeTo m_DataInput.m_TimeTo
+
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
     theParser.ParseProperty(inContext.m_ObjectDefinitions.type##_##name, theItem.m_##name);
@@ -534,9 +530,7 @@ struct SSceneTranslator : public SGraphObjectTranslator
         STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
         ITERATE_QT3DS_RENDER_SCENE_PROPERTIES
         SLayer *theCurrentLayer = nullptr;
-        qt3ds::render::SDataInput *theCurrentDataInput = nullptr;
         theItem.m_FirstChild = nullptr;
-        theItem.m_FirstDataInput = nullptr;
         for (long idx = 0, end = inContext.m_AssetGraph.GetChildCount(GetInstanceHandle());
              idx < end; ++idx) {
             SGraphObjectTranslator::PushTranslation(inContext);
@@ -552,16 +546,6 @@ struct SSceneTranslator : public SGraphObjectTranslator
                 else
                     theCurrentLayer->m_NextSibling = theLayerObj;
                 theCurrentLayer = theLayerObj;
-            } else if (theTranslator && theTranslator->GetGraphObject().m_Type ==
-                qt3ds::render::GraphObjectTypes::DataInput ) {
-                qt3ds::render::SDataInput *theDataInputObj =
-                        static_cast<qt3ds::render::SDataInput *>(&theTranslator->GetGraphObject());
-                theDataInputObj->m_NextSibling = nullptr;
-                if (theItem.m_FirstDataInput == nullptr)
-                    theItem.m_FirstDataInput = theDataInputObj;
-                else
-                    theCurrentDataInput->m_NextSibling = theDataInputObj;
-                theCurrentDataInput = theDataInputObj;
             }
         }
     }
@@ -569,7 +553,6 @@ struct SSceneTranslator : public SGraphObjectTranslator
     {
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
         SLayer *theLastChild = nullptr;
-        qt3ds::render::SDataInput *theLastDataInput = nullptr;
 
         for (SLayer *theChild = theItem.m_FirstChild; theChild;
              theChild = static_cast<SLayer *>(theChild->m_NextSibling)) {
@@ -579,32 +562,16 @@ struct SSceneTranslator : public SGraphObjectTranslator
             theLastChild = theChild;
         }
         theItem.m_FirstChild = nullptr;
-
-        for (qt3ds::render::SDataInput *theChild = theItem.m_FirstDataInput; theChild;
-            theChild = static_cast<qt3ds::render::SDataInput *>(theChild->m_NextSibling)) {
-            if (theLastDataInput)
-                theLastDataInput->m_NextSibling = nullptr;
-            theChild->m_Scene = nullptr;
-            theLastDataInput = theChild;
-        }
-        theItem.m_FirstDataInput = nullptr;
     }
     void AppendChild(SGraphObject &inChild) override
     {
-        if (inChild.m_Type != GraphObjectTypes::Layer &&
-            inChild.m_Type != GraphObjectTypes::DataInput ) {
+        if (inChild.m_Type != GraphObjectTypes::Layer) {
             QT3DS_ASSERT(false);
             return;
         }
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
-        if ( inChild.m_Type == GraphObjectTypes::Layer ) {
-            SLayer &theLayer = static_cast<SLayer &>(inChild);
-            theItem.AddChild(theLayer);
-        } else if (inChild.m_Type == GraphObjectTypes::DataInput) {
-            qt3ds::render::SDataInput &theDataInput =
-                static_cast<qt3ds::render::SDataInput &>(inChild);
-            theItem.AddDataInput(theDataInput);
-        }
+        SLayer &theLayer = static_cast<SLayer &>(inChild);
+        theItem.AddChild(theLayer);
     }
     void SetActive(bool /*inActive*/) override
     {
@@ -888,67 +855,6 @@ struct SPathSubPathTranslator : public SGraphObjectTranslator
     void ClearChildren() override {}
 
     void SetActive(bool /*inActive*/) override {}
-};
-
-struct SDataInputTranslator : public SGraphObjectTranslator
-{
-    SDataInputTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-        qt3ds::NVAllocatorCallback &inAlloc)
-        : SGraphObjectTranslator(inInstance, *QT3DS_NEW(inAlloc, qt3ds::render::SDataInput)())
-    {
-    }
-
-    void PushTranslation(STranslation &inContext) override
-    {
-        SGraphObjectTranslator::PushTranslation(inContext);
-        qt3ds::render::SDataInput &theItem =
-            static_cast<qt3ds::render::SDataInput &>(GetGraphObject());
-
-        STranslatorDataModelParser theParser(inContext, GetInstanceHandle());
-
-        ITERATE_QT3DS_RENDER_DATAINPUT_PROPERTIES
-
-        // Handle incoming controlled element - property pairs
-        CRegisteredString incomingElemProp = CRegisteredString();
-        theParser.ParseProperty(
-            inContext.m_ObjectDefinitions.m_DataInput.m_ControlledElemProp,
-            incomingElemProp);
-        qt3ds::render::IStringTable &theStrTable(inContext.m_Context.GetStringTable());
-
-        QVector<QPair<CRegisteredString, CRegisteredString>> newVec
-            = ResolveControlledElemProps(incomingElemProp.c_str(), theStrTable);
-        theItem.SetControlledElementProperties(newVec);
-    }
-    void AppendChild(SGraphObject &inChild) override {}
-
-    void ClearChildren() override { }
-
-    void SetActive(bool /*inActive*/) override {}
-
-    QVector<QPair<CRegisteredString, CRegisteredString>> ResolveControlledElemProps(
-        std::string elemProp, qt3ds::render::IStringTable &strTable)
-    {
-        if (!elemProp.size())
-            return QVector<QPair<CRegisteredString, CRegisteredString>>();
-
-        QVector<QPair<CRegisteredString, CRegisteredString>> ret;
-        std::string theStr = elemProp;
-        std::string theCurrentElemStr;
-        std::string theCurrentPropStr;
-        std::string::size_type thePos = 0;
-        while (thePos < theStr.length()) {
-            theCurrentElemStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
-            thePos += theCurrentElemStr.length() + 1;
-
-            theCurrentPropStr = theStr.substr(thePos, theStr.find(' ', thePos) - thePos);
-            thePos += theCurrentPropStr.length() + 1;
-
-            ret.append(QPair<CRegisteredString, CRegisteredString>(
-                strTable.RegisterStr(theCurrentElemStr.c_str()),
-                strTable.RegisterStr(theCurrentPropStr.c_str())));
-        }
-        return ret;
-    }
 };
 
 struct SPathTranslator : public SNodeTranslator
@@ -1710,9 +1616,6 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
     case qt3dsdm::ComposerObjectTypes::SubPath:
         theNewTranslator = QT3DS_NEW(m_Allocator, SPathSubPathTranslator)(inInstance, m_Allocator);
         break;
-    case qt3dsdm::ComposerObjectTypes::DataInput:
-        theNewTranslator = QT3DS_NEW(m_Allocator, SDataInputTranslator)(inInstance, m_Allocator);
-        break;
     case qt3dsdm::ComposerObjectTypes::Effect: {
         IEffectSystem &theSystem = m_Context.GetEffectSystem();
         if (theParentClass.Valid()) {
@@ -2073,7 +1976,6 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
 void STranslation::DeactivateScan(SGraphObjectTranslator &inParent,
                                   Qt3DSDMInstanceHandle inAliasHandle)
 {
-    SGraphObjectTranslator &theParentTranslator(inParent);
     // Alias handles propagate down the scene graph.
     if (inParent.GetInstanceHandle() != inParent.GetSceneGraphInstanceHandle())
         inAliasHandle = inParent.GetInstanceHandle();
@@ -2395,9 +2297,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         // Don't show the bounding box or pivot for the component we are *in* the component
         SGraphObjectTranslator *theTranslator = nullptr;
         long theToolMode = g_StudioApp.GetToolMode();
-        bool isEditCamera = m_EditCameraEnabled;
-        int theCameraToolMode = isEditCamera ? (theToolMode & (STUDIO_CAMERATOOL_MASK)) : 0;
-        long theModifiers = CHotKeys::GetCurrentKeyModifiers();
+        int theCameraToolMode = m_EditCameraEnabled ? (theToolMode & STUDIO_CAMERATOOL_MASK) : 0;
         bool shouldDisplayWidget = false;
         if (theCameraToolMode == 0) {
             switch (theToolMode) {
@@ -2411,7 +2311,6 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             };
         }
 
-        SDisableUseClearColor color(*this, isEditCamera);
         bool selectedPath = false;
 
         for (size_t selectedIdx = 0, selectedEnd = theHandles.size(); selectedIdx < selectedEnd;
@@ -2534,7 +2433,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
 
         m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
 
-        if (inDrawGuides && m_EditCameraEnabled == false && g_StudioApp.IsAuthorZoom() == false) {
+        if (inDrawGuides && !m_EditCameraEnabled && !g_StudioApp.IsAuthorZoom()) {
             m_GuideContainer.clear();
             // Figure out the matte area.
             NVRenderRect theContextViewport = m_Context.GetContextViewport();
@@ -2717,7 +2616,7 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
             theRenderContext.SetScissorRect(qt3ds::render::NVRenderRect(0, 0, 100, 100));
             theRenderContext.SetDepthWriteEnabled(true);
             theRenderContext.SetScissorTestEnabled(true);
-            theRenderContext.SetClearColor(QT3DSVec4(.2, .2, .2, 0));
+            theRenderContext.SetClearColor(QT3DSVec4(.2f, .2f, .2f, 0.0f));
             theRenderContext.Clear(qt3ds::render::NVRenderClearFlags(
                 qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
             theRenderer.RunLayerRender(*theLayer, thePickSetup->m_ViewProjection);
@@ -2872,12 +2771,11 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         }
     }
     // Pick against the widget first if possible.
-    // If we are in Edit camera mode, m_LastRenderedWidget might be outdated
-    // (and invisible = non-pickable) if the scene was not re-rendered when
-    // switching to edit camera. In this case do not pick against it, nor
-    // when it is inactive.
-    if (m_LastRenderedWidget && !m_EditCameraEnabled
-        && m_LastRenderedWidget->GetNode().m_Flags.IsActive()) {
+    if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
+                                 || m_LastRenderedWidget->GetNode().m_Type
+                                 == GraphObjectTypes::Light
+                                 || m_LastRenderedWidget->GetNode().m_Type
+                                 == GraphObjectTypes::Camera)) {
         Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
         if (picked.hasValue()) {
             RequestRender();
@@ -3195,8 +3093,7 @@ void STranslation::RotateSelectedInstanceAboutCameraDirectionVector(
 }
 
 // This method never feels right to me.  It is difficult to apply it to a single axis (of course for
-// that
-// you can use the inspector palette).
+// that you can use the inspector palette).
 void STranslation::RotateSelectedInstance(CPt inOriginalCoords, CPt inPreviousCoords,
                                           CPt inMouseCoords, CUpdateableDocumentEditor &inEditor,
                                           bool inLockToAxis)
@@ -3208,8 +3105,7 @@ void STranslation::RotateSelectedInstance(CPt inOriginalCoords, CPt inPreviousCo
     if (theCamera == nullptr)
         return;
     // We want to do a similar translation to what we did below but we need to calculate the
-    // parent's
-    // global rotation without scale included.
+    // parent's global rotation without scale included.
 
     QT3DSF32 theXDistance = (QT3DSF32)inMouseCoords.x - (QT3DSF32)inPreviousCoords.x;
     QT3DSF32 theYDistance = (QT3DSF32)inMouseCoords.y - (QT3DSF32)inPreviousCoords.y;
@@ -3489,7 +3385,6 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
 
     Option<QT3DSVec3> theOriginalPlaneCoords(thePrepResult->m_OriginalPlaneCoords);
     Option<QT3DSVec3> theCurrentPlaneCoords(thePrepResult->m_CurrentPlaneCoords);
-    Option<QT3DSVec3> thePreviousPlaneCoords(thePrepResult->m_PreviousPlaneCoords);
     QT3DSVec3 globalPos(thePrepResult->m_GlobalPos);
     bool isPlane(thePrepResult->m_IsPlane);
     QT3DSVec3 theAxis(thePrepResult->m_Axis);
@@ -3582,10 +3477,8 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             ApplyRotationToSelectedInstance(theRotation, *theNode, inEditor, false);
         }
         // In this case we are viewing the plane of rotation pretty much dead on, so we need to
-        // assume
-        // the camera and the object are both in the plane of rotation.  In this case we *sort* of
-        // need to
-        // do trackball rotation but force it to one plane of rotation.
+        // assume the camera and the object are both in the plane of rotation. In this case we
+        // *sort* of need to do trackball rotation but force it to one plane of rotation.
         else {
             // Setup a plane 600 units away from the camera and have the gadget run from there.
 

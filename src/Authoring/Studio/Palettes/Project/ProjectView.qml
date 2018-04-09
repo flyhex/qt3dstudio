@@ -49,7 +49,7 @@ Rectangle {
                 anchors.fill: parent
                 acceptedButtons: Qt.RightButton
                 onClicked: {
-                    _projectView.showContextMenu(mouse.x, mouse.y, projectTree.currentIndex);
+                    _parentView.showContextMenu(mouse.x, mouse.y, projectTree.currentIndex);
                 }
             }
 
@@ -61,7 +61,7 @@ Rectangle {
 
                 ScrollBar.vertical: ScrollBar {}
 
-                model: _projectView.projectModel
+                model: _parentView.projectModel
 
                 onCurrentIndexChanged: {
                     // Try to keep something selected always
@@ -119,7 +119,7 @@ Rectangle {
                                     drag.target: dragItemIcon
                                 }
 
-                                Drag.onDragStarted: _projectView.startDrag(dragAreaIcon, index)
+                                Drag.onDragStarted: _parentView.startDrag(dragAreaIcon, index)
                             }
                         }
 
@@ -146,7 +146,7 @@ Rectangle {
                                     drag.target: dragItem
                                 }
 
-                                Drag.onDragStarted: _projectView.startDrag(dragArea, index)
+                                Drag.onDragStarted: _parentView.startDrag(dragArea, index)
                             }
                         }
                     }
@@ -244,7 +244,7 @@ Rectangle {
 
             StyledToolButton {
                 enabledImage: "Asset-import-Normal.png";
-                onClicked: _projectView.assetImportAction(projectTree.currentIndex);
+                onClicked: _parentView.assetImportAction(projectTree.currentIndex);
                 toolTipText: qsTr("Import Assets");
             }
 
@@ -254,37 +254,37 @@ Rectangle {
 
             StyledToolButton {
                 enabledImage: "Objects-Effect-Normal.png";
-                onClicked: _projectView.effectAction(projectTree.currentIndex)
+                onClicked: _parentView.effectAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Effect Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Text-Normal.png";
-                onClicked: _projectView.fontAction(projectTree.currentIndex)
+                onClicked: _parentView.fontAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Font Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Image-Normal.png";
-                onClicked: _projectView.imageAction(projectTree.currentIndex)
+                onClicked: _parentView.imageAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Map Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Material-Normal.png";
-                onClicked: _projectView.materialAction(projectTree.currentIndex)
+                onClicked: _parentView.materialAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Material Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Model-Normal.png";
-                onClicked: _projectView.modelAction(projectTree.currentIndex)
+                onClicked: _parentView.modelAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Model Library")
             }
 
             StyledToolButton {
                 enabledImage: "Objects-Behavior-Normal.png";
-                onClicked: _projectView.behaviorAction(projectTree.currentIndex)
+                onClicked: _parentView.behaviorAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Behavior Library")
             }
         }

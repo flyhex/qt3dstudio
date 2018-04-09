@@ -85,41 +85,55 @@ Rectangle {
 
                 Image {
                     id: headerImage
-                    source: _actionView.itemIcon !== "" ? _resDir + _actionView.itemIcon : ""
+                    source: _parentView.itemIcon !== "" ? _resDir + _parentView.itemIcon : ""
                 }
 
                 StyledLabel {
                     Layout.fillWidth: true
-                    text: _actionView.itemText
-                    color: _actionView.itemColor
+                    text: _parentView.itemText
+                    color: _parentView.itemColor
                 }
 
                 StyledToolButton {
                     enabled: actionsList.currentIndex !== -1
                     enabledImage: "Action-Trash-Normal.png"
                     disabledImage: "Action-Trash-Disabled.png"
-                    toolTipText: qsTr("Delete selected action")
+                    toolTipText: qsTr("Delete (Del)")
 
-                    onClicked: _actionView.deleteAction(actionsList.currentIndex)
+                    onClicked: _parentView.deleteAction(actionsList.currentIndex)
                 }
 
                 StyledToolButton {
                     enabledImage: "add.png"
                     disabledImage: "add-disabled.png"
-                    toolTipText: qsTr("Add new action")
-                    enabled: _actionView.hasItem
+                    toolTipText: qsTr("New Action (") + _shiftKey + "A)"
+                    enabled: _parentView.hasItem
 
-                    onClicked: _actionView.addAction()
+                    onClicked: _parentView.addAction()
                 }
             }
             ListView {
                 id: actionsList
                 width: parent.width
-                height: count * _controlBaseHeight
+                height: count == 0 ? _controlBaseHeight : count * _controlBaseHeight
                 clip: true
 
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: parent.count == 0
+
+                    acceptedButtons: Qt.RightButton
+
+                     onClicked: {
+                        if (mouse.button == Qt.RightButton) {
+                            var updateMousePosition = mapToItem(actionsList, mouse.x, mouse.y)
+                            _parentView.showContextMenu(
+                                        updateMousePosition.x, updateMousePosition.y);
+                        }
+                    }
+                }
                 boundsBehavior: Flickable.StopAtBounds
-                model: _actionView.actionsModel
+                model: _parentView.actionsModel
 
                 delegate: Rectangle {
                     id: delegateItem
@@ -165,13 +179,13 @@ Rectangle {
                         onClicked: {
                             actionFlickable.scrollToBottom = false;
                             actionsList.currentIndex = model.index;
-                            _actionView.setCurrentActionIndex(model.index);
+                            _parentView.setCurrentActionIndex(model.index);
                             if (mouse.button == Qt.LeftButton && mouse.x < visibilityIcon.width + 10)
                                 model.visible = !model.visible;
 
                             if (mouse.button == Qt.RightButton) {
                                 var updateMousePosition = mapToItem(actionsList, mouse.x, mouse.y)
-                                _actionView.showContextMenu(updateMousePosition.x, updateMousePosition.y);
+                                _parentView.showContextMenu(updateMousePosition.x, updateMousePosition.y);
                             }
                         }
                         onDoubleClicked: {
@@ -196,7 +210,7 @@ Rectangle {
                         currentIndex = count - 1;
                 }
 
-                onCurrentIndexChanged: _actionView.setCurrentActionIndex(currentIndex);
+                onCurrentIndexChanged: _parentView.setCurrentActionIndex(currentIndex);
             }
 
             StyledMenuSeparator {
@@ -217,8 +231,8 @@ Rectangle {
                         text: qsTr("Trigger Object")
                     }
                     BrowserCombo {
-                        value: _actionView.triggerObjectName
-                        onShowBrowser: activeBrowser = _actionView.showTriggerObjectBrowser(
+                        value: _parentView.triggerObjectName
+                        onShowBrowser: activeBrowser = _parentView.showTriggerObjectBrowser(
                                            mapToGlobal(width, 0));
                     }
                 }
@@ -229,8 +243,8 @@ Rectangle {
                         text: qsTr("Event")
                     }
                     BrowserCombo {
-                        value: _actionView.eventName
-                        onShowBrowser: activeBrowser = _actionView.showEventBrowser(
+                        value: _parentView.eventName
+                        onShowBrowser: activeBrowser = _parentView.showEventBrowser(
                                            mapToGlobal(width, 0))
                     }
                 }
@@ -255,8 +269,8 @@ Rectangle {
                     }
 
                     BrowserCombo {
-                        value: _actionView.targetObjectName
-                        onShowBrowser: activeBrowser = _actionView.showTargetObjectBrowser(
+                        value: _parentView.targetObjectName
+                        onShowBrowser: activeBrowser = _parentView.showTargetObjectBrowser(
                                            mapToGlobal(width, 0))
                     }
                 }
@@ -268,8 +282,8 @@ Rectangle {
                     }
 
                     BrowserCombo {
-                        value: _actionView.handlerName
-                        onShowBrowser: activeBrowser = _actionView.showHandlerBrowser(
+                        value: _parentView.handlerName
+                        onShowBrowser: activeBrowser = _parentView.showHandlerBrowser(
                                            mapToGlobal(width, 0))
                     }
                 }
@@ -283,7 +297,7 @@ Rectangle {
 
                         onEditingFinished: {
                             if (parent)
-                                _actionView.setArgumentValue(parent.argument.handle, value)
+                                _parentView.setArgumentValue(parent.argument.handle, value)
                         }
                     }
                 }
@@ -301,7 +315,7 @@ Rectangle {
 
                         onEditingFinished: {
                             if (parent)
-                                _actionView.setArgumentValue(parent.argument.handle, value)
+                                _parentView.setArgumentValue(parent.argument.handle, value)
                         }
                     }
                 }
@@ -315,7 +329,7 @@ Rectangle {
 
                         onEditingFinished: {
                             if (parent)
-                                _actionView.setArgumentValue(parent.argument.handle, value);
+                                _parentView.setArgumentValue(parent.argument.handle, value);
                         }
                     }
                 }
@@ -325,12 +339,12 @@ Rectangle {
 
                     HandlerFireEvent {
                         label: parent && parent.argument.name ? parent.argument.name : ""
-                        value: _actionView.firedEvent === "" ? qsTr("[Unknown Event]")
-                                                             : _actionView.firedEvent
+                        value: _parentView.firedEvent === "" ? qsTr("[Unknown Event]")
+                                                             : _parentView.firedEvent
 
                         onShowBrowser: {
                             if (parent && parent.argument.handle) {
-                                activeBrowser = _actionView.showEventBrowserForArgument(
+                                activeBrowser = _parentView.showEventBrowserForArgument(
                                             parent.argument.handle, mapToGlobal(width, 0))
                             }
                         }
@@ -341,13 +355,13 @@ Rectangle {
                     id: slideHandlerComponent
 
                     HandlerGoToSlide {
-                        slideModel: _actionView.slideNames()
-                        defaultSlideIndex: parent && parent.argument.value ? _actionView.slideNameToIndex(parent.argument.value)
+                        slideModel: _parentView.slideNames()
+                        defaultSlideIndex: parent && parent.argument.value ? _parentView.slideNameToIndex(parent.argument.value)
                                                                            : 0
 
                         onIndexChanged: {
                             if (parent && parent.argument.handle && currentSlide)
-                                _actionView.setArgumentValue(parent.argument.handle, currentSlide)
+                                _parentView.setArgumentValue(parent.argument.handle, currentSlide)
                         }
                     }
                 }
@@ -361,7 +375,7 @@ Rectangle {
 
                         onClicked: {
                             if (parent && parent.argument.handle)
-                                _actionView.setArgumentValue(parent.argument.handle, !checked)
+                                _parentView.setArgumentValue(parent.argument.handle, !checked)
                         }
                     }
                 }
@@ -370,23 +384,23 @@ Rectangle {
                     id: propertyHandlerComponent
 
                     HandlerProperty {
-                        propertyModel: _actionView.propertyModel
+                        propertyModel: _parentView.propertyModel
                         defaultPropertyIndex: propertyModel ? propertyModel.defaultPropertyIndex : 0
 
                         onPropertySelected: {
                             if (parent && parent.argument.handle)
-                                _actionView.setCurrentPropertyIndex(parent.argument.handle, index);
+                                _parentView.setCurrentPropertyIndex(parent.argument.handle, index);
                         }
                     }
                 }
 
                 Repeater {
-                    model: _actionView.handlerArguments.length
+                    model: _parentView.handlerArguments.length
 
                     Loader {
                         x: 12
 
-                        readonly property var argument:_actionView.handlerArguments[model.index]
+                        readonly property var argument:_parentView.handlerArguments[model.index]
 
                         onLoaded: {
                             // HandlerProperty does its own tab order handling

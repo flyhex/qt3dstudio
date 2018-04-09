@@ -44,8 +44,6 @@
 #include "Qt3DSRenderPath.h"
 #include "Qt3DSRenderPathSubPath.h"
 #include "Qt3DSRenderPathManager.h"
-#include "Qt3DSTypes.h"
-#include <sstream>
 
 namespace Q3DStudio {
 enum ExtendedAttributes {
@@ -371,7 +369,11 @@ struct SRuntimePropertyParser
         if (theString.IsValid()) {
             SEnumNameMap *theMap = SEnumParseMap<TEnumType>::GetMap();
             for (SEnumNameMap *theItem = theMap; theItem->m_Name && *theItem->m_Name; ++theItem) {
-                if (strcmp(theString, theItem->m_Name) == 0) {
+                // hack to match advanced overlay types, whose name start with a '*'
+                const char8_t *p = theString.c_str();
+                if (*p == '*')
+                    ++p;
+                if (strcmp(p, theItem->m_Name) == 0) {
                     TEnumType theNewValue = static_cast<TEnumType>(theItem->m_Enum);
                     if (outValue != theNewValue) {
                         outValue = theNewValue;
@@ -644,11 +646,6 @@ struct SRuntimePropertyParser
 #define Path_PaintStyle ATTRIBUTE_PAINTSTYLE
 #define Path_PathBuffer ATTRIBUTE_SOURCEPATH
 #define SubPath_Closed ATTRIBUTE_CLOSED
-#define DataInput_Value ATTRIBUTE_VALUE
-#define DataInput_ValueStr ATTRIBUTE_VALUESTR
-#define DataInput_ControlledElemProp ATTRIBUTE_CONTROLLEDELEMPROP
-#define DataInput_TimeFrom ATTRIBUTE_TIMEFROM
-#define DataInput_TimeTo ATTRIBUTE_TIMETO
 
 // Fill in implementations for the actual parse tables.
 #define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
@@ -1172,141 +1169,6 @@ struct STextTranslator : public SNodeTranslator
     }
 };
 
-struct SDataInputTranslator : public Qt3DSTranslator
-{
-    typedef SDataInput TNodeType;
-    SDataInputTranslator(Q3DStudio::TElement &inElement, SDataInput &inRenderObject)
-        : Qt3DSTranslator(inElement, inRenderObject)
-    {
-    }
-    void OnSpecificPropertyChange(SRuntimePropertyParser &inParser)
-    {
-        SDataInput &theItem = *static_cast<SDataInput *>(m_RenderObject);
-        // Handle DataInput propertychange here instead of macro as
-        // this is a special case of controlling other elements
-        QVector<QPair<CRegisteredString, CRegisteredString>> controlledElementsProperties =
-                theItem.GetControlledElementsProperties();
-
-        for (int i = 0; i<controlledElementsProperties.size(); ++i) {
-            QPair<CRegisteredString, CRegisteredString> elemAndProperty =
-                    controlledElementsProperties.at(i);
-
-            // Datainput is always a direct child of Scene so we can pass
-            // Element().GetParent() to GetElement starting point of search
-            Q3DStudio::TElement *controlledElem =
-                    Q3DStudio::CLuaElementHelper::GetElement(
-                        Element().GetBelongedPresentation()->GetApplication(),
-                        Element().GetBelongedPresentation(), elemAndProperty.first,
-                        Element().GetParent());
-
-            if (!controlledElem) {
-                qCWarning(qt3ds::WARNING()) << "DataInput controlled element not found!";
-                QT3DS_ASSERT(false);
-                return;
-            }
-
-            SPresentation presentation = inParser.m_Presentation;
-            Qt3DSTranslator *controlledTranslator =
-                    reinterpret_cast<Qt3DSTranslator *>(controlledElem->GetAssociation());
-            SRuntimePropertyParser ControlledElementParser(presentation,
-                                                           inParser.m_RenderContext,
-                                                           *controlledElem);
-            ControlledElementParser.Setup(
-                Q3DStudio::CHash::HashAttribute(elemAndProperty.second),
-                inParser.m_Value, inParser.m_Type);
-
-            switch (inParser.m_PropertyName) {
-            case Q3DStudio::ATTRIBUTE_VALUE:
-                // Instead of generic macro, iterate through object types that are relevant for
-                // DataInput control and which have propertychange handler
-                switch (controlledTranslator->GetUIPType()) {
-                case GraphObjectTypes::Layer:
-                    (reinterpret_cast<SLayerTranslator *>(controlledTranslator))
-                            ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<SLayerTranslator *>(controlledTranslator))
-                            ->PostPropertyChanged(ControlledElementParser,
-                                                  *m_Element->GetBelongedPresentation());
-                    break;
-                case GraphObjectTypes::Light:
-                    (reinterpret_cast<SLightTranslator *>(controlledTranslator))
-                            ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<SLightTranslator *>(controlledTranslator))
-                            ->PostPropertyChanged(ControlledElementParser,
-                                                  *m_Element->GetBelongedPresentation());
-                    break;
-                case GraphObjectTypes::Camera:
-                    (reinterpret_cast<SCameraTranslator *>(controlledTranslator))
-                            ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<SCameraTranslator *>(controlledTranslator))
-                            ->PostPropertyChanged(ControlledElementParser,
-                                                  *m_Element->GetBelongedPresentation());
-                    break;
-                case GraphObjectTypes::Model:
-                    (reinterpret_cast<SModelTranslator *>(controlledTranslator))
-                            ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<SModelTranslator *>(controlledTranslator))
-                            ->PostPropertyChanged(ControlledElementParser,
-                                                  *m_Element->GetBelongedPresentation());
-                    break;
-                case GraphObjectTypes::DefaultMaterial:
-                    (reinterpret_cast<SDefaultMaterialTranslator *>(controlledTranslator))
-                            ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<SDefaultMaterialTranslator *>(controlledTranslator))
-                            ->PostPropertyChanged(ControlledElementParser,
-                                                  *m_Element->GetBelongedPresentation());
-                    break;
-                case GraphObjectTypes::Text:
-                    // TODO Remove this testcode. Allows pushing float values in to datainput
-                    // and showing them on textfield without text type parser throwing ASSERT
-                    if (Q3DStudio::CHash::HashAttribute(elemAndProperty.second) ==
-                            Q3DStudio::EAttribute::ATTRIBUTE_TEXTSTRING) {
-
-                        // workaround for MinGW https://gcc.gnu.org/bugzilla/show_bug.cgi?id=52015
-                        std::ostringstream oss;
-                        oss << inParser.m_Value.m_FLOAT;
-                        CRegisteredString valuestring = m_Element->GetBelongedPresentation()->
-                            GetStringTable().RegisterStr(oss.str().c_str());
-
-                        Q3DStudio::UVariant convertedVal;
-                        convertedVal.m_StringHandle = m_Element->GetBelongedPresentation()->
-                            GetStringTable().GetHandle(valuestring);
-                        ControlledElementParser.Setup(
-                            Q3DStudio::CHash::HashAttribute(elemAndProperty.second),
-                            convertedVal,Q3DStudio::EAttributeType::ATTRIBUTETYPE_STRING);
-                    }
-                    (reinterpret_cast<STextTranslator *>(controlledTranslator))
-                            ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<STextTranslator *>(controlledTranslator))
-                            ->PostPropertyChanged(ControlledElementParser,
-                                                  *m_Element->GetBelongedPresentation());
-                    break;
-                default:
-                    QT3DS_ASSERT(false);
-                    break;
-                }
-                break;
-            case Q3DStudio::ATTRIBUTE_VALUESTR:
-                if (controlledTranslator->GetUIPType() == GraphObjectTypes::Text) {
-                    (reinterpret_cast<STextTranslator *>(controlledTranslator))
-                        ->OnSpecificPropertyChange(ControlledElementParser);
-                    (reinterpret_cast<STextTranslator *>(controlledTranslator))
-                        ->PostPropertyChanged(ControlledElementParser,
-                                              *m_Element->GetBelongedPresentation());
-                }
-                break;
-                // TODO handle remaining properties
-                // (timefrom/to)
-            default:
-                // Unknown attribute, skip those as DataInput should only
-                // respond to property changes from outside, not from
-                // runtime internal animation loops
-                // QT3DS_ASSERT( false );
-                break;
-            }
-        }
-    }
-    void PostPropertyChanged(const SRuntimePropertyParser &, Q3DStudio::IPresentation &) {}
-};
 struct SEffectPropertyEntry
 {
     Q3DStudio::EAttributeType m_AttributeType;

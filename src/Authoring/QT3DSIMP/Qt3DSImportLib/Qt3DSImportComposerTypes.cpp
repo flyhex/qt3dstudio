@@ -92,12 +92,6 @@ DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const wchar
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportDataInput::GetPropertyDataType(const wchar_t *inPropertyName)
-{
-    ITERATE_COMPOSER_DATAINPUT_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
-
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
@@ -163,12 +157,6 @@ DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const char8
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportDataInput::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_DATAINPUT_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
-
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
@@ -195,8 +183,6 @@ SImportAsset &SImportComposerTypes::GetImportAssetForType(ComposerObjectTypes::E
         return m_SubPath;
     case ComposerObjectTypes::PathAnchorPoint:
         return m_PathAnchorPoint;
-    case ComposerObjectTypes::DataInput:
-        return m_DataInput;
     }
     QT3DS_ASSERT(false);
     return m_Asset;

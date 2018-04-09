@@ -57,6 +57,8 @@ void ObjectBrowserView::setModel(ObjectListModel *model)
         m_model = new FlatObjectListModel(model, this);
     }
     m_model->setSourceModel(model);
+    m_ownerInstance = 0;
+    m_selection = -1;
 
     Q_EMIT modelChanged();
 }
@@ -67,14 +69,17 @@ QSize ObjectBrowserView::sizeHint() const
     return {500, 500};
 }
 
-QString ObjectBrowserView::name(int index) const
+QString ObjectBrowserView::absPath(int index) const
 {
-    return m_model->index(index, 0).data(ObjectListModel::NameRole).toString();
+    return m_model->index(index, 0).data(ObjectListModel::AbsolutePathRole).toString();
 }
 
-QString ObjectBrowserView::path(int index) const
+QString ObjectBrowserView::relPath(int index) const
 {
-    return m_model->index(index, 0).data(ObjectListModel::PathReferenceRole).toString();
+    return m_model->data(
+        m_model->index(index),
+        m_model->sourceModel()->indexForHandle(m_ownerInstance),
+        ObjectListModel::PathReferenceRole).toString();
 }
 
 bool ObjectBrowserView::selectable(int index) const
@@ -84,9 +89,13 @@ bool ObjectBrowserView::selectable(int index) const
     return m_model->sourceModel()->selectable(handle);
 }
 
-void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
+void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &handle,
+                                        const qt3dsdm::Qt3DSDMInstanceHandle &owner)
 {
+    m_ownerInstance = owner;
     QModelIndex index = m_model->sourceIndexForHandle(handle);
+    if (!index.isValid())
+        return;
     m_model->expandTo(QModelIndex(), index);
     setSelection(m_model->rowForSourceIndex(index));
 }

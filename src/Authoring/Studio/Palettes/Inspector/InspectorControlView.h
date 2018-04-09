@@ -36,13 +36,13 @@
 #include "Qt3DSFileTools.h"
 #include "TabOrderHandler.h"
 #include "MouseHelper.h"
-#include "DataInputSelectDlg.h"
+#include "DataInputSelectView.h"
 
 class InspectorControlModel;
 QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class CInspectableBase;
 class ImageChooserView;
-class DataInputChooserView;
+class DataInputSelectView;
 class ImageChooserModel;
 class MeshChooserView;
 class ObjectBrowserView;
@@ -75,7 +75,8 @@ public:
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
-    Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE QObject *showDataInputChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE bool toolTipsEnabled();
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -109,6 +110,7 @@ private:
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     void showBrowser(QQuickWidget *browser, const QPoint &point);
     bool canLinkProperty(int instance, int handle) const;
+    void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_timeChanged;
@@ -123,7 +125,7 @@ private:
     QPointer<TextureChooserView> m_textureChooserView;
     QPointer<ObjectBrowserView> m_objectReferenceView;
     QPointer<ObjectListModel> m_objectReferenceModel;
-    QPointer<DataInputSelectDlg> m_dataInputChooserView;
+    QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
 

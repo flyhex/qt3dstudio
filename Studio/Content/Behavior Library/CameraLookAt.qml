@@ -50,7 +50,7 @@
 
 /*[[
     <Property name="cameraTarget" formalName="Camera Target" type="ObjectRef" default="Scene.Layer.Camera" description="Object in scene the camera should look at" />
-    <Property name="startImmediately" formalName="Start Immediately?" type="Boolean" default="True" publishLevel="Advanced" description="Start immediately, or wait for the Enable action to be called?" />
+    <Property name="startImmediately" formalName="Start Immediately?" type="Boolean" default="True" publishLevel="Advanced" description="Start immediately, or wait for\nthe Enable action to be called?" />
 
     <Handler name="start" formalName="Start" category="CameraLookAt" description="Begin looking the target" />
     <Handler name="stop" formalName="Stop" category="CameraLookAt" description="Stop looking the target" />

@@ -1172,10 +1172,17 @@ namespace render {
     {
         if (m_LayerPrepResult->IsLayerVisible()) {
             if (GetOffscreenRenderer()) {
-                m_LastFrameOffscreenRenderer->Render(
-                    CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
-                    m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
-                    SScene::ClearIsOptional);
+                if (m_Layer.m_Background == LayerBackground::Color) {
+                    m_LastFrameOffscreenRenderer->RenderWithClear(
+                        CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
+                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
+                        SScene::AlwaysClear, m_Layer.m_ClearColor, &m_Layer);
+                } else {
+                    m_LastFrameOffscreenRenderer->Render(
+                        CreateOffscreenRenderEnvironment(), m_Renderer.GetContext(),
+                        m_Renderer.GetQt3DSContext().GetPresentationScaleFactor(),
+                        SScene::ClearIsOptional, &m_Layer);
+                }
             } else {
                 RenderDepthPass(false);
                 Render();
@@ -1261,7 +1268,8 @@ namespace render {
         // progressive AA algorithm.
         if (thePrepResult.m_Flags.WasLayerDataDirty()
             || thePrepResult.m_Flags.WasDirty()
-            || m_Renderer.IsLayerCachingEnabled() == false) {
+            || m_Renderer.IsLayerCachingEnabled() == false
+            || thePrepResult.m_Flags.ShouldRenderToTexture()) {
             m_ProgressiveAAPassIndex = 0;
             m_NonDirtyTemporalAAPassIndex = 0;
             needsRender = true;
@@ -2078,6 +2086,11 @@ namespace render {
             theContext.SetScissorTestEnabled(false);
             m_Renderer.DrawScreenRect(theWidgetScreenRect, *m_BoundingRectColor);
         }
+        theContext.SetBlendFunction(qt3ds::render::NVRenderBlendFunctionArgument(
+                                        NVRenderSrcBlendFunc::One, NVRenderDstBlendFunc::OneMinusSrcAlpha,
+                                        NVRenderSrcBlendFunc::One, NVRenderDstBlendFunc::OneMinusSrcAlpha));
+        theContext.SetBlendEquation(qt3ds::render::NVRenderBlendEquationArgument(
+                                        NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
     }
 
 #define RENDER_FRAME_NEW(type) QT3DS_NEW(m_Renderer.GetPerFrameAllocator(), type)

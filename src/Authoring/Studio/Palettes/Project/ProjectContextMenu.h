@@ -41,7 +41,7 @@ public:
     virtual ~ProjectContextMenu();
 
 private Q_SLOTS:
-    void handleShowInExplorer();
+    void handleShowContainingFolder();
     void handleCopyPath();
     void handleCopyFullPath();
     void handleRefreshImport();

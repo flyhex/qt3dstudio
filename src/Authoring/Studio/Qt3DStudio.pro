@@ -8,7 +8,7 @@ CONFIG += nostrictstrings
 
 DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
     PCRE_STATIC EASTL_MINMAX_ENABLED=0 \
-    EASTL_NOMINMAX=0 DOM_DYNAMIC DRIVE_DESIGN_STUDIO
+    EASTL_NOMINMAX=0 DOM_DYNAMIC
 
 win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 
@@ -70,6 +70,7 @@ INCLUDEPATH += \
     ../Client/Code/Shared/Log \
     ../../Runtime/Source/Qt3DSRender/Include \
     ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../Runtime/Source/Qt3DSRuntimeRender/Include \
     ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
     ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
@@ -141,6 +142,8 @@ HEADERS += \
     _Win/Application/SubPresentationListDlg.h \
     Application/DataInputDlg.h \
     Application/DataInputListDlg.h \
+    Application/DataInputSelectModel.h \
+    Application/DataInputSelectView.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
@@ -157,7 +160,6 @@ HEADERS += \
     Palettes/Timeline/TimelineView.h \
     Palettes/Timeline/TimelineObjectModel.h \
     Palettes/Timeline/TimeMeasureItem.h \
-    Application/DataInputSelectDlg.h \
     Palettes/TimelineGraphicsView/TimelineWidget.h \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
     Palettes/TimelineGraphicsView/TimelineSplitter.h \
@@ -338,7 +340,6 @@ SOURCES += \
     Palettes/Timeline/TimelineKeyframe.cpp \
     Palettes/Timeline/TimelineRow.cpp \
     Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/DataInputTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
     Palettes/Timeline/Bindings/GroupTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/ImageTimelineItemBinding.cpp \
@@ -382,7 +383,8 @@ SOURCES += \
     Palettes/Timeline/TimePropertyItem.cpp \
     Application/DataInputDlg.cpp \
     Application/DataInputListDlg.cpp \
-    Application/DataInputSelectDlg.cpp \
+    Application/DataInputSelectModel.cpp \
+    Application/DataInputSelectView.cpp \
     Palettes/TimelineGraphicsView/TimelineWidget.cpp \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
     Palettes/TimelineGraphicsView/TimelineSplitter.cpp \

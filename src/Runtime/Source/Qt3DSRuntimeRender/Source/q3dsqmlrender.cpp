@@ -83,10 +83,12 @@ SOffscreenRendererEnvironment Q3DSQmlRender::GetDesiredEnvironment(QT3DSVec2 inP
 }
 
 SOffscreenRenderFlags Q3DSQmlRender::NeedsRender(const SOffscreenRendererEnvironment &inEnvironment,
-                                                  QT3DSVec2 inPresentationScaleFactor)
+                                                 QT3DSVec2 inPresentationScaleFactor,
+                                                 const SRenderInstanceId instanceId)
 {
     Q_UNUSED(inEnvironment);
     Q_UNUSED(inPresentationScaleFactor);
+    Q_UNUSED(instanceId);
     bool render = false;
     if (!m_qmlStreamRenderer)
         initializeRenderer();
@@ -96,8 +98,9 @@ SOffscreenRenderFlags Q3DSQmlRender::NeedsRender(const SOffscreenRendererEnviron
 }
 
 void Q3DSQmlRender::Render(const SOffscreenRendererEnvironment &inEnvironment,
-                            NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
-                            SScene::RenderClearCommand inColorBufferNeedsClear)
+                           NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
+                           SScene::RenderClearCommand inColorBufferNeedsClear,
+                           const SRenderInstanceId instanceId)
 {
     Q_UNUSED(inEnvironment);
     Q_UNUSED(inPresentationScaleFactor);

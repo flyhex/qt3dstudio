@@ -54,8 +54,7 @@
 #define _EULERANGLES_H_
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <qmath.h>
 #include "QuatTypes.h"
 
 #define EulFrmS 0

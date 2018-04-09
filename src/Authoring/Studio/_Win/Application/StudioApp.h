@@ -145,6 +145,8 @@ private:
     // user canceling file dialog?
     bool m_goStraightToWelcomeFileDialog;
     int m_tutorialPage;
+    QTimer *m_autosaveTimer;
+
 public:
     CMainFrame* m_pMainWnd;
 
@@ -173,6 +175,7 @@ public:
     bool CanChangeTimebarColor();
     void HandleSetChangedKeys();
     void DeleteSelectedKeys();
+    void DeleteSelectedObject();
     void HandleDuplicateCommand();
     bool CanDuplicateObject();
     void OnToggleAutosetKeyframes();
@@ -193,15 +196,18 @@ public:
     void PlaybackToggle();
     CInspectableBase *GetInspectableFromSelectable(Q3DStudio::SSelectedValue inSelectable);
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
-    bool OnSave();
+    bool OnSave(bool autosave = false);
     bool OnSaveAs();
     bool OnSaveCopy();
     bool OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError = true);
     void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
-    void OnFileNew();
+    QString OnFileNew(bool createFolder = true);
     bool IsAuthorZoom();
     void SetAuthorZoom(bool inZoom);
+    void SetAutosaveEnabled(bool enabled);
+    void SetAutosaveInterval(int interval);
+    void toggleEyeball();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;

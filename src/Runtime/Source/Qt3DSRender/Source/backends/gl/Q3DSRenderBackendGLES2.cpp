@@ -285,6 +285,11 @@ void NVRenderBackendGLES2Impl::UpdateSampler(
     QT3DS_ASSERT(!borderColor);
     NVRENDER_BACKEND_UNUSED(lodBias);
     NVRENDER_BACKEND_UNUSED(borderColor);
+    NVRENDER_BACKEND_UNUSED(wrapR);
+    NVRENDER_BACKEND_UNUSED(minLod);
+    NVRENDER_BACKEND_UNUSED(maxLod);
+    NVRENDER_BACKEND_UNUSED(compareMode);
+    NVRENDER_BACKEND_UNUSED(compareFunc);
 
     GLenum glTarget = m_Conversion.fromTextureTargetToGL(target);
 
@@ -320,18 +325,22 @@ void NVRenderBackendGLES2Impl::UpdateTextureSwizzle(NVRenderBackendTextureObject
                                                     NVRenderTextureSwizzleMode::Enum swizzleMode)
 {
     NVRENDER_BACKEND_UNUSED(to);
+    NVRENDER_BACKEND_UNUSED(target);
+    NVRENDER_BACKEND_UNUSED(swizzleMode);
+#if defined(QT_OPENGL_ES)
     if (m_backendSupport.caps.bits.bTextureSwizzleSupported) {
         GLint glSwizzle[4];
         GLenum glTarget = m_Conversion.fromTextureTargetToGL(target);
         m_Conversion.NVRenderConvertSwizzleModeToGL(swizzleMode, glSwizzle);
-#if defined(QT_OPENGL_ES)
+
         // since ES3 spec has no GL_TEXTURE_SWIZZLE_RGBA set it separately
         GL_CALL_EXTRA_FUNCTION(glTexParameteri(glTarget, GL_TEXTURE_SWIZZLE_R, glSwizzle[0]));
         GL_CALL_EXTRA_FUNCTION(glTexParameteri(glTarget, GL_TEXTURE_SWIZZLE_G, glSwizzle[1]));
         GL_CALL_EXTRA_FUNCTION(glTexParameteri(glTarget, GL_TEXTURE_SWIZZLE_B, glSwizzle[2]));
         GL_CALL_EXTRA_FUNCTION(glTexParameteri(glTarget, GL_TEXTURE_SWIZZLE_A, glSwizzle[3]));
-#endif
+
     }
+#endif
 }
 
 QT3DSU32
@@ -512,7 +521,7 @@ void NVRenderBackendGLES2Impl::SetReadBuffer(NVRenderBackendRenderTargetObject r
                                              NVReadFaces::Enum inReadFace)
 {
     NVRENDER_BACKEND_UNUSED(rto);
-
+    NVRENDER_BACKEND_UNUSED(inReadFace);
 }
 
 void NVRenderBackendGLES2Impl::RenderTargetAttach(NVRenderBackendRenderTargetObject,
@@ -520,6 +529,10 @@ void NVRenderBackendGLES2Impl::RenderTargetAttach(NVRenderBackendRenderTargetObj
                                                   NVRenderBackendTextureObject to, QT3DSI32 level,
                                                   QT3DSI32 layer)
 {
+    NVRENDER_BACKEND_UNUSED(attachment);
+    NVRENDER_BACKEND_UNUSED(to);
+    NVRENDER_BACKEND_UNUSED(level);
+    NVRENDER_BACKEND_UNUSED(layer);
     Q_ASSERT(false);
 }
 

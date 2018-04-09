@@ -87,10 +87,11 @@ private:
 
     void getImageList();
 
-    QPixmap getScaledPic(QList<QString>::iterator iter);
+    QPixmap getScaledPic(const QList<QString>::iterator &iter);
     QPixmap getPrevScaledPic();
     QPixmap getNextScaledPic();
-    qreal getDisplayScalingForImage(QList<QString>::iterator iter);
+    qreal getDisplayScalingForImage(const QList<QString>::iterator &iter);
+    QSize getPicSize(const QList<QString>::iterator &iter);
 };
 
 #endif // STUDIOTUTORIALWIDGET_H

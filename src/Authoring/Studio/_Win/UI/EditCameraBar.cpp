@@ -120,6 +120,12 @@ void CEditCameraBar::OnCameraChanged()
     HandleCameraChanged(m_CameraSelector->currentIndex());
 }
 
+void CEditCameraBar::setCameraIndex(int inIndex)
+{
+    m_CameraSelector->setCurrentIndex(inIndex);
+    OnCameraChanged();
+}
+
 //==============================================================================
 /**
  *	Handle the switching of the current edit camera
@@ -154,10 +160,10 @@ void CEditCameraBar::HandleCameraChanged(int inIndex)
     // set the tool to camera pan
     if (theMainFrame != nullptr) {
         long theToolMode = g_StudioApp.GetToolMode();
-        if (theRenderer.DoesEditCameraSupportRotation(theRenderer.GetEditCamera()) == false
+        if (!theRenderer.DoesEditCameraSupportRotation(theRenderer.GetEditCamera())
                 && theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE) {
             g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-            m_SceneView->SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
+            m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
         }
 
         // Trigger for tool changed. Changing between deployment/edit camera can change the tool

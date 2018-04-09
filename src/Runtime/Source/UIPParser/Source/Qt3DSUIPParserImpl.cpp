@@ -274,10 +274,12 @@ void SParseElementManager::MarkAttributeAsReferenced(const char8_t *inElement,
         MarkAttributeAsReferenced(*theData, inPropertyName);
 }
 
-void SParseElementManager::MarkAllAttributesAsReferenced(SElementData &inElement)
+void SParseElementManager::MarkAllAttributesAsReferenced(SElementData &inElement,
+                                                         bool searchParent)
 {
     m_PropertyList.clear();
-    m_MetaData.GetInstanceProperties(inElement.m_Type, inElement.m_Class, m_PropertyList, false);
+    m_MetaData.GetInstanceProperties(inElement.m_Type, inElement.m_Class, m_PropertyList,
+                                     searchParent);
     for (QT3DSU32 idx = 0, end = m_PropertyList.size(); idx < end; ++idx)
         MarkAttributeAsReferenced(inElement, m_PropertyList[idx].c_str());
 }
@@ -985,9 +987,6 @@ EElementType GetElementType(const char *inType)
     else if (AreEqual(inType, "SubPath"))
         return ELEMENTTYPE_SUBPATH;
 
-    else if (AreEqual(inType, "DataInput"))
-        return ELEMENTTYPE_DATAINPUT;
-
     else
         return ELEMENTTYPE_UNKNOWN;
 }
@@ -1173,10 +1172,6 @@ void CUIPParserImpl::CacheGraphRequiredAttributes(qt3dsdm::IDOMReader &inReader)
         // support it, since it is not really needed except during initialization
         m_ParseElementManager.MarkAttributeAsReferenced(theData, "controlledproperty");
 
-        if (AreEqual(theType, "Text")) {
-            m_ParseElementManager.MarkAttributeAsReferenced(theData, "textstring");
-        }
-
         // Behaviors need all attributes possible on the object on them all the time.
         if (AreEqual(theType, "Behavior") || AreEqual(theType, "RenderPlugin")) {
             m_ParseElementManager.MarkAllAttributesAsReferenced(theData);
@@ -1210,6 +1205,7 @@ BOOL CUIPParserImpl::CacheLogicRequiredAttributes(qt3dsdm::IDOMReader &inReader,
             if (AreEqual(inReader.GetNarrowElementName(), "Add")
                 || AreEqual(inReader.GetNarrowElementName(), "Set")) {
                 bool isSet = AreEqual(inReader.GetNarrowElementName(), "Set");
+
                 const char *theRef;
                 if (inReader.Att("ref", theRef)) {
                     theRef++; // remove the '#'
@@ -1220,6 +1216,17 @@ BOOL CUIPParserImpl::CacheLogicRequiredAttributes(qt3dsdm::IDOMReader &inReader,
                         QT3DS_ASSERT(false);
                         continue;
                     }
+                    // If this element has controlledproperty, need to mark all as referenced
+                    // in order for datainput initialisation to find attributes that
+                    // are controlled
+                    // TODO: we could parse out the exact controlled property names and
+                    // set only those as referenced. In this case we might have to expand vec3
+                    // type attributes to component parts
+                    const char *ctrldProp;
+                    inReader.Att("controlledproperty", ctrldProp);
+                    if (ctrldProp)
+                        m_ParseElementManager.MarkAllAttributesAsReferenced(*theData, true);
+
                     theCommandInstances.insert(theData->m_Id);
                     if (isSet) {
                         for (eastl::pair<const char *, const char *> theAtt =
@@ -2546,9 +2553,6 @@ SElementAndType CUIPParserImpl::GetElementForID(const char *inElementName)
         break;
     case qt3dsdm::ComposerObjectTypes::SubPath:
         theUIPType = UIPElementTypes::PathSubPath;
-        break;
-    case qt3dsdm::ComposerObjectTypes::DataInput:
-        theUIPType = UIPElementTypes::DataInput;
         break;
     default:
         QT3DS_ASSERT(false);

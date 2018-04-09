@@ -69,6 +69,7 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
     Q_PROPERTY(bool controllable MEMBER m_controllable CONSTANT)
+    Q_PROPERTY(QString controller MEMBER m_controller NOTIFY controlledChanged)
 
 public:
     virtual ~InspectorControlBase();
@@ -96,7 +97,7 @@ public:
     bool m_animated = false;
     bool m_controlled = false;
     bool m_controllable = false;
-
+    QString m_controller;
     std::vector<qt3dsdm::TSignalConnectionPtr> m_connections;
 };
 
@@ -125,18 +126,8 @@ public:
 
     QVariant getPropertyValue(long instance, int handle);
 
-    QString getCurrentController()
-    {
-        return m_currController;
-    };
-
-    void setCurrentController(const QString &currCntroller)
-    {
-        m_currController = currCntroller;
-    };
-
     qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
-
+    QString currentControllerValue(long instance, int handle) const;
     void setPropertyControllerInstance(long instance,int handle,
                                        Q3DStudio::CString controllerInstance,
                                        bool controlled);
@@ -159,8 +150,6 @@ private:
         QVariantList controlElements;
 
         ~GroupInspectorControl() {
-            //for (auto element : controlElements)
-            //    element.value<QObject *>()->deleteLater();
         }
     };
 
@@ -175,11 +164,6 @@ private:
 
     std::vector<MaterialEntry> m_materials;
 
-    // TODO: move this elsewhere where it is specific
-    // for a particular element - property, not member of
-    // the entire model
-    QString m_currController;
-
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
     QPair<long, int> m_modifiedProperty;
@@ -193,7 +177,6 @@ private:
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_controlledToggleConnection;
 
     QStringList materialValues() const;
     InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);
