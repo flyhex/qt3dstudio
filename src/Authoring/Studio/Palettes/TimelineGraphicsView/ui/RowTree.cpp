@@ -35,6 +35,7 @@
 #include "Qt3DSString.h"
 
 #include <QtGui/qpainter.h>
+#include "QtGui/qtextcursor.h"
 #include <QtWidgets/qgraphicslinearlayout.h>
 #include <QtWidgets/qgraphicssceneevent.h>
 
@@ -336,6 +337,16 @@ void RowTree::setState(State state)
 void RowTree::setTimelineRow(RowTimeline *rowTimeline)
 {
     m_rowTimeline = rowTimeline;
+}
+
+void RowTree::selectLabel()
+{
+    m_labelItem.setEnabled(true);
+    m_labelItem.setFocus();
+    // Select all text
+    QTextCursor cursor = m_labelItem.textCursor();
+    cursor.select(QTextCursor::Document);
+    m_labelItem.setTextCursor(cursor);
 }
 
 RowTree *RowTree::parentRow() const

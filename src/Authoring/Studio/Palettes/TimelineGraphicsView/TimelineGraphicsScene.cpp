@@ -47,6 +47,7 @@
 #include "ResourceCache.h"
 #include "DurationEditDlg.h"
 #include "TimelineControl.h"
+#include "RowTreeContextMenu.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -628,8 +629,6 @@ void TimelineGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 
 void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-    QMenu contextMenu;
-
     int index = event->scenePos().y() / TimelineConstants::ROW_H;
     RowTree *row = m_rowManager->rowAt(index);
 
@@ -658,6 +657,7 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
             m_keyframeManager->deselectAllKeyframes();
         }
 
+        QMenu contextMenu;
         auto actionInsertKeyframe = contextMenu.addAction(QObject::tr("Insert Keyframe"));
         auto actionCutSelectedKeyframes =
                 contextMenu.addAction(QObject::tr("Cut Selected Keyframe"));
@@ -720,12 +720,17 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         connect(actionDeleteRowKeyframes, &QAction::triggered, this, [=]() {
             m_keyframeManager->deleteKeyframes(row->rowTimeline());
         });
+
+        contextMenu.exec(event->screenPos());
+
     } else { // tree context menu
-        // Mahmoud_TODO: implement tree section context menu
+        if (!row->isProperty()) {
+            RowTreeContextMenu treeContextMenu(row);
+            treeContextMenu.exec(event->screenPos());
+        }
     }
 
 
-    contextMenu.exec(event->screenPos());
 }
 
 bool TimelineGraphicsScene::event(QEvent *event)

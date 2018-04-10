@@ -67,6 +67,7 @@ public:
     void setTreeWidth(double w);
     void setBinding(ITimelineItemBinding *binding);
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
+    void selectLabel();
     TreeControlType getClickedControl(const QPointF &scenePos);
     bool hasPropertyChildren();
     bool shy() const;
