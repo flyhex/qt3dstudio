@@ -282,8 +282,10 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     painter->drawPixmap(offset + 15, y, 16, 16, pixRowType);
 
-    // Shy, eye, lock BG (to hide the label when overlapping)
-    painter->fillRect(QRect(m_treeWidth - 53, 0, 53, size().height() - 1), bgColor);
+    // Shy, eye, lock separator
+    painter->fillRect(QRect(m_treeWidth - TimelineConstants::TREE_ICONS_W,
+                            0, 1, size().height()),
+                      TimelineConstants::WIDGET_BG_COLOR);
 
     // Shy, eye, lock
     static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
@@ -301,6 +303,11 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
         painter->drawRect(QRect(1, 1, m_treeWidth - 2, size().height() - 3));
     }
+}
+
+int RowTree::treeWidth() const
+{
+    return m_treeWidth;
 }
 
 void RowTree::setTreeWidth(double w)

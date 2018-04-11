@@ -81,6 +81,7 @@ public:
     bool selected() const;
     int depth() const;
     int type() const;
+    int treeWidth() const;
     EStudioObjectType rowType() const;
     QString propertyType() const;
     RowTree *parentRow() const;

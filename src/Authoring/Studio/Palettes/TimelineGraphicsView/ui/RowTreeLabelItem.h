@@ -55,6 +55,7 @@ protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     void focusOutEvent(QFocusEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    QRectF boundingRect() const override;
 
 signals:
     void invalidLabel();
