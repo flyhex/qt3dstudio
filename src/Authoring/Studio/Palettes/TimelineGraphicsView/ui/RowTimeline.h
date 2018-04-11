@@ -31,6 +31,7 @@
 
 #include "InteractiveTimelineItem.h"
 #include "RowTypes.h"
+#include "Bindings/Qt3DSDMTimelineItemProperty.h"
 
 class RowTree;
 struct Keyframe;
@@ -58,6 +59,8 @@ public:
     void updateKeyframes();
     void insertKeyframe(Keyframe *keyframe);
     void removeKeyframe(Keyframe *keyframe);
+    void updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle propHandle);
+    void updateDurationFromBinding();
     TimelineControlType getClickedControl(const QPointF &scenePos) const;
     double getStartTime() const;
     double getEndTime() const;

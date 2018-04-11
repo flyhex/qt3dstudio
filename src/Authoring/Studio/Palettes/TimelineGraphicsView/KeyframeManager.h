@@ -44,7 +44,7 @@ class KeyframeManager
 public:
     KeyframeManager(TimelineGraphicsScene *m_scene);
 
-    QList<Keyframe *> insertKeyframe(RowTimeline *row, double time, double value,
+    QList<Keyframe *> insertKeyframe(RowTimeline *row, double time,
                                      bool selectInsertedKeyframes = true);
     void selectKeyframe(Keyframe *keyframe);
     void selectKeyframesInRect(const QRectF &rect);
@@ -52,7 +52,7 @@ public:
     void deselectKeyframe(Keyframe *keyframe);
     void deselectAllKeyframes();
     void deleteSelectedKeyframes();
-    void deleteKeyframes(RowTimeline *row);
+    void deleteKeyframes(RowTimeline *row, bool repaint = true);
     void copySelectedKeyframes();
     void pasteKeyframes(RowTimeline *row);
     void moveSelectedKeyframes(double dx);

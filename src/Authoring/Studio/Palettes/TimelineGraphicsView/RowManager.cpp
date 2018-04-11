@@ -104,7 +104,7 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 
             QList<Keyframe *> addedKeyframes =
                     m_scene->keyframeManager()->insertKeyframe(propRow->rowTimeline(),
-                    static_cast<double>(kf->GetTime()) * .001, 0, false);
+                    static_cast<double>(kf->GetTime()) * .001, false);
 
             Keyframe *kfUI = addedKeyframes.at(0);
             kf->setUI(kfUI);
@@ -120,7 +120,6 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, RowTree *parentRow)
 {
     RowTree *newRow = createRowFromBinding(binding, parentRow);
-
     // create child rows recursively
     for (int i = 0; i < binding->GetChildrenCount(); i++)
         createRowsFromBindingRecursive(binding->GetChild(i), newRow);

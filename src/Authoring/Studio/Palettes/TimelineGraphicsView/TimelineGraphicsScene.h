@@ -64,6 +64,7 @@ public:
     Ruler *ruler() const;
     PlayHead *playHead() const;
     RowManager *rowManager() const;
+    RowMover *rowMover() const;
     QGraphicsWidget *widgetRoot() const;
     KeyframeManager *keyframeManager() const;
     QGraphicsLinearLayout *layoutTree() const;

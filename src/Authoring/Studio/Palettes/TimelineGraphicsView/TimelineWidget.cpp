@@ -31,6 +31,7 @@
 #include "TimelineConstants.h"
 #include "TimelineToolbar.h"
 #include "RowManager.h"
+#include "RowMover.h"
 #include "KeyframeManager.h"
 #include "RowTree.h"
 #include "Keyframe.h"
@@ -353,6 +354,18 @@ void TimelineWidget::OnNewPresentation()
         std::bind(&TimelineWidget::onActionEvent, this,
                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 
+    // object add, remove, move
+    Q3DStudio::CGraph &theGraph(*g_StudioApp.GetCore()->GetDoc()->GetAssetGraph());
+    m_connections.push_back(theGraph.ConnectChildAdded(
+        std::bind(&TimelineWidget::onChildAdded, this,
+                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
+    m_connections.push_back(theGraph.ConnectChildRemoved(
+        std::bind(&TimelineWidget::onChildRemoved, this,
+                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
+    m_connections.push_back(theGraph.ConnectChildMoved(
+        std::bind(&TimelineWidget::onChildMoved, this, std::placeholders::_1,
+                  std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)));
+
     // Connect toolbar play/stop now when m_pMainWnd exists
     connect(g_StudioApp.m_pMainWnd, &CMainFrame::playStateChanged,
             m_toolbar, &TimelineToolbar::updatePlayButtonState);
@@ -411,10 +424,6 @@ void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable
     for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
         qt3dsdm::Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
         if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(theInstance)) {
-            // Mahmoud_TODO: remove debug
-            qDebug() << "\x1b[42m \x1b[1m" << __FUNCTION__
-                     << theInstance
-                     << "\x1b[m";
             Qt3DSDMTimelineItemBinding *selectedBinding = getBindingForHandle(theInstance,
                                                                               m_binding);
             m_graphicsScene->rowManager()->selectRow(selectedBinding->getRowTree());
@@ -433,11 +442,6 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
         Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
                                                     ->GetParentInstance(inInstance), m_binding);
-        // Mahmoud_TODO: remove debug
-        qDebug() << "\x1b[42m \x1b[1m" << __FUNCTION__
-                 << ", binding=" << binding->GetName().toQString()
-                 << ", bindingParent=" << bindingParent->GetName().toQString()
-                 << "\x1b[m";
         RowTree *newRow = m_graphicsScene->rowManager()
                           ->createRowFromBinding(binding, bindingParent->getRowTree());
 
@@ -480,8 +484,8 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
         for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
             IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
             Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
-                        propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, 0,
-                        false).at(0);
+                        propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, false)
+                        .at(0);
 
             kf->setUI(kfUI);
             kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
@@ -545,6 +549,9 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
         if (binding != nullptr) {
             binding->RefreshPropertyKeyframe(theAnimationInfo.m_Property, inKeyframe,
                                              inTransaction);
+
+            binding->getRowTree()->rowTimeline()->updateKeyframesFromBinding(
+                        theAnimationInfo.m_Property);
         }
     }
 }
@@ -554,20 +561,45 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
-    if (binding != nullptr)
+    if (binding != nullptr) {
         binding->OnPropertyChanged(inProperty);
+
+        if (binding->getRowTree() != nullptr)
+            binding->getRowTree()->rowTimeline()->updateDurationFromBinding();
+    }
 }
 
 void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
                                    qt3dsdm::Qt3DSDMSlideHandle inSlide,
                                    qt3dsdm::Qt3DSDMInstanceHandle inOwner)
 {
-    Q_UNUSED(inAction);
-    Q_UNUSED(inSlide);
-    Q_UNUSED(inOwner);
+    Q_UNUSED(inAction)
+    Q_UNUSED(inSlide)
+    Q_UNUSED(inOwner)
 
-    // Mahmoud_TODO: implement
-    qDebug() << "\x1b[42m \x1b[1m" << __FUNCTION__ << "\x1b[m";
+    // Mahmoud_TODO: implement?
+}
+
+void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
+{
+    Q_UNUSED(inParent)
+    Q_UNUSED(inChild)
+    Q_UNUSED(inIndex)
+
+    // Mahmoud_TODO: possible improvement: move this to an [UNDO row reorder] event handler
+    if (!m_graphicsScene->rowMover()->isActive())
+        m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
+}
+
+void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
+{
+    // Mahmoud_TODO: implement?
+}
+
+void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
+                                  long inNewIndex)
+{
+    // Mahmoud_TODO: implement?
 }
 
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,

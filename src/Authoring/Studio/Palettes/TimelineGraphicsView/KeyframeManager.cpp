@@ -63,7 +63,7 @@ KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene) : m_scene(scene)
 {
 }
 
-QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time, double value,
+QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time,
                                                   bool selectInsertedKeyframes)
 {
     QList<Keyframe *> addedKeyframes;
@@ -81,7 +81,7 @@ QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time,
     if (!propRows.empty()) {
         Keyframe *keyframe = nullptr;
         for (const auto &r : qAsConst(propRows)) {
-            keyframe = new Keyframe(time, value, r);
+            keyframe = new Keyframe(time, r);
             r->insertKeyframe(keyframe);
             r->parentRow()->insertKeyframe(keyframe);
             addedKeyframes.append(keyframe);
@@ -231,7 +231,7 @@ void KeyframeManager::deleteSelectedKeyframes()
 }
 
 // delete all keyframes on a row
-void KeyframeManager::deleteKeyframes(RowTimeline *row)
+void KeyframeManager::deleteKeyframes(RowTimeline *row, bool repaint)
 {
     const auto keyframes = row->keyframes();
     for (auto keyframe : keyframes) {
@@ -247,7 +247,8 @@ void KeyframeManager::deleteKeyframes(RowTimeline *row)
     if (m_selectedKeyframesMasterRows.contains(row))
         m_selectedKeyframesMasterRows.removeAll(row);
 
-    row->updateKeyframes();
+    if (repaint)
+        row->updateKeyframes();
 }
 
 void KeyframeManager::copySelectedKeyframes()
@@ -304,7 +305,7 @@ void KeyframeManager::pasteKeyframes(RowTimeline *row)
             propRow = m_scene->rowManager()->getOrCreatePropertyRow(row->rowTree(),
                                                                     keyframe->propertyType);
             addedKeyframes.append(insertKeyframe(propRow->rowTimeline(), keyframe->time + dt,
-                                                 keyframe->value, false));
+                                                 false));
         }
 
         if (!addedKeyframes.empty()) {

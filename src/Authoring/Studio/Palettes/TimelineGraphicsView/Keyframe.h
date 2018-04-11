@@ -30,21 +30,19 @@
 #define KEYFRAME_H
 
 #include "Bindings/Qt3DSDMTimelineKeyframe.h"
-
-class RowTimeline;
+#include "RowTimeline.h"
+#include "RowTree.h"
 
 struct Keyframe
 {
-    Keyframe(double time, double value, RowTimeline *propRow)
+    Keyframe(double time, RowTimeline *propRow)
         : time(time)
-        , value(value)
         , rowProperty(propRow)
         , rowMaster(propRow->parentRow())
         , propertyType(propRow->rowTree()->propertyType())
     {}
 
     double time;
-    double value;
     bool selected = false;
     QString propertyType;
     RowTimeline *rowProperty;

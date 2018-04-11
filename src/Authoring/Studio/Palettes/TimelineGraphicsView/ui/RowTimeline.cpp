@@ -32,8 +32,10 @@
 #include "Ruler.h"
 #include "TimelineConstants.h"
 #include "Keyframe.h"
+#include "KeyframeManager.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
+#include "Bindings/Qt3DSDMTimelineItemProperty.h"
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -200,6 +202,55 @@ QList<Keyframe *> RowTimeline::getKeyframesInRange(const double left, const doub
     }
 
     return result;
+}
+
+void RowTimeline::updateDurationFromBinding()
+{
+    if (m_rowTree->isProperty()) // this method works for main rows only
+        return;
+
+    ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
+    setStartTime(timebar->GetStartTime() * .001);
+    setEndTime(timebar->GetEndTime() * .001);
+}
+
+void RowTimeline::updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle propHandle)
+{
+    if (m_rowTree->isProperty()) // this method works for main rows only
+        return;
+
+    // find the UI property row from handle
+    RowTree *propRow = nullptr;
+    const auto childRows = m_rowTree->childRows();
+    for (auto child : childRows) {
+        if (child->isProperty()) {
+            qt3dsdm::Qt3DSDMPropertyHandle propertyHandle =
+                static_cast<Qt3DSDMTimelineItemProperty *>(child->m_PropBinding)
+                ->getPropertyHandle();
+            if (propertyHandle == propHandle) {
+                propRow = child;
+                break;
+            }
+        }
+    }
+
+    if (propRow != nullptr) {
+        m_rowTree->m_scene->keyframeManager()->deleteKeyframes(propRow->rowTimeline(), false);
+
+        for (int i = 0; i < propRow->m_PropBinding->GetKeyframeCount(); i++) {
+            Qt3DSDMTimelineKeyframe *kf = static_cast<Qt3DSDMTimelineKeyframe *>
+                    (propRow->m_PropBinding->GetKeyframeByIndex(i));
+
+            Keyframe *kfUI = new Keyframe(static_cast<double>(kf->GetTime() * .001),
+                                          propRow->rowTimeline());
+            kfUI->binding = kf;
+            kf->setUI(kfUI);
+            propRow->rowTimeline()->insertKeyframe(kfUI);
+            propRow->parentRow()->rowTimeline()->insertKeyframe(kfUI);
+        }
+
+        propRow->rowTimeline()->update();
+    }
 }
 
 void RowTimeline::insertKeyframe(Keyframe *keyframe)

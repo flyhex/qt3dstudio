@@ -40,6 +40,7 @@
 #include "RowManager.h"
 #include "KeyframeManager.h"
 #include "Keyframe.h"
+#include "IDocumentEditor.h"
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
@@ -199,8 +200,6 @@ void TimelineGraphicsScene::commitMoveRows()
         rowsToMove.append(row_i);
     }
 
-    TAssetGraphPtr assetGraph = g_StudioApp.GetCore()->GetDoc()->GetAssetGraph();
-
     if (m_rowMover->movingDown())
         targetIndex -= rowsToMove.count();
 
@@ -220,13 +219,11 @@ void TimelineGraphicsScene::commitMoveRows()
             (m_rowMover->insertionParent()->getBinding())->GetInstance();
 
     // commit the row move to the binding
-    if (m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()
-        && rowInsertion == m_rowMover->insertionParent()) { // first child under same parent
-        assetGraph.get()->ReParent(handleSource, handleParent);
-    } else {
-        int index = m_rowManager->getChildIndex(m_rowMover->insertionParent(), rowInsertion) + 1;
-        assetGraph.get()->MoveTo(handleSource, handleParent, index);
-    }
+    bool firstChildInParent = m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()
+            && rowInsertion == m_rowMover->insertionParent();
+    int index = m_rowManager->getChildIndex(m_rowMover->insertionParent(), rowInsertion) + 1;
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Reorder Rows"))
+        ->ReorderRows(handleSource, handleParent, index, firstChildInParent);
 
     // commit the row move to the UI
     m_rowMover->insertionParent()->addChild(m_rowMover->sourceRow());
@@ -360,7 +357,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                        || item->type() == TimelineItem::TypeRowTreeLabelItem) {
                 item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
                 RowTree *rowTree = static_cast<RowTree *>(item);
-                if (!rowTree->isProperty()) {
+                if (!rowTree->isProperty() && rowTree->rowType() != OBJTYPE_MATERIAL) {
                     m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
                     if (m_clickedTreeControlType != TreeControlType::None) {
                         m_rowManager->updateFiltering(rowTree);
@@ -461,8 +458,10 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                         // not moving an ancestor into a decendent
                 valid = !rowAtIndex->isDecendentOf(m_rowMover->sourceRow())
 
-                        // not inserting next to property rows
-                         && !(nextRowAtIndex != nullptr && nextRowAtIndex->isProperty())
+                        // not inserting next to property or material rows
+                        && !(nextRowAtIndex != nullptr && (nextRowAtIndex->isProperty()
+                                                           || nextRowAtIndex->rowType()
+                                                              == OBJTYPE_MATERIAL))
 
                         // not inserting as a first child of self
                         && !(rowAtIndex == m_rowMover->sourceRow() && !rowAtIndex->empty())
@@ -550,7 +549,9 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
             m_keyframeManager->commitMoveSelectedKeyframes();
-        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+        } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle
+                   || m_clickedTimelineControlType == TimelineControlType::EndHandle
+                   || m_clickedTimelineControlType == TimelineControlType::Duration) {
             // update duration values to the binding
             m_editedTimelineRow->commitDurationMove();
         }
@@ -691,7 +692,7 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
                     if (kf->getUI() == nullptr) { // newly added keyframe
                         Keyframe *kfUI = m_keyframeManager->insertKeyframe(prop_i->getRowTree()
                                          ->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
-                                                         0, false).at(0);
+                                         false).at(0);
                         // wire the keyframe UI and binding
                         kf->setUI(kfUI);
                         kfUI->binding = kf;
@@ -786,6 +787,7 @@ QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType ty
 Ruler                 *TimelineGraphicsScene::ruler()           const { return m_ruler;           }
 PlayHead              *TimelineGraphicsScene::playHead()        const { return m_playHead;        }
 TreeHeader            *TimelineGraphicsScene::treeHeader()      const { return m_treeHeader;      }
+RowMover              *TimelineGraphicsScene::rowMover()        const { return m_rowMover;        }
 RowManager            *TimelineGraphicsScene::rowManager()      const { return m_rowManager;      }
 QGraphicsWidget       *TimelineGraphicsScene::widgetRoot()      const { return m_widgetRoot;      }
 KeyframeManager       *TimelineGraphicsScene::keyframeManager() const { return m_keyframeManager; }
