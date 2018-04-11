@@ -942,9 +942,6 @@ void CMainFrame::OnPlayStart()
 
     if (m_PlaybackFlag == false) {
         m_PlaybackFlag = true;
-
-        // g_StudioApp.GetCore()->GetDoc()->SetPlayMode( PLAYMODE_PLAY );
-
         m_playbackTimer.start();
     }
 }
@@ -962,7 +959,6 @@ void CMainFrame::OnPlayStop()
     if (m_PlaybackFlag == true) {
         m_PlaybackFlag = false;
         m_playbackTimer.stop();
-        // g_StudioApp.GetCore()->GetDoc()->SetPlayMode( PLAYMODE_STOP );
     }
 }
 
