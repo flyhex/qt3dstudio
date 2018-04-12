@@ -126,27 +126,57 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 
     // Keyframes
-    int keyFrameY = 2 - (TimelineConstants::ROW_H - size().height())/2;
+    int keyFrameY = 2 - (TimelineConstants::ROW_H - size().height()) / 2;
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
                 = QPixmap(":/images/Keyframe-Master-Normal.png");
         static const QPixmap pixKeyframeMasterSelected
                 = QPixmap(":/images/Keyframe-Master-Selected.png");
+        static const QPixmap pixKeyframeMasterDynamicNormal
+                = QPixmap(":/images/Keyframe-MasterDynamic-Normal.png");
+        static const QPixmap pixKeyframeMasterDynamicSelected
+                = QPixmap(":/images/Keyframe-MasterDynamic-Selected.png");
 
-        for (auto keyframe : m_keyframes) {
-            painter->drawPixmap(timeToX(keyframe->time) - 8.5, keyFrameY, keyframe->selected()
-                                ? pixKeyframeMasterSelected : pixKeyframeMasterNormal);
+        for (auto keyframe : qAsConst(m_keyframes)) {
+            QPixmap pixmap;
+            if (keyframe->selected()) {
+                if (keyframe->binding->IsDynamic())
+                    pixmap = pixKeyframeMasterDynamicSelected;
+                else
+                    pixmap = pixKeyframeMasterSelected;
+            } else {
+                if (keyframe->binding->IsDynamic())
+                    pixmap = pixKeyframeMasterDynamicNormal;
+                else
+                    pixmap = pixKeyframeMasterNormal;
+            }
+            painter->drawPixmap(timeToX(keyframe->time) - 8.5, keyFrameY, pixmap);
         }
     } else if (m_rowTree->isProperty()) {
         static const QPixmap pixKeyframePropertyNormal
                 = QPixmap(":/images/Keyframe-Property-Normal.png");
         static const QPixmap pixKeyframePropertySelected
                 = QPixmap(":/images/Keyframe-Property-Selected.png");
+        static const QPixmap pixKeyframePropertyDynamicNormal
+                = QPixmap(":/images/Keyframe-PropertyDynamic-Normal.png");
+        static const QPixmap pixKeyframePropertyDynamicSelected
+                = QPixmap(":/images/Keyframe-PropertyDynamic-Selected.png");
 
-        for (auto keyframe : m_keyframes) {
+        for (auto keyframe : qAsConst(m_keyframes)) {
+            QPixmap pixmap;
+            if (keyframe->selected()) {
+                if (keyframe->binding->IsDynamic())
+                    pixmap = pixKeyframePropertyDynamicSelected;
+                else
+                    pixmap = pixKeyframePropertySelected;
+            } else {
+                if (keyframe->binding->IsDynamic())
+                    pixmap = pixKeyframePropertyDynamicNormal;
+                else
+                    pixmap = pixKeyframePropertyNormal;
+            }
             painter->drawPixmap(timeToX(keyframe->time) - (keyframe->selected() ? 7.5 : 5.5),
-                                keyFrameY, keyframe->selected() ? pixKeyframePropertySelected
-                                                   : pixKeyframePropertyNormal);
+                                keyFrameY, pixmap);
         }
     }
 }

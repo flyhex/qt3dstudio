@@ -379,6 +379,10 @@ void TimelineWidget::OnClosingPresentation()
 
 void TimelineWidget::OnTimeChanged(long inTime)
 {
+    // Mahmoud_TODO: remove qDebug()
+    qDebug() << "\x1b[42m \x1b[1m" << __FUNCTION__
+             << ", inTime=" << inTime
+             << "\x1b[m";
     m_graphicsScene->playHead()->setTime(inTime * .001);
     m_toolbar->setTime(inTime);
 }

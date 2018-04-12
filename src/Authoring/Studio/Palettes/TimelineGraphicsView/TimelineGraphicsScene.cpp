@@ -423,9 +423,10 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         m_dragging = true;
 
     if (m_rulerPressed) {
-        double time = m_ruler->distanceToTime(event->scenePos().x() - m_ruler->durationStartX())
-                      * 1000;
-        g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
+        long time = m_ruler->distanceToTime(event->scenePos().x() - m_ruler->durationStartX())
+                    * 1000;
+        if (time >= 0)
+            g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
     } else if (m_dragging) {
         if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
             // resizing layer timline duration from left
