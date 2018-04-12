@@ -49,6 +49,7 @@
 #include "DurationEditDlg.h"
 #include "TimelineControl.h"
 #include "RowTreeContextMenu.h"
+#include "RowTimelineContextMenu.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -637,101 +638,14 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
         return;
 
     if (event->scenePos().x() > TimelineConstants::TREE_BOUND_W) { // timeline context menu
-        Keyframe *keyframe = row->rowTimeline()->getClickedKeyframe(event->scenePos());
-        bool propRow = row->isProperty();
-        bool hasPropRows = row->hasPropertyChildren();
-        bool ctrlPressed = event->modifiers() & Qt::ControlModifier;
-
-        //TODO: remove
-//      qDebug() << "index=" << index;
-//      qDebug() << "keyframe=" << (keyframe != nullptr);
-//      qDebug() << "propRow=" << propRow;
-//      qDebug() << "hasPropRows=" << hasPropRows;
-//      qDebug() << "---------------------";
-
-        if (keyframe) {
-            if (!keyframe->selected && !ctrlPressed)
-                m_keyframeManager->deselectAllKeyframes();
-
-            m_keyframeManager->selectKeyframe(keyframe);
-        } else {
-            m_keyframeManager->deselectAllKeyframes();
-        }
-
-        QMenu contextMenu;
-        auto actionInsertKeyframe = contextMenu.addAction(QObject::tr("Insert Keyframe"));
-        auto actionCutSelectedKeyframes =
-                contextMenu.addAction(QObject::tr("Cut Selected Keyframe"));
-        auto actionCopySelectedKeyframes =
-                contextMenu.addAction(QObject::tr("Copy Selected Keyframe"));
-        auto actionPasteKeyframes = contextMenu.addAction(QObject::tr("Paste Keyframes"));
-        auto actionDeleteSelectedKeyframes =
-                contextMenu.addAction(QObject::tr("Delete Selected Keyframe"));
-        auto actionDeleteRowKeyframes =
-                contextMenu.addAction(QObject::tr(propRow ? "Delete All Property Keyframes"
-                                                          : "Delete All Channel Keyframes"));
-
-        actionInsertKeyframe         ->setEnabled(!keyframe && (propRow || hasPropRows));
-        actionCutSelectedKeyframes   ->setEnabled(m_keyframeManager->oneMasterRowSelected());
-        actionCopySelectedKeyframes  ->setEnabled(m_keyframeManager->oneMasterRowSelected());
-        actionPasteKeyframes         ->setEnabled(m_keyframeManager->hasCopiedKeyframes());
-        actionDeleteSelectedKeyframes->setEnabled(m_keyframeManager->hasSelectedKeyframes());
-        actionDeleteRowKeyframes     ->setEnabled(!row->rowTimeline()->keyframes().empty());
-
-        // connections
-        connect(actionInsertKeyframe, &QAction::triggered, this, [=]() {
-            row->getBinding()->InsertKeyframe();
-
-            // update and wire the UI from binding
-            for (long i = 0; i < row->getBinding()->GetPropertyCount(); ++i) {
-                ITimelineItemProperty *prop_i = row->getBinding()->GetProperty(i);
-                for (long j = 0; j < prop_i->GetKeyframeCount(); ++j) {
-                    Qt3DSDMTimelineKeyframe *kf =
-                            static_cast<Qt3DSDMTimelineKeyframe *>(prop_i->GetKeyframeByIndex(j));
-
-                    if (kf->getUI() == nullptr) { // newly added keyframe
-                        Keyframe *kfUI = m_keyframeManager->insertKeyframe(prop_i->getRowTree()
-                                         ->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
-                                         false).at(0);
-                        // wire the keyframe UI and binding
-                        kf->setUI(kfUI);
-                        kfUI->binding = kf;
-                    }
-                }
-            }
-        });
-
-        connect(actionCutSelectedKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->copySelectedKeyframes();
-            m_keyframeManager->deleteSelectedKeyframes();
-        });
-
-        connect(actionCopySelectedKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->copySelectedKeyframes();
-        });
-
-        connect(actionPasteKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->pasteKeyframes(row->rowTimeline());
-        });
-
-        connect(actionDeleteSelectedKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->deleteSelectedKeyframes();
-        });
-
-        connect(actionDeleteRowKeyframes, &QAction::triggered, this, [=]() {
-            m_keyframeManager->deleteKeyframes(row->rowTimeline());
-        });
-
-        contextMenu.exec(event->screenPos());
-
+        RowTimelineContextMenu timelineContextMenu(row, m_keyframeManager, event);
+        timelineContextMenu.exec(event->screenPos());
     } else { // tree context menu
         if (!row->isProperty()) {
             RowTreeContextMenu treeContextMenu(row);
             treeContextMenu.exec(event->screenPos());
         }
     }
-
-
 }
 
 bool TimelineGraphicsScene::event(QEvent *event)

@@ -183,7 +183,8 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.h \
     Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.h \
     Palettes/TimelineGraphicsView/TimelineControl.h \
-    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.h
+    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.h \
+    Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -406,7 +407,8 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.cpp \
     Palettes/TimelineGraphicsView/TimelineControl.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.cpp
+    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.cpp
 
 HEADERS += \
     Application/TimeEditDlg.h \
