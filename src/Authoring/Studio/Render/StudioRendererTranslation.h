@@ -41,6 +41,7 @@
 #include "PathWidget.h"
 #include "StudioPreferences.h"
 #include "StudioGradientWidget.h"
+#include "StudioVisualAidWidget.h"
 
 namespace qt3ds {
 namespace studio {
@@ -378,10 +379,13 @@ namespace studio {
         NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_ScaleWidget;
         NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_LastRenderedWidget;
         NVScopedRefCounted<qt3ds::widgets::SGradientWidget> m_GradientWidget;
+        NVScopedRefCounted<qt3ds::widgets::SVisualAidWidget> m_VisualAidWidget;
+
         NVScopedRefCounted<qt3ds::widgets::IPathWidget> m_PathWidget;
         NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_PickBuffer;
         Option<SPathAnchorDragInitialValue> m_LastPathDragValue;
         nvvector<qt3ds::QT3DSU8> m_PixelBuffer;
+        nvvector<SGraphObjectTranslator *> m_editModeCamerasAndLights;
         QT3DSF32 m_CumulativeRotation;
         eastl::vector<qt3ds::render::SPGGraphObject *> m_GuideContainer;
         qt3ds::foundation::SFastAllocator<> m_GuideAllocator;
@@ -426,7 +430,6 @@ namespace studio {
         }
 
         void DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor);
-        void DrawLightBoundingBox(SNode &inNode, QT3DSVec3 inColor);
 
         void DrawChildBoundingBoxes(SNode &inNode)
         {
@@ -458,13 +461,7 @@ namespace studio {
         void DrawNonGroupBoundingBoxes(SGraphObjectTranslator &inTranslator)
         {
             SNode &theNode = static_cast<SNode &>(inTranslator.GetGraphObject());
-            if (inTranslator.GetGraphObject().m_Type == GraphObjectTypes::Light) {
-                ::CColor color = CStudioPreferences::GetLightBoundingBoxColor();
-                QT3DSVec3 colorVec(color.GetRed() / 255.f,
-                                   color.GetGreen() / 255.f,
-                                   color.GetBlue() / 255.f);
-                DrawLightBoundingBox(theNode, colorVec);
-            } else if (inTranslator.GetGraphObject().m_Type != GraphObjectTypes::Layer) {
+            if (inTranslator.GetGraphObject().m_Type != GraphObjectTypes::Layer) {
                 ::CColor color = CStudioPreferences::GetSingleBoundingBoxColor();
                 QT3DSVec3 colorVec(color.GetRed() / 255.f,
                                    color.GetGreen() / 255.f,

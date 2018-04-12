@@ -147,7 +147,8 @@ HEADERS += \
     Controls/TreeItem.h \
     Application/DataInputSelectModel.h \
     Application/DataInputSelectView.h \
-    Render/StudioGradientWidget.h
+    Render/StudioGradientWidget.h \
+    Render/StudioVisualAidWidget.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -357,6 +358,7 @@ SOURCES += \
     Render/StudioScaleWidget.cpp \
     Render/StudioTranslationWidget.cpp \
     Render/StudioWidget.cpp \
+    Render/StudioVisualAidWidget.cpp \
     Render/WGLRenderContext.cpp \
     Utils/ImportUtils.cpp \
     Utils/ResourceCache.cpp \

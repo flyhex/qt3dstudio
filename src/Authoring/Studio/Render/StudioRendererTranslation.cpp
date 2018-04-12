@@ -54,10 +54,13 @@
 #include "Qt3DSRenderPixelGraphicsTypes.h"
 #include "Qt3DSRenderPixelGraphicsRenderer.h"
 #include "Qt3DSRenderPathManager.h"
+
 #include "PathWidget.h"
 #include "Qt3DSRenderLightmaps.h"
 #include "StudioPreferences.h"
 #include "HotKeys.h"
+#include "Qt3DSRenderCamera.h"
+#include "Qt3DSRenderLight.h"
 
 #pragma warning(disable : 4100) // unreferenced formal parameter
 
@@ -72,6 +75,7 @@ using qt3ds::render::NVRenderRect;
 
 namespace {
 using namespace qt3dsdm;
+
 struct STranslatorDataModelParser
 {
     STranslation &m_Context;
@@ -1827,6 +1831,8 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inC
     , m_Viewport(0, 0)
     , m_EditCameraLayerTranslator(nullptr)
     , m_PixelBuffer(inContext.GetAllocator(), "STranslation::m_PixelBuffer")
+    , m_editModeCamerasAndLights(inContext.GetAllocator(),
+                                 "STranslation::m_editModeCamerasAndLights")
     , m_GuideAllocator(inContext.GetAllocator(), "STranslation::m_GuideAllocator")
 {
     m_EditCamera.m_Flags.SetActive(true);
@@ -1898,17 +1904,24 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
 {
     SGraphObjectTranslator &theParentTranslator(inParent);
     theParentTranslator.ClearChildren();
-    if (m_EditCameraEnabled
-        && theParentTranslator.GetGraphObject().m_Type == GraphObjectTypes::Layer) {
-        theParentTranslator.AppendChild(m_EditCamera);
-        if (m_EditLightEnabled) {
-            m_EditLight.m_Parent = &m_EditCamera;
-            m_EditCamera.m_FirstChild = &m_EditLight;
-        } else {
-            m_EditCamera.m_FirstChild = nullptr;
-            m_EditLight.m_Parent = nullptr;
+    if (m_EditCameraEnabled) {
+        const auto objectType = theParentTranslator.GetGraphObject().m_Type;
+        if (objectType == GraphObjectTypes::Layer) {
+            theParentTranslator.AppendChild(m_EditCamera);
+            if (m_EditLightEnabled) {
+                m_EditLight.m_Parent = &m_EditCamera;
+                m_EditCamera.m_FirstChild = &m_EditLight;
+            } else {
+                m_EditCamera.m_FirstChild = nullptr;
+                m_EditLight.m_Parent = nullptr;
+            }
+        } else if (objectType == GraphObjectTypes::Light) {
+            m_editModeCamerasAndLights.push_back(&inParent);
+        } else if (objectType == GraphObjectTypes::Camera) {
+            m_editModeCamerasAndLights.push_back(&inParent);
         }
     }
+
     // Alias handles propagate down the scene graph.
     if (inParent.GetInstanceHandle() != inParent.GetSceneGraphInstanceHandle())
         inAliasHandle = inParent.GetInstanceHandle();
@@ -2033,6 +2046,7 @@ void STranslation::PreRender()
     // but for now it is more stable to run through the graph.
     // There is always one root, the scene.
     TIdentifier theRoot = m_AssetGraph.GetRoot(0);
+    m_editModeCamerasAndLights.clear();
     ClearDirtySet();
     BuildRenderGraph(theRoot);
     m_Context.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
@@ -2451,6 +2465,34 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         }
 
         m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
+        if (m_editModeCamerasAndLights.size() > 0) {
+            if (!m_VisualAidWidget) {
+                m_VisualAidWidget = qt3ds::widgets::SVisualAidWidget
+                    ::CreateVisualAidWidget(m_Context.GetAllocator());
+            }
+            for (SGraphObjectTranslator *translator : m_editModeCamerasAndLights) {
+                SGraphObject &object = translator->GetGraphObject();
+                qt3dsdm::Qt3DSDMInstanceHandle handle = translator->GetInstanceHandle();
+                m_VisualAidWidget->setSelected(false);
+
+                for (int j = 0; j < theHandles.size(); ++j) {
+                    if (handle == theHandles[j]) {
+                        m_VisualAidWidget->setSelected(true);
+                        break;
+                    }
+                }
+
+                if (object.m_Type == GraphObjectTypes::Camera) {
+                    QT3DSVec2 dim = QT3DSVec2(m_InnerRect.m_Right - m_InnerRect.m_Left,
+                                              m_InnerRect.m_Top - m_InnerRect.m_Bottom);
+                    NVRenderRectF theViewport(0, 0, dim.x, dim.y);
+                    static_cast<SCamera *>(&object)->CalculateGlobalVariables(theViewport, dim);
+                }
+                m_VisualAidWidget->SetNode(static_cast<SNode *>(&object));
+                m_VisualAidWidget->Render(m_Context.GetRenderWidgetContext(),
+                                          m_Context.GetRenderContext());
+            }
+        }
 
         if (inDrawGuides && !m_EditCameraEnabled && !g_StudioApp.IsAuthorZoom()) {
             m_GuideContainer.clear();
@@ -2653,21 +2695,6 @@ void STranslation::DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor)
     m_Context.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
 
-void STranslation::DrawLightBoundingBox(SNode &inNode, QT3DSVec3 inColor)
-{
-    SLight *theLight = reinterpret_cast<SLight *>(&inNode);
-    if (theLight->m_LightType != qt3ds::render::RenderLightTypes::Area) {
-        return;
-    }
-
-    qt3ds::NVBounds3 theBounds(
-        qt3ds::QT3DSVec3(-theLight->m_AreaWidth * 0.5f, -theLight->m_AreaHeight * 0.5f, 0.0f),
-        qt3ds::QT3DSVec3(theLight->m_AreaWidth * 0.5f, theLight->m_AreaHeight * 0.5f, 0.0f));
-    qt3ds::render::IRenderWidget &theBBoxWidget = qt3ds::render::IRenderWidget::CreateBoundingBoxWidget(
-        inNode, theBounds, inColor, m_Context.GetRenderer().GetPerFrameAllocator());
-    m_Context.GetRenderer().AddRenderWidget(theBBoxWidget);
-}
-
 void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
 {
     if (GraphObjectTypes::IsNodeType(inTranslator.GetGraphObject().m_Type)) {
@@ -2802,12 +2829,35 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
             return m_LastRenderedWidget->PickIndexToPickValue(*picked);
         }
     }
+    // Pick against Lights and Cameras
+    // This doesn't use the color picker or renderer pick
+    float lastDist = 99999999999999.0f;
+    int lastIndex = -1;
+    for (size_t i = 0; i < m_editModeCamerasAndLights.size(); ++i) {
+        const QT3DSVec2 mouseCoords((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y);
+        float dist;
+        SGraphObject &object = m_editModeCamerasAndLights[i]->GetGraphObject();
+        m_VisualAidWidget->SetNode(static_cast<SNode *>(&object));
+        if (m_VisualAidWidget->pick(m_Context.GetRenderer().GetRenderWidgetContext(),
+                                    dist, GetViewportDimensions(), mouseCoords)) {
+            if (dist < lastDist) {
+                lastDist = dist;
+                lastIndex = i;
+            }
+        }
+    }
+
     if (m_Scene && m_Scene->m_FirstChild) {
         qt3ds::render::Qt3DSRenderPickResult thePickResult =
             m_Context.GetRenderer().Pick(*m_Scene->m_FirstChild, GetViewportDimensions(),
                                             QT3DSVec2((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y));
         if (thePickResult.m_HitObject) {
             const SGraphObject &theObject = *thePickResult.m_HitObject;
+
+            // check hit distance to cameras and lights
+            if (lastIndex != -1 && thePickResult.m_CameraDistanceSq > lastDist * lastDist)
+                return m_editModeCamerasAndLights[lastIndex]->GetInstanceHandle();
+
             if (theObject.m_Type == GraphObjectTypes::Model
                 || theObject.m_Type == GraphObjectTypes::Text
                 || theObject.m_Type == GraphObjectTypes::Path) {
@@ -2878,6 +2928,10 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
         if (requestRender)
             RequestRender();
     }
+
+    if (lastIndex != -1)
+        return m_editModeCamerasAndLights[lastIndex]->GetInstanceHandle();
+
     return SStudioPickValue();
 }
 
