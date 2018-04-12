@@ -146,7 +146,7 @@ namespace studio {
     };
 
     const QT3DSF32 g_EditCameraFOV = 45.0f;
-    const QT3DSF32 g_RotationScaleFactor = 2.0f * M_PI / 180.0f;
+    const QT3DSF32 g_RotationScaleFactor = 2.0f * QT3DSF32(M_PI) / 180.0f;
 
     struct SEditCameraPersistentInformation
     {
@@ -154,13 +154,13 @@ namespace studio {
         QT3DSVec3 m_Direction;
         QT3DSF32 m_ViewRadius;
         EditCameraTypes::Enum m_CameraType;
-        QT3DSQuat m_Rotation;
+        NVReal m_xRotation = 0.0f;
+        NVReal m_yRotation = 0.0f;
         SEditCameraPersistentInformation()
             : m_Position(0, 0, 0)
             , m_Direction(0, 0, 0)
             , m_ViewRadius(600)
             , m_CameraType(EditCameraTypes::Perspective)
-            , m_Rotation(QT3DSQuat::createIdentity())
         {
         }
 
@@ -173,11 +173,9 @@ namespace studio {
                 inCamera.m_FOV = g_EditCameraFOV;
                 TORAD(inCamera.m_FOV);
                 inCamera.m_Flags.SetOrthographic(false);
-            } else
+            } else {
                 inCamera.m_Flags.SetOrthographic(true);
-
-            QT3DSVec3 theDirection = m_Direction;
-            theDirection.normalize();
+            }
 
             // The goal is to setup a global transform that
             QT3DSMat44 thePivotMatrix = QT3DSMat44::createIdentity();
@@ -186,15 +184,23 @@ namespace studio {
             thePivotMatrix.column3.z = m_Position.z;
             QT3DSMat44 theGlobalTransform = thePivotMatrix;
 
-            QT3DSVec3 theUpDir(QT3DSVec3(0, 1, 0));
-            QT3DSF32 theTestLen = theDirection.cross(theUpDir).magnitudeSquared();
-            if (theTestLen < .01f)
-                theUpDir = QT3DSVec3(0, 0, 1) * theDirection.dot(QT3DSVec3(0, 1, 0));
-            theUpDir.normalize();
-            QT3DSMat33 theLookAtMatrix = inCamera.GetLookAtMatrix(theUpDir, theDirection);
-            QT3DSMat33 theFinalMatrix = theLookAtMatrix * QT3DSMat33(m_Rotation);
-            QT3DSMat44 theRotationTransform = QT3DSMat44(theFinalMatrix.column0, theFinalMatrix.column1,
-                                                   theFinalMatrix.column2, QT3DSVec3(0, 0, 0));
+            QT3DSVec3 theUpDir(0, 1, 0);
+            if (m_CameraType == EditCameraTypes::Directional) {
+                QT3DSF32 theTestLen = m_Direction.cross(theUpDir).magnitudeSquared();
+                if (theTestLen < .01f)
+                    theUpDir = QT3DSVec3(0, 0, 1) * m_Direction.dot(QT3DSVec3(0, 1, 0));
+                theUpDir.normalize();
+            }
+
+            QT3DSMat33 theLookAtMatrix = inCamera.GetLookAtMatrix(theUpDir, m_Direction);
+            QT3DSMat44 theRotationTransform =
+                    QT3DSMat44(theLookAtMatrix.column0, theLookAtMatrix.column1,
+                               theLookAtMatrix.column2, QT3DSVec3(0, 0, 0));
+
+            if (m_CameraType != EditCameraTypes::Directional) {
+                theRotationTransform.rotate(-m_xRotation, QT3DSVec3(0.0f, 1.0f, 0.0f));
+                theRotationTransform.rotate(m_yRotation, QT3DSVec3(1.0f, 0.0f, 0.0f));
+            }
 
             // The view radius dictates the zoom.
             QT3DSF32 theZoom = 1.0f;
