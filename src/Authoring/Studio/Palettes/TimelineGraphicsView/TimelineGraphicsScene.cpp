@@ -376,13 +376,20 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 if (keyframe != nullptr) {  // pressed a keyframe
                     const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
 
-                    if (ctrlKeyDown && keyframe->selected) {
-                        m_keyframeManager->deselectKeyframe(keyframe);
+                    if (ctrlKeyDown && keyframe->selected()) {
+                        if (m_editedTimelineRow->rowTree()->isProperty())
+                            m_keyframeManager->deselectKeyframe(keyframe);
+                        else
+                            m_keyframeManager->deselectConnectedKeyframes(keyframe);
                     } else {
-                        if (!ctrlKeyDown && !keyframe->selected)
+                        if (!ctrlKeyDown && !keyframe->selected())
                             m_keyframeManager->deselectAllKeyframes();
 
-                        m_keyframeManager->selectKeyframe(keyframe);
+                        if (m_editedTimelineRow->rowTree()->isProperty())
+                            m_keyframeManager->selectKeyframe(keyframe);
+                        else
+                            m_keyframeManager->selectConnectedKeyframes(keyframe);
+
                         m_keyframePressed = true;
                     }
                 } else {

@@ -47,9 +47,11 @@ public:
     QList<Keyframe *> insertKeyframe(RowTimeline *row, double time,
                                      bool selectInsertedKeyframes = true);
     void selectKeyframe(Keyframe *keyframe);
+    void selectConnectedKeyframes(Keyframe *keyframe);
     void selectKeyframesInRect(const QRectF &rect);
     void selectKeyframes(const QList<Keyframe *> &keyframes);
     void deselectKeyframe(Keyframe *keyframe);
+    void deselectConnectedKeyframes(Keyframe *keyframe);
     void deselectAllKeyframes();
     void deleteSelectedKeyframes();
     void deleteKeyframes(RowTimeline *row, bool repaint = true);

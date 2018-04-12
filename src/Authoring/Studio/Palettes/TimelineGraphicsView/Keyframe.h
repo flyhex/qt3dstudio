@@ -42,12 +42,16 @@ struct Keyframe
         , propertyType(propRow->rowTree()->propertyType())
     {}
 
+    bool selected() const
+    {
+        return binding && binding->IsSelected();
+    }
+
     double time;
-    bool selected = false;
     QString propertyType;
-    RowTimeline *rowProperty;
-    RowTimeline *rowMaster;
-    Qt3DSDMTimelineKeyframe *binding;
+    RowTimeline *rowProperty = nullptr;
+    RowTimeline *rowMaster = nullptr;
+    Qt3DSDMTimelineKeyframe *binding = nullptr;
 };
 
 #endif // KEYFRAME_H

@@ -134,7 +134,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-Master-Selected.png");
 
         for (auto keyframe : m_keyframes) {
-            painter->drawPixmap(timeToX(keyframe->time) - 8.5, keyFrameY, keyframe->selected
+            painter->drawPixmap(timeToX(keyframe->time) - 8.5, keyFrameY, keyframe->selected()
                                 ? pixKeyframeMasterSelected : pixKeyframeMasterNormal);
         }
     } else if (m_rowTree->isProperty()) {
@@ -144,8 +144,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-Property-Selected.png");
 
         for (auto keyframe : m_keyframes) {
-            painter->drawPixmap(timeToX(keyframe->time) - (keyframe->selected ? 7.5 : 5.5), keyFrameY,
-                                keyframe->selected ? pixKeyframePropertySelected
+            painter->drawPixmap(timeToX(keyframe->time) - (keyframe->selected() ? 7.5 : 5.5),
+                                keyFrameY, keyframe->selected() ? pixKeyframePropertySelected
                                                    : pixKeyframePropertyNormal);
         }
     }
@@ -247,6 +247,8 @@ void RowTimeline::updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle prop
             kf->setUI(kfUI);
             propRow->rowTimeline()->insertKeyframe(kfUI);
             propRow->parentRow()->rowTimeline()->insertKeyframe(kfUI);
+            if (kf->IsSelected())
+                m_rowTree->m_scene->keyframeManager()->selectKeyframe(kfUI);
         }
 
         propRow->rowTimeline()->update();
@@ -268,7 +270,7 @@ void RowTimeline::putSelectedKeyframesOnTop()
 {
     if (!m_keyframes.empty())
         std::partition(m_keyframes.begin(), m_keyframes.end(), [](Keyframe *kf) {
-            return !kf->selected;
+            return !kf->selected();
         });
 
     if (m_rowTree->hasPropertyChildren()) { // has property rows
@@ -276,7 +278,7 @@ void RowTimeline::putSelectedKeyframesOnTop()
         for (auto child : childRows) {
             std::partition(child->rowTimeline()->m_keyframes.begin(),
                            child->rowTimeline()->m_keyframes.end(), [](Keyframe *kf) {
-                return !kf->selected;
+                return !kf->selected();
             });
         }
     }

@@ -99,7 +99,6 @@ QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time,
 void KeyframeManager::selectKeyframe(Keyframe *keyframe)
 {
     if (!m_selectedKeyframes.contains(keyframe)) {
-        keyframe->selected = true;
         m_selectedKeyframes.append(keyframe);
 
         if (!m_selectedKeyframesMasterRows.contains(keyframe->rowMaster))
@@ -109,6 +108,16 @@ void KeyframeManager::selectKeyframe(Keyframe *keyframe)
         keyframe->rowMaster->updateKeyframes();
 
         keyframe->binding->SetSelected(true);
+    }
+}
+
+void KeyframeManager::selectConnectedKeyframes(Keyframe *keyframe)
+{
+    // Select all keyframes of same master row at same time
+    const auto keyframes = keyframe->rowMaster->keyframes();
+    for (const auto k : keyframes) {
+        if (k->time == keyframe->time)
+            selectKeyframe(k);
     }
 }
 
@@ -123,10 +132,8 @@ void KeyframeManager::selectKeyframes(const QList<Keyframe *> &keyframes)
         }
     }
 
-    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-        keyframe->selected = true;
+    for (auto keyframe : qAsConst(m_selectedKeyframes))
         keyframe->binding->SetSelected(true);
-    }
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows)) {
         row->putSelectedKeyframesOnTop();
@@ -137,8 +144,10 @@ void KeyframeManager::selectKeyframes(const QList<Keyframe *> &keyframes)
 // update bindings after selected keyframes are moved
 void KeyframeManager::commitMoveSelectedKeyframes()
 {
-    for (auto keyframe : qAsConst(m_selectedKeyframes))
-        keyframe->binding->SetTime(keyframe->time * 1000);
+    CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+    COffsetKeyframesCommandHelper h(*theDoc);
+    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
+        keyframe->binding->UpdateKeyframesTime(&h, keyframe->time * 1000);
 }
 
 void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
@@ -168,10 +177,8 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
         }
     }
 
-    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-        keyframe->selected = true;
+    for (auto keyframe : qAsConst(m_selectedKeyframes))
         keyframe->binding->SetSelected(true);
-    }
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows)) {
         row->putSelectedKeyframesOnTop();
@@ -182,21 +189,29 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
 void KeyframeManager::deselectKeyframe(Keyframe *keyframe)
 {
     if (m_selectedKeyframes.contains(keyframe)) {
-        keyframe->selected = false;
         m_selectedKeyframes.removeAll(keyframe);
         keyframe->rowMaster->updateKeyframes();
         m_selectedKeyframesMasterRows.removeAll(keyframe->rowMaster);
 
         keyframe->binding->SetSelected(false);
+        keyframe->rowMaster->putSelectedKeyframesOnTop();
+    }
+}
+
+void KeyframeManager::deselectConnectedKeyframes(Keyframe *keyframe)
+{
+    // Deselect all keyframes of same master row at same time
+    const auto keyframes = keyframe->rowMaster->keyframes();
+    for (const auto k : keyframes) {
+        if (k->time == keyframe->time)
+            deselectKeyframe(k);
     }
 }
 
 void KeyframeManager::deselectAllKeyframes()
 {
-    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-        keyframe->selected = false;
+    for (auto keyframe : qAsConst(m_selectedKeyframes))
         keyframe->binding->SetSelected(false);
-    }
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows))
         row->updateKeyframes();

@@ -89,7 +89,7 @@ void RowTimelineContextMenu::showEvent(QShowEvent *event)
     Keyframe *keyframe = m_rowTree->rowTimeline()->getClickedKeyframe(m_menuEvent->scenePos());
     bool ctrlPressed = m_menuEvent->modifiers() & Qt::ControlModifier;
     if (keyframe) {
-        if (!keyframe->selected && !ctrlPressed)
+        if (!keyframe->selected() && !ctrlPressed)
             m_keyframeManager->deselectAllKeyframes();
 
         m_keyframeManager->selectKeyframe(keyframe);
