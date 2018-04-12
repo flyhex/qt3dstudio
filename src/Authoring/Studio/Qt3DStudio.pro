@@ -183,7 +183,6 @@ SOURCES += \
     _Win/DragNDrop/DropProxy.cpp \
     _Win/Palettes/PaletteManager.cpp \
     _Win/Palettes/Progress/ProgressView.cpp \
-    _Win/Palettes/Splash/SplashView.cpp \
     _Win/UI/EditCameraBar.cpp \
     _Win/UI/EditorPane.cpp \
     _Win/UI/GLVersionDlg.cpp \
@@ -359,7 +358,6 @@ SOURCES += \
     Render/StudioTranslationWidget.cpp \
     Render/StudioWidget.cpp \
     Render/WGLRenderContext.cpp \
-    Utils/CmdLineParser.cpp \
     Utils/ImportUtils.cpp \
     Utils/ResourceCache.cpp \
     Utils/StudioUtils.cpp \

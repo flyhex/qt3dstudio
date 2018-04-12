@@ -78,7 +78,7 @@ CEditCameraBar::~CEditCameraBar()
 void CEditCameraBar::SetupCameras()
 {
     m_CameraSelector->clear();
-    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
+    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
     int idx = 1;
@@ -133,7 +133,7 @@ void CEditCameraBar::setCameraIndex(int inIndex)
  */
 void CEditCameraBar::HandleCameraChanged(int inIndex)
 {
-    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
+    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
     int theNumCameras = theCameraNames.size();
@@ -201,7 +201,7 @@ void CEditCameraBar::Enable(bool inFlag)
 void CEditCameraBar::OnEditCameraChanged()
 {
     using qt3ds::QT3DSI32;
-    QT3DSI32 cameraIndex = g_StudioApp.GetRenderer().GetEditCamera();
+    QT3DSI32 cameraIndex = g_StudioApp.getRenderer().GetEditCamera();
     long theNumEntry = m_CameraSelector->count();
     for (long theIndex = 0; theIndex < theNumEntry; ++theIndex) {
         if (m_CameraSelector->itemData(theIndex).toInt() == cameraIndex) {

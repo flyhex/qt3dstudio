@@ -55,7 +55,7 @@ public:
     virtual ~CViews();
 
     // Implementation
-    void CreateViews();
+    void CreateViews(bool silent);
     void DestroyViews();
 
     // Keyboard

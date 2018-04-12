@@ -76,7 +76,7 @@ public: // Methods
     bool LoadBuildConfigurations();
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
-    void OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory);
+    bool OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory);
     void OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void SetCommandStackModifier(ICmdStackModifier *inModifier);

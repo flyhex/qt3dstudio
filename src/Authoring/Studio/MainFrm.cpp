@@ -86,7 +86,7 @@ CMainFrame::CMainFrame()
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddFileOpenListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
-    g_StudioApp.SetupTimer(WM_STUDIO_TIMER, this);
+    g_StudioApp.setupTimer(WM_STUDIO_TIMER, this);
 
     m_remoteDeploymentSender = new RemoteDeploymentSender(this);
 
@@ -164,7 +164,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->action_Reference_Manual, &QAction::triggered, this, &CMainFrame::OnHelpIndex);
     connect(m_ui->action_Visit_Qt_Web_Site, &QAction::triggered, this, &CMainFrame::OnHelpVisitQt);
     connect(m_ui->action_About_Qt_3D_Studio, &QAction::triggered,
-            []() { g_StudioApp.OnAppAbout(); });
+            []() { g_StudioApp.onAppAbout(); });
     connect(m_ui->action_Open_Tutorial, &QAction::triggered, this, &CMainFrame::OnHelpOpenTutorial);
 
 
@@ -798,7 +798,7 @@ void CMainFrame::closeEvent(QCloseEvent *event)
     }
 
     // Tell the app to shutdown, do it here so it does not rely on static destructor.
-    g_StudioApp.PerformShutdown();
+    g_StudioApp.performShutdown();
 }
 
 //==============================================================================
@@ -1219,7 +1219,7 @@ void CMainFrame::OnToolGlobalManipulators()
     else
         g_StudioApp.SetManipulationMode(StudioManipulationModes::Local);
 
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================
@@ -1267,8 +1267,8 @@ void CMainFrame::OnUpdateToolItemSelection()
  */
 void CMainFrame::OnEditCameraZoomExtent()
 {
-    if (g_StudioApp.GetRenderer().GetEditCamera() >= 0)
-        g_StudioApp.GetRenderer().EditCameraZoomToFit();
+    if (g_StudioApp.getRenderer().GetEditCamera() >= 0)
+        g_StudioApp.getRenderer().EditCameraZoomToFit();
     else
         g_StudioApp.SetAuthorZoom(!g_StudioApp.IsAuthorZoom());
 }
@@ -1418,7 +1418,7 @@ void CMainFrame::HandleEditViewFillModeKey()
 {
     if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
         OnEditViewFillMode();
-        bool theEditViewFillMode = g_StudioApp.GetRenderer().IsEditLightEnabled();
+        bool theEditViewFillMode = g_StudioApp.getRenderer().IsEditLightEnabled();
         m_ui->actionShading_Mode->setChecked(theEditViewFillMode);
     }
 }
@@ -1431,8 +1431,8 @@ void CMainFrame::HandleEditViewFillModeKey()
 //==============================================================================
 void CMainFrame::OnEditViewFillMode()
 {
-    bool theEditViewFillMode = !g_StudioApp.GetRenderer().IsEditLightEnabled();
-    g_StudioApp.GetRenderer().SetEnableEditLight(theEditViewFillMode);
+    bool theEditViewFillMode = !g_StudioApp.getRenderer().IsEditLightEnabled();
+    g_StudioApp.getRenderer().SetEnableEditLight(theEditViewFillMode);
 }
 
 //==============================================================================
@@ -1449,7 +1449,7 @@ void CMainFrame::OnUpdateEditViewFillMode()
 {
     if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
         m_ui->actionShading_Mode->setEnabled(true);
-        m_ui->actionShading_Mode->setChecked(g_StudioApp.GetRenderer().IsEditLightEnabled());
+        m_ui->actionShading_Mode->setChecked(g_StudioApp.getRenderer().IsEditLightEnabled());
     } else {
         m_ui->actionShading_Mode->setEnabled(false);
         m_ui->actionShading_Mode->setChecked(false);
@@ -1458,7 +1458,7 @@ void CMainFrame::OnUpdateEditViewFillMode()
 
 void CMainFrame::OnViewGuidesRulers()
 {
-    g_StudioApp.GetRenderer().SetGuidesEnabled(!g_StudioApp.GetRenderer().AreGuidesEnabled());
+    g_StudioApp.getRenderer().SetGuidesEnabled(!g_StudioApp.getRenderer().AreGuidesEnabled());
     g_StudioApp.GetCore()->GetDispatch()->FireAuthorZoomChanged();
     m_SceneView->OnRulerGuideToggled();
 }
@@ -1466,39 +1466,39 @@ void CMainFrame::OnViewGuidesRulers()
 void CMainFrame::OnUpdateViewGuidesRulers()
 {
     m_ui->actionRulers_Guides->setEnabled(m_SceneView->IsDeploymentView());
-    m_ui->actionRulers_Guides->setChecked(g_StudioApp.GetRenderer().AreGuidesEnabled());
+    m_ui->actionRulers_Guides->setChecked(g_StudioApp.getRenderer().AreGuidesEnabled());
 }
 
 void CMainFrame::OnClearGuides()
 {
-    g_StudioApp.ClearGuides();
+    g_StudioApp.clearGuides();
 }
 
 void CMainFrame::OnUpdateClearGuides()
 {
-    bool enable = g_StudioApp.GetRenderer().AreGuidesEnabled()
-            && g_StudioApp.GetRenderer().AreGuidesEditable() && m_SceneView->IsDeploymentView();
+    bool enable = g_StudioApp.getRenderer().AreGuidesEnabled()
+            && g_StudioApp.getRenderer().AreGuidesEditable() && m_SceneView->IsDeploymentView();
 
     m_ui->actionClear_Guides->setEnabled(enable);
 }
 
 void CMainFrame::OnLockGuides()
 {
-    g_StudioApp.GetRenderer().SetGuidesEditable(!g_StudioApp.GetRenderer().AreGuidesEditable());
+    g_StudioApp.getRenderer().SetGuidesEditable(!g_StudioApp.getRenderer().AreGuidesEditable());
 }
 
 void CMainFrame::OnUpdateLockGuides()
 {
-    bool enable = g_StudioApp.GetRenderer().AreGuidesEnabled() && m_SceneView->IsDeploymentView();
+    bool enable = g_StudioApp.getRenderer().AreGuidesEnabled() && m_SceneView->IsDeploymentView();
     m_ui->actionLock_Guides->setEnabled(enable);
     // Set to the inverse of guides editable.
-    m_ui->actionLock_Guides->setChecked(!g_StudioApp.GetRenderer().AreGuidesEditable());
+    m_ui->actionLock_Guides->setChecked(!g_StudioApp.getRenderer().AreGuidesEditable());
 }
 
 void CMainFrame::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == WM_STUDIO_TIMER)
-        g_StudioApp.GetTickTock().ProcessMessages();
+        g_StudioApp.getTickTock().ProcessMessages();
     QMainWindow::timerEvent(event);
 }
 
@@ -1607,7 +1607,7 @@ void CMainFrame::OnUpdateViewTimeline()
 void CMainFrame::OnViewBoundingBoxes()
 {
     CStudioPreferences::SetBoundingBoxesOn(!CStudioPreferences::IsBoundingBoxesOn());
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================
@@ -1627,7 +1627,7 @@ void CMainFrame::OnUpdateViewBoundingBoxes()
 void CMainFrame::OnViewPivotPoint()
 {
     CStudioPreferences::SetDisplayPivotPoint(!CStudioPreferences::ShouldDisplayPivotPoint());
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================
@@ -1651,7 +1651,7 @@ void CMainFrame::OnViewWireframe()
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
     m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
 
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================

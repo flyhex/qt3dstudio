@@ -153,7 +153,7 @@ void CPlayerContainerWnd::SetScrollRanges()
 //==============================================================================
 void CPlayerContainerWnd::OnRulerGuideToggled()
 {
-    int scrollAmount = g_StudioApp.GetRenderer().AreGuidesEnabled() ? 16 : -16;
+    int scrollAmount = g_StudioApp.getRenderer().AreGuidesEnabled() ? 16 : -16;
     bool hasHorz = horizontalScrollBar()->isVisible();
     bool hasVert = verticalScrollBar()->isVisible();
     int hscrollPos = 0, vscrollPos = 0;
@@ -211,7 +211,7 @@ void CPlayerContainerWnd::RecenterClient()
     QRect glRect = m_ClientRect;
     glRect.setWidth(int(fixedDevicePixelRatio() * m_ClientRect.width()));
     glRect.setHeight(int(fixedDevicePixelRatio() * m_ClientRect.height()));
-    g_StudioApp.GetRenderer().SetViewRect(glRect);
+    g_StudioApp.getRenderer().SetViewRect(glRect);
 }
 
 void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
@@ -284,7 +284,7 @@ QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
     // presentation
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
-    if (g_StudioApp.GetRenderer().AreGuidesEnabled())
+    if (g_StudioApp.getRenderer().AreGuidesEnabled())
         theSize += QSize(32, 32);
 
     return theSize / fixedDevicePixelRatio();

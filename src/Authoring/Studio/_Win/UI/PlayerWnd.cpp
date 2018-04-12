@@ -120,8 +120,8 @@ void CPlayerWnd::mousePressEvent(QMouseEvent *event)
             toolChanged = true;
         } else if (btn == Qt::LeftButton) {
             // Alt + Left Click
-            if (g_StudioApp.GetRenderer().DoesEditCameraSupportRotation(
-                        g_StudioApp.GetRenderer().GetEditCamera())) {
+            if (g_StudioApp.getRenderer().DoesEditCameraSupportRotation(
+                        g_StudioApp.getRenderer().GetEditCamera())) {
                 toolMode = STUDIO_TOOLMODE_CAMERA_ROTATE;
                 toolChanged = true;
             }
@@ -220,7 +220,7 @@ QSize CPlayerWnd::sizeHint() const
 
 void CPlayerWnd::initializeGL()
 {
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
+    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     if (theRenderer.IsInitialized() == false) {
         try {
             theRenderer.Initialize(this);
@@ -237,7 +237,7 @@ void CPlayerWnd::initializeGL()
 
 void CPlayerWnd::paintGL()
 {
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
+    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     // Don't use request render here, this has to be synchronous inside paintGL
     theRenderer.RenderNow();
 }
@@ -256,7 +256,7 @@ qreal CPlayerWnd::fixedDevicePixelRatio() const
 void CPlayerWnd::resizeGL(int width, int height)
 {
     // This also passes the new FBO to the OpenGLContext
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
+    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     theRenderer.SetViewRect(QRect(0, 0, width * fixedDevicePixelRatio(),
                                   height * fixedDevicePixelRatio()));
 }

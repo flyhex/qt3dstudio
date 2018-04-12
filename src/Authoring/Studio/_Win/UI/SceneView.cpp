@@ -348,7 +348,7 @@ void CSceneView::OnEditCameraChanged()
     }
 
     // Update the view mode accordingly
-    SetViewMode(g_StudioApp.GetRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
+    SetViewMode(g_StudioApp.getRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
                                                                : CPlayerContainerWnd::VIEW_SCENE);
     m_PlayerWnd->update();
 }

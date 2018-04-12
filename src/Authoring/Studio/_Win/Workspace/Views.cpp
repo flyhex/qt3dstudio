@@ -63,12 +63,13 @@ CViews::~CViews()
 /**
  *
  */
-void CViews::CreateViews()
+void CViews::CreateViews(bool silent)
 {
     // To create the main window, this code creates a new frame window
     // object and then sets it as the application's main window object
     m_MainFrame = new CMainFrame();
-    m_MainFrame->show();
+    if (!silent)
+        m_MainFrame->show();
 }
 
 //=============================================================================

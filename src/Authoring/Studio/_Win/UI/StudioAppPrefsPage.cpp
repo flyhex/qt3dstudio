@@ -269,7 +269,7 @@ bool CStudioAppPrefsPage::OnApply()
     SetModified(false);
 
     // Request that the renderer refreshes as settings may have changed
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 
     return CStudioPreferencesPropPage::OnApply();
 }
@@ -331,7 +331,7 @@ void CStudioAppPrefsPage::EnableOptions()
 //==============================================================================
 void CStudioAppPrefsPage::InitEditStartViewCombo()
 {
-    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
+    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
     for (int idx = 0, end = theCameraNames.size(); idx < end; ++idx) {
@@ -422,7 +422,7 @@ void CStudioAppPrefsPage::OnBgColorButtonClicked()
         m_bgColor = previousColor;
     updateColorButton();
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
@@ -430,7 +430,7 @@ void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
     m_bgColor = color;
     updateColorButton();
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 void CStudioAppPrefsPage::enableAutosave(bool enabled)
