@@ -80,7 +80,10 @@ RowLayout {
     ColorDialog {
         id: colorDialog
         options: ColorDialog.DontUseNativeDialog
-        color: selectedColor
+
+        Component.onCompleted: {
+            color = selectedColor
+        }
 
         onCurrentColorChanged: {
             selectedColor = currentColor;
