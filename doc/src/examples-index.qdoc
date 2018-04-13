@@ -54,8 +54,17 @@ Extra setup steps after installing Qt 3D Studio and Qt 5.10.1:
    for details on how to set environment variables.
 \endlist
 
-The last three steps are only needed for C++ applications:
-\list 4
+Additional two steps are needed if you are running macOS:
+
+\list 1
+  \li Add \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\lib} to the end of the
+  DYLD_FRAMEWORK_PATH variable in the Run Environment for the build.
+  \li Add \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\lib} to the end of the
+  DYLD_LIBRARY_PATH variable in the Run Environment for the build.
+\endlist
+
+Additional three steps are needed for C++ applications:
+\list 1
   \li Copy \c{<Qt 3D Studio installation directory>\Tools\Qt3DStudio\include\QtStudio3D} under
   \c{<Qt installation directory>\5.10.1\<compiler>\include}
   (e.g. \c{C:\Qt\5.10.1\msvc2015_64\include}).
