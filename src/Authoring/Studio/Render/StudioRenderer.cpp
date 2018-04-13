@@ -393,9 +393,11 @@ struct SRendererImpl : public IStudioRenderer,
         // But to do that I need to figure out what the view frustum is at -600 units from the near
         // clip plane
 
-        QT3DSVec3 theExtents = theBounds.getExtents();
+        QT3DSVec3 theExtents = theBounds.getExtents().multiply(theNode.m_Scale);
+
         // get the largest extent and then some addition so things fit nicely in the viewport.
         QT3DSF32 theMaxPossibleRadius = theExtents.magnitude();
+
         // easiest case, the viewport dimensions map directly to the
         m_Translation->m_EditCameraInfo.m_ViewRadius = theMaxPossibleRadius;
         RequestRender();
