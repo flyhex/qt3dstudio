@@ -120,6 +120,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_timelineGVDock->setAllowedAreas(Qt::BottomDockWidgetArea);
     m_timelineWidget = new TimelineWidget(m_timelineGVDock);
     m_timelineGVDock->setWidget(m_timelineWidget);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineGVDock));
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
@@ -244,17 +245,6 @@ bool CPaletteManager::tabNavigateFocusedWidget(bool tabForward)
         }
     }
     return false;
-}
-
-//==============================================================================
-/**
- *  A helper for CMainFrame::GetTimelineControl() to access the CTimelineControl
- *  inside the QDockWidget
- */
-
-TimelineView *CPaletteManager::GetTimelineView() const
-{
-    return m_timelineView;
 }
 
 void CPaletteManager::onTimeChanged(long time)

@@ -31,6 +31,7 @@
 
 #include <QtCore/qlist.h>
 #include <StudioObjectTypes.h>
+#include "IKeyframesManager.h"
 
 class RowTimeline;
 class TimelineGraphicsScene;
@@ -39,7 +40,7 @@ struct Keyframe;
 QT_FORWARD_DECLARE_CLASS(QGraphicsSceneContextMenuEvent)
 QT_FORWARD_DECLARE_CLASS(QRectF)
 
-class KeyframeManager
+class KeyframeManager : public IKeyframesManager
 {
 public:
     KeyframeManager(TimelineGraphicsScene *m_scene);
@@ -53,12 +54,12 @@ public:
     void deselectKeyframe(Keyframe *keyframe);
     void deselectConnectedKeyframes(Keyframe *keyframe);
     void deselectAllKeyframes();
-    void deleteSelectedKeyframes();
     void deleteKeyframes(RowTimeline *row, bool repaint = true);
     void copySelectedKeyframes();
     void pasteKeyframes(RowTimeline *row);
     void moveSelectedKeyframes(double dx);
     void commitMoveSelectedKeyframes();
+    bool deleteSelectedKeyframes();
     bool oneMasterRowSelected() const;
     bool hasSelectedKeyframes() const;
     bool hasCopiedKeyframes() const;
@@ -68,6 +69,20 @@ public:
     QList<Keyframe *> m_selectedKeyframes;
     QList<Keyframe *> m_copiedKeyframes; // for copy, cut, paste
     QList<RowTimeline *> m_selectedKeyframesMasterRows;
+
+    // IKeyframesManager interface
+    // Mahmoud_TODO: rewrite a better interface for the new timeline
+    bool HasSelectedKeyframes(bool inOnlyDynamic) override;
+    bool HasDynamicKeyframes() override;
+    bool CanPerformKeyframeCopy() override;
+    bool CanPerformKeyframePaste() override;
+    void CopyKeyframes() override;
+    bool RemoveKeyframes(bool inPerformCopy) override;
+    void PasteKeyframes() override;
+    void SetKeyframeInterpolation() override;
+    void SelectAllKeyframes() override;
+    void DeselectAllKeyframes() override;
+    void SetChangedKeyframes() override;
 
 private:
     static const QHash<int, QList<QString>> SUPPORTED_ROW_PROPS;

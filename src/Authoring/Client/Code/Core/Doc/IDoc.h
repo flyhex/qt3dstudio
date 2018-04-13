@@ -49,6 +49,7 @@ class CAsset;
 class IKeyframesManager;
 class ISelectable;
 class CCore;
+class TimelineWidget;
 
 namespace qt3ds {
 namespace foundation {

@@ -58,7 +58,7 @@
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
-#include "TimelineView.h"
+#include "TimelineWidget.h"
 #include "ProjectView.h"
 
 #include <QtGui/qevent.h>
@@ -650,9 +650,7 @@ void CMainFrame::OnTimelineSetChangedKeyframe()
  */
 void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
 {
-    // TODO: reimplement in the new timeline
-//    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(
-//                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(getTimelineWidget()->hasSelectedKeyframes());
 }
 
 //==============================================================================
@@ -1865,9 +1863,10 @@ void CMainFrame::OnConnectionChanged(bool connected)
     m_ui->actionRemote_Preview->setEnabled(connected);
 }
 
-TimelineView *CMainFrame::GetTimelineView()
+TimelineWidget *CMainFrame::getTimelineWidget()
 {
-    return m_PaletteManager->GetTimelineView();
+    return static_cast<TimelineWidget *>(m_PaletteManager->GetControl(
+                                             CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
 }
 
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()

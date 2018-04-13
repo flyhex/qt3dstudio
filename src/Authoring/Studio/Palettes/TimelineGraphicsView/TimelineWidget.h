@@ -69,6 +69,7 @@ public:
 
     //CClientPlayChangeListener
     void OnTimeChanged(long inTime) override;
+    bool hasSelectedKeyframes() const;
 
 protected:
     // DataModel callbacks

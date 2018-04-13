@@ -46,6 +46,7 @@ class RowMover;
 class RowManager;
 class KeyframeManager;
 class TimelineControl;
+class IKeyframesManager;
 struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)

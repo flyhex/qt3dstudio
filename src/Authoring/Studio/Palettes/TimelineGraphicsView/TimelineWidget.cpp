@@ -193,6 +193,9 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     layoutRoot->addWidget(m_toolbar);
     setLayout(layoutRoot);
 
+    g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(
+                static_cast<IKeyframesManager *>(m_graphicsScene->keyframeManager()));
+
     // connect graphics scene geometryChanged
     connect(m_graphicsScene->widgetRoot(), &QGraphicsWidget::geometryChanged, this, [this]() {
         const QRectF rect = m_graphicsScene->widgetRoot()->rect();
@@ -659,4 +662,9 @@ QGraphicsView *TimelineWidget::viewTreeContent() const
 TimelineToolbar *TimelineWidget::toolbar() const
 {
     return m_toolbar;
+}
+
+bool TimelineWidget::hasSelectedKeyframes() const
+{
+    return m_graphicsScene->keyframeManager()->hasSelectedKeyframes();
 }

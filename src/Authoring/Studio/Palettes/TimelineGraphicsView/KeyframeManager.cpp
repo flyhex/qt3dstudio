@@ -43,8 +43,9 @@
 #include "CmdDataModelRemoveKeyframe.h"
 #include "CmdDataModelInsertKeyframe.h"
 #include "Bindings/ITimelineItemBinding.h"
-#include "Bindings/KeyframesManager.h"
+#include "Bindings/OffsetKeyframesCommandHelper.h"
 #include "Bindings/Qt3DSDMTimelineKeyframe.h"
+
 
 #include <qglobal.h>
 #include <QtCore/qhash.h>
@@ -220,7 +221,7 @@ void KeyframeManager::deselectAllKeyframes()
     m_selectedKeyframesMasterRows.clear();
 }
 
-void KeyframeManager::deleteSelectedKeyframes()
+bool KeyframeManager::deleteSelectedKeyframes()
 {
     if (!m_selectedKeyframes.empty()) {
         CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
@@ -242,7 +243,10 @@ void KeyframeManager::deleteSelectedKeyframes()
 
         g_StudioApp.GetCore()->ExecuteCommand(cmd);
         PostExecuteCommand(theDoc);
+        return true;
     }
+
+    return false;
 }
 
 // delete all keyframes on a row
@@ -388,6 +392,63 @@ bool KeyframeManager::hasSelectedKeyframes() const
 bool KeyframeManager::hasCopiedKeyframes() const
 {
     return !m_copiedKeyframes.empty();
+}
+
+// IKeyframesManager interface to connect Doc and KeyframeManager
+// Mahmoud_TODO: rewrite a better interface for the new timeline
+bool KeyframeManager::HasSelectedKeyframes(bool inOnlyDynamic)
+{
+    return hasSelectedKeyframes();
+}
+
+bool KeyframeManager::HasDynamicKeyframes()
+{
+    return true; // Mahmoud_TODO: implement
+}
+
+bool KeyframeManager::CanPerformKeyframeCopy()
+{
+    return true; // Mahmoud_TODO: implement
+}
+
+bool KeyframeManager::CanPerformKeyframePaste()
+{
+    return true; // Mahmoud_TODO: implement
+}
+
+void KeyframeManager::CopyKeyframes()
+{
+    copySelectedKeyframes();
+}
+
+bool KeyframeManager::RemoveKeyframes(bool inPerformCopy)
+{
+    return deleteSelectedKeyframes();
+}
+
+void KeyframeManager::PasteKeyframes()
+{
+    // Mahmoud_TODO: implement
+}
+
+void KeyframeManager::SetKeyframeInterpolation()
+{
+    // Mahmoud_TODO: implement
+}
+
+void KeyframeManager::SelectAllKeyframes()
+{
+    // Mahmoud_TODO: implement if needed
+}
+
+void KeyframeManager::DeselectAllKeyframes()
+{
+    // Mahmoud_TODO: implement if needed
+}
+
+void KeyframeManager::SetChangedKeyframes()
+{
+    // Mahmoud_TODO: implement if needed
 }
 
 const QHash<int, QList<QString>> KeyframeManager::SUPPORTED_ROW_PROPS = {

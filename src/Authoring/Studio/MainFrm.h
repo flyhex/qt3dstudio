@@ -54,7 +54,7 @@ class CSceneView;
 class CStudioApp;
 class ITimelineTimebar;
 class RemoteDeploymentSender;
-class TimelineView;
+class TimelineWidget;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -229,7 +229,7 @@ public:
     void onCtrlNPressed();
 
     ITimelineTimebar *GetSelectedTimelineTimebar();
-    TimelineView *GetTimelineView();
+    TimelineWidget *getTimelineWidget();
 
     void EditPreferences(short inPageIndex);
 

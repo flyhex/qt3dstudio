@@ -70,7 +70,8 @@ CKeyframesManager::CKeyframesManager(CTimelineTranslationManager *inTransMgr)
     , m_OffsetKeyframeCommandHelper(*(g_StudioApp.GetCore()->GetDoc()))
     , m_PasteKeyframeCommandHelper(nullptr)
 {
-    g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(this);
+    // Mahmoud_TODO: to be removed after further clean up
+//    g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(this);
 }
 
 CKeyframesManager::~CKeyframesManager()
