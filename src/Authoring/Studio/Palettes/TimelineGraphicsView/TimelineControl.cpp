@@ -56,8 +56,10 @@ void TimelineControl::ChangeEndTime(long inTime)
 
 void TimelineControl::Commit()
 {
-    long time = m_rowTimeline->getEndTime() * 1000;
-    m_timebar->ChangeTime(time, true);
+    long startTime = m_rowTimeline->getStartTime() * 1000;
+    m_timebar->ChangeTime(startTime, true);
+    long endTime = m_rowTimeline->getEndTime() * 1000;
+    m_timebar->ChangeTime(endTime, false);
     m_timebar->CommitTimeChange();
 }
 
