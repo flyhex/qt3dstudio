@@ -32,6 +32,7 @@
 #include "TimelineConstants.h"
 #include "StudioObjectTypes.h"
 #include "Bindings/ITimelineItemBinding.h"
+#include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSString.h"
 
 #include <QtGui/qpainter.h>
@@ -324,7 +325,12 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
     m_shy = m_binding->GetTimelineItem()->IsShy();
     m_visible = m_binding->GetTimelineItem()->IsVisible();
     m_locked = m_binding->GetTimelineItem()->IsLocked();
+
+    // Update label locking & color
+    Qt3DSDMTimelineItemBinding *itemBinding =
+            static_cast<Qt3DSDMTimelineItemBinding *>(binding);
     m_labelItem.setLocked(m_locked);
+    m_labelItem.setMaster(itemBinding->IsMaster());
 }
 
 void RowTree::setPropBinding(ITimelineItemProperty *binding)

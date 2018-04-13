@@ -46,6 +46,7 @@ public:
     QString label() const;
     void setLabel(const QString &label);
     void setLocked(bool isLocked);
+    void setMaster(bool isMaster);
     void setRowTypeLabel(EStudioObjectType rowType);
     RowTree *parentRow() const;
     void setParentRow(RowTree *row);
@@ -63,11 +64,13 @@ signals:
 
 private:
     void validateLabel();
+    void updateLabelColor();
 
     RowTree *m_rowTree = nullptr;
     QString m_label;
     QString m_rowTypeLabel;
     bool m_locked;
+    bool m_master;
     bool m_acceptOnFocusOut;
 
 };

@@ -30,6 +30,7 @@
 #include "TimelineConstants.h"
 #include "TimelineItem.h"
 #include "RowTree.h"
+#include "StudioPreferences.h"
 
 #include <QtWidgets/qstyleoption.h>
 #include <QtCore/qdebug.h>
@@ -39,11 +40,12 @@
 RowTreeLabelItem::RowTreeLabelItem(QGraphicsItem *parent)
     : QGraphicsTextItem(parent)
     , m_locked(false)
+    , m_master(false)
     , m_acceptOnFocusOut(true)
 {
-    setDefaultTextColor(TimelineConstants::ROW_TEXT_COLOR);
     setTextInteractionFlags(Qt::TextEditorInteraction);
     setEnabled(false);
+    updateLabelColor();
 }
 
 QString RowTreeLabelItem::label() const
@@ -60,13 +62,17 @@ void RowTreeLabelItem::setLabel(const QString &label)
     }
 }
 
+void RowTreeLabelItem::setMaster(bool isMaster) {
+    if (m_master != isMaster) {
+        m_master = isMaster;
+        updateLabelColor();
+    }
+}
+
 void RowTreeLabelItem::setLocked(bool isLocked) {
     if (m_locked != isLocked) {
         m_locked = isLocked;
-        if (m_locked)
-            setDefaultTextColor(TimelineConstants::ROW_TEXT_COLOR_DISABLED);
-        else
-            setDefaultTextColor(TimelineConstants::ROW_TEXT_COLOR);
+        updateLabelColor();
     }
 }
 
@@ -155,6 +161,16 @@ void RowTreeLabelItem::validateLabel()
     //emit invalidLabel();
 
     setLabel(text);
+}
+
+void RowTreeLabelItem::updateLabelColor()
+{
+    if (m_locked)
+        setDefaultTextColor(CStudioPreferences::GetDisabledTextColor());
+    else if (m_master)
+        setDefaultTextColor(CStudioPreferences::GetMasterColor());
+    else
+        setDefaultTextColor(CStudioPreferences::GetNormalColor());
 }
 
 void RowTreeLabelItem::setRowTypeLabel(EStudioObjectType rowType)

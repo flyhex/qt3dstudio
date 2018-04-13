@@ -68,8 +68,6 @@ namespace TimelineConstants
     const char ROW_COLOR_DURATION_EDGE[]      = "#000000"; // duration left and right edge lines
     const char ROW_COLOR_DURATION_SELECTED[]  = "#4D99CC";
     const char ROW_COLOR_MOVE_SRC[]           = "#464600";
-    const char ROW_TEXT_COLOR[]               = "#bbbbbb";
-    const char ROW_TEXT_COLOR_DISABLED[]      = "#888888";
     const char PLAYHEAD_COLOR[]               = "#ff0066";
     const char RULER_COLOR[]                  = "#888888";
     const char RULER_COLOR_DISABLED[]         = "#444444";
