@@ -51,6 +51,7 @@ namespace render {
             LightmapIndirect = 10,
             LightmapRadiosity = 11,
             LightmapShadow = 12,
+            Roughness = 13,
         };
     };
 

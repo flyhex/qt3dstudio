@@ -401,6 +401,7 @@ namespace render {
     HANDLE_QT3DS_RENDER_PROPERTY(Material, IOR, Dirty)                                               \
     HANDLE_QT3DS_RENDER_PROPERTY(Material, SpecularAmount, Dirty)                                    \
     HANDLE_QT3DS_RENDER_PROPERTY(Material, SpecularRoughness, Dirty)                                 \
+    HANDLE_QT3DS_RENDER_PROPERTY(Material, RoughnessMap, Dirty)                                      \
     HANDLE_QT3DS_RENDER_OPACITY_PROPERTY(Material, Opacity, Dirty)                                   \
     HANDLE_QT3DS_RENDER_PROPERTY(Material, OpacityMap, Dirty)                                        \
     HANDLE_QT3DS_RENDER_PROPERTY(Material, BumpMap, Dirty)                                           \

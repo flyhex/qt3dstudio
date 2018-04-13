@@ -90,6 +90,7 @@ ior
 fresnelPower
 specularamount
 specularroughness
+roughnessmap
 blendmode
 culling
 zbufferwrite

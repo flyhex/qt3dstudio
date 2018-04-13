@@ -554,6 +554,7 @@ namespace render {
             LightmapIndirect,
             LightmapRadiosity,
             LightmapShadow,
+            RoughnessMap,
             ImageMapCount
         };
 
@@ -619,6 +620,7 @@ namespace render {
             m_ImageMaps[12].m_Name = "lightmapIndirect";
             m_ImageMaps[13].m_Name = "lightmapRadiosity";
             m_ImageMaps[14].m_Name = "lightmapShadow";
+            m_ImageMaps[15].m_Name = "roughnessMap";
             m_TextureSwizzle[0].m_Name = "diffuseMap0_swizzle";
             m_TextureSwizzle[1].m_Name = "diffuseMap1_swizzle";
             m_TextureSwizzle[2].m_Name = "diffuseMap2_swizzle";
@@ -634,6 +636,7 @@ namespace render {
             m_TextureSwizzle[12].m_Name = "lightmapIndirect_swizzle";
             m_TextureSwizzle[13].m_Name = "lightmapRadiosity_swizzle";
             m_TextureSwizzle[14].m_Name = "lightmapShadow_swizzle";
+            m_TextureSwizzle[15].m_Name = "roughnessMap_swizzle";
             SetPropertyOffsets();
         }
 

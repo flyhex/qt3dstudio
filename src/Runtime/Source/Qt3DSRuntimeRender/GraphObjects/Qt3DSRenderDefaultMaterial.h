@@ -94,6 +94,7 @@ namespace render {
         QT3DSF32 m_FresnelPower;
         QT3DSF32 m_SpecularAmount; // 0-??, defaults to 0
         QT3DSF32 m_SpecularRoughness; // 0-??, defaults to 50
+        SImage *m_RoughnessMap;
         QT3DSF32 m_Opacity; // 0-1
         SImage *m_OpacityMap;
         SImage *m_BumpMap;
@@ -129,6 +130,7 @@ namespace render {
             inRemapper.Remap(m_EmissiveMap2);
             inRemapper.Remap(m_SpecularReflection);
             inRemapper.Remap(m_SpecularMap);
+            inRemapper.Remap(m_RoughnessMap);
             inRemapper.Remap(m_OpacityMap);
             inRemapper.Remap(m_BumpMap);
             inRemapper.Remap(m_NormalMap);

@@ -591,6 +591,7 @@ struct SRuntimePropertyParser
 #define Material_FresnelPower ATTRIBUTE_FRESNELPOWER
 #define Material_SpecularAmount ATTRIBUTE_SPECULARAMOUNT
 #define Material_SpecularRoughness ATTRIBUTE_SPECULARROUGHNESS
+#define Material_RoughnessMap ATTRIBUTE_ROUGHNESSMAP
 #define Material_Opacity ATTRIBUTE_OPACITY
 #define Material_OpacityMap ATTRIBUTE_OPACITYMAP
 #define Material_BumpAmount ATTRIBUTE_BUMPAMOUNT

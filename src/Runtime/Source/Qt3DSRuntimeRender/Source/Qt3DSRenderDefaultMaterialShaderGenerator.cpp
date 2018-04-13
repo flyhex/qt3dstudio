@@ -493,8 +493,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                               "kggxGlossyDefaultMtl( "
                            << "world_normal, tangent, -" << inLightDir << ".xyz, view_vector, "
                            << inLightSpecColor
-                           << ".rgb, vec3(material_specular.xyz), material_properties.y, "
-                              "material_properties.y ).rgb;"
+                           << ".rgb, vec3(material_specular.xyz), roughnessAmount, "
+                              "roughnessAmount ).rgb;"
                            << Endl;
         } break;
         case DefaultMaterialSpecularModel::KWard: {
@@ -504,8 +504,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                               "wardGlossyDefaultMtl( "
                            << "world_normal, tangent, -" << inLightDir << ".xyz, view_vector, "
                            << inLightSpecColor
-                           << ".rgb, vec3(material_specular.xyz), material_properties.y, "
-                              "material_properties.y ).rgb;"
+                           << ".rgb, vec3(material_specular.xyz), roughnessAmount, "
+                              "roughnessAmount ).rgb;"
                            << Endl;
         } break;
         default:
@@ -513,7 +513,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             fragmentShader << "\tglobal_specular_light.rgb += lightAttenuation * specularAmount * "
                               "specularBSDF( "
                            << "world_normal, -" << inLightDir << ".xyz, view_vector, "
-                           << inLightSpecColor << ".rgb, 1.0, 2.56 / (material_properties.y + "
+                           << inLightSpecColor << ".rgb, 1.0, 2.56 / (roughnessAmount + "
                                                   "0.01), vec3(1.0), scatter_reflect ).rgb;"
                            << Endl;
             break;
@@ -540,7 +540,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                             "specularAmount * sampleAreaGlossyDefault( tanFrame, "
                          << inPos << ", " << m_NormalizedDirection << ", " << m_LightPos << ".xyz, "
                          << m_LightRt << ".w, " << m_LightUp << ".w, " << inView
-                         << ", material_properties.y, material_properties.y ).rgb;" << Endl;
+                         << ", roughnessAmount, roughnessAmount ).rgb;" << Endl;
     }
 
     void AddTranslucencyIrradiance(IShaderStageGenerator &infragmentShader, SRenderableImage *image,
@@ -925,6 +925,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         QT3DSU32 bumpImageIdx = 0;
         SRenderableImage *specularAmountImage = NULL;
         QT3DSU32 specularAmountImageIdx = 0;
+        SRenderableImage *roughnessImage = NULL;
+        QT3DSU32 roughnessImageIdx = 0;
         // normal mapping
         SRenderableImage *normalImage = NULL;
         QT3DSU32 normalImageIdx = 0;
@@ -950,6 +952,9 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             } else if (img->m_MapType == ImageMapTypes::SpecularAmountMap) {
                 specularAmountImage = img;
                 specularAmountImageIdx = imageIdx;
+            } else if (img->m_MapType == ImageMapTypes::Roughness) {
+                roughnessImage = img;
+                roughnessImageIdx = imageIdx;
             } else if (img->m_MapType == ImageMapTypes::Normal) {
                 normalImage = img;
                 normalImageIdx = imageIdx;
@@ -1165,6 +1170,17 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                 fragmentShader << "\tspecularAmount = specularAmount * texture2D( "
                                << m_ImageSampler << ", " << m_ImageFragCoords << " ).x;" << Endl;
                 fragmentHasSpecularAmount = true;
+            }
+
+            fragmentShader << "\tfloat roughnessAmount = material_properties.y;" << Endl;
+            if (roughnessImage) {
+                GenerateImageUVCoordinates(roughnessImageIdx, *roughnessImage);
+                fragmentShader << "\tfloat sampledRoughness = texture2D( "
+                               << m_ImageSampler << ", " << m_ImageFragCoords << " ).x;" << Endl;
+                //The roughness sampled from roughness textures is Disney roughness
+                //which has to be squared to get the proper value
+                fragmentShader << "\troughnessAmount = roughnessAmount * "
+                               << "sampledRoughness * sampledRoughness;" << Endl;
             }
 
             fragmentHasSpecularAmount =
@@ -1396,7 +1412,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
                 fragmentShader << "\tglobal_specular_light.xyz += specularAmount * "
                                   "vec3(material_specular.xyz) * sampleGlossy( tanFrame, "
-                                  "view_vector, material_properties.y ).xyz;"
+                                  "view_vector, roughnessAmount ).xyz;"
                                << Endl;
             }
         }
@@ -1411,6 +1427,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                     || image->m_MapType == ImageMapTypes::Normal
                     || image->m_MapType == ImageMapTypes::Displacement
                     || image->m_MapType == ImageMapTypes::SpecularAmountMap
+                    || image->m_MapType == ImageMapTypes::Roughness
                     || image->m_MapType == ImageMapTypes::Translucency
                     || image->m_MapType == ImageMapTypes::LightmapIndirect
                     || image->m_MapType == ImageMapTypes::LightmapRadiosity) {

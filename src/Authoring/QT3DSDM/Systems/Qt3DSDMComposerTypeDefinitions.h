@@ -162,6 +162,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(specularreflection, m_SpecularReflection, SLong4, 0)                  \
     HANDLE_COMPOSER_PROPERTY(specularamount, m_SpecularAmount, float, 0.f)                         \
     HANDLE_COMPOSER_PROPERTY(specularroughness, m_SpecularRoughness, float, 50.f)                  \
+    HANDLE_COMPOSER_PROPERTY(roughnessmap, m_RoughnessMap, SLong4, 0)                              \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(opacity, m_Opacity, float, 100.f)                           \
     HANDLE_COMPOSER_PROPERTY(opacitymap, m_OpacityMap, SLong4, 0)                                  \
     HANDLE_COMPOSER_PROPERTY(emissivecolor, m_EmissiveColor, SFloat3, 0.f)                         \

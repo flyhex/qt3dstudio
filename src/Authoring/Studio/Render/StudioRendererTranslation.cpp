@@ -422,6 +422,7 @@ struct STranslatorDataModelParser
 #define Material_FresnelPower m_Material.m_FresnelPower
 #define Material_SpecularAmount m_Material.m_SpecularAmount
 #define Material_SpecularRoughness m_Material.m_SpecularRoughness
+#define Material_RoughnessMap m_Material.m_RoughnessMap
 #define Material_Opacity m_Material.m_Opacity
 #define Material_OpacityMap m_Material.m_OpacityMap
 #define Material_BumpMap m_Material.m_BumpMap

@@ -126,6 +126,7 @@ enum EAttribute {
     ATTRIBUTE_FRESNELPOWER =         0x022178B6, // fresnelPower
     ATTRIBUTE_SPECULARAMOUNT =       0x01144425, // specularamount
     ATTRIBUTE_SPECULARROUGHNESS =    0x03925653, // specularroughness
+    ATTRIBUTE_ROUGHNESSMAP =         0x01088174, // roughnessmap
     ATTRIBUTE_BLENDMODE =            0x01923A6C, // blendmode
     ATTRIBUTE_CULLING =              0x03C539F0, // culling
     ATTRIBUTE_ZBUFFERWRITE =         0x03E19B3B, // zbufferwrite
