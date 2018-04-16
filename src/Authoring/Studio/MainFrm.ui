@@ -386,7 +386,7 @@
     <string>Rulers &amp;&amp; Guides</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+;</string>
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionLock_Guides">
@@ -397,12 +397,15 @@
     <string>Lock Guides</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+;</string>
+    <string>Alt+R</string>
    </property>
   </action>
   <action name="actionClear_Guides">
    <property name="text">
     <string>Clear Guides</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+R</string>
    </property>
   </action>
   <action name="action_Undo">
