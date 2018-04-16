@@ -56,7 +56,13 @@ RowLayout {
             id: mouseArea
 
             anchors.fill: parent
-            onClicked: colorDialog.open();
+            onClicked: {
+                selectedColor = rect.color;
+                previousColor = rect.color;
+                colorDialog.color = selectedColor;
+                colorDialog.currentColor = selectedColor;
+                colorDialog.open();
+            }
         }
 
         Image {
@@ -68,11 +74,6 @@ RowLayout {
         }
     }
 
-    Component.onCompleted: {
-        selectedColor = rect.color;
-        previousColor = rect.color;
-    }
-
     Item {
         Layout.fillWidth: true
     }
@@ -80,10 +81,7 @@ RowLayout {
     ColorDialog {
         id: colorDialog
         options: ColorDialog.DontUseNativeDialog
-
-        Component.onCompleted: {
-            color = selectedColor
-        }
+        modality: Qt.ApplicationModal
 
         onCurrentColorChanged: {
             selectedColor = currentColor;
