@@ -522,7 +522,7 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
         if (propBinding != nullptr) {
             m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
 
-                binding->RemovePropertyRow(property);
+            binding->RemovePropertyRow(property);
         }
     }
 }

@@ -521,8 +521,6 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
             if (scenePos.x() < m_ruler->durationStartX())
                 scenePos.setX(m_ruler->durationStartX());
-            else if (scenePos.x() > m_ruler->durationEndX())
-                scenePos.setX(m_ruler->durationEndX());
 
             m_keyframeManager->moveSelectedKeyframes(scenePos.x() - m_pressPos.x());
 

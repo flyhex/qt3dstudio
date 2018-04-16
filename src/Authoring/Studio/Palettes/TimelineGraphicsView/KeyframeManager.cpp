@@ -351,16 +351,7 @@ void KeyframeManager::moveSelectedKeyframes(double dx)
 {
     double dt = m_scene->ruler()->distanceToTime(dx);
 
-    if (dt > 0) { // check max limit
-        double maxTime = 0;
-        for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-            if (keyframe->time > maxTime)
-                maxTime = keyframe->time;
-        }
-
-        if (maxTime + dt > m_scene->ruler()->duration())
-            dt = m_scene->ruler()->duration() - maxTime;
-    } else if (dt < 0) { // check min limit
+    if (dt < 0) { // check min limit
         double minTime = 999999; // seconds (~277.78 hrs)
         for (auto keyframe : qAsConst(m_selectedKeyframes)) {
             if (keyframe->time < minTime)
