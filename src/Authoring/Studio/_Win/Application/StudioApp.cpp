@@ -453,6 +453,30 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
     return theReturn;
 }
 
+QString CStudioApp::resolvePresentationFile(const QString &inFile)
+{
+    // If opening an .uia file, parse the main presentation file from it and load that instead
+    QString outFile = inFile;
+    QFileInfo inFileInfo(inFile);
+    if (inFileInfo.suffix().compare(QStringLiteral("uia"), Qt::CaseInsensitive) == 0) {
+        QString initialPresentation;
+        QString uiaPath = inFileInfo.absoluteFilePath();
+        if (inFileInfo.exists())
+            m_core->GetDoc()->LoadUIAInitialPresentationFilename(uiaPath, initialPresentation);
+
+        if (!initialPresentation.isEmpty()) {
+            QFileInfo uipFile(initialPresentation);
+            if (uipFile.isAbsolute()) {
+                outFile = initialPresentation;
+            } else {
+                uiaPath = inFileInfo.path();
+                outFile = uiaPath + QStringLiteral("/") + initialPresentation;
+            }
+        }
+    }
+    return outFile;
+}
+
 //=============================================================================
 /**
  * Show startup dialog and perform necessary action such as create new doc or load doc.
@@ -581,13 +605,16 @@ bool CStudioApp::blankRunApplication()
  */
 bool CStudioApp::openAndRunApplication(const QString &inFilename)
 {
+    // Need to resolve the actual file we want to load already to be able to check for it
+    QString loadFile = resolvePresentationFile(inFilename);
+
     // First check if the desired presentation is already open on another instance
     SharedTools::QtSingleApplication *app =
             static_cast<SharedTools::QtSingleApplication *>(QCoreApplication::instance());
     const auto pids = app->runningInstances();
     for (const auto pid : pids) {
         app->setBlock(true);
-        QString query = activePresentationQuery + inFilename;
+        QString query = activePresentationQuery + loadFile;
         if (app->sendMessage(query, true, 5000, pid))
             return true;
     }
@@ -595,7 +622,7 @@ bool CStudioApp::openAndRunApplication(const QString &inFilename)
     bool theSuccess = false;
     initCore();
     // Load document. Upon failure, don't show startup dialog but exit immediately.
-    if (OnLoadDocument(CString::fromQString(inFilename), false))
+    if (OnLoadDocument(CString::fromQString(loadFile), false))
         theSuccess = runApplication();
     return theSuccess;
 }
@@ -1407,15 +1434,18 @@ void CStudioApp::SetAutosaveInterval(int interval)
  */
 bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError)
 {
-    m_core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading ")),
-                                               inDocument.GetName());
-
     bool theLoadResult = false;
     QString theLoadErrorParameter;
     QString theErrorText;
+    QString loadFile = resolvePresentationFile(inDocument.GetPath().toQString());
+    Qt3DSFile loadDocument(CString::fromQString(loadFile));
+
+    m_core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading ")),
+                                               loadDocument.GetName());
+
     try {
-        OnLoadDocumentCatcher(inDocument);
-        m_core->GetDispatch()->FireOnOpenDocument(inDocument, true);
+        OnLoadDocumentCatcher(loadDocument);
+        m_core->GetDispatch()->FireOnOpenDocument(loadDocument, true);
         // Loading was successful
         theLoadResult = true;
     } catch (CUnsupportedFileFormatException &) {
@@ -1424,14 +1454,11 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         // We've encountered a file format that is older than the current, OR
         // corrupt files, unsupported file formats and illegal types.
     } catch (CInvalidFileFormatException &) {
-        theErrorText = tr("The file could not be opened. It appears to have been made with a "
-                          "newer version of Studio.");
-        // Cannot support opening newer file format, the UIP or (AP ie client portion)'s version is
-        // mismatched.
+        theErrorText = tr("The file could not be opened. The file format is invalid.");
     } catch (CLoadReferencedFileException &inError) {
         // referenced files (e.g. Data Files) failed to load
         theErrorText = tr("%1 failed to load due to invalid referenced file: %2.").arg(
-                    inDocument.GetName().toQString(),
+                    loadDocument.GetName().toQString(),
                     Q3DStudio::CString(inError.GetFilePath()).toQString());
         const wchar_t *theDesc = inError.GetDescription();
         if (theDesc && wcslen(theDesc) > 0) {
@@ -1440,7 +1467,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
                     + Q3DStudio::CString(inError.GetDescription()).toQString();
         }
     } catch (CIOException &) { // provide specific error message if possible
-        if (inDocument.Exists() == false)
+        if (loadDocument.Exists() == false)
             theLoadErrorParameter = tr(" does not exist.");
         qCCritical(qt3ds::INTERNAL_ERROR)
                 << "Failed to load document, IO error (file may be unreadable or nonexistent)";
@@ -1461,9 +1488,9 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         if (!theErrorText.isEmpty())
             m_dialogs->DisplayKnownErrorDialog(theErrorText);
         else
-            m_dialogs->DisplayLoadingPresentationFailed(inDocument, theLoadErrorParameter);
+            m_dialogs->DisplayLoadingPresentationFailed(loadDocument, theLoadErrorParameter);
 
-        m_core->GetDispatch()->FireOnOpenDocument(inDocument, false);
+        m_core->GetDispatch()->FireOnOpenDocument(loadDocument, false);
 
         // Show startup dialog
         if (inShowStartupDialogOnError) {
@@ -1471,7 +1498,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
                 qApp->quit();
         }
     } else {
-        m_dialogs->ResetSettings(inDocument.GetPath());
+        m_dialogs->ResetSettings(loadDocument.GetPath());
 
         m_subpresentations.clear();
         m_core->GetDoc()->LoadUIASubpresentations(m_core->GetDoc()->GetDocumentUIAFile(true),

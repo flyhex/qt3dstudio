@@ -107,6 +107,7 @@ protected:
     void initCore();
     bool showStartupDialog();
     bool handleWelcomeRes(int res, bool recursive);
+    QString resolvePresentationFile(const QString &inFile);
 
     CCore *m_core;
     bool m_isSilent; // true indicates Studio running in silent mode (no GUI)

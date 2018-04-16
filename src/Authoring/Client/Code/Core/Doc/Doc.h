@@ -194,6 +194,8 @@ public:
                                  QVector<SubPresentationRecord> &subpresentations);
     void LoadUIADataInputs(const QString &uiaFile,
                            QVector<CDataInputDialogItem *> &datainputs);
+    void LoadUIAInitialPresentationFilename(const QString &uiaFile,
+                                            QString &initialPresentation);
 
     bool IsModified();
     bool IsValid() const;

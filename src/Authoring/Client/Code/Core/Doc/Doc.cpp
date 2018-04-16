@@ -2843,3 +2843,43 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
         }
     }
 }
+
+void CDoc::LoadUIAInitialPresentationFilename(const QString &uiaFile, QString &initialPresentation)
+{
+    initialPresentation.clear();
+    if (QFileInfo::exists(uiaFile)) {
+        qt3dsdm::TStringTablePtr theStringTable = qt3dsdm::IStringTable::CreateStringTable();
+        std::shared_ptr<qt3dsdm::IDOMFactory> theDomFact =
+                qt3dsdm::IDOMFactory::CreateDOMFactory(theStringTable);
+
+        qt3ds::foundation::CFileSeekableIOStream theStream(
+                    uiaFile, qt3ds::foundation::FileReadFlags());
+
+        qt3dsdm::SDOMElement *theElem = qt3dsdm::CDOMSerializer::Read(*theDomFact, theStream);
+        if (theElem) {
+            std::shared_ptr<qt3dsdm::IDOMReader> theReader =
+                    qt3dsdm::IDOMReader::CreateDOMReader(*theElem, theStringTable, theDomFact);
+            if (theReader->MoveToFirstChild("assets")) {
+                qt3dsdm::TXMLStr initial = nullptr;
+
+                // initial should be the same as document name
+                if (!theReader->Att("initial", initial))
+                    return;
+
+                for (bool success = theReader->MoveToFirstChild(); success;
+                     success = theReader->MoveToNextSibling()) {
+                    if (qt3dsdm::AreEqual(theReader->GetElementName(), L"presentation")) {
+                        qt3dsdm::TXMLStr src = nullptr;
+                        qt3dsdm::TXMLStr id = nullptr;
+
+                        theReader->Att("id", id);
+                        if (id == initial) {
+                            if (theReader->Att("src", src))
+                                initialPresentation = QString(src.c_str());
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

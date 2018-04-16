@@ -915,13 +915,7 @@ Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDire
 Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory)
 {
     Qt3DSFile theFile("");
-    QString theFileExt;
-    QString theImportFilter;
-
-    theFileExt = QStringLiteral(".uip");
-    theImportFilter = QObject::tr("Studio UI Presentation");
-
-    theImportFilter += " (*" + theFileExt + ")";
+    QString theImportFilter = QObject::tr("Studio UI Presentation (*.uip *.uia)");
 
     QFileDialog theFileDlg(g_StudioApp.m_pMainWnd, QString(),
                            (inInitialDirectory == Q3DStudio::CString("."))
