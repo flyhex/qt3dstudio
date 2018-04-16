@@ -58,23 +58,27 @@ namespace TimelineConstants
     const int DURATION_HANDLE_W = 14;    // width of duration end handles in a timeline row
 
     // Colors
-    const char ROW_COLOR_NORMAL[]             = "#404040";
-    const char ROW_COLOR_NORMAL_PROP[]        = "#373737";
-    const char ROW_COLOR_OVER[]               = "#4d4d4d";
-    const char ROW_COLOR_SELECTED[]           = "#336699";
-    const char ROW_COLOR_DURATION[]           = "#66CCFF";
-    const char ROW_COLOR_DURATION_OFF1[]      = "#3388B3"; // duration off ancestors' bounds color1
-    const char ROW_COLOR_DURATION_OFF2[]      = "#222222"; // duration off ancestors' bounds color2
-    const char ROW_COLOR_DURATION_EDGE[]      = "#000000"; // duration left and right edge lines
-    const char ROW_COLOR_DURATION_SELECTED[]  = "#4D99CC";
-    const char ROW_COLOR_MOVE_SRC[]           = "#464600";
-    const char PLAYHEAD_COLOR[]               = "#ff0066";
-    const char RULER_COLOR[]                  = "#888888";
-    const char RULER_COLOR_DISABLED[]         = "#444444";
-    const char ROW_MOVER_COLOR[]              = "#ffff00";
-    const char WIDGET_BG_COLOR[]              = "#222222";
-    const char PLAYHEAD_LINE_COLOR[]          = "#b20808";
-    const char FILTER_BUTTON_SELECTED_COLOR[] = "#000000";
+    const char ROW_COLOR_NORMAL[]              = "#404040";
+    const char ROW_COLOR_NORMAL_PROP[]         = "#373737";
+    const char ROW_COLOR_OVER[]                = "#4d4d4d";
+    const char ROW_COLOR_SELECTED[]            = "#336699";
+    const char ROW_COLOR_DURATION[]            = "#66CCFF";
+    const char LAYER_COLOR_DURATION[]          = "#9999FF";
+    const char ROW_COLOR_DURATION_OFF1[]       = "#3388B3"; // duration off ancestors' bounds color1
+    const char ROW_COLOR_DURATION_OFF2[]       = "#222222"; // duration off ancestors' bounds color2
+    const char ROW_COLOR_DURATION_EDGE[]       = "#000000"; // duration left and right edge lines
+    const char ROW_COLOR_DURATION_SELECTED[]   = "#4D99CC";
+    const char LAYER_COLOR_DURATION_SELECTED[] = "#7D7DD1";
+    const char ROW_COLOR_MOVE_SRC[]            = "#464600";
+    const char ROW_TEXT_COLOR[]                = "#bbbbbb";
+    const char ROW_TEXT_COLOR_DISABLED[]       = "#888888";
+    const char PLAYHEAD_COLOR[]                = "#ff0066";
+    const char RULER_COLOR[]                   = "#888888";
+    const char RULER_COLOR_DISABLED[]          = "#444444";
+    const char ROW_MOVER_COLOR[]               = "#ffff00";
+    const char WIDGET_BG_COLOR[]               = "#222222";
+    const char PLAYHEAD_LINE_COLOR[]           = "#b20808";
+    const char FILTER_BUTTON_SELECTED_COLOR[]  = "#000000";
 
     // Other
     const int EXPAND_ANIMATION_DURATION       = 200;

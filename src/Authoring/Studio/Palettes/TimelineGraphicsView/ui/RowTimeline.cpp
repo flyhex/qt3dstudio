@@ -92,10 +92,18 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             // draw main duration part
             double x = std::max(m_startX, m_minStartX);
             double w = std::min(m_endX, m_maxEndX) - x;
+            const char *durationColor;
+            if (m_rowTree->rowType() == OBJTYPE_LAYER) {
+                durationColor = m_state == Selected
+                                 ? TimelineConstants::LAYER_COLOR_DURATION_SELECTED
+                                 : TimelineConstants::LAYER_COLOR_DURATION;
+            } else {
+                durationColor = m_state == Selected
+                                 ? TimelineConstants::ROW_COLOR_DURATION_SELECTED
+                                 : TimelineConstants::ROW_COLOR_DURATION;
+            }
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(x, 0, w, size().height() - 1), m_state == Selected
-                              ? TimelineConstants::ROW_COLOR_DURATION_SELECTED
-                              : TimelineConstants::ROW_COLOR_DURATION);
+            painter->fillRect(QRect(x, 0, w, size().height() - 1), durationColor);
 
             // draw hashed part before
             painter->setBrush(QBrush(QColor(TimelineConstants::ROW_COLOR_DURATION_OFF1),
