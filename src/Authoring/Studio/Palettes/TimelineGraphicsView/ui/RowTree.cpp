@@ -229,6 +229,9 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixComponentNormal = QPixmap(":/images/Objects-Component-Normal.png");
     static const QPixmap pixMaterialNormal  = QPixmap(":/images/Objects-Material-Normal.png");
     static const QPixmap pixPropertyNormal  = QPixmap(":/images/Objects-Property-Normal.png");
+    static const QPixmap pixImageNormal     = QPixmap(":/images/Objects-Image-Normal.png");
+    static const QPixmap pixBehaviorNormal  = QPixmap(":/images/Objects-Behavior-Normal.png");
+    static const QPixmap pixEffectNormal    = QPixmap(":/images/Objects-Effect-Normal.png");
 
     static const QPixmap pixSceneDisabled     = QPixmap(":/images/Objects-Scene-Disabled.png");
     static const QPixmap pixLayerDisabled     = QPixmap(":/images/Objects-Layer-Disabled.png");
@@ -241,6 +244,9 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixComponentDisabled = QPixmap(":/images/Objects-Component-Disabled.png");
     static const QPixmap pixMaterialDisabled  = QPixmap(":/images/Objects-Material-Disabled.png");
     static const QPixmap pixPropertyDisabled  = QPixmap(":/images/Objects-Property-Disabled.png");
+    static const QPixmap pixImageDisabled     = QPixmap(":/images/Objects-Image-Disabled.png");
+    static const QPixmap pixBehaviorDisabled  = QPixmap(":/images/Objects-Behavior-Disabled.png");
+    static const QPixmap pixEffectDisabled    = QPixmap(":/images/Objects-Effect-Disabled.png");
 
     QPixmap pixRowType;
     switch (m_rowType) {
@@ -273,6 +279,15 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         break;
     case OBJTYPE_MATERIAL:
         pixRowType = m_locked ? pixMaterialDisabled : pixMaterialNormal;
+        break;
+    case OBJTYPE_IMAGE:
+        pixRowType = m_locked ? pixImageDisabled : pixImageNormal;
+        break;
+    case OBJTYPE_BEHAVIOR:
+        pixRowType = m_locked ? pixBehaviorDisabled : pixBehaviorNormal;
+        break;
+    case OBJTYPE_EFFECT:
+        pixRowType = m_locked ? pixEffectDisabled : pixEffectNormal;
         break;
     default:
         break;
@@ -516,7 +531,7 @@ void RowTree::updateLockRecursive(bool state)
 void RowTree::updateLabelPosition()
 {
     int offset = 5 + m_depth * 15 + 30;
-    m_labelItem.setPos(offset, -3);
+    m_labelItem.setPos(offset, -1);
 }
 
 bool RowTree::expanded() const

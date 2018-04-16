@@ -451,15 +451,18 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     if (theDataModelBridge->IsSceneGraphInstance(inInstance)) {
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
-        Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
-                                                    ->GetParentInstance(inInstance), m_binding);
-        RowTree *newRow = m_graphicsScene->rowManager()
-                          ->createRowFromBinding(binding, bindingParent->getRowTree());
 
-        if (binding->GetObjectType() == OBJTYPE_LAYER)
-            m_graphicsScene->rowManager()->syncRowPositionWithBinding(newRow, bindingParent);
+        if (binding) {
+            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
+                                                        ->GetParentInstance(inInstance), m_binding);
+            RowTree *newRow = m_graphicsScene->rowManager()
+                              ->createRowFromBinding(binding, bindingParent->getRowTree());
 
-        m_handlesMap.insert(std::make_pair(inInstance, newRow));
+            if (binding->GetObjectType() == OBJTYPE_LAYER)
+                m_graphicsScene->rowManager()->syncRowPositionWithBinding(newRow, bindingParent);
+
+            m_handlesMap.insert(std::make_pair(inInstance, newRow));
+        }
     }
 }
 

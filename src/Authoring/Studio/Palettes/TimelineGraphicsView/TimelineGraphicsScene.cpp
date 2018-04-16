@@ -358,11 +358,12 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                        || item->type() == TimelineItem::TypeRowTreeLabelItem) {
                 item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
                 RowTree *rowTree = static_cast<RowTree *>(item);
-                if (!rowTree->isProperty() && rowTree->rowType() != OBJTYPE_MATERIAL) {
+                if (!rowTree->isProperty()) {
                     m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
                     if (m_clickedTreeControlType != TreeControlType::None) {
                         m_rowManager->updateFiltering(rowTree);
-                    } else if (!rowTree->locked()) { // dragging layers to reorder
+                    } else if (!rowTree->locked() && rowTree->rowType() != OBJTYPE_MATERIAL
+                               && rowTree->rowType() != OBJTYPE_IMAGE) { // dragging rows to reorder
                         int index = event->scenePos().y() / TimelineConstants::ROW_H;
                         m_rowManager->correctIndex(index);
 
