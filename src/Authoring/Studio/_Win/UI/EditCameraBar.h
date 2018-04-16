@@ -79,9 +79,9 @@ public:
     void HandleCameraChanged(int inIndex);
 
     // CEditCameraChangeListener
-    void OnEditCameraChanged() override;
-    void OnEditCamerasTransformed() override {}
-    void OnAuthorZoomChanged() override {}
+    void onEditCameraChanged() override;
+    void onEditCamerasTransformed() override {}
+    void onAuthorZoomChanged() override {}
 
 protected:
     CSceneView *m_SceneView; ///< The scene view object

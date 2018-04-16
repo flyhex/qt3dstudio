@@ -244,7 +244,7 @@ void CPlayerContainerWnd::scrollContentsBy(int, int)
 void CPlayerContainerWnd::SetViewMode(EViewMode inViewMode)
 {
     m_ViewMode = inViewMode;
-    m_SceneView->RecheckSizingMode();
+    m_SceneView->recheckSizingMode();
 }
 
 //==============================================================================

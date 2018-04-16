@@ -40,27 +40,26 @@
 
 #include <QtGui/qevent.h>
 
-CSceneView::CSceneView(CStudioApp *inStudioApp, QWidget *parent)
+CSceneView::CSceneView(QWidget *parent)
     : QWidget(parent)
+    , m_playerContainerWnd(new CPlayerContainerWnd(this))
+    , m_playerWnd(new CPlayerWnd(m_playerContainerWnd.data()))
 {
-    Q_UNUSED(inStudioApp)
-    m_PreviousSelectMode = g_StudioApp.GetSelectMode();
+    m_previousSelectMode = g_StudioApp.GetSelectMode();
 
-    m_PlayerContainerWnd = new CPlayerContainerWnd(this);
-    connect(m_PlayerContainerWnd, &CPlayerContainerWnd::toolChanged,
-            this, [=](){ SetViewCursor(); Q_EMIT toolChanged(); });
+    connect(m_playerContainerWnd.data(), &CPlayerContainerWnd::toolChanged,
+            this, [=](){ setViewCursor(); Q_EMIT toolChanged(); });
 
-    m_PlayerWnd = new CPlayerWnd(m_PlayerContainerWnd);
-    connect(m_PlayerWnd, &CPlayerWnd::dropReceived, this, &CSceneView::onDropReceived);
+    connect(m_playerWnd.data(), &CPlayerWnd::dropReceived, this, &CSceneView::onDropReceived);
 
-    m_PlayerContainerWnd->SetPlayerWnd(m_PlayerWnd);
+    m_playerContainerWnd->SetPlayerWnd(m_playerWnd.data());
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 CSceneView::CSceneView()
 {
-    m_PreviousSelectMode = g_StudioApp.GetSelectMode();
+    m_previousSelectMode = g_StudioApp.GetSelectMode();
 }
 
 void CSceneView::onDropReceived()
@@ -68,9 +67,9 @@ void CSceneView::onDropReceived()
     setFocus();
 }
 
-CPlayerWnd *CSceneView::GetPlayerWnd() const
+CPlayerWnd *CSceneView::getPlayerWnd() const
 {
-    return m_PlayerWnd;
+    return m_playerWnd.data();
 }
 
 CSceneView::~CSceneView()
@@ -97,31 +96,31 @@ void CSceneView::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
-    m_PlayerContainerWnd->RecenterClient();
+    m_playerContainerWnd->RecenterClient();
 
     // Set the scroll information.
-    m_PlayerContainerWnd->SetScrollRanges();
+    m_playerContainerWnd->SetScrollRanges();
 
     // Create the cursors
-    m_ArrowCursor = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ARROW);
-    m_CursorGroupMove = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_MOVE);
-    m_CursorGroupRotate =
+    m_arrowCursor = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ARROW);
+    m_cursorGroupMove = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_MOVE);
+    m_cursorGroupRotate =
             CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_ROTATE);
-    m_CursorGroupScale = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_SCALE);
-    m_CursorItemMove = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_MOVE);
-    m_CursorItemRotate = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_ROTATE);
-    m_CursorItemScale = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_SCALE);
-    m_CursorEditCameraPan =
+    m_cursorGroupScale = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_GROUP_SCALE);
+    m_cursorItemMove = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_MOVE);
+    m_cursorItemRotate = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_ROTATE);
+    m_cursorItemScale = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ITEM_SCALE);
+    m_cursorEditCameraPan =
             CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_PAN);
-    m_CursorEditCameraRotate =
+    m_cursorEditCameraRotate =
             CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ROTATE);
-    m_CursorEditCameraZoom =
+    m_cursorEditCameraZoom =
             CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM);
 
     g_StudioApp.GetCore()->GetDispatch()->AddEditCameraChangeListener(this);
 
     // Set the default cursor
-    SetViewCursor();
+    setViewCursor();
 }
 
 //==============================================================================
@@ -129,11 +128,11 @@ void CSceneView::showEvent(QShowEvent *event)
  * OnToolGroupSelection: Called when the Group Selection button is pressed.
  * Sets the current tool mode and changes the cursor.
  */
-void CSceneView::OnToolGroupSelection()
+void CSceneView::onToolGroupSelection()
 {
-    m_PreviousSelectMode = g_StudioApp.GetSelectMode();
+    m_previousSelectMode = g_StudioApp.GetSelectMode();
     g_StudioApp.SetSelectMode(STUDIO_SELECTMODE_GROUP);
-    SetViewCursor();
+    setViewCursor();
     Q_EMIT toolChanged();
 }
 
@@ -142,11 +141,11 @@ void CSceneView::OnToolGroupSelection()
  *	OnToolItemSelection: Called when the Item Selection button is pressed.
  *	Sets the current tool mode and changes the cursor.
  */
-void CSceneView::OnToolItemSelection()
+void CSceneView::onToolItemSelection()
 {
-    m_PreviousSelectMode = g_StudioApp.GetSelectMode();
+    m_previousSelectMode = g_StudioApp.GetSelectMode();
     g_StudioApp.SetSelectMode(STUDIO_SELECTMODE_ENTITY);
-    SetViewCursor();
+    setViewCursor();
     Q_EMIT toolChanged();
 }
 
@@ -158,7 +157,7 @@ void CSceneView::OnToolItemSelection()
  *	changes, you should call this function.  If you add extra tool modes, you
  *	will need to adjust this function.
  */
-void CSceneView::SetViewCursor()
+void CSceneView::setViewCursor()
 {
     long theCurrentToolSettings = g_StudioApp.GetToolMode();
     long theCurrentSelectSettings = g_StudioApp.GetSelectMode();
@@ -168,14 +167,14 @@ void CSceneView::SetViewCursor()
     case STUDIO_TOOLMODE_MOVE:
         switch (theCurrentSelectSettings) {
         case STUDIO_SELECTMODE_ENTITY:
-            m_PlayerWnd->setCursor(m_CursorItemMove);
+            m_playerWnd->setCursor(m_cursorItemMove);
             break;
         case STUDIO_SELECTMODE_GROUP:
-            m_PlayerWnd->setCursor(m_CursorGroupMove);
+            m_playerWnd->setCursor(m_cursorGroupMove);
             break;
             // Default - shouldn't happen
         default:
-            m_PlayerWnd->setCursor(m_CursorItemMove);
+            m_playerWnd->setCursor(m_cursorItemMove);
             break;
         }
         break;
@@ -183,14 +182,14 @@ void CSceneView::SetViewCursor()
     case STUDIO_TOOLMODE_ROTATE:
         switch (theCurrentSelectSettings) {
         case STUDIO_SELECTMODE_ENTITY:
-            m_PlayerWnd->setCursor(m_CursorItemRotate);
+            m_playerWnd->setCursor(m_cursorItemRotate);
             break;
         case STUDIO_SELECTMODE_GROUP:
-            m_PlayerWnd->setCursor(m_CursorGroupRotate);
+            m_playerWnd->setCursor(m_cursorGroupRotate);
             break;
             // Default - shouldn't happen
         default:
-            m_PlayerWnd->setCursor(m_CursorItemRotate);
+            m_playerWnd->setCursor(m_cursorItemRotate);
             break;
         }
         break;
@@ -198,33 +197,33 @@ void CSceneView::SetViewCursor()
     case STUDIO_TOOLMODE_SCALE:
         switch (theCurrentSelectSettings) {
         case STUDIO_SELECTMODE_ENTITY:
-            m_PlayerWnd->setCursor(m_CursorItemScale);
+            m_playerWnd->setCursor(m_cursorItemScale);
             break;
         case STUDIO_SELECTMODE_GROUP:
-            m_PlayerWnd->setCursor(m_CursorGroupScale);
+            m_playerWnd->setCursor(m_cursorGroupScale);
             break;
             // Default - shouldn't happen
         default:
-            m_PlayerWnd->setCursor(m_CursorItemScale);
+            m_playerWnd->setCursor(m_cursorItemScale);
             break;
         }
         break;
 
     case STUDIO_TOOLMODE_CAMERA_PAN:
-        m_PlayerWnd->setCursor(m_CursorEditCameraPan);
+        m_playerWnd->setCursor(m_cursorEditCameraPan);
         break;
 
     case STUDIO_TOOLMODE_CAMERA_ZOOM:
-        m_PlayerWnd->setCursor(m_CursorEditCameraZoom);
+        m_playerWnd->setCursor(m_cursorEditCameraZoom);
         break;
 
     case STUDIO_TOOLMODE_CAMERA_ROTATE:
-        m_PlayerWnd->setCursor(m_CursorEditCameraRotate);
+        m_playerWnd->setCursor(m_cursorEditCameraRotate);
         break;
 
         // Default - shouldn't happen
     default:
-        m_PlayerWnd->setCursor(m_CursorItemMove);
+        m_playerWnd->setCursor(m_cursorItemMove);
         break;
     }
 }
@@ -238,29 +237,29 @@ void CSceneView::SetViewCursor()
  *	is cleared.
  */
 //==============================================================================
-void CSceneView::RecalcMatte()
+void CSceneView::recalcMatte()
 {
     long theXOffset = 0;
     long theYOffset = 0;
     QRect theClientRect = rect();
 
     // Adjust the client area based if rulers are visible
-    if (m_PlayerContainerWnd) {
-        m_PlayerContainerWnd->setGeometry(theXOffset, theYOffset,
+    if (m_playerContainerWnd) {
+        m_playerContainerWnd->setGeometry(theXOffset, theYOffset,
                                           theClientRect.width() - theXOffset,
                                           theClientRect.height() - theYOffset);
 
         // Recenter the Client rect
-        m_PlayerContainerWnd->RecenterClient();
+        m_playerContainerWnd->RecenterClient();
     }
 }
 
 void CSceneView::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
-    if (m_PlayerContainerWnd) {
-        RecalcMatte();
-        SetPlayerWndPosition();
+    if (m_playerContainerWnd) {
+        recalcMatte();
+        setPlayerWndPosition();
         g_StudioApp.GetCore()->GetDoc( )->GetSceneGraph()->RequestRender();
     }
 }
@@ -273,14 +272,14 @@ void CSceneView::resizeEvent(QResizeEvent* event)
  *
  */
 //==============================================================================
-void CSceneView::SetPlayerWndPosition()
+void CSceneView::setPlayerWndPosition()
 {
     // Move the child player window to coincide with the scrollbars
-    if (m_PlayerContainerWnd) {
+    if (m_playerContainerWnd) {
         long theLeft, theTop;
         // Retrieve the left and top edge of the presentation currently in view
-        m_PlayerContainerWnd->SetPlayerWndPosition(theLeft, theTop);
-        m_PlayerContainerWnd->update();
+        m_playerContainerWnd->SetPlayerWndPosition(theLeft, theTop);
+        m_playerContainerWnd->update();
     }
 }
 
@@ -290,10 +289,10 @@ void CSceneView::SetPlayerWndPosition()
  *  an outside source needs to tell the scene view that size ranges have changed such
  *  as the preferences telling the sceneview that the size changed.
  */
-void CSceneView::RecheckSizingMode()
+void CSceneView::recheckSizingMode()
 {
-    if (m_PlayerContainerWnd)
-        m_PlayerContainerWnd->SetScrollRanges();
+    if (m_playerContainerWnd)
+        m_playerContainerWnd->SetScrollRanges();
 }
 
 //==============================================================================
@@ -301,13 +300,13 @@ void CSceneView::RecheckSizingMode()
  *	Redirect to PlayerContainerWnd to check whether we are in deployment view mode.
  *	@return true if is in deployment view mode, else false
  */
-bool CSceneView::IsDeploymentView()
+bool CSceneView::isDeploymentView()
 {
     // Default mode is SCENE_VIEW so if playercontainerwnd does not exist (should only happen on
     // startup), it is deployment view
     bool theStatus = true;
-    if (m_PlayerContainerWnd)
-        theStatus = m_PlayerContainerWnd->IsDeploymentView();
+    if (m_playerContainerWnd)
+        theStatus = m_playerContainerWnd->IsDeploymentView();
 
     return theStatus;
 }
@@ -319,17 +318,17 @@ bool CSceneView::IsDeploymentView()
  *	use the full scene area without any matte area.
  *	@param inViewMode	the view mode of this scene
  */
-void CSceneView::SetViewMode(CPlayerContainerWnd::EViewMode inViewMode)
+void CSceneView::setViewMode(CPlayerContainerWnd::EViewMode inViewMode)
 {
-    if (m_PlayerContainerWnd)
-        m_PlayerContainerWnd->SetViewMode(inViewMode);
+    if (m_playerContainerWnd)
+        m_playerContainerWnd->SetViewMode(inViewMode);
 }
 
-void CSceneView::SetToolMode(long inMode)
+void CSceneView::setToolMode(long inMode)
 {
-    if (m_PlayerContainerWnd)
-        m_PlayerContainerWnd->setToolMode(inMode);
-    SetViewCursor();
+    if (m_playerContainerWnd)
+        m_playerContainerWnd->setToolMode(inMode);
+    setViewCursor();
 }
 
 //==============================================================================
@@ -338,27 +337,27 @@ void CSceneView::SetToolMode(long inMode)
  *	find which entry is the one which is modified and update with the new string
  *	@param inCamera	the camera that has been modified
  */
-void CSceneView::OnEditCameraChanged()
+void CSceneView::onEditCameraChanged()
 {
     // Reset any scrolling and recalculate the window position.
-    if (m_PlayerContainerWnd) {
-        m_PlayerContainerWnd->SetScrollRanges();
-        RecalcMatte();
-        SetPlayerWndPosition();
+    if (m_playerContainerWnd) {
+        m_playerContainerWnd->SetScrollRanges();
+        recalcMatte();
+        setPlayerWndPosition();
     }
 
     // Update the view mode accordingly
-    SetViewMode(g_StudioApp.getRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
+    setViewMode(g_StudioApp.getRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
                                                                : CPlayerContainerWnd::VIEW_SCENE);
-    m_PlayerWnd->update();
+    m_playerWnd->update();
 }
 
-void CSceneView::OnAuthorZoomChanged()
+void CSceneView::onAuthorZoomChanged()
 {
-    OnEditCameraChanged();
+    onEditCameraChanged();
 }
 
-void CSceneView::OnRulerGuideToggled()
+void CSceneView::onRulerGuideToggled()
 {
-    m_PlayerContainerWnd->OnRulerGuideToggled();
+    m_playerContainerWnd->OnRulerGuideToggled();
 }

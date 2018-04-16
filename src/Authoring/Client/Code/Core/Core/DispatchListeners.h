@@ -237,9 +237,9 @@ public:
 class CEditCameraChangeListener
 {
 public:
-    virtual void OnEditCameraChanged() = 0;
-    virtual void OnEditCamerasTransformed() = 0;
-    virtual void OnAuthorZoomChanged() = 0;
+    virtual void onEditCameraChanged() = 0;
+    virtual void onEditCamerasTransformed() = 0;
+    virtual void onAuthorZoomChanged() = 0;
 };
 
 class CTimelineChangeListener

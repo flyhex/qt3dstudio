@@ -27,26 +27,15 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #include "Views.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "MainFrm.h"
-
-//==============================================================================
-//	Implementation
-//==============================================================================
 
 //=============================================================================
 /**
  *	Constructor
  */
 CViews::CViews(CStudioApp * /*inStudioApp*/)
-    : m_MainFrame(nullptr)
+    : m_mainFrame(nullptr)
 {
 }
 
@@ -56,35 +45,20 @@ CViews::CViews(CStudioApp * /*inStudioApp*/)
  */
 CViews::~CViews()
 {
-    DestroyViews();
 }
 
 //=============================================================================
 /**
  *
  */
-void CViews::CreateViews(bool silent)
+void CViews::createViews(bool silent)
 {
     // To create the main window, this code creates a new frame window
     // object and then sets it as the application's main window object
-    m_MainFrame = new CMainFrame();
+    m_mainFrame.reset(new CMainFrame);
     if (!silent)
-        m_MainFrame->show();
+        m_mainFrame->show();
 }
-
-//=============================================================================
-/**
- *
- */
-void CViews::DestroyViews()
-{
-    delete m_MainFrame;
-    m_MainFrame = nullptr;
-}
-
-//==============================================================================
-//	Keyboard
-//==============================================================================
 
 //=============================================================================
 /**
@@ -93,27 +67,23 @@ void CViews::DestroyViews()
  * view.
  * @param inHotKeys the handler to register on.
  */
-void CViews::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
+void CViews::registerGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
-    if (m_MainFrame)
-        m_MainFrame->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
+    if (m_mainFrame)
+        m_mainFrame->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
-//=============================================================================
-/**
- *	NO ONE SHOULD USE THIS FUNCTION OTHER THAN THE MAINFRAME ON WINDOWS
- */
-CMainFrame *CViews::GetMainFrame()
+CMainFrame *CViews::getMainFrame()
 {
-    return m_MainFrame;
+    return m_mainFrame.data();
 }
 
 //=============================================================================
 /**
  *
  */
-void CViews::RecheckMainframeSizingMode()
+void CViews::recheckMainframeSizingMode()
 {
-    if (m_MainFrame != nullptr)
-        m_MainFrame->RecheckSizingMode();
+    if (m_mainFrame != nullptr)
+        m_mainFrame->RecheckSizingMode();
 }

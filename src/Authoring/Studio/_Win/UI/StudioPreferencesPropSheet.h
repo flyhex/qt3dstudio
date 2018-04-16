@@ -32,10 +32,6 @@
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
-
 #include <QtWidgets/qdialog.h>
 
 class CStudioProjectSettingsPage;
@@ -55,24 +51,20 @@ class CStudioPreferencesPropPage : public QWidget
 public:
     explicit CStudioPreferencesPropPage(QWidget *parent = nullptr);
 
-    virtual bool OnApply() { OnOK(); SetModified(false); return true; }
-    virtual void OnOK() {}
-    virtual void OnCancel() {}
+    virtual bool onApply() { onOK(); setModified(false); return true; }
+    virtual void onOK() {}
+    virtual void onCancel() {}
 
 protected:
     CStudioPreferencesPropSheet* sheet();
 
-    void SetModified(bool modified);
-    void EndDialog(int returnCode);
+    void setModified(bool modified);
+    void endDialog(int returnCode);
 };
-
-/////////////////////////////////////////////////////////////////////////////
-// CStudioPreferencesPropSheet
 
 class CStudioPreferencesPropSheet : public QDialog
 {
     Q_OBJECT
-    // Construction
 public:
     explicit CStudioPreferencesPropSheet(const QString &pszCaption, QWidget *pParentWnd = nullptr,
                                          int iSelectPage = 0);
@@ -80,13 +72,11 @@ public:
 protected:
     QFont m_Font; // Font for text
 
-    // Implementation
 public:
     virtual ~CStudioPreferencesPropSheet();
 
-    // Generated message map functions
 protected:
-    virtual void OnInitDialog();
+    virtual void onInitDialog();
 
     bool apply();
     void accept() override;
@@ -95,7 +85,5 @@ protected:
 private:
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioPreferencesPropSheet)> m_ui;
 };
-
-/////////////////////////////////////////////////////////////////////////////
 
 #endif

@@ -78,6 +78,13 @@ const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
  */
 CMainFrame::CMainFrame()
     : m_ui(new Ui::MainFrame)
+    , m_remoteDeploymentSender(new RemoteDeploymentSender(this))
+    , m_sceneView(nullptr)
+    , m_recentItems(nullptr)
+    , m_paletteManager(nullptr)
+    , m_updateUITimer(new QTimer)
+    , m_playbackTimer(new QTimer)
+    , m_propSheet(nullptr)
 {
     m_ui->setupUi(this);
 
@@ -87,8 +94,6 @@ CMainFrame::CMainFrame()
     g_StudioApp.GetCore()->GetDispatch()->AddFileOpenListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
     g_StudioApp.setupTimer(WM_STUDIO_TIMER, this);
-
-    m_remoteDeploymentSender = new RemoteDeploymentSender(this);
 
     // File Menu
     connect(m_ui->action_New, &QAction::triggered, this, &CMainFrame::OnFileNew);
@@ -103,8 +108,8 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
-    m_RecentItems = new CRecentItems(m_ui->menuRecent_Projects, 0);
-    connect(m_RecentItems, &CRecentItems::openRecent, this, &CMainFrame::OnFileOpenRecent);
+    m_recentItems.reset(new CRecentItems(m_ui->menuRecent_Projects, 0));
+    connect(m_recentItems.data(), &CRecentItems::openRecent, this, &CMainFrame::OnFileOpenRecent);
     connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
     // Edit Menu
@@ -167,11 +172,11 @@ CMainFrame::CMainFrame()
             []() { g_StudioApp.onAppAbout(); });
     connect(m_ui->action_Open_Tutorial, &QAction::triggered, this, &CMainFrame::OnHelpOpenTutorial);
 
-
+    // Selection toolbar
     connect(m_ui->actionItem_Select_Tool, &QAction::triggered,
-            m_SceneView, &CSceneView::OnToolItemSelection);
+            m_sceneView.data(), &CSceneView::onToolItemSelection);
     connect(m_ui->actionGroup_Select_Tool, &QAction::triggered,
-            m_SceneView, &CSceneView::OnToolGroupSelection);
+            m_sceneView.data(), &CSceneView::onToolGroupSelection);
 
     // Playback toolbar
     connect(m_ui->actionPreview, &QAction::triggered,
@@ -206,13 +211,12 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionLock_Guides, &QAction::triggered, this, &CMainFrame::OnLockGuides);
 
     // Others
-    connect(m_remoteDeploymentSender, &RemoteDeploymentSender::connectionChanged,
+    connect(m_remoteDeploymentSender.data(), &RemoteDeploymentSender::connectionChanged,
             this, &CMainFrame::OnConnectionChanged);
 
     // TODO: better solution?
-    QTimer* updateUITimer = new QTimer;
-    updateUITimer->start(500);
-    connect(updateUITimer, &QTimer::timeout, [&]() {
+    m_updateUITimer->start(500);
+    connect(m_updateUITimer.data(), &QTimer::timeout, [&]() {
         if (QApplication::activeWindow() != this)
             return;
 
@@ -258,8 +262,8 @@ CMainFrame::CMainFrame()
         OnUpdateLockGuides();
     });
 
-    m_playbackTimer.setInterval(PLAYBACK_TIMER_TIMEOUT);
-    connect(&m_playbackTimer, &QTimer::timeout, this, &CMainFrame::onPlaybackTimeout);
+    m_playbackTimer->setInterval(PLAYBACK_TIMER_TIMEOUT);
+    connect(m_playbackTimer.data(), &QTimer::timeout, this, &CMainFrame::onPlaybackTimeout);
     qApp->installEventFilter(this);
 }
 
@@ -269,6 +273,9 @@ CMainFrame::CMainFrame()
  */
 CMainFrame::~CMainFrame()
 {
+    qApp->removeEventFilter(this);
+    m_playbackTimer->stop();
+    m_updateUITimer->stop();
 }
 
 //==============================================================================
@@ -302,13 +309,13 @@ void CMainFrame::hideEvent(QHideEvent *event)
  */
 void CMainFrame::OnCreate()
 {
-    m_SceneView = new CSceneView(&g_StudioApp, this);
-    connect(m_SceneView, &CSceneView::toolChanged, this, &CMainFrame::OnUpdateToolChange);
+    m_sceneView.reset(new CSceneView(this));
+    connect(m_sceneView.data(), &CSceneView::toolChanged, this, &CMainFrame::OnUpdateToolChange);
 
-    m_SceneView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_sceneView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // tell the edit camera bar about this scene view
-    m_ui->m_EditCamerasBar->SetSceneView(m_SceneView);
+    m_ui->m_EditCamerasBar->SetSceneView(m_sceneView.data());
 
     // Newly launched, the file dialog for open and import should default to more recent
     // opened/imported
@@ -316,8 +323,8 @@ void CMainFrame::OnCreate()
     // this must NOT be in 'command line' mode
     if (theDialogs) {
         Q3DStudio::CString theMostRecentOpen;
-        if (m_RecentItems && m_RecentItems->GetItemCount() > 0)
-            theMostRecentOpen = m_RecentItems->GetItem(0).GetPath();
+        if (m_recentItems && m_recentItems->GetItemCount() > 0)
+            theMostRecentOpen = m_recentItems->GetItem(0).GetPath();
         if (theMostRecentOpen.IsEmpty()) // default to exe
             theMostRecentOpen = Qt3DSFile::GetApplicationDirectory().GetPath();
 
@@ -325,7 +332,7 @@ void CMainFrame::OnCreate()
     }
 
     // Create the view manager
-    m_PaletteManager = new CPaletteManager(this);
+    m_paletteManager.reset(new CPaletteManager(this));
 
     // Remove basic toolbar (open, save, undo/redo, etc.)
     // Kept in ui form in case it is going to be added back later on.
@@ -351,7 +358,7 @@ void CMainFrame::OnCreate()
     m_ui->actionZoom_Tool->setVisible(false);
 #endif
 
-    setCentralWidget(m_SceneView);
+    setCentralWidget(m_sceneView.data());
 }
 
 //==============================================================================
@@ -365,7 +372,7 @@ void CMainFrame::OnNewPresentation()
     // Associate the scene object with the scene view
     m_ui->m_EditCamerasBar->SetupCameras();
     // Enable dockables, toolbars, and menus
-    m_PaletteManager->EnablePalettes();
+    m_paletteManager->EnablePalettes();
     m_ui->m_ClientToolsBar->setEnabled(true);
     m_ui->m_EditCamerasBar->setEnabled(true);
     m_ui->m_PlaybackToolbar->setEnabled(true);
@@ -860,12 +867,12 @@ void CMainFrame::OnFileDataInputs()
 void CMainFrame::EditPreferences(short inPageIndex)
 {
     // Set the active page based on the inPageIndex
-    CStudioPreferencesPropSheet thePropSheet(tr("Studio Preferences"), this, inPageIndex);
+    m_propSheet.reset(new CStudioPreferencesPropSheet(tr("Studio Preferences"), this, inPageIndex));
 
     // Display the CStudioPreferencesPropSheet
-    int thePrefsReturn = thePropSheet.exec();
+    int thePrefsReturn = m_propSheet->exec();
 
-    m_SceneView->OnEditCameraChanged();
+    m_sceneView->onEditCameraChanged();
 
     if (thePrefsReturn == PREFS_RESET_DEFAULTS) {
         // Restore default values
@@ -900,6 +907,8 @@ void CMainFrame::EditPreferences(short inPageIndex)
                     (float)CStudioPreferences::DEFAULT_SELECTOR_LENGTH);
 
         RecheckSizingMode();
+    } else if (thePrefsReturn == PREFS_RESET_LAYOUT) {
+        onViewResetLayout();
     }
 }
 
@@ -940,9 +949,9 @@ void CMainFrame::OnPlayStart()
     // Update the play button since this doesn't always happen automatically
     Q_EMIT playStateChanged(true);
 
-    if (m_PlaybackFlag == false) {
-        m_PlaybackFlag = true;
-        m_playbackTimer.start();
+    if (m_playbackFlag == false) {
+        m_playbackFlag = true;
+        m_playbackTimer->start();
     }
 }
 
@@ -956,9 +965,9 @@ void CMainFrame::OnPlayStop()
     // Update the play button since this doesn't always happen automatically
     Q_EMIT playStateChanged(false);
 
-    if (m_PlaybackFlag == true) {
-        m_PlaybackFlag = false;
-        m_playbackTimer.stop();
+    if (m_playbackFlag == true) {
+        m_playbackFlag = false;
+        m_playbackTimer->stop();
     }
 }
 
@@ -969,8 +978,8 @@ void CMainFrame::OnPlayStop()
  */
 void CMainFrame::OnTimeChanged(long inTime)
 {
-    if (m_PaletteManager)
-        m_PaletteManager->onTimeChanged(inTime);
+    if (m_paletteManager)
+        m_paletteManager->onTimeChanged(inTime);
 }
 
 //==============================================================================
@@ -1187,7 +1196,7 @@ void CMainFrame::OnUpdateToolGlobalManipulators()
 void CMainFrame::OnToolMove()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_MOVE);
+    m_sceneView->setToolMode(STUDIO_TOOLMODE_MOVE);
 }
 
 //==============================================================================
@@ -1198,7 +1207,7 @@ void CMainFrame::OnToolMove()
 void CMainFrame::OnToolRotate()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_ROTATE);
+    m_sceneView->setToolMode(STUDIO_TOOLMODE_ROTATE);
 }
 
 //==============================================================================
@@ -1209,7 +1218,7 @@ void CMainFrame::OnToolRotate()
 void CMainFrame::OnToolScale()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
-    m_SceneView->SetToolMode(STUDIO_TOOLMODE_SCALE);
+    m_sceneView->setToolMode(STUDIO_TOOLMODE_SCALE);
 }
 
 void CMainFrame::OnToolGlobalManipulators()
@@ -1292,7 +1301,7 @@ void CMainFrame::HandleEditCameraZoomExtent()
 void CMainFrame::OnEditCameraPan()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
+    m_sceneView->setViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1303,7 +1312,7 @@ void CMainFrame::OnEditCameraPan()
 void CMainFrame::OnEditCameraRotate()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ROTATE);
-    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
+    m_sceneView->setViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1314,7 +1323,7 @@ void CMainFrame::OnEditCameraRotate()
 void CMainFrame::OnEditCameraZoom()
 {
     g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_ZOOM);
-    m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
+    m_sceneView->setViewCursor(); // Just set cursor, we don't want to update previous tool
 }
 
 //==============================================================================
@@ -1329,7 +1338,7 @@ void CMainFrame::OnEditCameraZoom()
 //==============================================================================
 void CMainFrame::OnUpdateCameraZoomExtentAndAuthorZoom()
 {
-    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView())
+    if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView())
         m_ui->actionFit_Selected->setChecked(false);
     else
         m_ui->actionFit_Selected->setChecked(g_StudioApp.IsAuthorZoom());
@@ -1347,7 +1356,7 @@ void CMainFrame::OnUpdateCameraZoomExtentAndAuthorZoom()
 //==============================================================================
 void CMainFrame::OnUpdateEditCameraPan()
 {
-    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
+    if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         m_ui->actionPan_Tool->setEnabled(true);
 
         long theCurrentToolSettings = g_StudioApp.GetToolMode();
@@ -1397,7 +1406,7 @@ void CMainFrame::OnUpdateEditCameraRotate()
 //==============================================================================
 void CMainFrame::OnUpdateEditCameraZoom()
 {
-    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
+    if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         m_ui->actionZoom_Tool->setEnabled(true);
 
         long theCurrentToolSettings = g_StudioApp.GetToolMode();
@@ -1416,7 +1425,7 @@ void CMainFrame::OnUpdateEditCameraZoom()
 //==============================================================================
 void CMainFrame::HandleEditViewFillModeKey()
 {
-    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
+    if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         OnEditViewFillMode();
         bool theEditViewFillMode = g_StudioApp.getRenderer().IsEditLightEnabled();
         m_ui->actionShading_Mode->setChecked(theEditViewFillMode);
@@ -1447,7 +1456,7 @@ void CMainFrame::OnEditViewFillMode()
 //==============================================================================
 void CMainFrame::OnUpdateEditViewFillMode()
 {
-    if (m_SceneView == GetActiveView() && !m_SceneView->IsDeploymentView()) {
+    if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         m_ui->actionShading_Mode->setEnabled(true);
         m_ui->actionShading_Mode->setChecked(g_StudioApp.getRenderer().IsEditLightEnabled());
     } else {
@@ -1460,12 +1469,12 @@ void CMainFrame::OnViewGuidesRulers()
 {
     g_StudioApp.getRenderer().SetGuidesEnabled(!g_StudioApp.getRenderer().AreGuidesEnabled());
     g_StudioApp.GetCore()->GetDispatch()->FireAuthorZoomChanged();
-    m_SceneView->OnRulerGuideToggled();
+    m_sceneView->onRulerGuideToggled();
 }
 
 void CMainFrame::OnUpdateViewGuidesRulers()
 {
-    m_ui->actionRulers_Guides->setEnabled(m_SceneView->IsDeploymentView());
+    m_ui->actionRulers_Guides->setEnabled(m_sceneView->isDeploymentView());
     m_ui->actionRulers_Guides->setChecked(g_StudioApp.getRenderer().AreGuidesEnabled());
 }
 
@@ -1477,7 +1486,7 @@ void CMainFrame::OnClearGuides()
 void CMainFrame::OnUpdateClearGuides()
 {
     bool enable = g_StudioApp.getRenderer().AreGuidesEnabled()
-            && g_StudioApp.getRenderer().AreGuidesEditable() && m_SceneView->IsDeploymentView();
+            && g_StudioApp.getRenderer().AreGuidesEditable() && m_sceneView->isDeploymentView();
 
     m_ui->actionClear_Guides->setEnabled(enable);
 }
@@ -1489,7 +1498,7 @@ void CMainFrame::OnLockGuides()
 
 void CMainFrame::OnUpdateLockGuides()
 {
-    bool enable = g_StudioApp.getRenderer().AreGuidesEnabled() && m_SceneView->IsDeploymentView();
+    bool enable = g_StudioApp.getRenderer().AreGuidesEnabled() && m_sceneView->isDeploymentView();
     m_ui->actionLock_Guides->setEnabled(enable);
     // Set to the inverse of guides editable.
     m_ui->actionLock_Guides->setChecked(!g_StudioApp.getRenderer().AreGuidesEditable());
@@ -1508,7 +1517,7 @@ void CMainFrame::onViewResetLayout()
     int theChoice = QMessageBox::question(this,
                                           tr("Restart Needed"),
                                           tr("Are you sure that you want to restore Qt 3D Studio "
-                                             "layout? \nYour current layout will be lost, and"
+                                             "layout? \nYour current layout will be lost, and "
                                              "Studio will exit."));
 
     // If "Yes" is clicked, delete window geometry and window state keys from QSettings
@@ -1526,57 +1535,57 @@ void CMainFrame::onViewResetLayout()
 
 void CMainFrame::OnViewAction()
 {
-    m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_ACTION);
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_ACTION);
 }
 
 void CMainFrame::OnUpdateViewAction()
 {
     m_ui->actionAction->setChecked(
-                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_ACTION));
+                m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_ACTION));
 }
 
 void CMainFrame::OnViewBasicObjects()
 {
-    m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_BASICOBJECTS);
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_BASICOBJECTS);
 }
 
 void CMainFrame::OnUpdateViewBasicObjects()
 {
-    m_ui->actionBasic_Objects->setChecked(m_PaletteManager->IsControlVisible(
+    m_ui->actionBasic_Objects->setChecked(m_paletteManager->IsControlVisible(
                                               CPaletteManager::CONTROLTYPE_BASICOBJECTS));
 }
 
 void CMainFrame::OnViewInspector()
 {
-    m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
 }
 
 void CMainFrame::OnUpdateViewInspector()
 {
     m_ui->actionInspector->setChecked(
-                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_INSPECTOR));
+                m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_INSPECTOR));
 }
 
 void CMainFrame::OnViewProject()
 {
-    m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_PROJECT);
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_PROJECT);
 }
 
 void CMainFrame::OnUpdateViewProject()
 {
     m_ui->actionProject->setChecked(
-                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_PROJECT));
+                m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_PROJECT));
 }
 
 void CMainFrame::OnViewSlide()
 {
-    m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_SLIDE);
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_SLIDE);
 }
 
 void CMainFrame::OnUpdateViewSlide()
 {
     m_ui->actionSlide->setChecked(
-                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_SLIDE)
+                m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_SLIDE)
                 ? TRUE : FALSE);
 }
 
@@ -1586,7 +1595,7 @@ void CMainFrame::OnUpdateViewSlide()
  */
 void CMainFrame::OnViewTimeline()
 {
-    m_PaletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_TIMELINE);
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_TIMELINE);
 }
 
 //==============================================================================
@@ -1597,7 +1606,7 @@ void CMainFrame::OnViewTimeline()
 void CMainFrame::OnUpdateViewTimeline()
 {
     m_ui->actionTimeline->setChecked(
-                m_PaletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_TIMELINE));
+                m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_TIMELINE));
 }
 
 //==============================================================================
@@ -1738,7 +1747,7 @@ void CMainFrame::OnFileRevert()
 
 void CMainFrame::OnFileImportAssets()
 {
-    m_PaletteManager->projectView()->assetImportAction(0);
+    m_paletteManager->projectView()->assetImportAction(0);
 }
 
 void CMainFrame::OnFileConnectToDevice()
@@ -1767,7 +1776,7 @@ void CMainFrame::OnFileConnectToDevice()
  */
 void CMainFrame::OnFileOpenRecent(int nID)
 {
-    g_StudioApp.OnFileOpenRecent(m_RecentItems->GetItem(nID));
+    g_StudioApp.OnFileOpenRecent(m_recentItems->GetItem(nID));
 }
 
 //==============================================================================
@@ -1776,7 +1785,7 @@ void CMainFrame::OnFileOpenRecent(int nID)
  */
 void CMainFrame::RecheckSizingMode()
 {
-    m_SceneView->RecheckSizingMode();
+    m_sceneView->recheckSizingMode();
 }
 
 //==============================================================================
@@ -1786,9 +1795,9 @@ void CMainFrame::RecheckSizingMode()
 void CMainFrame::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
 {
     if (inSucceeded)
-        m_RecentItems->AddRecentItem(inFilename);
+        m_recentItems->AddRecentItem(inFilename);
     else
-        m_RecentItems->RemoveRecentItem(inFilename);
+        m_recentItems->RemoveRecentItem(inFilename);
 }
 
 //==============================================================================
@@ -1817,37 +1826,37 @@ void CMainFrame::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
     setWindowTitle(theTitle);
 
     if (inNewPath.Exists())
-        m_RecentItems->AddRecentItem(inNewPath);
+        m_recentItems->AddRecentItem(inNewPath);
 }
 
 void CMainFrame::OnShowSlide()
 {
-    m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_SLIDE);
+    m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_SLIDE);
 }
 
 void CMainFrame::OnShowTimeline()
 {
-    m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_TIMELINE);
+    m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_TIMELINE);
 }
 
 void CMainFrame::OnShowBasic()
 {
-    m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_BASICOBJECTS);
+    m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_BASICOBJECTS);
 }
 
 void CMainFrame::OnShowProject()
 {
-    m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_PROJECT);
+    m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_PROJECT);
 }
 
 void CMainFrame::OnShowAction()
 {
-    m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_ACTION);
+    m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_ACTION);
 }
 
 void CMainFrame::OnShowInspector()
 {
-    m_PaletteManager->ShowControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
+    m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
 }
 
 void CMainFrame::OnConnectionChanged(bool connected)
@@ -1859,7 +1868,7 @@ void CMainFrame::OnConnectionChanged(bool connected)
 
 CTimelineControl *CMainFrame::GetTimelineControl()
 {
-    return m_PaletteManager->GetTimelineControl();
+    return m_paletteManager->GetTimelineControl();
 }
 
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
@@ -1874,7 +1883,7 @@ ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
 
 CRecentItems *CMainFrame::GetRecentItems()
 {
-    return m_RecentItems;
+    return m_recentItems.data();
 }
 
 QWidget *CMainFrame::GetActiveView()
@@ -1884,7 +1893,7 @@ QWidget *CMainFrame::GetActiveView()
 
 CPlayerWnd *CMainFrame::GetPlayerWnd() const
 {
-    return m_SceneView->GetPlayerWnd();
+    return m_sceneView->getPlayerWnd();
 }
 
 bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
@@ -1900,10 +1909,10 @@ bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
     case QEvent::KeyPress: {
         QKeyEvent *ke = static_cast<QKeyEvent *>(event);
         if (ke->key() == Qt::Key_Tab) {
-            if (m_PaletteManager->tabNavigateFocusedWidget(true))
+            if (m_paletteManager->tabNavigateFocusedWidget(true))
                 return true;
         } else if (ke->key() == Qt::Key_Backtab) {
-            if (m_PaletteManager->tabNavigateFocusedWidget(false))
+            if (m_paletteManager->tabNavigateFocusedWidget(false))
                 return true;
         }
         break;
@@ -1947,9 +1956,9 @@ void CMainFrame::initializeGeometryAndState()
 void CMainFrame::toggleSelectMode()
 {
     if (m_ui->actionItem_Select_Tool->isChecked())
-        m_SceneView->OnToolGroupSelection();
+        m_sceneView->onToolGroupSelection();
     else
-        m_SceneView->OnToolItemSelection();
+        m_sceneView->onToolItemSelection();
 }
 
 void CMainFrame::actionActive(bool active)

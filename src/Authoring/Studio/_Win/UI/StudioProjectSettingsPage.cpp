@@ -191,7 +191,7 @@ void CStudioProjectSettingsPage::SaveSettings()
     QString theCompany = m_ui->m_Company->text();
     theProjectSettings->SetCompany(theCompany);
 
-    g_StudioApp.GetViews()->RecheckMainframeSizingMode();
+    g_StudioApp.GetViews()->recheckMainframeSizingMode();
 
     // Maintain Aspect Ratio checkbox
     theProjectSettings->SetMaintainAspect(m_ui->m_checkConstrainProportions->isChecked());
@@ -208,7 +208,7 @@ void CStudioProjectSettingsPage::SaveSettings()
 //==============================================================================
 void CStudioProjectSettingsPage::OnSettingsModified()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }
 
 //==============================================================================
@@ -218,14 +218,14 @@ void CStudioProjectSettingsPage::OnSettingsModified()
  *	@param	None
  */
 //==============================================================================
-bool CStudioProjectSettingsPage::OnApply()
+bool CStudioProjectSettingsPage::onApply()
 {
     // Apply was clicked - save settings and disabled the Apply button
     this->SaveSettings();
 
-    this->SetModified(FALSE);
+    this->setModified(FALSE);
 
-    return CStudioPreferencesPropPage::OnApply();
+    return CStudioPreferencesPropPage::onApply();
 }
 
 //==============================================================================
@@ -235,9 +235,9 @@ bool CStudioProjectSettingsPage::OnApply()
  *	@param	None
  */
 //==============================================================================
-void CStudioProjectSettingsPage::OnOK()
+void CStudioProjectSettingsPage::onOK()
 {
-    CStudioPreferencesPropPage::OnOK();
+    CStudioPreferencesPropPage::onOK();
 }
 
 //==============================================================================
@@ -249,7 +249,7 @@ void CStudioProjectSettingsPage::OnOK()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeEditPresWidth()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 
     // Should the aspect ratio be maintained?
     if (m_ui->m_checkConstrainProportions->isChecked()) {
@@ -274,7 +274,7 @@ void CStudioProjectSettingsPage::OnChangeEditPresWidth()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeEditPresHeight()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 
     // Should the aspect ratio be maintained?
     if (m_ui->m_checkConstrainProportions->isChecked()) {
@@ -299,7 +299,7 @@ void CStudioProjectSettingsPage::OnChangeEditPresHeight()
 //==============================================================================
 void CStudioProjectSettingsPage::OnCheckMaintainRatio()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 
     long thePresWidth, thePresHeight;
 
@@ -320,7 +320,7 @@ void CStudioProjectSettingsPage::OnCheckMaintainRatio()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeAuthor()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }
 
 //==============================================================================
@@ -332,7 +332,7 @@ void CStudioProjectSettingsPage::OnChangeAuthor()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeCompany()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }
 
 //==============================================================================
@@ -344,7 +344,7 @@ void CStudioProjectSettingsPage::OnChangeCompany()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeSet1()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }
 
 //==============================================================================
@@ -356,7 +356,7 @@ void CStudioProjectSettingsPage::OnChangeSet1()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeSet2()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }
 
 //==============================================================================
@@ -368,7 +368,7 @@ void CStudioProjectSettingsPage::OnChangeSet2()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeSet3()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }
 
 //==============================================================================
@@ -380,5 +380,5 @@ void CStudioProjectSettingsPage::OnChangeSet3()
 //==============================================================================
 void CStudioProjectSettingsPage::OnChangeSet5()
 {
-    this->SetModified(TRUE);
+    this->setModified(TRUE);
 }

@@ -241,10 +241,10 @@ void CStudioApp::performShutdown()
     }
 
     if (m_renderer) {
-        m_views->GetMainFrame()->GetPlayerWnd()->makeCurrent();
+        m_views->getMainFrame()->GetPlayerWnd()->makeCurrent();
         m_renderer->Close();
         m_renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
-        m_views->GetMainFrame()->GetPlayerWnd()->doneCurrent();
+        m_views->getMainFrame()->GetPlayerWnd()->doneCurrent();
     }
 
     delete m_views;
@@ -479,7 +479,7 @@ bool CStudioApp::showStartupDialog()
         // Populate recent items
         Q3DStudio::CFilePath theMostRecentDirectory = Q3DStudio::CFilePath(".");
         if (m_views) {
-            CRecentItems *theRecentItems = m_views->GetMainFrame()->GetRecentItems();
+            CRecentItems *theRecentItems = m_views->getMainFrame()->GetRecentItems();
             for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex) {
                 if (theIndex == 0) {
                     theMostRecentDirectory =
@@ -597,13 +597,13 @@ bool CStudioApp::createAndRunApplication(const QString &filename, const QString 
 
 //=============================================================================
 /**
- *	This is the app execution loop, the main thread loops here until the app exits.
- *	@return 0 on success; -1 on failure
+ * This is the app execution loop, the main thread loops here until the app exits.
+ * @return true on success; false on failure
  */
 bool CStudioApp::runApplication()
 {
     m_pMainWnd->initializeGeometryAndState();
-    return qApp->exec();
+    return qApp->exec() == 0;
 }
 
 //=============================================================================
@@ -620,8 +620,8 @@ void CStudioApp::initCore()
     m_core->Initialize();
 
     if (m_views) {
-        m_views->CreateViews(m_isSilent);
-        m_pMainWnd = m_views->GetMainFrame();
+        m_views->createViews(m_isSilent);
+        m_pMainWnd = m_views->getMainFrame();
     }
 
     RegisterGlobalKeyboardShortcuts(m_core->GetHotKeys(), m_pMainWnd);
@@ -1230,7 +1230,7 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                 Qt::Key_Space);
 
     if (m_views)
-        m_views->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
+        m_views->registerGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
 }
 
 //=============================================================================
@@ -1474,7 +1474,7 @@ void CStudioApp::OnLoadDocumentCatcher(const Qt3DSFile &inDocument)
 
     // Make sure the client scene is resized properly
     if (m_views)
-        m_views->RecheckMainframeSizingMode();
+        m_views->recheckMainframeSizingMode();
 }
 
 void CStudioApp::OnFileOpen()

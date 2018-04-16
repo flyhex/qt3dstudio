@@ -39,7 +39,6 @@
 #include <QtWidgets/qwidget.h>
 #include <QtGui/qcursor.h>
 
-class CStudioApp;
 class CHotKeys;
 
 class CSceneView : public QWidget,
@@ -47,49 +46,49 @@ class CSceneView : public QWidget,
 {
     Q_OBJECT
 protected:
-    CPlayerContainerWnd *m_PlayerContainerWnd = nullptr; ///< first-level child
-    CPlayerWnd *m_PlayerWnd = nullptr; ///< second-level child (grandchild)
-    QCursor m_ArrowCursor; ///< A pointer to the current cursor (changes according to mode)
-    QCursor m_CursorGroupMove; ///< The move group cursor
-    QCursor m_CursorGroupRotate; ///< The rotate group cursor
-    QCursor m_CursorGroupScale; ///< The scale group cursor
-    QCursor m_CursorItemMove; ///< The move item cursor
-    QCursor m_CursorItemRotate; ///< The rotate item cursor
-    QCursor m_CursorItemScale; ///< The scale item cursor
-    QCursor m_CursorEditCameraPan; ///< The edit camera pan cursor
-    QCursor m_CursorEditCameraRotate; ///< The edit camera rotate cursor
-    QCursor m_CursorEditCameraZoom; ///< The edit camera zoom cursor
+    QScopedPointer<CPlayerContainerWnd> m_playerContainerWnd; // first-level child
+    QScopedPointer<CPlayerWnd> m_playerWnd; // second-level child (grandchild)
+    QCursor m_arrowCursor; // A pointer to the current cursor (changes according to mode)
+    QCursor m_cursorGroupMove; // The move group cursor
+    QCursor m_cursorGroupRotate; // The rotate group cursor
+    QCursor m_cursorGroupScale; // The scale group cursor
+    QCursor m_cursorItemMove; // The move item cursor
+    QCursor m_cursorItemRotate; // The rotate item cursor
+    QCursor m_cursorItemScale; // The scale item cursor
+    QCursor m_cursorEditCameraPan; // The edit camera pan cursor
+    QCursor m_cursorEditCameraRotate; // The edit camera rotate cursor
+    QCursor m_cursorEditCameraZoom; // The edit camera zoom cursor
 
-    long m_PreviousSelectMode; ///< The previous select mode
+    long m_previousSelectMode; // The previous select mode
 
 public:
-    CSceneView(CStudioApp *inStudioApp, QWidget *parent = nullptr);
+    CSceneView(QWidget *parent = nullptr);
     CSceneView(); // used for serialization only!
     virtual ~CSceneView();
 
-    void SetViewCursor();
-    void RecheckSizingMode();
+    void setViewCursor();
+    void recheckSizingMode();
 
-    void SetPlayerWndPosition();
+    void setPlayerWndPosition();
 
     // redirect to/from PlayerContainerWnd
-    bool IsDeploymentView();
-    void SetViewMode(CPlayerContainerWnd::EViewMode inViewMode);
-    void SetToolMode(long inMode);
+    bool isDeploymentView();
+    void setViewMode(CPlayerContainerWnd::EViewMode inViewMode);
+    void setToolMode(long inMode);
 
-    void OnRulerGuideToggled();
+    void onRulerGuideToggled();
 
     // CEditCameraChangeListener
-    void OnEditCameraChanged() override;
-    void OnEditCamerasTransformed() override {}
-    void OnAuthorZoomChanged() override;
+    void onEditCameraChanged() override;
+    void onEditCamerasTransformed() override {}
+    void onAuthorZoomChanged() override;
 
     QSize sizeHint() const override;
 
-    void OnToolGroupSelection();
-    void OnToolItemSelection();
+    void onToolGroupSelection();
+    void onToolItemSelection();
 
-    CPlayerWnd *GetPlayerWnd() const;
+    CPlayerWnd *getPlayerWnd() const;
 
 Q_SIGNALS:
     void toolChanged();
@@ -99,7 +98,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    void RecalcMatte();
+    void recalcMatte();
     void onDropReceived();
 };
 

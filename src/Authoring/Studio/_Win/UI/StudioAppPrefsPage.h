@@ -30,9 +30,6 @@
 #ifndef STUDIOAPPPREFSPAGE_H_
 #define STUDIOAPPPREFSPAGE_H_
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "BuildConfigParser.h"
 
 #include "StudioPreferencesPropSheet.h"
@@ -40,9 +37,6 @@
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 
-class CStudioApp;
-/////////////////////////////////////////////////////////////////////////////
-// CStudioAppPrefsPage dialog
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
@@ -58,7 +52,6 @@ protected:
     typedef std::pair<Q3DStudio::CBuildConfiguration::SConfigProperty *, TBuildLabelDropdownPair>
     TBuildNameControlPair;
 
-    // Construction
 public:
     explicit CStudioAppPrefsPage(QWidget *parent = nullptr);
     ~CStudioAppPrefsPage();
@@ -67,46 +60,42 @@ public:
     QColor m_bgColor;
 
 public:
-    bool OnApply() override;
-    void OnOK() override;
+    bool onApply() override;
+    void onOK() override;
     void onBackgroundColorChanged(const QColor &color);
 
-    // Implementation
 protected:
-    BOOL m_TimebarShowTime; ///< TRUE if timebars are to display their time value
-    BOOL m_InterpolationIsSmooth; ///< TRUE if default interpolation is smooth
-    QFont m_Font; ///< Font for text
-    QFont m_BoldFont; ///< Bold font for drawing the group boxes
+    bool m_timebarShowTime; // TRUE if timebars are to display their time value
+    bool m_interpolationIsSmooth; // TRUE if default interpolation is smooth
+    QFont m_font; // Font for text
+    QFont m_boldFont; // Bold font for drawing the group boxes
     bool m_restartNeeded;
     bool m_autosaveChanged;
 
-    void EnableOptions();
-    void LoadSettings();
-    void SaveSettings();
+    void enableOptions();
+    void loadSettings();
+    void saveSettings();
 
-    // Generated message map functions
-    virtual void OnInitDialog();
-    void OnButtonRestoreDefaults();
+    virtual void onInitDialog();
+    void onButtonRestoreDefaults();
 #if 0 // Removed until we have some other Preview configurations that just Viewer
-    void OnChangePreviewConfiguration();
+    void onChangePreviewConfiguration();
 #endif
-    void OnBgColorButtonClicked();
+    void onBgColorButtonClicked();
 
     void enableAutosave(bool enabled);
     void setAutosaveInterval(int interval);
-
-protected: // helper functions
-    void InitEditStartViewCombo();
+    void onitEditStartViewCombo();
 
 protected:
-    std::list<TBuildNameControlPair> m_BuildProperties; ///< List of build properties, either
-                                                        /// ComboBox or Static
+    std::list<TBuildNameControlPair> m_buildProperties; // List of build properties, either
+                                                        // ComboBox or Static
 
 #if 0 // Removed until we have some other Preview configurations that just Viewer
-    void LoadPreviewSelections();
-    void LoadBuildProperties();
-    void SavePreviewSettings();
-    void RemovePreviewPropertyControls();
+    void loadPreviewSelections();
+    void loadBuildProperties();
+    void savePreviewSettings();
+    void removePreviewPropertyControls();
 #endif
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioAppPrefsPage)> m_ui;
 

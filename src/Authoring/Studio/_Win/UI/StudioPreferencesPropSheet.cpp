@@ -27,17 +27,8 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-
-#include "stdafx.h"
-
 #include "ui_StudioPreferencesPropSheet.h"
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "StudioPreferences.h"
 #include "StudioPreferencesPropSheet.h"
 #include "StudioProjectSettingsPage.h"
@@ -49,7 +40,7 @@ CStudioPreferencesPropPage::CStudioPreferencesPropPage(QWidget *parent)
 {
 }
 
-void CStudioPreferencesPropPage::SetModified(bool modified)
+void CStudioPreferencesPropPage::setModified(bool modified)
 {
     setProperty("modified", modified);
 
@@ -75,15 +66,12 @@ CStudioPreferencesPropSheet* CStudioPreferencesPropPage::sheet()
 }
 
 
-void CStudioPreferencesPropPage::EndDialog(int returnCode)
+void CStudioPreferencesPropPage::endDialog(int returnCode)
 {
     auto s = sheet();
     if (s)
         s->done(returnCode);
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// CStudioPreferencesPropSheet
 
 CStudioPreferencesPropSheet::CStudioPreferencesPropSheet(const QString &pszCaption,
                                                          QWidget *pParentWnd,
@@ -92,7 +80,7 @@ CStudioPreferencesPropSheet::CStudioPreferencesPropSheet(const QString &pszCapti
     , m_ui(new Ui::StudioPreferencesPropSheet)
 {
     setWindowTitle(pszCaption);
-    OnInitDialog();
+    onInitDialog();
     m_ui->m_TabCtrl->setCurrentIndex(iSelectPage);
 }
 
@@ -100,17 +88,7 @@ CStudioPreferencesPropSheet::~CStudioPreferencesPropSheet()
 {
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// CStudioPreferencesPropSheet message handlers
-
-//==============================================================================
-/**
- *	OnInitDialog: Handle the WM_INITDIALOG message to initialize the property sheet.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioPreferencesPropSheet::OnInitDialog()
+void CStudioPreferencesPropSheet::onInitDialog()
 {
     m_ui->setupUi(this);
     m_ui->buttonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
@@ -125,7 +103,7 @@ void CStudioPreferencesPropSheet::OnInitDialog()
 bool CStudioPreferencesPropSheet::apply()
 {
     for (auto page : findChildren<CStudioPreferencesPropPage *>()) {
-        if (!page->OnApply())
+        if (!page->onApply())
             return false;
     }
     return true;
@@ -140,6 +118,6 @@ void CStudioPreferencesPropSheet::accept()
 void CStudioPreferencesPropSheet::reject()
 {
     for (auto page : findChildren<CStudioPreferencesPropPage *>())
-        page->OnCancel();
+        page->onCancel();
     QDialog::reject();
 }
