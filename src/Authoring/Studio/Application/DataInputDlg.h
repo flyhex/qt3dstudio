@@ -47,14 +47,14 @@ QT_END_NAMESPACE
 QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 
 enum EDataType {
-    DataTypeRangedNumber = 0,
-    DataTypeString,
-    DataTypeFloat,
+    DataTypeBoolean = 0,
     DataTypeEvaluator,
-    DataTypeBoolean,
-    DataTypeVector3,
+    DataTypeFloat,
+    DataTypeRangedNumber,
+    DataTypeString,
+    DataTypeVariant,
     DataTypeVector2,
-    DataTypeVariant
+    DataTypeVector3
 };
 
 class CDataInputDlg : public QDialog

@@ -34,13 +34,16 @@
 #include <QtGui/qstandarditemmodel.h>
 #include <QtGui/qevent.h>
 #include <algorithm>
+#include <QtCore/qtimer.h>
 
 const int columnCount = 3;
 
-CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs, QWidget *parent)
+CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs,
+                                     bool goToAdd, QWidget *parent)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
+    , m_goToAdd(goToAdd)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
 {
@@ -111,6 +114,10 @@ void CDataInputListDlg::initDialog()
     connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &CDataInputListDlg::onSelectionChanged);
     connect(m_ui->tableView, &QTableView::activated, this, &CDataInputListDlg::onActivated);
+
+    // Directly show data input modification dialog
+    if (m_goToAdd)
+         QTimer::singleShot(0, this, &CDataInputListDlg::onAddDataInput);
 }
 
 void CDataInputListDlg::updateButtons()

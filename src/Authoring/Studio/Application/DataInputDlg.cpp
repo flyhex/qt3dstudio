@@ -31,6 +31,7 @@
 
 #include <QtWidgets/qabstractbutton.h>
 #include <QtGui/qstandarditemmodel.h>
+#include <QtWidgets/qstyleditemdelegate.h>
 
 CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                              QWidget *parent)
@@ -45,14 +46,18 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
 {
     m_ui->setupUi(this);
 
+    // For enabling stylesheet for drop-down items
+    QStyledItemDelegate *itemDelegate = new QStyledItemDelegate();
+    m_ui->comboBoxTypeList->setItemDelegate(itemDelegate);
+
+    m_ui->comboBoxTypeList->addItem(tr("Boolean"));
+    m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
+    m_ui->comboBoxTypeList->addItem(tr("Float"));
     m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
     m_ui->comboBoxTypeList->addItem(tr("String"));
-    m_ui->comboBoxTypeList->addItem(tr("Float"));
-    m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
-    m_ui->comboBoxTypeList->addItem(tr("Boolean"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector3"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
     m_ui->comboBoxTypeList->addItem(tr("Variant"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector3"));
 
     initDialog();
 

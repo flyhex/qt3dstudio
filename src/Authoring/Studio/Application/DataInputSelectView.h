@@ -37,10 +37,10 @@ class DataInputSelectModel;
 class DataInputSelectView : public QQuickWidget
 {
     Q_OBJECT
-
+    Q_PROPERTY(int selected MEMBER m_selection NOTIFY selectedChanged)
 public:
     explicit DataInputSelectView(QWidget *parent = nullptr);
-    void setData(const QStringList &dataInputList,
+    void setData(const QVector<QPair<QString, int>> &dataInputList,
                  const QString &currentController,
                  int handle = 0, int instance = 0);
     QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
@@ -50,7 +50,7 @@ public:
     Q_INVOKABLE int selection() const { return m_selection; }
 Q_SIGNALS:
     void dataInputChanged(int handle, int instance, const QString &selected);
-
+    void selectedChanged();
 
 protected:
     void focusOutEvent(QFocusEvent *event) override;
@@ -58,7 +58,8 @@ protected:
 
 private:
     void initialize();
-    void updateData(const QStringList &dataInputList);
+    void updateData(const QVector<QPair<QString, int>> &dataInputList);
+    QString getDiTypeStr(int type);
     int m_handle = 0;
     int m_instance = 0;
     DataInputSelectModel *m_model = nullptr;

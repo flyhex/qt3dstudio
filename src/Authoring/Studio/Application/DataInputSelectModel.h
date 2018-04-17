@@ -30,13 +30,22 @@
 
 #include <QtCore/qstringlistmodel.h>
 
-class DataInputSelectModel : public QStringListModel
+class DataInputSelectModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(int fixedItemCount MEMBER m_fixCount NOTIFY fixCountChanged)
 public:
     Q_INVOKABLE QString getActiveIconPath() const;
     Q_INVOKABLE QString getInactiveIconPath() const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        Q_UNUSED(parent);
+        return m_diTypePairList.size();
+    }
+    void setData(const QVector<QPair<QString, QString>> &data);
+    void clear();
+    QHash<int, QByteArray> roleNames() const;
     explicit DataInputSelectModel(QObject *parent = nullptr);
     virtual ~DataInputSelectModel();
     void setFixedItemCount(int count) { m_fixCount = count; }
@@ -46,6 +55,8 @@ Q_SIGNALS:
 
 private:
     int m_fixCount = 0;
+    QVector<QPair<QString, QString>> m_diTypePairList;
+    static const int TypeRole;
 
 };
 #endif // DATAINPUTSELECTMODEL_H

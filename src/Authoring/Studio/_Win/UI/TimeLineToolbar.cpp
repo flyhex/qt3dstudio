@@ -203,12 +203,14 @@ void TimeLineToolbar::showDataInputChooser(const QPoint &point)
 {
     QString currCtr = m_currController.size() ?
         m_currController : m_dataInputSelector->getNoneString();
-    QStringList dataInputList;
+    QVector<QPair<QString, int>> dataInputList;
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
         if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeRangedNumber)
-            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+            dataInputList.append(QPair<QString, int>(g_StudioApp.m_dataInputDialogItems[i]->name,
+                                                     g_StudioApp.m_dataInputDialogItems[i]->type));
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
+
     showBrowser(m_dataInputSelector, point);
 
     return;

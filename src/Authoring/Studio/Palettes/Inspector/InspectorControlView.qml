@@ -205,6 +205,42 @@ Rectangle {
                                 }
 
                                 Item {
+                                    width: (animatedPropertyButton.visible
+                                           ? 4 : animatedPropertyButton.width + 4)
+                                    height: loadedItem.height + 4 // Add little space between items
+                                }
+
+                                StyledLabel {
+                                    id: propertyRow
+
+                                    readonly property var modelData: model.modelData
+                                    text: model.modelData.title
+                                    // Color picked from DataInput icon
+                                    color: model.modelData.controlled?
+                                               _dataInputColor
+                                             : _parentView.titleColor(modelData.instance,
+                                                                      modelData.handle)
+
+                                    Layout.alignment: Qt.AlignTop
+
+                                    MouseArea {
+                                        id: mouse
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.RightButton
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            const coords = mapToItem(root, mouse.x, mouse.y);
+                                            groupDelegateItem.showContextMenu(coords);
+                                        }
+                                    }
+
+                                    StyledTooltip {
+                                        id: valueToolTip
+                                        text: modelData.toolTip
+                                        enabled: mouse.containsMouse
+                                    }
+                                }
+                                Item {
                                     Layout.alignment: Qt.AlignTop
                                     width: controlledPropertyButton.sourceSize.width
                                     height: _controlBaseHeight
@@ -253,45 +289,8 @@ Rectangle {
 
                                 Item {
                                     width: (controlledPropertyButton.visible
-                                           ? 4 : controlledPropertyButton.width + 4)
+                                            ? 4 : controlledPropertyButton.width + 4)
                                     height: loadedItem.height + 4 // Add little space between items
-                                }
-
-                                Item {
-                                    width: (animatedPropertyButton.visible
-                                           ? 4 : animatedPropertyButton.width + 4)
-                                    height: loadedItem.height + 4 // Add little space between items
-                                }
-
-                                StyledLabel {
-                                    id: propertyRow
-
-                                    readonly property var modelData: model.modelData
-                                    text: model.modelData.title
-                                    // Color picked from DataInput icon
-                                    color: model.modelData.controlled?
-                                               _dataInputColor
-                                             : _parentView.titleColor(modelData.instance,
-                                                                      modelData.handle)
-
-                                    Layout.alignment: Qt.AlignTop
-
-                                    MouseArea {
-                                        id: mouse
-                                        anchors.fill: parent
-                                        acceptedButtons: Qt.RightButton
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            const coords = mapToItem(root, mouse.x, mouse.y);
-                                            groupDelegateItem.showContextMenu(coords);
-                                        }
-                                    }
-
-                                    StyledTooltip {
-                                        id: valueToolTip
-                                        text: modelData.toolTip
-                                        enabled: mouse.containsMouse
-                                    }
                                 }
 
                                 ColumnLayout {
@@ -307,6 +306,30 @@ Rectangle {
                                                   modelData.controller : "[No datainput control]";
                                         color: modelData.controlled ?
                                                   _dataInputColor : _disabledColor;
+
+                                        StyledTooltip {
+                                            id: dILabelToolTip
+                                            text: modelData.toolTip
+                                            enabled: mouseareaDILabel.containsMouse
+                                        }
+
+                                        MouseArea {
+                                            id: mouseareaDILabel
+                                            anchors.fill: parent
+                                            acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                            hoverEnabled: true
+                                            onClicked: {
+                                                if (mouse.button === Qt.LeftButton) {
+                                                    _parentView.showDataInputChooser(
+                                                                model.modelData.handle,
+                                                                model.modelData.instance,
+                                                                mapToGlobal(mouse.x, mouse.y));
+                                                } else {
+                                                    groupDelegateItem.showContextMenu(
+                                                                mapToItem(root, mouse.x, mouse.y));
+                                                }
+                                            }
+                                        }
                                     }
 
                                     Loader {

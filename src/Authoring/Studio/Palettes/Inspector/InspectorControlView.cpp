@@ -499,18 +499,20 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
             m_inspectorControlModel->setPropertyControlled(instance, handle);
         });
     }
-    QStringList dataInputList;
     const auto propertySystem =
         g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetPropertySystem();
     const qt3dsdm::DataModelDataType::Value dataType
         = propertySystem->GetDataType(handle);
     // only add datainputs with matching type for this property
+    QVector<QPair<QString, int>> dataInputList;
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
         if (CDataInputDlg::isEquivalentDataType(
             g_StudioApp.m_dataInputDialogItems[i]->type, dataType)) {
-            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+            dataInputList.append(QPair<QString, int>(g_StudioApp.m_dataInputDialogItems[i]->name,
+                                                     g_StudioApp.m_dataInputDialogItems[i]->type));
         }
-    }
+        }
+
     m_dataInputChooserView->
             setData(dataInputList,
                     m_inspectorControlModel->currentControllerValue(instance, handle),

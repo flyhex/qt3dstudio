@@ -41,7 +41,7 @@ Rectangle {
     StyledLabel {
         id: title
         color: _dataInputColor
-        text: qsTr("Select controlling Data Input")
+        text: qsTr("Select Controlling Data Input")
         leftPadding: 8
         height: 20
     }
@@ -77,15 +77,30 @@ Rectangle {
                 Image {
                     // do not show item icon for fixed items
                     visible: index >= _dataInputSelectModel.fixedItemCount
-                    source: index === _dataInputSelectView.selection()
+                    source: index === _dataInputSelectView.selected
                                       ? _dataInputSelectModel.getActiveIconPath()
                                       : _dataInputSelectModel.getInactiveIconPath();
                 }
                 StyledLabel {
                     leftPadding: 5
-                    text: display
+                    text: model.display
+                    width: listView.width / 2;
                     color: (index >= _dataInputSelectModel.fixedItemCount)
-                           && (index === _dataInputSelectView.selection())
+                           && (index === _dataInputSelectView.selected)
+                           ? _dataInputColor : _textColor;
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: _dataInputSelectView.setSelection(index)
+                    }
+                }
+                StyledLabel {
+                    leftPadding: 5
+                    visible: index >= _dataInputSelectModel.fixedItemCount
+                    text:  "(" + model.datatype + ")"
+                    color: (index >= _dataInputSelectModel.fixedItemCount)
+                           && (index === _dataInputSelectView.selected)
                            ? _dataInputColor : _textColor;
 
                     MouseArea {

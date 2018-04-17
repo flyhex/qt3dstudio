@@ -120,10 +120,11 @@ void SlideView::showControllerDialog(const QPoint &point)
 {
     QString currCtr = m_currentController.size() ?
         m_currentController : m_dataInputSelector->getNoneString();
-    QStringList dataInputList;
+    QVector<QPair<QString, int>> dataInputList;
     for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
         if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeString)
-            dataInputList.append(g_StudioApp.m_dataInputDialogItems[i]->name);
+            dataInputList.append(QPair<QString, int>(g_StudioApp.m_dataInputDialogItems[i]->name,
+                                                     g_StudioApp.m_dataInputDialogItems[i]->type));
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
     showBrowser(m_dataInputSelector, point);
