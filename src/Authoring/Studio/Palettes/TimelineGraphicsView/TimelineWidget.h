@@ -38,6 +38,7 @@
 #include "TimelineObjectModel.h"
 #include "TreeHeaderView.h"
 #include "Bindings/Qt3DSDMTimeline.h"
+#include "NavigationBar.h"
 
 class RowTree;
 class TimelineToolbar;
@@ -108,6 +109,7 @@ private:
     QGraphicsView *m_viewTreeContent = nullptr;
     QGraphicsView *m_viewTimelineHeader = nullptr;
     QGraphicsView *m_viewTimelineContent = nullptr;
+    NavigationBar *m_navigationBar = nullptr;
     TimelineToolbar *m_toolbar = nullptr;
     TimelineGraphicsScene *m_graphicsScene;
     TimelineSplitter *m_splitter = nullptr;

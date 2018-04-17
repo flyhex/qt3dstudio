@@ -91,6 +91,9 @@ public:
 
     ITimelineItemBinding *getBinding() const;
 
+protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+
 private:
     void initialize();
     void initializeAnimations();
@@ -126,6 +129,7 @@ private:
     QRect m_rectShy;
     QRect m_rectVisible;
     QRect m_rectLocked;
+    QRect m_rectType;
 
     QParallelAnimationGroup m_expandAnimation;
     QPropertyAnimation *m_expandHeightAnimation;

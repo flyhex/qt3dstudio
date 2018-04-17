@@ -181,13 +181,16 @@ void RowTree::animateExpand(bool expand)
 
 void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    int offset = 5 + m_depth * 15;
+    const int offset = 5 + m_depth * 15;
+    const int iconSize = 16;
+    const int iconY = (size().height() / 2) - (iconSize / 2);
 
     // update button bounds rects
-    m_rectArrow  .setRect(offset, size().height() * .5 - 8, 16, 16);
-    m_rectShy    .setRect(m_treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
-    m_rectVisible.setRect(m_treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
-    m_rectLocked .setRect(m_treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
+    m_rectArrow  .setRect(offset, iconY, iconSize, iconSize);
+    m_rectType   .setRect(offset + iconSize, iconY, iconSize, iconSize);
+    m_rectShy    .setRect(m_treeWidth - 16 * 3.3, iconY, iconSize, iconSize);
+    m_rectVisible.setRect(m_treeWidth - 16 * 2.2, iconY, iconSize, iconSize);
+    m_rectLocked .setRect(m_treeWidth - 16 * 1.1, iconY, iconSize, iconSize);
 
     // Background
     QColor bgColor;
@@ -211,7 +214,6 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
-    double y = (size().height() - pixArrow.height()) * .5;
     if (!m_childRows.empty())
         painter->drawPixmap(m_rectArrow, m_expanded ? pixArrowDown : pixArrow);
 
@@ -279,9 +281,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     if (m_isProperty)
         pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
 
-    y = (size().height() - 16) * .5;
-
-    painter->drawPixmap(offset + 15, y, 16, 16, pixRowType);
+    painter->drawPixmap(m_rectType, pixRowType);
 
     // Shy, eye, lock separator
     painter->fillRect(QRect(m_treeWidth - TimelineConstants::TREE_ICONS_W,
@@ -439,6 +439,13 @@ void RowTree::removeChild(RowTree *child)
 bool RowTree::hasPropertyChildren()
 {
     return m_scene->rowManager()->hasProperties(this);
+}
+
+void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    QPointF p = event->pos();
+    if (m_rectType.contains(p.x(), p.y()) && !m_locked)
+        m_binding->OpenAssociatedEditor();
 }
 
 // handle clicked control and return its type

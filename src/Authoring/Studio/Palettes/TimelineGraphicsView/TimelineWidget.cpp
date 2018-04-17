@@ -186,9 +186,12 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     layoutContent->addWidget(m_splitter);
     layoutContent->addLayout(layoutTimeline);
 
+    m_navigationBar = new NavigationBar(this);
+
     auto *layoutRoot = new QVBoxLayout;
     layoutRoot->setContentsMargins(0, 0, 0, 0);
     layoutRoot->setSpacing(0);
+    layoutRoot->addWidget(m_navigationBar);
     layoutRoot->addLayout(layoutContent);
     layoutRoot->addWidget(m_toolbar);
     setLayout(layoutRoot);
@@ -411,6 +414,7 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
     m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
     m_handlesMap.clear();
     insertToHandlesMapRecursive(m_binding);
+    m_navigationBar->updateNavigationItems(m_translationManager->GetBreadCrumbProvider());
 }
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
