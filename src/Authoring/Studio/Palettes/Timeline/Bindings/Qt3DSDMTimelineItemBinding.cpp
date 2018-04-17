@@ -347,28 +347,25 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
     }
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
+    // Display warning if we had to modify the user-given name to make it unique
     if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
-        QString theTitle = QObject::tr("Rename Object Error");
-        QString theString = QObject::tr("The object name is duplicated under its parent, do you "
-                                        "want to make it unique?");
-        int theUserChoice = g_StudioApp.GetDialogs()->DisplayChoiceBox(
-                    theTitle, theString, Qt3DSMessageBox::ICON_WARNING);
-        if (theUserChoice == IDYES) {
-            // Set with the unique name
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                *m_TransMgr->GetDoc(), QObject::tr("Set Name"))
-                ->SetName(m_DataHandle, inName, true);
-            return;
-        }
-    }
-    // Set the name no matter it's unique or not
-    Qt3DSDMPropertyHandle theNamePropHandle =
-            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
-                                                                                    L"name");
+        // Find unique name based on the input string
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+            *m_TransMgr->GetDoc(), QObject::tr("Set Name"))->SetName(m_DataHandle, inName, true);
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*m_TransMgr->GetDoc(), QObject::tr("Set Name"))
-            ->SetInstancePropertyValue(m_DataHandle, theNamePropHandle,
-                                       std::make_shared<CDataStr>(inName));
+        QString theTitle = QObject::tr("Warning");
+        QString theString = QObject::tr("Object %1 was renamed to %2 because "
+                                        "original name was duplicated "
+                                        "under its parent.")
+                                        .arg(inName.toQString())
+                                        .arg(theBridge->GetName(m_DataHandle).toQString());
+        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString,
+                                                    Qt3DSMessageBox::ICON_WARNING, false);
+        return;
+    }
+
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+        *m_TransMgr->GetDoc(), QObject::tr("Set Name"))->SetName(m_DataHandle, inName, true);
 }
 
 ITimelineItem *Qt3DSDMTimelineItemBinding::GetTimelineItem()
