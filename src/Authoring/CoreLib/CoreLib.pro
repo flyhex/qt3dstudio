@@ -58,7 +58,6 @@ INCLUDEPATH += \
     ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
     ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
     ../../Runtime/Source/Qt3DSStateApplication/Application \
-    ../../3rdparty/Lua/UnknownVersion/src \
     ../../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
     ../../3rdparty/ColladaDOM/1.4.0/dom/include \
@@ -106,10 +105,8 @@ SOURCES += \
     ../Client/Code/Core/Doc/Doc.cpp \
     ../Client/Code/Core/Doc/DocumentBufferCache.cpp \
     ../Client/Code/Core/Doc/DocumentEditor.cpp \
-    ../Client/Code/Core/Doc/DynamicLua.cpp \
     ../Client/Code/Core/Doc/GraphUtils.cpp \
     ../Client/Code/Core/Doc/IComposerSerializer.cpp \
-    ../Client/Code/Core/Doc/PathImportTranslator.cpp \
     ../Client/Code/Core/Doc/RelativePathTools.cpp \
     ../Client/Code/Core/Doc/StudioProjectSettings.cpp \
     ../Client/Code/Core/Doc/Qt3DSDMStudioSystem.cpp \

@@ -110,12 +110,6 @@ struct SPerfLogGeneralEvent2
 {
 };
 
-struct SPerfLogLuaEvent1
-{
-};
-struct SPerfLogLuaMathEvent1
-{
-};
 struct SPerfLogRenderEvent1
 {
 };
@@ -141,11 +135,9 @@ typedef CPerfLogPairedEventWrapper<SPerfLogGeneralEvent1>
     TPerfLogGeneralEvent1; // Frame, update presentations, update scene, render scene
 typedef CPerfLogPairedEventWrapper<SPerfLogGeneralEvent2>
     TPerfLogGeneralEvent2; // Event processing and manager updates,
-// call lua function, frame and slide callbacks,
+// call frame and slide callbacks,
 // opaque, transparent, layer render, finalize drawlist and pick
 // level 2
-typedef CPerfLogPairedEventWrapper<SPerfLogLuaEvent1> TPerfLogLuaEvent1; // Specific lua bindings
-typedef CPerfLogPairedEventWrapper<SPerfLogLuaMathEvent1> TPerfLogLuaMathEvent1; // Lua math events
 typedef CPerfLogPairedEventWrapper<SPerfLogRenderEvent1>
     TPerfLogRenderEvent1; // More detailed rendering
 typedef CPerfLogPairedEventWrapper<SPerfLogSceneEvent1>
@@ -162,8 +154,6 @@ typedef CPerfLogPairedEventWrapper<SPerfLogRenderEvent2> TPerfLogRenderEvent2; /
 #define PerfLogGeneralEvent1(inEventID) TPerfLogGeneralEvent1 thePerfLog(inEventID);
 #define PerfLogGeneralEvent2(inEventID) TPerfLogGeneralEvent2 thePerfLog(inEventID);
 
-#define PerfLogLuaEvent1(inEventID) TPerfLogLuaEvent1 thePerfLog(inEventID);
-#define PerfLogLuaMathEvent1(inEventID) TPerfLogLuaMathEvent1 thePerfLog(inEventID);
 #define PerfLogRenderEvent1(inEventID) TPerfLogRenderEvent1 thePerfLog(inEventID);
 #define PerfLogSceneEvent1(inEventID) TPerfLogSceneEvent1 thePerfLog(inEventID);
 
@@ -174,8 +164,6 @@ typedef CPerfLogPairedEventWrapper<SPerfLogRenderEvent2> TPerfLogRenderEvent2; /
 #define PerfLogGeneralEvent1(inEventID)
 #define PerfLogGeneralEvent2(inEventID)
 
-#define PerfLogLuaEvent1(inEventID)
-#define PerfLogLuaMathEvent1(inEventID)
 #define PerfLogRenderEvent1(inEventID)
 #define PerfLogSceneEvent1(inEventID)
 

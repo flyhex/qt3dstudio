@@ -49,8 +49,6 @@
 //	Namespace
 //==============================================================================
 
-struct lua_State;
-
 typedef void (*qml_Function)(void *inUserData);
 
 class QINDDViewSignalProxy : public QObject
@@ -197,7 +195,6 @@ public:
     virtual bool PeekCustomAction(char *&outElementPath, char *&outActionName) = 0;
     virtual bool RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData) = 0;
     virtual void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument) = 0;
-    virtual bool AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction) = 0;
     virtual qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() = 0;
 
     virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
@@ -310,10 +307,6 @@ public:
     void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument)
     {
         m_NDDView->FireEvent(inEventType, inArgument);
-    }
-    bool AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction)
-    {
-        return m_NDDView->AddGlobalFunction(inFunctionName, inFunction);
     }
     qt3ds::foundation::Option<SPresentationSize> GetPrimaryPresentationSize()
     {

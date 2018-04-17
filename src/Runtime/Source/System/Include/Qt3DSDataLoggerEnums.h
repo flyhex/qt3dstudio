@@ -56,18 +56,11 @@ enum EDataLoggerEvents {
     DATALOGGER_ELEMENTMANAGERUPDATE, /// Time spent in CElementManager::Update doing activate and
                                      /// deactivate scans
     DATALOGGER_ANIMATIONMANAGERUPDATE, /// Time spent in CAnimationManager::Update
-    DATALOGGER_PROCESSFRAMECALLBACKS, /// Time spent in CLuaEngine::ProcessFrameCallbacks
 
     // More detailed presentation update
     DATALOGGER_PROCESSCOMMAND, /// xxx
     DATALOGGER_PROCESSEVENT, /// xxx
     DATALOGGER_PROCESSEVENTBUBBLING, /// xxx
-
-    // CLuaEngine
-    DATALOGGER_SLIDECALLBACKHELPER, /// xxx
-    DATALOGGER_FRAMECALLBACKSHELPER, /// xxx
-    DATALOGGER_CALLLUAFUNCTION, /// xxx
-    DATALOGGER_CALLLUAFUNCTIONONUPDATE, /// xxx
 
     // DATALOGGER_UPDATESCENES
     // CScene::Update
@@ -105,54 +98,11 @@ enum EDataLoggerEvents {
     DATALOGGER_MATERIAL_APPLY, /// asdf
     DATALOGGER_SETSHADER, /// asdf
 
-    // Lua vector math
+    // vector math
     DATALOGGER_VECTOR, /// asdf
     DATALOGGER_MATRIX, /// asdf
     DATALOGGER_CUBICROOT, /// asdf
 
-    // Misc
-    DATALOGGER_LUA_CALCULATEGLOBALTRANSFORM, /// asdf
-    DATALOGGER_LUA_SETLOCALTRANSFORMMATRIX, /// asdf
-    DATALOGGER_LUA_CLONE, /// asdf
-    DATALOGGER_LUA_EVENTREGISTRATION, /// asdf
-    DATALOGGER_LUA_CHANGEREGISTRATION, /// asdf
-    DATALOGGER_LUA_EVENTCALLBACK, /// asdf
-    DATALOGGER_LUA_CHANGECALLBACK, /// asdf
-    DATALOGGER_LUA_FINDCALLBACKDATA, /// asdf
-    DATALOGGER_LUA_SETATTRIBUTE, /// asdf
-    DATALOGGER_LUA_GETATTRIBUTE, /// asdf
-    DATALOGGER_LUA_HASATTRIBUTE, /// asdf
-    DATALOGGER_LUA_GETELEMENT, /// asdf
-
-    DATALOGGER_LUA_GETCURRENTSLIDE, /// asdf
-    DATALOGGER_LUA_GETTIME, /// asdf
-
-    DATALOGGER_LUA_FIRECOMMAND, /// Play, pause, goto time etc
-    DATALOGGER_LUA_GOTOTIME, /// Play
-    DATALOGGER_LUA_GOTOSLIDE, /// Play
-
-    // Lua vector math
-    DATALOGGER_LUA_VECTOR, /// asdf
-    DATALOGGER_LUA_MATRIX, /// asdf
-
-    // Data binding stuff
-    DATALOGGER_LUA_GETRECORD, /// asdf
-    DATALOGGER_LUA_GETRECORDS, /// asdf
-    DATALOGGER_LUA_GETINTERFACE, /// asdf
-    DATALOGGER_LUA_GETRECORDINTERFACE, /// asdf
-    DATALOGGER_LUA_GETFIELDS, /// asdf
-    DATALOGGER_LUA_GETRECORDFIELD, /// asdf
-
-    DATALOGGER_LUA_SCRIPTA, /// asdf
-    DATALOGGER_LUA_SCRIPTB, /// asdf
-    DATALOGGER_LUA_SCRIPTC, /// asdf
-    DATALOGGER_LUA_SCRIPTD, /// asdf
-    DATALOGGER_LUA_SCRIPTE, /// asdf
-    DATALOGGER_LUA_SCRIPTF, /// asdf
-    DATALOGGER_LUA_SCRIPTG, /// asdf
-    DATALOGGER_LUA_SCRIPTH, /// asdf
-    DATALOGGER_LUA_SCRIPTI, /// asdf
-    DATALOGGER_LUA_SCRIPTJ, /// asdf
     //
     DATALOGGER_COUNTERTEST, /// Time spent in counter test code
     DATALOGGER_COUNTERTESTX, /// Time spent in counter test code

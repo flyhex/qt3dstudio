@@ -59,7 +59,6 @@ namespace render {
                 ApplyBlitFramebuffer,
                 ApplyValue,
                 DepthStencil,
-                LuaCommand,
                 AllocateImage,
                 ApplyImageValue,
                 AllocateDataBuffer,
@@ -81,19 +80,15 @@ namespace render {
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyBlitFramebuffer)                                  \
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyValue)                                            \
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(DepthStencil)                                          \
-    QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(LuaCommand)                                            \
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateImage)                                         \
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyImageValue)                                       \
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(AllocateDataBuffer)                                    \
     QT3DS_RENDER_EFFECTS_HANDLE_COMMAND_TYPES(ApplyDataBufferValue)
 
         // All commands need at least two constructors.  One for when they are created that should
-        // setup
-        // all their member variables and one for when we are copying commands from an outside
-        // entity into
-        // the effect system.  We have to re-register strings in that case because we can't assume
-        // the outside
-        // entity was using the same string table we are...
+        // setup all their member variables and one for when we are copying commands from an outside
+        // entity into the effect system.  We have to re-register strings in that case because we
+        // can't assume the outside entity was using the same string table we are...
         struct SCommand
         {
             CommandTypes::Enum m_Type;
@@ -130,8 +125,7 @@ namespace render {
                 clearOrSet(inValue, AllocateBufferFlagValues::SceneLifetime);
             }
             // If isSceneLifetime is unset the buffer is assumed to be frame lifetime and will be
-            // released after this
-            // render operation.
+            // released after this render operation.
             bool IsSceneLifetime() const
             {
                 return this->operator&(AllocateBufferFlagValues::SceneLifetime);
@@ -618,25 +612,6 @@ namespace render {
                 , m_StencilFunction(inOther.m_StencilFunction)
                 , m_Reference(inOther.m_Reference)
                 , m_Mask(inOther.m_Mask)
-            {
-            }
-        };
-
-        struct SLuaCommand : public SCommand
-        {
-            CRegisteredString m_LuaScript;
-            SLuaCommand()
-                : SCommand(CommandTypes::LuaCommand)
-            {
-            }
-            SLuaCommand(CRegisteredString ls)
-                : SCommand(CommandTypes::LuaCommand)
-                , m_LuaScript(ls)
-            {
-            }
-            SLuaCommand(const SLuaCommand &cmd, IStringTable &inTable)
-                : SCommand(CommandTypes::LuaCommand)
-                , m_LuaScript(inTable.RegisterStr(cmd.m_LuaScript))
             {
             }
         };

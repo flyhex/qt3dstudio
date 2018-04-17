@@ -62,13 +62,6 @@ namespace state {
     {
     protected:
         virtual ~IVisualStateInterpreterFactory() {}
-    public:
-        // Create a new state machine
-        // inPath - relative path
-        // ID - state machine id
-        // datamodel - lua function to call to initialize datamodel
-        virtual IStateInterpreter *OnNewStateMachine(const char8_t *inPath, const char8_t *inId,
-                                                     const char8_t *inDatamodel) = 0;
     };
 
     // It is important that the visual state context list the elements it expects to find in a uip

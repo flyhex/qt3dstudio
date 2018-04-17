@@ -405,12 +405,6 @@ public:
     virtual void InternalizePath(TInstanceHandle path) = 0;
 
     static std::shared_ptr<IDOMReader>
-    ParseLuaFile(const Q3DStudio::CFilePath &inFullPathToDocument,
-                 std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
-                 std::shared_ptr<IImportFailedHandler> inHandler,
-                 qt3ds::render::IInputStreamFactory &inInputStreamFactory);
-
-    static std::shared_ptr<IDOMReader>
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,

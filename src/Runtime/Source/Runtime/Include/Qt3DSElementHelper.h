@@ -30,39 +30,28 @@
 
 #pragma once
 
-//==============================================================================
-//	Lua Includes
-//==============================================================================
-#include "Qt3DSLuaIncludes.h"
+namespace qt3ds {
+namespace runtime {
+    class IApplication;
+}
+}
 
-//==============================================================================
-//	Namespace
-//==============================================================================
 namespace Q3DStudio {
 
-//==============================================================================
-/**
- *	Helper class handling scene related operations
- */
-class CLuaSceneHelper
-{
-    //==============================================================================
-    //	Methods
-    //==============================================================================
-private: // Constructors
-    CLuaSceneHelper();
-    CLuaSceneHelper(const CLuaSceneHelper &);
-    CLuaSceneHelper &operator=(const CLuaSceneHelper &);
-    virtual ~CLuaSceneHelper();
+class IPresentation;
 
-public: // Lua Global Functions
-    static int CalculateGlobalOpacity(lua_State *inLuaState);
-    static int CalculateBoundingBox(lua_State *inLuaState);
-    static int CalculateLocalBoundingBox(lua_State *inLuaState);
-    static int CalculateGlobalTransform(lua_State *inLuaState);
-    // static int			Clone( lua_State* inLuaState );
-    static int GetImageInfo(lua_State *inLuaState);
-    static int SetLocalTransformMatrix(lua_State *inLuaState);
+class CElementHelper
+{
+private:
+    CElementHelper();
+    CElementHelper(const CElementHelper &);
+    CElementHelper &operator=(const CElementHelper &);
+    virtual ~CElementHelper();
+
+public:
+    static TElement *GetElement(qt3ds::runtime::IApplication &inApplication,
+                                IPresentation *inDefaultPresentation, const char *inPath,
+                                TElement *inStartElement = nullptr);
 };
 
 } // namespace Q3DStudio

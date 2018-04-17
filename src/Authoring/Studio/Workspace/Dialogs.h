@@ -92,7 +92,6 @@ public:
     static const char **GetImgFileExtensions();
     static const char *GetImportFileExtension();
     static const char *GetMeshFileExtension();
-    static const char *GetLUAFileExtension();
     static const char *GetQmlFileExtension();
     static const char **GetFontFileExtensions();
     static const char **GetEffectFileExtensions();
@@ -108,7 +107,6 @@ public:
     static const wchar_t *GetWideFbxFileExtension();
     static const wchar_t *GetWideImportFileExtension();
     static const wchar_t *GetWideMeshFileExtension();
-    static const wchar_t *GetWideLUAFileExtension();
     static const wchar_t **GetWideFontFileExtensions();
     static const wchar_t **GetWideImgFileExtensions();
     static const wchar_t **GetWideEffectFileExtensions();

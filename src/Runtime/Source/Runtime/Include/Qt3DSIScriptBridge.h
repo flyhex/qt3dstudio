@@ -32,7 +32,6 @@
 #include "Qt3DSIComponentManager.h"
 #include "EASTL/vector.h"
 #include "EASTL/string.h"
-#include "Qt3DSLuaIncludes.h"
 #include "foundation/Qt3DSRefCounted.h"
 //==============================================================================
 //	Namespace
@@ -56,7 +55,7 @@ namespace render {
 }
 }
 
-struct lua_State;
+struct script_State;
 
 namespace Q3DStudio {
 
@@ -72,12 +71,12 @@ class IPresentation;
  *	@brief		Callback and load interface for a script engine.
  */
 
-class ILuaScriptTableProvider
+class IScriptTableProvider
 {
 protected:
-    virtual ~ILuaScriptTableProvider() {}
+    virtual ~IScriptTableProvider() {}
 public:
-    virtual void CreateTable(lua_State *inState) = 0;
+    virtual void CreateTable(script_State *inState) = 0;
 };
 
 struct SScriptEngineGotoSlideArgs
@@ -86,7 +85,7 @@ struct SScriptEngineGotoSlideArgs
     //-2 means previous, -1 means next, 1-N means slide
     const char *m_PlaythroughTo;
     TULongOption m_StartTime;
-    FLOAT m_Rate;
+    float m_Rate;
     bool m_Reverse;
     TBoolOption m_Paused;
     SScriptEngineGotoSlideArgs()
@@ -107,7 +106,7 @@ public:
     virtual ~CScriptEngineCallFunctionArgRetriever() {}
     // Retrieve argument
     // Return value: -1 error; otherwise it indicates argument count
-    virtual int RetrieveArgument(lua_State *inState);
+    virtual int RetrieveArgument(script_State *inState);
     virtual eastl::string GetArgDescription();
 
 protected:
@@ -133,7 +132,7 @@ public: // Settings
     virtual void SetApplication(qt3ds::runtime::IApplication &inApplication) = 0;
 
 public: // Scripts
-    // Both loads lua script, create an self table -> scriptIndex in a behaviors table
+    // Both loads script, create an self table -> scriptIndex in a behaviors table
     // LoadScript goes further by registering scriptIndex->inPresentation, and inOwner->m_ScriptID=
     // scriptIndex
     virtual void LoadScript(IPresentation *inPresentation, TElement *inOwner,
@@ -157,9 +156,8 @@ public: // Custom Actions
 
 public: // Elements
     // Use inProvider to create a new table and associate with inElement: currently a render plugin
-    // element
-    // this mimics render plugin as an behaviour element
-    virtual void SetTableForElement(TElement &inElement, ILuaScriptTableProvider &inProvider) = 0;
+    // element this mimics render plugin as an behavior element
+    virtual void SetTableForElement(TElement &inElement, IScriptTableProvider &inProvider) = 0;
     virtual void SetAttribute(const char *element, const char *attName, const char *value) = 0;
     virtual void FireEvent(const char *element, const char *evtName) = 0;
     virtual void SetDataInputValue(const QString &name, const QVariant &value) = 0;

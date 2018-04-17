@@ -36,28 +36,20 @@
 #include "Qt3DSKernelTypes.h"
 
 namespace Q3DStudio {
-//==============================================================================
-/**
-*   Helper class handling element operations
-*/
+
 class CQmlElementHelper
 {
-    //==============================================================================
-    //  Methods
-    //==============================================================================
-private: // Constructors
+private:
     CQmlElementHelper();
     virtual ~CQmlElementHelper();
 
-public: // Lua Global Functions
+public:
     static TElement *GetElement(qt3ds::runtime::IApplication &inApplication,
                                 IPresentation *inDefaultPresentation, const char *inPath,
                                 TElement *inStartElement = NULL);
 
-    // Set attribute
     static bool SetAttribute(TElement *inElement, const char *inAttribute, const void *value,
                              bool inDelay);
-    // Get attribute
     static bool GetAttribute(TElement *inElement, const char *inAttribute, void *value);
 };
 }

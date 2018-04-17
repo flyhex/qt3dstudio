@@ -54,7 +54,6 @@ class NVFoundationBase;
 
 namespace Q3DStudio {
 using std::shared_ptr;
-class IDynamicLua;
 
 typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, qt3dsdm::Qt3DSDMInstanceHandle>>
     TSlideInstanceList;
@@ -239,9 +238,6 @@ public:
     // Must not be a master slide.  Used during duplicate slide.
     virtual std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(Qt3DSDMSlideHandle inSlide) = 0;
 
-    // Don't release this, it is owned and cached by the document.  Also, reset top to 0 with a
-    // scope, please.
-    virtual IDynamicLua *GetLuaContext() = 0;
     virtual qt3ds::NVFoundationBase &GetFoundation() = 0;
 };
 

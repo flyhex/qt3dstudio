@@ -35,7 +35,6 @@ STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
     -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
-    -lLua$$qtPlatformTargetSuffix() \
     $$END_ARCHIVE
 
 # On non-windows systems link the whole static archives and do not put them

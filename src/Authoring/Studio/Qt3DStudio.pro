@@ -84,7 +84,6 @@ linux {
 
 STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
-    -lLua$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lpcre$$qtPlatformTargetSuffix() \
     -lTinyXML$$qtPlatformTargetSuffix() \

@@ -46,19 +46,8 @@ SOURCES += \
     ../Source/Runtime/Source/Qt3DSEventCallbacks.cpp \
     ../Source/Runtime/Source/Qt3DSInputEngine.cpp \
     ../Source/Runtime/Source/Qt3DSLogicSystem.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaAxis.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaButton.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaColor.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaCommandHelper.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaElementHelper.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaEngine.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaEventHelper.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaHelper.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaKeyboard.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaMatrix.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaRotation.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaSceneHelper.cpp \
-    ../Source/Runtime/Source/Qt3DSLuaVector.cpp \
+    ../Source/Runtime/Source/Qt3DSCommandHelper.cpp \
+    ../Source/Runtime/Source/Qt3DSElementHelper.cpp \
     ../Source/Runtime/Source/Qt3DSOutputMemoryStream.cpp \
     ../Source/Runtime/Source/Qt3DSParametersSystem.cpp \
     ../Source/Runtime/Source/Qt3DSPresentation.cpp \
@@ -157,19 +146,15 @@ SOURCES += \
     ../Source/System/Source/Qt3DSTypes.cpp \
     ../Source/System/Source/Qt3DSVector3.cpp \
     ../Source/Qt3DSStateApplication/Application/Qt3DSStateApplication.cpp \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSLuaDatamodelCache.cpp \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSLuaSideDebugger.cpp \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSSceneGraphRuntimeDebugger.cpp \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDataTest.cpp \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDebuggedInterpreter.cpp \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDebugger.cpp \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDebuggerListener.cpp \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDebugStreams.cpp \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateLuaTest.cpp \
     ../Source/Qt3DSStateApplication/Source/Qt3DSStateContext.cpp \
     ../Source/Qt3DSStateApplication/Source/Qt3DSStateExecutionContext.cpp \
     ../Source/Qt3DSStateApplication/Source/Qt3DSStateInterpreter.cpp \
-    ../Source/Qt3DSStateApplication/Source/Qt3DSStateLuaScriptContext.cpp \
     ../Source/Qt3DSStateApplication/Source/Qt3DSStateVisualBindingContext.cpp \
     ../Source/Qt3DSStateApplication/Source/Qt3DSStateXMLIO.cpp \
     ../Source/UIPParser/Source/Qt3DSUIPParserActionHelper.cpp \
@@ -259,19 +244,8 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSEventCallbacks.h \
     ../Source/Runtime/Include/Qt3DSInputEngine.h \
     ../Source/Runtime/Include/Qt3DSLogicSystem.h \
-    ../Source/Runtime/Include/Qt3DSLuaAxis.h \
-    ../Source/Runtime/Include/Qt3DSLuaButton.h \
-    ../Source/Runtime/Include/Qt3DSLuaColor.h \
-    ../Source/Runtime/Include/Qt3DSLuaCommandHelper.h \
-    ../Source/Runtime/Include/Qt3DSLuaElementHelper.h \
-    ../Source/Runtime/Include/Qt3DSLuaEngine.h \
-    ../Source/Runtime/Include/Qt3DSLuaEventHelper.h \
-    ../Source/Runtime/Include/Qt3DSLuaHelper.h \
-    ../Source/Runtime/Include/Qt3DSLuaKeyboard.h \
-    ../Source/Runtime/Include/Qt3DSLuaMatrix.h \
-    ../Source/Runtime/Include/Qt3DSLuaRotation.h \
-    ../Source/Runtime/Include/Qt3DSLuaSceneHelper.h \
-    ../Source/Runtime/Include/Qt3DSLuaVector.h \
+    ../Source/Runtime/Include/Qt3DSCommandHelper.h \
+    ../Source/Runtime/Include/Qt3DSElementHelper.h \
     ../Source/Runtime/Include/Qt3DSOutputMemoryStream.h \
     ../Source/Runtime/Include/Qt3DSParametersSystem.h \
     ../Source/Runtime/Include/Qt3DSPresentation.h \
@@ -288,7 +262,6 @@ HEADERS += \
     ../Source/Runtime/Include/Qt3DSIStateful.h \
     ../Source/Runtime/Include/Qt3DSIText.h \
     ../Source/Runtime/Include/Qt3DSKernelTypes.h \
-    ../Source/Runtime/Include/Qt3DSLuaIncludes.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCamera.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderCustomMaterial.h \
     ../Source/Qt3DSRuntimeRender/GraphObjects/Qt3DSRenderDefaultMaterial.h \
@@ -430,9 +403,6 @@ HEADERS += \
     ../Source/System/Include/Qt3DSCircularArray.inl \
     ../Source/System/Include/Qt3DSFixedArray.inl \
     ../Source/Qt3DSStateApplication/Application/Qt3DSStateApplication.h \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSLuaDebugger.h \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSLuaDebuggerImpl.h \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSLuaDebuggerProtocol.h \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSSceneGraphDebugger.h \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSSceneGraphDebuggerProtocol.h \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSSceneGraphDebuggerValue.h \
@@ -441,14 +411,12 @@ HEADERS += \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDebuggerValues.h \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateDebugStreams.h \
     ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateTest.h \
-    ../Source/Qt3DSStateApplication/Debugger/Qt3DSStateTestCommon.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSState.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateContext.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateExecutionContext.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateExecutionTypes.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateIdValue.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateInterpreter.h \
-    ../Source/Qt3DSStateApplication/Include/Qt3DSStateLuaScriptContext.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateScriptContext.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateSharedImpl.h \
     ../Source/Qt3DSStateApplication/Include/Qt3DSStateSignalConnection.h \
@@ -673,12 +641,10 @@ SOURCES += \
 SOURCES += \
     ../Source/Qt3DSEvent/Source/EventFactory.cpp \
     ../Source/Qt3DSEvent/Source/EventPoller.cpp \
-    ../Source/Qt3DSEvent/Source/EventPollingSystemLuaBinding.cpp \
     ../Source/Qt3DSEvent/Source/EventSystemC.cpp
 
 HEADERS += \
     ../Source/Qt3DSEvent/InternalInclude/EventPollingSystem.h \
-    ../Source/Qt3DSEvent/InternalInclude/EventPollingSystemLuaBinding.h \
     ../Source/Qt3DSEvent/Include/EventSystem.h \
     ../Source/Qt3DSEvent/Include/EventSystemC.h
 

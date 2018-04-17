@@ -117,17 +117,6 @@ Q_DECL_EXPORT void Render(long inHostWidth, long inHostHeight, long inDrawTime);
 
 //==============================================================================
 /**
- *	Send a message comprising of 2 longs into the plugin.
- *	This can be invoked from Lua script using 'sendPluginMessage'.
- *	@param	inArg1	first argument
- *	@param	inArg2	second argument
- *	@return EDLLSTATUS_OK if successful
- */
-typedef long (*PROC_SendPluginMessage)(long inArg1, long inArg2);
-Q_DECL_EXPORT long SendPluginMessage(long inArg1, long inArg2);
-
-//==============================================================================
-/**
  *	Perform plugin uninitialization.
  *	@return EDLLSTATUS_OK if successful
  */

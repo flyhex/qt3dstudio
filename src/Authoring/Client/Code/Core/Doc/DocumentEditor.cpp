@@ -61,7 +61,6 @@
 #include "IComposerSerializer.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "Qt3DSDMMetaData.h"
-#include "DocumentResourceManagerLuaParser.h"
 #include "DocumentResourceManagerScriptParser.h"
 #include "DocumentResourceManagerRenderPluginParser.h"
 #include "DocumentResourceManagerCustomMaterialParser.h"
@@ -79,7 +78,6 @@
 #include "Qt3DSDMGuides.h"
 #include "Qt3DSRenderPathManager.h"
 #include "Qt3DSImportPath.h"
-#include "DynamicLua.h"
 #include "Dialogs.h"
 #include "foundation/Qt3DSLogging.h"
 #include <QtQml/qqmlengine.h>
@@ -87,12 +85,6 @@
 #include <QtCore/qdir.h>
 #include <unordered_set>
 #include "Runtime/Include/q3dsqmlbehavior.h"
-
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
 
 namespace {
 
@@ -104,17 +96,6 @@ using namespace qt3ds;
 using namespace qt3ds::foundation;
 using std::unordered_map;
 
-inline float ToDeg(float numberRad)
-{
-    // NVMathUtil.h. can't include it due to compile errors
-    return (QT3DSF32)57.29577951308232286465 * numberRad;
-}
-
-inline SFloat3 ToDataModel(QT3DSVec3 inData)
-{
-    return SFloat3(inData.x, inData.y, inData.z);
-}
-
 inline SFloat2 ToDataModel(QT3DSVec2 inData)
 {
     return SFloat2(inData.x, inData.y);
@@ -123,20 +104,6 @@ inline SFloat2 ToDataModel(QT3DSVec2 inData)
 inline QT3DSVec2 ToFnd(SFloat2 value)
 {
     return QT3DSVec2(value.m_Floats[0], value.m_Floats[1]);
-}
-
-inline QT3DSF32 ToDataModel(Option<QT3DSF32> inValue, QT3DSF32 inDefault)
-{
-    if (inValue.hasValue())
-        return *inValue;
-    return inDefault;
-}
-
-inline bool ToDataModel(Option<bool> inValue, bool inDefault)
-{
-    if (inValue.hasValue())
-        return *inValue;
-    return inDefault;
 }
 
 struct ScopedBoolean
@@ -174,7 +141,6 @@ struct SImportXmlErrorHandler : public CXmlErrorHandler
 
 class CDocEditor : public Q3DStudio::IInternalDocumentEditor
 {
-
     CDoc &m_Doc;
     Q3DStudio::CGraph &m_AssetGraph;
     CStudioSystem &m_StudioSystem;
@@ -199,7 +165,6 @@ class CDocEditor : public Q3DStudio::IInternalDocumentEditor
     Q3DStudio::Foundation::SStudioFoundation m_Foundation;
     TStreamFactoryPtr m_InputStreamFactory;
     std::unordered_map<long, QT3DSU32> m_GraphOrderMap;
-    IDynamicLua *m_LuaState;
 
 public:
     CDocEditor(CDoc &inDoc)
@@ -222,8 +187,6 @@ public:
         , m_StringTable(m_DataCore.GetStringTable())
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
         , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
-        , m_LuaState(NULL)
-
     {
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         IDirectoryWatchingSystem *theSystem(m_Doc.GetDirectoryWatchingSystem());
@@ -237,9 +200,6 @@ public:
     }
     virtual ~CDocEditor()
     {
-        if (m_LuaState)
-            m_LuaState->Release();
-        m_LuaState = NULL;
     }
     ///////////////////////////////////////////////////////////////////
     // IDocumentReader
@@ -832,12 +792,6 @@ public:
         WriteWriterToFile(*theWriter, L"Slide");
 #endif
         return theWriter->CreateDOMReader();
-    }
-
-    IDynamicLua *GetLuaContext() override
-    {
-        EnsureLuaState();
-        return m_LuaState;
     }
 
     qt3ds::NVFoundationBase &GetFoundation() override { return *m_Foundation.m_Foundation; }
@@ -2703,8 +2657,7 @@ public:
             ? inParent
             : Qt3DSDMInstanceHandle(m_AssetGraph.GetParent(inParent));
         // We have to pass in the real parent to the editor interface so that object lifetimes can
-        // be
-        // setup correctly as the import tree is being built.
+        // be setup correctly as the import tree is being built.
         std::shared_ptr<IComposerEditorInterface> importToComposer =
             IComposerEditorInterface::CreateEditorInterface(*this, theRealParent, inRoot, inSlide,
                                                             inDocDir, inImportFilePath, inStartTime,
@@ -2938,12 +2891,6 @@ public:
             return realloc(ptr, nsize);
     }
 
-    QString LoadLuaFile(const CFilePath &inFile)
-    {
-        Q_UNUSED(inFile)
-        return QString();
-    }
-
     QString LoadScriptFile(const CFilePath &inFile)
     {
         QString retval;
@@ -3173,35 +3120,6 @@ public:
         }
         return 0;
     }
-
-    struct CLuaDynamicInstanceLoader : public ISpecificDynamicInstance
-    {
-        CDocEditor &m_Editor;
-        CLuaDynamicInstanceLoader(CDocEditor &ed)
-            : m_Editor(ed)
-        {
-        }
-
-        Qt3DSDMInstanceHandle GetRootInstance() override
-        {
-            return m_Editor.m_Bridge.GetObjectDefinitions().m_Behavior.m_Instance;
-        }
-        // returns an error if there was one.  Empty string means no error.
-        QString LoadInstanceData(const CFilePath &inAbsPath) override
-        {
-            return m_Editor.LoadLuaFile(inAbsPath);
-        }
-
-        virtual std::shared_ptr<IDOMReader>
-        ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
-                                std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
-                                std::shared_ptr<IImportFailedHandler> inHandler,
-                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) override
-        {
-            return IDocumentEditor::ParseLuaFile(inFullPathToDocument, inStringTable, inHandler,
-                                                 inInputStreamFactory);
-        }
-    };
 
     struct CScriptDynamicInstanceLoader : public ISpecificDynamicInstance
     {
@@ -3450,32 +3368,6 @@ public:
         }
     }
 
-    static void *LuaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
-    {
-        CDocEditor *ctx = reinterpret_cast<CDocEditor *>(ud);
-        if (nsize == 0) {
-            if (ptr)
-                ctx->m_Foundation.m_AllocatorCallback->deallocate(ptr);
-            return NULL;
-        } else {
-            if (nsize < osize && ptr)
-                return ptr;
-
-            void *newMem = ctx->m_Foundation.m_AllocatorCallback->allocate(nsize, "lua memory",
-                                                                           __FILE__, __LINE__);
-            if (osize && ptr) {
-                size_t copyAmt = NVMin(osize, nsize);
-                memCopy(newMem, ptr, (QT3DSU32)copyAmt);
-                ctx->m_Foundation.m_AllocatorCallback->deallocate(ptr);
-            }
-            return newMem;
-        }
-    }
-
-    void EnsureLuaState()
-    {
-    }
-
     void SetUniqueName(TInstanceHandle inItem, const char8_t *inNameBase,
                        eastl::vector<Q3DStudio::CString> &inExistingNames)
     {
@@ -3492,205 +3384,6 @@ public:
         }
         SetName(inItem, theName, false);
         inExistingNames.push_back(theName);
-    }
-
-    void ParseSVGGroupChildren(TInstanceHandle inNewItem, TSlideHandle inSlide)
-    {
-        IDynamicLua::Scope __itemScope(*m_LuaState);
-        QT3DSI32 childIndex = 1;
-        eastl::vector<Q3DStudio::CString> existingNames;
-        for (bool success = m_LuaState->GetChildFromTopOfStackTable(childIndex); success;
-             ++childIndex, success = m_LuaState->GetChildFromTopOfStackTable(childIndex)) {
-            ParseSVGItem(inNewItem, inSlide, existingNames);
-            m_LuaState->SetTop(__itemScope.m_Top);
-        }
-    }
-
-    TInstanceHandle ParseSVGGroup(TInstanceHandle inParent, TSlideHandle inSlide,
-                                  eastl::vector<Q3DStudio::CString> &inExistingNames)
-    {
-        eastl::string itemType = m_LuaState->StringFromTopOfStackTable("TYPE");
-        eastl::string itemName = m_LuaState->StringFromTopOfStackTable("name");
-        if (itemName.size() == 0)
-            itemName = "Group";
-        // bool success = m_LuaState->GetChildFromTopOfStackTable( 1 );
-        TInstanceHandle retval =
-            CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Group, inParent, inSlide);
-        SetUniqueName(retval, itemName.c_str(), inExistingNames);
-        ParseSVGGroupChildren(retval, inSlide);
-        return retval;
-    }
-
-    TInstanceHandle ParseSVGPath(TInstanceHandle inParent, TSlideHandle inSlide,
-                                 eastl::vector<Q3DStudio::CString> &inExistingNames)
-    {
-        QT3DSF32 strokeWidth = ToDataModel(m_LuaState->NumberFromTopOfStackTable("stroke-width"), 1.0f);
-        QT3DSF32 pathOpacity = ToDataModel(m_LuaState->NumberFromTopOfStackTable("opacity"), 100.0f);
-        QT3DSF32 fillOpacity = ToDataModel(m_LuaState->NumberFromTopOfStackTable("fill-opacity"), 100.0f);
-        QT3DSF32 strokeOpacity =
-            ToDataModel(m_LuaState->NumberFromTopOfStackTable("stroke-opacity"), 100.0f);
-        Option<QT3DSVec3> fillColor = m_LuaState->Vec3FromTopOfStackTable("fill");
-        Option<QT3DSVec3> strokeColor = m_LuaState->Vec3FromTopOfStackTable("stroke");
-        eastl::string pathName = m_LuaState->StringFromTopOfStackTable("name");
-        QT3DSI32 childIndex = 1;
-        eastl::vector<Q3DStudio::CString> existingNames;
-        bool hasStroke = strokeColor.hasValue();
-        bool hasFill = fillColor.hasValue();
-        if (!hasStroke && !hasFill)
-            return TInstanceHandle();
-        TInstanceHandle retval =
-            CreateSceneGraphInstance(ComposerObjectTypes::Path, inParent, inSlide);
-        SetUniqueName(retval, pathName.c_str(), inExistingNames);
-        CreateSceneGraphInstance(ComposerObjectTypes::Material, retval, inSlide);
-        {
-            TInstanceHandle strokeMaterial = m_AssetGraph.GetChild(retval, 0);
-            SetName(strokeMaterial, L"Stroke");
-        }
-        eastl::vector<qt3ds::QT3DSVec2> thePoints;
-        qt3dsdm::ISlideCore &theSlideCore(
-            *m_StudioSystem.GetFullSystem()->GetCoreSystem()->GetTransactionlessSlideCore());
-        SComposerObjectDefinitions &theDefs(m_Bridge.GetObjectDefinitions());
-        for (bool success = m_LuaState->GetChildFromTopOfStackTable(childIndex); success;
-             ++childIndex, success = m_LuaState->GetChildFromTopOfStackTable(childIndex)) {
-            TInstanceHandle subpath =
-                CreateSceneGraphInstance(ComposerObjectTypes::SubPath, retval, inSlide);
-            wchar_t theNameBuffer[256];
-            swprintf(theNameBuffer, 256, L"SubPath_%d", childIndex);
-            SetName(subpath, theNameBuffer);
-            bool isClosed = ToDataModel(m_LuaState->BooleanFromTopOfStackTable("closepath"), true);
-            theSlideCore.ForceSetInstancePropertyValue(inSlide, subpath, theDefs.m_SubPath.m_Closed,
-                                                       isClosed);
-            // Note that this pops the child off the stack so it is no longer available as it is the
-            // first argument
-            // to the coordinates function.
-            if (!m_LuaState->ExecuteFunction("SVGPARSER", "coordinates", 1, 1))
-                continue;
-            int theTop1 = m_LuaState->GetTop();
-            thePoints.clear();
-            m_LuaState->ParseFloatingPointPairArray(thePoints);
-            int theTop2 = m_LuaState->GetTop();
-            QT3DSU32 numAnchors = (thePoints.size() / 3) + 1;
-            if (thePoints.size() == 0)
-                numAnchors = 0;
-            // Update points so that control points are relative to their respective anchors
-            for (QT3DSU32 anchorIdx = 0, anchorEnd = numAnchors; anchorIdx < anchorEnd; ++anchorIdx) {
-                QT3DSU32 pointIdx = anchorIdx * 3;
-                QT3DSVec2 position = thePoints[pointIdx];
-                if (pointIdx) {
-                    QT3DSVec2 incomingControl = thePoints[pointIdx - 1];
-                    incomingControl -= position;
-                    thePoints[pointIdx - 1] = incomingControl;
-                }
-                if (anchorIdx < (numAnchors - 1)) {
-                    QT3DSVec2 outgoingControl = thePoints[pointIdx + 1];
-                    outgoingControl -= position;
-                    thePoints[pointIdx + 1] = outgoingControl;
-                }
-            }
-
-            for (QT3DSU32 idx = 0, end = numAnchors; idx < end; ++idx) {
-                qt3dsdm::Qt3DSDMInstanceHandle anchorCanon =
-                    m_MetaData.GetCanonicalInstanceForType(L"PathAnchorPoint");
-                TInstanceHandle anchor = m_DataCore.CreateInstance();
-                TInstanceHandle theDerivationParent(anchorCanon);
-                m_DataCore.DeriveInstance(anchor, theDerivationParent);
-                if (inSlide.Valid())
-                    m_SlideSystem.AssociateInstanceWithSlide(inSlide, anchor);
-                m_AssetGraph.AddChild(subpath, anchor);
-                QT3DSU32 pointIdx = idx * 3;
-                QT3DSVec2 position(thePoints[pointIdx]);
-                QT3DSVec2 incoming(0, 0);
-                QT3DSVec2 outgoing(0, 0);
-                Option<float> angle;
-
-                if (idx > 0) {
-                    incoming = QT3DSVec2(thePoints[pointIdx - 1]);
-                    if (incoming.magnitudeSquared() > .001f)
-                        angle = ToDeg(NVAtan2(incoming.y, incoming.x));
-                }
-
-                if (idx < (numAnchors - 1)) {
-                    outgoing = QT3DSVec2(thePoints[pointIdx + 1]);
-                    if (!idx || (angle.hasValue() == false)) {
-                        angle = ToDeg(NVAtan2(outgoing.y, outgoing.x)) + 180.0f;
-                    }
-                }
-
-                if (!angle.hasValue())
-                    angle = 0.0f;
-
-                float incomingdistance = incoming.magnitude();
-                float outgoingdistance = outgoing.magnitude();
-
-                theSlideCore.ForceSetInstancePropertyValue(
-                    inSlide, anchor, theDefs.m_PathAnchorPoint.m_Position.m_Property,
-                    SFloat2(position.x, position.y));
-
-                theSlideCore.ForceSetInstancePropertyValue(
-                    inSlide, anchor, theDefs.m_PathAnchorPoint.m_IncomingAngle.m_Property, *angle);
-
-                theSlideCore.ForceSetInstancePropertyValue(
-                    inSlide, anchor, theDefs.m_PathAnchorPoint.m_IncomingDistance.m_Property,
-                    incomingdistance);
-
-                theSlideCore.ForceSetInstancePropertyValue(
-                    inSlide, anchor, theDefs.m_PathAnchorPoint.m_OutgoingDistance.m_Property,
-                    outgoingdistance);
-            }
-            int theTop = m_LuaState->GetTop();
-            (void)theTop;
-        }
-
-        theSlideCore.ForceSetInstancePropertyValue(
-            inSlide, retval, m_Bridge.GetObjectDefinitions().m_Node.m_Opacity, pathOpacity);
-        theSlideCore.ForceSetInstancePropertyValue(
-            inSlide, retval, m_Bridge.GetObjectDefinitions().m_Path.m_Width, strokeWidth);
-
-        if (hasFill) {
-            theSlideCore.ForceSetInstancePropertyValue(
-                inSlide, retval, m_Bridge.GetObjectDefinitions().m_Path.m_PathType,
-                TDataStrPtr(new CDataStr(L"Painted")));
-            QT3DSI32 fillMaterialIndex = 1;
-            if (hasStroke == false) {
-                fillMaterialIndex = 0;
-                SetInstancePropertyValue(retval,
-                                         m_Bridge.GetObjectDefinitions().m_Path.m_PaintStyle,
-                                         TDataStrPtr(new CDataStr(L"Filled")));
-            } else
-                SetInstancePropertyValue(retval,
-                                         m_Bridge.GetObjectDefinitions().m_Path.m_PaintStyle,
-                                         TDataStrPtr(new CDataStr(L"Filled and Stroked")));
-
-            qt3dsdm::Qt3DSDMInstanceHandle theFillMaterial =
-                m_AssetGraph.GetChild(retval, fillMaterialIndex);
-            theSlideCore.ForceSetInstancePropertyValue(
-                inSlide, theFillMaterial, m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseColor,
-                ToDataModel(*fillColor));
-            theSlideCore.ForceSetInstancePropertyValue(
-                inSlide, theFillMaterial, m_Bridge.GetObjectDefinitions().m_Material.m_Opacity,
-                fillOpacity);
-        }
-        if (hasStroke) {
-            qt3dsdm::Qt3DSDMInstanceHandle theStrokeMaterial = m_AssetGraph.GetChild(retval, 0);
-            theSlideCore.ForceSetInstancePropertyValue(
-                inSlide, theStrokeMaterial,
-                m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseColor, ToDataModel(*strokeColor));
-            theSlideCore.ForceSetInstancePropertyValue(
-                inSlide, theStrokeMaterial, m_Bridge.GetObjectDefinitions().m_Material.m_Opacity,
-                strokeOpacity);
-        }
-        return retval;
-    }
-
-    TInstanceHandle ParseSVGItem(TInstanceHandle inParent, TSlideHandle inSlide,
-                                 eastl::vector<Q3DStudio::CString> &inExistingNames)
-    {
-        IDynamicLua::Scope __itemScope(*m_LuaState);
-        eastl::string objType = m_LuaState->StringFromTopOfStackTable("TYPE");
-        if (objType == "group")
-            return ParseSVGGroup(inParent, inSlide, inExistingNames);
-        else
-            return ParseSVGPath(inParent, inSlide, inExistingNames);
     }
 
     virtual TInstanceHandle LoadPathBuffer(const Q3DStudio::CString &inFullPathToDocument,
@@ -3719,50 +3412,6 @@ public:
         SetInstancePropertyValue(retval, m_Bridge.GetObjectDefinitions().m_Asset.m_SourcePath,
                                  TDataStrPtr(new CDataStr(relPath.c_str())));
         FinalizeAddOrDrop(retval, inParent, inDropType, CPt(), inStartTime == -1, false);
-        return retval;
-    }
-
-    virtual TInstanceHandle LoadPath(const Q3DStudio::CString &inFullPathToDocument,
-                                     TInstanceHandle inParent, TSlideHandle inSlide,
-                                     DocumentEditorInsertType::Enum inDropType, long inStartTime)
-    {
-        std::shared_ptr<IImportFailedHandler> theHandler(m_Doc.GetImportFailedHandler());
-        eastl::vector<QT3DSU8> fileData;
-        {
-            CFileSeekableIOStream theFile(inFullPathToDocument, FileReadFlags());
-            if (theFile.IsOpen()) {
-                QT3DSU8 buf[1024];
-
-                for (QT3DSU32 amountRead = theFile.Read(toDataRef(buf, 1024)); amountRead;
-                     amountRead = theFile.Read(toDataRef(buf, 1024))) {
-                    fileData.insert(fileData.end(), buf, buf + amountRead);
-                }
-            }
-        }
-        if (fileData.size() == 0)
-            return TInstanceHandle();
-
-        fileData.push_back(0);
-        fileData.push_back(0); // just in case utf-16
-        EnsureLuaState();
-        IDynamicLua::Scope __parseScope(*m_LuaState);
-        eastl::vector<QT3DSVec2> thePoints;
-        TInstanceHandle retval;
-        if (m_LuaState->ExecuteFunction("SVGPARSER", "pathsfromxml",
-                                        (const char8_t *)fileData.data())) {
-            // Build list of names already under parent.
-            eastl::vector<Q3DStudio::CString> existingNames;
-            for (QT3DSI32 idx = 0, end = m_AssetGraph.GetChildCount(inParent); idx < end; ++idx) {
-                existingNames.push_back(GetName(m_AssetGraph.GetChild(inParent, idx)));
-            }
-            TInstanceHandle newItem = ParseSVGItem(inParent, inSlide, existingNames);
-            if (!retval.Valid())
-                retval = newItem;
-        }
-        if (retval.Valid()) {
-            FinalizeAddOrDrop(retval, inParent, inDropType, CPt(), inStartTime == -1, false);
-        }
-
         return retval;
     }
 
@@ -3797,14 +3446,6 @@ public:
         case DocumentEditorFileType::Material:
             return LoadCustomMaterial(inFullPathToDocument, inParent, inSlide, inDropType,
                                       inStartTime);
-        case DocumentEditorFileType::Path: {
-            Q3DStudio::CFilePath thePath(inFullPathToDocument);
-            if (thePath.GetExtension().CompareNoCase("path")) {
-                return LoadPathBuffer(inFullPathToDocument, inParent, inSlide, inDropType,
-                                      inStartTime);
-            } else
-                return LoadPath(inFullPathToDocument, inParent, inSlide, inDropType, inStartTime);
-        }
         default: {
             if (theHandler)
                 theHandler->DisplayImportFailed(inFullPathToDocument.toQString(),
@@ -4689,19 +4330,6 @@ Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
                       thePackedGuid.Data4);
     inDataCore.SetInstancePropertyValue(retval, theDefs.m_Guided.m_GuidProp, theLong4Id);
     return retval;
-}
-
-std::shared_ptr<IDOMReader>
-IDocumentEditor::ParseLuaFile(const CFilePath &inFullPathToDocument,
-                              std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
-                              std::shared_ptr<IImportFailedHandler> inHandler,
-                              qt3ds::render::IInputStreamFactory &inInputStreamFactory)
-{
-    Q_UNUSED(inFullPathToDocument)
-    Q_UNUSED(inStringTable)
-    Q_UNUSED(inHandler)
-    Q_UNUSED(inInputStreamFactory)
-    return nullptr;
 }
 
 std::shared_ptr<IDOMReader>

@@ -209,7 +209,6 @@ public:
     bool PeekCustomAction(char *&outElementPath, char *&outActionName) override;
     bool RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData) override;
     void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument) override;
-    bool AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction) override;
     qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() override;
 
     void BootupPreGraphicsInitObjects();
@@ -621,20 +620,6 @@ void CNDDView::FireEvent(const TEventCommandHash inEventType, eastl::string inAr
     }
 }
 
-bool CNDDView::AddGlobalFunction(const CHAR *inFunctionName, lua_CFunction inFunction)
-{
-    bool theResult = false;
-    if (m_Presentation) {
-        if (m_Application) {
-            // this is lua specific
-            Q3DStudio::CLuaEngine &theScriptEngine
-                    = static_cast<Q3DStudio::CLuaEngine &>(m_RuntimeFactoryCore->GetScriptEngine());
-            theScriptEngine.AddGlobalFunction(inFunctionName, inFunction);
-            theResult = true;
-        }
-    }
-    return theResult;
-}
 qt3ds::foundation::Option<SPresentationSize> CNDDView::GetPresentationSize()
 {
     if (m_Application) {

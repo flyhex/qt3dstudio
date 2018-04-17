@@ -35,7 +35,7 @@
 #include "foundation/Qt3DSTime.h"
 #include "Qt3DSStateDebugger.h"
 
-struct lua_State;
+struct script_State;
 
 namespace qt3ds {
 namespace state {
@@ -89,50 +89,11 @@ namespace state {
                                  IMultiProtocolSocketListener *protocolListener);
         };
 
-        struct LuaStreamError
-        {
-            enum _Enum {
-                NoLuaError = 0,
-                Timeout,
-                Closed,
-            };
-        };
-
         class CProtocolNames
         {
         public:
             static const char *getMobdebugProtocolName() { return "mobdebug"; }
             static const char *getSCXMLProtocolName() { return "scxml"; }
-        };
-
-        // Maintains a queue of messages and runs through them when asked.
-        // Mirrors the lua socket design and names so that systems built on lua
-        // socket can be retrofitted to channel through a multiple protocol stream
-        // as easily as possible.
-        class IMultiProtocolStreamLuaCompat : public NVRefCounted
-        {
-        public:
-            // timeout is just used to indicate if this should be
-            // blocking or not.
-            virtual void settimeout(QT3DSU32 value = 0) = 0;
-            virtual QT3DSU32 gettimeout() = 0;
-            // returns next line of data
-            // or error.  If error, retval.second will be false.
-            // reads a line at a time.
-            virtual eastl::pair<const char *, LuaStreamError::_Enum> receive(QT3DSU32 numBytes) = 0;
-            virtual void send(const char *data) = 0;
-            virtual bool hasData() = 0;
-
-            static const char *getProtocolName()
-            {
-                return CProtocolNames::getMobdebugProtocolName();
-            }
-
-            static NVScopedRefCounted<IMultiProtocolStreamLuaCompat>
-            Create(NVFoundationBase &fnd, IMultiProtocolSocket &socket);
-
-            // Puts a table at the top of the stack that binds all the functions of the stream.
-            static void Bind(lua_State *state, IMultiProtocolStreamLuaCompat &stream);
         };
     }
 }

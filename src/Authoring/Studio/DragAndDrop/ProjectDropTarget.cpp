@@ -42,7 +42,6 @@
 #include "Qt3DSImportPerformImport.h"
 #include "Qt3DSImportTranslation.h"
 #include "IDocumentEditor.h"
-#include "PathImportTranslator.h"
 
 //===============================================================================
 /**
@@ -142,21 +141,6 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
                     g_StudioApp.GetCore()->GetDoc()->GetImportFailedHandler(),
                     theTranslator.m_TranslationLog, forceError);
 #endif
-            } else if (theExtension.Compare(L"svg", Q3DStudio::CString::ENDOFSTRING, false)) {
-                IDocumentReader &theReader(g_StudioApp.GetCore()->GetDoc()->GetDocumentReader());
-                SPathImportTranslator theTranslator(theSourceFile.toQString(), *theReader.GetLuaContext(),
-                                                    theReader.GetFoundation());
-                CFilePath theOutputDir =
-                    SFileTools::FindUniqueDestDirectory(m_TargetDir, theFileStem);
-                CFilePath theFullOutputFile(
-                    CFilePath::CombineBaseAndRelative(theOutputDir, outputFileName));
-                SImportResult theImportResult =
-                    CPerformImport::TranslateToImportFile(theTranslator, theFullOutputFile);
-                bool forceError = theFullOutputFile.IsFile() == false;
-                IDocumentEditor::DisplayImportErrors(
-                    theSourceFile.toQString(), theImportResult.m_Error,
-                    g_StudioApp.GetCore()->GetDoc()->GetImportFailedHandler(),
-                    theTranslator.m_TranslationLog, forceError);
             } else {
                 // Copy the file to target directory
                 // FindAndCopyDestFile will make sure the file name is unique and make sure it is

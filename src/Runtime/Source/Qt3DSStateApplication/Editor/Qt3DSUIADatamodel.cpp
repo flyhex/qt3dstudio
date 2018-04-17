@@ -1260,10 +1260,10 @@ struct DatamodelImpl : public IDatamodel,
                     CFileTools::CombineBaseAndRelative(appDir.c_str(), srcPath, classItemPath);
 
                     if (AreEqual(theReader->GetElementName().c_str(), "Behavior")) {
-                        bool theLuaFile =
-                            theMetaData.LoadLuaFile("Behavior", id, name, classItemPath.c_str());
-                        QT3DS_ASSERT(theLuaFile);
-                        (void)theLuaFile;
+                        bool theScriptFile =
+                            theMetaData.LoadScriptFile("Behavior", id, name, classItemPath.c_str());
+                        QT3DS_ASSERT(theScriptFile);
+                        (void)theScriptFile;
                     } else if (AreEqual(theReader->GetElementName().c_str(), "Effect")) {
                         bool theEffectFile = theMetaData.LoadEffectXMLFile("Effect", id, name,
                                                                            classItemPath.c_str());

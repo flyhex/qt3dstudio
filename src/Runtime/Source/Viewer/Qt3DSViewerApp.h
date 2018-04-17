@@ -364,7 +364,6 @@ private:
     /*
      * @brief setup search path.
      *		  This functions setup additonal search path for resoruces
-     *		  and the lua engine
      *
      * @param[in] cmdLineArgs	string to command line parameter
      *

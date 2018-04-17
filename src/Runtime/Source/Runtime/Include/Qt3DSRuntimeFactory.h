@@ -30,11 +30,9 @@
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "Qt3DSTimer.h"
 #include "foundation/Qt3DSRefCounted.h"
+
 namespace qt3ds {
 namespace render {
     class IInputStreamFactory;
@@ -69,14 +67,9 @@ namespace foundation {
     class IPerfTimer;
 }
 }
-//==============================================================================
-//	Namespace
-//==============================================================================
+
 namespace Q3DStudio {
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class IScene;
 class CRenderEngine;
 class ISceneManager;
@@ -88,19 +81,11 @@ class IPresentation;
 class ITimeProvider;
 class ISceneBinaryLoader;
 
-//==============================================================================
-//	Typedefs
-//==============================================================================
-
-//==============================================================================
-//	Global Factories
-//==============================================================================
 // All of the interfaces available without opengl initialized.
 class IRuntimeFactoryCore : public qt3ds::foundation::NVRefCounted
 {
 public:
     virtual ISceneBinaryLoader &GetSceneLoader() = 0;
-    virtual IScriptBridge &GetScriptEngine() = 0;
     virtual IScriptBridge &GetScriptEngineQml() = 0;
     virtual qt3ds::render::IQt3DSRenderContextCore &GetRenderContextCore() = 0;
     virtual qt3ds::render::IInputStreamFactory &GetInputStreamFactory() = 0;
@@ -115,18 +100,12 @@ public:
     virtual qt3ds::runtime::IApplicationCore *GetApplicationCore() = 0;
     virtual void SetApplicationCore(qt3ds::runtime::IApplicationCore *app) = 0;
 };
-//==============================================================================
-/**
- *	@class	CRuntimeFactory
- *	@brief	Static class providing default creation methods
- */
+
 class IRuntimeFactory : public IRuntimeFactoryCore
 {
 protected:
     virtual ~IRuntimeFactory() {}
-    //==============================================================================
-    //	Methods
-    //==============================================================================
+
 public:
     virtual ISceneManager &GetSceneManager() = 0;
     virtual qt3ds::render::IQt3DSRenderContext &GetQt3DSRenderContext() = 0;

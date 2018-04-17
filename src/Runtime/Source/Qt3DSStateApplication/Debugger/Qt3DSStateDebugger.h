@@ -205,8 +205,6 @@ namespace state {
         };
 
         // Information coming from the network stream will call these iterfaces
-        // Since we want to debug both c++ and lua state machines, we need a common
-        // interface to talk to.
         class IStateMachineDebugInterface : public NVRefCounted
         {
         protected:
@@ -227,9 +225,6 @@ namespace state {
         public:
             virtual void OnServerConnected(IDebugOutStream &inStream) = 0;
             virtual void Connect(IStateMachineDebugInterface &inMachine) = 0;
-            // Called when an external entity breaks and we need to update the lua.
-            // In this case we want to update all state machine datasets.
-            virtual void OnExternalBreak() = 0;
             virtual void Disconnect(IStateMachineDebugInterface &inMachine) = 0;
             // Release any references to any state machines and to the output stream
             virtual void DisconnectFromServer() = 0;

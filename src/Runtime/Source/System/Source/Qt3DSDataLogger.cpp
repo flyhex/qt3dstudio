@@ -51,10 +51,6 @@ template <>
 TPerfLogGeneralEvent2::TLogEntryInternal TPerfLogGeneralEvent2::m_InternalLogFunc = NULL;
 
 template <>
-TPerfLogLuaEvent1::TLogEntryInternal TPerfLogLuaEvent1::m_InternalLogFunc = NULL;
-template <>
-TPerfLogLuaMathEvent1::TLogEntryInternal TPerfLogLuaMathEvent1::m_InternalLogFunc = NULL;
-template <>
 TPerfLogRenderEvent1::TLogEntryInternal TPerfLogRenderEvent1::m_InternalLogFunc = NULL;
 template <>
 TPerfLogSceneEvent1::TLogEntryInternal TPerfLogSceneEvent1::m_InternalLogFunc = NULL;
@@ -121,7 +117,6 @@ void CDataLogger::SetLogLevel(EDataLoggerLevel inLogLevel)
         TPerfLogGeneralEvent1::Disable();
         TPerfLogGeneralEvent2::Disable();
 
-        TPerfLogLuaEvent1::Disable();
         TPerfLogRenderEvent1::Disable();
         TPerfLogSceneEvent1::Disable();
 
@@ -136,7 +131,6 @@ void CDataLogger::SetLogLevel(EDataLoggerLevel inLogLevel)
         TPerfLogRenderEvent2::Enable();
 
     case LOG_LEVEL_2:
-        TPerfLogLuaEvent1::Enable();
         TPerfLogRenderEvent1::Enable();
         TPerfLogSceneEvent1::Enable();
 

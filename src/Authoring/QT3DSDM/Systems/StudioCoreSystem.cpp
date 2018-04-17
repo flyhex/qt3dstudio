@@ -402,8 +402,7 @@ void CStudioCoreSystem::SetConsumer(TTransactionConsumerPtr inConsumer)
     DoSetConsumer(inConsumer, m_ActionCore);
     DoSetConsumer(inConsumer, m_GuideSystem);
     // In general the meta data doesn't participate in the undo/redo system except
-    // in special cases.  This is because we don't want to generate undo/redo information
-    // when loading lua files and such
+    // in special cases.
     if (!inConsumer)
         DoSetConsumer(inConsumer, m_NewMetaData);
 }

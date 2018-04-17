@@ -38,7 +38,7 @@
 #include "Qt3DSDataLogger.h"
 #include "Qt3DSApplication.h"
 #include "Qt3DSRuntimeFactory.h"
-#include "Qt3DSLuaCommandHelper.h"
+#include "Qt3DSCommandHelper.h"
 #include "Qt3DSActivationManager.h"
 #include "Qt3DSRenderContextCore.h"
 #include "Qt3DSComponentManager.h"
@@ -223,10 +223,8 @@ void CPresentation::PostUpdate(const TTimeUnit inGlobalTime)
 {
     if (!m_Paused) {
         // Callback Stage
-        if (m_Application && m_PreviousGlobalTime != inGlobalTime) {
-            m_Application->GetRuntimeFactoryCore().GetScriptEngine().ProcessFrameCallbacks(this);
+        if (m_Application && m_PreviousGlobalTime != inGlobalTime)
             m_Application->GetRuntimeFactoryCore().GetScriptEngineQml().ProcessFrameCallbacks(this);
-        }
     }
 
     m_PreviousGlobalTime = inGlobalTime;
@@ -397,21 +395,21 @@ void CPresentation::ProcessCommand(const SEventCommand &inCommand)
         theAttributeKey.Convert(
             theHash); // Need this conversion to prevent problems arising due to endianess
         inCommand.m_Target->SetAttribute(theAttributeKey.m_Hash, inCommand.m_Arg2);
-    }
+
     // Events		(Arg1 = hashed event name)
-    else if (inCommand.m_Type == COMMAND_FIREEVENT)
+    } else if (inCommand.m_Type == COMMAND_FIREEVENT) {
         FireEvent(inCommand.m_Arg1.m_Hash, inCommand.m_Target);
 
     // Time			(Arg1 = time)
-    else if (inCommand.m_Type == COMMAND_PLAY)
+    } else if (inCommand.m_Type == COMMAND_PLAY) {
         GetComponentManager().SetPause(inCommand.m_Target, false);
-    else if (inCommand.m_Type == COMMAND_PAUSE)
+    } else if (inCommand.m_Type == COMMAND_PAUSE) {
         GetComponentManager().SetPause(inCommand.m_Target, true);
-    else if (inCommand.m_Type == COMMAND_GOTOTIME)
+    } else if (inCommand.m_Type == COMMAND_GOTOTIME) {
         GetComponentManager().GoToTime(inCommand.m_Target, inCommand.m_Arg1.m_INT32);
 
     // Slide		(Arg1 = slide index or slide name)
-    else if (inCommand.m_Type == COMMAND_GOTOSLIDE) {
+    } else if (inCommand.m_Type == COMMAND_GOTOSLIDE) {
         // Goto slide commands are handled differently.
         IComponentManager &theManager(GetComponentManager());
         Q3DStudio::SComponentGotoSlideData theGotoSlideData =
@@ -420,28 +418,30 @@ void CPresentation::ProcessCommand(const SEventCommand &inCommand)
             theManager.GotoSlideIndex(inCommand.m_Target, theGotoSlideData);
 
         theManager.ReleaseComponentGotoSlideCommand(inCommand.m_Target);
-    } else if (inCommand.m_Type == COMMAND_GOTOSLIDENAME)
+    } else if (inCommand.m_Type == COMMAND_GOTOSLIDENAME) {
         GetComponentManager().GotoSlideName(inCommand.m_Target, inCommand.m_Arg1.m_Hash);
-    else if (inCommand.m_Type == COMMAND_GOTONEXTSLIDE)
+    } else if (inCommand.m_Type == COMMAND_GOTONEXTSLIDE) {
         GetComponentManager().GoToNextSlide(inCommand.m_Target);
-    else if (inCommand.m_Type == COMMAND_GOTOPREVIOUSSLIDE)
+    } else if (inCommand.m_Type == COMMAND_GOTOPREVIOUSSLIDE) {
         GetComponentManager().GoToPreviousSlide(inCommand.m_Target);
-    else if (inCommand.m_Type == COMMAND_BACKSLIDE)
+    } else if (inCommand.m_Type == COMMAND_BACKSLIDE) {
         GetComponentManager().GoToBackSlide(inCommand.m_Target);
 
     // Behavior
-    else if (inCommand.m_Type == COMMAND_CUSTOMACTION)
+    } else if (inCommand.m_Type == COMMAND_CUSTOMACTION) {
         m_Application->GetRuntimeFactoryCore().GetScriptEngineQml()
                                               .ProcessCustomActions(this, inCommand);
-    else if (inCommand.m_Type == COMMAND_CUSTOMCALLBACK)
-        m_Application->GetRuntimeFactoryCore().GetScriptEngine().ProcessCustomCallback(this,
-                                                                                       inCommand);
-    else if (inCommand.m_Type == COMMAND_PLAYSOUND) {
+    } else if (inCommand.m_Type == COMMAND_CUSTOMCALLBACK) {
+        m_Application->GetRuntimeFactoryCore().GetScriptEngineQml().ProcessCustomCallback(
+                    this, inCommand);
+    } else if (inCommand.m_Type == COMMAND_PLAYSOUND) {
         CRegisteredString theSoundPathReg = GetStringTable().HandleToStr(inCommand.m_Arg1.m_INT32);
         if (theSoundPathReg.IsValid()) {
             const char *theSoundPath = theSoundPathReg.c_str();
-            if (strlen(theSoundPath) > 0)
-                m_Application->GetRuntimeFactoryCore().GetScriptEngine().PlaySoundFile(theSoundPath);
+            if (strlen(theSoundPath) > 0) {
+                m_Application->GetRuntimeFactoryCore().GetScriptEngineQml().PlaySoundFile(
+                            theSoundPath);
+            }
         }
     } else if (inCommand.m_Type == COMMAND_EMITSIGNAL) {
         m_Application->GetRuntimeFactoryCore().GetScriptEngineQml().ProcessSignal(this, inCommand);
@@ -532,8 +532,8 @@ void CPresentation::FireCommand(const TEventCommandHash inEventType, TElement *i
         TComponent *theComponent = GetComponentManager().GetComponent(inTarget);
         UINT8 theSlideIndex = GetSlideSystem().FindSlide(*theComponent, theSlideHashName);
         // Translate into a slide index command.
-        CLuaCommandHelper::SetupGotoSlideCommand(*inTarget, theSlideIndex,
-                                                 SScriptEngineGotoSlideArgs());
+        CCommandHelper::SetupGotoSlideCommand(*inTarget, theSlideIndex,
+                                              SScriptEngineGotoSlideArgs());
     } else {
         SEventCommand theCommand = { inTarget, inEventType };
 
@@ -648,18 +648,6 @@ bool CPresentation::GetActive() const
 IScene *CPresentation::GetScene() const
 {
     return m_Scene;
-}
-
-//==============================================================================
-/**
- *	Simple manager access: Script Bridge
- */
-IScriptBridge *CPresentation::GetScriptBridge()
-{
-    if (m_Application)
-        return &m_Application->GetRuntimeFactoryCore().GetScriptEngine();
-
-    return NULL;
 }
 
 //==============================================================================

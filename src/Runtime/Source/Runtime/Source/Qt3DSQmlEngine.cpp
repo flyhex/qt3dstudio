@@ -46,9 +46,7 @@
 #include "foundation/FileTools.h"
 #include "foundation/Qt3DSSystem.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
-#include "Qt3DSStateLuaScriptContext.h"
 #include "Qt3DSStateDebugger.h"
-#include "EventPollingSystemLuaBinding.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "Qt3DSSlideSystem.h"
 
@@ -93,18 +91,18 @@ using qt3ds::runtime::IApplication;
 using namespace qt3ds;
 
 namespace __SQmlEngineImpl_Basic_Structs__ {
-    struct LuaScopedLock
+    struct QmlScopedLock
     {
         qt3ds::foundation::Mutex *m_Mutex;
 
-        LuaScopedLock(qt3ds::foundation::Mutex *mtx)
+        QmlScopedLock(qt3ds::foundation::Mutex *mtx)
             : m_Mutex(mtx)
         {
             if (m_Mutex)
                 m_Mutex->lock();
         }
 
-        ~LuaScopedLock()
+        ~QmlScopedLock()
         {
             if (m_Mutex)
                 m_Mutex->unlock();
@@ -113,7 +111,7 @@ namespace __SQmlEngineImpl_Basic_Structs__ {
 }
 
 using namespace __SQmlEngineImpl_Basic_Structs__;
-#define QML_ENGINE_MULTITHREAD_PROTECT_METHOD LuaScopedLock __locker(m_MultithreadedMutex);
+#define QML_ENGINE_MULTITHREAD_PROTECT_METHOD QmlScopedLock __locker(m_MultithreadedMutex);
 
 //==============================================================================
 // Callback handling
@@ -410,7 +408,7 @@ public:
                                       const SEventCommand &inCommand) override;
     void ProcessCustomCallback(IPresentation *, const SEventCommand &) override {}
 
-    void SetTableForElement(TElement &, ILuaScriptTableProvider &) override {}
+    void SetTableForElement(TElement &, IScriptTableProvider &) override {}
     void SetAttribute(const char *element, const char *attName, const char *value) override;
     bool GetAttribute(const char *element, const char *attName, char *value) override;
     void FireEvent(const char *element, const char *evtName) override;

@@ -4048,16 +4048,6 @@ public:
                                                 theName), theTexFormat, theMagOp, theCoordOp,
                                             theSize, theFlags));
                         }
-                    } else if (AreEqual(inStream.GetNarrowElementName(), "Lua")) {
-                        const char8_t *luaScript;
-                        bool hasTransparency = false;
-                        if (inStream.Att("hasTransparency", hasTransparency))
-                            theMaterial.m_HasTransparency = hasTransparency;
-                        inStream.Value(luaScript);
-                        SLuaCommand *theCommand = new SLuaCommand();
-                        theCommand->m_LuaScript =
-                                m_StringTable.GetRenderStringTable().RegisterStr(luaScript);
-                        theMaterial.m_CustomerMaterialCommands.push_back(theCommand);
                     }
                 }
             }

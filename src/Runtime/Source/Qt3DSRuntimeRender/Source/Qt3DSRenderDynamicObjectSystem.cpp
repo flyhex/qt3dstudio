@@ -52,8 +52,6 @@ using namespace qt3ds;
 using namespace qt3ds::render;
 using namespace qt3ds::render::dynamic;
 
-// QT3DS_COMPILE_TIME_ASSERT( sizeof(void*) == 4 );
-
 namespace {
 typedef eastl::pair<CRegisteredString, CRegisteredString> TStrStrPair;
 }
@@ -103,8 +101,6 @@ namespace render {
                     + static_cast<const SApplyValue &>(inCommand).m_Value.mSize;
             case CommandTypes::DepthStencil:
                 return sizeof(SDepthStencil);
-            case CommandTypes::LuaCommand:
-                return sizeof(SLuaCommand);
             case CommandTypes::AllocateImage:
                 return sizeof(SAllocateImage);
             case CommandTypes::ApplyImageValue:
@@ -177,9 +173,6 @@ namespace render {
             }
             case CommandTypes::DepthStencil:
                 CopyConstructCommandT<SDepthStencil>(inDataBuffer, inCommand, inStrTable);
-                break;
-            case CommandTypes::LuaCommand:
-                CopyConstructCommandT<SLuaCommand>(inDataBuffer, inCommand, inStrTable);
                 break;
             case CommandTypes::AllocateImage:
                 CopyConstructCommandT<SAllocateImage>(inDataBuffer, inCommand, inStrTable);
@@ -332,16 +325,6 @@ struct SCommandRemapping<SDepthStencil>
     static void RemapCommandData(SDepthStencil &cmd, TRemapper &remapper)
     {
         remapper.Remap(cmd.m_BufferName);
-    }
-};
-
-template <>
-struct SCommandRemapping<SLuaCommand>
-{
-    template <typename TRemapper>
-    static void RemapCommandData(SLuaCommand &cmd, TRemapper &remapper)
-    {
-        remapper.Remap(cmd.m_LuaScript);
     }
 };
 

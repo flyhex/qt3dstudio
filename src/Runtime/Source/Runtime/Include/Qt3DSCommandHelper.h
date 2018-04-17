@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 NVIDIA Corporation.
+** Copyright (C) 1993-2009 NVIDIA Corporation.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -28,25 +28,28 @@
 **
 ****************************************************************************/
 
-#ifndef EVENT_POLLING_SYSTEM_LUA_BINDING_H
-#define EVENT_POLLING_SYSTEM_LUA_BINDING_H
-struct lua_State;
+#pragma once
 
-namespace qt3ds {
-namespace evt {
+#include "Qt3DSIScriptBridge.h"
 
-    class IEventSystem;
+namespace Q3DStudio {
 
-    struct SLuaEventPollerBinding
-    {
-        // Returns with an object with on the top of the stack.
-        // The object has two methods, getCInterface and getNextEvents
-        // getCInterface returns userdata that is a pointer to a Qt3DSEventSystemEventPoller (the 'c'
-        // interface).
-        // getNextEvents returns an array of the next events.
-        static void WrapEventPoller(lua_State *inState, IEventSystem &inPoller);
-    };
-}
-}
+class CCommandHelper
+{
+private:
+    CCommandHelper();
+    CCommandHelper(const CCommandHelper &);
+    CCommandHelper &operator=(const CCommandHelper &);
+    virtual ~CCommandHelper();
 
-#endif // EVENT_POLLING_SYSTEM_LUA_BINDING_H
+public:
+    static bool SetupGotoSlideCommand(TElement &inElement, const char *slideName,
+                                      const SScriptEngineGotoSlideArgs &inArgs);
+    static bool SetupGotoSlideCommand(TElement &inElement, Q3DStudio::INT32 inSlide,
+                                      const SScriptEngineGotoSlideArgs &inArgs);
+
+public:
+    static TElement *GetComponentParent(TElement *inParent);
+};
+
+} // namespace Q3DStudio

@@ -47,12 +47,11 @@ namespace render {
         virtual ~IRenderPluginInstance() {}
     public:
         static const char *IRenderPluginOffscreenRendererType() { return "IRenderPluginInstance"; }
-        // If this render plugin has an instance ptr, get it.  This is what will be used
-        // in lua whan an element's instance ptr is found.
+        // If this render plugin has an instance ptr, get it.
         virtual TRenderPluginInstancePtr GetRenderPluginInstance() = 0;
         virtual void Update(NVConstDataRef<SRenderPropertyValueUpdate> updateBuffer) = 0;
         virtual IRenderPluginClass &GetPluginClass() = 0;
-        virtual void CreateLuaProxy(lua_State *state) = 0;
+        virtual void CreateScriptProxy(script_State *state) = 0;
     };
     struct RenderPluginPropertyValueTypes
     {
