@@ -93,6 +93,16 @@ public:
     virtual void DisplayMessageBox(const Q3DStudio::CString &inDescription) = 0;
 };
 
+class IMoveRenameHandler
+{
+protected:
+    virtual ~IMoveRenameHandler() {}
+
+public:
+    virtual void displayMessageBox(const Q3DStudio::CString &origName,
+                                   const Q3DStudio::CString &newName) = 0;
+};
+
 class IDocumentEditor : public IDocumentReader
 {
 protected:

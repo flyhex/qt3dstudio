@@ -1465,6 +1465,16 @@ void CDoc::SetDocMessageBoxHandler(
     m_DeletingReferencedObjectHandler = inHandler;
 }
 
+void CDoc::setMoveRenameHandler(std::shared_ptr<Q3DStudio::IMoveRenameHandler> inHandler)
+{
+    m_moveRenameHandler = inHandler;
+}
+
+std::shared_ptr<Q3DStudio::IMoveRenameHandler> CDoc::getMoveRenameHandler()
+{
+    return m_moveRenameHandler;
+}
+
 Qt3DSFile CDoc::GetDocumentPath() const
 {
     return m_DocumentPath;

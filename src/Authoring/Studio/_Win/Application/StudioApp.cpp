@@ -662,6 +662,27 @@ struct SIDeletingReferencedObjectHandler : public Q3DStudio::IDeletingReferenced
     }
 };
 
+struct SIMoveRenameHandler : public Q3DStudio::IMoveRenameHandler
+{
+    CDialogs &m_dialogs;
+
+    SIMoveRenameHandler(CDialogs &dialogs)
+        : m_dialogs(dialogs)
+    {
+    }
+
+    void displayMessageBox(const Q3DStudio::CString &origName,
+                           const Q3DStudio::CString &newName) override
+    {
+        QString theTitle = QObject::tr("Warning");
+        QString theMessage = QObject::tr("Object %1 was renamed to %2 because "
+                                         "original name was duplicated "
+                                         "under its parent.")
+                                            .arg(origName.toQString()).arg(newName.toQString());
+        m_dialogs.DisplayMessageBox(theTitle, theMessage, Qt3DSMessageBox::ICON_WARNING, false);
+    }
+};
+
 void CStudioApp::setupTimer(long inMessageId, QWidget *inWnd)
 {
     m_tickTock = ITickTock::CreateTickTock(inMessageId, inWnd);
@@ -671,6 +692,8 @@ void CStudioApp::setupTimer(long inMessageId, QWidget *inWnd)
                 std::make_shared<SIImportFailedHandler>(std::ref(*GetDialogs())));
     m_core->GetDoc()->SetDocMessageBoxHandler(
                 std::make_shared<SIDeletingReferencedObjectHandler>(std::ref(*GetDialogs())));
+    m_core->GetDoc()->setMoveRenameHandler(
+                std::make_shared<SIMoveRenameHandler>(std::ref(*GetDialogs())));
 }
 
 ITickTock &CStudioApp::getTickTock()

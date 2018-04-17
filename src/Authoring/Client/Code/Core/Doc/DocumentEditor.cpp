@@ -2357,7 +2357,13 @@ public:
             // in order to respect the ordering.
             if (inInsertType == DocumentEditorInsertType::NextSibling)
                 theInstance = sortableList[end - idx - 1];
-
+            // Rename if the new parent already has object with a same name
+            CString currName = m_Bridge.GetName(theInstance);
+            if (!m_Bridge.CheckNameUnique(theInstance, currName)) {
+                CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance, currName);
+                m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                SetName(theInstance, newName);
+            }
             if (inInsertType == DocumentEditorInsertType::PreviousSibling)
                 m_AssetGraph.MoveBefore(theInstance, inDest);
             else if (inInsertType == DocumentEditorInsertType::NextSibling)
