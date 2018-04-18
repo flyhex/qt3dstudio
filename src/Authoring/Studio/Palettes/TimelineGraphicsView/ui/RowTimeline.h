@@ -49,8 +49,8 @@ public:
     void setState(State state) override;
     void setRowTree(RowTree *rowTree);
     void updatePosition();
+    void startDurationMove();
     void moveDurationBy(double dx);
-    void commitDurationMove();
     void setStartTime(double startTime);
     void setEndTime(double endTime);
     void setStartX(double startX);
@@ -64,6 +64,7 @@ public:
     TimelineControlType getClickedControl(const QPointF &scenePos) const;
     double getStartTime() const;
     double getEndTime() const;
+    double getDurationMoveOffset();
     int type() const;
     RowTimeline *parentRow() const;
     RowTree *rowTree() const;
@@ -84,6 +85,7 @@ private:
 
     RowTree *m_rowTree;
     double m_startTime = 0;
+    double m_startDurationMoveStartTime = 0;
     double m_endTime = 0;
     double m_startX = 0;
     double m_endX = 0;

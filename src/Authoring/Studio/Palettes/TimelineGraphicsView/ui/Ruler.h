@@ -48,7 +48,8 @@ public:
     double durationEndX() const;
     double timelineScale() const;
     double duration() const;
-    void setDuration(double duration);
+    double maxDuration() const;
+    void setDuration(double duration, double maxDuration);
     void setViewportX(int viewportX);
     int type() const;
 
@@ -63,6 +64,7 @@ private:
     const QString timestampString(int timeMs);
     double m_timeScale = 2;
     double m_duration = 0; // in seconds
+    double m_maxDuration = 0; // in seconds
     int m_viewportX = 0;
 };
 

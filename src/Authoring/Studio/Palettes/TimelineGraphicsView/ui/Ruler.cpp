@@ -40,7 +40,8 @@ Ruler::Ruler(TimelineItem *parent) : TimelineItem(parent)
 
 void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    Q_UNUSED(option);
+    Q_UNUSED(option)
+
     double xStep = TimelineConstants::RULER_SEC_W / TimelineConstants::RULER_SEC_DIV * m_timeScale;
     double totalSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
             + m_duration * xStep * TimelineConstants::RULER_SEC_DIV;
@@ -152,12 +153,19 @@ double Ruler::duration() const
     return m_duration;
 }
 
-void Ruler::setDuration(double duration)
+double Ruler::maxDuration() const
 {
-    if (m_duration != duration) {
+    return m_maxDuration;
+}
+
+void Ruler::setDuration(double duration, double maxDuration)
+{
+    if (m_duration != duration || m_maxDuration != maxDuration) {
         m_duration = duration;
-        emit durationChanged(duration);
+        m_maxDuration = maxDuration;
         update();
+
+        emit durationChanged(duration);
     }
 }
 

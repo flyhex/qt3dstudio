@@ -121,14 +121,26 @@ void TimelineGraphicsScene::setTimelineScale(int scl)
 {
     m_ruler->setTimelineScale(scl);
     m_playHead->updatePosition();
-
-    double timelineWidth = TimelineConstants::RULER_EDGE_OFFSET * 2
-                           + m_ruler->duration() * TimelineConstants::RULER_SEC_W * scl;
-    m_layoutTimeline->setMinimumWidth(timelineWidth);
-    m_layoutTimeline->setMaximumWidth(timelineWidth);
+    updateTimelineLayoutWidth();
 
     for (int i = 1; i < m_layoutTimeline->count(); i++)
         static_cast<RowTimeline *>(m_layoutTimeline->itemAt(i)->graphicsItem())->updatePosition();
+}
+
+void TimelineGraphicsScene::updateTimelineLayoutWidth()
+{
+    double timelineWidth = TimelineConstants::RULER_EDGE_OFFSET * 2
+                           + m_ruler->maxDuration() * TimelineConstants::RULER_SEC_W
+                           * m_ruler->timelineScale();
+
+    m_layoutTimeline->setMinimumWidth(timelineWidth);
+    m_layoutTimeline->setMaximumWidth(timelineWidth);
+    // Mahmoud_TODO: could be requested by UX. else will be removed
+//    m_widgetTimeline->viewTimelineContent()->horizontalScrollBar()->setValue(
+//               m_widgetTimeline->viewTimelineContent()->horizontalScrollBar()->maximum());
+
+//    if (m_editedTimelineRow)
+//        m_widgetTimeline->viewTimelineContent()->ensureVisible(m_editedTimelineRow);
 }
 
 void TimelineGraphicsScene::addNewLayer()
@@ -401,6 +413,8 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     // clicked an empty spot on a timeline row, start selection rect.
                     if (m_clickedTimelineControlType == TimelineControlType::None)
                         m_selectionRect->start(m_pressPos);
+                    else if (m_clickedTimelineControlType == TimelineControlType::Duration)
+                        m_editedTimelineRow->startDurationMove();
                 }
             }
         } else {
@@ -429,19 +443,27 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         if (time >= 0)
             g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
     } else if (m_dragging) {
+        bool shift = event->modifiers() & Qt::ShiftModifier;
         if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
             // resizing layer timline duration from left
-            m_editedTimelineRow->setStartX(event->scenePos().x() - m_ruler->pos().x());
+            double distance = event->scenePos().x() - m_ruler->pos().x();
+            if (shift)
+                snap(distance);
+            m_editedTimelineRow->setStartX(distance);
         } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
             // resizing layer timline duration from right
-            m_editedTimelineRow->setEndX(event->scenePos().x() - m_ruler->pos().x());
+            double distance = event->scenePos().x() - m_ruler->pos().x();
+            if (shift)
+                snap(distance);
+            m_editedTimelineRow->setEndX(distance);
+            rowManager()->updateRulerDuration();
         } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
             // moving layer timeline duration
-            double dx = event->scenePos().x() - m_pressPos.x();
+            double dx = event->screenPos().x() - event->lastScreenPos().x();
+            if (shift)
+                snap(dx);
             m_editedTimelineRow->moveDurationBy(dx);
-            if (dx > 0)
-                rowManager()->updateRulerDuration();
-            m_pressPos = event->scenePos();
+            rowManager()->updateRulerDuration();
         } else if (m_selectionRect->isActive()) {
             // resizing keyframe selection rect
             m_selectionRect->updateSize(event->scenePos());
@@ -518,17 +540,27 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             }
         } else if (m_keyframePressed) { // moving selected keyframes
             QPointF scenePos = event->scenePos();
-
             if (scenePos.x() < m_ruler->durationStartX())
                 scenePos.setX(m_ruler->durationStartX());
 
-            m_keyframeManager->moveSelectedKeyframes(scenePos.x() - m_pressPos.x());
+            double dx = scenePos.x() - m_pressPos.x();
+            if (shift)
+                snap(dx);
+            m_keyframeManager->moveSelectedKeyframes(dx);
 
             m_pressPos = scenePos;
         }
     }
 
     QGraphicsScene::mouseMoveEvent(event);
+}
+
+void TimelineGraphicsScene::snap(double &value)
+{
+   // TODO: implement snapping
+   // 1. snap to time steps
+   // 2. snap to duration edges
+   // 3, snap to keyframes
 }
 
 void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -557,17 +589,27 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
             m_keyframeManager->commitMoveSelectedKeyframes();
-        } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle
-                   || m_clickedTimelineControlType == TimelineControlType::EndHandle
-                   || m_clickedTimelineControlType == TimelineControlType::Duration) {
-            // update duration values to the binding
-            m_editedTimelineRow->commitDurationMove();
-        }
+        } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
+            ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
+                    ->GetTimelineItem()->GetTimebar();
+            timebar->ChangeTime(m_editedTimelineRow->getStartTime() * 1000, true);
+            timebar->CommitTimeChange();
+        } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+            ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
+                    ->GetTimelineItem()->GetTimebar();
+            timebar->ChangeTime(m_editedTimelineRow->getEndTime() * 1000, false);
+            timebar->CommitTimeChange();
 
-        if (m_clickedTimelineControlType == TimelineControlType::Duration
-                || m_clickedTimelineControlType == TimelineControlType::EndHandle) {
-            // Update ruler duration if needed
-            rowManager()->updateRulerDuration();
+            if (m_playHead->time() > ruler()->duration())
+                g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
+        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+            ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
+                    ->GetTimelineItem()->GetTimebar();
+            timebar->OffsetTime(m_editedTimelineRow->getDurationMoveOffset() * 1000);
+            timebar->CommitTimeChange();
+
+            if (m_playHead->time() > ruler()->duration())
+                g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
         }
 
         // reset mouse press params

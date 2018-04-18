@@ -43,6 +43,8 @@
 RowTimeline::RowTimeline()
     : InteractiveTimelineItem()
 {
+    setMinimumWidth(9999);
+    setMaximumWidth(9999);
 }
 
 RowTimeline::~RowTimeline()
@@ -68,7 +70,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         bgColor = TimelineConstants::ROW_COLOR_OVER;
     else
         bgColor = TimelineConstants::ROW_COLOR_NORMAL;
-    painter->fillRect(0, 0, widget->width() + size().width(), size().height() - 1, bgColor);
+    painter->fillRect(0, 0, size().width(), size().height() - 1, bgColor);
 
     // Duration
     if (m_rowTree->hasDurationBar()) {
@@ -344,20 +346,21 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
     return TimelineControlType::None;
 }
 
+void RowTimeline::startDurationMove()
+{
+    m_startDurationMoveStartTime = m_startTime;
+}
+
 // move the duration area (start/end x)
 void RowTimeline::moveDurationBy(double dx)
 {
-    double dur = m_endX - m_startX;
+    if (m_startX + dx < TimelineConstants::RULER_EDGE_OFFSET)
+        dx = TimelineConstants::RULER_EDGE_OFFSET - m_startX;
 
     m_startX += dx;
     m_endX += dx;
 
-    if (m_startX < TimelineConstants::RULER_EDGE_OFFSET) {
-        m_startX = TimelineConstants::RULER_EDGE_OFFSET;
-        m_endX = m_startX + dur;
-    }
-
-    if (m_rowTree->parentRow() == nullptr) {
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER) {
         m_minStartX = m_startX;
         m_maxEndX = m_endX;
     }
@@ -365,28 +368,26 @@ void RowTimeline::moveDurationBy(double dx)
     m_startTime = xToTime(m_startX);
     m_endTime = xToTime(m_endX);
 
-    updateChildrenMinStartXRecursive(m_rowTree);
-    updateChildrenMaxEndXRecursive(m_rowTree);
+    // move keyframes with the row
+    if (!m_rowTree->isProperty()) { // make sure we don't move the keyframes twice
+        for (Keyframe *keyframe : qAsConst(m_keyframes))
+            keyframe->time += rowTree()->m_scene->ruler()->distanceToTime(dx);
+    }
 
     update();
 
     if (!m_rowTree->empty()) {
+        updateChildrenMinStartXRecursive(m_rowTree);
+        updateChildrenMaxEndXRecursive(m_rowTree);
+
         for (RowTree *child : qAsConst(m_rowTree->m_childRows))
             child->m_rowTimeline->moveDurationBy(dx);
     }
 }
 
-void RowTimeline::commitDurationMove()
+double RowTimeline::getDurationMoveOffset()
 {
-    m_rowTree->m_binding->GetTimelineItem()->GetTimebar()->ChangeTime(m_startTime * 1000, true);
-    m_rowTree->m_binding->GetTimelineItem()->GetTimebar()->ChangeTime(m_endTime * 1000, false);
-    m_rowTree->m_binding->GetTimelineItem()->GetTimebar()->CommitTimeChange();
-    if (!m_rowTree->empty()) {
-        for (RowTree *child : qAsConst(m_rowTree->m_childRows)) {
-            if (!child->isProperty())
-                child->m_rowTimeline->commitDurationMove();
-        }
-    }
+    return m_startTime - m_startDurationMoveStartTime;
 }
 
 // convert time values to x
@@ -435,8 +436,6 @@ void RowTimeline::setEndX(double endX)
 {
     if (endX < m_startX + 1)
         endX = m_startX + 1;
-    else if (endX > m_endX)
-        rowTree()->m_scene->rowManager()->updateRulerDuration();
 
     double oldEndX = m_endX;
     m_endX = endX;
@@ -537,7 +536,6 @@ void RowTimeline::setEndTime(double endTime)
     if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
         m_maxEndX = 999999;
 
-    rowTree()->m_scene->rowManager()->updateRulerDuration();
     updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();

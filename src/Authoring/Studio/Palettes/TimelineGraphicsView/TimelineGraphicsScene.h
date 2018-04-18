@@ -60,6 +60,7 @@ public:
     explicit TimelineGraphicsScene(TimelineWidget *timelineWidget);
 
     void setTimelineScale(int scale);
+    void updateTimelineLayoutWidth();
     void addNewLayer();
     void deleteSelectedRow();
     Ruler *ruler() const;
@@ -90,10 +91,11 @@ private:
     void getLastChildRow(RowTree *row, int index, RowTree *outLastChild, RowTree *outNextSibling,
                          int &outLastChildIndex) const;
     void commitMoveRows();
+    void snap(double &value);
+    void updateHoverStatus(const QPointF &scenePos);
     int nextRowDepth(int index);
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
-    void updateHoverStatus(const QPointF &scenePos);
     QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
                                     QGraphicsItem *item,
                                     const QPointF &scenePos);

@@ -216,12 +216,6 @@ TimelineWidget::TimelineWidget(QWidget *parent)
                                                    rect.height()));
 
         m_graphicsScene->playHead()->setHeight(m_graphicsScene->widgetRoot()->geometry().height());
-
-        // While zooming in/out, keep playhead at center
-        int scrollValue = m_graphicsScene->ruler()->x() + TimelineConstants::RULER_EDGE_OFFSET
-                + m_graphicsScene->playHead()->time() * TimelineConstants::RULER_SEC_W
-                * m_graphicsScene->ruler()->timelineScale();
-        m_viewTimelineContent->centerOn(scrollValue, 0);
     });
 
     // connect timeline and ruler horizontalScrollBars
@@ -302,7 +296,7 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     });
 
     connect(m_graphicsScene->ruler(), &Ruler::durationChanged, this, [this]() {
-        m_graphicsScene->setTimelineScale(m_graphicsScene->ruler()->timelineScale());
+        m_graphicsScene->updateTimelineLayoutWidth();
     });
 
     // data model listeners

@@ -278,15 +278,19 @@ void RowManager::clearSelection()
 void RowManager::updateRulerDuration()
 {
     double duration = 0;
+    double maxDuration = 0; // for setting correct size for the view so scrollbars appear correctly
     for (int i = 1; i < m_layoutTree->count(); ++i) {
         RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-        if (row_i->parentRow()
-                && row_i->rowType() == OBJTYPE_LAYER
-                && row_i->parentRow()->rowType() == OBJTYPE_SCENE) {
-            duration = std::max(duration, row_i->rowTimeline()->getEndTime());
-        }
+        double dur_i = row_i->rowTimeline()->getEndTime();
+
+        if (row_i->rowType() == OBJTYPE_LAYER && dur_i > duration)
+            duration = dur_i;
+
+        if (dur_i > maxDuration)
+            maxDuration = dur_i;
     }
-    m_scene->ruler()->setDuration(duration);
+
+    m_scene->ruler()->setDuration(duration, maxDuration);
 }
 
 void RowManager::updateFiltering(RowTree *row)
