@@ -39,6 +39,8 @@
 #include "Qt3DSStateApplication.h"
 #include "PlayerWnd.h"
 #include "DataInputDlg.h"
+#include "qtsingleapplication.h"
+#include "qtlocalpeer.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -47,6 +49,8 @@
 #include <QtWidgets/qaction.h>
 #include <QtCore/qstandardpaths.h>
 #include <QtCore/qcommandlineparser.h>
+
+const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
 int main(int argc, char *argv[])
 {
@@ -57,7 +61,7 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(res);
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication guiApp(argc, argv);
+    SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);
 
 #if defined(Q_OS_MACOS)
     QSurfaceFormat openGL33Format;
@@ -117,6 +121,9 @@ int main(int argc, char *argv[])
         parser.showHelp(-1);
         exit(0);
     }
+
+    QObject::connect(&guiApp, &SharedTools::QtSingleApplication::messageReceived,
+                     &g_StudioApp, &CStudioApp::handleMessageReceived);
 
     // Load and apply stylesheet for the application
     QFile styleFile(":/style.qss");
@@ -241,10 +248,12 @@ void CStudioApp::performShutdown()
     }
 
     if (m_renderer) {
-        m_views->getMainFrame()->GetPlayerWnd()->makeCurrent();
+        if (m_views->getMainFrame())
+            m_views->getMainFrame()->GetPlayerWnd()->makeCurrent();
         m_renderer->Close();
         m_renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
-        m_views->getMainFrame()->GetPlayerWnd()->doneCurrent();
+        if (m_views->getMainFrame())
+            m_views->getMainFrame()->GetPlayerWnd()->doneCurrent();
     }
 
     delete m_views;
@@ -566,6 +575,17 @@ bool CStudioApp::blankRunApplication()
  */
 bool CStudioApp::openAndRunApplication(const QString &inFilename)
 {
+    // First check if the desired presentation is already open on another instance
+    SharedTools::QtSingleApplication *app =
+            static_cast<SharedTools::QtSingleApplication *>(QCoreApplication::instance());
+    const auto pids = app->runningInstances();
+    for (const auto pid : pids) {
+        app->setBlock(true);
+        QString query = activePresentationQuery + inFilename;
+        if (app->sendMessage(query, true, 5000, pid))
+            return true;
+    }
+
     bool theSuccess = false;
     initCore();
     // Load document. Upon failure, don't show startup dialog but exit immediately.
@@ -713,6 +733,35 @@ Q3DStudio::IStudioRenderer &CStudioApp::getRenderer()
 void CStudioApp::clearGuides()
 {
     SCOPED_DOCUMENT_EDITOR(*m_core->GetDoc(), QObject::tr("Clear Guides"))->ClearGuides();
+}
+
+void CStudioApp::handleMessageReceived(const QString &message, QObject *socket)
+{
+    if (message.startsWith(activePresentationQuery)) {
+        QLocalSocket *lsocket = qobject_cast<QLocalSocket *>(socket);
+        if (lsocket) {
+            // Another studio instance wants to know if specified presentation is open on this one
+            QFileInfo checkFile(message.mid(activePresentationQuery.size()));
+            QFileInfo openFile(m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString());
+            if (checkFile == openFile) {
+                lsocket->write(SharedTools::QtLocalPeer::acceptReply(),
+                               SharedTools::QtLocalPeer::acceptReply().size());
+                // Since we accept active presentation query, it means the querying instance will
+                // shut down and this instance must be made active window.
+                if (m_pMainWnd) {
+                    m_pMainWnd->setWindowState(m_pMainWnd->windowState() & ~Qt::WindowMinimized);
+                    m_pMainWnd->raise();
+                    m_pMainWnd->activateWindow();
+                }
+            } else {
+                lsocket->write(SharedTools::QtLocalPeer::denyReply(),
+                               SharedTools::QtLocalPeer::denyReply().size());
+            }
+            lsocket->waitForBytesWritten(1000);
+        }
+    }
+    if (socket)
+        delete socket;
 }
 
 void SendAsyncCommand(CDispatch &inDispatch, Q3DStudio::TCallbackFunc inFunc)

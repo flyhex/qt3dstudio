@@ -96,6 +96,9 @@ public:
     Q3DStudio::IStudioRenderer &getRenderer();
     void clearGuides();
 
+public Q_SLOTS:
+    void handleMessageReceived(const QString &message, QObject *socket);
+
 protected:
     bool runApplication();
     bool blankRunApplication();
