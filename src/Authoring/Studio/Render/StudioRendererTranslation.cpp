@@ -3357,12 +3357,18 @@ STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum i
             theAxis.normalize();
             QT3DSVec3 theCameraToObj = globalPos - camGlobalPos;
             QT3DSVec3 theTemp = theAxis.cross(theOriginalRay.m_Direction);
-            // Then the axis is parallel to the camera, we can't drag meaningfullly
+            // When the axis is parallel to the camera, we can't drag meaningfully
             if (theTemp.magnitudeSquared() < .05f) {
                 // Attempt to find a better axis by moving the object back towards the camera.
                 QT3DSF32 theSign = theCameraToObj.dot(theCamDirection) > 0.0 ? -1.0f : 1.0f;
                 QT3DSF32 theDistance = theCameraToObj.dot(theCamDirection);
                 QT3DSVec3 thePoint = globalPos + (theDistance * theSign) * theAxis;
+                // Check if we actually moved to right direction
+                QT3DSVec3 theNewCameraToObj = thePoint - camGlobalPos;
+                QT3DSF32 theNewDistance = theNewCameraToObj.dot(theCamDirection);
+                if (theNewDistance > theDistance)
+                    thePoint = globalPos - (theDistance * theSign) * theAxis;
+
                 QT3DSVec3 theNewDir = thePoint - camGlobalPos;
                 theNewDir.normalize();
                 theTemp = theAxis.cross(theNewDir);
