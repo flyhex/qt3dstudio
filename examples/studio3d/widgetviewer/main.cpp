@@ -55,9 +55,8 @@
 
 int main(int argc, char *argv[])
 {
-    // To enable QOpenGLWidget to work on macOS, we must set the default
-    // QSurfaceFormat before QApplication is created. Otherwise context-sharing
-    // fails and QOpenGLWidget breaks.
+    // To enable this to work on macOS, we must set the default QSurfaceFormat before QApplication
+    // is created. Otherwise context-sharing fails.
 #if defined(Q_OS_MACOS)
     QSurfaceFormat openGLFormat;
     openGLFormat.setRenderableType(QSurfaceFormat::OpenGL);
