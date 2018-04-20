@@ -1225,51 +1225,6 @@ struct SMaterialSystem : public ICustomMaterialSystem
         return SMaterialOrComputeShader();
     }
 
-    SMaterialOrComputeShader BindShaderFromLua(SCustomMaterialRenderContext &inRenderContext,
-                                               const SBindShader &inCommand,
-                                               TShaderFeatureSet inFeatureSet)
-    {
-        SDynamicShaderProgramFlags theFlags(inRenderContext.m_Model.m_TessellationMode,
-                                            inRenderContext.m_Subset.m_WireframeMode);
-        theFlags.SetTessellationEnabled(inRenderContext.m_Model.m_TessellationMode
-                                        != TessModeValues::NoTess);
-        theFlags.SetGeometryShaderEnabled(inRenderContext.m_Subset.m_WireframeMode);
-
-        TShaderAndFlags theProgramAndFlags =
-            m_Context->GetDynamicObjectSystem().GetShaderProgram(
-                inCommand.m_ShaderPath, inCommand.m_ShaderDefine, inFeatureSet, theFlags);
-
-        NVRenderShaderProgram *theProgram = theProgramAndFlags.first;
-        if (theProgram) {
-            if (theProgram->GetProgramType() == NVRenderShaderProgram::ProgramType::Graphics) {
-                SShaderDefaultMaterialKey theMaterialKey = 0;
-                SShaderMapKey skey = SShaderMapKey(
-                    TStrStrPair(inCommand.m_ShaderPath, inCommand.m_ShaderDefine), inFeatureSet,
-                    theFlags.m_TessMode, theFlags.m_WireframeMode, theMaterialKey);
-                eastl::pair<TShaderMap::iterator, bool> theInsertResult(m_ShaderMap.insert(
-                    eastl::make_pair(skey, NVScopedRefCounted<SCustomMaterialShader>(NULL))));
-
-                if (theInsertResult.second) {
-                    if (theProgram)
-                        theInsertResult.first->second = QT3DS_NEW(m_Allocator, SCustomMaterialShader)(
-                            *theProgram, theProgramAndFlags.second);
-                }
-
-                if (theInsertResult.first->second) {
-                    NVRenderContext &theContext(m_Context->GetRenderContext());
-                    theContext.SetActiveShader(theInsertResult.first->second->m_Shader);
-                }
-
-                return *theInsertResult.first->second;
-            } else {
-                NVRenderContext &theContext(m_Context->GetRenderContext());
-                theContext.SetActiveShader(theProgram);
-                return *(static_cast<NVRenderShaderProgram *>(theProgram));
-            }
-        }
-        return SMaterialOrComputeShader();
-    }
-
     void DoApplyInstanceValue(SCustomMaterial & /* inMaterial */, QT3DSU8 *inDataPtr,
                               CRegisteredString inPropertyName,
                               NVRenderShaderDataTypes::Enum inPropertyType,

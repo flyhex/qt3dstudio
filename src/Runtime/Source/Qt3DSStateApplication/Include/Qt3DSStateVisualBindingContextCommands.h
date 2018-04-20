@@ -125,7 +125,7 @@ namespace state {
             a. If the handler attribute is missing, or references a value that is not a function
     value, an error must be logged each time the executable would have been run, and the executable
     ignored.
-    3. A <call.../> executable may have an args="..." attribute that specifies a Lua expression to
+    3. A <call.../> executable may have an args="..." attribute that specifies an expression to
     evaluate.
             a. If the result of evaluating this expression is a single value, it is passed as the
     first argument to the behavior's function.
@@ -175,7 +175,7 @@ namespace state {
     executable ignored.
     3. A <set-attribute.../> executable must have an value="..." attribute that describes the value
     to set.
-            a. The contents of this attribute are evaluated as a Lua expression and the result used
+            a. The contents of this attribute are evaluated as an expression and the result used
     to set the attribute.
                     i. If the result of evaluating this expression does not match the type of the
     attribute on the element then an error must be logged and the executable ignored.

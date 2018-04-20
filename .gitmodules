@@ -7,9 +7,6 @@
 [submodule "src/3rdparty/pcre"]
 	path = src/3rdparty/pcre
 	url = ../qt3dstudio-pcre.git
-[submodule "src/3rdparty/Lua"]
-	path = src/3rdparty/Lua
-	url = ../qt3dstudio-lua.git
 [submodule "src/Runtime/qt3d-runtime"]
 	path = src/Runtime/qt3d-runtime
 	url = ../qt3d-runtime.git
