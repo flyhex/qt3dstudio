@@ -79,6 +79,7 @@ public:
     bool isProperty() const;
     bool empty() const;
     bool selected() const;
+    bool hasDurationBar() const;
     int depth() const;
     int type() const;
     int treeWidth() const;
@@ -103,7 +104,6 @@ private:
     void updateLockRecursive(bool state);
     void updateLabelPosition();
     bool hasActionButtons() const;
-    bool hasDurationBar() const;
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;

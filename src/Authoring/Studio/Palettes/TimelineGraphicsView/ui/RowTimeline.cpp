@@ -354,9 +354,11 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
     return TimelineControlType::None;
 }
 
-void RowTimeline::startDurationMove()
+void RowTimeline::startDurationMove(double clickX)
 {
+    // clickX is in ruler coordinate space
     m_startDurationMoveStartTime = m_startTime;
+    m_startDurationMoveOffsetX = clickX - m_startX;
 }
 
 // move the duration area (start/end x)
@@ -393,9 +395,49 @@ void RowTimeline::moveDurationBy(double dx)
     }
 }
 
-double RowTimeline::getDurationMoveOffset()
+void RowTimeline::moveDurationTo(double newX)
+{
+    if (newX < TimelineConstants::RULER_EDGE_OFFSET)
+        newX = TimelineConstants::RULER_EDGE_OFFSET;
+
+    double dx = newX - m_startX;
+    double durationX = m_endX - m_startX;
+    m_startX = newX;
+    m_endX = m_startX + durationX;
+
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER) {
+        m_minStartX = m_startX;
+        m_maxEndX = m_endX;
+    }
+
+    m_startTime = xToTime(m_startX);
+    m_endTime = xToTime(m_endX);
+
+    // move keyframes with the row
+    if (!m_rowTree->isProperty()) { // make sure we don't move the keyframes twice
+        for (Keyframe *keyframe : qAsConst(m_keyframes))
+            keyframe->time += rowTree()->m_scene->ruler()->distanceToTime(dx);
+    }
+
+    update();
+
+    if (!m_rowTree->empty()) {
+        updateChildrenMinStartXRecursive(m_rowTree);
+        updateChildrenMaxEndXRecursive(m_rowTree);
+
+        for (RowTree *child : qAsConst(m_rowTree->m_childRows))
+            child->m_rowTimeline->moveDurationBy(dx);
+    }
+}
+
+double RowTimeline::getDurationMoveTime() const
 {
     return m_startTime - m_startDurationMoveStartTime;
+}
+
+double RowTimeline::getDurationMoveOffsetX() const
+{
+    return m_startDurationMoveOffsetX;
 }
 
 // convert time values to x
@@ -547,6 +589,16 @@ void RowTimeline::setEndTime(double endTime)
     updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
+}
+
+double RowTimeline::getStartX() const
+{
+    return m_startX;
+}
+
+double RowTimeline::getEndX() const
+{
+    return m_endX;
 }
 
 double RowTimeline::getStartTime() const

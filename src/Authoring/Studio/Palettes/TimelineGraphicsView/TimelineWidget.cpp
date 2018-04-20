@@ -379,10 +379,6 @@ void TimelineWidget::OnClosingPresentation()
 
 void TimelineWidget::OnTimeChanged(long inTime)
 {
-    // Mahmoud_TODO: remove qDebug()
-    qDebug() << "\x1b[42m \x1b[1m" << __FUNCTION__
-             << ", inTime=" << inTime
-             << "\x1b[m";
     m_graphicsScene->playHead()->setTime(inTime * .001);
     m_toolbar->setTime(inTime);
 }
@@ -406,6 +402,7 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
                 m_translationManager->GetOrCreate(theSlideInstance));
 
     m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
+    m_graphicsScene->updateSnapSteps();
     m_handlesMap.clear();
     insertToHandlesMapRecursive(m_binding);
     m_navigationBar->updateNavigationItems(m_translationManager->GetBreadCrumbProvider());

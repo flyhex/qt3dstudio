@@ -36,6 +36,7 @@
 #include "MouseCursor.h"
 
 #include <QtWidgets/qgraphicsscene.h>
+#include <QtCore/qlist.h>
 
 class Ruler;
 class PlayHead;
@@ -74,6 +75,7 @@ public:
     void updateTreeWidth(double x);
     void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
     void resetMouseCursor();
+    void updateSnapSteps();
 
 protected:
     bool event(QEvent *event) override;
@@ -91,8 +93,8 @@ private:
     void getLastChildRow(RowTree *row, int index, RowTree *outLastChild, RowTree *outNextSibling,
                          int &outLastChildIndex) const;
     void commitMoveRows();
-    void snap(double &value);
     void updateHoverStatus(const QPointF &scenePos);
+    void snap(double &value);
     int nextRowDepth(int index);
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
@@ -115,6 +117,7 @@ private:
     RowManager *m_rowManager = nullptr;
     KeyframeManager *m_keyframeManager = nullptr;
     QPointF m_pressPos;
+    QList<double> m_snapSteps;
     CMouseCursor::Qt3DSMouseCursor m_currentCursor;
     TimelineControl *m_timelineControl = nullptr;
 

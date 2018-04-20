@@ -49,8 +49,9 @@ public:
     void setState(State state) override;
     void setRowTree(RowTree *rowTree);
     void updatePosition();
-    void startDurationMove();
+    void startDurationMove(double clickX);
     void moveDurationBy(double dx);
+    void moveDurationTo(double newX);
     void setStartTime(double startTime);
     void setEndTime(double endTime);
     void setStartX(double startX);
@@ -62,9 +63,12 @@ public:
     void updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle propHandle);
     void updateDurationFromBinding();
     TimelineControlType getClickedControl(const QPointF &scenePos) const;
+    double getStartX() const;
+    double getEndX() const;
     double getStartTime() const;
     double getEndTime() const;
-    double getDurationMoveOffset();
+    double getDurationMoveTime() const; // the time a row duration has moved (to commit to binding)
+    double getDurationMoveOffsetX() const;
     int type() const;
     RowTimeline *parentRow() const;
     RowTree *rowTree() const;
@@ -86,6 +90,7 @@ private:
     RowTree *m_rowTree;
     double m_startTime = 0;
     double m_startDurationMoveStartTime = 0;
+    double m_startDurationMoveOffsetX = 0;
     double m_endTime = 0;
     double m_startX = 0;
     double m_endX = 0;
