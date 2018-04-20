@@ -51,6 +51,7 @@
 #include "RowTreeContextMenu.h"
 #include "RowTimelineContextMenu.h"
 #include "StudioPreferences.h"
+#include "TimeEditDlg.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -686,7 +687,17 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
     const QPointF scenePos = event->scenePos();
     QGraphicsItem *item = itemAt(scenePos, QTransform());
     if (item != nullptr) {
-        item = getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
+        QGraphicsItem *itemBelowPlayhead =
+                getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
+        if (item->type() == TimelineItem::TypeRuler
+                || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
+            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+            CTimeEditDlg timeEditDlg;
+            timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
+            return;
+        }
+
+        item = itemBelowPlayhead;
         if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
             RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
             if (!treeLabelItem->parentRow()->isProperty()) {
@@ -695,13 +706,21 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 treeLabelItem->setFocus();
             }
         } else if (item->type() == TimelineItem::TypeRowTimeline) {
-            RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
-            long theStartTime = timelineItem->getStartTime() * 1000;
-            long theEndTime = timelineItem->getEndTime() * 1000;
-            m_timelineControl->setRowTimeline(timelineItem);
-            CDurationEditDlg theDurationEditDlg;
-            theDurationEditDlg.showDialog(theStartTime, theEndTime,
-                                          g_StudioApp.GetCore()->GetDoc(), m_timelineControl);
+            RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+            Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
+            if (clickedKeyframe) {
+                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                CTimeEditDlg timeEditDlg;
+                timeEditDlg.setKeyframesManager(m_keyframeManager);
+                timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
+            } else if (rowTimeline->rowTree()->hasDurationBar()) {
+                long theStartTime = rowTimeline->getStartTime() * 1000;
+                long theEndTime = rowTimeline->getEndTime() * 1000;
+                m_timelineControl->setRowTimeline(rowTimeline);
+                CDurationEditDlg theDurationEditDlg;
+                theDurationEditDlg.showDialog(theStartTime, theEndTime,
+                                              g_StudioApp.GetCore()->GetDoc(), m_timelineControl);
+            }
         }
     }
 

@@ -30,22 +30,12 @@
 #ifndef DURATION_EDIT_DIALOG_H
 #define DURATION_EDIT_DIALOG_H
 
+#include "TimeEnums.h"
 #include <QtWidgets/qdialog.h>
 
 class CTimebarControl;
 class IDoc;
 class ITimelineKeyframesManager;
-
-enum ETimeFormat { MSEC, SEC_MSEC, MIN_SEC_MSEC };
-
-enum ETimeConversionOperation {
-    CONVERT_MIN_TO_MSEC,
-    CONVERT_SEC_TO_MSEC,
-    CONVERT_MSEC_TO_MIN,
-    CONVERT_MSEC_TO_SEC,
-    CONVERT_TIME_TO_MSEC,
-    CONVERT_MSEC_TO_MIN_SEC_MSEC
-};
 
 class ITimeChangeCallback
 {

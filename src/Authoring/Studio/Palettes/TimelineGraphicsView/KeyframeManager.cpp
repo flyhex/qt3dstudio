@@ -385,8 +385,46 @@ bool KeyframeManager::hasCopiedKeyframes() const
     return !m_copiedKeyframes.empty();
 }
 
-// IKeyframesManager interface to connect Doc and KeyframeManager
 // Mahmoud_TODO: rewrite a better interface for the new timeline
+// ITimelineKeyframesManager interface
+void KeyframeManager::SetKeyframeTime(long inTime)
+{
+    // Mahmoud_TODO: implement if needed
+}
+
+void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
+{
+    // Mahmoud_TODO: implement if needed
+}
+
+long KeyframeManager::OffsetSelectedKeyframes(long inOffset)
+{
+    double dx = m_scene->ruler()->timeToDistance(inOffset / 1000.0);
+    moveSelectedKeyframes(dx);
+    return 0;
+}
+
+bool KeyframeManager::CanMakeSelectedKeyframesDynamic()
+{
+    // Mahmoud_TODO: implement if needed
+    return false;
+}
+
+void KeyframeManager::CommitChangedKeyframes()
+{
+    commitMoveSelectedKeyframes();
+}
+
+void KeyframeManager::RollbackChangedKeyframes()
+{
+    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
+        keyframe->time = keyframe->binding->GetTime() / 1000.0;
+
+    for (auto row : qAsConst(m_selectedKeyframesMasterRows))
+        row->updateKeyframes();
+}
+
+// IKeyframesManager interface
 bool KeyframeManager::HasSelectedKeyframes(bool inOnlyDynamic)
 {
     return hasSelectedKeyframes();

@@ -417,6 +417,7 @@ SOURCES += \
 HEADERS += \
     Application/TimeEditDlg.h \
     Application/DurationEditDlg.h \
+    Application/TimeEnums.h \
     _Win/Application/StudioApp.h \
     Controls/TextEditContextMenu.h \
     Palettes/Action/ActionModel.h \

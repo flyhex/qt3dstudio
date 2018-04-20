@@ -29,9 +29,9 @@
 #ifndef KEYFRAMEMANAGER_H
 #define KEYFRAMEMANAGER_H
 
+#include "Bindings/ITimelineKeyframesManager.h"
 #include <QtCore/qlist.h>
 #include <StudioObjectTypes.h>
-#include "IKeyframesManager.h"
 
 class RowTimeline;
 class TimelineGraphicsScene;
@@ -40,7 +40,7 @@ struct Keyframe;
 QT_FORWARD_DECLARE_CLASS(QGraphicsSceneContextMenuEvent)
 QT_FORWARD_DECLARE_CLASS(QRectF)
 
-class KeyframeManager : public IKeyframesManager
+class KeyframeManager : public ITimelineKeyframesManager
 {
 public:
     KeyframeManager(TimelineGraphicsScene *m_scene);
@@ -70,8 +70,15 @@ public:
     QList<Keyframe *> m_copiedKeyframes; // for copy, cut, paste
     QList<RowTimeline *> m_selectedKeyframesMasterRows;
 
-    // IKeyframesManager interface
     // Mahmoud_TODO: rewrite a better interface for the new timeline
+    // ITimelineKeyframesManager interface
+    void SetKeyframeTime(long inTime) override;
+    void SetKeyframesDynamic(bool inDynamic) override;
+    long OffsetSelectedKeyframes(long inOffset) override;
+    bool CanMakeSelectedKeyframesDynamic() override;
+    void CommitChangedKeyframes() override;
+    void RollbackChangedKeyframes() override;
+    // IKeyframesManager interface
     bool HasSelectedKeyframes(bool inOnlyDynamic) override;
     bool HasDynamicKeyframes() override;
     bool CanPerformKeyframeCopy() override;
