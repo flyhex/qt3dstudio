@@ -43,6 +43,12 @@ class RowTimeline;
 class Ruler;
 class ITimelineItemBinding;
 
+enum class ExpandState {
+    Hidden,
+    Collapsed,
+    Expanded
+};
+
 class RowTree : public InteractiveTimelineItem
 {
     Q_OBJECT
@@ -68,6 +74,9 @@ public:
     void setBinding(ITimelineItemBinding *binding);
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
     void selectLabel();
+    void togglePropertyExpanded();
+    void setPropertyExpanded(bool expand);
+    ITimelineItemProperty *propBinding();
     TreeControlType getClickedControl(const QPointF &scenePos);
     bool hasPropertyChildren();
     bool shy() const;
@@ -80,6 +89,7 @@ public:
     bool empty() const;
     bool selected() const;
     bool hasDurationBar() const;
+    bool propertyExpanded() const;
     int depth() const;
     int type() const;
     int treeWidth() const;
@@ -98,7 +108,7 @@ protected:
 private:
     void initialize();
     void initializeAnimations();
-    void animateExpand(bool expand);
+    void animateExpand(ExpandState state);
     void updateExpandStatus(bool expand, bool childrenOnly = false);
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
@@ -116,13 +126,14 @@ private:
     bool m_moveSource = false;
     bool m_moveTarget = false;
     bool m_isProperty = false;
+    bool m_isPropertyExpanded = false;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
     EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;
     QString m_propertyType; // for property rows
     QString m_label;
     QList<RowTree *> m_childRows;
-    ITimelineItemBinding *m_binding;
+    ITimelineItemBinding *m_binding = nullptr;
     ITimelineItemProperty *m_PropBinding; // for property rows
 
     QRect m_rectArrow;
@@ -134,11 +145,11 @@ private:
     QParallelAnimationGroup m_expandAnimation;
     QPropertyAnimation *m_expandHeightAnimation;
     QPropertyAnimation *m_expandTimelineHeightAnimation;
-    QParallelAnimationGroup m_collapseAnimation;
-    QPropertyAnimation *m_collapseHeightAnimation;
-    QPropertyAnimation *m_collapseTimelineHeightAnimation;
+    QPropertyAnimation *m_expandOpacityAnimation;
+    QPropertyAnimation *m_expandTimelineOpacityAnimation;
 
     friend class RowTimeline;
+    friend class RowTimelinePropertyGraph;
 };
 
 #endif // ROWTREE_H

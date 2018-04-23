@@ -479,6 +479,8 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             m_keyframeManager->selectKeyframesInRect(m_selectionRect->rect());
         } else if (m_rowMover->isActive()) {
             // moving rows vertically (reorder/reparent)
+            // collapse all properties so correctIndex() counts correctly
+            m_rowManager->collapseAllPropertyRows();
             int indexRaw = qRound(event->scenePos().y() / TimelineConstants::ROW_H) - 1;
             int index = indexRaw;
             m_rowManager->correctIndex(index);
@@ -698,9 +700,15 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
         }
 
         item = itemBelowPlayhead;
-        if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
+        if (item->type() == TimelineItem::TypeRowTree) {
+            RowTree *treeItem = static_cast<RowTree *>(item);
+            if (treeItem->isProperty())
+                treeItem->togglePropertyExpanded();
+        } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
             RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
-            if (!treeLabelItem->parentRow()->isProperty()) {
+            if (treeLabelItem->parentRow()->isProperty()) {
+                treeLabelItem->parentRow()->togglePropertyExpanded();
+            } else {
                 // Tree labels text can be edited with double-click
                 treeLabelItem->setEnabled(true);
                 treeLabelItem->setFocus();

@@ -57,6 +57,7 @@ public:
     void reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding);
     void syncRowPositionWithBinding(RowTree *row, Qt3DSDMTimelineItemBinding *parentBinding);
     void updateRulerDuration();
+    void collapseAllPropertyRows();
     int getChildIndex(RowTree *parentRow, RowTree *childRow);
     bool isFirstChild(RowTree *parent, RowTree *child);
     bool hasProperties(RowTree *row);

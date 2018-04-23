@@ -26,19 +26,29 @@
 **
 ****************************************************************************/
 
-#include "TimelineItem.h"
-#include "TimelineConstants.h"
+#ifndef ROWTIMELINEPROPERTYGRAPH_H
+#define ROWTIMELINEPROPERTYGRAPH_H
 
+#include <QtCore/qobject.h>
 #include <QtGui/qpainter.h>
 
-TimelineItem::TimelineItem(TimelineItem *parent) : QGraphicsWidget(parent)
-{
-    setPreferredHeight(TimelineConstants::ROW_H_EXPANDED);
-    setMaximumHeight(TimelineConstants::ROW_H);
-}
+class RowTimeline;
+class ITimelineItemProperty;
 
-int TimelineItem::type() const
+class RowTimelinePropertyGraph : public QObject
 {
-    // Enable the use of qgraphicsitem_cast with this item.
-    return TypeTimelineItem;
-}
+    Q_OBJECT
+public:
+    explicit RowTimelinePropertyGraph(QObject *parent = nullptr);
+    void paintGraphs(QPainter *painter, const QRectF &rect);
+
+private:
+    void paintSingleChannel(QPainter *painter, long inChannelIndex,
+                            const QColor &inColor);
+
+    RowTimeline *m_rowTimeline = nullptr;
+    ITimelineItemProperty *m_propBinding = nullptr;
+    QRectF m_rect;
+};
+
+#endif // ROWTIMELINEPROPERTYGRAPH_H

@@ -34,6 +34,7 @@
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 
 class RowTree;
+class RowTimelinePropertyGraph;
 struct Keyframe;
 
 class RowTimeline : public InteractiveTimelineItem
@@ -88,6 +89,7 @@ private:
     double xToTime(double xPos);
 
     RowTree *m_rowTree;
+    RowTimelinePropertyGraph *m_propertyGraph = nullptr;
     double m_startTime = 0;
     double m_startDurationMoveStartTime = 0;
     double m_startDurationMoveOffsetX = 0;

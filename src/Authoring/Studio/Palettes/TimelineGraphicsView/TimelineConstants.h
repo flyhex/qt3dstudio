@@ -33,6 +33,7 @@ namespace TimelineConstants
 {
     // Dimensions
     const int ROW_H             = 20;
+    const int ROW_H_EXPANDED    = 120;   // property rows height when graph is shown
     const int ROW_SPACING       = 2;
     const int RULER_SEC_W       = 30;    // width of 1 second section (at scale 1)
     const int RULER_SEC_DIV     = 10;    // second divisions

@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "RowTimeline.h"
+#include "RowTimelinePropertyGraph.h"
 #include "RowTree.h"
 #include "RowManager.h"
 #include "Ruler.h"
@@ -135,8 +136,17 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         painter->restore();
     }
 
+    if (m_propertyGraph) {
+        // Property graph
+        QRectF graphRect(TimelineConstants::RULER_EDGE_OFFSET, 0,
+                         widget->width(), size().height());
+        m_propertyGraph->paintGraphs(painter, graphRect);
+    }
+
     // Keyframes
-    int keyFrameY = 2 - (TimelineConstants::ROW_H - size().height()) / 2;
+    const int keyFrameH = 16;
+    const int keyFrameY = (TimelineConstants::ROW_H / 2) - (keyFrameH / 2);
+
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
                 = QPixmap(":/images/Keyframe-Master-Normal.png");
@@ -623,6 +633,11 @@ void RowTimeline::setState(State state)
 void RowTimeline::setRowTree(RowTree *rowTree)
 {
     m_rowTree = rowTree;
+    if (m_rowTree->isProperty()) {
+        if (m_propertyGraph)
+            delete m_propertyGraph;
+        m_propertyGraph = new RowTimelinePropertyGraph(this);
+    }
 }
 
 RowTree *RowTimeline::rowTree() const

@@ -189,7 +189,8 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.h \
     Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.h \
     Palettes/TimelineGraphicsView/ui/NavigationBar.h \
-    Palettes/TimelineGraphicsView/ui/NavigationBarItem.h
+    Palettes/TimelineGraphicsView/ui/NavigationBarItem.h \
+    Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.h
 
 FORMS += \
     Application/TimeEditDlg.ui \
@@ -414,7 +415,8 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.cpp \
     Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.cpp \
     Palettes/TimelineGraphicsView/ui/NavigationBar.cpp \
-    Palettes/TimelineGraphicsView/ui/NavigationBarItem.cpp
+    Palettes/TimelineGraphicsView/ui/NavigationBarItem.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.cpp
 
 HEADERS += \
     Application/TimeEditDlg.h \

@@ -106,84 +106,60 @@ void RowTree::initializeAnimations()
     // Init left side expand animations
     m_expandHeightAnimation = new QPropertyAnimation(this, "maximumSize");
     m_expandHeightAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    m_expandHeightAnimation->setEndValue(QSizeF(size().width(), TimelineConstants::ROW_H));
     m_expandAnimation.addAnimation(m_expandHeightAnimation);
-    auto *expandOpacityAnimation = new QPropertyAnimation(this, "opacity");
-    expandOpacityAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    expandOpacityAnimation->setEndValue(1);
-    m_expandAnimation.addAnimation(expandOpacityAnimation);
+    m_expandOpacityAnimation = new QPropertyAnimation(this, "opacity");
+    m_expandOpacityAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION / 3);
+    m_expandAnimation.addAnimation(m_expandOpacityAnimation);
 
     // Init right side expand animations
     m_expandTimelineHeightAnimation = new QPropertyAnimation(m_rowTimeline, "maximumSize");
     m_expandTimelineHeightAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(),
-                                                        TimelineConstants::ROW_H));
     m_expandAnimation.addAnimation(m_expandTimelineHeightAnimation);
-    auto *expandTimelineOpacityAnimation = new QPropertyAnimation(m_rowTimeline, "opacity");
-    expandTimelineOpacityAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    expandTimelineOpacityAnimation->setEndValue(1);
-    m_expandAnimation.addAnimation(expandTimelineOpacityAnimation);
+    m_expandTimelineOpacityAnimation = new QPropertyAnimation(m_rowTimeline, "opacity");
+    m_expandTimelineOpacityAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION / 3);
+    m_expandAnimation.addAnimation(m_expandTimelineOpacityAnimation);
 
-    // Init left side collapse animations
-    m_collapseHeightAnimation = new QPropertyAnimation(this, "maximumSize");
-    m_collapseHeightAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    m_collapseHeightAnimation->setEndValue(QSizeF(size().width(), 0));
-    m_collapseAnimation.addAnimation(m_collapseHeightAnimation);
-    auto *collapseOpacityAnimation = new QPropertyAnimation(this, "opacity");
-    collapseOpacityAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION/2);
-    collapseOpacityAnimation->setEndValue(0);
-    m_collapseAnimation.addAnimation(collapseOpacityAnimation);
-
-    // Init right side collapse animations
-    m_collapseTimelineHeightAnimation = new QPropertyAnimation(m_rowTimeline, "maximumSize");
-    m_collapseTimelineHeightAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    m_collapseTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(), 0));
-    m_collapseAnimation.addAnimation(m_collapseTimelineHeightAnimation);
-    auto *collapseTimelineOpacityAnimation = new QPropertyAnimation(m_rowTimeline, "opacity");
-    collapseTimelineOpacityAnimation->setDuration(TimelineConstants::EXPAND_ANIMATION_DURATION);
-    collapseTimelineOpacityAnimation->setEndValue(0);
-    m_collapseAnimation.addAnimation(collapseTimelineOpacityAnimation);
-
-    // Show when expanding starts
     connect(&m_expandAnimation, &QAbstractAnimation::stateChanged,
             [this](const QAbstractAnimation::State newState) {
         if (newState == QAbstractAnimation::Running) {
             setVisible(true);
             m_rowTimeline->setVisible(true);
-        }
-    });
-
-    // Hide when collapsing ends
-    connect(&m_collapseAnimation, &QAbstractAnimation::stateChanged,
-            [this](const QAbstractAnimation::State newState) {
-        if (newState == QAbstractAnimation::Stopped) {
-            setVisible(false);
-            m_rowTimeline->setVisible(false);
+        } else if (newState == QAbstractAnimation::Stopped) {
+            if (this->maximumHeight() == 0) {
+                setVisible(false);
+                m_rowTimeline->setVisible(false);
+            }
         }
     });
 
 }
 
-void RowTree::animateExpand(bool expand)
+void RowTree::animateExpand(ExpandState state)
 {
-    if (expand) {
-        // Update these as widths may have changed
-        m_expandHeightAnimation->setEndValue(QSizeF(size().width(), TimelineConstants::ROW_H));
-        m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(),
-                                                            TimelineConstants::ROW_H));
-        m_expandAnimation.start();
-    } else {
-        m_collapseHeightAnimation->setEndValue(QSizeF(size().width(), 0));
-        m_collapseTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(), 0));
-        m_collapseAnimation.start();
+    int endHeight = 0; // ExpandState::Hidden
+    float endOpacity = 0;
+    if (state == ExpandState::Expanded) {
+        endHeight = m_isPropertyExpanded ? TimelineConstants::ROW_H_EXPANDED
+                                         : TimelineConstants::ROW_H;
+        endOpacity = 1;
+    } else if (state == ExpandState::Collapsed) {
+        endHeight = TimelineConstants::ROW_H;
+        endOpacity = 1;
     }
+    m_expandHeightAnimation->setEndValue(QSizeF(size().width(), endHeight));
+    m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(),
+                                                        endHeight));
+    m_expandOpacityAnimation->setEndValue(endOpacity);
+    m_expandTimelineOpacityAnimation->setEndValue(endOpacity);
+
+    m_expandAnimation.start();
 }
 
 void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     const int offset = 5 + m_depth * 15;
     const int iconSize = 16;
-    const int iconY = (size().height() / 2) - (iconSize / 2);
+    const int iconY = (TimelineConstants::ROW_H / 2) - (iconSize / 2);
 
     // update button bounds rects
     m_rectArrow  .setRect(offset, iconY, iconSize, iconSize);
@@ -348,6 +324,11 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
     m_labelItem.setMaster(itemBinding->IsMaster());
 }
 
+ITimelineItemProperty *RowTree::propBinding()
+{
+    return m_PropBinding;
+}
+
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
@@ -460,7 +441,8 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     QPointF p = event->pos();
     if (m_rectType.contains(p.x(), p.y()) && !m_locked)
-        m_binding->OpenAssociatedEditor();
+        if (m_binding)
+            m_binding->OpenAssociatedEditor();
 }
 
 // handle clicked control and return its type
@@ -508,7 +490,7 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
 {
     if (!childrenOnly)
-        animateExpand(expand);
+        animateExpand(expand ? ExpandState::Expanded : ExpandState::Hidden);
 
     if (!m_childRows.empty()) {
         for (auto child : qAsConst(m_childRows))
@@ -635,4 +617,23 @@ bool RowTree::hasActionButtons() const
 bool RowTree::hasDurationBar() const
 {
     return hasActionButtons(); // Same at least now
+}
+
+bool RowTree::propertyExpanded() const
+{
+    return m_isPropertyExpanded;
+}
+
+void RowTree::togglePropertyExpanded()
+{
+    setPropertyExpanded(!m_isPropertyExpanded);
+}
+
+void RowTree::setPropertyExpanded(bool expand)
+{
+    m_isPropertyExpanded = expand;
+    if (m_isPropertyExpanded)
+        animateExpand(ExpandState::Expanded);
+    else
+        animateExpand(ExpandState::Collapsed);
 }
