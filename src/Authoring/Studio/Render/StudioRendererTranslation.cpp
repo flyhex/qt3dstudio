@@ -2377,7 +2377,8 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
                 static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
             SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
             bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
-            if (shouldDisplayWidget && isActiveCamera == false) {
+            if (shouldDisplayWidget && isActiveCamera == false
+                    && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Camera) {
                 switch (theToolMode) {
                 default:
                     QT3DS_ASSERT(false);
