@@ -81,13 +81,6 @@ namespace state {
             static Option<STestResults> RunFile(const char8_t *fname, const char8_t *inRootDir,
                                                 IDataLogger &inLogger);
         };
-
-        class ILuaTest
-        {
-        public:
-            static Option<STestResults> RunFile(const char8_t *fname, const char8_t *inRootDir,
-                                                const char8_t *inLunityPath, IDataLogger &inLogger);
-        };
     }
 }
 }

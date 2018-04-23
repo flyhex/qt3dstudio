@@ -510,7 +510,7 @@ void CDispatch::RemoveEditCameraChangeListener(CEditCameraChangeListener *inList
  */
 void CDispatch::FireOnEditCameraChanged()
 {
-    m_EditCameraChangeListeners.FireEvent(&CEditCameraChangeListener::OnEditCameraChanged);
+    m_EditCameraChangeListeners.FireEvent(&CEditCameraChangeListener::onEditCameraChanged);
 }
 
 //=============================================================================
@@ -519,12 +519,12 @@ void CDispatch::FireOnEditCameraChanged()
  */
 void CDispatch::FireOnCamerasTransformed()
 {
-    m_EditCameraChangeListeners.FireEvent(&CEditCameraChangeListener::OnEditCamerasTransformed);
+    m_EditCameraChangeListeners.FireEvent(&CEditCameraChangeListener::onEditCamerasTransformed);
 }
 
 void CDispatch::FireAuthorZoomChanged()
 {
-    m_EditCameraChangeListeners.FireEvent(&CEditCameraChangeListener::OnAuthorZoomChanged);
+    m_EditCameraChangeListeners.FireEvent(&CEditCameraChangeListener::onAuthorZoomChanged);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

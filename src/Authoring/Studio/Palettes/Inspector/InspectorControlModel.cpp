@@ -985,7 +985,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
 
     // some properties may initialize OpenGL resources (e.g. loading meshes will
     // initialize vertex buffers), so the renderer's OpenGL context must be current
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.GetRenderer());
+    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     theRenderer.MakeContextCurrent();
 
     m_UpdatableEditor.EnsureEditor(L"Set Property", __FILE__, __LINE__)

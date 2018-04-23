@@ -215,7 +215,7 @@ void CCore::GetCreateDirectoryFileName(const Qt3DSFile &inDocument,
  * Call to create a new document.
  * This will clear out the current doc (if there is one) then create a new one.
  */
-void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
+bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
 {
     CDispatchDataModelNotificationScope __dispatchScope(*m_Dispatch);
 
@@ -246,8 +246,8 @@ void CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
     // Update the uia file if possible. Edit the sub-presentation list only when creating a new
     // main presentation.
     QByteArray docBA = theDocument.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(),
-                                                      inCreateDirectory);
+    return qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), QStringList(),
+                                                             inCreateDirectory);
 }
 
 //=============================================================================

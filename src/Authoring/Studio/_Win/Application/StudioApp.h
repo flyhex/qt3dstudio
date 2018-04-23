@@ -27,18 +27,11 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_STUDIO_APP_H
 #define INCLUDED_STUDIO_APP_H 1
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "CmdLineParser.h"
 #include "StudioObjectTypes.h"
 #include "DispatchListeners.h"
 #include "Qt3DSDMHandles.h"
@@ -51,11 +44,11 @@ class IDirectoryWatchingSystem;
 class ITickTock;
 class IStudioRenderer;
 struct SSelectedValue;
-};
+}
 
 namespace qt3dsdm {
 class ISignalConnection;
-};
+}
 
 struct StudioManipulationModes
 {
@@ -65,12 +58,8 @@ struct StudioManipulationModes
     };
 };
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CCore;
 class CDialogs;
-class CSplashView;
 class CInspectableBase;
 class CDirectoryWatchingSystemWrapper;
 class CHotKeys;
@@ -79,6 +68,8 @@ class CMainFrame;
 enum EStudioObjectType;
 struct SubPresentationRecord;
 class CDataInputDialogItem;
+
+QT_FORWARD_DECLARE_CLASS(QCommandLineParser)
 
 class CStudioApp : public QObject,
         public CCoreAsynchronousEventListener,
@@ -91,58 +82,53 @@ public:
     CStudioApp();
     virtual ~CStudioApp();
 
-    // Overrides
 public:
-    virtual bool InitInstance(int argc, char *argv[]);
-    virtual int Run();
+    virtual bool initInstance(const QCommandLineParser &parser);
+    virtual bool run(const QCommandLineParser &parser);
 
-    void OnAppAbout();
+    void onAppAbout();
 
 public:
-    void PerformShutdown();
-    Q3DStudio::IDirectoryWatchingSystem &GetDirectoryWatchingSystem();
-    void SetupTimer(long inMessageId, QWidget *inWnd);
-    Q3DStudio::ITickTock &GetTickTock();
-    Q3DStudio::IStudioRenderer &GetRenderer();
-    void ClearGuides();
+    void performShutdown();
+    Q3DStudio::IDirectoryWatchingSystem &getDirectoryWatchingSystem();
+    void setupTimer(long inMessageId, QWidget *inWnd);
+    Q3DStudio::ITickTock &getTickTock();
+    Q3DStudio::IStudioRenderer &getRenderer();
+    void clearGuides();
+
+public Q_SLOTS:
+    void handleMessageReceived(const QString &message, QObject *socket);
 
 protected:
-    int RunApplication();
-    int BlankRunApplication();
-    int RunCmdLineTests(const Q3DStudio::CString &inTestArgs);
-    int RunSystemTests(const Q3DStudio::CString &inTestArgs);
-    int OpenAndRunApplication(const Q3DStudio::CString &inFilename);
-    void InitCore();
-    bool ShowStartupDialog();
-    bool HandleWelcomeRes(int res, bool recursive);
+    bool runApplication();
+    bool blankRunApplication();
+    bool openAndRunApplication(const QString &inFilename);
+    bool createAndRunApplication(const QString &filename, const QString &folder = QString());
+    void initCore();
+    bool showStartupDialog();
+    bool handleWelcomeRes(int res, bool recursive);
 
-    CCore *m_Core;
-    CSplashView *m_SplashPalette; ///< Startup splash palette
-    QString m_OldHelpFilePath; ///< Stores a pointer to the old
-    CCmdLineParser m_CmdLineParser; ///< Stores and returns execution modes
-    int m_UnitTestResults; ///< 0 on success; 1 on failure
-    bool m_IsSilent; ///< true indicates Studio running in silent mode (no GUI)
-    CViews *m_Views;
-    long m_ToolMode;
-    StudioManipulationModes::Enum m_ManipulationMode; ///< Controls what space the tras, rot, and
-                                                      /// scale manipulations work in.
-    long m_SelectMode;
-    CDialogs *m_Dialogs;
-    long m_PlaybackTime; ///< Stores the playhead's starting position so that it can be restored
-                         ///after playing the presentation for a little while
-    qt3dsdm::Qt3DSDMSlideHandle m_PlaybackOriginalSlide; ///< Stores the current slide handle
-                                                         /// before playback started.
+    CCore *m_core;
+    bool m_isSilent; // true indicates Studio running in silent mode (no GUI)
+    CViews *m_views;
+    long m_toolMode;
+    StudioManipulationModes::Enum m_manipulationMode; // Controls what space the tras, rot, and
+                                                      // scale manipulations work in.
+    long m_selectMode;
+    CDialogs *m_dialogs;
+    long m_playbackTime; // Stores the playhead's starting position so that it can be restored
+                         //after playing the presentation for a little while
+    qt3dsdm::Qt3DSDMSlideHandle m_playbackOriginalSlide; // Stores the current slide handle
+                                                         // before playback started.
 
-    std::shared_ptr<Q3DStudio::ITickTock> m_TickTock;
-    std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_DirectoryWatcherTicker;
-    std::shared_ptr<Q3DStudio::IStudioRenderer> m_Renderer;
-    bool m_AuthorZoom;
+    std::shared_ptr<Q3DStudio::ITickTock> m_tickTock;
+    std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_directoryWatchingSystem;
+    std::shared_ptr<Q3DStudio::IStudioRenderer> m_renderer;
+    bool m_authorZoom;
 
 private:
     bool m_welcomeShownThisSession;
-    // are we are launching welcome screen again due to
-    // user canceling file dialog?
+    // are we are launching welcome screen again due to user canceling file dialog?
     bool m_goStraightToWelcomeFileDialog;
     int m_tutorialPage;
     QTimer *m_autosaveTimer;
@@ -158,8 +144,8 @@ public:
     long GetSelectMode();
     void SetSelectMode(long inSelectMode);
 
-    StudioManipulationModes::Enum GetMinpulationMode() const;
-    void SetMinpulationMode(StudioManipulationModes::Enum inManipulationMode);
+    StudioManipulationModes::Enum GetManipulationMode() const;
+    void SetManipulationMode(StudioManipulationModes::Enum inManipulationMode);
 
     bool CanUndo();
     bool CanRedo();

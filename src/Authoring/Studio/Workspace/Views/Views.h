@@ -27,9 +27,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_VIEWS_H
 #define INCLUDED_VIEWS_H 1
 
@@ -37,16 +34,9 @@
 
 #include <QtWidgets/qwidget.h>
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CMainFrame;
 class CStudioApp;
 class CHotKeys;
-
-//==============================================================================
-//	Class
-//==============================================================================
 
 class CViews
 {
@@ -54,20 +44,16 @@ public:
     CViews(CStudioApp *inStudioApp);
     virtual ~CViews();
 
-    // Implementation
-    void CreateViews();
-    void DestroyViews();
+    void createViews(bool silent);
 
-    // Keyboard
-    void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
+    void registerGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
-    // Main Frame
-    CMainFrame *GetMainFrame(); // ONLY THE APP SHOULD USE THIS FUNCTION- ABSOLUTELY NO ONE ELSE!!!!
+    CMainFrame *getMainFrame();
 
-    void RecheckMainframeSizingMode();
+    void recheckMainframeSizingMode();
 
 protected:
-    CMainFrame *m_MainFrame;
+    QScopedPointer<CMainFrame> m_mainFrame;
 };
 
 #endif // INCLUDED_VIEWS_H

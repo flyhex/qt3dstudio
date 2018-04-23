@@ -139,7 +139,6 @@ public: // Execution
 
 public: // Bridge Control
     IScene *GetScene() const override;
-    IScriptBridge *GetScriptBridge() override;
     IScriptBridge *GetScriptBridgeQml() override;
     void SetScene(IScene *inScene) override;
 

@@ -32,6 +32,7 @@
 #include "StudioPreferences.h"
 #include "HotKeys.h"
 #include "StudioUtils.h"
+#include "Qt3DSMath.h"
 
 #include <QDebug>
 
@@ -392,9 +393,11 @@ struct SRendererImpl : public IStudioRenderer,
         // But to do that I need to figure out what the view frustum is at -600 units from the near
         // clip plane
 
-        QT3DSVec3 theExtents = theBounds.getExtents();
+        QT3DSVec3 theExtents = theBounds.getExtents().multiply(theNode.m_Scale);
+
         // get the largest extent and then some addition so things fit nicely in the viewport.
         QT3DSF32 theMaxPossibleRadius = theExtents.magnitude();
+
         // easiest case, the viewport dimensions map directly to the
         m_Translation->m_EditCameraInfo.m_ViewRadius = theMaxPossibleRadius;
         RequestRender();
@@ -468,7 +471,15 @@ struct SRendererImpl : public IStudioRenderer,
                 // accurately
                 // or consider requesting a larger depth buffer from the windowing system.
                 // Setup the camera
-                theCameraInfo->m_Direction = theDefinition.m_Direction;
+                QT3DSVec3 normalizedDir = theDefinition.m_Direction;
+                normalizedDir.normalize();
+                if (theDefinition.m_Type == EditCameraTypes::Directional) {
+                    theCameraInfo->m_Direction = normalizedDir;
+                } else {
+                    theCameraInfo->m_Direction = QT3DSVec3(0, 0, -1);
+                    theCameraInfo->m_xRotation = -qt3ds::NVAtan(normalizedDir.x / normalizedDir.z);
+                    theCameraInfo->m_yRotation = qt3ds::NVAsin(normalizedDir.y);
+                }
                 theCameraInfo->m_CameraType = theDefinition.m_Type;
             }
 
@@ -755,30 +766,27 @@ struct SRendererImpl : public IStudioRenderer,
                 } break;
                 case STUDIO_TOOLMODE_CAMERA_ROTATE: {
                     if (m_Translation->m_EditCameraInfo.SupportsRotation()) {
-                        if (rightClick == false) {
-                            QT3DSVec3 theXAxis = QT3DSVec3(1, 0, 0);
-                            QT3DSVec3 theYAxis = QT3DSVec3(0, 1, 0);
-                            // Rotate about the center; we will just rotation the direction vector.
-                            QT3DSQuat theXRotation(-1.0f * theSubsetXDistance * g_RotationScaleFactor
-                                                    / 20.0f,
-                                                theYAxis);
-                            QT3DSQuat theYRotation(-1.0f * theSubsetYDistance * g_RotationScaleFactor
-                                                    / 20.0f,
-                                                theXAxis);
-                            m_Translation->m_EditCameraInfo.m_Rotation =
-                                m_MouseDownCameraInformation.m_Rotation
-                                * (theXRotation * theYRotation);
-                        } else {
-                            QT3DSVec3 theZAxis = QT3DSVec3(0, 0, 1);
-                            QT3DSQuat theZRotation(
-                                -1.0f * theYDistance * g_RotationScaleFactor / 20.0f, theZAxis);
-                            m_Translation->m_EditCameraInfo.m_Rotation =
-                                m_MouseDownCameraInformation.m_Rotation * theZRotation;
+                        if (!rightClick) {
+                            m_Translation->m_EditCameraInfo.m_xRotation =
+                                    m_MouseDownCameraInformation.m_xRotation
+                                    + (theSubsetXDistance * g_RotationScaleFactor / 20.0f);
+                            m_Translation->m_EditCameraInfo.m_yRotation =
+                                    m_MouseDownCameraInformation.m_yRotation
+                                    - (theSubsetYDistance * g_RotationScaleFactor / 20.0f);
+                            // Avoid rounding errors stemming from extremely large rotation angles
+                            if (m_Translation->m_EditCameraInfo.m_xRotation < -qt3ds::NVPi)
+                                m_Translation->m_EditCameraInfo.m_xRotation += qt3ds::NVPi * 2.0f;
+                            if (m_Translation->m_EditCameraInfo.m_xRotation > qt3ds::NVPi)
+                                m_Translation->m_EditCameraInfo.m_xRotation -= qt3ds::NVPi * 2.0f;
+                            if (m_Translation->m_EditCameraInfo.m_yRotation < -qt3ds::NVPi)
+                                m_Translation->m_EditCameraInfo.m_yRotation += qt3ds::NVPi * 2.0f;
+                            if (m_Translation->m_EditCameraInfo.m_yRotation > qt3ds::NVPi)
+                                m_Translation->m_EditCameraInfo.m_yRotation -= qt3ds::NVPi * 2.0f;
                         }
-                        // Rotations need to be incremental and relative else things don't rotate
-                        // intuitively.
-                        m_MouseDownCameraInformation.m_Rotation =
-                            m_Translation->m_EditCameraInfo.m_Rotation;
+                        m_MouseDownCameraInformation.m_xRotation =
+                            m_Translation->m_EditCameraInfo.m_xRotation;
+                        m_MouseDownCameraInformation.m_yRotation =
+                            m_Translation->m_EditCameraInfo.m_yRotation;
                         RequestRender();
                     }
                 } break;

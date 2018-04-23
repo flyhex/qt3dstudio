@@ -89,6 +89,7 @@ namespace render {
         virtual NVFoundationBase &GetFoundation() = 0;
         virtual NVAllocatorCallback &GetAllocator() = 0;
         virtual IQt3DSRenderer &GetRenderer() = 0;
+        virtual IRenderWidgetContext &GetRenderWidgetContext() = 0;
         virtual IBufferManager &GetBufferManager() = 0;
         virtual IResourceManager &GetResourceManager() = 0;
         virtual NVRenderContext &GetRenderContext() = 0;

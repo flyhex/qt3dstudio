@@ -30,8 +30,10 @@
 #include "StudioUtils.h"
 #include "StudioObjectTypes.h"
 
+const int DataInputSelectModel::TypeRole = Qt::UserRole + 1;
+
 DataInputSelectModel::DataInputSelectModel(QObject *parent)
-    : QStringListModel(parent)
+    : QAbstractListModel(parent)
 {
 }
 
@@ -47,4 +49,45 @@ QString DataInputSelectModel::getActiveIconPath() const
 QString DataInputSelectModel::getInactiveIconPath() const
 {
     return resourceImageUrl() + CStudioObjectTypes::GetDisabledIconName(OBJTYPE_DATAINPUT);
+}
+
+QVariant DataInputSelectModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    if (index.row() >= m_diTypePairList.size() || index.row() < 0)
+        return QVariant();
+
+    QPair<QString, QString> pair = m_diTypePairList.at(index.row());
+    if (role == Qt::DisplayRole)
+        return QVariant::fromValue(QString(pair.first));
+    else if (role == TypeRole)
+        return QVariant::fromValue(QString(pair.second));
+
+    return QVariant();
+}
+
+void DataInputSelectModel::setData(const QVector<QPair<QString, QString>> &data)
+{
+    // need explicit begin/end in order to make model content update
+    // in UI also when datainput chooser widget parent is (QWidget-based)
+    // timeline toolbar or slideview
+    beginResetModel();
+    m_diTypePairList = data;
+    endResetModel();
+}
+
+void DataInputSelectModel::clear()
+{
+    beginResetModel();
+    m_diTypePairList.clear();
+    endResetModel();
+}
+
+QHash<int, QByteArray> DataInputSelectModel::roleNames() const
+{
+    QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
+    roles.insert(TypeRole, QByteArray("datatype"));
+    return roles;
 }

@@ -2,6 +2,7 @@ TEMPLATE = app
 TARGET = Qt3DStudio
 include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
+include(../../shared/qtsingleapplication/qtsingleapplication.pri)
 INCLUDEPATH += $$OUT_PWD/..
 
 CONFIG += nostrictstrings
@@ -86,7 +87,6 @@ linux {
 
 STATICRUNTIME = \
     $$BEGIN_ARCHIVE \
-    -lLua$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lpcre$$qtPlatformTargetSuffix() \
     -lTinyXML$$qtPlatformTargetSuffix() \
@@ -144,6 +144,9 @@ HEADERS += \
     Application/DataInputListDlg.h \
     Application/DataInputSelectModel.h \
     Application/DataInputSelectView.h \
+    Application/DataInputSelectModel.h \
+    Application/DataInputSelectView.h \
+    Render/StudioGradientWidget.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
     Palettes/Timeline/IBreadCrumbProvider.h \
@@ -221,7 +224,6 @@ SOURCES += \
     _Win/DragNDrop/DropProxy.cpp \
     _Win/Palettes/PaletteManager.cpp \
     _Win/Palettes/Progress/ProgressView.cpp \
-    _Win/Palettes/Splash/SplashView.cpp \
     _Win/UI/EditCameraBar.cpp \
     _Win/UI/EditorPane.cpp \
     _Win/UI/GLVersionDlg.cpp \
@@ -368,8 +370,8 @@ SOURCES += \
     Render/StudioScaleWidget.cpp \
     Render/StudioTranslationWidget.cpp \
     Render/StudioWidget.cpp \
+    Render/StudioGradientWidget.cpp \
     Render/WGLRenderContext.cpp \
-    Utils/CmdLineParser.cpp \
     Utils/ImportUtils.cpp \
     Utils/ResourceCache.cpp \
     Utils/StudioUtils.cpp \

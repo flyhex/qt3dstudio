@@ -214,8 +214,21 @@ manipulator tool handles.</string>
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string/>
+       </property>
        <property name="text">
         <string>Restore Defaults</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="m_buttonResetLayout">
+       <property name="toolTip">
+        <string>Click to restore default Studio palette positions and visibilities</string>
+       </property>
+       <property name="text">
+        <string>Reset Layout</string>
        </property>
       </widget>
      </item>

@@ -37,7 +37,7 @@
 #include "Qt3DSHash.h"
 #include "Qt3DSRenderPlugin.h"
 #include "Qt3DSRenderPluginPropertyValue.h"
-#include "Qt3DSLuaElementHelper.h"
+#include "Qt3DSElementHelper.h"
 #include "Qt3DSPresentation.h"
 #include "Qt3DSApplication.h"
 #include "Qt3DSRenderCustomMaterialSystem.h"
@@ -189,7 +189,7 @@ struct SRuntimePropertyParser
         } else if (m_Type == Q3DStudio::ATTRIBUTETYPE_STRING) {
             CRegisteredString theString =
                 m_RenderContext.GetStringTable().HandleToStr(m_Value.m_StringHandle);
-            theElem = Q3DStudio::CLuaElementHelper::GetElement(
+            theElem = Q3DStudio::CElementHelper::GetElement(
                 m_Element.GetBelongedPresentation()->GetApplication(),
                 m_Element.GetBelongedPresentation(), theString.c_str(), &m_Element);
         }
@@ -591,6 +591,7 @@ struct SRuntimePropertyParser
 #define Material_FresnelPower ATTRIBUTE_FRESNELPOWER
 #define Material_SpecularAmount ATTRIBUTE_SPECULARAMOUNT
 #define Material_SpecularRoughness ATTRIBUTE_SPECULARROUGHNESS
+#define Material_RoughnessMap ATTRIBUTE_ROUGHNESSMAP
 #define Material_Opacity ATTRIBUTE_OPACITY
 #define Material_OpacityMap ATTRIBUTE_OPACITYMAP
 #define Material_BumpAmount ATTRIBUTE_BUMPAMOUNT

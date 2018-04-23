@@ -422,6 +422,7 @@ struct STranslatorDataModelParser
 #define Material_FresnelPower m_Material.m_FresnelPower
 #define Material_SpecularAmount m_Material.m_SpecularAmount
 #define Material_SpecularRoughness m_Material.m_SpecularRoughness
+#define Material_RoughnessMap m_Material.m_RoughnessMap
 #define Material_Opacity m_Material.m_Opacity
 #define Material_OpacityMap m_Material.m_OpacityMap
 #define Material_BumpMap m_Material.m_BumpMap
@@ -2414,7 +2415,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         m_LastRenderedWidget = theNextWidget;
         if (m_LastRenderedWidget) {
             m_LastRenderedWidget->SetSubComponentId(inWidgetId);
-            switch (g_StudioApp.GetMinpulationMode()) {
+            switch (g_StudioApp.GetManipulationMode()) {
             case StudioManipulationModes::Local:
                 m_LastRenderedWidget->SetRenderWidgetMode(qt3ds::render::RenderWidgetModes::Local);
                 break;
@@ -2430,6 +2431,23 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         m_Scene->PrepareForRender(GetViewportDimensions(), m_Context);
 
         m_Context.RunRenderTasks();
+
+        if (m_EditCameraEnabled) {
+            if (m_GradientWidget == nullptr)
+                m_GradientWidget = qt3ds::widgets::SGradientWidget
+                                    ::CreateGradientWidget(m_Context.GetAllocator());
+            // render gradient background
+            if (m_EditCameraEnabled) {
+                SNode *node = GetEditCameraLayer();
+                m_GradientWidget->SetNode(*node);
+                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
+                                         m_Context.GetRenderContext(),
+                                         m_EditCameraInfo.IsOrthographic());
+            } else {
+                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
+                                         m_Context.GetRenderContext(), true);
+            }
+        }
 
         m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
 
@@ -3339,12 +3357,18 @@ STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum i
             theAxis.normalize();
             QT3DSVec3 theCameraToObj = globalPos - camGlobalPos;
             QT3DSVec3 theTemp = theAxis.cross(theOriginalRay.m_Direction);
-            // Then the axis is parallel to the camera, we can't drag meaningfullly
+            // When the axis is parallel to the camera, we can't drag meaningfully
             if (theTemp.magnitudeSquared() < .05f) {
                 // Attempt to find a better axis by moving the object back towards the camera.
                 QT3DSF32 theSign = theCameraToObj.dot(theCamDirection) > 0.0 ? -1.0f : 1.0f;
                 QT3DSF32 theDistance = theCameraToObj.dot(theCamDirection);
                 QT3DSVec3 thePoint = globalPos + (theDistance * theSign) * theAxis;
+                // Check if we actually moved to right direction
+                QT3DSVec3 theNewCameraToObj = thePoint - camGlobalPos;
+                QT3DSF32 theNewDistance = theNewCameraToObj.dot(theCamDirection);
+                if (theNewDistance > theDistance)
+                    thePoint = globalPos - (theDistance * theSign) * theAxis;
+
                 QT3DSVec3 theNewDir = thePoint - camGlobalPos;
                 theNewDir.normalize();
                 theTemp = theAxis.cross(theNewDir);

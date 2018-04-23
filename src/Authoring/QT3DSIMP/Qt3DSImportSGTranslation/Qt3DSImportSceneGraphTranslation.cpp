@@ -628,6 +628,9 @@ public:
         case ETextureMapTypeEmissive:
             theId.append(L"emissivemap");
             break;
+        case ETextureMapTypeRoughness:
+            theId.append(L"roughnessmap");
+            break;
         }
         InternalPushObject(theId.c_str(), ComposerObjectTypes::Image);
         TIMPHandle topObj = m_InstanceStack.back();

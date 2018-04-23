@@ -41,7 +41,6 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSImportTranslation.h"
 #include "IDocumentEditor.h"
-#include "PathImportTranslator.h"
 #include "IDragable.h"
 
 ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListModel(parent)
@@ -411,18 +410,6 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
                 sourceFile, importResult.m_Error, doc->GetImportFailedHandler(),
                 translator.m_TranslationLog, forceError);
 #endif
-    } else if (extension.compare(QLatin1String("svg"), Qt::CaseInsensitive) == 0) {
-        IDocumentReader &reader(doc->GetDocumentReader());
-        SPathImportTranslator translator(sourceFile, *reader.GetLuaContext(), reader.GetFoundation());
-        const QDir outputDir = SFileTools::FindUniqueDestDirectory(targetDir, fileStem);
-        const QString fullOutputFile = outputDir.filePath(outputFileName);
-        const SImportResult importResult =
-            CPerformImport::TranslateToImportFile(translator, CFilePath(fullOutputFile));
-        bool forceError = QFileInfo(fullOutputFile).isFile() == false;
-        IDocumentEditor::DisplayImportErrors(
-                sourceFile, importResult.m_Error,
-                doc->GetImportFailedHandler(),
-                translator.m_TranslationLog, forceError);
     } else {
         // Copy the file to target directory
         // FindAndCopyDestFile will make sure the file name is unique and make sure it is

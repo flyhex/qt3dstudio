@@ -534,7 +534,6 @@ struct SApp : public IApplication
         m_Timer.Start();
 
         m_CoreFactory->SetApplicationCore(this);
-        m_CoreFactory->GetScriptEngine().SetApplicationCore(*this);
         m_CoreFactory->GetScriptEngineQml().SetApplicationCore(*this);
 
         m_CoreFactory->AddSearchPath(tempStr.c_str());
@@ -620,7 +619,7 @@ struct SApp : public IApplication
     {
         m_ProfileLogging = true;
         if (m_RuntimeFactory)
-            m_RuntimeFactory->GetScriptEngine().EnableProfiling();
+            m_RuntimeFactory->GetScriptEngineQml().EnableProfiling();
     }
 
     // Verbose logging is disabled by default.
@@ -818,7 +817,7 @@ struct SApp : public IApplication
         }
 
         // Run the garbage collection
-        m_CoreFactory->GetScriptEngine().StepGC();
+        m_CoreFactory->GetScriptEngineQml().StepGC();
     }
 
     void UpdateScenes() { m_RuntimeFactory->GetSceneManager().Update(); }
@@ -856,7 +855,7 @@ struct SApp : public IApplication
             m_CoreFactory->GetVisualStateContext().Initialize();
 
         // First off, update any application level behaviors.
-        IScriptBridge &theScriptEngine = m_CoreFactory->GetScriptEngine();
+        IScriptBridge &theScriptEngine = m_CoreFactory->GetScriptEngineQml();
         for (QT3DSU32 idx = 0, end = m_Behaviors.size(); idx < end; ++idx) {
             eastl::pair<SBehaviorAsset, bool> &entry(m_Behaviors[idx]);
             if (!entry.second) {
@@ -1068,7 +1067,8 @@ struct SApp : public IApplication
                                    GetSceneGraphDebugger())) {
                 // Load the scene graph portion of the scene.
                 newScene = m_RuntimeFactory->GetSceneManager().LoadScene(
-                            thePresentation, theUIPParser.mPtr, m_CoreFactory->GetScriptEngine());
+                            thePresentation, theUIPParser.mPtr,
+                            m_CoreFactory->GetScriptEngineQml());
             }
 
             if (newScene == NULL) {
@@ -1145,10 +1145,13 @@ struct SApp : public IApplication
                     DataInputDef diDef;
                     const char8_t *name = "";
                     const char8_t *type = "";
+                    const char8_t *evaluator = "";
+                    diDef.value = QVariant::Invalid;
                     inReader.UnregisteredAtt("name", name);
                     inReader.UnregisteredAtt("type", type);
                     inReader.Att("min", diDef.min);
                     inReader.Att("max", diDef.max);
+                    inReader.UnregisteredAtt("evaluator", evaluator);
                     if (AreEqual(type, "Ranged Number"))
                         diDef.type = DataInputTypeRangedNumber;
                     else if (AreEqual(type, "String"))
@@ -1157,10 +1160,18 @@ struct SApp : public IApplication
                         diDef.type = DataInputTypeFloat;
                     else if (AreEqual(type, "Vector3"))
                         diDef.type = DataInputTypeVector3;
+                    else if (AreEqual(type, "Vector2"))
+                        diDef.type = DataInputTypeVector2;
                     else if (AreEqual(type, "Boolean"))
                         diDef.type = DataInputTypeBoolean;
                     else if (AreEqual(type, "Variant"))
                         diDef.type = DataInputTypeVariant;
+
+                    if (AreEqual(type, "Evaluator")) {
+                        diDef.type = DataInputTypeEvaluator;
+                        diDef.evaluator = QString::fromUtf8(evaluator);
+                    }
+
                     m_dataInputs.insert(QString::fromUtf8(name), diDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";
@@ -1225,7 +1236,7 @@ struct SApp : public IApplication
     void ConnectDebugger()
     {
         NVFoundationBase &fnd(m_CoreFactory->GetFoundation());
-        Q3DStudio::IScriptBridge &theBridge = m_CoreFactory->GetScriptEngine();
+        Q3DStudio::IScriptBridge &theBridge = m_CoreFactory->GetScriptEngineQml();
         if (m_DebugSettings.hasValue()) {
             m_SocketSystem = SocketSystem::createSocketSystem(fnd);
             if (m_DebugSettings->m_Listen) {
@@ -1432,7 +1443,6 @@ struct SApp : public IApplication
             // apparently may cause
             // the call to set application to fail miserably.
             m_RuntimeFactory->SetApplication(this);
-            m_RuntimeFactory->GetScriptEngine().DisableMultithreadedAccess();
             m_RuntimeFactory->GetStringTable().DisableMultithreadedAccess();
 
             for (QT3DSU32 idx = 0, end = m_OrderedAssets.size(); idx < end; ++idx) {
@@ -1711,7 +1721,7 @@ struct SXMLLoader : public IAppLoadContext
             case AssetValueTypes::Behavior: {
                 SBehaviorAsset &theBehaviorAsset = *theAsset.getDataPtr<SBehaviorAsset>();
                 Q3DStudio::INT32 scriptId
-                        = m_App.m_CoreFactory->GetScriptEngine().InitializeApplicationBehavior(
+                        = m_App.m_CoreFactory->GetScriptEngineQml().InitializeApplicationBehavior(
                             theBehaviorAsset.m_Src);
                 if (scriptId == 0) {
                     qCCritical(INVALID_OPERATION, "Unable to load application behavior %s",

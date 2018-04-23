@@ -644,14 +644,7 @@ BOOL CUIPParserImpl::LoadClasses(IPresentation & /*inPresentation*/, IDOMReader 
                 bool theLoadFlag = false;
                 QString theFullPath(theSourcePath);
 
-                if (theFullPath.endsWith(".lua")) {
-                    // Load the lua file
-                    theLoadFlag = m_MetaData.LoadLuaFile(inReader.GetNarrowElementName(), theId,
-                                                         theName, theFullPath.toUtf8().data());
-
-                    if (theLoadFlag)
-                        m_IdScriptMap[theId] = theSourcePath;
-                } else if (theFullPath.endsWith(".qml")) {
+                if (theFullPath.endsWith(".qml")) {
                     theLoadFlag = m_MetaData.LoadScriptFile(inReader.GetNarrowElementName(), theId,
                                                             theName, theFullPath.toUtf8().data());
                     if (theLoadFlag)
@@ -1001,7 +994,6 @@ BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &i
                                     qt3ds::runtime::element::SElement *inNewStyleParent)
 {
     IDOMReader::Scope __childScope(inReader);
-    IScriptBridge *theScriptBridge = inPresentation.GetScriptBridge();
     IScriptBridge *theScriptBridgeQml = inPresentation.GetScriptBridgeQml();
 
     eastl::string theFileString;

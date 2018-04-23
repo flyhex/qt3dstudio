@@ -40,7 +40,6 @@
 #include "Qt3DSDMWindowsCompatibility.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "DocumentResourceManagerScriptParser.h"
-#include "DocumentResourceManagerLuaParser.h"
 #include "foundation/StrConvertUTF.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "foundation/FileTools.h"
@@ -745,31 +744,6 @@ public:
                                outType, outAdditionalType);
     }
 
-    std::shared_ptr<IDOMReader> ParseLuaFile(const wchar_t *inFullPathToDocument,
-                                               std::shared_ptr<qt3dsdm::IStringTable> inStringTable)
-    {
-        using namespace LuaParser;
-        std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
-        std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-        SImportXmlErrorHandler theXmlErrorHandler;
-        qt3ds::foundation::MallocAllocator allocator;
-        eastl::basic_string<char8_t, ForwardingAllocator> convertBuf(
-            ForwardingAllocator(allocator, "Unused"));
-        qt3ds::foundation::ConvertUTF(
-            reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(
-                inFullPathToDocument),
-            0, convertBuf);
-        qt3ds::foundation::CFileTools::NormalizePath(convertBuf);
-        qt3ds::foundation::CFileTools::ToPlatformPath(convertBuf);
-        std::shared_ptr<IDOMReader> theReaderPtr(
-            SLuaParser::ParseLuaFile(theFactory, inStringTable, convertBuf.c_str(),
-                                     theXmlErrorHandler, m_InputStreamFactory));
-
-        if (!theReaderPtr)
-            qCCritical(INVALID_OPERATION) << "Failed to open lua file: " << convertBuf.c_str();
-        return theReaderPtr;
-    }
-
     std::shared_ptr<IDOMReader> ParseScriptFile(const wchar_t *inFullPathToDocument,
                                                   std::shared_ptr<qt3dsdm::IStringTable> inStringTable)
     {
@@ -783,7 +757,7 @@ public:
                                            path,
                                            theXmlErrorHandler, m_InputStreamFactory));
         if (!theReaderPtr)
-            qCCritical(INVALID_OPERATION) << "Failed to open lua file: " << path;
+            qCCritical(INVALID_OPERATION) << "Failed to open script file: " << path;
         return theReaderPtr;
     }
 
@@ -803,37 +777,6 @@ public:
         m_DataCore->DeriveInstance(theMaster, theCanonicalType);
         m_IdToHandleMap.insert(std::make_pair(theId, theMaster));
         return theMaster;
-    }
-
-    virtual bool LoadLuaFile(const wchar_t *inType, const wchar_t *inId, const wchar_t *inName,
-                             const wchar_t *inSourcePath)
-    {
-        // Check if the file with the given id has been loaded before and return immediately
-        TCharStr theId(inId);
-        if (m_IdToHandleMap.find(theId) != m_IdToHandleMap.end())
-            return true;
-
-        Qt3DSDMInstanceHandle theMaster = CreateAndDeriveInstance(inType, inId);
-        if (!theMaster.Valid())
-            return false;
-
-        // If we can't parse the lua file, go on.
-        std::shared_ptr<IDOMReader> theLuaPtr =
-            ParseLuaFile(inSourcePath, m_DataCore->GetStringTablePtr());
-        if (theLuaPtr) {
-            std::vector<SMetaDataLoadWarning> warnings;
-            // Now the magic section
-            m_NewMetaData->LoadInstance(*theLuaPtr, theMaster, inName, warnings);
-
-            // Set the name
-            Qt3DSDMPropertyHandle theProperty =
-                m_DataCore->GetAggregateInstancePropertyByName(theMaster, L"name");
-            m_DataCore->SetInstancePropertyValue(theMaster, theProperty,
-                                                 std::make_shared<CDataStr>(inName));
-            return true;
-        }
-
-        return false;
     }
 
     virtual bool LoadScriptFile(const wchar_t *inType, const wchar_t *inId, const wchar_t *inName,
@@ -862,13 +805,6 @@ public:
             return true;
         }
 
-        return false;
-    }
-
-    bool LoadLuaFile(const char *inType, const char *inId, const char *inName,
-                             const char *inSourcePath) override
-    {
-        // Disable loading lua scripts
         return false;
     }
 

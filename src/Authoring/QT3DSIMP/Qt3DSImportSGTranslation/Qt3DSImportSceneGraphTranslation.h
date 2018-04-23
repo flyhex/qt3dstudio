@@ -101,6 +101,7 @@ typedef enum _ETextureMapType {
     ETextureMapTypeDiffuse,
     ETextureMapTypeOpacity,
     ETextureMapTypeSpecular,
+    ETextureMapTypeRoughness,
     ETextureMapTypeEmissive
 } ETextureMapType;
 

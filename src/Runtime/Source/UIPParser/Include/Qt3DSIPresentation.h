@@ -123,7 +123,6 @@ public: // Execution
 public: // Bridge Control
     virtual void SetScene(IScene *inScene) = 0;
     virtual IScene *GetScene() const = 0;
-    virtual IScriptBridge *GetScriptBridge() = 0;
     virtual IScriptBridge *GetScriptBridgeQml() = 0;
 
 public: // Commands and Events

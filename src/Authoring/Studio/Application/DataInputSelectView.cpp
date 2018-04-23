@@ -35,6 +35,7 @@
 #include "Literals.h"
 #include "MainFrm.h"
 #include "DataInputListDlg.h"
+#include "DataInputDlg.h"
 #include "StudioApp.h"
 
 DataInputSelectView::DataInputSelectView(QWidget *parent)
@@ -47,7 +48,7 @@ DataInputSelectView::DataInputSelectView(QWidget *parent)
     QTimer::singleShot(0, this, &DataInputSelectView::initialize);
 }
 
-void DataInputSelectView::setData(const QStringList &dataInputList,
+void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputList,
                                   const QString &currentController,
                                   int handle, int instance)
 {
@@ -57,19 +58,59 @@ void DataInputSelectView::setData(const QStringList &dataInputList,
     updateData(dataInputList);
 }
 
-void DataInputSelectView::updateData(const QStringList &dataInputList)
+void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInputList)
 {
     m_model->setFixedItemCount(0);
-    QStringList dataInputs = dataInputList;
-    m_model->stringList().clear();
+    QVector<QPair<QString, QString>> dataInputs;
+    m_model->clear();
 
-    dataInputs.prepend(getAddNewDataInputString());
+    dataInputs.append(QPair<QString, QString>(getAddNewDataInputString(), QString("")));
     m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
 
-    dataInputs.prepend(getNoneString());
+    dataInputs.append(QPair<QString, QString>(getNoneString(), QString("")));
     m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
-    m_selection = dataInputs.indexOf(m_currController);
-    m_model->setStringList(dataInputs);
+
+    for (auto i : dataInputList) {
+        dataInputs.append(QPair<QString, QString>(i.first, getDiTypeStr(i.second)));
+        if (i.first == m_currController)
+            m_selection = dataInputs.size() - 1;
+    }
+
+    m_model->setData(dataInputs);
+}
+
+QString DataInputSelectView::getDiTypeStr(int type)
+{
+    switch (static_cast<EDataType>(type)) {
+    case EDataType::DataTypeBoolean:
+        return tr("Boolean");
+        break;
+    case EDataType::DataTypeEvaluator:
+        return tr("Evaluator");
+        break;
+    case EDataType::DataTypeFloat:
+        return tr("Float");
+        break;
+    case EDataType::DataTypeRangedNumber:
+        return tr("Ranged Number");
+        break;
+    case EDataType::DataTypeString:
+        return tr("String");
+        break;
+    case EDataType::DataTypeVariant:
+        return tr("Variant");
+        break;
+    case EDataType::DataTypeVector2:
+        return tr("Vector2");
+        break;
+    case EDataType::DataTypeVector3:
+        return tr("Vector3");
+        break;
+    default:
+        return QString("");
+        Q_ASSERT(false);
+        break;
+    }
 }
 
 void DataInputSelectView::showEvent(QShowEvent *event)
@@ -81,11 +122,12 @@ void DataInputSelectView::setSelection(int index)
 {
     if (m_selection != index) {
         m_selection = index;
-        QString sel = m_model->index(m_selection, 0).data().toString();
+        QString sel = m_model->data(m_model->index(index), Qt::DisplayRole).toString();
         if (sel != getAddNewDataInputString()) {
             Q_EMIT dataInputChanged(m_handle, m_instance, sel);
+            Q_EMIT selectedChanged();
         } else {
-            CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems));
+            CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true);
             dataInputDlg.exec();
 
             if (dataInputDlg.result() == QDialog::Accepted)

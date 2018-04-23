@@ -93,6 +93,16 @@ public:
     virtual void DisplayMessageBox(const Q3DStudio::CString &inDescription) = 0;
 };
 
+class IMoveRenameHandler
+{
+protected:
+    virtual ~IMoveRenameHandler() {}
+
+public:
+    virtual void displayMessageBox(const Q3DStudio::CString &origName,
+                                   const Q3DStudio::CString &newName) = 0;
+};
+
 class IDocumentEditor : public IDocumentReader
 {
 protected:
@@ -397,12 +407,6 @@ public:
 
     virtual void ExternalizePath(TInstanceHandle path) = 0;
     virtual void InternalizePath(TInstanceHandle path) = 0;
-
-    static std::shared_ptr<IDOMReader>
-    ParseLuaFile(const Q3DStudio::CFilePath &inFullPathToDocument,
-                 std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
-                 std::shared_ptr<IImportFailedHandler> inHandler,
-                 qt3ds::render::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,

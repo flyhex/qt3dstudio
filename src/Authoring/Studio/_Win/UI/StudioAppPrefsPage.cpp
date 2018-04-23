@@ -27,15 +27,8 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-
 #include "ui_StudioAppPrefsPage.h"
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "Doc.h"
 #include "StudioAppPrefsPage.h"
 #include "StudioConst.h"
@@ -54,9 +47,6 @@
 #include <QtWidgets/qmessagebox.h>
 #include <QtGui/qstandarditemmodel.h>
 
-/////////////////////////////////////////////////////////////////////////////
-// CStudioAppPrefsPage property page
-
 //==============================================================================
 /**
  *	Constructor: Initializes the object.
@@ -64,20 +54,20 @@
 //==============================================================================
 CStudioAppPrefsPage::CStudioAppPrefsPage(QWidget *parent)
     : CStudioPreferencesPropPage(parent)
-    , m_TimebarShowTime(false)
-    , m_InterpolationIsSmooth(false)
+    , m_timebarShowTime(false)
+    , m_interpolationIsSmooth(false)
     , m_restartNeeded(false)
     , m_autosaveChanged(false)
     , m_ui(new Ui::StudioAppPrefsPage)
 {
-    m_Font = QFont(CStudioPreferences::GetFontFaceName());
-    m_Font.setPixelSize(CStudioPreferences::fontSize());
+    m_font = QFont(CStudioPreferences::GetFontFaceName());
+    m_font.setPixelSize(CStudioPreferences::fontSize());
 
     // Create a bold font for the group box text
-    m_BoldFont = m_Font;
-    m_BoldFont.setBold(true);
+    m_boldFont = m_font;
+    m_boldFont.setBold(true);
 
-    OnInitDialog();
+    onInitDialog();
 }
 
 //==============================================================================
@@ -92,7 +82,7 @@ CStudioAppPrefsPage::~CStudioAppPrefsPage()
 /////////////////////////////////////////////////////////////////////////////
 // CStudioAppPrefsPage message handlers
 
-void CStudioAppPrefsPage::OnInitDialog()
+void CStudioAppPrefsPage::onInitDialog()
 {
     m_ui->setupUi(this);
 
@@ -105,41 +95,45 @@ void CStudioAppPrefsPage::OnInitDialog()
 
     // Set fonts for child windows.
     for (auto w : findChildren<QWidget *>())
-        w->setFont(m_Font);
+        w->setFont(m_font);
 
     // Make the group text bold
     for (auto w : findChildren<QGroupBox *>())
-        w->setFont(m_BoldFont);
+        w->setFont(m_boldFont);
 
     // Hidden until we have some other Preview configurations than just Viewer
     m_ui->groupBoxPreview->setVisible(false);
 
     // Load the settings for the controls
-    LoadSettings();
+    loadSettings();
 
     auto activated = static_cast<void(QComboBox::*)(int)>(&QComboBox::activated);
     connect(m_ui->m_buttonRestoreDefaults, &QPushButton::clicked,
-            this, &CStudioAppPrefsPage::OnButtonRestoreDefaults);
-    connect(m_ui->m_DefaultInterpolation, activated, this, [=](){ SetModified(true); });
-    connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ SetModified(true); });
+            this, &CStudioAppPrefsPage::onButtonRestoreDefaults);
+    connect(m_ui->m_buttonResetLayout, &QPushButton::clicked, [=](){
+        onApply(); // Save changed preferences before resetting, as it causes Studio to shut down
+        CStudioPreferencesPropPage::endDialog(PREFS_RESET_LAYOUT);
+    });
+    connect(m_ui->m_DefaultInterpolation, activated, this, [=](){ setModified(true); });
+    connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ setModified(true); });
     connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
-            this, [=](){ SetModified(true); EnableOptions(); });
+            this, [=](){ setModified(true); enableOptions(); });
     connect(m_ui->m_EditViewBGColor, &QPushButton::clicked,
-            this, &CStudioAppPrefsPage::OnBgColorButtonClicked);
-    connect(m_ui->m_EditViewStartupView, activated, this, [=](){ SetModified(true); });
+            this, &CStudioAppPrefsPage::onBgColorButtonClicked);
+    connect(m_ui->m_EditViewStartupView, activated, this, [=](){ setModified(true); });
     connect(m_ui->selectorWidth,
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-            this, [=](){ SetModified(true); m_restartNeeded = true; });
+            this, [=](){ setModified(true); m_restartNeeded = true; });
     connect(m_ui->selectorLength,
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-            this, [=](){ SetModified(true); m_restartNeeded = true; });
+            this, [=](){ setModified(true); m_restartNeeded = true; });
     connect(m_ui->autosaveEnabled, &QCheckBox::clicked, this,
-            [=](){ SetModified(true); m_autosaveChanged = true; });
+            [=](){ setModified(true); m_autosaveChanged = true; });
     connect(m_ui->autosaveInterval, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, [=](){ SetModified(true); m_autosaveChanged = true; });
+            this, [=](){ setModified(true); m_autosaveChanged = true; });
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     connect(m_ui->m_PreviewSelector, activated,
-            this, &CStudioAppPrefsPage::OnChangePreviewConfiguration);
+            this, &CStudioAppPrefsPage::onChangePreviewConfiguration);
 #endif
 }
 
@@ -150,7 +144,7 @@ void CStudioAppPrefsPage::OnInitDialog()
  *	@param	None
  */
 //==============================================================================
-void CStudioAppPrefsPage::LoadSettings()
+void CStudioAppPrefsPage::loadSettings()
 {
     // Get the Interpolation Preference
     m_ui->m_DefaultInterpolation->addItem(tr("Smooth"));
@@ -182,12 +176,12 @@ void CStudioAppPrefsPage::LoadSettings()
     m_ui->autosaveEnabled->setChecked(CStudioPreferences::GetAutoSavePreference());
     m_ui->autosaveInterval->setValue(CStudioPreferences::GetAutoSaveDelay());
 
-    InitEditStartViewCombo();
+    onitEditStartViewCombo();
 
-    EnableOptions();
+    enableOptions();
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
-    LoadPreviewSelections();
+    loadPreviewSelections();
 #endif
 
     m_bgColor = CStudioPreferences::GetEditViewBackgroundColor();
@@ -198,7 +192,7 @@ void CStudioAppPrefsPage::updateColorButton()
 {
     QString bgColorStyle = QStringLiteral("background-color: ") + m_bgColor.name();
     m_ui->m_EditViewBGColor->setStyleSheet(bgColorStyle);
-    SetModified(true);
+    setModified(true);
 }
 
 //==============================================================================
@@ -208,7 +202,7 @@ void CStudioAppPrefsPage::updateColorButton()
  *	@param	None
  */
 //==============================================================================
-void CStudioAppPrefsPage::SaveSettings()
+void CStudioAppPrefsPage::saveSettings()
 {
     // Default interpolation
     g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(
@@ -241,7 +235,7 @@ void CStudioAppPrefsPage::SaveSettings()
     m_autosaveChanged = false;
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
-    SavePreviewSettings();
+    savePreviewSettings();
 #endif
 
     if (m_restartNeeded) {
@@ -261,17 +255,17 @@ void CStudioAppPrefsPage::SaveSettings()
  *	@param	None
  */
 //==============================================================================
-bool CStudioAppPrefsPage::OnApply()
+bool CStudioAppPrefsPage::onApply()
 {
     // Apply was clicked - save settings and disable the Apply button
-    SaveSettings();
+    saveSettings();
 
-    SetModified(false);
+    setModified(false);
 
     // Request that the renderer refreshes as settings may have changed
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 
-    return CStudioPreferencesPropPage::OnApply();
+    return CStudioPreferencesPropPage::onApply();
 }
 
 //==============================================================================
@@ -281,9 +275,9 @@ bool CStudioAppPrefsPage::OnApply()
  *	@param	None
  */
 //==============================================================================
-void CStudioAppPrefsPage::OnOK()
+void CStudioAppPrefsPage::onOK()
 {
-    CStudioPreferencesPropPage::OnOK();
+    CStudioPreferencesPropPage::onOK();
 }
 
 //==============================================================================
@@ -293,7 +287,7 @@ void CStudioAppPrefsPage::OnOK()
  *	@param	None
  */
 //==============================================================================
-void CStudioAppPrefsPage::OnButtonRestoreDefaults()
+void CStudioAppPrefsPage::onButtonRestoreDefaults()
 {
     int theChoice = 0;
 
@@ -307,7 +301,7 @@ void CStudioAppPrefsPage::OnButtonRestoreDefaults()
     if (theChoice == QMessageBox::Yes) {
         // Restore default preferences by passing PREFS_RESET_DEFAULTS back
         // to the CStudioDocPreferences (that called this preferences sheet)
-        CStudioPreferencesPropPage::EndDialog(PREFS_RESET_DEFAULTS);
+        CStudioPreferencesPropPage::endDialog(PREFS_RESET_DEFAULTS);
     }
 }
 
@@ -318,7 +312,7 @@ void CStudioAppPrefsPage::OnButtonRestoreDefaults()
  *	@param	None
  */
 //==============================================================================
-void CStudioAppPrefsPage::EnableOptions()
+void CStudioAppPrefsPage::enableOptions()
 {
     m_ui->m_SnapRangeCombo->setEnabled(m_ui->m_checkTimelineAbsoluteSnapping->isChecked());
 }
@@ -329,9 +323,9 @@ void CStudioAppPrefsPage::EnableOptions()
  *	Set the initial selection to that saved to the preferences
  */
 //==============================================================================
-void CStudioAppPrefsPage::InitEditStartViewCombo()
+void CStudioAppPrefsPage::onitEditStartViewCombo()
 {
-    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
+    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
     for (int idx = 0, end = theCameraNames.size(); idx < end; ++idx) {
@@ -364,7 +358,7 @@ void CStudioAppPrefsPage::InitEditStartViewCombo()
 }
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
-void CStudioAppPrefsPage::LoadPreviewSelections()
+void CStudioAppPrefsPage::loadPreviewSelections()
 {
     // Load the configurations from all the .build files
     Q3DStudio::CBuildConfigurations &theConfig = g_StudioApp.GetCore()->GetBuildConfigurations();
@@ -403,13 +397,13 @@ void CStudioAppPrefsPage::LoadPreviewSelections()
  *	When the build configuration is changed, all the properties have to be updated.
  */
 //==============================================================================
-void CStudioAppPrefsPage::OnChangePreviewConfiguration()
+void CStudioAppPrefsPage::onChangePreviewConfiguration()
 {
     LoadBuildProperties();
 }
 #endif
 
-void CStudioAppPrefsPage::OnBgColorButtonClicked() 
+void CStudioAppPrefsPage::onBgColorButtonClicked()
 {
     QColor previousColor = m_bgColor;
     QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
@@ -422,7 +416,7 @@ void CStudioAppPrefsPage::OnBgColorButtonClicked()
         m_bgColor = previousColor;
     updateColorButton();
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
@@ -430,7 +424,7 @@ void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
     m_bgColor = color;
     updateColorButton();
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    g_StudioApp.GetRenderer().RequestRender();
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 void CStudioAppPrefsPage::enableAutosave(bool enabled)
@@ -451,7 +445,7 @@ void CStudioAppPrefsPage::setAutosaveInterval(int interval)
  */
 //==============================================================================
 #if 0 // Removed until we have some other Preview configurations than just Viewer
-void CStudioAppPrefsPage::LoadBuildProperties()
+void CStudioAppPrefsPage::loadBuildProperties()
 {
     // Remove those dynamic controls
     RemovePreviewPropertyControls();

@@ -715,6 +715,8 @@ namespace render {
                                     SShaderDefaultMaterialKeyProperties::EmissiveMap2);
             CHECK_IMAGE_AND_PREPARE(theMaterial->m_SpecularReflection, ImageMapTypes::Specular,
                                     SShaderDefaultMaterialKeyProperties::SpecularMap);
+            CHECK_IMAGE_AND_PREPARE(theMaterial->m_RoughnessMap, ImageMapTypes::Roughness,
+                                    SShaderDefaultMaterialKeyProperties::RoughnessMap);
             CHECK_IMAGE_AND_PREPARE(theMaterial->m_OpacityMap, ImageMapTypes::Opacity,
                                     SShaderDefaultMaterialKeyProperties::OpacityMap);
             CHECK_IMAGE_AND_PREPARE(theMaterial->m_BumpMap, ImageMapTypes::Bump,

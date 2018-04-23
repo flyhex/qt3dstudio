@@ -50,7 +50,8 @@ class CDataInputListDlg : public QDialog
 {
     Q_OBJECT
 public:
-    CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs, QWidget* parent = nullptr);
+    CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs,
+                      bool goToAdd = false, QWidget *parent = nullptr);
     ~CDataInputListDlg();
 
 protected:
@@ -75,6 +76,7 @@ private:
     QVector<CDataInputDialogItem *> *m_actualDataInputs;
     int m_currentDataInputIndex;
     QStandardItemModel *m_tableContents;
+    bool m_goToAdd;
 };
 
 #endif

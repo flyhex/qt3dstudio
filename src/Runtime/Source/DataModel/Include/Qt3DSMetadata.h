@@ -342,17 +342,6 @@ public:
                                        eastl::vector<TRuntimeMetaDataStrType> &outProperties,
                                        bool inSearchParent) = 0;
 
-    //==============================================================================
-    /**
-     *	Load Lua File
-     *	@param inType		   type, for example L"Behavior"
-     *	@param inId			   id
-     *	@param inName		   name
-     *  @param inSourcePath    source path to lua file. It should be absolute path.
-     */
-    virtual bool LoadLuaFile(const char *inType, const char *inId, const char *inName,
-                             const char *inSourcePath) = 0;
-
     virtual bool LoadScriptFile(const char *inType, const char *inId, const char *inName,
                                 const char *inSourcePath) = 0;
 

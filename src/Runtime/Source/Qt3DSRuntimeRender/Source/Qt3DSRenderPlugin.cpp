@@ -296,10 +296,10 @@ struct InstanceImpl : public IRenderPluginInstance
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Foundation.getAllocator())
 
-    void CreateLuaProxy(lua_State *state) override
+    void CreateScriptProxy(script_State *state) override
     {
-        if (m_Class.CreateInstanceLuaProxy)
-            m_Class.CreateInstanceLuaProxy(m_Class.m_Class, m_Instance, state);
+        if (m_Class.CreateInstanceScriptProxy)
+            m_Class.CreateInstanceScriptProxy(m_Class.m_Class, m_Instance, state);
     }
 
     // Arbitrary const char* returned to indicate the type of this renderer

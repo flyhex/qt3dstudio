@@ -37,7 +37,6 @@ INCLUDEPATH += \
     $$PWD/../Authoring/QT3DSDM/Systems \
     $$PWD/../Authoring/QT3DSDM/Systems/Cores \
     $$PWD/../3rdparty/EASTL/UnknownVersion/include \
-    $$PWD/../3rdparty/Lua/UnknownVersion/src \
     $$PWD/../3rdparty/utf8cpp/2.3.2/source \
     $$PWD/../3rdparty/color \
     $$PWD/../3rdparty/RuntimePlatformSpecific/$$PlatformSpecificDir/PlatformLibs \
@@ -55,7 +54,7 @@ win32-msvc {
 
 win32 {
 INCLUDEPATH += \
-    $$PWD/Source/PlatformSpecific/Windows/Qt3DSLibs
+    $$PWD/Source/PlatformSpecific/Windows/Qt3DSLibs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/Qt3DSLibs
 }
 
@@ -65,7 +64,7 @@ QMAKE_CFLAGS += -fpermissive
 INCLUDEPATH += \
     $$PWD/Source/Qt3DSFoundation/Include/foundation/linux \
     $$PWD/Source/Qt3DSFoundation/Source/foundation/linux \
-    $$PWD/Source/PlatformSpecific/Linux/Qt3DSLibs
+    $$PWD/Source/PlatformSpecific/Linux/Qt3DSLibs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/Qt3DSLibs
 }
 
@@ -73,7 +72,7 @@ integrity {
 INCLUDEPATH += \
     $$PWD/Source/Qt3DSFoundation/Include/foundation/linux \
     $$PWD/Source/Qt3DSFoundation/Source/foundation/linux \
-    $$PWD/Source/PlatformSpecific/Linux/Qt3DSLibs
+    $$PWD/Source/PlatformSpecific/Linux/Qt3DSLibs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/Qt3DSLibs
 }
 

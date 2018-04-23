@@ -758,6 +758,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Material_FresnelPower "fresnelPower"
 #define Material_SpecularAmount "specularamount"
 #define Material_SpecularRoughness "specularroughness"
+#define Material_RoughnessMap "roughnessmap"
 #define Material_Opacity "opacity"
 #define Material_OpacityMap "opacitymap"
 #define Material_BumpMap "bumpmap"

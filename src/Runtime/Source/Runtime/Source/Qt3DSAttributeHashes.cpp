@@ -135,6 +135,7 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_FRESNELPOWER: return "fresnelPower";
         case ATTRIBUTE_SPECULARAMOUNT: return "specularamount";
         case ATTRIBUTE_SPECULARROUGHNESS: return "specularroughness";
+        case ATTRIBUTE_ROUGHNESSMAP: return "roughnessmap";
         case ATTRIBUTE_BLENDMODE: return "blendmode";
         case ATTRIBUTE_CULLING: return "culling";
         case ATTRIBUTE_ZBUFFERWRITE: return "zbufferwrite";

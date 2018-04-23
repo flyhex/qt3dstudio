@@ -41,9 +41,12 @@
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qgridlayout.h>
 #include <QtWidgets/qdialogbuttonbox.h>
+#include <QtCore/qcoreapplication.h>
 
 class ConnectionDialog : public QDialog
 {
+    Q_DECLARE_TR_FUNCTIONS(ConnectionDialog)
+
 public:
     static QPair<QString, int> getInfo(QWidget *parent);
 

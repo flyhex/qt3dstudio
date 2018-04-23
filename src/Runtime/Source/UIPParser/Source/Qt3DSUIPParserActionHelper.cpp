@@ -694,7 +694,6 @@ void CUIPParserActionHelper::ExportCustomActionParameters(
     WCharTReader theReader((char8_t *)m_UIPParser->m_ValueBuffer.begin(), m_UIPParser->m_TempBuffer,
                            *m_UIPParser->GetDOMReader().GetStringTable());
 
-    // The function should match CLuaEngine::ProcessCustomActions
     // The function should match CUIPParserActionHelper::GetCustomActionParametersCount
     switch (inDataType) {
     case ERuntimeDataModelDataTypeFloat: {

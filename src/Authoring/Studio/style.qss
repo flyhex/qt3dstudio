@@ -339,6 +339,16 @@ QDialog#DataInputListDlg QTableView {
     gridline-color: #2e2f30;
 }
 
+QDialog#DataInputListDlg QComboBox QAbstractItemView::item:selected
+{
+    background-color: #46a2da;
+}
+
+QDialog#DataInputListDlg QComboBox QAbstractItemView::item
+{
+    margin-top: 5px;
+}
+
 QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton,
 QDialog#DataInputListDlg QPushButton#DataInputListButton {
     background-color: transparent;

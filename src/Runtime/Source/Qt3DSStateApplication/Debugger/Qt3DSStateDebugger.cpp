@@ -106,14 +106,6 @@ struct SDebugger : public IDebugger
         }
     }
 
-    void OnExternalBreak() override
-    {
-        if (m_OutStream) {
-            for (QT3DSU32 idx = 0, end = m_StateMachineList.size(); idx < end; ++idx)
-                m_StateMachineList[idx]->OnExternalBreak();
-        }
-    }
-
     void DisconnectStateMachine(IStateMachineDebugInterface &inMachine)
     {
         TMachineIdMap::iterator theIter = m_StateMachines.find(&inMachine);

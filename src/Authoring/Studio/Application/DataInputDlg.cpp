@@ -31,6 +31,7 @@
 
 #include <QtWidgets/qabstractbutton.h>
 #include <QtGui/qstandarditemmodel.h>
+#include <QtWidgets/qstyleditemdelegate.h>
 
 CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                              QWidget *parent)
@@ -45,15 +46,18 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
 {
     m_ui->setupUi(this);
 
+    // For enabling stylesheet for drop-down items
+    QStyledItemDelegate *itemDelegate = new QStyledItemDelegate();
+    m_ui->comboBoxTypeList->setItemDelegate(itemDelegate);
+
+    m_ui->comboBoxTypeList->addItem(tr("Boolean"));
+    m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
+    m_ui->comboBoxTypeList->addItem(tr("Float"));
     m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
     m_ui->comboBoxTypeList->addItem(tr("String"));
-    m_ui->comboBoxTypeList->addItem(tr("Float"));
-#if 0 // TODO Evaluator
-    m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
-#endif
-    m_ui->comboBoxTypeList->addItem(tr("Boolean"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector3"));
     m_ui->comboBoxTypeList->addItem(tr("Variant"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
+    m_ui->comboBoxTypeList->addItem(tr("Vector3"));
 
     initDialog();
 
@@ -67,9 +71,7 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
             static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &CDataInputDlg::onMaxChanged);
     connect(m_ui->lineEditInputName, &QLineEdit::textChanged, this, &CDataInputDlg::onNameChanged);
-#if 0 // TODO: To be added in version 2.x
     connect(m_ui->lineEditEvaluation, &QLineEdit::textChanged, this, &CDataInputDlg::onTextChanged);
-#endif
 }
 
 CDataInputDlg::~CDataInputDlg()
@@ -98,11 +100,9 @@ void CDataInputDlg::initDialog()
             m_min = m_dataInput->minValue;
             m_max = m_dataInput->maxValue;
         }
-#if 0 // TODO: To be added in version 2.x
         else if (m_type == DataTypeEvaluator) {
             m_ui->lineEditEvaluation->setText(m_dataInput->valueString);
         }
-#endif
     } else {
         m_name = getUniqueId(tr("newDataInput"));
         m_ui->lineEditInputName->setText(m_name);
@@ -117,11 +117,9 @@ void CDataInputDlg::on_buttonBox_accepted()
         m_dataInput->minValue = m_min;
         m_dataInput->maxValue = m_max;
     }
-#if 0 // TODO: To be added in version 2.x
     else if (m_type == DataTypeEvaluator) {
         m_dataInput->valueString = m_text;
     }
-#endif
     QDialog::accept();
 }
 
@@ -158,12 +156,10 @@ void CDataInputDlg::onNameChanged(const QString &name)
     m_ui->lineEditInputName->setCursorPosition(cursorPos);
 }
 
-#if 0 // TODO: To be added in version 2.x
 void CDataInputDlg::onTextChanged(const QString &text)
 {
     m_text = text;
 }
-#endif
 
 QString CDataInputDlg::getUniqueId(const QString &id)
 {
@@ -190,7 +186,6 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->doubleSpinBoxMax->setVisible(false);
     }
 
-#if 0 // TODO: To be added in version 2.x
     if (type == DataTypeEvaluator) {
         m_ui->lineEditEvaluation->setVisible(true);
         m_ui->labelEvaluation->setVisible(true);
@@ -199,13 +194,11 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->lineEditEvaluation->setVisible(false);
         m_ui->labelEvaluation->setVisible(false);
     }
-#endif
 }
 
 const bool CDataInputDlg::isEquivalentDataType(int dlgType,
                                                qt3dsdm::DataModelDataType::Value dmType)
 {
-    // TODO Evaluator
     if ((dlgType == EDataType::DataTypeString
          && dmType == qt3dsdm::DataModelDataType::String)
         || (dlgType == EDataType::DataTypeRangedNumber
@@ -218,7 +211,12 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
             && dmType == qt3dsdm::DataModelDataType::Bool)
         || (dlgType == EDataType::DataTypeVector3
             && dmType == qt3dsdm::DataModelDataType::Float3)
-        || dlgType == EDataType::DataTypeVariant) {
+        || (dlgType == EDataType::DataTypeVector2
+            && dmType == qt3dsdm::DataModelDataType::Float2)
+        // Variant can be bound to any property type.
+        // Allow also Evaluator binding to any property as we only know the evaluation
+        // result type at runtime.
+        || dlgType == EDataType::DataTypeVariant || dlgType == EDataType::DataTypeEvaluator) {
         return true;
     }
 

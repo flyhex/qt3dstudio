@@ -133,37 +133,6 @@ struct SStateMachineSystem : public IStateInterpreterEventHandler, public NVRefC
 
     void Initialize()
     {
-        if (!m_Interpreter) {
-            m_Running = false;
-            if (m_Error == false && m_InterpreterFactory) {
-                m_Interpreter = m_InterpreterFactory->OnNewStateMachine(
-                    m_Path.c_str(), m_Id.c_str(), m_DatamodelFunction.c_str());
-                if (!m_Interpreter) {
-                    m_Error = true;
-                } else {
-                    IStateContext *theContext = m_Interpreter->GetStateContext();
-                    if (theContext) {
-                        // Validate all of our ids in our command map.
-                        nvvector<CRegisteredString> invalidStates(
-                            m_Allocator, "SStateMachineSystem::Initialize::invalidStates");
-                        for (TStateEventCommandMap::iterator iter = m_CommandMap.begin(),
-                                                             end = m_CommandMap.end();
-                             iter != end; ++iter) {
-                            CRegisteredString testId = iter->first.m_Id;
-                            if (theContext->FindStateNode(testId) == NULL) {
-                                nvvector<CRegisteredString>::iterator theFind =
-                                    eastl::find(invalidStates.begin(), invalidStates.end(), testId);
-                                if (theFind == invalidStates.end()) {
-                                    qCCritical(INVALID_OPERATION, m_Path.c_str(), 0,
-                                        "State \"%s\" is not a valid state", testId.c_str());
-                                    invalidStates.push_back(testId);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     void Start()

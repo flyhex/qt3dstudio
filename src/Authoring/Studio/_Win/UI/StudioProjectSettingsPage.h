@@ -69,8 +69,8 @@ public:
     // Overrides
     // ClassWizard generate virtual function overrides
 public:
-    bool OnApply() override;
-    void OnOK() override;
+    bool onApply() override;
+    void onOK() override;
 
     // Implementation
 protected:

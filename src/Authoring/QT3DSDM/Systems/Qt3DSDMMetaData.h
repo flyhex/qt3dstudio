@@ -98,25 +98,19 @@ struct SMetaDataLoadWarning
 };
 
 /**
- *	Meta data class to hold meta data descriptions of the objects used in DataModel.
- *	A user-visible type in DataModel (things in the timeline) has a specific set of metadata,
- *	the type can have properties, events, handlers, and references.
+ * Meta data class to hold meta data descriptions of the objects used in DataModel.
+ * A user-visible type in DataModel (things in the timeline) has a specific set of metadata,
+ * the type can have properties, events, handlers, and references.
  *
- *	Properties are exactly what they sound like.  Events are messages the object can send,
- *	and handlers are functions that are exported from the object.
+ * Properties are exactly what they sound like.  Events are messages the object can send,
+ * and handlers are functions that are exported from the object.
  *
- *	Events are hooked up to handlers using an ActionCore which takes tuples
- *	of instance, event, handler and slide and maintains a specific instance of an action.
+ * Events are hooked up to handlers using an ActionCore which takes tuples
+ * of instance, event, handler and slide and maintains a specific instance of an action.
  *
- *	References allow us to track which properties are being accessed.  Properties are stripped
- *	from the engine portion of the runtime (although they still appear in the scenegraph)
- *	if they aren't animated nor set in a given slide.  Referencing a property allows us to
- *	avoid stripping them for lua scripts which do not animate the property through the
- *	tranditional system.
- *
- *	This design allows an artist to create and maintain a fairly complex interactive
- *presentation
- *	without the intervention of a lua scripter.
+ * References allow us to track which properties are being accessed.  Properties are stripped
+ * from the engine portion of the runtime (although they still appear in the scenegraph)
+ * if they aren't animated nor set in a given slide.
  */
 class IMetaData
 {

@@ -17,7 +17,6 @@ INCLUDEPATH += \
 LIBS += \
     $$QMAKE_LIBS_FBX \
     -lws2_32 \
-    -lLua$$qtPlatformTargetSuffix() \
     -lEASTL$$qtPlatformTargetSuffix() \
     -lRpcrt4 \
     -lGdiplus \

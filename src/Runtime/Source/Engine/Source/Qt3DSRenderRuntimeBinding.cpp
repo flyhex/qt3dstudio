@@ -33,7 +33,6 @@
 #include "Qt3DSSceneManager.h"
 #include "Qt3DSIScene.h"
 #include "Qt3DSTegraApplication.h"
-#include "Qt3DSLuaEngine.h"
 #include "Qt3DSQmlEngine.h"
 #include "Qt3DSRenderUIPLoader.h"
 #include "Qt3DSPresentationFrameData.h"
@@ -270,7 +269,6 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
     // m_Context->GetMousePickMouseCoords
     Q3DStudio::TElement *UserPick(float mouseX, float mouseY)
     {
-        // Note that lua:getMousePosition calls WindowToPresentation.
         // Note that the pick code below only calls GetMousePickMouseCoords
         // while windowToPresentation subtracts the window positional offset from
         // the mouse position.
@@ -913,14 +911,14 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
 
     static const char *GetBinaryExtension() { return "uibsg"; }
 
-    struct SPluginInstanceTableProvider : public Q3DStudio::ILuaScriptTableProvider
+    struct SPluginInstanceTableProvider : public Q3DStudio::IScriptTableProvider
     {
         IRenderPluginInstance &m_Instance;
         SPluginInstanceTableProvider(IRenderPluginInstance &ins)
             : m_Instance(ins)
         {
         }
-        void CreateTable(lua_State *inState) override { m_Instance.CreateLuaProxy(inState); }
+        void CreateTable(script_State *inState) override { m_Instance.CreateScriptProxy(inState); }
     };
 
     void InitializeTranslator(Qt3DSTranslator &inTranslator, Q3DStudio::IScriptBridge &inBridge)
@@ -1683,10 +1681,6 @@ public:
     }
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_Allocator)
 
-    qt3ds::state::IStateInterpreter *OnNewStateMachine(const char8_t *inPath,
-                                                             const char8_t *inId,
-                                                             const char8_t *inDatamodelFunction) override;
-
     void Handle(const qt3ds::state::SVisualStateCommand &inCommand,
                         qt3ds::state::IScriptContext &inScriptContext) override;
 };
@@ -1695,7 +1689,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
 {
     NVScopedRefCounted<SBindingCore> m_Context;
 
-    NVScopedRefCounted<Q3DStudio::CLuaEngine> m_ScriptBridge;
     NVScopedRefCounted<Q3DStudio::CQmlEngine> m_ScriptBridgeQml;
     NVScopedRefCounted<Qt3DSRenderSceneManager> m_SceneManager;
     NVScopedRefCounted<qt3ds::state::IVisualStateContext> m_VisualStateContext;
@@ -1706,7 +1699,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
 
     SRenderFactory(SBindingCore &inCore)
         : m_Context(inCore)
-        , m_ScriptBridge(NULL)
         , m_ScriptBridgeQml(NULL)
         , m_SceneManager(NULL)
         , m_ApplicationCore(NULL)
@@ -1722,7 +1714,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
         m_VisualStateContext = NULL;
         // Release the event system, it must be released before script engine
         m_EventSystem = NULL;
-        m_ScriptBridge->Shutdown(*m_Context->m_Foundation);
         m_ScriptBridgeQml->Shutdown(*m_Context->m_Foundation);
     }
 
@@ -1766,16 +1757,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
             m_SceneManager = QT3DS_NEW(m_Context->GetAllocator(),
                                     Qt3DSRenderSceneManager)(*m_Context, m_Context->m_WindowSystem);
         return *m_SceneManager;
-    }
-    Q3DStudio::IScriptBridge &GetScriptEngine() override
-    {
-        if (m_ScriptBridge == NULL) {
-            m_ScriptBridge =
-                Q3DStudio::CLuaEngine::Create(*m_Context->m_Foundation, m_Context->m_TimeProvider);
-            m_ScriptBridge->PreInitialize();
-        }
-
-        return *m_ScriptBridge;
     }
     Q3DStudio::IScriptBridge &GetScriptEngineQml() override
     {
@@ -1830,13 +1811,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
     {
         m_Application = app;
         if (app) {
-            GetScriptEngine();
-            m_ScriptBridge->SetApplication(*app);
-            // Most of the script bridge lua functions will hard crash if
-            // the initialization happens before the application is set.
-            // This keeps the errors in lua-land instead of in crashing ui composer.
-            m_ScriptBridge->Initialize();
-
             // QML engine
             GetScriptEngineQml();
             m_ScriptBridgeQml->SetApplication(*app);
@@ -1890,16 +1864,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
     }
 };
 
-qt3ds::state::IStateInterpreter *
-SVisualStateHandler::OnNewStateMachine(const char8_t *inPath, const char8_t *inId,
-                                       const char8_t *inDatamodelFunction)
-{
-    m_Factory.GetScriptEngine();
-    m_Factory.GetSceneManager();
-
-    return m_Factory.m_ScriptBridge->CreateStateMachine(inPath, inId, inDatamodelFunction);
-}
-
 Q3DStudio::SScriptEngineGotoSlideArgs ToEngine(const qt3ds::state::SGotoSlideData &inData)
 {
     using namespace qt3ds::state;
@@ -1944,7 +1908,7 @@ public:
         , m_ScriptContext(inScriptContext)
     {
     }
-    int RetrieveArgument(lua_State *inState) override
+    int RetrieveArgument(script_State *inState) override
     {
         (void *)inState;
         return m_ScriptContext.ExecuteStr(m_ArgumentString, true) ? 1 : -1;
@@ -1961,47 +1925,41 @@ void SVisualStateHandler::Handle(const qt3ds::state::SVisualStateCommand &inComm
     switch (inCommand.getType()) {
     case VisualStateCommandTypes::GotoSlide: {
         const SGotoSlide &theInfo(inCommand.getData<SGotoSlide>());
-        m_Factory.m_ScriptBridge->GotoSlide(theInfo.m_Component.c_str(), theInfo.m_Slide.c_str(),
-                                            ToEngine(theInfo.m_GotoSlideData));
-    } break;
-    case VisualStateCommandTypes::CallFunction: {
-        const SCallFunction &theInfo(inCommand.getData<SCallFunction>());
-        // I have to suppose the Lua state in the script context of this state machine is the same
-        // as the main Lua state
-        // That means all SScriptContext should be created with the main lua state
-        CStateScriptEngineCallFunctionArgRetriever theArgRetriever(theInfo.m_Arguments,
-                                                                   inScriptContext);
-        m_Factory.m_ScriptBridge->CallFunction(theInfo.m_Behavior.c_str(),
-                                               theInfo.m_Handler.c_str(), theArgRetriever);
+        m_Factory.m_ScriptBridgeQml->GotoSlide(theInfo.m_Component.c_str(),
+                                               theInfo.m_Slide.c_str(),
+                                               ToEngine(theInfo.m_GotoSlideData));
     } break;
     case VisualStateCommandTypes::SetAttribute: {
         const SSetAttribute &theInfo(inCommand.getData<SSetAttribute>());
-        m_Factory.m_ScriptBridge->SetAttribute(
-            theInfo.m_Element.c_str(), theInfo.m_Attribute.c_str(), theInfo.m_Value.c_str());
+        m_Factory.m_ScriptBridgeQml->SetAttribute(
+                    theInfo.m_Element.c_str(), theInfo.m_Attribute.c_str(),
+                    theInfo.m_Value.c_str());
     } break;
     case VisualStateCommandTypes::GotoSlideRelative: {
         const SGotoSlideRelative &theInfo(inCommand.getData<SGotoSlideRelative>());
         if (theInfo.m_Direction == SGotoSlideRelative::Error) {
             qCCritical(INVALID_OPERATION,
-                "Goto slide relative has invalid attribute (neither 'next' nor 'previous')");
+                       "Goto slide relative has invalid attribute (neither 'next' nor 'previous')");
         } else {
-            m_Factory.m_ScriptBridge->GotoSlideRelative(
-                theInfo.m_Component.c_str(), theInfo.m_Direction == SGotoSlideRelative::Next,
-                theInfo.m_Wrap, ToEngine(theInfo.m_GotoSlideData));
+            m_Factory.m_ScriptBridgeQml->GotoSlideRelative(
+                        theInfo.m_Component.c_str(),
+                        theInfo.m_Direction == SGotoSlideRelative::Next,
+                        theInfo.m_Wrap, ToEngine(theInfo.m_GotoSlideData));
         }
     } break;
     case VisualStateCommandTypes::FireEvent: {
         const SFireEvent &theInfo(inCommand.getData<SFireEvent>());
-        m_Factory.m_ScriptBridge->FireEvent(theInfo.m_Element, theInfo.m_Event);
+        m_Factory.m_ScriptBridgeQml->FireEvent(theInfo.m_Element, theInfo.m_Event);
     } break;
     case VisualStateCommandTypes::PresentationAttribute: {
         const SPresentationAttribute &theInfo(inCommand.getData<SPresentationAttribute>());
-        m_Factory.m_ScriptBridge->SetPresentationAttribute(theInfo.m_Presentation,
-                                                           theInfo.m_Attribute, theInfo.m_Value);
+        m_Factory.m_ScriptBridgeQml->SetPresentationAttribute(theInfo.m_Presentation,
+                                                              theInfo.m_Attribute,
+                                                              theInfo.m_Value);
     } break;
     case VisualStateCommandTypes::PlaySound: {
         const SPlaySound &theInfo(inCommand.getData<SPlaySound>());
-        m_Factory.m_ScriptBridge->PlaySoundFile(theInfo.m_SoundFilePath);
+        m_Factory.m_ScriptBridgeQml->PlaySoundFile(theInfo.m_SoundFilePath);
     } break;
     default:
         QT3DS_ASSERT(false);
@@ -2010,10 +1968,10 @@ void SVisualStateHandler::Handle(const qt3ds::state::SVisualStateCommand &inComm
 }
 }
 
-IQt3DSRenderFactoryCore &
-IQt3DSRenderFactoryCore::CreateRenderFactoryCore(const char8_t *inApplicationDirectory,
-                                               Q3DStudio::IWindowSystem &inWindowSystem,
-                                               Q3DStudio::ITimeProvider &inTimeProvider)
+IQt3DSRenderFactoryCore &IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
+        const char8_t *inApplicationDirectory,
+        Q3DStudio::IWindowSystem &inWindowSystem,
+        Q3DStudio::ITimeProvider &inTimeProvider)
 {
     SBindingCore *theCore = (SBindingCore *)malloc(sizeof(SBindingCore));
     new (theCore) SBindingCore(inApplicationDirectory, inWindowSystem, inTimeProvider);

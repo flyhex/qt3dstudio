@@ -234,6 +234,8 @@ namespace render {
                                                    const QT3DSVec2 &inViewportDimensions,
                                                    bool forceImageIntersect = false) const = 0;
 
+        virtual IRenderWidgetContext &GetRenderWidgetContext() = 0;
+
         static bool IsGlEsContext(qt3ds::render::NVRenderContextType inContextType);
         static bool IsGlEs3Context(qt3ds::render::NVRenderContextType inContextType);
         static bool IsGl2Context(qt3ds::render::NVRenderContextType inContextType);

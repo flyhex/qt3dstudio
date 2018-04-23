@@ -50,7 +50,7 @@ activated.
 
 
 The parsing system does this in reverse order so the passes look like:
-1.  Load meta data information (lua scripts, effects) to have a complete meta data model.
+1.  Load meta data information (scripts, effects) to have a complete meta data model.
 1.  Build element graph.  This is used during attribute lookup
 2.  Figure out which attributes will be on the elements in the graph by resolving behavior
 references, action references and

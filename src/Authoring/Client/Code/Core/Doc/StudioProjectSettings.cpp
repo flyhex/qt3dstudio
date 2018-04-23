@@ -45,7 +45,6 @@
 #include "Dispatch.h"
 #include "CommonConstants.h"
 #include "StudioPreferences.h"
-#include "Qt3DSDESKey.h"
 #include "Qt3DSLargeInteger.h"
 #include "CColor.h"
 #include "Qt3DSColor.h"

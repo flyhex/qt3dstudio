@@ -41,6 +41,8 @@ using namespace qt3ds::foundation;
 using namespace qt3ds::state;
 using namespace eastl;
 
+static const int DI_SEC_SZ = 5; // Datainput section length in UIP file
+
 bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
                                          const QStringList &parameters,
                                          bool subpresentations)
@@ -130,13 +132,16 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
                     writerData.first->End();
                 }
             } else {
-                for (int i = 0; i < parameters.size() / 4; i++) {
+                for (int i = 0; i < parameters.size() / DI_SEC_SZ; i++) {
                     writerData.first->Begin("dataInput");
-                    writerData.first->Att("name", qPrintable(parameters[4 * i]));
-                    writerData.first->Att("type", qPrintable(parameters[4 * i + 1]));
-                    if (QStringLiteral("Ranged Number") == parameters[4 * i + 1]) {
-                        writerData.first->Att("min", qPrintable(parameters[4 * i + 2]));
-                        writerData.first->Att("max", qPrintable(parameters[4 * i + 3]));
+                    writerData.first->Att("name", qPrintable(parameters[DI_SEC_SZ * i]));
+                    writerData.first->Att("type", qPrintable(parameters[DI_SEC_SZ * i + 1]));
+                    if (QStringLiteral("Ranged Number") == parameters[DI_SEC_SZ * i + 1]) {
+                        writerData.first->Att("min", qPrintable(parameters[DI_SEC_SZ * i + 2]));
+                        writerData.first->Att("max", qPrintable(parameters[DI_SEC_SZ * i + 3]));
+                    } else if (QStringLiteral("Evaluator") ==  parameters[DI_SEC_SZ * i + 1]) {
+                        writerData.first->Att("evaluator",
+                                              qPrintable(parameters[DI_SEC_SZ * i + 4]));
                     }
                     writerData.first->End();
                 }
@@ -184,17 +189,20 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
                 uiaFileData.append("\"/>\n");
             }
         } else {
-            for (int i = 0; i < parameters.size() / 4; i++) {
+            for (int i = 0; i < parameters.size() / DI_SEC_SZ; i++) {
                 uiaFileData.append("\t\t<dataInput ");
                 uiaFileData.append("name=\"");
-                uiaFileData.append(qPrintable(parameters[4 * i]));
+                uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i]));
                 uiaFileData.append("\" type=\"");
-                uiaFileData.append(qPrintable(parameters[4 * i + 1]));
-                if (QStringLiteral("Ranged Number") == parameters[4 * i + 1]) {
+                uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 1]));
+                if (QStringLiteral("Ranged Number") == parameters[DI_SEC_SZ * i + 1]) {
                     uiaFileData.append("\" min=\"");
-                    uiaFileData.append(qPrintable(parameters[4 * i + 2]));
+                    uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 2]));
                     uiaFileData.append("\" max=\"");
-                    uiaFileData.append(qPrintable(parameters[4 * i + 3]));
+                    uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 3]));
+                } else if (QStringLiteral("Evaluator") == parameters[DI_SEC_SZ * i + 1]) {
+                    uiaFileData.append("\" evaluator=\"");
+                    uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 4]));
                 }
                 uiaFileData.append("\"/>\n");
             }

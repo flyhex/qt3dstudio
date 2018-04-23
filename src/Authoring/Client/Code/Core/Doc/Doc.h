@@ -79,6 +79,7 @@ class IInternalDirectoryWatchingSystem;
 class IDirectoryWatchingSystem;
 class IImportFailedHandler;
 class IDeletingReferencedObjectHandler;
+class IMoveRenameHandler;
 class CTransactionCloseListenerSignaller;
 class IDocSceneGraph;
 struct SSelectedValue;
@@ -171,6 +172,8 @@ public:
     std::shared_ptr<Q3DStudio::IImportFailedHandler> GetImportFailedHandler();
     void SetDocMessageBoxHandler(
             std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler> inHandler);
+    void setMoveRenameHandler(std::shared_ptr<Q3DStudio::IMoveRenameHandler> inHandler);
+    std::shared_ptr<Q3DStudio::IMoveRenameHandler> getMoveRenameHandler();
 
     // The system may be null in the case where we are running without a UI.
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
@@ -451,6 +454,7 @@ protected:
     std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> m_DirectoryWatchingSystem;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
     std::shared_ptr<Q3DStudio::IDeletingReferencedObjectHandler> m_DeletingReferencedObjectHandler;
+    std::shared_ptr<Q3DStudio::IMoveRenameHandler> m_moveRenameHandler;
     long m_TransactionDepth;
     std::shared_ptr<qt3dsdm::CmdDataModel> m_OpenTransaction;
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;

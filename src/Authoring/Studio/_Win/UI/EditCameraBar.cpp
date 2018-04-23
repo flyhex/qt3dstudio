@@ -78,7 +78,7 @@ CEditCameraBar::~CEditCameraBar()
 void CEditCameraBar::SetupCameras()
 {
     m_CameraSelector->clear();
-    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
+    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
     int idx = 1;
@@ -133,7 +133,7 @@ void CEditCameraBar::setCameraIndex(int inIndex)
  */
 void CEditCameraBar::HandleCameraChanged(int inIndex)
 {
-    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.GetRenderer();
+    Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
     int theNumCameras = theCameraNames.size();
@@ -141,17 +141,17 @@ void CEditCameraBar::HandleCameraChanged(int inIndex)
         theRenderer.SetEditCamera(inIndex);
         m_ActiveCameraIndex = inIndex;
         if (m_SceneView)
-            m_SceneView->SetViewMode(CPlayerContainerWnd::VIEW_EDIT);
+            m_SceneView->setViewMode(CPlayerContainerWnd::VIEW_EDIT);
     } else if (inIndex > theNumCameras) {
         theRenderer.SetEditCamera(-1);
         m_ActiveCameraIndex = inIndex;
         if (m_SceneView)
-            m_SceneView->SetViewMode(CPlayerContainerWnd::VIEW_SCENE);
+            m_SceneView->setViewMode(CPlayerContainerWnd::VIEW_SCENE);
     } else {
         m_CameraSelector->setCurrentIndex(m_ActiveCameraIndex);
     }
     if (m_SceneView)
-        m_SceneView->OnEditCameraChanged();
+        m_SceneView->onEditCameraChanged();
 
     CMainFrame *theMainFrame = g_StudioApp.m_pMainWnd;
     ASSERT(theMainFrame != nullptr);
@@ -163,7 +163,7 @@ void CEditCameraBar::HandleCameraChanged(int inIndex)
         if (!theRenderer.DoesEditCameraSupportRotation(theRenderer.GetEditCamera())
                 && theToolMode == STUDIO_TOOLMODE_CAMERA_ROTATE) {
             g_StudioApp.SetToolMode(STUDIO_TOOLMODE_CAMERA_PAN);
-            m_SceneView->SetViewCursor(); // Just set cursor, we don't want to update previous tool
+            m_SceneView->setViewCursor(); // Just set cursor, we don't want to update previous tool
         }
 
         // Trigger for tool changed. Changing between deployment/edit camera can change the tool
@@ -198,10 +198,10 @@ void CEditCameraBar::Enable(bool inFlag)
  *	find which entry is the one which is modified and update with the new string
  *	@param inCamera	the camera that has been modified
  */
-void CEditCameraBar::OnEditCameraChanged()
+void CEditCameraBar::onEditCameraChanged()
 {
     using qt3ds::QT3DSI32;
-    QT3DSI32 cameraIndex = g_StudioApp.GetRenderer().GetEditCamera();
+    QT3DSI32 cameraIndex = g_StudioApp.getRenderer().GetEditCamera();
     long theNumEntry = m_CameraSelector->count();
     for (long theIndex = 0; theIndex < theNumEntry; ++theIndex) {
         if (m_CameraSelector->itemData(theIndex).toInt() == cameraIndex) {

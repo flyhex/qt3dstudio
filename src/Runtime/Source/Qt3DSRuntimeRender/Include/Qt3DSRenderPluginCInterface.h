@@ -123,7 +123,7 @@ typedef struct _NeedsRenderResult
     TBool HasTransparency;
 } TNeedsRenderResult;
 
-struct lua_State;
+struct script_State;
 
 /*
  *	Create a new instance object.  Typename is the name of the plugin file, so for example
@@ -135,19 +135,9 @@ struct lua_State;
 typedef TRenderPluginInstancePtr (*TCreateInstanceFunction)(TRenderPluginClassPtr cls,
                                                             const char *inTypeName);
 
-/*
- *  Implementations should leave a lua_table on top of the stack.  This table is then used as the
- *plugin's behavior
- *	proxy when handlers are called and when the runtime needs the behavior object associated
- *with an element.  This
- *	looks just like a behavior to the runtime so if plugins add functions to the table named
- *'onInitialize' or
- *  'onUpdate', these functions will get called just as if the plugin was an actual lua behavior.
- *
- *	Optional API function.
- */
-typedef void (*TCreateInstanceLuaProxy)(TRenderPluginClassPtr cls, TRenderPluginInstancePtr insPtr,
-                                        struct lua_State *state);
+typedef void (*TCreateInstanceScriptProxy)(TRenderPluginClassPtr cls,
+                                           TRenderPluginInstancePtr insPtr,
+                                           struct script_State *state);
 
 /*
  *	Update the plugin instance with a list of property updates.  Properties are broken down by
@@ -285,7 +275,7 @@ typedef struct _RenderPluginClass
     TReleaseClassFunction ReleaseClass;
 
     TCreateInstanceFunction CreateInstance;
-    TCreateInstanceLuaProxy CreateInstanceLuaProxy;
+    TCreateInstanceScriptProxy CreateInstanceScriptProxy;
     TUpdateInstanceFunction UpdateInstance;
     TSurfaceQueryFunction QueryInstanceRenderSurface;
     TNeedsRenderFunction NeedsRenderFunction;
@@ -319,7 +309,7 @@ PLUGIN_EXPORT_API TRenderPluginClass CreateRenderPlugin( const char*)
         retval.m_Class = classItem;
         retval.GetRenderPluginAPIVersion = GetAPIVersion;
         retval.CreateInstance = CreateInstance;
-        retval.CreateInstanceLuaProxy = CreateInstanceLuaProxy;
+        retval.CreateInstanceScriptProxy = CreateInstanceScriptProxy;
         retval.UpdateInstance = UpdateInstance;
         retval.QueryInstanceRenderSurface = QuerySurface;
         retval.RenderInstance = Render;

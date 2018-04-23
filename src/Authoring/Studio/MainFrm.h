@@ -55,6 +55,7 @@ class CStudioApp;
 class ITimelineTimebar;
 class RemoteDeploymentSender;
 class TimelineWidget;
+class CStudioPreferencesPropSheet;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -251,16 +252,18 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void handleGeometryAndState(bool save);
 
-    RemoteDeploymentSender *m_remoteDeploymentSender = nullptr;
-    CSceneView *m_SceneView = nullptr;
-    CRecentItems *m_RecentItems = nullptr;
-    CPaletteManager *m_PaletteManager = nullptr;
-    bool m_PlaybackFlag = false;
+    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
+    QScopedPointer<RemoteDeploymentSender> m_remoteDeploymentSender;
+    QScopedPointer<CSceneView> m_sceneView;
+    QScopedPointer<CRecentItems> m_recentItems;
+    QScopedPointer<CPaletteManager> m_paletteManager;
+    QScopedPointer<QTimer> m_updateUITimer;
+    QScopedPointer<QTimer> m_playbackTimer;
+    QScopedPointer<CStudioPreferencesPropSheet> m_propSheet;
+
+    bool m_playbackFlag = false;
     bool m_actionActive = false;
     bool m_resettingLayout = false;
-
-    QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
-    QTimer m_playbackTimer;
 };
 
 #endif // INCLUDED_MAIN_FRAME

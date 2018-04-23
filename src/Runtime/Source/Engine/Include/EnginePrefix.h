@@ -100,7 +100,6 @@
 #include "Qt3DSAssert.h"
 #include "Qt3DSMacros.h"
 #include "Qt3DSElementSystem.h"
-#include "Qt3DSLuaEngine.h"
 #include "Qt3DSQmlEngine.h"
 #include "Qt3DSAttributeHashes.h"
 

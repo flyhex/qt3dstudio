@@ -74,7 +74,7 @@ TElement *CQmlElementHelper::GetElement(qt3ds::runtime::IApplication &inApplicat
     IPresentation *thePresentation = nullptr;
     size_t thePathLength = ::strlen(thePath) + 1;
     char *theToken =
-        Q3DStudio_allocate_desc(CHAR, thePathLength, "Lua:TempPath"); // Temporary token storage
+        Q3DStudio_allocate_desc(CHAR, thePathLength, "Token:TempPath"); // Temporary token storage
     // Try to get the specified presentation
     theSubPath = ::strchr(thePath, PRESENTATION_DELIMITER);
     TElement *theElement = inStartElement;

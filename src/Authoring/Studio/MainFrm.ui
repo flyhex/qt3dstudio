@@ -284,7 +284,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Action Palette</string>
+    <string>Action</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
@@ -295,7 +295,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Basic Objects Palette</string>
+    <string>Basic Objects</string>
    </property>
    <property name="toolTip">
     <string>Show Basic Objects Palette</string>
@@ -309,7 +309,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Inspector Palette</string>
+    <string>Inspector</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
@@ -320,7 +320,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Project Palette</string>
+    <string>Project</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -331,7 +331,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Slide Palette</string>
+    <string>Slide</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+D</string>
@@ -342,7 +342,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Timeline Palette</string>
+    <string>Timeline</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
@@ -353,7 +353,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Bounding Boxes</string>
+    <string>Bounding Boxes</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+B</string>
@@ -364,7 +364,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Pivot Point</string>
+    <string>Pivot Point</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+P</string>
@@ -386,7 +386,7 @@
     <string>Rulers &amp;&amp; Guides</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+;</string>
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionLock_Guides">
@@ -397,12 +397,15 @@
     <string>Lock Guides</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+;</string>
+    <string>Alt+R</string>
    </property>
   </action>
   <action name="actionClear_Guides">
    <property name="text">
     <string>Clear Guides</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+R</string>
    </property>
   </action>
   <action name="action_Undo">
@@ -941,10 +944,10 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Toggle hide/unhide selected</string>
+    <string>Hide/unhide selected</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>H</string>
    </property>
   </action>
   <action name="actionFind">
@@ -963,7 +966,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Toggle hide/unhide unselected</string>
+    <string>Hide/unhide unselected</string>
    </property>
    <property name="shortcut">
     <string>Alt+H</string>
