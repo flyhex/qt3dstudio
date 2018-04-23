@@ -370,6 +370,8 @@ void TimelineWidget::OnNewPresentation()
     connect(g_StudioApp.m_pMainWnd, &CMainFrame::playStateChanged,
             m_toolbar, &TimelineToolbar::updatePlayButtonState);
 
+    // Clear active slide
+    m_activeSlide = qt3dsdm::Qt3DSDMSlideHandle();
 }
 
 void TimelineWidget::OnClosingPresentation()
@@ -423,13 +425,20 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
 {
     qt3dsdm::TInstanceHandleList theInstances = inNewSelectable.GetSelectedInstances();
-    for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
-        qt3dsdm::Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
-        if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(theInstance)) {
-            Qt3DSDMTimelineItemBinding *selectedBinding = getBindingForHandle(theInstance,
-                                                                              m_binding);
-            m_graphicsScene->rowManager()->selectRow(selectedBinding->getRowTree());
+    if (theInstances.size() > 0) {
+        for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
+            qt3dsdm::Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
+            if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(theInstance)) {
+                Qt3DSDMTimelineItemBinding *selectedBinding = getBindingForHandle(theInstance,
+                                                                                  m_binding);
+                if (selectedBinding)
+                    m_graphicsScene->rowManager()->selectRow(selectedBinding->getRowTree());
+                else
+                    m_graphicsScene->rowManager()->clearSelection();
+            }
         }
+    } else {
+        m_graphicsScene->rowManager()->clearSelection();
     }
 
     // Mahmoud_TODO: Expand the tree so the selection is visible
