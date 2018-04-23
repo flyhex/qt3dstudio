@@ -71,13 +71,17 @@ private Q_SLOTS:
     void onEditSubPresentation();
     void onActivated(const QModelIndex &index);
     void onSelectionChanged();
+    void onSortOrderChanged(int column, Qt::SortOrder order);
 
 private:
     Ui::SubPresentationListDlg *m_ui;
     QString m_directory;
     QVector<SubPresentationRecord> m_records;
     int m_currentIndex;
+    QString m_currentName;
     QStandardItemModel *m_tableContents;
+    int m_sortColumn;
+    Qt::SortOrder m_sortOrder;
 };
 
 #endif

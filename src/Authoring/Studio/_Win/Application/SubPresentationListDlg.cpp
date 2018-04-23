@@ -46,6 +46,7 @@ CSubPresentationListDlg::CSubPresentationListDlg(
     , m_records(subpresentations)
     , m_currentIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
+    , m_sortColumn(-1)
 {
     m_ui->setupUi(this);
 
@@ -96,20 +97,15 @@ void CSubPresentationListDlg::initDialog()
     // Update table contents
     updateContents();
 
-    // Disable selecting the whole table
-    m_ui->tableView->setCornerButtonEnabled(false);
-
     // Align columns left and prevent selecting the whole column
     m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-    m_ui->tableView->horizontalHeader()->setSectionsClickable(false);
     m_ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    // Hide the vertical header with line numbers
-    m_ui->tableView->verticalHeader()->setHidden(true);
 
     connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &CSubPresentationListDlg::onSelectionChanged);
     connect(m_ui->tableView, &QTableView::activated, this, &CSubPresentationListDlg::onActivated);
+    connect(m_ui->tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
+            this, &CSubPresentationListDlg::onSortOrderChanged);
 }
 
 void CSubPresentationListDlg::updateButtons()
@@ -157,6 +153,9 @@ void CSubPresentationListDlg::updateContents()
     }
 
     m_ui->tableView->setModel(m_tableContents);
+
+    if (m_sortColumn >= 0)
+        m_ui->tableView->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
 void CSubPresentationListDlg::keyPressEvent(QKeyEvent *event)
@@ -231,13 +230,20 @@ void CSubPresentationListDlg::onRemoveSubPresentation()
 void CSubPresentationListDlg::onEditSubPresentation()
 {
     if (m_currentIndex >= 0) {
-        CSubPresentationDlg subpresdialog(m_directory, m_records.at(m_currentIndex), this);
+        int index = 0;
+        for (int i = 0; i < m_records.size(); ++i) {
+            auto record = m_records.at(i);
+            index = i;
+            if (record.m_id == m_currentName)
+                break;
+        }
+        CSubPresentationDlg subpresdialog(m_directory, m_records.at(index), this);
         if (subpresdialog.exec() == QDialog::Accepted) {
-            m_records[m_currentIndex] = subpresdialog.subpresentation();
+            m_records[index] = subpresdialog.subpresentation();
             // We need to update the table to be able to accurately find out if the id is unique
             updateContents();
             // Make sure that id is still unique
-            m_records[m_currentIndex].m_id = getUniqueId(m_records[m_currentIndex].m_id, true);
+            m_records[index].m_id = getUniqueId(m_records[index].m_id, true);
         }
         // Update again, as the id might have been updated
         updateContents();
@@ -249,15 +255,23 @@ void CSubPresentationListDlg::onEditSubPresentation()
 
 void CSubPresentationListDlg::onActivated(const QModelIndex &index)
 {
-    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
-    m_currentIndex = indexes.size() == columnCount ? index.row() : -1;
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedRows(0);
+    m_currentIndex = indexes.size() ? index.row() : -1;
+    if (m_currentIndex >= 0) {
+        m_currentName = m_tableContents->itemFromIndex(
+                    indexes.at(0))->data(Qt::EditRole).toString();
+    }
     onEditSubPresentation();
 }
 
 void CSubPresentationListDlg::onSelectionChanged()
 {
-    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
-    m_currentIndex = indexes.size() == columnCount ? indexes.at(0).row() : -1;
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedRows(0);
+    m_currentIndex = indexes.size() ? indexes.at(0).row() : -1;
+    if (m_currentIndex >= 0) {
+        m_currentName
+                = m_tableContents->itemFromIndex(indexes.at(0))->data(Qt::EditRole).toString();
+    }
     updateButtons();
 }
 
@@ -273,4 +287,10 @@ QString CSubPresentationListDlg::getUniqueId(const QString &id, bool editing)
         ++idx;
     }
     return retval;
+}
+
+void CSubPresentationListDlg::onSortOrderChanged(int column, Qt::SortOrder order)
+{
+    m_sortColumn = column;
+    m_sortOrder = order;
 }
