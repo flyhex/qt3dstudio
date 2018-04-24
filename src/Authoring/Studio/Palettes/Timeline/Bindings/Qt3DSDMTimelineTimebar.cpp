@@ -50,6 +50,7 @@
 #include "StudioFullSystem.h"
 #include "StudioPreferences.h"
 #include "ITimelineItemBinding.h"
+#include "RowTree.h"
 
 Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,
@@ -106,27 +107,6 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
                 case OBJTYPE_LAYER:
                     m_Color = CStudioPreferences::GetLayerTimebarColor();
                     break;
-                case OBJTYPE_BEHAVIOR:
-                    m_Color = CStudioPreferences::GetBehaviorTimebarColor();
-                    break;
-                case OBJTYPE_CAMERA:
-                    m_Color = CStudioPreferences::GetCameraTimebarColor();
-                    break;
-                case OBJTYPE_LIGHT:
-                    m_Color = CStudioPreferences::GetLightTimebarColor();
-                    break;
-                case OBJTYPE_MODEL:
-                    m_Color = CStudioPreferences::GetModelTimebarColor();
-                    break;
-                case OBJTYPE_GROUP:
-                    m_Color = CStudioPreferences::GetGroupTimebarColor();
-                    break;
-                case OBJTYPE_COMPONENT:
-                    m_Color = CStudioPreferences::GetComponentTimebarColor();
-                    break;
-                case OBJTYPE_EFFECT:
-                    m_Color = CStudioPreferences::GetEffectTimebarColor();
-                    break;
                 default:
                     m_Color = CStudioPreferences::GetObjectTimebarColor();
                     break;
@@ -149,10 +129,9 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
             ITimelineItemBinding *theBinding =
                 m_TimelineTranslationManager->GetOrCreate(inInstance);
             if (theBinding) {
-                CBaseStateRow *theRow = theBinding->GetRow();
-                if (theRow) {
-                    theRow->RequestRefreshRowMetaData();
-                }
+                RowTree *rowTree = theBinding->getRowTree();
+                if (rowTree)
+                    rowTree->rowTimeline()->setBarColor(m_Color);
             }
         }
     }

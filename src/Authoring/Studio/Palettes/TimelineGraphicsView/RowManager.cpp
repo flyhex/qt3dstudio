@@ -83,10 +83,11 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
     binding->setRowTree(newRow);
     newRow->setBinding(binding);
 
-    // set row start/end time
+    // set row start/end time & color
     ITimelineTimebar *timebar = binding->GetTimelineItem()->GetTimebar();
     newRow->rowTimeline()->setStartTime(timebar->GetStartTime() * .001);
     newRow->rowTimeline()->setEndTime(timebar->GetEndTime() * .001);
+    newRow->rowTimeline()->setBarColor(timebar->GetTimebarColor());
 
     // create property rows
     for (int i = 0; i < binding->GetPropertyCount(); i++) {

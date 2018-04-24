@@ -683,3 +683,8 @@ bool TimelineWidget::hasSelectedKeyframes() const
 {
     return m_graphicsScene->keyframeManager()->hasSelectedKeyframes();
 }
+
+RowTree *TimelineWidget::selectedRow() const
+{
+    return m_graphicsScene->rowManager()->selectedRow();
+}

@@ -57,6 +57,7 @@ public:
     void setEndTime(double endTime);
     void setStartX(double startX);
     void setEndX(double endX);
+    void setBarColor(const QColor &color);
     void putSelectedKeyframesOnTop();
     void updateKeyframes();
     void insertKeyframe(Keyframe *keyframe);
@@ -100,6 +101,7 @@ private:
     double m_maxEndX = 0;
     bool m_isProperty = false; // used in the destructor
     QList<Keyframe *> m_keyframes;
+    QColor m_barColor;
 
     friend class RowTree;
 };

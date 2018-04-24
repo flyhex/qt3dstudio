@@ -60,6 +60,7 @@
 #include "InspectorControlView.h"
 #include "TimelineWidget.h"
 #include "ProjectView.h"
+#include "RowTree.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -1875,13 +1876,14 @@ TimelineWidget *CMainFrame::getTimelineWidget()
 
 ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
 {
-    // TODO: reimplement after finishing the new timeline
-//    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
-//            GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
-//    if (theTimelineItemBinding == NULL)
-        return NULL;
+    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
+            static_cast<Qt3DSDMTimelineItemBinding *>(
+                getTimelineWidget()->selectedRow()->getBinding());
 
-//    return theTimelineItemBinding->GetTimelineItem()->GetTimebar();
+    if (theTimelineItemBinding == nullptr)
+        return nullptr;
+
+    return theTimelineItemBinding->GetTimelineItem()->GetTimebar();
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

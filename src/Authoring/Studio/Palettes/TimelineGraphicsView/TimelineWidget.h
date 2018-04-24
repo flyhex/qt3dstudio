@@ -62,6 +62,7 @@ public:
     TimelineToolbar *toolbar() const;
     QGraphicsView *viewTimelineContent() const;
     QGraphicsView *viewTreeContent() const;
+    RowTree *selectedRow() const;
 
     // Presentation Change Listener
     void OnNewPresentation() override;
