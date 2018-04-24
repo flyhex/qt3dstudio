@@ -1798,6 +1798,7 @@ void CDoc::HandleCut()
         ASSERT(0); // dispatch
         // m_StudioApp->GetViews( )->GetActionControl( )->OnCutAction( );
     } else if (m_KeyframesManager && m_KeyframesManager->HasSelectedKeyframes()) {
+        m_KeyframesManager->CopyKeyframes();
         m_KeyframesManager->RemoveKeyframes(true);
     } else if (CanCopyObject()) {
         CutSelectedObject();

@@ -32,9 +32,11 @@
 #include "Bindings/ITimelineKeyframesManager.h"
 #include <QtCore/qlist.h>
 #include <StudioObjectTypes.h>
+#include "Qt3DSDMAnimation.h"
 
 class RowTimeline;
 class TimelineGraphicsScene;
+class CPasteKeyframeCommandHelper;
 struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsSceneContextMenuEvent)
@@ -44,6 +46,7 @@ class KeyframeManager : public ITimelineKeyframesManager
 {
 public:
     KeyframeManager(TimelineGraphicsScene *m_scene);
+    virtual ~KeyframeManager();
 
     QList<Keyframe *> insertKeyframe(RowTimeline *row, double time,
                                      bool selectInsertedKeyframes = true);
@@ -56,7 +59,7 @@ public:
     void deselectAllKeyframes();
     void deleteKeyframes(RowTimeline *row, bool repaint = true);
     void copySelectedKeyframes();
-    void pasteKeyframes(RowTimeline *row);
+    void pasteKeyframes();
     void moveSelectedKeyframes(double dx);
     void commitMoveSelectedKeyframes();
     bool deleteSelectedKeyframes();
@@ -64,12 +67,7 @@ public:
     bool hasSelectedKeyframes() const;
     bool hasCopiedKeyframes() const;
 
-    TimelineGraphicsScene *m_scene;
-
-    QList<Keyframe *> m_selectedKeyframes;
-    QList<Keyframe *> m_copiedKeyframes; // for copy, cut, paste
-    QList<RowTimeline *> m_selectedKeyframesMasterRows;
-
+    // IKeyframesManager interface
     // Mahmoud_TODO: rewrite a better interface for the new timeline
     // ITimelineKeyframesManager interface
     void SetKeyframeTime(long inTime) override;
@@ -95,6 +93,12 @@ private:
     static const QHash<int, QList<QString>> SUPPORTED_ROW_PROPS;
 
     QList<Keyframe *> filterKeyframesForRow(RowTimeline *row, const QList<Keyframe *> &keyframes);
+    qt3dsdm::SGetOrSetKeyframeInfo setKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
+                                                   qt3dsdm::IAnimationCore &inCore);
+    CPasteKeyframeCommandHelper *m_pasteKeyframeCommandHelper;
+    TimelineGraphicsScene *m_scene;
+    QList<Keyframe *> m_selectedKeyframes;
+    QList<RowTimeline *> m_selectedKeyframesMasterRows;
 };
 
 #endif // KEYFRAMEMANAGER_H

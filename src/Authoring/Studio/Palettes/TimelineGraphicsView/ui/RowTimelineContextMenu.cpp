@@ -155,7 +155,7 @@ void RowTimelineContextMenu::copySelectedKeyframes()
 
 void RowTimelineContextMenu::pasteKeyframes()
 {
-    m_keyframeManager->pasteKeyframes(m_rowTree->rowTimeline());
+    m_keyframeManager->pasteKeyframes();
 }
 
 void RowTimelineContextMenu::deleteSelectedKeyframes()

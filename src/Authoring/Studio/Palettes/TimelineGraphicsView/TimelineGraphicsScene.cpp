@@ -754,7 +754,7 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         }
     } else if (keyEvent->key() == Qt::Key_V && ctrl) { // Ctrl+V
         if (m_rowManager->selectedRow() != nullptr)
-            m_keyframeManager->pasteKeyframes(m_rowManager->selectedRow()->rowTimeline());
+            m_keyframeManager->pasteKeyframes();
     }
 
     QGraphicsScene::keyPressEvent(keyEvent);

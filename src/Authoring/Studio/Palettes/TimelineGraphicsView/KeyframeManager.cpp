@@ -42,12 +42,15 @@
 #include "Doc.h"
 #include "CmdDataModelRemoveKeyframe.h"
 #include "CmdDataModelInsertKeyframe.h"
+#include "Qt3DSDMAnimation.h"
+#include "ClientDataModelBridge.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/OffsetKeyframesCommandHelper.h"
 #include "Bindings/Qt3DSDMTimelineKeyframe.h"
 #include "StudioPreferences.h"
 #include "Qt3DSDMAnimation.h"
 #include "Dialogs.h"
+#include "Bindings/PasteKeyframesCommandHelper.h"
 
 #include <qglobal.h>
 #include <QtCore/qhash.h>
@@ -64,8 +67,15 @@ inline void PostExecuteCommand(IDoc *inDoc)
     theDoc->GetCore()->CommitCurrentCommand();
 }
 
-KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene) : m_scene(scene)
+KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene)
+    : m_scene(scene)
+    , m_pasteKeyframeCommandHelper(nullptr)
 {
+}
+
+KeyframeManager::~KeyframeManager()
+{
+    delete m_pasteKeyframeCommandHelper;
 }
 
 QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time,
@@ -278,66 +288,86 @@ void KeyframeManager::copySelectedKeyframes()
 {
     if (!m_selectedKeyframes.empty()
         && m_selectedKeyframesMasterRows.count() == 1) {
-        // delete old copies
-        for (auto keyframe : qAsConst(m_copiedKeyframes))
-            delete keyframe;
+        if (m_pasteKeyframeCommandHelper)
+            m_pasteKeyframeCommandHelper->Clear(); // clear out previously copied data
+        else
+            m_pasteKeyframeCommandHelper = new CPasteKeyframeCommandHelper();
 
-        m_copiedKeyframes.clear();
-
-        Keyframe *copyKeyframe;
+        // calc min copied frames time
+        double minTime = 999999.0; // in seconds (~277.78 hrs)
         for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-            copyKeyframe = new Keyframe(*keyframe);
-            copyKeyframe->rowMaster = nullptr;
-            copyKeyframe->rowProperty = nullptr;
-            m_copiedKeyframes.append(copyKeyframe);
-        }
-    }
-}
-
-void KeyframeManager::pasteKeyframes(RowTimeline *row)
-{
-    if (row == nullptr)
-        return;
-
-    if (row->rowTree()->isProperty())
-        row = row->parentRow();
-
-    if (!m_copiedKeyframes.empty()) {
-        // filter copied keyframes to the row supported properties
-        const QList<Keyframe *> filteredKeyframes = filterKeyframesForRow(row, m_copiedKeyframes);
-
-        // calc min/max copied frames time
-        double minTime = 999999; // seconds (~277.78 hrs)
-        double maxTime = 0;
-        for (auto keyframe : filteredKeyframes) {
             if (keyframe->time < minTime)
                 minTime = keyframe->time;
-
-            if (keyframe->time > maxTime)
-                maxTime = keyframe->time;
         }
 
-        double dt = m_scene->playHead()->time() - minTime;
+        qt3dsdm::IAnimationCore *animationCore = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                                                 ->GetAnimationCore();
 
-        if (maxTime + dt > m_scene->ruler()->duration())
-            dt = m_scene->ruler()->duration() - maxTime;
+        for (auto keyframe : qAsConst(m_selectedKeyframes)) {
+            Qt3DSDMTimelineKeyframe *kf = keyframe->binding;
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+            kf->GetKeyframeHandles(theKeyframeHandles);
+            qt3dsdm::SGetOrSetKeyframeInfo info[3];
+            size_t infoCount = 0;
+            if (!theKeyframeHandles.empty()) {
+                switch (theKeyframeHandles.size()) {
+                case 1:
+                    info[0] = setKeyframeInfo(theKeyframeHandles[0], *animationCore);
+                    infoCount = 1;
+                    break;
+                case 3:
+                    info[0] = setKeyframeInfo(theKeyframeHandles[0], *animationCore);
+                    info[1] = setKeyframeInfo(theKeyframeHandles[1], *animationCore);
+                    info[2] = setKeyframeInfo(theKeyframeHandles[2], *animationCore);
+                    infoCount = 3;
+                    break;
+                default:
+                    break;
+                }
 
-        RowTree *propRow;
-        QList<Keyframe *> addedKeyframes;
-        for (auto keyframe : filteredKeyframes) {
-            propRow = m_scene->rowManager()->getOrCreatePropertyRow(row->rowTree(),
-                                                                    keyframe->propertyType);
-            addedKeyframes.append(insertKeyframe(propRow->rowTimeline(), keyframe->time + dt,
-                                                 false));
-        }
-
-        if (!addedKeyframes.empty()) {
-            deselectAllKeyframes();
-            selectKeyframes(addedKeyframes);
+                double dt = Qt3DSDMTimelineKeyframe::GetTimeInSecs(kf->GetTime()) - minTime;
+                qt3dsdm::Qt3DSDMAnimationHandle animation =
+                    animationCore->GetAnimationForKeyframe(theKeyframeHandles[0]);
+                m_pasteKeyframeCommandHelper->AddKeyframeData(
+                    animationCore->GetAnimationInfo(animation).m_Property, dt, info, infoCount);
+            }
         }
     }
 }
 
+qt3dsdm::SGetOrSetKeyframeInfo KeyframeManager::setKeyframeInfo(
+        qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe, qt3dsdm::IAnimationCore &inCore)
+{
+    qt3dsdm::TKeyframe theKeyframeData = inCore.GetKeyframeData(inKeyframe);
+    qt3dsdm::SEaseInEaseOutKeyframe keyframe =
+            qt3dsdm::get<qt3dsdm::SEaseInEaseOutKeyframe>(theKeyframeData);
+    bool isDynamic = false;
+    if (inCore.IsFirstKeyframe(inKeyframe)) {
+        isDynamic = inCore.GetAnimationInfo(inCore.GetAnimationForKeyframe(inKeyframe))
+                .m_DynamicFirstKeyframe;
+    }
+
+    return qt3dsdm::SGetOrSetKeyframeInfo(keyframe.m_KeyframeValue, keyframe.m_EaseIn,
+                                          keyframe.m_EaseOut, isDynamic);
+}
+
+void KeyframeManager::pasteKeyframes()
+{
+    CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+    if (m_pasteKeyframeCommandHelper && m_pasteKeyframeCommandHelper->HasCopiedKeyframes()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
+        if (theSelectedInstance.Valid()) {
+            long theCurrentViewTimeInMilliseconds = theDoc->GetCurrentViewTime();
+            CCmdDataModelInsertKeyframe *theInsertKeyframesCommand =
+                m_pasteKeyframeCommandHelper->GetCommand(theDoc, theCurrentViewTimeInMilliseconds,
+                                                         theSelectedInstance);
+            if (theInsertKeyframesCommand)
+                g_StudioApp.GetCore()->ExecuteCommand(theInsertKeyframesCommand);
+        }
+    }
+}
+
+// Mahmoud_TODO: this method is not used anymore, will be removed by finishing the new timeline
 QList<Keyframe *> KeyframeManager::filterKeyframesForRow(RowTimeline *row,
                                                          const QList<Keyframe *> &keyframes)
 {
@@ -386,9 +416,11 @@ bool KeyframeManager::hasSelectedKeyframes() const
 
 bool KeyframeManager::hasCopiedKeyframes() const
 {
-    return !m_copiedKeyframes.empty();
+    return m_pasteKeyframeCommandHelper != nullptr &&
+           m_pasteKeyframeCommandHelper->HasCopiedKeyframes();
 }
 
+// IKeyframesManager interface to connect Doc and KeyframeManager
 // Mahmoud_TODO: rewrite a better interface for the new timeline
 // ITimelineKeyframesManager interface
 void KeyframeManager::SetKeyframeTime(long inTime)
@@ -436,17 +468,24 @@ bool KeyframeManager::HasSelectedKeyframes(bool inOnlyDynamic)
 
 bool KeyframeManager::HasDynamicKeyframes()
 {
-    return true; // Mahmoud_TODO: implement
+    return false; // Mahmoud_TODO: implement
 }
 
 bool KeyframeManager::CanPerformKeyframeCopy()
 {
-    return true; // Mahmoud_TODO: implement
+    return !m_selectedKeyframes.empty() && m_selectedKeyframesMasterRows.count() == 1;
 }
 
 bool KeyframeManager::CanPerformKeyframePaste()
 {
-    return true; // Mahmoud_TODO: implement
+    if (m_pasteKeyframeCommandHelper && m_pasteKeyframeCommandHelper->HasCopiedKeyframes()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance =
+            g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
+        if (theSelectedInstance.Valid())
+            return true;
+    }
+
+    return false;
 }
 
 void KeyframeManager::CopyKeyframes()
@@ -456,12 +495,14 @@ void KeyframeManager::CopyKeyframes()
 
 bool KeyframeManager::RemoveKeyframes(bool inPerformCopy)
 {
+    Q_UNUSED(inPerformCopy)
+
     return deleteSelectedKeyframes();
 }
 
 void KeyframeManager::PasteKeyframes()
 {
-    // Mahmoud_TODO: implement
+    pasteKeyframes();
 }
 
 void KeyframeManager::SetKeyframeInterpolation()
@@ -511,7 +552,7 @@ void KeyframeManager::SelectAllKeyframes()
 
 void KeyframeManager::DeselectAllKeyframes()
 {
-    // Mahmoud_TODO: implement if needed
+    deselectAllKeyframes();
 }
 
 void KeyframeManager::SetChangedKeyframes()
@@ -519,6 +560,7 @@ void KeyframeManager::SetChangedKeyframes()
     // Mahmoud_TODO: implement if needed
 }
 
+// Mahmoud_TODO: this Map is not used anymore, will be removed by finishing the new timeline
 const QHash<int, QList<QString>> KeyframeManager::SUPPORTED_ROW_PROPS = {
     { OBJTYPE_LAYER, {
         "Left",
