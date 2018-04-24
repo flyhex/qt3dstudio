@@ -480,36 +480,38 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
-    ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
+    if (binding) {
+        ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
 
-    // create the binding if doesn't exist
-    if (propBinding == nullptr) {
-        propBinding = binding->GetOrCreatePropertyBinding(property);
+        // create the binding if doesn't exist
+        if (propBinding == nullptr) {
+            propBinding = binding->GetOrCreatePropertyBinding(property);
 
-        // create the property UI row
-        RowTree *propRow = m_graphicsScene->rowManager()
-            ->getOrCreatePropertyRow(binding->getRowTree(), propBinding->GetName().toQString());
+            // create the property UI row
+            RowTree *propRow = m_graphicsScene->rowManager()
+                ->getOrCreatePropertyRow(binding->getRowTree(), propBinding->GetName().toQString());
 
-        // connect the row and binding
-        propBinding->setRowTree(propRow);
-        propRow->setPropBinding(propBinding);
+            // connect the row and binding
+            propBinding->setRowTree(propRow);
+            propRow->setPropBinding(propBinding);
 
-        // add keyframes
-        for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
-            IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
-            Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
-                        propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, false)
-                        .at(0);
+            // add keyframes
+            for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
+                IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
+                Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
+                            propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, false)
+                            .at(0);
 
-            kf->setUI(kfUI);
-            kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
+                kf->setUI(kfUI);
+                kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
+            }
+
+            propRow->update();
         }
 
-        propRow->update();
+        // make sure the property rows are in the same order as in the binding
+        m_graphicsScene->rowManager()->reorderPropertiesFromBinding(binding);
     }
-
-    // make sure the property rows are in the same order as in the binding
-    m_graphicsScene->rowManager()->reorderPropertiesFromBinding(binding);
 }
 
 void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
@@ -601,8 +603,14 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
     Q_UNUSED(inIndex)
 
     // Mahmoud_TODO: possible improvement: move this to an [UNDO row reorder] event handler
-    if (!m_graphicsScene->rowMover()->isActive())
+    // TODO: Recreating all rows every time a child is added is very ineffective,
+    //       as this is called e.g. for every child of component when
+    //       converting an object to component.
+    if (!m_graphicsScene->rowMover()->isActive()) {
         m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
+        m_handlesMap.clear();
+        insertToHandlesMapRecursive(m_binding);
+    }
 }
 
 void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
