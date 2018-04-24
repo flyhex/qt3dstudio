@@ -295,6 +295,35 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
         painter->drawRect(QRect(1, 1, m_treeWidth - 2, size().height() - 3));
     }
+
+    // Action indicators
+    static const QPixmap pixMasterAction = QPixmap(":/images/Action-MasterAction.png");
+    static const QPixmap pixAction = QPixmap(":/images/Action-Action.png");
+    static const QPixmap pixChildMasterAction = QPixmap(":/images/Action-ChildMasterAction.png");
+    static const QPixmap pixChildAction = QPixmap(":/images/Action-ChildAction.png");
+    static const QPixmap pixCompMasterAction = QPixmap(":/images/Action-ComponentMasterAction.png");
+    static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
+
+    if (!isProperty()) {
+        Qt3DSDMTimelineItemBinding *itemBinding =
+                static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
+        if (itemBinding->HasAction(true)) // has master action
+            painter->drawPixmap(0, 0, pixMasterAction);
+        else if (itemBinding->HasAction(false)) // has action
+            painter->drawPixmap(0, 0, pixAction);
+
+        if (!expanded()) {
+            if (itemBinding->ChildrenHasAction(true)) // children have master action
+                painter->drawPixmap(0, 0, pixChildMasterAction);
+            else if (itemBinding->ChildrenHasAction(false)) // children have action
+                painter->drawPixmap(0, 0, pixChildAction);
+        }
+
+        if (itemBinding->ComponentHasAction(true)) // component has master action
+            painter->drawPixmap(0, 0, pixCompMasterAction);
+        else if (itemBinding->ComponentHasAction(false)) // component has action
+            painter->drawPixmap(0, 0, pixCompAction);
+    }
 }
 
 int RowTree::treeWidth() const
@@ -549,8 +578,7 @@ bool RowTree::isContainer() const
 {
     return  m_rowType == OBJTYPE_SCENE
          || m_rowType == OBJTYPE_LAYER
-         || m_rowType == OBJTYPE_GROUP
-         || m_rowType == OBJTYPE_COMPONENT;
+         || m_rowType == OBJTYPE_GROUP;
 }
 
 bool RowTree::isProperty() const
