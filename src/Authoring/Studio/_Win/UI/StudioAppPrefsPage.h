@@ -85,6 +85,7 @@ protected:
 
     void enableAutosave(bool enabled);
     void setAutosaveInterval(int interval);
+    void onClearAutosaveFiles();
     void onitEditStartViewCombo();
 
 protected:

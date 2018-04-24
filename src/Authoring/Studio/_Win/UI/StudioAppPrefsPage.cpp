@@ -46,6 +46,7 @@
 #include <QtWidgets/qcolordialog.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtGui/qstandarditemmodel.h>
+#include <QtCore/qdiriterator.h>
 
 //==============================================================================
 /**
@@ -131,6 +132,8 @@ void CStudioAppPrefsPage::onInitDialog()
             [=](){ setModified(true); m_autosaveChanged = true; });
     connect(m_ui->autosaveInterval, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this, [=](){ setModified(true); m_autosaveChanged = true; });
+    connect(m_ui->clearAutosaveFiles, &QPushButton::clicked,
+            this, &CStudioAppPrefsPage::onClearAutosaveFiles);
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     connect(m_ui->m_PreviewSelector, activated,
             this, &CStudioAppPrefsPage::onChangePreviewConfiguration);
@@ -437,6 +440,16 @@ void CStudioAppPrefsPage::setAutosaveInterval(int interval)
 {
     if (m_autosaveChanged)
         g_StudioApp.SetAutosaveInterval(interval);
+}
+
+void CStudioAppPrefsPage::onClearAutosaveFiles()
+{
+    // Find all *_autosave.uip files and delete them
+    QDirIterator files(g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString());
+    while (files.hasNext()) {
+        if (files.next().endsWith(QStringLiteral("_autosave.uip")))
+            QFile::remove(files.filePath());
+    }
 }
 
 //==============================================================================

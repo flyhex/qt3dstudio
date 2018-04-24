@@ -124,6 +124,12 @@
     \uicontrol{Manipulator Tool Handles} - Sets the size of the manipulator tool handles.
   \li
     \uicontrol{Autosave} - Enables auto saving.
+    \list
+    \li
+      \b{Interval (seconds)} - Sets the delay between autosaves in seconds. Minimum interval is 30.
+    \li
+      \b{Clear Autosave Files} - Deletes all autosave files from the presentation folder.
+    \endlist
   \li
     \b{Restore Defaults} - Restores all preferences for Studio to
     their default state. This includes palette layout and placement.
