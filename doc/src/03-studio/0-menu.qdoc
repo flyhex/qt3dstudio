@@ -132,7 +132,8 @@
     \endlist
   \li
     \b{Restore Defaults} - Restores all preferences for Studio to
-    their default state. This includes palette layout and placement.
+    their default state. This does not restore palette layouts or positions.
+    \b{Reset Layout} - Restores palette layouts and positions. Requires a restart.
   \li
     \target project-settings
     \b{Presentation Settings}
