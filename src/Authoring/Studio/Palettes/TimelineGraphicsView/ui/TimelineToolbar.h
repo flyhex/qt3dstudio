@@ -32,12 +32,17 @@
 #include "SelectedValueImpl.h"
 #include "TimelineToolbarLabel.h"
 #include "Qt3DSDMSignals.h"
+#include "DispatchListeners.h"
+#include "Dispatch.h"
+#include "DataInputSelectView.h"
 #include <QtWidgets/qtoolbar.h>
+#include <QtWidgets/qlabel.h>
 
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QSlider)
 
-class TimelineToolbar : public QToolBar
+class TimelineToolbar : public QToolBar,
+                        public IDataModelListener
 {
     Q_OBJECT
 
@@ -54,8 +59,15 @@ signals:
 
 public:
     TimelineToolbar();
-
+    virtual ~TimelineToolbar();
     void setTime(long totalMillis);
+
+    // IDataModelListener
+    void OnBeginDataModelNotifications() override;
+    void OnEndDataModelNotifications() override;
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
+                                            long inInstanceCount) override;
 
 public Q_SLOTS:
     void updatePlayButtonState(bool started);
@@ -65,21 +77,34 @@ private Q_SLOTS:
     void onZoomLevelChanged(int scale);
     void onZoomInButtonClicked();
     void onZoomOutButtonClicked();
+    void onDiButtonClicked();
 
 private:
     void addSpacing(int width);
     void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
+    void onDataInputChange(int handle, int instance, const QString &dataInputName);
+    void showDataInputChooser(const QPoint &point);
+    void showBrowser(QQuickWidget *browser, const QPoint &point);
+    void updateDataInputStatus(bool isViaDispatch);
+    void updateTimelineTitleColor(bool controlled);
 
     TimelineToolbarLabel *m_timeLabel;
+    QLabel *m_diLabel;
     QAction *m_actionDeleteRow;
     QAction *m_actionPlayStop;
     QAction *m_actionZoomIn;
     QAction *m_actionZoomOut;
+    QAction *m_actionDataInput;
     qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
     QSlider *m_scaleSlider;
     QIcon m_iconStop;
     QIcon m_iconPlay;
+    QIcon m_iconDiActive;
+    QIcon m_iconDiInactive;
 
+    qt3dsdm::Qt3DSDMInstanceHandle m_currTimeCtxRoot = 0;
+    QString m_currController;
+
+    DataInputSelectView *m_dataInputSelector;
 };
-
 #endif // TIMELINETOOLBAR_H
