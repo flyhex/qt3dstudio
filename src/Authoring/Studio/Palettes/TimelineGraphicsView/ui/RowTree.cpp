@@ -613,6 +613,17 @@ bool RowTree::hasActionButtons() const
             && m_rowType != OBJTYPE_IMAGE);
 }
 
+bool RowTree::hasComponentAncestor()
+{
+    RowTree *parentRow = m_parentRow;
+    while (parentRow) {
+        if (parentRow->rowType() == OBJTYPE_COMPONENT)
+            return true;
+        parentRow = parentRow->parentRow();
+    }
+    return false;
+}
+
 // Returns true for items with duration bar
 bool RowTree::hasDurationBar() const
 {

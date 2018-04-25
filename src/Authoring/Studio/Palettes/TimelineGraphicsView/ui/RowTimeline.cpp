@@ -380,7 +380,8 @@ void RowTimeline::moveDurationBy(double dx)
     m_startX += dx;
     m_endX += dx;
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER) {
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER
+            || m_rowTree->hasComponentAncestor()) {
         m_minStartX = m_startX;
         m_maxEndX = m_endX;
     }
@@ -415,7 +416,8 @@ void RowTimeline::moveDurationTo(double newX)
     m_startX = newX;
     m_endX = m_startX + durationX;
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER) {
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER
+            || m_rowTree->hasComponentAncestor()) {
         m_minStartX = m_startX;
         m_maxEndX = m_endX;
     }
@@ -483,8 +485,10 @@ void RowTimeline::setStartX(double startX)
     m_startX = startX;
     m_startTime = xToTime(startX);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+            || m_rowTree->hasComponentAncestor()) {
         m_minStartX = 0;
+    }
 
     updateChildrenStartRecursive(m_rowTree, oldStartX);
     updateChildrenMinStartXRecursive(m_rowTree);
@@ -501,8 +505,10 @@ void RowTimeline::setEndX(double endX)
     m_endX = endX;
     m_endTime = xToTime(endX);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+        || m_rowTree->hasComponentAncestor()) {
         m_maxEndX = 999999;
+    }
 
     updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
@@ -549,9 +555,15 @@ void RowTimeline::updateChildrenMinStartXRecursive(RowTree *rowTree)
 {
     if (m_rowTree->rowType() != OBJTYPE_SCENE && !rowTree->empty()) {
         const auto childRows = rowTree->childRows();
+        bool isComponentChild = m_rowTree->rowType() == OBJTYPE_COMPONENT
+                || m_rowTree->hasComponentAncestor();
         for (auto child : childRows) {
-            child->rowTimeline()->m_minStartX = std::max(rowTree->rowTimeline()->m_startX,
-                                                         rowTree->rowTimeline()->m_minStartX);
+            if (isComponentChild) {
+                child->rowTimeline()->m_minStartX = 0;
+            } else {
+                child->rowTimeline()->m_minStartX = std::max(rowTree->rowTimeline()->m_startX,
+                                                             rowTree->rowTimeline()->m_minStartX);
+            }
             child->rowTimeline()->update();
 
             updateChildrenMinStartXRecursive(child);
@@ -563,9 +575,15 @@ void RowTimeline::updateChildrenMaxEndXRecursive(RowTree *rowTree)
 {
     if (m_rowTree->rowType() != OBJTYPE_SCENE && !rowTree->empty()) {
         const auto childRows = rowTree->childRows();
+        bool isComponentChild = m_rowTree->rowType() == OBJTYPE_COMPONENT
+                || m_rowTree->hasComponentAncestor();
         for (auto child : childRows) {
-            child->rowTimeline()->m_maxEndX = std::min(rowTree->rowTimeline()->m_endX,
-                                                       rowTree->rowTimeline()->m_maxEndX);
+            if (isComponentChild) {
+                child->rowTimeline()->m_maxEndX = 999999;
+            } else {
+                child->rowTimeline()->m_maxEndX = std::min(rowTree->rowTimeline()->m_endX,
+                                                           rowTree->rowTimeline()->m_maxEndX);
+            }
             child->rowTimeline()->update();
 
             updateChildrenMaxEndXRecursive(child);
@@ -579,8 +597,10 @@ void RowTimeline::setStartTime(double startTime)
     m_startTime = startTime;
     m_startX = timeToX(startTime);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+            || m_rowTree->hasComponentAncestor()) {
         m_minStartX = 0;
+    }
 
     updateChildrenStartRecursive(m_rowTree, oldStartX);
     updateChildrenMinStartXRecursive(m_rowTree);
@@ -593,8 +613,10 @@ void RowTimeline::setEndTime(double endTime)
     m_endTime = endTime;
     m_endX = timeToX(endTime);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE)
+    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+            || m_rowTree->hasComponentAncestor()) {
         m_maxEndX = 999999;
+    }
 
     updateChildrenEndRecursive(m_rowTree, oldEndX);
     updateChildrenMaxEndXRecursive(m_rowTree);
