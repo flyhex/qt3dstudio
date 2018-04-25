@@ -515,7 +515,10 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                              && rowAtIndex->rowType() == OBJTYPE_SCENE)
 
                         // Layer cases
-                        && validLayerMove(rowAtIndex, nextRowAtIndex);
+                        && validLayerMove(rowAtIndex, nextRowAtIndex)
+
+                        // Not inserting into a component
+                        && rowAtIndex->rowType() != OBJTYPE_COMPONENT;
             }
 
             if (valid) {
