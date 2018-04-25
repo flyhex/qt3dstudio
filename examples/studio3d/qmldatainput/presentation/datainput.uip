@@ -14,13 +14,9 @@
 					<Model id="Cone" >
 						<Material id="Default" name="Default" />
 					</Model>
-					<Model id="Cube" >
-						<Material id="Default_001" name="Default" />
-					</Model>
 					<Model id="Cylinder" >
 						<Material id="Default_002" name="Default" />
 					</Model>
-					<Text id="Text5" />
 					<Text id="Text6" />
 					<Text id="Text8" />
 					<Model id="Cube2" >
@@ -28,8 +24,6 @@
 					</Model>
 					<Text id="Text3" />
 					<Text id="Text4" />
-					<Text id="Text7" />
-					<Text id="Text9" />
 					<Text id="Text10" />
 					<Text id="Text11" />
 				</Layer>
@@ -49,19 +43,14 @@
 					<Add ref="#Text2" name="Text2" controlledproperty="" font="TitilliumWeb-Regular" position="259.808 217.95 0" scale="1 1 1" size="26" textstring="Text control&#10;Rotation animation control via datainput timeline control" />
 					<Add ref="#Cone" name="Cone" controlledproperty="$vec3Input scale" position="-417.135 -225.166 0" sourcepath="#Cone" />
 					<Add ref="#Default" />
-					<Add ref="#Cube" name="Cube" controlledproperty="$evaluatorInput opacity" opacity="60" position="-147.224 -184.752 0" sourcepath="#Cube" />
-					<Add ref="#Default_001" />
 					<Add ref="#Cylinder" name="Cylinder" controlledproperty="$variantInput opacity" position="131.347 -180.422 0" sourcepath="#Cylinder" />
 					<Add ref="#Default_002" />
-					<Add ref="#Text5" name="Text5" font="TitilliumWeb-Regular" position="-158.772 -301.665 0" textstring="Opacity control&#10;(Evaluator type)" />
 					<Add ref="#Text6" name="Text6" font="TitilliumWeb-Regular" position="135.678 -300.019 -8.28656" textstring="Opacity control&#10;(Variant type)" />
 					<Add ref="#Text8" name="Text8" font="TitilliumWeb-Regular" position="-428.683 -290.118 0" textstring="Scale control" />
 					<Add ref="#Cube2" name="Cube2" controlledproperty="$vec3Input rotation" position="409.919 -177.535 0" sourcepath="#Cube" />
 					<Add ref="#Default_003" controlledproperty="$vec3Input2 diffuse" />
 					<Add ref="#Text3" name="Text3" font="TitilliumWeb-Regular" position="434.456 -304.552 0" textstring="Rotation control&#10;Diffuse color control" />
 					<Add ref="#Text4" name="Text4" font="TitilliumWeb-Regular" position="-381.051 290.118 0" textstring="Directional light color and Camera xy &#10;rotation controlled via Datainput" />
-					<Add ref="#Text7" name="Text7" font="TitilliumWeb-Regular" position="-150.111 -69.2816 0" textstring="Opacity" />
-					<Add ref="#Text9" name="Text9" controlledproperty="$evaluatorInput textstring" font="TitilliumWeb-Regular" position="-150.111 -106.809 0" />
 					<Add ref="#Text10" name="Text10" font="TitilliumWeb-Regular" position="138.564 -66.3953 0" textstring="Opacity" />
 					<Add ref="#Text11" name="Text11" controlledproperty="$variantInput textstring" font="TitilliumWeb-Regular" position="138.564 -103.923 0" />
 				</State>

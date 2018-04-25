@@ -85,9 +85,11 @@ QString DataInputSelectView::getDiTypeStr(int type)
     case EDataType::DataTypeBoolean:
         return tr("Boolean");
         break;
+#ifdef DATAINPUT_EVALUATOR_ENABLED
     case EDataType::DataTypeEvaluator:
         return tr("Evaluator");
         break;
+#endif
     case EDataType::DataTypeFloat:
         return tr("Float");
         break;

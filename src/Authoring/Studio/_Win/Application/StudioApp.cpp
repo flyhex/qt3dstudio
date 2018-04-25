@@ -1553,8 +1553,10 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
                 list.append(QStringLiteral("Vector3"));
             else if (item->type == EDataType::DataTypeVector2)
                 list.append(QStringLiteral("Vector2"));
+#ifdef DATAINPUT_EVALUATOR_ENABLED
             else if (item->type == EDataType::DataTypeEvaluator)
                 list.append(QStringLiteral("Evaluator"));
+#endif
             else if (item->type == EDataType::DataTypeVariant)
                 list.append(QStringLiteral("Variant"));
 

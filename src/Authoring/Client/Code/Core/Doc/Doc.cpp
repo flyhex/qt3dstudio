@@ -2829,12 +2829,15 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
                                 item->type = EDataType::DataTypeVector2;
                             } else if (!QString(type.c_str()).compare(QStringLiteral("Variant"))) {
                                 item->type = EDataType::DataTypeVariant;
-                            } else if (!QString(type.c_str())
+                            }
+#ifdef DATAINPUT_EVALUATOR_ENABLED
+                            else if (!QString(type.c_str())
                                        .compare(QStringLiteral("Evaluator"))) {
                                 item->type = EDataType::DataTypeEvaluator;
                                 if (theReader->Att("evaluator", evaluator))
                                     item->valueString = evaluator.c_str();
                             }
+#endif
                         }
 
                         datainputs.push_back(item);

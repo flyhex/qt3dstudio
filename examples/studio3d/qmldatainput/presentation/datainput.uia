@@ -9,7 +9,6 @@
 		<dataInput name="variantInput" type="Variant"/>
 		<dataInput name="vec3Input2" type="Vector3"/>
 		<dataInput name="vec3Input3" type="Vector3"/>
-		<dataInput name="evaluatorInput" type="Evaluator" evaluator="(function(rangeInput, evaluatorInput) { return Math.abs((rangeInput - evaluatorInput)) % 100 ; })"/>
 	</assets>
 	<statemachine ref="#logic">
 		<visual-states>

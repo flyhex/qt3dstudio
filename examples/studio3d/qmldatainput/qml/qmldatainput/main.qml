@@ -73,7 +73,6 @@ Item {
         property string inputString: ""
         property int inputFloat: 0.0
         property variant inputVariant: 0
-        property real inputEvaluator: 0.0
         // A changing property to demonstrate DataInput
         NumberAnimation {
             target: studio3D
@@ -138,15 +137,6 @@ Item {
             loops: Animation.Infinite
             running: true
         }
-        NumberAnimation {
-            target: studio3D
-            property: "inputEvaluator"
-            duration: 8000
-            from: 10.0
-            to: 50.0
-            loops: Animation.Infinite
-            running: true
-        }
 
         // ViewerSettings item is used to specify presentation independent viewer settings.
         ViewerSettings {
@@ -186,10 +176,6 @@ Item {
             DataInput {
                 name: "variantInput"
                 value: studio3D.inputVariant
-            }
-            DataInput {
-                name: "evaluatorInput"
-                value: studio3D.inputEvaluator
             }
         }
         //![1]

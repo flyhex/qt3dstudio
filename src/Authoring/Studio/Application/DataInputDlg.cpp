@@ -51,7 +51,9 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     m_ui->comboBoxTypeList->setItemDelegate(itemDelegate);
 
     m_ui->comboBoxTypeList->addItem(tr("Boolean"));
+#ifdef DATAINPUT_EVALUATOR_ENABLED
     m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
+#endif
     m_ui->comboBoxTypeList->addItem(tr("Float"));
     m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
     m_ui->comboBoxTypeList->addItem(tr("String"));
@@ -96,9 +98,11 @@ void CDataInputDlg::initDialog()
             m_min = m_dataInput->minValue;
             m_max = m_dataInput->maxValue;
         }
+#ifdef DATAINPUT_EVALUATOR_ENABLED
         else if (m_type == DataTypeEvaluator) {
             m_ui->lineEditEvaluation->setText(m_dataInput->valueString);
         }
+#endif
     } else {
         m_name = getUniqueId(tr("newDataInput"));
         m_ui->lineEditInputName->setText(m_name);
@@ -115,9 +119,11 @@ void CDataInputDlg::on_buttonBox_accepted()
         m_dataInput->minValue = m_min;
         m_dataInput->maxValue = m_max;
     }
+#ifdef DATAINPUT_EVALUATOR_ENABLED
     else if (m_type == DataTypeEvaluator) {
         m_dataInput->valueString = m_text;
     }
+#endif
     QDialog::accept();
 }
 
@@ -183,15 +189,18 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->doubleSpinBoxMin->setVisible(false);
         m_ui->doubleSpinBoxMax->setVisible(false);
     }
-
+#ifdef DATAINPUT_EVALUATOR_ENABLED
     if (type == DataTypeEvaluator) {
         m_ui->lineEditEvaluation->setVisible(true);
         m_ui->labelEvaluation->setVisible(true);
-
     } else {
         m_ui->lineEditEvaluation->setVisible(false);
         m_ui->labelEvaluation->setVisible(false);
     }
+#else
+    m_ui->lineEditEvaluation->setVisible(false);
+    m_ui->labelEvaluation->setVisible(false);
+#endif
 }
 
 const bool CDataInputDlg::isEquivalentDataType(int dlgType,
@@ -214,7 +223,11 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
         // Variant can be bound to any property type.
         // Allow also Evaluator binding to any property as we only know the evaluation
         // result type at runtime.
-        || dlgType == EDataType::DataTypeVariant || dlgType == EDataType::DataTypeEvaluator) {
+        || dlgType == EDataType::DataTypeVariant
+#ifdef DATAINPUT_EVALUATOR_ENABLED
+        || dlgType == EDataType::DataTypeEvaluator
+#endif
+        ) {
         return true;
     }
 

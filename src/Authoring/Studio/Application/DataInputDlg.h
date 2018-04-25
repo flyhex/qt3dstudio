@@ -48,7 +48,9 @@ QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 
 enum EDataType {
     DataTypeBoolean = 0,
+#ifdef DATAINPUT_EVALUATOR_ENABLED
     DataTypeEvaluator,
+#endif
     DataTypeFloat,
     DataTypeRangedNumber,
     DataTypeString,

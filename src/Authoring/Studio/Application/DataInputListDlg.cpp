@@ -164,9 +164,11 @@ void CDataInputListDlg::updateContents()
             dataInput.append(new QStandardItem(tr("String")));
         } else if (dataInputType == DataTypeFloat) {
             dataInput.append(new QStandardItem(tr("Float")));
+#ifdef DATAINPUT_EVALUATOR_ENABLED
         } else if (dataInputType == DataTypeEvaluator) {
             dataInput.append(new QStandardItem(tr("Evaluator")));
             dataInput.append(new QStandardItem(m_dataInputs.at(i)->valueString));
+#endif
         } else if (dataInputType == DataTypeBoolean) {
             dataInput.append(new QStandardItem(tr("Boolean")));
         } else if (dataInputType == DataTypeVector3) {
