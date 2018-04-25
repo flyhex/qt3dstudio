@@ -672,9 +672,8 @@ void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineSetInterpolation()
 {
-    // TODO: reimplement at a later stage of the new timeline, leaving it here for reference
-//    m_ui->actionSet_Interpolation->setEnabled(
-//                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    m_ui->actionSet_Interpolation->setEnabled(
+                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
 //==============================================================================

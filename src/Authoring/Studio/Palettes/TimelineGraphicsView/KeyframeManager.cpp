@@ -45,11 +45,15 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/OffsetKeyframesCommandHelper.h"
 #include "Bindings/Qt3DSDMTimelineKeyframe.h"
-
+#include "StudioPreferences.h"
+#include "Qt3DSDMAnimation.h"
+#include "Dialogs.h"
 
 #include <qglobal.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qdebug.h>
+
+using namespace qt3dsdm;
 
 // Mahmmoud_TODO: This function is copied from old timeline code. It should be removed after the
 // new timeline is done (during cleanup of old timeline)
@@ -462,7 +466,42 @@ void KeyframeManager::PasteKeyframes()
 
 void KeyframeManager::SetKeyframeInterpolation()
 {
-    // Mahmoud_TODO: implement
+    if (!hasSelectedKeyframes())
+        return;
+
+    float theEaseIn = 0;
+    float theEaseOut = 0;
+    if (CStudioPreferences::GetInterpolation())
+        theEaseIn = theEaseOut = 100;
+
+    CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+    IAnimationCore *theAnimationCore = theDoc->GetStudioSystem()->GetAnimationCore();
+
+    if (!m_selectedKeyframes.empty()) {
+        Qt3DSDMTimelineKeyframe *theTimelineKeyframe = m_selectedKeyframes.front()->binding;
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+        theTimelineKeyframe->GetKeyframeHandles(theKeyframeHandles);
+        TKeyframe theKeyframeData = theAnimationCore->GetKeyframeData(theKeyframeHandles[0]);
+        GetEaseInOutValues(theKeyframeData, theEaseIn, theEaseOut);
+    }
+
+    if (g_StudioApp.GetDialogs()->PromptForKeyframeInterpolation(theEaseIn, theEaseOut)) {
+        // Note: Having "editor" variable here is important as its destructor
+        // creates proper transaction
+        Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Set Keyframe Interpolation",
+                                        __FILE__, __LINE__);
+        for (Keyframe *keyframe : qAsConst(m_selectedKeyframes)) {
+            Qt3DSDMTimelineKeyframe *theTimelineKeyframe = keyframe->binding;
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
+            theTimelineKeyframe->GetKeyframeHandles(theKeyframeHandles);
+            for (size_t i = 0; i < theKeyframeHandles.size(); ++i) {
+                TKeyframe theKeyframeData =
+                    theAnimationCore->GetKeyframeData(theKeyframeHandles[i]);
+                SetEaseInOutValues(theKeyframeData, theEaseIn, theEaseOut);
+                theAnimationCore->SetKeyframeData(theKeyframeHandles[i], theKeyframeData);
+            }
+        }
+    }
 }
 
 void KeyframeManager::SelectAllKeyframes()
