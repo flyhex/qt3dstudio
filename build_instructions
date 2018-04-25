@@ -69,6 +69,9 @@ Under "Build steps" click "Add Build Step" and select "Make". To make
 arguments type "install". This will move the qmlviewer plugin to correct
 place under Qt.
 
+If you encounter issues with missing debug symbols even when build target
+is Debug, try adding argument "debug" for the first make step after qmake step.
+
 
 5. Running Qt3DStudio
 
