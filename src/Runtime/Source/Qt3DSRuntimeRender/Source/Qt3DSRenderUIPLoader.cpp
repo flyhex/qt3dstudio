@@ -1738,7 +1738,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         m_Reader.UnregisteredAtt("sourcepath", srcPath);
                         CRegisteredString imgPath = m_StrTable.RegisterStr(srcPath);
                         bool hasTransparency = false;
-                        m_Reader.Att(L"hasTransparency", hasTransparency);
+                        m_Reader.Att("hasTransparency", hasTransparency);
                         m_BufferManager.SetImageHasTransparency(imgPath, hasTransparency);
                     }
                 }

@@ -990,10 +990,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
             inWriter.Att(L"type", theInfo.m_AnimationType);
 
             if (theInfo.m_DynamicFirstKeyframe)
-                inWriter.Att(L"dynamic", true);
+                inWriter.Att("dynamic", true);
 
             if (!theInfo.m_ArtistEdited)
-                inWriter.Att(L"artistedited", theInfo.m_ArtistEdited);
+                inWriter.Att("artistedited", theInfo.m_ArtistEdited);
 
             m_AnimationCore.GetKeyframes(inAnimations[idx], theKeyframes);
 
@@ -1033,9 +1033,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         inReader.Att(L"property", thePropertyName);
         inReader.Att(L"type", theAnimationType);
-        inReader.Att(L"dynamic", firstKeyframeDynamic);
+        inReader.Att("dynamic", firstKeyframeDynamic);
         bool artistEdited;
-        if (!inReader.Att(L"artistedited", artistEdited))
+        if (!inReader.Att("artistedited", artistEdited))
             artistEdited = true;
 
         uint32_t subIndex = 0;
@@ -1145,7 +1145,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         SActionInfo theInfo(m_ActionCore.GetActionInfo(theAction));
         inWriter.Att(L"id", GetActionId(theAction, inSlide, inInstance));
         bool eyeball = m_ActionSystem.GetActionEyeballValue(inSlide, theAction);
-        inWriter.Att(L"eyeball", eyeball);
+        inWriter.Att("eyeball", eyeball);
 
         WriteObjectRef(theInfo.m_TriggerObject, valueStr);
         inWriter.Att(L"triggerObject", valueStr);
@@ -1273,7 +1273,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             isRef = true;
         }
         bool eyeball = false;
-        inReader.Att(L"eyeball", eyeball);
+        inReader.Att("eyeball", eyeball);
         m_ActionSystem.SetActionEyeballValue(inSlide, theAction, eyeball);
         // Referenced actions can only set eyeball property on various slides, they can't
         // set anything else, so we can return safely here.
@@ -1835,7 +1835,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 bool hadAction = m_ActionToIdMap.find(theAction) != m_ActionToIdMap.end();
                 theRef.append(GetActionId(theAction, inParent, inInstance));
                 inWriter.Att(L"ref", theRef.c_str());
-                inWriter.Att(L"eyeball", theEyeballChanges[idx].second);
+                inWriter.Att("eyeball", theEyeballChanges[idx].second);
                 if (!hadAction)
                     m_ExternalActions.insert(theAction);
             }

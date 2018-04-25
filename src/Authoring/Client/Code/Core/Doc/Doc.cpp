@@ -2382,7 +2382,7 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                 if (theBuffer.m_TextureFlags.HasTransparency()) {
                     IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
                     theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
-                    theWriter.Att(L"hasTransparency", L"True");
+                    theWriter.Att("hasTransparency", true);
                 }
             }
         }
