@@ -135,6 +135,7 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
     , m_initialized(false)
     , m_prepared(false)
     , m_update(false)
+    , m_delayedUpdateRequest(false)
 {
     renderThreadClientCount->fetchAndAddAcquire(1);
 
@@ -359,6 +360,11 @@ bool Q3DSQmlStreamRenderer::event(QEvent *event)
         m_renderControl->prepareThread(m_renderThread);
         m_prepared = true;
 
+        if (m_delayedUpdateRequest) {
+            QCoreApplication::postEvent(this, new RequestUpdate());
+            m_delayedUpdateRequest = false;
+        }
+
         return true;
     }
 
@@ -396,6 +402,8 @@ void Q3DSQmlStreamRenderer::requestUpdate()
         m_requestUpdate = true;
         if (m_initialized)
             QCoreApplication::postEvent(this, new RequestUpdate());
+        else
+            m_delayedUpdateRequest = true;
     }
 }
 
