@@ -81,9 +81,6 @@ CDataInputDlg::~CDataInputDlg()
 
 void CDataInputDlg::initDialog()
 {
-    m_ui->lineEditEvaluation->setVisible(false);
-    m_ui->labelEvaluation->setVisible(false);
-
     // Disallow special characters and whitespaces
     QRegExpValidator *rxp = new QRegExpValidator(QRegExp("[A-Za-z0-9_]+"), this);
     m_ui->lineEditInputName->setValidator(rxp);
@@ -92,7 +89,6 @@ void CDataInputDlg::initDialog()
         m_name = m_dataInput->name;
         m_type = m_dataInput->type;
         m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
-        updateVisibility(m_dataInput->type);
         m_ui->lineEditInputName->setText(m_dataInput->name);
         if (m_type == DataTypeRangedNumber) {
             m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue);
@@ -107,6 +103,8 @@ void CDataInputDlg::initDialog()
         m_name = getUniqueId(tr("newDataInput"));
         m_ui->lineEditInputName->setText(m_name);
     }
+
+    updateVisibility(m_dataInput->type);
 }
 
 void CDataInputDlg::on_buttonBox_accepted()
