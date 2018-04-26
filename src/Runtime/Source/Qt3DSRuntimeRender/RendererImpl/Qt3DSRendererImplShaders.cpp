@@ -503,6 +503,12 @@ namespace render {
             }
         }
 
+        void DoGenerateVertexColor() override
+        {
+            Vertex().AddIncoming("attr_color", "vec3");
+            Vertex().Append("\tvarColor = attr_color;");
+        }
+
         void EndVertexGeneration() override
         {
 

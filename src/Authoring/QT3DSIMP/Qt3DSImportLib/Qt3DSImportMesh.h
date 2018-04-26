@@ -351,6 +351,7 @@ struct Mesh
     static const char *GetTexBinormalAttrName() { return "attr_binormal"; }
     static const char *GetWeightAttrName() { return "attr_weight"; }
     static const char *GetBoneIndexAttrName() { return "attr_boneid"; }
+    static const char *GetColorAttrName() { return "attr_color"; }
 
     // Run through the vertex buffer items indicated by subset
     // Assume vbuf entry[posEntryIndex] is the position entry

@@ -566,6 +566,7 @@ namespace render {
         SShaderKeyBoolean m_LightShadowFlags[LightCount];
         SShaderKeyBoolean m_SpecularEnabled;
         SShaderKeyBoolean m_FresnelEnabled;
+        SShaderKeyBoolean m_VertexColorsEnabled;
         SShaderKeySpecularModel m_SpecularModel;
         SShaderKeyImageMap m_ImageMaps[ImageMapCount];
         SShaderKeyTextureSwizzle m_TextureSwizzle[ImageMapCount];
@@ -579,6 +580,7 @@ namespace render {
             , m_LightCount("lightCount")
             , m_SpecularEnabled("specularEnabled")
             , m_FresnelEnabled("fresnelEnabled")
+            , m_VertexColorsEnabled("vertexColorsEnabled")
             , m_SpecularModel("specularModel")
             , m_TessellationMode("tessellationMode")
             , m_HasSkinning("hasSkinning")
@@ -661,6 +663,7 @@ namespace render {
 
             inVisitor.Visit(m_SpecularEnabled);
             inVisitor.Visit(m_FresnelEnabled);
+            inVisitor.Visit(m_VertexColorsEnabled);
             inVisitor.Visit(m_SpecularModel);
 
             for (QT3DSU32 idx = 0, end = ImageMapCount; idx < end; ++idx) {

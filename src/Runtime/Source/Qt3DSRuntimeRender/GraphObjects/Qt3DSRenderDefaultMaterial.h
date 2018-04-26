@@ -105,6 +105,7 @@ namespace render {
         SImage *m_TranslucencyMap;
         QT3DSF32 m_TranslucentFalloff; // 0 - ??
         QT3DSF32 m_DiffuseLightWrap; // 0 - 1
+        bool m_VertexColors;
         // Materials are stored as a linked list on models.
         SGraphObject *m_NextSibling;
         SModel *m_Parent;
@@ -113,6 +114,7 @@ namespace render {
 
         bool IsSpecularEnabled() const { return m_SpecularAmount > .01f; }
         bool IsFresnelEnabled() const { return m_FresnelPower > 0.0f; }
+        bool IsVertexColorsEnabled() const { return m_VertexColors; }
         bool HasLighting() const { return m_Lighting != DefaultMaterialLighting::NoLighting; }
 
         // Generic method used during serialization

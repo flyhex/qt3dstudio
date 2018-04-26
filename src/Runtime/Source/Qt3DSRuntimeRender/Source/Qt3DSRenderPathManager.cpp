@@ -541,6 +541,12 @@ struct SPathVertexPipeline : public SVertexPipelineImpl
         AssignOutput("varBinormal", "normal_matrix * binormal");
     }
 
+    void DoGenerateVertexColor() override
+    {
+        Vertex().AddIncoming("attr_color", "vec3");
+        Vertex() << "\tvarColor = attr_color;" << Endl;
+    }
+
     void EndVertexGeneration() override
     {
 
@@ -752,6 +758,12 @@ struct SXYRectVertexPipeline : public SVertexPipelineImpl
         Vertex().AddIncoming("attr_binormal", "vec3");
         Vertex() << "\tvarTangent = normal_matrix * vec3(1.0, 0.0, 0.0);" << Endl
                  << "\tvarBinormal = normal_matrix * vec3(0.0, 1.0, 0.0);" << Endl;
+    }
+
+    void DoGenerateVertexColor() override
+    {
+        Vertex().AddIncoming("attr_color", "vec3");
+        Vertex() << "\tvarColor = attr_color;" << Endl;
     }
 
     void EndVertexGeneration() override { Vertex().Append("}"); }

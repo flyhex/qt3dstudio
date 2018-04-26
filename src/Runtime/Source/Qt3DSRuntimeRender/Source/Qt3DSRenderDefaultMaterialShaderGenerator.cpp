@@ -910,6 +910,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     void GenerateFragmentShader(SShaderDefaultMaterialKey &inKey)
     {
         bool specularEnabled = Material().IsSpecularEnabled();
+        bool vertexColorsEnabled = Material().IsVertexColorsEnabled();
 
         bool hasLighting = Material().HasLighting();
         bool hasImage = m_FirstImage != NULL;
@@ -1046,6 +1047,11 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         }
         if (includeSSAOSSDOVars || specularEnabled || hasIblProbe || enableBumpNormal)
             vertexShader.GenerateVarTangentAndBinormal();
+
+        if (vertexColorsEnabled)
+            vertexShader.GenerateVertexColor();
+        else
+            fragmentShader.Append("\tvec3 vertColor = vec3(1.0);");
 
         // You do bump or normal mapping but not both
         if (bumpImage != NULL) {
@@ -1502,7 +1508,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         }
 
         // Ensure the rgb colors are in range.
-        fragmentShader.Append("\tfragOutput = vec4( clamp( global_diffuse_light.xyz + "
+        fragmentShader.Append("\tfragOutput = vec4( clamp( vertColor * global_diffuse_light.xyz + "
                               "global_specular_light.xyz, 0.0, 65519.0 ), global_diffuse_light.a "
                               ");");
 

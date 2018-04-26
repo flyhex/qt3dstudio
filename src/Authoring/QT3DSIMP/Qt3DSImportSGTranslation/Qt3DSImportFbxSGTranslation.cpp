@@ -68,7 +68,7 @@ public:
     typedef std::vector<_SVertexWeightInfo> TPerVertexWeightInfo;
     typedef std::vector<_SJointInfo> TJointInfoList;
     typedef std::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector4, SVector4,
-                         SVector2>
+                       SVector2, SVector3>
         TVertexInfoTuple;
     typedef std::pair<std::map<TVertexInfoTuple, long>,
                       std::vector<std::pair<std::string, TLongsList>>>
@@ -100,6 +100,8 @@ protected:
     void ReadVertex(const TPerVertexWeightInfo &inFbxWeights, int inFbxCtrlPointIndex,
                     float *outValue);
     void ReadNormal(const FbxGeometryElementNormal *inFbxNormals, int inFbxIndex, float *outValue);
+    void ReadColor(const FbxGeometryElementVertexColor *inFbxColors, int inFbxIndex,
+                   float *outValue);
     void ReadTexCoord(const FbxGeometryElementUV *inFbxUVs, int inFbxIndex, float *outValue);
     void ReadTexTangent(const FbxGeometryElementTangent *inFbxTangents, int inFbxIndex,
                         float *outValue);
@@ -1223,6 +1225,15 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
         theFbxMaterialsCount = theFbxMesh->GetElementMaterialCount();
         theFbxMaterialsMappingMode = theFbxMaterials->GetMappingMode();
     }
+    // vertex color data
+    const FbxGeometryElementVertexColor *theFbxColors = theFbxMesh->GetElementVertexColor();
+    int theFbxColorsCount = 0;
+    FbxGeometryElement::EMappingMode theFbxColorsMappingMode = FbxGeometryElement::eNone;
+    if (theFbxColors) {
+        theFbxColorsCount = theFbxColors->GetDirectArray().GetCount();
+        theFbxColorsMappingMode = theFbxColors->GetMappingMode();
+        canUseDirectMode &= theFbxColorsMappingMode == FbxGeometryElement::eByControlPoint;
+    }
 
     // check if we need to generate tangents and binormals
     std::vector<SVector3> newTangents;
@@ -1369,6 +1380,14 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                                  get<7>(theFaceTupleValues));
                 }
 
+                if (theFbxColors) {
+                    ReadColor(theFbxColors,
+                              (theFbxColorsMappingMode == FbxGeometryElement::eByPolygonVertex)
+                                   ? theVertexID
+                                   : theFbxCtrlPointIndex,
+                              get<8>(theFaceTupleValues));
+                }
+
                 long theFaceIndex = RetrieveFaceIndex(theFaceIndices, theFaceTupleValues);
                 theMaterialFaceIndicies.push_back(theFaceIndex);
 
@@ -1399,6 +1418,7 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     TFloatsList theWeights;
     TFloatsList theBoneIndex;
     TFloatsList theTexCoords2;
+    TFloatsList theColors;
 
     // Prepare arrays for population
     long theNumberOfUniqueFacePoints = (long)theFaceIndices.first.size();
@@ -1425,6 +1445,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     if (theFbxUV2s) {
         theTexCoords2.resize(theNumberOfUniqueFacePoints * 2);
     }
+    if (theFbxColors)
+        theColors.resize(theNumberOfUniqueFacePoints * 3);
 
     // Populate vertex, normal and texcoord arrays so that face indicies can reference from them
     TFaceIndicies::first_type::const_iterator theIter = theFaceIndices.first.begin();
@@ -1449,10 +1471,13 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
         }
         if (theFbxUV2s)
             WriteFloat2(theTexCoords2, theFaceIndex, get<7>(thePointTuple));
+        if (theFbxColors)
+            WriteFloat3(theColors, theFaceIndex, get<8>(thePointTuple));
     }
 
     m_Translator->SetGeometry(theVertices, theNormals, theTexCoords, theTexCoords2, theTexTangents,
-                              theTexBinormals, theWeights, theBoneIndex, theMaterialFaceIndicies);
+                              theTexBinormals, theWeights, theBoneIndex, theColors,
+                              theMaterialFaceIndicies);
 
     // Read material belonging to this mesh
     // At this point theFaceMaterialIndices contains the information which material is used for each
@@ -1589,6 +1614,29 @@ void FbxDomWalker::ReadNormal(const FbxGeometryElementNormal *inFbxNormals, int 
     outValue[0] = (float)theNormal[0];
     outValue[1] = (float)theNormal[1];
     outValue[2] = (float)theNormal[2];
+}
+
+void FbxDomWalker::ReadColor(const FbxGeometryElementVertexColor *inFbxColors, int inFbxIndex,
+                             float *outValue)
+{
+    int theFbxColorIndex = 0;
+    switch (inFbxColors->GetReferenceMode()) {
+    case FbxGeometryElement::eDirect:
+        theFbxColorIndex = inFbxIndex;
+        break;
+    case FbxGeometryElement::eIndexToDirect:
+        theFbxColorIndex = inFbxColors->GetIndexArray().GetAt(inFbxIndex);
+        break;
+    default:
+        QT3DS_ASSERT(false);
+        break;
+    }
+
+    FbxColor theColor = inFbxColors->GetDirectArray().GetAt(theFbxColorIndex);
+
+    outValue[0] = (float)theColor.mRed;
+    outValue[1] = (float)theColor.mGreen;
+    outValue[2] = (float)theColor.mBlue;
 }
 
 /**

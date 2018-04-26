@@ -770,6 +770,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Material_TranslucentFalloff "translucentfalloff"
 #define Material_DiffuseLightWrap "diffuselightwrap"
 #define Material_ReferencedMaterial "referencedmaterial"
+#define Material_VertexColors "vertexcolors"
 #define Image_ImagePath "sourcepath"
 #define Image_OffscreenRendererId "subpresentation"
 #define Image_Scale_X "scaleu"

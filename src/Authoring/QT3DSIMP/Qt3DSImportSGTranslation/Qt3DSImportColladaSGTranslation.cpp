@@ -71,7 +71,7 @@ public:
     ~ColladaDOMWalker();
 
 public:
-    typedef std::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector2>
+    typedef std::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector2, SVector4>
         TVertexInfoTuple;
     typedef std::vector<std::pair<std::string, daeURI>> TURIList;
     typedef std::pair<std::map<TVertexInfoTuple, long>,
@@ -96,7 +96,7 @@ protected:
     void ProcessGeometry(const domGeometry *inGeometry, TFaceIndicies &ioIndicies);
     void ProcessTriangle(const domTrianglesRef inTrianglesRef, TFaceIndicies &ioFaceIndicies,
                          bool &outHasNormals, bool &outHasTexCoords, bool &outHasTexCoords2,
-                         bool &outHasTexTangents, bool &outHasTexBinormals);
+                         bool &outHasTexTangents, bool &outHasTexBinormals, bool &outHasColors);
     void GenerateMeshTangents(const domTrianglesRef inTrianglesRef,
                               const SSourceArrayInfo &inVertexArrayInfo,
                               const SSourceArrayInfo &inNormalArrayInfo,
@@ -654,12 +654,14 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
     TFloatsList theWeights;
     TFloatsList theBoneIndex;
     TFloatsList theTexCoords2;
+    TFloatsList theColors;
 
     bool theHasNormals = false;
     bool theHasTexCoords = false;
     bool theHasTexCoords2 = false;
     bool theHasTexTangents = false;
     bool theHasTexBinormals = false;
+    bool theHasColors = false;
 
     const domMeshRef theMesh = inGeometry->getMesh();
 
@@ -670,7 +672,7 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
     long theTriangleArrayCount = (long)theTriangles.getCount();
     for (long theIndex = 0; theIndex < theTriangleArrayCount; ++theIndex) {
         ProcessTriangle(theTriangles[theIndex], ioFaceIndicies, theHasNormals, theHasTexCoords,
-                        theHasTexCoords2, theHasTexTangents, theHasTexBinormals);
+                        theHasTexCoords2, theHasTexTangents, theHasTexBinormals, theHasColors);
     }
 
     // Prepare arrays for population
@@ -689,6 +691,8 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
         theTexTangents.resize(theNumberOfUniqueFacePoints * 3);
     if (theHasTexBinormals)
         theTexBinormals.resize(theNumberOfUniqueFacePoints * 3);
+    if (theHasColors)
+        theColors.resize(theNumberOfUniqueFacePoints * 3);
 
     // Populate vertex, normal and texcoord arrays so that face indicies can reference from them
     TFaceIndicies::first_type::const_iterator theIter = ioFaceIndicies.first.begin();
@@ -709,6 +713,8 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
             Push3Floats(theTexBinormals, theFaceIndex, get<4>(thePointTuple));
         if (theHasTexCoords2)
             Push2Floats(theTexCoords2, theFaceIndex, get<5>(thePointTuple));
+        if (theHasColors)
+            Push3Floats(theColors, theFaceIndex, get<6>(thePointTuple));
     }
 
     // Lump all acquired face indicies from different materials, into a single list
@@ -721,7 +727,8 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
     }
 
     m_Translator->SetGeometry(theVertices, theNormals, theTexCoords, theTexCoords2, theTexTangents,
-                              theTexBinormals, theWeights, theBoneIndex, theEntireFaceIndiciesList);
+                              theTexBinormals, theWeights, theBoneIndex, theColors,
+                              theEntireFaceIndiciesList);
 
     // Pop up warning message if model contains non-triangles geometry
     if (theMesh->getPolylist_array().getCount() || theMesh->getPolygons_array().getCount()
@@ -738,7 +745,8 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
 void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
                                        TFaceIndicies &ioFaceIndicies, bool &outHasNormals,
                                        bool &outHasTexCoords, bool &outHasTexCoords2,
-                                       bool &outHasTexTangents, bool &outHasTexBinormals)
+                                       bool &outHasTexTangents, bool &outHasTexBinormals,
+                                       bool &outHasColors)
 {
     SSourceArrayInfo theVertexArrayInfo;
     SSourceArrayInfo theNormalArrayInfo;
@@ -746,6 +754,7 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
     SSourceArrayInfo theTexCoord2ArrayInfo;
     SSourceArrayInfo theTexTangentArrayInfo;
     SSourceArrayInfo theTexBinormalArrayInfo;
+    SSourceArrayInfo theColorArrayInfo;
 
     const domInputLocalOffset_Array &theInputOffsets = inTrianglesRef->getInput_array();
     long theInputOffsetsCount = (long)theInputOffsets.getCount();
@@ -779,6 +788,9 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
         } else if (::strcmp(theSemantic, "TEXBINORMAL") == 0) {
             GetDomSourceArrayAndVectorCapacity(theInputOffsets[theIndex], g_XYZIdentifiers,
                                                theTexBinormalArrayInfo, LogWarning);
+        } else if (::strcmp(theSemantic, "COLOR") == 0) {
+            GetDomSourceArrayAndVectorCapacity(theInputOffsets[theIndex], g_RGBAIdentifiers,
+                                               theColorArrayInfo, LogWarning);
         }
     }
 
@@ -813,6 +825,9 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
         } else if (::strcmp(theSemantic, "TEXBINORMAL") == 0) {
             GetSourceArrayInfo(theDomSource, g_XYZIdentifiers, theVertexArrayOffset,
                                theTexBinormalArrayInfo, LogWarning);
+        } else if (::strcmp(theSemantic, "COLOR") == 0) {
+            GetSourceArrayInfo(theDomSource, g_XYZIdentifiers, theVertexArrayOffset,
+                               theColorArrayInfo, LogWarning);
         }
     }
 
@@ -821,6 +836,7 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
     outHasTexCoords2 |= theTexCoord2ArrayInfo.m_POffset > -1;
     outHasTexTangents |= theTexTangentArrayInfo.m_POffset > -1;
     outHasTexBinormals |= theTexBinormalArrayInfo.m_POffset > -1;
+    outHasColors |= theColorArrayInfo.m_POffset > -1;
 
     // check if we need to generate tangents and binormals
     std::vector<SVector3> newTangents;
@@ -878,6 +894,11 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
             GetFaceTupleValue(
                 get<5>(theFaceTupleValues), theTexCoord2ArrayInfo,
                 (unsigned long)theListOfPInts[theIndex + theTexCoord2ArrayInfo.m_POffset]);
+
+        if (outHasColors)
+            GetFaceTupleValue(
+                get<6>(theFaceTupleValues), theColorArrayInfo,
+                (unsigned long)theListOfPInts[theIndex + theColorArrayInfo.m_POffset]);
 
         long theFaceIndex = RetrieveFaceIndex(ioFaceIndicies, theFaceTupleValues);
 

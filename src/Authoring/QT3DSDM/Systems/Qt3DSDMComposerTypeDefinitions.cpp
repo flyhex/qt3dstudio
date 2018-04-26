@@ -157,6 +157,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_iblprobe L"iblprobe"
 #define QT3DS_WCHAR_T_shaderlighting L"shaderlighting"
 #define QT3DS_WCHAR_T_blendmode L"blendmode"
+#define QT3DS_WCHAR_T_vertexcolors L"vertexcolors"
 #define QT3DS_WCHAR_T_diffuse L"diffuse"
 #define QT3DS_WCHAR_T_diffusemap L"diffusemap"
 #define QT3DS_WCHAR_T_diffusemap2 L"diffusemap2"
