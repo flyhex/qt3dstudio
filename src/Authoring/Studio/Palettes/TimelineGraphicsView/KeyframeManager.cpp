@@ -40,6 +40,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "StudioClipboard.h"
 #include "CmdDataModelRemoveKeyframe.h"
 #include "CmdDataModelInsertKeyframe.h"
 #include "Qt3DSDMAnimation.h"
@@ -286,8 +287,11 @@ void KeyframeManager::deleteKeyframes(RowTimeline *row, bool repaint)
 
 void KeyframeManager::copySelectedKeyframes()
 {
-    if (!m_selectedKeyframes.empty()
-        && m_selectedKeyframesMasterRows.count() == 1) {
+    if (!m_selectedKeyframes.empty() && m_selectedKeyframesMasterRows.count() == 1) {
+        // Keyframe copying doesn't use clipboard, so clear it so that next time we paste
+        // it will paste the keyframes rather than the last object we copied
+        CStudioClipboard::ClearClipboard();
+
         if (m_pasteKeyframeCommandHelper)
             m_pasteKeyframeCommandHelper->Clear(); // clear out previously copied data
         else

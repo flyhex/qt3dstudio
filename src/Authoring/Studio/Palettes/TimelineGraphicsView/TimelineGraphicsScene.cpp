@@ -743,19 +743,8 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 {
     bool ctrl = keyEvent->modifiers() & Qt::ControlModifier;
 
-    if (keyEvent->key() == Qt::Key_Delete) {
+    if (keyEvent->key() == Qt::Key_Delete)
         m_keyframeManager->deleteSelectedKeyframes();
-    } else if (keyEvent->key() == Qt::Key_C && ctrl) { // Ctrl+C
-        m_keyframeManager->copySelectedKeyframes();
-    } else if (keyEvent->key() == Qt::Key_X && ctrl) { // Ctrl+X
-        if (m_keyframeManager->oneMasterRowSelected()) { // must be from a single master row
-            m_keyframeManager->copySelectedKeyframes();
-            m_keyframeManager->deleteSelectedKeyframes();
-        }
-    } else if (keyEvent->key() == Qt::Key_V && ctrl) { // Ctrl+V
-        if (m_rowManager->selectedRow() != nullptr)
-            m_keyframeManager->pasteKeyframes();
-    }
 
     QGraphicsScene::keyPressEvent(keyEvent);
 }
