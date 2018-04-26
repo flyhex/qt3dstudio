@@ -117,6 +117,20 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
         m_playHead->setPosition(0);
         m_widgetTimeline->viewTreeContent()->horizontalScrollBar()->setValue(0);
     });
+
+    QAction *action = new QAction(this);
+    action->setShortcut(Qt::Key_S);
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this,
+            &TimelineGraphicsScene::handleInsertKeyframe);
+    timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_K));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this,
+            &TimelineGraphicsScene::handleDeleteChannelKeyframes);
+    timelineWidget->addAction(action);
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)
@@ -695,7 +709,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
 void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 {
     if (keyEvent->key() == Qt::Key_Delete)
-        m_keyframeManager->deleteSelectedKeyframes();
+        g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
 
     QGraphicsScene::keyPressEvent(keyEvent);
 }
@@ -774,6 +788,20 @@ QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType ty
             return hoverItems.at(1);
     }
     return item;
+}
+
+void TimelineGraphicsScene::handleInsertKeyframe()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow)
+        selectedRow->getBinding()->InsertKeyframe();
+}
+
+void TimelineGraphicsScene::handleDeleteChannelKeyframes()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow)
+        selectedRow->getBinding()->DeleteAllChannelKeyframes();
 }
 
 // Getters

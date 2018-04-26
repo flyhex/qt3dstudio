@@ -62,16 +62,17 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_iconPlay = QIcon(":/images/playback_tools_low-02.png");
 
     // create actions
-    QAction *actionNewLayer = new QAction(iconLayer, tr("Add New Layer"));
-    QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"));
-    QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"));
+    QAction *actionNewLayer = new QAction(iconLayer, tr("Add New Layer"), this);
+    QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"), this);
+    QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"), this);
     m_actionDataInput = new QAction(m_iconDiActive, "");
-    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"));
-    m_actionPlayStop = new QAction();
-    m_timeLabel = new TimelineToolbarLabel();
+    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"), this);
+    m_actionPlayStop = new QAction(this);
+    m_timeLabel = new TimelineToolbarLabel(this);
     m_diLabel = new QLabel();
-    m_actionZoomIn = new QAction(iconZoomIn, tr("Zoom In"));
-    m_actionZoomOut = new QAction(iconZoomOut, tr("Zoom Out"));
+    m_actionZoomIn = new QAction(iconZoomIn, tr("Zoom In"), this);
+    m_actionZoomOut = new QAction(iconZoomOut, tr("Zoom Out"), this);
+    QAction *actionGoToTime = new QAction(this);
 
     m_scaleSlider = new QSlider();
     m_scaleSlider->setOrientation(Qt::Horizontal);
@@ -96,8 +97,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     // connections
     connect(actionNewLayer, &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
     connect(m_actionDeleteRow, &QAction::triggered, this, &TimelineToolbar::deleteLayerTriggered);
-    connect(m_timeLabel, &TimelineToolbarLabel::clicked, this,
-            &TimelineToolbar::gotoTimeTriggered);
+    connect(m_timeLabel, &TimelineToolbarLabel::clicked, this, &TimelineToolbar::gotoTimeTriggered);
     connect(actionFirst, &QAction::triggered, this, &TimelineToolbar::firstFrameTriggered);
     connect(m_actionPlayStop, &QAction::triggered, this, &TimelineToolbar::onPlayButtonClicked);
     connect(actionLast, &QAction::triggered, this, &TimelineToolbar::lastFrameTriggered);
@@ -105,6 +105,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     connect(m_actionZoomIn, &QAction::triggered, this, &TimelineToolbar::onZoomInButtonClicked);
     connect(m_actionZoomOut, &QAction::triggered, this, &TimelineToolbar::onZoomOutButtonClicked);
     connect(m_actionDataInput, &QAction::triggered, this, &TimelineToolbar::onDiButtonClicked);
+    connect(actionGoToTime, &QAction::triggered, this, &TimelineToolbar::gotoTimeTriggered);
 
     // add actions
     addAction(actionNewLayer);
@@ -121,10 +122,15 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     addAction(m_actionZoomOut);
     addWidget(m_scaleSlider);
     addAction(m_actionZoomIn);
+    addAction(actionGoToTime);
 
     // add keyboard shortcuts
     m_actionZoomOut->setShortcut(Qt::Key_Minus);
+    m_actionZoomOut->setShortcutContext(Qt::ApplicationShortcut);
     m_actionZoomIn->setShortcut(Qt::Key_Plus);
+    m_actionZoomIn->setShortcutContext(Qt::ApplicationShortcut);
+    actionGoToTime->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
+    actionGoToTime->setShortcutContext(Qt::ApplicationShortcut);
 
     m_connectSelectionChange = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));

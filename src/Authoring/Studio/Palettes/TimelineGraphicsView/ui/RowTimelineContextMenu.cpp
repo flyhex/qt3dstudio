@@ -51,34 +51,44 @@ RowTimelineContextMenu::~RowTimelineContextMenu()
 void RowTimelineContextMenu::initialize()
 {
     m_insertKeyframeAction = new QAction(tr("Insert Keyframe"), this);
+    m_insertKeyframeAction->setShortcut(Qt::Key_S);
+    m_insertKeyframeAction->setShortcutVisibleInContextMenu(true);
     connect(m_insertKeyframeAction, &QAction::triggered, this,
             &RowTimelineContextMenu::insertKeyframe);
     addAction(m_insertKeyframeAction);
 
     m_cutSelectedKeyframesAction = new QAction(tr("Cut Selected Keyframe"), this);
+    m_cutSelectedKeyframesAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_X));
+    m_cutSelectedKeyframesAction->setShortcutVisibleInContextMenu(true);
     connect(m_cutSelectedKeyframesAction, &QAction::triggered, this,
             &RowTimelineContextMenu::cutSelectedKeyframes);
     addAction(m_cutSelectedKeyframesAction);
 
     m_copySelectedKeyframesAction = new QAction(tr("Copy Selected Keyframe"), this);
+    m_copySelectedKeyframesAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_C));
+    m_copySelectedKeyframesAction->setShortcutVisibleInContextMenu(true);
     connect(m_copySelectedKeyframesAction, &QAction::triggered, this,
             &RowTimelineContextMenu::copySelectedKeyframes);
     addAction(m_copySelectedKeyframesAction);
 
     m_pasteKeyframesAction = new QAction(tr("Paste Keyframes"), this);
+    m_pasteKeyframesAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_V));
+    m_pasteKeyframesAction->setShortcutVisibleInContextMenu(true);
     connect(m_pasteKeyframesAction, &QAction::triggered, this,
             &RowTimelineContextMenu::pasteKeyframes);
     addAction(m_pasteKeyframesAction);
 
     m_deleteSelectedKeyframesAction = new QAction(tr("Delete Selected Keyframe"), this);
+    m_deleteSelectedKeyframesAction->setShortcut(Qt::Key_Delete);
+    m_deleteSelectedKeyframesAction->setShortcutVisibleInContextMenu(true);
     connect(m_deleteSelectedKeyframesAction, &QAction::triggered, this,
             &RowTimelineContextMenu::deleteSelectedKeyframes);
     addAction(m_deleteSelectedKeyframesAction);
 
-    m_deleteRowKeyframesAction = new QAction(
-                m_rowTree->isProperty() ? tr("Delete All Property Keyframes")
-                                        : tr("Delete All Channel Keyframes"), this);
-
+    m_deleteRowKeyframesAction = new QAction(tr("Delete All Channel Keyframes"), this);
+    m_deleteRowKeyframesAction->setShortcut(
+                QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_K));
+    m_deleteRowKeyframesAction->setShortcutVisibleInContextMenu(true);
     connect(m_deleteRowKeyframesAction, &QAction::triggered, this,
             &RowTimelineContextMenu::deleteRowKeyframes);
     addAction(m_deleteRowKeyframesAction);
@@ -141,24 +151,6 @@ void RowTimelineContextMenu::insertKeyframe()
     }
 
     destinationRowTree->getBinding()->InsertKeyframe();
-
-    // update and wire the UI from binding
-    for (long i = 0; i < destinationRowTree->getBinding()->GetPropertyCount(); ++i) {
-        ITimelineItemProperty *prop_i = destinationRowTree->getBinding()->GetProperty(i);
-        for (long j = 0; j < prop_i->GetKeyframeCount(); ++j) {
-            Qt3DSDMTimelineKeyframe *kf =
-                    static_cast<Qt3DSDMTimelineKeyframe *>(prop_i->GetKeyframeByIndex(j));
-
-            if (kf->getUI() == nullptr) { // newly added keyframe
-                Keyframe *kfUI = m_keyframeManager->insertKeyframe(prop_i->getRowTree()
-                                 ->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
-                                 false).at(0);
-                // wire the keyframe UI and binding
-                kf->setUI(kfUI);
-                kfUI->binding = kf;
-            }
-        }
-    }
 }
 
 void RowTimelineContextMenu::cutSelectedKeyframes()
@@ -184,7 +176,14 @@ void RowTimelineContextMenu::deleteSelectedKeyframes()
 
 void RowTimelineContextMenu::deleteRowKeyframes()
 {
-    m_keyframeManager->deleteKeyframes(m_rowTree->rowTimeline());
+    RowTree *destinationRowTree = nullptr;
+    if (m_rowTree->isProperty()) {
+        // Can't delete nicely just from property, so get the actual object row
+        destinationRowTree = m_rowTree->parentRow();
+    } else {
+        destinationRowTree = m_rowTree;
+    }
+    destinationRowTree->getBinding()->DeleteAllChannelKeyframes();
 }
 
 void RowTimelineContextMenu::setInterpolation()

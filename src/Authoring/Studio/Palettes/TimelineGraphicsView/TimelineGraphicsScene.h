@@ -101,6 +101,8 @@ private:
     QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
                                     QGraphicsItem *item,
                                     const QPointF &scenePos);
+    void handleInsertKeyframe();
+    void handleDeleteChannelKeyframes();
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;

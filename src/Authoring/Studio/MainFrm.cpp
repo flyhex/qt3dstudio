@@ -1105,11 +1105,6 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
                             QKeySequence(Qt::CTRL | static_cast<Qt::Key>(keyN)),
                             CMainFrame::onCtrlNPressed);
     }
-
-    // TODO: reimplement in the new timeline
-//    TimelineView *theTimelineView = GetTimelineView();
-//    if (theTimelineView)
-//        theTimelineView->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
 //==============================================================================
