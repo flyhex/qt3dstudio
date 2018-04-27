@@ -247,7 +247,6 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
     connect(m_toolbar, &TimelineToolbar::newLayerTriggered, this, [this]() {
         using namespace Q3DStudio;
-
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
         CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
 
@@ -451,15 +450,11 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     if (theDataModelBridge->IsSceneGraphInstance(inInstance)) {
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
-
         if (binding) {
             Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
                                                         ->GetParentInstance(inInstance), m_binding);
             RowTree *newRow = m_graphicsScene->rowManager()
                               ->createRowFromBinding(binding, bindingParent->getRowTree());
-
-            if (binding->GetObjectType() == OBJTYPE_LAYER)
-                m_graphicsScene->rowManager()->syncRowPositionWithBinding(newRow, bindingParent);
 
             m_handlesMap.insert(std::make_pair(inInstance, newRow));
         }
@@ -489,7 +484,8 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 
             // create the property UI row
             RowTree *propRow = m_graphicsScene->rowManager()
-                ->getOrCreatePropertyRow(binding->getRowTree(), propBinding->GetName().toQString());
+            ->getOrCreatePropertyRow(binding->getRowTree(), propBinding->GetName().toQString(),
+                                     binding->getAnimatedPropertyIndex(property));
 
             // connect the row and binding
             propBinding->setRowTree(propRow);
@@ -508,9 +504,6 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 
             propRow->update();
         }
-
-        // make sure the property rows are in the same order as in the binding
-        m_graphicsScene->rowManager()->reorderPropertiesFromBinding(binding);
     }
 }
 
@@ -598,18 +591,13 @@ void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
 
 void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
 {
-    Q_UNUSED(inParent)
-    Q_UNUSED(inChild)
-    Q_UNUSED(inIndex)
+    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
+    Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(inParent, m_binding);
 
-    // Mahmoud_TODO: possible improvement: move this to an [UNDO row reorder] event handler
-    // TODO: Recreating all rows every time a child is added is very ineffective,
-    //       as this is called e.g. for every child of component when
-    //       converting an object to component.
-    if (!m_graphicsScene->rowMover()->isActive()) {
-        m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
-        m_handlesMap.clear();
-        insertToHandlesMapRecursive(m_binding);
+    if (binding && bindingParent) {
+        RowTree *row = binding->getRowTree();
+        RowTree *rowParent = bindingParent->getRowTree();
+        rowParent->addChildAt(row, inIndex);
     }
 }
 
@@ -621,7 +609,16 @@ void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
 void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
                                   long inNewIndex)
 {
-    // Mahmoud_TODO: implement?
+    Q_UNUSED(inOldIndex)
+
+    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
+    Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(inParent, m_binding);
+
+    if (binding && bindingParent) {
+        RowTree *row = binding->getRowTree();
+        RowTree *rowParent = bindingParent->getRowTree();
+        rowParent->addChildAt(row, inNewIndex);
+    }
 }
 
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,

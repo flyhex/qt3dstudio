@@ -71,6 +71,7 @@ public:
     QGraphicsWidget *widgetRoot() const;
     KeyframeManager *keyframeManager() const;
     QGraphicsLinearLayout *layoutTree() const;
+    QGraphicsLinearLayout *layoutTimeline() const;
     TreeHeader *treeHeader() const;
     void updateTreeWidth(double x);
     void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
@@ -90,14 +91,13 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 private:
-    void getLastChildRow(RowTree *row, int index, RowTree *outLastChild, RowTree *outNextSibling,
-                         int &outLastChildIndex) const;
     void commitMoveRows();
     void updateHoverStatus(const QPointF &scenePos);
     void snap(double &value);
     int nextRowDepth(int index);
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
+    RowTree *getNextSiblingRow(RowTree *row) const;
     QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
                                     QGraphicsItem *item,
                                     const QPointF &scenePos);

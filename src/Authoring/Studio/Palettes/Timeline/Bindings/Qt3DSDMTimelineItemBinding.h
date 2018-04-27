@@ -209,6 +209,7 @@ public:
     // Bridge between asset & DataModel. Ideally we should be fully DataModel
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstance() const;
 
+    int getAnimatedPropertyIndex(int propertyHandle) const;
 
     ITimelineItemProperty *GetOrCreatePropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     ITimelineItemProperty *GetPropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);

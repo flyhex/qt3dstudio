@@ -42,7 +42,7 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
 
-    void start(RowTree *row, int index);
+    void start(RowTree *row);
     void end();
     void resetInsertionParent(RowTree *newTarget = nullptr);
     void updateState(int index, int depth, int rawIndex);
@@ -51,16 +51,13 @@ public:
     RowTree *sourceRow() const;
 
     int targetIndex() const;
-    int sourceIndex() const;
     bool isActive();
     bool isValidMove(int index, RowTree *rowAtIndex);
-    bool movingDown() const;
 
 private:
     RowTree *m_insertionParent = nullptr; // insertion parent
     RowTree *m_sourceRow = nullptr;       // dragged row
     int m_targetIndex = -1;               // insertion index
-    int m_sourceIndex = -1;
     bool m_active = false;
 };
 

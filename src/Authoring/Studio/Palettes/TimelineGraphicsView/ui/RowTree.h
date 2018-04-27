@@ -66,6 +66,7 @@ public:
     void setTimelineRow(RowTimeline *rowTimeline);
     void setParent(RowTree *parent);
     void addChild(RowTree *child);
+    void addChildAt(RowTree *child, int index);
     void moveChild(int from, int to);   // NOT USED
     void removeChild(RowTree *child);
     void setMoveSourceRecursive(bool value);
@@ -78,7 +79,6 @@ public:
     void setPropertyExpanded(bool expand);
     ITimelineItemProperty *propBinding();
     TreeControlType getClickedControl(const QPointF &scenePos);
-    bool hasPropertyChildren();
     bool shy() const;
     bool visible() const;
     bool locked() const;
@@ -86,17 +86,24 @@ public:
     bool isDecendentOf(RowTree *row) const;
     bool isContainer() const;
     bool isProperty() const;
-    bool empty() const;
+    bool isPropertyOrMaterial() const;
+    bool hasPropertyChildren() const;
+    bool empty() const; // has zero child rows (and zero properties)
     bool selected() const;
+    bool draggable() const;
     bool hasDurationBar() const;
     bool propertyExpanded() const;
     int depth() const;
     int type() const;
+    int index() const;
+    int indexInLayout() const;
     int treeWidth() const;
     EStudioObjectType rowType() const;
     QString propertyType() const;
     RowTree *parentRow() const;
+    RowTree *getPropertyRow(const QString &type) const;
     QList<RowTree *> childRows() const;
+    QList<RowTree *> childProps() const;
     RowTimeline *rowTimeline() const;
     QString label() const;
 
@@ -113,12 +120,18 @@ private:
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
     void updateLabelPosition();
+    void updateIndices(bool isInsertion, int startIndex, int startIndexInLayout, bool isProperty);
     bool hasActionButtons() const;
     bool hasComponentAncestor();
+    int removeChildFromLayout(RowTree *child) const;
+    int getCountDecendentsRecursive() const;
+    int addChildToLayout(RowTree *child, int indexInLayout);
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
     int m_depth = 1;
+    int m_index = 0;
+    int m_indexInLayout = 1;
     int m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
     bool m_shy = false;
     bool m_visible = true;
@@ -134,6 +147,7 @@ private:
     QString m_propertyType; // for property rows
     QString m_label;
     QList<RowTree *> m_childRows;
+    QList<RowTree *> m_childProps;
     ITimelineItemBinding *m_binding = nullptr;
     ITimelineItemProperty *m_PropBinding; // for property rows
 

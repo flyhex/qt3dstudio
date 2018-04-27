@@ -190,7 +190,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
-    if (!m_childRows.empty())
+    if (!m_childRows.empty() || !m_childProps.empty())
         painter->drawPixmap(m_rectArrow, m_expanded ? pixArrowDown : pixArrow);
 
     // Row type icon
@@ -413,33 +413,105 @@ int RowTree::type() const
     return TypeRowTree;
 }
 
-void RowTree::addChild(RowTree *child)
+int RowTree::index() const
 {
-    if (child->parentRow() != this) {
-        if (child->parentRow() != nullptr)
-            child->parentRow()->removeChild(child);
-
-        if (!m_childRows.contains(child)) {
-            m_childRows.prepend(child);
-            child->m_depth = m_depth + 1;
-            child->m_parentRow = this;
-
-            child->updateDepthRecursive();
-            m_rowTimeline->updateChildrenMinStartXRecursive(this);
-            m_rowTimeline->updateChildrenMaxEndXRecursive(this);
-        }
-    }
+    // first child in a parent has index 0
+    return m_index;
 }
 
-void RowTree::updateDepthRecursive()
+int RowTree::indexInLayout() const
 {
-    m_depth = m_parentRow->m_depth + 1;
+    // first child (scene) at index 1, tree header at index 0
+    return m_indexInLayout;
+}
 
-    if (!empty()) {
-        for (auto child : qAsConst(m_childRows))
-            child->updateDepthRecursive();
+void RowTree::addChild(RowTree *child)
+{
+    int index = 0;
+    if (child->isProperty() && !m_childProps.empty())
+        index = m_childProps.last()->index() + 1;
+    else if (!child->isProperty() && !m_childRows.empty())
+        index = m_childRows.last()->index() + 1;
+
+    addChildAt(child, index);
+}
+
+int RowTree::getCountDecendentsRecursive() const
+{
+    int num = m_childProps.count();
+
+    for (auto child : qAsConst(m_childRows)) {
+       num++;
+       num += child->getCountDecendentsRecursive();
     }
-    updateLabelPosition();
+
+    return num;
+}
+
+void RowTree::addChildAt(RowTree *child, int index)
+{
+    // Mahmoud_TODO: improvement: implement moving the child (instead of remove/add) if it is added
+    //               under the same parent.
+
+    if (child->parentRow() == this && index == child->m_index) // same place
+        return;
+
+    if (child->parentRow() != nullptr)
+        child->parentRow()->removeChild(child);
+
+    child->m_index = index;
+
+    QList<RowTree *> &childRows = child->isProperty() ? m_childProps : m_childRows;
+    int updateIndexInLayout = child->m_indexInLayout;
+    child->m_indexInLayout = m_indexInLayout + index + 1;
+
+    if (!child->isProperty())
+        child->m_indexInLayout += m_childProps.count();
+
+    if (!m_childRows.empty()) {
+        for (int i = 0; i < index; ++i)
+            child->m_indexInLayout += m_childRows.at(i)->getCountDecendentsRecursive();
+    }
+
+    if (!childRows.contains(child))
+        childRows.insert(index, child);
+
+    child->m_parentRow = this;
+    child->updateDepthRecursive();
+    if (!child->isProperty()) {
+        m_rowTimeline->updateChildrenMinStartXRecursive(this);
+        m_rowTimeline->updateChildrenMaxEndXRecursive(this);
+    }
+
+    // update the layout
+    m_scene->layoutTree()->insertItem(child->m_indexInLayout, child);
+    m_scene->layoutTimeline()->insertItem(child->m_indexInLayout, child->rowTimeline());
+
+    int indexInLayout = child->m_indexInLayout + 1;
+    for (auto p : qAsConst(child->m_childProps))
+        indexInLayout = child->addChildToLayout(p, indexInLayout);
+
+    for (auto c : qAsConst(child->m_childRows))
+        indexInLayout = child->addChildToLayout(c, indexInLayout);
+
+    // update indices
+    updateIndexInLayout = std::min(updateIndexInLayout, child->m_indexInLayout);
+    updateIndices(true, child->m_index + 1, updateIndexInLayout, child->isProperty());
+}
+
+int RowTree::addChildToLayout(RowTree *child, int indexInLayout)
+{
+    m_scene->layoutTree()->insertItem(indexInLayout, child);
+    m_scene->layoutTimeline()->insertItem(indexInLayout, child->rowTimeline());
+    indexInLayout++;
+
+    for (auto p : qAsConst(child->m_childProps))
+        indexInLayout = child->addChildToLayout(p, indexInLayout);
+
+    for (auto c : qAsConst(child->m_childRows))
+        indexInLayout = child->addChildToLayout(c, indexInLayout);
+
+    return indexInLayout;
 }
 
 // TODO: so far not used, delete if end up not used
@@ -448,22 +520,89 @@ void RowTree::moveChild(int from, int to)
     m_childRows.move(from, to);
 }
 
+// this does not destroy the row, just remove it from the layout and parenting hierarchy
 void RowTree::removeChild(RowTree *child)
 {
     if (m_childRows.contains(child)) {
+        // remove child and all his ancestors from the layout
+        int numRemovedRows = removeChildFromLayout(child);
+
+        // detach from parent
         m_childRows.removeAll(child);
         child->m_depth = -1;
         child->m_parentRow = nullptr;
 
+        updateIndices(false, child->m_index, child->m_indexInLayout, child->isProperty());
+
         if (m_childRows.empty())
             m_expanded = true;
-        child->updateLabelPosition();
     }
 }
 
-bool RowTree::hasPropertyChildren()
+int RowTree::removeChildFromLayout(RowTree *child) const
 {
-    return m_scene->rowManager()->hasProperties(this);
+    int numRemoved = 0;
+    int deleteIndex = child->m_indexInLayout;
+    for (;;) {
+       RowTree *row_i = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(deleteIndex)
+                                               ->graphicsItem());
+       if (row_i->depth() <= child->depth() && numRemoved > 0)
+           break;
+
+       m_scene->layoutTree()->removeItem(row_i);
+       m_scene->layoutTimeline()->removeItem(row_i->rowTimeline());
+       numRemoved++;
+
+       if (m_scene->layoutTree()->count() == deleteIndex) // reached end of the list
+           break;
+    }
+
+    return numRemoved;
+}
+
+bool RowTree::draggable() const
+{
+    return !m_locked && !isPropertyOrMaterial()
+           && m_rowType != OBJTYPE_IMAGE
+           && m_rowType != OBJTYPE_SCENE;
+}
+
+void RowTree::updateDepthRecursive()
+{
+    if (m_parentRow) {
+        m_depth = m_parentRow->m_depth + 1;
+        updateLabelPosition();
+
+        for (auto p : qAsConst(m_childProps))
+            p->updateDepthRecursive();
+
+        for (auto r : qAsConst(m_childRows))
+            r->updateDepthRecursive();
+    }
+}
+
+// update this parent's children indices after a child row is inserted or removed
+void RowTree::updateIndices(bool isInsertion, int index, int indexInLayout, bool isProperty)
+{
+    // update index
+    if (isProperty && index < m_childProps.count()) {
+        for (int i = index; i < m_childProps.count(); i++)
+            m_childProps.at(i)->m_index += isInsertion ? 1 : -1;
+    } else if (!isProperty && index < m_childRows.count()) {
+        for (int i = index; i < m_childRows.count(); i++)
+            m_childRows.at(i)->m_index += isInsertion ? 1 : -1;
+    }
+
+    // update indexInLayout
+    for (int i = indexInLayout; i < m_scene->layoutTree()->count(); ++i) {
+        RowTree *row_i = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(i)->graphicsItem());
+        row_i->m_indexInLayout = i;
+    }
+}
+
+bool RowTree::hasPropertyChildren() const
+{
+    return !m_childProps.empty();
 }
 
 void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -478,7 +617,8 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (!m_childRows.empty() && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
+    if ((!m_childRows.empty() || !m_childProps.empty())
+            && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
         m_expanded = !m_expanded;
         updateExpandStatus(m_expanded, true);
         update();
@@ -525,6 +665,11 @@ void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
         for (auto child : qAsConst(m_childRows))
             child->updateExpandStatus(expand && child->parentRow()->m_expanded);
     }
+
+    if (!m_childProps.empty()) {
+        for (auto child : qAsConst(m_childProps))
+            child->updateExpandStatus(expand && child->parentRow()->m_expanded);
+    }
 }
 
 void RowTree::updateLockRecursive(bool state)
@@ -568,10 +713,12 @@ void RowTree::setMoveSourceRecursive(bool value)
 {
     m_moveSource = value;
     update();
-    if (!m_childRows.empty()) {
-        for (auto child : qAsConst(m_childRows))
-            child->setMoveSourceRecursive(value);
-    }
+
+    for (auto child : qAsConst(m_childProps))
+        child->setMoveSourceRecursive(value);
+
+    for (auto child : qAsConst(m_childRows))
+        child->setMoveSourceRecursive(value);
 }
 
 bool RowTree::isContainer() const
@@ -586,9 +733,25 @@ bool RowTree::isProperty() const
     return m_isProperty;
 }
 
+RowTree *RowTree::getPropertyRow(const QString &type) const
+{
+    for (RowTree *prop : qAsConst(m_childProps)) {
+        if (prop->label() == type)
+            return prop;
+    }
+
+    return nullptr;
+}
+
+
+bool RowTree::isPropertyOrMaterial() const
+{
+    return m_isProperty || rowType() == OBJTYPE_MATERIAL || rowType() == OBJTYPE_IMAGE;
+}
+
 bool RowTree::empty() const
 {
-    return m_childRows.empty();
+    return m_childRows.empty() && m_childProps.empty();
 }
 
 bool RowTree::selected() const
@@ -605,6 +768,11 @@ void RowTree::setMoveTarget(bool value)
 QList<RowTree *> RowTree::childRows() const
 {
     return m_childRows;
+}
+
+QList<RowTree *> RowTree::childProps() const
+{
+    return m_childProps;
 }
 
 RowTimeline *RowTree::rowTimeline() const

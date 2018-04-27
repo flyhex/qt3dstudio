@@ -54,24 +54,22 @@ public:
     void clearSelection();
     void updateFiltering(RowTree *rowTree = nullptr);
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
-    void reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding);
-    void syncRowPositionWithBinding(RowTree *row, Qt3DSDMTimelineItemBinding *parentBinding);
     void updateRulerDuration();
     void collapseAllPropertyRows();
     int getChildIndex(RowTree *parentRow, RowTree *childRow);
+    int getRowIndex(RowTree *row, int startAt = 1);
     bool isFirstChild(RowTree *parent, RowTree *child);
-    bool hasProperties(RowTree *row);
     RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
-    RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType);
+    RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index = -1);
     RowTree *createRow(EStudioObjectType rowType, RowTree *parentRow = nullptr,
-                       const QString &label = QString(), const QString &propType = QString());
+                       const QString &label = QString(), const QString &propType = QString(),
+                       int index = -1);
     RowTree *rowAt(int idx);
     RowTree *getRowAbove(RowTree *row);
     RowTree *selectedRow() const;
     RowTimeline *rowTimelineAt(int idx);
 
 private:
-    int getRowIndex(RowTree *row);
     int getLastChildIndex(RowTree *row, int index = -1);
     bool validIndex(int idx) const;
     void deleteRowRecursive(RowTree *row);

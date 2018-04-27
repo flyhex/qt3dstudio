@@ -2334,12 +2334,9 @@ public:
     }
 
     void ReorderRows(qt3dsdm::Qt3DSDMInstanceHandle handleSource,
-                     qt3dsdm::Qt3DSDMInstanceHandle handleParent,
-                     int index, bool firstChildInParent) override {
-        if (firstChildInParent)
-            m_AssetGraph.ReParent(handleSource, handleParent);
-        else
-            m_AssetGraph.MoveTo(handleSource, handleParent, index);
+                     qt3dsdm::Qt3DSDMInstanceHandle handleParent, int index) override
+    {
+        m_AssetGraph.MoveTo(handleSource, handleParent, index);
     }
 
     Qt3DSDMInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) override

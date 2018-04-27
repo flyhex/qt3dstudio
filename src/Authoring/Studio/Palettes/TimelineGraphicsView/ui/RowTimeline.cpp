@@ -206,8 +206,8 @@ Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
 
     QList<Keyframe *> keyframes;
     if (m_rowTree->hasPropertyChildren()) {
-        const auto childRows = m_rowTree->childRows();
-        for (auto child : childRows)
+        const auto childProps = m_rowTree->childProps();
+        for (auto child : childProps)
             keyframes.append(child->rowTimeline()->m_keyframes);
     } else {
         keyframes = m_keyframes;
@@ -269,20 +269,18 @@ void RowTimeline::updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle prop
 
     // find the UI property row from handle
     RowTree *propRow = nullptr;
-    const auto childRows = m_rowTree->childRows();
-    for (auto child : childRows) {
-        if (child->isProperty()) {
-            qt3dsdm::Qt3DSDMPropertyHandle propertyHandle =
-                static_cast<Qt3DSDMTimelineItemProperty *>(child->m_PropBinding)
-                ->getPropertyHandle();
-            if (propertyHandle == propHandle) {
-                propRow = child;
-                break;
-            }
+    const auto childProps = m_rowTree->childProps();
+    for (auto child : childProps) {
+        qt3dsdm::Qt3DSDMPropertyHandle propertyHandle =
+            static_cast<Qt3DSDMTimelineItemProperty *>(child->m_PropBinding)
+            ->getPropertyHandle();
+        if (propertyHandle == propHandle) {
+            propRow = child;
+            break;
         }
     }
 
-    if (propRow != nullptr) {
+    if (propRow) {
         m_rowTree->m_scene->keyframeManager()->deleteKeyframes(propRow->rowTimeline(), false);
 
         for (int i = 0; i < propRow->m_PropBinding->GetKeyframeCount(); i++) {
@@ -316,14 +314,15 @@ void RowTimeline::removeKeyframe(Keyframe *keyframe)
 
 void RowTimeline::putSelectedKeyframesOnTop()
 {
-    if (!m_keyframes.empty())
+    if (!m_keyframes.empty()) {
         std::partition(m_keyframes.begin(), m_keyframes.end(), [](Keyframe *kf) {
             return !kf->selected();
         });
+    }
 
     if (m_rowTree->hasPropertyChildren()) { // has property rows
-        const auto childRows = m_rowTree->childRows();
-        for (auto child : childRows) {
+        const auto childProps = m_rowTree->childProps();
+        for (auto child : childProps) {
             std::partition(child->rowTimeline()->m_keyframes.begin(),
                            child->rowTimeline()->m_keyframes.end(), [](Keyframe *kf) {
                 return !kf->selected();
@@ -337,8 +336,8 @@ void RowTimeline::updateKeyframes()
     update();
 
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
-        const auto childRows = m_rowTree->childRows();
-        for (const auto child : childRows)
+        const auto childProps = m_rowTree->childProps();
+        for (const auto child : childProps)
             child->rowTimeline()->update();
     }
 }

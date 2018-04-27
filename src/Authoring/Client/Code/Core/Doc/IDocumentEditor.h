@@ -285,8 +285,7 @@ public:
     }
 
     virtual void ReorderRows(qt3dsdm::Qt3DSDMInstanceHandle handleSource,
-                             qt3dsdm::Qt3DSDMInstanceHandle handleParent,
-                             int index, bool firstChildInParent) = 0;
+                             qt3dsdm::Qt3DSDMInstanceHandle handleParent, int index) = 0;
 
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;

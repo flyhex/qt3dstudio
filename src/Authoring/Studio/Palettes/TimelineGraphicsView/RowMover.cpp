@@ -71,19 +71,9 @@ void RowMover::resetInsertionParent(RowTree *newTarget)
     }
 }
 
-int RowMover::sourceIndex() const
-{
-    return m_sourceIndex;
-}
-
 int RowMover::targetIndex() const
 {
     return m_targetIndex;
-}
-
-bool RowMover::movingDown() const
-{
-    return m_targetIndex >= m_sourceIndex;
 }
 
 RowTree *RowMover::sourceRow() const
@@ -96,10 +86,9 @@ bool RowMover::isActive()
     return m_active;
 }
 
-void RowMover::start(RowTree *row, int index)
+void RowMover::start(RowTree *row)
 {
     m_sourceRow = row;
-    m_sourceIndex = index;
     m_active = true;
 
     m_sourceRow->setMoveSourceRecursive(true);
@@ -114,7 +103,6 @@ void RowMover::end()
 
         m_active = false;
         m_sourceRow = nullptr;
-        m_sourceIndex = -1;
 
         setVisible(false);
         resetInsertionParent();

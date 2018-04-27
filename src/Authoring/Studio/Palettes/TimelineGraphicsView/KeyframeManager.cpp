@@ -121,10 +121,9 @@ void KeyframeManager::selectKeyframe(Keyframe *keyframe)
         if (!m_selectedKeyframesMasterRows.contains(keyframe->rowMaster))
             m_selectedKeyframesMasterRows.append(keyframe->rowMaster);
 
+        keyframe->binding->SetSelected(true);
         keyframe->rowMaster->putSelectedKeyframesOnTop();
         keyframe->rowMaster->updateKeyframes();
-
-        keyframe->binding->SetSelected(true);
     }
 }
 

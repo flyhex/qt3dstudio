@@ -716,6 +716,24 @@ void Qt3DSDMTimelineItemBinding::LoadProperties()
     }
 }
 
+int Qt3DSDMTimelineItemBinding::getAnimatedPropertyIndex(int propertyHandle) const
+{
+    TPropertyHandleList theProperties;
+    m_StudioSystem->GetPropertySystem()->GetAggregateInstanceProperties(m_DataHandle,
+                                                                        theProperties);
+    int index = -1;
+    for (size_t i = 0; i < theProperties.size(); ++i) {
+        if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
+                    m_DataHandle, theProperties[i])) {
+            index++;
+        }
+        if (theProperties[i].GetHandleValue() == propertyHandle)
+            return index;
+    }
+
+    return -1;
+}
+
 void Qt3DSDMTimelineItemBinding::InsertKeyframe()
 {
     if (m_PropertyBindingMap.empty())

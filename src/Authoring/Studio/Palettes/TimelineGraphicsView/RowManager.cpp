@@ -126,23 +126,19 @@ void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, R
         createRowsFromBindingRecursive(binding->GetChild(i), newRow);
 }
 
-RowTree *RowManager::getOrCreatePropertyRow(RowTree *masterRow, const QString &propType)
+RowTree *RowManager::getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index)
 {
-    if (masterRow->hasPropertyChildren()) {
-        const auto childRows = masterRow->childRows();
-        for (const auto child : childRows) {
-            if (child->propertyType() == propType)
-                return child;
-        }
-    }
+    RowTree *propertyRow = masterRow->getPropertyRow(propType);
+    if (propertyRow)
+        return propertyRow;
 
-    return createRow(OBJTYPE_UNKNOWN, masterRow, 0, propType);
+    return createRow(OBJTYPE_UNKNOWN, masterRow, 0, propType, index);
 }
 
 RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, const QString &label,
-                               const QString &propType)
+                               const QString &propType, int index)
 {
-    if (parentRow != nullptr && parentRow->isProperty()) {
+    if (parentRow && parentRow->isProperty()) {
         qWarning() << __FUNCTION__ << "Property row cannot have children. No row added.";
     } else {
         // If the row doesnt have a parent, insert it under the scene (first row is the tree header)
@@ -156,59 +152,21 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
         else
             rowTree = new RowTree(m_scene, rowType, label);
 
-        if (parentRow != nullptr)
-            parentRow->addChild(rowTree);
-
-        int index = getLastChildIndex(parentRow) + 1;
-        if (index < 1)
-            index = 1;
-
-        m_layoutTree->insertItem(index, rowTree);
-        m_layoutTimeline->insertItem(index, rowTree->rowTimeline());
+        if (parentRow) {
+            if (index != -1)
+                parentRow->addChildAt(rowTree, index);
+            else
+                parentRow->addChild(rowTree);
+        } else {
+            // root element, no parent
+            m_layoutTree->insertItem(1, rowTree);
+            m_layoutTimeline->insertItem(1, rowTree->rowTimeline());
+        }
 
         return rowTree;
     }
 
     return nullptr;
-}
-
-// Mahmoud_TODO: optimize this method or use another approach
-void RowManager::syncRowPositionWithBinding(RowTree *row,
-                                            Qt3DSDMTimelineItemBinding *parentBinding)
-{
-    int count = parentBinding->GetChildrenCount();
-    int bindingIndex = -1;
-    for (int i = 0; i < count; i++) {
-        if (parentBinding->GetChild(i) == row->getBinding()) {
-            bindingIndex = i;
-            break;
-        }
-    }
-
-    if (bindingIndex != -1) {
-        int parentIndex = getRowIndex(parentBinding->getRowTree());
-        int rowIndex = parentIndex + 1;
-
-        for (int i = 0; i < bindingIndex; i++) {
-            RowTree *childRow = static_cast<RowTree *>(m_layoutTree->itemAt(rowIndex));
-            rowIndex = getLastChildIndex(childRow, rowIndex) + 1;
-        }
-
-        m_layoutTree->insertItem(rowIndex, row);
-        m_layoutTimeline->insertItem(rowIndex, row->rowTimeline());
-    }
-}
-
-void RowManager::reorderPropertiesFromBinding(Qt3DSDMTimelineItemBinding *binding)
-{
-     int index = getRowIndex(binding->getRowTree()) + 1;
-     if (index > 1) {
-         for (int i = binding->GetPropertyCount() - 1; i >= 0; i--) {
-             RowTree *rowToMove = binding->GetProperty(i)->getRowTree();
-             m_layoutTree->insertItem(index, rowToMove);
-             m_layoutTimeline->insertItem(index, rowToMove->rowTimeline());
-         }
-     }
 }
 
 RowTree *RowManager::getRowAbove(RowTree *row)
@@ -218,8 +176,8 @@ RowTree *RowManager::getRowAbove(RowTree *row)
     if (rowIndex > 1) {
         RowTree *rowAbove = static_cast<RowTree *>(m_layoutTree->itemAt(rowIndex - 1));
 
-        if (rowAbove != nullptr) {
-            while (rowAbove != nullptr && rowAbove->depth() > row->depth())
+        if (rowAbove) {
+            while (rowAbove && rowAbove->depth() > row->depth())
                 rowAbove = rowAbove->parentRow();
 
             return rowAbove;
@@ -270,7 +228,7 @@ void RowManager::selectRow(RowTree *row)
 
 void RowManager::clearSelection()
 {
-    if (m_selectedRow != nullptr) {
+    if (m_selectedRow) {
         m_selectedRow->setState(InteractiveTimelineItem::Normal);
         m_selectedRow = nullptr;
     }
@@ -335,9 +293,12 @@ void RowManager::updateRowFilter(RowTree *row)
 
 void RowManager::deleteRow(RowTree *row)
 {
-   if (row != nullptr && row->rowType() != OBJTYPE_SCENE) {
+   if (row && row->rowType() != OBJTYPE_SCENE) {
        if (m_selectedRow == row)
            selectRow(getRowAbove(row));
+
+       if (row->parentRow())
+           row->parentRow()->removeChild(row);
 
        deleteRowRecursive(row);
    }
@@ -345,6 +306,12 @@ void RowManager::deleteRow(RowTree *row)
 
 void RowManager::deleteRowRecursive(RowTree *row)
 {
+   if (!row->childProps().empty()) {
+       const auto childProps = row->childProps();
+       for (auto child : childProps)
+            deleteRowRecursive(child);
+   }
+
    if (!row->childRows().empty()) {
        const auto childRows = row->childRows();
        for (auto child : childRows)
@@ -354,13 +321,8 @@ void RowManager::deleteRowRecursive(RowTree *row)
    if (row == m_selectedRow)
        m_selectedRow = nullptr;
 
-   if (row->parentRow() != nullptr)
-       row->parentRow()->removeChild(row);
-
    m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline());
 
-   m_layoutTimeline->removeItem(row->rowTimeline());
-   m_layoutTree->removeItem(row);
    delete row;
 }
 
@@ -369,10 +331,10 @@ RowTree *RowManager::selectedRow() const
     return m_selectedRow;
 }
 
-int RowManager::getRowIndex(RowTree *row)
+int RowManager::getRowIndex(RowTree *row, int startAt)
 {
-    if (row != nullptr) {
-        for (int i = 1; i < m_layoutTree->count(); ++i) {
+    if (row) {
+        for (int i = startAt; i < m_layoutTree->count(); ++i) {
           if (row == m_layoutTree->itemAt(i)->graphicsItem())
              return i;
         }
@@ -407,20 +369,6 @@ int RowManager::getChildIndex(RowTree *parentRow, RowTree *childRow)
     }
 
     return -1;
-}
-
-bool RowManager::hasProperties(RowTree *row)
-{
-    if (row != nullptr && !row->empty()) {
-        int index = getRowIndex(row);
-        if (index != -1 && index < m_layoutTree->count() - 1) {
-            RowTree *nextRow = static_cast<RowTree *>(m_layoutTree->itemAt(index + 1)
-                                                      ->graphicsItem());
-            return nextRow->isProperty();
-        }
-    }
-
-    return false;
 }
 
 bool RowManager::isFirstChild(RowTree *parentRow, RowTree *childRow)
