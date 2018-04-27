@@ -1291,10 +1291,10 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                         QKeySequence(Qt::Key_Comma),
                         CStudioApp::ReduceTime);
     ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ShiftModifier | Qt::Key_Period),
+                        QKeySequence(Qt::AltModifier | Qt::Key_Period),
                         CStudioApp::AdvanceUltraBigTime);
     ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ShiftModifier | Qt::Key_Comma),
+                        QKeySequence(Qt::AltModifier | Qt::Key_Comma),
                         CStudioApp::ReduceUltraBigTime);
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Return),

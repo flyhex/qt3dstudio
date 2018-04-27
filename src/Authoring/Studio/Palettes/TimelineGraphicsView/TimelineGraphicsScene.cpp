@@ -765,7 +765,6 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     // Internally some things like make component depend on the correct row being selected,
     // so make sure it is.
     m_rowManager->selectRow(row);
-
     if (event->scenePos().x() > TimelineConstants::TREE_BOUND_W) { // timeline context menu
         RowTimelineContextMenu timelineContextMenu(row, m_keyframeManager, event);
         timelineContextMenu.exec(event->screenPos());

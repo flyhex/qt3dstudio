@@ -35,6 +35,7 @@
 
 class RowTree;
 class KeyframeManager;
+struct Keyframe;
 
 class RowTimelineContextMenu : public QMenu
 {
@@ -57,8 +58,11 @@ private:
     void pasteKeyframes();
     void deleteSelectedKeyframes();
     void deleteRowKeyframes();
+    void setInterpolation();
+    void setKeyframeTime();
 
     RowTree *m_rowTree = nullptr;
+    Keyframe *m_keyframe = nullptr;
     KeyframeManager *m_keyframeManager = nullptr;
     QGraphicsSceneContextMenuEvent *m_menuEvent = nullptr;
     QAction *m_insertKeyframeAction = nullptr;
@@ -67,6 +71,8 @@ private:
     QAction *m_pasteKeyframesAction = nullptr;
     QAction *m_deleteSelectedKeyframesAction = nullptr;
     QAction *m_deleteRowKeyframesAction = nullptr;
+    QAction *m_setInterpolationAction = nullptr;
+    QAction *m_setKeyframeTimeAction = nullptr;
 };
 
 #endif // ROWTIMELINECONTEXTMENU_H

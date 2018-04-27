@@ -51,6 +51,7 @@
 #include "StudioPreferences.h"
 #include "Qt3DSDMAnimation.h"
 #include "Dialogs.h"
+#include "TimeEditDlg.h"
 #include "Bindings/PasteKeyframesCommandHelper.h"
 
 #include <qglobal.h>
@@ -429,7 +430,9 @@ bool KeyframeManager::hasCopiedKeyframes() const
 // ITimelineKeyframesManager interface
 void KeyframeManager::SetKeyframeTime(long inTime)
 {
-    // Mahmoud_TODO: implement if needed
+    CTimeEditDlg theTimeEditDlg;
+    theTimeEditDlg.setKeyframesManager(this);
+    theTimeEditDlg.showDialog(inTime, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
 }
 
 void KeyframeManager::SetKeyframesDynamic(bool inDynamic)

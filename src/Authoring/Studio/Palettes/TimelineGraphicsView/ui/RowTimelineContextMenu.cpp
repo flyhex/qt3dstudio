@@ -82,25 +82,44 @@ void RowTimelineContextMenu::initialize()
     connect(m_deleteRowKeyframesAction, &QAction::triggered, this,
             &RowTimelineContextMenu::deleteRowKeyframes);
     addAction(m_deleteRowKeyframesAction);
-}
 
-void RowTimelineContextMenu::showEvent(QShowEvent *event)
-{
-    Keyframe *keyframe = m_rowTree->rowTimeline()->getClickedKeyframe(m_menuEvent->scenePos());
+    m_keyframe = m_rowTree->rowTimeline()->getClickedKeyframe(m_menuEvent->scenePos());
     bool ctrlPressed = m_menuEvent->modifiers() & Qt::ControlModifier;
-    if (keyframe) {
-        if (!keyframe->selected() && !ctrlPressed)
+    if (m_keyframe) {
+        if (!m_keyframe->selected() && !ctrlPressed)
             m_keyframeManager->deselectAllKeyframes();
 
-        m_keyframeManager->selectKeyframe(keyframe);
+        m_keyframeManager->selectKeyframe(m_keyframe);
     } else {
         m_keyframeManager->deselectAllKeyframes();
     }
 
+    if (m_keyframe) {
+        addSeparator();
+
+        m_setInterpolationAction = new QAction(tr("Set Interpolation"), this);
+        m_setInterpolationAction->setShortcut(Qt::Key_I);
+        m_setInterpolationAction->setShortcutVisibleInContextMenu(true);
+        connect(m_setInterpolationAction, &QAction::triggered, this,
+                &RowTimelineContextMenu::setInterpolation);
+        addAction(m_setInterpolationAction);
+
+        m_setKeyframeTimeAction = new QAction(tr("Set Keyframe Time"), this);
+        // TODO: Shortcut TBD
+        //m_setKeyframeTimeAction->setShortcut(Qt::Key_Foobar);
+        m_setKeyframeTimeAction->setShortcutVisibleInContextMenu(true);
+        connect(m_setKeyframeTimeAction, &QAction::triggered, this,
+                &RowTimelineContextMenu::setKeyframeTime);
+        addAction(m_setKeyframeTimeAction);
+    }
+}
+
+void RowTimelineContextMenu::showEvent(QShowEvent *event)
+{
     bool propRow = m_rowTree->isProperty();
     bool hasPropRows = m_rowTree->hasPropertyChildren();
 
-    m_insertKeyframeAction->setEnabled(!keyframe && (propRow || hasPropRows));
+    m_insertKeyframeAction->setEnabled(!m_keyframe && (propRow || hasPropRows));
     m_cutSelectedKeyframesAction->setEnabled(m_keyframeManager->oneMasterRowSelected());
     m_copySelectedKeyframesAction->setEnabled(m_keyframeManager->oneMasterRowSelected());
     m_pasteKeyframesAction->setEnabled(m_keyframeManager->hasCopiedKeyframes());
@@ -166,4 +185,14 @@ void RowTimelineContextMenu::deleteSelectedKeyframes()
 void RowTimelineContextMenu::deleteRowKeyframes()
 {
     m_keyframeManager->deleteKeyframes(m_rowTree->rowTimeline());
+}
+
+void RowTimelineContextMenu::setInterpolation()
+{
+    m_keyframeManager->SetKeyframeInterpolation();
+}
+
+void RowTimelineContextMenu::setKeyframeTime()
+{
+    m_keyframeManager->SetKeyframeTime(m_keyframe->time * 1000.0);
 }
