@@ -46,7 +46,6 @@
 #include "Doc.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "ResourceCache.h"
-#include "DurationEditDlg.h"
 #include "TimelineControl.h"
 #include "RowTreeContextMenu.h"
 #include "RowTimelineContextMenu.h"
@@ -121,8 +120,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     QAction *action = new QAction(this);
     action->setShortcut(Qt::Key_S);
     action->setShortcutContext(Qt::ApplicationShortcut);
-    connect(action, &QAction::triggered, this,
-            &TimelineGraphicsScene::handleInsertKeyframe);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleInsertKeyframe);
     timelineWidget->addAction(action);
 
     action = new QAction(this);
@@ -130,6 +128,12 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     action->setShortcutContext(Qt::ApplicationShortcut);
     connect(action, &QAction::triggered, this,
             &TimelineGraphicsScene::handleDeleteChannelKeyframes);
+    timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_T));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleSetTimeBarTime);
     timelineWidget->addAction(action);
 }
 
@@ -692,13 +696,8 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 CTimeEditDlg timeEditDlg;
                 timeEditDlg.setKeyframesManager(m_keyframeManager);
                 timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
-            } else if (rowTimeline->rowTree()->hasDurationBar()) {
-                long theStartTime = rowTimeline->getStartTime() * 1000;
-                long theEndTime = rowTimeline->getEndTime() * 1000;
-                m_timelineControl->setRowTimeline(rowTimeline);
-                CDurationEditDlg theDurationEditDlg;
-                theDurationEditDlg.showDialog(theStartTime, theEndTime,
-                                              g_StudioApp.GetCore()->GetDoc(), m_timelineControl);
+            } else {
+                handleSetTimeBarTime();
             }
         }
     }
@@ -731,7 +730,8 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     // so make sure it is.
     m_rowManager->selectRow(row);
     if (event->scenePos().x() > TimelineConstants::TREE_BOUND_W) { // timeline context menu
-        RowTimelineContextMenu timelineContextMenu(row, m_keyframeManager, event);
+        RowTimelineContextMenu timelineContextMenu(row, m_keyframeManager, event,
+                                                   m_timelineControl);
         timelineContextMenu.exec(event->screenPos());
     } else { // tree context menu
         if (!row->isProperty()) {
@@ -802,6 +802,15 @@ void TimelineGraphicsScene::handleDeleteChannelKeyframes()
     RowTree *selectedRow = m_rowManager->selectedRow();
     if (selectedRow)
         selectedRow->getBinding()->DeleteAllChannelKeyframes();
+}
+
+void TimelineGraphicsScene::handleSetTimeBarTime()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow && selectedRow->hasDurationBar()) {
+        m_timelineControl->setRowTimeline(selectedRow->rowTimeline());
+        m_timelineControl->showDurationEditDialog();
+    }
 }
 
 // Getters

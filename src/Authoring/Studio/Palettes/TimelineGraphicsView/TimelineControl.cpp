@@ -29,6 +29,10 @@
 #include "TimelineControl.h"
 #include "RowTree.h"
 #include "Bindings/ITimelineItemBinding.h"
+#include "DurationEditDlg.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
 
 TimelineControl::TimelineControl()
 {
@@ -40,6 +44,13 @@ void TimelineControl::setRowTimeline(RowTimeline *rowTimeline)
     m_timebar = m_rowTimeline->rowTree()->getBinding()->GetTimelineItem()->GetTimebar();
     m_startTime = m_rowTimeline->getStartTime();
     m_endTime = m_rowTimeline->getEndTime();
+}
+
+void TimelineControl::showDurationEditDialog()
+{
+    CDurationEditDlg theDurationEditDlg;
+    theDurationEditDlg.showDialog(m_startTime * 1000, m_endTime * 1000,
+                                  g_StudioApp.GetCore()->GetDoc(), this);
 }
 
 void TimelineControl::ChangeStartTime(long inTime)

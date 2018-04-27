@@ -103,6 +103,7 @@ private:
                                     const QPointF &scenePos);
     void handleInsertKeyframe();
     void handleDeleteChannelKeyframes();
+    void handleSetTimeBarTime();
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;

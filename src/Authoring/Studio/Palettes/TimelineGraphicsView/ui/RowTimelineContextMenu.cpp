@@ -30,16 +30,21 @@
 #include "RowTree.h"
 #include "Keyframe.h"
 #include "KeyframeManager.h"
+#include "MainFrm.h"
+#include "StudioApp.h"
+#include "TimelineControl.h"
 #include "Bindings/ITimelineItemBinding.h"
 
 RowTimelineContextMenu::RowTimelineContextMenu(RowTree *inRowTree,
                                                KeyframeManager *inKeyframeManager,
                                                QGraphicsSceneContextMenuEvent *inEvent,
+                                               TimelineControl *timelineControl,
                                                QWidget *parent)
     : QMenu(parent)
     , m_rowTree(inRowTree)
     , m_keyframeManager(inKeyframeManager)
     , m_menuEvent(inEvent)
+    , m_timelineControl(timelineControl)
 {
     initialize();
 }
@@ -104,23 +109,35 @@ void RowTimelineContextMenu::initialize()
         m_keyframeManager->deselectAllKeyframes();
     }
 
-    if (m_keyframe) {
-        addSeparator();
+    addSeparator();
 
-        m_setInterpolationAction = new QAction(tr("Set Interpolation"), this);
+    if (m_keyframe) {
+        m_setInterpolationAction = new QAction(tr("Set Interpolation..."), this);
         m_setInterpolationAction->setShortcut(Qt::Key_I);
         m_setInterpolationAction->setShortcutVisibleInContextMenu(true);
         connect(m_setInterpolationAction, &QAction::triggered, this,
                 &RowTimelineContextMenu::setInterpolation);
         addAction(m_setInterpolationAction);
 
-        m_setKeyframeTimeAction = new QAction(tr("Set Keyframe Time"), this);
+        m_setKeyframeTimeAction = new QAction(tr("Set Keyframe Time..."), this);
         // TODO: Shortcut TBD
         //m_setKeyframeTimeAction->setShortcut(Qt::Key_Foobar);
         m_setKeyframeTimeAction->setShortcutVisibleInContextMenu(true);
         connect(m_setKeyframeTimeAction, &QAction::triggered, this,
                 &RowTimelineContextMenu::setKeyframeTime);
         addAction(m_setKeyframeTimeAction);
+    } else {
+        m_setTimeBarColorAction = new QAction(tr("Change Time Bar Color..."), this);
+        connect(m_setTimeBarColorAction, &QAction::triggered, this,
+                &RowTimelineContextMenu::changeTimeBarColor);
+        addAction(m_setTimeBarColorAction);
+
+        m_setTimeBarTimeAction = new QAction(tr("Set Time Bar Time..."), this);
+        m_setTimeBarTimeAction->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_T));
+        m_setTimeBarTimeAction->setShortcutVisibleInContextMenu(true);
+        connect(m_setTimeBarTimeAction, &QAction::triggered, this,
+                &RowTimelineContextMenu::setTimeBarTime);
+        addAction(m_setTimeBarTimeAction);
     }
 }
 
@@ -135,6 +152,10 @@ void RowTimelineContextMenu::showEvent(QShowEvent *event)
     m_pasteKeyframesAction->setEnabled(m_keyframeManager->hasCopiedKeyframes());
     m_deleteSelectedKeyframesAction->setEnabled(m_keyframeManager->hasSelectedKeyframes());
     m_deleteRowKeyframesAction->setEnabled(!m_rowTree->rowTimeline()->keyframes().empty());
+    if (!m_keyframe) {
+        m_setTimeBarColorAction->setEnabled(m_rowTree->hasDurationBar());
+        m_setTimeBarTimeAction->setEnabled(m_rowTree->hasDurationBar());
+    }
 
     QMenu::showEvent(event);
 }
@@ -194,4 +215,17 @@ void RowTimelineContextMenu::setInterpolation()
 void RowTimelineContextMenu::setKeyframeTime()
 {
     m_keyframeManager->SetKeyframeTime(m_keyframe->time * 1000.0);
+}
+
+void RowTimelineContextMenu::changeTimeBarColor()
+{
+    g_StudioApp.m_pMainWnd->OnTimelineSetTimeBarColor();
+}
+
+void RowTimelineContextMenu::setTimeBarTime()
+{
+    if (m_timelineControl) {
+        m_timelineControl->setRowTimeline(m_rowTree->rowTimeline());
+        m_timelineControl->showDurationEditDialog();
+    }
 }

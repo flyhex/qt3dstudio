@@ -39,6 +39,7 @@ public:
     TimelineControl();
 
     void setRowTimeline(RowTimeline *rowTimeline);
+    void showDurationEditDialog();
 
     // ITimeChangeCallback
     void ChangeStartTime(long) override;

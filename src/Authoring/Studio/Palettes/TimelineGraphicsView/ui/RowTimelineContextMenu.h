@@ -35,6 +35,7 @@
 
 class RowTree;
 class KeyframeManager;
+class TimelineControl;
 struct Keyframe;
 
 class RowTimelineContextMenu : public QMenu
@@ -44,6 +45,7 @@ public:
     explicit RowTimelineContextMenu(RowTree *inRowTree,
                                     KeyframeManager *inKeyframeManager,
                                     QGraphicsSceneContextMenuEvent *inEvent,
+                                    TimelineControl *timelineControl,
                                     QWidget *parent = nullptr);
     virtual ~RowTimelineContextMenu();
 
@@ -60,6 +62,8 @@ private:
     void deleteRowKeyframes();
     void setInterpolation();
     void setKeyframeTime();
+    void changeTimeBarColor();
+    void setTimeBarTime();
 
     RowTree *m_rowTree = nullptr;
     Keyframe *m_keyframe = nullptr;
@@ -73,6 +77,9 @@ private:
     QAction *m_deleteRowKeyframesAction = nullptr;
     QAction *m_setInterpolationAction = nullptr;
     QAction *m_setKeyframeTimeAction = nullptr;
+    QAction *m_setTimeBarColorAction = nullptr;
+    QAction *m_setTimeBarTimeAction = nullptr;
+    TimelineControl *m_timelineControl = nullptr;
 };
 
 #endif // ROWTIMELINECONTEXTMENU_H
