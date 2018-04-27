@@ -195,6 +195,7 @@ public:
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);
     void toggleEyeball();
+    void showInvalidFilenameWarning();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;

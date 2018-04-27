@@ -177,7 +177,7 @@ public:
 
     // The system may be null in the case where we are running without a UI.
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
-    void SetDocumentPath(const Qt3DSFile &inFile);
+    bool SetDocumentPath(const Qt3DSFile &inFile);
     Qt3DSFile GetDocumentPath() const;
     Q3DStudio::CString GetDocumentDirectory() const;
     Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);

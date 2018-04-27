@@ -1405,7 +1405,7 @@ Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem()
     return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : NULL;
 }
 
-void CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
+bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
 {
     Q3DStudio::CString theDocPath = inDocumentPath.GetName();
     // We always need to have a document path.
@@ -1420,12 +1420,12 @@ void CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
         }
     }
 
-    // Document path should always be absolute path
-    ASSERT(!Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()));
-    // Document path should exist.
-    Q_ASSERT(m_DocumentPath.Exists());
+    // Document path should always be absolute path and it should exist
+    if (Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()) || !m_DocumentPath.Exists())
+        return false;
 
     m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath);
+    return true;
 }
 
 //=============================================================================

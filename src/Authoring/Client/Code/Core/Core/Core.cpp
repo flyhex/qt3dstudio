@@ -237,7 +237,11 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory)
 
     Qt3DSFile fileDocument(theDocument.toCString());
 
-    m_Doc->SetDocumentPath(fileDocument);
+    if (!m_Doc->SetDocumentPath(fileDocument)) {
+        m_Doc->CreateNewDocument(); // Required to prevent a crash, as the old one is already closed
+        return false;
+    }
+
     m_Doc->CreateNewDocument();
 
     // Serialize the new document.

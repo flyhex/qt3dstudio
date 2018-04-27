@@ -384,9 +384,14 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
     case StudioTutorialWidget::createNewResult: {
         Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString("."));
         if (theFile.GetPath() != "") {
-            m_core->OnNewDocument(theFile, true);
-            theReturn = true;
-            m_welcomeShownThisSession = true;
+            if (!m_core->OnNewDocument(theFile, true)) {
+                // Invalid filename, show a message box and the startup dialog
+                showInvalidFilenameWarning();
+                theReturn = showStartupDialog();
+            } else {
+                theReturn = true;
+                m_welcomeShownThisSession = true;
+            }
         } else {
             // User Cancels the dialog. Show the welcome screen.
             if (recursive) {
@@ -540,8 +545,11 @@ bool CStudioApp::showStartupDialog()
         case CStartupDlg::EStartupChoice_NewDoc: {
             Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(theMostRecentDirectory);
             if (theFile.GetPath() != "") {
-                m_core->OnNewDocument(theFile, true);
-                theReturn = true;
+                 if (!m_core->OnNewDocument(theFile, true)) {
+                     // Invalid filename, show a message box and the dialog again
+                     showInvalidFilenameWarning();
+                     theReturn = showStartupDialog();
+                 }
             } else {
                 // User Cancels the dialog. Show startup dialog again.
                 theReturn = showStartupDialog();
@@ -1595,9 +1603,12 @@ QString CStudioApp::OnFileNew(bool createFolder)
 {
     if (PerformSavePrompt()) {
         Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), createFolder);
-        if (theFile.GetPath() != "")
-            m_core->OnNewDocument(theFile, createFolder);
-        return theFile.GetName().toQString();
+        if (theFile.GetPath() != "") {
+            if (!m_core->OnNewDocument(theFile, createFolder))
+                showInvalidFilenameWarning();
+        } else {
+            return theFile.GetName().toQString();
+        }
     }
     return QString();
 }
@@ -1718,4 +1729,11 @@ void CStudioApp::toggleEyeball()
     bool boolValue = !qt3dsdm::get<bool>(value);
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
             ->SetInstancePropertyValue(handle, property, boolValue);
+}
+
+void CStudioApp::showInvalidFilenameWarning()
+{
+    m_dialogs->DisplayMessageBox(tr("Invalid filename"),
+                                 tr("The filename given was invalid."),
+                                 Qt3DSMessageBox::ICON_WARNING, false);
 }
