@@ -770,6 +770,12 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
 
 void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 {
+    // Eat left/right arrow keys on tree side unless some item (e.g. label) has focus
+    if ((keyEvent->key() == Qt::Key_Left || keyEvent->key() == Qt::Key_Right)
+            && (qApp->focusObject() == m_widgetTimeline->viewTreeContent() && !focusItem())) {
+        keyEvent->accept();
+        return;
+    }
     if (keyEvent->key() == Qt::Key_Delete)
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
 
