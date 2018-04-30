@@ -457,9 +457,6 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                         // not moving an ancestor into a decendent
                 valid = !rowAtIndex->isDecendentOf(m_rowMover->sourceRow())
 
-                        // not inserting above a property or material rows
-                        && !(nextRowAtIndex && nextRowAtIndex->isPropertyOrMaterial())
-
                         // not inserting as a first child of self
                         && !(rowAtIndex == m_rowMover->sourceRow() && !rowAtIndex->empty())
 
@@ -475,6 +472,13 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             }
 
             if (valid) {
+                // if dragging over a property or a parent of a property, move to the first row
+                // after the property
+                if (rowAtIndex->isProperty())
+                    indexRaw = rowAtIndex->parentRow()->childProps().last()->indexInLayout();
+                else if (rowAtIndex->hasPropertyChildren() && rowAtIndex->expanded())
+                    indexRaw = rowAtIndex->childProps().last()->indexInLayout();
+
                 // calc insertion depth
                 int depth;
                 if (m_rowMover->sourceRow()->rowType() == OBJTYPE_LAYER) {
@@ -486,8 +490,9 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                     if (rowAtIndex->isContainer() && rowAtIndex->expanded()
                             && rowAtIndex != m_rowMover->sourceRow()) {
                         depthMax++; // Container: allow insertion as a child
-                    } else if (rowAtIndex->isPropertyOrMaterial()) {
-                        depthMax--;
+                    } else if (rowAtIndex->isPropertyOrMaterial()
+                              && !rowAtIndex->parentRow()->isContainer()) {
+                         depthMax--; // non-container with properties and/or a material
                     }
 
                     depth = (event->scenePos().x() - 20) / 15;
@@ -500,24 +505,32 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                     insertParent = insertParent->parentRow();
                 m_rowMover->resetInsertionParent(insertParent);
 
-                // calc insertion index
-                int index = rowAtIndex->index() + 1;
-                if ((rowAtIndex->isPropertyOrMaterial() && depth == rowAtIndex->depth())
-                        || rowAtIndex == insertParent) {
-                    index = 0;
-                } else if (depth < rowAtIndex->depth()) {
-                    RowTree *row = rowAtIndex;
-                    for (int i = depth; i < rowAtIndex->depth(); ++i)
-                        row = row->parentRow();
-                    index = row->index() + 1;
+                if (m_rowMover->sourceRow()->rowType() == OBJTYPE_MATERIAL
+                        && m_rowMover->sourceRow()->parentRow()
+                        != m_rowMover->insertionParent()) {
+                    valid = false; // not moving a material row outside its parent
                 }
 
-                if (insertParent == m_rowMover->sourceRow()->parentRow()
-                        && index > m_rowMover->sourceRow()->index()) {
-                    index--;
-                }
+                if (valid) {
+                    // calc insertion index
+                    int index = rowAtIndex->index() + 1;
+                    if ((rowAtIndex->isProperty() && depth == rowAtIndex->depth())
+                            || rowAtIndex == insertParent) {
+                        index = 0;
+                    } else if (depth < rowAtIndex->depth()) {
+                        RowTree *row = rowAtIndex;
+                        for (int i = depth; i < rowAtIndex->depth(); ++i)
+                            row = row->parentRow();
+                        index = row->index() + 1;
+                    }
 
-                m_rowMover->updateState(index, depth, indexRaw);
+                    if (insertParent == m_rowMover->sourceRow()->parentRow()
+                            && index > m_rowMover->sourceRow()->index()) {
+                        index--;
+                    }
+
+                    m_rowMover->updateState(index, depth, indexRaw);
+                }
             }
 
             if (!valid) {

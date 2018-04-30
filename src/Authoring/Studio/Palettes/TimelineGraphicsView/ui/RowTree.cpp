@@ -562,7 +562,7 @@ int RowTree::removeChildFromLayout(RowTree *child) const
 
 bool RowTree::draggable() const
 {
-    return !m_locked && !isPropertyOrMaterial()
+    return !m_locked && !isProperty()
            && m_rowType != OBJTYPE_IMAGE
            && m_rowType != OBJTYPE_SCENE;
 }
@@ -723,9 +723,8 @@ void RowTree::setMoveSourceRecursive(bool value)
 
 bool RowTree::isContainer() const
 {
-    return  m_rowType == OBJTYPE_SCENE
-         || m_rowType == OBJTYPE_LAYER
-         || m_rowType == OBJTYPE_GROUP;
+    return !m_isProperty && m_rowType != OBJTYPE_ALIAS && m_rowType != OBJTYPE_MATERIAL
+            && m_rowType != OBJTYPE_IMAGE && m_rowType != OBJTYPE_TEXT;
 }
 
 bool RowTree::isProperty() const
