@@ -53,6 +53,10 @@ public:
 
     int m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
 
+    void toggleFilterShy();
+    void toggleFilterHidden();
+    void toggleFilterLocked();
+
 private:
     bool m_shy = false;
     bool m_visible = false;

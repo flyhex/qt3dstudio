@@ -104,6 +104,11 @@ private:
     void handleInsertKeyframe();
     void handleDeleteChannelKeyframes();
     void handleSetTimeBarTime();
+    void handleMakeComponent();
+    void handleCopyObjectPath();
+    void handleEditComponent();
+    void handleShySelected();
+    void handleLockSelected();
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;

@@ -51,6 +51,7 @@
 #include "RowTimelineContextMenu.h"
 #include "StudioPreferences.h"
 #include "TimeEditDlg.h"
+#include "StudioClipboard.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -135,6 +136,55 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     action->setShortcutContext(Qt::ApplicationShortcut);
     connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleSetTimeBarTime);
     timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_G));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleMakeComponent);
+    timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_G));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleEditComponent);
+    timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_C));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleCopyObjectPath);
+    timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_H));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleShySelected);
+    timelineWidget->addAction(action);
+
+    action = new QAction(this);
+    action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_H));
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleLockSelected);
+    timelineWidget->addAction(action);
+
+    // TODO: Shortcuts for these to be determined
+//    action = new QAction(this);
+//    action->setShortcut(QKeySequence(TBD));
+//    action->setShortcutContext(Qt::ApplicationShortcut);
+//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterShy);
+//    timelineWidget->addAction(action);
+
+//    action = new QAction(this);
+//    action->setShortcut(QKeySequence(TBD));
+//    action->setShortcutContext(Qt::ApplicationShortcut);
+//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterVisible);
+//    timelineWidget->addAction(action);
+
+//    action = new QAction(this);
+//    action->setShortcut(QKeySequence(TBD));
+//    action->setShortcutContext(Qt::ApplicationShortcut);
+//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterLock);
+//    timelineWidget->addAction(action);
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)
@@ -824,6 +874,47 @@ void TimelineGraphicsScene::handleSetTimeBarTime()
         m_timelineControl->setRowTimeline(selectedRow->rowTimeline());
         m_timelineControl->showDurationEditDialog();
     }
+}
+
+void TimelineGraphicsScene::handleMakeComponent()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow) {
+        selectedRow->getBinding()->PerformTransaction(
+                    ITimelineItemBinding::EUserTransaction_MakeComponent);
+    }
+}
+
+void TimelineGraphicsScene::handleCopyObjectPath()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow) {
+        CStudioClipboard::CopyTextToClipboard(
+                    selectedRow->getBinding()->GetObjectPath().toQString());
+    }
+}
+
+void TimelineGraphicsScene::handleEditComponent()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow && selectedRow->getBinding()->IsValidTransaction(
+                ITimelineItemBinding::EUserTransaction_EditComponent)) {
+        selectedRow->getBinding()->OpenAssociatedEditor();
+    }
+}
+
+void TimelineGraphicsScene::handleShySelected()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow)
+        selectedRow->toggleShy();
+}
+
+void TimelineGraphicsScene::handleLockSelected()
+{
+    RowTree *selectedRow = m_rowManager->selectedRow();
+    if (selectedRow)
+        selectedRow->toggleLocked();
 }
 
 // Getters

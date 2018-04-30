@@ -50,45 +50,61 @@ void RowTreeContextMenu::initialize()
     addAction(m_renameAction);
 
     m_duplicateAction = new QAction(tr("Duplicate Object"), this);
+    m_duplicateAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_D));
+    m_duplicateAction->setShortcutVisibleInContextMenu(true);
     connect(m_duplicateAction, &QAction::triggered,
             this, &RowTreeContextMenu::duplicateObject);
     addAction(m_duplicateAction);
 
     m_deleteAction = new QAction(tr("Delete Object"), this);
+    m_deleteAction->setShortcut(Qt::Key_Delete);
+    m_deleteAction->setShortcutVisibleInContextMenu(true);
     connect(m_deleteAction, &QAction::triggered, this, &RowTreeContextMenu::deleteObject);
     addAction(m_deleteAction);
 
     addSeparator();
 
     m_copyAction = new QAction(tr("Copy"), this);
+    m_copyAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_C));
+    m_copyAction->setShortcutVisibleInContextMenu(true);
     connect(m_copyAction, &QAction::triggered, this, &RowTreeContextMenu::copyObject);
     addAction(m_copyAction);
 
     m_pasteAction = new QAction(tr("Paste"), this);
+    m_pasteAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_V));
+    m_pasteAction->setShortcutVisibleInContextMenu(true);
     connect(m_pasteAction, &QAction::triggered, this, &RowTreeContextMenu::pasteObject);
     addAction(m_pasteAction);
 
     m_cutAction = new QAction(tr("Cut"), this);
+    m_cutAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_X));
+    m_cutAction->setShortcutVisibleInContextMenu(true);
     connect(m_cutAction, &QAction::triggered, this, &RowTreeContextMenu::cutObject);
     addAction(m_cutAction);
     addSeparator();
 
     m_makeAction = new QAction(tr("Make Component"), this);
+    m_makeAction->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_G));
+    m_makeAction->setShortcutVisibleInContextMenu(true);
     connect(m_makeAction, &QAction::triggered, this, &RowTreeContextMenu::makeComponent);
     addAction(m_makeAction);
 
     if (canInspectComponent()) {
         m_inspectAction = new QAction(tr("Edit Component"), this);
-        connect(m_inspectAction, &QAction::triggered,
-                this, &RowTreeContextMenu::inspectComponent);
+        m_inspectAction->setShortcut(QKeySequence(
+                                      Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_G));
+        m_inspectAction->setShortcutVisibleInContextMenu(true);
+        connect(m_inspectAction, &QAction::triggered, this, &RowTreeContextMenu::inspectComponent);
         addAction(m_inspectAction);
     }
 
     addSeparator();
 
     m_copyPathAction = new QAction(tr("Copy Object Path"), this);
-    connect(m_copyPathAction, &QAction::triggered,
-            this, &RowTreeContextMenu::copyObjectPath);
+    m_copyPathAction->setShortcut(QKeySequence(
+                                      Qt::ControlModifier | Qt::ShiftModifier | Qt::Key_C));
+    m_copyPathAction->setShortcutVisibleInContextMenu(true);
+    connect(m_copyPathAction, &QAction::triggered, this, &RowTreeContextMenu::copyObjectPath);
     addAction(m_copyPathAction);
 }
 

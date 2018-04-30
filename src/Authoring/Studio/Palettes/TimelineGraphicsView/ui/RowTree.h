@@ -106,6 +106,9 @@ public:
     QList<RowTree *> childProps() const;
     RowTimeline *rowTimeline() const;
     QString label() const;
+    void toggleShy();
+    void toggleVisible();
+    void toggleLocked();
 
     ITimelineItemBinding *getBinding() const;
 

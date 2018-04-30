@@ -1683,12 +1683,14 @@ void CStudioApp::toggleEyeball()
 {
     CDoc *theDoc = m_core->GetDoc();
     qt3dsdm::Qt3DSDMInstanceHandle handle = theDoc->GetSelectedInstance();
-    qt3dsdm::Qt3DSDMPropertyHandle property = theDoc->GetStudioSystem()->GetClientDataModelBridge()
-            ->GetSceneAsset().m_Eyeball;
-    SValue value;
-    theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
-                                                                             value);
-    bool boolValue = !qt3dsdm::get<bool>(value);
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
-            ->SetInstancePropertyValue(handle, property, boolValue);
+    if (handle.Valid()) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = theDoc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball;
+        SValue value;
+        theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
+                                                                                 value);
+        bool boolValue = !qt3dsdm::get<bool>(value);
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
+                ->SetInstancePropertyValue(handle, property, boolValue);
+    }
 }

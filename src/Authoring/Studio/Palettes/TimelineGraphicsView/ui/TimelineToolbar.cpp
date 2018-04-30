@@ -131,6 +131,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_actionZoomIn->setShortcutContext(Qt::ApplicationShortcut);
     actionGoToTime->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
     actionGoToTime->setShortcutContext(Qt::ApplicationShortcut);
+    actionNewLayer->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_L));
+    actionNewLayer->setShortcutContext(Qt::ApplicationShortcut);
 
     m_connectSelectionChange = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));

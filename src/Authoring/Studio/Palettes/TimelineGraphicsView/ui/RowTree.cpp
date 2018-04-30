@@ -627,28 +627,13 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 
     if (hasActionButtons()) {
         if (m_rectShy.contains(p.x(), p.y())) {
-            m_shy = !m_shy;
-            update();
-
-            m_binding->GetTimelineItem()->SetShy(m_shy);
-
+            toggleShy();
             return TreeControlType::Shy;
         } else if (m_rectVisible.contains(p.x(), p.y())) {
-            m_visible = !m_visible;
-            update();
-
-            m_binding->GetTimelineItem()->SetVisible(m_visible);
-
-
+            toggleVisible();
             return TreeControlType::Hide;
         } else if (m_rectLocked.contains(p.x(), p.y())) {
-            updateLockRecursive(!m_locked);
-
-            m_binding->GetTimelineItem()->SetLocked(m_locked);
-
-            if (m_locked && selected())
-                m_scene->rowManager()->clearSelection();
-
+            toggleLocked();
             return TreeControlType::Lock;
         }
     }
@@ -782,6 +767,34 @@ RowTimeline *RowTree::rowTimeline() const
 QString RowTree::label() const
 {
     return m_label;
+}
+
+void RowTree::toggleShy()
+{
+    if (hasActionButtons()) {
+        m_shy = !m_shy;
+        update();
+        m_binding->GetTimelineItem()->SetShy(m_shy);
+    }
+}
+
+void RowTree::toggleVisible()
+{
+    if (hasActionButtons()) {
+        m_visible = !m_visible;
+        update();
+        m_binding->GetTimelineItem()->SetVisible(m_visible);
+    }
+}
+
+void RowTree::toggleLocked()
+{
+    if (hasActionButtons()) {
+        updateLockRecursive(!m_locked);
+        m_binding->GetTimelineItem()->SetLocked(m_locked);
+        if (m_locked && selected())
+            m_scene->rowManager()->clearSelection();
+    }
 }
 
 bool RowTree::shy() const

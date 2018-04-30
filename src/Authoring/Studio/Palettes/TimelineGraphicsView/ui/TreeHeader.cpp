@@ -39,6 +39,9 @@ TreeHeader::TreeHeader(TimelineItem *parent) : TimelineItem(parent)
 void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                        QWidget *widget)
 {
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
     m_rectShy    .setRect(m_treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
     m_rectVisible.setRect(m_treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
     m_rectLock   .setRect(m_treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
@@ -73,16 +76,13 @@ TreeControlType TreeHeader::handleButtonsClick(const QPointF &scenePos)
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
 
     if (m_rectShy.contains(p.x(), p.y())) {
-        m_shy = !m_shy;
-        update();
+        toggleFilterShy();
         return TreeControlType::Shy;
     } else if (m_rectVisible.contains(p.x(), p.y())) {
-        m_visible = !m_visible;
-        update();
+        toggleFilterHidden();
         return TreeControlType::Hide;
     } else if (m_rectLock.contains(p.x(), p.y())) {
-        m_lock = !m_lock;
-        update();
+        toggleFilterLocked();
         return TreeControlType::Lock;
     }
 
@@ -108,4 +108,22 @@ int TreeHeader::type() const
 {
     // Enable the use of qgraphicsitem_cast with this item.
     return TypeTreeHeader;
+}
+
+void TreeHeader::toggleFilterShy()
+{
+    m_shy = !m_shy;
+    update();
+}
+
+void TreeHeader::toggleFilterHidden()
+{
+    m_visible = !m_visible;
+    update();
+}
+
+void TreeHeader::toggleFilterLocked()
+{
+    m_lock = !m_lock;
+    update();
 }
