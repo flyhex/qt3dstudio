@@ -71,6 +71,7 @@ public:
     double getEndTime() const;
     double getDurationMoveTime() const; // the time a row duration has moved (to commit to binding)
     double getDurationMoveOffsetX() const;
+    QColor barColor() const;
     int type() const;
     RowTimeline *parentRow() const;
     RowTree *rowTree() const;

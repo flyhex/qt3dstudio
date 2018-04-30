@@ -63,7 +63,11 @@ public:
     TimelineToolbar *toolbar() const;
     QGraphicsView *viewTimelineContent() const;
     QGraphicsView *viewTreeContent() const;
-    RowTree *selectedRow() const;
+    QVector<RowTree *> selectedRows() const;
+
+    void openBarColorDialog();
+    void onTimeBarColorChanged(const QColor &color);
+    void setSelectedTimeBarsColor(const QColor &color, bool preview);
 
     // Presentation Change Listener
     void OnNewPresentation() override;

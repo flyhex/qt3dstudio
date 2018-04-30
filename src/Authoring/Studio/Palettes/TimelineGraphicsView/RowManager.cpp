@@ -87,7 +87,6 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
     ITimelineTimebar *timebar = binding->GetTimelineItem()->GetTimebar();
     newRow->rowTimeline()->setStartTime(timebar->GetStartTime() * .001);
     newRow->rowTimeline()->setEndTime(timebar->GetEndTime() * .001);
-    newRow->rowTimeline()->setBarColor(timebar->GetTimebarColor());
 
     // create property rows
     for (int i = 0; i < binding->GetPropertyCount(); i++) {
@@ -207,7 +206,8 @@ RowTimeline *RowManager::rowTimelineAt(int idx)
     return nullptr;
 }
 
-void RowManager::selectRow(RowTree *row)
+// Call this to select/unselect row, affecting bindings
+void RowManager::selectRow(RowTree *row, bool multiSelect)
 {
     if (row == nullptr)
         return;
@@ -215,23 +215,34 @@ void RowManager::selectRow(RowTree *row)
     if (row->isProperty())
         row = row->parentRow();
 
-    if (row != m_selectedRow) {
-        clearSelection();
-        row->setState(InteractiveTimelineItem::Selected);
-        m_selectedRow = row;
+    Qt3DSDMTimelineItemBinding *binding =
+            static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+    if (binding)
+        binding->SetSelected(multiSelect);
+}
 
-        Qt3DSDMTimelineItemBinding *binding =
-                static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
-        g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(binding->GetInstance());
+// Call this to update row selection UI status
+void RowManager::setRowSelection(RowTree *row, bool selected)
+{
+    if (!row)
+        return;
+
+    if (selected) {
+        if (!m_selectedRows.contains(row))
+            m_selectedRows.append(row);
+        row->setState(InteractiveTimelineItem::Selected);
+    } else {
+        m_selectedRows.removeAll(row);
+        row->setState(InteractiveTimelineItem::Normal);
     }
 }
 
+// Call this to clear all selections UI status
 void RowManager::clearSelection()
 {
-    if (m_selectedRow) {
-        m_selectedRow->setState(InteractiveTimelineItem::Normal);
-        m_selectedRow = nullptr;
-    }
+    for (auto row : qAsConst(m_selectedRows))
+        row->setState(InteractiveTimelineItem::Normal);
+    m_selectedRows.clear();
 }
 
 void RowManager::updateRulerDuration()
@@ -294,8 +305,9 @@ void RowManager::updateRowFilter(RowTree *row)
 void RowManager::deleteRow(RowTree *row)
 {
    if (row && row->rowType() != OBJTYPE_SCENE) {
-       if (m_selectedRow == row)
-           selectRow(getRowAbove(row));
+       auto rowAbove = getRowAbove(row);
+       if (rowAbove)
+           selectRow(rowAbove);
 
        if (row->parentRow())
            row->parentRow()->removeChild(row);
@@ -318,8 +330,7 @@ void RowManager::deleteRowRecursive(RowTree *row)
             deleteRowRecursive(child);
    }
 
-   if (row == m_selectedRow)
-       m_selectedRow = nullptr;
+   m_selectedRows.removeAll(row);
 
    m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline(), false);
 
@@ -331,7 +342,14 @@ void RowManager::deleteRowRecursive(RowTree *row)
 
 RowTree *RowManager::selectedRow() const
 {
-    return m_selectedRow;
+    if (m_selectedRows.size() == 1)
+        return m_selectedRows.first();
+    return nullptr;
+}
+
+QVector<RowTree *> RowManager::selectedRows() const
+{
+    return m_selectedRows;
 }
 
 int RowManager::getRowIndex(RowTree *row, int startAt)
@@ -387,6 +405,11 @@ bool RowManager::isFirstChild(RowTree *parentRow, RowTree *childRow)
     }
 
     return false;
+}
+
+bool RowManager::isSingleSelected() const
+{
+    return m_selectedRows.size() == 1;
 }
 
 int RowManager::getLastChildIndex(RowTree *row, int index)

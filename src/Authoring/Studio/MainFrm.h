@@ -225,12 +225,9 @@ public:
 
     void OnConnectionChanged(bool);
 
-    void OnTimeBarColorChanged(const QColor &color);
-
     void onCtrlNPressed();
 
-    ITimelineTimebar *GetSelectedTimelineTimebar();
-    TimelineWidget *getTimelineWidget();
+    TimelineWidget *getTimelineWidget() const;
 
     void EditPreferences(short inPageIndex);
 

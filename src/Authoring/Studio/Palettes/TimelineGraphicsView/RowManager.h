@@ -49,7 +49,8 @@ public:
 
     void clampIndex(int &idx);
     void correctIndex(int &idx);
-    void selectRow(RowTree *row);
+    void selectRow(RowTree *row, bool multiSelect = false);
+    void setRowSelection(RowTree *row, bool selected);
     void deleteRow(RowTree *row);
     void clearSelection();
     void updateFiltering(RowTree *rowTree = nullptr);
@@ -59,6 +60,7 @@ public:
     int getChildIndex(RowTree *parentRow, RowTree *childRow);
     int getRowIndex(RowTree *row, int startAt = 1);
     bool isFirstChild(RowTree *parent, RowTree *child);
+    bool isSingleSelected() const;
     RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
     RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index = -1);
     RowTree *createRow(EStudioObjectType rowType, RowTree *parentRow = nullptr,
@@ -67,6 +69,7 @@ public:
     RowTree *rowAt(int idx);
     RowTree *getRowAbove(RowTree *row);
     RowTree *selectedRow() const;
+    QVector<RowTree *> selectedRows() const;
     RowTimeline *rowTimelineAt(int idx);
 
 private:
@@ -79,7 +82,7 @@ private:
                                         RowTree *parentRow = nullptr);
     void removeAllRows();
 
-    RowTree *m_selectedRow = nullptr;
+    QVector<RowTree *> m_selectedRows;
     TimelineGraphicsScene *m_scene;
     QGraphicsLinearLayout *m_layoutTree;
     QGraphicsLinearLayout *m_layoutTimeline;

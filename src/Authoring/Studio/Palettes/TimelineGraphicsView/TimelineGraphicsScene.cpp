@@ -234,10 +234,6 @@ void debugPrintRows(RowTree *row)
     }
 }
 
-void TimelineGraphicsScene::deleteSelectedRow() {
-    m_rowManager->deleteRow(m_rowManager->selectedRow());
-}
-
 // Mahmoud_TODO: debug func, remove
 void printAsset(Q3DStudio::TIdentifier asset, QString padding = " ")
 {
@@ -485,7 +481,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             // resizing keyframe selection rect
             m_selectionRect->updateSize(event->scenePos());
             m_keyframeManager->selectKeyframesInRect(m_selectionRect->rect());
-        } else if (m_rowMover->isActive()) {
+        } else if (m_rowMover->isActive() && m_rowManager->isSingleSelected()) {
             // moving rows vertically (reorder/reparent)
             // collapse all properties so correctIndex() counts correctly
             m_rowManager->collapseAllPropertyRows();
@@ -671,6 +667,7 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 
 void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
     if (event->button() == Qt::LeftButton) {
         QGraphicsItem *item = itemAt(event->scenePos(), QTransform());
 
@@ -686,7 +683,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
             if (rowTree && m_clickedTreeControlType == TreeControlType::None
                     && !rowTree->locked()) {
-                m_rowManager->selectRow(rowTree);
+                m_rowManager->selectRow(rowTree, ctrlKeyDown);
             }
 
         } else if (m_rowMover->isActive()) { // moving rows (reorder/reparent)

@@ -63,7 +63,6 @@ public:
     void setTimelineScale(int scale);
     void updateTimelineLayoutWidth();
     void addNewLayer();
-    void deleteSelectedRow();
     Ruler *ruler() const;
     PlayHead *playHead() const;
     RowManager *rowManager() const;

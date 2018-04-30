@@ -512,6 +512,11 @@ void RowTimeline::setEndX(double endX)
     update();
 }
 
+QColor RowTimeline::barColor() const
+{
+    return m_barColor;
+}
+
 void RowTimeline::setBarColor(const QColor &color)
 {
     m_barColor = color;

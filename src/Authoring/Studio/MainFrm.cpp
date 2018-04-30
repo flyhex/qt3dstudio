@@ -40,7 +40,6 @@
 //==============================================================================
 #include "Bindings/TimelineTranslationManager.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
-#include "Bindings/ITimelineTimebar.h"
 #include "SceneView.h"
 #include "StudioApp.h"
 #include "IKeyframesManager.h"
@@ -69,7 +68,6 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
-#include <QtWidgets/qcolordialog.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -598,25 +596,7 @@ void CMainFrame::OnUpdateToolChange()
  */
 void CMainFrame::OnTimelineSetTimeBarColor()
 {
-    ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
-    if (theTimelineTimebar) {
-        QColor previousColor = theTimelineTimebar->GetTimebarColor();
-        QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
-        theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
-        connect(theColorDlg, &QColorDialog::currentColorChanged,
-                this, &CMainFrame::OnTimeBarColorChanged);
-        if (theColorDlg->exec() == QDialog::Accepted)
-            theTimelineTimebar->SetTimebarColor(theColorDlg->selectedColor());
-        else
-            theTimelineTimebar->PreviewTimebarColor(previousColor);
-    }
-}
-
-void CMainFrame::OnTimeBarColorChanged(const QColor &color)
-{
-    ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
-    if (theTimelineTimebar)
-        theTimelineTimebar->PreviewTimebarColor(color);
+    getTimelineWidget()->openBarColorDialog();
 }
 
 //==============================================================================
@@ -1863,22 +1843,10 @@ void CMainFrame::OnConnectionChanged(bool connected)
     m_ui->actionRemote_Preview->setEnabled(connected);
 }
 
-TimelineWidget *CMainFrame::getTimelineWidget()
+TimelineWidget *CMainFrame::getTimelineWidget() const
 {
     return static_cast<TimelineWidget *>(m_paletteManager->GetControl(
                                              CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
-}
-
-ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
-{
-    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
-            static_cast<Qt3DSDMTimelineItemBinding *>(
-                getTimelineWidget()->selectedRow()->getBinding());
-
-    if (theTimelineItemBinding == nullptr)
-        return nullptr;
-
-    return theTimelineItemBinding->GetTimelineItem()->GetTimebar();
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

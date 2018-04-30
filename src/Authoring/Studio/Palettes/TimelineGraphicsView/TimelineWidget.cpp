@@ -48,9 +48,11 @@
 #include "ClientDataModelBridge.h"
 #include "Bindings/TimelineTranslationManager.h"
 #include "Bindings/ITimelineItemBinding.h"
+#include "Bindings/ITimelineTimebar.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include "TimeEditDlg.h"
+#include "IDocumentEditor.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -59,6 +61,7 @@
 #include <QtWidgets/qscrollbar.h>
 #include <QtWidgets/qslider.h>
 #include <QtWidgets/qlabel.h>
+#include <QtWidgets/qcolordialog.h>
 
 // Mahmoud_TODO: debug func, to be removed
 void printBinding(ITimelineItemBinding *binding, QString padding = " ")
@@ -432,20 +435,19 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
 {
     qt3dsdm::TInstanceHandleList theInstances = inNewSelectable.GetSelectedInstances();
+
+    // First deselect all items in UI
+    m_graphicsScene->rowManager()->clearSelection();
+
     if (theInstances.size() > 0) {
         for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
             if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(theInstance)) {
-                Qt3DSDMTimelineItemBinding *selectedBinding = getBindingForHandle(theInstance,
-                                                                                  m_binding);
-                if (selectedBinding)
-                    m_graphicsScene->rowManager()->selectRow(selectedBinding->getRowTree());
-                else
-                    m_graphicsScene->rowManager()->clearSelection();
+                auto *binding = getBindingForHandle(theInstance, m_binding);
+                if (binding)
+                    m_graphicsScene->rowManager()->setRowSelection(binding->getRowTree(), true);
             }
         }
-    } else {
-        m_graphicsScene->rowManager()->clearSelection();
     }
 
     // Mahmoud_TODO: Expand the tree so the selection is visible
@@ -692,7 +694,57 @@ bool TimelineWidget::hasSelectedKeyframes() const
     return m_graphicsScene->keyframeManager()->hasSelectedKeyframes();
 }
 
-RowTree *TimelineWidget::selectedRow() const
+QVector<RowTree *> TimelineWidget::selectedRows() const
 {
-    return m_graphicsScene->rowManager()->selectedRow();
+    return m_graphicsScene->rowManager()->selectedRows();
+}
+
+void TimelineWidget::openBarColorDialog()
+{
+    auto rows = selectedRows();
+    if (rows.isEmpty())
+        return;
+
+    // Note: Setup color dialog with bar color of last selected
+    // row as it can only default to one.
+    QColor previousColor = rows.first()->rowTimeline()->barColor();
+    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
+    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
+    connect(theColorDlg, &QColorDialog::currentColorChanged,
+            this, &TimelineWidget::onTimeBarColorChanged);
+    if (theColorDlg->exec() == QDialog::Accepted) {
+        CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+        QColor selectedColor = theColorDlg->selectedColor();
+        Q3DStudio::ScopedDocumentEditor editor(*theDoc,
+                                               L"Set Timebar Color",
+                                               __FILE__, __LINE__);
+        setSelectedTimeBarsColor(selectedColor, false);
+    } else {
+        setSelectedTimeBarsColor(previousColor, true);
+    }
+}
+
+void TimelineWidget::onTimeBarColorChanged(const QColor &color)
+{
+    setSelectedTimeBarsColor(color, true);
+}
+
+// Set the color of all currently selected timeline bars.
+// When preview, only set the UI without property changes.
+void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
+{
+    auto rows = selectedRows();
+    for (RowTree *row : qAsConst(rows)) {
+        row->rowTimeline()->setBarColor(color);
+        if (!preview) {
+            // Get editable handle into document editor without undo transactions
+            CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+            Q3DStudio::IDocumentEditor *editor =
+                    dynamic_cast<Q3DStudio::IDocumentEditor*>(&theDoc->GetDocumentReader());
+
+            Qt3DSDMTimelineItemBinding *timelineItemBinding =
+                static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+            editor->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
+        }
+    }
 }
