@@ -456,7 +456,7 @@ void RowTree::addChildAt(RowTree *child, int index)
     if (child->parentRow() == this && index == child->m_index) // same place
         return;
 
-    if (child->parentRow() != nullptr)
+    if (child->parentRow())
         child->parentRow()->removeChild(child);
 
     child->m_index = index;
@@ -699,7 +699,7 @@ bool RowTree::isDecendentOf(RowTree *row) const
 {
     RowTree *parentRow = m_parentRow;
 
-    while (parentRow != nullptr) {
+    while (parentRow) {
         if (parentRow == row)
             return true;
 

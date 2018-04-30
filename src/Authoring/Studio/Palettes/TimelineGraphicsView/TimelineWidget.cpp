@@ -597,7 +597,9 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
     if (binding && bindingParent) {
         RowTree *row = binding->getRowTree();
         RowTree *rowParent = bindingParent->getRowTree();
-        rowParent->addChildAt(row, inIndex);
+
+        if (row && rowParent)
+            rowParent->addChildAt(row, inIndex);
     }
 }
 
