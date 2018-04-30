@@ -108,18 +108,12 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
-    // TODO: remove after the new timeline is complete (leaving it as reference for now)
-//    m_timelineQmlDock = new QDockWidget(QObject::tr("Timeline"), inMainFrame);
-//    m_timelineQmlDock->setObjectName("timeline");
-//    m_timelineQmlDock->setAllowedAreas(Qt::BottomDockWidgetArea);
-//    m_timelineView = new TimelineView(m_timelineQmlDock);
-//    m_timelineQmlDock->setWidget(m_timelineView);
-
     m_timelineGVDock = new QDockWidget(QObject::tr("Timeline GV"), inMainFrame);
     m_timelineGVDock->setObjectName("timeline GV.");
     m_timelineGVDock->setAllowedAreas(Qt::BottomDockWidgetArea);
     m_timelineWidget = new TimelineWidget(m_timelineGVDock);
     m_timelineGVDock->setWidget(m_timelineWidget);
+    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineGVDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineGVDock));
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
@@ -143,6 +137,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_slideDock->setEnabled(false);
     m_actionDock->setEnabled(false);
     m_inspectorDock->setEnabled(false);
+    m_timelineGVDock->setEnabled(false);
 }
 
 //==============================================================================
@@ -262,7 +257,6 @@ void CPaletteManager::EnablePalettes()
     m_basicObjectsDock->setEnabled(true);
     m_projectDock->setEnabled(true);
     m_slideDock->setEnabled(true);
-//    m_timelineQmlDock->setEnabled(true);
     m_timelineGVDock->setEnabled(true);
     m_actionDock->setEnabled(true);
     m_inspectorDock->setEnabled(true);
