@@ -523,19 +523,19 @@ void RowTree::moveChild(int from, int to)
 // this does not destroy the row, just remove it from the layout and parenting hierarchy
 void RowTree::removeChild(RowTree *child)
 {
-    if (m_childRows.contains(child)) {
-        // remove child and all his ancestors from the layout
-        int numRemovedRows = removeChildFromLayout(child);
+    if (m_childProps.contains(child) || m_childRows.contains(child)) { // child exists
+        removeChildFromLayout(child);
 
         // detach from parent
-        m_childRows.removeAll(child);
+        if (child->isProperty())
+            m_childProps.removeAll(child);
+        else
+            m_childRows.removeAll(child);
+
         child->m_depth = -1;
         child->m_parentRow = nullptr;
 
         updateIndices(false, child->m_index, child->m_indexInLayout, child->isProperty());
-
-        if (m_childRows.empty())
-            m_expanded = true;
     }
 }
 

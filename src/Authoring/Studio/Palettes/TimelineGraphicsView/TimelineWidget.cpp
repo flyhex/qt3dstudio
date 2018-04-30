@@ -479,7 +479,7 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
 
         // create the binding if doesn't exist
-        if (propBinding == nullptr) {
+        if (!propBinding) {
             propBinding = binding->GetOrCreatePropertyBinding(property);
 
             // create the property UI row
@@ -511,10 +511,10 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
-    if (binding != nullptr) {
+    if (binding) {
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
 
-        if (propBinding != nullptr) {
+        if (propBinding) {
             m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
 
             binding->RemovePropertyRow(property);
