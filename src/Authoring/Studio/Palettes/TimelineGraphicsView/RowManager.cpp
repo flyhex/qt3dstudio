@@ -321,7 +321,7 @@ void RowManager::deleteRowRecursive(RowTree *row)
    if (row == m_selectedRow)
        m_selectedRow = nullptr;
 
-   m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline());
+   m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline(), false);
 
    if (row->getBinding())
         static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding())->setRowTree(nullptr);
