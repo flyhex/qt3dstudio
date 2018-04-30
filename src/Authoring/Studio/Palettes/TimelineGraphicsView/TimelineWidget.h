@@ -58,6 +58,7 @@ class TimelineWidget : public QWidget,
 
 public:
     explicit TimelineWidget(QWidget *parent = nullptr);
+    ~TimelineWidget();
 
     TimelineToolbar *toolbar() const;
     QGraphicsView *viewTimelineContent() const;

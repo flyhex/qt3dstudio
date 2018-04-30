@@ -303,6 +303,11 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
 }
 
+TimelineWidget::~TimelineWidget()
+{
+    m_graphicsScene->keyframeManager()->deselectAllKeyframes();
+}
+
 void TimelineWidget::OnNewPresentation()
 {
     // Register callbacks
