@@ -32,17 +32,15 @@
 \page studio-keyboard-shortcuts.html
 \ingroup qt3dstudio-studio
 
-\section1 File Management
+\section1 Menus
+
+\section2 File Menu
 
 \table
   \header
     \li Function
     \li Windows/Linux
     \li macOS
-  \row
-    \li Preview
-    \li \c{F5}
-    \li \c{F5}
   \row
     \li New
     \li \c{Ctrl + N}
@@ -56,16 +54,20 @@
     \li \c{Ctrl + S}
     \li \c{Cmd + S}
   \row
-    \li Save As...
+    \li Save as...
     \li \c{Ctrl + Shift + S}
     \li \c{Cmd + Shift + S}
   \row
-    \li Save a Copy
+    \li Save a copy
     \li \c{Ctrl + Alt + S}
     \li \c{Cmd + Option + S}
+  \row
+    \li Exit
+    \li \c{Ctrl + Q}
+    \li \c{Cmd + Q}
 \endtable
 
-\section1 Edit Menu
+\section2 Edit Menu
 
 \table
   \header
@@ -93,20 +95,28 @@
     \li \c{Ctrl + V}
     \li \c{Cmd + V}
   \row
-    \li Paste to Master Slide
+    \li Paste to master slide
     \li \c{Ctrl + Alt + V}
     \li \c{Cmd + Option + V}
   \row
-    \li Duplicate Object
+    \li Duplicate
     \li \c{Ctrl + D}
     \li \c{Cmd + D}
   \row
-    \li Presentation Settings
-    \li \c{Ctrl + P}
-    \li \c{Cmd + P}
+    \li Delete
+    \li Del
+    \li Del
+  \row
+    \li Studio preferences
+    \li \c{Shift + U}
+    \li \c{Shift + U}
+  \row
+    \li Presentation settings
+    \li \c{Ctrl + Shift + U}
+    \li \c{Cmd + Shift + U}
 \endtable
 
-\section1 View Menu
+\section2 View Menu
 
 \table
   \header
@@ -114,40 +124,64 @@
     \li Windows/Linux
     \li macOS
   \row
-    \li Show Action Palette
+    \li Fit selected
+    \li \c{F}
+    \li \c{F}
+  \row
+    \li Hide/unhide selected
+    \li \c{H}
+    \li \c{H}
+  \row
+    \li Show action palette
     \li \c{Ctrl + Shift + A}
     \li \c{Cmd + Shift + A}
   \row
-    \li Show Basic Objects Palette
+    \li Show basic objects palette
     \li \c{Ctrl + Shift + B}
     \li \c{Cmd+ Shift + B}
   \row
-    \li Show Inspector Palette
+    \li Show inspector palette
     \li \c{Ctrl + Shift + I}
     \li \c{Cmd + Shift + I}
   \row
-    \li Show Project Palette
+    \li Show project palette
     \li \c{Ctrl + Shift + P}
     \li \c{Cmd + Shift + P}
   \row
-    \li Show Slide Palette
+    \li Show slide palette
     \li \c{Ctrl + Shift + D}
     \li \c{Cmd + Shift + D}
   \row
-    \li Show Timeline Palette
+    \li Show timeline palette
     \li \c{Ctrl + Shift + T}
     \li \c{Cmd + Shift + T}
   \row
-    \li Show/Hide Bounding Boxes
+    \li Show/hide bounding boxes
     \li \c{Ctrl + B}
     \li \c{Cmd + B}
   \row
-    \li Show/Hide Pivot Point
+    \li Show/hide pivot point
     \li \c{Ctrl + Alt + P}
     \li \c{Cmd + Option + P}
+  \row
+    \li Wireframe
+    \li \c{M}
+    \li \c{M}
+  \row
+    \li Rulers & guides
+    \li \c{Ctrl + R}
+    \li \c{Cmd + R}
+  \row
+    \li Lock guides
+    \li \c{Shift + Alt + R}
+    \li \c{Shift + Option + R}
+  \row
+    \li Clear guides
+    \li \c{Ctrl + Alt + R}
+    \li \c{Cmd + Option + R}
 \endtable
 
-\section1 Animation Control
+\section2 Timeline Menu
 
 \table
   \header
@@ -155,16 +189,20 @@
     \li Windows/Linux
     \li macOS
   \row
-    \li Set Changed Keyframes
-    \li \c{F6}
-    \li \c{F6}
+    \li Set changed keyframes
+    \li \c{Ctrl + Shift + K}
+    \li \c{Cmd + Shift + K}
   \row
-    \li Toggle Autoset Keyframes
+    \li Set interpolation
+    \li \c{I}
+    \li \c{I}
+  \row
+    \li Autoset keyframes
     \li \c{K}
     \li \c{K}
 \endtable
 
-\section1 Scene View
+\section2 Help Menu
 
 \table
   \header
@@ -172,29 +210,93 @@
     \li Windows/Linux
     \li macOS
   \row
-    \li Group Select Mode
-    \li \c{A}
-    \li \c{A}
+    \li Reference manual
+    \li \c{F1}
+    \li \c{F1}
+\endtable
+
+\section1 Toolbar
+
+\section2 Scene View
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
   \row
-    \li Item Select Mode
-    \li \c{V}
-    \li \c{V}
+    \li Toggle group/item select mode
+    \li \c{Q}
+    \li \c{Q}
   \row
-    \li Position Mode
+    \li Position mode
     \li \c{W}
     \li \c{W}
   \row
-    \li Scale Mode
-    \li \c{E}
-    \li \c{E}
+    \li Scale mode
+    \li \c{R}
+    \li \c{R}
   \row
-    \li Rotate Mode
-    \li \c{R}
-    \li \c{R}
+    \li Rotate mode
+    \li \c{E}
+    \li \c{E}
   \row
     \li Constrain drag to axis
-    \li \c{Shift} + Mouse Drag
-    \li \c{Shift} + Mouse Drag
+    \li \c{Shift} + mouse drag
+    \li \c{Shift} + mouse drag
+  \row
+    \li Global/local manipulator
+    \li \c{Y}
+    \li \c{Y}
+  \row
+    \li Autoset keyframes
+    \li \c{K}
+    \li \c{K}
+\endtable
+
+\section2 Camera Views
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Perspective
+    \li \c{Ctrl + 2}
+    \li \c{Cmd + 2}
+  \row
+    \li Ortographic
+    \li \c{Ctrl + 3}
+    \li \c{Cmd + 3}
+  \row
+    \li Top
+    \li \c{Ctrl + 4}
+    \li \c{Cmd + 4}
+  \row
+    \li Bottom
+    \li \c{Ctrl + 5}
+    \li \c{Cmd + 5}
+  \row
+    \li Left
+    \li \c{Ctrl + 6}
+    \li \c{Cmd + 6}
+  \row
+    \li Right
+    \li \c{Ctrl + 7}
+    \li \c{Cmd + 7}
+  \row
+    \li Front
+    \li \c{Ctrl + 8}
+    \li \c{Cmd + 8}
+  \row
+    \li Back
+    \li \c{Ctrl + 9}
+    \li \c{Cmd + 9}
+  \row
+    \li Scene camera
+    \li \c{Ctrl + 1}
+    \li \c{Cmd + 1}
 \endtable
 
 \section2 Scene View Navigation
@@ -208,28 +310,24 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Windows/Linux
     \li macOS
   \row
-    \li Fit Selected
+    \li Fit selected
     \li \c{F}
     \li \c{F}
   \row
     \li Pan
-    \li \c{Alt} + Middle Mouse Drag
-    \li \c{Option} + Middle Mouse Drag
+    \li \c{Alt} + middle mouse drag
+    \li \c{Option} + middle mouse drag
   \row
     \li Zoom
-    \li \c{Alt} + Right Mouse Drag
-    \li \c{Option} + Right Mouse Drag
+    \li \c{Alt} + right mouse drag
+    \li \c{Option} + right mouse drag
   \row
     \li Orbit
-    \li \c{Alt} + Left Mouse Drag
-    \li \c{Option} + Left Mouse Drag
-  \row
-    \li Toggle Headlight
-    \li \c{F3}
-    \li \c{F3}
+    \li \c{Alt} + left mouse drag
+    \li \c{Option} + left mouse drag
 \endtable
 
-\section1 Timeline
+\section2 View
 
 \table
   \header
@@ -237,44 +335,35 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Windows/Linux
     \li macOS
   \row
-    \li Quick Play
-    \li Hold down \c{spacebar}
-    \li Hold down \c{spacebar}
+    \li Shading
+    \li \c{L}
+    \li \c{L}
   \row
-    \li Toggle Play/Pause
-    \li \c{Enter}
-    \li \c{Enter}
-  \row
-    \li Set Time Bar Start Time
-    \li \c{[}
-    \li \c{[}
-  \row
-    \li Set Time Bar End Time
-    \li \c{]}
-    \li \c{]}
-  \row
-    \li Snap while Dragging
-    \li \c{Shift} + Mouse Drag
-    \li \c{Shift} + Mouse Drag
-  \row
-    \li Move Playhead to next minor tick mark
-    \li \c{.}
-    \li \c{.}
-  \row
-    \li Move Playhead to previous minor tick mark
-    \li \c{,}
-    \li \c{,}
-  \row
-    \li Move Playhead to next medium tick mark
-    \li \c{Shift + .}
-    \li \c{Shift + .}
-  \row
-    \li Move Playhead to previous medium tick mark
-    \li \c{Shift + ,}
-    \li \c{Shift + ,}
+    \li Wireframes
+    \li \c{M}
+    \li \c{M}
 \endtable
 
-\section1 Inspector Palette
+\section2 Preview
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Preview
+    \li \c{F5}
+    \li \c{F5}
+  \row
+    \li Preview on remote device
+    \li \c{F6}
+    \li \c{F6}
+\endtable
+
+\section1 Palettes
+
+\section2 Inspector
 
 \table
   \header
@@ -293,6 +382,186 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Increment value by 10
     \li \c{Shift + Up/Down Arrow}
     \li \c{Shift + Up/Down Arrow}
+\endtable
+
+\section2 Scenegraph
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Duplicate
+    \li \c{Ctrl + D}
+    \li \c{Cmd + D}
+  \row
+    \li Delete
+    \li \c{Del}
+    \li \c{Del}
+  \row
+    \li Copy
+    \li \c{Ctrl + C}
+    \li \c{Cmd + C}
+  \row
+    \li Paste
+    \li \c{Ctrl + V}
+    \li \c{Cmd + V}
+  \row
+    \li Cut
+    \li \c{Ctrl + X}
+    \li \c{Cmd + X}
+  \row
+    \li Make component
+    \li \c{Shift + G}
+    \li \c{Shift + G}
+  \row
+    \li Edit component
+    \li \c{Ctrl + Shift + G}
+    \li \c{Cmd + Shift + G}
+  \row
+    \li Copy object path
+    \li \c{Ctrl + Shift + C}
+    \li \c{Cmd + Shift + C}
+  \row
+    \li Shy
+    \li \c{Shift + H}
+    \li \c{Shift + H}
+  \row
+    \li Hide
+    \li \c{H}
+    \li \c{H}
+  \row
+    \li Lock
+    \li \c{Ctrl + H}
+    \li \c{Cmd + H}
+  \row
+    \li Add new layer
+    \li \c{Ctrl + L}
+    \li \c{Cmd + L}
+  \row
+    \li Delete
+    \li \c{Del}
+    \li \c{Del}
+\endtable
+
+\section2 Timeline
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Insert keyframe
+    \li \c{S}
+    \li \c{S}
+  \row
+    \li Cut selected keyframe
+    \li \c{Ctrl + X}
+    \li \c{Cmd + X}
+  \row
+    \li Copy selected keyframe
+    \li \c{Ctrl + C}
+    \li \c{Cmd + C}
+  \row
+    \li Paste keyframe
+    \li \c{Ctrl + X}
+    \li \c{Cmd + X}
+  \row
+    \li Delete selected keyframe
+    \li \c{Del}
+    \li \c{Del}
+  \row
+    \li Delete all channel keyframes
+    \li \c{Ctrl + Alt + K}
+    \li \c{Cmd + Option + K}
+  \row
+    \li Set changed keyframes
+    \li \c{Ctrl + Shift + K}
+    \li \c{Cmd + Shift + K}
+  \row
+    \li Set timebar time
+    \li \c{Shift + T}
+    \li \c{Shift + T}
+  \row
+    \li Go to time
+    \li \c{Ctrl + Alt + T}
+    \li \c{Cmd + Option + T}
+  \row
+    \li Set interpolation
+    \li \c{I}
+    \li \c{I}
+  \row
+    \li Quick play
+    \li Hold down \c{spacebar}
+    \li Hold down \c{spacebar}
+  \row
+    \li Toggle play/pause
+    \li \c{Enter}
+    \li \c{Enter}
+  \row
+    \li Set time bar start time to playhead position
+    \li \c{[}
+    \li \c{[}
+  \row
+    \li Set time bar end time to playhead position
+    \li \c{]}
+    \li \c{]}
+  \row
+    \li Snap while dragging
+    \li \c{Shift} + Mouse Drag
+    \li \c{Shift} + Mouse Drag
+  \row
+    \li Move playhead to next minor tick mark
+    \li \c{.}
+    \li \c{.}
+  \row
+    \li Move playhead to previous minor tick mark
+    \li \c{,}
+    \li \c{,}
+  \row
+    \li Move playhead to next medium tick mark
+    \li \c{Shift + .}
+    \li \c{Shift + .}
+  \row
+    \li Move playhead to previous medium tick mark
+    \li \c{Shift + ,}
+    \li \c{Shift + ,}
+\endtable
+
+\section2 Slides
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Delete slide
+    \li \c{Del}
+    \li \c{Del}
+  \row
+    \li Duplicate slide
+    \li \c{Ctrl + D}
+    \li \c{Ctrl + D}
+\endtable
+
+\section2 Action
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Delete action
+    \li \c{Del}
+    \li \c{Del}
+  \row
+    \li New action
+    \li \c{Shift + A}
+    \li \c{Shift + A}
 \endtable
 
 */
