@@ -560,7 +560,7 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
             studioSystem->GetAnimationCore()->GetAnimationInfo(inAnimation);
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(theAnimationInfo.m_Instance,
                                                                   m_binding);
-        if (binding != nullptr) {
+        if (binding) {
             binding->RefreshPropertyKeyframe(theAnimationInfo.m_Property, inKeyframe,
                                              inTransaction);
 
@@ -575,10 +575,10 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 {
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
-    if (binding != nullptr) {
+    if (binding) {
         binding->OnPropertyChanged(inProperty);
 
-        if (binding->getRowTree() != nullptr)
+        if (binding->getRowTree())
             binding->getRowTree()->rowTimeline()->updateDurationFromBinding();
     }
 }
@@ -631,17 +631,18 @@ void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,
                                                 Qt3DSDMTimelineItemBinding *binding) const
 {
-    if (binding->GetInstance().GetHandleValue() == handle)
-        return binding;
+    if (binding) {
+        if (binding->GetInstance().GetHandleValue() == handle)
+            return binding;
 
-    for (int i = 0; i < binding->GetChildrenCount(); i++) {
-        Qt3DSDMTimelineItemBinding *b = getBindingForHandle(handle,
-                            static_cast<Qt3DSDMTimelineItemBinding *>(binding->GetChild(i)));
+        for (int i = 0; i < binding->GetChildrenCount(); i++) {
+            Qt3DSDMTimelineItemBinding *b = getBindingForHandle(handle,
+                                static_cast<Qt3DSDMTimelineItemBinding *>(binding->GetChild(i)));
 
-        if (b != nullptr)
-            return b;
+            if (b)
+                return b;
+        }
     }
-
     return nullptr;
 }
 

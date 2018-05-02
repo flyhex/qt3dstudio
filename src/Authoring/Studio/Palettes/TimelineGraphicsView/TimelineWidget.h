@@ -118,7 +118,7 @@ private:
     CTimelineTranslationManager *m_translationManager = nullptr;
     TimelineObjectModel *m_objectListModel = nullptr;
     FlatObjectListModel *m_model = nullptr;
-    Qt3DSDMTimelineItemBinding *m_binding;
+    Qt3DSDMTimelineItemBinding *m_binding = nullptr;
     bool m_splitterPressed = false;
 
     // data model connection
