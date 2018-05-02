@@ -409,6 +409,9 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         else
                             m_keyframeManager->selectConnectedKeyframes(keyframe);
 
+                        m_pressPosInKeyframe = (m_pressPos.x() - m_ruler->x())
+                                - (TimelineConstants::RULER_EDGE_OFFSET
+                                   + m_ruler->timeToDistance(keyframe->time));
                         m_keyframePressed = true;
                     }
                 } else {
@@ -450,7 +453,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if (m_rulerPressed) {
         double distance = event->scenePos().x() - m_ruler->x();
         if (shift)
-            snap(distance);
+            snap(distance, false);
         distance -= TimelineConstants::RULER_EDGE_OFFSET;
         long time = m_ruler->distanceToTime(distance) * 1000;
         if (time < 0)
@@ -588,12 +591,13 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_rowMover->resetInsertionParent();
             }
         } else if (m_keyframePressed) { // moving selected keyframes
-            double newX = event->scenePos().x() - m_ruler->x();
+            double newX = event->scenePos().x() - m_ruler->x() - m_pressPosInKeyframe;
+
             if (newX < TimelineConstants::RULER_EDGE_OFFSET)
                 newX = TimelineConstants::RULER_EDGE_OFFSET;
             if (shift)
                 snap(newX);
-            newX += m_ruler->x();
+            newX += m_ruler->x() + m_pressPosInKeyframe;
             double dx = newX - m_pressPos.x();
             m_keyframeManager->moveSelectedKeyframes(dx);
 
@@ -631,20 +635,27 @@ void TimelineGraphicsScene::updateSnapSteps() {
     }
 }
 
-void TimelineGraphicsScene::snap(double &value)
+void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 {
+    // snap to play head
+    if (snapToPlayHead) {
+        double playHeadX = m_playHead->x() - m_ruler->x();
+        if (abs(value - playHeadX) < CStudioPreferences::GetSnapRange()) {
+            value = playHeadX;
+            return;
+        }
+    }
+
     // duration edges snap
-    bool snappedToDuration = false;
     for (double v : qAsConst(m_snapSteps)) {
         if (abs(value - v) < CStudioPreferences::GetSnapRange()) {
             value = v;
-            snappedToDuration = true;
-            break;
+            return;
         }
     }
 
     // time steps snap
-    if (!snappedToDuration && CStudioPreferences::IsTimelineSnappingGridActive()) {
+    if (CStudioPreferences::IsTimelineSnappingGridActive()) {
         double snapStep = TimelineConstants::RULER_SEC_W * m_ruler->timelineScale();
         if (CStudioPreferences::GetTimelineSnappingGridResolution() == SNAPGRID_HALFSECONDS)
             snapStep *= .5;

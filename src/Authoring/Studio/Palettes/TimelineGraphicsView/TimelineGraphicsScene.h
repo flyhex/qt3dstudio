@@ -93,7 +93,7 @@ protected:
 private:
     void commitMoveRows();
     void updateHoverStatus(const QPointF &scenePos);
-    void snap(double &value);
+    void snap(double &value, bool snapToPlayHead = true);
     int nextRowDepth(int index);
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
@@ -134,6 +134,7 @@ private:
     bool m_dragging = false;
     TimelineControlType m_clickedTimelineControlType = TimelineControlType::None;
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
+    double m_pressPosInKeyframe;
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
 };
 
