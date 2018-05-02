@@ -109,6 +109,20 @@ void RowTimelineContextMenu::initialize()
         m_keyframeManager->deselectAllKeyframes();
     }
 
+    if (m_rowTree->rowTimeline()->keyframes().size()) {
+        m_hasDynamicKeyframes = m_keyframeManager->hasDynamicKeyframes(m_rowTree);
+        QString label;
+        if (m_hasDynamicKeyframes)
+            label = tr("Make Animations Static");
+        else
+            label = tr("Make Animations Dynamic");
+
+        m_dynamicKeyframesAction = new QAction(label, this);
+        connect(m_dynamicKeyframesAction, &QAction::triggered, this,
+                &RowTimelineContextMenu::toggleDynamicKeyframes);
+        addAction(m_dynamicKeyframesAction);
+    }
+
     addSeparator();
 
     if (m_keyframe) {
@@ -120,9 +134,6 @@ void RowTimelineContextMenu::initialize()
         addAction(m_setInterpolationAction);
 
         m_setKeyframeTimeAction = new QAction(tr("Set Keyframe Time..."), this);
-        // TODO: Shortcut TBD
-        //m_setKeyframeTimeAction->setShortcut(Qt::Key_Foobar);
-        m_setKeyframeTimeAction->setShortcutVisibleInContextMenu(true);
         connect(m_setKeyframeTimeAction, &QAction::triggered, this,
                 &RowTimelineContextMenu::setKeyframeTime);
         addAction(m_setKeyframeTimeAction);
@@ -228,4 +239,31 @@ void RowTimelineContextMenu::setTimeBarTime()
         m_timelineControl->setRowTimeline(m_rowTree->rowTimeline());
         m_timelineControl->showDurationEditDialog();
     }
+}
+
+void RowTimelineContextMenu::toggleDynamicKeyframes()
+{
+    // Store old selection, as we must change the selection for making keyframes dynamic
+    QList<Keyframe *> selectedKeyframes = m_keyframeManager->selectedKeyframes();
+
+    m_keyframeManager->deselectAllKeyframes();
+    QList<Keyframe *> keyframes;
+    // If property row is clicked, only make that property's first keyframe dynamic.
+    // Otherwise make all properties' first keyframes dynamic
+    // Note that it doesn't matter which keyframe we make dynamic, as the dynamic keyframe will
+    // automatically change to the first one in time order.
+    if (m_rowTree->isProperty()) {
+        keyframes.append(m_rowTree->rowTimeline()->keyframes().first());
+    } else {
+        const auto childProps = m_rowTree->childProps();
+        for (const auto prop : childProps)
+            keyframes.append(prop->rowTimeline()->keyframes().first());
+    }
+
+    m_keyframeManager->selectKeyframes(keyframes);
+    m_keyframeManager->SetKeyframesDynamic(!m_hasDynamicKeyframes);
+
+    // Restore selection
+    m_keyframeManager->deselectAllKeyframes();
+    m_keyframeManager->selectKeyframes(selectedKeyframes);
 }

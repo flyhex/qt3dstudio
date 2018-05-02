@@ -64,6 +64,7 @@ private:
     void setKeyframeTime();
     void changeTimeBarColor();
     void setTimeBarTime();
+    void toggleDynamicKeyframes();
 
     RowTree *m_rowTree = nullptr;
     Keyframe *m_keyframe = nullptr;
@@ -79,7 +80,9 @@ private:
     QAction *m_setKeyframeTimeAction = nullptr;
     QAction *m_setTimeBarColorAction = nullptr;
     QAction *m_setTimeBarTimeAction = nullptr;
+    QAction *m_dynamicKeyframesAction = nullptr;
     TimelineControl *m_timelineControl = nullptr;
+    bool m_hasDynamicKeyframes = false;
 };
 
 #endif // ROWTIMELINECONTEXTMENU_H

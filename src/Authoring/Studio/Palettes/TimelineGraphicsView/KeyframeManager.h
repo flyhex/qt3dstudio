@@ -35,6 +35,7 @@
 #include "Qt3DSDMAnimation.h"
 
 class RowTimeline;
+class RowTree;
 class TimelineGraphicsScene;
 class CPasteKeyframeCommandHelper;
 struct Keyframe;
@@ -54,6 +55,7 @@ public:
     void selectConnectedKeyframes(Keyframe *keyframe);
     void selectKeyframesInRect(const QRectF &rect);
     void selectKeyframes(const QList<Keyframe *> &keyframes);
+    QList<Keyframe *> selectedKeyframes() const;
     void deselectKeyframe(Keyframe *keyframe);
     void deselectConnectedKeyframes(Keyframe *keyframe);
     void deselectAllKeyframes();
@@ -66,6 +68,7 @@ public:
     bool oneMasterRowSelected() const;
     bool hasSelectedKeyframes() const;
     bool hasCopiedKeyframes() const;
+    bool hasDynamicKeyframes(RowTree *row) const;
 
     // IKeyframesManager interface
     // Mahmoud_TODO: rewrite a better interface for the new timeline

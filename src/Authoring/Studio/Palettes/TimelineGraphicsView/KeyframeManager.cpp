@@ -43,6 +43,7 @@
 #include "StudioClipboard.h"
 #include "CmdDataModelRemoveKeyframe.h"
 #include "CmdDataModelInsertKeyframe.h"
+#include "CmdDataModelChangeKeyframe.h"
 #include "Qt3DSDMAnimation.h"
 #include "ClientDataModelBridge.h"
 #include "Bindings/ITimelineItemBinding.h"
@@ -155,6 +156,11 @@ void KeyframeManager::selectKeyframes(const QList<Keyframe *> &keyframes)
         row->putSelectedKeyframesOnTop();
         row->updateKeyframes();
     }
+}
+
+QList<Keyframe *> KeyframeManager::selectedKeyframes() const
+{
+    return m_selectedKeyframes;
 }
 
 // update bindings after selected keyframes are moved
@@ -424,6 +430,16 @@ bool KeyframeManager::hasCopiedKeyframes() const
            m_pasteKeyframeCommandHelper->HasCopiedKeyframes();
 }
 
+bool KeyframeManager::hasDynamicKeyframes(RowTree *row) const
+{
+    const QList<Keyframe *> keyframes = row->rowTimeline()->keyframes();
+    for (const auto keyframe : keyframes) {
+        if (keyframe->binding->IsDynamic())
+            return true;
+    }
+    return false;
+}
+
 // IKeyframesManager interface to connect Doc and KeyframeManager
 // Mahmoud_TODO: rewrite a better interface for the new timeline
 // ITimelineKeyframesManager interface
@@ -436,7 +452,30 @@ void KeyframeManager::SetKeyframeTime(long inTime)
 
 void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
 {
-    // Mahmoud_TODO: implement if needed
+    if (!hasSelectedKeyframes())
+        return;
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    IAnimationCore *animationCore = doc->GetStudioSystem()->GetAnimationCore();
+
+    for (int i = 0; i < m_selectedKeyframes.size(); ++i) {
+        Qt3DSDMTimelineKeyframe *timelineKeyframe = m_selectedKeyframes[i]->binding;
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+        CCmdDataModelChangeDynamicKeyframe *cmd = nullptr;
+        timelineKeyframe->GetKeyframeHandles(keyframeHandles);
+
+        for (size_t keyIndex = 0; keyIndex < keyframeHandles.size(); ++keyIndex) {
+            qt3dsdm::Qt3DSDMAnimationHandle animation(
+                animationCore->GetAnimationForKeyframe(keyframeHandles.at(keyIndex)));
+            if (!cmd)
+                cmd = new CCmdDataModelChangeDynamicKeyframe(doc, animation, inDynamic);
+            else
+                cmd->AddHandle(animation);
+        }
+
+        if (cmd)
+            g_StudioApp.GetCore()->ExecuteCommand(cmd);
+    }
 }
 
 long KeyframeManager::OffsetSelectedKeyframes(long inOffset)
