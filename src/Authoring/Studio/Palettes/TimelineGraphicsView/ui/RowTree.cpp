@@ -465,12 +465,13 @@ void RowTree::addChildAt(RowTree *child, int index)
     int updateIndexInLayout = child->m_indexInLayout;
     child->m_indexInLayout = m_indexInLayout + index + 1;
 
-    if (!child->isProperty())
+    if (!child->isProperty()) {
         child->m_indexInLayout += m_childProps.count();
 
-    if (!m_childRows.empty()) {
-        for (int i = 0; i < index; ++i)
-            child->m_indexInLayout += m_childRows.at(i)->getCountDecendentsRecursive();
+        if (!m_childRows.empty()) {
+            for (int i = 0; i < index; ++i)
+                child->m_indexInLayout += m_childRows.at(i)->getCountDecendentsRecursive();
+        }
     }
 
     if (!childRows.contains(child))
