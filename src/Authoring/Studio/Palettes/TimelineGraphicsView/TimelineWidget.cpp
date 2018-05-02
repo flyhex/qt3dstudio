@@ -147,8 +147,7 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 
     m_viewTreeContent->setScene(m_graphicsScene);
     m_viewTreeContent->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    m_viewTreeContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    m_viewTreeContent->horizontalScrollBar()->hide();
+    m_viewTreeContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_viewTreeContent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_viewTreeContent->setFixedWidth(TimelineConstants::TREE_DEFAULT_W);
 
@@ -203,8 +202,12 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     connect(m_graphicsScene->widgetRoot(), &QGraphicsWidget::geometryChanged, this, [this]() {
         const QRectF rect = m_graphicsScene->widgetRoot()->rect();
 
+        double treeH = rect.height();
+        if (m_viewTimelineContent->horizontalScrollBar()->isVisible())
+            treeH += m_viewTimelineContent->horizontalScrollBar()->height() + 10;
+
         m_viewTreeContent->setSceneRect(QRectF(0, TimelineConstants::ROW_H,
-                                               TimelineConstants::TREE_MAX_W, rect.height()));
+                                               TimelineConstants::TREE_MAX_W, treeH));
 
         m_viewTimelineHeader->setSceneRect(QRectF(TimelineConstants::TREE_BOUND_W, 0,
                                                   rect.width() - TimelineConstants::TREE_BOUND_W,
