@@ -198,15 +198,16 @@ CStudioApp g_StudioApp;
 
 using namespace Q3DStudio;
 
-#ifndef WIN32
 namespace qt3ds
 {
-void NVAssert(const char *exp, const char *file, int line, bool *igonore)
+void Qt3DSAssert(const char *exp, const char *file, int line, bool *ignore)
 {
-    qFatal("NVAssertion thrown %s(%d): %s", file, line, exp);
+    Q_UNUSED(ignore)
+    g_StudioApp.GetDialogs()->DestroyProgressScreen();
+    g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(exp);
+    qFatal("Assertion thrown %s(%d): %s", file, line, exp);
 }
 }
-#endif
 
 //=============================================================================
 /**
@@ -571,7 +572,6 @@ bool CStudioApp::showStartupDialog()
             Qt3DSFile theFile = theStartupDlg.GetRecentDoc();
             if (theFile.GetPath() != "") {
                 OnLoadDocument(theFile);
-                // throw SlideNotFound( L"");
                 theReturn = true;
             } else {
                 // User Cancels the dialog. Show startup dialog again.
@@ -580,7 +580,7 @@ bool CStudioApp::showStartupDialog()
         } break;
 
         default:
-            ASSERT(false); // Should not reach this block.
+            QT3DS_ASSERT(false); // Should not reach this block.
             theReturn = false;
             break;
         }
@@ -597,10 +597,10 @@ bool CStudioApp::showStartupDialog()
 bool CStudioApp::blankRunApplication()
 {
     initCore();
-
-    if (showStartupDialog())
-        return runApplication();
-    return false;
+    // Event loop must be running before we launch startup dialog, or possible error message boxes
+    // will cause a silent crash.
+    QTimer::singleShot(0, this, &CStudioApp::showStartupDialog);
+    return runApplication();
 }
 
 //=============================================================================

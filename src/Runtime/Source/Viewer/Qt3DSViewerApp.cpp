@@ -47,12 +47,11 @@
 #include <mach-o/dyld.h>
 #endif
 
-#if defined(_LINUX) || defined(_MACOSX) || defined(_LINUXPLATFORM)
-
 namespace qt3ds {
-void NVAssert(const char *exp, const char *file, int line, bool *igonore)
+void Qt3DSAssert(const char *exp, const char *file, int line, bool *ignore)
 {
-    qCritical() << "NVAssertion thrown: " << file << " " << line << " " << exp;
+    Q_UNUSED(ignore)
+    qCritical() << "Assertion thrown: " << file << " " << line << " " << exp;
 }
 }
 
@@ -62,7 +61,6 @@ void EASTL_DEBUG_BREAK()
     qFatal("EASTL_DEBUG_BREAK: Assertion blown");
 }
 
-#endif
 #endif
 
 #ifdef _WIN32

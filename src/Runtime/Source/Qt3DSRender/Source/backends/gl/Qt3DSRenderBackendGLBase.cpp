@@ -538,13 +538,13 @@ namespace render {
     void NVRenderBackendGLBase::SetBlendEquation(const NVRenderBlendEquationArgument &)
     {
         // needs GL4 / GLES 3.1
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::SetBlendBarrier()
     {
         // needs GL4 / GLES 3.1
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GetScissorRect(NVRenderRect *pRect)
@@ -643,7 +643,7 @@ namespace render {
                                            size_t, size_t, NVRenderBufferAccessFlags)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return NULL;
     }
@@ -651,7 +651,7 @@ namespace render {
     bool NVRenderBackendGLBase::UnmapBuffer(NVRenderBackendBufferObject, NVRenderBufferBindFlags)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return true;
     }
@@ -659,13 +659,13 @@ namespace render {
     void NVRenderBackendGLBase::SetMemoryBarrier(NVRenderBufferBarrierFlags)
     {
         // needs GL 4 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     NVRenderBackend::NVRenderBackendQueryObject NVRenderBackendGLBase::CreateQuery()
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return NVRenderBackendQueryObject(0);
     }
@@ -673,46 +673,46 @@ namespace render {
     void NVRenderBackendGLBase::ReleaseQuery(NVRenderBackendQueryObject)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::BeginQuery(NVRenderBackendQueryObject, NVRenderQueryType::Enum)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::EndQuery(NVRenderBackendQueryObject, NVRenderQueryType::Enum)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GetQueryResult(NVRenderBackendQueryObject,
                                                NVRenderQueryResultType::Enum, QT3DSU32 *)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GetQueryResult(NVRenderBackendQueryObject,
                                                NVRenderQueryResultType::Enum, QT3DSU64 *)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::SetQueryTimer(NVRenderBackendQueryObject)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     NVRenderBackend::NVRenderBackendSyncObject
         NVRenderBackendGLBase::CreateSync(NVRenderSyncType::Enum, NVRenderSyncFlags)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return NVRenderBackendSyncObject(0);
     }
@@ -720,14 +720,14 @@ namespace render {
     void NVRenderBackendGLBase::ReleaseSync(NVRenderBackendSyncObject)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::WaitSync(NVRenderBackendSyncObject, NVRenderCommandFlushFlags,
                                          QT3DSU64)
     {
         // needs GL 3 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     NVRenderBackend::NVRenderBackendRenderTargetObject NVRenderBackendGLBase::CreateRenderTarget()
@@ -782,7 +782,7 @@ namespace render {
                                                    NVRenderBackendTextureObject, QT3DSI32, QT3DSI32)
     {
         // Needs GL3 or GLES 3
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::SetRenderTarget(NVRenderBackendRenderTargetObject rto)
@@ -891,7 +891,7 @@ namespace render {
                                                  NVRenderTextureFormats::Enum)
     {
         // needs GL 4 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::ReleaseTexture(NVRenderBackendTextureObject to)
@@ -993,7 +993,7 @@ namespace render {
                                                        NVRenderTextureFormats::Enum, size_t, size_t)
     {
         // you need GL 4.2 or GLES 3.1
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::SetTextureSubData2D(NVRenderBackendTextureObject to,
@@ -1082,7 +1082,7 @@ namespace render {
                                                  const void *)
     {
         // needs GL3 or GLES3
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GenerateMipMaps(NVRenderBackendTextureObject to,
@@ -1341,7 +1341,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(errorMessage);
         NVRENDER_BACKEND_UNUSED(binary);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return (NVRenderBackend::NVRenderBackendTessControlShaderObject)0;
     }
@@ -1355,7 +1355,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(errorMessage);
         NVRENDER_BACKEND_UNUSED(binary);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return (NVRenderBackend::NVRenderBackendTessEvaluationShaderObject)0;
     }
@@ -1369,7 +1369,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(errorMessage);
         NVRENDER_BACKEND_UNUSED(binary);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return (NVRenderBackend::NVRenderBackendGeometryShaderObject)0;
     }
@@ -1383,7 +1383,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(errorMessage);
         NVRENDER_BACKEND_UNUSED(binary);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return (NVRenderBackend::NVRenderBackendComputeShaderObject)0;
     }
@@ -1694,14 +1694,14 @@ namespace render {
     NVRenderBackend::NVRenderBackendProgramPipeline NVRenderBackendGLBase::CreateProgramPipeline()
     {
         // needs GL 4 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
         return NVRenderBackend::NVRenderBackendProgramPipeline(0);
     }
 
     void NVRenderBackendGLBase::ReleaseProgramPipeline(NVRenderBackendProgramPipeline)
     {
         // needs GL 4 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::SetActiveProgramPipeline(NVRenderBackendProgramPipeline)
@@ -1716,14 +1716,14 @@ namespace render {
                                                  NVRenderBackendShaderProgramObject)
     {
         // needs GL 4 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::DispatchCompute(NVRenderBackendShaderProgramObject, QT3DSU32, QT3DSU32,
                                                 QT3DSU32)
     {
         // needs GL 4 context
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     QT3DSI32 NVRenderBackendGLBase::GetConstantCount(NVRenderBackendShaderProgramObject po)
@@ -1787,7 +1787,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(length);
         NVRENDER_BACKEND_UNUSED(nameBuf);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return -1;
     }
@@ -1800,7 +1800,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(id);
         NVRENDER_BACKEND_UNUSED(indices);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GetConstantBufferParamInfoByIndices(
@@ -1815,7 +1815,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(size);
         NVRENDER_BACKEND_UNUSED(offset);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::ProgramSetConstantBlock(NVRenderBackendShaderProgramObject po,
@@ -1826,7 +1826,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(blockIndex);
         NVRENDER_BACKEND_UNUSED(binding);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::ProgramSetConstantBuffer(QT3DSU32 index,
@@ -1836,7 +1836,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(index);
         NVRENDER_BACKEND_UNUSED(bo);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     QT3DSI32 NVRenderBackendGLBase::GetStorageBufferCount(NVRenderBackendShaderProgramObject po)
@@ -1861,7 +1861,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(length);
         NVRENDER_BACKEND_UNUSED(nameBuf);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return -1;
     }
@@ -1896,7 +1896,7 @@ namespace render {
         NVRENDER_BACKEND_UNUSED(length);
         NVRENDER_BACKEND_UNUSED(nameBuf);
 
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return -1;
     }
@@ -2019,7 +2019,7 @@ namespace render {
     NVRenderBackend::NVRenderBackendPathObject NVRenderBackendGLBase::CreatePathNVObject(size_t)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
 
         return NVRenderBackend::NVRenderBackendPathObject(0);
     }
@@ -2027,7 +2027,7 @@ namespace render {
     void NVRenderBackendGLBase::ReleasePathNVObject(NVRenderBackendPathObject, size_t)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::LoadPathGlyphs(NVRenderBackendPathObject,
@@ -2038,7 +2038,7 @@ namespace render {
                                                NVRenderBackendPathObject, QT3DSF32)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::LoadPathGlyphRange(NVRenderBackendPathObject,
@@ -2048,7 +2048,7 @@ namespace render {
                                                    NVRenderBackendPathObject, QT3DSF32)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     NVRenderPathReturnValues::Enum NVRenderBackendGLBase::LoadPathGlyphsIndexed(
@@ -2056,7 +2056,8 @@ namespace render {
         NVRenderPathFontStyleFlags, QT3DSU32, size_t, NVRenderBackendPathObject, QT3DSF32)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
+
         return NVRenderPathReturnValues::FontUnavailable;
     }
 
@@ -2073,7 +2074,7 @@ namespace render {
                                                QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GetPathMetricsRange(NVRenderBackendPathObject, size_t,
@@ -2081,7 +2082,7 @@ namespace render {
                                                     QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::GetPathSpacing(NVRenderBackendPathObject, size_t,
@@ -2090,7 +2091,7 @@ namespace render {
                                                QT3DSF32, NVRenderPathTransformType::Enum, QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::StencilFillPathInstanced(NVRenderBackendPathObject, size_t,
@@ -2100,7 +2101,7 @@ namespace render {
                                                          const QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::StencilStrokePathInstancedN(NVRenderBackendPathObject, size_t,
@@ -2110,7 +2111,7 @@ namespace render {
                                                             const QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::CoverFillPathInstanced(NVRenderBackendPathObject, size_t,
@@ -2120,7 +2121,7 @@ namespace render {
                                                        const QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     void NVRenderBackendGLBase::CoverStrokePathInstanced(NVRenderBackendPathObject, size_t,
@@ -2130,7 +2131,7 @@ namespace render {
                                                          const QT3DSF32 *)
     {
         // Needs GL 4 backend
-        QT3DS_ASSERT(false);
+        qCCritical(INVALID_OPERATION) << QObject::tr("Unsupported method: ") << __FUNCTION__;
     }
 
     ///< private calls
@@ -2206,10 +2207,8 @@ namespace render {
     {
 #if !defined(NDEBUG) || defined(_DEBUG)
         GLenum error = m_glFunctions->glGetError();
-        if (error != GL_NO_ERROR) {
+        if (error != GL_NO_ERROR)
             qCCritical(GL_ERROR) << GLConversion::processGLError(error);
-            QT3DS_ASSERT(false);
-        }
 #endif
     }
 #endif

@@ -133,7 +133,6 @@ namespace render {
 
         if (!m_Context.IsShaderImageLoadStoreSupported()) {
             qCCritical(INVALID_OPERATION, "The extension Shader_Image_Load_Store is not supported");
-            QT3DS_ASSERT(false);
             return;
         }
 
