@@ -107,6 +107,7 @@ protected:
     void initCore();
     bool showStartupDialog();
     bool handleWelcomeRes(int res, bool recursive);
+    QString resolvePresentationFile(const QString &inFile);
 
     CCore *m_core;
     bool m_isSilent; // true indicates Studio running in silent mode (no GUI)
@@ -194,6 +195,7 @@ public:
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);
     void toggleEyeball();
+    void showInvalidFilenameWarning();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;

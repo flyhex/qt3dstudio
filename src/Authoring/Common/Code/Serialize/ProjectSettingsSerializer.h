@@ -117,7 +117,7 @@ public:
         }
 
         bool theMaintainAspect = theProjectSettings->GetMaintainAspect();
-        ar.Att(L"maintainAspect", theMaintainAspect);
+        ar.Att("maintainAspect", theMaintainAspect);
 
         if (QColorDialog::customCount() > 0) {
             CustomColorSerializer ccs;
@@ -152,7 +152,7 @@ public:
             theProjectSettings->SetRotatePresentation(true);
 
         bool theMaintainAspect;
-        ar.Att(L"maintainAspect", theMaintainAspect);
+        ar.Att("maintainAspect", theMaintainAspect);
         theProjectSettings->SetMaintainAspect(theMaintainAspect);
 
         {

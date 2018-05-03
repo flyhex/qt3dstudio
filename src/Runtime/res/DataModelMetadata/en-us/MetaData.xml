@@ -235,6 +235,7 @@
                 <Property name="name" formalName="Name" type="String" default="Material" hidden="True" category="Material" />
                 <Property name="shaderlighting" formalName="Lighting" description="Light model" list="Pixel:None" default="Pixel" category="Material" />
                 <Property name="blendmode" formalName="Blending Mode" description="How this material blends with content\nbehind it. Modes marked with * are\navailable only with HW supporting\nadvanced blending modes." list="Normal:Screen:Multiply:*Overlay:*ColorBurn:*ColorDodge" default="Normal" category="Material" />
+                <Property name="vertexcolors" formalName="Enable Vertex Colors" description="Use vertex colors from the mesh" type="Boolean" default="False" animatable="False" category="Material" />
                 <Property name="diffuse" formalName="Diffuse Color" description="Color when lit from any direction" type="Color" default="1 1 1" category="Material" controllable="True" />
                 <Property name="diffusemap" formalName="Diffuse Map" description="Image to multiply with diffuse color" type="Image" category="Material" />
                 <Property name="diffusemap2" formalName="Diffuse Map 2" description="Image to multiply with diffuse color" type="Image" category="Material" />

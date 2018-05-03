@@ -979,7 +979,7 @@ public:
                              TFloatsList &ioTexCoords, TFloatsList &ioTexCoords2,
                              TFloatsList &ioTexTangents, TFloatsList &ioTexBinormals,
                              TFloatsList &ioWeights, TFloatsList &ioBoneIndex,
-                             TLongsList &ioFaceIndicies) override
+                             TFloatsList &ioColors, TLongsList &ioFaceIndicies) override
     {
         // we clear our duplicate materials for each new geometry
         m_DuplicateMaterials.clear();
@@ -1019,8 +1019,9 @@ public:
             ToEntry(ioTexBinormals, Mesh::GetTexBinormalAttrName(), 3),
             ToEntry(ioWeights, Mesh::GetWeightAttrName(), 4),
             ToEntry(ioBoneIndex, Mesh::GetBoneIndexAttrName(), 4),
+            ToEntry(ioColors, Mesh::GetColorAttrName(), 3),
         };
-        valid = valid && theModel->SetVertexBuffer(toDataRef(entries, 8));
+        valid = valid && theModel->SetVertexBuffer(toDataRef(entries, 9));
 
         if (!valid) {
             valid = false;

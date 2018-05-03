@@ -500,6 +500,12 @@ void SCustomMaterialVertexPipeline::DoGenerateVarTangentAndBinormal()
              << Endl;
 }
 
+void SCustomMaterialVertexPipeline::DoGenerateVertexColor()
+{
+    Vertex().AddIncoming("attr_color", "vec3");
+    Vertex().Append("\tvarColor = attr_color;");
+}
+
 
 struct SMaterialClass
 {

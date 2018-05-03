@@ -182,6 +182,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(speculartint, m_SpecularTint, SFloat3, SFloat3(1, 1, 1))              \
     HANDLE_COMPOSER_PROPERTY(ior, m_IOR, float, 0)                                                 \
     HANDLE_COMPOSER_PROPERTY(fresnelPower, m_FresnelPower, float, 0)                               \
+    HANDLE_COMPOSER_PROPERTY(vertexcolors, m_VertexColors, bool, false)                            \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_REFERENCED_MATERIAL_PROPERTIES                                            \

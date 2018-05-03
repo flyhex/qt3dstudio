@@ -1686,6 +1686,14 @@ namespace render {
                     theResourceManager.Release(*theCurrentTexture);
 
                 theCurrentTexture = theRenderedEffect;
+
+                if (!theRenderedEffect) {
+                    QString errorMsg = QObject::tr("Failed to compile \"%1\" effect.\nConsider"
+                                                   " removing it from the presentation.")
+                            .arg(theEffect->m_ClassName.c_str());
+                    QT3DS_ALWAYS_ASSERT_MESSAGE(errorMsg.toUtf8());
+                    break;
+                }
             }
         }
 

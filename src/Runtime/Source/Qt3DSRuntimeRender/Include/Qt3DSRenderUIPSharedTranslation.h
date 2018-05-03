@@ -381,6 +381,7 @@ namespace render {
 #define ITERATE_QT3DS_RENDER_MATERIAL_PROPERTIES                                                     \
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Material, Lighting, Dirty)                                     \
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Material, BlendMode, Dirty)                                    \
+    HANDLE_QT3DS_RENDER_PROPERTY(Material, VertexColors, Dirty)                                      \
     HANDLE_QT3DS_RENDER_PROPERTY(MaterialBase, IblProbe, Dirty)                                      \
     HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(Material, DiffuseColor, Dirty)                           \
     HANDLE_QT3DS_RENDER_COLOR_PROPERTY(Material, DiffuseColor, Dirty)                                \

@@ -60,6 +60,7 @@ SDefaultMaterial::SDefaultMaterial()
     , m_TranslucencyMap(NULL)
     , m_TranslucentFalloff(0.f)
     , m_DiffuseLightWrap(0.f)
+    , m_VertexColors(false)
     , m_NextSibling(NULL)
     , m_Parent(NULL)
 {

@@ -46,6 +46,7 @@ CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs
     , m_goToAdd(goToAdd)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
+    , m_sortColumn(-1)
 {
     m_ui->setupUi(this);
 
@@ -97,23 +98,18 @@ void CDataInputListDlg::initDialog()
     // Update table contents
     updateContents();
 
-    // Disable selecting the whole table
-    m_ui->tableView->setCornerButtonEnabled(false);
-
     // Make the expression column wider than name and type
     m_ui->tableView->horizontalHeader()->setStretchLastSection(true);
     m_ui->tableView->horizontalHeader()->setMinimumSectionSize(125);
 
     // Align columns left and prevent selecting the whole column
     m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-    m_ui->tableView->horizontalHeader()->setSectionsClickable(false);
-
-    // Hide the vertical header with line numbers
-    m_ui->tableView->verticalHeader()->setHidden(true);
 
     connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &CDataInputListDlg::onSelectionChanged);
     connect(m_ui->tableView, &QTableView::activated, this, &CDataInputListDlg::onActivated);
+    connect(m_ui->tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
+            this, &CDataInputListDlg::onSortOrderChanged);
 
     // Directly show data input modification dialog
     if (m_goToAdd)
@@ -185,6 +181,9 @@ void CDataInputListDlg::updateContents()
     }
 
     m_ui->tableView->setModel(m_tableContents);
+
+    if (m_sortColumn >= 0)
+        m_ui->tableView->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
 void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
@@ -257,8 +256,14 @@ void CDataInputListDlg::onRemoveDataInput()
 void CDataInputListDlg::onEditDataInput()
 {
     if (m_currentDataInputIndex >= 0) {
-        CDataInputDlg datainputdialog(&m_dataInputs[m_currentDataInputIndex],
-                                      m_tableContents, this);
+        int index = 0;
+        for (int i = 0; i < m_dataInputs.size(); ++i) {
+            auto dataInput = m_dataInputs.at(i);
+            index = i;
+            if (dataInput->name == m_currentDataInputName)
+                break;
+        }
+        CDataInputDlg datainputdialog(&m_dataInputs[index], m_tableContents, this);
         datainputdialog.exec();
 
         updateButtons();
@@ -270,14 +275,28 @@ void CDataInputListDlg::onEditDataInput()
 
 void CDataInputListDlg::onActivated(const QModelIndex &index)
 {
-    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
-    m_currentDataInputIndex = indexes.size() == columnCount ? index.row() : -1;
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedRows(0);
+    m_currentDataInputIndex = indexes.size() ? index.row() : -1;
+    if (m_currentDataInputIndex >= 0) {
+        m_currentDataInputName
+                = m_tableContents->itemFromIndex(indexes.at(0))->data(Qt::EditRole).toString();
+    }
     onEditDataInput();
 }
 
 void CDataInputListDlg::onSelectionChanged()
 {
-    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
-    m_currentDataInputIndex = indexes.size() == columnCount ? indexes.at(0).row() : -1;
+    const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedRows(0);
+    m_currentDataInputIndex = indexes.size() ? indexes.at(0).row() : -1;
+    if (m_currentDataInputIndex >= 0) {
+        m_currentDataInputName
+                = m_tableContents->itemFromIndex(indexes.at(0))->data(Qt::EditRole).toString();
+    }
     updateButtons();
+}
+
+void CDataInputListDlg::onSortOrderChanged(int column, Qt::SortOrder order)
+{
+    m_sortColumn = column;
+    m_sortOrder = order;
 }

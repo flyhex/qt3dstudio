@@ -48,6 +48,7 @@ namespace render {
                 WorldPosition = 1 << 5,
                 TangentBinormal = 1 << 6,
                 UVCoords1 = 1 << 7,
+                VertexColor = 1 << 8,
             };
         };
 
@@ -318,6 +319,14 @@ namespace render {
             Fragment() << "\tvec3 tangent = normalize(varTangent);" << Endl
                        << "\tvec3 binormal = normalize(varBinormal);" << Endl;
         }
+        void GenerateVertexColor() override
+        {
+            if (SetCode(GenerationFlagValues::VertexColor))
+                return;
+            AddInterpolationParameter("varColor", "vec3");
+            DoGenerateVertexColor();
+            Fragment().Append("\tvec3 vertColor = normalize(varColor);");
+        }
 
         bool HasActiveWireframe() override { return m_Wireframe; }
 
@@ -418,6 +427,7 @@ namespace render {
         virtual void DoGenerateObjectNormal() = 0;
         virtual void DoGenerateWorldPosition() = 0;
         virtual void DoGenerateVarTangentAndBinormal() = 0;
+        virtual void DoGenerateVertexColor() = 0;
     };
 }
 }

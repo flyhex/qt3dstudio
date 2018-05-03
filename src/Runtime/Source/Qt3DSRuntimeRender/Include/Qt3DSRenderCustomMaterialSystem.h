@@ -166,6 +166,7 @@ namespace render {
         virtual void DoGenerateObjectNormal() override;
         virtual void DoGenerateWorldPosition() override;
         virtual void DoGenerateVarTangentAndBinormal() override;
+        virtual void DoGenerateVertexColor() override;
     };
 }
 }

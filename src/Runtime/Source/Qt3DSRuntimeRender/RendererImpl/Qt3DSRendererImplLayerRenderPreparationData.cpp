@@ -694,6 +694,11 @@ namespace render {
                     theGeneratedKey, true);
             }
 
+            if (theMaterial->IsVertexColorsEnabled()) {
+                m_Renderer.DefaultMaterialShaderKeyProperties().m_VertexColorsEnabled.SetValue(
+                    theGeneratedKey, true);
+            }
+
             // Run through the material's images and prepare them for render.
             // this may in fact set pickable on the renderable flags if one of the images
             // links to a sub presentation or any offscreen rendered object.

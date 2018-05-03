@@ -74,6 +74,7 @@ namespace render {
         virtual void
         GenerateWorldPosition() = 0; // model_world_position in both vert and frag shader
         virtual void GenerateVarTangentAndBinormal() = 0;
+        virtual void GenerateVertexColor() = 0;
 
         virtual bool HasActiveWireframe() = 0; // varEdgeDistance is a valid entity
 

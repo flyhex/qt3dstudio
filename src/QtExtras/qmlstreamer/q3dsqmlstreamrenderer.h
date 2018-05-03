@@ -116,6 +116,7 @@ private:
     bool m_initialized;
     bool m_prepared;
     bool m_update;
+    bool m_delayedUpdateRequest;
 
     friend class Q3DSQmlStreamEventHandler;
 };

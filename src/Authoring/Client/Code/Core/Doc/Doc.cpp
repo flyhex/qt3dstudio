@@ -1405,7 +1405,7 @@ Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem()
     return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : NULL;
 }
 
-void CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
+bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
 {
     Q3DStudio::CString theDocPath = inDocumentPath.GetName();
     // We always need to have a document path.
@@ -1420,12 +1420,12 @@ void CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
         }
     }
 
-    // Document path should always be absolute path
-    ASSERT(!Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()));
-    // Document path should exist.
-    Q_ASSERT(m_DocumentPath.Exists());
+    // Document path should always be absolute path and it should exist
+    if (Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()) || !m_DocumentPath.Exists())
+        return false;
 
     m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath);
+    return true;
 }
 
 //=============================================================================
@@ -2383,7 +2383,7 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                 if (theBuffer.m_TextureFlags.HasTransparency()) {
                     IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
                     theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
-                    theWriter.Att(L"hasTransparency", L"True");
+                    theWriter.Att("hasTransparency", true);
                 }
             }
         }
@@ -2838,6 +2838,46 @@ void CDoc::LoadUIADataInputs(const QString &uiaFile,
                         }
 
                         datainputs.push_back(item);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void CDoc::LoadUIAInitialPresentationFilename(const QString &uiaFile, QString &initialPresentation)
+{
+    initialPresentation.clear();
+    if (QFileInfo::exists(uiaFile)) {
+        qt3dsdm::TStringTablePtr theStringTable = qt3dsdm::IStringTable::CreateStringTable();
+        std::shared_ptr<qt3dsdm::IDOMFactory> theDomFact =
+                qt3dsdm::IDOMFactory::CreateDOMFactory(theStringTable);
+
+        qt3ds::foundation::CFileSeekableIOStream theStream(
+                    uiaFile, qt3ds::foundation::FileReadFlags());
+
+        qt3dsdm::SDOMElement *theElem = qt3dsdm::CDOMSerializer::Read(*theDomFact, theStream);
+        if (theElem) {
+            std::shared_ptr<qt3dsdm::IDOMReader> theReader =
+                    qt3dsdm::IDOMReader::CreateDOMReader(*theElem, theStringTable, theDomFact);
+            if (theReader->MoveToFirstChild("assets")) {
+                qt3dsdm::TXMLStr initial = nullptr;
+
+                // initial should be the same as document name
+                if (!theReader->Att("initial", initial))
+                    return;
+
+                for (bool success = theReader->MoveToFirstChild(); success;
+                     success = theReader->MoveToNextSibling()) {
+                    if (qt3dsdm::AreEqual(theReader->GetElementName(), L"presentation")) {
+                        qt3dsdm::TXMLStr src = nullptr;
+                        qt3dsdm::TXMLStr id = nullptr;
+
+                        theReader->Att("id", id);
+                        if (id == initial) {
+                            if (theReader->Att("src", src))
+                                initialPresentation = QString(src.c_str());
+                        }
                     }
                 }
             }

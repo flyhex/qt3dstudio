@@ -110,6 +110,7 @@ translucencymap
 translucentfalloff
 diffuselightwrap
 referencedmaterial
+vertexcolors
 
 rotationuv
 positionu

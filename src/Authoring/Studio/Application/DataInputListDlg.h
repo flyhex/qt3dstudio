@@ -69,14 +69,18 @@ private Q_SLOTS:
     void onEditDataInput();
     void onActivated(const QModelIndex &index);
     void onSelectionChanged();
+    void onSortOrderChanged(int column, Qt::SortOrder order);
 
 private:
     Ui::DataInputListDlg *m_ui;
     QVector<CDataInputDialogItem *> m_dataInputs;
     QVector<CDataInputDialogItem *> *m_actualDataInputs;
     int m_currentDataInputIndex;
+    QString m_currentDataInputName;
     QStandardItemModel *m_tableContents;
     bool m_goToAdd;
+    int m_sortColumn;
+    Qt::SortOrder m_sortOrder;
 };
 
 #endif

@@ -43,7 +43,7 @@ namespace widgets {
             Unknown,
             Translation,
             Scale,
-            Rotation,
+            Rotation
         };
     };
 

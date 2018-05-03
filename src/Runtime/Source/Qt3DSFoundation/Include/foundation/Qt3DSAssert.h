@@ -30,134 +30,32 @@
 #pragma once
 #ifndef QT3DS_ASSERT_H
 #define QT3DS_ASSERT_H
-#include "EABase/eabase.h"
-#include "EABase/config/eacompiler.h"
-#include "EABase/config/eacompilertraits.h"
-#include "EABase/config/eaplatform.h"
 #include "foundation/Qt3DSPreprocessor.h"
 
-#ifdef QT3DS_WINDOWS
-
-#include <stdio.h>
-
-#ifdef QT3DS_VC
-#include <crtdbg.h>
-
-extern void __debugbreak();
-#ifndef QT3DS_DOXYGEN
-
+// Force the user to define the Qt3DSAssert function
 namespace qt3ds {
-#endif
-QT3DS_INLINE void NVAssert(const char *exp, const char *file, int line, bool *ignore)
-{
-// printf("Assertion failed: %s, file %s, line %d\n", exp, file, line);
-#ifdef _DEBUG
-    if (ignore != NULL) {
-        int reportType = _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_REPORT_MODE);
-        // PH: _CrtDbgReport returns -1 on error, 0 on 'ignore', 1 on 'retry'. Hitting 'abort' will
-        // terminate the process immediately.
-        // If the mode is not 'Window', we just always break.
-        *ignore = *ignore || ((reportType == _CRTDBG_MODE_WNDW)
-                              && (_CrtDbgReport(_CRT_ASSERT, file, line, NULL, "%s", exp) == 0));
-    }
-
-    if (ignore == NULL || !*ignore)
-#else
-    QT3DS_FORCE_PARAMETER_REFERENCE(exp);
-    QT3DS_FORCE_PARAMETER_REFERENCE(file);
-    QT3DS_FORCE_PARAMETER_REFERENCE(line);
-    QT3DS_FORCE_PARAMETER_REFERENCE(ignore);
-#endif
-        __debugbreak();
+void Qt3DSAssert(const char *exp, const char *file, int line, bool *ignore);
 }
-
-#ifndef QT3DS_DOXYGEN
-} // namespace qt3ds
-#endif
 
 #ifdef __CUDACC__
 #define QT3DS_ASSERT(exp) ((void)0)
 #define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
-#else
+#else // __CUDACC__
 #ifndef NDEBUG
-#define QT3DS_ASSERT(exp)                                                                             \
+#define QT3DS_ASSERT(exp)                                                                          \
     {                                                                                              \
         static bool ignore = false;                                                                \
-        (void)((!!(exp)) || (qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));             \
+        (void)((!!(exp)) || (qt3ds::Qt3DSAssert(#exp, __FILE__, __LINE__, &ignore), false));       \
     }
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp)                                                              \
+#else // NDEBUG
+#define QT3DS_ASSERT(exp) ((void)0)
+#endif // NDEBUG
+#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp)                                                           \
     {                                                                                              \
         static bool ignore = false;                                                                \
-        (void)((qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));                          \
+        (void)((qt3ds::Qt3DSAssert(exp, __FILE__, __LINE__, &ignore), false));                     \
     }
-#else
-#define QT3DS_ASSERT(exp) ((void)0)
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
-#endif
-#endif
-#else
-
-#include <assert.h>
-
-namespace qt3ds {
-
-QT3DS_INLINE void NVAssert(const char *exp, const char *file, int line, bool *ignore)
-{
-    QT3DS_FORCE_PARAMETER_REFERENCE(exp);
-    QT3DS_FORCE_PARAMETER_REFERENCE(file);
-    QT3DS_FORCE_PARAMETER_REFERENCE(line);
-    QT3DS_FORCE_PARAMETER_REFERENCE(ignore);
-    assert(false);
-}
-
-} // qt3ds
-
-#ifndef NDEBUG
-#define QT3DS_ASSERT(exp)                                                                   \
-    {                                                                                       \
-        static bool ignore = false;                                                         \
-        (void)((!!(exp)) || (qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));   \
-    }
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp)                                                    \
-    {                                                                                       \
-        static bool ignore = false;                                                         \
-        (void)((qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));                \
-    }
-#else
-#define QT3DS_ASSERT(exp) ((void)0)
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
-#endif
-
-#endif
-
-#elif defined(QT3DS_PS3)
-#include "foundation/ps3/NVPS3Assert.h"
-
-#else // Force the user to define the NVAssert function
-namespace qt3ds {
-void NVAssert(const char *exp, const char *file, int line, bool *ignore);
-}
-#ifdef __CUDACC__
-#define QT3DS_ASSERT(exp) ((void)0)
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
-#else
-#ifndef NDEBUG
-#define QT3DS_ASSERT(exp)                                                                             \
-    {                                                                                              \
-        static bool ignore = false;                                                                \
-        (void)((!!(exp)) || (qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));             \
-    }
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp)                                                              \
-    {                                                                                              \
-        static bool ignore = false;                                                                \
-        (void)((qt3ds::NVAssert(#exp, __FILE__, __LINE__, &ignore), false));                          \
-    }
-#else
-#define QT3DS_ASSERT(exp) ((void)0)
-#define QT3DS_ALWAYS_ASSERT_MESSAGE(exp) ((void)0)
-#endif
-#endif
-#endif
+#endif // __CUDACC__
 
 #define QT3DS_ALWAYS_ASSERT() QT3DS_ASSERT(0)
 

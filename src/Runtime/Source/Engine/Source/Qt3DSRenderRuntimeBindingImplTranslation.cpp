@@ -603,6 +603,7 @@ struct SRuntimePropertyParser
 #define Material_TranslucencyMap ATTRIBUTE_TRANSLUCENCYMAP
 #define Material_DiffuseLightWrap ATTRIBUTE_DIFFUSELIGHTWRAP
 #define Material_ReferencedMaterial ATTRIBUTE_REFERENCEDMATERIAL
+#define Material_VertexColors ATTRIBUTE_VERTEXCOLORS
 #define Image_ImagePath ATTRIBUTE_SOURCEPATH
 #define Image_OffscreenRendererId ATTRIBUTE_SUBPRESENTATION
 #define Image_Scale_X ATTRIBUTE_SCALEU

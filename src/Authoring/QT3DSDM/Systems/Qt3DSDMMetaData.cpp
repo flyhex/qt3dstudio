@@ -2283,11 +2283,11 @@ public:
     {
         SerializePropertyBase(inArchive, inItem);
         if (inItem.m_IsHidden == true)
-            inArchive.Att(L"hidden", inItem.m_IsHidden);
+            inArchive.Att("hidden", inItem.m_IsHidden);
         if (inItem.m_Animatable == false)
-            inArchive.Att(L"animatable", inItem.m_Animatable);
+            inArchive.Att("animatable", inItem.m_Animatable);
         if (inItem.m_Controllable == true)
-            inArchive.Att(L"controllable", inItem.m_Controllable);
+            inArchive.Att("controllable", inItem.m_Controllable);
         NVConstDataRef<SPropertyFilterInfo> theInfos = GetMetaDataPropertyFilters(inHandle);
         for (QT3DSU32 idx = 0, end = theInfos.size(); idx < end; ++idx) {
             const SPropertyFilterInfo &theInfo(theInfos[idx]);
@@ -2312,9 +2312,9 @@ public:
         QT3DS_ASSERT(inHandle.Valid());
 
         SerializePropertyBase(inArchive, inItem);
-        inArchive.Att(L"hidden", inItem.m_IsHidden);
-        inArchive.Att(L"animatable", inItem.m_Animatable);
-        inArchive.Att(L"controllable", inItem.m_Controllable);
+        inArchive.Att("hidden", inItem.m_IsHidden);
+        inArchive.Att("animatable", inItem.m_Animatable);
+        inArchive.Att("controllable", inItem.m_Controllable);
         inArchive.Att(L"category", inItem.m_GroupName);
     }
 

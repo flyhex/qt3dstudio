@@ -375,7 +375,7 @@ public:
                              TFloatsList &ioTexCoords, TFloatsList &ioTexCoords2,
                              TFloatsList &ioTexTangents, TFloatsList &ioTexBinormals,
                              TFloatsList &ioWeights, TFloatsList &ioBoneIndex,
-                             TLongsList &ioFaceIndicies) = 0;
+                             TFloatsList &ioColors, TLongsList &ioFaceIndicies) = 0;
     virtual void SetMaterial(const SMaterialParameters &inMaterialParameters) = 0;
     virtual void SetTexture(long inMapType, const STextureParameters &inTextureParameters) = 0;
     virtual void SetJointNode(SJointInfo &inJointInfo) = 0;

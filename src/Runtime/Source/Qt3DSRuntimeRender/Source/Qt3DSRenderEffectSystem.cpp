@@ -967,7 +967,6 @@ struct SEffectSystem : public IEffectSystem
         NVRenderFrameBuffer *theBuffer = NULL;
         NVRenderTexture2D *theTexture = NULL;
         if (inEffect.m_Context) {
-
             SEffectContext &theContext(*inEffect.m_Context);
             QT3DSU32 bufferIdx = theContext.FindBuffer(inCommand.m_BufferName);
             if (bufferIdx < theContext.m_AllocatedBuffers.size()) {
@@ -978,8 +977,11 @@ struct SEffectSystem : public IEffectSystem
         }
         if (theBuffer == NULL) {
             qCCritical(INVALID_OPERATION, "Effect %s: Failed to find buffer %s for bind",
-                inEffect.m_ClassName.c_str(), inCommand.m_BufferName.c_str());
-            QT3DS_ASSERT(false);
+                       inEffect.m_ClassName.c_str(), inCommand.m_BufferName.c_str());
+            QString errorMsg = QObject::tr("Failed to compile \"%1\" effect.\nConsider"
+                                           " removing it from the presentation.")
+                    .arg(inEffect.m_ClassName.c_str());
+            QT3DS_ALWAYS_ASSERT_MESSAGE(errorMsg.toUtf8());
             outMVP = QT3DSMat44::createIdentity();
             return NULL;
         }
@@ -1718,7 +1720,7 @@ struct SEffectSystem : public IEffectSystem
 
     // Render the effect to the currently bound render target using this MVP
     bool RenderEffect(SEffectRenderArgument inRenderArgument, QT3DSMat44 &inMVP,
-                              bool inEnableBlendWhenRenderToTarget) override
+                      bool inEnableBlendWhenRenderToTarget) override
     {
         SEffectClass *theClass = GetEffectClass(inRenderArgument.m_Effect.m_ClassName);
         if (!theClass) {

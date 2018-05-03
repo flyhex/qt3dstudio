@@ -770,6 +770,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Material_TranslucentFalloff "translucentfalloff"
 #define Material_DiffuseLightWrap "diffuselightwrap"
 #define Material_ReferencedMaterial "referencedmaterial"
+#define Material_VertexColors "vertexcolors"
 #define Image_ImagePath "sourcepath"
 #define Image_OffscreenRendererId "subpresentation"
 #define Image_Scale_X "scaleu"
@@ -1738,7 +1739,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                         m_Reader.UnregisteredAtt("sourcepath", srcPath);
                         CRegisteredString imgPath = m_StrTable.RegisterStr(srcPath);
                         bool hasTransparency = false;
-                        m_Reader.Att(L"hasTransparency", hasTransparency);
+                        m_Reader.Att("hasTransparency", hasTransparency);
                         m_BufferManager.SetImageHasTransparency(imgPath, hasTransparency);
                     }
                 }

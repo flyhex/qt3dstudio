@@ -330,7 +330,7 @@ QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
 QDialog#SubPresentationListDlg QHeaderView::section,
 QDialog#DataInputListDlg QTableView QTableCornerButton::section,
 QDialog#DataInputListDlg QHeaderView::section {
-    background: transparent;
+    font-weight: bold;
 }
 
 QDialog#SubPresentationListDlg QTableView,

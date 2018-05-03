@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>347</width>
-    <height>387</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -95,7 +95,7 @@
        <widget class="QDoubleSpinBox" name="selectorWidth">
         <property name="toolTip">
          <string>The width of the 3D view
-manipulator tool handles.</string>
+manipulator tool handles</string>
         </property>
         <property name="decimals">
          <number>1</number>
@@ -132,7 +132,7 @@ manipulator tool handles.</string>
        <widget class="QDoubleSpinBox" name="selectorLength">
         <property name="toolTip">
          <string>The length of the 3D view
-manipulator tool handles.</string>
+manipulator tool handles</string>
         </property>
         <property name="decimals">
          <number>0</number>
@@ -162,7 +162,7 @@ manipulator tool handles.</string>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="intervalLabel">
         <property name="text">
          <string>Interval (seconds)</string>
         </property>
@@ -185,6 +185,16 @@ manipulator tool handles.</string>
         </property>
         <property name="value">
          <number>600</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="clearAutosaveFiles">
+        <property name="toolTip">
+         <string>Clear all autosave files from project folder</string>
+        </property>
+        <property name="text">
+         <string>Clear Autosave Files</string>
         </property>
        </widget>
       </item>
@@ -225,7 +235,8 @@ manipulator tool handles.</string>
      <item>
       <widget class="QPushButton" name="m_buttonResetLayout">
        <property name="toolTip">
-        <string>Click to restore default Studio palette positions and visibilities</string>
+        <string>Click to restore default Studio
+palette positions and visibilities</string>
        </property>
        <property name="text">
         <string>Reset Layout</string>

@@ -112,7 +112,10 @@ namespace render {
                 context, theBufferName, size, usageType,
                 toDataRef(const_cast<QT3DSU8 *>(bufferData.begin()), bufferData.size()), pBuffer);
         } else {
-            QT3DS_ASSERT(false);
+            QString errorMsg = QObject::tr("Shader storage buffers are not supported: %1")
+                    .arg(bufferName);
+            qCCritical(INVALID_OPERATION) << errorMsg;
+            QT3DS_ALWAYS_ASSERT_MESSAGE(errorMsg.toUtf8());
         }
         return retval;
     }
