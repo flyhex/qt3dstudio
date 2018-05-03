@@ -602,7 +602,24 @@ void KeyframeManager::DeselectAllKeyframes()
 
 void KeyframeManager::SetChangedKeyframes()
 {
-    // Mahmoud_TODO: implement if needed
+    CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMInstanceHandle selectedInstance = theDoc->GetSelectedInstance();
+    if (selectedInstance.Valid()) {
+        using namespace Q3DStudio;
+        Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Set Changed Keyframes",
+                                               __FILE__, __LINE__);
+        CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
+        // Get all animated properties.
+        TPropertyHandleList properties;
+        theStudioSystem->GetPropertySystem()->GetAggregateInstanceProperties(selectedInstance,
+                                                                             properties);
+        for (size_t i = 0; i < properties.size(); ++i) {
+            if (theStudioSystem->GetAnimationSystem()->IsPropertyAnimated(
+                        selectedInstance, properties[i])) {
+                editor->KeyframeProperty(selectedInstance, properties[i], true);
+            }
+        }
+    }
 }
 
 // Mahmoud_TODO: this Map is not used anymore, will be removed by finishing the new timeline
