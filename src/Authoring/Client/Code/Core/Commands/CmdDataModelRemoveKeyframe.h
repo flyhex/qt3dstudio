@@ -42,6 +42,7 @@
 #include "Qt3DSDMAnimation.h"
 #include "CmdDataModelBase.h"
 #include "Qt3DSDMStudioSystem.h"
+#include "Bindings/Qt3DSDMTimelineKeyframe.h"
 
 class CCmdDataModelRemoveKeyframe : public CCmd, public qt3dsdm::CmdDataModel
 {
@@ -51,17 +52,26 @@ protected: // Members
 
 public: // Construction
     //@param inTime is in secs
-    CCmdDataModelRemoveKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
+    CCmdDataModelRemoveKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe = 0)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
     {
-        AddKeyframeHandle(inKeyframe);
+        if (inKeyframe)
+            AddKeyframeHandle(inKeyframe);
     }
     ~CCmdDataModelRemoveKeyframe() {}
 
     void AddKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
     {
         m_Keyframes.push_back(inKeyframe);
+    }
+
+    void addKeyframeHandles(Qt3DSDMTimelineKeyframe *binding)
+    {
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList kfHandles;
+        binding->GetKeyframeHandles(kfHandles);
+        for (auto &&handle : qAsConst(kfHandles))
+            m_Keyframes.push_back(handle);
     }
 
     //======================================================================

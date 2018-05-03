@@ -40,7 +40,6 @@
 //==============================================================================
 #include "Bindings/TimelineTranslationManager.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
-#include "Bindings/ITimelineTimebar.h"
 #include "SceneView.h"
 #include "StudioApp.h"
 #include "IKeyframesManager.h"
@@ -58,7 +57,9 @@
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
 #include "InspectorControlView.h"
+#include "TimelineWidget.h"
 #include "ProjectView.h"
+#include "RowTree.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -67,7 +68,6 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
-#include <QtWidgets/qcolordialog.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -596,25 +596,7 @@ void CMainFrame::OnUpdateToolChange()
  */
 void CMainFrame::OnTimelineSetTimeBarColor()
 {
-    ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
-    if (theTimelineTimebar) {
-        QColor previousColor = theTimelineTimebar->GetTimebarColor();
-        QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
-        theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
-        connect(theColorDlg, &QColorDialog::currentColorChanged,
-                this, &CMainFrame::OnTimeBarColorChanged);
-        if (theColorDlg->exec() == QDialog::Accepted)
-            theTimelineTimebar->SetTimebarColor(theColorDlg->selectedColor());
-        else
-            theTimelineTimebar->PreviewTimebarColor(previousColor);
-    }
-}
-
-void CMainFrame::OnTimeBarColorChanged(const QColor &color)
-{
-    ITimelineTimebar *theTimelineTimebar = GetSelectedTimelineTimebar();
-    if (theTimelineTimebar)
-        theTimelineTimebar->PreviewTimebarColor(color);
+    getTimelineWidget()->openBarColorDialog();
 }
 
 //==============================================================================
@@ -656,8 +638,7 @@ void CMainFrame::OnTimelineSetChangedKeyframe()
  */
 void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
 {
-    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(
-                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    m_ui->actionDelete_Selected_Keyframe_s->setEnabled(getTimelineWidget()->hasSelectedKeyframes());
 }
 
 //==============================================================================
@@ -1104,10 +1085,6 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
                             QKeySequence(Qt::CTRL | static_cast<Qt::Key>(keyN)),
                             CMainFrame::onCtrlNPressed);
     }
-
-    CTimelineControl *theTimelineControl = GetTimelineControl();
-    if (theTimelineControl)
-        theTimelineControl->RegisterGlobalKeyboardShortcuts(inHotKeys, actionParent);
 }
 
 //==============================================================================
@@ -1866,19 +1843,10 @@ void CMainFrame::OnConnectionChanged(bool connected)
     m_ui->actionRemote_Preview->setEnabled(connected);
 }
 
-CTimelineControl *CMainFrame::GetTimelineControl()
+TimelineWidget *CMainFrame::getTimelineWidget() const
 {
-    return m_paletteManager->GetTimelineControl();
-}
-
-ITimelineTimebar *CMainFrame::GetSelectedTimelineTimebar()
-{
-    Qt3DSDMTimelineItemBinding *theTimelineItemBinding =
-            GetTimelineControl()->GetTranslationManager()->GetSelectedBinding();
-    if (theTimelineItemBinding == NULL)
-        return NULL;
-
-    return theTimelineItemBinding->GetTimelineItem()->GetTimebar();
+    return static_cast<TimelineWidget *>(m_paletteManager->GetControl(
+                                             CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

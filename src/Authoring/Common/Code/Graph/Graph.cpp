@@ -339,7 +339,7 @@ public:
     void ReParent(const TIdentifier inNode, const TIdentifier inNewParent) override
     {
         RemoveChild(inNode, false);
-        AddChild(inNewParent, inNode, COpaquePosition::LAST);
+        AddChild(inNewParent, inNode, COpaquePosition::FIRST);
     }
 
     void MoveChild(const TIdentifier inChild, const COpaquePosition & /*inOldIdx*/,
@@ -366,6 +366,7 @@ public:
         if (node && other) {
             long newPos = GetNodePosition(inOther).GetIndex();
             long currentPos = GetNodePosition(inNode).GetIndex();
+
             // We know we will do an erase followed by an insert.
             if (node->GetParentID() == other->GetParentID()) {
                 if (newPos > currentPos) {
@@ -423,11 +424,14 @@ public:
     void MoveTo(const TIdentifier inNode, const TIdentifier inNewParent,
                         const COpaquePosition &inPosition) override
     {
-        if (GetParent(inNode) != inNewParent
-            || !(GetNodePosition(inNode) == GetChildCount(inNewParent) - 1)) {
-            RemoveChild(inNode, false);
-            AddChild(inNewParent, inNode, inPosition);
-        }
+          // Mahmoud_TODO: will be eventually removed
+//        if (GetParent(inNode) != inNewParent
+//            || !(GetNodePosition(inNode) == GetChildCount(inNewParent) - 1)){
+//            RemoveChild(inNode, false);
+//            AddChild(inNewParent, inNode, inPosition);
+//        }
+        RemoveChild(inNode, false);
+        AddChild(inNewParent, inNode, inPosition);
     }
 
     void InsertTo(const TIdentifier inNode, const TIdentifier inNewParent,

@@ -45,6 +45,16 @@ Qt3DSDMAssetTimelineKeyframe::~Qt3DSDMAssetTimelineKeyframe()
 {
 }
 
+Keyframe *Qt3DSDMAssetTimelineKeyframe::getUI()
+{
+    return m_ui;
+}
+
+void Qt3DSDMAssetTimelineKeyframe::setUI(Keyframe *kfUI)
+{
+    m_ui = kfUI;
+}
+
 bool Qt3DSDMAssetTimelineKeyframe::IsSelected() const
 {
     return m_Selected;

@@ -968,9 +968,6 @@
    <property name="text">
     <string>Hide/unhide unselected</string>
    </property>
-   <property name="shortcut">
-    <string>Alt+H</string>
-   </property>
   </action>
  </widget>
  <customwidgets>

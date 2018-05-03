@@ -84,7 +84,7 @@ bool CImageTimelineItemBinding::ShowToggleControls() const
 void CImageTimelineItemBinding::Bind(CBaseStateRow *inRow)
 {
     Qt3DSDMTimelineItemBinding::Bind(inRow);
-    GetRow()->SetNameReadOnly(true);
+    inRow->requestSetNameReadOnly();
 }
 
 //=============================================================================

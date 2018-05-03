@@ -32,6 +32,7 @@
 #include "StateRowFactory.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "StateRow.h"
+#include "TimelineUIFactory.h"
 
 //=============================================================================
 /**
@@ -44,16 +45,11 @@
  * @return CStateRow the row that represents the state, or nullptr if it should not show up.
  */
 CStateRow *CStateRowFactory::CreateStateRow(ITimelineItemBinding *inTimelineItem,
-                                            CBaseStateRow *inParentRow,
-                                            ISnappingListProvider *inSnappingListProvider)
+                                            CBaseStateRow *inParentRow)
 {
     CStateRow *theRow = nullptr;
     if (inTimelineItem) {
-        theRow = new CStateRow(inParentRow);
-
-        if (theRow != nullptr) {
-            theRow->Initialize(inTimelineItem, inSnappingListProvider);
-        }
+        theRow = TimelineUIFactory::instance()->createStateRow(inParentRow, inTimelineItem);
     }
 
     return theRow;

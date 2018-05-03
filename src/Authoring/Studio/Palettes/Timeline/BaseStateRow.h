@@ -32,77 +32,45 @@
 
 #pragma once
 
+#include "stdafx.h"
+
 #include "TimelineRow.h"
-#include "ListLayout.h"
 #include "ToggleButton.h"
 #include "DispatchListeners.h"
 
+#include <Qt>
+
 class CPropertyRow;
-class CBaseTimelineTreeControl;
-class CColorControl;
-class CBlankToggleControl;
-class CBaseTimebarlessRow;
 class CStateRow;
 class CCmdBatch;
 class ITimelineItem;
-class ITimelineItemBinding;
-
-struct SBaseStateRowSelectionKeyState
-{
-    enum Enum {
-        NoKeyDown = 0,
-        ShiftKey = 1 << 0,
-        ControlKey = 1 << 1,
-    };
-    qt3ds::QT3DSU32 m_KeyState;
-    SBaseStateRowSelectionKeyState()
-        : m_KeyState(0)
-    {
-    }
-    void SetShiftDown() { m_KeyState = m_KeyState | ShiftKey; }
-    void SetControlDown() { m_KeyState = m_KeyState | ControlKey; }
-    bool IsShiftDown() const { return (m_KeyState & ShiftKey) != 0; }
-    bool IsControlDown() const { return (m_KeyState & ControlKey) != 0; }
-};
 
 class CBaseStateRow : public CTimelineRow
 {
+    Q_OBJECT
 public:
     typedef std::vector<CPropertyRow *> TPropertyRowList;
     typedef std::vector<CStateRow *> TStateRowList;
-    static const long DEFAULT_TOGGLE_LENGTH;
 
 public:
-    CBaseStateRow();
+    CBaseStateRow(CTimelineRow *parent, bool loaded = false);
     virtual ~CBaseStateRow();
 
-    virtual void Initialize(ITimelineItemBinding *inTimelineItemBinding);
+    void Initialize(ITimelineItemBinding *inTimelineItemBinding) override;
 
     bool IsExpanded();
     bool IsLoaded();
-    virtual void Expand(bool inExpandAll = false, bool inExpandUp = false);
-    virtual void Collapse(bool inCollapseAll = false);
+    void Expand(bool inExpandAll = false, bool inExpandUp = false) override;
+    void Collapse(bool inCollapseAll = false) override;
     void ToggleExpansion(CToggleButton *, CButtonControl::EButtonState);
 
     void SetTimeRatio(double inTimePerPixel) override;
 
-    CControl *GetColorControl() override;
-    CControl *GetTreeControl() override;
-    CControl *GetToggleControl() override;
-    CControl *GetTimebarControl() override;
-
-    void Select(SBaseStateRowSelectionKeyState inKeyState, bool inCheckKeySelection = true);
-    void SelectKeysInRect(CRct inRect, bool inModifierKeyDown, bool inGlobalCommitSelectionFlag);
+    void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true);
+    bool IsSelected() const override { return m_Selected; }
     void DeleteAllKeys();
 
-    virtual void OnMouseOver();
-    virtual void OnMouseOut();
-    virtual void OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags);
-    virtual void OnMouseRDown(CPt inPoint, Qt::KeyboardModifiers inFlags);
-    virtual void OnDirty();
-    virtual void OnSelected(bool inSelected);
-
-    void LoadChildren();
+    void LoadChildren() override;
     void AddChildRow(ITimelineItemBinding *inTimeLineItem, ITimelineItemBinding *inNextItem);
     void RemoveChildRow(ITimelineItemBinding *inTimeLineItem);
 
@@ -120,18 +88,8 @@ public:
 
     void Filter(const CFilter &inFilter, bool inFilterChildren = true) override;
     CFilter *GetFilter() { return &m_Filter; }
-    void OnChildVisibilityChanged() override;
 
     virtual bool HasVisibleChildren();
-
-    void PopulateSnappingList(CSnapper *inSnappingList) override;
-
-    virtual void SetEnabled(bool inEnabled);
-
-    void DoStartDrag(CControlWindowListener *inWndListener);
-    void AcceptDropAfter(bool inAccept);
-    void AcceptDropBefore(bool inAccept);
-    void SetDropTarget(CDropTarget *inDropTarget);
 
     // CTimelineRow
     virtual long GetEarliestStartTime();
@@ -139,67 +97,51 @@ public:
 
     long GetStartTime();
     long GetEndTime();
-    long GetActiveStart();
-    long GetActiveEnd();
-    virtual bool CalculateActiveStartTime() = 0;
-    virtual bool CalculateActiveEndTime() = 0;
     void Dispose() override;
 
     virtual QPixmap GetIcon();
     virtual QPixmap GetDisabledIcon();
 
-    EStudioObjectType GetObjectType() const;
-    ITimelineItemBinding *GetTimelineItemBinding() const;
-    ITimelineItem *GetTimelineItem() const;
+    TPropertyRowList GetPropertyRows() const;
+    TStateRowList GetStateRows() const;
 
-    void UpdateActionStatus();
-    void SetFocus();
+    virtual void OnSelected(bool inSelected);
+    void RequestRefreshRowMetaData();
+    void ForceEmitChildrenChanged();
+    void requestSetNameReadOnly();
+    void requestUpdateActionStatus();
 
-    CBaseTimebarlessRow *GetTimebar() const;
-
-    void SetNameReadOnly(bool inReadOnly);
-
-    void ClearDirty();
+Q_SIGNALS:
+    void expanded(bool isExpanded);
+    void visibleChanged(bool visible);
+    void hasChildrenChanged(bool hasChildren);
+    void rowAboutToBeRemoved(CTimelineRow *row);
+    void selectAllKeys();
+    void addRowToUILists(CTimelineRow *inRow, CTimelineRow *inNextRow, CFilter &inFilter);
+    void rowAdded(CBaseStateRow *row);
+    void refreshRowMetaData();
+    void setNameReadOnly();
+    void updateActionStatus();
 
 protected:
     void DeletePropertyRow(CPropertyRow *inPropertyRow);
-    virtual CBlankToggleControl *CreateToggleControl();
-    virtual CBaseTimebarlessRow *CreateTimebarRow() = 0;
     virtual bool PerformFilter(const CFilter &inFilter) = 0;
     CStateRow *GetRow(ITimelineItem *inTimelineItem);
     void DeleteRow(CStateRow *inRow);
-    void SetTimelineLatestTime(long inLength);
+    // KDAB_TODO unused?
+//    void SetTimelineLatestTime(long inLength);
 
     virtual void LoadProperties() {}
     void InitializePropertyRow(CPropertyRow *inRow, CTimelineRow *inNextRow = nullptr);
 
-    void AddRowToUILists(CTimelineRow *inRow, CTimelineRow *inNextRow, CFilter &inFilter);
     CStateRow *CreateChildRow(ITimelineItemBinding *inChildBinding, CStateRow *inNextRow);
 
-    double m_TimeRatio;
     CFilter m_Filter;
-    CListLayout m_ColorList;
-    CListLayout m_TreeList;
-    CListLayout m_ToggleList;
-    CListLayout m_TimebarList;
-
-    CBaseTimelineTreeControl *m_TreeControl;
-    CColorControl *m_ColorControl;
-    CBlankToggleControl *m_ToggleControl;
-    CBaseTimebarlessRow *m_TimebarControl;
 
     TStateRowList m_StateRows;
     TPropertyRowList m_PropertyRows;
 
     bool m_Loaded;
-    bool m_IsExpanded;
-    bool m_Highlighted;
-    bool m_Dirty;
     bool m_Selected;
-
-    ITimelineItemBinding *m_TimelineItemBinding;
-
-    long m_ActiveStart;
-    long m_ActiveEnd;
 };
 #endif // INCLUDED_BASE_STATE_ROW_H

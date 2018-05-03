@@ -174,14 +174,7 @@ public:
     static ::CColor GetGroupBackgroundColor();
     static ::CColor GetObjectBackgroundColor();
     static ::CColor GetObjectTimebarColor();
-    static ::CColor GetGroupTimebarColor();
     static ::CColor GetLayerTimebarColor();
-    static ::CColor GetBehaviorTimebarColor();
-    static ::CColor GetEffectTimebarColor();
-    static ::CColor GetCameraTimebarColor();
-    static ::CColor GetLightTimebarColor();
-    static ::CColor GetModelTimebarColor();
-    static ::CColor GetComponentTimebarColor();
     static ::CColor GetTopRowColor();
     static ::CColor GetTabButtonDownColor();
     static ::CColor GetDisabledTextColor();

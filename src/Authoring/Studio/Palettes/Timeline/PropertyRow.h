@@ -36,6 +36,7 @@
 //	Includes
 //==============================================================================
 
+#include "AbstractTimelineRowUI.h"
 #include "TimelineRow.h"
 #include "StateRow.h"
 #include "Rct.h"
@@ -47,37 +48,25 @@
 class CPropertyColorControl;
 class CBlankControl;
 class CPropertyTreeControl;
-class CPropertyToggleControl;
-class CPropertyTimebarRow;
 class ITimelineItemProperty;
 
 class CPropertyRow : public CTimelineRow
 {
+    Q_OBJECT
 public:
-    CPropertyRow(ITimelineItemProperty *inProperty);
+    CPropertyRow(ITimelineItemProperty *inProperty, CTimelineRow *parent);
     virtual ~CPropertyRow();
-    CControl *GetColorControl() override;
-    CControl *GetTreeControl() override;
-    CControl *GetToggleControl() override;
-    CControl *GetTimebarControl() override;
 
     void SetTimeRatio(double inTimePerPixel) override;
-    void SetIndent(long inIndent) override;
     void Filter(const CFilter &inFilter, bool inFilterChildren = true) override;
-    void OnMouseOver();
-    void OnMouseOut();
-    void OnMouseDoubleClick();
+
+    void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true) override {}
     void Select(bool inIsShiftKeyPressed = false);
-    void SetDetailedView(bool inIsInDetailedView);
-    void CommitSelections();
-    void SelectKeysInRect(CRct inRect, bool inModifierKeyDown);
-    void SelectAllKeys();
+    bool IsSelected() const override;
+
     void DeleteAllKeys();
     bool IsViewable() const override;
-    void SetEnabled(bool inEnabled);
 
-    ISnappingListProvider *GetSnappingListProvider() const override;
-    void SetSnappingListProvider(ISnappingListProvider *inProvider) override;
     using CTimelineRow::GetTimebarBackgroundColor;
     virtual ::CColor GetTimebarBackgroundColor();
     using CTimelineRow::GetTimebarHighlightBackgroundColor;
@@ -86,17 +75,29 @@ public:
     void Refresh();
     ITimelineItemProperty *GetProperty() const { return m_Property; }
 
-    CPropertyTimebarRow *GetTimebar() { return m_TimebarRow; }
+    void setExpanded(bool expanded) { m_Expanded = expanded; }
+    bool expanded() const { return m_Expanded; }
+
+    void Expand(bool inExpandAll = false, bool inExpandUp = false) override {}
+    void Collapse(bool inCollapseAll = false) override {}
+    bool CalculateActiveStartTime() override { return true; }
+    bool CalculateActiveEndTime() override { return true; }
+
+    // not implemented methods
+    void Initialize(ITimelineItemBinding *) override {}
+    void LoadChildren() override {}
+    bool HasVisibleChildren() override {return false;}
+
+Q_SIGNALS:
+    void visibleChanged(bool visible);
+    void deleteAllKeys();
+    void selectAllKeys();
+    void refreshRequested();
+
 
 protected:
-    CPropertyTreeControl *m_TreeControl;
-    CPropertyToggleControl *m_ToggleControl;
-    CPropertyColorControl *m_PropertyColorControl;
-    CPropertyTimebarRow *m_TimebarRow;
-    bool m_Highlighted;
-    bool m_DetailedView;
-    double m_TimeRatio;
     CFilter m_Filter;
     ITimelineItemProperty *m_Property;
+    bool m_Expanded = false;
 };
 #endif // INCLUDED_PROPERTY_CONTROL_H

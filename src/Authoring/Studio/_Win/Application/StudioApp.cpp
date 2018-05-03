@@ -1326,10 +1326,10 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                         QKeySequence(Qt::Key_Comma),
                         CStudioApp::ReduceTime);
     ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ShiftModifier | Qt::Key_Period),
+                        QKeySequence(Qt::AltModifier | Qt::Key_Period),
                         CStudioApp::AdvanceUltraBigTime);
     ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ShiftModifier | Qt::Key_Comma),
+                        QKeySequence(Qt::AltModifier | Qt::Key_Comma),
                         CStudioApp::ReduceUltraBigTime);
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Return),
@@ -1721,14 +1721,16 @@ void CStudioApp::toggleEyeball()
 {
     CDoc *theDoc = m_core->GetDoc();
     qt3dsdm::Qt3DSDMInstanceHandle handle = theDoc->GetSelectedInstance();
-    qt3dsdm::Qt3DSDMPropertyHandle property = theDoc->GetStudioSystem()->GetClientDataModelBridge()
-            ->GetSceneAsset().m_Eyeball;
-    SValue value;
-    theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
-                                                                             value);
-    bool boolValue = !qt3dsdm::get<bool>(value);
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
-            ->SetInstancePropertyValue(handle, property, boolValue);
+    if (handle.Valid()) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = theDoc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball;
+        SValue value;
+        theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
+                                                                                 value);
+        bool boolValue = !qt3dsdm::get<bool>(value);
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
+                ->SetInstancePropertyValue(handle, property, boolValue);
+    }
 }
 
 void CStudioApp::showInvalidFilenameWarning()

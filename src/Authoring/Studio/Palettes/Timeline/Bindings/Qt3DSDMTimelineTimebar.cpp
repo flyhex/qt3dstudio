@@ -47,10 +47,10 @@
 #include "DurationEditDlg.h"
 #include "IDocumentEditor.h"
 #include "BaseStateRow.h"
-#include "BaseTimebarlessRow.h"
 #include "StudioFullSystem.h"
 #include "StudioPreferences.h"
 #include "ITimelineItemBinding.h"
+#include "RowTree.h"
 
 Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,
@@ -72,7 +72,6 @@ Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
         m_Color.SetRGB(static_cast<int>(theTimebarColor.m_Floats[0] * 255.0f),
                        static_cast<int>(theTimebarColor.m_Floats[1] * 255.0f),
                        static_cast<int>(theTimebarColor.m_Floats[2] * 255.0f));
-        m_PreviousColor = m_Color;
     }
     qt3dsdm::IStudioFullSystemSignalProvider *theProvider =
         inTimelineTranslationManager->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
@@ -107,33 +106,11 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
                 case OBJTYPE_LAYER:
                     m_Color = CStudioPreferences::GetLayerTimebarColor();
                     break;
-                case OBJTYPE_BEHAVIOR:
-                    m_Color = CStudioPreferences::GetBehaviorTimebarColor();
-                    break;
-                case OBJTYPE_CAMERA:
-                    m_Color = CStudioPreferences::GetCameraTimebarColor();
-                    break;
-                case OBJTYPE_LIGHT:
-                    m_Color = CStudioPreferences::GetLightTimebarColor();
-                    break;
-                case OBJTYPE_MODEL:
-                    m_Color = CStudioPreferences::GetModelTimebarColor();
-                    break;
-                case OBJTYPE_GROUP:
-                    m_Color = CStudioPreferences::GetGroupTimebarColor();
-                    break;
-                case OBJTYPE_COMPONENT:
-                    m_Color = CStudioPreferences::GetComponentTimebarColor();
-                    break;
-                case OBJTYPE_EFFECT:
-                    m_Color = CStudioPreferences::GetEffectTimebarColor();
-                    break;
                 default:
                     m_Color = CStudioPreferences::GetObjectTimebarColor();
                     break;
                 }
             }
-            m_PreviousColor = m_Color;
             needsInvalidate = true;
         } else if (inProperty == theClientDataModelBridge->GetSceneAsset().m_TimebarText) {
             if (m_PropertySystem->GetInstancePropertyValue(
@@ -150,11 +127,9 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
             ITimelineItemBinding *theBinding =
                 m_TimelineTranslationManager->GetOrCreate(inInstance);
             if (theBinding) {
-                CBaseStateRow *theRow = theBinding->GetRow();
-                if (theRow) {
-                    CBaseTimebarlessRow *theTimebar = theRow->GetTimebar();
-                    theTimebar->RefreshRowMetaData();
-                }
+                RowTree *rowTree = theBinding->getRowTree();
+                if (rowTree)
+                    rowTree->rowTimeline()->setBarColor(m_Color);
             }
         }
     }
@@ -233,34 +208,6 @@ void Qt3DSDMTimelineTimebar::CommitTimeChange()
 void Qt3DSDMTimelineTimebar::RollbackTimeChange()
 {
     RollbackEditor();
-}
-
-void Qt3DSDMTimelineTimebar::SetTimebarColor(const ::CColor &inColor)
-{
-    using namespace Q3DStudio;
-    if (inColor != m_PreviousColor) {
-        // Change to previously stored color briefly so undo will contain correct previous color
-        PreviewTimebarColor(m_PreviousColor);
-        qt3dsdm::Qt3DSDMInstanceHandle theHandle = m_DataHandle;
-        SCOPED_DOCUMENT_EDITOR(*m_TimelineTranslationManager->GetDoc(), QObject::tr("Set Timebar Color"))
-            ->SetTimebarColor(theHandle, inColor);
-        m_PreviousColor = m_Color;
-    }
-}
-
-// Change timebar color without creating undo action (so just a preview)
-void Qt3DSDMTimelineTimebar::PreviewTimebarColor(const ::CColor &inColor)
-{
-    using namespace Q3DStudio;
-    m_Color = inColor;
-    // Get editable handle into document editor without undo transactions
-    IDocumentEditor *editor = dynamic_cast<IDocumentEditor*>(
-                &m_TimelineTranslationManager->GetDoc()->GetDocumentReader());
-    editor->SetTimebarColor(m_DataHandle, inColor);
-    m_TimelineTranslationManager->GetDoc()
-        ->GetCore()
-        ->GetDispatch()
-        ->FireImmediateRefreshInstance(m_DataHandle);
 }
 
 void Qt3DSDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComment)

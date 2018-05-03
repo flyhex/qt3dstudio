@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <QObject>
+
 #include "TimelineFilter.h"
 #include "CColor.h"
 #include "StudioObjectTypes.h"
@@ -40,37 +42,32 @@
 
 class CSnapper;
 class CControl;
-class CBaseStateRow;
 class ISnappingListProvider;
-class ITimelineControl;
+class ITimelineItemBinding;
+class CPropertyRow;
 
-class CTimelineRow
+const double DEFAULT_TIME_RATIO = .05;
+
+class CTimelineRow : public QObject
 {
+    Q_OBJECT
 public:
     static const long TREE_INDENT;
 
-    CTimelineRow();
+    explicit CTimelineRow(CTimelineRow *parent);
     virtual ~CTimelineRow();
 
-    virtual CControl *GetColorControl() = 0;
-    virtual CControl *GetTreeControl() = 0;
-    virtual CControl *GetToggleControl() = 0;
-    virtual CControl *GetTimebarControl() = 0;
-
-    virtual void SetIndent(long inIndent);
-    long GetIndent();
-
+    virtual void Initialize(ITimelineItemBinding *inTimelineItemBinding) = 0;
     virtual void Filter(const CFilter &inFilter, bool inFilterChildren = true) = 0;
 
-    void SetParent(CBaseStateRow *inParent);
-    CBaseStateRow *GetParentRow() const;
+    virtual void Select(Qt::KeyboardModifiers inKeyState, bool inCheckKeySelection = true) = 0;
+    virtual bool IsSelected() const = 0;
+
+    void SetParent(CTimelineRow *inParent);
+    CTimelineRow *GetParentRow() const;
     virtual void SetTimeRatio(double inTimeRatio);
-    virtual void OnChildVisibilityChanged();
+    virtual double GetTimeRatio();
     virtual bool IsViewable() const;
-    virtual void PopulateSnappingList(CSnapper *inSnappingList);
-    virtual ISnappingListProvider *GetSnappingListProvider() const = 0;
-    virtual void SetSnappingListProvider(ISnappingListProvider *inProvider) = 0;
-    virtual ITimelineControl *GetTopControl() const;
 
     virtual ::CColor GetTimebarBackgroundColor(EStudioObjectType inType);
     virtual ::CColor GetTimebarHighlightBackgroundColor(EStudioObjectType inType);
@@ -79,9 +76,46 @@ public:
 
     virtual void Dispose();
 
+    virtual void Expand(bool inExpandAll = false, bool inExpandUp = false) = 0;
+    virtual void Collapse(bool inCollapseAll = false) = 0;
+    bool isExpanded() const;
+
+    virtual bool CalculateActiveStartTime() = 0;
+    virtual bool CalculateActiveEndTime() = 0;
+    long GetActiveStart();
+    long GetActiveEnd();
+
+    void setDirty(bool dirty);
+
+    virtual void LoadChildren() = 0;
+    virtual bool HasVisibleChildren() = 0;
+
+    ITimelineItemBinding *GetTimelineItemBinding() const;
+    EStudioObjectType GetObjectType() const;
+    ITimelineItem *GetTimelineItem() const;
+
+    void RequestSelectKeysByTime(long inTime, bool inSelected);
+
+Q_SIGNALS:
+    void initialized();
+    void dirtyChanged(bool dirty);
+    void propertyRowAdded(CPropertyRow *newRow);
+    void childrenLoaded();
+    void selectKeysByTime(long inTime, bool inSelected);
+    void selectedChanged(bool selected);
+    void timeRatioChanged(double timeRatio);
+
 protected:
-    CBaseStateRow *m_ParentRow;
+    CTimelineRow *m_ParentRow;
+
+    ITimelineItemBinding *m_TimelineItemBinding = nullptr;
+
     bool m_IsViewable;
-    long m_Indent;
+    long m_ActiveStart;
+    long m_ActiveEnd;
+    bool m_Dirty = false;
+    bool m_IsExpanded = false;
+
+    double m_TimeRatio = DEFAULT_TIME_RATIO;
 };
 #endif // INCLUDED_TIMELINE_ROW_H

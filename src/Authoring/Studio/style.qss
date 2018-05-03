@@ -383,3 +383,24 @@ DataInputSelectDlg::item:selected {
 DataInputSelectDlg::item:hover {
     background: #23516d;
 }
+
+/* QSlider horizontal */
+QSlider {
+    background: transparent;
+}
+
+QSlider::groove:horizontal {
+    background: #dddddd;
+    height: 1px;
+}
+
+QSlider::handle:horizontal {
+    background: #999A9B;
+    width: 12px;
+    margin: -5px 0;
+    border-radius: 4px;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #cccccc;
+}

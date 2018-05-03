@@ -52,9 +52,9 @@ class CPaletteManager;
 class CRecentItems;
 class CSceneView;
 class CStudioApp;
-class CTimelineControl;
 class ITimelineTimebar;
 class RemoteDeploymentSender;
+class TimelineWidget;
 class CStudioPreferencesPropSheet;
 
 #ifdef QT_NAMESPACE
@@ -225,12 +225,9 @@ public:
 
     void OnConnectionChanged(bool);
 
-    void OnTimeBarColorChanged(const QColor &color);
-
     void onCtrlNPressed();
 
-    CTimelineControl *GetTimelineControl();
-    ITimelineTimebar *GetSelectedTimelineTimebar();
+    TimelineWidget *getTimelineWidget() const;
 
     void EditPreferences(short inPageIndex);
 

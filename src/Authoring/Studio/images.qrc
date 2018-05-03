@@ -192,6 +192,7 @@
         <file>images/playback_tools_low-01.png</file>
         <file>images/playback_tools_low-02.png</file>
         <file>images/playback_tools_low-03.png</file>
+        <file>images/playback_tools_low-04.png</file>
         <file>images/Toolbar-00.png</file>
         <file>images/Toolbar-01.png</file>
         <file>images/Toolbar-02.png</file>
@@ -257,6 +258,10 @@
         <file>images/toolbutton-arrow.png</file>
         <file>images/add-disabled.png</file>
         <file>images/add-disabled@2x.png</file>
+        <file>images/zoom_out.png</file>
+        <file>images/zoom_out@2x.png</file>
+        <file>images/zoom_in.png</file>
+        <file>images/zoom_in@2x.png</file>
         <file>images/Tutorial/screens/1x/1.png</file>
         <file>images/Tutorial/screens/1x/2.png</file>
         <file>images/Tutorial/screens/1x/3.png</file>

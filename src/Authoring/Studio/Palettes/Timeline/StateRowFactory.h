@@ -44,7 +44,6 @@ protected:
     virtual ~CStateRowFactory();
 
 public:
-    static CStateRow *CreateStateRow(ITimelineItemBinding *inTimelineItem, CBaseStateRow *inParent,
-                                     ISnappingListProvider *inSnappingListProvider);
+    static CStateRow *CreateStateRow(ITimelineItemBinding *inTimelineItem, CBaseStateRow *inParent);
 };
 #endif // INCLUDED_STATE_ROW_FACTORY_H

@@ -40,6 +40,7 @@ class IDoc;
 class CDoc;
 class CCmdBatch;
 class COffsetKeyframesCommandHelper;
+struct Keyframe;
 
 //==============================================================================
 /**
@@ -56,6 +57,7 @@ protected:
         m_KeyframeHandles; ///< no. corresponds to the channels the animated property has.
     CDoc *m_Doc;
     bool m_Selected;
+    Keyframe *m_ui = nullptr;
 
 public:
     Qt3DSDMTimelineKeyframe(IDoc *inDoc);
@@ -66,6 +68,8 @@ public:
     long GetTime() const override;
     void SetTime(const long inNewTime) override;
     void SetDynamic(bool inIsDynamic) override;
+    Keyframe *getUI() override;
+    void setUI(Keyframe *kfUI) override;
     bool IsDynamic() const override;
 
     void AddKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle);

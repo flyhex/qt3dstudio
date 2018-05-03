@@ -30,25 +30,16 @@
 #include "stdafx.h"
 
 #include "SlideRow.h"
-#include "BlankToggleControl.h"
 #include "ColorControl.h"
-#include "SlideTimebarRow.h"
 #include "Bindings/ITimelineItemBinding.h"
-#include "ITimelineControl.h"
 
-CSlideRow::CSlideRow(ITimelineItemBinding *inTimelineItem)
-    : m_TimelineControl(nullptr)
+CSlideRow::CSlideRow(CTimelineRow *parent)
+    : CBaseStateRow(parent)
 {
-    Initialize(inTimelineItem);
 }
 
 CSlideRow::~CSlideRow()
 {
-}
-
-void CSlideRow::SetTimelineControl(ITimelineControl *inTimelineControl)
-{
-    m_TimelineControl = inTimelineControl;
 }
 
 //=============================================================================
@@ -81,40 +72,6 @@ bool CSlideRow::CalculateActiveStartTime()
 bool CSlideRow::CalculateActiveEndTime()
 {
     return false;
-}
-
-ISnappingListProvider *CSlideRow::GetSnappingListProvider() const
-{
-    ASSERT(m_TimelineControl);
-    return m_TimelineControl->GetSnappingListProvider();
-}
-
-void CSlideRow::SetSnappingListProvider(ISnappingListProvider *inProvider)
-{
-    // does nothing
-    Q_UNUSED(inProvider);
-}
-
-//=============================================================================
-/**
- * See CBaseStateRow::GetTopControl comments.
- * This being to "top" row will have the actual pointer
- */
-ITimelineControl *CSlideRow::GetTopControl() const
-{
-    return m_TimelineControl;
-}
-
-//=============================================================================
-/**
- * Create a new CStateTimebarRow.
- * This is virtual and used for objects to return their type specific
- * timebar rows if they want to.
- * @return the created timebar row.
- */
-CBaseTimebarlessRow *CSlideRow::CreateTimebarRow()
-{
-    return new CSlideTimebarRow(this);
 }
 
 bool CSlideRow::PerformFilter(const CFilter &inFilter)

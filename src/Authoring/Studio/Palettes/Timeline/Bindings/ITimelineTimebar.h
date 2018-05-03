@@ -65,8 +65,6 @@ public:
     virtual void RollbackTimeChange() = 0;
     //
     virtual CColor GetTimebarColor() = 0;
-    virtual void SetTimebarColor(const CColor &inColor) = 0;
-    virtual void PreviewTimebarColor(const CColor &inColor) = 0;
     virtual Q3DStudio::CString GetTimebarComment() = 0;
     virtual void SetTimebarComment(const Q3DStudio::CString &inComment) = 0;
     virtual void SetTimebarTime(ITimeChangeCallback *inCallback = nullptr) = 0;

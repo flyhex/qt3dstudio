@@ -1087,44 +1087,9 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 /**
  * @return default colors for specific timebars in the timeline
  */
-::CColor CStudioPreferences::GetGroupTimebarColor()
-{
-    return ::CColor("#cbb0de");
-}
-
 ::CColor CStudioPreferences::GetLayerTimebarColor()
 {
     return ::CColor("#e7e0cd");
-}
-
-::CColor CStudioPreferences::GetBehaviorTimebarColor()
-{
-    return ::CColor("#91ba60");
-}
-
-::CColor CStudioPreferences::GetCameraTimebarColor()
-{
-    return ::CColor("#a0a1a2");
-}
-
-::CColor CStudioPreferences::GetLightTimebarColor()
-{
-    return ::CColor("#a0a1a2");
-}
-
-::CColor CStudioPreferences::GetModelTimebarColor()
-{
-    return ::CColor("#788ac5");
-}
-
-::CColor CStudioPreferences::GetComponentTimebarColor()
-{
-    return ::CColor("#bb7333");
-}
-
-::CColor CStudioPreferences::GetEffectTimebarColor()
-{
-    return ::CColor("#cb927f");
 }
 
 //==============================================================================
@@ -1327,6 +1292,7 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_studioColor2"), s_studioColor2);
     qml->setContextProperty(QStringLiteral("_studioColor3"), s_studioColor3);
     qml->setContextProperty(QStringLiteral("_backgroundColor"), s_backgroundColor);
+    qml->setContextProperty(QStringLiteral("_buttonDownColor"), s_ButtonDownColor.getQColor());
     qml->setContextProperty(QStringLiteral("_guideColor"), s_guideColor);
     qml->setContextProperty(QStringLiteral("_selectionColor"), s_selectionColor);
     qml->setContextProperty(QStringLiteral("_textColor"), s_textColor);

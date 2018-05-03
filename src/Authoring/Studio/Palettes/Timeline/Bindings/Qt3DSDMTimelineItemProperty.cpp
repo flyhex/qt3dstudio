@@ -39,7 +39,6 @@
 #include "PropertyRow.h"
 #include "TimelineTranslationManager.h"
 #include "ITimelineItemBinding.h"
-#include "PropertyTimebarRow.h"
 #include "Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSDMTimelineKeyframe.h"
 #include "KeyframesManager.h"
@@ -144,6 +143,11 @@ void Qt3DSDMTimelineItemProperty::ReleaseKeyframes()
     m_AnimationHandles.clear();
 }
 
+qt3dsdm::Qt3DSDMPropertyHandle Qt3DSDMTimelineItemProperty::getPropertyHandle() const
+{
+    return m_PropertyHandle;
+}
+
 // Type doesn't change and due to the logic required to figure this out, cache it.
 void Qt3DSDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
@@ -171,7 +175,7 @@ inline ITimelineItemBinding *GetParentBinding(CPropertyRow *inRow)
 {
     ITimelineItemBinding *theParentBinding = nullptr;
     if (inRow) {
-        CBaseStateRow *theParentRow = inRow->GetParentRow();
+        CBaseStateRow *theParentRow = dynamic_cast<CBaseStateRow *>(inRow->GetParentRow());
         if (theParentRow) {
             theParentBinding = theParentRow->GetTimelineItemBinding();
             ASSERT(theParentBinding); // TimelineItemBinding should be set properly during
@@ -229,6 +233,11 @@ void Qt3DSDMTimelineItemProperty::Bind(CPropertyRow *inRow)
     ASSERT(!m_Row);
 
     m_Row = inRow;
+}
+
+RowTree *Qt3DSDMTimelineItemProperty::getRowTree() const
+{
+    return m_rowTree;
 }
 
 void Qt3DSDMTimelineItemProperty::Release()
@@ -409,6 +418,11 @@ void Qt3DSDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /
     DoSelectKeyframes(inSelected, inTime, false, theParent);
 }
 
+void Qt3DSDMTimelineItemProperty::setRowTree(RowTree *rowTree)
+{
+    m_rowTree = rowTree;
+}
+
 CPropertyRow *Qt3DSDMTimelineItemProperty::GetRow()
 {
     return m_Row;
@@ -511,7 +525,7 @@ void Qt3DSDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime
     }
     // Requires UI to be updated explicitly
     if (inParentTriggered && m_Row)
-        m_Row->GetTimebar()->SelectKeysByTime(inTime, inSelected);
+        m_Row->RequestSelectKeysByTime(inTime, inSelected);
 
     // Support existing feature, selection by mouse-drag a rect, when all property keyframes are
     // selected, the asset keyframe is automatically selected as well.

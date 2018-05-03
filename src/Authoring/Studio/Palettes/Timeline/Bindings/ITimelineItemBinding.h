@@ -37,6 +37,7 @@
 #include "SIterator.h"
 
 class CBaseStateRow;
+class RowTree;
 class CControlWindowListener;
 class ITimelineKeyframesManager;
 
@@ -83,7 +84,9 @@ public:
     virtual ~ITimelineItemBinding() {}
 
     virtual ITimelineItem *GetTimelineItem() = 0;
-    virtual CBaseStateRow *GetRow() = 0;
+    virtual CBaseStateRow *GetRow() = 0; // Mahmoud_TODO: remove after timeline is complete
+    virtual RowTree *getRowTree() const = 0; // UI
+    virtual void setRowTree(RowTree *row) = 0;
 
     // Events
     virtual void SetSelected(bool multiSelect) = 0;
@@ -127,6 +130,11 @@ public:
     // Properties
     virtual void RemoveProperty(ITimelineItemProperty *inProperty) = 0;
     virtual void LoadProperties() = 0;
+
+    void setCreateUIRow(bool create) { m_createUIRow = create; }
+
+protected:
+    bool m_createUIRow = true; // control creation of UI row for old style timeline UI
 };
 
 //=============================================================================

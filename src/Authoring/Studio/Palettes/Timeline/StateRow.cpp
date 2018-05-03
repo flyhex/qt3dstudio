@@ -37,14 +37,7 @@
 //	Includes
 //==============================================================================
 #include "StateRow.h"
-#include "TimelineControl.h"
-#include "TimelineTimelineLayout.h"
-#include "ColorControl.h"
-#include "ToggleControl.h"
 #include "PropertyRow.h"
-#include "StateTimebarRow.h"
-#include "BaseTimebarlessRow.h"
-#include "BaseTimelineTreeControl.h"
 #include "Bindings/ITimelineItemBinding.h"
 
 //=============================================================================
@@ -52,7 +45,8 @@
  * Creates a new CStateRow for the Asset.
  * @param inParentRow the parent of this row.
  */
-CStateRow::CStateRow(CBaseStateRow *inParentRow)
+CStateRow::CStateRow(CBaseStateRow *inParentRow, bool loaded)
+    : CBaseStateRow(inParentRow, loaded)
 {
     m_ParentRow = inParentRow;
 }
@@ -61,32 +55,12 @@ CStateRow::~CStateRow()
 {
 }
 
-CBlankToggleControl *CStateRow::CreateToggleControl()
-{
-    return (m_TimelineItemBinding->ShowToggleControls())
-        ? new CToggleControl(this, m_TimelineItemBinding)
-        : CBaseStateRow::CreateToggleControl();
-}
-
-//=============================================================================
-/**
- * Create a new CStateTimebarRow.
- * This is virtual and used for objects to return their type specific
- * timebar rows if they want to.
- * @return the created timebar row.
- */
-CBaseTimebarlessRow *CStateRow::CreateTimebarRow()
-{
-    return new CStateTimebarRow(this);
-}
-
 //=============================================================================
 /**
  * Initialize this object.
  * This must be called after construction and may only be called once.
  */
-void CStateRow::Initialize(ITimelineItemBinding *inTimelineItemBinding,
-                           ISnappingListProvider *inProvider)
+void CStateRow::Initialize(ITimelineItemBinding *inTimelineItemBinding)
 {
     CBaseStateRow::Initialize(inTimelineItemBinding);
 
@@ -94,8 +68,6 @@ void CStateRow::Initialize(ITimelineItemBinding *inTimelineItemBinding,
     // recursive calculations on ever draw.
     CalculateActiveStartTime();
     CalculateActiveEndTime();
-
-    SetSnappingListProvider(inProvider);
 
     if (GetTimelineItem()->IsExpanded()) // this is stored for the current opened presentation and
                                          // conveniently help you remember the last view before you
@@ -130,7 +102,7 @@ void CStateRow::Expand(bool inExpandAll /*= false*/, bool inExpandUp)
         m_IsExpanded); // remember this setting so that it persist when this row is recreated
 
     if (theDoRecalLayout)
-        DoTimelineRecalcLayout();
+        emit layoutRecalcRequested();
 }
 
 //=============================================================================
@@ -147,38 +119,12 @@ void CStateRow::Collapse(bool inCollapseAll /* = false */)
         m_IsExpanded); // remember this setting so that it persist when this row is recreated
     // only RecalcLayout if this is collapsed
     if (theWasExpanded != m_IsExpanded)
-        DoTimelineRecalcLayout();
+        emit layoutRecalcRequested();
 }
 
 bool CStateRow::PerformFilter(const CFilter &inFilter)
 {
     return inFilter.Filter(m_TimelineItemBinding->GetTimelineItem());
-}
-
-//=============================================================================
-/**
- * Set the indent of this control.
- * This controls how far to the right the toggle and text display on this
- * control. The indent should be increased for every level of sub-controls.
- * @param inIndent how much this control should be indented.
- */
-void CStateRow::SetIndent(long inIndent)
-{
-    CTimelineRow::SetIndent(inIndent);
-
-    m_TreeControl->SetIndent(inIndent);
-
-    TStateRowList::iterator thePos = m_StateRows.begin();
-    for (; thePos != m_StateRows.end(); ++thePos)
-        (*thePos)->SetIndent(inIndent + CTimelineRow::TREE_INDENT);
-
-    // For each property on this object
-    TPropertyRowList::iterator thePropPos = m_PropertyRows.begin();
-    for (; thePropPos != m_PropertyRows.end(); ++thePropPos) {
-        CPropertyRow *thePropRow = (*thePropPos);
-        if (thePropRow)
-            thePropRow->SetIndent(inIndent + CTimelineRow::TREE_INDENT);
-    }
 }
 
 bool CStateRow::HasVisibleChildren()
@@ -197,33 +143,6 @@ bool CStateRow::HasVisibleChildren()
     return CBaseStateRow::HasVisibleChildren();
 }
 
-ISnappingListProvider *CStateRow::GetSnappingListProvider() const
-{
-    CStateTimebarRow *theTimebarControl = dynamic_cast<CStateTimebarRow *>(m_TimebarControl);
-    return (theTimebarControl) ? &theTimebarControl->GetSnappingListProvider() : nullptr;
-}
-
-void CStateRow::SetSnappingListProvider(ISnappingListProvider *inProvider)
-{
-    CStateTimebarRow *theTimebarControl = dynamic_cast<CStateTimebarRow *>(m_TimebarControl);
-    if (theTimebarControl)
-        theTimebarControl->SetSnappingListProvider(inProvider);
-}
-
-//=============================================================================
-/**
- * Trigger any external applications where applicable.
- */
-void CStateRow::OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
-    Q_UNUSED(inPoint);
-    Q_UNUSED(inFlags);
-
-    if (!m_TimelineItemBinding
-             ->OpenAssociatedEditor()) // if not handled, fall backon the base class
-        CBaseStateRow::OnMouseDoubleClick(inPoint, inFlags);
-}
-
 void CStateRow::OnTimeChange()
 {
     CalculateActiveStartTime();
@@ -233,11 +152,9 @@ void CStateRow::OnTimeChange()
     // of the control change
     //		this should just change width.. but maybe I am missing something, so I am leaving this
     //here for 'easy' debugging
-    // DoTimelineRecalcLayout( );
+    // emit layoutRecalcRequested();
 
-    m_TimebarControl->UpdateTime(GetStartTime(), GetEndTime());
-
-    GetTopControl()->OnLayoutChanged();
+    emit timeChanged();
 }
 
 //=============================================================================
@@ -298,14 +215,4 @@ long CStateRow::GetLatestEndTime()
 void CStateRow::LoadProperties()
 {
     m_TimelineItemBinding->LoadProperties();
-}
-
-//==============================================================================
-/**
- *	Tells the timeline timeline layout to recalc its layout.  Should only be called
- *  from this class, that's why it's protected.
- */
-void CStateRow::DoTimelineRecalcLayout()
-{
-    GetTopControl()->OnLayoutChanged();
 }

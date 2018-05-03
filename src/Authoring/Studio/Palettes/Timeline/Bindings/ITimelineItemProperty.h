@@ -36,6 +36,7 @@
 #include "Qt3DSDMMetaData.h"
 #include "Qt3DSString.h"
 
+class RowTree;
 class CPropertyRow;
 class IKeyframe;
 class ITimelineKeyframesManager;
@@ -62,7 +63,9 @@ public:
 
     virtual void Bind(CPropertyRow *inRow) = 0;
     virtual void Release() = 0;
-    virtual CPropertyRow *GetRow() = 0;
+    virtual void setRowTree(RowTree *row) = 0;
+    virtual RowTree *getRowTree() const = 0;
+    virtual CPropertyRow *GetRow() = 0; // Mahmoud_TODO: delete after new timeline is done
 
     // Keyframes
     virtual ITimelineKeyframesManager *GetKeyframesManager() const = 0;

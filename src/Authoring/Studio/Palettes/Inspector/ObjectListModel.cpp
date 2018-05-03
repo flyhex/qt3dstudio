@@ -28,6 +28,7 @@
 
 #include "ObjectListModel.h"
 
+#include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "Doc.h"
 #include "GraphUtils.h"
@@ -99,9 +100,21 @@ QVariant ObjectListModel::data(const QModelIndex &index,
     if (!hasIndex(index.row(), index.column(), index.parent()))
         return {};
 
+    auto handle = handleForIndex(index);
+
+    auto studioSystem = m_core->GetDoc()->GetStudioSystem();
+    auto propertySystem = studioSystem->GetPropertySystem();
+    qt3dsdm::SValue typeValue;
+    propertySystem->GetInstancePropertyValue(handle,
+                                             studioSystem->GetClientDataModelBridge()
+                                             ->GetTypeProperty(), typeValue);
+    qt3dsdm::DataModelDataType::Value valueType(qt3dsdm::GetValueType(typeValue));
+    if (valueType == qt3dsdm::DataModelDataType::None)
+        return {};
+
     switch (role) {
     case NameRole: {
-        return nameForHandle(handleForIndex(index));
+        return nameForHandle(handle);
     }
     case PathReferenceRole: {
         Q3DStudio::CString data;
@@ -109,30 +122,29 @@ QVariant ObjectListModel::data(const QModelIndex &index,
             data = m_objRefHelper->GetObjectReferenceString(
                         handleForIndex(startingIndex),
                         CRelativePathTools::EPATHTYPE_RELATIVE,
-                        handleForIndex(index));
+                        handle);
         } else {
             data = m_objRefHelper->GetObjectReferenceString(
                         m_baseHandle,
                         CRelativePathTools::EPATHTYPE_RELATIVE,
-                        handleForIndex(index));
+                        handle);
         }
         return data.toQString();
     }
     case AbsolutePathRole: {
         Q3DStudio::CString data(m_objRefHelper->GetObjectReferenceString(
-            m_baseHandle, CRelativePathTools::EPATHTYPE_GUID, handleForIndex(index)));
+            m_baseHandle, CRelativePathTools::EPATHTYPE_GUID, handle));
         return data.toQString();
     }
     case HandleRole: {
         return (int)handleForIndex(index);
     }
     case IconRole: {
-        auto info = m_objRefHelper->GetInfo(handleForIndex(index));
+        auto info = m_objRefHelper->GetInfo(handle);
         return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
     }
     case TextColorRole: {
         auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-        auto handle = handleForIndex(index);
         auto objType = bridge->GetObjectType(handle);
         auto info = m_objRefHelper->GetInfo(handle);
         if (m_excludeTypes.contains(objType))
@@ -175,11 +187,13 @@ QModelIndex ObjectListModel::parent(const QModelIndex &index) const
 
     int row = 0;
     qt3dsdm::Qt3DSDMInstanceHandle grandParentHandle = m_core->GetDoc()->GetAssetGraph()
-            ->GetParent(handle);
-    const auto children = childrenList(m_slideHandle, grandParentHandle);
-    const auto it = std::find(children.begin(), children.end(), parentHandle);
-    if (it != children.end())
+            ->GetParent(parentHandle);
+    if (grandParentHandle.Valid()) {
+        const auto children = childrenList(m_slideHandle, grandParentHandle);
+        const auto it = std::find(children.begin(), children.end(), parentHandle);
+        Q_ASSERT(it != children.end());
         row = it - children.begin();
+    }
 
     return createIndex(row, 0, (quintptr)(parentHandle));
 }
@@ -208,7 +222,8 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(
         const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
         const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
-    auto slideSystem = m_core->GetDoc()->GetStudioSystem()->GetSlideSystem();
+    auto studioSystem = m_core->GetDoc()->GetStudioSystem();
+    auto slideSystem = studioSystem->GetSlideSystem();
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);
 
     qt3dsdm::TInstanceHandleList children;
@@ -260,11 +275,10 @@ QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle
 
 FlatObjectListModel::FlatObjectListModel(ObjectListModel *sourceModel, QObject *parent)
     : QAbstractListModel(parent)
-    , m_sourceModel(sourceModel)
 
 {
     Q_ASSERT(sourceModel);
-    m_sourceInfo = collectSourceIndexes({}, 0);
+    setSourceModel(sourceModel);
 }
 
 QVector<FlatObjectListModel::SourceInfo> FlatObjectListModel::collectSourceIndexes(
@@ -302,6 +316,11 @@ QModelIndex FlatObjectListModel::mapToSource(const QModelIndex &proxyIndex) cons
     if (row < 0 || row >= m_sourceInfo.count())
         return {};
     return m_sourceInfo[row].index;
+}
+
+QModelIndex FlatObjectListModel::mapFromSource(const QModelIndex &sourceIndex) const
+{
+    return index(rowForSourceIndex(sourceIndex));
 }
 
 QVariant FlatObjectListModel::data(const QModelIndex &index, int role) const
@@ -391,6 +410,53 @@ int FlatObjectListModel::rowCount(const QModelIndex &parent) const
 void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
 {
     beginResetModel();
+    sourceModel->disconnect(this);
+    connect(sourceModel, &QAbstractListModel::dataChanged, this,
+            [this](const QModelIndex &start, const QModelIndex &end, const QVector<int> &roles) {
+        emit dataChanged(mapFromSource(start), mapFromSource(end), roles);
+
+    });
+    connect(sourceModel, &QAbstractListModel::rowsInserted, this,
+            [this](const QModelIndex &parent, int start, int end) {
+        const int parentRow = rowForSourceIndex(parent);
+        const int depth = m_sourceInfo[parentRow].depth + 1;
+        const int startRow = rowForSourceIndex(parent, start);
+        Q_ASSERT(startRow != -1);
+        beginInsertRows({}, startRow, startRow + end - start);
+        for (int row = end; row >= start; --row) {
+            SourceInfo info;
+            info.depth = depth;
+            info.index = m_sourceModel->index(row, 0, parent);
+            m_sourceInfo.insert(startRow, info);
+        }
+        endInsertRows();
+    });
+    connect(sourceModel, &QAbstractListModel::rowsRemoved, this,
+            [this](const QModelIndex &parent, int start, int end) {
+        const int startRow = rowForSourceIndex(parent, start);
+        const int endRow = rowForSourceIndex(parent, end);
+        Q_ASSERT(startRow != -1 && endRow != -1);
+        beginRemoveRows({}, startRow, endRow);
+        m_sourceInfo.remove(startRow, endRow - startRow + 1);
+        endRemoveRows();
+    });
+    connect(sourceModel, &QAbstractListModel::modelReset, this,
+            [this]() {
+        beginResetModel();
+        m_sourceInfo = collectSourceIndexes({}, 0);
+        endResetModel();
+    });
+
+    connect(sourceModel, &ObjectListModel::roleUpdated, this, [this](int role) {
+        emit dataChanged(index(0,0), index(rowCount() - 1, 0), {role});
+    });
+
+    connect(sourceModel, &ObjectListModel::rolesUpdated, this,
+            [this](const QVector<int> &roles = QVector<int> ()) {
+                emit dataChanged(index(0,0), index(rowCount() - 1, 0), roles);
+            });
+
+
     m_sourceModel = sourceModel;
     m_sourceInfo = collectSourceIndexes({}, 0);
     endResetModel();
@@ -424,11 +490,37 @@ bool FlatObjectListModel::expandTo(const QModelIndex &startIndex, const QModelIn
     return false;
 }
 
-int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex)
+int FlatObjectListModel::rowForSourceIndex(const QModelIndex &sourceIndex) const
 {
     for (int i = 0; i < m_sourceInfo.size(); i++) {
         if (m_sourceInfo[i].index == sourceIndex)
             return i;
     }
     return -1;
+}
+
+int FlatObjectListModel::rowForSourceIndex(const QModelIndex& parentIndex, int row) const
+{
+    const int parentRow = rowForSourceIndex(parentIndex);
+    if (parentRow == -1)
+        return -1;
+    const int childDepth = m_sourceInfo[parentRow].depth + 1;
+    int i = parentRow + 1;
+    while (i < m_sourceInfo.size()) {
+        const auto& info = m_sourceInfo[i];
+        if (info.depth < childDepth)
+            break;
+        if (info.depth == childDepth) {
+            if (row == 0)
+                break;
+            --row;
+        }
+        ++i;
+    }
+    return i;
+}
+
+QModelIndex FlatObjectListModel::sourceIndexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
+{
+    return m_sourceModel->indexForHandle(handle);
 }

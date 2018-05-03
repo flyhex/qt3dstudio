@@ -36,7 +36,6 @@
 //	Includes
 //==============================================================================
 #include "StateRow.h"
-#include "TimelineTimelineLayout.h"
 #include "Bindings/IKeyframeSelector.h"
 
 //==============================================================================

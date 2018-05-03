@@ -48,7 +48,6 @@ class CButtonDownListener;
 class CColorControl;
 class CStateTreeControl;
 class CToggleControl;
-class CStateTimebarlessRow;
 class CPropertyRow;
 class CCmdBatch;
 class CSnapper;
@@ -56,35 +55,29 @@ class CResImage;
 
 class CStateRow : public CBaseStateRow
 {
+    Q_OBJECT
 public:
-    CStateRow(CBaseStateRow *inParentRow);
+    CStateRow(CBaseStateRow *inParentRow, bool loaded = false);
     virtual ~CStateRow();
 
     using CBaseStateRow::Initialize;
-    virtual void Initialize(ITimelineItemBinding *inTimelineItemBinding,
-                            ISnappingListProvider *inProvider);
+    virtual void Initialize(ITimelineItemBinding *inTimelineItemBinding);
 
     void Expand(bool inExpandAll = false, bool inExpandUp = false) override;
     void Collapse(bool inCollapseAll = false) override;
-    void SetIndent(long inIndent) override;
     virtual void OnTimeChange();
 
     long GetLatestEndTime() override;
     bool CalculateActiveStartTime() override;
     bool CalculateActiveEndTime() override;
     bool HasVisibleChildren() override;
-    ISnappingListProvider *GetSnappingListProvider() const override;
-    void SetSnappingListProvider(ISnappingListProvider *inProvider) override;
 
-    // CControl
-    void OnMouseDoubleClick(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+Q_SIGNALS:
+    void timeChanged();
+    void layoutRecalcRequested();
 
 protected:
-    CBlankToggleControl *CreateToggleControl() override;
-    CBaseTimebarlessRow *CreateTimebarRow() override;
-
     bool PerformFilter(const CFilter &inFilter) override;
     void LoadProperties() override;
-    void DoTimelineRecalcLayout();
 };
 #endif // INCLUDED_STATE_ROW_H

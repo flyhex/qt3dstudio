@@ -37,6 +37,7 @@
 #include "Qt3DSDMTimeline.h"
 #include "Qt3DSDMPropertyDefinition.h"
 
+class RowTree;
 class CTimelineTranslationManager;
 class CCmdDataModelSetKeyframeValue;
 class Qt3DSDMTimelineItemBinding;
@@ -78,9 +79,11 @@ public:
     // IKeyframeSelector
     void SelectKeyframes(bool inSelected, long inTime = -1) override;
 
+    void setRowTree(RowTree *rowTree) override;
     void Bind(CPropertyRow *inRow) override;
+    RowTree *getRowTree() const override;
     void Release() override;
-    CPropertyRow *GetRow() override;
+    CPropertyRow *GetRow() override; // Mahmoud_TODO: delete
 
     bool RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
@@ -89,6 +92,8 @@ public:
                            Qt3DSDMTimelineItemBinding *inParent);
 
     void RefreshKeyFrames(void);
+
+    qt3dsdm::Qt3DSDMPropertyHandle getPropertyHandle() const;
 
 protected:
     void InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
@@ -103,7 +108,7 @@ protected:
 protected:
     typedef std::vector<Qt3DSDMTimelineKeyframe *> TKeyframeList;
 
-    CPropertyRow *m_Row;
+    CPropertyRow *m_Row; // Mahmoud_TODO: remove
     qt3dsdm::Qt3DSDMInstanceHandle m_InstanceHandle;
     qt3dsdm::Qt3DSDMPropertyHandle m_PropertyHandle;
     CTimelineTranslationManager *m_TransMgr;
@@ -114,6 +119,9 @@ protected:
     qt3dsdm::TDataTypePair m_Type;
     Q3DStudio::CString m_Name;
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Signals;
+
+private:
+    RowTree *m_rowTree = nullptr;
 };
 
 #endif // QT3DSDM_TIMELINE_ITEM_PROPERTY_H

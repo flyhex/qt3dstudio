@@ -93,7 +93,7 @@ void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &ha
                                         const qt3dsdm::Qt3DSDMInstanceHandle &owner)
 {
     m_ownerInstance = owner;
-    QModelIndex index = m_model->sourceModel()->indexForHandle(handle);
+    QModelIndex index = m_model->sourceIndexForHandle(handle);
     if (!index.isValid())
         return;
     m_model->expandTo(QModelIndex(), index);

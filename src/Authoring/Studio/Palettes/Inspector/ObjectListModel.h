@@ -76,11 +76,15 @@ public:
 
     void excludeObjectTypes(const QVector<EStudioObjectType> &types);
 
-private:
+Q_SIGNALS:
+    void roleUpdated(int role);
+    void rolesUpdated(const QVector<int> &roles = QVector<int> ());
+
+protected:
     qt3dsdm::Qt3DSDMInstanceHandle handleForIndex(const QModelIndex &index) const;
 
-    qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
-                                                    const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
+    virtual qt3dsdm::TInstanceHandleList childrenList(const qt3dsdm::Qt3DSDMSlideHandle &slideHandle,
+                                                      const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
     QString nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const;
 
@@ -97,6 +101,7 @@ class FlatObjectListModel : public QAbstractListModel
     Q_OBJECT
 
 public:
+    // TODO Make FlatObjectList take a shared pointer
     FlatObjectListModel(ObjectListModel *sourceModel, QObject *parent = nullptr);
 
     enum Roles {
@@ -117,10 +122,13 @@ public:
     void setSourceModel(ObjectListModel *sourceModel);
     ObjectListModel *sourceModel() const { return m_sourceModel; }
     bool expandTo(const QModelIndex &rootIndex, const QModelIndex &searchIndex);
-    int rowForSourceIndex(const QModelIndex &sourceIndex);
+    int rowForSourceIndex(const QModelIndex &sourceIndex) const;
+    QModelIndex sourceIndexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle);
 
 private:
+    int rowForSourceIndex(const QModelIndex &parentIndex, int row) const;
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
+    QModelIndex mapFromSource(const QModelIndex &sourceIndex) const;
 
     struct SourceInfo {
         bool expanded = false;
@@ -131,7 +139,7 @@ private:
     QVector<SourceInfo> collectSourceIndexes(const QModelIndex &sourceIndex, int depth) const;
 
     QVector<SourceInfo> m_sourceInfo;
-    ObjectListModel *m_sourceModel;
+    ObjectListModel *m_sourceModel = nullptr;
 };
 
 
