@@ -325,7 +325,7 @@ namespace render {
                 return;
             AddInterpolationParameter("varColor", "vec3");
             DoGenerateVertexColor();
-            Fragment().Append("\tvec3 vertColor = normalize(varColor);");
+            Fragment().Append("\tvec3 vertColor = varColor;");
         }
 
         bool HasActiveWireframe() override { return m_Wireframe; }
