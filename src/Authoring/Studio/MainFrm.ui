@@ -455,6 +455,9 @@
    <property name="text">
     <string>&amp;Duplicate</string>
    </property>
+   <property name="toolTip">
+    <string>Create an Alias Duplicate</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
    </property>

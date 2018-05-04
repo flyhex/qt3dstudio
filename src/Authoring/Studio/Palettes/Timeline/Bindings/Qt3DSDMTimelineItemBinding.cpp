@@ -657,7 +657,7 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     switch (inTransaction) {
     case EUserTransaction_Duplicate: {
         theDoc->DeselectAllKeyframes();
-        SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Duplicate Object"))->DuplicateInstances(theInstances);
+        theDoc->HandleDuplicateCommand();
     } break;
     case EUserTransaction_Cut: {
         theDispatch.FireOnAsynchronousCommand(
