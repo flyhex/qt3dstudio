@@ -32,6 +32,7 @@
 #include "CmdDataModelActionSetValue.h"
 #include "ClientDataModelBridge.h"
 #include "Core.h"
+#include "Dialogs.h"
 #include "Dispatch.h"
 #include "Doc.h"
 #include "IDocumentEditor.h"
@@ -385,7 +386,8 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
                                                          actionInfo.m_TriggerObject);
     m_triggerObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
 
-    showBrowser(m_triggerObjectBrowser, point);
+    m_triggerObjectBrowser->disconnect();
+    CDialogs::showWidgetBrowser(this, m_triggerObjectBrowser, point);
 
     connect(m_triggerObjectBrowser, &ObjectBrowserView::selectionChanged,
             this, &ActionView::OnTriggerSelectionChanged);
@@ -416,7 +418,8 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
                                                          actionInfo.m_TargetObject);
     m_targetObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
 
-    showBrowser(m_targetObjectBrowser, point);
+    m_targetObjectBrowser->disconnect();
+    CDialogs::showWidgetBrowser(this, m_targetObjectBrowser, point);
 
     connect(m_targetObjectBrowser, &ObjectBrowserView::selectionChanged,
             this, &ActionView::OnTargetSelectionChanged);
@@ -477,7 +480,8 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
     m_eventsBrowser->setModel(m_eventsModel);
 
     m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
-    showBrowser(m_eventsBrowser, point);
+    m_eventsBrowser->disconnect();
+    CDialogs::showWidgetBrowser(this, m_eventsBrowser, point);
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
@@ -512,7 +516,8 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
     m_handlerBrowser->setModel(m_handlersModel);
 
     m_handlerBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Handler));
-    showBrowser(m_handlerBrowser, point);
+    m_handlerBrowser->disconnect();
+    CDialogs::showWidgetBrowser(this, m_handlerBrowser, point);
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
@@ -559,7 +564,8 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
         }
     }
     m_fireEventsBrowser->selectAndExpand(eventName);
-    showBrowser(m_fireEventsBrowser, point);
+    m_fireEventsBrowser->disconnect();
+    CDialogs::showWidgetBrowser(this, m_fireEventsBrowser, point);
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this, handle] {
@@ -568,32 +574,6 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
     });
 
     return m_fireEventsBrowser;
-}
-
-void ActionView::showBrowser(QQuickWidget *browser, const QPoint &point)
-{
-    QSize popupSize = CStudioPreferences::browserPopupSize();
-    browser->disconnect();
-    browser->resize(popupSize);
-
-    // Make sure the popup doesn't go outside the screen
-    QSize screenSize = QApplication::desktop()->availableGeometry(
-                QApplication::desktop()->screenNumber(this)).size();
-    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
-    if (newPos.y() < 0)
-        newPos.setY(0);
-    if (newPos.x() + popupSize.width() > screenSize.width())
-        newPos.setX(screenSize.width() - popupSize.width());
-    else if (newPos.x() < 0)
-        newPos.setX(0);
-    browser->move(newPos);
-
-    // Show asynchronously to avoid flashing blank window on first show
-    QTimer::singleShot(0, this, [browser] {
-        browser->show();
-        browser->activateWindow();
-        browser->setFocus();
-    });
 }
 
 void ActionView::updateFiredEvent()

@@ -40,10 +40,10 @@
 #include "DataInputSelectView.h"
 #include "DataInputDlg.h"
 #include "IDocumentEditor.h"
-
 #include "ClientDataModelBridge.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMSlides.h"
+#include "Dialogs.h"
 
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qtimer.h>
@@ -127,7 +127,7 @@ void SlideView::showControllerDialog(const QPoint &point)
                                                      g_StudioApp.m_dataInputDialogItems[i]->type));
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
-    showBrowser(m_dataInputSelector, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
 
     return;
 }
@@ -135,31 +135,6 @@ void SlideView::showControllerDialog(const QPoint &point)
 bool SlideView::toolTipsEnabled()
 {
     return CStudioPreferences::ShouldShowTooltips();
-}
-
-void SlideView::showBrowser(QQuickWidget *browser, const QPoint &point)
-{
-    QSize popupSize = CStudioPreferences::browserPopupSize();
-    browser->resize(popupSize);
-
-    // Make sure the popup doesn't go outside the screen
-    QSize screenSize = QApplication::desktop()->availableGeometry(
-                QApplication::desktop()->screenNumber(this)).size();
-    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
-    if (newPos.y() < 0)
-        newPos.setY(0);
-    if (newPos.x() + popupSize.width() > screenSize.width())
-        newPos.setX(screenSize.width() - popupSize.width());
-    else if (newPos.x() < 0)
-        newPos.setX(0);
-    browser->move(newPos);
-
-    // Show asynchronously to avoid flashing blank window on first show
-    QTimer::singleShot(0, this, [browser] {
-        browser->show();
-        browser->activateWindow();
-        browser->setFocus();
-    });
 }
 
 QSize SlideView::sizeHint() const

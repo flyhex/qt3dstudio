@@ -84,7 +84,6 @@ private:
     void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
     void onDataInputChange(int handle, int instance, const QString &dataInputName);
     void showDataInputChooser(const QPoint &point);
-    void showBrowser(QQuickWidget *browser, const QPoint &point);
     void updateDataInputStatus(bool isViaDispatch);
     void updateTimelineTitleColor(bool controlled);
 

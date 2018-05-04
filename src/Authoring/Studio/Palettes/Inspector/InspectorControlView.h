@@ -108,7 +108,6 @@ private:
     void OnTimeChanged();
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
-    void showBrowser(QQuickWidget *browser, const QPoint &point);
     bool canLinkProperty(int instance, int handle) const;
     void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
 

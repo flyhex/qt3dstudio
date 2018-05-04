@@ -56,6 +56,8 @@
 #include <QtWidgets/qfiledialog.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtCore/qstandardpaths.h>
+#include <QtWidgets/qdesktopwidget.h>
+#include <QtGui/qscreen.h>
 
 #include <iostream>
 
@@ -1082,6 +1084,50 @@ void CDialogs::DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                        const Q3DStudio::CString &inRecommendedVersion)
 {
     DisplayGLVersionDialog(inGLVersion, inRecommendedVersion, false);
+}
+
+void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point)
+{
+    QSize popupSize = CStudioPreferences::browserPopupSize();
+    browser->resize(popupSize);
+    QPoint newPos = point;
+
+    // Make sure the popup doesn't go outside the screen
+    int screenNum = QApplication::desktop()->screenNumber(screenWidget);
+    QScreen *screen = nullptr;
+
+    // If we are somehow not on any screen, just show the browser at upper left corner of the
+    // primary screen.
+    if (screenNum < 0) {
+        screen = QGuiApplication::primaryScreen();
+        newPos = QPoint(25, 25) + QPoint(popupSize.width(), popupSize.height());
+    } else {
+        screen = QGuiApplication::screens().at(screenNum);
+    }
+    QRect screenRect = screen->availableGeometry();
+    QSize screenSize = screenRect.size();
+    newPos -= QPoint(popupSize.width(), popupSize.height()) + screenRect.topLeft();
+
+    if (newPos.y() < 0)
+        newPos.setY(0);
+    else if (newPos.y() + popupSize.height() > screenSize.height())
+        newPos.setY(screenSize.height() - popupSize.height());
+
+    if (newPos.x() + popupSize.width() > screenSize.width())
+        newPos.setX(screenSize.width() - popupSize.width());
+    else if (newPos.x() < 0)
+        newPos.setX(0);
+
+    newPos += screenRect.topLeft();
+
+    browser->move(newPos);
+
+    // Show asynchronously to avoid flashing blank window on first show
+    QTimer::singleShot(0, screenWidget, [browser] {
+        browser->show();
+        browser->activateWindow();
+        browser->setFocus();
+    });
 }
 
 //==============================================================================

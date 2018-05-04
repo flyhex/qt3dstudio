@@ -38,9 +38,9 @@
 #include "ClientDataModelBridge.h"
 #include "IDocumentEditor.h"
 #include "DocumentEditorEnumerations.h"
+#include "Dialogs.h"
 
 #include <QtWidgets/qslider.h>
-#include <QtWidgets/qdesktopwidget.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qtimer.h>
 
@@ -292,35 +292,7 @@ void TimelineToolbar::showDataInputChooser(const QPoint &point)
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
 
-    showBrowser(m_dataInputSelector, point);
-}
-
-void TimelineToolbar::showBrowser(QQuickWidget *browser, const QPoint &point)
-{
-    QSize popupSize = CStudioPreferences::browserPopupSize();
-    browser->resize(popupSize);
-
-    // Make sure the popup doesn't go outside the screen
-    QSize screenSize = QApplication::desktop()->availableGeometry(
-                QApplication::desktop()->screenNumber(this)).size();
-    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
-    if (newPos.y() < 0)
-        newPos.setY(0);
-    else if (newPos.y() - popupSize.height() < -screenSize.height())
-        newPos.setY(-screenSize.height() + popupSize.height());
-
-    if (newPos.x() + popupSize.width() > screenSize.width())
-        newPos.setX(screenSize.width() - popupSize.width());
-    else if (newPos.x() < 0)
-        newPos.setX(0);
-    browser->move(newPos);
-
-    // Show asynchronously to avoid flashing blank window on first show
-    QTimer::singleShot(0, this, [browser] {
-        browser->show();
-        browser->activateWindow();
-        browser->setFocus();
-    });
+    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
 }
 
 void TimelineToolbar::onDataInputChange(int handle, int instance, const QString &dataInputName)

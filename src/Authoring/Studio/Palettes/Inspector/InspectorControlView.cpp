@@ -53,6 +53,7 @@
 #include "ClientDataModelBridge.h"
 #include "MainFrm.h"
 #include "DataInputDlg.h"
+#include "Dialogs.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -367,7 +368,7 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
     m_imageChooserView->setHandle(handle);
     m_imageChooserView->setInstance(instance);
 
-    showBrowser(m_imageChooserView, point);
+    CDialogs::showWidgetBrowser(this, m_imageChooserView, point);
 
     return m_imageChooserView;
 }
@@ -386,7 +387,7 @@ QObject *InspectorControlView::showFilesChooser(int handle, int instance, const 
     m_fileChooserView->setHandle(handle);
     m_fileChooserView->setInstance(instance);
 
-    showBrowser(m_fileChooserView, point);
+    CDialogs::showWidgetBrowser(this, m_fileChooserView, point);
 
     return m_fileChooserView;
 }
@@ -409,7 +410,7 @@ QObject *InspectorControlView::showMeshChooser(int handle, int instance, const Q
     m_meshChooserView->setHandle(handle);
     m_meshChooserView->setInstance(instance);
 
-    showBrowser(m_meshChooserView, point);
+    CDialogs::showWidgetBrowser(this, m_meshChooserView, point);
 
     return m_meshChooserView;
 }
@@ -428,7 +429,7 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
     m_textureChooserView->setHandle(handle);
     m_textureChooserView->setInstance(instance);
 
-    showBrowser(m_textureChooserView, point);
+    CDialogs::showWidgetBrowser(this, m_textureChooserView, point);
 
     return m_textureChooserView;
 }
@@ -469,7 +470,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
         m_objectReferenceView->selectAndExpand(refInstance, instance);
     }
 
-    showBrowser(m_objectReferenceView, point);
+    CDialogs::showWidgetBrowser(this, m_objectReferenceView, point);
 
     connect(m_objectReferenceView, &ObjectBrowserView::selectionChanged,
             this, [this, doc, handle, instance] {
@@ -517,34 +518,9 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
             setData(dataInputList,
                     m_inspectorControlModel->currentControllerValue(instance, handle),
                     handle, instance);
-    showBrowser(m_dataInputChooserView, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, point);
 
     return m_dataInputChooserView;
-}
-
-void InspectorControlView::showBrowser(QQuickWidget *browser, const QPoint &point)
-{
-    QSize popupSize = CStudioPreferences::browserPopupSize();
-    browser->resize(popupSize);
-
-    // Make sure the popup doesn't go outside the screen
-    QSize screenSize = QApplication::desktop()->availableGeometry(
-                QApplication::desktop()->screenNumber(this)).size();
-    QPoint newPos = point - QPoint(popupSize.width(), popupSize.height());
-    if (newPos.y() < 0)
-        newPos.setY(0);
-    if (newPos.x() + popupSize.width() > screenSize.width())
-        newPos.setX(screenSize.width() - popupSize.width());
-    else if (newPos.x() < 0)
-        newPos.setX(0);
-    browser->move(newPos);
-
-    // Show asynchronously to avoid flashing blank window on first show
-    QTimer::singleShot(0, this, [browser] {
-        browser->show();
-        browser->activateWindow();
-        browser->setFocus();
-    });
 }
 
 bool InspectorControlView::toolTipsEnabled()

@@ -38,7 +38,6 @@
 //==============================================================================
 
 #include "StartupDlg.h"
-#include "StudioUtils.h"
 #include "StudioPreferences.h"
 #include "ui_StartupDlg.h"
 
@@ -46,6 +45,7 @@
 #include <QtGui/qpalette.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qdir.h>
+#include <QtWidgets/qdesktopwidget.h>
 
 // CStartupDlg dialog
 
@@ -90,10 +90,12 @@ void CStartupDlg::OnInitDialog()
     QWidget *p = qobject_cast<QWidget *>(parent());
     if (p) {
         QRect pRect;
-        if (p->isMaximized())
-            pRect = QRect(QPoint(0, 0), GetAvailableDisplaySize(getWidgetScreen(p)));
-        else
+        if (p->isMaximized()) {
+            pRect = QApplication::desktop()->availableGeometry(
+                        QApplication::desktop()->screenNumber(p));
+        } else {
             pRect = p->frameGeometry();
+        }
 
         move(pRect.x() + pRect.width() / 2 - width() / 2,
              pRect.y() + pRect.height() / 2 - height() / 2);

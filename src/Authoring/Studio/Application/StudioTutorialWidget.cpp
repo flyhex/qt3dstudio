@@ -77,7 +77,8 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
     // screen and buttons comfortably on display
     m_displayScale = getDisplayScalingForImage(m_imgIter);
     QSize picSize = getPicSize(m_imgIter);
-    QRect screenRect = QApplication::desktop()->availableGeometry(getWidgetScreen(this));
+    QRect screenRect = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this));
     QSize windowSize = screenRect.size();
     m_ui->verticalWidget->setFixedSize(picSize);
 
@@ -241,12 +242,13 @@ qreal StudioTutorialWidget::getDisplayScalingForImage(const QList<QString>::iter
     QPixmap picOrig = QPixmap(*iter);
 
     // Note that high DPI scaling has an effect on the display
-    // resolution returned by GetAvailableDisplaySize().
+    // resolution returned by QApplication::desktop()->availableGeometry().
     // DPI scaling factor is integer and taken from the primary screen.
     // When running studio on secondary monitor with different DPI,
     // or running it on primary with non-integer scaling, we might
     // get different dialog size than intended.
-    QSize displaySize = GetAvailableDisplaySize(getWidgetScreen(this));
+    QSize displaySize = QApplication::desktop()->availableGeometry(
+                QApplication::desktop()->screenNumber(this)).size();
 
     // Scale down if images do not fit on screen, otherwise use
     // 1:1 PNGs to avoid scaling artifacts. Scale to 90% of the display size if scaling is needed.

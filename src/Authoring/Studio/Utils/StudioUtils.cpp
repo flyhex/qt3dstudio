@@ -105,67 +105,6 @@ bool IsNumericString(const Q3DStudio::CString &inString)
     return theNumericFlag;
 }
 
-//=============================================================================
-/**
- * @return The available resolution in pixels of the display index "screen"
- * (minus the Dock/Taskbar, etc.). Default is current primary display.
- */
-QSize GetAvailableDisplaySize(int screen)
-{
-    return QApplication::desktop()->availableGeometry(screen).size();
-}
-
-//=============================================================================
-/**
-* @return The total resolution in pixels of the  display index "screen".
-* Default is the current primary display.
- */
-QSize GetDisplaySize(int screen)
-{
-    return QApplication::desktop()->screenGeometry(screen).size();
-
-}
-
-//=============================================================================
-/**
-* @return The index of the screen containing "widget".
- */
-int getWidgetScreen(QWidget *widget)
-{
-    return QApplication::desktop()->screenNumber(widget);
-}
-
-//=============================================================================
-/**
- * Helper function to adjust the point for the color popup dialog so that it
- * ends up in the right place.  Adjust the given point if it is near the left
- * or bottom part of the screen.
- * @param ioPoint upper-left corner of the color popup dialog; will be adjust if necessary on return
- */
-void TranslatePoint(QPoint &ioPoint, const QPoint &inSize)
-{
-    long theBuffer = 10; // Just because the taskbar seems to overlap the dialog by a little bit
-    QPoint theDlgSize(150, 260); // Size of color popup dialog - note that it's hard-coded
-    QSize theScreenSize = GetAvailableDisplaySize(-1);
-    long theVertOffset = theDlgSize.y() - inSize.y();
-    long theHorizOffset = theDlgSize.x();
-
-    // If the point is too close to both the left side and the bottom of the screen, adjust both the
-    // x and y values
-    if ((ioPoint.y() > theScreenSize.height() - theVertOffset - theBuffer)
-        && (ioPoint.x() >= theScreenSize.width() - theHorizOffset)) {
-
-        ioPoint.setX(ioPoint.x() - (theHorizOffset + inSize.x()));
-        ioPoint.setY(ioPoint.y() - theVertOffset);
-    }
-    // If the point is just too close to the bottom of the screen, adjust the y value
-    else if (ioPoint.y() > theScreenSize.height()  - theVertOffset - theBuffer)
-        ioPoint.setY(ioPoint.y() - theVertOffset);
-    // If the point is just too close to the left side of the screen, adjust the x value
-    else if (ioPoint.x() >= theScreenSize.width() - theHorizOffset)
-        ioPoint.setX(ioPoint.x() - (theHorizOffset + inSize.x()));
-}
-
 long TimeToPos(long inTime, double inTimeRatio)
 {
     return ::dtol(inTime * inTimeRatio) + CStudioPreferences::GUTTER_SIZE;

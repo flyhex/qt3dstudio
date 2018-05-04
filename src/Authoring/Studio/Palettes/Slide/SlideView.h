@@ -116,7 +116,6 @@ private:
     long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
-    void showBrowser(QQuickWidget *browser, const QPoint &point);
 
     SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;

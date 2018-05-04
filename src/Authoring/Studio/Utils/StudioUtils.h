@@ -45,10 +45,6 @@
 Q3DStudio::CString FormatTimeString(long inTimeMS);
 bool IsNumericString(Q3DStudio::CString inString);
 
-QSize GetAvailableDisplaySize(int screen = -1);
-QSize GetDisplaySize(int screen = -1);
-void TranslatePoint(QPoint &ioPoint, const QPoint &inSize);
-
 long TimeToPos(long inTime, double inTimeRatio);
 long TimeToPos(double inTime, double inTimeRatio);
 long PosToTime(long inPos, double inTimeRatio);
@@ -63,7 +59,5 @@ QString resourcePath();
 QString qmlImportPath();
 
 qreal devicePixelRatio();
-
-int getWidgetScreen(QWidget *widget);
 
 #endif // INCLUDED_STUDIO_UTILS_H

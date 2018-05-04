@@ -177,7 +177,6 @@ private:
     void updateFiredEvent();
     void resetFiredEvent();
     void updateFiredEventFromHandle(int handle);
-    void showBrowser(QQuickWidget *browser, const QPoint &point);
     void updateActionStates();
 
     static CDoc *GetDoc();

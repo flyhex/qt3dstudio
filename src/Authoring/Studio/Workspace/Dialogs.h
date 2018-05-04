@@ -54,7 +54,6 @@ class IDoc;
 class CStudioApp;
 class CControl;
 class CDialogControl;
-
 class CProgressView;
 
 class CDialogs
@@ -162,6 +161,7 @@ public:
                                       const Q3DStudio::CString &inMinVersion);
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                         const Q3DStudio::CString &inRecommendedVersion);
+    static void showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point);
 
 protected:
     QString CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::Enum fileTypeFilter,
