@@ -109,6 +109,7 @@ public:
     void toggleShy();
     void toggleVisible();
     void toggleLocked();
+    void updateFromBinding();
 
     ITimelineItemBinding *getBinding() const;
 

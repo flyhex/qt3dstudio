@@ -335,16 +335,7 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
 {
     m_binding = binding;
 
-    // update view (shy, visible, locked)
-    m_shy = m_binding->GetTimelineItem()->IsShy();
-    m_visible = m_binding->GetTimelineItem()->IsVisible();
-    m_locked = m_binding->GetTimelineItem()->IsLocked();
-
-    // Update label locking & color
-    Qt3DSDMTimelineItemBinding *itemBinding =
-            static_cast<Qt3DSDMTimelineItemBinding *>(binding);
-    m_labelItem.setLocked(m_locked);
-    m_labelItem.setMaster(itemBinding->IsMaster());
+    updateFromBinding();
 }
 
 ITimelineItemProperty *RowTree::propBinding()
@@ -593,6 +584,20 @@ void RowTree::updateIndices(bool isInsertion, int index, int indexInLayout, bool
         RowTree *row_i = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(i)->graphicsItem());
         row_i->m_indexInLayout = i;
     }
+}
+
+void RowTree::updateFromBinding()
+{
+    // update view (shy, visible, locked)
+    m_shy = m_binding->GetTimelineItem()->IsShy();
+    m_visible = m_binding->GetTimelineItem()->IsVisible();
+    m_locked = m_binding->GetTimelineItem()->IsLocked();
+
+    // Update label locking & color
+    Qt3DSDMTimelineItemBinding *itemBinding =
+            static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
+    m_labelItem.setLocked(m_locked);
+    m_labelItem.setMaster(itemBinding->IsMaster());
 }
 
 bool RowTree::hasPropertyChildren() const

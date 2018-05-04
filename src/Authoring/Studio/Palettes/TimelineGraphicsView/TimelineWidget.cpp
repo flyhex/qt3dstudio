@@ -578,13 +578,19 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
 void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
-    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
-
-    if (binding) {
-        binding->OnPropertyChanged(inProperty);
-
-        if (binding->getRowTree())
-            binding->getRowTree()->rowTimeline()->updateDurationFromBinding();
+    const SDataModelSceneAsset &asset = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge()->GetSceneAsset();
+    if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
+            || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime) {
+        Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
+        if (binding) {
+            binding->OnPropertyChanged(inProperty);
+            RowTree *row = binding->getRowTree();
+            if (row) {
+                row->rowTimeline()->updateDurationFromBinding();
+                row->updateFromBinding();
+            }
+        }
     }
 }
 
