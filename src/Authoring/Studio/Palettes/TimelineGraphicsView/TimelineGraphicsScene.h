@@ -72,6 +72,7 @@ public:
     QGraphicsLinearLayout *layoutTree() const;
     QGraphicsLinearLayout *layoutTimeline() const;
     TreeHeader *treeHeader() const;
+    double treeWidth() const;
     void updateTreeWidth(double x);
     void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
     void resetMouseCursor();

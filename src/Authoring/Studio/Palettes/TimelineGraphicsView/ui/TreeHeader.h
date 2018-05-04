@@ -32,6 +32,7 @@
 #include "TimelineItem.h"
 #include "TimelineConstants.h"
 #include "RowTypes.h"
+#include "TimelineGraphicsScene.h"
 
 class RowTimeline;
 
@@ -40,24 +41,22 @@ class TreeHeader : public TimelineItem
     Q_OBJECT
 
 public:
-    explicit TreeHeader(TimelineItem *parent = nullptr);
+    explicit TreeHeader(TimelineGraphicsScene *timelineScene, TimelineItem *parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                              QWidget *widget = nullptr) override;
-    void setWidth(double w);
     TreeControlType handleButtonsClick(const QPointF &scenePos);
     bool filterShy() const;
     bool filterHidden() const;
     bool filterLocked() const;
     int type() const;
 
-    int m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
-
     void toggleFilterShy();
     void toggleFilterHidden();
     void toggleFilterLocked();
 
 private:
+    TimelineGraphicsScene *m_scene;
     bool m_shy = false;
     bool m_visible = false;
     bool m_lock = false;

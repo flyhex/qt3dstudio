@@ -108,7 +108,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     m_layoutRoot->addItem(m_layoutTree);
     m_layoutRoot->addItem(m_layoutTimeline);
 
-    m_treeHeader = new TreeHeader;
+    m_treeHeader = new TreeHeader(this);
 
     m_layoutTree->addItem(m_treeHeader);
     m_layoutTimeline->addItem(m_ruler);
@@ -324,15 +324,15 @@ bool TimelineGraphicsScene::validLayerMove(RowTree *rowAtIndex, RowTree *nextRow
 
 void TimelineGraphicsScene::updateTreeWidth(double treeWidth)
 {
-    m_treeWidth = treeWidth;
-
-    m_treeHeader->setWidth(treeWidth);
-
-    RowTree *row_i;
-    for (int i = 1; i < m_layoutTree->count(); ++i) {
-        row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-        row_i->setTreeWidth(treeWidth);
+    if (m_treeWidth != treeWidth) {
+        m_treeWidth = treeWidth;
+        update();
     }
+}
+
+double TimelineGraphicsScene::treeWidth() const
+{
+    return m_treeWidth;
 }
 
 void TimelineGraphicsScene::setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor)

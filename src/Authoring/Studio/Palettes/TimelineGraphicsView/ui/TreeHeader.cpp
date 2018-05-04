@@ -31,7 +31,9 @@
 #include <QtGui/qpainter.h>
 
 
-TreeHeader::TreeHeader(TimelineItem *parent) : TimelineItem(parent)
+TreeHeader::TreeHeader(TimelineGraphicsScene *timelineScene, TimelineItem *parent)
+    : TimelineItem(parent)
+    , m_scene(timelineScene)
 {
 
 }
@@ -42,9 +44,10 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
-    m_rectShy    .setRect(m_treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
-    m_rectVisible.setRect(m_treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
-    m_rectLock   .setRect(m_treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
+    double treeWidth = m_scene->treeWidth();
+    m_rectShy    .setRect(treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
+    m_rectVisible.setRect(treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
+    m_rectLock   .setRect(treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
 
     static const QPixmap pixShy     = QPixmap(":/images/Toggle-Shy.png");
     static const QPixmap pixVisible = QPixmap(":/images/Toggle-HideShow.png");
@@ -63,12 +66,6 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     painter->drawPixmap(m_rectShy    , pixShy);
     painter->drawPixmap(m_rectVisible, pixVisible);
     painter->drawPixmap(m_rectLock   , pixLock);
-}
-
-void TreeHeader::setWidth(double w)
-{
-    m_treeWidth = w;
-    update();
 }
 
 TreeControlType TreeHeader::handleButtonsClick(const QPointF &scenePos)

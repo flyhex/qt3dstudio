@@ -135,7 +135,6 @@ private:
     int m_depth = 1;
     int m_index = 0;
     int m_indexInLayout = 1;
-    int m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
     bool m_shy = false;
     bool m_visible = true;
     bool m_locked = false;

@@ -164,9 +164,9 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // update button bounds rects
     m_rectArrow  .setRect(offset, iconY, iconSize, iconSize);
     m_rectType   .setRect(offset + iconSize, iconY, iconSize, iconSize);
-    m_rectShy    .setRect(m_treeWidth - 16 * 3.3, iconY, iconSize, iconSize);
-    m_rectVisible.setRect(m_treeWidth - 16 * 2.2, iconY, iconSize, iconSize);
-    m_rectLocked .setRect(m_treeWidth - 16 * 1.1, iconY, iconSize, iconSize);
+    m_rectShy    .setRect(treeWidth() - 16 * 3.3, iconY, iconSize, iconSize);
+    m_rectVisible.setRect(treeWidth() - 16 * 2.2, iconY, iconSize, iconSize);
+    m_rectLocked .setRect(treeWidth() - 16 * 1.1, iconY, iconSize, iconSize);
 
     // Background
     QColor bgColor;
@@ -275,7 +275,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPixmap(m_rectType, pixRowType);
 
     // Shy, eye, lock separator
-    painter->fillRect(QRect(m_treeWidth - TimelineConstants::TREE_ICONS_W,
+    painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
                             0, 1, size().height()),
                       TimelineConstants::WIDGET_BG_COLOR);
 
@@ -293,7 +293,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // Candidate parent of a dragged row
     if (m_moveTarget) {
         painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
-        painter->drawRect(QRect(1, 1, m_treeWidth - 2, size().height() - 3));
+        painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
     }
 
     // Action indicators
@@ -328,13 +328,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
 int RowTree::treeWidth() const
 {
-    return m_treeWidth;
-}
-
-void RowTree::setTreeWidth(double w)
-{
-    m_treeWidth = w;
-    update();
+    return m_scene->treeWidth();
 }
 
 void RowTree::setBinding(ITimelineItemBinding *binding)
