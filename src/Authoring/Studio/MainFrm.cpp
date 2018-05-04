@@ -1506,7 +1506,7 @@ void CMainFrame::onViewResetLayout()
         settings.remove(stateKey);
         // Prevent saving geometry and state, and exit
         m_resettingLayout = true;
-        close();
+        QTimer::singleShot(0, this, &CMainFrame::close);
     }
 }
 
