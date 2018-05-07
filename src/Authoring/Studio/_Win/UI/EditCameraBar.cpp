@@ -225,9 +225,14 @@ void CEditCameraBar::OnCustomizeToolbar()
 {
     // Create the combo box
     addWidget(m_CameraSelector = new QComboBox);
+#if (defined Q_OS_MACOS)
+    // There is a "selected" icon in the popup, and automatic scaling does not work for some reason
+    m_CameraSelector->setMinimumContentsLength(tr("Scene Camera View").length() + 1);
+#else
+    m_CameraSelector->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+#endif
     // We need to specify accessibleName and objectName for the combobox, as it's in the toolbar,
     // and we want to use a different style for it.
     m_CameraSelector->setAccessibleName(QStringLiteral("cameraSelector"));
     m_CameraSelector->setObjectName(QStringLiteral("cameraSelector"));
-    m_CameraSelector->setMinimumWidth(145);
 }
