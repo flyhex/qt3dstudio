@@ -87,6 +87,8 @@ private:
     void updateChildrenEndRecursive(RowTree *rowTree, double oldEndX);
     void updateChildrenMinStartXRecursive(RowTree *rowTree);
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
+    void drawColorPropertyGradient(QPainter *painter, int width);
+    bool isColorProperty() const;
     double timeToX(double time);
     double xToTime(double xPos);
 

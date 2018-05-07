@@ -152,7 +152,7 @@ private:
     QList<RowTree *> m_childRows;
     QList<RowTree *> m_childProps;
     ITimelineItemBinding *m_binding = nullptr;
-    ITimelineItemProperty *m_PropBinding; // for property rows
+    ITimelineItemProperty *m_PropBinding = nullptr; // for property rows
 
     QRect m_rectArrow;
     QRect m_rectShy;
