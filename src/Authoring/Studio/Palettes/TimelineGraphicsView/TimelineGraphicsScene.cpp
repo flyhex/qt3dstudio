@@ -631,6 +631,11 @@ void TimelineGraphicsScene::updateSnapSteps() {
     }
 }
 
+TExpandMap &TimelineGraphicsScene::expandMap()
+{
+    return m_expandMap;
+}
+
 void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 {
     // snap to play head

@@ -30,7 +30,6 @@
 #define ROWTREE_H
 
 #include "InteractiveTimelineItem.h"
-#include "TimelineGraphicsScene.h"
 #include "TimelineConstants.h"
 #include "RowTypes.h"
 #include "StudioObjectTypes.h"
@@ -42,18 +41,22 @@
 class RowTimeline;
 class Ruler;
 class ITimelineItemBinding;
-
-enum class ExpandState {
-    Hidden,
-    Collapsed,
-    Expanded
-};
+class TimelineGraphicsScene;
+class ITimelineItemProperty;
 
 class RowTree : public InteractiveTimelineItem
 {
     Q_OBJECT
 
 public:
+    enum class ExpandState {
+        Unknown,
+        Collapsed,
+        Expanded,
+        HiddenCollapsed,
+        HiddenExpanded
+    };
+
     explicit RowTree(TimelineGraphicsScene *timelineScene,
                      EStudioObjectType rowType = OBJTYPE_UNKNOWN, const QString &label = {});
     // property row constructor
@@ -110,6 +113,7 @@ public:
     void toggleVisible();
     void toggleLocked();
     void updateFromBinding();
+    void setRowVisible(bool visible);
 
     ITimelineItemBinding *getBinding() const;
 
@@ -120,7 +124,7 @@ private:
     void initialize();
     void initializeAnimations();
     void animateExpand(ExpandState state);
-    void updateExpandStatus(bool expand, bool childrenOnly = false);
+    void updateExpandStatus(ExpandState state, bool animate = true);
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
     void updateLabelPosition();
@@ -139,7 +143,7 @@ private:
     bool m_shy = false;
     bool m_visible = true;
     bool m_locked = false;
-    bool m_expanded = true;
+    ExpandState m_expandState = ExpandState::HiddenCollapsed;
     bool m_moveSource = false;
     bool m_moveTarget = false;
     bool m_isProperty = false;

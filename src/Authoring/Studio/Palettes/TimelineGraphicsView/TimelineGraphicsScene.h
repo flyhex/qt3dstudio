@@ -29,6 +29,7 @@
 #ifndef TIMELINEGRAPHICSSCENE_H
 #define TIMELINEGRAPHICSSCENE_H
 
+#include "RowTree.h"
 #include "TimelineWidget.h"
 #include "RowTimeline.h"
 #include "RowTypes.h"
@@ -37,11 +38,11 @@
 
 #include <QtWidgets/qgraphicsscene.h>
 #include <QtCore/qlist.h>
+#include <QtCore/qhash.h>
 
 class Ruler;
 class PlayHead;
 class TreeHeader;
-class RowTree;
 class SelectionRect;
 class RowMover;
 class RowManager;
@@ -52,6 +53,8 @@ struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
+
+typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree::ExpandState> TExpandMap;
 
 class TimelineGraphicsScene : public QGraphicsScene
 {
@@ -77,6 +80,7 @@ public:
     void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
     void resetMouseCursor();
     void updateSnapSteps();
+    TExpandMap &expandMap();
 
 protected:
     bool event(QEvent *event) override;
@@ -136,6 +140,7 @@ private:
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
+    TExpandMap m_expandMap;
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H

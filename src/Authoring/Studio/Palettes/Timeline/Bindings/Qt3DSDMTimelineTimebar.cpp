@@ -51,6 +51,7 @@
 #include "StudioPreferences.h"
 #include "ITimelineItemBinding.h"
 #include "RowTree.h"
+#include "RowTimeline.h"
 
 Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,

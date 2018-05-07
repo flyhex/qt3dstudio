@@ -31,6 +31,7 @@
 #include "RowManager.h"
 #include "TimelineConstants.h"
 #include "StudioObjectTypes.h"
+#include "TimelineGraphicsScene.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSString.h"
@@ -91,6 +92,10 @@ void RowTree::initialize()
     m_labelItem.setLabel(m_label);
     updateLabelPosition();
 
+    // Default all rows to collapsed
+    setRowVisible(false);
+    m_expandState = ExpandState::HiddenCollapsed;
+
     connect(&m_labelItem, &RowTreeLabelItem::labelChanged, this,
             [this](const QString &label) {
         // Update label on timeline and on model
@@ -131,12 +136,11 @@ void RowTree::initializeAnimations()
             }
         }
     });
-
 }
 
 void RowTree::animateExpand(ExpandState state)
 {
-    int endHeight = 0; // ExpandState::Hidden
+    int endHeight = 0; // hidden states
     float endOpacity = 0;
     if (state == ExpandState::Expanded) {
         endHeight = m_isPropertyExpanded ? TimelineConstants::ROW_H_EXPANDED
@@ -191,7 +195,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
     if (!m_childRows.empty() || !m_childProps.empty())
-        painter->drawPixmap(m_rectArrow, m_expanded ? pixArrowDown : pixArrow);
+        painter->drawPixmap(m_rectArrow, expanded() ? pixArrowDown : pixArrow);
 
     // Row type icon
     static const QPixmap pixSceneNormal     = QPixmap(":/images/Objects-Scene-Normal.png");
@@ -335,6 +339,37 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
 {
     m_binding = binding;
 
+    // Restore the expansion state of rows
+    m_expandState = m_scene->expandMap().value(
+                static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance(),
+                ExpandState::Unknown);
+
+    if (m_expandState == ExpandState::Unknown) {
+        // Everything but scene is initially collapsed and hidden
+        if (m_rowType == OBJTYPE_SCENE)
+            m_expandState = ExpandState::Expanded;
+        else
+            m_expandState = ExpandState::HiddenCollapsed;
+    }
+
+    // Make sure all children of visible expanded parents are shown, and vice versa
+    if (parentRow()) {
+        if (parentRow()->expanded()) {
+            if (m_expandState == ExpandState::HiddenCollapsed)
+                m_expandState = ExpandState::Collapsed;
+            else if (m_expandState == ExpandState::HiddenExpanded)
+                m_expandState = ExpandState::Expanded;
+        } else {
+            if (m_expandState == ExpandState::Collapsed)
+                m_expandState = ExpandState::HiddenCollapsed;
+            else if (m_expandState == ExpandState::Expanded)
+                m_expandState = ExpandState::HiddenExpanded;
+        }
+    }
+
+    setRowVisible(m_expandState == ExpandState::Collapsed
+            || m_expandState == ExpandState::Expanded);
+
     updateFromBinding();
 }
 
@@ -346,6 +381,9 @@ ITimelineItemProperty *RowTree::propBinding()
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
+
+    if (parentRow()->expanded())
+        setRowVisible(true);
 }
 
 void RowTree::setState(State state)
@@ -600,6 +638,25 @@ void RowTree::updateFromBinding()
     m_labelItem.setMaster(itemBinding->IsMaster());
 }
 
+void RowTree::setRowVisible(bool visible)
+{
+    if (visible) {
+        setMaximumHeight(TimelineConstants::ROW_H);
+        setOpacity(1.0);
+        setVisible(true);
+        m_rowTimeline->setMaximumHeight(TimelineConstants::ROW_H);
+        m_rowTimeline->setOpacity(1.0);
+        m_rowTimeline->setVisible(true);
+    } else {
+        setMaximumHeight(0.0);
+        setOpacity(0.0);
+        setVisible(false);
+        m_rowTimeline->setMaximumHeight(0.0);
+        m_rowTimeline->setOpacity(0.0);
+        m_rowTimeline->setVisible(false);
+    }
+}
+
 bool RowTree::hasPropertyChildren() const
 {
     return !m_childProps.empty();
@@ -619,8 +676,8 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
     if ((!m_childRows.empty() || !m_childProps.empty())
             && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
-        m_expanded = !m_expanded;
-        updateExpandStatus(m_expanded, true);
+        updateExpandStatus(m_expandState == ExpandState::Expanded ? ExpandState::Collapsed
+                                                                  : ExpandState::Expanded, false);
         update();
         return TreeControlType::Arrow;
     }
@@ -641,19 +698,44 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
     return TreeControlType::None;
 }
 
-void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
+void RowTree::updateExpandStatus(ExpandState state, bool animate)
 {
-    if (!childrenOnly)
-        animateExpand(expand ? ExpandState::Expanded : ExpandState::Hidden);
+    m_expandState = state;
+
+    // Store the expanded state of items so we can restore it on slide change
+    if (m_binding) {
+        m_scene->expandMap().insert(
+                    static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance(),
+                    m_expandState);
+    }
+
+    if (animate)
+        animateExpand(m_expandState);
 
     if (!m_childRows.empty()) {
-        for (auto child : qAsConst(m_childRows))
-            child->updateExpandStatus(expand && child->parentRow()->m_expanded);
+        for (auto child : qAsConst(m_childRows)) {
+            if (state == ExpandState::Expanded) {
+                if (child->m_expandState == ExpandState::HiddenExpanded)
+                    child->updateExpandStatus(ExpandState::Expanded);
+                else if (child->m_expandState == ExpandState::HiddenCollapsed)
+                    child->updateExpandStatus(ExpandState::Collapsed);
+            } else {
+                if (child->m_expandState == ExpandState::Expanded)
+                    child->updateExpandStatus(ExpandState::HiddenExpanded);
+                else if (child->m_expandState == ExpandState::Collapsed)
+                    child->updateExpandStatus(ExpandState::HiddenCollapsed);
+            }
+        }
     }
 
     if (!m_childProps.empty()) {
-        for (auto child : qAsConst(m_childProps))
-            child->updateExpandStatus(expand && child->parentRow()->m_expanded);
+        for (auto child : qAsConst(m_childProps)) {
+            // Properties can never be collapsed
+            if (state == ExpandState::Expanded)
+                child->updateExpandStatus(ExpandState::Expanded);
+            else
+                child->updateExpandStatus(ExpandState::HiddenExpanded);
+        }
     }
 }
 
@@ -677,7 +759,10 @@ void RowTree::updateLabelPosition()
 
 bool RowTree::expanded() const
 {
-    return m_expanded;
+    if (m_isProperty)
+        return false;
+    else
+        return m_expandState == ExpandState::Expanded;
 }
 
 bool RowTree::isDecendentOf(RowTree *row) const

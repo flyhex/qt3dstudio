@@ -34,6 +34,7 @@
 #include "TimelineConstants.h"
 #include "Keyframe.h"
 #include "KeyframeManager.h"
+#include "TimelineGraphicsScene.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
@@ -41,6 +42,7 @@
 #include <QtGui/qpainter.h>
 #include <QtGui/qbrush.h>
 #include <QtWidgets/qgraphicssceneevent.h>
+#include <QtWidgets/qwidget.h>
 
 RowTimeline::RowTimeline()
     : InteractiveTimelineItem()

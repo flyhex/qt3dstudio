@@ -30,6 +30,7 @@
 #include "RowTimeline.h"
 #include "RowTree.h"
 #include "Ruler.h"
+#include "TimelineGraphicsScene.h"
 #include "Bindings/ITimelineItemProperty.h"
 
 RowTimelinePropertyGraph::RowTimelinePropertyGraph(QObject *parent)

@@ -387,6 +387,7 @@ void TimelineWidget::OnNewPresentation()
 void TimelineWidget::OnClosingPresentation()
 {
     m_connections.clear();
+    m_graphicsScene->expandMap().clear();
 }
 
 void TimelineWidget::OnTimeChanged(long inTime)
@@ -478,6 +479,7 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     if (it != m_handlesMap.end()) { // scene object exists
         m_graphicsScene->rowManager()->deleteRow(it->second);
         m_handlesMap.erase(it);
+        m_graphicsScene->expandMap().remove(inInstance);
     }
 }
 
