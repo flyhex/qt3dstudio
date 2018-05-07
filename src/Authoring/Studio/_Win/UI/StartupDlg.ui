@@ -212,14 +212,23 @@
   <widget class="QLabel" name="versionStr">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>20</x>
      <y>90</y>
-     <width>141</width>
+     <width>411</width>
      <height>20</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="text">
     <string>Qt 3D Studio version string</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>
