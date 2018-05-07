@@ -2,7 +2,7 @@
 <Effect>
 	<MetaData>
 		<!--Simulates an artistic painting of the image-->
-		<Property name="NoiseSamp" 	formalName="Noise" filter="linear" clamp="repeat" type="Texture" default="./maps/effects/brushnoise.dds" description="Texture to be used for the brush texture"/>
+                <Property name="NoiseSamp" 	formalName="Noise" filter="linear" clamp="repeat" type="Texture" default="./maps/effects/brushnoise.png" description="Texture to be used for the brush texture"/>
 		<Property name="brushAngle" formalName="Brush Angle" 						default="45" 	description="Amount to rotate the noise texture."/>
 		<Property name="brushLen" 	formalName="Stroke Length" 	min="0" max="3" 	default="1" 	description="How far to offset the image/'brush'."/>
                 <Property name="brushSize" 	formalName="Stroke Size" 	min="10" max="200" 	default="100" 	description="Scale the brush.\nSmaller values yield larger sizes."/>

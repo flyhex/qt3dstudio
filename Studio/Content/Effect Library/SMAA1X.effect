@@ -2,7 +2,7 @@
 <Effect>
 	<MetaData>
 	<Property name="searchTex" 	filter="nearest" clamp="clamp" type="Texture" default="./maps/effects/SearchTex-yflipped.png" hidden="True"/>
-	<Property name="areaTex" 	filter="linear" clamp="clamp" type="Texture" default="./maps/effects/AreaTex-yflipped.dds" hidden="True"/>
+        <Property name="areaTex" 	filter="linear" clamp="clamp" type="Texture" default="./maps/effects/AreaTex-yflipped.png" hidden="True"/>
 	<Property name="blendTex" 	filter="linear" clamp="clamp" type="Texture" hidden="True"/>
 	</MetaData>
 	<Shaders>
