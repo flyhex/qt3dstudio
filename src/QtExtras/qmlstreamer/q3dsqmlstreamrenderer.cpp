@@ -159,7 +159,8 @@ Q3DSQmlStreamRenderer::Q3DSQmlStreamRenderer()
             this, &Q3DSQmlStreamRenderer::requestUpdate);
 
     m_quickWindow = new QQuickWindow(m_renderControl);
-    m_quickWindow->setClearBeforeRendering(false);
+    m_quickWindow->setClearBeforeRendering(true);
+    m_quickWindow->setColor(Qt::transparent);
 
     m_renderObject = new Q3DSQmlStreamEventHandler(this);
     renderThread->setObjectName(QStringLiteral("Qt3DSQmlStreamRenderer::renderThread"));
