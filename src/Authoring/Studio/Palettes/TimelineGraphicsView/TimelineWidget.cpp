@@ -615,9 +615,8 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
     if (binding && bindingParent) {
         RowTree *row = binding->getRowTree();
         RowTree *rowParent = bindingParent->getRowTree();
-
         if (row && rowParent)
-            rowParent->addChildAt(row, inIndex);
+            rowParent->addChildAt(row, bindingParent->convertIndex(inIndex, true));
     }
 }
 
@@ -637,7 +636,8 @@ void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
     if (binding && bindingParent) {
         RowTree *row = binding->getRowTree();
         RowTree *rowParent = bindingParent->getRowTree();
-        rowParent->addChildAt(row, inNewIndex);
+        if (row && rowParent)
+            rowParent->addChildAt(row, bindingParent->convertIndex(inNewIndex, true));
     }
 }
 

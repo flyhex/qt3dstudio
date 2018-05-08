@@ -264,12 +264,14 @@ void TimelineGraphicsScene::commitMoveRows()
             (m_rowMover->sourceRow()->getBinding())->GetInstance();
 
     // handle for the parent of the insertion row
-    qt3dsdm::Qt3DSDMInstanceHandle handleParent = static_cast<Qt3DSDMTimelineItemBinding *>
-            (m_rowMover->insertionParent()->getBinding())->GetInstance();
+    auto parentBinding = static_cast<Qt3DSDMTimelineItemBinding *>
+            (m_rowMover->insertionParent()->getBinding());
+    qt3dsdm::Qt3DSDMInstanceHandle handleParent = parentBinding->GetInstance();
 
     // commit the row move to the binding
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Reorder Rows"))
-        ->ReorderRows(handleSource, handleParent, m_rowMover->targetIndex());
+        ->ReorderRows(handleSource, handleParent,
+                      parentBinding->convertIndex(m_rowMover->targetIndex(), false));
 
     // updating the UI happens in TimelineWidget.onChildAdded()
 }
