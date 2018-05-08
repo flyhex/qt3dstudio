@@ -86,6 +86,7 @@ public:
     bool visible() const;
     bool locked() const;
     bool expanded() const;
+    bool expandHidden() const;
     bool isDecendentOf(RowTree *row) const;
     bool isContainer() const;
     bool isProperty() const;

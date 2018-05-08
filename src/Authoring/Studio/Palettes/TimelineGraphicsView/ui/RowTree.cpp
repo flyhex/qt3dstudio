@@ -345,8 +345,8 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
                 ExpandState::Unknown);
 
     if (m_expandState == ExpandState::Unknown) {
-        // Everything but scene is initially collapsed and hidden
-        if (m_rowType == OBJTYPE_SCENE)
+        // Everything but scene/component is initially collapsed and hidden
+        if (m_rowType == OBJTYPE_SCENE || m_rowType == OBJTYPE_COMPONENT)
             m_expandState = ExpandState::Expanded;
         else
             m_expandState = ExpandState::HiddenCollapsed;
@@ -763,6 +763,12 @@ bool RowTree::expanded() const
         return false;
     else
         return m_expandState == ExpandState::Expanded;
+}
+
+bool RowTree::expandHidden() const
+{
+    return m_expandState == ExpandState::HiddenExpanded
+            || m_expandState == ExpandState::HiddenCollapsed;
 }
 
 bool RowTree::isDecendentOf(RowTree *row) const

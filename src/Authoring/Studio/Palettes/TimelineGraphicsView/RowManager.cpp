@@ -297,8 +297,9 @@ void RowManager::updateRowFilter(RowTree *row)
     bool shyOk     = !row->shy()    || !m_scene->treeHeader()->filterShy();
     bool visibleOk = row->visible() || !m_scene->treeHeader()->filterHidden();
     bool lockOk    = !row->locked() || !m_scene->treeHeader()->filterLocked();
+    bool expandOk  = !row->expandHidden();
 
-    row->setVisible(parentOk && shyOk && visibleOk && lockOk);
+    row->setVisible(parentOk && shyOk && visibleOk && lockOk && expandOk);
     row->rowTimeline()->setVisible(row->isVisible());
 }
 
