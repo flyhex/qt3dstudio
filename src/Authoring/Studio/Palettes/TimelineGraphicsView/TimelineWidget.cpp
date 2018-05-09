@@ -724,8 +724,16 @@ void TimelineWidget::enableDnD(bool b)
     m_viewTreeHeader->setInteractive(!b);
     m_viewTreeContent->setInteractive(!b);
 
-    if (!b)
+    if (!b) { // object successfully dropped on the timeline tree
+        if (m_graphicsScene->rowMover()->insertionParent()
+                && !m_graphicsScene->rowMover()->insertionParent()->expanded()) {
+            RowTree *insertionParent = m_graphicsScene->rowMover()->insertionParent();
+            QTimer::singleShot(0, this, [=]() {
+                insertionParent->updateExpandStatus(RowTree::ExpandState::Expanded, false);
+            });
+        }
         m_graphicsScene->rowMover()->end(true);
+    }
 }
 
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,

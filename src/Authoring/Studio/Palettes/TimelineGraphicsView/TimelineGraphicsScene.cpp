@@ -213,16 +213,6 @@ void TimelineGraphicsScene::updateTimelineLayoutWidth()
 //        m_widgetTimeline->viewTimelineContent()->ensureVisible(m_editedTimelineRow);
 }
 
-void TimelineGraphicsScene::addNewLayer()
-{
-    // TODO: get the update from the data model
-//    RowTree *newLayer = m_rowManager->createRow(OBJTYPE_LAYER, m_sceneRow);
-//    m_rowManager->selectRow(newLayer);
-
-    // scroll to top
-    m_widgetTimeline->viewTimelineContent()->verticalScrollBar()->setValue(0);
-}
-
 // TODO: test function, to be removed
 void debugPrintRows(RowTree *row)
 {
@@ -272,6 +262,9 @@ void TimelineGraphicsScene::commitMoveRows()
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Reorder Rows"))
         ->ReorderRows(handleSource, handleParent,
                       parentBinding->convertIndex(m_rowMover->targetIndex(), false));
+
+    if (!m_rowMover->insertionParent()->expanded())
+        m_rowMover->insertionParent()->updateExpandStatus(RowTree::ExpandState::Expanded, false);
 
     // updating the UI happens in TimelineWidget.onChildAdded()
 }

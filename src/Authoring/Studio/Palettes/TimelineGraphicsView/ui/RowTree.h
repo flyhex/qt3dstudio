@@ -118,6 +118,7 @@ public:
     void setRowVisible(bool visible);
 
     ITimelineItemBinding *getBinding() const;
+    void updateExpandStatus(ExpandState state, bool animate = true);
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
@@ -126,7 +127,6 @@ private:
     void initialize();
     void initializeAnimations();
     void animateExpand(ExpandState state);
-    void updateExpandStatus(ExpandState state, bool animate = true);
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
     void updateLabelPosition();

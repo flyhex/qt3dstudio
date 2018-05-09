@@ -682,8 +682,7 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if ((!m_childRows.empty() || !m_childProps.empty())
-            && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
+    if (!empty() && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
         updateExpandStatus(m_expandState == ExpandState::Expanded ? ExpandState::Collapsed
                                                                   : ExpandState::Expanded, false);
         update();

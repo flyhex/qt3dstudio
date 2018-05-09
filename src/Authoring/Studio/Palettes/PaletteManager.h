@@ -84,7 +84,7 @@ protected:
     QDockWidget *m_projectDock;
     QDockWidget *m_slideDock;
     QDockWidget *m_timelineQmlDock;
-    QDockWidget *m_timelineGVDock;
+    QDockWidget *m_timelineDock;
     QDockWidget *m_actionDock;
     QDockWidget *m_inspectorDock;
 

@@ -177,8 +177,7 @@ void RowMover::updateTargetRow(int mouseX, int mouseY)
             int depthMin = nextRowAtIndex ? nextRowAtIndex->depth() : 3;
             int depthMax = rowAtIndex->depth();
 
-            if (rowAtIndex->isContainer() && rowAtIndex->expanded()
-                    && rowAtIndex != m_sourceRow) {
+            if (rowAtIndex->isContainer() && rowAtIndex != m_sourceRow) {
                 depthMax++; // Container: allow insertion as a child
             } else if (rowAtIndex->isPropertyOrMaterial()
                       && !rowAtIndex->parentRow()->isContainer()) {
@@ -205,9 +204,13 @@ void RowMover::updateTargetRow(int mouseX, int mouseY)
         if (valid) {
             // calc insertion index
             int index = rowAtIndex->index() + 1;
-            if ((rowAtIndex->isProperty() && depth == rowAtIndex->depth())
-                    || rowAtIndex == insertParent) {
+            if (rowAtIndex->isProperty() && depth == rowAtIndex->depth()) {
                 index = 0;
+            } else if (rowAtIndex == insertParent) {
+                if (insertParent->expanded() || insertParent->childRows().empty())
+                    index = 0;
+                else
+                    index = insertParent->childRows().last()->index() + 1;
             } else if (depth < rowAtIndex->depth()) {
                 RowTree *row = rowAtIndex;
                 for (int i = depth; i < rowAtIndex->depth(); ++i)
@@ -215,9 +218,9 @@ void RowMover::updateTargetRow(int mouseX, int mouseY)
                 index = row->index() + 1;
             }
 
-            if (m_sourceRow && insertParent == m_sourceRow->parentRow()
-                    && index > m_sourceRow->index()) {
-                index--;
+            if (m_sourceRow && m_sourceRow->parentRow() == insertParent
+                    && index > m_sourceRow->index()) { // moving down under the same parent
+                index--; // m_sourceRow is removed from layout, shift index up by 1
             }
 
             updateState(index, depth, indexRaw);

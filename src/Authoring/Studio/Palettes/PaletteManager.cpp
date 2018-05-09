@@ -108,12 +108,12 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
-    m_timelineGVDock = new QDockWidget(QObject::tr("Timeline GV"));
-    m_timelineGVDock->setObjectName("timeline GV.");
-    m_timelineGVDock->setAllowedAreas(Qt::BottomDockWidgetArea);
+    m_timelineDock = new QDockWidget(QObject::tr("Timeline"));
+    m_timelineDock->setObjectName("timeline");
+    m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
 
     m_timelineWidget = new TimelineWidget();
-    WidgetControl *timeLineWidgetControl = new WidgetControl(m_timelineWidget, m_timelineGVDock);
+    WidgetControl *timeLineWidgetControl = new WidgetControl(m_timelineWidget, m_timelineDock);
     timeLineWidgetControl->RegisterForDnd(timeLineWidgetControl);
     timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
     timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
@@ -124,9 +124,9 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
 
     m_timelineWidget->setParent(timeLineWidgetControl);
 
-    m_timelineGVDock->setWidget(timeLineWidgetControl);
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineGVDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineGVDock));
+    m_timelineDock->setWidget(timeLineWidgetControl);
+    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
@@ -149,7 +149,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_slideDock->setEnabled(false);
     m_actionDock->setEnabled(false);
     m_inspectorDock->setEnabled(false);
-    m_timelineGVDock->setEnabled(false);
+    m_timelineDock->setEnabled(false);
 }
 
 //==============================================================================
@@ -269,7 +269,7 @@ void CPaletteManager::EnablePalettes()
     m_basicObjectsDock->setEnabled(true);
     m_projectDock->setEnabled(true);
     m_slideDock->setEnabled(true);
-    m_timelineGVDock->setEnabled(true);
+    m_timelineDock->setEnabled(true);
     m_actionDock->setEnabled(true);
     m_inspectorDock->setEnabled(true);
 }

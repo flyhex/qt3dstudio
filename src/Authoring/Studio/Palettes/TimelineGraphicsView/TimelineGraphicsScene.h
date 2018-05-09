@@ -65,7 +65,6 @@ public:
 
     void setTimelineScale(int scale);
     void updateTimelineLayoutWidth();
-    void addNewLayer();
     Ruler *ruler() const;
     PlayHead *playHead() const;
     RowManager *rowManager() const;
