@@ -121,7 +121,12 @@ win: PRECOMPILED_HEADER = _Win/Studio/stdafx.h
 
 HEADERS += \
     MainFrm.h \
+    PreviewHelper.h \
+    remotedeploymentsender.h \
     _Win/Application/AboutDlg.h \
+    _Win/Application/SubPresentationDlg.h \
+    _Win/Application/SubPresentationListDlg.h \
+    _Win/Application/StudioApp.h \
     _Win/UI/EditCameraBar.h \
     _Win/UI/InterpolationDlg.h \
     _Win/UI/StartupDlg.h \
@@ -129,29 +134,58 @@ HEADERS += \
     _Win/UI/PlayerWnd.h \
     _Win/UI/PlayerContainerWnd.h \
     _Win/UI/SceneView.h \
-    Controls/WidgetControl.h \
     _Win/UI/StudioAppPrefsPage.h \
     _Win/UI/StudioPreferencesPropSheet.h \
     _Win/UI/StudioProjectSettingsPage.h \
     _Win/UI/ResetKeyframeValuesDlg.h \
     _Win/UI/GLVersionDlg.h \
     _Win/DragNDrop/DropProxy.h \
-    Palettes/Inspector/ObjectListModel.h \
-    Palettes/Inspector/ObjectBrowserView.h \
-    _Win/Application/SubPresentationDlg.h \
-    _Win/Application/SubPresentationListDlg.h \
     Application/DataInputDlg.h \
     Application/DataInputListDlg.h \
     Application/DataInputSelectModel.h \
     Application/DataInputSelectView.h \
-    Application/DataInputSelectModel.h \
-    Application/DataInputSelectView.h \
-    Render/StudioGradientWidget.h \
+    Application/DurationEditDlg.h \
+    Application/StudioTutorialWidget.h \
+    Application/TimeEditDlg.h \
+    Application/TimeEnums.h \
     Controls/ButtonControl.h \
     Controls/ToggleButton.h \
-    Palettes/Timeline/IBreadCrumbProvider.h \
+    Controls/ClickableLabel.h \
     Controls/BreadCrumbControl.h \
     Controls/TreeItem.h \
+    Controls/TextEditContextMenu.h \
+    Controls/WidgetControl.h \
+    Palettes/Action/ActionModel.h \
+    Palettes/Action/ActionContextMenu.h \
+    Palettes/Action/ActionView.h \
+    Palettes/Action/EventsModel.h \
+    Palettes/Action/EventsBrowserView.h \
+    Palettes/Action/PropertyModel.h \
+    Palettes/BasicObjects/BasicObjectsModel.h \
+    Palettes/BasicObjects/BasicObjectsView.h \
+    Palettes/Inspector/InspectorControlView.h \
+    Palettes/Inspector/InspectorControlModel.h \
+    Palettes/Inspector/ChooserModelBase.h \
+    Palettes/Inspector/ImageChooserView.h \
+    Palettes/Inspector/ImageChooserModel.h \
+    Palettes/Inspector/MeshChooserModel.h \
+    Palettes/Inspector/MeshChooserView.h \
+    Palettes/Inspector/FileChooserView.h \
+    Palettes/Inspector/FileChooserModel.h \
+    Palettes/Inspector/TextureChooserView.h \
+    Palettes/Inspector/TabOrderHandler.h \
+    Palettes/Inspector/MouseHelper.h \
+    Palettes/Inspector/ObjectListModel.h \
+    Palettes/Inspector/ObjectBrowserView.h \
+    Palettes/Project/ProjectView.h \
+    Palettes/Project/ProjectFileSystemModel.h \
+    Palettes/Project/ProjectContextMenu.h \
+    Palettes/Slide/SlideModel.h \
+    Palettes/Slide/SlideView.h \
+    Palettes/Slide/SlideContextMenu.h \
+    Palettes/Timeline/TimelineTimelineLayout.h \
+    Palettes/Timeline/TimePropertyItem.h \
+    Palettes/Timeline/IBreadCrumbProvider.h \
     Palettes/Timeline/AbstractTimelineRowUI.h \
     Palettes/Timeline/BaseStateRow.h \
     Palettes/Timeline/SlideRow.h \
@@ -163,6 +197,12 @@ HEADERS += \
     Palettes/Timeline/TimelineView.h \
     Palettes/Timeline/TimelineObjectModel.h \
     Palettes/Timeline/TimeMeasureItem.h \
+    Palettes/Timeline/Bindings/IKeyframeSelector.h \
+    Palettes/Timeline/Bindings/ITimelineItemBinding.h \
+    Palettes/Timeline/Bindings/ITimelineItem.h \
+    Palettes/Timeline/Bindings/ITimelineItemProperty.h \
+    Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
+    Palettes/Timeline/Bindings/ITimelineTimebar.h \
     Palettes/TimelineGraphicsView/TimelineWidget.h \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
     Palettes/TimelineGraphicsView/TimelineSplitter.h \
@@ -191,29 +231,28 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/NavigationBar.h \
     Palettes/TimelineGraphicsView/ui/NavigationBarItem.h \
     Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.h \
-    Application/DataInputSelectModel.h \
-    Application/DataInputSelectView.h \
+    Render/StudioVisualAidWidget.h \
     Render/StudioGradientWidget.h \
-    Render/StudioVisualAidWidget.h
+    ../Common/Code/Graph/GraphPosition.h
 
 FORMS += \
+    MainFrm.ui \
     Application/TimeEditDlg.ui \
+    Application/DataInputDlg.ui \
+    Application/DataInputListDlg.ui \
     Application/DurationEditDlg.ui \
+    Application/StudioTutorialWidget.ui \
+    _Win/Application/AboutDlg.ui \
+    _Win/Application/SubPresentationDlg.ui \
+    _Win/Application/SubPresentationListDlg.ui \
+    _Win/Palettes/Progress/ProgressDlg.ui \
     _Win/UI/StudioAppPrefsPage.ui \
     _Win/UI/StudioPreferencesPropSheet.ui \
     _Win/UI/StudioProjectSettingsPage.ui \
     _Win/UI/InterpolationDlg.ui \
     _Win/UI/ResetKeyframeValuesDlg.ui \
     _Win/UI/GLVersionDlg.ui \
-    MainFrm.ui \
-    _Win/Application/AboutDlg.ui \
-    _Win/UI/StartupDlg.ui \
-    _Win/Application/SubPresentationDlg.ui \
-    _Win/Application/SubPresentationListDlg.ui \
-    Application/DataInputDlg.ui \
-    Application/DataInputListDlg.ui \
-    _Win/Palettes/Progress/ProgressDlg.ui \
-    Application/StudioTutorialWidget.ui
+    _Win/UI/StartupDlg.ui
 
 SOURCES += \
     MainFrm.cpp \
@@ -222,6 +261,8 @@ SOURCES += \
     _Win/Application/AboutDlg.cpp \
     _Win/Application/MsgRouter.cpp \
     _Win/Application/StudioApp.cpp \
+    _Win/Application/SubPresentationDlg.cpp \
+    _Win/Application/SubPresentationListDlg.cpp \
     _Win/Controls/AppFonts.cpp \
     _Win/Controls/BufferedRenderer.cpp \
     _Win/Controls/OffscreenRenderer.cpp \
@@ -242,16 +283,21 @@ SOURCES += \
     _Win/UI/StudioAppPrefsPage.cpp \
     _Win/UI/StudioPreferencesPropSheet.cpp \
     _Win/UI/StudioProjectSettingsPage.cpp \
-    Application/TimeEditDlg.cpp \
-    Application/DurationEditDlg.cpp \
     _Win/Utils/MouseCursor.cpp \
     _Win/Workspace/Dialogs.cpp \
     _Win/Workspace/Views.cpp \
+    Application/TimeEditDlg.cpp \
+    Application/DataInputDlg.cpp \
+    Application/DataInputListDlg.cpp \
+    Application/DataInputSelectModel.cpp \
+    Application/DataInputSelectView.cpp \
+    Application/DurationEditDlg.cpp \
     Application/StudioTutorialWidget.cpp \
     Controls/BaseMeasure.cpp \
     Controls/BlankControl.cpp \
     Controls/BreadCrumbControl.cpp \
     Controls/ButtonControl.cpp \
+    Controls/ClickableLabel.cpp \
     Controls/Control.cpp \
     Controls/ControlData.cpp \
     Controls/ControlGraph.cpp \
@@ -284,6 +330,7 @@ SOURCES += \
     Controls/ToggleButton.cpp \
     Controls/TreeControl.cpp \
     Controls/TreeItem.cpp \
+    Controls/WidgetControl.cpp \
     DragAndDrop/BasicObjectDropSource.cpp \
     DragAndDrop/DropContainer.cpp \
     DragAndDrop/DropSource.cpp \
@@ -333,6 +380,7 @@ SOURCES += \
     Palettes/Slide/SlideModel.cpp \
     Palettes/Slide/SlideView.cpp \
     Palettes/Slide/SlideContextMenu.cpp \
+    Palettes/Timeline/AbstractTimelineRowUI.cpp \
     Palettes/Timeline/BaseStateRow.cpp \
     Palettes/Timeline/ColorBlankControl.cpp \
     Palettes/Timeline/ColorControl.cpp \
@@ -350,6 +398,11 @@ SOURCES += \
     Palettes/Timeline/TimelineFilter.cpp \
     Palettes/Timeline/TimelineKeyframe.cpp \
     Palettes/Timeline/TimelineRow.cpp \
+    Palettes/Timeline/TimelineUIFactory.cpp \
+    Palettes/Timeline/TimelineView.cpp \
+    Palettes/Timeline/TimelineObjectModel.cpp \
+    Palettes/Timeline/TimeMeasureItem.cpp \
+    Palettes/Timeline/TimePropertyItem.cpp \
     Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
     Palettes/Timeline/Bindings/GroupTimelineItemBinding.cpp \
@@ -368,35 +421,6 @@ SOURCES += \
     Palettes/Timeline/Bindings/Qt3DSDMTimelineItemProperty.cpp \
     Palettes/Timeline/Bindings/Qt3DSDMTimelineKeyframe.cpp \
     Palettes/Timeline/Bindings/Qt3DSDMTimelineTimebar.cpp \
-    Render/PathWidget.cpp \
-    Render/StudioRenderer.cpp \
-    Render/StudioRendererTranslation.cpp \
-    Render/StudioRotationWidget.cpp \
-    Render/StudioScaleWidget.cpp \
-    Render/StudioTranslationWidget.cpp \
-    Render/StudioWidget.cpp \
-    Render/StudioGradientWidget.cpp \
-    Render/StudioVisualAidWidget.cpp \
-    Render/WGLRenderContext.cpp \
-    Utils/ImportUtils.cpp \
-    Utils/ResourceCache.cpp \
-    Utils/StudioUtils.cpp \
-    Utils/SystemPreferences.cpp \
-    Utils/TickTock.cpp \
-    Controls/ClickableLabel.cpp \
-    Controls/WidgetControl.cpp \
-    _Win/Application/SubPresentationDlg.cpp \
-    _Win/Application/SubPresentationListDlg.cpp \
-    Palettes/Timeline/AbstractTimelineRowUI.cpp \
-    Palettes/Timeline/TimelineUIFactory.cpp \
-    Palettes/Timeline/TimelineView.cpp \
-    Palettes/Timeline/TimelineObjectModel.cpp \
-    Palettes/Timeline/TimeMeasureItem.cpp \
-    Palettes/Timeline/TimePropertyItem.cpp \
-    Application/DataInputDlg.cpp \
-    Application/DataInputListDlg.cpp \
-    Application/DataInputSelectModel.cpp \
-    Application/DataInputSelectView.cpp \
     Palettes/TimelineGraphicsView/TimelineWidget.cpp \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
     Palettes/TimelineGraphicsView/TimelineSplitter.cpp \
@@ -421,54 +445,22 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.cpp \
     Palettes/TimelineGraphicsView/ui/NavigationBar.cpp \
     Palettes/TimelineGraphicsView/ui/NavigationBarItem.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.cpp
-
-HEADERS += \
-    Application/TimeEditDlg.h \
-    Application/DurationEditDlg.h \
-    Application/TimeEnums.h \
-    _Win/Application/StudioApp.h \
-    Controls/TextEditContextMenu.h \
-    Palettes/Action/ActionModel.h \
-    Palettes/Action/ActionContextMenu.h \
-    Palettes/Action/ActionView.h \
-    Palettes/Action/EventsModel.h \
-    Palettes/Action/EventsBrowserView.h \
-    Palettes/Action/PropertyModel.h \
-    Palettes/BasicObjects/BasicObjectsModel.h \
-    Palettes/BasicObjects/BasicObjectsView.h \
-    Palettes/Inspector/InspectorControlView.h \
-    Palettes/Inspector/InspectorControlModel.h \
-    Palettes/Slide/SlideModel.h \
-    Palettes/Slide/SlideView.h \
-    Palettes/Timeline/Bindings/IKeyframeSelector.h \
-    Palettes/Timeline/Bindings/ITimelineItemBinding.h \
-    Palettes/Timeline/Bindings/ITimelineItem.h \
-    Palettes/Timeline/Bindings/ITimelineItemProperty.h \
-    Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
-    Palettes/Timeline/Bindings/ITimelineTimebar.h \
-    Palettes/Timeline/TimelineTimelineLayout.h \
-    Palettes/Timeline/TimeMeasureItem.h\
-    Palettes/Timeline/TimePropertyItem.h\
-    Palettes/Slide/SlideContextMenu.h \
-    Controls/ClickableLabel.h \
-    PreviewHelper.h \
-    remotedeploymentsender.h \
-    Application/StudioTutorialWidget.h \
-    Palettes/Inspector/ChooserModelBase.h \
-    Palettes/Inspector/ImageChooserView.h \
-    Palettes/Inspector/ImageChooserModel.h \
-    Palettes/Inspector/MeshChooserModel.h \
-    Palettes/Inspector/MeshChooserView.h \
-    Palettes/Inspector/FileChooserView.h \
-    Palettes/Inspector/FileChooserModel.h \
-    Palettes/Inspector/TextureChooserView.h \
-    Palettes/Inspector/TabOrderHandler.h \
-    Palettes/Inspector/MouseHelper.h \
-    Palettes/Project/ProjectView.h \
-    Palettes/Project/ProjectFileSystemModel.h \
-    Palettes/Project/ProjectContextMenu.h \
-    ../Common/Code/Graph/GraphPosition.h
+    Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.cpp \
+    Render/PathWidget.cpp \
+    Render/StudioRenderer.cpp \
+    Render/StudioRendererTranslation.cpp \
+    Render/StudioRotationWidget.cpp \
+    Render/StudioScaleWidget.cpp \
+    Render/StudioTranslationWidget.cpp \
+    Render/StudioWidget.cpp \
+    Render/StudioGradientWidget.cpp \
+    Render/StudioVisualAidWidget.cpp \
+    Render/WGLRenderContext.cpp \
+    Utils/ImportUtils.cpp \
+    Utils/ResourceCache.cpp \
+    Utils/StudioUtils.cpp \
+    Utils/SystemPreferences.cpp \
+    Utils/TickTock.cpp
 
 RESOURCES += \
     MainFrm.qrc \
