@@ -56,26 +56,23 @@ the presentation will start with a blank slate.
 
 \section1 Unlinking from the Master Slide
 
- By default, elements on the
-\l{studio-slide-palette.html#the-master-slide}{master slide} of their
-owning time context have the same property values on all slides. If you
-change the Scale of an that change is applied on all slides. However, it
-is also possible to \"unlink\" any property of a master element. An
-unlinked attriute can have custom values and animations for each slide.
+By default, elements on the
+\l{studio-slide-palette.html#the-master-slide}{master slide} have the same property values on all
+slides. If you change the scale of an object that change is applied on all slides. However, it
+is also possible to unlink any property of a master element. An
+unlinked property can have custom values and animations for each slide.
 
-To unlink an property, right-click on the property name in the Inspector
-palette and choose \"Unlink Property from Master Slide\". The name of
+To unlink a property, right-click on the property name in the inspector
+palette and choose \uicontrol {Unlink Property from Master Slide}. The name of
 the property will change from green to light grey. This is the same
 color used for the name of elements that are present only on a single
 slide, and the properties of such elements.
 
-Tip: when you first unlink a property the current value for that
-property, including any animation keyframes, is used as the value for
-every slide. If you want a similar-but-slightly-different animation on
+Tip: When you first unlink a property, the current value for that
+property (including any animation keyframes) is used as the value for
+every slide. If you want a similar but slightly different animation on
 all or most slides, first create the animation on the master slide and
-\b{then} unlink the property and tweak the animation on other
-slides. A little thinking ahead can save you from needing to perform
-redudant work.
+then unlink the property and tweak the animation on other slides.
 
 \section1 Editing Numeric Values
 
