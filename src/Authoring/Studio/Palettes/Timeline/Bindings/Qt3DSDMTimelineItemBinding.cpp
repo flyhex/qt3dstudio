@@ -754,10 +754,14 @@ int Qt3DSDMTimelineItemBinding::convertIndex(int index, bool isAssetGraphIndex) 
 
             // Compare children to adjust the index
             size_t skip = 0;
+            size_t maxCurrentIndex = currentChildren.GetCount() - 1;
             size_t count = qMin(allChildren.GetCount(), size_t(index));
             for (size_t current = 0; current < count; ++current) {
-                if (allChildren.GetResult(current) != currentChildren.GetResult(current - skip))
+                size_t skipIndex = current - skip;
+                if (skipIndex > maxCurrentIndex || allChildren.GetResult(current)
+                        != currentChildren.GetResult(skipIndex)) {
                     ++skip;
+                }
             }
             retval = index;
             if (isAssetGraphIndex)
