@@ -39,8 +39,7 @@ You can write your own materials and effects to use in Qt 3D Studio, this requir
 OpenGL Shading Language (GLSL).
 
 This document explains the structure of the \c{.effect} and \c{.material} files but does not go
-through how to write shaders in GLSL. For information about shaders see links in the end of this
-document.
+through how to write shaders in GLSL.
 
 \sa {Custom Material Reference}, {Effect Reference}
 

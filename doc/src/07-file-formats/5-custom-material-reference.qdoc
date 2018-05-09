@@ -45,9 +45,8 @@ The material system supports dielectric and transparent materials, point lights,
 area lights, ambient occlusion, shadowing, two-sided polygons,
 index-of-refraction and fragment cutoff(masking).
 
-Custom materials support multiple render passes. Each pass needs to have
-the fragment shader implemented either by using the material system or writing
-a main function.
+\note The Qt 3D Studio 2.0 runtime does not support multiple render passes for
+custom materials.
 
 \section1 Required Functions
 
@@ -463,56 +462,7 @@ void main()
 
 The only requirement is to leave the closing parenthesis out since the material system adds it.
 
-\section1 Render Passes
-
-Custom material can contain multiple passes. This allows implementing complicated materials,
-but they are also more expensive. Multipass material needs to specify the shaders and passes
-separately using the xml-notation where shaders are defined inside the Shaders element and
-passes using the Passes element. Renderpasses are executed in the order they are specified
-in the material.
-
-\badcode
-
-<Shaders>
-    <Shader name="MAIN">
-       <VertexShader>
-        ...
-        </VertexShader>
-        <FragmentShader>
-        ...
-        </FragmentShader>
-    </Shader>
-    <Shader name="PREPASS">
-        <VertexShader>
-        ...
-        </VertexShader>
-        <FragmentShader>
-        ...
-        </FragmentShader>
-    </Shader>
-</Shaders>
-<Passes>
-    <ShaderKey value="20"/>
-    <LayerKey count="1"/>
-    <Buffer name="frame_buffer" format="source" filter="linear" wrap="clamp" size="1.0" lifetime="frame"/>
-    <Buffer name="temp_buffer" format="source" filter="linear" wrap="clamp" size="1.0" lifetime="frame"/>
-    <Pass shader="PREPASS" output="temp_buffer">
-        <BufferBlit dest="frame_buffer"/>
-        <BufferInput value="frame_buffer" param="OriginBuffer"/>
-    </Pass>
-    <Pass shader="MAIN">
-        <BufferInput value="temp_buffer" param="paramName"/>
-        <Blending source="SrcAlpha" dest="OneMinusSrcAlpha"/>
-    </Pass>
-</Passes>
-\endcode
-
-Buffer-element can be used to create temporary buffers for the material. To access the current
-framebuffer, one must use the BufferBlit-element inside Pass-element to copy the
-framebuffer content to a buffer, which can then be accessed inside the shader. To access the
-buffer inside shader, one must specify input parameter with the BufferInput-element, which binds
-the buffer to a sampler declared in the shader. Blending-element can be used to change the
-blending mode of the pass.
+\section1 ShaderKey
 
 ShaderKey-element is a magic number specifying how the material gets compiled. The value is
 the sum of the properties the material needs to enable. Supported properties are:
