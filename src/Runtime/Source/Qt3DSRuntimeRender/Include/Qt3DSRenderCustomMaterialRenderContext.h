@@ -61,13 +61,15 @@ namespace render {
         const NVRenderTexture2D *m_AOTexture;
         SShaderDefaultMaterialKey m_MaterialKey;
         SRenderableImage *m_FirstImage;
+        QT3DSF32 m_Opacity;
 
         SCustomMaterialRenderContext(
             const SLayer &layer, const SLayerRenderData &data, NVDataRef<SLight *> lights,
             const SCamera &cam, const SModel &m, const SRenderSubset &subset, const QT3DSMat44 &mvp,
             const QT3DSMat44 &world, const QT3DSMat33 &nm, const SCustomMaterial &material,
             const NVRenderTexture2D *depthTex, const NVRenderTexture2D *aoTex,
-            SShaderDefaultMaterialKey inMaterialKey, SRenderableImage *inFirstImage = NULL)
+            SShaderDefaultMaterialKey inMaterialKey, SRenderableImage *inFirstImage = NULL,
+            QT3DSF32 opacity = 1.0)
             : m_Layer(layer)
             , m_LayerData(data)
             , m_Lights(lights)
@@ -82,6 +84,7 @@ namespace render {
             , m_AOTexture(aoTex)
             , m_MaterialKey(inMaterialKey)
             , m_FirstImage(inFirstImage)
+            , m_Opacity(opacity)
         {
         }
     };

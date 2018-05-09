@@ -173,6 +173,7 @@ struct SShaderGeneratorGeneratedShader
     NVRenderCachedShaderProperty<QT3DSI32> m_AreaLightCount;
     NVRenderCachedShaderProperty<QT3DSI32> m_ShadowMapCount;
     NVRenderCachedShaderProperty<QT3DSI32> m_ShadowCubeCount;
+    NVRenderCachedShaderProperty<QT3DSF32> m_Opacity;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AoShadowParams;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_LightsBuffer;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AreaLightsBuffer;
@@ -208,6 +209,7 @@ struct SShaderGeneratorGeneratedShader
         , m_AreaLightCount("uNumAreaLights", inShader)
         , m_ShadowMapCount("uNumShadowMaps", inShader)
         , m_ShadowCubeCount("uNumShadowCubes", inShader)
+        , m_Opacity("object_opacity", inShader)
         , m_AoShadowParams("cbAoShadow", inShader)
         , m_LightsBuffer("cbBufferLights", inShader)
         , m_AreaLightsBuffer("cbBufferAreaLights", inShader)
@@ -713,7 +715,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     void SetMaterialProperties(NVRenderShaderProgram &inProgram, const SCustomMaterial &inMaterial,
                                const QT3DSVec2 &, const QT3DSMat44 &inModelViewProjection,
                                const QT3DSMat33 &inNormalMatrix, const QT3DSMat44 &inGlobalTransform,
-                               SRenderableImage *inFirstImage, QT3DSF32,
+                               SRenderableImage *inFirstImage, QT3DSF32 inOpacity,
                                NVRenderTexture2D *inDepthTexture, NVRenderTexture2D *inSSaoTexture,
                                SImage *inLightProbe, SImage *inLightProbe2, QT3DSF32 inProbeHorizon,
                                QT3DSF32 inProbeBright, QT3DSF32 inProbe2Window, QT3DSF32 inProbe2Pos,
@@ -728,6 +730,8 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         theShader.m_DepthTexture.Set(inDepthTexture);
         theShader.m_AOTexture.Set(inSSaoTexture);
+
+        theShader.m_Opacity.Set(inOpacity);
 
         qt3ds::render::SImage *theLightProbe = inLightProbe;
         qt3ds::render::SImage *theLightProbe2 = inLightProbe2;
@@ -1125,6 +1129,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
             fragmentShader.Append("\trgba = mix( vec4(0.0, 1.0, 0.0, 1.0), rgba, mixVal);");
         }
+        fragmentShader << "  rgba.a *= object_opacity;" << Endl;
         if (m_RenderContext.GetRenderContext().GetRenderContextType()
                 == NVRenderContextValues::GLES2)
             fragmentShader << "  gl_FragColor = rgba;" << Endl;

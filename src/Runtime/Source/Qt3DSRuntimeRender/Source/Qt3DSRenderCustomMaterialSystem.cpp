@@ -333,6 +333,7 @@ void SCustomMaterialVertexPipeline::BeginVertexGeneration(QT3DSU32 displacementI
 
 void SCustomMaterialVertexPipeline::BeginFragmentGeneration()
 {
+    Fragment().AddUniform("object_opacity", "float");
     Fragment() << "void main()" << Endl << "{" << Endl;
 }
 
@@ -1633,7 +1634,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         theMaterialGenerator.SetMaterialProperties(
             *inShader.m_Shader, inRenderContext.m_Material, QT3DSVec2(1.0, 1.0),
             inRenderContext.m_ModelViewProjection, inRenderContext.m_NormalMatrix,
-            inRenderContext.m_ModelMatrix, inRenderContext.m_FirstImage, 1.0,
+            inRenderContext.m_ModelMatrix, inRenderContext.m_FirstImage, inRenderContext.m_Opacity,
             GetLayerGlobalRenderProperties(inRenderContext));
 
         // I think the prim type should always be fetched from the
