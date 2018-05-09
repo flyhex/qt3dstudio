@@ -977,7 +977,7 @@
   <customwidget>
    <class>CEditCameraBar</class>
    <extends>QToolBar</extends>
-   <header>Studio/_Win/UI/EditCameraBar.h</header>
+   <header>Studio/UI/EditCameraBar.h</header>
   </customwidget>
  </customwidgets>
  <resources>

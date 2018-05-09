@@ -39,7 +39,7 @@ INCLUDEPATH += \
     ../Studio/DragAndDrop \
     ../Studio/Render \
     ../Studio/Workspace \
-    ../Studio/_Win/DragNDrop \
+    ../Studio/DragAndDrop \
     ../Studio/Utils \
     ../Build \
     ../Common/Code/Thread \

@@ -17,15 +17,6 @@ QT += core gui openglextensions
 QT += qml quick widgets quickwidgets network
 
 INCLUDEPATH += \
-    _Win/Include \
-    _Win/Application \
-    _Win/Controls \
-    _Win/DragNDrop \
-    _Win/Palettes \
-    _Win/Palettes/Progress \
-    _Win/Palettes/Splash \
-    _Win/UI \
-    _Win/Utils \
     Application \
     Controls \
     DragAndDrop \
@@ -38,6 +29,7 @@ INCLUDEPATH += \
     Palettes/Progress \
     Palettes/Project \
     Palettes/Slide \
+    Palettes/Splash \
     Palettes/Timeline \
     Palettes/TimelineGraphicsView \
     Palettes/TimelineGraphicsView/ui \
@@ -117,122 +109,216 @@ linux {
         -lEGL
 }
 
-win: PRECOMPILED_HEADER = _Win/Studio/stdafx.h
+win: PRECOMPILED_HEADER = Studio/stdafx.h
 
 HEADERS += \
     MainFrm.h \
-    PreviewHelper.h \
-    remotedeploymentsender.h \
-    _Win/Application/AboutDlg.h \
-    _Win/Application/SubPresentationDlg.h \
-    _Win/Application/SubPresentationListDlg.h \
-    _Win/Application/StudioApp.h \
-    _Win/UI/EditCameraBar.h \
-    _Win/UI/InterpolationDlg.h \
-    _Win/UI/StartupDlg.h \
-    _Win/UI/RecentItems.h \
-    _Win/UI/PlayerWnd.h \
-    _Win/UI/PlayerContainerWnd.h \
-    _Win/UI/SceneView.h \
-    _Win/UI/StudioAppPrefsPage.h \
-    _Win/UI/StudioPreferencesPropSheet.h \
-    _Win/UI/StudioProjectSettingsPage.h \
-    _Win/UI/ResetKeyframeValuesDlg.h \
-    _Win/UI/GLVersionDlg.h \
-    _Win/DragNDrop/DropProxy.h \
+    Application/AboutDlg.h \
+    Application/AboutDlg.h \
+    Application/DataInputDlg.h \
     Application/DataInputDlg.h \
     Application/DataInputListDlg.h \
+    Application/DataInputListDlg.h \
+    Application/DataInputSelectModel.h \
     Application/DataInputSelectModel.h \
     Application/DataInputSelectView.h \
+    Application/DataInputSelectView.h \
     Application/DurationEditDlg.h \
+    Application/DurationEditDlg.h \
+    Application/StudioApp.h \
+    Application/StudioApp.h \
     Application/StudioTutorialWidget.h \
+    Application/StudioTutorialWidget.h \
+    Application/SubPresentationDlg.h \
+    Application/SubPresentationDlg.h \
+    Application/SubPresentationListDlg.h \
+    Application/SubPresentationListDlg.h \
+    Application/TimeEditDlg.h \
     Application/TimeEditDlg.h \
     Application/TimeEnums.h \
-    Controls/ButtonControl.h \
-    Controls/ToggleButton.h \
-    Controls/ClickableLabel.h \
+    Application/TimeEnums.h \
     Controls/BreadCrumbControl.h \
-    Controls/TreeItem.h \
+    Controls/BreadCrumbControl.h \
+    Controls/ButtonControl.h \
+    Controls/ButtonControl.h \
+    Controls/ClickableLabel.h \
+    Controls/ClickableLabel.h \
     Controls/TextEditContextMenu.h \
+    Controls/TextEditContextMenu.h \
+    Controls/ToggleButton.h \
+    Controls/ToggleButton.h \
+    Controls/TreeItem.h \
+    Controls/TreeItem.h \
     Controls/WidgetControl.h \
-    Palettes/Action/ActionModel.h \
+    Controls/WidgetControl.h \
+    DragAndDrop/DropProxy.h \
+    DragAndDrop/DropProxy.h \
+    MainFrm.h \
     Palettes/Action/ActionContextMenu.h \
+    Palettes/Action/ActionContextMenu.h \
+    Palettes/Action/ActionModel.h \
+    Palettes/Action/ActionModel.h \
     Palettes/Action/ActionView.h \
-    Palettes/Action/EventsModel.h \
+    Palettes/Action/ActionView.h \
     Palettes/Action/EventsBrowserView.h \
+    Palettes/Action/EventsBrowserView.h \
+    Palettes/Action/EventsModel.h \
+    Palettes/Action/EventsModel.h \
+    Palettes/Action/PropertyModel.h \
     Palettes/Action/PropertyModel.h \
     Palettes/BasicObjects/BasicObjectsModel.h \
+    Palettes/BasicObjects/BasicObjectsModel.h \
     Palettes/BasicObjects/BasicObjectsView.h \
-    Palettes/Inspector/InspectorControlView.h \
-    Palettes/Inspector/InspectorControlModel.h \
+    Palettes/BasicObjects/BasicObjectsView.h \
     Palettes/Inspector/ChooserModelBase.h \
-    Palettes/Inspector/ImageChooserView.h \
+    Palettes/Inspector/ChooserModelBase.h \
+    Palettes/Inspector/FileChooserModel.h \
+    Palettes/Inspector/FileChooserModel.h \
+    Palettes/Inspector/FileChooserView.h \
+    Palettes/Inspector/FileChooserView.h \
     Palettes/Inspector/ImageChooserModel.h \
+    Palettes/Inspector/ImageChooserModel.h \
+    Palettes/Inspector/ImageChooserView.h \
+    Palettes/Inspector/ImageChooserView.h \
+    Palettes/Inspector/InspectorControlModel.h \
+    Palettes/Inspector/InspectorControlModel.h \
+    Palettes/Inspector/InspectorControlView.h \
+    Palettes/Inspector/InspectorControlView.h \
+    Palettes/Inspector/MeshChooserModel.h \
     Palettes/Inspector/MeshChooserModel.h \
     Palettes/Inspector/MeshChooserView.h \
-    Palettes/Inspector/FileChooserView.h \
-    Palettes/Inspector/FileChooserModel.h \
-    Palettes/Inspector/TextureChooserView.h \
-    Palettes/Inspector/TabOrderHandler.h \
+    Palettes/Inspector/MeshChooserView.h \
     Palettes/Inspector/MouseHelper.h \
-    Palettes/Inspector/ObjectListModel.h \
+    Palettes/Inspector/MouseHelper.h \
     Palettes/Inspector/ObjectBrowserView.h \
-    Palettes/Project/ProjectView.h \
-    Palettes/Project/ProjectFileSystemModel.h \
+    Palettes/Inspector/ObjectBrowserView.h \
+    Palettes/Inspector/ObjectListModel.h \
+    Palettes/Inspector/ObjectListModel.h \
+    Palettes/Inspector/TabOrderHandler.h \
+    Palettes/Inspector/TabOrderHandler.h \
+    Palettes/Inspector/TextureChooserView.h \
+    Palettes/Inspector/TextureChooserView.h \
     Palettes/Project/ProjectContextMenu.h \
+    Palettes/Project/ProjectContextMenu.h \
+    Palettes/Project/ProjectFileSystemModel.h \
+    Palettes/Project/ProjectFileSystemModel.h \
+    Palettes/Project/ProjectView.h \
+    Palettes/Project/ProjectView.h \
+    Palettes/Slide/SlideContextMenu.h \
+    Palettes/Slide/SlideContextMenu.h \
+    Palettes/Slide/SlideModel.h \
     Palettes/Slide/SlideModel.h \
     Palettes/Slide/SlideView.h \
-    Palettes/Slide/SlideContextMenu.h \
-    Palettes/Timeline/TimelineTimelineLayout.h \
-    Palettes/Timeline/TimePropertyItem.h \
-    Palettes/Timeline/IBreadCrumbProvider.h \
+    Palettes/Slide/SlideView.h \
+    Palettes/Timeline/AbstractTimelineRowUI.h \
     Palettes/Timeline/AbstractTimelineRowUI.h \
     Palettes/Timeline/BaseStateRow.h \
-    Palettes/Timeline/SlideRow.h \
-    Palettes/Timeline/StateRow.h \
-    Palettes/Timeline/StateRowUI.h \
-    Palettes/Timeline/PropertyRow.h \
-    Palettes/Timeline/TimelineRow.h \
-    Palettes/Timeline/TimelineUIFactory.h \
-    Palettes/Timeline/TimelineView.h \
-    Palettes/Timeline/TimelineObjectModel.h \
-    Palettes/Timeline/TimeMeasureItem.h \
+    Palettes/Timeline/BaseStateRow.h \
     Palettes/Timeline/Bindings/IKeyframeSelector.h \
-    Palettes/Timeline/Bindings/ITimelineItemBinding.h \
+    Palettes/Timeline/Bindings/IKeyframeSelector.h \
     Palettes/Timeline/Bindings/ITimelineItem.h \
+    Palettes/Timeline/Bindings/ITimelineItem.h \
+    Palettes/Timeline/Bindings/ITimelineItemBinding.h \
+    Palettes/Timeline/Bindings/ITimelineItemBinding.h \
+    Palettes/Timeline/Bindings/ITimelineItemProperty.h \
     Palettes/Timeline/Bindings/ITimelineItemProperty.h \
     Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
+    Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Palettes/Timeline/Bindings/ITimelineTimebar.h \
-    Palettes/TimelineGraphicsView/TimelineWidget.h \
-    Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
-    Palettes/TimelineGraphicsView/TimelineSplitter.h \
-    Palettes/TimelineGraphicsView/ui/TimelineItem.h \
-    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.h \
-    Palettes/TimelineGraphicsView/ui/Ruler.h \
-    Palettes/TimelineGraphicsView/ui/PlayHead.h \
-    Palettes/TimelineGraphicsView/TimelineConstants.h \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
-    Palettes/TimelineGraphicsView/SelectionRect.h \
-    Palettes/TimelineGraphicsView/RowMover.h \
+    Palettes/Timeline/Bindings/ITimelineTimebar.h \
+    Palettes/Timeline/IBreadCrumbProvider.h \
+    Palettes/Timeline/IBreadCrumbProvider.h \
+    Palettes/Timeline/PropertyRow.h \
+    Palettes/Timeline/PropertyRow.h \
+    Palettes/Timeline/SlideRow.h \
+    Palettes/Timeline/SlideRow.h \
+    Palettes/Timeline/StateRow.h \
+    Palettes/Timeline/StateRow.h \
+    Palettes/Timeline/StateRowUI.h \
+    Palettes/Timeline/StateRowUI.h \
+    Palettes/Timeline/TimelineObjectModel.h \
+    Palettes/Timeline/TimelineObjectModel.h \
+    Palettes/Timeline/TimelineRow.h \
+    Palettes/Timeline/TimelineRow.h \
+    Palettes/Timeline/TimelineTimelineLayout.h \
+    Palettes/Timeline/TimelineTimelineLayout.h \
+    Palettes/Timeline/TimelineUIFactory.h \
+    Palettes/Timeline/TimelineUIFactory.h \
+    Palettes/Timeline/TimelineView.h \
+    Palettes/Timeline/TimelineView.h \
+    Palettes/Timeline/TimeMeasureItem.h \
+    Palettes/Timeline/TimeMeasureItem.h \
+    Palettes/Timeline/TimePropertyItem.h \
+    Palettes/Timeline/TimePropertyItem.h \
     Palettes/TimelineGraphicsView/Keyframe.h \
-    Palettes/TimelineGraphicsView/rowtypes.h \
     Palettes/TimelineGraphicsView/KeyframeManager.h \
     Palettes/TimelineGraphicsView/RowManager.h \
-    Palettes/TimelineGraphicsView/TimelineUtils.h \
-    Palettes/TimelineGraphicsView/ui/RowTree.h \
-    Palettes/TimelineGraphicsView/ui/RowTimeline.h \
-    Palettes/TimelineGraphicsView/ui/TreeHeader.h \
-    Palettes/TimelineGraphicsView/ui/RowTreeLabelItem.h \
-    Palettes/TimelineGraphicsView/ui/TreeHeaderView.h \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.h \
+    Palettes/TimelineGraphicsView/RowMover.h \
+    Palettes/TimelineGraphicsView/RowMover.h \
+    Palettes/TimelineGraphicsView/rowtypes.h \
+    Palettes/TimelineGraphicsView/SelectionRect.h \
+    Palettes/TimelineGraphicsView/SelectionRect.h \
+    Palettes/TimelineGraphicsView/TimelineConstants.h \
+    Palettes/TimelineGraphicsView/TimelineConstants.h \
     Palettes/TimelineGraphicsView/TimelineControl.h \
-    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.h \
-    Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.h \
+    Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
+    Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
+    Palettes/TimelineGraphicsView/TimelineSplitter.h \
+    Palettes/TimelineGraphicsView/TimelineSplitter.h \
+    Palettes/TimelineGraphicsView/TimelineUtils.h \
+    Palettes/TimelineGraphicsView/TimelineWidget.h \
+    Palettes/TimelineGraphicsView/TimelineWidget.h \
+    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.h \
+    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.h \
     Palettes/TimelineGraphicsView/ui/NavigationBar.h \
     Palettes/TimelineGraphicsView/ui/NavigationBarItem.h \
+    Palettes/TimelineGraphicsView/ui/PlayHead.h \
+    Palettes/TimelineGraphicsView/ui/PlayHead.h \
+    Palettes/TimelineGraphicsView/ui/RowTimeline.h \
+    Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.h \
     Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.h \
-    Render/StudioVisualAidWidget.h \
+    Palettes/TimelineGraphicsView/ui/RowTree.h \
+    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.h \
+    Palettes/TimelineGraphicsView/ui/RowTreeLabelItem.h \
+    Palettes/TimelineGraphicsView/ui/Ruler.h \
+    Palettes/TimelineGraphicsView/ui/Ruler.h \
+    Palettes/TimelineGraphicsView/ui/TimelineItem.h \
+    Palettes/TimelineGraphicsView/ui/TimelineItem.h \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.h \
+    Palettes/TimelineGraphicsView/ui/TreeHeader.h \
+    Palettes/TimelineGraphicsView/ui/TreeHeaderView.h \
+    PreviewHelper.h \
+    PreviewHelper.h \
+    remotedeploymentsender.h \
+    remotedeploymentsender.h \
     Render/StudioGradientWidget.h \
+    Render/StudioVisualAidWidget.h \
+    UI/EditCameraBar.h \
+    UI/EditCameraBar.h \
+    UI/GLVersionDlg.h \
+    UI/GLVersionDlg.h \
+    UI/InterpolationDlg.h \
+    UI/InterpolationDlg.h \
+    UI/PlayerContainerWnd.h \
+    UI/PlayerContainerWnd.h \
+    UI/PlayerWnd.h \
+    UI/PlayerWnd.h \
+    UI/RecentItems.h \
+    UI/RecentItems.h \
+    UI/ResetKeyframeValuesDlg.h \
+    UI/ResetKeyframeValuesDlg.h \
+    UI/SceneView.h \
+    UI/SceneView.h \
+    UI/StartupDlg.h \
+    UI/StartupDlg.h \
+    UI/StudioAppPrefsPage.h \
+    UI/StudioAppPrefsPage.h \
+    UI/StudioPreferencesPropSheet.h \
+    UI/StudioPreferencesPropSheet.h \
+    UI/StudioProjectSettingsPage.h \
+    UI/StudioProjectSettingsPage.h \
     ../Common/Code/Graph/GraphPosition.h
 
 FORMS += \
@@ -242,60 +328,36 @@ FORMS += \
     Application/DataInputListDlg.ui \
     Application/DurationEditDlg.ui \
     Application/StudioTutorialWidget.ui \
-    _Win/Application/AboutDlg.ui \
-    _Win/Application/SubPresentationDlg.ui \
-    _Win/Application/SubPresentationListDlg.ui \
-    _Win/Palettes/Progress/ProgressDlg.ui \
-    _Win/UI/StudioAppPrefsPage.ui \
-    _Win/UI/StudioPreferencesPropSheet.ui \
-    _Win/UI/StudioProjectSettingsPage.ui \
-    _Win/UI/InterpolationDlg.ui \
-    _Win/UI/ResetKeyframeValuesDlg.ui \
-    _Win/UI/GLVersionDlg.ui \
-    _Win/UI/StartupDlg.ui
+    Application/AboutDlg.ui \
+    Application/SubPresentationDlg.ui \
+    Application/SubPresentationListDlg.ui \
+    Palettes/Progress/ProgressDlg.ui \
+    UI/StudioAppPrefsPage.ui \
+    UI/StudioPreferencesPropSheet.ui \
+    UI/StudioProjectSettingsPage.ui \
+    UI/InterpolationDlg.ui \
+    UI/ResetKeyframeValuesDlg.ui \
+    UI/GLVersionDlg.ui \
+    UI/StartupDlg.ui
 
 SOURCES += \
-    MainFrm.cpp \
-    PreviewHelper.cpp \
-    remotedeploymentsender.cpp \
-    _Win/Application/AboutDlg.cpp \
-    _Win/Application/MsgRouter.cpp \
-    _Win/Application/StudioApp.cpp \
-    _Win/Application/SubPresentationDlg.cpp \
-    _Win/Application/SubPresentationListDlg.cpp \
-    _Win/Controls/AppFonts.cpp \
-    _Win/Controls/BufferedRenderer.cpp \
-    _Win/Controls/OffscreenRenderer.cpp \
-    _Win/Controls/WinRenderer.cpp \
-    _Win/DragNDrop/DropProxy.cpp \
-    _Win/Palettes/PaletteManager.cpp \
-    _Win/Palettes/Progress/ProgressView.cpp \
-    _Win/UI/EditCameraBar.cpp \
-    _Win/UI/EditorPane.cpp \
-    _Win/UI/GLVersionDlg.cpp \
-    _Win/UI/InterpolationDlg.cpp \
-    _Win/UI/PlayerContainerWnd.cpp \
-    _Win/UI/PlayerWnd.cpp \
-    _Win/UI/RecentItems.cpp \
-    _Win/UI/ResetKeyframeValuesDlg.cpp \
-    _Win/UI/SceneView.cpp \
-    _Win/UI/StartupDlg.cpp \
-    _Win/UI/StudioAppPrefsPage.cpp \
-    _Win/UI/StudioPreferencesPropSheet.cpp \
-    _Win/UI/StudioProjectSettingsPage.cpp \
-    _Win/Utils/MouseCursor.cpp \
-    _Win/Workspace/Dialogs.cpp \
-    _Win/Workspace/Views.cpp \
-    Application/TimeEditDlg.cpp \
+    Application/AboutDlg.cpp \
     Application/DataInputDlg.cpp \
     Application/DataInputListDlg.cpp \
     Application/DataInputSelectModel.cpp \
     Application/DataInputSelectView.cpp \
     Application/DurationEditDlg.cpp \
+    Application/MsgRouter.cpp \
+    Application/StudioApp.cpp \
     Application/StudioTutorialWidget.cpp \
+    Application/SubPresentationDlg.cpp \
+    Application/SubPresentationListDlg.cpp \
+    Application/TimeEditDlg.cpp \
+    Controls/AppFonts.cpp \
     Controls/BaseMeasure.cpp \
     Controls/BlankControl.cpp \
     Controls/BreadCrumbControl.cpp \
+    Controls/BufferedRenderer.cpp \
     Controls/ButtonControl.cpp \
     Controls/ClickableLabel.cpp \
     Controls/Control.cpp \
@@ -310,6 +372,7 @@ SOURCES += \
     Controls/ListBoxStringItem.cpp \
     Controls/ListLayout.cpp \
     Controls/NameEdit.cpp \
+    Controls/OffscreenRenderer.cpp \
     Controls/OverlayControl.cpp \
     Controls/Renderer.cpp \
     Controls/ScrollController.cpp \
@@ -331,8 +394,10 @@ SOURCES += \
     Controls/TreeControl.cpp \
     Controls/TreeItem.cpp \
     Controls/WidgetControl.cpp \
+    Controls/WinRenderer.cpp \
     DragAndDrop/BasicObjectDropSource.cpp \
     DragAndDrop/DropContainer.cpp \
+    DragAndDrop/DropProxy.cpp \
     DragAndDrop/DropSource.cpp \
     DragAndDrop/DropTarget.cpp \
     DragAndDrop/ExplorerFileDropSource.cpp \
@@ -343,45 +408,66 @@ SOURCES += \
     DragAndDrop/SceneDropTarget.cpp \
     DragAndDrop/TimelineDropSource.cpp \
     DragAndDrop/TimelineDropTarget.cpp \
+    MainFrm.cpp \
+    Palettes/Action/ActionContextMenu.cpp \
     Palettes/Action/ActionModel.cpp \
     Palettes/Action/ActionView.cpp \
-    Palettes/Action/ActionContextMenu.cpp \
-    Palettes/Action/EventsModel.cpp \
     Palettes/Action/EventsBrowserView.cpp \
+    Palettes/Action/EventsModel.cpp \
     Palettes/Action/PropertyModel.cpp \
     Palettes/BasicObjects/BasicObjectsModel.cpp \
     Palettes/BasicObjects/BasicObjectsView.cpp \
     Palettes/Inspector/ChooserModelBase.cpp \
     Palettes/Inspector/EasyInspectorGroup.cpp \
-    Palettes/Inspector/GuideInspectable.cpp \
-    Palettes/Inspector/InspectableBase.cpp \
-    Palettes/Inspector/InspectorGroup.cpp \
-    Palettes/Inspector/ImageChooserView.cpp \
-    Palettes/Inspector/FileChooserView.cpp \
     Palettes/Inspector/FileChooserModel.cpp \
+    Palettes/Inspector/FileChooserView.cpp \
+    Palettes/Inspector/GuideInspectable.cpp \
     Palettes/Inspector/ImageChooserModel.cpp \
+    Palettes/Inspector/ImageChooserView.cpp \
+    Palettes/Inspector/InspectableBase.cpp \
+    Palettes/Inspector/InspectorControlModel.cpp \
+    Palettes/Inspector/InspectorControlView.cpp \
+    Palettes/Inspector/InspectorGroup.cpp \
     Palettes/Inspector/MeshChooserModel.cpp \
     Palettes/Inspector/MeshChooserView.cpp \
-    Palettes/Inspector/TextureChooserView.cpp \
+    Palettes/Inspector/MouseHelper.cpp \
+    Palettes/Inspector/ObjectBrowserView.cpp \
+    Palettes/Inspector/ObjectListModel.cpp \
     Palettes/Inspector/Qt3DSDMInspectable.cpp \
     Palettes/Inspector/Qt3DSDMInspectorGroup.cpp \
     Palettes/Inspector/Qt3DSDMInspectorRow.cpp \
     Palettes/Inspector/Qt3DSDMMaterialInspectable.cpp \
     Palettes/Inspector/Qt3DSDMSceneInspectable.cpp \
-    Palettes/Inspector/InspectorControlView.cpp \
-    Palettes/Inspector/InspectorControlModel.cpp \
-    Palettes/Inspector/ObjectListModel.cpp \
-    Palettes/Inspector/ObjectBrowserView.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
-    Palettes/Inspector/MouseHelper.cpp \
-    Palettes/Project/ProjectView.cpp \
-    Palettes/Project/ProjectFileSystemModel.cpp \
+    Palettes/Inspector/TextureChooserView.cpp \
+    Palettes/PaletteManager.cpp \
+    Palettes/Progress/ProgressView.cpp \
     Palettes/Project/ProjectContextMenu.cpp \
+    Palettes/Project/ProjectFileSystemModel.cpp \
+    Palettes/Project/ProjectView.cpp \
+    Palettes/Slide/SlideContextMenu.cpp \
     Palettes/Slide/SlideModel.cpp \
     Palettes/Slide/SlideView.cpp \
-    Palettes/Slide/SlideContextMenu.cpp \
     Palettes/Timeline/AbstractTimelineRowUI.cpp \
     Palettes/Timeline/BaseStateRow.cpp \
+    Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
+    Palettes/Timeline/Bindings/GroupTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/ImageTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/KeyframesManager.cpp \
+    Palettes/Timeline/Bindings/LayerTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/MaterialTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/OffsetKeyframesCommandHelper.cpp \
+    Palettes/Timeline/Bindings/PathAnchorPointTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/PathTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/Qt3DSDMAssetTimelineKeyframe.cpp \
+    Palettes/Timeline/Bindings/Qt3DSDMTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/Qt3DSDMTimelineItemProperty.cpp \
+    Palettes/Timeline/Bindings/Qt3DSDMTimelineKeyframe.cpp \
+    Palettes/Timeline/Bindings/Qt3DSDMTimelineTimebar.cpp \
+    Palettes/Timeline/Bindings/SlideTimelineItemBinding.cpp \
+    Palettes/Timeline/Bindings/TimelineBreadCrumbProvider.cpp \
+    Palettes/Timeline/Bindings/TimelineTranslationManager.cpp \
     Palettes/Timeline/ColorBlankControl.cpp \
     Palettes/Timeline/ColorControl.cpp \
     Palettes/Timeline/CommentEdit.cpp \
@@ -397,70 +483,70 @@ SOURCES += \
     Palettes/Timeline/StateRowFactory.cpp \
     Palettes/Timeline/TimelineFilter.cpp \
     Palettes/Timeline/TimelineKeyframe.cpp \
+    Palettes/Timeline/TimelineObjectModel.cpp \
     Palettes/Timeline/TimelineRow.cpp \
     Palettes/Timeline/TimelineUIFactory.cpp \
     Palettes/Timeline/TimelineView.cpp \
-    Palettes/Timeline/TimelineObjectModel.cpp \
     Palettes/Timeline/TimeMeasureItem.cpp \
     Palettes/Timeline/TimePropertyItem.cpp \
-    Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
-    Palettes/Timeline/Bindings/GroupTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/ImageTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/KeyframesManager.cpp \
-    Palettes/Timeline/Bindings/LayerTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/MaterialTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/OffsetKeyframesCommandHelper.cpp \
-    Palettes/Timeline/Bindings/PathAnchorPointTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/PathTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/SlideTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/TimelineBreadCrumbProvider.cpp \
-    Palettes/Timeline/Bindings/TimelineTranslationManager.cpp \
-    Palettes/Timeline/Bindings/Qt3DSDMAssetTimelineKeyframe.cpp \
-    Palettes/Timeline/Bindings/Qt3DSDMTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/Qt3DSDMTimelineItemProperty.cpp \
-    Palettes/Timeline/Bindings/Qt3DSDMTimelineKeyframe.cpp \
-    Palettes/Timeline/Bindings/Qt3DSDMTimelineTimebar.cpp \
-    Palettes/TimelineGraphicsView/TimelineWidget.cpp \
-    Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
-    Palettes/TimelineGraphicsView/TimelineSplitter.cpp \
-    Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
-    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.cpp \
-    Palettes/TimelineGraphicsView/ui/PlayHead.cpp \
-    Palettes/TimelineGraphicsView/ui/Ruler.cpp \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \
-    Palettes/TimelineGraphicsView/SelectionRect.cpp \
-    Palettes/TimelineGraphicsView/RowMover.cpp \
     Palettes/TimelineGraphicsView/KeyframeManager.cpp \
     Palettes/TimelineGraphicsView/RowManager.cpp \
-    Palettes/TimelineGraphicsView/TimelineUtils.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTree.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTimeline.cpp \
-    Palettes/TimelineGraphicsView/ui/TreeHeader.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTreeLabelItem.cpp \
-    Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.cpp \
+    Palettes/TimelineGraphicsView/RowMover.cpp \
+    Palettes/TimelineGraphicsView/SelectionRect.cpp \
     Palettes/TimelineGraphicsView/TimelineControl.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.cpp \
+    Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
+    Palettes/TimelineGraphicsView/TimelineSplitter.cpp \
+    Palettes/TimelineGraphicsView/TimelineUtils.cpp \
+    Palettes/TimelineGraphicsView/TimelineWidget.cpp \
+    Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.cpp \
     Palettes/TimelineGraphicsView/ui/NavigationBar.cpp \
     Palettes/TimelineGraphicsView/ui/NavigationBarItem.cpp \
+    Palettes/TimelineGraphicsView/ui/PlayHead.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimeline.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimelineContextMenu.cpp \
     Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTree.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTreeLabelItem.cpp \
+    Palettes/TimelineGraphicsView/ui/Ruler.cpp \
+    Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \
+    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.cpp \
+    Palettes/TimelineGraphicsView/ui/TreeHeader.cpp \
+    Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
+    PreviewHelper.cpp \
+    remotedeploymentsender.cpp \
     Render/PathWidget.cpp \
+    Render/StudioGradientWidget.cpp \
     Render/StudioRenderer.cpp \
     Render/StudioRendererTranslation.cpp \
     Render/StudioRotationWidget.cpp \
     Render/StudioScaleWidget.cpp \
     Render/StudioTranslationWidget.cpp \
-    Render/StudioWidget.cpp \
-    Render/StudioGradientWidget.cpp \
     Render/StudioVisualAidWidget.cpp \
+    Render/StudioWidget.cpp \
     Render/WGLRenderContext.cpp \
+    UI/EditCameraBar.cpp \
+    UI/EditorPane.cpp \
+    UI/GLVersionDlg.cpp \
+    UI/InterpolationDlg.cpp \
+    UI/PlayerContainerWnd.cpp \
+    UI/PlayerWnd.cpp \
+    UI/RecentItems.cpp \
+    UI/ResetKeyframeValuesDlg.cpp \
+    UI/SceneView.cpp \
+    UI/StartupDlg.cpp \
+    UI/StudioAppPrefsPage.cpp \
+    UI/StudioPreferencesPropSheet.cpp \
+    UI/StudioProjectSettingsPage.cpp \
     Utils/ImportUtils.cpp \
+    Utils/MouseCursor.cpp \
     Utils/ResourceCache.cpp \
     Utils/StudioUtils.cpp \
     Utils/SystemPreferences.cpp \
-    Utils/TickTock.cpp
+    Utils/TickTock.cpp \
+    Workspace/Dialogs.cpp \
+    Workspace/Views.cpp
 
 RESOURCES += \
     MainFrm.qrc \

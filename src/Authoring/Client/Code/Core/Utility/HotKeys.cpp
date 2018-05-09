@@ -38,7 +38,7 @@
 #include "HotKeys.h"
 #include "StringTokenizer.h"
 
-#include "Studio/_Win/UI/SceneView.h"
+#include "Studio/UI/SceneView.h"
 #include "Studio/MainFrm.h"
 #include "Studio/Controls/TextEdit.h"
 #include "Studio/Controls/WidgetControl.h"
