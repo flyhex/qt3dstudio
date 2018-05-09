@@ -108,11 +108,23 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
 
-    m_timelineGVDock = new QDockWidget(QObject::tr("Timeline GV"), inMainFrame);
+    m_timelineGVDock = new QDockWidget(QObject::tr("Timeline GV"));
     m_timelineGVDock->setObjectName("timeline GV.");
     m_timelineGVDock->setAllowedAreas(Qt::BottomDockWidgetArea);
-    m_timelineWidget = new TimelineWidget(m_timelineGVDock);
-    m_timelineGVDock->setWidget(m_timelineWidget);
+
+    m_timelineWidget = new TimelineWidget();
+    WidgetControl *timeLineWidgetControl = new WidgetControl(m_timelineWidget, m_timelineGVDock);
+    timeLineWidgetControl->RegisterForDnd(timeLineWidgetControl);
+    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
+    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
+    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
+    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
+    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_TL);
+    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
+
+    m_timelineWidget->setParent(timeLineWidgetControl);
+
+    m_timelineGVDock->setWidget(timeLineWidgetControl);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineGVDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineGVDock));
 

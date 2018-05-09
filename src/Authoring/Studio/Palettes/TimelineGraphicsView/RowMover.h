@@ -34,27 +34,29 @@
 #include <QtWidgets/qgraphicsitem.h>
 
 class RowTree;
+class TimelineGraphicsScene;
 
 class RowMover : public QGraphicsRectItem
 {
 public:
-    RowMover();
+    RowMover(TimelineGraphicsScene *m_scene);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
 
-    void start(RowTree *row);
-    void end();
-    void resetInsertionParent(RowTree *newTarget = nullptr);
-    void updateState(int index, int depth, int rawIndex);
-
+    void start(RowTree *row = nullptr);
+    void end(bool force = false);
+    void updateTargetRow(int mouseX, int mouseY);
+    int targetIndex() const;
+    bool isActive();
+    bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
     RowTree *insertionParent() const;
     RowTree *sourceRow() const;
 
-    int targetIndex() const;
-    bool isActive();
-    bool isValidMove(int index, RowTree *rowAtIndex);
-
 private:
+    void updateState(int index, int depth, int rawIndex);
+    void resetInsertionParent(RowTree *newTarget = nullptr);
+
+    TimelineGraphicsScene *m_scene = nullptr;
     RowTree *m_insertionParent = nullptr; // insertion parent
     RowTree *m_sourceRow = nullptr;       // dragged row
     int m_targetIndex = -1;               // insertion index

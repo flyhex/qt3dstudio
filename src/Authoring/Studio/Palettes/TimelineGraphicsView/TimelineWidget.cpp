@@ -53,6 +53,8 @@
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include "TimeEditDlg.h"
 #include "IDocumentEditor.h"
+#include "Control.h"
+#include "TimelineDropTarget.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -134,6 +136,8 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     , m_viewTimelineContent(new QGraphicsView(this))
     , m_graphicsScene(new TimelineGraphicsScene(this))
 {
+    // Mahmoud_TODO: CTimelineTranslationManager should be eventually removed or cleaned. Already
+    // most of its functionality is implemented in this class
     m_translationManager = new CTimelineTranslationManager();
 
     setWindowTitle(tr("Timeline", "Title of timeline view"));
@@ -443,6 +447,7 @@ void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable
     if (theInstances.size() > 0) {
         for (size_t idx = 0, end = theInstances.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(theInstances[idx]);
+
             if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(theInstance)) {
                 auto *binding = getBindingForHandle(theInstance, m_binding);
                 if (binding)
@@ -639,6 +644,85 @@ void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
         if (row && rowParent)
             rowParent->addChildAt(row, bindingParent->convertIndex(inNewIndex, true));
     }
+}
+
+void TimelineWidget::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation)
+{
+
+}
+
+void TimelineWidget::Draw(CRenderer *inRenderer)
+{
+
+}
+
+void TimelineWidget::OnGainFocus()
+{
+
+}
+
+CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags)
+{
+    CTimeLineDropTarget *theTarget = new CTimeLineDropTarget();
+
+    int mouseY = inMousePoint.y - m_navigationBar->height()
+                 + viewTreeContent()->verticalScrollBar()->value()
+                 - viewTreeContent()->verticalScrollBar()->minimum();
+    RowMover *mover = m_graphicsScene->rowMover();
+    mover->updateTargetRow(inMousePoint.x, mouseY);
+
+    if (mover->insertionParent()) {
+        RowTree *targetRow = mover->insertionParent()->getChildAt(mover->targetIndex()-1);
+
+        if (targetRow) {
+            theTarget->SetDestination(EDROPDESTINATION_BELOW);
+            targetRow->getBinding()->SetDropTarget(theTarget);
+        } else {
+            if (mover->insertionParent()->childRows().empty()) {
+                theTarget->SetDestination(EDROPDESTINATION_ON);
+                mover->insertionParent()->getBinding()->SetDropTarget(theTarget);
+            } else {
+                theTarget->SetDestination(EDROPDESTINATION_ABOVE);
+                mover->insertionParent()->getChildAt(0)->getBinding()->SetDropTarget(theTarget);
+            }
+        }
+    }
+
+    return theTarget;
+}
+
+bool TimelineWidget::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+    return true;
+}
+
+void TimelineWidget::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+}
+
+void TimelineWidget::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+}
+
+CPt TimelineWidget::GetPreferredSize()
+{
+    return CPt();
+}
+
+void TimelineWidget::SetSize(long inX, long inY)
+{
+    setFixedSize(inX, inY);
+}
+
+// If views are interactive they block the DnD. If we could think of a way to make them do not block
+// DnD, then this method can be removed (and it's callers)
+void TimelineWidget::enableDnD(bool b)
+{
+    m_viewTreeHeader->setInteractive(!b);
+    m_viewTreeContent->setInteractive(!b);
+
+    if (!b)
+        m_graphicsScene->rowMover()->end(true);
 }
 
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,

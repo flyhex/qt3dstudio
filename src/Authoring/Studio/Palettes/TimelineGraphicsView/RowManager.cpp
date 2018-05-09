@@ -141,7 +141,7 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
         qWarning() << __FUNCTION__ << "Property row cannot have children. No row added.";
     } else {
         // If the row doesnt have a parent, insert it under the scene (first row is the tree header)
-        if (parentRow == nullptr && rowType != OBJTYPE_SCENE && m_layoutTree->count() > 1)
+        if (!parentRow && rowType != OBJTYPE_SCENE && m_layoutTree->count() > 1)
             parentRow = static_cast<RowTree *>(m_layoutTree->itemAt(1));
 
         RowTree *rowTree = nullptr;
@@ -168,18 +168,13 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
     return nullptr;
 }
 
-RowTree *RowManager::getRowAbove(RowTree *row)
+RowTree *RowManager::getNextSiblingRow(RowTree *row) const
 {
-    int rowIndex = getRowIndex(row);
-
-    if (rowIndex > 1) {
-        RowTree *rowAbove = static_cast<RowTree *>(m_layoutTree->itemAt(rowIndex - 1));
-
-        if (rowAbove) {
-            while (rowAbove && rowAbove->depth() > row->depth())
-                rowAbove = rowAbove->parentRow();
-
-            return rowAbove;
+    if (row && m_layoutTree->count() > 1) {
+        for (int i = row->indexInLayout() + 1; i < m_layoutTree->count(); ++i) {
+            RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+            if (row_i->depth() <= row->depth())
+                return row_i;
         }
     }
 
@@ -209,7 +204,7 @@ RowTimeline *RowManager::rowTimelineAt(int idx)
 // Call this to select/unselect row, affecting bindings
 void RowManager::selectRow(RowTree *row, bool multiSelect)
 {
-    if (row == nullptr)
+    if (!row)
         return;
 
     if (row->isProperty())
@@ -269,7 +264,7 @@ void RowManager::updateRulerDuration()
 
 void RowManager::updateFiltering(RowTree *row)
 {
-    if (row == nullptr) { // update all rows
+    if (!row) { // update all rows
         RowTree *row_i;
         for (int i = 1; i < m_layoutTree->count(); ++i) {
             row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
@@ -293,7 +288,7 @@ void RowManager::updateRowFilterRecursive(RowTree *row)
 
 void RowManager::updateRowFilter(RowTree *row)
 {
-    bool parentOk = row->parentRow() == nullptr || row->parentRow()->isVisible();
+    bool parentOk = !row->parentRow()|| row->parentRow()->isVisible();
     bool shyOk     = !row->shy()    || !m_scene->treeHeader()->filterShy();
     bool visibleOk = row->visible() || !m_scene->treeHeader()->filterHidden();
     bool lockOk    = !row->locked() || !m_scene->treeHeader()->filterLocked();
@@ -306,10 +301,6 @@ void RowManager::updateRowFilter(RowTree *row)
 void RowManager::deleteRow(RowTree *row)
 {
    if (row && row->rowType() != OBJTYPE_SCENE) {
-       auto rowAbove = getRowAbove(row);
-       if (rowAbove)
-           selectRow(rowAbove);
-
        if (row->parentRow())
            row->parentRow()->removeChild(row);
 

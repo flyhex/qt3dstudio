@@ -76,6 +76,7 @@ public:
     QGraphicsLinearLayout *layoutTimeline() const;
     TreeHeader *treeHeader() const;
     double treeWidth() const;
+    TimelineWidget *widgetTimeline() const;
     void updateTreeWidth(double x);
     void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
     void resetMouseCursor();
@@ -100,8 +101,6 @@ private:
     void snap(double &value, bool snapToPlayHead = true);
     int nextRowDepth(int index);
     bool lastRowInAParent(RowTree *rowAtIndex, int index);
-    bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
-    RowTree *getNextSiblingRow(RowTree *row) const;
     QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
                                     QGraphicsItem *item,
                                     const QPointF &scenePos);

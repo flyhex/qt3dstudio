@@ -538,6 +538,14 @@ int RowTree::addChildToLayout(RowTree *child, int indexInLayout)
     return indexInLayout;
 }
 
+RowTree *RowTree::getChildAt(int index) const
+{
+    if (index < 0 || index > m_childRows.count() - 1)
+        return nullptr;
+
+    return m_childRows.at(index);
+}
+
 // TODO: so far not used, delete if end up not used
 void RowTree::moveChild(int from, int to)
 {
@@ -799,8 +807,12 @@ void RowTree::setMoveSourceRecursive(bool value)
 
 bool RowTree::isContainer() const
 {
-    return !m_isProperty && m_rowType != OBJTYPE_ALIAS && m_rowType != OBJTYPE_MATERIAL
-            && m_rowType != OBJTYPE_IMAGE && m_rowType != OBJTYPE_TEXT;
+    return !m_isProperty
+            && m_rowType != OBJTYPE_ALIAS
+            && m_rowType != OBJTYPE_MATERIAL
+            && m_rowType != OBJTYPE_IMAGE
+            && m_rowType != OBJTYPE_TEXT
+            && m_rowType != OBJTYPE_COMPONENT;
 }
 
 bool RowTree::isProperty() const

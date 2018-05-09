@@ -28,13 +28,18 @@
 
 #include "RowMover.h"
 #include "RowTree.h"
+#include "RowManager.h"
+#include "TimelineGraphicsScene.h"
 #include "TimelineConstants.h"
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qgraphicsitem.h>
+#include <QtWidgets/qgraphicslinearlayout.h>
 
-RowMover::RowMover() : QGraphicsRectItem()
+RowMover::RowMover(TimelineGraphicsScene *scene)
+    : QGraphicsRectItem()
+    , m_scene(scene)
 {
     setZValue(99);
     setRect(0, -5, TimelineConstants::TREE_MAX_W, 10);
@@ -88,21 +93,23 @@ bool RowMover::isActive()
 
 void RowMover::start(RowTree *row)
 {
-    m_sourceRow = row;
     m_active = true;
 
-    m_sourceRow->setMoveSourceRecursive(true);
-
-    qApp->setOverrideCursor(Qt::ClosedHandCursor);
+    if (row) {
+        m_sourceRow = row;
+        m_sourceRow->setMoveSourceRecursive(true);
+        qApp->setOverrideCursor(Qt::ClosedHandCursor);
+    }
 }
 
-void RowMover::end()
+void RowMover::end(bool force)
 {
-    if (m_active) {
-        m_sourceRow->setMoveSourceRecursive(false);
-
+    if (m_active || force) {
         m_active = false;
-        m_sourceRow = nullptr;
+        if (m_sourceRow) {
+            m_sourceRow->setMoveSourceRecursive(false);
+            m_sourceRow = nullptr;
+        }
 
         setVisible(false);
         resetInsertionParent();
@@ -112,7 +119,6 @@ void RowMover::end()
     }
 }
 
-
 void RowMover::updateState(int index, int depth, int rawIndex)
 {
     m_targetIndex = index;
@@ -121,17 +127,125 @@ void RowMover::updateState(int index, int depth, int rawIndex)
     setVisible(true);
 }
 
-// TODO: not used, probably delete
-bool RowMover::isValidMove(int index, RowTree *rowAtIndex)
+void RowMover::updateTargetRow(int mouseX, int mouseY)
 {
-    return
-        // not the same row
-        //index != m_currentIndex &&
+    int indexRaw = qRound((float)mouseY / TimelineConstants::ROW_H) - 1;
+    int indexInLayout = indexRaw;
+    m_scene->rowManager()->correctIndex(indexInLayout);
+    bool valid = indexInLayout != -1;
 
-        // not moving an ancestor into a decendent
-        !rowAtIndex->isDecendentOf(m_sourceRow)
+    RowTree *rowAtIndex;
+    RowTree *nextRowAtIndex;
 
-        // not at the top of an expanded object with property children
-         && (rowAtIndex->childRows().empty() || !rowAtIndex->childRows().first()->isProperty()
-             || !rowAtIndex->expanded());
+    if (valid) { // valid row index
+        rowAtIndex = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(indexInLayout)
+                                            ->graphicsItem());
+        nextRowAtIndex = indexInLayout > m_scene->layoutTree()->count() - 2 ? nullptr :
+                     static_cast<RowTree *>(m_scene->layoutTree()->itemAt(indexInLayout + 1)
+                                            ->graphicsItem());
+
+        if (!rowAtIndex->expanded())
+            nextRowAtIndex = m_scene->rowManager()->getNextSiblingRow(rowAtIndex);
+
+                // not moving an ancestor into a decendent
+        valid = (!m_sourceRow || !rowAtIndex->isDecendentOf(m_sourceRow))
+
+                // not inserting as a first child of self
+                && (!m_sourceRow || !(rowAtIndex == m_sourceRow && !rowAtIndex->empty()))
+
+                // not inserting non-layer at root level
+                && !((!m_sourceRow || m_sourceRow->rowType() != OBJTYPE_LAYER)
+                     && rowAtIndex->rowType() == OBJTYPE_SCENE)
+
+                // Layer cases
+                && validLayerMove(rowAtIndex, nextRowAtIndex);
+    }
+
+    if (valid) {
+        // if dragging over a property or a parent of a property, move to the first row
+        // after the property
+        if (rowAtIndex->isProperty())
+            indexRaw = rowAtIndex->parentRow()->childProps().last()->indexInLayout();
+        else if (rowAtIndex->hasPropertyChildren() && rowAtIndex->expanded())
+            indexRaw = rowAtIndex->childProps().last()->indexInLayout();
+
+        // calc insertion depth
+        int depth;
+        if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_LAYER) {
+            depth = 2; // layers can only be moved on depth 2
+        } else {
+            int depthMin = nextRowAtIndex ? nextRowAtIndex->depth() : 3;
+            int depthMax = rowAtIndex->depth();
+
+            if (rowAtIndex->isContainer() && rowAtIndex->expanded()
+                    && rowAtIndex != m_sourceRow) {
+                depthMax++; // Container: allow insertion as a child
+            } else if (rowAtIndex->isPropertyOrMaterial()
+                      && !rowAtIndex->parentRow()->isContainer()) {
+                 depthMax--; // non-container with properties and/or a material
+            }
+
+            static const int LEFT_MARGIN = 20;
+            static const int STEP = 15;
+            depth = (mouseX - LEFT_MARGIN) / STEP;
+            depth = qBound(depthMin, depth, depthMax);
+        }
+
+        // calc insertion parent
+        RowTree *insertParent = rowAtIndex;
+        for (int i = rowAtIndex->depth(); i >= depth; --i)
+            insertParent = insertParent->parentRow();
+        resetInsertionParent(insertParent);
+
+        if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_MATERIAL
+                && m_sourceRow->parentRow() != m_insertionParent) {
+            valid = false; // not moving a material row outside its parent
+        }
+
+        if (valid) {
+            // calc insertion index
+            int index = rowAtIndex->index() + 1;
+            if ((rowAtIndex->isProperty() && depth == rowAtIndex->depth())
+                    || rowAtIndex == insertParent) {
+                index = 0;
+            } else if (depth < rowAtIndex->depth()) {
+                RowTree *row = rowAtIndex;
+                for (int i = depth; i < rowAtIndex->depth(); ++i)
+                    row = row->parentRow();
+                index = row->index() + 1;
+            }
+
+            if (m_sourceRow && insertParent == m_sourceRow->parentRow()
+                    && index > m_sourceRow->index()) {
+                index--;
+            }
+
+            updateState(index, depth, indexRaw);
+        }
+    }
+
+    if (!valid) {
+        setVisible(false);
+        resetInsertionParent();
+    }
+}
+
+bool RowMover::validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex)
+{
+    // we don't care about non-layers in this method
+    if (!m_sourceRow || m_sourceRow->rowType() != OBJTYPE_LAYER)
+        return true;
+
+    if (rowAtIndex->rowType() == OBJTYPE_SCENE)
+        return true;
+
+    if (rowAtIndex->rowType() == OBJTYPE_LAYER)
+       return rowAtIndex->empty() || !rowAtIndex->expanded();
+
+    if (!nextRowAtIndex || (nextRowAtIndex->depth() <= rowAtIndex->depth()
+                            && nextRowAtIndex->depth() == 2)) {
+        return true;
+    }
+
+    return false;
 }

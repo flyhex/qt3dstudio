@@ -39,6 +39,7 @@
 #include "TreeHeaderView.h"
 #include "Bindings/Qt3DSDMTimeline.h"
 #include "NavigationBar.h"
+#include "Control.h"
 
 class RowTree;
 class TimelineToolbar;
@@ -52,7 +53,8 @@ QT_FORWARD_DECLARE_CLASS(QGraphicsView)
 
 class TimelineWidget : public QWidget,
                        public CPresentationChangeListener,
-                       public CClientPlayChangeListener
+                       public CClientPlayChangeListener,
+                       public CControl
 {
     Q_OBJECT
 
@@ -64,10 +66,10 @@ public:
     QGraphicsView *viewTimelineContent() const;
     QGraphicsView *viewTreeContent() const;
     QVector<RowTree *> selectedRows() const;
-
     void openBarColorDialog();
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
+    void enableDnD(bool b = true);
 
     // Presentation Change Listener
     void OnNewPresentation() override;
@@ -77,6 +79,17 @@ public:
     //CClientPlayChangeListener
     void OnTimeChanged(long inTime) override;
     bool hasSelectedKeyframes() const;
+
+    // CControl
+    void OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation = false) override;
+    void Draw(CRenderer *inRenderer) override;
+    void OnGainFocus() override;
+    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags) override;
+    bool OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    CPt GetPreferredSize() override;
+    void SetSize(long inX, long inY) override;
 
 protected:
     // DataModel callbacks

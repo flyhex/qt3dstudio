@@ -41,6 +41,9 @@
 #include "TimelineDropSource.h"
 #include "BasicObjectDropSource.h"
 #include "ListBoxDropSource.h"
+#include "Views.h"
+#include "MainFrm.h"
+#include "TimelineWidget.h"
 
 CDropSource::CDropSource(long inFlavor, unsigned long inSize)
     : m_Flavor(inFlavor)
@@ -49,10 +52,12 @@ CDropSource::CDropSource(long inFlavor, unsigned long inSize)
     , m_HasValidTarget(false)
     , m_CurrentFlags(0)
 {
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->enableDnD();
 }
 
 CDropSource::~CDropSource()
 {
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->enableDnD(false);
 }
 
 CDropSource *CDropSourceFactory::Create(long inFlavor, void *inData, unsigned long inSize)

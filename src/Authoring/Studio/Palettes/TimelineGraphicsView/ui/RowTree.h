@@ -104,6 +104,7 @@ public:
     int treeWidth() const;
     EStudioObjectType rowType() const;
     QString propertyType() const;
+    RowTree *getChildAt(int index) const;
     RowTree *parentRow() const;
     RowTree *getPropertyRow(const QString &type) const;
     QList<RowTree *> childRows() const;

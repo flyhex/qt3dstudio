@@ -394,12 +394,13 @@ void TimelineToolbar::updateTimelineTitleColor(bool controlled)
 {
     QString styleString;
     if (controlled) {
-        styleString= "QDockWidget { color: "
+        styleString = "QDockWidget { color: "
                 + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     } else {
         styleString = "QDockWidget { color: "
                 + QString(CStudioPreferences::textColor().name()) + "; }";
     }
-    QWidget *timelineDock = parentWidget()->parentWidget();
+
+    QWidget *timelineDock = parentWidget()->parentWidget()->parentWidget()->parentWidget();
     timelineDock->setStyleSheet(styleString);
 }

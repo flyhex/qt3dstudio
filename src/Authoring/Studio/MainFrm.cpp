@@ -60,6 +60,7 @@
 #include "TimelineWidget.h"
 #include "ProjectView.h"
 #include "RowTree.h"
+#include "WidgetControl.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -1845,8 +1846,9 @@ void CMainFrame::OnConnectionChanged(bool connected)
 
 TimelineWidget *CMainFrame::getTimelineWidget() const
 {
-    return static_cast<TimelineWidget *>(m_paletteManager->GetControl(
-                                             CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
+    WidgetControl *control = static_cast<WidgetControl *>
+            (m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
+    return static_cast<TimelineWidget *>(control->getControl());
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

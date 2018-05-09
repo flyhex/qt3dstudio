@@ -117,7 +117,7 @@ public:
 
     virtual CPt GetSize() const;
     virtual void SetSize(CPt inSize);
-    void SetSize(long inWidth, long inHeight);
+    virtual void SetSize(long inWidth, long inHeight);
     virtual void OnSizeChanged(CPt inSize);
 
     virtual CPt GetMinimumSize();
