@@ -54,9 +54,6 @@ const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
 int main(int argc, char *argv[])
 {
-    // Hack to work around qml cache bug (QT3DS-556)
-    qputenv("QML_DISABLE_DISK_CACHE", "true");
-
     // Note: This will prevent localization from working on Linux, but it will fix QT3DS-1473
     // TODO: To be removed once the new parser is in use
 #if defined(Q_OS_LINUX)
