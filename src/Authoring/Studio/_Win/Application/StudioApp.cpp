@@ -117,19 +117,21 @@ int main(int argc, char *argv[])
     if (files.count() > 1 && !parser.isSet("create")) {
         qWarning() << "Only one presentation file can be given.";
         parser.showHelp(-1);
-        exit(0);
     } else if (files.count() > 2 && parser.isSet("create")) {
         qWarning() << "Only one presentation file and a target folder can be given.";
         parser.showHelp(-1);
-        exit(0);
     } else if (files.count() == 0 && parser.isSet("create")) {
         qWarning() << "A presentation file is required.";
         parser.showHelp(-1);
-        exit(0);
     }
 
     QObject::connect(&guiApp, &SharedTools::QtSingleApplication::messageReceived,
                      &g_StudioApp, &CStudioApp::handleMessageReceived);
+
+#if (defined Q_OS_MACOS)
+    QObject::connect(&guiApp, &SharedTools::QtSingleApplication::fileOpenRequest,
+                     &g_StudioApp, &CStudioApp::openApplication);
+#endif
 
     // Load and apply stylesheet for the application
     QFile styleFile(":/style.qss");
@@ -490,6 +492,11 @@ QString CStudioApp::resolvePresentationFile(const QString &inFile)
  */
 bool CStudioApp::showStartupDialog()
 {
+#if (defined Q_OS_MACOS)
+    if (m_fileOpenEvent)
+        return true;
+#endif
+
     int welcomeRes = QDialog::Rejected;
     bool theReturn = true;
 
@@ -590,6 +597,15 @@ bool CStudioApp::showStartupDialog()
     return theReturn;
 }
 
+#if (defined Q_OS_MACOS)
+void CStudioApp::openApplication(const QString &inFilename)
+{
+    m_fileOpenEvent = true;
+    QString loadFile = resolvePresentationFile(inFilename);
+    OnLoadDocument(CString::fromQString(loadFile), true);
+}
+#endif
+
 //=============================================================================
 /**
  * Start the app.
@@ -599,7 +615,12 @@ bool CStudioApp::blankRunApplication()
     initCore();
     // Event loop must be running before we launch startup dialog, or possible error message boxes
     // will cause a silent crash.
+#if (defined Q_OS_MACOS)
+    // Give a bit of time for Finder file open, in case that's how we were started
+    QTimer::singleShot(250, this, &CStudioApp::showStartupDialog);
+#else
     QTimer::singleShot(0, this, &CStudioApp::showStartupDialog);
+#endif
     return runApplication();
 }
 
@@ -1493,6 +1514,9 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
 
     // load fail
     if (!theLoadResult) {
+#if (defined Q_OS_MACOS)
+        m_fileOpenEvent = false;
+#endif
         if (!theErrorText.isEmpty())
             m_dialogs->DisplayKnownErrorDialog(theErrorText);
         else

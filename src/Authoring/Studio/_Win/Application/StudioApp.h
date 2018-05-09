@@ -82,19 +82,20 @@ public:
     CStudioApp();
     virtual ~CStudioApp();
 
-public:
     virtual bool initInstance(const QCommandLineParser &parser);
     virtual bool run(const QCommandLineParser &parser);
 
     void onAppAbout();
 
-public:
     void performShutdown();
     Q3DStudio::IDirectoryWatchingSystem &getDirectoryWatchingSystem();
     void setupTimer(long inMessageId, QWidget *inWnd);
     Q3DStudio::ITickTock &getTickTock();
     Q3DStudio::IStudioRenderer &getRenderer();
     void clearGuides();
+#if (defined Q_OS_MACOS)
+    void openApplication(const QString &inFilename);
+#endif
 
 public Q_SLOTS:
     void handleMessageReceived(const QString &message, QObject *socket);
@@ -133,6 +134,9 @@ private:
     bool m_goStraightToWelcomeFileDialog;
     int m_tutorialPage;
     QTimer *m_autosaveTimer;
+#if (defined Q_OS_MACOS)
+    bool m_fileOpenEvent = false;
+#endif
 
 public:
     CMainFrame* m_pMainWnd;

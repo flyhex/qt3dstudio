@@ -492,6 +492,10 @@ macos:!isEmpty(QMAKE_LIBS_FBX) {
     QMAKE_BUNDLE_DATA += fbxsdk
 }
 
+macos {
+    QMAKE_INFO_PLIST = Info.plist
+}
+
 # Copy necessary resources
 ABS_PRJ_ROOT = $$absolute_path($$PWD/../../..)
 macos:ABS_DEST_DIR = $$absolute_path($$BINDIR)/$${TARGET}.app/Contents/Resources

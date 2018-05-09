@@ -45,6 +45,10 @@ public:
 
     bool isRunning(qint64 pid = -1);
 
+#if (defined Q_OS_MACOS)
+    bool event(QEvent *event);
+#endif
+
     QString applicationId() const;
     void setBlock(bool value);
 
@@ -55,6 +59,9 @@ public:
 
 Q_SIGNALS:
     void messageReceived(const QString &message, QObject *socket);
+#if (defined Q_OS_MACOS)
+    void fileOpenRequest(const QString &file);
+#endif
 
 private:
     QString instancesFileName(const QString &m_appId);
