@@ -60,6 +60,8 @@ void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputL
 
 void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInputList)
 {
+    m_selection = -1;
+
     m_model->setFixedItemCount(0);
     QVector<QPair<QString, QString>> dataInputs;
     m_model->clear();
