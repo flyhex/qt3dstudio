@@ -448,7 +448,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             // moving rows vertically (reorder/reparent)
             // collapse all properties so correctIndex() counts correctly
             m_rowManager->collapseAllPropertyRows();
-            m_rowMover->updateTargetRow(event->scenePos().x(), event->scenePos().y());
+            m_rowMover->updateTargetRow(event->scenePos());
         } else if (m_keyframePressed) { // moving selected keyframes
             double newX = event->scenePos().x() - m_ruler->x() - m_pressPosInKeyframe;
 

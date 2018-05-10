@@ -30,13 +30,12 @@
 #define ROWMOVER_H
 
 #include "TimelineConstants.h"
-
-#include <QtWidgets/qgraphicsitem.h>
+#include "TimelineItem.h"
 
 class RowTree;
 class TimelineGraphicsScene;
 
-class RowMover : public QGraphicsRectItem
+class RowMover : public TimelineItem
 {
 public:
     RowMover(TimelineGraphicsScene *m_scene);
@@ -45,16 +44,18 @@ public:
 
     void start(RowTree *row = nullptr);
     void end(bool force = false);
-    void updateTargetRow(int mouseX, int mouseY);
+    void updateTargetRow(const QPointF &scenePos);
     int targetIndex() const;
     bool isActive();
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
     RowTree *insertionParent() const;
     RowTree *sourceRow() const;
+    int type() const;
 
 private:
-    void updateState(int index, int depth, int rawIndex);
+    void updateState(int index, int depth, double y);
     void resetInsertionParent(RowTree *newTarget = nullptr);
+    RowTree *getRowAtPos(const QPointF &scenePos);
 
     TimelineGraphicsScene *m_scene = nullptr;
     RowTree *m_insertionParent = nullptr; // insertion parent

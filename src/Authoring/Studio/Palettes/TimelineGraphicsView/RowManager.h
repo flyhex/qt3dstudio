@@ -67,7 +67,6 @@ public:
                        const QString &label = QString(), const QString &propType = QString(),
                        int index = -1);
     RowTree *rowAt(int idx);
-    RowTree *getNextSiblingRow(RowTree *row) const;
     RowTree *selectedRow() const;
     QVector<RowTree *> selectedRows() const;
     RowTimeline *rowTimelineAt(int idx);

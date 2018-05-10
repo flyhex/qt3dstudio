@@ -46,7 +46,8 @@ public:
         TypeRowTreeLabelItem,
         TypeRowTimeline,
         TypePlayHead,
-        TypeRuler
+        TypeRuler,
+        TypeRowMover
     };
 
    int type() const;

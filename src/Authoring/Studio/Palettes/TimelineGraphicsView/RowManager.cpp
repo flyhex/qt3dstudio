@@ -168,19 +168,6 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
     return nullptr;
 }
 
-RowTree *RowManager::getNextSiblingRow(RowTree *row) const
-{
-    if (row && m_layoutTree->count() > 1) {
-        for (int i = row->indexInLayout() + 1; i < m_layoutTree->count(); ++i) {
-            RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-            if (row_i->depth() <= row->depth())
-                return row_i;
-        }
-    }
-
-    return nullptr;
-}
-
 RowTree *RowManager::rowAt(int idx)
 {
     correctIndex(idx);

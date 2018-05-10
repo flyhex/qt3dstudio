@@ -672,7 +672,7 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
                  + viewTreeContent()->verticalScrollBar()->value()
                  - viewTreeContent()->verticalScrollBar()->minimum();
     RowMover *mover = m_graphicsScene->rowMover();
-    mover->updateTargetRow(inMousePoint.x, mouseY);
+    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY));
 
     if (mover->insertionParent()) {
         RowTree *targetRow = mover->insertionParent()->getChildAt(mover->targetIndex()-1);

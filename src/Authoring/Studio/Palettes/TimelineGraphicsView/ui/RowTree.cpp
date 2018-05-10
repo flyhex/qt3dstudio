@@ -161,16 +161,16 @@ void RowTree::animateExpand(ExpandState state)
 
 void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    const int offset = 5 + m_depth * 15;
-    const int iconSize = 16;
-    const int iconY = (TimelineConstants::ROW_H / 2) - (iconSize / 2);
+    static const int ICON_SIZE = 16;
+    const int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP;
+    const int iconY = (TimelineConstants::ROW_H / 2) - (ICON_SIZE / 2);
 
     // update button bounds rects
-    m_rectArrow  .setRect(offset, iconY, iconSize, iconSize);
-    m_rectType   .setRect(offset + iconSize, iconY, iconSize, iconSize);
-    m_rectShy    .setRect(treeWidth() - 16 * 3.3, iconY, iconSize, iconSize);
-    m_rectVisible.setRect(treeWidth() - 16 * 2.2, iconY, iconSize, iconSize);
-    m_rectLocked .setRect(treeWidth() - 16 * 1.1, iconY, iconSize, iconSize);
+    m_rectArrow  .setRect(offset, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectType   .setRect(offset + ICON_SIZE, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectShy    .setRect(treeWidth() - 16 * 3.3, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectVisible.setRect(treeWidth() - 16 * 2.2, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectLocked .setRect(treeWidth() - 16 * 1.1, iconY, ICON_SIZE, ICON_SIZE);
 
     // Background
     QColor bgColor;
@@ -444,7 +444,7 @@ int RowTree::index() const
 
 int RowTree::indexInLayout() const
 {
-    // first child (scene) at index 1, tree header at index 0
+    // first child (scene) at index 1, tree header at index 0 (invisible rows are also counted)
     return m_indexInLayout;
 }
 
@@ -760,7 +760,7 @@ void RowTree::updateLockRecursive(bool state)
 
 void RowTree::updateLabelPosition()
 {
-    int offset = 5 + m_depth * 15 + 30;
+    int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP + 30;
     m_labelItem.setPos(offset, -1);
 }
 
