@@ -696,7 +696,6 @@ qt3dsdm::Qt3DSDMSlideHandle CDoc::GetActiveSlide()
         return m_ActiveSlide;
     if (m_SceneInstance.Valid())
         return m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 0);
-    ASSERT(false); // something is wrong if m_SceneInstance is not valid
     return 0;
 }
 
