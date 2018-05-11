@@ -222,7 +222,7 @@
    </attribute>
    <addaction name="actionPreview"/>
    <addaction name="actionRemote_Preview"/>
-   <addaction name="actionPreviewRuntime2"/>
+   <addaction name="actionPreviewRuntime1"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
@@ -801,19 +801,19 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionPreviewRuntime2">
+  <action name="actionPreviewRuntime1">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
    </property>
    <property name="text">
-    <string>Preview with Runtime 2</string>
+    <string>Preview with Legacy Viewer</string>
    </property>
    <property name="iconText">
-    <string>Preview with Runtime 2</string>
+    <string>Preview with Legacy Viewer</string>
    </property>
    <property name="toolTip">
-    <string>Preview with Runtime 2</string>
+    <string>Preview with Legacy Viewer</string>
    </property>
   </action>
   <action name="actionImportAssets">

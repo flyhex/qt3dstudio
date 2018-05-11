@@ -181,16 +181,18 @@ CMainFrame::CMainFrame()
 
     // Playback toolbar
     connect(m_ui->actionPreview, &QAction::triggered,
-            this, &CMainFrame::OnPlaybackPreviewRuntime1);
+            this, &CMainFrame::OnPlaybackPreviewRuntime2);
+
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
-    // Only show runtime2 preview if we have appropriate viewer
-    if (CPreviewHelper::viewerExists(QStringLiteral("q3dsviewer"))) {
-        connect(m_ui->actionPreviewRuntime2, &QAction::triggered,
-                this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    // Only show runtime1 preview if we have appropriate viewer and it's enabled
+    if (CStudioPreferences::IsLegacyViewerActive()
+            && CPreviewHelper::viewerExists(QStringLiteral("Qt3DViewer"))) {
+        connect(m_ui->actionPreviewRuntime1, &QAction::triggered,
+                this, &CMainFrame::OnPlaybackPreviewRuntime1);
     } else {
-        m_ui->actionPreviewRuntime2->setVisible(false);
+        m_ui->actionPreviewRuntime1->setVisible(false);
     }
 
     // Tool mode toolbar
@@ -877,6 +879,9 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
+        CStudioPreferences::SetLegacyViewerActive(false);
+        // Hide legacy viewer preview button
+        m_ui->actionPreviewRuntime1->setVisible(false);
         CStudioPreferences::SetEditViewFillMode(true);
         CStudioPreferences::SetEditViewBackgroundColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetPreferredStartupView(
@@ -1011,7 +1016,7 @@ void CMainFrame::OnPlaybackPreviewRuntime2()
 
 void CMainFrame::OnPlaybackPreviewRemote()
 {
-    OnPlaybackPreview(QStringLiteral("Qt3DViewer"), true);
+    OnPlaybackPreview(QStringLiteral("q3dsviewer"), true);
 }
 
 //==============================================================================

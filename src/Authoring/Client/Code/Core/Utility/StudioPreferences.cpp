@@ -209,8 +209,28 @@ void CStudioPreferences::LoadPreferences()
 
 //==============================================================================
 /**
- *	Returns the state of the timeline snapping grid
- *	@return true if the snapping grid is active
+ *  Returns the state of the legacy viewer
+ *  @return true if the legacy viewer is active
+ */
+bool CStudioPreferences::IsLegacyViewerActive()
+{
+    return CPreferences::GetUserPreferences().GetValue("LegacyViewerActive", true);
+}
+
+//==============================================================================
+/**
+ *  Sets the state of the legacy viewer
+ *  @param inActiveFlag true if the legacy viewer is active
+ */
+void CStudioPreferences::SetLegacyViewerActive(bool inActive)
+{
+    CPreferences::GetUserPreferences().SetValue("LegacyViewerActive", inActive);
+}
+
+//==============================================================================
+/**
+ *  Returns the state of the timeline snapping grid
+ *  @return true if the snapping grid is active
  */
 bool CStudioPreferences::IsTimelineSnappingGridActive()
 {

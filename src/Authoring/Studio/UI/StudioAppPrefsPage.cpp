@@ -90,6 +90,7 @@ void CStudioAppPrefsPage::onInitDialog()
     // Add tool tips for controls
     m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
     m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
+    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable legacy viewer preview"));
     m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
     m_ui->m_buttonRestoreDefaults->setToolTip(tr("Click to restore default Studio settings"));
     m_ui->m_EditViewBGColor->setAutoFillBackground(true);
@@ -119,6 +120,8 @@ void CStudioAppPrefsPage::onInitDialog()
     connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ setModified(true); });
     connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
             this, [=](){ setModified(true); enableOptions(); });
+    connect(m_ui->m_checkLegacyViewer, &QCheckBox::clicked,
+            this, [=](){ setModified(true); m_restartNeeded = true; });
     connect(m_ui->m_EditViewBGColor, &QPushButton::clicked,
             this, &CStudioAppPrefsPage::onBgColorButtonClicked);
     connect(m_ui->m_EditViewStartupView, activated, this, [=](){ setModified(true); });
@@ -163,6 +166,9 @@ void CStudioAppPrefsPage::loadSettings()
     // Timeline snapping grid
     m_ui->m_checkTimelineAbsoluteSnapping->setChecked(
                 CStudioPreferences::IsTimelineSnappingGridActive());
+
+    // Legacy viewer
+    m_ui->m_checkLegacyViewer->setChecked(CStudioPreferences::IsLegacyViewerActive());
 
     // Tool handles
     m_ui->selectorWidth->setValue(CStudioPreferences::getSelectorLineWidth());
@@ -216,6 +222,9 @@ void CStudioAppPrefsPage::saveSettings()
                 m_ui->m_checkTimelineAbsoluteSnapping->isChecked());
     long theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
     CStudioPreferences::SetTimelineSnappingGridResolution((ESnapGridResolution)theCurrentSelection);
+
+    // Legacy viewer
+    CStudioPreferences::SetLegacyViewerActive(m_ui->m_checkLegacyViewer->isChecked());
 
     // Edit View Background Color
     CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);

@@ -173,7 +173,14 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     viewerFile = QStringLiteral("%1").arg(exeName);
 #endif
 #endif
-    return viewerDir.filePath() + QStringLiteral("/") + viewerFile;
+    QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
+    if (!QFileInfo(viewer).exists()
+            && exeName == QStringLiteral("q3dsviewer")) {
+        return viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+                + viewerFile;
+    } else {
+        return viewer;
+    }
 }
 
 void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
