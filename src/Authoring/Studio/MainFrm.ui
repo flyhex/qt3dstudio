@@ -397,7 +397,7 @@
     <string>Lock Guides</string>
    </property>
    <property name="shortcut">
-    <string>Alt+R</string>
+    <string>Alt+Shift+R</string>
    </property>
   </action>
   <action name="actionClear_Guides">
