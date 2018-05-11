@@ -2386,7 +2386,7 @@ public:
     {
         for (int i = 0; i < inInstances.size(); i++) {
             qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = inInstances.at(i);
-            if (m_Bridge.IsDuplicateable(theSelectedInstance)) {
+            if (m_Bridge.isAliasable(theSelectedInstance)) {
                 CPt thePoint(0, 0);
                 Qt3DSDMInstanceHandle addedInstance = CreateSceneGraphInstance(
                             ComposerObjectTypes::Alias, theSelectedInstance, theSlide,

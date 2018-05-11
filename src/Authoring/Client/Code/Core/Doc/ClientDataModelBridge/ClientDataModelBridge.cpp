@@ -1339,14 +1339,33 @@ bool CClientDataModelBridge::IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inIn
 
     EStudioObjectType theObjectType = GetObjectType(inInstance);
     if (theObjectType == OBJTYPE_SCENE || theObjectType == OBJTYPE_MATERIAL
-        || theObjectType == OBJTYPE_IMAGE)
+            || theObjectType == OBJTYPE_IMAGE) {
         return false;
-    // If we are delving inside component and selecting the component itself (the component is root
-    // in timeline palette)
-    else if (theObjectType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance))
+    } else if (theObjectType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance)) {
+        // If we are delving inside component and selecting the component itself (the component is
+        // root in timeline palette)
         return false;
-    else
+    } else {
         return !IsLockedAtAll(inInstance);
+    }
+}
+
+bool CClientDataModelBridge::isAliasable(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    if (!inInstance.Valid())
+        return false;
+
+    EStudioObjectType theObjectType = GetObjectType(inInstance);
+    if (theObjectType == OBJTYPE_SCENE || theObjectType == OBJTYPE_MATERIAL
+            || theObjectType == OBJTYPE_IMAGE || theObjectType == OBJTYPE_LAYER) {
+        return false;
+    } else if (theObjectType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance)) {
+        // If we are delving inside component and selecting the component itself (the component is
+        // root in timeline palette)
+        return false;
+    } else {
+        return !IsLockedAtAll(inInstance);
+    }
 }
 
 bool CClientDataModelBridge::IsMultiSelectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance)

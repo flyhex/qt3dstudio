@@ -569,7 +569,7 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())
-            return m_StudioSystem->GetClientDataModelBridge()->IsDuplicateable(theInstance);
+            return m_StudioSystem->GetClientDataModelBridge()->isAliasable(theInstance);
         break;
 
     case EUserTransaction_Cut:

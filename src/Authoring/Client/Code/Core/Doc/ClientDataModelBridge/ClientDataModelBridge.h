@@ -367,6 +367,7 @@ public:
     std::set<Q3DStudio::CString> GetDynamicObjectTextureList() const;
     bool IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    bool isAliasable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsMultiSelectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance);

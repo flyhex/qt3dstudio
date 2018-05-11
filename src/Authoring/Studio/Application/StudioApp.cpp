@@ -1039,7 +1039,7 @@ void CStudioApp::DeleteSelectedObject()
 
 //=============================================================================
 /**
- * Handles the duplicate object command
+ * Handles the alias duplicate object command
  */
 void CStudioApp::HandleDuplicateCommand()
 {
@@ -1048,7 +1048,7 @@ void CStudioApp::HandleDuplicateCommand()
 
 //=============================================================================
 /**
- * return true if the selected object is duplicatable
+ * return true if the selected object is alias-duplicatable
  */
 bool CStudioApp::CanDuplicateObject()
 {
@@ -1058,7 +1058,7 @@ bool CStudioApp::CanDuplicateObject()
         return false;
 
     // Check if the object can be duplicated
-    return m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsDuplicateable(
+    return m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->isAliasable(
                 theSelectedInstance);
 }
 
