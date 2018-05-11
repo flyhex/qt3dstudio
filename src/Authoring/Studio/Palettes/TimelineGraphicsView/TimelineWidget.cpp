@@ -96,8 +96,9 @@ void printBinding(ITimelineItemBinding *binding, QString padding = " ")
     padding = padding.append("-");
 
     // create child rows recursively
-    for (int i = 0; i < binding->GetChildrenCount(); i++)
-        printBinding(binding->GetChild(i), padding);
+    const QList<ITimelineItemBinding *> children = binding->GetChildren();
+    for (auto child : children)
+        printBinding(child, padding);
 }
 
 // Mahmoud_TODO: debug func, to be removed
@@ -430,10 +431,9 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
     if (binding->GetObjectType() != OBJTYPE_MATERIAL) {
         m_handlesMap.insert(std::make_pair(binding->GetInstance(), binding->getRowTree()));
 
-       for (int i = 0; i < binding->GetChildrenCount(); i++) {
-           insertToHandlesMapRecursive(
-                       static_cast<Qt3DSDMTimelineItemBinding *>(binding->GetChild(i)));
-       }
+        const QList<ITimelineItemBinding *> children = binding->GetChildren();
+        for (auto child : children)
+            insertToHandlesMapRecursive(static_cast<Qt3DSDMTimelineItemBinding *>(child));
     }
 }
 
@@ -587,15 +587,18 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 {
     const SDataModelSceneAsset &asset = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
             ->GetClientDataModelBridge()->GetSceneAsset();
-    if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
-            || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime) {
+    const bool filterProperty = inProperty == asset.m_Eyeball || inProperty == asset.m_Locked
+            || inProperty == asset.m_Shy;
+    const bool timeProperty = inProperty == asset.m_StartTime || inProperty == asset.m_EndTime;
+    if (filterProperty || timeProperty) {
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
         if (binding) {
-            binding->OnPropertyChanged(inProperty);
             RowTree *row = binding->getRowTree();
             if (row) {
-                row->rowTimeline()->updateDurationFromBinding();
-                row->updateFromBinding();
+                if (timeProperty)
+                    row->rowTimeline()->updateDurationFromBinding();
+                if (filterProperty)
+                    row->updateFromBinding();
             }
         }
     }
@@ -743,9 +746,10 @@ Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,
         if (binding->GetInstance().GetHandleValue() == handle)
             return binding;
 
-        for (int i = 0; i < binding->GetChildrenCount(); i++) {
+        const QList<ITimelineItemBinding *> children = binding->GetChildren();
+        for (auto child : children) {
             Qt3DSDMTimelineItemBinding *b = getBindingForHandle(handle,
-                                static_cast<Qt3DSDMTimelineItemBinding *>(binding->GetChild(i)));
+                                static_cast<Qt3DSDMTimelineItemBinding *>(child));
 
             if (b)
                 return b;

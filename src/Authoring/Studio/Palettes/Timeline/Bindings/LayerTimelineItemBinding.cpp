@@ -131,9 +131,6 @@ EStudioObjectType CLayerTimelineItemBinding::GetObjectType() const
 
 ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
 {
-    static const TCharStr theLayerPrefix(L"Layer_");
-    qt3dsdm::IPropertySystem *thePropertySystem = m_TransMgr->GetStudioSystem()->GetPropertySystem();
-
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
     if (theInstance.Valid()) {
         Q3DStudio::CGraphIterator theChildren;
@@ -141,74 +138,29 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetChild(long inIndex)
         GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
                                      theChildren, theActiveSlide);
         theChildren += inIndex;
-
-        qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
-        if (theChildInstance.Valid()) {
-            std::shared_ptr<IDataCore> theDataCore =
-                m_TransMgr->GetStudioSystem()->GetFullSystem()->GetCoreSystem()->GetDataCore();
-            ISlideSystem *theSlideSystem = m_TransMgr->GetStudioSystem()->GetSlideSystem();
-            ISlideCore *theSlideCore = m_TransMgr->GetStudioSystem()->GetSlideCore();
-
-            size_t theSlotCursor = (size_t)-1;
-            {
-
-                qt3dsdm::IPropertySystem *thePropertySystem =
-                    m_TransMgr->GetStudioSystem()->GetPropertySystem();
-                qt3dsdm::SLong4 theGuid;
-                {
-                    Qt3DSDMPropertyHandle theTypeProperty =
-                        thePropertySystem->GetAggregateInstancePropertyByName(theChildInstance,
-                                                                              L"id");
-                    SValue theIdValue;
-                    thePropertySystem->GetInstancePropertyValue(theChildInstance, theTypeProperty,
-                                                                theIdValue);
-                    theGuid = qt3dsdm::get<qt3dsdm::SLong4>(theIdValue);
-                }
-                for (size_t theSlotIndex = 0, theSlotCount = m_ImageNameFormalNamePairs.size();
-                     theSlotIndex < theSlotCount; ++theSlotIndex) {
-                    bool theIsMatch = false;
-                    qt3dsdm::Qt3DSDMPropertyHandle theProperty =
-                        std::get<2>(m_ImageNameFormalNamePairs[theSlotIndex]);
-                    SValue theValue;
-                    const Qt3DSDMPropertyDefinition &theDefinition(
-                        theDataCore->GetProperty(theProperty));
-                    if (theDefinition.m_Type == DataModelDataType::Long4) {
-                        SValue theDCValue;
-                        if (theDataCore->GetInstancePropertyValue(theInstance, theProperty,
-                                                                  theDCValue)) {
-                            SLong4 thePropGuid = get<SLong4>(theDCValue);
-                            if (thePropGuid == theGuid)
-                                theIsMatch = true;
-                        }
-                        Qt3DSDMSlideHandle theSlide =
-                            theSlideSystem->GetAssociatedSlide(theChildInstance);
-                        Qt3DSDMSlideHandle theMasterSlide = theSlideSystem->GetMasterSlide(theSlide);
-                        if (theIsMatch == false && theSlide.Valid()
-                            && theSlideCore->GetSpecificInstancePropertyValue(
-                                   theSlide, theInstance, theProperty, theValue)) {
-                            SLong4 thePropGuid = get<SLong4>(theValue);
-                            if (thePropGuid == theGuid)
-                                theIsMatch = true;
-                        }
-                    }
-                    if (theIsMatch) {
-                        theSlotCursor = theSlotIndex;
-                        break;
-                    }
-                }
-            }
-            if (theSlotCursor != (size_t)-1) {
-                Qt3DSDMPropertyHandle theImageProperty =
-                    thePropertySystem->GetAggregateInstancePropertyByName(
-                        m_DataHandle, std::get<0>(m_ImageNameFormalNamePairs[theSlotCursor]));
-                return GetOrCreateImageBinding(
-                    theImageProperty,
-                    std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]).wide_str());
-            } else
-                return m_TransMgr->GetOrCreate(theChildInstance);
-        }
+        return GetOrCreateBinding(theChildren.GetCurrent());
     }
     return nullptr;
+}
+
+QList<ITimelineItemBinding *> CLayerTimelineItemBinding::GetChildren()
+{
+    QList<ITimelineItemBinding *> retlist;
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
+    if (theInstance.Valid()) {
+        Q3DStudio::CGraphIterator theChildren;
+        Qt3DSDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
+                                     theChildren, theActiveSlide);
+        int childCount = int(theChildren.GetCount());
+        retlist.reserve(childCount);
+        for (int i = 0; i < childCount; ++i) {
+            retlist.append(GetOrCreateBinding(theChildren.GetCurrent()));
+            ++theChildren;
+        }
+    }
+
+    return retlist;
 }
 
 void CLayerTimelineItemBinding::OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -314,4 +266,72 @@ CLayerTimelineItemBinding::GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandl
             theImageBinding->SetPropertyHandle(inPropertyHandle);
     }
     return theImageTimelineRow;
+}
+
+ITimelineItemBinding *CLayerTimelineItemBinding::GetOrCreateBinding(Qt3DSDMInstanceHandle instance)
+{
+    if (instance.Valid()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
+        qt3dsdm::IPropertySystem *thePropertySystem =
+                m_TransMgr->GetStudioSystem()->GetPropertySystem();
+        std::shared_ptr<IDataCore> theDataCore =
+            m_TransMgr->GetStudioSystem()->GetFullSystem()->GetCoreSystem()->GetDataCore();
+        ISlideSystem *theSlideSystem = m_TransMgr->GetStudioSystem()->GetSlideSystem();
+        ISlideCore *theSlideCore = m_TransMgr->GetStudioSystem()->GetSlideCore();
+
+        size_t theSlotCursor = (size_t)-1;
+        {
+            qt3dsdm::IPropertySystem *thePropertySystem =
+                m_TransMgr->GetStudioSystem()->GetPropertySystem();
+            qt3dsdm::SLong4 theGuid;
+            {
+                Qt3DSDMPropertyHandle theTypeProperty =
+                    thePropertySystem->GetAggregateInstancePropertyByName(instance, L"id");
+                SValue theIdValue;
+                thePropertySystem->GetInstancePropertyValue(instance, theTypeProperty, theIdValue);
+                theGuid = qt3dsdm::get<qt3dsdm::SLong4>(theIdValue);
+            }
+            for (size_t theSlotIndex = 0, theSlotCount = m_ImageNameFormalNamePairs.size();
+                 theSlotIndex < theSlotCount; ++theSlotIndex) {
+                bool theIsMatch = false;
+                qt3dsdm::Qt3DSDMPropertyHandle theProperty =
+                    std::get<2>(m_ImageNameFormalNamePairs[theSlotIndex]);
+                SValue theValue;
+                const Qt3DSDMPropertyDefinition &theDefinition(
+                    theDataCore->GetProperty(theProperty));
+                if (theDefinition.m_Type == DataModelDataType::Long4) {
+                    SValue theDCValue;
+                    if (theDataCore->GetInstancePropertyValue(theInstance, theProperty,
+                                                              theDCValue)) {
+                        SLong4 thePropGuid = get<SLong4>(theDCValue);
+                        if (thePropGuid == theGuid)
+                            theIsMatch = true;
+                    }
+                    Qt3DSDMSlideHandle theSlide =
+                        theSlideSystem->GetAssociatedSlide(instance);
+                    Qt3DSDMSlideHandle theMasterSlide = theSlideSystem->GetMasterSlide(theSlide);
+                    if (theIsMatch == false && theSlide.Valid()
+                        && theSlideCore->GetSpecificInstancePropertyValue(
+                               theSlide, theInstance, theProperty, theValue)) {
+                        SLong4 thePropGuid = get<SLong4>(theValue);
+                        if (thePropGuid == theGuid)
+                            theIsMatch = true;
+                    }
+                }
+                if (theIsMatch) {
+                    theSlotCursor = theSlotIndex;
+                    break;
+                }
+            }
+        }
+        if (theSlotCursor != (size_t)-1) {
+            Qt3DSDMPropertyHandle theImageProperty =
+                thePropertySystem->GetAggregateInstancePropertyByName(
+                    m_DataHandle, std::get<0>(m_ImageNameFormalNamePairs[theSlotCursor]));
+            return GetOrCreateImageBinding(
+                theImageProperty,
+                std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]).wide_str());
+        } else
+            return m_TransMgr->GetOrCreate(instance);
+    }
 }

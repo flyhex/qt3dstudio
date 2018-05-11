@@ -160,6 +160,17 @@ ITimelineItemBinding *CMaterialTimelineItemBinding::GetChild(long inIndex)
         theImageProperty, std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]).wide_str());
 }
 
+QList<ITimelineItemBinding *> CMaterialTimelineItemBinding::GetChildren()
+{
+    int childCount = GetChildrenCount();
+    QList<ITimelineItemBinding *> retlist;
+    retlist.reserve(childCount);
+    for (int i = 0; i < childCount; ++i)
+        retlist.append(GetChild(i));
+
+    return retlist;
+}
+
 void CMaterialTimelineItemBinding::OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace qt3dsdm;

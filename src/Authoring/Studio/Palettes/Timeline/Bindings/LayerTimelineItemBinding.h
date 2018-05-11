@@ -64,6 +64,7 @@ public: // Qt3DSDMTimelineItemBinding
     EStudioObjectType GetObjectType() const override;
     // Hierarchy
     ITimelineItemBinding *GetChild(long inIndex) override;
+    QList<ITimelineItemBinding *> GetChildren() override;
     void OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     // Event callback
     void OnPropertyChanged(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle) override;
@@ -72,6 +73,7 @@ protected:
     qt3dsdm::Qt3DSDMInstanceHandle GetImage(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                                   const wchar_t *inName);
+    ITimelineItemBinding *GetOrCreateBinding(qt3dsdm::Qt3DSDMInstanceHandle instance);
 };
 
 #endif // INCLUDED_LAYER_TIMELINEITEM_BINDING_H

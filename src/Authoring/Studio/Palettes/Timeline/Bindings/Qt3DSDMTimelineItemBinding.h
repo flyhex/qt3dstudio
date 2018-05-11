@@ -135,6 +135,7 @@ public:
     // Hierarchy
     long GetChildrenCount() override;
     ITimelineItemBinding *GetChild(long inIndex) override;
+    QList<ITimelineItemBinding *> GetChildren() override;
     ITimelineItemBinding *GetParent() override;
     void SetParent(ITimelineItemBinding *parent) override;
     // Properties

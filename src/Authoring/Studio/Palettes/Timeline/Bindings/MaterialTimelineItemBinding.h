@@ -69,6 +69,7 @@ public: // Qt3DSDMTimelineItemBinding
     // Hierarchy
     long GetChildrenCount() override;
     ITimelineItemBinding *GetChild(long inIndex) override;
+    QList<ITimelineItemBinding *> GetChildren() override;
     void OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     // Event callback
     void OnPropertyChanged(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle) override;

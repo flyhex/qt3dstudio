@@ -180,13 +180,10 @@ void ToggleChildrenLock(Q3DStudio::ScopedDocumentEditor &scopedDocEditor,
 {
     scopedDocEditor->SetInstancePropertyValue(inTimelineItemBinding->GetInstanceHandle(),
                                               inSceneAsset.m_Locked, inLocked);
-    long childrenCount = inTimelineItemBinding->GetChildrenCount();
-    if (childrenCount == 0)
-        return;
-    for (long i = 0; i < childrenCount; ++i) {
-        Qt3DSDMTimelineItemBinding *child =
-                static_cast<Qt3DSDMTimelineItemBinding *>(inTimelineItemBinding->GetChild(i));
-        ToggleChildrenLock(scopedDocEditor, child, inSceneAsset, inLocked);
+    const QList<ITimelineItemBinding *> children = inTimelineItemBinding->GetChildren();
+    for (auto child : children) {
+        ToggleChildrenLock(scopedDocEditor, static_cast<Qt3DSDMTimelineItemBinding *>(child),
+                           inSceneAsset, inLocked);
     }
 }
 
@@ -464,6 +461,29 @@ ITimelineItemBinding *Qt3DSDMTimelineItemBinding::GetChild(long inIndex)
             return m_TransMgr->GetOrCreate(theChildInstance);
     }
     return nullptr;
+}
+
+QList<ITimelineItemBinding *> Qt3DSDMTimelineItemBinding::GetChildren()
+{
+    QList<ITimelineItemBinding *> retlist;
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
+    if (theInstance.Valid()) {
+        Q3DStudio::CGraphIterator theChildren;
+        Qt3DSDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
+                                     theChildren, theActiveSlide);
+        int childCount = int(theChildren.GetCount());
+        retlist.reserve(childCount);
+
+        for (int i = 0; i < childCount; ++i) {
+            qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
+            if (theChildInstance.Valid())
+                retlist.append(m_TransMgr->GetOrCreate(theChildInstance));
+            ++theChildren;
+        }
+    }
+
+    return retlist;
 }
 
 ITimelineItemBinding *Qt3DSDMTimelineItemBinding::GetParent()
@@ -890,11 +910,10 @@ void Qt3DSDMTimelineItemBinding::RefreshStateRow(bool inRefreshChildren)
         theRow->OnTimeChange();
         theRow->setDirty(false);
         if (inRefreshChildren) {
-            long theChildrenCount = GetChildrenCount();
-            for (long theIndex = 0; theIndex < theChildrenCount; ++theIndex) {
-                ITimelineItemBinding *theChild = GetChild(theIndex);
+            const QList<ITimelineItemBinding *> children = GetChildren();
+            for (auto child : children) {
                 Qt3DSDMTimelineItemBinding *theBinding =
-                        dynamic_cast<Qt3DSDMTimelineItemBinding *>(theChild);
+                        static_cast<Qt3DSDMTimelineItemBinding *>(child);
                 if (theBinding)
                     theBinding->RefreshStateRow(inRefreshChildren);
             }

@@ -121,8 +121,9 @@ void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, R
 {
     RowTree *newRow = createRowFromBinding(binding, parentRow);
     // create child rows recursively
-    for (int i = 0; i < binding->GetChildrenCount(); i++)
-        createRowsFromBindingRecursive(binding->GetChild(i), newRow);
+    const QList<ITimelineItemBinding *> children = binding->GetChildren();
+    for (auto child : children)
+        createRowsFromBindingRecursive(child, newRow);
 }
 
 RowTree *RowManager::getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index)

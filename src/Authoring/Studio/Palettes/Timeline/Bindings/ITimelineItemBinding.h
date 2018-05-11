@@ -99,6 +99,7 @@ public:
     // Hierarchy
     virtual long GetChildrenCount() = 0;
     virtual ITimelineItemBinding *GetChild(long inIndex) = 0;
+    virtual QList<ITimelineItemBinding *> GetChildren() = 0;
     virtual ITimelineItemBinding *GetParent() = 0;
     virtual void SetParent(ITimelineItemBinding *parent) = 0;
     // Properties
