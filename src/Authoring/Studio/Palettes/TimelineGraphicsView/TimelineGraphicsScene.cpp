@@ -343,10 +343,13 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 RowTree *rowTree = static_cast<RowTree *>(item);
                 if (!rowTree->isProperty()) {
                     m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
-                    if (m_clickedTreeControlType != TreeControlType::None)
+                    if (m_clickedTreeControlType == TreeControlType::Shy
+                            || m_clickedTreeControlType == TreeControlType::Hide
+                            || m_clickedTreeControlType == TreeControlType::Lock) {
                         m_rowManager->updateFiltering(rowTree);
-                    else if (rowTree->draggable())
+                    } else if (rowTree->draggable()) {
                         m_rowMover->start(rowTree);
+                    }
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
                 m_editedTimelineRow = static_cast<RowTimeline *>(item);
