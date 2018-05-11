@@ -209,6 +209,9 @@ void RowMover::updateTargetRow(const QPointF &scenePos)
             valid = false; // not moving a material row outside its parent
         }
 
+        if (m_sourceRow && m_sourceRow->isMaster() && !m_insertionParent->isMaster())
+            valid = false; // don't insert master slide object into non-master slide object
+
         if (valid) {
             // calc insertion index
             int index = rowInsert1->index() + 1;

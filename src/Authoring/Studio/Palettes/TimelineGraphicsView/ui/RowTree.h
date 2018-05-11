@@ -91,6 +91,7 @@ public:
     bool isContainer() const;
     bool isProperty() const;
     bool isPropertyOrMaterial() const;
+    bool isMaster() const;
     bool hasPropertyChildren() const;
     bool empty() const; // has zero child rows (and zero properties)
     bool selected() const;
@@ -150,6 +151,7 @@ private:
     bool m_moveTarget = false;
     bool m_isProperty = false;
     bool m_isPropertyExpanded = false;
+    bool m_master = false;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
     EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;

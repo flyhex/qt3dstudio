@@ -643,7 +643,8 @@ void RowTree::updateFromBinding()
     Qt3DSDMTimelineItemBinding *itemBinding =
             static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
     m_labelItem.setLocked(m_locked);
-    m_labelItem.setMaster(itemBinding->IsMaster());
+    m_master = itemBinding->IsMaster();
+    m_labelItem.setMaster(m_master);
 }
 
 void RowTree::setRowVisible(bool visible)
@@ -833,6 +834,11 @@ RowTree *RowTree::getPropertyRow(const QString &type) const
 bool RowTree::isPropertyOrMaterial() const
 {
     return m_isProperty || rowType() == OBJTYPE_MATERIAL || rowType() == OBJTYPE_IMAGE;
+}
+
+bool RowTree::isMaster() const
+{
+    return m_master;
 }
 
 bool RowTree::empty() const
