@@ -40,12 +40,6 @@ This file is used for generating a TOC in a .qch file.
     \include studio-index.qdoc toc
     \li \l {Viewer Index}{Viewer}
     \include viewer-index.qdoc toc
-    \li \l {QML API}{QML API Reference}
-    \include qml-index.qdoc toc
-    \li \l {C++ API}{C++ API Reference}
-    \include cpp-index.qdoc toc
-    \li \l {Runtime}
-    \include runtime-index.qdoc toc
     \li \l {File Formats}
     \include formats-index.qdoc toc
     \omit
