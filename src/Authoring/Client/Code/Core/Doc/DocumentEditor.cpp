@@ -2313,7 +2313,7 @@ public:
                 theInstance = sortableList[end - idx - 1];
             // Rename if the new parent already has object with a same name
             CString currName = m_Bridge.GetName(theInstance);
-            if (!m_Bridge.CheckNameUnique(theInstance, currName)) {
+            if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
                 CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance, currName);
                 m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
                 SetName(theInstance, newName);
@@ -2336,6 +2336,12 @@ public:
     void ReorderRows(qt3dsdm::Qt3DSDMInstanceHandle handleSource,
                      qt3dsdm::Qt3DSDMInstanceHandle handleParent, int index) override
     {
+        CString currName = m_Bridge.GetName(handleSource);
+        if (!m_Bridge.CheckNameUnique(handleParent, handleSource, currName)) {
+            CString newName = m_Bridge.GetUniqueChildName(handleParent, handleSource, currName);
+            m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+            SetName(handleSource, newName);
+        }
         m_AssetGraph.MoveTo(handleSource, handleParent, index);
     }
 

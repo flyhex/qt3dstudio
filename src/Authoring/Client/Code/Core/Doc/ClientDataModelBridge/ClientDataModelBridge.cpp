@@ -1044,12 +1044,13 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inPare
     return theUniqueName;
 }
 
-bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
+                                             qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                              Q3DStudio::CString inDesiredName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
     if (inDesiredName.Length() > 0) {
-        theExistingChild = GetChildByName(GetParentInstance(inInstance), inDesiredName,
+        theExistingChild = GetChildByName(inParentInstance, inDesiredName,
                                           qt3dsdm::Qt3DSDMInstanceHandle());
     }
 

@@ -343,7 +343,8 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     // Display warning if we had to modify the user-given name to make it unique
-    if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
+    if (!theBridge->CheckNameUnique(theBridge->GetParentInstance(m_DataHandle),
+                                    m_DataHandle, inName)) {
         // Find unique name based on the input string
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(
             *m_TransMgr->GetDoc(), QObject::tr("Set Name"))->SetName(m_DataHandle, inName, true);
