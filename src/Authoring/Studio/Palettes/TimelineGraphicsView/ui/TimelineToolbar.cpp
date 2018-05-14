@@ -62,11 +62,18 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_iconPlay = QIcon(":/images/playback_tools_low-02.png");
 
     // create actions
-    QAction *actionNewLayer = new QAction(iconLayer, tr("Add New Layer"), this);
+    QString ctrlKey(QStringLiteral("Ctrl+"));
+    QString altKey(QStringLiteral("Alt+"));
+#ifdef Q_OS_MACOS
+    ctrlKey = "⌘";
+    altKey = "⌥";
+#endif
+    QString newLayerString = tr("Add New Layer (%1L)").arg(ctrlKey);
+    QAction *actionNewLayer = new QAction(iconLayer, newLayerString, this);
     QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"), this);
     QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"), this);
     m_actionDataInput = new QAction(m_iconDiActive, "");
-    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"), this);
+    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object (Del)"), this);
     m_actionPlayStop = new QAction(this);
     m_timeLabel = new TimelineToolbarLabel(this);
     m_diLabel = new QLabel();
@@ -84,6 +91,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
 
     m_timeLabel->setText(tr("0:00.000"));
     m_timeLabel->setMinimumWidth(80);
+    m_timeLabel->setToolTip(tr("Go To Time (%1%2T)").arg(ctrlKey).arg(altKey));
 
     m_diLabel->setText("");
     m_diLabel->setMinimumWidth(100);
@@ -189,10 +197,10 @@ void TimelineToolbar::updatePlayButtonState(bool started)
 {
     if (started) {
         m_actionPlayStop->setIcon(m_iconStop);
-        m_actionPlayStop->setText(tr("Stop Playing"));
+        m_actionPlayStop->setText(tr("Stop Playing (Enter)"));
     } else {
         m_actionPlayStop->setIcon(m_iconPlay);
-        m_actionPlayStop->setText(tr("Start Playing"));
+        m_actionPlayStop->setText(tr("Start Playing (Enter)"));
     }
 }
 

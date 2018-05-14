@@ -109,6 +109,13 @@ void CEditCameraBar::SetupCameras()
         m_CameraSelector->setCurrentIndex(theIndex);
         HandleCameraChanged(theIndex);
     }
+
+    QString ctrlKey(QStringLiteral("Ctrl+"));
+#ifdef Q_OS_MACOS
+    ctrlKey = "⌘";
+#endif
+
+    m_CameraSelector->setToolTip(tr("Change Camera View (%1<1..9>)").arg(ctrlKey));
 }
 
 //==============================================================================
