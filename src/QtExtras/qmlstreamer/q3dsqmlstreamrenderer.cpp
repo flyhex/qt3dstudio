@@ -176,10 +176,10 @@ Q3DSQmlStreamRenderer::~Q3DSQmlStreamRenderer()
     QCoreApplication::postEvent(m_renderObject, new Cleanup());
     m_waitCondition.wait(&m_mutex);
 
-    delete m_offscreenSurface;
-    delete m_renderControl;
-    delete m_quickWindow;
-    delete m_renderObject;
+    m_offscreenSurface->deleteLater();
+    m_renderControl->deleteLater();
+    m_quickWindow->deleteLater();
+    m_renderObject->deleteLater();
 
     renderThreadClientCount->fetchAndSubAcquire(1);
     if (renderThreadClientCount->load() == 0)
