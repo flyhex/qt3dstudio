@@ -84,19 +84,22 @@ void Q3DSQmlStreamProxy::loadPresentationItem(const QString& presentationId,
         m_engine->setIncubationController(new Q3DSIncubationController(this));
     }
 
-    QUrl purl = QUrl(presentationArgs);
+    QString itemPath = presentationArgs;
+    itemPath.replace("\\", "/");
+
+    QUrl purl = QUrl(itemPath);
     if (purl.isRelative()) {
         purl.setPath(m_path.path() + QStringLiteral("/") + purl.path());
         purl.setScheme(m_path.scheme());
     } else {
-        purl = pathToUrl(presentationArgs);
+        purl = pathToUrl(itemPath);
     }
 
     QQmlComponent *component = new QQmlComponent(m_engine, purl);
     if (!component)
         return;
     renderitem *item = new renderitem;
-    item->args = presentationArgs;
+    item->args = itemPath;
     item->component = component;
     item->presentationId = presentationId;
     m_loadedItems.push_back(item);
