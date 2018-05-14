@@ -85,7 +85,6 @@
 #include <QtCore/qdir.h>
 #include <unordered_set>
 #include "Runtime/Include/q3dsqmlbehavior.h"
-#include "DataModelObjectReferenceHelper.h"
 
 namespace {
 
@@ -2379,40 +2378,6 @@ public:
 
         m_Doc.SelectDataModelObject(component);
         return component;
-    }
-
-    void CreateAliasDuplicates(const qt3dsdm::TInstanceHandleList &inInstances,
-                               qt3dsdm::Qt3DSDMSlideHandle theSlide) override
-    {
-        for (int i = 0; i < inInstances.size(); i++) {
-            qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = inInstances.at(i);
-            if (m_Bridge.isAliasable(theSelectedInstance)) {
-                CPt thePoint(0, 0);
-                Qt3DSDMInstanceHandle addedInstance = CreateSceneGraphInstance(
-                            ComposerObjectTypes::Alias, theSelectedInstance, theSlide,
-                            DocumentEditorInsertType::NextSibling, thePoint,
-                            PRIMITIVETYPE_UNKNOWN, -1);
-
-                // Compose name and verify it's unique
-                Q3DStudio::CString name = m_Bridge.GetName(addedInstance);
-                name.append(m_Bridge.GetName(theSelectedInstance));
-                if (!m_Bridge.CheckNameUnique(addedInstance, name)) {
-                    name = m_Bridge.GetUniqueChildName(m_Bridge.GetParentInstance(addedInstance),
-                                                       addedInstance, name);
-                }
-                m_Bridge.SetName(addedInstance, name);
-
-                // Object reference
-                qt3dsdm::SObjectRefType objRef =
-                        m_Doc.GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                            theSelectedInstance, addedInstance,
-                            CRelativePathTools::EPathType::EPATHTYPE_GUID);
-                qt3dsdm::Qt3DSDMPropertyHandle theProperty =
-                        m_Doc.GetPropertySystem()->GetAggregateInstancePropertyByName(
-                            addedInstance, L"referencednode");
-                SetInstancePropertyValue(addedInstance, theProperty, objRef);
-            }
-        }
     }
 
     void DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances) override

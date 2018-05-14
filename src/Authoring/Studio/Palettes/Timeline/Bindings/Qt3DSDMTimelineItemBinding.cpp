@@ -589,7 +589,7 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())
-            return m_StudioSystem->GetClientDataModelBridge()->isAliasable(theInstance);
+            return m_StudioSystem->GetClientDataModelBridge()->IsDuplicateable(theInstance);
         break;
 
     case EUserTransaction_Cut:
@@ -677,7 +677,8 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     switch (inTransaction) {
     case EUserTransaction_Duplicate: {
         theDoc->DeselectAllKeyframes();
-        theDoc->HandleDuplicateCommand();
+        SCOPED_DOCUMENT_EDITOR(*theDoc,
+                               QObject::tr("Duplicate Object"))->DuplicateInstances(theInstances);
     } break;
     case EUserTransaction_Cut: {
         theDispatch.FireOnAsynchronousCommand(

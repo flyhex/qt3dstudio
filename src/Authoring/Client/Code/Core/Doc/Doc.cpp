@@ -1969,13 +1969,19 @@ bool CDoc::CanCut()
 //==============================================================================
 /**
  * Handles the duplicate command passed by mainframe.
- * Makes an alias copy of the currently selected item (if there is one) and attaches
+ * Makes a copy of the currently selected item (if there is one) and attaches
  * it to the same parent as the original.
  */
 void CDoc::HandleDuplicateCommand()
 {
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Alias Duplicate"))
-            ->CreateAliasDuplicates(GetSelectedValue().GetSelectedInstances(), GetActiveSlide());
+    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+
+    // If we have a valid object to duplicate
+    if (m_StudioSystem->GetClientDataModelBridge()->IsDuplicateable(theSelectedInstance)) {
+        using namespace Q3DStudio;
+        SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Duplicate Object"))
+                ->DuplicateInstance(GetSelectedInstance());
+    }
 }
 
 //=============================================================================
