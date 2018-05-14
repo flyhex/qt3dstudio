@@ -83,7 +83,6 @@ public:
     void ChangeTime(long inTime, bool inSetStart) override;
     void CommitTimeChange() override;
     void RollbackTimeChange() override;
-    // TODO: Can be removed with new timeline
     ::CColor GetTimebarColor() override { return m_Color; }
     Q3DStudio::CString GetTimebarComment() override { return m_Comment; }
     void SetTimebarComment(const Q3DStudio::CString &inComment) override;

@@ -472,7 +472,8 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
             RowTree *newRow = m_graphicsScene->rowManager()
                               ->createRowFromBinding(binding, bindingParent->getRowTree());
 
-            m_handlesMap.insert(std::make_pair(inInstance, newRow));
+            if (binding->GetObjectType() != OBJTYPE_MATERIAL)
+                m_handlesMap.insert(std::make_pair(inInstance, newRow));
         }
     }
 }
@@ -630,7 +631,16 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
 
 void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
 {
-    // Mahmoud_TODO: implement?
+    Q_UNUSED(inParent)
+    Q_UNUSED(inIndex)
+
+    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
+    if (binding && binding->GetObjectType() == OBJTYPE_MATERIAL) {
+        // Note that this only handles removing materials now
+        RowTree *row = binding->getRowTree();
+        if (row)
+            m_graphicsScene->rowManager()->deleteRow(row);
+    }
 }
 
 void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
