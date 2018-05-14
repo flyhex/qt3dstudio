@@ -370,7 +370,9 @@ void CMainFrame::OnCreate()
     m_ui->actionZoom_Tool->setVisible(false);
 #endif
 
-    setCentralWidget(m_sceneView.data());
+    // Show a message about opening or creating a presentation
+    m_sceneView.data()->setVisible(false);
+    setCentralWidget(m_ui->infoText);
 }
 
 //==============================================================================
@@ -381,6 +383,10 @@ void CMainFrame::OnCreate()
  */
 void CMainFrame::OnNewPresentation()
 {
+    // Hide the message about opening or creating a presentation
+    m_sceneView.data()->setVisible(true);
+    setCentralWidget(m_sceneView.data());
+
     // Associate the scene object with the scene view
     m_ui->m_EditCamerasBar->SetupCameras();
     // Enable dockables, toolbars, and menus

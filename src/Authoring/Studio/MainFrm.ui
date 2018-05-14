@@ -17,7 +17,28 @@
    <iconset>
     <normaloff>:/images/icon_256x256</normaloff>:/images/icon_256x256</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="infoText">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>190</y>
+      <width>301</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>You have no active presentation.
+Open or Create a presentation using the File menu.
+
+To start working after that, add assets to the
+Project palette using Import functionality.</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
