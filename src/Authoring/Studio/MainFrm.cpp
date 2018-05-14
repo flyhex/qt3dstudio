@@ -217,6 +217,15 @@ CMainFrame::CMainFrame()
     connect(m_remoteDeploymentSender.data(), &RemoteDeploymentSender::connectionChanged,
             this, &CMainFrame::OnConnectionChanged);
 
+    // Hide unimplemented menu items
+    m_ui->actionRepeat->setVisible(false);
+    m_ui->actionGroup->setVisible(false);
+    m_ui->actionParent->setVisible(false);
+    m_ui->actionUnparent->setVisible(false);
+    m_ui->actionFit_all->setVisible(false);
+    m_ui->actionToggle_hide_unhide_unselected->setVisible(false);
+    m_ui->actionFind->setVisible(false);
+
     // TODO: better solution?
     m_updateUITimer->start(500);
     connect(m_updateUITimer.data(), &QTimer::timeout, [&]() {
