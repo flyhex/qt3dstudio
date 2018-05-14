@@ -586,12 +586,14 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
 void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
-    const SDataModelSceneAsset &asset = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-            ->GetClientDataModelBridge()->GetSceneAsset();
+    CClientDataModelBridge *bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
+    const SDataModelSceneAsset &asset = bridge->GetSceneAsset();
     const bool filterProperty = inProperty == asset.m_Eyeball || inProperty == asset.m_Locked
             || inProperty == asset.m_Shy;
     const bool timeProperty = inProperty == asset.m_StartTime || inProperty == asset.m_EndTime;
-    if (filterProperty || timeProperty) {
+    const bool nameProperty = inProperty == bridge->GetNameProperty();
+    if (filterProperty || timeProperty || nameProperty) {
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
         if (binding) {
             RowTree *row = binding->getRowTree();
@@ -600,6 +602,8 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
                     row->rowTimeline()->updateDurationFromBinding();
                 if (filterProperty)
                     row->updateFromBinding();
+                if (nameProperty)
+                    row->updateLabel();
             }
         }
     }

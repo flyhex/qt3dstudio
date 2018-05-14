@@ -331,6 +331,10 @@ Q3DStudio::CString Qt3DSDMTimelineItemBinding::GetName() const
 
 void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
 {
+    // Ignore if setting the name to what it currently is to avoid duplicate undo points
+    if (inName == GetName())
+        return;
+
     // Display warning dialog if user tried to enter an empty string
     if (inName.IsEmpty()) {
         QString theTitle = QObject::tr("Rename Object Error");

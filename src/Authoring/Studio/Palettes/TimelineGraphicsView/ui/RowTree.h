@@ -116,6 +116,7 @@ public:
     void toggleVisible();
     void toggleLocked();
     void updateFromBinding();
+    void updateLabel();
     void setRowVisible(bool visible);
 
     ITimelineItemBinding *getBinding() const;

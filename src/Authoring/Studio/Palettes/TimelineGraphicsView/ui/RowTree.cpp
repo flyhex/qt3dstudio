@@ -647,6 +647,12 @@ void RowTree::updateFromBinding()
     m_labelItem.setMaster(m_master);
 }
 
+void RowTree::updateLabel()
+{
+    if (m_binding)
+        m_labelItem.setLabel(m_binding->GetTimelineItem()->GetName().toQString());
+}
+
 void RowTree::setRowVisible(bool visible)
 {
     if (visible) {
