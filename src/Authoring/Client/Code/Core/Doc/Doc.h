@@ -193,11 +193,11 @@ public:
     QString GetDocumentUIAFile(bool master = false);
     // In outMap, returns datainput names found from element control
     // bindings but which are missing from (UIP) datainput list
-    void VerifyDatainputs(
+    void UpdateDatainputMap(
             const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                            qt3dsdm::Qt3DSDMPropertyHandle>> &outMap);
+                            qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
     void LoadUIASubpresentations(const QString &uiaFile,
                                  QVector<SubPresentationRecord> &subpresentations);
     void LoadUIADataInputs(const QString &uiaFile,
@@ -313,7 +313,7 @@ public:
 
     void RemoveDatainputBindings(
             const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                           qt3dsdm::Qt3DSDMPropertyHandle>> &map) override;
+                                           qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
@@ -411,6 +411,8 @@ protected:
     void SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
     void OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide);
     void OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     Q3DStudio::SSelectedValue SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     // Set the selection, but don't send an event.
     bool SetSelection(Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue());

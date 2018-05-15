@@ -29,6 +29,9 @@
 #include "DataInputListDlg.h"
 #include "ui_DataInputListDlg.h"
 #include "DataInputDlg.h"
+#include "StudioPreferences.h"
+#include "StudioApp.h"
+#include "Dialogs.h"
 
 #include <QtWidgets/qpushbutton.h>
 #include <QtGui/qstandarditemmodel.h>
@@ -180,7 +183,9 @@ void CDataInputListDlg::updateContents()
         } else if (dataInputType == DataTypeVariant) {
             dataInput.append(new QStandardItem(tr("Variant")));
         }
-
+        // highlight datainputs that are in use
+        if (it->controlledElems.size() != 0)
+            dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
         m_tableContents->appendRow(dataInput);
     }
 
@@ -235,6 +240,14 @@ void CDataInputListDlg::onAddDataInput()
 
 void CDataInputListDlg::onRemoveDataInput()
 {
+    QString title(QObject::tr("Warning"));
+    QString text(QObject::tr("This operation cannot be undone. Are you sure?"));
+    auto ret = g_StudioApp.GetDialogs()->DisplayMessageBox(title, text,
+                                                           Qt3DSMessageBox::ICON_WARNING, true,
+                                                           this);
+    if (ret != Qt3DSMessageBox::MSGBX_OK)
+        return;
+
     QVector<int> removedRows;
     if (m_ui->tableView->selectionModel()) {
         const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();

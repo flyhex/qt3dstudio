@@ -205,6 +205,7 @@ public:
     void SetAutosaveInterval(int interval);
     void toggleEyeball();
     void showInvalidFilenameWarning();
+    void checkDeletedDatainputs();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;
@@ -227,7 +228,7 @@ public:
     void OnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                  qt3dsdm::Qt3DSDMPropertyHandle>> &map) override;
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

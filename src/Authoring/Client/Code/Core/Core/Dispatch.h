@@ -201,7 +201,7 @@ public:
     void FireOnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                  qt3dsdm::Qt3DSDMPropertyHandle>> &map);
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map);
 
     void AddRendererListener(CRendererListener *inListener);
     void RemoveRendererListener(CRendererListener *inListener);

@@ -888,8 +888,10 @@ void InspectorControlModel::refresh()
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property.Valid())
+            if (property->m_property.Valid()) {
                 updatePropertyValue(property);
+                updateControlledToggleState(property);
+            }
         }
     }
     Q_EMIT dataChanged(index(0), index(rowCount() - 1));

@@ -370,9 +370,9 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
 bool CDialogs::DisplayUndefinedDatainputDlg(
         const QMultiMap<QString,
                         QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                              qt3dsdm::Qt3DSDMPropertyHandle>> &map)
+                              qt3dsdm::Qt3DSDMPropertyHandle>> *map)
 {
-    const auto keys = map.uniqueKeys();
+    const auto keys = map->uniqueKeys();
     QString theTitle = QObject::tr("Missing Data Input");
     QLabel *theText = new QLabel;
     int keysSize = keys.size();
@@ -570,14 +570,17 @@ void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
  */
 Qt3DSMessageBox::EMessageBoxReturn
 CDialogs::DisplayMessageBox(const QString &inTitle, const QString &inText,
-                            Qt3DSMessageBox::EMessageBoxIcon inIcon, bool inShowCancel)
+                            Qt3DSMessageBox::EMessageBoxIcon inIcon, bool inShowCancel,
+                            QWidget *parent)
 {
     Qt3DSMessageBox::EMessageBoxReturn theUserChoice;
 
     if (m_ShowGUI) {
+        if (parent == nullptr)
+            parent = g_StudioApp.m_pMainWnd;
         theUserChoice =
                 Qt3DSMessageBox::Show(inTitle, inText, inIcon,
-                                      inShowCancel, g_StudioApp.m_pMainWnd);
+                                      inShowCancel, parent);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << inTitle << ": " << inText;
         theUserChoice = Qt3DSMessageBox::MSGBX_OK;

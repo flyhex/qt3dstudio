@@ -1563,15 +1563,10 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
 
     m_core->GetDispatch()->FireAuthorZoomChanged();
 
-    QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> map;
-    m_core->GetDoc()->VerifyDatainputs(m_core->GetDoc()->GetActiveRootInstance(), map);
-
-    if (!map.empty())
-        m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
+    checkDeletedDatainputs();
 
     return theLoadResult;
 }
-
 
 //=============================================================================
 /**
@@ -1782,7 +1777,7 @@ void CStudioApp::OnPresentationModifiedExternally()
 
 void CStudioApp::OnUndefinedDatainputsFail(
         const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                       qt3dsdm::Qt3DSDMPropertyHandle>> &map)
+                                       qt3dsdm::Qt3DSDMPropertyHandle>> *map)
 {
     bool res = m_dialogs->DisplayUndefinedDatainputDlg(map);
 
@@ -1827,4 +1822,15 @@ void CStudioApp::showInvalidFilenameWarning()
     m_dialogs->DisplayMessageBox(tr("Invalid filename"),
                                  tr("The filename given was invalid."),
                                  Qt3DSMessageBox::ICON_WARNING, false);
+}
+
+void CStudioApp::checkDeletedDatainputs()
+{
+    QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
+    map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                       qt3dsdm::Qt3DSDMPropertyHandle>>;
+    m_core->GetDoc()->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
+
+    if (!map->empty())
+        m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
 }

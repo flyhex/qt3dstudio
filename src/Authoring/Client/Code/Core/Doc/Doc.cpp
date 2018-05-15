@@ -275,24 +275,28 @@ bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
 
         cpStr.TrimLeft();
         cpStr.TrimRight();
-
-        controlledPropStr = cpStr;
     } else {
-        // append without checking the existing content
-        controlledPropStr.append(" $" + diName + " " + propName);
+        Q3DStudio::CString controlledElemStr;
+        // Insert delimiter if we already have an existing string.
+        if (cpStr.size())
+            cpStr.append(" ");
+        cpStr.append("$" + diName);
+        cpStr.append(" ");
+        cpStr.append(propName);
     }
+    controlledPropStr = cpStr;
     return true;
 }
 
 void CDoc::RemoveDatainputBindings(
         const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                       qt3dsdm::Qt3DSDMPropertyHandle>> &map)
+                                       qt3dsdm::Qt3DSDMPropertyHandle>> *map)
 {
     // We might be altering several attributes, aggregate them together
     m_SceneEditor->BeginAggregateOperation();
-    const auto uniqueKeys = map.uniqueKeys();
+    const auto uniqueKeys = map->uniqueKeys();
     for (const auto &name : uniqueKeys) {
-        const auto values = map.values(name);
+        const auto values = map->values(name);
         for (const auto pair : values) {
             SetInstancePropertyControlled(pair.first, Q3DStudio::CString(),
                                           pair.second, Q3DStudio::CString::fromQString(name),
@@ -301,7 +305,10 @@ void CDoc::RemoveDatainputBindings(
     }
 
     m_SceneEditor->EndAggregateOperation();
-    CloseTransaction();
+    // if SetInstancePropertyControlled fails for some reason, we might not
+    // have open transaction.
+    if (IsTransactionOpened())
+        CloseTransaction();
 }
 
 // Set a property in an instance to be controlled by datainput.
@@ -309,78 +316,77 @@ void CDoc::RemoveDatainputBindings(
 // Caller is responsible for calling CloseTransaction() after all transactions
 // are finished
 void CDoc::SetInstancePropertyControlled(
-    qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DStudio::CString instancepath,
-    qt3dsdm::Qt3DSDMPropertyHandle propName, Q3DStudio::CString controller,
-    bool controlled, bool batch)
+        qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DStudio::CString instancepath,
+        qt3dsdm::Qt3DSDMPropertyHandle propName, Q3DStudio::CString newCtrl,
+        bool controlled, bool batch)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
+    // We might have invalid controller (not found from the global list of datainputs)
+    bool newCtrlrValid = false;
+    qt3dsdm::SValue controlledProperty;
+    Q3DStudio::CString currCtrldPropsStr = Q3DStudio::CString();
+    qt3dsdm::SValue currentCtrldProps;
+    qt3dsdm::Qt3DSDMMetaDataPropertyHandle metadataHandle;
+    qt3dsdm::Option<qt3dsdm::SMetaDataPropertyInfo> metadata;
 
     // Get current controller - property string for this element
-    qt3dsdm::SValue currentCtrldProps;
     qt3dsdm::Qt3DSDMPropertyHandle ctrldElemPropHandle
-        = thePropertySystem->GetAggregateInstancePropertyByName(instance,
-                                                                L"controlledproperty");
+            = thePropertySystem->GetAggregateInstancePropertyByName(instance,
+                                                                    L"controlledproperty");
 
-    qt3dsdm::SValue controlledProperty;
-
-    Q3DStudio::CString currCtrldPropsStr = Q3DStudio::CString();
-
+    // Get the controlledproperty tag for the target element
     if (ctrldElemPropHandle.Valid()) {
         thePropertySystem->GetInstancePropertyValue(
-            instance, ctrldElemPropHandle, currentCtrldProps);
-
-        currCtrldPropsStr
-            = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
+                    instance, ctrldElemPropHandle, currentCtrldProps);
+        if (!currentCtrldProps.empty())
+            currCtrldPropsStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
     }
+
+    // Get the name of controlled property if valid
+    if (propName.Valid()) {
+        metadataHandle
+                = GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(instance, propName);
+        metadata = GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(metadataHandle);
+    }
+
+    // Check for new controller validity
+    if (g_StudioApp.m_dataInputDialogItems.contains(newCtrl.toQString()))
+        newCtrlrValid = true;
+    else if (controlled)
+        return; // trying to set control on but new controller is not valid, abort
 
     // @slide and @timeline are not valid named properties thus incoming propName handle
     // will be invalid.
-    // Check if the caller wants to remove these two pseudo-properties
+    // Check if the caller wants to remove control from either pseudo-property
     // and handle them with a special case. Datamodel notifications will cause
     // slide and timeline views to update datainput control status, no need for additional
-    // signaling
-    if (!propName.Valid()) {
-        bool found = false;
-        if (currCtrldPropsStr.find(controller + " @slide") != Q3DStudio::CString::ENDOFSTRING) {
+    // signaling.
+    // Note that slide and timeline controls are never set using this interface,
+    // as @slide and @timeline are not using actual properties; we implement control
+    // removal here just for the purposes of enabling recursive removal of control throughout
+    // the graph
+    if (!propName.Valid() && !controlled) {
+        if (currCtrldPropsStr.find(newCtrl + " @slide") != Q3DStudio::CString::ENDOFSTRING) {
             ModifyControlStrForProperty(currCtrldPropsStr, Q3DStudio::CString("@slide"),
-                                        controlled, controller);
-            found = true;
+                                        false, newCtrl);
         }
-        if (currCtrldPropsStr.find(controller + " @timeline") != Q3DStudio::CString::ENDOFSTRING) {
+        if (currCtrldPropsStr.find(newCtrl + " @timeline") != Q3DStudio::CString::ENDOFSTRING) {
             ModifyControlStrForProperty(currCtrldPropsStr, Q3DStudio::CString("@timeline"),
-                                        controlled, controller);
-            found = true;
+                                        false, newCtrl);
         }
-        // we have no valid property handle, nor are we changing slide or timeline control
-        if (!found)
-            return;
+        // in any case, write out the controlledproperty string even if unmodified
         controlledProperty = std::make_shared<qt3dsdm::CDataStr>(currCtrldPropsStr);
     } else {
-        // Incoming property handle is valid; get the name of controlled property
-        auto metadataHandle
-                = GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(instance, propName);
-        auto metadata
-                = GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(metadataHandle);
-
         // We are going to set or change the controller for this property. Remove the
-        // old controller - property pair first if it exists.
+        // old controller - property pair from the controlledproperty string first if it exists.
         if (currCtrldPropsStr.find(metadata->m_Name.c_str()) != Q3DStudio::CString::ENDOFSTRING)
             ModifyControlStrForProperty(currCtrldPropsStr, metadata->m_Name.c_str(), false);
 
+        // Modify the controlledproperty tag for the target element
         if (controlled) {
-            // Build new controller - controlled property string.
-            Q3DStudio::CString controlledElemStr;
-            // Insert delimiter to if we already have an existing string.
-            if (currCtrldPropsStr.size())
-                controlledElemStr.append(" ");
-            controlledElemStr.append("$" + controller);
-            controlledElemStr.append(" ");
-            controlledElemStr.append(metadata->m_Name.c_str());
-
-            // append the existing controlledproperties with new string
-            controlledProperty = std::make_shared<qt3dsdm::CDataStr>(
-                        currCtrldPropsStr + controlledElemStr);
-        } else {
+            ModifyControlStrForProperty(currCtrldPropsStr, metadata->m_Name.c_str(), true, newCtrl);
+            controlledProperty = std::make_shared<qt3dsdm::CDataStr>(currCtrldPropsStr);
+        } else if (!controlled) {
             if (currCtrldPropsStr.size()) {
                 // Current controller - property string was already removed, just store
                 // what is left.
@@ -404,7 +410,6 @@ void CDoc::SetInstancePropertyControlled(
     } else {
         if (!IsTransactionOpened())
             OpenTransaction(L"Set multiple controlled", __FILE__, __LINE__);
-
         SetInstancePropertyValue(instance, L"controlledproperty", controlledProperty);
     }
 }
@@ -1249,6 +1254,31 @@ void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
                 m_ActiveSlide = 0;
             }
         }
+    }
+    // Remove this instance from datainputs controlled element list
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
+        if (it->controlledElems.contains(inInstance))
+            it->controlledElems.removeAll(inInstance);
+    }
+}
+
+void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                             qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+{
+    using namespace qt3dsdm;
+
+    // check if we changed datainput bindings
+    if (inProperty == m_StudioSystem->GetPropertySystem()
+            ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty")) {
+        // we need to rebuild the datainput map as we do not know what exactly
+        // happened with controlledproperty property
+        // TODO: implement a pre-change signal that can be used to extract
+        // controlledproperty string before and after the change, so we know exactly
+        // what happened to the element
+        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+            it->controlledElems.clear();
+
+        UpdateDatainputMap(m_Core->GetDoc()->GetActiveRootInstance());
     }
 }
 
@@ -2238,6 +2268,12 @@ void CDoc::SetupDataCoreSignals()
     m_Connections.push_back(
                 m_StudioSystem->GetFullSystem()->GetSignalProvider()->ConnectActiveSlide(
                     std::bind(&CDoc::OnComponentSeconds, this)));
+
+    // listener to keep track of datainput bindings
+    m_Connections.push_back(
+                m_StudioSystem->GetFullSystem()->GetSignalProvider()->ConnectInstancePropertyValue(
+                    std::bind(&CDoc::onPropertyChanged, this,
+                              std::placeholders::_1, std::placeholders::_2)));
 }
 
 std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
@@ -2812,10 +2848,10 @@ QString CDoc::GetDocumentUIAFile(bool master)
     return file;
 }
 
-void CDoc::VerifyDatainputs(
+void CDoc::UpdateDatainputMap(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,
-                  QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> &outMap)
+                  QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *outMap)
 {
     auto propSystem = GetPropertySystem();
 
@@ -2833,15 +2869,15 @@ void CDoc::VerifyDatainputs(
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
                 g_StudioApp.m_dataInputDialogItems[diName]->
                     controlledElems.append(inInstance);
-            } else {
-                // Do multi insert as single datainput name
-                // be found as in several elements
+            } else if (outMap != nullptr) {
+                // Do multi insert as single datainput name can
+                // be found in several elements
                 qt3dsdm::Qt3DSDMPropertyHandle prop
                         = propSystem->GetAggregateInstancePropertyByName(
                             inInstance, splitStr[i+1].toStdWString().c_str());
                 QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                       qt3dsdm::Qt3DSDMPropertyHandle> valuepair(inInstance, prop);
-                outMap.insertMulti(diName, valuepair);
+                outMap->insertMulti(diName, valuepair);
             }
         }
     }
@@ -2850,7 +2886,7 @@ void CDoc::VerifyDatainputs(
     Q3DStudio::CGraphIterator iter;
     GetAssetChildren(this, inInstance, iter);
     for (; !iter.IsDone(); ++iter)
-        VerifyDatainputs(iter.GetCurrent(), outMap);
+        UpdateDatainputMap(iter.GetCurrent(), outMap);
 }
 
 void CDoc::LoadUIASubpresentations(const QString &uiaFile,
