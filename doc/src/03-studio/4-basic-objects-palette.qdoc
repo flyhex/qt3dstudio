@@ -164,7 +164,7 @@ Aliases are only active during authoring time. At runtime they become a
 full copy of the referenced object and all its descendants. This allows
 you to, for example, create a single template component and with 10
 aliases of it controlled by script. While each alias will look identical
-in Studio during creation, Lua script or state machines can customize
+in Studio during creation, scripts or state machines can customize
 each instance based on data or application state.
 
 */
