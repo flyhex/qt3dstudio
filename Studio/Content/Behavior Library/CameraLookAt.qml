@@ -69,13 +69,16 @@ Behavior {
     function start() {
         running = true;
     }
+
     function stop() {
         running = false;
     }
+
     onInitialize: {
         if (startImmediately)
             start();
     }
+
     onUpdate: {
         if (!running)
             return;
@@ -84,7 +87,7 @@ Behavior {
         var cameraTransform = calculateGlobalTransform();
         var cameraSpot = cameraTransform.row(3).toVector3d();
 
-        var matrix = calculateGlobalTransform(getParent()).inverted();
+        var matrix = calculateGlobalTransform("parent").inverted();
         matrix.m41 = 0;
         matrix.m42 = 0;
         matrix.m43 = 0;
@@ -95,7 +98,6 @@ Behavior {
 
         var rotation = lookAt(rotateRay);
         setAttributeVector("rotation", rotation);
-        setAttributeVector("position", cameraSpot);
     }
 
     function getAttributeVector(name) {
