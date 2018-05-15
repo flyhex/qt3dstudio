@@ -158,11 +158,11 @@ QString qmlImportPath()
 
 qreal devicePixelRatio()
 {
-    static qreal pixelRatio = 0.0;
-    if (Q_UNLIKELY(pixelRatio == 0.0)) {
-        const QWindowList list = QGuiApplication::topLevelWindows();
-        if (list.size() > 0)
-            pixelRatio = list[0]->devicePixelRatio();
-    }
+    qreal pixelRatio;
+
+    const QWindowList list = QGuiApplication::topLevelWindows();
+    if (list.size() > 0)
+        pixelRatio = list[0]->devicePixelRatio();
+
     return pixelRatio;
 }

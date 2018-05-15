@@ -94,6 +94,7 @@ struct SRendererImpl : public IStudioRenderer,
     int m_LastToolMode;
     bool m_GuidesEnabled;
     qt3dsdm::TSignalConnectionPtr m_SelectionSignal;
+    float m_pixelRatio;
 
     SRendererImpl()
         : m_Dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -107,6 +108,7 @@ struct SRendererImpl : public IStudioRenderer,
         , m_RenderRequested(false)
         , m_LastToolMode(0)
         , m_GuidesEnabled(true)
+        , m_pixelRatio(0.0)
     {
         m_Dispatch.AddReloadListener(this);
         m_Dispatch.AddDataModelListener(this);
@@ -223,6 +225,7 @@ struct SRendererImpl : public IStudioRenderer,
 
         m_Rect = inRect;
         if (IsInitialized()) {
+            m_pixelRatio = devicePixelRatio();
             m_RenderContext->BeginRender();
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetViewport(qt3ds::render::NVRenderRect(0, 0, inRect.width(),
@@ -568,8 +571,8 @@ struct SRendererImpl : public IStudioRenderer,
         if (m_Translation == NULL)
             return;
 
-        inPoint.setX(inPoint.x() * devicePixelRatio());
-        inPoint.setY(inPoint.y() * devicePixelRatio());
+        inPoint.setX(inPoint.x() * m_pixelRatio);
+        inPoint.setY(inPoint.y() * m_pixelRatio);
 
         m_PickResult = SStudioPickValue();
         TranslationSelectMode::Enum theSelectMode = TranslationSelectMode::Group;
@@ -634,8 +637,8 @@ struct SRendererImpl : public IStudioRenderer,
         if (m_Translation == NULL)
             return;
 
-        inPoint.setX(inPoint.x() * devicePixelRatio());
-        inPoint.setY(inPoint.y() * devicePixelRatio());
+        inPoint.setX(inPoint.x() * m_pixelRatio);
+        inPoint.setY(inPoint.y() * m_pixelRatio);
 
         if (m_MaybeDragStart) {
             // Dragging in the first 5 pixels will be ignored to avoid unconsciously accidental
@@ -837,8 +840,8 @@ struct SRendererImpl : public IStudioRenderer,
     void OnSceneMouseDblClick(SceneDragSenderType::Enum inSenderType, QPoint inPoint) override
     {
         if (inSenderType == SceneDragSenderType::SceneWindow && m_Translation) {
-            inPoint.setX(inPoint.x() * devicePixelRatio());
-            inPoint.setY(inPoint.y() * devicePixelRatio());
+            inPoint.setX(inPoint.x() * m_pixelRatio);
+            inPoint.setY(inPoint.y() * m_pixelRatio);
             m_RenderContext->BeginRender();
             SStudioPickValue theResult(
                 m_Translation->Pick(inPoint, TranslationSelectMode::NestedComponentSingle));
