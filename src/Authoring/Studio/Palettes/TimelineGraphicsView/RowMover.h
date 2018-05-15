@@ -31,6 +31,7 @@
 
 #include "TimelineConstants.h"
 #include "TimelineItem.h"
+#include "DocumentEditorEnumerations.h"
 
 class RowTree;
 class TimelineGraphicsScene;
@@ -45,23 +46,26 @@ public:
     void start(RowTree *row = nullptr);
     void end(bool force = false);
     void updateTargetRow(const QPointF &scenePos);
-    int targetIndex() const;
     bool isActive();
     bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
+    RowTree *insertionTarget() const;
     RowTree *insertionParent() const;
     RowTree *sourceRow() const;
     int type() const;
+    Q3DStudio::DocumentEditorInsertType::Enum insertionType() const;
 
 private:
-    void updateState(int index, int depth, double y);
-    void resetInsertionParent(RowTree *newTarget = nullptr);
+    void updateState(int depth, double y);
+    void resetInsertionParent(RowTree *newParent = nullptr);
     RowTree *getRowAtPos(const QPointF &scenePos);
 
     TimelineGraphicsScene *m_scene = nullptr;
+    RowTree *m_insertionTarget = nullptr; // insertion target
     RowTree *m_insertionParent = nullptr; // insertion parent
     RowTree *m_sourceRow = nullptr;       // dragged row
-    int m_targetIndex = -1;               // insertion index
     bool m_active = false;
+    Q3DStudio::DocumentEditorInsertType::Enum m_insertType =
+            Q3DStudio::DocumentEditorInsertType::Unknown;
 };
 
 #endif // ROWMOVER_H

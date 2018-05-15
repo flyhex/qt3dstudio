@@ -58,27 +58,29 @@ void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->restore();
 }
 
+RowTree *RowMover::insertionTarget() const
+{
+    return m_insertionTarget;
+}
+
 RowTree *RowMover::insertionParent() const
 {
     return m_insertionParent;
 }
 
-void RowMover::resetInsertionParent(RowTree *newTarget)
+void RowMover::resetInsertionParent(RowTree *newParent)
 {
     if (m_insertionParent) {
         m_insertionParent->setMoveTarget(false);
         m_insertionParent = nullptr;
     }
 
-    if (newTarget) {
-        m_insertionParent = newTarget;
+    if (newParent) {
+        m_insertionParent = newParent;
         m_insertionParent->setMoveTarget(true);
+    } else {
+        m_insertionTarget = nullptr;
     }
-}
-
-int RowMover::targetIndex() const
-{
-    return m_targetIndex;
 }
 
 RowTree *RowMover::sourceRow() const
@@ -119,10 +121,8 @@ void RowMover::end(bool force)
     }
 }
 
-void RowMover::updateState(int index, int depth, double y)
+void RowMover::updateState(int depth, double y)
 {
-    m_targetIndex = index;
-
     setPos(25 + depth * TimelineConstants::ROW_DEPTH_STEP, y);
     setVisible(true);
 }
@@ -213,28 +213,28 @@ void RowMover::updateTargetRow(const QPointF &scenePos)
             valid = false; // don't insert master slide object into non-master slide object
 
         if (valid) {
-            // calc insertion index
-            int index = rowInsert1->index() + 1;
-            if (rowInsert1->isProperty() && depth == rowInsert1->depth()) {
-                index = 0;
-            } else if (rowInsert1 == insertParent) {
-                if (insertParent->expanded() || insertParent->childRows().empty())
-                    index = 0;
-                else
-                    index = insertParent->childRows().last()->index() + 1;
-            } else if (depth < rowInsert1->depth()) {
-                RowTree *row = rowInsert1;
-                for (int i = depth; i < rowInsert1->depth(); ++i)
-                    row = row->parentRow();
-                index = row->index() + 1;
+            // calc insertion target and type
+            if (rowInsert1 == m_insertionParent) {
+                if (m_insertionParent->expanded() && !m_insertionParent->childRows().empty()) {
+                    m_insertionTarget = m_insertionParent->childRows().at(0);
+                    m_insertType = Q3DStudio::DocumentEditorInsertType::PreviousSibling;
+                } else {
+                    m_insertionTarget = m_insertionParent;
+                    m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
+                }
+            } else if (rowInsert1->isProperty() && depth == rowInsert1->depth()) {
+                m_insertionTarget = m_insertionParent->childRows().at(0);
+                m_insertType = Q3DStudio::DocumentEditorInsertType::PreviousSibling;
+            } else {
+                m_insertionTarget = rowInsert1;
+                m_insertType = Q3DStudio::DocumentEditorInsertType::NextSibling;
+                if (depth < rowInsert1->depth()) {
+                    for (int i = depth; i < rowInsert1->depth(); ++i)
+                        m_insertionTarget = m_insertionTarget->parentRow();
+                }
             }
 
-            if (m_sourceRow && m_sourceRow->parentRow() == insertParent
-                    && index > m_sourceRow->index()) { // moving down under the same parent
-                index--; // m_sourceRow is removed from layout, shift index up by 1
-            }
-
-            updateState(index, depth, rowInsert1->y() + TimelineConstants::ROW_H);
+            updateState(depth, rowInsert1->y() + TimelineConstants::ROW_H);
         }
     }
 
@@ -268,4 +268,9 @@ int RowMover::type() const
 {
     // Enable the use of qgraphicsitem_cast with this item.
     return TypeRowMover;
+}
+
+Q3DStudio::DocumentEditorInsertType::Enum RowMover::insertionType() const
+{
+    return m_insertType;
 }

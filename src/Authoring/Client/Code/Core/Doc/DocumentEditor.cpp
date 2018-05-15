@@ -2333,18 +2333,6 @@ public:
         }
     }
 
-    void ReorderRows(qt3dsdm::Qt3DSDMInstanceHandle handleSource,
-                     qt3dsdm::Qt3DSDMInstanceHandle handleParent, int index) override
-    {
-        CString currName = m_Bridge.GetName(handleSource);
-        if (!m_Bridge.CheckNameUnique(handleParent, handleSource, currName)) {
-            CString newName = m_Bridge.GetUniqueChildName(handleParent, handleSource, currName);
-            m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
-            SetName(handleSource, newName);
-        }
-        m_AssetGraph.MoveTo(handleSource, handleParent, index);
-    }
-
     Qt3DSDMInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) override
     {
         if (inInstances.empty())

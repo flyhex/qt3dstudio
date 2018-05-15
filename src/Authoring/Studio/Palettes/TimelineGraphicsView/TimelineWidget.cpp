@@ -691,20 +691,18 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
     RowMover *mover = m_graphicsScene->rowMover();
     mover->updateTargetRow(QPointF(inMousePoint.x, mouseY));
 
-    if (mover->insertionParent()) {
-        RowTree *targetRow = mover->insertionParent()->getChildAt(mover->targetIndex()-1);
-
-        if (targetRow) {
+    if (mover->insertionTarget()) {
+        mover->insertionTarget()->getBinding()->SetDropTarget(theTarget);
+        switch (mover->insertionType()) {
+        case Q3DStudio::DocumentEditorInsertType::LastChild:
+            theTarget->SetDestination(EDROPDESTINATION_ON);
+            break;
+        case Q3DStudio::DocumentEditorInsertType::PreviousSibling:
+            theTarget->SetDestination(EDROPDESTINATION_ABOVE);
+            break;
+        default:
             theTarget->SetDestination(EDROPDESTINATION_BELOW);
-            targetRow->getBinding()->SetDropTarget(theTarget);
-        } else {
-            if (mover->insertionParent()->childRows().empty()) {
-                theTarget->SetDestination(EDROPDESTINATION_ON);
-                mover->insertionParent()->getBinding()->SetDropTarget(theTarget);
-            } else {
-                theTarget->SetDestination(EDROPDESTINATION_ABOVE);
-                mover->insertionParent()->getChildAt(0)->getBinding()->SetDropTarget(theTarget);
-            }
+            break;
         }
     }
 

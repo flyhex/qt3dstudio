@@ -243,28 +243,21 @@ void printAsset(Q3DStudio::TIdentifier asset, QString padding = " ")
 
 void TimelineGraphicsScene::commitMoveRows()
 {
-    // same place, abort
-    if ((m_rowMover->sourceRow()->index() == m_rowMover->targetIndex())
-        && m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()) {
+    if (!m_rowMover->insertionTarget() || m_rowMover->sourceRow() == m_rowMover->insertionTarget())
         return;
-    }
 
     // handle for the moving row
     qt3dsdm::Qt3DSDMInstanceHandle handleSource = static_cast<Qt3DSDMTimelineItemBinding *>
             (m_rowMover->sourceRow()->getBinding())->GetInstance();
-
-    // handle for the parent of the insertion row
-    auto parentBinding = static_cast<Qt3DSDMTimelineItemBinding *>
-            (m_rowMover->insertionParent()->getBinding());
-    qt3dsdm::Qt3DSDMInstanceHandle handleParent = parentBinding->GetInstance();
-
-    // commit the row move to the binding
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Reorder Rows"))
-        ->ReorderRows(handleSource, handleParent,
-                      parentBinding->convertIndex(m_rowMover->targetIndex(), false));
+    qt3dsdm::Qt3DSDMInstanceHandle handleTarget = static_cast<Qt3DSDMTimelineItemBinding *>
+            (m_rowMover->insertionTarget()->getBinding())->GetInstance();
 
     if (!m_rowMover->insertionParent()->expanded())
         m_rowMover->insertionParent()->updateExpandStatus(RowTree::ExpandState::Expanded, false);
+
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                      QObject::tr("Move Rows"))
+            ->RearrangeObject(handleSource, handleTarget, m_rowMover->insertionType());
 
     // updating the UI happens in TimelineWidget.onChildAdded()
 }
@@ -542,8 +535,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             }
 
         } else if (m_rowMover->isActive()) { // moving rows (reorder/reparent)
-            if (m_rowMover->insertionParent()) // valid row move, commit it
-                commitMoveRows();
+            commitMoveRows();
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
             m_keyframeManager->commitMoveSelectedKeyframes();
