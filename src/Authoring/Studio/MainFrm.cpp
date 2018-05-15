@@ -383,9 +383,8 @@ void CMainFrame::OnCreate()
  */
 void CMainFrame::OnNewPresentation()
 {
-    // Hide the message about opening or creating a presentation
-    m_sceneView.data()->setVisible(true);
-    setCentralWidget(m_sceneView.data());
+    // Make sure scene is visible
+    showScene();
 
     // Associate the scene object with the scene view
     m_ui->m_EditCamerasBar->SetupCameras();
@@ -1958,4 +1957,12 @@ void CMainFrame::actionActive(bool active)
     m_ui->action_Copy->setEnabled(!active);
     m_ui->action_Cut->setEnabled(!active);
     m_ui->action_Paste->setEnabled(!active);
+}
+
+void CMainFrame::showScene()
+{
+    if (!m_sceneView.data()->isVisible()) {
+        m_sceneView.data()->setVisible(true);
+        setCentralWidget(m_sceneView.data());
+    }
 }

@@ -1469,6 +1469,10 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
     m_core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading ")),
                                                loadDocument.GetName());
 
+    // Make sure scene is visible
+    if (m_views)
+        m_views->getMainFrame()->showScene();
+
     try {
         OnLoadDocumentCatcher(loadDocument);
         m_core->GetDispatch()->FireOnOpenDocument(loadDocument, true);

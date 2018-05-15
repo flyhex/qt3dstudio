@@ -241,6 +241,7 @@ public:
 
     void toggleSelectMode();
     void actionActive(bool active);
+    void showScene();
 
 Q_SIGNALS:
     void playStateChanged(bool started);
