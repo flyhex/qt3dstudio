@@ -214,7 +214,7 @@ void CStudioPreferences::LoadPreferences()
  */
 bool CStudioPreferences::IsLegacyViewerActive()
 {
-    return CPreferences::GetUserPreferences().GetValue("LegacyViewerActive", true);
+    return CPreferences::GetUserPreferences().GetValue("LegacyViewerActive", false);
 }
 
 //==============================================================================
