@@ -253,7 +253,7 @@ bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
     if (!controlled) {
         // get the length of to-be-deleted controller - property string and
         // delete it from the overall controlledproperty
-        long posProp = cpStr.find(propName);
+        long posProp = cpStr.find(" " + propName);
 
         if (posProp == Q3DStudio::CString::ENDOFSTRING)
             return false;
@@ -264,7 +264,7 @@ bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
         if (posCtrlr < 0)
             posCtrlr = 0;
 
-        long deletableStrLen = (posProp + propName.Length()) - posCtrlr;
+        long deletableStrLen = (posProp + propName.Length()) - posCtrlr + 1;
 
         cpStr.Delete(posCtrlr, deletableStrLen);
 
