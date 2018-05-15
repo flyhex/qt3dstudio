@@ -39,37 +39,27 @@
   \b{Open...} - Open a \c{.uip} presentation or
   \c{.uia} application file to view.
 \li
-  \b{Connect...} - Show connection dialog to set up remote deployment connection.
+  \b{Open Without Profiling...} - Same as \uicontrol Open but with certain profiling related
+  features disabled in order to improve performance.
+\li
+  \b{Remote Setup} - Switches to the remote deployment settings screen with
+  instructions on how to remotely send presentations to this viewer.
 \li
   \b{Reload} - Restart the presentation/application from the
   beginning.
 \li
-  \b{Quit} - Quit the Viewer.
+  \b{Exit} - Quit the Viewer.
 \endlist
 
 \section1 View
 
 \list
 \li
-  \b{Show Matte} - Toggle the display of any letterboxed regions
-  (areas outside the initial presentation) as a gray matte. When
-  disabled, the clear color for the initial presentation is displayed
-  instead.
+  \b{Toggle Full Screen} - Switches to fullscreen mode. The menu bar may still
+  be visible, depending on the windowing system.
 \li
-  \b{Scale Mode} - Override the scale mode set by the
-  \l{file-formats-uia.html#application}{application}:
-  \image Runtime-ApplicationScaleMode.png
-\li
-  \b{Show Render Statistics} - Display debug information on top of
-  the viewer with information for recent average frame rate/frame time.
-\li
-  \b{Full Screen} - Remove the window for the viewer and use the
-  full screen for the application. (Whether or not the initial
-  presentation fills the screen or not depends on the
-  \l{studio-menu.html#project-settings}{presentation size}
-  and the scale mode, which is set via the application
-  \l{file-formats-uia.html#application}{scale mode setting}, or
-  Viewer override command (see \e{Scale Mode} above).
+  \b{Profile and Debug} - Submenu with options to show/hide the built-in, in-scene
+  profiling and information pane, and to control its scale factor.
 \endlist
 
 */

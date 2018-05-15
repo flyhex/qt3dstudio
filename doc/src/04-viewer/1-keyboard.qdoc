@@ -37,22 +37,22 @@
 \table
   \header
     \li Function
-    \li Windows/Linux
+    \li Windows
+    \li Linux
     \li macOS
   \row
     \li Open
     \li \c{Ctrl + O}
+    \li \c{Ctrl + O}
     \li \c{Cmd + O}
-  \row
-    \li Connect
-    \li \c{F9}
-    \li \c{F9}
   \row
     \li Reload
     \li \c{F5}
+    \li \c{Ctrl + R}
     \li \c{F5}
   \row
-    \li Quit
+    \li Exit
+    \li \c{Ctrl + Q}
     \li \c{Ctrl + Q}
     \li \c{Cmd + Q}
 \endtable
@@ -62,27 +62,22 @@
 \table
   \header
     \li Function
-    \li Windows/Linux
+    \li Windows
+    \li Linux
     \li macOS
-  \row
-    \li Show Matte
-    \li \c{Ctrl + D}
-    \li \c{Cmd + D}
-  \row
-    \li Scale Modes (cycle through)
-    \li \c{Ctrl + Shift + S}
-    \li \c{Cmd + Shift + S}
-  \row
-    \li Show Render Statistics
-    \li \c{F7}
-    \li \c{F7}
   \row
     \li Full Screen
     \li \c{F11}
+    \li \c{Ctrl + F11}
     \li \c{F11}
   \row
     \li
-    \li {2, 1} To exit full screen, \c {F11}, \c {ESC} or swipe down gesture can be used.
+    \li {3, 1} To exit full screen, \c {F11}, \c {ESC} or swipe down gesture can be used.
+  \row
+    \li Toggle debug view
+    \li \c{F10}
+    \li \c{F10}
+    \li \c{F10}
 \endtable
 
 */
