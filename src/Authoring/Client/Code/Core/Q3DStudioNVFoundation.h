@@ -35,6 +35,7 @@
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSAllocatorCallback.h"
 #include "foundation/Qt3DSRefCounted.h"
+#include <memory>
 
 #pragma once
 

@@ -34,8 +34,6 @@
 #define INCLUDED_IDOCUMENTBUFFERCACHE_H
 #include "Qt3DSFileTools.h"
 #include "StudioObjectTypes.h"
-#include "Qt3DSRender.h"
-#include "Qt3DSRenderImageTextureData.h"
 
 namespace qt3ds {
 namespace render {

@@ -28,11 +28,11 @@
 ****************************************************************************/
 
 #include <stdio.h>
-#include "foundation/Qt3DSFoundation.h"
-#include "foundation/IOStreams.h"
+#include "Qt3DSFoundation.h"
+#include "IOStreams.h"
 #include "foundation/StringConversionImpl.h"
 #include "EASTL/string.h"
-#include "foundation/Qt3DSVec3.h"
+#include "Qt3DSVec3.h"
 #include "Qt3DSImportMesh.h"
 
 using namespace qt3ds;

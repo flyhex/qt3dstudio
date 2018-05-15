@@ -45,8 +45,8 @@
 #include "Qt3DSDMDataCore.h"
 #include "DataCoreProducer.h"
 #include "Qt3DSDMWindowsCompatibility.h"
-#include "Qt3DSRenderEffectSystem.h"
-#include "Qt3DSRenderDynamicObjectSystemCommands.h"
+#include "render/Qt3DSRenderBaseTypes.h"
+#include "render/Qt3DSRenderDynamicObjectSystemCommands.h"
 #include "foundation/StringConversionImpl.h"
 
 #include <QtCore/qdir.h>

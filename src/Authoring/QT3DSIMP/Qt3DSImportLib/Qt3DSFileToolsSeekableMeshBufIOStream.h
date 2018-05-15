@@ -29,7 +29,7 @@
 #pragma once
 #ifndef QT3DS_FILETOOLSSEEKABLEMESHBUFIOSTREAM
 #define QT3DS_FILETOOLSSEEKABLEMESHBUFIOSTREAM
-#include "foundation/IOStreams.h"
+#include "IOStreams.h"
 
 namespace Q3DStudio {
 struct SFile;

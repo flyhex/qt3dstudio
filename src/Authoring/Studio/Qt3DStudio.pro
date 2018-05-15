@@ -105,8 +105,6 @@ STATICRUNTIME = \
 }
 
 LIBS += \
-      -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
-      -lqt3dsqmlstreamer$$qtPlatformTargetSuffix() \
        $$QMAKE_LIBS_FBX
 
 linux {
@@ -395,7 +393,6 @@ RESOURCES += \
     images.qrc
 
 PREDEPS_LIBS += \
-    qt3dsruntimestatic \
     QT3DSDM \
     CommonLib \
     CoreLib

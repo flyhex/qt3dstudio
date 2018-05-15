@@ -35,11 +35,11 @@
 #include "Qt3DSImportMesh.h"
 #include "Qt3DSDMXML.h"
 #include "Qt3DSDMStringTable.h"
-#include "foundation/IOStreams.h"
+#include "IOStreams.h"
 #include "render/NvRenderBaseTypes.h"
-#include "foundation/TrackingAllocator.h"
+#include "TrackingAllocator.h"
 #include "StandardExtensions.h"
-#include "foundation/Qt3DSLogging.h"
+#include "Qt3DSLogging.h"
 
 using namespace Q3DStudio;
 using namespace std;

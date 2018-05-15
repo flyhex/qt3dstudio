@@ -2,6 +2,7 @@ TEMPLATE = lib
 TARGET = CommonLib
 CONFIG += staticlib nostrictstrings
 include(../commoninclude.pri)
+include(../../shared/shared.pri)
 
 QT += widgets
 
@@ -26,8 +27,6 @@ INCLUDEPATH += \
     ../Client/Code/Core/Utility \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
-    ../../Runtime/Source/Qt3DSFoundation/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \
     ..
@@ -78,6 +77,6 @@ SOURCES += \
     Code/Memory/MemoryObject.cpp \
     Code/Serialize/FormattedInputStream.cpp \
     Code/Serialize/FormattedOutputStream.cpp \
-    Code/Serialize/PreferencesSerializer.cpp \
+    Code/Serialize/PreferencesSerializer.cpp
 
 HEADERS = Code/Literals.h

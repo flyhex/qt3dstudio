@@ -33,7 +33,7 @@
 #include <fbxsdk.h>
 #include "eastl/string.h"
 #include "foundation/FileTools.h"
-#include "foundation/IOStreams.h"
+#include "IOStreams.h"
 
 using namespace eastl;
 using namespace qt3ds;

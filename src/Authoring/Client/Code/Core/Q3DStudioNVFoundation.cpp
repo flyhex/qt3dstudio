@@ -28,6 +28,7 @@
 ****************************************************************************/
 
 #include "Qt3DSCommonPrecompile.h"
+
 #include "Q3DStudioNVFoundation.h"
 #include "foundation/TrackingAllocator.h"
 

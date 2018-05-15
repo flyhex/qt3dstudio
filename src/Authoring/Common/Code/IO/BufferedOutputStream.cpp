@@ -166,7 +166,7 @@ long CBufferedSeekOutputStream::Write(const void *inBuffer, const long inBufferL
 
     ::memcpy(&m_Buffer[m_BufferPosition], &theBuffer[theDataRead], theDataLeft);
     m_BufferPosition += theDataLeft;
-    m_BufferUsed = Q3DStudio::MAX(m_BufferUsed, m_BufferPosition);
+    m_BufferUsed = qMax(m_BufferUsed, m_BufferPosition);
 
     return inBufferLength;
 }

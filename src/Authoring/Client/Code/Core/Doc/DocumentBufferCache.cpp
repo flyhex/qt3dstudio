@@ -33,9 +33,9 @@
 #include "foundation/Qt3DS.h"
 #include "Qt3DSDMStringTable.h"
 #include "EASTL/hash_map.h"
-#include "Qt3DSRenderBufferManager.h"
+
 #include "foundation/StringTable.h"
-#include "Qt3DSRenderMesh.h"
+
 #include "Core.h"
 #include "Dispatch.h"
 #include "IDocSceneGraph.h"

@@ -30,7 +30,7 @@
 #define AMXSMARTPTRH
 #include <memory>
 #include "PlatformMacros.h"
-#include "Qt3DSAssert.h"
+#include "foundation/Qt3DSAssert.h"
 #ifdef WIN32
 #pragma warning(disable : 4284)
 #endif

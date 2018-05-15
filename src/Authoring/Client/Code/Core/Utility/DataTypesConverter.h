@@ -36,8 +36,8 @@
 #include "Vector2.h"
 #include "Rotation3.h"
 #include "Vector3.h"
-#include "foundation/Qt3DSVec2.h"
-#include "foundation/Qt3DSVec3.h"
+#include "Qt3DSVec2.h"
+#include "Qt3DSVec3.h"
 
 // Convenience functions to convert from CoreLibProject/Types Files to UICDMDataTypes
 inline qt3dsdm::SValue ConvertToSValue(const Q3DStudio::CVector2 &inValue)

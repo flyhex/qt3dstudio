@@ -49,35 +49,30 @@
 #include "Qt3DSImport.h"
 #include "Qt3DSFileTools.h"
 #include "StudioFullSystem.h"
-#include "foundation/Qt3DS.h"
-#include "foundation/Qt3DSAssert.h"
 #include "StudioCoreSystem.h"
 #include "IDocumentBufferCache.h"
 #include "Qt3DSImportMesh.h"
 #include "Qt3DSDMSlideGraphCore.h"
 #include "IComposerEditorInterface.h"
 #include "Qt3DSDMXML.h"
-#include "foundation/IOStreams.h"
+#include "IOStreams.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "Qt3DSDMMetaData.h"
-#include "DocumentResourceManagerScriptParser.h"
-#include "DocumentResourceManagerRenderPluginParser.h"
-#include "DocumentResourceManagerCustomMaterialParser.h"
+
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "IDirectoryWatchingSystem.h"
 #include "Qt3DSDMActionCore.h"
 #include "PresentationFile.h"
 #include "ActionSystem.h"
 #include "StandardExtensions.h"
-#include "Qt3DSRenderMesh.h"
-#include "Qt3DSRenderImage.h"
+
 #include "IDocSceneGraph.h"
-#include "Qt3DSTextRenderer.h"
+
 #include "foundation/Qt3DSFoundation.h"
 #include "Q3DStudioNVFoundation.h"
 #include "Qt3DSDMGuides.h"
-#include "Qt3DSRenderPathManager.h"
+
 #include "Qt3DSImportPath.h"
 #include "Dialogs.h"
 #include "foundation/Qt3DSLogging.h"
@@ -85,8 +80,8 @@
 #include <QtQml/qqmlcomponent.h>
 #include <QtCore/qdir.h>
 #include <unordered_set>
-#include "Runtime/Include/q3dsqmlbehavior.h"
-#include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
+#include "DataModelObjectReferenceHelper.h"
+
 
 namespace {
 

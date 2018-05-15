@@ -38,12 +38,26 @@
 #include "Cmd.h"
 #include "StudioConst.h"
 #include "StudioPreferences.h"
-#include "Qt3DSStateApplication.h"
-#include "StudioApp.h"
-#include "Views/Views.h"
-#include "MainFrm.h"
+
 #include <QtWidgets/qaction.h>
 
+#include "foundation/FileTools.h"
+#include "EASTL/vector.h"
+#include "foundation/IOStreams.h"
+#include "foundation/XML.h"
+
+#include <QtCore/qstringlist.h>
+
+typedef eastl::string TAppStr;
+
+using namespace qt3ds::foundation;
+using namespace qt3ds::state;
+using namespace eastl;
+
+static const int DI_SEC_SZ = 5; // Datainput section length in UIP file
+
+//==============================================================================
+// Construction
 CCore::CCore()
     : m_Doc(NULL)
     , m_Dispatch(new CDispatch())

@@ -33,7 +33,6 @@
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #endif
 #include "StudioApp.h"
-#include "Qt3DSStateApplication.h"
 #include "PlayerWnd.h"
 #include "DataInputDlg.h"
 #include "qtsingleapplication.h"
@@ -1670,7 +1669,6 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
 
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
     QByteArray docBA = doc.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list, subpresentations);
 
     if (subpresentations)
         g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);

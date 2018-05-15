@@ -28,7 +28,7 @@
 ****************************************************************************/
 #ifndef IDOC_SCENE_GRAPH_H
 #define IDOC_SCENE_GRAPH_H
-#include "Qt3DSRender.h"
+
 #include "Qt3DSDMHandles.h"
 #include "foundation/Qt3DSVec3.h"
 #include "Pt.h"
@@ -41,10 +41,14 @@ namespace foundation {
 #pragma once
 namespace Q3DStudio {
 using qt3ds::QT3DSVec3;
-using qt3ds::render::IBufferManager;
-using qt3ds::render::ITextRenderer;
-using qt3ds::render::SGraphObject;
-using qt3ds::render::IPathManager;
+class IBufferManager;
+class ITextRenderer
+{
+public:
+    void ReloadFonts();
+};
+class SGraphObject;
+class IPathManager;
 
 class IDocSceneGraph
 {

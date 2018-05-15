@@ -31,6 +31,7 @@
 
 #include "OptimizedArithmetic.h"
 #include "Matrix.h"
+#include "Qt3DSMath.h"
 
 #ifdef WIN32
 #include "cpuid.h"

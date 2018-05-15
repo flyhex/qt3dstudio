@@ -32,7 +32,6 @@
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMWStrOps.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
-#include "foundation/Qt3DSMemoryBuffer.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMAnimation.h"
 #include "Qt3DSDMMetaDataTypes.h"

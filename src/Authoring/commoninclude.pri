@@ -17,34 +17,16 @@ mingw:win32 {
     DEFINES += WIN32
 }
 
-INCLUDEPATH += $$PWD/../Runtime/Source
+INCLUDEPATH += $$PWD/../shared/header
 
-win32 {
+linux|qnx {
+QMAKE_CXXFLAGS += -fpermissive
+QMAKE_CFLAGS += -fpermissive
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Windows/PlatformLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/PlatformLibs \
-    $$PWD/../Runtime/Source/PlatformSpecific/Windows/Qt3DSLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/Qt3DSLibs
+    $$PWD/../shared/header/foundation/linux
 }
 
-linux {
+integrity {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Linux/PlatformLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/PlatformLibs \
-    $$PWD/../Runtime/Source/PlatformSpecific/Linux/Qt3DSLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/Qt3DSLibs
-}
-
-macos {
-INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Macos/PlatformLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Macos/PlatformLibs \
-    $$PWD/../Runtime/Source/PlatformSpecific/Macos/Qt3DSLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Macos/Qt3DSLibs
-
-}
-android {
-INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Android/jni/Qt3DSLibs
-    $$PWD/../Runtime/Source/PlatformSpecific/Android/jni/Qt3DSLibs/nv_thread
+    $$PWD/../shared/header/foundation/linux
 }

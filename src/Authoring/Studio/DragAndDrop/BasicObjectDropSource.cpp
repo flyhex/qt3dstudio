@@ -44,7 +44,6 @@
 #include "BasicObjectsModel.h"
 #include "IDragable.h"
 #include "IDocSceneGraph.h"
-#include "Qt3DSTextRenderer.h"
 #include "HotKeys.h"
 #include "StudioUtils.h"
 

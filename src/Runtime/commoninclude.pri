@@ -12,6 +12,9 @@ DEFINES += COMPILED_FROM_DSP \
     QT3DS_AUTOTESTS_ENABLED
 
 INCLUDEPATH += \
+    $$PWD/../shared/header
+
+INCLUDEPATH += \
     $$PWD/Source \
     $$PWD/Source/DataModel/Include \
     $$PWD/Source/Runtime/Include \

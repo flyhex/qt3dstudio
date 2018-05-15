@@ -60,7 +60,7 @@
 #include "IDocumentBufferCache.h"
 #include "StudioCoreSystem.h"
 #include "Qt3DSDMXML.h"
-#include "foundation/IOStreams.h"
+#include "IOStreams.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSFileTools.h"

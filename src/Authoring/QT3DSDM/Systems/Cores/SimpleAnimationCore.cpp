@@ -44,9 +44,9 @@ struct SPerfLogEvent
 
 typedef SPerfLogEvent TPerfLogMathEvent1;
 
-#include "Qt3DSCubicRoots.h"
-#include "Qt3DSCubicRootsImpl.h"
-#include "Qt3DSBezierEval.h"
+#include "foundation/Qt3DSCubicRoots.h"
+#include "foundation/Qt3DSBezierEval.h"
+
 using namespace std;
 
 namespace qt3dsdm {

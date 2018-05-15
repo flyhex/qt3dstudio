@@ -39,7 +39,7 @@
 #include "StudioCoreSystem.h"
 #include "StudioFullSystem.h"
 #include "Qt3DSDMXML.h"
-#include "foundation/IOStreams.h"
+#include "IOStreams.h"
 #include "StudioUtils.h"
 
 using namespace std;
