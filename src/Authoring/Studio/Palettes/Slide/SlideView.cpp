@@ -388,7 +388,7 @@ void SlideView::initialize()
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
 
-    m_dataInputSelector = new DataInputSelectView(this);
+    m_dataInputSelector = new DataInputSelectView(this, EDataType::DataTypeString);
     connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &SlideView::onDataInputChange);
 }

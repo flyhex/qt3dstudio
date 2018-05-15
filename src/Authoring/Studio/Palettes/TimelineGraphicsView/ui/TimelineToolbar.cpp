@@ -146,7 +146,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));
 
     // make datainput indicator listen to selection dialog choice
-    m_dataInputSelector = new DataInputSelectView(this);
+    m_dataInputSelector = new DataInputSelectView(this, EDataType::DataTypeRangedNumber);
     g_StudioApp.GetCore()->GetDispatch()->AddDataModelListener(this);
     connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &TimelineToolbar::onDataInputChange);

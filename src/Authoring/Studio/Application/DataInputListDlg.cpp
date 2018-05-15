@@ -42,11 +42,12 @@
 const int columnCount = 3;
 
 CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *datainputs,
-                                     bool goToAdd, QWidget *parent)
+                                     bool goToAdd, QWidget *parent, EDataType defaultType)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
     , m_goToAdd(goToAdd)
+    , m_defaultType(defaultType)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
     , m_sortColumn(-1)
@@ -230,12 +231,23 @@ void CDataInputListDlg::onAddDataInput()
 {
     // Create a new data input dialog item and give it to dialog
     CDataInputDialogItem *dataInput = new CDataInputDialogItem();
+    dataInput->type = m_defaultType;
     CDataInputDlg datainputdialog(&dataInput, m_tableContents, this);
-    if (datainputdialog.exec() == QDialog::Accepted)
+    datainputdialog.setWindowTitle("Add Data Input");
+    if (datainputdialog.exec() == QDialog::Accepted) {
         m_dataInputs.insert(dataInput->name, dataInput);
+        m_mostRecentlyAdded = dataInput->name;
+    } else {
+        m_mostRecentlyAdded.clear();
+    }
 
     updateButtons();
     updateContents();
+
+    // If we went straight to adding a new datainput, close
+    // dialog automatically
+    if (m_goToAdd)
+        on_buttonBox_accepted();
 }
 
 void CDataInputListDlg::onRemoveDataInput()

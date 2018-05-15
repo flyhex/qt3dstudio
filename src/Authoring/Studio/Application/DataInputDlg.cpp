@@ -105,6 +105,7 @@ void CDataInputDlg::initDialog()
 #endif
     } else {
         m_name = getUniqueId(tr("newDataInput"));
+        m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
         m_ui->lineEditInputName->setText(m_name);
     }
 

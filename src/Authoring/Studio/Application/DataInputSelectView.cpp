@@ -38,9 +38,11 @@
 #include "DataInputDlg.h"
 #include "StudioApp.h"
 
-DataInputSelectView::DataInputSelectView(QWidget *parent)
+DataInputSelectView::DataInputSelectView(QWidget *parent, EDataType defaultType)
     : QQuickWidget(parent)
     , m_model(new DataInputSelectModel(this))
+    , m_defaultType(defaultType)
+
 {
     setWindowTitle(tr("Datainputs"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
@@ -131,11 +133,16 @@ void DataInputSelectView::setSelection(int index)
             Q_EMIT dataInputChanged(m_handle, m_instance, sel);
             Q_EMIT selectedChanged();
         } else {
-            CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true);
+            CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true,
+                                           nullptr, m_defaultType);
             dataInputDlg.exec();
 
-            if (dataInputDlg.result() == QDialog::Accepted)
+            if (dataInputDlg.result() == QDialog::Accepted) {
+                m_mostRecentlyAdded = dataInputDlg.getAddedDataInput();
+                if (m_mostRecentlyAdded.size())
+                    Q_EMIT dataInputChanged(m_handle, m_instance, m_mostRecentlyAdded);
                 g_StudioApp.SaveUIAFile(false);
+            }
         }
         QTimer::singleShot(0, this, &DataInputSelectView::close);
     }
