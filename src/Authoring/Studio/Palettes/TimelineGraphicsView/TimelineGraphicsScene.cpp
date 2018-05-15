@@ -269,22 +269,6 @@ void TimelineGraphicsScene::commitMoveRows()
     // updating the UI happens in TimelineWidget.onChildAdded()
 }
 
-// TODO: not used, remove
-bool TimelineGraphicsScene::lastRowInAParent(RowTree *rowAtIndex, int index)
-{
-    int depth = nextRowDepth(index);
-
-    return depth == -1 || depth < rowAtIndex->depth();
-}
-
-// not used except in lastRowInAParent()
-int TimelineGraphicsScene::nextRowDepth(int index) {
-    if (index < m_layoutTree->count() - 1)
-        index ++;
-
-    return static_cast<RowTree *>(m_layoutTree->itemAt(index)->graphicsItem())->depth();
-}
-
 void TimelineGraphicsScene::updateTreeWidth(double treeWidth)
 {
     if (m_treeWidth != treeWidth) {
@@ -728,7 +712,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
 // Used at least for skipping PlayHead and RowTreeLabelItem
 QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType type,
                                                        QGraphicsItem *item,
-                                                       const QPointF &scenePos)
+                                                       const QPointF &scenePos) const
 {
     if (item->type() == type) {
         const QList<QGraphicsItem *> hoverItems = items(scenePos);

@@ -134,10 +134,11 @@ private:
     void updateLabelPosition();
     void updateIndices(bool isInsertion, int startIndex, int startIndexInLayout, bool isProperty);
     bool hasActionButtons() const;
-    bool hasComponentAncestor();
+    bool hasComponentAncestor() const;
     int removeChildFromLayout(RowTree *child) const;
     int getCountDecendentsRecursive() const;
     int addChildToLayout(RowTree *child, int indexInLayout);
+    int getLastChildIndex(bool isProperty) const;
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
@@ -147,12 +148,12 @@ private:
     bool m_shy = false;
     bool m_visible = true;
     bool m_locked = false;
-    ExpandState m_expandState = ExpandState::HiddenCollapsed;
     bool m_moveSource = false;
     bool m_moveTarget = false;
     bool m_isProperty = false;
     bool m_isPropertyExpanded = false;
     bool m_master = false;
+    ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
     EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;

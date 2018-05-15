@@ -450,13 +450,19 @@ int RowTree::indexInLayout() const
 
 void RowTree::addChild(RowTree *child)
 {
-    int index = 0;
-    if (child->isProperty() && !m_childProps.empty())
-        index = m_childProps.last()->index() + 1;
-    else if (!child->isProperty() && !m_childRows.empty())
-        index = m_childRows.last()->index() + 1;
-
+    int index = getLastChildIndex(child->isProperty()) + 1;
     addChildAt(child, index);
+}
+
+int RowTree::getLastChildIndex(bool isProperty) const
+{
+    int index = -1;
+    if (isProperty && !m_childProps.empty())
+        index = m_childProps.last()->index();
+    else if (!isProperty && !m_childRows.empty())
+        index = m_childRows.last()->index();
+
+    return index;
 }
 
 int RowTree::getCountDecendentsRecursive() const
@@ -475,6 +481,11 @@ void RowTree::addChildAt(RowTree *child, int index)
 {
     // Mahmoud_TODO: improvement: implement moving the child (instead of remove/add) if it is added
     //               under the same parent.
+
+    int maxIndex = getLastChildIndex(child->isProperty()) + 1;
+
+    if (index > maxIndex)
+        index = maxIndex;
 
     if (child->parentRow() == this && index == child->m_index) // same place
         return;
@@ -935,7 +946,7 @@ bool RowTree::hasActionButtons() const
             && m_rowType != OBJTYPE_IMAGE);
 }
 
-bool RowTree::hasComponentAncestor()
+bool RowTree::hasComponentAncestor() const
 {
     RowTree *parentRow = m_parentRow;
     while (parentRow) {

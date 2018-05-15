@@ -98,11 +98,9 @@ private:
     void commitMoveRows();
     void updateHoverStatus(const QPointF &scenePos);
     void snap(double &value, bool snapToPlayHead = true);
-    int nextRowDepth(int index);
-    bool lastRowInAParent(RowTree *rowAtIndex, int index);
     QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
                                     QGraphicsItem *item,
-                                    const QPointF &scenePos);
+                                    const QPointF &scenePos) const;
     void handleInsertKeyframe();
     void handleDeleteChannelKeyframes();
     void handleSetTimeBarTime();
