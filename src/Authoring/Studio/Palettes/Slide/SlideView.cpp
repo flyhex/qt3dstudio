@@ -507,10 +507,10 @@ void SlideView::OnImmediateRefreshInstanceMultiple(
 void SlideView::UpdateSlideViewTitleColor() {
     QString styleString;
     if (m_controlled) {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#slide { color: "
                 + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     } else {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#slide { color: "
                 + QString(CStudioPreferences::textColor().name()) + "; }";
     }
 

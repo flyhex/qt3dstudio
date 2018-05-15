@@ -402,10 +402,10 @@ void TimelineToolbar::updateTimelineTitleColor(bool controlled)
 {
     QString styleString;
     if (controlled) {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#timeline { color: "
                 + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     } else {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#timeline { color: "
                 + QString(CStudioPreferences::textColor().name()) + "; }";
     }
 
