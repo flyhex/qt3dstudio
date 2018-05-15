@@ -1972,15 +1972,19 @@ bool CDoc::CanCut()
  * Makes a copy of the currently selected item (if there is one) and attaches
  * it to the same parent as the original.
  */
-void CDoc::HandleDuplicateCommand()
+void CDoc::HandleDuplicateCommand(bool slide)
 {
+    using namespace Q3DStudio;
     qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+    CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    qt3dsdm::Qt3DSDMSlideHandle slideHandle = GetActiveSlide();
 
-    // If we have a valid object to duplicate
-    if (m_StudioSystem->GetClientDataModelBridge()->IsDuplicateable(theSelectedInstance)) {
-        using namespace Q3DStudio;
+    // If we have a non-master slide or a valid object to duplicate
+    if (slide && slideHandle != m_StudioSystem->GetSlideSystem()->GetMasterSlide(slideHandle)) {
+        SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Duplicate Slide"))->DuplicateSlide(slideHandle);
+    } else if (bridge->IsDuplicateable(theSelectedInstance)) {
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Duplicate Object"))
-                ->DuplicateInstance(GetSelectedInstance());
+                ->DuplicateInstance(theSelectedInstance);
     }
 }
 

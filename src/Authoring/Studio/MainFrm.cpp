@@ -682,7 +682,7 @@ void CMainFrame::OnUpdateTimelineSetInterpolation()
  */
 void CMainFrame::OnEditDuplicate()
 {
-    g_StudioApp.HandleDuplicateCommand();
+    g_StudioApp.HandleDuplicateCommand(m_slideActive);
 }
 
 //==============================================================================
@@ -695,7 +695,7 @@ void CMainFrame::OnEditDuplicate()
  */
 void CMainFrame::OnUpdateEditDuplicate()
 {
-    m_ui->action_Duplicate_Object->setEnabled(g_StudioApp.CanDuplicateObject());
+    m_ui->action_Duplicate_Object->setEnabled(m_slideActive || g_StudioApp.CanDuplicateObject());
 }
 
 //=============================================================================
@@ -1950,7 +1950,7 @@ void CMainFrame::toggleSelectMode()
         m_sceneView->onToolItemSelection();
 }
 
-void CMainFrame::actionActive(bool active)
+void CMainFrame::onActionActive(bool active)
 {
     m_actionActive = active;
     m_ui->actionDelete->setEnabled(!active);
@@ -1965,4 +1965,9 @@ void CMainFrame::showScene()
         m_sceneView.data()->setVisible(true);
         setCentralWidget(m_sceneView.data());
     }
+}
+
+void CMainFrame::onSlideActive(bool active)
+{
+    m_slideActive = active;
 }

@@ -167,7 +167,7 @@ public:
     void HandleSetChangedKeys();
     void DeleteSelectedKeys();
     void DeleteSelectedObject();
-    void HandleDuplicateCommand();
+    void HandleDuplicateCommand(bool slide = false);
     bool CanDuplicateObject();
     void OnToggleAutosetKeyframes();
     void SetAutosetKeyframes(bool inFlag);

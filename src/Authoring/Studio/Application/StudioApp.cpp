@@ -1041,9 +1041,9 @@ void CStudioApp::DeleteSelectedObject()
 /**
  * Handles the duplicate object command
  */
-void CStudioApp::HandleDuplicateCommand()
+void CStudioApp::HandleDuplicateCommand(bool slide)
 {
-    m_core->GetDoc()->HandleDuplicateCommand();
+    m_core->GetDoc()->HandleDuplicateCommand(slide);
 }
 
 //=============================================================================

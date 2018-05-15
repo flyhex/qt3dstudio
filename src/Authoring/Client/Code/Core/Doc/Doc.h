@@ -255,7 +255,7 @@ public:
     bool CanPaste(); // for objects or keyframes or actions
     bool CanCopy(); // for objects or keyframes or actions
     bool CanCut(); // for objects or keyframes or actions
-    void HandleDuplicateCommand();
+    void HandleDuplicateCommand(bool slide = false);
 
     bool VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset);
 

@@ -240,8 +240,9 @@ public:
     void initializeGeometryAndState();
 
     void toggleSelectMode();
-    void actionActive(bool active);
+    void onActionActive(bool active);
     void showScene();
+    void onSlideActive(bool active);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -261,6 +262,7 @@ protected:
 
     bool m_playbackFlag = false;
     bool m_actionActive = false;
+    bool m_slideActive = false;
     bool m_resettingLayout = false;
 };
 

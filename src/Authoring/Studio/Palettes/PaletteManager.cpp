@@ -93,6 +93,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     auto slideView = new SlideView(m_slideDock);
     slideView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_slideDock->setWidget(slideView);
+    QObject::connect(slideView, &SlideView::slideFocused,
+                     m_MainFrame, &CMainFrame::onSlideActive);
     inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_SLIDE, m_slideDock));
 
@@ -140,7 +142,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     actionView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_actionDock->setWidget(actionView);
     QObject::connect(actionView, &ActionView::actionFocused,
-                     m_MainFrame, &CMainFrame::actionActive);
+                     m_MainFrame, &CMainFrame::onActionActive);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_actionDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, m_actionDock));
 
