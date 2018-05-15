@@ -38,7 +38,7 @@
 
 const int columnCount = 3;
 
-CDataInputListDlg::CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs,
+CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *datainputs,
                                      bool goToAdd, QWidget *parent)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputListDlg)
@@ -89,8 +89,9 @@ void CDataInputListDlg::initDialog()
 {
     // Copy given list to our internal one. We want to commit to the changes only after "Ok"
     // has been pressed.
-    for (int i = 0; i < m_actualDataInputs->count(); ++i)
-        m_dataInputs.append(m_actualDataInputs->at(i));
+    const auto keys = m_actualDataInputs->keys();
+    for (auto name : keys)
+        m_dataInputs.insert(name, m_actualDataInputs->value(name));
 
     // Check available list. If there are none, disable "Remove" and "Edit" buttons
     updateButtons();
@@ -148,16 +149,17 @@ void CDataInputListDlg::updateContents()
     m_tableContents->setHorizontalHeaderLabels(labels);
 
     QList<QStandardItem *> dataInput;
-    for (int i = 0; i < m_dataInputs.count(); ++i) {
+
+    for (auto it : qAsConst(m_dataInputs)) {
         dataInput.clear();
-        dataInput.append(new QStandardItem(m_dataInputs.at(i)->name));
-        int dataInputType = m_dataInputs.at(i)->type;
+        dataInput.append(new QStandardItem(it->name));
+        int dataInputType = it->type;
         if (dataInputType == DataTypeRangedNumber) {
             dataInput.append(new QStandardItem(tr("Ranged Number")));
             QString expression = QStringLiteral("[ ")
-                    + QString::number(m_dataInputs.at(i)->minValue)
+                    + QString::number(it->minValue)
                     + QStringLiteral(" ... ")
-                    + QString::number(m_dataInputs.at(i)->maxValue)
+                    + QString::number(it->maxValue)
                     + QStringLiteral(" ]");
             dataInput.append(new QStandardItem(expression));
         } else if (dataInputType == DataTypeString) {
@@ -208,9 +210,9 @@ void CDataInputListDlg::on_buttonBox_accepted()
 {
     m_actualDataInputs->clear();
 
-    for (int i = 0; i < m_dataInputs.count(); ++i)
-        m_actualDataInputs->append(m_dataInputs.at(i));
-
+    const auto keys = m_dataInputs.keys();
+    for (auto name : keys)
+        m_actualDataInputs->insert(name, m_dataInputs.value(name));
     QDialog::accept();
 }
 
@@ -225,7 +227,7 @@ void CDataInputListDlg::onAddDataInput()
     CDataInputDialogItem *dataInput = new CDataInputDialogItem();
     CDataInputDlg datainputdialog(&dataInput, m_tableContents, this);
     if (datainputdialog.exec() == QDialog::Accepted)
-        m_dataInputs.append(dataInput);
+        m_dataInputs.insert(dataInput->name, dataInput);
 
     updateButtons();
     updateContents();
@@ -244,7 +246,8 @@ void CDataInputListDlg::onRemoveDataInput()
         if (removedRows.size() > 0) {
             std::sort(removedRows.begin(), removedRows.end());
             for (int i = removedRows.size() - 1; i >= 0; --i)
-                m_dataInputs.removeAt(removedRows[i]);
+                m_dataInputs.remove(
+                            m_tableContents->item(removedRows[i])->data(Qt::EditRole).toString());
 
             m_ui->tableView->clearSelection();
             m_currentDataInputIndex = -1;
@@ -258,16 +261,12 @@ void CDataInputListDlg::onRemoveDataInput()
 void CDataInputListDlg::onEditDataInput()
 {
     if (m_currentDataInputIndex >= 0) {
-        int index = 0;
-        for (int i = 0; i < m_dataInputs.size(); ++i) {
-            auto dataInput = m_dataInputs.at(i);
-            index = i;
-            if (dataInput->name == m_currentDataInputName)
-                break;
-        }
-        CDataInputDlg datainputdialog(&m_dataInputs[index], m_tableContents, this);
+        CDataInputDialogItem *di = m_dataInputs.value(m_currentDataInputName);
+        CDataInputDlg datainputdialog(&di, m_tableContents, this);
         datainputdialog.exec();
 
+        // insert replaces the previous key - value pair
+        m_dataInputs.insert(m_currentDataInputName, di);
         updateButtons();
         updateContents();
 

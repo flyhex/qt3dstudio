@@ -506,13 +506,11 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
         = propertySystem->GetDataType(handle);
     // only add datainputs with matching type for this property
     QVector<QPair<QString, int>> dataInputList;
-    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
-        if (CDataInputDlg::isEquivalentDataType(
-            g_StudioApp.m_dataInputDialogItems[i]->type, dataType)) {
-            dataInputList.append(QPair<QString, int>(g_StudioApp.m_dataInputDialogItems[i]->name,
-                                                     g_StudioApp.m_dataInputDialogItems[i]->type));
-        }
-        }
+
+    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
+        if (CDataInputDlg::isEquivalentDataType(it->type, dataType))
+            dataInputList.append(QPair<QString, int>(it->name, it->type));
+    }
 
     m_dataInputChooserView->
             setData(dataInputList,

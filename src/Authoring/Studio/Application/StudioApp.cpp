@@ -319,6 +319,7 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
     // Dispatch registration
     m_core->GetDispatch()->AddAppStatusListener(this);
     m_core->GetDispatch()->AddCoreAsynchronousEventListener(this);
+    m_core->GetDispatch()->AddFailListener(this);
 
     // Initialize autosave
     m_autosaveTimer->setInterval(CStudioPreferences::GetAutoSaveDelay() * 1000);
@@ -1569,6 +1570,12 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
 
     m_core->GetDispatch()->FireAuthorZoomChanged();
 
+    QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> map;
+    m_core->GetDoc()->VerifyDatainputs(m_core->GetDoc()->GetActiveRootInstance(), map);
+
+    if (!map.empty())
+        m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
+
     return theLoadResult;
 }
 
@@ -1765,6 +1772,17 @@ void CStudioApp::OnPresentationModifiedExternally()
         Qt3DSFile theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);
     }
+}
+
+void CStudioApp::OnUndefinedDatainputsFail(
+        const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                       qt3dsdm::Qt3DSDMPropertyHandle>> &map)
+{
+    bool res = m_dialogs->DisplayUndefinedDatainputDlg(map);
+
+    // Delete invalid datainput bindings if user prompted so
+    if (res)
+        m_core->GetDoc()->RemoveDatainputBindings(map);
 }
 
 void CStudioApp::toggleEyeball()

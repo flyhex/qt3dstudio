@@ -150,6 +150,7 @@ public:
     float maxValue;
     QString name;
     int type;
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> controlledElems;
 };
 
 //==============================================================================
@@ -190,10 +191,17 @@ public:
     void SaveDocument(const Qt3DSFile &inDocument);
     void CreateNewDocument();
     QString GetDocumentUIAFile(bool master = false);
+    // In outMap, returns datainput names found from element control
+    // bindings but which are missing from (UIP) datainput list
+    void VerifyDatainputs(
+            const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+            QMultiMap<QString,
+                      QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                            qt3dsdm::Qt3DSDMPropertyHandle>> &outMap);
     void LoadUIASubpresentations(const QString &uiaFile,
                                  QVector<SubPresentationRecord> &subpresentations);
     void LoadUIADataInputs(const QString &uiaFile,
-                           QVector<CDataInputDialogItem *> &datainputs);
+                           QMap<QString, CDataInputDialogItem *> &datainputs);
     void LoadUIAInitialPresentationFilename(const QString &uiaFile,
                                             QString &initialPresentation);
 
@@ -301,7 +309,11 @@ public:
                                        Q3DStudio::CString instancepath,
                                        qt3dsdm::Qt3DSDMPropertyHandle propName,
                                        Q3DStudio::CString controller,
-                                       bool controlled) override;
+                                       bool controlled, bool batch = false) override;
+
+    void RemoveDatainputBindings(
+            const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                           qt3dsdm::Qt3DSDMPropertyHandle>> &map) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,

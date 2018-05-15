@@ -57,8 +57,12 @@
 #include <QtWidgets/qmessagebox.h>
 #include <QtCore/qstandardpaths.h>
 #include <QtWidgets/qdesktopwidget.h>
+#include <QtWidgets/qpushbutton.h>
 #include <QtGui/qscreen.h>
-
+#include <QtWidgets/qlayout.h>
+#include <QtWidgets/qdialogbuttonbox.h>
+#include <QtWidgets/qlabel.h>
+#include <QtWidgets/qstyle.h>
 #include <iostream>
 
 namespace {
@@ -358,6 +362,67 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMsgText;
     }
+}
+
+// Inform user that UIP file contained datainput bindings for datainput names not found
+// from UIA file. Returns true if user wants to delete invalid datainput bindings
+// automatically
+bool CDialogs::DisplayUndefinedDatainputDlg(
+        const QMultiMap<QString,
+                        QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                              qt3dsdm::Qt3DSDMPropertyHandle>> &map)
+{
+    const auto keys = map.uniqueKeys();
+    QString theTitle = QObject::tr("Missing Data Input");
+    QLabel *theText = new QLabel;
+    int keysSize = keys.size();
+    if (keysSize > 1) {
+        theText->setText(QObject::tr("Could not find Data Inputs. %1 Data Inputs missing.")
+                    .arg(keysSize));
+    } else {
+        theText->setText(QObject::tr("Could not find Data Input. %1 Data Input missing.")
+                    .arg(keysSize));
+    }
+
+    QString theSmallText;
+    for (auto it : keys)
+        theSmallText.append(it + "\n");
+
+    QLabel *diList = new QLabel(theSmallText);
+    theText->setIndent(10);
+    diList->setIndent(20);
+
+    QIcon warn(QApplication::style()->standardIcon(QStyle::SP_MessageBoxWarning));
+    QLabel *warnLab = new QLabel();
+    const int size = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
+    warnLab->setPixmap(warn.pixmap(QSize(size, size)));
+
+    QDialog msgBox(g_StudioApp.m_pMainWnd, Qt::WindowCloseButtonHint | Qt::WindowTitleHint
+                   | Qt::MSWindowsFixedSizeDialogHint);
+    QGridLayout *layout = new QGridLayout();
+
+    layout->addWidget(warnLab, 1, 1);
+    layout->addWidget(theText, 1, 2);
+
+    QPushButton *ok = new QPushButton(QObject::tr("Clear all bindings now"));
+    QPushButton *cancel = new QPushButton(QObject::tr("I'll replace bindings manually"));
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
+    buttonBox->addButton(ok, QDialogButtonBox::AcceptRole);
+    buttonBox->addButton(cancel, QDialogButtonBox::RejectRole);
+    layout->addWidget(buttonBox, 3, 1, 1, 3, Qt::AlignCenter);
+    layout->addWidget(diList, 2, 2);
+
+    msgBox.setLayout(layout);
+
+    msgBox.setWindowTitle(theTitle);
+
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, &msgBox, &QDialog::accept);
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, &msgBox, &QDialog::reject);
+
+    auto res = msgBox.exec();
+
+    return res == QDialog::Accepted ? true : false;
 }
 
 QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)

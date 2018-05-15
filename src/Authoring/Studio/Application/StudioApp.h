@@ -224,6 +224,10 @@ public:
     void OnErrorFail(const Q3DStudio::CString &inText) override;
     void OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
                                const Q3DStudio::CString &inDescription) override;
+    void OnUndefinedDatainputsFail(
+            const QMultiMap<QString,
+                            QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> &map) override;
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
@@ -232,7 +236,7 @@ public:
     Q3DStudio::CString m_pszHelpFilePath;
 
     QVector<SubPresentationRecord> m_subpresentations;
-    QVector<CDataInputDialogItem *> m_dataInputDialogItems;
+    QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
     void SaveUIAFile(bool subpresentations = true);
 };

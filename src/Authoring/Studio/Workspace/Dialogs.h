@@ -157,6 +157,11 @@ public:
     bool DisplayResetKeyframeValuesDlg();
     void DisplayPasteFailed();
 
+    bool DisplayUndefinedDatainputDlg(
+            const QMultiMap<QString,
+                            QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> &map);
+
     static void DisplayGLVersionError(const Q3DStudio::CString &inGLVersion,
                                       const Q3DStudio::CString &inMinVersion);
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
