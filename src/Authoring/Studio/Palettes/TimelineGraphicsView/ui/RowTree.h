@@ -137,7 +137,7 @@ private:
     bool hasComponentAncestor() const;
     int removeChildFromLayout(RowTree *child) const;
     int getCountDecendentsRecursive() const;
-    int addChildToLayout(RowTree *child, int indexInLayout);
+    int addToLayout(int indexInLayout);
     int getLastChildIndex(bool isProperty) const;
 
     RowTree *m_parentRow = nullptr;

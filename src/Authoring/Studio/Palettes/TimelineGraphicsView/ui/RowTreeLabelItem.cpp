@@ -96,6 +96,9 @@ void RowTreeLabelItem::paint(QPainter *painter,
                              const QStyleOptionGraphicsItem *option,
                              QWidget *widget)
 {
+    if (!m_rowTree->y()) // prevents flickering when the row is just inserted to the layout
+        return;
+
     // Remove the HasFocus style state, to prevent the dotted line from being drawn.
     QStyleOptionGraphicsItem *style = const_cast<QStyleOptionGraphicsItem *>(option);
     style->state &= ~QStyle::State_HasFocus;

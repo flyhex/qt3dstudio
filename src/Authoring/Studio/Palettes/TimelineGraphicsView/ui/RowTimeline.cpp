@@ -64,7 +64,10 @@ RowTimeline::~RowTimeline()
 
 void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    Q_UNUSED(option);
+    Q_UNUSED(option)
+
+    if (!y()) // prevents flickering when the row is just inserted to the layout
+        return;
 
     if (isColorProperty() && !m_keyframes.empty()) {
         drawColorPropertyGradient(painter, widget->width());

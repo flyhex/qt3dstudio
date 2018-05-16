@@ -161,6 +161,12 @@ void RowTree::animateExpand(ExpandState state)
 
 void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
+    if (!y()) // prevents flickering when the row is just inserted to the layout
+        return;
+
     static const int ICON_SIZE = 16;
     const int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP;
     const int iconY = (TimelineConstants::ROW_H / 2) - (ICON_SIZE / 2);
@@ -519,32 +525,25 @@ void RowTree::addChildAt(RowTree *child, int index)
     }
 
     // update the layout
-    m_scene->layoutTree()->insertItem(child->m_indexInLayout, child);
-    m_scene->layoutTimeline()->insertItem(child->m_indexInLayout, child->rowTimeline());
-
-    int indexInLayout = child->m_indexInLayout + 1;
-    for (auto p : qAsConst(child->m_childProps))
-        indexInLayout = child->addChildToLayout(p, indexInLayout);
-
-    for (auto c : qAsConst(child->m_childRows))
-        indexInLayout = child->addChildToLayout(c, indexInLayout);
+    child->addToLayout(child->m_indexInLayout);
 
     // update indices
     updateIndexInLayout = std::min(updateIndexInLayout, child->m_indexInLayout);
     updateIndices(true, child->m_index + 1, updateIndexInLayout, child->isProperty());
 }
 
-int RowTree::addChildToLayout(RowTree *child, int indexInLayout)
+int RowTree::addToLayout(int indexInLayout)
 {
-    m_scene->layoutTree()->insertItem(indexInLayout, child);
-    m_scene->layoutTimeline()->insertItem(indexInLayout, child->rowTimeline());
+    m_scene->layoutTree()->insertItem(indexInLayout, this);
+    m_scene->layoutTimeline()->insertItem(indexInLayout, rowTimeline());
+
     indexInLayout++;
 
-    for (auto p : qAsConst(child->m_childProps))
-        indexInLayout = child->addChildToLayout(p, indexInLayout);
+    for (auto p : qAsConst(m_childProps))
+        indexInLayout = p->addToLayout(indexInLayout);
 
-    for (auto c : qAsConst(child->m_childRows))
-        indexInLayout = child->addChildToLayout(c, indexInLayout);
+    for (auto c : qAsConst(m_childRows))
+        indexInLayout = c->addToLayout(indexInLayout);
 
     return indexInLayout;
 }
