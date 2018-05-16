@@ -137,6 +137,7 @@ private:
     double m_pressPosInKeyframe;
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
     TExpandMap m_expandMap;
+    RowTree *m_releaseSelectRow = nullptr;
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H

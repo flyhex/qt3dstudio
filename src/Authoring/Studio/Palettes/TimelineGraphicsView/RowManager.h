@@ -68,6 +68,7 @@ public:
                        int index = -1);
     RowTree *rowAt(int idx);
     RowTree *selectedRow() const;
+    bool isRowSelected(RowTree *row) const;
     QVector<RowTree *> selectedRows() const;
     RowTimeline *rowTimelineAt(int idx);
 

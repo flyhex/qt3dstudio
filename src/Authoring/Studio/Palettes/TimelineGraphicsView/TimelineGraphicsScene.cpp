@@ -300,12 +300,13 @@ void TimelineGraphicsScene::resetMouseCursor()
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
+        m_releaseSelectRow = nullptr;
         m_dragging = false;
         m_pressPos = event->scenePos();
         QGraphicsItem *item = itemAt(m_pressPos, QTransform());
+        const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
         if (item) {
             item = getItemBelowType(TimelineItem::TypePlayHead, item, m_pressPos);
-
             if (item->type() == TimelineItem::TypeRuler) {
                 m_rulerPressed = true;
                 double time = m_ruler->distanceToTime(event->scenePos().x()
@@ -318,22 +319,26 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                        || item->type() == TimelineItem::TypeRowTreeLabelItem) {
                 item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
                 RowTree *rowTree = static_cast<RowTree *>(item);
-                if (!rowTree->isProperty()) {
-                    m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
-                    if (m_clickedTreeControlType == TreeControlType::Shy
-                            || m_clickedTreeControlType == TreeControlType::Hide
-                            || m_clickedTreeControlType == TreeControlType::Lock) {
-                        m_rowManager->updateFiltering(rowTree);
-                    } else if (rowTree->draggable()) {
-                        m_rowMover->start(rowTree);
+                m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
+                if (m_clickedTreeControlType == TreeControlType::Shy
+                        || m_clickedTreeControlType == TreeControlType::Hide
+                        || m_clickedTreeControlType == TreeControlType::Lock) {
+                    m_rowManager->updateFiltering(rowTree);
+                } else {
+                    // Prepare to change selection to single selection at release if a multiselected
+                    // row is clicked without ctrl.
+                    if (!ctrlKeyDown && m_rowManager->isRowSelected(rowTree)
+                            && !m_rowManager->isSingleSelected() ) {
+                        m_releaseSelectRow = rowTree;
                     }
+                    m_rowManager->selectRow(rowTree, ctrlKeyDown);
+                    if (rowTree->draggable())
+                        m_rowMover->start(rowTree);
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
                 m_editedTimelineRow = static_cast<RowTimeline *>(item);
                 Keyframe *keyframe = m_editedTimelineRow->getClickedKeyframe(m_pressPos);
                 if (keyframe) {  // pressed a keyframe
-                    const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
-
                     if (ctrlKeyDown && keyframe->selected()) {
                         if (m_editedTimelineRow->rowTree()->isProperty())
                             m_keyframeManager->deselectKeyframe(keyframe);
@@ -362,6 +367,12 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     if (m_clickedTimelineControlType == TimelineControlType::None)
                         m_selectionRect->start(m_pressPos);
                     else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+                        if (!ctrlKeyDown
+                                && m_rowManager->isRowSelected(m_editedTimelineRow->rowTree())
+                                && !m_rowManager->isSingleSelected() ) {
+                            m_releaseSelectRow = m_editedTimelineRow->rowTree();
+                        }
+                        m_rowManager->selectRow(m_editedTimelineRow->rowTree(), ctrlKeyDown);
                         m_editedTimelineRow->startDurationMove(
                             // click position in ruler space
                             m_pressPos.x() - m_ruler->x());
@@ -515,26 +526,8 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 
 void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
     if (event->button() == Qt::LeftButton) {
-        QGraphicsItem *item = itemAt(event->scenePos(), QTransform());
-
-        if (item && !m_dragging) {
-            item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
-            item = getItemBelowType(TimelineItem::TypePlayHead, item, m_pressPos);
-            // select pressed row
-            RowTree *rowTree = nullptr;
-            if (item->type() == TimelineItem::TypeRowTree)
-                rowTree = static_cast<RowTree *>(item);
-            else if (item->type() == TimelineItem::TypeRowTimeline)
-                rowTree = static_cast<RowTimeline *>(item)->rowTree();
-
-            if (rowTree && m_clickedTreeControlType == TreeControlType::None
-                    && !rowTree->locked()) {
-                m_rowManager->selectRow(rowTree, ctrlKeyDown);
-            }
-
-        } else if (m_rowMover->isActive()) { // moving rows (reorder/reparent)
+        if (m_dragging && m_rowMover->isActive()) { // moving rows (reorder/reparent)
             commitMoveRows();
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
@@ -554,7 +547,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
-        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+        } else if (m_dragging && m_clickedTimelineControlType == TimelineControlType::Duration) {
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->OffsetTime(m_editedTimelineRow->getDurationMoveTime() * 1000);
@@ -562,6 +555,10 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
+        } else if (m_releaseSelectRow || !itemAt(event->scenePos(), QTransform())) {
+            m_rowManager->selectRow(nullptr);
+            if (m_releaseSelectRow)
+                m_rowManager->selectRow(m_releaseSelectRow);
         }
 
         // reset mouse press params
@@ -572,6 +569,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         m_keyframePressed = false;
         m_clickedTimelineControlType = TimelineControlType::None;
         m_editedTimelineRow = nullptr;
+        m_releaseSelectRow = nullptr;
     }
 
     QGraphicsScene::mouseReleaseEvent(event);

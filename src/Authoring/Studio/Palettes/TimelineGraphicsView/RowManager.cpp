@@ -193,7 +193,12 @@ RowTimeline *RowManager::rowTimelineAt(int idx)
 // Call this to select/unselect row, affecting bindings
 void RowManager::selectRow(RowTree *row, bool multiSelect)
 {
-    if (!row)
+    if (!row) {
+        g_StudioApp.GetCore()->GetDoc()->DeselectAllItems();
+        return;
+    }
+
+    if (row->locked())
         return;
 
     if (row->isProperty())
@@ -326,6 +331,11 @@ RowTree *RowManager::selectedRow() const
     if (m_selectedRows.size() == 1)
         return m_selectedRows.first();
     return nullptr;
+}
+
+bool RowManager::isRowSelected(RowTree *row) const
+{
+    return m_selectedRows.contains(row);
 }
 
 QVector<RowTree *> RowManager::selectedRows() const
