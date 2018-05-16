@@ -47,9 +47,8 @@ would be a shame, since it is rather useful; see below.)
 
 The content of the scene view depends on whether or not you are using an
 \l{studio-toolbar.html#edit-cameras}{edit camera}. Normally (without an
-edit camera) the contents of all layer - s seen through the camera for
-each laye - re composited in the scene view. When an edit camera is
-used, the contents of a single layer are seen as viewed through the edit
+edit camera) the contents of all layers seen through the camera are composited in the scene view.
+When an edit camera is used, the contents of the selected layer are seen as viewed through the edit
 camera.
 
 \section2 Selecting Elements
@@ -69,8 +68,7 @@ current selection.
 
 When an element is selected its bounding box is drawn in the scene view,
 along with the bounding boxes of immediate children. If this is getting
-in your way, you can turn off bounding boxes in the bottom half of the
-View menu (keyboard shortcut: \c{Ctrl-B}).
+in your way, you can turn off bounding boxes in the View menu.
 
 \section2 Transforming Elements
 

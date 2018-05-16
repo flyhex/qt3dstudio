@@ -69,19 +69,12 @@ to quickly add 3D models to your scene without a 3D modeling program.
 Adding one of these files does not add content to your models folder,
 but instead references an internal model.
 
-These primitives are created by the installer in a
-\c{res\textbackslash{}primitives\textbackslash{}*.mesh} subfolder.
-Note that if you modify one of these files, you must also the
-corresponding file installed with the Viewer application on your target
-application. Referencing a primitive does not include the mesh
-definition in your project. Note also that
-\l{studio-project-palette.html#using-assets}{dragging an image into the
-scene from the project palette} uses the Rectangle primitive to
-display the image; change this primitive only with the utmost caution.
-
 \section1 Component
 
-\image Studio-Basic-Component.png
+\table
+  \row
+    \li \image Studio-Basic-Component.png
+\endtable
 
 Components are somewhat like mini-scenes. Although they are 3D geometry
 (not a 2D composition of rendered layers), they have their own slides
@@ -95,7 +88,10 @@ and animation separate from the rest of its siblings.
 
 \section1 Group
 
-\image Studio-Basic-Group.png
+\table
+  \row
+    \li \image Studio-Basic-Group.png
+\endtable
 
 A group is an empty transform element. Attaching models to the group
 (placing them as children of the group in the Timeline palette) allows
@@ -105,22 +101,23 @@ children they do have an effect on runtime speed. Though the
 performance impact is very slight, you should avoid using groups
 \e{solely} for conceptual organization.
 
-Note that there is no way (currently) to group multiple existing items
-other than to create a new group and a drag the items in one at a time.
-We recognize the surprising nature of this and hope to provide more
-obvious mechanisms (e.g.~multiple select and \c{ctrl-g}) it in the
-future.
+\note There is currently no way to group multiple existing items
+other than to create a new group and drag the items in one at a time, or cut and paste multiple
+items at once. Support for grouping multi-selected items will be added in future releases.
 
 \section1 Text
 
-\image Studio-Basic-Text.png
+\table
+  \row
+    \li \image Studio-Basic-Text.png
+\endtable
 
 A text element is a flat plane of text placed in 3D space. It is
 basically a transparent image displayed on a rectangle, where the image
 and rectangle size are dynamically updated whenever the text to be
 displayed is changed.
 
-Note that if you drag out a text object with no existing fonts in your
+\note If you drag out a text object with no existing fonts in your
 project, Studio is forced to add a font file ("TitilliumWeb") to your
 project to support the display of text.
 
@@ -148,23 +145,5 @@ illuminate the models in your scene so that they can be seen. If you
 have zero lights you will need to set the
 \l{studio-inspector-palette.html#material-properties}{Lighting property
 for your materials} to \c{None} in order to see your models.
-
-\section1 Alias
-
-\image Studio-Basic-Alias.png
-
-An alias is an live copy of another node in the scene graph, with its
-own 3D transformation. If you create an alias and set its Reference
-property to a model, any changes to the material of that model will be
-represented in the alias. However, the position, scale, rotation, etc.
-of the alias are its own. If you change the scale the original model,
-the alias will not update.
-
-Aliases are only active during authoring time. At runtime they become a
-full copy of the referenced object and all its descendants. This allows
-you to, for example, create a single template component and with 10
-aliases of it controlled by script. While each alias will look identical
-in Studio during creation, scripts or state machines can customize
-each instance based on data or application state.
 
 */

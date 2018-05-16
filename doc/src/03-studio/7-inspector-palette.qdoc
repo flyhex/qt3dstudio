@@ -672,6 +672,9 @@ material, chosen in the top-most property:
   Lighter than \c Screen.
 \endlist
 \li
+  \b{Enable Vertex Colors} - Use vertex colors from the mesh. These will be multiplied by any other
+  colors specified for the material.
+\li
   \b{Diffuse Color} - The base color for the material. Set to black
   to create a purely-specular material (e.g. metals or mirrors).
 \li
@@ -722,6 +725,8 @@ material, chosen in the top-most property:
   highlight generated from lights, and the clarity of reflections in
   general. Larger values increase the roughness, softening specular
   highlights and blurring reflections.
+\li
+  \b{Roughness Map} - An image to control the specular roughness of the material.
 \li
   \b{Fresnel Power} - Decreases head-on reflections (looking
   directly at the surface) while maintaining reflections seen at grazing
@@ -946,21 +951,7 @@ TODO: Only one font for now. More to be added?
   horizontal spacing between every character pair.
 \endlist
 
-\section1 Alias Properties
-
-An \l{studio-basic-objects-palette.html#alias}{alias} selected in
-the Timeline palette shows the following properties in the Inspector
-palette (in addition to the \l{transform-properties}{transform properties} described above):
-
-\list
-\li
-  \b{Reference} - the node to create an alias of.
-\li
-  \e{Note that you cannot create an alias of a Scene, Layer,
-  Behavior, Material, Effect, or Image element. You can only alias items
-  that have a transform, i.e. groups, components, cameras, lights,
-  models, and text.}
-\endlist
+\omit
 \section1 Path Properties
 
 A \l{best-practices-paths.html}{path} selected in the
@@ -1085,5 +1076,5 @@ the following properties in the Inspector palette:
   first anchor point, as is the \"Outgoing\" value for the last anchor
   point.
 \endlist
-
+\endomit
 */

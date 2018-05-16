@@ -96,7 +96,7 @@ its best to understand the differences between your original file and
 the new version, and apply them to your presentation. For more details,
 read the section
 \l{best-practices-importing-3d-content.html}{Working with 3D Content}.
-
+\omit
 \section1 Locating Missing Assets
 
 \image Studio-Project-MissingAsset.png
@@ -110,7 +110,7 @@ the file.
 If you click on this icon, a context menu with the option \b {Locate
 File} will be shown. Choosing this option will show a standard file
 open dialog, allowing you to supply a new location for a moved asset.
-\omit
+
 \b {Warning}: If the missing assets expose custom properties to the
 artist - such as a presentation behavior, layer effect, or custom
 material - any custom values or animations you have specified for these

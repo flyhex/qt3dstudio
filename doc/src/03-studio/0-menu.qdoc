@@ -59,6 +59,10 @@
 \li
   \uicontrol{Import Assets} - Opens the assets library folder to import assets to your project.
 \li
+  \uicontrol{Sub-Presentations} - Manage \l{Using Sub-Presentations}{sub-presentations}.
+\li
+  \uicontrol{Data Inputs} - Manage \l{Using Data Inputs}{data inputs}.
+\li
   \uicontrol{Connect to Device} - Opens a dialog to connect to a remote device.
 \li
   \uicontrol{Recent Projects} - Provides quick access to the last 10
@@ -74,24 +78,18 @@
   \uicontrol{Undo}/\uicontrol{Redo} - As expected.
 \li
   \uicontrol{Cut}/\uicontrol{Copy}/\uicontrol{Paste} - As expected.
-  \list
-  \li
-    Cut/copy/pasting \e{actions} can only be done by right-clicking on them in
-    the \l{studio-action-palette.html}{action palette}.
-  \li
-    Duplicating slides can only be done by right-clicking on them in the
-    \l{studio-slide-palette.html}{slide palette}.
-  \li
-    Tip: Holding down the \c{Alt} key while pasting an element on the
-    Timeline will paste it to the master slide if possible.
-  \endlist
 \li
-  \uicontrol{Duplicate Object} - Creates a copy of the currently-selected
+  \uicontrol{Paste to Master Slide} - Pastes the copied element to master slide. The target
+  has to be on master slide, i.e. name is green.
+\li
+  \uicontrol{Duplicate} - Creates a copy of the currently-selected
   object in the timeline on the current slide. If the selected object
   is on the master slide, but you are on a slide other than the master
   slide, the copy will be non-master. Duplicating a
   master object on the master slide does \e{not} preserve any
   master-unlinked properties.
+\li
+  \uicontrol{Delete} - Delete the selected element.
 \li
   \uicontrol{Studio Preferences} - Opens the Studio Preferences dialog.
   \image ApplicationPreferences.png
@@ -108,6 +106,10 @@
       timeline, controls whether to snap to the largest ticks only (Low
       Resolution), largest and halfway ticks (Medium Resolution), or every
       tick mark (High Resolution).
+    \li
+      \uicontrol{Legacy Viewer} - Enables the legacy viewer preview button in the toolbar. Legacy
+      viewer uses Runtime from Qt 3D Studio 1.1, whereas the default viewer uses Runtime from
+      Qt 3D Studio 2.0. Requires a restart.
     \endlist
   \li
     \uicontrol{Editing View}
@@ -133,41 +135,53 @@
   \li
     \b{Restore Defaults} - Restores all preferences for Studio to
     their default state. This does not restore palette layouts or positions.
-    \b{Reset Layout} - Restores palette layouts and positions. Requires a restart.
   \li
-    \target project-settings
-    \b{Presentation Settings}
+    \b{Reset Layout} - Restores palette layouts and positions. Requires a restart.
+  \endlist
+\li
+  \target project-settings
+  \uicontrol{Presentation Settings} - Opens the Presentation Settings dialog.
+  \image PresentationSettings.png
+  \list
+  \li
+    \uicontrol{Presentation}
     \list
     \li
-      \b{Presentation Width/Height} - Sets the render size for the
-      presentation.
+      \uicontrol{Width x Height} - Sets the render size for the presentation.
       \note Setting a higher resolution for a sub-presentation than the final
       display size will result in anti-aliasing for the sub-presentation
       (albeit at a performance cost).
     \li
-      \b{Constrain Proportions} - When checked, editing a width or
+      \uicontrol{Constrain Proportions} - When checked, editing a width or
       height value will also update the other. (This setting has no effect
       at runtime.)
     \li
-      \b{Portrait Format} - When editing a portrait style
+      \uicontrol{Portrait Format} - When editing a portrait style
       presentation (width is smaller than height) designed to be displayed
       on a rotated hardware device (for example a tablet), check this setting to
       have the presentation rotated correctly. This setting has no effect
       when previewing on your computer.
+    \endlist
+  \li
+    \uicontrol{Project Info}
+    \list
     \li
-      \b{Author/Company} - Informational meta data stored in the \c{.uip} file.
+      \uicontrol{Author/Company} - Informational meta data stored in the \c{.uip} file.
       These settings have no effect at runtime.
     \endlist
   \endlist
-\li
-  \uicontrol{Sub-Presentations} - Manage \l{Using Sub-Presentations}{sub-presentations}.
-\li
-  \uicontrol{Data Inputs} - Manage \l{Using Data Inputs}{data inputs}.
 \endlist
 
 \section1 View
 
 \list
+\li
+  \uicontrol{Reset layout} - Resets the layout of palettes. Requires a restart.
+\li
+  \uicontrol{Fit selected} - Fit the selected element to the screen. Works only in
+  \l{studio-toolbar.html#edit-cameras}{edit camera} modes.
+\li
+  \uicontrol{Hide/unhide selected} - Hides/unhides the selected element.
 \li
   \uicontrol{\e{Palettes}} - Toggles the display of palettes.
 \li
@@ -220,7 +234,7 @@
   not affect the rendering of the presentation, it is only there to help
   you organize and keep track of your work.
 \li
-  \uicontrol{Autoset Keyframes} - Toggles the autoset keyframes
+  \uicontrol{Toggle Autoset Keyframes} - Toggles the autoset keyframes
   functionality. When enabled, any change to a property whose
   \l{studio-inspector-palette.html#animating-properties}{animation toggle}
   is enabled will result in a keyframe being created or updated
