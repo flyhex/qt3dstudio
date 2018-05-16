@@ -277,7 +277,7 @@ Rectangle {
             }
 
             StyledToolButton {
-                enabledImage: "Objects-Model-Normal.png";
+                enabledImage: "Assets-Model.png";
                 onClicked: _parentView.modelAction(projectTree.currentIndex)
                 toolTipText: qsTr("Open Model Library")
             }
