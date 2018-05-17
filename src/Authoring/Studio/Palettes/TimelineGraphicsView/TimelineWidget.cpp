@@ -682,8 +682,11 @@ void TimelineWidget::OnGainFocus()
 
 }
 
-CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags)
+CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                               EStudioObjectType objectType)
 {
+    Q_UNUSED(inFlags)
+
     CTimeLineDropTarget *theTarget = new CTimeLineDropTarget();
 
     // collapse all properties so index is counted correctly
@@ -693,7 +696,7 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
                  + viewTreeContent()->verticalScrollBar()->value()
                  - viewTreeContent()->verticalScrollBar()->minimum();
     RowMover *mover = m_graphicsScene->rowMover();
-    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY));
+    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY), objectType);
 
     if (mover->insertionTarget()) {
         mover->insertionTarget()->getBinding()->SetDropTarget(theTarget);

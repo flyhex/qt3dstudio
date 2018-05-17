@@ -86,7 +86,8 @@ public:
     void OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation = false) override;
     void Draw(CRenderer *inRenderer) override;
     void OnGainFocus() override;
-    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags) override;
+    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                   EStudioObjectType objectType) override;
     bool OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;

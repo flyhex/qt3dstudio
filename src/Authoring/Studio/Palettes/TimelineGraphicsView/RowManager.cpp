@@ -204,6 +204,15 @@ void RowManager::selectRow(RowTree *row, bool multiSelect)
     if (row->isProperty())
         row = row->parentRow();
 
+    if (multiSelect && m_selectedRows.size() > 0) {
+        // Do not allow certain object types into multiselection
+        const EStudioObjectType rowType = row->rowType();
+        const int singularType = OBJTYPE_SCENE | OBJTYPE_MATERIAL | OBJTYPE_LAYER
+                | OBJTYPE_BEHAVIOR | OBJTYPE_EFFECT;
+        if (singularType & rowType || singularType & m_selectedRows[0]->rowType())
+            return;
+    }
+
     Qt3DSDMTimelineItemBinding *binding =
             static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
     if (binding)

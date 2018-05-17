@@ -132,6 +132,7 @@ private:
     bool m_rulerPressed = false;
     bool m_keyframePressed = false;
     bool m_dragging = false;
+    bool m_startRowMoverOnNextDrag = false;
     TimelineControlType m_clickedTimelineControlType = TimelineControlType::None;
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;

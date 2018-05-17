@@ -249,7 +249,8 @@ bool WidgetControl::OnDragWithin(CDropSource &inSource)
     bool theReturn = false;
     CPt thePoint = inSource.GetCurrentPoint();
     Qt::KeyboardModifiers theFlags = inSource.GetCurrentFlags();
-    CDropTarget *theDropTarget = m_control->FindDropCandidate(thePoint, theFlags);
+    CDropTarget *theDropTarget = m_control->FindDropCandidate(
+                thePoint, theFlags, static_cast<EStudioObjectType>(inSource.GetObjectType()));
 
     if (theDropTarget) {
         theReturn = theDropTarget->Accept(inSource);
@@ -264,7 +265,8 @@ bool WidgetControl::OnDragReceive(CDropSource &inSource)
     CPt thePoint = inSource.GetCurrentPoint();
     Qt::KeyboardModifiers theFlags = inSource.GetCurrentFlags();
 
-    CDropTarget *theDropTarget = m_control->FindDropCandidate(thePoint, theFlags);
+    CDropTarget *theDropTarget = m_control->FindDropCandidate(
+                thePoint, theFlags, static_cast<EStudioObjectType>(inSource.GetObjectType()));
 
     if (theDropTarget) {
         theReturn = theDropTarget->Drop(inSource);

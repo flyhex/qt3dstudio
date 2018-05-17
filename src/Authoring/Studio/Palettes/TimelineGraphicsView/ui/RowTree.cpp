@@ -606,7 +606,8 @@ bool RowTree::draggable() const
 {
     return !m_locked && !isProperty()
            && m_rowType != OBJTYPE_IMAGE
-           && m_rowType != OBJTYPE_SCENE;
+           && m_rowType != OBJTYPE_SCENE
+           && m_rowType != OBJTYPE_MATERIAL;
 }
 
 void RowTree::updateDepthRecursive()
@@ -828,7 +829,9 @@ bool RowTree::isContainer() const
             && m_rowType != OBJTYPE_MATERIAL
             && m_rowType != OBJTYPE_IMAGE
             && m_rowType != OBJTYPE_TEXT
-            && m_rowType != OBJTYPE_COMPONENT;
+            && m_rowType != OBJTYPE_COMPONENT
+            && m_rowType != OBJTYPE_BEHAVIOR
+            && m_rowType != OBJTYPE_EFFECT;
 }
 
 bool RowTree::isProperty() const

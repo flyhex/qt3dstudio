@@ -32,6 +32,7 @@
 #include "TimelineConstants.h"
 #include "TimelineItem.h"
 #include "DocumentEditorEnumerations.h"
+#include "StudioObjectTypes.h"
 
 class RowTree;
 class TimelineGraphicsScene;
@@ -43,14 +44,13 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
 
-    void start(RowTree *row = nullptr);
+    void start(const QVector<RowTree *> &rows);
     void end(bool force = false);
-    void updateTargetRow(const QPointF &scenePos);
+    void updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType = OBJTYPE_UNKNOWN);
     bool isActive();
-    bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
     RowTree *insertionTarget() const;
     RowTree *insertionParent() const;
-    RowTree *sourceRow() const;
+    QVector<RowTree *> sourceRows() const;
     int type() const;
     Q3DStudio::DocumentEditorInsertType::Enum insertionType() const;
 
@@ -62,7 +62,7 @@ private:
     TimelineGraphicsScene *m_scene = nullptr;
     RowTree *m_insertionTarget = nullptr; // insertion target
     RowTree *m_insertionParent = nullptr; // insertion parent
-    RowTree *m_sourceRow = nullptr;       // dragged row
+    QVector<RowTree *> m_sourceRows;      // dragged rows
     bool m_active = false;
     Q3DStudio::DocumentEditorInsertType::Enum m_insertType =
             Q3DStudio::DocumentEditorInsertType::Unknown;

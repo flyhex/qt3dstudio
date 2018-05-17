@@ -188,7 +188,8 @@ protected:
     void SetMouseWheelEventState(ControlEventState::Enum inNewState);
 
 public:
-    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags);
+    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                   EStudioObjectType objectType);
 
     void AddChild(CControl *inControl, CControl *inInsertBefore = NULL);
     void RemoveChild(CControl *inControl);

@@ -159,7 +159,8 @@ public:
     void SetFocusToFirstAvailable();
     void SetFocusToLastAvailable();
 
-    virtual CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags);
+    virtual CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                           EStudioObjectType objectType);
 
     virtual void AddChild(CControl *inControl, CControl *inInsertBefore = NULL);
     virtual void RemoveChild(CControl *inControl);

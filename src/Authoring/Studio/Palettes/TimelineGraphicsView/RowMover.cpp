@@ -68,6 +68,11 @@ RowTree *RowMover::insertionParent() const
     return m_insertionParent;
 }
 
+QVector<RowTree *> RowMover::sourceRows() const
+{
+    return m_sourceRows;
+}
+
 void RowMover::resetInsertionParent(RowTree *newParent)
 {
     if (m_insertionParent) {
@@ -83,24 +88,34 @@ void RowMover::resetInsertionParent(RowTree *newParent)
     }
 }
 
-RowTree *RowMover::sourceRow() const
-{
-    return m_sourceRow;
-}
-
 bool RowMover::isActive()
 {
     return m_active;
 }
 
-void RowMover::start(RowTree *row)
+void RowMover::start(const QVector<RowTree *> &rows)
 {
-    m_active = true;
-
-    if (row) {
-        m_sourceRow = row;
-        m_sourceRow->setMoveSourceRecursive(true);
-        qApp->setOverrideCursor(Qt::ClosedHandCursor);
+    m_sourceRows.clear();
+    if (!rows.isEmpty()) {
+        // Remove rows that have an ancestor included in the selection or ones that are of
+        // invalid type for moving
+        for (auto candidateRow : rows) {
+            bool omit = !candidateRow->draggable();
+            if (!omit) {
+                for (auto checkRow : rows) {
+                    if (candidateRow->isDecendentOf(checkRow))
+                        omit = true;
+                }
+                if (!omit)
+                    m_sourceRows.append(candidateRow);
+            }
+        }
+        if (!m_sourceRows.isEmpty()) {
+            m_active = true;
+            for (auto row : qAsConst(m_sourceRows))
+                row->setMoveSourceRecursive(true);
+            qApp->setOverrideCursor(Qt::ClosedHandCursor);
+        }
     }
 }
 
@@ -108,10 +123,9 @@ void RowMover::end(bool force)
 {
     if (m_active || force) {
         m_active = false;
-        if (m_sourceRow) {
-            m_sourceRow->setMoveSourceRecursive(false);
-            m_sourceRow = nullptr;
-        }
+        for (auto row : qAsConst(m_sourceRows))
+            row->setMoveSourceRecursive(false);
+        m_sourceRows.clear();
 
         setVisible(false);
         resetInsertionParent();
@@ -141,26 +155,20 @@ RowTree *RowMover::getRowAtPos(const QPointF &scenePos)
     return nullptr;
 }
 
-void RowMover::updateTargetRow(const QPointF &scenePos)
+// rowType parameter is used to highlight the target row when RowMover is not active,
+// i.e. when dragging from project or basic objects palettes
+void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType)
 {
+    EStudioObjectType theRowType = rowType;
+    if (theRowType == OBJTYPE_UNKNOWN && m_sourceRows.size() == 1)
+        theRowType = m_sourceRows[0]->rowType();
+
     // row will be inserted just below rowInsert1 and just above rowInsert2 (if it exists)
     RowTree *rowInsert1 = getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * -.5));
     RowTree *rowInsert2 = getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * .5));
 
-    bool valid = rowInsert1
-
-            // not moving an ancestor into a decendent
-            && (!m_sourceRow || !rowInsert1->isDecendentOf(m_sourceRow))
-
-            // not inserting as a first child of self
-            && (!m_sourceRow || !(rowInsert1 == m_sourceRow && !rowInsert1->empty()))
-
-            // not inserting non-layer at root level
-            && !((!m_sourceRow || m_sourceRow->rowType() != OBJTYPE_LAYER)
-                 && rowInsert1->rowType() == OBJTYPE_SCENE)
-
-            // Layer cases
-            && validLayerMove(rowInsert1, rowInsert2);
+    bool valid = rowInsert1 && theRowType != OBJTYPE_MATERIAL
+            && theRowType != OBJTYPE_CUSTOMMATERIAL;
 
     if (valid) {
         // if dragging over a property or a parent of a property, move to the first row
@@ -175,19 +183,17 @@ void RowMover::updateTargetRow(const QPointF &scenePos)
 
         // calc insertion depth
         int depth;
-        int depthMin = rowInsert2 ? rowInsert2->depth() : 3;
+        int depthMin = rowInsert2 ? rowInsert2->depth() : (theRowType == OBJTYPE_LAYER ? 2 : 3);
         int depthMax = rowInsert1->depth();
-        if (rowInsert1->isContainer() && rowInsert1 != m_sourceRow)
+        if (rowInsert1->isContainer() && !m_sourceRows.contains(rowInsert1))
             depthMax++; // Container: allow insertion as a child
         else if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer())
             depthMax--; // non-container with properties and/or a material
 
-        if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_LAYER) {
+        if (theRowType == OBJTYPE_LAYER) {
             depth = 2; // layers can only be moved on depth 2
-        } else if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_EFFECT) {
+        } else if (theRowType == OBJTYPE_EFFECT) {
             depth = 3; // effects can only be moved on depth 3 (layer direct child)
-        } else if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_MATERIAL) {
-            depth = m_sourceRow->depth(); // materials cannot change parent
         } else {
             static const int LEFT_MARGIN = 20;
             depth = (scenePos.x() - LEFT_MARGIN) / TimelineConstants::ROW_DEPTH_STEP;
@@ -201,67 +207,69 @@ void RowMover::updateTargetRow(const QPointF &scenePos)
 
         resetInsertionParent(insertParent);
 
-        if (depth < depthMin || depth > depthMax)
+        if (depth < depthMin || depth > depthMax
+                || (theRowType != OBJTYPE_UNKNOWN
+                    && !CStudioObjectTypes::AcceptableParent(theRowType,
+                                                             m_insertionParent->rowType()))) {
             valid = false;
-
-        if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_MATERIAL
-                && m_sourceRow->parentRow() != m_insertionParent) {
-            valid = false; // not moving a material row outside its parent
         }
 
-        if (m_sourceRow && m_sourceRow->isMaster() && !m_insertionParent->isMaster())
-            valid = false; // don't insert master slide object into non-master slide object
+        // Don't insert master slide object into non-master slide object
+        // or object under itself, or under unacceptable parent
+        for (auto sourceRow : qAsConst(m_sourceRows)) {
+            if ((sourceRow->isMaster() && sourceRow->rowType() != OBJTYPE_LAYER
+                    && !m_insertionParent->isMaster())
+                    || m_insertionParent->isDecendentOf(sourceRow)
+                    || m_insertionParent == sourceRow
+                    || !CStudioObjectTypes::AcceptableParent(sourceRow->rowType(),
+                                                             m_insertionParent->rowType())) {
+                valid = false;
+                break;
+            }
+        }
 
-        if (valid) {
-            // calc insertion target and type
-            if (rowInsert1 == m_insertionParent) {
-                if (m_insertionParent->expanded() && !m_insertionParent->childRows().empty()) {
-                    m_insertionTarget = m_insertionParent->childRows().at(0);
-                    m_insertType = Q3DStudio::DocumentEditorInsertType::PreviousSibling;
-                } else {
-                    m_insertionTarget = m_insertionParent;
-                    m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
-                }
-            } else if (rowInsert1->isProperty() && depth == rowInsert1->depth()) {
+        // calc insertion target and type
+        if (rowInsert1 == m_insertionParent) {
+            if (m_insertionParent->expanded() && !m_insertionParent->childRows().empty()) {
                 m_insertionTarget = m_insertionParent->childRows().at(0);
                 m_insertType = Q3DStudio::DocumentEditorInsertType::PreviousSibling;
             } else {
-                m_insertionTarget = rowInsert1;
-                m_insertType = Q3DStudio::DocumentEditorInsertType::NextSibling;
-                if (depth < rowInsert1->depth()) {
-                    for (int i = depth; i < rowInsert1->depth(); ++i)
-                        m_insertionTarget = m_insertionTarget->parentRow();
-                }
+                m_insertionTarget = m_insertionParent;
+                m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
             }
-
-            updateState(depth, rowInsert1->y() + TimelineConstants::ROW_H);
+        } else if (rowInsert1->isProperty() && depth == rowInsert1->depth()) {
+            if (m_insertionParent->childRows().isEmpty()) {
+                m_insertionTarget = m_insertionParent;
+                m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
+            } else {
+                m_insertionTarget = m_insertionParent->childRows().at(0);
+                m_insertType = Q3DStudio::DocumentEditorInsertType::PreviousSibling;
+            }
+        } else {
+            m_insertionTarget = rowInsert1;
+            m_insertType = Q3DStudio::DocumentEditorInsertType::NextSibling;
+            if (depth < rowInsert1->depth()) {
+                for (int i = depth; i < rowInsert1->depth(); ++i)
+                    m_insertionTarget = m_insertionTarget->parentRow();
+            }
         }
+        // Don't allow single move right next to moving row at same depth
+        if (m_sourceRows.size() == 1
+                && (m_insertionTarget == m_sourceRows[0]
+                    || ((m_insertType == Q3DStudio::DocumentEditorInsertType::NextSibling
+                         && m_sourceRows[0]->index() - m_insertionTarget->index() == 1)
+                        || (m_insertType == Q3DStudio::DocumentEditorInsertType::PreviousSibling
+                            && m_insertionTarget->index() - m_sourceRows[0]->index() == 1)))) {
+            valid = false;
+        }
+        if (valid)
+            updateState(depth, rowInsert1->y() + TimelineConstants::ROW_H);
     }
 
     if (!valid) {
         setVisible(false);
         resetInsertionParent();
     }
-}
-
-bool RowMover::validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex)
-{
-    // we don't care about non-layers in this method
-    if (!m_sourceRow || m_sourceRow->rowType() != OBJTYPE_LAYER)
-        return true;
-
-    if (rowAtIndex->rowType() == OBJTYPE_SCENE)
-        return true;
-
-    if (rowAtIndex->rowType() == OBJTYPE_LAYER)
-       return rowAtIndex->empty() || !rowAtIndex->expanded();
-
-    if (!nextRowAtIndex || (nextRowAtIndex->depth() <= rowAtIndex->depth()
-                            && nextRowAtIndex->depth() == 2)) {
-        return true;
-    }
-
-    return false;
 }
 
 int RowMover::type() const

@@ -243,12 +243,19 @@ void printAsset(Q3DStudio::TIdentifier asset, QString padding = " ")
 
 void TimelineGraphicsScene::commitMoveRows()
 {
-    if (!m_rowMover->insertionTarget() || m_rowMover->sourceRow() == m_rowMover->insertionTarget())
+    if (!m_rowMover->insertionTarget()
+            || m_rowMover->sourceRows().contains(m_rowMover->insertionTarget())) {
         return;
+    }
 
-    // handle for the moving row
-    qt3dsdm::Qt3DSDMInstanceHandle handleSource = static_cast<Qt3DSDMTimelineItemBinding *>
-            (m_rowMover->sourceRow()->getBinding())->GetInstance();
+    // handles for the moving rows
+    qt3dsdm::TInstanceHandleList sourceHandles;
+    const auto sourceRows = m_rowMover->sourceRows();
+    for (auto sourceRow : sourceRows) {
+        qt3dsdm::Qt3DSDMInstanceHandle handleSource = static_cast<Qt3DSDMTimelineItemBinding *>
+                (sourceRow->getBinding())->GetInstance();
+        sourceHandles.push_back(handleSource);
+    }
     qt3dsdm::Qt3DSDMInstanceHandle handleTarget = static_cast<Qt3DSDMTimelineItemBinding *>
             (m_rowMover->insertionTarget()->getBinding())->GetInstance();
 
@@ -257,7 +264,7 @@ void TimelineGraphicsScene::commitMoveRows()
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                       QObject::tr("Move Rows"))
-            ->RearrangeObject(handleSource, handleTarget, m_rowMover->insertionType());
+            ->RearrangeObjects(sourceHandles, handleTarget, m_rowMover->insertionType());
 
     // updating the UI happens in TimelineWidget.onChildAdded()
 }
@@ -302,6 +309,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         m_releaseSelectRow = nullptr;
         m_dragging = false;
+        m_startRowMoverOnNextDrag = false;
         m_pressPos = event->scenePos();
         QGraphicsItem *item = itemAt(m_pressPos, QTransform());
         const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
@@ -333,7 +341,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     }
                     m_rowManager->selectRow(rowTree, ctrlKeyDown);
                     if (rowTree->draggable())
-                        m_rowMover->start(rowTree);
+                        m_startRowMoverOnNextDrag = true;
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
                 m_editedTimelineRow = static_cast<RowTimeline *>(item);
@@ -435,11 +443,17 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             // resizing keyframe selection rect
             m_selectionRect->updateSize(event->scenePos());
             m_keyframeManager->selectKeyframesInRect(m_selectionRect->rect());
-        } else if (m_rowMover->isActive() && m_rowManager->isSingleSelected()) {
+        } else if (m_startRowMoverOnNextDrag || m_rowMover->isActive()) {
             // moving rows vertically (reorder/reparent)
-            // collapse all properties so correctIndex() counts correctly
-            m_rowManager->collapseAllPropertyRows();
-            m_rowMover->updateTargetRow(event->scenePos());
+            if (m_startRowMoverOnNextDrag) {
+                m_startRowMoverOnNextDrag = false;
+                m_rowMover->start(m_rowManager->selectedRows());
+            }
+            if (m_rowMover->isActive()) {
+                // collapse all properties so correctIndex() counts correctly
+                m_rowManager->collapseAllPropertyRows();
+                m_rowMover->updateTargetRow(event->scenePos());
+            }
         } else if (m_keyframePressed) { // moving selected keyframes
             double newX = event->scenePos().x() - m_ruler->x() - m_pressPosInKeyframe;
 
@@ -565,6 +579,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         m_selectionRect->end();
         m_rowMover->end();
         m_dragging = false;
+        m_startRowMoverOnNextDrag = false;
         m_rulerPressed = false;
         m_keyframePressed = false;
         m_clickedTimelineControlType = TimelineControlType::None;
