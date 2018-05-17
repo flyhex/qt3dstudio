@@ -387,8 +387,10 @@ namespace render {
         if (pProgram->m_shaderInput)
             shaderAttribBuffer = pProgram->m_shaderInput->m_ShaderInputEntries;
 
-        if ((attribLayout->m_LayoutAttribEntries.size() < shaderAttribBuffer.size())
-            || (inputAssembler->m_VertexbufferHandles.size() <= attribLayout->m_MaxInputSlot)) {
+        if (attribLayout->m_LayoutAttribEntries.size() < shaderAttribBuffer.size())
+            return false;
+
+        if (inputAssembler->m_VertexbufferHandles.size() <= attribLayout->m_MaxInputSlot) {
             QT3DS_ASSERT(false);
             return false;
         }
