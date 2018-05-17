@@ -717,7 +717,7 @@ material, chosen in the top-most property:
   lights.}
 \endlist
 \li
-  \b{Specular Map} - A grayscale image map to modulate the amount
+  \b{Specular Map} - An RGB image map to modulate the amount and the color
   of specularity across the surface of the material. These values are
   multiplied by the Specular Amount.
 \li
