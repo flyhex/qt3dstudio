@@ -211,12 +211,8 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_graphicsScene->widgetRoot(), &QGraphicsWidget::geometryChanged, this, [this]() {
         const QRectF rect = m_graphicsScene->widgetRoot()->rect();
 
-        double treeH = rect.height();
-        if (m_viewTimelineContent->horizontalScrollBar()->isVisible())
-            treeH += m_viewTimelineContent->horizontalScrollBar()->height() + 10;
-
         m_viewTreeContent->setSceneRect(QRectF(0, TimelineConstants::ROW_H,
-                                               TimelineConstants::TREE_MAX_W, treeH));
+                                               TimelineConstants::TREE_MAX_W, rect.height()));
 
         m_viewTimelineHeader->setSceneRect(QRectF(TimelineConstants::TREE_BOUND_W, 0,
                                                   rect.width() - TimelineConstants::TREE_BOUND_W,
@@ -243,6 +239,12 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_viewTimelineContent->verticalScrollBar(), &QAbstractSlider::valueChanged, this,
             [this](int value) {
         m_viewTreeContent->verticalScrollBar()->setValue(value);
+
+        // make sure the 2 scrollbars stay in sync
+        if (m_viewTreeContent->verticalScrollBar()->value() != value) {
+            m_viewTimelineContent->verticalScrollBar()->setValue(
+                        m_viewTreeContent->verticalScrollBar()->value());
+        }
     });
 
     // connect tree and timeline verticalScrollBars
