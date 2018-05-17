@@ -175,23 +175,20 @@ void RowMover::updateTargetRow(const QPointF &scenePos)
 
         // calc insertion depth
         int depth;
+        int depthMin = rowInsert2 ? rowInsert2->depth() : 3;
+        int depthMax = rowInsert1->depth();
+        if (rowInsert1->isContainer() && rowInsert1 != m_sourceRow)
+            depthMax++; // Container: allow insertion as a child
+        else if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer())
+            depthMax--; // non-container with properties and/or a material
+
         if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_LAYER) {
             depth = 2; // layers can only be moved on depth 2
+        } else if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_EFFECT) {
+            depth = 3; // effects can only be moved on depth 3 (layer direct child)
         } else if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_MATERIAL) {
             depth = m_sourceRow->depth(); // materials cannot change parent
-            if (rowInsert2 && depth < rowInsert2->depth())
-                valid = false;
         } else {
-            int depthMin = rowInsert2 ? rowInsert2->depth() : 3;
-            int depthMax = rowInsert1->depth();
-
-            if (rowInsert1->isContainer() && rowInsert1 != m_sourceRow) {
-                depthMax++; // Container: allow insertion as a child
-            } else if (rowInsert1->isPropertyOrMaterial()
-                       && !rowInsert1->parentRow()->isContainer()) {
-                depthMax--; // non-container with properties and/or a material
-            }
-
             static const int LEFT_MARGIN = 20;
             depth = (scenePos.x() - LEFT_MARGIN) / TimelineConstants::ROW_DEPTH_STEP;
             depth = qBound(depthMin, depth, depthMax);
@@ -203,6 +200,9 @@ void RowMover::updateTargetRow(const QPointF &scenePos)
             insertParent = insertParent->parentRow();
 
         resetInsertionParent(insertParent);
+
+        if (depth < depthMin || depth > depthMax)
+            valid = false;
 
         if (m_sourceRow && m_sourceRow->rowType() == OBJTYPE_MATERIAL
                 && m_sourceRow->parentRow() != m_insertionParent) {
