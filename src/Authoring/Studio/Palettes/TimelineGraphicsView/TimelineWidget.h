@@ -59,8 +59,10 @@ class TimelineWidget : public QWidget,
     Q_OBJECT
 
 public:
-    explicit TimelineWidget(QWidget *parent = nullptr);
+    explicit TimelineWidget(const QSize &preferredSize, QWidget *parent = nullptr);
     ~TimelineWidget();
+
+    QSize sizeHint() const override;
 
     TimelineToolbar *toolbar() const;
     QGraphicsView *viewTimelineContent() const;
@@ -137,6 +139,7 @@ private:
     FlatObjectListModel *m_model = nullptr;
     Qt3DSDMTimelineItemBinding *m_binding = nullptr;
     bool m_splitterPressed = false;
+    QSize m_preferredSize;
 
     // data model connection
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;

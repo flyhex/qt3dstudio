@@ -128,7 +128,7 @@ public:
     }
 };
 
-TimelineWidget::TimelineWidget(QWidget *parent)
+TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     : QWidget()
     , m_toolbar(new TimelineToolbar())
     , m_viewTreeHeader(new TreeHeaderView(this))
@@ -136,6 +136,7 @@ TimelineWidget::TimelineWidget(QWidget *parent)
     , m_viewTimelineHeader(new QGraphicsView(this))
     , m_viewTimelineContent(new QGraphicsView(this))
     , m_graphicsScene(new TimelineGraphicsScene(this))
+    , m_preferredSize(preferredSize)
 {
     // Mahmoud_TODO: CTimelineTranslationManager should be eventually removed or cleaned. Already
     // most of its functionality is implemented in this class
@@ -317,6 +318,11 @@ TimelineWidget::TimelineWidget(QWidget *parent)
 TimelineWidget::~TimelineWidget()
 {
     m_graphicsScene->keyframeManager()->deselectAllKeyframes();
+}
+
+QSize TimelineWidget::sizeHint() const
+{
+    return m_preferredSize;
 }
 
 void TimelineWidget::OnNewPresentation()
@@ -724,7 +730,7 @@ void TimelineWidget::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
 CPt TimelineWidget::GetPreferredSize()
 {
-    return CPt();
+    return CPt(m_preferredSize.width(), m_preferredSize.height());
 }
 
 void TimelineWidget::SetSize(long inX, long inY)

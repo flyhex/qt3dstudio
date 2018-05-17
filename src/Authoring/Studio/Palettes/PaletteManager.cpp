@@ -114,7 +114,11 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_timelineDock->setObjectName("timeline");
     m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
 
-    m_timelineWidget = new TimelineWidget();
+    // Give the preferred size as percentages of the mainframe size
+    // -25 is applied to width to compensate the action palette having no tabs by default
+    m_timelineWidget = new TimelineWidget(QSize(inMainFrame->width() * 0.8 - 25,
+                                                inMainFrame->height() * 0.2));
+    m_timelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     WidgetControl *timeLineWidgetControl = new WidgetControl(m_timelineWidget, m_timelineDock);
     timeLineWidgetControl->RegisterForDnd(timeLineWidgetControl);
     timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
