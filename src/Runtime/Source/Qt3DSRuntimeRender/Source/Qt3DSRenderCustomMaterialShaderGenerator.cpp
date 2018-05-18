@@ -71,7 +71,7 @@ struct SShaderLightProperties
             dir *= -1;
             m_LightData.m_position = QT3DSVec4(dir, 0.0);
         } else if (inLight->m_LightType == RenderLightTypes::Area) {
-            dir = -1.0 * inLight->GetScalingCorrectDirection();
+            dir = inLight->GetScalingCorrectDirection();
             m_LightData.m_position = QT3DSVec4(inLight->GetGlobalPos(), 1.0);
         } else {
             dir = inLight->GetGlobalPos();
