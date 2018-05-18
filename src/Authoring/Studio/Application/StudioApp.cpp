@@ -303,7 +303,7 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
 
     // Initialize help file path
     m_pszHelpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
-            Q3DStudio::CString("/../doc/qt3dstudio/index.html");
+            Q3DStudio::CString("/../doc/qt3dstudio/qt3dstudio-index.html");
 
     CStudioPreferences::LoadPreferences();
 
