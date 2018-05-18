@@ -721,6 +721,8 @@ material, chosen in the top-most property:
   of specularity across the surface of the material. These values are
   multiplied by the Specular Amount.
 \li
+  \b{Specular Model} - Equation to use when calculating specular highlights for CG lights.
+\li
   \b{Specular Roughness} - Controls the size of the specular
   highlight generated from lights, and the clarity of reflections in
   general. Larger values increase the roughness, softening specular
@@ -761,9 +763,7 @@ material, chosen in the top-most property:
   \b{Displacement Map}\target material-properties\_displacement-map
 
   - A grayscale image used to offset the vertices of geometry across the
-  surface of the material. Brighter pixels indicate raised regions. The
-  amount of the effect is controlled by the Displacement Amount
-  property.
+  surface of the material. Brighter pixels indicate raised regions.
 \list
 \li
   \e{Tip: Displacement maps require vertices to offset. If your model
@@ -776,22 +776,7 @@ material, chosen in the top-most property:
   want to also add a matching bump map or normal map to your material.}
 \endlist
 \li
-  \b{Emissive Power} - The amount of self-illumination from the
-  material. In a scene with black ambient lighting a material with 0
-  emissive power will appear black wherever the light does not shine on
-  it; turning the emissive power to 100 will cause the material to
-  appear as its diffuse color instead.
-\list
-\li
-  \e{Tip: When you want a material to not be affected by lighting,
-  instead of using 100\% emissive power consider setting the lighting
-  mode to} \c{None} \e{for a performance benefit.}
-\endlist
-\li
-  \b{Emissive Map} - An image map used to set the emissive power
-  for different parts of the material. Using a grayscale image will not
-  affect the color of the result, while using a color image will produce
-  glowing regions with the color affected by the emissive map.
+  \b{Displacement Amount} - Controls the offset amount for the displacement map.
 \li
   \b{Opacity} - Drop the opacity of just this material, separate
   from the model.
@@ -808,6 +793,34 @@ material, chosen in the top-most property:
   use an image format with transparency (e.g. a 32-bit PNG, or a DDS
   with an alpha portion) for the opacity to be applied. You cannot use a
   grayscale PNG file, for example, to control the opacity.
+\li
+  \b{Emissive Color} - Color of self-illumination for this material.
+\li
+  \b{Emissive Power} - The amount of self-illumination from the
+  material. In a scene with black ambient lighting a material with 0
+  emissive power will appear black wherever the light does not shine on
+  it; turning the emissive power to 100 will cause the material to
+  appear as its diffuse color instead.
+\list
+\li
+  \e{Tip: When you want a material to not be affected by lighting,
+  instead of using 100\% emissive power consider setting the lighting
+  mode to} \c{None} \e{for a performance benefit.}
+\endlist
+\li
+  \b{Emissive Map/2} - An image map used to set the emissive power
+  for different parts of the material. Using a grayscale image will not
+  affect the color of the result, while using a color image will produce
+  glowing regions with the color affected by the emissive map.
+\li
+  \b{Translucency Map} - Grayscale image controlling how much light can pass through the material
+  from behind.
+\li
+  \b{Translucent Falloff} - The amount of falloff for the translucency based on the angle of the
+  normals of the object to the light source.
+\li
+  \b{Diffuse Light Wrap} - The amount of light wrap for the translucency map. A value of 0 will not
+  wrap the light at all while a value of 1 will wrap the light all around the object.
 \endlist
 Note that the Runtime custom-compiles shaders for each unique
 combination of material properties used. Each additional material
