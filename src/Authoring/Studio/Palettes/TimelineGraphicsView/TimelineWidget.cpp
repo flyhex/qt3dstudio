@@ -474,7 +474,9 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     if (theDataModelBridge->IsSceneGraphInstance(inInstance)) {
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
-        if (binding) {
+
+        bool rowExists = binding && binding->getRowTree();
+        if (binding && !rowExists) {
             Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
                                                         ->GetParentInstance(inInstance), m_binding);
             RowTree *newRow = m_graphicsScene->rowManager()
@@ -644,15 +646,9 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
 void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
 {
     Q_UNUSED(inParent)
+    Q_UNUSED(inChild)
     Q_UNUSED(inIndex)
-
-    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
-    if (binding && binding->GetObjectType() == OBJTYPE_MATERIAL) {
-        // Note that this only handles removing materials now
-        RowTree *row = binding->getRowTree();
-        if (row)
-            m_graphicsScene->rowManager()->deleteRow(row);
-    }
+    // Note: Unimplemented by design, see QT3DS-1684
 }
 
 void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
