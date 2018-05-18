@@ -440,7 +440,7 @@
                 <!-- HW accelerated fonts not supported
                     <Property name="enableacceleratedfont" formalName="Hardware accelerated font" description="Enabled hardware acclerated font" type="Boolean" default="false" />
                 -->
-                <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="24" animatable="False" controllable="True" />
+                <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="36" animatable="False" controllable="True" />
                 <Property name="horzalign" formalName="Horizontal Alignment" description="Horizontal Alignment" list="Left:Center:Right" default="Center" />
                 <Property name="vertalign" formalName="Vertical Alignment" description="Vertical Alignment" list="Top:Middle:Bottom" default="Middle" />
                 <Property name="leading" formalName="Leading" description="Leading" />
