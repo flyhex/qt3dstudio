@@ -445,12 +445,18 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
     if (binding->GetObjectType() != OBJTYPE_MATERIAL) {
-        m_handlesMap.insert(std::make_pair(binding->GetInstance(), binding->getRowTree()));
+        insertToHandlesMap(binding);
 
         const QList<ITimelineItemBinding *> children = binding->GetChildren();
         for (auto child : children)
             insertToHandlesMapRecursive(static_cast<Qt3DSDMTimelineItemBinding *>(child));
     }
+}
+
+void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
+{
+    if (binding->GetObjectType() != OBJTYPE_MATERIAL)
+        m_handlesMap.insert(std::make_pair(binding->GetInstance(), binding->getRowTree()));
 }
 
 void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
@@ -489,7 +495,7 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
                                                         ->GetParentInstance(inInstance), m_binding);
             m_graphicsScene->rowManager()
                     ->createRowFromBinding(binding, bindingParent->getRowTree());
-            insertToHandlesMapRecursive(binding);
+            insertToHandlesMap(binding);
         }
     }
 }
@@ -699,7 +705,7 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
             if (theDataModelBridge->IsSceneGraphInstance(inChild)) {
                 m_graphicsScene->rowManager()
                         ->createRowFromBinding(binding, rowParent, convertedIndex);
-                insertToHandlesMapRecursive(binding);
+                insertToHandlesMap(binding);
             }
         }
     }

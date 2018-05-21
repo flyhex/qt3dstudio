@@ -131,6 +131,7 @@ private:
     Qt3DSDMTimelineItemBinding *getBindingForHandle(int handle,
                                                     Qt3DSDMTimelineItemBinding *binding) const;
     void insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding);
+    void insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding);
     TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;
     QGraphicsView *m_viewTimelineHeader = nullptr;
