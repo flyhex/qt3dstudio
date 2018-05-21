@@ -61,7 +61,8 @@ public:
     int getRowIndex(RowTree *row, int startAt = 1);
     bool isFirstChild(RowTree *parent, RowTree *child);
     bool isSingleSelected() const;
-    RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
+    RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr,
+                                  int index = -1);
     RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index = -1);
     RowTree *createRow(EStudioObjectType rowType, RowTree *parentRow = nullptr,
                        const QString &label = QString(), const QString &propType = QString(),

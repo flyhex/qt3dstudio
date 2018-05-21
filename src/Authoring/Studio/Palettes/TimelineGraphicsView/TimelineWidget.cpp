@@ -479,11 +479,9 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         if (binding && !rowExists) {
             Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
                                                         ->GetParentInstance(inInstance), m_binding);
-            RowTree *newRow = m_graphicsScene->rowManager()
-                              ->createRowFromBinding(binding, bindingParent->getRowTree());
-
-            if (binding->GetObjectType() != OBJTYPE_MATERIAL)
-                m_handlesMap.insert(std::make_pair(inInstance, newRow));
+            m_graphicsScene->rowManager()
+                    ->createRowFromBinding(binding, bindingParent->getRowTree());
+            insertToHandlesMapRecursive(binding);
         }
     }
 }
@@ -636,10 +634,24 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
     Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(inParent, m_binding);
 
     if (binding && bindingParent) {
+        int convertedIndex = bindingParent->convertIndex(inIndex, true);
         RowTree *row = binding->getRowTree();
         RowTree *rowParent = bindingParent->getRowTree();
-        if (row && rowParent)
-            rowParent->addChildAt(row, bindingParent->convertIndex(inIndex, true));
+        if (row && rowParent) {
+            // Row already exists in bindings, just add it into UI
+            // (This happens e.g. when changing material row type)
+            rowParent->addChildAt(row, convertedIndex);
+        } else if (rowParent && !row) {
+            // Parent exists but row not, so create new row.
+            // (This happens e.g. when deleting a row -> undo)
+            CClientDataModelBridge *theDataModelBridge = g_StudioApp.GetCore()->GetDoc()
+                    ->GetStudioSystem()->GetClientDataModelBridge();
+            if (theDataModelBridge->IsSceneGraphInstance(inChild)) {
+                m_graphicsScene->rowManager()
+                        ->createRowFromBinding(binding, rowParent, convertedIndex);
+                insertToHandlesMapRecursive(binding);
+            }
+        }
     }
 }
 

@@ -74,10 +74,12 @@ void RowManager::removeAllRows()
     }
 }
 
-RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow)
+RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow,
+                                          int index)
 {
     RowTree *newRow = createRow(binding->GetTimelineItem()->GetObjectType(), parentRow,
-                                binding->GetTimelineItem()->GetName().toQString());
+                                binding->GetTimelineItem()->GetName().toQString(),
+                                QString(), index);
 
     // connect the new row and its binding
     binding->setRowTree(newRow);
