@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file alias="main.qml">qml/qmlstreamer/main.qml</file>
-        <file>presentation/rotating_cube.uip</file>
-        <file>presentation/rotating_cube.uia</file>
-        <file>presentation/images/dummy.png</file>
-        <file alias="RedFill.qml">presentation/scripts/RedFill.qml</file>
-    </qresource>
-</RCC>
