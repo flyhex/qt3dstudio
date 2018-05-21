@@ -111,6 +111,10 @@ protected:
                             qt3dsdm::Qt3DSDMPropertyHandle property);
     void onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
+    void onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                          qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void onPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void onChildAdded(int inParent, int inChild, long inIndex);
     void onChildRemoved(int inParent, int inChild, long inIndex);
     void onChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);

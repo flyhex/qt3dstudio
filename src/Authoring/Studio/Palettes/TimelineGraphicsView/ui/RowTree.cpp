@@ -390,6 +390,9 @@ void RowTree::setPropBinding(ITimelineItemProperty *binding)
 
     if (parentRow()->expanded())
         setRowVisible(true);
+
+    // Update label color
+    m_labelItem.setMaster(m_PropBinding->IsMaster());
 }
 
 void RowTree::setState(State state)

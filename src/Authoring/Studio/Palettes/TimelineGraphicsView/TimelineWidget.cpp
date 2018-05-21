@@ -377,6 +377,14 @@ void TimelineWidget::OnNewPresentation()
         std::bind(&TimelineWidget::onActionEvent, this,
                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)));
 
+    // connect property linked/unlinked
+    m_connections.push_back(theSignalProvider->ConnectPropertyLinked(
+        std::bind(&TimelineWidget::onPropertyLinked, this,
+                  std::placeholders::_2, std::placeholders::_3)));
+    m_connections.push_back(theSignalProvider->ConnectPropertyUnlinked(
+        std::bind(&TimelineWidget::onPropertyUnlinked, this,
+                  std::placeholders::_2, std::placeholders::_3)));
+
     // object add, remove, move
     Q3DStudio::CGraph &theGraph(*g_StudioApp.GetCore()->GetDoc()->GetAssetGraph());
     m_connections.push_back(theGraph.ConnectChildAdded(
@@ -539,8 +547,10 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
     if (binding) {
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
+        bool propAnimated = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                            ->GetAnimationSystem()->IsPropertyAnimated(parentInstance, property);
 
-        if (propBinding) {
+        if (propBinding && !propAnimated) {
             m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
 
             binding->RemovePropertyRow(property);
@@ -626,6 +636,46 @@ void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
     Q_UNUSED(inOwner)
 
     // Mahmoud_TODO: implement?
+}
+
+void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                      qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+{
+    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
+
+    if (binding) {
+        ITimelineItemProperty *propBinding = binding->GetPropertyBinding(inProperty);
+
+        if (propBinding) {
+            RowTree *propRow = binding->GetPropertyBinding(inProperty)->getRowTree();
+
+            // this call deletes and recreates the property binding so we need to reconnect the
+            // property binding and its RowTree, and the keyframes also
+            binding->OnPropertyLinked(inProperty);
+
+            propBinding = binding->GetPropertyBinding(inProperty);
+            propBinding->setRowTree(propRow);
+            propRow->setPropBinding(propBinding);
+
+            // recreate and connect prop row keyframes
+            m_graphicsScene->keyframeManager()->deleteKeyframes(propRow->rowTimeline(), false);
+            for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
+                IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
+                Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
+                            propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
+                            false).at(0);
+
+                kf->setUI(kfUI);
+                kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
+            }
+        }
+    }
+}
+
+void TimelineWidget::onPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+{
+    onPropertyLinked(inInstance, inProperty);
 }
 
 void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)

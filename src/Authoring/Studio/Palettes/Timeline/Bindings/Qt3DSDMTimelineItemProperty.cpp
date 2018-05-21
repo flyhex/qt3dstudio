@@ -46,6 +46,7 @@
 #include "CmdDataModelRemoveKeyframe.h"
 #include "StudioApp.h"
 #include "Core.h"
+#include "RowTree.h"
 
 // Link to data model
 #include "TimeEditDlg.h"
@@ -171,13 +172,13 @@ Q3DStudio::CString Qt3DSDMTimelineItemProperty::GetName() const
 }
 
 // Helper function to retrieve the parent binding class.
-inline ITimelineItemBinding *GetParentBinding(CPropertyRow *inRow)
+inline ITimelineItemBinding *GetParentBinding(RowTree *inRow)
 {
     ITimelineItemBinding *theParentBinding = nullptr;
     if (inRow) {
-        CBaseStateRow *theParentRow = dynamic_cast<CBaseStateRow *>(inRow->GetParentRow());
+        RowTree *theParentRow = inRow->parentRow();
         if (theParentRow) {
-            theParentBinding = theParentRow->GetTimelineItemBinding();
+            theParentBinding = theParentRow->getBinding();
             ASSERT(theParentBinding); // TimelineItemBinding should be set properly during
                                       // CBaseStateRow::Initialize
         }
@@ -187,9 +188,9 @@ inline ITimelineItemBinding *GetParentBinding(CPropertyRow *inRow)
 
 bool Qt3DSDMTimelineItemProperty::IsMaster() const
 {
-    if (m_Row) {
+    if (m_rowTree) {
         if (Qt3DSDMTimelineItemBinding *theParentBinding =
-                dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row)))
+                static_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_rowTree)))
             return m_TransMgr->GetDoc()->GetDocumentReader().IsPropertyLinked(
                 theParentBinding->GetInstanceHandle(), m_PropertyHandle);
     }
@@ -248,8 +249,8 @@ void Qt3DSDMTimelineItemProperty::Release()
 // Ensures the object that owns this property is selected.
 void Qt3DSDMTimelineItemProperty::SetSelected()
 {
-    if (m_Row) {
-        ITimelineItemBinding *theParentBinding = GetParentBinding(m_Row);
+    if (m_rowTree) {
+        ITimelineItemBinding *theParentBinding = GetParentBinding(m_rowTree);
         if (theParentBinding)
             theParentBinding->SetSelected(false);
     }
@@ -316,7 +317,7 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
     // if no keyframes, get current property value.
     if (m_Keyframes.empty()) {
         Qt3DSDMTimelineItemBinding *theParentBinding =
-            dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row));
+            static_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_rowTree));
         if (theParentBinding) {
 
             SValue theValue;
@@ -414,7 +415,7 @@ void Qt3DSDMTimelineItemProperty::OnEditKeyframeTime(long inCurrentTime, long in
 void Qt3DSDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /*= -1 */)
 {
     Qt3DSDMTimelineItemBinding *theParent =
-        dynamic_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_Row));
+        static_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_rowTree));
     DoSelectKeyframes(inSelected, inTime, false, theParent);
 }
 
