@@ -457,11 +457,11 @@ void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     IAnimationCore *animationCore = doc->GetStudioSystem()->GetAnimationCore();
+    CCmdDataModelChangeDynamicKeyframe *cmd = nullptr;
 
     for (int i = 0; i < m_selectedKeyframes.size(); ++i) {
         Qt3DSDMTimelineKeyframe *timelineKeyframe = m_selectedKeyframes[i]->binding;
         Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
-        CCmdDataModelChangeDynamicKeyframe *cmd = nullptr;
         timelineKeyframe->GetKeyframeHandles(keyframeHandles);
 
         for (size_t keyIndex = 0; keyIndex < keyframeHandles.size(); ++keyIndex) {
@@ -472,10 +472,10 @@ void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
             else
                 cmd->AddHandle(animation);
         }
-
-        if (cmd)
-            g_StudioApp.GetCore()->ExecuteCommand(cmd);
     }
+
+    if (cmd)
+        g_StudioApp.GetCore()->ExecuteCommand(cmd);
 }
 
 long KeyframeManager::OffsetSelectedKeyframes(long inOffset)
