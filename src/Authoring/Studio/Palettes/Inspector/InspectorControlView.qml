@@ -932,7 +932,7 @@ Rectangle {
             }
 
             onValueChanged: {
-                if (ready)
+                if (ready && !isNaN(value))
                     editText = value;
             }
 
