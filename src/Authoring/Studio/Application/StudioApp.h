@@ -129,9 +129,13 @@ protected:
     bool m_authorZoom;
 
 private:
+    void playbackPreviewStart();
+    void playbackPreviewEnd();
+
     bool m_welcomeShownThisSession;
     // are we are launching welcome screen again due to user canceling file dialog?
     bool m_goStraightToWelcomeFileDialog;
+    bool m_playbackPreviewOn = false;
     int m_tutorialPage;
     QTimer *m_autosaveTimer;
 #if (defined Q_OS_MACOS)
@@ -180,6 +184,7 @@ public:
     void OnFileOpenRecent(const Qt3DSFile &inDocument);
     bool PerformSavePrompt();
     void PlaybackStop();
+    bool isPlaybackPreviewOn() const;
     void AdvanceTime();
     void ReduceTime();
     void AdvanceUltraBigTime();

@@ -132,6 +132,7 @@ private:
                                                     Qt3DSDMTimelineItemBinding *binding) const;
     void insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding);
     void insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding);
+    Q3DStudio::CString getPlaybackMode();
     TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;
     QGraphicsView *m_viewTimelineHeader = nullptr;

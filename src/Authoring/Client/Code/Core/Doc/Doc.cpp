@@ -1266,6 +1266,11 @@ long CDoc::GetLatestEndTime()
     return theTime;
 }
 
+bool CDoc::isPlayHeadAtEnd()
+{
+    return m_CurrentViewTime >= GetLatestEndTime();
+}
+
 void CDoc::OnComponentSeconds()
 {
     long theTime = GetCurrentClientTime();
@@ -2889,4 +2894,14 @@ void CDoc::LoadUIAInitialPresentationFilename(const QString &uiaFile, QString &i
             }
         }
     }
+}
+
+void CDoc::setPlayBackPreviewState(bool state)
+{
+    m_playbackPreviewOn = state;
+}
+
+bool CDoc::isPlayBackPreviewOn() const
+{
+    return m_playbackPreviewOn;
 }

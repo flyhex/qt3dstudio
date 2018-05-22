@@ -296,6 +296,10 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     });
 
     connect(m_toolbar, &TimelineToolbar::playTriggered, this, [this]() {
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        if (getPlaybackMode() == "Stop at end" && doc->isPlayHeadAtEnd())
+            g_StudioApp.PlaybackRewind();
+
         g_StudioApp.PlaybackPlay();
     });
 
@@ -315,6 +319,23 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     // data model listeners
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
+}
+
+Q3DStudio::CString TimelineWidget::getPlaybackMode()
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMSlideHandle theActiveSlide(doc->GetActiveSlide());
+    // clock has passed the end, check whether needs to switch slide
+    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle = doc->GetStudioSystem()->GetSlideSystem()
+        ->GetSlideInstance(theActiveSlide);
+
+    CClientDataModelBridge *clientDataModelBridge = doc->GetStudioSystem()
+            ->GetClientDataModelBridge();
+    qt3dsdm::IPropertySystem *propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+    qt3dsdm::SValue theValue;
+    propertySystem->GetInstancePropertyValue(theInstanceHandle, clientDataModelBridge->GetSlide()
+                                             .m_PlayMode, theValue);
+    return qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData();
 }
 
 TimelineWidget::~TimelineWidget()
@@ -415,6 +436,11 @@ void TimelineWidget::OnTimeChanged(long inTime)
 {
     m_graphicsScene->playHead()->setTime(inTime * .001);
     m_toolbar->setTime(inTime);
+
+    if (inTime <= 0 && g_StudioApp.IsPlaying() && getPlaybackMode() == "Ping"
+            && !g_StudioApp.isPlaybackPreviewOn()) {
+        g_StudioApp.PlaybackStopNoRestore();
+    }
 }
 
 void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,

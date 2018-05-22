@@ -1354,14 +1354,35 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                         CStudioApp::PlaybackToggle);
 
     inShortcutHandler->RegisterKeyUpEvent(
-                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackStop), 0,
+                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewEnd), 0,
                 Qt::Key_Space);
     inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::PlaybackPlay), 0,
+                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewStart), 0,
                 Qt::Key_Space);
 
     if (m_views)
         m_views->registerGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
+}
+
+void CStudioApp::playbackPreviewStart()
+{
+    if (!m_playbackPreviewOn) {
+        m_playbackPreviewOn = true;
+        m_core->GetDoc()->setPlayBackPreviewState(true);
+        PlaybackPlay();
+    }
+}
+
+void CStudioApp::playbackPreviewEnd()
+{
+    m_core->GetDoc()->setPlayBackPreviewState(false);
+    m_playbackPreviewOn = false;
+    PlaybackStop();
+}
+
+bool CStudioApp::isPlaybackPreviewOn() const
+{
+    return m_playbackPreviewOn;
 }
 
 //=============================================================================

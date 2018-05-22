@@ -330,6 +330,7 @@ public:
     void ToggleDataModelObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
     void SelectAndNavigateToDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
     long GetLatestEndTime();
+    bool isPlayHeadAtEnd();
 
     CCore *GetCore() override;
 
@@ -388,6 +389,8 @@ public:
     Q3DStudio::CString
     GetProjectFontName(const Q3DStudio::CFilePath
                        &inFullPathToFontFile); // Given a font file, return the font name
+    void setPlayBackPreviewState(bool state);
+    bool isPlayBackPreviewOn() const;
 
 protected:
     // Set the active slide, return true if delving
@@ -476,6 +479,9 @@ protected:
     Qt3DSRenderDevice m_WindowHandle; ///< The window handle to which to render
     Q3DStudio::CRect m_ClientSize;
     Q3DStudio::CRect m_SceneRect; ///< The dimensions of the active scene view
+
+private:
+    bool m_playbackPreviewOn = false;
 };
 
 #endif // INCLUDED_DOC_H
