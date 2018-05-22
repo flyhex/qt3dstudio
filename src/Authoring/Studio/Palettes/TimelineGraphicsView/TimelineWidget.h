@@ -30,6 +30,7 @@
 #define TIMELINEWIDGET_H
 
 #include <QtWidgets/qwidget.h>
+#include <QtCore/qtimer.h>
 #include "DispatchListeners.h"
 #include "ObjectListModel.h"
 #include "Qt3DSDMHandles.h"
@@ -47,6 +48,7 @@ class TimelineSplitter;
 class TimelineGraphicsScene;
 class CTimelineTranslationManager;
 class Qt3DSDMTimelineItemBinding;
+class CClientDataModelBridge;
 
 QT_FORWARD_DECLARE_CLASS(QMouseEvent)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
@@ -93,6 +95,7 @@ public:
     void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     CPt GetPreferredSize() override;
     void SetSize(long inX, long inY) override;
+    bool isFullReconstructPending() const { return m_fullReconstruct; }
 
 protected:
     // DataModel callbacks
@@ -120,13 +123,14 @@ protected:
     void onChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);
     void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void onAsyncUpdate();
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, RowTree *> THandleMap;
+    typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree *> THandleMap;
 
     Qt3DSDMTimelineItemBinding *getBindingForHandle(int handle,
                                                     Qt3DSDMTimelineItemBinding *binding) const;
@@ -147,6 +151,10 @@ private:
     Qt3DSDMTimelineItemBinding *m_binding = nullptr;
     bool m_splitterPressed = false;
     QSize m_preferredSize;
+    QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
+    QTimer m_asyncUpdateTimer;
+    bool m_fullReconstruct = false;
+    CClientDataModelBridge *m_bridge = nullptr;
 
     // data model connection
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;

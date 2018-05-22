@@ -81,6 +81,7 @@ public:
     void resetMouseCursor();
     void updateSnapSteps();
     TExpandMap &expandMap();
+    void resetMousePressParams();
 
 protected:
     bool event(QEvent *event) override;

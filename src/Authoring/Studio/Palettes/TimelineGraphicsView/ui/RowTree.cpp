@@ -58,6 +58,7 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
 RowTree::~RowTree()
 {
     delete m_rowTimeline; // this will also delete the keyframes
+    m_rowTimeline = nullptr;
 }
 
 ITimelineItemBinding *RowTree::getBinding() const
@@ -126,13 +127,15 @@ void RowTree::initializeAnimations()
 
     connect(&m_expandAnimation, &QAbstractAnimation::stateChanged,
             [this](const QAbstractAnimation::State newState) {
-        if (newState == QAbstractAnimation::Running) {
-            setVisible(true);
-            m_rowTimeline->setVisible(true);
-        } else if (newState == QAbstractAnimation::Stopped) {
-            if (this->maximumHeight() == 0) {
-                setVisible(false);
-                m_rowTimeline->setVisible(false);
+        if (m_rowTimeline) {
+            if (newState == QAbstractAnimation::Running) {
+                setVisible(true);
+                m_rowTimeline->setVisible(true);
+            } else if (newState == QAbstractAnimation::Stopped) {
+                if (this->maximumHeight() == 0) {
+                    setVisible(false);
+                    m_rowTimeline->setVisible(false);
+                }
             }
         }
     });
@@ -315,6 +318,11 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
 
     if (!isProperty()) {
+        // Don't access binding when we are in inconsistent state
+        // TODO: Refactor so we don't need to access binding during paint
+        if (m_scene->widgetTimeline()->isFullReconstructPending())
+            return;
+
         Qt3DSDMTimelineItemBinding *itemBinding =
                 static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
         if (itemBinding->HasAction(true)) // has master action
@@ -729,6 +737,9 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 void RowTree::updateExpandStatus(ExpandState state, bool animate)
 {
     m_expandState = state;
+
+    if (m_scene->widgetTimeline()->isFullReconstructPending())
+        return;
 
     // Store the expanded state of items so we can restore it on slide change
     if (m_binding) {

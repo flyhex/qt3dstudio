@@ -262,11 +262,10 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_toolbar, &TimelineToolbar::newLayerTriggered, this, [this]() {
         using namespace Q3DStudio;
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
 
         // If active instance is component, just bail as we can't add layers to components
         qt3dsdm::Qt3DSDMInstanceHandle rootInstance = doc->GetActiveRootInstance();
-        if (bridge->GetObjectType(rootInstance) == OBJTYPE_COMPONENT)
+        if (m_bridge->GetObjectType(rootInstance) == OBJTYPE_COMPONENT)
             return;
 
         qt3dsdm::Qt3DSDMSlideHandle slide = doc->GetActiveSlide();
@@ -319,6 +318,10 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     // data model listeners
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
+
+    m_asyncUpdateTimer.setInterval(0);
+    m_asyncUpdateTimer.setSingleShot(true);
+    connect(&m_asyncUpdateTimer, &QTimer::timeout, this, &TimelineWidget::onAsyncUpdate);
 }
 
 Q3DStudio::CString TimelineWidget::getPlaybackMode()
@@ -351,8 +354,10 @@ QSize TimelineWidget::sizeHint() const
 void TimelineWidget::OnNewPresentation()
 {
     // Register callbacks
-    qt3dsdm::IStudioFullSystemSignalProvider *theSignalProvider =
-        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
+    auto studioSystem = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    qt3dsdm::IStudioFullSystemSignalProvider *theSignalProvider
+            = studioSystem->GetFullSystemSignalProvider();
+    m_bridge = studioSystem->GetClientDataModelBridge();
 
     m_connections.push_back(theSignalProvider->ConnectActiveSlide(
         std::bind(&TimelineWidget::onActiveSlide, this, std::placeholders::_1,
@@ -452,41 +457,35 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
     if (m_activeSlide == inSlide)
         return;
 
-    m_translationManager->Clear();
     m_activeSlide = inSlide;
 
-    auto *theSlideSystem = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetSlideSystem();
-    auto theSlideInstance = theSlideSystem->GetSlideInstance(inSlide);
-
-    m_binding = static_cast<Qt3DSDMTimelineItemBinding *>(
-                m_translationManager->GetOrCreate(theSlideInstance));
-
-    m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
-    m_graphicsScene->updateSnapSteps();
-    m_handlesMap.clear();
-    insertToHandlesMapRecursive(m_binding);
-    m_navigationBar->updateNavigationItems(m_translationManager->GetBreadCrumbProvider());
+    if (!m_fullReconstruct) {
+        m_fullReconstruct = true;
+        m_graphicsScene->resetMousePressParams();
+        if (!m_asyncUpdateTimer.isActive())
+            m_asyncUpdateTimer.start();
+    }
 }
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (binding->GetObjectType() != OBJTYPE_MATERIAL) {
-        insertToHandlesMap(binding);
-
-        const QList<ITimelineItemBinding *> children = binding->GetChildren();
-        for (auto child : children)
-            insertToHandlesMapRecursive(static_cast<Qt3DSDMTimelineItemBinding *>(child));
-    }
+    insertToHandlesMap(binding);
+    const QList<ITimelineItemBinding *> children = binding->GetChildren();
+    for (auto child : children)
+        insertToHandlesMapRecursive(static_cast<Qt3DSDMTimelineItemBinding *>(child));
 }
 
 void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (binding->GetObjectType() != OBJTYPE_MATERIAL)
-        m_handlesMap.insert(std::make_pair(binding->GetInstance(), binding->getRowTree()));
+    m_handlesMap.insert(binding->GetInstance(), binding->getRowTree());
 }
 
 void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable)
 {
+    // Full update will set selection anyway
+    if (m_fullReconstruct)
+        return;
+
     qt3dsdm::TInstanceHandleList theInstances = inNewSelectable.GetSelectedInstances();
 
     // First deselect all items in UI
@@ -509,15 +508,15 @@ void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable
 
 void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    CClientDataModelBridge *theDataModelBridge = g_StudioApp.GetCore()->GetDoc()
-                                                 ->GetStudioSystem()->GetClientDataModelBridge();
+    if (m_fullReconstruct)
+        return;
 
-    if (theDataModelBridge->IsSceneGraphInstance(inInstance)) {
+    if (m_bridge->IsSceneGraphInstance(inInstance)) {
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
         bool rowExists = binding && binding->getRowTree();
         if (binding && !rowExists) {
-            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(theDataModelBridge
+            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(m_bridge
                                                         ->GetParentInstance(inInstance), m_binding);
             m_graphicsScene->rowManager()
                     ->createRowFromBinding(binding, bindingParent->getRowTree());
@@ -528,11 +527,14 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
 void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    THandleMap::const_iterator it = m_handlesMap.find(inInstance);
+    if (m_fullReconstruct)
+        return;
 
-    if (it != m_handlesMap.end()) { // scene object exists
-        m_graphicsScene->rowManager()->deleteRow(it->second);
-        m_handlesMap.erase(it);
+    RowTree *row = m_handlesMap.value(inInstance);
+
+    if (row) { // scene object exists
+        m_graphicsScene->rowManager()->deleteRow(row);
+        m_handlesMap.remove(inInstance);
         m_graphicsScene->expandMap().remove(inInstance);
     }
 }
@@ -540,6 +542,9 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
+    if (m_fullReconstruct)
+        return;
+
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
     if (binding) {
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
@@ -576,6 +581,9 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
+    if (m_fullReconstruct)
+        return;
+
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
     if (binding) {
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
@@ -593,17 +601,26 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 void TimelineWidget::onKeyframeInserted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
                                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
 {
+    if (m_fullReconstruct)
+        return;
+
     refreshKeyframe(inAnimation, inKeyframe, ETimelineKeyframeTransaction_Add);
 }
 
 void TimelineWidget::onKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
                                        qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
 {
+    if (m_fullReconstruct)
+        return;
+
     refreshKeyframe(inAnimation, inKeyframe, ETimelineKeyframeTransaction_Delete);
 }
 
 void TimelineWidget::onKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe)
 {
+    if (m_fullReconstruct)
+        return;
+
     qt3dsdm::IAnimationCore *theAnimationCore =
             g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetAnimationCore();
     if (theAnimationCore->KeyframeValid(inKeyframe)) {
@@ -636,27 +653,69 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
 void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
-    CClientDataModelBridge *bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-            ->GetClientDataModelBridge();
-    const SDataModelSceneAsset &asset = bridge->GetSceneAsset();
-    const bool filterProperty = inProperty == asset.m_Eyeball || inProperty == asset.m_Locked
-            || inProperty == asset.m_Shy;
-    const bool timeProperty = inProperty == asset.m_StartTime || inProperty == asset.m_EndTime;
-    const bool nameProperty = inProperty == bridge->GetNameProperty();
-    if (filterProperty || timeProperty || nameProperty) {
-        Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
-        if (binding) {
-            RowTree *row = binding->getRowTree();
-            if (row) {
-                if (timeProperty)
-                    row->rowTimeline()->updateDurationFromBinding();
-                if (filterProperty)
-                    row->updateFromBinding();
-                if (nameProperty)
-                    row->updateLabel();
+    if (m_fullReconstruct)
+        return;
+
+    const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
+    if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
+            || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
+            || inProperty == m_bridge->GetNameProperty()) {
+        m_dirtyProperties.insert(inInstance, inProperty);
+        if (!m_asyncUpdateTimer.isActive())
+            m_asyncUpdateTimer.start();
+    }
+}
+
+void TimelineWidget::onAsyncUpdate()
+{
+    if (m_fullReconstruct) {
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        m_translationManager->Clear();
+        m_binding = static_cast<Qt3DSDMTimelineItemBinding *>(
+                    m_translationManager->GetOrCreate(
+                        doc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(m_activeSlide)));
+        m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
+        m_handlesMap.clear();
+        insertToHandlesMapRecursive(m_binding);
+        m_navigationBar->updateNavigationItems(m_translationManager->GetBreadCrumbProvider());
+        m_graphicsScene->updateSnapSteps();
+        m_fullReconstruct = false;
+        onSelectionChange(doc->GetSelectedValue());
+    } else {
+        // Update properties
+        if (!m_dirtyProperties.isEmpty()) {
+            const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
+            qt3dsdm::Qt3DSDMPropertyHandle nameProp = m_bridge->GetNameProperty();
+            for (int instance : qAsConst(m_dirtyProperties)) {
+                bool filterProperty = false;
+                bool timeProperty = false;
+                bool nameProperty = false;
+                const auto props = m_dirtyProperties.values(instance);
+                for (auto prop : props) {
+                    filterProperty = filterProperty || prop == asset.m_Eyeball
+                            || prop == asset.m_Locked || prop == asset.m_Shy;
+                    timeProperty = timeProperty
+                            || prop == asset.m_StartTime || prop == asset.m_EndTime;
+                    nameProperty = nameProperty || prop == nameProp;
+                }
+                if (filterProperty || timeProperty || nameProperty) {
+                    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(instance, m_binding);
+                    if (binding) {
+                        RowTree *row = binding->getRowTree();
+                        if (row) {
+                            if (timeProperty)
+                                row->rowTimeline()->updateDurationFromBinding();
+                            if (filterProperty)
+                                row->updateFromBinding();
+                            if (nameProperty)
+                                row->updateLabel();
+                        }
+                    }
+                }
             }
         }
     }
+    m_dirtyProperties.clear();
 }
 
 void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
@@ -673,6 +732,9 @@ void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
 void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                       qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
+    if (m_fullReconstruct)
+        return;
+
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
     if (binding) {
@@ -712,6 +774,9 @@ void TimelineWidget::onPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
 
 void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
 {
+    if (m_fullReconstruct)
+        return;
+
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
     Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(inParent, m_binding);
 
@@ -726,9 +791,7 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
         } else if (rowParent && !row) {
             // Parent exists but row not, so create new row.
             // (This happens e.g. when deleting a row -> undo)
-            CClientDataModelBridge *theDataModelBridge = g_StudioApp.GetCore()->GetDoc()
-                    ->GetStudioSystem()->GetClientDataModelBridge();
-            if (theDataModelBridge->IsSceneGraphInstance(inChild)) {
+            if (m_bridge->IsSceneGraphInstance(inChild)) {
                 m_graphicsScene->rowManager()
                         ->createRowFromBinding(binding, rowParent, convertedIndex);
                 insertToHandlesMap(binding);
@@ -748,6 +811,9 @@ void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
 void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
                                   long inNewIndex)
 {
+    if (m_fullReconstruct)
+        return;
+
     Q_UNUSED(inOldIndex)
 
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
@@ -842,7 +908,8 @@ void TimelineWidget::enableDnD(bool b)
 
     if (!b) { // object successfully dropped on the timeline tree
         if (m_graphicsScene->rowMover()->insertionParent()
-                && !m_graphicsScene->rowMover()->insertionParent()->expanded()) {
+                && !m_graphicsScene->rowMover()->insertionParent()->expanded()
+                && !m_fullReconstruct) {
             RowTree *insertionParent = m_graphicsScene->rowMover()->insertionParent();
             QTimer::singleShot(0, this, [=]() {
                 insertionParent->updateExpandStatus(RowTree::ExpandState::Expanded, false);

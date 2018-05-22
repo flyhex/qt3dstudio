@@ -157,6 +157,11 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     const int keyFrameH = 16;
     const int keyFrameY = (TimelineConstants::ROW_H / 2) - (keyFrameH / 2);
 
+    // Don't access binding when we are in inconsistent state
+    // TODO: Refactor so we don't need to access binding during paint
+    if (m_rowTree->m_scene->widgetTimeline()->isFullReconstructPending())
+        return;
+
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
                 = QPixmap(":/images/Keyframe-Master-Normal.png");

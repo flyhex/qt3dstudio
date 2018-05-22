@@ -306,7 +306,7 @@ void TimelineGraphicsScene::resetMouseCursor()
 
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
         m_releaseSelectRow = nullptr;
         m_dragging = false;
         m_startRowMoverOnNextDrag = false;
@@ -504,6 +504,19 @@ TExpandMap &TimelineGraphicsScene::expandMap()
     return m_expandMap;
 }
 
+void TimelineGraphicsScene::resetMousePressParams()
+{
+    m_selectionRect->end();
+    m_rowMover->end();
+    m_dragging = false;
+    m_startRowMoverOnNextDrag = false;
+    m_rulerPressed = false;
+    m_keyframePressed = false;
+    m_clickedTimelineControlType = TimelineControlType::None;
+    m_editedTimelineRow = nullptr;
+    m_releaseSelectRow = nullptr;
+}
+
 void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 {
     // snap to play head
@@ -575,16 +588,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 m_rowManager->selectRow(m_releaseSelectRow);
         }
 
-        // reset mouse press params
-        m_selectionRect->end();
-        m_rowMover->end();
-        m_dragging = false;
-        m_startRowMoverOnNextDrag = false;
-        m_rulerPressed = false;
-        m_keyframePressed = false;
-        m_clickedTimelineControlType = TimelineControlType::None;
-        m_editedTimelineRow = nullptr;
-        m_releaseSelectRow = nullptr;
+        resetMousePressParams();
     }
 
     QGraphicsScene::mouseReleaseEvent(event);
