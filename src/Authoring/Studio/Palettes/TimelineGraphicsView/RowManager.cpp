@@ -43,6 +43,8 @@
 #include "Doc.h"
 
 #include <QtWidgets/qgraphicslinearlayout.h>
+#include <QtCore/qpointer.h>
+#include <QtCore/qtimer.h>
 
 RowManager::RowManager(TimelineGraphicsScene *scene, QGraphicsLinearLayout *layoutLabels,
                        QGraphicsLinearLayout *layoutTimeline)
@@ -231,6 +233,19 @@ void RowManager::setRowSelection(RowTree *row, bool selected)
         if (!m_selectedRows.contains(row))
             m_selectedRows.append(row);
         row->setState(InteractiveTimelineItem::Selected);
+        // Expand parents if not expanded
+        QPointer<RowTree> pRow = row->parentRow();
+        if (!pRow.isNull()) {
+            QTimer::singleShot(0, [pRow]() {
+                if (!pRow.isNull()) {
+                    RowTree *parentRow = pRow.data();
+                    while (parentRow) {
+                        parentRow->updateExpandStatus(RowTree::ExpandState::Expanded, true);
+                        parentRow = parentRow->parentRow();
+                    }
+                }
+            });
+        }
     } else {
         m_selectedRows.removeAll(row);
         row->setState(InteractiveTimelineItem::Normal);
