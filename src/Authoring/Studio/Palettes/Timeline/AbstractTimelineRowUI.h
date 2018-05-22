@@ -37,7 +37,6 @@ class ITimelineControl;
 class ISnappingListProvider;
 
 class CControl;
-class CControlWindowListener;
 class CDropTarget;
 class CRct;
 class CSnapper;
@@ -76,7 +75,6 @@ public:
                                   bool inGlobalCommitSelectionFlag) = 0;
     virtual void PopulateSnappingList(CSnapper *inSnappingList) = 0;
 
-    virtual void DoStartDrag(CControlWindowListener *inWndListener) = 0;
     virtual void AcceptDropAfter(bool inAccept) = 0;
     virtual void AcceptDropBefore(bool inAccept) = 0;
     virtual void SetDropTarget(CDropTarget *inDropTarget) = 0;

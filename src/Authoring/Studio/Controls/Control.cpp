@@ -418,7 +418,6 @@ void CControl::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     m_ControlData->m_IsMouseOver = false;
 
-    GetWindowListener()->HideTooltips();
     // Go through all the children looking for ones that think the mouse is over.
     // If it is then notify it of a mouse out.
     ControlGraph::SReverseIterator thePos = ControlGraph::GetRChildren(*this);
@@ -628,20 +627,6 @@ bool CControl::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
 
             // only want OnMouseHover to be called on the first child under the point.
             break;
-        }
-    }
-
-    // If the mouseover was not handled
-    if (!theRetVal) {
-        // If the tooltip text is not empty
-        QString theTooltipText = GetTooltipText();
-        if (!theTooltipText.isEmpty()) {
-            // Show the tooltip, and return true so that parents don't cover this tooltip with their
-            // own
-            // Note that we are offsetting the point so that it appears below the mouse cursor
-            GetWindowListener()->ShowTooltips(GetGlobalPosition(CPt(inPoint.x, inPoint.y + 32)),
-                                              GetTooltipText());
-            theRetVal = true;
         }
     }
 
@@ -1041,30 +1026,6 @@ void CControl::OnChildInvalidated()
 bool CControl::IsChildInvalidated() const
 {
     return m_ControlData->m_IsChildInvalidated || m_ControlData->m_IsInvalidated;
-}
-
-void CControl::SetWindowListener(CControlWindowListener *inListener)
-{
-    m_ControlData->m_WindowListener = inListener;
-}
-
-//=============================================================================
-/**
- * Retrieves the topmost window of this control.  The window listener is the
- * bridge between the OS and the cross-platform custom control code below.
- * This function was added specifically to support drag-and-drop by providing
- * a way of setting the drag state on the outermost window.
- * @return pointer to the control window listener or std::shared_ptr<CControlData>() if there is
- * not one
- */
-CControlWindowListener *CControl::GetWindowListener()
-{
-    CControlWindowListener *theWindowListener = nullptr;
-    if (GetParent() != nullptr)
-        theWindowListener = GetParent()->GetWindowListener();
-    else
-        theWindowListener = m_ControlData->m_WindowListener;
-    return theWindowListener;
 }
 
 //=============================================================================
@@ -1638,26 +1599,6 @@ bool CControl::IsMouseDown()
 
 void CControl::OnMouseClick(CPt, Qt::KeyboardModifiers)
 {
-}
-
-//===============================================================================
-/**
- * Sets the text of the tooltip for this control.  If the string is empty, no
- * tooltip will be shown.
- * @param inText text of the tooltip
- */
-void CControl::SetTooltipText(const QString &inText)
-{
-    m_ControlData->SetTooltipText(inText);
-}
-
-//===============================================================================
-/**
- * @return the current tooltip text for this control
- */
-QString CControl::GetTooltipText()
-{
-    return m_ControlData->GetTooltipText();
 }
 
 void CControl::GrabFocus(CControl *inControl)

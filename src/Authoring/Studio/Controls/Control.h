@@ -192,9 +192,6 @@ public:
     bool GetEnabledFlag();
     void SetEnabledFlag(bool inIsEnabled);
 
-    void SetWindowListener(CControlWindowListener *inListener);
-    CControlWindowListener *GetWindowListener();
-
     virtual void OnChildSizeChanged(CControl *inChild);
     virtual void ResetMinMaxPref(){}
 
@@ -223,9 +220,6 @@ public:
     void AddFocusListener(CChildFocusListener *inListener);
     void RemoveFocusListener(CChildFocusListener *inListener);
     void FireFocusEvent(bool inStatus);
-
-    void SetTooltipText(const QString &inText);
-    QString GetTooltipText();
 
     virtual void EnsureVisible(CRct inRect);
     void EnsureVisible();

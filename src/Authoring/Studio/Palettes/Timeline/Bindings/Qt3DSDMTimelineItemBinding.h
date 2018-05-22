@@ -130,7 +130,6 @@ public:
     void OnCollapsed() override;
     void ClearKeySelection() override;
     bool OpenAssociatedEditor() override;
-    void DoStartDrag(CControlWindowListener *inWndListener) override;
     void SetDropTarget(CDropTarget *inTarget) override;
     // Hierarchy
     long GetChildrenCount() override;

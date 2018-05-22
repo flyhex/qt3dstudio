@@ -44,16 +44,13 @@
 WidgetControl::WidgetControl(CControl *control, QWidget *parent)
     : QWidget(parent)
     , m_control(control)
-    , m_controlListener(this)
 {
     Q_ASSERT(control);
-    control->SetWindowListener(&m_controlListener);
     setControlSize(sizeHint());
 }
 
 WidgetControl::~WidgetControl()
 {
-    m_control->SetWindowListener(nullptr);
 }
 
 bool WidgetControl::event(QEvent *event)
@@ -290,153 +287,3 @@ void WidgetControl::OnReflectMouse(CPt &inPoint, Qt::KeyboardModifiers inFlags)
     if (m_control->IsChildInvalidated())
         repaint();
 }
-
-//=============================================================================
-/**
- * Creates the pass thru class for the wnd control.
- */
-WidgetControlControlListener::WidgetControlControlListener(WidgetControl *inParent)
-{
-    m_Parent = inParent;
-}
-
-WidgetControlControlListener::~WidgetControlControlListener()
-{
-}
-
-//=============================================================================
-/**
- * Notification from the control that the window was invalidated.
- */
-void WidgetControlControlListener::OnControlInvalidated()
-{
-    m_Parent->update();
-}
-
-//=============================================================================
-/**
- * Notification from the control to do a popup at the specified location.
- */
-long WidgetControlControlListener::DoPopup(QMenu *inMenu, CPt inPoint)
-{
-    long selectedIndex = -1;
-    if (inMenu) {
-        m_Parent->setContextMenuShown(true);
-        auto action = inMenu->exec(m_Parent->mapToGlobal(inPoint));
-        m_Parent->setContextMenuShown(false);
-        if (action)
-            selectedIndex = inMenu->actions().indexOf(action);
-    }
-
-    return selectedIndex;
-}
-
-//=============================================================================
-/**
- * Get the location of the point in Screen coordinates.
- */
-CPt WidgetControlControlListener::ClientToScreen(CPt inPoint)
-{
-    return m_Parent->mapToGlobal(inPoint);
-}
-
-//=============================================================================
-/**
- * Get the location of the point into client coordinates.
- */
-CPt WidgetControlControlListener::ScreenToClient(CPt inPoint)
-{
-    return m_Parent->mapFromGlobal(inPoint);
-}
-
-//=============================================================================
-/**
- * Get the platform dependent view that this is embedding.
- * Used when platform dependent controls need to be embedded into the Controls.
- */
-TPlatformView WidgetControlControlListener::GetPlatformView()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    return m_Parent->m_hWnd;
-#else
-    return nullptr;
-#endif
-}
-
-//=============================================================================
-/**
- * Pass-thru to the CWndControl's SetIsDragging function.
- * @param inIsDragging true to specify that a drag is occurring or false to cancel a drag
- */
-void WidgetControlControlListener::SetIsDragging(bool inIsDragging)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    m_Parent->SetIsDragging(inIsDragging);
-#endif
-}
-
-//=============================================================================
-/**
- * Pass-thru to the CWndControl's ShowTooltips function.
- * @param inLocation mid-point of the tooltip in global coordinates
- * @param inText text to display as a tooltip
- */
-void WidgetControlControlListener::ShowTooltips(CPt inLocation, const QString &inText)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    m_Parent->ShowTooltips(inLocation, inText);
-#endif
-}
-
-//=============================================================================
-/**
- * Pass-thru to the CWndControl's HideTooltips function.
- */
-void WidgetControlControlListener::HideTooltips()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    m_Parent->HideTooltips();
-#endif
-}
-
-//=============================================================================
-/**
- * Pass-thru to the CWndControl's ShowMoveableTooltips function.
- * @param inLocation mid-point of the tooltip in global coordinates
- * @param inText text to display as a tooltip
- */
-void WidgetControlControlListener::ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText,
-                                                      CRct inBoundingRct)
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    m_Parent->ShowMoveableWindow(inLocation, inText, inBoundingRct);
-#endif
-}
-
-//=============================================================================
-/**
- * Pass-thru to the CWndControl's HideMoveableTooltips function.
- */
-void WidgetControlControlListener::HideMoveableWindow()
-{
-#ifdef KDAB_TEMPORARILY_REMOVED
-    m_Parent->HideMoveableWindow();
-#endif
-}
-
-void WidgetControlControlListener::DoStartDrag(IDragable *inDragable)
-{
-    m_Parent->DoStartDrag(inDragable);
-}
-
-//===============================================================================
-/**
-* performs a drag operation on a file
-*/
-void WidgetControlControlListener::DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameList)
-{
-    m_Parent->DoStartDrag(inDragFileNameList);
-}
-
-
-

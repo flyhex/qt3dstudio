@@ -422,11 +422,6 @@ bool Qt3DSDMTimelineItemBinding::OpenAssociatedEditor()
     return false; // nothing to do by default
 }
 
-void Qt3DSDMTimelineItemBinding::DoStartDrag(CControlWindowListener *inWndListener)
-{
-    inWndListener->DoStartDrag(this);
-}
-
 inline qt3dsdm::Qt3DSDMInstanceHandle Qt3DSDMTimelineItemBinding::GetInstance() const
 {
     return m_DataHandle;

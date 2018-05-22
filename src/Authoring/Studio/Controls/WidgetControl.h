@@ -37,33 +37,9 @@
 class CRenderer;
 class WidgetControl;
 
-class WidgetControlControlListener : public CControlWindowListener
-{
-public:
-    WidgetControlControlListener(WidgetControl *inParent);
-    virtual ~WidgetControlControlListener();
-
-    void OnControlInvalidated() override;
-    long DoPopup(QMenu *inMenu, CPt inLocation) override;
-    CPt ClientToScreen(CPt inPoint) override;
-    CPt ScreenToClient(CPt inPoint) override;
-    TPlatformView GetPlatformView() override;
-    void SetIsDragging(bool inIsDragging) override;
-    void ShowTooltips(CPt inLocation, const QString &inText) override;
-    void HideTooltips() override;
-    void DoStartDrag(IDragable *inDragable) override;
-    void DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameList) override;
-    void ShowMoveableWindow(CPt inLocation, const Q3DStudio::CString &inText,
-                            CRct inBoundingRct) override;
-    void HideMoveableWindow() override;
-
-protected:
-    WidgetControl *m_Parent;
-};
 class WidgetControl : public QWidget, public CWinDropContainer
 {
     Q_OBJECT
-    friend class ::WidgetControlControlListener;
 public:
     explicit WidgetControl(CControl *control, QWidget *parent = nullptr);
     virtual ~WidgetControl();
@@ -106,7 +82,6 @@ private:
     bool m_isLeftMouseDown = false;
     bool m_isDragging = false;
     bool m_isContextMenuShown = false;
-    WidgetControlControlListener m_controlListener;
 };
 
 #endif // WIDGETCONTROL_H

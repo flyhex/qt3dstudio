@@ -138,7 +138,6 @@ void CBreadCrumbControl::GenerateButtonText(const SBreadCrumb &inBreadCrumb, TBu
     inButton->SetTextColorUp(CStudioPreferences::GetNormalColor());
     inButton->SetTextColorDown(CStudioPreferences::GetNormalColor());
     inButton->SetText(theDisplayName);
-    inButton->SetTooltipText(theDisplayName);
     inButton->SetName(theDisplayName);
 }
 

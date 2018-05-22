@@ -93,7 +93,6 @@ public:
     virtual void OnCollapsed() = 0;
     virtual void ClearKeySelection() = 0;
     virtual bool OpenAssociatedEditor() = 0;
-    virtual void DoStartDrag(CControlWindowListener *inWndListener) = 0;
     virtual void SetDropTarget(CDropTarget *inTarget) = 0;
 
     // Hierarchy
