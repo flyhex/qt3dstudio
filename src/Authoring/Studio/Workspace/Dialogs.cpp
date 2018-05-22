@@ -376,7 +376,6 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
                                         QFileDialog::DontUseNativeDialog);
 }
 
-// outPath parameter is changed to last selected path if dialog was accepted
 QList<QUrl> CDialogs::SelectAssets(QString &outPath,
                                    Q3DStudio::DocumentEditorFileType::Enum assetType)
 {
@@ -392,8 +391,18 @@ QList<QUrl> CDialogs::SelectAssets(QString &outPath,
     QList<QUrl> files;
     if (fd.exec()) {
         files = fd.selectedUrls();
-        // Return the new path
-        outPath = fd.directory().absolutePath();
+        QString newOutPath = fd.directory().absolutePath();
+        QString contentPath = QDir::fromNativeSeparators(
+                    Qt3DSFile::GetApplicationDirectory().GetPath().toQString()
+                    + QStringLiteral("/Content"));
+
+        if (assetType != Q3DStudio::DocumentEditorFileType::Unknown
+                || (assetType == Q3DStudio::DocumentEditorFileType::Unknown
+                    && !newOutPath.startsWith(contentPath))) {
+            // Return the new path if we are browsing a specific asset type, or we are browsing
+            // outside the Content folder.
+            outPath = newOutPath;
+        }
     }
 
     return files;
