@@ -109,15 +109,21 @@ bool CStudioPreferencesPropSheet::apply()
     return true;
 }
 
+void CStudioPreferencesPropSheet::done(int code)
+{
+    m_returnCode = code;
+    QDialog::done(code);
+}
+
 void CStudioPreferencesPropSheet::accept()
 {
-    if (apply())
+    if (apply() && !m_returnCode)
         QDialog::accept();
+    else
+        QDialog::done(m_returnCode);
 }
 
 void CStudioPreferencesPropSheet::reject()
 {
-    for (auto page : findChildren<CStudioPreferencesPropPage *>())
-        page->onCancel();
     QDialog::reject();
 }

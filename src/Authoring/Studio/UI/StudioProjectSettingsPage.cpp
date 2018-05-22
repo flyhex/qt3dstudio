@@ -230,18 +230,6 @@ bool CStudioProjectSettingsPage::onApply()
 
 //==============================================================================
 /**
- *	OnOK: Handler for the OK button
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::onOK()
-{
-    CStudioPreferencesPropPage::onOK();
-}
-
-//==============================================================================
-/**
  *	OnChangeEditPresWidth: EN_CHANGE handler for the IDC_EDIT_PRESWIDTH field
  *
  *	@param	None

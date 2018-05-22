@@ -250,14 +250,7 @@ void CStudioAppPrefsPage::saveSettings()
     savePreviewSettings();
 #endif
 
-    if (m_restartNeeded) {
-        // If handles changed, a restart of Studio is needed
-        QMessageBox::information(this, tr("Restart Needed"),
-                                 tr("Some settings were changed that require a"
-                                    " restart of the Qt 3D Studio to take effect."));
-        // Just show the dialog once (unless the values are changed again)
-        m_restartNeeded = false;
-    }
+    checkRestartCondition();
 }
 
 //==============================================================================
@@ -278,18 +271,6 @@ bool CStudioAppPrefsPage::onApply()
     g_StudioApp.getRenderer().RequestRender();
 
     return CStudioPreferencesPropPage::onApply();
-}
-
-//==============================================================================
-/**
- *	OnOK: Handler for the OK button
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioAppPrefsPage::onOK()
-{
-    CStudioPreferencesPropPage::onOK();
 }
 
 //==============================================================================
@@ -458,6 +439,23 @@ void CStudioAppPrefsPage::onClearAutosaveFiles()
     while (files.hasNext()) {
         if (files.next().endsWith(QStringLiteral("_autosave.uip")))
             QFile::remove(files.filePath());
+    }
+}
+
+void CStudioAppPrefsPage::checkRestartCondition()
+{
+    if (m_restartNeeded) {
+        // If special settings have changed, a restart of Studio is needed
+        int retval = QMessageBox::question(this, tr("Restart Needed"),
+                                           tr("Some settings were changed that require a\n"
+                                              "restart of the Qt 3D Studio to take effect.\n"
+                                              "Restart now?"));
+
+        if (retval == QMessageBox::Yes)
+            CStudioPreferencesPropPage::endDialog(PREFS_SETTINGS_RESTART);
+
+        // Just show the dialog once (unless the values are changed again)
+        m_restartNeeded = false;
     }
 }
 

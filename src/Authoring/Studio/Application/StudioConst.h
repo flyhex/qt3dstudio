@@ -56,6 +56,7 @@ const long SHIFT_PLAYHEAD_SMALL_TICK = 0;
 const long SHIFT_PLAYHEAD_LARGE_TICK = 1;
 
 // Used to reset default preferences
+const long PREFS_SETTINGS_RESTART = 997;
 const long PREFS_RESET_LAYOUT = 998;
 const long PREFS_RESET_DEFAULTS = 999;
 

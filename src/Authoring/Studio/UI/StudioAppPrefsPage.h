@@ -61,7 +61,6 @@ public:
 
 public:
     bool onApply() override;
-    void onOK() override;
     void onBackgroundColorChanged(const QColor &color);
 
 protected:
@@ -87,6 +86,7 @@ protected:
     void setAutosaveInterval(int interval);
     void onClearAutosaveFiles();
     void onitEditStartViewCombo();
+    void checkRestartCondition();
 
 protected:
     std::list<TBuildNameControlPair> m_buildProperties; // List of build properties, either

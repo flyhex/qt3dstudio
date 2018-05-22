@@ -51,9 +51,7 @@ class CStudioPreferencesPropPage : public QWidget
 public:
     explicit CStudioPreferencesPropPage(QWidget *parent = nullptr);
 
-    virtual bool onApply() { onOK(); setModified(false); return true; }
-    virtual void onOK() {}
-    virtual void onCancel() {}
+    virtual bool onApply() { setModified(false); return true; }
 
 protected:
     CStudioPreferencesPropSheet* sheet();
@@ -74,6 +72,7 @@ protected:
 
 public:
     virtual ~CStudioPreferencesPropSheet();
+    void done(int code) override;
 
 protected:
     virtual void onInitDialog();
@@ -84,6 +83,7 @@ protected:
 
 private:
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioPreferencesPropSheet)> m_ui;
+    int m_returnCode = 0;
 };
 
 #endif

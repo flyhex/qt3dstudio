@@ -250,6 +250,7 @@ Q_SIGNALS:
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void handleGeometryAndState(bool save);
+    void handleRestart();
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
     QScopedPointer<RemoteDeploymentSender> m_remoteDeploymentSender;

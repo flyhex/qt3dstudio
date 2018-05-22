@@ -67,10 +67,8 @@ public:
     ~CStudioProjectSettingsPage();
 
     // Overrides
-    // ClassWizard generate virtual function overrides
 public:
     bool onApply() override;
-    void onOK() override;
 
     // Implementation
 protected:

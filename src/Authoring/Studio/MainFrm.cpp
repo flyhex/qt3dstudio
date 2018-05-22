@@ -69,6 +69,7 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
+#include <QtCore/qprocess.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -910,6 +911,8 @@ void CMainFrame::EditPreferences(short inPageIndex)
         RecheckSizingMode();
     } else if (thePrefsReturn == PREFS_RESET_LAYOUT) {
         onViewResetLayout();
+    } else if (thePrefsReturn == PREFS_SETTINGS_RESTART) {
+        QTimer::singleShot(0, this, &CMainFrame::handleRestart);
     }
 }
 
@@ -1515,7 +1518,7 @@ void CMainFrame::onViewResetLayout()
                                           tr("Restart Needed"),
                                           tr("Are you sure that you want to restore Qt 3D Studio "
                                              "layout? \nYour current layout will be lost, and "
-                                             "Studio will exit."));
+                                             "Studio will restart."));
 
     // If "Yes" is clicked, delete window geometry and window state keys from QSettings
     if (theChoice == QMessageBox::Yes) {
@@ -1526,7 +1529,7 @@ void CMainFrame::onViewResetLayout()
         settings.remove(stateKey);
         // Prevent saving geometry and state, and exit
         m_resettingLayout = true;
-        QTimer::singleShot(0, this, &CMainFrame::close);
+        QTimer::singleShot(0, this, &CMainFrame::handleRestart);
     }
 }
 
@@ -1927,6 +1930,14 @@ void CMainFrame::handleGeometryAndState(bool save)
         restoreGeometry(settings.value(geoKey).toByteArray());
         restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
     }
+}
+
+void CMainFrame::handleRestart()
+{
+    QStringList presentationFile = QStringList(g_StudioApp.GetCore()->GetDoc()
+                                               ->GetDocumentPath().GetAbsolutePath().toQString());
+    close();
+    QProcess::startDetached(qApp->arguments()[0], presentationFile);
 }
 
 void CMainFrame::initializeGeometryAndState()
