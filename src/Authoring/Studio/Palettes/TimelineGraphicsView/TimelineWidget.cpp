@@ -683,6 +683,41 @@ void TimelineWidget::onAsyncUpdate()
         m_fullReconstruct = false;
         onSelectionChange(doc->GetSelectedValue());
     } else {
+        if (!m_moveMap.isEmpty()) {
+            // Flip the hash around so that we collect moves by parent.
+            // We can't do this with m_moveMap originally, as things break if
+            // same row receives consecutive moves to different parents.
+            QMultiHash<int, int> flippedMap;
+            QHashIterator<int, int> it(m_moveMap);
+            while (it.hasNext()) {
+                it.next();
+                flippedMap.insert(it.value(), it.key());
+            }
+            const auto parentHandles = flippedMap.keys();
+            for (const auto parentHandle : parentHandles) {
+                QSet<int> movedInstances(flippedMap.values(parentHandle).toSet());
+                RowTree *rowParent = m_handlesMap.value(parentHandle);
+                if (rowParent) {
+                    Qt3DSDMTimelineItemBinding *bindingParent
+                            = static_cast<Qt3DSDMTimelineItemBinding *>(rowParent->getBinding());
+                    if (bindingParent) {
+                        // Resolve indexes for handles. QMap used for its automatic sorting by keys.
+                        QMap<int, int> indexMap;
+                        bindingParent->getTimeContextIndices(movedInstances, indexMap);
+                        QMapIterator<int, int> indexIt(indexMap);
+                        while (indexIt.hasNext()) {
+                            indexIt.next();
+                            RowTree *row = m_handlesMap.value(indexIt.value());
+                            if (row)
+                                rowParent->addChildAt(row, indexIt.key());
+                        }
+                    }
+                }
+            }
+            // Make sure selections on UI matches bindings
+            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+            onSelectionChange(doc->GetSelectedValue());
+        }
         // Update properties
         if (!m_dirtyProperties.isEmpty()) {
             const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
@@ -718,6 +753,7 @@ void TimelineWidget::onAsyncUpdate()
         }
     }
     m_dirtyProperties.clear();
+    m_moveMap.clear();
 }
 
 void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
@@ -776,33 +812,15 @@ void TimelineWidget::onPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
 
 void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
 {
+    Q_UNUSED(inIndex)
+
     if (m_fullReconstruct)
         return;
 
-    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
-    Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(inParent, m_binding);
-
-    if (binding && bindingParent) {
-        int convertedIndex = bindingParent->convertIndex(inIndex, true);
-        RowTree *row = binding->getRowTree();
-        RowTree *rowParent = bindingParent->getRowTree();
-        if (row && rowParent) {
-            // Row already exists in bindings, just add it into UI
-            // (This happens e.g. when changing material row type)
-            rowParent->addChildAt(row, convertedIndex);
-        } else if (rowParent && !row) {
-            // Parent exists but row not, so create new row.
-            // (This happens e.g. when deleting a row -> undo)
-            if (m_bridge->IsSceneGraphInstance(inChild)) {
-                m_graphicsScene->rowManager()
-                        ->createRowFromBinding(binding, rowParent, convertedIndex);
-                insertToHandlesMap(binding);
-            }
-        }
-        // Make sure selections on UI matches bindings
-        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        onSelectionChange(doc->GetSelectedValue());
-    }
+    // Handle row moves asynch, as we won't be able to get the final order correct otherwise
+    m_moveMap.insert(inChild, inParent);
+    if (!m_asyncUpdateTimer.isActive())
+        m_asyncUpdateTimer.start();
 }
 
 void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
@@ -816,20 +834,10 @@ void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
 void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
                                   long inNewIndex)
 {
-    if (m_fullReconstruct)
-        return;
-
     Q_UNUSED(inOldIndex)
 
-    Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inChild, m_binding);
-    Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(inParent, m_binding);
-
-    if (binding && bindingParent) {
-        RowTree *row = binding->getRowTree();
-        RowTree *rowParent = bindingParent->getRowTree();
-        if (row && rowParent)
-            rowParent->addChildAt(row, bindingParent->convertIndex(inNewIndex, true));
-    }
+    // Move and add are essentially the same operation
+    onChildAdded(inParent, inChild, inNewIndex);
 }
 
 void TimelineWidget::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation)
@@ -918,6 +926,10 @@ void TimelineWidget::enableDnD(bool b)
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,
                                                 Qt3DSDMTimelineItemBinding *binding) const
 {
+    const RowTree *row = m_handlesMap.value(handle);
+    if (row && row->getBinding())
+        return static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+
     if (binding) {
         if (binding->GetInstance().GetHandleValue() == handle)
             return binding;

@@ -210,7 +210,7 @@ public:
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstance() const;
 
     int getAnimatedPropertyIndex(int propertyHandle) const;
-    int convertIndex(int index, bool isAssetGraphIndex) const;
+    void getTimeContextIndices(const QSet<int> &children, QMap<int ,int> &indexMap);
 
     ITimelineItemProperty *GetOrCreatePropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     ITimelineItemProperty *GetPropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);

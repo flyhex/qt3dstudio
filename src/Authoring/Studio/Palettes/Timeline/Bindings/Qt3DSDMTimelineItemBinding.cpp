@@ -755,44 +755,22 @@ int Qt3DSDMTimelineItemBinding::getAnimatedPropertyIndex(int propertyHandle) con
     return -1;
 }
 
-// Converts global asset graph index of a child into local time context index or vice versa
-int Qt3DSDMTimelineItemBinding::convertIndex(int index, bool isAssetGraphIndex) const
+void Qt3DSDMTimelineItemBinding::getTimeContextIndices(const QSet<int> &children,
+                                                       QMap<int, int> &indexMap)
 {
-    // If we are not a master slide object or scene root, global and local indexes always match
-    int retval = 0;
-    if (!IsMaster() && GetObjectType() != OBJTYPE_SCENE) {
-        retval = index;
-    } else {
-        qt3dsdm::Qt3DSDMInstanceHandle instance = GetInstance();
-        if (instance.Valid()) {
-            Q3DStudio::CGraphIterator currentChildren;
-            Qt3DSDMSlideHandle activeSlide = m_TransMgr->GetDoc()->GetActiveSlide();
-            GetAssetChildrenInTimeParent(instance, m_TransMgr->GetDoc(), AmITimeParent(),
-                                         currentChildren, activeSlide);
-
-            Q3DStudio::CGraphIterator allChildren;
-            GetAssetChildren(m_TransMgr->GetDoc(), instance, allChildren);
-
-            // Compare children to adjust the index
-            size_t skip = 0;
-            size_t maxCurrentIndex = currentChildren.GetCount() - 1;
-            size_t count = qMin(allChildren.GetCount(), size_t(index));
-            for (size_t current = 0; current < count; ++current) {
-                size_t skipIndex = current - skip;
-                if (skipIndex > maxCurrentIndex || allChildren.GetResult(current)
-                        != currentChildren.GetResult(skipIndex)) {
-                    ++skip;
-                }
-            }
-            retval = index;
-            if (isAssetGraphIndex)
-                retval -= int(skip);
-            else
-                retval += int(skip);
+    qt3dsdm::Qt3DSDMInstanceHandle instance = GetInstance();
+    if (instance.Valid()) {
+        Q3DStudio::CGraphIterator graphChildren;
+        Qt3DSDMSlideHandle activeSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        GetAssetChildrenInTimeParent(instance, m_TransMgr->GetDoc(), AmITimeParent(),
+                                     graphChildren, activeSlide);
+        const size_t count = graphChildren.GetCount();
+        for (size_t current = 0; current < count; ++current) {
+            auto handle = graphChildren.GetResult(current);
+            if (children.contains(handle))
+                indexMap.insert(current, int(handle));
         }
     }
-
-    return retval;
 }
 
 void Qt3DSDMTimelineItemBinding::InsertKeyframe()

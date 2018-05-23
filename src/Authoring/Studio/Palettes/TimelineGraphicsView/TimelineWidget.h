@@ -153,6 +153,7 @@ private:
     bool m_splitterPressed = false;
     QSize m_preferredSize;
     QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
+    QHash<int, int> m_moveMap;
     QTimer m_asyncUpdateTimer;
     bool m_fullReconstruct = false;
     CClientDataModelBridge *m_bridge = nullptr;
