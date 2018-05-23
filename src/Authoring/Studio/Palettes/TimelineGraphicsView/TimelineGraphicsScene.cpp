@@ -644,7 +644,7 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         keyEvent->accept();
         return;
     }
-    if (keyEvent->key() == Qt::Key_Delete)
+    if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive())
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
 
     QGraphicsScene::keyPressEvent(keyEvent);
