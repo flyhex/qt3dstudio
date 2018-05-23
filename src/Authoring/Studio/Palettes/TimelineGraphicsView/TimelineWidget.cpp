@@ -798,6 +798,9 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
                 insertToHandlesMap(binding);
             }
         }
+        // Make sure selections on UI matches bindings
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        onSelectionChange(doc->GetSelectedValue());
     }
 }
 
