@@ -240,7 +240,7 @@ void RowManager::setRowSelection(RowTree *row, bool selected)
                 if (!pRow.isNull()) {
                     RowTree *parentRow = pRow.data();
                     while (parentRow) {
-                        parentRow->updateExpandStatus(RowTree::ExpandState::Expanded, true);
+                        parentRow->updateExpandStatus(RowTree::ExpandState::Expanded, false);
                         parentRow = parentRow->parentRow();
                     }
                 }
