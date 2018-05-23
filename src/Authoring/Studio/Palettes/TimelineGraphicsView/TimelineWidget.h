@@ -74,6 +74,7 @@ public:
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
     void enableDnD(bool b = true);
+    bool dndActive() const;
 
     // Presentation Change Listener
     void OnNewPresentation() override;

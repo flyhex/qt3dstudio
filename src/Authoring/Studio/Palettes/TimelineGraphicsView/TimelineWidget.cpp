@@ -977,6 +977,11 @@ TimelineToolbar *TimelineWidget::toolbar() const
     return m_toolbar;
 }
 
+bool TimelineWidget::dndActive() const
+{
+    return m_graphicsScene->rowMover()->isActive();
+}
+
 bool TimelineWidget::hasSelectedKeyframes() const
 {
     return m_graphicsScene->keyframeManager()->hasSelectedKeyframes();

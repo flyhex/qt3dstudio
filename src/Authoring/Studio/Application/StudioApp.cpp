@@ -41,6 +41,7 @@
 #include "DataInputDlg.h"
 #include "qtsingleapplication.h"
 #include "qtlocalpeer.h"
+#include "TimelineWidget.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -907,7 +908,8 @@ void CStudioApp::SetManipulationMode(StudioManipulationModes::Enum inManipulatio
  */
 bool CStudioApp::CanUndo()
 {
-    return m_core->GetCmdStack()->CanUndo();
+    return m_core->GetCmdStack()->CanUndo()
+            && !m_views->getMainFrame()->getTimelineWidget()->dndActive();
 }
 
 //=============================================================================
