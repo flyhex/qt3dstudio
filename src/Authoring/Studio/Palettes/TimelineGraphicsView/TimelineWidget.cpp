@@ -687,7 +687,8 @@ void TimelineWidget::onAsyncUpdate()
         if (!m_dirtyProperties.isEmpty()) {
             const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
             qt3dsdm::Qt3DSDMPropertyHandle nameProp = m_bridge->GetNameProperty();
-            for (int instance : qAsConst(m_dirtyProperties)) {
+            const auto instances = m_dirtyProperties.keys();
+            for (int instance : instances) {
                 bool filterProperty = false;
                 bool timeProperty = false;
                 bool nameProperty = false;
