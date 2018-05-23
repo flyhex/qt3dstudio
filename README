@@ -10,7 +10,7 @@ Clone the 3D Studio repository from
 https://codereview.qt-project.org/#/admin/projects/qt3dstudio/qt3dstudio
 
 Remember to add --recursive flag to the clone command, as the repository contains submodules
-for 3rd party components. For example:
+for runtime and 3rd party components. For example:
 
 git clone --recursive https://codereview.qt-project.org/qt3dstudio/qt3dstudio
 
@@ -61,9 +61,9 @@ Open <path to repo root>\qt3dstudio.pro in Qt Creator.
 Go to "Projects" view. Select desired Build & Run configuration (either
 Release, or Debug). Tested configurations:
 
-    Windows 10: Qt 5.9.2 MSVC2015_64bit
-    macOS:  Qt 5.9.2 clang_64
-    Linux:  Qt 5.9.2 gcc 64bit
+    Windows 10: Qt 5.11.0 MSVC2015_64bit
+    macOS:  Qt 5.11.0 clang_64
+    Linux:  Qt 5.11.0 gcc 64bit
 
 Under "Build steps" click "Add Build Step" and select "Make". To make
 arguments type "install". This will move the qmlviewer plugin to correct
@@ -76,10 +76,6 @@ is Debug, try adding argument "debug" for the first make step after qmake step.
 5. Running Qt3DStudio
 
 Run subproject Q3DStudio under Authoring
-
-Quick Viewer example:
-Open <path to qt3dstudio repo>\examples\qmldynamickeyframes\qmldynamickeyframes.pro in Qt Creator
-and build it. Done!
 
 6. Application deployment on Qt for Device Creation (Boot2Qt)
 
