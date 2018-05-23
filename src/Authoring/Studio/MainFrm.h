@@ -125,6 +125,7 @@ public:
     void onEditPasteToMaster();
     void OnUpdateEditPaste();
     void OnEditDuplicate();
+    void onEditDelete();
     void OnUpdateEditDuplicate();
 
     void timerEvent(QTimerEvent *event) override;

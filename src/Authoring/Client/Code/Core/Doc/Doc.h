@@ -204,8 +204,8 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance();
 
     void CutSelectedObject();
-    void DeleteSelectedItems();
-    void DeleteSelectedObject();
+    void DeleteSelectedItems(bool slide = false);
+    void DeleteSelectedObject(bool slide = false);
     bool DeleteSelectedKeys();
     void SetChangedKeyframes();
 

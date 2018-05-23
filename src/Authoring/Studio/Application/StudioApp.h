@@ -170,7 +170,7 @@ public:
     bool CanChangeTimebarColor();
     void HandleSetChangedKeys();
     void DeleteSelectedKeys();
-    void DeleteSelectedObject();
+    void DeleteSelectedObject(bool slide = false);
     void HandleDuplicateCommand(bool slide = false);
     bool CanDuplicateObject();
     void OnToggleAutosetKeyframes();

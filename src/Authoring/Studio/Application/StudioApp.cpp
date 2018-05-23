@@ -1032,9 +1032,9 @@ void CStudioApp::DeleteSelectedKeys()
 /**
  * Deletes selected object or keyframes
  */
-void CStudioApp::DeleteSelectedObject()
+void CStudioApp::DeleteSelectedObject(bool slide)
 {
-    m_core->GetDoc()->DeleteSelectedItems();
+    m_core->GetDoc()->DeleteSelectedItems(slide);
 }
 
 //=============================================================================

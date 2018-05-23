@@ -124,7 +124,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPaste_to_Master_Slide, &QAction::triggered,
             this, &CMainFrame::onEditPasteToMaster);
     connect(m_ui->action_Duplicate_Object, &QAction::triggered, this, &CMainFrame::OnEditDuplicate);
-    connect(m_ui->actionDelete, &QAction::triggered, [](){ g_StudioApp.DeleteSelectedObject(); });
+    connect(m_ui->actionDelete, &QAction::triggered, this, &CMainFrame::onEditDelete);
 //    connect(m_ui->actionGroup, &QAction::triggered, this, &CMainFrame::onEditGroup); // TODO: Implement
 //    connect(m_ui->actionParent, &QAction::triggered, this, &CMainFrame::onEditParent); // TODO: Implement
 //    connect(m_ui->actionUnparent, &QAction::triggered, this, &CMainFrame::onEditUnparent); // TODO: Implement
@@ -684,6 +684,11 @@ void CMainFrame::OnUpdateTimelineSetInterpolation()
 void CMainFrame::OnEditDuplicate()
 {
     g_StudioApp.HandleDuplicateCommand(m_slideActive);
+}
+
+void CMainFrame::onEditDelete()
+{
+    g_StudioApp.DeleteSelectedObject(m_slideActive);
 }
 
 //==============================================================================

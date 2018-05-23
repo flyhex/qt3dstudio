@@ -834,11 +834,22 @@ void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 /**
  * Deletes the selected object
  */
-void CDoc::DeleteSelectedObject()
+void CDoc::DeleteSelectedObject(bool slide)
 {
-    qt3dsdm::TInstanceHandleList theSelectedHandles = m_SelectedValue.GetSelectedInstances();
-    if (!theSelectedHandles.empty()) {
-        DeleteObject(theSelectedHandles);
+    if (!slide) {
+        qt3dsdm::TInstanceHandleList theSelectedHandles = m_SelectedValue.GetSelectedInstances();
+        if (!theSelectedHandles.empty())
+            DeleteObject(theSelectedHandles);
+    } else {
+        // Check if the slide is the last one or the master, and prevent deleting if it is
+        qt3dsdm::Qt3DSDMSlideHandle slideHandle = GetActiveSlide();
+        qt3dsdm::ISlideSystem *slideSys = m_StudioSystem->GetSlideSystem();
+        qt3dsdm::Qt3DSDMSlideHandle masterSlideHandle = slideSys->GetMasterSlide(slideHandle);
+        size_t slideCount = slideSys->GetSlideCount(masterSlideHandle);
+        if (slideHandle != masterSlideHandle && slideCount > 2) {
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Delete Slide"))->DeleteSlide(
+                        slideHandle);
+        }
     }
 }
 
@@ -942,12 +953,12 @@ void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
 /**
  * Deletes the selected items, this is the primary handler of the delete key.
  */
-void CDoc::DeleteSelectedItems()
+void CDoc::DeleteSelectedItems(bool slide)
 {
     // If there are keyframes selected, delete them
     if (!DeleteSelectedKeys()) {
         // If there are no keyframes selected, delete whatever asset is selected
-        DeleteSelectedObject();
+        DeleteSelectedObject(slide);
     }
 }
 
