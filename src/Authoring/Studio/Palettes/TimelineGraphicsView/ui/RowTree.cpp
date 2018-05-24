@@ -736,6 +736,9 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 
 void RowTree::updateExpandStatus(ExpandState state, bool animate)
 {
+    if (m_expandState == state)
+        return;
+
     m_expandState = state;
 
     if (m_scene->widgetTimeline()->isFullReconstructPending())
