@@ -35,6 +35,7 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSString.h"
+#include "TreeHeader.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -202,7 +203,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
-    if (!m_childRows.empty() || !m_childProps.empty())
+    if (m_arrowVisible)
         painter->drawPixmap(m_rectArrow, expanded() ? pixArrowDown : pixArrow);
 
     // Row type icon
@@ -481,6 +482,41 @@ int RowTree::getLastChildIndex(bool isProperty) const
     return index;
 }
 
+void RowTree::updateArrowVisibility()
+{
+    bool oldVisibility = m_arrowVisible;
+    if (m_childRows.empty() && m_childProps.empty()) {
+        m_arrowVisible = false;
+    } else {
+        if (m_childProps.empty()) {
+            m_arrowVisible = false;
+            for (RowTree *row : qAsConst(m_childRows)) {
+                if (!row->m_filtered) {
+                    m_arrowVisible = true;
+                    break;
+                }
+            }
+        } else {
+            m_arrowVisible = true;
+        }
+    }
+    if (oldVisibility != m_arrowVisible)
+        update();
+}
+
+void RowTree::updateFilter()
+{
+    bool parentOk = !m_parentRow || m_parentRow->isVisible();
+    bool shyOk     = !m_shy      || !m_scene->treeHeader()->filterShy();
+    bool visibleOk = m_visible   || !m_scene->treeHeader()->filterHidden();
+    bool lockOk    = !m_locked   || !m_scene->treeHeader()->filterLocked();
+    bool expandOk  = !expandHidden();
+
+    m_filtered = !(shyOk && visibleOk && lockOk);
+    setVisible(parentOk && shyOk && visibleOk && lockOk && expandOk);
+    m_rowTimeline->setVisible(isVisible());
+}
+
 int RowTree::getCountDecendentsRecursive() const
 {
     int num = m_childProps.count();
@@ -540,6 +576,7 @@ void RowTree::addChildAt(RowTree *child, int index)
     // update indices
     updateIndexInLayout = std::min(updateIndexInLayout, child->m_indexInLayout);
     updateIndices(true, child->m_index + 1, updateIndexInLayout, child->isProperty());
+    updateArrowVisibility();
 }
 
 int RowTree::addToLayout(int indexInLayout)
@@ -588,6 +625,7 @@ void RowTree::removeChild(RowTree *child)
         child->m_parentRow = nullptr;
 
         updateIndices(false, child->m_index, child->m_indexInLayout, child->isProperty());
+        updateArrowVisibility();
     }
 }
 
@@ -710,7 +748,7 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (!empty() && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
+    if (m_arrowVisible && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
         updateExpandStatus(m_expandState == ExpandState::Expanded ? ExpandState::Collapsed
                                                                   : ExpandState::Expanded, false);
         update();
@@ -778,6 +816,8 @@ void RowTree::updateExpandStatus(ExpandState state, bool animate)
                 child->updateExpandStatus(ExpandState::HiddenExpanded);
         }
     }
+
+    updateFilter();
 }
 
 void RowTree::updateLockRecursive(bool state)

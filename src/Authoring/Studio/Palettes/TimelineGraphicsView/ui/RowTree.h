@@ -121,6 +121,8 @@ public:
 
     ITimelineItemBinding *getBinding() const;
     void updateExpandStatus(ExpandState state, bool animate = true);
+    void updateArrowVisibility();
+    void updateFilter();
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
@@ -153,6 +155,8 @@ private:
     bool m_isProperty = false;
     bool m_isPropertyExpanded = false;
     bool m_master = false;
+    bool m_filtered = false;
+    bool m_arrowVisible = false;
     ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;

@@ -284,38 +284,21 @@ void RowManager::updateRulerDuration()
 
 void RowManager::updateFiltering(RowTree *row)
 {
-    if (!row) { // update all rows
-        RowTree *row_i;
-        for (int i = 1; i < m_layoutTree->count(); ++i) {
-            row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-            updateRowFilter(row_i);
-        }
-    } else {
-        updateRowFilterRecursive(row);
-    }
+    if (!row) // update all rows
+        row = static_cast<RowTree *>(m_layoutTree->itemAt(1));
+    updateRowFilterRecursive(row);
 }
 
 void RowManager::updateRowFilterRecursive(RowTree *row)
 {
-    updateRowFilter(row);
+    row->updateFilter();
 
     if (!row->empty()) {
         const auto childRows = row->childRows();
         for (auto child : childRows)
             updateRowFilterRecursive(child);
+        row->updateArrowVisibility();
     }
-}
-
-void RowManager::updateRowFilter(RowTree *row)
-{
-    bool parentOk = !row->parentRow()|| row->parentRow()->isVisible();
-    bool shyOk     = !row->shy()    || !m_scene->treeHeader()->filterShy();
-    bool visibleOk = row->visible() || !m_scene->treeHeader()->filterHidden();
-    bool lockOk    = !row->locked() || !m_scene->treeHeader()->filterLocked();
-    bool expandOk  = !row->expandHidden();
-
-    row->setVisible(parentOk && shyOk && visibleOk && lockOk && expandOk);
-    row->rowTimeline()->setVisible(row->isVisible());
 }
 
 void RowManager::deleteRow(RowTree *row)

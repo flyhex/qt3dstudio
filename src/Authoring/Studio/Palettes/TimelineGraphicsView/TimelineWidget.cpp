@@ -681,6 +681,7 @@ void TimelineWidget::onAsyncUpdate()
         m_navigationBar->updateNavigationItems(m_translationManager->GetBreadCrumbProvider());
         m_graphicsScene->updateSnapSteps();
         m_fullReconstruct = false;
+        m_graphicsScene->rowManager()->updateFiltering();
         onSelectionChange(doc->GetSelectedValue());
     } else {
         if (!m_moveMap.isEmpty()) {
@@ -723,6 +724,7 @@ void TimelineWidget::onAsyncUpdate()
             const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
             qt3dsdm::Qt3DSDMPropertyHandle nameProp = m_bridge->GetNameProperty();
             const auto instances = m_dirtyProperties.keys();
+            QSet<RowTree *> updateArrowParents;
             for (int instance : instances) {
                 bool filterProperty = false;
                 bool timeProperty = false;
@@ -742,14 +744,20 @@ void TimelineWidget::onAsyncUpdate()
                         if (row) {
                             if (timeProperty)
                                 row->rowTimeline()->updateDurationFromBinding();
-                            if (filterProperty)
+                            if (filterProperty) {
                                 row->updateFromBinding();
+                                m_graphicsScene->rowManager()->updateFiltering(row);
+                                // Filtering changes to children affect arrow visibility in parents
+                                updateArrowParents.insert(row->parentRow());
+                            }
                             if (nameProperty)
                                 row->updateLabel();
                         }
                     }
                 }
             }
+            for (RowTree *row : qAsConst(updateArrowParents))
+                row->updateArrowVisibility();
         }
     }
     m_dirtyProperties.clear();

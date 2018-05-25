@@ -77,7 +77,6 @@ private:
     int getLastChildIndex(RowTree *row, int index = -1);
     bool validIndex(int idx) const;
     void deleteRowRecursive(RowTree *row);
-    void updateRowFilter(RowTree *row);
     void updateRowFilterRecursive(RowTree *row);
     void createRowsFromBindingRecursive(ITimelineItemBinding *binding,
                                         RowTree *parentRow = nullptr);
