@@ -134,12 +134,14 @@ use the following settings when exporting:
   system, so ensure that \c{Up Axis} is set to \c{Y}.
 \li
   \b{FBX File Format}
-\li
-  \b{Type} - Studio supports either ASCII or Binary FBX files.
-  ASCII files are preferred for any bug reports.
-\li
-  \b{Version} - Studio supports FBX versions from 2013 up to
-  2016.1.2. We recommend 2016.1.2.
+  \list
+    \li
+      \b{Type} - Studio supports either ASCII or Binary FBX files.
+      ASCII files are preferred for any bug reports.
+    \li
+      \b{Version} - Studio supports FBX versions from 2013 up to
+      2016.1.2. We recommend 2016.1.2.
+  \endlist
 \endlist
 
 \section1 3D Content via COLLADA
