@@ -47,7 +47,6 @@ public:
     void setLabel(const QString &label);
     void setLocked(bool isLocked);
     void setMaster(bool isMaster);
-    void setRowTypeLabel(EStudioObjectType rowType);
     RowTree *parentRow() const;
     void setParentRow(RowTree *row);
     int type() const;
@@ -59,7 +58,6 @@ protected:
     QRectF boundingRect() const override;
 
 signals:
-    void invalidLabel();
     void labelChanged(const QString label);
 
 private:
@@ -68,7 +66,6 @@ private:
 
     RowTree *m_rowTree = nullptr;
     QString m_label;
-    QString m_rowTypeLabel;
     bool m_locked;
     bool m_master;
     bool m_acceptOnFocusOut;

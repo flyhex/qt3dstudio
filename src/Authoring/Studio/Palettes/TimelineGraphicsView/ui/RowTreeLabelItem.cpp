@@ -55,9 +55,9 @@ QString RowTreeLabelItem::label() const
 
 void RowTreeLabelItem::setLabel(const QString &label)
 {
+    setPlainText(label);
     if (m_label != label) {
         m_label = label;
-        setPlainText(m_label);
         emit labelChanged(m_label);
     }
 }
@@ -154,14 +154,13 @@ QRectF RowTreeLabelItem::boundingRect() const
 
 void RowTreeLabelItem::validateLabel()
 {
-    QString text = toPlainText();
+    QString text = toPlainText().trimmed();
     if (text.isEmpty()) {
-        setLabel(m_rowTypeLabel);
+        // Inform label was empty and return previous label
+        emit labelChanged("");
+        setLabel(m_label);
         return;
     }
-
-    // TODO: Check label is valid?
-    //emit invalidLabel();
 
     setLabel(text);
 }
@@ -175,45 +174,3 @@ void RowTreeLabelItem::updateLabelColor()
     else
         setDefaultTextColor(CStudioPreferences::GetNormalColor());
 }
-
-void RowTreeLabelItem::setRowTypeLabel(EStudioObjectType rowType)
-{
-    switch (rowType) {
-    case OBJTYPE_SCENE:
-        m_rowTypeLabel = tr("Scene");
-        break;
-    case OBJTYPE_LAYER:
-        m_rowTypeLabel = tr("Layer");
-        break;
-    case OBJTYPE_MODEL:
-        m_rowTypeLabel = tr("Object");
-        break;
-    case OBJTYPE_LIGHT:
-        m_rowTypeLabel = tr("Light");
-        break;
-    case OBJTYPE_CAMERA:
-        m_rowTypeLabel = tr("Camera");
-        break;
-    case OBJTYPE_TEXT:
-        m_rowTypeLabel = tr("Text");
-        break;
-    case OBJTYPE_ALIAS:
-        m_rowTypeLabel = tr("Alias");
-        break;
-    case OBJTYPE_GROUP:
-        m_rowTypeLabel = tr("Group");
-        break;
-    case OBJTYPE_COMPONENT:
-        m_rowTypeLabel = tr("Component");
-        break;
-    case OBJTYPE_MATERIAL:
-        m_rowTypeLabel = tr("Default");
-        break;
-    default:
-        break;
-    }
-
-    if (m_label.isEmpty())
-        setLabel(m_rowTypeLabel);
-}
-

@@ -50,7 +50,6 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
     m_scene = timelineScene;
     m_rowType = rowType;
     m_label = label;
-    m_labelItem.setRowTypeLabel(m_rowType);
 
     initialize();
 }
