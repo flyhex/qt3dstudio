@@ -2286,24 +2286,11 @@ public:
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType) override
     {
-        // The operations here are carefully constructed to ensure the various views can handle the
-        // messages.
-        // The timeline, for instance, requires that before a create operation happens all remove
-        // operations have happened.
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx)
-            qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
-
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx)
-            m_AssetGraph.RemoveChild(sortableList[idx], false);
-
         TInstanceHandle theParent(inDest);
         if (inInsertType == DocumentEditorInsertType::PreviousSibling
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
-
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx)
-            m_AssetGraph.AddChild(theParent, sortableList[idx]);
 
         for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
