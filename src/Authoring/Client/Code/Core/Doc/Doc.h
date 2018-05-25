@@ -404,6 +404,8 @@ public:
     void setPlayBackPreviewState(bool state);
     bool isPlayBackPreviewOn() const;
 
+    std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
+
 protected:
     // Set the active slide, return true if delving
     void SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);

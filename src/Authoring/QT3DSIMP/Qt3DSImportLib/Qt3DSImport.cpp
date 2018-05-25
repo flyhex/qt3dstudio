@@ -878,17 +878,17 @@ public:
         if (srcMesh.hasValue()) {
             if (!m_MeshDir.IsDirectory())
                 m_MeshDir.CreateDir(true);
-            if (!m_MeshDir.IsDirectory())
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir.toCString());
+            if (!m_MeshDir.IsDirectory()) {
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory,
+                                       m_MeshDir.toCString());
+            }
 
             CFilePath meshPath =
-                CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(srcMesh.getValue()));
+                    CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(srcMesh.getValue()));
 
             meshPath = meshPath.filePath();
-            Qt3DSFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
-                SFile::OpenForWrite(
-                    meshPath, FileOpenFlags(FileOpenFlagValues::Open | FileOpenFlagValues::Create)),
-                meshPath));
+            Qt3DSFileToolsSeekableMeshBufIOStream output(
+                        SFile::Wrap(SFile::OpenForWrite(meshPath, FileWriteFlags()), meshPath));
             if (output.IsOpen() == false) {
                 QT3DS_ASSERT(false);
                 return ImportErrorData(ImportErrorCodes::ResourceNotWriteable, srcMesh.getValue());

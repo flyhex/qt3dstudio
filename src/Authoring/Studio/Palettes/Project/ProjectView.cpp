@@ -305,10 +305,11 @@ void ProjectView::refreshImport(int row) const
         const QString fullSrcPath(QDir(destDir).filePath(srcFile));
         const QFileInfo oldFile(fullSrcPath);
         const QFileInfo newFile(g_StudioApp.GetDialogs()->ConfirmRefreshModelFile(fullSrcPath));
-        if (newFile.exists() && newFile.isFile()){
-            const auto doc = g_StudioApp.GetCore()->GetDoc();
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Refresh Import..."))
-                    ->RefreshImport(oldFile.canonicalFilePath(), newFile.canonicalFilePath());
+        if (newFile.exists() && newFile.isFile()) {
+            // We don't want to create undo point of "Refresh Import", undoing this sort of
+            // thing is supposed to be done in the DCC tool.
+            g_StudioApp.GetCore()->GetDoc()->getSceneEditor()->RefreshImport(
+                        oldFile.canonicalFilePath(), newFile.canonicalFilePath());
         }
     }
 }
