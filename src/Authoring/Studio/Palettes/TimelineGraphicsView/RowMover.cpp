@@ -43,6 +43,19 @@ RowMover::RowMover(TimelineGraphicsScene *scene)
 {
     setZValue(99);
     setGeometry(0, 0, TimelineConstants::TREE_MAX_W, 10);
+
+    m_autoExpandTimer.setSingleShot(true);
+    connect(&m_autoExpandTimer, &QTimer::timeout, [this]() {
+        if (m_rowAutoExpand) {
+            m_rowAutoExpand->updateExpandStatus(RowTree::ExpandState::Expanded, true);
+            // Update RowMover after the expansion. The +50 below is just a small margin to ensure
+            // correct row heights before updateTargetRowLater is called.
+            QTimer::singleShot(TimelineConstants::EXPAND_ANIMATION_DURATION + 50, [this]() {
+                if (updateTargetRowLater)
+                    updateTargetRowLater();
+            });
+        }
+    });
 }
 
 void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -50,15 +63,12 @@ void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
-    painter->save();
-
+    static const QPolygon polygon({QPoint(0, 0), QPoint(0, 3), QPoint(7, 3), QPoint(7, 1),
+                                   QPoint(TimelineConstants::TREE_BOUND_W, 1),
+                                   QPoint(TimelineConstants::TREE_BOUND_W, 0)});
     painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
-    painter->drawLine(0, 0, TimelineConstants::TREE_BOUND_W, 0);
-
-    painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 4));
-    painter->drawLine(0, 2, 5, 2);
-
-    painter->restore();
+    painter->setBrush(QColor(TimelineConstants::ROW_MOVER_COLOR));
+    painter->drawConvexPolygon(polygon);
 }
 
 RowTree *RowMover::insertionTarget() const
@@ -79,13 +89,13 @@ QVector<RowTree *> RowMover::sourceRows() const
 void RowMover::resetInsertionParent(RowTree *newParent)
 {
     if (m_insertionParent) {
-        m_insertionParent->setMoveTarget(false);
+        m_insertionParent->setDnDState(RowTree::DnDState::None, RowTree::DnDState::Parent);
         m_insertionParent = nullptr;
     }
 
     if (newParent) {
         m_insertionParent = newParent;
-        m_insertionParent->setMoveTarget(true);
+        m_insertionParent->setDnDState(RowTree::DnDState::Parent, RowTree::DnDState::None);
     } else {
         m_insertionTarget = nullptr;
     }
@@ -116,7 +126,7 @@ void RowMover::start(const QVector<RowTree *> &rows)
         if (!m_sourceRows.isEmpty()) {
             m_active = true;
             for (auto row : qAsConst(m_sourceRows))
-                row->setMoveSourceRecursive(true);
+                row->setDnDState(RowTree::DnDState::Source, RowTree::DnDState::None, true);
             qApp->setOverrideCursor(Qt::ClosedHandCursor);
         }
     }
@@ -127,20 +137,22 @@ void RowMover::end(bool force)
     if (m_active || force) {
         m_active = false;
         for (auto row : qAsConst(m_sourceRows))
-            row->setMoveSourceRecursive(false);
+            row->setDnDState(RowTree::DnDState::None, RowTree::DnDState::Any, true);
         m_sourceRows.clear();
 
         setVisible(false);
         resetInsertionParent();
-
+        updateTargetRowLater = {};
         qApp->changeOverrideCursor(Qt::ArrowCursor);
         qApp->restoreOverrideCursor();
+
+        m_autoExpandTimer.stop();
     }
 }
 
 void RowMover::updateState(int depth, double y)
 {
-    setPos(25 + depth * TimelineConstants::ROW_DEPTH_STEP, y);
+    setPos(24 + depth * TimelineConstants::ROW_DEPTH_STEP, y);
     setVisible(true);
 }
 
@@ -156,6 +168,18 @@ RowTree *RowMover::getRowAtPos(const QPointF &scenePos)
     }
 
     return nullptr;
+}
+
+bool RowMover::isSourceRowsDescendant(const RowTree *row) const
+{
+    if (row) {
+        for (auto sourceRow : qAsConst(m_sourceRows)) {
+            if (row == sourceRow || row->isDecendentOf(sourceRow))
+                return true;
+        }
+    }
+
+    return false;
 }
 
 // rowType parameter is used to highlight the target row when RowMover is not active,
@@ -188,10 +212,12 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         int depth;
         int depthMin = rowInsert2 ? rowInsert2->depth() : (theRowType == OBJTYPE_LAYER ? 2 : 3);
         int depthMax = rowInsert1->depth();
-        if (rowInsert1->isContainer() && !m_sourceRows.contains(rowInsert1))
+        if (!rowInsert1->locked() && rowInsert1->isContainer()
+                && !m_sourceRows.contains(rowInsert1)) {
             depthMax++; // Container: allow insertion as a child
-        else if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer())
+        } else if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer()) {
             depthMax--; // non-container with properties and/or a material
+        }
 
         if (theRowType == OBJTYPE_LAYER) {
             depth = 2; // layers can only be moved on depth 2
@@ -265,11 +291,26 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                             && m_insertionTarget->index() - m_sourceRows[0]->index() == 1)))) {
             valid = false;
         }
-        if (valid)
+        if (valid) {
             updateState(depth, rowInsert1->y() + TimelineConstants::ROW_H);
+
+            // auto expand
+            if (!rowInsert1->locked() && !rowInsert1->expanded() && rowInsert1->isContainer()
+                    && !rowInsert1->empty() && !isSourceRowsDescendant(rowInsert1)) {
+                updateTargetRowLater = std::bind(&RowMover::updateTargetRow, this,
+                                                 scenePos, rowType);
+                m_rowAutoExpand = rowInsert1;
+                m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_Time);
+            } else {
+                m_rowAutoExpand = nullptr;
+                m_autoExpandTimer.stop();
+            }
+        }
     }
 
     if (!valid) {
+        m_rowAutoExpand = nullptr;
+        m_autoExpandTimer.stop();
         setVisible(false);
         resetInsertionParent();
     }

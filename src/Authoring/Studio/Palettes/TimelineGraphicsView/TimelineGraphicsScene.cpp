@@ -113,6 +113,19 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     m_layoutTree->addItem(m_treeHeader);
     m_layoutTimeline->addItem(m_ruler);
 
+    // auto scrolling (when DnD is active and hovering on top or bottom of the tree list)
+    connect(&m_autoScrollTimer, &QTimer::timeout, [this]() {
+        QScrollBar *scrollbar = m_widgetTimeline->viewTreeContent()->verticalScrollBar();
+        if (m_autoScrollUpOn)
+            scrollbar->setValue(scrollbar->value() - TimelineConstants::AUTO_SCROLL_DELTA);
+        else if (m_autoScrollDownOn)
+            scrollbar->setValue(scrollbar->value() + TimelineConstants::AUTO_SCROLL_DELTA);
+    });
+
+    connect(&m_autoScrollTriggerTimer, &QTimer::timeout, [this]() {
+        m_autoScrollTimer.start(TimelineConstants::AUTO_SCROLL_PERIOD);
+    });
+
     QTimer::singleShot(0, this, [this]() {
         m_playHead->setPosition(0);
         m_widgetTimeline->viewTreeContent()->horizontalScrollBar()->setValue(0);
@@ -455,6 +468,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 // collapse all properties so correctIndex() counts correctly
                 m_rowManager->collapseAllPropertyRows();
                 m_rowMover->updateTargetRow(event->scenePos());
+                updateAutoScrolling(event->scenePos().y());
             }
         } else if (m_keyframePressed) { // moving selected keyframes
             double newX = event->scenePos().x() - m_ruler->x() - m_pressPosInKeyframe;
@@ -472,6 +486,37 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
 
     QGraphicsScene::mouseMoveEvent(event);
+}
+
+// auto scroll when the mouse is at the top or bottom of the tree list
+void TimelineGraphicsScene::updateAutoScrolling(double scenePosY)
+{
+    QScrollBar *scrollbar = m_widgetTimeline->viewTreeContent()->verticalScrollBar();
+    double mouseY = scenePosY - scrollbar->value();
+    int bottomY = m_widgetTimeline->height() - m_widgetTimeline->toolbar()->height()
+            - TimelineConstants::ROW_H;
+    if (mouseY > 0 && mouseY < TimelineConstants::ROW_H) {
+        if (!m_autoScrollUpOn) {
+            m_autoScrollTriggerTimer.start(TimelineConstants::AUTO_SCROLL_TRIGGER);
+            m_autoScrollUpOn = true;
+        }
+    } else if (m_autoScrollUpOn) {
+        m_autoScrollTimer.stop();
+        m_autoScrollTriggerTimer.stop();
+        m_autoScrollUpOn = false;
+    }
+
+    if (mouseY > bottomY - TimelineConstants::ROW_H - TimelineConstants::TOOLBAR_MARGIN
+            && mouseY < bottomY) {
+        if (!m_autoScrollDownOn) {
+            m_autoScrollTriggerTimer.start(TimelineConstants::AUTO_SCROLL_TRIGGER);
+            m_autoScrollDownOn = true;
+        }
+    } else if (m_autoScrollDownOn) {
+        m_autoScrollTimer.stop();
+        m_autoScrollTriggerTimer.stop();
+        m_autoScrollDownOn = false;
+    }
 }
 
 void TimelineGraphicsScene::updateSnapSteps() {
@@ -517,6 +562,8 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_clickedTimelineControlType = TimelineControlType::None;
     m_editedTimelineRow = nullptr;
     m_releaseSelectRow = nullptr;
+    m_autoScrollTimer.stop();
+    m_autoScrollTriggerTimer.stop();
 }
 
 void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)

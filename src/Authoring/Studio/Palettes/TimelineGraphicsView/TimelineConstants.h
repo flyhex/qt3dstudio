@@ -48,6 +48,7 @@ namespace TimelineConstants
     const int RULER_TICK_SCALE2 = 3;
     const int RULER_TICK_SCALE3 = 6;
     const int RULER_TICK_SCALE4 = 21;
+    const int TOOLBAR_MARGIN    = 10;    // margin between the timeline and the toolbar
 
     const double RULER_EDGE_OFFSET = 15;
     const double TREE_MIN_W     = 160;
@@ -69,7 +70,8 @@ namespace TimelineConstants
     const char ROW_COLOR_DURATION_OFF2[]       = "#222222"; // duration off ancestors' bounds color2
     const char ROW_COLOR_DURATION_EDGE[]       = "#000000"; // duration left and right edge lines
     const char ROW_COLOR_DURATION_SELECTED[]   = "#80000000";
-    const char ROW_COLOR_MOVE_SRC[]            = "#464600";
+    const char ROW_COLOR_DND_SRC[]             = "#464600";
+    const char ROW_COLOR_DND_TGT[]             = "#292929";
     const char ROW_TEXT_COLOR[]                = "#bbbbbb";
     const char ROW_TEXT_COLOR_DISABLED[]       = "#888888";
     const char PLAYHEAD_COLOR[]                = "#ff0066";
@@ -82,7 +84,11 @@ namespace TimelineConstants
     const char FILTER_BUTTON_HOVERED_COLOR[]   = "#40000000";
 
     // Other
-    const int EXPAND_ANIMATION_DURATION       = 200;
+    const int EXPAND_ANIMATION_DURATION = 200;
+    const int AUTO_SCROLL_PERIOD        = 50;  // time steps (millis) while auto scrolling
+    const int AUTO_SCROLL_DELTA         = 8;   // increment in scroll at each time step
+    const int AUTO_SCROLL_TRIGGER       = 500; // time after which auto scroll starts (millis)
+    const int AUTO_EXPAND_Time          = 500; // auto expand a hovered row (while DnD-ing)
 
     // TODO: move the colors (and maybe dimensions) to StudioPreferences.
 }

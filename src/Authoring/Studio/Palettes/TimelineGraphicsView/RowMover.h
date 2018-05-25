@@ -33,6 +33,7 @@
 #include "TimelineItem.h"
 #include "DocumentEditorEnumerations.h"
 #include "StudioObjectTypes.h"
+#include <QtCore/qtimer.h>
 
 class RowTree;
 class TimelineGraphicsScene;
@@ -58,14 +59,18 @@ private:
     void updateState(int depth, double y);
     void resetInsertionParent(RowTree *newParent = nullptr);
     RowTree *getRowAtPos(const QPointF &scenePos);
+    bool isSourceRowsDescendant(const RowTree *row) const;
 
     TimelineGraphicsScene *m_scene = nullptr;
     RowTree *m_insertionTarget = nullptr; // insertion target
     RowTree *m_insertionParent = nullptr; // insertion parent
+    RowTree *m_rowAutoExpand = nullptr;
     QVector<RowTree *> m_sourceRows;      // dragged rows
     bool m_active = false;
     Q3DStudio::DocumentEditorInsertType::Enum m_insertType =
             Q3DStudio::DocumentEditorInsertType::Unknown;
+    QTimer m_autoExpandTimer;
+    std::function<void()> updateTargetRowLater = {};
 };
 
 #endif // ROWMOVER_H

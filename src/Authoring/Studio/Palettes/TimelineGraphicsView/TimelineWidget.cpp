@@ -189,7 +189,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     layoutTimeline->addWidget(m_viewTimelineContent);
 
     auto *layoutContent = new QHBoxLayout;
-    layoutContent->setContentsMargins(QMargins(0, 0, 0, 10));
+    layoutContent->setContentsMargins(QMargins(0, 0, 0, TimelineConstants::TOOLBAR_MARGIN));
     layoutContent->addLayout(layoutTree);
     layoutContent->addWidget(m_splitter);
     layoutContent->addLayout(layoutTimeline);

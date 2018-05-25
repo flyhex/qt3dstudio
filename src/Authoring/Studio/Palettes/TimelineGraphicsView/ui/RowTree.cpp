@@ -183,10 +183,12 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     // Background
     QColor bgColor;
-    if (m_moveSource)
-        bgColor = TimelineConstants::ROW_COLOR_MOVE_SRC;
+    if (m_dndState == DnDState::Source)
+        bgColor = TimelineConstants::ROW_COLOR_DND_SRC;
     else if (m_isProperty)
         bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
+    else if (m_dndHover)
+        bgColor = TimelineConstants::ROW_COLOR_DND_TGT;
     else if (m_state == Selected)
         bgColor = TimelineConstants::ROW_COLOR_SELECTED;
     else if (m_state == Hovered && !m_locked)
@@ -304,7 +306,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     }
 
     // Candidate parent of a dragged row
-    if (m_moveTarget) {
+    if (m_dndState == DnDState::Parent) {
         painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
         painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
     }
@@ -866,16 +868,31 @@ bool RowTree::isDecendentOf(RowTree *row) const
     return false;
 }
 
-void RowTree::setMoveSourceRecursive(bool value)
+void RowTree::setDnDHover(bool val)
 {
-    m_moveSource = value;
+    m_dndHover = val;
     update();
+}
 
-    for (auto child : qAsConst(m_childProps))
-        child->setMoveSourceRecursive(value);
+void RowTree::setDnDState(DnDState state, DnDState onlyIfState, bool recursive)
+{
+    if (m_dndState == onlyIfState || onlyIfState == DnDState::Any) {
+        m_dndState = state;
+        update();
 
-    for (auto child : qAsConst(m_childRows))
-        child->setMoveSourceRecursive(value);
+        if (recursive) { // used by source rows to highlights all of their descendants
+            for (auto child : qAsConst(m_childProps))
+                child->setDnDState(state, onlyIfState, true);
+
+            for (auto child : qAsConst(m_childRows))
+                child->setDnDState(state, onlyIfState, true);
+        }
+    }
+}
+
+RowTree::DnDState RowTree::getDnDState() const
+{
+    return m_dndState;
 }
 
 bool RowTree::isContainer() const
@@ -924,12 +941,6 @@ bool RowTree::empty() const
 bool RowTree::selected() const
 {
     return m_state == Selected;
-}
-
-void RowTree::setMoveTarget(bool value)
-{
-    m_moveTarget = value;
-    update();
 }
 
 QList<RowTree *> RowTree::childRows() const

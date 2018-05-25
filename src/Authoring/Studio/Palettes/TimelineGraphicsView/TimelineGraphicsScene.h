@@ -110,6 +110,7 @@ private:
     void handleEditComponent();
     void handleShySelected();
     void handleLockSelected();
+    void updateAutoScrolling(double scenePosY);
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;
@@ -140,6 +141,10 @@ private:
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
     TExpandMap m_expandMap;
     RowTree *m_releaseSelectRow = nullptr;
+    bool m_autoScrollDownOn = false;
+    bool m_autoScrollUpOn = false;
+    QTimer m_autoScrollTimer;
+    QTimer m_autoScrollTriggerTimer; // triggers m_autoScrollTimer
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H
