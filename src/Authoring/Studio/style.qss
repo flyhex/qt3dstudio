@@ -325,6 +325,14 @@ TimeLineToolbar QLabel#dataInputName {
     color: #ff5102;
 }
 
+QLabel#timebarToolTip {
+    background: #404244;
+    color: #ffffff;
+    font-size: 12px;
+    border: 1px solid #727476;
+    border-radius: 2;
+}
+
 /* Loading progress dialog */
 QDialog#ProgressDlg QWidget {
     background-color: #202020;

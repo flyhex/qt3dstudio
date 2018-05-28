@@ -60,6 +60,7 @@
 #include <QtWidgets/qgraphicsview.h>
 #include <QtWidgets/qscrollbar.h>
 #include <QtWidgets/qmenu.h>
+#include <QtWidgets/qlabel.h>
 #include <QtWidgets/qaction.h>
 #include <QtGui/qevent.h>
 #include <QtCore/qtimer.h>
@@ -87,6 +88,14 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     addItem(m_selectionRect);
     addItem(m_rowMover);
     addItem(m_widgetRoot);
+
+    m_timebarToolTip = new QLabel(m_widgetTimeline);
+    m_timebarToolTip->setObjectName(QStringLiteral("timebarToolTip"));
+    m_timebarToolTip->setWindowModality(Qt::NonModal);
+    m_timebarToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
+    m_timebarToolTip->setContentsMargins(2, 2, 2, 2);
+    connect(qApp, &QApplication::focusChanged,
+            this, &TimelineGraphicsScene::handleApplicationFocusLoss);
 
     m_rowMover->setVisible(false);
 
@@ -198,6 +207,12 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 //    action->setShortcutContext(Qt::ApplicationShortcut);
 //    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterLock);
 //    timelineWidget->addAction(action);
+}
+
+TimelineGraphicsScene::~TimelineGraphicsScene()
+{
+    disconnect(qApp, &QApplication::focusChanged,
+               this, &TimelineGraphicsScene::handleApplicationFocusLoss);
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)
@@ -320,9 +335,7 @@ void TimelineGraphicsScene::resetMouseCursor()
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
-        m_releaseSelectRow = nullptr;
-        m_dragging = false;
-        m_startRowMoverOnNextDrag = false;
+        resetMousePressParams();
         m_pressPos = event->scenePos();
         QGraphicsItem *item = itemAt(m_pressPos, QTransform());
         const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
@@ -432,27 +445,30 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
     } else if (m_dragging) {
         if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
-            // resizing layer timline duration from left
+            // resizing row timeline duration from left
             double distance = event->scenePos().x() - m_ruler->pos().x();
             if (shift)
                 snap(distance);
             m_editedTimelineRow->setStartX(distance);
+            m_editedTimelineRow->showToolTip(event->screenPos());
         } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle
                    && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
-            // resizing layer timline duration from right
+            // resizing row timeline duration from right
             double distance = event->scenePos().x() - m_ruler->pos().x();
             if (shift)
                 snap(distance);
             m_editedTimelineRow->setEndX(distance);
+            m_editedTimelineRow->showToolTip(event->screenPos());
             rowManager()->updateRulerDuration();
         } else if (m_clickedTimelineControlType == TimelineControlType::Duration
                    && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
-            // moving layer timeline duration
+            // moving row timeline duration
             double newX = event->scenePos().x() - m_editedTimelineRow->getDurationMoveOffsetX()
                     - m_ruler->x();
             if (shift)
                 snap(newX);
             m_editedTimelineRow->moveDurationTo(newX);
+            m_editedTimelineRow->showToolTip(event->screenPos());
             rowManager()->updateRulerDuration();
         } else if (m_selectionRect->isActive()) {
             // resizing keyframe selection rect
@@ -564,6 +580,12 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_releaseSelectRow = nullptr;
     m_autoScrollTimer.stop();
     m_autoScrollTriggerTimer.stop();
+    m_timebarToolTip->hide();
+}
+
+QLabel *TimelineGraphicsScene::timebarTooltip()
+{
+    return m_timebarToolTip;
 }
 
 void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
@@ -842,6 +864,13 @@ void TimelineGraphicsScene::handleLockSelected()
     RowTree *selectedRow = m_rowManager->selectedRow();
     if (selectedRow)
         selectedRow->toggleLocked();
+}
+
+void TimelineGraphicsScene::handleApplicationFocusLoss()
+{
+    // Hide the timebar tooltip if application loses focus
+    if (!QApplication::focusWidget())
+        m_timebarToolTip->hide();
 }
 
 // Getters

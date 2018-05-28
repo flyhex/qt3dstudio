@@ -60,6 +60,7 @@ namespace TimelineConstants
     const int PLAYHEAD_W        = 14;
     const int DURATION_HANDLE_W = 14;    // width of duration end handles in a timeline row
     const int NAVIGATION_BAR_H  = 30;    // height of navigation/breadcrumb bar
+    const int TIMEBAR_TOOLTIP_OFFSET_V = 10;
 
     // Colors
     const char ROW_COLOR_NORMAL[]              = "#404040";

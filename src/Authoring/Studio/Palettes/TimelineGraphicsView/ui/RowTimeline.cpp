@@ -41,8 +41,12 @@
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qbrush.h>
+#include <QtWidgets/qdesktopwidget.h>
+#include <QtWidgets/qapplication.h>
 #include <QtWidgets/qgraphicssceneevent.h>
 #include <QtWidgets/qwidget.h>
+#include <QtWidgets/qlabel.h>
+#include <QtCore/qdatetime.h>
 
 RowTimeline::RowTimeline()
     : InteractiveTimelineItem()
@@ -736,6 +740,40 @@ RowTree *RowTimeline::rowTree() const
 QList<Keyframe *> RowTimeline::keyframes() const
 {
     return m_keyframes;
+}
+
+void RowTimeline::showToolTip(const QPointF &pos)
+{
+    QLabel *tooltip = m_rowTree->m_scene->timebarTooltip();
+
+    // .0000001 is added to ensure displayed times are rounded the right way
+    const double roundingFix = .0000001;
+    double start = m_startTime + roundingFix;
+    double end = m_endTime + roundingFix;
+    double duration = m_endTime - m_startTime + roundingFix;
+    QTime startTime(0, 0, int(start), int((start - int(start)) * 1000.0));
+    QTime endTime(0, 0, int(end), int((end - int(end)) * 1000.0));
+    QTime durationTime(0, 0, int(duration), qRound((duration - int(duration)) * 1000.0));
+
+    static const QString format = QStringLiteral("mm:ss:zzz");
+    static const QString toolTipTemplate = QStringLiteral("%1 - %2 (%3)");
+    const QString text = toolTipTemplate.arg(startTime.toString(format))
+            .arg(endTime.toString(format)).arg(durationTime.toString(format));
+
+    tooltip->setText(text);
+
+    QPoint newPos = pos.toPoint() + QPoint(-tooltip->width() / 2,
+                     -tooltip->height() - TimelineConstants::TIMEBAR_TOOLTIP_OFFSET_V);
+    tooltip->move(newPos);
+    if (!QApplication::desktop()->screenGeometry(
+                m_rowTree->m_scene->widgetTimeline()).contains(tooltip->geometry())) {
+        // Hide tooltip if position is even partially on different screen than
+        // the timeline widget to avoid artifacts from different pixel ratios
+        tooltip->hide();
+    } else {
+        tooltip->raise();
+        tooltip->show();
+    }
 }
 
 RowTimeline *RowTimeline::parentRow() const

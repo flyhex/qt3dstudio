@@ -78,6 +78,7 @@ public:
     Keyframe *getClickedKeyframe(const QPointF &scenePos);
     QList<Keyframe *> getKeyframesInRange(const double left, const double right);
     QList<Keyframe *> keyframes() const;
+    void showToolTip(const QPointF &pos);
 
 protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;

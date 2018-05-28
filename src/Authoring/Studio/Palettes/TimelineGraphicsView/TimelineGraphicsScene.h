@@ -53,6 +53,7 @@ struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 
 typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree::ExpandState> TExpandMap;
 
@@ -62,6 +63,7 @@ class TimelineGraphicsScene : public QGraphicsScene
 
 public:
     explicit TimelineGraphicsScene(TimelineWidget *timelineWidget);
+    virtual ~TimelineGraphicsScene();
 
     void setTimelineScale(int scale);
     void updateTimelineLayoutWidth();
@@ -82,6 +84,7 @@ public:
     void updateSnapSteps();
     TExpandMap &expandMap();
     void resetMousePressParams();
+    QLabel *timebarTooltip();
 
 protected:
     bool event(QEvent *event) override;
@@ -110,6 +113,7 @@ private:
     void handleEditComponent();
     void handleShySelected();
     void handleLockSelected();
+    void handleApplicationFocusLoss();
     void updateAutoScrolling(double scenePosY);
 
     QGraphicsLinearLayout *m_layoutRoot;
@@ -145,6 +149,7 @@ private:
     bool m_autoScrollUpOn = false;
     QTimer m_autoScrollTimer;
     QTimer m_autoScrollTriggerTimer; // triggers m_autoScrollTimer
+    QLabel *m_timebarToolTip = nullptr;
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H
