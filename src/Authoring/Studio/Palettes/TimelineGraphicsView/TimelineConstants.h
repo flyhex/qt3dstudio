@@ -79,6 +79,7 @@ namespace TimelineConstants
     const char WIDGET_BG_COLOR[]               = "#222222";
     const char PLAYHEAD_LINE_COLOR[]           = "#b20808";
     const char FILTER_BUTTON_SELECTED_COLOR[]  = "#000000";
+    const char FILTER_BUTTON_HOVERED_COLOR[]   = "#40000000";
 
     // Other
     const int EXPAND_ANIMATION_DURATION       = 200;

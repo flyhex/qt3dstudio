@@ -35,7 +35,7 @@ TreeHeader::TreeHeader(TimelineGraphicsScene *timelineScene, TimelineItem *paren
     : TimelineItem(parent)
     , m_scene(timelineScene)
 {
-
+    setAcceptHoverEvents(true);
 }
 
 void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -54,6 +54,8 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     static const QPixmap pixLock    = QPixmap(":/images/Toggle-Lock.png");
 
     QColor selectedColor = QColor(TimelineConstants::FILTER_BUTTON_SELECTED_COLOR);
+    QColor hoveredColor = QColor(TimelineConstants::FILTER_BUTTON_HOVERED_COLOR);
+
     if (m_shy)
         painter->fillRect(m_rectShy, selectedColor);
 
@@ -62,6 +64,14 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
     if (m_lock)
         painter->fillRect(m_rectLock, selectedColor);
+
+    // Paint hovering as semi-transparent overlay
+    if (m_hoveredItem == 0)
+        painter->fillRect(m_rectShy, hoveredColor);
+    else if (m_hoveredItem == 1)
+        painter->fillRect(m_rectVisible, hoveredColor);
+    else if (m_hoveredItem == 2)
+        painter->fillRect(m_rectLock, hoveredColor);
 
     painter->drawPixmap(m_rectShy    , pixShy);
     painter->drawPixmap(m_rectVisible, pixVisible);
@@ -122,5 +132,38 @@ void TreeHeader::toggleFilterHidden()
 void TreeHeader::toggleFilterLocked()
 {
     m_lock = !m_lock;
+    update();
+}
+
+void TreeHeader::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+    QPointF p = event->scenePos();
+    int hoveredItem = -1;
+    if (m_rectShy.contains(p.x(), p.y())) {
+        QString action = m_shy ? tr("Show") : tr("Hide");
+        setToolTip(tr("%1 shy objects").arg(action));
+        hoveredItem = 0;
+    } else if (m_rectVisible.contains(p.x(), p.y())) {
+        QString action = m_visible ? tr("Show") : tr("Hide");
+        setToolTip(tr("%1 inactive objects").arg(action));
+        hoveredItem = 1;
+    } else if (m_rectLock.contains(p.x(), p.y())) {
+        QString action = m_lock ? tr("Show") : tr("Hide");
+        setToolTip(tr("%1 locked objects").arg(action));
+        hoveredItem = 2;
+    } else {
+        setToolTip("");
+    }
+
+    if (m_hoveredItem != hoveredItem) {
+        // Update hover status only if it has changed
+        m_hoveredItem = hoveredItem;
+        update();
+    }
+}
+
+void TreeHeader::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    m_hoveredItem = -1;
     update();
 }
