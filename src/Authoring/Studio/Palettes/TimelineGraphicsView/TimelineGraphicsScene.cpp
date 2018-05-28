@@ -424,14 +424,16 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             if (shift)
                 snap(distance);
             m_editedTimelineRow->setStartX(distance);
-        } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+        } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle
+                   && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
             // resizing layer timline duration from right
             double distance = event->scenePos().x() - m_ruler->pos().x();
             if (shift)
                 snap(distance);
             m_editedTimelineRow->setEndX(distance);
             rowManager()->updateRulerDuration();
-        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+        } else if (m_clickedTimelineControlType == TimelineControlType::Duration
+                   && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
             // moving layer timeline duration
             double newX = event->scenePos().x() - m_editedTimelineRow->getDurationMoveOffsetX()
                     - m_ruler->x();
