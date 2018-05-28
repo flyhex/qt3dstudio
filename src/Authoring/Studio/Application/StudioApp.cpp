@@ -528,17 +528,10 @@ bool CStudioApp::showStartupDialog()
         CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
-        Q3DStudio::CFilePath theMostRecentDirectory = Q3DStudio::CFilePath(".");
         if (m_views) {
             CRecentItems *theRecentItems = m_views->getMainFrame()->GetRecentItems();
-            for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex) {
-                if (theIndex == 0) {
-                    theMostRecentDirectory =
-                            Q3DStudio::CFilePath(theRecentItems->GetItem(0).GetAbsolutePath())
-                            .GetDirectory();
-                }
+            for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex)
                 theStartupDlg.AddRecentItem(theRecentItems->GetItem(theIndex));
-            }
         }
 
         theStartupDlg.exec();
@@ -550,7 +543,7 @@ bool CStudioApp::showStartupDialog()
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {
-            Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(theMostRecentDirectory);
+            Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentDirectory());
             if (theFile.GetPath() != "") {
                  if (!m_core->OnNewDocument(theFile, true)) {
                      // Invalid filename, show a message box and the dialog again
@@ -564,7 +557,7 @@ bool CStudioApp::showStartupDialog()
         } break;
 
         case CStartupDlg::EStartupChoice_OpenDoc: {
-            Qt3DSFile theFile = m_dialogs->GetFileOpenChoice(theMostRecentDirectory);
+            Qt3DSFile theFile = m_dialogs->GetFileOpenChoice(getMostRecentDirectory());
             if (theFile.GetPath() != "") {
                 OnLoadDocument(theFile);
                 theReturn = true;
@@ -1628,6 +1621,19 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
     qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list, subpresentations);
 }
 
+CFilePath CStudioApp::getMostRecentDirectory() const
+{
+    CFilePath mostRecentDirectory = Q3DStudio::CFilePath(".");
+    if (m_views) {
+        CRecentItems *recentItems = m_views->getMainFrame()->GetRecentItems();
+        if (recentItems->GetItemCount() > 0) {
+            mostRecentDirectory = CFilePath(recentItems->GetItem(0).GetAbsolutePath())
+                    .GetDirectory();
+        }
+    }
+    return mostRecentDirectory;
+}
+
 //=============================================================================
 /**
  * Called by OnLoadDocument, to allow the error reporting to be inserted.
@@ -1650,7 +1656,7 @@ void CStudioApp::OnLoadDocumentCatcher(const Qt3DSFile &inDocument)
 void CStudioApp::OnFileOpen()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetFileOpenChoice();
+        Qt3DSFile theFile = m_dialogs->GetFileOpenChoice(getMostRecentDirectory());
         if (theFile.GetPath() != "")
             OnLoadDocument(theFile);
     }

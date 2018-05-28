@@ -35,7 +35,7 @@
 #include "StudioObjectTypes.h"
 #include "DispatchListeners.h"
 #include "Qt3DSDMHandles.h"
-
+#include "Qt3DSFileTools.h"
 #include <QtWidgets/qapplication.h>
 
 namespace Q3DStudio {
@@ -239,6 +239,7 @@ public:
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
     void SaveUIAFile(bool subpresentations = true);
+    Q3DStudio::CFilePath getMostRecentDirectory() const;
 };
 
 extern CStudioApp g_StudioApp;
