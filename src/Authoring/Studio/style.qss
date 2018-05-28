@@ -325,6 +325,19 @@ TimeLineToolbar QLabel#dataInputName {
     color: #ff5102;
 }
 
+/* Loading progress dialog */
+QDialog#ProgressDlg QWidget {
+    background-color: #202020;
+}
+
+QDialog#ProgressDlg QWidget#backgroundWidget {
+    border: 1px solid #808080;
+}
+
+QDialog#ProgressDlg QWidget#progressActionText {
+    font-size: 16px;
+}
+
 /* Sub-presentation Dialogs and Data Input Dialogs */
 QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
 QDialog#SubPresentationListDlg QHeaderView::section,

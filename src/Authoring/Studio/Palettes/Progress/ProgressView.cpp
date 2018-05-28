@@ -42,7 +42,7 @@ CProgressView::CProgressView(QWidget *parent)
     , m_ui(new Ui::ProgressDlg)
 {
     m_ui->setupUi(this);
-    m_ui->progressActionText->setStyleSheet("font-size: 16px;");
+    m_ui->progressAdditionalText->setWordWrap(true);
 }
 
 //=============================================================================
