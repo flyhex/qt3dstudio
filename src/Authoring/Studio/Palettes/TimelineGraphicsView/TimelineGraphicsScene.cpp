@@ -332,7 +332,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         || m_clickedTreeControlType == TreeControlType::Hide
                         || m_clickedTreeControlType == TreeControlType::Lock) {
                     m_rowManager->updateFiltering(rowTree);
-                } else {
+                } else if (m_clickedTreeControlType == TreeControlType::None) {
                     // Prepare to change selection to single selection at release if a multiselected
                     // row is clicked without ctrl.
                     if (!ctrlKeyDown && m_rowManager->isRowSelected(rowTree)
