@@ -68,6 +68,8 @@
 #include <QtCore/qdebug.h>
 #include <QtWidgets/qaction.h>
 
+static const QPointF invalidPoint(-999999.0, -999999.0);
+
 TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     : QGraphicsScene(timelineWidget)
     , m_layoutRoot(new QGraphicsLinearLayout)
@@ -81,6 +83,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
     , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
+    , m_pressPos(invalidPoint)
     , m_timelineControl(new TimelineControl(this))
     , m_currentCursor(-1)
 {
@@ -334,6 +337,11 @@ void TimelineGraphicsScene::resetMouseCursor()
 
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    // Ignore non-left presses if dragging
+    if (event->button() != Qt::LeftButton && (m_dragging || m_startRowMoverOnNextDrag)) {
+        event->accept();
+        return;
+    }
     if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
         resetMousePressParams();
         m_pressPos = event->scenePos();
@@ -429,9 +437,10 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if (!m_editedTimelineRow)
         updateHoverStatus(event->scenePos());
 
-    if (qAbs(event->scenePos().x() - m_pressPos.x()) > 10
-            || qAbs(event->scenePos().y() - m_pressPos.y()) > 10)
+    if (m_pressPos != invalidPoint && (qAbs(event->scenePos().x() - m_pressPos.x()) > 10
+                                       || qAbs(event->scenePos().y() - m_pressPos.y()) > 10)) {
         m_dragging = true;
+    }
 
     bool shift = event->modifiers() & Qt::ShiftModifier;
     if (m_rulerPressed) {
@@ -581,6 +590,7 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_autoScrollTimer.stop();
     m_autoScrollTriggerTimer.stop();
     m_timebarToolTip->hide();
+    m_pressPos = invalidPoint;
 }
 
 QLabel *TimelineGraphicsScene::timebarTooltip()
@@ -667,43 +677,45 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    const QPointF scenePos = event->scenePos();
-    QGraphicsItem *item = itemAt(scenePos, QTransform());
-    if (item) {
-        QGraphicsItem *itemBelowPlayhead =
-                getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
-        if (item->type() == TimelineItem::TypeRuler
-                || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
-            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-            CTimeEditDlg timeEditDlg;
-            timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
-            return;
-        }
-
-        item = itemBelowPlayhead;
-        if (item->type() == TimelineItem::TypeRowTree) {
-            RowTree *treeItem = static_cast<RowTree *>(item);
-            if (treeItem->isProperty())
-                treeItem->togglePropertyExpanded();
-        } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
-            RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
-            if (treeLabelItem->parentRow()->isProperty()) {
-                treeLabelItem->parentRow()->togglePropertyExpanded();
-            } else {
-                // Tree labels text can be edited with double-click
-                treeLabelItem->setEnabled(true);
-                treeLabelItem->setFocus();
-            }
-        } else if (item->type() == TimelineItem::TypeRowTimeline) {
-            RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
-            Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
-            if (clickedKeyframe) {
+    if (event->button() == Qt::LeftButton) {
+        const QPointF scenePos = event->scenePos();
+        QGraphicsItem *item = itemAt(scenePos, QTransform());
+        if (item) {
+            QGraphicsItem *itemBelowPlayhead =
+                    getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
+            if (item->type() == TimelineItem::TypeRuler
+                    || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
                 CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                 CTimeEditDlg timeEditDlg;
-                timeEditDlg.setKeyframesManager(m_keyframeManager);
-                timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
-            } else {
-                handleSetTimeBarTime();
+                timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
+                return;
+            }
+
+            item = itemBelowPlayhead;
+            if (item->type() == TimelineItem::TypeRowTree) {
+                RowTree *treeItem = static_cast<RowTree *>(item);
+                if (treeItem->isProperty())
+                    treeItem->togglePropertyExpanded();
+            } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
+                RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
+                if (treeLabelItem->parentRow()->isProperty()) {
+                    treeLabelItem->parentRow()->togglePropertyExpanded();
+                } else {
+                    // Tree labels text can be edited with double-click
+                    treeLabelItem->setEnabled(true);
+                    treeLabelItem->setFocus();
+                }
+            } else if (item->type() == TimelineItem::TypeRowTimeline) {
+                RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+                Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
+                if (clickedKeyframe) {
+                    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                    CTimeEditDlg timeEditDlg;
+                    timeEditDlg.setKeyframesManager(m_keyframeManager);
+                    timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
+                } else {
+                    handleSetTimeBarTime();
+                }
             }
         }
     }
@@ -735,8 +747,12 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     int index = event->scenePos().y() / TimelineConstants::ROW_H;
     RowTree *row = m_rowManager->rowAt(index);
 
-    if (row == nullptr)
+    if (row == nullptr || m_widgetTimeline->isFullReconstructPending() || m_dragging
+            || m_startRowMoverOnNextDrag) {
         return;
+    }
+
+    resetMousePressParams(); // Make sure our mouse handling doesn't get confused by context menu
 
     // Internally some things like make component depend on the correct row being selected,
     // so make sure it is.
