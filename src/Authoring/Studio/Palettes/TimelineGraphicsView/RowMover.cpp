@@ -239,7 +239,8 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         if (depth < depthMin || depth > depthMax
                 || (theRowType != OBJTYPE_UNKNOWN
                     && !CStudioObjectTypes::AcceptableParent(theRowType,
-                                                             m_insertionParent->rowType()))) {
+                                                             m_insertionParent->rowType()))
+                || m_insertionParent->locked()) {
             valid = false;
         }
 
