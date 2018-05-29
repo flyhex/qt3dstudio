@@ -1794,16 +1794,31 @@ void CStudioApp::OnUndefinedDatainputsFail(
 void CStudioApp::toggleEyeball()
 {
     CDoc *theDoc = m_core->GetDoc();
-    qt3dsdm::Qt3DSDMInstanceHandle handle = theDoc->GetSelectedInstance();
-    if (handle.Valid()) {
-        qt3dsdm::Qt3DSDMPropertyHandle property
-                = theDoc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball;
+    qt3dsdm::IPropertySystem *propertySystem = theDoc->GetStudioSystem()->GetPropertySystem();
+    qt3dsdm::TInstanceHandleList selectedInstances
+            = theDoc->GetSelectedValue().GetSelectedInstances();
+
+    if (selectedInstances.size() > 0) {
+        Q3DStudio::ScopedDocumentEditor editor(*theDoc,
+                                               L"Visibility Toggle",
+                                               __FILE__, __LINE__);
+        bool boolValue = false;
         SValue value;
-        theDoc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(handle, property,
-                                                                                 value);
-        bool boolValue = !qt3dsdm::get<bool>(value);
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Visibility Toggle"))
-                ->SetInstancePropertyValue(handle, property, boolValue);
+        for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
+            qt3dsdm::Qt3DSDMInstanceHandle handle(selectedInstances[idx]);
+
+            if (handle.Valid()) {
+                qt3dsdm::Qt3DSDMPropertyHandle property
+                        = theDoc->GetStudioSystem()->GetClientDataModelBridge()
+                        ->GetSceneAsset().m_Eyeball;
+                if (value.empty()) {
+                    // First valid handle selects if all are hidden/unhidden
+                    propertySystem->GetInstancePropertyValue(handle, property, value);
+                    boolValue = !qt3dsdm::get<bool>(value);
+                }
+                editor->SetInstancePropertyValue(handle, property, boolValue);
+            }
+        }
     }
 }
 
