@@ -209,8 +209,15 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         }
 
         // calc insertion depth
+        bool inAComponent = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(1))
+                                ->rowType() == OBJTYPE_COMPONENT;
         int depth;
-        int depthMin = rowInsert2 ? rowInsert2->depth() : (theRowType == OBJTYPE_LAYER ? 2 : 3);
+        int depthMin = 2;
+        if (rowInsert2)
+            depthMin = rowInsert2->depth();
+        else if (theRowType != OBJTYPE_LAYER && !inAComponent)
+            depthMin = 3;
+
         int depthMax = rowInsert1->depth();
         if (!rowInsert1->locked() && rowInsert1->isContainer()
                 && !m_sourceRows.contains(rowInsert1)) {
@@ -228,7 +235,6 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             depth = (scenePos.x() - LEFT_MARGIN) / TimelineConstants::ROW_DEPTH_STEP;
             depth = qBound(depthMin, depth, depthMax);
         }
-
         // calc insertion parent
         RowTree *insertParent = rowInsert1;
         for (int i = rowInsert1->depth(); i >= depth; --i)
@@ -248,7 +254,8 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         // or object under itself, or under unacceptable parent
         for (auto sourceRow : qAsConst(m_sourceRows)) {
             if ((sourceRow->isMaster() && sourceRow->rowType() != OBJTYPE_LAYER
-                    && !m_insertionParent->isMaster())
+                    && !m_insertionParent->isMaster()
+                    && insertParent->rowType() != OBJTYPE_COMPONENT)
                     || m_insertionParent->isDecendentOf(sourceRow)
                     || m_insertionParent == sourceRow
                     || !CStudioObjectTypes::AcceptableParent(sourceRow->rowType(),
@@ -297,7 +304,8 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
 
             // auto expand
             if (!rowInsert1->locked() && !rowInsert1->expanded() && rowInsert1->isContainer()
-                    && !rowInsert1->empty() && !isSourceRowsDescendant(rowInsert1)) {
+                    && !rowInsert1->empty() && !isSourceRowsDescendant(rowInsert1)
+                    && depth == rowInsert1->depth() + 1) {
                 updateTargetRowLater = std::bind(&RowMover::updateTargetRow, this,
                                                  scenePos, rowType);
                 m_rowAutoExpand = rowInsert1;
