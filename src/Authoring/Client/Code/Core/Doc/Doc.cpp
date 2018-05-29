@@ -83,10 +83,12 @@
 #include "EASTL/sort.h"
 #include "foundation/Qt3DSLogging.h"
 #include "Studio/Application/StudioApp.h"
+#include "Dialogs.h"
 
 #include <QtCore/qfileinfo.h>
 #include <QtWidgets/qaction.h>
 #include <QtWidgets/qwidget.h>
+#include <QtCore/qtimer.h>
 
 using std::ref;
 using std::shared_ptr;
@@ -94,7 +96,7 @@ using std::shared_ptr;
 //==============================================================================
 //	Constants
 //==============================================================================
-const long STUDIO_FILE_VERSION = 3;
+const long STUDIO_FILE_VERSION = 4;
 const long STUDIO_LAST_SUPPORTED_FILE_VERSION = 1;
 
 IMPLEMENT_OBJECT_COUNTER(CDoc)
@@ -2111,7 +2113,7 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
     // Let any interested parties know that a presentation is going to be loaded
     m_Core->GetDispatch()->FireOnLoadingPresentation();
 
-    LoadStudioData(inInputStream);
+    int uipVersion = LoadStudioData(inInputStream);
 
     // We have a new presentation and a new active time context (scene)
     OnNewPresentation();
@@ -2121,6 +2123,18 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
             m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 1);
     m_StudioSystem->GetFullSystem()->GetSignalSender()->SendActiveSlide(theMasterSlide, 1,
                                                                         theChildSlide);
+
+    if (uipVersion == 3) {
+        m_SceneEditor->CleanUpMeshes();
+        QTimer::singleShot(0, [](){
+            g_StudioApp.OnSave();
+            g_StudioApp.GetDialogs()->DisplayMessageBox(
+                        tr("Old Presentation Version"),
+                        tr("Presentation was in old format and had unoptimized meshes.\n"
+                           "They were optimized, and presentation version was updated."),
+                        Qt3DSMessageBox::ICON_INFO, false);
+        });
+    }
 }
 
 //==============================================================================
@@ -2129,11 +2143,12 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
  * Loads Studio object data from a presentation file archive.
  * @param inArchive CArchive from which to load the data objects.
  */
-void CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
+int CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
 {
     using namespace std;
     using namespace qt3dsdm;
     using namespace Q3DStudio;
+    qt3ds::QT3DSI32 theVersion = 0;
 
     QT3DS_PROFILE(LoadStudioData);
     bool theModifiedFlag = false;
@@ -2143,7 +2158,6 @@ void CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
         // This cuts down on a lot of redraw calls.
         CDispatchDataModelNotificationScope __dispatchScope(*GetCore()->GetDispatch());
 
-        qt3ds::QT3DSI32 theVersion = 0;
         {
             std::shared_ptr<IDOMReader> theReaderPtr =
                     CreateDOMReader(*inInputStream, theVersion);
@@ -2171,27 +2185,16 @@ void CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
         // Setup the Presentation and Scene
         // Asset Graph has only one root and that's the scene
         m_SceneInstance = m_AssetGraph->GetRoot(0);
-        m_ActiveSlide =
-                m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 1);
-        // Update from version 1 to current version here
-        if (theVersion == 1) {
-            // Ensure the scene editor even exists.
-            GetDocumentReader();
-            if (m_SceneGraph && m_SceneGraph->GetTextRenderer()) {
-                m_SceneGraph->GetTextRenderer()->ClearProjectFontDirectories();
-                m_SceneGraph->GetTextRenderer()->AddProjectFontDirectory(
-                            GetDocumentDirectory().GetCharStar());
-                m_SceneEditor->ReplaceTextFontNameWithTextFileStem(
-                            *m_SceneGraph->GetTextRenderer());
-                theModifiedFlag = true;
-            }
-        }
+        m_ActiveSlide = m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(
+                    m_SceneInstance, 1);
     } catch (...) {
         CleanupData();
         throw; // pass the error along to the caller, so the appropriate error message can be
         // feedback
     }
     SetModifiedFlag(theModifiedFlag);
+
+    return theVersion;
 }
 
 //==============================================================================

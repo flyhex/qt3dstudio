@@ -85,6 +85,7 @@
 #include <QtCore/qdir.h>
 #include <unordered_set>
 #include "Runtime/Include/q3dsqmlbehavior.h"
+#include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
 
 namespace {
 
@@ -3633,6 +3634,56 @@ public:
             m_SourcePathInstanceMap.clear();
             GetSourcePathToInstanceMap(m_SourcePathInstanceMap, false);
             DoRefreshImport(inOldFile, inNewFile);
+        } catch (...) {
+        }
+        theDispatch.FireOnProgressEnd();
+    }
+
+    void CleanUpMeshes() override
+    {
+        CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
+        theDispatch.FireOnProgressBegin(
+                    Q3DStudio::CString::fromQString(QObject::tr("Old UIP version")),
+                    Q3DStudio::CString::fromQString(QObject::tr("Cleaning up meshes")));
+        ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
+        try {
+            vector<CFilePath> importFileList;
+            m_SourcePathInstanceMap.clear();
+            GetSourcePathToInstanceMap(m_SourcePathInstanceMap, false);
+            for (TCharPtrToSlideInstanceMap::iterator theIter = m_SourcePathInstanceMap.begin(),
+                                                      end = m_SourcePathInstanceMap.end();
+                 theIter != end; ++theIter) {
+                CFilePath theSource(theIter->first);
+                if (theSource.GetExtension().Compare(L"mesh", CString::ENDOFSTRING, false)) {
+                    CFilePath theFullPath = m_Doc.GetResolvedPathToDoc(theSource);
+
+                    if (!theFullPath.Exists() || !theFullPath.isFile())
+                        continue;
+
+                    Mesh *theMesh = Mesh::LoadMulti(
+                                theFullPath.toCString().GetCharStar(),
+                                Mesh::GetHighestMultiVersion(
+                                    theFullPath.toCString().GetCharStar()));
+
+                    if (!theMesh)
+                        continue;
+
+                    // Import file still has revisions, so we need to use SaveMulti for saving
+                    // the mesh file with correct revision number.
+                    // Once import file revisioning has been removed (QT3DS-1815), this can be
+                    // replaced with theMesh->Save(theFullPath.toCString().GetCharStar());
+                    // It also requires ripping the revisions out from the *.import files
+                    Qt3DSFileToolsSeekableMeshBufIOStream output(
+                                SFile::Wrap(SFile::OpenForWrite(theFullPath, FileWriteFlags()),
+                                            theFullPath));
+                    if (!output.IsOpen())
+                        QT3DS_ALWAYS_ASSERT_MESSAGE(theFullPath.toCString().GetCharStar());
+                    MallocAllocator allocator;
+                    theMesh->SaveMulti(allocator, output);
+
+                    delete theMesh;
+                }
+            }
         } catch (...) {
         }
         theDispatch.FireOnProgressEnd();

@@ -419,7 +419,7 @@ protected:
 
     void CleanupData();
     void ResetData();
-    void LoadStudioData(CBufferedInputStream *inInputStream);
+    int LoadStudioData(CBufferedInputStream *inInputStream);
     void ResetDataCore();
     void SetupDataCoreSignals();
 
