@@ -55,7 +55,7 @@ public:
     void clearSelection();
     void updateFiltering(RowTree *rowTree = nullptr);
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
-    void updateRulerDuration();
+    void updateRulerDuration(bool updateMaxDuration = true);
     void collapseAllPropertyRows();
     int getChildIndex(RowTree *parentRow, RowTree *childRow);
     int getRowIndex(RowTree *row, int startAt = 1);

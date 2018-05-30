@@ -260,7 +260,10 @@ void RowManager::clearSelection()
     m_selectedRows.clear();
 }
 
-void RowManager::updateRulerDuration()
+// Updates duration of ruler
+// When you don't want to update max duration (so width of timeline, scrollbar)
+// set updateMaxDuration to false.
+void RowManager::updateRulerDuration(bool updateMaxDuration)
 {
     double duration = 0;
     double maxDuration = 0; // for setting correct size for the view so scrollbars appear correctly
@@ -279,7 +282,9 @@ void RowManager::updateRulerDuration()
         }
     }
 
-    m_scene->ruler()->setDuration(duration, maxDuration);
+    m_scene->ruler()->setDuration(duration);
+    if (updateMaxDuration)
+        m_scene->ruler()->setMaxDuration(maxDuration);
 }
 
 void RowManager::updateFiltering(RowTree *row)

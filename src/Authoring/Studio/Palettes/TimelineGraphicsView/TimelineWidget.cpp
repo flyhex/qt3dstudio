@@ -312,7 +312,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
         m_graphicsScene->setTimelineScale(scale);
     });
 
-    connect(m_graphicsScene->ruler(), &Ruler::durationChanged, this, [this]() {
+    connect(m_graphicsScene->ruler(), &Ruler::maxDurationChanged, this, [this]() {
         m_graphicsScene->updateTimelineLayoutWidth();
     });
 
@@ -742,8 +742,10 @@ void TimelineWidget::onAsyncUpdate()
                     if (binding) {
                         RowTree *row = binding->getRowTree();
                         if (row) {
-                            if (timeProperty)
+                            if (timeProperty) {
                                 row->rowTimeline()->updateDurationFromBinding();
+                                m_graphicsScene->rowManager()->updateRulerDuration();
+                            }
                             if (filterProperty) {
                                 row->updateFromBinding();
                                 m_graphicsScene->rowManager()->updateFiltering(row);

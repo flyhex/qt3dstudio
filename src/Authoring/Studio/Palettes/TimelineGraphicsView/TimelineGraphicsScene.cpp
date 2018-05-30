@@ -468,7 +468,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 snap(distance);
             m_editedTimelineRow->setEndX(distance);
             m_editedTimelineRow->showToolTip(event->screenPos());
-            rowManager()->updateRulerDuration();
+            rowManager()->updateRulerDuration(false);
         } else if (m_clickedTimelineControlType == TimelineControlType::Duration
                    && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
             // moving row timeline duration
@@ -478,7 +478,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 snap(newX);
             m_editedTimelineRow->moveDurationTo(newX);
             m_editedTimelineRow->showToolTip(event->screenPos());
-            rowManager()->updateRulerDuration();
+            rowManager()->updateRulerDuration(false);
         } else if (m_selectionRect->isActive()) {
             // resizing keyframe selection rect
             m_selectionRect->updateSize(event->scenePos());
@@ -648,6 +648,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             timebar->CommitTimeChange();
             updateSnapSteps();
         } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+            rowManager()->updateRulerDuration();
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->ChangeTime(m_editedTimelineRow->getEndTime() * 1000, false);
@@ -656,6 +657,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
         } else if (m_dragging && m_clickedTimelineControlType == TimelineControlType::Duration) {
+            rowManager()->updateRulerDuration();
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->OffsetTime(m_editedTimelineRow->getDurationMoveTime() * 1000);
