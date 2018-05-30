@@ -26,9 +26,6 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_TIMELINE_TRANSLATIONMANAGER_H
 #define INCLUDED_TIMELINE_TRANSLATIONMANAGER_H 1
 
@@ -39,31 +36,16 @@
 
 #include "Doc.h"
 
-//==============================================================================
-//	Classes
-//==============================================================================
 class ITimelineItemBinding;
-class ITimelineItemProperty;
 class Qt3DSDMTimelineItemBinding;
-class CBaseStateRow;
-class CPropertyRow;
-class CKeyframesManager;
-class IBreadCrumbProvider;
-
-// Link to data model
-class CAsset;
-class IUICDMSelectable;
-class CClientDataModelBridge;
 
 // DataModel
 namespace qt3dsdm {
 class CStudioSystem;
-class ISignalConnection;
 }
 
 class CDoc;
 
-//=============================================================================
 /**
  * There is a TranslationManager per presentation (project)
  */
@@ -81,79 +63,19 @@ protected: // Properties
     // DataModel support
     TInstanceHandleBindingMap m_InstanceHandleBindingMap;
 
-    CKeyframesManager *m_KeyframesManager;
-    IBreadCrumbProvider *m_BreadCrumbProvider;
-    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_Connections; /// connections to the DataModel
-
-    TInstanceHandleExpandedMap m_InstanceHandleExpandedMap;
-
 public:
     CTimelineTranslationManager();
     ~CTimelineTranslationManager();
 
 public:
     ITimelineItemBinding *GetOrCreate(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    CPropertyRow *CreateNewPropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding,
-                              CBaseStateRow *inParentRow, CPropertyRow *inNextRow);
-    void RemovePropertyRow(ITimelineItemProperty *inTimelineItemPropertyBinding);
-
     void Clear();
-    void Unregister(ITimelineItemBinding *inTimelineItem);
 
-    CKeyframesManager *GetKeyframesManager() const;
-    IBreadCrumbProvider *GetBreadCrumbProvider() const;
-    CBaseStateRow *GetSelectedRow() const;
-    long GetCurrentViewTime() const;
     Qt3DSDMTimelineItemBinding *GetBinding(qt3dsdm::Qt3DSDMInstanceHandle inHandle) const;
-    Qt3DSDMTimelineItemBinding *GetSelectedBinding() const;
-
-    void ClearKeyframeSelection();
-    void OnNewPresentation();
 
     qt3dsdm::CStudioSystem *GetStudioSystem() const;
 
-    // DataModel callback
-    void OnAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void OnAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void OnPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                          qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void OnPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void RefreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
-                         ETimelineKeyframeTransaction inTransaction);
-    void OnKeyframeInserted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                            qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
-    void OnKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                           qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
-    void OnKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
-    void OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void OnDynamicKeyframeChanged(qt3dsdm::Qt3DSDMAnimationHandle inAnimation, bool inDynamic);
-
-    void OnAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    void OnAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    void OnChildAdded(int inParent, int inChild, long inIndex);
-    void OnChildRemoved(int inParent, int inChild, long inIndex);
-    void OnChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);
-
-    void OnActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
-                       qt3dsdm::Qt3DSDMInstanceHandle inOwner);
-
-    // Helper function to iterate over all bindings
-    void ClearBindingsKeyframeSelection();
     CDoc *GetDoc() const;
-
-    // Store expanded state
-    bool IsExpanded(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
-    void SetExpanded(qt3dsdm::Qt3DSDMInstanceHandle inInstance, bool inExpanded);
-
-protected:
-    void SetSelected(Q3DStudio::SSelectedValue inSelectable, bool inSelected);
-    ITimelineItemBinding *EnsureLoaded(qt3dsdm::Qt3DSDMInstanceHandle inHandle);
 };
 
 #endif // INCLUDED_TIMELINE_TRANSLATIONMANAGER_H

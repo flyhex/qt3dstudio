@@ -58,8 +58,6 @@ public:
     virtual void SetLocked(bool) = 0;
     virtual bool IsVisible() const = 0;
     virtual void SetVisible(bool) = 0;
-    virtual bool IsExpanded() const = 0;
-    virtual void SetExpanded(bool) = 0;
     virtual bool IsImported() const { return false; }
 
     // Actions

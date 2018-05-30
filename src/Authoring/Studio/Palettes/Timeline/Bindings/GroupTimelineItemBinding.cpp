@@ -36,7 +36,6 @@
 //	Includes
 //==============================================================================
 #include "GroupTimelineItemBinding.h"
-#include "BaseStateRow.h"
 #include "TimelineTranslationManager.h"
 #include "StudioApp.h"
 #include "Core.h"

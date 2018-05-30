@@ -161,24 +161,12 @@ HEADERS += \
     Palettes/Slide/SlideContextMenu.h \
     Palettes/Slide/SlideModel.h \
     Palettes/Slide/SlideView.h \
-    Palettes/Timeline/AbstractTimelineRowUI.h \
-    Palettes/Timeline/BaseStateRow.h \
-    Palettes/Timeline/Bindings/IKeyframeSelector.h \
     Palettes/Timeline/Bindings/ITimelineItem.h \
     Palettes/Timeline/Bindings/ITimelineItemBinding.h \
     Palettes/Timeline/Bindings/ITimelineItemProperty.h \
     Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Palettes/Timeline/Bindings/ITimelineTimebar.h \
-    Palettes/Timeline/IBreadCrumbProvider.h \
-    Palettes/Timeline/PropertyRow.h \
-    Palettes/Timeline/SlideRow.h \
-    Palettes/Timeline/StateRow.h \
-    Palettes/Timeline/TimelineObjectModel.h \
-    Palettes/Timeline/TimelineRow.h \
-    Palettes/Timeline/TimelineUIFactory.h \
-    Palettes/Timeline/TimelineView.h \
-    Palettes/Timeline/TimeMeasureItem.h \
-    Palettes/Timeline/TimePropertyItem.h \
+    Palettes/Timeline/Bindings/IBreadCrumbProvider.h \
     Palettes/TimelineGraphicsView/Keyframe.h \
     Palettes/TimelineGraphicsView/KeyframeManager.h \
     Palettes/TimelineGraphicsView/RowManager.h \
@@ -352,13 +340,10 @@ SOURCES += \
     Palettes/Slide/SlideContextMenu.cpp \
     Palettes/Slide/SlideModel.cpp \
     Palettes/Slide/SlideView.cpp \
-    Palettes/Timeline/AbstractTimelineRowUI.cpp \
-    Palettes/Timeline/BaseStateRow.cpp \
     Palettes/Timeline/Bindings/BehaviorTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/EmptyTimelineTimebar.cpp \
     Palettes/Timeline/Bindings/GroupTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/ImageTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/KeyframesManager.cpp \
     Palettes/Timeline/Bindings/LayerTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/MaterialTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/OffsetKeyframesCommandHelper.cpp \
@@ -372,27 +357,6 @@ SOURCES += \
     Palettes/Timeline/Bindings/SlideTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/TimelineBreadCrumbProvider.cpp \
     Palettes/Timeline/Bindings/TimelineTranslationManager.cpp \
-    Palettes/Timeline/ColorBlankControl.cpp \
-    Palettes/Timeline/ColorControl.cpp \
-    Palettes/Timeline/CommentEdit.cpp \
-    Palettes/Timeline/PropertyColorControl.cpp \
-    Palettes/Timeline/PropertyGraphKeyframe.cpp \
-    Palettes/Timeline/PropertyRow.cpp \
-    Palettes/Timeline/PropertyTimebarGraph.cpp \
-    Palettes/Timeline/ScalableScroller.cpp \
-    Palettes/Timeline/ScalableScrollerBar.cpp \
-    Palettes/Timeline/SlideRow.cpp \
-    Palettes/Timeline/Snapper.cpp \
-    Palettes/Timeline/StateRow.cpp \
-    Palettes/Timeline/StateRowFactory.cpp \
-    Palettes/Timeline/TimelineFilter.cpp \
-    Palettes/Timeline/TimelineKeyframe.cpp \
-    Palettes/Timeline/TimelineObjectModel.cpp \
-    Palettes/Timeline/TimelineRow.cpp \
-    Palettes/Timeline/TimelineUIFactory.cpp \
-    Palettes/Timeline/TimelineView.cpp \
-    Palettes/Timeline/TimeMeasureItem.cpp \
-    Palettes/Timeline/TimePropertyItem.cpp \
     Palettes/TimelineGraphicsView/KeyframeManager.cpp \
     Palettes/TimelineGraphicsView/RowManager.cpp \
     Palettes/TimelineGraphicsView/RowMover.cpp \

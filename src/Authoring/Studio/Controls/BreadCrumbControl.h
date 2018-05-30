@@ -39,7 +39,7 @@
 #include "ProceduralButton.h"
 #include "ToggleButton.h"
 #include "TextButton.h"
-#include "IBreadCrumbProvider.h"
+#include "Bindings/IBreadCrumbProvider.h"
 
 //==============================================================================
 //	Forwards

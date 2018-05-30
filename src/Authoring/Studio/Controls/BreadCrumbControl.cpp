@@ -37,7 +37,7 @@
 //==============================================================================
 #include "BreadCrumbControl.h"
 #include "StudioPreferences.h"
-#include "IBreadCrumbProvider.h"
+#include "Bindings/IBreadCrumbProvider.h"
 
 #include <QtGui/qpixmap.h>
 

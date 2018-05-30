@@ -32,21 +32,18 @@
 
 #pragma once
 
-#include "IKeyframeSelector.h"
 #include "Qt3DSDMMetaData.h"
 #include "Qt3DSString.h"
 
 class RowTree;
-class CPropertyRow;
 class IKeyframe;
-class ITimelineKeyframesManager;
 
 //=============================================================================
 /**
  * Abstraction of a data model item's property that is displayed in the Timeline.
  */
 //=============================================================================
-class ITimelineItemProperty : public IKeyframeSelector
+class ITimelineItemProperty
 {
 public:
     virtual ~ITimelineItemProperty() {}
@@ -58,26 +55,18 @@ public:
     virtual float GetMinimumValue() const = 0;
 
     virtual void SetSelected() = 0;
-    virtual void ClearKeySelection() = 0;
     virtual void DeleteAllKeys() = 0;
 
-    virtual void Bind(CPropertyRow *inRow) = 0;
-    virtual void Release() = 0;
     virtual void setRowTree(RowTree *row) = 0;
     virtual RowTree *getRowTree() const = 0;
-    virtual CPropertyRow *GetRow() = 0; // Mahmoud_TODO: delete after new timeline is done
 
     // Keyframes
-    virtual ITimelineKeyframesManager *GetKeyframesManager() const = 0;
     virtual IKeyframe *GetKeyframeByTime(long inTime) const = 0;
     virtual IKeyframe *GetKeyframeByIndex(long inIndex) const = 0;
     virtual long GetKeyframeCount() const = 0;
     virtual long GetChannelCount() const = 0;
     virtual float GetChannelValueAtTime(long inChannelIndex, long inTime) = 0;
     virtual void SetChannelValueAtTime(long inChannelIndex, long inTime, float inValue) = 0;
-    virtual long OffsetSelectedKeyframes(long inOffset) = 0;
-    virtual void CommitChangedKeyframes() = 0;
-    virtual void OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation) = 0;
     virtual bool IsDynamicAnimation() = 0;
 };
 

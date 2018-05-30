@@ -51,6 +51,7 @@
 #include "Bindings/ITimelineTimebar.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
+#include "Bindings/TimelineBreadCrumbProvider.h"
 #include "TimeEditDlg.h"
 #include "IDocumentEditor.h"
 #include "Control.h"
@@ -141,6 +142,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     // Mahmoud_TODO: CTimelineTranslationManager should be eventually removed or cleaned. Already
     // most of its functionality is implemented in this class
     m_translationManager = new CTimelineTranslationManager();
+    m_BreadCrumbProvider = new CTimelineBreadCrumbProvider(g_StudioApp.GetCore()->GetDoc());
 
     setWindowTitle(tr("Timeline", "Title of timeline view"));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -345,6 +347,7 @@ Q3DStudio::CString TimelineWidget::getPlaybackMode()
 TimelineWidget::~TimelineWidget()
 {
     m_graphicsScene->keyframeManager()->deselectAllKeyframes();
+    delete m_BreadCrumbProvider;
 }
 
 QSize TimelineWidget::sizeHint() const
@@ -678,7 +681,7 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
         m_handlesMap.clear();
         insertToHandlesMapRecursive(m_binding);
-        m_navigationBar->updateNavigationItems(m_translationManager->GetBreadCrumbProvider());
+        m_navigationBar->updateNavigationItems(m_BreadCrumbProvider);
         m_graphicsScene->updateSnapSteps();
         m_fullReconstruct = false;
         m_graphicsScene->rowManager()->updateFiltering();

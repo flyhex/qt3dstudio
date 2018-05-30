@@ -32,7 +32,7 @@
 #include <QtCore/qpropertyanimation.h>
 #include <QtWidgets/qwidget.h>
 #include <QtWidgets/qboxlayout.h>
-#include "IBreadCrumbProvider.h"
+#include "Bindings/IBreadCrumbProvider.h"
 
 class NavigationBar : public QWidget
 {

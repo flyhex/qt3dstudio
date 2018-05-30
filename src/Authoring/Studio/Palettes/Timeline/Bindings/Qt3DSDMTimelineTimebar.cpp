@@ -46,7 +46,6 @@
 #include "Core.h"
 #include "DurationEditDlg.h"
 #include "IDocumentEditor.h"
-#include "BaseStateRow.h"
 #include "StudioFullSystem.h"
 #include "StudioPreferences.h"
 #include "ITimelineItemBinding.h"

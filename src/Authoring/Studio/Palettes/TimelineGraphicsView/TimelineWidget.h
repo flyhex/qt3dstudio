@@ -36,7 +36,6 @@
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSignals.h"
 #include "SelectedValueImpl.h"
-#include "TimelineObjectModel.h"
 #include "TreeHeaderView.h"
 #include "Bindings/Qt3DSDMTimeline.h"
 #include "NavigationBar.h"
@@ -49,6 +48,7 @@ class TimelineGraphicsScene;
 class CTimelineTranslationManager;
 class Qt3DSDMTimelineItemBinding;
 class CClientDataModelBridge;
+class IBreadCrumbProvider;
 
 QT_FORWARD_DECLARE_CLASS(QMouseEvent)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
@@ -138,6 +138,10 @@ private:
     void insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding);
     void insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding);
     Q3DStudio::CString getPlaybackMode();
+    void refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
+                         ETimelineKeyframeTransaction inTransaction);
+
     TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;
     QGraphicsView *m_viewTimelineHeader = nullptr;
@@ -147,7 +151,6 @@ private:
     TimelineGraphicsScene *m_graphicsScene;
     TimelineSplitter *m_splitter = nullptr;
     CTimelineTranslationManager *m_translationManager = nullptr;
-    TimelineObjectModel *m_objectListModel = nullptr;
     FlatObjectListModel *m_model = nullptr;
     Qt3DSDMTimelineItemBinding *m_binding = nullptr;
     bool m_splitterPressed = false;
@@ -157,14 +160,12 @@ private:
     QTimer m_asyncUpdateTimer;
     bool m_fullReconstruct = false;
     CClientDataModelBridge *m_bridge = nullptr;
+    IBreadCrumbProvider *m_BreadCrumbProvider = nullptr;
 
     // data model connection
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
     qt3dsdm::Qt3DSDMSlideHandle m_activeSlide;
     THandleMap m_handlesMap;
-    void refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
-                         ETimelineKeyframeTransaction inTransaction);
 };
 
 #endif // TIMELINEWIDGET_H

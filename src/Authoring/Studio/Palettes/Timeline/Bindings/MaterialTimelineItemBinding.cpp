@@ -37,7 +37,6 @@
 //==============================================================================
 #include "MaterialTimelineItemBinding.h"
 #include "TimelineTranslationManager.h"
-#include "BaseStateRow.h"
 #include "ImageTimelineItemBinding.h"
 #include "EmptyTimelineTimebar.h"
 
@@ -182,138 +181,14 @@ void CMaterialTimelineItemBinding::OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inI
         Qt3DSDMTimelineItemBinding::OnAddChild(inInstance);
 }
 
-// helper function to find the image binding class that 'represents' this property
-inline CImageTimelineItemBinding *FindImageBindingByProperty(CBaseStateRow *inRow,
-                                                             Qt3DSDMPropertyHandle inProperty)
-{
-    if (!inRow || !inProperty.Valid())
-        return nullptr;
-
-    CImageTimelineItemBinding *theInvalidImageBinding = nullptr;
-    for (long theIndex = 0; theIndex < inRow->GetNumNonPropertyRows(); ++theIndex) {
-        CImageTimelineItemBinding *theImageBinding = dynamic_cast<CImageTimelineItemBinding *>(
-            inRow->GetNonPropertyRow(theIndex)->GetTimelineItemBinding());
-        if (theImageBinding && theImageBinding->GetPropertyHandle() == inProperty) {
-            theInvalidImageBinding = theImageBinding;
-            break;
-        }
-    }
-    return theInvalidImageBinding;
-}
-
 void CMaterialTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPropertyHandle)
 {
-    bool theHandled = false;
-    if (m_Row) {
-        qt3dsdm::IPropertySystem *thePropertySystem =
-            m_TransMgr->GetStudioSystem()->GetPropertySystem();
-        CClientDataModelBridge *theBridge =
-            m_TransMgr->GetStudioSystem()->GetClientDataModelBridge();
-        qt3dsdm::TCharStr thePropertyName = thePropertySystem->GetName(inPropertyHandle);
-        size_t theSlotCount = m_ImageNameFormalNamePairs.size();
-        for (size_t theSlotIndex = 0; theSlotIndex < theSlotCount; ++theSlotIndex) {
-            qt3dsdm::TCharStr thePropName = std::get<0>(m_ImageNameFormalNamePairs[theSlotIndex]);
-            if (thePropertyName == thePropName) {
-                if (ImageSlotIsFilled(thePropertySystem, m_DataHandle, thePropName)) {
-                    // already created, bail!
-                    if (m_TransMgr->GetBinding(GetImage(inPropertyHandle)))
-                        return;
-
-                    // Image property was changed from one non-zero guid value to another, delete
-                    // the old and and create a new one
-                    CImageTimelineItemBinding *theReplacedImageBinding =
-                        FindImageBindingByProperty(m_Row, inPropertyHandle);
-                    if (theReplacedImageBinding)
-                        m_Row->RemoveChildRow(theReplacedImageBinding);
-
-                    ITimelineItemBinding *theNextImageBinding = nullptr;
-                    // Determine if this is inserted somewhere in the existing list.
-                    for (size_t theNextImage = theSlotIndex + 1; theNextImage < theSlotCount;
-                         ++theNextImage) {
-                        qt3dsdm::TCharStr theTempName =
-                            std::get<0>(m_ImageNameFormalNamePairs[theNextImage]);
-                        if (ImageSlotIsFilled(thePropertySystem, m_DataHandle, theTempName)) {
-                            Qt3DSDMPropertyHandle theNextImageProperty =
-                                theBridge->GetAggregateInstancePropertyByName(m_DataHandle,
-                                                                              theTempName);
-                            theNextImageBinding =
-                                m_TransMgr->GetBinding(GetImage(theNextImageProperty));
-                            break;
-                        }
-                    }
-                    m_Row->AddChildRow(
-                        GetOrCreateImageBinding(
-                            inPropertyHandle,
-                            std::get<1>(m_ImageNameFormalNamePairs[theSlotIndex]).wide_str()),
-                        theNextImageBinding);
-                } else // check for delete
-                {
-                    // GetImage will not return anything valid since the value is nuked.
-                    // From the UI end, there is no way we can tell which image is associated with
-                    // this property, since that is "encapsulated" in the property value.
-                    CImageTimelineItemBinding *theInvalidImageBinding =
-                        FindImageBindingByProperty(m_Row, inPropertyHandle);
-                    if (theInvalidImageBinding)
-                        m_Row->RemoveChildRow(theInvalidImageBinding);
-                }
-                theHandled = true;
-                break;
-            }
-        }
-    }
-    if (!theHandled)
-        Qt3DSDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
+    Qt3DSDMTimelineItemBinding::OnPropertyChanged(inPropertyHandle);
 }
 
 void CMaterialTimelineItemBinding::OnPropertyLinked(Qt3DSDMPropertyHandle inPropertyHandle)
 {
-    bool theHandled = false;
-    if (m_Row) {
-        qt3dsdm::IPropertySystem *thePropertySystem =
-            m_TransMgr->GetStudioSystem()->GetPropertySystem();
-        CClientDataModelBridge *theBridge =
-            m_TransMgr->GetStudioSystem()->GetClientDataModelBridge();
-        qt3dsdm::TCharStr thePropertyName = thePropertySystem->GetName(inPropertyHandle);
-        size_t theSlotCount = m_ImageNameFormalNamePairs.size();
-        for (size_t theSlotIndex = 0; theSlotIndex < theSlotCount; ++theSlotIndex) {
-            qt3dsdm::TCharStr thePropName = std::get<0>(m_ImageNameFormalNamePairs[theSlotIndex]);
-            if (thePropertyName == thePropName) {
-                // Refresh image child row by delete and recreate
-                CImageTimelineItemBinding *theInvalidImageBinding =
-                    FindImageBindingByProperty(m_Row, inPropertyHandle);
-                if (theInvalidImageBinding)
-                    m_Row->RemoveChildRow(theInvalidImageBinding);
-
-                if (ImageSlotIsFilled(thePropertySystem, m_DataHandle, thePropName)) {
-                    ITimelineItemBinding *theNextImageBinding = nullptr;
-                    // Determine if this is inserted somewhere in the existing list.
-                    for (size_t theNextImage = theSlotIndex + 1; theNextImage < theSlotCount;
-                         ++theNextImage) {
-                        qt3dsdm::TCharStr theTempName =
-                            std::get<0>(m_ImageNameFormalNamePairs[theNextImage]);
-                        if (ImageSlotIsFilled(thePropertySystem, m_DataHandle, theTempName)) {
-                            Qt3DSDMPropertyHandle theNextImageProperty =
-                                theBridge->GetAggregateInstancePropertyByName(m_DataHandle,
-                                                                              theTempName);
-                            theNextImageBinding =
-                                m_TransMgr->GetBinding(GetImage(theNextImageProperty));
-                            break;
-                        }
-                    }
-                    m_Row->AddChildRow(
-                        GetOrCreateImageBinding(
-                            inPropertyHandle,
-                            std::get<1>(m_ImageNameFormalNamePairs[theSlotIndex]).wide_str()),
-                        theNextImageBinding);
-                }
-
-                theHandled = true;
-                break;
-            }
-        }
-    }
-    if (!theHandled)
-        Qt3DSDMTimelineItemBinding::OnPropertyLinked(inPropertyHandle);
+    Qt3DSDMTimelineItemBinding::OnPropertyLinked(inPropertyHandle);
 }
 
 qt3dsdm::Qt3DSDMInstanceHandle

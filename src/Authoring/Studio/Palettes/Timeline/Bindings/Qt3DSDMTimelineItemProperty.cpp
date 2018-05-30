@@ -36,12 +36,10 @@
 //	Includes
 //==============================================================================
 #include "Qt3DSDMTimelineItemProperty.h"
-#include "PropertyRow.h"
 #include "TimelineTranslationManager.h"
 #include "ITimelineItemBinding.h"
 #include "Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSDMTimelineKeyframe.h"
-#include "KeyframesManager.h"
 #include "CmdDataModelChangeKeyframe.h"
 #include "CmdDataModelRemoveKeyframe.h"
 #include "StudioApp.h"
@@ -74,8 +72,7 @@ inline float DataModelToColor(float inValue)
 Qt3DSDMTimelineItemProperty::Qt3DSDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
                                                        Qt3DSDMPropertyHandle inPropertyHandle,
                                                        Qt3DSDMInstanceHandle inInstance)
-    : m_Row(nullptr)
-    , m_InstanceHandle(inInstance)
+    : m_InstanceHandle(inInstance)
     , m_PropertyHandle(inPropertyHandle)
     , m_TransMgr(inTransMgr)
     , m_SetKeyframeValueCommand(nullptr)
@@ -102,7 +99,6 @@ Qt3DSDMTimelineItemProperty::Qt3DSDMTimelineItemProperty(CTimelineTranslationMan
 Qt3DSDMTimelineItemProperty::~Qt3DSDMTimelineItemProperty()
 {
     ReleaseKeyframes();
-    Release();
 }
 
 void Qt3DSDMTimelineItemProperty::CreateKeyframes()
@@ -133,13 +129,6 @@ void Qt3DSDMTimelineItemProperty::CreateKeyframes()
 
 void Qt3DSDMTimelineItemProperty::ReleaseKeyframes()
 {
-    // clear any selection from m_TransMgr
-    TKeyframeList::iterator theIter = m_Keyframes.begin();
-    for (; theIter != m_Keyframes.end(); ++theIter) {
-        m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(*theIter, false);
-
-        SAFE_DELETE(*theIter);
-    }
     m_Keyframes.clear();
     m_AnimationHandles.clear();
 }
@@ -179,8 +168,7 @@ inline ITimelineItemBinding *GetParentBinding(RowTree *inRow)
         RowTree *theParentRow = inRow->parentRow();
         if (theParentRow) {
             theParentBinding = theParentRow->getBinding();
-            ASSERT(theParentBinding); // TimelineItemBinding should be set properly during
-                                      // CBaseStateRow::Initialize
+            ASSERT(theParentBinding);
         }
     }
     return theParentBinding;
@@ -229,21 +217,9 @@ float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
     return theRetVal;
 }
 
-void Qt3DSDMTimelineItemProperty::Bind(CPropertyRow *inRow)
-{
-    ASSERT(!m_Row);
-
-    m_Row = inRow;
-}
-
 RowTree *Qt3DSDMTimelineItemProperty::getRowTree() const
 {
     return m_rowTree;
-}
-
-void Qt3DSDMTimelineItemProperty::Release()
-{
-    m_Row = nullptr;
 }
 
 // Ensures the object that owns this property is selected.
@@ -256,11 +232,6 @@ void Qt3DSDMTimelineItemProperty::SetSelected()
     }
 }
 
-void Qt3DSDMTimelineItemProperty::ClearKeySelection()
-{
-    m_TransMgr->ClearKeyframeSelection();
-}
-
 void Qt3DSDMTimelineItemProperty::DeleteAllKeys()
 {
     if (m_Keyframes.empty())
@@ -271,11 +242,6 @@ void Qt3DSDMTimelineItemProperty::DeleteAllKeys()
     ScopedDocumentEditor editor(*m_TransMgr->GetDoc(), L"Delete All Keyframes", __FILE__, __LINE__);
     for (size_t idx = 0, end = m_AnimationHandles.size(); idx < end; ++idx)
         editor->DeleteAllKeyframes(m_AnimationHandles[idx]);
-}
-
-ITimelineKeyframesManager *Qt3DSDMTimelineItemProperty::GetKeyframesManager() const
-{
-    return m_TransMgr->GetKeyframesManager();
 }
 
 IKeyframe *Qt3DSDMTimelineItemProperty::GetKeyframeByTime(long inTime) const
@@ -384,49 +350,9 @@ void Qt3DSDMTimelineItemProperty::SetChannelValueAtTime(long inChannelIndex, lon
     }
 }
 
-long Qt3DSDMTimelineItemProperty::OffsetSelectedKeyframes(long inOffset)
-{
-    long theRetVal = m_TransMgr->GetKeyframesManager()->OffsetSelectedKeyframes(inOffset);
-    if (m_Row) // UI update, since the data model sends no event while the change isn't commited.
-    {
-        m_Row->Refresh();
-    }
-    return theRetVal;
-}
-
-void Qt3DSDMTimelineItemProperty::CommitChangedKeyframes()
-{
-    if (m_SetKeyframeValueCommand) { // if this is moving a keyframe value
-        m_SetKeyframeValueCommand->Finalize(m_SetKeyframeValueCommand->GetValue());
-        g_StudioApp.GetCore()->ExecuteCommand(m_SetKeyframeValueCommand, false);
-        m_SetKeyframeValueCommand = nullptr;
-    } else // otherwise its changing keyframe times
-        m_TransMgr->GetKeyframesManager()->CommitChangedKeyframes();
-}
-
-void Qt3DSDMTimelineItemProperty::OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation)
-{
-    (void)inObjectAssociation;
-    CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.setKeyframesManager(m_TransMgr->GetKeyframesManager());
-    theTimeEditDlg.showDialog(inCurrentTime, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
-}
-
-void Qt3DSDMTimelineItemProperty::SelectKeyframes(bool inSelected, long inTime /*= -1 */)
-{
-    Qt3DSDMTimelineItemBinding *theParent =
-        static_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_rowTree));
-    DoSelectKeyframes(inSelected, inTime, false, theParent);
-}
-
 void Qt3DSDMTimelineItemProperty::setRowTree(RowTree *rowTree)
 {
     m_rowTree = rowTree;
-}
-
-CPropertyRow *Qt3DSDMTimelineItemProperty::GetRow()
-{
-    return m_Row;
 }
 
 bool Qt3DSDMTimelineItemProperty::IsDynamicAnimation()
@@ -447,10 +373,8 @@ bool Qt3DSDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle
         TKeyframeList::iterator theIter = m_Keyframes.begin();
         for (; theIter != m_Keyframes.end(); ++theIter) {
             Qt3DSDMTimelineKeyframe *theKeyframe = *theIter;
-            if (theKeyframe->HasKeyframeHandle(inKeyframe)) { // clear selection
-                m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(theKeyframe, false);
+            if (theKeyframe->HasKeyframeHandle(inKeyframe)) {
                 m_Keyframes.erase(theIter);
-
                 theHandled = true;
                 break;
             }
@@ -477,8 +401,6 @@ bool Qt3DSDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle
     default:
         return false;
     }
-    if (theHandled && m_Row)
-        m_Row->Refresh();
 
     return theHandled;
 }
@@ -494,49 +416,6 @@ IKeyframe *Qt3DSDMTimelineItemProperty::GetKeyframeByHandle(qt3dsdm::Qt3DSDMKeyf
     return nullptr;
 }
 
-// This is either triggered from this property's keyframe selection OR from a parent's keyframe
-// selection.
-void Qt3DSDMTimelineItemProperty::DoSelectKeyframes(bool inSelected, long inTime,
-                                                   bool inParentTriggered,
-                                                   Qt3DSDMTimelineItemBinding *inParent)
-{
-    // this is what it used to do before the refactor. selecting a keyframe always selects the
-    // asset.
-    if (inSelected)
-        SetSelected();
-
-    if (!inParent)
-        return;
-
-    if (inTime == -1) // all keyframes
-    {
-        TKeyframeList::iterator theIter = m_Keyframes.begin();
-        for (; theIter != m_Keyframes.end(); ++theIter) {
-            (*theIter)->SetSelected(inSelected);
-            m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(*theIter, inSelected, inParent);
-        }
-    } else {
-        Qt3DSDMTimelineKeyframe *theKeyframe =
-            dynamic_cast<Qt3DSDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
-        if (theKeyframe) {
-            theKeyframe->SetSelected(inSelected);
-            m_TransMgr->GetKeyframesManager()->SetKeyframeSelected(theKeyframe, inSelected,
-                                                                   inParent);
-        }
-    }
-    // Requires UI to be updated explicitly
-    if (inParentTriggered && m_Row)
-        m_Row->RequestSelectKeysByTime(inTime, inSelected);
-
-    // Support existing feature, selection by mouse-drag a rect, when all property keyframes are
-    // selected, the asset keyframe is automatically selected as well.
-    // and the mouse drags 'outside' a keyframe and de-selecting it, the asset keyframe has to be
-    // deselected as well.
-    if (!inParentTriggered && inTime != -1)
-        inParent->OnPropertySelection(inTime);
-}
-
-//=============================================================================
 /**
  * Create a wrapper for this keyframe if doesn't exists.
  * @return true if created, false if already exists.

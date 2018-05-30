@@ -33,7 +33,6 @@
 #include "PaletteManager.h"
 #include "StudioApp.h"
 #include "MainFrm.h"
-#include "TimelineView.h"
 #include "TimelineWidget.h"
 #include "BasicObjectsView.h"
 #include "SlideView.h"
