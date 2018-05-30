@@ -168,7 +168,7 @@ Rectangle {
 
                                 Item {
                                     Layout.alignment: Qt.AlignTop
-                                    width: animatedPropertyButton.sourceSize.width
+                                    width: 16
                                     height: _controlBaseHeight
                                     visible: model.modelData.animatable
 
@@ -242,7 +242,7 @@ Rectangle {
                                 }
                                 Item {
                                     Layout.alignment: Qt.AlignTop
-                                    width: controlledPropertyButton.sourceSize.width
+                                    width: 16
                                     height: _controlBaseHeight
                                     visible: model.modelData.controllable
 
