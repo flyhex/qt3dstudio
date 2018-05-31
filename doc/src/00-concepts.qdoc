@@ -132,4 +132,21 @@ variations within the presentation.
 \e{Learn more about slides in}
 \l{studio-slide-palette.html}{Slide Palette}.
 
+\section1 Known Issues
+
+\section2 Possible problems after automatic mesh optimization
+
+When loading a presentation made with an earlier version (2.0 beta2 or older) of Qt 3D Studio
+which has imported FBX or DAE models, you may see the following messagebox:
+
+\image {mesh_optimization.png}{Old presentation version}
+
+If your \b{imported} models are not visible in the Viewer after seeing the message, you need to
+edit your \c{*.uip} file(s) manually. Some older versions of Studio referenced meshes with revision
+number in the \c{*.uip} file, and that revision causes it to be missing in the scope of the
+Viewer.
+
+You'll need to find all occurrences of \c{.mesh#<revision_number>} from you \c{*.uip} and
+replace them with \c{.mesh}.
+
 */
