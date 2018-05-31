@@ -97,6 +97,7 @@ public:
     bool isContainer() const;
     bool isProperty() const;
     bool isPropertyOrMaterial() const;
+    bool isComponent() const;
     bool isMaster() const;
     bool hasPropertyChildren() const;
     bool empty() const; // has zero child rows (and zero properties)

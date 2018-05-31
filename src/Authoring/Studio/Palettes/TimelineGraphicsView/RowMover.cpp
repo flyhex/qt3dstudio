@@ -170,7 +170,24 @@ RowTree *RowMover::getRowAtPos(const QPointF &scenePos)
     return nullptr;
 }
 
-bool RowMover::isSourceRowsDescendant(const RowTree *row) const
+bool RowMover::isNextSiblingRow(RowTree *rowMain, RowTree *rowSibling) const
+{
+    // order matters, rowSibling is below rowMain
+    return rowMain->parentRow() == rowSibling->parentRow()
+            && rowSibling->index() - rowMain->index() == 1;
+}
+
+bool RowMover::sourceRowsHasMaster() const
+{
+    for (auto sourceRow : qAsConst(m_sourceRows)) {
+        if (sourceRow->isMaster() && sourceRow->rowType() != OBJTYPE_LAYER)
+            return true;
+    }
+
+    return false;
+}
+
+bool RowMover::isSourceRowsDescendant(RowTree *row) const
 {
     if (row) {
         for (auto sourceRow : qAsConst(m_sourceRows)) {
@@ -209,8 +226,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         }
 
         // calc insertion depth
-        bool inAComponent = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(1))
-                                ->rowType() == OBJTYPE_COMPONENT;
+        bool inAComponent = static_cast<RowTree *>(m_scene->layoutTree()->itemAt(1))->isComponent();
         int depth;
         int depthMin = 2;
         if (rowInsert2)
@@ -219,11 +235,19 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             depthMin = 3;
 
         int depthMax = rowInsert1->depth();
-        if (!rowInsert1->locked() && rowInsert1->isContainer()
-                && !m_sourceRows.contains(rowInsert1)) {
+        bool srcHasMaster = sourceRowsHasMaster();
+        if (!rowInsert1->locked() && rowInsert1->isContainer() && !m_sourceRows.contains(rowInsert1)
+            // prevent insertion a master row under a non-master unless under a component root
+            && (!(srcHasMaster && !rowInsert1->isMaster()) || rowInsert1->isComponent())) {
             depthMax++; // Container: allow insertion as a child
         } else if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer()) {
             depthMax--; // non-container with properties and/or a material
+        } else if (srcHasMaster) {
+            RowTree *row = rowInsert1->parentRow();
+            while (row && !row->isMaster() && !row->isComponent()) {
+                depthMax--;
+                row = row->parentRow();
+            }
         }
 
         if (theRowType == OBJTYPE_LAYER) {
@@ -250,16 +274,12 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             valid = false;
         }
 
-        // Don't insert master slide object into non-master slide object
-        // or object under itself, or under unacceptable parent
         for (auto sourceRow : qAsConst(m_sourceRows)) {
-            if ((sourceRow->isMaster() && sourceRow->rowType() != OBJTYPE_LAYER
-                    && !m_insertionParent->isMaster()
-                    && insertParent->rowType() != OBJTYPE_COMPONENT)
-                    || m_insertionParent->isDecendentOf(sourceRow)
-                    || m_insertionParent == sourceRow
-                    || !CStudioObjectTypes::AcceptableParent(sourceRow->rowType(),
-                                                             m_insertionParent->rowType())) {
+            if (m_insertionParent == sourceRow
+                || m_insertionParent->isDecendentOf(sourceRow)
+                || !CStudioObjectTypes::AcceptableParent(sourceRow->rowType(),
+                                                         m_insertionParent->rowType())) {
+                // prevent insertion under itself, or under unacceptable parent
                 valid = false;
                 break;
             }
@@ -294,9 +314,9 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         if (m_sourceRows.size() == 1
                 && (m_insertionTarget == m_sourceRows[0]
                     || ((m_insertType == Q3DStudio::DocumentEditorInsertType::NextSibling
-                         && m_sourceRows[0]->index() - m_insertionTarget->index() == 1)
+                         && isNextSiblingRow(m_insertionTarget, m_sourceRows[0]))
                         || (m_insertType == Q3DStudio::DocumentEditorInsertType::PreviousSibling
-                            && m_insertionTarget->index() - m_sourceRows[0]->index() == 1)))) {
+                            && isNextSiblingRow(m_sourceRows[0], m_insertionTarget))))) {
             valid = false;
         }
         if (valid) {

@@ -897,6 +897,9 @@ RowTree::DnDState RowTree::getDnDState() const
 
 bool RowTree::isContainer() const
 {
+    if (isComponent() && m_indexInLayout == 1) // root element inside a component
+        return true;
+
     return !m_isProperty
             && m_rowType != OBJTYPE_ALIAS
             && m_rowType != OBJTYPE_MATERIAL
@@ -925,7 +928,12 @@ RowTree *RowTree::getPropertyRow(const QString &type) const
 
 bool RowTree::isPropertyOrMaterial() const
 {
-    return m_isProperty || rowType() == OBJTYPE_MATERIAL || rowType() == OBJTYPE_IMAGE;
+    return m_isProperty || m_rowType == OBJTYPE_MATERIAL || m_rowType == OBJTYPE_IMAGE;
+}
+
+bool RowTree::isComponent() const
+{
+    return m_rowType == OBJTYPE_COMPONENT;
 }
 
 bool RowTree::isMaster() const
