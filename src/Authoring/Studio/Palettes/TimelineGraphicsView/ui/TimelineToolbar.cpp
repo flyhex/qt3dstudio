@@ -47,10 +47,10 @@
 TimelineToolbar::TimelineToolbar() : QToolBar()
 {
     setContentsMargins(0, 0, 0, 0);
-    setIconSize(QSize(15, 15));
+    setIconSize(QSize(16, 16));
 
     // create icons
-    static const QIcon iconLayer = QIcon(":/images/Asset-Layer-Normal.png");
+    static const QIcon iconLayer = QIcon(":/images/Objects-Layer-Normal.png");
     static const QIcon iconDelete = QIcon(":/images/Action-Trash-Normal.png");
     static const QIcon iconFirst = QIcon(":/images/playback_tools_low-00.png");
     static const QIcon iconLast = QIcon(":/images/playback_tools_low-04.png");
