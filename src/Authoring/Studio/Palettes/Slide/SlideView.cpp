@@ -93,24 +93,18 @@ void SlideView::setShowMasterSlide(bool show)
         theBridge->GetOrCreateGraphRoot(theRoot); // this will return the master slide
     qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
     if (m_CurrentModel != m_MasterSlideModel) {
-        const auto theFind = m_MasterSlideReturnPointers.find(theNewActiveSlide);
-        size_t theSlideIndex = 1;
-        size_t theNumSlides = theSlideSystem->GetSlideCount(theNewActiveSlide);
-        if (theFind != m_MasterSlideReturnPointers.end() && theFind->second < theNumSlides)
-            theSlideIndex = theFind->second;
-
-        theNewActiveSlide = theSlideSystem->GetSlideByIndex(
-            theNewActiveSlide, theSlideIndex); // activate the first slide
-    } else {
-        int theIndex = theSlideSystem->GetActiveSlideIndex(theNewActiveSlide);
-        m_MasterSlideReturnPointers[theNewActiveSlide] = theIndex;
+        if (m_MasterSlideReturnPointers.contains(theNewActiveSlide)) {
+            theNewActiveSlide = m_MasterSlideReturnPointers.value(theNewActiveSlide);
+        } else {
+            theNewActiveSlide = theSlideSystem->GetSlideByIndex(
+                        theNewActiveSlide, 1); // activate the first slide;
+        }
     }
 
     // We have forced a mode change, and so we need to set the current active TC
     // to be in the correct mode so our slide palette will show the correct information
-    if (theNewActiveSlide.Valid()) {
+    if (theNewActiveSlide.Valid())
         theDoc->NotifyActiveSlideChanged(theNewActiveSlide);
-    }
 
     Q_EMIT showMasterSlideChanged();
     Q_EMIT currentModelChanged();
@@ -250,6 +244,8 @@ void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int i
     auto index = m_SlidesModel->index(currentSlideIndex - 1, 0);
     m_SlidesModel->setSelectedSlideIndex(index);
 
+    if (currentSlideIndex != 0)
+        m_MasterSlideReturnPointers[inMaster] = inSlide;
 }
 
 void SlideView::OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
