@@ -1667,8 +1667,10 @@ typedef NVRenderFrameBuffer *NVRenderFrameBufferPtr;
 typedef NVRenderVertexBuffer *NVRenderVertexBufferPtr;
 typedef NVRenderIndexBuffer *NVRenderIndexBufferPtr;
 typedef NVRenderTexture2D *NVRenderTexture2DPtr;
+typedef NVRenderTexture2DPtr *NVRenderTexture2DHandle;
 typedef NVRenderTexture2DArray *NVRenderTexture2DArrayPtr;
 typedef NVRenderTextureCube *NVRenderTextureCubePtr;
+typedef NVRenderTextureCubePtr *NVRenderTextureCubeHandle;
 typedef NVRenderImage2D *NVRenderImage2DPtr;
 typedef NVRenderDataBuffer *NVRenderDataBufferPtr;
 typedef const char *NVRenderConstCharPtr;
@@ -1895,8 +1897,10 @@ DECLARE_GENERIC_VECTOR_TYPE(QT3DSI32, 4);
     HANDLE_QT3DS_SHADER_DATA_TYPE(QT3DSMat33)                                                            \
     HANDLE_QT3DS_SHADER_DATA_TYPE(QT3DSMat44)                                                            \
     HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderTexture2DPtr)                                               \
+    HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderTexture2DHandle)                                               \
     HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderTexture2DArrayPtr)                                          \
     HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderTextureCubePtr)                                             \
+    HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderTextureCubeHandle)                                             \
     HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderImage2DPtr)                                                 \
     HANDLE_QT3DS_SHADER_DATA_TYPE(NVRenderDataBufferPtr)
 

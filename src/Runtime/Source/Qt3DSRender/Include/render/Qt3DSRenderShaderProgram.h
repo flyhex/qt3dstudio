@@ -281,9 +281,13 @@ namespace render {
                               const NVConstDataRef<QT3DSMat44> inValue, const QT3DSI32 inCount);
         void SetConstantValue(NVRenderShaderConstantBase *inConstant, NVRenderTexture2D *inValue,
                               const QT3DSI32 inCount);
+        void SetConstantValue(NVRenderShaderConstantBase *inConstant, NVRenderTexture2D **inValue,
+                              const QT3DSI32 inCount);
         void SetConstantValue(NVRenderShaderConstantBase *inConstant,
                               NVRenderTexture2DArray *inValue, const QT3DSI32 inCount);
         void SetConstantValue(NVRenderShaderConstantBase *inConstant, NVRenderTextureCube *inValue,
+                              const QT3DSI32 inCount);
+        void SetConstantValue(NVRenderShaderConstantBase *inConstant, NVRenderTextureCube **inValue,
                               const QT3DSI32 inCount);
         void SetConstantValue(NVRenderShaderConstantBase *inConstant, NVRenderImage2D *inValue,
                               const QT3DSI32 inCount);
@@ -440,6 +444,56 @@ namespace render {
         {
             if (m_Constant)
                 m_Shader->SetPropertyValue(m_Constant, inValue);
+        }
+
+        bool IsValid() const { return m_Constant != 0; }
+    };
+
+    template <typename TDataType, int size>
+    struct NVRenderCachedShaderPropertyArray
+    {
+        NVRenderShaderProgram *m_Shader; ///< pointer to shader program
+        NVRenderShaderConstantBase *m_Constant; ///< poiner to shader constant object
+        TDataType m_array[size];
+
+        NVRenderCachedShaderPropertyArray(const QString &inConstantName,
+                                          NVRenderShaderProgram &inShader)
+            : NVRenderCachedShaderPropertyArray(qPrintable(inConstantName), inShader)
+        {
+
+        }
+
+        NVRenderCachedShaderPropertyArray(const char *inConstantName,
+                                          NVRenderShaderProgram &inShader)
+            : m_Shader(&inShader)
+            , m_Constant(nullptr)
+        {
+            memset(m_array,  0, sizeof(m_array));
+            NVRenderShaderConstantBase *theConstant = inShader.GetShaderConstant(inConstantName);
+            if (theConstant) {
+                if (theConstant->m_ElementCount > 1 && theConstant->m_ElementCount <= size &&
+                        theConstant->GetShaderConstantType()
+                    == NVDataTypeToShaderDataTypeMap<TDataType*>::GetType()) {
+                    m_Constant = theConstant;
+                } else {
+                    // Property types do not match, this probably indicates that the shader changed
+                    // while the code creating this object did not change.
+                    QT3DS_ASSERT(false);
+                }
+            }
+        }
+
+        NVRenderCachedShaderPropertyArray()
+            : m_Shader(nullptr)
+            , m_Constant(nullptr)
+        {
+            memset(m_array,  0, sizeof(m_array));
+        }
+
+        void Set(int count)
+        {
+            if (m_Constant)
+                m_Shader->SetPropertyValue(m_Constant, (TDataType*)m_array, qMin(size, count));
         }
 
         bool IsValid() const { return m_Constant != 0; }

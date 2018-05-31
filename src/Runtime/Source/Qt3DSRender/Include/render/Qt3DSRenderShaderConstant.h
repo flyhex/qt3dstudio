@@ -122,6 +122,30 @@ namespace render {
         void Release() override { NVDelete(GetFoundation().getAllocator(), this); }
     };
 
+    ///< A specialized class for textures
+    template <>
+    class NVRenderShaderConstant<NVRenderTexture2DHandle> : public NVRenderShaderConstantBase
+    {
+    public:
+        NVFoundationBase &m_Foundation; ///< allocator
+        QVector<QT3DSU32> m_Value; ///< constant value
+
+    public:
+        NVRenderShaderConstant(NVRenderBackend *backend, CRegisteredString name, QT3DSI32 location,
+                               QT3DSI32 elementCount, NVRenderShaderDataTypes::Enum type,
+                               QT3DSI32 binding, NVFoundationBase &allocator)
+            : NVRenderShaderConstantBase(backend, name, location, elementCount, type, binding)
+            , m_Foundation(allocator)
+        {
+            m_Value.resize(elementCount);
+            m_Value.fill(QT3DS_MAX_U32);
+        }
+
+        NVFoundationBase &GetFoundation() { return m_Foundation; }
+
+        void Release() override { NVDelete(GetFoundation().getAllocator(), this); }
+    };
+
     ///< A specialized class for texture arrays
     template <>
     class NVRenderShaderConstant<NVRenderTexture2DArrayPtr> : public NVRenderShaderConstantBase
@@ -161,6 +185,30 @@ namespace render {
             , m_Foundation(allocator)
         {
             m_Value = QT3DS_MAX_U32;
+        }
+
+        NVFoundationBase &GetFoundation() { return m_Foundation; }
+
+        void Release() override { NVDelete(GetFoundation().getAllocator(), this); }
+    };
+
+    ///< A specialized class for cubemap textures
+    template <>
+    class NVRenderShaderConstant<NVRenderTextureCubeHandle> : public NVRenderShaderConstantBase
+    {
+    public:
+        NVFoundationBase &m_Foundation; ///< allocator
+        QVector<QT3DSU32> m_Value; ///< constant value
+
+    public:
+        NVRenderShaderConstant(NVRenderBackend *backend, CRegisteredString name, QT3DSI32 location,
+                               QT3DSI32 elementCount, NVRenderShaderDataTypes::Enum type,
+                               QT3DSI32 binding, NVFoundationBase &allocator)
+            : NVRenderShaderConstantBase(backend, name, location, elementCount, type, binding)
+            , m_Foundation(allocator)
+        {
+            m_Value.resize(elementCount);
+            m_Value.fill(QT3DS_MAX_U32);
         }
 
         NVFoundationBase &GetFoundation() { return m_Foundation; }

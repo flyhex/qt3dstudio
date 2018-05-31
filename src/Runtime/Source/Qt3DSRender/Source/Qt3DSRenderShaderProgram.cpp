@@ -343,6 +343,35 @@ namespace render {
     };
 
     template <>
+    struct ShaderConstantApplier<NVRenderTexture2DHandle>
+    {
+        void ApplyConstant(NVRenderShaderProgram *program, NVRenderBackend *backend,
+                           QT3DSI32 location, QT3DSI32 count, NVRenderShaderDataTypes::Enum type,
+                           NVRenderTexture2DHandle inValue, QVector<QT3DSU32> &oldValue)
+        {
+            if (inValue) {
+                bool update = false;
+                for (int i = 0; i < count; i++) {
+                    NVRenderTexture2D *texObj = reinterpret_cast<NVRenderTexture2D *>(inValue[i]);
+                    QT3DSU32 texUnit = QT3DS_MAX_U32;
+                    if (texObj) {
+                        texObj->Bind();
+                        texUnit = texObj->GetTextureUnit();
+                    }
+                    if (texUnit != oldValue[i]) {
+                        update = true;
+                        oldValue[i] = texUnit;
+                    }
+                }
+                if (update)
+                    backend->SetConstantValue(program->GetShaderProgramHandle(), location,
+                                              NVRenderShaderDataTypes::NVRenderTexture2DPtr,
+                                              count, oldValue.data());
+            }
+        }
+    };
+
+    template <>
     struct ShaderConstantApplier<NVRenderTexture2DArrayPtr>
     {
         void ApplyConstant(NVRenderShaderProgram *program, NVRenderBackend *backend, QT3DSI32 location,
@@ -379,6 +408,35 @@ namespace render {
                                               count, &texUnit);
                     oldValue = texUnit;
                 }
+            }
+        }
+    };
+
+    template <>
+    struct ShaderConstantApplier<NVRenderTextureCubeHandle>
+    {
+        void ApplyConstant(NVRenderShaderProgram *program, NVRenderBackend *backend,
+                           QT3DSI32 location, QT3DSI32 count, NVRenderShaderDataTypes::Enum type,
+                           NVRenderTextureCubeHandle inValue, QVector<QT3DSU32> &oldValue)
+        {
+            if (inValue) {
+                bool update = false;
+                for (int i = 0; i < count; i++) {
+                    NVRenderTextureCube *texObj = reinterpret_cast<NVRenderTextureCube *>(inValue[i]);
+                    QT3DSU32 texUnit = QT3DS_MAX_U32;
+                    if (texObj) {
+                        texObj->Bind();
+                        texUnit = texObj->GetTextureUnit();
+                    }
+                    if (texUnit != oldValue[i]) {
+                        update = true;
+                        oldValue[i] = texUnit;
+                    }
+                }
+                if (update)
+                    backend->SetConstantValue(program->GetShaderProgramHandle(), location,
+                                              NVRenderShaderDataTypes::NVRenderTextureCubePtr,
+                                              count, oldValue.data());
             }
         }
     };
@@ -509,9 +567,15 @@ namespace render {
                 location = m_Backend->GetConstantInfoByID(m_ProgramHandle, idx, 512, &elementCount,
                                                           &type, &binding, nameBuf);
 
+                // sampler arrays have different type
+                if (type == NVRenderShaderDataTypes::NVRenderTexture2DPtr && elementCount > 1) {
+                    type = NVRenderShaderDataTypes::NVRenderTexture2DHandle;
+                } else if (type == NVRenderShaderDataTypes::NVRenderTextureCubePtr
+                           && elementCount > 1) {
+                    type = NVRenderShaderDataTypes::NVRenderTextureCubeHandle;
+                }
                 if (location != -1) {
                     CRegisteredString theName(m_Context.GetStringTable().RegisterStr(nameBuf));
-
                     m_Constants.insert(eastl::make_pair(
                         theName,
                         ShaderConstantFactory(m_Backend, theName, m_Context.GetFoundation(),
@@ -842,6 +906,12 @@ namespace render {
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
                                                  NVRenderTexture2D *inValue, const QT3DSI32 inCount)
     {
+        SetConstantValueOfType(this, inConstant, inValue, 1);
+    }
+    void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
+                                                 NVRenderTexture2D **inValue,
+                                                 const QT3DSI32 inCount)
+    {
         SetConstantValueOfType(this, inConstant, inValue, inCount);
     }
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
@@ -852,6 +922,12 @@ namespace render {
     }
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
                                                  NVRenderTextureCube *inValue, const QT3DSI32 inCount)
+    {
+        SetConstantValueOfType(this, inConstant, inValue, 1);
+    }
+    void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
+                                                 NVRenderTextureCube **inValue,
+                                                 const QT3DSI32 inCount)
     {
         SetConstantValueOfType(this, inConstant, inValue, inCount);
     }
