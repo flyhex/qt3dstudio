@@ -2155,14 +2155,18 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
                                                                         theChildSlide);
 
     if (uipVersion == 3) {
-        m_SceneEditor->CleanUpMeshes();
-        QTimer::singleShot(0, [](){
+        bool cleaned = m_SceneEditor->CleanUpMeshes();
+        QTimer::singleShot(0, [=](){
+            // Update UIP version
             g_StudioApp.OnSave();
-            g_StudioApp.GetDialogs()->DisplayMessageBox(
-                        tr("Old Presentation Version"),
-                        tr("Presentation was in old format and had unoptimized meshes.\n"
-                           "They were optimized, and presentation version was updated."),
-                        Qt3DSMessageBox::ICON_INFO, false);
+            if (cleaned) {
+                // Show message box only if some meshes were cleaned
+                g_StudioApp.GetDialogs()->DisplayMessageBox(
+                            tr("Old Presentation Version"),
+                            tr("Presentation was in old format and had unoptimized meshes.\n"
+                               "They were optimized, and presentation version was updated."),
+                            Qt3DSMessageBox::ICON_INFO, false);
+            }
         });
     }
 }

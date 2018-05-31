@@ -3639,13 +3639,14 @@ public:
         theDispatch.FireOnProgressEnd();
     }
 
-    void CleanUpMeshes() override
+    bool CleanUpMeshes() override
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         theDispatch.FireOnProgressBegin(
                     Q3DStudio::CString::fromQString(QObject::tr("Old UIP version")),
                     Q3DStudio::CString::fromQString(QObject::tr("Cleaning up meshes")));
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
+        bool cleanedSome = false;
         try {
             vector<CFilePath> importFileList;
             m_SourcePathInstanceMap.clear();
@@ -3657,8 +3658,11 @@ public:
                 if (theSource.GetExtension().Compare(L"mesh", CString::ENDOFSTRING, false)) {
                     CFilePath theFullPath = m_Doc.GetResolvedPathToDoc(theSource);
 
-                    if (!theFullPath.Exists() || !theFullPath.isFile())
+                    if (!theFullPath.Exists() || !theFullPath.isFile()
+                            || Mesh::GetHighestMultiVersion(theFullPath.toCString().GetCharStar())
+                            == 1) {
                         continue;
+                    }
 
                     Mesh *theMesh = Mesh::LoadMulti(
                                 theFullPath.toCString().GetCharStar(),
@@ -3682,11 +3686,15 @@ public:
                     theMesh->SaveMulti(allocator, output);
 
                     delete theMesh;
+
+                    cleanedSome = true;
                 }
             }
         } catch (...) {
         }
         theDispatch.FireOnProgressEnd();
+
+        return cleanedSome;
     }
 
     void ExternalizePath(TInstanceHandle path) override

@@ -399,7 +399,7 @@ public:
     // Absolute path to the file.
     virtual void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) = 0;
 
-    virtual void CleanUpMeshes() = 0;
+    virtual bool CleanUpMeshes() = 0;
 
     virtual void ReplaceTextFontNameWithTextFileStem(qt3ds::render::ITextRenderer &inRenderer) = 0;
 
