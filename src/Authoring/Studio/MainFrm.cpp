@@ -1978,8 +1978,8 @@ void CMainFrame::onActionActive(bool active)
 void CMainFrame::showScene()
 {
     if (!m_sceneView.data()->isVisible()) {
-        m_sceneView.data()->setVisible(true);
         setCentralWidget(m_sceneView.data());
+        m_sceneView.data()->setVisible(true);
     }
 }
 
