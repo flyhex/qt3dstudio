@@ -40,8 +40,6 @@
 
 #include "Studio/UI/SceneView.h"
 #include "Studio/MainFrm.h"
-#include "Studio/Controls/TextEdit.h"
-#include "Studio/Controls/WidgetControl.h"
 
 #include <QtGui/qguiapplication.h>
 #include <QtGui/qevent.h>
@@ -50,6 +48,8 @@
 #include <QtQuick/qquickitem.h>
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qabstractbutton.h>
+#include <QtWidgets/qgraphicsview.h>
+#include <QtWidgets/qgraphicsitem.h>
 
 class KeyEventFilter : public QObject
 {
@@ -93,7 +93,7 @@ public:
             return false;
         }
 
-        // Ignore global shortcuts if we are in an "old" style textedit or qml control that
+        // Ignore global shortcuts if we are in a text control that
         // wants key events.
         if (m_hotkeys->isFocusOnControlThatWantsKeys())
             return false;
@@ -585,12 +585,12 @@ Qt::KeyboardModifiers CHotKeys::GetCurrentKeyModifiers()
 
 bool CHotKeys::isFocusOnControlThatWantsKeys()
 {
-    auto widgetControl = dynamic_cast<WidgetControl *>(qApp->focusObject());
-    if (widgetControl) {
-        auto control = widgetControl->getControl();
+    auto gview = qobject_cast<QGraphicsView *>(qApp->focusObject());
+    if (gview) {
+        auto control = gview->scene()->focusItem();
         if (control) {
-            auto te = dynamic_cast<CTextEdit *>(control->FocusedChild());
-            if (te && !te->IsReadOnly())
+            auto obj = qobject_cast<QGraphicsTextItem *>(control->toGraphicsObject());
+            if (obj)
                 return true;
         }
     } else {

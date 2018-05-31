@@ -689,7 +689,7 @@ void Qt3DSDMTimelineItemBinding::getTimeContextIndices(const QSet<int> &children
         for (size_t current = 0; current < count; ++current) {
             auto handle = graphChildren.GetResult(current);
             if (children.contains(handle))
-                indexMap.insert(current, int(handle));
+                indexMap.insert(int(current), int(handle));
         }
     }
 }

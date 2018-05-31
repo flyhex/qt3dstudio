@@ -255,4 +255,5 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetOrCreateBinding(Qt3DSDMInsta
         } else
             return m_TransMgr->GetOrCreate(instance);
     }
+    return nullptr;
 }

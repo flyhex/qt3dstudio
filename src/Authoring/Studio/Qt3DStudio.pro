@@ -29,7 +29,6 @@ INCLUDEPATH += \
     Palettes/Progress \
     Palettes/Project \
     Palettes/Slide \
-    Palettes/Splash \
     Palettes/Timeline \
     Palettes/TimelineGraphicsView \
     Palettes/TimelineGraphicsView/ui \
@@ -125,12 +124,7 @@ HEADERS += \
     Application/SubPresentationListDlg.h \
     Application/TimeEditDlg.h \
     Application/TimeEnums.h \
-    Controls/BreadCrumbControl.h \
-    Controls/ButtonControl.h \
     Controls/ClickableLabel.h \
-    Controls/TextEditContextMenu.h \
-    Controls/ToggleButton.h \
-    Controls/TreeItem.h \
     Controls/WidgetControl.h \
     DragAndDrop/DropProxy.h \
     Palettes/Action/ActionContextMenu.h \
@@ -246,45 +240,13 @@ SOURCES += \
     Application/SubPresentationListDlg.cpp \
     Application/TimeEditDlg.cpp \
     Controls/AppFonts.cpp \
-    Controls/BaseMeasure.cpp \
-    Controls/BlankControl.cpp \
-    Controls/BreadCrumbControl.cpp \
     Controls/BufferedRenderer.cpp \
-    Controls/ButtonControl.cpp \
     Controls/ClickableLabel.cpp \
     Controls/Control.cpp \
     Controls/ControlData.cpp \
     Controls/ControlGraph.cpp \
-    Controls/FloatEdit.cpp \
-    Controls/FlowLayout.cpp \
-    Controls/InsertionLine.cpp \
-    Controls/InsertionOverlay.cpp \
-    Controls/LazyFlow.cpp \
-    Controls/ListBoxItem.cpp \
-    Controls/ListBoxStringItem.cpp \
-    Controls/ListLayout.cpp \
-    Controls/NameEdit.cpp \
     Controls/OffscreenRenderer.cpp \
-    Controls/OverlayControl.cpp \
     Controls/Renderer.cpp \
-    Controls/ScrollController.cpp \
-    Controls/Scroller.cpp \
-    Controls/ScrollerBackground.cpp \
-    Controls/ScrollerBar.cpp \
-    Controls/ScrollerButtonControl.cpp \
-    Controls/ScrollerThumb.cpp \
-    Controls/SIcon.cpp \
-    Controls/SplashControl.cpp \
-    Controls/SplitBar.cpp \
-    Controls/Splitter.cpp \
-    Controls/StringEdit.cpp \
-    Controls/TextEdit.cpp \
-    Controls/TextEditContextMenu.cpp \
-    Controls/TextEditInPlace.cpp \
-    Controls/TimeEdit.cpp \
-    Controls/ToggleButton.cpp \
-    Controls/TreeControl.cpp \
-    Controls/TreeItem.cpp \
     Controls/WidgetControl.cpp \
     Controls/WinRenderer.cpp \
     DragAndDrop/BasicObjectDropSource.cpp \
@@ -294,8 +256,6 @@ SOURCES += \
     DragAndDrop/DropTarget.cpp \
     DragAndDrop/ExplorerFileDropSource.cpp \
     DragAndDrop/FileDropSource.cpp \
-    DragAndDrop/ListBoxDropSource.cpp \
-    DragAndDrop/ListBoxDropTarget.cpp \
     DragAndDrop/ProjectDropTarget.cpp \
     DragAndDrop/SceneDropTarget.cpp \
     DragAndDrop/TimelineDropSource.cpp \

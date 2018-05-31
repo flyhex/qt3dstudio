@@ -32,8 +32,6 @@
 //	Includes
 //==============================================================================
 #include "Qt3DSDMHandles.h"
-#include "IEasyInspectorRowListener.h"
-#include "IDataDrivenChangeListener.h"
 #include "DispatchListeners.h"
 #include "Qt3DSDMMetaDataTypes.h"
 #include "CmdBatch.h"

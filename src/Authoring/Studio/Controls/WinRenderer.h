@@ -95,7 +95,7 @@ public:
     QRect GetClippingRect() override;
     void PushClippingRect(const QRect &inRect) override;
     void PopClippingRect() override;
-    void PushAbsoluteClippingRect(const QRect &inRect) override {}
+    void PushAbsoluteClippingRect(const QRect &) override {}
     void FillHashed(const QRect &inRect, const QColor &inForeGroundColor) override;
     QPainter *GetPainter() override;
     QPen GetPen(const QColor &inColor, int inWidth, Qt::PenStyle inStyle);

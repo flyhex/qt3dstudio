@@ -27,9 +27,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #include "stdafx.h"
 
 #include "StudioPreferences.h"
@@ -37,9 +34,6 @@
 #include "CColor.h"
 #include "MasterP.h"
 #include "CommonConstants.h"
-
-// using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
-// the template generator go blah
 
 #include <QtGui/qpalette.h>
 #include <QtQml/qqmlcontext.h>
@@ -49,28 +43,7 @@
 ::CColor s_NormalColor;
 ::CColor s_MasterColor;
 ::CColor s_MouseOverHighlightColor;
-::CColor s_SelectColor;
 ::CColor s_ButtonDownColor;
-::CColor s_TopRowColor;
-::CColor s_LayerBackgroundColor;
-::CColor s_LayerHighlightBGColor;
-::CColor s_ExtendedLockedLightColor;
-::CColor s_LockedBorderColor;
-::CColor s_ScrollBGColor;
-::CColor s_TextBoxBGColorWithFocus;
-::CColor s_ControlRectBottomLineDarkColor;
-::CColor s_ControlRectBottomLineColor;
-::CColor s_ControlRectSideLineColor;
-::CColor s_ControlRectTopLineColor;
-::CColor s_ExtendedObjectLightColor;
-::CColor s_ComboEditBoxGradientStartColor;
-::CColor s_TimebarBorderColor;
-::CColor s_RowTopColor;
-::CColor s_ButtonHighlightColor;
-::CColor s_PropertyFloorColor;
-::CColor s_ButtonShadowColor;
-::CColor s_TreeFloorColor;
-::CColor s_TabButtonDownColor;
 ::CColor s_DisabledTextColor;
 
 QColor s_studioColor1;
@@ -88,8 +61,6 @@ int s_controlBaseHeight;
 int s_idWidth;
 int s_valueWidth;
 QSize s_browserPopupSize;
-
-bool CStudioPreferences::m_SudoMode = false;
 
 #define STRINGIFY(x) STRINGIFY2(x)
 #define STRINGIFY2(x) #x
@@ -126,68 +97,10 @@ void CStudioPreferences::LoadPreferences()
     s_MouseOverHighlightColor = s_BaseColor;
     s_MouseOverHighlightColor.SetLuminance(s_MouseOverHighlightColor.GetLuminance() - 0.05f);
 
-    s_SelectColor = s_BaseColor;
-    s_SelectColor.SetLuminance(s_SelectColor.GetLuminance() - 0.10f);
-
     s_ButtonDownColor = s_DarkBaseColor; // CPreferences::GetUserPreferences( "Preferences"
                                          // ).GetColorValue( "ButtonDownColor", ::CColor( 118, 202,
                                          // 8 ) );
 
-    m_SudoMode = CPreferences::GetUserPreferences().GetValue("sudo", false);
-
-    s_TopRowColor = s_BaseColor;
-    s_TopRowColor.SetLuminance(s_TopRowColor.GetLuminance() - 0.10f);
-
-    s_ExtendedLockedLightColor = s_BaseColor;
-    s_ExtendedLockedLightColor.SetLuminance(s_ExtendedLockedLightColor.GetLuminance() + 0.07f);
-
-    s_LockedBorderColor = s_BaseColor;
-    s_LockedBorderColor.SetLuminance(s_LockedBorderColor.GetLuminance() - 0.07f);
-
-    s_ScrollBGColor = s_BaseColor;
-
-    s_TextBoxBGColorWithFocus = s_BaseColor;
-    s_TextBoxBGColorWithFocus.SetLuminance(s_TextBoxBGColorWithFocus.GetLuminance() + 0.20f);
-
-    s_ControlRectBottomLineDarkColor = s_BaseColor;
-    s_ControlRectBottomLineDarkColor.SetLuminance(s_ControlRectBottomLineDarkColor.GetLuminance()
-                                                  - 0.50f);
-
-    s_ControlRectBottomLineColor = s_BaseColor;
-    s_ControlRectBottomLineColor.SetLuminance(s_ControlRectBottomLineColor.GetLuminance() - 0.20f);
-
-    s_ControlRectSideLineColor = s_BaseColor;
-    s_ControlRectSideLineColor.SetLuminance(s_ControlRectSideLineColor.GetLuminance() - 0.20f);
-
-    s_ControlRectTopLineColor = s_BaseColor;
-    s_ControlRectTopLineColor.SetLuminance(s_ControlRectTopLineColor.GetLuminance() - 0.30f);
-
-    s_ExtendedObjectLightColor = s_BaseColor;
-    s_ExtendedObjectLightColor.SetLuminance(s_ExtendedObjectLightColor.GetLuminance() + 0.13f);
-
-    s_ComboEditBoxGradientStartColor = s_BaseColor;
-    s_ComboEditBoxGradientStartColor.SetLuminance(s_ComboEditBoxGradientStartColor.GetLuminance()
-                                                  + 0.14f);
-
-    s_TimebarBorderColor = s_BaseColor;
-    s_TimebarBorderColor.SetLuminance(s_TimebarBorderColor.GetLuminance() - 0.45f);
-
-    s_RowTopColor = s_BaseColor;
-    s_RowTopColor.SetLuminance(s_RowTopColor.GetLuminance() - 0.45f);
-
-    s_ButtonHighlightColor = s_BaseColor;
-    s_ButtonHighlightColor.SetLuminance(s_ButtonHighlightColor.GetLuminance() + 0.14f);
-
-    s_PropertyFloorColor = s_BaseColor;
-    s_PropertyFloorColor.SetLuminance(s_PropertyFloorColor.GetLuminance() - 0.07f);
-
-    s_ButtonShadowColor = s_BaseColor;
-    s_ButtonShadowColor.SetLuminance(s_ButtonShadowColor.GetLuminance() - 0.45f);
-
-    s_TreeFloorColor = s_BaseColor;
-    s_TreeFloorColor.SetLuminance(s_TreeFloorColor.GetLuminance() - 0.07f);
-
-    s_TabButtonDownColor = ::CColor(175, 175, 175); // rgb value is 249, 255, 195
     s_DisabledTextColor = ::CColor(128, 128, 128);
 
     s_studioColor1 = QColor("#262829");
@@ -441,16 +354,6 @@ bool CStudioPreferences::ShouldShowTooltips()
 void CStudioPreferences::SetShowTooltips(bool inShowTooltips)
 {
     CPreferences::GetUserPreferences().SetValue("ShowTooltips", inShowTooltips);
-}
-
-//==============================================================================
-/**
- *	@return the color to use for the background of a tooltip
- */
-::CColor CStudioPreferences::GetTooltipBackgroundColor()
-{
-    ::CColor theTooltipBGColor(255, 255, 225);
-    return theTooltipBGColor;
 }
 
 //==============================================================================
@@ -736,55 +639,6 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
     CPreferences::GetUserPreferences().SetLongValue("BigTimeAdvance", inTime);
 }
 
-//==============================================================================
-/**
- * Color used in between most tree items in the timeline.
- */
-::CColor CStudioPreferences::GetTreeFloorColor()
-{
-    return s_BaseColor;
-}
-
-//==============================================================================
-/**
- * @return darker shadow color for use around the edges of most controls
- */
-::CColor CStudioPreferences::GetButtonShadowColor()
-{
-    return s_BaseColor;
-}
-
-//==============================================================================
-/**
- * Color to use between property rows and as the darker color behind the highlights
- * within the timeline.
- */
-::CColor CStudioPreferences::GetPropertyFloorColor()
-{
-    return s_BaseColor;
-}
-
-::CColor CStudioPreferences::GetButtonHighlightColor()
-{
-    return s_BaseColor;
-}
-
-//==============================================================================
-/**
- * Retrieves the color that should be used when the mouse goes over a row, such
- * as in the timeline or inspector palettes.
- */
-::CColor CStudioPreferences::GetSelectColor()
-{
-    return ::CColor("#46a2da");
-}
-
-::CColor CStudioPreferences::GetTimelineSelectColor()
-{
-    return s_selectionColor; // The normal select color (#46a2da) does not work with master color
-}
-
-//==============================================================================
 /**
  * Retrieves the color that should be used when the mouse goes over a row, such
  * as in the timeline or inspector palettes.
@@ -793,76 +647,7 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 {
     return s_MouseOverHighlightColor;
 }
-//==============================================================================
-/**
- * @return the fill color of the top-most row of a palette (for instance, the fill color behind the
- * time measure)
- */
-::CColor CStudioPreferences::GetRowTopColor()
-{
-    return s_RowTopColor;
-}
 
-::CColor CStudioPreferences::GetTimeBarBorderColor()
-{
-    return s_TimebarBorderColor;
-}
-
-//=============================================================================
-/**
- * @return color to use for the background of a property row in the timeline
- */
-::CColor CStudioPreferences::GetPropertyBackgroundColor()
-{
-    return s_BaseColor;
-}
-
-//=============================================================================
-/**
- * @return color to use for the background of a property row in the timeline
- * when the mouse is over the row
- */
-::CColor CStudioPreferences::GetPropertyMouseOverColor()
-{
-    return CStudioPreferences::GetMouseOverHighlightColor();
-}
-
-//=============================================================================
-/**
- * @return color to use for the background of a property row in the timeline
- */
-::CColor CStudioPreferences::GetComboEditBoxGradientStartColor()
-{
-    return s_ComboEditBoxGradientStartColor;
-}
-
-::CColor CStudioPreferences::GetPropertyTimbarLeft()
-{
-    return s_BaseColor;
-}
-
-//=============================================================================
-/**
- * Returns the base color which is what most of the other colors derive from.
- * The base color is also used to fill in empty areas of some controls and
- * palettes.
- * @return Base color from which most of the other colors are derived
- */
-::CColor CStudioPreferences::GetBaseColor()
-{
-    return s_BaseColor;
-}
-
-//=============================================================================
-/**
- * @return a darker version of the base color
- */
-::CColor CStudioPreferences::GetDarkBaseColor()
-{
-    return s_DarkBaseColor;
-}
-
-//=============================================================================
 /**
  * Returns the normal color used for non-master items and text throughout the UI
  */
@@ -889,211 +674,6 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
     return s_disabledColor;
 }
 
-//=============================================================================
-/**
- * Returns the background color of the toolbars. This is now just the base color.
- */
-::CColor CStudioPreferences::GetToolBarBaseColor()
-{
-    return GetBaseColor();
-}
-
-//=============================================================================
-/**
- * Returns the background color of the menu bar
- * sk - Ideally this would be the BaseColor (what the palettes are using) but there is a border with
- * the windows color that
- * I have not figured where it can be customized, so for the time being, that this fallback on the
- * old window system color (jason prefers that anyways)
- * This should be equivalent to if the associated code that uses this color, do not exist, but this
- * will allow us to easily change the color when we want to.
- */
-::CColor CStudioPreferences::GetMenuBarBaseColor()
-{
-    QColor theWinColor = QPalette().color(QPalette::Background);
-    return ::CColor(theWinColor.red(), theWinColor.green(), theWinColor.blue());
-}
-
-//=============================================================================
-/**
- * Returns the "button down color" used by some procedurally drawn CButtonControls.
- */
-::CColor CStudioPreferences::GetButtonDownColor()
-{
-    return s_ButtonDownColor;
-}
-
-::CColor CStudioPreferences::GetExtendedObjectLightColor()
-{
-    return s_ExtendedObjectLightColor;
-}
-
-::CColor CStudioPreferences::GetExtendedObjectDarkColor()
-{
-    return GetBaseColor();
-}
-
-//=============================================================================
-/**
- * Controls, such as CTextEdit draw rects with different color sides around the
- * control.  This function retrieves the color for the top line of the rect.
- */
-::CColor CStudioPreferences::GetControlRectTopLineColor()
-{
-    return s_ControlRectTopLineColor;
-}
-
-//=============================================================================
-/**
- * Controls, such as CTextEdit draw rects with different color sides around the
- * control.  This function retrieves the color for the left and right lines of
- * the rect.
- */
-::CColor CStudioPreferences::GetControlRectSideLineColor()
-{
-    return s_ControlRectSideLineColor;
-}
-
-//=============================================================================
-/**
- * Controls, such as CTextEdit draw rects with different color sides around the
- * control.  This function retrieves the color for the bottom line of the rect.
- */
-::CColor CStudioPreferences::GetControlRectBottomLineColor()
-{
-    return s_ControlRectBottomLineColor;
-}
-
-//=============================================================================
-/**
- * Controls, such as CTextEdit draw rects with different color sides around the
- * control.  This function retrieves the color for the bottom line of the rect,
- * for certain controls that have a darker bottom line (see CComboTextBox).
- */
-::CColor CStudioPreferences::GetControlRectBottomLineDarkColor()
-{
-    return s_ControlRectBottomLineDarkColor;
-}
-
-//=============================================================================
-/**
- * Controls sometimes have a drop-shadow on the top of the control (an indented
- * control) or on the bottom (an outdented control).  This function returns the
- * appropriate color.
- */
-::CColor CStudioPreferences::GetControlShadowColor()
-{
-    ::CColor theColor = GetBaseColor();
-    return theColor;
-}
-
-//=============================================================================
-/**
- * Fill color for text boxes that do not have focus.
- */
-::CColor CStudioPreferences::GetTextBoxBGColorNoFocus()
-{
-    return s_BaseColor;
-}
-
-//=============================================================================
-/**
- * Fill color for text boxes that do have focus.
- */
-::CColor CStudioPreferences::GetTextBoxBGColorWithFocus()
-{
-    return s_TextBoxBGColorWithFocus;
-}
-
-//=============================================================================
-/**
- * @return background color for scroll bars (behind thumb)
- */
-::CColor CStudioPreferences::GetScrollBGColor()
-{
-    return s_ScrollBGColor;
-}
-
-//=============================================================================
-/**
- * @return color of the scroll bar thumb
- */
-::CColor CStudioPreferences::GetScrollThumbBGColor()
-{
-    return CColor("#999A9B");
-}
-
-//=============================================================================
-/**
- * @return color of the scalable handle of the thumb
- */
-::CColor CStudioPreferences::GetScrollThumbHighlightColor()
-{
-    return s_studioColor2;
-}
-
-//=============================================================================
-/**
- * @return color for the outline of the scroll bar thumb (opposite side of the highlight)
- */
-::CColor CStudioPreferences::GetLockedTimebarColor()
-{
-    return GetBaseColor();
-}
-
-::CColor CStudioPreferences::GetLockedBorderColor()
-{
-    return s_LockedBorderColor;
-}
-
-::CColor CStudioPreferences::GetExtendedLockedLightColor()
-{
-    return s_ExtendedLockedLightColor;
-}
-
-::CColor CStudioPreferences::GetExtendedLockedDarkColor()
-{
-    return GetLockedBorderColor();
-}
-
-//=============================================================================
-/**
- * @return color for disabled (locked) text
- */
-::CColor CStudioPreferences::GetLockedTextColor()
-{
-    return s_disabledColor;
-}
-
-//=============================================================================
-/**
- * @return color for background of layer rows in the timeline
- */
-::CColor CStudioPreferences::GetLayerBackgroundColor()
-{
-    return s_backgroundColor;
-}
-
-//=============================================================================
-/**
- * @return color of timeline row background for layers when mouse is over
- */
-::CColor CStudioPreferences::GetGroupBackgroundColor()
-{
-    return s_studioColor2;
-}
-
-//=============================================================================
-/**
- * @return default color for rows in the timeline (if not specified by one of these other color
- * functions)
- */
-::CColor CStudioPreferences::GetObjectBackgroundColor()
-{
-    return s_studioColor2;
-}
-
-//=============================================================================
 /**
  * @return default color for object timebars in the timeline (if not specified by one of these other
  * functions)
@@ -1112,25 +692,6 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
     return ::CColor("#e7e0cd");
 }
 
-//==============================================================================
-/**
- * Color for the top row of the inspector and timeline palettes (title row color).
- */
-::CColor CStudioPreferences::GetTopRowColor()
-{
-    return s_TopRowColor;
-}
-
-//==============================================================================
-/**
- *	Color when the button is down on a tab control
- */
-::CColor CStudioPreferences::GetTabButtonDownColor()
-{
-    return s_TabButtonDownColor;
-}
-
-//==============================================================================
 /**
  *	Color when text is disabled
  */
@@ -1153,12 +714,6 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
     return ::CColor("#ff0000");
 }
 
-::CColor CStudioPreferences::GetLightBoundingBoxColor()
-{
-    return ::CColor("#ffff00");
-}
-
-//==============================================================================
 /**
  *  Colors for rulers and guides
  */
@@ -1221,89 +776,6 @@ float CStudioPreferences::getSelectorLineLength()
 void CStudioPreferences::setSelectorLineLength(float length)
 {
     CPreferences::GetUserPreferences().SetLongValue("SelectorLineLength", int(length));
-}
-
-//==============================================================================
-/**
- * Return the standard timeline row height
- */
-long CStudioPreferences::GetRowSize()
-{
-    return 20;
-}
-
-//==============================================================================
-/**
- * Return the timebar tip size for the tip that lies outside the timebar.
- */
-long CStudioPreferences::GetTimebarTipSize()
-{
-    return 6;
-}
-
-//==============================================================================
-/**
- * Return the timebar tip size for the tip that lies inside the timebar.
- */
-long CStudioPreferences::GetTimebarInnerTipSize()
-{
-    return 3;
-}
-
-//==============================================================================
-/**
- * Return the timeline name text size
- */
-long CStudioPreferences::GetTimelineNameSize()
-{
-    return 400;
-}
-
-//==============================================================================
-/**
- * Return the default comment size
- */
-long CStudioPreferences::GetDefaultCommentSize()
-{
-    return 1500;
-}
-
-//==============================================================================
-/**
- * @return the default height of a text edit box
- */
-long CStudioPreferences::GetDefaultTextEditSize()
-{
-    long theReturnValue = 15;
-    return theReturnValue;
-}
-
-long CStudioPreferences::GetDefaultButtonWidth()
-{
-    return 16;
-}
-
-//==============================================================================
-/**
- * @return The gutter size on the right and left edges of the inspector palette.
- */
-long CStudioPreferences::GetInspectorGutterSize()
-{
-    return 5;
-}
-
-//==============================================================================
-/**
- * @return The height of the top row of the timeline and inspector palettes.
- */
-long CStudioPreferences::GetHeaderHeight()
-{
-    return 21;
-}
-
-bool CStudioPreferences::IsSudoMode()
-{
-    return m_SudoMode;
 }
 
 void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)

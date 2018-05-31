@@ -149,8 +149,6 @@ CCmd *CTimeLineDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle i
                                                 qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    CClientDataModelBridge *theBridge = theDoc->GetStudioSystem()->GetClientDataModelBridge();
-
     if (CanCopy()) {
         SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Duplicate Object"))
             ->DuplicateInstances(m_Instances, inTarget,

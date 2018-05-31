@@ -117,17 +117,15 @@ CDropSource *CDropProxy::GetDropSource(const QMimeData *inDataObject, long inFla
         }
     } break;
     case QT3DS_FLAVOR_TEXT:
-    // Don't do anythiing for this
-    case QT3DS_FLAVOR_LISTBOX:
-    // Don't do anythiing for this
+    // Don't do anything for this
     case QT3DS_FLAVOR_BASIC_OBJECTS:
-    // Don't do anythiing for this
+    // Don't do anything for this
     case QT3DS_FLAVOR_ASSET_LIB:
-    // make an Aset out of this.
+    // make an asset out of this
     case QT3DS_FLAVOR_ASSET_TL:
-    // make an Aset out of this.
+    // make an asset out of this
     case QT3DS_FLAVOR_ASSET_UICFILE:
-        // make an Aset out of this.
+        // make an asset out of this
         // Get a pointer to the object
         theDropSource = dynamic_cast<const CDropSource *>(inDataObject);
         if (theDropSource != nullptr && theDropSource->GetFlavor() != inFlavor)

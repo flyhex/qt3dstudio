@@ -58,8 +58,6 @@ public:
     static ESnapGridResolution GetTimelineSnappingGridResolution();
     static void SetTimelineSnappingGridResolution(ESnapGridResolution inResolution);
 
-    static CPreferences GetTrialSettings(const Q3DStudio::CString &inKeyName);
-
     static ::CColor GetEditViewBackgroundColor();
     static void SetEditViewBackgroundColor(::CColor inColor);
 
@@ -83,8 +81,6 @@ public:
 
     static bool ShouldShowTooltips();
     static void SetShowTooltips(bool inShowTooltips);
-
-    static ::CColor GetTooltipBackgroundColor();
 
     static long GetTimelineSplitterLocation();
     static void SetTimelineSplitterLocation(long inLocation);
@@ -129,62 +125,18 @@ public:
     static void SetPreviewProperty(const Q3DStudio::CString &inName,
                                    const Q3DStudio::CString &inValue);
 
-    static ::CColor GetBaseColor();
-    static ::CColor GetDarkBaseColor();
-
     static ::CColor GetNormalColor();
     static ::CColor GetMasterColor();
     static ::CColor GetInactiveColor();
 
     static ::CColor GetMouseOverHighlightColor();
-    static ::CColor GetSelectColor();
-    static ::CColor GetTimelineSelectColor();
 
-    static ::CColor GetToolBarBaseColor();
-    static ::CColor GetMenuBarBaseColor();
-
-    static ::CColor GetButtonDownColor();
-    static ::CColor GetTreeFloorColor();
-    static ::CColor GetButtonShadowColor();
-    static ::CColor GetPropertyFloorColor();
-    static ::CColor GetButtonHighlightColor();
-    static ::CColor GetRowSelectedColor();
-    static ::CColor GetRowTopColor();
-    static ::CColor GetTimeBarBorderColor();
-    static ::CColor GetPropertyBackgroundColor();
-    static ::CColor GetPropertyMouseOverColor();
-    static ::CColor GetPropertyTimbarLeft();
-    static ::CColor GetExtendedObjectLightColor();
-    static ::CColor GetExtendedObjectDarkColor();
-    static ::CColor GetControlRectTopLineColor();
-    static ::CColor GetControlRectSideLineColor();
-    static ::CColor GetControlRectBottomLineColor();
-    static ::CColor GetControlRectBottomLineDarkColor();
-    static ::CColor GetControlShadowColor();
-    static ::CColor GetTextBoxBGColorNoFocus();
-    static ::CColor GetTextBoxBGColorWithFocus();
-    static ::CColor GetScrollBGColor();
-    static ::CColor GetScrollThumbBGColor();
-    static ::CColor GetScrollThumbHighlightColor();
-    static ::CColor GetComboEditBoxGradientStartColor();
-
-    static ::CColor GetLockedTimebarColor();
-    static ::CColor GetLockedBorderColor();
-    static ::CColor GetExtendedLockedLightColor();
-    static ::CColor GetExtendedLockedDarkColor();
-    static ::CColor GetLockedTextColor();
-    static ::CColor GetLayerBackgroundColor();
-    static ::CColor GetGroupBackgroundColor();
-    static ::CColor GetObjectBackgroundColor();
     static ::CColor GetObjectTimebarColor();
     static ::CColor GetLayerTimebarColor();
-    static ::CColor GetTopRowColor();
-    static ::CColor GetTabButtonDownColor();
     static ::CColor GetDisabledTextColor();
 
     static ::CColor GetSingleBoundingBoxColor();
     static ::CColor GetGroupBoundingBoxColor();
-    static ::CColor GetLightBoundingBoxColor();
 
     static ::CColor GetRulerBackgroundColor();
     static ::CColor GetRulerTickColor();
@@ -199,18 +151,6 @@ public:
     static void setSelectorLineWidth(float width);
     static float getSelectorLineLength();
     static void setSelectorLineLength(float length);
-
-    static long GetRowSize();
-    static long GetTimebarTipSize();
-    static long GetTimebarInnerTipSize();
-    static long GetTimelineNameSize();
-    static long GetDefaultCommentSize();
-    static long GetDefaultTextEditSize();
-    static long GetDefaultButtonWidth();
-    static long GetInspectorGutterSize();
-    static long GetHeaderHeight();
-
-    static bool IsSudoMode();
 
     static void setQmlContextProperties(QQmlContext *qml);
     static QColor studioColor1();
@@ -242,8 +182,5 @@ public:
     static const long DEFAULT_SELECTOR_WIDTH = 30;
     static const long DEFAULT_SELECTOR_LENGTH = 50;
     static const long DEFAULT_AUTOSAVE_DELAY = 600;
-
-protected:
-    static bool m_SudoMode;
 };
 #endif // INCLUDED_STUDIO_PREFERENCES_H

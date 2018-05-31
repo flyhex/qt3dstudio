@@ -120,7 +120,6 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_timelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     WidgetControl *timeLineWidgetControl = new WidgetControl(m_timelineWidget, m_timelineDock);
     timeLineWidgetControl->RegisterForDnd(timeLineWidgetControl);
-    timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_LISTBOX);
     timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_FILE);
     timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_UICFILE);
     timeLineWidgetControl->AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
