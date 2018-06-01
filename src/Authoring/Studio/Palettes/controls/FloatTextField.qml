@@ -103,6 +103,7 @@ TextField {
         property int pressedX: 0
         property bool draggingActive: false
 
+        acceptedButtons: Qt.LeftButton
         preventStealing: true
         anchors.fill: parent
         onPressed: {
