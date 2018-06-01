@@ -44,12 +44,20 @@ class Qt3DSQmlStreamEvent : public QEvent
 {
 public:
     Qt3DSQmlStreamEvent(const QString &id, const QString &args)
-        : QEvent(QEvent::User), presentationId(id), presentationArgs(args)
+        : QEvent(QEvent::User), presentationId(id), presentationArgs(args), unregister(false)
     {
 
     }
+
+    Qt3DSQmlStreamEvent(const QString &id)
+        : QEvent(QEvent::User), presentationId(id), unregister(true)
+    {
+
+    }
+
     QString presentationId;
     QString presentationArgs;
+    bool unregister;
 };
 
 Q3DSQmlStreamProxy::renderitem::~renderitem()
@@ -166,7 +174,20 @@ bool Q3DSQmlStreamProxy::event(QEvent *event)
     if (event->type() == QEvent::User) {
         Qt3DSQmlStreamEvent *e = static_cast<Qt3DSQmlStreamEvent *>(event);
         Q3DSQmlStreamProducer *producer = nullptr;
-        if (!m_streamProducers[e->presentationId]) {
+        if (e->unregister && m_streamProducers.value(e->presentationId, nullptr)) {
+            for (int i = 0; i < m_loadedItems.size(); i++) {
+                if (m_loadedItems[i]->presentationId == e->presentationId) {
+                    delete m_loadedItems[i];
+                    m_loadedItems.remove(i);
+                    break;
+                }
+            }
+            producer = static_cast<Q3DSQmlStreamProducer *>(m_streamProducers[e->presentationId]);
+            IQ3DSQmlStreamService::getQmlStreamService()->unregisterProducer(producer);
+            delete producer;
+            return true;
+        }
+        if (m_streamProducers.value(e->presentationId, nullptr) == nullptr) {
             producer = new Q3DSQmlStreamProducer(e->presentationId, e->presentationArgs, this);
             m_streamProducers[e->presentationId] = producer;
             IQ3DSQmlStreamService::getQmlStreamService()
@@ -194,6 +215,11 @@ void Q3DSQmlStreamProxy::registerPresentation(const QString &presentationId, con
 {
     QCoreApplication::postEvent(this,
                                 new Qt3DSQmlStreamEvent(QString(presentationId), QString(args)));
+}
+
+void Q3DSQmlStreamProxy::unregisterPresentation(const QString &presentationId)
+{
+    QCoreApplication::postEvent(this, new Qt3DSQmlStreamEvent(QString(presentationId)));
 }
 
 void Q3DSQmlStreamProxy::setSettings(Q3DSSubPresentationSettings *settings)

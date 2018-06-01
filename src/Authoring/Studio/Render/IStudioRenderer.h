@@ -33,6 +33,7 @@
 #include "IDocSceneGraph.h"
 #include <EASTL/vector.h>
 #include <EASTL/string.h>
+#include "Doc.h"
 
 #include <QRect>
 
@@ -79,6 +80,9 @@ public:
 
     virtual void MakeContextCurrent() = 0;
     virtual void ReleaseContext() = 0;
+
+    virtual void RegisterSubpresentations(
+            const QVector<SubPresentationRecord> &subpresentations) = 0;
 
     // Uses the global studio app to get the doc and dispatch.
     static std::shared_ptr<IStudioRenderer> CreateStudioRenderer();

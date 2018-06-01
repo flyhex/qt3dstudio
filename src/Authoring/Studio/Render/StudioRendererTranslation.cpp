@@ -219,8 +219,10 @@ struct STranslatorDataModelParser
                 Q3DStudio::CFilePath theDirectory = m_Context.m_Doc.GetDocumentDirectory();
                 Q3DStudio::CFilePath theResolvedPath =
                     Q3DStudio::CFilePath::CombineBaseAndRelative(theDirectory, outValue.c_str());
-                outValue =
-                    m_Context.m_Context.GetStringTable().RegisterStr(theResolvedPath.toCString());
+                if (theResolvedPath.exists()) {
+                    outValue = m_Context.m_Context.GetStringTable()
+                                    .RegisterStr(theResolvedPath.toCString());
+                }
             }
             return true;
         }

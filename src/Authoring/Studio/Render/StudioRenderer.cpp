@@ -33,6 +33,10 @@
 #include "HotKeys.h"
 #include "StudioUtils.h"
 #include "Qt3DSMath.h"
+#include "Qt3DSOffscreenRenderKey.h"
+#include "Qt3DSOffscreenRenderManager.h"
+#include "q3dsqmlrender.h"
+#include "q3dsqmlstreamproxy.h"
 
 #include <QtCore/qdebug.h>
 
@@ -65,6 +69,19 @@ SEditCameraDefinition g_EditCameraDefinitions[] = {
 };
 QT3DSU32 g_NumEditCameras = sizeof(g_EditCameraDefinitions) / sizeof(*g_EditCameraDefinitions);
 
+struct StudioSubPresentationRenderer
+{
+    SubPresentationRecord subpresentation;
+    IOffscreenRenderer *renderer;
+
+    bool operator == (const SubPresentationRecord &r) const
+    {
+        return r.m_id == subpresentation.m_id &&
+               r.m_argsOrSrc == subpresentation.m_argsOrSrc &&
+               r.m_type == subpresentation.m_type;
+    }
+};
+
 struct SRendererImpl : public IStudioRenderer,
                        public IDataModelListener,
                        public IReloadListener,
@@ -95,6 +112,8 @@ struct SRendererImpl : public IStudioRenderer,
     bool m_GuidesEnabled;
     qt3dsdm::TSignalConnectionPtr m_SelectionSignal;
     float m_pixelRatio;
+    QHash<QString, StudioSubPresentationRenderer> m_subpresentations;
+    QScopedPointer<Q3DSQmlStreamProxy> m_proxy;
 
     SRendererImpl()
         : m_Dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -134,6 +153,57 @@ struct SRendererImpl : public IStudioRenderer,
             return m_Translation->GetIntendedPosition(inHandle, inPoint);
 
         return QT3DSVec3(0, 0, 0);
+    }
+
+    void RegisterSubpresentations(const QVector<SubPresentationRecord> &subpresentations) override
+    {
+        if (m_proxy.isNull())
+            m_proxy.reset(new Q3DSQmlStreamProxy());
+        IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
+        m_proxy->setPath(m_Doc.GetDocumentPath().GetAbsolutePath().toQString());
+        QVector<SubPresentationRecord> toUnregister;
+        QVector<SubPresentationRecord> toRegister;
+        const auto keys = m_subpresentations.keys();
+        for (QString key : keys) {
+            if (!subpresentations.contains(m_subpresentations[key].subpresentation))
+                toUnregister.append(m_subpresentations[key].subpresentation);
+        }
+
+        for (int i = 0; i < subpresentations.size(); ++i) {
+            if (!m_subpresentations.contains(subpresentations[i].m_id)
+                    || !(m_subpresentations[subpresentations[i].m_id] == subpresentations[i])) {
+                toRegister.append(subpresentations[i]);
+            }
+        }
+
+        for (int i = 0; i < toUnregister.size(); ++i) {
+            QByteArray data = toUnregister[i].m_id.toLocal8Bit();
+            qt3ds::render::CRegisteredString rid
+                    = m_Context->GetStringTable().RegisterStr(data.data());
+            offscreenMgr.ReleaseOffscreenRenderer(qt3ds::render::SOffscreenRendererKey(rid));
+            m_subpresentations.remove(toUnregister[i].m_id);
+            m_proxy->unregisterPresentation(toUnregister[i].m_id);
+        }
+
+        for (int i = 0; i < toRegister.size(); ++i) {
+            QByteArray data = toRegister[i].m_id.toLocal8Bit();
+            qt3ds::render::CRegisteredString rid
+                    = m_Context->GetStringTable().RegisterStr(data.data());
+            if (toRegister[i].m_type == QStringLiteral("presentation-qml")) {
+                m_proxy->registerPresentation(toRegister[i].m_id, toRegister[i].m_argsOrSrc);
+
+                qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
+                    QT3DS_NEW(m_Context->GetAllocator(),
+                           Q3DSQmlRender)(*m_Context, data.data());
+                offscreenMgr.RegisterOffscreenRenderer(
+                            qt3ds::render::SOffscreenRendererKey(rid), *theOffscreenRenderer);
+                m_subpresentations[toRegister[i].m_id].renderer = theOffscreenRenderer;
+            } else {
+
+            }
+            m_subpresentations[toRegister[i].m_id].subpresentation = toRegister[i];
+        }
+        RequestRender();
     }
 
     ITextRenderer *GetTextRenderer() override
@@ -259,7 +329,7 @@ struct SRendererImpl : public IStudioRenderer,
         m_RenderContext->BeginRender();
     }
 
-    void ReleaseContext()
+    void ReleaseContext() override
     {
         m_RenderContext->EndRender();
     }
@@ -409,6 +479,8 @@ struct SRendererImpl : public IStudioRenderer,
     // This must be safe to call from multiple places
     void Close() override
     {
+        m_subpresentations.clear();
+        m_proxy.reset();
         m_Closed = true;
         m_Translation = std::shared_ptr<STranslation>();
         m_Context = nullptr;
@@ -536,6 +608,8 @@ struct SRendererImpl : public IStudioRenderer,
     void OnNewPresentation() override
     {
         OnClosingPresentation();
+        m_proxy.reset();
+        m_subpresentations.clear();
         m_HasPresentation = true;
         // Reset edit camera information.
         m_EditCameraInformation.clear();
@@ -657,7 +731,7 @@ struct SRendererImpl : public IStudioRenderer,
                     <= 25)
                     return;
             } else {
-                if (abs(theDragDistance.y) <= 5)
+                if (qAbs(theDragDistance.y) <= 5)
                     return;
             }
         }

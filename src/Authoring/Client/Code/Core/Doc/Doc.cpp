@@ -2941,7 +2941,6 @@ void CDoc::LoadUIASubpresentations(const QString &uiaFile,
                                 rec.m_argsOrSrc = QString(src.c_str());
                             if (theReader->Att("args", args))
                                 rec.m_argsOrSrc = QString(args.c_str());
-
                             subpresentations.push_back(rec);
                         }
                     }
@@ -2949,6 +2948,13 @@ void CDoc::LoadUIASubpresentations(const QString &uiaFile,
             }
         }
     }
+}
+
+QDebug operator<<(QDebug dbg, const SubPresentationRecord &r)
+{
+    QDebugStateSaver stateSaver(dbg);
+    dbg.nospace() << r.m_type << " " << r.m_id << " " << r.m_argsOrSrc;
+    return dbg;
 }
 
 void CDoc::LoadUIADataInputs(const QString &uiaFile,

@@ -69,7 +69,8 @@ INCLUDEPATH += \
     ../../Runtime/Source/Qt3DSStateApplication/Application \
     ../../Runtime/Source/Qt3DSEvent/InternalInclude \
     ../../3rdparty/EASTL/UnknownVersion/include \
-    ../../3rdparty/color
+    ../../3rdparty/color \
+    ../../QtExtras/qmlstreamer
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -100,6 +101,7 @@ STATICRUNTIME = \
 
 LIBS += \
       -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
+      -lqt3dsqmlstreamer$$qtPlatformTargetSuffix() \
        $$QMAKE_LIBS_FBX
 
 linux {

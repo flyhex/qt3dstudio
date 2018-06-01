@@ -177,10 +177,10 @@ Q3DSQmlStreamRenderer::~Q3DSQmlStreamRenderer()
     QCoreApplication::postEvent(m_renderObject, new Cleanup());
     m_waitCondition.wait(&m_mutex);
 
-    m_offscreenSurface->deleteLater();
-    m_renderControl->deleteLater();
-    m_quickWindow->deleteLater();
-    m_renderObject->deleteLater();
+    delete m_offscreenSurface;
+    delete m_renderControl;
+    delete m_quickWindow;
+    delete m_renderObject;
 
     renderThreadClientCount->fetchAndSubAcquire(1);
     if (renderThreadClientCount->load() == 0)
@@ -283,8 +283,11 @@ void Q3DSQmlStreamRenderer::initializeFboCopy()
     m_program->bindAttributeLocation("pos", 0);
     m_program->bindAttributeLocation("tc", 1);
 
-    if (!m_program->link())
-        qDebug () << "failed: " << m_program->log();
+    if (!m_program->link()) {
+        QByteArray logData(m_program->log().toLocal8Bit());
+        const char *log = logData.data();
+        qFatal("Failed to create shader program: %s", log);
+    }
 
     m_vertices = new QOpenGLBuffer;
     m_vertices->create();

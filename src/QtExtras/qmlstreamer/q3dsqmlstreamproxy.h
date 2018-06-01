@@ -49,6 +49,7 @@ public:
 
     bool event(QEvent *event) Q_DECL_OVERRIDE;
     void registerPresentation(const QString &presentationId, const QString &args);
+    void unregisterPresentation(const QString &presentationId);
     void setSettings(Q3DSSubPresentationSettings *settings);
     void setPath(const QString& path);
 

@@ -140,6 +140,11 @@ struct SubPresentationRecord
         m_argsOrSrc = o.m_argsOrSrc;
         return *this;
     }
+
+    bool operator == (const SubPresentationRecord &r) const
+    {
+        return r.m_id == m_id && r.m_argsOrSrc == m_argsOrSrc && r.m_type == m_type;
+    }
 };
 
 class CDataInputDialogItem

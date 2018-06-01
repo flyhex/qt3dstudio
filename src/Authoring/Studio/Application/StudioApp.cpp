@@ -1557,6 +1557,8 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_core->GetDoc()->LoadUIASubpresentations(m_core->GetDoc()->GetDocumentUIAFile(true),
                                                   m_subpresentations);
 
+        g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+
         m_dataInputDialogItems.clear();
         m_core->GetDoc()->LoadUIADataInputs(m_core->GetDoc()->GetDocumentUIAFile(true),
                                             m_dataInputDialogItems);
@@ -1617,6 +1619,9 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
     QByteArray docBA = doc.toQString().toLatin1();
     qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list, subpresentations);
+
+    if (subpresentations)
+        g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
 }
 
 CFilePath CStudioApp::getMostRecentDirectory() const
