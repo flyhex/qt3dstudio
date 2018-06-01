@@ -858,6 +858,25 @@ bool TimelineWidget::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
     return true;
 }
 
+
+void TimelineWidget::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
+{
+    Q_UNUSED(inFlags)
+
+    if (inPoint.x == -1 && inPoint.y == -1) { // drag leave
+        // upon cancelling a DnD, the mouse press event fires, this bool is to prevent that
+        m_blockMousePress = true;
+        QTimer::singleShot(500, [this]() {
+            m_blockMousePress = false;
+        });
+    }
+}
+
+bool TimelineWidget::blockMousePress() const
+{
+    return m_blockMousePress;
+}
+
 void TimelineWidget::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
 }

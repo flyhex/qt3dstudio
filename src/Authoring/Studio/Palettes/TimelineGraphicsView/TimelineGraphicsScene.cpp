@@ -289,6 +289,10 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         event->accept();
         return;
     }
+
+    if (m_widgetTimeline->blockMousePress())
+        return;
+
     if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
         resetMousePressParams();
         m_pressPos = event->scenePos();
@@ -679,9 +683,11 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
             && (qApp->focusObject() == m_widgetTimeline->viewTreeContent() && !focusItem())) {
         keyEvent->accept();
         return;
-    }
-    if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive())
+    } else if (keyEvent->key() == Qt::Key_Escape && m_rowMover->isActive()) {
+        m_rowMover->end();
+    } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()) {
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
+    }
 
     QGraphicsScene::keyPressEvent(keyEvent);
 }
