@@ -329,7 +329,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                 updateTargetRowLater = std::bind(&RowMover::updateTargetRow, this,
                                                  scenePos, rowType);
                 m_rowAutoExpand = rowInsert1;
-                m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_Time);
+                m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_TIME);
             } else {
                 m_rowAutoExpand = nullptr;
                 m_autoExpandTimer.stop();

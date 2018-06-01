@@ -77,7 +77,6 @@ public:
     void setParent(RowTree *parent);
     void addChild(RowTree *child);
     void addChildAt(RowTree *child, int index);
-    void moveChild(int from, int to);   // NOT USED
     void removeChild(RowTree *child);
     void setDnDState(DnDState state, DnDState onlyIfState = DnDState::Any, bool recursive = false);
     void setTreeWidth(double w);

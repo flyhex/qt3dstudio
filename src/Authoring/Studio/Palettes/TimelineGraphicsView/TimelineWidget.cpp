@@ -66,53 +66,6 @@
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qcolordialog.h>
 
-// Mahmoud_TODO: debug func, to be removed
-void printBinding(ITimelineItemBinding *binding, QString padding = " ")
-{
-    qDebug().noquote().nospace()
-            << "\x1b[42m \x1b[1m" << __FUNCTION__
-            << padding
-            << binding->GetTimelineItem()->GetName().toQString()
-            << " (" << static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance() << ")"
-            << "\x1b[m";
-
-    for (int i = 0; i < binding->GetPropertyCount(); i++) {
-        ITimelineItemProperty *property = binding->GetProperty(i);
-        qDebug().noquote().nospace()
-            << "\x1b[42m \x1b[1m" << __FUNCTION__
-            << padding
-            << "[" << property->GetName().toQString() << "]"
-            << " (" << static_cast<Qt3DSDMTimelineItemProperty*>(property)->getPropertyHandle() << ")"
-            << "\x1b[m";
-
-        for (int j = 0; j < property->GetKeyframeCount(); j++) {
-            IKeyframe *kf = property->GetKeyframeByIndex(j);
-            qDebug().noquote().nospace()
-                << "\x1b[42m \x1b[1m" << __FUNCTION__
-                << padding
-                << "  {KF: " << kf->GetTime() << ", selected: " << kf->IsSelected() << "}"
-                << "\x1b[m";
-        }
-    }
-    padding = padding.append("-");
-
-    // create child rows recursively
-    const QList<ITimelineItemBinding *> children = binding->GetChildren();
-    for (auto child : children)
-        printBinding(child, padding);
-}
-
-// Mahmoud_TODO: debug func, to be removed
-void printHandlesMap(std::map<qt3dsdm::Qt3DSDMInstanceHandle, RowTree *> theBindingMap)
-{
-    for (auto& kv : theBindingMap)
-        qDebug().noquote().nospace()
-                 << "\x1b[42m \x1b[1m" << __FUNCTION__
-                 << ", k=" << kv.first
-                 << ", v=" << (kv.second == nullptr ? "--" : kv.second->label())
-                 << "\x1b[m";
-}
-
 class Eventfilter : public QObject
 {
 public:
@@ -506,8 +459,6 @@ void TimelineWidget::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable
             }
         }
     }
-
-    // Mahmoud_TODO: Expand the tree so the selection is visible
 }
 
 void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -777,7 +728,7 @@ void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
     Q_UNUSED(inSlide)
     Q_UNUSED(inOwner)
 
-    // Mahmoud_TODO: implement?
+    // TODO: Likely needed for QT3DS-1850
 }
 
 void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,

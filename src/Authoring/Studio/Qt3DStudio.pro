@@ -171,7 +171,6 @@ HEADERS += \
     Palettes/TimelineGraphicsView/TimelineControl.h \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.h \
     Palettes/TimelineGraphicsView/TimelineSplitter.h \
-    Palettes/TimelineGraphicsView/TimelineUtils.h \
     Palettes/TimelineGraphicsView/TimelineWidget.h \
     Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.h \
     Palettes/TimelineGraphicsView/ui/NavigationBar.h \
@@ -324,7 +323,6 @@ SOURCES += \
     Palettes/TimelineGraphicsView/TimelineControl.cpp \
     Palettes/TimelineGraphicsView/TimelineGraphicsScene.cpp \
     Palettes/TimelineGraphicsView/TimelineSplitter.cpp \
-    Palettes/TimelineGraphicsView/TimelineUtils.cpp \
     Palettes/TimelineGraphicsView/TimelineWidget.cpp \
     Palettes/TimelineGraphicsView/ui/InteractiveTimelineItem.cpp \
     Palettes/TimelineGraphicsView/ui/NavigationBar.cpp \

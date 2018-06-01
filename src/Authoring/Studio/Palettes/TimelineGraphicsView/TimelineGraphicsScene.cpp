@@ -191,25 +191,6 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     action->setShortcutContext(Qt::ApplicationShortcut);
     connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleLockSelected);
     timelineWidget->addAction(action);
-
-    // TODO: Shortcuts for these to be determined
-//    action = new QAction(this);
-//    action->setShortcut(QKeySequence(TBD));
-//    action->setShortcutContext(Qt::ApplicationShortcut);
-//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterShy);
-//    timelineWidget->addAction(action);
-
-//    action = new QAction(this);
-//    action->setShortcut(QKeySequence(TBD));
-//    action->setShortcutContext(Qt::ApplicationShortcut);
-//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterVisible);
-//    timelineWidget->addAction(action);
-
-//    action = new QAction(this);
-//    action->setShortcut(QKeySequence(TBD));
-//    action->setShortcutContext(Qt::ApplicationShortcut);
-//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterLock);
-//    timelineWidget->addAction(action);
 }
 
 TimelineGraphicsScene::~TimelineGraphicsScene()
@@ -236,40 +217,6 @@ void TimelineGraphicsScene::updateTimelineLayoutWidth()
 
     m_layoutTimeline->setMinimumWidth(timelineWidth);
     m_layoutTimeline->setMaximumWidth(timelineWidth);
-    // Mahmoud_TODO: could be requested by UX. else will be removed
-//    m_widgetTimeline->viewTimelineContent()->horizontalScrollBar()->setValue(
-//               m_widgetTimeline->viewTimelineContent()->horizontalScrollBar()->maximum());
-
-//    if (m_editedTimelineRow)
-//        m_widgetTimeline->viewTimelineContent()->ensureVisible(m_editedTimelineRow);
-}
-
-// TODO: test function, to be removed
-void debugPrintRows(RowTree *row)
-{
-    qDebug().noquote().nospace() << "|" << QString("-").repeated(row->depth()) << row->label();
-
-    if (!row->empty()) {
-        for (auto child : row->childRows())
-            debugPrintRows(child);
-    }
-}
-
-// Mahmoud_TODO: debug func, remove
-void printAsset(Q3DStudio::TIdentifier asset, QString padding = " ")
-{
-    TAssetGraphPtr assetGraph = g_StudioApp.GetCore()->GetDoc()->GetAssetGraph();
-    padding = padding.append("-");
-
-    for (int i = 0; i < assetGraph.get()->GetChildCount(asset); i++) {
-        qDebug().noquote().nospace()
-                << "\x1b[42m \x1b[1m" << __FUNCTION__
-                << padding
-                << assetGraph.get()->GetChild(asset, i)
-                << "\x1b[m";
-
-        printAsset(assetGraph.get()->GetChild(asset, i), padding);
-    }
 }
 
 void TimelineGraphicsScene::commitMoveRows()

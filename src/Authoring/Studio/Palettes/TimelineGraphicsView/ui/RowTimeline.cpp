@@ -162,7 +162,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     const int keyFrameY = (TimelineConstants::ROW_H / 2) - (keyFrameH / 2);
 
     // Don't access binding when we are in inconsistent state
-    // TODO: Refactor so we don't need to access binding during paint
+    // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
     if (m_rowTree->m_scene->widgetTimeline()->isFullReconstructPending())
         return;
 

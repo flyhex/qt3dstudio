@@ -93,9 +93,6 @@ public:
     void SetChangedKeyframes() override;
 
 private:
-    static const QHash<int, QList<QString>> SUPPORTED_ROW_PROPS;
-
-    QList<Keyframe *> filterKeyframesForRow(RowTimeline *row, const QList<Keyframe *> &keyframes);
     qt3dsdm::SGetOrSetKeyframeInfo setKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                                    qt3dsdm::IAnimationCore &inCore);
     CPasteKeyframeCommandHelper *m_pasteKeyframeCommandHelper;

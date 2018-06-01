@@ -321,7 +321,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     if (!isProperty()) {
         // Don't access binding when we are in inconsistent state
-        // TODO: Refactor so we don't need to access binding during paint
+        // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
         if (m_scene->widgetTimeline()->isFullReconstructPending())
             return;
 
@@ -603,12 +603,6 @@ RowTree *RowTree::getChildAt(int index) const
         return nullptr;
 
     return m_childRows.at(index);
-}
-
-// TODO: so far not used, delete if end up not used
-void RowTree::moveChild(int from, int to)
-{
-    m_childRows.move(from, to);
 }
 
 // this does not destroy the row, just remove it from the layout and parenting hierarchy

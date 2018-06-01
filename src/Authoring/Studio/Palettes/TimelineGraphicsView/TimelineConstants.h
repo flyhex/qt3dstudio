@@ -89,9 +89,9 @@ namespace TimelineConstants
     const int AUTO_SCROLL_PERIOD        = 50;  // time steps (millis) while auto scrolling
     const int AUTO_SCROLL_DELTA         = 8;   // increment in scroll at each time step
     const int AUTO_SCROLL_TRIGGER       = 500; // time after which auto scroll starts (millis)
-    const int AUTO_EXPAND_Time          = 500; // auto expand a hovered row (while DnD-ing)
+    const int AUTO_EXPAND_TIME          = 500; // auto expand a hovered row (while DnD-ing)
 
-    // TODO: move the colors (and maybe dimensions) to StudioPreferences.
+    // TODO: move the colors and dimensions to StudioPreferences.
 }
 
 #endif // TIMELINECONSTANTS_H
