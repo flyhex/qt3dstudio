@@ -117,8 +117,12 @@ Row {
         }
 
         onPressedChanged: {
-            if (!pressed)
+            if (!pressed) {
+                if (rateLimiter.running)
+                    rateLimiter.stop();
+                textField.setTextFieldValue()
                 root.editingFinished();
+            }
         }
 
         MouseArea {
