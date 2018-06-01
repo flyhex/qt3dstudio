@@ -93,11 +93,11 @@ void SlideView::setShowMasterSlide(bool show)
         theBridge->GetOrCreateGraphRoot(theRoot); // this will return the master slide
     qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
     if (m_CurrentModel != m_MasterSlideModel) {
-        if (m_MasterSlideReturnPointers.contains(theNewActiveSlide)) {
-            theNewActiveSlide = m_MasterSlideReturnPointers.value(theNewActiveSlide);
-        } else {
+        qt3dsdm::Qt3DSDMSlideHandle masterSlide = theNewActiveSlide;
+        theNewActiveSlide = m_MasterSlideReturnPointers.value(masterSlide, 0);
+        if (!theSlideSystem->SlideValid(theNewActiveSlide)) {
             theNewActiveSlide = theSlideSystem->GetSlideByIndex(
-                        theNewActiveSlide, 1); // activate the first slide;
+                        masterSlide, 1); // activate the first slide;
         }
     }
 
