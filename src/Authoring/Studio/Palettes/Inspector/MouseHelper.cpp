@@ -36,6 +36,18 @@
 #include <QtWidgets/qmainwindow.h>
 #include <QtCore/qtimer.h>
 #include <QtGui/qevent.h>
+#include <QtGui/qbitmap.h>
+
+static void setBlankCursor()
+{
+    // Qt::BlankCursor gets corrupted in some situations, so use custom bitmap (QTBUG-61678)
+    static QBitmap *zeroBitmap = nullptr;
+    if (!zeroBitmap) {
+        zeroBitmap = new QBitmap(32, 32);
+        zeroBitmap->clear();
+    }
+    QGuiApplication::setOverrideCursor(QCursor(*zeroBitmap, *zeroBitmap));
+}
 
 MouseHelper::MouseHelper(QObject *parent)
     : QObject(parent)
@@ -51,7 +63,7 @@ MouseHelper::MouseHelper(QObject *parent)
 void MouseHelper::startUnboundedDrag()
 {
     m_dragState = StateDragging;
-    qApp->setOverrideCursor(QCursor(Qt::BlankCursor));
+    setBlankCursor();
     m_startPos = QCursor::pos();
 
     QWindow *window = g_StudioApp.m_pMainWnd->windowHandle();
@@ -146,4 +158,3 @@ bool MouseHelper::eventFilter(QObject *obj, QEvent *event)
     }
     return false;
 }
-
