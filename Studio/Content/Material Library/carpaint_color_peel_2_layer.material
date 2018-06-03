@@ -20,7 +20,7 @@
         <Property formalName="Base Color" name="base_color" type="Color" description="Base color of the material" default="0.1 0.001 0.001" category="Base paint"/>
         <Property formalName="Flake Macro roughness" name="flake_bumpiness" description="Bumpiness of the flakes" type="Float" default="0.600000" category="Flake layer"/>
         <Property formalName="Orange Peel Size" name="peel_size" description="Orange peel bump size" type="Float" default="1.000000" category="Top coat"/>
-        <Property formalName="Orange Peel Size" name="peel_size" description="Orange peel bump size" type="Float" default="0.010000" category="Top coat"/>
+        <Property formalName="Orange Peel Amount" name="peel_amount" description="Orange peel amount" type="Float" default="0.010000" category="Top coat"/>
     </MetaData>
     <Shaders type="GLSL" version="330">
     <Shader>
@@ -196,7 +196,7 @@ void computeBackLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFacto
 
 float computeIOR()
 {
-  return( false ? 1.0 : luminance( vec3( 1, 1, 1 ) ) );
+  return( false ? 1.0f : luminance( vec3( 1, 1, 1 ) ) );
 }
 
 float evalCutout()
