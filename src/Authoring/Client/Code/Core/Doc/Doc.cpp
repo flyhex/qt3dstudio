@@ -579,6 +579,11 @@ CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem)
     return 0;
 }
 
+int CDoc::getSelectedInstancesCount() const
+{
+    return m_SelectedValue.GetSelectedInstances().size();
+}
+
 qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance()
 {
     return GetInstanceFromSelectable(m_SelectedObject);

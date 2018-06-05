@@ -596,8 +596,15 @@ struct SRendererImpl : public IStudioRenderer,
             if (m_PickResult.getType() == StudioPickValueTypes::Instance) {
                 qt3dsdm::Qt3DSDMInstanceHandle theHandle(
                             m_PickResult.getData<Qt3DSDMInstanceHandle>());
-                if (theHandle != m_Doc.GetSelectedInstance())
-                    m_Doc.SelectDataModelObject(theHandle);
+                if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
+                    m_Doc.ToggleDataModelObjectToSelection(theHandle);
+                } else {
+                    if (m_Doc.getSelectedInstancesCount() > 1)
+                        m_Doc.DeselectAllItems(true);
+
+                    if (theHandle != m_Doc.GetSelectedInstance())
+                        m_Doc.SelectDataModelObject(theHandle);
+                }
             } else if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
                 m_Doc.NotifySelectionChanged(m_PickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>());
             } else if (m_PickResult.getType() == StudioPickValueTypes::Path) {

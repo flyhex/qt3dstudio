@@ -403,6 +403,7 @@ public:
                        &inFullPathToFontFile); // Given a font file, return the font name
     void setPlayBackPreviewState(bool state);
     bool isPlayBackPreviewOn() const;
+    int getSelectedInstancesCount() const;
 
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
 
