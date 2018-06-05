@@ -141,6 +141,7 @@ private:
     void refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
                          qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
+    void updateActionStates(const QSet<RowTree *> &rows);
 
     TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;
@@ -157,6 +158,7 @@ private:
     QSize m_preferredSize;
     QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
     QHash<int, int> m_moveMap;
+    QSet<int> m_actionChanges;
     QTimer m_asyncUpdateTimer;
     bool m_fullReconstruct = false;
     CClientDataModelBridge *m_bridge = nullptr;

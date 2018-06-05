@@ -64,6 +64,17 @@ public:
         Any     // accept any state (default value in setDnDState() method)
     };
 
+    enum class ActionState {
+        None = 0,
+        Action = 1,
+        ChildAction = 2,
+        ComponentAction = 4,
+        MasterAction = 8,
+        MasterChildAction = 16,
+        MasterComponentAction = 32
+    };
+    Q_DECLARE_FLAGS(ActionStates, ActionState)
+
     explicit RowTree(TimelineGraphicsScene *timelineScene,
                      EStudioObjectType rowType = OBJTYPE_UNKNOWN, const QString &label = {});
     // property row constructor
@@ -79,6 +90,7 @@ public:
     void addChildAt(RowTree *child, int index);
     void removeChild(RowTree *child);
     void setDnDState(DnDState state, DnDState onlyIfState = DnDState::Any, bool recursive = false);
+    void setActionStates(RowTree::ActionStates states);
     void setTreeWidth(double w);
     void setBinding(ITimelineItemBinding *binding);
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
@@ -165,6 +177,7 @@ private:
     bool m_arrowVisible = false;
     bool m_dndHover = false;
     DnDState m_dndState = DnDState::None;
+    ActionStates m_actionStates = ActionState::None;
     ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
@@ -191,5 +204,7 @@ private:
     friend class RowTimeline;
     friend class RowTimelinePropertyGraph;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(RowTree::ActionStates)
 
 #endif // ROWTREE_H

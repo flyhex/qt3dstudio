@@ -605,6 +605,33 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
     }
 }
 
+void TimelineWidget::updateActionStates(const QSet<RowTree *> &rows)
+{
+    for (RowTree *row : rows) {
+        Qt3DSDMTimelineItemBinding *binding =
+                static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+
+        RowTree::ActionStates states = RowTree::ActionState::None;
+        if (binding->HasAction(true)) // has master action
+            states |= RowTree::ActionState::MasterAction;
+        else if (binding->HasAction(false)) // has action
+            states |= RowTree::ActionState::Action;
+
+        if (binding->ChildrenHasAction(true)) // children have master action
+            states |= RowTree::ActionState::MasterChildAction;
+        else if (binding->ChildrenHasAction(false)) // children have action
+            states |= RowTree::ActionState::ChildAction;
+
+        if (row->isComponent()) {
+            if (binding->ComponentHasAction(true)) // component has master action
+                states |= RowTree::ActionState::MasterComponentAction;
+            else if (binding->ComponentHasAction(false)) // component has action
+                states |= RowTree::ActionState::ComponentAction;
+        }
+        row->setActionStates(states);
+    }
+}
+
 void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
@@ -632,6 +659,7 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->rowManager()->recreateRowsFromBinding(m_binding);
         m_handlesMap.clear();
         insertToHandlesMapRecursive(m_binding);
+        updateActionStates(m_handlesMap.values().toSet());
         m_navigationBar->updateNavigationItems(m_BreadCrumbProvider);
         m_graphicsScene->updateSnapSteps();
         m_fullReconstruct = false;
@@ -715,9 +743,25 @@ void TimelineWidget::onAsyncUpdate()
             for (RowTree *row : qAsConst(updateArrowParents))
                 row->updateArrowVisibility();
         }
+        if (!m_actionChanges.isEmpty()) {
+            QSet<RowTree *> rowSet;
+            for (int id : qAsConst(m_actionChanges)) {
+                RowTree *row = m_handlesMap.value(id);
+                if (row) {
+                    rowSet.insert(row);
+                    RowTree *parentRow = row->parentRow();
+                    while (parentRow) {
+                        rowSet.insert(parentRow);
+                        parentRow = parentRow->parentRow();
+                    }
+                }
+            }
+            updateActionStates(rowSet);
+        }
     }
     m_dirtyProperties.clear();
     m_moveMap.clear();
+    m_actionChanges.clear();
 }
 
 void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
@@ -726,9 +770,13 @@ void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,
 {
     Q_UNUSED(inAction)
     Q_UNUSED(inSlide)
-    Q_UNUSED(inOwner)
 
-    // TODO: Likely needed for QT3DS-1850
+    if (m_fullReconstruct)
+        return;
+
+    m_actionChanges.insert(inOwner);
+    if (!m_asyncUpdateTimer.isActive())
+        m_asyncUpdateTimer.start();
 }
 
 void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
@@ -783,6 +831,7 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
 
     // Handle row moves asynch, as we won't be able to get the final order correct otherwise
     m_moveMap.insert(inChild, inParent);
+    m_actionChanges.insert(inParent);
     if (!m_asyncUpdateTimer.isActive())
         m_asyncUpdateTimer.start();
 }
@@ -792,7 +841,12 @@ void TimelineWidget::onChildRemoved(int inParent, int inChild, long inIndex)
     Q_UNUSED(inParent)
     Q_UNUSED(inChild)
     Q_UNUSED(inIndex)
-    // Note: Unimplemented by design, see QT3DS-1684
+
+    m_actionChanges.insert(inParent);
+    if (!m_asyncUpdateTimer.isActive())
+        m_asyncUpdateTimer.start();
+
+    // Note: Actual child removal handling unimplemented by design, see QT3DS-1684
 }
 
 void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,

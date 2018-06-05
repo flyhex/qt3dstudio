@@ -320,28 +320,21 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
 
     if (!isProperty()) {
-        // Don't access binding when we are in inconsistent state
-        // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
-        if (m_scene->widgetTimeline()->isFullReconstructPending())
-            return;
-
-        Qt3DSDMTimelineItemBinding *itemBinding =
-                static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
-        if (itemBinding->HasAction(true)) // has master action
+        if (m_actionStates & ActionState::MasterAction) // has master action
             painter->drawPixmap(0, 0, pixMasterAction);
-        else if (itemBinding->HasAction(false)) // has action
+        else if (m_actionStates & ActionState::Action) // has action
             painter->drawPixmap(0, 0, pixAction);
 
         if (!expanded()) {
-            if (itemBinding->ChildrenHasAction(true)) // children have master action
+            if (m_actionStates & ActionState::MasterChildAction) // children have master action
                 painter->drawPixmap(0, 0, pixChildMasterAction);
-            else if (itemBinding->ChildrenHasAction(false)) // children have action
+            else if (m_actionStates & ActionState::ChildAction) // children have action
                 painter->drawPixmap(0, 0, pixChildAction);
         }
 
-        if (itemBinding->ComponentHasAction(true)) // component has master action
+        if (m_actionStates & ActionState::MasterComponentAction) // component has master action
             painter->drawPixmap(0, 0, pixCompMasterAction);
-        else if (itemBinding->ComponentHasAction(false)) // component has action
+        else if (m_actionStates & ActionState::ComponentAction) // component has action
             painter->drawPixmap(0, 0, pixCompAction);
     }
 }
@@ -887,6 +880,11 @@ void RowTree::setDnDState(DnDState state, DnDState onlyIfState, bool recursive)
 RowTree::DnDState RowTree::getDnDState() const
 {
     return m_dndState;
+}
+
+void RowTree::setActionStates(ActionStates states)
+{
+    m_actionStates = states;
 }
 
 bool RowTree::isContainer() const
