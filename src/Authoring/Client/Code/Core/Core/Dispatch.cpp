@@ -645,6 +645,13 @@ void CDispatch::FireOnRefreshResourceFail(const Q3DStudio::CString &inResourceNa
     m_FailListeners.FireEvent(&CFailListener::OnRefreshResourceFail, inResourceName, inDescription);
 }
 
+void CDispatch::FireOnUndefinedDatainputsFail(
+        const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                       qt3dsdm::Qt3DSDMPropertyHandle>> *map)
+{
+    m_FailListeners.FireEvent(&CFailListener::OnUndefinedDatainputsFail, map);
+}
+
 void CDispatch::AddRendererListener(CRendererListener *inListener)
 {
     m_RendererListeners.AddListener(inListener);

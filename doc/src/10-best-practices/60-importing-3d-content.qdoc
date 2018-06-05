@@ -32,7 +32,7 @@
 \page best-practices-importing-3d-content.html
 \ingroup qt3dstudio-best-practices
 
-\chapter 3D Content Overview
+\section1 3D Content Overview
 
 \list
 \li
@@ -97,7 +97,7 @@
   they are all at the same location in space.
 \endlist
 
-\chapter 3D Content via FBX
+\section1 3D Content via FBX
 
 \image 3D_Content/FBX-Maya.png
 
@@ -107,18 +107,20 @@ use the following settings when exporting:
 \list
 \li
   \b{Geometry}
-\li
-  Uncheck all options, except \b{check the following}:
   \list
-  \li
-    Split per-vertex Normals
-  \li
-    Tangents and Binormals
-  \li
-    Referenced Assets Content
-  \li
-    Triangulate
-  \endlist
+    \li
+      Uncheck all options, except \b{check the following}:
+      \list
+      \li
+        Split per-vertex Normals
+      \li
+        Tangents and Binormals
+      \li
+        Referenced Assets Content
+      \li
+        Triangulate
+      \endlist
+    \endlist
 \li
   \b{Animation} - enable or disable as desired; bake or unbake
   animations as desired
@@ -132,16 +134,19 @@ use the following settings when exporting:
   system, so ensure that \c{Up Axis} is set to \c{Y}.
 \li
   \b{FBX File Format}
-\li
-  \b{Type} - Studio supports either ASCII or Binary FBX files.
-  ASCII files are preferred for any bug reports.
-\li
-  \b{Version} - Studio supports FBX versions 2013 and 2014 (up to
-  2014.2). We recommend 2014.
+  \list
+    \li
+      \b{Type} - Studio supports either ASCII or Binary FBX files.
+      ASCII files are preferred for any bug reports.
+    \li
+      \b{Version} - Studio supports FBX versions from 2013 up to
+      2016.1.2. We recommend 2016.1.2.
+  \endlist
 \endlist
-\chapter 3D Content via COLLADA
 
-\section1 Exporting COLLADA from Various 3D Modeling Applications
+\section1 3D Content via COLLADA
+
+\section2 Exporting COLLADA from Various 3D Modeling Applications
 
 Each 3D modeling application uses a specific COLLADA exporter that
 produces a format recognized by Studio. Autodesk's 3D Studio Max 2011
@@ -153,7 +158,7 @@ Maya and 3D Studio Max need to be installed prior to installing the
 correct OpenCOLLADA version. In addition, be sure that no 3D programs
 are open during the installation of OpenCOLLADA.
 
-\section1 Exporting OpenCOLLADA from Maya
+\section2 Exporting OpenCOLLADA from Maya
 
 In order for the OpenCOLLADA exporter to become active, some options
 need to be checked and unchecked in the Plug-in Manager. To find the
@@ -184,7 +189,7 @@ folder outside of your Studio project folder.
 
 \image 3D_Content/colladaMaya04.png
 
-\section1 Exporting OpenCollada from 3D Studio Max
+\section2 Exporting OpenCollada from 3D Studio Max
 
 Select the object to be exported. Next, open the Export dialog box.
 
@@ -199,7 +204,7 @@ OpenCOLLADA exporter.
 
 Again, be sure that triangulate is checked on.
 
-\section1 Exporting COLLADA from Luxology's Modo 601
+\section2 Exporting COLLADA from Luxology's Modo 601
 
 Modo comes installed with a COLLADA exporter that works with Studio as
 of versions 501 and 601.
@@ -333,7 +338,8 @@ The animation toggle is associated with animatable properties.
   \b{Diffuse Map}: This channel UV maps a bitmap image onto a
   material's surface.
 \endlist
-\section3 Add texture maps to any channel by clicking on the channel
+
+Add texture maps to any channel by clicking on the channel
 slot and choosing an image from the pop-up menu. This menu displays all
 supported images in your project directory.
 
@@ -402,9 +408,8 @@ These fonts can be found in the project palette font library directory.
 
 \image 3D_Content/text01.png
 
-Drag a font from Windows Explorer to the fonts folder in the project
-directory. A copy of the font will be generated and added to the
-project.
+Select the font in file explorer and click \e{Open}. A copy of the font will be generated and
+added to the project.
 
 \image 3D_Content/text02.png
 
@@ -440,13 +445,14 @@ support for animations would be a hierarchy of items, rotated
 simultaneously on arbitrary axes in arbitrary axis order. Studio also
 supports importing bezier tangent value tweaked into animations.
 
-\chapter 3D Workflow Case Study
+\omit // TODO: Replace with our own example work flow
+\section1 3D Workflow Case Study
 
 The examples presented below use Luxology's Modo 601 for digital content
 creation, however, these concepts also apply to other DCC tools such as
 Autodesk's 3D Studio Max and Maya.
 
-\section1 Building a simple gauge and importing to Studio.
+\section2 Building a simple gauge and importing to Studio.
 
 The following section describes the process of building a simple gauge
 in Modo, Luxology's 3D modeling and animation program. The concepts of
@@ -464,7 +470,7 @@ basis for constructing the 3D gauge model. This technique ensures that
 proper scale and proportions of the 3D models match the original concept
 artwork.
 
-\section1 Elements of a texture map
+\section2 Elements of a texture map
 
 The texture map shown on the left features alpha transparency and will
 be the final map used in Studio on our mesh material. An alternate copy,
@@ -482,7 +488,7 @@ registration point that makes it easy for alignment.
 
 \image 3D_Content/02_texture_elements.png
 
-\section1 Modeling geometry based on backdrop image
+\section2 Modeling geometry based on backdrop image
 
 With Modo open, click on the Images tab on the upper right panel and
 choose Add Clip. Then locate and load the reference map or texture map.
@@ -554,7 +560,7 @@ The resulting mesh should look similar to this:
 
 \image 3D_Content/01_texture_map.png
 
-\section1 Modeling the needle and needle glow
+\section2 Modeling the needle and needle glow
 
 Create a new Mesh item in the Items tab and draw a cube over top of the
 Backdrop Item, matching the overall dimensions of the needle graphic.
@@ -586,7 +592,7 @@ We bisect long strips of polygons to avoid visual artifacts later on.
 
 \image 3D_Content/modeling_glow.png
 
-\section1 Adjusting needle location and pivot
+\section2 Adjusting needle location and pivot
 
 Next, we need to position the needle in such a way that will allow it to
 rotate about its Z axis at the base of the needle. Select all of the
@@ -613,7 +619,7 @@ Now position the pivot to the world origin using the move tool.
 
 \image 3D_Content/08_adjustPivots.png
 
-\section1 Creating a material and adding a texture map
+\section2 Creating a material and adding a texture map
 
 The following steps are a simple way to add a material to your polygon
 selections and adding texture maps to them easily.
@@ -634,7 +640,7 @@ material to assign a texture map to it.
 
 \image 3D_Content/image_toMaterial.png
 
-\section1 UV layout
+\section2 UV layout
 
 This section assumes prior knowledge of UV coordinates and layout. For
 further explanation on advanced techniques, please visit
@@ -666,7 +672,7 @@ The result should look something like this:
 
 \image 3D_Content/05_TexturedModel.png
 
-\section1 Exporting 3D models to Studio via COLLADA.
+\section2 Exporting 3D models to Studio via COLLADA.
 
 This section describes the process of preparing a model for export to
 Studio.
@@ -713,15 +719,14 @@ Export the 3D models by choosing File > Export As.
 Choose COLLADA as the Save as type. Save the COLLADA file as
 \"Gauge.dae\"
 
-\section1 Import 3D gauge into Studio
+\section2 Import 3D gauge into Studio
 
 The following steps will guide you through the process of importing a
 COLLADA 3D model into Studio.
 
-Launch Studio 5.0.
+Launch Studio.
 
-Create a new project and with \"Create directory for project\" checked
-on, save the project as Gauge.uip.
+Create a new project and save the project as Gauge.uip.
 
 You now have created a new UIP project called Gauge. Now, locate your
 exported Gauge.dae file in Windows Explorer.
@@ -776,4 +781,5 @@ Some values to consider:
 Now with the needle selected in the timeline, rotate it about its Z axis
 and notice how it rotates correctly.
 
+\endomit
 */

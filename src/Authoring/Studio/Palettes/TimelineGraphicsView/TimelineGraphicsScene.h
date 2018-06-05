@@ -29,6 +29,7 @@
 #ifndef TIMELINEGRAPHICSSCENE_H
 #define TIMELINEGRAPHICSSCENE_H
 
+#include "RowTree.h"
 #include "TimelineWidget.h"
 #include "RowTimeline.h"
 #include "RowTypes.h"
@@ -37,11 +38,11 @@
 
 #include <QtWidgets/qgraphicsscene.h>
 #include <QtCore/qlist.h>
+#include <QtCore/qhash.h>
 
 class Ruler;
 class PlayHead;
 class TreeHeader;
-class RowTree;
 class SelectionRect;
 class RowMover;
 class RowManager;
@@ -52,6 +53,9 @@ struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
+QT_FORWARD_DECLARE_CLASS(QLabel)
+
+typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree::ExpandState> TExpandMap;
 
 class TimelineGraphicsScene : public QGraphicsScene
 {
@@ -59,10 +63,10 @@ class TimelineGraphicsScene : public QGraphicsScene
 
 public:
     explicit TimelineGraphicsScene(TimelineWidget *timelineWidget);
+    virtual ~TimelineGraphicsScene();
 
     void setTimelineScale(int scale);
     void updateTimelineLayoutWidth();
-    void addNewLayer();
     Ruler *ruler() const;
     PlayHead *playHead() const;
     RowManager *rowManager() const;
@@ -73,10 +77,14 @@ public:
     QGraphicsLinearLayout *layoutTimeline() const;
     TreeHeader *treeHeader() const;
     double treeWidth() const;
+    TimelineWidget *widgetTimeline() const;
     void updateTreeWidth(double x);
     void setMouseCursor(CMouseCursor::Qt3DSMouseCursor cursor);
     void resetMouseCursor();
     void updateSnapSteps();
+    TExpandMap &expandMap();
+    void resetMousePressParams();
+    QLabel *timebarTooltip();
 
 protected:
     bool event(QEvent *event) override;
@@ -94,13 +102,9 @@ private:
     void commitMoveRows();
     void updateHoverStatus(const QPointF &scenePos);
     void snap(double &value, bool snapToPlayHead = true);
-    int nextRowDepth(int index);
-    bool lastRowInAParent(RowTree *rowAtIndex, int index);
-    bool validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex);
-    RowTree *getNextSiblingRow(RowTree *row) const;
     QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
                                     QGraphicsItem *item,
-                                    const QPointF &scenePos);
+                                    const QPointF &scenePos) const;
     void handleInsertKeyframe();
     void handleDeleteChannelKeyframes();
     void handleSetTimeBarTime();
@@ -109,6 +113,8 @@ private:
     void handleEditComponent();
     void handleShySelected();
     void handleLockSelected();
+    void handleApplicationFocusLoss();
+    void updateAutoScrolling(double scenePosY);
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;
@@ -132,10 +138,18 @@ private:
     bool m_rulerPressed = false;
     bool m_keyframePressed = false;
     bool m_dragging = false;
+    bool m_startRowMoverOnNextDrag = false;
     TimelineControlType m_clickedTimelineControlType = TimelineControlType::None;
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
+    TExpandMap m_expandMap;
+    RowTree *m_releaseSelectRow = nullptr;
+    bool m_autoScrollDownOn = false;
+    bool m_autoScrollUpOn = false;
+    QTimer m_autoScrollTimer;
+    QTimer m_autoScrollTriggerTimer; // triggers m_autoScrollTimer
+    QLabel *m_timebarToolTip = nullptr;
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H

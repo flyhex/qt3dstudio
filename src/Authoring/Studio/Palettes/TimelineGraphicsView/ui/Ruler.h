@@ -49,7 +49,8 @@ public:
     double timelineScale() const;
     double duration() const;
     double maxDuration() const;
-    void setDuration(double duration, double maxDuration);
+    void setDuration(double duration);
+    void setMaxDuration(double maxDuration);
     void setViewportX(int viewportX);
     int type() const;
 
@@ -58,7 +59,7 @@ protected:
                QWidget *widget = nullptr) override;
 
 signals:
-    void durationChanged(double duration);
+    void maxDurationChanged(double maxDuration);
 
 private:
     const QString timestampString(int timeMs);

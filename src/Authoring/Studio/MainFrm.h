@@ -125,6 +125,7 @@ public:
     void onEditPasteToMaster();
     void OnUpdateEditPaste();
     void OnEditDuplicate();
+    void onEditDelete();
     void OnUpdateEditDuplicate();
 
     void timerEvent(QTimerEvent *event) override;
@@ -240,7 +241,9 @@ public:
     void initializeGeometryAndState();
 
     void toggleSelectMode();
-    void actionActive(bool active);
+    void onActionActive(bool active);
+    void showScene();
+    void onSlideActive(bool active);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -248,6 +251,7 @@ Q_SIGNALS:
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void handleGeometryAndState(bool save);
+    void handleRestart();
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;
     QScopedPointer<RemoteDeploymentSender> m_remoteDeploymentSender;
@@ -260,6 +264,7 @@ protected:
 
     bool m_playbackFlag = false;
     bool m_actionActive = false;
+    bool m_slideActive = false;
     bool m_resettingLayout = false;
 };
 

@@ -51,7 +51,6 @@
 //	Classes
 //==============================================================================
 class CTimelineTranslationManager;
-class CBaseStateRow;
 class Qt3DSDMTimelineItemProperty;
 class CCmdDataModelSetKeyframeTime;
 class RowTree;
@@ -75,7 +74,6 @@ protected: // Typedef
     typedef std::vector<Qt3DSDMAssetTimelineKeyframe> TAssetKeyframeList;
 
 protected:
-    CBaseStateRow *m_Row; // TODO: remove after finishing the new timeline
     RowTree *m_rowTree = nullptr;
     CTimelineTranslationManager *m_TransMgr;
     qt3dsdm::Qt3DSDMInstanceHandle m_DataHandle;
@@ -110,8 +108,6 @@ public:
     void SetLocked(bool) override;
     bool IsVisible() const override;
     void SetVisible(bool) override;
-    bool IsExpanded() const override;
-    void SetExpanded(bool inExpanded) override;
     bool HasAction(bool inMaster) override;
     bool ChildrenHasAction(bool inMaster) override;
     bool ComponentHasAction(bool inMaster) override;
@@ -123,18 +119,16 @@ public:
 
     // ITimelineItemBinding
     ITimelineItem *GetTimelineItem() override;
-    CBaseStateRow *GetRow() override; // Mahmoud_TODO: remove after finishing the new timeline
     RowTree *getRowTree() const override;
     void setRowTree(RowTree *row) override;
     void SetSelected(bool inMultiSelect) override;
     void OnCollapsed() override;
-    void ClearKeySelection() override;
     bool OpenAssociatedEditor() override;
-    void DoStartDrag(CControlWindowListener *inWndListener) override;
     void SetDropTarget(CDropTarget *inTarget) override;
     // Hierarchy
     long GetChildrenCount() override;
     ITimelineItemBinding *GetChild(long inIndex) override;
+    QList<ITimelineItemBinding *> GetChildren() override;
     ITimelineItemBinding *GetParent() override;
     void SetParent(ITimelineItemBinding *parent) override;
     // Properties
@@ -144,31 +138,15 @@ public:
     bool ShowToggleControls() const override;
     bool IsLockedEnabled() const override;
     bool IsVisibleEnabled() const override;
-    // Init/Cleanup
-    void Bind(CBaseStateRow *inRow) override;
-    void Release() override;
     // ContextMenu
     bool IsValidTransaction(EUserTransaction inTransaction) override;
     void PerformTransaction(EUserTransaction inTransaction) override;
     Q3DStudio::CString GetObjectPath() override;
-    // Selected keyframes
-    ITimelineKeyframesManager *GetKeyframesManager() const override;
-    // Properties
-    void RemoveProperty(ITimelineItemProperty *inProperty) override;
-    void LoadProperties() override;
 
     // ITimelineItemKeyframesHolder
     void InsertKeyframe() override;
     void DeleteAllChannelKeyframes() override;
-    long GetKeyframeCount() const override;
     IKeyframe *GetKeyframeByTime(long inTime) const override;
-    IKeyframe *GetKeyframeByIndex(long inIndex) const override;
-    long OffsetSelectedKeyframes(long inOffset) override;
-    void CommitChangedKeyframes() override;
-    void OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation) override;
-
-    // IKeyframeSelector
-    void SelectKeyframes(bool inSelected, long inTime = -1) override;
 
     // IUICDMSelectable
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstanceHandle() const;
@@ -192,12 +170,9 @@ public:
     virtual void OnPropertyChanged(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     virtual void OnPropertyLinked(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
 
-    virtual void UIRefreshPropertyKeyframe(long inOffset);
     // Keyframe manipulation
     virtual bool HasDynamicKeyframes(long inTime);
     virtual void SetDynamicKeyframes(long inTime, bool inDynamic);
-    virtual void DoSelectKeyframes(bool inSelected, long inTime, bool inUpdateUI);
-    virtual void OnPropertySelection(long inTime);
 
     virtual void OnAddChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual void OnDeleteChild(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
@@ -210,6 +185,7 @@ public:
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstance() const;
 
     int getAnimatedPropertyIndex(int propertyHandle) const;
+    void getTimeContextIndices(const QSet<int> &children, QMap<int ,int> &indexMap);
 
     ITimelineItemProperty *GetOrCreatePropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     ITimelineItemProperty *GetPropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);

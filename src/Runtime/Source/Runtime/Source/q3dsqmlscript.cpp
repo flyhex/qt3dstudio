@@ -398,6 +398,6 @@ TElement *Q3DSQmlScript::getElementByPath(const QString &path)
     TElement *element = CQmlElementHelper::GetElement(
                         *m_api.GetApplication(),
                         m_api.GetApplication()->GetPrimaryPresentation(),
-                        path.toUtf8().constData(), NULL);
+                        path.toUtf8().constData(), &m_owner);
     return element;
 }

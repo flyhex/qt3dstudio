@@ -67,15 +67,15 @@ bool CTimeLineDropTarget::Accept(CDropSource &inSource)
 
 //===============================================================================
 /**
- *	This is where is actually happens.
- *	Note: At this point either everything should be verified, and setup in the dropsource.
- *	Then the only thing left to do is to get the Assets and move/copy or connect them.
- *	Or the dropsource needs the target to perform the actual drop.
- *	Note that if the Control key is depressed, the start time follows the current view time(
+ *  This is where it actually happens.
+ *  Note: At this point either everything should be verified, and setup in the dropsource.
+ *  Then the only thing left to do is to get the Assets and move/copy or connect them.
+ *  Or the dropsource needs the target to perform the actual drop.
+ *  Note that if the Control key is depressed, the start time follows the current view time(
  *i.e. playhead position )
  *
- *	@param inSource the Object in question.
- *	@return true if the drop was successful .
+ *  @param inSource the Object in question.
+ *  @return true if the drop was successful .
  */
 bool CTimeLineDropTarget::Drop(CDropSource &inSource)
 {

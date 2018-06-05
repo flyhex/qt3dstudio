@@ -43,6 +43,9 @@ PlayHead::PlayHead(Ruler *ruler)
 
 void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
     static const QPixmap pixHead = QPixmap(":/images/PlaybackHead.png");
 
     painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, pixHead);

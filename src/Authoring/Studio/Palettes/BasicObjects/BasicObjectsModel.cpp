@@ -58,7 +58,8 @@ const QVector<BasicObjectItem> BasicObjectsModel::InitializeObjectModel()
         {tr("Text"), "Asset-Text-Normal.png"_L1, OBJTYPE_TEXT, PRIMITIVETYPE_UNKNOWN},
         {tr("Camera"), "Asset-Camera-Normal.png"_L1, OBJTYPE_CAMERA, PRIMITIVETYPE_UNKNOWN},
         {tr("Light"), "Asset-Light-Normal.png"_L1, OBJTYPE_LIGHT, PRIMITIVETYPE_UNKNOWN},
-        {tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN},
+        // Hide alias until it will be replaced with prefabs
+        //{tr("Alias"), "Asset-Alias-Normal.png"_L1, OBJTYPE_ALIAS, PRIMITIVETYPE_UNKNOWN},
     };
 }
 

@@ -513,8 +513,13 @@ namespace render {
         case GL_SAMPLER_2D_ARRAY:
         case GL_SAMPLER_2D_SHADOW:
         case GL_SAMPLER_CUBE: {
-            GLint sampler = *(GLint *)value;
-            GL_CALL_EXTRA_FUNCTION(glProgramUniform1i(programID, id, sampler));
+            if (count <= 1) {
+                GLint sampler = *(GLint *)value;
+                GL_CALL_EXTRA_FUNCTION(glProgramUniform1i(programID, id, sampler));
+            } else {
+                GLint *sampler = (GLint *)value;
+                GL_CALL_EXTRA_FUNCTION(glProgramUniform1iv(programID, id, count, sampler));
+            }
         } break;
         default:
             qCCritical(INTERNAL_ERROR, "Unknown shader type format %d", type);

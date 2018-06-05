@@ -63,33 +63,21 @@ public:
     float GetMaximumValue() const override;
     float GetMinimumValue() const override;
     void SetSelected() override;
-    void ClearKeySelection() override;
     void DeleteAllKeys() override;
-    ITimelineKeyframesManager *GetKeyframesManager() const override;
     IKeyframe *GetKeyframeByTime(long inTime) const override;
     IKeyframe *GetKeyframeByIndex(long inIndex) const override;
     long GetKeyframeCount() const override;
     long GetChannelCount() const override;
     float GetChannelValueAtTime(long inChannelIndex, long inTime) override;
     void SetChannelValueAtTime(long inChannelIndex, long inTime, float inValue) override;
-    long OffsetSelectedKeyframes(long inOffset) override;
-    void CommitChangedKeyframes() override;
-    void OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation) override;
     bool IsDynamicAnimation() override;
-    // IKeyframeSelector
-    void SelectKeyframes(bool inSelected, long inTime = -1) override;
 
     void setRowTree(RowTree *rowTree) override;
-    void Bind(CPropertyRow *inRow) override;
     RowTree *getRowTree() const override;
-    void Release() override;
-    CPropertyRow *GetRow() override; // Mahmoud_TODO: delete
 
     bool RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
     IKeyframe *GetKeyframeByHandle(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
-    void DoSelectKeyframes(bool inSelected, long inTime, bool inParentTriggered,
-                           Qt3DSDMTimelineItemBinding *inParent);
 
     void RefreshKeyFrames(void);
 
@@ -108,7 +96,6 @@ protected:
 protected:
     typedef std::vector<Qt3DSDMTimelineKeyframe *> TKeyframeList;
 
-    CPropertyRow *m_Row; // Mahmoud_TODO: remove
     qt3dsdm::Qt3DSDMInstanceHandle m_InstanceHandle;
     qt3dsdm::Qt3DSDMPropertyHandle m_PropertyHandle;
     CTimelineTranslationManager *m_TransMgr;

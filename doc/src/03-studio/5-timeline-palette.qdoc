@@ -80,7 +80,7 @@ Placing one element as a child of another causes:
   The child element to inherit the opacity from the parent. As the
   parent becomes less opaque, so do its children.
 \li
-  The child element to inherit the `active' state from the parent. If
+  The child element to inherit the 'active' state from the parent. If
   the parent is eyeballed off on this slide, so are all its children.
 \li
   Events to bubble from the child to the parent. An
@@ -119,7 +119,7 @@ outside a component. To see and edit the contents of a component, either
 \"Edit Component\". The Timeline and Slide palettes will both switch to
 show the contents of the component.
 
-When you enter a component, a `breadcrumb' is shown at the top of the
+When you enter a component, a 'breadcrumb' is shown at the top of the
 Timeline palette:
 
 \image Studio-Timeline-Breadcrumb.png
@@ -154,9 +154,9 @@ should appear on a few slides, but not all?
 
 The second column after the name has eyeballs
 \inlineimage Studio-Timeline-Eyeball.png which are used
-to control the `active' state of an element and all its descendants. To
+to control the 'active' state of an element and all its descendants. To
 cause an element to not appear on only certain slides, place your
-element on the master slide and then `eyeball it off' on slides where it
+element on the master slide and then 'eyeball it off' on slides where it
 should not be present.
 
 The active state of an element controls more than just visibility.
@@ -191,7 +191,7 @@ on interaction with elements at runtime.
 
 \section2 Copying Object Path
 
-The `path' to an element is used both in presentation behaviors as well
+The 'path' to an element is used both in presentation behaviors as well
 as by an application's
 \l{file-formats-uia.html#visual-actions}{Visual Actions}. While you could
 type out the name of each ancestor of the element, a more convenient
@@ -352,8 +352,8 @@ Runtime can perform \e {linear interpolation}, \e {smooth
 interpolation}, or a custom blending somewhere in-between. With linear
 interpolation the value changes at the same rate from one value to the
 next. With smooth interpolation the value starts off holding the
-previous keyframe value, `accelerates' towards the next keyframe value,
-and then `decelerates' to stop at the new value.
+previous keyframe value, 'accelerates' towards the next keyframe value,
+and then 'decelerates' to stop at the new value.
 
 To set the interpolation, first select the keyframe(s) that you want to
 adjust, then right-click on one of the selected keyframes, and from the
@@ -390,8 +390,8 @@ To set the start or end time for many time bars at once:
 \li
   Set the playhead to the desired time.
 \li
-  Press the \c{{[}} key to set the start time to the playhead time,
-  or the \c{{]}} key to set the end time to the playhead.
+  Press the \c{[} key to set the start time to the playhead time,
+  or the \c{]} key to set the end time to the playhead.
 \endlist
 
 \list
@@ -399,7 +399,7 @@ To set the start or end time for many time bars at once:
   All descendant elements will also have their start or end time set to
   the same value. It is thus common when entering a new slide for the
   first time to select the scene or active component, set the playhead
-  to a particular time, and then press \c{{]}} to crop the entire
+  to a particular time, and then press \c{]} to crop the entire
   slide to that duration.
 \endlist
 
@@ -420,13 +420,15 @@ animations and slide transitions without leaving Studio.
 \li
   The \b{Rewind} command sets the playhead to time 0.
 \li
-  The \b{Stop} command stops any playback.
-\li
   The \b{Play} command starts advancing the playhead in realtime,
   previewing animations on elements. The \b{Play Mode} for the
   current slide is honored, possibly looping or ping-ponging playback,
   or causing Studio to switch to an new slide when the end time for the
   current slide is reached.
+\li
+  The \b{Stop} command stops any playback. Stop replaces \b{Play} when animation is playing.
+\li
+  The \b{Fast-forward} command sets the playhead to the timeline end.
 \li
   Holding down the space bar temporarily enables playback while held
   down. Releasing the spacebar returns the playhead to its previous

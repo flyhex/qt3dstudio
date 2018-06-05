@@ -45,9 +45,11 @@ The material system supports dielectric and transparent materials, point lights,
 area lights, ambient occlusion, shadowing, two-sided polygons,
 index-of-refraction and fragment cutoff(masking).
 
-Custom materials support multiple render passes. Each pass needs to have
-the fragment shader implemented either by using the material system or writing
-a main function.
+It is also possible to write custom material without using the boilerplate code,
+in which case the main function must be implemented in the shader.
+
+\note The Qt 3D Studio 2.0 runtime does not support multiple render passes for
+custom materials.
 
 \section1 Required Functions
 
@@ -463,56 +465,56 @@ void main()
 
 The only requirement is to leave the closing parenthesis out since the material system adds it.
 
-\section1 Render Passes
-
-Custom material can contain multiple passes. This allows implementing complicated materials,
-but they are also more expensive. Multipass material needs to specify the shaders and passes
-separately using the xml-notation where shaders are defined inside the Shaders element and
-passes using the Passes element. Renderpasses are executed in the order they are specified
-in the material.
+\section2 Simple Custom Material Example
 
 \badcode
-
-<Shaders>
-    <Shader name="MAIN">
-       <VertexShader>
-        ...
-        </VertexShader>
-        <FragmentShader>
-        ...
-        </FragmentShader>
-    </Shader>
-    <Shader name="PREPASS">
+<Material name="simplecustom" version="1.0">
+    <MetaData >
+        <Property formalName="Red" name="red_weight" type="Float" default="1.0" min="0" max="1.0" category="Material"/>
+        <Property formalName="Green" name="green_weight" type="Float" default="1.0" min="0" max="1.0" category="Material"/>
+        <Property formalName="Blue" name="blue_weight" type="Float" default="1.0" min="0" max="1.0" category="Material"/>
+        <Property formalName="Base Color" name="basecolor" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" category="Material"/>
+    </MetaData>
+    <Shaders type="GLSL" version="330">
+    <Shader>
+        <Shared></Shared>
         <VertexShader>
-        ...
         </VertexShader>
         <FragmentShader>
-        ...
+#define UIC_ENABLE_UV0 1
+#define UIC_ENABLE_WORLD_POSITION 1
+#define UIC_ENABLE_TEXTAN 0
+#define UIC_ENABLE_BINORMAL 0
+
+#include "vertexFragmentBase.glsllib"
+#include "SSAOCustomMaterial.glsllib"
+#include "sampleLight.glsllib"
+#include "sampleProbe.glsllib"
+#include "sampleArea.glsllib"
+
+// Set shader output.
+out vec4 fragColor;
+
+    void main()
+    {
+        vec4 c = texture(basecolor, varTexCoord0.xy);
+        c.rgb *= vec3(red_weight, green_weight, blue_weight);
+        fragColor = c;
+
+        // No closing parenthesis because the generator adds it for us.
         </FragmentShader>
     </Shader>
-</Shaders>
-<Passes>
-    <ShaderKey value="20"/>
-    <LayerKey count="1"/>
-    <Buffer name="frame_buffer" format="source" filter="linear" wrap="clamp" size="1.0" lifetime="frame"/>
-    <Buffer name="temp_buffer" format="source" filter="linear" wrap="clamp" size="1.0" lifetime="frame"/>
-    <Pass shader="PREPASS" output="temp_buffer">
-        <BufferBlit dest="frame_buffer"/>
-        <BufferInput value="frame_buffer" param="OriginBuffer"/>
-    </Pass>
-    <Pass shader="MAIN">
-        <BufferInput value="temp_buffer" param="paramName"/>
-        <Blending source="SrcAlpha" dest="OneMinusSrcAlpha"/>
+    </Shaders>
+    <Passes >
+        <ShaderKey value="7"/>
+        <LayerKey count="1"/>
+    <Pass >
     </Pass>
 </Passes>
+</Material>
 \endcode
 
-Buffer-element can be used to create temporary buffers for the material. To access the current
-framebuffer, one must use the BufferBlit-element inside Pass-element to copy the
-framebuffer content to a buffer, which can then be accessed inside the shader. To access the
-buffer inside shader, one must specify input parameter with the BufferInput-element, which binds
-the buffer to a sampler declared in the shader. Blending-element can be used to change the
-blending mode of the pass.
+\section1 ShaderKey
 
 ShaderKey-element is a magic number specifying how the material gets compiled. The value is
 the sum of the properties the material needs to enable. Supported properties are:

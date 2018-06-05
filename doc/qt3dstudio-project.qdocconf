@@ -1,6 +1,7 @@
 project                 = Qt3DStudio
 description             = Qt 3D Studio Reference Manual
 version                 = $QT_VERSION
+url                     = https://doc.qt.io/qt3dstudio
 
 sources.fileextensions  = "*.qdoc *.html"
 sourcedirs              = . \
@@ -11,7 +12,7 @@ headerdirs              = ../src/Viewer
 # TODO: Move images to doc/images
 imagedirs               = ./src/images
 
-depends = qtcore qtgui qtwidgets qtqml qtquick qtmultimedia qtdoc
+depends = qtcore qtgui qtwidgets qtqml qtquick qtmultimedia qtdoc qt3dstudioruntime2
 
 qhp.projects            = Qt3DStudio
 
@@ -39,7 +40,6 @@ qhp.Qt3DStudio.subprojects.classes.title      = C++ Classes
 qhp.Qt3DStudio.subprojects.classes.indexTitle = Qt 3D Studio C++ Classes
 qhp.Qt3DStudio.subprojects.classes.selectors  = class fake:headerfile
 qhp.Qt3DStudio.subprojects.classes.sortPages  = true
-
 
 # Add an .html file with sidebar content, used in the online style
 HTML.stylesheets             += style/qt5-sidebar.html

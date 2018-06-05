@@ -103,30 +103,30 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
 
     // These actions will be passed to the context menu. Some of them need to me members, as we
     // have to change their enabled state based on selection and previous actions.
-    QAction *action = new QAction(tr("New Action\t(%1A)").arg(shiftKey));
+    QAction *action = new QAction(tr("New Action\t%1A").arg(shiftKey));
     action->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_A));
     connect(action, &QAction::triggered, this, &ActionView::addAction);
     QQuickWidget::addAction(action);
 
-    m_actionCopy = new QAction(tr("Copy Action\t(%1C)").arg(ctrlKey));
+    m_actionCopy = new QAction(tr("Copy Action\t%1C").arg(ctrlKey));
     m_actionCopy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
     m_actionCopy->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionCopy, &QAction::triggered, this, &ActionView::copyAction);
     QQuickWidget::addAction(m_actionCopy);
 
-    m_actionPaste = new QAction(tr("Paste Action\t(%1V)").arg(ctrlKey));
+    m_actionPaste = new QAction(tr("Paste Action\t%1V").arg(ctrlKey));
     m_actionPaste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
     m_actionPaste->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionPaste, &QAction::triggered, this, &ActionView::pasteAction);
     QQuickWidget::addAction(m_actionPaste);
 
-    m_actionCut = new QAction(tr("Cut Action\t(%1X)").arg(ctrlKey));
+    m_actionCut = new QAction(tr("Cut Action\t%1X").arg(ctrlKey));
     m_actionCut->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
     m_actionCut->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionCut, &QAction::triggered, this, &ActionView::cutAction);
     QQuickWidget::addAction(m_actionCut);
 
-    m_actionDel = new QAction(tr("Delete Action\t(Del)"));
+    m_actionDel = new QAction(tr("Delete Action\tDel"));
     m_actionDel->setShortcut(QKeySequence(Qt::Key_Delete));
     m_actionDel->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionDel, &QAction::triggered, [=](){ deleteAction(m_currentActionIndex); });

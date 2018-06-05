@@ -17,7 +17,28 @@
    <iconset>
     <normaloff>:/images/icon_256x256</normaloff>:/images/icon_256x256</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="infoText">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>190</y>
+      <width>301</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>You have no active presentation.
+Open or Create a presentation using the File menu.
+
+To start working after that, add assets to the
+Project palette using Import functionality.</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -222,7 +243,7 @@
    </attribute>
    <addaction name="actionPreview"/>
    <addaction name="actionRemote_Preview"/>
-   <addaction name="actionPreviewRuntime2"/>
+   <addaction name="actionPreviewRuntime1"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
@@ -397,7 +418,7 @@
     <string>Lock Guides</string>
    </property>
    <property name="shortcut">
-    <string>Alt+R</string>
+    <string>Alt+Shift+R</string>
    </property>
   </action>
   <action name="actionClear_Guides">
@@ -454,9 +475,6 @@
   <action name="action_Duplicate_Object">
    <property name="text">
     <string>&amp;Duplicate</string>
-   </property>
-   <property name="toolTip">
-    <string>Create an Alias Duplicate</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -801,19 +819,19 @@
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionPreviewRuntime2">
+  <action name="actionPreviewRuntime1">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
    </property>
    <property name="text">
-    <string>Preview with Runtime 2</string>
+    <string>Preview with Legacy Viewer</string>
    </property>
    <property name="iconText">
-    <string>Preview with Runtime 2</string>
+    <string>Preview with Legacy Viewer</string>
    </property>
    <property name="toolTip">
-    <string>Preview with Runtime 2</string>
+    <string>Preview with Legacy Viewer</string>
    </property>
   </action>
   <action name="actionImportAssets">
@@ -977,7 +995,7 @@
   <customwidget>
    <class>CEditCameraBar</class>
    <extends>QToolBar</extends>
-   <header>Studio/_Win/UI/EditCameraBar.h</header>
+   <header>Studio/UI/EditCameraBar.h</header>
   </customwidget>
  </customwidgets>
  <resources>

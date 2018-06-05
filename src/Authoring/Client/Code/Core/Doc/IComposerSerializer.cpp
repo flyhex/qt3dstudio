@@ -1480,15 +1480,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                  TPropertyHandleValuePairList &outProperties)
     {
         bool hasNoLifetime =
-                m_DataCore.IsInstanceOrDerivedFrom(inInstance, m_ObjectDefinitions.m_Image.m_Instance)
+                m_DataCore.IsInstanceOrDerivedFrom(inInstance,
+                                                   m_ObjectDefinitions.m_Image.m_Instance)
                 || m_DataCore.IsInstanceOrDerivedFrom(inInstance,
                                                       m_ObjectDefinitions.m_Material.m_Instance);
-
-        bool checkConversionToV3LayerFormat = false;
-        if (m_UIPVersion.hasValue() && *m_UIPVersion < 3
-                && m_DataCore.IsInstanceOrDerivedFrom(inInstance,
-                                                      m_ObjectDefinitions.m_Layer.m_Instance))
-            checkConversionToV3LayerFormat = true;
 
         for (eastl::pair<TCharPtr, TCharPtr> theAtt = inReader.GetFirstAttribute();
              !IsTrivial(theAtt.first); theAtt = inReader.GetNextAttribute()) {
@@ -1497,38 +1492,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
             bool ignoreProperty = theValue.hasValue() == false
                     || (hasNoLifetime
                         && (theValue->first == m_ObjectDefinitions.m_Asset.m_StartTime.m_Property
-                            || theValue->first == m_ObjectDefinitions.m_Asset.m_EndTime.m_Property));
-            if (ignoreProperty) {
-                bool keepProperty = true;
-                if (checkConversionToV3LayerFormat) {
-                    if (AreEqual(theAtt.first, L"location") || AreEqual(theAtt.first, L"size")) {
-                        keepProperty = false;
-                        SValue theValueUnion = ParseValue(DataModelDataType::Float2, theAtt.second);
-                        SFloat2 theValue(theValueUnion.getData<SFloat2>());
-                        SValue theFirstValue(theValue.m_Floats[0]);
-                        SValue theSecondValue(theValue.m_Floats[1]);
-                        if (AreEqual(theAtt.first, L"location")) {
-                            Qt3DSDMPropertyHandle theLeft, theTop;
-                            theLeft =
-                                    m_DataCore.GetAggregateInstancePropertyByName(inInstance, L"left");
-                            theTop =
-                                    m_DataCore.GetAggregateInstancePropertyByName(inInstance, L"top");
-                            outProperties.push_back(std::make_pair(theLeft, theFirstValue));
-                            outProperties.push_back(std::make_pair(theTop, theSecondValue));
-                        } else {
-                            Qt3DSDMPropertyHandle theWidth, theHeight;
-                            theWidth =
-                                    m_DataCore.GetAggregateInstancePropertyByName(inInstance, L"width");
-                            theHeight = m_DataCore.GetAggregateInstancePropertyByName(inInstance,
-                                                                                      L"height");
-                            outProperties.push_back(std::make_pair(theWidth, theFirstValue));
-                            outProperties.push_back(std::make_pair(theHeight, theSecondValue));
-                        }
-                    }
-                }
-                if (keepProperty)
-                    outExtraAttributes.push_back(std::make_pair(theAtt.first, theAtt.second));
-            } else
+                            || theValue->first
+                            == m_ObjectDefinitions.m_Asset.m_EndTime.m_Property));
+            if (ignoreProperty)
+                outExtraAttributes.push_back(std::make_pair(theAtt.first, theAtt.second));
+            else
                 outProperties.push_back(std::make_pair(theValue->first, theValue->second));
         }
     }

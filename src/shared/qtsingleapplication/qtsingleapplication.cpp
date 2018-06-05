@@ -34,6 +34,7 @@
 #include <QtCore/qdir.h>
 #include <QtCore/qsharedmemory.h>
 #include <QtWidgets/qwidget.h>
+#include <QtGui/qevent.h>
 
 #if defined(Q_OS_WIN)
 #include <QtCore/qlibrary.h>
@@ -134,6 +135,18 @@ QtSingleApplication::~QtSingleApplication()
     *newpids = 0;
     lockfile.unlock();
 }
+
+#if (defined Q_OS_MACOS)
+bool QtSingleApplication::event(QEvent *event)
+{
+    if (event->type() == QEvent::FileOpen) {
+        QFileOpenEvent *foe = static_cast<QFileOpenEvent *>(event);
+        emit fileOpenRequest(foe->file());
+        return true;
+    }
+    return QApplication::event(event);
+}
+#endif
 
 bool QtSingleApplication::isRunning(qint64 pid)
 {

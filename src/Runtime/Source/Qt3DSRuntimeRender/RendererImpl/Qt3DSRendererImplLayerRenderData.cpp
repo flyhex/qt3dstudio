@@ -693,6 +693,9 @@ namespace render {
                                                   | qt3ds::render::NVRenderClearValues::Color);
 
         for (QT3DSU32 i = 0; i < m_Lights.size(); i++) {
+            // don't render shadows when not casting
+            if (m_Lights[i]->m_CastShadow == false)
+                continue;
             SShadowMapEntry *pEntry = m_ShadowMapManager->GetShadowMapEntry(i);
             if (pEntry && pEntry->m_DepthMap && pEntry->m_DepthCopy && pEntry->m_DepthRender) {
                 SCamera theCamera;

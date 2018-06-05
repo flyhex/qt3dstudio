@@ -30,7 +30,6 @@
 #define ROWTREE_H
 
 #include "InteractiveTimelineItem.h"
-#include "TimelineGraphicsScene.h"
 #include "TimelineConstants.h"
 #include "RowTypes.h"
 #include "StudioObjectTypes.h"
@@ -42,18 +41,29 @@
 class RowTimeline;
 class Ruler;
 class ITimelineItemBinding;
-
-enum class ExpandState {
-    Hidden,
-    Collapsed,
-    Expanded
-};
+class TimelineGraphicsScene;
+class ITimelineItemProperty;
 
 class RowTree : public InteractiveTimelineItem
 {
     Q_OBJECT
 
 public:
+    enum class ExpandState {
+        Unknown,
+        Collapsed,
+        Expanded,
+        HiddenCollapsed,
+        HiddenExpanded
+    };
+
+    enum class DnDState {
+        None,
+        Source, // the row being dragged while DnD-ing
+        Parent, // parent of the insertion point
+        Any     // accept any state (default value in setDnDState() method)
+    };
+
     explicit RowTree(TimelineGraphicsScene *timelineScene,
                      EStudioObjectType rowType = OBJTYPE_UNKNOWN, const QString &label = {});
     // property row constructor
@@ -67,10 +77,8 @@ public:
     void setParent(RowTree *parent);
     void addChild(RowTree *child);
     void addChildAt(RowTree *child, int index);
-    void moveChild(int from, int to);   // NOT USED
     void removeChild(RowTree *child);
-    void setMoveSourceRecursive(bool value);
-    void setMoveTarget(bool value);
+    void setDnDState(DnDState state, DnDState onlyIfState = DnDState::Any, bool recursive = false);
     void setTreeWidth(double w);
     void setBinding(ITimelineItemBinding *binding);
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
@@ -83,10 +91,13 @@ public:
     bool visible() const;
     bool locked() const;
     bool expanded() const;
+    bool expandHidden() const;
     bool isDecendentOf(RowTree *row) const;
     bool isContainer() const;
     bool isProperty() const;
     bool isPropertyOrMaterial() const;
+    bool isComponent() const;
+    bool isMaster() const;
     bool hasPropertyChildren() const;
     bool empty() const; // has zero child rows (and zero properties)
     bool selected() const;
@@ -100,6 +111,7 @@ public:
     int treeWidth() const;
     EStudioObjectType rowType() const;
     QString propertyType() const;
+    RowTree *getChildAt(int index) const;
     RowTree *parentRow() const;
     RowTree *getPropertyRow(const QString &type) const;
     QList<RowTree *> childRows() const;
@@ -110,8 +122,15 @@ public:
     void toggleVisible();
     void toggleLocked();
     void updateFromBinding();
+    void updateLabel();
+    void setRowVisible(bool visible);
+    void setDnDHover(bool val);
+    DnDState getDnDState() const;
 
     ITimelineItemBinding *getBinding() const;
+    void updateExpandStatus(ExpandState state, bool animate = true);
+    void updateArrowVisibility();
+    void updateFilter();
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
@@ -120,16 +139,16 @@ private:
     void initialize();
     void initializeAnimations();
     void animateExpand(ExpandState state);
-    void updateExpandStatus(bool expand, bool childrenOnly = false);
     void updateDepthRecursive();
     void updateLockRecursive(bool state);
     void updateLabelPosition();
     void updateIndices(bool isInsertion, int startIndex, int startIndexInLayout, bool isProperty);
     bool hasActionButtons() const;
-    bool hasComponentAncestor();
+    bool hasComponentAncestor() const;
     int removeChildFromLayout(RowTree *child) const;
     int getCountDecendentsRecursive() const;
-    int addChildToLayout(RowTree *child, int indexInLayout);
+    int addToLayout(int indexInLayout);
+    int getLastChildIndex(bool isProperty) const;
 
     RowTree *m_parentRow = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
@@ -139,11 +158,14 @@ private:
     bool m_shy = false;
     bool m_visible = true;
     bool m_locked = false;
-    bool m_expanded = true;
-    bool m_moveSource = false;
-    bool m_moveTarget = false;
     bool m_isProperty = false;
     bool m_isPropertyExpanded = false;
+    bool m_master = false;
+    bool m_filtered = false;
+    bool m_arrowVisible = false;
+    bool m_dndHover = false;
+    DnDState m_dndState = DnDState::None;
+    ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
     EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;
@@ -152,7 +174,7 @@ private:
     QList<RowTree *> m_childRows;
     QList<RowTree *> m_childProps;
     ITimelineItemBinding *m_binding = nullptr;
-    ITimelineItemProperty *m_PropBinding; // for property rows
+    ITimelineItemProperty *m_PropBinding = nullptr; // for property rows
 
     QRect m_rectArrow;
     QRect m_rectShy;

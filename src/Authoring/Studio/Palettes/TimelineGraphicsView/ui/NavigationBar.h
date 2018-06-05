@@ -29,9 +29,10 @@
 #ifndef NAVIGATIONBAR_H
 #define NAVIGATIONBAR_H
 
+#include <QtCore/qpropertyanimation.h>
 #include <QtWidgets/qwidget.h>
 #include <QtWidgets/qboxlayout.h>
-#include "IBreadCrumbProvider.h"
+#include "Bindings/IBreadCrumbProvider.h"
 
 class NavigationBar : public QWidget
 {
@@ -44,9 +45,11 @@ public slots:
     void itemClicked(int index);
 
 private:
+    void setBarVisibility(bool visible);
     IBreadCrumbProvider *m_breadCrumbProvider = nullptr;
     QHBoxLayout *m_layout = nullptr;
     int m_itemAmount = 0;
+    QPropertyAnimation m_expandAnimation;
 };
 
 #endif // NAVIGATIONBAR_H

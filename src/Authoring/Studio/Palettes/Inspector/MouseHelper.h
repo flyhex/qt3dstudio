@@ -47,6 +47,9 @@ public:
 private Q_SLOTS:
     void resetCursor();
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private:
     QPoint m_startPos;
     QPoint m_referencePoint;

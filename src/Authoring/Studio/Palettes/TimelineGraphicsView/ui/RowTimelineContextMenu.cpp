@@ -243,27 +243,26 @@ void RowTimelineContextMenu::setTimeBarTime()
 
 void RowTimelineContextMenu::toggleDynamicKeyframes()
 {
-    // Store old selection, as we must change the selection for making keyframes dynamic
     QList<Keyframe *> selectedKeyframes = m_keyframeManager->selectedKeyframes();
 
-    m_keyframeManager->deselectAllKeyframes();
-    QList<Keyframe *> keyframes;
-    // If property row is clicked, only make that property's first keyframe dynamic.
-    // Otherwise make all properties' first keyframes dynamic
-    // Note that it doesn't matter which keyframe we make dynamic, as the dynamic keyframe will
-    // automatically change to the first one in time order.
-    if (m_rowTree->isProperty()) {
-        keyframes.append(m_rowTree->rowTimeline()->keyframes().first());
-    } else {
-        const auto childProps = m_rowTree->childProps();
-        for (const auto prop : childProps)
-            keyframes.append(prop->rowTimeline()->keyframes().first());
+    if (selectedKeyframes.isEmpty()) {
+        // If property row is clicked, only make that property's first keyframe dynamic.
+        // Otherwise make all properties' first keyframes dynamic
+        // Note that it doesn't matter which keyframe we make dynamic, as the dynamic keyframe will
+        // automatically change to the first one in time order.
+        QList<Keyframe *> keyframes;
+        if (m_rowTree->isProperty()) {
+            keyframes.append(m_rowTree->rowTimeline()->keyframes().first());
+        } else {
+            const auto childProps = m_rowTree->childProps();
+            for (const auto prop : childProps)
+                keyframes.append(prop->rowTimeline()->keyframes().first());
+        }
+        m_keyframeManager->selectKeyframes(keyframes);
     }
 
-    m_keyframeManager->selectKeyframes(keyframes);
     m_keyframeManager->SetKeyframesDynamic(!m_hasDynamicKeyframes);
 
-    // Restore selection
-    m_keyframeManager->deselectAllKeyframes();
-    m_keyframeManager->selectKeyframes(selectedKeyframes);
+    if (selectedKeyframes.isEmpty())
+        m_keyframeManager->deselectAllKeyframes();
 }

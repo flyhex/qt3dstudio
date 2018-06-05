@@ -137,7 +137,8 @@ public:
     Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const QString &inTitle,
                                                          const QString &inText,
                                                          Qt3DSMessageBox::EMessageBoxIcon inIcon,
-                                                         bool inShowCancel);
+                                                         bool inShowCancel,
+                                                         QWidget *parent = nullptr);
     int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
     void DisplayKnownErrorDialog(const QString &inErrorText);
 
@@ -156,6 +157,11 @@ public:
 
     bool DisplayResetKeyframeValuesDlg();
     void DisplayPasteFailed();
+
+    bool DisplayUndefinedDatainputDlg(
+            const QMultiMap<QString,
+                            QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map);
 
     static void DisplayGLVersionError(const Q3DStudio::CString &inGLVersion,
                                       const Q3DStudio::CString &inMinVersion);

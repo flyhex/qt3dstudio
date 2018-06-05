@@ -360,7 +360,9 @@ public:
     Q3DStudio::CString GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
                                           qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                           Q3DStudio::CString inDesiredName);
-    bool CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inInstance, Q3DStudio::CString inDesiredName);
+    bool CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
+                         qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                         Q3DStudio::CString inDesiredName);
     Q3DStudio::CString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     std::set<Q3DStudio::CString> GetSourcePathList() const;
     std::set<Q3DStudio::CString> GetFontFileList() const;

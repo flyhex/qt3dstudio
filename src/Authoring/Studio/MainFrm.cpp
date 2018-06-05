@@ -60,6 +60,7 @@
 #include "TimelineWidget.h"
 #include "ProjectView.h"
 #include "RowTree.h"
+#include "WidgetControl.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -68,6 +69,7 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
+#include <QtCore/qprocess.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -122,7 +124,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPaste_to_Master_Slide, &QAction::triggered,
             this, &CMainFrame::onEditPasteToMaster);
     connect(m_ui->action_Duplicate_Object, &QAction::triggered, this, &CMainFrame::OnEditDuplicate);
-    connect(m_ui->actionDelete, &QAction::triggered, [](){ g_StudioApp.DeleteSelectedObject(); });
+    connect(m_ui->actionDelete, &QAction::triggered, this, &CMainFrame::onEditDelete);
 //    connect(m_ui->actionGroup, &QAction::triggered, this, &CMainFrame::onEditGroup); // TODO: Implement
 //    connect(m_ui->actionParent, &QAction::triggered, this, &CMainFrame::onEditParent); // TODO: Implement
 //    connect(m_ui->actionUnparent, &QAction::triggered, this, &CMainFrame::onEditUnparent); // TODO: Implement
@@ -180,16 +182,18 @@ CMainFrame::CMainFrame()
 
     // Playback toolbar
     connect(m_ui->actionPreview, &QAction::triggered,
-            this, &CMainFrame::OnPlaybackPreviewRuntime1);
+            this, &CMainFrame::OnPlaybackPreviewRuntime2);
+
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
-    // Only show runtime2 preview if we have appropriate viewer
-    if (CPreviewHelper::viewerExists(QStringLiteral("q3dsviewer"))) {
-        connect(m_ui->actionPreviewRuntime2, &QAction::triggered,
-                this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    // Only show runtime1 preview if we have appropriate viewer and it's enabled
+    if (CStudioPreferences::IsLegacyViewerActive()
+            && CPreviewHelper::viewerExists(QStringLiteral("Qt3DViewer"))) {
+        connect(m_ui->actionPreviewRuntime1, &QAction::triggered,
+                this, &CMainFrame::OnPlaybackPreviewRuntime1);
     } else {
-        m_ui->actionPreviewRuntime2->setVisible(false);
+        m_ui->actionPreviewRuntime1->setVisible(false);
     }
 
     // Tool mode toolbar
@@ -213,6 +217,15 @@ CMainFrame::CMainFrame()
     // Others
     connect(m_remoteDeploymentSender.data(), &RemoteDeploymentSender::connectionChanged,
             this, &CMainFrame::OnConnectionChanged);
+
+    // Hide unimplemented menu items
+    m_ui->actionRepeat->setVisible(false);
+    m_ui->actionGroup->setVisible(false);
+    m_ui->actionParent->setVisible(false);
+    m_ui->actionUnparent->setVisible(false);
+    m_ui->actionFit_all->setVisible(false);
+    m_ui->actionToggle_hide_unhide_unselected->setVisible(false);
+    m_ui->actionFind->setVisible(false);
 
     // TODO: better solution?
     m_updateUITimer->start(500);
@@ -358,7 +371,9 @@ void CMainFrame::OnCreate()
     m_ui->actionZoom_Tool->setVisible(false);
 #endif
 
-    setCentralWidget(m_sceneView.data());
+    // Show a message about opening or creating a presentation
+    m_sceneView.data()->setVisible(false);
+    setCentralWidget(m_ui->infoText);
 }
 
 //==============================================================================
@@ -369,6 +384,9 @@ void CMainFrame::OnCreate()
  */
 void CMainFrame::OnNewPresentation()
 {
+    // Make sure scene is visible
+    showScene();
+
     // Associate the scene object with the scene view
     m_ui->m_EditCamerasBar->SetupCameras();
     // Enable dockables, toolbars, and menus
@@ -665,7 +683,12 @@ void CMainFrame::OnUpdateTimelineSetInterpolation()
  */
 void CMainFrame::OnEditDuplicate()
 {
-    g_StudioApp.HandleDuplicateCommand();
+    g_StudioApp.HandleDuplicateCommand(m_slideActive);
+}
+
+void CMainFrame::onEditDelete()
+{
+    g_StudioApp.DeleteSelectedObject(m_slideActive);
 }
 
 //==============================================================================
@@ -678,7 +701,7 @@ void CMainFrame::OnEditDuplicate()
  */
 void CMainFrame::OnUpdateEditDuplicate()
 {
-    m_ui->action_Duplicate_Object->setEnabled(g_StudioApp.CanDuplicateObject());
+    m_ui->action_Duplicate_Object->setEnabled(m_slideActive || g_StudioApp.CanDuplicateObject());
 }
 
 //=============================================================================
@@ -876,6 +899,9 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
+        CStudioPreferences::SetLegacyViewerActive(false);
+        // Hide legacy viewer preview button
+        m_ui->actionPreviewRuntime1->setVisible(false);
         CStudioPreferences::SetEditViewFillMode(true);
         CStudioPreferences::SetEditViewBackgroundColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetPreferredStartupView(
@@ -890,6 +916,8 @@ void CMainFrame::EditPreferences(short inPageIndex)
         RecheckSizingMode();
     } else if (thePrefsReturn == PREFS_RESET_LAYOUT) {
         onViewResetLayout();
+    } else if (thePrefsReturn == PREFS_SETTINGS_RESTART) {
+        QTimer::singleShot(0, this, &CMainFrame::handleRestart);
     }
 }
 
@@ -1010,7 +1038,7 @@ void CMainFrame::OnPlaybackPreviewRuntime2()
 
 void CMainFrame::OnPlaybackPreviewRemote()
 {
-    OnPlaybackPreview(QStringLiteral("Qt3DViewer"), true);
+    OnPlaybackPreview(QStringLiteral("q3dsviewer"), true);
 }
 
 //==============================================================================
@@ -1495,7 +1523,7 @@ void CMainFrame::onViewResetLayout()
                                           tr("Restart Needed"),
                                           tr("Are you sure that you want to restore Qt 3D Studio "
                                              "layout? \nYour current layout will be lost, and "
-                                             "Studio will exit."));
+                                             "Studio will restart."));
 
     // If "Yes" is clicked, delete window geometry and window state keys from QSettings
     if (theChoice == QMessageBox::Yes) {
@@ -1506,7 +1534,7 @@ void CMainFrame::onViewResetLayout()
         settings.remove(stateKey);
         // Prevent saving geometry and state, and exit
         m_resettingLayout = true;
-        QTimer::singleShot(0, this, &CMainFrame::close);
+        QTimer::singleShot(0, this, &CMainFrame::handleRestart);
     }
 }
 
@@ -1845,8 +1873,9 @@ void CMainFrame::OnConnectionChanged(bool connected)
 
 TimelineWidget *CMainFrame::getTimelineWidget() const
 {
-    return static_cast<TimelineWidget *>(m_paletteManager->GetControl(
-                                             CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
+    WidgetControl *control = static_cast<WidgetControl *>
+            (m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
+    return static_cast<TimelineWidget *>(control->getControl());
 }
 
 CRecentItems *CMainFrame::GetRecentItems()
@@ -1908,6 +1937,14 @@ void CMainFrame::handleGeometryAndState(bool save)
     }
 }
 
+void CMainFrame::handleRestart()
+{
+    QStringList presentationFile = QStringList(g_StudioApp.GetCore()->GetDoc()
+                                               ->GetDocumentPath().GetAbsolutePath().toQString());
+    close();
+    QProcess::startDetached(qApp->arguments()[0], presentationFile);
+}
+
 void CMainFrame::initializeGeometryAndState()
 {
     QSettings settings;
@@ -1929,11 +1966,24 @@ void CMainFrame::toggleSelectMode()
         m_sceneView->onToolItemSelection();
 }
 
-void CMainFrame::actionActive(bool active)
+void CMainFrame::onActionActive(bool active)
 {
     m_actionActive = active;
     m_ui->actionDelete->setEnabled(!active);
     m_ui->action_Copy->setEnabled(!active);
     m_ui->action_Cut->setEnabled(!active);
     m_ui->action_Paste->setEnabled(!active);
+}
+
+void CMainFrame::showScene()
+{
+    if (!m_sceneView.data()->isVisible()) {
+        setCentralWidget(m_sceneView.data());
+        m_sceneView.data()->setVisible(true);
+    }
+}
+
+void CMainFrame::onSlideActive(bool active)
+{
+    m_slideActive = active;
 }

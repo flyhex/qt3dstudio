@@ -283,6 +283,10 @@ public:
     virtual void OnErrorFail(const Q3DStudio::CString &inText) = 0;
     virtual void OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
                                        const Q3DStudio::CString &inDescription) = 0;
+    virtual void OnUndefinedDatainputsFail(
+            const QMultiMap<QString,
+                            QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map) = 0;
 };
 
 class IDataModelListener

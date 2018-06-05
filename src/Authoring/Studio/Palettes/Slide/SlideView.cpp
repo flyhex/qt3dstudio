@@ -93,24 +93,18 @@ void SlideView::setShowMasterSlide(bool show)
         theBridge->GetOrCreateGraphRoot(theRoot); // this will return the master slide
     qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
     if (m_CurrentModel != m_MasterSlideModel) {
-        const auto theFind = m_MasterSlideReturnPointers.find(theNewActiveSlide);
-        size_t theSlideIndex = 1;
-        size_t theNumSlides = theSlideSystem->GetSlideCount(theNewActiveSlide);
-        if (theFind != m_MasterSlideReturnPointers.end() && theFind->second < theNumSlides)
-            theSlideIndex = theFind->second;
-
-        theNewActiveSlide = theSlideSystem->GetSlideByIndex(
-            theNewActiveSlide, theSlideIndex); // activate the first slide
-    } else {
-        int theIndex = theSlideSystem->GetActiveSlideIndex(theNewActiveSlide);
-        m_MasterSlideReturnPointers[theNewActiveSlide] = theIndex;
+        qt3dsdm::Qt3DSDMSlideHandle masterSlide = theNewActiveSlide;
+        theNewActiveSlide = m_MasterSlideReturnPointers.value(masterSlide, 0);
+        if (!theSlideSystem->SlideValid(theNewActiveSlide)) {
+            theNewActiveSlide = theSlideSystem->GetSlideByIndex(
+                        masterSlide, 1); // activate the first slide;
+        }
     }
 
     // We have forced a mode change, and so we need to set the current active TC
     // to be in the correct mode so our slide palette will show the correct information
-    if (theNewActiveSlide.Valid()) {
+    if (theNewActiveSlide.Valid())
         theDoc->NotifyActiveSlideChanged(theNewActiveSlide);
-    }
 
     Q_EMIT showMasterSlideChanged();
     Q_EMIT currentModelChanged();
@@ -121,10 +115,10 @@ void SlideView::showControllerDialog(const QPoint &point)
     QString currCtr = m_currentController.size() ?
         m_currentController : m_dataInputSelector->getNoneString();
     QVector<QPair<QString, int>> dataInputList;
-    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
-        if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeString)
-            dataInputList.append(QPair<QString, int>(g_StudioApp.m_dataInputDialogItems[i]->name,
-                                                     g_StudioApp.m_dataInputDialogItems[i]->type));
+
+    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
+        if (it->type == EDataType::DataTypeString)
+            dataInputList.append(QPair<QString, int>(it->name, it->type));
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
     CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
@@ -221,6 +215,18 @@ void SlideView::OnClosingPresentation()
     clearSlideList();
 }
 
+void SlideView::focusInEvent(QFocusEvent *event)
+{
+    Q_UNUSED(event)
+    Q_EMIT slideFocused(true);
+}
+
+void SlideView::focusOutEvent(QFocusEvent *event)
+{
+    Q_UNUSED(event)
+    Q_EMIT slideFocused(false);
+}
+
 void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                               const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
 {
@@ -238,6 +244,8 @@ void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int i
     auto index = m_SlidesModel->index(currentSlideIndex - 1, 0);
     m_SlidesModel->setSelectedSlideIndex(index);
 
+    if (currentSlideIndex != 0)
+        m_MasterSlideReturnPointers[inMaster] = inSlide;
 }
 
 void SlideView::OnNewSlide(const qt3dsdm::Qt3DSDMSlideHandle &inSlide)
@@ -376,7 +384,7 @@ void SlideView::initialize()
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
 
-    m_dataInputSelector = new DataInputSelectView(this);
+    m_dataInputSelector = new DataInputSelectView(this, EDataType::DataTypeString);
     connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &SlideView::onDataInputChange);
 }
@@ -507,10 +515,10 @@ void SlideView::OnImmediateRefreshInstanceMultiple(
 void SlideView::UpdateSlideViewTitleColor() {
     QString styleString;
     if (m_controlled) {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#slide { color: "
                 + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     } else {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#slide { color: "
                 + QString(CStudioPreferences::textColor().name()) + "; }";
     }
 

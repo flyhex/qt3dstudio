@@ -442,7 +442,8 @@ namespace render {
         SCustomMaterialRenderContext theRenderContext(
             inLayer, inLayerData, inLights, inCamera, m_ModelContext.m_Model, m_Subset,
             m_ModelContext.m_ModelViewProjection, m_GlobalTransform, m_ModelContext.m_NormalMatrix,
-            m_Material, inDepthTexture, inSsaoTexture, m_ShaderDescription, m_FirstImage);
+            m_Material, inDepthTexture, inSsaoTexture, m_ShaderDescription, m_FirstImage,
+            m_Opacity);
 
         qt3dsContext.GetCustomMaterialSystem().RenderSubset(theRenderContext, inFeatureSet);
     }

@@ -31,6 +31,7 @@
 #include <QtQuickWidgets/qquickwidget.h>
 #include <QtCore/qstringlistmodel.h>
 #include "DataInputSelectModel.h"
+#include "DataInputDlg.h"
 
 class DataInputSelectModel;
 
@@ -39,7 +40,8 @@ class DataInputSelectView : public QQuickWidget
     Q_OBJECT
     Q_PROPERTY(int selected MEMBER m_selection NOTIFY selectedChanged)
 public:
-    explicit DataInputSelectView(QWidget *parent = nullptr);
+    explicit DataInputSelectView(QWidget *parent = nullptr,
+                                 EDataType defaultType = EDataType::DataTypeFloat);
     void setData(const QVector<QPair<QString, int>> &dataInputList,
                  const QString &currentController,
                  int handle = 0, int instance = 0);
@@ -65,6 +67,8 @@ private:
     DataInputSelectModel *m_model = nullptr;
     int m_selection = -1;
     QString m_currController;
+    QString m_mostRecentlyAdded;
+    EDataType m_defaultType;
 };
 
 #endif // DATAINPUTSELECTDLG_H

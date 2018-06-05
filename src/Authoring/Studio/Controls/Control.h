@@ -117,7 +117,7 @@ public:
 
     virtual CPt GetSize() const;
     virtual void SetSize(CPt inSize);
-    void SetSize(long inWidth, long inHeight);
+    virtual void SetSize(long inWidth, long inHeight);
     virtual void OnSizeChanged(CPt inSize);
 
     virtual CPt GetMinimumSize();
@@ -159,7 +159,8 @@ public:
     void SetFocusToFirstAvailable();
     void SetFocusToLastAvailable();
 
-    virtual CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags);
+    virtual CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                           EStudioObjectType objectType);
 
     virtual void AddChild(CControl *inControl, CControl *inInsertBefore = NULL);
     virtual void RemoveChild(CControl *inControl);
@@ -191,9 +192,6 @@ public:
     bool GetEnabledFlag();
     void SetEnabledFlag(bool inIsEnabled);
 
-    void SetWindowListener(CControlWindowListener *inListener);
-    CControlWindowListener *GetWindowListener();
-
     virtual void OnChildSizeChanged(CControl *inChild);
     virtual void ResetMinMaxPref(){}
 
@@ -222,9 +220,6 @@ public:
     void AddFocusListener(CChildFocusListener *inListener);
     void RemoveFocusListener(CChildFocusListener *inListener);
     void FireFocusEvent(bool inStatus);
-
-    void SetTooltipText(const QString &inText);
-    QString GetTooltipText();
 
     virtual void EnsureVisible(CRct inRect);
     void EnsureVisible();

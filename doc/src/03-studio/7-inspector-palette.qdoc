@@ -56,26 +56,23 @@ the presentation will start with a blank slate.
 
 \section1 Unlinking from the Master Slide
 
- By default, elements on the
-\l{studio-slide-palette.html#the-master-slide}{master slide} of their
-owning time context have the same property values on all slides. If you
-change the Scale of an that change is applied on all slides. However, it
-is also possible to \"unlink\" any property of a master element. An
-unlinked attriute can have custom values and animations for each slide.
+By default, elements on the
+\l{studio-slide-palette.html#the-master-slide}{master slide} have the same property values on all
+slides. If you change the scale of an object that change is applied on all slides. However, it
+is also possible to unlink any property of a master element. An
+unlinked property can have custom values and animations for each slide.
 
-To unlink an property, right-click on the property name in the Inspector
-palette and choose \"Unlink Property from Master Slide\". The name of
+To unlink a property, right-click on the property name in the inspector
+palette and choose \uicontrol {Unlink Property from Master Slide}. The name of
 the property will change from green to light grey. This is the same
 color used for the name of elements that are present only on a single
 slide, and the properties of such elements.
 
-Tip: when you first unlink a property the current value for that
-property, including any animation keyframes, is used as the value for
-every slide. If you want a similar-but-slightly-different animation on
+Tip: When you first unlink a property, the current value for that
+property (including any animation keyframes) is used as the value for
+every slide. If you want a similar but slightly different animation on
 all or most slides, first create the animation on the master slide and
-\b{then} unlink the property and tweak the animation on other
-slides. A little thinking ahead can save you from needing to perform
-redudant work.
+then unlink the property and tweak the animation on other slides.
 
 \section1 Editing Numeric Values
 
@@ -675,6 +672,9 @@ material, chosen in the top-most property:
   Lighter than \c Screen.
 \endlist
 \li
+  \b{Enable Vertex Colors} - Use vertex colors from the mesh. These will be multiplied by any other
+  colors specified for the material.
+\li
   \b{Diffuse Color} - The base color for the material. Set to black
   to create a purely-specular material (e.g. metals or mirrors).
 \li
@@ -717,14 +717,18 @@ material, chosen in the top-most property:
   lights.}
 \endlist
 \li
-  \b{Specular Map} - A grayscale image map to modulate the amount
+  \b{Specular Map} - An RGB image map to modulate the amount and the color
   of specularity across the surface of the material. These values are
   multiplied by the Specular Amount.
+\li
+  \b{Specular Model} - Equation to use when calculating specular highlights for CG lights.
 \li
   \b{Specular Roughness} - Controls the size of the specular
   highlight generated from lights, and the clarity of reflections in
   general. Larger values increase the roughness, softening specular
   highlights and blurring reflections.
+\li
+  \b{Roughness Map} - An image to control the specular roughness of the material.
 \li
   \b{Fresnel Power} - Decreases head-on reflections (looking
   directly at the surface) while maintaining reflections seen at grazing
@@ -759,9 +763,7 @@ material, chosen in the top-most property:
   \b{Displacement Map}\target material-properties\_displacement-map
 
   - A grayscale image used to offset the vertices of geometry across the
-  surface of the material. Brighter pixels indicate raised regions. The
-  amount of the effect is controlled by the Displacement Amount
-  property.
+  surface of the material. Brighter pixels indicate raised regions.
 \list
 \li
   \e{Tip: Displacement maps require vertices to offset. If your model
@@ -774,22 +776,7 @@ material, chosen in the top-most property:
   want to also add a matching bump map or normal map to your material.}
 \endlist
 \li
-  \b{Emissive Power} - The amount of self-illumination from the
-  material. In a scene with black ambient lighting a material with 0
-  emissive power will appear black wherever the light does not shine on
-  it; turning the emissive power to 100 will cause the material to
-  appear as its diffuse color instead.
-\list
-\li
-  \e{Tip: When you want a material to not be affected by lighting,
-  instead of using 100\% emissive power consider setting the lighting
-  mode to} \c{None} \e{for a performance benefit.}
-\endlist
-\li
-  \b{Emissive Map} - An image map used to set the emissive power
-  for different parts of the material. Using a grayscale image will not
-  affect the color of the result, while using a color image will produce
-  glowing regions with the color affected by the emissive map.
+  \b{Displacement Amount} - Controls the offset amount for the displacement map.
 \li
   \b{Opacity} - Drop the opacity of just this material, separate
   from the model.
@@ -806,6 +793,34 @@ material, chosen in the top-most property:
   use an image format with transparency (e.g. a 32-bit PNG, or a DDS
   with an alpha portion) for the opacity to be applied. You cannot use a
   grayscale PNG file, for example, to control the opacity.
+\li
+  \b{Emissive Color} - Color of self-illumination for this material.
+\li
+  \b{Emissive Power} - The amount of self-illumination from the
+  material. In a scene with black ambient lighting a material with 0
+  emissive power will appear black wherever the light does not shine on
+  it; turning the emissive power to 100 will cause the material to
+  appear as its diffuse color instead.
+\list
+\li
+  \e{Tip: When you want a material to not be affected by lighting,
+  instead of using 100\% emissive power consider setting the lighting
+  mode to} \c{None} \e{for a performance benefit.}
+\endlist
+\li
+  \b{Emissive Map/2} - An image map used to set the emissive power
+  for different parts of the material. Using a grayscale image will not
+  affect the color of the result, while using a color image will produce
+  glowing regions with the color affected by the emissive map.
+\li
+  \b{Translucency Map} - Grayscale image controlling how much light can pass through the material
+  from behind.
+\li
+  \b{Translucent Falloff} - The amount of falloff for the translucency based on the angle of the
+  normals of the object to the light source.
+\li
+  \b{Diffuse Light Wrap} - The amount of light wrap for the translucency map. A value of 0 will not
+  wrap the light at all while a value of 1 will wrap the light all around the object.
 \endlist
 Note that the Runtime custom-compiles shaders for each unique
 combination of material properties used. Each additional material
@@ -949,21 +964,7 @@ TODO: Only one font for now. More to be added?
   horizontal spacing between every character pair.
 \endlist
 
-\section1 Alias Properties
-
-An \l{studio-basic-objects-palette.html#alias}{alias} selected in
-the Timeline palette shows the following properties in the Inspector
-palette (in addition to the \l{transform-properties}{transform properties} described above):
-
-\list
-\li
-  \b{Reference} - the node to create an alias of.
-\li
-  \e{Note that you cannot create an alias of a Scene, Layer,
-  Behavior, Material, Effect, or Image element. You can only alias items
-  that have a transform, i.e. groups, components, cameras, lights,
-  models, and text.}
-\endlist
+\omit
 \section1 Path Properties
 
 A \l{best-practices-paths.html}{path} selected in the
@@ -1088,5 +1089,5 @@ the following properties in the Inspector palette:
   first anchor point, as is the \"Outgoing\" value for the last anchor
   point.
 \endlist
-
+\endomit
 */

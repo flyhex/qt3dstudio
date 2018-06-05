@@ -29,7 +29,7 @@
 #ifndef SLIDEVIEW_H
 #define SLIDEVIEW_H
 
-#include <QQuickWidget>
+#include <QtQuickWidgets/qquickwidget.h>
 
 #include "DispatchListeners.h"
 #include "SlideModel.h"
@@ -38,7 +38,6 @@
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"
 #include "Dispatch.h"
-#include <unordered_map>
 class CClientDataModelBridge;
 class CDoc;
 
@@ -92,9 +91,12 @@ Q_SIGNALS:
     void currentModelChanged();
     void showMasterSlideChanged();
     void controlledChanged();
-
+    void slideFocused(bool);
 
 protected:
+    void focusInEvent(QFocusEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
+
     // DataModel callbacks
     virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,
                                const qt3dsdm::Qt3DSDMSlideHandle &inSlide);
@@ -124,7 +126,7 @@ private:
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
         m_Connections; /// connections to the DataModel
-    typedef std::unordered_map<int, int> TIntIntMap;
+    typedef QHash<int, int> TIntIntMap;
     // We need to remember which slide we were on when we entered the master slide.
     // Then, when the users leave the master slide we can go back to roughly the same
     // state.

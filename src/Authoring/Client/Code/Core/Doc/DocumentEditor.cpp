@@ -85,7 +85,7 @@
 #include <QtCore/qdir.h>
 #include <unordered_set>
 #include "Runtime/Include/q3dsqmlbehavior.h"
-#include "DataModelObjectReferenceHelper.h"
+#include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
 
 namespace {
 
@@ -2287,24 +2287,11 @@ public:
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType) override
     {
-        // The operations here are carefully constructed to ensure the various views can handle the
-        // messages.
-        // The timeline, for instance, requires that before a create operation happens all remove
-        // operations have happened.
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx)
-            qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
-
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx)
-            m_AssetGraph.RemoveChild(sortableList[idx], false);
-
         TInstanceHandle theParent(inDest);
         if (inInsertType == DocumentEditorInsertType::PreviousSibling
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
-
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx)
-            m_AssetGraph.AddChild(theParent, sortableList[idx]);
 
         for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
@@ -2314,7 +2301,7 @@ public:
                 theInstance = sortableList[end - idx - 1];
             // Rename if the new parent already has object with a same name
             CString currName = m_Bridge.GetName(theInstance);
-            if (!m_Bridge.CheckNameUnique(theInstance, currName)) {
+            if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
                 CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance, currName);
                 m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
                 SetName(theInstance, newName);
@@ -2332,12 +2319,6 @@ public:
             if (inInsertType == DocumentEditorInsertType::NextSibling)
                 theInstance = sortableList[end - idx - 1];
         }
-    }
-
-    void ReorderRows(qt3dsdm::Qt3DSDMInstanceHandle handleSource,
-                     qt3dsdm::Qt3DSDMInstanceHandle handleParent, int index) override
-    {
-        m_AssetGraph.MoveTo(handleSource, handleParent, index);
     }
 
     Qt3DSDMInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) override
@@ -2379,40 +2360,6 @@ public:
 
         m_Doc.SelectDataModelObject(component);
         return component;
-    }
-
-    void CreateAliasDuplicates(const qt3dsdm::TInstanceHandleList &inInstances,
-                               qt3dsdm::Qt3DSDMSlideHandle theSlide) override
-    {
-        for (int i = 0; i < inInstances.size(); i++) {
-            qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = inInstances.at(i);
-            if (m_Bridge.IsDuplicateable(theSelectedInstance)) {
-                CPt thePoint(0, 0);
-                Qt3DSDMInstanceHandle addedInstance = CreateSceneGraphInstance(
-                            ComposerObjectTypes::Alias, theSelectedInstance, theSlide,
-                            DocumentEditorInsertType::NextSibling, thePoint,
-                            PRIMITIVETYPE_UNKNOWN, -1);
-
-                // Compose name and verify it's unique
-                Q3DStudio::CString name = m_Bridge.GetName(addedInstance);
-                name.append(m_Bridge.GetName(theSelectedInstance));
-                if (!m_Bridge.CheckNameUnique(addedInstance, name)) {
-                    name = m_Bridge.GetUniqueChildName(m_Bridge.GetParentInstance(addedInstance),
-                                                       addedInstance, name);
-                }
-                m_Bridge.SetName(addedInstance, name);
-
-                // Object reference
-                qt3dsdm::SObjectRefType objRef =
-                        m_Doc.GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                            theSelectedInstance, addedInstance,
-                            CRelativePathTools::EPathType::EPATHTYPE_GUID);
-                qt3dsdm::Qt3DSDMPropertyHandle theProperty =
-                        m_Doc.GetPropertySystem()->GetAggregateInstancePropertyByName(
-                            addedInstance, L"referencednode");
-                SetInstancePropertyValue(addedInstance, theProperty, objRef);
-            }
-        }
     }
 
     void DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances) override
@@ -3690,6 +3637,64 @@ public:
         } catch (...) {
         }
         theDispatch.FireOnProgressEnd();
+    }
+
+    bool CleanUpMeshes() override
+    {
+        CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
+        theDispatch.FireOnProgressBegin(
+                    Q3DStudio::CString::fromQString(QObject::tr("Old UIP version")),
+                    Q3DStudio::CString::fromQString(QObject::tr("Cleaning up meshes")));
+        ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
+        bool cleanedSome = false;
+        try {
+            vector<CFilePath> importFileList;
+            m_SourcePathInstanceMap.clear();
+            GetSourcePathToInstanceMap(m_SourcePathInstanceMap, false);
+            for (TCharPtrToSlideInstanceMap::iterator theIter = m_SourcePathInstanceMap.begin(),
+                                                      end = m_SourcePathInstanceMap.end();
+                 theIter != end; ++theIter) {
+                CFilePath theSource(theIter->first);
+                if (theSource.GetExtension().Compare(L"mesh", CString::ENDOFSTRING, false)) {
+                    CFilePath theFullPath = m_Doc.GetResolvedPathToDoc(theSource);
+
+                    if (!theFullPath.Exists() || !theFullPath.isFile()
+                            || Mesh::GetHighestMultiVersion(theFullPath.toCString().GetCharStar())
+                            == 1) {
+                        continue;
+                    }
+
+                    Mesh *theMesh = Mesh::LoadMulti(
+                                theFullPath.toCString().GetCharStar(),
+                                Mesh::GetHighestMultiVersion(
+                                    theFullPath.toCString().GetCharStar()));
+
+                    if (!theMesh)
+                        continue;
+
+                    // Import file still has revisions, so we need to use SaveMulti for saving
+                    // the mesh file with correct revision number.
+                    // Once import file revisioning has been removed (QT3DS-1815), this can be
+                    // replaced with theMesh->Save(theFullPath.toCString().GetCharStar());
+                    // It also requires ripping the revisions out from the *.import files
+                    Qt3DSFileToolsSeekableMeshBufIOStream output(
+                                SFile::Wrap(SFile::OpenForWrite(theFullPath, FileWriteFlags()),
+                                            theFullPath));
+                    if (!output.IsOpen())
+                        QT3DS_ALWAYS_ASSERT_MESSAGE(theFullPath.toCString().GetCharStar());
+                    MallocAllocator allocator;
+                    theMesh->SaveMulti(allocator, output);
+
+                    delete theMesh;
+
+                    cleanedSome = true;
+                }
+            }
+        } catch (...) {
+        }
+        theDispatch.FireOnProgressEnd();
+
+        return cleanedSome;
     }
 
     void ExternalizePath(TInstanceHandle path) override

@@ -78,6 +78,7 @@ public:
     Keyframe *getClickedKeyframe(const QPointF &scenePos);
     QList<Keyframe *> getKeyframesInRange(const double left, const double right);
     QList<Keyframe *> keyframes() const;
+    void showToolTip(const QPointF &pos);
 
 protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
@@ -87,6 +88,8 @@ private:
     void updateChildrenEndRecursive(RowTree *rowTree, double oldEndX);
     void updateChildrenMinStartXRecursive(RowTree *rowTree);
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
+    void drawColorPropertyGradient(QPainter *painter, int width);
+    bool isColorProperty() const;
     double timeToX(double time);
     double xToTime(double xPos);
 

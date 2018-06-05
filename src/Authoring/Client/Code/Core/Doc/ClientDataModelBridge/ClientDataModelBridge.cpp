@@ -1044,12 +1044,13 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inPare
     return theUniqueName;
 }
 
-bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
+                                             qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                              Q3DStudio::CString inDesiredName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
     if (inDesiredName.Length() > 0) {
-        theExistingChild = GetChildByName(GetParentInstance(inInstance), inDesiredName,
+        theExistingChild = GetChildByName(inParentInstance, inDesiredName,
                                           qt3dsdm::Qt3DSDMInstanceHandle());
     }
 
@@ -1339,14 +1340,15 @@ bool CClientDataModelBridge::IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inIn
 
     EStudioObjectType theObjectType = GetObjectType(inInstance);
     if (theObjectType == OBJTYPE_SCENE || theObjectType == OBJTYPE_MATERIAL
-        || theObjectType == OBJTYPE_IMAGE)
+            || theObjectType == OBJTYPE_IMAGE) {
         return false;
-    // If we are delving inside component and selecting the component itself (the component is root
-    // in timeline palette)
-    else if (theObjectType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance))
+    } else if (theObjectType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance)) {
+        // If we are delving inside component and selecting the component itself (the component
+        // is root in timeline palette)
         return false;
-    else
+    } else {
         return !IsLockedAtAll(inInstance);
+    }
 }
 
 bool CClientDataModelBridge::IsMultiSelectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance)

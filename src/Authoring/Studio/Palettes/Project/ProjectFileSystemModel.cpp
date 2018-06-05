@@ -124,9 +124,9 @@ QString ProjectFileSystemModel::filePath(int row) const
 bool ProjectFileSystemModel::isRefreshable(int row) const
 {
     const QString path = filePath(row);
-    if (path.endsWith(QStringLiteral(".import")))
-        return m_references.contains(path);
-    return false;
+    // Import needs to be refreshable even if it is not referenced, as user may drag just individual
+    // meshes into the scene, and not the whole import.
+    return path.endsWith(QStringLiteral(".import"));
 }
 
 void ProjectFileSystemModel::updateReferences(bool emitDataChanged)

@@ -319,13 +319,14 @@ namespace render {
     SLayerRenderPreparationData::GenerateLightingKey(DefaultMaterialLighting::Enum inLightingType)
     {
         SShaderDefaultMaterialKey theGeneratedKey(GetShaderFeatureSetHash());
-        if (inLightingType != DefaultMaterialLighting::NoLighting) {
-            m_Renderer.DefaultMaterialShaderKeyProperties().m_HasLighting.SetValue(theGeneratedKey,
-                                                                                   true);
-
-            if (m_Layer.m_LightProbe && m_Layer.m_LightProbe->m_TextureData.m_Texture)
-                m_Renderer.DefaultMaterialShaderKeyProperties().m_HasIbl.SetValue(theGeneratedKey,
-                                                                                  true);
+        const bool lighting = inLightingType != DefaultMaterialLighting::NoLighting;
+        m_Renderer.DefaultMaterialShaderKeyProperties().m_HasLighting.SetValue(theGeneratedKey,
+                                                                               lighting);
+        if (lighting) {
+            const bool lightProbe = m_Layer.m_LightProbe
+                    && m_Layer.m_LightProbe->m_TextureData.m_Texture;
+            m_Renderer.DefaultMaterialShaderKeyProperties().m_HasIbl.SetValue(theGeneratedKey,
+                                                                              lightProbe);
 
             QT3DSU32 numLights = (QT3DSU32)m_Lights.size();
             if (numLights > SShaderDefaultMaterialKeyProperties::LightCount
@@ -338,19 +339,20 @@ namespace render {
             m_Renderer.DefaultMaterialShaderKeyProperties().m_LightCount.SetValue(theGeneratedKey,
                                                                                   numLights);
 
-            for (QT3DSU32 lightIdx = 0, lightEnd = m_Lights.size(); lightIdx < lightEnd; ++lightIdx) {
+            for (QT3DSU32 lightIdx = 0, lightEnd = m_Lights.size();
+                 lightIdx < lightEnd; ++lightIdx) {
                 SLight *theLight(m_Lights[lightIdx]);
-                if (theLight->m_LightType != RenderLightTypes::Directional)
-                    m_Renderer.DefaultMaterialShaderKeyProperties().m_LightFlags[lightIdx].SetValue(
-                        theGeneratedKey, true);
-                if (theLight->m_LightType == RenderLightTypes::Area)
-                    m_Renderer.DefaultMaterialShaderKeyProperties()
-                        .m_LightAreaFlags[lightIdx]
-                        .SetValue(theGeneratedKey, true);
-                if ((theLight->m_LightType != RenderLightTypes::Point) && (theLight->m_CastShadow))
-                    m_Renderer.DefaultMaterialShaderKeyProperties()
-                        .m_LightShadowFlags[lightIdx]
-                        .SetValue(theGeneratedKey, true);
+                const bool isDirectional = theLight->m_LightType == RenderLightTypes::Directional;
+                const bool isArea = theLight->m_LightType == RenderLightTypes::Area;
+                const bool castShadowsArea = (theLight->m_LightType != RenderLightTypes::Area)
+                        && (theLight->m_CastShadow);
+
+                m_Renderer.DefaultMaterialShaderKeyProperties().m_LightFlags[lightIdx]
+                    .SetValue(theGeneratedKey, !isDirectional);
+                m_Renderer.DefaultMaterialShaderKeyProperties().m_LightAreaFlags[lightIdx]
+                    .SetValue(theGeneratedKey, isArea);
+                m_Renderer.DefaultMaterialShaderKeyProperties().m_LightShadowFlags[lightIdx]
+                    .SetValue(theGeneratedKey, castShadowsArea);
             }
         }
         return theGeneratedKey;
@@ -682,22 +684,18 @@ namespace render {
             }
 
             bool specularEnabled = theMaterial->IsSpecularEnabled();
+            m_Renderer.DefaultMaterialShaderKeyProperties().m_SpecularEnabled.SetValue(
+                theGeneratedKey, specularEnabled);
             if (specularEnabled) {
-                m_Renderer.DefaultMaterialShaderKeyProperties().m_SpecularEnabled.SetValue(
-                    theGeneratedKey, true);
                 m_Renderer.DefaultMaterialShaderKeyProperties().m_SpecularModel.SetSpecularModel(
                     theGeneratedKey, theMaterial->m_SpecularModel);
             }
 
-            if (theMaterial->IsFresnelEnabled()) {
-                m_Renderer.DefaultMaterialShaderKeyProperties().m_FresnelEnabled.SetValue(
-                    theGeneratedKey, true);
-            }
+            m_Renderer.DefaultMaterialShaderKeyProperties().m_FresnelEnabled.SetValue(
+                theGeneratedKey, theMaterial->IsFresnelEnabled());
 
-            if (theMaterial->IsVertexColorsEnabled()) {
-                m_Renderer.DefaultMaterialShaderKeyProperties().m_VertexColorsEnabled.SetValue(
-                    theGeneratedKey, true);
-            }
+            m_Renderer.DefaultMaterialShaderKeyProperties().m_VertexColorsEnabled.SetValue(
+                theGeneratedKey, theMaterial->IsVertexColorsEnabled());
 
             // Run through the material's images and prepare them for render.
             // this may in fact set pickable on the renderable flags if one of the images

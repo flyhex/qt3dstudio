@@ -35,6 +35,7 @@ namespace TimelineConstants
     const int ROW_H             = 20;
     const int ROW_H_EXPANDED    = 120;   // property rows height when graph is shown
     const int ROW_SPACING       = 2;
+    const int ROW_DEPTH_STEP    = 15;    // x-distance between 2 consecutive depths
     const int RULER_SEC_W       = 30;    // width of 1 second section (at scale 1)
     const int RULER_SEC_DIV     = 10;    // second divisions
     const int RULER_DIV_H1      = 5;     // height of main divisions
@@ -47,6 +48,7 @@ namespace TimelineConstants
     const int RULER_TICK_SCALE2 = 3;
     const int RULER_TICK_SCALE3 = 6;
     const int RULER_TICK_SCALE4 = 21;
+    const int TOOLBAR_MARGIN    = 10;    // margin between the timeline and the toolbar
 
     const double RULER_EDGE_OFFSET = 15;
     const double TREE_MIN_W     = 160;
@@ -57,6 +59,8 @@ namespace TimelineConstants
     const int SPLITTER_W        = 8;
     const int PLAYHEAD_W        = 14;
     const int DURATION_HANDLE_W = 14;    // width of duration end handles in a timeline row
+    const int NAVIGATION_BAR_H  = 30;    // height of navigation/breadcrumb bar
+    const int TIMEBAR_TOOLTIP_OFFSET_V = 10;
 
     // Colors
     const char ROW_COLOR_NORMAL[]              = "#404040";
@@ -67,7 +71,8 @@ namespace TimelineConstants
     const char ROW_COLOR_DURATION_OFF2[]       = "#222222"; // duration off ancestors' bounds color2
     const char ROW_COLOR_DURATION_EDGE[]       = "#000000"; // duration left and right edge lines
     const char ROW_COLOR_DURATION_SELECTED[]   = "#80000000";
-    const char ROW_COLOR_MOVE_SRC[]            = "#464600";
+    const char ROW_COLOR_DND_SRC[]             = "#464600";
+    const char ROW_COLOR_DND_TGT[]             = "#292929";
     const char ROW_TEXT_COLOR[]                = "#bbbbbb";
     const char ROW_TEXT_COLOR_DISABLED[]       = "#888888";
     const char PLAYHEAD_COLOR[]                = "#ff0066";
@@ -77,11 +82,16 @@ namespace TimelineConstants
     const char WIDGET_BG_COLOR[]               = "#222222";
     const char PLAYHEAD_LINE_COLOR[]           = "#b20808";
     const char FILTER_BUTTON_SELECTED_COLOR[]  = "#000000";
+    const char FILTER_BUTTON_HOVERED_COLOR[]   = "#40000000";
 
     // Other
-    const int EXPAND_ANIMATION_DURATION       = 200;
+    const int EXPAND_ANIMATION_DURATION = 200;
+    const int AUTO_SCROLL_PERIOD        = 50;  // time steps (millis) while auto scrolling
+    const int AUTO_SCROLL_DELTA         = 8;   // increment in scroll at each time step
+    const int AUTO_SCROLL_TRIGGER       = 500; // time after which auto scroll starts (millis)
+    const int AUTO_EXPAND_TIME          = 500; // auto expand a hovered row (while DnD-ing)
 
-    // TODO: move the colors (and maybe dimensions) to StudioPreferences.
+    // TODO: move the colors and dimensions to StudioPreferences.
 }
 
 #endif // TIMELINECONSTANTS_H

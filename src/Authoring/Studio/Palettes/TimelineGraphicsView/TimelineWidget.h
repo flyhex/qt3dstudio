@@ -30,15 +30,16 @@
 #define TIMELINEWIDGET_H
 
 #include <QtWidgets/qwidget.h>
+#include <QtCore/qtimer.h>
 #include "DispatchListeners.h"
 #include "ObjectListModel.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSignals.h"
 #include "SelectedValueImpl.h"
-#include "TimelineObjectModel.h"
 #include "TreeHeaderView.h"
 #include "Bindings/Qt3DSDMTimeline.h"
 #include "NavigationBar.h"
+#include "Control.h"
 
 class RowTree;
 class TimelineToolbar;
@@ -46,28 +47,34 @@ class TimelineSplitter;
 class TimelineGraphicsScene;
 class CTimelineTranslationManager;
 class Qt3DSDMTimelineItemBinding;
+class CClientDataModelBridge;
+class IBreadCrumbProvider;
 
 QT_FORWARD_DECLARE_CLASS(QMouseEvent)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
 
 class TimelineWidget : public QWidget,
                        public CPresentationChangeListener,
-                       public CClientPlayChangeListener
+                       public CClientPlayChangeListener,
+                       public CControl
 {
     Q_OBJECT
 
 public:
-    explicit TimelineWidget(QWidget *parent = nullptr);
+    explicit TimelineWidget(const QSize &preferredSize, QWidget *parent = nullptr);
     ~TimelineWidget();
+
+    QSize sizeHint() const override;
 
     TimelineToolbar *toolbar() const;
     QGraphicsView *viewTimelineContent() const;
     QGraphicsView *viewTreeContent() const;
     QVector<RowTree *> selectedRows() const;
-
     void openBarColorDialog();
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
+    void enableDnD(bool b = true);
+    bool dndActive() const;
 
     // Presentation Change Listener
     void OnNewPresentation() override;
@@ -77,6 +84,19 @@ public:
     //CClientPlayChangeListener
     void OnTimeChanged(long inTime) override;
     bool hasSelectedKeyframes() const;
+
+    // CControl
+    void OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation = false) override;
+    void Draw(CRenderer *inRenderer) override;
+    void OnGainFocus() override;
+    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                   EStudioObjectType objectType) override;
+    bool OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    CPt GetPreferredSize() override;
+    void SetSize(long inX, long inY) override;
+    bool isFullReconstructPending() const { return m_fullReconstruct; }
 
 protected:
     // DataModel callbacks
@@ -95,22 +115,33 @@ protected:
                             qt3dsdm::Qt3DSDMPropertyHandle property);
     void onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                        qt3dsdm::Qt3DSDMInstanceHandle inOwner);
+    void onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                          qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void onPropertyUnlinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void onChildAdded(int inParent, int inChild, long inIndex);
     void onChildRemoved(int inParent, int inChild, long inIndex);
     void onChildMoved(int inParent, int inChild, long inOldIndex, long inNewIndex);
     void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void onAsyncUpdate();
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, RowTree *> THandleMap;
+    typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree *> THandleMap;
 
     Qt3DSDMTimelineItemBinding *getBindingForHandle(int handle,
                                                     Qt3DSDMTimelineItemBinding *binding) const;
     void insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding);
+    void insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding);
+    Q3DStudio::CString getPlaybackMode();
+    void refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
+                         ETimelineKeyframeTransaction inTransaction);
+
     TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;
     QGraphicsView *m_viewTimelineHeader = nullptr;
@@ -120,18 +151,21 @@ private:
     TimelineGraphicsScene *m_graphicsScene;
     TimelineSplitter *m_splitter = nullptr;
     CTimelineTranslationManager *m_translationManager = nullptr;
-    TimelineObjectModel *m_objectListModel = nullptr;
     FlatObjectListModel *m_model = nullptr;
     Qt3DSDMTimelineItemBinding *m_binding = nullptr;
     bool m_splitterPressed = false;
+    QSize m_preferredSize;
+    QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
+    QHash<int, int> m_moveMap;
+    QTimer m_asyncUpdateTimer;
+    bool m_fullReconstruct = false;
+    CClientDataModelBridge *m_bridge = nullptr;
+    IBreadCrumbProvider *m_BreadCrumbProvider = nullptr;
 
     // data model connection
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
     qt3dsdm::Qt3DSDMSlideHandle m_activeSlide;
     THandleMap m_handlesMap;
-    void refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                         qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
-                         ETimelineKeyframeTransaction inTransaction);
 };
 
 #endif // TIMELINEWIDGET_H

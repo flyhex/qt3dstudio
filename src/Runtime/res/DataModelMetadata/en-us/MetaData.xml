@@ -273,8 +273,8 @@
                 <Property name="sourcepath" formalName="Mesh" description="Geometry to use for this model" type="Mesh" />
                 <Property name="poseroot" hidden="True" type="Long" default="-1" />
                 <Property name="tessellation" formalName="Tessellation Mode" description="Type of tessellation to subdivide\nthe geometry" list="None:Linear:Phong:NPatch" default="None" />
-                <Property name="edgetess" formalName="Edge Tessellation Value" description="Max Tessellation amount" min="1" max="64" default="4" />
-                <Property name="innertess" formalName="Inner Tessellation Value" description="Min Tessellation amount" min="1" max="64" default="4" />
+                <Property name="edgetess" formalName="Edge Tessellation" description="Max Tessellation amount" min="1" max="64" default="4" />
+                <Property name="innertess" formalName="Inner Tessellation" description="Min Tessellation amount" min="1" max="64" default="4" />
         </Model>
         <Node>
                 <Event name="onPressureDown" category="Gesture" />
@@ -440,7 +440,7 @@
                 <!-- HW accelerated fonts not supported
                     <Property name="enableacceleratedfont" formalName="Hardware accelerated font" description="Enabled hardware acclerated font" type="Boolean" default="false" />
                 -->
-                <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="24" animatable="False" controllable="True" />
+                <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="36" animatable="False" controllable="True" />
                 <Property name="horzalign" formalName="Horizontal Alignment" description="Horizontal Alignment" list="Left:Center:Right" default="Center" />
                 <Property name="vertalign" formalName="Vertical Alignment" description="Vertical Alignment" list="Top:Middle:Bottom" default="Middle" />
                 <Property name="leading" formalName="Leading" description="Leading" />

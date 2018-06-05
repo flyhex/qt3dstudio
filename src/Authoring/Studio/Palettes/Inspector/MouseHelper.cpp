@@ -35,6 +35,19 @@
 #include <QtGui/qscreen.h>
 #include <QtWidgets/qmainwindow.h>
 #include <QtCore/qtimer.h>
+#include <QtGui/qevent.h>
+#include <QtGui/qbitmap.h>
+
+static void setBlankCursor()
+{
+    // Qt::BlankCursor gets corrupted in some situations, so use custom bitmap (QTBUG-61678)
+    static QBitmap *zeroBitmap = nullptr;
+    if (!zeroBitmap) {
+        zeroBitmap = new QBitmap(32, 32);
+        zeroBitmap->clear();
+    }
+    QGuiApplication::setOverrideCursor(QCursor(*zeroBitmap, *zeroBitmap));
+}
 
 MouseHelper::MouseHelper(QObject *parent)
     : QObject(parent)
@@ -50,11 +63,12 @@ MouseHelper::MouseHelper(QObject *parent)
 void MouseHelper::startUnboundedDrag()
 {
     m_dragState = StateDragging;
-    qApp->setOverrideCursor(QCursor(Qt::BlankCursor));
+    setBlankCursor();
     m_startPos = QCursor::pos();
 
     QWindow *window = g_StudioApp.m_pMainWnd->windowHandle();
     if (window) {
+        window->installEventFilter(this);
         QSize screenSize = window->screen()->size() / window->screen()->devicePixelRatio();
         m_referencePoint = QPoint(screenSize.width() / 2, screenSize.height() / 2);
     } else {
@@ -68,6 +82,9 @@ void MouseHelper::startUnboundedDrag()
 
 void MouseHelper::endUnboundedDrag()
 {
+    QWindow *window = g_StudioApp.m_pMainWnd->windowHandle();
+    if (window)
+        window->removeEventFilter(this);
     m_dragState = StateEndingDrag;
     m_cursorResetTimer.start();
 }
@@ -117,3 +134,27 @@ void MouseHelper::resetCursor()
     }
 }
 
+bool MouseHelper::eventFilter(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj)
+
+    // Eat all mouse button events that are not for left button and all key events
+    switch (event->type()) {
+    case QEvent::MouseButtonDblClick:
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseButtonRelease: {
+        QMouseEvent *me = static_cast<QMouseEvent *>(event);
+        if (me->button() == Qt::LeftButton)
+            return false;
+        else
+            return true;
+    }
+    case QEvent::KeyPress:
+    case QEvent::KeyRelease:
+    case QEvent::ShortcutOverride:
+        return true;
+    default:
+        break;
+    }
+    return false;
+}

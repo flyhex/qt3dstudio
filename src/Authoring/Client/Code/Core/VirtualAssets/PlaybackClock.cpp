@@ -169,6 +169,8 @@ void CPlaybackClock::OnReachedUpperBound()
             StartPlayback();
         }
     } else if (thePlayMode == L"Stop at end") {
+        if (!m_Doc->isPlayBackPreviewOn())
+            m_Doc->SetPlayMode(PLAYMODE_STOP);
         m_Doc->DoNotifyTimeChanged(m_UpperBound);
     }
 }

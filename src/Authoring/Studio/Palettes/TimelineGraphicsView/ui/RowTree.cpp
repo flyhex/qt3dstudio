@@ -31,9 +31,11 @@
 #include "RowManager.h"
 #include "TimelineConstants.h"
 #include "StudioObjectTypes.h"
+#include "TimelineGraphicsScene.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSString.h"
+#include "TreeHeader.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -49,7 +51,6 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
     m_scene = timelineScene;
     m_rowType = rowType;
     m_label = label;
-    m_labelItem.setRowTypeLabel(m_rowType);
 
     initialize();
 }
@@ -57,6 +58,7 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
 RowTree::~RowTree()
 {
     delete m_rowTimeline; // this will also delete the keyframes
+    m_rowTimeline = nullptr;
 }
 
 ITimelineItemBinding *RowTree::getBinding() const
@@ -91,6 +93,10 @@ void RowTree::initialize()
     m_labelItem.setLabel(m_label);
     updateLabelPosition();
 
+    // Default all rows to collapsed
+    setRowVisible(false);
+    m_expandState = ExpandState::HiddenCollapsed;
+
     connect(&m_labelItem, &RowTreeLabelItem::labelChanged, this,
             [this](const QString &label) {
         // Update label on timeline and on model
@@ -121,22 +127,23 @@ void RowTree::initializeAnimations()
 
     connect(&m_expandAnimation, &QAbstractAnimation::stateChanged,
             [this](const QAbstractAnimation::State newState) {
-        if (newState == QAbstractAnimation::Running) {
-            setVisible(true);
-            m_rowTimeline->setVisible(true);
-        } else if (newState == QAbstractAnimation::Stopped) {
-            if (this->maximumHeight() == 0) {
-                setVisible(false);
-                m_rowTimeline->setVisible(false);
+        if (m_rowTimeline) {
+            if (newState == QAbstractAnimation::Running) {
+                setVisible(true);
+                m_rowTimeline->setVisible(true);
+            } else if (newState == QAbstractAnimation::Stopped) {
+                if (this->maximumHeight() == 0) {
+                    setVisible(false);
+                    m_rowTimeline->setVisible(false);
+                }
             }
         }
     });
-
 }
 
 void RowTree::animateExpand(ExpandState state)
 {
-    int endHeight = 0; // ExpandState::Hidden
+    int endHeight = 0; // hidden states
     float endOpacity = 0;
     if (state == ExpandState::Expanded) {
         endHeight = m_isPropertyExpanded ? TimelineConstants::ROW_H_EXPANDED
@@ -157,23 +164,31 @@ void RowTree::animateExpand(ExpandState state)
 
 void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    const int offset = 5 + m_depth * 15;
-    const int iconSize = 16;
-    const int iconY = (TimelineConstants::ROW_H / 2) - (iconSize / 2);
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
+    if (!y()) // prevents flickering when the row is just inserted to the layout
+        return;
+
+    static const int ICON_SIZE = 16;
+    const int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP;
+    const int iconY = (TimelineConstants::ROW_H / 2) - (ICON_SIZE / 2);
 
     // update button bounds rects
-    m_rectArrow  .setRect(offset, iconY, iconSize, iconSize);
-    m_rectType   .setRect(offset + iconSize, iconY, iconSize, iconSize);
-    m_rectShy    .setRect(treeWidth() - 16 * 3.3, iconY, iconSize, iconSize);
-    m_rectVisible.setRect(treeWidth() - 16 * 2.2, iconY, iconSize, iconSize);
-    m_rectLocked .setRect(treeWidth() - 16 * 1.1, iconY, iconSize, iconSize);
+    m_rectArrow  .setRect(offset, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectType   .setRect(offset + ICON_SIZE, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectShy    .setRect(treeWidth() - 16 * 3.3, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectVisible.setRect(treeWidth() - 16 * 2.2, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectLocked .setRect(treeWidth() - 16 * 1.1, iconY, ICON_SIZE, ICON_SIZE);
 
     // Background
     QColor bgColor;
-    if (m_moveSource)
-        bgColor = TimelineConstants::ROW_COLOR_MOVE_SRC;
+    if (m_dndState == DnDState::Source)
+        bgColor = TimelineConstants::ROW_COLOR_DND_SRC;
     else if (m_isProperty)
         bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
+    else if (m_dndHover)
+        bgColor = TimelineConstants::ROW_COLOR_DND_TGT;
     else if (m_state == Selected)
         bgColor = TimelineConstants::ROW_COLOR_SELECTED;
     else if (m_state == Hovered && !m_locked)
@@ -190,8 +205,8 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
-    if (!m_childRows.empty() || !m_childProps.empty())
-        painter->drawPixmap(m_rectArrow, m_expanded ? pixArrowDown : pixArrow);
+    if (m_arrowVisible)
+        painter->drawPixmap(m_rectArrow, expanded() ? pixArrowDown : pixArrow);
 
     // Row type icon
     static const QPixmap pixSceneNormal     = QPixmap(":/images/Objects-Scene-Normal.png");
@@ -291,7 +306,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     }
 
     // Candidate parent of a dragged row
-    if (m_moveTarget) {
+    if (m_dndState == DnDState::Parent) {
         painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
         painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
     }
@@ -305,6 +320,11 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
 
     if (!isProperty()) {
+        // Don't access binding when we are in inconsistent state
+        // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
+        if (m_scene->widgetTimeline()->isFullReconstructPending())
+            return;
+
         Qt3DSDMTimelineItemBinding *itemBinding =
                 static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
         if (itemBinding->HasAction(true)) // has master action
@@ -335,6 +355,37 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
 {
     m_binding = binding;
 
+    // Restore the expansion state of rows
+    m_expandState = m_scene->expandMap().value(
+                static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance(),
+                ExpandState::Unknown);
+
+    if (m_expandState == ExpandState::Unknown) {
+        // Everything but scene/component is initially collapsed and hidden
+        if (m_rowType == OBJTYPE_SCENE || m_rowType == OBJTYPE_COMPONENT)
+            m_expandState = ExpandState::Expanded;
+        else
+            m_expandState = ExpandState::HiddenCollapsed;
+    }
+
+    // Make sure all children of visible expanded parents are shown, and vice versa
+    if (parentRow()) {
+        if (parentRow()->expanded()) {
+            if (m_expandState == ExpandState::HiddenCollapsed)
+                m_expandState = ExpandState::Collapsed;
+            else if (m_expandState == ExpandState::HiddenExpanded)
+                m_expandState = ExpandState::Expanded;
+        } else {
+            if (m_expandState == ExpandState::Collapsed)
+                m_expandState = ExpandState::HiddenCollapsed;
+            else if (m_expandState == ExpandState::Expanded)
+                m_expandState = ExpandState::HiddenExpanded;
+        }
+    }
+
+    setRowVisible(m_expandState == ExpandState::Collapsed
+            || m_expandState == ExpandState::Expanded);
+
     updateFromBinding();
 }
 
@@ -346,6 +397,12 @@ ITimelineItemProperty *RowTree::propBinding()
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
+
+    if (parentRow()->expanded())
+        setRowVisible(true);
+
+    // Update label color
+    m_labelItem.setMaster(m_PropBinding->IsMaster());
 }
 
 void RowTree::setState(State state)
@@ -406,19 +463,60 @@ int RowTree::index() const
 
 int RowTree::indexInLayout() const
 {
-    // first child (scene) at index 1, tree header at index 0
+    // first child (scene) at index 1, tree header at index 0 (invisible rows are also counted)
     return m_indexInLayout;
 }
 
 void RowTree::addChild(RowTree *child)
 {
-    int index = 0;
-    if (child->isProperty() && !m_childProps.empty())
-        index = m_childProps.last()->index() + 1;
-    else if (!child->isProperty() && !m_childRows.empty())
-        index = m_childRows.last()->index() + 1;
-
+    int index = getLastChildIndex(child->isProperty()) + 1;
     addChildAt(child, index);
+}
+
+int RowTree::getLastChildIndex(bool isProperty) const
+{
+    int index = -1;
+    if (isProperty && !m_childProps.empty())
+        index = m_childProps.last()->index();
+    else if (!isProperty && !m_childRows.empty())
+        index = m_childRows.last()->index();
+
+    return index;
+}
+
+void RowTree::updateArrowVisibility()
+{
+    bool oldVisibility = m_arrowVisible;
+    if (m_childRows.empty() && m_childProps.empty()) {
+        m_arrowVisible = false;
+    } else {
+        if (m_childProps.empty()) {
+            m_arrowVisible = false;
+            for (RowTree *row : qAsConst(m_childRows)) {
+                if (!row->m_filtered) {
+                    m_arrowVisible = true;
+                    break;
+                }
+            }
+        } else {
+            m_arrowVisible = true;
+        }
+    }
+    if (oldVisibility != m_arrowVisible)
+        update();
+}
+
+void RowTree::updateFilter()
+{
+    bool parentOk = !m_parentRow || m_parentRow->isVisible();
+    bool shyOk     = !m_shy      || !m_scene->treeHeader()->filterShy();
+    bool visibleOk = m_visible   || !m_scene->treeHeader()->filterHidden();
+    bool lockOk    = !m_locked   || !m_scene->treeHeader()->filterLocked();
+    bool expandOk  = !expandHidden();
+
+    m_filtered = !(shyOk && visibleOk && lockOk);
+    setVisible(parentOk && shyOk && visibleOk && lockOk && expandOk);
+    m_rowTimeline->setVisible(isVisible());
 }
 
 int RowTree::getCountDecendentsRecursive() const
@@ -437,6 +535,11 @@ void RowTree::addChildAt(RowTree *child, int index)
 {
     // Mahmoud_TODO: improvement: implement moving the child (instead of remove/add) if it is added
     //               under the same parent.
+
+    int maxIndex = getLastChildIndex(child->isProperty()) + 1;
+
+    if (index > maxIndex)
+        index = maxIndex;
 
     if (child->parentRow() == this && index == child->m_index) // same place
         return;
@@ -470,40 +573,36 @@ void RowTree::addChildAt(RowTree *child, int index)
     }
 
     // update the layout
-    m_scene->layoutTree()->insertItem(child->m_indexInLayout, child);
-    m_scene->layoutTimeline()->insertItem(child->m_indexInLayout, child->rowTimeline());
-
-    int indexInLayout = child->m_indexInLayout + 1;
-    for (auto p : qAsConst(child->m_childProps))
-        indexInLayout = child->addChildToLayout(p, indexInLayout);
-
-    for (auto c : qAsConst(child->m_childRows))
-        indexInLayout = child->addChildToLayout(c, indexInLayout);
+    child->addToLayout(child->m_indexInLayout);
 
     // update indices
     updateIndexInLayout = std::min(updateIndexInLayout, child->m_indexInLayout);
     updateIndices(true, child->m_index + 1, updateIndexInLayout, child->isProperty());
+    updateArrowVisibility();
 }
 
-int RowTree::addChildToLayout(RowTree *child, int indexInLayout)
+int RowTree::addToLayout(int indexInLayout)
 {
-    m_scene->layoutTree()->insertItem(indexInLayout, child);
-    m_scene->layoutTimeline()->insertItem(indexInLayout, child->rowTimeline());
+    m_scene->layoutTree()->insertItem(indexInLayout, this);
+    m_scene->layoutTimeline()->insertItem(indexInLayout, rowTimeline());
+
     indexInLayout++;
 
-    for (auto p : qAsConst(child->m_childProps))
-        indexInLayout = child->addChildToLayout(p, indexInLayout);
+    for (auto p : qAsConst(m_childProps))
+        indexInLayout = p->addToLayout(indexInLayout);
 
-    for (auto c : qAsConst(child->m_childRows))
-        indexInLayout = child->addChildToLayout(c, indexInLayout);
+    for (auto c : qAsConst(m_childRows))
+        indexInLayout = c->addToLayout(indexInLayout);
 
     return indexInLayout;
 }
 
-// TODO: so far not used, delete if end up not used
-void RowTree::moveChild(int from, int to)
+RowTree *RowTree::getChildAt(int index) const
 {
-    m_childRows.move(from, to);
+    if (index < 0 || index > m_childRows.count() - 1)
+        return nullptr;
+
+    return m_childRows.at(index);
 }
 
 // this does not destroy the row, just remove it from the layout and parenting hierarchy
@@ -522,6 +621,7 @@ void RowTree::removeChild(RowTree *child)
         child->m_parentRow = nullptr;
 
         updateIndices(false, child->m_index, child->m_indexInLayout, child->isProperty());
+        updateArrowVisibility();
     }
 }
 
@@ -550,7 +650,8 @@ bool RowTree::draggable() const
 {
     return !m_locked && !isProperty()
            && m_rowType != OBJTYPE_IMAGE
-           && m_rowType != OBJTYPE_SCENE;
+           && m_rowType != OBJTYPE_SCENE
+           && m_rowType != OBJTYPE_MATERIAL;
 }
 
 void RowTree::updateDepthRecursive()
@@ -597,7 +698,33 @@ void RowTree::updateFromBinding()
     Qt3DSDMTimelineItemBinding *itemBinding =
             static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
     m_labelItem.setLocked(m_locked);
-    m_labelItem.setMaster(itemBinding->IsMaster());
+    m_master = itemBinding->IsMaster();
+    m_labelItem.setMaster(m_master);
+}
+
+void RowTree::updateLabel()
+{
+    if (m_binding)
+        m_labelItem.setLabel(m_binding->GetTimelineItem()->GetName().toQString());
+}
+
+void RowTree::setRowVisible(bool visible)
+{
+    if (visible) {
+        setMaximumHeight(TimelineConstants::ROW_H);
+        setOpacity(1.0);
+        setVisible(true);
+        m_rowTimeline->setMaximumHeight(TimelineConstants::ROW_H);
+        m_rowTimeline->setOpacity(1.0);
+        m_rowTimeline->setVisible(true);
+    } else {
+        setMaximumHeight(0.0);
+        setOpacity(0.0);
+        setVisible(false);
+        m_rowTimeline->setMaximumHeight(0.0);
+        m_rowTimeline->setOpacity(0.0);
+        m_rowTimeline->setVisible(false);
+    }
 }
 
 bool RowTree::hasPropertyChildren() const
@@ -617,10 +744,9 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if ((!m_childRows.empty() || !m_childProps.empty())
-            && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
-        m_expanded = !m_expanded;
-        updateExpandStatus(m_expanded, true);
+    if (m_arrowVisible && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
+        updateExpandStatus(m_expandState == ExpandState::Expanded ? ExpandState::Collapsed
+                                                                  : ExpandState::Expanded, false);
         update();
         return TreeControlType::Arrow;
     }
@@ -641,20 +767,53 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
     return TreeControlType::None;
 }
 
-void RowTree::updateExpandStatus(bool expand, bool childrenOnly)
+void RowTree::updateExpandStatus(ExpandState state, bool animate)
 {
-    if (!childrenOnly)
-        animateExpand(expand ? ExpandState::Expanded : ExpandState::Hidden);
+    if (m_expandState == state)
+        return;
+
+    m_expandState = state;
+
+    if (m_scene->widgetTimeline()->isFullReconstructPending())
+        return;
+
+    // Store the expanded state of items so we can restore it on slide change
+    if (m_binding) {
+        m_scene->expandMap().insert(
+                    static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance(),
+                    m_expandState);
+    }
+
+    if (animate)
+        animateExpand(m_expandState);
 
     if (!m_childRows.empty()) {
-        for (auto child : qAsConst(m_childRows))
-            child->updateExpandStatus(expand && child->parentRow()->m_expanded);
+        for (auto child : qAsConst(m_childRows)) {
+            if (state == ExpandState::Expanded) {
+                if (child->m_expandState == ExpandState::HiddenExpanded)
+                    child->updateExpandStatus(ExpandState::Expanded);
+                else if (child->m_expandState == ExpandState::HiddenCollapsed)
+                    child->updateExpandStatus(ExpandState::Collapsed);
+            } else {
+                if (child->m_expandState == ExpandState::Expanded)
+                    child->updateExpandStatus(ExpandState::HiddenExpanded);
+                else if (child->m_expandState == ExpandState::Collapsed)
+                    child->updateExpandStatus(ExpandState::HiddenCollapsed);
+            }
+        }
     }
 
     if (!m_childProps.empty()) {
-        for (auto child : qAsConst(m_childProps))
-            child->updateExpandStatus(expand && child->parentRow()->m_expanded);
+        for (auto child : qAsConst(m_childProps)) {
+            // Properties can never be collapsed
+            if (state == ExpandState::Expanded)
+                child->updateExpandStatus(ExpandState::Expanded);
+            else
+                child->updateExpandStatus(ExpandState::HiddenExpanded);
+        }
     }
+
+    updateFilter();
 }
 
 void RowTree::updateLockRecursive(bool state)
@@ -671,13 +830,22 @@ void RowTree::updateLockRecursive(bool state)
 
 void RowTree::updateLabelPosition()
 {
-    int offset = 5 + m_depth * 15 + 30;
+    int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP + 30;
     m_labelItem.setPos(offset, -1);
 }
 
 bool RowTree::expanded() const
 {
-    return m_expanded;
+    if (m_isProperty)
+        return false;
+    else
+        return m_expandState == ExpandState::Expanded;
+}
+
+bool RowTree::expandHidden() const
+{
+    return m_expandState == ExpandState::HiddenExpanded
+            || m_expandState == ExpandState::HiddenCollapsed;
 }
 
 bool RowTree::isDecendentOf(RowTree *row) const
@@ -694,22 +862,46 @@ bool RowTree::isDecendentOf(RowTree *row) const
     return false;
 }
 
-void RowTree::setMoveSourceRecursive(bool value)
+void RowTree::setDnDHover(bool val)
 {
-    m_moveSource = value;
+    m_dndHover = val;
     update();
+}
 
-    for (auto child : qAsConst(m_childProps))
-        child->setMoveSourceRecursive(value);
+void RowTree::setDnDState(DnDState state, DnDState onlyIfState, bool recursive)
+{
+    if (m_dndState == onlyIfState || onlyIfState == DnDState::Any) {
+        m_dndState = state;
+        update();
 
-    for (auto child : qAsConst(m_childRows))
-        child->setMoveSourceRecursive(value);
+        if (recursive) { // used by source rows to highlights all of their descendants
+            for (auto child : qAsConst(m_childProps))
+                child->setDnDState(state, onlyIfState, true);
+
+            for (auto child : qAsConst(m_childRows))
+                child->setDnDState(state, onlyIfState, true);
+        }
+    }
+}
+
+RowTree::DnDState RowTree::getDnDState() const
+{
+    return m_dndState;
 }
 
 bool RowTree::isContainer() const
 {
-    return !m_isProperty && m_rowType != OBJTYPE_ALIAS && m_rowType != OBJTYPE_MATERIAL
-            && m_rowType != OBJTYPE_IMAGE && m_rowType != OBJTYPE_TEXT;
+    if (isComponent() && m_indexInLayout == 1) // root element inside a component
+        return true;
+
+    return !m_isProperty
+            && m_rowType != OBJTYPE_ALIAS
+            && m_rowType != OBJTYPE_MATERIAL
+            && m_rowType != OBJTYPE_IMAGE
+            && m_rowType != OBJTYPE_TEXT
+            && m_rowType != OBJTYPE_COMPONENT
+            && m_rowType != OBJTYPE_BEHAVIOR
+            && m_rowType != OBJTYPE_EFFECT;
 }
 
 bool RowTree::isProperty() const
@@ -730,7 +922,17 @@ RowTree *RowTree::getPropertyRow(const QString &type) const
 
 bool RowTree::isPropertyOrMaterial() const
 {
-    return m_isProperty || rowType() == OBJTYPE_MATERIAL || rowType() == OBJTYPE_IMAGE;
+    return m_isProperty || m_rowType == OBJTYPE_MATERIAL || m_rowType == OBJTYPE_IMAGE;
+}
+
+bool RowTree::isComponent() const
+{
+    return m_rowType == OBJTYPE_COMPONENT;
+}
+
+bool RowTree::isMaster() const
+{
+    return m_master;
 }
 
 bool RowTree::empty() const
@@ -741,12 +943,6 @@ bool RowTree::empty() const
 bool RowTree::selected() const
 {
     return m_state == Selected;
-}
-
-void RowTree::setMoveTarget(bool value)
-{
-    m_moveTarget = value;
-    update();
 }
 
 QList<RowTree *> RowTree::childRows() const
@@ -821,7 +1017,7 @@ bool RowTree::hasActionButtons() const
             && m_rowType != OBJTYPE_IMAGE);
 }
 
-bool RowTree::hasComponentAncestor()
+bool RowTree::hasComponentAncestor() const
 {
     RowTree *parentRow = m_parentRow;
     while (parentRow) {

@@ -284,14 +284,8 @@ public:
         RearrangeObjects(theInstances, inDest, inInsertType);
     }
 
-    virtual void ReorderRows(qt3dsdm::Qt3DSDMInstanceHandle handleSource,
-                             qt3dsdm::Qt3DSDMInstanceHandle handleParent, int index) = 0;
-
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
-
-    virtual void CreateAliasDuplicates(const qt3dsdm::TInstanceHandleList &inInstances,
-                                       qt3dsdm::Qt3DSDMSlideHandle theSlide) = 0;
 
     virtual qt3dsdm::TInstanceHandleList
     DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances, TInstanceHandle inDest,
@@ -404,6 +398,8 @@ public:
     // Refresh an import or dae file
     // Absolute path to the file.
     virtual void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) = 0;
+
+    virtual bool CleanUpMeshes() = 0;
 
     virtual void ReplaceTextFontNameWithTextFileStem(qt3ds::render::ITextRenderer &inRenderer) = 0;
 

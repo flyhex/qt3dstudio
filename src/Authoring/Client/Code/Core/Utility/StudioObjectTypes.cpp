@@ -44,6 +44,8 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
         theAcceptible = false;
         break;
     case OBJTYPE_LAYER:
+        theAcceptible = inParent == OBJTYPE_SCENE;
+        break;
     case OBJTYPE_BEHAVIOR:
         theAcceptible = (inParent == OBJTYPE_SCENE) || (inParent == OBJTYPE_LAYER)
             || (inParent == OBJTYPE_BEHAVIOR) || (inParent == OBJTYPE_CAMERA)
@@ -91,7 +93,7 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
     }
 
     return theAcceptible;
-};
+}
 
 //==============================================================================
 //	 Object Icon Lookups

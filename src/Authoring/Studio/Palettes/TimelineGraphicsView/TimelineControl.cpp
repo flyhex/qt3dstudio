@@ -27,6 +27,8 @@
 ****************************************************************************/
 
 #include "TimelineControl.h"
+#include "TimelineGraphicsScene.h"
+#include "RowManager.h"
 #include "RowTree.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "DurationEditDlg.h"
@@ -34,7 +36,8 @@
 #include "Core.h"
 #include "Doc.h"
 
-TimelineControl::TimelineControl()
+TimelineControl::TimelineControl(TimelineGraphicsScene *scene)
+    : m_scene(scene)
 {
 }
 
@@ -63,6 +66,7 @@ void TimelineControl::ChangeEndTime(long inTime)
 {
     double time = (double)inTime / 1000;
     m_rowTimeline->setEndTime(time);
+    m_scene->rowManager()->updateRulerDuration();
 }
 
 void TimelineControl::Commit()
@@ -78,4 +82,5 @@ void TimelineControl::Rollback()
 {
     m_rowTimeline->setStartTime(m_startTime);
     m_rowTimeline->setEndTime(m_endTime);
+    m_scene->rowManager()->updateRulerDuration();
 }

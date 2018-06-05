@@ -40,14 +40,12 @@
 #include "TimeEditDlg.h"
 #include "EmptyTimelineTimebar.h"
 #include "Qt3DSDMTimelineTimebar.h"
-#include "BaseStateRow.h"
-#include "PropertyRow.h"
-#include "KeyframesManager.h"
 #include "StudioApp.h"
 #include "Core.h"
 #include "Dialogs.h"
 #include "GraphUtils.h"
 #include "Qt3DSDMDataCore.h"
+#include "DropTarget.h"
 
 // Data model specific
 #include "IDoc.h"
@@ -72,8 +70,7 @@ using namespace qt3dsdm;
 
 Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr,
                                                        Qt3DSDMInstanceHandle inDataHandle)
-    : m_Row(nullptr)
-    , m_TransMgr(inMgr)
+    : m_TransMgr(inMgr)
     , m_DataHandle(inDataHandle)
     , m_Parent(nullptr)
     , m_TimelineTimebar(nullptr)
@@ -84,8 +81,7 @@ Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManag
 }
 
 Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr)
-    : m_Row(nullptr)
-    , m_TransMgr(inMgr)
+    : m_TransMgr(inMgr)
     , m_DataHandle(0)
     , m_Parent(nullptr)
     , m_TimelineTimebar(nullptr)
@@ -180,13 +176,10 @@ void ToggleChildrenLock(Q3DStudio::ScopedDocumentEditor &scopedDocEditor,
 {
     scopedDocEditor->SetInstancePropertyValue(inTimelineItemBinding->GetInstanceHandle(),
                                               inSceneAsset.m_Locked, inLocked);
-    long childrenCount = inTimelineItemBinding->GetChildrenCount();
-    if (childrenCount == 0)
-        return;
-    for (long i = 0; i < childrenCount; ++i) {
-        Qt3DSDMTimelineItemBinding *child =
-                static_cast<Qt3DSDMTimelineItemBinding *>(inTimelineItemBinding->GetChild(i));
-        ToggleChildrenLock(scopedDocEditor, child, inSceneAsset, inLocked);
+    const QList<ITimelineItemBinding *> children = inTimelineItemBinding->GetChildren();
+    for (auto child : children) {
+        ToggleChildrenLock(scopedDocEditor, static_cast<Qt3DSDMTimelineItemBinding *>(child),
+                           inSceneAsset, inLocked);
     }
 }
 
@@ -211,17 +204,6 @@ void Qt3DSDMTimelineItemBinding::SetVisible(bool inVisible)
 {
     SetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball,
                inVisible, QObject::tr("Visibility Toggle"));
-}
-
-// remember the expanded state for the current presentation
-bool Qt3DSDMTimelineItemBinding::IsExpanded() const
-{
-    return m_TransMgr->IsExpanded(m_DataHandle);
-}
-// remember the expanded state for the current presentation
-void Qt3DSDMTimelineItemBinding::SetExpanded(bool inExpanded)
-{
-    m_TransMgr->SetExpanded(m_DataHandle, inExpanded);
 }
 
 bool Qt3DSDMTimelineItemBinding::HasAction(bool inMaster)
@@ -334,6 +316,10 @@ Q3DStudio::CString Qt3DSDMTimelineItemBinding::GetName() const
 
 void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
 {
+    // Ignore if setting the name to what it currently is to avoid duplicate undo points
+    if (inName == GetName())
+        return;
+
     // Display warning dialog if user tried to enter an empty string
     if (inName.IsEmpty()) {
         QString theTitle = QObject::tr("Rename Object Error");
@@ -346,7 +332,8 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
     // Display warning if we had to modify the user-given name to make it unique
-    if (!theBridge->CheckNameUnique(m_DataHandle, inName)) {
+    if (!theBridge->CheckNameUnique(theBridge->GetParentInstance(m_DataHandle),
+                                    m_DataHandle, inName)) {
         // Find unique name based on the input string
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(
             *m_TransMgr->GetDoc(), QObject::tr("Set Name"))->SetName(m_DataHandle, inName, true);
@@ -369,12 +356,6 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
 ITimelineItem *Qt3DSDMTimelineItemBinding::GetTimelineItem()
 {
     return this;
-}
-
-// Mahmoud_TODO: remove after finishing the new timeline
-CBaseStateRow *Qt3DSDMTimelineItemBinding::GetRow()
-{
-    return m_Row;
 }
 
 RowTree *Qt3DSDMTimelineItemBinding::getRowTree() const
@@ -410,19 +391,9 @@ void Qt3DSDMTimelineItemBinding::OnCollapsed()
     }
 }
 
-void Qt3DSDMTimelineItemBinding::ClearKeySelection()
-{
-    m_TransMgr->ClearKeyframeSelection();
-}
-
 bool Qt3DSDMTimelineItemBinding::OpenAssociatedEditor()
 {
     return false; // nothing to do by default
-}
-
-void Qt3DSDMTimelineItemBinding::DoStartDrag(CControlWindowListener *inWndListener)
-{
-    inWndListener->DoStartDrag(this);
 }
 
 inline qt3dsdm::Qt3DSDMInstanceHandle Qt3DSDMTimelineItemBinding::GetInstance() const
@@ -464,6 +435,29 @@ ITimelineItemBinding *Qt3DSDMTimelineItemBinding::GetChild(long inIndex)
             return m_TransMgr->GetOrCreate(theChildInstance);
     }
     return nullptr;
+}
+
+QList<ITimelineItemBinding *> Qt3DSDMTimelineItemBinding::GetChildren()
+{
+    QList<ITimelineItemBinding *> retlist;
+    qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
+    if (theInstance.Valid()) {
+        Q3DStudio::CGraphIterator theChildren;
+        Qt3DSDMSlideHandle theActiveSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        GetAssetChildrenInTimeParent(theInstance, m_TransMgr->GetDoc(), AmITimeParent(),
+                                     theChildren, theActiveSlide);
+        int childCount = int(theChildren.GetCount());
+        retlist.reserve(childCount);
+
+        for (int i = 0; i < childCount; ++i) {
+            qt3dsdm::Qt3DSDMInstanceHandle theChildInstance = theChildren.GetCurrent();
+            if (theChildInstance.Valid())
+                retlist.append(m_TransMgr->GetOrCreate(theChildInstance));
+            ++theChildren;
+        }
+    }
+
+    return retlist;
 }
 
 ITimelineItemBinding *Qt3DSDMTimelineItemBinding::GetParent()
@@ -530,34 +524,6 @@ bool Qt3DSDMTimelineItemBinding::IsVisibleEnabled() const
     // You can only toggle visible if you aren't on the master slide.
     return m_StudioSystem->GetSlideSystem()->GetSlideIndex(m_TransMgr->GetDoc()->GetActiveSlide())
             != 0;
-}
-
-void Qt3DSDMTimelineItemBinding::Bind(CBaseStateRow *inRow)
-{
-    ASSERT(!m_Row);
-    m_Row = inRow;
-
-    // Because children(properties included) may only be loaded later, check if there are any
-    // keyframes without having to have the UI created.
-    TPropertyHandleList theProperties;
-    m_StudioSystem->GetPropertySystem()->GetAggregateInstanceProperties(m_DataHandle,
-                                                                        theProperties);
-    for (size_t thePropertyIndex = 0; thePropertyIndex < theProperties.size(); ++thePropertyIndex) {
-        if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
-                    m_DataHandle, theProperties[thePropertyIndex]))
-            AddKeyframes(GetOrCreatePropertyBinding(theProperties[thePropertyIndex]));
-    }
-
-    // Set selection status
-    Qt3DSDMInstanceHandle theSelectedInstance = m_TransMgr->GetDoc()->GetSelectedInstance();
-    m_Row->OnSelected(m_DataHandle == theSelectedInstance);
-}
-
-void Qt3DSDMTimelineItemBinding::Release()
-{
-    m_Row = nullptr;
-    RemoveAllPropertyBindings();
-    m_TransMgr->Unregister(this);
 }
 
 bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)
@@ -657,7 +623,8 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     switch (inTransaction) {
     case EUserTransaction_Duplicate: {
         theDoc->DeselectAllKeyframes();
-        theDoc->HandleDuplicateCommand();
+        SCOPED_DOCUMENT_EDITOR(*theDoc,
+                               QObject::tr("Duplicate Object"))->DuplicateInstances(theInstances);
     } break;
     case EUserTransaction_Cut: {
         theDispatch.FireOnAsynchronousCommand(
@@ -691,31 +658,6 @@ Q3DStudio::CString Qt3DSDMTimelineItemBinding::GetObjectPath()
     return CRelativePathTools::BuildAbsoluteReferenceString(m_DataHandle, theDoc);
 }
 
-ITimelineKeyframesManager *Qt3DSDMTimelineItemBinding::GetKeyframesManager() const
-{
-    return m_TransMgr->GetKeyframesManager();
-}
-
-void Qt3DSDMTimelineItemBinding::RemoveProperty(ITimelineItemProperty *inProperty)
-{
-    Q_UNUSED(inProperty);
-    // TODO: This function has no use in DataModel world. This is replaced by RemovePropertyRow(
-    // Qt3DSDMPropertyHandle inPropertyHandle ).
-    // Decide if this function should be removed from ITimelineItemBinding.
-}
-
-void Qt3DSDMTimelineItemBinding::LoadProperties()
-{
-    TPropertyHandleList theProperties;
-    m_StudioSystem->GetPropertySystem()->GetAggregateInstanceProperties(m_DataHandle,
-                                                                        theProperties);
-    for (size_t thePropertyIndex = 0; thePropertyIndex < theProperties.size(); ++thePropertyIndex) {
-        if (m_StudioSystem->GetAnimationSystem()->IsPropertyAnimated(
-                    m_DataHandle, theProperties[thePropertyIndex]))
-            AddPropertyRow(theProperties[thePropertyIndex], true);
-    }
-}
-
 int Qt3DSDMTimelineItemBinding::getAnimatedPropertyIndex(int propertyHandle) const
 {
     TPropertyHandleList theProperties;
@@ -732,6 +674,24 @@ int Qt3DSDMTimelineItemBinding::getAnimatedPropertyIndex(int propertyHandle) con
     }
 
     return -1;
+}
+
+void Qt3DSDMTimelineItemBinding::getTimeContextIndices(const QSet<int> &children,
+                                                       QMap<int, int> &indexMap)
+{
+    qt3dsdm::Qt3DSDMInstanceHandle instance = GetInstance();
+    if (instance.Valid()) {
+        Q3DStudio::CGraphIterator graphChildren;
+        Qt3DSDMSlideHandle activeSlide = m_TransMgr->GetDoc()->GetActiveSlide();
+        GetAssetChildrenInTimeParent(instance, m_TransMgr->GetDoc(), AmITimeParent(),
+                                     graphChildren, activeSlide);
+        const size_t count = graphChildren.GetCount();
+        for (size_t current = 0; current < count; ++current) {
+            auto handle = graphChildren.GetResult(current);
+            if (children.contains(handle))
+                indexMap.insert(int(current), int(handle));
+        }
+    }
 }
 
 void Qt3DSDMTimelineItemBinding::InsertKeyframe()
@@ -761,12 +721,6 @@ void Qt3DSDMTimelineItemBinding::DeleteAllChannelKeyframes()
     }
 }
 
-long Qt3DSDMTimelineItemBinding::GetKeyframeCount() const
-{
-    // This list is updated when properties are loaded and when keyframes are added & deleted.
-    return (long)m_Keyframes.size();
-}
-
 IKeyframe *Qt3DSDMTimelineItemBinding::GetKeyframeByTime(long inTime) const
 {
     TAssetKeyframeList::const_iterator theIter = m_Keyframes.begin();
@@ -775,39 +729,6 @@ IKeyframe *Qt3DSDMTimelineItemBinding::GetKeyframeByTime(long inTime) const
             return const_cast<Qt3DSDMAssetTimelineKeyframe *>(&(*theIter));
     }
     return nullptr;
-}
-
-IKeyframe *Qt3DSDMTimelineItemBinding::GetKeyframeByIndex(long inIndex) const
-{
-    if (inIndex >= 0 && inIndex < (long)m_Keyframes.size())
-        return const_cast<Qt3DSDMAssetTimelineKeyframe *>(&m_Keyframes[inIndex]);
-
-    ASSERT(0); // should not happen
-    return nullptr;
-}
-
-long Qt3DSDMTimelineItemBinding::OffsetSelectedKeyframes(long inOffset)
-{
-    return m_TransMgr->GetKeyframesManager()->OffsetSelectedKeyframes(inOffset);
-}
-
-void Qt3DSDMTimelineItemBinding::CommitChangedKeyframes()
-{
-    m_TransMgr->GetKeyframesManager()->CommitChangedKeyframes();
-}
-
-void Qt3DSDMTimelineItemBinding::OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation)
-{
-    CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.setKeyframesManager(m_TransMgr->GetKeyframesManager());
-    theTimeEditDlg.showDialog(inCurrentTime, g_StudioApp.GetCore()->GetDoc(),
-                              inObjectAssociation);
-}
-
-void Qt3DSDMTimelineItemBinding::SelectKeyframes(bool inSelected, long inTime /*= -1 */)
-{
-    // Callback from UI, hence skip the UI update
-    DoSelectKeyframes(inSelected, inTime, false);
 }
 
 Qt3DSDMInstanceHandle Qt3DSDMTimelineItemBinding::GetInstanceHandle() const
@@ -845,21 +766,6 @@ void Qt3DSDMTimelineItemBinding::OnImmediateRefreshInstanceMultiple(
 
 void Qt3DSDMTimelineItemBinding::RefreshStateRow(bool inRefreshChildren)
 {
-    CStateRow *theRow = dynamic_cast<CStateRow *>(m_Row);
-    if (theRow) {
-        theRow->OnTimeChange();
-        theRow->setDirty(false);
-        if (inRefreshChildren) {
-            long theChildrenCount = GetChildrenCount();
-            for (long theIndex = 0; theIndex < theChildrenCount; ++theIndex) {
-                ITimelineItemBinding *theChild = GetChild(theIndex);
-                Qt3DSDMTimelineItemBinding *theBinding =
-                        dynamic_cast<Qt3DSDMTimelineItemBinding *>(theChild);
-                if (theBinding)
-                    theBinding->RefreshStateRow(inRefreshChildren);
-            }
-        }
-    }
 }
 
 ITimelineTimebar *Qt3DSDMTimelineItemBinding::CreateTimelineTimebar()
@@ -903,7 +809,7 @@ void Qt3DSDMTimelineItemBinding::AddPropertyRow(Qt3DSDMPropertyHandle inProperty
                                                bool inAppend /*= false */)
 {
     ITimelineItemProperty *theTimelineProperty = GetPropertyBinding(inPropertyHandle);
-    if (theTimelineProperty && theTimelineProperty->GetRow()) // if created, bail
+    if (theTimelineProperty) // if created, bail
         return;
 
     if (!theTimelineProperty)
@@ -963,57 +869,13 @@ void Qt3DSDMTimelineItemBinding::RefreshPropertyKeyframe(
             if (theProperty->RefreshKeyframe(inKeyframe, inTransaction)) {
                 // Update asset keyframes
                 UpdateKeyframe(theProperty->GetKeyframeByHandle(inKeyframe), inTransaction);
-                if (m_Row) // UI update
-                    m_Row->setDirty(true);
             }
         }
     }
-}
-
-// called when the keyframes are updated in the UI and data model hasn't committed the change, ie no
-// event callback from DataModel
-void Qt3DSDMTimelineItemBinding::UIRefreshPropertyKeyframe(long inOffset)
-{
-    if (!m_Row)
-        return;
-
-    // TODO: figure out a better way to sync m_Keyframes
-    TAssetKeyframeList::iterator theKeyIter = m_Keyframes.begin();
-    for (; theKeyIter != m_Keyframes.end(); ++theKeyIter) {
-        if (theKeyIter->IsSelected())
-            theKeyIter->UpdateTime(theKeyIter->GetTime() + inOffset);
-    }
-    // If a asset keyframe was "shared" by several properties' keyframes
-    // we need to 'break' this sharing and create for the remaining unmoved keyframes.
-    TPropertyBindingMap::const_iterator theIter = m_PropertyBindingMap.begin();
-    for (; theIter != m_PropertyBindingMap.end(); ++theIter) {
-        (*theIter).second->RefreshKeyFrames();
-
-        for (long i = 0; i < theIter->second->GetKeyframeCount(); ++i) {
-            IKeyframe *theKeyframe = theIter->second->GetKeyframeByIndex(i);
-            UpdateKeyframe(theKeyframe, ETimelineKeyframeTransaction_Add);
-
-            // Unfortunately, this is the way we can propagate UI updates to ALL selected keyframes
-            if (theKeyframe->IsSelected()) {
-                CPropertyRow *thePropertyRow = theIter->second->GetRow();
-                if (thePropertyRow)
-                    thePropertyRow->setDirty(true);
-            }
-        }
-    }
-    m_Row->setDirty(true);
 }
 
 void Qt3DSDMTimelineItemBinding::OnPropertyChanged(Qt3DSDMPropertyHandle inPropertyHandle)
-{ // Refresh UI
-    CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
-    if (m_Row && (inPropertyHandle == theBridge->GetNameProperty()
-                  || inPropertyHandle == theBridge->GetSceneAsset().m_Eyeball
-                  || inPropertyHandle == theBridge->GetSceneAsset().m_Locked
-                  || inPropertyHandle == theBridge->GetSceneAsset().m_Shy
-                  || inPropertyHandle == theBridge->GetSceneAsset().m_StartTime
-                  || inPropertyHandle == theBridge->GetSceneAsset().m_EndTime))
-        m_Row->setDirty(true);
+{
 }
 
 void Qt3DSDMTimelineItemBinding::OnPropertyLinked(Qt3DSDMPropertyHandle inPropertyHandle)
@@ -1055,59 +917,6 @@ void Qt3DSDMTimelineItemBinding::SetDynamicKeyframes(long inTime, bool inDynamic
         IKeyframe *theKeyframe = theIter->second->GetKeyframeByTime(inTime);
         if (theKeyframe)
             theKeyframe->SetDynamic(inDynamic); // TODO: we want this in 1 batch command
-    }
-}
-
-// Update UI on the selection state of all keyframes on this row and all its properties' keyframes.
-void Qt3DSDMTimelineItemBinding::DoSelectKeyframes(bool inSelected, long inTime, bool inUpdateUI)
-{
-    if (inTime == -1) // all keyframes
-    {
-        TAssetKeyframeList::iterator theKeyIter = m_Keyframes.begin();
-        for (; theKeyIter != m_Keyframes.end(); ++theKeyIter)
-            theKeyIter->SetSelected(inSelected);
-    } else {
-        Qt3DSDMAssetTimelineKeyframe *theKeyframe =
-                dynamic_cast<Qt3DSDMAssetTimelineKeyframe *>(GetKeyframeByTime(inTime));
-        if (theKeyframe)
-            theKeyframe->SetSelected(inSelected);
-    }
-    if (inUpdateUI && m_Row)
-        m_Row->RequestSelectKeysByTime(-1, inSelected);
-
-    // legacy feature: all properties with keyframes at inTime or all if inTime is -1 are selected
-    // as well.
-    TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.begin();
-    for (; theIter != m_PropertyBindingMap.end(); ++theIter)
-        theIter->second->DoSelectKeyframes(inSelected, inTime, true, this);
-}
-
-// When selecting by mouse-drag, if all properties are selected, select the asset keyframe. And if
-// one gets de-selected, de-select. Legacy feature.
-// Note that if only 1 property has a keyframe at time t, the asset keyframe gets selected
-// automatically when that keyframe is selected. Its odd to me but
-// that's how it has always behaved.
-void Qt3DSDMTimelineItemBinding::OnPropertySelection(long inTime)
-{
-    IKeyframe *theAssetKeyframe = GetKeyframeByTime(inTime);
-    if (theAssetKeyframe) {
-        bool theAllSelectedFlag = true;
-        TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.begin();
-        for (; theIter != m_PropertyBindingMap.end(); ++theIter) {
-            IKeyframe *theKeyframe = theIter->second->GetKeyframeByTime(inTime);
-            if (theKeyframe && !theKeyframe->IsSelected()) {
-                // done, i.e selection remain unchanged.
-                theAllSelectedFlag = false;
-                break;
-            }
-        }
-        if (theAssetKeyframe->IsSelected() != theAllSelectedFlag) {
-            dynamic_cast<Qt3DSDMAssetTimelineKeyframe *>(theAssetKeyframe)
-                    ->SetSelected(theAllSelectedFlag);
-            // Update UI
-            if (m_Row)
-                m_Row->RequestSelectKeysByTime(inTime, theAllSelectedFlag);
-        }
     }
 }
 
@@ -1206,11 +1015,6 @@ void Qt3DSDMTimelineItemBinding::UpdateKeyframe(IKeyframe *inKeyframe,
                 m_Keyframes.push_back(Qt3DSDMAssetTimelineKeyframe(this, theKeyframeTime));
         }
     }
-    if (m_Row && (theDoAddFlag
-                  || inTransaction == ETimelineKeyframeTransaction_DynamicChanged)) {
-        // dynamic => only UI needs to refresh
-        m_Row->setDirty(true);
-    }
 }
 
 void Qt3DSDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
@@ -1248,17 +1052,10 @@ void Qt3DSDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
 
 void Qt3DSDMTimelineItemBinding::OnDeleteChild(Qt3DSDMInstanceHandle inInstance)
 {
-    ITimelineItemBinding *theChild = m_TransMgr->GetOrCreate(inInstance);
-    if (theChild) {
-        m_Row->RemoveChildRow(theChild);
-    }
 }
 
 void Qt3DSDMTimelineItemBinding::UpdateActionStatus()
 {
-    if (m_Row) {
-        m_Row->requestUpdateActionStatus();
-    }
 }
 
 //=============================================================================

@@ -33,10 +33,8 @@
 
 #include "ITimelineItem.h"
 #include "ITimelineItemProperty.h"
-#include "IKeyframeSelector.h"
 #include "SIterator.h"
 
-class CBaseStateRow;
 class RowTree;
 class CControlWindowListener;
 class ITimelineKeyframesManager;
@@ -51,12 +49,7 @@ public:
 
     virtual void InsertKeyframe() = 0;
     virtual void DeleteAllChannelKeyframes() = 0;
-    virtual long GetKeyframeCount() const = 0;
     virtual IKeyframe *GetKeyframeByTime(long inTime) const = 0;
-    virtual IKeyframe *GetKeyframeByIndex(long inIndex) const = 0;
-    virtual long OffsetSelectedKeyframes(long inOffset) = 0;
-    virtual void CommitChangedKeyframes() = 0;
-    virtual void OnEditKeyframeTime(long inCurrentTime, long inObjectAssociation) = 0;
 };
 
 //=============================================================================
@@ -64,7 +57,7 @@ public:
  * Interface to encapsulate data model specific functions, that Timeline UI objects can talk to.
  */
 //=============================================================================
-class ITimelineItemBinding : public ITimelineItemKeyframesHolder, public IKeyframeSelector
+class ITimelineItemBinding : public ITimelineItemKeyframesHolder
 {
 public:
     // List of possible transactions that requires querying the data model if they are valid
@@ -84,21 +77,19 @@ public:
     virtual ~ITimelineItemBinding() {}
 
     virtual ITimelineItem *GetTimelineItem() = 0;
-    virtual CBaseStateRow *GetRow() = 0; // Mahmoud_TODO: remove after timeline is complete
     virtual RowTree *getRowTree() const = 0; // UI
     virtual void setRowTree(RowTree *row) = 0;
 
     // Events
     virtual void SetSelected(bool multiSelect) = 0;
     virtual void OnCollapsed() = 0;
-    virtual void ClearKeySelection() = 0;
     virtual bool OpenAssociatedEditor() = 0;
-    virtual void DoStartDrag(CControlWindowListener *inWndListener) = 0;
     virtual void SetDropTarget(CDropTarget *inTarget) = 0;
 
     // Hierarchy
     virtual long GetChildrenCount() = 0;
     virtual ITimelineItemBinding *GetChild(long inIndex) = 0;
+    virtual QList<ITimelineItemBinding *> GetChildren() = 0;
     virtual ITimelineItemBinding *GetParent() = 0;
     virtual void SetParent(ITimelineItemBinding *parent) = 0;
     // Properties
@@ -110,10 +101,6 @@ public:
     virtual bool IsLockedEnabled() const = 0;
     virtual bool IsVisibleEnabled() const = 0;
 
-    // Init/Cleanup
-    virtual void Bind(CBaseStateRow *inRow) = 0;
-    virtual void Release() = 0;
-
     // ContextMenu
     virtual bool IsValidTransaction(EUserTransaction inTransaction) = 0;
     virtual void PerformTransaction(EUserTransaction inTransaction) = 0;
@@ -123,13 +110,6 @@ public:
     virtual void Externalize() {}
     virtual bool IsInternalizeable() { return false; }
     virtual void Internalize() {}
-
-    // Selected keyframes
-    virtual ITimelineKeyframesManager *GetKeyframesManager() const = 0;
-
-    // Properties
-    virtual void RemoveProperty(ITimelineItemProperty *inProperty) = 0;
-    virtual void LoadProperties() = 0;
 
     void setCreateUIRow(bool create) { m_createUIRow = create; }
 

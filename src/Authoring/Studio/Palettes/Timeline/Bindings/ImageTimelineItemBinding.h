@@ -41,7 +41,6 @@
 //	Classes
 //==============================================================================
 class CTimelineTranslationManager;
-class CBaseStateRow;
 class ITimelineTimebar;
 
 //=============================================================================
@@ -61,7 +60,6 @@ public:
     void SetName(const Q3DStudio::CString &inName) override;
     EStudioObjectType GetObjectType() const override;
     bool ShowToggleControls() const override;
-    void Bind(CBaseStateRow *inRow) override;
     bool OpenAssociatedEditor() override;
 
     void SetPropertyHandle(qt3dsdm::Qt3DSDMPropertyHandle inProperty)

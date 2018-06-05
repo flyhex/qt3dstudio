@@ -2,7 +2,7 @@
 <Effect>
 	<MetaData>
 		<!--Scatters the pixels in a layer, creating a blurry or smeared appearance. Without changing the color of each individual pixel, the Scatter effect redistributes the pixels randomly, but in the same general area as their original positions.-->
-		<Property name="NoiseSamp" 	formalName="Noise" filter="linear" clamp="repeat" type="Texture" default="./maps/effects/brushnoise.dds" hidden="True"/>
+                <Property name="NoiseSamp" 	formalName="Noise" filter="linear" clamp="repeat" type="Texture" default="./maps/effects/brushnoise.png" hidden="True"/>
 		<Property name="Amount" 	formalName="Scatter Amount" 		min="0" max="127" 					default="20.0" 	description="Determines how much to scatter."/>
                 <Property name="dir" 		formalName="Grain" 					list="Both:Horizontal:Vertical" 	default="Both" 	description="The direction in which to scatter the\npixels, horizontally or vertically.\nSelect Both to scatter pixels in all directions."/>
                 <Property name="isRand" 	formalName="Randomize Every Frame" 	type="Boolean" 						default="False"	description="Specifies whether scattering changes at\neach frame. To animate scattering without\nkeyframes, select the Randomize Every Frame\noption."/>

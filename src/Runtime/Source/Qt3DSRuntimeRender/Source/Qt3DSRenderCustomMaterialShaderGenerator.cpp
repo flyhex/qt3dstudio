@@ -71,7 +71,7 @@ struct SShaderLightProperties
             dir *= -1;
             m_LightData.m_position = QT3DSVec4(dir, 0.0);
         } else if (inLight->m_LightType == RenderLightTypes::Area) {
-            dir = -1.0 * inLight->GetScalingCorrectDirection();
+            dir = inLight->GetScalingCorrectDirection();
             m_LightData.m_position = QT3DSVec4(inLight->GetGlobalPos(), 1.0);
         } else {
             dir = inLight->GetGlobalPos();
@@ -173,12 +173,21 @@ struct SShaderGeneratorGeneratedShader
     NVRenderCachedShaderProperty<QT3DSI32> m_AreaLightCount;
     NVRenderCachedShaderProperty<QT3DSI32> m_ShadowMapCount;
     NVRenderCachedShaderProperty<QT3DSI32> m_ShadowCubeCount;
+    NVRenderCachedShaderProperty<QT3DSF32> m_Opacity;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AoShadowParams;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_LightsBuffer;
     NVRenderCachedShaderBuffer<qt3ds::render::NVRenderShaderConstantBuffer *> m_AreaLightsBuffer;
 
     SLightConstantProperties<SShaderGeneratorGeneratedShader> *m_lightsProperties;
     SLightConstantProperties<SShaderGeneratorGeneratedShader> *m_areaLightsProperties;
+
+    typedef NVRenderCachedShaderPropertyArray<NVRenderTexture2D *,
+                                              QT3DS_MAX_NUM_SHADOWS> ShadowMapPropertyArray;
+    typedef NVRenderCachedShaderPropertyArray<NVRenderTextureCube *,
+                                              QT3DS_MAX_NUM_SHADOWS> ShadowCubePropertyArray;
+
+    ShadowMapPropertyArray m_shadowMaps;
+    ShadowCubePropertyArray m_shadowCubes;
 
     // Cache the image property name lookups
     TCustomMaterialImagMap m_Images; // Images external to custom material usage
@@ -208,11 +217,14 @@ struct SShaderGeneratorGeneratedShader
         , m_AreaLightCount("uNumAreaLights", inShader)
         , m_ShadowMapCount("uNumShadowMaps", inShader)
         , m_ShadowCubeCount("uNumShadowCubes", inShader)
+        , m_Opacity("object_opacity", inShader)
         , m_AoShadowParams("cbAoShadow", inShader)
         , m_LightsBuffer("cbBufferLights", inShader)
         , m_AreaLightsBuffer("cbBufferAreaLights", inShader)
         , m_lightsProperties(nullptr)
         , m_areaLightsProperties(nullptr)
+        , m_shadowMaps("shadowMaps[0]", inShader)
+        , m_shadowCubes("shadowCubes[0]", inShader)
         , m_Images(inContext.GetAllocator(), "SShaderGeneratorGeneratedShader::m_Images")
         , m_RefCount(0)
     {
@@ -295,8 +307,6 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     TProgramToShaderMap m_ProgramToShaderMap;
 
     nvvector<TCustomMaterialLightEntry> m_LightEntries;
-    nvvector<TShadowMapEntry> m_ShadowMapEntries;
-    nvvector<TShadowCubeEntry> m_ShadowCubeEntries;
 
     TStrConstanBufMap m_ConstantBuffers; ///< store all constants buffers
 
@@ -312,8 +322,6 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         , m_HasTransparency(false)
         , m_ProgramToShaderMap(inRc.GetAllocator(), "m_ProgramToShaderMap")
         , m_LightEntries(inRc.GetAllocator(), "m_LightEntries")
-        , m_ShadowMapEntries(inRc.GetAllocator(), "m_ShadowMapEntries")
-        , m_ShadowCubeEntries(inRc.GetAllocator(), "m_ShadowCubeEntries")
         , m_ConstantBuffers(inRc.GetAllocator(), "m_ConstantBuffers")
         , m_RefCount(0)
     {
@@ -465,11 +473,12 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
                 return NULL;
             }
             // init first set
-            memset(&s[0], 0x0, sizeof(SLightSourceShader));
-            QT3DSI32 cgLights = 0;
-            pCB->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&cgLights, sizeof(QT3DSI32)));
+            memset(&s[0], 0x0, sizeof(SLightSourceShader) * QT3DS_MAX_NUM_LIGHTS);
+            QT3DSI32 cgLights[4] = {0, 0, 0, 0};
+            pCB->UpdateRaw(0, NVDataRef<QT3DSU8>((QT3DSU8 *)&cgLights, sizeof(QT3DSI32) * 4));
             pCB->UpdateRaw(4 * sizeof(QT3DSI32),
-                           NVDataRef<QT3DSU8>((QT3DSU8 *)&s[0], sizeof(SLightSourceShader)));
+                           NVDataRef<QT3DSU8>((QT3DSU8 *)&s[0],
+                           sizeof(SLightSourceShader) * QT3DS_MAX_NUM_LIGHTS));
             pCB->Update(); // update to hardware
 
             m_ConstantBuffers.insert(eastl::make_pair(theName, pCB));
@@ -551,33 +560,18 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     }
 
     void SetShadowMaps(NVRenderShaderProgram &inProgram, SShadowMapEntry *inShadow,
-                       QT3DSI32 &numShadowMaps, QT3DSI32 &numShadowCubes)
+                       QT3DSI32 &numShadowMaps, QT3DSI32 &numShadowCubes, bool shadowMap,
+                       SShaderGeneratorGeneratedShader::ShadowMapPropertyArray &shadowMaps,
+                       SShaderGeneratorGeneratedShader::ShadowCubePropertyArray &shadowCubes)
     {
         if (inShadow) {
-            eastl::string shadowName;
-            if (inShadow->m_DepthCube && (numShadowCubes < QT3DS_MAX_NUM_SHADOWS)) {
-                shadowName = "shadowCubes";
-                char buf[16];
-                _snprintf(buf, 16, "[%d]", numShadowCubes);
-                shadowName.append(buf);
-
-                NVRenderCachedShaderProperty<NVRenderTextureCube *> theNewEntry(shadowName.c_str(),
-                                                                                inProgram);
-                theNewEntry.Set(inShadow->m_DepthCube);
-                m_ShadowCubeEntries.push_back(eastl::make_pair(numShadowCubes, theNewEntry));
-
+            if (shadowMap == false && inShadow->m_DepthCube
+                    && (numShadowCubes < QT3DS_MAX_NUM_SHADOWS)) {
+                shadowCubes.m_array[numShadowCubes] = inShadow->m_DepthCube.mPtr;
                 ++numShadowCubes;
-            } else if (inShadow->m_DepthMap && (numShadowMaps < QT3DS_MAX_NUM_SHADOWS)) {
-                shadowName = "shadowMaps";
-                char buf[16];
-                _snprintf(buf, 16, "[%d]", numShadowMaps);
-                shadowName.append(buf);
-
-                NVRenderCachedShaderProperty<NVRenderTexture2D *> theNewEntry(shadowName.c_str(),
-                                                                              inProgram);
-                theNewEntry.Set(inShadow->m_DepthMap);
-                m_ShadowMapEntries.push_back(eastl::make_pair(numShadowMaps, theNewEntry));
-
+            } else if (shadowMap && inShadow->m_DepthMap
+                    && (numShadowMaps < QT3DS_MAX_NUM_SHADOWS)) {
+                shadowMaps.m_array[numShadowMaps] = inShadow->m_DepthMap.mPtr;
                 ++numShadowMaps;
             }
         }
@@ -622,14 +616,16 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             // Split the count between CG lights and area lights
             for (QT3DSU32 lightIdx = 0; lightIdx < inLights.size() && pLightCb; ++lightIdx) {
                 SShadowMapEntry *theShadow = NULL;
-                if (inShadowMaps)
+                if (inShadowMaps && inLights[lightIdx]->m_CastShadow)
                     theShadow = inShadowMaps->GetShadowMapEntry(lightIdx);
 
                 QT3DSI32 shdwIdx = (inLights[lightIdx]->m_LightType
                                                 != RenderLightTypes::Directional)
                     ? numShadowCubes
                     : numShadowMaps;
-                SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes);
+                SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes,
+                              inLights[lightIdx]->m_LightType == RenderLightTypes::Directional,
+                              theShader.m_shadowMaps, theShader.m_shadowCubes);
 
                 if (inLights[lightIdx]->m_LightType == RenderLightTypes::Area) {
                     SShaderLightProperties *theAreaLightEntry =
@@ -675,17 +671,19 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         } else {
             QVector<SShaderLightProperties *> lprop;
             QVector<SShaderLightProperties *> alprop;
-            for (int lightIdx = 0; lightIdx < inLights.size(); ++lightIdx) {
+            for (QT3DSU32 lightIdx = 0; lightIdx < inLights.size(); ++lightIdx) {
 
                 SShadowMapEntry *theShadow = NULL;
-                if (inShadowMaps)
+                if (inShadowMaps && inLights[lightIdx]->m_CastShadow)
                     theShadow = inShadowMaps->GetShadowMapEntry(lightIdx);
 
                 QT3DSI32 shdwIdx = (inLights[lightIdx]->m_LightType
                                     != RenderLightTypes::Directional)
                     ? numShadowCubes
                     : numShadowMaps;
-                SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes);
+                SetShadowMaps(inProgram, theShadow, numShadowMaps, numShadowCubes,
+                              inLights[lightIdx]->m_LightType == RenderLightTypes::Directional,
+                              theShader.m_shadowMaps, theShader.m_shadowCubes);
 
                 SShaderLightProperties *p = SetLight(inProgram, lightIdx, areaLights,
                                                      inLights[lightIdx], theShadow,
@@ -706,6 +704,12 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             theShader.m_LightCount.Set(lprop.size());
             theShader.m_AreaLightCount.Set(alprop.size());
         }
+        for (int i = numShadowMaps; i < QT3DS_MAX_NUM_SHADOWS; ++i)
+            theShader.m_shadowMaps.m_array[i] = NULL;
+        for (int i = numShadowCubes; i < QT3DS_MAX_NUM_SHADOWS; ++i)
+            theShader.m_shadowCubes.m_array[i] = NULL;
+        theShader.m_shadowMaps.Set(numShadowMaps);
+        theShader.m_shadowCubes.Set(numShadowCubes);
         theShader.m_ShadowMapCount.Set(numShadowMaps);
         theShader.m_ShadowCubeCount.Set(numShadowCubes);
     }
@@ -713,7 +717,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     void SetMaterialProperties(NVRenderShaderProgram &inProgram, const SCustomMaterial &inMaterial,
                                const QT3DSVec2 &, const QT3DSMat44 &inModelViewProjection,
                                const QT3DSMat33 &inNormalMatrix, const QT3DSMat44 &inGlobalTransform,
-                               SRenderableImage *inFirstImage, QT3DSF32,
+                               SRenderableImage *inFirstImage, QT3DSF32 inOpacity,
                                NVRenderTexture2D *inDepthTexture, NVRenderTexture2D *inSSaoTexture,
                                SImage *inLightProbe, SImage *inLightProbe2, QT3DSF32 inProbeHorizon,
                                QT3DSF32 inProbeBright, QT3DSF32 inProbe2Window, QT3DSF32 inProbe2Pos,
@@ -728,6 +732,8 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         theShader.m_DepthTexture.Set(inDepthTexture);
         theShader.m_AOTexture.Set(inSSaoTexture);
+
+        theShader.m_Opacity.Set(inOpacity);
 
         qt3ds::render::SImage *theLightProbe = inLightProbe;
         qt3ds::render::SImage *theLightProbe2 = inLightProbe2;
@@ -1125,6 +1131,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
             fragmentShader.Append("\trgba = mix( vec4(0.0, 1.0, 0.0, 1.0), rgba, mixVal);");
         }
+        fragmentShader << "  rgba.a *= object_opacity;" << Endl;
         if (m_RenderContext.GetRenderContext().GetRenderContextType()
                 == NVRenderContextValues::GLES2)
             fragmentShader << "  gl_FragColor = rgba;" << Endl;

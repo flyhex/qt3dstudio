@@ -110,7 +110,10 @@ public:
                                                Q3DStudio::CString instancepath,
                                                qt3dsdm::Qt3DSDMPropertyHandle propName,
                                                Q3DStudio::CString controller,
-                                               bool controlled) = 0;
+                                               bool controlled, bool batch = false) = 0;
+    virtual void RemoveDatainputBindings(
+            const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                           qt3dsdm::Qt3DSDMPropertyHandle>> *map) = 0;
     // Return an editor to editing the scene graph of the document.
     // This editor takes care of putting objects into the property slide
     // as well as updating the world

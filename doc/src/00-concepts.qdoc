@@ -29,7 +29,7 @@
 /*!
 \keyword Qt 3D Studio
 \title Qt 3D Studio Index
-\page index.html
+\page qt3dstudio-index.html
 
 \section1 Table of Contents
 
@@ -37,9 +37,6 @@
     \li \l {Getting started}
     \li \l {Studio Index}{Studio}
     \li \l {Viewer Index}{Viewer}
-    \li \l {QML API}{QML API Reference}
-    \li \l {C++ API}{C++ API Reference}
-    \li \l {Runtime}
     \li \l {File Formats}
     \omit
     TODO: Needs to be checked. Maybe a rewrite, or just remove it all.
@@ -48,7 +45,6 @@
     \li \l {Best Practices}
     \li \l {Requirements}
     \li \l {Experimental Features}
-    \li \l {Examples}
     \li \l {Copyright Notices}
 \endlist
 
@@ -135,5 +131,22 @@ variations within the presentation.
 
 \e{Learn more about slides in}
 \l{studio-slide-palette.html}{Slide Palette}.
+
+\section1 Known Issues
+
+\section2 Possible problems after automatic mesh optimization
+
+When loading a presentation made with an earlier version (2.0 beta2 or older) of Qt 3D Studio
+which has imported FBX or DAE models, you may see the following messagebox:
+
+\image {mesh_optimization.png}{Old presentation version}
+
+If your \b{imported} models are not visible in the Viewer after seeing the message, you need to
+edit your \c{*.uip} file(s) manually. Some older versions of Studio referenced meshes with revision
+number in the \c{*.uip} file, and that revision causes it to be missing in the scope of the
+Viewer.
+
+You'll need to find all occurrences of \c{.mesh#<revision_number>} from you \c{*.uip} and
+replace them with \c{.mesh}.
 
 */

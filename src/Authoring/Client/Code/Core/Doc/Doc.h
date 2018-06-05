@@ -150,6 +150,7 @@ public:
     float maxValue;
     QString name;
     int type;
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> controlledElems;
 };
 
 //==============================================================================
@@ -190,10 +191,17 @@ public:
     void SaveDocument(const Qt3DSFile &inDocument);
     void CreateNewDocument();
     QString GetDocumentUIAFile(bool master = false);
+    // In outMap, returns datainput names found from element control
+    // bindings but which are missing from (UIP) datainput list
+    void UpdateDatainputMap(
+            const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+            QMultiMap<QString,
+                      QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                            qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
     void LoadUIASubpresentations(const QString &uiaFile,
                                  QVector<SubPresentationRecord> &subpresentations);
     void LoadUIADataInputs(const QString &uiaFile,
-                           QVector<CDataInputDialogItem *> &datainputs);
+                           QMap<QString, CDataInputDialogItem *> &datainputs);
     void LoadUIAInitialPresentationFilename(const QString &uiaFile,
                                             QString &initialPresentation);
 
@@ -204,8 +212,8 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance();
 
     void CutSelectedObject();
-    void DeleteSelectedItems();
-    void DeleteSelectedObject();
+    void DeleteSelectedItems(bool slide = false);
+    void DeleteSelectedObject(bool slide = false);
     bool DeleteSelectedKeys();
     void SetChangedKeyframes();
 
@@ -255,7 +263,7 @@ public:
     bool CanPaste(); // for objects or keyframes or actions
     bool CanCopy(); // for objects or keyframes or actions
     bool CanCut(); // for objects or keyframes or actions
-    void HandleDuplicateCommand();
+    void HandleDuplicateCommand(bool slide = false);
 
     bool VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset);
 
@@ -301,7 +309,11 @@ public:
                                        Q3DStudio::CString instancepath,
                                        qt3dsdm::Qt3DSDMPropertyHandle propName,
                                        Q3DStudio::CString controller,
-                                       bool controlled) override;
+                                       bool controlled, bool batch = false) override;
+
+    void RemoveDatainputBindings(
+            const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                           qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
@@ -330,6 +342,7 @@ public:
     void ToggleDataModelObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
     void SelectAndNavigateToDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
     long GetLatestEndTime();
+    bool isPlayHeadAtEnd();
 
     CCore *GetCore() override;
 
@@ -388,12 +401,18 @@ public:
     Q3DStudio::CString
     GetProjectFontName(const Q3DStudio::CFilePath
                        &inFullPathToFontFile); // Given a font file, return the font name
+    void setPlayBackPreviewState(bool state);
+    bool isPlayBackPreviewOn() const;
+
+    std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
 
 protected:
     // Set the active slide, return true if delving
     void SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
     void OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide);
     void OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     Q3DStudio::SSelectedValue SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     // Set the selection, but don't send an event.
     bool SetSelection(Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue());
@@ -402,7 +421,7 @@ protected:
 
     void CleanupData();
     void ResetData();
-    void LoadStudioData(CBufferedInputStream *inInputStream);
+    int LoadStudioData(CBufferedInputStream *inInputStream);
     void ResetDataCore();
     void SetupDataCoreSignals();
 
@@ -476,6 +495,9 @@ protected:
     Qt3DSRenderDevice m_WindowHandle; ///< The window handle to which to render
     Q3DStudio::CRect m_ClientSize;
     Q3DStudio::CRect m_SceneRect; ///< The dimensions of the active scene view
+
+private:
+    bool m_playbackPreviewOn = false;
 };
 
 #endif // INCLUDED_DOC_H

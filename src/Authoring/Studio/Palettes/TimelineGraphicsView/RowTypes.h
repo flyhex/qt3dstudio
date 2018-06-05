@@ -31,46 +31,6 @@
 
 #include <qglobal.h>
 
-// Mahmoud_TODO: to be removed
-enum class PropertyType {
-    None = 200,
-    Position,
-    Rotation,
-    Scale,
-    Pivot,
-    Opacity,
-    EdgeTessellation,
-    InnerTessellation,
-    TextColor,          // Text
-    Leading,            // Text
-    Tracking,           // Text
-    LightColor,         // Light
-    SpecularColor,      // Light
-    AmbientColor,       // Light
-    Brightness,         // Light
-    ShadowDarkness,     // Light
-    ShadowSoftness,     // Light
-    ShadowDepthBias,    // Light
-    ShadowFarClip,      // Light
-    ShadowFOV,          // Light
-    FieldOfView,        // Camera
-    ClippingStart,      // Camera
-    ClippingEnd,        // Camera
-    Left,               // Layer
-    Top,                // Layer
-    Width,              // Layer
-    Height,             // Layer
-    AO,                 // Layer
-    AODistance,         // Layer
-    AOSoftness,         // Layer
-    AOThreshold,        // Layer
-    AOSamplingRate,     // Layer
-    IBLBrightness,      // Layer
-    IBLHorizonCutoff,   // Layer
-    IBLFOVAngle,        // Layer
-    ProbeCrossfade,     // Layer
-};
-
 enum class TimelineControlType {
     None = 300,
     KeyFrame,

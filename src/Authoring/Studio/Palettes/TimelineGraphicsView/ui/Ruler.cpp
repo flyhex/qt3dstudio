@@ -43,8 +43,10 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     Q_UNUSED(option)
 
     double xStep = TimelineConstants::RULER_SEC_W / TimelineConstants::RULER_SEC_DIV * m_timeScale;
-    double totalSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
+    double activeSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
             + m_duration * xStep * TimelineConstants::RULER_SEC_DIV;
+    double totalSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
+            + m_maxDuration * xStep * TimelineConstants::RULER_SEC_DIV;
 
     // Ruler painted width to be at least widget width
     double minRulerWidth = widget->width();
@@ -59,7 +61,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->setPen(QColor(TimelineConstants::RULER_COLOR));
     painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
                       TimelineConstants::RULER_BASE_Y,
-                      totalSegmentsWidth,
+                      activeSegmentsWidth,
                       TimelineConstants::RULER_BASE_Y);
 
     QFont font = painter->font();
@@ -81,7 +83,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
                 i % secDiv == secDiv * 0.5 ? TimelineConstants::RULER_DIV_H2 :
                 TimelineConstants::RULER_DIV_H3;
 
-        if (!useDisabledColor && rowX > totalSegmentsWidth) {
+        if (!useDisabledColor && rowX > activeSegmentsWidth) {
             painter->setPen(QColor(TimelineConstants::RULER_COLOR_DISABLED));
             useDisabledColor = true;
         }
@@ -148,24 +150,36 @@ double Ruler::timelineScale() const
     return m_timeScale;
 }
 
+// Returns end of right-most layer/component row.
+// Active color of ruler is used up to this point.
+// Slide plays up to this point.
 double Ruler::duration() const
 {
     return m_duration;
 }
 
+// Returns end of right-most row.
+// Ruler steps & labels are drawn up to this point.
+// Timeline scrollbar allows scrolling up to this point.
 double Ruler::maxDuration() const
 {
     return m_maxDuration;
 }
 
-void Ruler::setDuration(double duration, double maxDuration)
+void Ruler::setDuration(double duration)
 {
-    if (m_duration != duration || m_maxDuration != maxDuration) {
+    if (m_duration != duration) {
         m_duration = duration;
+        update();
+    }
+}
+
+void Ruler::setMaxDuration(double maxDuration)
+{
+    if (m_maxDuration != maxDuration) {
         m_maxDuration = maxDuration;
         update();
-
-        emit durationChanged(duration);
+        emit maxDurationChanged(m_maxDuration);
     }
 }
 

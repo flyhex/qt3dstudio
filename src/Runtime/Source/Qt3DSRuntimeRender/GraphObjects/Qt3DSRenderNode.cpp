@@ -341,16 +341,18 @@ void SNode::AddChild(SNode &inChild)
     if (inChild.m_Parent)
         inChild.m_Parent->RemoveChild(inChild);
     inChild.m_Parent = this;
-    if (m_FirstChild == NULL)
+    if (m_FirstChild == nullptr) {
         m_FirstChild = &inChild;
-    else {
+        inChild.m_NextSibling = nullptr;
+        inChild.m_PreviousSibling = nullptr;
+    } else {
         SNode *lastChild = GetLastChild();
-
         if (lastChild) {
             lastChild->m_NextSibling = &inChild;
             inChild.m_PreviousSibling = lastChild;
+            inChild.m_NextSibling = nullptr;
         } else {
-            QT3DS_ASSERT(false); // no last child but first chlid isn't null???
+            QT3DS_ASSERT(false); // no last child but first child isn't null?
         }
     }
 }

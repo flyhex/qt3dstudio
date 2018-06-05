@@ -61,15 +61,6 @@
 
 using namespace qt3dsdm;
 
-// Mahmmoud_TODO: This function is copied from old timeline code. It should be removed after the
-// new timeline is done (during cleanup of old timeline)
-// legacy stuff that we have to support for animation tracks in the old data model to work
-inline void PostExecuteCommand(IDoc *inDoc)
-{
-    CDoc *theDoc = dynamic_cast<CDoc *>(inDoc);
-    theDoc->GetCore()->CommitCurrentCommand();
-}
-
 KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene)
     : m_scene(scene)
     , m_pasteKeyframeCommandHelper(nullptr)
@@ -263,7 +254,6 @@ bool KeyframeManager::deleteSelectedKeyframes()
         m_selectedKeyframesMasterRows.clear();
 
         g_StudioApp.GetCore()->ExecuteCommand(cmd);
-        PostExecuteCommand(theDoc);
         return true;
     }
 
@@ -377,20 +367,6 @@ void KeyframeManager::pasteKeyframes()
     }
 }
 
-// Mahmoud_TODO: this method is not used anymore, will be removed by finishing the new timeline
-QList<Keyframe *> KeyframeManager::filterKeyframesForRow(RowTimeline *row,
-                                                         const QList<Keyframe *> &keyframes)
-{
-    QList<Keyframe *> result;
-
-    for (auto keyframe : keyframes) {
-        if (SUPPORTED_ROW_PROPS[row->rowTree()->rowType()].contains(keyframe->propertyType))
-            result.append(keyframe);
-    }
-
-    return result;
-}
-
 void KeyframeManager::moveSelectedKeyframes(double dx)
 {
     double dt = m_scene->ruler()->distanceToTime(dx);
@@ -457,11 +433,11 @@ void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     IAnimationCore *animationCore = doc->GetStudioSystem()->GetAnimationCore();
+    CCmdDataModelChangeDynamicKeyframe *cmd = nullptr;
 
     for (int i = 0; i < m_selectedKeyframes.size(); ++i) {
         Qt3DSDMTimelineKeyframe *timelineKeyframe = m_selectedKeyframes[i]->binding;
         Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
-        CCmdDataModelChangeDynamicKeyframe *cmd = nullptr;
         timelineKeyframe->GetKeyframeHandles(keyframeHandles);
 
         for (size_t keyIndex = 0; keyIndex < keyframeHandles.size(); ++keyIndex) {
@@ -472,10 +448,10 @@ void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
             else
                 cmd->AddHandle(animation);
         }
-
-        if (cmd)
-            g_StudioApp.GetCore()->ExecuteCommand(cmd);
     }
+
+    if (cmd)
+        g_StudioApp.GetCore()->ExecuteCommand(cmd);
 }
 
 long KeyframeManager::OffsetSelectedKeyframes(long inOffset)
@@ -621,85 +597,3 @@ void KeyframeManager::SetChangedKeyframes()
         }
     }
 }
-
-// Mahmoud_TODO: this Map is not used anymore, will be removed by finishing the new timeline
-const QHash<int, QList<QString>> KeyframeManager::SUPPORTED_ROW_PROPS = {
-    { OBJTYPE_LAYER, {
-        "Left",
-        "Width",
-        "Top",
-        "Height",
-        "Ambient Occulusion",
-        "AO Distance",
-        "AO Softness",
-        "AO Threshold",
-        "AO Sampling Rate",
-        "IBL Brightness",
-        "IBL Horizon Cutoff",
-        "IBL FOV Angle" }
-    },
-    { OBJTYPE_CAMERA, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "FieldOfView",
-        "ClippingStart",
-        "ClippingEnd" }
-    },
-    { OBJTYPE_LIGHT, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "LightColor",
-        "SpecularColor",
-        "AmbientColor",
-        "Brightness",
-        "ShadowDarkness",
-        "ShadowSoftness",
-        "ShadowDepthBias",
-        "ShadowFarClip",
-        "ShadowFOV" }
-    },
-    { OBJTYPE_MODEL, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "Opacity",
-        "EdgeTessellation",
-        "InnerTessellation" }
-    },
-    { OBJTYPE_TEXT, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "Opacity",
-        "TextColor",
-        "Leading",
-        "Tracking" }
-    },
-    { OBJTYPE_ALIAS, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "Opacity" }
-    },
-    { OBJTYPE_GROUP, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "Opacity" }
-    },
-    { OBJTYPE_COMPONENT, {
-        "Position",
-        "Rotation",
-        "Scale",
-        "Pivot",
-        "Opacity" }
-    }
-};

@@ -55,11 +55,16 @@ public:
     void toggleFilterHidden();
     void toggleFilterLocked();
 
+protected:
+    void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+
 private:
     TimelineGraphicsScene *m_scene;
     bool m_shy = false;
     bool m_visible = false;
     bool m_lock = false;
+    int m_hoveredItem = -1;
     QRect m_rectShy;
     QRect m_rectVisible;
     QRect m_rectLock;

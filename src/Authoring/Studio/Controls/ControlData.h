@@ -188,7 +188,8 @@ protected:
     void SetMouseWheelEventState(ControlEventState::Enum inNewState);
 
 public:
-    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags);
+    CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                   EStudioObjectType objectType);
 
     void AddChild(CControl *inControl, CControl *inInsertBefore = NULL);
     void RemoveChild(CControl *inControl);
@@ -219,9 +220,6 @@ public:
     bool GetEnabledFlag();
     void SetEnabledFlag(bool inIsEnabled);
 
-    void SetWindowListener(CControlWindowListener *inListener);
-    CControlWindowListener *GetWindowListener();
-
     void OnChildSizeChanged(CControl *inChild);
     void ResetMinMaxPref();
 
@@ -249,9 +247,6 @@ public:
     void AddFocusListener(CChildFocusListener *inListener);
     void RemoveFocusListener(CChildFocusListener *inListener);
     void FireFocusEvent(bool inStatus);
-
-    void SetTooltipText(const QString &inText);
-    QString GetTooltipText();
 
     void EnsureVisible(CRct inRect);
     void EnsureVisible();

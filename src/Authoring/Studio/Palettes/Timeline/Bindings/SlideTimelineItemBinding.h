@@ -42,7 +42,6 @@
 //==============================================================================
 class ITimelineItem;
 class CTimelineTranslationManager;
-class CBaseStateRow;
 
 //=============================================================================
 /**
@@ -58,13 +57,11 @@ public:
     // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
     void SetName(const Q3DStudio::CString &inName) override;
-    void Bind(CBaseStateRow *inRow) override;
     bool IsValidTransaction(EUserTransaction inTransaction) override;
 
     // No properties
     long GetPropertyCount() override { return 0; }
     ITimelineItemProperty *GetProperty(long) override { return nullptr; }
-    void LoadProperties() override {}
 
     // Eye/Lock toggles are not applicable
     bool ShowToggleControls() const override { return false; }
@@ -82,17 +79,9 @@ public:
     // Keyframes, not applicable to a Slide
     void InsertKeyframe() override {}
     void DeleteAllChannelKeyframes() override {}
-    long GetKeyframeCount() const override { return 0; }
     IKeyframe *GetKeyframeByTime(long) const override { return nullptr; }
-    IKeyframe *GetKeyframeByIndex(long) const override { return nullptr; }
-    long OffsetSelectedKeyframes(long) override { return 0; }
-    void CommitChangedKeyframes() override {}
-    void OnEditKeyframeTime(long, long) override {}
-    // IKeyframeSelector
-    void SelectKeyframes(bool, long inTime = -1) override { Q_UNUSED(inTime); }
 
     // Keyframe manipulation, not applicable
-    void UIRefreshPropertyKeyframe(long inOffset) override { Q_UNUSED(inOffset); }
     bool HasDynamicKeyframes(long inTime) override
     {
         Q_UNUSED(inTime);
@@ -103,13 +92,6 @@ public:
         Q_UNUSED(inTime);
         Q_UNUSED(inDynamic);
     }
-    void DoSelectKeyframes(bool inSelected, long inTime, bool inUpdateUI) override
-    {
-        Q_UNUSED(inSelected);
-        Q_UNUSED(inTime);
-        Q_UNUSED(inUpdateUI);
-    }
-    void OnPropertySelection(long inTime) override { Q_UNUSED(inTime); }
 
 protected:
     std::shared_ptr<qt3dsdm::ISignalConnection>

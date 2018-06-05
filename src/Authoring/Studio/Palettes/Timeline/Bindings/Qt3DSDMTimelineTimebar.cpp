@@ -46,11 +46,11 @@
 #include "Core.h"
 #include "DurationEditDlg.h"
 #include "IDocumentEditor.h"
-#include "BaseStateRow.h"
 #include "StudioFullSystem.h"
 #include "StudioPreferences.h"
 #include "ITimelineItemBinding.h"
 #include "RowTree.h"
+#include "RowTimeline.h"
 
 Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,

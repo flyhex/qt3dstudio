@@ -298,7 +298,7 @@ following (as many as you like, in any order):
   id-prefixed path to any element in a presentation.
 \li
   The \b{\c{attribute}} attribute must match the
-  \l{QML Reference: Attribute Names}{scripting name} of an attribute on that element.
+  \l{Attribute Names}{scripting name} of an attribute on that element.
 \li
   The \b{\c{value}} attribute must provide a Lua expression to
   evaluate, the result of which will be set as the value on the element.

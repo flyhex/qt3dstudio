@@ -307,7 +307,7 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
         break;
     }
 
-    for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx) {
+    for (int matIdx = 0, end = int(m_materials.size()); matIdx < end; ++matIdx) {
         if (m_materials[matIdx].m_relativePath == sourcePath)
             item->m_value = values[matIdx + 2]; // +2 for standard and referenced materials
     }
@@ -888,8 +888,10 @@ void InspectorControlModel::refresh()
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property.Valid())
+            if (property->m_property.Valid()) {
                 updatePropertyValue(property);
+                updateControlledToggleState(property);
+            }
         }
     }
     Q_EMIT dataChanged(index(0), index(rowCount() - 1));

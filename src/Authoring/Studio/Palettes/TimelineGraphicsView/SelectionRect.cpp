@@ -41,6 +41,9 @@ SelectionRect::SelectionRect(Ruler *ruler) : m_ruler(ruler)
 void SelectionRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                           QWidget *widget)
 {
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
     if (m_active)
         painter->drawRect(m_rect);
 }

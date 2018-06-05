@@ -1,14 +1,6 @@
 TEMPLATE = subdirs
 
 !package {
-    SUBDIRS += \
-        qmldynamickeyframes \
-        qmlstreamer \
-        widgetviewer \
-        surfaceviewer \
-        surfaceviewer_offscreen \
-        qmldatainput
-
     # Sample project only has the presentation.
     # We do not want to pollute the sample folder with .pro file, so do the install here.
     INSTALLS += sampleProject

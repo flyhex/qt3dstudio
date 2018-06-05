@@ -31,14 +31,16 @@
 \page viewer-commandline.html
 \ingroup qt3dstudio-viewer
 
-The Qt 3D Studio Viewer supports launching a specific presentation and generating image
-sequences using command line arguments.
+The Qt 3D Studio Viewer supports launching a specific presentation or waiting
+for incoming connections with a presentation sent remotely.
 
 \section1 Usage
 
 \badcode
-    Qt3DViewer [options] [presentation file]
+    q3dsviewer [options] [presentation file]
 \endcode
+
+When no filename is given, the viewer is launched in remote connection mode.
 
 The following command line options are supported:
 
@@ -50,67 +52,26 @@ The following command line options are supported:
         \li -?, -h, --help
         \li Displays help for command line usage.
     \row
-        \li --sequence
-        \li Generates an image sequence. The \c{presentation file} argument must be specified.
-            Specifying any of the seq-* options implies setting this option.
-    \row
-        \li --seq-start <ms>
-        \li Start time of the sequence in milliseconds. The default value is \c{0}.
-    \row
-        \li --seq-end <ms>
-        \li End time of the sequence in milliseconds. The default value is \c{1000}.
-    \row
-        \li --seq-fps <fps>
-        \li Frames per second for the sequence. The default value is \c{60}.
-    \row
-        \li --seq-interval <ms>
-        \li Time interval between frames in the sequence in milliseconds.
-            The \c{seq-fps} option is ignored if this option is used.
-    \row
-        \li --seq-width <pixels>
-        \li Width of the image sequence. The default value is \c{1920}.
-    \row
-        \li --seq-height <pixels>
-        \li Height of the image sequence. The default value is \c{1080}.
-    \row
-        \li --seq-outpath <path>
-        \li Output path of the image sequence. The default value is the current directory.
-    \row
-        \li --seq-outfile <file>
-        \li Output file name base for the image sequence.
-            The default value is derived from the presentation file name.
-    \row
-        \li --connect <port>
-        \li If this parameter is specified, the viewer is started in connection mode.
-            The default value is \c{36000}.
-    \row
-        \li --fullscreen
+        \li -f, --fullscreen
         \li Starts the viewer in fullscreen mode.
     \row
-        \li --maximized
-        \li Starts the viewer in maximized mode.
+        \li -w, --no-main-window
+        \li Disables the widget-based user interface, such as the menu bar.
+        This mode simulates the operating mode typical on embedded devices:
+        using a Qt platform plugin like \c eglfs, there will only be a single,
+        fullscreen QWindow (or, with Qt Quick applications, QQuickWindow or
+        QQuickView) present. This argument achieves the same even when running
+        on a desktop operating system. Combined with \c{-f} (going fullscreen)
+        this allows seeing the presentation in real full screen (no menu bar).
     \row
-        \li --windowgeometry <geometry>
-        \li Specifies the initial window geometry using the X11-syntax.
-            For example: \c{1000x800+50+50}
+        \li -p, --no-profile
+        \li Loads the presentation with some profiling options disabled. This
+        provides minimal performance improvements.
     \row
-        \li --mattecolor <color>
-        \li Specifies custom matte color using \c{#000000} syntax.
-            For example, white matte: \c{#ffffff}
-    \row
-        \li --showstats
-        \li Show render statistics on screen.
-    \row
-        \li --scalemode <center|fit|fill>
-        \li Specifies scaling mode. The default value is \c{center}.
+        \li --port <port_number>
+        \li Sets the port on which the viewer listens for remote connections.
+        The remote connection mode is active either when launching with no
+        presentation file specified, or when choosing \uicontrol{File > Remote Setup}.
 \endtable
-
-\section1 Example
-
-Creating a one minute 4k image sequence of a presentation:
-
-\badcode
-    Qt3DViewer --seq-end 60000 --seq-width 3840 --seq-height 2160 MyPresentation.uip
-\endcode
 
 */

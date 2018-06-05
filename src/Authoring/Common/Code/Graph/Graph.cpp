@@ -424,14 +424,11 @@ public:
     void MoveTo(const TIdentifier inNode, const TIdentifier inNewParent,
                         const COpaquePosition &inPosition) override
     {
-          // Mahmoud_TODO: will be eventually removed
-//        if (GetParent(inNode) != inNewParent
-//            || !(GetNodePosition(inNode) == GetChildCount(inNewParent) - 1)){
-//            RemoveChild(inNode, false);
-//            AddChild(inNewParent, inNode, inPosition);
-//        }
-        RemoveChild(inNode, false);
-        AddChild(inNewParent, inNode, inPosition);
+        if (GetParent(inNode) != inNewParent
+                || !(GetNodePosition(inNode) == GetChildCount(inNewParent) - 1)) {
+            RemoveChild(inNode, false);
+            AddChild(inNewParent, inNode, inPosition);
+        }
     }
 
     void InsertTo(const TIdentifier inNode, const TIdentifier inNewParent,

@@ -36,61 +36,61 @@
 
 \image slidePalette.png
 
- Each scene and
-component in a presentation has a set of "slides" associated with it.
-These slides can be used to effect drastic, PowerPoint-like changes
-(\e{each slide has completely different content}) or subtle
-variations on the same content (\e{make the button background pulse
-with a slight orange color on the 'Focused' slide}).
+Each scene and component in a presentation has a set of \e slides associated with it.
+These slides can be used to effect drastic, PowerPoint-like changes (each slide has completely
+different content) or subtle variations on the same content (i.e. make the button background pulse
+with a slight orange color on the active slide).
 
 Each slide has its own animation timeline and playback characteristics.
-Your 'Intro' slide may last for 1 second and automatically play through
+Your intro slide may last for 1 second and automatically play through
 to another slide that has no animation at all. A third slide may have 10
 seconds of different animation that play in a looping fashion.
 
 Each scene and component come to life with one slide already created. To
-add additional slides, right-click in the Slide palette and choose \"New
-Slide\" (or duplicate an existing slide).
+add additional slides, right-click in the slide palette and choose \uicontrol{New Slide}
+(or duplicate an existing slide).
 
 Click on a slide to select it. This will cause the
-\l{studio-timeline-palette.html}{Timeline palette} to show the
+\l{studio-timeline-palette.html}{timeline palette} to show the
 elements and animations for the selected slide, and the
 \l{studio-scene-view-and-matte.html}{scene view} to update
 accordingly. Adding new elements to your scene (via the
-\l{studio-basic-objects-palette.html}{Basic Objects} or
-\l{studio-project-palette.html}{Project} palettes) will add the
+\l{studio-basic-objects-palette.html}{basic objects palette} or
+\l{studio-project-palette.html}{project palette}) will add the
 elements only to this slide. Adding new actions (via the
-\l{studio-action-palette.html}{Actions palette} will create actions
+\l{studio-action-palette.html}{actions palette} will create actions
 that only can be triggered on this slide.
 
-You may re-order slides within the palette by dragging them.
+You may re-order slides within the slide palette by dragging them.
 
 \section1 The Master Slide
 
 \image Studio-Slide-Master.png
 
- To create content
-that subtly changes across multiple slides you need elements that exist
-across all of those slides. Each scene and component have one \"master
-slide\". Elements placed on this slide exist on all slides of that
-scene/component.
+To create content that subtly changes across multiple slides you need elements that exist
+across all of those slides. Each scene and component have one \e{master
+slide}. Elements placed on this slide exist on all slides of that
+scene or \l{component}.
 
-Click the \b {Edit Master} button at the top of the Slide palette to
-enter the master slide. As with other slides, the Timeline palette and
+Click the \uicontrol {Edit Master} slide at the top of the slide palette to
+enter the master slide. As with other slides, the timeline palette and
 scene view will update accordingly. Now adding new elements and actions
 will create these items on the master slide.
 
-Click the \b {Leave Master} button when you have finished adjusting the
+Click the \b {Leave Master} slide when you have finished adjusting the
 master slide. Note that you do not need to be on the master slide to
 adjust properties of elements on the master slide. Changes made to a
 property of a master element apply across all slides equally.
+
+To add an action to a master slide object you need to be on the master slide. If you add an action
+to a master slide object on any other slide, the action will only exist on that slide.
 
 To cause certain properties for an element to vary per slide, you must
 \l{studio-inspector-palette.html#unlinking-from-the-master-slide}
 {unlink each property} that you wish to change.
 
 To cause a property to smoothly transition when changing from one slide
-to another, animated the property using
+to another, animate the property using
 \l{best-practices-dynamic-keyframes.html}{dynamic keyframes}.
 
 */

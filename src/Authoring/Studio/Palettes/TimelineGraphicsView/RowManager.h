@@ -55,20 +55,21 @@ public:
     void clearSelection();
     void updateFiltering(RowTree *rowTree = nullptr);
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
-    void updateRulerDuration();
+    void updateRulerDuration(bool updateMaxDuration = true);
     void collapseAllPropertyRows();
     int getChildIndex(RowTree *parentRow, RowTree *childRow);
     int getRowIndex(RowTree *row, int startAt = 1);
     bool isFirstChild(RowTree *parent, RowTree *child);
     bool isSingleSelected() const;
-    RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr);
+    RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr,
+                                  int index = -1);
     RowTree *getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index = -1);
     RowTree *createRow(EStudioObjectType rowType, RowTree *parentRow = nullptr,
                        const QString &label = QString(), const QString &propType = QString(),
                        int index = -1);
     RowTree *rowAt(int idx);
-    RowTree *getRowAbove(RowTree *row);
     RowTree *selectedRow() const;
+    bool isRowSelected(RowTree *row) const;
     QVector<RowTree *> selectedRows() const;
     RowTimeline *rowTimelineAt(int idx);
 
@@ -76,7 +77,6 @@ private:
     int getLastChildIndex(RowTree *row, int index = -1);
     bool validIndex(int idx) const;
     void deleteRowRecursive(RowTree *row);
-    void updateRowFilter(RowTree *row);
     void updateRowFilterRecursive(RowTree *row);
     void createRowsFromBindingRecursive(ITimelineItemBinding *binding,
                                         RowTree *parentRow = nullptr);

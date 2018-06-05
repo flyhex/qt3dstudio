@@ -269,6 +269,8 @@
         <file>images/Tutorial/screens/1x/5.png</file>
         <file>images/Tutorial/screens/1x/6.png</file>
         <file>images/Tutorial/screens/1x/7.png</file>
+        <file>images/Tutorial/screens/1x/8.png</file>
+        <file>images/Tutorial/screens/1x/9.png</file>
         <file>images/Tutorial/screens/2x/1.png</file>
         <file>images/Tutorial/screens/2x/2.png</file>
         <file>images/Tutorial/screens/2x/3.png</file>
@@ -276,10 +278,14 @@
         <file>images/Tutorial/screens/2x/5.png</file>
         <file>images/Tutorial/screens/2x/6.png</file>
         <file>images/Tutorial/screens/2x/7.png</file>
+        <file>images/Tutorial/screens/2x/8.png</file>
+        <file>images/Tutorial/screens/2x/9.png</file>
         <file>images/remote.png</file>
         <file>images/remote@2x.png</file>
         <file>images/remote-disabled.png</file>
         <file>images/remote-disabled@2x.png</file>
+        <file>images/Assets-Model.png</file>
+        <file>images/Assets-Model@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

@@ -47,10 +47,10 @@
 TimelineToolbar::TimelineToolbar() : QToolBar()
 {
     setContentsMargins(0, 0, 0, 0);
-    setIconSize(QSize(15, 15));
+    setIconSize(QSize(16, 16));
 
     // create icons
-    static const QIcon iconLayer = QIcon(":/images/Asset-Layer-Normal.png");
+    static const QIcon iconLayer = QIcon(":/images/Objects-Layer-Normal.png");
     static const QIcon iconDelete = QIcon(":/images/Action-Trash-Normal.png");
     static const QIcon iconFirst = QIcon(":/images/playback_tools_low-00.png");
     static const QIcon iconLast = QIcon(":/images/playback_tools_low-04.png");
@@ -62,11 +62,18 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_iconPlay = QIcon(":/images/playback_tools_low-02.png");
 
     // create actions
-    QAction *actionNewLayer = new QAction(iconLayer, tr("Add New Layer"), this);
+    QString ctrlKey(QStringLiteral("Ctrl+"));
+    QString altKey(QStringLiteral("Alt+"));
+#ifdef Q_OS_MACOS
+    ctrlKey = "⌘";
+    altKey = "⌥";
+#endif
+    QString newLayerString = tr("Add New Layer (%1L)").arg(ctrlKey);
+    QAction *actionNewLayer = new QAction(iconLayer, newLayerString, this);
     QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"), this);
     QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"), this);
     m_actionDataInput = new QAction(m_iconDiActive, "");
-    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object"), this);
+    m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object (Del)"), this);
     m_actionPlayStop = new QAction(this);
     m_timeLabel = new TimelineToolbarLabel(this);
     m_diLabel = new QLabel();
@@ -84,6 +91,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
 
     m_timeLabel->setText(tr("0:00.000"));
     m_timeLabel->setMinimumWidth(80);
+    m_timeLabel->setToolTip(tr("Go To Time (%1%2T)").arg(ctrlKey).arg(altKey));
 
     m_diLabel->setText("");
     m_diLabel->setMinimumWidth(100);
@@ -138,7 +146,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));
 
     // make datainput indicator listen to selection dialog choice
-    m_dataInputSelector = new DataInputSelectView(this);
+    m_dataInputSelector = new DataInputSelectView(this, EDataType::DataTypeRangedNumber);
     g_StudioApp.GetCore()->GetDispatch()->AddDataModelListener(this);
     connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &TimelineToolbar::onDataInputChange);
@@ -189,10 +197,10 @@ void TimelineToolbar::updatePlayButtonState(bool started)
 {
     if (started) {
         m_actionPlayStop->setIcon(m_iconStop);
-        m_actionPlayStop->setText(tr("Stop Playing"));
+        m_actionPlayStop->setText(tr("Stop Playing (Enter)"));
     } else {
         m_actionPlayStop->setIcon(m_iconPlay);
-        m_actionPlayStop->setText(tr("Start Playing"));
+        m_actionPlayStop->setText(tr("Start Playing (Enter)"));
     }
 }
 
@@ -285,11 +293,12 @@ void TimelineToolbar::showDataInputChooser(const QPoint &point)
     QString currCtr = m_currController.size() ?
         m_currController : m_dataInputSelector->getNoneString();
     QVector<QPair<QString, int>> dataInputList;
-    for (int i = 0; i < g_StudioApp.m_dataInputDialogItems.size(); i++) {
-        if (g_StudioApp.m_dataInputDialogItems[i]->type == EDataType::DataTypeRangedNumber)
-            dataInputList.append(QPair<QString, int>(g_StudioApp.m_dataInputDialogItems[i]->name,
-                                                     g_StudioApp.m_dataInputDialogItems[i]->type));
+
+    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
+        if (it->type == EDataType::DataTypeRangedNumber)
+            dataInputList.append(QPair<QString, int>(it->name, it->type));
     }
+
     m_dataInputSelector->setData(dataInputList, currCtr);
 
     CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
@@ -394,12 +403,13 @@ void TimelineToolbar::updateTimelineTitleColor(bool controlled)
 {
     QString styleString;
     if (controlled) {
-        styleString= "QDockWidget { color: "
+        styleString = "QDockWidget#timeline { color: "
                 + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     } else {
-        styleString = "QDockWidget { color: "
+        styleString = "QDockWidget#timeline { color: "
                 + QString(CStudioPreferences::textColor().name()) + "; }";
     }
-    QWidget *timelineDock = parentWidget()->parentWidget();
+
+    QWidget *timelineDock = parentWidget()->parentWidget()->parentWidget()->parentWidget();
     timelineDock->setStyleSheet(styleString);
 }

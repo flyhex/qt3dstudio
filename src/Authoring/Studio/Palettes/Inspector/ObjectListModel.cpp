@@ -79,7 +79,7 @@ int ObjectListModel::rowCount(const QModelIndex &parent) const
 
     const auto handle = handleForIndex(parent);
     const auto children = childrenList(m_slideHandle, handle);
-    return children.size();
+    return int(children.size());
 }
 
 int ObjectListModel::columnCount(const QModelIndex &parent) const

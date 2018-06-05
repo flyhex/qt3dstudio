@@ -33,10 +33,12 @@
 #include "RowTimeline.h"
 #include "Bindings/ITimelineTimebar.h"
 
+class TimelineGraphicsScene;
+
 class TimelineControl : public ITimeChangeCallback
 {
 public:
-    TimelineControl();
+    TimelineControl(TimelineGraphicsScene *scene);
 
     void setRowTimeline(RowTimeline *rowTimeline);
     void showDurationEditDialog();
@@ -48,6 +50,7 @@ public:
     void Rollback() override;
 
 private:
+    TimelineGraphicsScene *m_scene = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
     ITimelineTimebar *m_timebar = nullptr;
     double m_startTime = 0;

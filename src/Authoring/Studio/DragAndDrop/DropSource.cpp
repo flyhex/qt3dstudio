@@ -40,7 +40,9 @@
 #include "ExplorerFileDropSource.h"
 #include "TimelineDropSource.h"
 #include "BasicObjectDropSource.h"
-#include "ListBoxDropSource.h"
+#include "Views.h"
+#include "MainFrm.h"
+#include "TimelineWidget.h"
 
 CDropSource::CDropSource(long inFlavor, unsigned long inSize)
     : m_Flavor(inFlavor)
@@ -49,10 +51,12 @@ CDropSource::CDropSource(long inFlavor, unsigned long inSize)
     , m_HasValidTarget(false)
     , m_CurrentFlags(0)
 {
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->enableDnD();
 }
 
 CDropSource::~CDropSource()
 {
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->enableDnD(false);
 }
 
 CDropSource *CDropSourceFactory::Create(long inFlavor, void *inData, unsigned long inSize)
@@ -80,10 +84,6 @@ CDropSource *CDropSourceFactory::Create(long inFlavor, IDragable *inDragable)
 {
     CDropSource *theDropSource(nullptr);
     switch (inFlavor) {
-    case QT3DS_FLAVOR_LISTBOX:
-        theDropSource = new CListBoxDropSource(inFlavor, inDragable);
-        break;
-
     case QT3DS_FLAVOR_BASIC_OBJECTS:
         theDropSource = new CBasicObjectDropSource(inFlavor, inDragable);
         break;
@@ -104,11 +104,6 @@ CDropSource *CDropSourceFactory::Extract(long inFlavor, void *inData, unsigned l
     CDropSource *theDropSource(nullptr);
     switch (inFlavor) {
     // For all of the Studio Flavors we just need to extract the dropsource out of it.
-    case QT3DS_FLAVOR_LISTBOX:
-        // make an Aset out of this.
-        theDropSource = static_cast<CListBoxDropSource *>(inData);
-        break;
-
     case QT3DS_FLAVOR_BASIC_OBJECTS:
         // make an Aset out of this.
         theDropSource = static_cast<CBasicObjectDropSource *>(inData);

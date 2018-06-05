@@ -30,35 +30,49 @@
 #define ROWMOVER_H
 
 #include "TimelineConstants.h"
-
-#include <QtWidgets/qgraphicsitem.h>
+#include "TimelineItem.h"
+#include "DocumentEditorEnumerations.h"
+#include "StudioObjectTypes.h"
+#include <QtCore/qtimer.h>
 
 class RowTree;
+class TimelineGraphicsScene;
 
-class RowMover : public QGraphicsRectItem
+class RowMover : public TimelineItem
 {
 public:
-    RowMover();
+    RowMover(TimelineGraphicsScene *m_scene);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
 
-    void start(RowTree *row);
-    void end();
-    void resetInsertionParent(RowTree *newTarget = nullptr);
-    void updateState(int index, int depth, int rawIndex);
-
-    RowTree *insertionParent() const;
-    RowTree *sourceRow() const;
-
-    int targetIndex() const;
+    void start(const QVector<RowTree *> &rows);
+    void end(bool force = false);
+    void updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType = OBJTYPE_UNKNOWN);
     bool isActive();
-    bool isValidMove(int index, RowTree *rowAtIndex);
+    RowTree *insertionTarget() const;
+    RowTree *insertionParent() const;
+    QVector<RowTree *> sourceRows() const;
+    int type() const;
+    Q3DStudio::DocumentEditorInsertType::Enum insertionType() const;
 
 private:
+    void updateState(int depth, double y);
+    void resetInsertionParent(RowTree *newParent = nullptr);
+    RowTree *getRowAtPos(const QPointF &scenePos);
+    bool isSourceRowsDescendant(RowTree *row) const;
+    bool sourceRowsHasMaster() const;
+    bool isNextSiblingRow(RowTree *r1, RowTree *r2) const;
+
+    TimelineGraphicsScene *m_scene = nullptr;
+    RowTree *m_insertionTarget = nullptr; // insertion target
     RowTree *m_insertionParent = nullptr; // insertion parent
-    RowTree *m_sourceRow = nullptr;       // dragged row
-    int m_targetIndex = -1;               // insertion index
+    RowTree *m_rowAutoExpand = nullptr;
+    QVector<RowTree *> m_sourceRows;      // dragged rows
     bool m_active = false;
+    Q3DStudio::DocumentEditorInsertType::Enum m_insertType =
+            Q3DStudio::DocumentEditorInsertType::Unknown;
+    QTimer m_autoExpandTimer;
+    std::function<void()> updateTargetRowLater = {};
 };
 
 #endif // ROWMOVER_H

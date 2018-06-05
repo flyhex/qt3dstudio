@@ -38,11 +38,6 @@
         <file>Palettes/controls/StyledTooltip.qml</file>
         <file>Palettes/controls/StyledToolButton.qml</file>
         <file>Palettes/controls/StyledMenuSeparator.qml</file>
-        <file>Palettes/Timeline/Timeline.qml</file>
-        <file>Palettes/Timeline/TimelineItem.qml</file>
-        <file>Palettes/Timeline/Keyframes.qml</file>
         <file>Palettes/controls/StyledToggleButton.qml</file>
-        <file>Palettes/Timeline/TimelineTreeDelegate.qml</file>
-        <file>Palettes/Timeline/PlayHead.qml</file>
     </qresource>
 </RCC>

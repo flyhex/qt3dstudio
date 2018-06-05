@@ -116,14 +116,6 @@ in mind while writing scripts.
 \li
   Caching values can improve performance.
 \li
-  Reading values from a Lua table is going to be faster than getting
-  them by calling \c{getAttribute()} to pull the value from the
-  element.
-\li
-  If you're going to be using a value often (an attribute value, element
-  reference, etc), consider storing it in a Lua table rather than
-  calling a function to look it up over and over again.
-\li
   Use \c{onUpdate} judiciously.
 \li
   A behavior's \c{onUpdate} handler, which can be used to execute

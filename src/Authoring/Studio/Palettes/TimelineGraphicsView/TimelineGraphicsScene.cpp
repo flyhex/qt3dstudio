@@ -60,12 +60,15 @@
 #include <QtWidgets/qgraphicsview.h>
 #include <QtWidgets/qscrollbar.h>
 #include <QtWidgets/qmenu.h>
+#include <QtWidgets/qlabel.h>
 #include <QtWidgets/qaction.h>
 #include <QtGui/qevent.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/qglobal.h>
 #include <QtCore/qdebug.h>
 #include <QtWidgets/qaction.h>
+
+static const QPointF invalidPoint(-999999.0, -999999.0);
 
 TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     : QGraphicsScene(timelineWidget)
@@ -75,18 +78,27 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_ruler(new Ruler)
     , m_playHead(new PlayHead(m_ruler))
     , m_selectionRect(new SelectionRect(m_ruler))
-    , m_rowMover(new RowMover)
+    , m_rowMover(new RowMover(this))
     , m_widgetTimeline(timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
     , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
-    , m_timelineControl(new TimelineControl)
+    , m_pressPos(invalidPoint)
+    , m_timelineControl(new TimelineControl(this))
     , m_currentCursor(-1)
 {
     addItem(m_playHead);
     addItem(m_selectionRect);
     addItem(m_rowMover);
     addItem(m_widgetRoot);
+
+    m_timebarToolTip = new QLabel(m_widgetTimeline);
+    m_timebarToolTip->setObjectName(QStringLiteral("timebarToolTip"));
+    m_timebarToolTip->setWindowModality(Qt::NonModal);
+    m_timebarToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
+    m_timebarToolTip->setContentsMargins(2, 2, 2, 2);
+    connect(qApp, &QApplication::focusChanged,
+            this, &TimelineGraphicsScene::handleApplicationFocusLoss);
 
     m_rowMover->setVisible(false);
 
@@ -112,6 +124,19 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 
     m_layoutTree->addItem(m_treeHeader);
     m_layoutTimeline->addItem(m_ruler);
+
+    // auto scrolling (when DnD is active and hovering on top or bottom of the tree list)
+    connect(&m_autoScrollTimer, &QTimer::timeout, [this]() {
+        QScrollBar *scrollbar = m_widgetTimeline->viewTreeContent()->verticalScrollBar();
+        if (m_autoScrollUpOn)
+            scrollbar->setValue(scrollbar->value() - TimelineConstants::AUTO_SCROLL_DELTA);
+        else if (m_autoScrollDownOn)
+            scrollbar->setValue(scrollbar->value() + TimelineConstants::AUTO_SCROLL_DELTA);
+    });
+
+    connect(&m_autoScrollTriggerTimer, &QTimer::timeout, [this]() {
+        m_autoScrollTimer.start(TimelineConstants::AUTO_SCROLL_PERIOD);
+    });
 
     QTimer::singleShot(0, this, [this]() {
         m_playHead->setPosition(0);
@@ -166,25 +191,12 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     action->setShortcutContext(Qt::ApplicationShortcut);
     connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleLockSelected);
     timelineWidget->addAction(action);
+}
 
-    // TODO: Shortcuts for these to be determined
-//    action = new QAction(this);
-//    action->setShortcut(QKeySequence(TBD));
-//    action->setShortcutContext(Qt::ApplicationShortcut);
-//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterShy);
-//    timelineWidget->addAction(action);
-
-//    action = new QAction(this);
-//    action->setShortcut(QKeySequence(TBD));
-//    action->setShortcutContext(Qt::ApplicationShortcut);
-//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterVisible);
-//    timelineWidget->addAction(action);
-
-//    action = new QAction(this);
-//    action->setShortcut(QKeySequence(TBD));
-//    action->setShortcutContext(Qt::ApplicationShortcut);
-//    connect(action, &QAction::triggered, m_treeHeader, &TreeHeader::toggleFilterLock);
-//    timelineWidget->addAction(action);
+TimelineGraphicsScene::~TimelineGraphicsScene()
+{
+    disconnect(qApp, &QApplication::focusChanged,
+               this, &TimelineGraphicsScene::handleApplicationFocusLoss);
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)
@@ -205,121 +217,34 @@ void TimelineGraphicsScene::updateTimelineLayoutWidth()
 
     m_layoutTimeline->setMinimumWidth(timelineWidth);
     m_layoutTimeline->setMaximumWidth(timelineWidth);
-    // Mahmoud_TODO: could be requested by UX. else will be removed
-//    m_widgetTimeline->viewTimelineContent()->horizontalScrollBar()->setValue(
-//               m_widgetTimeline->viewTimelineContent()->horizontalScrollBar()->maximum());
-
-//    if (m_editedTimelineRow)
-//        m_widgetTimeline->viewTimelineContent()->ensureVisible(m_editedTimelineRow);
-}
-
-void TimelineGraphicsScene::addNewLayer()
-{
-    // TODO: get the update from the data model
-//    RowTree *newLayer = m_rowManager->createRow(OBJTYPE_LAYER, m_sceneRow);
-//    m_rowManager->selectRow(newLayer);
-
-    // scroll to top
-    m_widgetTimeline->viewTimelineContent()->verticalScrollBar()->setValue(0);
-}
-
-// TODO: test function, to be removed
-void debugPrintRows(RowTree *row)
-{
-    qDebug().noquote().nospace() << "|" << QString("-").repeated(row->depth()) << row->label();
-
-    if (!row->empty()) {
-        for (auto child : row->childRows())
-            debugPrintRows(child);
-    }
-}
-
-// Mahmoud_TODO: debug func, remove
-void printAsset(Q3DStudio::TIdentifier asset, QString padding = " ")
-{
-    TAssetGraphPtr assetGraph = g_StudioApp.GetCore()->GetDoc()->GetAssetGraph();
-    padding = padding.append("-");
-
-    for (int i = 0; i < assetGraph.get()->GetChildCount(asset); i++) {
-        qDebug().noquote().nospace()
-                << "\x1b[42m \x1b[1m" << __FUNCTION__
-                << padding
-                << assetGraph.get()->GetChild(asset, i)
-                << "\x1b[m";
-
-        printAsset(assetGraph.get()->GetChild(asset, i), padding);
-    }
 }
 
 void TimelineGraphicsScene::commitMoveRows()
 {
-    // same place, abort
-    if ((m_rowMover->sourceRow()->index() == m_rowMover->targetIndex())
-        && m_rowMover->sourceRow()->parentRow() == m_rowMover->insertionParent()) {
+    if (!m_rowMover->insertionTarget()
+            || m_rowMover->sourceRows().contains(m_rowMover->insertionTarget())) {
         return;
     }
 
-    // handle for the moving row
-    qt3dsdm::Qt3DSDMInstanceHandle handleSource = static_cast<Qt3DSDMTimelineItemBinding *>
-            (m_rowMover->sourceRow()->getBinding())->GetInstance();
+    // handles for the moving rows
+    qt3dsdm::TInstanceHandleList sourceHandles;
+    const auto sourceRows = m_rowMover->sourceRows();
+    for (auto sourceRow : sourceRows) {
+        qt3dsdm::Qt3DSDMInstanceHandle handleSource = static_cast<Qt3DSDMTimelineItemBinding *>
+                (sourceRow->getBinding())->GetInstance();
+        sourceHandles.push_back(handleSource);
+    }
+    qt3dsdm::Qt3DSDMInstanceHandle handleTarget = static_cast<Qt3DSDMTimelineItemBinding *>
+            (m_rowMover->insertionTarget()->getBinding())->GetInstance();
 
-    // handle for the parent of the insertion row
-    qt3dsdm::Qt3DSDMInstanceHandle handleParent = static_cast<Qt3DSDMTimelineItemBinding *>
-            (m_rowMover->insertionParent()->getBinding())->GetInstance();
+    if (!m_rowMover->insertionParent()->expanded())
+        m_rowMover->insertionParent()->updateExpandStatus(RowTree::ExpandState::Expanded, false);
 
-    // commit the row move to the binding
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Reorder Rows"))
-        ->ReorderRows(handleSource, handleParent, m_rowMover->targetIndex());
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                      QObject::tr("Move Rows"))
+            ->RearrangeObjects(sourceHandles, handleTarget, m_rowMover->insertionType());
 
     // updating the UI happens in TimelineWidget.onChildAdded()
-}
-
-RowTree *TimelineGraphicsScene::getNextSiblingRow(RowTree *row) const
-{
-    if (row && m_layoutTree->count() > 1) {
-        for (int i = row->indexInLayout() + 1; i < m_layoutTree->count(); ++i) {
-            RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-            if (row_i->depth() <= row->depth())
-                return row_i;
-        }
-    }
-
-    return nullptr;
-}
-
-// TODO: not used, remove
-bool TimelineGraphicsScene::lastRowInAParent(RowTree *rowAtIndex, int index)
-{
-    int depth = nextRowDepth(index);
-
-    return depth == -1 || depth < rowAtIndex->depth();
-}
-
-// not used except in lastRowInAParent()
-int TimelineGraphicsScene::nextRowDepth(int index) {
-    if (index < m_layoutTree->count() - 1)
-        index ++;
-
-    return static_cast<RowTree *>(m_layoutTree->itemAt(index)->graphicsItem())->depth();
-}
-
-bool TimelineGraphicsScene::validLayerMove(RowTree *rowAtIndex, RowTree *nextRowAtIndex)
-{
-    // we don't care about non-layers in this method
-    if (m_rowMover->sourceRow()->rowType() != OBJTYPE_LAYER)
-        return true;
-
-    if (rowAtIndex->rowType() == OBJTYPE_SCENE)
-        return true;
-
-    if (rowAtIndex->rowType() == OBJTYPE_LAYER)
-       return rowAtIndex->empty() || !rowAtIndex->expanded();
-
-    if (nextRowAtIndex == nullptr || (nextRowAtIndex->depth() <= rowAtIndex->depth()
-                                      && nextRowAtIndex->depth() == 2))
-        return true;
-
-    return false;
 }
 
 void TimelineGraphicsScene::updateTreeWidth(double treeWidth)
@@ -359,13 +284,18 @@ void TimelineGraphicsScene::resetMouseCursor()
 
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        m_dragging = false;
+    // Ignore non-left presses if dragging
+    if (event->button() != Qt::LeftButton && (m_dragging || m_startRowMoverOnNextDrag)) {
+        event->accept();
+        return;
+    }
+    if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
+        resetMousePressParams();
         m_pressPos = event->scenePos();
         QGraphicsItem *item = itemAt(m_pressPos, QTransform());
+        const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
         if (item) {
             item = getItemBelowType(TimelineItem::TypePlayHead, item, m_pressPos);
-
             if (item->type() == TimelineItem::TypeRuler) {
                 m_rulerPressed = true;
                 double time = m_ruler->distanceToTime(event->scenePos().x()
@@ -378,19 +308,26 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                        || item->type() == TimelineItem::TypeRowTreeLabelItem) {
                 item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
                 RowTree *rowTree = static_cast<RowTree *>(item);
-                if (!rowTree->isProperty()) {
-                    m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
-                    if (m_clickedTreeControlType != TreeControlType::None)
-                        m_rowManager->updateFiltering(rowTree);
-                    else if (rowTree->draggable())
-                        m_rowMover->start(rowTree);
+                m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
+                if (m_clickedTreeControlType == TreeControlType::Shy
+                        || m_clickedTreeControlType == TreeControlType::Hide
+                        || m_clickedTreeControlType == TreeControlType::Lock) {
+                    m_rowManager->updateFiltering(rowTree);
+                } else if (m_clickedTreeControlType == TreeControlType::None) {
+                    // Prepare to change selection to single selection at release if a multiselected
+                    // row is clicked without ctrl.
+                    if (!ctrlKeyDown && m_rowManager->isRowSelected(rowTree)
+                            && !m_rowManager->isSingleSelected() ) {
+                        m_releaseSelectRow = rowTree;
+                    }
+                    m_rowManager->selectRow(rowTree, ctrlKeyDown);
+                    if (rowTree->draggable())
+                        m_startRowMoverOnNextDrag = true;
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
                 m_editedTimelineRow = static_cast<RowTimeline *>(item);
                 Keyframe *keyframe = m_editedTimelineRow->getClickedKeyframe(m_pressPos);
                 if (keyframe) {  // pressed a keyframe
-                    const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
-
                     if (ctrlKeyDown && keyframe->selected()) {
                         if (m_editedTimelineRow->rowTree()->isProperty())
                             m_keyframeManager->deselectKeyframe(keyframe);
@@ -419,6 +356,12 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     if (m_clickedTimelineControlType == TimelineControlType::None)
                         m_selectionRect->start(m_pressPos);
                     else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+                        if (!ctrlKeyDown
+                                && m_rowManager->isRowSelected(m_editedTimelineRow->rowTree())
+                                && !m_rowManager->isSingleSelected() ) {
+                            m_releaseSelectRow = m_editedTimelineRow->rowTree();
+                        }
+                        m_rowManager->selectRow(m_editedTimelineRow->rowTree(), ctrlKeyDown);
                         m_editedTimelineRow->startDurationMove(
                             // click position in ruler space
                             m_pressPos.x() - m_ruler->x());
@@ -441,9 +384,10 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if (!m_editedTimelineRow)
         updateHoverStatus(event->scenePos());
 
-    if (qAbs(event->scenePos().x() - m_pressPos.x()) > 10
-            || qAbs(event->scenePos().y() - m_pressPos.y()) > 10)
+    if (m_pressPos != invalidPoint && (qAbs(event->scenePos().x() - m_pressPos.x()) > 10
+                                       || qAbs(event->scenePos().y() - m_pressPos.y()) > 10)) {
         m_dragging = true;
+    }
 
     bool shift = event->modifiers() & Qt::ShiftModifier;
     if (m_rulerPressed) {
@@ -457,134 +401,46 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
     } else if (m_dragging) {
         if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
-            // resizing layer timline duration from left
+            // resizing row timeline duration from left
             double distance = event->scenePos().x() - m_ruler->pos().x();
             if (shift)
                 snap(distance);
             m_editedTimelineRow->setStartX(distance);
-        } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
-            // resizing layer timline duration from right
+            m_editedTimelineRow->showToolTip(event->screenPos());
+        } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle
+                   && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
+            // resizing row timeline duration from right
             double distance = event->scenePos().x() - m_ruler->pos().x();
             if (shift)
                 snap(distance);
             m_editedTimelineRow->setEndX(distance);
-            rowManager()->updateRulerDuration();
-        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
-            // moving layer timeline duration
+            m_editedTimelineRow->showToolTip(event->screenPos());
+            rowManager()->updateRulerDuration(false);
+        } else if (m_clickedTimelineControlType == TimelineControlType::Duration
+                   && qAbs(event->scenePos().x() - event->lastScenePos().x()) < 50) {
+            // moving row timeline duration
             double newX = event->scenePos().x() - m_editedTimelineRow->getDurationMoveOffsetX()
                     - m_ruler->x();
             if (shift)
                 snap(newX);
             m_editedTimelineRow->moveDurationTo(newX);
-            rowManager()->updateRulerDuration();
+            m_editedTimelineRow->showToolTip(event->screenPos());
+            rowManager()->updateRulerDuration(false);
         } else if (m_selectionRect->isActive()) {
             // resizing keyframe selection rect
             m_selectionRect->updateSize(event->scenePos());
             m_keyframeManager->selectKeyframesInRect(m_selectionRect->rect());
-        } else if (m_rowMover->isActive() && m_rowManager->isSingleSelected()) {
+        } else if (m_startRowMoverOnNextDrag || m_rowMover->isActive()) {
             // moving rows vertically (reorder/reparent)
-            // collapse all properties so correctIndex() counts correctly
-            m_rowManager->collapseAllPropertyRows();
-            int indexRaw = qRound(event->scenePos().y() / TimelineConstants::ROW_H) - 1;
-            int indexInLayout = indexRaw;
-            m_rowManager->correctIndex(indexInLayout);
-            bool valid = indexInLayout != -1;
-
-            RowTree *rowAtIndex;
-            RowTree *nextRowAtIndex;
-
-            if (valid) { // valid row index
-                rowAtIndex = static_cast<RowTree *>(m_layoutTree->itemAt(indexInLayout)
-                                                    ->graphicsItem());
-                nextRowAtIndex = indexInLayout > m_layoutTree->count() - 2 ? nullptr :
-                             static_cast<RowTree *>(m_layoutTree->itemAt(indexInLayout + 1)
-                                                    ->graphicsItem());
-
-                if (!rowAtIndex->expanded())
-                    nextRowAtIndex = getNextSiblingRow(rowAtIndex);
-
-                        // not moving an ancestor into a decendent
-                valid = !rowAtIndex->isDecendentOf(m_rowMover->sourceRow())
-
-                        // not inserting as a first child of self
-                        && !(rowAtIndex == m_rowMover->sourceRow() && !rowAtIndex->empty())
-
-                        // not inserting non-layer at root level
-                        && !(m_rowMover->sourceRow()->rowType() != OBJTYPE_LAYER
-                             && rowAtIndex->rowType() == OBJTYPE_SCENE)
-
-                        // Layer cases
-                        && validLayerMove(rowAtIndex, nextRowAtIndex)
-
-                        // Not inserting into a component
-                        && rowAtIndex->rowType() != OBJTYPE_COMPONENT;
+            if (m_startRowMoverOnNextDrag) {
+                m_startRowMoverOnNextDrag = false;
+                m_rowMover->start(m_rowManager->selectedRows());
             }
-
-            if (valid) {
-                // if dragging over a property or a parent of a property, move to the first row
-                // after the property
-                if (rowAtIndex->isProperty())
-                    indexRaw = rowAtIndex->parentRow()->childProps().last()->indexInLayout();
-                else if (rowAtIndex->hasPropertyChildren() && rowAtIndex->expanded())
-                    indexRaw = rowAtIndex->childProps().last()->indexInLayout();
-
-                // calc insertion depth
-                int depth;
-                if (m_rowMover->sourceRow()->rowType() == OBJTYPE_LAYER) {
-                    depth = 2; // layers can only be moved on depth 2
-                } else {
-                    int depthMin = nextRowAtIndex ? nextRowAtIndex->depth() : 3;
-                    int depthMax = rowAtIndex->depth();
-
-                    if (rowAtIndex->isContainer() && rowAtIndex->expanded()
-                            && rowAtIndex != m_rowMover->sourceRow()) {
-                        depthMax++; // Container: allow insertion as a child
-                    } else if (rowAtIndex->isPropertyOrMaterial()
-                              && !rowAtIndex->parentRow()->isContainer()) {
-                         depthMax--; // non-container with properties and/or a material
-                    }
-
-                    depth = (event->scenePos().x() - 20) / 15;
-                    depth = qBound(depthMin, depth, depthMax);
-                }
-
-                // calc insertion parent
-                RowTree *insertParent = rowAtIndex;
-                for (int i = rowAtIndex->depth(); i >= depth; --i)
-                    insertParent = insertParent->parentRow();
-                m_rowMover->resetInsertionParent(insertParent);
-
-                if (m_rowMover->sourceRow()->rowType() == OBJTYPE_MATERIAL
-                        && m_rowMover->sourceRow()->parentRow()
-                        != m_rowMover->insertionParent()) {
-                    valid = false; // not moving a material row outside its parent
-                }
-
-                if (valid) {
-                    // calc insertion index
-                    int index = rowAtIndex->index() + 1;
-                    if ((rowAtIndex->isProperty() && depth == rowAtIndex->depth())
-                            || rowAtIndex == insertParent) {
-                        index = 0;
-                    } else if (depth < rowAtIndex->depth()) {
-                        RowTree *row = rowAtIndex;
-                        for (int i = depth; i < rowAtIndex->depth(); ++i)
-                            row = row->parentRow();
-                        index = row->index() + 1;
-                    }
-
-                    if (insertParent == m_rowMover->sourceRow()->parentRow()
-                            && index > m_rowMover->sourceRow()->index()) {
-                        index--;
-                    }
-
-                    m_rowMover->updateState(index, depth, indexRaw);
-                }
-            }
-
-            if (!valid) {
-                m_rowMover->setVisible(false);
-                m_rowMover->resetInsertionParent();
+            if (m_rowMover->isActive()) {
+                // collapse all properties so correctIndex() counts correctly
+                m_rowManager->collapseAllPropertyRows();
+                m_rowMover->updateTargetRow(event->scenePos());
+                updateAutoScrolling(event->scenePos().y());
             }
         } else if (m_keyframePressed) { // moving selected keyframes
             double newX = event->scenePos().x() - m_ruler->x() - m_pressPosInKeyframe;
@@ -602,6 +458,37 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
 
     QGraphicsScene::mouseMoveEvent(event);
+}
+
+// auto scroll when the mouse is at the top or bottom of the tree list
+void TimelineGraphicsScene::updateAutoScrolling(double scenePosY)
+{
+    QScrollBar *scrollbar = m_widgetTimeline->viewTreeContent()->verticalScrollBar();
+    double mouseY = scenePosY - scrollbar->value();
+    int bottomY = m_widgetTimeline->height() - m_widgetTimeline->toolbar()->height()
+            - TimelineConstants::ROW_H;
+    if (mouseY > 0 && mouseY < TimelineConstants::ROW_H) {
+        if (!m_autoScrollUpOn) {
+            m_autoScrollTriggerTimer.start(TimelineConstants::AUTO_SCROLL_TRIGGER);
+            m_autoScrollUpOn = true;
+        }
+    } else if (m_autoScrollUpOn) {
+        m_autoScrollTimer.stop();
+        m_autoScrollTriggerTimer.stop();
+        m_autoScrollUpOn = false;
+    }
+
+    if (mouseY > bottomY - TimelineConstants::ROW_H - TimelineConstants::TOOLBAR_MARGIN
+            && mouseY < bottomY) {
+        if (!m_autoScrollDownOn) {
+            m_autoScrollTriggerTimer.start(TimelineConstants::AUTO_SCROLL_TRIGGER);
+            m_autoScrollDownOn = true;
+        }
+    } else if (m_autoScrollDownOn) {
+        m_autoScrollTimer.stop();
+        m_autoScrollTriggerTimer.stop();
+        m_autoScrollDownOn = false;
+    }
 }
 
 void TimelineGraphicsScene::updateSnapSteps() {
@@ -629,6 +516,33 @@ void TimelineGraphicsScene::updateSnapSteps() {
             }
         }
     }
+}
+
+TExpandMap &TimelineGraphicsScene::expandMap()
+{
+    return m_expandMap;
+}
+
+void TimelineGraphicsScene::resetMousePressParams()
+{
+    m_selectionRect->end();
+    m_rowMover->end();
+    m_dragging = false;
+    m_startRowMoverOnNextDrag = false;
+    m_rulerPressed = false;
+    m_keyframePressed = false;
+    m_clickedTimelineControlType = TimelineControlType::None;
+    m_editedTimelineRow = nullptr;
+    m_releaseSelectRow = nullptr;
+    m_autoScrollTimer.stop();
+    m_autoScrollTriggerTimer.stop();
+    m_timebarToolTip->hide();
+    m_pressPos = invalidPoint;
+}
+
+QLabel *TimelineGraphicsScene::timebarTooltip()
+{
+    return m_timebarToolTip;
 }
 
 void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
@@ -667,28 +581,9 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 
 void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
     if (event->button() == Qt::LeftButton) {
-        QGraphicsItem *item = itemAt(event->scenePos(), QTransform());
-
-        if (item && !m_dragging) {
-            item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
-            item = getItemBelowType(TimelineItem::TypePlayHead, item, m_pressPos);
-            // select pressed row
-            RowTree *rowTree = nullptr;
-            if (item->type() == TimelineItem::TypeRowTree)
-                rowTree = static_cast<RowTree *>(item);
-            else if (item->type() == TimelineItem::TypeRowTimeline)
-                rowTree = static_cast<RowTimeline *>(item)->rowTree();
-
-            if (rowTree && m_clickedTreeControlType == TreeControlType::None
-                    && !rowTree->locked()) {
-                m_rowManager->selectRow(rowTree, ctrlKeyDown);
-            }
-
-        } else if (m_rowMover->isActive()) { // moving rows (reorder/reparent)
-            if (m_rowMover->insertionParent()) // valid row move, commit it
-                commitMoveRows();
+        if (m_dragging && m_rowMover->isActive()) { // moving rows (reorder/reparent)
+            commitMoveRows();
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
             m_keyframeManager->commitMoveSelectedKeyframes();
@@ -700,6 +595,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             timebar->CommitTimeChange();
             updateSnapSteps();
         } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+            rowManager()->updateRulerDuration();
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->ChangeTime(m_editedTimelineRow->getEndTime() * 1000, false);
@@ -707,7 +603,8 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
-        } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+        } else if (m_dragging && m_clickedTimelineControlType == TimelineControlType::Duration) {
+            rowManager()->updateRulerDuration();
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->OffsetTime(m_editedTimelineRow->getDurationMoveTime() * 1000);
@@ -715,16 +612,13 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
+        } else if (m_releaseSelectRow || !itemAt(event->scenePos(), QTransform())) {
+            m_rowManager->selectRow(nullptr);
+            if (m_releaseSelectRow)
+                m_rowManager->selectRow(m_releaseSelectRow);
         }
 
-        // reset mouse press params
-        m_selectionRect->end();
-        m_rowMover->end();
-        m_dragging = false;
-        m_rulerPressed = false;
-        m_keyframePressed = false;
-        m_clickedTimelineControlType = TimelineControlType::None;
-        m_editedTimelineRow = nullptr;
+        resetMousePressParams();
     }
 
     QGraphicsScene::mouseReleaseEvent(event);
@@ -732,43 +626,45 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    const QPointF scenePos = event->scenePos();
-    QGraphicsItem *item = itemAt(scenePos, QTransform());
-    if (item) {
-        QGraphicsItem *itemBelowPlayhead =
-                getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
-        if (item->type() == TimelineItem::TypeRuler
-                || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
-            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-            CTimeEditDlg timeEditDlg;
-            timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
-            return;
-        }
-
-        item = itemBelowPlayhead;
-        if (item->type() == TimelineItem::TypeRowTree) {
-            RowTree *treeItem = static_cast<RowTree *>(item);
-            if (treeItem->isProperty())
-                treeItem->togglePropertyExpanded();
-        } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
-            RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
-            if (treeLabelItem->parentRow()->isProperty()) {
-                treeLabelItem->parentRow()->togglePropertyExpanded();
-            } else {
-                // Tree labels text can be edited with double-click
-                treeLabelItem->setEnabled(true);
-                treeLabelItem->setFocus();
-            }
-        } else if (item->type() == TimelineItem::TypeRowTimeline) {
-            RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
-            Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
-            if (clickedKeyframe) {
+    if (event->button() == Qt::LeftButton) {
+        const QPointF scenePos = event->scenePos();
+        QGraphicsItem *item = itemAt(scenePos, QTransform());
+        if (item) {
+            QGraphicsItem *itemBelowPlayhead =
+                    getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
+            if (item->type() == TimelineItem::TypeRuler
+                    || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
                 CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                 CTimeEditDlg timeEditDlg;
-                timeEditDlg.setKeyframesManager(m_keyframeManager);
-                timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
-            } else {
-                handleSetTimeBarTime();
+                timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
+                return;
+            }
+
+            item = itemBelowPlayhead;
+            if (item->type() == TimelineItem::TypeRowTree) {
+                RowTree *treeItem = static_cast<RowTree *>(item);
+                if (treeItem->isProperty())
+                    treeItem->togglePropertyExpanded();
+            } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
+                RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
+                if (treeLabelItem->parentRow()->isProperty()) {
+                    treeLabelItem->parentRow()->togglePropertyExpanded();
+                } else {
+                    // Tree labels text can be edited with double-click
+                    treeLabelItem->setEnabled(true);
+                    treeLabelItem->setFocus();
+                }
+            } else if (item->type() == TimelineItem::TypeRowTimeline) {
+                RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+                Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
+                if (clickedKeyframe) {
+                    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                    CTimeEditDlg timeEditDlg;
+                    timeEditDlg.setKeyframesManager(m_keyframeManager);
+                    timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
+                } else {
+                    handleSetTimeBarTime();
+                }
             }
         }
     }
@@ -784,7 +680,7 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         keyEvent->accept();
         return;
     }
-    if (keyEvent->key() == Qt::Key_Delete)
+    if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive())
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
 
     QGraphicsScene::keyPressEvent(keyEvent);
@@ -800,8 +696,12 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     int index = event->scenePos().y() / TimelineConstants::ROW_H;
     RowTree *row = m_rowManager->rowAt(index);
 
-    if (row == nullptr)
+    if (row == nullptr || m_widgetTimeline->isFullReconstructPending() || m_dragging
+            || m_startRowMoverOnNextDrag) {
         return;
+    }
+
+    resetMousePressParams(); // Make sure our mouse handling doesn't get confused by context menu
 
     // Internally some things like make component depend on the correct row being selected,
     // so make sure it is.
@@ -857,7 +757,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
 // Used at least for skipping PlayHead and RowTreeLabelItem
 QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType type,
                                                        QGraphicsItem *item,
-                                                       const QPointF &scenePos)
+                                                       const QPointF &scenePos) const
 {
     if (item->type() == type) {
         const QList<QGraphicsItem *> hoverItems = items(scenePos);
@@ -931,6 +831,13 @@ void TimelineGraphicsScene::handleLockSelected()
         selectedRow->toggleLocked();
 }
 
+void TimelineGraphicsScene::handleApplicationFocusLoss()
+{
+    // Hide the timebar tooltip if application loses focus
+    if (!QApplication::focusWidget())
+        m_timebarToolTip->hide();
+}
+
 // Getters
 Ruler                 *TimelineGraphicsScene::ruler()           const { return m_ruler;           }
 PlayHead              *TimelineGraphicsScene::playHead()        const { return m_playHead;        }
@@ -941,3 +848,4 @@ QGraphicsWidget       *TimelineGraphicsScene::widgetRoot()      const { return m
 KeyframeManager       *TimelineGraphicsScene::keyframeManager() const { return m_keyframeManager; }
 QGraphicsLinearLayout *TimelineGraphicsScene::layoutTree()      const { return m_layoutTree;      }
 QGraphicsLinearLayout *TimelineGraphicsScene::layoutTimeline()  const { return m_layoutTimeline;  }
+TimelineWidget        *TimelineGraphicsScene::widgetTimeline()  const { return m_widgetTimeline;  }

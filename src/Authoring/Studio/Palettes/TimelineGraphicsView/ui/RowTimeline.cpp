@@ -34,12 +34,19 @@
 #include "TimelineConstants.h"
 #include "Keyframe.h"
 #include "KeyframeManager.h"
+#include "TimelineGraphicsScene.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 
 #include <QtGui/qpainter.h>
+#include <QtGui/qbrush.h>
+#include <QtWidgets/qdesktopwidget.h>
+#include <QtWidgets/qapplication.h>
 #include <QtWidgets/qgraphicssceneevent.h>
+#include <QtWidgets/qwidget.h>
+#include <QtWidgets/qlabel.h>
+#include <QtCore/qdatetime.h>
 
 RowTimeline::RowTimeline()
     : InteractiveTimelineItem()
@@ -61,17 +68,26 @@ RowTimeline::~RowTimeline()
 
 void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    // Background
-    QColor bgColor;
-    if (m_rowTree->isProperty())
-        bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
-    else if (m_state == Selected)
-        bgColor = TimelineConstants::ROW_COLOR_SELECTED;
-    else if (m_state == Hovered && !m_rowTree->m_locked)
-        bgColor = TimelineConstants::ROW_COLOR_OVER;
-    else
-        bgColor = TimelineConstants::ROW_COLOR_NORMAL;
-    painter->fillRect(0, 0, size().width(), size().height() - 1, bgColor);
+    Q_UNUSED(option)
+
+    if (!y()) // prevents flickering when the row is just inserted to the layout
+        return;
+
+    if (isColorProperty() && !m_keyframes.empty()) {
+        drawColorPropertyGradient(painter, widget->width());
+    } else {
+        // Background
+        QColor bgColor;
+        if (m_rowTree->isProperty())
+            bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
+        else if (m_state == Selected)
+            bgColor = TimelineConstants::ROW_COLOR_SELECTED;
+        else if (m_state == Hovered && !m_rowTree->m_locked)
+            bgColor = TimelineConstants::ROW_COLOR_OVER;
+        else
+            bgColor = TimelineConstants::ROW_COLOR_NORMAL;
+        painter->fillRect(0, 0, size().width(), size().height() - 1, bgColor);
+    }
 
     // Duration
     if (m_rowTree->hasDurationBar()) {
@@ -91,8 +107,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->drawLine(m_endX, 0, m_endX, size().height() - 1);
         } else {
             // draw main duration part
-            double x = std::max(m_startX, m_minStartX);
-            double w = std::min(m_endX, m_maxEndX) - x;
+            double x = qMax(m_startX, m_minStartX);
+            double w = qMin(m_endX, m_maxEndX) - x;
 
             painter->setPen(Qt::NoPen);
             painter->fillRect(QRect(x, 0, w, size().height() - 1), m_barColor);
@@ -144,6 +160,11 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     // Keyframes
     const int keyFrameH = 16;
     const int keyFrameY = (TimelineConstants::ROW_H / 2) - (keyFrameH / 2);
+
+    // Don't access binding when we are in inconsistent state
+    // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
+    if (m_rowTree->m_scene->widgetTimeline()->isFullReconstructPending())
+        return;
 
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
@@ -197,6 +218,47 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                 keyFrameY, pixmap);
         }
     }
+}
+
+bool RowTimeline::isColorProperty() const
+{
+    ITimelineItemProperty *propBinding = m_rowTree->propBinding();
+    if (propBinding) {
+        qt3dsdm::TDataTypePair type = propBinding->GetType();
+        if (m_rowTree->isProperty()
+                && type.first == qt3dsdm::DataModelDataType::Float3
+                && type.second == qt3dsdm::AdditionalMetaDataType::Color) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void RowTimeline::drawColorPropertyGradient(QPainter *painter, int width)
+{
+    // Gradient scaled width, or at least widget width
+    double minWidth = width;
+    double timelineScale = m_rowTree->m_scene->ruler()->timelineScale();
+    double scaledWidth = width * (timelineScale / 2);
+    width = qMax(minWidth, scaledWidth);
+
+    ITimelineItemProperty *propBinding = m_rowTree->propBinding();
+    QLinearGradient bgGradient(0, 0, width, 0);
+
+    for (auto keyframe : qAsConst(m_keyframes)) {
+        double xPos = timeToX(keyframe->time);
+        double gradPos = xPos / width;
+        gradPos = qBound(0.0, gradPos, 1.0);
+        long timeMs = keyframe->time * 1000;
+        QColor currentColor;
+        // Get the color at the specified time.
+        currentColor.setRed(propBinding->GetChannelValueAtTime(0, timeMs));
+        currentColor.setGreen(propBinding->GetChannelValueAtTime(1, timeMs));
+        currentColor.setBlue(propBinding->GetChannelValueAtTime(2, timeMs));
+        bgGradient.setColorAt(gradPos, currentColor);
+    }
+    painter->fillRect(TimelineConstants::RULER_EDGE_OFFSET, 0,
+                      width, size().height() - 1, bgGradient);
 }
 
 Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
@@ -569,8 +631,8 @@ void RowTimeline::updateChildrenMinStartXRecursive(RowTree *rowTree)
             if (isComponentChild) {
                 child->rowTimeline()->m_minStartX = 0;
             } else {
-                child->rowTimeline()->m_minStartX = std::max(rowTree->rowTimeline()->m_startX,
-                                                             rowTree->rowTimeline()->m_minStartX);
+                child->rowTimeline()->m_minStartX = qMax(rowTree->rowTimeline()->m_startX,
+                                                         rowTree->rowTimeline()->m_minStartX);
             }
             child->rowTimeline()->update();
 
@@ -589,8 +651,8 @@ void RowTimeline::updateChildrenMaxEndXRecursive(RowTree *rowTree)
             if (isComponentChild) {
                 child->rowTimeline()->m_maxEndX = 999999;
             } else {
-                child->rowTimeline()->m_maxEndX = std::min(rowTree->rowTimeline()->m_endX,
-                                                           rowTree->rowTimeline()->m_maxEndX);
+                child->rowTimeline()->m_maxEndX = qMin(rowTree->rowTimeline()->m_endX,
+                                                       rowTree->rowTimeline()->m_maxEndX);
             }
             child->rowTimeline()->update();
 
@@ -678,6 +740,40 @@ RowTree *RowTimeline::rowTree() const
 QList<Keyframe *> RowTimeline::keyframes() const
 {
     return m_keyframes;
+}
+
+void RowTimeline::showToolTip(const QPointF &pos)
+{
+    QLabel *tooltip = m_rowTree->m_scene->timebarTooltip();
+
+    // .0000001 is added to ensure displayed times are rounded the right way
+    const double roundingFix = .0000001;
+    double start = m_startTime + roundingFix;
+    double end = m_endTime + roundingFix;
+    double duration = m_endTime - m_startTime + roundingFix;
+    QTime startTime(0, 0, int(start), int((start - int(start)) * 1000.0));
+    QTime endTime(0, 0, int(end), int((end - int(end)) * 1000.0));
+    QTime durationTime(0, 0, int(duration), qRound((duration - int(duration)) * 1000.0));
+
+    static const QString format = QStringLiteral("mm:ss:zzz");
+    static const QString toolTipTemplate = QStringLiteral("%1 - %2 (%3)");
+    const QString text = toolTipTemplate.arg(startTime.toString(format))
+            .arg(endTime.toString(format)).arg(durationTime.toString(format));
+
+    tooltip->setText(text);
+
+    QPoint newPos = pos.toPoint() + QPoint(-tooltip->width() / 2,
+                     -tooltip->height() - TimelineConstants::TIMEBAR_TOOLTIP_OFFSET_V);
+    tooltip->move(newPos);
+    if (!QApplication::desktop()->screenGeometry(
+                m_rowTree->m_scene->widgetTimeline()).contains(tooltip->geometry())) {
+        // Hide tooltip if position is even partially on different screen than
+        // the timeline widget to avoid artifacts from different pixel ratios
+        tooltip->hide();
+    } else {
+        tooltip->raise();
+        tooltip->show();
+    }
 }
 
 RowTimeline *RowTimeline::parentRow() const

@@ -48,16 +48,13 @@ create a new project.
 \image createNewProject.png "Create new project"
 
 You can also create a new project after closing the welcome screen by selecting
-\e{Create New Project}.
+\e{Create Project}.
 
 \image createNewProject2.png "Create new project"
 
 Then browse to the location in your file system where you want to create your project and
 give your project a name. Your project file (\c{.uip}) and project folder will be
-named accordingly.
-
-It is recommended to check the \e{Create directory for project} check box. This will create a new
-folder with the project name. Inside the folder a pre-defined project folder structure is created.
+named accordingly. Inside the folder a pre-defined project folder structure is created.
 
 \image newProjectDialog.png "Create new project dialog window"
 
@@ -251,7 +248,7 @@ animated or changed.
 
 Properties that can be animated have a small stopwatch icon next to them in the
 \e{inspector palette}. Click on the icon to enable/disable animation for the specific property.
-The icon is yellow \inlineimage{animationIconActive.png}
+The icon is blue \inlineimage{animationIconActive.png}
 when animation is enabled and grey \inlineimage{animationIconInactive.png}
 when disabled.
 

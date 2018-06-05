@@ -30,6 +30,8 @@
 #define DATAINPUTLISTDLG_H
 
 #include <QtWidgets/qdialog.h>
+#include <QtCore/qmap.h>
+#include "DataInputDlg.h"
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -50,9 +52,12 @@ class CDataInputListDlg : public QDialog
 {
     Q_OBJECT
 public:
-    CDataInputListDlg(QVector<CDataInputDialogItem *> *datainputs,
-                      bool goToAdd = false, QWidget *parent = nullptr);
+    CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *datainputs,
+                      bool goToAdd = false, QWidget *parent = nullptr,
+                      EDataType defaultType = EDataType::DataTypeFloat);
     ~CDataInputListDlg();
+
+    QString getAddedDataInput() { return m_mostRecentlyAdded; }
 
 protected:
     void initDialog();
@@ -73,14 +78,16 @@ private Q_SLOTS:
 
 private:
     Ui::DataInputListDlg *m_ui;
-    QVector<CDataInputDialogItem *> m_dataInputs;
-    QVector<CDataInputDialogItem *> *m_actualDataInputs;
+    QMap<QString, CDataInputDialogItem *> m_dataInputs;
+    QMap<QString, CDataInputDialogItem *> *m_actualDataInputs;
     int m_currentDataInputIndex;
     QString m_currentDataInputName;
     QStandardItemModel *m_tableContents;
     bool m_goToAdd;
     int m_sortColumn;
     Qt::SortOrder m_sortOrder;
+    QString m_mostRecentlyAdded;
+    EDataType m_defaultType;
 };
 
 #endif

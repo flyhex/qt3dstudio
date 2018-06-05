@@ -168,7 +168,7 @@ Rectangle {
 
                                 Item {
                                     Layout.alignment: Qt.AlignTop
-                                    width: animatedPropertyButton.sourceSize.width
+                                    width: 16
                                     height: _controlBaseHeight
                                     visible: model.modelData.animatable
 
@@ -242,7 +242,7 @@ Rectangle {
                                 }
                                 Item {
                                     Layout.alignment: Qt.AlignTop
-                                    width: controlledPropertyButton.sourceSize.width
+                                    width: 16
                                     height: _controlBaseHeight
                                     visible: model.modelData.controllable
 
@@ -920,7 +920,8 @@ Rectangle {
                 bottom: 1
             }
 
-            model: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72", "96", "120"]
+            model: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28",
+                "36", "48", "72", "96", "120", "160", "200"]
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight
@@ -931,7 +932,7 @@ Rectangle {
             }
 
             onValueChanged: {
-                if (ready)
+                if (ready && !isNaN(value))
                     editText = value;
             }
 

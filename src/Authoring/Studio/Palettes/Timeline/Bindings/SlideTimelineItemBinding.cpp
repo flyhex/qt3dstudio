@@ -36,7 +36,6 @@
 //	Includes
 //==============================================================================
 #include "SlideTimelineItemBinding.h"
-#include "BaseStateRow.h"
 
 // Data model specific
 #include "Doc.h"
@@ -81,12 +80,6 @@ ITimelineTimebar *CSlideTimelineItemBinding::GetTimebar()
 void CSlideTimelineItemBinding::SetName(const Q3DStudio::CString & /*inName*/)
 {
     // Do nothing because name is read only
-}
-
-void CSlideTimelineItemBinding::Bind(CBaseStateRow *inRow)
-{
-    Qt3DSDMTimelineItemBinding::Bind(inRow);
-    inRow->requestSetNameReadOnly();
 }
 
 bool CSlideTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)

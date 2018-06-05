@@ -434,10 +434,11 @@ ControlEventState::Enum CControlData::GetMouseWheelEventState()
     return m_MouseWheelState.m_EventState;
 }
 
-CDropTarget *CControlData::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags)
+CDropTarget *CControlData::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
+                                             EStudioObjectType objectType)
 {
     if (m_Control)
-        return m_Control->FindDropCandidate(inMousePoint, inFlags);
+        return m_Control->FindDropCandidate(inMousePoint, inFlags, objectType);
     return nullptr;
 }
 
@@ -575,16 +576,6 @@ void CControlData::SetEnabledFlag(bool inIsEnabled)
     m_IsEnabled = inIsEnabled;
 }
 
-void CControlData::SetWindowListener(CControlWindowListener *inListener)
-{
-    m_WindowListener = inListener;
-}
-
-CControlWindowListener *CControlData::GetWindowListener()
-{
-    return m_WindowListener;
-}
-
 void CControlData::OnChildSizeChanged(CControl *inChild)
 {
     if (m_Control)
@@ -715,16 +706,6 @@ void CControlData::FireFocusEvent(bool inStatus)
 {
     if (m_Control)
         m_Control->FireFocusEvent(inStatus);
-}
-
-void CControlData::SetTooltipText(const QString &inText)
-{
-    m_TooltipText = inText;
-}
-
-QString CControlData::GetTooltipText()
-{
-    return m_TooltipText;
 }
 
 void CControlData::EnsureVisible(CRct inRect)
