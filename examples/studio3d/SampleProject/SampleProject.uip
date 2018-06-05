@@ -12,6 +12,7 @@
 		</BufferData>
 		<Classes >
 			<Effect id="VignetteEffect" name="VignetteEffect" sourcepath="effects/VignetteEffect.effect" />
+			<Behavior id="dateAndTime" name="dateAndTime" sourcepath="scripts/dateAndTime.qml" />
 		</Classes>
 		<Graph >
 			<Scene id="Scene" controlledproperty="$slide @slide" >
@@ -34,6 +35,7 @@
 						</Component>
 					</Group>
 					<Text id="DateAndTime" />
+					<Behavior id="dateAndTime_001" class="#dateAndTime" />
 				</Layer>
 				<Layer id="Cluster3D2" >
 					<Camera id="Camera_002" />
@@ -332,6 +334,7 @@
 					<Set ref="#Light_003" endtime="4000" />
 					<Set ref="#VignetteEffect_001" endtime="4000" />
 					<Set ref="#Map" endtime="4000" />
+					<Add ref="#dateAndTime_001" name="dateAndTime" endtime="4000" locale="en_EN" target="#DateAndTime" timeformat="hh:mm:ss" />
 					<Add ref="#Car" name="Car" endtime="4000" position="14.2649 -2.34836 -562.801" scale="0.15 0.15 0.15" />
 				</State>
 				<State id="Scene-Angle" name="Angle" initialplaystate="Play" playmode="Stop at end" playthroughto="Previous" >
