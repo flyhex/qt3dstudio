@@ -111,6 +111,7 @@ protected:
     void onKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
                            qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
     void onKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
+    void onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation, bool inDynamic);
     void onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle property);
     void onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,

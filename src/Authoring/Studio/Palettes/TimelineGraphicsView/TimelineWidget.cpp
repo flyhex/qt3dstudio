@@ -351,6 +351,9 @@ void TimelineWidget::OnNewPresentation()
     m_connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
         std::bind(&TimelineWidget::onPropertyChanged, this,
              std::placeholders::_1, std::placeholders::_2)));
+    m_connections.push_back(theSignalProvider->ConnectFirstKeyframeDynamicSet(
+        std::bind(&TimelineWidget::onFirstKeyframeDynamicSet, this,
+                  std::placeholders::_1, std::placeholders::_2)));
 
     // action created/deleted
     m_connections.push_back(theSignalProvider->ConnectActionCreated(
@@ -526,6 +529,7 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 
                 kf->setUI(kfUI);
                 kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
+                kfUI->dynamic = kf->IsDynamic();
             }
 
             propRow->update();
@@ -603,6 +607,13 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
                         theAnimationInfo.m_Property);
         }
     }
+}
+
+void TimelineWidget::onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
+                                               bool inDynamic)
+{
+    Q_UNUSED(inDynamic)
+    refreshKeyframe(inAnimation, 0, ETimelineKeyframeTransaction_DynamicChanged);
 }
 
 void TimelineWidget::updateActionStates(const QSet<RowTree *> &rows)
@@ -811,6 +822,7 @@ void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
 
                 kf->setUI(kfUI);
                 kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
+                kfUI->dynamic = kf->IsDynamic();
             }
         }
     }

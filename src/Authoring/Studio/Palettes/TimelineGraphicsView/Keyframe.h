@@ -52,6 +52,7 @@ struct Keyframe
     RowTimeline *rowProperty = nullptr;
     RowTimeline *rowMaster = nullptr;
     Qt3DSDMTimelineKeyframe *binding = nullptr;
+    bool dynamic = false;
 };
 
 #endif // KEYFRAME_H

@@ -161,11 +161,6 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     const int keyFrameH = 16;
     const int keyFrameY = (TimelineConstants::ROW_H / 2) - (keyFrameH / 2);
 
-    // Don't access binding when we are in inconsistent state
-    // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
-    if (m_rowTree->m_scene->widgetTimeline()->isFullReconstructPending())
-        return;
-
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
                 = QPixmap(":/images/Keyframe-Master-Normal.png");
@@ -179,12 +174,12 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (keyframe->selected()) {
-                if (keyframe->binding->IsDynamic())
+                if (keyframe->dynamic)
                     pixmap = pixKeyframeMasterDynamicSelected;
                 else
                     pixmap = pixKeyframeMasterSelected;
             } else {
-                if (keyframe->binding->IsDynamic())
+                if (keyframe->dynamic)
                     pixmap = pixKeyframeMasterDynamicNormal;
                 else
                     pixmap = pixKeyframeMasterNormal;
@@ -204,12 +199,12 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (keyframe->selected()) {
-                if (keyframe->binding->IsDynamic())
+                if (keyframe->dynamic)
                     pixmap = pixKeyframePropertyDynamicSelected;
                 else
                     pixmap = pixKeyframePropertySelected;
             } else {
-                if (keyframe->binding->IsDynamic())
+                if (keyframe->dynamic)
                     pixmap = pixKeyframePropertyDynamicNormal;
                 else
                     pixmap = pixKeyframePropertyNormal;
@@ -352,6 +347,7 @@ void RowTimeline::updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle prop
             Keyframe *kfUI = new Keyframe(static_cast<double>(kf->GetTime() * .001),
                                           propRow->rowTimeline());
             kfUI->binding = kf;
+            kfUI->dynamic = kf->IsDynamic();
             kf->setUI(kfUI);
             propRow->rowTimeline()->insertKeyframe(kfUI);
             propRow->parentRow()->rowTimeline()->insertKeyframe(kfUI);

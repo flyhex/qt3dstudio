@@ -114,6 +114,7 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
             Keyframe *kfUI = addedKeyframes.at(0);
             kf->setUI(kfUI);
             kfUI->binding = kf;
+            kfUI->dynamic = kf->IsDynamic();
         }
     }
 
