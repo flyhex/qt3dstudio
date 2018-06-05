@@ -245,47 +245,76 @@
           <enum>QLayout::SetMaximumSize</enum>
          </property>
          <item>
+          <widget class="QWidget" name="leftSpacer">
+           <property name="minimumSize">
+            <size>
+             <width>160</width>
+             <height>80</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+          </spacer>
+         </item>
+         <item>
+          <widget class="StudioTutorialPageIndicator" name="pageIndicator" native="true">
+           <property name="minimumSize">
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>200</width>
+             <height>40</height>
             </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
           </spacer>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="buttons">
-           <item>
-            <widget class="QPushButton" name="studioTutorialOpen">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="accessibleName">
-              <string>studioTutorialOpen</string>
-             </property>
-             <property name="text">
-              <string>Open Sample Project</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="studioTutorialNew">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="accessibleName">
-              <string>studioTutorialNew</string>
-             </property>
-             <property name="text">
-              <string>Create New</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QWidget" name="buttonsArea" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>160</width>
+             <height>80</height>
+            </size>
+           </property>
+           <layout class="QVBoxLayout" name="buttons">
+            <item>
+             <widget class="QPushButton" name="studioTutorialOpen">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+              <property name="accessibleName">
+               <string>studioTutorialOpen</string>
+              </property>
+              <property name="text">
+               <string>Open Sample Project</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="studioTutorialNew">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+              <property name="accessibleName">
+               <string>studioTutorialNew</string>
+              </property>
+              <property name="text">
+               <string>Create New</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -295,6 +324,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StudioTutorialPageIndicator</class>
+   <extends>QWidget</extends>
+   <header>StudioTutorialPageIndicator.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../images.qrc"/>
  </resources>

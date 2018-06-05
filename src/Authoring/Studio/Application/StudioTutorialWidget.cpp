@@ -29,6 +29,7 @@
 #include "ui_StudioTutorialWidget.h"
 #include "StudioUtils.h"
 #include <QtWidgets/qdesktopwidget.h>
+#include <QtGui/qpainter.h>
 
 StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog,
                                            bool showProjectButtons) :
@@ -46,6 +47,8 @@ StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog,
             &StudioTutorialWidget::handleBack);
     connect(m_ui->studioTutorialForward, &QPushButton::clicked, this,
             &StudioTutorialWidget::handleFwd);
+    connect(m_ui->pageIndicator, &StudioTutorialPageIndicator::indexChanged, this,
+            &StudioTutorialWidget::handleIndexChange);
     connect(m_ui->studioTutorialShowAgain, &QCheckBox::stateChanged, this,
             &StudioTutorialWidget::handleDoNotShowAgainChange);
     connect(m_ui->studioTutorialNew, &QPushButton::clicked, this,
@@ -54,6 +57,11 @@ StudioTutorialWidget::StudioTutorialWidget(QWidget *parent, bool goToFileDialog,
             &StudioTutorialWidget::handleOpenSample);
 
     OnInitDialog(goToFileDialog);
+
+    if (m_showProjectButtons)
+        m_ui->studioTutorialNew->setText(tr("Create New"));
+    else
+        m_ui->studioTutorialNew->setText(tr("OK"));
 }
 
 StudioTutorialWidget::~StudioTutorialWidget()
@@ -70,43 +78,28 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
     // populate welcome screen images
     getImageList();
     m_imgIter = m_welcomeImages->begin();
+    m_imgIterPrev = m_imgIter;
+    m_pageOutPixmap = getScaledPic(m_imgIterPrev);
+    m_pageInPixmap = getScaledPic(m_imgIter);
+    m_backgroundPixmap = QPixmap(":/images/Tutorial/background.png");
 
-    // do we go straight to last page with file dialog buttons?
-    int page = goToFileDialog ? m_welcomeImages->size() - 1 : 0;
-    // based on first PNG, get the scale that we need to fit welcome
+    // based on background PNG, get the scale that we need to fit welcome
     // screen and buttons comfortably on display
-    m_displayScale = getDisplayScalingForImage(m_imgIter);
-    QSize picSize = getPicSize(m_imgIter);
+    m_displayScale = getDisplayScalingForImage(m_backgroundPixmap);
+    QSize backgroundSize = m_backgroundPixmap.size();
     QRect screenRect = QApplication::desktop()->availableGeometry(
                 QApplication::desktop()->screenNumber(this));
     QSize windowSize = screenRect.size();
-    m_ui->verticalWidget->setFixedSize(picSize);
 
-    move(screenRect.x() + (windowSize.width() - picSize.width()) / 2,
-         screenRect.y() + (windowSize.height() - picSize.height()) / 2);
+    m_ui->verticalWidget->setFixedSize(backgroundSize);
 
-    if (!m_welcomeImages->isEmpty()) {
-        for (int i = 0; i < page && m_imgIter != m_welcomeImages->end(); ++i)
-            m_imgIter++;
+    move(screenRect.x() + (windowSize.width() - backgroundSize.width()) / 2,
+         screenRect.y() + (windowSize.height() - backgroundSize.height()) / 2);
 
-        m_ui->studioTutorialShowAgain->setVisible(false);
-        m_ui->checkBoxLabel->setVisible(false);
-        if (*m_imgIter == m_welcomeImages->last() || m_imgIter == m_welcomeImages->end()) {
-            if (m_imgIter == m_welcomeImages->end())
-                m_imgIter--;
-            m_ui->studioTutorialForward->setVisible(false);
-            m_ui->studioTutorialOpen->setVisible(true);
-            m_ui->studioTutorialNew->setVisible(true);
-        } else {
-            if (m_imgIter == m_welcomeImages->begin()) {
-                m_ui->studioTutorialBack->setVisible(false);
-                m_ui->studioTutorialShowAgain->setVisible(true);
-                m_ui->checkBoxLabel->setVisible(true);
-            }
-            m_ui->studioTutorialOpen->setVisible(false);
-            m_ui->studioTutorialNew->setVisible(false);
-        }
-    }
+    // do we go straight to last page with file dialog buttons?
+    int initPage = goToFileDialog ? m_welcomeImages->size() - 1 : 0;
+    m_imgIter = m_welcomeImages->begin() + initPage;
+    updateButtons();
 
     QSettings settings;
     m_ui->studioTutorialShowAgain->setChecked(!settings.value("showWelcomeScreen").toBool());
@@ -117,60 +110,81 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
 void StudioTutorialWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
-    if (m_palette)
-        return;
 
-    m_palette = new QPalette;
-    QPixmap pic = getScaledPic(m_imgIter);
-    pic.setDevicePixelRatio(devicePixelRatio());
-    m_palette->setBrush(QPalette::Window, pic);
-    setPalette(*m_palette);
-    resize(pic.size());
-    setFixedSize(size());
+    QPainter painter(this);
+
+    if (!m_palette) {
+        m_palette = new QPalette;
+        m_palette->setBrush(QPalette::Window, m_backgroundPixmap);
+        setPalette(*m_palette);
+        resize(m_backgroundPixmap.size());
+        setFixedSize(size());
+    }
+
+    // Make tutorial images to scale to full background width, vertically centered,
+    // while keeping correct aspect ratio
+    qreal aspectRatio = (qreal) m_pageInPixmap.height() / m_pageInPixmap.width();
+    int rectHeight = size().width() * aspectRatio;
+    QRect rect(0, (size().height() / 2) - (rectHeight / 2),
+               size().width(), rectHeight);
+
+    qreal pageOutOpacity = 1.0 - m_pageInOpacity;
+
+    if (pageOutOpacity > 0.0) {
+        painter.setOpacity(pageOutOpacity);
+        painter.drawPixmap(rect, m_pageOutPixmap);
+    }
+    if (m_pageInOpacity > 0.0) {
+        painter.setOpacity(m_pageInOpacity);
+        painter.drawPixmap(rect, m_pageInPixmap);
+    }
+
+    if (m_pageInOpacity < 1.0) {
+        // Page switching animation still going on
+        qreal opacityAnimationStep = qreal(m_opacityTime.restart()) / 300.0;
+        m_pageInOpacity += opacityAnimationStep;
+        m_pageInOpacity = qMin(m_pageInOpacity, 1.0);
+        update();
+    }
+}
+
+void StudioTutorialWidget::animateInOut()
+{
+    m_pageOutPixmap = getScaledPic(m_imgIterPrev);
+    m_pageInPixmap = getScaledPic(m_imgIter);
+    m_pageInOpacity = 0.0;
+    m_opacityTime.start();
+    update();
 }
 
 void StudioTutorialWidget::handleFwd()
 {
     if (*m_imgIter != m_welcomeImages->last()) {
-        QPixmap pic = getNextScaledPic();
-        m_palette->setBrush(QPalette::Window, pic);
-        setPalette(*m_palette);
-
-        m_ui->studioTutorialBack->setVisible(true);
-        m_ui->studioTutorialShowAgain->setVisible(false);
-        m_ui->checkBoxLabel->setVisible(false);
-    }
-
-    if (*m_imgIter == m_welcomeImages->last()) {
-        m_ui->studioTutorialForward->setVisible(false);
-        m_ui->studioTutorialOpen->setVisible(m_showProjectButtons);
-        if (m_showProjectButtons)
-            m_ui->studioTutorialNew->setText(tr("Create New"));
-        else
-            m_ui->studioTutorialNew->setText(tr("OK"));
-        m_ui->studioTutorialNew->setVisible(true);
+        m_imgIterPrev = m_imgIter;
+        m_imgIter++;
+        updateButtons();
+        animateInOut();
     }
 }
 
 void StudioTutorialWidget::handleBack()
 {
     if (*m_imgIter != m_welcomeImages->first()) {
-        QPixmap pic = getPrevScaledPic();
-        m_palette->setBrush(QPalette::Window, pic);
-        setPalette(*m_palette);
-
-        m_ui->studioTutorialForward->setVisible(true);
-        m_ui->studioTutorialShowAgain->setVisible(false);
-        m_ui->checkBoxLabel->setVisible(false);
-
-        m_ui->studioTutorialOpen->setVisible(false);
-        m_ui->studioTutorialNew->setVisible(false);
+        m_imgIterPrev = m_imgIter;
+        m_imgIter--;
+        updateButtons();
+        animateInOut();
     }
+}
 
-    if (*m_imgIter == m_welcomeImages->first()) {
-        m_ui->studioTutorialBack->setVisible(false);
-        m_ui->studioTutorialShowAgain->setVisible(true);
-        m_ui->checkBoxLabel->setVisible(true);
+void StudioTutorialWidget::handleIndexChange(int index)
+{
+    index = qBound(0, index, m_welcomeImages->size() - 1);
+    if (index != page()) {
+        m_imgIterPrev = m_imgIter;
+        m_imgIter = m_welcomeImages->begin() + index;
+        updateButtons();
+        animateInOut();
     }
 }
 
@@ -203,6 +217,8 @@ void StudioTutorialWidget::getImageList()
 
     while (it->hasNext())
         m_welcomeImages->append(it->next());
+
+    m_ui->pageIndicator->setCount(m_welcomeImages->size());
 }
 
 int StudioTutorialWidget::page() const
@@ -213,23 +229,13 @@ int StudioTutorialWidget::page() const
     return i;
 }
 
-QPixmap StudioTutorialWidget::getNextScaledPic()
-{
-    return getScaledPic(++m_imgIter);
-}
-
-QPixmap StudioTutorialWidget::getPrevScaledPic()
-{
-    return getScaledPic(--m_imgIter);
-}
-
 QPixmap StudioTutorialWidget::getScaledPic(const QList<QString>::iterator &iter)
 {
     QPixmap picOrig = QPixmap(*iter);
     QPixmap pic = picOrig;
     if (m_displayScale < 1.0) {
         // Limit to the maximum size of @2x images
-        pic = picOrig.scaledToHeight(qMin(1800.0, m_displayScale * picOrig.height()),
+        pic = picOrig.scaledToHeight(qMin(1200.0, m_displayScale * picOrig.height()),
                                      Qt::SmoothTransformation);
     }
 
@@ -237,15 +243,8 @@ QPixmap StudioTutorialWidget::getScaledPic(const QList<QString>::iterator &iter)
     return pic;
 }
 
-QSize StudioTutorialWidget::getPicSize(const QList<QString>::iterator &iter)
+qreal StudioTutorialWidget::getDisplayScalingForImage(const QPixmap &picOrig)
 {
-    return getScaledPic(iter).size();
-}
-
-qreal StudioTutorialWidget::getDisplayScalingForImage(const QList<QString>::iterator &iter)
-{
-    QPixmap picOrig = QPixmap(*iter);
-
     // Note that high DPI scaling has an effect on the display
     // resolution returned by QApplication::desktop()->availableGeometry().
     // DPI scaling factor is integer and taken from the primary screen.
@@ -266,4 +265,19 @@ qreal StudioTutorialWidget::getDisplayScalingForImage(const QList<QString>::iter
     } else {
         return 1.0;
     }
+}
+
+void StudioTutorialWidget::updateButtons()
+{
+    bool isFirst = (*m_imgIter == m_welcomeImages->first());
+    bool isLast = (*m_imgIter == m_welcomeImages->last());
+
+    m_ui->studioTutorialBack->setVisible(!isFirst);
+    m_ui->studioTutorialForward->setVisible(!isLast);
+    m_ui->studioTutorialOpen->setVisible(isLast && m_showProjectButtons);
+    m_ui->studioTutorialNew->setVisible(isLast);
+    m_ui->studioTutorialShowAgain->setVisible(isFirst);
+    m_ui->checkBoxLabel->setVisible(isFirst);
+
+    m_ui->pageIndicator->setCurrentIndex(page());
 }

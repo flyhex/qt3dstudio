@@ -216,7 +216,8 @@ HEADERS += \
     Palettes/Project/EditPresentationIdDlg.h \
     Application/ProjectFile.h \
     Application/PresentationFile.h \
-    Palettes/Project/ChooseImagePropertyDlg.h
+    Palettes/Project/ChooseImagePropertyDlg.h \
+    Application/StudioTutorialPageIndicator.h
 
 FORMS += \
     MainFrm.ui \
@@ -387,7 +388,8 @@ SOURCES += \
     Palettes/Project/EditPresentationIdDlg.cpp \
     Application/ProjectFile.cpp \
     Application/PresentationFile.cpp \
-    Palettes/Project/ChooseImagePropertyDlg.cpp
+    Palettes/Project/ChooseImagePropertyDlg.cpp \
+    Application/StudioTutorialPageIndicator.cpp
 
 RESOURCES += \
     MainFrm.qrc \
