@@ -202,6 +202,67 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     painter->setPen(TimelineConstants::WIDGET_BG_COLOR);
     painter->drawLine(18, 0, 18, size().height() - 1);
 
+    // Shy, eye, lock separator
+    painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
+                            0, 1, size().height()),
+                      TimelineConstants::WIDGET_BG_COLOR);
+
+    // Shy, eye, lock
+    static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
+    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
+    static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
+    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
+    if (hasActionButtons()) {
+        painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
+        painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
+        painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
+    }
+
+    // Candidate parent of a dragged row
+    if (m_dndState == DnDState::Parent) {
+        painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
+        painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
+    }
+
+    // Action indicators
+    static const QPixmap pixMasterAction = QPixmap(":/images/Action-MasterAction.png");
+    static const QPixmap pixAction = QPixmap(":/images/Action-Action.png");
+    static const QPixmap pixChildMasterAction = QPixmap(":/images/Action-ChildMasterAction.png");
+    static const QPixmap pixChildAction = QPixmap(":/images/Action-ChildAction.png");
+    static const QPixmap pixCompMasterAction = QPixmap(":/images/Action-ComponentMasterAction.png");
+    static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
+
+    if (!isProperty()) {
+        // Don't access binding when we are in inconsistent state
+        // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
+        if (m_scene->widgetTimeline()->isFullReconstructPending())
+            return;
+
+        Qt3DSDMTimelineItemBinding *itemBinding =
+                static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
+        if (itemBinding->HasAction(true)) // has master action
+            painter->drawPixmap(0, 0, pixMasterAction);
+        else if (itemBinding->HasAction(false)) // has action
+            painter->drawPixmap(0, 0, pixAction);
+
+        if (!expanded()) {
+            if (itemBinding->ChildrenHasAction(true)) // children have master action
+                painter->drawPixmap(0, 0, pixChildMasterAction);
+            else if (itemBinding->ChildrenHasAction(false)) // children have action
+                painter->drawPixmap(0, 0, pixChildAction);
+        }
+
+        if (itemBinding->ComponentHasAction(true)) // component has master action
+            painter->drawPixmap(0, 0, pixCompMasterAction);
+        else if (itemBinding->ComponentHasAction(false)) // component has action
+            painter->drawPixmap(0, 0, pixCompAction);
+    }
+
+    // The following items need to be clipped so that they do not draw overlapping shy etc. buttons
+
+    painter->setClipRect(0, 0, treeWidth() - TimelineConstants::TREE_ICONS_W,
+                         TimelineConstants::ROW_H);
+
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
@@ -288,62 +349,6 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
 
     painter->drawPixmap(m_rectType, pixRowType);
-
-    // Shy, eye, lock separator
-    painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
-                            0, 1, size().height()),
-                      TimelineConstants::WIDGET_BG_COLOR);
-
-    // Shy, eye, lock
-    static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
-    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
-    static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
-    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
-    if (hasActionButtons()) {
-        painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
-        painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
-        painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
-    }
-
-    // Candidate parent of a dragged row
-    if (m_dndState == DnDState::Parent) {
-        painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
-        painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
-    }
-
-    // Action indicators
-    static const QPixmap pixMasterAction = QPixmap(":/images/Action-MasterAction.png");
-    static const QPixmap pixAction = QPixmap(":/images/Action-Action.png");
-    static const QPixmap pixChildMasterAction = QPixmap(":/images/Action-ChildMasterAction.png");
-    static const QPixmap pixChildAction = QPixmap(":/images/Action-ChildAction.png");
-    static const QPixmap pixCompMasterAction = QPixmap(":/images/Action-ComponentMasterAction.png");
-    static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
-
-    if (!isProperty()) {
-        // Don't access binding when we are in inconsistent state
-        // TODO: Refactor so we don't need to access binding during paint (QT3DS-1850)
-        if (m_scene->widgetTimeline()->isFullReconstructPending())
-            return;
-
-        Qt3DSDMTimelineItemBinding *itemBinding =
-                static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
-        if (itemBinding->HasAction(true)) // has master action
-            painter->drawPixmap(0, 0, pixMasterAction);
-        else if (itemBinding->HasAction(false)) // has action
-            painter->drawPixmap(0, 0, pixAction);
-
-        if (!expanded()) {
-            if (itemBinding->ChildrenHasAction(true)) // children have master action
-                painter->drawPixmap(0, 0, pixChildMasterAction);
-            else if (itemBinding->ChildrenHasAction(false)) // children have action
-                painter->drawPixmap(0, 0, pixChildAction);
-        }
-
-        if (itemBinding->ComponentHasAction(true)) // component has master action
-            painter->drawPixmap(0, 0, pixCompMasterAction);
-        else if (itemBinding->ComponentHasAction(false)) // component has action
-            painter->drawPixmap(0, 0, pixCompAction);
-    }
 }
 
 int RowTree::treeWidth() const
