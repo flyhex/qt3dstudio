@@ -173,11 +173,10 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
     m_scene->rowManager()->clampIndex(idx1);
     m_scene->rowManager()->clampIndex(idx2);
 
-    RowTimeline *rowTimeline;
     for (int i = idx1; i <= idx2; ++i) {
-        rowTimeline = m_scene->rowManager()->rowTimelineAt(i);
+        RowTimeline *rowTimeline = m_scene->rowManager()->rowTimelineAt(i);
 
-        if (rowTimeline != nullptr) {
+        if (rowTimeline) {
             const auto keyframes = rowTimeline->getKeyframesInRange(rect.left(), rect.right());
             for (auto keyframe : keyframes) {
                 if (!m_selectedKeyframes.contains(keyframe)) {
@@ -402,7 +401,7 @@ bool KeyframeManager::hasSelectedKeyframes() const
 
 bool KeyframeManager::hasCopiedKeyframes() const
 {
-    return m_pasteKeyframeCommandHelper != nullptr &&
+    return m_pasteKeyframeCommandHelper &&
            m_pasteKeyframeCommandHelper->HasCopiedKeyframes();
 }
 

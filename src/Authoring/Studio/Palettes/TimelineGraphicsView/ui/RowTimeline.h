@@ -76,7 +76,7 @@ public:
     RowTimeline *parentRow() const;
     RowTree *rowTree() const;
     Keyframe *getClickedKeyframe(const QPointF &scenePos);
-    QList<Keyframe *> getKeyframesInRange(const double left, const double right);
+    QList<Keyframe *> getKeyframesInRange(double left, double right);
     QList<Keyframe *> keyframes() const;
     void showToolTip(const QPointF &pos);
 

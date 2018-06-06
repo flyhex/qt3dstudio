@@ -285,26 +285,15 @@ Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
     return nullptr;
 }
 
-QList<Keyframe *> RowTimeline::getKeyframesInRange(const double left, const double right)
+QList<Keyframe *> RowTimeline::getKeyframesInRange(double left, double right)
 {
     double x;
     double x1 = mapFromScene(left, 0).x();
     double x2 = mapFromScene(right, 0).x();
 
     QList<Keyframe *> result;
-    QList<Keyframe *> keyframes;
 
-    if (m_rowTree->hasPropertyChildren()) {
-        const auto childRows = m_rowTree->childRows();
-        for (auto child : childRows) {
-            if (child->isProperty())
-                keyframes.append(child->rowTimeline()->m_keyframes);
-        }
-    } else {
-        keyframes = m_keyframes;
-    }
-
-    for (auto keyframe : qAsConst(keyframes)) {
+    for (auto keyframe : qAsConst(m_keyframes)) {
         x = timeToX(keyframe->time);
 
         if (x1 < x && x2 > x)
