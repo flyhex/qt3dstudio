@@ -38,6 +38,7 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/ITimelineTimebar.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
+#include "AppFonts.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qbrush.h>
@@ -92,8 +93,9 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         painter->fillRect(0, 0, size().width(), currentHeight, bgColor);
     }
 
-    // Duration
-    if (m_rowTree->hasDurationBar()) {
+    // Duration. Draw duration bar (for scene/component root) also if it has
+    // datainput controller
+    if (m_rowTree->hasDurationBar() || m_controllerDataInput.size()) {
         painter->save();
 
         // fully outside ancestors' limits, draw fully hashed
@@ -112,15 +114,45 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             // draw main duration part
             double x = qMax(m_startX, m_minStartX);
             double w = qMin(m_endX, m_maxEndX) - x;
+            static const int marginY = 3;
 
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(x, 0, w, currentHeight), m_barColor);
+
+            if (m_controllerDataInput.size()) {
+                painter->fillRect(QRect(x, 0, w, currentHeight),
+                                  QColor(TimelineConstants::ROW_COLOR_DATAINPUT_DURATION));
+            } else {
+                painter->fillRect(QRect(x, 0, w, currentHeight), m_barColor);
+            }
 
             if ( m_state == Selected) {
                 // draw selection overlay on bar
-                int marginY = 3;
                 painter->fillRect(QRect(x, marginY, w, currentHeight - marginY * 2),
                                   QColor(TimelineConstants::ROW_COLOR_DURATION_SELECTED));
+            }
+
+            if (m_controllerDataInput.size()) {
+                static const QPixmap pixDataInput
+                        = QPixmap(":/images/Objects-DataInput-White.png");
+                static const QFont normalFont = CAppFonts::GetInstance()->GetNormalFont();
+                static const QFontMetrics fm(normalFont);
+
+                // need clip region to limit datainput icon visibility to the same rect as we use
+                // for text
+                painter->setClipRect(x, 0, w, currentHeight);
+                painter->setClipping(true);
+                painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DATAINPUT_TEXT), 2));
+                painter->drawText(QRect(x + pixDataInput.width(), 0, w, currentHeight),
+                                  m_controllerDataInput, QTextOption(Qt::AlignCenter));
+                // place the icon marginY amount away from the datainput name
+                int textwidth = fm.width(m_controllerDataInput);
+                int iconx = x + (w - textwidth) / 2;
+                if (iconx < x)
+                    iconx = x;
+                painter->drawPixmap(iconx, marginY, pixDataInput.width(), pixDataInput.height(),
+                                    pixDataInput);
+                painter->setPen(Qt::NoPen);
+                painter->setClipping(false);
             }
 
             // draw hashed part before
@@ -623,6 +655,12 @@ QColor RowTimeline::barColor() const
 void RowTimeline::setBarColor(const QColor &color)
 {
     m_barColor = color;
+    update();
+}
+
+void RowTimeline::setControllerText(const QString &controller)
+{
+    m_controllerDataInput = controller;
     update();
 }
 

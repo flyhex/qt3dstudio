@@ -337,6 +337,16 @@ void TimelineGraphicsScene::setTimelineScale(int scl)
         static_cast<RowTimeline *>(m_layoutTimeline->itemAt(i)->graphicsItem())->updatePosition();
 }
 
+void TimelineGraphicsScene::setControllerText(const QString &controller)
+{
+    // check that we have scene/container root item at index 1
+    if (m_layoutTimeline->count() < 2)
+        return;
+
+    RowTimeline *rt = static_cast<RowTimeline *>(m_layoutTimeline->itemAt(1)->graphicsItem());
+    rt->setControllerText(controller);
+}
+
 void TimelineGraphicsScene::updateTimelineLayoutWidth()
 {
     double timelineWidth = TimelineConstants::RULER_EDGE_OFFSET * 2
@@ -345,6 +355,20 @@ void TimelineGraphicsScene::updateTimelineLayoutWidth()
 
     m_layoutTimeline->setMinimumWidth(timelineWidth);
     m_layoutTimeline->setMaximumWidth(timelineWidth);
+}
+
+void TimelineGraphicsScene::updateControllerLayoutWidth()
+{
+    if (m_layoutTimeline->count() < 2)
+        return;
+    auto root = m_layoutTimeline->itemAt(1);
+
+    static_cast<RowTimeline *>(root->graphicsItem())->setEndTime(ruler()->duration());
+}
+
+void TimelineGraphicsScene::updateController()
+{
+    setControllerText(m_widgetTimeline->toolbar()->getCurrentController());
 }
 
 void TimelineGraphicsScene::commitMoveRows()

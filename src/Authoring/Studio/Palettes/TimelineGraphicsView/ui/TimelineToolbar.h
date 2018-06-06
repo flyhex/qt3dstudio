@@ -53,6 +53,7 @@ signals:
     void firstFrameTriggered();
     void stopTriggered();
     void playTriggered();
+    void controllerChanged(const QString &controller);
     void lastFrameTriggered();
     void timelineScaleChanged(int scale);
     void setDurationTriggered();
@@ -61,6 +62,7 @@ public:
     TimelineToolbar();
     virtual ~TimelineToolbar();
     void setTime(long totalMillis);
+    QString getCurrentController() const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;

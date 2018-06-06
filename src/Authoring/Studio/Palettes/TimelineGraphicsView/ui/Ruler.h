@@ -60,6 +60,7 @@ protected:
 
 signals:
     void maxDurationChanged(double maxDuration);
+    void durationChanged(double duration);
 
 private:
     const QString timestampString(int timeMs);

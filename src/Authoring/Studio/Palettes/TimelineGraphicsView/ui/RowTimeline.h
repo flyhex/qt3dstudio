@@ -58,6 +58,7 @@ public:
     void setStartX(double startX);
     void setEndX(double endX);
     void setBarColor(const QColor &color);
+    void setControllerText(const QString &controller);
     void putSelectedKeyframesOnTop();
     void updateKeyframes();
     void insertKeyframe(Keyframe *keyframe);
@@ -107,6 +108,7 @@ private:
     double m_minStartX = 0;
     double m_maxEndX = 0;
     bool m_isProperty = false; // used in the destructor
+    QString m_controllerDataInput;
     QList<Keyframe *> m_keyframes;
     QColor m_barColor;
 

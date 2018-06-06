@@ -194,6 +194,11 @@ void TimelineToolbar::setTime(long totalMillis)
     m_timeLabel->setText(QString::asprintf("%01d:%02d.%03d", mins, secs, millis));
 }
 
+QString TimelineToolbar::getCurrentController() const
+{
+    return m_currController;
+}
+
 void TimelineToolbar::updatePlayButtonState(bool started)
 {
     if (started) {
@@ -280,6 +285,7 @@ void TimelineToolbar::updateDataInputStatus()
             updateTimelineTitleColor(false);
         }
         m_diLabel->setText(m_currController);
+        emit controllerChanged(m_currController);
     }
 }
 
@@ -324,6 +330,8 @@ void TimelineToolbar::onDataInputChange(int handle, int instance, const QString 
         m_currController.clear();
         updateTimelineTitleColor(false);
     }
+
+    emit controllerChanged(m_currController);
 
     // To indicate that this presentation timeline is controlled by data input,
     // we set "controlled property" of this time context root (scene or component)

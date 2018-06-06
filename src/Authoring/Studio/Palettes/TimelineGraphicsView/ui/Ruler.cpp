@@ -171,6 +171,7 @@ void Ruler::setDuration(double duration)
     if (m_duration != duration) {
         m_duration = duration;
         update();
+        emit durationChanged(m_duration);
     }
 }
 

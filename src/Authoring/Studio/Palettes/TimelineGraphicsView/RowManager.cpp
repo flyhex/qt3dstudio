@@ -275,9 +275,11 @@ void RowManager::updateRulerDuration(bool updateMaxDuration)
             if (dur_i > maxDuration)
                 maxDuration = dur_i;
         }
+        rootRow->rowTimeline()->setEndTime(maxDuration);
     }
 
     m_scene->ruler()->setDuration(duration);
+
     if (updateMaxDuration)
         m_scene->ruler()->setMaxDuration(maxDuration);
 }

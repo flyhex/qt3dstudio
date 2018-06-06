@@ -277,6 +277,8 @@
         <file>images/remote-disabled@2x.png</file>
         <file>images/Assets-Model.png</file>
         <file>images/Assets-Model@2x.png</file>
+        <file>images/Objects-DataInput-White.png</file>
+        <file>images/Objects-DataInput-White@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

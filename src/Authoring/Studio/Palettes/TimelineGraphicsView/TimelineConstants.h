@@ -73,6 +73,8 @@ namespace TimelineConstants
     const char ROW_COLOR_DURATION_SELECTED[]   = "#80000000";
     const char ROW_COLOR_DND_SRC[]             = "#464600";
     const char ROW_COLOR_DND_TGT[]             = "#292929";
+    const char ROW_COLOR_DATAINPUT_TEXT[]      = "#ffffff";
+    const char ROW_COLOR_DATAINPUT_DURATION[]  = "#ff5102";
     const char ROW_TEXT_COLOR[]                = "#bbbbbb";
     const char ROW_TEXT_COLOR_DISABLED[]       = "#888888";
     const char PLAYHEAD_COLOR[]                = "#ff0066";

@@ -267,8 +267,17 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
         m_graphicsScene->setTimelineScale(scale);
     });
 
+    connect(m_toolbar, &TimelineToolbar::controllerChanged, this,
+            [this](const QString &controller) {
+        m_graphicsScene->setControllerText(controller);
+    });
+
     connect(m_graphicsScene->ruler(), &Ruler::maxDurationChanged, this, [this]() {
         m_graphicsScene->updateTimelineLayoutWidth();
+    });
+
+    connect(m_graphicsScene->ruler(), &Ruler::durationChanged, this, [this]() {
+        m_graphicsScene->updateControllerLayoutWidth();
     });
 
     // data model listeners
@@ -689,6 +698,7 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->updateSnapSteps();
         m_fullReconstruct = false;
         m_graphicsScene->rowManager()->updateFiltering();
+        m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
     } else {
         if (!m_moveMap.isEmpty()) {
