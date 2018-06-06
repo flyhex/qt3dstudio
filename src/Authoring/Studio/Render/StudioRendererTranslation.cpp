@@ -1130,6 +1130,13 @@ struct SEffectTranslator : public SDynamicObjectTranslator
         else
             theItem.m_Flags.SetActive(inActive);
     }
+
+    void ResetEffect() override
+    {
+        SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
+        if (m_EffectSystem)
+            theItem.Reset(*m_EffectSystem);
+    }
 };
 struct SCustomMaterialTranslator : public SDynamicObjectTranslator
 {
@@ -2035,6 +2042,10 @@ void STranslation::MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     THandleTranslatorPairList &theTranslators = GetTranslatorsForInstance(inInstance);
     for (size_t idx = 0, end = theTranslators.size(); idx < end; ++idx) {
         m_DirtySet.insert(*theTranslators[(eastl::allocator::size_type)idx].second);
+        // Reset effect when effect parameters change, as with certain corner cases
+        // some effects would accumulate ~infinitely and result would not reflect
+        // actual parameter setting unless reset (f.ex corona, other blur types)
+        m_DirtySet.back()->ResetEffect();
     }
     RequestRender();
 }

@@ -67,6 +67,8 @@ namespace render {
         // to reset our context.
         void SetActive(bool inActive, IEffectSystem &inSystem);
 
+        void Reset(IEffectSystem &inSystem);
+
         // Generic method used during serialization
         // to remap string and object pointers
         template <typename TRemapperType>

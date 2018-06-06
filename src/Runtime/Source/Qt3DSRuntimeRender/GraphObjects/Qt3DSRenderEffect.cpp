@@ -52,3 +52,10 @@ void SEffect::SetActive(bool inActive, IEffectSystem &inManager)
         m_Flags.SetDirty(true);
     }
 }
+
+void SEffect::Reset(IEffectSystem &inSystem)
+{
+    if (m_Context)
+        inSystem.ResetEffectFrameData(*m_Context);
+    m_Flags.SetDirty(true);
+}

@@ -94,6 +94,7 @@ namespace studio {
         virtual void SetActive(bool inActive) = 0;
         virtual void ClearChildren() = 0;
         virtual void AppendChild(SGraphObject &inChild) = 0;
+        virtual void ResetEffect() {}
         virtual SGraphObject &GetGraphObject() { return *m_GraphObject; }
         virtual SGraphObject &GetNonAliasedGraphObject() { return *m_GraphObject; }
         virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstanceHandle() { return m_InstanceHandle; }
