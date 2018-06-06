@@ -985,7 +985,7 @@ public:
             m_Bridge.GetOrCreateGraphRoot(retval);
 
         TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
-                                                   inPosition, false);
+                                                   inPosition, false, true, false);
         SetName(retval, theName, true);
         return handle;
     }
@@ -2101,7 +2101,8 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle
     FinalizeAddOrDrop(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle inParent,
                       DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition,
-                      bool inSetTimeRangeToParent, bool inSelectInstanceWhenFinished = true)
+                      bool inSetTimeRangeToParent, bool inSelectInstanceWhenFinished = true,
+                      bool checkUniqueName = true)
     {
         if (inPosition.x != 0 && inPosition.y != 0) {
             Q3DStudio::IDocSceneGraph *theGraph(m_Doc.GetSceneGraph());
@@ -2113,7 +2114,7 @@ public:
                 QT3DS_ASSERT(false);
             }
         }
-        RearrangeObject(inInstance, inParent, inInsertType);
+        RearrangeObject(inInstance, inParent, inInsertType, checkUniqueName);
         if (inSetTimeRangeToParent)
             SetTimeRangeToParent(inInstance);
         if (inSelectInstanceWhenFinished)
@@ -2285,7 +2286,8 @@ public:
 
     void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
-                                  DocumentEditorInsertType::Enum inInsertType) override
+                                  DocumentEditorInsertType::Enum inInsertType,
+                                  bool checkUniqueName) override
     {
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
         TInstanceHandle theParent(inDest);
@@ -2301,10 +2303,13 @@ public:
                 theInstance = sortableList[end - idx - 1];
             // Rename if the new parent already has object with a same name
             CString currName = m_Bridge.GetName(theInstance);
-            if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
-                CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance, currName);
-                m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
-                SetName(theInstance, newName);
+            if (checkUniqueName) {
+                if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
+                    CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance,
+                                                                  currName);
+                    m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                    SetName(theInstance, newName);
+                }
             }
             if (inInsertType == DocumentEditorInsertType::PreviousSibling)
                 m_AssetGraph.MoveBefore(theInstance, inDest);
@@ -2676,9 +2681,10 @@ public:
                 else
                     m_DataCore.SetInstancePropertyValue(theImportRoot, theProp, theSourcePathValue);
 
+                // Do not check for unique name as we set it anyway after getting new handle
                 Qt3DSDMInstanceHandle retval =
                     FinalizeAddOrDrop(importToComposer->GetRoot(), inParent, inInsertType,
-                                      inPosition, inStartTime == -1);
+                                      inPosition, inStartTime == -1, true, false);
                 SetName(retval, theRelPath.GetFileStem(), true);
 
                 return retval;
@@ -3234,11 +3240,12 @@ public:
         if (inStartTime != -1)
             SetStartTime(theTextInstance, inStartTime);
 
-        // Set unique name
-        SetName(theTextInstance, GetName(theTextInstance), true);
+        // Set the name afterwards, do not do uniqueness check here
+        auto handle = FinalizeAddOrDrop(theTextInstance, inParent, inDropType, inPosition,
+                                        inStartTime == -1, true, false);
+        SetName(handle, GetName(handle), true);
 
-        return FinalizeAddOrDrop(theTextInstance, inParent, inDropType, inPosition,
-                                 inStartTime == -1);
+        return handle;
     }
 
     typedef void (IMetaData::*TDynamicObjectLoader)(const char *inShaderFile,
