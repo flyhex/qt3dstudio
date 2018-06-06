@@ -850,6 +850,8 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
         }
     }
 
+    m_graphicsScene->updateAutoScrolling(mouseY);
+
     return theTarget;
 }
 
