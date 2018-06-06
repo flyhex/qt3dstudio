@@ -78,8 +78,6 @@ Row {
     Slider {
         id: slider
 
-        property bool ignoreHotkeys: true
-
         leftPadding: 0
 
         background: Rectangle {
