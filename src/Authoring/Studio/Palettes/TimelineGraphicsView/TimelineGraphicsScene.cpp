@@ -306,8 +306,10 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                                                       - m_ruler->durationStartX()) * 1000;
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
             } else if (item->type() == TimelineItem::TypeTreeHeader) {
-                if (m_treeHeader->handleButtonsClick(m_pressPos) != TreeControlType::None)
+                if (m_treeHeader->handleButtonsClick(m_pressPos) != TreeControlType::None) {
                     m_rowManager->updateFiltering();
+                    updateSnapSteps();
+                }
             } else if (item->type() == TimelineItem::TypeRowTree
                        || item->type() == TimelineItem::TypeRowTreeLabelItem) {
                 item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
@@ -317,6 +319,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         || m_clickedTreeControlType == TreeControlType::Hide
                         || m_clickedTreeControlType == TreeControlType::Lock) {
                     m_rowManager->updateFiltering(rowTree);
+                    updateSnapSteps();
                 } else if (m_clickedTreeControlType == TreeControlType::None) {
                     // Prepare to change selection to single selection at release if a multiselected
                     // row is clicked without ctrl.
@@ -501,7 +504,7 @@ void TimelineGraphicsScene::updateSnapSteps() {
     for (int i = 2; i < m_layoutTimeline->count(); i++) {
         RowTree *rowTree = static_cast<RowTree *>
                 (m_layoutTree->itemAt(i)->graphicsItem());
-        if (rowTree->hasDurationBar() && rowTree->expanded()) {
+        if (rowTree->hasDurationBar() && rowTree->isVisible()) {
             if (!m_snapSteps.contains(rowTree->rowTimeline()->getStartX()))
                 m_snapSteps.push_back(rowTree->rowTimeline()->getStartX());
 
