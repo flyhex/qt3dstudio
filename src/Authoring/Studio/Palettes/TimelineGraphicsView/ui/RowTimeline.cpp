@@ -410,15 +410,22 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
         return TimelineControlType::None;
 
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (p.x() > m_startX - TimelineConstants::DURATION_HANDLE_W * .5
-            && p.x() < m_startX + TimelineConstants::DURATION_HANDLE_W * .5) {
-        return TimelineControlType::StartHandle;
-    } else if (p.x() > m_endX - TimelineConstants::DURATION_HANDLE_W * .5
-               && p.x() < m_endX + TimelineConstants::DURATION_HANDLE_W * .5) {
-        return TimelineControlType::EndHandle;
-    } else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked()) {
-        return TimelineControlType::Duration;
+    const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
+    // Never choose start handle if end time is zero, as you cannot adjust it in that case
+    bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle
+            && !qFuzzyIsNull(m_endTime);
+    bool endHandle = p.x() > m_endX - halfHandle && p.x() < m_endX + halfHandle;
+    if (startHandle && endHandle) {
+        // If handles overlap, choose the handle based on the side of the click relative to start
+        startHandle = p.x() < m_startX;
+        endHandle = !startHandle;
     }
+    if (startHandle)
+        return TimelineControlType::StartHandle;
+    else if (endHandle)
+        return TimelineControlType::EndHandle;
+    else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked())
+        return TimelineControlType::Duration;
 
     return TimelineControlType::None;
 }
@@ -537,8 +544,8 @@ void RowTimeline::setStartX(double startX)
 {
     if (startX < TimelineConstants::RULER_EDGE_OFFSET)
         startX = TimelineConstants::RULER_EDGE_OFFSET;
-    else if (startX > m_endX - 1)
-        startX = m_endX - 1;
+    else if (startX > m_endX)
+        startX = m_endX;
 
     double oldStartX = m_startX;
     m_startX = startX;
@@ -557,8 +564,8 @@ void RowTimeline::setStartX(double startX)
 // Set the position of the end of the row duration
 void RowTimeline::setEndX(double endX)
 {
-    if (endX < m_startX + 1)
-        endX = m_startX + 1;
+    if (endX < m_startX)
+        endX = m_startX;
 
     double oldEndX = m_endX;
     m_endX = endX;

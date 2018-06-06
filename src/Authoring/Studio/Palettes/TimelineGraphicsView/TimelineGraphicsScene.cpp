@@ -360,9 +360,9 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             m_editedTimelineRow->getClickedControl(m_pressPos);
 
                     // clicked an empty spot on a timeline row, start selection rect.
-                    if (m_clickedTimelineControlType == TimelineControlType::None)
+                    if (m_clickedTimelineControlType == TimelineControlType::None) {
                         m_selectionRect->start(m_pressPos);
-                    else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+                    } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
                         if (!ctrlKeyDown
                                 && m_rowManager->isRowSelected(m_editedTimelineRow->rowTree())
                                 && !m_rowManager->isSingleSelected() ) {
