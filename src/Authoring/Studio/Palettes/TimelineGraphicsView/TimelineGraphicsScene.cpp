@@ -701,7 +701,7 @@ void TimelineGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 
 void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-    RowTree *row = m_rowManager->getRowAtPos(event->scenePos());
+    RowTree *row = m_rowManager->getRowAtPos(QPointF(0, event->scenePos().y()));
 
     if (!row || m_widgetTimeline->isFullReconstructPending() || m_dragging
             || m_startRowMoverOnNextDrag) {
