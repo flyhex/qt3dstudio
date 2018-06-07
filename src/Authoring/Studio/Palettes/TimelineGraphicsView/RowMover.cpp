@@ -156,20 +156,6 @@ void RowMover::updateState(int depth, double y)
     setVisible(true);
 }
 
-RowTree *RowMover::getRowAtPos(const QPointF &scenePos)
-{
-    QList<QGraphicsItem *> items = m_scene->items(scenePos);
-
-    int index = 0;
-    while (index < items.size()) {
-        QGraphicsItem *item = items.at(index++);
-        if (item->type() == TimelineItem::TypeRowTree)
-            return static_cast<RowTree *>(item);
-    }
-
-    return nullptr;
-}
-
 bool RowMover::isNextSiblingRow(RowTree *rowMain, RowTree *rowSibling) const
 {
     // order matters, rowSibling is below rowMain
@@ -208,8 +194,10 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         theRowType = m_sourceRows[0]->rowType();
 
     // row will be inserted just below rowInsert1 and just above rowInsert2 (if it exists)
-    RowTree *rowInsert1 = getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * -.5));
-    RowTree *rowInsert2 = getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * .5));
+    RowTree *rowInsert1 = m_scene->rowManager()
+            ->getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * -.5));
+    RowTree *rowInsert2 = m_scene->rowManager()
+            ->getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * .5));
 
     bool valid = rowInsert1 && theRowType != OBJTYPE_MATERIAL
             && theRowType != OBJTYPE_CUSTOMMATERIAL;
@@ -219,10 +207,12 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         // after the property
         if (rowInsert1->isProperty()) {
             rowInsert1 = rowInsert1->parentRow()->childProps().last();
-            rowInsert2 = getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
+            rowInsert2 = m_scene->rowManager()
+                    ->getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
         } else if (rowInsert1->hasPropertyChildren() && rowInsert1->expanded()) {
             rowInsert1 = rowInsert1->childProps().last();
-            rowInsert2 = getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
+            rowInsert2 = m_scene->rowManager()
+                    ->getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
         }
 
         // calc insertion depth
@@ -320,7 +310,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             valid = false;
         }
         if (valid) {
-            updateState(depth, rowInsert1->y() + TimelineConstants::ROW_H);
+            updateState(depth, rowInsert1->y() + rowInsert1->size().height());
 
             // auto expand
             if (!rowInsert1->locked() && !rowInsert1->expanded() && rowInsert1->isContainer()

@@ -285,19 +285,21 @@ Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
     return nullptr;
 }
 
-QList<Keyframe *> RowTimeline::getKeyframesInRange(double left, double right)
+QList<Keyframe *> RowTimeline::getKeyframesInRange(const QRectF &rect) const
 {
     double x;
-    double x1 = mapFromScene(left, 0).x();
-    double x2 = mapFromScene(right, 0).x();
+    QRectF localRect = mapFromScene(rect).boundingRect();
 
     QList<Keyframe *> result;
 
+    static const int KF_CENTER_Y = 10;
     for (auto keyframe : qAsConst(m_keyframes)) {
         x = timeToX(keyframe->time);
 
-        if (x1 < x && x2 > x)
+        if (localRect.left() < x && localRect.right() > x
+                && localRect.top() < KF_CENTER_Y && localRect.bottom() > KF_CENTER_Y) {
             result.append(keyframe);
+        }
     }
 
     return result;
@@ -508,14 +510,14 @@ double RowTimeline::getDurationMoveOffsetX() const
 }
 
 // convert time values to x
-double RowTimeline::timeToX(double time)
+double RowTimeline::timeToX(double time) const
 {
     return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_SEC_W
            * rowTree()->m_scene->ruler()->timelineScale();
 }
 
 // convert x values to time
-double RowTimeline::xToTime(double xPos)
+double RowTimeline::xToTime(double xPos) const
 {
     return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
            / (TimelineConstants::RULER_SEC_W * rowTree()->m_scene->ruler()->timelineScale());

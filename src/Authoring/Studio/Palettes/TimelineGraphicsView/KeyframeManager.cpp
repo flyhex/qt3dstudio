@@ -167,26 +167,19 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
 {
     deselectAllKeyframes();
 
-    int idx1 = (rect.top() + 4) / TimelineConstants::ROW_H;
-    int idx2 = (rect.bottom() - 4) / TimelineConstants::ROW_H;
+    RowTree *row = m_scene->rowManager()->getRowAtPos(QPointF(0, rect.top()));
+    while (row && row->y() < rect.bottom()) {
+        const auto keyframes = row->rowTimeline()->getKeyframesInRange(rect);
+        for (auto keyframe : keyframes) {
+            if (!m_selectedKeyframes.contains(keyframe)) {
+                m_selectedKeyframes.append(keyframe);
 
-    m_scene->rowManager()->clampIndex(idx1);
-    m_scene->rowManager()->clampIndex(idx2);
-
-    for (int i = idx1; i <= idx2; ++i) {
-        RowTimeline *rowTimeline = m_scene->rowManager()->rowTimelineAt(i);
-
-        if (rowTimeline) {
-            const auto keyframes = rowTimeline->getKeyframesInRange(rect.left(), rect.right());
-            for (auto keyframe : keyframes) {
-                if (!m_selectedKeyframes.contains(keyframe)) {
-                    m_selectedKeyframes.append(keyframe);
-
-                    if (!m_selectedKeyframesMasterRows.contains(keyframe->rowMaster))
-                        m_selectedKeyframesMasterRows.append(keyframe->rowMaster);
-                }
+                if (!m_selectedKeyframesMasterRows.contains(keyframe->rowMaster))
+                    m_selectedKeyframesMasterRows.append(keyframe->rowMaster);
             }
         }
+
+        row = m_scene->rowManager()->getRowAtPos(QPointF(0, row->y() + row->size().height()));
     }
 
     for (auto keyframe : qAsConst(m_selectedKeyframes))

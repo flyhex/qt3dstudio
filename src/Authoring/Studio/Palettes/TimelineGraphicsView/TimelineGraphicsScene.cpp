@@ -444,7 +444,6 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_rowMover->start(m_rowManager->selectedRows());
             }
             if (m_rowMover->isActive()) {
-                // collapse all properties so correctIndex() counts correctly
                 m_rowManager->collapseAllPropertyRows();
                 m_rowMover->updateTargetRow(event->scenePos());
                 updateAutoScrolling(event->scenePos().y());
@@ -702,10 +701,9 @@ void TimelineGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 
 void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-    int index = event->scenePos().y() / TimelineConstants::ROW_H;
-    RowTree *row = m_rowManager->rowAt(index);
+    RowTree *row = m_rowManager->getRowAtPos(event->scenePos());
 
-    if (row == nullptr || m_widgetTimeline->isFullReconstructPending() || m_dragging
+    if (!row || m_widgetTimeline->isFullReconstructPending() || m_dragging
             || m_startRowMoverOnNextDrag) {
         return;
     }

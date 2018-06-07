@@ -58,7 +58,6 @@ public:
 private:
     void updateState(int depth, double y);
     void resetInsertionParent(RowTree *newParent = nullptr);
-    RowTree *getRowAtPos(const QPointF &scenePos);
     bool isSourceRowsDescendant(RowTree *row) const;
     bool sourceRowsHasMaster() const;
     bool isNextSiblingRow(RowTree *r1, RowTree *r2) const;
