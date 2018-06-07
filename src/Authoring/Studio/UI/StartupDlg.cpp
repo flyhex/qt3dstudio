@@ -178,15 +178,14 @@ void CStartupDlg::OpenRecent(size_t inIndex)
 void CStartupDlg::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
+    if (m_palette)
+        return;
+
+    m_palette = new QPalette;
     QPixmap pic = QPixmap(":/startup/open_dialog.png");
     pic.setDevicePixelRatio(devicePixelRatio());
-
-    if (!m_palette) {
-        m_palette = new QPalette;
-        m_palette->setBrush(QPalette::Window, pic);
-        setPalette(*m_palette);
-    }
-
+    m_palette->setBrush(QPalette::Window, pic);
+    setPalette(*m_palette);
     resize(pic.size());
     setFixedSize(size());
 }
