@@ -2837,19 +2837,27 @@ QString CDoc::GetDocumentUIAFile(bool master)
             = Q3DStudio::CFilePath(GetDocumentPath().GetName()).GetFileStem();
 
     QString file;
+    QString masterFile;
     std::vector<Q3DStudio::CFilePath> dirFiles;
     Q3DStudio::CFilePath thePath(docDir);
     thePath.ListFilesAndDirectories(dirFiles);
     for (size_t idx = 0, end = dirFiles.size(); idx < end; ++idx) {
-        if (dirFiles[idx].IsFile()) {
-            Q3DStudio::CString ext = dirFiles[idx].GetExtension();
-            if (ext.CompareNoCase("uia") && (master || dirFiles[idx].GetFileStem() == docName)) {
-                file = dirFiles[idx].toQString();
+        Q3DStudio::CFilePath dirEntry = dirFiles[idx];
+        if (dirEntry.IsFile() && dirEntry.GetExtension().CompareNoCase("uia")) {
+            // First check if there is an *.uia file with the same name as the *.uip
+            // If there is, that's what we want
+            // If not, then check if we are looking for the master *.uia, and take that instead
+            if (dirEntry.GetFileStem() == docName) {
+                file = dirEntry.toQString();
+                // We found what we're looking for, so stop looking
                 break;
+            } else if (master) {
+                masterFile = dirEntry.toQString();
+                // Keep looking, as we may still find another *.uia with the correct name
             }
         }
     }
-    return file;
+    return file.isEmpty() ? masterFile : file;
 }
 
 void CDoc::UpdateDatainputMap(
