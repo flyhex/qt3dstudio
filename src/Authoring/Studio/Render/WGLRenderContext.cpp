@@ -102,6 +102,10 @@ QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
     };
 
     ContextVersion versions[] = {
+        {4, 5, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 4, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 3, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 2, qt3ds::render::NVRenderContextValues::GL4},
         {4, 1, qt3ds::render::NVRenderContextValues::GL4},
         {3, 3, qt3ds::render::NVRenderContextValues::GL3},
         {2, 1, qt3ds::render::NVRenderContextValues::GL2},
@@ -150,6 +154,7 @@ QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
     }
 
     qDebug() << Q_FUNC_INFO << "selected surface format:" << result;
+    QSurfaceFormat::setDefaultFormat(result);
     return result;
 }
 

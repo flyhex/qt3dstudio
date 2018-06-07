@@ -37,6 +37,7 @@
 #include "Qt3DSOffscreenRenderManager.h"
 #include "q3dsqmlrender.h"
 #include "q3dsqmlstreamproxy.h"
+#include "StudioSubPresentationRenderer.h"
 
 #include <QtCore/qdebug.h>
 
@@ -69,7 +70,7 @@ SEditCameraDefinition g_EditCameraDefinitions[] = {
 };
 QT3DSU32 g_NumEditCameras = sizeof(g_EditCameraDefinitions) / sizeof(*g_EditCameraDefinitions);
 
-struct StudioSubPresentationRenderer
+struct StudioSubPresentation
 {
     SubPresentationRecord subpresentation;
     IOffscreenRenderer *renderer;
@@ -112,7 +113,7 @@ struct SRendererImpl : public IStudioRenderer,
     bool m_GuidesEnabled;
     qt3dsdm::TSignalConnectionPtr m_SelectionSignal;
     float m_pixelRatio;
-    QHash<QString, StudioSubPresentationRenderer> m_subpresentations;
+    QHash<QString, StudioSubPresentation> m_subpresentations;
     QScopedPointer<Q3DSQmlStreamProxy> m_proxy;
 
     SRendererImpl()
@@ -160,7 +161,9 @@ struct SRendererImpl : public IStudioRenderer,
         if (m_proxy.isNull())
             m_proxy.reset(new Q3DSQmlStreamProxy());
         IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
-        m_proxy->setPath(m_Doc.GetDocumentPath().GetAbsolutePath().toQString());
+        const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath().toQString();
+        // setPath expects full path, but strips the filename
+        m_proxy->setPath(projectPath + "/dummy.uip");
         QVector<SubPresentationRecord> toUnregister;
         QVector<SubPresentationRecord> toRegister;
         const auto keys = m_subpresentations.keys();
@@ -199,7 +202,14 @@ struct SRendererImpl : public IStudioRenderer,
                             qt3ds::render::SOffscreenRendererKey(rid), *theOffscreenRenderer);
                 m_subpresentations[toRegister[i].m_id].renderer = theOffscreenRenderer;
             } else {
-
+                qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
+                    QT3DS_NEW(m_Context->GetAllocator(),
+                           StudioSubpresentationRenderer)(*m_Context, toRegister[i].m_id,
+                                                          toRegister[i].m_argsOrSrc,
+                                                          projectPath);
+                offscreenMgr.RegisterOffscreenRenderer(
+                            qt3ds::render::SOffscreenRendererKey(rid), *theOffscreenRenderer);
+                m_subpresentations[toRegister[i].m_id].renderer = theOffscreenRenderer;
             }
             m_subpresentations[toRegister[i].m_id].subpresentation = toRegister[i];
         }
@@ -227,6 +237,7 @@ struct SRendererImpl : public IStudioRenderer,
         }
 
     }
+
     ITextRenderer *GetTextRenderer() override
     {
         if (m_Context.mPtr)

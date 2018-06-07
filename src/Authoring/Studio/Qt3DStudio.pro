@@ -16,6 +16,11 @@ win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 QT += core gui xml openglextensions
 QT += qml quick widgets quickwidgets network
 
+# Configuration for RT1/RT2 preview. RT2 doesn't work yet so uset RT1.
+QT += studio3d-private
+#QT += 3dstudioruntime2-private
+#DEFINES += Q3DS_PREVIEW_SUBPRESENTATION_RT2
+
 INCLUDEPATH += \
     Application \
     Controls \
@@ -193,6 +198,7 @@ HEADERS += \
     remotedeploymentsender.h \
     Render/StudioGradientWidget.h \
     Render/StudioVisualAidWidget.h \
+    Render/StudioSubPresentationRenderer.h \
     UI/EditCameraBar.h \
     UI/GLVersionDlg.h \
     UI/InterpolationDlg.h \
@@ -355,6 +361,7 @@ SOURCES += \
     Render/StudioVisualAidWidget.cpp \
     Render/StudioWidget.cpp \
     Render/WGLRenderContext.cpp \
+    Render/StudioSubPresentationRenderer.cpp \
     UI/EditCameraBar.cpp \
     UI/EditorPane.cpp \
     UI/GLVersionDlg.cpp \

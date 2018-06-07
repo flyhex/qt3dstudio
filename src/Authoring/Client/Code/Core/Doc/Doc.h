@@ -145,6 +145,8 @@ struct SubPresentationRecord
     {
         return r.m_id == m_id && r.m_argsOrSrc == m_argsOrSrc && r.m_type == m_type;
     }
+
+    friend QDebug operator << (QDebug debug, const SubPresentationRecord &rec);
 };
 
 class CDataInputDialogItem

@@ -53,6 +53,20 @@ load(qt_parts)
                     $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QML_FILE_D)) \
                     $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QML_FILE_D))
             }
+
+            # copy QtStudio3D.dll
+            release {
+                QTSTUDIO3D_LIB = Qt5Studio3D.dll
+            } else {
+                QTSTUDIO3D_LIB = Qt5Studio3Dd.dll
+            }
+            QMAKE_EXTRA_TARGETS += copyStudio3D
+            deployTarget.depends += copyStudio3D
+            copyStudio3D.commands = \
+                $$QMAKE_COPY $$shell_quote($$shell_path( \
+                    $$OUT_PWD/bin/$$QTSTUDIO3D_LIB)) \
+                $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$QTSTUDIO3D_LIB))
+
             QMLDIR_FILE = QtStudio3D/qmldir
             QMAKE_EXTRA_TARGETS += deployQmldir
             deployTarget.depends += deployQmldir
