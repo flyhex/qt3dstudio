@@ -34,8 +34,7 @@
 Qt 3D Studio supports using behavior scripts. Included in Studio is a
 set of behavior scripts. These can be found in the scripts asset library.
 
-It is possible to write new behavior scripts and use them in Studio. See
-\l{Behavior} for more information about that.
+It is possible to write new behavior scripts and use them in Studio.
 
 Behavior scripts can be applied to objects to give the specific object a certain behavior. Behavior
 properties can be edited in the \e{inspector palette}.
