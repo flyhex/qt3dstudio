@@ -39,6 +39,6 @@
 //==============================================================================
 
 // Copyright date (year only) used through out the Studio program; must be a quoted string.
-#define STUDIO_COPYRIGHT_YEAR "2017"
+#define STUDIO_COPYRIGHT_YEAR "2017-2018"
 
 #endif // STUDIO_DEFINITIONS_H
