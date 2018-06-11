@@ -2877,7 +2877,7 @@ void CDoc::UpdateDatainputMap(
             = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
         QStringList splitStr = currCtrldPropsStr.toQString().split(' ');
         for (int i = 0; i < splitStr.size() - 1; i += 2) {
-            QString diName = splitStr[i].remove(0, 1);
+            QString diName = splitStr[i].startsWith('$') ? splitStr[i].remove(0, 1) : splitStr[i];
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
                 g_StudioApp.m_dataInputDialogItems[diName]->
                     controlledElems.append(inInstance);
