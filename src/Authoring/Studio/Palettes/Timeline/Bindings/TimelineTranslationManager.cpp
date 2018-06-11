@@ -27,14 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "TimelineTranslationManager.h"
 #include "SlideTimelineItemBinding.h"
 #include "GroupTimelineItemBinding.h"
@@ -105,7 +98,7 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
             theReturn = new Qt3DSDMTimelineItemBinding(this, inInstance);
         else {
             // Add support for additional DataModel types here.
-            ASSERT(0);
+            Q_ASSERT(0);
         }
 
         m_InstanceHandleBindingMap.insert(

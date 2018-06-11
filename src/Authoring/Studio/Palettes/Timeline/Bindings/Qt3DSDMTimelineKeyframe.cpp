@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSDMTimelineKeyframe.h"
 #include "Qt3DSDMAnimation.h"
 #include "CmdDataModelChangeKeyframe.h"
@@ -108,7 +108,7 @@ void Qt3DSDMTimelineKeyframe::SetTime(const long inNewTime)
     IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     long theTest = static_cast<long>(
         KeyframeTime(theAnimationCore->GetKeyframeData(*m_KeyframeHandles.begin())) * 1000);
-    ASSERT(inNewTime == theTest);
+    Q_ASSERT(inNewTime == theTest);
 #endif
 }
 

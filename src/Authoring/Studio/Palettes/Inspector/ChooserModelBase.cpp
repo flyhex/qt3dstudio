@@ -25,9 +25,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include <QSet>
+#include <QtCore/qset.h>
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "ChooserModelBase.h"
 #include "Core.h"

@@ -27,10 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportImpl.h"
 #include "Qt3DSImportMesh.h"
@@ -43,7 +40,7 @@
 #include "Qt3DSImportComposerTypes.h"
 #include "CommonConstants.h"
 
-#include <QString>
+#include <QtCore/qstring.h>
 
 using namespace qt3dsimp;
 

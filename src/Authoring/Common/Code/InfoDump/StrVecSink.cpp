@@ -26,16 +26,11 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-//==============================================================================
-//	Prefixes
-//==============================================================================
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "StrVecSink.h"
 
 #include <fstream>
-#include <algorithm>
 #include <functional>
-#include <stdexcept>
 #include "StrUtilities.h"
 #include "DumpFileSink.h"
 

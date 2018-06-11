@@ -27,14 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "EditCameraBar.h"
 #include "MainFrm.h"
 #include "SceneView.h"
@@ -161,7 +154,7 @@ void CEditCameraBar::HandleCameraChanged(int inIndex)
         m_SceneView->onEditCameraChanged();
 
     CMainFrame *theMainFrame = g_StudioApp.m_pMainWnd;
-    ASSERT(theMainFrame != nullptr);
+    Q_ASSERT(theMainFrame != nullptr);
 
     // if the current tool is camera rotate and has been switch to 2d camera
     // set the tool to camera pan

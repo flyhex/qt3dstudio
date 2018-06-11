@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "PlayerWnd.h"
 #include "MainFrm.h"
 #include "SceneView.h"

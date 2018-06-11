@@ -27,12 +27,12 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "Renderer.h"
 
-#include <QPoint>
-#include <QRect>
+#include <QtCore/qpoint.h>
+#include <QtCore/qrect.h>
 
 /**
  * Draws the outline of a rectangle in the specified colors.

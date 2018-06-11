@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "CmdActivateSlide.h"
 #include "Doc.h"
@@ -36,7 +36,7 @@
 #include "SlideSystem.h"
 #include "ClientDataModelBridge.h"
 
-#include <QObject>
+#include <QtCore/qobject.h>
 
 CCmdActivateSlide::CCmdActivateSlide(CDoc *inDoc, qt3dsdm::Qt3DSDMSlideHandle inSlideHandle)
     : m_Doc(inDoc)

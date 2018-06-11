@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "IComposerEditorInterface.h"
 #include "Qt3DSImport.h"
 #include "Qt3DSImportTranslation.h"

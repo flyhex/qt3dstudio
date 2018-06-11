@@ -65,10 +65,9 @@ INCLUDEPATH += \
     ../../3rdparty/color \
     ..
 
-PRECOMPILED_HEADER = ../Client/Code/Core/StdAfx.h
+PRECOMPILED_HEADER = ../Common/Code/Qt3DSCommonPrecompile.h
 
 SOURCES += \
-    ../Client/Code/Core/StdAfx.cpp \
     ../Client/Code/Core/Q3DStudioNVFoundation.cpp \
     ../Client/Code/Core/Types/BoundingBox.cpp \
     ../Client/Code/Core/Types/CachedMatrix.cpp \
@@ -116,7 +115,6 @@ SOURCES += \
     ../Client/Code/Core/VirtualAssets/VClockPolicy.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImport.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportComposerTypes.cpp \
-    ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportLibPrecompile.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshBuilder.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshStudioOnly.cpp \

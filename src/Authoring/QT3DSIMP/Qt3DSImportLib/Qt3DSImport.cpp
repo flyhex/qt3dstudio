@@ -26,10 +26,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSImportLibPrecompile.h"
 #include "Qt3DSImport.h"
 #include "Qt3DSImportImpl.h"
-#include <algorithm>
 #include "Qt3DSFileTools.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "Qt3DSDMXML.h"

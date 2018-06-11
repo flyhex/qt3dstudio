@@ -27,9 +27,8 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
-//#include <stdlib.h>
 #include "Qt3DSMemory.h"
 //#include "Qt3DSSynch.h"
 

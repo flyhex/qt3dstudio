@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Preferences.h"
 #include "PreferencesSerializer.h"
 #include "StringTokenizer.h"

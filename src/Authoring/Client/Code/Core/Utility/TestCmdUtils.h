@@ -32,7 +32,7 @@
 #pragma once
 
 #include "Qt3DSDMHandles.h"
-#include "StdAfx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 class CAsset;
 class CAsset;

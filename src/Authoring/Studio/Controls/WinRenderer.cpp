@@ -27,11 +27,10 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "WinRenderer.h"
 #include "MasterP.h"
-#include <math.h>
 #include "CoreUtils.h"
 
 //=============================================================================

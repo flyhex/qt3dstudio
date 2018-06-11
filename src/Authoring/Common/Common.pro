@@ -22,6 +22,8 @@ INCLUDEPATH += \
     Code/_Win32/Include \
     Code/Report \
     Code/Serialize \
+    ../Client/Code/Shared \
+    ../Client/Code/Core/Utility \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
     ../../Runtime/Source/Qt3DSFoundation/Include \
@@ -30,7 +32,7 @@ INCLUDEPATH += \
     ../../3rdparty/color \
     ..
 
-PRECOMPILED_HEADER += Code/_Win32/stdafx.h
+PRECOMPILED_HEADER += Code/Qt3DSCommonPrecompile.h
 
 SOURCES += \
     ../../3rdparty/color/CColor.cpp \
@@ -55,7 +57,6 @@ SOURCES += \
     Code/Exceptions/XMLException.cpp \
     Code/_Win32/FileIterator.cpp \
     Code/_Win32/Preferences.cpp \
-    Code/_Win32/stdafx.cpp \
     Code/_Win32/Qt3DSFile.cpp \
     Code/Graph/Graph.cpp \
     Code/InfoDump/CoutSink.cpp \

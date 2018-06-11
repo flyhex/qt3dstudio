@@ -27,15 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
-
+#include "Qt3DSCommonPrecompile.h"
 #include "PlaybackClock.h"
 #include "Doc.h"
 #include "ClientDataModelBridge.h"
@@ -216,7 +208,7 @@ void CPlaybackClock::UpdateClockProperties()
 {
     qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle =
         GetSlideSystem()->GetSlideInstance(m_Doc->GetActiveSlide());
-    ASSERT(theInstanceHandle.Valid());
+    Q_ASSERT(theInstanceHandle.Valid());
 
     qt3dsdm::SValue theValue;
     GetPropertySystem()->GetInstancePropertyValue(

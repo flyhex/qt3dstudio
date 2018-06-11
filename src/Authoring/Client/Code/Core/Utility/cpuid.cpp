@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "cpuid.h"
 #include <QtCore/qglobal.h>
 

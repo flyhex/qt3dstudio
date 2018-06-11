@@ -26,26 +26,5 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Mutex.h"
-
-#ifdef KDAB_TEMPORARILY_REMOVED
-//=============================================================================
-/** THIS IS BAD DUE TO CLOSING THE MUTEX ON DESTROY
- */
-CMutex::CMutex(const CMutex &inMutex)
-{
-    m_Mutex = inMutex.m_Mutex;
-}
-
-//=============================================================================
-/** THIS IS BAD DUE TO CLOSING THE MUTEX ON DESTROY
- */
-CMutex &CMutex::operator=(const CMutex &inMutex)
-{
-    if (&inMutex == this)
-        return *this;
-    m_Mutex = inMutex.m_Mutex;
-    return *this;
-}
-#endif

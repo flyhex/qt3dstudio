@@ -27,14 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Include
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "CmdLocateReference.h"
 #include "Doc.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -43,7 +36,6 @@
 #include "Qt3DSDMSlides.h"
 #include "Qt3DSDMSlideCore.h"
 
-//=============================================================================
 /**
  * Constructor
  */
@@ -57,11 +49,11 @@ CCmdLocateReference::CCmdLocateReference(CDoc *inDoc, const Q3DStudio::CFilePath
     // Convert the path to relative
     if (m_OldPath.IsAbsolute()) {
         m_OldPath = m_Doc->GetRelativePathToDoc(m_OldPath);
-        ASSERT(!m_OldPath.IsAbsolute());
+        Q_ASSERT(!m_OldPath.IsAbsolute());
     }
     if (m_NewPath.IsAbsolute()) {
         m_NewPath = m_Doc->GetRelativePathToDoc(m_NewPath);
-        ASSERT(!m_NewPath.IsAbsolute());
+        Q_ASSERT(!m_NewPath.IsAbsolute());
     }
 
     m_Bridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();

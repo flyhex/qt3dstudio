@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "BufferedRenderer.h"
 #include "AppFonts.h"

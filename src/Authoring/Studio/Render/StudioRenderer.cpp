@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "StudioRendererImpl.h"
 #include "StudioRendererTranslation.h"
 #include "StudioPreferences.h"
@@ -34,7 +34,7 @@
 #include "StudioUtils.h"
 #include "Qt3DSMath.h"
 
-#include <QDebug>
+#include <QtCore/qdebug.h>
 
 #ifdef _WIN32
 #pragma warning(disable : 4201) // nonstandard extension used : nameless struct/union

@@ -27,17 +27,7 @@
 **
 ****************************************************************************/
 
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-//
-
 #pragma once
-
-#ifndef _WIN32_WINNT // Allow use of features specific to Windows XP or later.
-#define _WIN32_WINNT                                                                               \
-    0x0501 // Change this to the appropriate value to target other versions of Windows.
-#endif
 
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSDataRef.h"
@@ -52,10 +42,6 @@
 #include <sstream>
 #include <fstream>
 #include "Qt3DSDMDataTypes.h"
-#ifdef _WIN32
-#include <winsock2.h>
-#include <windows.h>
-#endif
 #include "foundation/Qt3DSIntrinsics.h"
 #include "foundation/Qt3DSBasicTemplates.h"
 

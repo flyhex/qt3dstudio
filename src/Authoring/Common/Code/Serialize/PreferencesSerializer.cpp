@@ -26,10 +26,10 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "PreferencesSerializer.h"
 
-#include <QDir>
+#include <QtCore/qdir.h>
 
 CPreferencesSerializer::CPreferencesSerializer()
     : m_FileSet(false)

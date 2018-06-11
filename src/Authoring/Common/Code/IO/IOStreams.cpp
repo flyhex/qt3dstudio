@@ -27,14 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "IOStreams.h"
 #include "InputStream.h"
 #include "OutputStream.h"
@@ -42,9 +35,6 @@
 
 #include <wctype.h>
 #include <ctype.h>
-#include <wchar.h>
-#include <limits>
-#include <stdlib.h>
 
 /** Create an input stream wrapper with no stream.
  */

@@ -27,21 +27,10 @@
 **
 ****************************************************************************/
 
-// WIN32 VERSION
-
-//=============================================================================
-// Prefix
-//=============================================================================
-#include "stdafx.h"
-
-//=============================================================================
-// Includes
-//=============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "MouseCursor.h"
-#include <QPixmap>
-#include <QDebug>
+#include <QtGui/qpixmap.h>
 
-//#ifdef WIN32
 const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_ARROW = 0; // IDC_ARROW
 const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_WAIT = 1; // IDC_WAIT
 const CMouseCursor::Qt3DSMouseCursor CMouseCursor::CURSOR_RESIZE_LEFTRIGHT = 2; // IDC_SIZEWE

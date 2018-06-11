@@ -26,14 +26,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "ITickTock.h"
 #include "Qt3DSDMSignals.h"
 #include "Thread.h"
 #include "Mutex.h"
 #include "Conditional.h"
 #include "StandardExtensions.h"
-#include <vector>
 
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qdatetime.h>

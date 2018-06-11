@@ -27,10 +27,7 @@
 **
 ****************************************************************************/
 
-#include "StdAfx.h"
-
-#include <math.h>
-#include <float.h>
+#include "Qt3DSCommonPrecompile.h"
 
 #include "OptimizedArithmetic.h"
 #include "Matrix.h"
@@ -38,8 +35,6 @@
 #ifdef WIN32
 #include "cpuid.h"
 #endif
-
-#include "Qt3DSMath.h"
 
 void SSE_MatrixMultiply(const float *inSource1, const float *inSource2, float *outDest);
 void C_MatrixMultiply(const float *inSource1, const float *inSource2, float *outDest);

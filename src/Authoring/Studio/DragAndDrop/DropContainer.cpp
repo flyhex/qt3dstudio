@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "StudioApp.h"
 #include "DropContainer.h"
 #include "HotKeys.h"

@@ -29,12 +29,12 @@
 #ifndef ACTIONVIEW_H
 #define ACTIONVIEW_H
 
-#include <QQuickWidget>
-#include <QColor>
-#include <QPointer>
-#include <QTimer>
+#include <QtQuickWidgets/qquickwidget.h>
+#include <QtGui/qcolor.h>
+#include <QtCore/qpointer.h>
+#include <QtCore/qtimer.h>
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "DispatchListeners.h"
 #include "EventsBrowserView.h"
 #include "EventsModel.h"

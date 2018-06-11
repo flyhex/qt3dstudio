@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "TimelineBreadCrumbProvider.h"
 #include "Core.h"
 
@@ -74,7 +74,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
     Q3DStudio::CId theId = theBridge->GetGUID(inInstance);
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
             theSlideSystem->GetMasterSlideByComponentGuid(GuidtoSLong4(theId));
-    ASSERT(theMasterSlide.Valid()); // it should be valid because inAsset should be OBJTYPE_SCENE or
+    Q_ASSERT(theMasterSlide.Valid()); // it should be valid because inAsset should be OBJTYPE_SCENE or
                                     // non-library OBJTYPE_COMPONENT
 
     // Get the active slide index of the master slide. Master Slide always has index 0
@@ -94,7 +94,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
         Qt3DSDMSlideHandle theActiveSlide =
                 theSlideSystem->GetSlideByIndex(theMasterSlide, theActiveIndex);
         Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theActiveSlide);
-        ASSERT(theInstanceHandle.Valid());
+        Q_ASSERT(theInstanceHandle.Valid());
         outBreadCrumb.m_String += theBridge->GetName(theInstanceHandle).toQString();
     }
     outBreadCrumb.m_String += ")";

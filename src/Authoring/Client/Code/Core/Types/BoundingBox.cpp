@@ -26,14 +26,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "BoundingBox.h"
-
-//==============================================================================
-//	Prefix
-//==============================================================================
 #include "OptimizedArithmetic.h"
-#include <vector>
 
 namespace Q3DStudio {
 

@@ -10,11 +10,8 @@ Hinweis: (c) 1999 by Christian Rodemeyer
          - MSDN: 'HLS Color Spaces'
          - MSDN: 'Converting Colors Between RGB and HLS'
 \****************************************************************************/
-#include "stdafx.h"
-
+#include "Qt3DSCommonPrecompile.h"
 #include "CColor.h"
-#include <math.h>
-#include <assert.h>
 
 float GetMin( float in1, float in2 );
 float GetMin( float in1, float in2 )

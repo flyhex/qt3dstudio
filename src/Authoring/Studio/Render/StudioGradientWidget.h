@@ -29,7 +29,7 @@
 #ifndef STUDIO_GRADIENT_WIDGET_H
 #define STUDIO_GRADIENT_WIDGET_H
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "StudioWidgetImpl.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "render/Qt3DSRenderContext.h"

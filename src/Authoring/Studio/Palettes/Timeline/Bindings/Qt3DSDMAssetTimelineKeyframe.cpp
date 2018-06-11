@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSDMAssetTimelineKeyframe.h"
 #include "Qt3DSDMTimelineItemBinding.h"
 
@@ -70,7 +70,7 @@ void Qt3DSDMAssetTimelineKeyframe::SetTime(const long inNewTime)
     Q_UNUSED(inNewTime);
     // note: this is not used. because setting time is currently only done through offsetting by
     // moving keyframes OR using the edit time dialog.
-    ASSERT(0);
+    Q_ASSERT(0);
 }
 
 void Qt3DSDMAssetTimelineKeyframe::SetDynamic(bool inIsDynamic)

@@ -28,7 +28,7 @@
 
 #include "ActionModel.h"
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "ClientDataModelBridge.h"
 #include "CmdDataModelActionSetValue.h"
 #include "Core.h"

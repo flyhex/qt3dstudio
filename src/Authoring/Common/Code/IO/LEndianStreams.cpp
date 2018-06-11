@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h" //Where the defines for big or little endian must lie
+#include "Qt3DSCommonPrecompile.h" //Where the defines for big or little endian must lie
 #include "LEndianStreams.h"
 #include "IOLibraryException.h"
 #include "Qt3DSEndian.h"

@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSDMDataCore.h"
 #include "Qt3DSDMSlideCore.h"
@@ -2546,7 +2546,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                 QT3DS_ASSERT(false);
                             }
                         } else {
-                            ASSERT(false);
+                            QT3DS_ASSERT(false);
                         }
                         ParseAndSetInstanceProperties(inReader, 0, theMaster, theExtraAtts,
                                                       theValues);

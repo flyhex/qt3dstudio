@@ -27,15 +27,13 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSString.h"
 #include "Qt3DSMath.h"
 #include "Qt3DSMemory.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdarg.h>
 
-#include <QString>
+#include <QtCore/qstring.h>
 
 namespace Q3DStudio {
 

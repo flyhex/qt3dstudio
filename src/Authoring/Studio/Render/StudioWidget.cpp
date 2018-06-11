@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "StudioWidget.h"
 #include "Qt3DSRenderWidgets.h"
 #include "Qt3DSRenderContextCore.h"

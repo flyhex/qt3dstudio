@@ -27,9 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Includes
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Core.h"
 #include "Doc.h"
 #include "Dispatch.h"
@@ -45,7 +43,6 @@
 #include <QtWidgets/qaction.h>
 #include <QtWidgets/qwidget.h>
 
-//==============================================================================
 // Construction
 CCore::CCore()
     : m_Doc(NULL)

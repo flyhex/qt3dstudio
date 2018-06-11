@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "CmdDataModel.h"
 #include "Qt3DSDMTransactions.h"
 #include "Qt3DSDMStudioSystem.h"

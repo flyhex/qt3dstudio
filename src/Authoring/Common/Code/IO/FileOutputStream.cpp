@@ -27,19 +27,12 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "FileOutputStream.h"
 #include "IOLibraryException.h"
 
-#include <QByteArray>
-#include <QString>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qstring.h>
 
 CFileOutputStream::CFileOutputStream(const Q3DStudio::CString &inFilename, bool inAppend /* = false */)
     : m_Position(0)

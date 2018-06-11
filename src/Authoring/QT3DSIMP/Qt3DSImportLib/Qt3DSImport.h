@@ -35,7 +35,6 @@
 #include "Qt3DSImportPerformImport.h"
 #include "Qt3DSDMStringTable.h"
 #include "Qt3DSImportComposerTypes.h"
-#include <string>
 
 namespace qt3dsimp {
 using namespace std;

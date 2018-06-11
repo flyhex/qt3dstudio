@@ -41,12 +41,10 @@
 
 #include <string.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <EASTL/string.h>
 
-#include <QString>
-#include <QDebug>
+#include <QtCore/qstring.h>
 
 namespace Q3DStudio {
 #define _LSTR(string) L##string

@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "SceneView.h"
 #include "Doc.h"
 #include "StudioProjectSettings.h"

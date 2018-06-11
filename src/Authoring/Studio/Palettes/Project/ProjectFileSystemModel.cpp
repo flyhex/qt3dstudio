@@ -28,7 +28,7 @@
 #include "qtAuthoring-config.h"
 #include <QtCore/qset.h>
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "ProjectFileSystemModel.h"
 #include "StudioUtils.h"
 #include "StudioApp.h"
@@ -415,7 +415,7 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
         // FindAndCopyDestFile will make sure the file name is unique and make sure it is
         // not read only.
         bool copyResult = SFileTools::FindAndCopyDestFile(targetDir, sourceFile);
-        ASSERT(copyResult);
+        Q_ASSERT(copyResult);
 
         // For effect and custom material files, automatically copy related resources
         if (CDialogs::IsEffectFileExtension(extension.toLatin1().data())

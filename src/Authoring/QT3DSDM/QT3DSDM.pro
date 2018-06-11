@@ -27,7 +27,6 @@ PRECOMPILED_HEADER = Qt3DSDMPrefix.h
 
 SOURCES += \
     EASTL_new.cpp \
-    Qt3DSDMPrefix.cpp \
     Systems/ActionSystem.cpp \
     Systems/SignalsImpl.cpp \
     Systems/SlideSystem.cpp \

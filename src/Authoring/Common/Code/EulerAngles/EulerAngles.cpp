@@ -26,14 +26,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "stdafx.h"
-#include <math.h>
-#include <float.h>
+
+#include "Qt3DSCommonPrecompile.h"
 #include <string.h>
-#include <stdio.h>
 #include "EulerAngles.h"
 
 namespace EulerAngleConverter {

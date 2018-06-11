@@ -27,10 +27,7 @@
 **
 ****************************************************************************/
 
-//=============================================================================
-// Includes
-//=============================================================================
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "WGLRenderContext.h"
 #include "foundation/TrackingAllocator.h"
@@ -41,7 +38,7 @@
 
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QSurfaceFormat>
-#include <QOpenGLWidget>
+#include <QtWidgets/qopenglwidget.h>
 
 //QT3DS_DEFINE_THISFILE;
 

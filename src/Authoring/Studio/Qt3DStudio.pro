@@ -108,7 +108,7 @@ linux {
         -lEGL
 }
 
-win: PRECOMPILED_HEADER = Studio/stdafx.h
+win: PRECOMPILED_HEADER = ../Common/Code/Qt3DSCommonPrecompile.h
 
 HEADERS += \
     MainFrm.h \

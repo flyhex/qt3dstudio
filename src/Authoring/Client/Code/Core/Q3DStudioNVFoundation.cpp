@@ -27,13 +27,9 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "StdAfx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Q3DStudioNVFoundation.h"
 #include "foundation/TrackingAllocator.h"
-#include <string>
 
 namespace Q3DStudio {
 namespace Foundation {

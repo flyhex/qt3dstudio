@@ -31,7 +31,7 @@
 
 #ifdef QT_3DSTUDIO_FBX
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #define FBXSDK_NEW_API 1
 

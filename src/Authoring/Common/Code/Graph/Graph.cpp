@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSDMPrefix.h"
 #include "Qt3DSDMTransactions.h"
 #include "Qt3DSDMSignals.h"

@@ -27,12 +27,12 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 
 #include "RecentItems.h"
 #include "Preferences.h"
 
-#include <QMenu>
+#include <QtWidgets/qmenu.h>
 
 // using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
 // the template generator go blah

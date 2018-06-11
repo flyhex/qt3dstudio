@@ -27,8 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
-#include <string>
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSFileTools.h"
 #include "foundation/Qt3DSIntrinsics.h"
 #include "Qt3DSDMWStrOpsImpl.h"

@@ -27,21 +27,14 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-// Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "MsgRouter.h"
 #include "StudioConst.h"
 #include "Core.h"
 #include "Doc.h"
 #include "Views.h"
 
-#include <QCoreApplication>
+#include <QtCore/qcoreapplication.h>
 
 static std::unique_ptr<CMsgRouter> static_theInstance;
 

@@ -27,14 +27,7 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSDMTimelineItemProperty.h"
 #include "TimelineTranslationManager.h"
 #include "ITimelineItemBinding.h"
@@ -168,7 +161,7 @@ inline ITimelineItemBinding *GetParentBinding(RowTree *inRow)
         RowTree *theParentRow = inRow->parentRow();
         if (theParentRow) {
             theParentBinding = theParentRow->getBinding();
-            ASSERT(theParentBinding);
+            Q_ASSERT(theParentBinding);
         }
     }
     return theParentBinding;
@@ -263,7 +256,7 @@ IKeyframe *Qt3DSDMTimelineItemProperty::GetKeyframeByIndex(long inIndex) const
     if (inIndex >= 0 && inIndex < (long)m_Keyframes.size())
         return m_Keyframes[inIndex];
 
-    ASSERT(0); // should not happen
+    Q_ASSERT(0); // should not happen
     return nullptr;
 }
 
@@ -381,7 +374,7 @@ bool Qt3DSDMTimelineItemProperty::RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle
         }
     } break;
     case ETimelineKeyframeTransaction_Add: {
-        ASSERT(!m_AnimationHandles.empty());
+        Q_ASSERT(!m_AnimationHandles.empty());
         IAnimationCore *theAnimationCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
         Qt3DSDMAnimationHandle theAnimationHandle =
             theAnimationCore->GetAnimationForKeyframe(inKeyframe);
@@ -435,7 +428,7 @@ bool Qt3DSDMTimelineItemProperty::CreateKeyframeIfNonExistent(
     theNewKeyframe->AddKeyframeHandle(inKeyframeHandle);
     if (m_AnimationHandles.size()
         > 1) { // assert assumption that is only called for the first handle
-        ASSERT(m_AnimationHandles[0] == inOwningAnimation);
+        Q_ASSERT(m_AnimationHandles[0] == inOwningAnimation);
         IAnimationCore *theAnimationCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
         float theKeyframeTime = KeyframeTime(theAnimationCore->GetKeyframeData(inKeyframeHandle));
         for (size_t i = 1; i < m_AnimationHandles.size(); ++i) {

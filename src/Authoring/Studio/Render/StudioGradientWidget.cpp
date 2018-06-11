@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "StudioGradientWidget.h"
 
 namespace qt3ds {

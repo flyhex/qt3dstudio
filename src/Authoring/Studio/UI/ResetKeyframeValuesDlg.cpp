@@ -30,12 +30,12 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "ResetKeyframeValuesDlg.h"
 #include "ui_ResetKeyframeValuesDlg.h"
 
-#include <QPushButton>
-#include <QStyle>
+#include <QtWidgets/qpushbutton.h>
+#include <QtWidgets/qstyle.h>
 
 CResetKeyframeValuesDlg::CResetKeyframeValuesDlg(QWidget *pParent)
     : QDialog(pParent)

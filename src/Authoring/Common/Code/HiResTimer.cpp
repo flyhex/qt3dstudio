@@ -26,11 +26,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
-
+#include "Qt3DSCommonPrecompile.h"
 #include "HiResTimer.h"
 
-//=============================================================================
 /**
  * Construct a new HiRes Timer, the timer starts out stopped.
  */

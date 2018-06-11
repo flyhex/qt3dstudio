@@ -41,6 +41,9 @@
 #pragma warning(disable : 4290) // C++ Exception Specification ignored
 #pragma warning(disable : 4514) // unreferenced inline function
 #pragma warning(disable : 4819)
+#pragma warning(disable : 4100) // unreferenced formal parameter
+#pragma warning(disable : 4127) // conditional expression is constant
+#pragma warning(disable : 4189) // local variable is initialized but not referenced
 #endif
 
 //==============================================================================
@@ -50,20 +53,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
-
-#ifdef _WIN32
-//==============================================================================
-//	Windows Includes
-//==============================================================================
-#include <winsock2.h> //must include before windows.h to avoid winsock.h defines.
-#define QT3DS_LITTLE_ENDIAN
-#include <windows.h>
-#endif
-
-#include <assert.h>
-#ifndef ASSERT
-#define ASSERT(a) assert(a)
-#endif
+#include <wchar.h>
 
 //==============================================================================
 //	STL Includes
@@ -88,13 +78,6 @@
 #endif
 
 //==============================================================================
-//	Memory Manager Includes
-//==============================================================================
-#ifdef USE_MEMORY_MANAGER
-#include <mmgr.h>
-#endif
-
-//==============================================================================
 //	Common Player Includes
 //==============================================================================
 #include "Qt3DSMath.h"
@@ -114,13 +97,7 @@
 #include "Conditional.h"
 #include "STLHelpers.h"
 #include "GenericFunctor.h"
-#include "Qt3DSRender.h"
 
 #include <QtGlobal>
 
-#ifdef _WIN32
-#pragma warning(disable : 4100) // unreferenced formal parameter
-#pragma warning(disable : 4127) // conditional expression is constant
-#pragma warning(disable : 4189) // local variable is initialized but not referenced
-#endif
 #endif

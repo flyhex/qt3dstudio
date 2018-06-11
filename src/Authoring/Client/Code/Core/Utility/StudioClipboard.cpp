@@ -27,25 +27,18 @@
  **
  ****************************************************************************/
 
-//==============================================================================
-//  Prefix
-//==============================================================================
-#include "stdafx.h"
-
-//==============================================================================
-//  Includes
-//==============================================================================
+#include "Qt3DSCommonPrecompile.h"
 #include "StudioClipboard.h"
 
 #include "Literals.h"
 #include "StudioObjectTypes.h"
 #include "Qt3DSString.h"
 
-#include <QClipboard>
-#include <QDataStream>
-#include <QFile>
-#include <QGuiApplication>
-#include <QMimeData>
+#include <QtGui/qclipboard.h>
+#include <QtCore/qdatastream.h>
+#include <QtCore/qfile.h>
+#include <QtGui/qguiapplication.h>
+#include <QtCore/qmimedata.h>
 
 Qt3DSFile CStudioClipboard::s_InternalClipObject("");
 qint64 CStudioClipboard::s_InternalContextData = 0;

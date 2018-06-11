@@ -26,10 +26,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "CachedMatrix.h"
 #include "OptimizedArithmetic.h"
-#include <math.h>
 
 namespace Q3DStudio {
 

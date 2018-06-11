@@ -26,7 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "PathTimelineItemBinding.h"
 #include "TimelineTranslationManager.h"
 #include "Doc.h"

@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "qtAuthoring-config.h"
 #include "ProjectDropTarget.h"
 #include "DropSource.h"
@@ -94,7 +94,7 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
             m_TargetDir = m_TargetDir.GetDirectory();
 
         // Sanity check
-        ASSERT(m_TargetDir.IsDirectory());
+        Q_ASSERT(m_TargetDir.IsDirectory());
 
         // Get the Source file to be copied
         CExplorerFileDropSource *theFileDropSource =
@@ -149,8 +149,8 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
                     m_TargetDir, CFilePath::GetAbsolutePath(theSourceFile));
 
                 // Sanity check
-                ASSERT(theCopyResult.m_Error == Q3DStudio::FileErrorCodes::NoError);
-                ASSERT(theCopyResult.m_DestFilename.Exists());
+                Q_ASSERT(theCopyResult.m_Error == Q3DStudio::FileErrorCodes::NoError);
+                Q_ASSERT(theCopyResult.m_DestFilename.Exists());
 
                 // For effect and custom material files, automatically copy related resources
                 if (CDialogs::IsEffectFileExtension(theExtension)
@@ -161,7 +161,7 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
 
                     if (theShaderFile.GetExtension() != "effect"
                         && theShaderFile.GetExtension() != "material") {
-                        ASSERT(false); // what file is this?
+                        Q_ASSERT(false); // what file is this?
                     } else {
                     }
 

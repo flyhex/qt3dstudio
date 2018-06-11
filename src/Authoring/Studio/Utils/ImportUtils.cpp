@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "ImportUtils.h"
 #include "Dialogs.h"
 #include "Qt3DSFileTools.h"

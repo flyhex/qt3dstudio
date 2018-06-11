@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "CmdStack.h"
 #include "Cmd.h"
 #include "CmdStackModifier.h"

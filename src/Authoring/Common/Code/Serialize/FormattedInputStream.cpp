@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "stdafx.h"
+#include "Qt3DSCommonPrecompile.h"
 #include "FormattedInputStream.h"
 #include "Qt3DSEndian.h"
 #include "FileOutputStream.h"
