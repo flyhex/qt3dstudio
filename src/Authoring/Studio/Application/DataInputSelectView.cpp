@@ -38,12 +38,17 @@
 #include "DataInputDlg.h"
 #include "StudioApp.h"
 
-DataInputSelectView::DataInputSelectView(QWidget *parent, EDataType defaultType)
+// Empty acceptedTypes vector means all types are accepted
+DataInputSelectView::DataInputSelectView(const QVector<EDataType> &acceptedTypes, QWidget *parent)
     : QQuickWidget(parent)
     , m_model(new DataInputSelectModel(this))
-    , m_defaultType(defaultType)
+    , m_defaultType(EDataType::DataTypeFloat)
+    , m_acceptedTypes(acceptedTypes)
 
 {
+    if (!m_acceptedTypes.isEmpty())
+        m_defaultType = m_acceptedTypes[0];
+
     setWindowTitle(tr("Datainputs"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -58,6 +63,13 @@ void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputL
     m_instance = instance;
     m_currController = currentController;
     updateData(dataInputList);
+}
+
+void DataInputSelectView::setAcceptedTypes(const QVector<EDataType> &acceptedTypes)
+{
+    m_acceptedTypes = acceptedTypes;
+    if (!m_acceptedTypes.isEmpty())
+        m_defaultType = m_acceptedTypes[0];
 }
 
 void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInputList)
@@ -139,8 +151,15 @@ void DataInputSelectView::setSelection(int index)
 
             if (dataInputDlg.result() == QDialog::Accepted) {
                 m_mostRecentlyAdded = dataInputDlg.getAddedDataInput();
-                if (m_mostRecentlyAdded.size())
-                    Q_EMIT dataInputChanged(m_handle, m_instance, m_mostRecentlyAdded);
+                if (m_mostRecentlyAdded.size()) {
+                    CDataInputDialogItem *diItem = g_StudioApp.m_dataInputDialogItems.value(
+                                m_mostRecentlyAdded);
+                    if (m_acceptedTypes.isEmpty()
+                            || (diItem && m_acceptedTypes.contains(
+                                    static_cast<EDataType>(diItem->type)))) {
+                        Q_EMIT dataInputChanged(m_handle, m_instance, m_mostRecentlyAdded);
+                    }
+                }
                 g_StudioApp.SaveUIAFile(false);
             }
         }
