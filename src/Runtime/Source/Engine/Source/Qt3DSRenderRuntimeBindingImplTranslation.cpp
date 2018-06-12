@@ -767,8 +767,6 @@ struct SRuntimePropertyParser
         inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
         break;
 
-const float g_DegToRad = float(M_PI / 180.0);
-
 struct SSceneTranslator : public Qt3DSTranslator
 {
     typedef SScene TNodeType;

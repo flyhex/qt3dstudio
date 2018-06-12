@@ -3658,22 +3658,6 @@ void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
         inEditor.EnsureEditor(L"Delete Guide", __FILE__, __LINE__).DeleteGuide(inGuide);
 }
 
-namespace {
-
-QT3DSF32 degToRad(const QT3DSF32 a)
-{
-    return (QT3DSF32)0.01745329251994329547 * a;
-}
-
-/**
-\brief Converts radians to degrees.
-*/
-QT3DSF32 radToDeg(const QT3DSF32 a)
-{
-    return (QT3DSF32)57.29577951308232286465 * a;
-}
-}
-
 void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,
                                    CPt inPreviousMouseCoords, CPt inMouseCoords,
                                    CUpdateableDocumentEditor &inEditor)
@@ -3759,7 +3743,8 @@ void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inO
                         anchorPosVec, theCurrentValue);
                 float angleDiff = angleDistance.x - lastValue.m_IncomingAngle;
                 float minimalDiff =
-                    radToDeg(qt3ds::render::SRotationHelper::ToMinimalAngle(degToRad(angleDiff)));
+                    qRadiansToDegrees(qt3ds::render::SRotationHelper::ToMinimalAngle(
+                                          qDegreesToRadians(angleDiff)));
                 float newAngle = lastValue.m_IncomingAngle + minimalDiff;
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theAngleProperty, newAngle);
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theIncomingDistanceProperty,
@@ -3772,7 +3757,8 @@ void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inO
                 angleDistance.x += 180.0f;
                 float angleDiff = angleDistance.x - lastValue.m_IncomingAngle;
                 float minimalDiff =
-                    radToDeg(qt3ds::render::SRotationHelper::ToMinimalAngle(degToRad(angleDiff)));
+                        qRadiansToDegrees(qt3ds::render::SRotationHelper::ToMinimalAngle(
+                                              qDegreesToRadians(angleDiff)));
                 float newAngle = lastValue.m_IncomingAngle + minimalDiff;
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theAngleProperty, newAngle);
                 theEditor.SetInstancePropertyValue(theAnchorHandle, theOutgoingDistanceProperty,
