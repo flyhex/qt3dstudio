@@ -47,8 +47,6 @@ public:
     RowManager(TimelineGraphicsScene *scene, QGraphicsLinearLayout *layoutLabels,
                QGraphicsLinearLayout *layoutTimeline);
 
-    void clampIndex(int &idx);
-    void correctIndex(int &idx);
     void selectRow(RowTree *row, bool multiSelect = false);
     void setRowSelection(RowTree *row, bool selected);
     void deleteRow(RowTree *row);
@@ -67,15 +65,13 @@ public:
     RowTree *createRow(EStudioObjectType rowType, RowTree *parentRow = nullptr,
                        const QString &label = QString(), const QString &propType = QString(),
                        int index = -1);
-    RowTree *rowAt(int idx);
+    RowTree *getRowAtPos(const QPointF &scenePos) const;
     RowTree *selectedRow() const;
     bool isRowSelected(RowTree *row) const;
     QVector<RowTree *> selectedRows() const;
-    RowTimeline *rowTimelineAt(int idx);
 
 private:
     int getLastChildIndex(RowTree *row, int index = -1);
-    bool validIndex(int idx) const;
     void deleteRowRecursive(RowTree *row);
     void updateRowFilterRecursive(RowTree *row);
     void createRowsFromBindingRecursive(ITimelineItemBinding *binding,

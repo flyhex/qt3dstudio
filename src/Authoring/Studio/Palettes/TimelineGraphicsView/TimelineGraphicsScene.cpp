@@ -289,6 +289,10 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         event->accept();
         return;
     }
+
+    if (m_widgetTimeline->blockMousePress())
+        return;
+
     if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
         resetMousePressParams();
         m_pressPos = event->scenePos();
@@ -302,8 +306,10 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                                                       - m_ruler->durationStartX()) * 1000;
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
             } else if (item->type() == TimelineItem::TypeTreeHeader) {
-                if (m_treeHeader->handleButtonsClick(m_pressPos) != TreeControlType::None)
+                if (m_treeHeader->handleButtonsClick(m_pressPos) != TreeControlType::None) {
                     m_rowManager->updateFiltering();
+                    updateSnapSteps();
+                }
             } else if (item->type() == TimelineItem::TypeRowTree
                        || item->type() == TimelineItem::TypeRowTreeLabelItem) {
                 item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
@@ -313,6 +319,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         || m_clickedTreeControlType == TreeControlType::Hide
                         || m_clickedTreeControlType == TreeControlType::Lock) {
                     m_rowManager->updateFiltering(rowTree);
+                    updateSnapSteps();
                 } else if (m_clickedTreeControlType == TreeControlType::None) {
                     // Prepare to change selection to single selection at release if a multiselected
                     // row is clicked without ctrl.
@@ -353,9 +360,9 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             m_editedTimelineRow->getClickedControl(m_pressPos);
 
                     // clicked an empty spot on a timeline row, start selection rect.
-                    if (m_clickedTimelineControlType == TimelineControlType::None)
+                    if (m_clickedTimelineControlType == TimelineControlType::None) {
                         m_selectionRect->start(m_pressPos);
-                    else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
+                    } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
                         if (!ctrlKeyDown
                                 && m_rowManager->isRowSelected(m_editedTimelineRow->rowTree())
                                 && !m_rowManager->isSingleSelected() ) {
@@ -437,7 +444,6 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_rowMover->start(m_rowManager->selectedRows());
             }
             if (m_rowMover->isActive()) {
-                // collapse all properties so correctIndex() counts correctly
                 m_rowManager->collapseAllPropertyRows();
                 m_rowMover->updateTargetRow(event->scenePos());
                 updateAutoScrolling(event->scenePos().y());
@@ -497,7 +503,7 @@ void TimelineGraphicsScene::updateSnapSteps() {
     for (int i = 2; i < m_layoutTimeline->count(); i++) {
         RowTree *rowTree = static_cast<RowTree *>
                 (m_layoutTree->itemAt(i)->graphicsItem());
-        if (rowTree->hasDurationBar() && rowTree->expanded()) {
+        if (rowTree->hasDurationBar() && rowTree->isVisible()) {
             if (!m_snapSteps.contains(rowTree->rowTimeline()->getStartX()))
                 m_snapSteps.push_back(rowTree->rowTimeline()->getStartX());
 
@@ -679,9 +685,11 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
             && (qApp->focusObject() == m_widgetTimeline->viewTreeContent() && !focusItem())) {
         keyEvent->accept();
         return;
-    }
-    if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive())
+    } else if (keyEvent->key() == Qt::Key_Escape && m_rowMover->isActive()) {
+        m_rowMover->end();
+    } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()) {
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
+    }
 
     QGraphicsScene::keyPressEvent(keyEvent);
 }
@@ -693,10 +701,9 @@ void TimelineGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 
 void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-    int index = event->scenePos().y() / TimelineConstants::ROW_H;
-    RowTree *row = m_rowManager->rowAt(index);
+    RowTree *row = m_rowManager->getRowAtPos(QPointF(0, event->scenePos().y()));
 
-    if (row == nullptr || m_widgetTimeline->isFullReconstructPending() || m_dragging
+    if (!row || m_widgetTimeline->isFullReconstructPending() || m_dragging
             || m_startRowMoverOnNextDrag) {
         return;
     }

@@ -274,14 +274,16 @@ public:
 
     virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
-                                  DocumentEditorInsertType::Enum inInsertType) = 0;
+                                  DocumentEditorInsertType::Enum inInsertType,
+                                  bool checkUniqueName = true) = 0;
 
     void RearrangeObject(TInstanceHandle inInstance, TInstanceHandle inDest,
-                         DocumentEditorInsertType::Enum inInsertType)
+                         DocumentEditorInsertType::Enum inInsertType,
+                         bool checkUniqueName = true)
     {
         qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
-        RearrangeObjects(theInstances, inDest, inInsertType);
+        RearrangeObjects(theInstances, inDest, inInsertType, checkUniqueName);
     }
 
     // Returns the new component.

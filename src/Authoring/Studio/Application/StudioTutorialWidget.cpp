@@ -90,6 +90,7 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
             m_imgIter++;
 
         m_ui->studioTutorialShowAgain->setVisible(false);
+        m_ui->checkBoxLabel->setVisible(false);
         if (*m_imgIter == m_welcomeImages->last() || m_imgIter == m_welcomeImages->end()) {
             if (m_imgIter == m_welcomeImages->end())
                 m_imgIter--;
@@ -100,6 +101,7 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
             if (m_imgIter == m_welcomeImages->begin()) {
                 m_ui->studioTutorialBack->setVisible(false);
                 m_ui->studioTutorialShowAgain->setVisible(true);
+                m_ui->checkBoxLabel->setVisible(true);
             }
             m_ui->studioTutorialOpen->setVisible(false);
             m_ui->studioTutorialNew->setVisible(false);
@@ -115,14 +117,14 @@ void StudioTutorialWidget::OnInitDialog(bool goToFileDialog)
 void StudioTutorialWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
+    if (m_palette)
+        return;
+
+    m_palette = new QPalette;
     QPixmap pic = getScaledPic(m_imgIter);
-
-    if (!m_palette) {
-        m_palette = new QPalette;
-        m_palette->setBrush(QPalette::Window, pic);
-        setPalette(*m_palette);
-    }
-
+    pic.setDevicePixelRatio(devicePixelRatio());
+    m_palette->setBrush(QPalette::Window, pic);
+    setPalette(*m_palette);
     resize(pic.size());
     setFixedSize(size());
 }
@@ -136,6 +138,7 @@ void StudioTutorialWidget::handleFwd()
 
         m_ui->studioTutorialBack->setVisible(true);
         m_ui->studioTutorialShowAgain->setVisible(false);
+        m_ui->checkBoxLabel->setVisible(false);
     }
 
     if (*m_imgIter == m_welcomeImages->last()) {
@@ -158,6 +161,7 @@ void StudioTutorialWidget::handleBack()
 
         m_ui->studioTutorialForward->setVisible(true);
         m_ui->studioTutorialShowAgain->setVisible(false);
+        m_ui->checkBoxLabel->setVisible(false);
 
         m_ui->studioTutorialOpen->setVisible(false);
         m_ui->studioTutorialNew->setVisible(false);
@@ -166,6 +170,7 @@ void StudioTutorialWidget::handleBack()
     if (*m_imgIter == m_welcomeImages->first()) {
         m_ui->studioTutorialBack->setVisible(false);
         m_ui->studioTutorialShowAgain->setVisible(true);
+        m_ui->checkBoxLabel->setVisible(true);
     }
 }
 

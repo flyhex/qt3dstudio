@@ -72,6 +72,7 @@ protected:
     void ReconstructList();
     void RebuildList();
     void SaveRecentList();
+    void handleAboutToShow();
 
     TFileList m_RecentItems;
 

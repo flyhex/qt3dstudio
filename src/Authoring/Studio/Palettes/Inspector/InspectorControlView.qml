@@ -384,6 +384,10 @@ Rectangle {
                                                     return comboDropDown;
                                                 if (modelData.propertyType === AdditionalMetaDataType.Texture)
                                                     return textureChooser;
+                                                // TODO: Add AdditionalMetaDataType for String (QT3DS-1865)
+                                                // Until then, 'String' type is received as 'None'
+                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                    return editLine;
                                                 console.warn("KDAB_TODO: (String) implement handler for type \"string\" property:",
                                                              modelData.propertyType);
                                                 return null;
@@ -439,6 +443,58 @@ Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    Component {
+        id: editLine
+
+        TextField {
+            id: textArea
+
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property variant value: parent.modelData.value
+            width: _valueWidth
+            horizontalAlignment: TextInput.AlignLeft
+            verticalAlignment: TextInput.AlignVCenter
+            font.pixelSize: _fontSize
+            color: _textColor
+            selectionColor: _selectionColor
+            selectedTextColor: _textColor
+
+            background: Rectangle {
+                height: textArea.height
+                color: textArea.enabled ? _studioColor2 : "transparent"
+                border.width: textArea.activeFocus ? 1 : 0
+                border.color: textArea.activeFocus ? _selectionColor : _disabledColor
+            }
+
+            MouseArea {
+                id: mouseAreaX
+                anchors.fill: parent
+                property int clickedPos
+                preventStealing: true
+
+                onPressed: {
+                    textArea.forceActiveFocus()
+                    clickedPos = textArea.positionAt(mouse.x, mouse.y)
+                    textArea.cursorPosition = clickedPos
+                }
+                onDoubleClicked: textArea.selectAll()
+                onPositionChanged: {
+                    textArea.cursorPosition = textArea.positionAt(mouse.x, mouse.y)
+                    textArea.select(clickedPos, textArea.cursorPosition)
+                }
+            }
+
+            text: value
+
+            onTextChanged:
+                _inspectorModel.setPropertyValue(instance, handle, text, false)
+
+            onEditingFinished:
+                _inspectorModel.setPropertyValue(instance, handle, text, true)
         }
     }
 

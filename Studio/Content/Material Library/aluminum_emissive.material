@@ -19,7 +19,6 @@
         <Property formalName="Emissive Mask Offset" name="emissive_mask_offset" description="Offset of the emissive mask texture" type="Vector" default="0 0 0" category="Material"/>
         <Property formalName="Bump Map" name="bump_texture" description="Bump texture of the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="bump" default="./maps/materials/grunge_d.png" category="Material"/>
         <Property formalName="Bump Amount" name="bump_amount" type="Float" min="0" max="2" default="0.500000" description="Scale value for bump amount" category="Material"/>
-        <Property formalName="Emissive Mask Map" name="emissive_mask_texture" description="Emissive mask texture for the material" type="Texture" filter="linear" minfilter="linearMipmapLinear" clamp="repeat" usage="emissive_mask" category="Material"/>
     </MetaData>
     <Shaders type="GLSL" version="330">
     <Shader>

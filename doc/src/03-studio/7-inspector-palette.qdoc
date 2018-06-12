@@ -284,6 +284,18 @@ in the Inspector palette:
     \note If you see AO shadowing on objects where there should be
     no shadowing, increase the AO Threshold value slightly to clip away
     close results.
+  \li
+    \note On objects with smooth shading, it is possible that AO makes the faces of an object appear
+    since AO occurs on the original mesh without smooth shading applied. To avoid this,
+    adjusting the AO Threshold value might help. Usually a value between 0.1 and 1.0 will give
+    a good result.
+    \raw HTML
+    <a href=images/ao-threshold.png>
+    \endraw
+    \image ao-threshold.png
+    \raw HTML
+    </a>
+    \endraw
   \endlist
 \li
   \b{AO Sampling Rate} - Larger values result in better AO quality

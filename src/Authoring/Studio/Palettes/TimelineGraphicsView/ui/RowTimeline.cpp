@@ -280,30 +280,21 @@ Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
     return nullptr;
 }
 
-QList<Keyframe *> RowTimeline::getKeyframesInRange(const double left, const double right)
+QList<Keyframe *> RowTimeline::getKeyframesInRange(const QRectF &rect) const
 {
     double x;
-    double x1 = mapFromScene(left, 0).x();
-    double x2 = mapFromScene(right, 0).x();
+    QRectF localRect = mapFromScene(rect).boundingRect();
 
     QList<Keyframe *> result;
-    QList<Keyframe *> keyframes;
 
-    if (m_rowTree->hasPropertyChildren()) {
-        const auto childRows = m_rowTree->childRows();
-        for (auto child : childRows) {
-            if (child->isProperty())
-                keyframes.append(child->rowTimeline()->m_keyframes);
-        }
-    } else {
-        keyframes = m_keyframes;
-    }
-
-    for (auto keyframe : qAsConst(keyframes)) {
+    static const int KF_CENTER_Y = 10;
+    for (auto keyframe : qAsConst(m_keyframes)) {
         x = timeToX(keyframe->time);
 
-        if (x1 < x && x2 > x)
+        if (localRect.left() < x && localRect.right() > x
+                && localRect.top() < KF_CENTER_Y && localRect.bottom() > KF_CENTER_Y) {
             result.append(keyframe);
+        }
     }
 
     return result;
@@ -406,15 +397,22 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
         return TimelineControlType::None;
 
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (p.x() > m_startX - TimelineConstants::DURATION_HANDLE_W * .5
-            && p.x() < m_startX + TimelineConstants::DURATION_HANDLE_W * .5) {
-        return TimelineControlType::StartHandle;
-    } else if (p.x() > m_endX - TimelineConstants::DURATION_HANDLE_W * .5
-               && p.x() < m_endX + TimelineConstants::DURATION_HANDLE_W * .5) {
-        return TimelineControlType::EndHandle;
-    } else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked()) {
-        return TimelineControlType::Duration;
+    const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
+    // Never choose start handle if end time is zero, as you cannot adjust it in that case
+    bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle
+            && !qFuzzyIsNull(m_endTime);
+    bool endHandle = p.x() > m_endX - halfHandle && p.x() < m_endX + halfHandle;
+    if (startHandle && endHandle) {
+        // If handles overlap, choose the handle based on the side of the click relative to start
+        startHandle = p.x() < m_startX;
+        endHandle = !startHandle;
     }
+    if (startHandle)
+        return TimelineControlType::StartHandle;
+    else if (endHandle)
+        return TimelineControlType::EndHandle;
+    else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked())
+        return TimelineControlType::Duration;
 
     return TimelineControlType::None;
 }
@@ -508,14 +506,14 @@ double RowTimeline::getDurationMoveOffsetX() const
 }
 
 // convert time values to x
-double RowTimeline::timeToX(double time)
+double RowTimeline::timeToX(double time) const
 {
     return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_SEC_W
            * rowTree()->m_scene->ruler()->timelineScale();
 }
 
 // convert x values to time
-double RowTimeline::xToTime(double xPos)
+double RowTimeline::xToTime(double xPos) const
 {
     return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
            / (TimelineConstants::RULER_SEC_W * rowTree()->m_scene->ruler()->timelineScale());
@@ -533,8 +531,8 @@ void RowTimeline::setStartX(double startX)
 {
     if (startX < TimelineConstants::RULER_EDGE_OFFSET)
         startX = TimelineConstants::RULER_EDGE_OFFSET;
-    else if (startX > m_endX - 1)
-        startX = m_endX - 1;
+    else if (startX > m_endX)
+        startX = m_endX;
 
     double oldStartX = m_startX;
     m_startX = startX;
@@ -553,8 +551,8 @@ void RowTimeline::setStartX(double startX)
 // Set the position of the end of the row duration
 void RowTimeline::setEndX(double endX)
 {
-    if (endX < m_startX + 1)
-        endX = m_startX + 1;
+    if (endX < m_startX)
+        endX = m_startX;
 
     double oldEndX = m_endX;
     m_endX = endX;

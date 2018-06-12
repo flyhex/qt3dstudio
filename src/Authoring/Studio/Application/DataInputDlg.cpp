@@ -89,12 +89,7 @@ void CDataInputDlg::initDialog()
 
     if (!m_dataInput->name.isEmpty()) {
         m_name = m_dataInput->name;
-        m_type = m_dataInput->type;
-        m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
-        m_ui->lineEditInputName->setText(m_dataInput->name);
-        if (m_type == DataTypeRangedNumber) {
-            m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue);
-            m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
+        if (m_dataInput->type == DataTypeRangedNumber) {
             m_min = m_dataInput->minValue;
             m_max = m_dataInput->maxValue;
         }
@@ -105,8 +100,18 @@ void CDataInputDlg::initDialog()
 #endif
     } else {
         m_name = getUniqueId(tr("newDataInput"));
-        m_ui->comboBoxTypeList->setCurrentIndex(m_dataInput->type);
-        m_ui->lineEditInputName->setText(m_name);
+        if (m_dataInput->type == DataTypeRangedNumber) {
+            m_dataInput->minValue = m_min;
+            m_dataInput->maxValue = m_max;
+        }
+    }
+
+    m_type = m_dataInput->type;
+    m_ui->comboBoxTypeList->setCurrentIndex(m_type);
+    m_ui->lineEditInputName->setText(m_name);
+    if (m_type == DataTypeRangedNumber) {
+        m_ui->doubleSpinBoxMin->setValue(m_dataInput->minValue);
+        m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
     }
 
     updateVisibility(m_dataInput->type);
@@ -233,4 +238,28 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
     }
 
     return false;
+}
+
+QVector<EDataType> CDataInputDlg::getAcceptedTypes(qt3dsdm::DataModelDataType::Value dmType)
+{
+    // The order also specifies the priority for default type in case of multiple accepted types
+    static const QVector<EDataType> allDataTypes = {
+        EDataType::DataTypeString,
+        EDataType::DataTypeFloat,
+        EDataType::DataTypeVector3,
+        EDataType::DataTypeVector2,
+        EDataType::DataTypeRangedNumber,
+        EDataType::DataTypeBoolean,
+#ifdef DATAINPUT_EVALUATOR_ENABLED
+        EDataType::DataTypeEvaluator,
+#endif
+        EDataType::DataTypeVariant
+    };
+
+    QVector<EDataType> acceptedTypes;
+    for (auto candidate : allDataTypes) {
+        if (isEquivalentDataType(candidate, dmType))
+            acceptedTypes.append(candidate);
+    }
+    return acceptedTypes;
 }

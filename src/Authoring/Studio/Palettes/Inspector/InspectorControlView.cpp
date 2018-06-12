@@ -488,7 +488,8 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
 QObject *InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
 {
     if (!m_dataInputChooserView) {
-        m_dataInputChooserView = new DataInputSelectView(this);
+        const QVector<EDataType> acceptedTypes;
+        m_dataInputChooserView = new DataInputSelectView(acceptedTypes);
         connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
                 [this](int handle, int instance, const QString &controllerName) {
             bool controlled =
@@ -511,7 +512,7 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
         if (CDataInputDlg::isEquivalentDataType(it->type, dataType))
             dataInputList.append(QPair<QString, int>(it->name, it->type));
     }
-
+    m_dataInputChooserView->setAcceptedTypes(CDataInputDlg::getAcceptedTypes(dataType));
     m_dataInputChooserView->
             setData(dataInputList,
                     m_inspectorControlModel->currentControllerValue(instance, handle),

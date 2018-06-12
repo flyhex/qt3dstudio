@@ -31,13 +31,41 @@
 \page using-data-inputs.html
 \ingroup using-data-inputs
 
-This is a technology preview of how Qt 3D Studio could support data-driven animations. This makes
-it possible to control timeline animations and slides with data input. Additionally you can control
-the text property of a text object with data input.
+Qt 3D Studio supports data-driven animations. This makes it possible to control timeline
+animations, object properties and slides with data input.
 
-The data input value can be set using
-\l{Behavior::setDataInputValue(string name, variant value)}{behavior scripts}
-or the DataInput QML Type.
+This page explains how to define and connect data inputs in the Qt 3D Studio editor. The data
+input value can be set using behavior scripts, DataInput QML Types, Presentation QML Types or
+Q3DSPresentation in the C++ API.
+
+\section1 Data Types
+
+\table
+  \header
+    \li Data type
+    \li Description
+  \row
+    \li Boolean
+    \li Binary true/false value
+  \row
+    \li Float
+    \li Decimal value
+  \row
+    \li Ranged number
+    \li Decimal value with maximum and minimum values defined
+  \row
+    \li String
+    \li Text
+  \row
+    \li Variant
+    \li Any of the basic data types (boolean, float and string)
+  \row
+    \li Vector2
+    \li 2 float values
+  \row
+    \li Vector3
+    \li 3 float values
+\endtable
 
 \section1 Manage Data Inputs
 
@@ -46,7 +74,7 @@ or the DataInput QML Type.
 To add a new data input, follow the steps below.
 
 \list 1
-  \li Select \uicontrol{Edit > Data Inputs} from the file menu in Studio.
+  \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
   \li Click the \inlineimage add-data-input-icon.png
   icon.
   \li Enter \uicontrol{Name} for the data input.
@@ -62,7 +90,7 @@ To add a new data input, follow the steps below.
 To edit a data input, follow the steps below.
 
 \list 1
-  \li Select \uicontrol{Edit > Data Inputs} from the file menu in Studio.
+  \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
   \li Select the data input you want to edit by clicking on it.
     \raw HTML
     <p>Or</p>
@@ -81,7 +109,7 @@ To edit a data input, follow the steps below.
 To delete a data input, follow the steps below.
 
 \list 1
-  \li Select \uicontrol{Edit > Data Inputs} from the file menu in Studio.
+  \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
   \li Select the data input you want to delete by clicking on it.
   \li Click the \inlineimage delete-data-input-icon.png
   icon.
@@ -138,23 +166,52 @@ To remove the data input, repeat the steps below but select \uicontrol{[No contr
 
 \section1 Control an Object Property with Data Input
 
-\image datainput-text-property.png
+\image datainput-object-property.png
+
+With data input, you can control many object properties. The properties that can be controlled is
+indicated with the data input icon
+\inlineimage datainput-to-timeline-icon-inactive.png
+next to the property name in the inspector palette.
+
+The following data input types can be used to control object properties:
+
+\table
+  \header
+    \li Data input type
+    \li Usage
+  \row
+    \li Boolean
+    \li To control binary true/false properties
+  \row
+    \li Float
+    \li To control numeric properties
+  \row
+    \li String
+    \li To control text properties
+  \row
+    \li Variant
+    \li To control object properties with different data types using the same data input
+  \row
+    \li Vector2
+    \li To control properties with two numeric values such as 2D coordinates
+  \row
+    \li Vector3
+    \li To control properties with three numeric values such as 3D coordinates or RGB colors
+\endtable
 
 \list 1
   \li Add the data input according to
   \l {add data input}{instructions above}.
-  \li Select the desired text object in the scene graph.
+  \li Select the desired object in the scene graph.
   \li In the inspector palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
-  icon next to the \e{text string} property.
+  icon next to the object property you wish to control.
   \li Select the desired data input from the list by clicking it.
   \li Press \uicontrol{OK}.
 \endlist
 
-When you have selected a data input for the text object the \e{text string} property and the
-data input icon in the inspector palette will turn orange
-\inlineimage datainput-text-property-active-icon.png
-to indicate that the property is connected to a data input, and the name of the data input is
-shown next to the icon.
+When you have selected a data input for the property the property name and the
+data input icon in the inspector palette will turn orange to indicate that the property
+is connected to a data input, and the name of the data input is shown next to the icon.
 
 To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 4.
 

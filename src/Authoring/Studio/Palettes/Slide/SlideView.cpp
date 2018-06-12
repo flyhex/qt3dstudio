@@ -384,7 +384,8 @@ void SlideView::initialize()
     engine()->addImportPath(qmlImportPath());
     setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
 
-    m_dataInputSelector = new DataInputSelectView(this, EDataType::DataTypeString);
+    const QVector<EDataType> acceptedTypes = { EDataType::DataTypeString };
+    m_dataInputSelector = new DataInputSelectView(acceptedTypes, this);
     connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
             this, &SlideView::onDataInputChange);
 }

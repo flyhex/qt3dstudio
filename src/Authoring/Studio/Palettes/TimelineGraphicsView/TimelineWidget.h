@@ -75,6 +75,7 @@ public:
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
     void enableDnD(bool b = true);
     bool dndActive() const;
+    bool blockMousePress() const;
 
     // Presentation Change Listener
     void OnNewPresentation() override;
@@ -92,6 +93,7 @@ public:
     CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
                                    EStudioObjectType objectType) override;
     bool OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
+    void OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     CPt GetPreferredSize() override;
@@ -162,6 +164,7 @@ private:
     QSet<int> m_actionChanges;
     QTimer m_asyncUpdateTimer;
     bool m_fullReconstruct = false;
+    bool m_blockMousePress = false;
     CClientDataModelBridge *m_bridge = nullptr;
     IBreadCrumbProvider *m_BreadCrumbProvider = nullptr;
 

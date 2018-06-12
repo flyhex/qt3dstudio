@@ -76,7 +76,7 @@ public:
     RowTimeline *parentRow() const;
     RowTree *rowTree() const;
     Keyframe *getClickedKeyframe(const QPointF &scenePos);
-    QList<Keyframe *> getKeyframesInRange(const double left, const double right);
+    QList<Keyframe *> getKeyframesInRange(const QRectF &rect) const;
     QList<Keyframe *> keyframes() const;
     void showToolTip(const QPointF &pos);
 
@@ -90,8 +90,8 @@ private:
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
     void drawColorPropertyGradient(QPainter *painter, int width);
     bool isColorProperty() const;
-    double timeToX(double time);
-    double xToTime(double xPos);
+    double timeToX(double time) const;
+    double xToTime(double xPos) const;
 
     RowTree *m_rowTree;
     RowTimelinePropertyGraph *m_propertyGraph = nullptr;

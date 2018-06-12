@@ -69,6 +69,8 @@ public:
 
     // Maps between DataModel datatypes and datainput dialog types
     static const bool isEquivalentDataType(int dlgType, qt3dsdm::DataModelDataType::Value dmType);
+    static QVector<EDataType> getAcceptedTypes(qt3dsdm::DataModelDataType::Value dmType);
+
 protected:
     void initDialog();
     QString getUniqueId(const QString &id);

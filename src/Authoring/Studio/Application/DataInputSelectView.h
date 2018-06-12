@@ -40,11 +40,12 @@ class DataInputSelectView : public QQuickWidget
     Q_OBJECT
     Q_PROPERTY(int selected MEMBER m_selection NOTIFY selectedChanged)
 public:
-    explicit DataInputSelectView(QWidget *parent = nullptr,
-                                 EDataType defaultType = EDataType::DataTypeFloat);
+    explicit DataInputSelectView(const QVector<EDataType> &acceptedTypes,
+                                 QWidget *parent = nullptr);
     void setData(const QVector<QPair<QString, int>> &dataInputList,
                  const QString &currentController,
                  int handle = 0, int instance = 0);
+    void setAcceptedTypes(const QVector<EDataType> &acceptedTypes);
     QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
     QString getNoneString() { return tr("[None]"); }
 
@@ -69,6 +70,7 @@ private:
     QString m_currController;
     QString m_mostRecentlyAdded;
     EDataType m_defaultType;
+    QVector<EDataType> m_acceptedTypes;
 };
 
 #endif // DATAINPUTSELECTDLG_H

@@ -175,22 +175,16 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
     return nullptr;
 }
 
-RowTree *RowManager::rowAt(int idx)
+RowTree *RowManager::getRowAtPos(const QPointF &scenePos) const
 {
-    correctIndex(idx);
+    QList<QGraphicsItem *> items = m_scene->items(scenePos);
 
-    if (idx != -1)
-        return static_cast<RowTree *>(m_layoutTree->itemAt(idx)->graphicsItem());
-
-    return nullptr;
-}
-
-RowTimeline *RowManager::rowTimelineAt(int idx)
-{
-    correctIndex(idx);
-
-    if (idx != -1)
-        return static_cast<RowTimeline *>(m_layoutTimeline->itemAt(idx)->graphicsItem());
+    int index = 0;
+    while (index < items.size()) {
+        QGraphicsItem *item = items.at(index++);
+        if (item->type() == TimelineItem::TypeRowTree)
+            return static_cast<RowTree *>(item);
+    }
 
     return nullptr;
 }
@@ -435,39 +429,6 @@ int RowManager::getLastChildIndex(RowTree *row, int index)
     }
 
     return -1;
-}
-
-void RowManager::clampIndex(int &idx)
-{
-    if (idx < 1)
-        idx = 1;
-    else if (idx > m_layoutTree->count() - 1)
-        idx = m_layoutTree->count() - 1;
-}
-
-// Index within rows indices bounds
-bool RowManager::validIndex(int idx) const
-{
-    return idx > 0 && idx < m_layoutTree->count();
-}
-
-// Adjust index to point to the correct row taking into consideration collaped rows
-void RowManager::correctIndex(int &idx)
-{
-    if (!validIndex(idx)) {
-        idx = -1;
-        return;
-    }
-
-    // adjust for collapsed and filtered items (invisible)
-    for (int i = 1; i <= idx; ++i) {
-        if (!m_layoutTimeline->itemAt(i)->graphicsItem()->isVisible()) {
-            if (++idx > m_layoutTimeline->count() - 1) {
-                idx = -1;
-                return;
-            }
-        }
-    }
 }
 
 void RowManager::collapseAllPropertyRows()

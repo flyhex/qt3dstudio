@@ -202,6 +202,60 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     painter->setPen(TimelineConstants::WIDGET_BG_COLOR);
     painter->drawLine(18, 0, 18, size().height() - 1);
 
+    // Shy, eye, lock separator
+    painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
+                            0, 1, size().height()),
+                      TimelineConstants::WIDGET_BG_COLOR);
+
+    // Shy, eye, lock
+    static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
+    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
+    static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
+    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
+    if (hasActionButtons()) {
+        painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
+        painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
+        painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
+    }
+
+    // Candidate parent of a dragged row
+    if (m_dndState == DnDState::Parent) {
+        painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
+        painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
+    }
+
+    // Action indicators
+    static const QPixmap pixMasterAction = QPixmap(":/images/Action-MasterAction.png");
+    static const QPixmap pixAction = QPixmap(":/images/Action-Action.png");
+    static const QPixmap pixChildMasterAction = QPixmap(":/images/Action-ChildMasterAction.png");
+    static const QPixmap pixChildAction = QPixmap(":/images/Action-ChildAction.png");
+    static const QPixmap pixCompMasterAction = QPixmap(":/images/Action-ComponentMasterAction.png");
+    static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
+
+    if (!isProperty()) {
+        if (m_actionStates & ActionState::MasterAction) // has master action
+            painter->drawPixmap(0, 0, pixMasterAction);
+        else if (m_actionStates & ActionState::Action) // has action
+            painter->drawPixmap(0, 0, pixAction);
+
+        if (!expanded()) {
+            if (m_actionStates & ActionState::MasterChildAction) // children have master action
+                painter->drawPixmap(0, 0, pixChildMasterAction);
+            else if (m_actionStates & ActionState::ChildAction) // children have action
+                painter->drawPixmap(0, 0, pixChildAction);
+        }
+
+        if (m_actionStates & ActionState::MasterComponentAction) // component has master action
+            painter->drawPixmap(0, 0, pixCompMasterAction);
+        else if (m_actionStates & ActionState::ComponentAction) // component has action
+            painter->drawPixmap(0, 0, pixCompAction);
+    }
+
+    // The following items need to be clipped so that they do not draw overlapping shy etc. buttons
+
+    painter->setClipRect(0, 0, treeWidth() - TimelineConstants::TREE_ICONS_W,
+                         TimelineConstants::ROW_H);
+
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
@@ -288,55 +342,6 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
 
     painter->drawPixmap(m_rectType, pixRowType);
-
-    // Shy, eye, lock separator
-    painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
-                            0, 1, size().height()),
-                      TimelineConstants::WIDGET_BG_COLOR);
-
-    // Shy, eye, lock
-    static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
-    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
-    static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
-    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
-    if (hasActionButtons()) {
-        painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
-        painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
-        painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
-    }
-
-    // Candidate parent of a dragged row
-    if (m_dndState == DnDState::Parent) {
-        painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
-        painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
-    }
-
-    // Action indicators
-    static const QPixmap pixMasterAction = QPixmap(":/images/Action-MasterAction.png");
-    static const QPixmap pixAction = QPixmap(":/images/Action-Action.png");
-    static const QPixmap pixChildMasterAction = QPixmap(":/images/Action-ChildMasterAction.png");
-    static const QPixmap pixChildAction = QPixmap(":/images/Action-ChildAction.png");
-    static const QPixmap pixCompMasterAction = QPixmap(":/images/Action-ComponentMasterAction.png");
-    static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
-
-    if (!isProperty()) {
-        if (m_actionStates & ActionState::MasterAction) // has master action
-            painter->drawPixmap(0, 0, pixMasterAction);
-        else if (m_actionStates & ActionState::Action) // has action
-            painter->drawPixmap(0, 0, pixAction);
-
-        if (!expanded()) {
-            if (m_actionStates & ActionState::MasterChildAction) // children have master action
-                painter->drawPixmap(0, 0, pixChildMasterAction);
-            else if (m_actionStates & ActionState::ChildAction) // children have action
-                painter->drawPixmap(0, 0, pixChildAction);
-        }
-
-        if (m_actionStates & ActionState::MasterComponentAction) // component has master action
-            painter->drawPixmap(0, 0, pixCompMasterAction);
-        else if (m_actionStates & ActionState::ComponentAction) // component has action
-            painter->drawPixmap(0, 0, pixCompAction);
-    }
 }
 
 int RowTree::treeWidth() const

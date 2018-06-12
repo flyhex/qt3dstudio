@@ -85,6 +85,7 @@ public:
     TExpandMap &expandMap();
     void resetMousePressParams();
     QLabel *timebarTooltip();
+    void updateAutoScrolling(double scenePosY);
 
 protected:
     bool event(QEvent *event) override;
@@ -114,7 +115,6 @@ private:
     void handleShySelected();
     void handleLockSelected();
     void handleApplicationFocusLoss();
-    void updateAutoScrolling(double scenePosY);
 
     QGraphicsLinearLayout *m_layoutRoot;
     QGraphicsLinearLayout *m_layoutTree;

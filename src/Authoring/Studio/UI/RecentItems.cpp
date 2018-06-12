@@ -34,9 +34,6 @@
 
 #include <QtWidgets/qmenu.h>
 
-// using namespace Q3DStudio;  <-- Do not do this here because it will conflict with CList and make
-// the template generator go blah
-
 const Q3DStudio::CString CRecentItems::RECENTITEM_KEY = "RecentItem";
 const Q3DStudio::CString CRecentItems::RECENTIMPORT_KEY = "RecentImport";
 const Q3DStudio::CString CRecentItems::RECENTITEM_VALID = "RecentValid";
@@ -48,6 +45,8 @@ CRecentItems::CRecentItems(QMenu *inMenuID, long inCommandID, Q3DStudio::CString
     m_Menu = inMenuID;
     m_ValidItems = 10;
     m_PreferenceKey = inPreferenceKey;
+
+    connect(m_Menu, &QMenu::aboutToShow, this, &CRecentItems::handleAboutToShow);
 
     ReconstructList();
 }
@@ -97,11 +96,8 @@ void CRecentItems::ReconstructList()
         Q3DStudio::CString theFilename = thePrefs.GetStringValue(theKey, "");
         if (theFilename != "") {
             Qt3DSFile theFile(theFilename);
-
-            QAction *act = m_Menu->addAction(theFile.GetName().toQString(),
-                                             this, &CRecentItems::onTriggerRecent);
-            act->setData(static_cast<int>(m_RecentItems.size()));
-            m_RecentItems.push_back(theFile);
+            if (theFile.Exists())
+                m_RecentItems.push_back(theFile);
         }
     }
 }
@@ -114,17 +110,23 @@ void CRecentItems::RebuildList()
     thePrefs.SetLongValue(RECENTITEM_VALID, GetItemCount());
     TFileList::iterator thePos = m_RecentItems.begin();
     for (long theIndex = 0; thePos != m_RecentItems.end(); ++thePos, ++theIndex) {
-        Q3DStudio::CString theFilename = (*thePos).GetName();
+        Qt3DSFile theFile = *thePos;
+        if (theFile.Exists()) {
+            QAction *act = m_Menu->addAction(theFile.GetName().toQString(),
+                                             this, &CRecentItems::onTriggerRecent);
+            act->setData(static_cast<int>(theIndex));
 
-        QAction *act = m_Menu->addAction(theFilename.toQString(),
-                                         this, &CRecentItems::onTriggerRecent);
-        act->setData(static_cast<int>(theIndex));
+            Q3DStudio::CString theKey;
+            theKey.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(m_PreferenceKey), theIndex);
 
-        Q3DStudio::CString theKey;
-        theKey.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(m_PreferenceKey), theIndex);
-
-        thePrefs.SetStringValue(theKey, (*thePos).GetAbsolutePath());
+            thePrefs.SetStringValue(theKey, (*thePos).GetAbsolutePath());
+        }
     }
+}
+
+void CRecentItems::handleAboutToShow()
+{
+    RebuildList();
 }
 
 void CRecentItems::ClearMenu()

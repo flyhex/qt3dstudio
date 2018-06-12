@@ -67,56 +67,10 @@ static QStringList renderableItems()
     renderables.push_back(QObject::tr("No renderable item"));
     const CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     Q3DStudio::CString docDir = doc->GetDocumentDirectory();
-    Q3DStudio::CFilePath fullDocPath = doc->GetDocumentPath().GetAbsolutePath();
-    Q3DStudio::CString docFilename = fullDocPath.GetFileName();
-    // First step, find uia file, parse and pull out renderable asset id's but ignoring the
-    // current presentation.
-    std::vector<Q3DStudio::CFilePath> dirFiles;
-    Q3DStudio::CFilePath thePath(docDir);
-    thePath.ListFilesAndDirectories(dirFiles);
-    for (size_t idx = 0, end = dirFiles.size(); idx < end; ++idx) {
-        if (!dirFiles[idx].IsFile())
-            continue;
 
-        Q3DStudio::CString ext = dirFiles[idx].GetExtension();
-        if (!ext.CompareNoCase("uia"))
-            continue;
+    for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations))
+        renderables.push_back(r.m_id);
 
-        qt3dsdm::TStringTablePtr theStringTable
-                = qt3dsdm::IStringTable::CreateStringTable();
-        std::shared_ptr<qt3dsdm::IDOMFactory> theDomFact =
-            qt3dsdm::IDOMFactory::CreateDOMFactory(theStringTable);
-        Q3DStudio::CString fullFile = dirFiles[idx];
-        qt3ds::foundation::CFileSeekableIOStream theStream(
-            fullFile, qt3ds::foundation::FileReadFlags());
-
-        qt3dsdm::SDOMElement *theElem
-                = qt3dsdm::CDOMSerializer::Read(*theDomFact, theStream);
-        if (theElem) {
-            std::shared_ptr<qt3dsdm::IDOMReader> theReader =
-                qt3dsdm::IDOMReader::CreateDOMReader(*theElem, theStringTable,
-                                                   theDomFact);
-            if (theReader->MoveToFirstChild("assets")) {
-                for (bool success = theReader->MoveToFirstChild(); success;
-                     success = theReader->MoveToNextSibling()) {
-                    if (qt3dsdm::AreEqual(theReader->GetElementName(), L"presentation") ||
-                        qt3dsdm::AreEqual(theReader->GetElementName(), L"presentation-qml")) {
-                        qt3dsdm::TXMLStr src = nullptr;
-                        qt3dsdm::TXMLStr id = nullptr;
-                        theReader->Att("src", src);
-                        theReader->Att("id", id);
-                        if (docFilename != src.c_str())
-                            renderables.push_back(QString::fromLatin1(id.c_str()));
-                    } else if (qt3dsdm::AreEqual(theReader->GetElementName(),
-                                        L"renderplugin")) {
-                        const wchar_t *id = nullptr;
-                        theReader->UnregisteredAtt(L"id", id);
-                        renderables.push_back(QString::fromWCharArray(id));
-                    }
-                }
-            }
-        }
-    }
     // second step, find the renderable plugins.
     {
         Q3DStudio::CFilePath pluginDir
