@@ -72,6 +72,11 @@ CMsgRouter *CMsgRouter::GetInstance()
     return static_theInstance.get();
 }
 
+void CMsgRouter::blockMessages()
+{
+    qApp->removeEventFilter(this);
+}
+
 //==============================================================================
 /**
  * Send a command to be executed asynchronously.

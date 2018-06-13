@@ -99,6 +99,7 @@ public:
     virtual ~CMsgRouter();
 
     void SendCommand(CCmd *inCommand, CCore *inCore);
+    void blockMessages();
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;

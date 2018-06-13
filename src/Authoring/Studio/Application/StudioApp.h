@@ -87,7 +87,6 @@ public:
 
     void onAppAbout();
 
-    void performShutdown();
     Q3DStudio::IDirectoryWatchingSystem &getDirectoryWatchingSystem();
     void setupTimer(long inMessageId, QWidget *inWnd);
     Q3DStudio::ITickTock &getTickTock();
@@ -99,6 +98,7 @@ public:
 
 public Q_SLOTS:
     void handleMessageReceived(const QString &message, QObject *socket);
+    void performShutdown();
 
 protected:
     bool runApplication();
