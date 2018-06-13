@@ -270,6 +270,8 @@ void CStudioApp::performShutdown()
     // Get rid of the temp files
     Qt3DSFile::ClearCurrentTempCache();
 
+    CMsgRouter::GetInstance()->blockMessages();
+
     qApp->exit();
 }
 
@@ -792,9 +794,13 @@ void CStudioApp::handleMessageReceived(const QString &message, QObject *socket)
         QLocalSocket *lsocket = qobject_cast<QLocalSocket *>(socket);
         if (lsocket) {
             // Another studio instance wants to know if specified presentation is open on this one
-            QFileInfo checkFile(message.mid(activePresentationQuery.size()));
-            QFileInfo openFile(m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString());
-            if (checkFile == openFile) {
+            QString checkPath(message.mid(activePresentationQuery.size()));
+            QFileInfo checkFile(checkPath);
+            QString docPath;
+            if (m_core)
+                docPath = m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
+            QFileInfo openFile(docPath);
+            if (!checkPath.isEmpty() && checkFile == openFile) {
                 lsocket->write(SharedTools::QtLocalPeer::acceptReply(),
                                SharedTools::QtLocalPeer::acceptReply().size());
                 // Since we accept active presentation query, it means the querying instance will

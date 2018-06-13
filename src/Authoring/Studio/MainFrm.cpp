@@ -809,7 +809,7 @@ void CMainFrame::closeEvent(QCloseEvent *event)
     }
 
     // Tell the app to shutdown, do it here so it does not rely on static destructor.
-    g_StudioApp.performShutdown();
+    QTimer::singleShot(0, &g_StudioApp, &CStudioApp::performShutdown);
 }
 
 //==============================================================================
